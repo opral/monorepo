@@ -43,44 +43,12 @@ export async function loadProjectFromDirectoryInMemory(
 	// 1. set settings is called from an app - it should detect and reject the setting of settings -> app need to be able to validate before calling set
 	// 2. the settings file loaded from disc here is corrupted -> user has to fix the file on disc
 
-	type ExporterPlugin = InlangPlugin &
-		Required<Pick<InlangPlugin, "exportFiles">>;
-
-	type ImporterPlugin = InlangPlugin &
-		Required<Pick<InlangPlugin, "importFiles" | "toBeImportedFiles">>;
-
-	type LoadMessagesPlugin = InlangPlugin &
-		Required<Pick<InlangPlugin, "loadMessages">>;
-
-	type SaveMessagesPlugin = InlangPlugin &
-		Required<Pick<InlangPlugin, "saveMessages">>;
-
-	const loadMessagesPlugins = project.plugins
-		.get()
-		.filter(
-			(plugin): plugin is LoadMessagesPlugin =>
-				plugin.loadMessages !== undefined
-		);
-	const saveMessagesPlugins = project.plugins
-		.get()
-		.filter(
-			(plugin): plugin is SaveMessagesPlugin =>
-				plugin.saveMessages !== undefined
-		);
-
-	const exportPlugins = project.plugins
-		.get()
-		.filter(
-			(plugin): plugin is ExporterPlugin => plugin.exportFiles !== undefined
-		);
-
-	const importPlugins = project.plugins
-		.get()
-		.filter(
-			(plugin): plugin is ImporterPlugin =>
-				plugin.importFiles !== undefined &&
-				plugin.toBeImportedFiles !== undefined
-		);
+	const {
+		loadMessagesPlugins,
+		saveMessagesPlugins,
+		importPlugins,
+		exportPlugins,
+	} = categorizePlugins(project.plugins.get());
 
 	if (loadMessagesPlugins.length > 1 || saveMessagesPlugins.length > 1) {
 		throw new Error(
@@ -213,4 +181,51 @@ async function traverseDir(args: {
 		}
 	}
 	return result;
+}
+
+// TODO i guess we should move this validation logic into sdk2/src/project/loadProject.ts
+function categorizePlugins(plugins: readonly InlangPlugin[]): {
+	loadMessagesPlugins: (InlangPlugin &
+		Required<Pick<InlangPlugin, "loadMessages">>)[];
+	saveMessagesPlugins: (InlangPlugin &
+		Required<Pick<InlangPlugin, "saveMessages">>)[];
+	importPlugins: (InlangPlugin &
+		Required<Pick<InlangPlugin, "importFiles" | "toBeImportedFiles">>)[];
+	exportPlugins: (InlangPlugin & Required<Pick<InlangPlugin, "exportFiles">>)[];
+} {
+	const loadMessagesPlugins = plugins.filter(
+		(
+			plugin
+		): plugin is InlangPlugin & Required<Pick<InlangPlugin, "loadMessages">> =>
+			plugin.loadMessages !== undefined
+	);
+
+	const saveMessagesPlugins = plugins.filter(
+		(
+			plugin
+		): plugin is InlangPlugin & Required<Pick<InlangPlugin, "saveMessages">> =>
+			plugin.saveMessages !== undefined
+	);
+
+	const importPlugins = plugins.filter(
+		(
+			plugin
+		): plugin is InlangPlugin &
+			Required<Pick<InlangPlugin, "importFiles" | "toBeImportedFiles">> =>
+			plugin.importFiles !== undefined && plugin.toBeImportedFiles !== undefined
+	);
+
+	const exportPlugins = plugins.filter(
+		(
+			plugin
+		): plugin is InlangPlugin & Required<Pick<InlangPlugin, "exportFiles">> =>
+			plugin.exportFiles !== undefined
+	);
+
+	return {
+		loadMessagesPlugins,
+		saveMessagesPlugins,
+		importPlugins,
+		exportPlugins,
+	};
 }
