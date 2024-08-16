@@ -93,6 +93,12 @@ export async function loadProjectFromDirectoryInMemory(
 		);
 
 		await Promise.all(insertQueries);
+
+		// TODO check user id and description (where will this one appear?)
+		await project.lix.commit({
+			userId: "inlang-bot",
+			description: "Executed importFiles",
+		});
 	}
 
 	const chosenLegacyPlugin = loadMessagesPlugins[0];
