@@ -43,18 +43,30 @@ export async function loadProjectFromDirectoryInMemory(
 	// 1. set settings is called from an app - it should detect and reject the setting of settings -> app need to be able to validate before calling set
 	// 2. the settings file loaded from disc here is corrupted -> user has to fix the file on disc
 
-	const loadMessagesPlugins = project.plugins
-		.get()
-		.filter((plugin) => plugin.loadMessages !== undefined);
-	const saveMessagesPlugins = project.plugins
-		.get()
-		.filter((plugin) => plugin.saveMessages !== undefined);
-
 	type ExporterPlugin = InlangPlugin &
 		Required<Pick<InlangPlugin, "exportFiles">>;
 
 	type ImporterPlugin = InlangPlugin &
 		Required<Pick<InlangPlugin, "importFiles" | "toBeImportedFiles">>;
+
+	type LoadMessagesPlugin = InlangPlugin &
+		Required<Pick<InlangPlugin, "loadMessages">>;
+
+	type SaveMessagesPlugin = InlangPlugin &
+		Required<Pick<InlangPlugin, "saveMessages">>;
+
+	const loadMessagesPlugins = project.plugins
+		.get()
+		.filter(
+			(plugin): plugin is LoadMessagesPlugin =>
+				plugin.loadMessages !== undefined
+		);
+	const saveMessagesPlugins = project.plugins
+		.get()
+		.filter(
+			(plugin): plugin is SaveMessagesPlugin =>
+				plugin.saveMessages !== undefined
+		);
 
 	const exportPlugins = project.plugins
 		.get()
@@ -117,11 +129,7 @@ export async function loadProjectFromDirectoryInMemory(
 
 	const chosenLegacyPlugin = loadMessagesPlugins[0];
 
-	if (!chosenLegacyPlugin) {
-		return project;
-	}
-
-	if (chosenLegacyPlugin.loadMessages) {
+	if (chosenLegacyPlugin) {
 		await loadLegacyMessages({
 			project,
 			fs: args.fs,
