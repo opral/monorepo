@@ -343,8 +343,10 @@ describe("plugin.diff.file", () => {
 			})
 			.execute();
 
-		// workaround until await lix.settled() is implemented
+		// FIXME: how to await inlang sdk persisting the inlang db to lix?
 		await new Promise((resolve) => setTimeout(resolve, 500));
+
+		await project.lix.settled();
 
 		const changes = await project.lix.db
 			.selectFrom("change")
