@@ -7,6 +7,14 @@ import type { MessageNested, Option, Pattern } from "@inlang/sdk2"
 
 /**
  * Represents a (partial) branch
+ *
+ * ICU1 Messages can have multiple sequential brances, eg: Two plurals after another. A "branch" represents
+ * one path through these. For example "one" on the first plural and "many" on the second.
+ *
+ * 1. The values each variables needs in order to trigger this branch
+ * 2. The pattern that gets rendered if this branch is triggered.
+ *
+ * These branches get compiled to variants afterwards.
  */
 type Branch = {
 	/**
@@ -17,6 +25,8 @@ type Branch = {
 	/**
 	 * The (partial) match-values that are needed to produce this branch
 	 * [arg, function?, match]
+	 *
+	 * Add options?
 	 */
 	match: [string, string | undefined, string][]
 }
@@ -111,6 +121,21 @@ export function generateBranches(elements: MessageFormatElement[], branch: Branc
 				}
 
 				branches = newBranches
+				break
+			}
+			case TYPE.pound: {
+				for (const branch of branches) {
+					const lastMatch = branch.match.at(-1)
+					if (lastMatch) {
+						branch.pattern.push({
+							type: "expression",
+							arg: {
+								type: "variable",
+								name: lastMatch[0],
+							},
+						})
+					}
+				}
 				break
 			}
 			case TYPE.tag:
