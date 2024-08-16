@@ -49,12 +49,26 @@ export async function loadProjectFromDirectoryInMemory(
 	const saveMessagesPlugins = project.plugins
 		.get()
 		.filter((plugin) => plugin.saveMessages !== undefined);
+
+	type ExporterPlugin = InlangPlugin &
+		Required<Pick<InlangPlugin, "exportFiles">>;
+
+	type ImporterPlugin = InlangPlugin &
+		Required<Pick<InlangPlugin, "importFiles" | "toBeImportedFiles">>;
+
 	const exportPlugins = project.plugins
 		.get()
-		.filter((plugin) => plugin.exportFiles !== undefined);
+		.filter(
+			(plugin): plugin is ExporterPlugin => plugin.exportFiles !== undefined
+		);
+
 	const importPlugins = project.plugins
 		.get()
-		.filter((plugin) => plugin.importFiles !== undefined);
+		.filter(
+			(plugin): plugin is ImporterPlugin =>
+				plugin.importFiles !== undefined &&
+				plugin.toBeImportedFiles !== undefined
+		);
 
 	if (loadMessagesPlugins.length > 1 || saveMessagesPlugins.length > 1) {
 		throw new Error(
