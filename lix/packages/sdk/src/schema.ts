@@ -42,6 +42,7 @@ export type Commit = {
 
 export type Change = {
 	id: string;
+	parent_id: Change["id"];
 	file_id: LixFile["id"];
 	/**
 	 * If no commit id exists on a change,
