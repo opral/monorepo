@@ -2,7 +2,7 @@
 	"baseLocale": "en",
 	"locales": ["en", "de"],
 	"modules": ["local:@inlang/icu1-importer"],
-	"importer.inlang.icu-messageformat-1": {
+	"plugin.inlang.icu-messageformat-1": {
 		"messagesFolderPath": "./messages"
 	}
 }
