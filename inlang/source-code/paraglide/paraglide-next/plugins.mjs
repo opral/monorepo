@@ -16,6 +16,7 @@ if (typeof version !== "string") {
 export const plugins = [
 	typescript({
 		tsconfig: "./tsconfig.json",
+		exclude: ["**/node_modules/**/*"],
 	}),
 	cjs(),
 	resolve({

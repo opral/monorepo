@@ -76,7 +76,7 @@ function Play() {
 
 function addLinksToText(text: string) {
 	const replacements: { [key: string]: string } = {
-		"lix apps": `https://github.com/opral/monorepo/tree/main/lix`,
+		"lix apps": `https://lix.opral.com`,
 		"use case": `${isProduction ? `https://inlang.com?` : "http://localhost:3000?"}#personas`,
 	}
 

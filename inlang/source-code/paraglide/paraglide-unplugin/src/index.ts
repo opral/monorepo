@@ -41,7 +41,11 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 	let virtualModuleOutput: Record<string, string> = {}
 
-	async function triggerCompile(messages: readonly Message[], settings: ProjectSettings) {
+	async function triggerCompile(
+		messages: readonly Message[],
+		settings: ProjectSettings,
+		projectId: string | undefined
+	) {
 		const currentMessagesHash = hashMessages(messages ?? [], settings)
 		if (currentMessagesHash === previousMessagesHash) return
 
@@ -54,8 +58,13 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		previousMessagesHash = currentMessagesHash
 
 		const [regularOutput, messageModulesOutput] = await Promise.all([
-			compile({ messages, settings, outputStructure: "regular" }),
-			compile({ messages, settings, outputStructure: "message-modules" }),
+			compile({
+				messages,
+				settings,
+				outputStructure: "regular",
+				projectId,
+			}),
+			compile({ messages, settings, outputStructure: "message-modules", projectId }),
 		])
 
 		virtualModuleOutput = messageModulesOutput
@@ -109,7 +118,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 				const initialMessages = project.query.messages.getAll()
 				const settings = project.settings()
-				await triggerCompile(initialMessages, settings)
+				await triggerCompile(initialMessages, settings, project.id)
 
 				project.errors.subscribe((errors) => {
 					if (errors.length === 0) return
@@ -132,7 +141,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 				project.query.messages.getAll.subscribe((messages) => {
 					numInvocations++
 					if (numInvocations === 1) return
-					triggerCompile(messages, project.settings())
+					triggerCompile(messages, project.settings(), project.id)
 				})
 			},
 
@@ -141,7 +150,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 				//In the other bundlers `buildStart` already runs before the build. In webpack it's a race condition
 				compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
 					const project = await getProject()
-					await triggerCompile(project.query.messages.getAll(), project.settings())
+					await triggerCompile(project.query.messages.getAll(), project.settings(), project.id)
 					console.info(`Compiled Messages into ${options.outdir}`)
 				})
 			},
