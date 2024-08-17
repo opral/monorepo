@@ -29,7 +29,7 @@
 	"peerDependencies": {
 		"express": "^4.18.2",
 		"posthog-js": "^1.53.2",
-		"posthog-node": "^3.0.0"
+		"posthog-node": "^4.0.1"
 	},
 	"license": "Apache-2.0"
 }

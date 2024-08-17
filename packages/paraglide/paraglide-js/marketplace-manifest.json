@@ -22,6 +22,7 @@
 			"/usage": "./inlang/source-code/paraglide/paraglide-js/docs/usage.md",
 			"/scaling": "./inlang/source-code/paraglide/paraglide-js/docs/scaling.md",
 			"/architecture": "./inlang/source-code/paraglide/paraglide-js/docs/architecture.md",
+			"/manual-setup": "./inlang/source-code/paraglide/paraglide-js/docs/manual-setup.md",
 			"/changelog": "./inlang/source-code/paraglide/paraglide-js/CHANGELOG.md"
 		},
 
