@@ -1,5 +1,3 @@
-// TODO implement this test
-
 import type { DiffReport, LixPlugin } from "./plugin.js";
 
 type Types = {
@@ -14,6 +12,23 @@ type Types = {
 const plugin: LixPlugin<Types> = {
 	key: "inlang-lix-plugin-v1",
 	glob: "*",
+	applyChanges: async ({ changes }) => {
+		const change = changes[0];
+		// expect changes to be of type Change<Types[keyof Types]>[]
+		change?.value satisfies Types[keyof Types] | undefined;
+
+		// expect change.value to be of type Types[keyof Types]
+		if (change?.operation === "create" || change?.operation === "update") {
+			change.value satisfies Types[keyof Types];
+		}
+
+		// expect change.value to be undefined
+		if (change?.operation === "delete") {
+			change.value satisfies undefined;
+		}
+
+		return {} as any;
+	},
 	diff: {
 		file: () => {
 			throw new Error("Not implemented");

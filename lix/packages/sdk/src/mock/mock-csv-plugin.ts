@@ -9,6 +9,57 @@ export const mockCsvPlugin: LixPlugin<{
 }> = {
 	key: "csv",
 	glob: "*.csv",
+	applyChanges: async ({ file, changes, lix }) => {
+		const parsed = papaparse.parse(new TextDecoder().decode(file.data));
+		for (const change of changes) {
+			if (change.operation === "create" || change.operation === "update") {
+				const { rowIndex, columnIndex, text } = change.value;
+				// create the row if it doesn't exist
+				if (!parsed.data[rowIndex]) {
+					parsed.data[rowIndex] = [];
+				}
+				for (let i = 0; i < columnIndex; i++) {
+					// create the column if it doesn't exist recursively
+					// till the current cell is reached
+					// else, setting the cell value based on the index
+					// will lead to bugs
+					if (!(parsed.data[rowIndex] as any)[i]) {
+						(parsed.data[rowIndex] as any)[i] = "";
+					}
+				}
+				// update the cell
+				(parsed.data[rowIndex] as any)[columnIndex] = text;
+			} else if (change.operation === "delete") {
+				// TODO possibility to avoid querying the parent change?
+				const parent = await lix.db
+					.selectFrom("change")
+					.selectAll()
+					.where("change.id", "=", change.parent_id)
+					.executeTakeFirstOrThrow();
+				if (parent.operation !== "create" && parent.operation !== "update") {
+					throw new Error(
+						"Expected the previous change to be a create or update",
+					);
+				}
+				const { rowIndex, columnIndex } = parent.value as any;
+				(parsed.data as any)[rowIndex][columnIndex] = "";
+				// if the row is empty after deleting the cell, remove it
+				if (
+					(parsed.data[rowIndex] as any).every((cell: string) => cell === "")
+				) {
+					parsed.data.splice(rowIndex, 1);
+				}
+			}
+		}
+		const csv = papaparse.unparse(parsed as any, {
+			...parsed.meta,
+			// parse.meta and unparse mapping
+			newline: parsed.meta.linebreak,
+		});
+		return {
+			fileData: new TextEncoder().encode(csv),
+		};
+	},
 	diff: {
 		file: async ({ old, neu }) => {
 			const result: DiffReport[] = [];

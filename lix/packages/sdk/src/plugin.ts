@@ -1,4 +1,5 @@
 import type { Change, LixFile } from "./schema.js";
+import type { Lix } from "./types.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
 export type LixPlugin<
@@ -15,9 +16,14 @@ export type LixPlugin<
 	// 	message: Message,
 	// 	variant: Variant,
 	// },
-	diffFile?: () => Promise<Array<DiffReport>>;
 	reportConflicts?: () => Promise<Array<unknown>>;
-	applyChanges?: () => Promise<LixFile>;
+	applyChanges?: (args: {
+		file: Readonly<LixFile>;
+		changes: Readonly<Array<Readonly<Change<T[keyof T]>>>>;
+		lix: Lix;
+	}) => Promise<{
+		fileData: LixFile["data"];
+	}>;
 	tryResolveConflict?: () => Promise<
 		{ success: true; change: Change } | { success: false }
 	>;
@@ -56,9 +62,9 @@ export type DiffReport = {
 	old?: Record<string, any> & { id: string };
 	neu?: Record<string, any> & { id: string };
 	meta?: Record<string, any>;
-} & (DiffReportInsertion | DiffReportUpdate | DiffReportDeletion);
+} & (DiffReportCreate | DiffReportUpdate | DiffReportDeletion);
 
-type DiffReportInsertion = {
+type DiffReportCreate = {
 	operation: "create";
 	old: undefined;
 	neu: Record<string, any> & {
