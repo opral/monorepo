@@ -1,4 +1,4 @@
-import type { LixFile } from "./schema.js";
+import type { Change, LixFile } from "./schema.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
 export type LixPlugin<
@@ -6,6 +6,21 @@ export type LixPlugin<
 > = {
 	key: string;
 	glob: string;
+	// TODO https://github.com/opral/lix-sdk/issues/37
+	// idea:
+	//   1. runtime reflection for lix on the change schema
+	//   2. lix can validate the changes based on the schema
+	// schema: {
+	// 	bundle: Bundle,
+	// 	message: Message,
+	// 	variant: Variant,
+	// },
+	diffFile?: () => Promise<Array<DiffReport>>;
+	reportConflicts?: () => Promise<Array<unknown>>;
+	applyChanges?: () => Promise<LixFile>;
+	tryResolveConflict?: () => Promise<
+		{ success: true; change: Change } | { success: false }
+	>;
 	// getting around bundling for the prototype
 	setup?: () => Promise<void>;
 	diffComponent?: {
