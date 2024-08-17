@@ -21,8 +21,10 @@
 		"uuid": "^10.0.0"
 	},
 	"devDependencies": {
+		"@types/papaparse": "^5.3.14",
 		"@types/uuid": "^10.0.0",
+		"papaparse": "^5.4.1",
 		"typescript": "^5.5.4",
-		"vitest": "0.34.6"
+		"vitest": "^2.0.5"
 	}
 }
