@@ -40,7 +40,7 @@ export type Commit = {
 	// @relation changes: Change[]
 };
 
-export type Change = {
+export type Change<T extends Record<string, any> = object> = {
 	id: string;
 	parent_id: Change["id"];
 	file_id: LixFile["id"];
@@ -81,12 +81,26 @@ export type Change = {
 	 *   - For a csv cell change, the value would be the new cell value.
 	 *   - For an inlang message change, the value would be the new message.
 	 */
-	value?: Record<string, any> & {
-		id: string;
-	}; // JSONB
+	value?: T; // JSONB
 	/**
 	 * Additional metadata for the change used by the plugin
 	 * to process changes.
 	 */
-	meta?: string; // JSONB
+	meta?: Record<string, any>; // JSONB
+} & (ChangeCreate<T> | ChangeUpdate<T> | ChangeDelete);
+
+// utility type to help with type narrowing
+type ChangeCreate<T extends Record<string, any>> = {
+	operation: "create";
+	value: T;
+};
+// utility type to help with type narrowing
+type ChangeUpdate<T extends Record<string, any>> = {
+	operation: "update";
+	value: T;
+};
+// utility type to help with type narrowing
+type ChangeDelete = {
+	operation: "delete";
+	value: undefined;
 };
