@@ -3,7 +3,7 @@ import type { Lix } from "./types.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
 export type LixPlugin<
-	T extends Record<string, Record<string, unknown>> = Record<string, never>,
+	T extends Record<string, Record<string, unknown>> = Record<string, any>,
 > = {
 	key: string;
 	glob: string;
