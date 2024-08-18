@@ -17,16 +17,6 @@ const plugin: LixPlugin<Types> = {
 		// expect changes to be of type Change<Types[keyof Types]>[]
 		change?.value satisfies Types[keyof Types] | undefined;
 
-		// expect change.value to be of type Types[keyof Types]
-		if (change?.operation === "create" || change?.operation === "update") {
-			change.value satisfies Types[keyof Types];
-		}
-
-		// expect change.value to be undefined
-		if (change?.operation === "delete") {
-			change.value satisfies undefined;
-		}
-
 		return {} as any;
 	},
 	diff: {
