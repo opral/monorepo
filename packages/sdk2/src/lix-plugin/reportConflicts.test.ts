@@ -64,7 +64,7 @@ test("it should report deletions as a conflict if the parent of the target and s
 	});
 	expect(conflicts).toHaveLength(1);
 	expect(conflicts[0]?.change_id).toBe("1");
-	expect(conflicts[0]?.conflicts_with_change_id).toBe("2");
+	expect(conflicts[0]?.conflicting_change_id).toBe("2");
 });
 
 test("it should report an UPDATE as a conflict (until more sophisticated reasoning is added)", async () => {
@@ -179,5 +179,5 @@ test("it should NOT report a DELETE as a conflict if the parent of the target an
 
 	expect(conflicts).toHaveLength(1);
 	expect(conflicts[0]?.change_id).toBe("2qa");
-	expect(conflicts[0]?.conflicts_with_change_id).toBe("3sd");
+	expect(conflicts[0]?.conflicting_change_id).toBe("3sd");
 });

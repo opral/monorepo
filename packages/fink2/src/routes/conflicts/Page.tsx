@@ -19,7 +19,7 @@ export default function Page() {
 			const conflicting = await project?.lix.db
 				.selectFrom("change")
 				.selectAll()
-				.where("id", "=", conflict.conflicts_with_change_id)
+				.where("id", "=", conflict.conflicting_change_id)
 				.executeTakeFirstOrThrow();
 
 			result[conflicting.id] = conflicting;
@@ -40,7 +40,7 @@ export default function Page() {
 			) : (
 				conflicts.map((c) => {
 					const change = conflictingChanges[c.change_id];
-					const conflicting = conflictingChanges[c.conflicts_with_change_id];
+					const conflicting = conflictingChanges[c.conflicting_change_id];
 					return (
 						<div className="space-y-2">
 							<h2 className="font-bold text-xl">This {change?.type} change </h2>

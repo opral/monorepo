@@ -6,6 +6,8 @@ import { getLastChildOfChange } from "./utilities/getLastChildOfChange.js";
 export const reportConflicts: LixPlugin["reportConflicts"] = async ({
 	sourceLix,
 	targetLix,
+  // TODO
+  leafChangesOnlyInSource,
 }) => {
 	const result: Conflict[] = [];
 	const changesNotInTarget = await getChangesNotInTarget({
@@ -44,7 +46,7 @@ export const reportConflicts: LixPlugin["reportConflicts"] = async ({
 		// more sophisticated conflict reporting can be incrementally added
 		result.push({
 			change_id: lastChangeInTarget.id,
-			conflicts_with_change_id: change.id,
+			conflicting_change_id: change.id,
 			reason:
 				"The snapshots of the change do not match. More sophisticated reasoning will be added later.",
 		});
