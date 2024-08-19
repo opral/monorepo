@@ -3,7 +3,7 @@ import { PluginSettings } from "./settings.js"
 import { createMessage } from "./parse.js"
 
 const pluginKey = "plugin.inlang.icu-messageformat-1"
-export const importer: InlangPlugin<{
+export const plugin: InlangPlugin<{
 	[importerKey]: PluginSettings
 }> = {
 	key: importerKey,
