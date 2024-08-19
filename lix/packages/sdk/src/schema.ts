@@ -45,7 +45,7 @@ export type Change<
 	T extends Record<string, any> = Record<string, { id: string }>,
 > = {
 	id: string;
-	parent_id: Change["id"];
+	parent_id?: Change["id"];
 	file_id: LixFile["id"];
 	/**
 	 * If no commit id exists on a change,
