@@ -65,6 +65,7 @@ test("it should report deletions as a conflict if the parent of the target and s
 	expect(conflicts).toHaveLength(1);
 	expect(conflicts[0]?.change_id).toBe("1");
 	expect(conflicts[0]?.conflicting_change_id).toBe("2");
+  throw new Error("The parent is identicak, fix this test");
 });
 
 test("it should report an UPDATE as a conflict (until more sophisticated reasoning is added)", async () => {
