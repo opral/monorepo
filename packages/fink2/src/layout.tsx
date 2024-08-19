@@ -12,8 +12,7 @@ import {
 } from "@shoelace-style/shoelace/dist/react";
 import { Link } from "react-router-dom";
 import ModeSwitcher from "./components/ModeSwitcher.tsx";
-import { combineChanges } from "../../../../lix/packages/sdk/dist/combine/combine-changes.js";
-import { loadDatabaseInMemory } from "../../../../lix/packages/sqlite-wasm-kysely/dist/util/loadDatabaseInMemory.js";
+import { merge } from "../../../../lix/packages/sdk/dist/merge/merge.js";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [, setWithPolling] = useAtom(withPollingAtom);
@@ -231,7 +230,7 @@ const CombineButton = () => {
 						reader.onload = async () => {
 							const blob = new Blob([reader.result as ArrayBuffer]);
 							const incoming = await loadProjectInMemory({ blob });
-							await combineChanges({
+							await merge({
 								source: incoming.lix,
 								target: project!.lix,
 							});
