@@ -17,7 +17,7 @@ test("a create operation should not report a conflict given that the change does
 		value: JSON.stringify(["change 1"]),
 	};
 	await sourceLix.db.insertInto("change").values([change]).execute();
-	const conflicts = await inlangLixPluginV1.reportConflicts!({
+	const conflicts = await inlangLixPluginV1.detectConflicts!({
 		sourceLix,
 		targetLix,
 	});
@@ -63,7 +63,7 @@ test.todo(
 			.values(changesNotInTarget)
 			.execute();
 
-		const conflicts = await inlangLixPluginV1.reportConflicts!({
+		const conflicts = await inlangLixPluginV1.detectConflicts!({
 			sourceLix,
 			targetLix,
 		});
@@ -182,7 +182,7 @@ test("it should NOT report a DELETE as a conflict if the parent of the target an
 
 	await targetLix.db.insertInto("change").values(changesNotInSource).execute();
 
-	const conflicts = await inlangLixPluginV1.reportConflicts!({
+	const conflicts = await inlangLixPluginV1.detectConflicts!({
 		sourceLix,
 		targetLix,
 	});

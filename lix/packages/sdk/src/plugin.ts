@@ -21,7 +21,7 @@ export type LixPlugin<
 	 *
 	 * - returns `undefined` if no conflict exists
 	 */
-	reportConflicts?: (args: {
+	detectConflicts?: (args: {
 		sourceLix: LixReadonly;
 		targetLix: LixReadonly;
 	}) => Promise<Conflict[]>;
