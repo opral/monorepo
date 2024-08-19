@@ -43,7 +43,7 @@ export type InlangPlugin<
 	}) => Promise<Array<ResourceFile>> | Array<ResourceFile>;
 	importFiles?: (args: {
 		files: Array<ResourceFile>;
-		settings: ProjectSettings; // we expose the settings in case the importFunction needs to access the plugin config
+		settings: ProjectSettings & ExternalSettings; // we expose the settings in case the importFunction needs to access the plugin config
 	}) => {
 		bundles: BundleNested[];
 	};
