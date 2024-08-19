@@ -5,7 +5,12 @@ import type { Lix } from "../types.js";
 /**
  * Combines the changes of two lixes into the target lix.
  */
-export async function combineChanges(args: { target: Lix; source: Lix }): Promise<void> {
+export async function merge(args: {
+	target: Lix;
+	source: Lix;
+	// TODO selectively merge changes
+	// onlyTheseChanges
+}): Promise<void> {
 	const toBeAppliedChanges: Record<LixPlugin["key"], Array<Change>> = {};
 
 	// TODO ideally a right join via sqlite attaching works

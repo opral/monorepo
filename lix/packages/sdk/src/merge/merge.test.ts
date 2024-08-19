@@ -2,7 +2,7 @@
 import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
-import { combineChanges } from "./combine-changes.js";
+import { merge } from "./merge.js";
 import type { Change, Conflict } from "../schema.js";
 import type { LixPlugin } from "../plugin.js";
 
@@ -43,7 +43,7 @@ test("it should copy changes from the source into the target that do not exist i
 		})
 		.execute();
 
-	await combineChanges({ source, target });
+	await merge({ source, target });
 
 	const changes = await target.db.selectFrom("change").select("id").execute();
 
@@ -103,7 +103,7 @@ test("it should save change conflicts", async () => {
 		})
 		.execute();
 
-	await combineChanges({ source, target });
+	await merge({ source, target });
 
 	const conflicts = await target.db
 		.selectFrom("conflict")
@@ -159,7 +159,7 @@ test("it should apply changes that are not conflicting", async () => {
 		})
 		.execute();
 
-	await combineChanges({ source, target });
+	await merge({ source, target });
 
 	const changes = await target.db.selectFrom("change").selectAll().execute();
 	const conflicts = await target.db
