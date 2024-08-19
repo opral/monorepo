@@ -1,20 +1,21 @@
 import type { DiffReport, LixPlugin } from "../plugin.js";
 import papaparse from "papaparse";
 
+type Cell = { rowIndex: number; columnIndex: number; text: string };
+
 /**
  * A mock plugin that can be used for testing purposes.
  */
 export const mockCsvPlugin: LixPlugin<{
-	cell: { rowIndex: number; columnIndex: number; text: string };
+	cell: Cell;
 }> = {
 	key: "csv",
 	glob: "*.csv",
 	applyChanges: async ({ file, changes, lix }) => {
 		const parsed = papaparse.parse(new TextDecoder().decode(file.data));
 		for (const change of changes) {
-			if (change.operation === "create" || change.operation === "update") {
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				const { rowIndex, columnIndex, text } = change.value!;
+			if (change.value) {
+				const { rowIndex, columnIndex, text } = change.value as unknown as Cell;
 				// create the row if it doesn't exist
 				if (!parsed.data[rowIndex]) {
 					parsed.data[rowIndex] = [];
@@ -30,19 +31,20 @@ export const mockCsvPlugin: LixPlugin<{
 				}
 				// update the cell
 				(parsed.data[rowIndex] as any)[columnIndex] = text;
-			} else if (change.operation === "delete") {
+			} else {
+				if (change.parent_id === undefined) {
+					throw new Error(
+						"Expected a previous change to exist if a value is undefined (a deletion)",
+					);
+				}
 				// TODO possibility to avoid querying the parent change?
 				const parent = await lix.db
 					.selectFrom("change")
 					.selectAll()
 					.where("change.id", "=", change.parent_id)
 					.executeTakeFirstOrThrow();
-				if (parent.operation !== "create" && parent.operation !== "update") {
-					throw new Error(
-						"Expected the previous change to be a create or update",
-					);
-				}
-				const { rowIndex, columnIndex } = parent.value as any;
+
+				const { rowIndex, columnIndex } = parent.value as unknown as Cell;
 				(parsed.data as any)[rowIndex][columnIndex] = "";
 				// if the row is empty after deleting the cell, remove it
 				if (
