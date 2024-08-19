@@ -6,8 +6,8 @@ import { getLastChildOfChange } from "./utilities/getLastChildOfChange.js";
 export const reportConflicts: LixPlugin["reportConflicts"] = async ({
 	sourceLix,
 	targetLix,
-  // TODO
-  leafChangesOnlyInSource,
+	// TODO
+	// leafChangesOnlyInSource,
 }) => {
 	const result: Conflict[] = [];
 	const changesNotInTarget = await getChangesNotInTarget({
