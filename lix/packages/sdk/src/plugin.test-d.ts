@@ -12,13 +12,6 @@ type Types = {
 const plugin: LixPlugin<Types> = {
 	key: "inlang-lix-plugin-v1",
 	glob: "*",
-	applyChanges: async ({ changes }) => {
-		const change = changes[0];
-		// expect changes to be of type Change<Types[keyof Types]>[]
-		change?.value satisfies Types[keyof Types] | undefined;
-
-		return {} as any;
-	},
 	diff: {
 		file: () => {
 			throw new Error("Not implemented");

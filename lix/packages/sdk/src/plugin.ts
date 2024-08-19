@@ -16,15 +16,20 @@ export type LixPlugin<
 	// 	message: Message,
 	// 	variant: Variant,
 	// },
+	/**
+	 * Reports if a change from the source lix conflicts with a change in the target lix.
+	 *
+	 * - returns `undefined` if no conflict exists
+	 */
 	reportConflict?: (args: {
 		sourceLix: LixReadonly;
 		targetLix: LixReadonly;
-		change: Change<T[keyof T]>;
+		change: Change;
 	}) => Promise<Conflict | undefined>;
 	applyChanges?: (args: {
 		lix: LixReadonly;
 		file: LixFile;
-		changes: Array<Change<T[keyof T]>>;
+		changes: Array<Change>;
 	}) => Promise<{
 		fileData: LixFile["data"];
 	}>;
