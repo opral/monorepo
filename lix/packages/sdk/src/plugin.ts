@@ -1,4 +1,4 @@
-import type { Change, LixFile } from "./schema.js";
+import type { Change, Conflict, LixFile } from "./schema.js";
 import type { Lix } from "./types.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
@@ -16,11 +16,15 @@ export type LixPlugin<
 	// 	message: Message,
 	// 	variant: Variant,
 	// },
-	reportConflicts?: () => Promise<Array<unknown>>;
+	reportConflict?: (args: {
+		sourceLix: LixReadonly;
+		targetLix: LixReadonly;
+		change: Change<T[keyof T]>;
+	}) => Promise<Conflict | undefined>;
 	applyChanges?: (args: {
-		file: Readonly<LixFile>;
-		changes: Readonly<Array<Readonly<Change<T[keyof T]>>>>;
-		lix: Lix;
+		lix: LixReadonly;
+		file: LixFile;
+		changes: Array<Change<T[keyof T]>>;
 	}) => Promise<{
 		fileData: LixFile["data"];
 	}>;
@@ -88,4 +92,13 @@ type DiffReportDeletion = {
 		id: string;
 	};
 	neu: undefined;
+};
+
+/**
+ * Plugins are not allowed to mutate lix.
+ */
+type LixReadonly = Pick<Lix, "plugins"> & {
+	db: {
+		selectFrom: Lix["db"]["selectFrom"];
+	};
 };

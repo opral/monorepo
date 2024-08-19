@@ -7,6 +7,7 @@ export type LixDatabase = {
 	ref: Ref;
 	file_internal: LixFile;
 	change_queue: ChangeQueueEntry;
+	conflict: Conflict;
 };
 
 export type Ref = {
@@ -40,7 +41,9 @@ export type Commit = {
 	// @relation changes: Change[]
 };
 
-export type Change<T extends Record<string, any> = object> = {
+export type Change<
+	T extends Record<string, any> = Record<string, { id: string }>,
+> = {
 	id: string;
 	parent_id: Change["id"];
 	file_id: LixFile["id"];
@@ -87,20 +90,11 @@ export type Change<T extends Record<string, any> = object> = {
 	 * to process changes.
 	 */
 	meta?: Record<string, any>; // JSONB
-} & (ChangeCreate<T> | ChangeUpdate<T> | ChangeDelete);
+};
 
-// utility type to help with type narrowing
-type ChangeCreate<T extends Record<string, any>> = {
-	operation: "create";
-	value: T;
-};
-// utility type to help with type narrowing
-type ChangeUpdate<T extends Record<string, any>> = {
-	operation: "update";
-	value: T;
-};
-// utility type to help with type narrowing
-type ChangeDelete = {
-	operation: "delete";
-	value: undefined;
+export type Conflict = {
+	meta?: Record<string, any>;
+	reason?: string;
+	change_id: Change["id"];
+	conflicts_with_change_id: Change["id"];
 };

@@ -108,6 +108,7 @@ export async function handleFileInsert(args: {
 						operation: diff.operation,
 						// @ts-expect-error - database expects stringified json
 						value: JSON.stringify(value),
+						// @ts-expect-error - database expects stringified json
 						meta: JSON.stringify(diff.meta),
 						// add queueId interesting for debugging or knowning what changes were generated in same worker run
 					})
@@ -223,6 +224,7 @@ export async function handleFileChange(args: {
 								// @ts-expect-error - database expects stringified json
 								value: JSON.stringify(value),
 								operation: diff.operation,
+								// @ts-expect-error - database expects stringified json
 								meta: JSON.stringify(diff.meta),
 							})
 							.execute();
@@ -238,6 +240,7 @@ export async function handleFileChange(args: {
 							parent_id: previousCommittedChange?.id,
 							// @ts-expect-error - database expects stringified json
 							value: JSON.stringify(value),
+							// @ts-expect-error - database expects stringified json
 							meta: JSON.stringify(diff.meta),
 							operation: diff.operation,
 						})

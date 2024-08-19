@@ -13,7 +13,8 @@ export const mockCsvPlugin: LixPlugin<{
 		const parsed = papaparse.parse(new TextDecoder().decode(file.data));
 		for (const change of changes) {
 			if (change.operation === "create" || change.operation === "update") {
-				const { rowIndex, columnIndex, text } = change.value;
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				const { rowIndex, columnIndex, text } = change.value!;
 				// create the row if it doesn't exist
 				if (!parsed.data[rowIndex]) {
 					parsed.data[rowIndex] = [];
