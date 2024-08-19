@@ -1,7 +1,10 @@
-import type { DiffReport, LixPlugin } from "@lix-js/sdk";
+import type { Conflict, DiffReport, LixPlugin } from "@lix-js/sdk";
 import { Bundle, Message, Variant } from "../schema/schemaV2.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { initKysely } from "../database/initKysely.js";
+import { getLastChildOfChange } from "./getLastChildOfChange.js";
+import { getFirstCommonParent } from "./getFirstCommonParent.js";
+import { getChangesNotInTarget } from "./getChangesNotInTarget.js";
 
 export const inlangLixPluginV1: LixPlugin<{
 	bundle: Bundle;
@@ -10,15 +13,52 @@ export const inlangLixPluginV1: LixPlugin<{
 }> = {
 	key: "inlang-lix-plugin-v1",
 	glob: "*",
-	// TODO
-	// idea:
-	//   1. runtime reflection for lix on the change schema
-	//   2. lix can validate the changes based on the schema
-	// schema: {
-	// 	bundle: Bundle,
-	// 	message: Message,
-	// 	variant: Variant,
-	// },
+	reportConflicts: async ({ sourceLix, targetLix }) => {
+		const result: Conflict[] = [];
+		const changesNotInTarget = await getChangesNotInTarget({
+			sourceLix,
+			targetLix,
+		});
+		for (const change of changesNotInTarget) {
+			const commonParent = await getFirstCommonParent({
+				sourceChange: change,
+				sourceLix,
+				targetLix,
+			});
+
+			if (commonParent === undefined) {
+				// no common parent, no conflict. must be an insert
+				continue;
+			}
+
+			const lastChangeInTarget = await getLastChildOfChange({
+				change: commonParent,
+				lix: targetLix,
+			});
+
+			const hasDiff =
+				JSON.stringify(change.value) !==
+				JSON.stringify(lastChangeInTarget.value);
+
+			if (hasDiff === false) {
+				// TODO we have two different changes that yielded the same snapshot,
+				// lix or the plugin need to change the parents of the target change
+				// to both the source and the target change. users likely want to
+				// see that two "branches" led to the same snapshot
+				continue;
+			}
+
+			// naive raise any snapshot difference as a conflict for now
+			// more sophisticated conflict reporting can be incrementally added
+			result.push({
+				change_id: lastChangeInTarget.id,
+				conflicts_with_change_id: change.id,
+				reason:
+					"The snapshots of the change do not match. More sophisticated reasoning will be added later.",
+			});
+		}
+		return result;
+	},
 	diff: {
 		// TODO does not account for deletions
 		file: async ({ old, neu }) => {
@@ -94,16 +134,13 @@ export const inlangLixPluginV1: LixPlugin<{
 
 			return result;
 		},
-		bundle: ({ old, neu }) =>
-			jsonStringifyComparison({ old, neu, type: "bundle" }),
-		message: ({ old, neu }) =>
-			jsonStringifyComparison({ old, neu, type: "message" }),
-		variant: ({ old, neu }) =>
-			jsonStringifyComparison({ old, neu, type: "variant" }),
+		bundle: ({ old, neu }) => diffSnapshot({ old, neu, type: "bundle" }),
+		message: ({ old, neu }) => diffSnapshot({ old, neu, type: "message" }),
+		variant: ({ old, neu }) => diffSnapshot({ old, neu, type: "variant" }),
 	},
 };
 
-function jsonStringifyComparison({
+function diffSnapshot({
 	old,
 	neu,
 	type,
