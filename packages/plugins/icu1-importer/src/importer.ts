@@ -2,7 +2,7 @@ import type { BundleNested, InlangPlugin, ResourceFile } from "@inlang/sdk2"
 import { PluginSettings } from "./settings.js"
 import { createMessage } from "./parse.js"
 
-const importerKey = "importer.inlang.icu-messageformat-1"
+const pluginKey = "plugin.inlang.icu-messageformat-1"
 export const importer: InlangPlugin<{
 	[importerKey]: PluginSettings
 }> = {
