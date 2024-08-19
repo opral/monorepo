@@ -5,6 +5,6 @@
     "type": "module",
     "dependencies": {
         "@inlang/sdk2": "workspace:*",
-        "@inlang/icu1-importer": "workspace:*"
+        "@inlang/plugin-icu1": "workspace:*"
     }
 }
