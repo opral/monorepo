@@ -1,4 +1,4 @@
-import { i } from "~/services/codegen/identifier.js"
+import { jsIdentifier } from "~/services/codegen/identifier.js"
 import type { LanguageTag, Message } from "@inlang/sdk"
 import { paramsType, type Params } from "./paramsType.js"
 import { isValidJSIdentifier } from "~/services/valid-js-identifier/index.js"
@@ -30,7 +30,10 @@ export const ${args.message.id} = (params ${hasParams ? "" : "= {}"}, options = 
 ${args.availableLanguageTags
 	// sort language tags alphabetically to make the generated code more readable
 	.sort((a, b) => a.localeCompare(b))
-	.map((tag) => `\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${i(tag)}.${args.message.id}`)
+	.map(
+		(tag) =>
+			`\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${jsIdentifier(tag)}.${args.message.id}`
+	)
 	.join(",\n")}
 	}[options.languageTag ?? languageTag()](${hasParams ? "params" : ""})
 }
