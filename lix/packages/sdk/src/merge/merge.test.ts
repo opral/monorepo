@@ -13,7 +13,7 @@ test("it should copy changes from the source into the target that do not exist i
 		diff: {
 			file: vi.fn(),
 		},
-		reportConflicts: vi.fn().mockResolvedValue(undefined),
+		detectConflicts: vi.fn().mockResolvedValue(undefined),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
 
@@ -54,7 +54,7 @@ test("it should copy changes from the source into the target that do not exist i
 	]);
 
 	expect(mockPlugin.applyChanges).toHaveBeenCalledTimes(1);
-	expect(mockPlugin.reportConflicts).toHaveBeenCalledTimes(2);
+	expect(mockPlugin.detectConflicts).toHaveBeenCalledTimes(2);
 });
 
 test("it should save change conflicts", async () => {
@@ -64,7 +64,7 @@ test("it should save change conflicts", async () => {
 		diff: {
 			file: vi.fn(),
 		},
-		reportConflicts: vi
+		detectConflicts: vi
 			.fn()
 			.mockResolvedValue(undefined)
 			.mockResolvedValueOnce({
@@ -124,7 +124,7 @@ test("it should apply changes that are not conflicting", async () => {
 		diff: {
 			file: vi.fn(),
 		},
-		reportConflicts: vi.fn().mockResolvedValue(undefined),
+		detectConflicts: vi.fn().mockResolvedValue(undefined),
 		applyChanges: vi.fn().mockResolvedValue({
 			fileData: new TextEncoder().encode(
 				// @ts-expect-error - expects parsed json

@@ -49,12 +49,12 @@ export async function merge(args: {
 			throw new Error("Plugin not found");
 		}
 
-		if (!plugin.reportConflicts) {
-			throw new Error("Plugin does not support conflict reporting");
+		if (!plugin.detectConflicts) {
+			throw new Error("Plugin does not support detecting conflicts");
 		}
 
 		// TODO bug this is a bug
-		const conflict = await plugin.reportConflicts({
+		const conflict = await plugin.detectConflicts({
 			sourceLix: args.source,
 			targetLix: args.target,
 		});
