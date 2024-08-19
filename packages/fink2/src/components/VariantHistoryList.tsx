@@ -1,10 +1,10 @@
 import { useAtom } from "jotai";
 import { projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
-import { timeAgo } from "../routes/changes/Page.tsx";
 import { Pattern, Variant } from "@inlang/sdk2";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import queryHelper from "../helper/queryHelper.ts";
+import timeAgo from "../helper/timeAgo.ts";
 
 const VariantHistoryList = (props: {
 	variantId: string;
@@ -68,7 +68,7 @@ const VariantHistoryList = (props: {
 								changed variant
 							</h3>
 							<p className="text-[16px] text-zinc-700">
-								{timeAgo(change.zoned_date_time)}
+								{timeAgo(change.created)}
 							</p>
 						</div>
 						<div className="flex gap-2 mt-1">
@@ -95,9 +95,9 @@ const VariantHistoryList = (props: {
 								variant="default"
 								size="medium"
 								className="mt-4 ml-auto"
-								loading={loading === change.zoned_date_time}
+								loading={loading === change.created}
 								onClick={() =>
-									handleRollback(change.value, change.zoned_date_time)
+									handleRollback(change.value, change.created)
 								}
 							>
 								Rollback

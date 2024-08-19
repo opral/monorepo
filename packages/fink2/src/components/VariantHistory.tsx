@@ -2,7 +2,7 @@ import { useAtom } from "jotai";
 import { projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
 import { InlangProject } from "@inlang/sdk2";
-import { timeAgo } from "../routes/changes/Page.tsx";
+import timeAgo from "../helper/timeAgo.ts";
 
 const VariantHistory = (props: { variantId: string }) => {
 	const [project] = useAtom(projectAtom);
@@ -27,7 +27,7 @@ const VariantHistory = (props: { variantId: string }) => {
 		<div className="flex items-center text-zinc-400 text-sm!">
 			{latestCommit?.user_id && (
 				<p>
-					by {latestCommit?.user_id} | {timeAgo(latestCommit?.zoned_date_time)}
+					by {latestCommit?.user_id} | {timeAgo(latestCommit?.created)}
 				</p>
 			)}
 		</div>

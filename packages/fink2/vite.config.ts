@@ -5,10 +5,11 @@ import tailwindcss from "@tailwindcss/vite"
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [react(), tailwindcss()],
+	envPrefix: "PUBLIC_",
 	server: {
 		headers: {
-			"Cross-Origin-Opener-Policy": "same-origin",
-			"Cross-Origin-Embedder-Policy": "require-corp",
+			"Cross-Origin-Opener-Policy": "*",
+			"Cross-Origin-Embedder-Policy": "*",
 		},
 	},
 	optimizeDeps: {
@@ -18,5 +19,10 @@ export default defineConfig({
 			"@sqlite.org/sqlite-wasm",
 			"@eliaspourquoi/sqlite-node-wasm",
 		],
+	},
+	build: {
+		// target is es2022 to support top level await
+		// https://caniuse.com/?search=top%20level%20await
+		target: "es2022",
 	},
 });
