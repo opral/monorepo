@@ -3,7 +3,7 @@ import { Bundle, Message, Variant } from "../schema/schemaV2.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { initKysely } from "../database/initKysely.js";
 import { applyChanges } from "./applyChanges.js";
-import { reportConflicts } from "./reportConflicts.js";
+import { detectConflicts } from "./detectConflicts.js";
 
 export const inlangLixPluginV1: LixPlugin<{
 	bundle: Bundle;
@@ -13,7 +13,7 @@ export const inlangLixPluginV1: LixPlugin<{
 	key: "inlang-lix-plugin-v1",
 	glob: "*",
 	applyChanges,
-	reportConflicts,
+	detectConflicts,
 	diff: {
 		// TODO does not account for deletions
 		file: async ({ old, neu }) => {

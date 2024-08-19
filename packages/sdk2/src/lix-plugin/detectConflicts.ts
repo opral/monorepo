@@ -3,7 +3,7 @@ import { getChangesNotInTarget } from "./utilities/getChangesNotInTarget.js";
 import { getFirstCommonParent } from "./utilities/getFirstCommonParent.js";
 import { getLastChildOfChange } from "./utilities/getLastChildOfChange.js";
 
-export const reportConflicts: LixPlugin["reportConflicts"] = async ({
+export const detectConflicts: LixPlugin["detectConflicts"] = async ({
 	sourceLix,
 	targetLix,
 	// TODO
