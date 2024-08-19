@@ -1,7 +1,7 @@
 import { compileMessage } from "./compileMessage.js"
 import { ProjectSettings, type Message, LanguageTag, lookup } from "@inlang/sdk"
 import { telemetry } from "../services/telemetry/implementation.js"
-import { i } from "../services/codegen/identifier.js"
+import { jsIdentifier } from "../services/codegen/identifier.js"
 import { getStackInfo } from "../services/telemetry/stack-detection.js"
 import fs from "node:fs/promises"
 import { getPackageJson } from "../services/environment/package.js"
@@ -107,7 +107,7 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 				opts.settings.languageTags
 					.map(
 						(languageTag) =>
-							`import * as ${i(languageTag)} from "../${languageTag}/${message.source.id}.js"`
+							`import * as ${jsIdentifier(languageTag)} from "../${languageTag}/${message.source.id}.js"`
 					)
 					.join("\n"),
 				"\n",
@@ -156,7 +156,10 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 				"/* eslint-disable */",
 				'import { languageTag } from "./runtime.js"',
 				opts.settings.languageTags
-					.map((languageTag) => `import * as ${i(languageTag)} from "./messages/${languageTag}.js"`)
+					.map(
+						(languageTag) =>
+							`import * as ${jsIdentifier(languageTag)} from "./messages/${languageTag}.js"`
+					)
 					.join("\n"),
 				"\n",
 				compiledMessages.map((message) => message.index).join("\n\n"),
