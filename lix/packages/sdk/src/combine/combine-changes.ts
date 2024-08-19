@@ -48,6 +48,7 @@ export async function combineChanges(args: { target: Lix; source: Lix }): Promis
 			throw new Error("Plugin does not support conflict reporting");
 		}
 
+		// TODO bug this is a bug
 		const conflict = await plugin.reportConflicts({
 			sourceLix: args.source,
 			targetLix: args.target,

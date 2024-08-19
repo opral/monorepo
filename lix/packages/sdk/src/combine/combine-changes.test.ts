@@ -69,7 +69,7 @@ test("it should save change conflicts", async () => {
 			.mockResolvedValue(undefined)
 			.mockResolvedValueOnce({
 				change_id: mockChanges[1]!.id,
-				conflicts_with_change_id: mockChanges[2]!.id,
+				conflicting_change_id: mockChanges[2]!.id,
 			} satisfies Conflict),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
@@ -107,13 +107,13 @@ test("it should save change conflicts", async () => {
 
 	const conflicts = await target.db
 		.selectFrom("conflict")
-		.select(["change_id", "conflicts_with_change_id"])
+		.select(["change_id", "conflicting_change_id"])
 		.execute();
 
 	expect(conflicts.length).toBe(1);
 	expect(conflicts[0]).toEqual({
 		change_id: mockChanges[1]!.id,
-		conflicts_with_change_id: mockChanges[2]!.id,
+		conflicting_change_id: mockChanges[2]!.id,
 	});
 });
 

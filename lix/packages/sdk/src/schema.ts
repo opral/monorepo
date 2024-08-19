@@ -96,5 +96,5 @@ export type Conflict = {
 	meta?: Record<string, any>;
 	reason?: string;
 	change_id: Change["id"];
-	conflicts_with_change_id: Change["id"];
+	conflicting_change_id: Change["id"];
 };

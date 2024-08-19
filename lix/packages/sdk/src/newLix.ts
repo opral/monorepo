@@ -61,10 +61,10 @@ export async function newLixFile(): Promise<Blob> {
 
       CREATE TABLE conflict (
         change_id TEXT NOT NULL,
-        conflicts_with_change_id TEXT NOT NULL,
+        conflicting_change_id TEXT NOT NULL,
         reason TEXT,
         meta TEXT,
-        PRIMARY KEY (change_id, conflicts_with_change_id)
+        PRIMARY KEY (change_id, conflicting_change_id)
       ) strict;
         
       CREATE TABLE 'commit' (
