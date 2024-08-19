@@ -12,7 +12,7 @@ export const importer: InlangPlugin<{
 	toBeImportedFiles: async ({ settings, nodeFs }) => {
 		const files: ResourceFile[] = []
 
-		const folderPath = settings["importer.inlang.icu-messageformat-1"].messagesFolderPath
+		const folderPath = settings["plugin.inlang.icu-messageformat-1"].messagesFolderPath
 		const entries = await nodeFs.readdir(folderPath)
 
 		for (const entry of entries) {
