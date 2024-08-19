@@ -3,7 +3,7 @@ import { useAtom } from "jotai";
 import { projectAtom, selectedProjectPathAtom, withPollingAtom } from "./state.ts";
 import { useEffect, useMemo, useState } from "react";
 import SlDialog from "@shoelace-style/shoelace/dist/react/dialog/index.js";
-import { newProject } from "@inlang/sdk2";
+import { loadProjectInMemory, newProject } from "@inlang/sdk2";
 import {
 	SlInput,
 	SlButton,
@@ -12,6 +12,8 @@ import {
 } from "@shoelace-style/shoelace/dist/react";
 import { Link } from "react-router-dom";
 import ModeSwitcher from "./components/ModeSwitcher.tsx";
+import { combineChanges } from "../../../../lix/packages/sdk/dist/combine/combine-changes.js";
+import { loadDatabaseInMemory } from "../../../../lix/packages/sqlite-wasm-kysely/dist/util/loadDatabaseInMemory.js";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [, setWithPolling] = useAtom(withPollingAtom);
@@ -39,8 +41,11 @@ const MenuBar = () => {
 				</div>
 				<SelectProject />
 
-				<div>
+				<div className="flex gap-2">
 					<CreateNewProject size="small" />
+					<CombineButton />
+					<ImportFileButton />
+					<ExportInlangFile />
 					<SettingsButton />
 				</div>
 			</div>
@@ -158,13 +163,20 @@ export const CreateNewProject = (props: { size: "small" | "large" }) => {
 			>
 				<SlInput
 					label="Filename"
-					helpText={fileName ? `Create project file ${fileName}` : "Enter the name of your inlang file"}
+					helpText={
+						fileName
+							? `Create project file ${fileName}`
+							: "Enter the name of your inlang file"
+					}
 					placeholder="my-website"
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					onInput={(e: any) => setFileName(e.target.value ? e.target.value + ".inlang" : "")}
+					onInput={(e: any) =>
+						setFileName(e.target.value ? e.target.value + ".inlang" : "")
+					}
 				></SlInput>
 				<div className="mt-6 p-4 text-slate-600 bg-slate-200 border border-slate-600 rounded text-[14px]!">
-					<span className="font-semibold">Info:</span> Demo data will be imported automatically until we can import your own data.
+					<span className="font-semibold">Info:</span> Demo data will be
+					imported automatically until we can import your own data.
 				</div>
 				<SlButton
 					loading={loading}
@@ -187,10 +199,120 @@ const SettingsButton = () => {
 		<Link to="/settings">
 			<SlButton
 				disabled={project === undefined}
-				slot="trigger" size="small" variant="default"
+				slot="trigger"
+				size="small"
+				variant="default"
 			>
 				Settings
 			</SlButton>
 		</Link>
+	);
+};
+
+const CombineButton = () => {
+	const [project] = useAtom(projectAtom);
+	const [selectedProjectPath, setSelectedProjectPath] = useAtom(
+		selectedProjectPathAtom
+	);
+
+	return (
+		<SlButton
+			size="small"
+			disabled={project === undefined}
+			variant="default"
+			onClick={async () => {
+				const input = document.createElement("input");
+				input.type = "file";
+				input.accept = ".inlang";
+				input.onchange = async (e) => {
+					const file = (e.target as HTMLInputElement).files?.[0];
+					if (file) {
+						const reader = new FileReader();
+						reader.onload = async () => {
+							const blob = new Blob([reader.result as ArrayBuffer]);
+							const incoming = await loadProjectInMemory({ blob });
+							await combineChanges({
+								source: incoming.lix,
+								target: project!.lix,
+							});
+							// trigger re-load of the project
+							setSelectedProjectPath(selectedProjectPath);
+						};
+						reader.readAsArrayBuffer(file);
+					}
+				};
+				input.click();
+			}}
+		>
+			Combine
+		</SlButton>
+	);
+};
+
+const ExportInlangFile = () => {
+	const [project] = useAtom(projectAtom);
+	const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
+
+	return (
+		<SlButton
+			disabled={project === undefined}
+			size="small"
+			variant="default"
+			onClick={async () => {
+				const blob = await project!.toBlob();
+				const blobUrl = URL.createObjectURL(blob);
+				const link = document.createElement("a");
+				link.href = blobUrl;
+				link.download = selectedProjectPath!;
+				document.body.appendChild(link);
+				link.dispatchEvent(
+					new MouseEvent("click", {
+						bubbles: true,
+						cancelable: true,
+						view: window,
+					})
+				);
+				document.body.removeChild(link);
+			}}
+		>
+			Export file
+		</SlButton>
+	);
+};
+
+const ImportFileButton = () => {
+	const [, setSelectedProjectPath] = useAtom(selectedProjectPathAtom);
+
+	return (
+		<SlButton
+			size="small"
+			variant="default"
+			onClick={async () => {
+				const input = document.createElement("input");
+				input.type = "file";
+				input.accept = ".inlang";
+				input.onchange = async (e) => {
+					const file = (e.target as HTMLInputElement).files?.[0];
+					if (file) {
+						const reader = new FileReader();
+						reader.onload = async () => {
+							const blob = new Blob([reader.result as ArrayBuffer]);
+							const opfsRoot = await navigator.storage.getDirectory();
+							const fileHandle = await opfsRoot.getFileHandle(file.name, {
+								create: true,
+							});
+							const writable = await fileHandle.createWritable();
+							await writable.write(blob);
+							await writable.close();
+							setSelectedProjectPath(file!.name);
+						};
+						reader.readAsArrayBuffer(file);
+					}
+				};
+				input.click();
+			}}
+		>
+			Import file
+		</SlButton>
 	);
 };

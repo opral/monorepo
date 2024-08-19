@@ -26,7 +26,7 @@ export const projectAtom = atom(async (get) => {
 			const file = await project.toBlob();
 			await writable.write(file);
 			await writable.close();
-		}, 1000);
+		}, 2000);
 
 		//@ts-ignore
 		window.lix = project.lix;
@@ -93,6 +93,19 @@ export const pendingChangesAtom = atom(async (get) => {
 		.selectFrom("change")
 		.selectAll()
 		.where("commit_id", "is", null)
+		.execute();
+
+	//console.log(result);
+	return result;
+});
+
+export const conflictsAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const project = await get(projectAtom);
+	if (!project) return [];
+	const result = await project.lix.db
+		.selectFrom("conflict")
+		.selectAll()
 		.execute();
 
 	//console.log(result);
