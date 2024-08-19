@@ -7,7 +7,7 @@ import { applyChanges } from "./applyChanges.js";
 import { initKysely } from "../database/initKysely.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
 
-test.todo("it should delete a type if the parent one level ", async () => {
+test.todo("it should delete a type (bundle) if the parent in both source and target are identical", async () => {
 	const project = await loadProjectInMemory({
 		blob: await newProject(),
 	});
