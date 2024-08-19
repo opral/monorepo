@@ -68,61 +68,64 @@ test("it should report deletions as a conflict if the parent of the target and s
   throw new Error("The parent is identicak, fix this test");
 });
 
-test("it should report an UPDATE as a conflict (until more sophisticated reasoning is added)", async () => {
-	const targetLix = await openLixInMemory({ blob: await newLixFile() });
-	const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
+test.todo(
+	"it should report an UPDATE as a conflict (until more sophisticated reasoning is added)",
+	async () => {
+		const targetLix = await openLixInMemory({ blob: await newLixFile() });
+		const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
 
-	const commonChanges: Change[] = [
-		{
-			id: "12s",
-			parent_id: undefined,
-			operation: "create",
-			file_id: "mock",
-			plugin_key: "mock",
-			type: "mock",
-			// @ts-expect-error  - type error in lix
-			value: JSON.stringify(["change 12s"]),
-		},
-	];
+		const commonChanges: Change[] = [
+			{
+				id: "12s",
+				parent_id: undefined,
+				operation: "create",
+				file_id: "mock",
+				plugin_key: "mock",
+				type: "mock",
+				// @ts-expect-error  - type error in lix
+				value: JSON.stringify(["change 12s"]),
+			},
+		];
 
-	const changesOnlyInTarget: Change[] = [
-		{
-			id: "3sd",
-			parent_id: "12s",
-			operation: "update",
-			file_id: "mock",
-			plugin_key: "mock",
-			type: "mock",
-			// @ts-expect-error  - type error in lix
-			value: JSON.stringify(["change 3sd"]),
-		},
-	];
+		const changesOnlyInTarget: Change[] = [
+			{
+				id: "3sd",
+				parent_id: "12s",
+				operation: "update",
+				file_id: "mock",
+				plugin_key: "mock",
+				type: "mock",
+				// @ts-expect-error  - type error in lix
+				value: JSON.stringify(["change 3sd"]),
+			},
+		];
 
-	const changesOnlyInSource: Change[] = [
-		{
-			id: "2qa",
-			parent_id: "12s",
-			operation: "update",
-			file_id: "mock",
-			plugin_key: "mock",
-			type: "mock",
-			// @ts-expect-error  - type error in lix
-			value: JSON.stringify(["change 2qa"]),
-		},
-	];
+		const changesOnlyInSource: Change[] = [
+			{
+				id: "2qa",
+				parent_id: "12s",
+				operation: "update",
+				file_id: "mock",
+				plugin_key: "mock",
+				type: "mock",
+				// @ts-expect-error  - type error in lix
+				value: JSON.stringify(["change 2qa"]),
+			},
+		];
 
-	await sourceLix.db
-		.insertInto("change")
-		.values([...commonChanges, ...changesOnlyInSource])
-		.execute();
+		await sourceLix.db
+			.insertInto("change")
+			.values([...commonChanges, ...changesOnlyInSource])
+			.execute();
 
-	await targetLix.db
-		.insertInto("change")
-		.values([...commonChanges, ...changesOnlyInTarget])
-		.execute();
+		await targetLix.db
+			.insertInto("change")
+			.values([...commonChanges, ...changesOnlyInTarget])
+			.execute();
 
-	// const conflict = await inlangLixPluginV1.reportConflicts!({
-});
+		// const conflict = await inlangLixPluginV1.reportConflicts!({
+	}
+);
 
 test("it should NOT report a DELETE as a conflict if the parent of the target and source are identical", async () => {
 	const targetLix = await openLixInMemory({ blob: await newLixFile() });
