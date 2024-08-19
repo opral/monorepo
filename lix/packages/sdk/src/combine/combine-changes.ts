@@ -44,14 +44,13 @@ export async function combineChanges(args: { target: Lix; source: Lix }): Promis
 			throw new Error("Plugin not found");
 		}
 
-		if (!plugin.reportConflict) {
+		if (!plugin.reportConflicts) {
 			throw new Error("Plugin does not support conflict reporting");
 		}
 
-		const conflict = await plugin.reportConflict({
+		const conflict = await plugin.reportConflicts({
 			sourceLix: args.source,
 			targetLix: args.target,
-			change,
 		});
 
 		if (conflict) {
