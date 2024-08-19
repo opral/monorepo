@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/icu1-importer",
+	"name": "@inlang/plugin-icu1",
 	"version": "0.0.1",
 	"private": true,
 	"type": "module",
