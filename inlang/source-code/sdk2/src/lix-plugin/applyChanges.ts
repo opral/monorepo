@@ -3,7 +3,7 @@ import { contentFromDatabase, loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { initKysely } from "../database/initKysely.js";
 import { getLastChildOfChange } from "./utilities/getLastChildOfChange.js";
 
-export const applyChanges: LixPlugin["applyChanges"] = async ({
+export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	lix,
 	file,
 	changes,
@@ -17,27 +17,31 @@ export const applyChanges: LixPlugin["applyChanges"] = async ({
 	const db = initKysely({ sqlite });
 
 	for (const change of changes) {
+		if (change.value === undefined) {
+			throw Error("Deletions are unimplemented");
+		}
 		// given that the inlang plugin stores snapshots,
 		// taking the last snapshot of the change should be good enough
 		const lastChange = await getLastChildOfChange({ change, lix });
 
 		// deletion
-		if (lastChange.value === undefined) {
-			if (lastChange.parent_id === undefined) {
-				throw Error(
-					"Unexpected state: change is a deletion but has no parent (insertion)"
-				);
-			}
-			const parent = await lix.db
-				.selectFrom("change")
-				.selectAll()
-				.where("id", "=", lastChange.parent_id)
-				.executeTakeFirstOrThrow();
+		if (change.value === undefined) {
+			throw Error("Deletions are unimplemented");
+			// if (lastChange.parent_id === undefined) {
+			// 	throw Error(
+			// 		"Unexpected state: change is a deletion but has no parent (insertion)"
+			// 	);
+			// }
+			// const parent = await lix.db
+			// 	.selectFrom("change")
+			// 	.selectAll()
+			// 	.where("id", "=", lastChange.parent_id)
+			// 	.executeTakeFirstOrThrow();
 
-			await db
-				.deleteFrom(lastChange.type as "bundle" | "message" | "variant")
-				.where("id", "=", parent.value?.id as any)
-				.execute();
+			// await db
+			// 	.deleteFrom(change.type as "bundle" | "message" | "variant")
+			// 	.where("id", "=", parent.value?.id as any)
+			// 	.execute();
 		}
 		// upsert the value
 		else {
