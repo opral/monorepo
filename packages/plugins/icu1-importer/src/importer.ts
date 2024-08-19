@@ -2,8 +2,8 @@ import type { BundleNested, InlangPlugin, ResourceFile } from "@inlang/sdk2"
 import { PluginSettings } from "./settings.js"
 import { createMessage } from "./parse.js"
 
-const importerKey = "importer.inlang.icu-messageformat-1"
-export const importer: InlangPlugin<{
+const pluginKey = "plugin.inlang.icu-messageformat-1"
+export const plugin: InlangPlugin<{
 	[importerKey]: PluginSettings
 }> = {
 	key: importerKey,
@@ -12,7 +12,7 @@ export const importer: InlangPlugin<{
 	toBeImportedFiles: async ({ settings, nodeFs }) => {
 		const files: ResourceFile[] = []
 
-		const folderPath = settings["importer.inlang.icu-messageformat-1"].messagesFolderPath
+		const folderPath = settings["plugin.inlang.icu-messageformat-1"].messagesFolderPath
 		const entries = await nodeFs.readdir(folderPath)
 
 		for (const entry of entries) {
