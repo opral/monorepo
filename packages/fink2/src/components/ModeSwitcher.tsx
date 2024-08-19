@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import clsx from "clsx";
-import { pendingChangesAtom } from "../state.ts";
+import { conflictsAtom, pendingChangesAtom } from "../state.ts";
 import { useAtom } from "jotai";
 
 const data: { path: string; name: string }[] = [
@@ -12,6 +12,7 @@ const data: { path: string; name: string }[] = [
 		path: "/changes",
 		name: "Changes",
 	},
+	{ path: "/conflicts", name: "Conflicts" },
 ];
 
 const ModeSwitcher = () => {
@@ -38,6 +39,8 @@ const SwitcherButton = (props: {
 	name: string;
 	numUncommittedChanges: number;
 }) => {
+	const [conflicts] = useAtom(conflictsAtom);
+
 	return (
 		<Link key={props.path} to={props.path}>
 			<div
@@ -50,13 +53,27 @@ const SwitcherButton = (props: {
 			>
 				{props.name}
 				{props.path === "/changes" && (
-					<div className={clsx("ml-2 text-xs!  h-5 rounded flex items-center px-2 font-medium -mr-1",
-						props.numUncommittedChanges === 0
-							? "text-zinc-700 bg-zinc-300"
-							: "text-blue-700 bg-blue-200"
-					)}
+					<div
+						className={clsx(
+							"ml-2 text-xs!  h-5 rounded flex items-center px-2 font-medium -mr-1",
+							props.numUncommittedChanges === 0
+								? "text-zinc-700 bg-zinc-300"
+								: "text-blue-700 bg-blue-200"
+						)}
 					>
 						{props.numUncommittedChanges}
+					</div>
+				)}
+				{props.path === "/conflicts" && (
+					<div
+						className={clsx(
+							"ml-2 text-xs!  h-5 rounded flex items-center px-2 font-medium -mr-1",
+							conflicts.length === 0
+								? "text-zinc-700 bg-zinc-300"
+								: "text-blue-700 bg-blue-200"
+						)}
+					>
+						{conflicts.length}
 					</div>
 				)}
 			</div>
