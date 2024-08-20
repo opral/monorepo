@@ -10,13 +10,7 @@ import { createReactiveState } from "./logic/reactiveState.js";
 import { BehaviorSubject, map } from "rxjs";
 import { setSettings } from "./logic/setSettings.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
-import {
-	PluginDoesNotImplementFunctionError,
-	PluginError,
-	PluginMissingError,
-} from "../plugin/errors.js";
-import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
-import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
+import { exportFiles, importFiles } from "../import-export/index.js";
 
 /**
  * Common load project logic.
@@ -79,47 +73,21 @@ export async function loadProject(args: {
 				setSettings({ newSettings, lix: args.lix, reactiveState }),
 		},
 		importFiles: async ({ files, pluginKey }) => {
-			const plugin = plugins.find((p) => p.key === pluginKey);
-			if (!plugin) throw new PluginMissingError({ plugin: pluginKey });
-			if (!plugin.importFiles) {
-				throw new PluginDoesNotImplementFunctionError({
-					plugin: pluginKey,
-					function: "importFiles",
-				});
-			}
-
-			const { bundles } = plugin.importFiles({
+			return await importFiles({
 				files,
-				settings: structuredClone(
-					reactiveState.settings$.getValue()
-				) as ProjectSettings,
+				pluginKey,
+				settings: reactiveState.settings$.getValue(),
+				plugins: reactiveState.plugins$.getValue(),
+				db,
 			});
-
-			const insertPromises = bundles.map((bundle) =>
-				insertBundleNested(db, bundle)
-			);
-
-			await Promise.all(insertPromises);
-			return bundles;
 		},
 		exportFiles: async ({ pluginKey }) => {
-			const plugin = plugins.find((p) => p.key === pluginKey);
-			if (!plugin) throw new PluginMissingError({ plugin: pluginKey });
-			if (!plugin.exportFiles) {
-				throw new PluginDoesNotImplementFunctionError({
-					plugin: pluginKey,
-					function: "exportFiles",
-				});
-			}
-
-			const bundles = await selectBundleNested(db).selectAll().execute();
-			const files = plugin.exportFiles({
-				bundles: bundles,
-				settings: structuredClone(
-					reactiveState.settings$.getValue()
-				) as ProjectSettings,
+			return await exportFiles({
+				pluginKey,
+				db,
+				plugins: reactiveState.plugins$.getValue(),
+				settings: reactiveState.settings$.getValue(),
 			});
-			return files;
 		},
 		close: async () => {
 			args.sqlite.close();
