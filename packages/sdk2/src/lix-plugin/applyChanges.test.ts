@@ -7,7 +7,7 @@ import { applyChanges } from "./applyChanges.js";
 import { initKysely } from "../database/initKysely.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
 
-test.todo("it should delete a type (bundle) if the parent in both source and target are identical", async () => {
+test("it should delete a type (bundle) if the parent in both source and target are identical", async () => {
 	const project = await loadProjectInMemory({
 		blob: await newProject(),
 	});
@@ -20,6 +20,7 @@ test.todo("it should delete a type (bundle) if the parent in both source and tar
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "bundle",
+			meta: { id: "mock" },
 			// @ts-expect-error - type error somewhere
 			value: {
 				id: "mock",
@@ -34,7 +35,10 @@ test.todo("it should delete a type (bundle) if the parent in both source and tar
 			operation: "update",
 			file_id: "mock",
 			plugin_key: "mock",
-			type: "mock",
+			type: "bundle",
+			meta: {
+				id: "mock",
+			},
 			// @ts-expect-error - type error somewhere
 			value: {
 				id: "mock",
@@ -49,7 +53,10 @@ test.todo("it should delete a type (bundle) if the parent in both source and tar
 			operation: "delete",
 			file_id: "mock",
 			plugin_key: "mock",
-			type: "mock",
+			meta: {
+				id: "mock",
+			},
+			type: "bundle",
 			value: undefined,
 		},
 	];

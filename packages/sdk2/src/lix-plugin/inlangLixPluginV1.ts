@@ -114,6 +114,10 @@ function diffSnapshot({
 			return [
 				{
 					type,
+					meta: {
+						// id is required for deletions
+						id: old.id ?? neu.id,
+					},
 					operation: "update",
 					old,
 					neu,
