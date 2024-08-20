@@ -3,6 +3,6 @@
 	"locales": ["en", "de"],
 	"modules": ["local:@inlang/icu1-importer"],
 	"plugin.inlang.icu-messageformat-1": {
-		"messagesFolderPath": "./messages"
+		"pathPattern": "./messages/{locale}.json"
 	}
 }
