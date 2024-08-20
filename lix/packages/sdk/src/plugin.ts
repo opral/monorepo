@@ -17,9 +17,7 @@ export type LixPlugin<
 	// 	variant: Variant,
 	// },
 	/**
-	 * Reports if a change from the source lix conflicts with a change in the target lix.
-	 *
-	 * - returns `undefined` if no conflict exists
+	 * Detects changes from the source lix that conflict with changes in the target lix.
 	 */
 	detectConflicts?: (args: {
 		sourceLix: LixReadonly;
