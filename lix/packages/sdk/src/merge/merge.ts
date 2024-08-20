@@ -118,7 +118,7 @@ export async function merge(args: {
 
 		// 3. update the file data with the applied changes
 		await trx
-			.updateTable("file")
+			.updateTable("file_internal")
 			.set("data", fileData)
 			.where("id", "=", file.id)
 			.execute();
