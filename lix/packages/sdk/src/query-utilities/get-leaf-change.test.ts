@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { newLixFile, openLixInMemory, type Change } from "@lix-js/sdk";
 import { test, expect } from "vitest";
-import { getLastChildOfChange } from "./getLastChildOfChange.js";
+import { getLeafChange } from "./get-leaf-change.js";
 
 test("it should find the latest child of a given change", async () => {
 	const lix = await openLixInMemory({
@@ -43,24 +43,24 @@ test("it should find the latest child of a given change", async () => {
 
 	await lix.db.insertInto("change").values(mockChanges).executeTakeFirst();
 
-	const lastChangeOf1 = await getLastChildOfChange({
+	const leafOfChange01 = await getLeafChange({
 		change: mockChanges[0]!,
 		lix,
 	});
 
-	expect(lastChangeOf1?.id).toBe("3");
+	expect(leafOfChange01?.id).toBe("3");
 
-	const lastChangeOf2 = await getLastChildOfChange({
+	const leafOfChange2 = await getLeafChange({
 		change: mockChanges[1]!,
 		lix,
 	});
 
-	expect(lastChangeOf2?.id).toBe("3");
+	expect(leafOfChange2?.id).toBe("3");
 
-	const lastChangeOf3 = await getLastChildOfChange({
+	const leafOfChange3 = await getLeafChange({
 		change: mockChanges[2]!,
 		lix,
 	});
 
-	expect(lastChangeOf3?.id).toBe("3");
+	expect(leafOfChange3?.id).toBe("3");
 });

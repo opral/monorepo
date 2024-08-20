@@ -1,8 +1,8 @@
 import { newLixFile, openLixInMemory, type Change } from "@lix-js/sdk";
 import { test, expect } from "vitest";
-import { getChangesNotInTarget } from "./getChangesNotInTarget.js";
+import { getLeafChangesOnlyInSource } from "./get-leaf-changes-only-in-source.js";
 
-test("it should find the changes that are not in target", async () => {
+test("it should get the leaf changes that only exist in source", async () => {
 	const sourceLix = await openLixInMemory({
 		blob: await newLixFile(),
 	});
@@ -11,15 +11,16 @@ test("it should find the changes that are not in target", async () => {
 	});
 	const commonChanges: Change[] = [
 		{
-			id: "1",
+			id: "c1",
 			file_id: "mock",
 			operation: "create",
 			plugin_key: "mock",
 			type: "mock",
 		},
 		{
-			id: "2",
+			id: "c2",
 			file_id: "mock",
+			parent_id: "c1",
 			operation: "create",
 			plugin_key: "mock",
 			type: "mock",
@@ -27,16 +28,33 @@ test("it should find the changes that are not in target", async () => {
 	];
 	const changesOnlyInSource: Change[] = [
 		{
-			id: "3",
+			id: "s1",
 			file_id: "mock",
 			operation: "create",
+			plugin_key: "mock",
+			type: "mock",
+		},
+		{
+			id: "s2",
+			parent_id: "s1",
+			file_id: "mock",
+			operation: "update",
+			plugin_key: "mock",
+			type: "mock",
+		},
+		{
+			id: "s3",
+			parent_id: "s2",
+			file_id: "mock",
+			operation: "update",
 			plugin_key: "mock",
 			type: "mock",
 		},
 	];
 	const changesOnlyInTarget: Change[] = [
 		{
-			id: "4",
+			id: "t1",
+			parent_id: "c2",
 			file_id: "mock",
 			operation: "create",
 			plugin_key: "mock",
@@ -54,10 +72,12 @@ test("it should find the changes that are not in target", async () => {
 		.values([...commonChanges, ...changesOnlyInSource])
 		.execute();
 
-	const result = await getChangesNotInTarget({
+	const result = await getLeafChangesOnlyInSource({
 		sourceLix: sourceLix,
 		targetLix: targetLix,
 	});
 
-	expect(result.map((c) => c.id)).toEqual(["3"]);
+	// only the last change in the source is expected,
+	// not s1 and s2 which are parents of s3
+	expect(result.map((c) => c.id)).toEqual(["s3"]);
 });

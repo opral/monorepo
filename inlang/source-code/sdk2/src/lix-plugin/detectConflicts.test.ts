@@ -20,6 +20,7 @@ test("a create operation should not report a conflict given that the change does
 	const conflicts = await inlangLixPluginV1.detectConflicts!({
 		sourceLix,
 		targetLix,
+		leafChangesOnlyInSource: [change],
 	});
 	expect(conflicts).toHaveLength(0);
 });
@@ -66,6 +67,7 @@ test.todo(
 		const conflicts = await inlangLixPluginV1.detectConflicts!({
 			sourceLix,
 			targetLix,
+			leafChangesOnlyInSource: changesNotInTarget,
 		});
 		expect(conflicts).toHaveLength(1);
 		expect(conflicts[0]?.change_id).toBe("1");
@@ -185,6 +187,7 @@ test("it should NOT report a DELETE as a conflict if the parent of the target an
 	const conflicts = await inlangLixPluginV1.detectConflicts!({
 		sourceLix,
 		targetLix,
+		leafChangesOnlyInSource: changesNotInTarget,
 	});
 
 	expect(conflicts).toHaveLength(1);

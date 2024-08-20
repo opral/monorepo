@@ -5,7 +5,7 @@ import type { Change, LixReadonly } from "@lix-js/sdk";
  *
  * - Returns `undefined` if no common parent exists.
  */
-export async function getFirstCommonParent(args: {
+export async function getCommonParent(args: {
 	sourceChange: Change;
 	sourceLix: LixReadonly;
 	targetLix: LixReadonly;
@@ -23,7 +23,7 @@ export async function getFirstCommonParent(args: {
 
 	if (sourceChangeExistsInTarget) {
 		throw Error(
-			"Source change exists in target. No need to find a common parent."
+			"Source change exists in target. No need to find a common parent.",
 		);
 	}
 

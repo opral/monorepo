@@ -1,7 +1,6 @@
-import type { LixPlugin } from "@lix-js/sdk";
+import { getLeafChange, type LixPlugin } from "@lix-js/sdk";
 import { contentFromDatabase, loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { initKysely } from "../database/initKysely.js";
-import { getLastChildOfChange } from "./utilities/getLastChildOfChange.js";
 
 export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	lix,
@@ -22,35 +21,33 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		}
 		// given that the inlang plugin stores snapshots,
 		// taking the last snapshot of the change should be good enough
-		const lastChange = await getLastChildOfChange({ change, lix });
+		const leafChange = await getLeafChange({ change, lix });
 
 		// deletion
-		if (change.value === undefined) {
-			throw Error("Deletions are unimplemented");
-			// if (lastChange.parent_id === undefined) {
-			// 	throw Error(
-			// 		"Unexpected state: change is a deletion but has no parent (insertion)"
-			// 	);
-			// }
-			// const parent = await lix.db
-			// 	.selectFrom("change")
-			// 	.selectAll()
-			// 	.where("id", "=", lastChange.parent_id)
-			// 	.executeTakeFirstOrThrow();
+		// if (change.value === undefined) {
+		// 	throw Error("Deletions are unimplemented");
+		// if (lastChange.parent_id === undefined) {
+		// 	throw Error(
+		// 		"Unexpected state: change is a deletion but has no parent (insertion)"
+		// 	);
+		// }
+		// const parent = await lix.db
+		// 	.selectFrom("change")
+		// 	.selectAll()
+		// 	.where("id", "=", lastChange.parent_id)
+		// 	.executeTakeFirstOrThrow();
 
-			// await db
-			// 	.deleteFrom(change.type as "bundle" | "message" | "variant")
-			// 	.where("id", "=", parent.value?.id as any)
-			// 	.execute();
-		}
+		// await db
+		// 	.deleteFrom(change.type as "bundle" | "message" | "variant")
+		// 	.where("id", "=", parent.value?.id as any)
+		// 	.execute();
+		// }
 		// upsert the value
-		else {
-			await db
-				.insertInto(lastChange.type as "bundle" | "message" | "variant")
-				.values(lastChange.value as any)
-				.onConflict((c) => c.column("id").doUpdateSet(lastChange.value as any))
-				.execute();
-		}
+		await db
+			.insertInto(leafChange.type as "bundle" | "message" | "variant")
+			.values(leafChange.value as any)
+			.onConflict((c) => c.column("id").doUpdateSet(leafChange.value as any))
+			.execute();
 	}
 	return { fileData: contentFromDatabase(sqlite) };
 };

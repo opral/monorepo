@@ -3,7 +3,7 @@ import type { Change, LixReadonly } from "@lix-js/sdk";
 /**
  * Find the last "child" change of the given change.
  */
-export async function getLastChildOfChange(args: {
+export async function getLeafChange(args: {
 	change: Change;
 	lix: LixReadonly;
 }): Promise<Change> {

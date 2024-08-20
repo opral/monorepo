@@ -7,13 +7,43 @@ import type { Change, Conflict } from "../schema.js";
 import type { LixPlugin } from "../plugin.js";
 
 test("it should copy changes from the source into the target that do not exist in target yet", async () => {
+	const mockChanges: Change[] = [
+		{
+			id: "1",
+			operation: "create",
+			type: "mock",
+			// @ts-expect-error - expects serialized json
+			value: JSON.stringify({ id: "mock-id", color: "red" }),
+			file_id: "mock-file",
+			plugin_key: "mock-plugin",
+		},
+		{
+			id: "2",
+			operation: "update",
+			type: "mock",
+			// @ts-expect-error - expects serialized json
+			value: JSON.stringify({ id: "mock-id", color: "blue" }),
+			file_id: "mock-file",
+			plugin_key: "mock-plugin",
+		},
+		{
+			id: "3",
+			operation: "update",
+			type: "mock",
+			// @ts-expect-error - expects serialized json
+			value: JSON.stringify({ id: "mock-id", color: "green" }),
+			file_id: "mock-file",
+			plugin_key: "mock-plugin",
+		},
+	];
+
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
 			file: vi.fn(),
 		},
-		detectConflicts: vi.fn().mockResolvedValue(undefined),
+		detectConflicts: vi.fn().mockResolvedValue([]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
 
@@ -54,23 +84,52 @@ test("it should copy changes from the source into the target that do not exist i
 	]);
 
 	expect(mockPlugin.applyChanges).toHaveBeenCalledTimes(1);
-	expect(mockPlugin.detectConflicts).toHaveBeenCalledTimes(2);
+	expect(mockPlugin.detectConflicts).toHaveBeenCalledTimes(1);
 });
 
 test("it should save change conflicts", async () => {
+	const mockChanges: Change[] = [
+		{
+			id: "1",
+			operation: "create",
+			type: "mock",
+			// @ts-expect-error - expects serialized json
+			value: JSON.stringify({ id: "mock-id", color: "red" }),
+			file_id: "mock-file",
+			plugin_key: "mock-plugin",
+		},
+		{
+			id: "2",
+			operation: "update",
+			type: "mock",
+			// @ts-expect-error - expects serialized json
+			value: JSON.stringify({ id: "mock-id", color: "blue" }),
+			file_id: "mock-file",
+			plugin_key: "mock-plugin",
+		},
+		{
+			id: "3",
+			operation: "update",
+			type: "mock",
+			// @ts-expect-error - expects serialized json
+			value: JSON.stringify({ id: "mock-id", color: "green" }),
+			file_id: "mock-file",
+			plugin_key: "mock-plugin",
+		},
+	];
+
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
 			file: vi.fn(),
 		},
-		detectConflicts: vi
-			.fn()
-			.mockResolvedValue(undefined)
-			.mockResolvedValueOnce({
+		detectConflicts: vi.fn().mockResolvedValue([
+			{
 				change_id: mockChanges[1]!.id,
 				conflicting_change_id: mockChanges[2]!.id,
-			} satisfies Conflict),
+			} satisfies Conflict,
+		]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
 
@@ -118,13 +177,43 @@ test("it should save change conflicts", async () => {
 });
 
 test("it should apply changes that are not conflicting", async () => {
+	const mockChanges: Change[] = [
+		{
+			id: "1",
+			operation: "create",
+			type: "mock",
+			// @ts-expect-error - expects serialized json
+			value: JSON.stringify({ id: "mock-id", color: "red" }),
+			file_id: "mock-file",
+			plugin_key: "mock-plugin",
+		},
+		{
+			id: "2",
+			operation: "update",
+			type: "mock",
+			// @ts-expect-error - expects serialized json
+			value: JSON.stringify({ id: "mock-id", color: "blue" }),
+			file_id: "mock-file",
+			plugin_key: "mock-plugin",
+		},
+		{
+			id: "3",
+			operation: "update",
+			type: "mock",
+			// @ts-expect-error - expects serialized json
+			value: JSON.stringify({ id: "mock-id", color: "green" }),
+			file_id: "mock-file",
+			plugin_key: "mock-plugin",
+		},
+	];
+
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
 			file: vi.fn(),
 		},
-		detectConflicts: vi.fn().mockResolvedValue(undefined),
+		detectConflicts: vi.fn().mockResolvedValue([]),
 		applyChanges: vi.fn().mockResolvedValue({
 			fileData: new TextEncoder().encode(
 				// @ts-expect-error - expects parsed json
@@ -181,33 +270,3 @@ test("it should apply changes that are not conflicting", async () => {
 		),
 	);
 });
-
-const mockChanges: Change[] = [
-	{
-		id: "1",
-		operation: "create",
-		type: "mock",
-		// @ts-expect-error - expects serialized json
-		value: JSON.stringify({ id: "mock-id", color: "red" }),
-		file_id: "mock-file",
-		plugin_key: "mock-plugin",
-	},
-	{
-		id: "2",
-		operation: "update",
-		type: "mock",
-		// @ts-expect-error - expects serialized json
-		value: JSON.stringify({ id: "mock-id", color: "blue" }),
-		file_id: "mock-file",
-		plugin_key: "mock-plugin",
-	},
-	{
-		id: "3",
-		operation: "update",
-		type: "mock",
-		// @ts-expect-error - expects serialized json
-		value: JSON.stringify({ id: "mock-id", color: "green" }),
-		file_id: "mock-file",
-		plugin_key: "mock-plugin",
-	},
-];

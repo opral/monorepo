@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { newLixFile, openLixInMemory, type Change } from "@lix-js/sdk";
 import { test, expect } from "vitest";
-import { getFirstCommonParent } from "./getFirstCommonParent.js";
+import { getCommonParent } from "./get-common-parent.js";
 
 test("it should find the common parent of two changes recursively", async () => {
 	const sourceLix = await openLixInMemory({
@@ -55,7 +55,7 @@ test("it should find the common parent of two changes recursively", async () => 
 		.values([mockChanges[0]!, mockChanges[1]!, mockChanges[2]!])
 		.executeTakeFirst();
 
-	const commonParent = await getFirstCommonParent({
+	const commonParent = await getCommonParent({
 		sourceChange: mockChanges[2]!,
 		sourceLix,
 		targetLix,
@@ -115,7 +115,7 @@ test("it should return undefined if no common parent exists", async () => {
 		.values([mockChanges[0]!, mockChanges[1]!, mockChanges[2]!])
 		.executeTakeFirst();
 
-	const commonParent = await getFirstCommonParent({
+	const commonParent = await getCommonParent({
 		sourceChange: mockChanges[2]!,
 		targetLix,
 		sourceLix,
