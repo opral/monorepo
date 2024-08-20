@@ -10,7 +10,11 @@ import { createReactiveState } from "./logic/reactiveState.js";
 import { BehaviorSubject, map } from "rxjs";
 import { setSettings } from "./logic/setSettings.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
-import { PluginError } from "../plugin/errors.js";
+import {
+	PluginDoesNotImplementFunctionError,
+	PluginError,
+	PluginMissingError,
+} from "../plugin/errors.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 
@@ -76,19 +80,12 @@ export async function loadProject(args: {
 		},
 		importFiles: async ({ files, pluginKey }) => {
 			const plugin = plugins.find((p) => p.key === pluginKey);
-			if (!plugin)
-				throw new PluginError(`No plugin with key "${pluginKey}" found`, {
-					plugin: pluginKey,
-				});
-
+			if (!plugin) throw new PluginMissingError({ plugin: pluginKey });
 			if (!plugin.importFiles) {
-				// fail silently?
-				throw new PluginError(
-					`Plugin "${pluginKey}" does not implement importFiles`,
-					{
-						plugin: pluginKey,
-					}
-				);
+				throw new PluginDoesNotImplementFunctionError({
+					plugin: pluginKey,
+					function: "importFiles",
+				});
 			}
 
 			const { bundles } = plugin.importFiles({
@@ -107,19 +104,12 @@ export async function loadProject(args: {
 		},
 		exportFiles: async ({ pluginKey }) => {
 			const plugin = plugins.find((p) => p.key === pluginKey);
-			if (!plugin)
-				throw new PluginError(`No plugin with key "${pluginKey}" found`, {
-					plugin: pluginKey,
-				});
-
+			if (!plugin) throw new PluginMissingError({ plugin: pluginKey });
 			if (!plugin.exportFiles) {
-				// fail silently?
-				throw new PluginError(
-					`Plugin "${pluginKey}" does not implement exportFiles`,
-					{
-						plugin: pluginKey,
-					}
-				);
+				throw new PluginDoesNotImplementFunctionError({
+					plugin: pluginKey,
+					function: "exportFiles",
+				});
 			}
 
 			const bundles = await selectBundleNested(db).selectAll().execute();
