@@ -70,4 +70,8 @@ export const plugin: InlangPlugin<{
 
 		return { bundles: Object.values(bundles) }
 	},
+
+	exportFiles: ({ bundles, settings }) => {
+		return []
+	},
 }
