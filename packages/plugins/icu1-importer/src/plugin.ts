@@ -1,6 +1,7 @@
 import type { BundleNested, InlangPlugin, ResourceFile } from "@inlang/sdk2"
 import { PluginSettings } from "./settings.js"
 import { createMessage } from "./parse.js"
+import { serializeMessage } from "./serialize.js"
 
 const pluginKey = "plugin.inlang.icu-messageformat-1"
 export const plugin: InlangPlugin<{
@@ -72,6 +73,26 @@ export const plugin: InlangPlugin<{
 	},
 
 	exportFiles: ({ bundles, settings }) => {
-		return []
+		const files: ResourceFile[] = []
+		const utf8 = new TextEncoder()
+		const pathPattern = settings["plugin.inlang.icu-messageformat-1"].pathPattern
+
+		for (const locale of settings.locales) {
+			const messages: Record<string, string> = {}
+
+			for (const bundle of bundles) {
+				const message = bundle.messages.find((message) => message.locale === locale)
+				if (!message) continue
+				messages[bundle.id] = serializeMessage(message)
+			}
+
+			files.push({
+				content: utf8.encode(JSON.stringify(messages)),
+				path: pathPattern.replace("{locale}", locale),
+				pluginKey: pluginKey,
+			})
+		}
+
+		return files
 	},
 }
