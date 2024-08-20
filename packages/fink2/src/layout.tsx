@@ -265,7 +265,7 @@ const AppMenu = () => {
 				<SlMenu onSlSelect={handleSelect}>
 					<SlMenuItem value="new">New project</SlMenuItem>
 					<SlMenuItem value="open">Open file</SlMenuItem>
-					<SlMenuItem value="download">Download file</SlMenuItem>
+					<SlMenuItem value="download">Save file</SlMenuItem>
 					<SlMenuItem value="import">Merge file</SlMenuItem>
 				</SlMenu>
 			</SlDropdown>
