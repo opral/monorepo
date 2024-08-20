@@ -42,6 +42,11 @@ export async function merge(args: {
 		toBeCopiedChanges.push(change);
 	}
 
+	if (toBeCopiedChanges.length === 0) {
+		// no new changes exist, exit early
+		return;
+	}
+
 	// TODO don't query the changes again. Very inefficient.
 	const leafChangesOnlyInSource = await getLeafChangesOnlyInSource({
 		sourceLix: args.source,
@@ -113,7 +118,13 @@ export async function merge(args: {
 
 		// 2. insert the conflicts of those changes
 		if (conflicts.length > 0) {
-			await trx.insertInto("conflict").values(conflicts).execute();
+			await trx
+				.insertInto("conflict")
+				.values(conflicts)
+				// the conflict is already tracked
+				// do nothing
+				.onConflict((oc) => oc.doNothing())
+				.execute();
 		}
 
 		// 3. update the file data with the applied changes

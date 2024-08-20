@@ -270,3 +270,102 @@ test("it should apply changes that are not conflicting", async () => {
 		),
 	);
 });
+
+
+
+test("subsequent merges should not lead to duplicate changes and/or conflicts", async () => {
+	const commonChanges: Change[] = [
+		{
+			id: "1",
+			operation: "create",
+			type: "mock",
+			// @ts-expect-error - expects serialized json
+			value: JSON.stringify({ id: "mock-id", color: "red" }),
+			file_id: "mock-file",
+			plugin_key: "mock-plugin",
+		},
+	];
+	const changesOnlyInTarget: Change[] = [];
+	const changesOnlyInSource: Change[] = [
+		{
+			id: "2",
+			operation: "update",
+			type: "mock",
+			// @ts-expect-error - expects serialized json
+			value: JSON.stringify({ id: "mock-id", color: "blue" }),
+			file_id: "mock-file",
+			plugin_key: "mock-plugin",
+		},
+	];
+
+	const mockPlugin: LixPlugin = {
+		key: "mock-plugin",
+		glob: "*",
+		diff: {
+			file: vi.fn(),
+		},
+		detectConflicts: vi.fn().mockResolvedValue([
+			{
+				change_id: commonChanges[0]!.id,
+				conflicting_change_id: changesOnlyInSource[0]!.id,
+			} satisfies Conflict,
+		]),
+		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
+	};
+
+	const source = await openLixInMemory({
+		blob: await newLixFile(),
+		providePlugins: [mockPlugin],
+	});
+
+	const target = await openLixInMemory({
+		blob: await newLixFile(),
+		providePlugins: [mockPlugin],
+	});
+
+	await source.db
+		.insertInto("change")
+		.values([...commonChanges, ...changesOnlyInSource])
+		.execute();
+
+	await target.db
+		.insertInto("change")
+		.values([...commonChanges, ...changesOnlyInTarget])
+		.execute();
+
+	await target.db
+		.insertInto("file")
+		.values({
+			id: "mock-file",
+			path: "/mock-file.json",
+			data: new TextEncoder().encode(JSON.stringify({})),
+		})
+		.execute();
+
+	await merge({ source, target });
+
+	const changes = await target.db.selectFrom("change").selectAll().execute();
+
+	const conflicts = await target.db
+		.selectFrom("conflict")
+		.selectAll()
+		.execute();
+
+	expect(changes.length).toBe(2);
+	expect(conflicts.length).toBe(1);
+
+	await merge({ source, target });
+
+	const changesAfterSecondMerge = await target.db
+		.selectFrom("change")
+		.selectAll()
+		.execute();
+
+	const conflictsAfterSecondMerge = await target.db
+		.selectFrom("conflict")
+		.selectAll()
+		.execute();
+
+	expect(changesAfterSecondMerge.length).toBe(2);
+	expect(conflictsAfterSecondMerge.length).toBe(1);
+});
