@@ -7,7 +7,7 @@ import { applyChanges } from "./applyChanges.js";
 import { initKysely } from "../database/initKysely.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
 
-test("it should delete a type (bundle) if the parent in both source and target are identical", async () => {
+test("it should be able to delete", async () => {
 	const project = await loadProjectInMemory({
 		blob: await newProject(),
 	});
@@ -91,4 +91,79 @@ test("it should delete a type (bundle) if the parent in both source and target a
 	const bundles = await db.selectFrom("bundle").selectAll().execute();
 
 	expect(bundles).toHaveLength(0);
+});
+
+test("it should be able to upsert (insert & update)", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+	});
+
+	const changes: Change[] = [
+		{
+			id: "1",
+			parent_id: undefined,
+			operation: "create",
+			file_id: "mock",
+			plugin_key: "mock",
+			type: "bundle",
+			meta: { id: "mock" },
+			// @ts-expect-error - type error somewhere
+			value: {
+				id: "mock",
+				alias: {
+					foo: "mock-alias",
+				},
+			} satisfies Bundle,
+		},
+		{
+			id: "2",
+			parent_id: "1",
+			operation: "update",
+			file_id: "mock",
+			plugin_key: "mock",
+			type: "bundle",
+			meta: {
+				id: "mock",
+			},
+			// @ts-expect-error - type error somewhere
+			value: {
+				id: "mock",
+				alias: {
+					foo: "mock-alias-updated",
+				},
+			} satisfies Bundle,
+		},
+	];
+
+	await project.db
+		.insertInto("bundle")
+		.values({
+			id: "mock",
+			// @ts-expect-error - todo auto serialize values
+			alias: JSON.stringify({
+				foo: "mock-alias",
+			}),
+		})
+		.execute();
+
+	const dbFile = await project.lix.db
+		.selectFrom("file")
+		.selectAll()
+		.where("path", "=", "/db.sqlite")
+		.executeTakeFirstOrThrow();
+
+	const dbFileAfter = await applyChanges({
+		lix: project.lix,
+		file: dbFile,
+		changes,
+	});
+
+	const db = initKysely({
+		sqlite: await loadDatabaseInMemory(dbFileAfter.fileData),
+	});
+
+	const bundles = await db.selectFrom("bundle").selectAll().execute();
+
+	expect(bundles).toHaveLength(1);
+	expect(bundles[0]?.alias).toEqual({ foo: "mock-alias-updated" });
 });

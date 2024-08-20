@@ -37,25 +37,6 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 			continue;
 		}
 
-		// deletion
-		// if (change.value === undefined) {
-		// 	throw Error("Deletions are unimplemented");
-		// if (lastChange.parent_id === undefined) {
-		// 	throw Error(
-		// 		"Unexpected state: change is a deletion but has no parent (insertion)"
-		// 	);
-		// }
-		// const parent = await lix.db
-		// 	.selectFrom("change")
-		// 	.selectAll()
-		// 	.where("id", "=", lastChange.parent_id)
-		// 	.executeTakeFirstOrThrow();
-
-		// await db
-		// 	.deleteFrom(change.type as "bundle" | "message" | "variant")
-		// 	.where("id", "=", parent.value?.id as any)
-		// 	.execute();
-		// }
 		// upsert the value
 		const value = jsonStringifyObjectProperties(leafChange.value) as any;
 		await db
