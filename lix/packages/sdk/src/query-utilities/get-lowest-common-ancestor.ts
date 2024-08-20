@@ -1,30 +1,29 @@
 import type { Change, LixReadonly } from "@lix-js/sdk";
 
 /**
- * Find the first common parent of two changes.
+ * Finds the lowest common change of the source
+ * change in the source lix and the target lix.
  *
- * - Returns `undefined` if no common parent exists.
+ * https://en.wikipedia.org/wiki/Lowest_common_ancestor
  */
-export async function getCommonParent(args: {
+export async function getLowestCommonAncestor(args: {
 	sourceChange: Change;
 	sourceLix: LixReadonly;
 	targetLix: LixReadonly;
 }): Promise<Change | undefined> {
-	// the change has no parent (is the root change)
+	// the change has no parent (it is the root change)
 	if (args.sourceChange?.parent_id === undefined) {
 		return undefined;
 	}
 
-	const sourceChangeExistsInTarget = await args.targetLix.db
+	const changeExistsInTarget = await args.targetLix.db
 		.selectFrom("change")
 		.selectAll()
 		.where("id", "=", args.sourceChange.id)
 		.executeTakeFirst();
 
-	if (sourceChangeExistsInTarget) {
-		throw Error(
-			"Source change exists in target. No need to find a common parent.",
-		);
+	if (changeExistsInTarget) {
+		return changeExistsInTarget;
 	}
 
 	let nextChange: Change | undefined;
