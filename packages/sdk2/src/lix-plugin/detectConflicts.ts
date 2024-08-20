@@ -1,21 +1,18 @@
-import type { Conflict, LixPlugin } from "@lix-js/sdk";
-import { getChangesNotInTarget } from "./utilities/getChangesNotInTarget.js";
-import { getFirstCommonParent } from "./utilities/getFirstCommonParent.js";
-import { getLastChildOfChange } from "./utilities/getLastChildOfChange.js";
+import {
+	getCommonParent,
+	getLeafChange,
+	type Conflict,
+	type LixPlugin,
+} from "@lix-js/sdk";
 
 export const detectConflicts: LixPlugin["detectConflicts"] = async ({
 	sourceLix,
 	targetLix,
-	// TODO
-	// leafChangesOnlyInSource,
+	leafChangesOnlyInSource,
 }) => {
 	const result: Conflict[] = [];
-	const changesNotInTarget = await getChangesNotInTarget({
-		sourceLix,
-		targetLix,
-	});
-	for (const change of changesNotInTarget) {
-		const commonParent = await getFirstCommonParent({
+	for (const change of leafChangesOnlyInSource) {
+		const commonParent = await getCommonParent({
 			sourceChange: change,
 			sourceLix,
 			targetLix,
@@ -26,7 +23,7 @@ export const detectConflicts: LixPlugin["detectConflicts"] = async ({
 			continue;
 		}
 
-		const lastChangeInTarget = await getLastChildOfChange({
+		const lastChangeInTarget = await getLeafChange({
 			change: commonParent,
 			lix: targetLix,
 		});
