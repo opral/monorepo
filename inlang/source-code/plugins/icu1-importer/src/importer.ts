@@ -4,9 +4,9 @@ import { createMessage } from "./parse.js"
 
 const pluginKey = "plugin.inlang.icu-messageformat-1"
 export const plugin: InlangPlugin<{
-	[importerKey]: PluginSettings
+	[pluginKey]: PluginSettings
 }> = {
-	key: importerKey,
+	key: pluginKey,
 	settingsSchema: PluginSettings,
 
 	toBeImportedFiles: async ({ settings, nodeFs }) => {
@@ -26,7 +26,7 @@ export const plugin: InlangPlugin<{
 			files.push({
 				path,
 				content: file,
-				pluginKey: importerKey,
+				pluginKey: pluginKey,
 			})
 		}
 
