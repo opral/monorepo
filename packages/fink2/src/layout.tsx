@@ -243,7 +243,7 @@ const CombineButton = () => {
 				input.click();
 			}}
 		>
-			Combine
+			Merge
 		</SlButton>
 	);
 };
