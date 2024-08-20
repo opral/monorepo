@@ -12,24 +12,31 @@ export const detectConflicts: LixPlugin["detectConflicts"] = async ({
 }) => {
 	const result: Conflict[] = [];
 	for (const change of leafChangesOnlyInSource) {
-		const commonChange = await getLowestCommonAncestor({
+		const lowestCommonAncestor = await getLowestCommonAncestor({
 			sourceChange: change,
 			sourceLix,
 			targetLix,
 		});
 
-		if (commonChange === undefined) {
+		if (lowestCommonAncestor === undefined) {
 			// no common parent, no conflict. must be an insert
 			continue;
 		}
 
-		const lastChangeInTarget = await getLeafChange({
-			change: commonChange,
+		const leafChangeInTarget = await getLeafChange({
+			change: lowestCommonAncestor,
 			lix: targetLix,
 		});
 
+		if (lowestCommonAncestor.id === leafChangeInTarget.id) {
+			// no conflict. the lowest common ancestor is 
+			// the leaf change in the target. aka, no changes
+			// in target have been made that could conflict with the source
+			continue;
+		}
+
 		const hasDiff =
-			JSON.stringify(change.value) !== JSON.stringify(lastChangeInTarget.value);
+			JSON.stringify(change.value) !== JSON.stringify(leafChangeInTarget.value);
 
 		if (hasDiff === false) {
 			// TODO we have two different changes that yielded the same snapshot,
@@ -42,7 +49,7 @@ export const detectConflicts: LixPlugin["detectConflicts"] = async ({
 		// naive raise any snapshot difference as a conflict for now
 		// more sophisticated conflict reporting can be incrementally added
 		result.push({
-			change_id: lastChangeInTarget.id,
+			change_id: leafChangeInTarget.id,
 			conflicting_change_id: change.id,
 			reason:
 				"The snapshots of the change do not match. More sophisticated reasoning will be added later.",
