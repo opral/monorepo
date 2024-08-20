@@ -1,5 +1,5 @@
 import {
-	getCommonParent,
+	getLowestCommonAncestor,
 	getLeafChange,
 	type Conflict,
 	type LixPlugin,
@@ -12,19 +12,19 @@ export const detectConflicts: LixPlugin["detectConflicts"] = async ({
 }) => {
 	const result: Conflict[] = [];
 	for (const change of leafChangesOnlyInSource) {
-		const commonParent = await getCommonParent({
+		const commonChange = await getLowestCommonAncestor({
 			sourceChange: change,
 			sourceLix,
 			targetLix,
 		});
 
-		if (commonParent === undefined) {
+		if (commonChange === undefined) {
 			// no common parent, no conflict. must be an insert
 			continue;
 		}
 
 		const lastChangeInTarget = await getLeafChange({
-			change: commonParent,
+			change: commonChange,
 			lix: targetLix,
 		});
 
