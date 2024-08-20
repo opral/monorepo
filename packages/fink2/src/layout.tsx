@@ -266,7 +266,7 @@ const AppMenu = () => {
 					<SlMenuItem value="new">New project</SlMenuItem>
 					<SlMenuItem value="open">Open file</SlMenuItem>
 					<SlMenuItem value="download">Download file</SlMenuItem>
-					<SlMenuItem value="import">Import translations</SlMenuItem>
+					<SlMenuItem value="import">Merge file</SlMenuItem>
 				</SlMenu>
 			</SlDropdown>
 			<CreateProjectDialog showNewProjectDialog={showNewProjectDialog} setShowNewProjectDialog={setShowNewProjectDialog} />
