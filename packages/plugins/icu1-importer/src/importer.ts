@@ -44,7 +44,11 @@ export const plugin: InlangPlugin<{
 
 				for (const [key, value] of Object.entries(json)) {
 					if (typeof value !== "string") continue
-					const message = createMessage(value, key, locale)
+					const message = createMessage({
+						messageSource: value,
+						bundleId: key,
+						locale: locale,
+					})
 
 					const bundle = bundles[message.bundleId] ?? {
 						id: message.bundleId,

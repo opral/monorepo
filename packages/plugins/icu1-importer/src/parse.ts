@@ -148,11 +148,15 @@ export function generateBranches(elements: MessageFormatElement[], branch: Branc
 	return branches
 }
 
-export function createMessage(
-	messageSource: string,
-	bundleId: string,
+export function createMessage({
+	messageSource,
+	bundleId,
+	locale,
+}: {
+	messageSource: string
+	bundleId: string
 	locale: string
-): MessageNested {
+}): MessageNested {
 	const ast = parseICU(messageSource, {
 		ignoreTag: true, // TODO: Change once we support markup
 		requiresOtherClause: false,

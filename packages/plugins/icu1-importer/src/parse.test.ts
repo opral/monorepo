@@ -293,7 +293,11 @@ describe("generateBranches", () => {
 
 describe("createMessage", () => {
 	it("creates a message for a branchless string", () => {
-		const message = createMessage("Hello World", "sad_elephant", "en")
+		const message = createMessage({
+			messageSource: "Hello World",
+			bundleId: "sad_elephant",
+			locale: "en",
+		})
 		expect(message).toEqual({
 			bundleId: "sad_elephant",
 			declarations: [],
@@ -319,7 +323,7 @@ describe("createMessage", () => {
 	it("creates a message with multiple variants", () => {
 		const icu1 =
 			"It's {season, select, spring {spring} summer {summer} fall {fall} winter {winter}}!"
-		const message = createMessage(icu1, "sad_elephant", "en")
+		const message = createMessage({ messageSource: icu1, bundleId: "sad_elephant", locale: "en" })
 		expect(message).toEqual({
 			bundleId: "sad_elephant",
 			declarations: [
@@ -429,7 +433,11 @@ describe("createMessage", () => {
 	})
 
 	it("treats tags as text", () => {
-		const message = createMessage("<b>Hello</b>", "sad_elephant", "en")
+		const message = createMessage({
+			messageSource: "<b>Hello</b>",
+			bundleId: "sad_elephant",
+			locale: "en",
+		})
 		expect(message).toEqual({
 			bundleId: "sad_elephant",
 			declarations: [],
