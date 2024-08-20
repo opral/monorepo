@@ -89,6 +89,9 @@ describe("plugin.diff.file", () => {
 
 		expect(diffReports).toEqual([
 			{
+				meta: {
+					id: "1",
+				},
 				type: "bundle",
 				operation: "update",
 				old: { id: "1", alias: {} },
@@ -197,6 +200,9 @@ describe("plugin.diff.file", () => {
 		});
 		expect(diffReports).toEqual([
 			{
+				meta: {
+					id: "1",
+				},
 				type: "message",
 				operation: "update",
 				old: {
@@ -307,6 +313,9 @@ describe("plugin.diff.file", () => {
 		});
 		expect(diffReports).toEqual([
 			{
+				meta: {
+					id: "1",
+				},
 				operation: "update",
 				type: "variant",
 				old: {
@@ -393,7 +402,13 @@ describe("plugin.diff.variant", () => {
 		};
 		const diff = await inlangLixPluginV1.diff.variant({ old, neu });
 		expect(diff).toEqual([
-			{ operation: "update", type: "variant", neu, old } satisfies DiffReport,
+			{
+				meta: { id: "1" },
+				operation: "update",
+				type: "variant",
+				neu,
+				old,
+			} satisfies DiffReport,
 		]);
 	});
 

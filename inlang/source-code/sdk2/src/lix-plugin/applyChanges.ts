@@ -1,4 +1,4 @@
-import { getLeafChange, type LixPlugin } from "@lix-js/sdk";
+import { getLeafChange, type Change, type LixPlugin } from "@lix-js/sdk";
 import { contentFromDatabase, loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { initKysely } from "../database/initKysely.js";
 
@@ -15,13 +15,27 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	const sqlite = await loadDatabaseInMemory(file.data);
 	const db = initKysely({ sqlite });
 
-	for (const change of changes) {
-		if (change.value === undefined) {
-			throw Error("Deletions are unimplemented");
+	const leafChanges = new Set(
+		await Promise.all(
+			changes.map(async (change) => {
+				const leafChange = await getLeafChange({ change, lix });
+				// enable string comparison and avoid duplicates
+				return JSON.stringify(leafChange);
+			})
+		)
+	);
+
+	for (const unparsedLeafChange of leafChanges) {
+		const leafChange: Change = JSON.parse(unparsedLeafChange);
+
+		// deletion
+		if (leafChange.value === undefined) {
+			await db
+				.deleteFrom(leafChange.type as "bundle" | "message" | "variant")
+				.where("id", "=", leafChange.meta?.id)
+				.execute();
+			continue;
 		}
-		// given that the inlang plugin stores snapshots,
-		// taking the last snapshot of the change should be good enough
-		const leafChange = await getLeafChange({ change, lix });
 
 		// deletion
 		// if (change.value === undefined) {
@@ -43,11 +57,25 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		// 	.execute();
 		// }
 		// upsert the value
+		const value = jsonStringifyObjectProperties(leafChange.value) as any;
 		await db
 			.insertInto(leafChange.type as "bundle" | "message" | "variant")
-			.values(leafChange.value as any)
-			.onConflict((c) => c.column("id").doUpdateSet(leafChange.value as any))
+			.values(value)
+			.onConflict((c) => c.column("id").doUpdateSet(value))
 			.execute();
 	}
 	return { fileData: contentFromDatabase(sqlite) };
 };
+
+// TODO remove after https://github.com/opral/inlang-message-sdk/issues/123
+function jsonStringifyObjectProperties(value: Record<string, any>) {
+	const result: Record<string, any> = {};
+	for (const key in value) {
+		if (typeof value[key] === "object") {
+			result[key] = JSON.stringify(value[key]);
+		} else {
+			result[key] = value[key];
+		}
+	}
+	return result;
+}
