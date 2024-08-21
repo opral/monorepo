@@ -87,8 +87,8 @@ export async function loadProject(args: {
 			return await importFiles({
 				files,
 				pluginKey,
-				settings: reactiveState.settings$.getValue(),
-				plugins: reactiveState.plugins$.getValue(),
+				settings: state.settings$.getValue(),
+				plugins: state.plugins$.getValue(),
 				db,
 			});
 		},
@@ -96,8 +96,8 @@ export async function loadProject(args: {
 			return await exportFiles({
 				pluginKey,
 				db,
-				plugins: reactiveState.plugins$.getValue(),
-				settings: reactiveState.settings$.getValue(),
+				plugins: state.plugins$.getValue(),
+				settings: state.settings$.getValue(),
 			});
 		},
 		close: async () => {
