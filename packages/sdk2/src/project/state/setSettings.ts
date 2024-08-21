@@ -1,14 +1,14 @@
 import type { Lix } from "@lix-js/sdk";
 import type { ProjectSettings } from "../../schema/settings.js";
-import type { ReactiveState } from "./reactiveState.js";
+import type { State } from "./state.js";
 import dedent from "dedent";
 
 export async function setSettings(args: {
 	newSettings: ProjectSettings;
 	lix: Lix;
-	reactiveState: Pick<ReactiveState, "settings$">;
+	state: Pick<State, "settings$">;
 }) {
-	const previousSettings = args.reactiveState.settings$.getValue();
+	const previousSettings = args.state.settings$.getValue();
 	if (
 		previousSettings.sourceLanguageTag !== args.newSettings.sourceLanguageTag ||
 		// Check if the length is different, and if so,
@@ -49,5 +49,5 @@ export async function setSettings(args: {
 		})
 		.execute();
 	// if successfull set next value for reactive state
-	args.reactiveState.settings$.next(cloned);
+	args.state.settings$.next(cloned);
 }
