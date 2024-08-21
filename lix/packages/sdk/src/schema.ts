@@ -36,14 +36,17 @@ export type Commit = {
 	//  think of real-time collaboration scenarios
 	user_id: string; // @relation to a user
 	description: string;
+	/**
+	 * @deprecated use created_at instead
+	 * todo remove before release
+	 */
 	created?: string;
+	created_at?: string;
 	parent_id: string;
 	// @relation changes: Change[]
 };
 
-export type Change<
-	T extends Record<string, any> = Record<string, { id: string }>,
-> = {
+export type Change<T extends Record<string, any> = Record<string, { id: string }>> = {
 	id: string;
 	parent_id?: Change["id"];
 	file_id: LixFile["id"];
@@ -90,6 +93,11 @@ export type Change<
 	 * to process changes.
 	 */
 	meta?: Record<string, any>; // JSONB
+	/**
+	 * The time the change was created.
+	 */
+	// TODO make selectable, updatable
+	created_at?: string;
 };
 
 export type Conflict = {

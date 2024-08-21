@@ -8,7 +8,7 @@ test("should use queue and settled correctly", async () => {
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
-			file: async ({ old, neu }) => {
+			file: async ({ old }) => {
 				return [
 					!old
 						? {
@@ -86,7 +86,8 @@ test("should use queue and settled correctly", async () => {
 
 	expect(changes).toEqual([
 		{
-			id: changes[0]?.id!,
+			id: changes[0]?.id,
+			created_at: changes[0]?.created_at,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -143,7 +144,8 @@ test("should use queue and settled correctly", async () => {
 
 	expect(updatedChanges).toEqual([
 		{
-			id: updatedChanges[0]?.id!,
+			id: updatedChanges[0]?.id,
+			created_at: updatedChanges[0]?.created_at,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
