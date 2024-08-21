@@ -1,3 +1,4 @@
+import type { Generated } from "kysely";
 import type { LixPlugin } from "./plugin.js";
 
 export type LixDatabase = {
@@ -90,6 +91,10 @@ export type Change<
 	 * to process changes.
 	 */
 	meta?: Record<string, any>; // JSONB
+	/**
+	 * The time the change was created.
+	 */
+	created_at: Generated<string>;
 };
 
 export type Conflict = {

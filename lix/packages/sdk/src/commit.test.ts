@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, test } from "vitest";
 import { openLixInMemory } from "./open/openLixInMemory.js";
 import { newLixFile } from "./newLix.js";
@@ -8,7 +10,7 @@ test("should be able to add and commit changes", async () => {
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
-			file: async ({ old, neu }) => {
+			file: async ({ old }) => {
 				return [
 					!old
 						? {
@@ -19,7 +21,7 @@ test("should be able to add and commit changes", async () => {
 									id: "test",
 									text: "inserted text",
 								},
-						  }
+							}
 						: {
 								type: "text",
 								operation: "update",
@@ -31,7 +33,7 @@ test("should be able to add and commit changes", async () => {
 									id: "test",
 									text: "updated text",
 								},
-						  },
+							},
 				];
 			},
 		},
@@ -63,7 +65,8 @@ test("should be able to add and commit changes", async () => {
 
 	expect(changes).toEqual([
 		{
-			id: changes[0]?.id!,
+			id: changes[0]?.id,
+			created_at: changes[0]?.created_at,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -96,7 +99,8 @@ test("should be able to add and commit changes", async () => {
 
 	expect(commitedChanges).toEqual([
 		{
-			id: commitedChanges[0]?.id!,
+			id: commitedChanges[0]?.id,
+			created_at: changes[0]?.created_at,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -137,6 +141,7 @@ test("should be able to add and commit changes", async () => {
 	expect(updatedChanges).toEqual([
 		{
 			id: updatedChanges[0]?.id!,
+			created_at: updatedChanges[0]?.created_at,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -152,6 +157,7 @@ test("should be able to add and commit changes", async () => {
 		{
 			id: updatedChanges[1]?.id!,
 			parent_id: updatedChanges[0]?.id!,
+			created_at: updatedChanges[0]?.created_at,
 			type: "text",
 			file_id: "test",
 			plugin_key: "mock-plugin",
