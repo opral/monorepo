@@ -102,7 +102,6 @@ const SingleDiffBundle = (props: {
 								);
 							}
 						})}
-						);
 					</InlangMessage>
 				);
 			})}

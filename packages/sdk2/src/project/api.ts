@@ -28,6 +28,7 @@ export type InlangProject = {
 		set: (settings: ProjectSettings) => Promise<void>;
 		subscribe: Subscription<ProjectSettings>;
 	};
+	settled: () => Promise<void>;
 	lix: Lix;
 	importFiles: (args: {
 		pluginKey: InlangPlugin["key"];
