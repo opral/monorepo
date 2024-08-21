@@ -104,7 +104,7 @@ export function generateBranches(elements: MessageFormatElement[], branch: Branc
 
 					if (element.type === TYPE.plural && option !== "other") {
 						if (option.startsWith("=")) {
-							const exact = element.value.slice(1)
+							const exact = option.slice(1)
 							selector = [element.value, undefined, exact]
 						} else {
 							selector = [element.value, "plural", option]

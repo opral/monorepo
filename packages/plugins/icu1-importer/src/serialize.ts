@@ -1,81 +1,85 @@
-import type { MessageNested, Pattern } from "@inlang/sdk2"
-import { TYPE, type MessageFormatElement } from "@formatjs/icu-messageformat-parser"
-
-type Branch = {
-	/**
-	 * The (partial) Pattern that this branch results in
-	 */
-	pattern: Pattern
-
-	/**
-	 * The (partial) match-values that are needed to produce this branch
-	 * [arg, function?, match]
-	 *
-	 * Add options?
-	 */
-	match: {
-		arg: string
-		function?: string // todo: add options?
-		match: string
-	}[]
-}
+import type { Expression, MessageNested, Pattern, Variant } from "@inlang/sdk2"
+import {
+	TYPE,
+	type MessageFormatElement,
+	type PluralOrSelectOption,
+} from "@formatjs/icu-messageformat-parser"
 
 export function serializeMessage(message: MessageNested): string {
-	const branches = getBranches(message)
-	if (branches.length < 1) return "" // shouldn't happen, just being safe
-
-	const ast = branchesToICU1(branches)
+	const ast = variantsToICU1(message.variants, message.selectors)
 	return serializeICU1Message(ast)
 }
 
-/**
- * Turns the variants into branches that we can work with more easily.
- *
- * Branches contain the information of both the variant and the selectors, so they're easier to
- * work with than just variants.
- */
-function getBranches(message: MessageNested): Branch[] {
-	const branches: Branch[] = []
-	for (const variant of message.variants) {
-		const match: Branch["match"] = []
+function variantsToICU1(variants: Variant[], selectors: Expression[]): MessageFormatElement[] {
+	const [selector, ...remainingSelectors] = selectors
 
-		for (let i = 0; i < message.selectors.length; i++) {
-			const selector = message.selectors[i]
-			const match = variant.match[i]
-			if (match === "*") continue
-			if (selector?.arg.type !== "variable") continue
-
-			const arg = selector?.arg.name
-			const fnName = selector?.annotation?.name
-
-			match.push({
-				arg,
-				function: fnName,
-				match: match,
-			})
-		}
-
-		const branch: Branch = {
-			pattern: variant.pattern,
-			match,
-		}
-
-		branches.push(branch)
+	// if there are no selectors, just return the variant's pattern transpiled to ICU1
+	if (!selector) {
+		const variant = variants[0]
+		if (!variant || variants.length > 1) throw new Error("Expected exactly one variant")
+		return patternToICU1(variant.pattern)
 	}
 
-	return branches
+	// if there are selectors left, create a select/plural and recursively call this function for each branch
+	// TODO, exact plurals and selectordinal and options
+	const type = selector.annotation?.name === "plural" ? TYPE.plural : TYPE.select
+
+	// group variants by selector value
+	const variantGroups = Object.groupBy(variants, (variant) => variant.match[0])
+	const options: Record<string, PluralOrSelectOption> = {}
+
+	for (const [selectorValue, variants] of Object.entries(variantGroups)) {
+		if (!variants) continue
+
+		const branch = selectorValue === "*" ? "other" : selectorValue
+
+		// remove the selector we just selected over from the variant's matches
+		const newVariants = variants.map((variant) => {
+			return {
+				...variant,
+				match: variant.match.slice(1),
+			}
+		})
+
+		options[branch] = {
+			value: variantsToICU1(newVariants, remainingSelectors),
+		}
+	}
+
+	return [
+		{
+			type,
+			pluralType: type === TYPE.plural ? "cardinal" : undefined,
+			value: selector.arg.name,
+			options,
+		},
+	] as MessageFormatElement[]
 }
 
-function branchesToICU1(branches: Branch[]): MessageFormatElement[] {
-	const elements: MessageFormatElement[] = []
+function patternToICU1(pattern: Pattern): MessageFormatElement[] {
+	return pattern.map((icu2El): MessageFormatElement => {
+		if (icu2El.type === "text") {
+			return { type: TYPE.literal, value: icu2El.value }
+		}
 
-	// group branches by their next element
+		// expression
+		if (!icu2El.annotation) {
+			// variable interpolation
+			return { type: TYPE.argument, value: icu2El.arg.name }
+		}
 
-	// Two cases
-	// 1. All the branches in one group -> append the element to the result
-	// 2. Not all the branches in one group -> discriminate by selectors
+		// function
+		const type = (
+			{
+				time: TYPE.time,
+				number: TYPE.number,
+				date: TYPE.date,
+			} as const
+		)[icu2El.annotation.name]
+		if (type === undefined) throw new Error(`Unsupported function ${icu2El.annotation.name}`)
 
-	return elements
+		return { type, value: icu2El.arg.name }
+	})
 }
 
 /**
@@ -83,7 +87,7 @@ function branchesToICU1(branches: Branch[]): MessageFormatElement[] {
  * @returns The serialized ICU1 MessageFormat string
  * @private Only exported for tests
  */
-export function serializeICU1Message(elements: MessageFormatElement[]): string {
+function serializeICU1Message(elements: MessageFormatElement[]): string {
 	let result = ""
 
 	for (const element of elements) {
@@ -146,3 +150,6 @@ export function serializeICU1Message(elements: MessageFormatElement[]): string {
 
 	return result
 }
+
+// Exports for testing
+export { serializeICU1Message as _serializeICU1Message }

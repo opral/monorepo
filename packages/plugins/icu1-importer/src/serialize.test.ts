@@ -1,6 +1,61 @@
 import { describe, it, expect } from "vitest"
-import { serializeICU1Message } from "./serialize.js"
+import { _serializeICU1Message as serializeICU1Message, serializeMessage } from "./serialize.js"
+import { createMessage } from "./parse.js"
 import { parse as parseICU1 } from "@formatjs/icu-messageformat-parser"
+// this test-suite trusts that `createMessage` works correctly
+
+describe("serializeMessage", () => {
+	it("serializes a message with a single variant", () => {
+		const msg = createMessage({
+			messageSource: "Hello {name}!",
+			bundleId: "sad_elephant",
+			locale: "en",
+		})
+
+		const serialized = serializeMessage(msg)
+		expect(serialized).toBe("Hello {name}!")
+	})
+
+	it("serializes a message with a select (no other)", () => {
+		const msg = createMessage({
+			messageSource:
+				"It's, {season, select, spring {spring} summer {summer} fall {fall} winter {winter}}",
+			bundleId: "sad_elephant",
+			locale: "en",
+		})
+
+		const serialized = serializeMessage(msg)
+		expect(serialized).toBe(
+			"{season, select, spring {It's, spring} summer {It's, summer} fall {It's, fall} winter {It's, winter}}"
+		)
+	})
+
+	it("serializes a message with a select (with other)", () => {
+		const msg = createMessage({
+			messageSource:
+				"It's, {season, select, spring {spring} summer {summer} fall {fall} other {winter}}",
+			bundleId: "sad_elephant",
+			locale: "en",
+		})
+		const serialized = serializeMessage(msg)
+		expect(serialized).toBe(
+			"{season, select, spring {It's, spring} summer {It's, summer} fall {It's, fall} other {It's, winter}}"
+		)
+	})
+
+	it("serializes a message with a plural", () => {
+		const msg = createMessage({
+			messageSource: "{likes, plural, =0 {No Likes} one {One Like} other {# Likes}}",
+			bundleId: "sad_elephant",
+			locale: "en",
+		})
+
+		const serialized = serializeMessage(msg)
+		expect(serialized).toMatchInlineSnapshot(
+			'"{likes, select, 0 {{likes, plural, other {No Likes}}} other {{likes, plural, one {One Like} other { Likes}}}}"'
+		)
+	})
+})
 
 describe("serializeICU1Message", () => {
 	it("serializes text", () => {
