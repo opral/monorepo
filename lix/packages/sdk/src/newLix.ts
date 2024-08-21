@@ -73,7 +73,8 @@ export async function newLixFile(): Promise<Blob> {
         user_id TEXT NOT NULL,
         parent_id TEXT NOT NULL,
         description TEXT NOT NULL,
-        created TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
+        created TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
       ) strict;
 
       INSERT INTO ref values ('current', '00000000-0000-0000-0000-000000000000');

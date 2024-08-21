@@ -119,6 +119,7 @@ test("should be able to add and commit changes", async () => {
 		{
 			id: commits[0]?.id!,
 			created: commits[0]?.created!,
+			created_at: commits[0]?.created_at!,
 			description: "test",
 			parent_id: "00000000-0000-0000-0000-000000000000",
 			user_id: "tester",
@@ -176,14 +177,16 @@ test("should be able to add and commit changes", async () => {
 	expect(newCommits).toEqual([
 		{
 			id: newCommits[0]?.id!,
-			created: newCommits[0]?.created!,
+			created: commits[0]?.created!,
+			created_at: newCommits[0]?.created_at!,
 			description: "test",
 			parent_id: "00000000-0000-0000-0000-000000000000",
 			user_id: "tester",
 		},
 		{
 			id: newCommits[1]?.id!,
-			created: newCommits[1]?.created!,
+			created: commits[0]?.created!,
+			created_at: newCommits[1]?.created_at!,
 			description: "test 2",
 			parent_id: newCommits[0]?.id!,
 			user_id: "tester",
