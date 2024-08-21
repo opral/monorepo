@@ -72,3 +72,29 @@ export class PluginSettingsAreInvalidError extends PluginError {
 		this.name = "PluginSettingsAreInvalidError";
 	}
 }
+
+/**
+ * Error when a plugin does not implement a required function
+ */
+export class PluginDoesNotImplementFunctionError extends PluginError {
+	constructor(options: { plugin: string; function: string }) {
+		super(
+			`The plugin "${options.plugin}" does not implement the "${options.function}" function`,
+			options
+		);
+		this.name = "PluginDoesNotImplementFunction";
+	}
+}
+
+/**
+ * Error when a plugin was expected to exist, but doesn't
+ */
+export class PluginMissingError extends PluginError {
+	constructor(options: { plugin: string }) {
+		super(
+			`The plugin "${options.plugin}" does not exist`,
+			options
+		);
+		this.name = "PluginMissingError";
+	}
+}
