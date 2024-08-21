@@ -6,14 +6,14 @@ import {
 } from "../../state.ts";
 import { useAtom } from "jotai";
 import InlangBundle from "../../components/InlangBundle.tsx";
-import { SlDialog, SlSpinner } from "@shoelace-style/shoelace/dist/react";
+import { SlButton, SlDialog, SlSpinner } from "@shoelace-style/shoelace/dist/react";
 // import { InlangPatternEditor } from "../../components/SingleDiffBundle.tsx";
 // import VariantHistory from "../../components/VariantHistory.tsx";
 import VariantHistoryList from "../../components/VariantHistoryList.tsx";
 import { useState } from "react";
 import NoProjectView from "../../components/NoProjectView.tsx";
 import { demoBundles } from "../../../demo/bundles.ts";
-import { insertBundleNested } from "@inlang/sdk2";
+import { createBundle, insertBundleNested } from "@inlang/sdk2";
 
 // import VariantHistory from "../../components/VariantHistory.tsx";
 
@@ -44,9 +44,26 @@ export default function App() {
 		handleDemoImport();
 	}
 
+	// create new empty bundle
+	const handleNewBundle = () => {
+		if (project) {
+			insertBundleNested(project.db, createBundle({ messages: [] }));
+		}
+	}
+
 	return (
 		<>
 			<Layout>
+				{/* new bundle button */}
+				<div className="flex mb-3 justify-end">
+					<SlButton
+						size="small"
+						className="btn btn-primary"
+						onClick={() => handleNewBundle()}
+					>
+						New bundle
+					</SlButton>
+				</div>
 				{bundlesNested.length > 0 &&
 					bundlesNested.map((bundle) => (
 						<InlangBundle

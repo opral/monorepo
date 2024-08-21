@@ -32,16 +32,21 @@ export type InlangProject = {
 	lix: Lix;
 	importFiles: (args: {
 		pluginKey: InlangPlugin["key"];
-		files: ResourceFile;
-	}) => BundleNested;
-	exportFiles: (args: { pluginKey: InlangPlugin["key"] }) => ResourceFile[];
+		files: ResourceFile[];
+	}) => Promise<BundleNested[]>;
+	exportFiles: (args: {
+		pluginKey: InlangPlugin["key"];
+	}) => Promise<ResourceFile[]>;
 	close: () => Promise<void>;
 	toBlob: () => Promise<Blob>;
 };
 
 export type ResourceFile = {
+	/** The absolute filepath of the resource */
 	path: string;
+	/** The binary content of the resource */
 	content: ArrayBuffer;
+	/** The plugin which loaded this resource */
 	pluginKey: InlangPlugin["key"];
 };
 
