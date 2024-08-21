@@ -25,8 +25,8 @@ describe("serializeMessage", () => {
 		})
 
 		const serialized = serializeMessage(msg)
-		expect(serialized).toBe(
-			"{season, select, spring {It's, spring} summer {It's, summer} fall {It's, fall} winter {It's, winter}}"
+		expect(serialized).toMatchInlineSnapshot(
+			'"It\'s, {season, select, spring {spring} summer {summer} fall {fall} winter {winter}}"'
 		)
 	})
 
@@ -38,8 +38,8 @@ describe("serializeMessage", () => {
 			locale: "en",
 		})
 		const serialized = serializeMessage(msg)
-		expect(serialized).toBe(
-			"{season, select, spring {It's, spring} summer {It's, summer} fall {It's, fall} other {It's, winter}}"
+		expect(serialized).toMatchInlineSnapshot(
+			'"It\'s, {season, select, spring {spring} summer {summer} fall {fall} other {winter}}"'
 		)
 	})
 
@@ -52,7 +52,7 @@ describe("serializeMessage", () => {
 
 		const serialized = serializeMessage(msg)
 		expect(serialized).toMatchInlineSnapshot(
-			'"{likes, select, 0 {{likes, plural, other {No Likes}}} other {{likes, plural, one {One Like} other { Likes}}}}"'
+			'"{likes, select, 0 {No Likes} other {{likes, plural, one {One Like} other {{likes} Likes}}}}"'
 		)
 	})
 })

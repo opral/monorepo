@@ -38,7 +38,11 @@ export const NULL_BRANCH: Branch = { pattern: [], match: [] }
  * @param elements An array of AST elements
  * @param branch The current branch (pass a copy, may accidentally mutate)
  */
-export function generateBranches(elements: MessageFormatElement[], branch: Branch): Branch[] {
+export function generateBranches(
+	elements: MessageFormatElement[],
+	branch: Branch,
+	poundReference: string | undefined = undefined
+): Branch[] {
 	let branches: Branch[] = [structuredClone(branch)]
 
 	for (const element of elements) {
@@ -104,7 +108,7 @@ export function generateBranches(elements: MessageFormatElement[], branch: Branc
 
 					if (element.type === TYPE.plural && option !== "other") {
 						if (option.startsWith("=")) {
-							const exact = option.slice(1)
+							const exact = option.slice(1) // remove the "=" before the number
 							selector = [element.value, undefined, exact]
 						} else {
 							selector = [element.value, "plural", option]
@@ -112,10 +116,14 @@ export function generateBranches(elements: MessageFormatElement[], branch: Branc
 					}
 
 					for (const existingBranch of branches) {
-						const newBranchesForBranch = generateBranches(optionValue.value, {
-							...existingBranch,
-							match: selector ? [...existingBranch.match, selector] : existingBranch.match,
-						})
+						const newBranchesForBranch = generateBranches(
+							optionValue.value,
+							{
+								...existingBranch,
+								match: selector ? [...existingBranch.match, selector] : existingBranch.match,
+							},
+							element.value
+						)
 						newBranches.push(...newBranchesForBranch)
 					}
 				}
@@ -125,15 +133,16 @@ export function generateBranches(elements: MessageFormatElement[], branch: Branc
 			}
 			case TYPE.pound: {
 				for (const branch of branches) {
-					const lastMatch = branch.match.at(-1)
-					if (lastMatch) {
+					if (poundReference) {
 						branch.pattern.push({
 							type: "expression",
 							arg: {
 								type: "variable",
-								name: lastMatch[0],
+								name: poundReference,
 							},
 						})
+					} else {
+						throw new Error("Unexpected pound element")
 					}
 				}
 				break
