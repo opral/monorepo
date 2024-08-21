@@ -1,0 +1,8 @@
+{
+	"baseLocale": "en",
+	"locales": ["en", "de"],
+	"modules": ["local:@inlang/icu1-importer"],
+	"plugin.inlang.icu-messageformat-1": {
+		"pathPattern": "./messages/{locale}.json"
+	}
+}

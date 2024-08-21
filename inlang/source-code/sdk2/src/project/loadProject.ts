@@ -10,6 +10,7 @@ import { createState } from "./state/state.js";
 import { BehaviorSubject, map } from "rxjs";
 import { setSettings } from "./state/setSettings.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
+import { exportFiles, importFiles } from "../import-export/index.js";
 
 /**
  * Common load project logic.
@@ -82,11 +83,22 @@ export async function loadProject(args: {
 				.subscribe as Subscription<ProjectSettings>,
 			set: (newSettings) => setSettings({ newSettings, lix: args.lix, state }),
 		},
-		importFiles: () => {
-			throw new Error("Not implemented");
+		importFiles: async ({ files, pluginKey }) => {
+			return await importFiles({
+				files,
+				pluginKey,
+				settings: reactiveState.settings$.getValue(),
+				plugins: reactiveState.plugins$.getValue(),
+				db,
+			});
 		},
-		exportFiles: () => {
-			throw new Error("Not implemented");
+		exportFiles: async ({ pluginKey }) => {
+			return await exportFiles({
+				pluginKey,
+				db,
+				plugins: reactiveState.plugins$.getValue(),
+				settings: reactiveState.settings$.getValue(),
+			});
 		},
 		close: async () => {
 			args.sqlite.close();

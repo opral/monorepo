@@ -43,18 +43,12 @@ export async function loadProjectFromDirectoryInMemory(
 	// 1. set settings is called from an app - it should detect and reject the setting of settings -> app need to be able to validate before calling set
 	// 2. the settings file loaded from disc here is corrupted -> user has to fix the file on disc
 
-	const loadMessagesPlugins = project.plugins
-		.get()
-		.filter((plugin) => plugin.loadMessages !== undefined);
-	const saveMessagesPlugins = project.plugins
-		.get()
-		.filter((plugin) => plugin.saveMessages !== undefined);
-	const exportPlugins = project.plugins
-		.get()
-		.filter((plugin) => plugin.importFiles !== undefined);
-	const importPlugins = project.plugins
-		.get()
-		.filter((plugin) => plugin.exportFiles !== undefined);
+	const {
+		loadMessagesPlugins,
+		saveMessagesPlugins,
+		importPlugins,
+		exportPlugins,
+	} = categorizePlugins(project.plugins.get());
 
 	if (loadMessagesPlugins.length > 1 || saveMessagesPlugins.length > 1) {
 		throw new Error(
@@ -83,13 +77,29 @@ export async function loadProjectFromDirectoryInMemory(
 		);
 	}
 
-	const chosenLegacyPlugin = loadMessagesPlugins[0];
+	for (const importer of importPlugins) {
+		const files = importer.toBeImportedFiles
+			? await importer.toBeImportedFiles({
+					settings: project.settings.get() as any,
+					nodeFs: args.fs,
+			  })
+			: [];
 
-	if (!chosenLegacyPlugin) {
-		return project;
+		await project.importFiles({
+			pluginKey: importer.key,
+			files,
+		});
+
+		// TODO check user id and description (where will this one appear?)
+		await project.lix.commit({
+			userId: "inlang-bot",
+			description: "Executed importFiles",
+		});
 	}
 
-	if (chosenLegacyPlugin.loadMessages) {
+	const chosenLegacyPlugin = loadMessagesPlugins[0];
+
+	if (chosenLegacyPlugin) {
 		await loadLegacyMessages({
 			project,
 			fs: args.fs,
@@ -173,4 +183,51 @@ async function traverseDir(args: {
 		}
 	}
 	return result;
+}
+
+// TODO i guess we should move this validation logic into sdk2/src/project/loadProject.ts
+function categorizePlugins(plugins: readonly InlangPlugin[]): {
+	loadMessagesPlugins: (InlangPlugin &
+		Required<Pick<InlangPlugin, "loadMessages">>)[];
+	saveMessagesPlugins: (InlangPlugin &
+		Required<Pick<InlangPlugin, "saveMessages">>)[];
+	importPlugins: (InlangPlugin &
+		Required<Pick<InlangPlugin, "importFiles" | "toBeImportedFiles">>)[];
+	exportPlugins: (InlangPlugin & Required<Pick<InlangPlugin, "exportFiles">>)[];
+} {
+	const loadMessagesPlugins = plugins.filter(
+		(
+			plugin
+		): plugin is InlangPlugin & Required<Pick<InlangPlugin, "loadMessages">> =>
+			plugin.loadMessages !== undefined
+	);
+
+	const saveMessagesPlugins = plugins.filter(
+		(
+			plugin
+		): plugin is InlangPlugin & Required<Pick<InlangPlugin, "saveMessages">> =>
+			plugin.saveMessages !== undefined
+	);
+
+	const importPlugins = plugins.filter(
+		(
+			plugin
+		): plugin is InlangPlugin &
+			Required<Pick<InlangPlugin, "importFiles" | "toBeImportedFiles">> =>
+			plugin.importFiles !== undefined && plugin.toBeImportedFiles !== undefined
+	);
+
+	const exportPlugins = plugins.filter(
+		(
+			plugin
+		): plugin is InlangPlugin & Required<Pick<InlangPlugin, "exportFiles">> =>
+			plugin.exportFiles !== undefined
+	);
+
+	return {
+		loadMessagesPlugins,
+		saveMessagesPlugins,
+		importPlugins,
+		exportPlugins,
+	};
 }
