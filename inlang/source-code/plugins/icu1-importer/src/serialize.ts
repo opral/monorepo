@@ -34,9 +34,14 @@ function variantsToICU1(variants: Variant[], selectors: Expression[]): MessageFo
 		}
 	})
 
-	// filter out the variants that have no patterns left
-	variants = variants.filter((variant) => variant.pattern.length > 0)
-	if (variants.length === 0) return patternToICU1(sharedPrefixPattern)
+	const sharedSuffixPattern = commonSuffix(variants.map((variants) => variants.pattern))
+	// remove the shared suffix from all variants
+	variants = variants.map((variants) => {
+		return {
+			...variants,
+			pattern: variants.pattern.slice(0, variants.pattern.length - sharedSuffixPattern.length),
+		}
+	})
 
 	// group variants by selector value
 	const variantGroups = Object.groupBy(variants, (variant) => variant.match[0])
@@ -55,10 +60,17 @@ function variantsToICU1(variants: Variant[], selectors: Expression[]): MessageFo
 			}
 		})
 
-		options[branch] = {
-			value: variantsToICU1(newVariants, remainingSelectors),
+		const optionPattern = variantsToICU1(newVariants, remainingSelectors)
+		if (optionPattern.length !== 0) {
+			options[branch] = {
+				value: optionPattern,
+			}
 		}
 	}
+
+	// if there are no options, just return []
+	if (Object.keys(options).length === 0)
+		return [...patternToICU1(sharedPrefixPattern), ...patternToICU1(sharedSuffixPattern)]
 
 	return [
 		...patternToICU1(sharedPrefixPattern),
@@ -68,6 +80,7 @@ function variantsToICU1(variants: Variant[], selectors: Expression[]): MessageFo
 			value: selector.arg.name,
 			options,
 		},
+		...patternToICU1(sharedSuffixPattern),
 	] as MessageFormatElement[]
 }
 
@@ -91,6 +104,27 @@ function commonPrefix(patterns: Pattern[]): Pattern {
 	}
 
 	return prefix
+}
+
+function commonSuffix(patterns: Pattern[]): Pattern {
+	const suffix: Pattern = []
+
+	for (let i = 0; i < Math.min(...patterns.map((pattern) => pattern.length)); i++) {
+		const elementsAtIndex = patterns
+			.map((pattern) => pattern[pattern.length - 1 - i])
+			.filter((p) => !!p)
+		const baseElemenet = elementsAtIndex[0]
+		if (!baseElemenet) break
+
+		const allEqual = elementsAtIndex.reduce(
+			(acc, el) => acc && patternElementsAreEqual(el, baseElemenet),
+			true
+		)
+		if (!allEqual) break
+		suffix.unshift(baseElemenet)
+	}
+
+	return suffix
 }
 
 function patternElementsAreEqual(el_a: Pattern[number], el_b: Pattern[number]): boolean {
