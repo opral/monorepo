@@ -459,4 +459,97 @@ describe("createMessage", () => {
 			],
 		})
 	})
+
+	it("handles pounds", () => {
+		const message = createMessage({
+			messageSource: "You have {likes, plural, one {# like} other {# likes}}",
+			bundleId: "sad_elephant",
+			locale: "en",
+		})
+
+		expect(message).toMatchInlineSnapshot(`
+			{
+			  "bundleId": "sad_elephant",
+			  "declarations": [
+			    {
+			      "name": "likes",
+			      "type": "input",
+			      "value": {
+			        "arg": {
+			          "name": "likes",
+			          "type": "variable",
+			        },
+			        "type": "expression",
+			      },
+			    },
+			  ],
+			  "id": "sad_elephant_en",
+			  "locale": "en",
+			  "selectors": [
+			    {
+			      "annotation": {
+			        "name": "plural",
+			        "options": [],
+			        "type": "function",
+			      },
+			      "arg": {
+			        "name": "likes",
+			        "type": "variable",
+			      },
+			      "type": "expression",
+			    },
+			  ],
+			  "variants": [
+			    {
+			      "id": "sad_elephant_en_one",
+			      "match": [
+			        "one",
+			      ],
+			      "messageId": "sad_elephant_en",
+			      "pattern": [
+			        {
+			          "type": "text",
+			          "value": "You have ",
+			        },
+			        {
+			          "arg": {
+			            "name": "likes",
+			            "type": "variable",
+			          },
+			          "type": "expression",
+			        },
+			        {
+			          "type": "text",
+			          "value": " like",
+			        },
+			      ],
+			    },
+			    {
+			      "id": "sad_elephant_en_any",
+			      "match": [
+			        "*",
+			      ],
+			      "messageId": "sad_elephant_en",
+			      "pattern": [
+			        {
+			          "type": "text",
+			          "value": "You have ",
+			        },
+			        {
+			          "arg": {
+			            "name": "likes",
+			            "type": "variable",
+			          },
+			          "type": "expression",
+			        },
+			        {
+			          "type": "text",
+			          "value": " likes",
+			        },
+			      ],
+			    },
+			  ],
+			}
+		`)
+	})
 })

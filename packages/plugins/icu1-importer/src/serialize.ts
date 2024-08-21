@@ -24,10 +24,24 @@ function variantsToICU1(variants: Variant[], selectors: Expression[]): MessageFo
 	// TODO, exact plurals and selectordinal and options
 	const type = selector.annotation?.name === "plural" ? TYPE.plural : TYPE.select
 
+	const sharedPrefixPattern = commonPrefix(variants.map((variants) => variants.pattern))
+
+	// remove the shared prefix from all variants
+	variants = variants.map((variants) => {
+		return {
+			...variants,
+			pattern: variants.pattern.slice(sharedPrefixPattern.length),
+		}
+	})
+
+	// filter out the variants that have no patterns left
+	variants = variants.filter((variant) => variant.pattern.length > 0)
+	if (variants.length === 0) return patternToICU1(sharedPrefixPattern)
+
 	// group variants by selector value
 	const variantGroups = Object.groupBy(variants, (variant) => variant.match[0])
-	const options: Record<string, PluralOrSelectOption> = {}
 
+	const options: Record<string, PluralOrSelectOption> = {}
 	for (const [selectorValue, variants] of Object.entries(variantGroups)) {
 		if (!variants) continue
 
@@ -47,6 +61,7 @@ function variantsToICU1(variants: Variant[], selectors: Expression[]): MessageFo
 	}
 
 	return [
+		...patternToICU1(sharedPrefixPattern),
 		{
 			type,
 			pluralType: type === TYPE.plural ? "cardinal" : undefined,
@@ -54,6 +69,64 @@ function variantsToICU1(variants: Variant[], selectors: Expression[]): MessageFo
 			options,
 		},
 	] as MessageFormatElement[]
+}
+
+/**
+ * Returns the common prefix of all the patterns
+ */
+function commonPrefix(patterns: Pattern[]): Pattern {
+	const prefix: Pattern = []
+
+	for (let i = 0; i < Math.min(...patterns.map((pattern) => pattern.length)); i++) {
+		const elementsAtIndex = patterns.map((pattern) => pattern[i]).filter((p) => !!p)
+		const baseElemenet = elementsAtIndex[0]
+		if (!baseElemenet) break
+
+		const allEqual = elementsAtIndex.reduce(
+			(acc, el) => acc && patternElementsAreEqual(el, baseElemenet),
+			true
+		)
+		if (!allEqual) break
+		prefix.push(baseElemenet)
+	}
+
+	return prefix
+}
+
+function patternElementsAreEqual(el_a: Pattern[number], el_b: Pattern[number]): boolean {
+	if (el_a.type !== el_b.type) return false
+	if (el_a.type === "text" && el_b.type === "text") {
+		return el_a.value === el_b.value
+	}
+
+	if (el_a.type === "expression" && el_b.type === "expression") {
+		// must have the same arg
+		if (el_a.arg.name !== el_b.arg.name) return false
+
+		// if one has an annotation, the other one must have one aswell
+		if (el_a.annotation && !el_b.annotation) return false
+		if (!el_a.annotation && el_b.annotation) return false
+
+		// if both have annotations, they must be the same
+		if (el_a.annotation && el_b.annotation) {
+			if (el_a.annotation.name !== el_b.annotation.name) return false
+			if (!recordsAreEqual(el_a.annotation.options, el_b.annotation.options)) return false
+		}
+	}
+
+	return true
+}
+
+function recordsAreEqual(a: Record<string, any>, b: Record<string, any>): boolean {
+	// same size
+	if (Object.keys(a).length !== Object.keys(b).length) return false
+
+	// same keys and values
+	for (const key in a) {
+		if (a[key] !== b[key]) return false
+	}
+
+	return true
 }
 
 function patternToICU1(pattern: Pattern): MessageFormatElement[] {
