@@ -4,9 +4,7 @@ import { createMessage } from "./parse.js"
 import { serializeMessage } from "./serialize.js"
 
 const pluginKey = "plugin.inlang.icu-messageformat-1"
-export const plugin: InlangPlugin<{
-	[pluginKey]: PluginSettings
-}> = {
+export const plugin = {
 	key: pluginKey,
 	settingsSchema: PluginSettings,
 
@@ -95,4 +93,6 @@ export const plugin: InlangPlugin<{
 
 		return files
 	},
-}
+} satisfies InlangPlugin<{
+	[pluginKey]: PluginSettings
+}>
