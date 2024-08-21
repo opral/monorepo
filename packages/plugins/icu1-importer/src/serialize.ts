@@ -81,7 +81,68 @@ function branchesToICU1(branches: Branch[]): MessageFormatElement[] {
 /**
  * @param element An ICU1 ast
  * @returns The serialized ICU1 MessageFormat string
+ * @private Only exported for tests
  */
-function serializeICU1Message(element: MessageFormatElement[]): string {
-	// TODO
+export function serializeICU1Message(elements: MessageFormatElement[]): string {
+	let result = ""
+
+	for (const element of elements) {
+		switch (element.type) {
+			case TYPE.literal: {
+				result += element.value
+				break
+			}
+			case TYPE.argument: {
+				result += "{" + element.value + "}"
+				break
+			}
+			case TYPE.time:
+			case TYPE.number:
+			case TYPE.date: {
+				const fnName = {
+					[TYPE.time]: "time",
+					[TYPE.number]: "number",
+					[TYPE.date]: "date",
+				}[element.type]
+
+				result +=
+					"{" + element.value + ", " + fnName + element.style ? ", " + element.style : "" + "}"
+
+				break
+			}
+			// case added for completeness. We don't generate pound-elements yet, but it could be done
+			case TYPE.pound:
+				result += "#"
+				break
+			case TYPE.select: {
+				const options: string[] = []
+				for (const [name, value] of Object.entries(element.options)) {
+					options.push(name + " {" + serializeICU1Message(value.value) + "}")
+				}
+				result += "{" + element.value + ", select, " + options.join(" ") + "}"
+				break
+			}
+			case TYPE.plural: {
+				const fnName = {
+					ordinal: "selectOrdinal",
+					cardinal: "plural",
+				}[element.pluralType || "cardinal"]
+
+				const options: string[] = []
+				for (const [name, value] of Object.entries(element.options)) {
+					options.push(name + " {" + serializeICU1Message(value.value) + "}")
+				}
+
+				result += "{" + element.value + ", " + fnName + "," + options.join(" ") + "}"
+				break
+			}
+
+			case TYPE.tag: // we don't support markup yet. This should be a text-element instead
+			default: {
+				throw new Error(`Unsupported ICU1 element of type: ${(element as any)?.type}`)
+			}
+		}
+	}
+
+	return result
 }
