@@ -6,7 +6,9 @@ import type { ProjectSettings } from "../schema/settings.js";
 import type fs from "node:fs/promises";
 import type { ResourceFile } from "../project/api.js";
 
-export type InlangPlugin = {
+export type InlangPlugin<
+	ExternalSettings extends Record<string, any> | unknown = unknown
+> = {
 	/**
 	 * @deprecated Use `key` instead.
 	 */
@@ -36,15 +38,18 @@ export type InlangPlugin = {
 	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
 	 */
 	toBeImportedFiles?: (args: {
-		settings: ProjectSettings;
+		settings: ProjectSettings & ExternalSettings;
 		nodeFs: typeof fs;
 	}) => Promise<Array<ResourceFile>> | Array<ResourceFile>;
-	importFiles?: (args: { files: Array<ResourceFile> }) => {
-		bundles: BundleNested;
+	importFiles?: (args: {
+		files: Array<ResourceFile>;
+		settings: ProjectSettings & ExternalSettings; // we expose the settings in case the importFunction needs to access the plugin config
+	}) => {
+		bundles: BundleNested[];
 	};
 	exportFiles?: (args: {
-		bundles: BundleNested;
-		settings: ProjectSettings;
+		bundles: BundleNested[];
+		settings: ProjectSettings & ExternalSettings;
 	}) => Array<ResourceFile>;
 	/**
 	 * Define app specific APIs.
@@ -57,6 +62,6 @@ export type InlangPlugin = {
 	 *  })
 	 */
 	addCustomApi?: (args: {
-		settings: ProjectSettings;
+		settings: ProjectSettings & ExternalSettings;
 	}) => Record<string, unknown>;
 };
