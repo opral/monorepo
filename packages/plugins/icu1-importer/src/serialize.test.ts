@@ -45,14 +45,14 @@ describe("serializeMessage", () => {
 
 	it("serializes a message with a plural", () => {
 		const msg = createMessage({
-			messageSource: "{likes, plural, =0 {No Likes} one {One Like} other {# Likes}}!",
+			messageSource: "You have {likes, plural, =0 {No Likes} one {One Like} other {# Likes}}!",
 			bundleId: "sad_elephant",
 			locale: "en",
 		})
 
 		const serialized = serializeMessage(msg)
 		expect(serialized).toMatchInlineSnapshot(
-			'"{likes, select, 0 {No Likes} other {{likes, plural, one {One Like} other {{likes} Likes}}}}!"'
+			'"You have {likes, select, 0 {No Likes} other {{likes, plural, one {One Like} other {{likes} Likes}}}}!"'
 		)
 	})
 })
