@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAtom } from "jotai";
-import { projectAtom, selectedProjectPathAtom, withPollingAtom } from "./state.ts";
+import {
+	forceReloadProjectAtom,
+	projectAtom,
+	selectedProjectPathAtom,
+	withPollingAtom,
+} from "./state.ts";
 import { SetStateAction, useEffect, useMemo, useState } from "react";
 import SlDialog from "@shoelace-style/shoelace/dist/react/dialog/index.js";
 import { loadProjectInMemory, newProject } from "@inlang/sdk2";
@@ -17,7 +22,6 @@ import { Link } from "react-router-dom";
 import ModeSwitcher from "./components/ModeSwitcher.tsx";
 import { merge } from "../../../../lix/packages/sdk/dist/merge/merge.js";
 import { SlSelectEvent } from "@shoelace-style/shoelace";
-
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [, setWithPolling] = useAtom(withPollingAtom);
@@ -100,7 +104,10 @@ const SelectProject = () => {
 	);
 };
 
-export const CreateProjectDialog = (props: { showNewProjectDialog: boolean, setShowNewProjectDialog: React.Dispatch<SetStateAction<boolean>> }) => {
+export const CreateProjectDialog = (props: {
+	showNewProjectDialog: boolean;
+	setShowNewProjectDialog: React.Dispatch<SetStateAction<boolean>>;
+}) => {
 	const [fileName, setFileName] = useState("");
 	const [loading, setLoading] = useState(false);
 	const isValid = useMemo(() => fileName.endsWith(".inlang"), [fileName]);
@@ -140,8 +147,8 @@ export const CreateProjectDialog = (props: { showNewProjectDialog: boolean, setS
 				}
 			></SlInput>
 			<div className="mt-6 p-4 text-slate-600 bg-slate-200 border border-slate-600 rounded text-[14px]!">
-				<span className="font-semibold">Info:</span> Demo data will be
-				imported automatically until we can import your own data.
+				<span className="font-semibold">Info:</span> Demo data will be imported
+				automatically until we can import your own data.
 			</div>
 			<SlButton
 				loading={loading}
@@ -154,7 +161,7 @@ export const CreateProjectDialog = (props: { showNewProjectDialog: boolean, setS
 			</SlButton>
 		</SlDialog>
 	);
-}
+};
 
 const SettingsButton = () => {
 	const [project] = useAtom(projectAtom);
@@ -175,8 +182,11 @@ const SettingsButton = () => {
 
 const AppMenu = () => {
 	const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
-	const [selectedProjectPath, setSelectedProjectPath] = useAtom(selectedProjectPathAtom);
+	const [selectedProjectPath, setSelectedProjectPath] = useAtom(
+		selectedProjectPathAtom
+	);
 	const [project] = useAtom(projectAtom);
+	const [, setForceReloadProject] = useAtom(forceReloadProjectAtom);
 
 	const handleDownload = async () => {
 		const blob = await project!.toBlob();
@@ -193,7 +203,7 @@ const AppMenu = () => {
 			})
 		);
 		document.body.removeChild(link);
-	}
+	};
 
 	const handleOpen = async () => {
 		const input = document.createElement("input");
@@ -218,7 +228,7 @@ const AppMenu = () => {
 			}
 		};
 		input.click();
-	}
+	};
 
 	const handleImport = async () => {
 		const input = document.createElement("input");
@@ -231,36 +241,69 @@ const AppMenu = () => {
 				reader.onload = async () => {
 					const blob = new Blob([reader.result as ArrayBuffer]);
 					const incoming = await loadProjectInMemory({ blob });
+					// TODO remove workaround for https://github.com/opral/lix-sdk/issues/47
+					const opfsRoot = await navigator.storage.getDirectory();
+					const fileHandle = await opfsRoot.getFileHandle(
+						selectedProjectPath!,
+						{
+							create: true,
+						}
+					);
+					const writable = await fileHandle.createWritable();
 					await merge({
 						source: incoming.lix,
 						target: project!.lix,
 					});
-					// trigger re-load of the project
-					setSelectedProjectPath(selectedProjectPath);
+					const mergedBlob = await project!.toBlob();
+					await writable.write(mergedBlob);
+					await writable.close();
+					setForceReloadProject(Date.now());
 				};
+
 				reader.readAsArrayBuffer(file);
 			}
 		};
 		input.click();
-	}
-
+	};
 
 	const handleSelect = async (event: SlSelectEvent) => {
 		switch (event.detail.item.value) {
-			case "new": setShowNewProjectDialog(true); break;
-			case "open": handleOpen(); break;
-			case "download": handleDownload(); break;
-			case "import": handleImport(); break;
-			default: break;
+			case "new":
+				setShowNewProjectDialog(true);
+				break;
+			case "open":
+				handleOpen();
+				break;
+			case "download":
+				handleDownload();
+				break;
+			case "import":
+				handleImport();
+				break;
+			default:
+				break;
 		}
-	}
+	};
 
 	return (
 		<>
 			<SlDropdown distance={8}>
-				<SlButton slot="trigger" size="small" className="flex justify-center items-center">
+				<SlButton
+					slot="trigger"
+					size="small"
+					className="flex justify-center items-center"
+				>
 					{/* Burger menu icon */}
-					<svg className="-mx-2 mt-0.5" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" /></svg>
+					<svg
+						className="-mx-2 mt-0.5"
+						xmlns="http://www.w3.org/2000/svg"
+						height="24px"
+						viewBox="0 -960 960 960"
+						width="24px"
+						fill="currentColor"
+					>
+						<path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
+					</svg>
 				</SlButton>
 				<SlMenu onSlSelect={handleSelect}>
 					<SlMenuItem value="new">New project</SlMenuItem>
@@ -269,7 +312,10 @@ const AppMenu = () => {
 					<SlMenuItem value="import">Merge file</SlMenuItem>
 				</SlMenu>
 			</SlDropdown>
-			<CreateProjectDialog showNewProjectDialog={showNewProjectDialog} setShowNewProjectDialog={setShowNewProjectDialog} />
+			<CreateProjectDialog
+				showNewProjectDialog={showNewProjectDialog}
+				setShowNewProjectDialog={setShowNewProjectDialog}
+			/>
 		</>
-	)
+	);
 };
