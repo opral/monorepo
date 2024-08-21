@@ -2,10 +2,11 @@
 import { test, expect, describe } from "vitest";
 import { inlangLixPluginV1 } from "./inlangLixPluginV1.js";
 import type { Variant } from "../schema/schemaV2.js";
-import type { DiffReport } from "@lix-js/sdk";
+import { type DiffReport } from "@lix-js/sdk";
 import { newProject } from "../project/newProject.js";
 import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
 import { contentFromDatabase } from "sqlite-wasm-kysely";
+
 
 describe("plugin.diff.file", () => {
 	test("insert of bundle", async () => {
@@ -88,6 +89,9 @@ describe("plugin.diff.file", () => {
 
 		expect(diffReports).toEqual([
 			{
+				meta: {
+					id: "1",
+				},
 				type: "bundle",
 				operation: "update",
 				old: { id: "1", alias: {} },
@@ -196,6 +200,9 @@ describe("plugin.diff.file", () => {
 		});
 		expect(diffReports).toEqual([
 			{
+				meta: {
+					id: "1",
+				},
 				type: "message",
 				operation: "update",
 				old: {
@@ -306,6 +313,9 @@ describe("plugin.diff.file", () => {
 		});
 		expect(diffReports).toEqual([
 			{
+				meta: {
+					id: "1",
+				},
 				operation: "update",
 				type: "variant",
 				old: {
@@ -392,7 +402,13 @@ describe("plugin.diff.variant", () => {
 		};
 		const diff = await inlangLixPluginV1.diff.variant({ old, neu });
 		expect(diff).toEqual([
-			{ operation: "update", type: "variant", neu, old } satisfies DiffReport,
+			{
+				meta: { id: "1" },
+				operation: "update",
+				type: "variant",
+				neu,
+				old,
+			} satisfies DiffReport,
 		]);
 	});
 

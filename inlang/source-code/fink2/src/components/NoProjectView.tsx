@@ -1,6 +1,10 @@
-import { CreateNewProject } from "../layout.tsx";
+import { useState } from "react";
+import { CreateProjectDialog } from "../layout.tsx";
+import { SlButton } from "@shoelace-style/shoelace/dist/react";
 
 const NoProjectView = () => {
+	const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
+
 	return (
 		<div className="flex flex-col items-center justify-center h-full gap-8 mt-32">
 			<svg
@@ -29,7 +33,17 @@ const NoProjectView = () => {
 				<h2 className="text-lg font-medium text-gray-900">No project</h2>
 				<p className="text-gray-600">Get started by creating a new project.</p>
 			</div>
-			<CreateNewProject size="large" />
+			<SlButton
+				size="small"
+				variant="primary"
+				onClick={() => setShowNewProjectDialog(true)}
+			>
+				Create new project
+			</SlButton>
+			<CreateProjectDialog
+				showNewProjectDialog={showNewProjectDialog}
+				setShowNewProjectDialog={setShowNewProjectDialog}
+			/>
 		</div>
 	);
 };

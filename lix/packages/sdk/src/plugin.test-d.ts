@@ -1,5 +1,3 @@
-// TODO implement this test
-
 import type { DiffReport, LixPlugin } from "./plugin.js";
 
 type Types = {
@@ -10,6 +8,7 @@ type Types = {
 
 // ------------------- PLUGIN -------------------
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const plugin: LixPlugin<Types> = {
 	key: "inlang-lix-plugin-v1",
 	glob: "*",

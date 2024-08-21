@@ -7,6 +7,7 @@ export type LixDatabase = {
 	ref: Ref;
 	file_internal: LixFile;
 	change_queue: ChangeQueueEntry;
+	conflict: Conflict;
 };
 
 export type Ref = {
@@ -40,8 +41,11 @@ export type Commit = {
 	// @relation changes: Change[]
 };
 
-export type Change = {
+export type Change<
+	T extends Record<string, any> = Record<string, { id: string }>,
+> = {
 	id: string;
+	parent_id?: Change["id"];
 	file_id: LixFile["id"];
 	/**
 	 * If no commit id exists on a change,
@@ -80,12 +84,17 @@ export type Change = {
 	 *   - For a csv cell change, the value would be the new cell value.
 	 *   - For an inlang message change, the value would be the new message.
 	 */
-	value?: Record<string, any> & {
-		id: string;
-	}; // JSONB
+	value?: T; // JSONB
 	/**
 	 * Additional metadata for the change used by the plugin
 	 * to process changes.
 	 */
-	meta?: string; // JSONB
+	meta?: Record<string, any>; // JSONB
+};
+
+export type Conflict = {
+	meta?: Record<string, any>;
+	reason?: string;
+	change_id: Change["id"];
+	conflicting_change_id: Change["id"];
 };
