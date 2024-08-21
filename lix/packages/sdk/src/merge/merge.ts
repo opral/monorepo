@@ -1,7 +1,6 @@
 /* eslint-disable unicorn/prefer-array-find */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { LixPlugin } from "../plugin.js";
-import type { Change } from "../schema.js";
 import type { Lix } from "../types.js";
 import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-only-in-source.js";
 
@@ -14,40 +13,22 @@ export async function merge(args: {
 	// TODO selectively merge changes
 	// onlyTheseChanges
 }): Promise<void> {
-	// TODO
-	// This function is unoptimized and loops like crazy.
-	// But, it's good enough for prototypes.
-	const toBeCopiedChanges: Change[] = [];
-
-	// TODO use `getLeafChangesOnlyInSource` and
-	//      combined with `getCommonParent` to only
-	//      traverse the changes that are needed.
+	// TODO increase performance by using attach mode
+	//      and only get the changes and commits that
+	//      are not in target.
 	const sourceChanges = await args.source.db
 		.selectFrom("change")
 		.selectAll()
 		.execute();
 
-	// 1. Get the changes that exists in source but not in target
-	for (const change of sourceChanges) {
-		const targetChange = await args.target.db
-			.selectFrom("change")
-			.select("id")
-			.where("id", "=", change.id)
-			.executeTakeFirst();
+	// TODO increase performance by only getting commits
+	//      that are not in target in the future.
+	const sourceCommits = await args.source.db
+		.selectFrom("commit")
+		.selectAll()
+		.execute();
 
-		// change already exists, skip
-		if (targetChange !== undefined) {
-			continue;
-		}
-		toBeCopiedChanges.push(change);
-	}
-
-	if (toBeCopiedChanges.length === 0) {
-		// no new changes exist, exit early
-		return;
-	}
-
-	// TODO don't query the changes again. Very inefficient.
+	// TODO don't query the changes again. inefficient.
 	const leafChangesOnlyInSource = await getLeafChangesOnlyInSource({
 		sourceLix: args.source,
 		targetLix: args.target,
@@ -70,7 +51,7 @@ export async function merge(args: {
 	});
 
 	// 3. apply non conflicting leaf changes
-	// TODO extremely inefficient double looping
+	// TODO inefficient double looping
 	const nonConflictingLeafChangesInSource = leafChangesOnlyInSource.filter(
 		(c) =>
 			conflicts.every((conflict) => conflict.conflicting_change_id !== c.id),
@@ -84,7 +65,7 @@ export async function merge(args: {
 			"id",
 			"=",
 			// todo handle multiple files
-			toBeCopiedChanges[0]!.file_id,
+			sourceChanges[0]!.file_id,
 		)
 		.executeTakeFirst();
 
@@ -104,30 +85,45 @@ export async function merge(args: {
 	});
 
 	await args.target.db.transaction().execute(async (trx) => {
-		// 1. copy the changes from source
-		await trx
-			.insertInto("change")
-			.values(
-				// @ts-expect-error - todo auto serialize values
-				toBeCopiedChanges.map((change) => ({
-					...change,
-					value: JSON.stringify(change.value),
-				})),
-			)
-			.execute();
-
-		// 2. insert the conflicts of those changes
-		if (conflicts.length > 0) {
+		if (sourceChanges.length > 0) {
+			// 1. copy the changes from source
 			await trx
-				.insertInto("conflict")
-				.values(conflicts)
-				// the conflict is already tracked
-				// do nothing
+				.insertInto("change")
+				.values(
+					// @ts-expect-error - todo auto serialize values
+					// https://github.com/opral/inlang-message-sdk/issues/123
+					sourceChanges.map((change) => ({
+						...change,
+						value: JSON.stringify(change.value),
+						meta: JSON.stringify(change.meta),
+					})),
+				)
+				// ignore if already exists
 				.onConflict((oc) => oc.doNothing())
 				.execute();
 		}
 
-		// 3. update the file data with the applied changes
+		// 2. copy the commits from source
+		if (sourceCommits.length > 0) {
+			await trx
+				.insertInto("commit")
+				.values(sourceCommits)
+				// ignore if already exists
+				.onConflict((oc) => oc.doNothing())
+				.execute();
+		}
+
+		// 3. insert the conflicts of those changes
+		if (conflicts.length > 0) {
+			await trx
+				.insertInto("conflict")
+				.values(conflicts)
+				// ignore if already exists
+				.onConflict((oc) => oc.doNothing())
+				.execute();
+		}
+
+		// 4. update the file data with the applied changes
 		await trx
 			.updateTable("file_internal")
 			.set("data", fileData)
