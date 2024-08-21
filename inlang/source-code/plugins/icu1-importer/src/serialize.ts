@@ -133,7 +133,7 @@ export function serializeICU1Message(elements: MessageFormatElement[]): string {
 					options.push(name + " {" + serializeICU1Message(value.value) + "}")
 				}
 
-				result += "{" + element.value + ", " + fnName + "," + options.join(" ") + "}"
+				result += "{" + element.value + ", " + fnName + ", " + options.join(" ") + "}"
 				break
 			}
 
