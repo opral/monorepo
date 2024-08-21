@@ -17,4 +17,13 @@ describe("serializeICU1Message", () => {
 			"It's, {season, select, spring {spring} summer {summer} fall {fall} winter {winter}}!"
 		)
 	})
+
+	it("serializes plurals", () => {
+		const ast = parseICU1("{likes, plural, =0 {No Likes} one {One Like} other {# Likes}}", {
+			requiresOtherClause: false,
+		})
+		expect(serializeICU1Message(ast)).toBe(
+			"{likes, plural, =0 {No Likes} one {One Like} other {# Likes}}"
+		)
+	})
 })
