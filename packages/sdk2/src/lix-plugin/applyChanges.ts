@@ -12,6 +12,9 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 			"Unimplemented. Only the db.sqlite file can be handled for now."
 		);
 	}
+
+	// todo make transactional
+
 	const sqlite = await loadDatabaseInMemory(file.data);
 	const db = initKysely({ sqlite });
 
