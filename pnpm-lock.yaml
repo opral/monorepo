@@ -44,7 +44,7 @@ importers:
         version: 2.8.3
       vitest:
         specifier: ^2.0.5
-        version: 2.0.5(jsdom@22.1.0)
+        version: 2.0.5
 
   inlang/development-projects/inlang-nextjs:
     dependencies:
@@ -2614,9 +2614,6 @@ importers:
       dedent:
         specifier: 1.5.1
         version: 1.5.1
-      install:
-        specifier: ^0.13.0
-        version: 0.13.0
       kysely:
         specifier: ^0.27.4
         version: 0.27.4
@@ -2633,36 +2630,21 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0
     devDependencies:
-      '@inlang/json-types':
-        specifier: workspace:*
-        version: link:../json-types
-      '@types/debug':
-        specifier: ^4.1.12
-        version: 4.1.12
       '@types/murmurhash3js':
         specifier: ^3.0.7
         version: 3.0.7
       '@vitest/coverage-v8':
         specifier: ^2.0.5
         version: 2.0.5(vitest@2.0.5)
-      '@vitest/web-worker':
-        specifier: ^1.6.0
-        version: 1.6.0(vitest@2.0.5)
-      jsdom:
-        specifier: 22.1.0
-        version: 22.1.0
       memfs:
         specifier: 4.6.0
         version: 4.6.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.3)
       typescript:
         specifier: ^5.5.2
         version: 5.5.4
-      vite:
-        specifier: ^5.3.2
-        version: 5.4.0(@types/node@20.14.14)
       vitest:
         specifier: ^2.0.5
-        version: 2.0.5(jsdom@22.1.0)
+        version: 2.0.5
 
   inlang/source-code/server:
     dependencies:
@@ -3552,7 +3534,7 @@ importers:
         version: 5.5.4
       vitest:
         specifier: ^2.0.5
-        version: 2.0.5(jsdom@22.1.0)
+        version: 2.0.5
 
   lix/packages/server:
     dependencies:
@@ -14292,7 +14274,7 @@ packages:
       std-env: 3.7.0
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 2.0.5(jsdom@22.1.0)
+      vitest: 2.0.5
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -14564,17 +14546,6 @@ packages:
       estree-walker: 3.0.3
       loupe: 3.1.1
       tinyrainbow: 1.2.0
-    dev: true
-
-  /@vitest/web-worker@1.6.0(vitest@2.0.5):
-    resolution: {integrity: sha512-VVKzjk6PVKfaXfhRwTxXaQ0NCp2BoUPhiR2OYd3InZb60jbZVmKquvngFXgvgOf1aDT8ztloMi8yu3wj9eRcuQ==}
-    peerDependencies:
-      vitest: ^1.0.0
-    dependencies:
-      debug: 4.3.6(supports-color@8.1.1)
-      vitest: 2.0.5(jsdom@22.1.0)
-    transitivePeerDependencies:
-      - supports-color
     dev: true
 
   /@volar/kit@2.4.0-alpha.18(typescript@5.5.4):
@@ -21664,11 +21635,6 @@ packages:
       strip-ansi: 6.0.1
       wrap-ansi: 6.2.0
     dev: true
-
-  /install@0.13.0:
-    resolution: {integrity: sha512-zDml/jzr2PKU9I8J/xyZBQn8rPCAY//UOYNmR01XwNwyfhEWObo2SWfSl1+0tm1u6PhxLwDnfsT/6jB7OUxqFA==}
-    engines: {node: '>= 0.10'}
-    dev: false
 
   /internal-slot@1.0.7:
     resolution: {integrity: sha512-NGnrKwXzSms2qUUih/ILZ5JBqNTSa1+ZmP6flaIp6KmSElgE9qdndzS3cqjrDovwFdmwsGsLdeFgB6suw+1e9g==}
@@ -32158,7 +32124,7 @@ packages:
       - terser
     dev: true
 
-  /vitest@2.0.5(jsdom@22.1.0):
+  /vitest@2.0.5:
     resolution: {integrity: sha512-8GUxONfauuIdeSl5f9GTgVEpg5BTOlplET4WEDaeY2QBiN8wSm68vxN/tb5z405OwppfoCavnwXafiaYBC/xOA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -32193,7 +32159,6 @@ packages:
       chai: 5.1.1
       debug: 4.3.6(supports-color@8.1.1)
       execa: 8.0.1
-      jsdom: 22.1.0
       magic-string: 0.30.11
       pathe: 1.1.2
       std-env: 3.7.0
