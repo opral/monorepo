@@ -20,6 +20,7 @@ import { Link } from "react-router-dom";
 import { merge } from "../../../../lix/packages/sdk/dist/merge/merge.js";
 import { SlSelectEvent } from "@shoelace-style/shoelace";
 import SubNavigation from "./components/SubNavigation.tsx";
+import { handleDownload } from "./helper/utils.ts";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [, setWithPolling] = useAtom(withPollingAtom);
@@ -248,30 +249,13 @@ const DownloadButton = () => {
 	const [project] = useAtom(projectAtom);
 	const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
 
-	const handleDownload = async () => {
-		const blob = await project!.toBlob();
-		const blobUrl = URL.createObjectURL(blob);
-		const link = document.createElement("a");
-		link.href = blobUrl;
-		link.download = selectedProjectPath!;
-		document.body.appendChild(link);
-		link.dispatchEvent(
-			new MouseEvent("click", {
-				bubbles: true,
-				cancelable: true,
-				view: window,
-			})
-		);
-		document.body.removeChild(link);
-	};
-
 	return (
 		<SlButton
 			disabled={project === undefined}
 			slot="trigger"
 			size="small"
 			variant="default"
-			onClick={() => handleDownload()}
+			onClick={() => handleDownload(project, selectedProjectPath)}
 		>
 			<div className="text-[13px]! h-full aspect-squere flex items-center justify-center -mx-[3px] -ml-[4px] gap-[5px]">
 				<svg
