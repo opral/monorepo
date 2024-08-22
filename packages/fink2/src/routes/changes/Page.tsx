@@ -13,6 +13,7 @@ import {
 } from "@shoelace-style/shoelace/dist/react";
 import DiffBundleView from "../../components/DiffBundleView.tsx";
 import { BundleNested } from "@inlang/sdk2";
+import { useNavigate } from "react-router-dom";
 
 const bundleIdsWithPendingChangesAtom = atom(async (get) => {
 	const bundlesNested = await get(bundlesNestedAtom);
@@ -35,6 +36,7 @@ export default function App() {
 	const [commitAuthor, setCommitAuthor] = useState<string>("");
 	const [commitDescription, setCommitDescription] = useState<string>("");
 	const [showDialog, setShowDialog] = useState(false);
+	const navigate = useNavigate();
 
 	const handleCommit = async () => {
 		await project?.lix.commit({
@@ -47,6 +49,7 @@ export default function App() {
 		// close dialog after commit
 		if (pendingChanges.length === 0) {
 			setShowDialog(false);
+			navigate("/");
 		}
 	});
 
@@ -66,7 +69,7 @@ export default function App() {
 			<Layout>
 				<div className="bg-white border-b border-zinc-200">
 					<Grid>
-						<div className="py-8 flex justify-between items-center">
+						<div className="py-6 flex justify-between items-center">
 							<h2 className="text-[20px]">Changes</h2>
 							<SlButton
 								size="small"
@@ -119,7 +122,7 @@ export default function App() {
 				</div>
 				<Grid>
 					{bundlesWithChanges.length > 0 && (
-						<div className="relative pb-10 mt-8 divide-y divide-zinc-200 border-y border-zinc-200">
+						<div className="relative mb-8 mt-8 divide-y divide-zinc-200 border-y border-zinc-200">
 							{bundlesWithChanges.map((bundle) => (
 								<DiffBundleView
 									changes={getScopedChangesByBundle(bundle)}
