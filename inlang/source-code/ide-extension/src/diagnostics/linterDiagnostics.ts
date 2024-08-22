@@ -2,11 +2,10 @@ import * as vscode from "vscode"
 import { state } from "../utilities/state.js"
 import type { MessageLintReport } from "@inlang/sdk"
 import { recommendNinja } from "../utilities/recommend/ninja/ninja.js"
-import type { NodeishFilesystem } from "@lix-js/fs"
 
 export async function linterDiagnostics(args: {
 	context: vscode.ExtensionContext
-	nodeishFs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 }) {
 	const linterDiagnosticCollection = vscode.languages.createDiagnosticCollection("inlang-lint")
 
@@ -16,6 +15,7 @@ export async function linterDiagnostics(args: {
 			return
 		}
 
+		// TODO: Clarify how to derive customApi from project
 		const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
 
 		if (!ideExtension) {
@@ -37,6 +37,7 @@ export async function linterDiagnostics(args: {
 					}) ?? state().project.query.messages.getByDefaultAlias(message.messageId)
 
 				if (_message) {
+					// TODO: Clarify how to derive validation rules from lix
 					state().project.query.messageLintReports.get.subscribe(
 						{
 							where: {
@@ -89,7 +90,7 @@ export async function linterDiagnostics(args: {
 							)
 
 							if (diagnostics.length > 0) {
-								recommendNinja({ fs: args.nodeishFs })
+								recommendNinja({ fs: args.fs })
 							}
 						}
 					)

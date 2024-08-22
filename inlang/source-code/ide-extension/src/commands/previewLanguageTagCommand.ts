@@ -8,20 +8,20 @@ export const previewLanguageTagCommand = {
 	title: "Sherlock: Change preview language tag",
 	register: vscode.commands.registerCommand,
 	callback: async () => {
-		const settings = state().project?.settings()
-		const selectedTag = await vscode.window.showQuickPick(settings.languageTags, {
+		const settings = state().project?.settings.get()
+		const selectedLocale = await vscode.window.showQuickPick(settings.locales, {
 			placeHolder: "Select a language",
 		})
 
-		if (!selectedTag) {
+		if (!selectedLocale) {
 			return
 		}
 
-		await updateSetting("previewLanguageTag", selectedTag)
+		await updateSetting("previewLanguageTag", selectedLocale)
 
 		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
 		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
 		CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire()
-		CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.fire(selectedTag)
+		CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.fire(selectedLocale)
 	},
 }

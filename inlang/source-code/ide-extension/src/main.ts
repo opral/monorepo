@@ -9,10 +9,10 @@ import { messagePreview } from "./decorations/messagePreview.js"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { errorView } from "./utilities/errors/errors.js"
 import { messageView } from "./utilities/messages/messages.js"
-import { listProjects } from "@inlang/sdk"
+import { listProjects } from "@inlang/sdk2"
 import { createFileSystemMapper } from "./utilities/fs/createFileSystemMapper.js"
 import fs from "node:fs/promises"
-import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
+import { normalizePath } from "@lix-js/fs"
 import { gettingStartedView } from "./utilities/getting-started/gettingStarted.js"
 import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
 import { recommendationBannerView } from "./utilities/recommendation/recommendation.js"
@@ -45,17 +45,21 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			},
 		})
 
-		const nodeishFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)
+		const mappedFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)
 
 		try {
-			const projectsList = await listProjects(nodeishFs, normalizePath(workspaceFolder.uri.fsPath))
+			// TODO: Move listProject to sdk v2 because its needed in the extension
+			const projectsList = await listProjects({
+				fs: mappedFs,
+				from: normalizePath(workspaceFolder.uri.fsPath),
+			})
 			setState({ ...state(), projectsInWorkspace: projectsList })
 		} catch (error) {
 			handleError(error)
 			return
 		}
 
-		await main({ context, workspaceFolder, nodeishFs })
+		await main({ context, workspaceFolder, fs: mappedFs })
 		msg("Sherlock activated", "info")
 	} catch (error) {
 		handleError(error)
@@ -66,7 +70,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 async function main(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	nodeishFs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 }): Promise<void> {
 	if (state().projectsInWorkspace.length > 0) {
 		// find the closest project to the workspace
@@ -108,7 +112,7 @@ async function main(args: {
 function setupFileSystemWatcher(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	nodeishFs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 }) {
 	const watcher = vscode.workspace.createFileSystemWatcher(
 		new vscode.RelativePattern(
@@ -122,7 +126,7 @@ function setupFileSystemWatcher(args: {
 		await main({
 			context: args.context,
 			workspaceFolder: args.workspaceFolder,
-			nodeishFs: args.nodeishFs,
+			fs: args.fs,
 		})
 	})
 }
@@ -130,7 +134,7 @@ function setupFileSystemWatcher(args: {
 function registerExtensionComponents(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	nodeishFs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 }) {
 	args.context.subscriptions.push(
 		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))
@@ -155,7 +159,7 @@ function registerExtensionComponents(args: {
 }
 
 function handleInlangErrors() {
-	const inlangErrors = state().project.errors() || []
+	const inlangErrors = state().project.errors.get() || []
 	if (inlangErrors.length > 0) {
 		console.error("Extension errors (Sherlock):", inlangErrors)
 	}

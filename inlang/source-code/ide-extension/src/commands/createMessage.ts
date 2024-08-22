@@ -14,10 +14,10 @@ export const createMessageCommand = {
 	title: "Sherlock: Create Message",
 	register: commands.registerCommand,
 	callback: async function () {
-		const sourceLanguageTag = state().project.settings().sourceLanguageTag
+		const baseLocale = state().project.settings.get().baseLocale
 
 		// guard
-		if (sourceLanguageTag === undefined) {
+		if (baseLocale === undefined) {
 			return msg(
 				"The `sourceLanguageTag` is not defined in the project but required to create a message.",
 				"warn",
@@ -52,7 +52,7 @@ export const createMessageCommand = {
 			selectors: [],
 			variants: [
 				{
-					languageTag: sourceLanguageTag,
+					languageTag: baseLocale,
 					match: [],
 					pattern: [
 						{
