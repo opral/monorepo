@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-js",
 	"type": "module",
-	"version": "1.11.2",
+	"version": "2.0.0-prerelease.0",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
@@ -49,8 +49,12 @@
 		"clean": "rm -rf ./dist ./node_modules",
 		"check": "tsc --noEmit --emitDeclarationOnly false"
 	},
+	"bundleDependencies": [
+		"@inlang/sdk2"
+	],
 	"dependencies": {
 		"@inlang/detect-json-formatting": "workspace:*",
+		"@inlang/sdk2": "workspace:*",
 		"commander": "11.1.0",
 		"consola": "3.2.3",
 		"dedent": "1.5.1",
@@ -65,7 +69,6 @@
 		"@inlang/recommend-ninja": "workspace:*",
 		"@inlang/recommend-sherlock": "workspace:*",
 		"@inlang/sdk": "workspace:*",
-		"@inlang/sdk2": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@rollup/plugin-terser": "0.4.3",
