@@ -28,12 +28,12 @@ export async function importPlugins(args: {
 			continue;
 		}
 		try {
-			const moduleAsText = await fetchModuleWithCache(uri);
-			const preprocessed =
-				(await args.preprocessPluginBeforeImport?.(moduleAsText)) ??
-				moduleAsText;
+			let moduleAsText = await fetchModuleWithCache(uri);
+			if (args.preprocessPluginBeforeImport) {
+				moduleAsText = await args.preprocessPluginBeforeImport(moduleAsText);
+			}
 			const moduleWithMimeType =
-				"data:application/javascript," + encodeURIComponent(preprocessed);
+				"data:application/javascript," + encodeURIComponent(moduleAsText);
 			const { default: plugin } = await import(
 				/* @vite-ignore */ moduleWithMimeType
 			);
@@ -46,7 +46,6 @@ export async function importPlugins(args: {
 }
 
 async function fetchModuleWithCache(uri: string): Promise<string> {
-	console.warn("fetchWithCache is not implemented");
 	const response = await fetch(uri);
 	if (!response.ok) {
 		throw new Error(

@@ -4,7 +4,10 @@ import type { ProjectSettings } from "../schema/settings.js";
 import { type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initKysely } from "../database/initKysely.js";
 import { initHandleSaveToLixOnChange } from "./logic/initHandleSaveToLixOnChange.js";
-import { importPlugins } from "../plugin/importPlugins.js";
+import {
+	importPlugins,
+	type PreprocessPluginBeforeImportFunction,
+} from "../plugin/importPlugins.js";
 import type { InlangProject, Subscription } from "./api.js";
 import { createState } from "./state/state.js";
 import { BehaviorSubject, map } from "rxjs";
@@ -26,6 +29,19 @@ export async function loadProject(args: {
 	 *
 	 */
 	_mockPlugins?: Record<string, InlangPlugin>;
+	/**
+	 * Function that preprocesses the plugin before importing it.
+	 *
+	 * The callback can be used to process plugins as needed in the
+	 * environment of the app. For example, Sherlock uses this to convert
+	 * ESM, which all inlang plugins are written in, to CJS which Sherlock
+	 * runs in.
+	 *
+	 * @example
+	 *   const project = await loadProject({ preprocessPluginBeforeImport: (moduleText) => convertEsmToCjs(moduleText) })
+	 *
+	 */
+	preprocessPluginBeforeImport?: PreprocessPluginBeforeImportFunction;
 }): Promise<InlangProject> {
 	const db = initKysely({ sqlite: args.sqlite });
 
@@ -42,6 +58,7 @@ export async function loadProject(args: {
 	const { plugins, errors: pluginErrors } = await importPlugins({
 		settings,
 		mockPlugins: args._mockPlugins,
+		preprocessPluginBeforeImport: args.preprocessPluginBeforeImport,
 	});
 
 	const state = await createState({
