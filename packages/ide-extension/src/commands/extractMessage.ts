@@ -16,7 +16,7 @@ export const extractMessageCommand = {
 	register: commands.registerTextEditorCommand,
 	callback: async function (textEditor: TextEditor | undefined) {
 		const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
-		const sourceLanguageTag = state().project.settings().sourceLanguageTag
+		const baseLocale = state().project.settings.get().baseLocale
 
 		// guards
 		if (!ideExtension) {
@@ -33,7 +33,7 @@ export const extractMessageCommand = {
 				"notification"
 			)
 		}
-		if (sourceLanguageTag === undefined) {
+		if (baseLocale === undefined) {
 			return msg(
 				"The `sourceLanguageTag` is not defined in the project but required to extract a message.",
 				"warn",
@@ -104,7 +104,7 @@ export const extractMessageCommand = {
 			selectors: [],
 			variants: [
 				{
-					languageTag: state().project.settings()?.sourceLanguageTag as string,
+					languageTag: state().project.settings.get()?.baseLocale as string,
 					match: [],
 					pattern: [
 						{

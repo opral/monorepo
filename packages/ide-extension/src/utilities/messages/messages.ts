@@ -212,7 +212,7 @@ export function createMessageHtml(args: {
 		return Object.keys(aliases).length > 0
 	}
 
-	const isExperimentalAliasesEnabled = state().project.settings()?.experimental?.aliases
+	const isExperimentalAliasesEnabled = state().project.settings.get()?.experimental?.aliases
 
 	const aliasHtml =
 		isExperimentalAliasesEnabled && hasAliases(args.message.alias)
@@ -286,7 +286,7 @@ export function getTranslationsTableHtml(args: {
 	message: Message
 	workspaceFolder: vscode.WorkspaceFolder
 }): string {
-	const configuredLanguageTags = state().project.settings()?.languageTags || []
+	const configuredLanguageTags = state().project.settings.get()?.locales || []
 	const contextTableRows = configuredLanguageTags.map((languageTag) => {
 		const variant = args.message.variants.find((v) => v.languageTag === languageTag)
 
@@ -302,7 +302,7 @@ export function getTranslationsTableHtml(args: {
 
 		const editCommand = `editMessage('${args.message.id}', '${escapeHtml(languageTag)}')`
 		const machineTranslateCommand = `machineTranslate('${args.message.id}', '${
-			state().project.settings()?.sourceLanguageTag
+			state().project.settings.get()?.baseLocale
 		}', ['${languageTag}'])`
 
 		return `

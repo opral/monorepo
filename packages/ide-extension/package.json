@@ -242,6 +242,7 @@
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk2": "workspace:*",
 		"@inlang/settings-component": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
 		"@lix-js/client": "workspace:*",

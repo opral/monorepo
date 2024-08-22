@@ -55,7 +55,7 @@ export function contextTooltip(
 	}
 
 	// Get the configured language tags
-	const configuredLanguageTags = state().project.settings()?.languageTags || []
+	const configuredLanguageTags = state().project.settings.get()?.locales || []
 
 	// Generate rows for each configured language tag
 	const contextTableRows: ContextTableRow[] = configuredLanguageTags.map((languageTag) => {
@@ -81,7 +81,7 @@ export function contextTooltip(
 				"MACHINE_TRANSLATE_MESSAGE",
 				JSON.stringify({
 					messageId: referenceMessage.messageId,
-					sourceLanguageTag: state().project.settings()?.sourceLanguageTag,
+					sourceLanguageTag: state().project.settings.get()?.baseLocale,
 					targetLanguageTags: [languageTag],
 				})
 			)
