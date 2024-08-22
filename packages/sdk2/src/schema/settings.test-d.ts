@@ -11,3 +11,11 @@ settings.baseLocale = undefined;
 
 // @ts-expect-error - locales are required
 settings.locales = undefined;
+
+// expect no error
+settings["plugin.mock"] = {
+	key: "value",
+  nested: {
+    moreNested: {}
+  },
+};
