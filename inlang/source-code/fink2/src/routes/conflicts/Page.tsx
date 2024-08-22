@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import Layout from "../../layout.tsx";
+import Layout, { Grid } from "../../layout.tsx";
 import { bundlesNestedAtom, conflictsAtom, projectAtom } from "../../state.ts";
 import { useEffect, useState } from "react";
 import DiffBundleView from "../../components/DiffBundleView.tsx";
@@ -26,9 +26,7 @@ export default function Page() {
 			// get the bundleId of the change
 			const bundleWithConflict = bundlesNested.filter((bundle) =>
 				bundle.messages.find((message) =>
-					message.variants.find((variant) =>
-						variant.id === change.value.id
-					)
+					message.variants.find((variant) => variant.id === change.value.id)
 				)
 			);
 			result[conflicting.id] = conflicting;
@@ -45,35 +43,41 @@ export default function Page() {
 
 	return (
 		<Layout>
-			{conflicts.length === 0 ? (
-				<p>No Conflicts</p>
-			) : (
-					conflicts.map((c) => {
-						const bundleId = conflictingChanges[c.change_id]?.bundleId;
-						const change = conflictingChanges[c.change_id];
-						const conflicting = conflictingChanges[c.conflicting_change_id];
-						return (
-							<div className="space-y-2">
-								<h2 className="font-bold text-xl">This {change?.type} change </h2>
-								<pre>{JSON.stringify(change?.value, undefined, 2)}</pre>
-								<h2 className="font-bold text-xl">
-									Conflicts with this {conflicting?.type} change
-								</h2>
-								<pre>{JSON.stringify(conflicting?.value, undefined, 2)}</pre>
-								<h2 className="font-bold text-xl">Because</h2>
-								<p>{c.reason}</p>
-								{change && conflicting && (
-									<>
-										<DiffBundleView
-											bundleId={bundleId}
-											changes={[change, conflicting]}
-										/>
-									</>
-								)}
-							</div>
-						);
-					})
-			)}
+			<Grid>
+				<div className="mt-8">
+					{conflicts.length === 0 ? (
+						<p>No Conflicts</p>
+					) : (
+						conflicts.map((c) => {
+							const bundleId = conflictingChanges[c.change_id]?.bundleId;
+							const change = conflictingChanges[c.change_id];
+							const conflicting = conflictingChanges[c.conflicting_change_id];
+							return (
+								<div className="space-y-2">
+									<h2 className="font-bold text-xl">
+										This {change?.type} change{" "}
+									</h2>
+									<pre>{JSON.stringify(change?.value, undefined, 2)}</pre>
+									<h2 className="font-bold text-xl">
+										Conflicts with this {conflicting?.type} change
+									</h2>
+									<pre>{JSON.stringify(conflicting?.value, undefined, 2)}</pre>
+									<h2 className="font-bold text-xl">Because</h2>
+									<p>{c.reason}</p>
+									{change && conflicting && (
+										<>
+											<DiffBundleView
+												bundleId={bundleId}
+												changes={[change, conflicting]}
+											/>
+										</>
+									)}
+								</div>
+							);
+						})
+					)}
+				</div>
+			</Grid>
 		</Layout>
 	);
 }
