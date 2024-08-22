@@ -85,6 +85,14 @@ const SelectProject = () => {
 		return projects;
 	};
 
+	const handleSetExistingProjects = async () => {
+		setExistingProjects(await getProjects());
+	};
+
+	useEffect(() => {
+		handleSetExistingProjects();
+	}, [selectedProjectPath]);
+
 	return (
 		<div className="flex items-center gap-1">
 			<div className="w-8 h-8 flex justify-center items-center">
@@ -100,42 +108,51 @@ const SelectProject = () => {
 					/>
 				</svg>
 			</div>
-			<p className="text-[16px]">
-				{selectedProjectPath?.replace(".inlang", "")}
-			</p>
-			<SlDropdown
-				onSlShow={async () => {
-					const projects = await getProjects();
-					setExistingProjects(projects);
-				}}
-				placement="bottom-end"
-				distance={4}
-			>
-				<div
-					slot="trigger"
-					className="h-8 px-1 hover:bg-zinc-100 flex justify-center items-center rounded-lg text-zinc-500 hover:text-zinc-950 cursor-pointer"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="20"
-						viewBox="0 0 24 24"
+			{selectedProjectPath ? (
+				<>
+					<p className="text-[16px]">
+						{selectedProjectPath?.replace(".inlang", "")}
+					</p>
+					<SlDropdown
+						onSlShow={async () => {
+							const projects = await getProjects();
+							setExistingProjects(projects);
+						}}
+						placement="bottom-end"
+						distance={4}
 					>
-						<path
-							fill="currentColor"
-							d="m6 9.657l1.414 1.414l4.243-4.243l4.243 4.243l1.414-1.414L11.657 4zm0 4.786l1.414-1.414l4.243 4.243l4.243-4.243l1.414 1.414l-5.657 5.657z"
-						/>
-					</svg>
-				</div>
-				<SlMenu>
-					{existingProjects.map((name) => (
-						<SlMenuItem>
-							<p className="py-2" onClick={() => setSelectedProjectPath(name)}>
-								{name}
-							</p>
-						</SlMenuItem>
-					))}
-				</SlMenu>
-			</SlDropdown>
+						<div
+							slot="trigger"
+							className="h-8 px-1 hover:bg-zinc-100 flex justify-center items-center rounded-lg text-zinc-500 hover:text-zinc-950 cursor-pointer"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="20"
+								viewBox="0 0 24 24"
+							>
+								<path
+									fill="currentColor"
+									d="m6 9.657l1.414 1.414l4.243-4.243l4.243 4.243l1.414-1.414L11.657 4zm0 4.786l1.414-1.414l4.243 4.243l4.243-4.243l1.414 1.414l-5.657 5.657z"
+								/>
+							</svg>
+						</div>
+						<SlMenu>
+							{existingProjects.map((name) => (
+								<SlMenuItem>
+									<p
+										className="py-2"
+										onClick={() => setSelectedProjectPath(name)}
+									>
+										{name}
+									</p>
+								</SlMenuItem>
+							))}
+						</SlMenu>
+					</SlDropdown>
+				</>
+			) : (
+				<p className="text-[16px]">no project</p>
+			)}
 		</div>
 	);
 };
@@ -150,7 +167,6 @@ export const CreateProjectDialog = (props: {
 	const [, setSelectedProjectPath] = useAtom(selectedProjectPathAtom);
 
 	const handleCreateNewProject = async () => {
-		console.log("handleCreateNewProject");
 		setLoading(true);
 		const opfsRoot = await navigator.storage.getDirectory();
 		const fileHandle = await opfsRoot.getFileHandle(fileName, { create: true });

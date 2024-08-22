@@ -1,9 +1,5 @@
 import { atom } from "jotai";
-import {
-	InlangProject,
-	loadProjectInMemory,
-	selectBundleNested,
-} from "@inlang/sdk2";
+import { loadProjectInMemory, selectBundleNested } from "@inlang/sdk2";
 import { atomWithStorage } from "jotai/utils";
 import { jsonObjectFrom } from "kysely/helpers/sqlite";
 
