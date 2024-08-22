@@ -60,25 +60,29 @@ export default function App() {
 			<Layout>
 				<Grid>
 					{/* new bundle button */}
-					<div className="flex mb-3 justify-end mt-3">
-						<SlButton
-							size="small"
-							className="btn btn-primary"
-							onClick={() => handleNewBundle()}
-						>
-							New bundle
-						</SlButton>
-					</div>
-					<div className="pb-8">
-						{bundlesNested.length > 0 &&
-							bundlesNested.map((bundle) => (
-								<InlangBundle
-									key={bundle.id}
-									bundle={bundle}
-									setShowHistory={handleOpenHistoryModal}
-								/>
-							))}
-					</div>
+					{project && selectedProjectPath && (
+						<>
+							<div className="flex mb-3 justify-end mt-3">
+								<SlButton
+									size="small"
+									className="btn btn-primary"
+									onClick={() => handleNewBundle()}
+								>
+									New bundle
+								</SlButton>
+							</div>
+							<div className="pb-8">
+								{bundlesNested.length > 0 &&
+									bundlesNested.map((bundle) => (
+										<InlangBundle
+											key={bundle.id}
+											bundle={bundle}
+											setShowHistory={handleOpenHistoryModal}
+										/>
+									))}
+							</div>
+						</>
+					)}
 					{(!project || !selectedProjectPath) && <NoProjectView />}
 					{project && selectedProjectPath && bundlesNested.length === 0 && (
 						<div className="h-96 flex flex-col justify-center items-center gap-6">

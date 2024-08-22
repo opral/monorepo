@@ -3,12 +3,14 @@ import Layout, { Grid } from "../../layout.tsx";
 import { bundlesNestedAtom, conflictsAtom, projectAtom } from "../../state.ts";
 import { useEffect, useState } from "react";
 import DiffBundleView from "../../components/DiffBundleView.tsx";
+import { useNavigate } from "react-router-dom";
 
 export default function Page() {
 	const [project] = useAtom(projectAtom);
 	const [conflicts] = useAtom(conflictsAtom);
 	const [bundlesNested] = useAtom(bundlesNestedAtom);
 	const [conflictingChanges, setConflictingChanges] = useState({});
+	const navigate = useNavigate();
 
 	const getConflictingChanges = async () => {
 		const result = {};
@@ -39,6 +41,13 @@ export default function Page() {
 	useEffect(() => {
 		const interval = setInterval(getConflictingChanges, 1000);
 		return () => clearInterval(interval);
+	});
+
+	useEffect(() => {
+		// close dialog after commit
+		if (conflicts.length === 0) {
+			navigate("/");
+		}
 	});
 
 	return (
