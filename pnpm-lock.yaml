@@ -1086,6 +1086,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 0.34.3
         version: 0.34.3(vitest@0.34.3)
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
       typescript:
         specifier: 5.2.2
         version: 5.2.2
