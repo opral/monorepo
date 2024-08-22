@@ -15,13 +15,13 @@ const data: { path: string; name: string }[] = [
 	{ path: "/conflicts", name: "Conflicts" },
 ];
 
-const ModeSwitcher = () => {
+const SubNavigation = () => {
 	const [pendingChanges] = useAtom(pendingChangesAtom);
 
 	return (
-		<div className="h-[34px] px-[2px] flex items-center bg-zinc-100 rounded">
+		<div className="flex px-[2px] gap-3 items-center -mb-[1px] -ml-[6px]">
 			{data.map((item) => (
-				<SwitcherButton
+				<NavItem
 					key={item.path}
 					path={item.path}
 					name={item.name}
@@ -32,9 +32,9 @@ const ModeSwitcher = () => {
 	);
 };
 
-export default ModeSwitcher;
+export default SubNavigation;
 
-const SwitcherButton = (props: {
+const NavItem = (props: {
 	path: string;
 	name: string;
 	numUncommittedChanges: number;
@@ -42,20 +42,20 @@ const SwitcherButton = (props: {
 	const [conflicts] = useAtom(conflictsAtom);
 
 	return (
-		<Link key={props.path} to={props.path}>
+		<Link key={props.path} to={props.path} className={clsx("pb-1 relative")}>
 			<div
 				className={clsx(
-					"h-8 items-center px-4 flex text-xs! border rounded box-border",
+					"h-8 items-center px-2 flex text-[14px]! box-border text-zinc-500 hover:bg-zinc-100 rounded",
 					window && window.location.pathname === props.path
-						? "bg-white border-zinc-300"
-						: "border-transparent"
+						? "text-zinc-950"
+						: ""
 				)}
 			>
 				{props.name}
 				{props.path === "/changes" && (
 					<div
 						className={clsx(
-							"ml-2 text-xs!  h-5 rounded flex items-center px-2 font-medium -mr-1",
+							"ml-2 text-xs!  h-5 rounded flex items-center px-2 font-medium",
 							props.numUncommittedChanges === 0
 								? "text-zinc-700 bg-zinc-300"
 								: "text-blue-700 bg-blue-200"
@@ -67,7 +67,7 @@ const SwitcherButton = (props: {
 				{props.path === "/conflicts" && (
 					<div
 						className={clsx(
-							"ml-2 text-xs!  h-5 rounded flex items-center px-2 font-medium -mr-1",
+							"ml-2 text-xs!  h-5 rounded flex items-center px-2 font-medium",
 							conflicts.length === 0
 								? "text-zinc-700 bg-zinc-300"
 								: "text-blue-700 bg-blue-200"
@@ -77,6 +77,14 @@ const SwitcherButton = (props: {
 					</div>
 				)}
 			</div>
+			<div
+				className={clsx(
+					"w-[calc(100%_-_8px)] mx-[4px] h-[2px] bottom-0 right-0 absolute",
+					window && window.location.pathname === props.path
+						? "bg-zinc-950"
+						: "bg-transparent"
+				)}
+			></div>
 		</Link>
 	);
 };

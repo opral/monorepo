@@ -30,9 +30,9 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 	};
 
 	return (
-		<div className="bg-zinc-50 rounded p-4 mt-2">
+		<div className="bg-white border-x border-zinc-200 p-4">
 			<div className="flex justify-between items-center mb-3">
-				<h3 className="font-medium text-[16px]">{props.bundleId}</h3>
+				<h3 className="font-medium text-[14px]!">{props.bundleId}</h3>
 				<div className="flex items-center gap-3">
 					<div className="text-xs! text-zinc-700 bg-zinc-300 h-5 rounded flex items-center px-2 font-medium">
 						{props.changes.length}{" "}

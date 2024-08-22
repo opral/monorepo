@@ -1,4 +1,4 @@
-import Layout from "../../layout.tsx";
+import Layout, { Grid } from "../../layout.tsx";
 import {
 	bundlesNestedAtom,
 	projectAtom,
@@ -6,7 +6,11 @@ import {
 } from "../../state.ts";
 import { useAtom } from "jotai";
 import InlangBundle from "../../components/InlangBundle.tsx";
-import { SlButton, SlDialog, SlSpinner } from "@shoelace-style/shoelace/dist/react";
+import {
+	SlButton,
+	SlDialog,
+	SlSpinner,
+} from "@shoelace-style/shoelace/dist/react";
 // import { InlangPatternEditor } from "../../components/SingleDiffBundle.tsx";
 // import VariantHistory from "../../components/VariantHistory.tsx";
 import VariantHistoryList from "../../components/VariantHistoryList.tsx";
@@ -49,38 +53,38 @@ export default function App() {
 		if (project) {
 			insertBundleNested(project.db, createBundle({ messages: [] }));
 		}
-	}
+	};
 
 	return (
 		<>
 			<Layout>
-				{/* new bundle button */}
-				<div className="flex mb-3 justify-end">
-					<SlButton
-						size="small"
-						className="btn btn-primary"
-						onClick={() => handleNewBundle()}
-					>
-						New bundle
-					</SlButton>
-				</div>
-				{bundlesNested.length > 0 &&
-					bundlesNested.map((bundle) => (
-						<InlangBundle
-							key={bundle.id}
-							bundle={bundle}
-							setShowHistory={handleOpenHistoryModal}
-						/>
-					))}
-				{(!project || !selectedProjectPath) && <NoProjectView />}
-				{project && selectedProjectPath && bundlesNested.length === 0 && (
-					<div className="h-96 flex flex-col justify-center items-center gap-6">
-						<p className="text-gray-500 text-lg">
-							Import demo data
-						</p>
-						<SlSpinner />
+				<Grid>
+					{/* new bundle button */}
+					<div className="flex mb-3 justify-end mt-3">
+						<SlButton
+							size="small"
+							className="btn btn-primary"
+							onClick={() => handleNewBundle()}
+						>
+							New bundle
+						</SlButton>
 					</div>
-				)}
+					{bundlesNested.length > 0 &&
+						bundlesNested.map((bundle) => (
+							<InlangBundle
+								key={bundle.id}
+								bundle={bundle}
+								setShowHistory={handleOpenHistoryModal}
+							/>
+						))}
+					{(!project || !selectedProjectPath) && <NoProjectView />}
+					{project && selectedProjectPath && bundlesNested.length === 0 && (
+						<div className="h-96 flex flex-col justify-center items-center gap-6">
+							<p className="text-gray-500 text-lg">Import demo data</p>
+							<SlSpinner />
+						</div>
+					)}
+				</Grid>
 			</Layout>
 			<SlDialog
 				label="History"
