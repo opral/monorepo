@@ -3,7 +3,7 @@
 	"include": ["src/**/*.ts"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
-		"types": ["vite/client"],
+		"types": [],
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"declaration": true,
