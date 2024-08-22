@@ -18,6 +18,7 @@ import { useState } from "react";
 import NoProjectView from "../../components/NoProjectView.tsx";
 import { demoBundles } from "../../../demo/bundles.ts";
 import { createBundle, insertBundleNested } from "@inlang/sdk2";
+import LixFloat from "../../components/LixFloat.tsx";
 
 // import VariantHistory from "../../components/VariantHistory.tsx";
 
@@ -91,6 +92,7 @@ export default function App() {
 						</div>
 					)}
 				</Grid>
+				<LixFloat />
 			</Layout>
 			<SlDialog
 				label="History"
