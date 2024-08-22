@@ -69,14 +69,16 @@ export default function App() {
 							New bundle
 						</SlButton>
 					</div>
-					{bundlesNested.length > 0 &&
-						bundlesNested.map((bundle) => (
-							<InlangBundle
-								key={bundle.id}
-								bundle={bundle}
-								setShowHistory={handleOpenHistoryModal}
-							/>
-						))}
+					<div className="pb-8">
+						{bundlesNested.length > 0 &&
+							bundlesNested.map((bundle) => (
+								<InlangBundle
+									key={bundle.id}
+									bundle={bundle}
+									setShowHistory={handleOpenHistoryModal}
+								/>
+							))}
+					</div>
 					{(!project || !selectedProjectPath) && <NoProjectView />}
 					{project && selectedProjectPath && bundlesNested.length === 0 && (
 						<div className="h-96 flex flex-col justify-center items-center gap-6">
