@@ -9,7 +9,6 @@ import InlangBundle from "../../components/InlangBundle.tsx";
 import {
 	SlButton,
 	SlDialog,
-	SlSpinner,
 } from "@shoelace-style/shoelace/dist/react";
 // import { InlangPatternEditor } from "../../components/SingleDiffBundle.tsx";
 // import VariantHistory from "../../components/VariantHistory.tsx";
@@ -43,11 +42,6 @@ export default function App() {
 			}
 		}
 	};
-
-	// import demo data if no bundles are found
-	if (project && selectedProjectPath && bundlesNested.length === 0) {
-		handleDemoImport();
-	}
 
 	// create new empty bundle
 	const handleNewBundle = () => {
@@ -87,8 +81,18 @@ export default function App() {
 					{(!project || !selectedProjectPath) && <NoProjectView />}
 					{project && selectedProjectPath && bundlesNested.length === 0 && (
 						<div className="h-96 flex flex-col justify-center items-center gap-6">
-							<p className="text-gray-500 text-lg">Import demo data</p>
-							<SlSpinner />
+							<h2 className="text-xl font-bold">Empty project</h2>
+							<p className="text-gray-500 text-lg">
+								Create new bundles or import demo data to get started.
+							</p>
+							<SlButton
+								size="small"
+								variant="primary"
+								className="btn btn-primary"
+								onClick={handleDemoImport}
+							>
+								Import demo data
+							</SlButton>
 						</div>
 					)}
 				</Grid>
