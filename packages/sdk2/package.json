@@ -8,7 +8,7 @@
 	"homepage": "https://inlang.com/documentation/sdk",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/opral/inlang-message-sdk"
+		"url": "https://github.com/opral/inlang-sdk"
 	},
 	"exports": {
 		".": "./dist/index.js"
