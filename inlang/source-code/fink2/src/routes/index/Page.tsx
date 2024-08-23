@@ -57,7 +57,7 @@ export default function App() {
 					{/* new bundle button */}
 					{project && selectedProjectPath && (
 						<>
-							<div className="flex mb-3 justify-end mt-3">
+							{/* <div className="flex mb-3 justify-end mt-3">
 								<SlButton
 									size="small"
 									className="btn btn-primary"
@@ -65,7 +65,7 @@ export default function App() {
 								>
 									New bundle
 								</SlButton>
-							</div>
+							</div> */}
 							<div>
 								{bundlesNested.length > 0 &&
 									bundlesNested.map((bundle) => (
@@ -80,16 +80,15 @@ export default function App() {
 					)}
 					{(!project || !selectedProjectPath) && <NoProjectView />}
 					{project && selectedProjectPath && bundlesNested.length === 0 && (
-						<div className="h-full mx-auto max-w-md flex flex-col justify-center items-center gap-8 bg-white border-zinc-400 p-8 rounded shadow-2xl">
-							<img className="max-w-80 rounded" src="/empty-project-image.png" />
-							{/* <h2 className="text-xl font-bold">Empty project</h2> */}
-							<p className="max-w-80 text-gray-500">
-								Create new bundles or import demo data to get started.
-							</p>
+						<div className="h-full mx-auto max-w-80 flex flex-col justify-center items-center gap-8 mt-16">
+							<img className="rounded" src="/empty-project-image.png" />
+							<div className="w-full text-gray-500 text-md text-center leading-normal">
+								Import the demo data to get started.
+							</div>
 							<SlButton
 								size="small"
 								variant="primary"
-								className="btn btn-primary"
+								className="w-full"
 								onClick={handleDemoImport}
 							>
 								Import demo data
