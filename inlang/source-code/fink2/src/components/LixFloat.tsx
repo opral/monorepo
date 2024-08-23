@@ -35,7 +35,7 @@ const LixFloat = () => {
 
   return (
     <div className={clsx(
-      "lixfloat z-30 sticky mx-auto bottom-8 w-[300px] my-8 opacity-0",
+      "lixfloat z-30 sticky mx-auto top-[calc(100%_-_74px)] bottom-8 w-[300px] my-8 opacity-0",
       pendingChanges.length > 0 && "animate-slideIn opacity-100",
       // "transition-all translate-y-8 duration-500"
     )}>
