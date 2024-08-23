@@ -3,7 +3,7 @@ import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../schema/settings.js";
 import { type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initKysely } from "../database/initKysely.js";
-import { initHandleSaveToLixOnChange } from "./logic/initHandleSaveToLixOnChange.js";
+import { initHandleSaveToLixOnChange } from "./initHandleSaveToLixOnChange.js";
 import {
 	importPlugins,
 	type PreprocessPluginBeforeImportFunction,
