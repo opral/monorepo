@@ -1,4 +1,4 @@
-import { compileBundle } from "./compileBundle.js"
+import { compileBundle, type Resource } from "./compileBundle.js"
 import { telemetry } from "../services/telemetry/implementation.js"
 import { jsIdentifier } from "../services/codegen/identifier.js"
 import { getStackInfo } from "../services/telemetry/stack-detection.js"
@@ -24,10 +24,17 @@ export type CompileOptions = {
 	bundles: Readonly<BundleNested[]>
 	settings: Pick<ProjectSettings, "baseLocale" | "locales">
 	projectId: string | undefined
+	/**
+	 * The file-structure of the compiled output.
+	 *
+	 * @default "regular"
+	 */
+	outputStructure?: "regular" | "message-modules"
 }
 
 const defaultCompileOptions = {
 	projectId: undefined,
+	outputStructure: "regular",
 } satisfies Partial<CompileOptions>
 
 /**
@@ -48,13 +55,37 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 	//Maps each language to it's fallback
 	//If there is no fallback, it will be undefined
 	const fallbackMap = getFallbackMap(opts.settings.locales, opts.settings.baseLocale)
-
 	const resources = opts.bundles.map((bundle) => compileBundle(bundle, fallbackMap))
 
+	const output =
+		opts.outputStructure === "regular"
+			? generateRegularOutput(resources, opts.settings, fallbackMap)
+			: generateModuleOutput(resources, opts.settings, fallbackMap)
+
+	// telemetry
+	const pkgJson = await getPackageJson(fs, process.cwd())
+	const stack = getStackInfo(pkgJson)
+	telemetry.capture(
+		{
+			event: "PARAGLIDE-JS compile executed",
+			properties: { stack },
+		},
+		opts.projectId
+	)
+
+	telemetry.shutdown()
+	return await formatFiles(output)
+}
+
+function generateRegularOutput(
+	resources: Resource[],
+	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
+	fallbackMap: Record<string, string | undefined>
+): Record<string, string> {
 	const indexFile = [
 		"/* eslint-disable */",
 		'import { languageTag } from "./runtime.js"',
-		opts.settings.locales
+		settings.locales
 			.map((locale) => `import * as ${jsIdentifier(locale)} from "./messages/${locale}.js"`)
 			.join("\n"),
 		"\n",
@@ -64,13 +95,13 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 	const output: Record<string, string> = {
 		".prettierignore": ignoreDirectory,
 		".gitignore": ignoreDirectory,
-		"runtime.js": createRuntime(opts.settings),
+		"runtime.js": createRuntime(settings),
 		"registry.js": createRegistry(),
 		"messages.js": indexFile,
 	}
 
 	// generate message files
-	for (const locale of opts.settings.locales) {
+	for (const locale of settings.locales) {
 		const filename = `messages/${locale}.js`
 		let file = ["/* eslint-disable */", "import * as registry from '../registry.js' "].join("\n")
 
@@ -91,7 +122,7 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 							file += `\nexport { "${escapeForDoubleQuoteString(alias)}" } from "./${fallbackLocale}.js"`
 					}
 				} else {
-					file += `\nexport const ${jsIdentifier(resource.bundle.source.id)} = '${escapeForSingleQuoteString(
+					file += `\nexport const ${jsIdentifier(resource.bundle.source.id)} = () => '${escapeForSingleQuoteString(
 						resource.bundle.source.id
 					)}'`
 					for (const alias of aliases) {
@@ -111,20 +142,91 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 
 		output[filename] = file
 	}
+	return output
+}
 
-	// telemetry
-	const pkgJson = await getPackageJson(fs, process.cwd())
-	const stack = getStackInfo(pkgJson)
-	telemetry.capture(
-		{
-			event: "PARAGLIDE-JS compile executed",
-			properties: { stack },
-		},
-		opts.projectId
-	)
+function generateModuleOutput(
+	resources: Resource[],
+	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
+	fallbackMap: Record<string, string | undefined>
+): Record<string, string> {
+	const output: Record<string, string> = {
+		".prettierignore": ignoreDirectory,
+		".gitignore": ignoreDirectory,
+		"runtime.js": createRuntime(settings),
+		"registry.js": createRegistry(),
+	}
 
-	telemetry.shutdown()
-	return await formatFiles(output)
+	// index messages
+	output["messages.js"] = [
+		"/* eslint-disable */",
+		...resources.map(({ bundle }) => `export * from './messages/index/${bundle.source.id}.js'`),
+	].join("\n")
+
+	for (const resource of resources) {
+		const filename = `messages/index/${resource.bundle.source.id}.js`
+		const code = [
+			"/* eslint-disable */",
+			"import * as registry from '../../registry.js'",
+			settings.locales
+				.map((locale) => `import * as ${jsIdentifier(locale)} from "../${locale}.js"`)
+				.join("\n"),
+			"import { languageTag } from '../../runtime.js'",
+			"",
+			resource.bundle.code,
+		].join("\n")
+		output[filename] = code
+	}
+
+	// generate locales
+	for (const locale of settings.locales) {
+		const messageIndexFile = [
+			"/* eslint-disable */",
+			...resources.map(({ bundle }) => `export * from './${locale}/${bundle.source.id}.js'`),
+		].join("\n")
+		output[`messages/${locale}.js`] = messageIndexFile
+
+		// generate individual message files
+		for (const resource of resources) {
+			let file = ["/* eslint-disable */", "import * as registry from '../../registry.js' "].join(
+				"\n"
+			)
+
+			// Bundle Aliases
+			const aliases = Object.values(resource.bundle.source.alias)
+
+			const compiledMessage = resource.messages[locale]
+			if (!compiledMessage) {
+				// add fallback
+				const fallbackLocale = fallbackMap[locale]
+				if (fallbackLocale) {
+					file += `\nexport { ${jsIdentifier(resource.bundle.source.id)} } from "../${fallbackLocale}.js"`
+					for (const alias of aliases) {
+						if (isValidJSIdentifier(alias))
+							file += `\nexport { ${alias} } from "../${fallbackLocale}.js"`
+						else
+							file += `\nexport { "${escapeForDoubleQuoteString(alias)}" } from "../${fallbackLocale}.js"`
+					}
+				} else {
+					file += `\nexport const ${jsIdentifier(resource.bundle.source.id)} = () => '${escapeForSingleQuoteString(
+						resource.bundle.source.id
+					)}'`
+					for (const alias of aliases) {
+						file += `\nexport {${jsIdentifier(resource.bundle.source.id)} as ${jsIdentifier(alias)} }`
+					}
+				}
+			} else {
+				file += `\n${compiledMessage.code}`
+				file += `\nexport { ${jsIdentifier(compiledMessage.source.id)} as ${resource.bundle.source.id} }`
+				for (const alias of aliases) {
+					file += `\nexport { ${jsIdentifier(compiledMessage.source.id)} as ${jsIdentifier(alias)} }`
+				}
+			}
+
+			output[`messages/${locale}/${resource.bundle.source.id}.js`] = file
+		}
+	}
+	return output
 }
 
 async function formatFiles(files: Record<string, string>): Promise<Record<string, string>> {
