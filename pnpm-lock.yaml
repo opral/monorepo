@@ -1520,6 +1520,9 @@ importers:
       '@inlang/detect-json-formatting':
         specifier: workspace:*
         version: link:../../detect-json-formatting
+      '@inlang/sdk2':
+        specifier: workspace:*
+        version: link:../../sdk2
       commander:
         specifier: 11.1.0
         version: 11.1.0
@@ -1542,12 +1545,6 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(prettier@3.3.3)
     devDependencies:
-      '@inlang/language-tag':
-        specifier: workspace:*
-        version: link:../../versioned-interfaces/language-tag
-      '@inlang/plugin-message-format':
-        specifier: workspace:*
-        version: link:../../plugins/inlang-message-format
       '@inlang/recommend-ninja':
         specifier: workspace:*
         version: link:../../recommendations/recommend-ninja
@@ -1557,9 +1554,6 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
-      '@inlang/sdk2':
-        specifier: workspace:*
-        version: link:../../sdk2
       '@lix-js/client':
         specifier: workspace:*
         version: link:../../../../lix/packages/client
@@ -1575,9 +1569,6 @@ importers:
       '@ts-morph/bootstrap':
         specifier: 0.20.0
         version: 0.20.0
-      '@types/minimist':
-        specifier: 1.2.3
-        version: 1.2.3
       '@types/node':
         specifier: ^20.12.7
         version: 20.14.14
