@@ -35,12 +35,6 @@ test("plugin.loadMessages and plugin.saveMessages must not be condigured togethe
 		},
 	};
 
-	const mockPluginMapping = {
-		"./mock-legacy-module.js": mockLegacyPlugin,
-		"./mock-legacy-module-2.js": mockLegacyPlugin2,
-		"./mock-import-export-plugin.js": mockImportExportPlugin,
-	};
-
 	await expect(
 		(async () => {
 			await loadProjectFromDirectoryInMemory({
@@ -48,11 +42,15 @@ test("plugin.loadMessages and plugin.saveMessages must not be condigured togethe
 					"./project.inlang/settings.json": JSON.stringify({
 						baseLocale: "en",
 						locales: ["en", "de"],
-						modules: ["./mock-legacy-module.js", "./mock-legacy-module-2.js"],
+						modules: [],
 					} satisfies ProjectSettings),
 				}).promises as any,
 				path: "./project.inlang",
-				_mockPlugins: mockPluginMapping,
+				providePlugins: [
+					mockLegacyPlugin,
+					mockLegacyPlugin2,
+					mockImportExportPlugin,
+				],
 			});
 		})()
 	).rejects.toThrowError();
@@ -64,14 +62,15 @@ test("plugin.loadMessages and plugin.saveMessages must not be condigured togethe
 					"./project.inlang/settings.json": JSON.stringify({
 						baseLocale: "en",
 						locales: ["en", "de"],
-						modules: [
-							"./mock-legacy-module.js",
-							"./mock-import-export-plugin.js",
-						],
+						modules: [],
 					} satisfies ProjectSettings),
 				}).promises as any,
 				path: "./project.inlang",
-				_mockPlugins: mockPluginMapping,
+				providePlugins: [
+					mockLegacyPlugin,
+					mockLegacyPlugin2,
+					mockImportExportPlugin,
+				],
 			});
 		})()
 	).rejects.toThrowError();
@@ -145,9 +144,7 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 	const project = await loadProjectFromDirectoryInMemory({
 		fs: fs as any,
 		path: "./project.inlang",
-		_mockPlugins: {
-			"./mock-module.js": mockLegacyPlugin,
-		},
+		providePlugins: [mockLegacyPlugin],
 	});
 
 	const bundles = await selectBundleNested(project.db).execute();

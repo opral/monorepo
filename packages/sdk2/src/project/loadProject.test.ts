@@ -77,27 +77,6 @@ test("get and set settings", async () => {
 	expect(updatedSettings["plugin.key"]).toEqual({ test: "value" });
 });
 
-test("providing mock plugins should be possible", async () => {
-	const project = await loadProjectInMemory({
-		blob: await newProject({
-			settings: {
-				baseLocale: "en",
-				locales: ["en"],
-				modules: ["/my-cool-plugin.js"],
-			},
-		}),
-		_mockPlugins: {
-			"/my-cool-plugin.js": {
-				key: "my-cool-plugin",
-			},
-		},
-	});
-
-	const plugins = project.plugins.get();
-	expect(plugins.length).toBe(1);
-	expect(plugins[0]?.key).toBe("my-cool-plugin");
-	expect(project.errors.get().length).toBe(0);
-});
 
 test("it should set sourceLanguageTag and languageTags if non-existent to make v1 plugins work", async () => {
 	const project = await loadProjectInMemory({
@@ -113,4 +92,22 @@ test("it should set sourceLanguageTag and languageTags if non-existent to make v
 	expect(settings.sourceLanguageTag).toBe("en");
 	expect(settings.languageTags).toEqual(["en", "de"]);
 	expect(settings.locales).toEqual(["en", "de"]);
+});
+
+test("providing plugins should work", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en"],
+				modules: [],
+			},
+		}),
+		providePlugins: [{ key: "my-provided-plugin" }],
+	});
+
+	const plugins = project.plugins.get();
+	expect(plugins.length).toBe(1);
+	expect(plugins[0]?.key).toBe("my-provided-plugin");
+	expect(project.errors.get().length).toBe(0);
 });

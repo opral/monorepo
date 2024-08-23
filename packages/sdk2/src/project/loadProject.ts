@@ -22,13 +22,13 @@ export async function loadProject(args: {
 	sqlite: SqliteDatabase;
 	lix: Lix;
 	/**
-	 * For testing purposes only.
+	 * Provide plugins to the project.
 	 *
-	 * @example
-	 *   const project = await loadProject({ _mockPlugins: { "my-plugin": InlangPlugin } })
-	 *
+	 * This is useful for testing or providing plugins that are
+	 * app specific. Keep in mind that provided plugins
+	 * are not shared with other instances.
 	 */
-	_mockPlugins?: Record<string, InlangPlugin>;
+	providePlugins?: InlangPlugin[];
 	/**
 	 * Function that preprocesses the plugin before importing it.
 	 *
@@ -57,9 +57,12 @@ export async function loadProject(args: {
 
 	const { plugins, errors: pluginErrors } = await importPlugins({
 		settings,
-		mockPlugins: args._mockPlugins,
 		preprocessPluginBeforeImport: args.preprocessPluginBeforeImport,
 	});
+
+	if (args.providePlugins) {
+		plugins.push(...args.providePlugins);
+	}
 
 	const state = await createState({
 		plugins,

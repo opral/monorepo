@@ -13,7 +13,6 @@ export type PreprocessPluginBeforeImportFunction = (
 
 export async function importPlugins(args: {
 	settings: ProjectSettings;
-	mockPlugins?: Record<string, InlangPlugin>;
 	preprocessPluginBeforeImport?: PreprocessPluginBeforeImportFunction;
 }): Promise<{
 	plugins: InlangPlugin[];
@@ -22,11 +21,6 @@ export async function importPlugins(args: {
 	const plugins: InlangPlugin[] = [];
 	const errors: PluginError[] = [];
 	for (const uri of args.settings.modules ?? []) {
-		const mockPlugin = args.mockPlugins?.[uri];
-		if (mockPlugin) {
-			plugins.push(mockPlugin);
-			continue;
-		}
 		try {
 			let moduleAsText = await fetchModuleWithCache(uri);
 			if (args.preprocessPluginBeforeImport) {
