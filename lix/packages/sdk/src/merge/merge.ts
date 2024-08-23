@@ -8,45 +8,45 @@ import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-
  * Combined the changes of the source lix into the target lix.
  */
 export async function merge(args: {
-	target: Lix;
-	source: Lix;
+	targetLix: Lix;
+	sourceLix: Lix;
 	// TODO selectively merge changes
 	// onlyTheseChanges
 }): Promise<void> {
 	// TODO increase performance by using attach mode
 	//      and only get the changes and commits that
 	//      are not in target.
-	const sourceChanges = await args.source.db
+	const sourceChanges = await args.sourceLix.db
 		.selectFrom("change")
 		.selectAll()
 		.execute();
 
 	// TODO increase performance by only getting commits
 	//      that are not in target in the future.
-	const sourceCommits = await args.source.db
+	const sourceCommits = await args.sourceLix.db
 		.selectFrom("commit")
 		.selectAll()
 		.execute();
 
 	// TODO don't query the changes again. inefficient.
 	const leafChangesOnlyInSource = await getLeafChangesOnlyInSource({
-		sourceLix: args.source,
-		targetLix: args.target,
+		sourceLix: args.sourceLix,
+		targetLix: args.targetLix,
 	});
 
 	// 2. Let the plugin detect conflicts
 
-	const plugin = args.source.plugins[0] as LixPlugin;
+	const plugin = args.sourceLix.plugins[0] as LixPlugin;
 
 	// TODO function assumes that all changes belong to the same file
-	if (args.source.plugins.length !== 1) {
+	if (args.sourceLix.plugins.length !== 1) {
 		throw new Error("Unimplemented. Only one plugin is supported for now");
 	} else if (plugin.detectConflicts === undefined) {
 		throw new Error("Plugin does not support conflict detection");
 	}
 	const conflicts = await plugin.detectConflicts({
-		sourceLix: args.source,
-		targetLix: args.target,
+		sourceLix: args.sourceLix,
+		targetLix: args.targetLix,
 		leafChangesOnlyInSource,
 	});
 
@@ -57,7 +57,7 @@ export async function merge(args: {
 			conflicts.every((conflict) => conflict.conflicting_change_id !== c.id),
 	);
 
-	const file = await args.target.db
+	const file = await args.targetLix.db
 		.selectFrom("file")
 		.selectAll()
 		// todo fix changes for one plugin can belong to different files
@@ -81,10 +81,10 @@ export async function merge(args: {
 	const { fileData } = await plugin.applyChanges({
 		changes: nonConflictingLeafChangesInSource,
 		file,
-		lix: args.target,
+		lix: args.targetLix,
 	});
 
-	await args.target.db.transaction().execute(async (trx) => {
+	await args.targetLix.db.transaction().execute(async (trx) => {
 		if (sourceChanges.length > 0) {
 			// 1. copy the changes from source
 			await trx

@@ -6,7 +6,7 @@ import { merge } from "./merge.js";
 import type { Change, Commit, Conflict } from "../schema.js";
 import type { LixPlugin } from "../plugin.js";
 
-test("it should copy changes from the source into the target that do not exist in target yet", async () => {
+test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const mockChanges: Change[] = [
 		{
 			id: "1",
@@ -47,24 +47,24 @@ test("it should copy changes from the source into the target that do not exist i
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
 
-	const source = await openLixInMemory({
+	const sourceLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
 
-	const target = await openLixInMemory({
+	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
 
-	await source.db
+	await sourceLix.db
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[1]!, mockChanges[2]!])
 		.execute();
 
-	await target.db.insertInto("change").values([mockChanges[0]!]).execute();
+	await targetLix.db.insertInto("change").values([mockChanges[0]!]).execute();
 
-	await target.db
+	await targetLix.db
 		.insertInto("file")
 		.values({
 			id: "mock-file",
@@ -73,9 +73,9 @@ test("it should copy changes from the source into the target that do not exist i
 		})
 		.execute();
 
-	await merge({ source, target });
+	await merge({ sourceLix, targetLix });
 
-	const changes = await target.db.selectFrom("change").select("id").execute();
+	const changes = await targetLix.db.selectFrom("change").select("id").execute();
 
 	expect(changes.map((c) => c.id)).toStrictEqual([
 		mockChanges[0]?.id,
@@ -133,27 +133,27 @@ test("it should save change conflicts", async () => {
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
 
-	const source = await openLixInMemory({
+	const sourceLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
 
-	const target = await openLixInMemory({
+	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
 
-	await source.db
+	await sourceLix.db
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[2]!])
 		.execute();
 
-	await target.db
+	await targetLix.db
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.execute();
 
-	await target.db
+	await targetLix.db
 		.insertInto("file")
 		.values({
 			id: "mock-file",
@@ -162,9 +162,9 @@ test("it should save change conflicts", async () => {
 		})
 		.execute();
 
-	await merge({ source, target });
+	await merge({ sourceLix, targetLix });
 
-	const conflicts = await target.db
+	const conflicts = await targetLix.db
 		.selectFrom("conflict")
 		.select(["change_id", "conflicting_change_id"])
 		.execute();
@@ -189,8 +189,8 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 		},
 	];
 
-	const changesOnlyInTarget: Change[] = [];
-	const changesOnlyInSource: Change[] = [
+	const changesOnlyInTargetLix: Change[] = [];
+	const changesOnlyInSourceLix: Change[] = [
 		{
 			id: "2",
 			operation: "update",
@@ -202,7 +202,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 		},
 	];
 
-	const mockPluginInSource: LixPlugin = {
+	const mockPluginInSourceLix: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
@@ -212,7 +212,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
 
-	const mockPluginInTarget: LixPlugin = {
+	const mockPluginInTargetLix: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
@@ -222,27 +222,27 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
 
-	const source = await openLixInMemory({
+	const sourceLix = await openLixInMemory({
 		blob: await newLixFile(),
-		providePlugins: [mockPluginInSource],
+		providePlugins: [mockPluginInSourceLix],
 	});
 
-	const target = await openLixInMemory({
+	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
-		providePlugins: [mockPluginInTarget],
+		providePlugins: [mockPluginInTargetLix],
 	});
 
-	await source.db
+	await sourceLix.db
 		.insertInto("change")
-		.values([...commonChanges, ...changesOnlyInSource])
+		.values([...commonChanges, ...changesOnlyInSourceLix])
 		.execute();
 
-	await target.db
+	await targetLix.db
 		.insertInto("change")
-		.values([...commonChanges, ...changesOnlyInTarget])
+		.values([...commonChanges, ...changesOnlyInTargetLix])
 		.execute();
 
-	await target.db
+	await targetLix.db
 		.insertInto("file")
 		.values({
 			id: "mock-file",
@@ -251,11 +251,11 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 		})
 		.execute();
 
-	await merge({ source, target });
+	await merge({ sourceLix, targetLix });
 
-	expect(mockPluginInSource.diff.file).toHaveBeenCalledTimes(0);
+	expect(mockPluginInSourceLix.diff.file).toHaveBeenCalledTimes(0);
 	// once for the mock file insert
-	expect(mockPluginInTarget.diff.file).toHaveBeenCalledTimes(1);
+	expect(mockPluginInTargetLix.diff.file).toHaveBeenCalledTimes(1);
 });
 
 test("it should apply changes that are not conflicting", async () => {
@@ -304,24 +304,24 @@ test("it should apply changes that are not conflicting", async () => {
 		}),
 	};
 
-	const source = await openLixInMemory({
+	const sourceLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
 
-	const target = await openLixInMemory({
+	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
 
-	await source.db
+	await sourceLix.db
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.execute();
 
-	await target.db.insertInto("change").values([mockChanges[0]!]).execute();
+	await targetLix.db.insertInto("change").values([mockChanges[0]!]).execute();
 
-	await target.db
+	await targetLix.db
 		.insertInto("file")
 		.values({
 			id: "mock-file",
@@ -330,15 +330,15 @@ test("it should apply changes that are not conflicting", async () => {
 		})
 		.execute();
 
-	await merge({ source, target });
+	await merge({ sourceLix, targetLix });
 
-	const changes = await target.db.selectFrom("change").selectAll().execute();
-	const conflicts = await target.db
+	const changes = await targetLix.db.selectFrom("change").selectAll().execute();
+	const conflicts = await targetLix.db
 		.selectFrom("conflict")
 		.selectAll()
 		.execute();
 
-	const file = await target.db
+	const file = await targetLix.db
 		.selectFrom("file")
 		.selectAll()
 		.executeTakeFirstOrThrow();
@@ -365,8 +365,8 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 			plugin_key: "mock-plugin",
 		},
 	];
-	const changesOnlyInTarget: Change[] = [];
-	const changesOnlyInSource: Change[] = [
+	const changesOnlyInTargetLix: Change[] = [];
+	const changesOnlyInSourceLix: Change[] = [
 		{
 			id: "2",
 			operation: "update",
@@ -387,33 +387,33 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 		detectConflicts: vi.fn().mockResolvedValue([
 			{
 				change_id: commonChanges[0]!.id,
-				conflicting_change_id: changesOnlyInSource[0]!.id,
+				conflicting_change_id: changesOnlyInSourceLix[0]!.id,
 			} satisfies Conflict,
 		]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
 
-	const source = await openLixInMemory({
+	const sourceLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
 
-	const target = await openLixInMemory({
+	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
 
-	await source.db
+	await sourceLix.db
 		.insertInto("change")
-		.values([...commonChanges, ...changesOnlyInSource])
+		.values([...commonChanges, ...changesOnlyInSourceLix])
 		.execute();
 
-	await target.db
+	await targetLix.db
 		.insertInto("change")
-		.values([...commonChanges, ...changesOnlyInTarget])
+		.values([...commonChanges, ...changesOnlyInTargetLix])
 		.execute();
 
-	await target.db
+	await targetLix.db
 		.insertInto("file")
 		.values({
 			id: "mock-file",
@@ -422,11 +422,11 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 		})
 		.execute();
 
-	await merge({ source, target });
+	await merge({ sourceLix, targetLix });
 
-	const changes = await target.db.selectFrom("change").selectAll().execute();
+	const changes = await targetLix.db.selectFrom("change").selectAll().execute();
 
-	const conflicts = await target.db
+	const conflicts = await targetLix.db
 		.selectFrom("conflict")
 		.selectAll()
 		.execute();
@@ -434,14 +434,14 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 	expect(changes.length).toBe(2);
 	expect(conflicts.length).toBe(1);
 
-	await merge({ source, target });
+	await merge({ sourceLix, targetLix });
 
-	const changesAfterSecondMerge = await target.db
+	const changesAfterSecondMerge = await targetLix.db
 		.selectFrom("change")
 		.selectAll()
 		.execute();
 
-	const conflictsAfterSecondMerge = await target.db
+	const conflictsAfterSecondMerge = await targetLix.db
 		.selectFrom("conflict")
 		.selectAll()
 		.execute();
@@ -450,8 +450,8 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 	expect(conflictsAfterSecondMerge.length).toBe(1);
 });
 
-test("it should naively copy changes from the source into the target that do not exist in target yet", async () => {
-	const changesOnlyInSource: Change[] = [
+test("it should naively copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
+	const changesOnlyInSourceLix: Change[] = [
 		{
 			id: "2",
 			operation: "update",
@@ -464,7 +464,7 @@ test("it should naively copy changes from the source into the target that do not
 		},
 	];
 
-	const commitsOnlyInSource: Commit[] = [
+	const commitsOnlyInSourceLix: Commit[] = [
 		{
 			id: "commit-1",
 			description: "",
@@ -483,29 +483,29 @@ test("it should naively copy changes from the source into the target that do not
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
 
-	const source = await openLixInMemory({
+	const sourceLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
 
-	const target = await openLixInMemory({
+	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
 
-	await target.db
+	await targetLix.db
 		.insertInto("file")
 		.values({ id: "mock-file", path: "", data: new Uint8Array() })
 		.execute();
 
-	await source.db.insertInto("change").values(changesOnlyInSource).execute();
+	await sourceLix.db.insertInto("change").values(changesOnlyInSourceLix).execute();
 
-	await source.db.insertInto("commit").values(commitsOnlyInSource).execute();
+	await sourceLix.db.insertInto("commit").values(commitsOnlyInSourceLix).execute();
 
-	await merge({ source, target });
+	await merge({ sourceLix, targetLix });
 
-	const changes = await target.db.selectFrom("change").selectAll().execute();
-	const commits = await target.db.selectFrom("commit").selectAll().execute();
+	const changes = await targetLix.db.selectFrom("change").selectAll().execute();
+	const commits = await targetLix.db.selectFrom("commit").selectAll().execute();
 
 	expect(changes.length).toBe(1);
 	expect(commits.length).toBe(1);
