@@ -27,6 +27,10 @@
     border: 1px solid #DA2728;
 }
 
+.conflict-pattern .inlang-pattern-editor-contenteditable{
+    background-color: #FAFAFA;
+}
+
 .hide-new-variant::part(new-variant) {
     display: none;
 }

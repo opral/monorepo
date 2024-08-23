@@ -97,7 +97,7 @@ const NavItem = (props: {
 							"ml-2 text-xs!  h-5 rounded flex items-center px-2 font-medium",
 							conflicts.length === 0
 								? "text-zinc-700 bg-zinc-300"
-								: "text-blue-700 bg-blue-200"
+								: "text-red-700 bg-red-200"
 						)}
 					>
 						{conflicts.length}
