@@ -358,8 +358,8 @@ const MergeButton = () => {
 					);
 					const writable = await fileHandle.createWritable();
 					await merge({
-						source: incoming.lix,
-						target: project!.lix,
+						sourceLix: incoming.lix,
+						targetLix: project!.lix,
 					});
 					const mergedBlob = await project!.toBlob();
 					await writable.write(mergedBlob);

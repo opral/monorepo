@@ -116,7 +116,7 @@ test("it should update the variant to the source's value", async () => {
 		.values([...commonChanges, ...changesOnlyInTarget])
 		.execute();
 
-	await merge({ source: source.lix, target: target.lix });
+	await merge({ sourceLix: source.lix, targetLix: target.lix });
 
 	await target.lix.settled();
 
