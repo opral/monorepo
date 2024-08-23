@@ -122,7 +122,7 @@ function generateRegularOutput(
 							file += `\nexport { "${escapeForDoubleQuoteString(alias)}" } from "./${fallbackLocale}.js"`
 					}
 				} else {
-					file += `\nexport const ${jsIdentifier(resource.bundle.source.id)} = '${escapeForSingleQuoteString(
+					file += `\nexport const ${jsIdentifier(resource.bundle.source.id)} = () => '${escapeForSingleQuoteString(
 						resource.bundle.source.id
 					)}'`
 					for (const alias of aliases) {
@@ -168,6 +168,9 @@ function generateModuleOutput(
 		const code = [
 			"/* eslint-disable */",
 			"import * as registry from '../../registry.js'",
+			settings.locales
+				.map((locale) => `import * as ${jsIdentifier(locale)} from "../${locale}.js"`)
+				.join("\n"),
 			"import { languageTag } from '../../runtime.js'",
 			"",
 			resource.bundle.code,
@@ -197,15 +200,15 @@ function generateModuleOutput(
 				// add fallback
 				const fallbackLocale = fallbackMap[locale]
 				if (fallbackLocale) {
-					file += `\nexport { ${jsIdentifier(resource.bundle.source.id)} } from "./${fallbackLocale}.js"`
+					file += `\nexport { ${jsIdentifier(resource.bundle.source.id)} } from "../${fallbackLocale}.js"`
 					for (const alias of aliases) {
 						if (isValidJSIdentifier(alias))
-							file += `\nexport { ${alias} } from "./${fallbackLocale}.js"`
+							file += `\nexport { ${alias} } from "../${fallbackLocale}.js"`
 						else
-							file += `\nexport { "${escapeForDoubleQuoteString(alias)}" } from "./${fallbackLocale}.js"`
+							file += `\nexport { "${escapeForDoubleQuoteString(alias)}" } from "../${fallbackLocale}.js"`
 					}
 				} else {
-					file += `\nexport const ${jsIdentifier(resource.bundle.source.id)} = '${escapeForSingleQuoteString(
+					file += `\nexport const ${jsIdentifier(resource.bundle.source.id)} = () => '${escapeForSingleQuoteString(
 						resource.bundle.source.id
 					)}'`
 					for (const alias of aliases) {

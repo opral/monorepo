@@ -55,4 +55,5 @@ export const compileCommand2 = new Command()
 		})
 
 		logger.info("Successfully compiled the project.")
+		process.exit(0)
 	})
