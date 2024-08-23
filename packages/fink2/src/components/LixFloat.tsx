@@ -1,21 +1,22 @@
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { Link } from "react-router-dom";
-import { pendingChangesAtom, projectAtom, selectedProjectPathAtom } from "../state.ts";
+import { bundlesNestedAtom, pendingChangesAtom, projectAtom, selectedProjectPathAtom } from "../state.ts";
 import { useAtom } from "jotai";
 import clsx from "clsx";
 import { handleDownload } from "../helper/utils.ts";
 import { useEffect, useState } from "react";
 
 const LixFloat = () => {
-  const [pendingChanges] = useAtom(pendingChangesAtom);
   const [project] = useAtom(projectAtom);
   const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
+  const [bundlesNested] = useAtom(bundlesNestedAtom)
+  const [pendingChanges] = useAtom(pendingChangesAtom);
 
   const [pendingChangesWasEmpty, setPendingChangesWasEmpty] = useState(pendingChanges.length === 0);
 
   // SlideOut Animation for the LixFloat
   useEffect(() => {
-    if (pendingChanges.length === 0 && !pendingChangesWasEmpty) {
+    if (pendingChanges.length === 0 && !pendingChangesWasEmpty && bundlesNested.length > 0) {
       const lixfloat = document.querySelector(".lixfloat")
       lixfloat?.classList.remove("opacity-0")
       lixfloat?.classList.add("animate-slideOut")

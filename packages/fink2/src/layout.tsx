@@ -199,10 +199,6 @@ export const CreateProjectDialog = (props: {
 					setFileName(e.target.value ? e.target.value + ".inlang" : "")
 				}
 			></SlInput>
-			<div className="mt-6 p-4 text-slate-600 bg-slate-200 border border-slate-600 rounded text-[14px]!">
-				<span className="font-semibold">Info:</span> Demo data will be imported
-				automatically until we can import your own data.
-			</div>
 			<SlButton
 				loading={loading}
 				variant="primary"
