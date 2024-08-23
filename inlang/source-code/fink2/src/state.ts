@@ -8,6 +8,11 @@ export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	undefined
 );
 
+export const authorNameAtom = atomWithStorage<string | undefined>(
+	"author-name",
+	undefined
+);
+
 let safeProjectToOpfsInterval: number;
 
 /**

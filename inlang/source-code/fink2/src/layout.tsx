@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAtom } from "jotai";
 import {
+	authorNameAtom,
 	forceReloadProjectAtom,
 	projectAtom,
 	selectedProjectPathAtom,
@@ -31,6 +32,16 @@ export default function Layout(props: { children: React.ReactNode }) {
 		return () => clearInterval(interval);
 	});
 
+	const [authorName] = useAtom(authorNameAtom);
+	const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
+	const [showAuthorDialog, setShowAuthorDialog] = useState(false);
+
+	useEffect(() => {
+		if (selectedProjectPath && !authorName) {
+			setShowAuthorDialog(true);
+		}
+	}, [authorName, selectedProjectPath]);
+
 	return (
 		<div className="w-full min-h-screen bg-zinc-50">
 			<div className="bg-white border-b border-zinc-200">
@@ -40,6 +51,10 @@ export default function Layout(props: { children: React.ReactNode }) {
 				</Grid>
 			</div>
 			{props.children}
+			<UserAuthDialog
+				showAuthorDialog={showAuthorDialog}
+				setShowAuthorDialog={setShowAuthorDialog}
+			/>
 		</div>
 	);
 }
@@ -65,6 +80,52 @@ const MenuBar = () => {
 				</div>
 			</div>
 		</>
+	);
+};
+
+const UserAuthDialog = (props: {
+	showAuthorDialog: boolean;
+	setShowAuthorDialog: (value: boolean) => void;
+}) => {
+	const [author, setAuthor] = useState("");
+	const [, setAuthorName] = useAtom(authorNameAtom);
+
+	const handleSetAuthor = async () => {
+		setAuthorName(author);
+		props.setShowAuthorDialog(false);
+	};
+
+	return (
+		<SlDialog
+			open={props.showAuthorDialog}
+			onSlRequestClose={() => props.setShowAuthorDialog(false)}
+			noHeader
+		>
+			<h2 className="text-lg font-medium pb-2">Set author information</h2>
+			<p className="text-sm leading-[1.5]! max-w-[400px] pb-4 text-zinc-500">
+				Your author name is appended to your changes and is visible in the
+				project history.
+			</p>
+			<img
+				src="./../assets/setAuthor.png"
+				alt="set author image"
+				className="rounded-lg pb-8"
+			/>
+			<SlInput
+				label="Username"
+				placeholder="Max Mustermann"
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				onInput={(e: any) => setAuthor(e.target.value)}
+			></SlInput>
+			<SlButton
+				variant="primary"
+				slot="footer"
+				onClick={handleSetAuthor}
+				className="w-full"
+			>
+				Save
+			</SlButton>
+		</SlDialog>
 	);
 };
 
