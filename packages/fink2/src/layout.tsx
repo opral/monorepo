@@ -199,8 +199,8 @@ const SelectProject = () => {
 							</svg>
 						</div>
 						<SlMenu>
-							{existingProjects.map((name) => (
-								<SlMenuItem>
+							{existingProjects.map((name, index) => (
+								<SlMenuItem key={index}>
 									<p
 										className="py-2"
 										onClick={() => setSelectedProjectPath(name)}
