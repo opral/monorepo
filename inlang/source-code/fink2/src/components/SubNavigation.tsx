@@ -9,14 +9,14 @@ const data: { path: string; name: string }[] = [
 		name: "Edit",
 	},
 	{
-		path: "/history",
-		name: "History",
-	},
-	{
 		path: "/changes",
 		name: "Changes",
 	},
 	{ path: "/conflicts", name: "Conflicts" },
+	{
+		path: "/history",
+		name: "History",
+	},
 ];
 
 const SubNavigation = () => {
