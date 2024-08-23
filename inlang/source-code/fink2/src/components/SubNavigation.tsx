@@ -9,6 +9,10 @@ const data: { path: string; name: string }[] = [
 		name: "Edit",
 	},
 	{
+		path: "/history",
+		name: "History",
+	},
+	{
 		path: "/changes",
 		name: "Changes",
 	},
@@ -17,42 +21,42 @@ const data: { path: string; name: string }[] = [
 
 const SubNavigation = () => {
 	const [pendingChanges] = useAtom(pendingChangesAtom);
-    const [conflicts] = useAtom(conflictsAtom);
+	const [conflicts] = useAtom(conflictsAtom);
 
-		return (
-			<div className="flex px-[2px] gap-3 items-center -mb-[1px] -ml-[6px]">
-				{data.map((item) => {
-					if (item.path === "/conflicts" && conflicts.length > 0) {
-						return (
-							<NavItem
-								key={item.path}
-								path={item.path}
-								name={item.name}
-								numUncommittedChanges={pendingChanges.length}
-							/>
-						);
-					} else if (item.path === "/changes" && pendingChanges.length > 0) {
-						return (
-							<NavItem
-								key={item.path}
-								path={item.path}
-								name={item.name}
-								numUncommittedChanges={pendingChanges.length}
-							/>
-						);
-					} else if (item.path === "/") {
-						return (
-							<NavItem
-								key={item.path}
-								path={item.path}
-								name={item.name}
-								numUncommittedChanges={pendingChanges.length}
-							/>
-						);
-					}
-				})}
-			</div>
-		);
+	return (
+		<div className="flex px-[2px] gap-3 items-center -mb-[1px] -ml-[6px]">
+			{data.map((item) => {
+				if (item.path === "/conflicts" && conflicts.length > 0) {
+					return (
+						<NavItem
+							key={item.path}
+							path={item.path}
+							name={item.name}
+							numUncommittedChanges={pendingChanges.length}
+						/>
+					);
+				} else if (item.path === "/changes" && pendingChanges.length > 0) {
+					return (
+						<NavItem
+							key={item.path}
+							path={item.path}
+							name={item.name}
+							numUncommittedChanges={pendingChanges.length}
+						/>
+					);
+				} else if (item.path === "/" || item.path === "/history") {
+					return (
+						<NavItem
+							key={item.path}
+							path={item.path}
+							name={item.name}
+							numUncommittedChanges={pendingChanges.length}
+						/>
+					);
+				}
+			})}
+		</div>
+	);
 };
 
 export default SubNavigation;
