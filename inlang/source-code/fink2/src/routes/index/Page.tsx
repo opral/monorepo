@@ -80,9 +80,10 @@ export default function App() {
 					)}
 					{(!project || !selectedProjectPath) && <NoProjectView />}
 					{project && selectedProjectPath && bundlesNested.length === 0 && (
-						<div className="h-96 flex flex-col justify-center items-center gap-6">
-							<h2 className="text-xl font-bold">Empty project</h2>
-							<p className="text-gray-500 text-lg">
+						<div className="h-full mx-auto max-w-md flex flex-col justify-center items-center gap-8 bg-white border-zinc-400 p-8 rounded shadow-2xl">
+							<img className="max-w-80 rounded" src="/empty-project-image.png" />
+							{/* <h2 className="text-xl font-bold">Empty project</h2> */}
+							<p className="max-w-80 text-gray-500">
 								Create new bundles or import demo data to get started.
 							</p>
 							<SlButton
