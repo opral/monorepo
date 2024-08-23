@@ -66,7 +66,7 @@ export const Grid = (props: { children: React.ReactNode }) => {
 const MenuBar = () => {
 	return (
 		<>
-			<div className="relative flex gap-2 mb-4 mt-3 justify-between items-center">
+			<div className="relative flex gap-2 mb-4 pt-3 justify-between items-center">
 				<div className="flex gap-4 items-center">
 					<AppMenu />
 					<p className="text-zinc-300 text-[16px]!">{"/"}</p>
