@@ -66,7 +66,7 @@ export default function App() {
 									New bundle
 								</SlButton>
 							</div>
-							<div className="pb-8">
+							<div>
 								{bundlesNested.length > 0 &&
 									bundlesNested.map((bundle) => (
 										<InlangBundle
