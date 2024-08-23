@@ -66,7 +66,7 @@ export default function App() {
 									New bundle
 								</SlButton>
 							</div> */}
-							<div>
+							<div className="mt-8">
 								{bundlesNested.length > 0 &&
 									bundlesNested.map((bundle) => (
 										<InlangBundle
