@@ -5,7 +5,6 @@ import * as nodePath from "node:path"
 import nodeFsPromises from "node:fs/promises"
 import { telemetry } from "~/services/telemetry/implementation.js"
 import { Logger } from "~/services/logger/index.js"
-import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import { findPackageJson } from "~/services/environment/package.js"
 import { checkForUncommittedChanges } from "~/cli/steps/check-for-uncomitted-changes.js"
 import { initializeInlangProject } from "~/cli/steps/initialize-inlang-project.js"
@@ -13,26 +12,13 @@ import { maybeAddSherlock } from "~/cli/steps/maybe-add-sherlock.js"
 import { maybeChangeTsConfig } from "~/cli/steps/update-ts-config.js"
 import { promptForOutdir } from "~/cli/steps/prompt-for-outdir.js"
 import { updatePackageJson } from "~/cli/steps/update-package-json.js"
-import { runCompiler } from "~/cli/steps/run-compiler.js"
+import { runCompiler } from "~/cli/steps/run-compiler2.js"
 import type { CliStep } from "../../utils.js"
-import { maybeAddNinja } from "~/cli/steps.js"
 
-export const initCommand = new Command()
+export const initCommand2 = new Command()
 	.name("init")
 	.summary("Initializes inlang Paraglide-JS.")
 	.action(async () => {
-		const repoRoot = await findRepoRoot({
-			nodeishFs: nodeFsPromises,
-			path: process.cwd(),
-		})
-
-		// We are risking that there is no git repo. As long as we only use FS features and no Git features
-		// from the SDK we should be fine.
-		// Basic operations like `loadProject` should always work without a repo since it's used in CI.
-		const repo = await openRepository(repoRoot ?? "file://" + process.cwd(), {
-			nodeishFs: nodeFsPromises,
-		})
-
 		const logger = new Logger({ silent: false, prefix: false })
 
 		logger.box("Welcome to inlang Paraglide-JS 🪂")
@@ -40,13 +26,10 @@ export const initCommand = new Command()
 
 		const ctx = {
 			logger,
-			repo,
-			repoRoot: repoRoot?.replace("file://", "") ?? process.cwd(),
 			appId: PARJS_MARKTEPLACE_ID,
 		} as const
 
-		const ctx1 = await checkForUncommittedChanges(ctx)
-		const ctx2 = await enforcePackageJsonExists(ctx1)
+		const ctx2 = await enforcePackageJsonExists(ctx)
 		const ctx3 = await initializeInlangProject(ctx2)
 		const ctx4 = await promptForOutdir(ctx3)
 		telemetry.capture({ event: "PARAGLIDE-JS init project initialized" })
@@ -56,10 +39,9 @@ export const initCommand = new Command()
 		telemetry.capture({ event: "PARAGLIDE-JS init added compile commands" })
 		const ctx7 = await maybeChangeTsConfig(ctx6)
 		const ctx8 = await maybeAddSherlock(ctx7)
-		const ctx9 = await maybeAddNinja(ctx8)
 
 		try {
-			await runCompiler(ctx9)
+			await runCompiler(ctx8)
 			ctx.logger.success("Run paraglide compiler")
 		} catch (e) {
 			ctx.logger.warn(
