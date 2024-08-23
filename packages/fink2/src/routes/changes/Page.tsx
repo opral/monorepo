@@ -2,6 +2,7 @@ import {
 	pendingChangesAtom,
 	projectAtom,
 	bundlesNestedAtom,
+	authorNameAtom,
 } from "../../state.ts";
 import { atom, useAtom } from "jotai";
 import Layout, { Grid } from "../../layout.tsx";
@@ -33,16 +34,20 @@ export default function App() {
 	const [project] = useAtom(projectAtom);
 	const [pendingChanges] = useAtom(pendingChangesAtom);
 	const [bundlesWithChanges] = useAtom(bundleIdsWithPendingChangesAtom);
-	const [commitAuthor, setCommitAuthor] = useState<string>("");
 	const [commitDescription, setCommitDescription] = useState<string>("");
 	const [showDialog, setShowDialog] = useState(false);
 	const navigate = useNavigate();
+	const [author] = useAtom(authorNameAtom);
 
 	const handleCommit = async () => {
-		await project?.lix.commit({
-			userId: commitAuthor,
-			description: commitDescription,
-		});
+		if (author) {
+			await project?.lix.commit({
+				userId: author,
+				description: commitDescription,
+			});
+		} else {
+			console.error("Author not set");
+		}
 	};
 
 	useEffect(() => {
@@ -93,14 +98,6 @@ export default function App() {
 									}}
 								>
 									<div className="flex flex-col gap-4">
-										<SlInput
-											required
-											label="Author"
-											helpText="Enter your name"
-											placeholder="Max Mustermann"
-											// eslint-disable-next-line @typescript-eslint/no-explicit-any
-											onInput={(e: any) => setCommitAuthor(e.target.value)}
-										></SlInput>
 										<SlInput
 											required
 											label="Description"
