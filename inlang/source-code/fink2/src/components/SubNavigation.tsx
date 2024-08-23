@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import clsx from "clsx";
-import { conflictsAtom, pendingChangesAtom } from "../state.ts";
+import { commitsAtom, conflictsAtom, pendingChangesAtom } from "../state.ts";
 import { useAtom } from "jotai";
 
 const data: { path: string; name: string }[] = [
@@ -22,6 +22,7 @@ const data: { path: string; name: string }[] = [
 const SubNavigation = () => {
 	const [pendingChanges] = useAtom(pendingChangesAtom);
 	const [conflicts] = useAtom(conflictsAtom);
+	const [commits] = useAtom(commitsAtom)
 
 	return (
 		<div className="flex px-[2px] gap-3 items-center -mb-[1px] -ml-[6px]">
@@ -44,7 +45,16 @@ const SubNavigation = () => {
 							numUncommittedChanges={pendingChanges.length}
 						/>
 					);
-				} else if (item.path === "/" || item.path === "/history") {
+				} else if (item.path === "/history" && commits.length > 0) {
+					return (
+						<NavItem
+							key={item.path}
+							path={item.path}
+							name={item.name}
+							numUncommittedChanges={pendingChanges.length}
+						/>
+					);
+				} else if (item.path === "/") {
 					return (
 						<NavItem
 							key={item.path}
