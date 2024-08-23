@@ -32,7 +32,7 @@ export default function App() {
 								<div className="w-5 h-5 bg-zinc-100 flex items-center justify-center rounded-full ml-4">
 									<div className="w-2 h-2 bg-zinc-700 rounded-full"></div>
 								</div>
-								<div className="flex-1 flex gap-2 items-center justify-between px-4 py-3 rounded h-[46px]">
+								<div className="flex-1 flex gap-2 items-center justify-between pr-4 py-3 rounded h-[46px]">
 									<div className="flex gap-2 items-center">
 										<p className="text-zinc-950 text-sm! font-semibold">
 											By {commit.user_id}
