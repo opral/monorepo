@@ -3514,6 +3514,9 @@ importers:
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
+      '@vitest/coverage-v8':
+        specifier: ^2.0.5
+        version: 2.0.5(vitest@2.0.5)
       papaparse:
         specifier: ^5.4.1
         version: 5.4.1

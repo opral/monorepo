@@ -8,7 +8,7 @@
 	},
 	"scripts": {
 		"build": "tsc --build",
-		"test": "tsc --noEmit && vitest run",
+		"test": "tsc --noEmit && vitest run --coverage",
 		"test:watch": "vitest",
 		"dev": "tsc --watch",
 		"format": "prettier ./src --write"
@@ -23,6 +23,7 @@
 	"devDependencies": {
 		"@types/papaparse": "^5.3.14",
 		"@types/uuid": "^10.0.0",
+		"@vitest/coverage-v8": "^2.0.5",
 		"papaparse": "^5.4.1",
 		"typescript": "^5.5.4",
 		"vitest": "^2.0.5"
