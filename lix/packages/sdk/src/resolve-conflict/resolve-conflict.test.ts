@@ -6,7 +6,7 @@ import { resolveConflict } from "./resolve-conflict.js";
 import type { Change } from "../schema.js";
 import type { LixPlugin } from "../plugin.js";
 
-test("it should resolve a conflict and apply the change", async () => {
+test("it should resolve a conflict by applying the change and mark the conflict as resolved with the applied change", async () => {
 	const mockChanges: Change[] = [
 		{
 			id: "change1",
@@ -90,10 +90,25 @@ test("it should resolve a conflict and apply the change", async () => {
 		.executeTakeFirstOrThrow();
 
 	const parsed = new TextDecoder().decode(fileAfterResolve.data);
-	console.log(parsed);
-
-	await lix.settled();
 
 	expect(parsed).toBe(mockChanges[0]!.value);
 	expect(resolvedConflict.resolved_with_change_id).toBe(changes[0]!.id);
 });
+
+test.todo(
+	"resolving a conflict should throw if the change to resolve with is not a direct child of the conflicting changes",
+);
+
+test.todo(
+	"resolving a conflict should throw if the change to resolve with does not belong to the same file as the conflicting changes",
+);
+
+test.todo(
+	"resolving a conflict should throw if the plugin does not support applying changes",
+);
+
+test.todo("resolving a conflict should throw if the file does not exist");
+
+test.todo(
+	"resolving a conflict with multiple conflicting changes should resolve all conflicts",
+);

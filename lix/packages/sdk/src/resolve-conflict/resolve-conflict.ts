@@ -81,7 +81,7 @@ export async function resolveConflict(args: {
 
 	await args.lix.db.transaction().execute(async (trx) => {
 		await trx
-			.updateTable("file_internal")
+			.updateTable("file")
 			.set("data", fileData)
 			.where("id", "=", args.resolveWithChange.file_id)
 			.execute();
