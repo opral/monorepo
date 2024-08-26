@@ -249,6 +249,7 @@
 		"@lix-js/fs": "workspace:*",
 		"@vitest/coverage-v8": "0.34.6",
 		"comlink": "^4.4.1",
+		"fast-glob": "^3.2.12",
 		"https-proxy-agent": "7.0.2",
 		"lit-html": "^3.1.2",
 		"require-from-string": "^2.0.2",
