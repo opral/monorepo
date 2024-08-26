@@ -9,7 +9,6 @@ import { messagePreview } from "./decorations/messagePreview.js"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { errorView } from "./utilities/errors/errors.js"
 import { messageView } from "./utilities/messages/messages.js"
-import { listProjects } from "@inlang/sdk2"
 import { createFileSystemMapper } from "./utilities/fs/createFileSystemMapper.js"
 import fs from "node:fs/promises"
 import { normalizePath } from "@lix-js/fs"
@@ -19,6 +18,7 @@ import { recommendationBannerView } from "./utilities/recommendation/recommendat
 import { telemetry } from "./services/telemetry/implementation.js"
 import { version } from "../package.json"
 import { statusBar } from "./utilities/settings/statusBar.js"
+import fg from "fast-glob"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
@@ -48,11 +48,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		const mappedFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)
 
 		try {
-			// TODO: Move listProject to sdk v2 because its needed in the extension
-			const projectsList = await listProjects({
-				fs: mappedFs,
-				from: normalizePath(workspaceFolder.uri.fsPath),
-			})
+			const projectsList = (await fg.async("*.inlang", { onlyDirectories: true })).map(
+				(project) => ({
+					projectPath: project,
+				})
+			)
 			setState({ ...state(), projectsInWorkspace: projectsList })
 		} catch (error) {
 			handleError(error)
