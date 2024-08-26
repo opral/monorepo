@@ -77,9 +77,9 @@ export function generateBranches(
 				}
 
 				const fnName = {
-					[TYPE.time]: "time",
+					[TYPE.time]: "datetime",
 					[TYPE.number]: "number",
-					[TYPE.date]: "date",
+					[TYPE.date]: "datetime",
 				} as const
 
 				for (const branch of branches) {
