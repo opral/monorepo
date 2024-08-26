@@ -2,7 +2,7 @@ import type { Pattern } from "@inlang/sdk2"
 import { escapeForTemplateLiteral } from "../services/codegen/escape.js"
 import { backtick } from "../services/codegen/quotes.js"
 import { compileExpression } from "./compileExpression.js"
-import type { Compilation } from "./types.js"
+import { mergeTypeRestrictions, type Compilation } from "./types.js"
 import type { Registry } from "./registry.js"
 
 /**
@@ -34,6 +34,9 @@ export const compilePattern = (
 	})
 	const code = backtick(compiledPatternElements.map((res) => res.code).join(""))
 
-	const typeRestrictions: Record<string, string> = {}
+	const typeRestrictions: Record<string, string> = compiledPatternElements
+		.map((el) => el.typeRestrictions)
+		.reduce(mergeTypeRestrictions, {})
+
 	return { code, typeRestrictions, source: pattern }
 }

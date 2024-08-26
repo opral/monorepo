@@ -60,8 +60,9 @@ function compileArg(arg: Expression["arg"]): string {
 		case "literal":
 			return `"${escapeForDoubleQuoteString(arg.name)}"`
 		case "variable": {
-			const escaped = !isValidJSIdentifier(arg.name)
-			return escaped ? `inputs['${escapeForSingleQuoteString(arg.name)}']` : `inputs.${arg.name}`
+			return !isValidJSIdentifier(arg.name)
+				? `inputs['${escapeForSingleQuoteString(arg.name)}']`
+				: `inputs.${arg.name}`
 		}
 	}
 }

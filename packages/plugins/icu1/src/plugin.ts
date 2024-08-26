@@ -48,6 +48,7 @@ export const plugin = {
 
 				for (const [key, value] of Object.entries(json)) {
 					if (typeof value !== "string") continue
+					if (key === "$schema") continue
 					const message = createMessage({
 						messageSource: value,
 						bundleId: key,
