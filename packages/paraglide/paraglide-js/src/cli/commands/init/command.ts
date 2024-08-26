@@ -36,7 +36,10 @@ export const initCommand = new Command()
 		const logger = new Logger({ silent: false, prefix: false })
 
 		logger.box("Welcome to inlang Paraglide-JS 🪂")
-		telemetry.capture({ event: "PARAGLIDE-JS init started" })
+		telemetry.capture({
+			event: "PARAGLIDE-JS init started",
+			properties: { version: PARJS_PACKAGE_VERSION },
+		})
 
 		const ctx = {
 			logger,
@@ -49,11 +52,20 @@ export const initCommand = new Command()
 		const ctx2 = await enforcePackageJsonExists(ctx1)
 		const ctx3 = await initializeInlangProject(ctx2)
 		const ctx4 = await promptForOutdir(ctx3)
-		telemetry.capture({ event: "PARAGLIDE-JS init project initialized" })
+		telemetry.capture({
+			event: "PARAGLIDE-JS init project initialized",
+			properties: { version: PARJS_PACKAGE_VERSION },
+		})
 		const ctx5 = await addParaglideJsToDevDependencies(ctx4)
-		telemetry.capture({ event: "PARAGLIDE-JS init added to devDependencies" })
+		telemetry.capture({
+			event: "PARAGLIDE-JS init added to devDependencies",
+			properties: { version: PARJS_PACKAGE_VERSION },
+		})
 		const ctx6 = await addCompileStepToPackageJSON(ctx5)
-		telemetry.capture({ event: "PARAGLIDE-JS init added compile commands" })
+		telemetry.capture({
+			event: "PARAGLIDE-JS init added compile commands",
+			properties: { version: PARJS_PACKAGE_VERSION },
+		})
 		const ctx7 = await maybeChangeTsConfig(ctx6)
 		const ctx8 = await maybeAddSherlock(ctx7)
 		const ctx9 = await maybeAddNinja(ctx8)
@@ -67,7 +79,10 @@ export const initCommand = new Command()
 			)
 		}
 
-		telemetry.capture({ event: "PARAGLIDE-JS init finished" })
+		telemetry.capture({
+			event: "PARAGLIDE-JS init finished",
+			properties: { version: PARJS_PACKAGE_VERSION },
+		})
 
 		const absoluteSettingsPath = nodePath.resolve(ctx9.projectPath, "settings.json")
 		const relativeSettingsFilePath = absoluteSettingsPath.replace(process.cwd(), ".")
