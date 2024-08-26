@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest"
-import { getPreviewLanguageTag } from "./getPreviewLanguageTag.js"
+import { getPreviewLanguageTag } from "./getPreviewLocale.js"
 import { state } from "../state.js"
 import { getSetting } from "../settings/index.js"
 
@@ -18,8 +18,8 @@ describe("getPreviewLanguageTag", () => {
 		state.mockImplementation(() => ({
 			project: {
 				settings: () => ({
-					sourceLanguageTag: "en",
-					languageTags: ["en", "de"],
+					baseLocale: "en",
+					locales: ["en", "de"],
 				}),
 			},
 		}))
@@ -27,13 +27,13 @@ describe("getPreviewLanguageTag", () => {
 		expect(await getPreviewLanguageTag()).toBe("de")
 	})
 
-	it("falls back to sourceLanguageTag when previewLanguageTag is not available", async () => {
+	it("falls back to baseLocale when previewLanguageTag is not available", async () => {
 		// @ts-expect-error
 		state.mockImplementation(() => ({
 			project: {
 				settings: () => ({
-					sourceLanguageTag: "en",
-					languageTags: ["en"],
+					baseLocale: "en",
+					locales: ["en"],
 				}),
 			},
 		}))
@@ -41,13 +41,13 @@ describe("getPreviewLanguageTag", () => {
 		expect(await getPreviewLanguageTag()).toBe("en")
 	})
 
-	it("uses sourceLanguageTag if previewLanguageTag is not set", async () => {
+	it("uses baseLocale if previewLanguageTag is not set", async () => {
 		// @ts-expect-error
 		state.mockImplementation(() => ({
 			project: {
 				settings: () => ({
-					sourceLanguageTag: "en",
-					languageTags: ["en", "de"],
+					baseLocale: "en",
+					locales: ["en", "de"],
 				}),
 			},
 		}))
@@ -55,13 +55,13 @@ describe("getPreviewLanguageTag", () => {
 		expect(await getPreviewLanguageTag()).toBe("en")
 	})
 
-	it("handles undefined sourceLanguageTag gracefully", async () => {
+	it("handles undefined baseLocale gracefully", async () => {
 		// @ts-expect-error
 		state.mockImplementation(() => ({
 			project: {
 				settings: () => ({
-					sourceLanguageTag: undefined,
-					languageTags: [],
+					baseLocale: undefined,
+					locales: [],
 				}),
 			},
 		}))
