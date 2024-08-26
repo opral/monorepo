@@ -73,6 +73,7 @@ export async function handleFileInsert(args: {
 	neu: LixFile;
 	plugins: LixPlugin[];
 	db: Kysely<LixDatabase>;
+	currentAuthor?: string;
 	queueEntry: any;
 }) {
 	const pluginDiffs: any[] = [];
@@ -104,6 +105,7 @@ export async function handleFileInsert(args: {
 						id: v4(),
 						type: diff.type,
 						file_id: args.neu.id,
+						author: args.currentAuthor,
 						plugin_key: pluginKey,
 						operation: diff.operation,
 						// @ts-expect-error - database expects stringified json
@@ -129,6 +131,7 @@ export async function handleFileChange(args: {
 	old: LixFile;
 	neu: LixFile;
 	plugins: LixPlugin[];
+	currentAuthor?: string;
 	db: Kysely<LixDatabase>;
 }) {
 	const fileId = args.neu?.id ?? args.old?.id;
@@ -221,6 +224,7 @@ export async function handleFileChange(args: {
 							.where("commit_id", "is", null)
 							.set({
 								id: v4(),
+								author: args.currentAuthor,
 								// @ts-expect-error - database expects stringified json
 								value: JSON.stringify(value),
 								operation: diff.operation,
@@ -237,6 +241,7 @@ export async function handleFileChange(args: {
 							type: diff.type,
 							file_id: fileId,
 							plugin_key: pluginKey,
+							author: args.currentAuthor,
 							parent_id: previousCommittedChange?.id,
 							// @ts-expect-error - database expects stringified json
 							value: JSON.stringify(value),

@@ -32,9 +32,9 @@ export type LixFile = {
 export type Commit = {
 	id: string; // uuid
 	// todo:
-	//  multiple users can commit one change
+	//  multiple authors can commit one change
 	//  think of real-time collaboration scenarios
-	user_id: string; // @relation to a user
+	author?: string;
 	description: string;
 	/**
 	 * @deprecated use created_at instead
@@ -46,9 +46,12 @@ export type Commit = {
 	// @relation changes: Change[]
 };
 
-export type Change<T extends Record<string, any> = Record<string, { id: string }>> = {
+export type Change<
+	T extends Record<string, any> = Record<string, { id: string }>,
+> = {
 	id: string;
 	parent_id?: Change["id"];
+	author?: string;
 	file_id: LixFile["id"];
 	/**
 	 * If no commit id exists on a change,
