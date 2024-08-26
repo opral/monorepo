@@ -57,7 +57,7 @@ function compileMessageWithMultipleVariants(
 		.join(", ")} ]`
 
 	const compiledVariants = message.variants.map((variant): Compilation<Variant> => {
-		const compiledPattern = compilePattern(message.locale, variant.pattern)
+		const compiledPattern = compilePattern(message.locale, variant.pattern, registry)
 		const typeRestrictions = compiledPattern.typeRestrictions
 
 		const allWildcards: boolean = variant.match.every((m: string) => m === "*")

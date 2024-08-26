@@ -7,6 +7,7 @@ export * from "./schema/settings.js";
 export * from "./mock/index.js";
 export * from "./helper.js";
 export * from "./query-utilities/index.js";
+export * from "./plugin/errors.js";
 export {
 	generateBundleId,
 	/**

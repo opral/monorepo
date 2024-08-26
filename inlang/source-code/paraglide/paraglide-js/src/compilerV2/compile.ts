@@ -5,7 +5,7 @@ import { getStackInfo } from "../services/telemetry/stack-detection.js"
 import { getPackageJson } from "../services/environment/package.js"
 import { createRuntime } from "./runtime.js"
 import { createRegistry, DEFAULT_REGISTRY } from "./registry.js"
-import { lookup } from "@inlang/sdk"
+import { lookup } from "~/services/lookup.js"
 import { type BundleNested, type ProjectSettings } from "@inlang/sdk2"
 import fs from "node:fs/promises"
 import * as prettier from "prettier"
@@ -271,14 +271,14 @@ async function fmt(js: string): Promise<string> {
 }
 
 export function getFallbackMap<T extends string>(
-	languageTags: T[],
-	sourceLanguageTag: NoInfer<T>
+	locales: T[],
+	baseLocale: NoInfer<T>
 ): Record<T, T | undefined> {
 	return Object.fromEntries(
-		languageTags.map((lang) => {
+		locales.map((lang) => {
 			const fallbackLanguage = lookup(lang, {
-				languageTags: languageTags.filter((t) => t !== lang),
-				defaultLanguageTag: sourceLanguageTag,
+				locales: locales.filter((l) => l !== lang),
+				baseLocale,
 			})
 
 			if (lang === fallbackLanguage) return [lang, undefined]

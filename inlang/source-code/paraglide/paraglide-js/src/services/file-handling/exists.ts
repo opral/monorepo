@@ -1,4 +1,4 @@
-import type { NodeishFilesystem } from "@lix-js/fs"
+import type { NodeishFilesystem } from "./types.js"
 
 /**
  * Returns true if the path exists (file or directory), false otherwise.
