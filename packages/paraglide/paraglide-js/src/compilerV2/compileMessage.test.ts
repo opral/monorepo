@@ -69,7 +69,7 @@ describe("compileMessage", () => {
 			/* @__NO_SIDE_EFFECTS__ */
 			const some_message = (inputs) => {
 				const selectors = [ inputs.fistInput, registry.plural(\\"en\\", inputs['second Input']) ]
-					if (selectors[0] === \\"1\\" && selectors[1] === \\"2\\") return \`One\${registry.number(\\"en\\", inputs.fistInput)}\`
+					if (selectors[0] == \\"1\\" && selectors[1] == \\"2\\") return \`One\${registry.number(\\"en\\", inputs.fistInput)}\`
 				return \`Many\`
 			}"
 		`)

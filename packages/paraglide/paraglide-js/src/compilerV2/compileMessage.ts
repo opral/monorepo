@@ -56,7 +56,7 @@ function compileMessageWithMultipleVariants(
 		.map((sel) => sel.code)
 		.join(", ")} ]`
 
-	const compiledVariants = message.variants.map((variant): Compilation<Variant> => {
+	const compiledVariants = sortVariants(message.variants).map((variant): Compilation<Variant> => {
 		const compiledPattern = compilePattern(message.locale, variant.pattern, registry)
 		const typeRestrictions = compiledPattern.typeRestrictions
 
@@ -113,4 +113,28 @@ ${compilation.code}`
 		typeRestrictions: tr,
 		code,
 	}
+}
+
+/**
+ * Sorts variants from most-specific to least-specific.
+ *
+ * @param variants
+ */
+function sortVariants(variants: Variant[]): Variant[] {
+	function compareMatches(a: string, b: string): number {
+		if (a === "*" && b === "*") return 0
+		if (a === "*") 1
+		if (b === "*") return -1
+		return 0
+	}
+
+	return variants.toSorted((a, b) => {
+		let i = 0
+		while (i < Math.min(a.match.length, b.match.length)) {
+			const cmp = compareMatches(a.match[i], b.match[i])
+			if (cmp !== 0) return cmp
+			i += 1
+		}
+		return 0
+	})
 }

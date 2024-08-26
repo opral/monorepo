@@ -12,6 +12,7 @@
 		"emitDeclarationOnly": true,
 		"declarationMap": false,
 		"skipLibCheck": true,
+		"lib": ["ESNext"],
 		"paths": {
 			"~/*": ["./src/*"]
 		}
