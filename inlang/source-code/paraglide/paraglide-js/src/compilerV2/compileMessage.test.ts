@@ -34,7 +34,18 @@ describe("compileMessage", () => {
 					id: "1",
 					messageId: "some_message",
 					match: ["1", "2"],
-					pattern: [{ type: "text", value: "One" }],
+					pattern: [
+						{ type: "text", value: "One" },
+						{
+							type: "expression",
+							arg: { type: "variable", name: "fistInput" },
+							annotation: {
+								type: "function",
+								name: "number",
+								options: [],
+							},
+						},
+					],
 				},
 				{
 					id: "2",
@@ -47,18 +58,18 @@ describe("compileMessage", () => {
 
 		const compiled = compileMessage(msg, DEFAULT_REGISTRY)
 		expect(compiled.typeRestrictions).toEqual({
-			fistInput: "NonNullable<unknown>",
+			fistInput: "number",
 			"second Input": "number",
 		})
 		expect(compiled.code).toMatchInlineSnapshot(`
 			"/**
-			 * @param {{ 'second Input': number, fistInput: NonNullable<unknown> }} inputs
+			 * @param {{ fistInput: number, 'second Input': number }} inputs
 			 * @returns {string}
 			 */
 			/* @__NO_SIDE_EFFECTS__ */
 			const some_message = (inputs) => {
 				const selectors = [ inputs.fistInput, registry.plural(\\"en\\", inputs['second Input']) ]
-					if (selectors[0] === \\"1\\" && selectors[1] === \\"2\\") return \`One\`
+					if (selectors[0] === \\"1\\" && selectors[1] === \\"2\\") return \`One\${registry.number(\\"en\\", inputs.fistInput)}\`
 				return \`Many\`
 			}"
 		`)

@@ -6,5 +6,6 @@
 	"with_backtick": "`Hello World!`",
 	"with_nonjs_variable": "Hello {000}",
 	"missing_in_german": "This is missing in German",
-	"number_test": "Progress: {n, number, percent}"
+	"number_test": "Progress: {n, number, percent}",
+	"plural_test": "I have {n, plural, one {# cat} other {# cats}}"
 }
