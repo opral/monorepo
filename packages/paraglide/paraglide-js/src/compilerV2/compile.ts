@@ -4,7 +4,7 @@ import { jsIdentifier } from "../services/codegen/identifier.js"
 import { getStackInfo } from "../services/telemetry/stack-detection.js"
 import { getPackageJson } from "../services/environment/package.js"
 import { createRuntime } from "./runtime.js"
-import { createRegistry } from "./registry.js"
+import { createRegistry, DEFAULT_REGISTRY } from "./registry.js"
 import { lookup } from "@inlang/sdk"
 import { type BundleNested, type ProjectSettings } from "@inlang/sdk2"
 import fs from "node:fs/promises"
@@ -55,7 +55,13 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 	//Maps each language to it's fallback
 	//If there is no fallback, it will be undefined
 	const fallbackMap = getFallbackMap(opts.settings.locales, opts.settings.baseLocale)
-	const resources = opts.bundles.map((bundle) => compileBundle(bundle, fallbackMap))
+	const resources = opts.bundles.map((bundle) =>
+		compileBundle({
+			bundle,
+			fallbackMap,
+			registry: DEFAULT_REGISTRY,
+		})
+	)
 
 	const output =
 		opts.outputStructure === "regular"

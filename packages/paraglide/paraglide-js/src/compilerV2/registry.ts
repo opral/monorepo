@@ -13,7 +13,7 @@ export type Registry = Record<
 	}
 >
 
-export const REGISTRY: Registry = {
+export const DEFAULT_REGISTRY: Registry = {
 	plural: {
 		typeRestriction: "number",
 		options: {

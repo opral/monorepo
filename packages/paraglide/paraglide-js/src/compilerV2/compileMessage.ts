@@ -5,6 +5,7 @@ import { compileExpression } from "./compileExpression.js"
 import { mergeTypeRestrictions, type Compilation } from "./types.js"
 import { inputsType } from "./inputsType.js"
 import { jsIdentifier } from "~/services/codegen/identifier.js"
+import type { Registry } from "./registry.js"
 
 /**
  * Returns the compiled message as a string
@@ -13,33 +14,42 @@ import { jsIdentifier } from "~/services/codegen/identifier.js"
  * @param message The message to compile
  * @returns (inputs) => string
  */
-export const compileMessage = (message: MessageNested): Compilation<MessageNested> => {
+export const compileMessage = (
+	message: MessageNested,
+	registry: Registry
+): Compilation<MessageNested> => {
 	// return empty string instead?
 	if (message.variants.length == 0) throw new Error("Message must have at least one variant")
 	const hasMultipleVariants = message.variants.length > 1
 	return addTypes(
 		hasMultipleVariants
-			? compileMessageWithMultipleVariants(message)
-			: compileMessageWithOneVariant(message)
+			? compileMessageWithMultipleVariants(message, registry)
+			: compileMessageWithOneVariant(message, registry)
 	)
 }
 
-function compileMessageWithOneVariant(message: MessageNested): Compilation<MessageNested> {
+function compileMessageWithOneVariant(
+	message: MessageNested,
+	registry: Registry
+): Compilation<MessageNested> {
 	const variant = message.variants[0]
 	if (!variant || message.variants.length !== 1)
 		throw new Error("Message must have exactly one variant")
 	const hasInputs = message.declarations.some((decl) => decl.type === "input")
-	const compiledPattern = compilePattern(message.locale, variant.pattern)
+	const compiledPattern = compilePattern(message.locale, variant.pattern, registry)
 	const code = `const ${jsIdentifier(message.id)} = (${hasInputs ? "inputs" : ""}) => ${compiledPattern.code}`
 	return { code, typeRestrictions: compiledPattern.typeRestrictions, source: message }
 }
 
-function compileMessageWithMultipleVariants(message: MessageNested): Compilation<MessageNested> {
+function compileMessageWithMultipleVariants(
+	message: MessageNested,
+	registry: Registry
+): Compilation<MessageNested> {
 	if (message.variants.length <= 1) throw new Error("Message must have more than one variant")
 	const hasInputs = message.declarations.some((decl) => decl.type === "input")
 
 	const compiledSelectors = message.selectors.map((selector) =>
-		compileExpression(message.locale, selector)
+		compileExpression(message.locale, selector, registry)
 	)
 
 	const selectorCode = `const selectors = [ ${compiledSelectors
