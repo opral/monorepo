@@ -83,10 +83,10 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 					)
 					.execute()
 
-				const previewLanguageTag = await getPreviewLocale()
-				const translationLanguageTag = previewLanguageTag.length ? previewLanguageTag : baseLocale
+				const previewLocale = await getPreviewLocale()
+				const translationLocale = previewLocale.length ? previewLocale : baseLocale
 
-				const variant = _message?.variants?.find((v) => v.languageTag === translationLanguageTag)
+				const variant = _message?.variants?.find((v) => v.languageTag === translationLocale)
 
 				const translationString = getStringFromPattern({
 					pattern: variant?.pattern || [
@@ -95,7 +95,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 							value: "", // TODO: Fix pattern type to be always defined either/or Text / VariableReference
 						},
 					],
-					languageTag: translationLanguageTag,
+					languageTag: translationLocale,
 					messageId: message.messageId,
 				})
 
