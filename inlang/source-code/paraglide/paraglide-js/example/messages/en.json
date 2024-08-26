@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"currentLanguageTag": "The current language tag is \"{languageTag}\".",
-	"greeting": "Welcome {name}! You have {count, plural, one {one message} =0 {no messages} other {# messages}}.",
+	"greeting": "Welcome {name}! You have {count, plural, other {# messages} one {one message} =0 {no messages}}.",
 	"hello": "Hello World!",
 	"with_backtick": "`Hello World!`",
 	"with_nonjs_variable": "Hello {000}",

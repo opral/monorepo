@@ -7,7 +7,7 @@ import { languageTag, setLanguageTag } from "./paraglide/runtime.js"
 setLanguageTag("en")
 
 console.log(m.currentLanguageTag({ languageTag: languageTag() }))
-console.log(m.greeting({ name: "Samuel", count: 0 }))
+console.log(m.greeting({ name: "Samuel", count: 5 }))
 
 setLanguageTag("de")
 
