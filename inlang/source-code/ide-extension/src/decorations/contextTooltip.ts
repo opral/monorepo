@@ -81,7 +81,7 @@ export function contextTooltip(
 				"MACHINE_TRANSLATE_MESSAGE",
 				JSON.stringify({
 					messageId: referenceMessage.messageId,
-					sourceLanguageTag: state().project.settings.get()?.baseLocale,
+					baseLocale: state().project.settings.get()?.baseLocale,
 					targetLanguageTags: [languageTag],
 				})
 			)
