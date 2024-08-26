@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest"
 import { compileMessage } from "./compileMessage.js"
 import type { MessageNested } from "@inlang/sdk2"
+import { DEFAULT_REGISTRY } from "./registry.js"
 
 describe("compileMessage", () => {
 	it("compiles a message with variants", () => {
@@ -44,7 +45,7 @@ describe("compileMessage", () => {
 			],
 		}
 
-		const compiled = compileMessage(msg)
+		const compiled = compileMessage(msg, DEFAULT_REGISTRY)
 		expect(compiled.typeRestrictions).toEqual({
 			fistInput: "NonNullable<unknown>",
 			"second Input": "number",

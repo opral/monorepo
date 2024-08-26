@@ -3,6 +3,7 @@ import { escapeForTemplateLiteral } from "../services/codegen/escape.js"
 import { backtick } from "../services/codegen/quotes.js"
 import { compileExpression } from "./compileExpression.js"
 import type { Compilation } from "./types.js"
+import type { Registry } from "./registry.js"
 
 /**
  * Compiles a pattern into a template literal string.
@@ -11,7 +12,11 @@ import type { Compilation } from "./types.js"
  *  const { compiled, params } = compilePattern([{ type: "Text", value: "Hello " }, { type: "VariableReference", name: "name" }])
  *  >> compiled === "`Hello ${params.name}`"
  */
-export const compilePattern = (lang: string, pattern: Pattern): Compilation<Pattern> => {
+export const compilePattern = (
+	lang: string,
+	pattern: Pattern,
+	registry: Registry
+): Compilation<Pattern> => {
 	const compiledPatternElements = pattern.map((element): Compilation<Pattern[number]> => {
 		switch (element.type) {
 			case "text":
@@ -21,7 +26,7 @@ export const compilePattern = (lang: string, pattern: Pattern): Compilation<Patt
 					source: element,
 				}
 			case "expression": {
-				const compiledExpression = compileExpression(lang, element)
+				const compiledExpression = compileExpression(lang, element, registry)
 				const code = "${" + compiledExpression.code + "}"
 				return { code, typeRestrictions: compiledExpression.typeRestrictions, source: element }
 			}
