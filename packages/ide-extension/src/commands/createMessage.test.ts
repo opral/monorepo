@@ -76,20 +76,20 @@ describe("createMessageCommand", () => {
 		vi.restoreAllMocks()
 	})
 
-	it("should warn if sourceLanguageTag is undefined", async () => {
-		mockState.project.settings.mockReturnValueOnce({ sourceLanguageTag: undefined })
+	it("should warn if baseLocale is undefined", async () => {
+		mockState.project.settings.mockReturnValueOnce({ baseLocale: undefined })
 
 		await createMessageCommand.callback()
 
 		expect(msg).toHaveBeenCalledWith(
-			"The `sourceLanguageTag` is not defined in the project but required to create a message.",
+			"The `baseLocale` is not defined in the project but required to create a message.",
 			"warn",
 			"notification"
 		)
 	})
 
 	it("should return if message content input is cancelled", async () => {
-		mockState.project.settings.mockReturnValueOnce({ sourceLanguageTag: "en" })
+		mockState.project.settings.mockReturnValueOnce({ baseLocale: "en" })
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce(undefined)
 
@@ -102,7 +102,7 @@ describe("createMessageCommand", () => {
 	})
 
 	it("should return if message ID input is cancelled", async () => {
-		mockState.project.settings.mockReturnValueOnce({ sourceLanguageTag: "en" })
+		mockState.project.settings.mockReturnValueOnce({ baseLocale: "en" })
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("Message content")
 		// @ts-expect-error
@@ -117,7 +117,7 @@ describe("createMessageCommand", () => {
 	})
 
 	it("should show error message if message creation fails", async () => {
-		mockState.project.settings.mockReturnValueOnce({ sourceLanguageTag: "en" })
+		mockState.project.settings.mockReturnValueOnce({ baseLocale: "en" })
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("Message content")
 		// @ts-expect-error
@@ -132,7 +132,7 @@ describe("createMessageCommand", () => {
 	})
 
 	it("should create message and show success message", async () => {
-		mockState.project.settings.mockReturnValueOnce({ sourceLanguageTag: "en" })
+		mockState.project.settings.mockReturnValueOnce({ baseLocale: "en" })
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("Message content")
 		// @ts-expect-error
@@ -168,7 +168,7 @@ describe("createMessageCommand", () => {
 	})
 
 	it("should use randomHumanId as default messageId if autoHumanId is true", async () => {
-		mockState.project.settings.mockReturnValueOnce({ sourceLanguageTag: "en" })
+		mockState.project.settings.mockReturnValueOnce({ baseLocale: "en" })
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("Message content")
 		// @ts-expect-error
@@ -185,7 +185,7 @@ describe("createMessageCommand", () => {
 	})
 
 	it("should not use randomHumanId as default messageId if autoHumanId is false", async () => {
-		mockState.project.settings.mockReturnValueOnce({ sourceLanguageTag: "en" })
+		mockState.project.settings.mockReturnValueOnce({ baseLocale: "en" })
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("Message content")
 		// @ts-expect-error
