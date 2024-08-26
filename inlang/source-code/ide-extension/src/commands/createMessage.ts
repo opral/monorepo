@@ -2,7 +2,7 @@ import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
-import { randomHumanId, type Message } from "@inlang/sdk"
+import { generateBundleId, type Message } from "@inlang/sdk2"
 import { CONFIGURATION } from "../configuration.js"
 import { getSetting } from "../utilities/settings/index.js"
 
@@ -37,7 +37,7 @@ export const createMessageCommand = {
 
 		const messageId = await window.showInputBox({
 			title: "Enter the ID:",
-			value: autoHumanId ? randomHumanId() : "",
+			value: autoHumanId ? generateBundleId() : "",
 			prompt:
 				autoHumanId &&
 				"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.",
@@ -48,20 +48,8 @@ export const createMessageCommand = {
 
 		const message: Message = {
 			id: messageId,
-			alias: {},
+			locale: baseLocale,
 			selectors: [],
-			variants: [
-				{
-					languageTag: baseLocale,
-					match: [],
-					pattern: [
-						{
-							type: "Text",
-							value: messageValue,
-						},
-					],
-				},
-			],
 		}
 
 		// create message
