@@ -96,13 +96,13 @@ describe("showStatusBar", () => {
 		expect(vscode.window.createStatusBarItem).not.toHaveBeenCalled()
 	})
 
-	it("should handle the case when previewLanguageTag is not available", async () => {
+	it("should handle the case when previewLocale is not available", async () => {
 		vi.mocked(getSetting).mockResolvedValueOnce("")
 		await showStatusBar()
 		expect(vscode.window.createStatusBarItem).toHaveBeenCalledTimes(1)
 	})
 
-	it("should not set previewLanguageTag if it's not in settings.locales", async () => {
+	it("should not set previewLocale if it's not in settings.locales", async () => {
 		vi.mocked(getSetting).mockResolvedValueOnce("de")
 		await showStatusBar()
 
