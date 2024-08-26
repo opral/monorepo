@@ -11,11 +11,11 @@ export const machineTranslateMessageCommand = {
 	register: commands.registerCommand,
 	callback: async function ({
 		messageId,
-		sourceLanguageTag,
+		baseLocale,
 		targetLanguageTags,
 	}: {
 		messageId: Message["id"]
-		sourceLanguageTag: LanguageTag
+		baseLocale: LanguageTag
 		targetLanguageTags: LanguageTag[]
 	}) {
 		// Get the message from the state
@@ -27,7 +27,7 @@ export const machineTranslateMessageCommand = {
 		// Call machine translation RPC function
 		const result = await rpc.machineTranslateMessage({
 			message,
-			sourceLanguageTag,
+			baseLocale,
 			targetLanguageTags,
 		})
 

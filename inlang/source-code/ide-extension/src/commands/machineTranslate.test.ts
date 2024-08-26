@@ -84,7 +84,7 @@ describe("machineTranslateMessageCommand", () => {
 	it("should return a message if messageId is not found", async () => {
 		await machineTranslateMessageCommand.callback({
 			messageId: "nonexistent",
-			sourceLanguageTag: "en",
+			baseLocale: "en",
 			targetLanguageTags: ["es"],
 		})
 
@@ -97,7 +97,7 @@ describe("machineTranslateMessageCommand", () => {
 
 		await machineTranslateMessageCommand.callback({
 			messageId: "validId",
-			sourceLanguageTag: "en",
+			baseLocale: "en",
 			targetLanguageTags: ["es"],
 		})
 
@@ -110,7 +110,7 @@ describe("machineTranslateMessageCommand", () => {
 
 		await machineTranslateMessageCommand.callback({
 			messageId: "validId",
-			sourceLanguageTag: "en",
+			baseLocale: "en",
 			targetLanguageTags: ["es"],
 		})
 
@@ -124,7 +124,7 @@ describe("machineTranslateMessageCommand", () => {
 
 		await machineTranslateMessageCommand.callback({
 			messageId: "validId",
-			sourceLanguageTag: "en",
+			baseLocale: "en",
 			targetLanguageTags: ["es"],
 		})
 
@@ -138,7 +138,7 @@ describe("machineTranslateMessageCommand", () => {
 
 		await machineTranslateMessageCommand.callback({
 			messageId: "validId",
-			sourceLanguageTag: "en",
+			baseLocale: "en",
 			targetLanguageTags: ["es"],
 		})
 
