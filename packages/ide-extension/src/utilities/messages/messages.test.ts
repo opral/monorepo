@@ -81,7 +81,7 @@ describe("Message Webview Provider Tests", () => {
 				},
 				// @ts-expect-error
 				settings: vi.fn().mockReturnValue({
-					languageTags: ["en"],
+					locales: ["en"],
 				}),
 				selectedProjectPath: "/test/path",
 			},
@@ -115,7 +115,7 @@ describe("Message Webview Provider Tests", () => {
 				},
 				// @ts-expect-error
 				settings: vi.fn().mockReturnValue({
-					languageTags: ["en"],
+					locales: ["en"],
 				}),
 			},
 			selectedProjectPath: "/test/path",
@@ -146,7 +146,7 @@ describe("Message Webview Provider Tests", () => {
 				},
 				// @ts-expect-error
 				settings: vi.fn().mockReturnValue({
-					languageTags: ["en"],
+					locales: ["en"],
 				}),
 			},
 			selectedProjectPath: "/test/path",
