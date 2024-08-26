@@ -3,7 +3,7 @@ import type { CliStep } from "../utils.js"
 import path from "node:path"
 import { compile } from "~/compilerV2/compile.js"
 import { writeOutput } from "~/services/file-handling/write-output.js"
-import type { NodeishFilesystem } from "@lix-js/fs"
+import type { NodeishFilesystem } from "~/services/file-handling/types.js"
 
 export const runCompiler: CliStep<
 	{

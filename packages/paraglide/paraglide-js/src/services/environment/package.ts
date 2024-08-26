@@ -1,4 +1,4 @@
-import type { NodeishFilesystem } from "@lix-js/fs"
+import type { NodeishFilesystem } from "../file-handling/types.js"
 import path from "node:path"
 import { pathExists } from "../file-handling/exists.js"
 

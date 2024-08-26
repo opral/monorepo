@@ -2,7 +2,7 @@ import memfs from "memfs"
 import nodeFsPromises from "node:fs/promises"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
-import type { NodeishFilesystem } from "@lix-js/fs"
+import type { NodeishFilesystem } from "./types.js"
 
 beforeEach(() => {
 	vi.resetModules()
