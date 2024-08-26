@@ -4,9 +4,9 @@ import { v4 } from "uuid";
 
 export async function commit(args: {
 	db: Kysely<LixDatabase>;
-	userId: string;
+	currentAuthor?: string;
+	// TODO remove description
 	description: string;
-	// merge?: boolean
 }) {
 	const newCommitId = v4();
 
@@ -21,7 +21,7 @@ export async function commit(args: {
 			.insertInto("commit")
 			.values({
 				id: newCommitId,
-				user_id: args.userId,
+				author: args.currentAuthor,
 				// todo - use zoned datetime
 				description: args.description,
 				parent_id,

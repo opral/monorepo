@@ -52,6 +52,8 @@ export async function openLix(args: {
 		},
 	});
 
+	let currentAuthor: string | undefined;
+
 	let pending: Promise<void> | undefined;
 	let resolve: () => void;
 	// run number counts the worker runs in a current batch and is used to prevent race conditions where a trigger is missed because a previous run is just about to reset the hasMoreEntriesSince flag
@@ -90,6 +92,7 @@ export async function openLix(args: {
 
 			if (existingFile?.data) {
 				await handleFileChange({
+					currentAuthor,
 					queueEntry: entry,
 					old: {
 						id: entry.file_id,
@@ -106,6 +109,7 @@ export async function openLix(args: {
 				});
 			} else {
 				await handleFileInsert({
+					currentAuthor,
 					queueEntry: entry,
 					neu: {
 						id: entry.file_id,
@@ -150,6 +154,13 @@ export async function openLix(args: {
 	return {
 		db,
 		settled,
+		currentAuthor: {
+			get: () => currentAuthor,
+			// async setter for future proofing
+			set: async (author: string) => {
+				currentAuthor = author;
+			},
+		},
 		toBlob: async () => {
 			await settled();
 			return new Blob([contentFromDatabase(args.database)]);
@@ -159,8 +170,8 @@ export async function openLix(args: {
 			args.database.close();
 			await db.destroy();
 		},
-		commit: (args: { userId: string; description: string }) => {
-			return commit({ db, ...args });
+		commit: (args: { description: string }) => {
+			return commit({ ...args, db, currentAuthor });
 		},
 	};
 }
