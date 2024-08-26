@@ -5,6 +5,7 @@ import {
 	ChangeHasBeenMutatedError,
 	ChangeNotDirectChildOfConflictError,
 } from "./errors.js";
+import { isEqual } from "lodash-es";
 
 /**
  * Resolves a conflict by applying the given change.
@@ -43,8 +44,7 @@ export async function resolveConflict(args: {
 
 	if (
 		existingResolvedChange &&
-		JSON.stringify(existingResolvedChange) !==
-			JSON.stringify(args.resolveWithChange)
+		isEqual(existingResolvedChange, args.resolveWithChange) === false
 	) {
 		throw new ChangeHasBeenMutatedError();
 	}
