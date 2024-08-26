@@ -108,4 +108,11 @@ export type Conflict = {
 	reason?: string;
 	change_id: Change["id"];
 	conflicting_change_id: Change["id"];
+	/**
+	 * The change id that the conflict was resolved with.
+	 *
+	 * Can be the change_id, conflicting_change_id, or another change_id
+	 * that resulted from a merge.
+	 */
+	resolved_with_change_id?: Change["id"];
 };
