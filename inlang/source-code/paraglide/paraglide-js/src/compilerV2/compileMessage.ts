@@ -65,8 +65,12 @@ function compileMessageWithMultipleVariants(
 			return { code: `return ${compiledPattern.code}`, typeRestrictions, source: variant }
 
 		const conditions: string[] = (variant.match as string[])
-			.filter((m) => m !== "*")
-			.map((m, i) => `selectors[${i}] === "${escapeForDoubleQuoteString(m)}"`)
+			.map((m, i) => {
+				if (m === "*") return undefined
+				// we use == instead of === to automatically convert to string if necessary
+				return `selectors[${i}] == "${escapeForDoubleQuoteString(m)}"`
+			})
+			.filter((m) => m !== undefined)
 
 		return {
 			code: `if (${conditions.join(" && ")}) return ${compiledPattern.code}`,
