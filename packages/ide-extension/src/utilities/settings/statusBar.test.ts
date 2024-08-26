@@ -36,8 +36,8 @@ vi.mock("../state", () => ({
 	state: vi.fn().mockImplementation(() => ({
 		project: {
 			settings: vi.fn().mockReturnValue({
-				sourceLanguageTag: "en",
-				languageTags: ["en", "fr"],
+				baseLocale: "en",
+				locales: ["en", "fr"],
 			}),
 		},
 	})),
@@ -58,7 +58,7 @@ describe("statusBar", () => {
 
 		expect(context.subscriptions.push).toHaveBeenCalledTimes(2)
 		expect(CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event).toHaveBeenCalled()
-		expect(CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.event).toHaveBeenCalled()
+		expect(CONFIGURATION.EVENTS.ON_DID_PREVIEW_LOCALE_CHANGE.event).toHaveBeenCalled()
 	})
 })
 
@@ -81,14 +81,14 @@ describe("showStatusBar", () => {
 		expect(disposeMock).toHaveBeenCalled()
 	})
 
-	it("should do nothing if sourceLanguageTag is not available", async () => {
+	it("should do nothing if baseLocale is not available", async () => {
 		// Modify the mock for state to return a more defensive structure
 		vi.mocked(state).mockReturnValueOnce({
 			project: {
 				settings: () => ({
 					// @ts-expect-error
-					sourceLanguageTag: undefined,
-					languageTags: ["en", "fr"],
+					baseLocale: undefined,
+					locales: ["en", "fr"],
 				}),
 			},
 		})
@@ -102,7 +102,7 @@ describe("showStatusBar", () => {
 		expect(vscode.window.createStatusBarItem).toHaveBeenCalledTimes(1)
 	})
 
-	it("should not set previewLanguageTag if it's not in settings.languageTags", async () => {
+	it("should not set previewLanguageTag if it's not in settings.locales", async () => {
 		vi.mocked(getSetting).mockResolvedValueOnce("de")
 		await showStatusBar()
 
