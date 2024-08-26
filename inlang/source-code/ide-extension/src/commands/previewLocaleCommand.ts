@@ -3,7 +3,7 @@ import { updateSetting } from "../utilities/settings/index.js"
 import { state } from "../utilities/state.js"
 import { CONFIGURATION } from "../configuration.js"
 
-export const previewLanguageTagCommand = {
+export const previewLocaleCommand = {
 	command: "sherlock.previewLanguageTag",
 	title: "Sherlock: Change preview language tag",
 	register: vscode.commands.registerCommand,
@@ -22,6 +22,6 @@ export const previewLanguageTagCommand = {
 		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
 		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
 		CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire()
-		CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.fire(selectedLocale)
+		CONFIGURATION.EVENTS.ON_DID_PREVIEW_LOCALE_CHANGE.fire(selectedLocale)
 	},
 }
