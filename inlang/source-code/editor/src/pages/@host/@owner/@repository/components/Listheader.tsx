@@ -82,7 +82,7 @@ export const ListHeader = () => {
 										prop:size="small"
 										class={
 											filteredMessageLintRules()?.includes(lintRule || "")
-												? getLintRule(lintRule)!.level === "warning"
+												? getLintRule(lintRule)?.level === "warning"
 													? "ring-warning/20 ring-1 rounded animate-blendIn"
 													: "ring-danger/20 ring-1 rounded animate-blendIn"
 												: "animate-blendIn"

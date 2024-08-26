@@ -1068,8 +1068,8 @@ importers:
         specifier: ^0.8.4
         version: 0.8.4
       posthog-node:
-        specifier: ^3.1.2
-        version: 3.1.3
+        specifier: ^4.0.1
+        version: 4.1.1
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@swc/core@1.7.6(@swc/helpers@0.5.5))(@types/node@20.14.14)(typescript@5.3.2)
@@ -1477,6 +1477,10 @@ importers:
       astro:
         specifier: ^4.0.0
         version: 4.13.2(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)(typescript@5.5.4)
+    devDependencies:
+      typescript:
+        specifier: ^5.5.4
+        version: 5.5.4
 
   inlang/source-code/paraglide/paraglide-astro/example:
     dependencies:
@@ -1533,8 +1537,8 @@ importers:
         specifier: 2.2.3
         version: 2.2.3
       posthog-node:
-        specifier: 3.1.3
-        version: 3.1.3
+        specifier: ^4.0.1
+        version: 4.1.1
       prettier:
         specifier: ^3.3.3
         version: 3.3.3
@@ -3026,8 +3030,8 @@ importers:
         specifier: ^1.53.2
         version: 1.154.5
       posthog-node:
-        specifier: ^3.0.0
-        version: 3.1.3
+        specifier: ^4.0.1
+        version: 4.1.1
     devDependencies:
       '@types/express':
         specifier: 4.17.17
@@ -3800,6 +3804,34 @@ importers:
       webdriverio:
         specifier: ^8.39.1
         version: 8.40.2
+
+  lix/website:
+    dependencies:
+      '@lit-labs/ssr':
+        specifier: ^3.2.2
+        version: 3.2.2
+      '@lit-labs/ssr-client':
+        specifier: ^1.1.7
+        version: 1.1.7
+      lit:
+        specifier: ^3.1.4
+        version: 3.2.0
+      vike:
+        specifier: ^0.4.181
+        version: 0.4.193(vite@5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5))
+    devDependencies:
+      '@tailwindcss/vite':
+        specifier: ^4.0.0-alpha.17
+        version: 4.0.0-alpha.18(vite@5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5))
+      tailwindcss:
+        specifier: ^4.0.0-alpha.17
+        version: 4.0.0-alpha.18
+      typescript:
+        specifier: ^5.5.3
+        version: 5.5.4
+      vite:
+        specifier: ^5.3.4
+        version: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
 
 packages:
 
@@ -4759,6 +4791,9 @@ packages:
 
   '@brillout/vite-plugin-import-build@0.2.22':
     resolution: {integrity: sha512-n5sv0HdCB5WC2QJSnTN6iS/F+sJsF0AmtsCCaQ+5+dRjgsoGGsa3auinJV8tuEog5WsX+3MF8RIwn3A/u0e04w==}
+
+  '@brillout/vite-plugin-server-entry@0.4.12':
+    resolution: {integrity: sha512-d2GPMPFfKEIjajW6wylIL9QsW4Sp/QyY7yr1FDxpgehgcgiXJUjRSvHBt0Ynyb4PtOyeLbhJECVIKwVMU4+BmQ==}
 
   '@brillout/vite-plugin-server-entry@0.4.7':
     resolution: {integrity: sha512-G/wHFx/JdFUA9kPSPDT0nIJH1wmgIwUIY27RL4N6EaHeaXgN4zSCBZTNvvKHyojvMxMw825m4vE0VksHXLyOng==}
@@ -6067,8 +6102,15 @@ packages:
   '@lit-labs/router@0.1.3':
     resolution: {integrity: sha512-G+HHo57KsArG58LOI8DLtipFfC9tVV4lGaDy2I8hYQvS2P/pV5wQObrpFYPZswse8D47y8VuHNXNdVPQOVc5MA==}
 
+  '@lit-labs/ssr-client@1.1.7':
+    resolution: {integrity: sha512-VvqhY/iif3FHrlhkzEPsuX/7h/NqnfxLwVf0p8ghNIlKegRyRqgeaJevZ57s/u/LiFyKgqksRP5n+LmNvpxN+A==}
+
   '@lit-labs/ssr-dom-shim@1.2.1':
     resolution: {integrity: sha512-wx4aBmgeGvFmOKucFKY+8VFJSYZxs9poN3SDNQFF6lT6NrQUnHiPB2PWz2sc4ieEcAaYYzN+1uWahEeTq2aRIQ==}
+
+  '@lit-labs/ssr@3.2.2':
+    resolution: {integrity: sha512-He5TzeNPM9ECmVpgXRYmVlz0UA5YnzHlT43kyLi2Lu6mUidskqJVonk9W5K699+2DKhoXp8Ra4EJmHR6KrcW1Q==}
+    engines: {node: '>=13.9.0'}
 
   '@lit/react@1.0.5':
     resolution: {integrity: sha512-RSHhrcuSMa4vzhqiTenzXvtQ6QDq3hSPsnHHO3jaPmmvVFeoNNm4DHoQ0zLdKAUvY3wP3tTENSUf7xpyVfrDEA==}
@@ -6666,6 +6708,9 @@ packages:
   '@parcel/watcher@2.4.1':
     resolution: {integrity: sha512-HNjmfLQEVRZmHRET336f20H/8kOozUGwk7yajvsonjNxbj2wBTK1WsQuHkD5yYh9RxFGL2EyDHryOihOwUoKDA==}
     engines: {node: '>= 10.0.0'}
+
+  '@parse5/tools@0.3.0':
+    resolution: {integrity: sha512-zxRyTHkqb7WQMV8kTNBKWb1BeOFUKXBXTBWuxg9H9hfvQB3IwP6Iw2U75Ia5eyRxPNltmY7E8YAlz6zWwUnjKg==}
 
   '@phenomnomnominal/tsquery@4.2.0':
     resolution: {integrity: sha512-hR2U3uVcrrdkuG30ItQ+uFDs4ncZAybxWG0OjTE8ptPzVoU7GVeXpy+vMU8zX9EbmjGeITPw/su5HjYQyAH8bA==}
@@ -8540,6 +8585,9 @@ packages:
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
 
+  '@types/node@16.18.105':
+    resolution: {integrity: sha512-w2d0Z9yMk07uH3+Cx0N8lqFyi3yjXZxlbYappPj+AsOlT02OyxyiuNoNHdGt6EuiSm8Wtgp2YV7vWg+GMFrvFA==}
+
   '@types/node@17.0.45':
     resolution: {integrity: sha512-w+tIMs3rq2afQdsPJlODhoUEKzFP1ayaoyl1CcnwtIlsVe7K7bA1NGm4s3PraqTLlXnbIN84zuBlxBWo1u9BLw==}
 
@@ -9773,6 +9821,9 @@ packages:
 
   axios@1.7.3:
     resolution: {integrity: sha512-Ar7ND9pU99eJ9GpoGQKhKf58GpUOgnzuaB7ueNQ5BMi0p+LZ5oaEnfF999fAArcTIBwXTCHAmGcHOZJaWPq9Nw==}
+
+  axios@1.7.5:
+    resolution: {integrity: sha512-fZu86yCo+svH3uqJ/yTdQ0QHpQu5oL+/QE+QPSv6BZSkDAoky9vytxp7u5qk83OJFS3kEBcesWni9WTZAv3tSw==}
 
   axobject-query@3.1.1:
     resolution: {integrity: sha512-goKlv8DZrK9hUh975fnHzhNIO4jUnFCfv/dszV5VwUGDFjI6vQ2VwoyjYjYNEbBE8AH87TduWP5uyDR1D+Iteg==}
@@ -15296,8 +15347,8 @@ packages:
   posthog-js@1.154.5:
     resolution: {integrity: sha512-YYhWckDIRObfCrQpiLq+fdcDTIbQp8ebiKi0ueGohMRgugIG9LJVSpBgCeCHZm2C7sOxDUNcAr3T5VBDUSQoOg==}
 
-  posthog-node@3.1.3:
-    resolution: {integrity: sha512-UaOOoWEUYTcaaDe1w0fgHW/sXvFr3RO0l7yI7RUDzkZNZCfwXNO9r3pc14d1EtNppF/SHBrV5hNiZZATpf/vUw==}
+  posthog-node@4.1.1:
+    resolution: {integrity: sha512-hva26cNSz62H76blhWUF8mZmE3Q81KTrkkpHEZlD00qDov/phLQCrKQnxwjiAN3yI9pv/0/uwte6Gluy1xBmUA==}
     engines: {node: '>=15.0.0'}
 
   preact@10.23.1:
@@ -17889,6 +17940,17 @@ packages:
       react-streaming:
         optional: true
 
+  vike@0.4.193:
+    resolution: {integrity: sha512-nrqSXfocmm10asmoYrczO9iO4aZZ9SNygbpDTn0emmOPUFxROW3MUd8XcuBWJh6QVUTN4KiZYZDZGBMgPfhdbg==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
+    peerDependencies:
+      react-streaming: '>=0.3.42'
+      vite: '>=5.1.0'
+    peerDependenciesMeta:
+      react-streaming:
+        optional: true
+
   vinxi@0.4.1:
     resolution: {integrity: sha512-WGEYqIuJ2/P3sBoSVKsGvp/UKpW4wVSaAFdA18gthyMCEExN6nVteoA+Rv1wQFLKXTVL9JRpeGJjcLzcRRgGCA==}
     hasBin: true
@@ -20173,6 +20235,10 @@ snapshots:
     dependencies:
       '@brillout/import': 0.2.3
 
+  '@brillout/vite-plugin-server-entry@0.4.12':
+    dependencies:
+      '@brillout/import': 0.2.3
+
   '@brillout/vite-plugin-server-entry@0.4.7':
     dependencies:
       '@brillout/import': 0.2.3
@@ -21257,7 +21323,27 @@ snapshots:
     dependencies:
       lit: 3.2.0
 
+  '@lit-labs/ssr-client@1.1.7':
+    dependencies:
+      '@lit/reactive-element': 2.0.4
+      lit: 3.2.0
+      lit-html: 3.2.0
+
   '@lit-labs/ssr-dom-shim@1.2.1': {}
+
+  '@lit-labs/ssr@3.2.2':
+    dependencies:
+      '@lit-labs/ssr-client': 1.1.7
+      '@lit-labs/ssr-dom-shim': 1.2.1
+      '@lit/reactive-element': 2.0.4
+      '@parse5/tools': 0.3.0
+      '@types/node': 16.18.105
+      enhanced-resolve: 5.17.1
+      lit: 3.2.0
+      lit-element: 4.1.0
+      lit-html: 3.2.0
+      node-fetch: 3.3.2
+      parse5: 7.1.2
 
   '@lit/react@1.0.5(@types/react@18.3.3)':
     dependencies:
@@ -22153,6 +22239,10 @@ snapshots:
       '@parcel/watcher-win32-arm64': 2.4.1
       '@parcel/watcher-win32-ia32': 2.4.1
       '@parcel/watcher-win32-x64': 2.4.1
+
+  '@parse5/tools@0.3.0':
+    dependencies:
+      parse5: 7.1.2
 
   '@phenomnomnominal/tsquery@4.2.0(typescript@5.0.3)':
     dependencies:
@@ -24582,6 +24672,8 @@ snapshots:
 
   '@types/node@12.20.55': {}
 
+  '@types/node@16.18.105': {}
+
   '@types/node@17.0.45': {}
 
   '@types/node@18.19.43':
@@ -26679,6 +26771,14 @@ snapshots:
       - debug
 
   axios@1.7.3:
+    dependencies:
+      follow-redirects: 1.15.4
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
+  axios@1.7.5:
     dependencies:
       follow-redirects: 1.15.4
       form-data: 4.0.0
@@ -34101,9 +34201,9 @@ snapshots:
       preact: 10.23.1
       web-vitals: 4.2.3
 
-  posthog-node@3.1.3:
+  posthog-node@4.1.1:
     dependencies:
-      axios: 1.7.3
+      axios: 1.7.5
       rusha: 0.8.14
     transitivePeerDependencies:
       - debug
@@ -37582,6 +37682,23 @@ snapshots:
       sirv: 2.0.4
       source-map-support: 0.5.21
       vite: 4.5.3(@types/node@20.5.9)(lightningcss@1.26.0)(terser@5.31.5)
+
+  vike@0.4.193(vite@5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)):
+    dependencies:
+      '@brillout/import': 0.2.3
+      '@brillout/json-serializer': 0.5.13
+      '@brillout/picocolors': 1.0.14
+      '@brillout/require-shim': 0.1.2
+      '@brillout/vite-plugin-server-entry': 0.4.12
+      acorn: 8.12.1
+      cac: 6.7.14
+      es-module-lexer: 1.5.4
+      esbuild: 0.19.12
+      fast-glob: 3.3.2
+      semver: 7.6.3
+      sirv: 2.0.4
+      source-map-support: 0.5.21
+      vite: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
 
   vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5):
     dependencies:

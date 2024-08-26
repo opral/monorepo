@@ -15,7 +15,7 @@ const ignoreDirectory = `# ignore everything because the directory is auto-gener
 export type CompileOptions = {
 	messages: Readonly<Message[]>
 	settings: ProjectSettings
-	projectId?: string | undefined
+	projectId: string | undefined
 	/**
 	 * The file-structure of the compiled output.
 	 *
@@ -62,6 +62,7 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 		{
 			event: "PARAGLIDE-JS compile executed",
 			properties: {
+				version: PARJS_PACKAGE_VERSION,
 				stack,
 			},
 		},
