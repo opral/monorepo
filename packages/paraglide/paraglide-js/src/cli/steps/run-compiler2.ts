@@ -20,7 +20,7 @@ export const runCompiler: CliStep<
 		bundles: bundles,
 		settings: ctx.project.settings.get(),
 		projectId: undefined,
-		outputStructure: "message-modules",
+		// outputStructure: "message-modules",
 	})
 
 	await writeOutput(absoluteOutdir, output, ctx.fs)

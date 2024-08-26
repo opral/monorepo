@@ -265,6 +265,7 @@ async function fmt(js: string): Promise<string> {
 	return await prettier.format(js, {
 		arrowParens: "always",
 		singleQuote: true,
+		printWidth: 100,
 		parser: "babel",
 		plugins: ["prettier-plugin-jsdoc"],
 	})
