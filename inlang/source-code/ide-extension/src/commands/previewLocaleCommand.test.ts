@@ -4,7 +4,7 @@ import * as settings from "../utilities/settings/index.js"
 import { previewLocaleCommand } from "./previewLocaleCommand.js"
 import { CONFIGURATION } from "../configuration.js"
 
-describe("previewLanguageTagCommand", () => {
+describe("previewLocaleCommand", () => {
 	beforeEach(() => {
 		// Resetting the mocks before each test
 		vi.resetAllMocks()
