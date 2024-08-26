@@ -1,5 +1,10 @@
 import type { Change, Conflict } from "../schema.js";
 import type { Lix } from "../types.js";
+import {
+	ChangeDoesNotBelongToFileError,
+	ChangeHasBeenMutatedError,
+	ChangeNotDirectChildOfConflictError,
+} from "./errors.js";
 
 /**
  * Resolves a conflict by applying the given change.
@@ -11,10 +16,6 @@ export async function resolveConflict(args: {
 }): Promise<void> {
 	if (args.lix.plugins.length !== 1) {
 		throw new Error("Unimplemented. Only one plugin is supported for now");
-	}
-
-	if (args.conflict.resolved_with_change_id !== null) {
-		throw new Error("Conflict already resolved");
 	}
 
 	const plugin = args.lix.plugins[0];
@@ -30,7 +31,7 @@ export async function resolveConflict(args: {
 		.where("id", "=", args.conflict.change_id)
 		.executeTakeFirst();
 
-	const potentiallyExistingResolvedChange = await args.lix.db
+	const existingResolvedChange = await args.lix.db
 		.selectFrom("change")
 		.selectAll()
 		.where("id", "=", args.resolveWithChange.id)
@@ -41,29 +42,23 @@ export async function resolveConflict(args: {
 	// should be a new change.
 
 	if (
-		potentiallyExistingResolvedChange &&
-		JSON.stringify(potentiallyExistingResolvedChange) !==
+		existingResolvedChange &&
+		JSON.stringify(existingResolvedChange) !==
 			JSON.stringify(args.resolveWithChange)
 	) {
-		throw new Error(
-			"The to be resolved change id already exists in the database but both changes not equal. Changes are immutable. If you want to resolve a conflict by updating a change, create a new change.",
-		);
+		throw new ChangeHasBeenMutatedError();
 	}
 
-	// it's a new change (likely a result of a merge resolution)
-	if (potentiallyExistingResolvedChange === undefined) {
+	// it's a new change (likely the result of a merge resolution)
+	if (existingResolvedChange === undefined) {
 		if (
 			// TODO a change can have multiple parents. Displaying branches and merges is not possible if we only allow one parent.
-			args.resolveWithChange.parent_id !== args.conflict.change_id ||
+			args.resolveWithChange.parent_id !== args.conflict.change_id &&
 			args.resolveWithChange.parent_id !== args.conflict.conflicting_change_id
 		) {
-			throw new Error(
-				"The to be resolved change is not a direct child of the conflicting changes. The parent_id of the resolveWithChange must be the id of the conflict or the conflicting change.",
-			);
+			throw new ChangeNotDirectChildOfConflictError();
 		} else if (args.resolveWithChange.file_id !== change?.file_id) {
-			throw new Error(
-				"The to be resolved change does not belong to the same file as the conflicting changes",
-			);
+			throw new ChangeDoesNotBelongToFileError();
 		}
 	}
 
@@ -87,7 +82,7 @@ export async function resolveConflict(args: {
 			.execute();
 
 		// The change does not exist yet. (likely a merge resolution which led to a new change)
-		if (potentiallyExistingResolvedChange === undefined) {
+		if (existingResolvedChange === undefined) {
 			await trx
 				.insertInto("change")
 				.values({
