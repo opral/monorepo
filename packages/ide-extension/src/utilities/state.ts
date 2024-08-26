@@ -1,4 +1,3 @@
-import type { listProjects } from "@inlang/sdk"
 import type { InlangProject } from "@inlang/sdk2"
 
 /**
@@ -10,7 +9,7 @@ type State = {
 	 */
 	project: InlangProject
 	selectedProjectPath: string
-	projectsInWorkspace: Awaited<ReturnType<typeof listProjects>>
+	projectsInWorkspace: Array<{ projectPath: string }>
 }
 
 let _state: State
