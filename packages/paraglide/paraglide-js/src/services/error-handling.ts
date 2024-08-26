@@ -1,6 +1,6 @@
 import { PluginError } from "@inlang/sdk2"
 
-export function classifyProjectErrors(errors: PluginError[]) {
+export function classifyProjectErrors(errors: readonly Error[]) {
 	const isModuleError = (err: Error): err is PluginError => err instanceof PluginError
 
 	const [moduleErrors, otherErrors] = split(errors as Error[], isModuleError)

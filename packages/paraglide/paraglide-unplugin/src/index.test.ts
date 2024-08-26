@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { hashMessages } from "./index.js"
-import type { Message, ProjectSettings } from "@inlang/sdk"
+import type { Message, ProjectSettings } from "@inlang/sdk2"
 
 describe("hashMessages", () => {
 	it("should return the same hash for the same set of messages", () => {
