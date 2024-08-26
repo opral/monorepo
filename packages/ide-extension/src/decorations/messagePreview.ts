@@ -4,7 +4,7 @@ import { contextTooltip } from "./contextTooltip.js"
 import { getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
 import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
-import { getPreviewLanguageTag } from "../utilities/locale/getPreviewLocale.js"
+import { getPreviewLocale } from "../utilities/locale/getPreviewLocale.js"
 import { getSetting } from "../utilities/settings/index.js"
 import { selectBundleNested } from "@inlang/sdk2"
 
@@ -83,7 +83,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 					)
 					.execute()
 
-				const previewLanguageTag = await getPreviewLanguageTag()
+				const previewLanguageTag = await getPreviewLocale()
 				const translationLanguageTag = previewLanguageTag.length ? previewLanguageTag : baseLocale
 
 				const variant = _message?.variants?.find((v) => v.languageTag === translationLanguageTag)

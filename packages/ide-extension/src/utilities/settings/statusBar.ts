@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
 import { CONFIGURATION } from "../../configuration.js"
-import { getPreviewLanguageTag } from "../locale/getPreviewLocale.js"
+import { getPreviewLocale } from "../locale/getPreviewLocale.js"
 
 let statusBarItem: vscode.StatusBarItem | undefined = undefined
 
@@ -26,7 +26,7 @@ export const showStatusBar = async () => {
 		statusBarItem.dispose()
 	}
 
-	const previewLanguageTag = await getPreviewLanguageTag()
+	const previewLanguageTag = await getPreviewLocale()
 
 	if (!previewLanguageTag) return
 

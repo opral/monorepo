@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest"
-import { getPreviewLanguageTag } from "./getPreviewLocale.js"
+import { getPreviewLocale } from "./getPreviewLocale.js"
 import { state } from "../state.js"
 import { getSetting } from "../settings/index.js"
 
@@ -12,7 +12,7 @@ vi.mock("../settings/index", () => ({
 	getSetting: vi.fn(),
 }))
 
-describe("getPreviewLanguageTag", () => {
+describe("getPreviewLocale", () => {
 	it("returns the previewLanguageTag when it is available in project languages", async () => {
 		// @ts-expect-error
 		state.mockImplementation(() => ({
@@ -24,7 +24,7 @@ describe("getPreviewLanguageTag", () => {
 			},
 		}))
 		vi.mocked(getSetting).mockResolvedValue("de")
-		expect(await getPreviewLanguageTag()).toBe("de")
+		expect(await getPreviewLocale()).toBe("de")
 	})
 
 	it("falls back to baseLocale when previewLanguageTag is not available", async () => {
@@ -38,7 +38,7 @@ describe("getPreviewLanguageTag", () => {
 			},
 		}))
 		vi.mocked(getSetting).mockResolvedValue("fr")
-		expect(await getPreviewLanguageTag()).toBe("en")
+		expect(await getPreviewLocale()).toBe("en")
 	})
 
 	it("uses baseLocale if previewLanguageTag is not set", async () => {
@@ -52,7 +52,7 @@ describe("getPreviewLanguageTag", () => {
 			},
 		}))
 		vi.mocked(getSetting).mockResolvedValue("")
-		expect(await getPreviewLanguageTag()).toBe("en")
+		expect(await getPreviewLocale()).toBe("en")
 	})
 
 	it("handles undefined baseLocale gracefully", async () => {
@@ -66,6 +66,6 @@ describe("getPreviewLanguageTag", () => {
 			},
 		}))
 		vi.mocked(getSetting).mockResolvedValue("de")
-		expect(await getPreviewLanguageTag()).toBeUndefined()
+		expect(await getPreviewLocale()).toBeUndefined()
 	})
 })

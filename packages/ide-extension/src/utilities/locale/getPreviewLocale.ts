@@ -1,7 +1,7 @@
 import { state } from "../state.js"
 import { getSetting } from "../settings/index.js"
 
-export async function getPreviewLanguageTag() {
+export async function getPreviewLocale() {
 	const baseLocale = state().project.settings.get()?.baseLocale
 	const previewLanguageTag = ((await getSetting("previewLanguageTag")) as string) || baseLocale
 
