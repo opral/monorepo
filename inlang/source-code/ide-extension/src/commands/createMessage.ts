@@ -19,7 +19,7 @@ export const createMessageCommand = {
 		// guard
 		if (baseLocale === undefined) {
 			return msg(
-				"The `sourceLanguageTag` is not defined in the project but required to create a message.",
+				"The `baseLocale` is not defined in the project but required to create a message.",
 				"warn",
 				"notification"
 			)
