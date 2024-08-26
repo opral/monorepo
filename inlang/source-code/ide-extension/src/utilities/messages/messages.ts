@@ -467,11 +467,11 @@ export function getHtml(args: {
 					});
 				}
 
-				function machineTranslate(messageId, sourceLanguageTag, targetLanguageTags) {
+				function machineTranslate(messageId, baseLocale, targetLanguageTags) {
 					vscode.postMessage({
 						command: 'executeCommand',
 						commandName: 'sherlock.machineTranslateMessage',
-						commandArgs: { messageId, sourceLanguageTag, targetLanguageTags },
+						commandArgs: { messageId, baseLocale, targetLanguageTags },
 					});
 				}
             </script>
