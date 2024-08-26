@@ -4,8 +4,9 @@ import { contextTooltip } from "./contextTooltip.js"
 import { getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
 import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
-import { getPreviewLanguageTag } from "../utilities/language-tag/getPreviewLanguageTag.js"
+import { getPreviewLanguageTag } from "../utilities/locale/getPreviewLocale.js"
 import { getSetting } from "../utilities/settings/index.js"
+import { selectBundleNested } from "@inlang/sdk2"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -28,12 +29,12 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 		}
 
 		// Get the reference language
-		const sourceLanguageTag = state().project.settings()?.sourceLanguageTag
+		const baseLocale = state().project.settings.get().baseLocale
 		const ideExtensionConfig = state().project.customApi()?.["app.inlang.ideExtension"]
 
 		const messageReferenceMatchers = ideExtensionConfig?.messageReferenceMatchers
 
-		if (sourceLanguageTag === undefined || messageReferenceMatchers === undefined) {
+		if (baseLocale === undefined || messageReferenceMatchers === undefined) {
 			// don't show an error message. See issue:
 			// https://github.com/opral/monorepo/issues/927
 			return
@@ -70,15 +71,20 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 			return messages.map(async (message) => {
 				// resolve message from id or alias
-				const _message =
-					state().project.query.messages.get({
-						where: { id: message.messageId },
-					}) ?? state().project.query.messages.getByDefaultAlias(message.messageId)
+				const _message = await selectBundleNested(state().project.db)
+					// eb = expression builder
+					.where((eb) =>
+						eb.or([
+							// either the ids is equal to the message id
+							eb("id", "=", message.id),
+							// or the default alias (alias is a json that's why the --> syntax) is equal to the messageId
+							eb(eb.ref("alias", "->").key("default"), "=", message.id),
+						])
+					)
+					.execute()
 
 				const previewLanguageTag = await getPreviewLanguageTag()
-				const translationLanguageTag = previewLanguageTag.length
-					? previewLanguageTag
-					: sourceLanguageTag
+				const translationLanguageTag = previewLanguageTag.length ? previewLanguageTag : baseLocale
 
 				const variant = _message?.variants?.find((v) => v.languageTag === translationLanguageTag)
 
@@ -118,7 +124,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 									margin: "0 0.5rem",
 									contentText:
 										truncatedTranslation === "" || truncatedTranslation === undefined
-											? `ERROR: '${message.messageId}' not found in source with language tag '${sourceLanguageTag}'`
+											? `ERROR: '${message.messageId}' not found in source with language tag '${baseLocale}'`
 											: translation,
 									backgroundColor: translation
 										? editorInfoColors.background
@@ -165,7 +171,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 	CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => updateDecorations())
 	CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => updateDecorations())
 	CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.event(() => updateDecorations())
-	CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.event(() => updateDecorations())
+	CONFIGURATION.EVENTS.ON_DID_PREVIEW_LOCALE_CHANGE.event(() => updateDecorations())
 
 	vscode.workspace.onDidChangeConfiguration(
 		(event) => {
