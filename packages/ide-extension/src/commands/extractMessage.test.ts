@@ -74,7 +74,7 @@ describe("extractMessageCommand", () => {
 				})),
 				// @ts-expect-error
 				settings: vi.fn(() => ({
-					sourceLanguageTag: "en",
+					baseLocale: "en",
 				})),
 				query: {
 					// @ts-expect-error
@@ -107,7 +107,7 @@ describe("extractMessageCommand", () => {
 				// @ts-expect-error
 				customApi: vi.fn(() => ({ "app.inlang.ideExtension": {} })),
 				// @ts-expect-error
-				settings: vi.fn(() => ({ sourceLanguageTag: "en" })),
+				settings: vi.fn(() => ({ baseLocale: "en" })),
 			},
 		})
 		await extractMessageCommand.callback(mockTextEditor)

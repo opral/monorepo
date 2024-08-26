@@ -35,7 +35,7 @@ export const extractMessageCommand = {
 		}
 		if (baseLocale === undefined) {
 			return msg(
-				"The `sourceLanguageTag` is not defined in the project but required to extract a message.",
+				"The `baseLocale` is not defined in the project but required to extract a message.",
 				"warn",
 				"notification"
 			)
