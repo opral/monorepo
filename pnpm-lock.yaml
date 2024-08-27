@@ -897,6 +897,9 @@ importers:
       eslint-plugin-unicorn:
         specifier: ^55.0.0
         version: 55.0.0(eslint@8.57.0)
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
       tailwindcss:
         specifier: ^4.0.0-alpha.17
         version: 4.0.0-alpha.18
