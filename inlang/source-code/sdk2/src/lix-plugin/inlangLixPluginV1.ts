@@ -1,7 +1,9 @@
 import type { DiffReport, LixPlugin } from "@lix-js/sdk";
 import { Bundle, Message, Variant } from "../schema/schemaV2.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
-import { initKysely } from "../database/initKysely.js";
+import { initDb } from "../database/initDb.js";
+import { applyChanges } from "./applyChanges.js";
+import { detectConflicts } from "./detectConflicts.js";
 
 export const inlangLixPluginV1: LixPlugin<{
 	bundle: Bundle;
@@ -10,15 +12,8 @@ export const inlangLixPluginV1: LixPlugin<{
 }> = {
 	key: "inlang-lix-plugin-v1",
 	glob: "*",
-	// TODO
-	// idea:
-	//   1. runtime reflection for lix on the change schema
-	//   2. lix can validate the changes based on the schema
-	// schema: {
-	// 	bundle: Bundle,
-	// 	message: Message,
-	// 	variant: Variant,
-	// },
+	applyChanges,
+	detectConflicts,
 	diff: {
 		// TODO does not account for deletions
 		file: async ({ old, neu }) => {
@@ -28,11 +23,11 @@ export const inlangLixPluginV1: LixPlugin<{
 			}
 			const result: DiffReport[] = [];
 			const oldDb = old
-				? initKysely({ sqlite: await loadDatabaseInMemory(old.data) })
+				? initDb({ sqlite: await loadDatabaseInMemory(old.data) })
 				: undefined;
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			const newDb = neu
-				? initKysely({
+				? initDb({
 						sqlite: await loadDatabaseInMemory(neu.data),
 				  })
 				: undefined;
@@ -94,16 +89,13 @@ export const inlangLixPluginV1: LixPlugin<{
 
 			return result;
 		},
-		bundle: ({ old, neu }) =>
-			jsonStringifyComparison({ old, neu, type: "bundle" }),
-		message: ({ old, neu }) =>
-			jsonStringifyComparison({ old, neu, type: "message" }),
-		variant: ({ old, neu }) =>
-			jsonStringifyComparison({ old, neu, type: "variant" }),
+		bundle: ({ old, neu }) => diffSnapshot({ old, neu, type: "bundle" }),
+		message: ({ old, neu }) => diffSnapshot({ old, neu, type: "message" }),
+		variant: ({ old, neu }) => diffSnapshot({ old, neu, type: "variant" }),
 	},
 };
 
-function jsonStringifyComparison({
+function diffSnapshot({
 	old,
 	neu,
 	type,
@@ -122,6 +114,10 @@ function jsonStringifyComparison({
 			return [
 				{
 					type,
+					meta: {
+						// id is required for deletions
+						id: old.id ?? neu.id,
+					},
 					operation: "update",
 					old,
 					neu,

@@ -1,14 +1,17 @@
 import { type Lix } from "@lix-js/sdk";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../schema/settings.js";
-import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
-import { initKysely } from "../database/initKysely.js";
-import { initHandleSaveToLixOnChange } from "./logic/initHandleSaveToLixOnChange.js";
-import { importPlugins } from "../plugin/importPlugins.js";
+import { type SqliteDatabase } from "sqlite-wasm-kysely";
+import { initDb } from "../database/initDb.js";
+import { initHandleSaveToLixOnChange } from "./initHandleSaveToLixOnChange.js";
+import {
+	importPlugins,
+	type PreprocessPluginBeforeImportFunction,
+} from "../plugin/importPlugins.js";
 import type { InlangProject, Subscription } from "./api.js";
-import { createReactiveState } from "./logic/reactiveState.js";
+import { createState } from "./state/state.js";
 import { BehaviorSubject, map } from "rxjs";
-import { setSettings } from "./logic/setSettings.js";
+import { setSettings } from "./state/setSettings.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
 import { exportFiles, importFiles } from "../import-export/index.js";
 
@@ -19,15 +22,28 @@ export async function loadProject(args: {
 	sqlite: SqliteDatabase;
 	lix: Lix;
 	/**
-	 * For testing purposes only.
+	 * Provide plugins to the project.
+	 *
+	 * This is useful for testing or providing plugins that are
+	 * app specific. Keep in mind that provided plugins
+	 * are not shared with other instances.
+	 */
+	providePlugins?: InlangPlugin[];
+	/**
+	 * Function that preprocesses the plugin before importing it.
+	 *
+	 * The callback can be used to process plugins as needed in the
+	 * environment of the app. For example, Sherlock uses this to convert
+	 * ESM, which all inlang plugins are written in, to CJS which Sherlock
+	 * runs in.
 	 *
 	 * @example
-	 *   const project = await loadProject({ _mockPlugins: { "my-plugin": InlangPlugin } })
+	 *   const project = await loadProject({ preprocessPluginBeforeImport: (moduleText) => convertEsmToCjs(moduleText) })
 	 *
 	 */
-	_mockPlugins?: Record<string, InlangPlugin>;
+	preprocessPluginBeforeImport?: PreprocessPluginBeforeImportFunction;
 }): Promise<InlangProject> {
-	const db = initKysely({ sqlite: args.sqlite });
+	const db = initDb({ sqlite: args.sqlite });
 
 	const settingsFile = await args.lix.db
 		.selectFrom("file")
@@ -41,43 +57,58 @@ export async function loadProject(args: {
 
 	const { plugins, errors: pluginErrors } = await importPlugins({
 		settings,
-		mockPlugins: args._mockPlugins,
+		preprocessPluginBeforeImport: args.preprocessPluginBeforeImport,
 	});
 
-	const reactiveState = await createReactiveState({
+	if (args.providePlugins) {
+		plugins.push(...args.providePlugins);
+	}
+
+	const state = await createState({
 		plugins,
 		errors: pluginErrors,
 		settings,
 	});
 
-	await initHandleSaveToLixOnChange({ sqlite: args.sqlite, db, lix: args.lix });
+	await initHandleSaveToLixOnChange({
+		sqlite: args.sqlite,
+		db,
+		lix: args.lix,
+		state,
+	});
+
+	const settled = async () => {
+		await Promise.all(state.pendingPromises);
+		await args.lix.settled();
+	};
 
 	return {
 		db,
 		plugins: {
-			get: () => reactiveState.plugins$.getValue() as InlangPlugin[],
-			subscribe: withStructuredClone(reactiveState.plugins$)
-				.subscribe as Subscription<InlangPlugin[]>,
+			get: () => state.plugins$.getValue() as InlangPlugin[],
+			subscribe: withStructuredClone(state.plugins$).subscribe as Subscription<
+				InlangPlugin[]
+			>,
 		},
 		errors: {
-			get: () => structuredClone(reactiveState.errors$.getValue()) as Error[],
-			subscribe: withStructuredClone(reactiveState.errors$)
-				.subscribe as Subscription<Error[]>,
+			get: () => structuredClone(state.errors$.getValue()) as Error[],
+			subscribe: withStructuredClone(state.errors$).subscribe as Subscription<
+				Error[]
+			>,
 		},
+		settled,
 		settings: {
-			get: () =>
-				structuredClone(reactiveState.settings$.getValue()) as ProjectSettings,
-			subscribe: withStructuredClone(reactiveState.settings$)
+			get: () => structuredClone(state.settings$.getValue()) as ProjectSettings,
+			subscribe: withStructuredClone(state.settings$)
 				.subscribe as Subscription<ProjectSettings>,
-			set: (newSettings) =>
-				setSettings({ newSettings, lix: args.lix, reactiveState }),
+			set: (newSettings) => setSettings({ newSettings, lix: args.lix, state }),
 		},
 		importFiles: async ({ files, pluginKey }) => {
 			return await importFiles({
 				files,
 				pluginKey,
-				settings: reactiveState.settings$.getValue(),
-				plugins: reactiveState.plugins$.getValue(),
+				settings: state.settings$.getValue(),
+				plugins: state.plugins$.getValue(),
 				db,
 			});
 		},
@@ -85,8 +116,8 @@ export async function loadProject(args: {
 			return await exportFiles({
 				pluginKey,
 				db,
-				plugins: reactiveState.plugins$.getValue(),
-				settings: reactiveState.settings$.getValue(),
+				plugins: state.plugins$.getValue(),
+				settings: state.settings$.getValue(),
 			});
 		},
 		close: async () => {
@@ -96,20 +127,13 @@ export async function loadProject(args: {
 		},
 		_sqlite: args.sqlite,
 		toBlob: async () => {
-			const inlangDbContent = contentFromDatabase(args.sqlite);
-			// flush db to lix
-			await args.lix.db
-				.updateTable("file")
-				.where("path", "is", "/db.sqlite")
-				.set({
-					data: inlangDbContent,
-				})
-				.execute();
+			await settled();
 			return await args.lix.toBlob();
 		},
 		lix: args.lix,
 	};
 }
+
 
 /**
  * Ensures that the given value is a clone of the original value.

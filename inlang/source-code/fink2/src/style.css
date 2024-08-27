@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+@theme {
+    /* Animations */
+    --animate-slideIn: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1;
+    --animate-slideOut: slideOut 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+
+    @keyframes slideIn {
+        0% { transform: translate(0px, 80px) }
+        75% { transform: translate(0px, -8px) }
+        100% { transform: translate(0px, 0) }
+    }
+
+    @keyframes slideOut {
+        0% { transform: translate(0px, 0) }
+        25% { transform: translate(0px, -8px) }
+        100% { transform: translate(0px, 80px) }
+    }
+}
+
 .inlang-pattern-editor-neu .inlang-pattern-editor-contenteditable {
     background-color: #B2F4D4;
     border: 1px solid #16A34B;
@@ -7,6 +25,10 @@
 .inlang-pattern-editor-old .inlang-pattern-editor-contenteditable {
     background-color: #F3C9CD;
     border: 1px solid #DA2728;
+}
+
+.conflict-pattern .inlang-pattern-editor-contenteditable{
+    background-color: #FAFAFA;
 }
 
 .hide-new-variant::part(new-variant) {

@@ -7,6 +7,7 @@ export type LixDatabase = {
 	ref: Ref;
 	file_internal: LixFile;
 	change_queue: ChangeQueueEntry;
+	conflict: Conflict;
 };
 
 export type Ref = {
@@ -31,17 +32,26 @@ export type LixFile = {
 export type Commit = {
 	id: string; // uuid
 	// todo:
-	//  multiple users can commit one change
+	//  multiple authors can commit one change
 	//  think of real-time collaboration scenarios
-	user_id: string; // @relation to a user
+	author?: string;
 	description: string;
+	/**
+	 * @deprecated use created_at instead
+	 * todo remove before release
+	 */
 	created?: string;
+	created_at?: string;
 	parent_id: string;
 	// @relation changes: Change[]
 };
 
-export type Change = {
+export type Change<
+	T extends Record<string, any> = Record<string, { id: string }>,
+> = {
 	id: string;
+	parent_id?: Change["id"];
+	author?: string;
 	file_id: LixFile["id"];
 	/**
 	 * If no commit id exists on a change,
@@ -80,12 +90,29 @@ export type Change = {
 	 *   - For a csv cell change, the value would be the new cell value.
 	 *   - For an inlang message change, the value would be the new message.
 	 */
-	value?: Record<string, any> & {
-		id: string;
-	}; // JSONB
+	value?: T; // JSONB
 	/**
 	 * Additional metadata for the change used by the plugin
 	 * to process changes.
 	 */
-	meta?: string; // JSONB
+	meta?: Record<string, any>; // JSONB
+	/**
+	 * The time the change was created.
+	 */
+	// TODO make selectable, updatable
+	created_at?: string;
+};
+
+export type Conflict = {
+	meta?: Record<string, any>;
+	reason?: string;
+	change_id: Change["id"];
+	conflicting_change_id: Change["id"];
+	/**
+	 * The change id that the conflict was resolved with.
+	 *
+	 * Can be the change_id, conflicting_change_id, or another change_id
+	 * that resulted from a merge.
+	 */
+	resolved_with_change_id?: Change["id"];
 };

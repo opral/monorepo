@@ -1,14 +1,12 @@
 {
 	"name": "@inlang/sdk2",
+	"version": "2.0.0-prerelease.0",
 	"type": "module",
 	"license": "Apache-2.0",
-	"publishConfig": {
-		"access": "public"
-	},
 	"homepage": "https://inlang.com/documentation/sdk",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/opral/inlang-message-sdk"
+		"url": "https://github.com/opral/inlang-sdk"
 	},
 	"exports": {
 		".": "./dist/index.js"
@@ -29,11 +27,14 @@
 	"engines": {
 		"node": ">=18.0.0"
 	},
+	"bundleDependencies": [
+		"@lix-js/sdk",
+		"sqlite-wasm-kysely"
+	],
 	"dependencies": {
 		"@lix-js/sdk": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",
 		"dedent": "1.5.1",
-		"install": "^0.13.0",
 		"kysely": "^0.27.4",
 		"murmurhash3js": "^3.0.1",
 		"rxjs": "7.8.1",
@@ -41,15 +42,11 @@
 		"uuid": "^10.0.0"
 	},
 	"devDependencies": {
-		"@inlang/json-types": "workspace:*",
-		"@types/debug": "^4.1.12",
 		"@types/murmurhash3js": "^3.0.7",
+		"@types/uuid": "^10.0.0",
 		"@vitest/coverage-v8": "^2.0.5",
-		"@vitest/web-worker": "^1.6.0",
-		"jsdom": "22.1.0",
 		"memfs": "4.6.0",
 		"typescript": "^5.5.2",
-		"vite": "^5.3.2",
 		"vitest": "^2.0.5"
 	}
 }

@@ -13,7 +13,6 @@ export type PreprocessPluginBeforeImportFunction = (
 
 export async function importPlugins(args: {
 	settings: ProjectSettings;
-	mockPlugins?: Record<string, InlangPlugin>;
 	preprocessPluginBeforeImport?: PreprocessPluginBeforeImportFunction;
 }): Promise<{
 	plugins: InlangPlugin[];
@@ -22,18 +21,13 @@ export async function importPlugins(args: {
 	const plugins: InlangPlugin[] = [];
 	const errors: PluginError[] = [];
 	for (const uri of args.settings.modules ?? []) {
-		const mockPlugin = args.mockPlugins?.[uri];
-		if (mockPlugin) {
-			plugins.push(mockPlugin);
-			continue;
-		}
 		try {
-			const moduleAsText = await fetchModuleWithCache(uri);
-			const preprocessed =
-				(await args.preprocessPluginBeforeImport?.(moduleAsText)) ??
-				moduleAsText;
+			let moduleAsText = await fetchModuleWithCache(uri);
+			if (args.preprocessPluginBeforeImport) {
+				moduleAsText = await args.preprocessPluginBeforeImport(moduleAsText);
+			}
 			const moduleWithMimeType =
-				"data:application/javascript," + encodeURIComponent(preprocessed);
+				"data:application/javascript," + encodeURIComponent(moduleAsText);
 			const { default: plugin } = await import(
 				/* @vite-ignore */ moduleWithMimeType
 			);
@@ -46,7 +40,6 @@ export async function importPlugins(args: {
 }
 
 async function fetchModuleWithCache(uri: string): Promise<string> {
-	console.warn("fetchWithCache is not implemented");
 	const response = await fetch(uri);
 	if (!response.ok) {
 		throw new Error(

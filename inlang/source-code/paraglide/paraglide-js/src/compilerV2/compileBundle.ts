@@ -3,7 +3,7 @@ import { bundleIndexFunction } from "./bundleIndex.js"
 import { compileMessage } from "./compileMessage.js"
 import { mergeTypeRestrictions, type Compilation } from "./types.js"
 
-type Resource = {
+export type Resource = {
 	/** The compilation result for the bundle index */
 	bundle: Compilation<BundleNested>
 	/** The compilation results for the languages */

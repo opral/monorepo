@@ -1,10 +1,8 @@
 import type { TObject } from "@sinclair/typebox";
-import type { BundleNested } from "../schema/schemaV2.js";
 import type { MessageV1 } from "../schema/schemaV1.js";
 import type { ProjectSettings } from "../schema/settings.js";
-// eslint-disable-next-line no-restricted-imports
-import type fs from "node:fs/promises";
 import type { ResourceFile } from "../project/api.js";
+import type { BundleNested, NewBundleNested } from "../database/schema.js";
 
 export type InlangPlugin<
 	ExternalSettings extends Record<string, any> | unknown = unknown
@@ -23,7 +21,7 @@ export type InlangPlugin<
 	 */
 	loadMessages?: (args: {
 		settings: ProjectSettings;
-		nodeishFs: Pick<typeof fs, "readFile" | "readdir" | "mkdir" | "writeFile">;
+		nodeishFs: NodeFsPromisesSubsetLegacy;
 	}) => Promise<MessageV1[]> | MessageV1[];
 	/**
 	 * @deprecated Use `exportFiles` instead.
@@ -31,7 +29,7 @@ export type InlangPlugin<
 	saveMessages?: (args: {
 		messages: MessageV1[];
 		settings: ProjectSettings;
-		nodeishFs: Pick<typeof fs, "readFile" | "readdir" | "mkdir" | "writeFile">;
+		nodeishFs: NodeFsPromisesSubsetLegacy;
 	}) => Promise<void> | void;
 	/**
 	 * Import / Export files.
@@ -39,13 +37,13 @@ export type InlangPlugin<
 	 */
 	toBeImportedFiles?: (args: {
 		settings: ProjectSettings & ExternalSettings;
-		nodeFs: typeof fs;
+		nodeFs: NodeFsPromisesSubset;
 	}) => Promise<Array<ResourceFile>> | Array<ResourceFile>;
 	importFiles?: (args: {
 		files: Array<ResourceFile>;
 		settings: ProjectSettings & ExternalSettings; // we expose the settings in case the importFunction needs to access the plugin config
 	}) => {
-		bundles: BundleNested[];
+		bundles: NewBundleNested[];
 	};
 	exportFiles?: (args: {
 		bundles: BundleNested[];
@@ -64,4 +62,26 @@ export type InlangPlugin<
 	addCustomApi?: (args: {
 		settings: ProjectSettings & ExternalSettings;
 	}) => Record<string, unknown>;
+};
+
+/**
+ * Exposing only a subset to ease mapping of fs functions.
+ *
+ * https://github.com/opral/inlang-sdk/issues/136
+ */
+type NodeFsPromisesSubsetLegacy = {
+	readFile: (path: string) => Promise<Buffer>;
+	readdir: (path: string) => Promise<string[]>;
+	writeFile: (path: string, data: Buffer) => Promise<void>;
+	mkdir: (path: string) => Promise<void>;
+};
+
+/**
+ * Exposing only a subset to ease mapping of fs functions.
+ *
+ * https://github.com/opral/inlang-sdk/issues/136
+ */
+type NodeFsPromisesSubset = {
+	readFile: (path: string) => Promise<Buffer>;
+	readdir: (path: string) => Promise<string[]>;
 };

@@ -1,14 +1,14 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { openLixInMemory } from "./open/openLixInMemory.js";
 import { newLixFile } from "./newLix.js";
-import type { LixPlugin } from "./plugin.js";
+import type { DiffReport, LixPlugin } from "./plugin.js";
 
 test("should use queue and settled correctly", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
-			file: async ({ old, neu }) => {
+			file: async ({ old }) => {
 				return [
 					!old
 						? {
@@ -86,7 +86,9 @@ test("should use queue and settled correctly", async () => {
 
 	expect(changes).toEqual([
 		{
-			id: changes[0]?.id!,
+			id: changes[0]?.id,
+			author: null,
+			created_at: changes[0]?.created_at,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -143,7 +145,9 @@ test("should use queue and settled correctly", async () => {
 
 	expect(updatedChanges).toEqual([
 		{
-			id: updatedChanges[0]?.id!,
+			author: null,
+			id: updatedChanges[0]?.id,
+			created_at: updatedChanges[0]?.created_at,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -158,5 +162,78 @@ test("should use queue and settled correctly", async () => {
 		},
 	]);
 
-	await lix.commit({ userId: "tester", description: "test commit" });
+	await lix.commit({ description: "test commit" });
+});
+
+test("changes should contain the author", async () => {
+	const mockPlugin: LixPlugin = {
+		key: "mock-plugin",
+		glob: "*",
+		diff: {
+			file: vi.fn().mockResolvedValue([
+				{
+					type: "mock",
+					operation: "create",
+					old: undefined,
+					neu: {} as any,
+				},
+			] satisfies DiffReport[]),
+		},
+	};
+	const lix = await openLixInMemory({
+		blob: await newLixFile(),
+		providePlugins: [mockPlugin],
+	});
+
+	await lix.currentAuthor.set("some-id");
+
+	// testing an insert
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "mock",
+			data: new Uint8Array(),
+			path: "/mock-file.json",
+		})
+		.execute();
+
+	await lix.settled();
+
+	const changes1 = await lix.db.selectFrom("change").selectAll().execute();
+
+	expect(changes1[0]?.author).toBe("some-id");
+
+	// testing an update
+
+	await lix.db
+		.updateTable("file")
+		.set({
+			data: new Uint8Array(),
+		})
+		.where("id", "=", "mock")
+		.execute();
+
+	await lix.settled();
+
+	const changes2 = await lix.db.selectFrom("change").selectAll().execute();
+
+	expect(changes2[1]?.author).toBe("some-id");
+
+	// testing setting the author
+	await lix.currentAuthor.set("some-other-id");
+
+	await lix.db
+		.updateTable("file")
+		.set({
+			data: new Uint8Array(),
+		})
+		.where("id", "=", "mock")
+		.execute();
+
+	await lix.settled();
+
+	const changes3 = await lix.db.selectFrom("change").selectAll().execute();
+
+	expect(changes3.at(-1)?.author).toBe("some-other-id");
 });

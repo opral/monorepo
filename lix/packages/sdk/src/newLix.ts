@@ -49,6 +49,7 @@ export async function newLixFile(): Promise<Blob> {
       
       CREATE TABLE change (
         id TEXT PRIMARY KEY,
+        author TEXT,
         parent_id TEXT,
         type TEXT NOT NULL,
         file_id TEXT NOT NULL,
@@ -56,15 +57,26 @@ export async function newLixFile(): Promise<Blob> {
         operation TEXT NOT NULL,
         value TEXT,
         meta TEXT,
-        commit_id TEXT
+        commit_id TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
+      ) strict;
+
+      CREATE TABLE conflict (
+        change_id TEXT NOT NULL,
+        conflicting_change_id TEXT NOT NULL,
+        reason TEXT,
+        meta TEXT,
+        resolved_with_change_id TEXT,
+        PRIMARY KEY (change_id, conflicting_change_id)
       ) strict;
         
       CREATE TABLE 'commit' (
         id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
+        author TEXT,
         parent_id TEXT NOT NULL,
         description TEXT NOT NULL,
-        created TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
+        created TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
       ) strict;
 
       INSERT INTO ref values ('current', '00000000-0000-0000-0000-000000000000');

@@ -5,3 +5,7 @@ export * from "./schema.js";
 export { jsonObjectFrom, jsonArrayFrom } from "kysely/helpers/sqlite";
 export { v4 as uuidv4 } from "uuid";
 export * from "./types.js";
+export * from "./query-utilities/index.js";
+export * from "./resolve-conflict/errors.js";
+export { merge } from "./merge/merge.js";
+export { resolveConflict } from "./resolve-conflict/resolve-conflict.js";
