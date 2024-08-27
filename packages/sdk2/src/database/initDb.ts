@@ -3,6 +3,7 @@ import type { InlangDatabaseSchema } from "./schema.js";
 import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { v4 } from "uuid";
 import { generateBundleId } from "../bundle-id/bundle-id.js";
+import { SerializeJsonPlugin } from "./serializeJsonPlugin.js";
 
 export function initDb(args: { sqlite: SqliteDatabase }) {
 	initDefaultValueFunctions({ sqlite: args.sqlite });
@@ -10,7 +11,11 @@ export function initDb(args: { sqlite: SqliteDatabase }) {
 		dialect: createDialect({
 			database: args.sqlite,
 		}),
-		plugins: [new ParseJSONResultsPlugin(), new CamelCasePlugin()],
+		plugins: [
+			new ParseJSONResultsPlugin(),
+			new CamelCasePlugin(),
+			new SerializeJsonPlugin(),
+		],
 	});
 	return db;
 }
