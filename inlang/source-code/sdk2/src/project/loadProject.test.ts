@@ -8,8 +8,7 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 	const bundle = await project1.db
 		.insertInto("bundle")
 		.values({
-			// @ts-expect-error - manual stringification
-			alias: JSON.stringify({ default: "bundle1" }),
+			alias: { default: "bundle1" },
 		})
 		.returning("id")
 		.executeTakeFirstOrThrow();
@@ -17,12 +16,10 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 	const message = await project1.db
 		.insertInto("message")
 		.values({
-			bundle_id: bundle.id,
+			bundleId: bundle.id,
 			locale: "en",
-			// @ts-expect-error - manual stringification
-			declarations: "[]",
-			// @ts-expect-error - manual stringification
-			selectors: "[]",
+			declarations: [],
+			selectors: [],
 		})
 		.returning("id")
 		.executeTakeFirstOrThrow();
@@ -30,11 +27,9 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 	await project1.db
 		.insertInto("variant")
 		.values({
-			message_id: message.id,
-			// @ts-expect-error - manual stringification
-			match: JSON.stringify({}),
-			// @ts-expect-error - manual stringification
-			pattern: "[]",
+			messageId: message.id,
+			match: {},
+			pattern: [],
 		})
 		.execute();
 
