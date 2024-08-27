@@ -3,6 +3,8 @@ import { customElement, property, state } from "lit/decorators.js"
 
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
+import { createChangeEvent } from "../../helper/event.js"
+import type { Message } from "@inlang/sdk2"
 
 @customElement("inlang-add-input")
 export default class InlangAddInput extends LitElement {
@@ -62,9 +64,8 @@ export default class InlangAddInput extends LitElement {
 		`,
 	]
 
-	//props
-	@property()
-	addInput: (inputName: string) => void = () => {}
+	@property({ type: Array })
+	messages: Message[] | undefined
 
 	//state
 	@state()
@@ -82,13 +83,11 @@ export default class InlangAddInput extends LitElement {
 				class="dropdown"
 				@sl-show=${(e: CustomEvent) => {
 					const dropdown = this.shadowRoot?.querySelector("sl-dropdown")
-					if (dropdown) {
-						if (e.target === dropdown) {
-							const input: SlInput | undefined | null = this.shadowRoot?.querySelector("sl-input")
-							setTimeout(() => {
-								if (input) input.focus()
-							})
-						}
+					if (dropdown && e.target === dropdown) {
+						const input: SlInput | undefined | null = this.shadowRoot?.querySelector("sl-input")
+						setTimeout(() => {
+							if (input) input.focus()
+						})
 					}
 				}}
 			>
@@ -110,9 +109,33 @@ export default class InlangAddInput extends LitElement {
 							@keydown=${(e: KeyboardEvent) => {
 								if (e.key === "Enter") {
 									if (this._newInput && this._newInput.trim() !== "") {
-										this.addInput(this._newInput)
+										for (const message of this.messages ?? []) {
+											const newMessage = structuredClone(message)
+
+											newMessage.declarations.push({
+												type: "input",
+												name: this._newInput!,
+												value: {
+													type: "expression",
+													arg: {
+														type: "variable",
+														name: this._newInput!,
+													},
+												},
+											})
+
+											this.dispatchEvent(
+												createChangeEvent({
+													type: "Message",
+													operation: "update",
+													newData: newMessage,
+												})
+											)
+										}
 									}
+
 									this._newInput = ""
+
 									const dropdown = this.shadowRoot?.querySelector(".dropdown") as SlDropdown
 									dropdown.hide()
 								}

@@ -1,24 +1,29 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 
-import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
-
-import {
-	type Declaration,
-	createMessage,
-	createVariant,
-	type Message,
-	type Variant,
-	type MessageNested,
-	type Expression,
-	type ProjectSettings,
-} from "@inlang/sdk2"
-import addSelector from "../helper/crud/selector/add.js"
-import upsertVariant from "../helper/crud/variant/upsert.js"
+import { createVariant, type Message, type MessageNested, type Expression } from "@inlang/sdk2"
+import addSelector from "../../helper/crud/selector/add.js"
+import upsertVariant from "../../helper/crud/variant/upsert.js"
 import "./inlang-add-input.js"
+import getInputs from "../../helper/crud/input/get.js"
 
-@customElement("inlang-selector-configurator")
-export default class InlangSelectorConfigurator extends LitElement {
+import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
+import SlSelect from "@shoelace-style/shoelace/dist/components/select/select.component.js"
+import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
+import SlOption from "@shoelace-style/shoelace/dist/components/option/option.component.js"
+import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
+import SlTooltip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js"
+import { createChangeEvent } from "../../helper/event.js"
+
+if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)
+if (!customElements.get("sl-select")) customElements.define("sl-select", SlSelect)
+if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
+if (!customElements.get("sl-option")) customElements.define("sl-option", SlOption)
+if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
+if (!customElements.get("sl-tooltip")) customElements.define("sl-tooltip", SlTooltip)
+
+@customElement("inlang-add-selector")
+export default class InlangAddSelector extends LitElement {
 	static override styles = [
 		css`
 			.button-wrapper {
@@ -142,32 +147,24 @@ export default class InlangSelectorConfigurator extends LitElement {
 			sl-input::part(base) {
 				font-size: 13px;
 			}
+			.add-selector::part(base) {
+				border-radius: 4px;
+				cursor: pointer;
+				font-size: 14px;
+			}
+			.add-selector::part(base):hover {
+				background-color: var(--sl-input-background-color-hover);
+				color: var(--sl-input-color-hover);
+				border: 1px solid var(--sl-input-border-color-hover);
+			}
 		`,
 	]
-
-	@property()
-	inputs: Declaration[] | undefined
-
-	@property()
-	bundleId: string | undefined
 
 	@property()
 	message?: MessageNested | undefined
 
 	@property()
-	locale: ProjectSettings["locales"][number] | undefined
-
-	@property()
-	triggerMessageBundleRefresh: () => void = () => {}
-
-	@property()
-	triggerSave: () => void = () => {}
-
-	@property()
-	addMessage: (newMessage: MessageNested) => void = () => {}
-
-	@property()
-	addInput: (inputName: string) => void = () => {}
+	messages?: MessageNested | undefined
 
 	@state()
 	private _input: string | undefined
@@ -184,65 +181,14 @@ export default class InlangSelectorConfigurator extends LitElement {
 	@state()
 	private _newInputSting: string | undefined
 
-	// events
-	dispatchOnInsertMessage(message: Message, variants: Variant[]) {
-		const onInsertMessage = new CustomEvent("insert-message", {
-			bubbles: true,
-			composed: true,
-			detail: {
-				argument: {
-					message,
-					variants,
-				},
-			},
-		})
-		this.dispatchEvent(onInsertMessage)
-	}
-
-	dispatchOnUpdateMessage(message: Message, variants: Variant[]) {
-		const onUpdateMessage = new CustomEvent("update-message", {
-			bubbles: true,
-			composed: true,
-			detail: {
-				argument: {
-					message,
-					variants,
-				},
-			},
-		})
-		this.dispatchEvent(onUpdateMessage)
-	}
-
-	dispatchOnInsertVariant(variant: Variant) {
-		const onInsertVariant = new CustomEvent("insert-variant", {
-			bubbles: true,
-			composed: true,
-			detail: {
-				argument: {
-					variant,
-				},
-			},
-		})
-		this.dispatchEvent(onInsertVariant)
-	}
-
-	dispatchOnUpdateVariant(variant: Variant) {
-		const onUpdateVariant = new CustomEvent("update-variant", {
-			bubbles: true,
-			composed: true,
-			detail: {
-				argument: {
-					variant,
-				},
-			},
-		})
-		this.dispatchEvent(onUpdateVariant)
-	}
-
 	private _getPluralCategories = (): string[] | undefined => {
-		return this.locale
-			? [...new Intl.PluralRules(this.locale).resolvedOptions().pluralCategories, "*"]
+		return this.message?.locale
+			? [...new Intl.PluralRules(this.message.locale).resolvedOptions().pluralCategories, "*"]
 			: undefined
+	}
+
+	private _getInputs = () => {
+		return getInputs({ messages: (this.messages as any as Message[]) || [] })
 	}
 
 	private _handleAddSelector = (newMatchers: string[]) => {
@@ -250,95 +196,97 @@ export default class InlangSelectorConfigurator extends LitElement {
 		const dropdown = this.shadowRoot?.querySelector(".dropdown") as SlDropdown
 		if (dropdown) dropdown.hide()
 
+		// adding input
 		if (this._isNewInput && this._newInputSting && this._newInputSting.length > 0) {
-			this.addInput(this._newInputSting)
+			for (const message of (this.messages as any as Message[]) || []) {
+				const newMessage = structuredClone(message)
+
+				newMessage.declarations.push({
+					type: "input",
+					name: this._newInputSting!,
+					value: {
+						type: "expression",
+						arg: {
+							type: "variable",
+							name: this._newInputSting!,
+						},
+					},
+				})
+
+				this.dispatchEvent(
+					createChangeEvent({
+						type: "Message",
+						operation: "update",
+						newData: newMessage,
+					})
+				)
+			}
 			this._input = this._newInputSting
 		}
 
-		if (this._input) {
-			if (!this.message && this.locale) {
-				// create selector in not present message
-				const newMessage = createMessage({
-					bundleId: this.bundleId!,
-					locale: this.locale,
-					text: "",
-				})
+		if (this._input && this.message) {
+			// get variant matchers arrays
+			const _variants = structuredClone(this.message ? this.message.variants : [])
+			const _variantsMatcher = _variants.map((variant) => variant.match)
+			const message = structuredClone(this.message)
 
-				// add selector
-				addSelector({
-					message: newMessage,
-					selector: {
-						type: "expression",
-						arg: {
-							type: "variable",
-							name: this._input,
-						},
-						annotation: {
-							type: "function",
-							name: this._function || "plural",
-							options: [],
-						},
+			// add selector
+			addSelector({
+				message,
+				selector: {
+					type: "expression",
+					arg: {
+						type: "variable",
+						name: this._input,
 					},
-				})
-
-				this._addVariants({
-					message: newMessage,
-					variantsMatcher: [],
-					newMatchers: newMatchers,
-					newSelectorName: this._input,
-				})
-				this.addMessage(newMessage)
-				this.dispatchOnInsertMessage(newMessage, newMessage.variants)
-				for (const variant of newMessage.variants) {
-					this.dispatchOnInsertVariant(variant)
-				}
-			} else if (this.message) {
-				// get variant matchers arrays
-				const _variants = structuredClone(this.message ? this.message.variants : [])
-				const _variantsMatcher = _variants.map((variant) => variant.match)
-
-				// add selector
-				addSelector({
-					message: this.message,
-					selector: {
-						type: "expression",
-						arg: {
-							type: "variable",
-							name: this._input,
-						},
-						annotation: {
-							type: "function",
-							name: this._function || "plural",
-							options: [],
-						},
+					annotation: {
+						type: "function",
+						name: this._function || "plural",
+						options: [],
 					},
+				},
+			})
+
+			const updatedVariants = structuredClone(message.variants)
+			this.dispatchEvent(
+				createChangeEvent({
+					type: "Message",
+					operation: "update",
+					newData: message,
 				})
+			)
 
-				const updatedVariants = structuredClone(this.message.variants)
-				this.dispatchOnUpdateMessage(this.message, updatedVariants)
+			this._addVariants({
+				message: message,
+				variantsMatcher: _variantsMatcher,
+				newMatchers: newMatchers,
+				newSelectorName: this._input,
+			})
 
-				this._addVariants({
-					message: this.message,
-					variantsMatcher: _variantsMatcher,
-					newMatchers: newMatchers,
-					newSelectorName: this._input,
-				})
+			// only inserted variants should be dispatched -> show filter
+			const insertedVariants = message.variants.filter(
+				(variant) => !updatedVariants.some((v) => v.id === variant.id)
+			)
 
-				// only inserted variants should be dispatched -> show filter
-				const insertedVariants = this.message.variants.filter(
-					(variant) => !updatedVariants.find((v) => v.id === variant.id)
+			for (const insertedVariant of insertedVariants) {
+				this.dispatchEvent(
+					createChangeEvent({
+						type: "Variant",
+						operation: "create",
+						newData: insertedVariant,
+					})
 				)
-				for (const variant of insertedVariants) {
-					this.dispatchOnInsertVariant(variant)
-				}
-
-				for (const updatedVariant of updatedVariants) {
-					this.dispatchOnUpdateVariant(updatedVariant)
-				}
 			}
 
-			this.triggerSave()
-			this.triggerMessageBundleRefresh()
+			for (const updatedVariant of updatedVariants) {
+				this.dispatchEvent(
+					createChangeEvent({
+						type: "Variant",
+						operation: "update",
+						newData: updatedVariant,
+					})
+				)
+			}
 		}
 	}
 
@@ -349,8 +297,9 @@ export default class InlangSelectorConfigurator extends LitElement {
 		newSelectorName: string
 	}) => {
 		const newMatchers = props.newMatchers.filter((category) => category !== "*")
+
 		if (newMatchers) {
-			if (props.variantsMatcher && props.variantsMatcher.length > 0) {
+			if (props.variantsMatcher && JSON.stringify(props.variantsMatcher) !== "[{}]") {
 				for (const variantMatcher of props.variantsMatcher) {
 					for (const category of newMatchers) {
 						upsertVariant({
@@ -378,15 +327,15 @@ export default class InlangSelectorConfigurator extends LitElement {
 		}
 	}
 
-	private _resetConfiguration = () => {
-		this._input = this.inputs && this.inputs[0] && this.inputs[0].name
-		this._function = "plural"
-		this._matchers = this._getPluralCategories() || ["*"]
-	}
+	// private _resetConfiguration = () => {
+	// 	this._input = this.inputs && this.inputs[0] && this.inputs[0].name
+	// 	this._function = "plural"
+	// 	this._matchers = this._getPluralCategories() || ["*"]
+	// }
 
 	override async firstUpdated() {
 		await this.updateComplete
-		this._input = this.inputs && this.inputs[0] && this.inputs[0].name
+		this._input = this._getInputs()?.[0]?.name
 		this._function = "plural"
 		this._matchers = this._getPluralCategories() || ["*"]
 	}
@@ -400,23 +349,37 @@ export default class InlangSelectorConfigurator extends LitElement {
 					const dropdown = this.shadowRoot?.querySelector("sl-dropdown")
 					if (dropdown && e.target === dropdown) {
 						this._input =
-							this.inputs && this.inputs.length > 0 && this.inputs[0]
-								? this.inputs[0].name
+							this._getInputs() && this._getInputs().length > 0 && this._getInputs()[0]
+								? this._getInputs()[0]!.name
 								: undefined
-						if (this.inputs && this.inputs.length === 0) {
+						if (this._getInputs() && this._getInputs().length === 0) {
 							this._isNewInput = true
 						}
 					}
 				}}
 			>
 				<div slot="trigger" class="button-wrapper">
-					<slot></slot>
+					<sl-tooltip content="Add Selector to message"
+						><sl-button size="small" class="add-selector">
+							<svg
+								viewBox="0 0 24 24"
+								width="18"
+								height="18"
+								slot="prefix"
+								class="w-5 h-5 -mx-1"
+								style="margin-right: -3px"
+							>
+								<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
+							</svg>
+							Selector
+						</sl-button>
+					</sl-tooltip>
 				</div>
 				<div class="dropdown-container">
 					<div class="dropdown-item">
 						<div class="dropdown-header">
 							<p class="dropdown-title">Input</p>
-							${this._isNewInput && this.inputs && this.inputs.length > 0
+							${this._isNewInput && this._getInputs() && this._getInputs().length > 0
 								? html`<sl-tooltip content="Show inputs">
 										<sl-button
 											class="add-input"
@@ -478,10 +441,10 @@ export default class InlangSelectorConfigurator extends LitElement {
 										this._input = inputElement.value
 									}}
 									size="small"
-									value=${this._input || this.inputs?.[0]}
+									value=${this._input || this._getInputs()?.[0]}
 							  >
-									${this.inputs &&
-									this.inputs.map((input) => {
+									${this._getInputs() &&
+									this._getInputs().map((input) => {
 										return html`<sl-option value=${input.name}>${input.name}</sl-option>`
 									})}
 							  </sl-select>`
@@ -619,7 +582,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 								} else {
 									console.info("No matchers present")
 								}
-								this._resetConfiguration()
+								//this._resetConfiguration()
 							}}
 							size="small"
 							variant="primary"
@@ -634,6 +597,6 @@ export default class InlangSelectorConfigurator extends LitElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		"inlang-selector-configurator": InlangSelectorConfigurator
+		"inlang-add-selector": InlangAddSelector
 	}
 }

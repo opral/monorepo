@@ -45,6 +45,7 @@
 		"@lit/task": "^1.0.0",
 		"@shoelace-style/shoelace": "2.14.0",
 		"@sinclair/typebox": "0.31.28",
+		"@storybook/preview-api": "^8.2.9",
 		"chroma-js": "^2.4.2",
 		"lexical": "^0.16.1",
 		"typescript": "^5.5.4"

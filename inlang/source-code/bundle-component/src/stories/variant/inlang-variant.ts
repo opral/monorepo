@@ -1,28 +1,30 @@
-import {
-	type Variant,
-	type MessageNested,
-	type Declaration,
-	type ProjectSettings,
-} from "@inlang/sdk2"
+import { type Variant } from "@inlang/sdk2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
+import { baseStyling } from "../../styling/base.js"
 
 //helpers
-import deleteVariant from "../helper/crud/variant/delete.js"
-import updateMatch from "../helper/crud/variant/updateMatch.js"
+import updateMatch from "../../helper/crud/variant/updateMatch.js"
+import overridePrimitiveColors from "../../helper/overridePrimitiveColors.js"
 
-// internal components
-import "./inlang-lint-report-tip.js"
-import "./inlang-selector-configurator.js"
-import "./pattern-editor/inlang-pattern-editor.js"
+//components
+import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
+import SlTooltip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js"
+import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
+import { createChangeEvent } from "../../helper/event.js"
+
+if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
+if (!customElements.get("sl-tooltip")) customElements.define("sl-tooltip", SlTooltip)
+if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
 
 @customElement("inlang-variant")
 export default class InlangVariant extends LitElement {
 	static override styles = [
+		baseStyling,
 		css`
 			div {
 				box-sizing: border-box;
-				font-size: 13px;
+				font-size: 14px;
 			}
 			:host {
 				border-top: 1px solid var(--sl-input-border-color) !important;
@@ -119,136 +121,45 @@ export default class InlangVariant extends LitElement {
 	]
 
 	@property()
-	bundleId: string | undefined
-
-	//props
-	@property()
-	message: MessageNested | undefined
-
-	@property()
-	locale: ProjectSettings["locales"][number] | undefined
-
-	@property()
 	variant: Variant | undefined
 
-	@property()
-	inputs: Declaration[] | undefined
-
-	@property()
-	variantValidationReports: Array<any> | undefined
-
-	@property()
-	messageValidationReports: Array<any> | undefined
-
-	@property()
-	noHistory: boolean = false
-
-	@property()
-	setHoveredVariantId: (variantId: string | undefined) => void = () => {}
-
-	@property()
-	addMessage: (newMessage: MessageNested) => void = () => {}
-
-	@property()
-	addInput: (inputName: string) => void = () => {}
-
-	@property()
-	triggerMessageBundleRefresh: () => void = () => {}
-
-	@property()
-	triggerSave: () => void = () => {}
-
-	// @property()
-	// revert: (messageId?: string, variantId?: string) => void = () => {}
-
-	dispatchOnDeleteVariant(variant: Variant) {
-		const onDeleteVariant = new CustomEvent("delete-variant", {
-			bubbles: true,
-			composed: true,
-			detail: {
-				argument: {
-					variant,
-				},
-			},
-		})
-		this.dispatchEvent(onDeleteVariant)
-	}
-
-	dispatchOnUpdateVariant(variant: Variant) {
-		const onUpdateVariant = new CustomEvent("update-variant", {
-			bubbles: true,
-			composed: true,
-			detail: {
-				argument: {
-					variant,
-				},
-			},
-		})
-		this.dispatchEvent(onUpdateVariant)
-	}
-
-	dispatchOnShowHistory(variantId: string) {
-		const onShowHistory = new CustomEvent("show-history", {
-			bubbles: true,
-			composed: true,
-			detail: {
-				argument: {
-					variantId,
-				},
-			},
-		})
-		this.dispatchEvent(onShowHistory)
-	}
-
-	//functions
-	// private _getLintReports = (): any[] => {
-	// 	// wether a lint report belongs to a variant or message and when they are shown
-	// 	if (
-	// 		((this.message?.selectors && this.message.selectors.length === 0) ||
-	// 			!this.message?.selectors) &&
-	// 		this.message?.variants.length === 1
-	// 	) {
-	// 		// when there are no selectors the reports of the message and variant are shown on variant level
-	// 		return (this.messageValidationReports || []).concat(this.variantValidationReports || [])
-	// 	}
-
-	// 	return this.variantValidationReports || []
-	// }
-
 	private _delete = () => {
-		if (this.message && this.variant) {
-			deleteVariant({
-				message: this.message,
-				variant: this.variant,
-			})
-			this.dispatchOnDeleteVariant(this.variant)
-			this.triggerMessageBundleRefresh()
+		if (this.variant) {
+			this.dispatchEvent(
+				createChangeEvent({
+					type: "Variant",
+					operation: "delete",
+					newData: this.variant,
+				})
+			)
 		}
 	}
 
 	private _updateMatch = (selectorName: string, value: string) => {
 		//TODO improve this function
-		if (this.variant && this.message) {
+		if (this.variant) {
+			const newVariant = structuredClone(this.variant)
 			updateMatch({
-				variant: this.variant,
+				variant: newVariant,
 				selectorName,
 				value,
 			})
-			const variantID = this.variant.id
-
-			const changedVariant = this.message.variants.find((v) => v.id === variantID)
-			if (changedVariant) {
-				changedVariant.match[selectorName] = value
-			}
-
-			this.dispatchOnUpdateVariant(this.variant)
-			this.triggerMessageBundleRefresh()
+			this.dispatchEvent(
+				createChangeEvent({
+					type: "Variant",
+					operation: "update",
+					newData: newVariant,
+				})
+			)
 		}
 	}
 
 	//hooks
 	override async firstUpdated() {
 		await this.updateComplete
+
+		//get all sl-inputs and set the color to the inlang colors
+		overridePrimitiveColors()
 
 		// adds classes when dropdown is open, to keep it open when not hovering the variant
 		const selectorConfigurator = this.shadowRoot?.querySelector("inlang-selector-configurator")
@@ -301,19 +212,19 @@ export default class InlangVariant extends LitElement {
 	}
 
 	override render() {
-		return !(!this.variant && this.message && this.message?.selectors.length > 0)
+		return this.variant
 			? html`<div class="variant">
 					${this.variant
 						? Object.entries(this.variant.match).map(([selectorName, match]) => {
 								return html`
 									<sl-input
-										id="${this.message!.id}-${this.variant!.id}-${match}"
+										id="${this.variant!.id}-${match}"
 										class="match"
 										size="small"
 										value=${match}
 										@sl-blur=${(e: Event) => {
 											const element = this.shadowRoot?.getElementById(
-												`${this.message!.id}-${this.variant!.id}-${match}`
+												`${this.variant!.id}-${match}`
 											)
 											if (element && e.target === element) {
 												this._updateMatch(selectorName, (e.target as HTMLInputElement).value)
@@ -327,37 +238,7 @@ export default class InlangVariant extends LitElement {
 					<div class="actions">
 						<div class="dynamic-actions hide-dynamic-actions">
 							<slot name="variant-action"></slot>
-							${(this.message?.selectors.length === 0 && this.message?.variants.length <= 1) ||
-							!this.message?.selectors
-								? html`<inlang-selector-configurator
-										.inputs=${this.inputs}
-										.bundleId=${this.message?.bundleId ? this.message?.bundleId : this.bundleId!}
-										.message=${this.message}
-										.locale=${this.locale}
-										.triggerMessageBundleRefresh=${this.triggerMessageBundleRefresh}
-										.triggerSave=${this.triggerSave}
-										.addMessage=${this.addMessage}
-										.addInput=${this.addInput}
-								  >
-										<sl-tooltip content="Add Selector to message"
-											><sl-button size="small" class="add-selector">
-												<svg
-													viewBox="0 0 24 24"
-													width="18"
-													height="18"
-													slot="prefix"
-													class="w-5 h-5 -mx-1"
-													style="margin-right: -3px"
-												>
-													<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
-												</svg>
-												Selector
-											</sl-button>
-										</sl-tooltip>
-								  </inlang-selector-configurator>`
-								: ``}
-							${(this.message && this.variant && this.message.selectors.length > 0) ||
-							(this.message && this.variant && this.message.variants.length > 1)
+							${this.variant.pattern && this.variant.pattern.length > 1
 								? html`<sl-tooltip content="Delete"
 										><sl-button size="small" @click=${() => this._delete()}
 											><svg
@@ -380,31 +261,9 @@ export default class InlangVariant extends LitElement {
 								  ></sl-tooltip>`
 								: ``}
 						</div>
-						${!this.noHistory
-							? html`<div class="history-button">
-									<sl-tooltip content="Show history of variant">
-										<sl-button
-											size="small"
-											@click=${() =>
-												this.variant ? this.dispatchOnShowHistory(this.variant?.id) : undefined}
-											><svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="20px"
-												height="20px"
-												viewBox="0 0 24 24"
-												slot="prefix"
-												style="margin: 0 -3px"
-											>
-												<path
-													fill="currentColor"
-													d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89l.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7s-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.95 8.95 0 0 0 13 21a9 9 0 0 0 0-18m-1 5v5l4.28 2.54l.72-1.21l-3.5-2.08V8z"
-												/></svg
-										></sl-button>
-									</sl-tooltip>
-							  </div>`
-							: ``}
+						<slot name="edit-status"></slot>
 					</div>
-			  </div> `
+			  </div>`
 			: undefined
 	}
 }
