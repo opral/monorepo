@@ -8,8 +8,8 @@ import { classifyProjectErrors } from "~/services/error-handling.js"
 import { loadProjectFromDirectoryInMemory } from "@inlang/sdk2"
 
 export const compileCommand2 = new Command()
-	.name("compile2")
-	.summary("Compiles inlang Paraglide-JS using SDKv2")
+	.name("compile")
+	.summary("Compiles inlang Paraglide-JS")
 	.requiredOption("--project <path>", 'The path to the inlang project. Example: "./project.inlang"')
 	.requiredOption(
 		"--outdir <path>",
@@ -55,4 +55,5 @@ export const compileCommand2 = new Command()
 		})
 
 		logger.info("Successfully compiled the project.")
+		process.exit(0)
 	})

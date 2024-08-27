@@ -8,12 +8,31 @@ export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	undefined
 );
 
+export const authorNameAtom = atomWithStorage<string | undefined>(
+	"author-name",
+	undefined
+);
+
 let safeProjectToOpfsInterval: number;
 
+/**
+ * Force reload the project.
+ *
+ * Search for `setReloadProject` to see where this atom is set.
+ */
+export const forceReloadProjectAtom = atom<
+	ReturnType<typeof Date.now> | undefined
+>(undefined);
+
 export const projectAtom = atom(async (get) => {
+	// listen to forceReloadProjectAtom to reload the project
+	// workaround for https://github.com/opral/lix-sdk/issues/47
+	get(forceReloadProjectAtom);
+
 	if (safeProjectToOpfsInterval) {
 		clearInterval(safeProjectToOpfsInterval);
 	}
+
 	try {
 		const path = get(selectedProjectPathAtom);
 		if (!path) return undefined;
@@ -26,7 +45,7 @@ export const projectAtom = atom(async (get) => {
 			const file = await project.toBlob();
 			await writable.write(file);
 			await writable.close();
-		}, 1000);
+		}, 2000);
 
 		//@ts-ignore
 		window.lix = project.lix;
@@ -78,6 +97,14 @@ export const committedChangesAtom = atom(async (get) => {
 			).as("commit"),
 		])
 		.where("commit_id", "is not", null)
+		// TODO remove after sequence concept on lix
+		.where(
+			"change.id",
+			"not in",
+			project.lix.db
+				.selectFrom("conflict")
+				.select("conflict.conflicting_change_id")
+		)
 		.innerJoin("commit", "commit.id", "change.commit_id")
 		.orderBy("commit.created desc")
 		.execute();
@@ -93,6 +120,26 @@ export const pendingChangesAtom = atom(async (get) => {
 		.selectFrom("change")
 		.selectAll()
 		.where("commit_id", "is", null)
+		// TODO remove after sequence concept on lix
+		.where(
+			"change.id",
+			"not in",
+			project.lix.db
+				.selectFrom("conflict")
+				.select("conflict.conflicting_change_id")
+		)
+		.execute();
+	//console.log(result);
+	return result;
+});
+
+export const conflictsAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const project = await get(projectAtom);
+	if (!project) return [];
+	const result = await project.lix.db
+		.selectFrom("conflict")
+		.selectAll()
 		.execute();
 
 	//console.log(result);

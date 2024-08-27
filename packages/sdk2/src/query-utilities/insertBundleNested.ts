@@ -1,39 +1,42 @@
 import type { Kysely } from "kysely";
-import type { BundleNested } from "../schema/schemaV2.js";
 import { json } from "./toJSONRawBuilder.js";
-import type { InlangDatabaseSchema } from "../database/schema.js";
+import type {
+	InlangDatabaseSchema,
+	NewBundleNested,
+} from "../database/schema.js";
 
 export const insertBundleNested = async (
 	db: Kysely<InlangDatabaseSchema>,
-	bundle: BundleNested
+	bundle: NewBundleNested
 ): Promise<void> => {
-	await db
+	const insertedBundle = await db
 		.insertInto("bundle")
 		.values({
 			id: bundle.id,
 			alias: json(bundle.alias),
 		})
 		.returning("id")
-		.execute();
+		.executeTakeFirstOrThrow();
 
 	for (const message of bundle.messages) {
-		await db
+		const insertedMessage = await db
 			.insertInto("message")
 			.values({
 				id: message.id,
-				bundleId: bundle.id,
+				bundleId: insertedBundle.id,
 				locale: message.locale,
 				declarations: json(message.declarations),
 				selectors: json(message.selectors),
 			})
-			.execute();
+			.returning("id")
+			.executeTakeFirstOrThrow();
 
 		for (const variant of message.variants) {
 			await db
 				.insertInto("variant")
 				.values({
 					id: variant.id,
-					messageId: message.id,
+					messageId: insertedMessage.id,
 					match: json(variant.match),
 					pattern: json(variant.pattern),
 				})

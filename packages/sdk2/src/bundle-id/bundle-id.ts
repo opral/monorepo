@@ -10,6 +10,11 @@ export function generateBundleId() {
 	}`;
 }
 
+export function isBundleId(id: string): boolean {
+	// naive implementation (good enough for now)
+	return id.split("_").length === 4;
+}
+
 /**
  * The function generated a stable bundle id based on the input value.
  *

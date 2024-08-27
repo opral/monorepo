@@ -1,8 +1,6 @@
 import { expect, test } from "vitest";
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
-import { generateBundleId } from "../bundle-id/bundle-id.js";
-import { uuidv4 } from "@lix-js/sdk";
 
 test("it should persist changes of bundles, messages, and variants to lix ", async () => {
 	const file1 = await newProject();
@@ -10,9 +8,7 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 	const bundle = await project1.db
 		.insertInto("bundle")
 		.values({
-			id: generateBundleId(),
-			// @ts-expect-error - manual stringification
-			alias: JSON.stringify({ default: "bundle1" }),
+			alias: { default: "bundle1" },
 		})
 		.returning("id")
 		.executeTakeFirstOrThrow();
@@ -20,13 +16,10 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 	const message = await project1.db
 		.insertInto("message")
 		.values({
-			id: uuidv4(),
-			bundle_id: bundle.id,
+			bundleId: bundle.id,
 			locale: "en",
-			// @ts-expect-error - manual stringification
-			declarations: "[]",
-			// @ts-expect-error - manual stringification
-			selectors: "[]",
+			declarations: [],
+			selectors: [],
 		})
 		.returning("id")
 		.executeTakeFirstOrThrow();
@@ -34,13 +27,13 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 	await project1.db
 		.insertInto("variant")
 		.values({
-			id: uuidv4(),
-			message_id: message.id,
-			match: "exact",
-			// @ts-expect-error - manual stringification
-			pattern: "[]",
+			messageId: message.id,
+			match: {},
+			pattern: [],
 		})
 		.execute();
+
+	await project1.settled();
 
 	const file1AfterUpdates = await project1.toBlob();
 	await project1.close();
@@ -75,27 +68,6 @@ test("get and set settings", async () => {
 	expect(updatedSettings["plugin.key"]).toEqual({ test: "value" });
 });
 
-test("providing mock plugins should be possible", async () => {
-	const project = await loadProjectInMemory({
-		blob: await newProject({
-			settings: {
-				baseLocale: "en",
-				locales: ["en"],
-				modules: ["/my-cool-plugin.js"],
-			},
-		}),
-		_mockPlugins: {
-			"/my-cool-plugin.js": {
-				key: "my-cool-plugin",
-			},
-		},
-	});
-
-	const plugins = project.plugins.get();
-	expect(plugins.length).toBe(1);
-	expect(plugins[0]?.key).toBe("my-cool-plugin");
-	expect(project.errors.get().length).toBe(0);
-});
 
 test("it should set sourceLanguageTag and languageTags if non-existent to make v1 plugins work", async () => {
 	const project = await loadProjectInMemory({
@@ -111,4 +83,22 @@ test("it should set sourceLanguageTag and languageTags if non-existent to make v
 	expect(settings.sourceLanguageTag).toBe("en");
 	expect(settings.languageTags).toEqual(["en", "de"]);
 	expect(settings.locales).toEqual(["en", "de"]);
+});
+
+test("providing plugins should work", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en"],
+				modules: [],
+			},
+		}),
+		providePlugins: [{ key: "my-provided-plugin" }],
+	});
+
+	const plugins = project.plugins.get();
+	expect(plugins.length).toBe(1);
+	expect(plugins[0]?.key).toBe("my-provided-plugin");
+	expect(project.errors.get().length).toBe(0);
 });

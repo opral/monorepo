@@ -23,6 +23,14 @@ const VariantHistoryList = (props: {
 			.where("change.type", "=", "variant")
 			.where((eb) => eb.ref("value", "->>").key("id"), "=", props.variantId)
 			.innerJoin("commit", "commit.id", "change.commit_id")
+			// TODO remove after sequence concept on lix
+			.where(
+				"change.id",
+				"not in",
+				project.lix.db
+					.selectFrom("conflict")
+					.select("conflict.conflicting_change_id")
+			)
 			.orderBy("commit.user_id desc")
 			.orderBy("commit.created desc")
 			.execute();

@@ -4,7 +4,6 @@ import {
 	type TTemplateLiteral,
 	type TLiteral,
 } from "@sinclair/typebox";
-import { JSONObject } from "@inlang/json-types";
 
 const SDKSettings = Type.Object({
 	// TODO SDK-v2 SETTINGS do we need to generate a settings v2 schema?
@@ -111,7 +110,7 @@ const ExternalSettings = Type.Record(
 	// Using JSON (array and object) as a workaround to make the
 	// intersection between `InternalSettings`, which contains an array,
 	// and `ExternalSettings` which are objects possible
-	JSON as unknown as typeof JSONObject,
+	Type.Record(Type.String(), Type.Any()),
 	{ description: "Settings defined by apps, plugins, etc." }
 );
 

@@ -1,7 +1,6 @@
 import { expect, test } from "vitest";
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
-import { generateBundleId } from "../bundle-id/bundle-id.js";
 
 test("roundtrip should succeed", async () => {
 	const file1 = await newProject();
@@ -15,9 +14,7 @@ test("roundtrip should succeed", async () => {
 	const insertedBundle = await project1.db
 		.insertInto("bundle")
 		.values({
-			id: generateBundleId(),
-			// @ts-expect-error - manual stringification
-			alias: JSON.stringify({ default: "bundle1" }),
+			alias: { default: "bundle1" },
 		})
 		.returning("id")
 		.executeTakeFirstOrThrow();
