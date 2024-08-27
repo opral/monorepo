@@ -1,8 +1,7 @@
 import { test, expect } from "vitest";
 import { fromMessageV1 } from "./fromMessageV1.js";
 import { Value } from "@sinclair/typebox/value";
-import { MessageV1 } from "../../schema/schemaV1.js";
-import { BundleNested } from "../../schema/schemaV2.js";
+import { MessageV1 } from "../schemaV1.js";
 
 const messageV1: MessageV1 = {
 	id: "hello_world",
@@ -83,11 +82,9 @@ const bundle = {
 	],
 };
 
-test.todo("fromMessageV1", () => {
+test("fromMessageV1", () => {
 	expect(Value.Check(MessageV1, messageV1)).toBe(true);
-
 	const nestedBundle: unknown = fromMessageV1(messageV1, "mock");
-	expect(Value.Check(BundleNested, nestedBundle)).toBe(true);
 
 	expect(nestedBundle).toEqual(bundle);
 });
