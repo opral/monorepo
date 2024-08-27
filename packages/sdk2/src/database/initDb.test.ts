@@ -15,10 +15,9 @@ test("bundle ids should have a default value", async () => {
 	const bundle = await db
 		.insertInto("bundle")
 		.values({
-			// @ts-expect-error - manually serialize
-			alias: JSON.stringify({
+			alias: {
 				mock: "mock",
-			}),
+			},
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -38,10 +37,8 @@ test("message ids should default to uuid", async () => {
 		.values({
 			bundleId: "mock",
 			locale: "en",
-			// @ts-expect-error - manually serialize
-			selectors: JSON.stringify({ mock: "mock" }),
-			// @ts-expect-error - manually serialize
-			declarations: JSON.stringify({ mock: "mock" }),
+			selectors: [],
+			declarations: [],
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -60,13 +57,29 @@ test("variant ids should default to uuid", async () => {
 		.insertInto("variant")
 		.values({
 			messageId: "mock",
-			// @ts-expect-error - manually serialize
-			match: "{}",
-			// @ts-expect-error - manually serialize
-			pattern: JSON.stringify({}),
+			match: {},
+			pattern: [],
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
 	expect(validate(variant.id)).toBe(true);
+});
+
+test("it should handle json serialization", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+	await createSchema({ db, sqlite });
+
+	const bundle = await db
+		.insertInto("bundle")
+		.values({
+			alias: { mock: "mock" },
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(bundle.alias).toEqual({ mock: "mock" });
 });
