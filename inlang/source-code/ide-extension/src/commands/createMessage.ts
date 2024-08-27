@@ -2,7 +2,7 @@ import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
-import { generateBundleId, type Message } from "@inlang/sdk2"
+import { createMessage, generateBundleId } from "@inlang/sdk2"
 import { CONFIGURATION } from "../configuration.js"
 import { getSetting } from "../utilities/settings/index.js"
 
@@ -46,16 +46,23 @@ export const createMessageCommand = {
 			return
 		}
 
-		const message: Message = {
-			id: messageId,
+		const message = createMessage({
+			bundleId: generateBundleId(),
 			locale: baseLocale,
-			selectors: [],
-		}
+			text: messageValue,
+		})
 
 		// create message
-		const success = state().project.query.messages.create({
-			data: message,
-		})
+		const success = state()
+			.project.db.insertInto("message")
+			.values({
+				id: message.id,
+				bundleId: message.bundleId,
+				locale: message.locale,
+				declarations: message.declarations,
+				selectors: message.selectors,
+			})
+			.execute()
 
 		if (!success) {
 			return window.showErrorMessage(`Couldn't upsert new message with id ${messageId}.`)
