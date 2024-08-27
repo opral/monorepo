@@ -70,3 +70,21 @@ test("variant ids should default to uuid", async () => {
 
 	expect(validate(variant.id)).toBe(true);
 });
+
+test("it should handle json serialization", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+	await createSchema({ db, sqlite });
+
+	const bundle = await db
+		.insertInto("bundle")
+		.values({
+			alias: { mock: "mock" },
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(bundle.alias).toEqual({ mock: "mock" });
+});
