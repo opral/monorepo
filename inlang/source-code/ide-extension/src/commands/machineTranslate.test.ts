@@ -85,7 +85,7 @@ describe("machineTranslateMessageCommand", () => {
 		await machineTranslateMessageCommand.callback({
 			messageId: "nonexistent",
 			baseLocale: "en",
-			targetLanguageTags: ["es"],
+			targetLocales: ["es"],
 		})
 
 		expect(msg).toHaveBeenCalledWith("Message with id nonexistent not found.")
@@ -98,7 +98,7 @@ describe("machineTranslateMessageCommand", () => {
 		await machineTranslateMessageCommand.callback({
 			messageId: "validId",
 			baseLocale: "en",
-			targetLanguageTags: ["es"],
+			targetLocales: ["es"],
 		})
 
 		expect(msg).toHaveBeenCalledWith("Error translating message: RPC Error")
@@ -111,7 +111,7 @@ describe("machineTranslateMessageCommand", () => {
 		await machineTranslateMessageCommand.callback({
 			messageId: "validId",
 			baseLocale: "en",
-			targetLanguageTags: ["es"],
+			targetLocales: ["es"],
 		})
 
 		expect(msg).toHaveBeenCalledWith("No translation available.")
@@ -125,7 +125,7 @@ describe("machineTranslateMessageCommand", () => {
 		await machineTranslateMessageCommand.callback({
 			messageId: "validId",
 			baseLocale: "en",
-			targetLanguageTags: ["es"],
+			targetLocales: ["es"],
 		})
 
 		expect(msg).toHaveBeenCalledWith("Message translated.")
@@ -139,7 +139,7 @@ describe("machineTranslateMessageCommand", () => {
 		await machineTranslateMessageCommand.callback({
 			messageId: "validId",
 			baseLocale: "en",
-			targetLanguageTags: ["es"],
+			targetLocales: ["es"],
 		})
 
 		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).toHaveBeenCalled()
