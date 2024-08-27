@@ -17,3 +17,4 @@ export {
 export type { InlangDatabaseSchema } from "./database/schema.js";
 export type { ResourceFile } from "./project/api.js";
 export type { InlangPlugin } from "./plugin/schema.js";
+export * from "./database/schema.js";

@@ -231,6 +231,7 @@ describe("plugin.diff.file", () => {
 				messageId: "1",
 				// @ts-expect-error - database expects stringified json
 				pattern: JSON.stringify([{ type: "text", value: "hello world" }]),
+				// @ts-expect-error - database expects stringified json
 				match: JSON.stringify({}),
 			})
 			.execute();
@@ -266,6 +267,7 @@ describe("plugin.diff.file", () => {
 					messageId: "1",
 					// @ts-expect-error - database expects stringified json
 					pattern: JSON.stringify([{ type: "text", value: "hello world" }]),
+					// @ts-expect-error - database expects stringified json
 					match: JSON.stringify({}),
 				},
 				{
@@ -273,6 +275,7 @@ describe("plugin.diff.file", () => {
 					messageId: "1",
 					// @ts-expect-error - database expects stringified json
 					pattern: JSON.stringify([{ type: "text", value: "hello world" }]),
+					// @ts-expect-error - database expects stringified json
 					match: JSON.stringify({}),
 				},
 			])
@@ -288,6 +291,7 @@ describe("plugin.diff.file", () => {
 					pattern: JSON.stringify([
 						{ type: "text", value: "hello world from Berlin" },
 					]),
+					// @ts-expect-error - database expects stringified json
 					match: JSON.stringify({}),
 				},
 				{
@@ -295,6 +299,7 @@ describe("plugin.diff.file", () => {
 					messageId: "1",
 					// @ts-expect-error - database expects stringified json
 					pattern: JSON.stringify([{ type: "text", value: "hello world" }]),
+					// @ts-expect-error - database expects stringified json
 					match: JSON.stringify({}),
 				},
 			])

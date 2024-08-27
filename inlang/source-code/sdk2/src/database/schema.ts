@@ -1,7 +1,5 @@
-import type { Generated } from "kysely";
+import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { Bundle, Message, Variant } from "../schema/schemaV2.js";
-import type { SqliteDatabase } from "sqlite-wasm-kysely";
-import { sql, type Kysely } from "kysely";
 
 export type InlangDatabaseSchema = {
 	bundle: BundleTable;
@@ -21,33 +19,31 @@ type VariantTable = Omit<Variant, "id"> & {
 	id: Generated<string>;
 };
 
-export async function createSchema(args: {
-	db: Kysely<any>;
-	sqlite: SqliteDatabase;
-}) {
-	return sql`
-CREATE TABLE bundle (
-  id TEXT PRIMARY KEY DEFAULT (bundle_id()),
-  alias TEXT NOT NULL
-);
+export type NewBundle = Insertable<BundleTable>;
+export type BundleUpdate = Updateable<BundleTable>;
 
-CREATE TABLE message (
-  id TEXT PRIMARY KEY DEFAULT (uuid_v4()), 
-  bundle_id TEXT NOT NULL,
-  locale TEXT NOT NULL,
-  declarations TEXT NOT NULL,
-  selectors TEXT NOT NULL
-);
+export type NewMessage = Insertable<MessageTable>;
+export type MessageUpdate = Updateable<MessageTable>;
 
-CREATE TABLE variant (
-  id TEXT PRIMARY KEY DEFAULT (uuid_v4()), 
-  message_id TEXT NOT NULL,
-  match TEXT NOT NULL,
-  pattern TEXT NOT NULL
-);
-  
-CREATE INDEX idx_message_bundle_id ON message (bundle_id);
-CREATE INDEX idx_variant_message_id ON variant (message_id);
+export type NewVariant = Selectable<VariantTable>;
+export type VariantUpdate = Updateable<VariantTable>;
 
-`.execute(args.db);
-}
+export type MessageNested = Message & {
+	variants: Variant[];
+};
+export type NewMessageNested = NewMessage & {
+	variants: NewVariant[];
+};
+export type MessageNestedUpdate = Updateable<MessageTable> & {
+	variants: VariantUpdate[];
+};
+
+export type BundleNested = Bundle & {
+	messages: MessageNested[];
+};
+export type NewBundleNested = NewBundle & {
+	messages: NewMessageNested[];
+};
+export type BundleNestedUpdate = BundleUpdate & {
+	messages: MessageNestedUpdate[];
+};

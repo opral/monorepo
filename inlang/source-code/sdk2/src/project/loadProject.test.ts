@@ -1,8 +1,6 @@
 import { expect, test } from "vitest";
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
-import { generateBundleId } from "../bundle-id/bundle-id.js";
-import { uuidv4 } from "@lix-js/sdk";
 
 test("it should persist changes of bundles, messages, and variants to lix ", async () => {
 	const file1 = await newProject();
@@ -10,7 +8,6 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 	const bundle = await project1.db
 		.insertInto("bundle")
 		.values({
-			id: generateBundleId(),
 			// @ts-expect-error - manual stringification
 			alias: JSON.stringify({ default: "bundle1" }),
 		})
@@ -20,7 +17,6 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 	const message = await project1.db
 		.insertInto("message")
 		.values({
-			id: uuidv4(),
 			bundle_id: bundle.id,
 			locale: "en",
 			// @ts-expect-error - manual stringification
@@ -34,9 +30,9 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 	await project1.db
 		.insertInto("variant")
 		.values({
-			id: uuidv4(),
 			message_id: message.id,
-			match: "exact",
+			// @ts-expect-error - manual stringification
+			match: JSON.stringify({}),
 			// @ts-expect-error - manual stringification
 			pattern: "[]",
 		})
