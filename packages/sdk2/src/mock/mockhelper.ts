@@ -1,11 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type {
-	BundleNested,
-	Declaration,
-	Expression,
-	MessageNested,
-	Pattern,
-} from "../schema/schemaV2.js";
+import type { Declaration, Expression, Pattern } from "../schema/schemaV2.js";
 import { generateBundleId } from "../bundle-id/bundle-id.js";
 import {
 	inputNames,
@@ -15,6 +9,7 @@ import {
 } from "./mockdata.js";
 //@ts-ignore
 import { v4 } from "uuid";
+import type { BundleNested, MessageNested } from "../database/schema.js";
 
 export function generateUUID() {
 	return v4();

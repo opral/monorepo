@@ -1,14 +1,8 @@
 import { generateStableBundleId } from "../../bundle-id/bundle-id.js";
+import type { BundleNested, MessageNested } from "../../database/schema.js";
 import type { InlangPlugin } from "../../plugin/schema.js";
-import type { MessageV1, PatternV1 } from "../../schema/schemaV1.js";
-import type {
-	BundleNested,
-	Declaration,
-	Expression,
-	MessageNested,
-	Pattern,
-	Variant,
-} from "../../schema/schemaV2.js";
+import type { MessageV1, PatternV1 } from "../schemaV1.js";
+import type { Declaration, Expression, Pattern, Variant } from "../schemaV2.js";
 
 /**
  * Converts a MessageV1 into a BundleNested
@@ -58,6 +52,7 @@ export function fromMessageV1(
 			}
 
 			variants.push({
+				// @ts-expect-error - matching was not supported. no problem should arise
 				match: v1Variant.match,
 				pattern: fromPatternV1(v1Variant.pattern),
 				id: messageId + "_" + variantIndex,
