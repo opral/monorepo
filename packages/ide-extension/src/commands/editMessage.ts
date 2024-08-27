@@ -1,46 +1,49 @@
 import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
-import type { LanguageTag, Message } from "@inlang/sdk"
 import { getPatternFromString, getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
+import { selectBundleNested, createMessage, createVariant } from "@inlang/sdk2"
+import { Message } from "@inlang/sdk2"
 
 export const editMessageCommand = {
 	command: "sherlock.editMessage",
 	title: "Sherlock: Edit a Message",
 	register: commands.registerCommand,
-	callback: async function ({
-		messageId,
-		languageTag,
-	}: {
-		messageId: Message["id"]
-		languageTag: LanguageTag
-	}) {
-		// Get the message from the state
-		const message = state().project.query.messages.get({ where: { id: messageId } })
-		if (!message) {
+	callback: async function ({ messageId, locale }: { messageId: Message["id"]; locale: string }) {
+		// Get the bundle from the database
+		const bundle = await selectBundleNested(state().project.db)
+			.where((eb) => eb("bundle.id", "=", messageId))
+			.executeTakeFirstOrThrow()
+
+		if (!bundle) {
 			return msg(`Message with id ${messageId} not found.`)
 		}
 
-		// Find the variant with the specified language tag or create a new one
-		let variant = message.variants.find((v) => v.languageTag === languageTag)
+		// Find the message with the specified locale or create a new one
+		let message = bundle.messages.find((m) => m.locale === locale)
+
+		if (!message) {
+			message = createMessage({
+				bundleId: bundle.id,
+				locale: locale,
+				text: "",
+			})
+		}
+
+		// Find or create the variant for the locale
+		let variant = message.variants.find((v) => v.match["locale"] === locale)
+
 		if (!variant) {
-			// Create a new variant
-			variant = {
-				languageTag,
-				match: [],
-				pattern: [
-					{
-						type: "Text",
-						value: "",
-					},
-				],
-			}
+			variant = createVariant({
+				messageId: message.id,
+			})
+
 			message.variants.push(variant)
 		}
 
 		// Construct the complete pattern text
-		const stringPattern = getStringFromPattern({ pattern: variant.pattern, languageTag, messageId })
+		const stringPattern = getStringFromPattern({ pattern: variant.pattern, locale, messageId })
 
 		// Show input box with current message content
 		const newValue = await window.showInputBox({
@@ -55,10 +58,14 @@ export const editMessageCommand = {
 		variant.pattern = getPatternFromString({ string: newValue })
 
 		// Upsert the updated message
-		state().project.query.messages.upsert({
-			where: { id: messageId },
-			data: message,
-		})
+		await state()
+			.project.db.updateTable("message")
+			.set({
+				declarations: message.declarations,
+				selectors: message.selectors,
+			})
+			.where("message.id", "=", messageId)
+			.execute()
 
 		// Emit event to notify that a message was edited
 		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
