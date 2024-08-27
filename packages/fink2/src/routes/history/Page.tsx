@@ -35,7 +35,7 @@ export default function App() {
 								<div className="flex-1 flex gap-2 items-center justify-between pr-4 py-3 rounded h-[46px]">
 									<div className="flex gap-2 items-center">
 										<p className="text-zinc-950 text-sm! font-semibold">
-											By {commit.user_id}
+											By {commit.author}
 										</p>
 										<p className="text-sm! text-zinc-600">
 											{commit.description}
