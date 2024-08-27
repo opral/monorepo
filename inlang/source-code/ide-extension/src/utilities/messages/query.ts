@@ -1,45 +1,55 @@
-import type { LanguageTag, Message, Pattern } from "@inlang/sdk"
+import type { Message, Pattern, Expression, Text } from "@inlang/sdk2"
 import { msg } from "./msg.js"
 
-// get string from Pattern
 export const getStringFromPattern = (args: {
 	pattern: Pattern
-	languageTag: LanguageTag
+	locale: string
 	messageId: Message["id"]
 }): string => {
 	return args.pattern
 		.map((element) => {
-			if (element.type === "Text") {
-				return element.value
-			} else if (element.type === "VariableReference") {
-				return `{${element.name}}` // TODO: Use framework specific placeholder indication
+			if (element.type === "text") {
+				return (element as Text).value
+			} else if (element.type === "expression") {
+				const expression = element as Expression
+				if (expression.arg.type === "variable") {
+					return `{${expression.arg.name}}` // Handle VariableReference within Expression
+				} else if (expression.arg.type === "literal") {
+					return expression.arg.name // Handle Literal within Expression
+				} else {
+					return msg(
+						`Unknown expression type in message with id ${args.messageId} for locale ${args.locale}.`
+					)
+				}
 			} else {
 				return msg(
-					`Unknown pattern element type in message with id ${args.messageId} for languageTag ${args.languageTag}.`
+					`Unknown pattern element type in message with id ${args.messageId} for locale ${args.locale}.`
 				)
 			}
 		})
 		.join("")
 }
 
-// get Pattern from string
 export const getPatternFromString = (args: { string: string }): Pattern => {
-	const patternElements = args.string.split(/(\\?{.*?})/g) // TODO: Use framework specific placeholder indication
+	const patternElements = args.string.split(/(\\?{.*?})/g) // Split by placeholder patterns
 	const patternElementsWithTypes = patternElements
 		.flatMap((element) => {
 			if (element.startsWith("{") && element.endsWith("}")) {
 				return {
-					type: "VariableReference" as const,
-					name: element.slice(1, -1),
-				}
+					type: "expression" as const,
+					arg: {
+						type: "variable" as const,
+						name: element.slice(1, -1),
+					},
+				} as Expression // Return as an Expression with a VariableReference
 			} else if (element && element !== "") {
 				return {
-					type: "Text" as const,
+					type: "text" as const,
 					value: element,
-				}
+				} as Text // Return as Text
 			}
 			return undefined
 		})
-		.filter(Boolean) as Pattern
+		.filter(Boolean) as Pattern // Filter out any undefined elements
 	return patternElementsWithTypes
 }
