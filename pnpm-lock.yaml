@@ -237,15 +237,6 @@ importers:
         specifier: ^5.5.4
         version: 5.5.4
     devDependencies:
-      '@inlang/marketplace-manifest':
-        specifier: workspace:^
-        version: link:../versioned-interfaces/marketplace-manifest
-      '@inlang/marketplace-registry':
-        specifier: workspace:^
-        version: link:../marketplace-registry
-      '@inlang/message-lint-rule':
-        specifier: workspace:^
-        version: link:../versioned-interfaces/message-lint-rule
       '@nx/storybook':
         specifier: ^18.0.4
         version: 18.3.5(@types/node@20.14.14)(nx@18.3.3)(typescript@5.5.4)
@@ -1256,9 +1247,6 @@ importers:
 
   inlang/source-code/marketplace-registry:
     dependencies:
-      '@inlang/env-variables':
-        specifier: workspace:*
-        version: link:../env-variables
       '@inlang/marketplace-manifest':
         specifier: workspace:*
         version: link:../versioned-interfaces/marketplace-manifest
@@ -2950,9 +2938,6 @@ importers:
 
   inlang/source-code/versioned-interfaces/marketplace-manifest:
     dependencies:
-      '@inlang/project-settings':
-        specifier: workspace:*
-        version: link:../project-settings
       '@inlang/translatable':
         specifier: workspace:*
         version: link:../translatable
@@ -3081,14 +3066,13 @@ importers:
         version: 0.34.3
 
   inlang/source-code/versioned-interfaces/translatable:
-    dependencies:
-      '@inlang/language-tag':
-        specifier: workspace:*
-        version: link:../language-tag
     devDependencies:
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
       tsd:
         specifier: 0.28.1
         version: 0.28.1
