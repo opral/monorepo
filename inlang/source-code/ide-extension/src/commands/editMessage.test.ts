@@ -68,7 +68,7 @@ describe("editMessageCommand", () => {
 			executeTakeFirstOrThrow: vi.fn().mockResolvedValueOnce(undefined),
 		})
 
-		await editMessageCommand.callback({ messageId: "testMessage", locale: "en" })
+		await editMessageCommand.callback({ bundleId: "testMessage", locale: "en" })
 		expect(msg).toHaveBeenCalledWith("Message with id testMessage not found.")
 	})
 
@@ -108,7 +108,7 @@ describe("editMessageCommand", () => {
 		vi.mocked(window.showInputBox).mockResolvedValueOnce("Updated Message Content")
 		vi.mocked(getStringFromPattern).mockReturnValueOnce("Updated Message Content")
 
-		await editMessageCommand.callback({ messageId: "newMessage", locale: "en" })
+		await editMessageCommand.callback({ bundleId: "newMessage", locale: "en" })
 
 		expect(createMessage).toHaveBeenCalledWith({
 			bundleId: "testBundle",
@@ -148,7 +148,7 @@ describe("editMessageCommand", () => {
 		vi.mocked(window.showInputBox).mockResolvedValueOnce("Updated Message Content")
 		vi.mocked(getStringFromPattern).mockReturnValueOnce("Updated Message Content")
 
-		await editMessageCommand.callback({ messageId: "testMessage", locale: "en" })
+		await editMessageCommand.callback({ bundleId: "testMessage", locale: "en" })
 
 		expect(createVariant).toHaveBeenCalledWith({ messageId: "testMessage" })
 		expect(window.showInputBox).toHaveBeenCalledWith({
@@ -177,7 +177,7 @@ describe("editMessageCommand", () => {
 
 		vi.mocked(window.showInputBox).mockResolvedValueOnce("Updated content")
 
-		await editMessageCommand.callback({ messageId: "testMessage", locale: "en" })
+		await editMessageCommand.callback({ bundleId: "testMessage", locale: "en" })
 
 		expect(window.showInputBox).toHaveBeenCalledWith({
 			title: "Enter new value:",
@@ -192,7 +192,7 @@ describe("editMessageCommand", () => {
 	it("should cancel the operation if no new value is provided", async () => {
 		vi.mocked(window.showInputBox).mockResolvedValueOnce(undefined)
 
-		await editMessageCommand.callback({ messageId: "testMessage", locale: "en" })
+		await editMessageCommand.callback({ bundleId: "testMessage", locale: "en" })
 
 		expect(state().project.db.updateTable).not.toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).not.toHaveBeenCalled()
