@@ -1,26 +1,35 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from "vitest";
 import { inlangLixPluginV1 } from "./inlangLixPluginV1.js";
-import { newLixFile, openLixInMemory, type Change } from "@lix-js/sdk";
+import {
+	newLixFile,
+	openLixInMemory,
+	type Change,
+	type NewChange,
+} from "@lix-js/sdk";
 
 test("a create operation should not report a conflict given that the change does not exist in target", async () => {
 	const targetLix = await openLixInMemory({ blob: await newLixFile() });
 	const sourceLix = await openLixInMemory({ blob: await newLixFile() });
-	const change: Change = {
-		id: "1",
-		parent_id: undefined,
-		operation: "create",
-		file_id: "mock",
-		plugin_key: "mock",
-		type: "mock",
-		// @ts-expect-error  - type error in lix
-		value: JSON.stringify(["change 1"]),
-	};
-	await sourceLix.db.insertInto("change").values([change]).execute();
+	const changes = await sourceLix.db
+		.insertInto("change")
+		.values([
+			{
+				id: "1",
+				parent_id: undefined,
+				operation: "create",
+				file_id: "mock",
+				plugin_key: "mock",
+				type: "mock",
+				value: { id: "change 1" },
+			},
+		])
+		.returningAll()
+		.execute();
 	const conflicts = await inlangLixPluginV1.detectConflicts!({
 		sourceLix,
 		targetLix,
-		leafChangesOnlyInSource: [change],
+		leafChangesOnlyInSource: changes,
 	});
 	expect(conflicts).toHaveLength(0);
 });
@@ -39,15 +48,16 @@ test.todo(
 					file_id: "mock",
 					plugin_key: "mock",
 					type: "mock",
-					// @ts-expect-error  - type error in lix
-					value: JSON.stringify(["change 1"]),
+					value: {
+						id: "change 1",
+					},
 				},
 			])
 			.execute();
 
 		const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
 
-		const changesNotInTarget: Change[] = [
+		const changesNotInTarget: NewChange[] = [
 			{
 				id: "2",
 				parent_id: "1",
@@ -67,7 +77,7 @@ test.todo(
 		const conflicts = await inlangLixPluginV1.detectConflicts!({
 			sourceLix,
 			targetLix,
-			leafChangesOnlyInSource: changesNotInTarget,
+			leafChangesOnlyInSource: changesNotInTarget as Change[],
 		});
 		expect(conflicts).toHaveLength(1);
 		expect(conflicts[0]?.change_id).toBe("1");
@@ -80,7 +90,7 @@ test("it should report an UPDATE as a conflict if leaf changes are conflicting",
 	const targetLix = await openLixInMemory({ blob: await newLixFile() });
 	const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
 
-	const commonChanges: Change[] = [
+	const commonChanges: NewChange[] = [
 		{
 			id: "12s",
 			parent_id: undefined,
@@ -88,12 +98,13 @@ test("it should report an UPDATE as a conflict if leaf changes are conflicting",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			// @ts-expect-error  - type error in lix
-			value: JSON.stringify(["change 12s"]),
+			value: {
+				id: "change 12s",
+			},
 		},
 	];
 
-	const changesOnlyInTarget: Change[] = [
+	const changesOnlyInTarget: NewChange[] = [
 		{
 			id: "3sd",
 			parent_id: "12s",
@@ -101,12 +112,13 @@ test("it should report an UPDATE as a conflict if leaf changes are conflicting",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			// @ts-expect-error  - type error in lix
-			value: JSON.stringify(["change 3sd"]),
+			value: {
+				id: "change 3sd",
+			},
 		},
 	];
 
-	const changesOnlyInSource: Change[] = [
+	const changesOnlyInSource: NewChange[] = [
 		{
 			id: "2qa",
 			parent_id: "12s",
@@ -114,8 +126,9 @@ test("it should report an UPDATE as a conflict if leaf changes are conflicting",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			// @ts-expect-error  - type error in lix
-			value: JSON.stringify(["change 2qa"]),
+			value: {
+				id: "change 2qa",
+			},
 		},
 	];
 
@@ -130,7 +143,7 @@ test("it should report an UPDATE as a conflict if leaf changes are conflicting",
 		.execute();
 
 	const conflicts = await inlangLixPluginV1.detectConflicts!({
-		leafChangesOnlyInSource: changesOnlyInSource,
+		leafChangesOnlyInSource: changesOnlyInSource as Change[],
 		sourceLix: sourceLix,
 		targetLix: targetLix,
 	});
@@ -148,7 +161,7 @@ test("it should NOT report an UPDATE as a conflict if the common ancestor is the
 	const targetLix = await openLixInMemory({ blob: await newLixFile() });
 	const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
 
-	const commonChanges: Change[] = [
+	const commonChanges: NewChange[] = [
 		{
 			id: "12s",
 			parent_id: undefined,
@@ -156,12 +169,13 @@ test("it should NOT report an UPDATE as a conflict if the common ancestor is the
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			// @ts-expect-error  - type error in lix
-			value: JSON.stringify(["change 12s"]),
+			value: {
+				id: "change 12s",
+			},
 		},
 	];
 
-	const changesOnlyInTarget: Change[] = [
+	const changesOnlyInTarget: NewChange[] = [
 		{
 			id: "3sd",
 			parent_id: "12s",
@@ -169,8 +183,9 @@ test("it should NOT report an UPDATE as a conflict if the common ancestor is the
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			// @ts-expect-error  - type error in lix
-			value: JSON.stringify(["change 3sd"]),
+			value: {
+				id: "change 3sd",
+			},
 		},
 		{
 			id: "23a",
@@ -179,12 +194,13 @@ test("it should NOT report an UPDATE as a conflict if the common ancestor is the
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			// @ts-expect-error  - type error in lix
-			value: JSON.stringify(["change 23a"]),
+			value: {
+				id: "change 23a",
+			},
 		},
 	];
 
-	const changesOnlyInSource: Change[] = [];
+	const changesOnlyInSource: NewChange[] = [];
 
 	await sourceLix.db
 		.insertInto("change")
@@ -197,7 +213,7 @@ test("it should NOT report an UPDATE as a conflict if the common ancestor is the
 		.execute();
 
 	const conflicts = await inlangLixPluginV1.detectConflicts!({
-		leafChangesOnlyInSource: changesOnlyInSource,
+		leafChangesOnlyInSource: changesOnlyInSource as Change[],
 		sourceLix: sourceLix,
 		targetLix: targetLix,
 	});
@@ -217,15 +233,16 @@ test("it should NOT report a DELETE as a conflict if the parent of the target an
 				file_id: "mock",
 				plugin_key: "mock",
 				type: "mock",
-				// @ts-expect-error  - type error in lix
-				value: JSON.stringify(["change 12s"]),
+				value: {
+					id: "change 12s",
+				},
 			},
 		])
 		.execute();
 
 	const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
 
-	const changesNotInTarget: Change[] = [
+	const changesNotInTarget: NewChange[] = [
 		{
 			id: "3sd",
 			parent_id: "12s",
@@ -237,7 +254,7 @@ test("it should NOT report a DELETE as a conflict if the parent of the target an
 		},
 	];
 
-	const changesNotInSource: Change[] = [
+	const changesNotInSource: NewChange[] = [
 		{
 			id: "2qa",
 			parent_id: "12s",
@@ -245,8 +262,9 @@ test("it should NOT report a DELETE as a conflict if the parent of the target an
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			// @ts-expect-error  - type error in lix
-			value: JSON.stringify(["change 2qa"]),
+			value: {
+				id: "2qa",
+			},
 		},
 	];
 
@@ -257,7 +275,7 @@ test("it should NOT report a DELETE as a conflict if the parent of the target an
 	const conflicts = await inlangLixPluginV1.detectConflicts!({
 		sourceLix,
 		targetLix,
-		leafChangesOnlyInSource: changesNotInTarget,
+		leafChangesOnlyInSource: changesNotInTarget as Change[],
 	});
 
 	expect(conflicts).toHaveLength(1);

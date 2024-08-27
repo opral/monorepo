@@ -82,8 +82,15 @@ class ParseJsonTransformer extends OperationNodeTransformer {
 	}
 }
 
-function serializeJson(value: any): string {
-	if (typeof value === "object" || Array.isArray(value)) {
+function serializeJson(value: any): any {
+	if (
+		// binary data
+		value instanceof ArrayBuffer ||
+		// uint8array, etc
+		ArrayBuffer.isView(value)
+	) {
+		return value;
+	} else if (typeof value === "object" || Array.isArray(value)) {
 		return JSON.stringify(value);
 	}
 	return value;
