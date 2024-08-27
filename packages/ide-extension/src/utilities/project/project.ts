@@ -5,6 +5,7 @@ import { CONFIGURATION } from "../../configuration.js"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import { setState, state } from "../state.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
+import { _import } from "../import/_import.js"
 
 let projectViewNodes: ProjectViewNode[] = []
 
@@ -97,7 +98,7 @@ export async function handleTreeSelection(args: {
 		const inlangProject = await loadProjectFromDirectoryInMemory({
 			path: newSelectedProject,
 			fs: args.fs,
-			//_import: _import(normalizePath(args.workspaceFolder.uri.fsPath)),
+			preprocessPluginBeforeImport: _import(normalizePath(args.workspaceFolder.uri.fsPath)),
 		})
 
 		setState({
