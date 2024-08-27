@@ -6,7 +6,7 @@ import { window } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
 import { CONFIGURATION } from "../configuration.js"
 import { getSetting } from "../utilities/settings/index.js"
-import { randomHumanId } from "@inlang/sdk"
+import { generateBundleId } from "@inlang/sdk2"
 
 vi.mock("vscode", () => ({
 	commands: {
@@ -46,19 +46,19 @@ vi.mock("../utilities/settings/index", () => ({
 	getSetting: vi.fn(),
 }))
 
-vi.mock("@inlang/sdk", () => ({
-	randomHumanId: vi.fn(() => "randomHumanId123"),
+vi.mock("@inlang/sdk2", () => ({
+	createMessage: vi.fn(),
+	generateBundleId: vi.fn(() => "randomBundleId123"),
 }))
 
 describe("createMessageCommand", () => {
 	const mockState = {
 		project: {
 			settings: vi.fn().mockReturnThis(),
-			customApi: vi.fn().mockReturnThis(),
-			query: {
-				messages: {
-					create: vi.fn(),
-				},
+			db: {
+				insertInto: vi.fn().mockReturnThis(),
+				values: vi.fn().mockReturnThis(),
+				execute: vi.fn(),
 			},
 		},
 	}
@@ -122,7 +122,7 @@ describe("createMessageCommand", () => {
 		window.showInputBox.mockResolvedValueOnce("Message content")
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("messageId")
-		mockState.project.query.messages.create.mockReturnValueOnce(false)
+		mockState.project.db.execute.mockResolvedValueOnce(false)
 
 		await createMessageCommand.callback()
 
@@ -137,28 +137,17 @@ describe("createMessageCommand", () => {
 		window.showInputBox.mockResolvedValueOnce("Message content")
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("messageId")
-		mockState.project.query.messages.create.mockReturnValueOnce(true)
+		mockState.project.db.execute.mockResolvedValueOnce(true)
 
 		await createMessageCommand.callback()
 
-		expect(mockState.project.query.messages.create).toHaveBeenCalledWith({
-			data: {
-				id: "messageId",
-				alias: {},
-				selectors: [],
-				variants: [
-					{
-						languageTag: "en",
-						match: [],
-						pattern: [
-							{
-								type: "Text",
-								value: "Message content",
-							},
-						],
-					},
-				],
-			},
+		expect(mockState.project.db.insertInto).toHaveBeenCalledWith("message")
+		expect(mockState.project.db.values).toHaveBeenCalledWith({
+			id: expect.any(String),
+			bundleId: expect.any(String),
+			locale: "en",
+			declarations: expect.any(Array),
+			selectors: expect.any(Array),
 		})
 		expect(CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire).toHaveBeenCalled()
 		expect(telemetry.capture).toHaveBeenCalledWith({
@@ -167,24 +156,24 @@ describe("createMessageCommand", () => {
 		expect(msg).toHaveBeenCalledWith("Message created.")
 	})
 
-	it("should use randomHumanId as default messageId if autoHumanId is true", async () => {
+	it("should use generateBundleId as default messageId if autoHumanId is true", async () => {
 		mockState.project.settings.mockReturnValueOnce({ baseLocale: "en" })
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("Message content")
 		// @ts-expect-error
 		getSetting.mockResolvedValueOnce(true)
 		// @ts-expect-error
-		window.showInputBox.mockResolvedValueOnce("randomHumanId123")
+		window.showInputBox.mockResolvedValueOnce("randomBundleId123")
 
 		await createMessageCommand.callback()
 
-		expect(randomHumanId).toHaveBeenCalled()
+		expect(generateBundleId).toHaveBeenCalled()
 		expect(window.showInputBox).toHaveBeenCalledWith({
 			title: "Enter the message content:",
 		})
 	})
 
-	it("should not use randomHumanId as default messageId if autoHumanId is false", async () => {
+	it("should not use generateBundleId as default messageId if autoHumanId is false", async () => {
 		mockState.project.settings.mockReturnValueOnce({ baseLocale: "en" })
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("Message content")
