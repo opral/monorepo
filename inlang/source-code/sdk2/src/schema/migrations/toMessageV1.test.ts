@@ -1,12 +1,10 @@
 import { test, expect } from "vitest";
 import { toMessageV1 } from "./toMessageV1.js";
 import { Value } from "@sinclair/typebox/value";
-import { MessageV1 } from "../../schema/schemaV1.js";
-import { BundleNested } from "../../schema/schemaV2.js";
+import { MessageV1 } from "../schemaV1.js";
+import type { BundleNested } from "../../database/schema.js";
 
 test("toMessageV1", () => {
-	expect(Value.Check(BundleNested, bundle)).toBe(true);
-
 	const message: unknown = toMessageV1(bundle, "mock");
 	expect(Value.Check(MessageV1, message)).toBe(true);
 
@@ -66,7 +64,7 @@ const bundle = {
 			variants: [
 				{
 					id: humanReadableId + "_en_1",
-					match: [],
+					match: {},
 					messageId: humanReadableId + "_en",
 					pattern: [
 						{

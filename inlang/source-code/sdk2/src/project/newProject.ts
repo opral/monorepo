@@ -5,7 +5,7 @@ import {
 	createInMemoryDatabase,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
-import { createSchema } from "../database/schema.js";
+import { createSchema } from "../database/createSchema.js";
 
 /**
  * Creates a new inlang project.
