@@ -53,7 +53,6 @@ export const editMessageCommand = {
 		variant.pattern = getPatternFromString({ string: newValue })
 
 		// Upsert the updated message and variant
-
 		await state()
 			.project.db.transaction()
 			.execute(async (trx) => {
