@@ -28,7 +28,7 @@ export class SerializeJsonPlugin implements KyselyPlugin {
 	}
 
 	async transformResult(
-		args: PluginTransformResultArgs
+		args: PluginTransformResultArgs,
 	): Promise<QueryResult<UnknownRow>> {
 		return args.result;
 	}
@@ -74,7 +74,7 @@ class ParseJsonTransformer extends OperationNodeTransformer {
 							({
 								kind: "ValueNode",
 								value,
-							} as ValueNode)
+							}) as ValueNode,
 					),
 				} as ValueListNode;
 			}),

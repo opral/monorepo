@@ -1,4 +1,4 @@
-import { newLixFile, openLixInMemory, uuidv4 } from "@lix-js/sdk";
+import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import type { ProjectSettings } from "../schema/settings.js";
 import {
 	contentFromDatabase,
@@ -33,21 +33,13 @@ export async function newProject(args?: {
 			.insertInto("file")
 			.values([
 				{
-					// TODO ensure posix paths validation with lix
 					path: "/db.sqlite",
-					// TODO let lix generate the id
-					id: uuidv4(),
 					data: inlangDbContent,
 				},
 				{
 					path: "/settings.json",
-					id: uuidv4(),
 					data: await new Blob([
-						JSON.stringify(
-							args?.settings ?? defaultProjectSettings,
-							undefined,
-							2
-						),
+						JSON.stringify(args?.settings ?? defaultProjectSettings),
 					]).arrayBuffer(),
 				},
 			])

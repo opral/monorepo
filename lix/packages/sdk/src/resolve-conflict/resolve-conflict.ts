@@ -1,4 +1,5 @@
-import type { Change, Conflict } from "../schema.js";
+import type { Change, Conflict, NewChange } from "../database/schema.js";
+import { uuidv4 } from "../index.js";
 import type { Lix } from "../types.js";
 import {
 	ChangeDoesNotBelongToFileError,
@@ -13,7 +14,7 @@ import { isEqual } from "lodash-es";
 export async function resolveConflict(args: {
 	lix: Lix;
 	conflict: Conflict;
-	resolveWithChange: Change;
+	resolveWithChange: Change | NewChange;
 }): Promise<void> {
 	if (args.lix.plugins.length !== 1) {
 		throw new Error("Unimplemented. Only one plugin is supported for now");
@@ -30,13 +31,15 @@ export async function resolveConflict(args: {
 		.selectFrom("change")
 		.selectAll()
 		.where("id", "=", args.conflict.change_id)
-		.executeTakeFirst();
+		.executeTakeFirstOrThrow();
 
-	const existingResolvedChange = await args.lix.db
-		.selectFrom("change")
-		.selectAll()
-		.where("id", "=", args.resolveWithChange.id)
-		.executeTakeFirst();
+	const existingResolvedChange = args.resolveWithChange.id
+		? await args.lix.db
+				.selectFrom("change")
+				.selectAll()
+				.where("id", "=", args.resolveWithChange.id)
+				.executeTakeFirst()
+		: undefined;
 
 	// verify that the existing change does not differ from the resolveWithChange
 	// (changes are immutable). A change that is the result of a merge resolution
@@ -65,20 +68,27 @@ export async function resolveConflict(args: {
 	const file = await args.lix.db
 		.selectFrom("file")
 		.selectAll()
-		.where("id", "=", args.resolveWithChange.file_id)
+		.where("id", "=", change.file_id)
 		.executeTakeFirstOrThrow();
+
+	if (args.resolveWithChange.id === undefined) {
+		args.resolveWithChange.id = uuidv4();
+	}
 
 	const { fileData } = await plugin.applyChanges({
 		lix: args.lix,
 		file: file,
-		changes: [args.resolveWithChange],
+		changes: [
+			// @ts-ignore
+			args.resolveWithChange,
+		],
 	});
 
 	await args.lix.db.transaction().execute(async (trx) => {
 		await trx
 			.updateTable("file")
 			.set("data", fileData)
-			.where("id", "=", args.resolveWithChange.file_id)
+			.where("id", "=", change.file_id)
 			.execute();
 
 		// The change does not exist yet. (likely a merge resolution which led to a new change)
@@ -87,10 +97,8 @@ export async function resolveConflict(args: {
 				.insertInto("change")
 				.values({
 					...args.resolveWithChange,
-					// @ts-expect-error - manual stringification
-					value: JSON.stringify(args.resolveWithChange.value),
-					// @ts-expect-error - manual stringification
-					meta: JSON.stringify(args.resolveWithChange.meta),
+					value: args.resolveWithChange.value,
+					meta: args.resolveWithChange.meta,
 				})
 				.execute();
 		}

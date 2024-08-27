@@ -1,4 +1,4 @@
-import type { Change, Conflict, LixFile } from "./schema.js";
+import type { Change, LixFile, NewConflict } from "./database/schema.js";
 import type { LixReadonly } from "./types.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
@@ -29,7 +29,7 @@ export type LixPlugin<
 		 * conflicting changes in the target lix.
 		 */
 		leafChangesOnlyInSource: Change[];
-	}) => Promise<Conflict[]>;
+	}) => Promise<NewConflict[]>;
 	applyChanges?: (args: {
 		lix: LixReadonly;
 		file: LixFile;
@@ -106,4 +106,3 @@ type DiffReportDeletion = {
 	};
 	neu: undefined;
 };
-

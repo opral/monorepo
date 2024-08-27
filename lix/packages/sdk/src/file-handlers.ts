@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import type { LixDatabase, LixFile } from "./schema.js";
+import type { LixDatabaseSchema, LixFile } from "./database/schema.js";
 import type { LixPlugin } from "./plugin.js";
 import { minimatch } from "minimatch";
 import { Kysely } from "kysely";
@@ -25,7 +25,7 @@ async function getChangeHistory({
 	fileId: string;
 	pluginKey: string;
 	diffType: string;
-	db: Kysely<LixDatabase>;
+	db: Kysely<LixDatabaseSchema>;
 }): Promise<any[]> {
 	if (depth > 1) {
 		// TODO: walk change parents until depth
@@ -72,7 +72,7 @@ async function getChangeHistory({
 export async function handleFileInsert(args: {
 	neu: LixFile;
 	plugins: LixPlugin[];
-	db: Kysely<LixDatabase>;
+	db: Kysely<LixDatabaseSchema>;
 	currentAuthor?: string;
 	queueEntry: any;
 }) {
@@ -132,7 +132,7 @@ export async function handleFileChange(args: {
 	neu: LixFile;
 	plugins: LixPlugin[];
 	currentAuthor?: string;
-	db: Kysely<LixDatabase>;
+	db: Kysely<LixDatabaseSchema>;
 }) {
 	const fileId = args.neu?.id ?? args.old?.id;
 
