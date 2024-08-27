@@ -1,7 +1,7 @@
 import type { DiffReport, LixPlugin } from "@lix-js/sdk";
 import { Bundle, Message, Variant } from "../schema/schemaV2.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
-import { initKysely } from "../database/initKysely.js";
+import { initDb } from "../database/initDb.js";
 import { applyChanges } from "./applyChanges.js";
 import { detectConflicts } from "./detectConflicts.js";
 
@@ -23,11 +23,11 @@ export const inlangLixPluginV1: LixPlugin<{
 			}
 			const result: DiffReport[] = [];
 			const oldDb = old
-				? initKysely({ sqlite: await loadDatabaseInMemory(old.data) })
+				? initDb({ sqlite: await loadDatabaseInMemory(old.data) })
 				: undefined;
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			const newDb = neu
-				? initKysely({
+				? initDb({
 						sqlite: await loadDatabaseInMemory(neu.data),
 				  })
 				: undefined;
