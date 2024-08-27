@@ -18,7 +18,19 @@ vi.mock("vscode", () => ({
 }))
 
 vi.mock("../utilities/state.js", () => ({
-	state: vi.fn(),
+	state: vi.fn(() => ({
+		project: {
+			db: {
+				transaction: vi.fn().mockReturnValue({
+					execute: vi.fn(),
+				}),
+				updateTable: vi.fn().mockReturnThis(),
+				set: vi.fn().mockReturnThis(),
+				where: vi.fn().mockReturnThis(),
+				execute: vi.fn(),
+			},
+		},
+	})),
 }))
 
 vi.mock("../utilities/messages/msg.js", () => ({
@@ -40,7 +52,7 @@ vi.mock("../configuration.js", () => ({
 }))
 
 describe("editMessageCommand", () => {
-	let mockBundle: any = {}
+	let mockBundle: any
 
 	beforeEach(() => {
 		mockBundle = {
@@ -65,35 +77,21 @@ describe("editMessageCommand", () => {
 		// @ts-expect-error
 		vi.mocked(selectBundleNested).mockReturnValueOnce({
 			where: vi.fn().mockReturnThis(),
-			executeTakeFirstOrThrow: vi.fn().mockResolvedValueOnce(undefined),
+			executeTakeFirst: vi.fn().mockResolvedValueOnce(undefined),
 		})
 
-		await editMessageCommand.callback({ bundleId: "testMessage", locale: "en" })
-		expect(msg).toHaveBeenCalledWith("Message with id testMessage not found.")
+		await editMessageCommand.callback({ bundleId: "testBundle", locale: "en" })
+
+		expect(msg).toHaveBeenCalledWith("Bundle with id testBundle not found.")
 	})
 
 	it("should create a new message if none exists for the locale", async () => {
-		mockBundle = {
-			id: "testBundle",
-			messages: [
-				{
-					id: "testMessage",
-					locale: "en",
-					variants: [
-						{
-							id: "testVariant",
-							match: { locale: "en" },
-							pattern: { elements: [] },
-						},
-					],
-				},
-			],
-		}
+		mockBundle.messages = [] // No messages available
 
 		// @ts-expect-error
 		vi.mocked(selectBundleNested).mockReturnValueOnce({
 			where: vi.fn().mockReturnThis(),
-			executeTakeFirstOrThrow: vi.fn().mockResolvedValueOnce(mockBundle),
+			executeTakeFirst: vi.fn().mockResolvedValueOnce(mockBundle),
 		})
 
 		vi.mocked(createMessage).mockReturnValueOnce({
@@ -108,7 +106,7 @@ describe("editMessageCommand", () => {
 		vi.mocked(window.showInputBox).mockResolvedValueOnce("Updated Message Content")
 		vi.mocked(getStringFromPattern).mockReturnValueOnce("Updated Message Content")
 
-		await editMessageCommand.callback({ bundleId: "newMessage", locale: "en" })
+		await editMessageCommand.callback({ bundleId: "testBundle", locale: "en" })
 
 		expect(createMessage).toHaveBeenCalledWith({
 			bundleId: "testBundle",
@@ -119,18 +117,18 @@ describe("editMessageCommand", () => {
 			title: "Enter new value:",
 			value: "Updated Message Content",
 		})
-		expect(state().project.db.updateTable).toHaveBeenCalled()
+		expect(state().project.db.transaction().execute).toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).toHaveBeenCalled()
-		expect(msg).toHaveBeenCalledWith
+		expect(msg).toHaveBeenCalledWith("Message updated.")
 	})
 
 	it("should create a new variant if none exists for the locale", async () => {
-		mockBundle.messages[0].variants = []
+		mockBundle.messages[0].variants = [] // No variants available
 
 		// @ts-expect-error
 		vi.mocked(selectBundleNested).mockReturnValueOnce({
 			where: vi.fn().mockReturnThis(),
-			executeTakeFirstOrThrow: vi.fn().mockResolvedValueOnce(mockBundle),
+			executeTakeFirst: vi.fn().mockResolvedValueOnce(mockBundle),
 		})
 
 		vi.mocked(createVariant).mockReturnValueOnce({
@@ -148,14 +146,14 @@ describe("editMessageCommand", () => {
 		vi.mocked(window.showInputBox).mockResolvedValueOnce("Updated Message Content")
 		vi.mocked(getStringFromPattern).mockReturnValueOnce("Updated Message Content")
 
-		await editMessageCommand.callback({ bundleId: "testMessage", locale: "en" })
+		await editMessageCommand.callback({ bundleId: "testBundle", locale: "en" })
 
 		expect(createVariant).toHaveBeenCalledWith({ messageId: "testMessage" })
 		expect(window.showInputBox).toHaveBeenCalledWith({
 			title: "Enter new value:",
 			value: "Updated Message Content",
 		})
-		expect(state().project.db.updateTable).toHaveBeenCalled()
+		expect(state().project.db.transaction().execute).toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).toHaveBeenCalled()
 		expect(msg).toHaveBeenCalledWith("Message updated.")
 	})
@@ -164,7 +162,7 @@ describe("editMessageCommand", () => {
 		// @ts-expect-error
 		vi.mocked(selectBundleNested).mockReturnValueOnce({
 			where: vi.fn().mockReturnThis(),
-			executeTakeFirstOrThrow: vi.fn().mockResolvedValueOnce(mockBundle),
+			executeTakeFirst: vi.fn().mockResolvedValueOnce(mockBundle),
 		})
 
 		vi.mocked(getStringFromPattern).mockReturnValueOnce("Current content")
@@ -177,14 +175,14 @@ describe("editMessageCommand", () => {
 
 		vi.mocked(window.showInputBox).mockResolvedValueOnce("Updated content")
 
-		await editMessageCommand.callback({ bundleId: "testMessage", locale: "en" })
+		await editMessageCommand.callback({ bundleId: "testBundle", locale: "en" })
 
 		expect(window.showInputBox).toHaveBeenCalledWith({
 			title: "Enter new value:",
 			value: "Current content",
 		})
 		expect(getPatternFromString).toHaveBeenCalledWith({ string: "Updated content" })
-		expect(state().project.db.updateTable).toHaveBeenCalled()
+		expect(state().project.db.transaction().execute).toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).toHaveBeenCalled()
 		expect(msg).toHaveBeenCalledWith("Message updated.")
 	})
@@ -192,9 +190,9 @@ describe("editMessageCommand", () => {
 	it("should cancel the operation if no new value is provided", async () => {
 		vi.mocked(window.showInputBox).mockResolvedValueOnce(undefined)
 
-		await editMessageCommand.callback({ bundleId: "testMessage", locale: "en" })
+		await editMessageCommand.callback({ bundleId: "testBundle", locale: "en" })
 
-		expect(state().project.db.updateTable).not.toHaveBeenCalled()
+		expect(state().project.db.transaction().execute).not.toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).not.toHaveBeenCalled()
 	})
 })
