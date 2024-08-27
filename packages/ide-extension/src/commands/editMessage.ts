@@ -53,22 +53,27 @@ export const editMessageCommand = {
 		variant.pattern = getPatternFromString({ string: newValue })
 
 		// Upsert the updated message and variant
-		await state()
-			.project.db.updateTable("message")
-			.set({
-				declarations: message.declarations,
-				selectors: message.selectors,
-			})
-			.where("message.id", "=", message.id)
-			.execute()
 
 		await state()
-			.project.db.updateTable("variant")
-			.set({
-				pattern: variant.pattern,
+			.project.db.transaction()
+			.execute(async (trx) => {
+				await trx
+					.updateTable("message")
+					.set({
+						declarations: message.declarations,
+						selectors: message.selectors,
+					})
+					.where("message.id", "=", message.id)
+					.execute()
+
+				await trx
+					.updateTable("variant")
+					.set({
+						pattern: variant.pattern,
+					})
+					.where("variant.id", "=", variant.id)
+					.execute()
 			})
-			.where("variant.id", "=", variant.id)
-			.execute()
 
 		// Emit event to notify that a message was edited
 		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
