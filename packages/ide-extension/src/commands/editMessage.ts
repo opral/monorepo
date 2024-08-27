@@ -3,43 +3,34 @@ import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
 import { getPatternFromString, getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
-import { createMessage, createVariant, Bundle, Variant } from "@inlang/sdk2"
+import { Bundle, selectBundleNested } from "@inlang/sdk2"
 
 export const editMessageCommand = {
 	command: "sherlock.editMessage",
 	title: "Sherlock: Edit a Message",
 	register: commands.registerCommand,
 	callback: async function ({ bundleId, locale }: { bundleId: Bundle["id"]; locale: string }) {
-		// Get the bundle from the database
-		let message = await state()
-			.project.db.selectFrom("message")
-			.where("message.bundleId", "=", bundleId)
-			.where("locale", "=", locale)
-			.selectAll()
+		// Get the message from the database
+		const bundle = await selectBundleNested(state().project.db)
+			.where("bundle.id", "=", bundleId)
 			.executeTakeFirst()
 
-		if (!message) {
-			message = createMessage({
-				bundleId: bundleId,
-				locale: locale,
-				text: "",
-			})
+		if (!bundle) {
+			return msg(`Bundle with id ${bundleId} not found.`)
 		}
 
-		// Find or create the variant for the locale
-		let variant: Variant | undefined = await state()
-			.project.db.selectFrom("variant")
-			.where("variant.messageId", "=", message.id)
-			.selectAll()
-			.executeTakeFirst()
+		// Get the message from the bundle
+		const message = bundle.messages.find((m) => m.locale === locale)
+
+		if (!message) {
+			return msg(`Message with locale ${locale} not found.`)
+		}
+
+		// Get the variant from the message
+		const variant = message.variants.find((v) => v.match.locale === locale)
 
 		if (!variant) {
-			variant = createVariant({
-				messageId: message.id,
-			})
-
-			// Add the new variant to the message's variants list
-			message.variants.push(variant)
+			return msg(`Variant with locale ${locale} not found.`)
 		}
 
 		// Construct the complete pattern text
