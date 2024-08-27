@@ -1,20 +1,28 @@
-import type { MessageNested, Declaration, ProjectSettings, Variant, Message } from "@inlang/sdk2"
+import type { MessageNested, ProjectSettings } from "@inlang/sdk2"
 import { createVariant } from "@inlang/sdk2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import deleteSelector from "../helper/crud/selector/delete.js"
-import upsertVariant from "../helper/crud/variant/upsert.js"
+import { baseStyling } from "../../styling/base.js"
 
-import "./inlang-variant.js"
-import "./inlang-selector-configurator.js"
+import SlTag from "@shoelace-style/shoelace/dist/components/tag/tag.component.js"
+import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
+import SlMenu from "@shoelace-style/shoelace/dist/components/menu/menu.component.js"
+import SlMenuItem from "@shoelace-style/shoelace/dist/components/menu-item/menu-item.component.js"
+import { createChangeEvent } from "../../helper/event.js"
+
+if (!customElements.get("sl-tag")) customElements.define("sl-tag", SlTag)
+if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)
+if (!customElements.get("sl-menu")) customElements.define("sl-menu", SlMenu)
+if (!customElements.get("sl-menu-item")) customElements.define("sl-menu-item", SlMenuItem)
 
 @customElement("inlang-message")
 export default class InlangMessage extends LitElement {
 	static override styles = [
+		baseStyling,
 		css`
 			div {
 				box-sizing: border-box;
-				font-size: 13px;
+				font-size: 14px;
 			}
 			:host {
 				position: relative;
@@ -150,78 +158,17 @@ export default class InlangMessage extends LitElement {
 				height: 22px;
 				border: none;
 			}
+			.selector-button {
+				margin-left: 8px;
+			}
 		`,
 	]
 
 	@property()
-	locale: ProjectSettings["locales"][number] | undefined
-
-	@property()
 	message: MessageNested | undefined
-
-	@property()
-	messageValidationReports: Array<any> | undefined
 
 	@property({ type: Object })
 	settings: ProjectSettings | undefined
-
-	@property({ type: Array })
-	inputs: Declaration[] | undefined
-
-	@property({ type: Array })
-	freshlyAddedVariants: string[] = []
-
-	@property()
-	addInput: (name: string) => void = () => {}
-
-	@property()
-	addMessage: (message: MessageNested) => void = () => {}
-
-	@property()
-	resetFreshlyAddedVariants: (newArray: string[]) => void = () => {}
-
-	@property()
-	triggerMessageBundleRefresh: () => void = () => {}
-
-	dispatchOnInsertVariant(variant: Variant) {
-		const onInsertVariant = new CustomEvent("insert-variant", {
-			bubbles: true,
-			composed: true,
-			detail: {
-				argument: {
-					variant,
-				},
-			},
-		})
-		this.dispatchEvent(onInsertVariant)
-	}
-
-	dispatchOnUpdateMessage(message: Message, variants: Variant[]) {
-		const onUpdateMessage = new CustomEvent("update-message", {
-			bubbles: true,
-			composed: true,
-			detail: {
-				argument: {
-					message,
-					variants,
-				},
-			},
-		})
-		this.dispatchEvent(onUpdateMessage)
-	}
-
-	dispatchOnUpdateVariant(variant: Variant) {
-		const onUpdateVariant = new CustomEvent("update-variant", {
-			bubbles: true,
-			composed: true,
-			detail: {
-				argument: {
-					variant,
-				},
-			},
-		})
-		this.dispatchEvent(onUpdateVariant)
-	}
 
 	private _refLocale = (): ProjectSettings["locales"][number] | undefined => {
 		return this.settings?.baseLocale
@@ -230,8 +177,8 @@ export default class InlangMessage extends LitElement {
 	override render() {
 		return html`
 			<div class="language-container">
-				<span>${this.locale}</span>
-				${this._refLocale() === this.locale
+				<span>${this.message?.locale}</span>
+				${this._refLocale() === this.message?.locale
 					? html`<sl-tag class="ref-tag" size="small" variant="neutral">ref</sl-tag>`
 					: ``}
 			</div>
@@ -258,12 +205,39 @@ export default class InlangMessage extends LitElement {
 											<sl-menu-item
 												value="delete"
 												@click=${() => {
-													deleteSelector({ message: this.message!, index })
-													this.dispatchOnUpdateMessage(this.message!, this.message!.variants)
-													for (const variant of this.message!.variants) {
-														this.dispatchOnUpdateVariant(variant)
+													if (this.message) {
+														// remove matches from underlying variants
+														for (const variant of this.message.variants) {
+															const matchObj = Object.fromEntries(
+																Object.entries(variant.match).filter(
+																	([key]) => key !== selector.arg.name
+																)
+															)
+
+															this.dispatchEvent(
+																createChangeEvent({
+																	type: "Variant",
+																	operation: "update",
+																	newData: {
+																		...variant,
+																		match: matchObj,
+																	},
+																})
+															)
+														}
+														// remove selector from message
+														this.dispatchEvent(
+															createChangeEvent({
+																type: "Message",
+																operation: "update",
+																newData: {
+																	...this.message,
+
+																	selectors: this.message.selectors.filter((_, i) => i !== index),
+																},
+															})
+														)
 													}
-													this.triggerMessageBundleRefresh()
 												}}
 												><svg
 													xmlns="http://www.w3.org/2000/svg"
@@ -287,76 +261,11 @@ export default class InlangMessage extends LitElement {
 										</sl-menu>
 									</sl-dropdown>`
 								)}
-								<div class="add-selector-container">
-									<inlang-selector-configurator
-										.inputs=${this.inputs}
-										.bundleId=${this.message.bundleId}
-										.message=${this.message}
-										.locale=${this.locale}
-										.triggerMessageBundleRefresh=${this.triggerMessageBundleRefresh}
-										.addMessage=${this.addMessage}
-										.addInput=${this.addInput}
-									>
-										<sl-tooltip content="Add Selector to message"
-											><sl-button size="small" class="add-selector">
-												<svg
-													viewBox="0 0 24 24"
-													width="18"
-													height="18"
-													slot="prefix"
-													class="w-5 h-5 -mx-1"
-												>
-													<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
-												</svg>
-											</sl-button>
-										</sl-tooltip>
-									</inlang-selector-configurator>
+								<div class="selector-button">
+									<slot name="selector-button"></slot>
 								</div>
 							</div>
-							<div class="message-actions">
-								${this.message
-									? this.freshlyAddedVariants.some((id) =>
-											this.message!.variants.map((variant) => variant.id).includes(id)
-									  )
-										? html`<sl-button
-												class="message-actions-button"
-												size="small"
-												@click=${() => {
-													const newArray = this.freshlyAddedVariants.filter(
-														(id) =>
-															!this.message!.variants.map((variant) => variant.id).includes(id)
-													)
-													this.resetFreshlyAddedVariants(newArray)
-													this.requestUpdate()
-													this.triggerMessageBundleRefresh()
-												}}
-												><svg
-													slot="prefix"
-													width="18"
-													height="18"
-													viewBox="0 0 20 20"
-													style="margin-right: -2px; opacity: 0.7"
-												>
-													<g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd">
-														<path
-															d="M10.293 7.707a1 1 0 0 1 0-1.414l3-3a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0"
-														/>
-														<path
-															d="M17.707 7.707a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 1.414-1.414l3 3a1 1 0 0 1 0 1.414"
-														/>
-														<path
-															d="M14 5a1 1 0 0 1 1 1v8a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1m-4.293 7.293a1 1 0 0 1 0 1.414l-3 3a1 1 0 0 1-1.414-1.414l3-3a1 1 0 0 1 1.414 0"
-														/>
-														<path
-															d="M2.293 12.293a1 1 0 0 1 1.414 0l3 3a1 1 0 1 1-1.414 1.414l-3-3a1 1 0 0 1 0-1.414"
-														/>
-														<path d="M6 15a1 1 0 0 1-1-1V6a1 1 0 1 1 2 0v8a1 1 0 0 1-1 1" />
-													</g></svg
-												>Sort</sl-button
-										  >`
-										: ``
-									: ``}
-							</div>
+							<div class="message-actions"></div>
 					  </div>`
 					: ``}
 				<div class="variants-container">
@@ -371,18 +280,18 @@ export default class InlangMessage extends LitElement {
 										match: (() => {
 											const match: Record<string, string> = {}
 											for (const selector of this.message!.selectors) {
-												match[selector.arg.name] = "null"
+												match[selector.arg.name] = "*"
 											}
 											return match
 										})(),
 									})
-									this.freshlyAddedVariants.push(variant.id)
-									upsertVariant({
-										message: this.message!,
-										variant: variant,
-									})
-									this.dispatchOnInsertVariant(variant)
-									this.triggerMessageBundleRefresh()
+									this.dispatchEvent(
+										createChangeEvent({
+											type: "Variant",
+											operation: "create",
+											newData: variant,
+										})
+									)
 								}}
 								class="new-variant"
 						  >

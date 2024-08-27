@@ -57,7 +57,7 @@ describe("getInput", () => {
 				},
 			],
 		})
-		const inputs = getInput({ messageBundle })
+		const inputs = getInput({ messages: messageBundle.messages })
 		expect(inputs.length).toBe(1)
 		expect(inputs[0]!.name).toBe("count")
 	})

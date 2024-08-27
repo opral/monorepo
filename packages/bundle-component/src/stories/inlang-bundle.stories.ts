@@ -1,23 +1,20 @@
-import "./inlang-bundle.ts"
-import "./testing/reactiveWrapper.ts"
 import type { Meta, StoryObj } from "@storybook/web-components"
 import { html } from "lit"
-// import {
-// 	mockInstalledLintRules,
-// 	mockMessageLintReports,
-// 	mockVariantLintReports,
-// } from "../mock/lint.ts"
 import { mockSettings } from "../mock/settings.ts"
 import { bundleWithoutSelectors } from "../mock/messageBundle.ts"
-import { pluralBundle } from "@inlang/sdk2"
 
+//@ts-ignore
+import { useArgs } from "@storybook/preview-api"
+import { Message, MessageNested, pluralBundle, Variant } from "@inlang/sdk2"
+import { type DispatchChangeInterface } from "../helper/event.ts"
+
+//components
+import "./inlang-bundle.ts"
+import "./message/inlang-message.ts"
+import "./variant/inlang-variant.ts"
+import "./pattern-editor/inlang-pattern-editor.ts"
 import "./actions/inlang-bundle-action.ts"
-import {
-	mockBundleLintReports,
-	mockInstalledLintRules,
-	mockMessageLintReports,
-	mockVariantLintReports,
-} from "../mock/lint.ts"
+import "./actions/inlang-add-selector.ts"
 
 const meta: Meta = {
 	component: "inlang-bundle",
@@ -27,150 +24,183 @@ const meta: Meta = {
 			control: { type: "object" },
 			description: "Type MessageBundle: see sdk v2",
 		},
-		settings: {
-			control: { type: "object" },
-			description: "Type ProjectSettings2: see sdk v2",
-		},
-		installedLintRules: {
-			control: { type: "Array" },
-			description:
-				"Optional: Type InstalledLintRule[]: see sdk v2. If defined the reports will be shown with more meta data.",
-		},
-		filteredLocales: {
-			control: { type: "Array" },
-			description:
-				"Optional: Type LanguageTag[]. Pass it in when you want to filter the locales of the bundle. If not passed, all locales will be shown.",
-		},
 	},
 }
 
 export default meta
 
+let simpleBundleBuffer = bundleWithoutSelectors
+
 export const Simple: StoryObj = {
+	args: {
+		bundle: bundleWithoutSelectors,
+		messages: bundleWithoutSelectors.messages,
+	},
 	render: () => {
-		return html`<inlang-bundle
-			.bundle=${bundleWithoutSelectors}
-			.settings=${mockSettings}
-			.filteredLocales=${["en", "de"]}
-			@change-bundle=${(data: any) => console.info("changeBundle", data.detail.argument)}
-			@machine-translate=${(data: any) =>
-				console.info("machine translate", JSON.stringify(data.detail.argument))}
-			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
-		>
+		const [{ bundle, messages }, updateArgs] = useArgs()
+
+		const handleChange = (e) => {
+			const data = e.detail.argument as DispatchChangeInterface
+			const newBundle = structuredClone(simpleBundleBuffer)
+			switch (data.type) {
+				case "Message":
+					if (data.newData) {
+						const message = newBundle.messages.find((m) => m.id === (data.newData as Message).id)
+						if (message) {
+							message.selectors = (data.newData as Message).selectors
+							message.declarations = (data.newData as Message).declarations
+						}
+					}
+					break
+				case "Variant":
+					if (
+						data.operation === "delete" &&
+						newBundle.messages.some((m) => m.id === (data.newData as Variant).messageId)
+					) {
+						// delete variant
+						const message = newBundle.messages.find(
+							(m) => m.id === (data.newData as Variant).messageId
+						)
+						if (message) {
+							message.variants = message.variants.filter((v) => v.id !== data.newData!.id)
+						}
+					} else if (
+						data.newData &&
+						newBundle.messages.some((m) => m.id === (data.newData as Variant).messageId)
+					) {
+						const message = newBundle.messages.find(
+							(m) => m.id === (data.newData as Variant).messageId
+						)
+						if (message) {
+							const index = message.variants.findIndex((v) => v.id === data.newData!.id)
+							if (index === -1) {
+								// create new variant
+								message.variants.push(data.newData as Variant)
+							} else {
+								// update variant
+								message.variants[index] = data.newData as Variant
+							}
+						}
+					}
+					break
+			}
+			simpleBundleBuffer = newBundle
+			updateArgs({ bundle: newBundle, messages: newBundle.messages })
+			console.info(data.type, data.operation, data.newData, newBundle)
+		}
+
+		return html`<inlang-bundle .bundle=${bundle} .messages=${messages} @change=${handleChange}>
+			${messages.map((message: MessageNested) => {
+				return html`<inlang-message slot="message" .message=${message} .settings=${mockSettings}>
+					${message.variants.map((variant) => {
+						return html`<inlang-variant slot="variant" .variant=${variant}>
+							<inlang-pattern-editor slot="pattern-editor" .variant=${variant}>
+							</inlang-pattern-editor>
+							${(message.selectors.length === 0 && message.variants.length <= 1) ||
+							!message.selectors
+								? html`<inlang-add-selector
+										slot="variant-action"
+										.message=${message}
+										.messages=${messages}
+								  ></inlang-add-selector>`
+								: ``}
+						</inlang-variant>`
+					})}
+					<inlang-add-selector
+						slot="selector-button"
+						.message=${message}
+						.messages=${messages}
+					></inlang-add-selector>
+				</inlang-message>`
+			})}
 		</inlang-bundle>`
 	},
 }
 
+let bundleBuffer = pluralBundle
+
 export const Complex: StoryObj = {
-	render: () => {
-		return html`<inlang-bundle
-			.bundle=${pluralBundle}
-			.settings=${mockSettings}
-			.installedLintRules=${mockInstalledLintRules}
-			.bundleValidationReports=${mockBundleLintReports}
-			.messageValidationReports=${mockMessageLintReports}
-			.variantValidationReports=${mockVariantLintReports}
-			@update-bundle=${(data: any) => console.info("updateBundle", data.detail.argument)}
-			@insert-message=${(data: any) => console.info("insertMessage", data.detail.argument)}
-			@update-message=${(data: any) => console.info("updateMessage", data.detail.argument)}
-			@delete-message=${(data: any) => console.info("deleteMessage", data.detail.argument)}
-			@insert-variant=${(data: any) => console.info("insertVariant", data.detail.argument)}
-			@update-variant=${(data: any) => console.info("updateVariant", data.detail.argument)}
-			@delete-variant=${(data: any) => console.info("deleteVariant", data.detail.argument)}
-			@show-history=${(data: any) => console.info("showHistory", data.detail.argument)}
-			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
-		>
-			<inlang-bundle-action
-				actionTitle="Share"
-				@click=${() => console.log("Share")}
-			></inlang-bundle-action>
-			<inlang-bundle-action
-				actionTitle="Edit alias"
-				@click=${() => console.log("Edit alias")}
-			></inlang-bundle-action>
-		</inlang-bundle> `
+	args: {
+		bundle: pluralBundle,
+		messages: pluralBundle.messages,
 	},
-}
-
-export const Styled: StoryObj = {
-	render: () =>
-		html`
-			<style>
-				.inlang-pattern-editor-contenteditable {
-					background-color: #313131 !important;
-					color: #e0e0e0 !important;
-				}
-				.inlang-pattern-editor-contenteditable:hover {
-					background-color: #000 !important;
-					color: #ffffff !important;
-				}
-				.inlang-pattern-editor-placeholder {
-					color: #e0e0e0;
-				}
-				inlang-bundle-header::part(base) {
-					background-color: #000;
-				}
-
-				inlang-bundle-root {
-					--inlang-color-primary: #f97316;
-
-					/* input & button */
-					--sl-input-background-color: #313131;
-					--sl-input-background-color-hover: #000;
-					--sl-input-border-color: #606060;
-					--sl-input-border-color-hover: #646464;
-					--sl-input-color: #e0e0e0;
-					--sl-input-color-focus: #ffffff;
-					--sl-input-color-hover: #ffffff;
-					--sl-input-placeholder-color: #a0a0a0;
-					--sl-input-background-color-disabled: #242424;
-
-					/* focus ring */
-					--sl-input-focus-ring-color: var(--inlang-color-primary);
-					--sl-focus-ring-width: 2px;
-
-					/* tooltip */
-					--sl-tooltip-background-color: #000000;
-					--sl-tooltip-color: #e0e0e0;
-
-					/* panel */
-					--sl-panel-background-color: #242424;
-					--sl-input-help-text-color: #b0b0b0;
-					--sl-panel-border-color: #606060;
-				}
-
-				inlang-bundle-action {
-					--sl-input-background-color: #313131;
-					--sl-input-background-color-hover: #000;
-					--sl-input-border-color: #606060;
-					--sl-input-color: #e0e0e0;
-					--sl-input-color-hover: #ffffff;
-				}
-			</style>
-
-			<inlang-bundle
-				.bundle=${pluralBundle}
-				.settings=${mockSettings}
-				.lintReports=${[]}
-				@change-message-bundle=${(data: any) =>
-					console.info("changeMessageBundle", data.detail.argument)}
-				@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
-			>
-				<inlang-bundle-action
-					actionTitle="Share"
-					@click=${() => console.log("Share")}
-				></inlang-bundle-action>
-				<inlang-bundle-action
-					actionTitle="Edit alias"
-					@click=${() => console.log("Edit alias")}
-				></inlang-bundle-action>
-			</inlang-bundle>
-		`,
-}
-
-export const ReactiveLints: StoryObj = {
 	render: () => {
-		return html`<inlang-reactive-wrapper .bundle=${pluralBundle} .settings=${mockSettings}>
-		</inlang-reactive-wrapper> `
+		const [{ bundle, messages }, updateArgs] = useArgs()
+
+		const handleChange = (e) => {
+			const data = e.detail.argument as DispatchChangeInterface
+			const newBundle = structuredClone(bundleBuffer)
+			switch (data.type) {
+				case "Message":
+					if (data.newData) {
+						const message = newBundle.messages.find((m) => m.id === (data.newData as Message).id)
+						if (message) {
+							message.selectors = (data.newData as Message).selectors
+							message.declarations = (data.newData as Message).declarations
+						}
+					}
+					break
+				case "Variant":
+					if (
+						data.operation === "delete" &&
+						newBundle.messages.some((m) => m.id === (data.newData as Variant).messageId)
+					) {
+						// delete variant
+						const message = newBundle.messages.find(
+							(m) => m.id === (data.newData as Variant).messageId
+						)
+						if (message) {
+							message.variants = message.variants.filter((v) => v.id !== data.newData!.id)
+						}
+					} else if (
+						data.newData &&
+						newBundle.messages.some((m) => m.id === (data.newData as Variant).messageId)
+					) {
+						const message = newBundle.messages.find(
+							(m) => m.id === (data.newData as Variant).messageId
+						)
+						if (message) {
+							const index = message.variants.findIndex((v) => v.id === data.newData!.id)
+							if (index === -1) {
+								// create new variant
+								message.variants.push(data.newData as Variant)
+							} else {
+								// update variant
+								message.variants[index] = data.newData as Variant
+							}
+						}
+					}
+					break
+			}
+			bundleBuffer = newBundle
+			updateArgs({ bundle: newBundle, messages: newBundle.messages })
+			console.info(data.type, data.operation, data.newData, newBundle)
+		}
+
+		return html`<inlang-bundle .bundle=${bundle} .messages=${messages} @change=${handleChange}>
+			${messages.map((message: MessageNested) => {
+				return html`<inlang-message slot="message" .message=${message} .settings=${mockSettings}>
+					${message.variants.map((variant) => {
+						return html`<inlang-variant slot="variant" .variant=${variant}>
+							<inlang-pattern-editor slot="pattern-editor" .variant=${variant}>
+							</inlang-pattern-editor>
+							${(message.selectors.length === 0 && message.variants.length <= 1) ||
+							!message.selectors
+								? html`<inlang-add-selector
+										slot="variant-action"
+										.message=${message}
+										.messages=${messages}
+								  ></inlang-add-selector>`
+								: ``}
+						</inlang-variant>`
+					})}
+					<inlang-add-selector
+						slot="selector-button"
+						.message=${message}
+						.messages=${messages}
+					></inlang-add-selector>
+				</inlang-message>`
+			})}
+		</inlang-bundle>`
 	},
 }
