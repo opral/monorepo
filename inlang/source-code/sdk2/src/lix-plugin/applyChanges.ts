@@ -1,6 +1,6 @@
 import { getLeafChange, type Change, type LixPlugin } from "@lix-js/sdk";
 import { contentFromDatabase, loadDatabaseInMemory } from "sqlite-wasm-kysely";
-import { initKysely } from "../database/initKysely.js";
+import { initDb } from "../database/initDb.js";
 
 export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	lix,
@@ -16,7 +16,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	// todo make transactional
 
 	const sqlite = await loadDatabaseInMemory(file.data);
-	const db = initKysely({ sqlite });
+	const db = initDb({ sqlite });
 
 	const leafChanges = new Set(
 		await Promise.all(

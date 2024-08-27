@@ -49,6 +49,7 @@ export async function newLixFile(): Promise<Blob> {
       
       CREATE TABLE change (
         id TEXT PRIMARY KEY,
+        author TEXT,
         parent_id TEXT,
         type TEXT NOT NULL,
         file_id TEXT NOT NULL,
@@ -65,12 +66,13 @@ export async function newLixFile(): Promise<Blob> {
         conflicting_change_id TEXT NOT NULL,
         reason TEXT,
         meta TEXT,
+        resolved_with_change_id TEXT,
         PRIMARY KEY (change_id, conflicting_change_id)
       ) strict;
         
       CREATE TABLE 'commit' (
         id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
+        author TEXT,
         parent_id TEXT NOT NULL,
         description TEXT NOT NULL,
         created TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,

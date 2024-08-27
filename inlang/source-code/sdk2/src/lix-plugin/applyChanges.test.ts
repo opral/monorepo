@@ -4,8 +4,8 @@ import { newProject } from "../project/newProject.js";
 import type { Change } from "@lix-js/sdk";
 import type { Bundle } from "../schema/schemaV2.js";
 import { applyChanges } from "./applyChanges.js";
-import { initKysely } from "../database/initKysely.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
+import { initDb } from "../database/initDb.js";
 
 test("it should be able to delete", async () => {
 	const project = await loadProjectInMemory({
@@ -65,10 +65,9 @@ test("it should be able to delete", async () => {
 		.insertInto("bundle")
 		.values({
 			id: "mock",
-			// @ts-expect-error - todo auto serialize values
-			alias: JSON.stringify({
+			alias: {
 				foo: "mock-alias",
-			}),
+			},
 		})
 		.execute();
 
@@ -84,7 +83,7 @@ test("it should be able to delete", async () => {
 		changes,
 	});
 
-	const db = initKysely({
+	const db = initDb({
 		sqlite: await loadDatabaseInMemory(dbFileAfter.fileData),
 	});
 
@@ -158,7 +157,7 @@ test("it should be able to upsert (insert & update)", async () => {
 		changes,
 	});
 
-	const db = initKysely({
+	const db = initDb({
 		sqlite: await loadDatabaseInMemory(dbFileAfter.fileData),
 	});
 

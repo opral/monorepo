@@ -2,6 +2,10 @@ import { Bundle, InlangDatabaseSchema, Message, Variant } from "@inlang/sdk2";
 import { Kysely } from "kysely";
 import { json } from "./toJSONRawBuilder.ts";
 
+/**
+ * @deprecated json mapping happens automatically https://github.com/opral/monorepo/pull/3078 
+ *             use the query api directly.
+ */
 const queryHelper = {
 	bundle: {
 		/*

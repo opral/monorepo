@@ -469,7 +469,6 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 			id: "commit-1",
 			description: "",
 			parent_id: "0",
-			user_id: "",
 		},
 	];
 

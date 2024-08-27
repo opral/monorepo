@@ -1,15 +1,9 @@
 // @ts-ignore
 import { v4 as uuid } from "uuid";
-import type {
-	Bundle,
-	BundleNested,
-	Expression,
-	MessageNested,
-	Text,
-	Variant,
-} from "./schema/schemaV2.js";
+import type { Bundle, Expression, Text, Variant } from "./schema/schemaV2.js";
 import type { ProjectSettings } from "./schema/settings.js";
 import { generateBundleId } from "./bundle-id/bundle-id.js";
+import type { BundleNested, MessageNested } from "./database/schema.js";
 
 /**
  * create v2 Bundle with a random human ID

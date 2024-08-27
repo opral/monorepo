@@ -29,7 +29,6 @@ test("inserting a commit should auto fill the created_at column", async () => {
 		.insertInto("commit")
 		.values({
 			id: "test",
-			user_id: "test",
 			parent_id: "test",
 			description: "test",
 		})
