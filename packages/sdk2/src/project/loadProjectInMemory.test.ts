@@ -14,8 +14,7 @@ test("roundtrip should succeed", async () => {
 	const insertedBundle = await project1.db
 		.insertInto("bundle")
 		.values({
-			// @ts-expect-error - manual stringification
-			alias: JSON.stringify({ default: "bundle1" }),
+			alias: { default: "bundle1" },
 		})
 		.returning("id")
 		.executeTakeFirstOrThrow();

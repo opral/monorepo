@@ -65,10 +65,9 @@ test("it should be able to delete", async () => {
 		.insertInto("bundle")
 		.values({
 			id: "mock",
-			// @ts-expect-error - todo auto serialize values
-			alias: JSON.stringify({
+			alias: {
 				foo: "mock-alias",
-			}),
+			},
 		})
 		.execute();
 
