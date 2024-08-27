@@ -3,7 +3,7 @@ import { test, expect } from "vitest";
 import { initDb } from "./initDb.js";
 import { isBundleId } from "../bundle-id/bundle-id.js";
 import { validate } from "uuid";
-import { createSchema } from "./schema.js";
+import { createSchema } from "./createSchema.js";
 
 test("bundle ids should have a default value", async () => {
 	const sqlite = await createInMemoryDatabase({
@@ -60,7 +60,8 @@ test("variant ids should default to uuid", async () => {
 		.insertInto("variant")
 		.values({
 			messageId: "mock",
-			match: "mock",
+			// @ts-expect-error - manually serialize
+			match: "{}",
 			// @ts-expect-error - manually serialize
 			pattern: JSON.stringify({}),
 		})
