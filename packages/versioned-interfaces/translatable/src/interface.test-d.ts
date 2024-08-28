@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { LanguageTag } from "@inlang/language-tag"
 import type { Translatable } from "./interface.js"
 import { expectType } from "tsd"
 
-const tag: LanguageTag = "en"
+const tag: string = "en"
 
 /**
  * --------------------- INCREMENTALLY ADOPTABLE ---------------------
@@ -36,7 +35,7 @@ typeof externalTranslatable === "object" &&
 
 const val =
 	typeof externalTranslatable === "object"
-		? externalTranslatable[tag] ?? externalTranslatable.en
+		? (externalTranslatable[tag] ?? externalTranslatable.en)
 		: externalTranslatable
 
 // --------------------- TESTING A TRANSLATABLE<T extends not String> ---------------------
