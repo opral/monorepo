@@ -27,7 +27,8 @@
 		"@inlang/message": "workspace:*",
 		"@inlang/project-settings": "workspace:*",
 		"@inlang/translatable": "workspace:*",
-		"@lix-js/fs": "workspace:*"
+		"@lix-js/fs": "workspace:*",
+		"prettier": "^3.3.3"
 	},
 	"peerDependencies": {
 		"@sinclair/typebox": "^0.31.17"

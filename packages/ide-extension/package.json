@@ -252,6 +252,7 @@
 		"fast-glob": "^3.2.12",
 		"https-proxy-agent": "7.0.2",
 		"lit-html": "^3.1.2",
+		"prettier": "^3.3.3",
 		"require-from-string": "^2.0.2",
 		"throttle-debounce": "^5.0.0",
 		"vitest": "0.34.6"
