@@ -72,9 +72,6 @@ export function getWebviewContent(args: {
                 const settingsContainer = document.getElementById('settings-container');
                 const settingsElement = document.createElement('inlang-settings');
                 settingsElement.installedPlugins = ${JSON.stringify(installedPlugins)};
-                // settingsElement.installedMessageLintRules = ${JSON.stringify(
-									installedMessageLintRules
-								)};
                 settingsElement.settings = ${JSON.stringify(settings)};
 
                 settingsContainer.appendChild(settingsElement);

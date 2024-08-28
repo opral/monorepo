@@ -22,9 +22,12 @@
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
-		"tsd": "0.29.0",
 		"@vitest/coverage-v8": "0.34.3",
+		"tsd": "0.29.0",
 		"typescript": "^5.5.2",
 		"vitest": "0.34.3"
+	},
+	"dependencies": {
+		"prettier": "^3.3.3"
 	}
 }

@@ -21,10 +21,10 @@ describe("getStringFromPattern", () => {
 	it("should handle Text elements", () => {
 		const result = getStringFromPattern({
 			pattern: [
-				{ type: "Text", value: "Hello " },
-				{ type: "Text", value: "World" },
+				{ type: "text", value: "Hello " },
+				{ type: "text", value: "World" },
 			],
-			languageTag: "en-US",
+			locale: "en-US",
 			messageId: "1",
 		})
 		expect(result).toBe("Hello World")
@@ -32,7 +32,7 @@ describe("getStringFromPattern", () => {
 
 	it("should handle VariableReference elements", () => {
 		const result = getStringFromPattern({
-			pattern: [{ type: "VariableReference", name: "name" }],
+			pattern: [{ type: "expression", name: "name" }],
 			languageTag: "en-US",
 			messageId: "2",
 		})

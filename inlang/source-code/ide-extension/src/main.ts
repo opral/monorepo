@@ -159,7 +159,6 @@ function registerExtensionComponents(args: {
 	)
 
 	messagePreview(args)
-
 	// Replace by lix validation rules
 	// linterDiagnostics(args)
 }

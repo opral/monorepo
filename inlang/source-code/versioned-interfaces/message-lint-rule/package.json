@@ -26,7 +26,8 @@
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/message": "workspace:*",
 		"@inlang/project-settings": "workspace:*",
-		"@inlang/translatable": "workspace:*"
+		"@inlang/translatable": "workspace:*",
+		"prettier": "^3.3.3"
 	},
 	"peerDependencies": {
 		"@sinclair/typebox": "^0.31.17"

@@ -22,8 +22,9 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/message-lint-rule": "workspace:*",
 		"@inlang/plugin": "workspace:*",
-		"@inlang/message-lint-rule": "workspace:*"
+		"prettier": "^3.3.3"
 	},
 	"peerDependencies": {
 		"@sinclair/typebox": "^0.31.17"
