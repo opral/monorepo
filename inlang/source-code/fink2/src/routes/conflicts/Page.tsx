@@ -1,7 +1,11 @@
 import { useAtom } from "jotai";
 import Layout, { Grid } from "../../layout.tsx";
-import { bundlesNestedAtom, conflictsAtom, projectAtom } from "../../state.ts";
-import { useEffect, useState } from "react";
+import {
+	bundlesNestedAtom,
+	unresolvedConflictsAtom,
+	projectAtom,
+	conflictingChangesAtom,
+} from "../../state.ts";
 import { useNavigate } from "react-router-dom";
 import timeAgo from "../../helper/timeAgo.ts";
 import {
@@ -9,44 +13,19 @@ import {
 	InlangVariant,
 } from "../../components/SingleDiffBundle.tsx";
 import { resolveConflictBySelecting } from "@lix-js/sdk";
+import { useEffect } from "react";
 
 export default function Page() {
 	const [project] = useAtom(projectAtom);
-	const [conflicts] = useAtom(conflictsAtom);
+	const [unresolvedConflicts] = useAtom(unresolvedConflictsAtom);
 	const [bundlesNested] = useAtom(bundlesNestedAtom);
-	const [conflictingChanges, setConflictingChanges] = useState({});
+	const [conflictingChanges] = useAtom(conflictingChangesAtom);
+
 	const navigate = useNavigate();
-
-	const getConflictingChanges = async () => {
-		const result = {};
-		for (const conflict of conflicts) {
-			const change = await project?.lix.db
-				.selectFrom("change")
-				.selectAll()
-				.where("id", "=", conflict.change_id)
-				.executeTakeFirstOrThrow();
-			const conflicting = await project?.lix.db
-				.selectFrom("change")
-				.selectAll()
-				.where("id", "=", conflict.conflicting_change_id)
-				.executeTakeFirstOrThrow();
-			result[conflicting.id] = conflicting;
-			result[change.id] = change;
-		}
-		setConflictingChanges(result);
-	};
-
-	useEffect(() => {
-		getConflictingChanges();
-		const interval = setInterval(async () => {
-			await getConflictingChanges();
-		}, 1000);
-		return () => clearInterval(interval);
-	}, [project]);
 
 	useEffect(() => {
 		// close dialog after commit
-		if (conflicts.length === 0) {
+		if (unresolvedConflicts.length === 0) {
 			navigate("/");
 		}
 	});
@@ -62,11 +41,15 @@ export default function Page() {
 			</div>
 			<Grid>
 				<div className="mt-8 bg-white border-zinc-200 border rounded-lg divide-y divide-zinc-200 py-[4px]">
-					{conflicts.length > 0 &&
-						conflicts.map((conflict) => {
-							const change = conflictingChanges[conflict.change_id];
-							const conflictingChange =
-								conflictingChanges[conflict.conflicting_change_id];
+					{unresolvedConflicts.length > 0 &&
+						unresolvedConflicts.map((conflict) => {
+							const change = conflictingChanges.find(
+								(change) => change.id === conflict.change_id
+							)!;
+							const conflictingChange = conflictingChanges.find(
+								(change) => change.id === conflict.conflicting_change_id
+							)!;
+
 							const bundleId = bundlesNested.find((bundle) =>
 								bundle.messages.filter((message) =>
 									message.variants.find(

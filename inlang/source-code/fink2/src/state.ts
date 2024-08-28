@@ -2,6 +2,7 @@ import { atom } from "jotai";
 import { loadProjectInMemory, selectBundleNested } from "@inlang/sdk2";
 import { atomWithStorage } from "jotai/utils";
 import { jsonObjectFrom } from "kysely/helpers/sqlite";
+import { Change } from "@lix-js/sdk";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -133,7 +134,8 @@ export const pendingChangesAtom = atom(async (get) => {
 	return result;
 });
 
-export const conflictsAtom = atom(async (get) => {
+export const unresolvedConflictsAtom = atom(async (get) => {
+	console.log("executing unresolvedConflictsAtom");
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];
@@ -143,8 +145,41 @@ export const conflictsAtom = atom(async (get) => {
 		.selectAll()
 		.execute();
 
+	console.log("conflicts", result);
+
 	//console.log(result);
 	return result;
+});
+
+/**
+ * Get all conflicting changes.
+ *
+ * @example
+ *   const [conflictingChanges] = useAtom(conflictingChangesAtom);
+ *   conflictingChanges.find((change) => change.id === id);
+ */
+export const conflictingChangesAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const project = await get(projectAtom);
+	const unresolvedConflicts = await get(unresolvedConflictsAtom);
+	if (!project) return [];
+	const result: Set<Change> = new Set();
+
+	for (const conflict of unresolvedConflicts) {
+		const change = await project.lix.db
+			.selectFrom("change")
+			.selectAll()
+			.where("id", "=", conflict.change_id)
+			.executeTakeFirstOrThrow();
+		const conflicting = await project.lix.db
+			.selectFrom("change")
+			.selectAll()
+			.where("id", "=", conflict.conflicting_change_id)
+			.executeTakeFirstOrThrow();
+		result.add(change);
+		result.add(conflicting);
+	}
+	return [...result];
 });
 
 export const commitsAtom = atom(async (get) => {
