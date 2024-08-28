@@ -6,8 +6,7 @@ import { CONFIGURATION } from "../configuration.js"
 import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
 import { getPreviewLocale } from "../utilities/locale/getPreviewLocale.js"
 import { getSetting } from "../utilities/settings/index.js"
-import { selectBundleNested, type BundleNested, type IdeExtensionConfig } from "@inlang/sdk2"
-import { msg } from "../utilities/messages/msg.js"
+import { selectBundleNested, type IdeExtensionConfig } from "@inlang/sdk2"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -80,34 +79,31 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 			return bundles.map(async (bundle) => {
 				// Query for message with bundle id and locale
-				const _bundle = selectBundleNested(state().project.db)
+				const _bundle = await selectBundleNested(state().project.db)
 					.where("bundle.id", "=", bundle.bundleId)
 					.executeTakeFirst()
 
-				if (!_bundle) {
-					return msg(`Bundle with id ${bundle.bundleId} not found.`)
-				}
+				// Get the message from the bundle
+				const message = _bundle?.messages.find((m) => m.locale === baseLocale)
 
-				const message = _bundle.messages.find((m) => m.locale === baseLocale)
-
-				// Check if variant is defined
-				if (!variant) {
-					return msg(`Variant with locale ${baseLocale} not found.`)
-				}
+				// Get the variant from the message
+				const variant = message?.variants.find((v) => v.match.locale === baseLocale)
 
 				const previewLocale = await getPreviewLocale()
 				const translationLocale = previewLocale.length ? previewLocale : baseLocale
 
-				const translationString = getStringFromPattern({
-					pattern: message.pattern || [
-						{
-							type: "Text",
-							value: "", // TODO: Fix pattern type to be always defined either/or Text / VariableReference
-						},
-					],
-					locale: translationLocale,
-					messageId: message.messageId,
-				})
+				const translationString = variant
+					? getStringFromPattern({
+							pattern: variant.pattern || [
+								{
+									type: "text",
+									value: "", // TODO: Fix pattern type to be always defined either/or Text / VariableReference
+								},
+							],
+							locale: translationLocale,
+							messageId: variant.messageId,
+					  })
+					: ""
 
 				const translation = resolveEscapedCharacters(translationString)
 
@@ -118,11 +114,8 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 						: translation)
 
 				const range = new vscode.Range(
-					new vscode.Position(
-						message.position.start.line - 1,
-						message.position.start.character - 1
-					),
-					new vscode.Position(message.position.end.line - 1, message.position.end.character - 1)
+					new vscode.Position(bundle.position.start.line - 1, bundle.position.start.character - 1),
+					new vscode.Position(bundle.position.end.line - 1, bundle.position.end.character - 1)
 				)
 
 				const decoration: vscode.DecorationOptions = {
@@ -133,7 +126,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 									margin: "0 0.5rem",
 									contentText:
 										truncatedTranslation === "" || truncatedTranslation === undefined
-											? `ERROR: '${message.messageId}' not found in source with language tag '${baseLocale}'`
+											? `ERROR: '${bundle.bundleId}' not found in source with language tag '${baseLocale}'`
 											: translation,
 									backgroundColor: translation
 										? editorInfoColors.background
