@@ -155,7 +155,9 @@ function registerExtensionComponents(args: {
 	)
 
 	messagePreview(args)
-	linterDiagnostics(args)
+
+	// Replace by lix validation rules
+	// linterDiagnostics(args)
 }
 
 function handleInlangErrors() {
