@@ -37,17 +37,11 @@ export default function App() {
 	const [commitDescription, setCommitDescription] = useState<string>("");
 	const [showDialog, setShowDialog] = useState(false);
 	const navigate = useNavigate();
-	const [author] = useAtom(authorNameAtom);
 
 	const handleCommit = async () => {
-		if (author) {
-			await project?.lix.commit({
-				userId: author,
-				description: commitDescription,
-			});
-		} else {
-			console.error("Author not set");
-		}
+		await project?.lix.commit({
+			description: commitDescription,
+		});
 	};
 
 	useEffect(() => {

@@ -33,14 +33,21 @@ export default function Layout(props: { children: React.ReactNode }) {
 	});
 
 	const [authorName] = useAtom(authorNameAtom);
+	const [project] = useAtom(projectAtom);
 	const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
 	const [showAuthorDialog, setShowAuthorDialog] = useState(false);
 
 	useEffect(() => {
 		if (selectedProjectPath && !authorName) {
 			setShowAuthorDialog(true);
+		} 
+	}, [authorName, project?.lix.currentAuthor, selectedProjectPath]);
+
+	useEffect(() => {
+		if (authorName && project?.lix.currentAuthor.get() !== authorName) {
+			project?.lix.currentAuthor.set(authorName);
 		}
-	}, [authorName, selectedProjectPath]);
+	}, [authorName, project?.lix.currentAuthor])
 
 	return (
 		<div className="w-full min-h-screen bg-zinc-50">
