@@ -91,7 +91,7 @@ export const committedChangesAtom = atom(async (get) => {
 						"commit.id",
 						"commit.author",
 						"commit.description",
-						"commit.created",
+						"commit.created_at",
 					])
 					.whereRef("change.commit_id", "=", "commit.id")
 			).as("commit"),
@@ -106,7 +106,7 @@ export const committedChangesAtom = atom(async (get) => {
 				.select("conflict.conflicting_change_id")
 		)
 		.innerJoin("commit", "commit.id", "change.commit_id")
-		.orderBy("commit.created desc")
+		.orderBy("commit.created_at desc")
 		.execute();
 
 	return result;
@@ -153,7 +153,7 @@ export const commitsAtom = atom(async (get) => {
 	return await project.lix.db
 		.selectFrom("commit")
 		.selectAll()
-		.orderBy("commit.created desc")
+		.orderBy("commit.created_at desc")
 		.execute();
 });
 

@@ -131,7 +131,7 @@ export default function Page() {
 												</p>
 												<p className="text-sm! text-zinc-600">{`bundle_id: ${bundleId}`}</p>
 											</div>
-											<p className="text-sm!">{timeAgo(change?.created_at)}</p>
+											<p className="text-sm!">{timeAgo(change.created_at)}</p>
 										</div>
 									</div>
 
