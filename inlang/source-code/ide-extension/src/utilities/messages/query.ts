@@ -18,12 +18,12 @@ export const getStringFromPattern = (args: {
 					return expression.arg.name // Handle Literal within Expression
 				} else {
 					return msg(
-						`Unknown expression type in message with id ${args.messageId} for locale ${args.locale}.`
+						`Unknown expression type in variant with message id ${args.messageId} for locale ${args.locale}.`
 					)
 				}
 			} else {
 				return msg(
-					`Unknown pattern element type in message with id ${args.messageId} for locale ${args.locale}.`
+					`Unknown pattern element type in variant with message id ${args.messageId} for locale ${args.locale}.`
 				)
 			}
 		})
