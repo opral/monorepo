@@ -4,13 +4,10 @@ import type { ProjectSettings } from "../schema/settings.js";
 import { type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
 import { initHandleSaveToLixOnChange } from "./initHandleSaveToLixOnChange.js";
-import {
-	importPlugins,
-	type PreprocessPluginBeforeImportFunction,
-} from "../plugin/importPlugins.js";
+import { type PreprocessPluginBeforeImportFunction } from "../plugin/importPlugins.js";
 import type { InlangProject, Subscription } from "./api.js";
 import { createState } from "./state/state.js";
-import { BehaviorSubject, map } from "rxjs";
+import { BehaviorSubject, map, Observable } from "rxjs";
 import { setSettings } from "./state/setSettings.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
 import { exportFiles, importFiles } from "../import-export/index.js";
@@ -55,18 +52,8 @@ export async function loadProject(args: {
 		JSON.parse(new TextDecoder().decode(settingsFile.data)) as ProjectSettings
 	);
 
-	const { plugins, errors: pluginErrors } = await importPlugins({
-		settings,
-		preprocessPluginBeforeImport: args.preprocessPluginBeforeImport,
-	});
-
-	if (args.providePlugins) {
-		plugins.push(...args.providePlugins);
-	}
-
 	const state = await createState({
-		plugins,
-		errors: pluginErrors,
+		...args,
 		settings,
 	});
 
@@ -84,6 +71,12 @@ export async function loadProject(args: {
 
 	return {
 		db,
+		settings: {
+			get: () => structuredClone(state.settings$.getValue()) as ProjectSettings,
+			subscribe: withStructuredClone(state.settings$)
+				.subscribe as Subscription<ProjectSettings>,
+			set: (newSettings) => setSettings({ newSettings, lix: args.lix, state }),
+		},
 		plugins: {
 			get: () => state.plugins$.getValue() as InlangPlugin[],
 			subscribe: withStructuredClone(state.plugins$).subscribe as Subscription<
@@ -97,12 +90,6 @@ export async function loadProject(args: {
 			>,
 		},
 		settled,
-		settings: {
-			get: () => structuredClone(state.settings$.getValue()) as ProjectSettings,
-			subscribe: withStructuredClone(state.settings$)
-				.subscribe as Subscription<ProjectSettings>,
-			set: (newSettings) => setSettings({ newSettings, lix: args.lix, state }),
-		},
 		importFiles: async ({ files, pluginKey }) => {
 			return await importFiles({
 				files,
@@ -134,13 +121,12 @@ export async function loadProject(args: {
 	};
 }
 
-
 /**
  * Ensures that the given value is a clone of the original value.
  *
  * The DX is higher and risks for bugs lower if the project API
  * returns immutable values.
  */
-function withStructuredClone<T>(subject: BehaviorSubject<T>) {
+function withStructuredClone<T>(subject: BehaviorSubject<T> | Observable<T>) {
 	return subject.pipe(map((v) => structuredClone(v)));
 }

@@ -2,11 +2,13 @@ import type { Lix } from "@lix-js/sdk";
 import type { ProjectSettings } from "../../schema/settings.js";
 import type { State } from "./state.js";
 import dedent from "dedent";
+import { isEqual } from "lodash-es";
+import { importPlugins } from "../../plugin/importPlugins.js";
 
 export async function setSettings(args: {
 	newSettings: ProjectSettings;
 	lix: Lix;
-	state: Pick<State, "settings$">;
+	state: State;
 }) {
 	const previousSettings = args.state.settings$.getValue();
 	if (
@@ -50,4 +52,12 @@ export async function setSettings(args: {
 		.execute();
 	// if successfull set next value for reactive state
 	args.state.settings$.next(cloned);
+
+	if (isEqual(previousSettings.modules, args.newSettings.modules) === false) {
+		const { plugins, errors } = await importPlugins({
+			settings: args.newSettings,
+		});
+		args.state.plugins$.next(plugins);
+		args.state.errors$.next(errors);
+	}
 }
