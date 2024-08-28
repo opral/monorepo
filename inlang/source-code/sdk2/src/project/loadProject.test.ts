@@ -98,7 +98,9 @@ test("providing plugins should work", async () => {
 	});
 
 	const plugins = project.plugins.get();
+	const errors = project.errors.get();
+
 	expect(plugins.length).toBe(1);
 	expect(plugins[0]?.key).toBe("my-provided-plugin");
-	expect(project.errors.get().length).toBe(0);
+	expect(errors.length).toBe(0);
 });
