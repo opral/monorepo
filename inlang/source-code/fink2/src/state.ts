@@ -139,6 +139,7 @@ export const conflictsAtom = atom(async (get) => {
 	if (!project) return [];
 	const result = await project.lix.db
 		.selectFrom("conflict")
+		.where("resolved_with_change_id", "is", null)
 		.selectAll()
 		.execute();
 
