@@ -53,7 +53,7 @@ export const editMessageCommand = {
 		variant.pattern = getPatternFromString({ string: newValue })
 
 		// Upsert the updated message and variant
-		await state()
+		const success = await state()
 			.project.db.transaction()
 			.execute(async (trx) => {
 				await trx
@@ -65,14 +65,19 @@ export const editMessageCommand = {
 					.where("message.id", "=", message.id)
 					.execute()
 
-				await trx
+				return await trx
 					.updateTable("variant")
 					.set({
 						pattern: variant.pattern,
 					})
 					.where("variant.id", "=", variant.id)
+					.returningAll()
 					.execute()
 			})
+
+		if (!success) {
+			return msg(`Couldn't update bundle with id ${bundleId}.`)
+		}
 
 		// Emit event to notify that a message was edited
 		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
