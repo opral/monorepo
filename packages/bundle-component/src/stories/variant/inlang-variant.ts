@@ -4,14 +4,13 @@ import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../../styling/base.js"
 
 //helpers
-import updateMatch from "../../helper/crud/variant/updateMatch.js"
 import overridePrimitiveColors from "../../helper/overridePrimitiveColors.js"
+import { createChangeEvent } from "../../helper/event.js"
 
 //components
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
 import SlTooltip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
-import { createChangeEvent } from "../../helper/event.js"
 
 if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
 if (!customElements.get("sl-tooltip")) customElements.define("sl-tooltip", SlTooltip)
@@ -139,11 +138,13 @@ export default class InlangVariant extends LitElement {
 		//TODO improve this function
 		if (this.variant) {
 			const newVariant = structuredClone(this.variant)
-			updateMatch({
-				variant: newVariant,
-				selectorName,
-				value,
-			})
+
+			// if matchName is not in variant, return
+			if (newVariant.match[selectorName]) {
+				// update the match with value (mutates variant)
+				newVariant.match[selectorName] = value
+			}
+
 			this.dispatchEvent(
 				createChangeEvent({
 					type: "Variant",
@@ -160,55 +161,6 @@ export default class InlangVariant extends LitElement {
 
 		//get all sl-inputs and set the color to the inlang colors
 		overridePrimitiveColors()
-
-		// adds classes when dropdown is open, to keep it open when not hovering the variant
-		const selectorConfigurator = this.shadowRoot?.querySelector("inlang-selector-configurator")
-		const selectorDropdown = selectorConfigurator?.shadowRoot?.querySelector("sl-dropdown")
-		if (selectorDropdown) {
-			selectorDropdown.addEventListener("sl-show", (e) => {
-				if (e.target === selectorDropdown) {
-					//set parent class dropdown-open
-					selectorConfigurator?.parentElement?.classList.add("dropdown-open")
-				}
-			})
-			selectorDropdown.addEventListener("sl-hide", (e) => {
-				if (e.target === selectorDropdown) {
-					//remove parent class dropdown-open
-					selectorConfigurator?.parentElement?.classList.remove("dropdown-open")
-				}
-			})
-		}
-	}
-
-	// hooks
-	override updated(changedProperties: any) {
-		// works like useEffect
-		// In order to not mutate object references, we need to clone the object
-		// When the messageBundle prop changes, we update the internal state
-		if (changedProperties.has("variantValidationReports", "messageValidationReports")) {
-			// adds classes when dropdown is open, to keep it open when not hovering the variant
-			const lintReportsTip = this.shadowRoot?.querySelector("inlang-lint-report-tip")
-			const lintReportDropdown = lintReportsTip?.shadowRoot?.querySelector("sl-dropdown")
-			if (lintReportDropdown) {
-				const previousSibling = lintReportsTip?.previousSibling?.previousSibling?.previousSibling
-				lintReportDropdown.addEventListener("sl-show", (e) => {
-					if (
-						e.target === lintReportDropdown && //set parent class dropdown-open
-						previousSibling instanceof HTMLElement
-					) {
-						previousSibling.classList.add("dropdown-open")
-					}
-				})
-				lintReportDropdown.addEventListener("sl-hide", (e) => {
-					if (
-						e.target === lintReportDropdown && //remove parent class dropdown-open
-						previousSibling instanceof HTMLElement
-					) {
-						previousSibling.classList.remove("dropdown-open")
-					}
-				})
-			}
-		}
 	}
 
 	override render() {
@@ -238,7 +190,7 @@ export default class InlangVariant extends LitElement {
 					<div class="actions">
 						<div class="dynamic-actions hide-dynamic-actions">
 							<slot name="variant-action"></slot>
-							${this.variant.pattern && this.variant.pattern.length > 1
+							${this.variant.pattern
 								? html`<sl-tooltip content="Delete"
 										><sl-button size="small" @click=${() => this._delete()}
 											><svg

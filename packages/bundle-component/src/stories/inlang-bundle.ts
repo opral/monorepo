@@ -18,10 +18,9 @@ if (!customElements.get("sl-menu")) customElements.define("sl-menu", SlMenu)
 if (!customElements.get("sl-menu-item")) customElements.define("sl-menu-item", SlMenuItem)
 
 //components
-import "./actions/inlang-add-input.js"
+import "./actions/add-input/inlang-add-input.js"
 
 //helpers
-import getInputs from "../helper/crud/input/get.js"
 import { baseStyling } from "../styling/base.js"
 
 @customElement("inlang-bundle")
@@ -154,7 +153,17 @@ export default class InlangBundle extends LitElement {
 	private _bundleActionsPresent = false
 
 	private _inputs = (): Declaration[] | undefined => {
-		return this.messages ? getInputs({ messages: this.messages }) : undefined
+		const inputs: Declaration[] = []
+		if (this.messages) {
+			for (const message of this.messages as unknown as Message[]) {
+				for (const declaration of message.declarations) {
+					if (declaration.type === "input" && !inputs.some((d) => d.name === declaration.name)) {
+						inputs.push(declaration)
+					}
+				}
+			}
+		}
+		return inputs
 	}
 
 	override async firstUpdated() {
@@ -289,7 +298,7 @@ export default class InlangBundle extends LitElement {
 					</div>
 				</div>
 				<slot name="message"></slot>
-				<!-- TODO: workaround for slot needs a better solution -->
+				<!-- TODO: workaround for slot needs a better solution | when conditionally rendered, the slot doesn't get passed into the dom and then can not be queried. That's why we put it here additionally. Will never be renedered under a message. -->
 				<slot name="bundle-action"></slot>
 			</div>
 		`

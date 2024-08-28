@@ -13,8 +13,8 @@ import "./inlang-bundle.ts"
 import "./message/inlang-message.ts"
 import "./variant/inlang-variant.ts"
 import "./pattern-editor/inlang-pattern-editor.ts"
-import "./actions/inlang-bundle-action.ts"
-import "./actions/inlang-add-selector.ts"
+import "./actions/bundle-action/inlang-bundle-action.ts"
+import "./actions/add-selector/inlang-add-selector.ts"
 
 const meta: Meta = {
 	component: "inlang-bundle",
@@ -31,7 +31,7 @@ export default meta
 
 let simpleBundleBuffer = bundleWithoutSelectors
 
-export const Simple: StoryObj = {
+export const Example: StoryObj = {
 	args: {
 		bundle: bundleWithoutSelectors,
 		messages: bundleWithoutSelectors.messages,

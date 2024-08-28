@@ -5,5 +5,5 @@ export { default as InlangVariant } from "./stories/variant/inlang-variant.js"
 export { default as InlangPatternEditor } from "./stories/pattern-editor/inlang-pattern-editor.js"
 
 //modals & actions
-export { default as InlangBundleAction } from "./stories/actions/inlang-bundle-action.js"
-export { default as InlangAddSelector } from "./stories/actions/inlang-add-selector.js"
+export { default as InlangBundleAction } from "./stories/actions/bundle-action/inlang-bundle-action.js"
+export { default as InlangAddSelector } from "./stories/actions/add-selector/inlang-add-selector.js"
