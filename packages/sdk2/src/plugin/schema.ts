@@ -50,18 +50,22 @@ export type InlangPlugin<
 		settings: ProjectSettings & ExternalSettings;
 	}) => Array<ResourceFile>;
 	/**
-	 * Define app specific APIs.
-	 *
-	 * @example
-	 * addCustomApi: () => ({
-	 *   "app.inlang.ide-extension": {
-	 *     messageReferenceMatcher: () => {}
-	 *   }
-	 *  })
+	 * @deprecated Use the `meta` field instead.
 	 */
 	addCustomApi?: (args: {
 		settings: ProjectSettings & ExternalSettings;
 	}) => Record<string, unknown>;
+	/**
+	 * Define app-specific APIs under a `meta` field.
+	 *
+	 * @example
+	 * meta: {
+	 *   "app.inlang.ide-extension": {
+	 *     documentPaths: ["*.json"]
+	 *   }
+	 * }
+	 */
+	meta?: Record<string, Record<string, unknown>>;
 };
 
 /**
