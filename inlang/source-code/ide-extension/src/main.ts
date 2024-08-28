@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
 import { msg } from "./utilities/messages/msg.js"
-import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
+// import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { handleError } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
 import { projectView } from "./utilities/project/project.js"
@@ -19,6 +19,7 @@ import { telemetry } from "./services/telemetry/implementation.js"
 import { version } from "../package.json"
 import { statusBar } from "./utilities/settings/statusBar.js"
 import fg from "fast-glob"
+import type { IdeExtensionConfig } from "@inlang/sdk2"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
@@ -140,12 +141,15 @@ function registerExtensionComponents(args: {
 		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))
 	)
 
-	const additionalSelectors =
-		state().project.customApi()["app.inlang.ideExtension"]?.documentSelectors || []
+	const ideExtension = state()
+		.project.plugins.get()
+		.find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])?.meta?.[
+		"app.inlang.ideExtension"
+	] as IdeExtensionConfig | undefined
 
 	const documentSelectors: vscode.DocumentSelector = [
 		{ language: "javascript", pattern: `!${CONFIGURATION.FILES.PROJECT}` },
-		...(state().project ? additionalSelectors : []),
+		...(ideExtension?.documentSelectors ?? []),
 	]
 
 	args.context.subscriptions.push(
