@@ -12,7 +12,9 @@ export const plugin = {
 		const files: ResourceFile[] = []
 		const pathPattern =
 			settings["plugin.inlang.icu-messageformat-1"].pathPattern ??
-			settings["plugin.inlang.messageFormat"]?.pathPattern?.replace("{languageTag}", "{locale}")
+			settings["plugin.inlang.messageFormat"]?.pathPattern
+				?.replace("{languageTag}", "{locale}")
+				.replace(".json", ".experimental.json")
 
 		for (const locale of settings.locales) {
 			const path = pathPattern.replace("{locale}", locale)
