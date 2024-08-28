@@ -8,7 +8,7 @@ import {
 	InlangPatternEditor,
 	InlangVariant,
 } from "../../components/SingleDiffBundle.tsx";
-import { resolveConflict } from "@lix-js/sdk";
+import { resolveConflictBySelecting } from "@lix-js/sdk";
 
 export default function Page() {
 	const [project] = useAtom(projectAtom);
@@ -35,7 +35,6 @@ export default function Page() {
 		}
 		setConflictingChanges(result);
 	};
-
 
 	useEffect(() => {
 		getConflictingChanges();
@@ -66,10 +65,13 @@ export default function Page() {
 					{conflicts.length > 0 &&
 						conflicts.map((conflict) => {
 							const change = conflictingChanges[conflict.change_id];
-							const conflictingChange = conflictingChanges[conflict.conflicting_change_id];
+							const conflictingChange =
+								conflictingChanges[conflict.conflicting_change_id];
 							const bundleId = bundlesNested.find((bundle) =>
 								bundle.messages.filter((message) =>
-									message.variants.find((variant) => variant.id === conflict.change_id)
+									message.variants.find(
+										(variant) => variant.id === conflict.change_id
+									)
 								)
 							)?.id;
 							return (
@@ -122,13 +124,12 @@ export default function Page() {
 													<div
 														className="absolute top-[50%] -translate-y-[50%] right-2 bg-zinc-700 hover:bg-black cursor-pointer text-zinc-100 rounded-md flex justify-center items-center px-3 h-[30px]"
 														onClick={async () => {
-															await resolveConflict({
+															await resolveConflictBySelecting({
 																lix: project!.lix,
 																conflict,
-																resolveWithChange: change
-															})
-														}
-														}
+																selectChangeId: change.id,
+															});
+														}}
 													>
 														Keep
 													</div>
@@ -172,13 +173,12 @@ export default function Page() {
 														className="absolute top-[50%] -translate-y-[50%] right-2 bg-zinc-700 hover:bg-black cursor-pointer text-zinc-100 rounded-md flex justify-center items-center px-3 h-[30px]"
 														onClick={async () => {
 															console.log({ conflict, conflictingChange });
-															await resolveConflict({
+															await resolveConflictBySelecting({
 																lix: project!.lix,
 																conflict,
-																resolveWithChange: conflictingChange
-															})
-														}
-														}
+																selectChangeId: conflictingChange.id,
+															});
+														}}
 													>
 														Accept
 													</div>
