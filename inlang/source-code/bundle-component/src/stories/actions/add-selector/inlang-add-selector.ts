@@ -1,11 +1,14 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-
-import { createVariant, type Message, type MessageNested, type Expression } from "@inlang/sdk2"
-import addSelector from "../../helper/crud/selector/add.js"
-import upsertVariant from "../../helper/crud/variant/upsert.js"
-import "./inlang-add-input.js"
-import getInputs from "../../helper/crud/input/get.js"
+import { createChangeEvent } from "../../../helper/event.js"
+import { baseStyling } from "../../../styling/base.js"
+import {
+	createVariant,
+	type Message,
+	type MessageNested,
+	type Expression,
+	Declaration,
+} from "@inlang/sdk2"
 
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
 import SlSelect from "@shoelace-style/shoelace/dist/components/select/select.component.js"
@@ -13,7 +16,6 @@ import SlInput from "@shoelace-style/shoelace/dist/components/input/input.compon
 import SlOption from "@shoelace-style/shoelace/dist/components/option/option.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
 import SlTooltip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js"
-import { createChangeEvent } from "../../helper/event.js"
 
 if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)
 if (!customElements.get("sl-select")) customElements.define("sl-select", SlSelect)
@@ -25,6 +27,7 @@ if (!customElements.get("sl-tooltip")) customElements.define("sl-tooltip", SlToo
 @customElement("inlang-add-selector")
 export default class InlangAddSelector extends LitElement {
 	static override styles = [
+		baseStyling,
 		css`
 			.button-wrapper {
 				height: 44px;
@@ -188,27 +191,61 @@ export default class InlangAddSelector extends LitElement {
 	}
 
 	private _getInputs = () => {
-		return getInputs({ messages: (this.messages as any as Message[]) || [] })
+		const inputs: Declaration[] = []
+		if (this.messages) {
+			for (const message of this.messages as unknown as Message[]) {
+				for (const declaration of message.declarations) {
+					if (declaration.type === "input" && !inputs.some((d) => d.name === declaration.name)) {
+						inputs.push(declaration)
+					}
+				}
+			}
+		}
+		return inputs
 	}
 
 	private _handleAddSelector = (newMatchers: string[]) => {
-		// get dropdown by "dropdown" class
+		// close dropdown
 		const dropdown = this.shadowRoot?.querySelector(".dropdown") as SlDropdown
 		if (dropdown) dropdown.hide()
 
-		// adding input
+		// Step 0 | (optinal) adding input
+		this._addInput()
+
+		if (this._input && this.message) {
+			// get variant matcher
+			const message = structuredClone(this.message)
+			const _variantsMatcher = (message ? message.variants : []).map((variant) => variant.match)
+
+			// Step 1 | add selector to message
+			this._updateSelector()
+
+			// Step 2 | add "*" to existing variants
+			this._addMatchToExistingVariants()
+
+			// Step 3 | get newCombinations and add new variants
+			const newCombinations = this._generateNewMatcherCombinations({
+				variantsMatcher: _variantsMatcher,
+				newMatchers: newMatchers,
+				newSelectorName: this._input,
+			})
+			this._addVariantsFromNewCombinations(newCombinations)
+		}
+	}
+
+	private _addInput = () => {
 		if (this._isNewInput && this._newInputSting && this._newInputSting.length > 0) {
 			for (const message of (this.messages as any as Message[]) || []) {
 				const newMessage = structuredClone(message)
 
 				newMessage.declarations.push({
 					type: "input",
-					name: this._newInputSting!,
+					name: this._newInputSting,
 					value: {
 						type: "expression",
 						arg: {
 							type: "variable",
-							name: this._newInputSting!,
+							name: this._newInputSting,
 						},
 					},
 				})
@@ -223,115 +260,82 @@ export default class InlangAddSelector extends LitElement {
 			}
 			this._input = this._newInputSting
 		}
+	}
 
-		if (this._input && this.message) {
-			// get variant matchers arrays
-			const _variants = structuredClone(this.message ? this.message.variants : [])
-			const _variantsMatcher = _variants.map((variant) => variant.match)
-			const message = structuredClone(this.message)
-
-			// add selector
-			addSelector({
-				message,
-				selector: {
-					type: "expression",
-					arg: {
-						type: "variable",
-						name: this._input,
-					},
-					annotation: {
-						type: "function",
-						name: this._function || "plural",
-						options: [],
-					},
+	private _updateSelector = () => {
+		if (this.message && this._input) {
+			this.message.selectors.push({
+				type: "expression",
+				arg: {
+					type: "variable",
+					name: this._input,
+				},
+				annotation: {
+					type: "function",
+					name: this._function || "plural",
+					options: [],
 				},
 			})
-
-			const updatedVariants = structuredClone(message.variants)
 			this.dispatchEvent(
 				createChangeEvent({
 					type: "Message",
 					operation: "update",
-					newData: message,
+					newData: this.message,
 				})
 			)
+		}
+	}
 
-			this._addVariants({
-				message: message,
-				variantsMatcher: _variantsMatcher,
-				newMatchers: newMatchers,
-				newSelectorName: this._input,
-			})
-
-			// only inserted variants should be dispatched -> show filter
-			const insertedVariants = message.variants.filter(
-				(variant) => !updatedVariants.some((v) => v.id === variant.id)
-			)
-
-			for (const insertedVariant of insertedVariants) {
-				this.dispatchEvent(
-					createChangeEvent({
-						type: "Variant",
-						operation: "create",
-						newData: insertedVariant,
-					})
-				)
-			}
-
-			for (const updatedVariant of updatedVariants) {
+	private _addMatchToExistingVariants = () => {
+		if (this.message && this._input) {
+			for (const variant of this.message.variants) {
+				variant.match[this._input] = "*"
 				this.dispatchEvent(
 					createChangeEvent({
 						type: "Variant",
 						operation: "update",
-						newData: updatedVariant,
+						newData: variant,
 					})
 				)
 			}
 		}
 	}
 
-	private _addVariants = (props: {
-		message: MessageNested
-		variantsMatcher: Record<Expression["arg"]["name"], string>[]
-		newMatchers: string[]
-		newSelectorName: string
-	}) => {
-		const newMatchers = props.newMatchers.filter((category) => category !== "*")
-
-		if (newMatchers) {
-			if (props.variantsMatcher && JSON.stringify(props.variantsMatcher) !== "[{}]") {
-				for (const variantMatcher of props.variantsMatcher) {
-					for (const category of newMatchers) {
-						upsertVariant({
-							message: props.message,
-							variant: createVariant({
-								messageId: props.message.id,
-								// combine the matches that are already present with the new category -> like a matrix
-								match: { ...variantMatcher, ...{ [props.newSelectorName]: category } },
-							}),
-						})
-					}
-				}
-			} else {
-				for (const category of newMatchers) {
-					upsertVariant({
-						message: props.message,
-						variant: createVariant({
-							messageId: props.message.id,
-							// combine the matches that are already present with the new category -> like a matrix
-							match: { [props.newSelectorName]: category },
-						}),
+	private _addVariantsFromNewCombinations = (newCombinations: Array<Record<string, string>>) => {
+		if (this.message) {
+			for (const combination of newCombinations) {
+				const newVariant = createVariant({
+					messageId: this.message.id,
+					match: combination,
+					text: "",
+				})
+				this.dispatchEvent(
+					createChangeEvent({
+						type: "Variant",
+						operation: "create",
+						newData: newVariant,
 					})
-				}
+				)
 			}
 		}
 	}
 
-	// private _resetConfiguration = () => {
-	// 	this._input = this.inputs && this.inputs[0] && this.inputs[0].name
-	// 	this._function = "plural"
-	// 	this._matchers = this._getPluralCategories() || ["*"]
-	// }
+	private _generateNewMatcherCombinations = (props: {
+		variantsMatcher: Record<Expression["arg"]["name"], string>[]
+		newMatchers: string[]
+		newSelectorName: string
+	}): Array<Record<string, string>> => {
+		const newMatchers = props.newMatchers.filter((category) => category !== "*")
+		const newCombinations: Array<Record<string, string>> = []
+		if (newMatchers) {
+			for (const variantMatcher of props.variantsMatcher) {
+				for (const category of newMatchers) {
+					newCombinations.push({ ...variantMatcher, ...{ [props.newSelectorName]: category } })
+				}
+			}
+		}
+		return newCombinations
+	}
 
 	override async firstUpdated() {
 		await this.updateComplete
@@ -582,7 +586,6 @@ export default class InlangAddSelector extends LitElement {
 								} else {
 									console.info("No matchers present")
 								}
-								//this._resetConfiguration()
 							}}
 							size="small"
 							variant="primary"

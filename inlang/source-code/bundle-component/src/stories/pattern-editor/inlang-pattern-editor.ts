@@ -5,8 +5,8 @@ import { ref, createRef, type Ref } from "lit/directives/ref.js"
 import { createEditor } from "lexical"
 import { registerPlainText } from "@lexical/plain-text"
 import { $getRoot, $createParagraphNode, $createTextNode } from "lexical"
-import patternToString from "../../helper/crud/pattern/patternToString.js"
-import stringToPattern from "../../helper/crud/pattern/stringToPattern.js"
+import patternToString from "../../helper/patternToString.js"
+import stringToPattern from "../../helper/stringToPattern.js"
 import { createChangeEvent } from "../../helper/event.js"
 
 //editor config
@@ -36,6 +36,7 @@ export default class InlangPatternEditor extends LitElement {
 	// create editor
 	editor = createEditor(config)
 
+	// update editor state when variant prop changes
 	override updated(changedProperties: PropertyValues<this>) {
 		if (
 			changedProperties.has("variant") &&
@@ -47,10 +48,13 @@ export default class InlangPatternEditor extends LitElement {
 
 	// set editor state
 	private _setEditorState = () => {
+		// remove text content listener
 		this._removeTextContentListener?.()
 
+		// override pattern state
 		this._patternState = this.variant?.pattern
-		// only handling strings so far -> TODO: handle real patterns
+
+		//update editor
 		this.editor.update(
 			() => {
 				const root = $getRoot()
@@ -77,50 +81,40 @@ export default class InlangPatternEditor extends LitElement {
 			}
 		)
 
-		// if (reAddEventListner) {
+		// readd text content listener
 		this._removeTextContentListener = this.editor.registerTextContentListener(
 			(textContent: any) => {
-				// The latest text content of the editor!
-				this._patternState = stringToPattern({ text: textContent })
-
-				this.dispatchEvent(
-					createChangeEvent({
-						type: "Variant",
-						operation: "update",
-						newData: { ...this.variant, pattern: this._patternState } as Variant,
-					})
-				)
+				this._handleListenToTextContent(textContent)
 			}
 		)
-		// }
 	}
 
 	override async firstUpdated() {
+		// initialize editor
 		const contentEditableElement = this.contentEditableElementRef.value
 		if (contentEditableElement) {
 			// set root element of editor and register plain text
 			this.editor.setRootElement(contentEditableElement)
 			registerPlainText(this.editor)
 
-			// listen to text content changes and dispatch `change-pattern` event
+			// listen to text content changes and dispatch `change` event
 			this._removeTextContentListener = this.editor.registerTextContentListener(
 				(textContent: any) => {
-					// The latest text content of the editor!
-					//check if something changed
-
-					this._patternState = stringToPattern({ text: textContent })
-					// this.requestUpdate("pattern")
-					//check if something changed
-					this.dispatchEvent(
-						createChangeEvent({
-							type: "Variant",
-							operation: "update",
-							newData: { ...this.variant, pattern: this._patternState } as Variant,
-						})
-					)
+					this._handleListenToTextContent(textContent)
 				}
 			)
 		}
+	}
+
+	private _handleListenToTextContent = (textContent: any) => {
+		this._patternState = stringToPattern({ text: textContent })
+		this.dispatchEvent(
+			createChangeEvent({
+				type: "Variant",
+				operation: "update",
+				newData: { ...this.variant, pattern: this._patternState } as Variant,
+			})
+		)
 	}
 
 	private _removeTextContentListener: undefined | (() => void)

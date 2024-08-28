@@ -1,4 +1,7 @@
 import "./inlang-message.ts"
+import "./../variant/inlang-variant.ts"
+import "./../pattern-editor/inlang-pattern-editor.ts"
+import "./../inlang-bundle.ts"
 
 import type { Meta, StoryObj } from "@storybook/web-components"
 //@ts-ignore
@@ -58,12 +61,65 @@ export const Example: StoryObj = {
 		}
 
 		return html`<inlang-message .message=${message} .settings=${settings} @change=${handleChange}>
-			${message.variants.map(
-				(variant) => html`<inlang-variant slot="variant" .variant=${variant}>
+			${message.variants.map((variant) => {
+				return html`<inlang-variant slot="variant" .variant=${variant}>
                     <inlang-pattern-editor slot="pattern-editor" .variant="${variant}">
                 </inlang-variant>`
-			)}
-			<div slot="selector-button">Add</div>
+			})}
 		</inlang-message>`
+	},
+}
+
+export const MessageInBundle: StoryObj = {
+	args: {
+		message: pluralBundle.messages[1],
+		settings: mockSettings,
+	},
+	render: () => {
+		const [{ message, settings }, updateArgs] = useArgs()
+		const handleChange = (e) => {
+			const data = e.detail.argument as DispatchChangeInterface
+			const newMessage = structuredClone(bufferMessage)
+			switch (data.type) {
+				case "Message":
+					if (!data.newData) break
+					newMessage["selectors"] = (data.newData as Message).selectors
+					newMessage["declarations"] = (data.newData as Message).declarations
+					break
+				case "Variant":
+					if (data.operation === "delete") {
+						// delete variant
+						newMessage.variants = newMessage.variants.filter((v) => v.id !== data.newData!.id)
+					} else if (data.newData) {
+						const index = newMessage.variants.findIndex((v) => v.id === data.newData!.id)
+						if (index === -1) {
+							// create new variant
+							newMessage.variants.push(data.newData as Variant)
+						} else {
+							// update variant
+							newMessage.variants[index] = data.newData as Variant
+						}
+					}
+					break
+			}
+			bufferMessage = newMessage
+			updateArgs({ message: newMessage })
+			console.info(data.type, data.operation, data.newData)
+		}
+
+		return html`<inlang-bundle .bundle=${pluralBundle}>
+			<inlang-message
+				slot="message"
+				.message=${message}
+				.settings=${settings}
+				@change=${handleChange}
+			>
+				${message.variants.map((variant) => {
+					return html`<inlang-variant slot="variant" .variant=${variant}>
+                    <inlang-pattern-editor slot="pattern-editor" .variant="${variant}">
+                </inlang-variant>`
+				})}
+			</inlang-message>
+		</inlang-bundle>`
 	},
 }

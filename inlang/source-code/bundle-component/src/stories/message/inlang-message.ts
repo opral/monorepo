@@ -3,12 +3,12 @@ import { createVariant } from "@inlang/sdk2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../../styling/base.js"
+import { createChangeEvent } from "../../helper/event.js"
 
 import SlTag from "@shoelace-style/shoelace/dist/components/tag/tag.component.js"
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
 import SlMenu from "@shoelace-style/shoelace/dist/components/menu/menu.component.js"
 import SlMenuItem from "@shoelace-style/shoelace/dist/components/menu-item/menu-item.component.js"
-import { createChangeEvent } from "../../helper/event.js"
 
 if (!customElements.get("sl-tag")) customElements.define("sl-tag", SlTag)
 if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)

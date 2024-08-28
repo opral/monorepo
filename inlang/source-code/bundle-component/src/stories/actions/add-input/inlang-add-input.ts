@@ -1,14 +1,19 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
+import { createChangeEvent } from "../../../helper/event.js"
+import type { Message } from "@inlang/sdk2"
+import { baseStyling } from "../../../styling/base.js"
 
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
-import { createChangeEvent } from "../../helper/event.js"
-import type { Message } from "@inlang/sdk2"
+
+if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)
+if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
 
 @customElement("inlang-add-input")
 export default class InlangAddInput extends LitElement {
 	static override styles = [
+		baseStyling,
 		css`
 			.button-wrapper {
 				height: 44px;

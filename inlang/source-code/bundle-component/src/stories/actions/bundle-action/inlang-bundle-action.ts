@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import { baseStyling } from "../../styling/base.js"
+import { baseStyling } from "../../../styling/base.js"
 
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
 
