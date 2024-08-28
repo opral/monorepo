@@ -1,14 +1,14 @@
-import type { CustomApiInlangIdeExtension, LanguageTag } from "@inlang/sdk"
 import { MarkdownString, Uri } from "vscode"
 import { state } from "../utilities/state.js"
 import { getStringFromPattern } from "../utilities/messages/query.js"
 import { INTERPOLATE } from "../configuration.js"
 import { escapeHtml } from "../utilities/utils.js"
+import { selectBundleNested, type IdeExtensionConfig } from "@inlang/sdk2"
 
 const MISSING_TRANSLATION_MESSAGE = "[missing]"
 
 type ContextTableRow = {
-	language: LanguageTag
+	locale: string
 	message: string
 	editCommand?: Uri
 	openInFinkCommand?: Uri
@@ -30,27 +30,31 @@ function renderTranslationRow(row: ContextTableRow) {
 		actionCommandLink = row.editCommand ? `<a href="${row.editCommand}">$(edit)</a>` : ""
 	}
 
-	const messageListing = `<td><strong>${escapeHtml(
-		row.language
-	)}&nbsp;</strong></td><td>${escapeHtml(row.message)}</td>`
+	const messageListing = `<td><strong>${escapeHtml(row.locale)}&nbsp;</strong></td><td>${escapeHtml(
+		row.message
+	)}</td>`
 	const actionCommandCell = actionCommandLink ? `<td>&nbsp;&nbsp;${actionCommandLink}</td>` : ""
 	const openInFinkCell = openInFinkLink ? `<td>&nbsp;${openInFinkLink}</td>` : ""
 
 	return `<tr>${messageListing}${actionCommandCell}${openInFinkCell}</tr>`
 }
 
-export function contextTooltip(
+export async function contextTooltip(
 	referenceMessage: Awaited<
-		ReturnType<CustomApiInlangIdeExtension["messageReferenceMatchers"][number]>
+		ReturnType<IdeExtensionConfig["messageReferenceMatchers"][number]>
 	>[number]
 ) {
 	// resolve message from id or alias
-	const message =
-		state().project.query.messages.get({
-			where: { id: referenceMessage.messageId },
-		}) ?? state().project.query.messages.getByDefaultAlias(referenceMessage.messageId)
+	const bundle = await selectBundleNested(state().project.db)
+		.where((eb) =>
+			eb.or([
+				eb("id", "=", referenceMessage.bundleId),
+				eb(eb.ref("alias", "->").key("default"), "=", referenceMessage.bundleId),
+			])
+		)
+		.executeTakeFirst()
 
-	if (!message) {
+	if (!bundle) {
 		return undefined // Return early if message is not found
 	}
 
@@ -58,21 +62,24 @@ export function contextTooltip(
 	const configuredLanguageTags = state().project.settings.get()?.locales || []
 
 	// Generate rows for each configured language tag
-	const contextTableRows: ContextTableRow[] = configuredLanguageTags.map((languageTag) => {
-		const variant = message.variants.find((v) => v.languageTag === languageTag)
+	const contextTableRows: ContextTableRow[] = configuredLanguageTags.map((locale) => {
+		const message = bundle.messages.find((m) => m.locale === locale)
+
+		// Get the variant from the message
+		const variant = message?.variants.find((v) => v.match.locale === locale)
 
 		let m = MISSING_TRANSLATION_MESSAGE
 
-		if (variant) {
+		if (message && variant) {
 			m = getStringFromPattern({
 				pattern: variant.pattern,
-				languageTag: variant.languageTag,
+				locale: message.locale,
 				messageId: message.id,
 			})
 		}
 
 		const args = encodeURIComponent(
-			JSON.stringify([{ messageId: referenceMessage.messageId, languageTag: languageTag }])
+			JSON.stringify([{ bundleId: referenceMessage.bundleId, languageTag: locale }])
 		)
 
 		const editCommand = Uri.parse(INTERPOLATE.COMMAND_URI("EDIT_MESSAGE", args))
@@ -80,16 +87,16 @@ export function contextTooltip(
 			INTERPOLATE.COMMAND_URI(
 				"MACHINE_TRANSLATE_MESSAGE",
 				JSON.stringify({
-					messageId: referenceMessage.messageId,
+					bundleId: referenceMessage.bundleId,
 					baseLocale: state().project.settings.get()?.baseLocale,
-					targetLanguageTags: [languageTag],
+					targetLocales: [locale],
 				})
 			)
 		)
 		const openInFinkCommand = Uri.parse(INTERPOLATE.COMMAND_URI("OPEN_IN_FINK", args))
 
 		return {
-			language: languageTag,
+			locale,
 			message: m,
 			editCommand,
 			openInFinkCommand,
