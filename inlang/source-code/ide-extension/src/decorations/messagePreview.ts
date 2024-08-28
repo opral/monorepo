@@ -6,7 +6,8 @@ import { CONFIGURATION } from "../configuration.js"
 import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
 import { getPreviewLocale } from "../utilities/locale/getPreviewLocale.js"
 import { getSetting } from "../utilities/settings/index.js"
-import { selectBundleNested } from "@inlang/sdk2"
+import { selectBundleNested, type BundleNested, type IdeExtensionConfig } from "@inlang/sdk2"
+import { msg } from "../utilities/messages/msg.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -30,9 +31,17 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 		// Get the reference language
 		const baseLocale = state().project.settings.get().baseLocale
-		const ideExtensionConfig = state().project.customApi()?.["app.inlang.ideExtension"]
+		const ideExtension = state()
+			.project.plugins.get()
+			.find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])?.meta?.[
+			"app.inlang.ideExtension"
+		] as IdeExtensionConfig | undefined
 
-		const messageReferenceMatchers = ideExtensionConfig?.messageReferenceMatchers
+		if (baseLocale === undefined || ideExtension === undefined) {
+			return
+		}
+
+		const messageReferenceMatchers = ideExtension?.messageReferenceMatchers
 
 		if (baseLocale === undefined || messageReferenceMatchers === undefined) {
 			// don't show an error message. See issue:
@@ -65,37 +74,38 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 		// Get the message references
 		const wrappedDecorations = (messageReferenceMatchers ?? []).map(async (matcher) => {
-			const messages = await matcher({
+			const bundles = await matcher({
 				documentText: activeTextEditor.document.getText(),
 			})
 
-			return messages.map(async (message) => {
-				// resolve message from id or alias
-				const _message = await selectBundleNested(state().project.db)
-					// eb = expression builder
-					.where((eb) =>
-						eb.or([
-							// either the ids is equal to the message id
-							eb("id", "=", message.id),
-							// or the default alias (alias is a json that's why the --> syntax) is equal to the messageId
-							eb(eb.ref("alias", "->").key("default"), "=", message.id),
-						])
-					)
-					.execute()
+			return bundles.map(async (bundle) => {
+				// Query for message with bundle id and locale
+				const _bundle = selectBundleNested(state().project.db)
+					.where("bundle.id", "=", bundle.bundleId)
+					.executeTakeFirst()
+
+				if (!_bundle) {
+					return msg(`Bundle with id ${bundle.bundleId} not found.`)
+				}
+
+				const message = _bundle.messages.find((m) => m.locale === baseLocale)
+
+				// Check if variant is defined
+				if (!variant) {
+					return msg(`Variant with locale ${baseLocale} not found.`)
+				}
 
 				const previewLocale = await getPreviewLocale()
 				const translationLocale = previewLocale.length ? previewLocale : baseLocale
 
-				const variant = _message?.variants?.find((v) => v.languageTag === translationLocale)
-
 				const translationString = getStringFromPattern({
-					pattern: variant?.pattern || [
+					pattern: message.pattern || [
 						{
 							type: "Text",
 							value: "", // TODO: Fix pattern type to be always defined either/or Text / VariableReference
 						},
 					],
-					languageTag: translationLocale,
+					locale: translationLocale,
 					messageId: message.messageId,
 				})
 
@@ -108,7 +118,6 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 						: translation)
 
 				const range = new vscode.Range(
-					// Visual Studio Code starts to count lines and columns from zero
 					new vscode.Position(
 						message.position.start.line - 1,
 						message.position.start.character - 1
