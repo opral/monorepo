@@ -21,13 +21,11 @@
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
-	"dependencies": {
-		"@inlang/language-tag": "workspace:*"
-	},
 	"devDependencies": {
+		"@sinclair/typebox": "^0.31.17",
+		"prettier": "^3.3.3",
 		"tsd": "0.28.1",
 		"typescript": "^5.5.2",
-		"vitest": "0.34.3",
-		"@sinclair/typebox": "^0.31.17"
+		"vitest": "0.34.3"
 	}
 }
