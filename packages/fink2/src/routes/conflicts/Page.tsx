@@ -2,16 +2,13 @@ import { useAtom } from "jotai";
 import Layout, { Grid } from "../../layout.tsx";
 import { bundlesNestedAtom, conflictsAtom, projectAtom } from "../../state.ts";
 import { useEffect, useState } from "react";
-import DiffBundleView from "../../components/DiffBundleView.tsx";
 import { useNavigate } from "react-router-dom";
 import timeAgo from "../../helper/timeAgo.ts";
 import {
 	InlangPatternEditor,
 	InlangVariant,
 } from "../../components/SingleDiffBundle.tsx";
-import { discover } from "@shoelace-style/shoelace/dist/shoelace-autoloader.js";
-import { Variant } from "@inlang/sdk2";
-import queryHelper from "../../helper/queryHelper.ts";
+import { resolveConflict } from "@lix-js/sdk";
 
 export default function Page() {
 	const [project] = useAtom(projectAtom);
@@ -21,7 +18,6 @@ export default function Page() {
 	const navigate = useNavigate();
 
 	const getConflictingChanges = async () => {
-		console.log("getting conflicts");
 		const result = {};
 		for (const conflict of conflicts) {
 			const change = await project?.lix.db
@@ -34,47 +30,12 @@ export default function Page() {
 				.selectAll()
 				.where("id", "=", conflict.conflicting_change_id)
 				.executeTakeFirstOrThrow();
-			// get the bundleId of the change
-			const bundleWithConflict = bundlesNested.filter((bundle) =>
-				bundle.messages.find((message) =>
-					message.variants.find((variant) => variant.id === change.value.id)
-				)
-			);
 			result[conflicting.id] = conflicting;
 			result[change.id] = change;
-			result[change.id].bundleId = bundleWithConflict[0].id;
 		}
 		setConflictingChanges(result);
 	};
 
-	const applyConflict = async (newVariant: Variant, change_id: string) => {
-		console.log(newVariant);
-		if (project) {
-			await project.lix.db
-				.deleteFrom("conflict")
-				.where("conflict.change_id", "=", change_id)
-				.execute();
-			console.log("partially complete");
-			await queryHelper.variant.update(project.db, newVariant).execute();
-		}
-	};
-
-	const removeConflict = async (
-		change_id: string,
-		conflicting_change_id: string
-	) => {
-		if (project) {
-			await project.lix.db
-				.deleteFrom("conflict")
-				.where("conflict.change_id", "=", change_id)
-				.execute();
-
-			await project.lix.db
-				.deleteFrom("change")
-				.where("id", "=", conflicting_change_id)
-				.execute();
-		}
-	};
 
 	useEffect(() => {
 		getConflictingChanges();
@@ -103,12 +64,16 @@ export default function Page() {
 			<Grid>
 				<div className="mt-8 bg-white border-zinc-200 border rounded-lg divide-y divide-zinc-200 py-[4px]">
 					{conflicts.length > 0 &&
-						conflicts.map((c) => {
-							const bundleId = conflictingChanges[c.change_id]?.bundleId;
-							const change = conflictingChanges[c.change_id];
-							const conflicting = conflictingChanges[c.conflicting_change_id];
+						conflicts.map((conflict) => {
+							const change = conflictingChanges[conflict.change_id];
+							const conflictingChange = conflictingChanges[conflict.conflicting_change_id];
+							const bundleId = bundlesNested.find((bundle) =>
+								bundle.messages.filter((message) =>
+									message.variants.find((variant) => variant.id === conflict.change_id)
+								)
+							)?.id;
 							return (
-								<div key={c.change_id + Math.random()} className="">
+								<div key={conflict.change_id + Math.random()} className="">
 									<div className="flex gap-3 items-center">
 										<div className="w-5 h-5 flex items-center justify-center rounded-full ml-4">
 											<svg
@@ -135,7 +100,7 @@ export default function Page() {
 										</div>
 									</div>
 
-									{change && conflicting && (
+									{change && conflictingChange && (
 										<div className="flex items-end px-4 pb-[8px] pb-[16px]">
 											<div className="flex-1">
 												<p className="text-zinc-500 py-2 px-1">{`By ${change.author}, ${timeAgo(
@@ -156,8 +121,13 @@ export default function Page() {
 													</InlangVariant>
 													<div
 														className="absolute top-[50%] -translate-y-[50%] right-2 bg-zinc-700 hover:bg-black cursor-pointer text-zinc-100 rounded-md flex justify-center items-center px-3 h-[30px]"
-														onClick={() =>
-															removeConflict(change.id, conflicting.id)
+														onClick={async () => {
+															await resolveConflict({
+																lix: project!.lix,
+																conflict,
+																resolveWithChange: change
+															})
+														}
 														}
 													>
 														Keep
@@ -182,24 +152,32 @@ export default function Page() {
 												<div className="absolute border-t border-dashed border-zinc-400 w-full top-[50%]" />
 											</div>
 											<div className="flex-1">
-												<p className="text-zinc-500 py-2 px-1">{`Conflicting change`}</p>
+												<p className="text-zinc-500 py-2 px-1">{`By ${conflictingChange.author}, ${timeAgo(
+													conflictingChange.created_at
+												)}`}</p>
 												<div className="relative border border-zinc-300 rounded-lg overflow-hidden">
 													<InlangVariant
 														bundleId={bundleId}
-														variant={conflicting.value}
+														variant={conflictingChange.value}
 														className={"pointer-events-none conflict-variant"}
 														noHistory={true}
 													>
 														<InlangPatternEditor
 															slot="pattern-editor"
-															pattern={conflicting.value.pattern}
+															pattern={conflictingChange.value.pattern}
 															className={"conflict-pattern"}
 														></InlangPatternEditor>
 													</InlangVariant>
 													<div
 														className="absolute top-[50%] -translate-y-[50%] right-2 bg-zinc-700 hover:bg-black cursor-pointer text-zinc-100 rounded-md flex justify-center items-center px-3 h-[30px]"
-														onClick={() =>
-															applyConflict(conflicting.value, change.id)
+														onClick={async () => {
+															console.log({ conflict, conflictingChange });
+															await resolveConflict({
+																lix: project!.lix,
+																conflict,
+																resolveWithChange: conflictingChange
+															})
+														}
 														}
 													>
 														Accept
