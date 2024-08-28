@@ -95,7 +95,7 @@ const SingleDiffBundle = (props: {
 												slot="pattern-editor"
 												className="absolute right-4 h-full flex items-center text-green-800"
 											>
-												by You
+												by {change.author}
 											</div>
 										)}
 									</InlangVariant>
