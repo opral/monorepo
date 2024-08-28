@@ -1,9 +1,9 @@
 import { createUnplugin } from "unplugin"
 import {
-	BundleNested,
-	ProjectSettings,
-	loadProjectFromDirectoryInMemory,
+	type BundleNested,
+	type ProjectSettings,
 	type InlangProject,
+	loadProjectFromDirectoryInMemory,
 	selectBundleNested,
 } from "@inlang/sdk2"
 import path from "node:path"
