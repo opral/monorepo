@@ -2,7 +2,6 @@ import {
 	pendingChangesAtom,
 	projectAtom,
 	bundlesNestedAtom,
-	authorNameAtom,
 } from "../../state.ts";
 import { atom, useAtom } from "jotai";
 import Layout, { Grid } from "../../layout.tsx";

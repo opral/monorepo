@@ -114,7 +114,7 @@ const UserAuthDialog = (props: {
 				project history.
 			</p>
 			<img
-				src="./../assets/setAuthor.png"
+				src="/setAuthor.png"
 				alt="set author image"
 				className="rounded-lg pb-8"
 			/>
