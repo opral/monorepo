@@ -20,7 +20,7 @@ export const extractMessageCommand = {
 	title: "Sherlock: Extract Message",
 	register: commands.registerTextEditorCommand,
 	callback: async function (textEditor: TextEditor | undefined) {
-		const ideExtension: IdeExtensionConfig | undefined = state()
+		const ideExtension = state()
 			.project.plugins.get()
 			.find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])?.meta?.[
 			"app.inlang.ideExtension"
