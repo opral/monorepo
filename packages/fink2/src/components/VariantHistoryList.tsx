@@ -68,7 +68,6 @@ const VariantHistoryList = (props: {
 			{changes.map((change) => {
 				return (
 					<div key={change.id} className="py-6 px-1">
-						<pre>{JSON.stringify(change, null, 2)}</pre>
 						<div className="flex items-center justify-between">
 							<h3 className="text-[16px] text-zinc-500">
 								<span className="font-medium text-zinc-950">

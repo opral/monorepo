@@ -46,11 +46,6 @@ export default function App() {
 										<p className="text-sm!">{timeAgo(commit.created_at)}</p>
 									</div>
 								</div>
-								<div>
-									<pre>
-										{JSON.stringify(commit, null, 2)}
-									</pre>
-								</div>
 							</div>
 						))}
 					</div>
