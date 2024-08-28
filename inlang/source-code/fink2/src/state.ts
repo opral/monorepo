@@ -89,7 +89,7 @@ export const committedChangesAtom = atom(async (get) => {
 					.selectFrom("commit")
 					.select([
 						"commit.id",
-						"commit.user_id",
+						"commit.author",
 						"commit.description",
 						"commit.created",
 					])

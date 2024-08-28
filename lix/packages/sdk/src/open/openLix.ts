@@ -1,14 +1,9 @@
 import type { LixPlugin } from "../plugin.js";
-import { Kysely, ParseJSONResultsPlugin } from "kysely";
-import type { LixDatabase } from "../schema.js";
 import { commit } from "../commit.js";
 import { handleFileChange, handleFileInsert } from "../file-handlers.js";
 import { loadPlugins } from "../load-plugin.js";
-import {
-	contentFromDatabase,
-	createDialect,
-	type SqliteDatabase,
-} from "sqlite-wasm-kysely";
+import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
+import { initDb } from "../database/initDb.js";
 
 // TODO: fix in fink to not use time ordering!
 // .orderBy("commit.created desc")
@@ -32,10 +27,7 @@ export async function openLix(args: {
 	 */
 	providePlugins?: LixPlugin[];
 }) {
-	const db = new Kysely<LixDatabase>({
-		dialect: createDialect({ database: args.database }),
-		plugins: [new ParseJSONResultsPlugin()],
-	});
+	const db = initDb({ sqlite: args.database });
 
 	const plugins = await loadPlugins(db);
 	if (args.providePlugins && args.providePlugins.length > 0) {
@@ -190,4 +182,3 @@ export async function openLix(args: {
 // 		}
 // 	}
 // }
-

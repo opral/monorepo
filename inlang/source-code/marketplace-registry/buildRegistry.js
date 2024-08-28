@@ -1,9 +1,11 @@
-import { privateEnv } from "@inlang/env-variables"
 import fs from "node:fs/promises"
 import { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { Value } from "@sinclair/typebox/value"
 import algoliasearch from "algoliasearch"
 import fetch from "node-fetch"
+
+// eslint-disable-next-line no-undef
+const envVariables = process.env
 
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 const manifestLinks = JSON.parse(await fs.readFile("./registry.json", "utf-8"))
@@ -72,12 +74,8 @@ await fs.writeFile(
 	)}`
 )
 
-if (!privateEnv.ALGOLIA_ADMIN || !privateEnv.ALGOLIA_APPLICATION) {
-	throw new Error("Algolia API keys are not set")
-}
-
-if (privateEnv.DOPPLER_ENVIRONMENT === "production") {
-	const client = algoliasearch(privateEnv.ALGOLIA_APPLICATION, privateEnv.ALGOLIA_ADMIN)
+if (envVariables.DOPPLER_ENVIRONMENT === "production") {
+	const client = algoliasearch(envVariables.ALGOLIA_APPLICATION, envVariables.ALGOLIA_ADMIN)
 	const index = client.initIndex("registry")
 
 	const objects = await Promise.all(

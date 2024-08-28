@@ -92,7 +92,6 @@ export async function loadProjectFromDirectoryInMemory(
 
 		// TODO check user id and description (where will this one appear?)
 		await project.lix.commit({
-			userId: "inlang-bot",
 			description: "Executed importFiles",
 		});
 	}
@@ -108,7 +107,6 @@ export async function loadProjectFromDirectoryInMemory(
 		});
 		// TODO check user id and description (where will this one appear?)
 		await project.lix.commit({
-			userId: "inlang-bot",
 			description: "legacy load and save messages",
 		});
 	}

@@ -4,7 +4,7 @@ import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import { resolveConflict } from "./resolve-conflict.js";
-import type { Change } from "../schema.js";
+import type { Change } from "../database/schema.js";
 import type { LixPlugin } from "../plugin.js";
 import {
 	ChangeDoesNotBelongToFileError,
@@ -422,8 +422,11 @@ test("resolving a conflict with a new change (likely the result of a merge resol
 			parent_id: changes[0]!.id,
 			plugin_key: "plugin1",
 			type: "mock",
+			meta: {},
+			author: undefined,
+			commit_id: "mock",
 			value: {
-				// @ts-expect-error - manual stringification
+				id: "mock",
 				key: "value3",
 			},
 		},
@@ -452,6 +455,7 @@ test("resolving a conflict with a new change (likely the result of a merge resol
 		changesAfterResolve[2]?.id,
 	);
 	expect(changesAfterResolve[2]!.value).toStrictEqual({
+		id: "mock",
 		key: "value3",
 	});
 	expect(new TextDecoder().decode(fileAfterResolve.data)).toBe(

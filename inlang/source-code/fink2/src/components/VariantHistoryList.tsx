@@ -31,7 +31,7 @@ const VariantHistoryList = (props: {
 					.selectFrom("conflict")
 					.select("conflict.conflicting_change_id")
 			)
-			.orderBy("commit.user_id desc")
+			.orderBy("commit.author desc")
 			.orderBy("commit.created desc")
 			.execute();
 
@@ -71,7 +71,7 @@ const VariantHistoryList = (props: {
 						<div className="flex items-center justify-between">
 							<h3 className="text-[16px] text-zinc-500">
 								<span className="font-medium text-zinc-950">
-									{change.user_id}
+									{change.author}
 								</span>{" "}
 								changed variant
 							</h3>

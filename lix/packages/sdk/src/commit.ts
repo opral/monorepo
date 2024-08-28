@@ -1,9 +1,9 @@
 import { Kysely } from "kysely";
-import type { LixDatabase } from "./schema.js";
+import type { LixDatabaseSchema } from "./database/schema.js";
 import { v4 } from "uuid";
 
 export async function commit(args: {
-	db: Kysely<LixDatabase>;
+	db: Kysely<LixDatabaseSchema>;
 	currentAuthor?: string;
 	// TODO remove description
 	description: string;

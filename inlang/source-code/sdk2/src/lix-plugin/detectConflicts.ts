@@ -1,8 +1,8 @@
 import {
 	getLowestCommonAncestor,
 	getLeafChange,
-	type Conflict,
 	type LixPlugin,
+	type NewConflict,
 } from "@lix-js/sdk";
 
 export const detectConflicts: LixPlugin["detectConflicts"] = async ({
@@ -10,7 +10,7 @@ export const detectConflicts: LixPlugin["detectConflicts"] = async ({
 	targetLix,
 	leafChangesOnlyInSource,
 }) => {
-	const result: Conflict[] = [];
+	const result: NewConflict[] = [];
 	for (const change of leafChangesOnlyInSource) {
 		const lowestCommonAncestor = await getLowestCommonAncestor({
 			sourceChange: change,
@@ -29,7 +29,7 @@ export const detectConflicts: LixPlugin["detectConflicts"] = async ({
 		});
 
 		if (lowestCommonAncestor.id === leafChangeInTarget.id) {
-			// no conflict. the lowest common ancestor is 
+			// no conflict. the lowest common ancestor is
 			// the leaf change in the target. aka, no changes
 			// in target have been made that could conflict with the source
 			continue;
