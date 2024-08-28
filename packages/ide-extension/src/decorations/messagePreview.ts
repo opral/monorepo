@@ -138,7 +138,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 								},
 						  }
 						: undefined,
-					hoverMessage: contextTooltip(message),
+					hoverMessage: await contextTooltip(bundle),
 				}
 				return decoration
 			})
