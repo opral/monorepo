@@ -138,7 +138,7 @@ export default function Page() {
 									{change && conflicting && (
 										<div className="flex items-end px-4 pb-[8px] pb-[16px]">
 											<div className="flex-1">
-												<p className="text-zinc-500 py-2 px-1">{`By you, ${timeAgo(
+												<p className="text-zinc-500 py-2 px-1">{`By ${change.author}, ${timeAgo(
 													change.created_at
 												)}`}</p>
 												<div className="relative border border-zinc-300 rounded-lg overflow-hidden">
