@@ -65,7 +65,7 @@ type ChangeTable = {
 	id: Generated<string>;
 	parent_id?: ChangeTable["id"];
 	author?: string;
-	file_id: LixFileTable["id"];
+	file_id: string;
 	/**
 	 * If no commit id exists on a change,
 	 * the change is considered uncommitted.
