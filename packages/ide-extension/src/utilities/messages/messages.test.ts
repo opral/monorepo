@@ -1,11 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import * as vscode from "vscode"
 import { state } from "../state.js"
-import type { Message } from "@inlang/sdk"
 import {
 	createMessageHtml,
-	createMessageWebviewProvider,
 	createNoMessagesFoundHtml,
+	createMessagesLoadingHtml,
 	getHtml,
 	getTranslationsTableHtml,
 	messageView,
@@ -33,150 +32,161 @@ vi.mock("../state.js", () => ({
 	state: vi.fn(),
 }))
 
-vi.mock("../../configuration.js", () => ({
-	CONFIGURATION: {
-		EVENTS: {
-			ON_DID_EXTRACT_MESSAGE: { event: vi.fn() },
-			ON_DID_CREATE_MESSAGE: { event: vi.fn() },
-			ON_DID_EDIT_MESSAGE: { event: vi.fn() },
-			ON_DID_PROJECT_TREE_VIEW_CHANGE: { event: vi.fn() },
-		},
-		STRINGS: {
-			MISSING_TRANSLATION_MESSAGE: "Missing Translation",
-		},
-	},
-}))
-
-// Mock data
-const mockMessage: Message = {
-	id: "testMessage",
-	alias: {},
-	selectors: [],
-	variants: [
-		{
-			languageTag: "en",
-			match: ["Test Message"],
-			pattern: [
-				{
-					type: "Text",
-					value: "Test Message",
-				},
-			],
-		},
-	],
-}
-
 describe("Message Webview Provider Tests", () => {
-	let context: vscode.ExtensionContext
-
 	beforeEach(() => {
-		context = { subscriptions: [] } as unknown as vscode.ExtensionContext
-		vi.mocked(state).mockReturnValue({
-			project: {
-				query: {
-					messages: {
-						// @ts-expect-error
-						getAll: vi.fn().mockReturnValue([mockMessage]),
-					},
-				},
-				// @ts-expect-error
-				settings: vi.fn().mockReturnValue({
-					locales: ["en"],
-				}),
-				selectedProjectPath: "/test/path",
-			},
-		})
-	})
-
-	afterEach(() => {
 		vi.clearAllMocks()
 	})
 
-	it("should create and return a webview provider", () => {
-		const workspaceFolder = {
-			uri: { fsPath: "/test/path/project.inlang" },
-		} as vscode.WorkspaceFolder
-		const provider = createMessageWebviewProvider({ context, workspaceFolder })
-		expect(provider).toBeDefined()
-		expect(typeof provider.resolveWebviewView).toBe("function")
-	})
-
 	it("should create HTML for a message", () => {
-		const workspaceFolder = {
-			uri: { fsPath: "/test/path/project.inlang" },
-		} as vscode.WorkspaceFolder
-		vi.mocked(state).mockReturnValue({
+		// @ts-expect-error
+		state.mockReturnValue({
 			project: {
-				query: {
-					messages: {
-						// @ts-expect-error
-						getAll: vi.fn().mockReturnValue([mockMessage]),
-					},
-				},
-				// @ts-expect-error
-				settings: vi.fn().mockReturnValue({
-					locales: ["en"],
-				}),
+				settings: new Map().set("experimental", { aliases: true }),
 			},
-			selectedProjectPath: "/test/path",
+			selectedProjectPath: "/workspace/project",
 		})
-		const html = createMessageHtml({ message: mockMessage, isHighlighted: true, workspaceFolder })
-		expect(html).toContain("testMessage")
-		expect(html).toContain("collapsible")
+
+		const html = createMessageHtml({
+			bundle: {
+				id: "message-id",
+				alias: { aliasKey: "aliasValue" },
+				messages: [
+					{
+						id: "message-id",
+						bundleId: "bundle-id",
+						locale: "en",
+						declarations: [],
+						selectors: [],
+						variants: [
+							{
+								id: "variant-id",
+								match: {},
+								messageId: "message-id",
+								pattern: [{ type: "text", value: "Hello" }],
+							},
+						],
+					},
+				],
+			},
+			isHighlighted: false,
+			workspaceFolder: {
+				uri: { fsPath: "/workspace/project" },
+			} as vscode.WorkspaceFolder,
+		})
+
+		expect(html).toContain("message-id")
+		expect(html).toContain("aliasValue")
+		expect(html).toContain("Hello")
 	})
 
-	it("should return correct HTML when no messages are found", () => {
-		const html = createNoMessagesFoundHtml()
-		expect(html).toContain(
-			`No messages found. Extract text to create a message by selecting a text and using the "Extract message" quick action / command.`
-		)
+	it("should handle cases where settings are not available", () => {
+		// @ts-expect-error
+		state.mockReturnValue({
+			project: {
+				settings: new Map(),
+			},
+		})
+
+		const html = createMessageHtml({
+			bundle: {
+				id: "message-id",
+				alias: { aliasKey: "aliasValue" },
+				messages: [],
+			},
+			isHighlighted: false,
+			workspaceFolder: {
+				uri: { fsPath: "/workspace/project" },
+			} as vscode.WorkspaceFolder,
+		})
+
+		expect(html).toContain("message-id")
+		expect(html).not.toContain("aliasValue") // Since aliases should be disabled
 	})
 
 	it("should create a translations table for a message", () => {
-		const workspaceFolder = {
-			uri: { fsPath: "/test/path/project.inlang" },
-		} as vscode.WorkspaceFolder
-		vi.mocked(state).mockReturnValue({
-			project: {
-				query: {
-					messages: {
-						// @ts-expect-error
-						getAll: vi.fn().mockReturnValue([mockMessage]),
+		const html = getTranslationsTableHtml({
+			bundle: {
+				id: "message-id",
+				alias: {},
+				messages: [
+					{
+						id: "message-id",
+						bundleId: "bundle-id",
+						locale: "en",
+						declarations: [],
+						selectors: [],
+						variants: [
+							{
+								id: "variant-id",
+								match: {},
+								messageId: "message-id",
+								pattern: [{ type: "text", value: "Hello" }],
+							},
+						],
 					},
-				},
-				// @ts-expect-error
-				settings: vi.fn().mockReturnValue({
-					locales: ["en"],
-				}),
+				],
 			},
-			selectedProjectPath: "/test/path",
+			workspaceFolder: {
+				uri: { fsPath: "/workspace/project" },
+			} as vscode.WorkspaceFolder,
 		})
-		const html = getTranslationsTableHtml({ message: mockMessage, workspaceFolder })
-		expect(html).toContain("Test Message")
-		expect(html).toContain("en")
+
+		expect(html).toContain("Language")
+		expect(html).toContain("Translation")
+		expect(html).toContain("Hello")
 	})
 
-	it("should generate HTML for the webview", () => {
-		const mockWebview = {
-			asWebviewUri: vi.fn((uri) => uri),
-			options: {},
-			html: "",
-			onDidReceiveMessage: vi.fn(),
-			cspSource: "mockCspSource",
-		}
+	it("should handle cases where there are no translations", () => {
+		const html = getTranslationsTableHtml({
+			bundle: {
+				id: "message-id",
+				alias: {},
+				messages: [],
+			},
+			workspaceFolder: {
+				uri: { fsPath: "/workspace/project" },
+			} as vscode.WorkspaceFolder,
+		})
+
+		expect(html).toContain("No translations available")
+	})
+
+	it("should create 'No Messages Found' HTML", () => {
+		const html = createNoMessagesFoundHtml()
+		expect(html).toContain("No messages found")
+	})
+
+	it("should create 'Loading Messages' HTML", () => {
+		const html = createMessagesLoadingHtml()
+		expect(html).toContain("Loading messages...")
+	})
+
+	it("should create the complete webview HTML", () => {
 		const html = getHtml({
-			mainContent: "Main Content",
-			context,
-			webview: mockWebview as unknown as vscode.Webview,
+			mainContent: "<div>Main Content</div>",
+			context: {
+				extensionUri: vscode.Uri.file("/path/to/extension"),
+			} as vscode.ExtensionContext,
+			webview: {
+				asWebviewUri: (uri: vscode.Uri) => uri,
+				cspSource: "cspSource",
+			} as vscode.Webview,
 		})
-		expect(html).toContain("Main Content")
+
+		expect(html).toContain("<div>Main Content</div>")
+		expect(html).toContain("Content-Security-Policy")
 	})
 
-	it("should register a webview view provider", async () => {
-		const workspaceFolder = {
-			uri: { fsPath: "/test/path/project.inlang" },
-		} as vscode.WorkspaceFolder
-		await messageView({ context, workspaceFolder })
+	it("should register the message webview provider", () => {
+		const context = {
+			subscriptions: [],
+		} as unknown as vscode.ExtensionContext
+
+		messageView({
+			context,
+			workspaceFolder: { name: "", index: 1, uri: vscode.Uri.file("/path/to/workspace") },
+		})
+
 		expect(vscode.window.registerWebviewViewProvider).toHaveBeenCalled()
 	})
 })
