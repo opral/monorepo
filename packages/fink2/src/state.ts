@@ -2,7 +2,7 @@ import { atom } from "jotai";
 import { loadProjectInMemory, selectBundleNested } from "@inlang/sdk2";
 import { atomWithStorage } from "jotai/utils";
 import { jsonObjectFrom } from "kysely/helpers/sqlite";
-import { Change } from "@lix-js/sdk";
+import { Change, isInSimulatedCurrentBranch } from "@lix-js/sdk";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -99,13 +99,8 @@ export const committedChangesAtom = atom(async (get) => {
 		])
 		.where("commit_id", "is not", null)
 		// TODO remove after sequence concept on lix
-		.where(
-			"change.id",
-			"not in",
-			project.lix.db
-				.selectFrom("conflict")
-				.select("conflict.conflicting_change_id")
-		)
+		// https://linear.app/opral/issue/LIX-126/branching
+		.where(isInSimulatedCurrentBranch)
 		.innerJoin("commit", "commit.id", "change.commit_id")
 		.orderBy("commit.created_at desc")
 		.execute();
@@ -122,20 +117,14 @@ export const pendingChangesAtom = atom(async (get) => {
 		.selectAll()
 		.where("commit_id", "is", null)
 		// TODO remove after sequence concept on lix
-		.where(
-			"change.id",
-			"not in",
-			project.lix.db
-				.selectFrom("conflict")
-				.select("conflict.conflicting_change_id")
-		)
+		// https://linear.app/opral/issue/LIX-126/branching
+		.where(isInSimulatedCurrentBranch)
 		.execute();
 	//console.log(result);
 	return result;
 });
 
 export const unresolvedConflictsAtom = atom(async (get) => {
-	console.log("executing unresolvedConflictsAtom");
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];
@@ -144,8 +133,6 @@ export const unresolvedConflictsAtom = atom(async (get) => {
 		.where("resolved_with_change_id", "is", null)
 		.selectAll()
 		.execute();
-
-	console.log("conflicts", result);
 
 	//console.log(result);
 	return result;

@@ -5,6 +5,7 @@ import {
 	unresolvedConflictsAtom,
 	projectAtom,
 	conflictingChangesAtom,
+	forceReloadProjectAtom,
 } from "../../state.ts";
 import { useNavigate } from "react-router-dom";
 import timeAgo from "../../helper/timeAgo.ts";
@@ -20,6 +21,7 @@ export default function Page() {
 	const [unresolvedConflicts] = useAtom(unresolvedConflictsAtom);
 	const [bundlesNested] = useAtom(bundlesNestedAtom);
 	const [conflictingChanges] = useAtom(conflictingChangesAtom);
+	const [, setForceReloadProject] = useAtom(forceReloadProjectAtom);
 
 	const navigate = useNavigate();
 
@@ -155,7 +157,6 @@ export default function Page() {
 													<div
 														className="absolute top-[50%] -translate-y-[50%] right-2 bg-zinc-700 hover:bg-black cursor-pointer text-zinc-100 rounded-md flex justify-center items-center px-3 h-[30px]"
 														onClick={async () => {
-															console.log({ conflict, conflictingChange });
 															await resolveConflictBySelecting({
 																lix: project!.lix,
 																conflict,
