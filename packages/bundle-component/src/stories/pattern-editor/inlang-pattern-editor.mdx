@@ -1,0 +1,23 @@
+import { Canvas, Meta } from '@storybook/blocks';
+ 
+import * as InlangPatternEditor from './inlang-pattern-editor.stories';
+ 
+<Meta of={InlangPatternEditor} />
+ 
+# InlangPatternEditor
+ 
+The InlangPatternEditor component is a rich text editor build on top of [Lexical](https://lexical.dev/). In the next weeks this component will get more features and will be more customizable.
+
+## Plain usage
+
+> Don't ever use the component in a Shadow DOM. It will not work.
+
+#### Props:
+- `variant`: The variant includes the pattern (we need some variant information to dispatch a meaningful event)
+
+#### Event:
+- `change`: The component dispatches a change event that contains the variant information. 
+
+> The event bubbles up, so you can have a change event listener on a higher level.
+ 
+<Canvas of={InlangPatternEditor.Example} />
