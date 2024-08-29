@@ -87,7 +87,9 @@ function serializeJson(value: any): any {
 		// binary data
 		value instanceof ArrayBuffer ||
 		// uint8array, etc
-		ArrayBuffer.isView(value)
+		ArrayBuffer.isView(value) ||
+		value === null ||
+		value === undefined
 	) {
 		return value;
 	} else if (typeof value === "object" || Array.isArray(value)) {
