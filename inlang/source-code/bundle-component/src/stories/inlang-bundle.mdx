@@ -1,0 +1,35 @@
+import { Canvas, Meta } from '@storybook/blocks';
+ 
+import * as InlangBundle from './inlang-bundle.stories.ts';
+ 
+<Meta of={InlangBundle} />
+ 
+# InlangBundle
+ 
+The InlangBundle component shows a single message of a bundle. (Example: "en" is a message of a certain bundle referenced in code).
+
+## Plain usage
+
+The compoent allows the following:
+- Show the variants in a listener
+- Show the locale of the message
+- Show the configured selectors 
+
+#### Simple
+<Canvas of={InlangBundle.Example} />
+
+#### Complex
+<Canvas of={InlangBundle.Complex} />
+
+#### Props:
+- `bundle`: The bundle as Bundle (not BundleNested)
+- `messages`: The messages as Message[] (for input handling)
+
+#### Event:
+- `change`: The component dispatches a change event that contains the message information.
+
+> The event bubbles up, so you can have a change event listener on a higher level.
+
+#### Slots: (Might change in the future)
+- `message`: Slot the InlangMessage components
+- `bundle-action`: To slot the InlangBundleAction components (to fill the three dot menu on the top right)
