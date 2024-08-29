@@ -1,18 +1,18 @@
 import { test, expect } from "vitest";
 import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
 import { newProject } from "../project/newProject.js";
-import type { Change } from "@lix-js/sdk";
+import type { Change, NewChange } from "@lix-js/sdk";
 import type { Bundle } from "../schema/schemaV2.js";
 import { applyChanges } from "./applyChanges.js";
-import { initKysely } from "../database/initKysely.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
+import { initDb } from "../database/initDb.js";
 
 test("it should be able to delete", async () => {
 	const project = await loadProjectInMemory({
 		blob: await newProject(),
 	});
 
-	const changes: Change[] = [
+	const changes: NewChange[] = [
 		{
 			id: "1",
 			parent_id: undefined,
@@ -21,7 +21,6 @@ test("it should be able to delete", async () => {
 			plugin_key: "mock",
 			type: "bundle",
 			meta: { id: "mock" },
-			// @ts-expect-error - type error somewhere
 			value: {
 				id: "mock",
 				alias: {
@@ -39,7 +38,6 @@ test("it should be able to delete", async () => {
 			meta: {
 				id: "mock",
 			},
-			// @ts-expect-error - type error somewhere
 			value: {
 				id: "mock",
 				alias: {
@@ -65,10 +63,9 @@ test("it should be able to delete", async () => {
 		.insertInto("bundle")
 		.values({
 			id: "mock",
-			// @ts-expect-error - todo auto serialize values
-			alias: JSON.stringify({
+			alias: {
 				foo: "mock-alias",
-			}),
+			},
 		})
 		.execute();
 
@@ -81,10 +78,10 @@ test("it should be able to delete", async () => {
 	const dbFileAfter = await applyChanges({
 		lix: project.lix,
 		file: dbFile,
-		changes,
+		changes: changes as Change[],
 	});
 
-	const db = initKysely({
+	const db = initDb({
 		sqlite: await loadDatabaseInMemory(dbFileAfter.fileData),
 	});
 
@@ -98,7 +95,7 @@ test("it should be able to upsert (insert & update)", async () => {
 		blob: await newProject(),
 	});
 
-	const changes: Change[] = [
+	const changes: NewChange[] = [
 		{
 			id: "1",
 			parent_id: undefined,
@@ -107,7 +104,6 @@ test("it should be able to upsert (insert & update)", async () => {
 			plugin_key: "mock",
 			type: "bundle",
 			meta: { id: "mock" },
-			// @ts-expect-error - type error somewhere
 			value: {
 				id: "mock",
 				alias: {
@@ -125,7 +121,6 @@ test("it should be able to upsert (insert & update)", async () => {
 			meta: {
 				id: "mock",
 			},
-			// @ts-expect-error - type error somewhere
 			value: {
 				id: "mock",
 				alias: {
@@ -155,10 +150,10 @@ test("it should be able to upsert (insert & update)", async () => {
 	const dbFileAfter = await applyChanges({
 		lix: project.lix,
 		file: dbFile,
-		changes,
+		changes: changes as Change[],
 	});
 
-	const db = initKysely({
+	const db = initDb({
 		sqlite: await loadDatabaseInMemory(dbFileAfter.fileData),
 	});
 

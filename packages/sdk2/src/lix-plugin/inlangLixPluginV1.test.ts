@@ -15,8 +15,7 @@ describe("plugin.diff.file", () => {
 			.insertInto("bundle")
 			.values({
 				id: "1",
-				// @ts-expect-error - database expects stringified json
-				alias: JSON.stringify({}),
+				alias: {},
 			})
 			.execute();
 		const path = "/db.sqlite";
@@ -45,13 +44,11 @@ describe("plugin.diff.file", () => {
 			.values([
 				{
 					id: "1",
-					// @ts-expect-error - database expects stringified json
-					alias: JSON.stringify({}),
+					alias: {},
 				},
 				{
 					id: "2",
-					// @ts-expect-error - database expects stringified json
-					alias: JSON.stringify({}),
+					alias: {},
 				},
 			])
 			.execute();
@@ -61,15 +58,13 @@ describe("plugin.diff.file", () => {
 			.values([
 				{
 					id: "1",
-					// @ts-expect-error - database expects stringified json
-					alias: JSON.stringify({
+					alias: {
 						default: "Peter Parker",
-					}),
+					},
 				},
 				{
 					id: "2",
-					// @ts-expect-error - database expects stringified json
-					alias: JSON.stringify({}),
+					alias: {},
 				},
 			])
 			.execute();
@@ -106,11 +101,9 @@ describe("plugin.diff.file", () => {
 			.insertInto("message")
 			.values({
 				id: "1",
-				// @ts-expect-error - database expects stringified json
-				declarations: JSON.stringify([]),
+				declarations: [],
 				bundleId: "unknown",
-				// @ts-expect-error - database expects stringified json
-				selectors: JSON.stringify({}),
+				selectors: [],
 				locale: "en",
 			})
 			.execute();
@@ -131,7 +124,7 @@ describe("plugin.diff.file", () => {
 					id: "1",
 					declarations: [],
 					bundleId: "unknown",
-					selectors: {},
+					selectors: [],
 					locale: "en",
 				},
 			} satisfies DiffReport,
@@ -144,20 +137,16 @@ describe("plugin.diff.file", () => {
 			.values([
 				{
 					id: "1",
-					// @ts-expect-error - database expects stringified json
-					declarations: JSON.stringify([]),
+					declarations: [],
+					selectors: [],
 					bundleId: "unknown",
-					// @ts-expect-error - database expects stringified json
-					selectors: JSON.stringify({}),
 					locale: "en",
 				},
 				{
 					id: "2",
-					// @ts-expect-error - database expects stringified json
-					declarations: JSON.stringify([]),
+					declarations: [],
 					bundleId: "unknown",
-					// @ts-expect-error - database expects stringified json
-					selectors: JSON.stringify({}),
+					selectors: [],
 					locale: "en",
 				},
 			])
@@ -168,20 +157,16 @@ describe("plugin.diff.file", () => {
 			.values([
 				{
 					id: "1",
-					// @ts-expect-error - database expects stringified json
-					declarations: JSON.stringify([]),
+					declarations: [],
 					bundleId: "unknown",
-					// @ts-expect-error - database expects stringified json
-					selectors: JSON.stringify({}),
+					selectors: [],
 					locale: "de",
 				},
 				{
 					id: "2",
-					// @ts-expect-error - database expects stringified json
-					declarations: JSON.stringify([]),
+					declarations: [],
 					bundleId: "unknown",
-					// @ts-expect-error - database expects stringified json
-					selectors: JSON.stringify({}),
+					selectors: [],
 					locale: "en",
 				},
 			])
@@ -209,14 +194,14 @@ describe("plugin.diff.file", () => {
 					id: "1",
 					declarations: [],
 					bundleId: "unknown",
-					selectors: {},
+					selectors: [],
 					locale: "en",
 				},
 				neu: {
 					id: "1",
 					declarations: [],
 					bundleId: "unknown",
-					selectors: {},
+					selectors: [],
 					locale: "de",
 				},
 			} satisfies DiffReport,
@@ -229,9 +214,8 @@ describe("plugin.diff.file", () => {
 			.values({
 				id: "1",
 				messageId: "1",
-				// @ts-expect-error - database expects stringified json
-				pattern: JSON.stringify([{ type: "text", value: "hello world" }]),
-				match: JSON.stringify({}),
+				pattern: [{ type: "text", value: "hello world" }],
+				match: {},
 			})
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
@@ -264,16 +248,14 @@ describe("plugin.diff.file", () => {
 				{
 					id: "1",
 					messageId: "1",
-					// @ts-expect-error - database expects stringified json
-					pattern: JSON.stringify([{ type: "text", value: "hello world" }]),
-					match: JSON.stringify({}),
+					pattern: [{ type: "text", value: "hello world" }],
+					match: {},
 				},
 				{
 					id: "2",
 					messageId: "1",
-					// @ts-expect-error - database expects stringified json
-					pattern: JSON.stringify([{ type: "text", value: "hello world" }]),
-					match: JSON.stringify({}),
+					pattern: [{ type: "text", value: "hello world" }],
+					match: {},
 				},
 			])
 			.execute();
@@ -284,18 +266,14 @@ describe("plugin.diff.file", () => {
 				{
 					id: "1",
 					messageId: "1",
-					// @ts-expect-error - database expects stringified json
-					pattern: JSON.stringify([
-						{ type: "text", value: "hello world from Berlin" },
-					]),
-					match: JSON.stringify({}),
+					pattern: [{ type: "text", value: "hello world from Berlin" }],
+					match: {},
 				},
 				{
 					id: "2",
 					messageId: "1",
-					// @ts-expect-error - database expects stringified json
-					pattern: JSON.stringify([{ type: "text", value: "hello world" }]),
-					match: JSON.stringify({}),
+					pattern: [{ type: "text", value: "hello world" }],
+					match: {},
 				},
 			])
 			.execute();
@@ -348,8 +326,7 @@ describe("plugin.diff.file", () => {
 			.insertInto("bundle")
 			.values({
 				id: "1",
-				// @ts-expect-error - database expects stringified json
-				alias: JSON.stringify({}),
+				alias: {},
 			})
 			.execute();
 

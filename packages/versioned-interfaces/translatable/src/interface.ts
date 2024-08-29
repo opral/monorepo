@@ -1,4 +1,3 @@
-import { LanguageTag } from "@inlang/language-tag"
 import { Type, type TString, type TTemplateLiteral } from "@sinclair/typebox"
 
 /**
@@ -45,7 +44,7 @@ export type Translatable<T extends string> =
 	| T
 	| {
 			en: T
-			[languageTag: LanguageTag]: T
+			[locale: string]: T
 	  }
 export const Translatable = <T extends TString | TTemplateLiteral>(type: T) =>
-	Type.Union([type, Type.Intersect([Type.Object({ en: type }), Type.Record(LanguageTag, type)])])
+	Type.Union([type, Type.Intersect([Type.Object({ en: type }), Type.Record(Type.String(), type)])])

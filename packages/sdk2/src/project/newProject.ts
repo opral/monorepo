@@ -1,11 +1,11 @@
-import { newLixFile, openLixInMemory, uuidv4 } from "@lix-js/sdk";
+import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import type { ProjectSettings } from "../schema/settings.js";
 import {
 	contentFromDatabase,
-	createDialect,
 	createInMemoryDatabase,
 } from "sqlite-wasm-kysely";
-import { Kysely, sql } from "kysely";
+import { initDb } from "../database/initDb.js";
+import { createSchema } from "../database/createSchema.js";
 
 /**
  * Creates a new inlang project.
@@ -19,37 +19,10 @@ export async function newProject(args?: {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = new Kysely({
-		dialect: createDialect({
-			database: sqlite,
-		}),
-	});
+	const db = initDb({ sqlite });
 
 	try {
-		await sql`
-CREATE TABLE bundle (
-  id TEXT PRIMARY KEY,
-  alias TEXT NOT NULL
-);
-
-CREATE TABLE message (
-  id TEXT PRIMARY KEY, 
-  bundle_id TEXT NOT NULL,
-  locale TEXT NOT NULL,
-  declarations TEXT NOT NULL,
-  selectors TEXT NOT NULL
-);
-
-CREATE TABLE variant (
-  id TEXT PRIMARY KEY, 
-  message_id TEXT NOT NULL,
-  match TEXT NOT NULL,
-  pattern TEXT NOT NULL
-);
-  
-CREATE INDEX idx_message_bundle_id ON message (bundle_id);
-CREATE INDEX idx_variant_message_id ON variant (message_id);
-		`.execute(db);
+		await createSchema({ db, sqlite });
 
 		const inlangDbContent = contentFromDatabase(sqlite);
 
@@ -60,21 +33,13 @@ CREATE INDEX idx_variant_message_id ON variant (message_id);
 			.insertInto("file")
 			.values([
 				{
-					// TODO ensure posix paths validation with lix
 					path: "/db.sqlite",
-					// TODO let lix generate the id
-					id: uuidv4(),
 					data: inlangDbContent,
 				},
 				{
 					path: "/settings.json",
-					id: uuidv4(),
 					data: await new Blob([
-						JSON.stringify(
-							args?.settings ?? defaultProjectSettings,
-							undefined,
-							2
-						),
+						JSON.stringify(args?.settings ?? defaultProjectSettings),
 					]).arrayBuffer(),
 				},
 			])

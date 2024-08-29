@@ -1,8 +1,8 @@
 import type { TObject } from "@sinclair/typebox";
-import type { BundleNested } from "../schema/schemaV2.js";
 import type { MessageV1 } from "../schema/schemaV1.js";
 import type { ProjectSettings } from "../schema/settings.js";
 import type { ResourceFile } from "../project/api.js";
+import type { BundleNested, NewBundleNested } from "../database/schema.js";
 
 export type InlangPlugin<
 	ExternalSettings extends Record<string, any> | unknown = unknown
@@ -43,7 +43,7 @@ export type InlangPlugin<
 		files: Array<ResourceFile>;
 		settings: ProjectSettings & ExternalSettings; // we expose the settings in case the importFunction needs to access the plugin config
 	}) => {
-		bundles: BundleNested[];
+		bundles: NewBundleNested[];
 	};
 	exportFiles?: (args: {
 		bundles: BundleNested[];
