@@ -50,7 +50,7 @@ describe("recommendationBannerView", () => {
 
 	it("should register a webview view provider", async () => {
 		const args = {
-			nodeishFs: createNodeishMemoryFs(),
+			fs: {} as typeof fs,
 			workspaceFolder: {
 				uri: { fsPath: "/path/to/workspace" } as vscode.Uri,
 				name: "test-workspace",

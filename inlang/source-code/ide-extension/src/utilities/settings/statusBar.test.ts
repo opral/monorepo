@@ -4,6 +4,7 @@ import { statusBar, showStatusBar } from "./statusBar.js"
 import { state } from "../state.js"
 import { getSetting } from "./index.js"
 import { CONFIGURATION } from "../../configuration.js"
+import { get } from "node:http"
 
 let lastStatusBarItem: any = undefined // Track the last status bar item created for testing
 
@@ -84,12 +85,15 @@ describe("showStatusBar", () => {
 	it("should do nothing if baseLocale is not available", async () => {
 		// Modify the mock for state to return a more defensive structure
 		vi.mocked(state).mockReturnValueOnce({
+			// @ts-expect-error
 			project: {
-				settings: () => ({
-					// @ts-expect-error
-					baseLocale: undefined,
-					locales: ["en", "fr"],
-				}),
+				settings: {
+					get: () => {
+						return { baseLocale: "en", locales: ["en", "fr"] }
+					},
+					set: vi.fn(),
+					subscribe: vi.fn(),
+				},
 			},
 		})
 		await showStatusBar()
