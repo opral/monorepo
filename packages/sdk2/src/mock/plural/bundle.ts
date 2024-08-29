@@ -135,7 +135,7 @@ export const pluralBundle: BundleNested = {
 			],
 			variants: [
 				{
-					messageId: "mock_message_id_de",
+					messageId: "mock_message_id_en",
 					id: "mock_variant_id_en_zero",
 					match: { numProducts: "zero" },
 					pattern: [
@@ -146,7 +146,7 @@ export const pluralBundle: BundleNested = {
 					],
 				},
 				{
-					messageId: "mock_message_id_de",
+					messageId: "mock_message_id_en",
 					id: "mock_variant_id_en_one",
 					match: { numProducts: "one" },
 					pattern: [
@@ -157,7 +157,7 @@ export const pluralBundle: BundleNested = {
 					],
 				},
 				{
-					messageId: "mock_message_id_de",
+					messageId: "mock_message_id_en",
 					id: "mock_variant_id_en_other",
 					match: { numProducts: "other" },
 					pattern: [
