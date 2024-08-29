@@ -24,7 +24,8 @@
 	},
 	"dependencies": {
 		"@inlang/json-types": "workspace:*",
-		"@inlang/language-tag": "workspace:*"
+		"@inlang/language-tag": "workspace:*",
+		"prettier": "^3.3.3"
 	},
 	"devDependencies": {
 		"tsd": "0.28.1",
