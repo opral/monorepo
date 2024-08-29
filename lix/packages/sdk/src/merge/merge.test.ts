@@ -3,17 +3,16 @@ import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import { merge } from "./merge.js";
-import type { Change, Commit, Conflict } from "../schema.js";
+import type { NewChange, NewCommit, NewConflict } from "../database/schema.js";
 import type { LixPlugin } from "../plugin.js";
 
 test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
-	const mockChanges: Change[] = [
+	const mockChanges: NewChange[] = [
 		{
 			id: "1",
 			operation: "create",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "red" }),
+			value: { id: "mock-id", color: "red" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -21,8 +20,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 			id: "2",
 			operation: "update",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "blue" }),
+			value: { id: "mock-id", color: "blue" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -30,8 +28,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 			id: "3",
 			operation: "update",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "green" }),
+			value: { id: "mock-id", color: "green" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -75,7 +72,10 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 
 	await merge({ sourceLix, targetLix });
 
-	const changes = await targetLix.db.selectFrom("change").select("id").execute();
+	const changes = await targetLix.db
+		.selectFrom("change")
+		.select("id")
+		.execute();
 
 	expect(changes.map((c) => c.id)).toStrictEqual([
 		mockChanges[0]?.id,
@@ -88,13 +88,12 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 });
 
 test("it should save change conflicts", async () => {
-	const mockChanges: Change[] = [
+	const mockChanges: NewChange[] = [
 		{
 			id: "1",
 			operation: "create",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "red" }),
+			value: { id: "mock-id", color: "red" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -102,8 +101,7 @@ test("it should save change conflicts", async () => {
 			id: "2",
 			operation: "update",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "blue" }),
+			value: { id: "mock-id", color: "blue" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -111,8 +109,7 @@ test("it should save change conflicts", async () => {
 			id: "3",
 			operation: "update",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "green" }),
+			value: { id: "mock-id", color: "green" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -128,7 +125,7 @@ test("it should save change conflicts", async () => {
 			{
 				change_id: mockChanges[1]!.id,
 				conflicting_change_id: mockChanges[2]!.id,
-			} satisfies Conflict,
+			} satisfies NewConflict,
 		]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
@@ -177,26 +174,24 @@ test("it should save change conflicts", async () => {
 });
 
 test("diffing should not be invoked to prevent the generation of duplicate changes", async () => {
-	const commonChanges: Change[] = [
+	const commonChanges: NewChange[] = [
 		{
 			id: "1",
 			operation: "create",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "red" }),
+			value: { id: "mock-id", color: "red" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
 	];
 
-	const changesOnlyInTargetLix: Change[] = [];
-	const changesOnlyInSourceLix: Change[] = [
+	const changesOnlyInTargetLix: NewChange[] = [];
+	const changesOnlyInSourceLix: NewChange[] = [
 		{
 			id: "2",
 			operation: "update",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "blue" }),
+			value: { id: "mock-id", color: "blue" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -259,13 +254,12 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 });
 
 test("it should apply changes that are not conflicting", async () => {
-	const mockChanges: Change[] = [
+	const mockChanges: NewChange[] = [
 		{
 			id: "1",
 			operation: "create",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "red" }),
+			value: { id: "mock-id", color: "red" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -273,8 +267,7 @@ test("it should apply changes that are not conflicting", async () => {
 			id: "2",
 			operation: "update",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "blue" }),
+			value: { id: "mock-id", color: "blue" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -282,8 +275,7 @@ test("it should apply changes that are not conflicting", async () => {
 			id: "3",
 			operation: "update",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "green" }),
+			value: { id: "mock-id", color: "green" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -354,25 +346,23 @@ test("it should apply changes that are not conflicting", async () => {
 });
 
 test("subsequent merges should not lead to duplicate changes and/or conflicts", async () => {
-	const commonChanges: Change[] = [
+	const commonChanges: NewChange[] = [
 		{
 			id: "1",
 			operation: "create",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "red" }),
+			value: { id: "mock-id", color: "red" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
 	];
-	const changesOnlyInTargetLix: Change[] = [];
-	const changesOnlyInSourceLix: Change[] = [
+	const changesOnlyInTargetLix: NewChange[] = [];
+	const changesOnlyInSourceLix: NewChange[] = [
 		{
 			id: "2",
 			operation: "update",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "blue" }),
+			value: { id: "mock-id", color: "blue" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -388,7 +378,7 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 			{
 				change_id: commonChanges[0]!.id,
 				conflicting_change_id: changesOnlyInSourceLix[0]!.id,
-			} satisfies Conflict,
+			} satisfies NewConflict,
 		]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
@@ -451,25 +441,23 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 });
 
 test("it should naively copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
-	const changesOnlyInSourceLix: Change[] = [
+	const changesOnlyInSourceLix: NewChange[] = [
 		{
 			id: "2",
 			operation: "update",
 			commit_id: "commit-1",
 			type: "mock",
-			// @ts-expect-error - expects serialized json
-			value: JSON.stringify({ id: "mock-id", color: "blue" }),
+			value: { id: "mock-id", color: "blue" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
 	];
 
-	const commitsOnlyInSourceLix: Commit[] = [
+	const commitsOnlyInSourceLix: NewCommit[] = [
 		{
 			id: "commit-1",
 			description: "",
 			parent_id: "0",
-			user_id: "",
 		},
 	];
 
@@ -498,9 +486,15 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 		.values({ id: "mock-file", path: "", data: new Uint8Array() })
 		.execute();
 
-	await sourceLix.db.insertInto("change").values(changesOnlyInSourceLix).execute();
+	await sourceLix.db
+		.insertInto("change")
+		.values(changesOnlyInSourceLix)
+		.execute();
 
-	await sourceLix.db.insertInto("commit").values(commitsOnlyInSourceLix).execute();
+	await sourceLix.db
+		.insertInto("commit")
+		.values(commitsOnlyInSourceLix)
+		.execute();
 
 	await merge({ sourceLix, targetLix });
 

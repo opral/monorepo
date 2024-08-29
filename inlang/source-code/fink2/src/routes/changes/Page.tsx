@@ -2,7 +2,6 @@ import {
 	pendingChangesAtom,
 	projectAtom,
 	bundlesNestedAtom,
-	authorNameAtom,
 } from "../../state.ts";
 import { atom, useAtom } from "jotai";
 import Layout, { Grid } from "../../layout.tsx";
@@ -37,17 +36,11 @@ export default function App() {
 	const [commitDescription, setCommitDescription] = useState<string>("");
 	const [showDialog, setShowDialog] = useState(false);
 	const navigate = useNavigate();
-	const [author] = useAtom(authorNameAtom);
 
 	const handleCommit = async () => {
-		if (author) {
-			await project?.lix.commit({
-				userId: author,
-				description: commitDescription,
-			});
-		} else {
-			console.error("Author not set");
-		}
+		await project?.lix.commit({
+			description: commitDescription,
+		});
 	};
 
 	useEffect(() => {

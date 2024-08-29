@@ -1,6 +1,8 @@
-import { newLixFile, openLixInMemory, type Change } from "@lix-js/sdk";
 import { test, expect } from "vitest";
 import { getLeafChangesOnlyInSource } from "./get-leaf-changes-only-in-source.js";
+import { openLixInMemory } from "../open/openLixInMemory.js";
+import { newLixFile } from "../newLix.js";
+import type { NewChange } from "../database/schema.js";
 
 test("it should get the leaf changes that only exist in source", async () => {
 	const sourceLix = await openLixInMemory({
@@ -9,7 +11,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 	});
-	const commonChanges: Change[] = [
+	const commonChanges: NewChange[] = [
 		{
 			id: "c1",
 			file_id: "mock",
@@ -26,7 +28,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			type: "mock",
 		},
 	];
-	const changesOnlyInSource: Change[] = [
+	const changesOnlyInSource: NewChange[] = [
 		{
 			id: "s1",
 			file_id: "mock",
@@ -51,7 +53,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			type: "mock",
 		},
 	];
-	const changesOnlyInTarget: Change[] = [
+	const changesOnlyInTarget: NewChange[] = [
 		{
 			id: "t1",
 			parent_id: "c2",

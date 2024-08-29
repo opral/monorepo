@@ -20,9 +20,6 @@
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
-		"@inlang/marketplace-manifest": "workspace:^",
-		"@inlang/marketplace-registry": "workspace:^",
-		"@inlang/message-lint-rule": "workspace:^",
 		"@nx/storybook": "^18.0.4",
 		"@storybook/addon-essentials": "^7.6.16",
 		"@storybook/addon-links": "^7.6.16",

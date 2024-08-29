@@ -240,15 +240,6 @@ importers:
         specifier: ^5.5.4
         version: 5.5.4
     devDependencies:
-      '@inlang/marketplace-manifest':
-        specifier: workspace:^
-        version: link:../versioned-interfaces/marketplace-manifest
-      '@inlang/marketplace-registry':
-        specifier: workspace:^
-        version: link:../marketplace-registry
-      '@inlang/message-lint-rule':
-        specifier: workspace:^
-        version: link:../versioned-interfaces/message-lint-rule
       '@nx/storybook':
         specifier: ^18.0.4
         version: 18.3.5(@babel/traverse@7.25.3)(@types/node@20.14.14)(js-yaml@4.1.0)(nx@18.3.5)(typescript@5.5.4)
@@ -839,6 +830,9 @@ importers:
       '@lit/react':
         specifier: ^1.0.5
         version: 1.0.5(@types/react@18.3.3)
+      '@lix-js/sdk':
+        specifier: workspace:*
+        version: link:../../../lix/packages/sdk
       '@shoelace-style/shoelace':
         specifier: ^2.16.0
         version: 2.16.0(@types/react@18.3.3)
@@ -900,6 +894,9 @@ importers:
       eslint-plugin-unicorn:
         specifier: ^55.0.0
         version: 55.0.0(eslint@8.57.0)
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
       tailwindcss:
         specifier: ^4.0.0-alpha.17
         version: 4.0.0-alpha.18
@@ -1256,9 +1253,6 @@ importers:
 
   inlang/source-code/marketplace-registry:
     dependencies:
-      '@inlang/env-variables':
-        specifier: workspace:*
-        version: link:../env-variables
       '@inlang/marketplace-manifest':
         specifier: workspace:*
         version: link:../versioned-interfaces/marketplace-manifest
@@ -2624,6 +2618,9 @@ importers:
       '@types/murmurhash3js':
         specifier: ^3.0.7
         version: 3.0.7
+      '@types/uuid':
+        specifier: ^10.0.0
+        version: 10.0.0
       '@vitest/coverage-v8':
         specifier: ^2.0.5
         version: 2.0.5(vitest@2.0.5(@types/node@22.4.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6))
@@ -2947,9 +2944,6 @@ importers:
 
   inlang/source-code/versioned-interfaces/marketplace-manifest:
     dependencies:
-      '@inlang/project-settings':
-        specifier: workspace:*
-        version: link:../project-settings
       '@inlang/translatable':
         specifier: workspace:*
         version: link:../translatable
@@ -3078,14 +3072,13 @@ importers:
         version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.6)(webdriverio@8.40.3)
 
   inlang/source-code/versioned-interfaces/translatable:
-    dependencies:
-      '@inlang/language-tag':
-        specifier: workspace:*
-        version: link:../language-tag
     devDependencies:
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
       tsd:
         specifier: 0.28.1
         version: 0.28.1
@@ -3495,9 +3488,15 @@ importers:
 
   lix/packages/sdk:
     dependencies:
+      dedent:
+        specifier: 1.5.1
+        version: 1.5.1
       kysely:
         specifier: ^0.27.4
         version: 0.27.4
+      lodash-es:
+        specifier: ^4.17.21
+        version: 4.17.21
       minimatch:
         specifier: ^10.0.1
         version: 10.0.1
@@ -3511,6 +3510,9 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0
     devDependencies:
+      '@types/lodash-es':
+        specifier: ^4.17.12
+        version: 4.17.12
       '@types/papaparse':
         specifier: ^5.3.14
         version: 5.3.14

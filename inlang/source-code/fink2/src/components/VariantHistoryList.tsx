@@ -1,10 +1,11 @@
 import { useAtom } from "jotai";
 import { projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
-import { Pattern, Variant } from "@inlang/sdk2";
+import type { Pattern, Variant } from "@inlang/sdk2";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import queryHelper from "../helper/queryHelper.ts";
 import timeAgo from "../helper/timeAgo.ts";
+import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
 
 const VariantHistoryList = (props: {
 	variantId: string;
@@ -23,16 +24,11 @@ const VariantHistoryList = (props: {
 			.where("change.type", "=", "variant")
 			.where((eb) => eb.ref("value", "->>").key("id"), "=", props.variantId)
 			.innerJoin("commit", "commit.id", "change.commit_id")
-			// TODO remove after sequence concept on lix
-			.where(
-				"change.id",
-				"not in",
-				project.lix.db
-					.selectFrom("conflict")
-					.select("conflict.conflicting_change_id")
-			)
-			.orderBy("commit.user_id desc")
-			.orderBy("commit.created desc")
+			// TODO remove after branching concept on lix
+			// https://linear.app/opral/issue/LIX-126/branching
+			.where(isInSimulatedCurrentBranch)
+			.orderBy("commit.author desc")
+			.orderBy("commit.created_at desc")
 			.execute();
 
 		setChanges(result);
@@ -71,12 +67,12 @@ const VariantHistoryList = (props: {
 						<div className="flex items-center justify-between">
 							<h3 className="text-[16px] text-zinc-500">
 								<span className="font-medium text-zinc-950">
-									{change.user_id}
+									{change.author}
 								</span>{" "}
 								changed variant
 							</h3>
 							<p className="text-[16px] text-zinc-700">
-								{timeAgo(change.created)}
+								{timeAgo(change.created_at)}
 							</p>
 						</div>
 						<div className="flex gap-2 mt-1">
@@ -103,10 +99,8 @@ const VariantHistoryList = (props: {
 								variant="default"
 								size="medium"
 								className="mt-4 ml-auto"
-								loading={loading === change.created}
-								onClick={() =>
-									handleRollback(change.value, change.created)
-								}
+								loading={loading === change.created_at}
+								onClick={() => handleRollback(change.value, change.created_at)}
 							>
 								Rollback
 							</SlButton>

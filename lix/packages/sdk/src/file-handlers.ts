@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import type { LixDatabase, LixFile } from "./schema.js";
+import type { LixDatabaseSchema, LixFile } from "./database/schema.js";
 import type { LixPlugin } from "./plugin.js";
 import { minimatch } from "minimatch";
 import { Kysely } from "kysely";
@@ -25,7 +25,7 @@ async function getChangeHistory({
 	fileId: string;
 	pluginKey: string;
 	diffType: string;
-	db: Kysely<LixDatabase>;
+	db: Kysely<LixDatabaseSchema>;
 }): Promise<any[]> {
 	if (depth > 1) {
 		// TODO: walk change parents until depth
@@ -72,7 +72,8 @@ async function getChangeHistory({
 export async function handleFileInsert(args: {
 	neu: LixFile;
 	plugins: LixPlugin[];
-	db: Kysely<LixDatabase>;
+	db: Kysely<LixDatabaseSchema>;
+	currentAuthor?: string;
 	queueEntry: any;
 }) {
 	const pluginDiffs: any[] = [];
@@ -104,6 +105,7 @@ export async function handleFileInsert(args: {
 						id: v4(),
 						type: diff.type,
 						file_id: args.neu.id,
+						author: args.currentAuthor,
 						plugin_key: pluginKey,
 						operation: diff.operation,
 						// @ts-expect-error - database expects stringified json
@@ -129,7 +131,8 @@ export async function handleFileChange(args: {
 	old: LixFile;
 	neu: LixFile;
 	plugins: LixPlugin[];
-	db: Kysely<LixDatabase>;
+	currentAuthor?: string;
+	db: Kysely<LixDatabaseSchema>;
 }) {
 	const fileId = args.neu?.id ?? args.old?.id;
 
@@ -220,7 +223,6 @@ export async function handleFileChange(args: {
 							.where("plugin_key", "=", pluginKey)
 							.where("commit_id", "is", null)
 							.set({
-								id: v4(),
 								// @ts-expect-error - database expects stringified json
 								value: JSON.stringify(value),
 								operation: diff.operation,
@@ -237,6 +239,7 @@ export async function handleFileChange(args: {
 							type: diff.type,
 							file_id: fileId,
 							plugin_key: pluginKey,
+							author: args.currentAuthor,
 							parent_id: previousCommittedChange?.id,
 							// @ts-expect-error - database expects stringified json
 							value: JSON.stringify(value),

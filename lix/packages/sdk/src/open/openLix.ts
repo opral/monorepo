@@ -1,14 +1,9 @@
 import type { LixPlugin } from "../plugin.js";
-import { Kysely, ParseJSONResultsPlugin } from "kysely";
-import type { LixDatabase } from "../schema.js";
 import { commit } from "../commit.js";
 import { handleFileChange, handleFileInsert } from "../file-handlers.js";
 import { loadPlugins } from "../load-plugin.js";
-import {
-	contentFromDatabase,
-	createDialect,
-	type SqliteDatabase,
-} from "sqlite-wasm-kysely";
+import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
+import { initDb } from "../database/initDb.js";
 
 // TODO: fix in fink to not use time ordering!
 // .orderBy("commit.created desc")
@@ -32,10 +27,7 @@ export async function openLix(args: {
 	 */
 	providePlugins?: LixPlugin[];
 }) {
-	const db = new Kysely<LixDatabase>({
-		dialect: createDialect({ database: args.database }),
-		plugins: [new ParseJSONResultsPlugin()],
-	});
+	const db = initDb({ sqlite: args.database });
 
 	const plugins = await loadPlugins(db);
 	if (args.providePlugins && args.providePlugins.length > 0) {
@@ -51,6 +43,8 @@ export async function openLix(args: {
 			queueWorker();
 		},
 	});
+
+	let currentAuthor: string | undefined;
 
 	let pending: Promise<void> | undefined;
 	let resolve: () => void;
@@ -90,6 +84,7 @@ export async function openLix(args: {
 
 			if (existingFile?.data) {
 				await handleFileChange({
+					currentAuthor,
 					queueEntry: entry,
 					old: {
 						id: entry.file_id,
@@ -106,6 +101,7 @@ export async function openLix(args: {
 				});
 			} else {
 				await handleFileInsert({
+					currentAuthor,
 					queueEntry: entry,
 					neu: {
 						id: entry.file_id,
@@ -150,6 +146,13 @@ export async function openLix(args: {
 	return {
 		db,
 		settled,
+		currentAuthor: {
+			get: () => currentAuthor,
+			// async setter for future proofing
+			set: async (author: string) => {
+				currentAuthor = author;
+			},
+		},
 		toBlob: async () => {
 			await settled();
 			return new Blob([contentFromDatabase(args.database)]);
@@ -159,8 +162,8 @@ export async function openLix(args: {
 			args.database.close();
 			await db.destroy();
 		},
-		commit: (args: { userId: string; description: string }) => {
-			return commit({ db, ...args });
+		commit: (args: { description: string }) => {
+			return commit({ ...args, db, currentAuthor });
 		},
 	};
 }
@@ -179,4 +182,3 @@ export async function openLix(args: {
 // 		}
 // 	}
 // }
-

@@ -7,7 +7,7 @@ import type fs from "node:fs/promises";
 import nodePath from "node:path";
 import type { InlangPlugin } from "../plugin/schema.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
-import { fromMessageV1 } from "./util/fromMessageV1.js";
+import { fromMessageV1 } from "../schema/migrations/fromMessageV1.js";
 
 /**
  * Loads a project from a directory.
@@ -92,7 +92,6 @@ export async function loadProjectFromDirectoryInMemory(
 
 		// TODO check user id and description (where will this one appear?)
 		await project.lix.commit({
-			userId: "inlang-bot",
 			description: "Executed importFiles",
 		});
 	}
@@ -108,7 +107,6 @@ export async function loadProjectFromDirectoryInMemory(
 		});
 		// TODO check user id and description (where will this one appear?)
 		await project.lix.commit({
-			userId: "inlang-bot",
 			description: "legacy load and save messages",
 		});
 	}

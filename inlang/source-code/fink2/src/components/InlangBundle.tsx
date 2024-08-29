@@ -231,18 +231,6 @@ const InlangBundle = (props: {
 							}
 						})}
 					</ReactInlangBundle>
-					{/* <div className="absolute top-0 right-0 pointer-events-none h-full">
-						{arraysIntersect(
-							getAllNestedIds(props.bundle),
-							pendingChanges.map((change) => {
-								if (change.value) {
-									return change.value.id;
-								} else {
-									return undefined;
-								}
-							})
-						) && <div className="bg-blue-500 w-[3px] h-full text-white" />}
-					</div> */}
 				</div>
 			)}
 		</>
@@ -250,27 +238,3 @@ const InlangBundle = (props: {
 };
 
 export default InlangBundle;
-
-const getAllNestedIds = (bundle: BundleNested): string[] => {
-	const messageIds = bundle.messages.map((message) => message.id);
-	const variantIds = bundle.messages
-		.flatMap((message) => message.variants)
-		.map((variant) => variant.id);
-	return [...messageIds, ...variantIds, ...bundle.id];
-};
-
-// @NilsJacobsen what is this function for?
-function arraysIntersect(arr1: any[], arr2: any[]): boolean {
-	// Convert the first array to a Set
-	const set1 = new Set(arr1);
-
-	// Check if any element in arr2 exists in set1
-	for (const element of arr2) {
-		if (set1.has(element)) {
-			return true;
-		}
-	}
-
-	// If no elements are found in the intersection
-	return false;
-}

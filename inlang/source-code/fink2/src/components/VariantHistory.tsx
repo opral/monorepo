@@ -25,9 +25,9 @@ const VariantHistory = (props: { variantId: string }) => {
 	}, [latestCommit]);
 	return (
 		<div className="flex items-center text-zinc-400 text-sm!">
-			{latestCommit?.user_id && (
+			{latestCommit?.author && (
 				<p>
-					by {latestCommit?.user_id} | {timeAgo(latestCommit?.created)}
+					by {latestCommit?.author} | {timeAgo(latestCommit.created_at)}
 				</p>
 			)}
 		</div>
@@ -44,8 +44,8 @@ const queryLatestCommit = async (project: InlangProject, variantId: string) => {
 		.where("change.commit_id", "!=", "null")
 		.where((eb) => eb.ref("value", "->>").key("id"), "=", variantId)
 		.innerJoin("commit", "commit.id", "change.commit_id")
-		.orderBy("commit.user_id desc")
-		.orderBy("commit.created desc")
+		.orderBy("commit.author desc")
+		.orderBy("commit.created_at desc")
 		.executeTakeFirst();
 
 	return result;

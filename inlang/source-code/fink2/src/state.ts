@@ -2,6 +2,7 @@ import { atom } from "jotai";
 import { loadProjectInMemory, selectBundleNested } from "@inlang/sdk2";
 import { atomWithStorage } from "jotai/utils";
 import { jsonObjectFrom } from "kysely/helpers/sqlite";
+import { Change, isInSimulatedCurrentBranch } from "@lix-js/sdk";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -89,24 +90,19 @@ export const committedChangesAtom = atom(async (get) => {
 					.selectFrom("commit")
 					.select([
 						"commit.id",
-						"commit.user_id",
+						"commit.author",
 						"commit.description",
-						"commit.created",
+						"commit.created_at",
 					])
 					.whereRef("change.commit_id", "=", "commit.id")
 			).as("commit"),
 		])
 		.where("commit_id", "is not", null)
 		// TODO remove after sequence concept on lix
-		.where(
-			"change.id",
-			"not in",
-			project.lix.db
-				.selectFrom("conflict")
-				.select("conflict.conflicting_change_id")
-		)
+		// https://linear.app/opral/issue/LIX-126/branching
+		.where(isInSimulatedCurrentBranch)
 		.innerJoin("commit", "commit.id", "change.commit_id")
-		.orderBy("commit.created desc")
+		.orderBy("commit.created_at desc")
 		.execute();
 
 	return result;
@@ -121,29 +117,56 @@ export const pendingChangesAtom = atom(async (get) => {
 		.selectAll()
 		.where("commit_id", "is", null)
 		// TODO remove after sequence concept on lix
-		.where(
-			"change.id",
-			"not in",
-			project.lix.db
-				.selectFrom("conflict")
-				.select("conflict.conflicting_change_id")
-		)
+		// https://linear.app/opral/issue/LIX-126/branching
+		.where(isInSimulatedCurrentBranch)
 		.execute();
 	//console.log(result);
 	return result;
 });
 
-export const conflictsAtom = atom(async (get) => {
+export const unresolvedConflictsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];
 	const result = await project.lix.db
 		.selectFrom("conflict")
+		.where("resolved_with_change_id", "is", null)
 		.selectAll()
 		.execute();
 
 	//console.log(result);
 	return result;
+});
+
+/**
+ * Get all conflicting changes.
+ *
+ * @example
+ *   const [conflictingChanges] = useAtom(conflictingChangesAtom);
+ *   conflictingChanges.find((change) => change.id === id);
+ */
+export const conflictingChangesAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const project = await get(projectAtom);
+	const unresolvedConflicts = await get(unresolvedConflictsAtom);
+	if (!project) return [];
+	const result: Set<Change> = new Set();
+
+	for (const conflict of unresolvedConflicts) {
+		const change = await project.lix.db
+			.selectFrom("change")
+			.selectAll()
+			.where("id", "=", conflict.change_id)
+			.executeTakeFirstOrThrow();
+		const conflicting = await project.lix.db
+			.selectFrom("change")
+			.selectAll()
+			.where("id", "=", conflict.conflicting_change_id)
+			.executeTakeFirstOrThrow();
+		result.add(change);
+		result.add(conflicting);
+	}
+	return [...result];
 });
 
 export const commitsAtom = atom(async (get) => {
@@ -153,7 +176,7 @@ export const commitsAtom = atom(async (get) => {
 	return await project.lix.db
 		.selectFrom("commit")
 		.selectAll()
-		.orderBy("commit.created desc")
+		.orderBy("commit.created_at desc")
 		.execute();
 });
 

@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
 import clsx from "clsx";
-import { commitsAtom, conflictsAtom, pendingChangesAtom } from "../state.ts";
+import {
+	commitsAtom,
+	unresolvedConflictsAtom,
+	pendingChangesAtom,
+} from "../state.ts";
 import { useAtom } from "jotai";
 
 const data: { path: string; name: string }[] = [
@@ -21,13 +25,13 @@ const data: { path: string; name: string }[] = [
 
 const SubNavigation = () => {
 	const [pendingChanges] = useAtom(pendingChangesAtom);
-	const [conflicts] = useAtom(conflictsAtom);
-	const [commits] = useAtom(commitsAtom)
+	const [unresolvedConflicts] = useAtom(unresolvedConflictsAtom);
+	const [commits] = useAtom(commitsAtom);
 
 	return (
 		<div className="flex px-[2px] gap-3 items-center -mb-[1px] -ml-[6px]">
 			{data.map((item) => {
-				if (item.path === "/conflicts" && conflicts.length > 0) {
+				if (item.path === "/conflicts" && unresolvedConflicts.length > 0) {
 					return (
 						<NavItem
 							key={item.path}
@@ -76,7 +80,7 @@ const NavItem = (props: {
 	name: string;
 	numUncommittedChanges: number;
 }) => {
-	const [conflicts] = useAtom(conflictsAtom);
+	const [unresolvedConflicts] = useAtom(unresolvedConflictsAtom);
 
 	return (
 		<Link key={props.path} to={props.path} className={clsx("pb-1 relative")}>
@@ -105,12 +109,12 @@ const NavItem = (props: {
 					<div
 						className={clsx(
 							"ml-2 text-xs!  h-5 rounded flex items-center px-2 font-medium",
-							conflicts.length === 0
+							unresolvedConflicts.length === 0
 								? "text-zinc-700 bg-zinc-300"
 								: "text-red-700 bg-red-200"
 						)}
 					>
-						{conflicts.length}
+						{unresolvedConflicts.length}
 					</div>
 				)}
 			</div>

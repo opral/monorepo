@@ -1,15 +1,12 @@
+import type { BundleNested } from "../../database/schema.js";
 import type { InlangPlugin } from "../../plugin/schema.js";
 import type {
 	ExpressionV1,
 	MessageV1,
 	PatternV1,
 	VariantV1,
-} from "../../schema/schemaV1.js";
-import type {
-	BundleNested,
-	Expression,
-	Pattern,
-} from "../../schema/schemaV2.js";
+} from "../schemaV1.js";
+import type { Expression, Pattern } from "../schemaV2.js";
 
 /**
  * Converts a BundleNested into a legacy format.
@@ -33,7 +30,7 @@ export function toMessageV1(
 		for (const variant of message.variants) {
 			variants.push({
 				languageTag: message.locale,
-				match: variant.match,
+				match: [],
 				pattern: toV1Pattern(variant.pattern),
 			});
 		}

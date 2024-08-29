@@ -66,6 +66,7 @@ test("should be able to add and commit changes", async () => {
 	expect(changes).toEqual([
 		{
 			id: changes[0]?.id,
+			author: null,
 			created_at: changes[0]?.created_at,
 			parent_id: null,
 			type: "text",
@@ -81,7 +82,7 @@ test("should be able to add and commit changes", async () => {
 		},
 	]);
 
-	await lix.commit({ userId: "tester", description: "test" });
+	await lix.commit({ description: "test" });
 
 	const secondRef = await lix.db
 		.selectFrom("ref")
@@ -100,6 +101,7 @@ test("should be able to add and commit changes", async () => {
 	expect(commitedChanges).toEqual([
 		{
 			id: commitedChanges[0]?.id,
+			author: null,
 			created_at: changes[0]?.created_at,
 			parent_id: null,
 			type: "text",
@@ -118,11 +120,11 @@ test("should be able to add and commit changes", async () => {
 	expect(commits).toEqual([
 		{
 			id: commits[0]?.id!,
+			author: null,
 			created: commits[0]?.created!,
 			created_at: commits[0]?.created_at!,
 			description: "test",
 			parent_id: "00000000-0000-0000-0000-000000000000",
-			user_id: "tester",
 		},
 	]);
 
@@ -142,6 +144,7 @@ test("should be able to add and commit changes", async () => {
 	expect(updatedChanges).toEqual([
 		{
 			id: updatedChanges[0]?.id!,
+			author: null,
 			created_at: updatedChanges[0]?.created_at,
 			parent_id: null,
 			type: "text",
@@ -157,6 +160,7 @@ test("should be able to add and commit changes", async () => {
 		},
 		{
 			id: updatedChanges[1]?.id!,
+			author: null,
 			parent_id: updatedChanges[0]?.id!,
 			created_at: updatedChanges[0]?.created_at,
 			type: "text",
@@ -172,24 +176,24 @@ test("should be able to add and commit changes", async () => {
 		},
 	]);
 
-	await lix.commit({ userId: "tester", description: "test 2" });
+	await lix.commit({ description: "test 2" });
 	const newCommits = await lix.db.selectFrom("commit").selectAll().execute();
 	expect(newCommits).toEqual([
 		{
 			id: newCommits[0]?.id!,
+			author: null,
 			created: commits[0]?.created!,
 			created_at: newCommits[0]?.created_at!,
 			description: "test",
 			parent_id: "00000000-0000-0000-0000-000000000000",
-			user_id: "tester",
 		},
 		{
 			id: newCommits[1]?.id!,
+			author: null,
 			created: commits[0]?.created!,
 			created_at: newCommits[1]?.created_at!,
 			description: "test 2",
 			parent_id: newCommits[0]?.id!,
-			user_id: "tester",
 		},
 	]);
 });

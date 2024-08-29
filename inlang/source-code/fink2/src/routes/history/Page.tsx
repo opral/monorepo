@@ -27,6 +27,8 @@ export default function App() {
 						{commits.map((commit) => (
 							<div
 								key={commit.id + Math.random()}
+							>
+								<div
 								className="flex gap-3 items-center"
 							>
 								<div className="w-5 h-5 bg-zinc-100 flex items-center justify-center rounded-full ml-4">
@@ -35,13 +37,14 @@ export default function App() {
 								<div className="flex-1 flex gap-2 items-center justify-between pr-4 py-3 rounded h-[46px]">
 									<div className="flex gap-2 items-center">
 										<p className="text-zinc-950 text-sm! font-semibold">
-											By {commit.user_id}
+											By {commit.author}
 										</p>
 										<p className="text-sm! text-zinc-600">
 											{commit.description}
 										</p>
 									</div>
-									<p className="text-sm!">{timeAgo(commit.created!)}</p>
+										<p className="text-sm!">{timeAgo(commit.created_at)}</p>
+									</div>
 								</div>
 							</div>
 						))}
