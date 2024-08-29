@@ -1,16 +1,16 @@
 import * as vscode from "vscode"
 import { state } from "../state.js"
-import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../../configuration.js"
 import { getStringFromPattern } from "./query.js"
 import { escapeHtml } from "../utils.js"
 import { throttle } from "throttle-debounce"
+import type { Bundle, BundleNested } from "@inlang/sdk2"
 
 export function createMessageWebviewProvider(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
 }) {
-	let messages: Message[] | undefined
+	let bundles: BundleNested[] | undefined
 	let isLoading = true
 	let subscribedToProjectPath = ""
 	let activeFileContent: string | undefined
@@ -49,7 +49,7 @@ export function createMessageWebviewProvider(args: {
 				if (subscribedToProjectPath !== state().selectedProjectPath) {
 					subscribedToProjectPath = state().selectedProjectPath
 					state().project.query.messages.getAll.subscribe((fetchedMessages) => {
-						messages = fetchedMessages ? [...fetchedMessages] : []
+						bundles = fetchedMessages ? [...fetchedMessages] : []
 						isLoading = false
 						throttledUpdateWebviewContent()
 					})
@@ -163,8 +163,8 @@ export function createMessageWebviewProvider(args: {
 				let mainContentHtml = ""
 				if (isLoading) {
 					mainContentHtml = createMessagesLoadingHtml()
-				} else if (messages && messages.length > 0) {
-					mainContentHtml = `${highlightedMessagesHtml}<main>${allMessagesBanner}${messages
+				} else if (bundles && bundles.length > 0) {
+					mainContentHtml = `${highlightedMessagesHtml}<main>${allMessagesBanner}${bundles
 						.map((message) =>
 							createMessageHtml({
 								message,
@@ -193,7 +193,7 @@ export function createMessageWebviewProvider(args: {
 }
 
 export function createMessageHtml(args: {
-	message: Message
+	bundle: Bundle
 	position?: {
 		start: {
 			line: number
@@ -208,18 +208,18 @@ export function createMessageHtml(args: {
 	workspaceFolder: vscode.WorkspaceFolder
 }): string {
 	// Function to check if the record has any keys
-	const hasAliases = (aliases: Message["alias"]): boolean => {
+	const hasAliases = (aliases: Bundle["alias"]): boolean => {
 		return Object.keys(aliases).length > 0
 	}
 
 	const isExperimentalAliasesEnabled = state().project.settings.get()?.experimental?.aliases
 
 	const aliasHtml =
-		isExperimentalAliasesEnabled && hasAliases(args.message.alias)
+		isExperimentalAliasesEnabled && hasAliases(args.bundle.alias)
 			? `<div class="aliases" title="Alias">
 				<span><strong>@</strong></span>
 				<div>
-				${Object.entries(args.message.alias)
+				${Object.entries(args.bundle.alias)
 					.map(
 						([key, value]) =>
 							`<span data-alias="${escapeHtml(value)}"><i>${escapeHtml(key)}</i>: ${escapeHtml(
@@ -232,7 +232,7 @@ export function createMessageHtml(args: {
 			: ""
 
 	const translationsTableHtml = getTranslationsTableHtml({
-		message: args.message,
+		bundle: args.bundle,
 		workspaceFolder: args.workspaceFolder,
 	})
 
@@ -243,15 +243,15 @@ export function createMessageHtml(args: {
 	)
 
 	const positionHtml = encodeURIComponent(JSON.stringify(args.position))
-	const jumpCommand = `jumpToPosition('${args.message.id}', '${positionHtml}');event.stopPropagation();`
-	const openCommand = `openInFink('${args.message.id}', '${relativeProjectPathFromWorkspace}');event.stopPropagation();`
+	const jumpCommand = `jumpToPosition('${args.bundle.id}', '${positionHtml}');event.stopPropagation();`
+	const openCommand = `openInFink('${args.bundle.id}', '${relativeProjectPathFromWorkspace}');event.stopPropagation();`
 
 	return `
 	<div class="tree-item">
-		<div class="collapsible" data-message-id="${args.message.id}">
+		<div class="collapsible" data-message-id="${args.bundle.id}">
 			<div class="messageId">
 				<span><strong>#</strong></span>
-				<span>${args.message.id}</span>
+				<span>${args.bundle.id}</span>
 			</div>
 			<div class="actionButtons">
 				${
@@ -283,34 +283,34 @@ export function createMessagesLoadingHtml(): string {
 }
 
 export function getTranslationsTableHtml(args: {
-	message: Message
+	bundle: BundleNested
 	workspaceFolder: vscode.WorkspaceFolder
 }): string {
-	const configuredLanguageTags = state().project.settings.get()?.locales || []
-	const contextTableRows = configuredLanguageTags.map((languageTag) => {
-		const variant = args.message.variants.find((v) => v.languageTag === languageTag)
+	const configuredLocales = state().project.settings.get()?.locales || []
+	const contextTableRows = configuredLocales.map((locale) => {
+		const message = args.bundle.messages.find((m) => m.locale === locale)
 
 		let m = CONFIGURATION.STRINGS.MISSING_TRANSLATION_MESSAGE as string
 
-		if (variant) {
+		if (message) {
 			m = getStringFromPattern({
 				pattern: variant.pattern,
-				languageTag: variant.languageTag,
-				messageId: args.message.id,
+				locale: message.locale,
+				messageId: message.id,
 			})
 		}
 
-		const editCommand = `editMessage('${args.message.id}', '${escapeHtml(languageTag)}')`
-		const machineTranslateCommand = `machineTranslate('${args.message.id}', '${
+		const editCommand = `editMessage('${args.bundle.id}', '${escapeHtml(locale)}')`
+		const machineTranslateCommand = `machineTranslate('${args.bundle.id}', '${
 			state().project.settings.get()?.baseLocale
-		}', ['${languageTag}'])`
+		}', ['${locale}'])`
 
 		return `
             <div class="section">
                 <span class="languageTag"><strong>${escapeHtml(languageTag)}</strong></span>
                 <span class="message"><button onclick="${editCommand}">${escapeHtml(
-			m
-		)}</button></span>
+									m
+								)}</button></span>
 				<span class="actionButtons">
 				${
 					m === CONFIGURATION.STRINGS.MISSING_TRANSLATION_MESSAGE
