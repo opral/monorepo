@@ -32,29 +32,41 @@ export async function resolveConflictBySelecting(args: {
 		);
 	}
 
-	const change = await args.lix.db
+	const selectedChange = await args.lix.db
 		.selectFrom("change")
 		.selectAll()
 		.where("id", "=", args.selectChangeId)
-		.executeTakeFirstOrThrow();
+		.executeTakeFirst();
+
+	if (selectedChange === undefined) {
+		throw new Error(
+			"The selected change has not been found. If you want to resolve a conflict by selecting a change, the change must exist.",
+		);
+	}
 
 	const file = await args.lix.db
 		.selectFrom("file")
 		.selectAll()
-		.where("id", "=", change.file_id)
-		.executeTakeFirstOrThrow();
+		.where("id", "=", selectedChange.file_id)
+		.executeTakeFirst();
+
+	if (file === undefined) {
+		throw new Error(
+			"The file of the selected change has not been found. If you want to resolve a conflict by selecting a change, the file must exist to apply the selected change.",
+		);
+	}
 
 	const { fileData } = await plugin.applyChanges({
 		lix: args.lix,
 		file: file,
-		changes: [change],
+		changes: [selectedChange],
 	});
 
 	await args.lix.db.transaction().execute(async (trx) => {
 		await trx
 			.updateTable("file")
 			.set("data", fileData)
-			.where("id", "=", change.file_id)
+			.where("id", "=", selectedChange.file_id)
 			.executeTakeFirstOrThrow();
 
 		await trx
@@ -66,7 +78,7 @@ export async function resolveConflictBySelecting(args: {
 					resolved_with_change_id: undefined,
 				}),
 			)
-			.set("resolved_with_change_id", change.id)
+			.set("resolved_with_change_id", selectedChange.id)
 			.executeTakeFirstOrThrow();
 	});
 }
