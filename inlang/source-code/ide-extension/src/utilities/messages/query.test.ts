@@ -32,8 +32,8 @@ describe("getStringFromPattern", () => {
 
 	it("should handle VariableReference elements", () => {
 		const result = getStringFromPattern({
-			pattern: [{ type: "expression", name: "name" }],
-			languageTag: "en-US",
+			pattern: [{ type: "expression", arg: { type: "variable", name: "name" } }],
+			locale: "en-US",
 			messageId: "2",
 		})
 		expect(result).toBe("{name}")
@@ -43,9 +43,9 @@ describe("getStringFromPattern", () => {
 		const result = getStringFromPattern({
 			pattern: [
 				{ type: "text", value: "Hello " },
-				{ type: "expression", name: "name" },
+				{ type: "expression", arg: { type: "variable", name: "name" } },
 			],
-			languageTag: "en-US",
+			locale: "en-US",
 			messageId: "3",
 		})
 		expect(result).toBe("Hello {name}")
@@ -55,31 +55,31 @@ describe("getStringFromPattern", () => {
 describe("getPatternFromString", () => {
 	it("should convert string to pattern with Text elements", () => {
 		const result = getPatternFromString({ string: "Hello World" })
-		expect(result).toEqual([{ type: "Text", value: "Hello World" }])
+		expect(result).toEqual([{ type: "text", value: "Hello World" }])
 	})
 
 	it("should convert string to pattern with VariableReference elements", () => {
 		const result = getPatternFromString({ string: "{name}" })
-		expect(result).toEqual([{ type: "VariableReference", name: "name" }])
+		expect(result).toEqual([{ type: "expression", arg: { type: "variable", name: "name" } }])
 	})
 
 	it("should convert string to mixed pattern", () => {
 		const result = getPatternFromString({ string: "Hello {name}" })
 		expect(result).toEqual([
-			{ type: "Text", value: "Hello " },
-			{ type: "VariableReference", name: "name" },
+			{ type: "text", value: "Hello " },
+			{ type: "expression", arg: { type: "variable", name: "name" } },
 		])
 	})
 
-	describe("getPatternFromString with Complex Strings", () => {
-		it("should handle complex patterns correctly", () => {
-			const result = getPatternFromString({ string: "Hello {name}, welcome to {place}" })
-			expect(result).toEqual([
-				{ type: "Text", value: "Hello " },
-				{ type: "VariableReference", name: "name" },
-				{ type: "Text", value: ", welcome to " },
-				{ type: "VariableReference", name: "place" },
-			])
+	it("should handle complex patterns correctly", () => {
+		const result = getPatternFromString({
+			string: "Hello {name}, welcome to {place}",
 		})
+		expect(result).toEqual([
+			{ type: "text", value: "Hello " },
+			{ type: "expression", arg: { type: "variable", name: "name" } },
+			{ type: "text", value: ", welcome to " },
+			{ type: "expression", arg: { type: "variable", name: "place" } },
+		])
 	})
 })
