@@ -18,10 +18,12 @@ export const telemetry: Omit<typeof telemetryNode, "capture"> & { capture: typeo
  *
  * Exists to avoid typos/always set the correct event name and properties.
  */
-type CaptureEventArguments =
-	| Omit<Parameters<typeof telemetryNode.capture>[0], "distinctId" | "groups"> & {
-			event: TelemetryEvents
-	  }
+type CaptureEventArguments = Omit<
+	Parameters<typeof telemetryNode.capture>[0],
+	"distinctId" | "groups"
+> & {
+	event: TelemetryEvents
+}
 
 // let gitOrigin: string | undefined
 let userID: string
@@ -34,14 +36,14 @@ async function capture(args: CaptureEventArguments) {
 		userID = await getUserId()
 	}
 	// state might me undefined on bootup
-	const project = state()?.project
+	const projectID = "sherlock-dummy-id-please-fix-for-project-id"
 	return telemetryNode.capture({
 		...args,
 		// automatically add the project if one exists
-		groups: project?.id
+		groups: projectID
 			? {
-					project: project.id,
-			  }
+					project: projectID,
+				}
 			: undefined,
 		distinctId: userID,
 	})
