@@ -494,3 +494,14 @@ export function getTranslationsTableHtml(args: {
                 </tbody>
             </table>`
 }
+
+export async function messageView(args: {
+	context: vscode.ExtensionContext
+	workspaceFolder: vscode.WorkspaceFolder
+}) {
+	const provider = createMessageWebviewProvider({ ...args })
+
+	args.context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider("messageView", provider)
+	)
+}
