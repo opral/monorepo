@@ -1,0 +1,32 @@
+import { Canvas, Meta } from '@storybook/blocks';
+ 
+import * as InlangVariant from './inlang-variant.stories.ts';
+ 
+<Meta of={InlangVariant} />
+ 
+# InlangVariant
+ 
+The InlangVariant component shows a single variant of a message. (Example: "`count` products" is a variant of the message "en"). The variants of a message get matched with selectors and corresponing matches.
+
+## Plain usage
+
+The component consists out 3 parts. A main text editor that shows the pattern (slotted pattern editor), the matches that are editable and different kind of actions and additional information on the right side.
+
+#### Props:
+- `variant`: The variant includes the pattern (we need some variant information to dispatch a meaningful event)
+ 
+<Canvas of={InlangVariant.Example} />
+
+#### Event:
+- `change`: The component dispatches a change event that contains the variant information.
+
+> The event bubbles up, so you can have a change event listener on a higher level.
+
+#### Slots:
+- `pattern-editor`: Is the main text editor that shows the pattern (use InlangPatternEditor component for that)
+
+## Usage in Messgae
+
+The InlangVariant component is used in the message component. To achieve this you need to slot is as `variant`. 
+
+<Canvas of={InlangVariant.VariantInMessage} />
