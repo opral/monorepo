@@ -43,8 +43,7 @@ export function createRegistry() {
 /**
  * @param {import("./runtime.js").AvailableLanguageTag} locale
  * @param {number} input
- * @param {object} [options]
- * @param {"cardinal" | "ordinal"} [options.type="cardinal"] 
+ * @param {Intl.PluralRulesOptions} [options]
  * @returns {string}
  */
 export function plural(locale, input, options) { 
@@ -54,7 +53,7 @@ export function plural(locale, input, options) {
 /**
  * @param {import("./runtime.js").AvailableLanguageTag} locale
  * @param {number} input
- * @param {object} [options]
+ * @param {Intl.NumberFormatOptions} [options]
  * @returns {string}
  */
 export function number(locale, input, options) {
@@ -64,7 +63,7 @@ export function number(locale, input, options) {
 /**
  * @param {import("./runtime.js").AvailableLanguageTag} locale
  * @param {Date} input
- * @param {object} [options]
+ * @param {Intl.DateTimeFormatOptions} [options]
  * @returns {string}
  */
 export function datetime(locale, input, options) {
