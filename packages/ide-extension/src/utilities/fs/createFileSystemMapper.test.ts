@@ -1,27 +1,33 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as _path from "node:path"
 import { createFileSystemMapper } from "./createFileSystemMapper.js"
-import type { NodeishFilesystem } from "@lix-js/fs"
 
 describe("createFileSystemMapper", () => {
 	const normalizedBase = "/base/path"
-	let mockFs: NodeishFilesystem
+	let mockFs: typeof import("node:fs/promises")
 
 	beforeEach(() => {
 		mockFs = {
+			// TODO: Fix the type of the mockFs object – fix overloads
 			writeFile: vi.fn(),
 			// @ts-expect-error
 			readFile: vi.fn(),
+			// @ts-expect-error
 			readdir: vi.fn(),
-			mkdir: vi.fn(),
-			stat: vi.fn(),
-			watch: vi.fn(),
-			lstat: vi.fn(),
 			rm: vi.fn(),
 			rmdir: vi.fn(),
 			unlink: vi.fn(),
+			// @ts-expect-error
 			readlink: vi.fn(),
 			symlink: vi.fn(),
+			// @ts-expect-error
+			mkdir: vi.fn(),
+			// @ts-expect-error
+			stat: vi.fn(),
+			// @ts-expect-error
+			watch: vi.fn(),
+			// @ts-expect-error
+			lstat: vi.fn(),
 		}
 	})
 
