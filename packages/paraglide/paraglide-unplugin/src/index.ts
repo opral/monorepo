@@ -78,34 +78,59 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		return project
 	}
 
+	let acs: AbortController[] = []
+	async function loadAndWatchProject() {
+		const project = await getProject()
+
+		const bundles = await selectBundleNested(project.db).execute()
+		const settings = project.settings.get()
+		await triggerCompile(bundles, settings)
+
+		project.errors.subscribe((errors) => {
+			if (errors.length === 0) return
+
+			const { fatalErrors, nonFatalErrors } = classifyProjectErrors(errors)
+			for (const error of nonFatalErrors) {
+				logger.warn(error.message)
+			}
+
+			for (const error of fatalErrors) {
+				if (error instanceof Error) {
+					logger.error(error.message) // hide the stack trace
+				} else {
+					logger.error(error)
+				}
+			}
+		})
+
+		// watch files
+		const resourceFiles = []
+		for (const plugin of project.plugins.get()) {
+			if (!plugin.toBeImportedFiles) continue
+			const pluginFiles = await plugin.toBeImportedFiles({ settings, nodeFs: fs })
+			resourceFiles.push(...pluginFiles)
+		}
+
+		// Create a watcher for each file
+		for (const file of resourceFiles) {
+			const ac = new AbortController()
+			const watcher = fs.watch(file.path, { signal: ac.signal })
+			onGeneration(watcher, (ev) => {
+				if (ev.eventType !== "change") return
+				for (const ac of acs) ac.abort()
+				acs = []
+				loadAndWatchProject()
+			})
+		}
+	}
+
 	return [
 		{
 			name: PLUGIN_NAME,
 
 			enforce: "pre",
 			async buildStart() {
-				const project = await getProject()
-
-				const bundles = await selectBundleNested(project.db).execute()
-				const settings = project.settings.get()
-				await triggerCompile(bundles, settings)
-
-				project.errors.subscribe((errors) => {
-					if (errors.length === 0) return
-
-					const { fatalErrors, nonFatalErrors } = classifyProjectErrors(errors)
-					for (const error of nonFatalErrors) {
-						logger.warn(error.message)
-					}
-
-					for (const error of fatalErrors) {
-						if (error instanceof Error) {
-							logger.error(error.message) // hide the stack trace
-						} else {
-							logger.error(error)
-						}
-					}
-				})
+				loadAndWatchProject()
 			},
 
 			webpack(compiler) {
@@ -158,3 +183,9 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		},
 	]
 })
+
+async function onGeneration<T>(generator: AsyncIterable<T>, cb: (value: T) => void) {
+	for await (const value of generator) {
+		cb(value)
+	}
+}
