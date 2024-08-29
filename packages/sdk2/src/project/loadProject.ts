@@ -5,10 +5,8 @@ import { type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
 import { initHandleSaveToLixOnChange } from "./initHandleSaveToLixOnChange.js";
 import { type PreprocessPluginBeforeImportFunction } from "../plugin/importPlugins.js";
-import type { InlangProject, Subscription } from "./api.js";
-import { createState } from "./state/state.js";
-import { BehaviorSubject, map, Observable } from "rxjs";
-import { setSettings } from "./state/setSettings.js";
+import type { InlangProject } from "./api.js";
+import { createProjectState } from "./state/state.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
 import { exportFiles, importFiles } from "../import-export/index.js";
 
@@ -52,50 +50,45 @@ export async function loadProject(args: {
 		JSON.parse(new TextDecoder().decode(settingsFile.data)) as ProjectSettings
 	);
 
-	const state = await createState({
+	const state = createProjectState({
 		...args,
 		settings,
 	});
+
+	/**
+	 * Pending promises are used for the `project.settled()` api.
+	 */
+	// TODO implement garbage collection/a proper queue.
+	//      for the protoype and tests, it seems good enough
+	//      without garbage collection of old promises.
+	const pendingPromises: Promise<unknown>[] = [];
 
 	await initHandleSaveToLixOnChange({
 		sqlite: args.sqlite,
 		db,
 		lix: args.lix,
-		state,
+		pendingPromises,
 	});
 
+	// todo not garbage collected
+	// todo2 settled is not needed if lix has an attach mode for sqlite
 	const settled = async () => {
-		await Promise.all(state.pendingPromises);
+		await Promise.all(pendingPromises);
 		await args.lix.settled();
 	};
 
 	return {
 		db,
-		settings: {
-			get: () => structuredClone(state.settings$.getValue()) as ProjectSettings,
-			subscribe: withStructuredClone(state.settings$)
-				.subscribe as Subscription<ProjectSettings>,
-			set: (newSettings) => setSettings({ newSettings, lix: args.lix, state }),
-		},
-		plugins: {
-			get: () => state.plugins$.getValue() as InlangPlugin[],
-			subscribe: withStructuredClone(state.plugins$).subscribe as Subscription<
-				InlangPlugin[]
-			>,
-		},
-		errors: {
-			get: () => structuredClone(state.errors$.getValue()) as Error[],
-			subscribe: withStructuredClone(state.errors$).subscribe as Subscription<
-				Error[]
-			>,
-		},
+		settings: state.settings,
+		plugins: state.plugins,
+		errors: state.errors,
 		settled,
 		importFiles: async ({ files, pluginKey }) => {
 			return await importFiles({
 				files,
 				pluginKey,
-				settings: state.settings$.getValue(),
-				plugins: state.plugins$.getValue(),
+				settings: await state.settings.get(),
+				plugins: await state.plugins.get(),
 				db,
 			});
 		},
@@ -103,8 +96,8 @@ export async function loadProject(args: {
 			return await exportFiles({
 				pluginKey,
 				db,
-				plugins: state.plugins$.getValue(),
-				settings: state.settings$.getValue(),
+				settings: await state.settings.get(),
+				plugins: await state.plugins.get(),
 			});
 		},
 		close: async () => {
@@ -121,12 +114,3 @@ export async function loadProject(args: {
 	};
 }
 
-/**
- * Ensures that the given value is a clone of the original value.
- *
- * The DX is higher and risks for bugs lower if the project API
- * returns immutable values.
- */
-function withStructuredClone<T>(subject: BehaviorSubject<T> | Observable<T>) {
-	return subject.pipe(map((v) => structuredClone(v)));
-}
