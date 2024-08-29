@@ -5,6 +5,7 @@ import type { Pattern, Variant } from "@inlang/sdk2";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import queryHelper from "../helper/queryHelper.ts";
 import timeAgo from "../helper/timeAgo.ts";
+import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
 
 const VariantHistoryList = (props: {
 	variantId: string;
@@ -23,14 +24,9 @@ const VariantHistoryList = (props: {
 			.where("change.type", "=", "variant")
 			.where((eb) => eb.ref("value", "->>").key("id"), "=", props.variantId)
 			.innerJoin("commit", "commit.id", "change.commit_id")
-			// TODO remove after sequence concept on lix
-			.where(
-				"change.id",
-				"not in",
-				project.lix.db
-					.selectFrom("conflict")
-					.select("conflict.conflicting_change_id")
-			)
+			// TODO remove after branching concept on lix
+			// https://linear.app/opral/issue/LIX-126/branching
+			.where(isInSimulatedCurrentBranch)
 			.orderBy("commit.author desc")
 			.orderBy("commit.created_at desc")
 			.execute();
@@ -104,9 +100,7 @@ const VariantHistoryList = (props: {
 								size="medium"
 								className="mt-4 ml-auto"
 								loading={loading === change.created_at}
-								onClick={() =>
-									handleRollback(change.value, change.created_at)
-								}
+								onClick={() => handleRollback(change.value, change.created_at)}
 							>
 								Rollback
 							</SlButton>
