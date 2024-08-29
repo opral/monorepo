@@ -8,7 +8,7 @@ import { InlangAddSelector as LitInlangAddSelector } from "@inlang/bundle-compon
 
 import React from "react";
 import { useAtom } from "jotai";
-import { pendingChangesAtom, projectAtom } from "../state.ts";
+import { pendingChangesAtom, projectAtom, settingsAtom } from "../state.ts";
 import {
 	BundleNested,
 	createMessage,
@@ -58,6 +58,7 @@ const InlangBundle = (props: {
 }) => {
 	const [project] = useAtom(projectAtom);
 	const [pendingChanges] = useAtom(pendingChangesAtom);
+	const [settings] = useAtom(settingsAtom);
 
 	const onMesageInsert = async (message: Message) => {
 		if (project) {
@@ -117,7 +118,7 @@ const InlangBundle = (props: {
 						messages={props.bundle.messages}
 						change={handleChange}
 					>
-						{project?.settings.get().locales.map((locale) => {
+						{settings.locales.map((locale) => {
 							const message = props.bundle.messages.find(
 								(message) => message.locale === locale
 							);
@@ -127,7 +128,7 @@ const InlangBundle = (props: {
 										slot="message"
 										key={message.id}
 										message={message}
-										settings={project?.settings.get()}
+										settings={settings}
 									>
 										{message.variants.map((variant) => {
 											const change = pendingChanges.find(

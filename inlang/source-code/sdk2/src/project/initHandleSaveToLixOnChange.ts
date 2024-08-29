@@ -2,7 +2,6 @@ import { Kysely, sql } from "kysely";
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
 import type { Lix } from "@lix-js/sdk";
 import type { InlangDatabaseSchema } from "../database/schema.js";
-import type { State } from "./state/state.js";
 
 /**
  * Saves updates of the database (file) to lix.
@@ -11,7 +10,7 @@ export async function initHandleSaveToLixOnChange(args: {
 	sqlite: SqliteDatabase;
 	db: Kysely<InlangDatabaseSchema>;
 	lix: Lix;
-	state: Pick<State, "pendingPromises">;
+	pendingPromises: Promise<unknown>[];
 }) {
 	args.sqlite.createFunction({
 		name: "save_db_file_to_lix",
@@ -21,7 +20,7 @@ export async function initHandleSaveToLixOnChange(args: {
 			// TODO handle in cancellable queue. only the last entry
 			// in the queue needs to be pushed to the file table
 			// because all previous entries are overwritten anyways
-			args.state.pendingPromises.push(
+			args.pendingPromises.push(
 				(async () => {
 					// We have to await the database operations to be finished and the database to eb in a consistent state, otherwise contentFromDatabase will crash! 100 ms is too short for current test cases, but we need a proper solution for this
 					await new Promise((resolve) => setTimeout(resolve, 400));
