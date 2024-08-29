@@ -23652,7 +23652,8 @@ snapshots:
     dependencies:
       '@types/node': 20.14.14
 
-  '@types/lodash.merge@4.6.7':
+  /@types/lodash.merge@4.6.7:
+    resolution: {integrity: sha512-OwxUJ9E50gw3LnAefSHJPHaBLGEKmQBQ7CZe/xflHkyy/wH2zVyEIAKReHvVrrn7zKdF58p16We9kMfh7v0RRQ==}
     dependencies:
       '@types/lodash': 4.17.7
 
@@ -30548,7 +30549,9 @@ snapshots:
     dependencies:
       p-locate: 6.0.0
 
-  lodash.castarray@4.4.0: {}
+  /lodash.castarray@4.4.0:
+    resolution: {integrity: sha512-aVx8ztPv7/2ULbArGJ2Y42bG1mEQ5mGjpdvrbJcJFU3TbYybe+QlLS4pst9zV52ymy2in1KpFPiZnAOATxD4+Q==}
+    dev: true
 
   lodash.clonedeep@4.5.0: {}
 
