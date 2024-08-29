@@ -1,17 +1,25 @@
 import { useEffect, useState } from "react";
-import { projectAtom } from "../state.ts";
+import { projectAtom, settingsAtom } from "../state.ts";
 import { useAtom } from "jotai";
-import { BundleNested, InlangProject, updateBundleNested, selectBundleNested } from "@inlang/sdk2";
+import {
+	BundleNested,
+	InlangProject,
+	updateBundleNested,
+	selectBundleNested,
+} from "@inlang/sdk2";
 import SingleDiffBundle from "./SingleDiffBundle.tsx";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 
 const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 	const [project] = useAtom(projectAtom);
+	const [settings] = useAtom(settingsAtom);
 	const [bundle, setBundle] = useState<BundleNested | undefined>(undefined);
 	const [oldBundle, setOldBundle] = useState<BundleNested | undefined>(
 		undefined
 	);
 	const [loadingDiscard, setLoadingDiscard] = useState(false);
+
+	console.log({ settings });
 
 	useEffect(() => {
 		if (!project) return;
@@ -89,7 +97,7 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 						<SingleDiffBundle
 							bundle={bundle}
 							oldBundle={oldBundle}
-							settings={project.settings.get()}
+							settings={settings}
 							changes={props.changes}
 							show="old"
 						/>
@@ -100,7 +108,7 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 						<SingleDiffBundle
 							bundle={bundle}
 							oldBundle={oldBundle}
-							settings={project.settings.get()}
+							settings={settings}
 							changes={props.changes}
 							show="neu"
 						/>

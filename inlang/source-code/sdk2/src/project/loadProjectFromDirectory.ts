@@ -48,7 +48,7 @@ export async function loadProjectFromDirectoryInMemory(
 		saveMessagesPlugins,
 		importPlugins,
 		exportPlugins,
-	} = categorizePlugins(project.plugins.get());
+	} = categorizePlugins(await project.plugins.get());
 
 	if (loadMessagesPlugins.length > 1 || saveMessagesPlugins.length > 1) {
 		throw new Error(
@@ -80,7 +80,7 @@ export async function loadProjectFromDirectoryInMemory(
 	for (const importer of importPlugins) {
 		const files = importer.toBeImportedFiles
 			? await importer.toBeImportedFiles({
-					settings: project.settings.get() as any,
+					settings: await project.settings.get(),
 					nodeFs: args.fs,
 			  })
 			: [];
@@ -121,7 +121,7 @@ async function loadLegacyMessages(args: {
 	fs: typeof fs;
 }) {
 	const loadedLegacyMessages = await args.loadMessagesFn({
-		settings: args.project.settings.get(),
+		settings: await args.project.settings.get(),
 		nodeishFs: args.fs,
 	});
 	const insertQueries = [];

@@ -8,7 +8,7 @@ test("it should be possible to provide settings for testing or other purposes", 
 			settings: { baseLocale: "fr", locales: ["fr"], modules: [] },
 		}),
 	});
-	const settings = project.settings.get();
+	const settings = await project.settings.get();
 	expect(settings.baseLocale).toBe("fr");
 	expect(settings.locales).toEqual(["fr"]);
 	expect(settings.modules).toEqual([]);

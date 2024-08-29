@@ -1,8 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { atom } from "jotai";
-import { loadProjectInMemory, selectBundleNested } from "@inlang/sdk2";
-import { atomWithStorage } from "jotai/utils";
+import {
+	InlangProject,
+	loadProjectInMemory,
+	ProjectSettings,
+	selectBundleNested,
+} from "@inlang/sdk2";
+import { atomWithObservable, atomWithStorage } from "jotai/utils";
 import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { Change, isInSimulatedCurrentBranch } from "@lix-js/sdk";
+import { atomEffect } from "jotai-effect";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -56,6 +63,14 @@ export const projectAtom = atom(async (get) => {
 		console.error(e);
 		return undefined;
 	}
+});
+
+export const settingsAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const project = await get(projectAtom);
+	// assuming that the project is always defined when the settings are read
+	if (!project) return undefined as unknown as ProjectSettings;
+	return await project?.settings.get();
 });
 
 /**
