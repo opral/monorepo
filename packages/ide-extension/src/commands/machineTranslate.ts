@@ -1,5 +1,5 @@
 import { commands } from "vscode"
-import { Message } from "@inlang/sdk2"
+import { Bundle, selectBundleNested } from "@inlang/sdk2"
 import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { rpc } from "@inlang/rpc"
@@ -10,31 +10,28 @@ export const machineTranslateMessageCommand = {
 	title: "Sherlock: Machine Translate Message",
 	register: commands.registerCommand,
 	callback: async function ({
-		messageId,
+		bundleId,
 		baseLocale,
 		targetLocales,
 	}: {
-		messageId: Message["id"]
+		bundleId: Bundle["id"]
 		baseLocale: string
 		targetLocales: string[]
 	}) {
 		// Get the message from the database
-		const message = await state()
-			.project.db.selectFrom("message")
-			.selectAll()
-			.where("message.id", "=", messageId)
+		const bundle = await selectBundleNested(state().project.db)
+			.where("bundle.id", "=", bundleId)
 			.executeTakeFirst()
 
-		if (!message) {
-			return msg(`Message with id ${messageId} not found.`)
+		if (!bundle) {
+			return msg(`Bundle with id ${bundleId} not found.`)
 		}
 
 		// Call machine translation RPC function
 
 		const result = await rpc.machineTranslateMessage({
-			message,
+			bundle,
 			// TODO: refactor machine translation to use baseLocale and targetLocales
-			// @ts-expect-error
 			baseLocale,
 			targetLocales,
 		})

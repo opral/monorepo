@@ -83,7 +83,7 @@ describe("machineTranslateMessageCommand", () => {
 
 	it("should return a message if messageId is not found", async () => {
 		await machineTranslateMessageCommand.callback({
-			messageId: "nonexistent",
+			bundleId: "nonexistent",
 			baseLocale: "en",
 			targetLocales: ["es"],
 		})
@@ -96,7 +96,7 @@ describe("machineTranslateMessageCommand", () => {
 		rpc.machineTranslateMessage.mockResolvedValueOnce({ error: "RPC Error" })
 
 		await machineTranslateMessageCommand.callback({
-			messageId: "validId",
+			bundleId: "validId",
 			baseLocale: "en",
 			targetLocales: ["es"],
 		})
@@ -109,7 +109,7 @@ describe("machineTranslateMessageCommand", () => {
 		rpc.machineTranslateMessage.mockResolvedValueOnce({ data: undefined })
 
 		await machineTranslateMessageCommand.callback({
-			messageId: "validId",
+			bundleId: "validId",
 			baseLocale: "en",
 			targetLocales: ["es"],
 		})
@@ -123,7 +123,7 @@ describe("machineTranslateMessageCommand", () => {
 		rpc.machineTranslateMessage.mockResolvedValueOnce({ data: mockTranslation })
 
 		await machineTranslateMessageCommand.callback({
-			messageId: "validId",
+			bundleId: "validId",
 			baseLocale: "en",
 			targetLocales: ["es"],
 		})
@@ -137,7 +137,7 @@ describe("machineTranslateMessageCommand", () => {
 		rpc.machineTranslateMessage.mockResolvedValueOnce({ data: mockTranslation })
 
 		await machineTranslateMessageCommand.callback({
-			messageId: "validId",
+			bundleId: "validId",
 			baseLocale: "en",
 			targetLocales: ["es"],
 		})
