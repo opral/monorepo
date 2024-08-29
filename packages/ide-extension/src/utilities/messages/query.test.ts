@@ -42,8 +42,8 @@ describe("getStringFromPattern", () => {
 	it("should handle mixed elements", () => {
 		const result = getStringFromPattern({
 			pattern: [
-				{ type: "Text", value: "Hello " },
-				{ type: "VariableReference", name: "name" },
+				{ type: "text", value: "Hello " },
+				{ type: "expression", name: "name" },
 			],
 			languageTag: "en-US",
 			messageId: "3",
