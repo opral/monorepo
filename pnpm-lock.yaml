@@ -2952,6 +2952,9 @@ importers:
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
     devDependencies:
       tsd:
         specifier: 0.28.1
@@ -2987,6 +2990,9 @@ importers:
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
     devDependencies:
       typescript:
         specifier: ^5.5.2
@@ -3090,6 +3096,9 @@ importers:
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
     devDependencies:
       tsd:
         specifier: 0.28.1
