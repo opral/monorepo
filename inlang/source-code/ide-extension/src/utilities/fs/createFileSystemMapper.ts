@@ -15,11 +15,11 @@ export function createFileSystemMapper(
 	const normalizedBase = normalizePath(base)
 
 	return {
-		// Those expected typescript errors are because of overloads in node:fs/promises
+		// TODO: Those expected typescript errors are because of overloads in node:fs/promises
 		// @ts-expect-error
 		readFile: async (
-			path: Parameters<typeof import("node:fs/promises")["readFile"]>[0],
-			options: Parameters<typeof import("node:fs/promises")["readFile"]>[1]
+			path: Parameters<(typeof import("node:fs/promises"))["readFile"]>[0],
+			options: Parameters<(typeof import("node:fs/promises"))["readFile"]>[1]
 		): Promise<string | Uint8Array> => {
 			return fs.readFile(
 				normalizePath(
@@ -31,9 +31,9 @@ export function createFileSystemMapper(
 			)
 		},
 		writeFile: async (
-			path: Parameters<typeof import("node:fs/promises")["writeFile"]>[0],
-			data: Parameters<typeof import("node:fs/promises")["writeFile"]>[1],
-			options: Parameters<typeof import("node:fs/promises")["writeFile"]>[2]
+			path: Parameters<(typeof import("node:fs/promises"))["writeFile"]>[0],
+			data: Parameters<(typeof import("node:fs/promises"))["writeFile"]>[1],
+			options: Parameters<(typeof import("node:fs/promises"))["writeFile"]>[2]
 		) => {
 			return fs.writeFile(
 				normalizePath(
@@ -47,8 +47,8 @@ export function createFileSystemMapper(
 		},
 		// @ts-expect-error
 		mkdir: async (
-			path: Parameters<typeof import("node:fs/promises")["mkdir"]>[0],
-			options?: Parameters<typeof import("node:fs/promises")["mkdir"]>[1]
+			path: Parameters<(typeof import("node:fs/promises"))["mkdir"]>[0],
+			options?: Parameters<(typeof import("node:fs/promises"))["mkdir"]>[1]
 		) => {
 			return fs.mkdir(
 				normalizePath(
@@ -59,7 +59,7 @@ export function createFileSystemMapper(
 				options
 			)
 		},
-		rmdir: async (path: Parameters<typeof import("node:fs/promises")["rmdir"]>[0]) => {
+		rmdir: async (path: Parameters<(typeof import("node:fs/promises"))["rmdir"]>[0]) => {
 			return fs.rmdir(
 				normalizePath(
 					String(path).startsWith(normalizedBase)
@@ -69,8 +69,8 @@ export function createFileSystemMapper(
 			)
 		},
 		rm: async (
-			path: Parameters<typeof import("node:fs/promises")["rm"]>[0],
-			options: Parameters<typeof import("node:fs/promises")["rm"]>[1]
+			path: Parameters<(typeof import("node:fs/promises"))["rm"]>[0],
+			options: Parameters<(typeof import("node:fs/promises"))["rm"]>[1]
 		) => {
 			return fs.rm(
 				normalizePath(
@@ -81,7 +81,7 @@ export function createFileSystemMapper(
 				options
 			)
 		},
-		unlink: async (path: Parameters<typeof import("node:fs/promises")["unlink"]>[0]) => {
+		unlink: async (path: Parameters<(typeof import("node:fs/promises"))["unlink"]>[0]) => {
 			return fs.unlink(
 				normalizePath(
 					String(path).startsWith(normalizedBase)
@@ -91,7 +91,7 @@ export function createFileSystemMapper(
 			)
 		},
 		// @ts-expect-error
-		readdir: async (path: Parameters<typeof import("node:fs/promises")["readdir"]>[0]) => {
+		readdir: async (path: Parameters<(typeof import("node:fs/promises"))["readdir"]>[0]) => {
 			return fs.readdir(
 				normalizePath(
 					String(path).startsWith(normalizedBase)
@@ -101,7 +101,7 @@ export function createFileSystemMapper(
 			)
 		},
 		// @ts-expect-error
-		readlink: async (path: Parameters<typeof import("node:fs/promises")["readlink"]>[0]) => {
+		readlink: async (path: Parameters<(typeof import("node:fs/promises"))["readlink"]>[0]) => {
 			return fs.readlink(
 				normalizePath(
 					String(path).startsWith(normalizedBase)
@@ -111,8 +111,8 @@ export function createFileSystemMapper(
 			)
 		},
 		symlink: async (
-			path: Parameters<typeof import("node:fs/promises")["symlink"]>[0],
-			target: Parameters<typeof import("node:fs/promises")["symlink"]>[1]
+			path: Parameters<(typeof import("node:fs/promises"))["symlink"]>[0],
+			target: Parameters<(typeof import("node:fs/promises"))["symlink"]>[1]
 		) => {
 			return fs.symlink(
 				normalizePath(
@@ -128,7 +128,7 @@ export function createFileSystemMapper(
 			)
 		},
 		// @ts-expect-error
-		stat: async (path: Parameters<typeof import("node:fs/promises")["stat"]>[0]) => {
+		stat: async (path: Parameters<(typeof import("node:fs/promises"))["stat"]>[0]) => {
 			return fs.stat(
 				normalizePath(
 					String(path).startsWith(normalizedBase)
@@ -138,7 +138,7 @@ export function createFileSystemMapper(
 			)
 		},
 		// @ts-expect-error
-		lstat: async (path: Parameters<typeof import("node:fs/promises")["lstat"]>[0]) => {
+		lstat: async (path: Parameters<(typeof import("node:fs/promises"))["lstat"]>[0]) => {
 			return fs.lstat(
 				normalizePath(
 					String(path).startsWith(normalizedBase)
@@ -149,8 +149,8 @@ export function createFileSystemMapper(
 		},
 		// @ts-expect-error
 		watch: (
-			path: Parameters<typeof import("node:fs/promises")["watch"]>[0],
-			options: Parameters<typeof import("node:fs/promises")["watch"]>[1]
+			path: Parameters<(typeof import("node:fs/promises"))["watch"]>[0],
+			options: Parameters<(typeof import("node:fs/promises"))["watch"]>[1]
 		) => {
 			return fs.watch(
 				normalizePath(
@@ -162,8 +162,8 @@ export function createFileSystemMapper(
 			)
 		},
 		access: async (
-			path: Parameters<typeof import("node:fs/promises")["access"]>[0],
-			mode: Parameters<typeof import("node:fs/promises")["access"]>[1]
+			path: Parameters<(typeof import("node:fs/promises"))["access"]>[0],
+			mode: Parameters<(typeof import("node:fs/promises"))["access"]>[1]
 		) => {
 			return fs.access(
 				normalizePath(
@@ -175,9 +175,9 @@ export function createFileSystemMapper(
 			)
 		},
 		copyFile: async (
-			src: Parameters<typeof import("node:fs/promises")["copyFile"]>[0],
-			dest: Parameters<typeof import("node:fs/promises")["copyFile"]>[1],
-			flags: Parameters<typeof import("node:fs/promises")["copyFile"]>[2]
+			src: Parameters<(typeof import("node:fs/promises"))["copyFile"]>[0],
+			dest: Parameters<(typeof import("node:fs/promises"))["copyFile"]>[1],
+			flags: Parameters<(typeof import("node:fs/promises"))["copyFile"]>[2]
 		) => {
 			return fs.copyFile(
 				normalizePath(
