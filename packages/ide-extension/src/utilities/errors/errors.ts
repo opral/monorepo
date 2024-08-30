@@ -35,7 +35,7 @@ export function createErrorNode(error: Error | 0 | undefined): ErrorNode {
 }
 
 export async function createErrorNodes(): Promise<ErrorNode[]> {
-	const errors = state().project.errors() as Error[]
+	const errors = state().project.errors.get() as Error[]
 	if (state().project === undefined) {
 		// no project
 		return [createErrorNode(undefined)]

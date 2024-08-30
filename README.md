@@ -31,7 +31,7 @@
 
 ## What is inlang?
 
-Inlang is an ecosystem of interoperable [lix apps](https://github.com/opral/monorepo/tree/main/lix) to globalize software. 
+Inlang is an ecosystem of interoperable [lix apps](https://lix.opral.com) to globalize software. 
 
 Every app in the inlang ecosystem shares the same review, automation, and collaboration layer, making cross-team collaboration possible. No syncing, hand-offs, or automation barriers. 
 

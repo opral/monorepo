@@ -4,8 +4,13 @@ import { commands, type TextEditor, window } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
 import { CONFIGURATION } from "../configuration.js"
 import { isQuoted, stripQuotes } from "../utilities/messages/isQuoted.js"
-import { Message, randomHumanId } from "@inlang/sdk"
 import { getSetting } from "../utilities/settings/index.js"
+import {
+	createBundle,
+	createMessage,
+	generateBundleId,
+	type IdeExtensionConfig,
+} from "@inlang/sdk2"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -15,8 +20,13 @@ export const extractMessageCommand = {
 	title: "Sherlock: Extract Message",
 	register: commands.registerTextEditorCommand,
 	callback: async function (textEditor: TextEditor | undefined) {
-		const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
-		const sourceLanguageTag = state().project.settings().sourceLanguageTag
+		const ideExtension = state()
+			.project.plugins.get()
+			.find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])?.meta?.[
+			"app.inlang.ideExtension"
+		] as IdeExtensionConfig | undefined
+
+		const baseLocale = state().project.settings.get().baseLocale
 
 		// guards
 		if (!ideExtension) {
@@ -33,9 +43,9 @@ export const extractMessageCommand = {
 				"notification"
 			)
 		}
-		if (sourceLanguageTag === undefined) {
+		if (baseLocale === undefined) {
 			return msg(
-				"The `sourceLanguageTag` is not defined in the project but required to extract a message.",
+				"The `baseLocale` is not defined in the project but required to extract a message.",
 				"warn",
 				"notification"
 			)
@@ -56,14 +66,14 @@ export const extractMessageCommand = {
 		// create random message id as default value
 		const autoHumanId = await getSetting("extract.autoHumanId.enabled").catch(() => true)
 
-		const messageId = await window.showInputBox({
+		const bundleId = await window.showInputBox({
 			title: "Enter the ID:",
-			value: autoHumanId ? randomHumanId() : "",
+			value: autoHumanId ? generateBundleId() : "",
 			prompt:
 				autoHumanId &&
 				"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.",
 		})
-		if (messageId === undefined) {
+		if (bundleId === undefined) {
 			return
 		}
 
@@ -71,13 +81,16 @@ export const extractMessageCommand = {
 
 		const preparedExtractOptions = ideExtension.extractMessageOptions.reduce((acc, option) => {
 			const formattedSelection = isQuoted(messageValue) ? stripQuotes(messageValue) : messageValue
-			const formattedOption = option.callback({ messageId, selection: formattedSelection })
+			const formattedOption = option.callback({
+				bundleId,
+				selection: formattedSelection,
+			})
 
 			if (acc.includes(formattedOption)) {
 				return acc
 			}
 			return [...acc, formattedOption]
-		}, [] as { messageId: string; messageReplacement: string }[])
+		}, [] as { bundleId: string; messageReplacement: string }[])
 
 		const messageReplacements = preparedExtractOptions.map(
 			({ messageReplacement }) => messageReplacement
@@ -98,31 +111,44 @@ export const extractMessageCommand = {
 			return msg("Couldn't find choosen extract option.", "warn", "notification")
 		}
 
-		const message: Message = {
-			id: selectedExtractOption.messageId,
-			alias: {},
-			selectors: [],
-			variants: [
-				{
-					languageTag: state().project.settings()?.sourceLanguageTag as string,
-					match: [],
-					pattern: [
-						{
-							type: "Text",
-							value: isQuoted(messageValue) ? stripQuotes(messageValue) : messageValue,
-						},
-					],
-				},
-			],
-		}
-
-		// create message
-		const success = state().project.query.messages.create({
-			data: message,
+		const message = createMessage({
+			bundleId: selectedExtractOption.bundleId,
+			locale: baseLocale,
+			text: isQuoted(messageValue) ? stripQuotes(messageValue) : messageValue,
 		})
 
+		const bundle = createBundle({
+			id: bundleId,
+			messages: [message],
+		})
+
+		// create message
+		const success = await state()
+			.project.db.transaction()
+			.execute(async (trx) => {
+				await trx
+					.insertInto("bundle")
+					.values({
+						id: bundle.id,
+						alias: bundle.alias,
+					})
+					.execute()
+
+				return await trx
+					.insertInto("message")
+					.values({
+						id: message.id,
+						bundleId: message.bundleId,
+						locale: message.locale,
+						declarations: message.declarations,
+						selectors: message.selectors,
+					})
+					.returningAll()
+					.execute()
+			})
+
 		if (!success) {
-			return window.showErrorMessage(`Couldn't upsert new message with id ${messageId}.`)
+			return window.showErrorMessage(`Couldn't upsert new message with id ${bundleId}.`)
 		}
 
 		await textEditor.edit((editor) => {

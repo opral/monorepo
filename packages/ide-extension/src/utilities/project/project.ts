@@ -1,13 +1,11 @@
 import * as vscode from "vscode"
-import { loadProject } from "@inlang/sdk"
-import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
+import { loadProjectFromDirectoryInMemory } from "@inlang/sdk2"
+import { normalizePath } from "@lix-js/fs"
 import { CONFIGURATION } from "../../configuration.js"
 import { telemetry } from "../../services/telemetry/implementation.js"
-import { openRepository } from "@lix-js/client"
-import { findRepoRoot } from "@lix-js/client"
 import { setState, state } from "../state.js"
-import { _import } from "../import/_import.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
+import { _import } from "../import/_import.js"
 
 let projectViewNodes: ProjectViewNode[] = []
 
@@ -63,7 +61,7 @@ export function createProjectViewNodes(args: {
 
 export function getTreeItem(args: {
 	element: ProjectViewNode
-	nodeishFs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 	workspaceFolder: vscode.WorkspaceFolder
 }): vscode.TreeItem {
 	return {
@@ -77,14 +75,14 @@ export function getTreeItem(args: {
 		command: {
 			command: "sherlock.openProject",
 			title: "Open File",
-			arguments: [args.element, args.nodeishFs, args.workspaceFolder],
+			arguments: [args.element, args.fs, args.workspaceFolder],
 		},
 	}
 }
 
 export async function handleTreeSelection(args: {
 	selectedNode: ProjectViewNode
-	nodeishFs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 	workspaceFolder: vscode.WorkspaceFolder
 }): Promise<void> {
 	const selectedProject = normalizePath(args.selectedNode.path)
@@ -96,22 +94,11 @@ export async function handleTreeSelection(args: {
 
 	const newSelectedProject = projectViewNodes.find((node) => node.isSelected)?.path as string
 
-	const repo = await openRepository(
-		(await findRepoRoot({
-			nodeishFs: args.nodeishFs,
-			path: newSelectedProject,
-		})) || newSelectedProject,
-		{
-			nodeishFs: args.nodeishFs,
-		}
-	)
-
 	try {
-		const inlangProject = await loadProject({
-			projectPath: newSelectedProject,
-			appId: CONFIGURATION.STRINGS.APP_ID,
-			repo,
-			_import: _import(normalizePath(args.workspaceFolder.uri.fsPath)),
+		const inlangProject = await loadProjectFromDirectoryInMemory({
+			path: newSelectedProject,
+			fs: args.fs,
+			preprocessPluginBeforeImport: _import(normalizePath(args.workspaceFolder.uri.fsPath)),
 		})
 
 		setState({
@@ -129,14 +116,14 @@ export async function handleTreeSelection(args: {
 		CONFIGURATION.EVENTS.ON_DID_ERROR_TREE_VIEW_CHANGE.fire(undefined)
 
 		const isInWorkspaceRecommendation = await Sherlock.shouldRecommend({
-			fs: args.nodeishFs,
+			fs: args.fs,
 			workingDirectory: normalizePath(args.workspaceFolder.uri.fsPath),
 		})
 
 		telemetry.capture({
 			event: "IDE-EXTENSION loaded project",
 			properties: {
-				errors: inlangProject?.errors(),
+				errors: inlangProject?.errors.get(),
 				isInWorkspaceRecommendation,
 			},
 		})
@@ -146,13 +133,13 @@ export async function handleTreeSelection(args: {
 }
 
 export function createTreeDataProvider(args: {
-	nodeishFs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 	workspaceFolder: vscode.WorkspaceFolder
 	context: vscode.ExtensionContext
 }): vscode.TreeDataProvider<ProjectViewNode> {
 	return {
 		getTreeItem: (element: ProjectViewNode) =>
-			getTreeItem({ element, nodeishFs: args.nodeishFs, workspaceFolder: args.workspaceFolder }),
+			getTreeItem({ element, fs: args.fs, workspaceFolder: args.workspaceFolder }),
 		getChildren: () =>
 			createProjectViewNodes({ context: args.context, workspaceFolder: args.workspaceFolder }),
 		onDidChangeTreeData: CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event,
@@ -162,10 +149,10 @@ export function createTreeDataProvider(args: {
 export const projectView = async (args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	nodeishFs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 }) => {
 	const treeDataProvider = createTreeDataProvider({
-		nodeishFs: args.nodeishFs,
+		fs: args.fs,
 		workspaceFolder: args.workspaceFolder,
 		context: args.context,
 	})
@@ -183,7 +170,7 @@ export const projectView = async (args: {
 		if (selectedNode) {
 			await handleTreeSelection({
 				selectedNode,
-				nodeishFs: args.nodeishFs,
+				fs: args.fs,
 				workspaceFolder: args.workspaceFolder,
 			})
 		}

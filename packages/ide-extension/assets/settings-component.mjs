@@ -5613,9 +5613,9 @@ var require_ms = __commonJS({
   }
 });
 
-// ../../../node_modules/.pnpm/debug@4.3.5/node_modules/debug/src/common.js
+// ../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/common.js
 var require_common = __commonJS({
-  "../../../node_modules/.pnpm/debug@4.3.5/node_modules/debug/src/common.js"(exports, module) {
+  "../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/common.js"(exports, module) {
     function setup(env) {
       createDebug.debug = createDebug;
       createDebug.default = createDebug;
@@ -5776,9 +5776,9 @@ var require_common = __commonJS({
   }
 });
 
-// ../../../node_modules/.pnpm/debug@4.3.5/node_modules/debug/src/browser.js
+// ../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/browser.js
 var require_browser = __commonJS({
-  "../../../node_modules/.pnpm/debug@4.3.5/node_modules/debug/src/browser.js"(exports, module) {
+  "../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/browser.js"(exports, module) {
     exports.formatArgs = formatArgs;
     exports.save = save;
     exports.load = load;
@@ -26971,7 +26971,7 @@ var b = class extends HTMLElement {
 };
 b.elementStyles = [], b.shadowRootOptions = { mode: "open" }, b[d("elementProperties")] = /* @__PURE__ */ new Map(), b[d("finalized")] = /* @__PURE__ */ new Map(), p?.({ ReactiveElement: b }), (a.reactiveElementVersions ??= []).push("2.0.4");
 
-// ../../../node_modules/.pnpm/lit-html@3.1.4/node_modules/lit-html/lit-html.js
+// ../../../node_modules/.pnpm/lit-html@3.1.3/node_modules/lit-html/lit-html.js
 var t2 = globalThis;
 var i3 = t2.trustedTypes;
 var s2 = i3 ? i3.createPolicy("lit-html", { createHTML: (t7) => t7 }) : void 0;
@@ -27229,7 +27229,7 @@ var L = class {
 };
 var z = { P: e3, A: h2, C: o3, M: 1, L: P, R: S2, D: u2, V: N, I: M, H: R, N: H, U: I, B: k, F: L };
 var Z = t2.litHtmlPolyfillSupport;
-Z?.(V, M), (t2.litHtmlVersions ??= []).push("3.1.4");
+Z?.(V, M), (t2.litHtmlVersions ??= []).push("3.1.3");
 var j = (t7, i5, s5) => {
   const e11 = s5?.renderBefore ?? i5;
   let h3 = e11._$litPart$;
@@ -27240,7 +27240,7 @@ var j = (t7, i5, s5) => {
   return h3._$AI(t7), h3;
 };
 
-// ../../../node_modules/.pnpm/lit-element@4.0.6/node_modules/lit-element/lit-element.js
+// ../../../node_modules/.pnpm/lit-element@4.0.5/node_modules/lit-element/lit-element.js
 var s3 = class extends b {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
@@ -27266,7 +27266,7 @@ var s3 = class extends b {
 s3._$litElement$ = true, s3["finalized", "finalized"] = true, globalThis.litElementHydrateSupport?.({ LitElement: s3 });
 var r4 = globalThis.litElementPolyfillSupport;
 r4?.({ LitElement: s3 });
-(globalThis.litElementVersions ??= []).push("4.0.6");
+(globalThis.litElementVersions ??= []).push("4.0.5");
 
 // ../../../node_modules/.pnpm/@lit+reactive-element@2.0.4/node_modules/@lit/reactive-element/decorators/custom-element.js
 var t3 = (t7) => (e11, o9) => {
@@ -32110,7 +32110,7 @@ __decorateClass2([
   n4()
 ], ShoelaceElement.prototype, "lang", 2);
 
-// ../../../node_modules/.pnpm/lit-html@3.1.4/node_modules/lit-html/directive-helpers.js
+// ../../../node_modules/.pnpm/lit-html@3.1.3/node_modules/lit-html/directive-helpers.js
 var { I: t4 } = z;
 var e6 = (o9, t7) => void 0 === t7 ? void 0 !== o9?._$litType$ : o9?._$litType$ === t7;
 var f3 = (o9) => void 0 === o9.strings;
@@ -32267,7 +32267,7 @@ __decorateClass2([
   watch(["name", "src", "library"])
 ], SlIcon.prototype, "setIcon", 1);
 
-// ../../../node_modules/.pnpm/lit-html@3.1.4/node_modules/lit-html/directive.js
+// ../../../node_modules/.pnpm/lit-html@3.1.3/node_modules/lit-html/directive.js
 var t5 = { ATTRIBUTE: 1, CHILD: 2, PROPERTY: 3, BOOLEAN_ATTRIBUTE: 4, EVENT: 5, ELEMENT: 6 };
 var e7 = (t7) => (...e11) => ({ _$litDirective$: t7, values: e11 });
 var i4 = class {
@@ -32287,7 +32287,7 @@ var i4 = class {
   }
 };
 
-// ../../../node_modules/.pnpm/lit-html@3.1.4/node_modules/lit-html/directives/class-map.js
+// ../../../node_modules/.pnpm/lit-html@3.1.3/node_modules/lit-html/directives/class-map.js
 var e8 = e7(class extends i4 {
   constructor(t7) {
     if (super(t7), t7.type !== t5.ATTRIBUTE || "class" !== t7.name || t7.strings?.length > 2)
@@ -32314,7 +32314,7 @@ var e8 = e7(class extends i4 {
   }
 });
 
-// ../../../node_modules/.pnpm/lit-html@3.1.4/node_modules/lit-html/static.js
+// ../../../node_modules/.pnpm/lit-html@3.1.3/node_modules/lit-html/static.js
 var e9 = Symbol.for("");
 var o5 = (t7) => {
   if (t7?.r === e9)
@@ -32346,7 +32346,7 @@ var l3 = (t7) => (r8, ...e11) => {
 var n5 = l3(x);
 var u4 = l3(b2);
 
-// ../../../node_modules/.pnpm/lit-html@3.1.4/node_modules/lit-html/directives/if-defined.js
+// ../../../node_modules/.pnpm/lit-html@3.1.3/node_modules/lit-html/directives/if-defined.js
 var o6 = (o9) => o9 ?? T;
 
 // ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7XLSSP47.js
@@ -33291,7 +33291,7 @@ function rectToClientRect(rect) {
   };
 }
 
-// ../../../node_modules/.pnpm/@floating-ui+core@1.6.2/node_modules/@floating-ui/core/dist/floating-ui.core.mjs
+// ../../../node_modules/.pnpm/@floating-ui+core@1.6.1/node_modules/@floating-ui/core/dist/floating-ui.core.mjs
 function computeCoordsFromPlacement(_ref, placement, rtl) {
   let {
     reference,
@@ -33814,16 +33814,16 @@ var size = function(options) {
         widthSide = side;
         heightSide = alignment === "end" ? "top" : "bottom";
       }
-      const maximumClippingHeight = height - overflow.top - overflow.bottom;
-      const maximumClippingWidth = width - overflow.left - overflow.right;
-      const overflowAvailableHeight = min(height - overflow[heightSide], maximumClippingHeight);
-      const overflowAvailableWidth = min(width - overflow[widthSide], maximumClippingWidth);
+      const overflowAvailableHeight = height - overflow[heightSide];
+      const overflowAvailableWidth = width - overflow[widthSide];
       const noShift = !state.middlewareData.shift;
       let availableHeight = overflowAvailableHeight;
       let availableWidth = overflowAvailableWidth;
       if (isYAxis) {
+        const maximumClippingWidth = width - overflow.left - overflow.right;
         availableWidth = alignment || noShift ? min(overflowAvailableWidth, maximumClippingWidth) : maximumClippingWidth;
       } else {
+        const maximumClippingHeight = height - overflow.top - overflow.bottom;
         availableHeight = alignment || noShift ? min(overflowAvailableHeight, maximumClippingHeight) : maximumClippingHeight;
       }
       if (noShift && !alignment) {
@@ -35371,7 +35371,7 @@ var HasSlotController = class {
   }
 };
 
-// ../../../node_modules/.pnpm/lit-html@3.1.4/node_modules/lit-html/directives/unsafe-html.js
+// ../../../node_modules/.pnpm/lit-html@3.1.3/node_modules/lit-html/directives/unsafe-html.js
 var e10 = class extends i4 {
   constructor(i5) {
     if (super(i5), this.it = T, i5.type !== t5.CHILD)
@@ -36606,7 +36606,7 @@ var input_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/lit-html@3.1.4/node_modules/lit-html/directives/live.js
+// ../../../node_modules/.pnpm/lit-html@3.1.3/node_modules/lit-html/directives/live.js
 var l4 = e7(class extends i4 {
   constructor(r8) {
     if (super(r8), r8.type !== t5.PROPERTY && r8.type !== t5.ATTRIBUTE && r8.type !== t5.BOOLEAN_ATTRIBUTE)

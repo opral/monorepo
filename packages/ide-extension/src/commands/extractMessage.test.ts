@@ -5,9 +5,11 @@ import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { CONFIGURATION } from "../configuration.js"
 
+// Mocking vscode module
 vi.mock("vscode", () => ({
 	commands: {
 		registerTextEditorCommand: vi.fn(),
+		registerCommand: vi.fn(),
 	},
 	window: {
 		showInputBox: vi.fn(),
@@ -22,20 +24,17 @@ vi.mock("vscode", () => ({
 	},
 }))
 
+// Mocking state module
 vi.mock("../utilities/state.js", () => ({
 	state: vi.fn(),
 }))
 
+// Mocking msg module
 vi.mock("../utilities/messages/msg.js", () => ({
 	msg: vi.fn(),
 }))
 
-vi.mock("../services/telemetry/index.js", () => ({
-	telemetry: {
-		capture: vi.fn(),
-	},
-}))
-
+// Mocking configuration
 vi.mock("../configuration.js", () => ({
 	CONFIGURATION: {
 		EVENTS: {
@@ -58,29 +57,35 @@ describe("extractMessageCommand", () => {
 		}
 		vi.mocked(state).mockReturnValue({
 			project: {
-				// @ts-expect-error
-				customApi: vi.fn(() => ({
-					"app.inlang.ideExtension": {
-						extractMessageOptions: [
-							{
-								callback: vi.fn(() => ({
-									messageId: "test",
-									messageReplacement: "Test Replacement",
-								})),
+				plugins: {
+					subscribe: vi.fn(),
+					get: () => [
+						{
+							key: "plugin1",
+							meta: {
+								"app.inlang.ideExtension": {
+									extractMessageOptions: [
+										{
+											callback: vi.fn(() => ({
+												messageId: "test",
+												messageReplacement: "Test Replacement",
+											})),
+										},
+									],
+								},
 							},
-							// Additional options if needed
-						],
-					},
-				})),
+						},
+					],
+				},
 				// @ts-expect-error
 				settings: vi.fn(() => ({
-					sourceLanguageTag: "en",
+					baseLocale: "en",
 				})),
-				query: {
+				db: {
 					// @ts-expect-error
-					messages: {
-						create: vi.fn().mockReturnValue(true),
-					},
+					transaction: () => ({
+						execute: vi.fn().mockResolvedValue(true),
+					}),
 				},
 			},
 		})
@@ -89,8 +94,17 @@ describe("extractMessageCommand", () => {
 	it("should handle missing ideExtension configuration", async () => {
 		vi.mocked(state).mockReturnValueOnce({
 			project: {
+				plugins: {
+					subscribe: vi.fn(),
+					get: () => [
+						{
+							key: "plugin1",
+							meta: {},
+						},
+					],
+				},
 				// @ts-expect-error
-				customApi: vi.fn(() => ({})),
+				settings: vi.fn(() => ({ baseLocale: "en" })),
 			},
 		})
 		await extractMessageCommand.callback(mockTextEditor)
@@ -104,10 +118,19 @@ describe("extractMessageCommand", () => {
 	it("should handle missing extractMessageOptions", async () => {
 		vi.mocked(state).mockReturnValueOnce({
 			project: {
+				plugins: {
+					subscribe: vi.fn(),
+					get: () => [
+						{
+							key: "plugin1",
+							meta: {
+								"app.inlang.ideExtension": {},
+							},
+						},
+					],
+				},
 				// @ts-expect-error
-				customApi: vi.fn(() => ({ "app.inlang.ideExtension": {} })),
-				// @ts-expect-error
-				settings: vi.fn(() => ({ sourceLanguageTag: "en" })),
+				settings: vi.fn(() => ({ baseLocale: "en" })),
 			},
 		})
 		await extractMessageCommand.callback(mockTextEditor)
@@ -126,14 +149,9 @@ describe("extractMessageCommand", () => {
 
 	it("should handle non-existent extract option", async () => {
 		vi.mocked(window.showInputBox).mockResolvedValueOnce("test")
-		// @ts-expect-error
-		vi.mocked(window.showQuickPick).mockResolvedValueOnce("Non-existent option")
+		vi.mocked(window.showQuickPick).mockResolvedValueOnce(undefined)
 		await extractMessageCommand.callback(mockTextEditor)
-		expect(msg).toHaveBeenCalledWith(
-			"Couldn't find choosen extract option.",
-			"warn",
-			"notification"
-		)
+		expect(msg).toHaveBeenCalledWith("Couldn't find chosen extract option.", "warn", "notification")
 	})
 
 	it("should extract a message successfully", async () => {

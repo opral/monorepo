@@ -1,5 +1,5 @@
 import { commands } from "vscode"
-import { LanguageTag, Message } from "@inlang/sdk"
+import { Bundle, selectBundleNested } from "@inlang/sdk2"
 import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { rpc } from "@inlang/rpc"
@@ -10,25 +10,30 @@ export const machineTranslateMessageCommand = {
 	title: "Sherlock: Machine Translate Message",
 	register: commands.registerCommand,
 	callback: async function ({
-		messageId,
-		sourceLanguageTag,
-		targetLanguageTags,
+		bundleId,
+		baseLocale,
+		targetLocales,
 	}: {
-		messageId: Message["id"]
-		sourceLanguageTag: LanguageTag
-		targetLanguageTags: LanguageTag[]
+		bundleId: Bundle["id"]
+		baseLocale: string
+		targetLocales: string[]
 	}) {
-		// Get the message from the state
-		const message = state().project.query.messages.get({ where: { id: messageId } })
-		if (!message) {
-			return msg(`Message with id ${messageId} not found.`)
+		// Get the message from the database
+		const bundle = await selectBundleNested(state().project.db)
+			.where("bundle.id", "=", bundleId)
+			.executeTakeFirst()
+
+		if (!bundle) {
+			return msg(`Bundle with id ${bundleId} not found.`)
 		}
 
 		// Call machine translation RPC function
+
 		const result = await rpc.machineTranslateMessage({
-			message,
-			sourceLanguageTag,
-			targetLanguageTags,
+			bundle,
+			// TODO: refactor machine translation to use baseLocale and targetLocales
+			baseLocale,
+			targetLocales,
 		})
 
 		if (result.error) {
@@ -36,20 +41,37 @@ export const machineTranslateMessageCommand = {
 		}
 
 		// Update the message with the translated content
-		const updatedMessage = result.data
-		if (!updatedMessage) {
-			return msg("No translation available.")
+		const updatedMessages = result.data
+		if (!updatedMessages || !Array.isArray(updatedMessages)) {
+			return msg("No translations available.")
 		}
 
-		state().project.query.messages.upsert({
-			where: { id: messageId },
-			data: updatedMessage,
-		})
+		// Upsert each translated message directly using Kysely
+		for (const updatedMessage of updatedMessages) {
+			await state()
+				.project.db.insertInto("message")
+				.values({
+					id: updatedMessage.id,
+					bundleId: updatedMessage.bundleId,
+					locale: updatedMessage.locale,
+					declarations: updatedMessage.declarations,
+					selectors: updatedMessage.selectors,
+				})
+				.onConflict((oc) =>
+					oc.column("id").doUpdateSet({
+						bundleId: updatedMessage.bundleId,
+						locale: updatedMessage.locale,
+						declarations: updatedMessage.declarations,
+						selectors: updatedMessage.selectors,
+					})
+				)
+				.execute()
+		}
 
-		// Emit event to notify that a message was edited
+		// Emit event to notify that messages were edited
 		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
 
 		// Return success message
-		return msg("Message translated.")
+		return msg("Messages translated.")
 	},
 } as const

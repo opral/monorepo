@@ -22,7 +22,8 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/language-tag": "workspace:*"
+		"@inlang/language-tag": "workspace:*",
+		"prettier": "^3.3.3"
 	},
 	"peerDependencies": {
 		"@sinclair/typebox": "^0.31.17"

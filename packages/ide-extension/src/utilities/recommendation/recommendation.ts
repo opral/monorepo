@@ -2,13 +2,12 @@ import * as vscode from "vscode"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
 import * as Ninja from "@inlang/recommend-ninja"
-import type { NodeishFilesystem } from "@lix-js/fs"
 import { CONFIGURATION } from "../../configuration.js"
 
 export function createRecommendationView(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	fs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 }) {
 	return {
 		async resolveWebviewView(webviewView: vscode.WebviewView) {
@@ -70,7 +69,7 @@ export async function getRecommendationViewHtml(args: {
 	webview: vscode.Webview
 	workspaceFolder: vscode.WorkspaceFolder
 	context: vscode.ExtensionContext
-	fs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 }): Promise<string> {
 	const shouldRecommendNinja = await Ninja.shouldRecommend({ fs: args.fs })
 	const shouldRecommendSherlock = await Sherlock.shouldRecommend({
@@ -232,12 +231,12 @@ export async function getRecommendationViewHtml(args: {
 export async function recommendationBannerView(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	nodeishFs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 }) {
 	return vscode.window.registerWebviewViewProvider(
 		"recommendationBanner",
 		createRecommendationView({
-			fs: args.nodeishFs,
+			fs: args.fs,
 			context: args.context,
 			workspaceFolder: args.workspaceFolder,
 		})

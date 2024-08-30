@@ -37,10 +37,6 @@ const Footer = () => {
 				href: "/documentation",
 			},
 			{
-				name: m.footer_resources_roadmap(),
-				href: "https://github.com/orgs/inlang/projects?query=is%3Aopen",
-			},
-			{
 				name: m.footer_resources_inlang_manage(),
 				href: import.meta.env.PROD ? "https://manage.inlang.com" : "http://localhost:4004",
 			},

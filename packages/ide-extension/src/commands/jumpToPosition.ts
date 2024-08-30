@@ -1,14 +1,14 @@
 import { commands, Position, Range, TextEditorRevealType, window } from "vscode"
 import { telemetry } from "../services/telemetry/implementation.js"
-import type { Message } from "@inlang/sdk"
 import * as vscode from "vscode"
+import type { Bundle } from "@inlang/sdk2"
 
 export const jumpToPositionCommand = {
 	command: "sherlock.jumpToPosition",
 	title: "Sherlock: Jump to position in editor",
 	register: commands.registerCommand,
 	callback: async function (args: {
-		messageId: Message["id"]
+		bundleId: Bundle["id"]
 		position: {
 			start: {
 				line: number

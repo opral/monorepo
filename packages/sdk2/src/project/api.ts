@@ -18,15 +18,15 @@ export type InlangProject = {
 	 */
 	_sqlite: SqliteDatabase;
 	plugins: {
-		get: () => readonly InlangPlugin[];
+		get: () => Promise<readonly InlangPlugin[]>;
 		subscribe: Subscription<readonly InlangPlugin[]>;
 	};
 	errors: {
-		get: () => readonly Error[];
+		get: () => Promise<readonly Error[]>;
 		subscribe: Subscription<readonly Error[]>;
 	};
 	settings: {
-		get: () => ProjectSettings;
+		get: () => Promise<ProjectSettings>;
 		set: (settings: ProjectSettings) => Promise<void>;
 		subscribe: Subscription<ProjectSettings>;
 	};
@@ -58,3 +58,4 @@ export type ResourceFile = {
 export type Subscription<T> = (callback: (value: T) => void) => {
 	unsubscribe: () => void;
 };
+

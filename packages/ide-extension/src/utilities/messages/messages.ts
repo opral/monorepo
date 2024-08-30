@@ -1,28 +1,152 @@
 import * as vscode from "vscode"
 import { state } from "../state.js"
-import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../../configuration.js"
 import { getStringFromPattern } from "./query.js"
 import { escapeHtml } from "../utils.js"
-import { throttle } from "throttle-debounce"
+// TODO: Uncomment when bundle subscribe is implemented
+// import { throttle } from "throttle-debounce"
+import {
+	selectBundleNested,
+	type Bundle,
+	type BundleNested,
+	type IdeExtensionConfig,
+	type InlangProject,
+} from "@inlang/sdk2"
 
 export function createMessageWebviewProvider(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
 }) {
-	let messages: Message[] | undefined
+	let bundles: BundleNested[] | undefined
 	let isLoading = true
 	let subscribedToProjectPath = ""
 	let activeFileContent: string | undefined
 	let debounceTimer: NodeJS.Timeout | undefined
 
+	const updateMessages = async () => {
+		// Check if project is loaded
+		const project = state().project as InlangProject | undefined
+		if (!project) {
+			isLoading = true
+			updateWebviewContent()
+			return
+		}
+
+		// Subscribe to messages just once for a project
+		if (subscribedToProjectPath !== state().selectedProjectPath) {
+			subscribedToProjectPath = state().selectedProjectPath
+			// TODO: Uncomment when bundle subscribe is implemented
+			// project.query.messages.getAll.subscribe((fetchedMessages: BundleNested[]) => {
+			// 	bundles = fetchedMessages ? [...fetchedMessages] : []
+			// 	isLoading = false
+			// 	throttledUpdateWebviewContent()
+			// })
+		}
+	}
+
+	const debounceUpdate = () => {
+		const activeEditor = vscode.window.activeTextEditor
+		const fileContent = activeEditor ? activeEditor.document.getText() : ""
+		if (debounceTimer) {
+			clearTimeout(debounceTimer)
+		}
+		debounceTimer = setTimeout(() => {
+			if (activeFileContent !== fileContent) {
+				activeFileContent = fileContent
+				updateWebviewContent()
+			}
+		}, 300)
+	}
+
+	const updateWebviewContent = async () => {
+		const activeEditor = vscode.window.activeTextEditor
+		const fileContent = activeEditor ? activeEditor.document.getText() : ""
+		const project = state().project as InlangProject | undefined
+		const ideExtension = project?.plugins
+			.get()
+			.find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])?.meta?.[
+			"app.inlang.ideExtension"
+		] as IdeExtensionConfig | undefined
+		const messageReferenceMatchers = ideExtension?.messageReferenceMatchers
+
+		const matchedBundles = (
+			await Promise.all(
+				(messageReferenceMatchers ?? []).map(async (matcher) => {
+					return matcher({ documentText: fileContent })
+				})
+			)
+		).flat()
+
+		const highlightedBundles = await Promise.all(
+			matchedBundles.map(async (bundle) => {
+				const bundleData = await selectBundleNested(state().project.db)
+					.where("bundle.id", "=", bundle.bundleId)
+					.executeTakeFirst()
+				return bundleData
+			})
+		)
+
+		const highlightedMessagesHtml =
+			highlightedBundles.length > 0
+				? `<div class="highlighted-section">
+                        <div class="banner"><span class="active-dot"></span><span>Current file<span></div>
+                        ${await Promise.all(
+													highlightedBundles.map(async (bundle) =>
+														createMessageHtml({
+															bundle: bundle!,
+															position: matchedBundles.find((m) => m.bundleId === bundle?.id)
+																?.position,
+															isHighlighted: true,
+															workspaceFolder: args.workspaceFolder,
+														})
+													)
+												).then((htmls) => htmls.join(""))}
+                    </div>`
+				: ""
+
+		const allMessagesBanner = '<div class="banner">All Messages</div>'
+		let mainContentHtml = ""
+		if (isLoading) {
+			mainContentHtml = createMessagesLoadingHtml()
+		} else if (bundles && bundles.length > 0) {
+			mainContentHtml = `${highlightedMessagesHtml}<main>${allMessagesBanner}${await Promise.all(
+				bundles.map(async (message) =>
+					createMessageHtml({
+						bundle: message,
+						isHighlighted: false,
+						workspaceFolder: args.workspaceFolder,
+					})
+				)
+			).then((htmls) => htmls.join(""))}</main>`
+		} else {
+			mainContentHtml = `${highlightedMessagesHtml}<main>${
+				allMessagesBanner + createNoMessagesFoundHtml()
+			}</main>`
+		}
+
+		if (webviewView) {
+			webviewView.webview.html = getHtml({
+				mainContent: mainContentHtml,
+				context: args.context,
+				webview: webviewView.webview,
+			})
+		}
+	}
+
+	// TODO: Uncomment when bundle subscribe is implemented
+	// const throttledUpdateWebviewContent = throttle(500, updateWebviewContent)
+
+	let webviewView: vscode.WebviewView | undefined
+
 	return {
-		resolveWebviewView(webviewView: vscode.WebviewView) {
-			webviewView.webview.options = {
+		resolveWebviewView(view: vscode.WebviewView) {
+			webviewView = view
+
+			view.webview.options = {
 				enableScripts: true,
 			}
 
-			webviewView.webview.onDidReceiveMessage(
+			view.webview.onDidReceiveMessage(
 				(message) => {
 					if (message.command === "executeCommand") {
 						const commandName = message.commandName
@@ -33,42 +157,6 @@ export function createMessageWebviewProvider(args: {
 				undefined,
 				args.context.subscriptions
 			)
-
-			const updateMessages = async () => {
-				// Check if project is loaded
-				if (!state().project) {
-					isLoading = true
-					updateWebviewContent()
-					return
-				}
-
-				// TODO XXX discuss https://github.com/opral/monorepo/commit/ea473bcfb0c25751e454d0cbdd976aae043abf38#diff-d70c61d977625ed10ef52c85005752b7c647b2663317340f46087c1330d2c479 with  felix and reset to ea473bc
-				// Subscribe to messages just once for a project
-				// Assumes that subscriptions will be gc'ed when projects are switched
-				// TODO: set isLoading while switching projects
-				if (subscribedToProjectPath !== state().selectedProjectPath) {
-					subscribedToProjectPath = state().selectedProjectPath
-					state().project.query.messages.getAll.subscribe((fetchedMessages) => {
-						messages = fetchedMessages ? [...fetchedMessages] : []
-						isLoading = false
-						throttledUpdateWebviewContent()
-					})
-				}
-			}
-
-			const debounceUpdate = () => {
-				const activeEditor = vscode.window.activeTextEditor
-				const fileContent = activeEditor ? activeEditor.document.getText() : ""
-				if (debounceTimer) {
-					clearTimeout(debounceTimer)
-				}
-				debounceTimer = setTimeout(() => {
-					if (activeFileContent !== fileContent) {
-						activeFileContent = fileContent
-						updateWebviewContent()
-					}
-				}, 300)
-			}
 
 			args.context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(debounceUpdate))
 			args.context.subscriptions.push(
@@ -83,109 +171,35 @@ export function createMessageWebviewProvider(args: {
 			)
 			args.context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(updateMessages))
 
-			// if message was created, update webview
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.event(() => {
 					updateMessages()
 				})
 			)
 
-			// if message was extracted, update webview
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => {
 					updateMessages()
 				})
 			)
 
-			// if message was edited, update webview
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => {
 					updateMessages()
 				})
 			)
 
-			// when project view changes, update webview
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event(() => {
 					updateMessages()
 				})
 			)
 
-			// when settings view changes, update webview
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_SETTINGS_VIEW_CHANGE.event(() => {
 					updateMessages()
 				})
 			)
-
-			const updateWebviewContent = async () => {
-				const activeEditor = vscode.window.activeTextEditor
-				const fileContent = activeEditor ? activeEditor.document.getText() : ""
-				const ideExtensionConfig = state().project.customApi()?.["app.inlang.ideExtension"]
-				const messageReferenceMatchers = ideExtensionConfig?.messageReferenceMatchers
-
-				const matchedMessages = (
-					await Promise.all(
-						(messageReferenceMatchers ?? []).map(async (matcher) => {
-							return matcher({ documentText: fileContent })
-						})
-					)
-				).flat()
-
-				const highlightedMessages = matchedMessages
-					// resolve messages from id or alias
-					.map((message) => {
-						return (
-							state().project.query.messages.get({ where: { id: message.messageId } }) ??
-							state().project.query.messages.getByDefaultAlias(message.messageId)
-						)
-					})
-					.filter((message): message is Message => message !== undefined)
-				const highlightedMessagesHtml =
-					highlightedMessages.length > 0
-						? `<div class="highlighted-section">
-                        <div class="banner"><span class="active-dot"></span><span>Current file<span></div>
-                        ${highlightedMessages
-													.map((message) =>
-														createMessageHtml({
-															message,
-															position: matchedMessages.find((m) => m.messageId === message.id)
-																?.position,
-															isHighlighted: true,
-															workspaceFolder: args.workspaceFolder,
-														})
-													)
-													.join("")}
-                    </div>`
-						: ""
-
-				const allMessagesBanner = '<div class="banner">All Messages</div>'
-				let mainContentHtml = ""
-				if (isLoading) {
-					mainContentHtml = createMessagesLoadingHtml()
-				} else if (messages && messages.length > 0) {
-					mainContentHtml = `${highlightedMessagesHtml}<main>${allMessagesBanner}${messages
-						.map((message) =>
-							createMessageHtml({
-								message,
-								isHighlighted: false,
-								workspaceFolder: args.workspaceFolder,
-							})
-						)
-						.join("")}</main>`
-				} else {
-					mainContentHtml = `${highlightedMessagesHtml}<main>${
-						allMessagesBanner + createNoMessagesFoundHtml()
-					}</main>`
-				}
-
-				webviewView.webview.html = getHtml({
-					mainContent: mainContentHtml,
-					context: args.context,
-					webview: webviewView.webview,
-				})
-			}
-			const throttledUpdateWebviewContent = throttle(500, updateWebviewContent)
 
 			updateMessages() // Initial update
 		},
@@ -193,7 +207,7 @@ export function createMessageWebviewProvider(args: {
 }
 
 export function createMessageHtml(args: {
-	message: Message
+	bundle: BundleNested
 	position?: {
 		start: {
 			line: number
@@ -208,65 +222,65 @@ export function createMessageHtml(args: {
 	workspaceFolder: vscode.WorkspaceFolder
 }): string {
 	// Function to check if the record has any keys
-	const hasAliases = (aliases: Message["alias"]): boolean => {
+	const hasAliases = (aliases: Bundle["alias"]): boolean => {
 		return Object.keys(aliases).length > 0
 	}
 
-	const isExperimentalAliasesEnabled = state().project.settings()?.experimental?.aliases
+	const isExperimentalAliasesEnabled = state().project.settings.get()?.experimental?.aliases
 
 	const aliasHtml =
-		isExperimentalAliasesEnabled && hasAliases(args.message.alias)
+		isExperimentalAliasesEnabled && hasAliases(args.bundle.alias)
 			? `<div class="aliases" title="Alias">
-				<span><strong>@</strong></span>
-				<div>
-				${Object.entries(args.message.alias)
-					.map(
-						([key, value]) =>
-							`<span data-alias="${escapeHtml(value)}"><i>${escapeHtml(key)}</i>: ${escapeHtml(
-								value
-							)}</span>`
-					)
-					.join("")}
-				</div>
-			</div>`
+                <span><strong>@</strong></span>
+                <div>
+                ${Object.entries(args.bundle.alias)
+									.map(
+										([key, value]) =>
+											`<span data-alias="${escapeHtml(value)}"><i>${escapeHtml(key)}</i>: ${escapeHtml(
+												value
+											)}</span>`
+									)
+									.join("")}
+                </div>
+            </div>`
 			: ""
 
 	const translationsTableHtml = getTranslationsTableHtml({
-		message: args.message,
+		bundle: args.bundle,
 		workspaceFolder: args.workspaceFolder,
 	})
 
-	// Fink needs the relative path from the workspace/git root
+	// Find the relative path from the workspace/git root
 	const relativeProjectPathFromWorkspace = state().selectedProjectPath.replace(
 		args.workspaceFolder.uri.fsPath,
 		""
 	)
 
 	const positionHtml = encodeURIComponent(JSON.stringify(args.position))
-	const jumpCommand = `jumpToPosition('${args.message.id}', '${positionHtml}');event.stopPropagation();`
-	const openCommand = `openInFink('${args.message.id}', '${relativeProjectPathFromWorkspace}');event.stopPropagation();`
+	const jumpCommand = `jumpToPosition('${args.bundle.id}', '${positionHtml}');event.stopPropagation();`
+	const openCommand = `openInFink('${args.bundle.id}', '${relativeProjectPathFromWorkspace}');event.stopPropagation();`
 
 	return `
-	<div class="tree-item">
-		<div class="collapsible" data-message-id="${args.message.id}">
-			<div class="messageId">
-				<span><strong>#</strong></span>
-				<span>${args.message.id}</span>
-			</div>
-			<div class="actionButtons">
-				${
-					args.position
-						? `<span title="Jump to message" onclick="${jumpCommand}"><span class="codicon codicon-magnet"></span></span>`
-						: ""
-				}
-				<span title="Open in Fink" onclick="${openCommand}"><span class="codicon codicon-link-external"></span></span>
-			</div>
-		</div>
-		<div class="content" style="display: none;">
-			${translationsTableHtml}
-			${aliasHtml}
-		</div>
-	</div>
+    <div class="tree-item">
+        <div class="collapsible" data-message-id="${args.bundle.id}">
+            <div class="messageId">
+                <span><strong>#</strong></span>
+                <span>${args.bundle.id}</span>
+            </div>
+            <div class="actionButtons">
+                ${
+									args.position
+										? `<span title="Jump to message" onclick="${jumpCommand}"><span class="codicon codicon-magnet"></span></span>`
+										: ""
+								}
+                <span title="Open in Fink" onclick="${openCommand}"><span class="codicon codicon-link-external"></span></span>
+            </div>
+        </div>
+        <div class="content" style="display: none;">
+            ${translationsTableHtml}
+            ${aliasHtml}
+        </div>
+    </div>
     `
 }
 
@@ -280,50 +294,6 @@ export function createMessagesLoadingHtml(): string {
 	return `<div class="loading">
 				<span>Loading messages...</span>
 			</div>`
-}
-
-export function getTranslationsTableHtml(args: {
-	message: Message
-	workspaceFolder: vscode.WorkspaceFolder
-}): string {
-	const configuredLanguageTags = state().project.settings()?.languageTags || []
-	const contextTableRows = configuredLanguageTags.map((languageTag) => {
-		const variant = args.message.variants.find((v) => v.languageTag === languageTag)
-
-		let m = CONFIGURATION.STRINGS.MISSING_TRANSLATION_MESSAGE as string
-
-		if (variant) {
-			m = getStringFromPattern({
-				pattern: variant.pattern,
-				languageTag: variant.languageTag,
-				messageId: args.message.id,
-			})
-		}
-
-		const editCommand = `editMessage('${args.message.id}', '${escapeHtml(languageTag)}')`
-		const machineTranslateCommand = `machineTranslate('${args.message.id}', '${
-			state().project.settings()?.sourceLanguageTag
-		}', ['${languageTag}'])`
-
-		return `
-            <div class="section">
-                <span class="languageTag"><strong>${escapeHtml(languageTag)}</strong></span>
-                <span class="message"><button onclick="${editCommand}">${escapeHtml(
-			m
-		)}</button></span>
-				<span class="actionButtons">
-				${
-					m === CONFIGURATION.STRINGS.MISSING_TRANSLATION_MESSAGE
-						? `
-				<button title="Translate message with Inlang AI" onclick="${machineTranslateCommand}"><span class="codicon codicon-sparkle"></span></button>`
-						: `<button title="Edit" onclick="${editCommand}"><span class="codicon codicon-edit"></span></button>`
-				}
-				</span>
-            </div>
-        `
-	})
-
-	return `<div class="table">${contextTableRows.join("")}</div>`
 }
 
 export function getHtml(args: {
@@ -467,17 +437,62 @@ export function getHtml(args: {
 					});
 				}
 
-				function machineTranslate(messageId, sourceLanguageTag, targetLanguageTags) {
+				function machineTranslate(messageId, baseLocale, targetLanguageTags) {
 					vscode.postMessage({
 						command: 'executeCommand',
 						commandName: 'sherlock.machineTranslateMessage',
-						commandArgs: { messageId, sourceLanguageTag, targetLanguageTags },
+						commandArgs: { messageId, baseLocale, targetLanguageTags },
 					});
 				}
             </script>
         </body>
         </html>
     `
+}
+
+export function getTranslationsTableHtml(args: {
+	bundle: BundleNested
+	workspaceFolder: vscode.WorkspaceFolder
+}): string {
+	const hasTranslations = Object.keys(args.bundle.messages).length > 0
+
+	const rowsHtml = hasTranslations
+		? args.bundle.messages
+				.map(
+					(message) =>
+						`<tr>
+                        <td class="language">${escapeHtml(message.locale)}</td>
+                        ${message.variants
+													.map((variant) => {
+														const translation = getStringFromPattern({
+															pattern: variant.pattern || [
+																{
+																	type: "text",
+																	value: "", // TODO: Fix pattern type to be always defined either/or Text / VariableReference
+																},
+															],
+															locale: message.locale,
+															messageId: variant.messageId,
+														})
+														return `<td class="translation">${escapeHtml(translation)}</td>`
+													})
+													.join("")}
+                    </tr>`
+				)
+				.join("")
+		: '<tr><td colspan="2" class="no-translations">No translations available</td></tr>'
+
+	return `<table class="translations">
+                <thead>
+                    <tr>
+                        <th class="language-column">Language</th>
+                        <th class="translation-column">Translation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>`
 }
 
 export async function messageView(args: {

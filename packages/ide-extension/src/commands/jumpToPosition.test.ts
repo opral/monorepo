@@ -46,7 +46,7 @@ describe("jumpToPositionCommand", () => {
 
 	it("should not execute if no active editor", async () => {
 		await jumpToPositionCommand.callback({
-			messageId: "test-message",
+			bundleId: "test-message",
 			position: { start: { line: 1, character: 5 }, end: { line: 1, character: 10 } },
 		})
 		expect(vscode.window.activeTextEditor).toBeUndefined()
@@ -65,7 +65,7 @@ describe("jumpToPositionCommand", () => {
 		}
 
 		const args = {
-			messageId: "test-message",
+			bundleId: "test-message",
 			position: { start: { line: 1, character: 5 }, end: { line: 1, character: 10 } },
 		}
 

@@ -1,6 +1,5 @@
 import * as vscode from "vscode"
 import { handleTreeSelection, type ProjectViewNode } from "../utilities/project/project.js"
-import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const openProjectCommand = {
 	command: "sherlock.openProject",
@@ -8,9 +7,9 @@ export const openProjectCommand = {
 	register: vscode.commands.registerCommand,
 	callback: async (
 		node: ProjectViewNode,
-		nodeishFs: NodeishFilesystem,
+		fs: typeof import("node:fs/promises"),
 		workspaceFolder: vscode.WorkspaceFolder
 	) => {
-		await handleTreeSelection({ selectedNode: node, nodeishFs, workspaceFolder })
+		await handleTreeSelection({ selectedNode: node, fs, workspaceFolder })
 	},
 }

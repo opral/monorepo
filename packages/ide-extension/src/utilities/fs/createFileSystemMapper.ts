@@ -1,4 +1,4 @@
-import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
+import { normalizePath } from "@lix-js/fs"
 import { default as _path } from "node:path"
 
 /**
@@ -7,98 +7,190 @@ import { default as _path } from "node:path"
  * @param base uri for relative paths
  * @returns file system mapper
  */
-export function createFileSystemMapper(base: string, fs: NodeishFilesystem): NodeishFilesystem {
+export function createFileSystemMapper(
+	base: string,
+	fs: typeof import("node:fs/promises")
+): typeof import("node:fs/promises") {
 	// Prevent path issue on non Unix based system normalizing the <base> before using it
 	const normalizedBase = normalizePath(base)
 
 	return {
+		// TODO: Those expected typescript errors are because of overloads in node:fs/promises
 		// @ts-expect-error
 		readFile: async (
-			path: Parameters<NodeishFilesystem["readFile"]>[0],
-			options: Parameters<NodeishFilesystem["readFile"]>[1]
+			path: Parameters<(typeof import("node:fs/promises"))["readFile"]>[0],
+			options: Parameters<(typeof import("node:fs/promises"))["readFile"]>[1]
 		): Promise<string | Uint8Array> => {
 			return fs.readFile(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
+				normalizePath(
+					String(path).startsWith(normalizedBase)
+						? String(path)
+						: _path.resolve(normalizedBase, String(path))
+				),
 				options
 			)
 		},
 		writeFile: async (
-			path: Parameters<NodeishFilesystem["writeFile"]>[0],
-			data: Parameters<NodeishFilesystem["writeFile"]>[1],
-			options: Parameters<NodeishFilesystem["writeFile"]>[2]
+			path: Parameters<(typeof import("node:fs/promises"))["writeFile"]>[0],
+			data: Parameters<(typeof import("node:fs/promises"))["writeFile"]>[1],
+			options: Parameters<(typeof import("node:fs/promises"))["writeFile"]>[2]
 		) => {
 			return fs.writeFile(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
+				normalizePath(
+					String(path).startsWith(normalizedBase)
+						? String(path)
+						: _path.resolve(normalizedBase, String(path))
+				),
 				data,
 				options
 			)
 		},
+		// @ts-expect-error
 		mkdir: async (
-			path: Parameters<NodeishFilesystem["mkdir"]>[0],
-			options: Parameters<NodeishFilesystem["mkdir"]>[1]
+			path: Parameters<(typeof import("node:fs/promises"))["mkdir"]>[0],
+			options?: Parameters<(typeof import("node:fs/promises"))["mkdir"]>[1]
 		) => {
 			return fs.mkdir(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
-				options
-			)
-		},
-		rmdir: async (path: Parameters<NodeishFilesystem["rmdir"]>[0]) => {
-			return fs.rmdir(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
-			)
-		},
-		rm: async (
-			path: Parameters<NodeishFilesystem["rm"]>[0],
-			options: Parameters<NodeishFilesystem["rm"]>[1]
-		) => {
-			return fs.rm(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
-				options
-			)
-		},
-		unlink: async (path: Parameters<NodeishFilesystem["unlink"]>[0]) => {
-			return fs.unlink(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
-			)
-		},
-		readdir: async (path: Parameters<NodeishFilesystem["readdir"]>[0]) => {
-			return fs.readdir(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
-			)
-		},
-		readlink: async (path: Parameters<NodeishFilesystem["readlink"]>[0]) => {
-			return fs.readlink(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
-			)
-		},
-		symlink: async (
-			path: Parameters<NodeishFilesystem["symlink"]>[0],
-			target: Parameters<NodeishFilesystem["symlink"]>[1]
-		) => {
-			return fs.symlink(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
 				normalizePath(
-					target.startsWith(normalizedBase) ? target : _path.resolve(normalizedBase, target)
+					String(path).startsWith(normalizedBase)
+						? String(path)
+						: _path.resolve(normalizedBase, String(path))
+				),
+				options
+			)
+		},
+		rmdir: async (path: Parameters<(typeof import("node:fs/promises"))["rmdir"]>[0]) => {
+			return fs.rmdir(
+				normalizePath(
+					String(path).startsWith(normalizedBase)
+						? String(path)
+						: _path.resolve(normalizedBase, String(path))
 				)
 			)
 		},
-		stat: async (path: Parameters<NodeishFilesystem["stat"]>[0]) => {
-			return fs.stat(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
-			)
-		},
-		watch: (
-			path: Parameters<NodeishFilesystem["watch"]>[0],
-			options: Parameters<NodeishFilesystem["watch"]>[1]
+		rm: async (
+			path: Parameters<(typeof import("node:fs/promises"))["rm"]>[0],
+			options: Parameters<(typeof import("node:fs/promises"))["rm"]>[1]
 		) => {
-			return fs.watch(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
+			return fs.rm(
+				normalizePath(
+					String(path).startsWith(normalizedBase)
+						? String(path)
+						: _path.resolve(normalizedBase, String(path))
+				),
 				options
 			)
 		},
-		lstat: async (path: Parameters<NodeishFilesystem["lstat"]>[0]) => {
+		unlink: async (path: Parameters<(typeof import("node:fs/promises"))["unlink"]>[0]) => {
+			return fs.unlink(
+				normalizePath(
+					String(path).startsWith(normalizedBase)
+						? String(path)
+						: _path.resolve(normalizedBase, String(path))
+				)
+			)
+		},
+		// @ts-expect-error
+		readdir: async (path: Parameters<(typeof import("node:fs/promises"))["readdir"]>[0]) => {
+			return fs.readdir(
+				normalizePath(
+					String(path).startsWith(normalizedBase)
+						? String(path)
+						: _path.resolve(normalizedBase, String(path))
+				)
+			)
+		},
+		// @ts-expect-error
+		readlink: async (path: Parameters<(typeof import("node:fs/promises"))["readlink"]>[0]) => {
+			return fs.readlink(
+				normalizePath(
+					String(path).startsWith(normalizedBase)
+						? String(path)
+						: _path.resolve(normalizedBase, String(path))
+				)
+			)
+		},
+		symlink: async (
+			path: Parameters<(typeof import("node:fs/promises"))["symlink"]>[0],
+			target: Parameters<(typeof import("node:fs/promises"))["symlink"]>[1]
+		) => {
+			return fs.symlink(
+				normalizePath(
+					String(path).startsWith(normalizedBase)
+						? String(path)
+						: _path.resolve(normalizedBase, String(path))
+				),
+				normalizePath(
+					String(target).startsWith(normalizedBase)
+						? String(target)
+						: _path.resolve(normalizedBase, String(target))
+				)
+			)
+		},
+		// @ts-expect-error
+		stat: async (path: Parameters<(typeof import("node:fs/promises"))["stat"]>[0]) => {
+			return fs.stat(
+				normalizePath(
+					String(path).startsWith(normalizedBase)
+						? String(path)
+						: _path.resolve(normalizedBase, String(path))
+				)
+			)
+		},
+		// @ts-expect-error
+		lstat: async (path: Parameters<(typeof import("node:fs/promises"))["lstat"]>[0]) => {
 			return fs.lstat(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+				normalizePath(
+					String(path).startsWith(normalizedBase)
+						? String(path)
+						: _path.resolve(normalizedBase, String(path))
+				)
+			)
+		},
+		// @ts-expect-error
+		watch: (
+			path: Parameters<(typeof import("node:fs/promises"))["watch"]>[0],
+			options: Parameters<(typeof import("node:fs/promises"))["watch"]>[1]
+		) => {
+			return fs.watch(
+				normalizePath(
+					String(path).startsWith(normalizedBase)
+						? String(path)
+						: _path.resolve(normalizedBase, String(path))
+				),
+				options
+			)
+		},
+		access: async (
+			path: Parameters<(typeof import("node:fs/promises"))["access"]>[0],
+			mode: Parameters<(typeof import("node:fs/promises"))["access"]>[1]
+		) => {
+			return fs.access(
+				normalizePath(
+					String(path).startsWith(normalizedBase)
+						? String(path)
+						: _path.resolve(normalizedBase, String(path))
+				),
+				mode
+			)
+		},
+		copyFile: async (
+			src: Parameters<(typeof import("node:fs/promises"))["copyFile"]>[0],
+			dest: Parameters<(typeof import("node:fs/promises"))["copyFile"]>[1],
+			flags: Parameters<(typeof import("node:fs/promises"))["copyFile"]>[2]
+		) => {
+			return fs.copyFile(
+				normalizePath(
+					String(src).startsWith(normalizedBase)
+						? String(src)
+						: _path.resolve(normalizedBase, String(src))
+				),
+				normalizePath(
+					String(dest).startsWith(normalizedBase)
+						? String(dest)
+						: _path.resolve(normalizedBase, String(dest))
+				),
+				flags
 			)
 		},
 	}

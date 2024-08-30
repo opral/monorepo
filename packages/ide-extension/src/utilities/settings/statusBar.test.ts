@@ -4,6 +4,7 @@ import { statusBar, showStatusBar } from "./statusBar.js"
 import { state } from "../state.js"
 import { getSetting } from "./index.js"
 import { CONFIGURATION } from "../../configuration.js"
+import { get } from "node:http"
 
 let lastStatusBarItem: any = undefined // Track the last status bar item created for testing
 
@@ -36,8 +37,8 @@ vi.mock("../state", () => ({
 	state: vi.fn().mockImplementation(() => ({
 		project: {
 			settings: vi.fn().mockReturnValue({
-				sourceLanguageTag: "en",
-				languageTags: ["en", "fr"],
+				baseLocale: "en",
+				locales: ["en", "fr"],
 			}),
 		},
 	})),
@@ -58,7 +59,7 @@ describe("statusBar", () => {
 
 		expect(context.subscriptions.push).toHaveBeenCalledTimes(2)
 		expect(CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event).toHaveBeenCalled()
-		expect(CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.event).toHaveBeenCalled()
+		expect(CONFIGURATION.EVENTS.ON_DID_PREVIEW_LOCALE_CHANGE.event).toHaveBeenCalled()
 	})
 })
 
@@ -81,28 +82,31 @@ describe("showStatusBar", () => {
 		expect(disposeMock).toHaveBeenCalled()
 	})
 
-	it("should do nothing if sourceLanguageTag is not available", async () => {
+	it("should do nothing if baseLocale is not available", async () => {
 		// Modify the mock for state to return a more defensive structure
 		vi.mocked(state).mockReturnValueOnce({
+			// @ts-expect-error
 			project: {
-				settings: () => ({
-					// @ts-expect-error
-					sourceLanguageTag: undefined,
-					languageTags: ["en", "fr"],
-				}),
+				settings: {
+					get: () => {
+						return { baseLocale: "en", locales: ["en", "fr"] }
+					},
+					set: vi.fn(),
+					subscribe: vi.fn(),
+				},
 			},
 		})
 		await showStatusBar()
 		expect(vscode.window.createStatusBarItem).not.toHaveBeenCalled()
 	})
 
-	it("should handle the case when previewLanguageTag is not available", async () => {
+	it("should handle the case when previewLocale is not available", async () => {
 		vi.mocked(getSetting).mockResolvedValueOnce("")
 		await showStatusBar()
 		expect(vscode.window.createStatusBarItem).toHaveBeenCalledTimes(1)
 	})
 
-	it("should not set previewLanguageTag if it's not in settings.languageTags", async () => {
+	it("should not set previewLocale if it's not in settings.locales", async () => {
 		vi.mocked(getSetting).mockResolvedValueOnce("de")
 		await showStatusBar()
 

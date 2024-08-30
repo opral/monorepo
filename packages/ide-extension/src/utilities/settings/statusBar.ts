@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
 import { CONFIGURATION } from "../../configuration.js"
-import { getPreviewLanguageTag } from "../../utilities/language-tag/getPreviewLanguageTag.js"
+import { getPreviewLocale } from "../locale/getPreviewLocale.js"
 
 let statusBarItem: vscode.StatusBarItem | undefined = undefined
 
@@ -13,7 +13,7 @@ export const statusBar = async (args: { context: vscode.ExtensionContext }) => {
 	)
 	// when value of previewLanguageTag changes, update status bar
 	args.context.subscriptions.push(
-		CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.event(() => {
+		CONFIGURATION.EVENTS.ON_DID_PREVIEW_LOCALE_CHANGE.event(() => {
 			showStatusBar()
 		})
 	)
@@ -26,7 +26,7 @@ export const showStatusBar = async () => {
 		statusBarItem.dispose()
 	}
 
-	const previewLanguageTag = await getPreviewLanguageTag()
+	const previewLanguageTag = await getPreviewLocale()
 
 	if (!previewLanguageTag) return
 

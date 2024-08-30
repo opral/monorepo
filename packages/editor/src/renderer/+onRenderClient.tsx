@@ -53,7 +53,7 @@ setBasePath("./../../node_modules/@shoelace-style/shoelace/dist")
 if (import.meta.env.PROD) {
 	Sentry.init({
 		dsn: publicEnv.PUBLIC_FINK_SENTRY_DSN,
-		integrations: [],
+		integrations: [new posthog.SentryIntegration(posthog, 'opral', 4506599134461952)],
 		tracesSampleRate: 0.1,
 	})
 }
