@@ -47,10 +47,17 @@ test("if the settings file has been updated in lix, the observable should emit t
 		.updateTable("file")
 		.where("file.path", "=", "/settings.json")
 		.set({
-			data: new TextEncoder().encode(JSON.stringify(settings)),
+			data: new TextEncoder().encode(
+				JSON.stringify({
+					...settings,
+					baseLocale: "mock-locale",
+					"plugin.mock": "mock",
+				})
+			),
 		})
 		.execute();
 
 	const settings3 = await firstValueFrom(settings$);
 	expect(settings3.baseLocale).toBe("mock-locale");
+	expect(settings3["plugin.mock"]).toBe("mock");
 });
