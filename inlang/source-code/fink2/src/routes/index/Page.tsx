@@ -6,20 +6,13 @@ import {
 } from "../../state.ts";
 import { useAtom } from "jotai";
 import InlangBundle from "../../components/InlangBundle.tsx";
-import {
-	SlButton,
-	SlDialog,
-} from "@shoelace-style/shoelace/dist/react";
-// import { InlangPatternEditor } from "../../components/SingleDiffBundle.tsx";
-// import VariantHistory from "../../components/VariantHistory.tsx";
+import { SlButton, SlDialog } from "@shoelace-style/shoelace/dist/react";
 import VariantHistoryList from "../../components/VariantHistoryList.tsx";
 import { useState } from "react";
 import NoProjectView from "../../components/NoProjectView.tsx";
 import { demoBundles } from "../../../demo/bundles.ts";
-import { createBundle, insertBundleNested } from "@inlang/sdk2";
+import { insertBundleNested } from "@inlang/sdk2";
 import LixFloat from "../../components/LixFloat.tsx";
-
-// import VariantHistory from "../../components/VariantHistory.tsx";
 
 export default function App() {
 	const [project] = useAtom(projectAtom);
@@ -44,12 +37,11 @@ export default function App() {
 	};
 
 	// create new empty bundle
-	const handleNewBundle = () => {
-		if (project) {
-			insertBundleNested(project.db, createBundle({ messages: [] }));
-		}
-	};
-
+	// const handleNewBundle = () => {
+	// 	if (project) {
+	// 		insertBundleNested(project.db, createBundle({ messages: [] }));
+	// 	}
+	// };
 	return (
 		<>
 			<Layout>

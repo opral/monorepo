@@ -59,7 +59,7 @@ describe("extractMessageCommand", () => {
 			project: {
 				plugins: {
 					subscribe: vi.fn(),
-					get: () => [
+					get: async () => [
 						{
 							key: "plugin1",
 							meta: {
@@ -96,7 +96,7 @@ describe("extractMessageCommand", () => {
 			project: {
 				plugins: {
 					subscribe: vi.fn(),
-					get: () => [
+					get: async () => [
 						{
 							key: "plugin1",
 							meta: {},
@@ -120,7 +120,7 @@ describe("extractMessageCommand", () => {
 			project: {
 				plugins: {
 					subscribe: vi.fn(),
-					get: () => [
+					get: async () => [
 						{
 							key: "plugin1",
 							meta: {

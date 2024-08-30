@@ -29,12 +29,10 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 		}
 
 		// Get the reference language
-		const baseLocale = state().project.settings.get().baseLocale
-		const ideExtension = state()
-			.project.plugins.get()
-			.find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])?.meta?.[
-			"app.inlang.ideExtension"
-		] as IdeExtensionConfig | undefined
+		const baseLocale = (await state().project.settings.get()).baseLocale
+		const ideExtension = (await state().project.plugins.get()).find(
+			(plugin) => plugin?.meta?.["app.inlang.ideExtension"]
+		)?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
 
 		if (baseLocale === undefined || ideExtension === undefined) {
 			return
@@ -102,7 +100,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 							],
 							locale: translationLocale,
 							messageId: variant.messageId,
-					  })
+						})
 					: ""
 
 				const translation = resolveEscapedCharacters(translationString)
@@ -136,7 +134,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 										translation ? editorInfoColors.border : editorErrorColors.border
 									}`,
 								},
-						  }
+							}
 						: undefined,
 					hoverMessage: await contextTooltip(bundle),
 				}

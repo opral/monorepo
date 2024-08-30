@@ -20,13 +20,11 @@ export const extractMessageCommand = {
 	title: "Sherlock: Extract Message",
 	register: commands.registerTextEditorCommand,
 	callback: async function (textEditor: TextEditor | undefined) {
-		const ideExtension = state()
-			.project.plugins.get()
-			.find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])?.meta?.[
-			"app.inlang.ideExtension"
-		] as IdeExtensionConfig | undefined
+		const ideExtension = (await state().project.plugins.get()).find(
+			(plugin) => plugin?.meta?.["app.inlang.ideExtension"]
+		)?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
 
-		const baseLocale = state().project.settings.get().baseLocale
+		const baseLocale = (await state().project.settings.get()).baseLocale
 
 		// guards
 		if (!ideExtension) {
@@ -79,18 +77,21 @@ export const extractMessageCommand = {
 
 		const messageValue = textEditor.document.getText(textEditor.selection)
 
-		const preparedExtractOptions = ideExtension.extractMessageOptions.reduce((acc, option) => {
-			const formattedSelection = isQuoted(messageValue) ? stripQuotes(messageValue) : messageValue
-			const formattedOption = option.callback({
-				bundleId,
-				selection: formattedSelection,
-			})
+		const preparedExtractOptions = ideExtension.extractMessageOptions.reduce(
+			(acc, option) => {
+				const formattedSelection = isQuoted(messageValue) ? stripQuotes(messageValue) : messageValue
+				const formattedOption = option.callback({
+					bundleId,
+					selection: formattedSelection,
+				})
 
-			if (acc.includes(formattedOption)) {
-				return acc
-			}
-			return [...acc, formattedOption]
-		}, [] as { bundleId: string; messageReplacement: string }[])
+				if (acc.includes(formattedOption)) {
+					return acc
+				}
+				return [...acc, formattedOption]
+			},
+			[] as { bundleId: string; messageReplacement: string }[]
+		)
 
 		const messageReplacements = preparedExtractOptions.map(
 			({ messageReplacement }) => messageReplacement
