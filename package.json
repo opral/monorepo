@@ -3,32 +3,34 @@
 	"name": "monorepo",
 	"type": "module",
 	"scripts": {
-		"dev": "pnpm exec nx run-many --nx-bail --target=dev --parallel 1000 --output-style stream",
-		"dev:ide": "pnpm exec nx run-many --nx-bail --target=dev --parallel=10 --verbose --projects=vs-code-extension --output-style=stream",
-		"production": "pnpm exec nx run-many --nx-bail --target=production --parallel 1000 --projects=@inlang/website --projects=@inlang/server --output-style=stream",
-		"build": "pnpm exec nx run-many --nx-bail --target=build --parallel",
-		"dev:lix": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter \"@lix-js/*\" --filter @inlang/server dev",
-		"dev:lix-fink": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter \"@lix-js/*\" --filter @inlang/server --filter @inlang/manage --filter @inlang/editor --filter @inlang/sdk --filter @inlang/website --filter @inlang/telemetry-proxy --filter @inlang/telemetry-proxy-parrot dev",
+		"dev": "npx pnpm exec nx run-many --nx-bail --target=dev --parallel 1000 --output-style stream",
+		"dev:ide": "npx pnpm exec nx run-many --nx-bail --target=dev --parallel=10 --verbose --projects=vs-code-extension --output-style=stream",
+		"production": "npx pnpm exec nx run-many --nx-bail --target=production --parallel 1000 --projects=@inlang/website --projects=@inlang/server --output-style=stream",
+		"build": "npx pnpm exec nx run-many --nx-bail --target=build --parallel",
+		"dev:lix": "npx pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter \"@lix-js/*\" --filter @inlang/server dev",
+		"dev:lix-fink": "npx pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter \"@lix-js/*\" --filter @inlang/server --filter @inlang/manage --filter @inlang/editor --filter @inlang/sdk --filter @inlang/website --filter @inlang/telemetry-proxy --filter @inlang/telemetry-proxy-parrot dev",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "pnpm exec nx run-many --target=test --parallel",
+		"test": "npx pnpm exec nx run-many --target=test --parallel",
 		"---- LINT ----------------------------------------------------------": "",
-		"lint": "pnpm exec nx run-many --target=lint --parallel",
-		"format": "pnpm exec nx run-many --target=format --parallel",
+		"lint": "npx pnpm exec nx run-many --target=lint --parallel",
+		"format": "npx pnpm exec nx run-many --target=format --parallel",
 		"---- OTHER ---------------------------------------------------------": "",
-		"build:no-nx": "pnpm --stream --parallel build",
-		"dev:no-nx": "pnpm --stream --parallel dev",
-		"dev:no-clear": "pnpm dev:no-nx | sed -u 's/\\x1Bc//g'",
+		"build:no-nx": "npx pnpm --stream --parallel build",
+		"dev:no-nx": "npx pnpm --stream --parallel dev",
+		"dev:no-clear": "npx pnpm dev:no-nx | sed -u 's/\\x1Bc//g'",
 		"fetch-env:internal": "doppler secrets download --no-file --format env > .env",
 		"changeset": "npx changeset",
-		"clean": "pnpm recursive run clean && rm -rf ./.env ./node_modules",
+		"clean": "npx pnpm recursive run clean && rm -rf ./.env ./node_modules",
 		"----- CI ---- used to test the codebase on every commit": "",
-		"ci": "pnpm install && pnpm check-all",
-		"check-all": "pnpm audit --audit-level=high && pnpm format && pnpm lint && pnpm build && pnpm test",
-		"ci:publish": "pnpm --filter !vs-code-extension publish -r"
+		"ci": "npx pnpm install && pnpm check-all",
+		"check-all": "npx pnpm audit --audit-level=high && pnpm format && pnpm lint && pnpm build && pnpm test",
+		"ci:publish": "npx pnpm --filter !vs-code-extension publish -r"
 	},
 	"engines": {
 		"npm": ">=8.0.0",
-		"node": ">=18.17.0"
+		"node": ">=18.17.0",
+		"_comment": "Use npx pnpm to use the correct version of pnpm as defined in the dev dependencies",
+		"pnpm": "9.9.0"
 	},
 	"pnpm": {
 		"overrides": {
@@ -56,6 +58,7 @@
 		"eslint-plugin-unicorn": "^45.0.2",
 		"nx": "18.3.3",
 		"nx-cloud": "16.5.2",
+		"pnpm": "9.9.0",
 		"prettier": "2.8.3",
 		"vitest": "^2.0.5"
 	}
