@@ -88,7 +88,7 @@ describe("showStatusBar", () => {
 			// @ts-expect-error
 			project: {
 				settings: {
-					get: () => {
+					get: async () => {
 						return { baseLocale: "en", locales: ["en", "fr"] }
 					},
 					set: vi.fn(),
