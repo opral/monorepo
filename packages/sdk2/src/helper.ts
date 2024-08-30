@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 import type { ProjectSettings } from "./json-schema/settings.js";
-import { generateBundleId } from "./bundle-id/bundle-id.js";
+import { humanId } from "./human-id/human-id.js";
 import type {
 	Bundle,
 	MessageNested,
@@ -26,7 +26,7 @@ export function createBundle(args: {
 	alias?: Bundle["alias"];
 }): NewBundleNested {
 	return {
-		id: args.id ?? generateBundleId(),
+		id: args.id ?? humanId(),
 		alias: args.alias ?? {},
 		messages: args.messages,
 	};

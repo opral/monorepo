@@ -1,7 +1,7 @@
 import { createInMemoryDatabase } from "sqlite-wasm-kysely";
 import { test, expect } from "vitest";
 import { initDb } from "./initDb.js";
-import { isBundleId } from "../bundle-id/bundle-id.js";
+import { isHumanId } from "../human-id/human-id.js";
 import { validate as isUuid } from "uuid";
 import { createSchema } from "./schema.js";
 
@@ -18,7 +18,7 @@ test("bundle default values", async () => {
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	expect(isBundleId(bundle.id)).toBe(true);
+	expect(isHumanId(bundle.id)).toBe(true);
 	expect(bundle.alias).toStrictEqual({});
 });
 

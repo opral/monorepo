@@ -7,7 +7,7 @@ export async function createSchema(args: { sqlite: SqliteDatabase }) {
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE bundle (
-  id TEXT PRIMARY KEY DEFAULT (bundle_id()),
+  id TEXT PRIMARY KEY DEFAULT (human_id()),
   alias TEXT NOT NULL DEFAULT '{}'
 ) strict;
 

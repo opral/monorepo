@@ -8,12 +8,11 @@ export * from "./mock/index.js";
 export * from "./helper.js";
 export * from "./query-utilities/index.js";
 export {
-	generateBundleId,
+	humanId,
 	/**
-	 * @deprecated use newBundleId instead
+	 * @deprecated use `humandId()` instead (it's a rename)
 	 */
-	generateBundleId as randomHumanId,
-} from "./bundle-id/bundle-id.js";
+} from "./human-id/human-id.js";
 export type { InlangDatabaseSchema } from "./database/schema.js";
 export type { ResourceFile } from "./project/api.js";
 export type { InlangPlugin } from "./plugin/schema.js";
