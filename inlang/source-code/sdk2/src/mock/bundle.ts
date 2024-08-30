@@ -1,5 +1,8 @@
-import type { BundleNested } from "../../database/schema.js";
+import type { BundleNested } from "../database/schema.js";
 
+/**
+ * @deprecated use your own plural bundle mock. This variable will be removed at any time in the future.
+ */
 export const pluralBundle: BundleNested = {
 	id: "mock_bundle_human_id",
 	alias: {

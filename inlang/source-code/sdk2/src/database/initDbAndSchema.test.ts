@@ -2,10 +2,10 @@ import { createInMemoryDatabase } from "sqlite-wasm-kysely";
 import { test, expect } from "vitest";
 import { initDb } from "./initDb.js";
 import { isBundleId } from "../bundle-id/bundle-id.js";
-import { validate } from "uuid";
+import { validate as isUuid } from "uuid";
 import { createSchema } from "./schema.js";
 
-test("bundle ids should have a default value", async () => {
+test("bundle default values", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
@@ -14,36 +14,15 @@ test("bundle ids should have a default value", async () => {
 
 	const bundle = await db
 		.insertInto("bundle")
-		.values({
-			alias: {
-				mock: "mock",
-			},
-		})
+		.defaultValues()
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
 	expect(isBundleId(bundle.id)).toBe(true);
-});
-
-test("bundle aliases should default to an empty object to ease bundle creation", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-	await createSchema({ sqlite });
-
-	const bundle = await db
-		.insertInto("bundle")
-		.values({
-			id: "mock-id",
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
 	expect(bundle.alias).toStrictEqual({});
 });
 
-test("message ids should default to uuid", async () => {
+test("message default values", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
@@ -61,16 +40,16 @@ test("message ids should default to uuid", async () => {
 		.values({
 			bundleId: bundle.id,
 			locale: "en",
-			selectors: [],
-			declarations: [],
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	expect(validate(message.id)).toBe(true);
+	expect(isUuid(message.id)).toBe(true);
+	expect(message.declarations).toStrictEqual([]);
+	expect(message.selectors).toStrictEqual([]);
 });
 
-test("variant ids should default to uuid", async () => {
+test("variant default values", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
@@ -88,8 +67,6 @@ test("variant ids should default to uuid", async () => {
 		.values({
 			bundleId: bundle.id,
 			locale: "en",
-			selectors: [],
-			declarations: [],
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -98,13 +75,13 @@ test("variant ids should default to uuid", async () => {
 		.insertInto("variant")
 		.values({
 			messageId: message.id,
-			match: {},
-			pattern: [],
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	expect(validate(variant.id)).toBe(true);
+	expect(isUuid(variant.id)).toBe(true);
+	expect(variant.match).toStrictEqual({});
+	expect(variant.pattern).toStrictEqual([]);
 });
 
 test("it should handle json serialization", async () => {

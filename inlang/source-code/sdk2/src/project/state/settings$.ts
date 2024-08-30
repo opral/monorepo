@@ -1,6 +1,6 @@
 import { type Lix } from "@lix-js/sdk";
 import { map, share, type Observable } from "rxjs";
-import type { ProjectSettings } from "../../schema/settings.js";
+import type { ProjectSettings } from "../../json-schema/settings.js";
 import { withLanguageTagToLocaleMigration } from "../../migrations/v2/withLanguageTagToLocaleMigration.js";
 import { pollQuery } from "../../query-utilities/pollQuery.js";
 

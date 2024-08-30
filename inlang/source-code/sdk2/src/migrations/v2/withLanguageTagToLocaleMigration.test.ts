@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import type { ProjectSettings } from "../../schema/settings.js";
+import type { ProjectSettings } from "../../json-schema/settings.js";
 import { withLanguageTagToLocaleMigration } from "./withLanguageTagToLocaleMigration.js";
 
 test("it should set sourceLanguageTag and languageTags if non-existent to make v1 plugins work", async () => {
