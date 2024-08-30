@@ -2,7 +2,7 @@
 import { expect, test } from "vitest";
 import { ProjectSettings } from "../json-schema/settings.js";
 import { Volume } from "memfs";
-import { loadProjectFromDirectoryInMemory } from "./loadProjectFromDirectory.js";
+import { loadProjectFromDirectory } from "./loadProjectFromDirectory.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import { Text } from "../json-schema/pattern.js";
 import type { InlangPlugin } from "../plugin/schema.js";
@@ -40,7 +40,7 @@ test("plugin.loadMessages and plugin.saveMessages must not be condigured togethe
 
 	await expect(
 		(async () => {
-			await loadProjectFromDirectoryInMemory({
+			await loadProjectFromDirectory({
 				fs: Volume.fromJSON({
 					"./project.inlang/settings.json": JSON.stringify({
 						baseLocale: "en",
@@ -60,7 +60,7 @@ test("plugin.loadMessages and plugin.saveMessages must not be condigured togethe
 
 	await expect(
 		(async () => {
-			await loadProjectFromDirectoryInMemory({
+			await loadProjectFromDirectory({
 				fs: Volume.fromJSON({
 					"./project.inlang/settings.json": JSON.stringify({
 						baseLocale: "en",
@@ -144,7 +144,7 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 		} satisfies ProjectSettings),
 	};
 	const fs = Volume.fromJSON(mockRepo).promises;
-	const project = await loadProjectFromDirectoryInMemory({
+	const project = await loadProjectFromDirectory({
 		fs: fs as any,
 		path: "./project.inlang",
 		providePlugins: [mockLegacyPlugin],
@@ -201,7 +201,7 @@ test("it should copy all files in a directory into lix", async () => {
 		"/project.inlang/settings.json": JSON.stringify(mockSettings),
 	};
 	const fs = Volume.fromJSON(mockDirectory).promises;
-	const project = await loadProjectFromDirectoryInMemory({
+	const project = await loadProjectFromDirectory({
 		fs: fs as any,
 		path: "/project.inlang",
 	});
