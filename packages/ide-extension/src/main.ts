@@ -99,10 +99,12 @@ async function main(args: {
 		// Status Bar
 		await statusBar(args)
 
-		registerExtensionComponents(args)
+		// Register Extension Components & Handle Inlang Errors
+		await registerExtensionComponents(args)
+		await handleInlangErrors()
+
 		// TODO: Replace by reactive settings API?
 		setupFileSystemWatcher(args)
-		handleInlangErrors()
 
 		return
 	} else {
@@ -132,7 +134,7 @@ function setupFileSystemWatcher(args: {
 	})
 }
 
-function registerExtensionComponents(args: {
+async function registerExtensionComponents(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
 	fs: typeof import("node:fs/promises")
@@ -141,11 +143,9 @@ function registerExtensionComponents(args: {
 		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))
 	)
 
-	const ideExtension = state()
-		.project.plugins.get()
-		.find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])?.meta?.[
-		"app.inlang.ideExtension"
-	] as IdeExtensionConfig | undefined
+	const ideExtension = (await state().project.plugins.get()).find(
+		(plugin) => plugin?.meta?.["app.inlang.ideExtension"]
+	)?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
 
 	const documentSelectors: vscode.DocumentSelector = [
 		{ language: "javascript", pattern: `!${CONFIGURATION.FILES.PROJECT}` },
@@ -163,8 +163,8 @@ function registerExtensionComponents(args: {
 	// linterDiagnostics(args)
 }
 
-function handleInlangErrors() {
-	const inlangErrors = state().project.errors.get() || []
+async function handleInlangErrors() {
+	const inlangErrors = (await state().project.errors.get()) || []
 	if (inlangErrors.length > 0) {
 		console.error("Extension errors (Sherlock):", inlangErrors)
 	}
