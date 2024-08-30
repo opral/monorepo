@@ -95,7 +95,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		const project = await getProject()
 
 		const bundles = await selectBundleNested(project.db).execute()
-		const settings = project.settings.get()
+		const settings = await project.settings.get()
 		await triggerCompile(bundles, settings)
 
 		project.errors.subscribe((errors) => {
@@ -151,7 +151,8 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 				compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
 					const project = await getProject()
 					const bundles = await selectBundleNested(project.db).execute()
-					await triggerCompile(bundles, project.settings.get())
+					const settings = await project.settings.get()
+					await triggerCompile(bundles, settings)
 					console.info(`Compiled Messages into ${options.outdir}`)
 				})
 			},

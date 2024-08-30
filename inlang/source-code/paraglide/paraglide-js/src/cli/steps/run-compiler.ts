@@ -15,12 +15,13 @@ export const runCompiler: CliStep<
 > = async (ctx) => {
 	const absoluteOutdir = path.resolve(process.cwd(), ctx.outdir)
 	const bundles = await selectBundleNested(ctx.project.db).execute()
+	const settings = await ctx.project.settings.get()
 
 	const output = await compile({
-		bundles: bundles,
-		settings: ctx.project.settings.get(),
+		bundles,
+		settings,
 		projectId: undefined,
-		// outputStructure: "message-modules",
+		outputStructure: "regular",
 	})
 
 	await writeOutput(absoluteOutdir, output, ctx.fs)
