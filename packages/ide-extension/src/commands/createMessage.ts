@@ -14,7 +14,7 @@ export const createMessageCommand = {
 	title: "Sherlock: Create Message",
 	register: commands.registerCommand,
 	callback: async function () {
-		const baseLocale = state().project.settings.get().baseLocale
+		const baseLocale = (await state().project.settings.get()).baseLocale
 
 		// guard
 		if (baseLocale === undefined) {
