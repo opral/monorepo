@@ -59,50 +59,52 @@ export async function contextTooltip(
 	}
 
 	// Get the configured language tags
-	const configuredLanguageTags = state().project.settings.get()?.locales || []
+	const configuredLanguageTags = (await state().project.settings.get())?.locales || []
 
 	// Generate rows for each configured language tag
-	const contextTableRows: ContextTableRow[] = configuredLanguageTags.map((locale) => {
-		const message = bundle.messages.find((m) => m.locale === locale)
+	const contextTableRows: ContextTableRow[] = await Promise.all(
+		configuredLanguageTags.map(async (locale) => {
+			const message = bundle.messages.find((m) => m.locale === locale)
 
-		// Get the variant from the message
-		const variant = message?.variants.find((v) => v.match.locale === locale)
+			// Get the variant from the message
+			const variant = message?.variants.find((v) => v.match.locale === locale)
 
-		let m = MISSING_TRANSLATION_MESSAGE
+			let m = MISSING_TRANSLATION_MESSAGE
 
-		if (message && variant) {
-			m = getStringFromPattern({
-				pattern: variant.pattern,
-				locale: message.locale,
-				messageId: message.id,
-			})
-		}
-
-		const args = encodeURIComponent(
-			JSON.stringify([{ bundleId: referenceMessage.bundleId, languageTag: locale }])
-		)
-
-		const editCommand = Uri.parse(INTERPOLATE.COMMAND_URI("EDIT_MESSAGE", args))
-		const machineTranslateCommand = Uri.parse(
-			INTERPOLATE.COMMAND_URI(
-				"MACHINE_TRANSLATE_MESSAGE",
-				JSON.stringify({
-					bundleId: referenceMessage.bundleId,
-					baseLocale: state().project.settings.get()?.baseLocale,
-					targetLocales: [locale],
+			if (message && variant) {
+				m = getStringFromPattern({
+					pattern: variant.pattern,
+					locale: message.locale,
+					messageId: message.id,
 				})
-			)
-		)
-		const openInFinkCommand = Uri.parse(INTERPOLATE.COMMAND_URI("OPEN_IN_FINK", args))
+			}
 
-		return {
-			locale,
-			message: m,
-			editCommand,
-			openInFinkCommand,
-			machineTranslateCommand,
-		}
-	})
+			const args = encodeURIComponent(
+				JSON.stringify([{ bundleId: referenceMessage.bundleId, languageTag: locale }])
+			)
+
+			const editCommand = Uri.parse(INTERPOLATE.COMMAND_URI("EDIT_MESSAGE", args))
+			const machineTranslateCommand = Uri.parse(
+				INTERPOLATE.COMMAND_URI(
+					"MACHINE_TRANSLATE_MESSAGE",
+					JSON.stringify({
+						bundleId: referenceMessage.bundleId,
+						baseLocale: (await state().project.settings.get())?.baseLocale,
+						targetLocales: [locale],
+					})
+				)
+			)
+			const openInFinkCommand = Uri.parse(INTERPOLATE.COMMAND_URI("OPEN_IN_FINK", args))
+
+			return {
+				locale,
+				message: m,
+				editCommand,
+				openInFinkCommand,
+				machineTranslateCommand,
+			}
+		})
+	)
 
 	const contextTable = `<table>${contextTableRows.map(renderTranslationRow).join("")}</table>`
 	const tooltip = new MarkdownString(contextTable, true)
