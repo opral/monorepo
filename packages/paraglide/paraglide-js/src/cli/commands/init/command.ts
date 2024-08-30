@@ -70,7 +70,7 @@ export const initCommand = new Command()
 			properties: { version: PARJS_PACKAGE_VERSION },
 		})
 
-		const absoluteSettingsPath = nodePath.resolve(ctx9.projectPath, "settings.json")
+		const absoluteSettingsPath = nodePath.resolve(ctx8.projectPath, "settings.json")
 		const relativeSettingsFilePath = absoluteSettingsPath.replace(process.cwd(), ".")
 
 		const successMessage = dedent`inlang Paraglide-JS has been set up sucessfully.
