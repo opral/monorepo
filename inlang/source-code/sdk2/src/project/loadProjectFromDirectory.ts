@@ -15,7 +15,7 @@ import { fromMessageV1 } from "../json-schema/old-v1-message/fromMessageV1.js";
  * Main use case are dev tools that want to load a project from a directory
  * that is stored in git.
  */
-export async function loadProjectFromDirectoryInMemory(
+export async function loadProjectFromDirectory(
 	args: { path: string; fs: typeof fs } & Omit<
 		Parameters<typeof loadProjectInMemory>[0],
 		"blob"
