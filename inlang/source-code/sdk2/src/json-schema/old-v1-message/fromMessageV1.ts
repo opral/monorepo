@@ -1,9 +1,9 @@
-import { generateStableBundleId } from "../../bundle-id/bundle-id.js";
 import type {
 	BundleNested,
 	MessageNested,
 	Variant,
 } from "../../database/schema.js";
+import { stableHumanId } from "../../human-id/human-id.js";
 import type { InlangPlugin } from "../../plugin/schema.js";
 import type { Declaration, Expression, Pattern } from "../pattern.js";
 import type { MessageV1, PatternV1 } from "./schemaV1.js";
@@ -17,7 +17,7 @@ export function fromMessageV1(
 	messageV1: MessageV1,
 	pluginKey: NonNullable<InlangPlugin["key"] | InlangPlugin["id"]>
 ): BundleNested {
-	const bundleId = generateStableBundleId(messageV1.id);
+	const bundleId = stableHumanId(messageV1.id);
 
 	const languages = [
 		...new Set(messageV1.variants.map((variant) => variant.languageTag)),

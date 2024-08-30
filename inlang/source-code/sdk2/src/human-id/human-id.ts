@@ -2,7 +2,7 @@
 import murmurhash3 from "murmurhash3js";
 import { adjectives, animals, verbs, adverbs } from "./words.js";
 
-export function generateBundleId() {
+export function humanId() {
 	return `${adjectives[Math.floor(Math.random() * 256)]}_${
 		adjectives[Math.floor(Math.random() * 256)]
 	}_${animals[Math.floor(Math.random() * 256)]}_${
@@ -10,7 +10,7 @@ export function generateBundleId() {
 	}`;
 }
 
-export function isBundleId(id: string): boolean {
+export function isHumanId(id: string): boolean {
 	// naive implementation (good enough for now)
 	return id.split("_").length === 4;
 }
@@ -19,10 +19,10 @@ export function isBundleId(id: string): boolean {
  * The function generated a stable bundle id based on the input value.
  *
  * @example
- *   generateStableBundleId("login-button-header") // => "..."
+ *   stableHumanId("login-button-header") // => "..."
  *
  */
-export function generateStableBundleId(value: string, offset: number = 0) {
+export function stableHumanId(value: string, offset: number = 0) {
 	// Seed value can be any arbitrary value
 	const seed = 42;
 
