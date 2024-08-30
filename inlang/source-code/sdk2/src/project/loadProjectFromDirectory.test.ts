@@ -47,7 +47,7 @@ test("plugin.loadMessages and plugin.saveMessages must not be condigured togethe
 						locales: ["en", "de"],
 						modules: [],
 					} satisfies ProjectSettings),
-				}).promises as any,
+				}) as any,
 				path: "./project.inlang",
 				providePlugins: [
 					mockLegacyPlugin,
@@ -67,7 +67,7 @@ test("plugin.loadMessages and plugin.saveMessages must not be condigured togethe
 						locales: ["en", "de"],
 						modules: [],
 					} satisfies ProjectSettings),
-				}).promises as any,
+				}) as any,
 				path: "./project.inlang",
 				providePlugins: [
 					mockLegacyPlugin,
@@ -143,7 +143,7 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 			},
 		} satisfies ProjectSettings),
 	};
-	const fs = Volume.fromJSON(mockRepo).promises;
+	const fs = Volume.fromJSON(mockRepo);
 	const project = await loadProjectFromDirectory({
 		fs: fs as any,
 		path: "./project.inlang",
@@ -186,7 +186,7 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 	).toBe("wert2");
 });
 
-test("it should copy all files in a directory into lix", async () => {
+test("it should keep files between the inlang directory and lix in sync", async () => {
 	const mockSettings = {
 		baseLocale: "en",
 		locales: ["en", "de"],
@@ -200,7 +200,7 @@ test("it should copy all files in a directory into lix", async () => {
 		"/project.inlang/README.md": "readme value",
 		"/project.inlang/settings.json": JSON.stringify(mockSettings),
 	};
-	const fs = Volume.fromJSON(mockDirectory).promises;
+	const fs = Volume.fromJSON(mockDirectory);
 	const project = await loadProjectFromDirectory({
 		fs: fs as any,
 		path: "/project.inlang",
@@ -220,4 +220,55 @@ test("it should copy all files in a directory into lix", async () => {
 	expect(filesByPath["/prettierrc.json"]).toBe("prettier value");
 	expect(filesByPath["/README.md"]).toBe("readme value");
 	expect(filesByPath["/settings.json"]).toBe(JSON.stringify(mockSettings));
+
+	// changes to a file on disk should reflect in lix
+	fs.writeFileSync(
+		"/project.inlang/settings.json",
+		JSON.stringify({ ...mockSettings, baseLocale: "brand-new-locale" })
+	);
+	const fileInLix = await project.lix.db
+		.selectFrom("file")
+		.selectAll()
+		.where("path", "=", "/settings.json")
+		.executeTakeFirstOrThrow();
+
+	const settingsAfterUpdateOnDisk = JSON.parse(
+		new TextDecoder().decode(fileInLix.data)
+	);
+
+	expect(settingsAfterUpdateOnDisk.baseLocale).toBe("brand-new-locale");
+
+	fs.writeFileSync("/project.inlang/random-file.txt", "random value", {
+		encoding: "utf-8",
+	});
+
+	const f = fs.readFileSync("/project.inlang/random-file.txt");
+
+	console.log({ f: f.toString() });
+
+	await new Promise((resolve) => setTimeout(resolve, 100));
+
+	const randomFileInLix = await project.lix.db
+		.selectFrom("file")
+		.selectAll()
+		.where("path", "=", "/random-file.txt")
+		.executeTakeFirstOrThrow();
+
+	expect(new TextDecoder().decode(randomFileInLix.data)).toBe("random value");
+
+	// changes to a file in lix should reflect in the project directory
+	await project.lix.db
+		.updateTable("file")
+		.where("path", "=", "/settings.json")
+		.set({
+			data: new TextEncoder().encode(
+				JSON.stringify({ ...mockSettings, baseLocale: "brand-new-locale" })
+			),
+		})
+		.execute();
+
+	const fileOnDisk = fs.readFileSync("/project.inlang/settings.json");
+	const settings = JSON.parse(fileOnDisk.toString());
+
+	expect(settings.baseLocale).toBe("brand-new-locale");
 });
