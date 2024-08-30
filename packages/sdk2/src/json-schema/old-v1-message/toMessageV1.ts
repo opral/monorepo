@@ -1,12 +1,12 @@
 import type { BundleNested } from "../../database/schema.js";
 import type { InlangPlugin } from "../../plugin/schema.js";
+import type { Expression, Pattern } from "../pattern.js";
 import type {
 	ExpressionV1,
 	MessageV1,
 	PatternV1,
 	VariantV1,
-} from "../schemaV1.js";
-import type { Expression, Pattern } from "../schemaV2.js";
+} from "./schemaV1.js";
 
 /**
  * Converts a BundleNested into a legacy format.

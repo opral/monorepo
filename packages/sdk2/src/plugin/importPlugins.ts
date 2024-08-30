@@ -1,4 +1,4 @@
-import type { ProjectSettings } from "../schema/settings.js";
+import type { ProjectSettings } from "../json-schema/settings.js";
 import { PluginError, PluginImportError } from "./errors.js";
 import type { InlangPlugin } from "./schema.js";
 

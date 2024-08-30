@@ -3,7 +3,7 @@ import {
 	PluginDoesNotImplementFunctionError,
 	PluginMissingError,
 } from "../plugin/errors.js";
-import type { ProjectSettings } from "../schema/settings.js";
+import type { ProjectSettings } from "../json-schema/settings.js";
 import type { InlangDatabaseSchema } from "../database/schema.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import type { InlangPlugin } from "../plugin/schema.js";

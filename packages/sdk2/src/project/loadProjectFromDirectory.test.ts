@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, test } from "vitest";
-import { ProjectSettings } from "../schema/settings.js";
+import { ProjectSettings } from "../json-schema/settings.js";
 import { Volume } from "memfs";
 import { loadProjectFromDirectoryInMemory } from "./loadProjectFromDirectory.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
-import type { Text } from "../schema/schemaV2.js";
+import { Text } from "../json-schema/pattern.js";
 import type { InlangPlugin } from "../plugin/schema.js";
-import type { MessageV1, VariantV1 } from "../schema/schemaV1.js";
+import type {
+	MessageV1,
+	VariantV1,
+} from "../json-schema/old-v1-message/schemaV1.js";
 
 test("plugin.loadMessages and plugin.saveMessages must not be condigured together with import export", async () => {
 	const mockLegacyPlugin: InlangPlugin = {

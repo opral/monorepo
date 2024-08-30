@@ -1,5 +1,5 @@
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
-import type { ProjectSettings } from "../schema/settings.js";
+import type { ProjectSettings } from "../json-schema/settings.js";
 import {
 	contentFromDatabase,
 	createInMemoryDatabase,

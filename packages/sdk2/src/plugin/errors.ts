@@ -37,22 +37,6 @@ export class PluginImportError extends PluginError {
 	}
 }
 
-export class PluginExportIsInvalidError extends PluginError {
-	constructor(options: { plugin: string; errors: ValueError[] }) {
-		super(
-			`The export(s) of "${options.plugin}" are invalid:\n\n${options.errors
-				.map(
-					(error) =>
-						`"${error.path}" "${JSON.stringify(error.value, undefined, 2)}": "${
-							error.message
-						}"`
-				)
-				.join("\n")}`,
-			options
-		);
-		this.name = "PluginExportIsInvalidError";
-	}
-}
 
 export class PluginSettingsAreInvalidError extends PluginError {
 	constructor(options: { plugin: string; errors: ValueError[] }) {

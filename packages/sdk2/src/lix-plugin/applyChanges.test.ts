@@ -2,10 +2,10 @@ import { test, expect } from "vitest";
 import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
 import { newProject } from "../project/newProject.js";
 import type { Change, NewChange } from "@lix-js/sdk";
-import type { Bundle } from "../schema/schemaV2.js";
 import { applyChanges } from "./applyChanges.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
+import type { Bundle } from "../database/schema.js";
 
 test("it should be able to delete", async () => {
 	const project = await loadProjectInMemory({

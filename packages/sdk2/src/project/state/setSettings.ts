@@ -1,5 +1,5 @@
 import type { Lix } from "@lix-js/sdk";
-import type { ProjectSettings } from "../../schema/settings.js";
+import type { ProjectSettings } from "../../json-schema/settings.js";
 
 export async function setSettings(args: { newSettings: ProjectSettings; lix: Lix }) {
 	const cloned = structuredClone(args.newSettings);

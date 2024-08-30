@@ -18,8 +18,6 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 		.values({
 			bundleId: bundle.id,
 			locale: "en",
-			declarations: [],
-			selectors: [],
 		})
 		.returning("id")
 		.executeTakeFirstOrThrow();

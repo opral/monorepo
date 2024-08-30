@@ -1,6 +1,6 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
-import type { Bundle, Message, Variant } from "../schema/schemaV2.js";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
+import { Declaration, Expression, Pattern } from "../json-schema/pattern.js";
 
 export async function createSchema(args: { sqlite: SqliteDatabase }) {
 	args.sqlite.exec(`
@@ -15,16 +15,16 @@ CREATE TABLE message (
   id TEXT PRIMARY KEY DEFAULT (uuid_v4()), 
   bundle_id TEXT NOT NULL,
   locale TEXT NOT NULL,
-  declarations TEXT NOT NULL,
-  selectors TEXT NOT NULL,
+  declarations TEXT NOT NULL DEFAULT '[]',
+  selectors TEXT NOT NULL DEFAULT '[]',
   FOREIGN KEY (bundle_id) REFERENCES bundle(id) ON DELETE CASCADE
 ) strict;
 
 CREATE TABLE variant (
   id TEXT PRIMARY KEY DEFAULT (uuid_v4()), 
   message_id TEXT NOT NULL,
-  match TEXT NOT NULL,
-  pattern TEXT NOT NULL,
+  match TEXT NOT NULL DEFAULT '{}',
+  pattern TEXT NOT NULL DEFAULT '[]',
   FOREIGN KEY (message_id) REFERENCES message(id) ON DELETE CASCADE
 ) strict;
   
@@ -44,20 +44,30 @@ type BundleTable = {
 	alias: Generated<Record<string, string>>;
 };
 
-type MessageTable = Omit<Message, "id"> & {
+type MessageTable = {
 	id: Generated<string>;
+	bundleId: string;
+	locale: string;
+	declarations: Generated<Array<Declaration>>;
+	selectors: Generated<Array<Expression>>;
 };
 
-type VariantTable = Omit<Variant, "id"> & {
+type VariantTable = {
 	id: Generated<string>;
+	messageId: string;
+	match: Generated<Record<string, string>>;
+	pattern: Generated<Pattern>;
 };
 
+export type Bundle = Selectable<BundleTable>;
 export type NewBundle = Insertable<BundleTable>;
 export type BundleUpdate = Updateable<BundleTable>;
 
+export type Message = Selectable<MessageTable>;
 export type NewMessage = Insertable<MessageTable>;
 export type MessageUpdate = Updateable<MessageTable>;
 
+export type Variant = Selectable<VariantTable>;
 export type NewVariant = Selectable<VariantTable>;
 export type VariantUpdate = Updateable<VariantTable>;
 

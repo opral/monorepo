@@ -1,6 +1,6 @@
 import { type Lix } from "@lix-js/sdk";
 import type { InlangPlugin } from "../plugin/schema.js";
-import type { ProjectSettings } from "../schema/settings.js";
+import type { ProjectSettings } from "../json-schema/settings.js";
 import { type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
 import { initHandleSaveToLixOnChange } from "./initHandleSaveToLixOnChange.js";

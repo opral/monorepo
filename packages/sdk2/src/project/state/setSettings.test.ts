@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { newLixFile, openLixInMemory, uuidv4 } from "@lix-js/sdk";
-import { ProjectSettings } from "../../schema/settings.js";
+import { ProjectSettings } from "../../json-schema/settings.js";
 import { createProjectState } from "./state.js";
 import { setSettings } from "./setSettings.js";
 

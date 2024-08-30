@@ -1,7 +1,7 @@
 import { test, expect, vi } from "vitest";
 import { createProjectState } from "./state.js";
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
-import type { ProjectSettings } from "../../schema/settings.js";
+import type { ProjectSettings } from "../../json-schema/settings.js";
 
 test("plugins should be re-imported if the settings have been updated", async () => {
 	const mockImportPlugins = vi.hoisted(() =>
