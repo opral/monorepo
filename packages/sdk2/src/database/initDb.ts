@@ -2,7 +2,7 @@ import { CamelCasePlugin, Kysely, ParseJSONResultsPlugin } from "kysely";
 import type { InlangDatabaseSchema } from "./schema.js";
 import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { v4 } from "uuid";
-import { generateBundleId } from "../bundle-id/bundle-id.js";
+import { humanId } from "../human-id/human-id.js";
 import { SerializeJsonPlugin } from "./serializeJsonPlugin.js";
 
 export function initDb(args: { sqlite: SqliteDatabase }) {
@@ -27,8 +27,8 @@ function initDefaultValueFunctions(args: { sqlite: SqliteDatabase }) {
 		xFunc: () => v4(),
 	});
 	args.sqlite.createFunction({
-		name: "bundle_id",
+		name: "human_id",
 		arity: 0,
-		xFunc: () => generateBundleId(),
+		xFunc: () => humanId(),
 	});
 }
