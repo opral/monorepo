@@ -8,7 +8,7 @@ export const previewLocaleCommand = {
 	title: "Sherlock: Change preview language tag",
 	register: vscode.commands.registerCommand,
 	callback: async () => {
-		const settings = state().project?.settings.get()
+		const settings = await state().project?.settings.get()
 		const selectedLocale = await vscode.window.showQuickPick(settings.locales, {
 			placeHolder: "Select a language",
 		})
