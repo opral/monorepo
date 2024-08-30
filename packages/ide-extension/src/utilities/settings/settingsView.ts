@@ -13,7 +13,7 @@ export async function settingsPanel(args: { context: vscode.ExtensionContext }) 
 		}
 	)
 
-	panel.webview.html = getWebviewContent({
+	panel.webview.html = await getWebviewContent({
 		context: args.context,
 		webview: panel.webview,
 	})
@@ -28,10 +28,10 @@ export async function settingsPanel(args: { context: vscode.ExtensionContext }) 
 	})
 }
 
-export function getWebviewContent(args: {
+export async function getWebviewContent(args: {
 	context: vscode.ExtensionContext
 	webview: vscode.Webview
-}): string {
+}): Promise<string> {
 	const styleUri = args.webview.asWebviewUri(
 		vscode.Uri.joinPath(args.context.extensionUri, "assets", "settings-view.css")
 	)
@@ -44,8 +44,8 @@ export function getWebviewContent(args: {
 		vscode.Uri.joinPath(args.context.extensionUri, "assets", "lit-html.js")
 	)
 
-	const settings = state().project.settings.get()
-	const installedPlugins = state().project.plugins.get()
+	const settings = await state().project.settings.get()
+	const installedPlugins = await state().project.plugins.get()
 	// TODO: Clarify how to derive validation rules from lix
 	// const installedMessageLintRules = state().project.installed.messageLintRules()
 
