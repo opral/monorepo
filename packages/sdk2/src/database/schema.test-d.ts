@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Selectable } from "kysely";
-import type { Bundle, Message, Variant } from "../schema/schemaV2.js";
-import type { InlangDatabaseSchema } from "./schema.js";
+import type {
+	Bundle,
+	InlangDatabaseSchema,
+	Message,
+	Variant,
+} from "./schema.js";
 
 let _;
 

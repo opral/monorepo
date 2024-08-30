@@ -1,8 +1,12 @@
 import { generateStableBundleId } from "../../bundle-id/bundle-id.js";
-import type { BundleNested, MessageNested } from "../../database/schema.js";
+import type {
+	BundleNested,
+	MessageNested,
+	Variant,
+} from "../../database/schema.js";
 import type { InlangPlugin } from "../../plugin/schema.js";
-import type { MessageV1, PatternV1 } from "../schemaV1.js";
-import type { Declaration, Expression, Pattern, Variant } from "../schemaV2.js";
+import type { Declaration, Expression, Pattern } from "../pattern.js";
+import type { MessageV1, PatternV1 } from "./schemaV1.js";
 
 /**
  * Converts a MessageV1 into a BundleNested

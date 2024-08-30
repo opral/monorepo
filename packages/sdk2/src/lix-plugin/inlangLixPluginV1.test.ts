@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect, describe } from "vitest";
 import { inlangLixPluginV1 } from "./inlangLixPluginV1.js";
-import type { Variant } from "../schema/schemaV2.js";
 import { type DiffReport } from "@lix-js/sdk";
 import { newProject } from "../project/newProject.js";
 import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
 import { contentFromDatabase } from "sqlite-wasm-kysely";
-
+import type { Variant } from "../database/schema.js";
 
 describe("plugin.diff.file", () => {
 	test("insert of bundle", async () => {
@@ -101,9 +100,7 @@ describe("plugin.diff.file", () => {
 			.insertInto("message")
 			.values({
 				id: "1",
-				declarations: [],
 				bundleId: "unknown",
-				selectors: [],
 				locale: "en",
 			})
 			.execute();
@@ -137,16 +134,12 @@ describe("plugin.diff.file", () => {
 			.values([
 				{
 					id: "1",
-					declarations: [],
-					selectors: [],
 					bundleId: "unknown",
 					locale: "en",
 				},
 				{
 					id: "2",
-					declarations: [],
 					bundleId: "unknown",
-					selectors: [],
 					locale: "en",
 				},
 			])
@@ -157,16 +150,12 @@ describe("plugin.diff.file", () => {
 			.values([
 				{
 					id: "1",
-					declarations: [],
 					bundleId: "unknown",
-					selectors: [],
 					locale: "de",
 				},
 				{
 					id: "2",
-					declarations: [],
 					bundleId: "unknown",
-					selectors: [],
 					locale: "en",
 				},
 			])

@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { fromMessageV1 } from "./fromMessageV1.js";
 import { Value } from "@sinclair/typebox/value";
-import { MessageV1 } from "../schemaV1.js";
+import { MessageV1 } from "./schemaV1.js";
 
 const messageV1: MessageV1 = {
 	id: "hello_world",
