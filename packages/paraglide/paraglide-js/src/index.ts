@@ -1,4 +1,4 @@
-export { compile } from "./compilerV2/compile.js"
+export { compile } from "./compiler/compile.js"
 export { writeOutput } from "./services/file-handling/write-output.js"
 export { Logger, type LoggerOptions } from "./services/logger/index.js"
 export { classifyProjectErrors } from "./services/error-handling.js"
