@@ -9,7 +9,7 @@ export async function createSchema(args: { db: Kysely<any> }) {
 
   CREATE TABLE file_internal (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
-    path TEXT NOT NULL,
+    path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL
   ) strict;
 
