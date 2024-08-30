@@ -7,7 +7,7 @@ import type fs from "node:fs/promises";
 import nodePath from "node:path";
 import type { InlangPlugin } from "../plugin/schema.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
-import { fromMessageV1 } from "../schema/migrations/fromMessageV1.js";
+import { fromMessageV1 } from "../json-schema/old-v1-message/fromMessageV1.js";
 
 /**
  * Loads a project from a directory.

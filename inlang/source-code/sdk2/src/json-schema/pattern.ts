@@ -47,26 +47,3 @@ export const Declaration = Type.Object({
 
 export type Pattern = Static<typeof Pattern>;
 export const Pattern = Type.Array(Type.Union([Text, Expression]));
-
-export type Bundle = Static<typeof Bundle>;
-export const Bundle = Type.Object({
-	id: Type.String(),
-	alias: Type.Record(Type.String(), Type.String()),
-});
-
-export type Message = Static<typeof Message>;
-export const Message = Type.Object({
-	id: Type.String(),
-	bundleId: Type.String(),
-	locale: Type.String(),
-	declarations: Type.Array(Declaration),
-	selectors: Type.Array(Expression),
-});
-
-export type Variant = Static<typeof Variant>;
-export const Variant = Type.Object({
-	id: Type.String(),
-	messageId: Type.String(),
-	match: Type.Record(Type.String(), Type.String()),
-	pattern: Pattern,
-});

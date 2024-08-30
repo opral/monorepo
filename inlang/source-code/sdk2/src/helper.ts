@@ -1,9 +1,15 @@
-// @ts-ignore
 import { v4 as uuid } from "uuid";
-import type { Bundle, Expression, Text, Variant } from "./schema/schemaV2.js";
-import type { ProjectSettings } from "./schema/settings.js";
+import type { ProjectSettings } from "./json-schema/settings.js";
 import { generateBundleId } from "./bundle-id/bundle-id.js";
-import type { BundleNested, MessageNested } from "./database/schema.js";
+import type {
+	Bundle,
+	MessageNested,
+	NewBundleNested,
+	NewMessageNested,
+	NewVariant,
+	Variant,
+} from "./database/schema.js";
+import type { Expression, Text } from "./json-schema/pattern.js";
 
 /**
  * create v2 Bundle with a random human ID
@@ -18,7 +24,7 @@ export function createBundle(args: {
 	id?: string;
 	messages: MessageNested[];
 	alias?: Bundle["alias"];
-}): BundleNested {
+}): NewBundleNested {
 	return {
 		id: args.id ?? generateBundleId(),
 		alias: args.alias ?? {},
@@ -35,14 +41,12 @@ export function createMessage(args: {
 	locale: ProjectSettings["locales"][number];
 	text: string;
 	match?: Record<Expression["arg"]["name"], string>;
-}): MessageNested {
+}): NewMessageNested {
 	const messageId = uuid();
 	return {
 		bundleId: args.bundleId,
 		id: messageId,
 		locale: args.locale,
-		declarations: [],
-		selectors: [],
 		variants: [
 			createVariant({
 				messageId: messageId,
@@ -63,7 +67,7 @@ export function createVariant(args: {
 	text?: string;
 	match?: Record<Expression["arg"]["name"], string>;
 	pattern?: Variant["pattern"];
-}): Variant {
+}): NewVariant {
 	return {
 		messageId: args.messageId,
 		id: args.id ? args.id : uuid(),

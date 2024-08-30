@@ -1,4 +1,4 @@
-import type { ProjectSettings } from "../../schema/settings.js";
+import type { ProjectSettings } from "../../json-schema/settings.js";
 
 /**
  * Change introduced in v2.

@@ -1,9 +1,9 @@
 import type { DiffReport, LixPlugin } from "@lix-js/sdk";
-import { Bundle, Message, Variant } from "../schema/schemaV2.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
 import { applyChanges } from "./applyChanges.js";
 import { detectConflicts } from "./detectConflicts.js";
+import type { Bundle, Message, Variant } from "../database/schema.js";
 
 export const inlangLixPluginV1: LixPlugin<{
 	bundle: Bundle;

@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { createSettings$ } from "./settings$.js";
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
-import type { ProjectSettings } from "../../schema/settings.js";
+import type { ProjectSettings } from "../../json-schema/settings.js";
 import { firstValueFrom } from "rxjs";
 import { withLanguageTagToLocaleMigration } from "../../migrations/v2/withLanguageTagToLocaleMigration.js";
 

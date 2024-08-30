@@ -1,6 +1,6 @@
 import type { TObject } from "@sinclair/typebox";
-import type { MessageV1 } from "../schema/schemaV1.js";
-import type { ProjectSettings } from "../schema/settings.js";
+import type { MessageV1 } from "../json-schema/old-v1-message/schemaV1.js";
+import type { ProjectSettings } from "../json-schema/settings.js";
 import type { ResourceFile } from "../project/api.js";
 import type { BundleNested, NewBundleNested } from "../database/schema.js";
 
