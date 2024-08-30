@@ -5,7 +5,7 @@ import {
 	createInMemoryDatabase,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
-import { createSchema } from "../database/createSchema.js";
+import { createSchema } from "../database/schema.js";
 
 /**
  * Creates a new inlang project.
@@ -22,7 +22,7 @@ export async function newProject(args?: {
 	const db = initDb({ sqlite });
 
 	try {
-		await createSchema({ db, sqlite });
+		await createSchema({ sqlite });
 
 		const inlangDbContent = contentFromDatabase(sqlite);
 

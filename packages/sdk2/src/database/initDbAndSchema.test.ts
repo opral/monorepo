@@ -3,14 +3,14 @@ import { test, expect } from "vitest";
 import { initDb } from "./initDb.js";
 import { isBundleId } from "../bundle-id/bundle-id.js";
 import { validate } from "uuid";
-import { createSchema } from "./createSchema.js";
+import { createSchema } from "./schema.js";
 
 test("bundle ids should have a default value", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
-	await createSchema({ db, sqlite });
+	await createSchema({ sqlite });
 
 	const bundle = await db
 		.insertInto("bundle")
@@ -25,17 +25,41 @@ test("bundle ids should have a default value", async () => {
 	expect(isBundleId(bundle.id)).toBe(true);
 });
 
+test("bundle aliases should default to an empty object to ease bundle creation", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+	await createSchema({ sqlite });
+
+	const bundle = await db
+		.insertInto("bundle")
+		.values({
+			id: "mock-id",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(bundle.alias).toStrictEqual({});
+});
+
 test("message ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
-	await createSchema({ db, sqlite });
+	await createSchema({ sqlite });
+
+	const bundle = await db
+		.insertInto("bundle")
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
 
 	const message = await db
 		.insertInto("message")
 		.values({
-			bundleId: "mock",
+			bundleId: bundle.id,
 			locale: "en",
 			selectors: [],
 			declarations: [],
@@ -51,12 +75,29 @@ test("variant ids should default to uuid", async () => {
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
-	await createSchema({ db, sqlite });
+	await createSchema({ sqlite });
+
+	const bundle = await db
+		.insertInto("bundle")
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const message = await db
+		.insertInto("message")
+		.values({
+			bundleId: bundle.id,
+			locale: "en",
+			selectors: [],
+			declarations: [],
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
 
 	const variant = await db
 		.insertInto("variant")
 		.values({
-			messageId: "mock",
+			messageId: message.id,
 			match: {},
 			pattern: [],
 		})
@@ -71,7 +112,7 @@ test("it should handle json serialization", async () => {
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
-	await createSchema({ db, sqlite });
+	await createSchema({ sqlite });
 
 	const bundle = await db
 		.insertInto("bundle")
