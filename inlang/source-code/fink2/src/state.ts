@@ -1,15 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { atom } from "jotai";
 import {
-	InlangProject,
 	loadProjectInMemory,
 	ProjectSettings,
 	selectBundleNested,
 } from "@inlang/sdk2";
-import { atomWithObservable, atomWithStorage } from "jotai/utils";
+import { atomWithStorage } from "jotai/utils";
 import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { Change, isInSimulatedCurrentBranch } from "@lix-js/sdk";
-import { atomEffect } from "jotai-effect";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
