@@ -28,7 +28,8 @@ export default function Layout(props: { children: React.ReactNode }) {
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setWithPolling(Date.now());
-		}, 2500);
+			// put it down to 500 ms to show seamless loading
+		}, 500);
 		return () => clearInterval(interval);
 	});
 

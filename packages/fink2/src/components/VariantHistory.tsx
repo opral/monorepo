@@ -1,21 +1,25 @@
 import { useAtom } from "jotai";
-import { projectAtom } from "../state.ts";
+import { authorNameAtom, projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
 import { InlangProject } from "@inlang/sdk2";
 import timeAgo from "../helper/timeAgo.ts";
+import { Commit } from "@lix-js/sdk";
 
 const VariantHistory = (props: { variantId: string }) => {
 	const [project] = useAtom(projectAtom);
-	const [latestCommit, setLatestCommit] = useState<any>(undefined);
+	const [authenticatedUser] = useAtom(authorNameAtom);
+	const [latestCommit, setLatestCommit] = useState<Commit | undefined>(
+		undefined
+	);
 
 	useEffect(() => {
 		if (!project) return;
 		queryLatestCommit(project, props.variantId).then((result) =>
-			setLatestCommit(result)
+			setLatestCommit(result as unknown as Commit)
 		);
 		const interval = setInterval(async () => {
 			const result = await queryLatestCommit(project, props.variantId);
-			setLatestCommit(result);
+			setLatestCommit(result as unknown as Commit);
 		}, 1000);
 		return () => clearInterval(interval);
 	}, []);
@@ -24,10 +28,14 @@ const VariantHistory = (props: { variantId: string }) => {
 		console.log(latestCommit);
 	}, [latestCommit]);
 	return (
-		<div className="flex items-center text-zinc-400 text-sm!">
+		<div className="flex items-center text-zinc-400 text-[14px]! font-normal">
 			{latestCommit?.author && (
 				<p>
-					by {latestCommit?.author} | {timeAgo(latestCommit.created_at)}
+					by{" "}
+					{latestCommit?.author === authenticatedUser
+						? "You"
+						: authenticatedUser}
+					, {timeAgo(latestCommit.created_at)}
 				</p>
 			)}
 		</div>
