@@ -223,8 +223,6 @@ export async function handleFileChange(args: {
 							.where("plugin_key", "=", pluginKey)
 							.where("commit_id", "is", null)
 							.set({
-								id: v4(),
-								author: args.currentAuthor,
 								// @ts-expect-error - database expects stringified json
 								value: JSON.stringify(value),
 								operation: diff.operation,

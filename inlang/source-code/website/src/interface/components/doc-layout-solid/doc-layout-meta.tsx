@@ -2,7 +2,7 @@ import Link from "#src/renderer/Link.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { Show, createEffect, createSignal, onMount, For } from "solid-js"
-import MaterialSymbolsWarningOutlineRounded from "~icons/material-symbols/warning-outline-rounded"
+// import MaterialSymbolsWarningOutlineRounded from "~icons/material-symbols/warning-outline-rounded"
 import { Chip } from "../Chip.jsx"
 import { getGithubLink } from "#src/pages/m/helper/getGithubLink.js"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
@@ -126,7 +126,7 @@ const InlangDocMeta = (props: {
 
 			<div class="w-full h-[1px] bg-surface-200 my-4" />
 			<p class="text-surface-400 pb-1 uppercase text-[12px]">Meta information</p>
-			<Link
+			{/* <Link
 				href="/g/7777asdy/guide-nilsjacobsen-ecosystemCompatible"
 				class="flex items-center gap-2 text-surface-600 hover:text-primary cursor-pointer"
 			>
@@ -158,7 +158,7 @@ const InlangDocMeta = (props: {
 						? "Powered by Lix"
 						: "Ecosystem incompatible"}
 				</p>
-			</Link>
+			</Link> */}
 			<div class="flex items-center gap-2 text-surface-600">
 				<div class="w-7 h-7 flex items-center justify-center">
 					<svg

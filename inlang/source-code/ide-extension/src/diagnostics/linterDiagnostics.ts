@@ -1,12 +1,13 @@
+// @ts-nocheck
 import * as vscode from "vscode"
 import { state } from "../utilities/state.js"
 import type { MessageLintReport } from "@inlang/sdk"
 import { recommendNinja } from "../utilities/recommend/ninja/ninja.js"
-import type { NodeishFilesystem } from "@lix-js/fs"
+import { selectBundleNested, type IdeExtensionConfig } from "@inlang/sdk2"
 
 export async function linterDiagnostics(args: {
 	context: vscode.ExtensionContext
-	nodeishFs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 }) {
 	const linterDiagnosticCollection = vscode.languages.createDiagnosticCollection("inlang-lint")
 
@@ -16,27 +17,38 @@ export async function linterDiagnostics(args: {
 			return
 		}
 
-		const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
+		// TODO: Clarify how to derive customApi from project
+		const ideExtension = state()
+			.project.plugins.get()
+			.find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])?.meta?.[
+			"app.inlang.ideExtension"
+		] as IdeExtensionConfig | undefined
 
 		if (!ideExtension) {
 			return
 		}
 
 		const wrappedLints = (ideExtension.messageReferenceMatchers ?? []).map(async (matcher) => {
-			const messages = await matcher({
+			const bundles = await matcher({
 				documentText: activeTextEditor.document.getText(),
 			})
 
 			const diagnosticsIndex: Record<string, Record<string, vscode.Diagnostic[]>> = {}
 
-			for (const message of messages) {
+			for (const bundle of bundles) {
 				// resolve message from id or alias
-				const _message =
-					state().project.query.messages.get({
-						where: { id: message.messageId },
-					}) ?? state().project.query.messages.getByDefaultAlias(message.messageId)
+				const _bundle = await selectBundleNested(state().project.db)
+					// eb = expression builder
+					.where((eb) =>
+						eb.or([
+							eb("id", "=", bundle.bundleId),
+							eb(eb.ref("alias", "->").key("default"), "=", bundle.bundleId),
+						])
+					)
+					.execute()
 
-				if (_message) {
+				if (_bundle) {
+					// TODO: Clarify how to derive validation rules from lix
 					state().project.query.messageLintReports.get.subscribe(
 						{
 							where: {
@@ -89,7 +101,7 @@ export async function linterDiagnostics(args: {
 							)
 
 							if (diagnostics.length > 0) {
-								recommendNinja({ fs: args.nodeishFs })
+								recommendNinja({ fs: args.fs })
 							}
 						}
 					)

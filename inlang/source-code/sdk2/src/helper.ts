@@ -62,12 +62,13 @@ export function createVariant(args: {
 	id?: string;
 	text?: string;
 	match?: Record<Expression["arg"]["name"], string>;
+	pattern?: Variant["pattern"];
 }): Variant {
 	return {
 		messageId: args.messageId,
 		id: args.id ? args.id : uuid(),
 		match: args.match ? args.match : {},
-		pattern: [toTextElement(args.text ?? "")],
+		pattern: args.pattern ? args.pattern : [toTextElement(args.text ?? "")],
 	};
 }
 

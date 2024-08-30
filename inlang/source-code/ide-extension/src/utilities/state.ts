@@ -1,4 +1,4 @@
-import type { InlangProject, listProjects } from "@inlang/sdk"
+import type { InlangProject } from "@inlang/sdk2"
 
 /**
  * The state of the Visual Studio Code extension (Sherlock).
@@ -9,7 +9,7 @@ type State = {
 	 */
 	project: InlangProject
 	selectedProjectPath: string
-	projectsInWorkspace: Awaited<ReturnType<typeof listProjects>>
+	projectsInWorkspace: Array<{ projectPath: string }>
 }
 
 let _state: State

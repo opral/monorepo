@@ -28,6 +28,31 @@ services:
     domains:
       - inlang.com
 
+  - name: lix-website
+    type: web
+    runtime: static
+    autoDeploy: true
+    staticPublishPath: ./lix/website/dist/client
+    buildCommand: pnpm install && pnpm --filter lix-website run build
+    buildFilter:
+      paths:
+        - lix/website/**
+    domains:
+      - lix.opral.com
+
+  - name: fink2
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: lix-integration
+    staticPublishPath: ./inlang/source-code/fink2/dist
+    buildCommand: pnpm install && pnpm run --filter @inlang/fink2... build
+    buildFilter:
+      paths:
+        - inlang/source-code/fink2/**
+    envVars:
+      - fromGroup: production
+
   - name: git-proxy
     type: web
     runtime: node

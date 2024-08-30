@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
 import { msg } from "./utilities/messages/msg.js"
-import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
+// import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { handleError } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
 import { projectView } from "./utilities/project/project.js"
@@ -9,16 +9,17 @@ import { messagePreview } from "./decorations/messagePreview.js"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { errorView } from "./utilities/errors/errors.js"
 import { messageView } from "./utilities/messages/messages.js"
-import { listProjects } from "@inlang/sdk"
 import { createFileSystemMapper } from "./utilities/fs/createFileSystemMapper.js"
 import fs from "node:fs/promises"
-import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
+import { normalizePath } from "@lix-js/fs"
 import { gettingStartedView } from "./utilities/getting-started/gettingStarted.js"
 import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
 import { recommendationBannerView } from "./utilities/recommendation/recommendation.js"
 import { telemetry } from "./services/telemetry/implementation.js"
 import { version } from "../package.json"
 import { statusBar } from "./utilities/settings/statusBar.js"
+import fg from "fast-glob"
+import type { IdeExtensionConfig } from "@inlang/sdk2"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
@@ -45,17 +46,21 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			},
 		})
 
-		const nodeishFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)
+		const mappedFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)
 
 		try {
-			const projectsList = await listProjects(nodeishFs, normalizePath(workspaceFolder.uri.fsPath))
+			const projectsList = (await fg.async("*.inlang", { onlyDirectories: true })).map(
+				(project) => ({
+					projectPath: project,
+				})
+			)
 			setState({ ...state(), projectsInWorkspace: projectsList })
 		} catch (error) {
 			handleError(error)
 			return
 		}
 
-		await main({ context, workspaceFolder, nodeishFs })
+		await main({ context, workspaceFolder, fs: mappedFs })
 		msg("Sherlock activated", "info")
 	} catch (error) {
 		handleError(error)
@@ -66,7 +71,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 async function main(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	nodeishFs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 }): Promise<void> {
 	if (state().projectsInWorkspace.length > 0) {
 		// find the closest project to the workspace
@@ -108,7 +113,7 @@ async function main(args: {
 function setupFileSystemWatcher(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	nodeishFs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 }) {
 	const watcher = vscode.workspace.createFileSystemWatcher(
 		new vscode.RelativePattern(
@@ -122,7 +127,7 @@ function setupFileSystemWatcher(args: {
 		await main({
 			context: args.context,
 			workspaceFolder: args.workspaceFolder,
-			nodeishFs: args.nodeishFs,
+			fs: args.fs,
 		})
 	})
 }
@@ -130,18 +135,21 @@ function setupFileSystemWatcher(args: {
 function registerExtensionComponents(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	nodeishFs: NodeishFilesystem
+	fs: typeof import("node:fs/promises")
 }) {
 	args.context.subscriptions.push(
 		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))
 	)
 
-	const additionalSelectors =
-		state().project.customApi()["app.inlang.ideExtension"]?.documentSelectors || []
+	const ideExtension = state()
+		.project.plugins.get()
+		.find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])?.meta?.[
+		"app.inlang.ideExtension"
+	] as IdeExtensionConfig | undefined
 
 	const documentSelectors: vscode.DocumentSelector = [
 		{ language: "javascript", pattern: `!${CONFIGURATION.FILES.PROJECT}` },
-		...(state().project ? additionalSelectors : []),
+		...(ideExtension?.documentSelectors ?? []),
 	]
 
 	args.context.subscriptions.push(
@@ -151,11 +159,12 @@ function registerExtensionComponents(args: {
 	)
 
 	messagePreview(args)
-	linterDiagnostics(args)
+	// Replace by lix validation rules
+	// linterDiagnostics(args)
 }
 
 function handleInlangErrors() {
-	const inlangErrors = state().project.errors() || []
+	const inlangErrors = state().project.errors.get() || []
 	if (inlangErrors.length > 0) {
 		console.error("Extension errors (Sherlock):", inlangErrors)
 	}

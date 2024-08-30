@@ -37,7 +37,19 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	let numCompiles = 0
 	let virtualModuleOutput: Record<string, string> = {}
 
-	async function triggerCompile(bundles: readonly BundleNested[], settings: ProjectSettings) {
+	async function triggerCompile(
+		messages: readonly Message[],
+		settings: ProjectSettings,
+		projectId: string | undefined
+	) {
+		const currentMessagesHash = hashMessages(messages ?? [], settings)
+		if (currentMessagesHash === previousMessagesHash) return
+
+		if (messages.length === 0) {
+			logger.warn("No messages found - Skipping compilation")
+			return
+		}
+
 		logMessageChange()
 
 		const [regularOutput, messageModulesOutput] = await Promise.all([

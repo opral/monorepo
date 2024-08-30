@@ -1,22 +1,35 @@
 import { it, expect } from "vitest"
 import { privateEnv } from "@inlang/env-variables"
 import { machineTranslateMessage } from "./machineTranslateMessage.js"
-import { type Message } from "@inlang/message"
+import type { Variant, BundleNested } from "@inlang/sdk2"
 
 it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
-	"should translate multiple target language tags",
+	"should translate multiple target locales",
 	async () => {
 		const result = await machineTranslateMessage({
-			sourceLanguageTag: "en",
-			targetLanguageTags: ["de", "fr"],
-			message: {
-				id: "mockMessage",
+			baseLocale: "en",
+			targetLocales: ["de", "fr"],
+			bundle: {
+				id: "mockBundle",
 				alias: {},
-				selectors: [],
-				variants: [
-					{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Hello world" }] },
+				messages: [
+					{
+						id: "mockMessage",
+						bundleId: "mockBundle",
+						locale: "en",
+						declarations: [],
+						selectors: [],
+						variants: [
+							{
+								id: "internal-dummy-id",
+								messageId: "dummy-id",
+								match: {},
+								pattern: [{ type: "text", value: "Hello world" }],
+							},
+						],
+					},
 				],
-			},
+			} as BundleNested,
 		})
 		expect(result.error).toBeUndefined()
 		expect(result.data).toEqual({
@@ -24,10 +37,25 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			alias: {},
 			selectors: [],
 			variants: [
-				{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Hello world" }] },
-				{ languageTag: "de", match: [], pattern: [{ type: "Text", value: "Hallo Welt" }] },
-				{ languageTag: "fr", match: [], pattern: [{ type: "Text", value: "Bonjour le monde" }] },
-			],
+				{
+					id: "internal-dummy-id",
+					messageId: "dummy-id",
+					match: {},
+					pattern: [{ type: "text", value: "Hello world" }],
+				},
+				{
+					id: "internal-dummy-id",
+					messageId: "dummy-id",
+					match: {},
+					pattern: [{ type: "text", value: "Hallo Welt" }],
+				},
+				{
+					id: "internal-dummy-id",
+					messageId: "dummy-id",
+					match: {},
+					pattern: [{ type: "text", value: "Bonjour le monde" }],
+				},
+			] as Variant[],
 		})
 	}
 )
@@ -36,26 +64,52 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	"should escape pattern elements that are not Text",
 	async () => {
 		const result = await machineTranslateMessage({
-			sourceLanguageTag: "en",
-			targetLanguageTags: ["de"],
-			message: {
-				id: "mockMessage",
+			baseLocale: "en",
+			targetLocales: ["de"],
+			bundle: {
+				id: "mockBundle",
 				alias: {},
-				selectors: [],
-				variants: [
-					{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Good evening" }] },
+				messages: [
 					{
-						languageTag: "en",
-						match: [],
-						pattern: [{ type: "VariableReference", name: "username" }],
-					},
-					{
-						languageTag: "en",
-						match: [],
-						pattern: [{ type: "Text", value: ", what a beautiful sunset." }],
+						id: "mockMessage",
+						bundleId: "mockBundle",
+						locale: "en",
+						declarations: [],
+						selectors: [],
+						variants: [
+							{
+								id: "internal-dummy-id",
+								messageId: "dummy-id",
+								match: {},
+								pattern: [
+									{ type: "text", value: "Good evening" },
+									{
+										type: "expression",
+										arg: {
+											type: "variable",
+											name: "username",
+										},
+										annotation: {
+											type: "function",
+											name: "username",
+											options: [
+												{
+													name: "username",
+													value: {
+														type: "variable",
+														name: "username",
+													},
+												},
+											],
+										},
+									},
+									{ type: "text", value: ", what a beautiful sunset." },
+								],
+							},
+						],
 					},
 				],
-			},
+			} as BundleNested,
 		})
 		expect(result.error).toBeUndefined()
 		expect(result.data).toEqual({
@@ -63,59 +117,108 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			alias: {},
 			selectors: [],
 			variants: [
-				{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Good evening" }] },
 				{
-					languageTag: "en",
-					match: [],
-					pattern: [{ type: "VariableReference", name: "username" }],
+					id: "internal-dummy-id",
+					messageId: "dummy-id",
+					match: {},
+					pattern: [
+						{ type: "text", value: "Good evening" },
+						{
+							type: "expression",
+							arg: {
+								type: "variable",
+								name: "username",
+							},
+							annotation: {
+								type: "function",
+								name: "username",
+								options: [
+									{
+										name: "username",
+										value: {
+											type: "variable",
+											name: "username",
+										},
+									},
+								],
+							},
+						},
+						{ type: "text", value: ", what a beautiful sunset." },
+					],
 				},
 				{
-					languageTag: "en",
-					match: [],
-					pattern: [{ type: "Text", value: ", what a beautiful sunset." }],
+					id: "internal-dummy-id",
+					messageId: "dummy-id",
+					match: {},
+					pattern: [
+						{ type: "text", value: "Guten Abend" },
+						{
+							type: "expression",
+							arg: {
+								type: "variable",
+								name: "username",
+							},
+							annotation: {
+								type: "function",
+								name: "username",
+								options: [
+									{
+										name: "username",
+										value: {
+											type: "variable",
+											name: "username",
+										},
+									},
+								],
+							},
+						},
+						{ type: "text", value: ", was für ein schöner Sonnenuntergang." },
+					],
 				},
-				{ languageTag: "de", match: [], pattern: [{ type: "Text", value: "Guten Abend" }] },
-				{
-					languageTag: "de",
-					match: [],
-					pattern: [{ type: "VariableReference", name: "username" }],
-				},
-				{
-					languageTag: "de",
-					match: [],
-					pattern: [{ type: "Text", value: ", was für ein wunderschöner Sonnenuntergang." }],
-				},
-			],
-		} satisfies Message)
+			] as Variant[],
+		})
 	}
 )
 
-it.todo("should not naively compare the variant lenghts and instead match variants", async () => {
+it.todo("should not naively compare the variant lengths and instead match variants", async () => {
 	const result = await machineTranslateMessage({
-		sourceLanguageTag: "en",
-		targetLanguageTags: ["de"],
-		message: {
-			id: "mockMessage",
+		baseLocale: "en",
+		targetLocales: ["de"],
+		bundle: {
+			id: "mockBundle",
 			alias: {},
-			selectors: [
+			messages: [
 				{
-					type: "VariableReference",
-					name: "gender",
+					id: "mockMessage",
+					bundleId: "mockBundle",
+					locale: "en",
+					declarations: [],
+					selectors: [
+						{
+							type: "expression",
+							arg: {
+								type: "variable",
+								name: "gender",
+							},
+						},
+					],
+					variants: [
+						{
+							id: "internal-dummy-id",
+							messageId: "dummy-id",
+							match: { gender: "male" },
+							pattern: [{ type: "text", value: "Gender male" }],
+						},
+						{
+							id: "internal-dummy-id",
+							messageId: "dummy-id",
+							match: { gender: "*" },
+							pattern: [{ type: "text", value: "Veraltete Übersetzung" }],
+						},
+					],
 				},
 			],
-			variants: [
-				{
-					languageTag: "en",
-					match: ["male"],
-					pattern: [{ type: "Text", value: "Gender male" }],
-				},
-				{
-					languageTag: "de",
-					match: ["*"],
-					pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
-				},
-			],
-		},
+		} as BundleNested,
 	})
 	expect(result.error).toBeUndefined()
 	expect(result.data).toEqual({
@@ -123,27 +226,30 @@ it.todo("should not naively compare the variant lenghts and instead match varian
 		alias: {},
 		selectors: [
 			{
-				type: "VariableReference",
+				type: "variable",
 				name: "gender",
 			},
 		],
 		variants: [
 			{
-				languageTag: "en",
-				match: ["male"],
-				pattern: [{ type: "Text", value: "Gender male" }],
+				id: "internal-dummy-id",
+				messageId: "dummy-id",
+				match: { gender: "male" },
+				pattern: [{ type: "text", value: "Gender male" }],
 			},
 			{
-				languageTag: "de",
-				match: ["*"],
-				pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
+				id: "internal-dummy-id",
+				messageId: "dummy-id",
+				match: { gender: "*" },
+				pattern: [{ type: "text", value: "Veraltete Übersetzung" }],
 			},
 			{
-				languageTag: "de",
-				match: ["male"],
-				pattern: [{ type: "Text", value: "Geschlecht männlich" }],
+				id: "internal-dummy-id",
+				messageId: "dummy-id",
+				match: { gender: "male" },
+				pattern: [{ type: "text", value: "Geschlecht männlich" }],
 			},
-		],
+		] as Variant[],
 	})
 })
 
@@ -151,24 +257,33 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	"should not return escaped quotation marks",
 	async () => {
 		const result = await machineTranslateMessage({
-			sourceLanguageTag: "en",
-			targetLanguageTags: ["de"],
-			message: {
-				id: "mockMessage",
+			baseLocale: "en",
+			targetLocales: ["de"],
+			bundle: {
+				id: "mockBundle",
 				alias: {},
-				selectors: [],
-				variants: [
+				messages: [
 					{
-						languageTag: "en",
-						match: [],
-						pattern: [
-							{ type: "Text", value: "'" },
-							{ type: "VariableReference", name: "id" },
-							{ type: "Text", value: "' added a new todo" },
+						id: "mockMessage",
+						bundleId: "mockBundle",
+						locale: "en",
+						declarations: [],
+						selectors: [],
+						variants: [
+							{
+								id: "internal-dummy-id",
+								messageId: "dummy-id",
+								match: {},
+								pattern: [
+									{ type: "text", value: "'" },
+									{ type: "variable", name: "id" },
+									{ type: "text", value: "' added a new todo" },
+								],
+							},
 						],
 					},
 				],
-			},
+			} as BundleNested,
 		})
 		expect(result.error).toBeUndefined()
 		expect(result.data).toEqual({
@@ -177,24 +292,26 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			selectors: [],
 			variants: [
 				{
-					languageTag: "en",
-					match: [],
+					id: "internal-dummy-id",
+					messageId: "dummy-id",
+					match: {},
 					pattern: [
-						{ type: "Text", value: "'" },
-						{ type: "VariableReference", name: "id" },
-						{ type: "Text", value: "' added a new todo" },
+						{ type: "text", value: "'" },
+						{ type: "variable", name: "id" },
+						{ type: "text", value: "' added a new todo" },
 					],
 				},
 				{
-					languageTag: "de",
-					match: [],
+					id: "internal-dummy-id",
+					messageId: "dummy-id",
+					match: {},
 					pattern: [
-						{ type: "Text", value: "' " },
-						{ type: "VariableReference", name: "id" },
-						{ type: "Text", value: " ' hat ein neues To-Do hinzugefügt" },
+						{ type: "text", value: "' " },
+						{ type: "variable", name: "id" },
+						{ type: "text", value: " ' hat ein neues To-Do hinzugefügt" },
 					],
 				},
-			],
+			] as Variant[],
 		})
 	}
 )
@@ -203,25 +320,34 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	"should not keep line breaks in multiline translations",
 	async () => {
 		const result = await machineTranslateMessage({
-			sourceLanguageTag: "en",
-			targetLanguageTags: ["de"],
-			message: {
-				id: "mockMessage",
+			baseLocale: "en",
+			targetLocales: ["de"],
+			bundle: {
+				id: "mockBundle",
 				alias: {},
-				selectors: [],
-				variants: [
+				messages: [
 					{
-						languageTag: "en",
-						match: [],
-						pattern: [
+						id: "mockMessage",
+						bundleId: "mockBundle",
+						locale: "en",
+						declarations: [],
+						selectors: [],
+						variants: [
 							{
-								type: "Text",
-								value: "This is a test\r\nwith line break.",
+								id: "internal-dummy-id",
+								messageId: "dummy-id",
+								match: {},
+								pattern: [
+									{
+										type: "text",
+										value: "This is a\nmultiline\ntranslation.",
+									},
+								],
 							},
 						],
 					},
 				],
-			},
+			} as BundleNested,
 		})
 		expect(result.error).toBeUndefined()
 		expect(result.data).toEqual({
@@ -230,26 +356,18 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			selectors: [],
 			variants: [
 				{
-					languageTag: "en",
-					match: [],
-					pattern: [
-						{
-							type: "Text",
-							value: "This is a test\r\nwith line break.",
-						},
-					],
+					id: "internal-dummy-id",
+					messageId: "dummy-id",
+					match: {},
+					pattern: [{ type: "text", value: "This is a multiline translation." }],
 				},
 				{
-					languageTag: "de",
-					match: [],
-					pattern: [
-						{
-							type: "Text",
-							value: "Das ist ein Test\r\nmit Zeilenumbruch.",
-						},
-					],
+					id: "internal-dummy-id",
+					messageId: "dummy-id",
+					match: {},
+					pattern: [{ type: "text", value: "Dies ist eine mehrzeilige Übersetzung." }],
 				},
-			],
+			] as Variant[],
 		})
 	}
 )

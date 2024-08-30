@@ -1,5 +1,11 @@
 # @inlang/editor
 
+## 0.1.9
+
+### Patch Changes
+
+- 52d1972: add sentry integration
+
 ## 0.1.8
 
 ### Patch Changes

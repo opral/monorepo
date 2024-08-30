@@ -2,7 +2,7 @@ import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
-import { randomHumanId, type Message } from "@inlang/sdk"
+import { createMessage, generateBundleId } from "@inlang/sdk2"
 import { CONFIGURATION } from "../configuration.js"
 import { getSetting } from "../utilities/settings/index.js"
 
@@ -14,12 +14,12 @@ export const createMessageCommand = {
 	title: "Sherlock: Create Message",
 	register: commands.registerCommand,
 	callback: async function () {
-		const sourceLanguageTag = state().project.settings().sourceLanguageTag
+		const baseLocale = state().project.settings.get().baseLocale
 
 		// guard
-		if (sourceLanguageTag === undefined) {
+		if (baseLocale === undefined) {
 			return msg(
-				"The `sourceLanguageTag` is not defined in the project but required to create a message.",
+				"The `baseLocale` is not defined in the project but required to create a message.",
 				"warn",
 				"notification"
 			)
@@ -37,7 +37,7 @@ export const createMessageCommand = {
 
 		const messageId = await window.showInputBox({
 			title: "Enter the ID:",
-			value: autoHumanId ? randomHumanId() : "",
+			value: autoHumanId ? generateBundleId() : "",
 			prompt:
 				autoHumanId &&
 				"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.",
@@ -46,28 +46,23 @@ export const createMessageCommand = {
 			return
 		}
 
-		const message: Message = {
-			id: messageId,
-			alias: {},
-			selectors: [],
-			variants: [
-				{
-					languageTag: sourceLanguageTag,
-					match: [],
-					pattern: [
-						{
-							type: "Text",
-							value: messageValue,
-						},
-					],
-				},
-			],
-		}
+		const message = createMessage({
+			bundleId: generateBundleId(),
+			locale: baseLocale,
+			text: messageValue,
+		})
 
 		// create message
-		const success = state().project.query.messages.create({
-			data: message,
-		})
+		const success = state()
+			.project.db.insertInto("message")
+			.values({
+				id: message.id,
+				bundleId: message.bundleId,
+				locale: message.locale,
+				declarations: message.declarations,
+				selectors: message.selectors,
+			})
+			.execute()
 
 		if (!success) {
 			return window.showErrorMessage(`Couldn't upsert new message with id ${messageId}.`)

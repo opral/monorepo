@@ -5,7 +5,7 @@ import {
 	createRecommendationView,
 	getRecommendationViewHtml,
 } from "./recommendation.js"
-import { createNodeishMemoryFs, type NodeishFilesystem } from "@lix-js/fs"
+import * as fs from "node:fs/promises"
 
 vi.mock("vscode", () => ({
 	resolveWebviewView: vi.fn(),
@@ -50,7 +50,7 @@ describe("recommendationBannerView", () => {
 
 	it("should register a webview view provider", async () => {
 		const args = {
-			nodeishFs: createNodeishMemoryFs(),
+			fs: {} as typeof fs,
 			workspaceFolder: {
 				uri: { fsPath: "/path/to/workspace" } as vscode.Uri,
 				name: "test-workspace",
@@ -77,7 +77,7 @@ describe("createRecommendationBanner", () => {
 
 	it("should return an object with a resolveWebviewView function", () => {
 		const result = createRecommendationView({
-			fs: createNodeishMemoryFs(),
+			fs: fs,
 			workspaceFolder: fakeWorkspaceFolder,
 			context: {} as vscode.ExtensionContext,
 		})
@@ -94,7 +94,7 @@ describe("createRecommendationBanner", () => {
 
 	it("should return an object with a resolveWebviewView function", () => {
 		const result = createRecommendationView({
-			fs: createNodeishMemoryFs(),
+			fs: fs,
 			workspaceFolder: fakeWorkspaceFolder,
 			context: {} as vscode.ExtensionContext,
 		})
@@ -123,7 +123,7 @@ describe("getRecommendationBannerHtml", () => {
 				postMessage: vi.fn(),
 				cspSource: "self",
 			} as unknown as vscode.Webview,
-			fs: {} as NodeishFilesystem,
+			fs: {} as typeof fs,
 			workspaceFolder: fakeWorkspaceFolder,
 			context: {} as vscode.ExtensionContext,
 		}

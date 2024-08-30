@@ -4,6 +4,7 @@ import { validateEnvVariables, privateEnv } from "@inlang/env-variables"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
 import { router } from "./router.js"
+import { posthog } from "posthog-js"
 // --------------- SETUP -----------------
 
 export const isProduction = process.env.NODE_ENV === "production"
@@ -26,6 +27,8 @@ if (isProduction) {
 	Sentry.init({
 		dsn: privateEnv.SERVER_SENTRY_DSN,
 		integrations: [
+			// enable posthog integration
+			new posthog.SentryIntegration(posthog, "opral", 4506599134461952),
 			// enable HTTP calls tracing
 			new Sentry.Integrations.Http({ tracing: true }),
 			// enable Express.js middleware tracing

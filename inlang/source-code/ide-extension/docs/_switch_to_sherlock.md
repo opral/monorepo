@@ -19,8 +19,8 @@ Transitioning to Sherlock involves a few straightforward steps:
    ```json
    {
      "$schema": "https://inlang.com/schema/project-settings",
-     "sourceLanguageTag": "en",
-     "languageTags": ["en", "de"],
+     "baseLocale": "en",
+     "locales": ["en", "de"],
      "modules": [
        "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js"
      ]

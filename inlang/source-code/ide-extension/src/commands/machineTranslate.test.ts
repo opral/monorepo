@@ -83,9 +83,9 @@ describe("machineTranslateMessageCommand", () => {
 
 	it("should return a message if messageId is not found", async () => {
 		await machineTranslateMessageCommand.callback({
-			messageId: "nonexistent",
-			sourceLanguageTag: "en",
-			targetLanguageTags: ["es"],
+			bundleId: "nonexistent",
+			baseLocale: "en",
+			targetLocales: ["es"],
 		})
 
 		expect(msg).toHaveBeenCalledWith("Message with id nonexistent not found.")
@@ -96,9 +96,9 @@ describe("machineTranslateMessageCommand", () => {
 		rpc.machineTranslateMessage.mockResolvedValueOnce({ error: "RPC Error" })
 
 		await machineTranslateMessageCommand.callback({
-			messageId: "validId",
-			sourceLanguageTag: "en",
-			targetLanguageTags: ["es"],
+			bundleId: "validId",
+			baseLocale: "en",
+			targetLocales: ["es"],
 		})
 
 		expect(msg).toHaveBeenCalledWith("Error translating message: RPC Error")
@@ -109,9 +109,9 @@ describe("machineTranslateMessageCommand", () => {
 		rpc.machineTranslateMessage.mockResolvedValueOnce({ data: undefined })
 
 		await machineTranslateMessageCommand.callback({
-			messageId: "validId",
-			sourceLanguageTag: "en",
-			targetLanguageTags: ["es"],
+			bundleId: "validId",
+			baseLocale: "en",
+			targetLocales: ["es"],
 		})
 
 		expect(msg).toHaveBeenCalledWith("No translation available.")
@@ -123,9 +123,9 @@ describe("machineTranslateMessageCommand", () => {
 		rpc.machineTranslateMessage.mockResolvedValueOnce({ data: mockTranslation })
 
 		await machineTranslateMessageCommand.callback({
-			messageId: "validId",
-			sourceLanguageTag: "en",
-			targetLanguageTags: ["es"],
+			bundleId: "validId",
+			baseLocale: "en",
+			targetLocales: ["es"],
 		})
 
 		expect(msg).toHaveBeenCalledWith("Message translated.")
@@ -137,9 +137,9 @@ describe("machineTranslateMessageCommand", () => {
 		rpc.machineTranslateMessage.mockResolvedValueOnce({ data: mockTranslation })
 
 		await machineTranslateMessageCommand.callback({
-			messageId: "validId",
-			sourceLanguageTag: "en",
-			targetLanguageTags: ["es"],
+			bundleId: "validId",
+			baseLocale: "en",
+			targetLocales: ["es"],
 		})
 
 		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).toHaveBeenCalled()

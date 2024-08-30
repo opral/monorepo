@@ -55,19 +55,19 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 
 test("get and set settings", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
-	const settings = project.settings.get();
+	const settings = await project.settings.get();
 
 	expect(settings["plugin.key"]).toBeUndefined();
 
 	const copied = structuredClone(settings);
 
 	copied["plugin.key"] = { test: "value" };
+
 	await project.settings.set(copied);
 
-	const updatedSettings = project.settings.get();
+	const updatedSettings = await project.settings.get();
 	expect(updatedSettings["plugin.key"]).toEqual({ test: "value" });
 });
-
 
 test("it should set sourceLanguageTag and languageTags if non-existent to make v1 plugins work", async () => {
 	const project = await loadProjectInMemory({
@@ -78,7 +78,7 @@ test("it should set sourceLanguageTag and languageTags if non-existent to make v
 			},
 		}),
 	});
-	const settings = project.settings.get();
+	const settings = await project.settings.get();
 	expect(settings.baseLocale).toBe("en");
 	expect(settings.sourceLanguageTag).toBe("en");
 	expect(settings.languageTags).toEqual(["en", "de"]);
@@ -97,8 +97,10 @@ test("providing plugins should work", async () => {
 		providePlugins: [{ key: "my-provided-plugin" }],
 	});
 
-	const plugins = project.plugins.get();
+	const plugins = await project.plugins.get();
+	const errors = await project.errors.get();
+
 	expect(plugins.length).toBe(1);
 	expect(plugins[0]?.key).toBe("my-provided-plugin");
-	expect(project.errors.get().length).toBe(0);
+	expect(errors.length).toBe(0);
 });

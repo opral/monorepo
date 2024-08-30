@@ -17,9 +17,9 @@ You can use the following template when using JSON files as translation files. I
 	// official schema ensures that your project file is valid
 	"$schema": "https://inlang.com/schema/project-settings",
 	// the "source" language tag that is used in your project
-	"sourceLanguageTag": "en",
+	"baseLocale": "en",
 	// all the language tags you want to support in your project
-	"languageTags": ["en", "de"],
+	"locales": ["en", "de"],
 	"modules": [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js"
 	], // or use another storage module: https://inlang.com/c/plugins (i18next, json, inlang message format)

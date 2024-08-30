@@ -23,10 +23,11 @@
 	},
 	"dependencies": {
 		"@inlang/sdk": "workspace:*",
-		"@lix-js/fs": "workspace:*",
 		"@lix-js/client": "workspace:*",
+		"@lix-js/fs": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",
-		"js-yaml": "^4.1.0"
+		"js-yaml": "^4.1.0",
+		"prettier": "^3.3.3"
 	},
 	"devDependencies": {
 		"@types/js-yaml": "^4.0.9",

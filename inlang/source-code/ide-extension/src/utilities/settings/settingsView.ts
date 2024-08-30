@@ -21,7 +21,7 @@ export async function settingsPanel(args: { context: vscode.ExtensionContext }) 
 	panel.webview.onDidReceiveMessage(async (message) => {
 		switch (message.command) {
 			case "setSettings":
-				state().project.setSettings(message.settings)
+				state().project.settings.set(message.settings)
 				CONFIGURATION.EVENTS.ON_DID_SETTINGS_VIEW_CHANGE.fire()
 				break
 		}
@@ -44,9 +44,10 @@ export function getWebviewContent(args: {
 		vscode.Uri.joinPath(args.context.extensionUri, "assets", "lit-html.js")
 	)
 
-	const settings = state().project.settings()
-	const installedPlugins = state().project.installed.plugins()
-	const installedMessageLintRules = state().project.installed.messageLintRules()
+	const settings = state().project.settings.get()
+	const installedPlugins = state().project.plugins.get()
+	// TODO: Clarify how to derive validation rules from lix
+	// const installedMessageLintRules = state().project.installed.messageLintRules()
 
 	return `<!DOCTYPE html>
         <html lang="en">
@@ -71,9 +72,6 @@ export function getWebviewContent(args: {
                 const settingsContainer = document.getElementById('settings-container');
                 const settingsElement = document.createElement('inlang-settings');
                 settingsElement.installedPlugins = ${JSON.stringify(installedPlugins)};
-                settingsElement.installedMessageLintRules = ${JSON.stringify(
-									installedMessageLintRules
-								)};
                 settingsElement.settings = ${JSON.stringify(settings)};
 
                 settingsContainer.appendChild(settingsElement);

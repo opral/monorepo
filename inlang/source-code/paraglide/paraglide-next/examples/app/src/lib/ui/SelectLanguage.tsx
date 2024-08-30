@@ -1,9 +1,10 @@
 "use client"
 import { availableLanguageTags, AvailableLanguageTag, languageTag } from "@/paraglide/runtime"
 import { usePathname, useRouter } from "@/lib/i18n"
+import { Route } from "next"
 
 export function SelectLanguage() {
-	const pathname = usePathname()
+	const pathname = usePathname() as Route
 	const router = useRouter()
 
 	const labels: Record<AvailableLanguageTag, string> = {

@@ -16,7 +16,7 @@ const LixHeader = () => {
 						{m.marketplace_header_lix_description()}
 					</p>
 					<div class="pt-2 flex flex-wrap gap-4">
-						<Button type="secondaryOnGray" href="https://github.com/opral/monorepo/tree/main/lix">
+						<Button type="secondaryOnGray" href="https://lix.opral.com">
 							{m.marketplace_header_lix_button()}
 						</Button>
 					</div>

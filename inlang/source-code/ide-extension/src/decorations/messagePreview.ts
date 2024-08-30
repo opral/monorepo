@@ -4,8 +4,9 @@ import { contextTooltip } from "./contextTooltip.js"
 import { getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
 import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
-import { getPreviewLanguageTag } from "../utilities/language-tag/getPreviewLanguageTag.js"
+import { getPreviewLocale } from "../utilities/locale/getPreviewLocale.js"
 import { getSetting } from "../utilities/settings/index.js"
+import { selectBundleNested, type IdeExtensionConfig } from "@inlang/sdk2"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -28,12 +29,20 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 		}
 
 		// Get the reference language
-		const sourceLanguageTag = state().project.settings()?.sourceLanguageTag
-		const ideExtensionConfig = state().project.customApi()?.["app.inlang.ideExtension"]
+		const baseLocale = state().project.settings.get().baseLocale
+		const ideExtension = state()
+			.project.plugins.get()
+			.find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])?.meta?.[
+			"app.inlang.ideExtension"
+		] as IdeExtensionConfig | undefined
 
-		const messageReferenceMatchers = ideExtensionConfig?.messageReferenceMatchers
+		if (baseLocale === undefined || ideExtension === undefined) {
+			return
+		}
 
-		if (sourceLanguageTag === undefined || messageReferenceMatchers === undefined) {
+		const messageReferenceMatchers = ideExtension?.messageReferenceMatchers
+
+		if (baseLocale === undefined || messageReferenceMatchers === undefined) {
 			// don't show an error message. See issue:
 			// https://github.com/opral/monorepo/issues/927
 			return
@@ -64,34 +73,37 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 		// Get the message references
 		const wrappedDecorations = (messageReferenceMatchers ?? []).map(async (matcher) => {
-			const messages = await matcher({
+			const bundles = await matcher({
 				documentText: activeTextEditor.document.getText(),
 			})
 
-			return messages.map(async (message) => {
-				// resolve message from id or alias
-				const _message =
-					state().project.query.messages.get({
-						where: { id: message.messageId },
-					}) ?? state().project.query.messages.getByDefaultAlias(message.messageId)
+			return bundles.map(async (bundle) => {
+				// Query for message with bundle id and locale
+				const _bundle = await selectBundleNested(state().project.db)
+					.where("bundle.id", "=", bundle.bundleId)
+					.executeTakeFirst()
 
-				const previewLanguageTag = await getPreviewLanguageTag()
-				const translationLanguageTag = previewLanguageTag.length
-					? previewLanguageTag
-					: sourceLanguageTag
+				// Get the message from the bundle
+				const message = _bundle?.messages.find((m) => m.locale === baseLocale)
 
-				const variant = _message?.variants?.find((v) => v.languageTag === translationLanguageTag)
+				// Get the variant from the message
+				const variant = message?.variants.find((v) => v.match.locale === baseLocale)
 
-				const translationString = getStringFromPattern({
-					pattern: variant?.pattern || [
-						{
-							type: "Text",
-							value: "", // TODO: Fix pattern type to be always defined either/or Text / VariableReference
-						},
-					],
-					languageTag: translationLanguageTag,
-					messageId: message.messageId,
-				})
+				const previewLocale = await getPreviewLocale()
+				const translationLocale = previewLocale.length ? previewLocale : baseLocale
+
+				const translationString = variant
+					? getStringFromPattern({
+							pattern: variant.pattern || [
+								{
+									type: "text",
+									value: "", // TODO: Fix pattern type to be always defined either/or Text / VariableReference
+								},
+							],
+							locale: translationLocale,
+							messageId: variant.messageId,
+					  })
+					: ""
 
 				const translation = resolveEscapedCharacters(translationString)
 
@@ -102,12 +114,8 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 						: translation)
 
 				const range = new vscode.Range(
-					// Visual Studio Code starts to count lines and columns from zero
-					new vscode.Position(
-						message.position.start.line - 1,
-						message.position.start.character - 1
-					),
-					new vscode.Position(message.position.end.line - 1, message.position.end.character - 1)
+					new vscode.Position(bundle.position.start.line - 1, bundle.position.start.character - 1),
+					new vscode.Position(bundle.position.end.line - 1, bundle.position.end.character - 1)
 				)
 
 				const decoration: vscode.DecorationOptions = {
@@ -118,7 +126,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 									margin: "0 0.5rem",
 									contentText:
 										truncatedTranslation === "" || truncatedTranslation === undefined
-											? `ERROR: '${message.messageId}' not found in source with language tag '${sourceLanguageTag}'`
+											? `ERROR: '${bundle.bundleId}' not found in source with language tag '${baseLocale}'`
 											: translation,
 									backgroundColor: translation
 										? editorInfoColors.background
@@ -130,7 +138,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 								},
 						  }
 						: undefined,
-					hoverMessage: contextTooltip(message),
+					hoverMessage: await contextTooltip(bundle),
 				}
 				return decoration
 			})
@@ -165,7 +173,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 	CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => updateDecorations())
 	CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => updateDecorations())
 	CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.event(() => updateDecorations())
-	CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.event(() => updateDecorations())
+	CONFIGURATION.EVENTS.ON_DID_PREVIEW_LOCALE_CHANGE.event(() => updateDecorations())
 
 	vscode.workspace.onDidChangeConfiguration(
 		(event) => {
