@@ -1,7 +1,6 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"include": ["src/**/*.ts"],
-	"exclude": ["src/**/*.test.ts"],
 	"compilerOptions": {
 		"outDir": "./dist",
 		"rootDir": "./src",
@@ -12,7 +11,6 @@
 		"emitDeclarationOnly": true,
 		"declarationMap": false,
 		"skipLibCheck": true,
-		"lib": ["ESNext"],
 		"paths": {
 			"~/*": ["./src/*"]
 		}
