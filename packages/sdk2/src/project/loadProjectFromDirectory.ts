@@ -2,7 +2,7 @@ import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
 import { type Lix } from "@lix-js/sdk";
 // eslint-disable-next-line no-restricted-imports
-import type fs from "node:fs/promises";
+import type fs from "node:fs";
 // eslint-disable-next-line no-restricted-imports
 import nodePath from "node:path";
 import type { InlangPlugin } from "../plugin/schema.js";
@@ -25,7 +25,8 @@ export async function loadProjectFromDirectory(
 		...args,
 		blob: await newProject(),
 	});
-	await copyFiles({ fs: args.fs, path: args.path, lix: project.lix });
+
+	keepFilesInSync({ fs: args.fs, path: args.path, lix: project.lix });
 
 	// TODO i guess we should move this validation logic into sdk2/src/project/loadProject.ts
 	// Two scenarios could arise:
@@ -70,7 +71,7 @@ export async function loadProjectFromDirectory(
 		const files = importer.toBeImportedFiles
 			? await importer.toBeImportedFiles({
 					settings: await project.settings.get(),
-					nodeFs: args.fs,
+					nodeFs: args.fs.promises,
 			  })
 			: [];
 
@@ -111,7 +112,7 @@ async function loadLegacyMessages(args: {
 }) {
 	const loadedLegacyMessages = await args.loadMessagesFn({
 		settings: await args.project.settings.get(),
-		nodeishFs: args.fs,
+		nodeishFs: args.fs.promises,
 	});
 	const insertQueries = [];
 
@@ -122,51 +123,83 @@ async function loadLegacyMessages(args: {
 
 	return Promise.all(insertQueries);
 }
-
 /**
- * Copies the files in a directory into lix.
+ * Watches a directory and copies files into lix, keeping them in sync.
  */
-async function copyFiles(args: {
-	fs: typeof fs;
-	path: string;
-	lix: Lix;
-}): Promise<void> {
-	const paths = await traverseDir({ path: args.path, fs: args.fs });
+function keepFilesInSync(args: { fs: typeof fs; path: string; lix: Lix }) {
+	function copyFilesFromDiskRecursive(dirPath: string) {
+		const entries = args.fs.readdirSync(dirPath, { withFileTypes: true });
 
-	for (const path of paths) {
-		const data = await args.fs.readFile(nodePath.join(args.path, path));
-		await args.lix.db
-			// TODO write to normal file table
-			// see https://linear.app/opral/issue/LIX-102/re-visit-simplifying-the-change-queue-implementation#comment-65eb3485
+		for (const entry of entries) {
+			const fullPath = nodePath.join(dirPath, entry.name);
+			if (entry.isDirectory()) {
+				copyFilesFromDiskRecursive(fullPath);
+			} else {
+				handleFile(args, fullPath, "add");
+			}
+		}
+	}
+
+	// Initial copy of all files
+	copyFilesFromDiskRecursive(args.path);
+
+	// Set up recursive watch for all files on disk
+	const watcher = args.fs.watch(
+		args.path,
+		{ recursive: true },
+		(eventType, filename) => {
+			if (!filename) return;
+			console.log(`File ${filename} changed`);
+			const fullPath = nodePath.join(args.path, filename);
+			try {
+				const stats = args.fs.statSync(fullPath);
+				if (!stats.isDirectory()) {
+					handleFile(args, fullPath, eventType === "rename" ? "add" : "change");
+				}
+			} catch (error) {
+				if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+					handleFile(args, fullPath, "delete");
+				} else {
+					console.error(`Error handling file ${fullPath}:`, error);
+				}
+			}
+		}
+	);
+	return () => {
+		watcher.close();
+	};
+}
+
+function handleFile(
+	args: { fs: typeof fs; path: string; lix: Lix },
+	filePath: string,
+	event: "add" | "change" | "delete"
+): Promise<void> {
+	console.log(`Handling file ${filePath} with event ${event}`);
+	const relativePath = nodePath.relative(args.path, filePath);
+	const normalizedPath =
+		"/" + nodePath.normalize(relativePath).replace(/^\.inlang[/\\]/, "");
+
+	if (event === "delete") {
+		args.lix.db
+			.deleteFrom("file_internal")
+			.where("path", "=", normalizedPath)
+			.execute();
+	} else {
+		const data = args.fs.readFileSync(filePath);
+		console.log({ data, txt: new TextDecoder().decode(data) });
+		args.lix.db
 			.insertInto("file_internal")
 			.values({
-				path,
+				path: normalizedPath,
 				data,
 			})
 			.onConflict((oc) => oc.column("path").doUpdateSet({ data }))
 			.execute();
+		console.log(`File ${filePath} copied to lix, content: ${data.toString()}`);
 	}
 }
 
-async function traverseDir(args: {
-	path: string;
-	fs: typeof fs;
-}): Promise<string[]> {
-	const result = [];
-	for (const file of await args.fs.readdir(args.path)) {
-		const joinedPath = nodePath.join(args.path, file);
-		const isDirectory = (await args.fs.lstat(joinedPath)).isDirectory();
-		if (isDirectory) {
-			result.push(...(await traverseDir({ path: joinedPath, fs: args.fs })));
-		} else {
-			const withoutProjectPath = nodePath.normalize(
-				joinedPath.replace(/.*\.inlang/, "")
-			);
-			result.push(withoutProjectPath);
-		}
-	}
-	return result;
-}
 
 // TODO i guess we should move this validation logic into sdk2/src/project/loadProject.ts
 function categorizePlugins(plugins: readonly InlangPlugin[]): {
