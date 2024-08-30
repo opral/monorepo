@@ -2,13 +2,13 @@ import { Command } from "commander"
 import nodeFsPromises from "node:fs/promises"
 import { resolve } from "node:path"
 import { Logger } from "~/services/logger/index.js"
-import { runCompiler } from "~/cli/steps/run-compiler2.js"
+import { runCompiler } from "~/cli/steps/run-compiler.js"
 import { DEFAULT_OUTDIR } from "~/cli/defaults.js"
 import { classifyProjectErrors } from "~/services/error-handling.js"
 import { loadProjectFromDirectoryInMemory } from "@inlang/sdk2"
 import icu1Importer from "@inlang/plugin-icu1"
 
-export const compileCommand2 = new Command()
+export const compileCommand = new Command()
 	.name("compile")
 	.summary("Compiles inlang Paraglide-JS")
 	.requiredOption("--project <path>", 'The path to the inlang project. Example: "./project.inlang"')
