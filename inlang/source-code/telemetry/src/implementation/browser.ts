@@ -23,13 +23,16 @@ function initWrapper(
 	name?: Parameters<typeof posthog.init>[2]
 ): ReturnType<typeof posthog.init> {
 	if (window === undefined) {
-		return console.warn(
+		console.warn(
 			"You are likely trying to use this in a Node.js environment. Use telemetryNode instead."
 		)
+		return undefined
 	} else if (config?.api_host) {
-		return console.warn("The api_host is set by the telemetry module.")
+		console.warn("The api_host is set by the telemetry module.")
+		return undefined
 	} else if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
-		return console.warn("Posthog token is not set. Telemetry will not be initialized.")
+		console.warn("Posthog token is not set. Telemetry will not be initialized.")
+		return undefined
 	}
 	return posthog.init(
 		publicEnv.PUBLIC_POSTHOG_TOKEN,
