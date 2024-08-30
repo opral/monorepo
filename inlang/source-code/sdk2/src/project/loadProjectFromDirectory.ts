@@ -1,6 +1,6 @@
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
-import { uuidv4, type Lix } from "@lix-js/sdk";
+import { type Lix } from "@lix-js/sdk";
 // eslint-disable-next-line no-restricted-imports
 import type fs from "node:fs/promises";
 // eslint-disable-next-line no-restricted-imports
@@ -21,22 +21,11 @@ export async function loadProjectFromDirectoryInMemory(
 		"blob"
 	>
 ) {
-	const tempProject = await loadProjectInMemory({
-		// pass common arguments to loadProjectInMemory
+	const project = await loadProjectInMemory({
 		...args,
 		blob: await newProject(),
 	});
-	await copyFiles({ fs: args.fs, path: args.path, lix: tempProject.lix });
-
-	// TODO call tempProject.lix.settled() to wait for the new settings file, and remove reload of the proejct as soon as reactive settings has landed
-	// NOTE: we need to ensure two things:
-	// 1. settled needs to include the changes from the copyFiles call
-	// 2. the changes created from the copyFiles call need to be realized and lead to a signal on the settings
-	const project = await loadProjectInMemory({
-		// pass common arguments to loadProjectInMemory
-		...args,
-		blob: await tempProject.toBlob(),
-	});
+	await copyFiles({ fs: args.fs, path: args.path, lix: project.lix });
 
 	// TODO i guess we should move this validation logic into sdk2/src/project/loadProject.ts
 	// Two scenarios could arise:
@@ -145,25 +134,18 @@ async function copyFiles(args: {
 	const paths = await traverseDir({ path: args.path, fs: args.fs });
 
 	for (const path of paths) {
-		if (path.endsWith("settings.json")) {
-			continue;
-		}
+		const data = await args.fs.readFile(nodePath.join(args.path, path));
 		await args.lix.db
-			.insertInto("file")
+			// TODO write to normal file table
+			// see https://linear.app/opral/issue/LIX-102/re-visit-simplifying-the-change-queue-implementation#comment-65eb3485
+			.insertInto("file_internal")
 			.values({
-				id: uuidv4(),
-				path: "/" + nodePath.relative(args.path, path),
-				data: await args.fs.readFile(nodePath.resolve(args.path, path)),
+				path,
+				data,
 			})
+			.onConflict((oc) => oc.column("path").doUpdateSet({ data }))
 			.execute();
 	}
-	await args.lix.db
-		.updateTable("file")
-		.set({
-			data: await args.fs.readFile(nodePath.join(args.path, "settings.json")),
-		})
-		.where("path", "=", "/settings.json")
-		.execute();
 }
 
 async function traverseDir(args: {
@@ -172,12 +154,15 @@ async function traverseDir(args: {
 }): Promise<string[]> {
 	const result = [];
 	for (const file of await args.fs.readdir(args.path)) {
-		const fullPath = nodePath.join(args.path, file);
-		const isDirectory = (await args.fs.lstat(fullPath)).isDirectory();
+		const joinedPath = nodePath.join(args.path, file);
+		const isDirectory = (await args.fs.lstat(joinedPath)).isDirectory();
 		if (isDirectory) {
-			result.push(...(await traverseDir({ path: fullPath, fs: args.fs })));
+			result.push(...(await traverseDir({ path: joinedPath, fs: args.fs })));
 		} else {
-			result.push(fullPath);
+			const withoutProjectPath = nodePath.normalize(
+				joinedPath.replace(/.*\.inlang/, "")
+			);
+			result.push(withoutProjectPath);
 		}
 	}
 	return result;

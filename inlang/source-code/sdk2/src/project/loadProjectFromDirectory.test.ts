@@ -186,7 +186,7 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 	).toBe("wert2");
 });
 
-test.skip("it should copy all files in a directory into lix", async () => {
+test("it should copy all files in a directory into lix", async () => {
 	const mockSettings = {
 		baseLocale: "en",
 		locales: ["en", "de"],
@@ -205,11 +205,10 @@ test.skip("it should copy all files in a directory into lix", async () => {
 		fs: fs as any,
 		path: "/project.inlang",
 	});
-	const files = (
-		await project.lix.db.selectFrom("file").selectAll().execute()
-	).filter((file) => file.path !== "/db.sqlite");
 
-	expect(files.length).toBe(5);
+	const files = await project.lix.db.selectFrom("file").selectAll().execute();
+
+	expect(files.length).toBe(5 + 1 /* the db.sqlite file */);
 
 	const filesByPath = files.reduce((acc, file) => {
 		acc[file.path] = new TextDecoder().decode(file.data);
