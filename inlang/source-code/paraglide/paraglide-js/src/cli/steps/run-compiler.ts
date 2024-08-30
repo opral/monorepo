@@ -1,7 +1,7 @@
 import { selectBundleNested, type InlangProject } from "@inlang/sdk2"
 import type { CliStep } from "../utils.js"
 import path from "node:path"
-import { compile } from "~/compilerV2/compile.js"
+import { compile } from "~/compiler/compile.js"
 import { writeOutput } from "~/services/file-handling/write-output.js"
 import type { NodeishFilesystem } from "~/services/file-handling/types.js"
 
