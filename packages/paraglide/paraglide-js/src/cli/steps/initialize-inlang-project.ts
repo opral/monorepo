@@ -22,14 +22,12 @@ export const initializeInlangProject: CliStep<
 		projectPath: string
 	}
 > = async (ctx) => {
-	const existingProjectPaths = (await listProjects(ctx.repo.nodeishFs, ctx.root)).map(
-		(v) => v.projectPath
-	)
+	const existingProjectPaths = (await listProjects(ctx.fs, ctx.root)).map((v) => v.projectPath)
 
 	if (existingProjectPaths.length > 0) {
 		const { project, projectPath } = await existingProjectFlow({
 			existingProjectPaths,
-			repo: ctx.repo,
+			fs: ctx.fs,
 			logger: ctx.logger,
 			appId: ctx.appId,
 		})
@@ -52,7 +50,7 @@ export const initializeInlangProject: CliStep<
 export const existingProjectFlow = async (ctx: {
 	/** An array of absolute paths to existing projects. */
 	existingProjectPaths: string[]
-	repo: Repository
+	fs: NodeishFilesystem
 	logger: Logger
 	appId: string
 }): Promise<{ project: InlangProject; projectPath: string }> => {
@@ -80,7 +78,7 @@ export const existingProjectFlow = async (ctx: {
 	const projectPath = selection
 	const project = await loadProject({
 		projectPath,
-		repo: ctx.repo,
+		fs: ctx.fs,
 		appId: ctx.appId,
 	})
 
@@ -196,7 +194,7 @@ export const createNewProjectFlow = async (ctx: {
 	const projectPath = nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH)
 	await createNewProject({
 		projectPath,
-		repo: ctx.repo,
+		fs: ctx.fs,
 		projectSettings: settings,
 	})
 
