@@ -1,11 +1,11 @@
 import type { MessageNested, Variant } from "@inlang/sdk2"
+import type { Registry } from "./registry.js"
 import { compilePattern } from "./compilePattern.js"
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
 import { compileExpression } from "./compileExpression.js"
 import { mergeTypeRestrictions, type Compilation } from "./types.js"
 import { inputsType } from "./inputsType.js"
 import { jsIdentifier } from "~/services/codegen/identifier.js"
-import type { Registry } from "./registry.js"
 
 /**
  * Returns the compiled message as a string
