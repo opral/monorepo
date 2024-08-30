@@ -103,6 +103,15 @@ export default class InlangPatternEditor extends LitElement {
 					this._handleListenToTextContent(textContent)
 				}
 			)
+
+			contentEditableElement.addEventListener("focus", () => {
+				const onPatternEditorFocus = new CustomEvent("pattern-editor-focus")
+				this.dispatchEvent(onPatternEditorFocus)
+			})
+			contentEditableElement.addEventListener("blur", () => {
+				const onPatternEditorBlur = new CustomEvent("pattern-editor-blur")
+				this.dispatchEvent(onPatternEditorBlur)
+			})
 		}
 	}
 

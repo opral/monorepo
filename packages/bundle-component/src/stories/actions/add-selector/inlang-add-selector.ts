@@ -36,12 +36,9 @@ export default class InlangAddSelector extends LitElement {
 				justify-content: center;
 			}
 			.dropdown-container {
-				font-size: 13px;
-				width: 240px;
-				background-color: var(--sl-panel-background-color);
-				border: 1px solid var(--sl-input-border-color);
-				padding: 12px;
-				border-radius: 6px;
+				font-size: 14px;
+				width: full;
+				padding: 20px;
 				display: flex;
 				flex-direction: column;
 				gap: 16px;
@@ -59,7 +56,7 @@ export default class InlangAddSelector extends LitElement {
 				font-size: 12px;
 			}
 			.dropdown-title {
-				font-size: 12px;
+				font-size: 14px;
 				font-weight: 500;
 				margin: 6px 0;
 			}
@@ -71,10 +68,10 @@ export default class InlangAddSelector extends LitElement {
 				color: var(--sl-input-color-hover);
 			}
 			sl-select::part(form-control-label) {
-				font-size: 13px;
+				font-size: 14px;
 			}
 			sl-select::part(display-input) {
-				font-size: 13px;
+				font-size: 14px;
 			}
 			sl-option::part(label) {
 				font-size: 14px;
@@ -148,7 +145,7 @@ export default class InlangAddSelector extends LitElement {
 				gap: 4px;
 			}
 			sl-input::part(base) {
-				font-size: 13px;
+				font-size: 14px;
 			}
 			.add-selector::part(base) {
 				border-radius: 4px;
@@ -230,6 +227,8 @@ export default class InlangAddSelector extends LitElement {
 				newSelectorName: this._input,
 			})
 			this._addVariantsFromNewCombinations(newCombinations)
+
+			this.dispatchEvent(new CustomEvent("submit"))
 		}
 	}
 
@@ -290,6 +289,7 @@ export default class InlangAddSelector extends LitElement {
 		if (this.message && this._input) {
 			for (const variant of this.message.variants) {
 				variant.match[this._input] = "*"
+
 				this.dispatchEvent(
 					createChangeEvent({
 						type: "Variant",
@@ -309,6 +309,7 @@ export default class InlangAddSelector extends LitElement {
 					match: combination,
 					text: "",
 				})
+
 				this.dispatchEvent(
 					createChangeEvent({
 						type: "Variant",
@@ -346,254 +347,215 @@ export default class InlangAddSelector extends LitElement {
 
 	override render() {
 		return html`
-			<sl-dropdown
-				distance="-4"
-				class="dropdown"
-				@sl-show=${(e: CustomEvent) => {
-					const dropdown = this.shadowRoot?.querySelector("sl-dropdown")
-					if (dropdown && e.target === dropdown) {
-						this._input =
-							this._getInputs() && this._getInputs().length > 0 && this._getInputs()[0]
-								? this._getInputs()[0]!.name
-								: undefined
-						if (this._getInputs() && this._getInputs().length === 0) {
-							this._isNewInput = true
-						}
-					}
-				}}
-			>
-				<div slot="trigger" class="button-wrapper">
-					<sl-tooltip content="Add Selector to message"
-						><sl-button size="small" class="add-selector">
-							<svg
-								viewBox="0 0 24 24"
-								width="18"
-								height="18"
-								slot="prefix"
-								class="w-5 h-5 -mx-1"
-								style="margin-right: -3px"
-							>
-								<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
-							</svg>
-							Selector
-						</sl-button>
-					</sl-tooltip>
-				</div>
-				<div class="dropdown-container">
-					<div class="dropdown-item">
-						<div class="dropdown-header">
-							<p class="dropdown-title">Input</p>
-							${this._isNewInput && this._getInputs() && this._getInputs().length > 0
-								? html`<sl-tooltip content="Show inputs">
-										<sl-button
-											class="add-input"
-											variant="text"
-											size="small"
-											@click=${() => {
-												this._isNewInput = false
-												this.requestUpdate()
-											}}
+			<div class="dropdown-container">
+				<div class="dropdown-item">
+					<div class="dropdown-header">
+						<p class="dropdown-title">Input</p>
+						${this._isNewInput && this._getInputs() && this._getInputs().length > 0
+							? html`<sl-tooltip content="Show inputs">
+									<sl-button
+										class="add-input"
+										variant="text"
+										size="small"
+										@click=${() => {
+											this._isNewInput = false
+											this.requestUpdate()
+										}}
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="18"
+											height="18"
+											viewBox="0 0 24 24"
+											slot="prefix"
+											style="margin: 0 -2px"
 										>
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="18"
-												height="18"
-												viewBox="0 0 24 24"
-												slot="prefix"
-												style="margin: 0 -2px"
-											>
-												<path
-													fill="currentColor"
-													fill-rule="evenodd"
-													d="M3.25 7A.75.75 0 0 1 4 6.25h16a.75.75 0 0 1 0 1.5H4A.75.75 0 0 1 3.25 7m0 5a.75.75 0 0 1 .75-.75h11a.75.75 0 0 1 0 1.5H4a.75.75 0 0 1-.75-.75m0 5a.75.75 0 0 1 .75-.75h5a.75.75 0 0 1 0 1.5H4a.75.75 0 0 1-.75-.75"
-													clip-rule="evenodd"
-												/>
-											</svg>
-										</sl-button>
-								  </sl-tooltip>`
-								: ``}
-							${!this._isNewInput
-								? html`<sl-tooltip content="Add a new input">
-										<sl-button
-											class="add-input"
-											variant="text"
-											size="small"
-											@click=${() => {
-												this._isNewInput = true
-												this.requestUpdate()
-											}}
-											><svg
-												viewBox="0 0 24 24"
-												width="18"
-												height="18"
-												slot="prefix"
-												style="margin: 0 -2px"
-											>
-												<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
-										></sl-button>
-								  </sl-tooltip>`
-								: ``}
-						</div>
+											<path
+												fill="currentColor"
+												fill-rule="evenodd"
+												d="M3.25 7A.75.75 0 0 1 4 6.25h16a.75.75 0 0 1 0 1.5H4A.75.75 0 0 1 3.25 7m0 5a.75.75 0 0 1 .75-.75h11a.75.75 0 0 1 0 1.5H4a.75.75 0 0 1-.75-.75m0 5a.75.75 0 0 1 .75-.75h5a.75.75 0 0 1 0 1.5H4a.75.75 0 0 1-.75-.75"
+												clip-rule="evenodd"
+											/>
+										</svg>
+									</sl-button>
+							  </sl-tooltip>`
+							: ``}
 						${!this._isNewInput
-							? html`<sl-select
-									@sl-change=${(e: CustomEvent) => {
-										const inputElement = e.target as HTMLInputElement
-										this._input = inputElement.value
-									}}
-									@sl-show=${(e: CustomEvent) => {
-										const inputElement = e.target as HTMLInputElement
-										this._input = inputElement.value
-									}}
-									size="small"
-									value=${this._input || this._getInputs()?.[0]}
-							  >
-									${this._getInputs() &&
-									this._getInputs().map((input) => {
-										return html`<sl-option value=${input.name}>${input.name}</sl-option>`
-									})}
-							  </sl-select>`
-							: html`<sl-input 
+							? html`<sl-tooltip content="Add a new input">
+									<sl-button
+										class="add-input"
+										variant="text"
+										size="small"
+										@click=${() => {
+											this._isNewInput = true
+											this.requestUpdate()
+										}}
+										><svg
+											viewBox="0 0 24 24"
+											width="18"
+											height="18"
+											slot="prefix"
+											style="margin: 0 -2px"
+										>
+											<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
+									></sl-button>
+							  </sl-tooltip>`
+							: ``}
+					</div>
+					${!this._isNewInput
+						? html`<sl-select
+								@sl-change=${(e: CustomEvent) => {
+									const inputElement = e.target as HTMLInputElement
+									this._input = inputElement.value
+								}}
+								@sl-show=${(e: CustomEvent) => {
+									const inputElement = e.target as HTMLInputElement
+									this._input = inputElement.value
+								}}
+								size="small"
+								value=${this._input || this._getInputs()?.[0]}
+						  >
+								${this._getInputs() &&
+								this._getInputs().map((input) => {
+									return html`<sl-option value=${input.name}>${input.name}</sl-option>`
+								})}
+						  </sl-select>`
+						: html`<sl-input 
 										size="small" 
 										placeholder="Enter input name ..." 
 										@sl-input=${(e: CustomEvent) => {
 											this._newInputSting = (e.target as HTMLInputElement).value
 										}}
 										</sl-input>`}
+				</div>
+				${this._isNewInput
+					? html`<div class="help-text">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="24px"
+								height="24px"
+								viewBox="0 0 256 256"
+							>
+								<path
+									fill="currentColor"
+									d="M140 180a12 12 0 1 1-12-12a12 12 0 0 1 12 12M128 72c-22.06 0-40 16.15-40 36v4a8 8 0 0 0 16 0v-4c0-11 10.77-20 24-20s24 9 24 20s-10.77 20-24 20a8 8 0 0 0-8 8v8a8 8 0 0 0 16 0v-.72c18.24-3.35 32-17.9 32-35.28c0-19.85-17.94-36-40-36m104 56A104 104 0 1 1 128 24a104.11 104.11 0 0 1 104 104m-16 0a88 88 0 1 0-88 88a88.1 88.1 0 0 0 88-88"
+								/>
+							</svg>
+							<p>No input present. Add a new input to create a selector.</p>
+					  </div>`
+					: ``}
+				<div class="dropdown-item">
+					<div class="dropdown-header">
+						<p class="dropdown-title">Function</p>
 					</div>
-					${this._isNewInput
-						? html`<div class="help-text">
-								<svg
+					<sl-select
+						size="small"
+						value="plural"
+						@sl-change=${(e: CustomEvent) => {
+							const option = (e.target as HTMLSelectElement).value as string
+							if (option === "string") {
+								this._function = "string"
+								this._matchers = ["*"]
+								this.requestUpdate()
+							} else if (option === "plural") {
+								this._function = "plural"
+								this._matchers = this._getPluralCategories() || ["*"]
+								this.requestUpdate()
+							}
+						}}
+					>
+						<sl-option value="plural">plural</sl-option>
+						<sl-option value="string">string</sl-option>
+					</sl-select>
+				</div>
+				<div class="options-container">
+					<div class="dropdown-header">
+						<p class="dropdown-title">Match</p>
+						<sl-tooltip content="Add a match to this selector">
+							<sl-button
+								class="add-input"
+								variant="text"
+								size="small"
+								@click=${() => {
+									this._matchers?.push("")
+									this.requestUpdate()
+									// get the last input element and focus it
+									setTimeout(() => {
+										const inputs = this.shadowRoot?.querySelectorAll(".option")
+										// @ts-ignore -- .at seems not to be available in the type? @NilsJacobsen
+										const lastInput = inputs && (inputs.at(-1) as HTMLInputElement)
+										lastInput?.focus(), 100
+									})
+								}}
+								><svg
+									viewBox="0 0 24 24"
+									width="18"
+									height="18"
+									slot="prefix"
+									style="margin: 0 -2px"
+								>
+									<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
+							></sl-button>
+						</sl-tooltip>
+					</div>
+					<div class="options-wrapper">
+						${this._matchers?.map((category, index) => {
+							return html`<sl-input
+								class="option"
+								size="small"
+								value=${category}
+								filled
+								@input=${(e: Event) => {
+									this._matchers = this._matchers || []
+									this._matchers[index] = (e.target as HTMLInputElement).value
+								}}
+								><svg
 									xmlns="http://www.w3.org/2000/svg"
-									width="24px"
-									height="24px"
-									viewBox="0 0 256 256"
+									width="18px"
+									height="18px"
+									viewBox="0 0 24 24"
+									slot="suffix"
+									class="delete-icon"
+									style="margin-left: -4px; margin-right: 8px"
+									@click=${() => {
+										//delete with splic
+										this._matchers = this._matchers || []
+										this._matchers.splice(index, 1)
+										this.requestUpdate()
+									}}
 								>
 									<path
 										fill="currentColor"
-										d="M140 180a12 12 0 1 1-12-12a12 12 0 0 1 12 12M128 72c-22.06 0-40 16.15-40 36v4a8 8 0 0 0 16 0v-4c0-11 10.77-20 24-20s24 9 24 20s-10.77 20-24 20a8 8 0 0 0-8 8v8a8 8 0 0 0 16 0v-.72c18.24-3.35 32-17.9 32-35.28c0-19.85-17.94-36-40-36m104 56A104 104 0 1 1 128 24a104.11 104.11 0 0 1 104 104m-16 0a88 88 0 1 0-88 88a88.1 88.1 0 0 0 88-88"
-									/>
-								</svg>
-								<p>No input present. Add a new input to create a selector.</p>
-						  </div>`
-						: ``}
-					<div class="dropdown-item">
-						<div class="dropdown-header">
-							<p class="dropdown-title">Function</p>
-						</div>
-						<sl-select
-							size="small"
-							value="plural"
-							@sl-change=${(e: CustomEvent) => {
-								const option = (e.target as HTMLSelectElement).value as string
-								if (option === "string") {
-									this._function = "string"
-									this._matchers = ["*"]
-									this.requestUpdate()
-								} else if (option === "plural") {
-									this._function = "plural"
-									this._matchers = this._getPluralCategories() || ["*"]
-									this.requestUpdate()
-								}
-							}}
-						>
-							<sl-option value="plural">plural</sl-option>
-							<sl-option value="string">string</sl-option>
-						</sl-select>
-					</div>
-					<div class="options-container">
-						<div class="dropdown-header">
-							<p class="dropdown-title">Match</p>
-							<sl-tooltip content="Add a match to this selector">
-								<sl-button
-									class="add-input"
-									variant="text"
-									size="small"
-									@click=${() => {
-										this._matchers?.push("")
-										this.requestUpdate()
-										// get the last input element and focus it
-										setTimeout(() => {
-											const inputs = this.shadowRoot?.querySelectorAll(".option")
-											// @ts-ignore -- .at seems not to be available in the type? @NilsJacobsen
-											const lastInput = inputs && (inputs.at(-1) as HTMLInputElement)
-											lastInput?.focus(), 100
-										})
-									}}
-									><svg
-										viewBox="0 0 24 24"
-										width="18"
-										height="18"
-										slot="prefix"
-										style="margin: 0 -2px"
-									>
-										<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
-								></sl-button>
-							</sl-tooltip>
-						</div>
-						<div class="options-wrapper">
-							${this._matchers?.map((category, index) => {
-								return html`<sl-input
-									class="option"
-									size="small"
-									value=${category}
-									filled
-									@input=${(e: Event) => {
-										this._matchers = this._matchers || []
-										this._matchers[index] = (e.target as HTMLInputElement).value
-									}}
-									><svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="18px"
-										height="18px"
-										viewBox="0 0 24 24"
-										slot="suffix"
-										class="delete-icon"
-										style="margin-left: -4px; margin-right: 8px"
-										@click=${() => {
-											//delete with splic
-											this._matchers = this._matchers || []
-											this._matchers.splice(index, 1)
-											this.requestUpdate()
-										}}
-									>
-										<path
-											fill="currentColor"
-											d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"
-										/></svg
-								></sl-input>`
-							})}
-						</div>
-					</div>
-					<div class="help-text">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="24px"
-							height="24px"
-							viewBox="0 0 256 256"
-						>
-							<path
-								fill="currentColor"
-								d="M140 180a12 12 0 1 1-12-12a12 12 0 0 1 12 12M128 72c-22.06 0-40 16.15-40 36v4a8 8 0 0 0 16 0v-4c0-11 10.77-20 24-20s24 9 24 20s-10.77 20-24 20a8 8 0 0 0-8 8v8a8 8 0 0 0 16 0v-.72c18.24-3.35 32-17.9 32-35.28c0-19.85-17.94-36-40-36m104 56A104 104 0 1 1 128 24a104.11 104.11 0 0 1 104 104m-16 0a88 88 0 1 0-88 88a88.1 88.1 0 0 0 88-88"
-							/>
-						</svg>
-						<p>The selector automatically adds the variants from the list of matchers.</p>
-					</div>
-					<div class="actions">
-						<sl-button
-							@click=${() => {
-								if (this._matchers) {
-									this._handleAddSelector(this._matchers)
-								} else {
-									console.info("No matchers present")
-								}
-							}}
-							size="small"
-							variant="primary"
-							>Add selector</sl-button
-						>
+										d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"
+									/></svg
+							></sl-input>`
+						})}
 					</div>
 				</div>
-			</sl-dropdown>
+				<div class="help-text">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 256 256">
+						<path
+							fill="currentColor"
+							d="M140 180a12 12 0 1 1-12-12a12 12 0 0 1 12 12M128 72c-22.06 0-40 16.15-40 36v4a8 8 0 0 0 16 0v-4c0-11 10.77-20 24-20s24 9 24 20s-10.77 20-24 20a8 8 0 0 0-8 8v8a8 8 0 0 0 16 0v-.72c18.24-3.35 32-17.9 32-35.28c0-19.85-17.94-36-40-36m104 56A104 104 0 1 1 128 24a104.11 104.11 0 0 1 104 104m-16 0a88 88 0 1 0-88 88a88.1 88.1 0 0 0 88-88"
+						/>
+					</svg>
+					<p>The selector automatically adds the variants from the list of matchers.</p>
+				</div>
+				<div class="actions">
+					<sl-button
+						@click=${() => {
+							if (this._matchers) {
+								this._handleAddSelector(this._matchers)
+							} else {
+								console.info("No matchers present")
+							}
+						}}
+						size="medium"
+						variant="primary"
+						>Add selector</sl-button
+					>
+				</div>
+			</div>
 		`
 	}
 }

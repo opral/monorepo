@@ -3,9 +3,12 @@ import { html } from "lit"
 import { mockSettings } from "../mock/settings.ts"
 import { bundleWithoutSelectors } from "../mock/messageBundle.ts"
 
+import SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.component.js"
+if (!customElements.get("sl-dialog")) customElements.define("sl-dialog", SlDialog)
+
 //@ts-ignore
 import { useArgs } from "@storybook/preview-api"
-import { Message, MessageNested, pluralBundle, Variant } from "@inlang/sdk2"
+import { pluralBundle, type Message, type MessageNested, type Variant } from "@inlang/sdk2"
 import { type DispatchChangeInterface } from "../helper/event.ts"
 
 //components
@@ -89,6 +92,11 @@ export const Example: StoryObj = {
 			console.info(data.type, data.operation, data.newData, newBundle)
 		}
 
+		const handleSelectorModal = () => {
+			const dialog = document.querySelector("sl-dialog") as SlDialog
+			dialog.show()
+		}
+
 		return html`<inlang-bundle .bundle=${bundle} .messages=${messages} @change=${handleChange}>
 			${messages.map((message: MessageNested) => {
 				return html`<inlang-message slot="message" .message=${message} .settings=${mockSettings}>
@@ -98,19 +106,46 @@ export const Example: StoryObj = {
 							</inlang-pattern-editor>
 							${(message.selectors.length === 0 && message.variants.length <= 1) ||
 							!message.selectors
-								? html`<inlang-add-selector
-										slot="variant-action"
-										.message=${message}
-										.messages=${messages}
-								  ></inlang-add-selector>`
+								? html`<style>
+											sl-dialog::part(body) {
+												padding: 0;
+												margin-top: -16px;
+											}
+											sl-dialog::part(panel) {
+												border-radius: 8px;
+											}
+										</style>
+										<div slot="variant-action" @click=${handleSelectorModal}>Add selector</div>
+										<sl-dialog slot="variant-action" label="Add Selector">
+											<inlang-add-selector
+												.message=${message}
+												.messages=${messages}
+											></inlang-add-selector>
+										</sl-dialog>`
 								: ``}
 						</inlang-variant>`
 					})}
-					<inlang-add-selector
-						slot="selector-button"
-						.message=${message}
-						.messages=${messages}
-					></inlang-add-selector>
+					<style>
+						.add-selector {
+							height: 44px;
+							display: flex;
+							align-items: center;
+							margin-right: 12px;
+						}
+						sl-dialog::part(body) {
+							padding: 0;
+							margin-top: -16px;
+						}
+						sl-dialog::part(panel) {
+							border-radius: 8px;
+						}
+					</style>
+					<div slot="selector-button" class="add-selector" @click=${handleSelectorModal}>
+						Add selector
+					</div>
+					<sl-dialog slot="selector-button" label="Add Selector">
+						<inlang-add-selector .message=${message} .messages=${messages}></inlang-add-selector>
+					</sl-dialog>
 				</inlang-message>`
 			})}
 		</inlang-bundle>`

@@ -16,16 +16,12 @@ export default meta
 
 export const Example: StoryObj = {
 	render: () => {
-		return html`<style>
-				.container {
-					padding-bottom: 400px;
-				}
-			</style>
-			<div class="container">
-				<inlang-add-selector
-					.message=${pluralBundle.messages[0]}
-					.messages=${pluralBundle.messages}
-				></inlang-add-selector>
-			</div>`
+		return html`
+			<inlang-add-selector
+				.message=${pluralBundle.messages[0]}
+				.messages=${pluralBundle.messages}
+				@change=${(e) => console.info(e.detail.argument)}
+			></inlang-add-selector>
+		`
 	},
 }

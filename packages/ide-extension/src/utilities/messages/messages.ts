@@ -61,12 +61,9 @@ export function createMessageWebviewProvider(args: {
 	const updateWebviewContent = async () => {
 		const activeEditor = vscode.window.activeTextEditor
 		const fileContent = activeEditor ? activeEditor.document.getText() : ""
-		const project = state().project as InlangProject | undefined
-		const ideExtension = project?.plugins
-			.get()
-			.find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])?.meta?.[
-			"app.inlang.ideExtension"
-		] as IdeExtensionConfig | undefined
+		const ideExtension = (await state().project.plugins.get()).find(
+			(plugin) => plugin?.meta?.["app.inlang.ideExtension"]
+		)?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
 		const messageReferenceMatchers = ideExtension?.messageReferenceMatchers
 
 		const matchedBundles = (
@@ -91,14 +88,15 @@ export function createMessageWebviewProvider(args: {
 				? `<div class="highlighted-section">
                         <div class="banner"><span class="active-dot"></span><span>Current file<span></div>
                         ${await Promise.all(
-													highlightedBundles.map(async (bundle) =>
-														createMessageHtml({
-															bundle: bundle!,
-															position: matchedBundles.find((m) => m.bundleId === bundle?.id)
-																?.position,
-															isHighlighted: true,
-															workspaceFolder: args.workspaceFolder,
-														})
+													highlightedBundles.map(
+														async (bundle) =>
+															await createMessageHtml({
+																bundle: bundle!,
+																position: matchedBundles.find((m) => m.bundleId === bundle?.id)
+																	?.position,
+																isHighlighted: true,
+																workspaceFolder: args.workspaceFolder,
+															})
 													)
 												).then((htmls) => htmls.join(""))}
                     </div>`
@@ -110,12 +108,13 @@ export function createMessageWebviewProvider(args: {
 			mainContentHtml = createMessagesLoadingHtml()
 		} else if (bundles && bundles.length > 0) {
 			mainContentHtml = `${highlightedMessagesHtml}<main>${allMessagesBanner}${await Promise.all(
-				bundles.map(async (message) =>
-					createMessageHtml({
-						bundle: message,
-						isHighlighted: false,
-						workspaceFolder: args.workspaceFolder,
-					})
+				bundles.map(
+					async (message) =>
+						await createMessageHtml({
+							bundle: message,
+							isHighlighted: false,
+							workspaceFolder: args.workspaceFolder,
+						})
 				)
 			).then((htmls) => htmls.join(""))}</main>`
 		} else {
@@ -206,7 +205,7 @@ export function createMessageWebviewProvider(args: {
 	}
 }
 
-export function createMessageHtml(args: {
+export async function createMessageHtml(args: {
 	bundle: BundleNested
 	position?: {
 		start: {
@@ -220,13 +219,13 @@ export function createMessageHtml(args: {
 	}
 	isHighlighted: boolean
 	workspaceFolder: vscode.WorkspaceFolder
-}): string {
+}): Promise<string> {
 	// Function to check if the record has any keys
 	const hasAliases = (aliases: Bundle["alias"]): boolean => {
 		return Object.keys(aliases).length > 0
 	}
 
-	const isExperimentalAliasesEnabled = state().project.settings.get()?.experimental?.aliases
+	const isExperimentalAliasesEnabled = (await state().project.settings.get())?.experimental?.aliases
 
 	const aliasHtml =
 		isExperimentalAliasesEnabled && hasAliases(args.bundle.alias)
