@@ -44,11 +44,18 @@ describe("Message Webview Provider Tests", () => {
 	})
 
 	it("should create HTML for a message", async () => {
-		// Mocking state to return a specific project configuration
-		// @ts-expect-error
-		state.mockReturnValue({
+		vi.mocked(state).mockReturnValue({
 			project: {
-				settings: new Map().set("experimental", { aliases: true }),
+				// @ts-expect-error
+				settings: {
+					get: vi.fn().mockResolvedValue({
+						baseLocale: "en",
+						locales: ["en", "de"],
+						experimental: {
+							aliases: true,
+						},
+					}),
+				},
 			},
 			selectedProjectPath: "/workspace/project",
 		})
@@ -90,11 +97,14 @@ describe("Message Webview Provider Tests", () => {
 
 	it("should handle cases where settings are not available", async () => {
 		// Mocking state to return a project with no specific settings
-		// @ts-expect-error
-		state.mockReturnValue({
+		vi.mocked(state).mockReturnValue({
 			project: {
-				settings: new Map(),
+				// @ts-expect-error
+				settings: {
+					get: vi.fn().mockResolvedValue({}),
+				},
 			},
+			selectedProjectPath: "/workspace/project",
 		})
 
 		// Creating a message HTML without aliases enabled
