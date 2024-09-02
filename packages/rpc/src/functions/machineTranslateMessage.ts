@@ -1,6 +1,12 @@
 import { privateEnv } from "@inlang/env-variables"
 import type { Result } from "@inlang/result"
-import { createVariant, Text, VariableReference, Variant, type BundleNested } from "@inlang/sdk2"
+import {
+	createVariant,
+	Text,
+	VariableReference,
+	type Variant,
+	type BundleNested,
+} from "@inlang/sdk2"
 
 export async function machineTranslateMessage(args: {
 	bundle: BundleNested
