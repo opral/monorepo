@@ -96,7 +96,9 @@ const HistoryEntry = ({ commit }) => {
       </div>
       {isOpen && (
         <div className="p-4">
-          {changeHistory.map(({ current, previous }, index) => (
+          {changeHistory
+            .filter(({ current }) => current.type === "variant") // only show variant changes
+            .map(({ current, previous }, index) => (
             <div key={index}>
               <div className="flex gap-4 items-end px-4 pb-[8px] pb-[16px]">
                 <div className="flex-1">
