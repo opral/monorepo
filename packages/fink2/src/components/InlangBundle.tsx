@@ -114,7 +114,6 @@ const InlangBundle = (props: {
 
 	const handleChange = (e: Event) => {
 		const data = (e as CustomEvent).detail.argument;
-		console.log(data);
 		switch (data.type) {
 			case "Message":
 				if (data.operation === "create") {
@@ -347,7 +346,7 @@ const InlangBundle = (props: {
 												onClick={async () => {
 													if (project) {
 														await queryHelper.message
-															.insert(project.db, message)
+															.insert(project.db, messagde)
 															.execute();
 
 														await queryHelper.variant
