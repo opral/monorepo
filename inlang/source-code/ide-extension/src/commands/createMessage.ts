@@ -31,8 +31,9 @@ export const createMessageCommand = {
 			title: "Enter the ID:",
 			value: autoHumanId ? humanId() : "",
 			prompt:
-				autoHumanId &&
-				"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.",
+				(autoHumanId &&
+					"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.") ||
+				undefined,
 		})
 		if (bundleId === undefined) {
 			return
@@ -74,6 +75,7 @@ export const createMessageCommand = {
 			telemetry.capture({
 				event: "IDE-EXTENSION command executed: Create Message",
 			})
+
 			return msg("Message created.")
 		} catch (e) {
 			return window.showErrorMessage(`Couldn't upsert new message. ${e}`)
