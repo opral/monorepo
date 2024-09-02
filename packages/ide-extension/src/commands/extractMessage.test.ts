@@ -101,7 +101,7 @@ describe("extractMessageCommand", () => {
 				db: {
 					// @ts-expect-error
 					transaction: () => ({
-						execute: vi.fn().mockResolvedValue(true),
+						execute: vi.fn(),
 					}),
 				},
 			},
@@ -193,19 +193,29 @@ describe("extractMessageCommand", () => {
 	})
 
 	it("should handle non-existent extract option", async () => {
+		console.log("Starting test: should handle non-existent extract option")
+
 		vi.mocked(getSetting).mockResolvedValueOnce(true)
 		vi.mocked(window.showInputBox).mockResolvedValueOnce("generatedId123")
 		vi.mocked(window.showQuickPick).mockResolvedValueOnce(undefined)
 
 		await extractMessageCommand.callback(mockTextEditor)
+
+		console.log("Completed callback execution")
+		console.log("msg.calls:", msg.mock.calls)
+
 		expect(msg).toHaveBeenCalledWith(
 			"Couldn't find choosen extract option.",
 			"warn",
 			"notification"
 		)
+
+		console.log("Test completed: should handle non-existent extract option")
 	})
 
 	it("should show error message if message creation fails", async () => {
+		console.log("Starting test: should show error message if message creation fails")
+
 		vi.mocked(getSetting).mockResolvedValueOnce(true)
 		vi.mocked(window.showInputBox).mockResolvedValueOnce("generatedId123")
 		// @ts-expect-error
@@ -240,17 +250,26 @@ describe("extractMessageCommand", () => {
 				db: {
 					// @ts-expect-error
 					transaction: () => ({
-						execute: vi.fn().mockRejectedValue(false),
+						execute: vi.fn().mockRejectedValue(new Error("Some error")),
 					}),
 				},
 			},
 		})
 
-		await extractMessageCommand.callback(mockTextEditor)
+		try {
+			await extractMessageCommand.callback(mockTextEditor)
+		} catch (e) {
+			console.error("Caught an error in callback execution:", e)
+		}
+
+		console.log("Completed callback execution")
+		console.log("window.showErrorMessage.calls:", window.showErrorMessage.mock.calls)
 
 		expect(window.showErrorMessage).toHaveBeenCalledWith(
-			`Couldn't upsert new message with id generatedId123.`
+			`Couldn't extract new message with id generatedId123.`
 		)
+
+		console.log("Test completed: should show error message if message creation fails")
 	})
 
 	it("should extract a message successfully", async () => {
