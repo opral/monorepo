@@ -20,12 +20,10 @@ const LixFloat = () => {
       const lixfloat = document.querySelector(".lixfloat")
       lixfloat?.classList.remove("opacity-0")
       lixfloat?.classList.add("animate-slideOut")
-      console.log("addAnimation")
       setTimeout(() => {
         lixfloat?.classList.remove("animate-slideout")
         lixfloat?.classList.add("opacity-0")
         setPendingChangesWasEmpty(true);
-        console.log("removeAnimation")
       }, 500)
     } else {
       setPendingChangesWasEmpty(pendingChanges.length === 0);
