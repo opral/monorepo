@@ -12,6 +12,7 @@ export {
 	/**
 	 * @deprecated use `humandId()` instead (it's a rename)
 	 */
+	humanId as generateBundleId
 } from "./human-id/human-id.js";
 export type { InlangDatabaseSchema } from "./database/schema.js";
 export type { ResourceFile } from "./project/api.js";
