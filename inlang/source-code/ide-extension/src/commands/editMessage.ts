@@ -3,7 +3,7 @@ import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
 import { getPatternFromString, getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
-import { Bundle, selectBundleNested } from "@inlang/sdk2"
+import { type Bundle, selectBundleNested } from "@inlang/sdk2"
 
 export const editMessageCommand = {
 	command: "sherlock.editMessage",

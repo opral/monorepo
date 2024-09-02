@@ -4,8 +4,9 @@ import { msg } from "../utilities/messages/msg.js"
 import { window } from "vscode"
 import { CONFIGURATION } from "../configuration.js"
 import { getSetting } from "../utilities/settings/index.js"
-import { telemetry } from "../services/telemetry/implementation.js"
+import { telemetry } from "../services/telemetry/index.js"
 import { humanId } from "@inlang/sdk2"
+import { state } from "../utilities/state.js"
 
 vi.mock("vscode", () => ({
 	window: {
@@ -22,7 +23,7 @@ vi.mock("../utilities/messages/msg", () => ({
 	msg: vi.fn(),
 }))
 
-vi.mock("../services/telemetry", () => ({
+vi.mock("../services/telemetry/index.js", () => ({
 	telemetry: {
 		capture: vi.fn(),
 	},
@@ -47,21 +48,25 @@ vi.mock("@inlang/sdk2", () => ({
 	createMessage: vi.fn(),
 }))
 
+vi.mock("../utilities/state", () => ({
+	state: vi.fn(),
+}))
+
 describe("createMessageCommand", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 	})
 
 	it("should return if message content input is cancelled", async () => {
-		vi.mock("../utilities/state", () => ({
-			state: () => ({
-				project: {
-					settings: {
-						get: vi.fn().mockResolvedValueOnce({ baseLocale: "en" }),
-					},
+		vi.mocked(state).mockReturnValue({
+			project: {
+				// @ts-expect-error
+				settings: {
+					get: vi.fn().mockResolvedValueOnce({ baseLocale: "en" }),
 				},
-			}),
-		}))
+			},
+		})
+
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce(undefined)
 		await createMessageCommand.callback()
@@ -72,15 +77,15 @@ describe("createMessageCommand", () => {
 	})
 
 	it("should handle message ID input cancellation", async () => {
-		vi.mock("../utilities/state", () => ({
-			state: () => ({
-				project: {
-					settings: {
-						get: vi.fn().mockResolvedValueOnce({ baseLocale: "en" }),
-					},
+		vi.mocked(state).mockReturnValue({
+			project: {
+				// @ts-expect-error
+				settings: {
+					get: vi.fn().mockResolvedValueOnce({ baseLocale: "de" }),
 				},
-			}),
-		}))
+			},
+		})
+
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("Some message content")
 		// @ts-expect-error
@@ -92,20 +97,20 @@ describe("createMessageCommand", () => {
 
 	it("should show error message if message creation fails", async () => {
 		// Mock state with proper transaction rejection
-		vi.mock("../utilities/state", () => ({
-			state: () => ({
-				project: {
-					settings: {
-						get: vi.fn().mockResolvedValueOnce({ baseLocale: "en" }),
-					},
-					db: {
-						transaction: () => ({
-							execute: vi.fn().mockRejectedValueOnce(new Error("Some error")),
-						}),
-					},
+		vi.mocked(state).mockReturnValue({
+			project: {
+				// @ts-expect-error
+				settings: {
+					get: vi.fn().mockResolvedValueOnce({ baseLocale: "en" }),
 				},
-			}),
-		}))
+				db: {
+					// @ts-expect-error
+					transaction: () => ({
+						execute: vi.fn().mockRejectedValueOnce(new Error("Some error")),
+					}),
+				},
+			},
+		})
 
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("Some message content")
@@ -121,20 +126,20 @@ describe("createMessageCommand", () => {
 
 	it("should create message and show success message", async () => {
 		// Mock state with proper transaction rejection
-		vi.mock("../utilities/state", () => ({
-			state: () => ({
-				project: {
-					settings: {
-						get: vi.fn().mockResolvedValueOnce({ baseLocale: "en" }),
-					},
-					db: {
-						transaction: () => ({
-							execute: vi.fn().mockResolvedValueOnce(true),
-						}),
-					},
+		vi.mocked(state).mockReturnValue({
+			project: {
+				// @ts-expect-error
+				settings: {
+					get: vi.fn().mockResolvedValueOnce({ baseLocale: "en" }),
 				},
-			}),
-		}))
+				db: {
+					// @ts-expect-error
+					transaction: () => ({
+						execute: vi.fn().mockResolvedValueOnce(true),
+					}),
+				},
+			},
+		})
 
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("Some message content")
@@ -149,15 +154,14 @@ describe("createMessageCommand", () => {
 	})
 
 	it("should use humanId as default messageId if autoHumanId is true", async () => {
-		vi.mock("../utilities/state", () => ({
-			state: () => ({
-				project: {
-					settings: {
-						get: vi.fn().mockResolvedValueOnce({ baseLocale: "en" }),
-					},
+		vi.mocked(state).mockReturnValue({
+			project: {
+				// @ts-expect-error
+				settings: {
+					get: vi.fn().mockResolvedValueOnce({ baseLocale: "en" }),
 				},
-			}),
-		}))
+			},
+		})
 		// @ts-expect-error
 		getSetting.mockResolvedValueOnce(true)
 		// @ts-expect-error
@@ -173,15 +177,14 @@ describe("createMessageCommand", () => {
 	})
 
 	it("should not use humanId as default messageId if autoHumanId is false", async () => {
-		vi.mock("../utilities/state", () => ({
-			state: () => ({
-				project: {
-					settings: {
-						get: vi.fn().mockResolvedValueOnce({ baseLocale: "en" }),
-					},
+		vi.mocked(state).mockReturnValue({
+			project: {
+				// @ts-expect-error
+				settings: {
+					get: vi.fn().mockResolvedValueOnce({ baseLocale: "en" }),
 				},
-			}),
-		}))
+			},
+		})
 
 		// @ts-expect-error
 		getSetting.mockResolvedValueOnce(false)
