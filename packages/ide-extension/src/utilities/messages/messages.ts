@@ -6,6 +6,7 @@ import { escapeHtml } from "../utils.js"
 // TODO: Uncomment when bundle subscribe is implemented
 // import { throttle } from "throttle-debounce"
 import {
+	type ProjectSettings,
 	selectBundleNested,
 	type Bundle,
 	type BundleNested,
@@ -225,7 +226,8 @@ export async function createMessageHtml(args: {
 		return Object.keys(aliases).length > 0
 	}
 
-	const isExperimentalAliasesEnabled = (await state().project.settings.get())?.experimental?.aliases
+	const isExperimentalAliasesEnabled = ((await state().project.settings.get()) as ProjectSettings)
+		.experimental?.aliases
 
 	const aliasHtml =
 		isExperimentalAliasesEnabled && hasAliases(args.bundle.alias)
