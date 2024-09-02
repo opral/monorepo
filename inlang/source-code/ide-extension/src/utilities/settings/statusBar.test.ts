@@ -4,7 +4,6 @@ import { statusBar, showStatusBar } from "./statusBar.js"
 import { state } from "../state.js"
 import { getSetting } from "./index.js"
 import { CONFIGURATION } from "../../configuration.js"
-import { get } from "node:http"
 
 let lastStatusBarItem: any = undefined // Track the last status bar item created for testing
 
@@ -36,10 +35,9 @@ vi.mock("vscode", () => ({
 vi.mock("../state", () => ({
 	state: vi.fn().mockImplementation(() => ({
 		project: {
-			settings: vi.fn().mockReturnValue({
-				baseLocale: "en",
-				locales: ["en", "fr"],
-			}),
+			settings: {
+				get: vi.fn().mockResolvedValueOnce({ baseLocale: "en", locales: ["en", "de"] }),
+			},
 		},
 	})),
 }))

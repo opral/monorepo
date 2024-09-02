@@ -2,11 +2,10 @@ import { state } from "../state.js"
 import { getSetting } from "../settings/index.js"
 
 export async function getPreviewLocale() {
-	const baseLocale = (await state().project.settings.get())?.baseLocale
+	const settings = await state().project.settings.get()
+	const baseLocale = settings.baseLocale
 	const previewLanguageTag = ((await getSetting("previewLanguageTag")) as string) || baseLocale
 
-	const isPreviewLangAvailable = (await state().project.settings.get()).locales.includes(
-		previewLanguageTag
-	)
+	const isPreviewLangAvailable = settings.locales.includes(previewLanguageTag)
 	return isPreviewLangAvailable ? previewLanguageTag : baseLocale
 }

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as vscode from "vscode"
+import * as fs from "node:fs/promises"
 import { loadProject } from "@inlang/sdk"
 import { setState, state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
@@ -208,7 +209,6 @@ describe("handleTreeSelection", () => {
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: mockContext,
 		}
-		const fs = {} as typeof import("node:fs/promises")
 		const workspaceFolder = {
 			uri: {
 				fsPath: "/path/to/workspace",
@@ -238,7 +238,6 @@ describe("handleTreeSelection", () => {
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: mockContext,
 		}
-		const fs = {} as typeof import("node:fs/promises")
 		const workspaceFolder = {
 			uri: {
 				fsPath: "/path/to/workspace",
@@ -270,7 +269,6 @@ describe("handleTreeSelection", () => {
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: mockContext,
 		}
-		const fs = {} as typeof import("node:fs/promises")
 		const workspaceFolder = {
 			uri: {
 				fsPath: "/path/to/workspace",
@@ -293,7 +291,6 @@ describe("createTreeDataProvider", () => {
 	const mockContext = {} as vscode.ExtensionContext
 
 	it("should create a TreeDataProvider", () => {
-		const fs = {} as typeof import("node:fs/promises")
 		const workspaceFolder = {
 			uri: {
 				fsPath: "/path/to/workspace",
@@ -321,7 +318,6 @@ describe("projectView", () => {
 				fsPath: "/path/to/workspace",
 			},
 		} as vscode.WorkspaceFolder
-		const fs = {} as typeof import("node:fs/promises")
 
 		await projectView({ context, workspaceFolder, fs })
 
