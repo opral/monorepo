@@ -55,14 +55,14 @@ describe("settingsPanel", () => {
 	})
 })
 
-describe("getWebviewContent", () => {
-	it("should return expected HTML content", () => {
+describe("getWebviewContent", async () => {
+	it("should return expected HTML content", async () => {
 		const mockWebview = { asWebviewUri: vi.fn() } as unknown as vscode.Webview
 		const mockContext = { extensionUri: "uri" } as unknown as vscode.ExtensionContext
 		// @ts-expect-error
 		mockWebview.asWebviewUri.mockImplementation((uri: any) => uri)
 
-		const htmlContent = getWebviewContent({ context: mockContext, webview: mockWebview })
+		const htmlContent = await getWebviewContent({ context: mockContext, webview: mockWebview })
 		expect(htmlContent).toContain("<title>Settings</title>")
 	})
 })
