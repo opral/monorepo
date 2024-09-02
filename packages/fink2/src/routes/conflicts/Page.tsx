@@ -150,7 +150,7 @@ export default function Page() {
 													>
 														<InlangPatternEditor
 															slot="pattern-editor"
-															pattern={conflictingChange.value.pattern}
+															pattern={conflictingChange.value}
 															className={"conflict-pattern"}
 														></InlangPatternEditor>
 													</InlangVariant>
