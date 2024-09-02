@@ -75,7 +75,6 @@ export const editMessageCommand = {
 
 			return msg("Message updated.")
 		} catch (e) {
-			console.error(e)
 			return msg(`Couldn't update bundle with id ${bundleId}. ${e}`)
 		}
 	},
