@@ -41,13 +41,6 @@ export const extractMessageCommand = {
 				"notification"
 			)
 		}
-		if (baseLocale === undefined) {
-			return msg(
-				"The `baseLocale` is not defined in the project but required to extract a message.",
-				"warn",
-				"notification"
-			)
-		}
 
 		if (textEditor === undefined) {
 			return msg(
@@ -123,45 +116,45 @@ export const extractMessageCommand = {
 			messages: [message],
 		})
 
-		// create message
-		const success = await state()
-			.project.db.transaction()
-			.execute(async (trx) => {
-				await trx
-					.insertInto("bundle")
-					.values({
-						id: bundle.id,
-						alias: bundle.alias,
-					})
-					.execute()
+		try {
+			await state()
+				.project.db.transaction()
+				.execute(async (trx) => {
+					await trx
+						.insertInto("bundle")
+						.values({
+							id: bundle.id,
+							alias: bundle.alias,
+						})
+						.execute()
 
-				return await trx
-					.insertInto("message")
-					.values({
-						id: message.id,
-						bundleId: message.bundleId,
-						locale: message.locale,
-						declarations: message.declarations,
-						selectors: message.selectors,
-					})
-					.returningAll()
-					.execute()
+					return await trx
+						.insertInto("message")
+						.values({
+							id: message.id,
+							bundleId: message.bundleId,
+							locale: message.locale,
+							declarations: message.declarations,
+							selectors: message.selectors,
+						})
+						.returningAll()
+						.execute()
+				})
+
+			await textEditor.edit((editor) => {
+				editor.replace(textEditor.selection, preparedExtractOption)
 			})
 
-		if (!success) {
+			// Emit event to notify that a message was extracted
+			CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
+
+			telemetry.capture({
+				event: "IDE-EXTENSION command executed: Extract Message",
+			})
+
+			return msg("Message extracted.")
+		} catch (e) {
 			return window.showErrorMessage(`Couldn't upsert new message with id ${bundleId}.`)
 		}
-
-		await textEditor.edit((editor) => {
-			editor.replace(textEditor.selection, preparedExtractOption)
-		})
-
-		// Emit event to notify that a message was extracted
-		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
-
-		telemetry.capture({
-			event: "IDE-EXTENSION command executed: Extract Message",
-		})
-		return msg("Message extracted.")
 	},
-} as const
+}

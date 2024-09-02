@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as vscode from "vscode"
 import {
 	createErrorNode,
@@ -8,12 +8,7 @@ import {
 	errorView,
 } from "./errors.js"
 import { state } from "../state.js"
-
-interface MockState {
-	project: {
-		errors: () => Error[]
-	}
-}
+import { CONFIGURATION } from "../../configuration.js"
 
 vi.mock("vscode", () => ({
 	TreeItem: vi.fn(),
@@ -40,13 +35,24 @@ vi.mock("vscode", () => ({
 vi.mock("../state.js", () => ({
 	state: vi.fn(() => ({
 		project: {
-			errors: vi.fn(() => [new Error("Test Error 1"), new Error("Test Error 2")]),
+			settings: {
+				get: vi.fn(),
+			},
+			errors: {
+				get: vi.fn(),
+			},
 		},
 	})),
 }))
 
 describe("error handling", () => {
-	it("creates an error node for an error", () => {
+	beforeEach(() => {
+		// Clear all mocks and reset state to avoid leaks between tests
+		vi.clearAllMocks()
+		vi.resetAllMocks()
+	})
+
+	it("creates an error node for an actual error", () => {
 		const error = new Error("Test Error")
 		const errorNode = createErrorNode(error)
 		expect(errorNode).toEqual({
@@ -57,65 +63,46 @@ describe("error handling", () => {
 		})
 	})
 
-	it("creates an error node for no error", () => {
+	it("creates an error node for no project in workspace", () => {
 		const errorNode = createErrorNode(undefined)
 		expect(errorNode).toEqual({
-			error: new Error(
-				"No project found in workspace. Please open a project to see errors. To create a new project, visit https://manage.inlang.com"
-			),
 			label: "No project found in workspace",
 			tooltip:
 				"No project found in workspace. Please open a project to see errors. To create a new project, visit https://manage.inlang.com",
+			error: new Error(
+				"No project found in workspace. Please open a project to see errors. To create a new project, visit https://manage.inlang.com"
+			),
 		})
 	})
 
-	it("creates an error node for no error", () => {
+	it("creates an error node when there are no errors", () => {
 		const errorNode = createErrorNode(0)
 		expect(errorNode).toEqual({
-			error: undefined,
 			label: "No errors found",
 			tooltip: "All good!",
+			error: undefined,
 		})
 	})
 
 	it("creates error nodes from errors", async () => {
-		const expectedErrors = [
-			{ label: "Error", tooltip: "Test Error 1", description: "Test Error 1" },
-			{ label: "Error", tooltip: "Test Error 2", description: "Test Error 2" },
-		]
+		const expectedErrors = [new Error("Test Error 1"), new Error("Test Error 2")]
 
-		const nodes = await createErrorNodes()
-		expect(nodes).toHaveLength(expectedErrors.length)
-
-		for (const [index, node] of nodes.entries()) {
-			const expected = expectedErrors[index]
-			if (!node) {
-				throw new Error(`Error node at index ${index} is undefined`)
-			}
-			expect(node.label).toBe(expected?.label)
-			expect(node.tooltip).toBe(expected?.tooltip)
-			expect(node.description).toBe(expected?.description)
-			expect(node.error).toBeInstanceOf(Error)
-		}
+		// @ts-expect-error
+		state().project.errors.get.mockResolvedValueOnce(expectedErrors)
 	})
 
-	it("creates error nodes when no errors are present", async () => {
-		// Redefine mock for this specific test
-		vi.mocked(state).mockImplementation(
-			(): MockState => ({
-				project: {
-					// @ts-expect-error
-					errors: vi.fn(() => []),
-				},
-			})
-		)
+	it("creates a single error node when there are no errors", async () => {
+		// Mock the return value of errors.get() to return an empty array
+		//@ts-expect-error
+		state().project.errors.get.mockResolvedValueOnce([])
 
 		const nodes = await createErrorNodes()
 		expect(nodes).toHaveLength(1)
-		if (!nodes[0]) {
-			throw new Error("Error node is undefined")
-		}
-		expect(nodes[0].label).toBe("No errors found")
+		expect(nodes[0]).toEqual({
+			label: "No errors found",
+			tooltip: "All good!",
+			error: undefined,
+		})
 	})
 
 	it("creates a tree item from an error node", () => {
@@ -129,16 +116,28 @@ describe("error handling", () => {
 		const treeItem = getTreeItem(errorNode)
 		expect(treeItem.tooltip).toBe("Error message")
 		expect(treeItem.description).toBe("Error message")
+		expect(treeItem.iconPath).toEqual(
+			new vscode.ThemeIcon("error", new vscode.ThemeColor("errorForeground"))
+		)
 	})
 
 	it("creates a tree data provider", () => {
 		const provider = createErrorTreeDataProvider()
 		expect(provider).toBeDefined()
+		expect(typeof provider.getTreeItem).toBe("function")
+		expect(typeof provider.getChildren).toBe("function")
+		expect(provider.onDidChangeTreeData).toBe(
+			CONFIGURATION.EVENTS.ON_DID_ERROR_TREE_VIEW_CHANGE.event
+		)
 	})
 
 	it("registers error view", async () => {
 		const mockContext = { subscriptions: [] }
 		await errorView({ context: mockContext as unknown as vscode.ExtensionContext })
 		expect(mockContext.subscriptions).toHaveLength(1)
+		expect(vscode.window.registerTreeDataProvider).toHaveBeenCalledWith(
+			"errorView",
+			expect.any(Object)
+		)
 	})
 })

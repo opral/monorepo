@@ -29,10 +29,11 @@ vi.mock("../state.js", () => ({
 	state: () => ({
 		selectedProjectPath: "Users/username/happy-elephant.inlang",
 		project: {
-			settings: vi.fn().mockReturnValue({}),
-			installed: {
-				plugins: vi.fn().mockReturnValue([]),
-				messageLintRules: vi.fn().mockReturnValue([]),
+			settings: {
+				get: async () => vi.fn().mockReturnValue({}),
+			},
+			plugins: {
+				get: async () => vi.fn().mockReturnValue({}),
 			},
 		},
 	}),

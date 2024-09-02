@@ -3,7 +3,7 @@ import { getPreviewLocale } from "./getPreviewLocale.js"
 import { state } from "../state.js"
 import { getSetting } from "../settings/index.js"
 
-// Mock the external modules directly
+// Mock the external modules
 vi.mock("../state", () => ({
 	state: vi.fn(),
 }))
@@ -17,13 +17,16 @@ describe("getPreviewLocale", () => {
 		// @ts-expect-error
 		state.mockImplementation(() => ({
 			project: {
-				settings: () => ({
-					baseLocale: "en",
-					locales: ["en", "de"],
-				}),
+				settings: {
+					get: async () => ({
+						baseLocale: "en",
+						locales: ["en", "de"],
+					}),
+				},
 			},
 		}))
-		vi.mocked(getSetting).mockResolvedValue("de")
+		// @ts-expect-error
+		getSetting.mockResolvedValue("de")
 		expect(await getPreviewLocale()).toBe("de")
 	})
 
@@ -31,13 +34,16 @@ describe("getPreviewLocale", () => {
 		// @ts-expect-error
 		state.mockImplementation(() => ({
 			project: {
-				settings: () => ({
-					baseLocale: "en",
-					locales: ["en"],
-				}),
+				settings: {
+					get: async () => ({
+						baseLocale: "en",
+						locales: ["en"],
+					}),
+				},
 			},
 		}))
-		vi.mocked(getSetting).mockResolvedValue("fr")
+		// @ts-expect-error
+		getSetting.mockResolvedValue("fr")
 		expect(await getPreviewLocale()).toBe("en")
 	})
 
@@ -45,13 +51,16 @@ describe("getPreviewLocale", () => {
 		// @ts-expect-error
 		state.mockImplementation(() => ({
 			project: {
-				settings: () => ({
-					baseLocale: "en",
-					locales: ["en", "de"],
-				}),
+				settings: {
+					get: async () => ({
+						baseLocale: "en",
+						locales: ["en", "de"],
+					}),
+				},
 			},
 		}))
-		vi.mocked(getSetting).mockResolvedValue("")
+		// @ts-expect-error
+		getSetting.mockResolvedValue("")
 		expect(await getPreviewLocale()).toBe("en")
 	})
 
@@ -59,13 +68,16 @@ describe("getPreviewLocale", () => {
 		// @ts-expect-error
 		state.mockImplementation(() => ({
 			project: {
-				settings: () => ({
-					baseLocale: undefined,
-					locales: [],
-				}),
+				settings: {
+					get: async () => ({
+						baseLocale: undefined,
+						locales: ["en", "de"],
+					}),
+				},
 			},
 		}))
-		vi.mocked(getSetting).mockResolvedValue("de")
-		expect(await getPreviewLocale()).toBeUndefined()
+		// @ts-expect-error
+		getSetting.mockResolvedValue("de")
+		expect(await getPreviewLocale()).toBe("de")
 	})
 })
