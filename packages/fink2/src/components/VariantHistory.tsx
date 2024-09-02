@@ -24,9 +24,6 @@ const VariantHistory = (props: { variantId: string }) => {
 		return () => clearInterval(interval);
 	}, []);
 
-	useEffect(() => {
-		console.log(latestCommit);
-	}, [latestCommit]);
 	return (
 		<div className="flex items-center text-zinc-400 text-[14px]! font-normal">
 			{latestCommit?.author && (
