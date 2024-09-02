@@ -33,16 +33,7 @@ vi.mock("vscode", () => ({
 
 // Mock the state module
 vi.mock("../state.js", () => ({
-	state: vi.fn(() => ({
-		project: {
-			settings: {
-				get: vi.fn(),
-			},
-			errors: {
-				get: vi.fn(),
-			},
-		},
-	})),
+	state: vi.fn(),
 }))
 
 describe("error handling", () => {
@@ -84,17 +75,15 @@ describe("error handling", () => {
 		})
 	})
 
-	it("creates error nodes from errors", async () => {
-		const expectedErrors = [new Error("Test Error 1"), new Error("Test Error 2")]
-
-		// @ts-expect-error
-		state().project.errors.get.mockResolvedValueOnce(expectedErrors)
-	})
-
 	it("creates a single error node when there are no errors", async () => {
-		// Mock the return value of errors.get() to return an empty array
-		//@ts-expect-error
-		state().project.errors.get.mockResolvedValueOnce([])
+		vi.mocked(state).mockReturnValue({
+			project: {
+				// @ts-expect-error
+				errors: {
+					get: vi.fn().mockResolvedValue([]),
+				},
+			},
+		})
 
 		const nodes = await createErrorNodes()
 		expect(nodes).toHaveLength(1)
