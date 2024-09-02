@@ -100,7 +100,7 @@ describe("createMessageCommand", () => {
 					},
 					db: {
 						transaction: () => ({
-							execute: vi.fn().mockRejectedValueOnce("Some error"),
+							execute: vi.fn().mockRejectedValueOnce(new Error("Some error")),
 						}),
 					},
 				},
@@ -148,7 +148,7 @@ describe("createMessageCommand", () => {
 		expect(msg).toHaveBeenCalledWith("Message created.")
 	})
 
-	it("should use generateBundleId as default messageId if autoHumanId is true", async () => {
+	it("should use humanId as default messageId if autoHumanId is true", async () => {
 		vi.mock("../utilities/state", () => ({
 			state: () => ({
 				project: {
@@ -172,7 +172,7 @@ describe("createMessageCommand", () => {
 		})
 	})
 
-	it("should not use generateBundleId as default messageId if autoHumanId is false", async () => {
+	it("should not use humanId as default messageId if autoHumanId is false", async () => {
 		vi.mock("../utilities/state", () => ({
 			state: () => ({
 				project: {
@@ -182,12 +182,16 @@ describe("createMessageCommand", () => {
 				},
 			}),
 		}))
+
 		// @ts-expect-error
 		getSetting.mockResolvedValueOnce(false)
+
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("Some message content")
 
 		await createMessageCommand.callback()
+
+		expect(humanId).not.toHaveBeenCalled()
 
 		expect(window.showInputBox).toHaveBeenCalledWith({
 			title: "Enter the ID:",

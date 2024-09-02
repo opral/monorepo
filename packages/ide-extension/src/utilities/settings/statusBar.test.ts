@@ -80,24 +80,6 @@ describe("showStatusBar", () => {
 		expect(disposeMock).toHaveBeenCalled()
 	})
 
-	it("should do nothing if baseLocale is not available", async () => {
-		// Modify the mock for state to return a more defensive structure
-		vi.mocked(state).mockReturnValueOnce({
-			// @ts-expect-error
-			project: {
-				settings: {
-					get: async () => {
-						return { baseLocale: "en", locales: ["en", "fr"] }
-					},
-					set: vi.fn(),
-					subscribe: vi.fn(),
-				},
-			},
-		})
-		await showStatusBar()
-		expect(vscode.window.createStatusBarItem).not.toHaveBeenCalled()
-	})
-
 	it("should handle the case when previewLocale is not available", async () => {
 		vi.mocked(getSetting).mockResolvedValueOnce("")
 		await showStatusBar()
@@ -105,7 +87,7 @@ describe("showStatusBar", () => {
 	})
 
 	it("should not set previewLocale if it's not in settings.locales", async () => {
-		vi.mocked(getSetting).mockResolvedValueOnce("de")
+		vi.mocked(getSetting).mockResolvedValueOnce("es")
 		await showStatusBar()
 
 		expect(lastStatusBarItem.text).toBe("Sherlock: en")
