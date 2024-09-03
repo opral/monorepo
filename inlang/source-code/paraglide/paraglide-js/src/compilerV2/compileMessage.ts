@@ -1,4 +1,5 @@
 import type { MessageNested, Variant } from "@inlang/sdk2"
+
 import { compilePattern } from "./compilePattern.js"
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
 import { compileExpression } from "./compileExpression.js"
@@ -50,13 +51,15 @@ function compileMessageWithMultipleVariants(message: MessageNested): Compilation
 		const compiledPattern = compilePattern(message.locale, variant.pattern)
 		const typeRestrictions = compiledPattern.typeRestrictions
 
-		const allWildcards: boolean = variant.match.every((m: string) => m === "*")
+		const allWildcards: boolean = Object.values(variant.match).every((m: string) => m === "*")
 		if (allWildcards)
 			return { code: `return ${compiledPattern.code}`, typeRestrictions, source: variant }
 
-		const conditions: string[] = (variant.match as string[])
-			.filter((m) => m !== "*")
-			.map((m, i) => `selectors[${i}] === "${escapeForDoubleQuoteString(m)}"`)
+		const conditions: string[] = []
+		// TODO @samuelstroschein seems like paraglide is not yet aware of the matching record and bases on indexes for matching
+		// 	const conditions: string[] = (variant.match as string[])
+		// .filter((m) => m !== "*")
+		// .map((m, i) => `selectors[${i}] === "${escapeForDoubleQuoteString(m)}"`)
 
 		return {
 			code: `if (${conditions.join(" && ")}) return ${compiledPattern.code}`,

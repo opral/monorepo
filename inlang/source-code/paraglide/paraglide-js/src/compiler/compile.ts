@@ -133,7 +133,7 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 			}
 		}
 
-		const messageIDs = compiledMessages.map((message) => message.source.id)
+		const messageIDs = compiledMessages.map((message: any) => message.source.id)
 
 		// add the barrel files
 		output["messages.js"] = [
