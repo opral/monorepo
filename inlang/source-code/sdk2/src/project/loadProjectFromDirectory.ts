@@ -126,8 +126,12 @@ async function loadLegacyMessages(args: {
 /**
  * Watches a directory and copies files into lix, keeping them in sync.
  */
-function keepFilesInSync(args: { fs: typeof fs; path: string; lix: Lix }) {
-	function copyFilesFromDiskRecursive(dirPath: string) {
+async function keepFilesInSync(args: {
+	fs: typeof fs;
+	path: string;
+	lix: Lix;
+}) {
+	async function copyFilesFromDiskRecursive(dirPath: string) {
 		const entries = args.fs.readdirSync(dirPath, { withFileTypes: true });
 
 		for (const entry of entries) {
@@ -135,13 +139,13 @@ function keepFilesInSync(args: { fs: typeof fs; path: string; lix: Lix }) {
 			if (entry.isDirectory()) {
 				copyFilesFromDiskRecursive(fullPath);
 			} else {
-				handleFile(args, fullPath, "add");
+				await handleFile(args, fullPath, "add");
 			}
 		}
 	}
 
 	// Initial copy of all files
-	copyFilesFromDiskRecursive(args.path);
+	await copyFilesFromDiskRecursive(args.path);
 
 	// Set up recursive watch for all files on disk
 	const watcher = args.fs.watch(
@@ -170,11 +174,12 @@ function keepFilesInSync(args: { fs: typeof fs; path: string; lix: Lix }) {
 	};
 }
 
-function handleFile(
+async function handleFile(
 	args: { fs: typeof fs; path: string; lix: Lix },
 	filePath: string,
 	event: "add" | "change" | "delete"
 ): Promise<void> {
+	await 1; // send to the next tick?
 	console.log(`Handling file ${filePath} with event ${event}`);
 	const relativePath = nodePath.relative(args.path, filePath);
 	const normalizedPath =
@@ -188,7 +193,7 @@ function handleFile(
 	} else {
 		const data = args.fs.readFileSync(filePath);
 		console.log({ data, txt: new TextDecoder().decode(data) });
-		args.lix.db
+		await args.lix.db
 			.insertInto("file_internal")
 			.values({
 				path: normalizedPath,
