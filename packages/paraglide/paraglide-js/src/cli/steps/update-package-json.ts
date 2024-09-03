@@ -1,15 +1,15 @@
 import type { Logger } from "~/services/logger/index.js"
 import type { CliStep } from "../utils.js"
-import type { Repository } from "@lix-js/client"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
+import type { NodeishFilesystem } from "~/services/file-handling/types.js"
 
 export function updatePackageJson(opt: {
 	dependencies?: (deps: Record<string, string>) => Promise<Record<string, string>>
 	devDependencies?: (devDeps: Record<string, string>) => Promise<Record<string, string>>
 	scripts?: (scripts: Record<string, string>) => Promise<Record<string, string>>
-}): CliStep<{ packageJsonPath: string; repo: Repository; logger: Logger }, unknown> {
+}): CliStep<{ packageJsonPath: string; fs: NodeishFilesystem; logger: Logger }, unknown> {
 	return async (ctx) => {
-		const file = await ctx.repo.nodeishFs.readFile(ctx.packageJsonPath, {
+		const file = await ctx.fs.readFile(ctx.packageJsonPath, {
 			encoding: "utf-8",
 		})
 
@@ -36,7 +36,7 @@ export function updatePackageJson(opt: {
 		} catch (e) {
 			return ctx
 		}
-		await ctx.repo.nodeishFs.writeFile("./package.json", stringify(pkg))
+		await ctx.fs.writeFile("./package.json", stringify(pkg))
 		return ctx
 	}
 }

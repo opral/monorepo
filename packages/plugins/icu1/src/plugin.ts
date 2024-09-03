@@ -10,7 +10,11 @@ export const plugin = {
 
 	toBeImportedFiles: async ({ settings, nodeFs }) => {
 		const files: ResourceFile[] = []
-		const pathPattern = settings["plugin.inlang.icu-messageformat-1"].pathPattern
+		const pathPattern =
+			settings["plugin.inlang.icu-messageformat-1"].pathPattern ??
+			settings["plugin.inlang.messageFormat"]?.pathPattern
+				?.replace("{languageTag}", "{locale}")
+				.replace(".json", ".experimental.json")
 
 		for (const locale of settings.locales) {
 			const path = pathPattern.replace("{locale}", locale)
@@ -48,6 +52,7 @@ export const plugin = {
 
 				for (const [key, value] of Object.entries(json)) {
 					if (typeof value !== "string") continue
+					if (key === "$schema") continue
 					const message = createMessage({
 						messageSource: value,
 						bundleId: key,

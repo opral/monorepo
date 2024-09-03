@@ -1,10 +1,11 @@
-import { type InlangProject, ModuleError } from "@inlang/sdk"
+import { PluginError } from "@inlang/sdk2"
 
-export function classifyProjectErrors(errors: ReturnType<InlangProject["errors"]>) {
-	const isModuleError = (err: Error): err is ModuleError => err instanceof ModuleError
+export function classifyProjectErrors(errors: readonly Error[]) {
+	const isModuleError = (err: Error): err is PluginError => err instanceof PluginError
+
 	const [moduleErrors, otherErrors] = split(errors as Error[], isModuleError)
 
-	const isFatalModuleError = (err: ModuleError): err is ModuleError => err.module.includes("plugin")
+	const isFatalModuleError = (err: PluginError): err is PluginError => err.plugin.includes("plugin")
 	const [fatalModuleErrors, nonFatalModuleErrors] = split(moduleErrors, isFatalModuleError)
 
 	const fatalErrors = [...fatalModuleErrors, ...otherErrors]
