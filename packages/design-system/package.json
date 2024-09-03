@@ -27,10 +27,7 @@
 	},
 	"devDependencies": {
 		"@vitest/coverage-v8": "0.34.3",
-<<<<<<< HEAD
-=======
 		"prettier": "^3.3.3",
->>>>>>> 420e7628f8048c7be97b9c9666b12cca94d8d05c
 		"tailwindcss": "^3.3.3",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"
