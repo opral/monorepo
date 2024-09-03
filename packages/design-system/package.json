@@ -22,11 +22,12 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@ctrl/tinycolor": "^4.0.1"
+		"@ctrl/tinycolor": "^4.0.1",
+		"prettier": "^3.3.3"
 	},
 	"devDependencies": {
-		"tailwindcss": "^3.3.3",
 		"@vitest/coverage-v8": "0.34.3",
+		"tailwindcss": "^3.3.3",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"
 	},

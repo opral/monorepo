@@ -27,6 +27,7 @@
 		"vitest": "^0.34.1"
 	},
 	"dependencies": {
-		"guess-json-indent": "2.0.0"
+		"guess-json-indent": "2.0.0",
+		"prettier": "^3.3.3"
 	}
 }
