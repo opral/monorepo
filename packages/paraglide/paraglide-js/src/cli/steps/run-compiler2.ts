@@ -18,7 +18,7 @@ export const runCompiler: CliStep<
 
 	const output = await compile({
 		bundles: bundles,
-		settings: ctx.project.settings.get(),
+		settings: await ctx.project.settings.get(),
 		projectId: undefined,
 		outputStructure: "message-modules",
 	})

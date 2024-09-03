@@ -28,7 +28,7 @@ export const compileCommand2 = new Command()
 			fs: nodeFsPromises,
 		})
 
-		const errors = project.errors.get()
+		const errors = await project.errors.get()
 
 		if (errors.length > 0) {
 			const { nonFatalErrors, fatalErrors } = classifyProjectErrors(errors as any)

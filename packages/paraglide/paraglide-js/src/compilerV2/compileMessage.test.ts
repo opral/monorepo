@@ -32,13 +32,13 @@ describe("compileMessage", () => {
 				{
 					id: "1",
 					messageId: "some_message",
-					match: ["1", "2"],
+					match: { firstInput: "1", secondInput: "2" },
 					pattern: [{ type: "text", value: "One" }],
 				},
 				{
 					id: "2",
 					messageId: "some_message",
-					match: ["*", "*"],
+					match: { firstInput: "*", secondInput: "*" },
 					pattern: [{ type: "text", value: "Many" }],
 				},
 			],
