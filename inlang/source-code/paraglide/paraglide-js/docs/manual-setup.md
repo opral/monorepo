@@ -38,6 +38,8 @@ Eddit the `languageTags` and `sourceLanguageTag` fields to match the languages y
 
 In `package.json` add a script that you will call to recompile. 
 
+<doc-important title="TypeScript usage" description="If you use Paraglide JS with TypeScript, ensure that `allowJs` is set to `true` in the tsconfig. Otherwise, TypeScript won't resolve the JSDoc types Paraglide JS emits."></doc-important>
+
 ```diff
 // package.json
 { 
