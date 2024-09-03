@@ -1,148 +1,140 @@
-import { LanguageTag, type Message } from "@inlang/sdk"
+import type { MessageNested, Variant } from "@inlang/sdk2"
+import type { Registry } from "./registry.js"
 import { compilePattern } from "./compilePattern.js"
-import { paramsType, type Params } from "./paramsType.js"
-import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
-import { reexportAliases } from "./aliases.js"
-import { messageIndexFunction } from "./messageIndex.js"
+import { compileExpression } from "./compileExpression.js"
+import { mergeTypeRestrictions, type Compilation } from "./types.js"
+import { inputsType } from "./inputsType.js"
+import { jsIdentifier } from "~/services/codegen/identifier.js"
 
-type Resource = {
-	/**
-	 * The original message
-	 */
-	source: Message
-	/**
-	 * The parameters needed for this message
-	 */
-	params: Params
-	/**
-	 * The index-message function for this message
-	 */
-	index: string
-	/**
-	 * The message-function for each language
-	 */
-	translations: {
-		[languageTag: string]: string
+/**
+ * Returns the compiled message as a string
+ *
+ * @example
+ * @param message The message to compile
+ * @returns (inputs) => string
+ */
+export const compileMessage = (
+	message: MessageNested,
+	registry: Registry
+): Compilation<MessageNested> => {
+	// return empty string instead?
+	if (message.variants.length == 0) throw new Error("Message must have at least one variant")
+	const hasMultipleVariants = message.variants.length > 1
+	return addTypes(
+		hasMultipleVariants
+			? compileMessageWithMultipleVariants(message, registry)
+			: compileMessageWithOneVariant(message, registry)
+	)
+}
+
+function compileMessageWithOneVariant(
+	message: MessageNested,
+	registry: Registry
+): Compilation<MessageNested> {
+	const variant = message.variants[0]
+	if (!variant || message.variants.length !== 1)
+		throw new Error("Message must have exactly one variant")
+	const hasInputs = message.declarations.some((decl) => decl.type === "input")
+	const compiledPattern = compilePattern(message.locale, variant.pattern, registry)
+	const code = `const ${jsIdentifier(message.id)} = (${hasInputs ? "inputs" : ""}) => ${compiledPattern.code}`
+	return { code, typeRestrictions: compiledPattern.typeRestrictions, source: message }
+}
+
+function compileMessageWithMultipleVariants(
+	message: MessageNested,
+	registry: Registry
+): Compilation<MessageNested> {
+	if (message.variants.length <= 1) throw new Error("Message must have more than one variant")
+	const hasInputs = message.declarations.some((decl) => decl.type === "input")
+
+	const compiledSelectors = message.selectors.map((selector) =>
+		compileExpression(message.locale, selector, registry)
+	)
+
+	const selectorCode = `const selectors = [ ${compiledSelectors
+		.map((sel) => sel.code)
+		.join(", ")} ]`
+
+	const compiledVariants = sortVariants(message.variants).map((variant): Compilation<Variant> => {
+		const compiledPattern = compilePattern(message.locale, variant.pattern, registry)
+		const typeRestrictions = compiledPattern.typeRestrictions
+
+		const allWildcards: boolean = variant.match.every((m: string) => m === "*")
+		if (allWildcards)
+			return { code: `return ${compiledPattern.code}`, typeRestrictions, source: variant }
+
+		const conditions: string[] = (variant.match as string[])
+			.map((m, i) => {
+				if (m === "*") return undefined
+				// we use == instead of === to automatically convert to string if necessary
+				return `selectors[${i}] == "${escapeForDoubleQuoteString(m)}"`
+			})
+			.filter((m) => m !== undefined)
+
+		return {
+			code: `if (${conditions.join(" && ")}) return ${compiledPattern.code}`,
+			typeRestrictions,
+			source: variant,
+		}
+	})
+
+	const tr = [
+		...compiledVariants.map((v) => v.typeRestrictions),
+		...compiledSelectors.map((v) => v.typeRestrictions),
+	].reduce(mergeTypeRestrictions, {})
+
+	const code = `const ${jsIdentifier(message.id)} = (${hasInputs ? "inputs" : ""}) => {
+	${selectorCode}
+	${compiledVariants.map((l) => `\t${l.code}`).join("\n")}
+}`
+
+	return { code, typeRestrictions: tr, source: message }
+}
+
+function addTypes(compilation: Compilation<MessageNested>): Compilation<MessageNested> {
+	// add types for the inputs
+	const tr = structuredClone(compilation.typeRestrictions)
+	for (const decl of compilation.source.declarations) {
+		const name = decl.value.arg.name
+		if (name in tr) continue
+		tr[name] = "NonNullable<unknown>"
+	}
+
+	const code = `/**
+ * ${inputsType(tr, false)}
+ * @returns {string}
+ */
+/* @__NO_SIDE_EFFECTS__ */
+${compilation.code}`
+
+	return {
+		...compilation,
+		typeRestrictions: tr,
+		code,
 	}
 }
 
 /**
- * Returns the compiled messages for the given message.
+ * Sorts variants from most-specific to least-specific.
  *
- * @example
- *   {
- *      index: "export const hello_world = (params) => { ... }",
- *      en: "export const hello_world = (params) => { ... }",
- *      de: "export const hello_world = (params) => { ... }",
- *   }
- *
- * @param message The message to compile
- * @param lookupTable A table that maps language tags to their fallbacks.
+ * @param variants
  */
-export const compileMessage = (
-	message: Message,
-	fallbackMap: Record<LanguageTag, LanguageTag | undefined>,
-	output: "regular" | "message-modules" = "regular"
-): Resource => {
-	if (!isValidJSIdentifier(message.id)) {
-		throw new Error(
-			`Cannot compile message with ID "${message.id}".\n\nThe message is not a valid JavaScript variable name. Please choose a different ID.\n\nTo detect this issue during linting, use the valid-js-identifier lint rule: https://inlang.com/m/teldgniy/messageLintRule-inlang-validJsIdentifier`
-		)
+function sortVariants(variants: Variant[]): Variant[] {
+	function compareMatches(a: string, b: string): number {
+		if (a === "*" && b === "*") return 0
+		if (a === "*") 1
+		if (b === "*") return -1
+		return 0
 	}
 
-	const compiledPatterns: Record<LanguageTag, string> = {}
-	// parameter names and TypeScript types
-	// only allowing types that JS transpiles to strings under the hood like string and number.
-	// the pattern nodes must be extended to hold type information in the future.
-	let params: Params = {}
-
-	for (const variant of message.variants) {
-		if (compiledPatterns[variant.languageTag]) {
-			throw new Error(
-				`Duplicate language tag: ${variant.languageTag}. Multiple variants for one language tag are not supported in paraglide yet. `
-			)
+	return variants.toSorted((a, b) => {
+		let i = 0
+		while (i < Math.min(a.match.length, b.match.length)) {
+			const cmp = compareMatches(a.match[i], b.match[i])
+			if (cmp !== 0) return cmp
+			i += 1
 		}
-
-		// merge params
-		const { compiled, params: variantParams } = compilePattern(variant.pattern)
-		params = { ...params, ...variantParams }
-
-		// set the pattern for the language tag
-		compiledPatterns[variant.languageTag] = compiled
-	}
-
-	const resource: Resource = {
-		source: message,
-		params,
-		index: messageIndexFunction({
-			message,
-			params,
-			availableLanguageTags: Object.keys(fallbackMap),
-		}),
-		translations: Object.fromEntries(
-			Object.entries(fallbackMap).map(([languageTag, fallbackLanguage]) => {
-				const compiledPattern = compiledPatterns[languageTag]
-
-				return [
-					languageTag,
-					compiledPattern
-						? messageFunction({
-								message,
-								params,
-								languageTag,
-								compiledPattern,
-						  })
-						: fallbackLanguage
-						? reexportMessage(message, fallbackLanguage, output)
-						: messageIdFallback(message, languageTag),
-				]
-			})
-		),
-	}
-
-	return resource
-}
-
-const messageFunction = (args: {
-	message: Message
-	params: Params
-	languageTag: LanguageTag
-	compiledPattern: string
-}) => {
-	const hasParams = Object.keys(args.params).length > 0
-
-	return `/**
- * ${paramsType(args.params, false)}
- * @returns {string}
- */
-/* @__NO_SIDE_EFFECTS__ */
-export const ${args.message.id} = (${hasParams ? "params" : ""}) => ${args.compiledPattern}
-${reexportAliases(args.message)}`
-}
-
-function reexportMessage(
-	message: Message,
-	fromLanguageTag: string,
-	output: "regular" | "message-modules"
-) {
-	const exports: string[] = [message.id]
-
-	if (message.alias["default"] && message.id !== message.alias["default"]) {
-		exports.push(message.alias["default"])
-	}
-
-	const from = output === "message-modules" ? `../${fromLanguageTag}.js` : `./${fromLanguageTag}.js`
-
-	return `export { ${exports.join(", ")} } from "${from}"`
-}
-
-function messageIdFallback(message: Message, languageTag: string) {
-	return `/**
- * Failed to resolve message ${message.id} for languageTag "${languageTag}". 
- * @returns {string}
- */
-/* @__NO_SIDE_EFFECTS__ */
-export const ${message.id} = () => "${escapeForDoubleQuoteString(message.id)}"
-${reexportAliases(message)}`
+		return 0
+	})
 }

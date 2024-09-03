@@ -1,44 +1,345 @@
 import { expect, test, describe, vi, beforeEach } from "vitest"
 import { createProject as typescriptProject, ts } from "@ts-morph/bootstrap"
-import { Message, ProjectSettings } from "@inlang/sdk"
+import { BundleNested, ProjectSettings } from "@inlang/sdk2"
 import { compile } from "./compile.js"
 import { rollup } from "rollup"
 import virtual from "@rollup/plugin-virtual"
 import terser from "@rollup/plugin-terser"
 
-beforeEach(() => {
-	// reset the imports to make sure that the runtime is reloaded
-	vi.resetModules()
+const mockBundles: BundleNested[] = [
+	{
+		id: "happy_elephant_bundle",
+		alias: {
+			inlang: "missingInGerman",
+		},
+		messages: [
+			{
+				id: "happy_elephant_message_en",
+				bundleId: "happy_elephant_bundle",
+				locale: "en",
+				declarations: [],
+				selectors: [],
+				variants: [
+					{
+						id: "happy_elephant_message_en_variant_one",
+						match: [],
+						messageId: "happy_elephant_message_en",
+						pattern: [{ type: "text", value: "A simple message." }],
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "sad_penguin_bundle",
+		alias: {
+			inlang: "onlyText",
+		},
+		messages: [
+			{
+				id: "sad_penguin_message_en",
+				bundleId: "sad_penguin_bundle",
+				locale: "en",
+				selectors: [],
+				declarations: [],
+				variants: [
+					{
+						id: "sad_penguin_message_en_variant_one",
+						messageId: "sad_penguin_message_en",
+						match: [],
+						pattern: [{ type: "text", value: "A simple message." }],
+					},
+				],
+			},
+			{
+				id: "sad_penguin_message_en_us",
+				bundleId: "sad_penguin_bundle",
+				locale: "en-US",
+				selectors: [],
+				declarations: [],
+				variants: [
+					{
+						id: "sad_penguin_message_en_us_variant_one",
+						messageId: "sad_penguin_message_en_us",
+						match: [],
+						pattern: [
+							{ type: "text", value: "FUCKTARD. I am from New York. This is a simple message!" },
+						],
+					},
+				],
+			},
+			{
+				id: "sad_penguin_message_de",
+				bundleId: "sad_penguin_bundle",
+				locale: "de",
+				selectors: [],
+				declarations: [],
+				variants: [
+					{
+						id: "sad_penguin_message_de_variant_one",
+						messageId: "sad_penguin_message_de",
+						match: [],
+						pattern: [{ type: "text", value: "Eine einfache Nachricht." }],
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "depressed_dog",
+		alias: {
+			inlang: "oneParam",
+		},
+		messages: [
+			{
+				id: "depressed_dog_en",
+				bundleId: "depressed_dog",
+				locale: "en",
+				selectors: [],
+				declarations: [
+					{
+						type: "input",
+						name: "name",
+						value: { type: "expression", arg: { type: "variable", name: "name" } },
+					},
+				],
+				variants: [
+					{
+						id: "depressed_dog_en_variant_one",
+						messageId: "depressed_dog_en",
+						match: [],
+						pattern: [
+							{ type: "text", value: "Good morning " },
+							{ type: "expression", arg: { type: "variable", name: "name" } },
+							{ type: "text", value: "!" },
+						],
+					},
+				],
+			},
+			{
+				id: "depressed_dog_de",
+				bundleId: "depressed_dog",
+				locale: "de",
+				selectors: [],
+				declarations: [
+					{
+						type: "input",
+						name: "name",
+						value: { type: "expression", arg: { type: "variable", name: "name" } },
+					},
+				],
+				variants: [
+					{
+						id: "depressed_dog_de_variant_one",
+						messageId: "depressed_dog_de",
+						match: [],
+						pattern: [
+							{ type: "text", value: "Guten Morgen " },
+							{ type: "expression", arg: { type: "variable", name: "name" } },
+							{ type: "text", value: "!" },
+						],
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "insane_cats",
+		alias: {
+			input: "multipleParams",
+		},
+		messages: [
+			{
+				id: "insane_cats_en",
+				bundleId: "insane_cats",
+				locale: "en",
+				declarations: [
+					{
+						type: "input",
+						name: "name",
+						value: { type: "expression", arg: { type: "variable", name: "name" } },
+					},
+					{
+						type: "input",
+						name: "name",
+						value: { type: "expression", arg: { type: "variable", name: "count" } },
+					},
+				],
+				selectors: [],
+				variants: [
+					{
+						id: "insane_cats_en_variant_one",
+						messageId: "insane_cats_en",
+						match: [],
+						pattern: [
+							{ type: "text", value: "Hello " },
+							{ type: "expression", arg: { type: "variable", name: "name" } },
+							{ type: "text", value: "! You have " },
+							{ type: "expression", arg: { type: "variable", name: "count" } },
+							{ type: "text", value: " messages." },
+						],
+					},
+				],
+			},
+			{
+				id: "insane_cats_de",
+				bundleId: "insane_cats",
+				locale: "de",
+				declarations: [
+					{
+						type: "input",
+						name: "name",
+						value: { type: "expression", arg: { type: "variable", name: "name" } },
+					},
+					{
+						type: "input",
+						name: "name",
+						value: { type: "expression", arg: { type: "variable", name: "count" } },
+					},
+				],
+				selectors: [],
+				variants: [
+					{
+						id: "insane_cats_de_variant_one",
+						messageId: "insane_cats_de",
+						match: [],
+						pattern: [
+							{ type: "text", value: "Hallo " },
+							{ type: "expression", arg: { type: "variable", name: "name" } },
+							{ type: "text", value: "! Du hast " },
+							{ type: "expression", arg: { type: "variable", name: "count" } },
+							{ type: "text", value: " Nachrichten." },
+						],
+					},
+				],
+			},
+		],
+	},
+]
+
+const mockSettings: ProjectSettings = {
+	baseLocale: "en",
+	locales: ["en", "de", "en-US"],
+}
+
+const output = await compile({
+	bundles: mockBundles,
+	settings: mockSettings,
+	projectId: undefined,
 })
 
-describe.each(["regular", "message-modules"] as const)("paraglide", async function (outputStyle) {
-	// the compiled should be ignored to avoid merge conflicts
-	test("the files should include a gitignore file", async () => {
-		expect(output).toHaveProperty(".gitignore")
-		expect(output[".gitignore"]).toContain("*")
+describe("paraglide", () => {
+	beforeEach(() => {
+		// reset the imports to make sure that the runtime is reloaded
+		vi.resetModules()
 	})
-	// ignore all formatting stuff
-	test("the files should include a prettierignore file", async () => {
-		expect(output).toHaveProperty(".prettierignore")
-		expect(output[".prettierignore"]).toContain("*")
-	})
-
-	test("the files should include files for each language, even if there are no messages", async () => {
-		const output = await compile({
-			messages: [],
-			settings: { languageTags: ["en", "de"], sourceLanguageTag: "en", modules: [] },
-			projectId: undefined,
+	describe("output-formalities", () => {
+		// the compiled should be ignored to avoid merge conflicts
+		test("the files should include a gitignore file", async () => {
+			expect(output).toHaveProperty(".gitignore")
+			expect(output[".gitignore"]).toContain("*")
 		})
-		expect(output["messages/en.js"]).includes("export {}")
-		expect(output["messages/de.js"]).includes("export {}")
+		// ignore all formatting stuff
+		test("the files should include a prettierignore file", async () => {
+			expect(output).toHaveProperty(".prettierignore")
+			expect(output[".prettierignore"]).toContain("*")
+		})
+
+		test("the files should include files for each language, even if there are no messages", async () => {
+			const output = await compile({
+				bundles: [],
+				settings: { locales: ["en", "de"], baseLocale: "en" },
+				projectId: undefined,
+			})
+			expect(output["messages/en.js"]).toBeDefined()
+			expect(output["messages/de.js"]).toBeDefined()
+		})
 	})
 
-	// All JS files must be eslint ignored
-	test("the files should include an eslint ignore comment", async () => {
-		for (const [filePath, content] of Object.entries(output)) {
-			if (!filePath.endsWith(".js")) continue
-			expect(content).toContain("/* eslint-disable */")
-		}
+	describe("tree-shaking", () => {
+		// removing comments makes the output more predictable and testable
+		const removeComments = () =>
+			// @ts-expect-error - rollup types are not up to date
+			terser({
+				format: {
+					comments: false,
+				},
+				compress: false,
+				mangle: false,
+			})
+
+		test("should tree-shake unused messages", async () => {
+			const bundle = await rollup({
+				input: "app.js",
+				plugins: [
+					removeComments(),
+					// @ts-expect-error - rollup types are not up to date
+					virtual({
+						...Object.fromEntries(
+							Object.entries(output).map(([fileName, code]) => ["paraglide/" + fileName, code])
+						),
+						"app.js": `
+					import * as m from "./paraglide/messages.js"
+
+					console.log(m.sad_penguin_bundle())
+					`,
+					}),
+				],
+			})
+			const compiled = await bundle.generate({ format: "esm" })
+			const log = vi.spyOn(console, "log").mockImplementation(() => {})
+			// all required code for the message to be rendered is included like sourceLanguageTag.
+			// but, all other messages except of 'onlyText' are tree-shaken away.
+			for (const { id } of mockBundles) {
+				if (id === "sad_penguin_bundle") {
+					expect(compiled.output[0].code).toContain(id)
+				} else {
+					expect(compiled.output[0].code).not.toContain(id)
+				}
+			}
+			eval(compiled.output[0].code)
+			expect(log).toHaveBeenCalledWith("A simple message.")
+		})
+
+		test("should not treeshake messages that are used", async () => {
+			const bundle = await rollup({
+				input: "app.js",
+				plugins: [
+					removeComments(),
+					// @ts-expect-error - rollup types are not up to date
+					virtual({
+						...Object.fromEntries(
+							Object.entries(output).map(([fileName, code]) => ["paraglide/" + fileName, code])
+						),
+						"app.js": `
+
+					import * as m from "./paraglide/messages.js"
+
+					console.log(
+						m.sad_penguin_bundle(),
+						m.depressed_dog({ name: "Samuel" }),
+						m.insane_cats({ name: "Samuel", count: 5 })
+					)
+					`,
+					}),
+				],
+			})
+			const result = await bundle.generate({ format: "esm" })
+			const log = vi.spyOn(console, "log").mockImplementation(() => {})
+			for (const id of mockBundles.map((m) => m.id)) {
+				if (["sad_penguin_bundle", "depressed_dog", "insane_cats"].includes(id)) {
+					expect(result.output[0].code).toContain(id)
+				} else {
+					expect(result.output[0].code).not.toContain(id)
+				}
+			}
+			eval(result.output[0].code)
+			expect(log).toHaveBeenCalledWith(
+				"A simple message.",
+				"Good morning Samuel!",
+				"Hello Samuel! You have 5 messages."
+			)
+		})
 	})
 
 	describe("e2e", async () => {
@@ -251,93 +552,7 @@ describe.each(["regular", "message-modules"] as const)("paraglide", async functi
 		})
 	})
 
-	describe("tree-shaking", () => {
-		// removing comments makes the output more predictable and testable
-		const removeComments = () =>
-			// @ts-expect-error - rollup types are not up to date
-			terser({
-				format: {
-					comments: false,
-				},
-				compress: false,
-				mangle: false,
-			})
-
-		test("should tree-shake unused messages", async () => {
-			const bundle = await rollup({
-				input: "app.js",
-				plugins: [
-					removeComments(),
-					// @ts-expect-error - rollup types are not up to date
-					virtual({
-						...Object.fromEntries(
-							Object.entries(output).map(([fileName, code]) => ["paraglide/" + fileName, code])
-						),
-						"app.js": `
-					import * as m from "./paraglide/messages.js"
-
-					console.log(m.onlyText())
-					`,
-					}),
-				],
-			})
-			const compiled = await bundle.generate({ format: "esm" })
-			const log = vi.spyOn(console, "log").mockImplementation(() => {})
-			// all required code for the message to be rendered is included like sourceLanguageTag.
-			// but, all other messages except of 'onlyText' are tree-shaken away.
-			for (const id of mockMessages.map((m) => m.id)) {
-				if (id === "onlyText") {
-					expect(compiled.output[0].code).toContain(id)
-				} else {
-					expect(compiled.output[0].code).not.toContain(id)
-				}
-			}
-			eval(compiled.output[0].code)
-			expect(log).toHaveBeenCalledWith("A simple message.")
-		})
-
-		test("should not treeshake messages that are used", async () => {
-			const bundle = await rollup({
-				input: "app.js",
-				plugins: [
-					removeComments(),
-					// @ts-expect-error - rollup types are not up to date
-					virtual({
-						...Object.fromEntries(
-							Object.entries(output).map(([fileName, code]) => ["paraglide/" + fileName, code])
-						),
-						"app.js": `
-
-					import * as m from "./paraglide/messages.js"
-
-					console.log(
-						m.onlyText(),
-						m.oneParam({ name: "Samuel" }),
-						m.multipleParams({ name: "Samuel", count: 5 })
-					)
-					`,
-					}),
-				],
-			})
-			const result = await bundle.generate({ format: "esm" })
-			const log = vi.spyOn(console, "log").mockImplementation(() => {})
-			for (const id of mockMessages.map((m) => m.id)) {
-				if (["onlyText", "oneParam", "multipleParams"].includes(id)) {
-					expect(result.output[0].code).toContain(id)
-				} else {
-					expect(result.output[0].code).not.toContain(id)
-				}
-			}
-			eval(result.output[0].code)
-			expect(log).toHaveBeenCalledWith(
-				"A simple message.",
-				"Good morning Samuel!",
-				"Hello Samuel! You have 5 messages."
-			)
-		})
-	})
-
-	test("typesafety", async () => {
+	test("ts", async () => {
 		const project = await typescriptProject({
 			useInMemoryFileSystem: true,
 			compilerOptions: {
@@ -355,7 +570,6 @@ describe.each(["regular", "message-modules"] as const)("paraglide", async functi
 				project.createSourceFile(fileName, code)
 			}
 		}
-
 		project.createSourceFile(
 			"test.ts",
 			`
@@ -423,115 +637,9 @@ describe.each(["regular", "message-modules"] as const)("paraglide", async functi
 
 		const program = project.createProgram()
 		const diagnostics = ts.getPreEmitDiagnostics(program)
-		if (diagnostics.length > 0) {
-			console.error(diagnostics)
+		for (const diagnostic of diagnostics) {
+			console.error(diagnostic.messageText, diagnostic.file?.fileName)
 		}
-		expect(diagnostics.length).toBe(0)
-	})
-
-	const mockMessages: Message[] = [
-		{
-			id: "missingInGerman",
-			alias: {},
-			selectors: [],
-			variants: [
-				{
-					match: [],
-					languageTag: "en",
-					pattern: [{ type: "Text", value: "A simple message." }],
-				},
-			],
-		},
-		{
-			id: "onlyText",
-			alias: {},
-			selectors: [],
-			variants: [
-				{
-					match: [],
-					languageTag: "en",
-					pattern: [{ type: "Text", value: "A simple message." }],
-				},
-				{
-					match: [],
-					languageTag: "en-US",
-					pattern: [
-						{ type: "Text", value: "FUCKTARD. I am from New York. This is a simple message!" },
-					],
-				},
-				{
-					match: [],
-					languageTag: "de",
-					pattern: [{ type: "Text", value: "Eine einfache Nachricht." }],
-				},
-			],
-		},
-		{
-			id: "oneParam",
-			alias: {},
-			selectors: [],
-			variants: [
-				{
-					match: [],
-					languageTag: "en",
-					pattern: [
-						{ type: "Text", value: "Good morning " },
-						{ type: "VariableReference", name: "name" },
-						{ type: "Text", value: "!" },
-					],
-				},
-				{
-					match: [],
-					languageTag: "de",
-					pattern: [
-						{ type: "Text", value: "Guten Morgen " },
-						{ type: "VariableReference", name: "name" },
-						{ type: "Text", value: "!" },
-					],
-				},
-			],
-		},
-		{
-			id: "multipleParams",
-			alias: {},
-			selectors: [],
-			variants: [
-				{
-					match: [],
-					languageTag: "en",
-					pattern: [
-						{ type: "Text", value: "Hello " },
-						{ type: "VariableReference", name: "name" },
-						{ type: "Text", value: "! You have " },
-						{ type: "VariableReference", name: "count" },
-						{ type: "Text", value: " messages." },
-					],
-				},
-				{
-					match: [],
-					languageTag: "de",
-					pattern: [
-						{ type: "Text", value: "Hallo " },
-						{ type: "VariableReference", name: "name" },
-						{ type: "Text", value: "! Du hast " },
-						{ type: "VariableReference", name: "count" },
-						{ type: "Text", value: " Nachrichten." },
-					],
-				},
-			],
-		},
-	]
-
-	const mockSettings: ProjectSettings = {
-		sourceLanguageTag: "en",
-		languageTags: ["en", "de", "en-US"],
-		modules: [],
-	}
-
-	const output = await compile({
-		messages: mockMessages,
-		settings: mockSettings,
-		outputStructure: outputStyle,
-		projectId: undefined,
+		expect(diagnostics.length).toEqual(0)
 	})
 })
