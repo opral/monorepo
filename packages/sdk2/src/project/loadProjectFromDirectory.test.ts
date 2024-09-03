@@ -226,6 +226,7 @@ test("it should keep files between the inlang directory and lix in sync", async 
 		"/project.inlang/settings.json",
 		JSON.stringify({ ...mockSettings, baseLocale: "brand-new-locale" })
 	);
+	await new Promise((resolve) => setTimeout(resolve, 100));
 	const fileInLix = await project.lix.db
 		.selectFrom("file")
 		.selectAll()
