@@ -346,7 +346,7 @@ const InlangBundle = (props: {
 												onClick={async () => {
 													if (project) {
 														await queryHelper.message
-															.insert(project.db, messagde)
+															.insert(project.db, message)
 															.execute();
 
 														await queryHelper.variant
