@@ -1,44 +1,33 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as vscode from "vscode"
 import * as settings from "../utilities/settings/index.js"
 import { previewLocaleCommand } from "./previewLocaleCommand.js"
 import { CONFIGURATION } from "../configuration.js"
+import { state } from "../utilities/state.js"
+
+vi.mock("vscode", () => ({
+	window: { showQuickPick: vi.fn() },
+	commands: { registerCommand: vi.fn() },
+}))
+vi.mock("../utilities/settings/index.js", () => ({ updateSetting: vi.fn() }))
+vi.mock("../utilities/settings/statusBar.js", () => ({ showStatusBar: vi.fn() }))
+vi.mock("../utilities/state.js", () => ({
+	state: vi.fn(),
+}))
+vi.mock("../configuration.js", () => ({
+	CONFIGURATION: {
+		EVENTS: {
+			ON_DID_CREATE_MESSAGE: { fire: vi.fn() },
+			ON_DID_EDIT_MESSAGE: { fire: vi.fn() },
+			ON_DID_EXTRACT_MESSAGE: { fire: vi.fn() },
+			ON_DID_PREVIEW_LOCALE_CHANGE: { fire: vi.fn() },
+		},
+	},
+}))
 
 describe("previewLocaleCommand", () => {
 	beforeEach(() => {
-		// Resetting the mocks before each test
-		vi.resetAllMocks()
-
-		// Setting up the mocks with inline functions
-		vi.mock("vscode", () => ({
-			window: { showQuickPick: vi.fn() },
-			commands: { registerCommand: vi.fn() },
-		}))
-		vi.mock("../utilities/settings/index.js", () => ({ updateSetting: vi.fn() }))
-		vi.mock("../utilities/settings/statusBar.js", () => ({ showStatusBar: vi.fn() }))
-		vi.mock("../utilities/state.js", () => ({
-			state: () => ({
-				project: {
-					settings: () => ({
-						locales: ["en", "es", "fr"],
-					}),
-				},
-			}),
-		}))
-		vi.mock("../configuration.js", () => ({
-			CONFIGURATION: {
-				EVENTS: {
-					ON_DID_CREATE_MESSAGE: { fire: vi.fn() },
-					ON_DID_EDIT_MESSAGE: { fire: vi.fn() },
-					ON_DID_EXTRACT_MESSAGE: { fire: vi.fn() },
-					ON_DID_PREVIEW_LOCALE_CHANGE: { fire: vi.fn() },
-				},
-			},
-		}))
-	})
-
-	afterEach(() => {
-		vi.restoreAllMocks()
+		vi.clearAllMocks()
 	})
 
 	it("should register the command", () => {
@@ -48,7 +37,17 @@ describe("previewLocaleCommand", () => {
 	})
 
 	it("should show language tags and update setting if a tag is selected", async () => {
-		// Mocking the return value of showQuickPick
+		vi.mocked(state).mockReturnValue({
+			project: {
+				// @ts-expect-error
+				settings: {
+					get: vi.fn().mockResolvedValue({
+						baseLocale: "en",
+						locales: ["en", "es", "fr"],
+					}),
+				},
+			},
+		})
 		// @ts-expect-error
 		vi.mocked(vscode.window.showQuickPick).mockResolvedValue("en")
 

@@ -2,7 +2,7 @@ import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
-import { createMessage, generateBundleId } from "@inlang/sdk2"
+import { createMessage, humanId } from "@inlang/sdk2"
 import { CONFIGURATION } from "../configuration.js"
 import { getSetting } from "../utilities/settings/index.js"
 
@@ -16,18 +16,10 @@ export const createMessageCommand = {
 	callback: async function () {
 		const baseLocale = (await state().project.settings.get()).baseLocale
 
-		// guard
-		if (baseLocale === undefined) {
-			return msg(
-				"The `baseLocale` is not defined in the project but required to create a message.",
-				"warn",
-				"notification"
-			)
-		}
-
 		const messageValue = await window.showInputBox({
 			title: "Enter the message content:",
 		})
+
 		if (messageValue === undefined) {
 			return
 		}
@@ -35,45 +27,58 @@ export const createMessageCommand = {
 		// create random message id as default value
 		const autoHumanId = await getSetting("extract.autoHumanId.enabled").catch(() => true)
 
-		const messageId = await window.showInputBox({
+		const bundleId = await window.showInputBox({
 			title: "Enter the ID:",
-			value: autoHumanId ? generateBundleId() : "",
+			value: autoHumanId ? humanId() : "",
 			prompt:
-				autoHumanId &&
-				"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.",
+				(autoHumanId &&
+					"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.") ||
+				undefined,
 		})
-		if (messageId === undefined) {
+		if (bundleId === undefined) {
 			return
 		}
 
 		const message = createMessage({
-			bundleId: generateBundleId(),
+			bundleId,
 			locale: baseLocale,
 			text: messageValue,
 		})
 
-		// create message
-		const success = state()
-			.project.db.insertInto("message")
-			.values({
-				id: message.id,
-				bundleId: message.bundleId,
-				locale: message.locale,
-				declarations: message.declarations,
-				selectors: message.selectors,
+		try {
+			await state()
+				.project.db.transaction()
+				.execute(async (trx) => {
+					await trx
+						.insertInto("bundle")
+						.values({
+							id: bundleId,
+						})
+						.execute()
+
+					return await trx
+						.insertInto("message")
+						.values({
+							id: message.id,
+							bundleId: message.bundleId,
+							locale: message.locale,
+							declarations: message.declarations,
+							selectors: message.selectors,
+						})
+						.returningAll()
+						.execute()
+				})
+
+			// Emit event to notify that a message was created
+			CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire()
+
+			telemetry.capture({
+				event: "IDE-EXTENSION command executed: Create Message",
 			})
-			.execute()
 
-		if (!success) {
-			return window.showErrorMessage(`Couldn't upsert new message with id ${messageId}.`)
+			return msg("Message created.")
+		} catch (e) {
+			return window.showErrorMessage(`Couldn't upsert new message. ${e}`)
 		}
-
-		// Emit event to notify that a message was created
-		CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire()
-
-		telemetry.capture({
-			event: "IDE-EXTENSION command executed: Create Message",
-		})
-		return msg("Message created.")
 	},
 } as const
