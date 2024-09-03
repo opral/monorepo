@@ -2,10 +2,10 @@ import * as vscode from "vscode"
 import { loadProjectFromDirectoryInMemory } from "@inlang/sdk2"
 import { normalizePath } from "@lix-js/fs"
 import { CONFIGURATION } from "../../configuration.js"
-import { telemetry } from "../../services/telemetry/implementation.js"
+import { telemetry } from "../../services/telemetry/index.js"
 import { setState, state } from "../state.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
-import { _import } from "../import/_import.js"
+import { transpileToCjs } from "../import/transpileToCjs.js"
 
 let projectViewNodes: ProjectViewNode[] = []
 
@@ -98,7 +98,7 @@ export async function handleTreeSelection(args: {
 		const inlangProject = await loadProjectFromDirectoryInMemory({
 			path: newSelectedProject,
 			fs: args.fs,
-			preprocessPluginBeforeImport: _import(normalizePath(args.workspaceFolder.uri.fsPath)),
+			preprocessPluginBeforeImport: transpileToCjs,
 		})
 
 		setState({
@@ -123,7 +123,7 @@ export async function handleTreeSelection(args: {
 		telemetry.capture({
 			event: "IDE-EXTENSION loaded project",
 			properties: {
-				errors: inlangProject?.errors.get(),
+				errors: await inlangProject.errors.get(),
 				isInWorkspaceRecommendation,
 			},
 		})

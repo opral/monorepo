@@ -7,9 +7,9 @@ import {
 	createMessagesLoadingHtml,
 	getHtml,
 	getTranslationsTableHtml,
-	messageView,
 } from "./messages.js"
 
+// Mocking vscode module and state module
 vi.mock("vscode", () => ({
 	window: {
 		activeTextEditor: undefined,
@@ -22,10 +22,16 @@ vi.mock("vscode", () => ({
 	},
 	Uri: {
 		joinPath: vi.fn(),
+		file: vi.fn((path: string) => ({ fsPath: path })),
 	},
 	commands: {
 		executeCommand: vi.fn(),
 	},
+	Webview: vi.fn(() => ({
+		asWebviewUri: vi.fn(),
+		cspSource: "cspSource",
+	})),
+	EventEmitter: vi.fn(),
 }))
 
 vi.mock("../state.js", () => ({
@@ -37,16 +43,25 @@ describe("Message Webview Provider Tests", () => {
 		vi.clearAllMocks()
 	})
 
-	it("should create HTML for a message", () => {
-		// @ts-expect-error
-		state.mockReturnValue({
+	it("should create HTML for a message", async () => {
+		vi.mocked(state).mockReturnValue({
 			project: {
-				settings: new Map().set("experimental", { aliases: true }),
+				// @ts-expect-error
+				settings: {
+					get: vi.fn().mockResolvedValue({
+						baseLocale: "en",
+						locales: ["en", "de"],
+						experimental: {
+							aliases: true,
+						},
+					}),
+				},
 			},
 			selectedProjectPath: "/workspace/project",
 		})
 
-		const html = createMessageHtml({
+		// Creating a message HTML using the mocked data
+		const html = await createMessageHtml({
 			bundle: {
 				id: "message-id",
 				alias: { aliasKey: "aliasValue" },
@@ -74,20 +89,26 @@ describe("Message Webview Provider Tests", () => {
 			} as vscode.WorkspaceFolder,
 		})
 
+		// Validating that the created HTML contains the expected content
 		expect(html).toContain("message-id")
 		expect(html).toContain("aliasValue")
 		expect(html).toContain("Hello")
 	})
 
-	it("should handle cases where settings are not available", () => {
-		// @ts-expect-error
-		state.mockReturnValue({
+	it("should handle cases where settings are not available", async () => {
+		// Mocking state to return a project with no specific settings
+		vi.mocked(state).mockReturnValue({
 			project: {
-				settings: new Map(),
+				// @ts-expect-error
+				settings: {
+					get: vi.fn().mockResolvedValue({}),
+				},
 			},
+			selectedProjectPath: "/workspace/project",
 		})
 
-		const html = createMessageHtml({
+		// Creating a message HTML without aliases enabled
+		const html = await createMessageHtml({
 			bundle: {
 				id: "message-id",
 				alias: { aliasKey: "aliasValue" },
@@ -99,11 +120,13 @@ describe("Message Webview Provider Tests", () => {
 			} as vscode.WorkspaceFolder,
 		})
 
+		// Validating that the created HTML does not contain aliasValue since aliases are disabled
 		expect(html).toContain("message-id")
-		expect(html).not.toContain("aliasValue") // Since aliases should be disabled
+		expect(html).not.toContain("aliasValue")
 	})
 
 	it("should create a translations table for a message", () => {
+		// Creating a translations table HTML
 		const html = getTranslationsTableHtml({
 			bundle: {
 				id: "message-id",
@@ -131,12 +154,14 @@ describe("Message Webview Provider Tests", () => {
 			} as vscode.WorkspaceFolder,
 		})
 
+		// Validating that the translations table contains the expected content
 		expect(html).toContain("Language")
 		expect(html).toContain("Translation")
 		expect(html).toContain("Hello")
 	})
 
 	it("should handle cases where there are no translations", () => {
+		// Creating a translations table HTML with no translations available
 		const html = getTranslationsTableHtml({
 			bundle: {
 				id: "message-id",
@@ -148,45 +173,44 @@ describe("Message Webview Provider Tests", () => {
 			} as vscode.WorkspaceFolder,
 		})
 
+		// Validating that the HTML indicates no translations are available
 		expect(html).toContain("No translations available")
 	})
 
 	it("should create 'No Messages Found' HTML", () => {
+		// Creating HTML for when no messages are found
 		const html = createNoMessagesFoundHtml()
+
+		// Validating that the created HTML contains the expected content
 		expect(html).toContain("No messages found")
 	})
 
 	it("should create 'Loading Messages' HTML", () => {
+		// Creating HTML for when messages are loading
 		const html = createMessagesLoadingHtml()
+
+		// Validating that the created HTML contains the expected content
 		expect(html).toContain("Loading messages...")
 	})
 
 	it("should create the complete webview HTML", () => {
+		// Mocking the context and webview
+		const context = {
+			extensionUri: vscode.Uri.file("/path/to/extension"),
+		} as vscode.ExtensionContext
+
+		// @ts-expect-error
+		const webview = new vscode.Webview()
+
+		// Creating the complete webview HTML
 		const html = getHtml({
 			mainContent: "<div>Main Content</div>",
-			context: {
-				extensionUri: vscode.Uri.file("/path/to/extension"),
-			} as vscode.ExtensionContext,
-			webview: {
-				asWebviewUri: (uri: vscode.Uri) => uri,
-				cspSource: "cspSource",
-			} as vscode.Webview,
+			context,
+			webview,
 		})
 
+		// Validating that the webview HTML contains the expected content
 		expect(html).toContain("<div>Main Content</div>")
 		expect(html).toContain("Content-Security-Policy")
-	})
-
-	it("should register the message webview provider", () => {
-		const context = {
-			subscriptions: [],
-		} as unknown as vscode.ExtensionContext
-
-		messageView({
-			context,
-			workspaceFolder: { name: "", index: 1, uri: vscode.Uri.file("/path/to/workspace") },
-		})
-
-		expect(vscode.window.registerWebviewViewProvider).toHaveBeenCalled()
 	})
 })

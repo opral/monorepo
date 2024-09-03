@@ -96,7 +96,9 @@ const HistoryEntry = ({ commit }) => {
       </div>
       {isOpen && (
         <div className="p-4">
-          {changeHistory.map(({ current, previous }, index) => (
+          {changeHistory
+            .filter(({ current }) => current.type === "variant") // only show variant changes
+            .map(({ current, previous }, index) => (
             <div key={index}>
               <div className="flex gap-4 items-end px-4 pb-[8px] pb-[16px]">
                 <div className="flex-1">
@@ -106,7 +108,7 @@ const HistoryEntry = ({ commit }) => {
                       previous?.created_at
                     )}`}</p>
                   <div className="relative border border-zinc-300 overflow-hidden">
-                    {previous && previous.value && previous.value.pattern && (
+                      {previous && previous.value && (
                       <InlangVariant
                         slot="variant"
                         variant={previous.value}
@@ -115,7 +117,7 @@ const HistoryEntry = ({ commit }) => {
                       >
                         <InlangPatternEditor
                           slot="pattern-editor"
-                          variant={previous.value.pattern}
+                            variant={previous.value}
                           className={"inlang-pattern-editor-old"}
                         ></InlangPatternEditor>
                       </InlangVariant>
@@ -129,7 +131,7 @@ const HistoryEntry = ({ commit }) => {
                       current.created_at
                     )}`}</p>
                   <div className="relative border border-zinc-300 overflow-hidden">
-                    {current && current.value && current.value.pattern && (
+                      {current && current.value && (
                       <InlangVariant
                         slot="variant"
                         variant={current.value}
@@ -138,7 +140,7 @@ const HistoryEntry = ({ commit }) => {
                       >
                         <InlangPatternEditor
                           slot="pattern-editor"
-                          variant={current.value.pattern}
+                            variant={current.value}
                           className={"inlang-pattern-editor-neu"}
                         ></InlangPatternEditor>
                       </InlangVariant>

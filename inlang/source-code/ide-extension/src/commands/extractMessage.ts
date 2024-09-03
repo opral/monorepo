@@ -5,12 +5,7 @@ import { telemetry } from "../services/telemetry/index.js"
 import { CONFIGURATION } from "../configuration.js"
 import { isQuoted, stripQuotes } from "../utilities/messages/isQuoted.js"
 import { getSetting } from "../utilities/settings/index.js"
-import {
-	createBundle,
-	createMessage,
-	generateBundleId,
-	type IdeExtensionConfig,
-} from "@inlang/sdk2"
+import { createMessage, humanId, type IdeExtensionConfig } from "@inlang/sdk2"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -20,13 +15,15 @@ export const extractMessageCommand = {
 	title: "Sherlock: Extract Message",
 	register: commands.registerTextEditorCommand,
 	callback: async function (textEditor: TextEditor | undefined) {
+		// Simulating an error to test the catch block
+		// throw new Error("Forced error for testing");
+
 		const ideExtension = (await state().project.plugins.get()).find(
 			(plugin) => plugin?.meta?.["app.inlang.ideExtension"]
 		)?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
 
 		const baseLocale = (await state().project.settings.get()).baseLocale
 
-		// guards
 		if (!ideExtension) {
 			return msg(
 				"There is no `plugin` configuration for the Visual Studio Code extension (Sherlock). One of the `modules` should expose a `plugin` which has `customApi` containing `app.inlang.ideExtension`",
@@ -34,16 +31,10 @@ export const extractMessageCommand = {
 				"notification"
 			)
 		}
+
 		if (ideExtension.extractMessageOptions === undefined) {
 			return msg(
 				"The `extractMessageOptions` are not defined in `app.inlang.ideExtension` but required to extract a message.",
-				"warn",
-				"notification"
-			)
-		}
-		if (baseLocale === undefined) {
-			return msg(
-				"The `baseLocale` is not defined in the project but required to extract a message.",
 				"warn",
 				"notification"
 			)
@@ -61,16 +52,15 @@ export const extractMessageCommand = {
 			return msg("Please select a text to extract in your text editor.", "warn", "notification")
 		}
 
-		// create random message id as default value
 		const autoHumanId = await getSetting("extract.autoHumanId.enabled").catch(() => true)
-
 		const bundleId = await window.showInputBox({
 			title: "Enter the ID:",
-			value: autoHumanId ? generateBundleId() : "",
+			value: autoHumanId ? humanId() : "",
 			prompt:
 				autoHumanId &&
 				"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.",
 		})
+
 		if (bundleId === undefined) {
 			return
 		}
@@ -100,8 +90,9 @@ export const extractMessageCommand = {
 		const preparedExtractOption = await window.showQuickPick(messageReplacements, {
 			title: "Replace highlighted text with:",
 		})
+
 		if (preparedExtractOption === undefined) {
-			return
+			return msg("Couldn't find choosen extract option.", "warn", "notification")
 		}
 
 		const selectedExtractOption = preparedExtractOptions.find(
@@ -118,50 +109,43 @@ export const extractMessageCommand = {
 			text: isQuoted(messageValue) ? stripQuotes(messageValue) : messageValue,
 		})
 
-		const bundle = createBundle({
-			id: bundleId,
-			messages: [message],
-		})
+		try {
+			await state()
+				.project.db.transaction()
+				.execute(async (trx) => {
+					await trx
+						.insertInto("bundle")
+						.values({
+							id: bundleId,
+						})
+						.execute()
 
-		// create message
-		const success = await state()
-			.project.db.transaction()
-			.execute(async (trx) => {
-				await trx
-					.insertInto("bundle")
-					.values({
-						id: bundle.id,
-						alias: bundle.alias,
-					})
-					.execute()
+					return await trx
+						.insertInto("message")
+						.values({
+							id: message.id,
+							bundleId: message.bundleId,
+							locale: message.locale,
+							declarations: message.declarations,
+							selectors: message.selectors,
+						})
+						.returningAll()
+						.execute()
+				})
 
-				return await trx
-					.insertInto("message")
-					.values({
-						id: message.id,
-						bundleId: message.bundleId,
-						locale: message.locale,
-						declarations: message.declarations,
-						selectors: message.selectors,
-					})
-					.returningAll()
-					.execute()
+			await textEditor.edit((editor) => {
+				editor.replace(textEditor.selection, preparedExtractOption)
 			})
 
-		if (!success) {
-			return window.showErrorMessage(`Couldn't upsert new message with id ${bundleId}.`)
+			CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
+
+			telemetry.capture({
+				event: "IDE-EXTENSION command executed: Extract Message",
+			})
+
+			return msg("Message extracted.")
+		} catch (e) {
+			return window.showErrorMessage(`Couldn't extract new message. ${e}`)
 		}
-
-		await textEditor.edit((editor) => {
-			editor.replace(textEditor.selection, preparedExtractOption)
-		})
-
-		// Emit event to notify that a message was extracted
-		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
-
-		telemetry.capture({
-			event: "IDE-EXTENSION command executed: Extract Message",
-		})
-		return msg("Message extracted.")
 	},
-} as const
+}

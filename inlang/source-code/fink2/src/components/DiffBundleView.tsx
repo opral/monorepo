@@ -19,8 +19,6 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 	);
 	const [loadingDiscard, setLoadingDiscard] = useState(false);
 
-	console.log({ settings });
-
 	useEffect(() => {
 		if (!project) return;
 		queryNewBundle(project, props, setBundle, setOldBundle);

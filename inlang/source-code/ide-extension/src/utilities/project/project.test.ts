@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as vscode from "vscode"
-import { loadProject } from "@inlang/sdk"
+import * as fs from "node:fs/promises"
 import { setState, state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
-import { telemetry } from "../../services/telemetry/implementation.js"
+import { telemetry } from "../../services/telemetry/index.js"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import {
 	createProjectViewNodes,
@@ -13,6 +13,7 @@ import {
 	type ProjectViewNode,
 	projectView,
 } from "./project.js"
+import { loadProjectFromDirectoryInMemory } from "@inlang/sdk2"
 
 vi.mock("vscode", () => ({
 	Uri: {
@@ -35,8 +36,8 @@ vi.mock("vscode", () => ({
 	EventEmitter: vi.fn(),
 }))
 
-vi.mock("@inlang/sdk", () => ({
-	loadProject: vi.fn(),
+vi.mock("@inlang/sdk2", () => ({
+	loadProjectFromDirectoryInMemory: vi.fn(),
 }))
 
 vi.mock("@lix-js/fs", () => ({
@@ -90,7 +91,7 @@ vi.mock("../../configuration.js", () => ({
 	},
 }))
 
-vi.mock("../../services/telemetry/implementation.js", () => ({
+vi.mock("../../services/telemetry/index.js", () => ({
 	telemetry: {
 		capture: vi.fn(),
 	},
@@ -110,7 +111,7 @@ describe("createProjectViewNodes", () => {
 	} as vscode.WorkspaceFolder
 
 	beforeEach(() => {
-		vi.resetAllMocks()
+		vi.clearAllMocks()
 	})
 
 	it("should create project view nodes from state", () => {
@@ -208,24 +209,35 @@ describe("handleTreeSelection", () => {
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: mockContext,
 		}
-		const fs = {} as typeof import("node:fs/promises")
 		const workspaceFolder = {
 			uri: {
 				fsPath: "/path/to/workspace",
 			},
 		} as vscode.WorkspaceFolder
 
+		const errors: Error[] = []
+
+		const mockProject = {
+			errors: {
+				get: vi.fn().mockReturnValue(errors),
+			},
+		}
+
+		// Mock the resolved value of loadProjectFromDirectoryInMemory to return the mockProject
 		// @ts-expect-error
-		openRepository.mockResolvedValue({})
-		// @ts-expect-error
-		findRepoRoot.mockResolvedValue("/path/to/repo")
-		// @ts-expect-error
-		loadProject.mockResolvedValue({ errors: () => [] })
+		vi.mocked(loadProjectFromDirectoryInMemory).mockResolvedValue(mockProject)
 
 		await handleTreeSelection({ selectedNode, fs, workspaceFolder })
 
 		expect(setState).toBeCalled()
-		expect(telemetry.capture).toBeCalled()
+		expect(telemetry.capture).toBeCalledWith(
+			expect.objectContaining({
+				event: "IDE-EXTENSION loaded project",
+				properties: expect.objectContaining({
+					errors: errors,
+				}),
+			})
+		)
 		expect(CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.fire).toBeCalled()
 	})
 
@@ -238,7 +250,6 @@ describe("handleTreeSelection", () => {
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: mockContext,
 		}
-		const fs = {} as typeof import("node:fs/promises")
 		const workspaceFolder = {
 			uri: {
 				fsPath: "/path/to/workspace",
@@ -250,7 +261,7 @@ describe("handleTreeSelection", () => {
 		// @ts-expect-error
 		findRepoRoot.mockResolvedValue("/path/to/repo")
 		// @ts-expect-error
-		loadProject.mockRejectedValue(new Error("Loading failed"))
+		loadProjectFromDirectoryInMemory.mockRejectedValue(new Error("Loading failed"))
 
 		await handleTreeSelection({ selectedNode, fs, workspaceFolder })
 
@@ -259,32 +270,32 @@ describe("handleTreeSelection", () => {
 		)
 	})
 
-	it("should handle error when project loading fails", async () => {
-		const mockContext = {} as vscode.ExtensionContext
-
+	it("should show error message if project loading fails", async () => {
 		const selectedNode: ProjectViewNode = {
-			label: "selected/project.inlang",
-			path: "/path/to/selected/project.inlang",
-			relativePath: "./path/to/selected/project.inlang",
+			label: "SelectedProject",
+			path: "/path/to/selected",
+			relativePath: "./path/to/selected",
 			isSelected: true,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-			context: mockContext,
+			context: {} as vscode.ExtensionContext,
 		}
-		const fs = {} as typeof import("node:fs/promises")
-		const workspaceFolder = {
-			uri: {
-				fsPath: "/path/to/workspace",
-			},
+
+		const error = new Error("Loading failed")
+
+		vi.mocked(loadProjectFromDirectoryInMemory).mockRejectedValue(error)
+
+		const mockWorkspaceFolder = {
+			uri: { fsPath: "/path/to/workspace" },
 		} as vscode.WorkspaceFolder
 
-		// @ts-expect-error
-		loadProject.mockRejectedValue(new Error("Loading failed"))
+		await handleTreeSelection({
+			selectedNode,
+			fs,
+			workspaceFolder: mockWorkspaceFolder,
+		})
 
-		await handleTreeSelection({ selectedNode, fs, workspaceFolder })
-
-		// Update the expected error message according to the actual implementation
-		expect(vscode.window.showErrorMessage).toBeCalledWith(
-			expect.stringContaining('Failed to load project "undefined": Error: Loading failed')
+		expect(vscode.window.showErrorMessage).toHaveBeenCalledWith(
+			`Failed to load project "/path/to/selected": Error: ${error.message}`
 		)
 	})
 })
@@ -293,7 +304,6 @@ describe("createTreeDataProvider", () => {
 	const mockContext = {} as vscode.ExtensionContext
 
 	it("should create a TreeDataProvider", () => {
-		const fs = {} as typeof import("node:fs/promises")
 		const workspaceFolder = {
 			uri: {
 				fsPath: "/path/to/workspace",
@@ -321,7 +331,6 @@ describe("projectView", () => {
 				fsPath: "/path/to/workspace",
 			},
 		} as vscode.WorkspaceFolder
-		const fs = {} as typeof import("node:fs/promises")
 
 		await projectView({ context, workspaceFolder, fs })
 

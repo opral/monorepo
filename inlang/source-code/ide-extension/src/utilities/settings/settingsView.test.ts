@@ -29,10 +29,11 @@ vi.mock("../state.js", () => ({
 	state: () => ({
 		selectedProjectPath: "Users/username/happy-elephant.inlang",
 		project: {
-			settings: vi.fn().mockReturnValue({}),
-			installed: {
-				plugins: vi.fn().mockReturnValue([]),
-				messageLintRules: vi.fn().mockReturnValue([]),
+			settings: {
+				get: async () => vi.fn().mockReturnValue({}),
+			},
+			plugins: {
+				get: async () => vi.fn().mockReturnValue({}),
 			},
 		},
 	}),
@@ -54,14 +55,14 @@ describe("settingsPanel", () => {
 	})
 })
 
-describe("getWebviewContent", () => {
-	it("should return expected HTML content", () => {
+describe("getWebviewContent", async () => {
+	it("should return expected HTML content", async () => {
 		const mockWebview = { asWebviewUri: vi.fn() } as unknown as vscode.Webview
 		const mockContext = { extensionUri: "uri" } as unknown as vscode.ExtensionContext
 		// @ts-expect-error
 		mockWebview.asWebviewUri.mockImplementation((uri: any) => uri)
 
-		const htmlContent = getWebviewContent({ context: mockContext, webview: mockWebview })
+		const htmlContent = await getWebviewContent({ context: mockContext, webview: mockWebview })
 		expect(htmlContent).toContain("<title>Settings</title>")
 	})
 })

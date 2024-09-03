@@ -15,6 +15,7 @@ import {
 } from "../../components/SingleDiffBundle.tsx";
 import { resolveConflictBySelecting } from "@lix-js/sdk";
 import { useEffect } from "react";
+import { Variant } from "@inlang/sdk2";
 
 export default function Page() {
 	const [project] = useAtom(projectAtom);
@@ -102,7 +103,7 @@ export default function Page() {
 													>
 														<InlangPatternEditor
 															slot="pattern-editor"
-															pattern={change.value.pattern}
+															variant={change.value}
 															className={"conflict-pattern"}
 														></InlangPatternEditor>
 													</InlangVariant>
@@ -150,7 +151,7 @@ export default function Page() {
 													>
 														<InlangPatternEditor
 															slot="pattern-editor"
-															pattern={conflictingChange.value.pattern}
+															variant={conflictingChange.value}
 															className={"conflict-pattern"}
 														></InlangPatternEditor>
 													</InlangVariant>

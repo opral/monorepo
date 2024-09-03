@@ -228,7 +228,8 @@
 		"vscode:prepublish": "npm run build",
 		"---- TEST ----------------------------------------------------------": "",
 		"pretest": "node ./build.js",
-		"test": "vitest run --passWithNoTests --coverage",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"test:e2e": "npm run pretest && wdio run ./test/wdio.conf.ts",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "eslint ./src --fix",
@@ -255,7 +256,7 @@
 		"prettier": "^3.3.3",
 		"require-from-string": "^2.0.2",
 		"throttle-debounce": "^5.0.0",
-		"vitest": "0.34.6"
+		"vitest": "^2.0.5"
 	},
 	"devDependencies": {
 		"@sentry/node": "^7.99.0",

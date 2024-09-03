@@ -3,14 +3,13 @@ import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
 import { getPatternFromString, getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
-import { Bundle, selectBundleNested } from "@inlang/sdk2"
+import { type Bundle, selectBundleNested } from "@inlang/sdk2"
 
 export const editMessageCommand = {
 	command: "sherlock.editMessage",
 	title: "Sherlock: Edit a Message",
 	register: commands.registerCommand,
 	callback: async function ({ bundleId, locale }: { bundleId: Bundle["id"]; locale: string }) {
-		// Get the message from the database
 		const bundle = await selectBundleNested(state().project.db)
 			.where("bundle.id", "=", bundleId)
 			.executeTakeFirst()
@@ -19,14 +18,12 @@ export const editMessageCommand = {
 			return msg(`Bundle with id ${bundleId} not found.`)
 		}
 
-		// Get the message from the bundle
 		const message = bundle.messages.find((m) => m.locale === locale)
 
 		if (!message) {
 			return msg(`Message with locale ${locale} not found.`)
 		}
 
-		// Get the variant from the message
 		const variant = message.variants.find((v) => v.match.locale === locale)
 
 		if (!variant) {
@@ -40,49 +37,45 @@ export const editMessageCommand = {
 			messageId: message.id,
 		})
 
-		// Show input box with current message content
 		const newValue = await window.showInputBox({
 			title: "Enter new value:",
 			value: stringPattern,
 		})
+
 		if (!newValue) {
 			return
 		}
 
-		// Update the pattern
 		variant.pattern = getPatternFromString({ string: newValue })
 
-		// Upsert the updated message and variant
-		const success = await state()
-			.project.db.transaction()
-			.execute(async (trx) => {
-				await trx
-					.updateTable("message")
-					.set({
-						declarations: message.declarations,
-						selectors: message.selectors,
-					})
-					.where("message.id", "=", message.id)
-					.execute()
+		try {
+			await state()
+				.project.db.transaction()
+				.execute(async (trx) => {
+					await trx
+						.updateTable("message")
+						.set({
+							declarations: message.declarations,
+							selectors: message.selectors,
+						})
+						.where("message.id", "=", message.id)
+						.execute()
 
-				return await trx
-					.updateTable("variant")
-					.set({
-						pattern: variant.pattern,
-					})
-					.where("variant.id", "=", variant.id)
-					.returningAll()
-					.execute()
-			})
+					return await trx
+						.updateTable("variant")
+						.set({
+							pattern: variant.pattern,
+						})
+						.where("variant.id", "=", variant.id)
+						.returningAll()
+						.execute()
+				})
 
-		if (!success) {
-			return msg(`Couldn't update bundle with id ${bundleId}.`)
+			CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
+
+			return msg("Message updated.")
+		} catch (e) {
+			return msg(`Couldn't update bundle with id ${bundleId}. ${e}`)
 		}
-
-		// Emit event to notify that a message was edited
-		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
-
-		// Return success message
-		return msg("Message updated.")
 	},
 } as const

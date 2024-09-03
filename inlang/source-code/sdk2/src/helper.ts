@@ -47,6 +47,8 @@ export function createMessage(args: {
 		bundleId: args.bundleId,
 		id: messageId,
 		locale: args.locale,
+		selectors: [],
+		declarations: [],
 		variants: [
 			createVariant({
 				messageId: messageId,

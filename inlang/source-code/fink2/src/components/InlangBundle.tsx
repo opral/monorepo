@@ -114,7 +114,6 @@ const InlangBundle = (props: {
 
 	const handleChange = (e: Event) => {
 		const data = (e as CustomEvent).detail.argument;
-		console.log(data);
 		switch (data.type) {
 			case "Message":
 				if (data.operation === "create") {
