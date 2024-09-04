@@ -28,7 +28,7 @@ export const maybeAddSherlock: CliStep<
 	const settings = await ctx.project.settings.get()
 
 	// m function matcher is not installed
-	if (settings.modules.some((m) => m.includes("plugin-m-function-matcher")) === false) {
+	if (settings.modules?.some((m) => m.includes("plugin-m-function-matcher")) === false) {
 		// add the m function matcher plugin
 		settings.modules.push(
 			"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"

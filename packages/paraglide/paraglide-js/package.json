@@ -55,11 +55,10 @@
 	],
 	"dependencies": {
 		"@inlang/detect-json-formatting": "workspace:*",
-		"@inlang/sdk2": "workspace:*",
-		"@inlang/plugin-icu1": "workspace:*",
 		"commander": "11.1.0",
 		"consola": "3.2.3",
 		"dedent": "1.5.1",
+		"fast-glob": "^3.2.12",
 		"json5": "2.2.3",
 		"posthog-node": "^4.0.1",
 		"prettier": "^3.3.3",
@@ -68,6 +67,8 @@
 	"devDependencies": {
 		"@inlang/recommend-ninja": "workspace:*",
 		"@inlang/recommend-sherlock": "workspace:*",
+		"@inlang/plugin-icu1": "workspace:*",
+		"@inlang/sdk2": "workspace:*",
 		"@rollup/plugin-terser": "0.4.3",
 		"@rollup/plugin-virtual": "3.0.1",
 		"@ts-morph/bootstrap": "0.20.0",
