@@ -53,12 +53,14 @@ export default class InlangVariant extends LitElement {
 				border: none;
 				border-radius: 0;
 				min-height: 44px;
+				color: var(--sl-input-color);
 			}
 			.match::part(input) {
 				min-height: 44px;
+				background-color: var(--sl-input-background-color);
 			}
 			.match::part(input):hover {
-				background-color: var(--sl-input-background-color-);
+				background-color: var(--sl-input-background-color-hover);
 			}
 			.variant {
 				position: relative;

@@ -219,23 +219,120 @@ export const Complex: StoryObj = {
 						return html`<inlang-variant slot="variant" .variant=${variant}>
 							<inlang-pattern-editor slot="pattern-editor" .variant=${variant}>
 							</inlang-pattern-editor>
-							${(message.selectors.length === 0 && message.variants.length <= 1) ||
-							!message.selectors
-								? html`<inlang-add-selector
-										slot="variant-action"
-										.message=${message}
-										.messages=${messages}
-								  ></inlang-add-selector>`
-								: ``}
 						</inlang-variant>`
 					})}
-					<inlang-add-selector
-						slot="selector-button"
-						.message=${message}
-						.messages=${messages}
-					></inlang-add-selector>
 				</inlang-message>`
 			})}
 		</inlang-bundle>`
+	},
+}
+
+export const Themed: StoryObj = {
+	args: {
+		bundle: pluralBundle,
+		messages: pluralBundle.messages,
+	},
+	render: () => {
+		const [{ bundle, messages }] = useArgs()
+
+		return html` <style>
+				.inlang-pattern-editor-contenteditable {
+					background-color: #2f2a33 !important;
+					color: #fcfafc !important;
+				}
+				.inlang-pattern-editor-contenteditable:hover {
+					background-color: #4a474d !important;
+				}
+				.inlang-pattern-editor-placeholder {
+					color: #fcfafc !important;
+				}
+				inlang-variant {
+					--sl-input-border-color: #9e9d9e;
+					--sl-input-background-color: #2f2a33;
+					--sl-input-background-color-focus: #4a474d;
+					--sl-input-background-color-hover: #4a474d;
+					--sl-input-border-color-hover: #9e9d9e;
+					--sl-input-color: #fcfafc;
+					--sl-input-color-focus: #fcfafc;
+					--sl-input-color-hover: #fcfafc;
+				}
+				inlang-message {
+					--sl-input-border-color: #9e9d9e;
+					--sl-input-background-color: #2f2a33;
+					--sl-input-background-color-focus: #4a474d;
+					--sl-input-background-color-hover: #4a474d;
+					--sl-input-border-color-hover: #9e9d9e;
+					--sl-input-color: #fcfafc;
+					--sl-input-color-focus: #fcfafc;
+					--sl-input-color-hover: #fcfafc;
+					--sl-input-background-color-disabled: #211f23;
+					--sl-input-placeholder-color: #fcfafc;
+				}
+				inlang-bundle {
+					--sl-input-border-color: #9e9d9e;
+					--sl-input-background-color: #2f2a33;
+					--sl-input-background-color-focus: #4a474d;
+					--sl-input-background-color-hover: #4a474d;
+					--sl-input-border-color-hover: #9e9d9e;
+					--sl-input-color: #fcfafc;
+					--sl-input-color-focus: #fcfafc;
+					--sl-input-color-hover: #fcfafc;
+					--sl-input-background-color-disabled: #211f23;
+					--sl-input-placeholder-color: #fcfafc;
+				}
+				inlang-bundle::part(base) {
+					background-color: #18161a;
+				}
+			</style>
+			<inlang-bundle .bundle=${bundle} .messages=${messages}>
+				${messages.map((message: MessageNested) => {
+					return html`<inlang-message slot="message" .message=${message} .settings=${mockSettings}>
+						${message.variants.map((variant) => {
+							return html`<inlang-variant slot="variant" .variant=${variant}>
+								<inlang-pattern-editor slot="pattern-editor" .variant=${variant}>
+								</inlang-pattern-editor>
+								${(message.selectors.length === 0 && message.variants.length <= 1) ||
+								!message.selectors
+									? html`<style>
+												sl-dialog::part(body) {
+													padding: 0;
+													margin-top: -16px;
+												}
+												sl-dialog::part(panel) {
+													border-radius: 8px;
+												}
+											</style>
+											<div slot="variant-action">Add selector</div>
+											<sl-dialog slot="variant-action" label="Add Selector">
+												<inlang-add-selector
+													.message=${message}
+													.messages=${messages}
+												></inlang-add-selector>
+											</sl-dialog>`
+									: ``}
+							</inlang-variant>`
+						})}
+						<style>
+							.add-selector {
+								height: 44px;
+								display: flex;
+								align-items: center;
+								margin-right: 12px;
+							}
+							sl-dialog::part(body) {
+								padding: 0;
+								margin-top: -16px;
+							}
+							sl-dialog::part(panel) {
+								border-radius: 8px;
+							}
+						</style>
+						<div slot="selector-button" class="add-selector">Add selector</div>
+						<sl-dialog slot="selector-button" label="Add Selector">
+							<inlang-add-selector .message=${message} .messages=${messages}></inlang-add-selector>
+						</sl-dialog>
+					</inlang-message>`
+				})}
+			</inlang-bundle>`
 	},
 }
