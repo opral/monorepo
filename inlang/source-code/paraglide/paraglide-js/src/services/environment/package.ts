@@ -1,4 +1,3 @@
-import type { NodeishFilesystem } from "../file-handling/types.js"
 import path from "node:path"
 import { pathExists } from "../file-handling/exists.js"
 
@@ -10,7 +9,7 @@ import { pathExists } from "../file-handling/exists.js"
  * @returns The path to the package.json file, or undefined if none was found.
  */
 export async function findPackageJson(
-	fs: NodeishFilesystem,
+	fs: typeof import("node:fs/promises"),
 	cwd: string
 ): Promise<string | undefined> {
 	const potentialPackageJsonPath = path.resolve(cwd, "package.json")
@@ -20,7 +19,7 @@ export async function findPackageJson(
 }
 
 export async function getPackageJson(
-	fs: NodeishFilesystem,
+	fs: typeof import("node:fs/promises"),
 	cwd: string
 ): Promise<unknown | undefined> {
 	const packageJsonPath = await findPackageJson(fs, cwd)

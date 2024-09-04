@@ -1,15 +1,14 @@
 import { defineConfig } from "vite"
-import dts from "vite-plugin-dts"
 import tsconfigPaths from "vite-tsconfig-paths"
 import pkg from "./package.json"
 import manifest from "./marketplace-manifest.json"
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
 	// eslint-disable-next-line no-undef
 	const pToken = process.env.PUBLIC_POSTHOG_TOKEN ?? "placeholder"
 
 	return {
-		plugins: [dts({ insertTypesEntry: true, ignoreConfigErrors: true }), tsconfigPaths()],
+		plugins: [tsconfigPaths({ ignoreConfigErrors: true })],
 		build: {
 			lib: {
 				entry: ["src/index.ts", "src/adapter-utils/index.ts", "src/cli/index.ts"],

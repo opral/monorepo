@@ -4,7 +4,6 @@ import { compileCommand } from "./commands/compile/command.js"
 export const cli = new Command()
 	.name("paraglide-js")
 	.addCommand(compileCommand)
-	// .addCommand(initCommand2)
 	.showHelpAfterError()
 	.version(PARJS_PACKAGE_VERSION)
 
