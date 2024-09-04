@@ -1,6 +1,6 @@
 import path from "node:path"
 import crypto from "node:crypto"
-import type { NodeishFilesystem } from "@lix-js/fs"
+import type { NodeishFilesystem } from "./types.js"
 
 let previousOutputHash: string | undefined
 
@@ -14,7 +14,7 @@ export async function writeOutput(
 	if (currentOutputHash === previousOutputHash) return
 
 	// create the output directory if it doesn't exist
-	await fs.access(outputDirectory).catch(async () => {
+	await fs.stat(outputDirectory).catch(async () => {
 		await fs.mkdir(outputDirectory, { recursive: true })
 	})
 

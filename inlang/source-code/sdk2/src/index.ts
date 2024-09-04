@@ -7,6 +7,7 @@ export * from "./json-schema/pattern.js";
 export * from "./mock/index.js";
 export * from "./helper.js";
 export * from "./query-utilities/index.js";
+export * from "./plugin/errors.js";
 export {
 	humanId,
 	/**

@@ -35,6 +35,10 @@
 		"rollup",
 		"webpack"
 	],
+	"bundledDependencies": [
+		"@inlang/sdk2",
+		"@inlang/plugin-icu1"
+	],
 	"files": [
 		"./dist"
 	],
@@ -48,8 +52,8 @@
 	},
 	"dependencies": {
 		"@inlang/paraglide-js": "workspace:*",
-		"@lix-js/client": "workspace:*",
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk2": "workspace:*",
+		"@inlang/plugin-icu1": "workspace:*",
 		"unplugin": "1.5.1"
 	},
 	"devDependencies": {

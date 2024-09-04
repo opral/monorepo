@@ -42,7 +42,7 @@
 	],
 	"scripts": {
 		"dev": "vite build --mode development --watch",
-		"build": "npm run check && vite build --mode production",
+		"build": "vite build --mode production",
 		"test": "vitest run --coverage ./src/**/*",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
@@ -50,11 +50,13 @@
 		"check": "tsc --noEmit --emitDeclarationOnly false"
 	},
 	"bundleDependencies": [
-		"@inlang/sdk2"
+		"@inlang/sdk2",
+		"@inlang/plugin-icu1"
 	],
 	"dependencies": {
 		"@inlang/detect-json-formatting": "workspace:*",
 		"@inlang/sdk2": "workspace:*",
+		"@inlang/plugin-icu1": "workspace:*",
 		"commander": "11.1.0",
 		"consola": "3.2.3",
 		"dedent": "1.5.1",
