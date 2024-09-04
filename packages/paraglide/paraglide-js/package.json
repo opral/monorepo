@@ -44,6 +44,7 @@
 		"dev": "vite build --mode development --watch",
 		"build": "vite build --mode production",
 		"test": "vitest run --coverage ./src/**/*",
+		"test:watch": "vitest --watch ./src/**/*",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules",
