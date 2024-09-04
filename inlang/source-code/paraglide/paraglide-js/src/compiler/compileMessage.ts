@@ -56,14 +56,17 @@ function compileMessageWithMultipleVariants(
 		.map((sel) => sel.code)
 		.join(", ")} ]`
 
+	// TODO make sure that matchers use keys instead of indexes
 	const compiledVariants = sortVariants(message.variants).map((variant): Compilation<Variant> => {
 		const compiledPattern = compilePattern(message.locale, variant.pattern, registry)
 		const typeRestrictions = compiledPattern.typeRestrictions
 
+		// @ts-expect-error
 		const allWildcards: boolean = variant.match.every((m: string) => m === "*")
 		if (allWildcards)
 			return { code: `return ${compiledPattern.code}`, typeRestrictions, source: variant }
 
+		// @ts-expect-error
 		const conditions: string[] = (variant.match as string[])
 			.map((m, i) => {
 				if (m === "*") return undefined
@@ -128,9 +131,12 @@ function sortVariants(variants: Variant[]): Variant[] {
 		return 0
 	}
 
+	// @ts-ignore
 	return variants.toSorted((a, b) => {
 		let i = 0
+		// @ts-ignore
 		while (i < Math.min(a.match.length, b.match.length)) {
+			// @ts-ignore
 			const cmp = compareMatches(a.match[i], b.match[i])
 			if (cmp !== 0) return cmp
 			i += 1

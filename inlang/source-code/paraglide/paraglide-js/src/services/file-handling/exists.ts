@@ -1,14 +1,12 @@
-import type { NodeishFilesystem } from "./types.js"
-
 /**
  * Returns true if the path exists (file or directory), false otherwise.
  *
  * @param nodeishFs
  * @returns
  */
-export async function pathExists(filePath: string, nodeishFs: NodeishFilesystem) {
+export async function pathExists(filePath: string, fs: typeof import("node:fs/promises")) {
 	try {
-		await nodeishFs.stat(filePath)
+		await fs.stat(filePath)
 		return true
 	} catch (error) {
 		//@ts-ignore

@@ -1,6 +1,6 @@
 import { expect, test, describe, vi, beforeEach } from "vitest"
 import { createProject as typescriptProject, ts } from "@ts-morph/bootstrap"
-import { BundleNested, ProjectSettings } from "@inlang/sdk2"
+import { type BundleNested, ProjectSettings } from "@inlang/sdk2"
 import { compile } from "./compile.js"
 import { rollup } from "rollup"
 import virtual from "@rollup/plugin-virtual"
@@ -22,7 +22,7 @@ const mockBundles: BundleNested[] = [
 				variants: [
 					{
 						id: "happy_elephant_message_en_variant_one",
-						match: [],
+						match: {},
 						messageId: "happy_elephant_message_en",
 						pattern: [{ type: "text", value: "A simple message." }],
 					},
@@ -46,7 +46,7 @@ const mockBundles: BundleNested[] = [
 					{
 						id: "sad_penguin_message_en_variant_one",
 						messageId: "sad_penguin_message_en",
-						match: [],
+						match: {},
 						pattern: [{ type: "text", value: "A simple message." }],
 					},
 				],
@@ -61,7 +61,7 @@ const mockBundles: BundleNested[] = [
 					{
 						id: "sad_penguin_message_en_us_variant_one",
 						messageId: "sad_penguin_message_en_us",
-						match: [],
+						match: {},
 						pattern: [
 							{ type: "text", value: "FUCKTARD. I am from New York. This is a simple message!" },
 						],
@@ -78,7 +78,7 @@ const mockBundles: BundleNested[] = [
 					{
 						id: "sad_penguin_message_de_variant_one",
 						messageId: "sad_penguin_message_de",
-						match: [],
+						match: {},
 						pattern: [{ type: "text", value: "Eine einfache Nachricht." }],
 					},
 				],
@@ -107,7 +107,7 @@ const mockBundles: BundleNested[] = [
 					{
 						id: "depressed_dog_en_variant_one",
 						messageId: "depressed_dog_en",
-						match: [],
+						match: {},
 						pattern: [
 							{ type: "text", value: "Good morning " },
 							{ type: "expression", arg: { type: "variable", name: "name" } },
@@ -132,7 +132,7 @@ const mockBundles: BundleNested[] = [
 					{
 						id: "depressed_dog_de_variant_one",
 						messageId: "depressed_dog_de",
-						match: [],
+						match: {},
 						pattern: [
 							{ type: "text", value: "Guten Morgen " },
 							{ type: "expression", arg: { type: "variable", name: "name" } },
@@ -170,7 +170,7 @@ const mockBundles: BundleNested[] = [
 					{
 						id: "insane_cats_en_variant_one",
 						messageId: "insane_cats_en",
-						match: [],
+						match: {},
 						pattern: [
 							{ type: "text", value: "Hello " },
 							{ type: "expression", arg: { type: "variable", name: "name" } },
@@ -202,7 +202,7 @@ const mockBundles: BundleNested[] = [
 					{
 						id: "insane_cats_de_variant_one",
 						messageId: "insane_cats_de",
-						match: [],
+						match: {},
 						pattern: [
 							{ type: "text", value: "Hallo " },
 							{ type: "expression", arg: { type: "variable", name: "name" } },
