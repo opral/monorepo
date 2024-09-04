@@ -37,7 +37,7 @@ function compileMessageWithOneVariant(
 		throw new Error("Message must have exactly one variant")
 	const hasInputs = message.declarations.some((decl) => decl.type === "input")
 	const compiledPattern = compilePattern(message.locale, variant.pattern, registry)
-	const code = `const ${jsIdentifier(message.id)} = (${hasInputs ? "inputs" : ""}) => ${compiledPattern.code}`
+	const code = `export const ${jsIdentifier(message.id)} = (${hasInputs ? "inputs" : ""}) => ${compiledPattern.code}`
 	return { code, typeRestrictions: compiledPattern.typeRestrictions, source: message }
 }
 
@@ -61,17 +61,17 @@ function compileMessageWithMultipleVariants(
 		const compiledPattern = compilePattern(message.locale, variant.pattern, registry)
 		const typeRestrictions = compiledPattern.typeRestrictions
 
-		// @ts-expect-error
-		const allWildcards: boolean = variant.match.every((m: string) => m === "*")
-		if (allWildcards)
-			return { code: `return ${compiledPattern.code}`, typeRestrictions, source: variant }
+		const allWildcards: boolean = Object.values(variant.match).every((value) => value === "*")
 
-		// @ts-expect-error
-		const conditions: string[] = (variant.match as string[])
-			.map((m, i) => {
-				if (m === "*") return undefined
+		if (allWildcards) {
+			return { code: `return ${compiledPattern.code}`, typeRestrictions, source: variant }
+		}
+
+		const conditions: string[] = Object.values(variant.match)
+			.map((value, i) => {
+				if (value === "*") return undefined
 				// we use == instead of === to automatically convert to string if necessary
-				return `selectors[${i}] == "${escapeForDoubleQuoteString(m)}"`
+				return `selectors[${i}] == "${escapeForDoubleQuoteString(value)}"`
 			})
 			.filter((m) => m !== undefined)
 
@@ -87,7 +87,7 @@ function compileMessageWithMultipleVariants(
 		...compiledSelectors.map((v) => v.typeRestrictions),
 	].reduce(mergeTypeRestrictions, {})
 
-	const code = `const ${jsIdentifier(message.id)} = (${hasInputs ? "inputs" : ""}) => {
+	const code = `export const ${jsIdentifier(message.id)} = (${hasInputs ? "inputs" : ""}) => {
 	${selectorCode}
 	${compiledVariants.map((l) => `\t${l.code}`).join("\n")}
 }`
@@ -130,9 +130,9 @@ function sortVariants(variants: Variant[]): Variant[] {
 		if (b === "*") return -1
 		return 0
 	}
-
-	// @ts-ignore
-	return variants.toSorted((a, b) => {
+	// not using .toSorted() because node js 18 doesn't have it
+	const copy = [...variants]
+	return copy.sort((a, b) => {
 		let i = 0
 		// @ts-ignore
 		while (i < Math.min(a.match.length, b.match.length)) {
