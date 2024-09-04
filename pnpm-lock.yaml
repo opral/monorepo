@@ -1536,12 +1536,6 @@ importers:
       '@inlang/detect-json-formatting':
         specifier: workspace:*
         version: link:../../detect-json-formatting
-      '@inlang/plugin-icu1':
-        specifier: workspace:*
-        version: link:../../plugins/icu1
-      '@inlang/sdk2':
-        specifier: workspace:*
-        version: link:../../sdk2
       commander:
         specifier: 11.1.0
         version: 11.1.0
@@ -1567,12 +1561,18 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(prettier@3.3.3)
     devDependencies:
+      '@inlang/plugin-icu1':
+        specifier: workspace:*
+        version: link:../../plugins/icu1
       '@inlang/recommend-ninja':
         specifier: workspace:*
         version: link:../../recommendations/recommend-ninja
       '@inlang/recommend-sherlock':
         specifier: workspace:*
         version: link:../../recommendations/recommend-sherlock
+      '@inlang/sdk2':
+        specifier: workspace:*
+        version: link:../../sdk2
       '@rollup/plugin-terser':
         specifier: 0.4.3
         version: 0.4.3(rollup@3.29.1)
@@ -1589,8 +1589,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       '@vitest/coverage-v8':
-        specifier: 0.34.3
-        version: 0.34.3(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.6)(webdriverio@8.40.3))
+        specifier: 2.0.5
+        version: 2.0.5(vitest@2.0.5(@types/node@20.14.14)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6))
       memfs:
         specifier: 4.6.0
         version: 4.6.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.3)
@@ -1610,8 +1610,8 @@ importers:
         specifier: ^4.3.2
         version: 4.3.2(typescript@5.5.4)(vite@4.5.3(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.6))
       vitest:
-        specifier: 0.34.3
-        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.6)(webdriverio@8.40.3)
+        specifier: 2.0.5
+        version: 2.0.5(@types/node@20.14.14)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6)
 
   inlang/source-code/paraglide/paraglide-js/example:
     dependencies:
@@ -1988,6 +1988,9 @@ importers:
       '@types/node':
         specifier: 20.9.3
         version: 20.9.3
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
       typescript:
         specifier: ^5.5.2
         version: 5.5.4
@@ -25006,6 +25009,24 @@ snapshots:
       strip-literal: 2.1.0
       test-exclude: 6.0.0
       vitest: 1.6.0(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitest/coverage-v8@2.0.5(vitest@2.0.5(@types/node@20.14.14)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6))':
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@bcoe/v8-coverage': 0.2.3
+      debug: 4.3.6(supports-color@8.1.1)
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 5.0.6
+      istanbul-reports: 3.1.7
+      magic-string: 0.30.11
+      magicast: 0.3.4
+      std-env: 3.7.0
+      test-exclude: 7.0.1
+      tinyrainbow: 1.2.0
+      vitest: 2.0.5(@types/node@20.14.14)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6)
     transitivePeerDependencies:
       - supports-color
 
