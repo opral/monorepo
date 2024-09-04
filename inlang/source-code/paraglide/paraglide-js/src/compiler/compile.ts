@@ -1,13 +1,9 @@
 import { compileBundle, type Resource } from "./compileBundle.js"
-import { telemetry } from "../services/telemetry/implementation.js"
 import { jsIdentifier } from "../services/codegen/identifier.js"
-import { getStackInfo } from "../services/telemetry/stack-detection.js"
-import { getPackageJson } from "../services/environment/package.js"
 import { createRuntime } from "./runtime.js"
 import { createRegistry, DEFAULT_REGISTRY } from "./registry.js"
 import { lookup } from "~/services/lookup.js"
 import { type BundleNested, type ProjectSettings } from "@inlang/sdk2"
-import fs from "node:fs/promises"
 import * as prettier from "prettier"
 import {
 	escapeForDoubleQuoteString,
@@ -23,7 +19,6 @@ const ignoreDirectory = `# ignore everything because the directory is auto-gener
 export type CompileOptions = {
 	bundles: Readonly<BundleNested[]>
 	settings: Pick<ProjectSettings, "baseLocale" | "locales">
-	projectId: string | undefined
 	/**
 	 * The file-structure of the compiled output.
 	 *
@@ -33,7 +28,6 @@ export type CompileOptions = {
 }
 
 const defaultCompileOptions = {
-	projectId: undefined,
 	outputStructure: "regular",
 } satisfies Partial<CompileOptions>
 
@@ -68,18 +62,18 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 			? generateRegularOutput(resources, opts.settings, fallbackMap)
 			: generateModuleOutput(resources, opts.settings, fallbackMap)
 
-	// telemetry
-	const pkgJson = await getPackageJson(fs, process.cwd())
-	const stack = getStackInfo(pkgJson)
-	telemetry.capture(
-		{
-			event: "PARAGLIDE-JS compile executed",
-			properties: { stack },
-		},
-		opts.projectId
-	)
+	// // telemetry
+	// const pkgJson = await getPackageJson(fs, process.cwd())
+	// const stack = getStackInfo(pkgJson)
+	// telemetry.capture(
+	// 	{
+	// 		event: "PARAGLIDE-JS compile executed",
+	// 		properties: { stack },
+	// 	},
+	// 	opts.projectId
+	// )
 
-	telemetry.shutdown()
+	// telemetry.shutdown()
 	return await formatFiles(output)
 }
 

@@ -225,7 +225,6 @@ const mockSettings: ProjectSettings = {
 const output = await compile({
 	bundles: mockBundles,
 	settings: mockSettings,
-	projectId: undefined,
 })
 
 describe("paraglide", () => {
@@ -249,7 +248,6 @@ describe("paraglide", () => {
 			const output = await compile({
 				bundles: [],
 				settings: { locales: ["en", "de"], baseLocale: "en" },
-				projectId: undefined,
 			})
 			expect(output["messages/en.js"]).toBeDefined()
 			expect(output["messages/de.js"]).toBeDefined()
