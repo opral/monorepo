@@ -201,5 +201,9 @@ describe("createMessageCommand", () => {
 			value: "",
 			prompt: undefined,
 		})
+
+		expect(window.showInputBox).toHaveBeenCalledWith({
+			title: "Enter the message content:",
+		})
 	})
 })
