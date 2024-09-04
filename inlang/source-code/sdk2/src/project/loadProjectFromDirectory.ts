@@ -9,6 +9,8 @@ import type { InlangPlugin } from "../plugin/schema.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
 import { fromMessageV1 } from "../json-schema/old-v1-message/fromMessageV1.js";
 
+import Watcher from "watcher";
+
 /**
  * Loads a project from a directory.
  *
@@ -26,12 +28,14 @@ export async function loadProjectFromDirectory(
 		blob: await newProject(),
 	});
 
-	keepFilesInSync({ fs: args.fs, path: args.path, lix: project.lix });
+	await keepFilesInSync({ fs: args.fs, path: args.path, lix: project.lix });
 
 	// TODO i guess we should move this validation logic into sdk2/src/project/loadProject.ts
 	// Two scenarios could arise:
 	// 1. set settings is called from an app - it should detect and reject the setting of settings -> app need to be able to validate before calling set
 	// 2. the settings file loaded from disc here is corrupted -> user has to fix the file on disc
+
+	// TODO expose a onFileChange Event in lix via temp trigger
 
 	const {
 		loadMessagesPlugins,
@@ -148,17 +152,27 @@ async function keepFilesInSync(args: {
 	await copyFilesFromDiskRecursive(args.path);
 
 	// Set up recursive watch for all files on disk
-	const watcher = args.fs.watch(
-		args.path,
-		{ recursive: true },
-		(eventType, filename) => {
-			if (!filename) return;
-			console.log(`File ${filename} changed`);
-			const fullPath = nodePath.join(args.path, filename);
+
+	const setupWatcher = new Promise((resolve) => {
+		const watcher = new Watcher("/project.inlang/settings.json", {
+			renameDetection: true,
+			recursive: true,
+		});
+
+		watcher.on("all", (event, targetPath, targetPathNext) => {
+			console.log(event); // => could be any target event: 'add', 'addDir', 'change', 'rename', 'renameDir', 'unlink' or 'unlinkDir'
+			console.log(targetPath); // => the file system path where the event took place, this is always provided
+			console.log(targetPathNext); // => the file system path "targetPath" got renamed to, this is only provided on 'rename'/'renameDir' events
+		});
+
+		watcher.on("add", (fp) => {
+			console.log(`File ${fp} added`);
+			const fullPath = fp;
 			try {
 				const stats = args.fs.statSync(fullPath);
 				if (!stats.isDirectory()) {
-					handleFile(args, fullPath, eventType === "rename" ? "add" : "change");
+					// TODO shouldnt we pass the content here? what happens if the file gets removed in the meantime
+					handleFile(args, fullPath, "add");
 				}
 			} catch (error) {
 				if ((error as NodeJS.ErrnoException).code === "ENOENT") {
@@ -167,11 +181,39 @@ async function keepFilesInSync(args: {
 					console.error(`Error handling file ${fullPath}:`, error);
 				}
 			}
-		}
-	);
-	return () => {
-		watcher.close();
-	};
+		});
+
+		watcher.on("change", (fp) => {
+			const fullPath = fp;
+
+			try {
+				const stats = args.fs.statSync(fullPath);
+				if (!stats.isDirectory()) {
+					// TODO shouldnt we pass the content here? what happens if the file gets removed in the meantime
+					handleFile(args, fullPath, "change");
+				}
+			} catch (error) {
+				if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+					handleFile(args, fullPath, "delete");
+				} else {
+					console.error(`Error handling file ${fullPath}:`, error);
+				}
+			}
+		});
+
+		watcher.on("unlink", (fp) => {
+			const fullPath = fp;
+			handleFile(args, fullPath, "delete");
+		});
+
+		watcher.on("ready", () => {
+			resolve(() => {
+				watcher.close();
+			});
+		});
+	});
+
+	return await setupWatcher;
 }
 
 async function handleFile(
@@ -194,7 +236,7 @@ async function handleFile(
 		const data = args.fs.readFileSync(filePath);
 		console.log({ data, txt: new TextDecoder().decode(data) });
 		await args.lix.db
-			.insertInto("file_internal")
+			.insertInto("file_internal") // change queue
 			.values({
 				path: normalizedPath,
 				data,

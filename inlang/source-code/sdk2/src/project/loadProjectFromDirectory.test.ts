@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { expect, test } from "vitest";
+import { beforeEach, expect, test, vi } from "vitest";
 import { ProjectSettings } from "../json-schema/settings.js";
-import { Volume } from "memfs";
+import { fs, vol } from "memfs";
 import { loadProjectFromDirectory } from "./loadProjectFromDirectory.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import { Text } from "../json-schema/pattern.js";
@@ -10,6 +10,16 @@ import type {
 	MessageV1,
 	VariantV1,
 } from "../json-schema/old-v1-message/schemaV1.js";
+
+// tell vitest to use fs mock from __mocks__ folder
+// this can be done in a setup file if fs should always be mocked
+vi.mock("node:fs");
+vi.mock("node:fs/promises");
+
+beforeEach(() => {
+	// reset the state of in-memory fs
+	vol.reset()
+})
 
 test("plugin.loadMessages and plugin.saveMessages must not be condigured together with import export", async () => {
 	const mockLegacyPlugin: InlangPlugin = {
@@ -200,7 +210,8 @@ test("it should keep files between the inlang directory and lix in sync", async 
 		"/project.inlang/README.md": "readme value",
 		"/project.inlang/settings.json": JSON.stringify(mockSettings),
 	};
-	const fs = Volume.fromJSON(mockDirectory);
+	vol.fromJSON(mockDirectory)
+	
 	const project = await loadProjectFromDirectory({
 		fs: fs as any,
 		path: "/project.inlang",
@@ -226,22 +237,24 @@ test("it should keep files between the inlang directory and lix in sync", async 
 		"/project.inlang/settings.json",
 		JSON.stringify({ ...mockSettings, baseLocale: "brand-new-locale" })
 	);
-	await new Promise((resolve) => setTimeout(resolve, 100));
-	const fileInLix = await project.lix.db
-		.selectFrom("file")
-		.selectAll()
-		.where("path", "=", "/settings.json")
-		.executeTakeFirstOrThrow();
 
-	const settingsAfterUpdateOnDisk = JSON.parse(
-		new TextDecoder().decode(fileInLix.data)
-	);
+		await new Promise((resolve) => setTimeout(resolve, 100));
+		const fileInLix = await project.lix.db
+			.selectFrom("file")
+			.selectAll()
+			.where("path", "=", "/settings.json")
+			.executeTakeFirstOrThrow();
 
-	expect(settingsAfterUpdateOnDisk.baseLocale).toBe("brand-new-locale");
+		const settingsAfterUpdateOnDisk = JSON.parse(
+			new TextDecoder().decode(fileInLix.data)
+		);
 
-	fs.writeFileSync("/project.inlang/random-file.txt", "random value", {
-		encoding: "utf-8",
-	});
+		expect(settingsAfterUpdateOnDisk.baseLocale).toBe("brand-new-locale");
+
+		fs.writeFileSync("/project.inlang/random-file.txt", "random value", {
+			encoding: "utf-8",
+		});
+		console.log("file wirtten");
 
 	const f = fs.readFileSync("/project.inlang/random-file.txt");
 
