@@ -1,16 +1,15 @@
 import { createUnplugin } from "unplugin"
 import {
-	Message,
-	ProjectSettings,
-	loadProject,
+	type BundleNested,
+	type ProjectSettings,
 	type InlangProject,
-	normalizeMessage,
-} from "@inlang/sdk"
-import { openRepository, findRepoRoot } from "@lix-js/client"
+	loadProjectFromDirectoryInMemory,
+	selectBundleNested,
+} from "@inlang/sdk2"
 import path from "node:path"
 import fs from "node:fs/promises"
+import icu1Importer from "@inlang/plugin-icu1"
 import { compile, writeOutput, Logger, classifyProjectErrors } from "@inlang/paraglide-js/internal"
-import crypto from "node:crypto"
 
 const PLUGIN_NAME = "unplugin-paraglide"
 const VITE_BUILD_PLUGIN_NAME = "unplugin-paraglide-vite-virtual-message-modules"
@@ -29,7 +28,6 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		...config,
 	}
 
-	const projectPath = path.resolve(process.cwd(), options.project)
 	const outputDirectory = path.resolve(process.cwd(), options.outdir)
 	let normalizedOutdir = outputDirectory.replaceAll("\\", "/")
 	if (!normalizedOutdir.endsWith("/")) normalizedOutdir = normalizedOutdir + "/"
@@ -37,8 +35,6 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 	//Keep track of how many times we've compiled
 	let numCompiles = 0
-	let previousMessagesHash: string | undefined = undefined
-
 	let virtualModuleOutput: Record<string, string> = {}
 
 	async function triggerCompile(
@@ -55,21 +51,14 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		}
 
 		logMessageChange()
-		previousMessagesHash = currentMessagesHash
 
 		const [regularOutput, messageModulesOutput] = await Promise.all([
-			compile({
-				messages,
-				settings,
-				outputStructure: "regular",
-				projectId,
-			}),
-			compile({ messages, settings, outputStructure: "message-modules", projectId }),
+			compile({ bundles, settings, outputStructure: "regular", projectId: undefined }),
+			compile({ bundles, settings, outputStructure: "message-modules", projectId: undefined }),
 		])
 
 		virtualModuleOutput = messageModulesOutput
 		const fsOutput = regularOutput
-
 		await writeOutput(outputDirectory, fsOutput, fs)
 		numCompiles++
 	}
@@ -91,22 +80,61 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	async function getProject(): Promise<InlangProject> {
 		if (project) return project
 
-		const repoRoot = await findRepoRoot({ nodeishFs: fs, path: projectPath })
-
-		const repo = await openRepository(repoRoot || "file://" + process.cwd(), {
-			nodeishFs: fs,
-		})
-
-		project = await loadProject({
-			appId: "library.inlang.paraglideJs",
-			projectPath: path.resolve(process.cwd(), options.project),
-			repo,
+		const projectPath = path.resolve(process.cwd(), options.project)
+		project = await loadProjectFromDirectoryInMemory({
+			path: projectPath,
+			fs: fs,
+			providePlugins: [icu1Importer],
 		})
 
 		return project
 	}
 
-	// if build
+	let acs: AbortController[] = []
+	async function loadAndWatchProject() {
+		const project = await getProject()
+
+		const bundles = await selectBundleNested(project.db).execute()
+		const settings = await project.settings.get()
+		await triggerCompile(bundles, settings)
+
+		project.errors.subscribe((errors) => {
+			if (errors.length === 0) return
+
+			const { fatalErrors, nonFatalErrors } = classifyProjectErrors(errors)
+			for (const error of nonFatalErrors) {
+				logger.warn(error.message)
+			}
+
+			for (const error of fatalErrors) {
+				if (error instanceof Error) {
+					logger.error(error.message) // hide the stack trace
+				} else {
+					logger.error(error)
+				}
+			}
+		})
+
+		// watch files
+		const resourceFiles = []
+		for (const plugin of project.plugins.get()) {
+			if (!plugin.toBeImportedFiles) continue
+			const pluginFiles = await plugin.toBeImportedFiles({ settings, nodeFs: fs })
+			resourceFiles.push(...pluginFiles)
+		}
+
+		// Create a watcher for each file
+		for (const file of resourceFiles) {
+			const ac = new AbortController()
+			const watcher = fs.watch(file.path, { signal: ac.signal })
+			onGeneration(watcher, (ev) => {
+				if (ev.eventType !== "change") return
+				for (const ac of acs) ac.abort()
+				acs = []
+				loadAndWatchProject()
+			})
+		}
+	}
 
 	return [
 		{
@@ -114,35 +142,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 			enforce: "pre",
 			async buildStart() {
-				const project = await getProject()
-
-				const initialMessages = project.query.messages.getAll()
-				const settings = project.settings()
-				await triggerCompile(initialMessages, settings, project.id)
-
-				project.errors.subscribe((errors) => {
-					if (errors.length === 0) return
-
-					const { fatalErrors, nonFatalErrors } = classifyProjectErrors(errors)
-					for (const error of nonFatalErrors) {
-						logger.warn(error.message)
-					}
-
-					for (const error of fatalErrors) {
-						if (error instanceof Error) {
-							logger.error(error.message) // hide the stack trace
-						} else {
-							logger.error(error)
-						}
-					}
-				})
-
-				let numInvocations = 0
-				project.query.messages.getAll.subscribe((messages) => {
-					numInvocations++
-					if (numInvocations === 1) return
-					triggerCompile(messages, project.settings(), project.id)
-				})
+				loadAndWatchProject()
 			},
 
 			webpack(compiler) {
@@ -150,7 +150,9 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 				//In the other bundlers `buildStart` already runs before the build. In webpack it's a race condition
 				compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
 					const project = await getProject()
-					await triggerCompile(project.query.messages.getAll(), project.settings(), project.id)
+					const bundles = await selectBundleNested(project.db).execute()
+					const settings = await project.settings.get()
+					await triggerCompile(bundles, settings)
 					console.info(`Compiled Messages into ${options.outdir}`)
 				})
 			},
@@ -195,17 +197,8 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	]
 })
 
-export function hashMessages(messages: readonly Message[], settings: ProjectSettings): string {
-	const normalizedMessages = messages
-		.map(normalizeMessage)
-		.sort((a, b) => a.id.localeCompare(b.id, "en"))
-
-	try {
-		const hash = crypto.createHash("sha256")
-		hash.update(JSON.stringify(normalizedMessages))
-		hash.update(JSON.stringify(settings))
-		return hash.digest("hex")
-	} catch (e) {
-		return crypto.randomUUID()
+async function onGeneration<T>(generator: AsyncIterable<T>, cb: (value: T) => void) {
+	for await (const value of generator) {
+		cb(value)
 	}
 }

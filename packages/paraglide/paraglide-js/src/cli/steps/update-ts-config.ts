@@ -1,14 +1,15 @@
-import type { Repository } from "@lix-js/client"
 import type { CliStep } from "../utils.js"
 import type { Logger } from "~/services/logger/index.js"
 import { prompt } from "~/cli/utils.js"
 import JSON5 from "json5"
 import { pathExists } from "~/services/file-handling/exists.js"
 import nodePath from "node:path"
+import type { NodeishFilesystem } from "~/services/file-handling/types.js"
 
-export const maybeChangeTsConfig: CliStep<{ repo: Repository; logger: Logger }, unknown> = async (
-	ctx
-) => {
+export const maybeChangeTsConfig: CliStep<
+	{ fs: NodeishFilesystem; logger: Logger },
+	unknown
+> = async (ctx) => {
 	const ctx1 = await maybeChangeTsConfigModuleResolution(ctx)
 	return await maybeChangeTsConfigAllowJs(ctx1)
 }
@@ -17,13 +18,13 @@ export const maybeChangeTsConfig: CliStep<{ repo: Repository; logger: Logger }, 
  * Paraligde JS compiles to JS with JSDoc comments. TypeScript doesn't allow JS files by default.
  */
 export const maybeChangeTsConfigAllowJs: CliStep<
-	{ repo: Repository; logger: Logger },
+	{ fs: NodeishFilesystem; logger: Logger },
 	unknown
 > = async (ctx) => {
-	if ((await pathExists("./tsconfig.json", ctx.repo.nodeishFs)) === false) {
+	if ((await pathExists("./tsconfig.json", ctx.fs)) === false) {
 		return ctx
 	}
-	const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
+	const file = await ctx.fs.readFile("./tsconfig.json", { encoding: "utf-8" })
 	// tsconfig allows comments ... FML
 	let tsconfig = JSON5.parse(file)
 
@@ -61,7 +62,7 @@ export const maybeChangeTsConfigAllowJs: CliStep<
 			return ctx
 		}
 
-		const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
+		const file = await ctx.fs.readFile("./tsconfig.json", { encoding: "utf-8" })
 		tsconfig = JSON5.parse(file)
 		if (tsconfig?.compilerOptions?.allowJs === true) {
 			isValid = true
@@ -82,13 +83,13 @@ export const maybeChangeTsConfigAllowJs: CliStep<
  * errors with Paraglide-JS.
  */
 export const maybeChangeTsConfigModuleResolution: CliStep<
-	{ repo: Repository; logger: Logger },
+	{ fs: NodeishFilesystem; logger: Logger },
 	unknown
 > = async (ctx) => {
-	if ((await pathExists("./tsconfig.json", ctx.repo.nodeishFs)) === false) {
+	if ((await pathExists("./tsconfig.json", ctx.fs)) === false) {
 		return ctx
 	}
-	const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
+	const file = await ctx.fs.readFile("./tsconfig.json", { encoding: "utf-8" })
 	// tsconfig allows comments ... FML
 	let tsconfig = JSON5.parse(file)
 
@@ -97,7 +98,7 @@ export const maybeChangeTsConfigModuleResolution: CliStep<
 	if (tsconfig.extends) {
 		try {
 			const parentTsConfigPath = nodePath.resolve(process.cwd(), tsconfig.extends)
-			const parentTsConfigFile = await ctx.repo.nodeishFs.readFile(parentTsConfigPath, {
+			const parentTsConfigFile = await ctx.fs.readFile(parentTsConfigPath, {
 				encoding: "utf-8",
 			})
 			parentTsConfig = JSON5.parse(parentTsConfigFile)
@@ -147,7 +148,7 @@ export const maybeChangeTsConfigModuleResolution: CliStep<
 			return ctx
 		}
 
-		const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
+		const file = await ctx.fs.readFile("./tsconfig.json", { encoding: "utf-8" })
 		tsconfig = JSON5.parse(file)
 		if (
 			tsconfig?.compilerOptions?.moduleResolution &&
