@@ -1,4 +1,4 @@
-import { listProjects, loadProjectFromDirectoryInMemory, type InlangProject } from "@inlang/sdk2"
+import { loadProjectFromDirectoryInMemory, type InlangProject } from "@inlang/sdk2"
 import type { Logger } from "~/services/logger/index.js"
 import type { CliStep } from "../utils.js"
 import { prompt } from "~/cli/utils.js"
@@ -7,6 +7,7 @@ import nodePath from "node:path"
 import consola from "consola"
 import dedent from "dedent"
 import type { NodeishFilesystem } from "~/services/file-handling/types.js"
+import fg from "fast-glob"
 
 export const initializeInlangProject: CliStep<
 	{ fs: NodeishFilesystem; logger: Logger; root: string; appId: string },
@@ -16,9 +17,7 @@ export const initializeInlangProject: CliStep<
 		projectPath: string
 	}
 > = async (ctx) => {
-	const existingProjectPaths = (await listProjects({ fs: ctx.fs, from: ctx.root })).map(
-		(v) => v.projectPath
-	)
+	const existingProjectPaths = fg.sync("*.inlang")
 
 	if (existingProjectPaths.length > 0) {
 		const { project, projectPath } = await existingProjectFlow({
@@ -75,7 +74,7 @@ export const existingProjectFlow = async (ctx: {
 	const project = await loadProjectFromDirectoryInMemory({
 		path: projectPath,
 		fs: ctx.fs,
-		appId: ctx.appId,
+		// appId: ctx.appId,
 	})
 
 	if ((await project.errors.get()).length > 0) {
@@ -201,7 +200,7 @@ export const createNewProjectFlow = async (ctx: {
 	const project = await loadProjectFromDirectoryInMemory({
 		path: projectPath,
 		fs: ctx.fs,
-		appId: ctx.appId,
+		// appId: ctx.appId,
 	})
 
 	if ((await project.errors.get()).length > 0) {
