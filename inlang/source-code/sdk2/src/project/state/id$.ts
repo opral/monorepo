@@ -1,5 +1,5 @@
 import { type Lix } from "@lix-js/sdk";
-import { map, share, type Observable } from "rxjs";
+import { filter, map, share, type Observable } from "rxjs";
 import { pollQuery } from "../../query-utilities/pollQuery.js";
 
 export function createId$(args: { lix: Lix }): Observable<string> {
@@ -8,8 +8,12 @@ export function createId$(args: { lix: Lix }): Observable<string> {
 			.selectFrom("file")
 			.where("path", "=", "/project_id")
 			.selectAll()
-			.executeTakeFirstOrThrow()
+			.executeTakeFirst()
 	).pipe(
+		// undefined can happen if a project has no id yet
+		// the project id will be automatically generated
+		// shortly after
+		filter((file) => file !== undefined),
 		map((file) => new TextDecoder().decode(file.data)),
 		share()
 	);
