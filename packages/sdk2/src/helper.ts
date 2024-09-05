@@ -3,7 +3,6 @@ import type { ProjectSettings } from "./json-schema/settings.js";
 import { humanId } from "./human-id/human-id.js";
 import type {
 	Bundle,
-	MessageNested,
 	NewBundleNested,
 	NewMessageNested,
 	NewVariant,
@@ -22,7 +21,7 @@ import type { Expression, Text } from "./json-schema/pattern.js";
  */
 export function createBundle(args: {
 	id?: string;
-	messages: MessageNested[];
+	messages: NewMessageNested[];
 	alias?: Bundle["alias"];
 }): NewBundleNested {
 	return {
