@@ -44,7 +44,7 @@ export function createProjectViewNodes(args: {
 		const projectPath = typeof project.projectPath === "string" ? project.projectPath : ""
 		const projectName = projectPath.split("/").slice(-1).join("/").replace(".inlang", "")
 		const relativePath =
-			"./" + normalizePath(projectPath.replace(args.workspaceFolder.uri.fsPath, "./"))
+			"." + normalizePath(projectPath.replace(args.workspaceFolder.uri.fsPath, "./"))
 
 		return {
 			label: projectName,
@@ -95,11 +95,19 @@ export async function handleTreeSelection(args: {
 	const newSelectedProject = projectViewNodes.find((node) => node.isSelected)?.path as string
 
 	try {
+		console.log("args", {
+			newSelectedProject,
+			hello: args.fs,
+			transpileToCjs,
+		})
+
 		const inlangProject = await loadProjectFromDirectoryInMemory({
 			path: newSelectedProject,
 			fs: args.fs,
 			preprocessPluginBeforeImport: transpileToCjs,
 		})
+
+		console.log("Loaded project", inlangProject)
 
 		setState({
 			...state(),
