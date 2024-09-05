@@ -8,6 +8,7 @@ import {
 import { setSettings } from "./setSettings.js";
 import type { Lix } from "@lix-js/sdk";
 import { createSettings$ } from "./settings$.js";
+import { createId$ } from "./id$.js";
 
 /**
  * State of a project.
@@ -61,7 +62,13 @@ export function createProjectState(args: {
 		_importPluginsResult$.pipe(map((result) => result.errors))
 	).pipe(share());
 
+	const id$ = createId$({ lix: args.lix });
+
 	return {
+		id: {
+			get: () => firstValueFrom(id$),
+			subscribe: id$.subscribe,
+		},
 		settings: {
 			get: () => firstValueFrom(settings$),
 			set: (settings: ProjectSettings) =>
