@@ -9,7 +9,7 @@ import type { InlangPlugin } from "../plugin/schema.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
 import { fromMessageV1 } from "../json-schema/old-v1-message/fromMessageV1.js";
 
-import Watcher from "watcher";
+import { watch } from "../chokidar/index.js";
 
 /**
  * Loads a project from a directory.
@@ -154,8 +154,7 @@ async function keepFilesInSync(args: {
 	// Set up recursive watch for all files on disk
 
 	const setupWatcher = new Promise((resolve) => {
-		const watcher = new Watcher("/project.inlang/settings.json", {
-			renameDetection: true,
+		const watcher = watch(args.path, {
 			recursive: true,
 		});
 
@@ -206,11 +205,11 @@ async function keepFilesInSync(args: {
 			handleFile(args, fullPath, "delete");
 		});
 
-		watcher.on("ready", () => {
-			resolve(() => {
-				watcher.close();
-			});
+		// watcher.on("ready", () => {
+		resolve(() => {
+			watcher.close();
 		});
+		// });
 	});
 
 	return await setupWatcher;
