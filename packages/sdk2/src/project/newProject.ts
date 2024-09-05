@@ -1,4 +1,5 @@
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
+import { v4 } from "uuid";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import {
 	contentFromDatabase,
@@ -38,9 +39,13 @@ export async function newProject(args?: {
 				},
 				{
 					path: "/settings.json",
-					data: await new Blob([
-						JSON.stringify(args?.settings ?? defaultProjectSettings),
-					]).arrayBuffer(),
+					data: new TextEncoder().encode(
+						JSON.stringify(args?.settings ?? defaultProjectSettings)
+					),
+				},
+				{
+					path: "/project_id",
+					data: new TextEncoder().encode(v4()),
 				},
 			])
 			.execute();
@@ -53,10 +58,10 @@ export async function newProject(args?: {
 	}
 }
 
-const defaultProjectSettings = {
+export const defaultProjectSettings = {
 	$schema: "https://inlang.com/schema/project-settings",
 	baseLocale: "en",
-	locales: ["en", "de"],
+	locales: ["en"],
 	modules: [
 		// for instant gratification, we're adding common rules
 		// "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
