@@ -1,4 +1,4 @@
-import { Change, isInSimulatedCurrentBranch } from "@lix-js/sdk";
+import { Change, isInSimulatedCurrentBranch } from "@inlang/sdk2";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { projectAtom } from "../state.ts";

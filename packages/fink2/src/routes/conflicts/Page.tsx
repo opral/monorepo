@@ -13,7 +13,7 @@ import {
 	InlangPatternEditor,
 	InlangVariant,
 } from "../../components/SingleDiffBundle.tsx";
-import { resolveConflictBySelecting } from "@lix-js/sdk";
+import { resolveConflictBySelecting } from "@inlang/sdk2";
 import { useEffect } from "react";
 import { Variant } from "@inlang/sdk2";
 
