@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
+import { validate } from "uuid";
 
 test("it should persist changes of bundles, messages, and variants to lix ", async () => {
 	const file1 = await newProject();
@@ -101,4 +102,22 @@ test("providing plugins should work", async () => {
 	expect(plugins.length).toBe(1);
 	expect(plugins[0]?.key).toBe("my-provided-plugin");
 	expect(errors.length).toBe(0);
+});
+
+test("if a project has no id, it should be generated", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+
+	await project.lix.db
+		.deleteFrom("file_internal")
+		.where("path", "=", "/project_id")
+		.execute();
+
+	const blob = await project.toBlob();
+
+	const project2 = await loadProjectInMemory({ blob });
+
+	const id = await project2.id.get();
+
+	expect(id).toBeDefined();
+	expect(validate(id)).toBe(true);
 });

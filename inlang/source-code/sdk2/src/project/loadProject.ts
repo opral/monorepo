@@ -9,6 +9,7 @@ import type { InlangProject } from "./api.js";
 import { createProjectState } from "./state/state.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
 import { exportFiles, importFiles } from "../import-export/index.js";
+import { v4 } from "uuid";
 
 /**
  * Common load project logic.
@@ -39,6 +40,8 @@ export async function loadProject(args: {
 	preprocessPluginBeforeImport?: PreprocessPluginBeforeImportFunction;
 }): Promise<InlangProject> {
 	const db = initDb({ sqlite: args.sqlite });
+
+	await maybeMigrateFirstProjectId({ lix: args.lix });
 
 	const settingsFile = await args.lix.db
 		.selectFrom("file")
@@ -115,3 +118,25 @@ export async function loadProject(args: {
 	};
 }
 
+/**
+ * Old leftover migration from v1. Probably not needed anymore.
+ *
+ * Kept it in just in case.
+ */
+async function maybeMigrateFirstProjectId(args: { lix: Lix }): Promise<void> {
+	const firstProjectIdFile = await args.lix.db
+		.selectFrom("file")
+		.select("data")
+		.where("path", "=", "/project_id")
+		.executeTakeFirst();
+
+	if (!firstProjectIdFile) {
+		await args.lix.db
+			.insertInto("file")
+			.values({
+				path: "/project_id",
+				data: new TextEncoder().encode(v4()),
+			})
+			.execute();
+	}
+}
