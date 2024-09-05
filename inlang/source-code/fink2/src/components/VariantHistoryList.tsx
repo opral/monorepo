@@ -5,7 +5,7 @@ import type { Pattern, Variant } from "@inlang/sdk2";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import queryHelper from "../helper/queryHelper.ts";
 import timeAgo from "../helper/timeAgo.ts";
-import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
+import { isInSimulatedCurrentBranch } from "@inlang/sdk2";
 
 const VariantHistoryList = (props: {
 	variantId: string;
