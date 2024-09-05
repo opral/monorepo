@@ -20,3 +20,4 @@ export type { ResourceFile } from "./project/api.js";
 export type { InlangPlugin } from "./plugin/schema.js";
 export type { IdeExtensionConfig } from "./plugin/meta/ideExtension.js";
 export * from "./database/schema.js";
+export * from "@lix-js/sdk";

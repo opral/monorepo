@@ -7,7 +7,7 @@ import {
 } from "@inlang/sdk2";
 import { atomWithStorage } from "jotai/utils";
 import { jsonObjectFrom } from "kysely/helpers/sqlite";
-import { Change, isInSimulatedCurrentBranch } from "@lix-js/sdk";
+import { Change, isInSimulatedCurrentBranch } from "@inlang/sdk2";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
