@@ -28,10 +28,15 @@ export async function importPlugins(args: {
 			}
 			const moduleWithMimeType =
 				"data:application/javascript," + encodeURIComponent(moduleAsText);
-			const { default: plugin } = await import(
+			const { default: module } = await import(
 				/* @vite-ignore */ moduleWithMimeType
 			);
-			plugins.push(plugin);
+			// old legacy message lint rules are not supported
+			// and ingored for backwards compatibility
+			if (module.id?.includes("messageLintRule")) {
+				continue;
+			}
+			plugins.push(module);
 		} catch (e) {
 			errors.push(new PluginImportError({ plugin: uri, cause: e as Error }));
 		}
