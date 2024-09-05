@@ -79,6 +79,7 @@ export async function loadProject(args: {
 
 	return {
 		db,
+		id: state.id,
 		settings: state.settings,
 		plugins: state.plugins,
 		errors: state.errors,

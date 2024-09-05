@@ -17,6 +17,10 @@ export type InlangProject = {
 	 * TODO remove this
 	 */
 	_sqlite: SqliteDatabase;
+	id: {
+		get: () => Promise<string>;
+		subscribe: Subscription<string>;
+	};
 	plugins: {
 		get: () => Promise<readonly InlangPlugin[]>;
 		subscribe: Subscription<readonly InlangPlugin[]>;
