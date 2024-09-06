@@ -47,16 +47,7 @@ export async function loadProject(args: {
 	 *
 	 * The app id can be removed at any time in the future
 	 */
-	applicationId?: string;
-	/**
-	 * The version of the application that is using the SDK.
-	 *
-	 * This is used for telemetry purposes. To derive insights like
-	 * which version of the SDK is used, how many projects are loaded, etc.
-	 *
-	 * The application version can be removed at any time in the future.
-	 */
-	applicationVersion?: string;
+	appId?: string;
 }): Promise<InlangProject> {
 	const db = initDb({ sqlite: args.sqlite });
 
@@ -103,8 +94,7 @@ export async function loadProject(args: {
 	maybeCaptureLoadedProject({
 		db,
 		state,
-		applicationId: args.applicationId,
-		applicationVersion: args.applicationVersion,
+		appId: args.appId,
 	});
 
 	return {

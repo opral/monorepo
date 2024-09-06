@@ -6,8 +6,7 @@ import { ENV_VARIABLES } from "../services/env-variables/index.js";
 
 export async function maybeCaptureLoadedProject(args: {
 	state: ProjectState;
-	applicationId?: string;
-	applicationVersion?: string;
+	appId?: string;
 	db: Kysely<InlangDatabaseSchema>;
 }) {
 	const id = await args.state.id.get();
@@ -36,8 +35,7 @@ export async function maybeCaptureLoadedProject(args: {
 		settings,
 		properties: {
 			// Insight: Which app is used by the SDK
-			applicationId: args.applicationId,
-			applicationVersion: args.applicationVersion,
+			appId: args.appId,
 			// Insight: How many languages are used, etc.
 			settings,
 			// Insight on the used plugins (which one's to prioritize)
