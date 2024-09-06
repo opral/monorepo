@@ -133,7 +133,7 @@ export async function loadProjectFromDirectoryInMemory(
 				const errors = await project.errors.get();
 				return [
 					...withLocallyImportedPluginWarning(errors),
-					...localImport.deprecatedLintRuleWarnings,
+					...localImport.errors,
 				];
 			},
 			subscribe: (
@@ -142,7 +142,7 @@ export async function loadProjectFromDirectoryInMemory(
 				return project.errors.subscribe((value) => {
 					callback([
 						...withLocallyImportedPluginWarning(value),
-						...localImport.deprecatedLintRuleWarnings,
+						...localImport.errors,
 					]);
 				});
 			},
@@ -276,7 +276,7 @@ async function importLocalPlugins(args: {
 	path: string;
 	preprocessPluginBeforeImport?: PreprocessPluginBeforeImportFunction;
 }) {
-	const deprecatedLintRuleWarnings: WarningDeprecatedLintRule[] = [];
+	const errors: Error[] = [];
 	const locallyImportedPlugins = [];
 	const settingsPath = nodePath.join(args.path, "settings.json");
 	const settings = JSON.parse(
@@ -293,7 +293,7 @@ async function importLocalPlugins(args: {
 		try {
 			let moduleAsText = await args.fs.readFile(modulePath, "utf8");
 			if (moduleAsText.includes("messageLintRule")) {
-				deprecatedLintRuleWarnings.push(new WarningDeprecatedLintRule(module));
+				errors.push(new WarningDeprecatedLintRule(module));
 				continue;
 			}
 			if (args.preprocessPluginBeforeImport) {
@@ -306,11 +306,12 @@ async function importLocalPlugins(args: {
 			);
 			locallyImportedPlugins.push(plugin);
 		} catch (e) {
+			errors.push(new PluginImportError({ plugin: module, cause: e as Error }));
 			continue;
 		}
 	}
 	return {
-		deprecatedLintRuleWarnings,
+		errors,
 		locallyImportedPlugins,
 	};
 }
