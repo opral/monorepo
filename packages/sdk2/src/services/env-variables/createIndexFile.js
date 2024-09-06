@@ -24,6 +24,7 @@ await fs.writeFile(
 	`
 export const ENV_VARIABLES = {
   PUBLIC_POSTHOG_TOKEN: "${process.env.PUBLIC_POSTHOG_TOKEN}",
+	PUBLIC_INLANG_SDK_SENTRY_DSN: "${process.env.PUBLIC_INLANG_SDK_SENTRY_DSN}",
 	SDK_VERSION: "${packageJson.version}",
 }
 `

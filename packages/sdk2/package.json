@@ -16,14 +16,15 @@
 		"./src"
 	],
 	"scripts": {
-		"build": "npm run env-variables && tsc --build",
+		"build": "npm run env-variables && tsc --build && npm run sentry:sourcemaps",
 		"dev": "npm run env-variables && tsc --watch",
 		"env-variables": "node ./src/services/env-variables/createIndexFile.js",
 		"test": "npm run env-variables && tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "npm run env-variables && vitest",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
-		"clean": "rm -rf ./dist ./node_modules"
+		"clean": "rm -rf ./dist ./node_modules",
+		"sentry:sourcemaps": "sentry-cli sourcemaps inject --org opral --project inlang-sdk ./dist && sentry-cli sourcemaps upload --org opral --project inlang-sdk ./dist"
 	},
 	"engines": {
 		"node": ">=18.0.0"
@@ -34,6 +35,7 @@
 	],
 	"dependencies": {
 		"@lix-js/sdk": "workspace:*",
+		"@sentry/browser": "^7.118.0",
 		"@sinclair/typebox": "^0.31.17",
 		"dedent": "1.5.1",
 		"kysely": "^0.27.4",
@@ -43,6 +45,7 @@
 		"uuid": "^10.0.0"
 	},
 	"devDependencies": {
+		"@sentry/cli": "^2.35.0",
 		"@types/murmurhash3js": "^3.0.7",
 		"@types/node": "^22.5.1",
 		"@types/uuid": "^10.0.0",
