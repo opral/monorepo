@@ -23,12 +23,18 @@ await fs.writeFile(
 	dirname + "/index.ts",
 	`
 export const ENV_VARIABLES = {
-  PUBLIC_POSTHOG_TOKEN: "${process.env.PUBLIC_POSTHOG_TOKEN}",
-	PUBLIC_INLANG_SDK_SENTRY_DSN: "${process.env.PUBLIC_INLANG_SDK_SENTRY_DSN}",
-	SDK_VERSION: "${packageJson.version}",
+  PUBLIC_POSTHOG_TOKEN: ${ifDefined(process.env.PUBLIC_POSTHOG_TOKEN)},
+	PUBLIC_INLANG_SDK_SENTRY_DSN: ${ifDefined(
+		process.env.PUBLIC_INLANG_SDK_SENTRY_DSN
+	)},
+	SDK_VERSION: ${ifDefined(packageJson.version)},
 }
 `
 );
 
 // eslint-disable-next-line no-console
 // console.log("✅ Created env variable index file.");
+
+function ifDefined(value) {
+	return value ? `"${value}"` : undefined;
+}
