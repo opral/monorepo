@@ -6,7 +6,6 @@ import {
 	createInMemoryDatabase,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
-import { createSchema } from "../database/schema.js";
 
 /**
  * Creates a new inlang project.
@@ -23,8 +22,6 @@ export async function newProject(args?: {
 	const db = initDb({ sqlite });
 
 	try {
-		await createSchema({ sqlite });
-
 		const inlangDbContent = contentFromDatabase(sqlite);
 
 		const lix = await openLixInMemory({ blob: await newLixFile() });
