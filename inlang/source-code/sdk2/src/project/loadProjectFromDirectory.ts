@@ -8,6 +8,10 @@ import nodePath from "node:path";
 import type { InlangPlugin } from "../plugin/schema.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
 import { fromMessageV1 } from "../json-schema/old-v1-message/fromMessageV1.js";
+import type { ProjectSettings } from "../json-schema/settings.js";
+import type { PreprocessPluginBeforeImportFunction } from "../plugin/importPlugins.js";
+import { PluginImportError } from "../plugin/errors.js";
+import type { InlangProject } from "./api.js";
 
 /**
  * Loads a project from a directory.
@@ -28,6 +32,16 @@ export async function loadProjectFromDirectoryInMemory(
 	});
 	await copyFiles({ fs: args.fs, path: args.path, lix: tempProject.lix });
 
+	const localImport = await importLocalPlugins({
+		fs: args.fs,
+		path: args.path,
+	});
+
+	const providePluginsWithLocalPlugins = [
+		...(args.providePlugins ?? []),
+		...localImport.locallyImportedPlugins,
+	];
+
 	// TODO call tempProject.lix.settled() to wait for the new settings file, and remove reload of the proejct as soon as reactive settings has landed
 	// NOTE: we need to ensure two things:
 	// 1. settled needs to include the changes from the copyFiles call
@@ -35,6 +49,7 @@ export async function loadProjectFromDirectoryInMemory(
 	const project = await loadProjectInMemory({
 		// pass common arguments to loadProjectInMemory
 		...args,
+		providePlugins: providePluginsWithLocalPlugins,
 		blob: await tempProject.toBlob(),
 	});
 
@@ -111,7 +126,28 @@ export async function loadProjectFromDirectoryInMemory(
 		});
 	}
 
-	return project;
+	return {
+		...project,
+		errors: {
+			get: async () => {
+				const errors = await project.errors.get();
+				return [
+					...withLocallyImportedPluginWarning(errors),
+					...localImport.deprecatedLintRuleWarnings,
+				];
+			},
+			subscribe: (
+				callback: Parameters<InlangProject["errors"]["subscribe"]>[0]
+			) => {
+				return project.errors.subscribe((value) => {
+					callback([
+						...withLocallyImportedPluginWarning(value),
+						...localImport.deprecatedLintRuleWarnings,
+					]);
+				});
+			},
+		},
+	};
 }
 
 async function loadLegacyMessages(args: {
@@ -228,4 +264,83 @@ function categorizePlugins(plugins: readonly InlangPlugin[]): {
 		importPlugins,
 		exportPlugins,
 	};
+}
+
+/**
+ * Imports local plugins for backwards compatibility.
+ *
+ * https://github.com/opral/inlang-sdk/issues/171
+ */
+async function importLocalPlugins(args: {
+	fs: typeof fs;
+	path: string;
+	preprocessPluginBeforeImport?: PreprocessPluginBeforeImportFunction;
+}) {
+	const deprecatedLintRuleWarnings: WarningDeprecatedLintRule[] = [];
+	const locallyImportedPlugins = [];
+	const settingsPath = nodePath.join(args.path, "settings.json");
+	const settings = JSON.parse(
+		await args.fs.readFile(settingsPath, "utf8")
+	) as ProjectSettings;
+	for (const module of settings.modules ?? []) {
+		// need to remove the project path from the module path for legacy reasons
+		// "/project.inlang/local-plugins/mock-plugin.js" -> "/local-plugins/mock-plugin.js"
+		const pathWithoutProject = args.path
+			.split(nodePath.sep)
+			.slice(0, -1)
+			.join(nodePath.sep);
+		const modulePath = nodePath.join(pathWithoutProject, module);
+		try {
+			let moduleAsText = await args.fs.readFile(modulePath, "utf8");
+			if (moduleAsText.includes("messageLintRule")) {
+				deprecatedLintRuleWarnings.push(new WarningDeprecatedLintRule(module));
+				continue;
+			}
+			if (args.preprocessPluginBeforeImport) {
+				moduleAsText = await args.preprocessPluginBeforeImport(moduleAsText);
+			}
+			const moduleWithMimeType =
+				"data:application/javascript," + encodeURIComponent(moduleAsText);
+			const { default: plugin } = await import(
+				/* @vite-ignore */ moduleWithMimeType
+			);
+			locallyImportedPlugins.push(plugin);
+		} catch (e) {
+			continue;
+		}
+	}
+	return {
+		deprecatedLintRuleWarnings,
+		locallyImportedPlugins,
+	};
+}
+
+function withLocallyImportedPluginWarning(errors: readonly Error[]) {
+	return errors.map((error) => {
+		if (
+			error instanceof PluginImportError &&
+			error.plugin.startsWith("http") === false
+		) {
+			return new WarningLocalPluginImport(error.plugin);
+		}
+		return error;
+	});
+}
+
+export class WarningLocalPluginImport extends Error {
+	constructor(module: string) {
+		super(
+			`Plugin ${module} is imported from a local path. This will work fine in dev tools like Sherlock or Paraglide JS but is not portable. Web apps like Fink or Parrot won't be able to import this plugin. It is recommended to use an http url to import plugins. The plugins are cached locally and will be available offline.`
+		);
+		this.name = "WarningLocalImport";
+	}
+}
+
+export class WarningDeprecatedLintRule extends Error {
+	constructor(module: string) {
+		super(
+			`The lint rule ${module} is deprecated. Please remove the lint rule from the settings. Lint rules are interim built into apps and will be succeeded by more generilizable lix validation rules.`
+		);
+		this.name = "WarningDeprecatedLintRule";
+	}
 }
