@@ -6,6 +6,7 @@ import { telemetry } from "../../services/telemetry/index.js"
 import { setState, state } from "../state.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
 import { transpileToCjs } from "../import/transpileToCjs.js"
+import * as fs from "node:fs/promises"
 
 let projectViewNodes: ProjectViewNode[] = []
 
@@ -103,7 +104,7 @@ export async function handleTreeSelection(args: {
 
 		const inlangProject = await loadProjectFromDirectoryInMemory({
 			path: newSelectedProject,
-			fs: args.fs,
+			fs,
 			preprocessPluginBeforeImport: transpileToCjs,
 		})
 
@@ -136,6 +137,8 @@ export async function handleTreeSelection(args: {
 			},
 		})
 	} catch (error) {
+		console.log(error)
+
 		vscode.window.showErrorMessage(`Failed to load project "${selectedProject}": ${error}`)
 	}
 }
