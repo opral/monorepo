@@ -45,8 +45,7 @@ test("it should capture as expected", async () => {
 
 	await maybeCaptureLoadedProject({
 		state: project as unknown as ProjectState,
-		applicationId: "test",
-		applicationVersion: "1.5.3",
+		appId: "test",
 		db: project.db,
 	});
 
@@ -54,8 +53,7 @@ test("it should capture as expected", async () => {
 		projectId: await project.id.get(),
 		settings: await project.settings.get(),
 		properties: {
-			applicationId: "test",
-			applicationVersion: "1.5.3",
+			appId: "test",
 			settings: await project.settings.get(),
 			pluginKeys: [],
 			sdkVersion: "1.0.0-mock",
