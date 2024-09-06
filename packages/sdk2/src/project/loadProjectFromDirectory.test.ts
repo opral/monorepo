@@ -2,7 +2,11 @@
 import { expect, test } from "vitest";
 import { ProjectSettings } from "../json-schema/settings.js";
 import { Volume } from "memfs";
-import { loadProjectFromDirectoryInMemory } from "./loadProjectFromDirectory.js";
+import {
+	loadProjectFromDirectoryInMemory,
+	WarningDeprecatedLintRule,
+	WarningLocalPluginImport,
+} from "./loadProjectFromDirectory.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import { Text } from "../json-schema/pattern.js";
 import type { InlangPlugin } from "../plugin/schema.js";
@@ -221,4 +225,46 @@ test.skip("it should copy all files in a directory into lix", async () => {
 	expect(filesByPath["/prettierrc.json"]).toBe("prettier value");
 	expect(filesByPath["/README.md"]).toBe("readme value");
 	expect(filesByPath["/settings.json"]).toBe(JSON.stringify(mockSettings));
+});
+
+test("it should provide plugins from disk for backwards compatibility but warn that those plugins are not portable", async () => {
+	const mockRepo = {
+		"/local-plugins/mock-plugin.js": "export default { key: 'mock-plugin' }",
+		"/local-plugins/mock-rule.js":
+			"export default { id: 'messageLintRule.mock }",
+		"/website/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en", "de"],
+			modules: [
+				"../local-plugins/mock-plugin.js",
+				"../local-plugins/mock-rule.js",
+			],
+		} satisfies ProjectSettings),
+	};
+
+	const fs = Volume.fromJSON(mockRepo).promises;
+
+	const project = await loadProjectFromDirectoryInMemory({
+		fs: fs as any,
+		path: "/website/project.inlang",
+	});
+
+	const plugins = await project.plugins.get();
+	const errors = await project.errors.get();
+	const settings = await project.settings.get();
+
+	expect(plugins.length).toBe(1);
+	expect(plugins[0]?.key).toBe("mock-plugin");
+
+	// old mock lint rule import is number two import
+	// it's hard to model the import of a lint rule
+	// best if they are removed
+	expect(errors.length).toBe(3);
+	expect(errors[0]).toBeInstanceOf(WarningLocalPluginImport);
+	expect(errors[1]).toBeInstanceOf(WarningLocalPluginImport);
+	expect(errors[2]).toBeInstanceOf(WarningDeprecatedLintRule);
+
+	// it should not remove the module from the settings
+	// else roundtrips would not work
+	expect(settings.modules?.[0]).toBe("../local-plugins/mock-plugin.js");
 });
