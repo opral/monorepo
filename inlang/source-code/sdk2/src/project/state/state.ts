@@ -47,6 +47,7 @@ export function createProjectState(args: {
 			// re-import the plugins when the settings change
 			importPlugins({
 				settings,
+				lix: args.lix,
 				preprocessPluginBeforeImport: args.preprocessPluginBeforeImport,
 			})
 		),
