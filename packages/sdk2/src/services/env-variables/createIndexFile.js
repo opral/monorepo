@@ -20,7 +20,7 @@ const packageJson = JSON.parse(
 );
 
 await fs.writeFile(
-	dirname + "/index.js",
+	dirname + "/index.ts",
 	`
 export const ENV_VARIABLES = {
   PUBLIC_POSTHOG_TOKEN: "${process.env.PUBLIC_POSTHOG_TOKEN}",
