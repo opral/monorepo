@@ -1,4 +1,4 @@
-import type { Result } from "@inlang/result"
+import type { Result } from "../types.js"
 
 export async function subscribeNewsletter(args: { email: string }): Promise<Result<string, Error>> {
 	try {

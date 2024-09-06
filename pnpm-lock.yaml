@@ -2483,24 +2483,6 @@ importers:
 
   inlang/source-code/rpc:
     dependencies:
-      '@inlang/env-variables':
-        specifier: workspace:*
-        version: link:../env-variables
-      '@inlang/language-tag':
-        specifier: workspace:*
-        version: link:../versioned-interfaces/language-tag
-      '@inlang/marketplace-registry':
-        specifier: workspace:*
-        version: link:../marketplace-registry
-      '@inlang/message':
-        specifier: workspace:*
-        version: link:../versioned-interfaces/message
-      '@inlang/result':
-        specifier: workspace:*
-        version: link:../result
-      '@inlang/sdk':
-        specifier: workspace:*
-        version: link:../sdk
       '@inlang/sdk2':
         specifier: workspace:*
         version: link:../sdk2
@@ -2530,14 +2512,14 @@ importers:
         specifier: 4.17.17
         version: 4.17.17
       '@vitest/coverage-v8':
-        specifier: 0.34.3
-        version: 0.34.3(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.6)(webdriverio@8.40.3))
+        specifier: 2.0.5
+        version: 2.0.5(vitest@2.0.5(@types/node@22.5.2)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6))
       typescript:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.3
-        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.6)(webdriverio@8.40.3)
+        specifier: 2.0.5
+        version: 2.0.5(@types/node@22.5.2)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6)
 
   inlang/source-code/sdk:
     dependencies:
@@ -20786,6 +20768,21 @@ snapshots:
       - typescript
       - verdaccio
 
+  '@nrwl/js@18.3.5(@babel/traverse@7.25.3)(@types/node@20.14.14)(nx@18.3.5)(typescript@5.5.4)':
+    dependencies:
+      '@nx/js': 18.3.5(@babel/traverse@7.25.3)(@types/node@20.14.14)(nx@18.3.5)(typescript@5.5.4)
+    transitivePeerDependencies:
+      - '@babel/traverse'
+      - '@swc-node/register'
+      - '@swc/core'
+      - '@swc/wasm'
+      - '@types/node'
+      - debug
+      - nx
+      - supports-color
+      - typescript
+      - verdaccio
+
   '@nrwl/js@18.3.5(@babel/traverse@7.25.3)(@types/node@22.5.2)(nx@18.3.5)(typescript@5.4.5)':
     dependencies:
       '@nx/js': 18.3.5(@babel/traverse@7.25.3)(@types/node@22.5.2)(nx@18.3.5)(typescript@5.4.5)
@@ -21074,7 +21071,7 @@ snapshots:
       '@babel/preset-env': 7.25.3(@babel/core@7.25.2)
       '@babel/preset-typescript': 7.24.7(@babel/core@7.25.2)
       '@babel/runtime': 7.25.0
-      '@nrwl/js': 18.3.5(@babel/traverse@7.25.3)(@types/node@20.14.14)(nx@18.3.5)(typescript@5.4.5)
+      '@nrwl/js': 18.3.5(@babel/traverse@7.25.3)(@types/node@20.14.14)(nx@18.3.5)(typescript@5.5.4)
       '@nx/devkit': 18.3.5(nx@18.3.5)
       '@nx/workspace': 18.3.5
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.5.4)

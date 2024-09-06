@@ -1,4 +1,4 @@
-import type { Result } from "@inlang/result"
+import type { Result } from "../types.js"
 
 export async function subscribeCategory(args: {
 	category: string
