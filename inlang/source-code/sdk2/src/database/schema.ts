@@ -2,16 +2,19 @@ import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import { Declaration, Expression, Pattern } from "../json-schema/pattern.js";
 
-export async function createSchema(args: { sqlite: SqliteDatabase }) {
-	args.sqlite.exec(`
-PRAGMA foreign_keys = ON;
+export function applySchema(args: { sqlite: SqliteDatabase }) {
+	const foreignKeys: any = args.sqlite.exec("PRAGMA foreign_keys");
+	if (foreignKeys["foreign_keys"] === 0) {
+		args.sqlite.exec("PRAGMA foreign_keys = ON");
+	}
 
-CREATE TABLE bundle (
+	args.sqlite.exec(`
+CREATE TABLE IF NOT EXISTS bundle (
   id TEXT PRIMARY KEY DEFAULT (human_id()),
   alias TEXT NOT NULL DEFAULT '{}'
 ) strict;
 
-CREATE TABLE message (
+CREATE TABLE IF NOT EXISTS message (
   id TEXT PRIMARY KEY DEFAULT (uuid_v4()), 
   bundle_id TEXT NOT NULL,
   locale TEXT NOT NULL,
@@ -20,7 +23,7 @@ CREATE TABLE message (
   FOREIGN KEY (bundle_id) REFERENCES bundle(id) ON DELETE CASCADE
 ) strict;
 
-CREATE TABLE variant (
+CREATE TABLE IF NOT EXISTS variant (
   id TEXT PRIMARY KEY DEFAULT (uuid_v4()), 
   message_id TEXT NOT NULL,
   match TEXT NOT NULL DEFAULT '{}',
@@ -28,8 +31,8 @@ CREATE TABLE variant (
   FOREIGN KEY (message_id) REFERENCES message(id) ON DELETE CASCADE
 ) strict;
   
-CREATE INDEX idx_message_bundle_id ON message (bundle_id);
-CREATE INDEX idx_variant_message_id ON variant (message_id);
+CREATE INDEX IF NOT EXISTS idx_message_bundle_id ON message (bundle_id);
+CREATE INDEX IF NOT EXISTS idx_variant_message_id ON variant (message_id);
 		`);
 }
 
@@ -46,7 +49,7 @@ type BundleTable = {
 
 type MessageTable = {
 	id: Generated<string>;
-	bundleId: string;
+	bundleId: Generated<string>;
 	locale: string;
 	declarations: Generated<Array<Declaration>>;
 	selectors: Generated<Array<Expression>>;
