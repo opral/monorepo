@@ -71,7 +71,7 @@ export type NewMessage = Insertable<MessageTable>;
 export type MessageUpdate = Updateable<MessageTable>;
 
 export type Variant = Selectable<VariantTable>;
-export type NewVariant = Selectable<VariantTable>;
+export type NewVariant = Insertable<VariantTable>;
 export type VariantUpdate = Updateable<VariantTable>;
 
 export type MessageNested = Message & {
