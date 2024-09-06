@@ -11,18 +11,6 @@ export class PluginError extends Error {
 	}
 }
 
-/**
- * Error when a plugin does not export any plugins or lint rules.
- */
-export class PluginHasNoExportsError extends PluginError {
-	constructor(options: { plugin: string; cause?: Error }) {
-		super(
-			`Plugin "${options.plugin}" has no exports. Every plugin must have an "export default".`,
-			options
-		);
-		this.name = "PluginHasNoExportsError";
-	}
-}
 
 /**
  * Error when a plugin cannot be imported.
