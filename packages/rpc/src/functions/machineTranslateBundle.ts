@@ -1,99 +1,92 @@
-import { privateEnv } from "@inlang/env-variables"
-import type { Result } from "@inlang/result"
 import {
 	createVariant,
 	Text,
 	VariableReference,
 	type Variant,
 	type BundleNested,
+	type NewBundleNested,
+	uuidv4,
 } from "@inlang/sdk2"
+import type { Result } from "../types.js"
+import { ENV_VARIABLES } from "../services/env-variables/index.js"
 
-export async function machineTranslateMessage(args: {
+export async function machineTranslateBundle(args: {
 	bundle: BundleNested
-	baseLocale: string
+	sourceLocale: string
 	targetLocales: string[]
-}): Promise<Result<BundleNested, string>> {
+}): Promise<Result<NewBundleNested, string>> {
 	try {
-		if (!privateEnv.GOOGLE_TRANSLATE_API_KEY) {
-			throw new Error("GOOGLE_TRANSLATE_API_KEY is not set")
+		if (!ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY) {
+			return { error: "GOOGLE_TRANSLATE_API_KEY is not set" }
 		}
 
 		const copy = structuredClone(args.bundle)
 
-		// Iterate over each message in the bundle
-		for (const message of args.bundle.messages) {
-			// Skip if the message locale does not match the base locale
-			if (message.locale !== args.baseLocale) {
-				continue
-			}
+		const sourceMessage = copy.messages.find((m) => m.locale === args.sourceLocale)
 
-			// Proceed only if the message has exactly one variant
-			if (message.variants.length !== 1) {
-				continue
-			}
-
-			const baseVariant = message.variants[0]
-
-			// Skip if the variant has no pattern
-			if (!baseVariant) {
-				continue
-			}
-
-			const q = serializePattern(baseVariant.pattern, {})
-
-			// Translate the variant for each target locale
-			for (const targetLocale of args.targetLocales) {
-				let translation: string
-
-				if (!process.env.MOCK_TRANSLATE) {
-					const response = await fetch(
-						"https://translation.googleapis.com/language/translate/v2?" +
-							new URLSearchParams({
-								q,
-								target: targetLocale,
-								source: args.baseLocale,
-								format: "html",
-								key: privateEnv.GOOGLE_TRANSLATE_API_KEY,
-							}),
-						{ method: "POST" }
-					)
-
-					if (!response.ok) {
-						const err = `${response.status} ${response.statusText}: translating from ${args.baseLocale} to ${targetLocale}`
-						return { error: err }
-					}
-
-					const json = await response.json()
-					translation = json.data.translations[0].translatedText
-				} else {
-					const mockTranslation = await mockTranslateApi(q, args.baseLocale, targetLocale)
-					if (mockTranslation.error) return { error: mockTranslation.error }
-					translation = mockTranslation.translation
-				}
-
-				// Deserialize the translated pattern
-				const translatedPattern = deserializePattern(translation)
-
-				// Create a new message with the translated locale and the translated variant
-				const translatedMessage = {
-					...message,
-					locale: targetLocale,
-					variants: [
-						createVariant({
-							pattern: translatedPattern,
-							messageId: message.id,
-						}),
-					],
-				}
-
-				// Add the translated message to the bundle
-				copy.messages.push(translatedMessage)
-			}
+		if (!sourceMessage) {
+			return { error: "Source locale not found in the bundle" }
 		}
 
+		for (const sourceVariant of sourceMessage.variants) {
+			const sourcePattern = serializePattern(sourceVariant.pattern, {})
+
+			for (const targetLocale of args.targetLocales) {
+				// if by mistake the source locale is in the target locales, skip it
+				if (targetLocale === args.sourceLocale) {
+					continue
+				}
+
+				const response = await fetch(
+					"https://translation.googleapis.com/language/translate/v2?" +
+						new URLSearchParams({
+							q: sourcePattern,
+							target: targetLocale,
+							source: args.sourceLocale,
+							format: "html",
+							key: ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY,
+						}),
+					{ method: "POST" }
+				)
+
+				if (!response.ok) {
+					const err = `${response.status} ${response.statusText}: translating from ${args.sourceLocale} to ${targetLocale}`
+					return { error: err }
+				}
+
+				const json = await response.json()
+				const pattern = deserializePattern(json.data.translations[0].translatedText)
+				const targetMessage = copy.messages.find((m) => m.locale === targetLocale)
+
+				if (targetMessage) {
+					targetMessage.variants.push(
+						createVariant({
+							id: uuidv4(),
+							messageId: targetMessage.id,
+							match: sourceVariant.match,
+							pattern,
+						}) as Variant
+					)
+				} else {
+					const newMessageId = uuidv4()
+					copy.messages.push({
+						...sourceMessage,
+						id: newMessageId,
+						locale: targetLocale,
+						variants: [
+							createVariant({
+								id: uuidv4(),
+								messageId: newMessageId,
+								match: sourceVariant.match,
+								pattern,
+							}) as Variant,
+						],
+					})
+				}
+			}
+		}
 		return { data: copy }
 	} catch (error) {
-		console.error(error)
 		return { error: error?.toString() ?? "unknown error" }
 	}
 }
@@ -217,8 +210,8 @@ function deserializePattern(text: string): Variant["pattern"] {
 			break
 		}
 
-		const placeholderAsText = unescapedText.slice(start + escapeStart.length, end)
-		const placeholder = JSON.parse(placeholderAsText) as VariableReference
+		const expressionAsText = unescapedText.slice(start + escapeStart.length, end)
+		const expression = JSON.parse(expressionAsText) as VariableReference
 
 		// can't get it running, ignoring for now
 		// const lastElement = result[result.length]
@@ -235,7 +228,7 @@ function deserializePattern(text: string): Variant["pattern"] {
 
 		// TODO: handle placeholder with correct type
 		// @ts-expect-error
-		result.push(placeholder)
+		result.push(expression)
 		i = end + escapeEnd.length
 	}
 	return result
