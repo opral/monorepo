@@ -44,3 +44,24 @@ test("if a fetch fails, a plugin import error is expected", async () => {
 	expect(result.errors.length).toBe(1);
 	expect(result.errors[0]).toBeInstanceOf(PluginImportError);
 });
+
+
+test("it should filter message lint rules for legacy reasons", async () => {
+	global.fetch = vi.fn().mockResolvedValue({
+		ok: true,
+		text: vi
+			.fn()
+			.mockResolvedValue("export default { id: 'messageLintRule.something' }"),
+	});
+
+	const result = await importPlugins({
+		settings: {
+			baseLocale: "en",
+			locales: ["en"],
+			modules: ["https://mock.com/module.js"],
+		},
+	});
+
+	expect(result.plugins.length).toBe(0);
+	expect(result.errors.length).toBe(0);
+});
