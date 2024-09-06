@@ -1,4 +1,4 @@
-import { test, expect, vi, beforeEach } from "vitest";
+import { test, expect, vi } from "vitest";
 import { createProjectState } from "./state.js";
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import type { ProjectSettings } from "../../json-schema/settings.js";
