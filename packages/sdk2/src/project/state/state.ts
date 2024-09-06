@@ -68,7 +68,8 @@ export function createProjectState(args: {
 	return {
 		id: {
 			get: () => firstValueFrom(id$),
-			subscribe: id$.subscribe,
+			// bind to keep the context of this
+			subscribe: id$.subscribe.bind(id$),
 		},
 		settings: {
 			get: () => firstValueFrom(settings$),
@@ -81,11 +82,13 @@ export function createProjectState(args: {
 		},
 		errors: {
 			get: () => firstValueFrom(errors$),
-			subscribe: errors$.subscribe,
+			// bind to keep the context of this
+			subscribe: errors$.subscribe.bind(errors$),
 		},
 		plugins: {
 			get: () => firstValueFrom(plugins$),
-			subscribe: plugins$.subscribe,
+			// bind to keep the context of this
+			subscribe: plugins$.subscribe.bind(plugins$),
 		},
 	};
 }

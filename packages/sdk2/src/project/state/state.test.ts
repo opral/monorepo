@@ -2,6 +2,9 @@ import { test, expect, vi } from "vitest";
 import { createProjectState } from "./state.js";
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import type { ProjectSettings } from "../../json-schema/settings.js";
+import { loadProjectInMemory } from "../loadProjectInMemory.js";
+import { newProject } from "../newProject.js";
+import type { InlangPlugin } from "../../plugin/schema.js";
 
 test("plugins should be re-imported if the settings have been updated", async () => {
 	const mockImportPlugins = vi.hoisted(() =>
@@ -82,4 +85,44 @@ test("plugins should be re-imported if the settings have been updated", async ()
 
 	expect(plugins4).toEqual([]);
 	// expect(mockImportPlugins).toHaveBeenCalledTimes(3);
+});
+
+test("subscribing to plugins should work", async () => {
+	// vite hoists the import plugin from the previous test :/
+	const project = await loadProjectInMemory({ blob: await newProject() });
+
+	const state = createProjectState({
+		lix: project.lix,
+		settings: {
+			baseLocale: "en",
+			locales: ["en"],
+			modules: [],
+		},
+	});
+
+	expect(await state.plugins.get()).toEqual([]);
+
+	let pluginsFromSub: readonly InlangPlugin[] = [];
+	const sub = state.plugins.subscribe((value) => {
+		pluginsFromSub = value;
+	});
+
+	await project.lix.db
+		.updateTable("file_internal")
+		.where("path", "=", "/settings.json")
+		.set({
+			data: new TextEncoder().encode(
+				JSON.stringify({
+					baseLocale: "en",
+					locales: ["en"],
+					modules: ["broken-module.js"],
+				})
+			),
+		})
+		.execute();
+
+	const plugins = await state.plugins.get();
+	expect(plugins.length).toBe(1);
+	expect(pluginsFromSub).toStrictEqual(plugins);
+	sub.unsubscribe();
 });
