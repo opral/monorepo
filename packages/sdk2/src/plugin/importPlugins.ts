@@ -1,6 +1,8 @@
+import type { Lix } from "@lix-js/sdk";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import { PluginError, PluginImportError } from "./errors.js";
 import type { InlangPlugin } from "./schema.js";
+import { withCache } from "./cache.js";
 
 /**
  * Function that preprocesses the plugin before importing it.
@@ -12,6 +14,7 @@ export type PreprocessPluginBeforeImportFunction = (
 ) => Promise<string> | string;
 
 export async function importPlugins(args: {
+	lix: Lix;
 	settings: ProjectSettings;
 	preprocessPluginBeforeImport?: PreprocessPluginBeforeImportFunction;
 }): Promise<{
@@ -22,7 +25,7 @@ export async function importPlugins(args: {
 	const errors: PluginError[] = [];
 	for (const uri of args.settings.modules ?? []) {
 		try {
-			let moduleAsText = await fetchModuleWithCache(uri);
+			let moduleAsText = await withCache(fetchPlugin, args.lix)(uri);
 			if (args.preprocessPluginBeforeImport) {
 				moduleAsText = await args.preprocessPluginBeforeImport(moduleAsText);
 			}
@@ -44,12 +47,14 @@ export async function importPlugins(args: {
 	return { plugins, errors };
 }
 
-async function fetchModuleWithCache(uri: string): Promise<string> {
-	const response = await fetch(uri);
-	if (!response.ok) {
-		throw new Error(
-			`Failed to fetch the plugin. Is the link ${uri} valid? ${response.statusText}`
-		);
+async function fetchPlugin(uri: string): Promise<string> {
+	try {
+		const response = await fetch(uri);
+		return await response.text();
+	} catch (error) {
+		throw new PluginImportError({
+			plugin: uri,
+			cause: error as Error,
+		});
 	}
-	return await response.text();
 }
