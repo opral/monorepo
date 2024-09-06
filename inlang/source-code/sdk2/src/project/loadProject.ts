@@ -10,6 +10,7 @@ import { createProjectState } from "./state/state.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
 import { exportFiles, importFiles } from "../import-export/index.js";
 import { v4 } from "uuid";
+import { initErrorReporting } from "../services/error-reporting/index.js";
 import { maybeCaptureLoadedProject } from "./maybeCaptureTelemetry.js";
 
 /**
@@ -96,6 +97,8 @@ export async function loadProject(args: {
 		state,
 		appId: args.appId,
 	});
+
+	initErrorReporting({ projectId: await state.id.get() });
 
 	return {
 		db,

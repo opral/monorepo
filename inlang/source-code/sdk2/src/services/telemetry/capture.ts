@@ -2,6 +2,7 @@
 
 import type { ProjectSettings } from "../../json-schema/settings.js";
 import { ENV_VARIABLES } from "../env-variables/index.js";
+import { captureError } from "../error-reporting/index.js";
 
 /**
  * List of telemetry events for typesafety.
@@ -53,8 +54,7 @@ export const capture = async (
 			properties: { name: args.projectId },
 		});
 	} catch (e) {
-		// TODO implement sentry logging
-		// do not console.log and avoid exposing internal errors to the user
+		captureError(e);
 	}
 };
 
@@ -93,8 +93,6 @@ const identifyProject = async (args: {
 			}),
 		});
 	} catch (e) {
-		// console.log(e);
-		// TODO implement sentry logging
-		// do not console.log and avoid exposing internal errors to the user
+		captureError(e);
 	}
 };
