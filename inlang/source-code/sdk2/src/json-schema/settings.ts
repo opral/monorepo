@@ -76,6 +76,16 @@ const SDKSettings = Type.Object({
 			}
 		)
 	),
+	telemetry: Type.Optional(
+		Type.Union(
+			[
+				Type.Literal("off", {
+					description: "No telemetry events ",
+				}),
+			],
+			{ description: "If not set, defaults to all" }
+		)
+	),
 	experimental: Type.Optional(
 		Type.Record(Type.String(), Type.Literal(true), {
 			title: "Experimental settings",
