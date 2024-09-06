@@ -382,7 +382,7 @@ importers:
         version: 0.34.3(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.6)(webdriverio@8.40.3))
       tailwindcss:
         specifier: ^3.3.3
-        version: 3.4.9(ts-node@10.9.2(@types/node@20.14.14)(typescript@5.2.2))
+        version: 3.4.9(ts-node@10.9.2(@types/node@22.5.2)(typescript@5.2.2))
       typescript:
         specifier: 5.2.2
         version: 5.2.2
@@ -1639,7 +1639,7 @@ importers:
         version: 10.4.5
       next:
         specifier: ^13.0.0 || ^14.0.0 || ^15.0.0
-        version: 14.1.3(react-dom@19.0.0-rc-941e1b4a-20240729(react@18.3.1))(react@18.3.1)
+        version: 14.1.3(@babel/core@7.25.2)(react-dom@19.0.0-rc-941e1b4a-20240729(react@18.3.1))(react@18.3.1)
       qs:
         specifier: ^6.12.1
         version: 6.13.0
@@ -2630,7 +2630,7 @@ importers:
         specifier: workspace:*
         version: link:../../../lix/packages/sdk
       '@sentry/browser':
-        specifier: ^7.27.0
+        specifier: ^7.118.0
         version: 7.118.0
       '@sinclair/typebox':
         specifier: ^0.31.17
@@ -2654,6 +2654,9 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0
     devDependencies:
+      '@sentry/cli':
+        specifier: ^2.35.0
+        version: 2.35.0
       '@types/murmurhash3js':
         specifier: ^3.0.7
         version: 3.0.7
@@ -7369,6 +7372,52 @@ packages:
   '@sentry/browser@7.118.0':
     resolution: {integrity: sha512-8onDOFV1VLEoBuqA5yaJeR3FF1JNuxr5C7p1oN3OwY724iTVqQnOLmZKZaSnHV3RkY67wKDGQkQIie14sc+42g==}
     engines: {node: '>=8'}
+
+  '@sentry/cli-darwin@2.35.0':
+    resolution: {integrity: sha512-dRtDaASkB1ncSbCLMIL8bxki4dPMimSdYz74XOUJ5IvDVVzEInEO7PqvyOj/cyafB+1FSNudaZ90ZRvsNN1Maw==}
+    engines: {node: '>=10'}
+    os: [darwin]
+
+  '@sentry/cli-linux-arm64@2.35.0':
+    resolution: {integrity: sha512-NpyVz2lQWWkMa9GZkt0m4cA/wsgYnWOE6Z+4ePUGjbOIG3Ws9DLaHjYxUUYI79kxfbVCp7wLo1S6kOkj+M1Dlw==}
+    engines: {node: '>=10'}
+    cpu: [arm64]
+    os: [linux, freebsd]
+
+  '@sentry/cli-linux-arm@2.35.0':
+    resolution: {integrity: sha512-zNL+/HnepZ4/MkIS8wfoUQxSa+k6r0DSSdX1TpDH5436u+3LB5rfCTBfZ624DWHKMoXX+1dI+rWSi+zL8QFMsg==}
+    engines: {node: '>=10'}
+    cpu: [arm]
+    os: [linux, freebsd]
+
+  '@sentry/cli-linux-i686@2.35.0':
+    resolution: {integrity: sha512-vIYwZVqx+kYZdPsenIm+UqjSCKe9Q2Aof6kzrzW0DPR1WyqIWbWG4NbiugiPTiuA1dLjUjYpGP8wyIqb8hxv4w==}
+    engines: {node: '>=10'}
+    cpu: [x86, ia32]
+    os: [linux, freebsd]
+
+  '@sentry/cli-linux-x64@2.35.0':
+    resolution: {integrity: sha512-7Wy5QNt6wZ8EaxEbHqP0DEiyUcXRVItRt9jzhpa2nCaawL+fwDOQCjUkHGsdIC+y14UqA+er9CaPCSp8sA6Vaw==}
+    engines: {node: '>=10'}
+    cpu: [x64]
+    os: [linux, freebsd]
+
+  '@sentry/cli-win32-i686@2.35.0':
+    resolution: {integrity: sha512-XDcBUtO5A9elH+xgFNs6NBjkMBnz0sZLo5DU7LE77qKXULnlLeJ63eZD1ukQIRPvxEDsIEPOllRweLuAlUMDtw==}
+    engines: {node: '>=10'}
+    cpu: [x86, ia32]
+    os: [win32]
+
+  '@sentry/cli-win32-x64@2.35.0':
+    resolution: {integrity: sha512-86yHO+31qAXUeAdSCH7MNodn/cn/9xd2fTrxjtfNZWO0pX0jW91sCdomfBxhu5b977cyV9gNcqeBbc9XSIKIIA==}
+    engines: {node: '>=10'}
+    cpu: [x64]
+    os: [win32]
+
+  '@sentry/cli@2.35.0':
+    resolution: {integrity: sha512-7sHRJViEgHTfEXf+HD1Fb2cwmnxlILmb2NNxghP2vvrgC2PhuwuJU7AX4zg7HjJgxH9HBmnn4AJskDujaJ/6cQ==}
+    engines: {node: '>= 10'}
+    hasBin: true
 
   '@sentry/core@7.114.0':
     resolution: {integrity: sha512-YnanVlmulkjgZiVZ9BfY9k6I082n+C+LbZo52MTvx3FY6RE5iyiPMpaOh67oXEZRWcYQEGm+bKruRxLVP6RlbA==}
@@ -20737,21 +20786,6 @@ snapshots:
       - typescript
       - verdaccio
 
-  '@nrwl/js@18.3.5(@babel/traverse@7.25.3)(@types/node@20.14.14)(nx@18.3.5)(typescript@5.5.4)':
-    dependencies:
-      '@nx/js': 18.3.5(@babel/traverse@7.25.3)(@types/node@20.14.14)(nx@18.3.5)(typescript@5.5.4)
-    transitivePeerDependencies:
-      - '@babel/traverse'
-      - '@swc-node/register'
-      - '@swc/core'
-      - '@swc/wasm'
-      - '@types/node'
-      - debug
-      - nx
-      - supports-color
-      - typescript
-      - verdaccio
-
   '@nrwl/js@18.3.5(@babel/traverse@7.25.3)(@types/node@22.5.2)(nx@18.3.5)(typescript@5.4.5)':
     dependencies:
       '@nx/js': 18.3.5(@babel/traverse@7.25.3)(@types/node@22.5.2)(nx@18.3.5)(typescript@5.4.5)
@@ -21040,7 +21074,7 @@ snapshots:
       '@babel/preset-env': 7.25.3(@babel/core@7.25.2)
       '@babel/preset-typescript': 7.24.7(@babel/core@7.25.2)
       '@babel/runtime': 7.25.0
-      '@nrwl/js': 18.3.5(@babel/traverse@7.25.3)(@types/node@20.14.14)(nx@18.3.5)(typescript@5.5.4)
+      '@nrwl/js': 18.3.5(@babel/traverse@7.25.3)(@types/node@20.14.14)(nx@18.3.5)(typescript@5.4.5)
       '@nx/devkit': 18.3.5(nx@18.3.5)
       '@nx/workspace': 18.3.5
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.5.4)
@@ -22397,6 +22431,46 @@ snapshots:
       '@sentry/replay': 7.118.0
       '@sentry/types': 7.118.0
       '@sentry/utils': 7.118.0
+
+  '@sentry/cli-darwin@2.35.0':
+    optional: true
+
+  '@sentry/cli-linux-arm64@2.35.0':
+    optional: true
+
+  '@sentry/cli-linux-arm@2.35.0':
+    optional: true
+
+  '@sentry/cli-linux-i686@2.35.0':
+    optional: true
+
+  '@sentry/cli-linux-x64@2.35.0':
+    optional: true
+
+  '@sentry/cli-win32-i686@2.35.0':
+    optional: true
+
+  '@sentry/cli-win32-x64@2.35.0':
+    optional: true
+
+  '@sentry/cli@2.35.0':
+    dependencies:
+      https-proxy-agent: 5.0.1
+      node-fetch: 2.7.0
+      progress: 2.0.3
+      proxy-from-env: 1.1.0
+      which: 2.0.2
+    optionalDependencies:
+      '@sentry/cli-darwin': 2.35.0
+      '@sentry/cli-linux-arm': 2.35.0
+      '@sentry/cli-linux-arm64': 2.35.0
+      '@sentry/cli-linux-i686': 2.35.0
+      '@sentry/cli-linux-x64': 2.35.0
+      '@sentry/cli-win32-i686': 2.35.0
+      '@sentry/cli-win32-x64': 2.35.0
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
 
   '@sentry/core@7.114.0':
     dependencies:
@@ -27993,7 +28067,7 @@ snapshots:
       eslint: 8.41.0
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0)
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1)(eslint@8.41.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0)
       eslint-plugin-jsx-a11y: 6.9.0(eslint@8.41.0)
       eslint-plugin-react: 7.35.0(eslint@8.41.0)
       eslint-plugin-react-hooks: 4.6.2(eslint@8.41.0)
@@ -28078,7 +28152,7 @@ snapshots:
       enhanced-resolve: 5.17.1
       eslint: 8.41.0
       eslint-module-utils: 2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0)
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1)(eslint@8.41.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0)
       fast-glob: 3.3.2
       get-tsconfig: 4.7.6
       is-core-module: 2.15.0
@@ -28149,7 +28223,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1)(eslint@8.41.0):
+  eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0):
     dependencies:
       array-includes: 3.1.8
       array.prototype.findlastindex: 1.2.5
@@ -32136,7 +32210,7 @@ snapshots:
       postcss: 8.4.31
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.1(react@18.3.1)
+      styled-jsx: 5.1.1(@babel/core@7.25.2)(react@18.3.1)
     optionalDependencies:
       '@next/swc-darwin-arm64': 14.1.2-canary.4
       '@next/swc-darwin-x64': 14.1.2-canary.4
@@ -32147,6 +32221,31 @@ snapshots:
       '@next/swc-win32-arm64-msvc': 14.1.2-canary.4
       '@next/swc-win32-ia32-msvc': 14.1.2-canary.4
       '@next/swc-win32-x64-msvc': 14.1.2-canary.4
+    transitivePeerDependencies:
+      - '@babel/core'
+      - babel-plugin-macros
+
+  next@14.1.3(@babel/core@7.25.2)(react-dom@19.0.0-rc-941e1b4a-20240729(react@18.3.1))(react@18.3.1):
+    dependencies:
+      '@next/env': 14.1.3
+      '@swc/helpers': 0.5.2
+      busboy: 1.6.0
+      caniuse-lite: 1.0.30001651
+      graceful-fs: 4.2.11
+      postcss: 8.4.31
+      react: 18.3.1
+      react-dom: 19.0.0-rc-941e1b4a-20240729(react@18.3.1)
+      styled-jsx: 5.1.1(@babel/core@7.25.2)(react@18.3.1)
+    optionalDependencies:
+      '@next/swc-darwin-arm64': 14.1.3
+      '@next/swc-darwin-x64': 14.1.3
+      '@next/swc-linux-arm64-gnu': 14.1.3
+      '@next/swc-linux-arm64-musl': 14.1.3
+      '@next/swc-linux-x64-gnu': 14.1.3
+      '@next/swc-linux-x64-musl': 14.1.3
+      '@next/swc-win32-arm64-msvc': 14.1.3
+      '@next/swc-win32-ia32-msvc': 14.1.3
+      '@next/swc-win32-x64-msvc': 14.1.3
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
@@ -32186,32 +32285,7 @@ snapshots:
       postcss: 8.4.31
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.1(react@18.3.1)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.1.3
-      '@next/swc-darwin-x64': 14.1.3
-      '@next/swc-linux-arm64-gnu': 14.1.3
-      '@next/swc-linux-arm64-musl': 14.1.3
-      '@next/swc-linux-x64-gnu': 14.1.3
-      '@next/swc-linux-x64-musl': 14.1.3
-      '@next/swc-win32-arm64-msvc': 14.1.3
-      '@next/swc-win32-ia32-msvc': 14.1.3
-      '@next/swc-win32-x64-msvc': 14.1.3
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-
-  next@14.1.3(react-dom@19.0.0-rc-941e1b4a-20240729(react@18.3.1))(react@18.3.1):
-    dependencies:
-      '@next/env': 14.1.3
-      '@swc/helpers': 0.5.2
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001651
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 18.3.1
-      react-dom: 19.0.0-rc-941e1b4a-20240729(react@18.3.1)
-      styled-jsx: 5.1.1(react@18.3.1)
+      styled-jsx: 5.1.1(@babel/core@7.25.2)(react@18.3.1)
     optionalDependencies:
       '@next/swc-darwin-arm64': 14.1.3
       '@next/swc-darwin-x64': 14.1.3
@@ -33186,14 +33260,6 @@ snapshots:
       postcss: 8.4.41
       ts-node: 10.9.2(@types/node@20.14.14)(typescript@5.0.4)
 
-  postcss-load-config@4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@20.14.14)(typescript@5.2.2)):
-    dependencies:
-      lilconfig: 3.1.2
-      yaml: 2.5.0
-    optionalDependencies:
-      postcss: 8.4.41
-      ts-node: 10.9.2(@types/node@20.14.14)(typescript@5.2.2)
-
   postcss-load-config@4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@20.14.14)(typescript@5.3.2)):
     dependencies:
       lilconfig: 3.1.2
@@ -33217,6 +33283,14 @@ snapshots:
     optionalDependencies:
       postcss: 8.4.41
       ts-node: 10.9.2(@types/node@20.5.9)(typescript@5.5.4)
+
+  postcss-load-config@4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@22.5.2)(typescript@5.2.2)):
+    dependencies:
+      lilconfig: 3.1.2
+      yaml: 2.5.0
+    optionalDependencies:
+      postcss: 8.4.41
+      ts-node: 10.9.2(@types/node@22.5.2)(typescript@5.2.2)
 
   postcss-load-config@4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@22.5.2)(typescript@5.3.2)):
     dependencies:
@@ -35017,15 +35091,17 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.3
 
+  styled-jsx@5.1.1(@babel/core@7.25.2)(react@18.3.1):
+    dependencies:
+      client-only: 0.0.1
+      react: 18.3.1
+    optionalDependencies:
+      '@babel/core': 7.25.2
+
   styled-jsx@5.1.1(react@18.2.0):
     dependencies:
       client-only: 0.0.1
       react: 18.2.0
-
-  styled-jsx@5.1.1(react@18.3.1):
-    dependencies:
-      client-only: 0.0.1
-      react: 18.3.1
 
   sucrase@3.35.0:
     dependencies:
@@ -35257,33 +35333,6 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
-  tailwindcss@3.4.9(ts-node@10.9.2(@types/node@20.14.14)(typescript@5.2.2)):
-    dependencies:
-      '@alloc/quick-lru': 5.2.0
-      arg: 5.0.2
-      chokidar: 3.6.0
-      didyoumean: 1.2.2
-      dlv: 1.1.3
-      fast-glob: 3.3.2
-      glob-parent: 6.0.2
-      is-glob: 4.0.3
-      jiti: 1.21.6
-      lilconfig: 2.1.0
-      micromatch: 4.0.7
-      normalize-path: 3.0.0
-      object-hash: 3.0.0
-      picocolors: 1.0.1
-      postcss: 8.4.41
-      postcss-import: 15.1.0(postcss@8.4.41)
-      postcss-js: 4.0.1(postcss@8.4.41)
-      postcss-load-config: 4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@20.14.14)(typescript@5.2.2))
-      postcss-nested: 6.2.0(postcss@8.4.41)
-      postcss-selector-parser: 6.1.1
-      resolve: 1.22.8
-      sucrase: 3.35.0
-    transitivePeerDependencies:
-      - ts-node
-
   tailwindcss@3.4.9(ts-node@10.9.2(@types/node@20.14.14)(typescript@5.3.2)):
     dependencies:
       '@alloc/quick-lru': 5.2.0
@@ -35358,6 +35407,33 @@ snapshots:
       postcss-import: 15.1.0(postcss@8.4.41)
       postcss-js: 4.0.1(postcss@8.4.41)
       postcss-load-config: 4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@20.5.9)(typescript@5.5.4))
+      postcss-nested: 6.2.0(postcss@8.4.41)
+      postcss-selector-parser: 6.1.1
+      resolve: 1.22.8
+      sucrase: 3.35.0
+    transitivePeerDependencies:
+      - ts-node
+
+  tailwindcss@3.4.9(ts-node@10.9.2(@types/node@22.5.2)(typescript@5.2.2)):
+    dependencies:
+      '@alloc/quick-lru': 5.2.0
+      arg: 5.0.2
+      chokidar: 3.6.0
+      didyoumean: 1.2.2
+      dlv: 1.1.3
+      fast-glob: 3.3.2
+      glob-parent: 6.0.2
+      is-glob: 4.0.3
+      jiti: 1.21.6
+      lilconfig: 2.1.0
+      micromatch: 4.0.7
+      normalize-path: 3.0.0
+      object-hash: 3.0.0
+      picocolors: 1.0.1
+      postcss: 8.4.41
+      postcss-import: 15.1.0(postcss@8.4.41)
+      postcss-js: 4.0.1(postcss@8.4.41)
+      postcss-load-config: 4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@22.5.2)(typescript@5.2.2))
       postcss-nested: 6.2.0(postcss@8.4.41)
       postcss-selector-parser: 6.1.1
       resolve: 1.22.8
@@ -35729,25 +35805,6 @@ snapshots:
       yn: 3.1.1
     optional: true
 
-  ts-node@10.9.2(@types/node@20.14.14)(typescript@5.2.2):
-    dependencies:
-      '@cspotcode/source-map-support': 0.8.1
-      '@tsconfig/node10': 1.0.11
-      '@tsconfig/node12': 1.0.11
-      '@tsconfig/node14': 1.0.3
-      '@tsconfig/node16': 1.0.4
-      '@types/node': 20.14.14
-      acorn: 8.12.1
-      acorn-walk: 8.3.3
-      arg: 4.1.3
-      create-require: 1.1.1
-      diff: 4.0.2
-      make-error: 1.3.6
-      typescript: 5.2.2
-      v8-compile-cache-lib: 3.0.1
-      yn: 3.1.1
-    optional: true
-
   ts-node@10.9.2(@types/node@20.14.14)(typescript@5.3.2):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
@@ -35800,6 +35857,25 @@ snapshots:
       diff: 4.0.2
       make-error: 1.3.6
       typescript: 5.5.4
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optional: true
+
+  ts-node@10.9.2(@types/node@22.5.2)(typescript@5.2.2):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 22.5.2
+      acorn: 8.12.1
+      acorn-walk: 8.3.3
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.2.2
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     optional: true
