@@ -5,7 +5,10 @@ import { uuidv4, type Lix } from "@lix-js/sdk";
 import type fs from "node:fs/promises";
 // eslint-disable-next-line no-restricted-imports
 import nodePath from "node:path";
-import type { InlangPlugin } from "../plugin/schema.js";
+import type {
+	InlangPlugin,
+	NodeFsPromisesSubsetLegacy,
+} from "../plugin/schema.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
 import { fromMessageV1 } from "../json-schema/old-v1-message/fromMessageV1.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
@@ -102,7 +105,7 @@ export async function loadProjectFromDirectoryInMemory(
 
 		await project.importFiles({
 			pluginKey: importer.key,
-			files,
+			files: files.map((file) => ({ ...file, pluginKey: importer.key })),
 		});
 
 		// TODO check user id and description (where will this one appear?)
@@ -116,6 +119,7 @@ export async function loadProjectFromDirectoryInMemory(
 	if (chosenLegacyPlugin) {
 		await loadLegacyMessages({
 			project,
+			projectPath: args.path,
 			fs: args.fs,
 			pluginKey: chosenLegacyPlugin.key ?? chosenLegacyPlugin.id,
 			loadMessagesFn: chosenLegacyPlugin.loadMessages,
@@ -154,11 +158,13 @@ async function loadLegacyMessages(args: {
 	project: Awaited<ReturnType<typeof loadProjectInMemory>>;
 	pluginKey: NonNullable<InlangPlugin["key"] | InlangPlugin["id"]>;
 	loadMessagesFn: Required<InlangPlugin>["loadMessages"];
+	projectPath: string;
 	fs: typeof fs;
 }) {
 	const loadedLegacyMessages = await args.loadMessagesFn({
 		settings: await args.project.settings.get(),
-		nodeishFs: args.fs,
+		// @ts-ignore
+		nodeishFs: withAbsolutePaths(args.fs, args.projectPath),
 	});
 	const insertQueries = [];
 
@@ -283,13 +289,7 @@ async function importLocalPlugins(args: {
 		await args.fs.readFile(settingsPath, "utf8")
 	) as ProjectSettings;
 	for (const module of settings.modules ?? []) {
-		// need to remove the project path from the module path for legacy reasons
-		// "/project.inlang/local-plugins/mock-plugin.js" -> "/local-plugins/mock-plugin.js"
-		const pathWithoutProject = args.path
-			.split(nodePath.sep)
-			.slice(0, -1)
-			.join(nodePath.sep);
-		const modulePath = nodePath.join(pathWithoutProject, module);
+		const modulePath = absolutePathFromProject(args.path, module);
 		try {
 			let moduleAsText = await args.fs.readFile(modulePath, "utf8");
 			if (moduleAsText.includes("messageLintRule")) {
@@ -344,4 +344,60 @@ export class WarningDeprecatedLintRule extends Error {
 		);
 		this.name = "WarningDeprecatedLintRule";
 	}
+}
+
+/**
+ * Resolving absolute paths for fs functions.
+ *
+ * This mapping is required for backwards compatibility.
+ * Relative paths in the project.inlang/settings.json
+ * file are resolved to absolute paths with `*.inlang`
+ * being pruned.
+ *
+ * @example
+ *   "/website/project.inlang"
+ *   "./local-plugins/mock-plugin.js"
+ *   -> "/website/local-plugins/mock-plugin.js"
+ *
+ */
+function withAbsolutePaths(
+	fs: NodeFsPromisesSubsetLegacy,
+	projectPath: string
+): NodeFsPromisesSubsetLegacy {
+	return {
+		// @ts-expect-error
+		readFile: (path, options) => {
+			return fs.readFile(absolutePathFromProject(projectPath, path), options);
+		},
+		writeFile: (path, data) => {
+			return fs.writeFile(absolutePathFromProject(projectPath, path), data);
+		},
+		mkdir: (path) => {
+			return fs.mkdir(absolutePathFromProject(projectPath, path));
+		},
+		readdir: (path) => {
+			return fs.readdir(absolutePathFromProject(projectPath, path));
+		},
+	};
+}
+
+/**
+ * Joins a path from a project path.
+ *
+ * @example
+ *   joinPathFromProject("/project.inlang", "./local-plugins/mock-plugin.js") -> "/local-plugins/mock-plugin.js"
+ *
+ *   joinPathFromProject("/website/project.inlang", "./mock-plugin.js") -> "/website/mock-plugin.js"
+ */
+function absolutePathFromProject(projectPath: string, path: string) {
+	// need to remove the project path from the module path for legacy reasons
+	// "/project.inlang/local-plugins/mock-plugin.js" -> "/local-plugins/mock-plugin.js"
+	const pathWithoutProject = projectPath
+		.split(nodePath.sep)
+		.slice(0, -1)
+		.join(nodePath.sep);
+
+	const resolvedPath = nodePath.resolve(pathWithoutProject, path);
+
+	return resolvedPath;
 }
