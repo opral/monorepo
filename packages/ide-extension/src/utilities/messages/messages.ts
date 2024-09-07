@@ -12,6 +12,7 @@ import {
 	type BundleNested,
 	type IdeExtensionConfig,
 	type InlangProject,
+	pollQuery,
 } from "@inlang/sdk2"
 
 export function createMessageWebviewProvider(args: {
@@ -37,6 +38,13 @@ export function createMessageWebviewProvider(args: {
 		if (subscribedToProjectPath !== state().selectedProjectPath) {
 			subscribedToProjectPath = state().selectedProjectPath
 			// TODO: Uncomment when bundle subscribe is implemented
+			// TODO unsubscribe 
+			pollQuery(() => selectBundleNested(project.db).execute()).subscribe((newBundles) => {
+				bundles = newBundles
+				isLoading = false
+				updateWebviewContent()
+				// throttledUpdateWebviewContent()
+			})
 			// project.query.messages.getAll.subscribe((fetchedMessages: BundleNested[]) => {
 			// 	bundles = fetchedMessages ? [...fetchedMessages] : []
 			// 	isLoading = false
