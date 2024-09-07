@@ -38,17 +38,17 @@ export type InlangPlugin<
 	toBeImportedFiles?: (args: {
 		settings: ProjectSettings & ExternalSettings;
 		nodeFs: NodeFsPromisesSubset;
-	}) => Promise<Array<ResourceFile>> | Array<ResourceFile>;
+	}) => MaybePromise<Array<ResourceFile>>;
 	importFiles?: (args: {
 		files: Array<ResourceFile>;
 		settings: ProjectSettings & ExternalSettings; // we expose the settings in case the importFunction needs to access the plugin config
-	}) => {
+	}) => MaybePromise<{
 		bundles: NewBundleNested[];
-	};
+	}>;
 	exportFiles?: (args: {
 		bundles: BundleNested[];
 		settings: ProjectSettings & ExternalSettings;
-	}) => Array<ResourceFile>;
+	}) => MaybePromise<Array<ResourceFile>>;
 	/**
 	 * @deprecated Use the `meta` field instead.
 	 */
@@ -89,3 +89,5 @@ type NodeFsPromisesSubset = {
 	readFile: (path: string) => Promise<Buffer>;
 	readdir: (path: string) => Promise<string[]>;
 };
+
+type MaybePromise<T> = T | Promise<T>;
