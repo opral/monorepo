@@ -11,10 +11,10 @@
 	],
 	"plugin.inlang.i18next": {
 		"pathPattern": {
-			"client-page": "./../../app/i18n/locales/{languageTag}/client-page.json",
-			"footer": "./../../app/i18n/locales/{languageTag}/footer.json",
-			"second-page": "./../../app/i18n/locales/{languageTag}/second-page.json",
-			"translation": "./../../app/i18n/locales/{languageTag}/translation.json"
+			"client-page": "./../app/i18n/locales/{languageTag}/client-page.json",
+			"footer": "./../app/i18n/locales/{languageTag}/footer.json",
+			"second-page": "./../app/i18n/locales/{languageTag}/second-page.json",
+			"translation": "./../app/i18n/locales/{languageTag}/translation.json"
 		}
 	},
 	"experimental": {
