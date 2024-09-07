@@ -275,19 +275,17 @@ test("plugin calls that use fs should be intercepted to use an absolute path", a
 	process.cwd = () => "/";
 
 	const mockRepo = {
-		"/inlang/development-projects/inlang-nextjs/app/i18n/locales/en.json":
-			JSON.stringify({
-				key1: "value1",
-				key2: "value2",
-			}),
-		"/inlang/development-projects/inlang-nextjs/other-folder/backend.inlang/settings.json":
-			JSON.stringify({
-				baseLocale: "en",
-				locales: ["en", "de"],
-				"plugin.mock-plugin": {
-					pathPattern: "./../../app/i18n/locales/{locale}.json",
-				},
-			} satisfies ProjectSettings),
+		"/messages/en.json": JSON.stringify({
+			key1: "value1",
+			key2: "value2",
+		}),
+		"/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en", "de"],
+			"plugin.mock-plugin": {
+				pathPattern: "./messages/{locale}.json",
+			},
+		} satisfies ProjectSettings),
 	};
 
 	const mockPlugin: InlangPlugin = {
@@ -348,12 +346,12 @@ test("plugin calls that use fs should be intercepted to use an absolute path", a
 
 	const project = await loadProjectFromDirectoryInMemory({
 		fs: fs as any,
-		path: "/inlang/development-projects/inlang-nextjs/other-folder/backend.inlang",
+		path: "/project.inlang",
 		providePlugins: [mockPlugin],
 	});
 
 	expect(loadMessagesSpy).toHaveBeenCalled();
-	expect(fsReadFileSpy).toHaveBeenCalledWith("/messages/en.json");
+	expect(fsReadFileSpy).toHaveBeenCalledWith("/messages/en.json", undefined);
 
 	// todo test that saveMessages works too.
 	// await project.db.insertInto("bundle").defaultValues().execute();
