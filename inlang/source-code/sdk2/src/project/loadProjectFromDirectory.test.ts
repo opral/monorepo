@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { ProjectSettings } from "../json-schema/settings.js";
 import { Volume } from "memfs";
 import {
@@ -267,4 +268,116 @@ test("it should provide plugins from disk for backwards compatibility but warn t
 	// it should not remove the module from the settings
 	// else roundtrips would not work
 	expect(settings.modules?.[0]).toBe("../local-plugins/mock-plugin.js");
+});
+
+// https://github.com/opral/inlang-sdk/issues/174
+test("plugin calls that use fs should be intercepted to use an absolute path", async () => {
+	process.cwd = () => "/";
+
+	const mockRepo = {
+		"/inlang/development-projects/inlang-nextjs/app/i18n/locales/en.json":
+			JSON.stringify({
+				key1: "value1",
+				key2: "value2",
+			}),
+		"/inlang/development-projects/inlang-nextjs/other-folder/backend.inlang/settings.json":
+			JSON.stringify({
+				baseLocale: "en",
+				locales: ["en", "de"],
+				"plugin.mock-plugin": {
+					pathPattern: "./../../app/i18n/locales/{locale}.json",
+				},
+			} satisfies ProjectSettings),
+	};
+
+	const mockPlugin: InlangPlugin = {
+		key: "mock-plugin",
+		loadMessages: async ({ nodeishFs, settings }) => {
+			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern.replace(
+				"{locale}",
+				"en"
+			) as string;
+			const file = await nodeishFs.readFile(pathPattern);
+			// reading the file should be possible without an error
+			expect(file.toString()).toBe(
+				JSON.stringify({
+					key1: "value1",
+					key2: "value2",
+				})
+			);
+			return [];
+		},
+		saveMessages: async ({ nodeishFs, settings }) => {
+			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern.replace(
+				"{locale}",
+				"en"
+			) as string;
+			const file = new TextEncoder().encode(
+				JSON.stringify({
+					key1: "value1",
+					key2: "value2",
+					key3: "value3",
+				})
+			);
+			await nodeishFs.writeFile(pathPattern, file);
+		},
+		toBeImportedFiles: async ({ settings, nodeFs }) => {
+			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern.replace(
+				"{locale}",
+				"en"
+			) as string;
+			const file = await nodeFs.readFile(pathPattern);
+			// reading the file should be possible without an error
+			expect(file.toString()).toBe(
+				JSON.stringify({
+					key1: "value1",
+					key2: "value2",
+				})
+			);
+			return [];
+		},
+	};
+
+	const fs = Volume.fromJSON(mockRepo).promises;
+
+	const loadMessagesSpy = vi.spyOn(mockPlugin, "loadMessages");
+	const saveMessagesSpy = vi.spyOn(mockPlugin, "saveMessages");
+	const toBeImportedFilesSpy = vi.spyOn(mockPlugin, "toBeImportedFiles");
+	const fsReadFileSpy = vi.spyOn(fs, "readFile");
+	const fsWriteFileSpy = vi.spyOn(fs, "writeFile");
+
+	const project = await loadProjectFromDirectoryInMemory({
+		fs: fs as any,
+		path: "/inlang/development-projects/inlang-nextjs/other-folder/backend.inlang",
+		providePlugins: [mockPlugin],
+	});
+
+	expect(loadMessagesSpy).toHaveBeenCalled();
+	expect(fsReadFileSpy).toHaveBeenCalledWith("/messages/en.json");
+
+	// todo test that saveMessages works too.
+	// await project.db.insertInto("bundle").defaultValues().execute();
+
+	// const translationFile = await fs.readFile("/messages/en.json", "utf-8");
+
+	// expect(translationFile).toBe(
+	// 	JSON.stringify({
+	// 		key1: "value1",
+	// 		key2: "value2",
+	// 		key3: "value3",
+	// 	})
+	// );
+
+	// expect(fsWriteFileSpy).toHaveBeenCalledWith(
+	// 	"/messages/en.json",
+	// 	JSON.stringify({
+	// 		key1: "value1",
+	// 		key2: "value2",
+	// 		key3: "value3",
+	// 	}),
+	// 	"utf-8"
+	// );
+
+	// expect(saveMessagesSpy).toHaveBeenCalled();
+	// expect(toBeImportedFilesSpy).toHaveBeenCalled();
 });
