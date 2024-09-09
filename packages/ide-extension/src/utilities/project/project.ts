@@ -96,19 +96,11 @@ export async function handleTreeSelection(args: {
 	const newSelectedProject = projectViewNodes.find((node) => node.isSelected)?.path as string
 
 	try {
-		console.log("args", {
-			newSelectedProject,
-			hello: args.fs,
-			transpileToCjs,
-		})
-
 		const inlangProject = await loadProjectFromDirectoryInMemory({
 			path: newSelectedProject,
 			fs,
 			preprocessPluginBeforeImport: transpileToCjs,
 		})
-
-		console.log("Loaded project", inlangProject)
 
 		setState({
 			...state(),
@@ -137,9 +129,8 @@ export async function handleTreeSelection(args: {
 			},
 		})
 	} catch (error) {
-		console.log(error)
-
 		vscode.window.showErrorMessage(`Failed to load project "${selectedProject}": ${error}`)
+		console.error(error)
 	}
 }
 
