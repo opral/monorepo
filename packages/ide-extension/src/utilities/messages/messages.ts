@@ -40,8 +40,6 @@ export function createMessageWebviewProvider(args: {
 			// TODO: Uncomment when bundle subscribe is implemented
 			// TODO unsubscribe
 			pollQuery(() => selectBundleNested(project.db).execute()).subscribe((newBundles) => {
-				console.log("newBundles", newBundles)
-
 				bundles = newBundles
 				isLoading = false
 				updateWebviewContent()
