@@ -1,9 +1,9 @@
-import { CamelCasePlugin, Kysely, ParseJSONResultsPlugin } from "kysely";
+import { CamelCasePlugin, Kysely } from "kysely";
 import { applySchema, type InlangDatabaseSchema } from "./schema.js";
 import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { v4 } from "uuid";
 import { humanId } from "../human-id/human-id.js";
-import { SerializeJsonPlugin } from "./serializeJsonPlugin.js";
+import { JsonbPlugin } from "./jsonbPlugin.js";
 
 export function initDb(args: { sqlite: SqliteDatabase }) {
 	initDefaultValueFunctions({ sqlite: args.sqlite });
@@ -13,9 +13,8 @@ export function initDb(args: { sqlite: SqliteDatabase }) {
 			database: args.sqlite,
 		}),
 		plugins: [
-			new ParseJSONResultsPlugin(),
 			new CamelCasePlugin(),
-			new SerializeJsonPlugin(),
+			new JsonbPlugin({ database: args.sqlite }),
 		],
 	});
 	return db;

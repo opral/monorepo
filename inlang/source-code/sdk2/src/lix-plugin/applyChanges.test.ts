@@ -134,10 +134,9 @@ test("it should be able to upsert (insert & update)", async () => {
 		.insertInto("bundle")
 		.values({
 			id: "mock",
-			// @ts-expect-error - todo auto serialize values
-			alias: JSON.stringify({
+			alias: {
 				foo: "mock-alias",
-			}),
+			},
 		})
 		.execute();
 
