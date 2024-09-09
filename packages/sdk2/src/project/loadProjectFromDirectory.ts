@@ -360,7 +360,7 @@ export class WarningDeprecatedLintRule extends Error {
  *   -> "/website/local-plugins/mock-plugin.js"
  *
  */
-function withAbsolutePaths(
+export function withAbsolutePaths(
 	fs: NodeFsPromisesSubsetLegacy,
 	projectPath: string
 ): NodeFsPromisesSubsetLegacy {
@@ -389,7 +389,7 @@ function withAbsolutePaths(
  *
  *   joinPathFromProject("/website/project.inlang", "./mock-plugin.js") -> "/website/mock-plugin.js"
  */
-function absolutePathFromProject(projectPath: string, path: string) {
+export function absolutePathFromProject(projectPath: string, path: string) {
 	// need to remove the project path from the module path for legacy reasons
 	// "/project.inlang/local-plugins/mock-plugin.js" -> "/local-plugins/mock-plugin.js"
 	const pathWithoutProject = projectPath
