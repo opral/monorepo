@@ -80,7 +80,7 @@ test("variant default values", async () => {
 	expect(variant.pattern).toStrictEqual([]);
 });
 
-test("it should handle json serialization", async () => {
+test("it should handle json serialization and parsing for bundles", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
@@ -96,3 +96,4 @@ test("it should handle json serialization", async () => {
 
 	expect(bundle.alias).toEqual({ mock: "mock" });
 });
+
