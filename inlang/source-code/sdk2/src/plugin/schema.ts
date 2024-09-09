@@ -48,7 +48,7 @@ export type InlangPlugin<
 	exportFiles?: (args: {
 		bundles: BundleNested[];
 		settings: ProjectSettings & ExternalSettings;
-	}) => MaybePromise<Array<ResourceFile>>;
+	}) => MaybePromise<Array<Omit<ResourceFile, "pluginKey">>>;
 	/**
 	 * @deprecated Use the `meta` field instead.
 	 */
