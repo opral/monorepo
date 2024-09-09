@@ -32,7 +32,7 @@ export function fromMessageV1(
 
 		//find all selector names
 		const selectorNames = new Set<string>();
-		for (const v1Selector of messageV1.selectors) {
+		for (const v1Selector of messageV1.selectors ?? []) {
 			selectorNames.add(v1Selector.name);
 		}
 		const selectors: Expression[] = [...selectorNames].map((name) => ({
