@@ -26,6 +26,7 @@ type ChangeQueueTable = {
 	id: Generated<number>;
 	path: string;
 	file_id: LixFileTable["id"];
+	metadata: Record<string, any> | null;
 	data: ArrayBuffer;
 };
 
@@ -37,6 +38,7 @@ type LixFileTable = {
 	id: Generated<string>;
 	path: string;
 	data: ArrayBuffer;
+	metadata: Record<string, any> | null;
 };
 
 export type Commit = Selectable<CommitTable>;

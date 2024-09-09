@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 import { newLixFile } from "../newLix.js";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { mockCsvPlugin } from "./mock-csv-plugin.js";
@@ -21,7 +22,7 @@ describe("applyChanges()", () => {
 		];
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const { fileData } = await mockCsvPlugin.applyChanges!({
-			file: { id: "mock", path: "x.csv", data: old },
+			file: { id: "mock", path: "x.csv", data: old, metadata: null },
 			changes: changes as any,
 			lix: {} as any,
 		});
@@ -40,7 +41,7 @@ describe("applyChanges()", () => {
 		];
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const { fileData } = await mockCsvPlugin.applyChanges!({
-			file: { id: "mock", path: "x.csv", data: old },
+			file: { id: "mock", path: "x.csv", data: old, metadata: null },
 			changes: changes as any,
 			lix: {} as any,
 		});
@@ -77,7 +78,7 @@ describe("applyChanges()", () => {
 		];
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const { fileData } = await mockCsvPlugin.applyChanges!({
-			file: { id: "mock", path: "x.csv", data: old },
+			file: { id: "mock", path: "x.csv", data: old, metadata: null },
 			changes: changes as any,
 			lix,
 		});
@@ -90,8 +91,8 @@ describe("diff.file()", () => {
 		const old = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 		const neu = old;
 		const diffs = await mockCsvPlugin.diff.file?.({
-			old: { id: "random", path: "x.csv", data: old },
-			neu: { id: "random", path: "x.csv", data: neu },
+			old: { id: "random", path: "x.csv", data: old, metadata: null },
+			neu: { id: "random", path: "x.csv", data: neu, metadata: null },
 		});
 		expect(diffs).toEqual([]);
 	});
@@ -102,8 +103,8 @@ describe("diff.file()", () => {
 			"Name,Age\nAnna,20\nPeter,50\nJohn,30",
 		);
 		const diffs = await mockCsvPlugin.diff.file?.({
-			old: { id: "random", path: "x.csv", data: old },
-			neu: { id: "random", path: "x.csv", data: neu },
+			old: { id: "random", path: "x.csv", data: old, metadata: null },
+			neu: { id: "random", path: "x.csv", data: neu, metadata: null },
 		});
 		expect(diffs).toEqual([
 			{
@@ -125,8 +126,8 @@ describe("diff.file()", () => {
 		const old = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 		const neu = new TextEncoder().encode("Name,Age\nAnna,21\nPeter,50");
 		const diffs = await mockCsvPlugin.diff.file?.({
-			old: { id: "random", path: "x.csv", data: old },
-			neu: { id: "random", path: "x.csv", data: neu },
+			old: { id: "random", path: "x.csv", data: old, metadata: null },
+			neu: { id: "random", path: "x.csv", data: neu, metadata: null },
 		});
 		expect(diffs).toEqual([
 			{
@@ -142,8 +143,8 @@ describe("diff.file()", () => {
 		const old = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 		const neu = new TextEncoder().encode("Name,Age\nAnna,20");
 		const diffs = await mockCsvPlugin.diff.file?.({
-			old: { id: "random", path: "x.csv", data: old },
-			neu: { id: "random", path: "x.csv", data: neu },
+			old: { id: "random", path: "x.csv", data: old, metadata: null },
+			neu: { id: "random", path: "x.csv", data: neu, metadata: null },
 		});
 		expect(diffs).toEqual([
 			{
