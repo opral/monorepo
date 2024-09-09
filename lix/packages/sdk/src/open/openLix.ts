@@ -77,8 +77,7 @@ export async function openLix(args: {
 			if (entry) {
 				const existingFile = await db
 					.selectFrom("file_internal")
-					.select("data")
-					.select("path")
+					.selectAll()
 					.where("id", "=", entry.file_id)
 					.limit(1)
 					.executeTakeFirst();
@@ -88,14 +87,12 @@ export async function openLix(args: {
 						currentAuthor,
 						queueEntry: entry,
 						old: {
+							...existingFile,
 							id: entry.file_id,
-							path: existingFile?.path,
-							data: existingFile?.data,
 						},
 						neu: {
+							...entry,
 							id: entry.file_id,
-							path: entry.path,
-							data: entry.data,
 						},
 						plugins,
 						db,
@@ -105,9 +102,8 @@ export async function openLix(args: {
 						currentAuthor,
 						queueEntry: entry,
 						neu: {
+							...entry,
 							id: entry.file_id,
-							path: entry.path,
-							data: entry.data,
 						},
 						plugins,
 						db,
