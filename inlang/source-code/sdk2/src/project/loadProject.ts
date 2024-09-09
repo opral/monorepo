@@ -117,12 +117,14 @@ export async function loadProject(args: {
 			});
 		},
 		exportFiles: async ({ pluginKey }) => {
-			return await exportFiles({
+			return (
+				await exportFiles({
 				pluginKey,
 				db,
 				settings: await state.settings.get(),
 				plugins: await state.plugins.get(),
-			});
+				})
+			).map((output) => ({ ...output, pluginKey }));
 		},
 		close: async () => {
 			args.sqlite.close();
