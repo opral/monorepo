@@ -46,7 +46,7 @@ class ParseJsonTransformer extends OperationNodeTransformer {
 				// @ts-ignore
 				const { value } = listNodeItem;
 
-				const serializedValue = maybeSerializeJson(value);
+				const serializedValue = serializeJson(value);
 
 				if (value === serializedValue) {
 					return listNodeItem;
@@ -57,23 +57,6 @@ class ParseJsonTransformer extends OperationNodeTransformer {
 				return sql`json(${serializedValue})`.toOperationNode();
 			}),
 		});
-	}
-
-	/**
-	 * Directly transform the value to a json value.
-	 *
-	 * Input: { value: { a: 1 } }
-	 * Output: { value: "{ a: 1 }"" }
-	 */
-	protected override transformValue(node: ValueNode): ValueNode {
-		const { value } = node;
-
-		const serializedValue = maybeSerializeJson(value);
-
-		if (value === serializedValue) {
-			return node;
-		}
-		return { ...node, value: serializedValue };
 	}
 
 	override transformValues(node: ValuesNode): ValuesNode {
@@ -99,7 +82,7 @@ class ParseJsonTransformer extends OperationNodeTransformer {
 	}
 }
 
-function maybeSerializeJson(value: any): any {
+function serializeJson(value: any): any {
 	if (
 		// binary data
 		value instanceof ArrayBuffer ||
