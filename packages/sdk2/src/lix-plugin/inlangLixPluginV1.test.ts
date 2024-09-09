@@ -24,6 +24,7 @@ describe("plugin.diff.file", () => {
 				id: "uuid",
 				path,
 				data: contentFromDatabase(neuProject._sqlite),
+				metadata: {},
 			},
 		});
 		expect(diffReports).toEqual([
@@ -73,11 +74,13 @@ describe("plugin.diff.file", () => {
 				id: "uuid",
 				path: "/db.sqlite",
 				data: contentFromDatabase(oldProject._sqlite),
+				metadata: {},
 			},
 			neu: {
 				id: "uuid",
 				path: "/db.sqlite",
 				data: contentFromDatabase(neuProject._sqlite),
+				metadata: {},
 			},
 		});
 
@@ -110,6 +113,7 @@ describe("plugin.diff.file", () => {
 				id: "uuid",
 				path: "/db.sqlite",
 				data: contentFromDatabase(neuProject._sqlite),
+				metadata: {},
 			},
 		});
 		expect(diffReports).toEqual([
@@ -165,11 +169,13 @@ describe("plugin.diff.file", () => {
 				id: "uuid",
 				path: "/db.sqlite",
 				data: contentFromDatabase(oldProject._sqlite),
+				metadata: {},
 			},
 			neu: {
 				id: "uuid",
 				path: "/db.sqlite",
 				data: contentFromDatabase(neuProject._sqlite),
+				metadata: {},
 			},
 		});
 		expect(diffReports).toEqual([
@@ -213,6 +219,7 @@ describe("plugin.diff.file", () => {
 				id: "uuid",
 				path: "/db.sqlite",
 				data: contentFromDatabase(neuProject._sqlite),
+				metadata: {},
 			},
 		});
 		expect(diffReports).toEqual([
@@ -271,11 +278,13 @@ describe("plugin.diff.file", () => {
 				id: "uuid",
 				path: "/db.sqlite",
 				data: contentFromDatabase(oldProject._sqlite),
+				metadata: {},
 			},
 			neu: {
 				id: "uuid",
 				path: "/db.sqlite",
 				data: contentFromDatabase(neuProject._sqlite),
+				metadata: {},
 			},
 		});
 		expect(diffReports).toEqual([
