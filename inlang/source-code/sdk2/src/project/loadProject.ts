@@ -69,27 +69,17 @@ export async function loadProject(args: {
 		settings,
 	});
 
-	/**
-	 * Pending promises are used for the `project.settled()` api.
-	 */
 	// TODO implement garbage collection/a proper queue.
 	//      for the protoype and tests, it seems good enough
 	//      without garbage collection of old promises.
-	const pendingPromises: Promise<unknown>[] = [];
+	const pendingSaveToLixPromises: Promise<unknown>[] = [];
 
 	await initHandleSaveToLixOnChange({
 		sqlite: args.sqlite,
 		db,
 		lix: args.lix,
-		pendingPromises,
+		pendingPromises: pendingSaveToLixPromises,
 	});
-
-	// todo not garbage collected
-	// todo2 settled is not needed if lix has an attach mode for sqlite
-	const settled = async () => {
-		await Promise.all(pendingPromises);
-		await args.lix.settled();
-	};
 
 	// not awaiting to not block the load time of a project
 	maybeCaptureLoadedProject({
@@ -106,7 +96,6 @@ export async function loadProject(args: {
 		settings: state.settings,
 		plugins: state.plugins,
 		errors: state.errors,
-		settled,
 		importFiles: async ({ files, pluginKey }) => {
 			return await importFiles({
 				files,
@@ -119,10 +108,10 @@ export async function loadProject(args: {
 		exportFiles: async ({ pluginKey }) => {
 			return (
 				await exportFiles({
-				pluginKey,
-				db,
-				settings: await state.settings.get(),
-				plugins: await state.plugins.get(),
+					pluginKey,
+					db,
+					settings: await state.settings.get(),
+					plugins: await state.plugins.get(),
 				})
 			).map((output) => ({ ...output, pluginKey }));
 		},
@@ -133,7 +122,7 @@ export async function loadProject(args: {
 		},
 		_sqlite: args.sqlite,
 		toBlob: async () => {
-			await settled();
+			await Promise.all(pendingSaveToLixPromises);
 			return await args.lix.toBlob();
 		},
 		lix: args.lix,

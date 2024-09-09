@@ -32,8 +32,6 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 		})
 		.execute();
 
-	await project1.settled();
-
 	const file1AfterUpdates = await project1.toBlob();
 	await project1.close();
 
