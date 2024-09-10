@@ -11,23 +11,23 @@ export function applySchema(args: { sqlite: SqliteDatabase }) {
 	args.sqlite.exec(`
 CREATE TABLE IF NOT EXISTS bundle (
   id TEXT PRIMARY KEY DEFAULT (human_id()),
-  alias TEXT NOT NULL DEFAULT '{}'
+  alias BLOB NOT NULL DEFAULT (jsonb('{}'))
 ) strict;
 
 CREATE TABLE IF NOT EXISTS message (
   id TEXT PRIMARY KEY DEFAULT (uuid_v4()), 
   bundle_id TEXT NOT NULL,
   locale TEXT NOT NULL,
-  declarations TEXT NOT NULL DEFAULT '[]',
-  selectors TEXT NOT NULL DEFAULT '[]',
+  declarations BLOB NOT NULL DEFAULT (jsonb('[]')),
+  selectors BLOB NOT NULL DEFAULT (jsonb('[]')),
   FOREIGN KEY (bundle_id) REFERENCES bundle(id) ON DELETE CASCADE
 ) strict;
 
 CREATE TABLE IF NOT EXISTS variant (
   id TEXT PRIMARY KEY DEFAULT (uuid_v4()), 
   message_id TEXT NOT NULL,
-  match TEXT NOT NULL DEFAULT '{}',
-  pattern TEXT NOT NULL DEFAULT '[]',
+  match BLOB NOT NULL DEFAULT (jsonb('{}')),
+  pattern BLOB NOT NULL DEFAULT (jsonb('[]')),
   FOREIGN KEY (message_id) REFERENCES message(id) ON DELETE CASCADE
 ) strict;
   
