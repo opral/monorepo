@@ -1,7 +1,6 @@
 import * as vscode from "vscode"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
-import * as Ninja from "@inlang/recommend-ninja"
 import { CONFIGURATION } from "../../configuration.js"
 import type { FileSystem } from "../fs/createFileSystemMapper.js"
 
@@ -33,16 +32,6 @@ export function createRecommendationView(args: {
 							CONFIGURATION.EVENTS.ON_DID_RECOMMENDATION_VIEW_CHANGE.fire()
 						}
 						break
-					case "addNinjaGithubAction":
-						Ninja.add({ fs: args.fs })
-
-						telemetry.capture({
-							event: "IDE-EXTENSION recommendation: add Ninja Github Action workflow to repository",
-							properties: { outcome: "Accepted" },
-						})
-
-						CONFIGURATION.EVENTS.ON_DID_RECOMMENDATION_VIEW_CHANGE.fire()
-						break
 				}
 			})
 
@@ -72,7 +61,6 @@ export async function getRecommendationViewHtml(args: {
 	context: vscode.ExtensionContext
 	fs: FileSystem
 }): Promise<string> {
-	const shouldRecommendNinja = await Ninja.shouldRecommend({ fs: args.fs })
 	const shouldRecommendSherlock = await Sherlock.shouldRecommend({
 		fs: args.fs,
 		workingDirectory: args.workspaceFolder.uri.fsPath,
@@ -81,7 +69,6 @@ export async function getRecommendationViewHtml(args: {
 		fs: args.fs,
 		workingDirectory: args.workspaceFolder.uri.fsPath,
 	})
-	const isAdoptedNinja = await Ninja.isAdopted({ fs: args.fs })
 
 	const codiconsUri = args.webview.asWebviewUri(
 		vscode.Uri.joinPath(args.context.extensionUri, "assets", "codicon.css")
@@ -185,7 +172,7 @@ export async function getRecommendationViewHtml(args: {
 			
 			<div class="container">
 			${
-				shouldRecommendSherlock || shouldRecommendNinja || isAdoptedSherlock || isAdoptedNinja
+				shouldRecommendSherlock || isAdoptedSherlock
 					? `<span>To improve your i18n workflow:</span>
 					${
 						shouldRecommendSherlock
@@ -193,14 +180,7 @@ export async function getRecommendationViewHtml(args: {
 							: isAdoptedSherlock
 								? `<div class="item"><span class="codicon codicon-pass-filled"></span><span>Sherlock is recommended in this VS Code workspace.</span></div>`
 								: ``
-					}
-				${
-					shouldRecommendNinja
-						? `<div class="item active" id="addNinjaGithubAction"><span class="codicon codicon-add"></span><span>Add Ninja Github Action workflow to this repository</span></div>`
-						: isAdoptedNinja
-							? `<div class="item"><span class="codicon codicon-pass-filled"></span><span>Ninja Github Action workflow is installed.</span></div>`
-							: ``
-				}`
+					}`
 					: `No recommendations available.`
 			}
 
@@ -216,14 +196,6 @@ export async function getRecommendationViewHtml(args: {
                     });
                 });`
 								}
-				${
-					shouldRecommendNinja &&
-					`document.getElementById('addNinjaGithubAction').addEventListener('click', () => {
-					vscode.postMessage({
-						command: 'addNinjaGithubAction'
-					});
-				});`
-				}
 			</script>
 		</body>
 		</html>`
