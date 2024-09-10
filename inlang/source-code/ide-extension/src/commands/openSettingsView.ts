@@ -1,5 +1,5 @@
 import { commands } from "vscode"
-import { telemetry } from "../services/telemetry/implementation.js"
+import { telemetry } from "../services/telemetry/index.js"
 import { settingsPanel } from "../utilities/settings/settingsView.js"
 import type { ProjectViewNode } from "../utilities/project/project.js"
 

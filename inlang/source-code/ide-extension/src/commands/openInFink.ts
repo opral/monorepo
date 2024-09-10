@@ -1,5 +1,4 @@
 import { Uri, commands, env } from "vscode"
-import { telemetry } from "../services/telemetry/implementation.js"
 import type { Bundle } from "@inlang/sdk2"
 // import { CONFIGURATION } from "../configuration.js"
 
@@ -13,9 +12,9 @@ export const openInFinkCommand = {
 		const uri = "not implemented"
 		env.openExternal(Uri.parse(uri))
 
-		telemetry.capture({
-			event: "IDE-EXTENSION Editor opened via tooltip",
-		})
+		// capture({
+		// 	event: "IDE-EXTENSION Editor opened via tooltip",
+		// })
 		return undefined
 	},
 }

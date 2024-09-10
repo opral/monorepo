@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { telemetry } from "../../services/telemetry/implementation.js"
+import { telemetry } from "../../services/telemetry/index.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
 import { CONFIGURATION } from "../../configuration.js"
 import type { FileSystem } from "../fs/createFileSystemMapper.js"
