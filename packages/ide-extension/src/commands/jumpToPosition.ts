@@ -1,5 +1,5 @@
 import { commands, Position, Range, TextEditorRevealType, window } from "vscode"
-import { telemetry } from "../services/telemetry/implementation.js"
+import { telemetry } from "../services/telemetry/index.js"
 import * as vscode from "vscode"
 import type { Bundle } from "@inlang/sdk2"
 
