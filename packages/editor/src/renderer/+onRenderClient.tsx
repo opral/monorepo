@@ -8,7 +8,6 @@ import type { PageContextRenderer } from "./types.js"
 import * as Sentry from "@sentry/browser"
 import { MetaProvider } from "@solidjs/meta"
 import { posthog } from "posthog-js"
-import { publicEnv } from "@inlang/env-variables"
 
 posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "", {
 	api_host: import.meta.env.PROD ? "https://tm.inlang.com" : "http://localhost:4005",
@@ -47,6 +46,7 @@ import "@shoelace-style/shoelace/dist/components/option/option.js"
 // import inlang components
 import "@inlang/settings-component"
 import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js"
+import { publicEnv } from "#src/services/env-variables/index.js"
 setBasePath("./../../node_modules/@shoelace-style/shoelace/dist")
 
 // enable error logging via sentry in production

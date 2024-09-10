@@ -71,7 +71,6 @@
 		"@inlang/recommend-ninja": "workspace:*",
 		"@inlang/design-system": "workspace:*",
 		"@inlang/detect-json-formatting": "workspace:*",
-		"@inlang/env-variables": "workspace:*",
 		"@inlang/markdown": "workspace:*",
 		"@inlang/marketplace-manifest": "workspace:*",
 		"@inlang/marketplace-registry": "workspace:*",
