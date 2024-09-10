@@ -1,15 +1,13 @@
 import { createContext, type JSXElement, onCleanup, onMount, useContext } from "solid-js"
 import { createStore, reconcile, type SetStoreFunction } from "solid-js/store"
 import { defaultLocalStorage, type LocalStorageSchema } from "./schema.js"
-import { telemetryBrowser } from "@inlang/telemetry"
 import { getAuthClient } from "@lix-js/client"
 import { onSignOut } from "#src/services/auth/index.js"
-import { publicEnv } from "@inlang/env-variables"
 
 const browserAuth = getAuthClient({
-	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
-	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
-	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+	gitHubProxyBaseUrl: import.meta.env.PUBLIC_GIT_PROXY_BASE_URL,
+	githubAppName: import.meta.env.PUBLIC_LIX_GITHUB_APP_NAME,
+	githubAppClientId: import.meta.env.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
 })
 
 const LocalStorageContext = createContext()
@@ -89,9 +87,6 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 					setStore(storage)
 				} else {
 					setStore("user", user)
-				}
-				if (user) {
-					telemetryBrowser.identify(user.username)
 				}
 			})
 			// set user to undefined if an error occurs
