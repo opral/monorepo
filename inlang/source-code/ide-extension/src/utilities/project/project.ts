@@ -1,6 +1,5 @@
 import * as vscode from "vscode"
 import { loadProjectFromDirectoryInMemory } from "@inlang/sdk2"
-import { normalizePath } from "@lix-js/fs"
 import { CONFIGURATION } from "../../configuration.js"
 import { telemetry } from "../../services/telemetry/index.js"
 import { setState, state } from "../state.js"
@@ -8,6 +7,7 @@ import * as Sherlock from "@inlang/recommend-sherlock"
 import { transpileToCjs } from "../import/transpileToCjs.js"
 import * as fs from "node:fs/promises"
 import type { FileSystem } from "../fs/createFileSystemMapper.js"
+import path from "node:path"
 
 let projectViewNodes: ProjectViewNode[] = []
 
@@ -46,7 +46,7 @@ export function createProjectViewNodes(args: {
 		const projectPath = typeof project.projectPath === "string" ? project.projectPath : ""
 		const projectName = projectPath.split("/").slice(-1).join("/").replace(".inlang", "")
 		const relativePath =
-			"." + normalizePath(projectPath.replace(args.workspaceFolder.uri.fsPath, "./"))
+			"./" + path.normalize(projectPath.replace(args.workspaceFolder.uri.fsPath, "./"))
 
 		return {
 			label: projectName,
@@ -87,7 +87,7 @@ export async function handleTreeSelection(args: {
 	fs: FileSystem
 	workspaceFolder: vscode.WorkspaceFolder
 }): Promise<void> {
-	const selectedProject = normalizePath(args.selectedNode.path)
+	const selectedProject = path.normalize(args.selectedNode.path)
 
 	projectViewNodes = projectViewNodes.map((node) => ({
 		...node,
@@ -119,7 +119,7 @@ export async function handleTreeSelection(args: {
 
 		const isInWorkspaceRecommendation = await Sherlock.shouldRecommend({
 			fs: args.fs,
-			workingDirectory: normalizePath(args.workspaceFolder.uri.fsPath),
+			workingDirectory: path.normalize(args.workspaceFolder.uri.fsPath),
 		})
 
 		telemetry.capture({
@@ -131,7 +131,6 @@ export async function handleTreeSelection(args: {
 		})
 	} catch (error) {
 		vscode.window.showErrorMessage(`Failed to load project "${selectedProject}": ${error}`)
-		console.error(error)
 	}
 }
 
