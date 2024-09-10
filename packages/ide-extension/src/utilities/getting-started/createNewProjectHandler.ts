@@ -1,7 +1,5 @@
 import * as vscode from "vscode"
-import { openRepository } from "@lix-js/client"
-import { createNewProject } from "@inlang/sdk"
-import { defaultProjectSettings } from "@inlang/sdk"
+import { loadProjectInMemory, newProject, saveProjectToDirectory } from "@inlang/sdk2"
 import { normalizePath } from "@lix-js/fs"
 import fs from "node:fs/promises"
 import { createFileSystemMapper } from "../fs/createFileSystemMapper.js"
@@ -16,26 +14,25 @@ export async function createNewProjectHandler(args: { workspaceFolderPath: strin
 		const workspaceFolderPath = args.workspaceFolderPath
 		const nodeishFs = createFileSystemMapper(normalizePath(workspaceFolderPath), fs)
 
-		// Prefix the workspace folder path with the file protocol file://
-		const workspaceFolderUri = `file://${workspaceFolderPath}`
+		// The path to the project directory
+		const projectPath = normalizePath(`${workspaceFolderPath}/project.inlang`)
 
-		// The path to the project file
-		const projectPath = normalizePath(`${workspaceFolderPath}/yourProjectName.inlang`)
+		// Create a new project in memory
+		const project = await loadProjectInMemory({
+			blob: await newProject(),
+		})
 
-		const repo = await openRepository(workspaceFolderUri, { nodeishFs })
+		// Save the project blob as a directory
+		await saveProjectToDirectory({
+			fs: nodeishFs,
+			project,
+			path: projectPath,
+		})
 
-		if (!repo) {
-			vscode.window.showErrorMessage(
-				"Failed to open repository. Please make sure you have a valid git repository. You can create a new git repository by running 'git init' in the workspace folder."
-			)
-		}
-
-		// Use the default project settings
-		const projectSettings = defaultProjectSettings
-
-		await createNewProject({ projectPath, repo, projectSettings })
+		// Reload the window after creating and saving the project
 		vscode.commands.executeCommand("workbench.action.reloadWindow")
 	} catch (error: any) {
 		vscode.window.showErrorMessage(`Failed to create new project: ${error.message}`)
+		console.log(error)
 	}
 }
