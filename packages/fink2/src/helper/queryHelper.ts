@@ -1,9 +1,8 @@
 import { Bundle, InlangDatabaseSchema, Message, Variant } from "@inlang/sdk2";
 import { Kysely } from "kysely";
-import { json } from "./toJSONRawBuilder.ts";
 
 /**
- * @deprecated json mapping happens automatically https://github.com/opral/monorepo/pull/3078 
+ * @deprecated json mapping happens automatically https://github.com/opral/monorepo/pull/3078
  *             use the query api directly.
  */
 const queryHelper = {
@@ -28,19 +27,17 @@ const queryHelper = {
         */
 		select: (db: Kysely<InlangDatabaseSchema>) => db.selectFrom("bundle"),
 		insert: (db: Kysely<InlangDatabaseSchema>, bundle: Bundle) => {
-			return db.insertInto("bundle").values({
-				id: bundle.id,
-				alias: json(bundle.alias), // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-			});
+			return db.insertInto("bundle").values(bundle);
 		},
 		update: (
 			db: Kysely<InlangDatabaseSchema>,
 			bundle: Partial<Bundle> & { id: string }
 		) => {
-			const bundleProperties = structuredClone(bundle as any); // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+			const bundleProperties = structuredClone(bundle);
+			// @ts-expect-error - ts doesn't expect id to be removed
 			delete bundleProperties.id;
 			if (bundle.alias) {
-				bundleProperties.alias = json(bundle.alias);
+				bundleProperties.alias = bundle.alias;
 			}
 			return db
 				.updateTable("bundle")
@@ -54,13 +51,7 @@ const queryHelper = {
 	message: {
 		select: (db: Kysely<InlangDatabaseSchema>) => db.selectFrom("message"),
 		insert: (db: Kysely<InlangDatabaseSchema>, message: Message) => {
-			return db.insertInto("message").values({
-				id: message.id,
-				bundleId: message.bundleId,
-				locale: message.locale,
-				declarations: json(message.declarations), // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-				selectors: json(message.selectors), // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-			});
+			return db.insertInto("message").values(message);
 		},
 		update: (
 			db: Kysely<InlangDatabaseSchema>,
@@ -68,13 +59,7 @@ const queryHelper = {
 		) => {
 			return db
 				.updateTable("message")
-				.set({
-					id: message.id,
-					bundleId: message.bundleId,
-					locale: message.locale,
-					declarations: json(message.declarations),
-					selectors: json(message.selectors),
-				})
+				.set(message)
 				.where("message.id", "=", message.id);
 		},
 		delete: (db: Kysely<InlangDatabaseSchema>, message: Message) => {
@@ -84,12 +69,7 @@ const queryHelper = {
 	variant: {
 		select: (db: Kysely<InlangDatabaseSchema>) => db.selectFrom("variant"),
 		insert: (db: Kysely<InlangDatabaseSchema>, variant: Variant) => {
-			return db.insertInto("variant").values({
-				id: variant.id,
-				messageId: variant.messageId,
-				match: json(variant.match),
-				pattern: json(variant.pattern),
-			});
+			return db.insertInto("variant").values(variant);
 		},
 		update: (
 			db: Kysely<InlangDatabaseSchema>,
@@ -97,12 +77,7 @@ const queryHelper = {
 		) => {
 			return db
 				.updateTable("variant")
-				.set({
-					id: variant.id,
-					messageId: variant.messageId,
-					match: json(variant.match),
-					pattern: json(variant.pattern),
-				})
+				.set(variant)
 				.where("variant.id", "=", variant.id);
 		},
 		delete: (db: Kysely<InlangDatabaseSchema>, variant: Variant) => {
