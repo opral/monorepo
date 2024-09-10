@@ -74,23 +74,6 @@ services:
     domains:
       - git.inlang.com
 
-  - name: badge-service
-    type: web
-    runtime: node
-    region: frankfurt
-    plan: standard
-    branch: main
-    buildCommand: pnpm install && pnpm run build --projects=@inlang/badge
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/badge run production
-    autoDeploy: true
-    envVars:
-      - fromGroup: production
-    buildFilter:
-      paths:
-        - inlang/source-code/badge/CHANGELOG.md
-    domains:
-      - badge.inlang.com
-
   - name: fink-editor
     type: web
     runtime: node
