@@ -967,9 +967,6 @@ importers:
       '@inlang/settings-component':
         specifier: workspace:*
         version: link:../settings-component
-      '@inlang/telemetry':
-        specifier: workspace:*
-        version: link:../telemetry
       '@lix-js/client':
         specifier: workspace:*
         version: link:../../../lix/packages/client

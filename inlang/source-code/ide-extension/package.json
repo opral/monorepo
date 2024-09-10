@@ -245,7 +245,6 @@
 		"@inlang/sdk": "workspace:*",
 		"@inlang/sdk2": "workspace:*",
 		"@inlang/settings-component": "workspace:*",
-		"@inlang/telemetry": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@vitest/coverage-v8": "0.34.6",
