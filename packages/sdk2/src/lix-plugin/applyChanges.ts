@@ -41,7 +41,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		}
 
 		// upsert the value
-		const value = jsonStringifyObjectProperties(leafChange.value) as any;
+		const value = leafChange.value as any;
 		await db
 			.insertInto(leafChange.type as "bundle" | "message" | "variant")
 			.values(value)
@@ -50,16 +50,3 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	}
 	return { fileData: contentFromDatabase(sqlite) };
 };
-
-// TODO remove after https://github.com/opral/inlang-message-sdk/issues/123
-function jsonStringifyObjectProperties(value: Record<string, any>) {
-	const result: Record<string, any> = {};
-	for (const key in value) {
-		if (typeof value[key] === "object") {
-			result[key] = JSON.stringify(value[key]);
-		} else {
-			result[key] = value[key];
-		}
-	}
-	return result;
-}

@@ -1,11 +1,7 @@
-import { telemetryBrowser } from "@inlang/telemetry"
 import { For, createEffect, createSignal } from "solid-js"
 // children get a default style use content for custome style
 export function Feedback() {
-	const submitFeedback = (reaction: string) => {
-		telemetryBrowser.capture("DOCS submitted reaction", {
-			reaction,
-		})
+	const submitFeedback = () => {
 		setSubmittedFeedback(true)
 	}
 
@@ -32,7 +28,7 @@ export function Feedback() {
 							type="submit"
 							class="text-xl rounded hover:bg-surface-200 px-1"
 							disabled={submittedFeedback() === true}
-							onClick={() => submitFeedback(emoji)}
+							onClick={() => submitFeedback()}
 						>
 							{emoji}
 						</button>

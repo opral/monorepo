@@ -6,9 +6,11 @@ import { setCurrentPageContext } from "./state.js"
 import type { PageContextRenderer } from "./types.js"
 import * as Sentry from "@sentry/browser"
 import { MetaProvider } from "@solidjs/meta"
-import { telemetryBrowser } from "@inlang/telemetry"
+import { posthog } from "posthog-js"
 
-telemetryBrowser.init()
+posthog.init(import.meta.env.PUBLIC_POSTHOG_TOKEN, {
+	api_host: "https://eu.posthog.com",
+})
 
 // import the css
 import "./app.css"
@@ -37,12 +39,11 @@ import "@shoelace-style/shoelace/dist/components/spinner/spinner.js"
 import "@shoelace-style/shoelace/dist/components/select/select.js"
 import "@shoelace-style/shoelace/dist/components/option/option.js"
 import "@shoelace-style/shoelace/dist/components/drawer/drawer.js"
-import { publicEnv } from "@inlang/env-variables"
 
 // enable error logging via sentry in production
 if (import.meta.env.PROD) {
 	Sentry.init({
-		dsn: publicEnv.PUBLIC_WEBSITE_SENTRY_DSN,
+		dsn: import.meta.env.PUBLIC_WEBSITE_SENTRY_DSN,
 		integrations: [],
 		tracesSampleRate: 0.1,
 	})
@@ -75,7 +76,7 @@ export default function onRenderClient(pageContext: PageContextRenderer) {
 			isFirstRender = false
 		}
 		// https://posthog.com/docs/integrate/client/js#one-page-apps-and-page-views
-		telemetryBrowser.capture("$pageview")
+		posthog.capture("$pageview")
 	} catch (e) {
 		console.error("ERROR in renderer", e)
 	}
