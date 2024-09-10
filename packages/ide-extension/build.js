@@ -32,6 +32,8 @@ let buildOptions = {
 	define: {
 		ENV_DEFINED_IN_BUILD_STEP: JSON.stringify({
 			IS_PRODUCTION: !isDev,
+			// eslint-disable-next-line no-undef
+			PUBLIC_POSTHOG_TOKEN: process.env?.PUBLIC_POSTHOG_TOKEN,
 		}),
 	},
 }

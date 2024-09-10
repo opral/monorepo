@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/node"
 import { version } from "../../../package.json"
-import { ENV_VARIABLES } from "./env.js"
+import { ENV_VARIABLES } from "../env-variables/index.js"
 
 export function initErrorMonitoring() {
 	Sentry.init({
