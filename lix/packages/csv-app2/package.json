@@ -1,0 +1,44 @@
+{
+	"name": "@lix-js/csv-app2",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite --host",
+		"build": "vite build",
+		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+		"preview": "vite preview",
+		"generate": "node ./scripts/generateDemoData.js"
+	},
+	"dependencies": {
+		"@lix-js/sdk": "workspace:*",
+		"@shoelace-style/shoelace": "^2.16.0",
+		"@sqlite.org/sqlite-wasm": "^3.46.0-build2",
+		"@types/papaparse": "^5.3.14",
+		"clsx": "^2.1.1",
+		"jotai": "^2.9.1",
+		"kysely": "^0.27.4",
+		"react": "19.0.0-rc-941e1b4a-20240729",
+		"react-datasheet-grid": "^4.11.4",
+		"react-dom": "19.0.0-rc-941e1b4a-20240729",
+		"react-dropzone": "^14.2.3",
+		"react-router-dom": "^6.25.1"
+	},
+	"devDependencies": {
+		"@tailwindcss/vite": "^4.0.0-alpha.17",
+		"@types/react": "^18.3.3",
+		"@types/react-dom": "^18.3.0",
+		"@typescript-eslint/eslint-plugin": "^7.15.0",
+		"@typescript-eslint/parser": "^7.15.0",
+		"@vitejs/plugin-react": "^4.3.1",
+		"eslint": "^8.57.0",
+		"eslint-plugin-react-hooks": "^4.6.2",
+		"eslint-plugin-react-refresh": "^0.4.7",
+		"eslint-plugin-unicorn": "^55.0.0",
+		"papaparse": "^5.4.1",
+		"prettier": "^3.3.3",
+		"tailwindcss": "^4.0.0-alpha.17",
+		"typescript": "^5.2.2",
+		"vite": "^5.3.4"
+	}
+}
