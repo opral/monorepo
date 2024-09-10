@@ -1,7 +1,7 @@
 import { telemetryNode } from "@inlang/telemetry"
 import type { TelemetryEvents } from "./events.js"
 import { getUserId } from "../../utilities/settings/getUserId.js"
-import { state } from "../../utilities/state.js"
+// import { state } from "../../utilities/state.js"
 
 export const telemetry: Omit<typeof telemetryNode, "capture"> & { capture: typeof capture } =
 	new Proxy(telemetryNode, {
