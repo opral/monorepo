@@ -1,4 +1,3 @@
-import { normalizePath } from "@lix-js/fs"
 import { default as _path } from "node:path"
 import type * as fs from "node:fs/promises"
 
@@ -13,7 +12,7 @@ export type FileSystem = typeof fs
  */
 export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem {
 	// Prevent path issue on non Unix based system normalizing the <base> before using it
-	const normalizedBase = normalizePath(base)
+	const normalizedBase = _path.normalize(base)
 
 	return {
 		// TODO: Those expected typescript errors are because of overloads in node:fs/promises
@@ -23,7 +22,7 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 			options: Parameters<FileSystem["readFile"]>[1]
 		): Promise<string | Uint8Array> => {
 			return fs.readFile(
-				normalizePath(
+				_path.normalize(
 					String(path).startsWith(normalizedBase)
 						? String(path)
 						: _path.resolve(normalizedBase, String(path))
@@ -37,7 +36,7 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 			options: Parameters<FileSystem["writeFile"]>[2]
 		) => {
 			return fs.writeFile(
-				normalizePath(
+				_path.normalize(
 					String(path).startsWith(normalizedBase)
 						? String(path)
 						: _path.resolve(normalizedBase, String(path))
@@ -52,7 +51,7 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 			options?: Parameters<FileSystem["mkdir"]>[1]
 		) => {
 			return fs.mkdir(
-				normalizePath(
+				_path.normalize(
 					String(path).startsWith(normalizedBase)
 						? String(path)
 						: _path.resolve(normalizedBase, String(path))
@@ -62,7 +61,7 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 		},
 		rmdir: async (path: Parameters<FileSystem["rmdir"]>[0]) => {
 			return fs.rmdir(
-				normalizePath(
+				_path.normalize(
 					String(path).startsWith(normalizedBase)
 						? String(path)
 						: _path.resolve(normalizedBase, String(path))
@@ -71,7 +70,7 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 		},
 		rm: async (path: Parameters<FileSystem["rm"]>[0], options: Parameters<FileSystem["rm"]>[1]) => {
 			return fs.rm(
-				normalizePath(
+				_path.normalize(
 					String(path).startsWith(normalizedBase)
 						? String(path)
 						: _path.resolve(normalizedBase, String(path))
@@ -81,7 +80,7 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 		},
 		unlink: async (path: Parameters<FileSystem["unlink"]>[0]) => {
 			return fs.unlink(
-				normalizePath(
+				_path.normalize(
 					String(path).startsWith(normalizedBase)
 						? String(path)
 						: _path.resolve(normalizedBase, String(path))
@@ -91,7 +90,7 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 		// @ts-expect-error
 		readdir: async (path: Parameters<FileSystem["readdir"]>[0]) => {
 			return fs.readdir(
-				normalizePath(
+				_path.normalize(
 					String(path).startsWith(normalizedBase)
 						? String(path)
 						: _path.resolve(normalizedBase, String(path))
@@ -101,7 +100,7 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 		// @ts-expect-error
 		readlink: async (path: Parameters<FileSystem["readlink"]>[0]) => {
 			return fs.readlink(
-				normalizePath(
+				_path.normalize(
 					String(path).startsWith(normalizedBase)
 						? String(path)
 						: _path.resolve(normalizedBase, String(path))
@@ -113,12 +112,12 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 			target: Parameters<FileSystem["symlink"]>[1]
 		) => {
 			return fs.symlink(
-				normalizePath(
+				_path.normalize(
 					String(path).startsWith(normalizedBase)
 						? String(path)
 						: _path.resolve(normalizedBase, String(path))
 				),
-				normalizePath(
+				_path.normalize(
 					String(target).startsWith(normalizedBase)
 						? String(target)
 						: _path.resolve(normalizedBase, String(target))
@@ -128,7 +127,7 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 		// @ts-expect-error
 		stat: async (path: Parameters<FileSystem["stat"]>[0]) => {
 			return fs.stat(
-				normalizePath(
+				_path.normalize(
 					String(path).startsWith(normalizedBase)
 						? String(path)
 						: _path.resolve(normalizedBase, String(path))
@@ -138,7 +137,7 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 		// @ts-expect-error
 		lstat: async (path: Parameters<FileSystem["lstat"]>[0]) => {
 			return fs.lstat(
-				normalizePath(
+				_path.normalize(
 					String(path).startsWith(normalizedBase)
 						? String(path)
 						: _path.resolve(normalizedBase, String(path))
@@ -151,7 +150,7 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 			options: Parameters<FileSystem["watch"]>[1]
 		) => {
 			return fs.watch(
-				normalizePath(
+				_path.normalize(
 					String(path).startsWith(normalizedBase)
 						? String(path)
 						: _path.resolve(normalizedBase, String(path))
@@ -164,7 +163,7 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 			mode: Parameters<FileSystem["access"]>[1]
 		) => {
 			return fs.access(
-				normalizePath(
+				_path.normalize(
 					String(path).startsWith(normalizedBase)
 						? String(path)
 						: _path.resolve(normalizedBase, String(path))
@@ -178,12 +177,12 @@ export function createFileSystemMapper(base: string, fs: FileSystem): FileSystem
 			flags: Parameters<FileSystem["copyFile"]>[2]
 		) => {
 			return fs.copyFile(
-				normalizePath(
+				_path.normalize(
 					String(src).startsWith(normalizedBase)
 						? String(src)
 						: _path.resolve(normalizedBase, String(src))
 				),
-				normalizePath(
+				_path.normalize(
 					String(dest).startsWith(normalizedBase)
 						? String(dest)
 						: _path.resolve(normalizedBase, String(dest))
