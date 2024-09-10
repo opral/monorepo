@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as vscode from "vscode"
 import { jumpToPositionCommand } from "./jumpToPosition.js"
-import { telemetry } from "../services/telemetry/implementation.js"
+import { telemetry } from "../services/telemetry/index.js"
 
 vi.mock("vscode", () => ({
 	commands: {
