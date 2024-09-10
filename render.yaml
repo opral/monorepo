@@ -110,25 +110,6 @@ services:
     domains:
       - fink.inlang.com
 
-  - name: inlang-manage
-    type: web
-    runtime: node
-    region: frankfurt
-    plan: standard
-    pullRequestPreviewsEnabled: false
-    buildCommand: pnpm install && pnpm run build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/manage production
-    autoDeploy: true
-    envVars:
-      - fromGroup: production
-      - key: PORT
-        value: 4004
-    buildFilter:
-      paths:
-        - inlang/source-code/manage/CHANGELOG.md
-    domains:
-      - manage.inlang.com
-
   - name: opral-website
     type: web
     runtime: static
