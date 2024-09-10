@@ -2,7 +2,7 @@ import { shouldRecommend, add } from "@inlang/recommend-ninja"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import * as vscode from "vscode"
 import { getSetting, updateSetting } from "../../settings/index.js"
-import { telemetry } from "../../../services/telemetry/implementation.js"
+import { telemetry } from "../../../services/telemetry/index.js"
 
 export const recommendNinja = async (args: { fs: NodeishFilesystem }): Promise<void> => {
 	if (

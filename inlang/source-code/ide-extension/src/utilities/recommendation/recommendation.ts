@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { telemetry } from "../../services/telemetry/implementation.js"
+import { telemetry } from "../../services/telemetry/index.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
 import * as Ninja from "@inlang/recommend-ninja"
 import { CONFIGURATION } from "../../configuration.js"
@@ -96,8 +96,8 @@ export async function getRecommendationViewHtml(args: {
             <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${
 							args.webview.cspSource
 						}; style-src ${args.webview.cspSource} 'unsafe-inline'; script-src ${
-		args.webview.cspSource
-	} 'unsafe-inline';">
+							args.webview.cspSource
+						} 'unsafe-inline';">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<link href="${codiconsUri}" rel="stylesheet">
 			<link href="${codiconsTtfUri}" rel="stylesheet">
@@ -190,15 +190,15 @@ export async function getRecommendationViewHtml(args: {
 						shouldRecommendSherlock
 							? `<div class="item active" id="addSherlockToWorkspace"><span class="codicon codicon-add"></span><span>Add Sherlock to this VS Code workspace</span></div>`
 							: isAdoptedSherlock
-							? `<div class="item"><span class="codicon codicon-pass-filled"></span><span>Sherlock is recommended in this VS Code workspace.</span></div>`
-							: ``
+								? `<div class="item"><span class="codicon codicon-pass-filled"></span><span>Sherlock is recommended in this VS Code workspace.</span></div>`
+								: ``
 					}
 				${
 					shouldRecommendNinja
 						? `<div class="item active" id="addNinjaGithubAction"><span class="codicon codicon-add"></span><span>Add Ninja Github Action workflow to this repository</span></div>`
 						: isAdoptedNinja
-						? `<div class="item"><span class="codicon codicon-pass-filled"></span><span>Ninja Github Action workflow is installed.</span></div>`
-						: ``
+							? `<div class="item"><span class="codicon codicon-pass-filled"></span><span>Ninja Github Action workflow is installed.</span></div>`
+							: ``
 				}`
 					: `No recommendations available.`
 			}
