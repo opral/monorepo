@@ -25,7 +25,6 @@ import {
 	type LixError,
 } from "@lix-js/client"
 
-import { publicEnv } from "@inlang/env-variables"
 import {
 	LanguageTag,
 	MessageLintRule,
@@ -38,6 +37,7 @@ import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
 import { id } from "../../../../../marketplace-manifest.json"
 import * as Ninja from "@inlang/recommend-ninja"
+import { publicEnv } from "#src/services/env-variables/index.js"
 
 type EditorStateSchema = {
 	/**

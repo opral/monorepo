@@ -1,5 +1,4 @@
 import type { Kysely } from "kysely";
-import { json } from "./toJSONRawBuilder.js";
 import type {
 	InlangDatabaseSchema,
 	NewBundleNested,
@@ -13,7 +12,7 @@ export const insertBundleNested = async (
 		.insertInto("bundle")
 		.values({
 			id: bundle.id,
-			alias: json(bundle.alias),
+			alias: bundle.alias,
 		})
 		.returning("id")
 		.executeTakeFirstOrThrow();
@@ -24,9 +23,9 @@ export const insertBundleNested = async (
 			.values({
 				id: message.id,
 				bundleId: insertedBundle.id,
+				declarations: message.declarations,
 				locale: message.locale,
-				declarations: json(message.declarations),
-				selectors: json(message.selectors),
+				selectors: message.selectors,
 			})
 			.returning("id")
 			.executeTakeFirstOrThrow();
@@ -37,8 +36,8 @@ export const insertBundleNested = async (
 				.values({
 					id: variant.id,
 					messageId: insertedMessage.id,
-					match: json(variant.match),
-					pattern: json(variant.pattern),
+					match: variant.match,
+					pattern: variant.pattern,
 				})
 				.execute();
 		}
