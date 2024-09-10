@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as vscode from "vscode"
 import { jumpToPositionCommand } from "./jumpToPosition.js"
-import { telemetry } from "../services/telemetry/index.js"
+import * as telemetry from "../services/telemetry/index.js"
 
 vi.mock("vscode", () => ({
 	commands: {
@@ -45,15 +45,18 @@ describe("jumpToPositionCommand", () => {
 	})
 
 	it("should not execute if no active editor", async () => {
+		const captureSpy = vi.spyOn(telemetry, "capture")
+
 		await jumpToPositionCommand.callback({
 			bundleId: "test-message",
 			position: { start: { line: 1, character: 5 }, end: { line: 1, character: 10 } },
 		})
 		expect(vscode.window.activeTextEditor).toBeUndefined()
-		expect(telemetry.capture).not.toHaveBeenCalled()
+		expect(captureSpy).not.toHaveBeenCalled()
 	})
 
 	it("should set editor selection and reveal range when editor is active", async () => {
+		const captureSpy = vi.spyOn(telemetry, "capture")
 		// Mock an active editor
 		vscode.window.activeTextEditor = {
 			selection: {} as vscode.Selection,
@@ -74,7 +77,7 @@ describe("jumpToPositionCommand", () => {
 		expect(vscode.Position).toHaveBeenCalledTimes(2)
 		expect(vscode.Range).toHaveBeenCalled()
 		expect(vscode.window.activeTextEditor?.revealRange).toHaveBeenCalled()
-		expect(telemetry.capture).toHaveBeenCalledWith({
+		expect(captureSpy).toHaveBeenCalledWith({
 			event: "IDE-EXTENSION jumped to position in editor",
 		})
 	})
