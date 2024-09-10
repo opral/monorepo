@@ -14,6 +14,7 @@ import {
 	projectView,
 } from "./project.js"
 import { loadProjectFromDirectoryInMemory } from "@inlang/sdk2"
+import type { FileSystem } from "../fs/createFileSystemMapper.js"
 
 vi.mock("vscode", () => ({
 	Uri: {
@@ -187,7 +188,7 @@ describe("getTreeItem", () => {
 		} as vscode.WorkspaceFolder
 		const treeItem = getTreeItem({
 			element: node,
-			fs: {} as typeof import("node:fs/promises"),
+			fs: {} as FileSystem,
 			workspaceFolder,
 		})
 		expect(treeItem.label).toBe("testProject")

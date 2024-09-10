@@ -4,7 +4,7 @@ import { createFileSystemMapper } from "./createFileSystemMapper.js"
 
 describe("createFileSystemMapper", () => {
 	const normalizedBase = "/base/path"
-	let mockFs: typeof import("node:fs/promises")
+	let mockFs: FileSystem
 
 	beforeEach(() => {
 		mockFs = {

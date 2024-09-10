@@ -7,6 +7,7 @@ import { setState, state } from "../state.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
 import { transpileToCjs } from "../import/transpileToCjs.js"
 import * as fs from "node:fs/promises"
+import type { FileSystem } from "../fs/createFileSystemMapper.js"
 
 let projectViewNodes: ProjectViewNode[] = []
 
@@ -62,7 +63,7 @@ export function createProjectViewNodes(args: {
 
 export function getTreeItem(args: {
 	element: ProjectViewNode
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 	workspaceFolder: vscode.WorkspaceFolder
 }): vscode.TreeItem {
 	return {
@@ -83,7 +84,7 @@ export function getTreeItem(args: {
 
 export async function handleTreeSelection(args: {
 	selectedNode: ProjectViewNode
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 	workspaceFolder: vscode.WorkspaceFolder
 }): Promise<void> {
 	const selectedProject = normalizePath(args.selectedNode.path)
@@ -135,7 +136,7 @@ export async function handleTreeSelection(args: {
 }
 
 export function createTreeDataProvider(args: {
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 	workspaceFolder: vscode.WorkspaceFolder
 	context: vscode.ExtensionContext
 }): vscode.TreeDataProvider<ProjectViewNode> {
@@ -151,7 +152,7 @@ export function createTreeDataProvider(args: {
 export const projectView = async (args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 }) => {
 	const treeDataProvider = createTreeDataProvider({
 		fs: args.fs,

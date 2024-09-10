@@ -9,7 +9,7 @@ import { messagePreview } from "./decorations/messagePreview.js"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { errorView } from "./utilities/errors/errors.js"
 import { messageView } from "./utilities/messages/messages.js"
-import { createFileSystemMapper } from "./utilities/fs/createFileSystemMapper.js"
+import { createFileSystemMapper, type FileSystem } from "./utilities/fs/createFileSystemMapper.js"
 import fs from "node:fs/promises"
 import { normalizePath } from "@lix-js/fs"
 import { gettingStartedView } from "./utilities/getting-started/gettingStarted.js"
@@ -61,7 +61,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 async function main(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 }): Promise<void> {
 	if (state().projectsInWorkspace.length > 0) {
 		// find the closest project to the workspace
@@ -105,7 +105,7 @@ async function main(args: {
 function setupFileSystemWatcher(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 }) {
 	const watcher = vscode.workspace.createFileSystemWatcher(
 		new vscode.RelativePattern(
@@ -127,7 +127,7 @@ function setupFileSystemWatcher(args: {
 async function registerExtensionComponents(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 }) {
 	args.context.subscriptions.push(
 		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))
