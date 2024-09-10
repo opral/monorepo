@@ -3,7 +3,7 @@ import { default as _path } from "node:path"
 import type * as fs from "node:fs/promises"
 
 // Define an interface for the fs methods
-type FileSystem = typeof fs
+export type FileSystem = typeof fs
 
 /**
  * Creates a new mapper between vscode and inlang file systems.
