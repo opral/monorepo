@@ -282,7 +282,8 @@ export async function createMessageHtml(args: {
 										? `<span title="Jump to message" onclick="${jumpCommand}"><span class="codicon codicon-magnet"></span></span>`
 										: ""
 								}
-                <span title="Open in Fink" onclick="${openCommand}"><span class="codicon codicon-link-external"></span></span>
+				<!-- Removed until we have a proper way to open in Fink with Lix host -->
+                <!--<span title="Open in Fink" onclick="${openCommand}"><span class="codicon codicon-link-external"></span></span>-->
             </div>
         </div>
         <div class="content" style="display: none;">
