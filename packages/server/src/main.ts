@@ -3,7 +3,6 @@ import compression from "compression"
 import { validateEnvVariables, privateEnv } from "@inlang/env-variables"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
-import { router as telemetryRouter } from "@inlang/telemetry/router"
 import { router as rpcRouter } from "@inlang/rpc/router"
 import { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { ProjectSettings } from "@inlang/project-settings"
@@ -74,8 +73,6 @@ app.get("/schema/inlang-message-format", (_, response) => {
 	response.header("Content-Type", "application/json")
 	response.send(serializedMessageStorageFormat)
 })
-
-app.use(telemetryRouter)
 
 app.use(rpcRouter)
 
