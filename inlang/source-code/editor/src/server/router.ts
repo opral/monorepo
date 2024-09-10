@@ -14,10 +14,10 @@
 import express, { Router, type NextFunction, type Request, type Response } from "express"
 import { createServer as createViteServer } from "vite"
 import { URL } from "node:url"
-import { privateEnv } from "@inlang/env-variables"
 import sirv from "sirv"
 import cookieSession from "cookie-session"
 import { renderPage } from "vike/server"
+import { privateEnv } from "#src/services/env-variables/index.js"
 
 /** the root path of the server (website/) */
 const rootPath = new URL("../..", import.meta.url).pathname

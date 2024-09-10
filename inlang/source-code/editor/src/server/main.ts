@@ -1,21 +1,13 @@
 import express from "express"
 import compression from "compression"
-import { validateEnvVariables, privateEnv } from "@inlang/env-variables"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
 import { router } from "./router.js"
 import { posthog } from "posthog-js"
+import { privateEnv } from "#src/services/env-variables/index.js"
 // --------------- SETUP -----------------
 
 export const isProduction = process.env.NODE_ENV === "production"
-const { error: errors } = validateEnvVariables({ forProduction: isProduction })
-
-if (errors) {
-	throw Error(
-		"Production env variables are missing:\n\n" +
-			errors.map((e) => `${e.key}: ${e.errorMessage}`).join("\n")
-	)
-}
 
 const app = express()
 // compress responses with gzip
