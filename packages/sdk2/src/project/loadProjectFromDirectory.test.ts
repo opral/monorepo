@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { beforeEach, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { ProjectSettings } from "../json-schema/settings.js";
-import { fs, vol } from "memfs";
+import { fs, vol, Volume } from "memfs";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import { Text } from "../json-schema/pattern.js";
 import type { InlangPlugin } from "../plugin/schema.js";
@@ -11,15 +11,6 @@ import type {
 	VariantV1,
 } from "../json-schema/old-v1-message/schemaV1.js";
 
-vi.mock("node:fs/promises", async () => {
-	const memfs: { fs: typeof fs } = await vi.importActual("memfs");
-	return memfs.fs.promises;
-});
-
-vi.mock("node:fs", async () => {
-	const memfs: { fs: typeof fs } = await vi.importActual("memfs");
-	return memfs.fs;
-});
 
 beforeEach(() => {
 	// reset the state of in-memory fs
@@ -201,93 +192,268 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 	).toBe("wert2");
 });
 
-test("it should keep files between the inlang directory and lix in sync", async () => {
-	const mockSettings = {
-		baseLocale: "en",
-		locales: ["en", "de"],
-		modules: [],
-	} satisfies ProjectSettings;
+const mockSettings = {
+	baseLocale: "en",
+	locales: ["en", "de"],
+	modules: [],
+} satisfies ProjectSettings;
 
-	const mockDirectory = {
-		"/project.inlang/cache/plugin/29j49j2": "cache value",
-		"/project.inlang/.gitignore": "git value",
-		"/project.inlang/prettierrc.json": "prettier value",
-		"/project.inlang/README.md": "readme value",
-		"/project.inlang/settings.json": JSON.stringify(mockSettings),
-	};
-	vol.fromJSON(mockDirectory, "/");
+const mockDirectory = {
+	"/project.inlang/cache/plugin/29j49j2": "cache value",
+	"/project.inlang/.gitignore": "git value",
+	"/project.inlang/prettierrc.json": "prettier value",
+	"/project.inlang/README.md": "readme value",
+	"/project.inlang/settings.json": JSON.stringify(mockSettings),
+};
 
-	const project = await loadProjectFromDirectory({
-		fs: fs as any,
-		path: "/project.inlang",
+describe("it should keep files between the inlang directory and lix in sync", async () => {
+	test("files from directory should be available via lix after project has been loaded from directory", async () => {
+		const syncInterval = 100;
+		vol.fromJSON(mockDirectory, "/");
+		const project = await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+			syncInterval: syncInterval,
+		});
+
+		const files = await project.lix.db.selectFrom("file").selectAll().execute();
+
+		expect(files.length).toBe(5 + 1 /* the db.sqlite file */);
+
+		const filesByPath = files.reduce((acc, file) => {
+			acc[file.path] = new TextDecoder().decode(file.data);
+			return acc;
+		}, {} as any);
+
+		expect(filesByPath["/cache/plugin/29j49j2"]).toBe("cache value");
+		expect(filesByPath["/.gitignore"]).toBe("git value");
+		expect(filesByPath["/prettierrc.json"]).toBe("prettier value");
+		expect(filesByPath["/README.md"]).toBe("readme value");
+		expect(filesByPath["/settings.json"]).toBe(JSON.stringify(mockSettings));
 	});
 
-	const files = await project.lix.db.selectFrom("file").selectAll().execute();
+	test("file created in fs should be avaialable in lix ", async () => {
+		const syncInterval = 100;
+		vol.fromJSON(mockDirectory, "/");
+		const project = await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+			syncInterval: syncInterval,
+		});
 
-	expect(files.length).toBe(5 + 1 /* the db.sqlite file */);
+		fs.writeFileSync(
+			"/project.inlang/file-created-on-fs.txt",
+			"value written by fs",
+			{
+				encoding: "utf-8",
+			}
+		);
 
-	const filesByPath = files.reduce((acc, file) => {
-		acc[file.path] = new TextDecoder().decode(file.data);
-		return acc;
-	}, {} as any);
+		// lets wait a seconds to allow the sync process catch up
+		await new Promise((resolve) => setTimeout(resolve, syncInterval + 10));
 
-	expect(filesByPath["/cache/plugin/29j49j2"]).toBe("cache value");
-	expect(filesByPath["/.gitignore"]).toBe("git value");
-	expect(filesByPath["/prettierrc.json"]).toBe("prettier value");
-	expect(filesByPath["/README.md"]).toBe("readme value");
-	expect(filesByPath["/settings.json"]).toBe(JSON.stringify(mockSettings));
+		const randomFileInLix = await project.lix.db
+			.selectFrom("file")
+			.selectAll()
+			.where("path", "=", "/file-created-on-fs.txt")
+			.executeTakeFirstOrThrow();
 
-	// changes to a file on disk should reflect in lix
-	fs.writeFileSync(
-		"/project.inlang/settings.json",
-		JSON.stringify({ ...mockSettings, baseLocale: "brand-new-locale" })
-	);
-
-	await new Promise((resolve) => setTimeout(resolve, 100));
-	const fileInLix = await project.lix.db
-		.selectFrom("file")
-		.selectAll()
-		.where("path", "=", "/settings.json")
-		.executeTakeFirstOrThrow();
-
-	const settingsAfterUpdateOnDisk = JSON.parse(
-		new TextDecoder().decode(fileInLix.data)
-	);
-
-	expect(settingsAfterUpdateOnDisk.baseLocale).toBe("brand-new-locale");
-
-	fs.writeFileSync("/project.inlang/random-file.txt", "random value", {
-		encoding: "utf-8",
+		expect(new TextDecoder().decode(randomFileInLix.data)).toBe(
+			"value written by fs"
+		);
 	});
-	console.log("file wirtten");
 
-	const f = fs.readFileSync("/project.inlang/random-file.txt");
+	test("file updated in fs should be avaialable in lix ", async () => {
+		const syncInterval = 100;
+		vol.fromJSON(mockDirectory, "/");
+		const project = await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+			syncInterval: syncInterval,
+		});
 
-	console.log({ f: f.toString() });
+		// "changes to a file on disk should reflect in lix
+		fs.writeFileSync(
+			"/project.inlang/settings.json",
+			JSON.stringify({
+				...mockSettings,
+				baseLocale: "brand-new-locale-written-to-fs-file",
+			})
+		);
 
-	await new Promise((resolve) => setTimeout(resolve, 100));
+		// console.log("wrting fs settings");
+		await new Promise((resolve) => setTimeout(resolve, syncInterval + 10));
+		const fileInLix = await project.lix.db
+			.selectFrom("file")
+			.selectAll()
+			.where("path", "=", "/settings.json")
+			.executeTakeFirstOrThrow();
 
-	const randomFileInLix = await project.lix.db
-		.selectFrom("file")
-		.selectAll()
-		.where("path", "=", "/random-file.txt")
-		.executeTakeFirstOrThrow();
+		const settingsAfterUpdateOnDisk = JSON.parse(
+			new TextDecoder().decode(fileInLix.data)
+		);
 
-	expect(new TextDecoder().decode(randomFileInLix.data)).toBe("random value");
+		expect(settingsAfterUpdateOnDisk.baseLocale).toBe(
+			"brand-new-locale-written-to-fs-file"
+		);
+	});
 
-	// changes to a file in lix should reflect in the project directory
-	await project.lix.db
-		.updateTable("file")
-		.where("path", "=", "/settings.json")
-		.set({
-			data: new TextEncoder().encode(
-				JSON.stringify({ ...mockSettings, baseLocale: "brand-new-locale" })
-			),
-		})
-		.execute();
+	test("file deleted in fs should be droped from lix ", async () => {
+		const syncInterval = 100;
+		vol.fromJSON(mockDirectory, "/");
+		const project = await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+			syncInterval: syncInterval,
+		});
 
-	const fileOnDisk = fs.readFileSync("/project.inlang/settings.json");
-	const settings = JSON.parse(fileOnDisk.toString());
+		const filesInLixBefore = await project.lix.db
+			.selectFrom("file")
+			.selectAll()
+			.where("path", "=", "/README.md")
+			.execute();
 
-	expect(settings.baseLocale).toBe("brand-new-locale");
+		expect(filesInLixBefore.length).toBe(1);
+
+		// "changes to a file on disk should reflect in lix
+		fs.unlinkSync("/project.inlang/README.md");
+
+		// console.log("wrting fs settings");
+		await new Promise((resolve) => setTimeout(resolve, syncInterval + 10));
+		const fileInLixAfter = await project.lix.db
+			.selectFrom("file")
+			.selectAll()
+			.where("path", "=", "/README.md")
+			.execute();
+
+		expect(fileInLixAfter.length).toBe(0);
+	});
+
+	test("file created in lix should be avaialable in fs ", async () => {
+		const syncInterval = 100;
+		vol.fromJSON(mockDirectory, "/");
+		const project = await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+			syncInterval: syncInterval,
+		});
+
+		await project.lix.db
+			.insertInto("file")
+			.values({
+				path: "/file-created-in.lix.txt",
+				data: new TextEncoder().encode("random value lix"),
+			})
+			.execute();
+
+		// lets wait a seconds to allow the sync process catch up
+		await new Promise((resolve) => setTimeout(resolve, syncInterval + 10));
+
+		const randomFileOnDiskContent = fs
+			.readFileSync("/project.inlang/file-created-in.lix.txt")
+			.toString();
+		expect(randomFileOnDiskContent).toBe("random value lix");
+	});
+
+	test("file updated in lix should be avaialable in fs ", async () => {
+		const syncInterval = 100;
+		vol.fromJSON(mockDirectory, "/");
+		const project = await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+			syncInterval: syncInterval,
+		});
+
+		// console.log("wrting lix settings");
+		// changes to a file in lix should reflect in the project directory
+		await project.lix.db
+			.updateTable("file")
+			.where("path", "=", "/settings.json")
+			.set({
+				data: new TextEncoder().encode(
+					JSON.stringify({ ...mockSettings, baseLocale: "brand-new-locale2" })
+				),
+			})
+			.execute();
+
+		// lets wait a seconds to allow the sync process catch up
+		await new Promise((resolve) => setTimeout(resolve, syncInterval + 10));
+
+		const fileOnDisk = fs.readFileSync("/project.inlang/settings.json");
+		const settings = JSON.parse(fileOnDisk.toString());
+
+		expect(settings.baseLocale).toBe("brand-new-locale2");
+	});
+
+	test("file deleted in lix should be gone in fs as awell", async () => {
+		const syncInterval = 100;
+		vol.fromJSON(mockDirectory, "/");
+		const project = await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+			syncInterval: syncInterval,
+		});
+
+		// console.log("wrting lix settings");
+		// changes to a file in lix should reflect in the project directory
+		await project.lix.db
+			.deleteFrom("file_internal")
+			.where("path", "=", "/.gitignore")
+			.execute();
+
+		// lets wait a seconds to allow the sync process catch up
+		await new Promise((resolve) => setTimeout(resolve, syncInterval + 10));
+
+		const fileExistsOnDisk = fs.existsSync("/project.inlang/.gitignore");
+
+		expect(fileExistsOnDisk).toBe(false);
+	});
+
+	test("file updated in fs and lix (conflicting) should result in the fs state", async () => {
+		const syncInterval = 100;
+		vol.fromJSON(mockDirectory, "/");
+		const project = await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+			syncInterval: syncInterval,
+		});
+
+		// console.log("wrting fs settings simultanous");
+		// changes to a file on disk and lix at the same time should lead to the fs version
+		fs.writeFileSync(
+			"/project.inlang/settings.json",
+			JSON.stringify({ ...mockSettings, baseLocale: "fs-version" })
+		);
+
+		// console.log("wrting lix settings simultanous");
+		await project.lix.db
+			.updateTable("file")
+			.where("path", "=", "/settings.json")
+			.set({
+				data: new TextEncoder().encode(
+					JSON.stringify({ ...mockSettings, baseLocale: "lix-version" })
+				),
+			})
+			.execute();
+
+		// lets wait a seconds to allow the sync process catch up
+		await new Promise((resolve) => setTimeout(resolve, 1010));
+
+		const fileOnDiskUpdated = fs.readFileSync("/project.inlang/settings.json");
+		const settingsUpdated = JSON.parse(fileOnDiskUpdated.toString());
+
+		expect(settingsUpdated.baseLocale).toBe("fs-version");
+
+		const fileInLixUpdated = await project.lix.db
+			.selectFrom("file")
+			.selectAll()
+			.where("path", "=", "/settings.json")
+			.executeTakeFirstOrThrow();
+
+		const settingsAfterUpdateOnDiskAndLix = JSON.parse(
+			new TextDecoder().decode(fileInLixUpdated.data)
+		);
+
+		expect(settingsAfterUpdateOnDiskAndLix.baseLocale).toBe("fs-version");
+	});
 });

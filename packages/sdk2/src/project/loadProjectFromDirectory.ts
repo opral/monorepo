@@ -2,14 +2,12 @@ import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
 import { type Lix } from "@lix-js/sdk";
 // eslint-disable-next-line no-restricted-imports
-import type fs from "node:fs";
+import fs from "node:fs";
 // eslint-disable-next-line no-restricted-imports
 import nodePath from "node:path";
 import type { InlangPlugin } from "../plugin/schema.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
 import { fromMessageV1 } from "../json-schema/old-v1-message/fromMessageV1.js";
-
-import { watch } from "../chokidar/index.js";
 
 /**
  * Loads a project from a directory.
@@ -18,7 +16,7 @@ import { watch } from "../chokidar/index.js";
  * that is stored in git.
  */
 export async function loadProjectFromDirectory(
-	args: { path: string; fs: typeof fs } & Omit<
+	args: { path: string; fs: typeof fs; syncInterval?: number } & Omit<
 		Parameters<typeof loadProjectInMemory>[0],
 		"blob"
 	>
@@ -28,7 +26,12 @@ export async function loadProjectFromDirectory(
 		blob: await newProject(),
 	});
 
-	await keepFilesInSync({ fs: args.fs, path: args.path, lix: project.lix });
+	await syncFiles({
+		fs: args.fs,
+		path: args.path,
+		lix: project.lix,
+		syncInterval: args.syncInterval,
+	});
 
 	// TODO i guess we should move this validation logic into sdk2/src/project/loadProject.ts
 	// Two scenarios could arise:
@@ -127,125 +130,378 @@ async function loadLegacyMessages(args: {
 
 	return Promise.all(insertQueries);
 }
+
+type FsFileState = Record<
+	string,
+	{
+		/*mtime: number, hash: string, */ content: ArrayBuffer;
+		state: "known" | "unknown" | "updated" | "gone";
+	}
+>;
+
+function arrayBuffersEqual(a: ArrayBuffer, b: ArrayBuffer) {
+	if (a.byteLength !== b.byteLength) return false;
+
+	// Create views for byte-by-byte comparison
+	const view1 = new Uint8Array(a);
+	const view2 = new Uint8Array(b);
+
+	// Compare each byte
+	for (const [i, element] of view1.entries()) {
+		if (element !== view2[i]) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 /**
  * Watches a directory and copies files into lix, keeping them in sync.
  */
-async function keepFilesInSync(args: {
+async function syncFiles(args: {
 	fs: typeof fs;
 	path: string;
 	lix: Lix;
+	syncInterval?: number;
 }) {
-	async function copyFilesFromDiskRecursive(dirPath: string) {
+	// NOTE this function is async - while it runs 100% sync in the naiv implementation - we may want to change to an async version to optimize
+	async function checkFsStateRecursive(
+		dirPath: string,
+		currentState: FsFileState
+	) {
 		const entries = args.fs.readdirSync(dirPath, { withFileTypes: true });
 
 		for (const entry of entries) {
 			const fullPath = nodePath.join(dirPath, entry.name);
 			if (entry.isDirectory()) {
-				copyFilesFromDiskRecursive(fullPath);
+				checkFsStateRecursive(fullPath, currentState);
 			} else {
-				await handleFile(args, fullPath, "add");
+				// NOTE we could start with comparing the mdate and skip file read completely...
+				const data = args.fs.readFileSync(fullPath);
+
+				const relativePath = "/" + nodePath.relative(args.path, fullPath);
+
+				if (!currentState[relativePath]) {
+					currentState[relativePath] = {
+						content: data,
+						state: "unknown",
+					};
+				} else {
+					if (arrayBuffersEqual(currentState[relativePath].content, data)) {
+						currentState[relativePath].state = "known";
+					} else {
+						currentState[relativePath].state = "updated";
+						currentState[relativePath].content = data;
+					}
+				}
 			}
 		}
 	}
 
-	// Initial copy of all files
-	await copyFilesFromDiskRecursive(args.path);
+	async function checkLixState(currentLixState: FsFileState) {
+		// go through all files in lix and check there state
+		const filesInLix = await args.lix.db
+			.selectFrom("file_internal")
+			.where("path", "not like", "%db.sqlite")
+			.selectAll()
+			.execute();
 
-	// Set up recursive watch for all files on disk
-
-	const setupWatcher = new Promise((resolve) => {
-		const watcher = watch(args.path, {
-			recursive: true,
-		});
-
-		watcher.on("all", (event, targetPath, targetPathNext) => {
-			console.log(event); // => could be any target event: 'add', 'addDir', 'change', 'rename', 'renameDir', 'unlink' or 'unlinkDir'
-			console.log(targetPath); // => the file system path where the event took place, this is always provided
-			console.log(targetPathNext); // => the file system path "targetPath" got renamed to, this is only provided on 'rename'/'renameDir' events
-		});
-
-		watcher.on("add", (fp) => {
-			console.log(`File ${fp} added`);
-			const fullPath = fp;
-			try {
-				const stats = args.fs.statSync(fullPath);
-				if (!stats.isDirectory()) {
-					// TODO shouldnt we pass the content here? what happens if the file gets removed in the meantime
-					handleFile(args, fullPath, "add");
-				}
-			} catch (error) {
-				if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-					handleFile(args, fullPath, "delete");
+		console.log(filesInLix.map((f) => f.path).join(", "));
+		for (const fileInLix of filesInLix) {
+			const currentStateOfFileInLix = currentLixState[fileInLix.path];
+			// NOTE we could start with comparing the mdate and skip file read completely...
+			if (!currentStateOfFileInLix) {
+				currentLixState[fileInLix.path] = {
+					content: new Uint8Array(fileInLix.data),
+					state: "unknown",
+				};
+			} else {
+				if (
+					arrayBuffersEqual(currentStateOfFileInLix.content, fileInLix.data)
+				) {
+					currentStateOfFileInLix.state = "known";
 				} else {
-					console.error(`Error handling file ${fullPath}:`, error);
+					currentStateOfFileInLix.state = "updated";
+					currentStateOfFileInLix.content = fileInLix.data;
 				}
 			}
-		});
-
-		watcher.on("change", (fp) => {
-			const fullPath = fp;
-
-			try {
-				const stats = args.fs.statSync(fullPath);
-				if (!stats.isDirectory()) {
-					// TODO shouldnt we pass the content here? what happens if the file gets removed in the meantime
-					handleFile(args, fullPath, "change");
-				}
-			} catch (error) {
-				if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-					handleFile(args, fullPath, "delete");
-				} else {
-					console.error(`Error handling file ${fullPath}:`, error);
-				}
-			}
-		});
-
-		watcher.on("unlink", (fp) => {
-			const fullPath = fp;
-			handleFile(args, fullPath, "delete");
-		});
-
-		// watcher.on("ready", () => {
-		resolve(() => {
-			watcher.close();
-		});
-		// });
-	});
-
-	return await setupWatcher;
-}
-
-async function handleFile(
-	args: { fs: typeof fs; path: string; lix: Lix },
-	filePath: string,
-	event: "add" | "change" | "delete"
-): Promise<void> {
-	await 1; // send to the next tick?
-	console.log(`Handling file ${filePath} with event ${event}`);
-	const relativePath = nodePath.relative(args.path, filePath);
-	const normalizedPath =
-		"/" + nodePath.normalize(relativePath).replace(/^\.inlang[/\\]/, "");
-
-	if (event === "delete") {
-		args.lix.db
-			.deleteFrom("file_internal")
-			.where("path", "=", normalizedPath)
-			.execute();
-	} else {
-		const data = args.fs.readFileSync(filePath);
-		console.log({ data, txt: new TextDecoder().decode(data) });
-		await args.lix.db
-			.insertInto("file_internal") // change queue
-			.values({
-				path: normalizedPath,
-				data,
-			})
-			.onConflict((oc) => oc.column("path").doUpdateSet({ data }))
-			.execute();
-		console.log(`File ${filePath} copied to lix, content: ${data.toString()}`);
+		}
 	}
+
+	async function syncUpFsAndLixFiles(statesToSync: {
+		fsFileStates: FsFileState;
+		lixFileStates: FsFileState;
+	}) {
+		// for (const file of Object.keys(statesToSync.fsFileStates)) {
+		// 	if (file.includes("gitignore"))
+		// 		console.log(
+		// 			"fsFileStates : " +
+		// 				file +
+		// 				" fs " +
+		// 				statesToSync.fsFileStates[file]?.state +
+		// 				" lix " +
+		// 				statesToSync.lixFileStates[file]?.state
+		// 		);
+		// }
+
+		// Sync cases:
+		//                          fs - no state for file | fs - unkonwn   | fs - known    | fs - updated | fs - gone
+		// lix - no state for file      	NOTHING	(1)	   | ADD TO LIX(2)  |  ERROR (3)    | ERROR  (4)   | ERROR (5)
+		// lix - unknown					ADD TO FS (6)  | USE FS VER.(7) |  ERROR (8)    | CASE (9)     | CASE (10)
+		// lix - known                      ERROR (11)     | ERROR (12)     |  NOTHING(13)  | ERROR (14)   | ERROR (15)
+		// lix - updated					ERROR (16)     | ERROR (17)     | USE LIX (18)  | CASE (19)    | CASE (20)
+		// lix - gone  						ERROR (21)     | ERROR (22)     | DELETE FS (23)| CASE (24)    | CASE (25)
+
+		// TODO check export import from saveFileToDirectory
+
+		for (const [path, fsState] of Object.entries(statesToSync.fsFileStates)) {
+			// no state for file in LIX
+			if (!statesToSync.lixFileStates[path]) {
+				if (fsState.state === "unknown") {
+					// ADD TO LIX(2)
+					await upsertFileInLix(args, path, fsState.content);
+					statesToSync.lixFileStates[path] = {
+						state: "known",
+						content: fsState.content,
+					};
+					fsState.state = "known";
+				} else {
+					// ERROR (3), ERROR (4), ERROR (5)
+					// The file does not exist in lix but its state differs from unknown?
+					throw new Error(
+						"Illeagal lix<->fs sync state. The file [" +
+							path +
+							"] that was " +
+							fsState.state +
+							" on disc did not exit in lix"
+					);
+				}
+			} else {
+				const lixState = statesToSync.lixFileStates[path];
+				if (fsState.state === "unknown") {
+					if (lixState.state === "unknown") {
+						if (arrayBuffersEqual(lixState.content, fsState.content)) {
+							lixState.state = "known";
+							fsState.state = "known";
+						} else {
+							await upsertFileInLix(args, path, fsState.content);
+							lixState.content = fsState.content;
+							lixState.state = "known";
+							fsState.state = "known";
+						}
+					} else {
+						// ERROR 12, 17, 22
+						throw new Error(
+							"Illeagal lix<->fs sync state. The file [" +
+								path +
+								"] that was " +
+								fsState.state +
+								" but did exist in lix already"
+						);
+					}
+				} else if (fsState.state === "known") {
+					if (lixState.state === "known") {
+						// NO OP  - NOTHING(13)
+					} else if (lixState.state === "updated") {
+						// USE LIX (18)
+						args.fs.writeFileSync(
+							// TODO check platform dependent folder separator
+							args.path + path,
+							Buffer.from(lixState.content)
+						);
+						fsState.content = lixState.content;
+						fsState.state = "known";
+						lixState.state = "known";
+					} else if (lixState.state === "gone") {
+						// DELETE FS (23)
+						args.fs.unlinkSync(args.path + path);
+						fsState.state = "gone";
+						lixState.state = "gone";
+					}
+				} else if (fsState.state === "updated") {
+					if (lixState.state === "unknown") {
+						// TODO A file was added to lix while a known file from fs was updated?
+						throw new Error(
+							"Illeagal lix<->fs sync state. The file [" +
+								path +
+								"] that was " +
+								fsState.state +
+								" but it was not known by lix yet?"
+						);
+					} else if (lixState.state === "known") {
+						await upsertFileInLix(args, path, fsState.content);
+						lixState.content = fsState.content;
+
+						fsState.state = "known";
+					} else if (lixState.state === "updated") {
+						// seems like we saw an update on the file in fs while some changes on lix have not been reached fs? FS -> Winns?
+						console.warn(
+							"seems like we saw an update on the file " +
+								path +
+								" in fs while some changes on lix have not been reached fs? FS -> Winns?"
+						);
+						await upsertFileInLix(args, path, fsState.content);
+						lixState.content = fsState.content;
+						lixState.state = "known";
+						fsState.state = "known";
+					} else if (lixState.state === "gone") {
+						console.warn(
+							"seems like we saw an delete in lix while some changes on fs have not been reached fs? FS -> Winns?"
+						);
+						// TODO update the lix state
+						lixState.content = fsState.content;
+						lixState.state = "known";
+						fsState.state = "known";
+					}
+				} else if (fsState.state === "gone") {
+					if (lixState.state === "unknown") {
+						// TODO A file was added to lix while a known file from fs was removed?
+						throw new Error(
+							"Illeagal lix<->fs sync state. The file [" +
+								path +
+								"] that was " +
+								fsState.state +
+								" but it was not known by lix yet?"
+						);
+					} else if (lixState.state === "known") {
+						// file is in known state with lix - means we have only changes on the fs - easy
+						await args.lix.db
+							.deleteFrom("file_internal")
+							.where("path", "=", path)
+							.execute();
+						// NOTE: states where both are gone will get removed in the lix state loop
+						lixState.state = "gone";
+					} else if (lixState.state === "updated") {
+						// seems like we saw an update on the file in fs while some changes on lix have not been reached fs? FS -> Winns?
+						console.warn(
+							"seems like we saw an update on the file in fs while some changes on lix have not been reached fs? FS -> Winns?"
+						);
+						await args.lix.db
+							.deleteFrom("file_internal")
+							.where("path", "=", path)
+							.execute();
+						// NOTE: states where both are gone will get removed in the lix state loop
+						lixState.state = "gone";
+						fsState.state = "gone";
+					} else if (lixState.state === "gone") {
+						console.warn(
+							"seems like we saw an delete in lix while we have a delete in lix simultaniously?"
+						);
+						lixState.state = "gone";
+						fsState.state = "gone";
+					}
+				}
+			}
+		}
+
+		for (const [path, lixState] of Object.entries(statesToSync.lixFileStates)) {
+			// no state for file in fs
+			if (!statesToSync.fsFileStates[path]) {
+				if (lixState.state == "unknown") {
+					// ADD TO FS (6)
+					args.fs.writeFileSync(
+						// TODO check platform dependent folder separator
+						args.path + path,
+						Buffer.from(lixState.content)
+					);
+					statesToSync.fsFileStates[path] = {
+						state: "known",
+						content: lixState.content,
+					};
+				} else {
+					// ERROR (11) 16 21
+					// The file does not exist on fs but its state differs from unknown?
+					throw new Error(
+						"Illeagal lix<->fs sync state. The file [" +
+							path +
+							"] that was in the state" +
+							lixState.state +
+							" for lix did not exist on disk"
+					);
+				}
+			} else {
+				if (
+					lixState.state === "gone" &&
+					statesToSync.fsFileStates[path].state === "gone"
+				) {
+					delete statesToSync.lixFileStates[path];
+					delete statesToSync.fsFileStates[path];
+				} else if (lixState.state !== statesToSync.fsFileStates[path].state) {
+					throw new Error(
+						"At this stage both states should be in sync lix state " +
+							lixState.state +
+							" fs state " +
+							statesToSync.fsFileStates[path].state
+					);
+				}
+			}
+		}
+	}
+
+	async function syncFiles(
+		dirPath: string,
+		fileStates: {
+			lixFileStates: FsFileState;
+			fsFileStates: FsFileState;
+		},
+		interval?: number
+	) {
+		// mark all states as removed - checkFsStateRecursive will update those that exist on the disc correspondingly
+		for (const fsState of Object.values(fileStates.fsFileStates)) {
+			fsState.state = "gone";
+		}
+
+		// mark all states as removed - checkFsStateRecursive will update those that exist on the disc correspondingly
+		for (const lixState of Object.values(fileStates.lixFileStates)) {
+			lixState.state = "gone";
+		}
+
+		// read states from disc - detect changes
+		await checkFsStateRecursive(dirPath, fileStates.fsFileStates);
+
+		// read states form lix - detect changes
+		await checkLixState(fileStates.lixFileStates);
+
+		// sync fs<->lix
+		await syncUpFsAndLixFiles(fileStates);
+
+		if (interval) {
+			setTimeout(() => {
+				syncFiles(dirPath, fileStates, interval);
+			}, interval);
+		}
+
+		return;
+	}
+
+	// Initial copy of all files
+	await syncFiles(
+		args.path,
+		{ fsFileStates: {}, lixFileStates: {} },
+		args.syncInterval
+	);
+
+	return;
 }
 
+async function upsertFileInLix(
+	args: { fs: typeof fs; path: string; lix: Lix },
+	path: string,
+	data: ArrayBuffer
+) {
+	// file is in known state with lix - means we have only changes on the fs - easy
+	// NOTE we use file_internal for now see: https://linear.app/opral/issue/LIXDK-102/re-visit-simplifying-the-change-queue-implementation#comment-65eb3485
+	// This means we don't see changes for the file we update via this method!
+	await args.lix.db
+		.insertInto("file_internal") // change queue
+		.values({
+			path: path,
+			data,
+		})
+		.onConflict((oc) => oc.column("path").doUpdateSet({ data }))
+		.execute();
+}
 
 // TODO i guess we should move this validation logic into sdk2/src/project/loadProject.ts
 function categorizePlugins(plugins: readonly InlangPlugin[]): {
