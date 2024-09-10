@@ -1,5 +1,4 @@
 import type { HCaptchaFunctions, HCaptchaExecuteResponse } from "solid-hcaptcha"
-import { publicEnv } from "@inlang/env-variables"
 
 import HCaptcha from "solid-hcaptcha"
 import { Show } from "solid-js"
@@ -28,7 +27,7 @@ export default function Captcha(props: {
 		>
 			<Show when={typeof window !== "undefined"}>
 				<HCaptcha
-					sitekey={publicEnv.PUBLIC_HCAPTCHA_SITEKEY}
+					sitekey={import.meta.env.PUBLIC_HCAPTCHA_SITEKEY}
 					onLoad={(hcaptcha_instance) => (hcaptcha = hcaptcha_instance)}
 					size="invisible"
 				/>
