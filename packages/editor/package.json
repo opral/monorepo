@@ -78,7 +78,6 @@
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
-		"@inlang/telemetry": "workspace:*",
 		"@tailwindcss/aspect-ratio": "^0.4.2",
 		"@tailwindcss/forms": "^0.5.3",
 		"@tailwindcss/typography": "^0.5.7",
