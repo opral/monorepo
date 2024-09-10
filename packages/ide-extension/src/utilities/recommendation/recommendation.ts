@@ -19,7 +19,7 @@ export function createRecommendationView(args: {
 				switch (message.command) {
 					case "addSherlockToWorkspace":
 						if (args.workspaceFolder) {
-							Sherlock.add({
+							await Sherlock.add({
 								fs: args.fs,
 								workingDirectory: args.workspaceFolder.uri.fsPath,
 							})
@@ -35,24 +35,40 @@ export function createRecommendationView(args: {
 				}
 			})
 
-			webviewView.webview.html = await getRecommendationViewHtml({
-				webview: webviewView.webview,
-				workspaceFolder: args.workspaceFolder,
-				context: args.context,
-				fs: args.fs,
-			})
+			// Load the webview content initially
+			await updateRecommendationViewHtml(webviewView, args)
 
-			// Listen for updates
-			CONFIGURATION.EVENTS.ON_DID_RECOMMENDATION_VIEW_CHANGE.event(async () => {
-				webviewView.webview.html = await getRecommendationViewHtml({
-					webview: webviewView.webview,
-					workspaceFolder: args.workspaceFolder,
-					context: args.context,
-					fs: args.fs,
-				})
+			// Listen for updates and debounce rapid events
+			const debouncedUpdate = debounce(() => updateRecommendationViewHtml(webviewView, args), 300)
+
+			const disposableEvent = CONFIGURATION.EVENTS.ON_DID_RECOMMENDATION_VIEW_CHANGE.event(
+				async () => {
+					debouncedUpdate()
+				}
+			)
+
+			// Dispose the listener when the view is disposed
+			webviewView.onDidDispose(() => {
+				disposableEvent.dispose()
 			})
 		},
 	}
+}
+
+async function updateRecommendationViewHtml(
+	webviewView: vscode.WebviewView,
+	args: {
+		workspaceFolder: vscode.WorkspaceFolder
+		context: vscode.ExtensionContext
+		fs: FileSystem
+	}
+) {
+	webviewView.webview.html = await getRecommendationViewHtml({
+		webview: webviewView.webview,
+		workspaceFolder: args.workspaceFolder,
+		context: args.context,
+		fs: args.fs,
+	})
 }
 
 export async function getRecommendationViewHtml(args: {
@@ -214,4 +230,15 @@ export async function recommendationBannerView(args: {
 			workspaceFolder: args.workspaceFolder,
 		})
 	)
+}
+
+const debounce = <T extends (...args: any[]) => void>(
+	fn: T,
+	delay: number
+): ((...args: Parameters<T>) => void) => {
+	let timeout: NodeJS.Timeout
+	return (...args: Parameters<T>) => {
+		clearTimeout(timeout)
+		timeout = setTimeout(() => fn(...args), delay)
+	}
 }
