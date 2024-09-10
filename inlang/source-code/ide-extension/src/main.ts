@@ -11,7 +11,6 @@ import { errorView } from "./utilities/errors/errors.js"
 import { messageView } from "./utilities/messages/messages.js"
 import { createFileSystemMapper, type FileSystem } from "./utilities/fs/createFileSystemMapper.js"
 import fs from "node:fs/promises"
-import { normalizePath } from "@lix-js/fs"
 import { gettingStartedView } from "./utilities/getting-started/gettingStarted.js"
 import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
 import { recommendationBannerView } from "./utilities/recommendation/recommendation.js"
@@ -20,6 +19,7 @@ import { version } from "../package.json"
 import { statusBar } from "./utilities/settings/statusBar.js"
 import fg from "fast-glob"
 import type { IdeExtensionConfig } from "@inlang/sdk2"
+import path from "node:path"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
@@ -46,7 +46,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			},
 		})
 
-		const mappedFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)
+		const mappedFs = createFileSystemMapper(path.normalize(workspaceFolder.uri.fsPath), fs)
 
 		await setProjects({ workspaceFolder })
 		await main({ context, workspaceFolder, fs: mappedFs })
@@ -66,7 +66,7 @@ async function main(args: {
 	if (state().projectsInWorkspace.length > 0) {
 		// find the closest project to the workspace
 		const closestProjectToWorkspace = await closestInlangProject({
-			workingDirectory: normalizePath(args.workspaceFolder.uri.fsPath),
+			workingDirectory: path.normalize(args.workspaceFolder.uri.fsPath),
 			projects: state().projectsInWorkspace,
 		})
 
