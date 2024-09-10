@@ -1,5 +1,5 @@
 import type { TelemetryEvents } from "../services/telemetry/events.js"
-import { telemetry } from "../services/telemetry/implementation.js"
+import { telemetry } from "../services/telemetry/index.js"
 import * as vscode from "vscode"
 import { version } from "../../package.json"
 
