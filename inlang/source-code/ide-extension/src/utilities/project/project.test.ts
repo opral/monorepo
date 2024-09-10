@@ -4,7 +4,6 @@ import * as fs from "node:fs/promises"
 import { setState, state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
 import { telemetry } from "../../services/telemetry/index.js"
-import { openRepository, findRepoRoot } from "@lix-js/client"
 import {
 	createProjectViewNodes,
 	getTreeItem,
@@ -14,6 +13,7 @@ import {
 	projectView,
 } from "./project.js"
 import { loadProjectFromDirectoryInMemory } from "@inlang/sdk2"
+import type { FileSystem } from "../fs/createFileSystemMapper.js"
 
 vi.mock("vscode", () => ({
 	Uri: {
@@ -38,10 +38,6 @@ vi.mock("vscode", () => ({
 
 vi.mock("@inlang/sdk2", () => ({
 	loadProjectFromDirectoryInMemory: vi.fn(),
-}))
-
-vi.mock("@lix-js/fs", () => ({
-	normalizePath: vi.fn((path: string) => path),
 }))
 
 vi.mock("../state.js", () => ({
@@ -187,7 +183,7 @@ describe("getTreeItem", () => {
 		} as vscode.WorkspaceFolder
 		const treeItem = getTreeItem({
 			element: node,
-			fs: {} as typeof import("node:fs/promises"),
+			fs: {} as FileSystem,
 			workspaceFolder,
 		})
 		expect(treeItem.label).toBe("testProject")
@@ -256,10 +252,6 @@ describe("handleTreeSelection", () => {
 			},
 		} as vscode.WorkspaceFolder
 
-		// @ts-expect-error
-		openRepository.mockResolvedValue({})
-		// @ts-expect-error
-		findRepoRoot.mockResolvedValue("/path/to/repo")
 		// @ts-expect-error
 		loadProjectFromDirectoryInMemory.mockRejectedValue(new Error("Loading failed"))
 

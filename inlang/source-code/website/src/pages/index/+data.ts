@@ -1,5 +1,3 @@
-import { privateEnv } from "@inlang/env-variables"
-
 export { data }
 export type Data = Awaited<ReturnType<typeof data>>
 
@@ -92,7 +90,7 @@ async function data() {
 				{
 					method: "POST",
 					headers: {
-						Authorization: "Bearer " + privateEnv.POSTHOG_API_KEY,
+						Authorization: "Bearer " + process.env.POSTHOG_API_KEY,
 						"Content-Type": "application/json",
 					},
 					body: raw,

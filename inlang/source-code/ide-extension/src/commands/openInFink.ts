@@ -1,5 +1,5 @@
 import { Uri, commands, env } from "vscode"
-import { telemetry } from "../services/telemetry/index.js"
+import { telemetry } from "../services/telemetry/implementation.js"
 import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../configuration.js"
 import { getGitOrigin } from "../utilities/settings/getGitOrigin.js"
@@ -15,7 +15,7 @@ export const openInFinkCommand = {
 		const uri = args.messageId
 			? `${CONFIGURATION.STRINGS.FINK_BASE_URL}${origin}?project=${encodeURIComponent(
 					args.selectedProjectPath
-				)}&branch=${encodeURIComponent(branch)}&id=${encodeURIComponent(args.messageId)}`
+			  )}&branch=${encodeURIComponent(branch)}&id=${encodeURIComponent(args.messageId)}`
 			: `${CONFIGURATION.STRINGS.FINK_BASE_URL}${origin}?branch=${encodeURIComponent(branch)}`
 
 		env.openExternal(Uri.parse(uri))

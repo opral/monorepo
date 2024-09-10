@@ -1,6 +1,7 @@
 export { newProject } from "./project/newProject.js";
 export { loadProjectInMemory } from "./project/loadProjectInMemory.js";
 export { loadProjectFromDirectoryInMemory } from "./project/loadProjectFromDirectory.js";
+export { saveProjectToDirectory } from "./project/saveProjectToDirectory.js";
 export type { InlangProject } from "./project/api.js";
 export * from "./json-schema/settings.js";
 export * from "./json-schema/pattern.js";

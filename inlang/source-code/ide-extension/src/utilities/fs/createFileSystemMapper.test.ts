@@ -1,34 +1,29 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as _path from "node:path"
-import { createFileSystemMapper } from "./createFileSystemMapper.js"
+import { createFileSystemMapper, type FileSystem } from "./createFileSystemMapper.js"
 
 describe("createFileSystemMapper", () => {
 	const normalizedBase = "/base/path"
-	let mockFs: typeof import("node:fs/promises")
+	let mockFs: FileSystem
 
 	beforeEach(() => {
+		// Mock the fs functions
 		mockFs = {
-			// TODO: Fix the type of the mockFs object – fix overloads
-			writeFile: vi.fn(),
-			// @ts-expect-error
 			readFile: vi.fn(),
-			// @ts-expect-error
-			readdir: vi.fn(),
-			rm: vi.fn(),
+			writeFile: vi.fn(),
+			mkdir: vi.fn(),
 			rmdir: vi.fn(),
+			rm: vi.fn(),
 			unlink: vi.fn(),
-			// @ts-expect-error
+			readdir: vi.fn(),
 			readlink: vi.fn(),
 			symlink: vi.fn(),
-			// @ts-expect-error
-			mkdir: vi.fn(),
-			// @ts-expect-error
 			stat: vi.fn(),
-			// @ts-expect-error
-			watch: vi.fn(),
-			// @ts-expect-error
 			lstat: vi.fn(),
-		}
+			watch: vi.fn(),
+			access: vi.fn(),
+			copyFile: vi.fn(),
+		} as unknown as FileSystem
 	})
 
 	it("should map writeFile correctly", async () => {

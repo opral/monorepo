@@ -16,8 +16,8 @@ import Link from "#src/renderer/Link.jsx"
 import { getAuthClient } from "@lix-js/client"
 import { currentPageContext } from "#src/renderer/state.js"
 import { replaceMetaInfo } from "./helper/ReplaceMetaInfo.js"
-import { publicEnv } from "@inlang/env-variables"
 import { posthog as telemetryBrowser } from "posthog-js"
+import { publicEnv } from "#src/services/env-variables/index.js"
 
 const browserAuth = getAuthClient({
 	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
