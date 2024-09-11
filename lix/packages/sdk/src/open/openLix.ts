@@ -3,6 +3,7 @@ import { handleFileChange, handleFileInsert } from "../file-handlers.js";
 import { loadPlugins } from "../load-plugin.js";
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
+import { commit } from "../commit.js";
 
 // TODO: fix in fink to not use time ordering!
 // .orderBy("commit.created desc")
@@ -170,10 +171,8 @@ export async function openLix(args: {
 		/**
 		 * @deprecated we will use another solutionf or commits like taggin changes to filter the hitory
 		 */
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		commit: (args: { description: string }) => {
-			return;
-			// return commit({ ...args, db, currentAuthor });
+			return commit({ ...args, db, currentAuthor });
 		},
 	};
 }

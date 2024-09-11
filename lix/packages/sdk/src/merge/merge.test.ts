@@ -445,6 +445,7 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 		{
 			id: "2",
 			operation: "update",
+			commit_id: "commit-1",
 			type: "mock",
 			value: { id: "mock-id", color: "blue" },
 			file_id: "mock-file",
@@ -452,13 +453,13 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 		},
 	];
 
-	// const commitsOnlyInSourceLix: NewCommit[] = [
-	// 	{
-	// 		id: "commit-1",
-	// 		description: "",
-	// 		parent_id: "0",
-	// 	},
-	// ];
+	const commitsOnlyInSourceLix: NewCommit[] = [
+		{
+			id: "commit-1",
+			description: "",
+			parent_id: "0",
+		},
+	];
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
@@ -490,17 +491,17 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 		.values(changesOnlyInSourceLix)
 		.execute();
 
-	// await sourceLix.db
-	// 	.insertInto("commit")
-	// 	.values(commitsOnlyInSourceLix)
-	// 	.execute();
+	await sourceLix.db
+		.insertInto("commit")
+		.values(commitsOnlyInSourceLix)
+		.execute();
 
 	await merge({ sourceLix, targetLix });
 
 	const changes = await targetLix.db.selectFrom("change").selectAll().execute();
-	// const commits = await targetLix.db.selectFrom("commit").selectAll().execute();
+	const commits = await targetLix.db.selectFrom("commit").selectAll().execute();
 
 	expect(changes.length).toBe(1);
-	// expect(commits.length).toBe(1);
-	// expect(changes[0]?.commit_id).toBe("commit-1");
+	expect(commits.length).toBe(1);
+	expect(changes[0]?.commit_id).toBe("commit-1");
 });
