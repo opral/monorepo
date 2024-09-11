@@ -1,4 +1,18 @@
-import { defaultProjectSettings } from "@inlang/sdk"
+import type { ProjectSettings } from "@inlang/sdk2"
+
+/**
+ * Default project settings for createNewProject
+ * from paraglide-js/src/cli/commands/init/defaults.ts
+ */
+const defaultProjectSettings = {
+	$schema: "https://inlang.com/schema/project-settings",
+	baseLocale: "en",
+	locales: ["en"],
+	modules: [],
+	"plugin.inlang.messageFormat": {
+		pathPattern: "./messages/{locale}.json",
+	},
+} satisfies ProjectSettings
 
 /**
  * @returns A new copy of the default project template that is safe to mutate.

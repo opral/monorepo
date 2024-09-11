@@ -1,8 +1,6 @@
 import memfs from "memfs"
-import nodeFsPromises from "node:fs/promises"
+import type fs from "node:fs/promises"
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
-import type { NodeishFilesystem } from "@lix-js/fs"
 
 beforeEach(() => {
 	vi.resetModules()
@@ -77,20 +75,5 @@ describe("write output", () => {
 
 const mockFs = (files: memfs.DirectoryJSON) => {
 	const _memfs = memfs.createFsFromVolume(memfs.Volume.fromJSON(files))
-	const lixFs = createNodeishMemoryFs()
-	for (const prop in nodeFsPromises) {
-		// @ts-ignore - memfs has the same interface as node:fs/promises
-		if (typeof nodeFsPromises[prop] !== "function") continue
-		// @ts-ignore - memfs dies not have a watch interface - quick fix should be updated
-		if (nodeFsPromises[prop].name === "watch") {
-			// @ts-ignore - memfs has the same interface as node:fs/promises
-			vi.spyOn(_memfs.promises, prop).mockImplementation(lixFs[prop])
-		} else {
-			if (prop in _memfs.promises) {
-				// @ts-ignore - memfs has the same interface as node:fs/promises
-				vi.spyOn(_memfs.promises, prop)
-			}
-		}
-	}
-	return _memfs.promises as NodeishFilesystem
+	return _memfs.promises as unknown as typeof fs
 }

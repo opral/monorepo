@@ -26,7 +26,7 @@ export async function importFiles(opts: {
 		});
 	}
 
-	const { bundles } = plugin.importFiles({
+	const { bundles } = await plugin.importFiles({
 		files: opts.files,
 		settings: structuredClone(opts.settings),
 	});

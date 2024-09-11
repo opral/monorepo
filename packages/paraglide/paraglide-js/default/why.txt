@@ -1,4 +1,3 @@
 Paraglide is a CLI at it's heart & therefore doesn't have a real JS entry point. This 
 means that NPM doesn't show the TS icon on the package, which may lead people to believe
-it's not typesafe. To sidestep this we added an empty export. We don't think this is dishonest,
-because both paraglide's source code and it's output are fully typed. 
+it's not typesafe. To sidestep this we added an empty export.

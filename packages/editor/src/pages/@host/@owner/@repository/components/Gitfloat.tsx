@@ -22,8 +22,8 @@ import {
 import { WarningIcon } from "./Notification/NotificationHint.jsx"
 import IconArrowDownward from "~icons/material-symbols/arrow-downward-alt"
 import { debounce } from "throttle-debounce"
-import { publicEnv } from "@inlang/env-variables"
 import { triggerAddNinja } from "../+Page.jsx"
+import { publicEnv } from "#src/services/env-variables/index.js"
 
 const browserAuth = getAuthClient({
 	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,

@@ -1,9 +1,10 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"currentLanguageTag": "The current language tag is \"{languageTag}\".",
-	"greeting": "Welcome {name}! You have {count} messages.",
+	"greeting": "Welcome {name}! You have {count, plural, other {# messages} one {one message} =0 {no messages}}.",
 	"hello": "Hello World!",
 	"with_backtick": "`Hello World!`",
 	"with_nonjs_variable": "Hello {000}",
-	"missing_in_german": "This is missing in German"
+	"missing_in_german": "This is missing in German",
+	"progress": "Progress: {n, number, percent}"
 }

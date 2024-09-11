@@ -48,19 +48,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 		const mappedFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)
 
-		try {
-			const projectsList = (await fg.async("*.inlang", { onlyDirectories: true })).map(
-				(project) => ({
-					projectPath: project,
-				})
-			)
-			setState({ ...state(), projectsInWorkspace: projectsList })
-		} catch (error) {
-			handleError(error)
-			return
-		}
-
+		await setProjects({ workspaceFolder })
 		await main({ context, workspaceFolder, fs: mappedFs })
+
 		msg("Sherlock activated", "info")
 	} catch (error) {
 		handleError(error)
@@ -167,5 +157,25 @@ async function handleInlangErrors() {
 	const inlangErrors = (await state().project.errors.get()) || []
 	if (inlangErrors.length > 0) {
 		console.error("Extension errors (Sherlock):", inlangErrors)
+	}
+}
+
+async function setProjects(args: { workspaceFolder: vscode.WorkspaceFolder }) {
+	try {
+		const projectsList = (
+			await fg.async(`${args.workspaceFolder.uri.fsPath}/**/*.inlang`, {
+				onlyDirectories: true,
+				ignore: ["**/node_modules/**"],
+			})
+		).map((project) => ({
+			projectPath: project,
+		}))
+
+		setState({
+			...state(),
+			projectsInWorkspace: projectsList,
+		})
+	} catch (error) {
+		handleError(error)
 	}
 }

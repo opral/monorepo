@@ -1,13 +1,13 @@
 import { subscribeNewsletter } from "./subscribeNewsletter.js"
 import { subscribeCategory } from "./subscribeCategory.js"
-import { machineTranslateMessage } from "./machineTranslateMessage.js"
+import { machineTranslateBundle } from "./machineTranslateBundle.js"
 
 export const allRpcs = {
-	machineTranslateMessage,
+	machineTranslateBundle,
 	/**
-	 * @deprecated use machineTranslateMessage instead
+	 * @deprecated renamed to `machineTranslateBundle`
 	 */
-	machineTranslate: () => undefined,
+	machineTranslateMessage: machineTranslateBundle,
 	subscribeNewsletter,
 	subscribeCategory,
 }
