@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { bundleIdOrAliasIs } from "./bundleIdOrAliasIs.js";
 import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
 import { newProject } from "../project/newProject.js";
+import { selectBundleNested } from "./selectBundleNested.js";
 
 test("should return the bundle by id", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
@@ -68,5 +69,32 @@ test("it should return multiple bundles by alias", async () => {
 
 	expect(byId).toStrictEqual([
 		{ id: "some-id", alias: { mock: "some-alias" } },
+	]);
+});
+
+test("combining with other query utilities should be possible", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	await project.db
+		.insertInto("bundle")
+		.values([
+			{ id: "some-id", alias: { mock: "some-alias" } },
+			{ id: "some-id-2", alias: { other: "some-alias" } },
+			{ id: "some-id-3", alias: { other: "another-alias" } },
+		])
+		.execute();
+
+	const bundles = await selectBundleNested(project.db)
+		.where(bundleIdOrAliasIs("some-alias"))
+		.execute();
+
+	expect(bundles).toEqual([
+		expect.objectContaining({
+			id: "some-id",
+			alias: { mock: "some-alias" },
+		}),
+		expect.objectContaining({
+			id: "some-id-2",
+			alias: { other: "some-alias" },
+		}),
 	]);
 });
