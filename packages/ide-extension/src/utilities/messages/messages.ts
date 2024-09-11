@@ -474,7 +474,7 @@ export async function getTranslationsTableHtml(args: {
 			const missingTranslationMessage = CONFIGURATION.STRINGS.MISSING_TRANSLATION_MESSAGE
 			const editCommand = `editMessage('${args.bundle.id}', '${escapeHtml(locale)}')`
 			const machineTranslateCommand = `machineTranslate('${args.bundle.id}', '${
-				settings.sourceLanguageTag || settings.baseLocale
+				settings.baseLocale
 			}', ['${locale}'])`
 
 			return `
