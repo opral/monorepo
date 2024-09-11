@@ -1,26 +1,29 @@
-import type { InlangProject } from "@inlang/sdk"
+import { selectBundleNested, type InlangProject } from "@inlang/sdk2"
 import type { CliStep } from "../utils.js"
 import path from "node:path"
 import { compile } from "~/compiler/compile.js"
 import { writeOutput } from "~/services/file-handling/write-output.js"
-import type { Repository } from "@lix-js/client"
+import type { NodeishFilesystem } from "~/services/file-handling/types.js"
 
 export const runCompiler: CliStep<
 	{
 		project: InlangProject
 		outdir: string
-		repo: Repository
+		fs: NodeishFilesystem
 	},
 	unknown
 > = async (ctx) => {
 	const absoluteOutdir = path.resolve(process.cwd(), ctx.outdir)
+	const bundles = await selectBundleNested(ctx.project.db).execute()
+	const settings = await ctx.project.settings.get()
 
 	const output = await compile({
-		messages: ctx.project.query.messages.getAll(),
-		settings: ctx.project.settings(),
-		projectId: ctx.project.id,
+		bundles,
+		settings,
+		projectId: undefined,
+		outputStructure: "regular",
 	})
 
-	await writeOutput(absoluteOutdir, output, ctx.repo.nodeishFs)
+	await writeOutput(absoluteOutdir, output, ctx.fs)
 	return ctx
 }

@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
+import { validate } from "uuid";
 
 test("it should persist changes of bundles, messages, and variants to lix ", async () => {
 	const file1 = await newProject();
@@ -30,8 +31,6 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 			pattern: [],
 		})
 		.execute();
-
-	await project1.settled();
 
 	const file1AfterUpdates = await project1.toBlob();
 	await project1.close();
@@ -101,4 +100,53 @@ test("providing plugins should work", async () => {
 	expect(plugins.length).toBe(1);
 	expect(plugins[0]?.key).toBe("my-provided-plugin");
 	expect(errors.length).toBe(0);
+});
+
+test("if a project has no id, it should be generated", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+
+	await project.lix.db
+		.deleteFrom("file_internal")
+		.where("path", "=", "/project_id")
+		.execute();
+
+	const blob = await project.toBlob();
+
+	const project2 = await loadProjectInMemory({ blob });
+
+	const id = await project2.id.get();
+
+	expect(id).toBeDefined();
+	expect(validate(id)).toBe(true);
+});
+
+test("subscribing to errors should work", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+
+	expect(await project.errors.get()).toEqual([]);
+
+	let errorsFromSub: readonly Error[] = [];
+	project.errors.subscribe((value) => {
+		errorsFromSub = value;
+	});
+
+	await project.lix.db
+		.updateTable("file_internal")
+		.where("path", "=", "/settings.json")
+		.set({
+			data: new TextEncoder().encode(
+				JSON.stringify({
+					baseLocale: "en",
+					locales: ["en"],
+					modules: ["invalid-module.js"],
+				})
+			),
+		})
+		.execute();
+
+	const errors = await project.errors.get();
+
+	expect(errors.length).toBe(1);
+	expect(errorsFromSub.length).toBe(1);
+	expect(errorsFromSub).toStrictEqual(errors);
 });

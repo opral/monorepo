@@ -8,8 +8,6 @@
 		"sourceMap": false,
 		"checkJs": true,
 		"allowJs": true,
-		"emitDeclarationOnly": true,
-		"declarationMap": false,
 		"skipLibCheck": true,
 		"paths": {
 			"~/*": ["./src/*"]

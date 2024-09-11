@@ -3,7 +3,7 @@ import { authorNameAtom, projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
 import { InlangProject } from "@inlang/sdk2";
 import timeAgo from "../helper/timeAgo.ts";
-import { Commit } from "@lix-js/sdk";
+import { Commit } from "@inlang/sdk2";
 
 const VariantHistory = (props: { variantId: string }) => {
 	const [project] = useAtom(projectAtom);

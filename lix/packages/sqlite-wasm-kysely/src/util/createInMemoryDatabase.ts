@@ -23,6 +23,8 @@ async function initSqlite() {
     await sqlite3InitModule({
       // @ts-expect-error
       wasmBinary: wasmBinary,
+      // https://github.com/opral/inlang-sdk/issues/170#issuecomment-2334768193
+      locateFile: () => "sqlite3.wasm",
     }),
   );
 }

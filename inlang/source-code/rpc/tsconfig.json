@@ -1,9 +1,11 @@
 {
 	"extends": "../tsconfig.base.json",
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*.ts", "src/services/env-variables/index.js"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
 		"types": [],
+		// required to copy js files to dist
+		"allowJs": true,
 		"outDir": "./dist",
 		"rootDir": "./src"
 	}

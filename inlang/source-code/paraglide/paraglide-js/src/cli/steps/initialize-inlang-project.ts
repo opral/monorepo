@@ -1,12 +1,4 @@
-import {
-	LanguageTag,
-	isValidLanguageTag,
-	createNewProject,
-	listProjects,
-	loadProject,
-	type InlangProject,
-} from "@inlang/sdk"
-import type { Repository } from "@lix-js/client"
+import { loadProjectFromDirectoryInMemory, type InlangProject } from "@inlang/sdk2"
 import type { Logger } from "~/services/logger/index.js"
 import type { CliStep } from "../utils.js"
 import { prompt } from "~/cli/utils.js"
@@ -14,23 +6,23 @@ import { DEFAULT_PROJECT_PATH, getNewProjectTemplate } from "~/cli/defaults.js"
 import nodePath from "node:path"
 import consola from "consola"
 import dedent from "dedent"
+import type { NodeishFilesystem } from "~/services/file-handling/types.js"
+import fg from "fast-glob"
 
 export const initializeInlangProject: CliStep<
-	{ repo: Repository; logger: Logger; repoRoot: string; appId: string },
+	{ fs: NodeishFilesystem; logger: Logger; root: string; appId: string },
 	{
 		project: InlangProject
 		/** Relative path to the project */
 		projectPath: string
 	}
 > = async (ctx) => {
-	const existingProjectPaths = (await listProjects(ctx.repo.nodeishFs, ctx.repoRoot)).map(
-		(v) => v.projectPath
-	)
+	const existingProjectPaths = fg.sync("*.inlang")
 
 	if (existingProjectPaths.length > 0) {
 		const { project, projectPath } = await existingProjectFlow({
 			existingProjectPaths,
-			repo: ctx.repo,
+			fs: ctx.fs,
 			logger: ctx.logger,
 			appId: ctx.appId,
 		})
@@ -53,7 +45,7 @@ export const initializeInlangProject: CliStep<
 export const existingProjectFlow = async (ctx: {
 	/** An array of absolute paths to existing projects. */
 	existingProjectPaths: string[]
-	repo: Repository
+	fs: NodeishFilesystem
 	logger: Logger
 	appId: string
 }): Promise<{ project: InlangProject; projectPath: string }> => {
@@ -79,17 +71,17 @@ export const existingProjectFlow = async (ctx: {
 	if (selection === NEW_PROJECT_VALUE) return createNewProjectFlow(ctx)
 
 	const projectPath = selection
-	const project = await loadProject({
-		projectPath,
-		repo: ctx.repo,
-		appId: ctx.appId,
+	const project = await loadProjectFromDirectoryInMemory({
+		path: projectPath,
+		fs: ctx.fs,
+		// appId: ctx.appId,
 	})
 
-	if (project.errors().length > 0) {
+	if ((await project.errors.get()).length > 0) {
 		ctx.logger.error(
 			"Aborting paragilde initialization. - The selected project has errors. Either fix them, or remove the project and create a new one."
 		)
-		for (const error of project.errors()) {
+		for (const error of await project.errors.get()) {
 			ctx.logger.error(error)
 		}
 		process.exit(1)
@@ -99,7 +91,7 @@ export const existingProjectFlow = async (ctx: {
 }
 
 function parseLanguageTagInput(input: string): {
-	validLanguageTags: LanguageTag[]
+	validLanguageTags: string[]
 	invalidLanguageTags: string[]
 } {
 	const languageTags = input
@@ -108,7 +100,7 @@ function parseLanguageTagInput(input: string): {
 		.filter(Boolean) //remove empty segments
 		.map((tag) => tag.toLowerCase())
 
-	const validLanguageTags: LanguageTag[] = []
+	const validLanguageTags: string[] = []
 	const invalidLanguageTags: string[] = []
 
 	for (const tag of languageTags) {
@@ -125,9 +117,7 @@ function parseLanguageTagInput(input: string): {
 	}
 }
 
-async function promptForLanguageTags(
-	initialLanguageTags: LanguageTag[] = []
-): Promise<LanguageTag[]> {
+async function promptForLanguageTags(initialLanguageTags: string[] = []): Promise<string[]> {
 	const languageTagsInput =
 		(await prompt("Which languages do you want to support?", {
 			type: "text",
@@ -146,9 +136,9 @@ async function promptForLanguageTags(
 		const message =
 			invalidLanguageTags.length === 1
 				? invalidLanguageTags[0] +
-				  " isn't a valid language tag. Please stick to IEEE BCP-47 Language Tags"
+					" isn't a valid language tag. Please stick to IEEE BCP-47 Language Tags"
 				: invalidLanguageTags.map((tag) => `"${tag}"`).join(", ") +
-				  " aren't valid language tags. Please stick to IEEE BCP-47 Language Tags"
+					" aren't valid language tags. Please stick to IEEE BCP-47 Language Tags"
 
 		consola.warn(message)
 		return await promptForLanguageTags(validLanguageTags)
@@ -157,7 +147,7 @@ async function promptForLanguageTags(
 	return validLanguageTags
 }
 export const createNewProjectFlow = async (ctx: {
-	repo: Repository
+	fs: NodeishFilesystem
 	logger: Logger
 	appId: string
 }): Promise<{
@@ -172,19 +162,19 @@ export const createNewProjectFlow = async (ctx: {
 	const sourceLanguageTag = languageTags[0]
 	if (!sourceLanguageTag) throw new Error("sourceLanguageTag is not defined")
 
-	settings.languageTags = languageTags
-	settings.sourceLanguageTag = sourceLanguageTag
+	settings.locales = languageTags
+	settings.baseLocale = sourceLanguageTag
 
 	const messagePath = settings["plugin.inlang.messageFormat"].pathPattern
 
 	//create the messages dir if it doesn't exist
 	const messageDir = nodePath.dirname(nodePath.resolve(process.cwd(), messagePath))
-	await ctx.repo.nodeishFs.mkdir(messageDir, { recursive: true })
+	await ctx.fs.mkdir(messageDir, { recursive: true })
 
 	await Promise.allSettled(
 		languageTags.map(async (languageTag) => {
 			const languageFile = nodePath.resolve(messageDir, languageTag + ".json")
-			await ctx.repo.nodeishFs.writeFile(
+			await ctx.fs.writeFile(
 				languageFile,
 				dedent`
                     {
@@ -197,22 +187,27 @@ export const createNewProjectFlow = async (ctx: {
 	ctx.logger.info(`Creating a new inlang project in the current working directory.`)
 
 	const projectPath = nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH)
-	await createNewProject({
-		projectPath,
-		repo: ctx.repo,
-		projectSettings: settings,
-	})
-	const project = await loadProject({
-		projectPath,
-		repo: ctx.repo,
-		appId: ctx.appId,
+
+	//create default project
+	await ctx.fs.mkdir(projectPath, { recursive: true })
+
+	// write default settings
+	await ctx.fs.writeFile(
+		nodePath.resolve(projectPath, "settings.json"),
+		JSON.stringify(settings, undefined, 2)
+	)
+
+	const project = await loadProjectFromDirectoryInMemory({
+		path: projectPath,
+		fs: ctx.fs,
+		// appId: ctx.appId,
 	})
 
-	if (project.errors().length > 0) {
+	if ((await project.errors.get()).length > 0) {
 		ctx.logger.warn(
 			"Failed to create a new inlang project.\n\nThis is likely an internal bug. Please file an issue at https://github.com/opral/monorepo."
 		)
-		for (const error of project.errors()) {
+		for (const error of await project.errors.get()) {
 			ctx.logger.error(error)
 		}
 		return process.exit(1)
@@ -255,3 +250,11 @@ function longestCommonPrefix(strA: string, strB: string): string {
 	}
 	return commonPrefix
 }
+
+/**
+ * Follows the IETF BCP 47 language tag schema with modifications.
+ */
+export const pattern =
+	"^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$"
+
+const isValidLanguageTag = (languageTag: string): boolean => RegExp(`${pattern}`).test(languageTag)

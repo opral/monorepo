@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 import { expect, test, vi } from "vitest";
 import { openLixInMemory } from "./open/openLixInMemory.js";
 import { newLixFile } from "./newLix.js";
@@ -59,6 +60,7 @@ test("should use queue and settled correctly", async () => {
 		{
 			id: 1,
 			file_id: "test",
+			metadata: null,
 			path: "test.txt",
 			data: queue[0]?.data,
 		},
@@ -79,6 +81,7 @@ test("should use queue and settled correctly", async () => {
 			data: internalFilesAfter[0]?.data,
 			id: "test",
 			path: "test.txt",
+			metadata: null,
 		},
 	]);
 
@@ -122,12 +125,14 @@ test("should use queue and settled correctly", async () => {
 			id: 2,
 			file_id: "test",
 			path: "test.txt",
+			metadata: null,
 			data: queue2[0]?.data,
 		},
 		{
 			id: 3,
 			file_id: "test",
 			path: "test.txt",
+			metadata: null,
 			data: queue2[1]?.data,
 		},
 	]);

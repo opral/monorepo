@@ -42,22 +42,24 @@
 	],
 	"scripts": {
 		"dev": "vite build --mode development --watch",
-		"build": "npm run check && vite build --mode production",
+		"build": "vite build --mode production",
 		"test": "vitest run --coverage ./src/**/*",
+		"test:watch": "vitest --watch ./src/**/*",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules",
 		"check": "tsc --noEmit --emitDeclarationOnly false"
 	},
 	"bundleDependencies": [
-		"@inlang/sdk2"
+		"@inlang/sdk2",
+		"@inlang/plugin-icu1"
 	],
 	"dependencies": {
 		"@inlang/detect-json-formatting": "workspace:*",
-		"@inlang/sdk2": "workspace:*",
 		"commander": "11.1.0",
 		"consola": "3.2.3",
 		"dedent": "1.5.1",
+		"fast-glob": "^3.2.12",
 		"json5": "2.2.3",
 		"posthog-node": "^4.0.1",
 		"prettier": "^3.3.3",
@@ -69,19 +71,21 @@
 		"@lix-js/fs": "workspace:*",
 		"@inlang/recommend-ninja": "workspace:*",
 		"@inlang/recommend-sherlock": "workspace:*",
+		"@inlang/plugin-icu1": "workspace:*",
+		"@inlang/sdk2": "workspace:*",
 		"@rollup/plugin-terser": "0.4.3",
 		"@rollup/plugin-virtual": "3.0.1",
 		"@ts-morph/bootstrap": "0.20.0",
 		"@types/node": "^20.12.7",
 		"@types/prettier": "^3.0.0",
-		"@vitest/coverage-v8": "0.34.3",
+		"@vitest/coverage-v8": "2.0.5",
 		"memfs": "4.6.0",
 		"rollup": "3.29.1",
 		"typescript": "^5.5.2",
 		"vite": "^4.5.2",
 		"vite-plugin-dts": "^3.8.1",
 		"vite-tsconfig-paths": "^4.3.2",
-		"vitest": "0.34.3"
+		"vitest": "2.0.5"
 	},
 	"exports": {
 		".": {

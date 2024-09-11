@@ -1,8 +1,8 @@
 import type { SetStoreFunction } from "solid-js/store"
 import type { LocalStorageSchema } from "../../../services/local-storage/index.js"
-import { publicEnv } from "@inlang/env-variables"
 import { posthog as telemetryBrowser } from "posthog-js"
 import { getAuthClient } from "@lix-js/client"
+import { publicEnv } from "#src/services/env-variables/index.js"
 
 const browserAuth = getAuthClient({
 	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,

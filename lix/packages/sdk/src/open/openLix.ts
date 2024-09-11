@@ -53,90 +53,96 @@ export async function openLix(args: {
 	// If a queue trigger happens during an existing queue run we might miss updates and use hasMoreEntriesSince to make sure there is always a final immediate queue worker execution
 	let hasMoreEntriesSince: number | undefined = undefined;
 	async function queueWorker(trail = false) {
-		if (pending && !trail) {
-			hasMoreEntriesSince = runNumber;
-			// console.log({ hasMoreEntriesSince });
-			return;
-		}
-		runNumber++;
+		try {
+			if (pending && !trail) {
+				hasMoreEntriesSince = runNumber;
+				// console.log({ hasMoreEntriesSince });
+				return;
+			}
+			runNumber++;
 
-		if (!pending) {
-			pending = new Promise((res) => {
-				resolve = res;
-			});
-		}
+			if (!pending) {
+				pending = new Promise((res) => {
+					resolve = res;
+				});
+			}
 
-		const entry = await db
-			.selectFrom("change_queue")
-			.selectAll()
-			.orderBy("id asc")
-			.limit(1)
-			.executeTakeFirst();
-
-		if (entry) {
-			const existingFile = await db
-				.selectFrom("file_internal")
-				.select("data")
-				.select("path")
-				.where("id", "=", entry.file_id)
+			const entry = await db
+				.selectFrom("change_queue")
+				.selectAll()
+				.orderBy("id asc")
 				.limit(1)
 				.executeTakeFirst();
 
-			if (existingFile?.data) {
-				await handleFileChange({
-					currentAuthor,
-					queueEntry: entry,
-					old: {
-						id: entry.file_id,
-						path: existingFile?.path,
-						data: existingFile?.data,
-					},
-					neu: {
-						id: entry.file_id,
-						path: entry.path,
-						data: entry.data,
-					},
-					plugins,
-					db,
-				});
-			} else {
-				await handleFileInsert({
-					currentAuthor,
-					queueEntry: entry,
-					neu: {
-						id: entry.file_id,
-						path: entry.path,
-						data: entry.data,
-					},
-					plugins,
-					db,
-				});
+			if (entry) {
+				const existingFile = await db
+					.selectFrom("file_internal")
+					.selectAll()
+					.where("id", "=", entry.file_id)
+					.limit(1)
+					.executeTakeFirst();
+
+				if (existingFile?.data) {
+					await handleFileChange({
+						currentAuthor,
+						queueEntry: entry,
+						old: {
+							...existingFile,
+							id: entry.file_id,
+						},
+						neu: {
+							...entry,
+							id: entry.file_id,
+						},
+						plugins,
+						db,
+					});
+				} else {
+					await handleFileInsert({
+						currentAuthor,
+						queueEntry: entry,
+						neu: {
+							...entry,
+							id: entry.file_id,
+						},
+						plugins,
+						db,
+					});
+				}
 			}
+
+			// console.log("getrting { numEntries }");
+
+			const { numEntries } = await db
+				.selectFrom("change_queue")
+				.select((eb) => eb.fn.count<number>("id").as("numEntries"))
+				.executeTakeFirstOrThrow();
+
+			// console.log({ numEntries });
+
+			if (
+				!hasMoreEntriesSince ||
+				(numEntries === 0 && hasMoreEntriesSince < runNumber)
+			) {
+				resolve!(); // TODO: fix type
+				pending = undefined;
+				hasMoreEntriesSince = undefined;
+				// console.log("resolving");
+			}
+
+			// TODO: handle endless tries on failing quee entries
+			// we either execute the queue immediately if we know there is more work or fall back to polling
+			setTimeout(() => queueWorker(true), hasMoreEntriesSince ? 0 : 1000);
+		} catch (e) {
+			// https://linear.app/opral/issue/LIXDK-102/re-visit-simplifying-the-change-queue-implementation
+
+			console.error(
+				"change queue failed (will remain so until rework of change queue): ",
+				e,
+			);
 		}
-
-		// console.log("getrting { numEntries }");
-
-		const { numEntries } = await db
-			.selectFrom("change_queue")
-			.select((eb) => eb.fn.count<number>("id").as("numEntries"))
-			.executeTakeFirstOrThrow();
-
-		// console.log({ numEntries });
-
-		if (
-			!hasMoreEntriesSince ||
-			(numEntries === 0 && hasMoreEntriesSince < runNumber)
-		) {
-			resolve!(); // TODO: fix type
-			pending = undefined;
-			hasMoreEntriesSince = undefined;
-			// console.log("resolving");
-		}
-
-		// TODO: handle endless tries on failing quee entries
-		// we either execute the queue immediately if we know there is more work or fall back to polling
-		setTimeout(() => queueWorker(true), hasMoreEntriesSince ? 0 : 1000);
 	}
+
 	queueWorker();
 
 	async function settled() {

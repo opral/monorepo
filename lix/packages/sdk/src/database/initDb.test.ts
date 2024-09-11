@@ -57,3 +57,39 @@ test("change ids should default to uuid", async () => {
 
 	expect(validate(change.id)).toBe(true);
 });
+
+// https://github.com/opral/lix-sdk/issues/71
+test("files should be able to have metadata", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+	await createSchema({ db });
+
+	const file = await db
+		.insertInto("file_internal")
+		.values({
+			path: "/mock.csv",
+			data: new Uint8Array(),
+			metadata: {
+				primary_key: "email",
+			},
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(file.metadata?.primary_key).toBe("email");
+
+	const updatedFile = await db
+		.updateTable("file_internal")
+		.where("path", "=", "/mock.csv")
+		.set({
+			metadata: {
+				primary_key: "something-else",
+			},
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(updatedFile.metadata?.primary_key).toBe("something-else");
+});

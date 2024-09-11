@@ -7,7 +7,7 @@ import type { Meta, StoryObj } from "@storybook/web-components"
 //@ts-ignore
 import { useArgs } from "@storybook/preview-api"
 import { html } from "lit"
-import { Message, pluralBundle, Variant } from "@inlang/sdk2"
+import { type Message, pluralBundle, type Variant } from "@inlang/sdk2"
 import { mockSettings } from "./../../mock/settings.ts"
 import { type DispatchChangeInterface } from "../../helper/event.ts"
 
