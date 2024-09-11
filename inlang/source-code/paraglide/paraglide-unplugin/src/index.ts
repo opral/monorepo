@@ -1,14 +1,16 @@
 import { createUnplugin } from "unplugin"
 import {
-	type BundleNested,
 	type ProjectSettings,
 	type InlangProject,
 	loadProjectFromDirectoryInMemory,
 	selectBundleNested,
+	type BundleNested,
 } from "@inlang/sdk2"
 import path from "node:path"
 import fs from "node:fs/promises"
+// @ts-ignore
 import icu1Importer from "@inlang/plugin-icu1"
+// @ts-ignore
 import { compile, writeOutput, Logger, classifyProjectErrors } from "@inlang/paraglide-js/internal"
 
 const PLUGIN_NAME = "unplugin-paraglide"
@@ -35,29 +37,18 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 	//Keep track of how many times we've compiled
 	let numCompiles = 0
+
 	let virtualModuleOutput: Record<string, string> = {}
 
-	async function triggerCompile(
-		messages: readonly Message[],
-		settings: ProjectSettings,
-		projectId: string | undefined
-	) {
-		const currentMessagesHash = hashMessages(messages ?? [], settings)
-		if (currentMessagesHash === previousMessagesHash) return
-
-		if (messages.length === 0) {
-			logger.warn("No messages found - Skipping compilation")
-			return
-		}
-
+	async function triggerCompile(bundles: readonly BundleNested[], settings: ProjectSettings) {
 		logMessageChange()
 
 		const [regularOutput, messageModulesOutput] = await Promise.all([
-			compile({ bundles, settings, outputStructure: "regular", projectId: undefined }),
-			compile({ bundles, settings, outputStructure: "message-modules", projectId: undefined }),
+			compile({ bundles, settings, outputStructure: "regular" }),
+			compile({ bundles, settings, outputStructure: "message-modules" }),
 		])
 
-		virtualModuleOutput = messageModulesOutput
+		virtualModuleOutput = messageModulesOutput as any // TODO fix type
 		const fsOutput = regularOutput
 		await writeOutput(outputDirectory, fsOutput, fs)
 		numCompiles++
@@ -95,6 +86,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		const project = await getProject()
 
 		const bundles = await selectBundleNested(project.db).execute()
+
 		const settings = await project.settings.get()
 		await triggerCompile(bundles, settings)
 
@@ -117,7 +109,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 		// watch files
 		const resourceFiles = []
-		for (const plugin of project.plugins.get()) {
+		for (const plugin of await project.plugins.get()) {
 			if (!plugin.toBeImportedFiles) continue
 			const pluginFiles = await plugin.toBeImportedFiles({ settings, nodeFs: fs })
 			resourceFiles.push(...pluginFiles)
@@ -126,6 +118,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		// Create a watcher for each file
 		for (const file of resourceFiles) {
 			const ac = new AbortController()
+			acs.push(ac)
 			const watcher = fs.watch(file.path, { signal: ac.signal })
 			onGeneration(watcher, (ev) => {
 				if (ev.eventType !== "change") return

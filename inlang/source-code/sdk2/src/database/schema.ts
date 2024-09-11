@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS message (
   FOREIGN KEY (bundle_id) REFERENCES bundle(id) ON DELETE CASCADE
 ) strict;
 
+
 CREATE TABLE IF NOT EXISTS variant (
   id TEXT PRIMARY KEY DEFAULT (uuid_v4()), 
   message_id TEXT NOT NULL,
