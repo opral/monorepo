@@ -41,6 +41,9 @@ type LixFileTable = {
 	metadata: Record<string, any> | null;
 };
 
+/**
+ * @deprecated don't use this
+ */
 export type Commit = Selectable<CommitTable>;
 export type NewCommit = Insertable<CommitTable>;
 export type CommitUpdate = Updateable<CommitTable>;

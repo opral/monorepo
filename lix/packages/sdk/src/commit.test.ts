@@ -5,7 +5,7 @@ import { openLixInMemory } from "./open/openLixInMemory.js";
 import { newLixFile } from "./newLix.js";
 import type { LixPlugin } from "./plugin.js";
 
-test("should be able to add and commit changes", async () => {
+test.skip("should be able to add and commit changes", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",

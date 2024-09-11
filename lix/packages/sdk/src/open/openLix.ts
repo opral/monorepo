@@ -1,5 +1,4 @@
 import type { LixPlugin } from "../plugin.js";
-import { commit } from "../commit.js";
 import { handleFileChange, handleFileInsert } from "../file-handlers.js";
 import { loadPlugins } from "../load-plugin.js";
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
@@ -168,8 +167,13 @@ export async function openLix(args: {
 			args.database.close();
 			await db.destroy();
 		},
+		/**
+		 * @deprecated we will use another solutionf or commits like taggin changes to filter the hitory
+		 */
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		commit: (args: { description: string }) => {
-			return commit({ ...args, db, currentAuthor });
+			return;
+			// return commit({ ...args, db, currentAuthor });
 		},
 	};
 }

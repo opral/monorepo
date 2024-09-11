@@ -21,12 +21,12 @@ export async function merge(args: {
 		.selectAll()
 		.execute();
 
-	// TODO increase performance by only getting commits
-	//      that are not in target in the future.
-	const sourceCommits = await args.sourceLix.db
-		.selectFrom("commit")
-		.selectAll()
-		.execute();
+	// // TODO increase performance by only getting commits
+	// //      that are not in target in the future.
+	// const sourceCommits = await args.sourceLix.db
+	// 	.selectFrom("commit")
+	// 	.selectAll()
+	// 	.execute();
 
 	// TODO don't query the changes again. inefficient.
 	const leafChangesOnlyInSource = await getLeafChangesOnlyInSource({
@@ -103,15 +103,15 @@ export async function merge(args: {
 				.execute();
 		}
 
-		// 2. copy the commits from source
-		if (sourceCommits.length > 0) {
-			await trx
-				.insertInto("commit")
-				.values(sourceCommits)
-				// ignore if already exists
-				.onConflict((oc) => oc.doNothing())
-				.execute();
-		}
+		// // 2. copy the commits from source
+		// if (sourceCommits.length > 0) {
+		// 	await trx
+		// 		.insertInto("commit")
+		// 		.values(sourceCommits)
+		// 		// ignore if already exists
+		// 		.onConflict((oc) => oc.doNothing())
+		// 		.execute();
+		// }
 
 		// 3. insert the conflicts of those changes
 		if (conflicts.length > 0) {
