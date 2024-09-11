@@ -9,15 +9,16 @@ import "react-datasheet-grid/dist/style.css";
 import Papa from "papaparse";
 import { csvDataAtom, editorSelectionAtom, projectAtom } from "../state.ts";
 import { CellDrawer } from "./CellDrawer.tsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+export const primaryKey = "seq";
 
 const TableEditor = () => {
 	const [csvData] = useAtom(csvDataAtom);
 	const [project] = useAtom(projectAtom);
 	const [showDrawer, setShowDrawer] = useState(false);
-	const [, setSelection] = useAtom(editorSelectionAtom);
-
-	const primaryKey = "seq";
+	const [screenHeight, setScreenHeight] = useState<number>(800);
+	const [selection, setSelection] = useAtom(editorSelectionAtom);
 
 	const handleUpdateCsvData = async (
 		newData: [
@@ -42,15 +43,24 @@ const TableEditor = () => {
 					...keyColumn(key, textColumn),
 					title: key,
 					disabled: true,
+					maxWidth: 200,
 				});
 			} else {
-				columns.push({ ...keyColumn(key, textColumn), title: key });
+				columns.push({
+					...keyColumn(key, textColumn),
+					title: key,
+					maxWidth: 200,
+				});
 			}
 		}
 	}
 
+	useEffect(() => {
+		setScreenHeight(window.innerHeight);
+	}, [window.innerHeight]);
+
 	return (
-		<div className="relative">
+		<div className="relative h-[calc(100vh_-_87px)]">
 			<DynamicDataSheetGrid
 				value={
 					csvData as [
@@ -59,7 +69,7 @@ const TableEditor = () => {
 						},
 					]
 				}
-				height={600}
+				height={screenHeight}
 				columns={columns}
 				onChange={(newData) =>
 					handleUpdateCsvData(
@@ -79,15 +89,25 @@ const TableEditor = () => {
 							JSON.stringify(e.selection.min)
 						) {
 							const selectedRow = csvData[e.selection.max.row];
-							setSelection({
+							const newSelection = {
 								row: selectedRow[primaryKey],
 								col: e.selection.max.colId,
-							});
-							setShowDrawer(true);
+							};
+							if (JSON.stringify(newSelection) !== JSON.stringify(selection)) {
+								setSelection({
+									row: selectedRow[primaryKey],
+									col: e.selection.max.colId,
+								});
+							}
+							if (!showDrawer) setShowDrawer(true);
 						}
 					} else {
-						setSelection(null);
-						setShowDrawer(false);
+						if (selection !== null) {
+							setSelection(null);
+						}
+						if (showDrawer) {
+							setShowDrawer(false);
+						}
 					}
 				}}
 				addRowsComponent={() => <div></div>}

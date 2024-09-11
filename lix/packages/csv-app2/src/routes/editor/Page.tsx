@@ -90,7 +90,7 @@ export default function App() {
 		<>
 			<Layout>
 				{csvData && csvData.length > 0 ? <TableEditor /> : <NoDataView />}
-				<div>
+				<div className="absolute bottom-4 left-4">
 					<SlButton onClick={() => createProject()}>Create Project</SlButton>
 					<SlButton onClick={() => addDemoCSV()}>Add Demo CSV</SlButton>
 					<SlButton onClick={() => handleCommit()}>Commit</SlButton>

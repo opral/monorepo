@@ -44,6 +44,23 @@ function compareObjects(
 	return JSON.stringify(normalizedObj1) === JSON.stringify(normalizedObj2);
 }
 
+function getChangedKey<T extends Record<string, string>>(
+	oldObj: T,
+	newObj: T
+): string | undefined {
+	for (const key in oldObj) {
+		if (oldObj[key] !== newObj[key]) {
+			return key;
+		}
+	}
+	for (const key in newObj) {
+		if (!(key in oldObj)) {
+			return key;
+		}
+	}
+	return undefined;
+}
+
 export const plugin: LixPlugin = {
 	key: "csv",
 	glob: "*.csv",
@@ -276,11 +293,15 @@ export const plugin: LixPlugin = {
 
 					const isEqual = oldRow ? compareObjects(oldRow, row) : false;
 					if (!isEqual) {
+						const col = getChangedKey(oldRow, row);
 						const diff = {
 							type: "row",
 							operation: oldRow && row ? "update" : old ? "delete" : "create",
 							old: oldRow as DiffReport["old"],
 							neu: row as DiffReport["neu"],
+							meta: {
+								col_name: col,
+							},
 						};
 
 						result.push(diff as DiffReport);

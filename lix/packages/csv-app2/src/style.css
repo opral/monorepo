@@ -52,3 +52,19 @@ p {
 sl-dialog::part(panel) {
     border-radius: 8px;
 }
+
+.cellDrawer::part(panel) {
+    border-left: 1px solid lightgrey;
+    width: 400px;
+}
+.cellDrawer::part(body) {
+padding: 0;
+}
+
+@media screen and (max-width: 768px) {
+    .cellDrawer::part(panel) {
+        border-top: 1px solid lightgrey;
+        border-radius: 20px 20px 0 0;
+        width: 100%;
+    }
+}
