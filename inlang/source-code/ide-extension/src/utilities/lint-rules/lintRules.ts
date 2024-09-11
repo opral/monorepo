@@ -1,5 +1,6 @@
 import { selectBundleNested } from "@inlang/sdk2"
 import { state } from "../state.js"
+import * as vscode from "vscode"
 
 export interface LintResult {
 	bundleId: string
@@ -7,6 +8,7 @@ export interface LintResult {
 	messageLocale?: string
 	code: string
 	description: string
+	severity?: vscode.DiagnosticSeverity
 }
 
 /**
@@ -114,4 +116,28 @@ export const invalidJSIdentifier = async (bundleId: string): Promise<LintResult[
 					description: `Bundle id ${bundleId} is not a valid JS identifier`,
 				},
 			]
+}
+
+/**
+ * Utility function to find identical patterns in messages.
+ */
+export const identicalPattern = async (bundleId: string): Promise<LintResult[]> => {
+	const db = state().project.db
+
+	const bundle = await selectBundleNested(db).where("bundle.id", "=", bundleId).executeTakeFirst()
+
+	if (!bundle) return []
+
+	const identicalPatterns = bundle.messages.filter((message) => {
+		const patterns = message.variants.map((variant) => variant.pattern)
+		return new Set(patterns).size !== patterns.length
+	})
+
+	return identicalPatterns.map((message: any) => ({
+		bundleId: bundle.id,
+		messageId: message.id,
+		messageLocale: message.locale,
+		code: "identicalPattern",
+		description: `Message with id ${message.id} and locale ${message.locale} has identical patterns`,
+	}))
 }

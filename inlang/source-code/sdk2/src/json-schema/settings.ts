@@ -132,5 +132,7 @@ export type ProjectSettings = Omit<
 	sourceLanguageTag?: string;
 	/** @deprecated Use `locales` */
 	languageTags?: string[];
+	/** @deprecated This will soon be replaced by `Lix Validation Rules` */
+	messageLintRuleLevels?: Record<string, "error" | "warning">;
 };
 export const ProjectSettings = Type.Intersect([SDKSettings, ExternalSettings]);
