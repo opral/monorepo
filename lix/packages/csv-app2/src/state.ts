@@ -18,6 +18,10 @@ export const authorNameAtom = atomWithStorage<string | undefined>(
 	undefined
 );
 
+export const editorSelectionAtom = atom<{ row: string; col: string } | null>(
+	null
+);
+
 let safeProjectToOpfsInterval: number;
 
 /**
@@ -40,7 +44,6 @@ export const projectAtom = atom(async (get) => {
 
 	try {
 		const path = get(selectedProjectPathAtom);
-		console.log(path);
 		if (!path) return undefined;
 		const opfsRoot = await navigator.storage.getDirectory();
 		const fileHandle = await opfsRoot.getFileHandle(path);

@@ -3,6 +3,7 @@ import Layout from "../../layout.tsx";
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import {
+	authorNameAtom,
 	commitsAtom,
 	csvDataAtom,
 	pendingChangesAtom,
@@ -11,16 +12,21 @@ import {
 import { selectedProjectPathAtom } from "../../state.ts";
 import { plugin } from "../../csv-plugin.ts";
 import TableEditor from "../../components/TableEditor.tsx";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { UserAuthDialog } from "../../components/UserAuthDialog.tsx";
+import NoDataView from "../../components/NoData.tsx";
 
 export default function App() {
-	const [pendingChanges] = useAtom(pendingChangesAtom);
+	// const [pendingChanges] = useAtom(pendingChangesAtom);
 	const [csvData] = useAtom(csvDataAtom);
-	const [commits] = useAtom(commitsAtom);
+	// const [commits] = useAtom(commitsAtom);
+	const [authorName] = useAtom(authorNameAtom);
 	const [project] = useAtom(projectAtom);
 	const [selectedProjectPath, setSelectedProjectPath] = useAtom(
 		selectedProjectPathAtom
 	);
+
+	const [showAuthorDialog, setShowAuthorDialog] = useState(false);
 
 	const createProject = async () => {
 		const opfsRoot = await navigator.storage.getDirectory();
@@ -67,23 +73,33 @@ export default function App() {
 	};
 
 	useEffect(() => {
-		console.log(pendingChanges);
-	}, [pendingChanges]);
+		console.log("set", authorName);
+		if (authorName) {
+			project?.currentAuthor.set(authorName);
+		}
+	}, [authorName, project, project?.currentAuthor]);
 
-	// useEffect(() => {
-	// 	console.log("commits", commits);
-	// }, [commits]);
+	useEffect(() => {
+		console.log("author", project?.currentAuthor.get(), authorName);
+		if (!authorName && project) {
+			setShowAuthorDialog(true);
+		}
+	}, [authorName, project]);
 
 	return (
 		<>
 			<Layout>
+				{csvData && csvData.length > 0 ? <TableEditor /> : <NoDataView />}
 				<div>
 					<SlButton onClick={() => createProject()}>Create Project</SlButton>
 					<SlButton onClick={() => addDemoCSV()}>Add Demo CSV</SlButton>
 					<SlButton onClick={() => handleCommit()}>Commit</SlButton>
 				</div>
-				{selectedProjectPath ? <TableEditor /> : <p>No project</p>}
 			</Layout>
+			<UserAuthDialog
+				showAuthorDialog={showAuthorDialog}
+				setShowAuthorDialog={setShowAuthorDialog}
+			/>
 		</>
 	);
 }

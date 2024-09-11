@@ -7,11 +7,15 @@ import {
 } from "react-datasheet-grid";
 import "react-datasheet-grid/dist/style.css";
 import Papa from "papaparse";
-import { csvDataAtom, projectAtom } from "../state.ts";
+import { csvDataAtom, editorSelectionAtom, projectAtom } from "../state.ts";
+import { CellDrawer } from "./CellDrawer.tsx";
+import { useState } from "react";
 
 const TableEditor = () => {
 	const [csvData] = useAtom(csvDataAtom);
 	const [project] = useAtom(projectAtom);
+	const [showDrawer, setShowDrawer] = useState(false);
+	const [, setSelection] = useAtom(editorSelectionAtom);
 
 	const primaryKey = "seq";
 
@@ -46,7 +50,7 @@ const TableEditor = () => {
 	}
 
 	return (
-		<div>
+		<div className="relative">
 			<DynamicDataSheetGrid
 				value={
 					csvData as [
@@ -75,18 +79,20 @@ const TableEditor = () => {
 							JSON.stringify(e.selection.min)
 						) {
 							const selectedRow = csvData[e.selection.max.row];
-							console.log(
-								"position:",
-								e.selection.max.colId,
-								selectedRow[primaryKey]
-							);
+							setSelection({
+								row: selectedRow[primaryKey],
+								col: e.selection.max.colId,
+							});
+							setShowDrawer(true);
 						}
 					} else {
-						console.log("blur");
+						setSelection(null);
+						setShowDrawer(false);
 					}
 				}}
 				addRowsComponent={() => <div></div>}
 			/>
+			<CellDrawer showDrawer={showDrawer} setShowDrawer={setShowDrawer} />
 		</div>
 	);
 };

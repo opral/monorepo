@@ -1,6 +1,10 @@
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
-import { projectAtom, selectedProjectPathAtom } from "../../state.ts";
+import {
+	authorNameAtom,
+	projectAtom,
+	selectedProjectPathAtom,
+} from "../../state.ts";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { openLixInMemory } from "@lix-js/sdk";
@@ -9,13 +13,15 @@ import { CreateProjectDialog } from "../../components/CreateProjectDialog.tsx";
 
 type ProjectPreview = {
 	path: string;
-	lastModified: string;
-	lastAuthoredBy: string;
-	lastCommitAnnotation: string;
+	lastModified: string | undefined;
+	lastAuthoredBy: string | undefined;
+	lastCommitAnnotation: string | undefined;
 };
 
 export default function App() {
 	const [project] = useAtom(projectAtom);
+	const [authorName] = useAtom(authorNameAtom);
+
 	const [projects, setProjects] = useState<ProjectPreview[]>([]);
 	const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
 	const [, setSelectedProjectPath] = useAtom(selectedProjectPathAtom);
@@ -44,16 +50,16 @@ export default function App() {
 
 				projects.push({
 					path: path,
-					lastModified: timeAgo(`${lastCommit?.created}`),
-					lastAuthoredBy: `${lastCommit?.author}`,
-					lastCommitAnnotation: `${lastCommit?.description}`,
+					lastModified: lastCommit
+						? timeAgo(`${lastCommit.created}`)
+						: undefined,
+					lastAuthoredBy: lastCommit ? `${lastCommit.author}` : undefined,
+					lastCommitAnnotation: lastCommit
+						? `${lastCommit?.description}`
+						: undefined,
 				});
 			}
 		}
-		//sort by last modified
-		projects.sort((a, b) => {
-			return Number(b.lastModified) - Number(a.lastModified);
-		});
 		setProjects(projects);
 	};
 
@@ -61,6 +67,7 @@ export default function App() {
 		getProjects();
 	}, [project]);
 
+	console.log("rendered");
 	return (
 		<div className="w-full">
 			<div className="w-full border-b border-zinc-200 bg-white flex items-center px-4 min-h-[54px] gap-2">
@@ -98,7 +105,7 @@ export default function App() {
 					return (
 						<div
 							key={project.path}
-							className="flex flex-col gap-4 bg-white border border-zinc-200 rounded-lg px-6 py-5 hover:border-zinc-700 transition-all cursor-pointer"
+							className="flex flex-col gap-4 bg-white border border-zinc-200 rounded-lg px-6 py-5 hover:border-zinc-700 transition-all cursor-pointer min-h-[90px]"
 							onClick={() => {
 								setSelectedProjectPath(project.path);
 								navigate("/editor");
@@ -117,28 +124,29 @@ export default function App() {
 									</p>
 								</div>
 							</div>
-							<div className="text-zinc-600 flex flex-col gap-1">
-								<div className="flex gap-2 items-center">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="18"
-										height="18"
-										viewBox="0 0 512 512"
-									>
-										<path
-											fill="currentColor"
-											d="M480 224H380a128 128 0 0 0-247.9 0H32v64h100.05A128 128 0 0 0 380 288h100Zm-224 96a64 64 0 1 1 64-64a64.07 64.07 0 0 1-64 64"
-										/>
-									</svg>
-									<p>{project.lastCommitAnnotation}</p>
-								</div>
+							{project.lastModified && (
+								<div className="text-zinc-600 flex flex-col gap-1">
+									<div className="flex gap-2 items-center">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="18"
+											height="18"
+											viewBox="0 0 512 512"
+										>
+											<path
+												fill="currentColor"
+												d="M480 224H380a128 128 0 0 0-247.9 0H32v64h100.05A128 128 0 0 0 380 288h100Zm-224 96a64 64 0 1 1 64-64a64.07 64.07 0 0 1-64 64"
+											/>
+										</svg>
+										<p>{project.lastCommitAnnotation}</p>
+									</div>
 
-								<p>
-									{project.lastAuthoredBy !== "null" &&
-										`By ${project.lastAuthoredBy}, `}
-									{` ${timeAgo(project.lastModified)}`}
-								</p>
-							</div>
+									<p>
+										{`By ${project.lastAuthoredBy}, `}
+										{` ${timeAgo(project.lastModified as string)}`}
+									</p>
+								</div>
+							)}
 						</div>
 					);
 				})}
