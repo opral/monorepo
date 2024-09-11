@@ -20,7 +20,6 @@ export const runCompiler: CliStep<
 	const output = await compile({
 		bundles,
 		settings,
-		projectId: undefined,
 		outputStructure: "regular",
 	})
 
