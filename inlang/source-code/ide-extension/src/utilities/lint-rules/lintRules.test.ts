@@ -29,6 +29,15 @@ vi.mock("@inlang/sdk2", () => ({
 	selectBundleNested: vi.fn(),
 }))
 
+vi.mock("vscode", () => ({
+	DiagnosticSeverity: {
+		Error: 1,
+		Warning: 2,
+		Information: 3,
+		Hint: 4,
+	},
+}))
+
 describe("Lint Rules", () => {
 	// Test for missingMessage lint rule
 	it("should return missing messages if no messages for some locales or variants are empty", async () => {
