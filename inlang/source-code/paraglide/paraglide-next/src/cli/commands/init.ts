@@ -2,7 +2,15 @@ import { findRepoRoot, openRepository } from "@lix-js/client"
 import { Command } from "commander"
 import nodeishFs from "node:fs/promises"
 import { Logger } from "@inlang/paraglide-js/internal"
-import { Steps, cli as ParaglideCli } from "@inlang/paraglide-js/internal/cli"
+import {
+	initializeInlangProject,
+	checkForUncommittedChanges,
+	runCompiler,
+	updatePackageJson,
+	maybeChangeTsConfig,
+	maybeAddSherlock,
+	cli as ParaglideCli,
+} from "@inlang/paraglide-js/internal/cli"
 import { scanNextJSProject } from "../flows/scan-next-project"
 import { appRouterSetup } from "../flows/app-router-setup"
 import { getOutDir } from "../flows/getOutDir"
@@ -22,7 +30,7 @@ export const InitCommand = new Command()
 		})
 
 		const logger = new Logger({ prefix: false, silent: false })
-		const ctx0 = await Steps.checkForUncommittedChanges({
+		const ctx0 = await checkForUncommittedChanges({
 			repo,
 			repoRoot: repoRoot?.replace("file://", "") ?? process.cwd(),
 			logger,
@@ -31,8 +39,8 @@ export const InitCommand = new Command()
 
 		const ctx1 = await scanNextJSProject(ctx0)
 		const ctx2 = await getOutDir(ctx1)
-		const ctx4 = await Steps.initializeInlangProject(ctx2)
-		const ctx5 = await Steps.updatePackageJson({
+		const ctx4 = await initializeInlangProject(ctx2)
+		const ctx5 = await updatePackageJson({
 			dependencies: async (deps) => ({
 				...deps,
 				"@inlang/paraglide-next": PARAGLIDE_NEXT_VERSION,
@@ -42,17 +50,17 @@ export const InitCommand = new Command()
 				"@inlang/paraglide-js": ParaglideCli.version() as string,
 			}),
 		})(ctx4)
-		const ctx6 = await Steps.maybeChangeTsConfig(ctx5)
+		const ctx6 = await maybeChangeTsConfig(ctx5)
 
 		// addRouter Setup
 		const ctx7 =
 			ctx6.nextProject.router == "pages" ? await pagesRouterSetup(ctx6) : await appRouterSetup(ctx6)
 
-		const ctx8 = await Steps.maybeAddSherlock(ctx7)
-		const ctx9 = await Steps.maybeAddNinja(ctx8)
+		const ctx8 = await maybeAddSherlock(ctx7)
+		// const ctx9 = await maybeAddNinja(ctx8)
 
 		try {
-			await Steps.runCompiler({ ...ctx9, outdir: ctx9.outdir.path })
+			await runCompiler({ ...ctx8, outdir: ctx8.outdir.path })
 		} catch (e) {
 			//silently ignore
 		}
