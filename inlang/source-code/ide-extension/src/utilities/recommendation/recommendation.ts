@@ -1,13 +1,13 @@
 import * as vscode from "vscode"
-import { telemetry } from "../../services/telemetry/implementation.js"
+import { telemetry } from "../../services/telemetry/index.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
-import * as Ninja from "@inlang/recommend-ninja"
 import { CONFIGURATION } from "../../configuration.js"
+import type { FileSystem } from "../fs/createFileSystemMapper.js"
 
 export function createRecommendationView(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 }) {
 	return {
 		async resolveWebviewView(webviewView: vscode.WebviewView) {
@@ -19,7 +19,7 @@ export function createRecommendationView(args: {
 				switch (message.command) {
 					case "addSherlockToWorkspace":
 						if (args.workspaceFolder) {
-							Sherlock.add({
+							await Sherlock.add({
 								fs: args.fs,
 								workingDirectory: args.workspaceFolder.uri.fsPath,
 							})
@@ -32,46 +32,51 @@ export function createRecommendationView(args: {
 							CONFIGURATION.EVENTS.ON_DID_RECOMMENDATION_VIEW_CHANGE.fire()
 						}
 						break
-					case "addNinjaGithubAction":
-						Ninja.add({ fs: args.fs })
-
-						telemetry.capture({
-							event: "IDE-EXTENSION recommendation: add Ninja Github Action workflow to repository",
-							properties: { outcome: "Accepted" },
-						})
-
-						CONFIGURATION.EVENTS.ON_DID_RECOMMENDATION_VIEW_CHANGE.fire()
-						break
 				}
 			})
 
-			webviewView.webview.html = await getRecommendationViewHtml({
-				webview: webviewView.webview,
-				workspaceFolder: args.workspaceFolder,
-				context: args.context,
-				fs: args.fs,
-			})
+			// Load the webview content initially
+			await updateRecommendationViewHtml(webviewView, args)
 
-			// Listen for updates
-			CONFIGURATION.EVENTS.ON_DID_RECOMMENDATION_VIEW_CHANGE.event(async () => {
-				webviewView.webview.html = await getRecommendationViewHtml({
-					webview: webviewView.webview,
-					workspaceFolder: args.workspaceFolder,
-					context: args.context,
-					fs: args.fs,
-				})
+			// Listen for updates and debounce rapid events
+			const debouncedUpdate = debounce(() => updateRecommendationViewHtml(webviewView, args), 300)
+
+			const disposableEvent = CONFIGURATION.EVENTS.ON_DID_RECOMMENDATION_VIEW_CHANGE.event(
+				async () => {
+					debouncedUpdate()
+				}
+			)
+
+			// Dispose the listener when the view is disposed
+			webviewView.onDidDispose(() => {
+				disposableEvent.dispose()
 			})
 		},
 	}
+}
+
+async function updateRecommendationViewHtml(
+	webviewView: vscode.WebviewView,
+	args: {
+		workspaceFolder: vscode.WorkspaceFolder
+		context: vscode.ExtensionContext
+		fs: FileSystem
+	}
+) {
+	webviewView.webview.html = await getRecommendationViewHtml({
+		webview: webviewView.webview,
+		workspaceFolder: args.workspaceFolder,
+		context: args.context,
+		fs: args.fs,
+	})
 }
 
 export async function getRecommendationViewHtml(args: {
 	webview: vscode.Webview
 	workspaceFolder: vscode.WorkspaceFolder
 	context: vscode.ExtensionContext
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 }): Promise<string> {
-	const shouldRecommendNinja = await Ninja.shouldRecommend({ fs: args.fs })
 	const shouldRecommendSherlock = await Sherlock.shouldRecommend({
 		fs: args.fs,
 		workingDirectory: args.workspaceFolder.uri.fsPath,
@@ -80,7 +85,6 @@ export async function getRecommendationViewHtml(args: {
 		fs: args.fs,
 		workingDirectory: args.workspaceFolder.uri.fsPath,
 	})
-	const isAdoptedNinja = await Ninja.isAdopted({ fs: args.fs })
 
 	const codiconsUri = args.webview.asWebviewUri(
 		vscode.Uri.joinPath(args.context.extensionUri, "assets", "codicon.css")
@@ -96,8 +100,8 @@ export async function getRecommendationViewHtml(args: {
             <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${
 							args.webview.cspSource
 						}; style-src ${args.webview.cspSource} 'unsafe-inline'; script-src ${
-		args.webview.cspSource
-	} 'unsafe-inline';">
+							args.webview.cspSource
+						} 'unsafe-inline';">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<link href="${codiconsUri}" rel="stylesheet">
 			<link href="${codiconsTtfUri}" rel="stylesheet">
@@ -184,22 +188,15 @@ export async function getRecommendationViewHtml(args: {
 			
 			<div class="container">
 			${
-				shouldRecommendSherlock || shouldRecommendNinja || isAdoptedSherlock || isAdoptedNinja
+				shouldRecommendSherlock || isAdoptedSherlock
 					? `<span>To improve your i18n workflow:</span>
 					${
 						shouldRecommendSherlock
 							? `<div class="item active" id="addSherlockToWorkspace"><span class="codicon codicon-add"></span><span>Add Sherlock to this VS Code workspace</span></div>`
 							: isAdoptedSherlock
-							? `<div class="item"><span class="codicon codicon-pass-filled"></span><span>Sherlock is recommended in this VS Code workspace.</span></div>`
-							: ``
-					}
-				${
-					shouldRecommendNinja
-						? `<div class="item active" id="addNinjaGithubAction"><span class="codicon codicon-add"></span><span>Add Ninja Github Action workflow to this repository</span></div>`
-						: isAdoptedNinja
-						? `<div class="item"><span class="codicon codicon-pass-filled"></span><span>Ninja Github Action workflow is installed.</span></div>`
-						: ``
-				}`
+								? `<div class="item"><span class="codicon codicon-pass-filled"></span><span>Sherlock is recommended in this VS Code workspace.</span></div>`
+								: ``
+					}`
 					: `No recommendations available.`
 			}
 
@@ -215,14 +212,6 @@ export async function getRecommendationViewHtml(args: {
                     });
                 });`
 								}
-				${
-					shouldRecommendNinja &&
-					`document.getElementById('addNinjaGithubAction').addEventListener('click', () => {
-					vscode.postMessage({
-						command: 'addNinjaGithubAction'
-					});
-				});`
-				}
 			</script>
 		</body>
 		</html>`
@@ -231,7 +220,7 @@ export async function getRecommendationViewHtml(args: {
 export async function recommendationBannerView(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 }) {
 	return vscode.window.registerWebviewViewProvider(
 		"recommendationBanner",
@@ -241,4 +230,15 @@ export async function recommendationBannerView(args: {
 			workspaceFolder: args.workspaceFolder,
 		})
 	)
+}
+
+const debounce = <T extends (...args: any[]) => void>(
+	fn: T,
+	delay: number
+): ((...args: Parameters<T>) => void) => {
+	let timeout: NodeJS.Timeout
+	return (...args: Parameters<T>) => {
+		clearTimeout(timeout)
+		timeout = setTimeout(() => fn(...args), delay)
+	}
 }

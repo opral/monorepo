@@ -1,7 +1,7 @@
 import { commands, Position, Range, TextEditorRevealType, window } from "vscode"
-import { telemetry } from "../services/telemetry/implementation.js"
 import * as vscode from "vscode"
 import type { Bundle } from "@inlang/sdk2"
+import { capture } from "../services/telemetry/index.js"
 
 export const jumpToPositionCommand = {
 	command: "sherlock.jumpToPosition",
@@ -33,7 +33,7 @@ export const jumpToPositionCommand = {
 		editor.selection = new vscode.Selection(range.start, range.end)
 		editor.revealRange(range, TextEditorRevealType.InCenterIfOutsideViewport)
 
-		telemetry.capture({
+		capture({
 			event: "IDE-EXTENSION jumped to position in editor",
 		})
 	},

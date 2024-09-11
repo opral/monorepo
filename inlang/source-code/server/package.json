@@ -11,8 +11,6 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/badge": "workspace:*",
-		"@inlang/env-variables": "workspace:*",
 		"@inlang/marketplace-manifest": "workspace:*",
 		"@inlang/plugin-message-format": "workspace:*",
 		"@inlang/project-settings": "workspace:*",
