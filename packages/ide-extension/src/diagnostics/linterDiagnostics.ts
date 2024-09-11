@@ -4,10 +4,11 @@ import { state } from "../utilities/state.js"
 import type { MessageLintReport } from "@inlang/sdk"
 import { recommendNinja } from "../utilities/recommend/ninja/ninja.js"
 import { selectBundleNested, type IdeExtensionConfig } from "@inlang/sdk2"
+import type { FileSystem } from "../utilities/fs/createFileSystemMapper.js"
 
 export async function linterDiagnostics(args: {
 	context: vscode.ExtensionContext
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 }) {
 	const linterDiagnosticCollection = vscode.languages.createDiagnosticCollection("inlang-lint")
 

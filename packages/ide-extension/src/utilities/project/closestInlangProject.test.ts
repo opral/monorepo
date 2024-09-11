@@ -1,53 +1,82 @@
-import { createNodeishMemoryFs } from "@lix-js/fs"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, beforeEach } from "vitest"
 import { closestInlangProject } from "./closestInlangProject.js"
+import * as fs from "node:fs/promises"
+import * as os from "node:os"
+import * as path from "node:path"
 
-describe("closestInlangProject", async () => {
-	const nodeishFs = createNodeishMemoryFs()
+describe("closestInlangProject", () => {
+	let tempDir: string
 
-	// Create mock files and folders
-	await nodeishFs.mkdir("/root/path", { recursive: true })
-	await nodeishFs.mkdir("/root/path/folder1", { recursive: true })
-	await nodeishFs.mkdir("/root/path/folder2", { recursive: true })
-	await nodeishFs.mkdir("/root/path/folder3", { recursive: true })
-	// Create two inlang projects in root
-	await nodeishFs.mkdir("/root/path/folder1.inlang", { recursive: true })
-	await nodeishFs.mkdir("/root/path/folder2.inlang", { recursive: true })
-	// Create an inlang project in folder 2
-	await nodeishFs.mkdir("/root/path/folder2/project.inlang", { recursive: true })
-	await nodeishFs.writeFile("/root/path/file1.txt", "")
-	await nodeishFs.writeFile("/root/path/file2.txt", "")
-
-	const projects = [
-		{ projectPath: "/root/path/folder1.inlang" },
-		{ projectPath: "/root/path/folder2.inlang" },
-		{ projectPath: "/root/path/folder2/project.inlang" },
-	]
+	// Create a temporary directory before each test
+	beforeEach(async () => {
+		tempDir = path.join(os.tmpdir(), "test-root")
+		await fs.mkdir(tempDir, { recursive: true })
+	})
 
 	it("should find the closest inlang project", async () => {
+		const rootPath = path.join(tempDir, "path")
+		await fs.mkdir(rootPath, { recursive: true })
+		await fs.mkdir(path.join(rootPath, "folder1"), { recursive: true })
+		await fs.mkdir(path.join(rootPath, "folder2"), { recursive: true })
+		await fs.mkdir(path.join(rootPath, "folder3"), { recursive: true })
+
+		// Create inlang project directories
+		await fs.mkdir(path.join(rootPath, "folder1.inlang"), { recursive: true })
+		await fs.mkdir(path.join(rootPath, "folder2.inlang"), { recursive: true })
+		await fs.mkdir(path.join(rootPath, "folder2", "project.inlang"), { recursive: true })
+
+		// Write some test files
+		await fs.writeFile(path.join(rootPath, "file1.txt"), "")
+		await fs.writeFile(path.join(rootPath, "file2.txt"), "")
+
+		const projects = [
+			{ projectPath: path.join(rootPath, "folder1.inlang") },
+			{ projectPath: path.join(rootPath, "folder2.inlang") },
+			{ projectPath: path.join(rootPath, "folder2", "project.inlang") },
+		]
+
 		const result = await closestInlangProject({
-			workingDirectory: "/root/path",
+			workingDirectory: rootPath,
 			projects,
 		})
 
-		expect(result).toEqual({ projectPath: "/root/path/folder1.inlang" })
+		expect(result).toEqual({ projectPath: path.join(rootPath, "folder1.inlang") })
 	})
 
 	it("should return undefined if no inlang project is found", async () => {
+		const rootPath = path.join(tempDir, "path")
+		await fs.mkdir(rootPath, { recursive: true })
+		await fs.mkdir(path.join(rootPath, "folder3"), { recursive: true })
+
+		const projects = [
+			{ projectPath: path.join(rootPath, "folder1.inlang") },
+			{ projectPath: path.join(rootPath, "folder2.inlang") },
+			{ projectPath: path.join(rootPath, "folder2", "project.inlang") },
+		]
+
 		const result = await closestInlangProject({
-			workingDirectory: "/root/path/folder3",
+			workingDirectory: path.join(rootPath, "folder3"),
 			projects,
 		})
 
-		expect(result).toEqual(undefined)
+		expect(result).toBeUndefined()
 	})
 
 	it("should handle workingDirectory being empty", async () => {
+		const rootPath = path.join(tempDir, "path")
+		await fs.mkdir(rootPath, { recursive: true })
+
+		const projects = [
+			{ projectPath: path.join(rootPath, "folder1.inlang") },
+			{ projectPath: path.join(rootPath, "folder2.inlang") },
+			{ projectPath: path.join(rootPath, "folder2", "project.inlang") },
+		]
+
 		const result = await closestInlangProject({
 			workingDirectory: "",
 			projects,
 		})
 
-		expect(result).toEqual(undefined)
+		expect(result).toBeUndefined()
 	})
 })
