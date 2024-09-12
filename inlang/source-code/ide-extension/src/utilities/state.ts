@@ -1,4 +1,4 @@
-import type { InlangProject } from "@inlang/sdk2"
+import type { InlangProject, InlangPlugin } from "@inlang/sdk2"
 
 /**
  * The state of the Visual Studio Code extension (Sherlock).
@@ -17,11 +17,12 @@ let _state: State
 /**
  * Set the state.
  *
- * Export variables can not be assigned outside of this file. Thus,
- * this function is a wrapper to assign the `state` variable.
+ * This function now just sets the state and delegates the proxying of project.plugins.get to a helper.
  */
 export function setState(state: State) {
 	_state = state
+
+	if (state.project) proxyPluginGetMethod(state.project)
 }
 
 /**
@@ -29,9 +30,63 @@ export function setState(state: State) {
  *
  * The state is a function because importing a variable
  * is static i.e. if the variable is mutated after an
- * import occured, the change (might) not be reflected.
+ * import occurred, the change (might) not be reflected.
  * State that is not reflected = endless bugs.
  */
 export function state(): State {
 	return _state
+}
+
+// --- Helper Functions / Remove this when plugins are all converted to the new API plugin.meta API from plugin.addCustomApi ---
+
+/**
+ * Proxy the project.plugins.get method to apply migration automatically
+ */
+function proxyPluginGetMethod(project: InlangProject) {
+	const originalGet = project.plugins.get
+
+	// Replace the get function with our proxy
+	project.plugins.get = async function (): Promise<InlangPlugin[]> {
+		const plugins = await originalGet.call(project.plugins)
+
+		// Create a mutable copy of the plugins array
+		const mutablePlugins = [...plugins]
+
+		// Apply the migration logic to plugins
+		await migrateAddCustomApi(mutablePlugins)
+
+		return mutablePlugins // Return the migrated plugins
+	}
+}
+
+/**
+ * Migrate the addCustomApi method to meta for a list of plugins.
+ */
+async function migrateAddCustomApi(plugins: InlangPlugin[]): Promise<void> {
+	const project = state().project
+
+	// Migrate each plugin
+	for (const plugin of plugins) {
+		// If the plugin has an addCustomApi function and meta is not set
+		if (plugin.addCustomApi && !plugin.meta) {
+			// Call addCustomApi and ensure it's typed correctly
+			const customApi: Record<string, unknown> = plugin.addCustomApi({
+				settings: await project.settings.get(),
+			})
+
+			// Initialize meta if it's not already present
+			plugin.meta = plugin.meta || {}
+
+			// Safely iterate over the custom API keys and migrate them to meta
+			for (const [apiName, apiValue] of Object.entries(customApi)) {
+				if (typeof apiName === "string") {
+					// @ts-expect-error
+					plugin.meta[apiName] = apiValue
+				}
+			}
+
+			// Remove the deprecated addCustomApi method
+			delete plugin.addCustomApi
+		}
+	}
 }

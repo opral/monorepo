@@ -130,10 +130,6 @@ export async function loadProjectFromDirectoryInMemory(
 		});
 	}
 
-	for (const plugin of await project.plugins.get()) {
-		migrateAddCustomApi(plugin, project);
-	}
-
 	return {
 		...project,
 		errors: {
@@ -404,37 +400,6 @@ export function absolutePathFromProject(projectPath: string, path: string) {
 	const resolvedPath = nodePath.resolve(pathWithoutProject, path);
 
 	return resolvedPath;
-}
-
-/**
- * Migrate the addCustomApi method to meta
- *
- */
-async function migrateAddCustomApi(
-	plugin: InlangPlugin,
-	project: InlangProject
-) {
-	// Check if addCustomApi exists and meta is not already set
-	if (plugin.addCustomApi && !plugin.meta) {
-		// Call addCustomApi and ensure it's typed correctly
-		const customApi: Record<string, unknown> = plugin.addCustomApi({
-			settings: await project.settings.get(),
-		});
-
-		// Initialize meta if it's not already present
-		plugin.meta = plugin.meta || {};
-
-		// Safely iterate over the custom API keys and migrate them to meta
-		for (const [apiName, apiValue] of Object.entries(customApi)) {
-			if (typeof apiName === "string") {
-				// @ts-ignore
-				plugin.meta[apiName] = apiValue;
-			}
-		}
-
-		// Remove the deprecated addCustomApi method
-		delete plugin.addCustomApi;
-	}
 }
 
 
