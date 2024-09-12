@@ -6,7 +6,7 @@ import { vi } from "vitest"
 import { beforeEach } from "node:test"
 import { pluginId } from "./plugin.js"
 import type { PluginSettings } from "../settings.js"
-import { StorageSchema } from "../storageSchema.js"
+import { FileSchema } from "../fileSchema.js"
 import { Value } from "@sinclair/typebox/value"
 import { Volume } from "memfs"
 import { createMessageV1 as createMessage } from "@inlang/sdk2"
@@ -38,12 +38,12 @@ test("roundtrip (saving/loading messages)", async () => {
 		$schema: "https://inlang.com/schema/inlang-message-format",
 		first_message: "If this fails I will be sad",
 		second_message: "Let's see if this works",
-	} satisfies StorageSchema)
+	} satisfies FileSchema)
 
 	const deInitial = JSON.stringify({
 		$schema: "https://inlang.com/schema/inlang-message-format",
 		second_message: "Mal sehen ob das funktioniert",
-	} satisfies StorageSchema)
+	} satisfies FileSchema)
 
 	await fs.mkdir("./messages")
 	await fs.writeFile("./messages/en.json", enInitial)
@@ -76,9 +76,9 @@ test("roundtrip (saving/loading messages)", async () => {
 	expect(enAfterRoundtrip).toStrictEqual(enInitial)
 	expect(deAfterRoundtrip).toStrictEqual(deInitial)
 	// @ts-expect-error - memfs type error
-	expect(Value.Check(StorageSchema, JSON.parse(enAfterRoundtrip))).toBe(true)
+	expect(Value.Check(FileSchema, JSON.parse(enAfterRoundtrip))).toBe(true)
 	// @ts-expect-error - memfs type error
-	expect(Value.Check(StorageSchema, JSON.parse(deAfterRoundtrip))).toBe(true)
+	expect(Value.Check(FileSchema, JSON.parse(deAfterRoundtrip))).toBe(true)
 
 	const messagesAfterRoundtrip = await plugin.loadMessages!({
 		settings,
@@ -104,7 +104,7 @@ test("keep the json formatting to decrease git diff's and merge conflicts", asyn
 		{
 			$schema: "https://inlang.com/schema/inlang-message-format",
 			hello_world: "hello",
-		} satisfies StorageSchema,
+		} satisfies FileSchema,
 		undefined,
 		2
 	)
@@ -128,7 +128,7 @@ test("keep the json formatting to decrease git diff's and merge conflicts", asyn
 	// the file should still tab indentation
 	expect(fileAfterRoundtrip).toStrictEqual(initialFile)
 	// @ts-expect-error - memfs type error
-	expect(Value.Check(StorageSchema, JSON.parse(fileAfterRoundtrip))).toBe(true)
+	expect(Value.Check(FileSchema, JSON.parse(fileAfterRoundtrip))).toBe(true)
 })
 
 test("don't throw if the storage path does not exist. instead, create the file and/or folder (enables project initialization usage)", async () => {
@@ -169,7 +169,7 @@ test("don't throw if the storage path does not exist. instead, create the file a
 		const parsedFile = JSON.parse(createdFile)
 		// messages should be empty but no error should be thrown
 		expect(messages).toStrictEqual([createMessage("hello_world", { en: "hello" })])
-		expect(Value.Check(StorageSchema, parsedFile)).toBe(true)
+		expect(Value.Check(FileSchema, parsedFile)).toBe(true)
 	}
 })
 
@@ -188,12 +188,12 @@ test("throws if json has a trailing comma", async () => {
 		$schema: "https://inlang.com/schema/inlang-message-format",
 		first_message: "If this works I will be sad",
 		second_message: "Let's see if this blows up",
-	} satisfies StorageSchema)
+	} satisfies FileSchema)
 
 	let deInitial = JSON.stringify({
 		$schema: "https://inlang.com/schema/inlang-message-format",
 		second_message: "Mal sehen ob das knallt",
-	} satisfies StorageSchema)
+	} satisfies FileSchema)
 
 	// inject trailing comma
 	deInitial = deInitial.slice(0, -1) + ",}"
@@ -242,7 +242,7 @@ test("recursively creating a directory should not fail if a subpath already exis
 	const parsedFile = JSON.parse(createdFile)
 	// messages should be empty but no error should be thrown
 	expect(parsedFile.hello_world).toEqual("hello")
-	expect(Value.Check(StorageSchema, parsedFile)).toBe(true)
+	expect(Value.Check(FileSchema, parsedFile)).toBe(true)
 })
 
 // adds typesafety in IDEs
@@ -270,10 +270,10 @@ test("it should add the $schema property to the file if it does not exist", asyn
 
 	const fileAfterSave = await fs.readFile("./messages/en.json", { encoding: "utf-8" })
 	// @ts-expect-error - memfs type error
-	const json = JSON.parse(fileAfterSave) as StorageSchema
+	const json = JSON.parse(fileAfterSave) as FileSchema
 	expect(json.$schema).toBe("https://inlang.com/schema/inlang-message-format")
 	expect(Object.keys(json).length).toBe(2)
-	expect(Value.Check(StorageSchema, json)).toBe(true)
+	expect(Value.Check(FileSchema, json)).toBe(true)
 })
 
 test("it should migrate to v2", async () => {
@@ -318,19 +318,19 @@ test("it should migrate to v2", async () => {
 	expect(JSON.parse(en)).toStrictEqual({
 		$schema: "https://inlang.com/schema/inlang-message-format",
 		greeting: "Hello",
-	} satisfies StorageSchema)
+	} satisfies FileSchema)
 
 	// @ts-expect-error - memfs type error
 	expect(JSON.parse(de)).toStrictEqual({
 		$schema: "https://inlang.com/schema/inlang-message-format",
 		greeting: "Guten Tag",
-	} satisfies StorageSchema)
+	} satisfies FileSchema)
 
 	// @ts-expect-error - memfs type error
 	expect(JSON.parse(enUS)).toStrictEqual({
 		$schema: "https://inlang.com/schema/inlang-message-format",
 		greeting: "Howdy",
-	} satisfies StorageSchema)
+	} satisfies FileSchema)
 
 	// if the files exist already, the load function should not throw
 	await plugin.loadMessages!({
