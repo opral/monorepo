@@ -6,7 +6,7 @@ import { CONFIGURATION } from "../configuration.js"
 import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
 import { getPreviewLocale } from "../utilities/locale/getPreviewLocale.js"
 import { getSetting } from "../utilities/settings/index.js"
-import { extensionApi, getSelectedBundleByBundleIdOrAlias } from "../utilities/helper.js"
+import { getExtensionApi, getSelectedBundleByBundleIdOrAlias } from "../utilities/helper.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -30,8 +30,11 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 		// Get the reference language
 		const baseLocale = (await state().project.settings.get()).baseLocale
+		const extensionApi = await getExtensionApi()
 
-		if (baseLocale === undefined || extensionApi?.messageReferenceMatchers === undefined) {
+		if (!extensionApi) return
+
+		if (baseLocale === undefined || extensionApi.messageReferenceMatchers === undefined) {
 			// don't show an error message. See issue:
 			// https://github.com/opral/monorepo/issues/927
 			return

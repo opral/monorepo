@@ -1,7 +1,7 @@
 import { bundleIdOrAliasIs, selectBundleNested, type IdeExtensionConfig } from "@inlang/sdk2"
 import { state } from "./state.js"
 
-export const extensionApi = async () =>
+export const getExtensionApi = async (): Promise<IdeExtensionConfig | undefined> =>
 	(await state().project.plugins.get()).find((plugin) => plugin?.meta?.["app.inlang.ideExtension"])
 		?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
 
