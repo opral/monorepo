@@ -1,12 +1,15 @@
+// @ts-nocheck
+
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from "vitest"
-import { createMessage, createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 import { vi } from "vitest"
 import { beforeEach } from "node:test"
 import { pluginId } from "./plugin.js"
-import type { PluginSettings } from "./settings.js"
-import { StorageSchema } from "./storageSchema.js"
+import type { PluginSettings } from "../settings.js"
+import { StorageSchema } from "../storageSchema.js"
 import { Value } from "@sinclair/typebox/value"
+import { Volume } from "memfs"
+import { createMessageV1 as createMessage } from "@inlang/sdk2"
 
 beforeEach(() => {
 	// clear plugin state between tests
@@ -20,7 +23,9 @@ beforeEach(() => {
 //   - after loading and saving messages, the state is the same as before (roundtrip)
 test("roundtrip (saving/loading messages)", async () => {
 	const { plugin } = await import("./plugin.js")
-	const fs = createNodeishMemoryFs()
+	const fs = Volume.fromJSON({}).promises
+
+	process.cwd = () => "/"
 
 	const settings = {
 		sourceLanguageTag: "en",
@@ -70,7 +75,9 @@ test("roundtrip (saving/loading messages)", async () => {
 
 	expect(enAfterRoundtrip).toStrictEqual(enInitial)
 	expect(deAfterRoundtrip).toStrictEqual(deInitial)
+	// @ts-expect-error - memfs type error
 	expect(Value.Check(StorageSchema, JSON.parse(enAfterRoundtrip))).toBe(true)
+	// @ts-expect-error - memfs type error
 	expect(Value.Check(StorageSchema, JSON.parse(deAfterRoundtrip))).toBe(true)
 
 	const messagesAfterRoundtrip = await plugin.loadMessages!({
@@ -83,7 +90,7 @@ test("roundtrip (saving/loading messages)", async () => {
 
 test("keep the json formatting to decrease git diff's and merge conflicts", async () => {
 	const { plugin } = await import("./plugin.js")
-	const fs = createNodeishMemoryFs()
+	const fs = Volume.fromJSON({}).promises
 
 	const settings = {
 		sourceLanguageTag: "en",
@@ -120,6 +127,7 @@ test("keep the json formatting to decrease git diff's and merge conflicts", asyn
 
 	// the file should still tab indentation
 	expect(fileAfterRoundtrip).toStrictEqual(initialFile)
+	// @ts-expect-error - memfs type error
 	expect(Value.Check(StorageSchema, JSON.parse(fileAfterRoundtrip))).toBe(true)
 })
 
@@ -130,7 +138,7 @@ test("don't throw if the storage path does not exist. instead, create the file a
 		"./folder/folder/{languageTag}.json",
 	]) {
 		const { plugin } = await import("./plugin.js")
-		const fs = createNodeishMemoryFs()
+		const fs = Volume.fromJSON({}).promises
 
 		const messages = await plugin.loadMessages!({
 			settings: {
@@ -157,6 +165,7 @@ test("don't throw if the storage path does not exist. instead, create the file a
 		const createdFile = await fs.readFile(path.replace("{languageTag}", "en"), {
 			encoding: "utf-8",
 		})
+		// @ts-expect-error - memfs type error
 		const parsedFile = JSON.parse(createdFile)
 		// messages should be empty but no error should be thrown
 		expect(messages).toStrictEqual([createMessage("hello_world", { en: "hello" })])
@@ -166,7 +175,7 @@ test("don't throw if the storage path does not exist. instead, create the file a
 
 test("throws if json has a trailing comma", async () => {
 	const { plugin } = await import("./plugin.js")
-	const fs = createNodeishMemoryFs()
+	const fs = Volume.fromJSON({}).promises
 
 	const settings = {
 		sourceLanguageTag: "en",
@@ -206,7 +215,7 @@ test("throws if json has a trailing comma", async () => {
 
 test("recursively creating a directory should not fail if a subpath already exists", async () => {
 	const { plugin } = await import("./plugin.js")
-	const fs = createNodeishMemoryFs()
+	const fs = Volume.fromJSON({}).promises
 	// folder-a exists but folder-b doesn't
 	const path = "./folder-a/folder-b/{languageTag}.json"
 
@@ -229,6 +238,7 @@ test("recursively creating a directory should not fail if a subpath already exis
 	})
 
 	const createdFile = await fs.readFile(path.replace("{languageTag}", "en"), { encoding: "utf-8" })
+	// @ts-expect-error - memfs type error
 	const parsedFile = JSON.parse(createdFile)
 	// messages should be empty but no error should be thrown
 	expect(parsedFile.hello_world).toEqual("hello")
@@ -239,7 +249,7 @@ test("recursively creating a directory should not fail if a subpath already exis
 test("it should add the $schema property to the file if it does not exist", async () => {
 	const { plugin } = await import("./plugin.js")
 
-	const fs = createNodeishMemoryFs()
+	const fs = Volume.fromJSON({}).promises
 
 	const settings = {
 		sourceLanguageTag: "en",
@@ -259,6 +269,7 @@ test("it should add the $schema property to the file if it does not exist", asyn
 	})
 
 	const fileAfterSave = await fs.readFile("./messages/en.json", { encoding: "utf-8" })
+	// @ts-expect-error - memfs type error
 	const json = JSON.parse(fileAfterSave) as StorageSchema
 	expect(json.$schema).toBe("https://inlang.com/schema/inlang-message-format")
 	expect(Object.keys(json).length).toBe(2)
@@ -267,7 +278,7 @@ test("it should add the $schema property to the file if it does not exist", asyn
 
 test("it should migrate to v2", async () => {
 	const { plugin } = await import("./plugin.js")
-	const fs = createNodeishMemoryFs()
+	const fs = Volume.fromJSON({}).promises
 
 	const messages = [
 		createMessage("greeting", {
@@ -303,16 +314,19 @@ test("it should migrate to v2", async () => {
 	const de = await fs.readFile("./i18n/de.json", { encoding: "utf-8" })
 	const enUS = await fs.readFile("./i18n/en-US.json", { encoding: "utf-8" })
 
+	// @ts-expect-error - memfs type error
 	expect(JSON.parse(en)).toStrictEqual({
 		$schema: "https://inlang.com/schema/inlang-message-format",
 		greeting: "Hello",
 	} satisfies StorageSchema)
 
+	// @ts-expect-error - memfs type error
 	expect(JSON.parse(de)).toStrictEqual({
 		$schema: "https://inlang.com/schema/inlang-message-format",
 		greeting: "Guten Tag",
 	} satisfies StorageSchema)
 
+	// @ts-expect-error - memfs type error
 	expect(JSON.parse(enUS)).toStrictEqual({
 		$schema: "https://inlang.com/schema/inlang-message-format",
 		greeting: "Howdy",
