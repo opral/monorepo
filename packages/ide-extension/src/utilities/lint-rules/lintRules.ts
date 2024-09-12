@@ -1,4 +1,4 @@
-import { selectBundleNested } from "@inlang/sdk2"
+import { bundleIdOrAliasIs, selectBundleNested } from "@inlang/sdk2"
 import { state } from "../state.js"
 import * as vscode from "vscode"
 
@@ -18,7 +18,7 @@ export const missingMessage = async (bundleId: string): Promise<LintResult[]> =>
 	const db = state().project.db
 	const locales = (await state().project.settings.get()).locales
 
-	const bundle = await selectBundleNested(db).where("bundle.id", "=", bundleId).executeTakeFirst()
+	const bundle = await selectBundleNested(db).where(bundleIdOrAliasIs(bundleId)).executeTakeFirst()
 
 	if (!bundle) return []
 
@@ -46,7 +46,7 @@ export const bundleWithoutMessageWithBaseLocale = async (
 	const db = state().project.db
 	const baseLocale = (await state().project.settings.get()).baseLocale
 
-	const bundle = await selectBundleNested(db).where("bundle.id", "=", bundleId).executeTakeFirst()
+	const bundle = await selectBundleNested(db).where(bundleIdOrAliasIs(bundleId)).executeTakeFirst()
 
 	if (!bundle) return []
 
@@ -69,7 +69,7 @@ export const bundleWithoutMessageWithBaseLocale = async (
 export const variantWithEmptyPattern = async (bundleId: string): Promise<LintResult[]> => {
 	const db = state().project.db
 
-	const bundle = await selectBundleNested(db).where("bundle.id", "=", bundleId).executeTakeFirst()
+	const bundle = await selectBundleNested(db).where(bundleIdOrAliasIs(bundleId)).executeTakeFirst()
 
 	if (!bundle) return []
 
@@ -101,7 +101,7 @@ export const invalidJSIdentifier = async (bundleId: string): Promise<LintResult[
 
 	const db = state().project.db
 
-	const bundle = await selectBundleNested(db).where("bundle.id", "=", bundleId).executeTakeFirst()
+	const bundle = await selectBundleNested(db).where(bundleIdOrAliasIs(bundleId)).executeTakeFirst()
 
 	if (!bundle) return []
 
@@ -124,7 +124,7 @@ export const invalidJSIdentifier = async (bundleId: string): Promise<LintResult[
 export const identicalPattern = async (bundleId: string): Promise<LintResult[]> => {
 	const db = state().project.db
 
-	const bundle = await selectBundleNested(db).where("bundle.id", "=", bundleId).executeTakeFirst()
+	const bundle = await selectBundleNested(db).where(bundleIdOrAliasIs(bundleId)).executeTakeFirst()
 
 	if (!bundle) return []
 
