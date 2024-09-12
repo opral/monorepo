@@ -2,7 +2,7 @@
 import * as vscode from "vscode"
 import { resolveLintRules } from "./lintRuleResolver.js"
 import type { FileSystem } from "../utilities/fs/createFileSystemMapper.js"
-import { extensionApi, getSelectedBundleByBundleIdOrAlias } from "../utilities/helper.js"
+import { getExtensionApi, getSelectedBundleByBundleIdOrAlias } from "../utilities/helper.js"
 
 export async function linterDiagnostics(args: {
 	context: vscode.ExtensionContext
@@ -15,6 +15,7 @@ export async function linterDiagnostics(args: {
 		if (!activeTextEditor) return
 
 		const documentText = activeTextEditor.document.getText()
+		const extensionApi = await getExtensionApi()
 
 		if (!extensionApi) return
 
