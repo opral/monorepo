@@ -1,11 +1,10 @@
-import { v4 as uuid } from "uuid";
+import { v7 as uuid } from "uuid";
 import type { ProjectSettings } from "./json-schema/settings.js";
 import { humanId } from "./human-id/human-id.js";
 import type {
 	Bundle,
 	NewBundleNested,
 	NewMessageNested,
-	NewVariant,
 	Variant,
 } from "./database/schema.js";
 import type { Expression, Text } from "./json-schema/pattern.js";
