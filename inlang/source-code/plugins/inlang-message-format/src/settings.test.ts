@@ -4,11 +4,11 @@ import { Value } from "@sinclair/typebox/value"
 
 test("the file path pattern must end with .json", () => {
 	const valid = [
-		"./messages/{languageTag}.json",
-		"./src/i18n/{languageTag}.json",
-		"./translations/{languageTag}.json",
+		"./messages/{locale}.json",
+		"./src/i18n/{locale}.json",
+		"./translations/{locale}.json",
 	]
-	const invalid = ["./messages/{languageTag}.json.txt", "./messages/{languageTag}.js"]
+	const invalid = ["./messages/{locale}.json.txt", "./messages/{locale}.js"]
 	for (const path of valid) {
 		expect(Value.Check(PluginSettings, { pathPattern: path } satisfies PluginSettings)).toBe(true)
 	}
@@ -17,7 +17,7 @@ test("the file path pattern must end with .json", () => {
 	}
 })
 
-test("the file path pattern must contain the {languageTag} placeholder", () => {
+test("the file path pattern can contain the {languageTag} placeholder for legacy reasons", () => {
 	const valid = [
 		"./messages/{languageTag}.json",
 		"./src/i18n/{languageTag}.json",
@@ -34,21 +34,21 @@ test("the file path pattern must contain the {languageTag} placeholder", () => {
 
 test("it should be possible to use an absolute path", () => {
 	const settings = {
-		pathPattern: "/home/{languageTag}.json",
+		pathPattern: "/home/{locale}.json",
 	} satisfies PluginSettings
 	expect(Value.Check(PluginSettings, settings)).toBe(true)
 })
 
 test("it should be possible to use a relative path", () => {
 	const settings = {
-		pathPattern: "./home/{languageTag}.json",
+		pathPattern: "./home/{locale}.json",
 	} satisfies PluginSettings
 	expect(Value.Check(PluginSettings, settings)).toBe(true)
 })
 
 test("it should be possible to use parent directories in the storage path", () => {
 	const settings = {
-		pathPattern: "../home/{languageTag}.json",
+		pathPattern: "../home/{locale}.json",
 	} satisfies PluginSettings
 	expect(Value.Check(PluginSettings, settings)).toBe(true)
 })
