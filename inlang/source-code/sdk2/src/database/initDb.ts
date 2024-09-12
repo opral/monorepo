@@ -1,7 +1,7 @@
 import { CamelCasePlugin, Kysely } from "kysely";
 import { applySchema, type InlangDatabaseSchema } from "./schema.js";
 import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely";
-import { v4 } from "uuid";
+import { v7 } from "uuid";
 import { humanId } from "../human-id/human-id.js";
 import { JsonbPlugin } from "./jsonbPlugin.js";
 
@@ -22,9 +22,9 @@ export function initDb(args: { sqlite: SqliteDatabase }) {
 
 function initDefaultValueFunctions(args: { sqlite: SqliteDatabase }) {
 	args.sqlite.createFunction({
-		name: "uuid_v4",
+		name: "uuid_v7",
 		arity: 0,
-		xFunc: () => v4(),
+		xFunc: () => v7(),
 	});
 	args.sqlite.createFunction({
 		name: "human_id",
