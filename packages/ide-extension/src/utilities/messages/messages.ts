@@ -424,7 +424,6 @@ export function getHtml(args: {
 				}
 
 				function editMessage(bundleId, locale) {
-					console.log("editMessage", bundleId, locale);
 					vscode.postMessage({
 						command: 'executeCommand',
 						commandName: 'sherlock.editMessage',
