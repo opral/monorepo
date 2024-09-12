@@ -15,9 +15,7 @@ export const CellDrawer = (props: {
 	const [project] = useAtom(projectAtom);
 	const [csvData] = useAtom(csvDataAtom);
 	const [row, setRow] = useState<{ [key: string]: string } | undefined>();
-	const [drawerType, setDrawerType] = useState<"row" | "cell">("row");
 	const [relevantChangesOfRow, setRelevantChangesOfRow] = useState<any[]>([]);
-	const [relevantChangesOfCell, setRelevantChangesOfCell] = useState<any[]>([]);
 
 	const getPlacement = () => {
 		if (window.innerWidth < 768) {
@@ -65,42 +63,6 @@ export const CellDrawer = (props: {
 		setRelevantChangesOfRow(relevantChanges);
 	};
 
-	const getHistoryOfCell = async () => {
-		const relevantChanges = [];
-		const commits = await project?.db
-			.selectFrom("commit")
-			.selectAll()
-			.orderBy("created_at desc")
-			.execute();
-
-		if (!commits) return;
-		for await (const commit of commits) {
-			const change = await project?.db
-				.selectFrom("change")
-				.selectAll()
-				.where("change.commit_id", "==", commit.id)
-				.where(
-					(eb) => eb.ref("meta", "->>").key("col_name"),
-					"=",
-					selection?.col
-				)
-				.where(
-					(eb) => eb.ref("value", "->>").key(primaryKey),
-					"=",
-					selection?.row
-				)
-				.innerJoin("commit", "commit.id", "change.commit_id")
-				.where(isInSimulatedCurrentBranch)
-				.orderBy("change.created_at desc")
-				.executeTakeFirst();
-
-			if (change) {
-				relevantChanges.push(change);
-			}
-		}
-		setRelevantChangesOfCell(relevantChanges);
-	};
-
 	useEffect(() => {
 		if (selection) {
 			getCsvRow(selection);
@@ -110,88 +72,129 @@ export const CellDrawer = (props: {
 	useEffect(() => {
 		if (row) {
 			getHistoryOfRow();
-			getHistoryOfCell();
 		}
 	}, [row]);
 
+	useEffect(() => {
+		console.log("showDrawer", props.showDrawer);
+	}, [props.showDrawer]);
+
 	return (
-		<SlDrawer
-			open={props.showDrawer}
-			contained
-			onSlRequestClose={() => props.setShowDrawer(false)}
-			placement={getPlacement()}
-			noHeader
-			className="cellDrawer"
-		>
-			<div className="w-full flex items-center min-h-[54px] gap-1 border-b border-zinc-200">
-				<div className="w-full flex justify-between items-center text-zinc-950 h-9 rounded-lg px-3">
-					<h1 className="font-medium pl-1">{"History"}</h1>
-					<div className="flex items-center gap-1">
-						<p
-							className={clsx(
-								"cursor-pointer bg-white rounded-lg px-3 py-2 font-regular text-zinc-600 hover:bg-zinc-100",
-								drawerType === "cell" && "text-zinc-950 font-medium bg-zinc-100"
-							)}
-						>
-							Cell
-						</p>
-						<p
-							className={clsx(
-								"cursor-pointer bg-white rounded-lg px-3 py-2 font-regular text-zinc-600 hover:bg-zinc-100",
-								drawerType === "row" && "text-zinc-950 font-medium bg-zinc-100"
-							)}
-						>
-							Row
+		<div className="">
+			<SlDrawer
+				open={props.showDrawer}
+				contained
+				onSlRequestClose={() => {
+					console.log("request close");
+					//props.setShowDrawer(false);
+				}}
+				placement={getPlacement()}
+				noHeader
+				className="cellDrawer"
+			>
+				<div className="w-full flex items-center min-h-[54px] gap-1 border-b border-zinc-200">
+					<div className=" w-full flex justify-between items-center text-zinc-950 h-9 rounded-lg px-3">
+						<div className="flex items-center gap-2">
+							<div
+								onClick={() => props.setShowDrawer(false)}
+								className="flex rotate-90 md:rotate-0 bg-zinc-100 hover:bg-zinc-200 cursor-pointer w-7 h-7 items-center justify-center rounded"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="18"
+									height="18"
+									viewBox="0 0 24 24"
+								>
+									<path
+										fill="currentColor"
+										d="M10 6L8.59 7.41L13.17 12l-4.58 4.59L10 18l6-6z"
+									/>
+								</svg>
+							</div>
+
+							<h1 className="font-medium pl-1">{"History"}</h1>
+						</div>
+						{/* <div className="flex items-center gap-1">
+							<p
+								onClick={() => setDrawerType("cell")}
+								className={clsx(
+									"cursor-pointer bg-white rounded-lg px-3 py-2 font-regular text-zinc-600 hover:bg-zinc-100",
+									drawerType === "cell" &&
+										"text-zinc-950 font-medium bg-zinc-100"
+								)}
+							>
+								Cell
+							</p>
+							<p
+								onClick={() => setDrawerType("row")}
+								className={clsx(
+									"cursor-pointer bg-white rounded-lg px-3 py-2 font-regular text-zinc-600 hover:bg-zinc-100",
+									drawerType === "row" &&
+										"text-zinc-950 font-medium bg-zinc-100"
+								)}
+							>
+								Row
+							</p>
+						</div> */}
+						<p className="text-zinc-500 pr-1">
+							{selection?.row} - {selection?.col}
 						</p>
 					</div>
 				</div>
-			</div>
-			{/* <div className="flex items-center justify-between min-h-[40px] text-zinc-500 px-4">
-				<p>Position</p>
-				<p className="">
-					{selection?.row} - {selection?.col}
-				</p>
-			</div> */}
-			<div className="mb-12 mt-2 relative flex flex-col gap-3">
-				{relevantChangesOfRow.map((change) => {
-					return (
-						<div className="relative z-10 flex items-start justify-between text-zinc-500 px-4 mt-4 gap-5">
-							<div className="mt-1 w-5 h-5 bg-zinc-100 flex items-center justify-center rounded-full">
-								<div className="w-2 h-2 bg-zinc-950 rounded-full"></div>
-							</div>
-							<div className="flex-1 flex flex-col gap-1">
-								<div className="flex justify-between">
-									<div className="">
-										<span className="text-zinc-950 font-medium">
-											{change.author}
-										</span>{" "}
-										changed value
-									</div>
-									<div className="">{timeAgo(change.created_at)}</div>
-								</div>
-								<div className="flex items-center gap-2">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="1em"
-										height="1em"
-										viewBox="0 0 24 24"
+				{/* <div className="flex items-center justify-between min-h-[54px] text-zinc-500 px-4 border-b border-zinc-200">
+					<p>Position</p>
+					<p className="">
+						{selection?.row} - {selection?.col}
+					</p>
+				</div> */}
+				{selection && (
+					<div className="mb-12 relative flex flex-col gap-3">
+						{relevantChangesOfRow
+							.filter((cell) => cell.meta.col_name.includes(selection.col))
+							.map((change) => {
+								return (
+									<div
+										key={change.id}
+										className="relative z-10 flex items-start justify-between text-zinc-500 pr-4 pl-3  mt-4 gap-5"
 									>
-										<path
-											fill="currentColor"
-											d="M5.763 17H20V5H4v13.385zm.692 2L2 22.5V4a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1z"
-										/>
-									</svg>
-									<p className="text-sm">{change.description}</p>
-								</div>
-								<div className="mt-3 px-3 py-1.5 bg-zinc-100 border border-zinc-200 rounded">
-									{change.value[selection?.col]}
-								</div>
-							</div>
-						</div>
-					);
-				})}
-				<div className="absolute w-[1px] h-[calc(100%_-_100px)] top-[20px] left-[25px] bg-zinc-300"></div>
-			</div>
-		</SlDrawer>
+										<div className="mt-1 w-5 h-5 bg-white flex items-center justify-center rounded-full">
+											<div className="w-1.5 h-1.5 bg-zinc-600 rounded-full"></div>
+										</div>
+										<div className="flex-1 flex flex-col gap-1">
+											<div className="flex justify-between">
+												<div className="">
+													<span className="text-zinc-950 font-medium">
+														{change.author}
+													</span>{" "}
+													changed value
+												</div>
+												<div className="">{timeAgo(change.created_at)}</div>
+											</div>
+											<div className="flex items-center gap-2">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="1em"
+													height="1em"
+													viewBox="0 0 24 24"
+												>
+													<path
+														fill="currentColor"
+														d="M5.763 17H20V5H4v13.385zm.692 2L2 22.5V4a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1z"
+													/>
+												</svg>
+												<p className="text-sm">{change.description}</p>
+											</div>
+											<div className="mt-2 px-3 py-1.5 bg-zinc-100 border border-zinc-200 rounded">
+												{change.value[selection?.col]}
+											</div>
+										</div>
+									</div>
+								);
+							})}
+						<div className="absolute w-[2px] h-[calc(100%_-_100px)] top-[20px] left-[21px] bg-zinc-200"></div>
+					</div>
+				)}
+			</SlDrawer>
+		</div>
 	);
 };

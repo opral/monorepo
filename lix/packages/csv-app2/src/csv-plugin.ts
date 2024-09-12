@@ -44,21 +44,18 @@ function compareObjects(
 	return JSON.stringify(normalizedObj1) === JSON.stringify(normalizedObj2);
 }
 
-function getChangedKey<T extends Record<string, string>>(
+function getChangedKeys<T extends Record<string, string>>(
 	oldObj: T,
 	newObj: T
-): string | undefined {
-	for (const key in oldObj) {
-		if (oldObj[key] !== newObj[key]) {
-			return key;
+): string[] | undefined {
+	// check if the objects are the same, report all keys that differ in an array, oldObj might be undefined when creating
+	const keys = Object.keys({ ...oldObj, ...newObj });
+	return keys.filter((key) => {
+		if (!oldObj) {
+			return true;
 		}
-	}
-	for (const key in newObj) {
-		if (!(key in oldObj)) {
-			return key;
-		}
-	}
-	return undefined;
+		return oldObj[key] !== newObj[key];
+	});
 }
 
 export const plugin: LixPlugin = {
@@ -293,14 +290,15 @@ export const plugin: LixPlugin = {
 
 					const isEqual = oldRow ? compareObjects(oldRow, row) : false;
 					if (!isEqual) {
-						const col = getChangedKey(oldRow, row);
+						const cols = getChangedKeys(oldRow, row);
+						console.log("check", oldRow, row, cols);
 						const diff = {
 							type: "row",
 							operation: oldRow && row ? "update" : old ? "delete" : "create",
 							old: oldRow as DiffReport["old"],
 							neu: row as DiffReport["neu"],
 							meta: {
-								col_name: col,
+								col_name: JSON.stringify(cols),
 							},
 						};
 
@@ -308,7 +306,7 @@ export const plugin: LixPlugin = {
 					}
 				}
 			}
-
+			console.log(result);
 			return result;
 		},
 	},

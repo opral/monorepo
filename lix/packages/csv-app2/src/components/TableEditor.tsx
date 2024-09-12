@@ -56,7 +56,7 @@ const TableEditor = () => {
 	}
 
 	useEffect(() => {
-		setScreenHeight(window.innerHeight);
+		setScreenHeight(window.innerHeight - 87);
 	}, [window.innerHeight]);
 
 	return (
@@ -102,12 +102,12 @@ const TableEditor = () => {
 							if (!showDrawer) setShowDrawer(true);
 						}
 					} else {
-						if (selection !== null) {
-							setSelection(null);
-						}
-						if (showDrawer) {
-							setShowDrawer(false);
-						}
+						// if (selection !== null) {
+						// 	setSelection(null);
+						// }
+						// if (showDrawer) {
+						// 	setShowDrawer(false);
+						// }
 					}
 				}}
 				addRowsComponent={() => <div></div>}

@@ -1,16 +1,7 @@
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import Layout from "../../layout.tsx";
-import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import { useAtom } from "jotai";
-import {
-	authorNameAtom,
-	commitsAtom,
-	csvDataAtom,
-	pendingChangesAtom,
-	projectAtom,
-} from "../../state.ts";
-import { selectedProjectPathAtom } from "../../state.ts";
-import { plugin } from "../../csv-plugin.ts";
+import { authorNameAtom, csvDataAtom, projectAtom } from "../../state.ts";
 import TableEditor from "../../components/TableEditor.tsx";
 import { useEffect, useState } from "react";
 import { UserAuthDialog } from "../../components/UserAuthDialog.tsx";
@@ -22,29 +13,8 @@ export default function App() {
 	// const [commits] = useAtom(commitsAtom);
 	const [authorName] = useAtom(authorNameAtom);
 	const [project] = useAtom(projectAtom);
-	const [selectedProjectPath, setSelectedProjectPath] = useAtom(
-		selectedProjectPathAtom
-	);
 
 	const [showAuthorDialog, setShowAuthorDialog] = useState(false);
-
-	const createProject = async () => {
-		const opfsRoot = await navigator.storage.getDirectory();
-		const fileHandle = await opfsRoot.getFileHandle("demo.lix", {
-			create: true,
-		});
-		const writable = await fileHandle.createWritable();
-		const blob = await newLixFile();
-		const newProject = await openLixInMemory({
-			blob,
-			providePlugins: [plugin],
-		});
-		console.log(newProject);
-		const file = await newProject.toBlob();
-		await writable.write(file);
-		await writable.close();
-		setSelectedProjectPath("demo.lix");
-	};
 
 	const addDemoCSV = async () => {
 		// get csv content from demo.csv file
@@ -91,7 +61,6 @@ export default function App() {
 			<Layout>
 				{csvData && csvData.length > 0 ? <TableEditor /> : <NoDataView />}
 				<div className="absolute bottom-4 left-4">
-					<SlButton onClick={() => createProject()}>Create Project</SlButton>
 					<SlButton onClick={() => addDemoCSV()}>Add Demo CSV</SlButton>
 					<SlButton onClick={() => handleCommit()}>Commit</SlButton>
 				</div>
