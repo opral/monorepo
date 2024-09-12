@@ -61,8 +61,6 @@ test("it should overwrite all files to the directory except the db.sqlite file",
 });
 
 test("a roundtrip should work", async () => {
-	const volume = Volume.fromJSON({});
-
 	const mockBundleNested: BundleNested = {
 		id: "mock-bundle",
 		alias: { "mock-plugin": "peter-gruen" },
@@ -78,15 +76,14 @@ test("a roundtrip should work", async () => {
 		],
 	};
 
+	const volume = Volume.fromJSON({
+		"/mock-file.json": JSON.stringify([mockBundleNested]),
+	});
+
 	const mockPlugin: InlangPlugin = {
 		key: "mock-plugin",
 		toBeImportedFiles: async () => {
-			return [
-				{
-					path: "./mock-file.json",
-					content: new TextEncoder().encode(JSON.stringify([mockBundleNested])),
-				},
-			];
+			return ["/mock-file.json"];
 		},
 		importFiles: async ({ files }) => {
 			const bundles = JSON.parse(new TextDecoder().decode(files[0]?.content));
