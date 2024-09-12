@@ -2,7 +2,7 @@
 import * as vscode from "vscode"
 import { resolveLintRules } from "./lintRuleResolver.js"
 import { state } from "../utilities/state.js"
-import { selectBundleNested } from "@inlang/sdk2"
+import { bundleIdOrAliasIs, selectBundleNested } from "@inlang/sdk2"
 import type { FileSystem } from "../utilities/fs/createFileSystemMapper.js"
 import { type IdeExtensionConfig } from "@inlang/sdk2"
 
@@ -37,18 +37,16 @@ export async function linterDiagnostics(args: {
 			const diagnosticsIndex: Record<string, Record<string, vscode.Diagnostic[]>> = {}
 
 			for (const bundle of bundles) {
+				// @ts-ignore TODO: Introduce deprecation message for messageId
+				bundle.bundleId = bundle.bundleId || bundle.messageId
 				// Retrieve the bundle and messages
 				const _bundle = await selectBundleNested(state().project.db)
-					.where((eb) =>
-						eb.or([
-							eb("id", "=", bundle.bundleId),
-							eb(eb.ref("alias", "->").key("default"), "=", bundle.bundleId),
-						])
-					)
+					.where(bundleIdOrAliasIs(bundle.bundleId))
 					.execute()
 
 				if (_bundle) {
 					for (const lintRule of activeLintRules) {
+						// @ts-ignore TODO: Introduce deprecation message for messageId
 						const lintResults = await lintRule.ruleFn(bundle.bundleId)
 
 						for (const result of lintResults) {
