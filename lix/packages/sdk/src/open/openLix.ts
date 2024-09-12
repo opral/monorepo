@@ -1,5 +1,7 @@
 import type { LixPlugin } from "../plugin.js";
 import { commit } from "../commit.js";
+import { startDiscussion } from "../discussion/start-discussion.js";
+import { comment } from "../discussion/comment.js";
 import { handleFileChange, handleFileInsert } from "../file-handlers.js";
 import { loadPlugins } from "../load-plugin.js";
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
@@ -170,6 +172,22 @@ export async function openLix(args: {
 		},
 		commit: (args: { description: string }) => {
 			return commit({ ...args, db, currentAuthor });
+		},
+		startDiscussion: (args: { changes: { id: string }[]; body: string }) => {
+			if (currentAuthor === undefined) {
+				throw new Error("current author not set");
+			}
+			return startDiscussion({
+				...args,
+				db,
+				currentAuthor,
+			});
+		},
+		comment: (args: { parentComment: { id: string }; body: string }) => {
+			if (!currentAuthor) {
+				throw new Error("current author not set");
+			}
+			return comment({ ...args, db, currentAuthor });
 		},
 	};
 }
