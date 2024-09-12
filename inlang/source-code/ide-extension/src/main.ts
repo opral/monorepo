@@ -20,6 +20,7 @@ import { statusBar } from "./utilities/settings/statusBar.js"
 import fg from "fast-glob"
 import type { IdeExtensionConfig } from "@inlang/sdk2"
 import path from "node:path"
+import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
@@ -149,8 +150,8 @@ async function registerExtensionComponents(args: {
 	)
 
 	messagePreview(args)
-	// Replace by lix validation rules
-	// linterDiagnostics(args)
+	// TODO: Replace by lix validation rules
+	linterDiagnostics(args)
 }
 
 async function handleInlangErrors() {

@@ -103,6 +103,9 @@ importers:
       eslint-config-next:
         specifier: ^13.4.7
         version: 13.5.6(eslint@8.41.0)(typescript@5.0.4)
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
 
   inlang/development-projects/inlang-svelte:
     devDependencies:
@@ -1494,6 +1497,9 @@ importers:
       jsdom:
         specifier: 22.1.0
         version: 22.1.0
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
       rollup:
         specifier: 3.29.1
         version: 3.29.1
@@ -1953,6 +1959,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^0.33.0
         version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.6)(webdriverio@8.40.3))
+      prettier:
+        specifier: 3.3.3
+        version: 3.3.3
       typescript:
         specifier: ^5.5.2
         version: 5.5.4
@@ -3252,6 +3261,9 @@ importers:
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
       typescript:
         specifier: ^5.2.2
         version: 5.5.4
