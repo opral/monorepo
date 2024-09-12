@@ -14,7 +14,7 @@ import { fromMessageV1 } from "../json-schema/old-v1-message/fromMessageV1.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import type { PreprocessPluginBeforeImportFunction } from "../plugin/importPlugins.js";
 import { PluginImportError } from "../plugin/errors.js";
-import type { InlangProject } from "./api.js";
+import type { InlangProject, ResourceFile } from "./api.js";
 
 /**
  * Loads a project from a directory.
@@ -95,22 +95,32 @@ export async function loadProjectFromDirectoryInMemory(
 		);
 	}
 
+	const importedResourceFileErrors: Error[] = [];
+
 	for (const importer of importPlugins) {
-		const files = importer.toBeImportedFiles
-			? await importer.toBeImportedFiles({
-					settings: await project.settings.get(),
-					nodeFs: args.fs,
-			  })
-			: [];
+		const files: ResourceFile[] = [];
+
+		if (importer.toBeImportedFiles) {
+			const paths = await importer.toBeImportedFiles({
+				settings: await project.settings.get(),
+				nodeFs: args.fs,
+			});
+			for (const path of paths) {
+				const absolute = absolutePathFromProject(args.path, path);
+				try {
+					const data = await args.fs.readFile(absolute);
+					files.push({ path, content: data, pluginKey: importer.key });
+				} catch (e) {
+					importedResourceFileErrors.push(
+						new ResourceFileImportError({ cause: e as Error, path })
+					);
+				}
+			}
+		}
 
 		await project.importFiles({
 			pluginKey: importer.key,
-			files: files.map((file) => ({ ...file, pluginKey: importer.key })),
-		});
-
-		// TODO check user id and description (where will this one appear?)
-		await project.lix.commit({
-			description: "Executed importFiles",
+			files,
 		});
 	}
 
@@ -124,10 +134,6 @@ export async function loadProjectFromDirectoryInMemory(
 			pluginKey: chosenLegacyPlugin.key ?? chosenLegacyPlugin.id,
 			loadMessagesFn: chosenLegacyPlugin.loadMessages,
 		});
-		// TODO check user id and description (where will this one appear?)
-		await project.lix.commit({
-			description: "legacy load and save messages",
-		});
 	}
 
 	return {
@@ -138,6 +144,7 @@ export async function loadProjectFromDirectoryInMemory(
 				return [
 					...withLocallyImportedPluginWarning(errors),
 					...localImport.errors,
+					...importedResourceFileErrors,
 				];
 			},
 			subscribe: (
@@ -147,6 +154,7 @@ export async function loadProjectFromDirectoryInMemory(
 					callback([
 						...withLocallyImportedPluginWarning(value),
 						...localImport.errors,
+						...importedResourceFileErrors,
 					]);
 				});
 			},
@@ -402,4 +410,13 @@ export function absolutePathFromProject(projectPath: string, path: string) {
 	return resolvedPath;
 }
 
+export class ResourceFileImportError extends Error {
+	path: string;
 
+	constructor(args: { cause: Error; path: string }) {
+		super("Could not import a resource file");
+		this.name = "ResourceFileImportError";
+		this.cause = args.cause;
+		this.path = args.path;
+	}
+}

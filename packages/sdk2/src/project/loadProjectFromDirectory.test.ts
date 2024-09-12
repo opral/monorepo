@@ -5,6 +5,7 @@ import { ProjectSettings } from "../json-schema/settings.js";
 import { Volume } from "memfs";
 import {
 	loadProjectFromDirectoryInMemory,
+	ResourceFileImportError,
 	WarningDeprecatedLintRule,
 	WarningLocalPluginImport,
 } from "./loadProjectFromDirectory.js";
@@ -226,6 +227,38 @@ test.skip("it should copy all files in a directory into lix", async () => {
 	expect(filesByPath["/prettierrc.json"]).toBe("prettier value");
 	expect(filesByPath["/README.md"]).toBe("readme value");
 	expect(filesByPath["/settings.json"]).toBe(JSON.stringify(mockSettings));
+});
+
+test("errors from importing translation files should be shown", async () => {
+	const mock = {
+		"/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en", "de"],
+			modules: [],
+		} satisfies ProjectSettings),
+	};
+
+	const fs = Volume.fromJSON(mock).promises;
+
+	const mockPlugin: InlangPlugin = {
+		key: "mock-plugin",
+		importFiles: async () => {
+			return { bundles: [] };
+		},
+		toBeImportedFiles: async () => {
+			return ["./non-existing-file.json"];
+		},
+	};
+
+	const project = await loadProjectFromDirectoryInMemory({
+		fs: fs as any,
+		path: "/project.inlang",
+		providePlugins: [mockPlugin],
+	});
+
+	const errors = await project.errors.get();
+	expect(errors).toHaveLength(1);
+	expect(errors[0]).toBeInstanceOf(ResourceFileImportError);
 });
 
 test("it should provide plugins from disk for backwards compatibility but warn that those plugins are not portable", async () => {
