@@ -6,7 +6,6 @@ import { msg } from "../utilities/messages/msg.js"
 import { CONFIGURATION } from "../configuration.js"
 import { selectBundleNested } from "@inlang/sdk2"
 import { getPatternFromString, getStringFromPattern } from "../utilities/messages/query.js"
-import { exec } from "node:child_process"
 
 vi.mock("vscode", () => ({
 	commands: {

@@ -23,7 +23,7 @@ export const editMessageCommand = {
 			return msg(`Message with locale ${locale} not found.`)
 		}
 
-		const variant = message.variants.find((v) => v.match.locale === locale)
+		const variant = message?.variants.find((v) => Object.keys(v.match).length === 0)
 
 		if (!variant) {
 			return msg(`Variant with locale ${locale} not found.`)
