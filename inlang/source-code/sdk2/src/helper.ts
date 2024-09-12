@@ -68,7 +68,7 @@ export function createVariant(args: {
 	text?: string;
 	match?: Record<Expression["arg"]["name"], string>;
 	pattern?: Variant["pattern"];
-}): NewVariant {
+}): Variant {
 	return {
 		messageId: args.messageId,
 		id: args.id ? args.id : uuid(),

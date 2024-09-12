@@ -44,7 +44,9 @@ function variantsToICU1(variants: Variant[], selectors: Expression[]): MessageFo
 	})
 
 	// group variants by selector value
-	const variantGroups = Object.groupBy(variants, (variant) => variant.match[0])
+	// TODO match is an object instead of an array now
+	// const variantGroups = Object.groupBy(variants, (variant) => variant.match[0])
+	const variantGroups = Object.groupBy(variants, () => "*")
 
 	const options: Record<string, PluralOrSelectOption> = {}
 	for (const [selectorValue, variants] of Object.entries(variantGroups)) {
@@ -56,7 +58,9 @@ function variantsToICU1(variants: Variant[], selectors: Expression[]): MessageFo
 		const newVariants = variants.map((variant) => {
 			return {
 				...variant,
-				match: variant.match.slice(1),
+				// TODO match is an object instead of an array now
+				// match: {variant.match.slice(1)},
+				match: {},
 			}
 		})
 

@@ -1,10 +1,13 @@
-import type { BundleNested, InlangPlugin, ResourceFile } from "@inlang/sdk2"
+import type { BundleNested, InlangPlugin, NewBundleNested, ResourceFile } from "@inlang/sdk2"
 import { PluginSettings } from "./settings.js"
 import { createMessage } from "./parse.js"
 import { serializeMessage } from "./serialize.js"
 
 const pluginKey = "plugin.inlang.icu-messageformat-1"
-export const plugin = {
+
+export const plugin: InlangPlugin<{
+	[pluginKey]: PluginSettings
+}> = {
 	key: pluginKey,
 	settingsSchema: PluginSettings,
 
@@ -28,7 +31,12 @@ export const plugin = {
 
 		return files
 	},
-	importFiles: ({ files, settings }) => {
+	importFiles: ({
+		files,
+		settings,
+	}): {
+		bundles: NewBundleNested[]
+	} => {
 		const bundles: Record<string, BundleNested> = {}
 		const utf8 = new TextDecoder("utf-8")
 		const pathPattern = settings["plugin.inlang.icu-messageformat-1"].pathPattern
@@ -98,6 +106,4 @@ export const plugin = {
 
 		return files
 	},
-} satisfies InlangPlugin<{
-	[pluginKey]: PluginSettings
-}>
+}
