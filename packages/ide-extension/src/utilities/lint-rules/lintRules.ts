@@ -1,6 +1,6 @@
-import { bundleIdOrAliasIs, selectBundleNested } from "@inlang/sdk2"
 import { state } from "../state.js"
 import * as vscode from "vscode"
+import { getSelectedBundleByBundleIdOrAlias } from "../helper.js"
 
 export interface LintResult {
 	bundleId: string
@@ -15,10 +15,9 @@ export interface LintResult {
  * Lint rule: Checks if any message in a bundle is missing a translation (empty variants).
  */
 export const missingMessage = async (bundleId: string): Promise<LintResult[]> => {
-	const db = state().project.db
 	const locales = (await state().project.settings.get()).locales
 
-	const bundle = await selectBundleNested(db).where(bundleIdOrAliasIs(bundleId)).executeTakeFirst()
+	const bundle = await getSelectedBundleByBundleIdOrAlias(bundleId)
 
 	if (!bundle) return []
 
@@ -43,10 +42,9 @@ export const missingMessage = async (bundleId: string): Promise<LintResult[]> =>
 export const bundleWithoutMessageWithBaseLocale = async (
 	bundleId: string
 ): Promise<LintResult[]> => {
-	const db = state().project.db
 	const baseLocale = (await state().project.settings.get()).baseLocale
 
-	const bundle = await selectBundleNested(db).where(bundleIdOrAliasIs(bundleId)).executeTakeFirst()
+	const bundle = await getSelectedBundleByBundleIdOrAlias(bundleId)
 
 	if (!bundle) return []
 
@@ -67,9 +65,7 @@ export const bundleWithoutMessageWithBaseLocale = async (
  * Lint rule: Checks if any variant in a bundle has an empty pattern.
  */
 export const variantWithEmptyPattern = async (bundleId: string): Promise<LintResult[]> => {
-	const db = state().project.db
-
-	const bundle = await selectBundleNested(db).where(bundleIdOrAliasIs(bundleId)).executeTakeFirst()
+	const bundle = await getSelectedBundleByBundleIdOrAlias(bundleId)
 
 	if (!bundle) return []
 
@@ -99,9 +95,7 @@ export const invalidJSIdentifier = async (bundleId: string): Promise<LintResult[
 		}
 	}
 
-	const db = state().project.db
-
-	const bundle = await selectBundleNested(db).where(bundleIdOrAliasIs(bundleId)).executeTakeFirst()
+	const bundle = await getSelectedBundleByBundleIdOrAlias(bundleId)
 
 	if (!bundle) return []
 
@@ -122,9 +116,7 @@ export const invalidJSIdentifier = async (bundleId: string): Promise<LintResult[
  * Utility function to find identical patterns in messages.
  */
 export const identicalPattern = async (bundleId: string): Promise<LintResult[]> => {
-	const db = state().project.db
-
-	const bundle = await selectBundleNested(db).where(bundleIdOrAliasIs(bundleId)).executeTakeFirst()
+	const bundle = await getSelectedBundleByBundleIdOrAlias(bundleId)
 
 	if (!bundle) return []
 

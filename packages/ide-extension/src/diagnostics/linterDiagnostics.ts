@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as vscode from "vscode"
 import { resolveLintRules } from "./lintRuleResolver.js"
-import { state } from "../utilities/state.js"
-import { bundleIdOrAliasIs, selectBundleNested } from "@inlang/sdk2"
 import type { FileSystem } from "../utilities/fs/createFileSystemMapper.js"
-import { type IdeExtensionConfig } from "@inlang/sdk2"
+import { extensionApi, getSelectedBundleByBundleIdOrAlias } from "../utilities/helper.js"
 
 export async function linterDiagnostics(args: {
 	context: vscode.ExtensionContext
@@ -18,15 +16,10 @@ export async function linterDiagnostics(args: {
 
 		const documentText = activeTextEditor.document.getText()
 
-		// Retrieve IDE Extension Config
-		const ideExtension = (await state().project.plugins.get()).find(
-			(plugin) => plugin?.meta?.["app.inlang.ideExtension"]
-		)?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
-
-		if (!ideExtension) return
+		if (!extensionApi) return
 
 		// Process messageReferenceMatchers to match bundles
-		const messageReferenceMatchers = ideExtension.messageReferenceMatchers ?? []
+		const messageReferenceMatchers = extensionApi.messageReferenceMatchers ?? []
 		const activeLintRules = await resolveLintRules()
 		const diagnostics: vscode.Diagnostic[] = []
 
@@ -40,9 +33,7 @@ export async function linterDiagnostics(args: {
 				// @ts-ignore TODO: Introduce deprecation message for messageId
 				bundle.bundleId = bundle.bundleId || bundle.messageId
 				// Retrieve the bundle and messages
-				const _bundle = await selectBundleNested(state().project.db)
-					.where(bundleIdOrAliasIs(bundle.bundleId))
-					.execute()
+				const _bundle = await getSelectedBundleByBundleIdOrAlias(bundle.bundleId)
 
 				if (_bundle) {
 					for (const lintRule of activeLintRules) {
