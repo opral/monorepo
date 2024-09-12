@@ -1,10 +1,8 @@
 import { Type, type Static } from "@sinclair/typebox"
 
 const InternalProperties = Type.Object(
-	{
-		$schema: Type.Optional(Type.Literal("https://inlang.com/schema/inlang-message-format")),
-	},
-	{ additionalProperties: true }
+	{ $schema: Type.Optional(Type.Literal("https://inlang.com/schema/inlang-message-format")) },
+	{ additionalProperties: false }
 )
 
 const Messages = Type.Record(
@@ -15,7 +13,7 @@ const Messages = Type.Record(
 		examples: ["helloWorld", "hello_world", "helloWorld123", "hello_world_123"],
 	}),
 	Type.String(),
-	{ additionalProperties: true }
+	{ additionalProperties: false }
 )
 
 /**
@@ -35,5 +33,5 @@ const Messages = Type.Record(
  *      - No optimizations but they can be introduced in a non-breaking change manner
  *        in the future, IF REQUIRED.
  */
-export type StorageSchema = Static<typeof StorageSchema>
-export const StorageSchema = Type.Union([InternalProperties, Messages])
+export type FileSchema = Static<typeof FileSchema>
+export const FileSchema = Type.Union([InternalProperties, Messages])
