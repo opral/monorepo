@@ -3,7 +3,8 @@ import { state } from "../utilities/state.js"
 import { getStringFromPattern } from "../utilities/messages/query.js"
 import { INTERPOLATE } from "../configuration.js"
 import { escapeHtml } from "../utilities/utils.js"
-import { selectBundleNested, type IdeExtensionConfig } from "@inlang/sdk2"
+import { type IdeExtensionConfig } from "@inlang/sdk2"
+import { getSelectedBundleByBundleIdOrAlias } from "../utilities/helper.js"
 
 const MISSING_TRANSLATION_MESSAGE = "[missing]"
 
@@ -44,15 +45,10 @@ export async function contextTooltip(
 		ReturnType<IdeExtensionConfig["messageReferenceMatchers"][number]>
 	>[number]
 ) {
+	// @ts-ignore TODO: Introduce deprecation message for messageId
+	referenceMessage.bundleId = referenceMessage.bundleId || referenceMessage.messageId
 	// resolve message from id or alias
-	const bundle = await selectBundleNested(state().project.db)
-		.where((eb) =>
-			eb.or([
-				eb("id", "=", referenceMessage.bundleId),
-				eb(eb.ref("alias", "->").key("default"), "=", referenceMessage.bundleId),
-			])
-		)
-		.executeTakeFirst()
+	const bundle = await getSelectedBundleByBundleIdOrAlias(referenceMessage.bundleId)
 
 	if (!bundle) {
 		return undefined // Return early if message is not found

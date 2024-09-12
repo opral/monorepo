@@ -14,6 +14,7 @@ import {
 	type InlangProject,
 	pollQuery,
 } from "@inlang/sdk2"
+import { getSelectedBundleByBundleIdOrAlias } from "../helper.js"
 
 export function createMessageWebviewProvider(args: {
 	context: vscode.ExtensionContext
@@ -85,9 +86,9 @@ export function createMessageWebviewProvider(args: {
 
 		const highlightedBundles = await Promise.all(
 			matchedBundles.map(async (bundle) => {
-				const bundleData = await selectBundleNested(state().project.db)
-					.where("bundle.id", "=", bundle.bundleId)
-					.executeTakeFirst()
+				// @ts-ignore TODO: Introduce deprecation message for messageId
+				bundle.bundleId = bundle.bundleId || bundle.messageId
+				const bundleData = await getSelectedBundleByBundleIdOrAlias(bundle.bundleId)
 				return bundleData
 			})
 		)
@@ -422,36 +423,36 @@ export function getHtml(args: {
 					});
 				}
 
-				function editMessage(messageId, languageTag) {
+				function editMessage(bundleId, locale) {
 					vscode.postMessage({
 						command: 'executeCommand',
 						commandName: 'sherlock.editMessage',
-						commandArgs: { messageId, languageTag },
+						commandArgs: { bundleId, locale },
 					});
 				}
 			
-				function openInFink(messageId, selectedProjectPath) {
+				function openInFink(bundleId, selectedProjectPath) {
 					vscode.postMessage({
 						command: 'executeCommand',
 						commandName: 'sherlock.openInFink',
-						commandArgs: { messageId, selectedProjectPath },
+						commandArgs: { bundleId, selectedProjectPath },
 					});
 				}
 
-				function jumpToPosition(messageId, position) {
+				function jumpToPosition(bundleId, position) {
 					const decodedPosition = JSON.parse(decodeURIComponent(position));
 					vscode.postMessage({
 						command: 'executeCommand',
 						commandName: 'sherlock.jumpToPosition',
-						commandArgs: { messageId, position: decodedPosition },
+						commandArgs: { bundleId, position: decodedPosition },
 					});
 				}
 
-				function machineTranslate(messageId, baseLocale, targetLanguageTags) {
+				function machineTranslate(bundleId, baseLocale, targetLanguageTags) {
 					vscode.postMessage({
 						command: 'executeCommand',
 						commandName: 'sherlock.machineTranslateMessage',
-						commandArgs: { messageId, baseLocale, targetLanguageTags },
+						commandArgs: { bundleId, baseLocale, targetLanguageTags },
 					});
 				}
             </script>
@@ -495,7 +496,8 @@ export async function getTranslationsTableHtml(args: {
 				locale: message.locale,
 				messageId: message.id,
 			})
-			const editCommand = `editMessage('${args.bundle.id}', '${escapeHtml(locale)}', ${index})`
+
+			const editCommand = `editMessage('${args.bundle.id}', '${escapeHtml(locale)}')`
 
 			return `
 				<div class="section">

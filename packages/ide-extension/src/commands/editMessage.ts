@@ -3,16 +3,15 @@ import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
 import { getPatternFromString, getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
-import { type Bundle, selectBundleNested } from "@inlang/sdk2"
+import { type Bundle } from "@inlang/sdk2"
+import { getSelectedBundleByBundleIdOrAlias } from "../utilities/helper.js"
 
 export const editMessageCommand = {
 	command: "sherlock.editMessage",
 	title: "Sherlock: Edit a Message",
 	register: commands.registerCommand,
 	callback: async function ({ bundleId, locale }: { bundleId: Bundle["id"]; locale: string }) {
-		const bundle = await selectBundleNested(state().project.db)
-			.where("bundle.id", "=", bundleId)
-			.executeTakeFirst()
+		const bundle = await getSelectedBundleByBundleIdOrAlias(bundleId)
 
 		if (!bundle) {
 			return msg(`Bundle with id ${bundleId} not found.`)
@@ -24,7 +23,7 @@ export const editMessageCommand = {
 			return msg(`Message with locale ${locale} not found.`)
 		}
 
-		const variant = message.variants.find((v) => v.match.locale === locale)
+		const variant = message?.variants.find((v) => Object.keys(v.match).length === 0)
 
 		if (!variant) {
 			return msg(`Variant with locale ${locale} not found.`)
