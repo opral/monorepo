@@ -1,10 +1,11 @@
-import type { LanguageTag, Message, NodeishFilesystemSubset, Plugin } from "@inlang/sdk"
-import type { StorageSchema } from "./storageSchema.js"
-import { displayName, description } from "../marketplace-manifest.json"
-import { PluginSettings } from "./settings.js"
+// @ts-nocheck
+
+import type { InlangPlugin, Message } from "@inlang/sdk2"
+import type { StorageSchema } from "../storageSchema.js"
+import { PluginSettings } from "../settings.js"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
-import { serializeMessage } from "./parsing/serializeMessage.js"
-import { parseMessage } from "./parsing/parseMessage.js"
+import { serializeMessage } from "../parsing/serializeMessage.js"
+import { parseMessage } from "../parsing/parseMessage.js"
 
 export const pluginId = "plugin.inlang.messageFormat"
 
@@ -13,12 +14,11 @@ export const pluginId = "plugin.inlang.messageFormat"
  */
 const stringifyWithFormatting: Record<string, ReturnType<typeof detectJsonFormatting>> = {}
 
-export const plugin: Plugin<{
+export const plugin: InlangPlugin<{
 	[pluginId]: PluginSettings
 }> = {
 	id: pluginId,
-	displayName,
-	description,
+	key: "inlang-message-format",
 	settingsSchema: PluginSettings,
 	loadMessages: async ({ settings, nodeishFs }) => {
 		await maybeMigrateToV2({ settings, nodeishFs })
@@ -61,7 +61,7 @@ export const plugin: Plugin<{
 				}
 			}
 		}
-		return Object.values(result)
+		return Object.values(result) as any
 	},
 	saveMessages: async ({ settings, nodeishFs, messages }) => {
 		const result: Record<LanguageTag, Record<string, string>> = {}

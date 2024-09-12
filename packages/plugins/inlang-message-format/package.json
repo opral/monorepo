@@ -23,9 +23,10 @@
 	"devDependencies": {
 		"@inlang/cli": "workspace:*",
 		"@inlang/detect-json-formatting": "workspace:*",
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk2": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",
 		"@vitest/coverage-v8": "^2.0.5",
+		"memfs": "4.6.0",
 		"prettier": "^3.3.3",
 		"typescript": "^5.5.2",
 		"vitest": "^2.0.5"
