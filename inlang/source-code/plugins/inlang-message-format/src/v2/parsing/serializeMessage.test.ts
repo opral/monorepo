@@ -1,5 +1,6 @@
+// @ts-nocheck
+
 import { test, expect } from "vitest"
-import type { Message } from "@inlang/sdk"
 import { serializeMessage } from "./serializeMessage.js"
 
 test("it should split the variants into language tags", async () => {
