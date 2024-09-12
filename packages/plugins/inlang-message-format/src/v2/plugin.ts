@@ -4,8 +4,8 @@ import type { InlangPlugin, Message } from "@inlang/sdk2"
 import type { StorageSchema } from "../storageSchema.js"
 import { PluginSettings } from "../settings.js"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
-import { serializeMessage } from "../parsing/serializeMessage.js"
-import { parseMessage } from "../parsing/parseMessage.js"
+import { serializeMessage } from "./parsing/serializeMessage.js"
+import { parseMessage } from "./parsing/parseMessage.js"
 
 export const pluginId = "plugin.inlang.messageFormat"
 

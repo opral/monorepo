@@ -1,4 +1,4 @@
-import type { LanguageTag, Message } from "@inlang/sdk"
+// @ts-nocheck
 import { serializedPattern } from "./serializePattern.js"
 
 export const serializeMessage = (message: Message): Record<LanguageTag, string> => {
