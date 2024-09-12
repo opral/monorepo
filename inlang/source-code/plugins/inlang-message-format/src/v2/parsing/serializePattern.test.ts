@@ -1,6 +1,7 @@
+// @ts-nocheck
+
 import { test, expect } from "vitest"
 import { serializedPattern } from "./serializePattern.js"
-import type { Message } from "@inlang/sdk"
 
 test("it should serialize variable references to {name}", async () => {
 	const pattern: Message["variants"][number]["pattern"] = [
