@@ -1,4 +1,3 @@
-import { Volume } from "memfs"
 import { test, expect, vi, beforeEach } from "vitest"
 
 beforeEach(() => {
@@ -7,15 +6,10 @@ beforeEach(() => {
 })
 
 test("toBeImportedFiles should work with locale as setting", async () => {
-	const fs = Volume.fromJSON({
-		"/translations/en.json": "mock en",
-		"/translations/de.json": "mock de",
-	}).promises
-
 	const { plugin } = await import("./plugin.js")
 
 	const result = await plugin.toBeImportedFiles?.({
-		nodeFs: fs as any,
+		nodeFs: {} as any,
 		settings: {
 			baseLocale: "en",
 			locales: ["en", "de"],
@@ -25,14 +19,22 @@ test("toBeImportedFiles should work with locale as setting", async () => {
 		},
 	})
 
-	expect(result).toEqual([
-		{
-			path: "/translations/en.json",
-			content: "mock en",
+	expect(result).toEqual(["/translations/en.json", "/translations/de.json"])
+})
+
+test("toBeImportedFiles should work with languageTag as setting for backward compatibility", async () => {
+	const { plugin } = await import("./plugin.js")
+
+	const result = await plugin.toBeImportedFiles?.({
+		nodeFs: {} as any,
+		settings: {
+			baseLocale: "en",
+			locales: ["en", "de"],
+			"plugin.inlang.messageFormat": {
+				pathPattern: "/translations/{languageTag}.json",
+			},
 		},
-		{
-			path: "/translations/de.json",
-			content: "mock de",
-		},
-	])
+	})
+
+	expect(result).toEqual(["/translations/en.json", "/translations/de.json"])
 })
