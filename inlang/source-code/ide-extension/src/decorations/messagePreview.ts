@@ -6,7 +6,7 @@ import { CONFIGURATION } from "../configuration.js"
 import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
 import { getPreviewLocale } from "../utilities/locale/getPreviewLocale.js"
 import { getSetting } from "../utilities/settings/index.js"
-import { bundleIdOrAliasIs, selectBundleNested, type IdeExtensionConfig } from "@inlang/sdk2"
+import { extensionApi, getSelectedBundleByBundleIdOrAlias } from "../utilities/helper.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -30,17 +30,8 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 		// Get the reference language
 		const baseLocale = (await state().project.settings.get()).baseLocale
-		const ideExtension = (await state().project.plugins.get()).find(
-			(plugin) => plugin?.meta?.["app.inlang.ideExtension"]
-		)?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
 
-		if (baseLocale === undefined || ideExtension === undefined) {
-			return
-		}
-
-		const messageReferenceMatchers = ideExtension?.messageReferenceMatchers
-
-		if (baseLocale === undefined || messageReferenceMatchers === undefined) {
+		if (baseLocale === undefined || extensionApi?.messageReferenceMatchers === undefined) {
 			// don't show an error message. See issue:
 			// https://github.com/opral/monorepo/issues/927
 			return
@@ -70,78 +61,81 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 		}
 
 		// Get the message references
-		const wrappedDecorations = (messageReferenceMatchers ?? []).map(async (matcher) => {
-			const bundles = await matcher({
-				documentText: activeTextEditor.document.getText(),
-			})
+		const wrappedDecorations = (extensionApi.messageReferenceMatchers ?? []).map(
+			async (matcher) => {
+				const bundles = await matcher({
+					documentText: activeTextEditor.document.getText(),
+				})
 
-			return bundles.map(async (bundle) => {
-				// @ts-ignore TODO: Introduce deprecation message for messageId
-				bundle.bundleId = bundle.bundleId || bundle.messageId
-				// Retrieve the bundle and messages
-				const _bundle = await selectBundleNested(state().project.db)
-					.where(bundleIdOrAliasIs(bundle.bundleId))
-					.executeTakeFirst()
+				return bundles.map(async (bundle) => {
+					// @ts-ignore TODO: Introduce deprecation message for messageId
+					bundle.bundleId = bundle.bundleId || bundle.messageId
+					// Retrieve the bundle and messages
+					const _bundle = await getSelectedBundleByBundleIdOrAlias(bundle.bundleId)
 
-				// Get the message from the bundle
-				const message = _bundle?.messages.find((m) => m.locale === baseLocale)
+					// Get the message from the bundle
+					const message = _bundle?.messages.find((m) => m.locale === baseLocale)
 
-				const variant = message?.variants.find((v) => Object.keys(v.match).length === 0)
+					const variant = message?.variants.find((v) => Object.keys(v.match).length === 0)
 
-				const previewLocale = await getPreviewLocale()
-				const translationLocale = previewLocale.length ? previewLocale : baseLocale
+					const previewLocale = await getPreviewLocale()
+					const translationLocale = previewLocale.length ? previewLocale : baseLocale
 
-				const translationString = variant
-					? getStringFromPattern({
-							pattern: variant.pattern || [
-								{
-									type: "text",
-									value: "", // TODO: Fix pattern type to be always defined either/or Text / VariableReference
-								},
-							],
-							locale: translationLocale,
-							messageId: variant.messageId,
-						})
-					: ""
+					const translationString = variant
+						? getStringFromPattern({
+								pattern: variant.pattern || [
+									{
+										type: "text",
+										value: "", // TODO: Fix pattern type to be always defined either/or Text / VariableReference
+									},
+								],
+								locale: translationLocale,
+								messageId: variant.messageId,
+							})
+						: ""
 
-				const translation = resolveEscapedCharacters(translationString)
+					const translation = resolveEscapedCharacters(translationString)
 
-				const truncatedTranslation =
-					translation &&
-					(translation.length > (MAXIMUM_PREVIEW_LENGTH || 0)
-						? `${translation.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
-						: translation)
+					const truncatedTranslation =
+						translation &&
+						(translation.length > (MAXIMUM_PREVIEW_LENGTH || 0)
+							? `${translation.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
+							: translation)
 
-				const range = new vscode.Range(
-					new vscode.Position(bundle.position.start.line - 1, bundle.position.start.character - 1),
-					new vscode.Position(bundle.position.end.line - 1, bundle.position.end.character - 1)
-				)
+					const range = new vscode.Range(
+						new vscode.Position(
+							bundle.position.start.line - 1,
+							bundle.position.start.character - 1
+						),
+						new vscode.Position(bundle.position.end.line - 1, bundle.position.end.character - 1)
+					)
 
-				const decoration: vscode.DecorationOptions = {
-					range,
-					renderOptions: inlineAnnotationsEnabled
-						? {
-								after: {
-									margin: "0 0.5rem",
-									contentText:
-										truncatedTranslation === "" || truncatedTranslation === undefined
-											? `ERROR: '${bundle.bundleId}' not found in source with language tag '${baseLocale}'`
-											: translation,
-									backgroundColor: translation
-										? editorInfoColors.background
-										: editorErrorColors.background,
-									color: translation ? editorInfoColors.foreground : editorErrorColors.foreground,
-									border: `1px solid ${
-										translation ? editorInfoColors.border : editorErrorColors.border
-									}`,
-								},
-							}
-						: undefined,
-					hoverMessage: await contextTooltip(bundle),
-				}
-				return decoration
-			})
-		})
+					const decoration: vscode.DecorationOptions = {
+						range,
+						renderOptions: inlineAnnotationsEnabled
+							? {
+									after: {
+										margin: "0 0.5rem",
+										contentText:
+											truncatedTranslation === "" || truncatedTranslation === undefined
+												? `ERROR: '${bundle.bundleId}' not found in source with language tag '${baseLocale}'`
+												: translation,
+										backgroundColor: translation
+											? editorInfoColors.background
+											: editorErrorColors.background,
+										color: translation ? editorInfoColors.foreground : editorErrorColors.foreground,
+										border: `1px solid ${
+											translation ? editorInfoColors.border : editorErrorColors.border
+										}`,
+									},
+								}
+							: undefined,
+						hoverMessage: await contextTooltip(bundle),
+					}
+					return decoration
+				})
+			}
+		)
 		const decorations = (await Promise.all(wrappedDecorations || [])).flat()
 		const unwrappedDecorations = await Promise.all(decorations)
 		activeTextEditor.setDecorations(messagePreview, unwrappedDecorations)

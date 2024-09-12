@@ -14,6 +14,7 @@ import {
 	type InlangProject,
 	pollQuery,
 } from "@inlang/sdk2"
+import { getSelectedBundleByBundleIdOrAlias } from "../helper.js"
 
 export function createMessageWebviewProvider(args: {
 	context: vscode.ExtensionContext
@@ -85,9 +86,9 @@ export function createMessageWebviewProvider(args: {
 
 		const highlightedBundles = await Promise.all(
 			matchedBundles.map(async (bundle) => {
-				const bundleData = await selectBundleNested(state().project.db)
-					.where("bundle.id", "=", bundle.bundleId)
-					.executeTakeFirst()
+				// @ts-ignore TODO: Introduce deprecation message for messageId
+				bundle.bundleId = bundle.bundleId || bundle.messageId
+				const bundleData = await getSelectedBundleByBundleIdOrAlias(bundle.bundleId)
 				return bundleData
 			})
 		)
