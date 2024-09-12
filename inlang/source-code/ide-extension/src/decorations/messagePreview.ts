@@ -6,7 +6,7 @@ import { CONFIGURATION } from "../configuration.js"
 import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
 import { getPreviewLocale } from "../utilities/locale/getPreviewLocale.js"
 import { getSetting } from "../utilities/settings/index.js"
-import { selectBundleNested, type IdeExtensionConfig } from "@inlang/sdk2"
+import { bundleIdOrAliasIs, selectBundleNested, type IdeExtensionConfig } from "@inlang/sdk2"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -76,16 +76,17 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 			})
 
 			return bundles.map(async (bundle) => {
-				// Query for message with bundle id and locale
+				// @ts-ignore TODO: Introduce deprecation message for messageId
+				bundle.bundleId = bundle.bundleId || bundle.messageId
+				// Retrieve the bundle and messages
 				const _bundle = await selectBundleNested(state().project.db)
-					.where("bundle.id", "=", bundle.bundleId)
+					.where(bundleIdOrAliasIs(bundle.bundleId))
 					.executeTakeFirst()
 
 				// Get the message from the bundle
 				const message = _bundle?.messages.find((m) => m.locale === baseLocale)
 
-				// Get the variant from the message
-				const variant = message?.variants.find((v) => v.match.locale === baseLocale)
+				const variant = message?.variants.find((v) => Object.keys(v.match).length === 0)
 
 				const previewLocale = await getPreviewLocale()
 				const translationLocale = previewLocale.length ? previewLocale : baseLocale
