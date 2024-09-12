@@ -120,51 +120,51 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 
 		bar?.start(filteredMessages.length, 0)
 
-		const logs: Array<() => void> = []
+		// const logs: Array<() => void> = []
 
-		const rpcTranslate = async (toBeTranslatedMessage: Message) => {
-			const logId =
-				`"${toBeTranslatedMessage.id}"` +
-				(experimentalAliases ? ` (alias "${toBeTranslatedMessage.alias.default ?? ""}")` : "")
+		// const rpcTranslate = async (toBeTranslatedMessage: Message) => {
+		// 	const logId =
+		// 		`"${toBeTranslatedMessage.id}"` +
+		// 		(experimentalAliases ? ` (alias "${toBeTranslatedMessage.alias.default ?? ""}")` : "")
 
-			const { data: translatedMessage, error } = await rpcTranslateAction({
-				message: toBeTranslatedMessage,
-				sourceLanguageTag,
-				targetLanguageTags,
-			})
-			if (error) {
-				logs.push(() => log.error(`Couldn't translate message ${logId}: ${error}`))
-				return
-			} else if (
-				translatedMessage &&
-				translatedMessage?.variants.length > toBeTranslatedMessage.variants.length
-			) {
-				if (v2Persistence) {
-					await args.project.store!.messageBundles.set({ data: fromV1Message(translatedMessage) })
-				} else {
-					args.project.query.messages.update({
-						where: { id: translatedMessage.id },
-						data: translatedMessage!,
-					})
-				}
-				if (!options.quiet) {
-					logs.push(() => log.info(`Machine translated message ${logId}`))
-				}
-			}
-			bar?.increment()
-		}
-		// parallelize rpcTranslate calls with a limit of 100 concurrent calls
-		const limit = plimit(process.env.MOCK_TRANSLATE_LOCAL ? 100000 : 100)
-		const promises = filteredMessages.map((message) => limit(() => rpcTranslate(message)))
-		await Promise.all(promises)
+		// 	const { data: translatedMessage, error } = await rpcTranslateAction({
+		// 		message: toBeTranslatedMessage,
+		// 		sourceLanguageTag,
+		// 		targetLanguageTags,
+		// 	})
+		// 	if (error) {
+		// 		logs.push(() => log.error(`Couldn't translate message ${logId}: ${error}`))
+		// 		return
+		// 	} else if (
+		// 		translatedMessage &&
+		// 		translatedMessage?.variants.length > toBeTranslatedMessage.variants.length
+		// 	) {
+		// 		if (v2Persistence) {
+		// 			await args.project.store!.messageBundles.set({ data: fromV1Message(translatedMessage) })
+		// 		} else {
+		// 			args.project.query.messages.update({
+		// 				where: { id: translatedMessage.id },
+		// 				data: translatedMessage!,
+		// 			})
+		// 		}
+		// 		if (!options.quiet) {
+		// 			logs.push(() => log.info(`Machine translated message ${logId}`))
+		// 		}
+		// 	}
+		// 	bar?.increment()
+		// }
+		// // parallelize rpcTranslate calls with a limit of 100 concurrent calls
+		// const limit = plimit(process.env.MOCK_TRANSLATE_LOCAL ? 100000 : 100)
+		// const promises = filteredMessages.map((message) => limit(() => rpcTranslate(message)))
+		// await Promise.all(promises)
 
-		bar?.stop()
-		for (const log of logs) {
-			log()
-		}
+		// bar?.stop()
+		// for (const log of logs) {
+		// 	log()
+		// }
 
-		// Log the message counts
-		log.success("Machine translate complete.")
+		// // Log the message counts
+		// log.success("Machine translate complete.")
 	} catch (error) {
 		logError(error)
 	}

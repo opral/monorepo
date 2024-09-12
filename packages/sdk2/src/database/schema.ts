@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS bundle (
 ) strict;
 
 CREATE TABLE IF NOT EXISTS message (
-  id TEXT PRIMARY KEY DEFAULT (uuid_v4()), 
+  id TEXT PRIMARY KEY DEFAULT (uuid_v7()), 
   bundle_id TEXT NOT NULL,
   locale TEXT NOT NULL,
   declarations BLOB NOT NULL DEFAULT (jsonb('[]')),
@@ -23,8 +23,9 @@ CREATE TABLE IF NOT EXISTS message (
   FOREIGN KEY (bundle_id) REFERENCES bundle(id) ON DELETE CASCADE
 ) strict;
 
+
 CREATE TABLE IF NOT EXISTS variant (
-  id TEXT PRIMARY KEY DEFAULT (uuid_v4()), 
+  id TEXT PRIMARY KEY DEFAULT (uuid_v7()), 
   message_id TEXT NOT NULL,
   match BLOB NOT NULL DEFAULT (jsonb('{}')),
   pattern BLOB NOT NULL DEFAULT (jsonb('[]')),
