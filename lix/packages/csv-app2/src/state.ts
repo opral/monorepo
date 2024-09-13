@@ -6,7 +6,6 @@ import Papa from "papaparse";
 // import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
 import { plugin } from "./csv-plugin.js";
-import { keyColumn, textColumn } from "react-datasheet-grid";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -226,6 +225,7 @@ export const commitsAtom = atom(async (get) => {
 		.execute();
 });
 
+// @ts-ignore
 const humanFileSize = (bytes, si = false, dp = 1) => {
 	const thresh = si ? 1000 : 1024;
 

@@ -1,11 +1,15 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useAtom } from "jotai";
 import { useEffect } from "react";
-import { selectedProjectPathAtom, withPollingAtom } from "./state.ts";
+import {
+	projectAtom,
+	selectedProjectPathAtom,
+	withPollingAtom,
+} from "./state.ts";
 import { useNavigate } from "react-router-dom";
-import SubNavigation from "./components/SubNavigation.tsx";
-import { SlButton } from "@shoelace-style/shoelace/dist/react";
+import { SlButton, SlTooltip } from "@shoelace-style/shoelace/dist/react";
 
 export default function Layout(props: {
 	children: React.ReactNode;
@@ -13,8 +17,37 @@ export default function Layout(props: {
 }) {
 	const [, setWithPolling] = useAtom(withPollingAtom);
 	const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
+	const [project] = useAtom(projectAtom);
 
 	const navigate = useNavigate();
+
+	const handleDownload = async () => {
+		const file = await project?.db
+			.selectFrom("file")
+			.selectAll()
+			.where("path", "=", "/data.csv")
+			.executeTakeFirst();
+		if (!file) return;
+
+		const blob = new Blob([file.data]);
+		if (!blob) return;
+
+		//create download link
+		const blobUrl = URL.createObjectURL(blob);
+		console.log(blobUrl);
+		const link = document.createElement("a");
+		link.href = blobUrl;
+		link.download = selectedProjectPath!.replace("lix", "csv");
+		document.body.appendChild(link);
+		link.dispatchEvent(
+			new MouseEvent("click", {
+				bubbles: true,
+				cancelable: true,
+				view: window,
+			})
+		);
+		document.body.removeChild(link);
+	};
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -51,7 +84,33 @@ export default function Layout(props: {
 							<h1 className="font-medium">{selectedProjectPath}</h1>
 						</div>
 					</div>
-					<div className="mr-3">
+					<div className="mr-3 flex items-center gap-1.5">
+						<SlTooltip content="Download .csv">
+							<SlButton
+								size="small"
+								variant="default"
+								onClick={() => handleDownload()}
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="18"
+									height="18"
+									viewBox="0 0 16 16"
+									style={{ margin: "0 -1px" }}
+									// @ts-ignore
+									slot="prefix"
+								>
+									<path
+										fill="none"
+										stroke="currentColor"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="1.5"
+										d="M3.25 13.25h9m-8.5-6.5l4 3.5l4-3.5m-4-5v8.5"
+									/>
+								</svg>
+							</SlButton>
+						</SlTooltip>
 						<SlButton
 							size="small"
 							variant="primary"

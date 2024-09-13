@@ -68,3 +68,13 @@ padding: 0;
         width: 100%;
     }
 }
+
+sl-button[variant="default"]::part(base) {
+    transition: all 0.2s;
+}
+
+sl-button[variant="default"]::part(base):hover {
+    background-color: white;
+    border-color: grey;
+    color: black
+}

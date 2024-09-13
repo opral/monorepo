@@ -5,9 +5,9 @@ import {
 	SlInput,
 } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
-import { csvDataAtom, projectAtom } from "../state.ts";
+import { projectAtom } from "../state.ts";
 import Dropzone from "./Dropzone.tsx";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Papa from "papaparse";
 import { LixFile } from "@lix-js/sdk";
 
@@ -16,7 +16,6 @@ export const WelcomeDialog = (props: {
 	setShowWelcomeDialog: (value: boolean) => void;
 }) => {
 	const [project] = useAtom(projectAtom);
-	const [fileIsRead, setfileIsRead] = useState(false);
 	const [uniqueColumn, setUniqueColumn] = useState("");
 	const [importedArrayBuffer, setImportedArrayBuffer] = useState<
 		ArrayBuffer | undefined
@@ -61,7 +60,6 @@ export const WelcomeDialog = (props: {
 				// }, 500);
 			};
 			reader.readAsArrayBuffer(file);
-			setfileIsRead(true);
 		}
 	};
 

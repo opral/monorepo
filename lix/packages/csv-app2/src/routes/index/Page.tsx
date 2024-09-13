@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
-import {
-	authorNameAtom,
-	projectAtom,
-	selectedProjectPathAtom,
-} from "../../state.ts";
+import { projectAtom, selectedProjectPathAtom } from "../../state.ts";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { openLixInMemory } from "@lix-js/sdk";
