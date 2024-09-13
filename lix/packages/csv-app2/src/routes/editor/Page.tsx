@@ -36,10 +36,28 @@ export default function App() {
 		}
 	}, [csvData, project]);
 
+	// const handleDownloadProject = async () => {
+	// 	const blob = await project!.toBlob();
+	// 	const blobUrl = URL.createObjectURL(blob);
+	// 	const link = document.createElement("a");
+	// 	link.href = blobUrl;
+	// 	link.download = selectedProjectPath!;
+	// 	document.body.appendChild(link);
+	// 	link.dispatchEvent(
+	// 		new MouseEvent("click", {
+	// 			bubbles: true,
+	// 			cancelable: true,
+	// 			view: window,
+	// 		})
+	// 	);
+	// 	document.body.removeChild(link);
+	// };
+
 	return (
 		<>
 			<Layout setShowImportDialog={setShowImportDialog}>
 				{csvData && csvData.length > 0 ? <TableEditor /> : <></>}
+				{/* <SlButton onClick={() => handleDownloadProject()}>Import</SlButton> */}
 			</Layout>
 			<UserAuthDialog
 				showAuthorDialog={showAuthorDialog}

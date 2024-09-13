@@ -44,8 +44,6 @@ export default function App() {
 					.orderBy("created_at", "desc")
 					.executeTakeFirst();
 
-				console.log(lastCommit);
-
 				projects.push({
 					path: path,
 					lastModified: lastCommit ? lastCommit.created_at : undefined,
