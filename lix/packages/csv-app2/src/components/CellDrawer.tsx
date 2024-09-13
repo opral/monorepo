@@ -80,10 +80,6 @@ export const CellDrawer = (props: {
 		}
 	}, [row]);
 
-	useEffect(() => {
-		console.log(uniqueColumn);
-	}, [uniqueColumn]);
-
 	return (
 		<div className="">
 			<SlDrawer
