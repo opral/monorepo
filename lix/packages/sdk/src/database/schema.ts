@@ -160,7 +160,7 @@ export type Comment = Selectable<CommentTable>;
 export type NewComment = Insertable<CommentTable>;
 export type CommentUpdate = Updateable<CommentTable>;
 type CommentTable = {
-	id: string;
+	id: Generated<string>;
 	parent_id?: string;
 	discussion_id: string;
 	author_id: string;

@@ -8,8 +8,6 @@ export async function comment(args: {
 	parentComment: { id: string };
 	body: string;
 }) {
-	const newCommentId = v4();
-
 	return args.db.transaction().execute(async (trx) => {
 		// verify that the parent comment exists and fetch the discussion_id
 		const { discussion_id } = await trx
@@ -21,11 +19,9 @@ export async function comment(args: {
 		const comment = await trx
 			.insertInto("comment")
 			.values({
-				id: newCommentId,
 				parent_id: args.parentComment.id,
 				discussion_id,
 				author_id: args.currentAuthor,
-				// todo - use zoned datetime
 				body: args.body,
 			})
 			.returning("id")

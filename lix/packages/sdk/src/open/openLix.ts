@@ -1,6 +1,6 @@
 import type { LixPlugin } from "../plugin.js";
 import { commit } from "../commit.js";
-import { startDiscussion } from "../discussion/start-discussion.js";
+import { createDiscussion } from "../discussion/create-discussion.js";
 import { comment } from "../discussion/comment.js";
 import { handleFileChange, handleFileInsert } from "../file-handlers.js";
 import { loadPlugins } from "../load-plugin.js";
@@ -173,11 +173,11 @@ export async function openLix(args: {
 		commit: (args: { description: string }) => {
 			return commit({ ...args, db, currentAuthor });
 		},
-		startDiscussion: (args: { changes: { id: string }[]; body: string }) => {
+		createDiscussion: (args: { changes?: { id: string }[]; body: string }) => {
 			if (currentAuthor === undefined) {
 				throw new Error("current author not set");
 			}
-			return startDiscussion({
+			return createDiscussion({
 				...args,
 				db,
 				currentAuthor,

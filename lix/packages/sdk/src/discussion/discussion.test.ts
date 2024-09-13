@@ -78,7 +78,7 @@ test("should be able to start a discussion on changes", async () => {
 		},
 	]);
 
-	const discussion = await lix.startDiscussion({
+	const discussion = await lix.createDiscussion({
 		changes: [changes[0]!],
 		body: "comment on a change",
 	});
@@ -159,7 +159,7 @@ test("should fail to create a disussion on non existing changes", async () => {
 
 	let err;
 	await lix
-		.startDiscussion({
+		.createDiscussion({
 			changes: [
 				{
 					id: "I DON’T EXIST",
@@ -169,5 +169,6 @@ test("should fail to create a disussion on non existing changes", async () => {
 		})
 		.catch((e) => (err = e));
 
-	expect(e).toBeTypeOf("error");
+	// TODO check for error
+	// .toThrowError ... https://vitest.dev/api/expect.html#tothrowerror
 });

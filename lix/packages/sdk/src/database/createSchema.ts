@@ -82,7 +82,7 @@ export async function createSchema(args: { db: Kysely<any> }) {
   -- change discussions 
 
   CREATE TABLE discussion (
-    -- TODO in inlang i saw we replace uuid_v3 with uuid_v7 any reason we use v4 in lix 
+    -- TODO https://github.com/opral/lix-sdk/issues/74 replace with uuid_v7
     id TEXT PRIMARY KEY DEFAULT (uuid_v4())
   ) strict;
 
@@ -97,12 +97,11 @@ export async function createSchema(args: { db: Kysely<any> }) {
   ) strict;
 
 
-
   CREATE TABLE comment (
     --- TODO in inlang i saw we replace uuid_v3 with uuid_v7 any reason we use v4 in lix?
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     parent_id TEXT,
-    discussion_id TEXT NOT NULL,
+    discussion_id TEXT NULL,
     author_id TEXT NOT NULL, 
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
     body TEXT NOT NULL,

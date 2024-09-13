@@ -2,10 +2,10 @@ import { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import { v4 } from "uuid";
 
-export async function startDiscussion(args: {
+export async function createDiscussion(args: {
 	db: Kysely<LixDatabaseSchema>;
 	currentAuthor: string;
-	changes: { id: string }[];
+	changes?: { id: string }[];
 	body: string;
 }) {
 	const newDiscussionId = v4();
@@ -30,7 +30,7 @@ export async function startDiscussion(args: {
 				throw new Error("unknown changes passed");
 			}
 		}
-		
+
 		const discussion = await trx
 			.insertInto("discussion")
 			.values({
@@ -50,7 +50,7 @@ export async function startDiscussion(args: {
 				.executeTakeFirstOrThrow();
 		}
 
-		const comment = await trx
+		await trx
 			.insertInto("comment")
 			.values({
 				id: newCommentId,
@@ -60,7 +60,6 @@ export async function startDiscussion(args: {
 				// todo - use zoned datetime
 				body: args.body,
 			})
-			.returning("id")
 			.executeTakeFirstOrThrow();
 
 		return discussion;
