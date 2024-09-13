@@ -25,9 +25,7 @@ export const DemoCard = () => {
 			providePlugins: [plugin],
 		});
 
-		const csvContent = await fetch("./../../../demo/cap-table.csv").then(
-			(res) => res.text()
-		);
+		const csvContent = await fetch("/cap-table.csv").then((res) => res.text());
 
 		if (newProject) {
 			await newProject.db
@@ -50,8 +48,8 @@ export const DemoCard = () => {
 				description: "Inital demo imported",
 			});
 
-			const csvContent2 = await fetch("./../../../demo/cap-table02.csv").then(
-				(res) => res.text()
+			const csvContent2 = await fetch("/cap-table02.csv").then((res) =>
+				res.text()
 			);
 
 			if (newProject) {
