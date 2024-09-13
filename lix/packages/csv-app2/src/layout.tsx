@@ -34,7 +34,6 @@ export default function Layout(props: {
 
 		//create download link
 		const blobUrl = URL.createObjectURL(blob);
-		console.log(blobUrl);
 		const link = document.createElement("a");
 		link.href = blobUrl;
 		link.download = selectedProjectPath!.replace("lix", "csv");

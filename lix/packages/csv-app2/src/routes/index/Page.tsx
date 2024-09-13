@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { openLixInMemory } from "@lix-js/sdk";
 import timeAgo from "./../../helper/timeAgo.js";
 import { CreateProjectDialog } from "../../components/CreateProjectDialog.tsx";
+import { DemoCard } from "../../components/DemoCard.tsx";
 
 type ProjectPreview = {
 	path: string;
@@ -43,11 +44,11 @@ export default function App() {
 					.orderBy("created_at", "desc")
 					.executeTakeFirst();
 
+				console.log(lastCommit);
+
 				projects.push({
 					path: path,
-					lastModified: lastCommit
-						? timeAgo(`${lastCommit.created}`)
-						: undefined,
+					lastModified: lastCommit ? lastCommit.created_at : undefined,
 					lastAuthoredBy: lastCommit ? `${lastCommit.author}` : undefined,
 					lastCommitAnnotation: lastCommit
 						? `${lastCommit?.description}`
@@ -55,6 +56,7 @@ export default function App() {
 				});
 			}
 		}
+
 		setProjects(projects);
 	};
 
@@ -68,11 +70,13 @@ export default function App() {
 				<img src="/lix.svg" alt="logo" className="w-8 h-8" />
 				<h1 className="font-medium">CSV App</h1>
 			</div>
+
 			<div className="max-w-5xl mx-auto mt-8 px-4">
-				<h2 className="text-4xl">
-					Change control in your{" "}
-					<span className="font-mono text-3xl bg-zinc-200 px-1">.csv</span> file
+				<h2 className="text-4xl md:text-5xl max-w-[500px] text-center mx-auto leading-[44px] md:leading-[54px]">
+					Lix brings change control to your{" "}
+					<span className="bg-zinc-200 text-zinc-700 px-1">.csv</span> files
 				</h2>
+				<DemoCard />
 				<div className="flex items-end mt-6 w-full justify-between">
 					<div className="flex items-center gap-2">
 						<svg
@@ -90,7 +94,7 @@ export default function App() {
 						<p className="text-md text-zinc-700 font-medium">Your projects</p>
 					</div>
 					<SlButton
-						size="small"
+						size="medium"
 						style={{ "--sl-button-font-size-small": "13px" } as any}
 						onClick={() => setShowNewProjectDialog(true)}
 					>
@@ -98,56 +102,83 @@ export default function App() {
 					</SlButton>
 				</div>
 			</div>
-			<div className="max-w-5xl mx-auto mt-6 px-4 flex flex-col gap-3">
-				{projects.map((project) => {
-					return (
+			<div className="max-w-5xl mx-auto mt-6 px-4 flex flex-wrap gap-3 mb-16">
+				{!projects ||
+					(projects.length === 0 && (
 						<div
-							key={project.path}
-							className="flex flex-col gap-4 bg-white border border-zinc-200 rounded-lg px-6 py-5 hover:border-zinc-700 transition-all cursor-pointer min-h-[90px]"
-							onClick={() => {
-								setSelectedProjectPath(project.path);
-								navigate("/editor");
-							}}
+							className="flex flex-col justify-center items-center gap-4 w-full md:w-[calc((100%_-_12px)_/_2)] bg-transparent border border-zinc-300 rounded-lg px-6 py-5 hover:border-zinc-700 hover:bg-zinc-100 transition-all cursor-pointer min-h-[140px] border-dashed text-zinc-400 hover:text-zinc-950"
+							onClick={() => setShowNewProjectDialog(true)}
 						>
-							<div className="flex items-center gap-3">
-								<div className="border border-zinc-200 bg-zinc-50 rounded-full flex items-center justify-center text-2xl h-12 w-12">
-									{project.path[0].toUpperCase()}
-								</div>
-								<div className="flex flex-col gap-2">
-									<p className="text-lg font-medium">
-										{project.path.replace(".lix", "")}
-									</p>
-									<p className="bg-zinc-100 border border-zinc-200 px-2 py-1">
-										/{project.path}
-									</p>
-								</div>
-							</div>
-							{project.lastModified && (
-								<div className="text-zinc-600 flex flex-col gap-1">
-									<div className="flex gap-2 items-center">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="18"
-											height="18"
-											viewBox="0 0 512 512"
-										>
-											<path
-												fill="currentColor"
-												d="M480 224H380a128 128 0 0 0-247.9 0H32v64h100.05A128 128 0 0 0 380 288h100Zm-224 96a64 64 0 1 1 64-64a64.07 64.07 0 0 1-64 64"
-											/>
-										</svg>
-										<p>{project.lastCommitAnnotation}</p>
-									</div>
-
-									<p>
-										{`By ${project.lastAuthoredBy}, `}
-										{` ${timeAgo(project.lastModified as string)}`}
-									</p>
-								</div>
-							)}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="24"
+								height="24"
+								viewBox="0 0 24 24"
+							>
+								<path
+									fill="currentColor"
+									d="M19 12.998h-6v6h-2v-6H5v-2h6v-6h2v6h6z"
+								/>
+							</svg>
 						</div>
-					);
-				})}
+					))}
+				{projects
+					.sort((a, b) => {
+						if (!a.lastModified || !b.lastModified) return 0;
+						return (
+							new Date(b.lastModified).getTime() -
+							new Date(a.lastModified).getTime()
+						);
+					})
+					.map((project) => {
+						return (
+							<div
+								key={project.path}
+								className="flex flex-col gap-4 w-full md:w-[calc((100%_-_12px)_/_2)] bg-white border border-zinc-200 rounded-lg px-6 py-5 hover:border-zinc-700 transition-all cursor-pointer min-h-[90px]"
+								onClick={() => {
+									setSelectedProjectPath(project.path);
+									navigate("/editor");
+								}}
+							>
+								<div className="flex items-center gap-3">
+									<div className="border border-zinc-200 bg-zinc-50 rounded-full flex items-center justify-center text-2xl h-12 w-12">
+										{project.path[0].toUpperCase()}
+									</div>
+									<div className="flex flex-col gap-2">
+										<p className="text-lg font-medium">
+											{project.path.replace(".lix", "")}
+										</p>
+										<p className="bg-zinc-100 border border-zinc-200 px-2 py-1">
+											/{project.path}
+										</p>
+									</div>
+								</div>
+								{project.lastModified && (
+									<div className="text-zinc-500 flex flex-col gap-2">
+										<div className="flex gap-2 items-center">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="18"
+												height="18"
+												viewBox="0 0 512 512"
+											>
+												<path
+													fill="currentColor"
+													d="M480 224H380a128 128 0 0 0-247.9 0H32v64h100.05A128 128 0 0 0 380 288h100Zm-224 96a64 64 0 1 1 64-64a64.07 64.07 0 0 1-64 64"
+												/>
+											</svg>
+											<p>{project.lastCommitAnnotation}</p>
+										</div>
+
+										<p>
+											{`By ${project.lastAuthoredBy}, `}
+											{timeAgo(project.lastModified)}
+										</p>
+									</div>
+								)}
+							</div>
+						);
+					})}
 			</div>
 			<CreateProjectDialog
 				showNewProjectDialog={showNewProjectDialog}

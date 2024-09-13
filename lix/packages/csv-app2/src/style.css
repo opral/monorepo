@@ -78,3 +78,18 @@ sl-button[variant="default"]::part(base):hover {
     border-color: grey;
     color: black
 }
+
+sl-button[variant="primary"]::part(base) {
+    transition: all 0.2s;
+    color: white;
+    background-color: black;
+    border: none
+}
+sl-button[variant="primary"]::part(base):hover {
+    background-color: rgb(63, 63, 63);
+    border: none
+}
+
+sl-button[size="medium"]::part(base) {
+    border-radius: 8px;
+}
