@@ -53,6 +53,19 @@ services:
     envVars:
       - fromGroup: production
 
+  - name: csv
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: csv-app2
+    staticPublishPath: ./lix/packages/csv-app2/dist
+    buildCommand: pnpm install && pnpm run --filter @lix-js/csv-app2... build
+    buildFilter:
+      paths:
+        - lix/packages/csv-app2/**
+    envVars:
+      - fromGroup: production
+
   - name: git-proxy
     type: web
     runtime: node
