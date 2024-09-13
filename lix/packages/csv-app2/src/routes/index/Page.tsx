@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
 import {
@@ -20,7 +21,6 @@ type ProjectPreview = {
 
 export default function App() {
 	const [project] = useAtom(projectAtom);
-	const [authorName] = useAtom(authorNameAtom);
 
 	const [projects, setProjects] = useState<ProjectPreview[]>([]);
 	const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
@@ -46,7 +46,6 @@ export default function App() {
 					.selectAll()
 					.orderBy("created_at", "desc")
 					.executeTakeFirst();
-				console.log(lastCommit);
 
 				projects.push({
 					path: path,
@@ -67,7 +66,6 @@ export default function App() {
 		getProjects();
 	}, [project]);
 
-	console.log("rendered");
 	return (
 		<div className="w-full">
 			<div className="w-full border-b border-zinc-200 bg-white flex items-center px-4 min-h-[54px] gap-2">
@@ -95,7 +93,11 @@ export default function App() {
 						</svg>
 						<p className="text-md text-zinc-700 font-medium">Your projects</p>
 					</div>
-					<SlButton size="small" onClick={() => setShowNewProjectDialog(true)}>
+					<SlButton
+						size="small"
+						style={{ "--sl-button-font-size-small": "13px" } as any}
+						onClick={() => setShowNewProjectDialog(true)}
+					>
 						Create new
 					</SlButton>
 				</div>

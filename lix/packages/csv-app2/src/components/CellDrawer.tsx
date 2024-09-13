@@ -75,19 +75,11 @@ export const CellDrawer = (props: {
 		}
 	}, [row]);
 
-	useEffect(() => {
-		console.log("showDrawer", props.showDrawer);
-	}, [props.showDrawer]);
-
 	return (
 		<div className="">
 			<SlDrawer
 				open={props.showDrawer}
 				contained
-				onSlRequestClose={() => {
-					console.log("request close");
-					//props.setShowDrawer(false);
-				}}
 				placement={getPlacement()}
 				noHeader
 				className="cellDrawer"

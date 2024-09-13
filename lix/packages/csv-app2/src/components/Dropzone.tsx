@@ -20,7 +20,7 @@ const Dropzone = (props: {
 			<input {...getInputProps()} />
 			<div
 				className={clsx(
-					"border  flex flex-col items-center w-[340px] rounded-xl px-4 py-12 gap-3 border-dashed cursor-pointer hover:border-zinc-600 hover:bg-zinc-100",
+					"border  flex flex-col items-center w-full rounded-xl px-4 py-12 gap-3 border-dashed cursor-pointer hover:border-zinc-600 hover:bg-zinc-100",
 					isDragActive
 						? "bg-blue-50 border-blue-500"
 						: "bg-zinc-50 border-zinc-300"

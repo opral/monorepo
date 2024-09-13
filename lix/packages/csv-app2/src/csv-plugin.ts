@@ -294,7 +294,8 @@ export const plugin: LixPlugin = {
 						console.log("check", oldRow, row, cols);
 						const diff = {
 							type: "row",
-							operation: oldRow && row ? "update" : old ? "delete" : "create",
+							operation:
+								oldRow && row ? "update" : oldRow ? "delete" : "create",
 							old: oldRow as DiffReport["old"],
 							neu: row as DiffReport["neu"],
 							meta: {

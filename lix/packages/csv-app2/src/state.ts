@@ -93,6 +93,13 @@ export const csvDataAtom = atom(async (get) => {
 		.where("path", "=", "/data.csv")
 		.executeTakeFirst();
 	if (!csvFile) return [];
+	console.log(
+		"parsed",
+		Papa.parse(new TextDecoder().decode(csvFile.data), {
+			header: true,
+			skipEmptyLines: true,
+		}).data
+	);
 	return Papa.parse(new TextDecoder().decode(csvFile.data), {
 		header: true,
 		skipEmptyLines: true,

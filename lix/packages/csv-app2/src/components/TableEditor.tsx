@@ -62,6 +62,7 @@ const TableEditor = () => {
 	return (
 		<div className="relative h-[calc(100vh_-_87px)]">
 			<DynamicDataSheetGrid
+				disableContextMenu
 				value={
 					csvData as [
 						{
@@ -81,7 +82,7 @@ const TableEditor = () => {
 					)
 				}
 				rowKey={primaryKey}
-				onFocus={(cell) => console.log("onFocus", cell)}
+				// onFocus={(cell) => console.log("onFocus", cell)}
 				onSelectionChange={(e: { selection: any }) => {
 					if (e.selection) {
 						if (

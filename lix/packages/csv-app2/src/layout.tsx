@@ -5,8 +5,12 @@ import { useEffect } from "react";
 import { selectedProjectPathAtom, withPollingAtom } from "./state.ts";
 import { useNavigate } from "react-router-dom";
 import SubNavigation from "./components/SubNavigation.tsx";
+import { SlButton } from "@shoelace-style/shoelace/dist/react";
 
-export default function Layout(props: { children: React.ReactNode }) {
+export default function Layout(props: {
+	children: React.ReactNode;
+	setShowImportDialog: (value: boolean) => void;
+}) {
 	const [, setWithPolling] = useAtom(withPollingAtom);
 	const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
 
@@ -23,30 +27,43 @@ export default function Layout(props: { children: React.ReactNode }) {
 	return (
 		<div className="w-full min-h-screen bg-zinc-50">
 			<div className="w-full border-b border-zinc-200 bg-white">
-				<div className="w-full flex items-center px-1 min-h-[54px] gap-1">
-					<div
-						className="flex justify-center items-center text-zinc-500 w-9 h-9 hover:bg-zinc-100 hover:text-zinc-950 rounded-lg cursor-pointer"
-						onClick={() => navigate("/")}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="24px"
-							height="24px"
-							viewBox="0 0 24 24"
+				<div className="w-full flex items-center justify-between px-1 min-h-[54px] gap-1">
+					<div className="flex items-center gap-1">
+						<div
+							className="flex justify-center items-center text-zinc-500 w-9 h-9 hover:bg-zinc-100 hover:text-zinc-950 rounded-lg cursor-pointer"
+							onClick={() => navigate("/")}
 						>
-							<path
-								fill="currentColor"
-								d="M21 20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.49a1 1 0 0 1 .386-.79l8-6.223a1 1 0 0 1 1.228 0l8 6.223a1 1 0 0 1 .386.79zm-2-1V9.978l-7-5.444l-7 5.444V19z"
-							/>
-						</svg>
-					</div>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="24px"
+								height="24px"
+								viewBox="0 0 24 24"
+							>
+								<path
+									fill="currentColor"
+									d="M21 20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.49a1 1 0 0 1 .386-.79l8-6.223a1 1 0 0 1 1.228 0l8 6.223a1 1 0 0 1 .386.79zm-2-1V9.978l-7-5.444l-7 5.444V19z"
+								/>
+							</svg>
+						</div>
 
-					<p className="font-medium opacity-30">/</p>
-					<div className="flex justify-center items-center text-zinc-950 h-9 rounded-lg px-2">
-						<h1 className="font-medium">{selectedProjectPath}</h1>
+						<p className="font-medium opacity-30">/</p>
+						<div className="flex justify-center items-center text-zinc-950 h-9 rounded-lg px-2">
+							<h1 className="font-medium">{selectedProjectPath}</h1>
+						</div>
+					</div>
+					<div className="mr-3">
+						<SlButton
+							size="small"
+							variant="primary"
+							onClick={() => props.setShowImportDialog(true)}
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
+							style={{ "--sl-button-font-size-small": "13px" } as any}
+						>
+							Import .csv
+						</SlButton>
 					</div>
 				</div>
-				<div className="w-full -mt-1 px-2">
+				<div className="w-full -mt-2 px-2">
 					<SubNavigation />
 				</div>
 			</div>
