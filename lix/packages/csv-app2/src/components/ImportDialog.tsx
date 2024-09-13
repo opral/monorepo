@@ -5,20 +5,15 @@ import {
 	SlInput,
 } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
-import {
-	forceReloadProjectAtom,
-	pendingChangesAtom,
-	projectAtom,
-} from "../state.ts";
+import { pendingChangesAtom, projectAtom } from "../state.ts";
 import Dropzone from "./Dropzone.tsx";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export const ImportDialog = (props: {
 	showImportDialog: boolean;
 	setShowImportDialog: (value: boolean) => void;
 }) => {
 	const [project] = useAtom(projectAtom);
-	const [, setForceReloadProject] = useAtom(forceReloadProjectAtom);
 	const [pendingChanges] = useAtom(pendingChangesAtom);
 	const [importInitialized, setImportInitialized] = useState(false);
 	const [description, setDescription] = useState("");
@@ -97,7 +92,7 @@ export const ImportDialog = (props: {
 								placeholder="What did you import?"
 								// eslint-disable-next-line @typescript-eslint/no-explicit-any
 								onInput={(e: any) =>
-									setDescription(e.target.value ? e.target.value + ".lix" : "")
+									setDescription(e.target.value ? e.target.value : "")
 								}
 							></SlInput>
 						</div>

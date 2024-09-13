@@ -13,6 +13,7 @@ import {
 	// type Conflict,
 	type LixPlugin,
 	DiffReport,
+	LixFile,
 } from "@lix-js/sdk";
 
 // await resolveConflict({
@@ -263,14 +264,22 @@ export const plugin: LixPlugin = {
 			const oldColumns = Object.keys(
 				(oldParsed?.data[0] as Record<string, string>) || {}
 			);
-			const primaryKey: string = oldColumns[0];
-
+			let uniqueColumn: string = oldColumns[0];
+			const oldUniqueColumn = (old as LixFile)?.metadata?.unique_column;
+			if (oldUniqueColumn) {
+				uniqueColumn = oldUniqueColumn;
+			}
+			const newUniqueColumn = (neu as LixFile)?.metadata?.unique_column;
+			if (newUniqueColumn) {
+				uniqueColumn = newUniqueColumn;
+			}
+			console.log("uniqueColumn", uniqueColumn);
 			const oldById =
 				oldParsed?.data.reduce((agg: Record<string, unknown>, row) => {
-					if (!(row as Record<string, string>)[primaryKey]) {
+					if (!(row as Record<string, string>)[uniqueColumn]) {
 						return agg;
 					}
-					agg[(row as Record<string, string>)[primaryKey]] = row;
+					agg[(row as Record<string, string>)[uniqueColumn]] = row;
 					return agg;
 				}, {}) || {};
 
@@ -285,13 +294,12 @@ export const plugin: LixPlugin = {
 					Record<string, string>
 				>) {
 					const oldRow = oldById[
-						(row as Record<string, string>)[primaryKey]
+						(row as Record<string, string>)[uniqueColumn]
 					] as Record<string, string>;
 
 					const isEqual = oldRow ? compareObjects(oldRow, row) : false;
 					if (!isEqual) {
 						const cols = getChangedKeys(oldRow, row);
-						console.log("check", oldRow, row, cols);
 						const diff = {
 							type: "row",
 							operation:

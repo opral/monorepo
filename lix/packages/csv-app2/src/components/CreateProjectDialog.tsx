@@ -33,7 +33,6 @@ export const CreateProjectDialog = (props: {
 			blob,
 			providePlugins: [plugin],
 		});
-		console.log(newProject);
 		const file = await newProject.toBlob();
 		await writable.write(file);
 		await writable.close();

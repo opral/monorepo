@@ -93,17 +93,27 @@ export const csvDataAtom = atom(async (get) => {
 		.where("path", "=", "/data.csv")
 		.executeTakeFirst();
 	if (!csvFile) return [];
-	console.log(
-		"parsed",
-		Papa.parse(new TextDecoder().decode(csvFile.data), {
-			header: true,
-			skipEmptyLines: true,
-		}).data
-	);
 	return Papa.parse(new TextDecoder().decode(csvFile.data), {
 		header: true,
 		skipEmptyLines: true,
 	}).data as [{ [key: string]: string }];
+});
+
+export const uniqueColumnAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const project = await get(projectAtom);
+	if (!project) return [];
+
+	const result = await project.db
+		.selectFrom("file")
+		.select("metadata")
+		.where("path", "=", "/data.csv")
+		.executeTakeFirst();
+	if (!result) return undefined;
+	// @ts-ignore
+	const uniqueColumn = result.metadata.unique_column;
+	if (!uniqueColumn) return undefined;
+	return uniqueColumn;
 });
 
 // export const committedChangesAtom = atom(async (get) => {

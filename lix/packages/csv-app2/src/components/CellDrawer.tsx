@@ -1,10 +1,13 @@
 import { SlDrawer } from "@shoelace-style/shoelace/dist/react";
 import { SetStateAction, useAtom } from "jotai";
 import React, { useEffect, useState } from "react";
-import { csvDataAtom, editorSelectionAtom, projectAtom } from "../state.ts";
-import { primaryKey } from "./TableEditor.tsx";
+import {
+	csvDataAtom,
+	editorSelectionAtom,
+	projectAtom,
+	uniqueColumnAtom,
+} from "../state.ts";
 import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
-import clsx from "clsx";
 import timeAgo from "../helper/timeAgo.ts";
 
 export const CellDrawer = (props: {
@@ -14,7 +17,9 @@ export const CellDrawer = (props: {
 	const [selection] = useAtom(editorSelectionAtom);
 	const [project] = useAtom(projectAtom);
 	const [csvData] = useAtom(csvDataAtom);
+	const [uniqueColumn] = useAtom(uniqueColumnAtom);
 	const [row, setRow] = useState<{ [key: string]: string } | undefined>();
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [relevantChangesOfRow, setRelevantChangesOfRow] = useState<any[]>([]);
 
 	const getPlacement = () => {
@@ -27,7 +32,7 @@ export const CellDrawer = (props: {
 
 	const getCsvRow = async (selection: { row: string; col: string }) => {
 		if (csvData && csvData.length > 0) {
-			const row = csvData.find((row) => row[primaryKey] === selection.row);
+			const row = csvData.find((row) => row[uniqueColumn] === selection.row);
 			setRow(row);
 		}
 	};
@@ -47,7 +52,7 @@ export const CellDrawer = (props: {
 				.selectAll()
 				.where("change.commit_id", "==", commit.id)
 				.where(
-					(eb) => eb.ref("value", "->>").key(primaryKey),
+					(eb) => eb.ref("value", "->>").key(uniqueColumn),
 					"=",
 					selection?.row
 				)
@@ -74,6 +79,10 @@ export const CellDrawer = (props: {
 			getHistoryOfRow();
 		}
 	}, [row]);
+
+	useEffect(() => {
+		console.log(uniqueColumn);
+	}, [uniqueColumn]);
 
 	return (
 		<div className="">
@@ -133,12 +142,6 @@ export const CellDrawer = (props: {
 						</p>
 					</div>
 				</div>
-				{/* <div className="flex items-center justify-between min-h-[54px] text-zinc-500 px-4 border-b border-zinc-200">
-					<p>Position</p>
-					<p className="">
-						{selection?.row} - {selection?.col}
-					</p>
-				</div> */}
 				{selection && (
 					<div className="mb-12 relative flex flex-col gap-3">
 						{relevantChangesOfRow

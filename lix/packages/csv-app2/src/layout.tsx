@@ -26,7 +26,7 @@ export default function Layout(props: {
 
 	return (
 		<div className="w-full min-h-screen bg-zinc-50">
-			<div className="w-full border-b border-zinc-200 bg-white">
+			<div className="w-full border-b border-zinc-200 bg-white relative z-90 -mb-[1px]">
 				<div className="w-full flex items-center justify-between px-1 min-h-[54px] gap-1">
 					<div className="flex items-center gap-1">
 						<div
@@ -63,9 +63,9 @@ export default function Layout(props: {
 						</SlButton>
 					</div>
 				</div>
-				<div className="w-full -mt-2 px-2">
+				{/* <div className="w-full -mt-2 px-2">
 					<SubNavigation />
-				</div>
+				</div> */}
 			</div>
 
 			{props.children}
