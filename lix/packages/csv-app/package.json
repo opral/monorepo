@@ -1,31 +1,32 @@
 {
-  "name": "csv-app",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@js-temporal/polyfill": "^0.4.4",
-    "@lit-labs/preact-signals": "^1.0.2",
-    "@lit-labs/router": "^0.1.3",
-    "@lit/task": "^1.0.1",
-    "@shoelace-style/shoelace": "^2.15.1",
-    "@tailwindcss/vite": "^4.0.0-alpha.17",
-    "lit": "^3.2.0",
-    "lit-element": "^4.1.0",
-    "papaparse": "^5.4.1",
-    "tailwindcss": "^4.0.0-alpha.17",
-    "uuid": "^10.0.0",
-    "@lix-js/sdk": "workspace:*"
-  },
-  "devDependencies": {
-    "@types/papaparse": "^5.3.14",
-    "@types/uuid": "^10.0.0",
-    "typescript": "^5.2.2",
-    "vite": "^5.3.1"
-  }
+	"name": "csv-app",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"@js-temporal/polyfill": "^0.4.4",
+		"@lit-labs/preact-signals": "^1.0.2",
+		"@lit-labs/router": "^0.1.3",
+		"@lit/task": "^1.0.1",
+		"@shoelace-style/shoelace": "^2.15.1",
+		"@tailwindcss/vite": "^4.0.0-alpha.17",
+		"lit": "^3.2.0",
+		"lit-element": "^4.1.0",
+		"papaparse": "^5.4.1",
+		"tailwindcss": "^4.0.0-alpha.17",
+		"uuid": "^10.0.0",
+		"@lix-js/sdk": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/papaparse": "^5.3.14",
+		"@types/uuid": "^10.0.0",
+		"prettier": "^3.3.3",
+		"typescript": "^5.2.2",
+		"vite": "^5.3.1"
+	}
 }

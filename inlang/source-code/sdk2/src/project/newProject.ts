@@ -1,11 +1,12 @@
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
+import { v4 } from "uuid";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import {
 	contentFromDatabase,
 	createInMemoryDatabase,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
-import { createSchema } from "../database/schema.js";
+import { captureError } from "../services/error-reporting/index.js";
 
 /**
  * Creates a new inlang project.
@@ -22,8 +23,6 @@ export async function newProject(args?: {
 	const db = initDb({ sqlite });
 
 	try {
-		await createSchema({ sqlite });
-
 		const inlangDbContent = contentFromDatabase(sqlite);
 
 		const lix = await openLixInMemory({ blob: await newLixFile() });
@@ -38,25 +37,33 @@ export async function newProject(args?: {
 				},
 				{
 					path: "/settings.json",
-					data: await new Blob([
-						JSON.stringify(args?.settings ?? defaultProjectSettings),
-					]).arrayBuffer(),
+					data: new TextEncoder().encode(
+						JSON.stringify(args?.settings ?? defaultProjectSettings)
+					),
+				},
+				{
+					path: "/project_id",
+					data: new TextEncoder().encode(v4()),
 				},
 			])
 			.execute();
 		return lix.toBlob();
 	} catch (e) {
-		throw new Error(`Failed to create new inlang project: ${e}`, { cause: e });
+		const error = new Error(`Failed to create new inlang project: ${e}`, {
+			cause: e,
+		});
+		captureError(error);
+		throw error;
 	} finally {
 		sqlite.close();
 		await db.destroy();
 	}
 }
 
-const defaultProjectSettings = {
+export const defaultProjectSettings = {
 	$schema: "https://inlang.com/schema/project-settings",
 	baseLocale: "en",
-	locales: ["en", "de"],
+	locales: ["en"],
 	modules: [
 		// for instant gratification, we're adding common rules
 		// "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",

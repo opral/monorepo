@@ -9,6 +9,9 @@ import type { InlangProject } from "./api.js";
 import { createProjectState } from "./state/state.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
 import { exportFiles, importFiles } from "../import-export/index.js";
+import { v4 } from "uuid";
+import { initErrorReporting } from "../services/error-reporting/index.js";
+import { maybeCaptureLoadedProject } from "./maybeCaptureTelemetry.js";
 
 /**
  * Common load project logic.
@@ -37,8 +40,19 @@ export async function loadProject(args: {
 	 *
 	 */
 	preprocessPluginBeforeImport?: PreprocessPluginBeforeImportFunction;
+	/**
+	 * The id of the app that is using the SDK.
+	 *
+	 * The is used for telemetry purposes. To derive insights like
+	 * which app is using the SDK, how many projects are loaded, etc.
+	 *
+	 * The app id can be removed at any time in the future
+	 */
+	appId?: string;
 }): Promise<InlangProject> {
 	const db = initDb({ sqlite: args.sqlite });
+
+	await maybeMigrateFirstProjectId({ lix: args.lix });
 
 	const settingsFile = await args.lix.db
 		.selectFrom("file")
@@ -55,34 +69,33 @@ export async function loadProject(args: {
 		settings,
 	});
 
-	/**
-	 * Pending promises are used for the `project.settled()` api.
-	 */
 	// TODO implement garbage collection/a proper queue.
 	//      for the protoype and tests, it seems good enough
 	//      without garbage collection of old promises.
-	const pendingPromises: Promise<unknown>[] = [];
+	const pendingSaveToLixPromises: Promise<unknown>[] = [];
 
 	await initHandleSaveToLixOnChange({
 		sqlite: args.sqlite,
 		db,
 		lix: args.lix,
-		pendingPromises,
+		pendingPromises: pendingSaveToLixPromises,
 	});
 
-	// todo not garbage collected
-	// todo2 settled is not needed if lix has an attach mode for sqlite
-	const settled = async () => {
-		await Promise.all(pendingPromises);
-		await args.lix.settled();
-	};
+	// not awaiting to not block the load time of a project
+	maybeCaptureLoadedProject({
+		db,
+		state,
+		appId: args.appId,
+	});
+
+	initErrorReporting({ projectId: await state.id.get() });
 
 	return {
 		db,
+		id: state.id,
 		settings: state.settings,
 		plugins: state.plugins,
 		errors: state.errors,
-		settled,
 		importFiles: async ({ files, pluginKey }) => {
 			return await importFiles({
 				files,
@@ -93,12 +106,14 @@ export async function loadProject(args: {
 			});
 		},
 		exportFiles: async ({ pluginKey }) => {
-			return await exportFiles({
-				pluginKey,
-				db,
-				settings: await state.settings.get(),
-				plugins: await state.plugins.get(),
-			});
+			return (
+				await exportFiles({
+					pluginKey,
+					db,
+					settings: await state.settings.get(),
+					plugins: await state.plugins.get(),
+				})
+			).map((output) => ({ ...output, pluginKey }));
 		},
 		close: async () => {
 			args.sqlite.close();
@@ -107,10 +122,32 @@ export async function loadProject(args: {
 		},
 		_sqlite: args.sqlite,
 		toBlob: async () => {
-			await settled();
+			await Promise.all(pendingSaveToLixPromises);
 			return await args.lix.toBlob();
 		},
 		lix: args.lix,
 	};
 }
 
+/**
+ * Old leftover migration from v1. Probably not needed anymore.
+ *
+ * Kept it in just in case.
+ */
+async function maybeMigrateFirstProjectId(args: { lix: Lix }): Promise<void> {
+	const firstProjectIdFile = await args.lix.db
+		.selectFrom("file")
+		.select("data")
+		.where("path", "=", "/project_id")
+		.executeTakeFirst();
+
+	if (!firstProjectIdFile) {
+		await args.lix.db
+			.insertInto("file")
+			.values({
+				path: "/project_id",
+				data: new TextEncoder().encode(v4()),
+			})
+			.execute();
+	}
+}

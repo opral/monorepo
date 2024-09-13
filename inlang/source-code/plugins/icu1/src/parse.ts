@@ -214,13 +214,17 @@ export function createMessage({
 			annotation: fn ? { type: "function", name: fn, options: [] } : undefined,
 		})),
 		variants: branches.map((branch) => {
-			const match = selectors.map(([name, fn]) => {
-				const matches = branch.match.find((m) => m[0] === name && m[1] === fn)
-				if (matches) return matches[2]
-				else return "*"
-			})
+			const match = {}
+			// TODO support named matchers
+			// selectors.map(([name, fn]) => {
+			// 	const matches = branch.match.find((m) => m[0] === name && m[1] === fn)
+			// 	if (matches) return matches[2]
+			// 	else return "*"
+			// })
 
-			const variantId = `${messageId}_${match.map((m) => (m === "*" ? "any" : m)).join("_")}`
+			// TODO support named matchers
+			//const variantId = `${messageId}_${match.map((m) => (m === "*" ? "any" : m)).join("_")}`
+			const variantId = `${messageId}_any`
 			return {
 				id: variantId,
 				messageId,

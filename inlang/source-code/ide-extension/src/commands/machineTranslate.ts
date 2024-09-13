@@ -1,9 +1,10 @@
 import { commands } from "vscode"
-import { type Bundle, selectBundleNested } from "@inlang/sdk2"
+import { type Bundle } from "@inlang/sdk2"
 import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { rpc } from "@inlang/rpc"
 import { CONFIGURATION } from "../configuration.js"
+import { getSelectedBundleByBundleIdOrAlias } from "../utilities/helper.js"
 
 export const machineTranslateMessageCommand = {
 	command: "sherlock.machineTranslateMessage",
@@ -19,9 +20,7 @@ export const machineTranslateMessageCommand = {
 		targetLocales: string[]
 	}) {
 		// Get the message from the database
-		const bundle = await selectBundleNested(state().project.db)
-			.where("bundle.id", "=", bundleId)
-			.executeTakeFirst()
+		const bundle = await getSelectedBundleByBundleIdOrAlias(bundleId)
 
 		if (!bundle) {
 			return msg(`Bundle with id ${bundleId} not found.`)
@@ -32,7 +31,7 @@ export const machineTranslateMessageCommand = {
 		const result = await rpc.machineTranslateMessage({
 			bundle,
 			// TODO: refactor machine translation to use baseLocale and targetLocales
-			baseLocale,
+			sourceLocale: baseLocale,
 			targetLocales,
 		})
 

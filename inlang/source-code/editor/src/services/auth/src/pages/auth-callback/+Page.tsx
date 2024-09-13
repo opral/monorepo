@@ -1,8 +1,8 @@
 import { createEffect, createResource, Match, Switch } from "solid-js"
 import { getAuthClient } from "@lix-js/client"
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded"
-import { publicEnv } from "@inlang/env-variables"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
+import { publicEnv } from "#src/services/env-variables/index.js"
 
 const browserAuth = getAuthClient({
 	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,

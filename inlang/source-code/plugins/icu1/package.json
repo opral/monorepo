@@ -11,7 +11,7 @@
 	],
 	"scripts": {
 		"dev": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",
-		"build": "inlang module build --entry ./src/index.ts --outdir ./dist",
+		"build": "tsc --noEmit && inlang module build --entry ./src/index.ts --outdir ./dist",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
@@ -24,6 +24,7 @@
 		"@sinclair/typebox": "^0.31.17",
 		"@vitest/coverage-v8": "^0.33.0",
 		"typescript": "^5.5.2",
+		"prettier": "3.3.3",
 		"vitest": "0.33.0"
 	},
 	"dependencies": {

@@ -1,4 +1,3 @@
-import { privateEnv } from "@inlang/env-variables"
 import type { Result } from "@inlang/result"
 import algoliasearch, { type AlgoliaSearchOptions, type SearchClient } from "algoliasearch"
 import { registry } from "@inlang/marketplace-registry"
@@ -9,7 +8,11 @@ const algolia = algoliasearch as unknown as (
 	options?: AlgoliaSearchOptions
 ) => SearchClient
 
-const client = algolia(privateEnv.ALGOLIA_APPLICATION, privateEnv.ALGOLIA_ADMIN)
+if (process.env.ALGOLIA_APPLICATION === undefined || process.env.ALGOLIA_ADMIN === undefined) {
+	throw new Error("ALGOLIA_APPLICATION is not set")
+}
+
+const client = algolia(process.env.ALGOLIA_APPLICATION, process.env.ALGOLIA_ADMIN)
 const index = client.initIndex("registry")
 
 index.setSettings({
@@ -38,10 +41,6 @@ export async function search(args: {
 			}
 		}
 		return { data: JSON.stringify(hits) }
-	}
-
-	if (!privateEnv.ALGOLIA_ADMIN || !privateEnv.ALGOLIA_APPLICATION) {
-		throw new Error("ALGOLIA_ADMIN is not set")
 	}
 
 	const data = await index.search(args.term)

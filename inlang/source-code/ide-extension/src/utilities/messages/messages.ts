@@ -12,7 +12,9 @@ import {
 	type BundleNested,
 	type IdeExtensionConfig,
 	type InlangProject,
+	pollQuery,
 } from "@inlang/sdk2"
+import { getSelectedBundleByBundleIdOrAlias } from "../helper.js"
 
 export function createMessageWebviewProvider(args: {
 	context: vscode.ExtensionContext
@@ -37,6 +39,13 @@ export function createMessageWebviewProvider(args: {
 		if (subscribedToProjectPath !== state().selectedProjectPath) {
 			subscribedToProjectPath = state().selectedProjectPath
 			// TODO: Uncomment when bundle subscribe is implemented
+			// TODO unsubscribe
+			pollQuery(() => selectBundleNested(project.db).execute()).subscribe((newBundles) => {
+				bundles = newBundles
+				isLoading = false
+				updateWebviewContent()
+				// throttledUpdateWebviewContent()
+			})
 			// project.query.messages.getAll.subscribe((fetchedMessages: BundleNested[]) => {
 			// 	bundles = fetchedMessages ? [...fetchedMessages] : []
 			// 	isLoading = false
@@ -77,9 +86,9 @@ export function createMessageWebviewProvider(args: {
 
 		const highlightedBundles = await Promise.all(
 			matchedBundles.map(async (bundle) => {
-				const bundleData = await selectBundleNested(state().project.db)
-					.where("bundle.id", "=", bundle.bundleId)
-					.executeTakeFirst()
+				// @ts-ignore TODO: Introduce deprecation message for messageId
+				bundle.bundleId = bundle.bundleId || bundle.messageId
+				const bundleData = await getSelectedBundleByBundleIdOrAlias(bundle.bundleId)
 				return bundleData
 			})
 		)
@@ -246,7 +255,7 @@ export async function createMessageHtml(args: {
             </div>`
 			: ""
 
-	const translationsTableHtml = getTranslationsTableHtml({
+	const translationsTableHtml = await getTranslationsTableHtml({
 		bundle: args.bundle,
 		workspaceFolder: args.workspaceFolder,
 	})
@@ -274,7 +283,8 @@ export async function createMessageHtml(args: {
 										? `<span title="Jump to message" onclick="${jumpCommand}"><span class="codicon codicon-magnet"></span></span>`
 										: ""
 								}
-                <span title="Open in Fink" onclick="${openCommand}"><span class="codicon codicon-link-external"></span></span>
+				<!-- Removed until we have a proper way to open in Fink with Lix host -->
+                <!--<span title="Open in Fink" onclick="${openCommand}"><span class="codicon codicon-link-external"></span></span>-->
             </div>
         </div>
         <div class="content" style="display: none;">
@@ -413,36 +423,36 @@ export function getHtml(args: {
 					});
 				}
 
-				function editMessage(messageId, languageTag) {
+				function editMessage(bundleId, locale) {
 					vscode.postMessage({
 						command: 'executeCommand',
 						commandName: 'sherlock.editMessage',
-						commandArgs: { messageId, languageTag },
+						commandArgs: { bundleId, locale },
 					});
 				}
 			
-				function openInFink(messageId, selectedProjectPath) {
+				function openInFink(bundleId, selectedProjectPath) {
 					vscode.postMessage({
 						command: 'executeCommand',
 						commandName: 'sherlock.openInFink',
-						commandArgs: { messageId, selectedProjectPath },
+						commandArgs: { bundleId, selectedProjectPath },
 					});
 				}
 
-				function jumpToPosition(messageId, position) {
+				function jumpToPosition(bundleId, position) {
 					const decodedPosition = JSON.parse(decodeURIComponent(position));
 					vscode.postMessage({
 						command: 'executeCommand',
 						commandName: 'sherlock.jumpToPosition',
-						commandArgs: { messageId, position: decodedPosition },
+						commandArgs: { bundleId, position: decodedPosition },
 					});
 				}
 
-				function machineTranslate(messageId, baseLocale, targetLanguageTags) {
+				function machineTranslate(bundleId, baseLocale, targetLanguageTags) {
 					vscode.postMessage({
 						command: 'executeCommand',
 						commandName: 'sherlock.machineTranslateMessage',
-						commandArgs: { messageId, baseLocale, targetLanguageTags },
+						commandArgs: { bundleId, baseLocale, targetLanguageTags },
 					});
 				}
             </script>
@@ -451,49 +461,57 @@ export function getHtml(args: {
     `
 }
 
-export function getTranslationsTableHtml(args: {
+export async function getTranslationsTableHtml(args: {
 	bundle: BundleNested
 	workspaceFolder: vscode.WorkspaceFolder
-}): string {
-	const hasTranslations = Object.keys(args.bundle.messages).length > 0
+}): Promise<string> {
+	const settings = await state().project.settings.get()
+	const configuredLocales = settings.locales
+	const contextTableRows = configuredLocales.flatMap((locale) => {
+		const message = args.bundle.messages.find((m) => m.locale === locale)
 
-	const rowsHtml = hasTranslations
-		? args.bundle.messages
-				.map(
-					(message) =>
-						`<tr>
-                        <td class="language">${escapeHtml(message.locale)}</td>
-                        ${message.variants
-													.map((variant) => {
-														const translation = getStringFromPattern({
-															pattern: variant.pattern || [
-																{
-																	type: "text",
-																	value: "", // TODO: Fix pattern type to be always defined either/or Text / VariableReference
-																},
-															],
-															locale: message.locale,
-															messageId: variant.messageId,
-														})
-														return `<td class="translation">${escapeHtml(translation)}</td>`
-													})
-													.join("")}
-                    </tr>`
-				)
-				.join("")
-		: '<tr><td colspan="2" class="no-translations">No translations available</td></tr>'
+		// Handle missing translation scenario
+		if (!message) {
+			const missingTranslationMessage = CONFIGURATION.STRINGS.MISSING_TRANSLATION_MESSAGE
+			const editCommand = `editMessage('${args.bundle.id}', '${escapeHtml(locale)}')`
+			const machineTranslateCommand = `machineTranslate('${args.bundle.id}', '${
+				settings.baseLocale
+			}', ['${locale}'])`
 
-	return `<table class="translations">
-                <thead>
-                    <tr>
-                        <th class="language-column">Language</th>
-                        <th class="translation-column">Translation</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rowsHtml}
-                </tbody>
-            </table>`
+			return `
+				<div class="section">
+					<span class="languageTag"><strong>${escapeHtml(locale)}</strong></span>
+					<span class="message"><button onclick="${editCommand}">${escapeHtml(missingTranslationMessage)}</button></span>
+					<span class="actionButtons">
+						<button title="Translate message with Inlang AI" onclick="${machineTranslateCommand}"><span class="codicon codicon-sparkle"></span></button>
+					</span>
+				</div>
+			`
+		}
+
+		// If message is present, map over each variant
+		return message.variants.map((variant, index) => {
+			const pattern = getStringFromPattern({
+				pattern: variant.pattern,
+				locale: message.locale,
+				messageId: message.id,
+			})
+
+			const editCommand = `editMessage('${args.bundle.id}', '${escapeHtml(locale)}')`
+
+			return `
+				<div class="section">
+					<span class="languageTag"><strong>${escapeHtml(locale)} - Variant ${index + 1}</strong></span>
+					<span class="message"><button onclick="${editCommand}">${escapeHtml(pattern)}</button></span>
+					<span class="actionButtons">
+						<button title="Edit" onclick="${editCommand}"><span class="codicon codicon-edit"></span></button>
+					</span>
+				</div>
+			`
+		})
+	})
+
+	return `<div class="table">${contextTableRows.join("")}</div>`
 }
 
 export async function messageView(args: {

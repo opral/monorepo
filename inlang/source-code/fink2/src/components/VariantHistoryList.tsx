@@ -1,11 +1,10 @@
 import { useAtom } from "jotai";
 import { projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
-import type { Pattern, Variant } from "@inlang/sdk2";
+import type { Change, Pattern, Variant } from "@inlang/sdk2";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
-import queryHelper from "../helper/queryHelper.ts";
 import timeAgo from "../helper/timeAgo.ts";
-import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
+import { isInSimulatedCurrentBranch } from "@inlang/sdk2";
 
 const VariantHistoryList = (props: {
 	variantId: string;
@@ -40,7 +39,11 @@ const VariantHistoryList = (props: {
 	) => {
 		if (project) {
 			setLoading(zoned_date_time);
-			await queryHelper.variant.update(project.db, revertedVariant).execute();
+			await project.db
+				.updateTable("variant")
+				.set(revertedVariant)
+				.where("variant.id", "=", revertedVariant.id)
+				.execute();
 
 			setTimeout(() => {
 				setLoading(undefined);
@@ -122,9 +125,7 @@ const patternToString = (props: { pattern: Pattern }): string => {
 		.map((p) => {
 			if ("value" in p) {
 				return p.value;
-				// @ts-ignore
 			} else if (p.type === "expression" && p.arg.type === "variable") {
-				// @ts-ignore
 				return `{{${p.arg.name}}}`;
 			}
 			return "";

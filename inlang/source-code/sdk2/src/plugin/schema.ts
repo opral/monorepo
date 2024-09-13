@@ -33,22 +33,23 @@ export type InlangPlugin<
 	}) => Promise<void> | void;
 	/**
 	 * Import / Export files.
-	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
+	 *
+	 * @returns The paths of the files that should be imported.
 	 */
 	toBeImportedFiles?: (args: {
 		settings: ProjectSettings & ExternalSettings;
 		nodeFs: NodeFsPromisesSubset;
-	}) => Promise<Array<ResourceFile>> | Array<ResourceFile>;
+	}) => MaybePromise<string[]>;
 	importFiles?: (args: {
 		files: Array<ResourceFile>;
 		settings: ProjectSettings & ExternalSettings; // we expose the settings in case the importFunction needs to access the plugin config
-	}) => {
+	}) => MaybePromise<{
 		bundles: NewBundleNested[];
-	};
+	}>;
 	exportFiles?: (args: {
 		bundles: BundleNested[];
 		settings: ProjectSettings & ExternalSettings;
-	}) => Array<ResourceFile>;
+	}) => MaybePromise<Array<Omit<ResourceFile, "pluginKey">>>;
 	/**
 	 * @deprecated Use the `meta` field instead.
 	 */
@@ -73,10 +74,12 @@ export type InlangPlugin<
  *
  * https://github.com/opral/inlang-sdk/issues/136
  */
-type NodeFsPromisesSubsetLegacy = {
-	readFile: (path: string) => Promise<Buffer>;
+export type NodeFsPromisesSubsetLegacy = {
+	readFile:
+		| ((path: string) => Promise<ArrayBuffer>)
+		| ((path: string, options?: { encoding: "utf-8" }) => Promise<string>);
 	readdir: (path: string) => Promise<string[]>;
-	writeFile: (path: string, data: Buffer) => Promise<void>;
+	writeFile: (path: string, data: ArrayBuffer | string) => Promise<void>;
 	mkdir: (path: string) => Promise<void>;
 };
 
@@ -85,7 +88,9 @@ type NodeFsPromisesSubsetLegacy = {
  *
  * https://github.com/opral/inlang-sdk/issues/136
  */
-type NodeFsPromisesSubset = {
-	readFile: (path: string) => Promise<Buffer>;
+export type NodeFsPromisesSubset = {
+	readFile: (path: string) => Promise<ArrayBuffer>;
 	readdir: (path: string) => Promise<string[]>;
 };
+
+type MaybePromise<T> = T | Promise<T>;

@@ -1,14 +1,47 @@
+/* eslint-disable unicorn/no-null */
 import { expect, test, vi } from "vitest";
 import { openLixInMemory } from "./open/openLixInMemory.js";
 import { newLixFile } from "./newLix.js";
 import type { DiffReport, LixPlugin } from "./plugin.js";
 
 test("should use queue and settled correctly", async () => {
-	const mockPlugin: LixPlugin = {
+	const mockPlugin: LixPlugin<{
+		text: { id: string; text: string };
+	}> = {
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
-			file: async ({ old }) => {
+			file: async ({ old, neu }) => {
+				const dec = new TextDecoder();
+				// console.log("diff", neu, old?.data, neu?.data);
+				const newText = dec.decode(neu?.data);
+				const oldText = dec.decode(old?.data);
+
+				if (newText === oldText) {
+					return [];
+				}
+
+				return await mockPlugin.diff.text({
+					old: old
+						? {
+								id: "test",
+								text: oldText,
+							}
+						: undefined,
+					neu: neu
+						? {
+								id: "test",
+								text: newText,
+							}
+						: undefined,
+				});
+			},
+			text: async ({ old, neu }) => {
+				// console.log("text", old, neu);
+				if (old?.text === neu?.text) {
+					return [];
+				}
+
 				return [
 					!old
 						? {
@@ -17,7 +50,7 @@ test("should use queue and settled correctly", async () => {
 								old: undefined,
 								neu: {
 									id: "test",
-									text: "inserted text",
+									text: neu?.text,
 								},
 							}
 						: {
@@ -25,17 +58,18 @@ test("should use queue and settled correctly", async () => {
 								operation: "update",
 								old: {
 									id: "test",
-									text: "inserted text",
+									text: old?.text,
 								},
 								neu: {
 									id: "test",
-									text: "updated text",
+									text: neu?.text,
 								},
 							},
 				];
 			},
 		},
 	};
+
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
@@ -59,6 +93,7 @@ test("should use queue and settled correctly", async () => {
 		{
 			id: 1,
 			file_id: "test",
+			metadata: null,
 			path: "test.txt",
 			data: queue[0]?.data,
 		},
@@ -79,6 +114,7 @@ test("should use queue and settled correctly", async () => {
 			data: internalFilesAfter[0]?.data,
 			id: "test",
 			path: "test.txt",
+			metadata: null,
 		},
 	]);
 
@@ -95,7 +131,7 @@ test("should use queue and settled correctly", async () => {
 			plugin_key: "mock-plugin",
 			value: {
 				id: "test",
-				text: "inserted text",
+				text: "test",
 			},
 			meta: null,
 			commit_id: null,
@@ -104,6 +140,13 @@ test("should use queue and settled correctly", async () => {
 	]);
 
 	// Test replacing uncommitted changes and multiple changes processing
+	await lix.db
+		.updateTable("file")
+		.set({ data: enc.encode("test updated text") })
+		.where("id", "=", "test")
+		.execute();
+
+	// re apply same change
 	await lix.db
 		.updateTable("file")
 		.set({ data: enc.encode("test updated text") })
@@ -119,15 +162,17 @@ test("should use queue and settled correctly", async () => {
 	const queue2 = await lix.db.selectFrom("change_queue").selectAll().execute();
 	expect(queue2).toEqual([
 		{
-			id: 2,
-			file_id: "test",
-			path: "test.txt",
-			data: queue2[0]?.data,
-		},
-		{
 			id: 3,
 			file_id: "test",
 			path: "test.txt",
+			metadata: null,
+			data: queue2[0]?.data,
+		},
+		{
+			id: 4,
+			file_id: "test",
+			path: "test.txt",
+			metadata: null,
 			data: queue2[1]?.data,
 		},
 	]);
@@ -151,14 +196,46 @@ test("should use queue and settled correctly", async () => {
 			parent_id: null,
 			type: "text",
 			file_id: "test",
-			operation: "update",
+			operation: "create",
 			plugin_key: "mock-plugin",
 			value: {
 				id: "test",
-				text: "updated text",
+				text: "test",
 			},
 			meta: null,
 			commit_id: null,
+		},
+		{
+			author: null,
+			commit_id: null,
+			created_at: updatedChanges[1]?.created_at,
+			file_id: "test",
+			id: updatedChanges[1]?.id,
+			meta: null,
+			operation: "update",
+			parent_id: updatedChanges[0]?.id,
+			plugin_key: "mock-plugin",
+			type: "text",
+			value: {
+				id: "test",
+				text: "test updated text",
+			},
+		},
+		{
+			author: null,
+			commit_id: null,
+			created_at: updatedChanges[2]?.created_at,
+			file_id: "test",
+			id: updatedChanges[2]?.id,
+			meta: null,
+			operation: "update",
+			parent_id: updatedChanges[1]?.id,
+			plugin_key: "mock-plugin",
+			type: "text",
+			value: {
+				id: "test",
+				text: "test updated text second update",
+			},
 		},
 	]);
 

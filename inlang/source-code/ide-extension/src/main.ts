@@ -9,17 +9,18 @@ import { messagePreview } from "./decorations/messagePreview.js"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { errorView } from "./utilities/errors/errors.js"
 import { messageView } from "./utilities/messages/messages.js"
-import { createFileSystemMapper } from "./utilities/fs/createFileSystemMapper.js"
+import { createFileSystemMapper, type FileSystem } from "./utilities/fs/createFileSystemMapper.js"
 import fs from "node:fs/promises"
-import { normalizePath } from "@lix-js/fs"
 import { gettingStartedView } from "./utilities/getting-started/gettingStarted.js"
 import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
 import { recommendationBannerView } from "./utilities/recommendation/recommendation.js"
-import { telemetry } from "./services/telemetry/implementation.js"
+import { telemetry } from "./services/telemetry/index.js"
 import { version } from "../package.json"
 import { statusBar } from "./utilities/settings/statusBar.js"
 import fg from "fast-glob"
 import type { IdeExtensionConfig } from "@inlang/sdk2"
+import path from "node:path"
+import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
@@ -46,21 +47,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			},
 		})
 
-		const mappedFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)
+		const mappedFs = createFileSystemMapper(path.normalize(workspaceFolder.uri.fsPath), fs)
 
-		try {
-			const projectsList = (await fg.async("*.inlang", { onlyDirectories: true })).map(
-				(project) => ({
-					projectPath: project,
-				})
-			)
-			setState({ ...state(), projectsInWorkspace: projectsList })
-		} catch (error) {
-			handleError(error)
-			return
-		}
-
+		await setProjects({ workspaceFolder })
 		await main({ context, workspaceFolder, fs: mappedFs })
+
 		msg("Sherlock activated", "info")
 	} catch (error) {
 		handleError(error)
@@ -71,12 +62,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 async function main(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 }): Promise<void> {
 	if (state().projectsInWorkspace.length > 0) {
 		// find the closest project to the workspace
 		const closestProjectToWorkspace = await closestInlangProject({
-			workingDirectory: normalizePath(args.workspaceFolder.uri.fsPath),
+			workingDirectory: path.normalize(args.workspaceFolder.uri.fsPath),
 			projects: state().projectsInWorkspace,
 		})
 
@@ -115,7 +106,7 @@ async function main(args: {
 function setupFileSystemWatcher(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 }) {
 	const watcher = vscode.workspace.createFileSystemWatcher(
 		new vscode.RelativePattern(
@@ -137,7 +128,7 @@ function setupFileSystemWatcher(args: {
 async function registerExtensionComponents(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
-	fs: typeof import("node:fs/promises")
+	fs: FileSystem
 }) {
 	args.context.subscriptions.push(
 		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))
@@ -159,13 +150,33 @@ async function registerExtensionComponents(args: {
 	)
 
 	messagePreview(args)
-	// Replace by lix validation rules
-	// linterDiagnostics(args)
+	// TODO: Replace by lix validation rules
+	linterDiagnostics(args)
 }
 
 async function handleInlangErrors() {
 	const inlangErrors = (await state().project.errors.get()) || []
 	if (inlangErrors.length > 0) {
 		console.error("Extension errors (Sherlock):", inlangErrors)
+	}
+}
+
+async function setProjects(args: { workspaceFolder: vscode.WorkspaceFolder }) {
+	try {
+		const projectsList = (
+			await fg.async(`${args.workspaceFolder.uri.fsPath}/**/*.inlang`, {
+				onlyDirectories: true,
+				ignore: ["**/node_modules/**"],
+			})
+		).map((project) => ({
+			projectPath: project,
+		}))
+
+		setState({
+			...state(),
+			projectsInWorkspace: projectsList,
+		})
+	} catch (error) {
+		handleError(error)
 	}
 }

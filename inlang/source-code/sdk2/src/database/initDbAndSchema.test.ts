@@ -3,14 +3,12 @@ import { test, expect } from "vitest";
 import { initDb } from "./initDb.js";
 import { isHumanId } from "../human-id/human-id.js";
 import { validate as isUuid } from "uuid";
-import { createSchema } from "./schema.js";
 
 test("bundle default values", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
-	await createSchema({ sqlite });
 
 	const bundle = await db
 		.insertInto("bundle")
@@ -27,7 +25,6 @@ test("message default values", async () => {
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
-	await createSchema({ sqlite });
 
 	const bundle = await db
 		.insertInto("bundle")
@@ -54,7 +51,6 @@ test("variant default values", async () => {
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
-	await createSchema({ sqlite });
 
 	const bundle = await db
 		.insertInto("bundle")
@@ -84,12 +80,11 @@ test("variant default values", async () => {
 	expect(variant.pattern).toStrictEqual([]);
 });
 
-test("it should handle json serialization", async () => {
+test("it should handle json serialization and parsing for bundles", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
-	await createSchema({ sqlite });
 
 	const bundle = await db
 		.insertInto("bundle")
@@ -101,3 +96,4 @@ test("it should handle json serialization", async () => {
 
 	expect(bundle.alias).toEqual({ mock: "mock" });
 });
+

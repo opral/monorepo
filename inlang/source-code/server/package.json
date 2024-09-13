@@ -11,13 +11,10 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/badge": "workspace:*",
-		"@inlang/env-variables": "workspace:*",
 		"@inlang/marketplace-manifest": "workspace:*",
 		"@inlang/plugin-message-format": "workspace:*",
 		"@inlang/project-settings": "workspace:*",
 		"@inlang/rpc": "workspace:*",
-		"@inlang/telemetry": "workspace:*",
 		"@inlang/website": "workspace:*",
 		"@sentry/node": "^7.47.0",
 		"@sentry/tracing": "^7.47.0",

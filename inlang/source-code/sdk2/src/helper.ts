@@ -3,7 +3,6 @@ import type { ProjectSettings } from "./json-schema/settings.js";
 import { humanId } from "./human-id/human-id.js";
 import type {
 	Bundle,
-	MessageNested,
 	NewBundleNested,
 	NewMessageNested,
 	NewVariant,
@@ -22,7 +21,7 @@ import type { Expression, Text } from "./json-schema/pattern.js";
  */
 export function createBundle(args: {
 	id?: string;
-	messages: MessageNested[];
+	messages: NewMessageNested[];
 	alias?: Bundle["alias"];
 }): NewBundleNested {
 	return {
@@ -69,7 +68,7 @@ export function createVariant(args: {
 	text?: string;
 	match?: Record<Expression["arg"]["name"], string>;
 	pattern?: Variant["pattern"];
-}): NewVariant {
+}): Variant {
 	return {
 		messageId: args.messageId,
 		id: args.id ? args.id : uuid(),

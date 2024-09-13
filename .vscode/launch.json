@@ -49,7 +49,6 @@
 				// change this path to specify what folder should be opened upon running this configuration
 				"${workspaceFolder}/inlang/development-projects/inlang-nextjs"
 			],
-			"sourceMaps": true,
 			"outFiles": [
 				"${workspaceFolder}/**/*.js",
 				"${workspaceFolder}/**/*.ts",

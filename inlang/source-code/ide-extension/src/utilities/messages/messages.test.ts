@@ -101,7 +101,9 @@ describe("Message Webview Provider Tests", () => {
 			project: {
 				// @ts-expect-error
 				settings: {
-					get: vi.fn().mockResolvedValue({}),
+					get: vi.fn().mockResolvedValue({
+						locales: [], // Handling undefined locales case
+					}),
 				},
 			},
 			selectedProjectPath: "/workspace/project",
@@ -125,9 +127,23 @@ describe("Message Webview Provider Tests", () => {
 		expect(html).not.toContain("aliasValue")
 	})
 
-	it("should create a translations table for a message", () => {
+	it("should create a translations table for a message", async () => {
+		// Mocking state with valid locales
+		vi.mocked(state).mockReturnValue({
+			project: {
+				// @ts-expect-error
+				settings: {
+					get: vi.fn().mockResolvedValue({
+						baseLocale: "en",
+						locales: ["en", "de"], // Configured locales
+					}),
+				},
+			},
+			selectedProjectPath: "/workspace/project",
+		})
+
 		// Creating a translations table HTML
-		const html = getTranslationsTableHtml({
+		const html = await getTranslationsTableHtml({
 			bundle: {
 				id: "message-id",
 				alias: {},
@@ -147,6 +163,7 @@ describe("Message Webview Provider Tests", () => {
 							},
 						],
 					},
+					// German translation is missing (to test the "missing" message)
 				],
 			},
 			workspaceFolder: {
@@ -154,27 +171,45 @@ describe("Message Webview Provider Tests", () => {
 			} as vscode.WorkspaceFolder,
 		})
 
-		// Validating that the translations table contains the expected content
-		expect(html).toContain("Language")
-		expect(html).toContain("Translation")
-		expect(html).toContain("Hello")
+		// Validate that the translations table contains the expected structure
+		expect(html).toContain("en - Variant 1") // English variant
+		expect(html).toContain("Hello") // English message content
+		expect(html).toContain("de") // German translation section
+		expect(html).toContain("[missing]") // Missing German translation
 	})
 
-	it("should handle cases where there are no translations", () => {
+	it("should handle cases where there are no translations", async () => {
+		// Mocking state with valid locales but no translations available
+		vi.mocked(state).mockReturnValue({
+			project: {
+				// @ts-expect-error
+				settings: {
+					get: vi.fn().mockResolvedValue({
+						baseLocale: "en",
+						locales: ["en", "de"], // Configured locales
+					}),
+				},
+			},
+			selectedProjectPath: "/workspace/project",
+		})
+
 		// Creating a translations table HTML with no translations available
-		const html = getTranslationsTableHtml({
+		const html = await getTranslationsTableHtml({
 			bundle: {
 				id: "message-id",
 				alias: {},
-				messages: [],
+				messages: [], // No messages for any locale
 			},
 			workspaceFolder: {
 				uri: { fsPath: "/workspace/project" },
 			} as vscode.WorkspaceFolder,
 		})
 
-		// Validating that the HTML indicates no translations are available
-		expect(html).toContain("No translations available")
+		// Validate that the HTML indicates missing translations for each locale
+		expect(html).toContain("en") // English section should still appear
+		expect(html).toContain("[missing]") // Missing English translation
+		expect(html).toContain("de") // German section should appear
+		expect(html).toContain("[missing]") // Missing German translation
 	})
 
 	it("should create 'No Messages Found' HTML", () => {

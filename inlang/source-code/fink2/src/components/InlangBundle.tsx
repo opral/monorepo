@@ -19,7 +19,6 @@ import {
 	ProjectSettings,
 	Variant,
 } from "@inlang/sdk2";
-import queryHelper from "../helper/queryHelper.ts";
 import {
 	SlDialog,
 	SlDropdown,
@@ -88,27 +87,44 @@ const InlangBundle = (props: {
 
 	const onMesageInsert = async (message: Message) => {
 		if (project) {
-			await queryHelper.message.insert(project.db, message).execute();
+			await project.db
+				.insertInto("message")
+				.values(message)
+				.execute();
 		}
 	};
 	const onMesageUpdate = async (message: Message) => {
 		if (project) {
-			await queryHelper.message.update(project.db, message).execute();
+			await project.db
+				.updateTable("message")
+				.set(message)
+				.where("message.id", "=", message.id)
+				.execute();
 		}
 	};
 	const onVariantInsert = async (variant: Variant) => {
 		if (project) {
-			await queryHelper.variant.insert(project.db, variant).execute();
+			await project.db
+				.insertInto("variant")
+				.values(variant)
+				.execute();
 		}
 	};
 	const onVariantUpdate = async (variant: Variant) => {
 		if (project) {
-			await queryHelper.variant.update(project.db, variant).execute();
+			await project.db
+				.updateTable("variant")
+				.set(variant)
+				.where("variant.id", "=", variant.id)
+				.execute();
 		}
 	};
 	const onVariantDelete = async (variant: Variant) => {
 		if (project) {
-			await queryHelper.variant.delete(project.db, variant).execute();
+			await project.db
+				.deleteFrom("variant")
+				.where("variant.id", "=", variant.id)
+				.executeTakeFirst();
 		}
 	};
 
@@ -345,15 +361,14 @@ const InlangBundle = (props: {
 												slot="variant"
 												onClick={async () => {
 													if (project) {
-														await queryHelper.message
-															.insert(project.db, message)
+														await project.db
+															.insertInto("message")
+															.values(message)
 															.execute();
 
-														await queryHelper.variant
-															.insert(
-																project.db,
-																createVariant({ messageId: message.id })
-															)
+														await project.db
+															.insertInto("variant")
+															.values(createVariant({ messageId: message.id }))
 															.execute();
 													}
 												}}

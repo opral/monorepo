@@ -2,34 +2,38 @@ import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import { Declaration, Expression, Pattern } from "../json-schema/pattern.js";
 
-export async function createSchema(args: { sqlite: SqliteDatabase }) {
-	args.sqlite.exec(`
-PRAGMA foreign_keys = ON;
+export function applySchema(args: { sqlite: SqliteDatabase }) {
+	const foreignKeys: any = args.sqlite.exec("PRAGMA foreign_keys");
+	if (foreignKeys["foreign_keys"] === 0) {
+		args.sqlite.exec("PRAGMA foreign_keys = ON");
+	}
 
-CREATE TABLE bundle (
+	args.sqlite.exec(`
+CREATE TABLE IF NOT EXISTS bundle (
   id TEXT PRIMARY KEY DEFAULT (human_id()),
-  alias TEXT NOT NULL DEFAULT '{}'
+  alias BLOB NOT NULL DEFAULT (jsonb('{}'))
 ) strict;
 
-CREATE TABLE message (
-  id TEXT PRIMARY KEY DEFAULT (uuid_v4()), 
+CREATE TABLE IF NOT EXISTS message (
+  id TEXT PRIMARY KEY DEFAULT (uuid_v7()), 
   bundle_id TEXT NOT NULL,
   locale TEXT NOT NULL,
-  declarations TEXT NOT NULL DEFAULT '[]',
-  selectors TEXT NOT NULL DEFAULT '[]',
+  declarations BLOB NOT NULL DEFAULT (jsonb('[]')),
+  selectors BLOB NOT NULL DEFAULT (jsonb('[]')),
   FOREIGN KEY (bundle_id) REFERENCES bundle(id) ON DELETE CASCADE
 ) strict;
 
-CREATE TABLE variant (
-  id TEXT PRIMARY KEY DEFAULT (uuid_v4()), 
+
+CREATE TABLE IF NOT EXISTS variant (
+  id TEXT PRIMARY KEY DEFAULT (uuid_v7()), 
   message_id TEXT NOT NULL,
-  match TEXT NOT NULL DEFAULT '{}',
-  pattern TEXT NOT NULL DEFAULT '[]',
+  match BLOB NOT NULL DEFAULT (jsonb('{}')),
+  pattern BLOB NOT NULL DEFAULT (jsonb('[]')),
   FOREIGN KEY (message_id) REFERENCES message(id) ON DELETE CASCADE
 ) strict;
   
-CREATE INDEX idx_message_bundle_id ON message (bundle_id);
-CREATE INDEX idx_variant_message_id ON variant (message_id);
+CREATE INDEX IF NOT EXISTS idx_message_bundle_id ON message (bundle_id);
+CREATE INDEX IF NOT EXISTS idx_variant_message_id ON variant (message_id);
 		`);
 }
 
@@ -46,7 +50,7 @@ type BundleTable = {
 
 type MessageTable = {
 	id: Generated<string>;
-	bundleId: string;
+	bundleId: Generated<string>;
 	locale: string;
 	declarations: Generated<Array<Declaration>>;
 	selectors: Generated<Array<Expression>>;
@@ -68,7 +72,7 @@ export type NewMessage = Insertable<MessageTable>;
 export type MessageUpdate = Updateable<MessageTable>;
 
 export type Variant = Selectable<VariantTable>;
-export type NewVariant = Selectable<VariantTable>;
+export type NewVariant = Insertable<VariantTable>;
 export type VariantUpdate = Updateable<VariantTable>;
 
 export type MessageNested = Message & {

@@ -17,6 +17,10 @@ export type InlangProject = {
 	 * TODO remove this
 	 */
 	_sqlite: SqliteDatabase;
+	id: {
+		get: () => Promise<string>;
+		subscribe: Subscription<string>;
+	};
 	plugins: {
 		get: () => Promise<readonly InlangPlugin[]>;
 		subscribe: Subscription<readonly InlangPlugin[]>;
@@ -30,7 +34,6 @@ export type InlangProject = {
 		set: (settings: ProjectSettings) => Promise<void>;
 		subscribe: Subscription<ProjectSettings>;
 	};
-	settled: () => Promise<void>;
 	lix: Lix;
 	importFiles: (args: {
 		pluginKey: InlangPlugin["key"];

@@ -5,9 +5,16 @@ import { uuidv4, type Lix } from "@lix-js/sdk";
 import type fs from "node:fs/promises";
 // eslint-disable-next-line no-restricted-imports
 import nodePath from "node:path";
-import type { InlangPlugin } from "../plugin/schema.js";
+import type {
+	InlangPlugin,
+	NodeFsPromisesSubsetLegacy,
+} from "../plugin/schema.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
 import { fromMessageV1 } from "../json-schema/old-v1-message/fromMessageV1.js";
+import type { ProjectSettings } from "../json-schema/settings.js";
+import type { PreprocessPluginBeforeImportFunction } from "../plugin/importPlugins.js";
+import { PluginImportError } from "../plugin/errors.js";
+import type { InlangProject, ResourceFile } from "./api.js";
 
 /**
  * Loads a project from a directory.
@@ -28,6 +35,16 @@ export async function loadProjectFromDirectoryInMemory(
 	});
 	await copyFiles({ fs: args.fs, path: args.path, lix: tempProject.lix });
 
+	const localImport = await importLocalPlugins({
+		fs: args.fs,
+		path: args.path,
+	});
+
+	const providePluginsWithLocalPlugins = [
+		...(args.providePlugins ?? []),
+		...localImport.locallyImportedPlugins,
+	];
+
 	// TODO call tempProject.lix.settled() to wait for the new settings file, and remove reload of the proejct as soon as reactive settings has landed
 	// NOTE: we need to ensure two things:
 	// 1. settled needs to include the changes from the copyFiles call
@@ -35,6 +52,7 @@ export async function loadProjectFromDirectoryInMemory(
 	const project = await loadProjectInMemory({
 		// pass common arguments to loadProjectInMemory
 		...args,
+		providePlugins: providePluginsWithLocalPlugins,
 		blob: await tempProject.toBlob(),
 	});
 
@@ -77,22 +95,32 @@ export async function loadProjectFromDirectoryInMemory(
 		);
 	}
 
+	const importedResourceFileErrors: Error[] = [];
+
 	for (const importer of importPlugins) {
-		const files = importer.toBeImportedFiles
-			? await importer.toBeImportedFiles({
-					settings: await project.settings.get(),
-					nodeFs: args.fs,
-			  })
-			: [];
+		const files: ResourceFile[] = [];
+
+		if (importer.toBeImportedFiles) {
+			const paths = await importer.toBeImportedFiles({
+				settings: await project.settings.get(),
+				nodeFs: args.fs,
+			});
+			for (const path of paths) {
+				const absolute = absolutePathFromProject(args.path, path);
+				try {
+					const data = await args.fs.readFile(absolute);
+					files.push({ path, content: data, pluginKey: importer.key });
+				} catch (e) {
+					importedResourceFileErrors.push(
+						new ResourceFileImportError({ cause: e as Error, path })
+					);
+				}
+			}
+		}
 
 		await project.importFiles({
 			pluginKey: importer.key,
 			files,
-		});
-
-		// TODO check user id and description (where will this one appear?)
-		await project.lix.commit({
-			description: "Executed importFiles",
 		});
 	}
 
@@ -101,28 +129,50 @@ export async function loadProjectFromDirectoryInMemory(
 	if (chosenLegacyPlugin) {
 		await loadLegacyMessages({
 			project,
+			projectPath: args.path,
 			fs: args.fs,
 			pluginKey: chosenLegacyPlugin.key ?? chosenLegacyPlugin.id,
 			loadMessagesFn: chosenLegacyPlugin.loadMessages,
 		});
-		// TODO check user id and description (where will this one appear?)
-		await project.lix.commit({
-			description: "legacy load and save messages",
-		});
 	}
 
-	return project;
+	return {
+		...project,
+		errors: {
+			get: async () => {
+				const errors = await project.errors.get();
+				return [
+					...withLocallyImportedPluginWarning(errors),
+					...localImport.errors,
+					...importedResourceFileErrors,
+				];
+			},
+			subscribe: (
+				callback: Parameters<InlangProject["errors"]["subscribe"]>[0]
+			) => {
+				return project.errors.subscribe((value) => {
+					callback([
+						...withLocallyImportedPluginWarning(value),
+						...localImport.errors,
+						...importedResourceFileErrors,
+					]);
+				});
+			},
+		},
+	};
 }
 
 async function loadLegacyMessages(args: {
 	project: Awaited<ReturnType<typeof loadProjectInMemory>>;
 	pluginKey: NonNullable<InlangPlugin["key"] | InlangPlugin["id"]>;
 	loadMessagesFn: Required<InlangPlugin>["loadMessages"];
+	projectPath: string;
 	fs: typeof fs;
 }) {
 	const loadedLegacyMessages = await args.loadMessagesFn({
 		settings: await args.project.settings.get(),
-		nodeishFs: args.fs,
+		// @ts-ignore
+		nodeishFs: withAbsolutePaths(args.fs, args.projectPath),
 	});
 	const insertQueries = [];
 
@@ -228,4 +278,145 @@ function categorizePlugins(plugins: readonly InlangPlugin[]): {
 		importPlugins,
 		exportPlugins,
 	};
+}
+
+/**
+ * Imports local plugins for backwards compatibility.
+ *
+ * https://github.com/opral/inlang-sdk/issues/171
+ */
+async function importLocalPlugins(args: {
+	fs: typeof fs;
+	path: string;
+	preprocessPluginBeforeImport?: PreprocessPluginBeforeImportFunction;
+}) {
+	const errors: Error[] = [];
+	const locallyImportedPlugins = [];
+	const settingsPath = nodePath.join(args.path, "settings.json");
+	const settings = JSON.parse(
+		await args.fs.readFile(settingsPath, "utf8")
+	) as ProjectSettings;
+	for (const module of settings.modules ?? []) {
+		const modulePath = absolutePathFromProject(args.path, module);
+		try {
+			let moduleAsText = await args.fs.readFile(modulePath, "utf8");
+			if (moduleAsText.includes("messageLintRule")) {
+				errors.push(new WarningDeprecatedLintRule(module));
+				continue;
+			}
+			if (args.preprocessPluginBeforeImport) {
+				moduleAsText = await args.preprocessPluginBeforeImport(moduleAsText);
+			}
+			const moduleWithMimeType =
+				"data:application/javascript," + encodeURIComponent(moduleAsText);
+			const { default: plugin } = await import(
+				/* @vite-ignore */ moduleWithMimeType
+			);
+			locallyImportedPlugins.push(plugin);
+		} catch (e) {
+			errors.push(new PluginImportError({ plugin: module, cause: e as Error }));
+			continue;
+		}
+	}
+	return {
+		errors,
+		locallyImportedPlugins,
+	};
+}
+
+function withLocallyImportedPluginWarning(errors: readonly Error[]) {
+	return errors.map((error) => {
+		if (
+			error instanceof PluginImportError &&
+			error.plugin.startsWith("http") === false
+		) {
+			return new WarningLocalPluginImport(error.plugin);
+		}
+		return error;
+	});
+}
+
+export class WarningLocalPluginImport extends Error {
+	constructor(module: string) {
+		super(
+			`Plugin ${module} is imported from a local path. This will work fine in dev tools like Sherlock or Paraglide JS but is not portable. Web apps like Fink or Parrot won't be able to import this plugin. It is recommended to use an http url to import plugins. The plugins are cached locally and will be available offline.`
+		);
+		this.name = "WarningLocalImport";
+	}
+}
+
+export class WarningDeprecatedLintRule extends Error {
+	constructor(module: string) {
+		super(
+			`The lint rule ${module} is deprecated. Please remove the lint rule from the settings. Lint rules are interim built into apps and will be succeeded by more generilizable lix validation rules.`
+		);
+		this.name = "WarningDeprecatedLintRule";
+	}
+}
+
+/**
+ * Resolving absolute paths for fs functions.
+ *
+ * This mapping is required for backwards compatibility.
+ * Relative paths in the project.inlang/settings.json
+ * file are resolved to absolute paths with `*.inlang`
+ * being pruned.
+ *
+ * @example
+ *   "/website/project.inlang"
+ *   "./local-plugins/mock-plugin.js"
+ *   -> "/website/local-plugins/mock-plugin.js"
+ *
+ */
+export function withAbsolutePaths(
+	fs: NodeFsPromisesSubsetLegacy,
+	projectPath: string
+): NodeFsPromisesSubsetLegacy {
+	return {
+		// @ts-expect-error
+		readFile: (path, options) => {
+			return fs.readFile(absolutePathFromProject(projectPath, path), options);
+		},
+		writeFile: (path, data) => {
+			return fs.writeFile(absolutePathFromProject(projectPath, path), data);
+		},
+		mkdir: (path) => {
+			return fs.mkdir(absolutePathFromProject(projectPath, path));
+		},
+		readdir: (path) => {
+			return fs.readdir(absolutePathFromProject(projectPath, path));
+		},
+	};
+}
+
+/**
+ * Joins a path from a project path.
+ *
+ * @example
+ *   joinPathFromProject("/project.inlang", "./local-plugins/mock-plugin.js") -> "/local-plugins/mock-plugin.js"
+ *
+ *   joinPathFromProject("/website/project.inlang", "./mock-plugin.js") -> "/website/mock-plugin.js"
+ */
+export function absolutePathFromProject(projectPath: string, path: string) {
+	// need to remove the project path from the module path for legacy reasons
+	// "/project.inlang/local-plugins/mock-plugin.js" -> "/local-plugins/mock-plugin.js"
+	const pathWithoutProject = projectPath
+		.split(nodePath.sep)
+		.slice(0, -1)
+		.join(nodePath.sep);
+
+	const resolvedPath = nodePath.resolve(pathWithoutProject, path);
+
+	return resolvedPath;
+}
+
+export class ResourceFileImportError extends Error {
+	path: string;
+
+	constructor(args: { cause: Error; path: string }) {
+		super("Could not import a resource file");
+		this.name = "ResourceFileImportError";
+		this.cause = args.cause;
+		this.path = args.path;
+	}
 }

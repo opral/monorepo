@@ -1,8 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { ProjectSettings } from "../json-schema/settings.js";
 import { Volume } from "memfs";
-import { loadProjectFromDirectoryInMemory } from "./loadProjectFromDirectory.js";
+import {
+	loadProjectFromDirectoryInMemory,
+	ResourceFileImportError,
+	WarningDeprecatedLintRule,
+	WarningLocalPluginImport,
+} from "./loadProjectFromDirectory.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import { Text } from "../json-schema/pattern.js";
 import type { InlangPlugin } from "../plugin/schema.js";
@@ -221,4 +227,188 @@ test.skip("it should copy all files in a directory into lix", async () => {
 	expect(filesByPath["/prettierrc.json"]).toBe("prettier value");
 	expect(filesByPath["/README.md"]).toBe("readme value");
 	expect(filesByPath["/settings.json"]).toBe(JSON.stringify(mockSettings));
+});
+
+test("errors from importing translation files should be shown", async () => {
+	const mock = {
+		"/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en", "de"],
+			modules: [],
+		} satisfies ProjectSettings),
+	};
+
+	const fs = Volume.fromJSON(mock).promises;
+
+	const mockPlugin: InlangPlugin = {
+		key: "mock-plugin",
+		importFiles: async () => {
+			return { bundles: [] };
+		},
+		toBeImportedFiles: async () => {
+			return ["./non-existing-file.json"];
+		},
+	};
+
+	const project = await loadProjectFromDirectoryInMemory({
+		fs: fs as any,
+		path: "/project.inlang",
+		providePlugins: [mockPlugin],
+	});
+
+	const errors = await project.errors.get();
+	expect(errors).toHaveLength(1);
+	expect(errors[0]).toBeInstanceOf(ResourceFileImportError);
+});
+
+test("it should provide plugins from disk for backwards compatibility but warn that those plugins are not portable", async () => {
+	const mockRepo = {
+		"/local-plugins/mock-plugin.js": "export default { key: 'mock-plugin' }",
+		"/local-plugins/mock-rule.js":
+			"export default { id: 'messageLintRule.mock }",
+		"/website/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en", "de"],
+			modules: [
+				"../local-plugins/mock-plugin.js",
+				"../local-plugins/mock-rule.js",
+			],
+		} satisfies ProjectSettings),
+	};
+
+	const fs = Volume.fromJSON(mockRepo).promises;
+
+	const project = await loadProjectFromDirectoryInMemory({
+		fs: fs as any,
+		path: "/website/project.inlang",
+	});
+
+	const plugins = await project.plugins.get();
+	const errors = await project.errors.get();
+	const settings = await project.settings.get();
+
+	expect(plugins.length).toBe(1);
+	expect(plugins[0]?.key).toBe("mock-plugin");
+
+	// old mock lint rule import is number two import
+	// it's hard to model the import of a lint rule
+	// best if they are removed
+	expect(errors.length).toBe(3);
+	expect(errors[0]).toBeInstanceOf(WarningLocalPluginImport);
+	expect(errors[1]).toBeInstanceOf(WarningLocalPluginImport);
+	expect(errors[2]).toBeInstanceOf(WarningDeprecatedLintRule);
+
+	// it should not remove the module from the settings
+	// else roundtrips would not work
+	expect(settings.modules?.[0]).toBe("../local-plugins/mock-plugin.js");
+});
+
+// https://github.com/opral/inlang-sdk/issues/174
+test("plugin calls that use fs should be intercepted to use an absolute path", async () => {
+	process.cwd = () => "/";
+
+	const mockRepo = {
+		"/messages/en.json": JSON.stringify({
+			key1: "value1",
+			key2: "value2",
+		}),
+		"/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en", "de"],
+			"plugin.mock-plugin": {
+				pathPattern: "./messages/{locale}.json",
+			},
+		} satisfies ProjectSettings),
+	};
+
+	const mockPlugin: InlangPlugin = {
+		key: "mock-plugin",
+		loadMessages: async ({ nodeishFs, settings }) => {
+			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern.replace(
+				"{locale}",
+				"en"
+			) as string;
+			const file = await nodeishFs.readFile(pathPattern);
+			// reading the file should be possible without an error
+			expect(file.toString()).toBe(
+				JSON.stringify({
+					key1: "value1",
+					key2: "value2",
+				})
+			);
+			return [];
+		},
+		saveMessages: async ({ nodeishFs, settings }) => {
+			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern.replace(
+				"{locale}",
+				"en"
+			) as string;
+			const file = new TextEncoder().encode(
+				JSON.stringify({
+					key1: "value1",
+					key2: "value2",
+					key3: "value3",
+				})
+			);
+			await nodeishFs.writeFile(pathPattern, file);
+		},
+		toBeImportedFiles: async ({ settings, nodeFs }) => {
+			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern.replace(
+				"{locale}",
+				"en"
+			) as string;
+			const file = await nodeFs.readFile(pathPattern);
+			// reading the file should be possible without an error
+			expect(file.toString()).toBe(
+				JSON.stringify({
+					key1: "value1",
+					key2: "value2",
+				})
+			);
+			return [];
+		},
+	};
+
+	const fs = Volume.fromJSON(mockRepo).promises;
+
+	const loadMessagesSpy = vi.spyOn(mockPlugin, "loadMessages");
+	const saveMessagesSpy = vi.spyOn(mockPlugin, "saveMessages");
+	const toBeImportedFilesSpy = vi.spyOn(mockPlugin, "toBeImportedFiles");
+	const fsReadFileSpy = vi.spyOn(fs, "readFile");
+	const fsWriteFileSpy = vi.spyOn(fs, "writeFile");
+
+	const project = await loadProjectFromDirectoryInMemory({
+		fs: fs as any,
+		path: "/project.inlang",
+		providePlugins: [mockPlugin],
+	});
+
+	expect(loadMessagesSpy).toHaveBeenCalled();
+	expect(fsReadFileSpy).toHaveBeenCalledWith("/messages/en.json", undefined);
+
+	// todo test that saveMessages works too.
+	// await project.db.insertInto("bundle").defaultValues().execute();
+
+	// const translationFile = await fs.readFile("/messages/en.json", "utf-8");
+
+	// expect(translationFile).toBe(
+	// 	JSON.stringify({
+	// 		key1: "value1",
+	// 		key2: "value2",
+	// 		key3: "value3",
+	// 	})
+	// );
+
+	// expect(fsWriteFileSpy).toHaveBeenCalledWith(
+	// 	"/messages/en.json",
+	// 	JSON.stringify({
+	// 		key1: "value1",
+	// 		key2: "value2",
+	// 		key3: "value3",
+	// 	}),
+	// 	"utf-8"
+	// );
+
+	// expect(saveMessagesSpy).toHaveBeenCalled();
+	// expect(toBeImportedFilesSpy).toHaveBeenCalled();
 });
