@@ -1,0 +1,163 @@
+{
+	"blue_moon_box": "Good morning, {user}!",
+	"happy_hippo_sky": {
+		"photoCount=one, userGender=male": "{username} added a new photo to his stream.",
+		"photoCount=one, userGender=female": "{username} added a new photo to her stream.",
+		"photoCount=one, userGender=*": "{username} added a new photo to their stream.",
+		"photoCount=*, userGender=male": "{username} added {photoCount} new photos to his stream.",
+		"photoCount=*, userGender=female": "{username} added {photoCount} new photos to her stream.",
+		"photoCount=*, userGender=*": "{username} added {photoCount} new photos to their stream."
+	},
+	"happy_hippo_sky2": {
+		"declarations": [
+			{
+				"type": "input",
+				"name": "username",
+				"registryType": "string"
+			},
+			{
+				"type": "input",
+				"name": "time",
+				"registryType": "datetime"
+			},
+			{
+				"type": "input",
+				"name": "userGender",
+				"registryType": "gender"
+			},
+			{
+				"type": "input",
+				"name": "photoCount",
+				"registryType": "number"
+			},
+			{
+				"type": "expression",
+				"arg": {
+					"type": "variable",
+					"name": "doublePhotoCount"
+				},
+				"annotation": {
+					"type": "function",
+					"name": "double",
+					"options": [
+						{
+							"name": "input",
+							"value": {
+								"type": "variable",
+								"value": "photoCount"
+							}
+						}
+					]
+				}
+			}
+		],
+		"selectors": ["photoCount:plural", "userGender"],
+		"match": {
+			"one, male": "{username} added a new photo to his stream.",
+			"one, female": "{username} added a new photo to her stream.",
+			"one, *": "{username} added a new photo to their stream {time :date}.",
+			"*, male": "{username} added {photoCount} new photos to his stream.",
+			"*, female": "{username} added {photoCount} new photos to her stream.",
+			"*, *": "{username} added {photoCount} new photos to their stream {time :format_date show=day}."
+		}
+	},
+	// adding 'local-variable' to the declarations
+	//    + having a top level "name" of variables that are used is simpler to reason about
+	//    o both inputs and local variables are ... variables. What's the benefit of having a 'declaration concept'?
+	"happy_hippo_sky3": {
+		"declaration": [
+			{
+				"type": "input",
+				"name": "username",
+				"registryType": "string"
+			},
+			{
+				"type": "input",
+				"name": "time",
+				"registryType": "datetime"
+			},
+			{
+				"type": "input",
+				"name": "userGender",
+				"registryType": "gender"
+			},
+			{
+				"type": "input",
+				"name": "photoCount",
+				"registryType": "number"
+			},
+			{
+				"type": "local",
+				"name": "doublePhotoCount",
+				"expression": {
+					"arg": {
+						"type": "declaration",
+						"name": "photoCount"
+					},
+					"annotation": {
+						"type": "function",
+						"name": "double"
+					}
+				}
+			}
+		],
+		"selectors": ["photoCount: plural", "userGender"],
+		"match": {
+			"one, male": "{username} added a new photo to his stream.",
+			"one, female": "{username} added a new photo to her stream.",
+			"one, *": "{username} added a new photo to their stream {time :date}.",
+			"*, male": "{username} added {photoCount} new photos to his stream.",
+			"*, female": "{username} added {photoCount} new photos to her stream.",
+			"*, *": "{username} added {photoCount} new photos to their stream {time :format_date show=day}."
+		}
+	},
+	// renaming declaration to variables
+	"happy_hippo_sky4": {
+		"variables": [
+			{
+				"type": "input",
+				"name": "username",
+				"registryType": "string"
+			},
+			{
+				"type": "input",
+				"name": "time",
+				"registryType": "datetime"
+			},
+			{
+				"type": "input",
+				"name": "userGender",
+				"registryType": "gender"
+			},
+			{
+				"type": "input",
+				"name": "photoCount",
+				"registryType": "number"
+			},
+			{
+				"type": "local",
+				"name": "doublePhotoCount",
+				"expression": {
+					"arg": {
+						"type": "variable-reference",
+						"name": "photoCount"
+					},
+					"annotation": {
+						"type": "function",
+						"name": "double"
+					}
+				}
+			}
+		],
+		"selectors": ["photoCount: plural", "userGender"],
+		"match": {
+			"one, male": "{username} added a new photo to his stream.",
+			"one, female": "{username} added a new photo to her stream.",
+			"one, *": "{username} added a new photo to their stream {time :date}.",
+			"*, male": "{username} added {photoCount} new photos to his stream.",
+			"*, female": "{username} added {photoCount} new photos to her stream.",
+			"*, *": "{username} added {photoCount} new photos to their stream {time :format_date show=day}."
+		}
+	},
+	
+}
