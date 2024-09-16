@@ -1,14 +1,8 @@
-import { test, expect, vi, beforeEach } from "vitest"
-
-beforeEach(() => {
-	// clear plugin state between tests
-	vi.resetModules()
-})
+import { test, expect } from "vitest"
+import { toBeImportedFiles } from "./toBeImportedFiles.js"
 
 test("toBeImportedFiles should work with locale as setting", async () => {
-	const { plugin } = await import("./plugin.js")
-
-	const result = await plugin.toBeImportedFiles?.({
+	const result = await toBeImportedFiles({
 		nodeFs: {} as any,
 		settings: {
 			baseLocale: "en",
@@ -19,13 +13,20 @@ test("toBeImportedFiles should work with locale as setting", async () => {
 		},
 	})
 
-	expect(result).toEqual(["/translations/en.json", "/translations/de.json"])
+	expect(result).toEqual([
+		{
+			locale: "en",
+			path: "/translations/en.json",
+		},
+		{
+			locale: "de",
+			path: "/translations/de.json",
+		},
+	])
 })
 
 test("toBeImportedFiles should work with languageTag as setting for backward compatibility", async () => {
-	const { plugin } = await import("./plugin.js")
-
-	const result = await plugin.toBeImportedFiles?.({
+	const result = await toBeImportedFiles({
 		nodeFs: {} as any,
 		settings: {
 			baseLocale: "en",
@@ -36,5 +37,14 @@ test("toBeImportedFiles should work with languageTag as setting for backward com
 		},
 	})
 
-	expect(result).toEqual(["/translations/en.json", "/translations/de.json"])
+	expect(result).toEqual([
+		{
+			locale: "en",
+			path: "/translations/en.json",
+		},
+		{
+			locale: "de",
+			path: "/translations/de.json",
+		},
+	])
 })

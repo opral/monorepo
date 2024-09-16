@@ -1,7 +1,7 @@
 import type { MessageNested, Variant } from "@inlang/sdk2"
 
-export function parseFile(args: { locale: string; fileContent: ArrayBuffer }): MessageNested[] {
-	const json = JSON.parse(new TextDecoder().decode(args.fileContent))
+export function parseFile(args: { locale: string; content: ArrayBuffer }): MessageNested[] {
+	const json = JSON.parse(new TextDecoder().decode(args.content))
 
 	const messages: MessageNested[] = []
 
