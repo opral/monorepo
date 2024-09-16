@@ -15,15 +15,15 @@ export const pluralBundle: BundleNested = {
 			locale: "de",
 			declarations: [
 				{
-					type: "input",
+					type: "input-variable",
 					name: "numProducts",
 				},
 				{
-					type: "input",
+					type: "input-variable",
 					name: "count",
 				},
 				{
-					type: "input",
+					type: "input-variable",
 					name: "projectCount",
 				},
 			],
@@ -90,7 +90,7 @@ export const pluralBundle: BundleNested = {
 			locale: "en",
 			declarations: [
 				{
-					type: "input",
+					type: "input-variable",
 					name: "numProducts",
 				},
 			],

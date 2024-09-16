@@ -67,7 +67,7 @@ export function fromMessageV1(
 
 		//Create an input declaration for each variable and selector we need
 		const declarations: Declaration[] = [...variableNames].map((name) => ({
-			type: "input",
+			type: "input-variable",
 			name,
 			value: {
 				type: "expression",
