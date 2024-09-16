@@ -31,11 +31,11 @@ export const pluralBundle: BundleNested = {
 				{
 					type: "expression",
 					arg: {
-						type: "variable",
+						type: "variable-reference",
 						name: "numProducts",
 					},
 					annotation: {
-						type: "function",
+						type: "function-reference",
 						name: "plural",
 						options: [],
 					},
@@ -72,7 +72,7 @@ export const pluralBundle: BundleNested = {
 						{
 							type: "expression",
 							arg: {
-								type: "variable",
+								type: "variable-reference",
 								name: "numProducts",
 							},
 						},
@@ -98,11 +98,11 @@ export const pluralBundle: BundleNested = {
 				{
 					type: "expression",
 					arg: {
-						type: "variable",
+						type: "variable-reference",
 						name: "numProducts",
 					},
 					annotation: {
-						type: "function",
+						type: "function-reference",
 						name: "plural",
 						options: [],
 					},
@@ -139,7 +139,7 @@ export const pluralBundle: BundleNested = {
 						{
 							type: "expression",
 							arg: {
-								type: "variable",
+								type: "variable-reference",
 								name: "numProducts",
 							},
 						},

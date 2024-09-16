@@ -2,7 +2,7 @@ import { Type, type Static } from "@sinclair/typebox";
 
 export type VariableReference = Static<typeof VariableReference>;
 export const VariableReference = Type.Object({
-	type: Type.Literal("variable"),
+	type: Type.Literal("variable-reference"),
 	name: Type.String(),
 });
 
@@ -20,7 +20,7 @@ export const Option = Type.Object({
 
 export type FunctionReference = Static<typeof FunctionReference>;
 export const FunctionReference = Type.Object({
-	type: Type.Literal("function"),
+	type: Type.Literal("function-reference"),
 	name: Type.String(),
 	options: Type.Array(Option),
 });

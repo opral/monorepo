@@ -39,7 +39,7 @@ export function fromMessageV1(
 			type: "expression",
 			annotation: undefined,
 			arg: {
-				type: "variable",
+				type: "variable-reference",
 				name: name,
 			},
 		}));
@@ -110,7 +110,7 @@ function fromPatternV1(pattern: PatternV1): Pattern {
 				return {
 					type: "expression",
 					arg: {
-						type: "variable",
+						type: "variable-reference",
 						name: element.name,
 					},
 				};
