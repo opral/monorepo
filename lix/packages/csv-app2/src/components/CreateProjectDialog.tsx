@@ -23,7 +23,12 @@ export const CreateProjectDialog = (props: {
 
 	const handleCreateNewProject = async () => {
 		setLoading(true);
-		const opfsRoot = await navigator.storage.getDirectory();
+		const opfsRoot = await navigator.storage?.getDirectory();
+		if (!opfsRoot) {
+			console.error("navigator.storage is undefined -> no opfs available");
+			return;
+		}
+
 		const fileHandle = await opfsRoot.getFileHandle(fileName, {
 			create: true,
 		});

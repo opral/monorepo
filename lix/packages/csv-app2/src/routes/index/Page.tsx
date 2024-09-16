@@ -27,12 +27,16 @@ export default function App() {
 
 	const getProjects = async () => {
 		const projects: ProjectPreview[] = [];
-		const opfsRoot = await navigator.storage.getDirectory();
+		const opfsRoot = await navigator.storage?.getDirectory();
+		if (!opfsRoot) {
+			console.error("navigator.storage is undefined -> no opfs available");
+			return;
+		}
 		// @ts-expect-error - TS doesn't know about the keys method
 		for await (const path of opfsRoot.keys()) {
 			if (path.endsWith(".lix")) {
 				if (!path) return undefined;
-				const opfsRoot = await navigator.storage.getDirectory();
+
 				const fileHandle = await opfsRoot.getFileHandle(path);
 				const file = await fileHandle.getFile();
 				const lixProject = await openLixInMemory({
