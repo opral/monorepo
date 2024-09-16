@@ -21,6 +21,10 @@ const data: { path: string; name: string }[] = [
 		path: "/history",
 		name: "History",
 	},
+	{
+		path: "/settings",
+		name: "Settings",
+	},
 ];
 
 const SubNavigation = () => {
@@ -50,6 +54,15 @@ const SubNavigation = () => {
 						/>
 					);
 				} else if (item.path === "/history" && commits.length > 0) {
+					return (
+						<NavItem
+							key={item.path}
+							path={item.path}
+							name={item.name}
+							numUncommittedChanges={pendingChanges.length}
+						/>
+					);
+				} else if (item.path === "/settings") {
 					return (
 						<NavItem
 							key={item.path}
