@@ -22,6 +22,7 @@ import { merge } from "../../../../lix/packages/sdk/dist/merge/merge.js";
 import { SlSelectEvent } from "@shoelace-style/shoelace";
 import SubNavigation from "./components/SubNavigation.tsx";
 import { handleDownload } from "./helper/utils.ts";
+import Footer from "./components/Footer.tsx";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [, setWithPolling] = useAtom(withPollingAtom);
@@ -51,19 +52,22 @@ export default function Layout(props: { children: React.ReactNode }) {
 	}, [authorName, project?.lix.currentAuthor])
 
 	return (
-		<div className="w-full min-h-screen bg-zinc-50">
-			<div className="bg-white border-b border-zinc-200">
-				<Grid>
-					<MenuBar />
-					<SubNavigation />
-				</Grid>
+		<>
+			<div className="w-full min-h-screen bg-zinc-50">
+				<div className="bg-white border-b border-zinc-200">
+					<Grid>
+						<MenuBar />
+						<SubNavigation />
+					</Grid>
+				</div>
+				{props.children}
+				<UserAuthDialog
+					showAuthorDialog={showAuthorDialog}
+					setShowAuthorDialog={setShowAuthorDialog}
+				/>
 			</div>
-			{props.children}
-			<UserAuthDialog
-				showAuthorDialog={showAuthorDialog}
-				setShowAuthorDialog={setShowAuthorDialog}
-			/>
-		</div>
+			<Footer />
+		</>
 	);
 }
 
