@@ -38,12 +38,23 @@ export const Text = Type.Object({
 	value: Type.String(),
 });
 
-export type Declaration = Static<typeof Declaration>;
-export const Declaration = Type.Object({
+export type Input = Static<typeof Input>;
+export const Input = Type.Object({
 	type: Type.Literal("input"),
+	name: Type.String(),
+	// future
+	// registryType: Type.String(),
+});
+
+export type LocalVariable = Static<typeof LocalVariable>;
+export const LocalVariable = Type.Object({
+	type: Type.Literal("local"),
 	name: Type.String(),
 	value: Expression,
 });
+
+export type Declaration = Static<typeof Declaration>;
+export const Declaration = Type.Union([Input, LocalVariable]);
 
 export type Pattern = Static<typeof Pattern>;
 export const Pattern = Type.Array(Type.Union([Text, Expression]));
