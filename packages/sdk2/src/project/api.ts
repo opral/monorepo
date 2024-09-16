@@ -47,6 +47,8 @@ export type InlangProject = {
 };
 
 export type ResourceFile = {
+	/** The locale of the resource file */
+	locale: string;
 	/** The absolute filepath of the resource */
 	path: string;
 	/** The binary content of the resource */
