@@ -32,6 +32,10 @@ export const CreateProjectDialog = (props: {
 		const fileHandle = await opfsRoot.getFileHandle(fileName, {
 			create: true,
 		});
+		if (!fileHandle) {
+			console.error("fileHandle is undefined");
+			return;
+		}
 		const writable = await fileHandle.createWritable();
 		const blob = await newLixFile();
 		const newProject = await openLixInMemory({
