@@ -8,21 +8,19 @@ import {
 	withPollingAtom,
 } from "./state.ts";
 import { SetStateAction, useEffect, useMemo, useState } from "react";
-import SlDialog from "@shoelace-style/shoelace/dist/react/dialog/index.js";
-import { loadProjectInMemory, newProject } from "@inlang/sdk2";
+import { loadProjectInMemory, newProject, merge } from "@inlang/sdk2";
 import {
 	SlInput,
 	SlButton,
 	SlDropdown,
 	SlMenu,
 	SlMenuItem,
+	SlDialog
 } from "@shoelace-style/shoelace/dist/react";
-import { Link } from "react-router-dom";
-import { merge } from "../../../../lix/packages/sdk/dist/merge/merge.js";
 import { SlSelectEvent } from "@shoelace-style/shoelace";
 import SubNavigation from "./components/SubNavigation.tsx";
 import { handleDownload } from "./helper/utils.ts";
-import Footer from "./components/Footer.tsx";
+import Footer, { getFinkResourcesLinks } from "./components/Footer.tsx";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [, setWithPolling] = useAtom(withPollingAtom);
@@ -86,6 +84,7 @@ const MenuBar = () => {
 				</div>
 
 				<div className="flex gap-[4px]">
+					<HelpMenu />
 					<DownloadButton />
 					<MergeButton />
 				</div>
@@ -270,6 +269,31 @@ export const CreateProjectDialog = (props: {
 		</SlDialog>
 	);
 };
+
+const HelpMenu = () => {
+	return (
+		<SlDropdown placement="bottom-end" className="peer">
+			<button
+				slot="trigger"
+				className="h-8 px-2 flex justify-center items-center text-zinc-500 hover:text-zinc-950 cursor-pointer"
+			>
+				Need Help?
+			</button>
+			<SlMenu className="w-fit">
+				{getFinkResourcesLinks().map((link) => (
+					<SlMenuItem>
+						<a href={link.href} target="_blank">
+							{link.name}
+						</a>
+						{link.name === "About the ecosystem" && (
+							<div className="w-full border-b border-surface-200 my-1" />
+						)}
+					</SlMenuItem>
+				))}
+			</SlMenu>
+		</SlDropdown>
+	)
+}
 
 const DownloadButton = () => {
 	const [project] = useAtom(projectAtom);
