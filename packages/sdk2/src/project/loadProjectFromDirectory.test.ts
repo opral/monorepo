@@ -5,6 +5,7 @@ import { ProjectSettings } from "../json-schema/settings.js";
 import { fs, vol, Volume } from "memfs";
 import {
 	loadProjectFromDirectory,
+	ResourceFileImportError,
 	WarningDeprecatedLintRule,
 	WarningLocalPluginImport,
 } from "./loadProjectFromDirectory.js";
@@ -209,7 +210,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 	test("files from directory should be available via lix after project has been loaded from directory", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
-		
+
 		const project = await loadProjectFromDirectory({
 			fs: fs as any,
 			path: "/project.inlang",
@@ -237,7 +238,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 	test("file created in fs should be avaialable in lix ", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
-		
+
 		const project = await loadProjectFromDirectory({
 			fs: fs as any,
 			path: "/project.inlang",
@@ -269,7 +270,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 	test("file updated in fs should be avaialable in lix ", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
-		
+
 		const project = await loadProjectFromDirectory({
 			fs: fs as any,
 			path: "/project.inlang",
@@ -305,7 +306,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 	test("file deleted in fs should be droped from lix ", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
-		
+
 		const project = await loadProjectFromDirectory({
 			fs: fs as any,
 			path: "/project.inlang",
@@ -337,7 +338,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 	test("file created in lix should be avaialable in fs ", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
-		
+
 		const project = await loadProjectFromDirectory({
 			fs: fs as any,
 			path: "/project.inlang",
@@ -364,7 +365,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 	test("file updated in lix should be avaialable in fs ", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
-		
+
 		const project = await loadProjectFromDirectory({
 			fs: fs as any,
 			path: "/project.inlang",
@@ -395,7 +396,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 	test("file deleted in lix should be gone in fs as awell", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
-		
+
 		const project = await loadProjectFromDirectory({
 			fs: fs as any,
 			path: "/project.inlang",
@@ -420,7 +421,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 	test("file updated in fs and lix (conflicting) should result in the fs state", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
-		
+
 		const project = await loadProjectFromDirectory({
 			fs: fs as any,
 			path: "/project.inlang",
@@ -465,6 +466,38 @@ describe("it should keep files between the inlang directory and lix in sync", as
 
 		expect(settingsAfterUpdateOnDiskAndLix.baseLocale).toBe("fs-version");
 	});
+});
+
+test("errors from importing translation files should be shown", async () => {
+	const mock = {
+		"/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en", "de"],
+			modules: [],
+		} satisfies ProjectSettings),
+	};
+
+	const fs = Volume.fromJSON(mock);
+
+	const mockPlugin: InlangPlugin = {
+		key: "mock-plugin",
+		importFiles: async () => {
+			return { bundles: [] };
+		},
+		toBeImportedFiles: async () => {
+			return ["./non-existing-file.json"];
+		},
+	};
+
+	const project = await loadProjectFromDirectory({
+		fs: fs as any,
+		path: "/project.inlang",
+		providePlugins: [mockPlugin],
+	});
+
+	const errors = await project.errors.get();
+	expect(errors).toHaveLength(1);
+	expect(errors[0]).toBeInstanceOf(ResourceFileImportError);
 });
 
 test("it should provide plugins from disk for backwards compatibility but warn that those plugins are not portable", async () => {

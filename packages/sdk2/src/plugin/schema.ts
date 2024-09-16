@@ -33,12 +33,13 @@ export type InlangPlugin<
 	}) => Promise<void> | void;
 	/**
 	 * Import / Export files.
-	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
+	 *
+	 * @returns The paths of the files that should be imported.
 	 */
 	toBeImportedFiles?: (args: {
 		settings: ProjectSettings & ExternalSettings;
 		nodeFs: NodeFsPromisesSubset;
-	}) => MaybePromise<Array<Omit<ResourceFile, "pluginKey">>>;
+	}) => MaybePromise<string[]>;
 	importFiles?: (args: {
 		files: Array<ResourceFile>;
 		settings: ProjectSettings & ExternalSettings; // we expose the settings in case the importFunction needs to access the plugin config
