@@ -1,7 +1,7 @@
 import type { MessageNested } from "@inlang/sdk2"
 import { expect, test } from "vitest"
 import { parseFile } from "./parseFile.js"
-import type { FileSchema } from "./fileSchema.js"
+import type { FileSchema } from "../fileSchema.js"
 
 test("it parses a file with one variant", async () => {
 	const mockFile = {
@@ -10,7 +10,7 @@ test("it parses a file with one variant", async () => {
 
 	const result = parseFile({
 		locale: "en",
-		fileContent: new TextEncoder().encode(JSON.stringify(mockFile)),
+		content: new TextEncoder().encode(JSON.stringify(mockFile)),
 	})
 
 	expect(result).toStrictEqual([
@@ -39,7 +39,7 @@ test("it parses a file with one variant which uses variables", async () => {
 
 	const result = parseFile({
 		locale: "en",
-		fileContent: new TextEncoder().encode(JSON.stringify(mockFile)),
+		content: new TextEncoder().encode(JSON.stringify(mockFile)),
 	})
 
 	expect(result).toStrictEqual([
@@ -95,7 +95,7 @@ test.todo("it parses multi variants", async () => {
 
 	const result = parseFile({
 		locale: "en",
-		fileContent: new TextEncoder().encode(JSON.stringify(mockFile)),
+		content: new TextEncoder().encode(JSON.stringify(mockFile)),
 	})
 
 	expect(result).toStrictEqual([
