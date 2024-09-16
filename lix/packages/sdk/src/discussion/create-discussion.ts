@@ -5,28 +5,26 @@ import { v4 } from "uuid";
 export async function createDiscussion(args: {
 	db: Kysely<LixDatabaseSchema>;
 	currentAuthor: string;
-	changes?: { id: string }[];
+	changeIds?: string[];
 	body: string;
 }) {
 	const newDiscussionId = v4();
 	const newCommentId = v4();
 
 	return args.db.transaction().execute(async (trx) => {
+		const changeIds =
+			args.changeIds && args.changeIds.length > 0 ? args.changeIds : undefined;
 		// verify changes exists
-		if (args.changes.length > 0) {
+		if (changeIds) {
 			console.log("checking changes");
 			const { count } = (await trx
 				.selectFrom("change")
 				.select(trx.fn.countAll().as("count"))
 				// NOTE: for high amount of changes this will be extremly costy since its a huge or clause
-				.where(
-					"change.id",
-					"in",
-					args.changes.map((change) => change.id),
-				) // NOTE: this will need to be batched if the amount of changes passed is bigger than sqlite max parameter count
+				.where("change.id", "in", changeIds) // NOTE: this will need to be batched if the amount of changes passed is bigger than sqlite max parameter count
 				.executeTakeFirstOrThrow()) as { count: number }; // TODO check if this cast is ok - it coult be a string/bigint or number
 
-			if (count !== args.changes.length) {
+			if (count !== changeIds.length) {
 				throw new Error("unknown changes passed");
 			}
 		}
@@ -39,15 +37,17 @@ export async function createDiscussion(args: {
 			.returning("id")
 			.executeTakeFirstOrThrow();
 
-		// create mappinf from discussion to changes
-		for (const change of args.changes) {
-			await trx
-				.insertInto("discussion_change_map")
-				.values({
-					change_id: change.id,
-					discussion_id: newDiscussionId,
-				})
-				.executeTakeFirstOrThrow();
+		// create mapping from discussion to changes
+		if (changeIds) {
+			for (const changeId of changeIds ?? []) {
+				await trx
+					.insertInto("discussion_change_map")
+					.values({
+						change_id: changeId,
+						discussion_id: newDiscussionId,
+					})
+					.executeTakeFirstOrThrow();
+			}
 		}
 
 		await trx

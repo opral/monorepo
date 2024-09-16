@@ -160,10 +160,10 @@ test("should fail to create a disussion on non existing changes", async () => {
 	let err;
 	await lix
 		.createDiscussion({
-			changes: [
-				{
-					id: "I DON’T EXIST",
-				},
+			changeIds: [
+				
+					"I DON’T EXIST",
+				
 			],
 			body: "comment on a change",
 		})

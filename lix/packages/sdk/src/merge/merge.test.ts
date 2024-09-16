@@ -589,7 +589,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 	]);
 
 	const discussion = await lix1.createDiscussion({
-		changes: [changes[0]!],
+		changeIds: [changes[0]!.id],
 		body: "comment on a change",
 	});
 

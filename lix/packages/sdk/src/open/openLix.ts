@@ -173,7 +173,7 @@ export async function openLix(args: {
 		commit: (args: { description: string }) => {
 			return commit({ ...args, db, currentAuthor });
 		},
-		createDiscussion: (args: { changes?: { id: string }[]; body: string }) => {
+		createDiscussion: (args: { changeIds?: string[]; body: string }) => {
 			if (currentAuthor === undefined) {
 				throw new Error("current author not set");
 			}
