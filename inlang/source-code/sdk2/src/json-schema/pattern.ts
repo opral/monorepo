@@ -17,10 +17,10 @@ export const Option = Type.Object({
 	name: Type.String(),
 	value: Type.Union([Literal, VariableReference]),
 });
- 
-export type FunctionReference = Static<typeof FunctionReference>;
-export const FunctionReference = Type.Object({
-	type: Type.Literal("function-reference"),
+
+export type FunctionAnnotation = Static<typeof FunctionAnnotation>;
+export const FunctionAnnotation = Type.Object({
+	type: Type.Literal("function"),
 	name: Type.String(),
 	options: Type.Array(Option),
 });
@@ -29,7 +29,7 @@ export type Expression = Static<typeof Expression>;
 export const Expression = Type.Object({
 	type: Type.Literal("expression"),
 	arg: Type.Union([VariableReference, Literal]),
-	annotation: Type.Optional(FunctionReference),
+	annotation: Type.Optional(FunctionAnnotation),
 });
 
 export type Text = Static<typeof Text>;
