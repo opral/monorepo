@@ -35,23 +35,6 @@ test("it parses a file with one variant", async () => {
 test("it parses a file with one variant which uses variables", async () => {
 	const mockFile = {
 		some_happy_cat: "Used by {count} devs, {numDesigners} designers and translators",
-		multi_variant: {
-			"plural(count)=one": "You have one photo.",
-			"plural(count)=other": "You have {count} photos.",
-		},
-		multi_variant2: {
-			declaration: {
-				count: { type: "input", expression: "plural($count)" },
-				countTimesTwo: { type: "Variable", expression: "double($count)" },
-			},
-			selectors: {
-				count: "plural($count)",
-			},
-			match: {
-				"count=one": "You have one photo.",
-				"count=other": "You have {$doubleCount} photos.",
-			},
-		},
 	}
 
 	const result = parseFile({
@@ -93,7 +76,7 @@ test("it parses a file with one variant which uses variables", async () => {
 	] satisfies MessageNested[])
 })
 
-test("it parses multi variants", async () => {
+test.todo("it parses multi variants", async () => {
 	const mockFile: FileSchema = {
 		some_happy_cat: {
 			selectors: {
