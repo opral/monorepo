@@ -39,28 +39,6 @@ export const CreateProjectDialog = (props: {
 		const file = await newProject.toBlob();
 		await writable.write(file);
 		await writable.close();
-		// const opfsRoot = await navigator.storage?.getDirectory();
-		// if (!opfsRoot) {
-		// 	console.error("navigator.storage is undefined -> no opfs available");
-		// 	return;
-		// }
-
-		// const fileHandle = await opfsRoot.getFileHandle(fileName, {
-		// 	create: true,
-		// });
-		// if (!fileHandle) {
-		// 	console.error("fileHandle is undefined");
-		// 	return;
-		// }
-		// const writable = await fileHandle.createWritable();
-		// const blob = await newLixFile();
-		// const newProject = await openLixInMemory({
-		// 	blob,
-		// 	providePlugins: [plugin],
-		// });
-		// const file = await newProject.toBlob();
-		// await writable.write(file);
-		// await writable.close();
 
 		setSelectedProjectPath(fileName);
 		setLoading(false);
