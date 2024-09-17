@@ -1,7 +1,9 @@
-import type { InlangPlugin, NewBundleNested } from "@inlang/sdk2"
+import type { InlangPlugin } from "@inlang/sdk2"
 import { plugin as pluginV2 } from "./v2/plugin.js"
 import { PluginSettings } from "./settings.js"
 import { toBeImportedFiles } from "./import-export/toBeImportedFiles.js"
+import { importFiles } from "./import-export/importFiles.js"
+import { exportFiles } from "./import-export/exportFiles.js"
 
 export const PLUGIN_KEY = "plugin.inlang.messageFormat"
 
@@ -17,6 +19,6 @@ export const plugin: InlangPlugin<{
 	saveMessages: pluginV2.saveMessages,
 	settingsSchema: PluginSettings,
 	toBeImportedFiles,
-	importFiles: () => ({ bundles: [] as NewBundleNested[] }),
-	exportFiles: () => [],
+	importFiles,
+	exportFiles,
 }
