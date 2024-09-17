@@ -9,6 +9,7 @@ import {
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import plugin from "../csv-plugin.ts";
 import { useNavigate } from "react-router-dom";
+import { getOriginPrivateDirectory } from "native-file-system-adapter";
 
 export const CreateProjectDialog = (props: {
 	showNewProjectDialog: boolean;
@@ -23,19 +24,12 @@ export const CreateProjectDialog = (props: {
 
 	const handleCreateNewProject = async () => {
 		setLoading(true);
-		const opfsRoot = await navigator.storage?.getDirectory();
-		if (!opfsRoot) {
-			console.error("navigator.storage is undefined -> no opfs available");
-			return;
-		}
+		console.log("create new project", fileName);
 
-		const fileHandle = await opfsRoot.getFileHandle(fileName, {
+		const rootHandle = await getOriginPrivateDirectory();
+		const fileHandle = await rootHandle.getFileHandle(fileName, {
 			create: true,
 		});
-		if (!fileHandle) {
-			console.error("fileHandle is undefined");
-			return;
-		}
 		const writable = await fileHandle.createWritable();
 		const blob = await newLixFile();
 		const newProject = await openLixInMemory({
@@ -45,6 +39,28 @@ export const CreateProjectDialog = (props: {
 		const file = await newProject.toBlob();
 		await writable.write(file);
 		await writable.close();
+		// const opfsRoot = await navigator.storage?.getDirectory();
+		// if (!opfsRoot) {
+		// 	console.error("navigator.storage is undefined -> no opfs available");
+		// 	return;
+		// }
+
+		// const fileHandle = await opfsRoot.getFileHandle(fileName, {
+		// 	create: true,
+		// });
+		// if (!fileHandle) {
+		// 	console.error("fileHandle is undefined");
+		// 	return;
+		// }
+		// const writable = await fileHandle.createWritable();
+		// const blob = await newLixFile();
+		// const newProject = await openLixInMemory({
+		// 	blob,
+		// 	providePlugins: [plugin],
+		// });
+		// const file = await newProject.toBlob();
+		// await writable.write(file);
+		// await writable.close();
 
 		setSelectedProjectPath(fileName);
 		setLoading(false);

@@ -6,6 +6,7 @@ import Papa from "papaparse";
 // import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
 import { plugin } from "./csv-plugin.js";
+import { getOriginPrivateDirectory } from "native-file-system-adapter";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -44,8 +45,8 @@ export const projectAtom = atom(async (get) => {
 	try {
 		const path = get(selectedProjectPathAtom);
 		if (!path) return undefined;
-		const opfsRoot = await navigator.storage.getDirectory();
-		const fileHandle = await opfsRoot.getFileHandle(path);
+		const rootHandle = await getOriginPrivateDirectory();
+		const fileHandle = await rootHandle.getFileHandle(path);
 		const file = await fileHandle.getFile();
 		const project = await openLixInMemory({
 			blob: file,

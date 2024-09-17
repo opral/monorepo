@@ -37,28 +37,32 @@ export default function App() {
 			if (path.endsWith(".lix")) {
 				if (!path) return undefined;
 
-				const fileHandle = await opfsRoot.getFileHandle(path);
-				const file = await fileHandle.getFile();
-				const lixProject = await openLixInMemory({
-					blob: file,
-				});
-				const lastCommit = await lixProject.db
-					.selectFrom("commit")
-					.selectAll()
-					.orderBy("created_at", "desc")
-					.executeTakeFirst();
+				try {
+					const fileHandle = await opfsRoot.getFileHandle(path);
+					const file = await fileHandle.getFile();
+					const lixProject = await openLixInMemory({
+						blob: file,
+					});
+					const lastCommit = await lixProject.db
+						.selectFrom("commit")
+						.selectAll()
+						.orderBy("created_at", "desc")
+						.executeTakeFirst();
 
-				projects.push({
-					path: path,
-					lastModified: lastCommit ? lastCommit.created_at : undefined,
-					lastAuthoredBy: lastCommit ? `${lastCommit.author}` : undefined,
-					lastCommitAnnotation: lastCommit
-						? `${lastCommit?.description}`
-						: undefined,
-				});
+					projects.push({
+						path: path,
+						lastModified: lastCommit ? lastCommit.created_at : undefined,
+						lastAuthoredBy: lastCommit ? `${lastCommit.author}` : undefined,
+						lastCommitAnnotation: lastCommit
+							? `${lastCommit?.description}`
+							: undefined,
+					});
+				} catch (e) {
+					// console.error(e);
+					continue;
+				}
 			}
 		}
-
 		setProjects(projects);
 	};
 
