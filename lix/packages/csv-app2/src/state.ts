@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { openLixInMemory } from "@lix-js/sdk";
 import { atom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
+import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import Papa from "papaparse";
 // import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
@@ -15,7 +15,9 @@ export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 
 export const authorNameAtom = atomWithStorage<string | undefined>(
 	"author-name",
-	undefined
+	undefined,
+	createJSONStorage(),
+	{ getOnInit: true }
 );
 
 export const editorSelectionAtom = atom<{ row: string; col: string } | null>(

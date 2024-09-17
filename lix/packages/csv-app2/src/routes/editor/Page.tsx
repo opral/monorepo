@@ -19,45 +19,27 @@ export default function App() {
 	const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
 
 	useEffect(() => {
-		if (authorName) {
+		if (authorName && project) {
 			project?.currentAuthor.set(authorName);
 		}
 	}, [authorName, project, project?.currentAuthor]);
 
 	useEffect(() => {
-		if (!authorName && project) {
-			setShowAuthorDialog(true);
-		}
-	}, [authorName, project]);
-
-	useEffect(() => {
 		if (project && csvData && csvData.length === 0 && authorName) {
 			setShowWelcomeDialog(true);
 		}
-	}, [csvData, project]);
+	}, [csvData, project, authorName]);
 
-	// const handleDownloadProject = async () => {
-	// 	const blob = await project!.toBlob();
-	// 	const blobUrl = URL.createObjectURL(blob);
-	// 	const link = document.createElement("a");
-	// 	link.href = blobUrl;
-	// 	link.download = selectedProjectPath!;
-	// 	document.body.appendChild(link);
-	// 	link.dispatchEvent(
-	// 		new MouseEvent("click", {
-	// 			bubbles: true,
-	// 			cancelable: true,
-	// 			view: window,
-	// 		})
-	// 	);
-	// 	document.body.removeChild(link);
-	// };
+	useEffect(() => {
+		if (!authorName && project && csvData) {
+			setShowAuthorDialog(true);
+		}
+	}, [authorName, project, csvData]);
 
 	return (
 		<>
 			<Layout setShowImportDialog={setShowImportDialog}>
 				{csvData && csvData.length > 0 ? <TableEditor /> : <></>}
-				{/* <SlButton onClick={() => handleDownloadProject()}>Import</SlButton> */}
 			</Layout>
 			<UserAuthDialog
 				showAuthorDialog={showAuthorDialog}
