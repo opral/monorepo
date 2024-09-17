@@ -40,7 +40,7 @@ export type InlangPlugin<
 		nodeFs: NodeFsPromisesSubset;
 	}) => MaybePromise<Array<Pick<ResourceFile, "path" | "locale">>>;
 	importFiles?: (args: {
-		files: Array<ResourceFile>;
+		files: Array<Omit<ResourceFile, "pluginKey">>;
 		settings: ProjectSettings & ExternalSettings; // we expose the settings in case the importFunction needs to access the plugin config
 	}) => MaybePromise<{
 		bundles: NewBundleNested[];
