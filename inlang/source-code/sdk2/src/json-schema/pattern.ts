@@ -46,15 +46,9 @@ export const Input = Type.Object({
 	// registryType: Type.String(),
 });
 
-export type LocalVariable = Static<typeof LocalVariable>;
-export const LocalVariable = Type.Object({
-	type: Type.Literal("local"),
-	name: Type.String(),
-	value: Expression,
-});
 
 export type Declaration = Static<typeof Declaration>;
-export const Declaration = Type.Union([Input, LocalVariable]);
+export const Declaration = Type.Union([Input]);
 
 export type Pattern = Static<typeof Pattern>;
 export const Pattern = Type.Array(Type.Union([Text, Expression]));
