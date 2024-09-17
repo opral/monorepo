@@ -52,7 +52,7 @@ test("it handles single variants without expressions", async () => {
 	})
 })
 
-test("it handles variable expressions ins patterns", async () => {
+test("it handles variable expressions in patterns", async () => {
 	const mockSettings: ProjectSettings = {
 		baseLocale: "en",
 		locales: ["en", "de"],
@@ -114,6 +114,34 @@ test("it handles variable expressions ins patterns", async () => {
 				],
 			},
 		] satisfies BundleNested[],
+	})
+})
+
+test("it ingores the $schema property that is used for typesafety", async () => {
+	const mockSettings: ProjectSettings = {
+		baseLocale: "en",
+		locales: ["en", "de"],
+	}
+
+	const mockEnFile = new TextEncoder().encode(
+		JSON.stringify({
+			$schema: "https://mock.com/file-schema",
+		})
+	)
+
+	const result = await importFiles({
+		settings: mockSettings,
+		files: [
+			{
+				locale: "en",
+				content: mockEnFile,
+				path: "mock/en.json",
+			},
+		],
+	})
+
+	expect(result).toStrictEqual({
+		bundles: [],
 	})
 })
 

@@ -4,20 +4,20 @@ export const toBeImportedFiles: NonNullable<(typeof plugin)["toBeImportedFiles"]
 	settings,
 }) => {
 	const result = []
-	const pluginSettings = settings[PLUGIN_KEY]
-	if (pluginSettings === undefined) {
+	const pathPattern = settings[PLUGIN_KEY]?.pathPattern
+	if (pathPattern === undefined) {
 		return []
 	}
 	for (const locale of settings.locales) {
-		if (pluginSettings.pathPattern.includes("{languageTag}")) {
+		if (pathPattern.includes("{languageTag}")) {
 			result.push({
 				locale,
-				path: pluginSettings.pathPattern.replace("{languageTag}", locale),
+				path: pathPattern.replace("{languageTag}", locale),
 			})
 		} else {
 			result.push({
 				locale,
-				path: pluginSettings.pathPattern.replace("{locale}", locale),
+				path: pathPattern.replace("{locale}", locale),
 			})
 		}
 	}

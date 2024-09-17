@@ -25,6 +25,23 @@ test("toBeImportedFiles should work with locale as setting", async () => {
 	])
 })
 
+test("toBeImportedFiles returns [] if the pathPattern is not provided", async () => {
+	const result = await toBeImportedFiles({
+		nodeFs: {} as any,
+		settings: {
+			baseLocale: "en",
+			locales: ["en", "de"],
+			"plugin.inlang.messageFormat": {
+				// @ts-expect-error - testing defined plugin settings without pathPattern
+				"some-other-prop": "value",
+				// pathPattern: "/translations/{locale}.json",
+			},
+		},
+	})
+
+	expect(result).toEqual([])
+})
+
 test("toBeImportedFiles should work with languageTag as setting for backward compatibility", async () => {
 	const result = await toBeImportedFiles({
 		nodeFs: {} as any,
