@@ -17,6 +17,15 @@ test("roundtrip of import and export", async () => {
 	const mockEnFileParsed = {
 		some_happy_cat: "Read more about Lix",
 		blue_horse_shoe: "Hello {username}, welcome to the {placename}!",
+		jojo_mountain_day: {
+			match: {
+				"platform=android, userGender=male":
+					"{username} has to download the app on his phone from the Google Play Store.",
+				"platform=ios, userGender=female":
+					"{username} has to download the app on her iPhone from the App Store.",
+				"platform=*, userGender=*": "The person has to download the app.",
+			},
+		},
 	}
 
 	const imported = await importFiles({
