@@ -1,4 +1,4 @@
-import { PLUGIN_KEY, type plugin } from "../index.js"
+import { PLUGIN_KEY, type plugin } from "../plugin.js"
 
 export const toBeImportedFiles: NonNullable<(typeof plugin)["toBeImportedFiles"]> = async ({
 	settings,

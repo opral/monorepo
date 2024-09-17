@@ -1,5 +1,5 @@
 import type { MessageNested, NewBundleNested, Variant } from "@inlang/sdk2"
-import { type plugin } from "../index.js"
+import { type plugin } from "../plugin.js"
 
 export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({ files }) => {
 	const messages = files.flatMap(parseFile)
