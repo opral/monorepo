@@ -6,7 +6,7 @@ import { toBeImportedFiles } from "./import-export/toBeImportedFiles.js"
 export const PLUGIN_KEY = "plugin.inlang.messageFormat"
 
 export const plugin: InlangPlugin<{
-	[PLUGIN_KEY]: PluginSettings
+	[PLUGIN_KEY]?: PluginSettings
 }> = {
 	key: PLUGIN_KEY,
 	// legacy v2 stuff for backwards compatibility
@@ -16,7 +16,7 @@ export const plugin: InlangPlugin<{
 	loadMessages: pluginV2.loadMessages,
 	saveMessages: pluginV2.saveMessages,
 	settingsSchema: PluginSettings,
-	toBeImportedFiles: toBeImportedFiles,
+	toBeImportedFiles,
 	importFiles: () => ({ bundles: [] as NewBundleNested[] }),
 	exportFiles: () => [],
 }
