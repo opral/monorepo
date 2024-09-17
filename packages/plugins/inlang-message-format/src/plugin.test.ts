@@ -43,3 +43,78 @@ test("roundtrip of import and export", async () => {
 
 	expect(parsed).toStrictEqual(mockEnFileParsed)
 })
+
+test("roundtrip with new variants that have been created by apps", async () => {
+	const mockSettings: ProjectSettings = {
+		baseLocale: "en",
+		locales: ["en", "de"],
+		[PLUGIN_KEY]: {
+			pathPattern: "/i18n/{locale}.json",
+		} satisfies PluginSettings,
+	}
+
+	const mockEnFileParsed = {
+		some_happy_cat: "Read more about Lix",
+	}
+
+	const imported1 = await importFiles({
+		settings: mockSettings,
+		files: [
+			{
+				content: new TextEncoder().encode(JSON.stringify(mockEnFileParsed)),
+				locale: "en",
+				path: "/i18n/en.json",
+			},
+		],
+	})
+
+	// simulating adding a new bundle, message, and variant
+	imported1.bundles.push({
+		id: "green_box_atari",
+		alias: {},
+		messages: [
+			{
+				id: "0j299j-3si02j0j4=s02-3js2",
+				bundleId: "green_box_atari",
+				declarations: [],
+				selectors: [],
+				locale: "en",
+				variants: [
+					{
+						id: "929s",
+						match: {},
+						messageId: "0j299j-3si02j0j4=s02-3js2",
+						pattern: [{ type: "text", value: "New variant" }],
+					},
+				],
+			},
+		],
+	})
+
+	// export after adding the bundle, messages, variants
+	const exported1 = await exportFiles({
+		settings: mockSettings,
+		bundles: imported1.bundles as BundleNested[],
+	})
+
+	const imported2 = await importFiles({
+		settings: mockSettings,
+		files: exported1,
+	})
+
+	const exported2 = await exportFiles({
+		settings: mockSettings,
+		bundles: imported2.bundles as BundleNested[],
+	})
+
+	expect(imported2.bundles).toStrictEqual([
+		expect.objectContaining({
+			id: "some_happy_cat",
+		}),
+		expect.objectContaining({
+			id: "green_box_atari",
+		}),
+	])
+
+	expect(exported2).toStrictEqual(exported1)
+})
