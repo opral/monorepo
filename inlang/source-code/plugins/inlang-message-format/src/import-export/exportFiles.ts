@@ -47,8 +47,16 @@ function serializeVariants(variants: Variant[]): string | Record<string, string>
 	if (variants.length === 1) {
 		return serializePattern(variants[0]!.pattern)
 	}
-	// multi variant
-	throw new Error("Multi variant is not implemented")
+	const entries = []
+	for (const variant of variants) {
+		const match = serializeMatcher(variant.match)
+		const pattern = serializePattern(variant.pattern)
+		entries.push([match, pattern])
+	}
+
+	return {
+		match: Object.fromEntries(entries),
+	}
 }
 
 function serializePattern(pattern: Variant["pattern"]): string {
@@ -64,4 +72,11 @@ function serializePattern(pattern: Variant["pattern"]): string {
 		}
 	}
 	return result
+}
+
+// input: { platform: "android", userGender: "male" }
+// output: `platform=android,userGender=male`
+function serializeMatcher(match: Record<string, string>): string {
+	const parts = Object.entries(match).map(([key, value]) => `${key}=${value}`)
+	return parts.join(", ")
 }
