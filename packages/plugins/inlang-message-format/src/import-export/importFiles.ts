@@ -75,12 +75,13 @@ function parseVariants(messageId: string, value: string | Record<string, string>
 	}
 	// multi variant
 	const variants: Variant[] = []
-	for (const variant of Object.values(value)) {
+	for (const [matcher, pattern] of Object.entries(value["match"] as string)) {
 		variants.push({
-			id: messageId,
+			// "some_happy_cat_en;platform=ios,userGender=female"
+			id: messageId + ";" + matcher.replaceAll(" ", ""),
 			messageId,
-			match: {},
-			pattern: parsePattern(variant),
+			match: parseMatcher(matcher),
+			pattern: parsePattern(pattern),
 		})
 	}
 	return variants
@@ -91,7 +92,7 @@ function parsePattern(value: string): Variant["pattern"] {
 
 	// splits a pattern like "Hello {name}!" into an array of parts
 	// "hello {name}, how are you?" -> ["hello ", "{name}", ", how are you?"]
-	const parts = value.split(/(\{.*?\})/)
+	const parts = value.split(/(\{.*?\})/).filter((part) => part !== "")
 
 	for (const part of parts) {
 		// it's text
@@ -106,4 +107,20 @@ function parsePattern(value: string): Variant["pattern"] {
 	}
 
 	return pattern
+}
+
+// input: `platform=android,userGender=male`
+// output: { platform: "android", userGender: "male" }
+function parseMatcher(value: string): Record<string, string> {
+	const stripped = value.replace(" ", "")
+	const match: Record<string, string> = {}
+	const parts = stripped.split(",")
+	for (const part of parts) {
+		const [key, value] = part.split("=")
+		if (!key || !value) {
+			continue
+		}
+		match[key] = value
+	}
+	return match
 }
