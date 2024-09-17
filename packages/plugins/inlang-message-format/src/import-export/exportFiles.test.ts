@@ -171,3 +171,18 @@ test("it assigns the correct locales to files", async () => {
 		}),
 	])
 })
+
+test("it should throw if pathPattern is not defined because no export is possible", async () => {
+	const mockSettings: ProjectSettings = {
+		baseLocale: "en",
+		locales: ["en", "de"],
+		[PLUGIN_KEY]: {},
+	}
+
+	await expect(
+		exportFiles({
+			settings: mockSettings,
+			bundles: [],
+		})
+	).rejects.toThrow("pathPattern is not defined")
+})
