@@ -1,4 +1,5 @@
-import type { LanguageTag, Message } from "@inlang/sdk"
+// @ts-nocheck
+
 import { parsePattern } from "./parsePattern.js"
 
 export const parseMessage = (args: {

@@ -22,14 +22,6 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 			appId: id,
 		})
 
-		const errors = await project.errors.get()
-		if (errors.length > 0) {
-			for (const error of errors) {
-				console.error(error)
-			}
-			process.exit(1)
-		}
-
 		lastUsedProject = project
 		return project
 	} catch (err) {

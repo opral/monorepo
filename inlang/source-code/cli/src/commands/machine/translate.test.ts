@@ -49,18 +49,22 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 		expect(bundles[0]?.id).toBe("mock")
 		expect(messages?.find((m) => m.locale === "en")).toBeDefined()
 		expect(messages?.find((m) => m.locale === "de")).toBeDefined()
-		expect(variants).toBe([
+		expect(variants).toStrictEqual([
 			expect.objectContaining({
-				pattern: {
-					type: "text",
-					value: "Hello World",
-				},
+				pattern: [
+					{
+						type: "text",
+						value: "Hello World",
+					},
+				],
 			}),
 			expect.objectContaining({
-				pattern: {
-					type: "text",
-					value: "Hello Welt",
-				},
+				pattern: [
+					{
+						type: "text",
+						value: "Hallo Welt",
+					},
+				],
 			}),
 		])
 	},

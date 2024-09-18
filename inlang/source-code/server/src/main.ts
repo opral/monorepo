@@ -5,7 +5,7 @@ import * as Tracing from "@sentry/tracing"
 import { router as rpcRouter } from "@inlang/rpc/router"
 import { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { ProjectSettings } from "@inlang/project-settings"
-import { StorageSchema } from "@inlang/plugin-message-format/storage-schema"
+import { FileSchema } from "@inlang/plugin-message-format/file-schema"
 import { createProxyMiddleware } from "http-proxy-middleware"
 
 // --------------- SETUP -----------------
@@ -58,7 +58,7 @@ app.get("/schema/project-settings", (_, response) => {
 	response.send(serializedProjectSettings)
 })
 
-const serializedMessageStorageFormat = JSON.stringify(StorageSchema)
+const serializedMessageStorageFormat = JSON.stringify(FileSchema)
 
 app.get("/schema/inlang-message-format", (_, response) => {
 	response.header("Content-Type", "application/json")

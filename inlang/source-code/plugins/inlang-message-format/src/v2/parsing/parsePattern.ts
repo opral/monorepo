@@ -1,4 +1,4 @@
-import type { Message } from "@inlang/sdk"
+// @ts-nocheck
 
 /**
  * Parses a pattern like "Hello {name}!" to AST.

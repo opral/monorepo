@@ -101,18 +101,30 @@ export async function loadProjectFromDirectoryInMemory(
 		const files: ResourceFile[] = [];
 
 		if (importer.toBeImportedFiles) {
-			const paths = await importer.toBeImportedFiles({
+			const toBeImportedFiles = await importer.toBeImportedFiles({
 				settings: await project.settings.get(),
 				nodeFs: args.fs,
 			});
-			for (const path of paths) {
-				const absolute = absolutePathFromProject(args.path, path);
+			for (const toBeImported of toBeImportedFiles) {
+				const absolute = absolutePathFromProject(args.path, toBeImported.path);
 				try {
 					const data = await args.fs.readFile(absolute);
-					files.push({ path, content: data, pluginKey: importer.key });
+					files.push({
+						path: toBeImported.path,
+						locale: toBeImported.locale,
+						content: data,
+						pluginKey: importer.key,
+					});
 				} catch (e) {
+					// https://github.com/opral/inlang-sdk/issues/202
+					if ((e as any)?.code === "ENOENT") {
+						continue;
+					}
 					importedResourceFileErrors.push(
-						new ResourceFileImportError({ cause: e as Error, path })
+						new ResourceFileImportError({
+							cause: e as Error,
+							path: toBeImported.path,
+						})
 					);
 				}
 			}

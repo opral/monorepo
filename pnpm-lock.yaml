@@ -1336,9 +1336,6 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(prettier@3.3.3)
     devDependencies:
-      '@inlang/plugin-icu1':
-        specifier: workspace:*
-        version: link:../../plugins/icu1
       '@inlang/recommend-ninja':
         specifier: workspace:*
         version: link:../../recommendations/recommend-ninja
@@ -1947,24 +1944,27 @@ importers:
       '@inlang/cli':
         specifier: workspace:*
         version: link:../../cli
-      '@inlang/detect-json-formatting':
+      '@inlang/sdk2':
         specifier: workspace:*
-        version: link:../../detect-json-formatting
-      '@inlang/sdk':
-        specifier: workspace:*
-        version: link:../../sdk
+        version: link:../../sdk2
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
       '@vitest/coverage-v8':
-        specifier: ^0.33.0
-        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.6)(webdriverio@8.40.3))
+        specifier: ^2.0.5
+        version: 2.0.5(vitest@2.0.5(@types/node@22.5.2)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6))
+      memfs:
+        specifier: 4.6.0
+        version: 4.6.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.3)
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
       typescript:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.33.0
-        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.6)(webdriverio@8.40.3)
+        specifier: ^2.0.5
+        version: 2.0.5(@types/node@22.5.2)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6)
 
   inlang/source-code/plugins/json:
     dependencies:

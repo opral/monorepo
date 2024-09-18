@@ -83,7 +83,7 @@ test("a roundtrip should work", async () => {
 	const mockPlugin: InlangPlugin = {
 		key: "mock-plugin",
 		toBeImportedFiles: async () => {
-			return ["/mock-file.json"];
+			return [{ path: "/mock-file.json", locale: "mock" }];
 		},
 		importFiles: async ({ files }) => {
 			const bundles = JSON.parse(new TextDecoder().decode(files[0]?.content));
@@ -94,6 +94,7 @@ test("a roundtrip should work", async () => {
 				{
 					content: new TextEncoder().encode(JSON.stringify(bundles)),
 					path: "./mock-file.json",
+					locale: "mock",
 				},
 			];
 		},
