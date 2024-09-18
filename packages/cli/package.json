@@ -34,7 +34,8 @@
 	"scripts": {
 		"dev": "node ./build.js",
 		"build": "cross-env NODE_ENV=production node ./build.js && tsc --noEmit",
-		"test": "vitest run --passWithNoTests --coverage --test-timeout=10000",
+		"test": "tsc --noEmit && vitest run --coverage --test-timeout=10000",
+		"test:watch": "vitest",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
@@ -61,7 +62,7 @@
 		"@inlang/rpc": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/result": "workspace:*",
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk2": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"fs-extra": "11.1.1",
