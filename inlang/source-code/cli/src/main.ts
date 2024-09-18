@@ -5,19 +5,12 @@ import { version } from "../package.json"
 // import consola, { Consola } from "consola"
 import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 import { open } from "./commands/open/index.js"
-import fetchPolyfill from "node-fetch"
 import { lint } from "./commands/lint/index.js"
 import { validate } from "./commands/validate/index.js"
 import { capture } from "./telemetry/capture.js"
 import { lastUsedProject } from "./utilities/getInlangProject.js"
 
 // --------------- INIT ---------------
-
-// polyfilling node < 18 with fetch
-// see https://github.com/osmosis-labs/osmosis-frontend/pull/1575#pullrequestreview-1434480086
-if (typeof fetch === "undefined") {
-	globalThis.fetch = fetchPolyfill as any
-}
 
 initErrorMonitoring()
 // checks whether the gitOrigin corresponds to the pattern
