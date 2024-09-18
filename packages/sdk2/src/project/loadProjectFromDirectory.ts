@@ -116,6 +116,10 @@ export async function loadProjectFromDirectoryInMemory(
 						pluginKey: importer.key,
 					});
 				} catch (e) {
+					// https://github.com/opral/inlang-sdk/issues/202
+					if ((e as any)?.code === "ENOENT") {
+						continue;
+					}
 					importedResourceFileErrors.push(
 						new ResourceFileImportError({
 							cause: e as Error,
