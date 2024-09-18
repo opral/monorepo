@@ -228,24 +228,12 @@ importers:
         specifier: ^0.19.2
         version: 0.19.12
     devDependencies:
-      '@inlang/language-tag':
-        specifier: workspace:*
-        version: link:../versioned-interfaces/language-tag
-      '@inlang/result':
-        specifier: workspace:*
-        version: link:../result
       '@inlang/rpc':
         specifier: workspace:*
         version: link:../rpc
-      '@inlang/sdk':
+      '@inlang/sdk2':
         specifier: workspace:*
-        version: link:../sdk
-      '@lix-js/client':
-        specifier: workspace:*
-        version: link:../../../lix/packages/client
-      '@lix-js/fs':
-        specifier: workspace:*
-        version: link:../../../lix/packages/fs
+        version: link:../sdk2
       '@sentry/node':
         specifier: ^7.64.0
         version: 7.118.0
@@ -255,9 +243,6 @@ importers:
       '@types/cli-progress':
         specifier: ^3.11.5
         version: 3.11.6
-      '@types/fs-extra':
-        specifier: 11.0.2
-        version: 11.0.2
       '@types/node':
         specifier: 20.5.9
         version: 20.5.9
@@ -273,9 +258,6 @@ importers:
       cli-progress:
         specifier: ^3.12.0
         version: 3.12.0
-      cli-table3:
-        specifier: 0.6.3
-        version: 0.6.3
       commander:
         specifier: ^11.0.0
         version: 11.1.0
@@ -288,15 +270,6 @@ importers:
       esbuild:
         specifier: ^0.19.2
         version: 0.19.12
-      fs-extra:
-        specifier: 11.1.1
-        version: 11.1.1
-      node-fetch:
-        specifier: ^3.3.2
-        version: 3.3.2
-      p-limit:
-        specifier: ^5.0.0
-        version: 5.0.0
       prompts:
         specifier: ^2.4.2
         version: 2.4.2
@@ -589,9 +562,6 @@ importers:
       '@inlang/recommend-ninja':
         specifier: workspace:*
         version: link:../recommendations/recommend-ninja
-      '@inlang/result':
-        specifier: workspace:*
-        version: link:../result
       '@inlang/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -750,6 +720,9 @@ importers:
       kysely:
         specifier: ^0.27.4
         version: 0.27.4
+      native-file-system-adapter:
+        specifier: ^3.0.1
+        version: 3.0.1
       posthog-js:
         specifier: ^1.91.1
         version: 1.154.5
@@ -3028,9 +3001,6 @@ importers:
       '@inlang/design-system':
         specifier: workspace:*
         version: link:../design-system
-      '@inlang/detect-json-formatting':
-        specifier: workspace:*
-        version: link:../detect-json-formatting
       '@inlang/markdown':
         specifier: workspace:*
         version: link:../markdown
@@ -3046,9 +3016,6 @@ importers:
       '@inlang/paraglide-vite':
         specifier: workspace:*
         version: link:../paraglide/paraglide-vite
-      '@inlang/result':
-        specifier: workspace:*
-        version: link:../result
       '@inlang/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -9598,7 +9565,7 @@ packages:
     resolution: {integrity: sha512-7CEBgcMjVmitjYo5q8JTJVra6X5mQ20uTThdK+0kR7UEaDrAWEQcRiBtWJzga4eRpP6afNwwLsX2SET2JhVB1Q==}
 
   concat-map@0.0.1:
-    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
+    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
 
   concat-stream@1.6.2:
     resolution: {integrity: sha512-27HBghJxjiZtIk3Ycvn/4kbJk/1uZuJFfuPEns6LaEvpvG1f0hTea8lilrouyo9mVc2GWdcEZ8OLoGmSADlrCw==}
@@ -12087,7 +12054,7 @@ packages:
     hasBin: true
 
   json-buffer@3.0.0:
-    resolution: {integrity: sha1-Wx85evx11ne96Lz8Dkfh+aPZqJg=}
+    resolution: {integrity: sha512-CuUqjv0FUZIdXkHPI8MezCnFCdaTAacej1TZYulLoAg1h/PhwkdXFN4V/gzY4g+fMBCOV2xF+rp7t2XD2ns/NQ==}
 
   json-buffer@3.0.1:
     resolution: {integrity: sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==}
@@ -13181,6 +13148,10 @@ packages:
 
   napi-build-utils@1.0.2:
     resolution: {integrity: sha512-ONmRUqK7zj7DWX0D9ADe03wbwOBZxNAfF20PlGfCWQcD3+/MakShIHrMqx9YwPTfxDdF1zLeL+RGZiR9kGMLdg==}
+
+  native-file-system-adapter@3.0.1:
+    resolution: {integrity: sha512-ocuhsYk2SY0906LPc3QIMW+rCV3MdhqGiy7wV5Bf0e8/5TsMjDdyIwhNiVPiKxzTJLDrLT6h8BoV9ERfJscKhw==}
+    engines: {node: '>=14.8.0'}
 
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
@@ -30572,6 +30543,10 @@ snapshots:
 
   napi-build-utils@1.0.2:
     optional: true
+
+  native-file-system-adapter@3.0.1:
+    optionalDependencies:
+      fetch-blob: 3.2.0
 
   natural-compare@1.4.0: {}
 
