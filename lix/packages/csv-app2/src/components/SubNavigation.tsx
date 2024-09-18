@@ -6,7 +6,7 @@ import { useAtom } from "jotai";
 const data: { path: string; name: string }[] = [
 	{
 		path: "/editor",
-		name: "Edit",
+		name: "Data",
 	},
 	{
 		path: "/history",

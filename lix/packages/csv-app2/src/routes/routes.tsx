@@ -1,6 +1,7 @@
 import { RouteObject } from "react-router-dom";
 import EditorPage from "./editor/Page.tsx";
 import IndexPage from "./index/Page.tsx";
+import HistoryPage from "./history/Page.tsx";
 
 export const routes: RouteObject[] = [
 	{
@@ -10,5 +11,9 @@ export const routes: RouteObject[] = [
 	{
 		path: "/editor",
 		element: <EditorPage />,
+	},
+	{
+		path: "/history",
+		element: <HistoryPage />,
 	},
 ];

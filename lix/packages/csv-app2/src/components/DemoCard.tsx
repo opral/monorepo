@@ -28,6 +28,7 @@ export const DemoCard = () => {
 		const csvContent = await fetch("/cap-table.csv").then((res) => res.text());
 
 		if (newProject) {
+			newProject.currentAuthor.set("Demo User");
 			await newProject.db
 				.insertInto("file")
 				.values([

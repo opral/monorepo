@@ -109,7 +109,7 @@ export const CellDrawer = (props: {
 								</svg>
 							</div>
 
-							<h1 className="font-medium pl-1">{"History"}</h1>
+							<h1 className="font-medium pl-1">{"Cell history"}</h1>
 						</div>
 						{/* <div className="flex items-center gap-1">
 							<p
@@ -133,11 +133,15 @@ export const CellDrawer = (props: {
 								Row
 							</p>
 						</div> */}
-						<p className="text-zinc-500 pr-1">
-							{selection?.row} - {selection?.col}
-						</p>
 					</div>
 				</div>
+				<div className="flex px-3 h-[54px] items-center justify-between border-b border-zinc-200">
+					<p>Position: </p>
+					<p className="text-zinc-500 pr-1">
+						{selection?.row} - {selection?.col}
+					</p>
+				</div>
+
 				{selection && (
 					<div className="mb-12 relative flex flex-col gap-3">
 						{relevantChangesOfRow
