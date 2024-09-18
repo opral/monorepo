@@ -26,8 +26,10 @@ export const translate = new Command()
 			const project = await getInlangProject({ projectPath: args.project })
 			await translateCommandAction({ project })
 			await saveProjectToDirectory({ fs, path: args.project, project })
+			process.exit(0)
 		} catch (error) {
 			logError(error)
+			process.exit(1)
 		}
 	})
 
@@ -82,6 +84,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 				await upsertBundleNested(args.project.db, bundle.data)
 			}
 		}
+		bar?.stop()
 
 		log.success("Machine translate complete.")
 		if (errors.length > 0) {
@@ -90,7 +93,5 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 		}
 	} catch (error) {
 		logError(error)
-	} finally {
-		bar?.stop()
 	}
 }
