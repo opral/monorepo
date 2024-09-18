@@ -562,9 +562,6 @@ importers:
       '@inlang/recommend-ninja':
         specifier: workspace:*
         version: link:../recommendations/recommend-ninja
-      '@inlang/result':
-        specifier: workspace:*
-        version: link:../result
       '@inlang/rpc':
         specifier: workspace:*
         version: link:../rpc
