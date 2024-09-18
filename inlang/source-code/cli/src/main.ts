@@ -1,6 +1,6 @@
 import { Command } from "commander"
 import { machine } from "./commands/machine/index.js"
-import { module } from "./commands/module/index.js"
+import { plugin } from "./commands/plugin/index.js"
 import { version } from "../package.json"
 import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 import { validate } from "./commands/validate/index.js"
@@ -25,7 +25,7 @@ export const cli = new Command()
 	// Commands
 	.addCommand(validate)
 	.addCommand(machine)
-	.addCommand(module)
+	.addCommand(plugin)
 	// Hooks
 	.hook("postAction", async (command) => {
 		// name enables better grouping in the telemetry dashboard

@@ -243,9 +243,6 @@ importers:
       '@types/cli-progress':
         specifier: ^3.11.5
         version: 3.11.6
-      '@types/fs-extra':
-        specifier: 11.0.2
-        version: 11.0.2
       '@types/node':
         specifier: 20.5.9
         version: 20.5.9
@@ -261,9 +258,6 @@ importers:
       cli-progress:
         specifier: ^3.12.0
         version: 3.12.0
-      cli-table3:
-        specifier: 0.6.3
-        version: 0.6.3
       commander:
         specifier: ^11.0.0
         version: 11.1.0
@@ -276,12 +270,6 @@ importers:
       esbuild:
         specifier: ^0.19.2
         version: 0.19.12
-      fs-extra:
-        specifier: 11.1.1
-        version: 11.1.1
-      p-limit:
-        specifier: ^5.0.0
-        version: 5.0.0
       prompts:
         specifier: ^2.4.2
         version: 2.4.2
