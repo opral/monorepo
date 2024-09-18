@@ -85,6 +85,14 @@ export default function Layout(props: {
 						</div>
 					</div>
 					<div className="mr-1 flex items-center gap-1.5">
+						<SlTooltip content="Learn more about Lix">
+							<p className="md:hidden text-zinc-500 hover:text-black text-[14px] pr-2 cursor-pointer">
+								SDK
+							</p>
+							<p className="hidden md:block text-zinc-500 hover:text-black text-[14px] pr-2 cursor-pointer">
+								Discover SDK
+							</p>
+						</SlTooltip>
 						<SlTooltip content="Download .csv">
 							<SlButton
 								size="small"
