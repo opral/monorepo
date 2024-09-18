@@ -12,8 +12,8 @@
 		"access": "public"
 	},
 	"scripts": {
-		"dev": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",
-		"build": "inlang module build --entry ./src/index.ts --outdir ./dist",
+		"dev": "inlang plugin build --entry ./src/index.ts --outdir ./dist --watch",
+		"build": "inlang plugin build --entry ./src/index.ts --outdir ./dist",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "vitest",
 		"lint": "eslint ./src --fix",

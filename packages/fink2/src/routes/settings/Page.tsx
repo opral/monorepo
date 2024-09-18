@@ -2,8 +2,6 @@ import Layout, { Grid } from "../../layout.tsx";
 import { useAtom } from "jotai";
 import { projectAtom, settingsAtom } from "../../state.js";
 import Settings from "../../components/InlangSettings.tsx";
-import { Link } from "react-router-dom";
-import { SlButton } from "@shoelace-style/shoelace/dist/react";
 
 export default function App() {
 	const [project] = useAtom(projectAtom);
@@ -12,16 +10,14 @@ export default function App() {
 	return (
 		<>
 			<Layout>
+				<div className="bg-white border-b border-zinc-200 mb-8">
+					<Grid>
+						<div className="py-6 flex justify-between items-center">
+							<h2 className="text-[20px]">Settings</h2>
+						</div>
+					</Grid>
+				</div>
 				<Grid>
-					<div className="flex items-center mb-8 gap-4 mt-8">
-						<Link to="/">
-							<SlButton slot="trigger" size="small" variant="default">
-								Back
-							</SlButton>
-						</Link>
-						<h1 className="text-2xl">Settings</h1>
-					</div>
-
 					{project && settings && (
 						<Settings
 							settings={settings}
