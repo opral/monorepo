@@ -3,16 +3,10 @@
 import type { InlangPlugin, Message } from "@inlang/sdk2"
 import type { StorageSchema } from "../fileSchema.js"
 import { PluginSettings } from "../settings.js"
-import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import { serializeMessage } from "./parsing/serializeMessage.js"
 import { parseMessage } from "./parsing/parseMessage.js"
 
 export const pluginId = "plugin.inlang.messageFormat"
-
-/**
- * Stringify functions of each resource file to keep the formatting.
- */
-const stringifyWithFormatting: Record<string, ReturnType<typeof detectJsonFormatting>> = {}
 
 export const plugin: InlangPlugin<{
 	[pluginId]: PluginSettings
@@ -34,7 +28,6 @@ export const plugin: InlangPlugin<{
 						encoding: "utf-8",
 					}
 				)
-				stringifyWithFormatting[tag] = detectJsonFormatting(file)
 				const json = JSON.parse(file)
 				for (const key in json) {
 					if (key === "$schema") {
@@ -84,7 +77,6 @@ export const plugin: InlangPlugin<{
 			await nodeishFs.writeFile(
 				settings["plugin.inlang.messageFormat"].pathPattern.replace("{languageTag}", languageTag),
 				(
-					stringifyWithFormatting[languageTag] ??
 					// default to tab indentation
 					// PS sorry for anyone who reads this code
 					((data: object) => JSON.stringify(data, undefined, "\t"))
