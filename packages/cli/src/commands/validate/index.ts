@@ -2,7 +2,6 @@ import { Command } from "commander"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
 import { projectOption } from "../../utilities/globalFlags.js"
-import { resolve } from "node:path"
 
 export const validate = new Command()
 	.command("validate")
@@ -14,8 +13,14 @@ export async function validateCommandAction(args: { project: string }) {
 	try {
 		log.info("🔎 Validating the inlang project...")
 		// if `getInlangProject` doesn't throw, the project is valid
-		await getInlangProject({ projectPath: args.project })
-		log.success(`Opened project at ${resolve(process.cwd(), args.project)}`)
+		const project = await getInlangProject({ projectPath: args.project })
+
+		const errors = await project.errors.get()
+		if (errors.length > 0) {
+			log.info("The project contains errors:")
+			for (const error of errors) log.error(error)
+			process.exit(1)
+		}
 
 		log.success("The project is valid!")
 	} catch (error) {
