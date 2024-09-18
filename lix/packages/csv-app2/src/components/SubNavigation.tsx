@@ -19,7 +19,7 @@ const SubNavigation = () => {
 	const [commits] = useAtom(commitsAtom);
 
 	return (
-		<div className="flex px-[2px] gap-3 items-center -mb-[1px] -ml-[6px]">
+		<div className="flex px-[2px] gap-3 items-center -mb-[1px] -ml-[3px]">
 			{data.map((item) => {
 				if (item.path === "/history" && commits.length > 0) {
 					return (
