@@ -1,0 +1,8 @@
+{
+	"baseLocale": "en",
+	"locales": ["en", "de"],
+	"modules": ["../dist/index.js"],
+	"plugin.inlang.messageFormat": {
+		"pathPattern": "./translations/{locale}.json"
+	}
+}
