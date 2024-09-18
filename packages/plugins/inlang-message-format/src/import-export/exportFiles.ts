@@ -23,7 +23,8 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 	for (const locale in files) {
 		result.push({
 			locale,
-			content: new TextEncoder().encode(JSON.stringify(files[locale])),
+			// beautify the json
+			content: new TextEncoder().encode(JSON.stringify(files[locale], undefined, '\t')),
 			path: pathPattern.replace("{locale}", locale),
 			pluginKey: PLUGIN_KEY,
 		})
