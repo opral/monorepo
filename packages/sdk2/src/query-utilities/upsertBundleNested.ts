@@ -4,7 +4,7 @@ import type {
 	NewBundleNested,
 } from "../database/schema.js";
 
-export const insertBundleNested = async (
+export const upsertBundleNested = async (
 	db: Kysely<InlangDatabaseSchema>,
 	bundle: NewBundleNested
 ): Promise<void> => {
@@ -16,6 +16,13 @@ export const insertBundleNested = async (
 				alias: bundle.alias,
 			})
 			.returning("id")
+			.onConflict((oc) =>
+				oc.column("id").doUpdateSet({
+					...bundle,
+					// @ts-expect-error
+					messages: undefined,
+				})
+			)
 			.executeTakeFirstOrThrow();
 
 		for (const message of bundle.messages) {
@@ -28,6 +35,13 @@ export const insertBundleNested = async (
 					locale: message.locale,
 					selectors: message.selectors,
 				})
+				.onConflict((oc) =>
+					oc.column("id").doUpdateSet({
+						...message,
+						// @ts-expect-error
+						variants: undefined,
+					})
+				)
 				.returning("id")
 				.executeTakeFirstOrThrow();
 
@@ -40,6 +54,7 @@ export const insertBundleNested = async (
 						match: variant.match,
 						pattern: variant.pattern,
 					})
+					.onConflict((oc) => oc.column("id").doUpdateSet(variant))
 					.execute();
 			}
 		}

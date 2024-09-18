@@ -246,7 +246,7 @@ test("errors from importing translation files should be shown", async () => {
 			return { bundles: [] };
 		},
 		toBeImportedFiles: async () => {
-			return ["./non-existing-file.json"];
+			return [{ path: "./non-existing-file.json", locale: "mock" }];
 		},
 	};
 
