@@ -13,6 +13,7 @@ import { jumpToPositionCommand } from "./commands/jumpToPosition.js"
 import { machineTranslateMessageCommand } from "./commands/machineTranslate.js"
 import { openSettingsViewCommand } from "./commands/openSettingsView.js"
 import { toggleInlineAnnotationsCommand } from "./commands/toggleInlineAnnotation.js"
+import { openEditorViewCommand } from "./commands/openBundleEditorView.js"
 
 export const CONFIGURATION = {
 	EVENTS: {
@@ -23,6 +24,7 @@ export const CONFIGURATION = {
 		ON_DID_ERROR_TREE_VIEW_CHANGE: new EventEmitter<ErrorNode | undefined>(),
 		ON_DID_PREVIEW_LOCALE_CHANGE: new EventEmitter<string>(),
 		ON_DID_SETTINGS_VIEW_CHANGE: new EventEmitter<void>(),
+		ON_DID_EDITOR_VIEW_CHANGE: new EventEmitter<void>(),
 		ON_DID_RECOMMENDATION_VIEW_CHANGE: new EventEmitter<void>(),
 	},
 	COMMANDS: {
@@ -35,6 +37,7 @@ export const CONFIGURATION = {
 		OPEN_PROJECT: openProjectCommand,
 		OPEN_SETTINGS_FILE: openSettingsFileCommand,
 		OPEN_SETTINGS_VIEW: openSettingsViewCommand,
+		OPEN_EDITOR_VIEW: openEditorViewCommand,
 		COPY_ERROR: copyErrorCommand,
 		MACHINE_TRANSLATE_MESSAGE: machineTranslateMessageCommand,
 		TOGGLE_INLINE_ANNOTATIONS: toggleInlineAnnotationsCommand,
