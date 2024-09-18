@@ -1,7 +1,6 @@
 import fs from "node:fs/promises"
-import { loadProject, type InlangProject } from "@inlang/sdk"
+import { loadProjectFromDirectoryInMemory, type InlangProject } from "@inlang/sdk2"
 import { resolve } from "node:path"
-import { openRepository, findRepoRoot } from "@lix-js/client"
 import { id } from "../../marketplace-manifest.json"
 
 /**
@@ -17,26 +16,15 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 		const baseDirectory = process.cwd()
 		const projectPath = resolve(baseDirectory, args.projectPath)
 
-		let repoRoot = await findRepoRoot({ nodeishFs: fs, path: projectPath })
-
-		if (!repoRoot) {
-			console.error(
-				`Could not find repository root for path ${projectPath}, falling back to direct fs access`
-			)
-			repoRoot = "file://" + baseDirectory
-		}
-		const repo = await openRepository(repoRoot, {
-			nodeishFs: fs,
-		})
-
-		const project = await loadProject({
-			projectPath,
-			repo,
+		const project = await loadProjectFromDirectoryInMemory({
+			path: projectPath,
+			fs: fs,
 			appId: id,
 		})
 
-		if (project.errors().length > 0) {
-			for (const error of project.errors()) {
+		const errors = await project.errors.get()
+		if (errors.length > 0) {
+			for (const error of errors) {
 				console.error(error)
 			}
 			process.exit(1)
