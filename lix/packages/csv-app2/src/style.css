@@ -93,3 +93,7 @@ sl-button[variant="primary"]::part(base):hover {
 sl-button[size="medium"]::part(base) {
     border-radius: 8px;
 }
+
+p {
+    line-height: 150%;
+}

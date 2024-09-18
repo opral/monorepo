@@ -62,11 +62,11 @@ const TableEditor = () => {
 	}
 
 	useEffect(() => {
-		setScreenHeight(window.innerHeight - 55);
+		setScreenHeight(window.innerHeight - 82);
 	}, [window.innerHeight]);
 
 	return (
-		<div className="relative h-[calc(100vh_-_55px)]">
+		<div className="relative h-[calc(100vh_-_82px)]">
 			<DynamicDataSheetGrid
 				disableContextMenu
 				value={

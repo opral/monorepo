@@ -10,6 +10,7 @@ import {
 } from "./state.ts";
 import { useNavigate } from "react-router-dom";
 import { SlButton, SlTooltip } from "@shoelace-style/shoelace/dist/react";
+import SubNavigation from "./components/SubNavigation.tsx";
 
 export default function Layout(props: {
 	children: React.ReactNode;
@@ -121,9 +122,9 @@ export default function Layout(props: {
 						</SlButton>
 					</div>
 				</div>
-				{/* <div className="w-full -mt-2 px-2">
+				<div className="w-full -mt-2 px-2">
 					<SubNavigation />
-				</div> */}
+				</div>
 			</div>
 
 			{props.children}
