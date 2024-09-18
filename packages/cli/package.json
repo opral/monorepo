@@ -54,7 +54,6 @@
 		"consola": "^3.2.3",
 		"cross-env": "^7.0.3",
 		"esbuild": "^0.19.2",
-		"node-fetch": "^3.3.2",
 		"prompts": "^2.4.2",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3",
