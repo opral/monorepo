@@ -1,4 +1,3 @@
-import type { Result } from "@inlang/result"
 import algoliasearch, { type AlgoliaSearchOptions, type SearchClient } from "algoliasearch"
 import { registry } from "@inlang/marketplace-registry"
 
@@ -22,7 +21,7 @@ index.setSettings({
 export async function search(args: {
 	term: string
 	category?: string
-}): Promise<Result<string, Error>> {
+}): Promise<{ data?: string; error?: Error }> {
 	if (args.category) {
 		const hits = []
 		for (const product of registry) {

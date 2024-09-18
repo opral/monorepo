@@ -3019,9 +3019,6 @@ importers:
       '@inlang/paraglide-vite':
         specifier: workspace:*
         version: link:../paraglide/paraglide-vite
-      '@inlang/result':
-        specifier: workspace:*
-        version: link:../result
       '@inlang/rpc':
         specifier: workspace:*
         version: link:../rpc
