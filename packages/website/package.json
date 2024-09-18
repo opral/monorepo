@@ -63,7 +63,6 @@
 		"@inlang/marketplace-registry": "workspace:*",
 		"@inlang/paraglide-js": "workspace:*",
 		"@inlang/paraglide-vite": "workspace:*",
-		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@tailwindcss/aspect-ratio": "^0.4.2",
