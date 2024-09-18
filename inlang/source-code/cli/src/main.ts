@@ -2,10 +2,7 @@ import { Command } from "commander"
 import { machine } from "./commands/machine/index.js"
 import { module } from "./commands/module/index.js"
 import { version } from "../package.json"
-// import consola, { Consola } from "consola"
 import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
-import { open } from "./commands/open/index.js"
-import { lint } from "./commands/lint/index.js"
 import { validate } from "./commands/validate/index.js"
 import { capture } from "./telemetry/capture.js"
 import { lastUsedProject } from "./utilities/getInlangProject.js"
@@ -27,9 +24,7 @@ export const cli = new Command()
 	.description("CLI for inlang.")
 	// Commands
 	.addCommand(validate)
-	.addCommand(lint)
 	.addCommand(machine)
-	.addCommand(open)
 	.addCommand(module)
 	// Hooks
 	.hook("postAction", async (command) => {
@@ -41,7 +36,7 @@ export const cli = new Command()
 
 		await capture({
 			event: `CLI command executed`,
-			projectId: lastUsedProject?.id,
+			projectId: await lastUsedProject?.id.get(),
 			properties: {
 				name: name.join(" "),
 				args: command.args.join(" "),
