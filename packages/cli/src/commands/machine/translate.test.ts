@@ -1,173 +1,68 @@
 import { test, expect } from "vitest"
-import { translateCommandAction, hasMissingTranslations } from "./translate.js"
-import { Message, ProjectSettings, loadProject, Plugin, type InlangModule } from "@inlang/sdk"
-import { createMessage } from "@inlang/sdk/test-utilities"
-import { mockRepo } from "@lix-js/client"
+import { translateCommandAction } from "./translate.js"
+import {
+	insertBundleNested,
+	loadProjectInMemory,
+	newProject,
+	selectBundleNested,
+} from "@inlang/sdk2"
 
 test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 	"should tanslate the missing languages",
 	async () => {
-		const exampleMessages: Message[] = [
-			createMessage("a", {
-				en: "test",
+		const project = await loadProjectInMemory({
+			blob: await newProject({
+				settings: {
+					baseLocale: "en",
+					locales: ["en", "de"],
+				},
 			}),
-			createMessage("b", {
-				en: "title",
-				de: "Titel",
-			}),
-		]
+		})
 
-		const repo = await mockRepo()
-		const fs = repo.nodeishFs
-
-		await fs.mkdir("/user/project.inlang", { recursive: true })
-		await fs.writeFile(
-			"/user/project.inlang/settings.json",
-			JSON.stringify({
-				sourceLanguageTag: "en",
-				languageTags: ["en", "de", "it"],
-				modules: ["./plugin.js"],
-			} satisfies ProjectSettings)
-		)
-
-		const _mockPlugin: Plugin = {
-			id: "plugin.inlang.json",
-			description: { en: "Mock plugin description" },
-			displayName: { en: "Mock Plugin" },
-			loadMessages: () => exampleMessages,
-			saveMessages: () => undefined as any,
-		}
-
-		const _import = async () => {
-			return {
-				default: _mockPlugin,
-			} satisfies InlangModule
-		}
-
-		const project = await loadProject({
-			projectPath: "/user/project.inlang",
-			repo,
-			_import,
+		await insertBundleNested(project.db, {
+			id: "mock",
+			messages: [
+				{
+					id: "mock_en",
+					locale: "en",
+					variants: [
+						{
+							id: "mock_en",
+							messageId: "mock_en",
+							pattern: [{ type: "text", value: "Hello World" }],
+						},
+					],
+				},
+			],
 		})
 
 		await translateCommandAction({ project })
 
-		const messages = project.query.messages.getAll()
+		const bundles = await selectBundleNested(project.db).execute()
+		const messages = bundles[0]?.messages
+		const variants = messages?.flatMap((m) => m.variants)
 
-		expect(messages[0]?.variants.length).toBe(3)
-		expect(messages[1]?.variants.length).toBe(3)
+		expect(bundles.length).toBe(1)
+		expect(messages?.length).toBe(2)
+		expect(variants?.length).toBe(2)
 
-		for (const message of messages) {
-			// @ts-ignore - type mismatch error - fix after refactor
-			expect(message.variants.map((variant) => variant.languageTag).sort()).toStrictEqual([
-				"de",
-				"en",
-				"it",
-			])
-
-			for (const variant of message.variants) {
-				expect(variant.pattern[0]?.type).toBe("Text")
-
-				if (variant.pattern[0]?.type === "Text") {
-					expect(variant.pattern[0]?.value.length).toBeGreaterThan(2)
-				}
-			}
-		}
-	},
-	{ timeout: 10000 }
-)
-
-test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
-	"it should escape variable references",
-	async () => {
-		const exampleMessages: Message[] = [
-			{
-				id: "a",
-				alias: {},
-				selectors: [],
-				variants: [
-					{
-						languageTag: "en",
-						match: [],
-						pattern: [
-							{
-								type: "Text",
-								value: "Good morning ",
-							},
-							{
-								type: "VariableReference",
-								name: "username",
-							},
-							{
-								type: "Text",
-								value: ".",
-							},
-						],
-					},
-				],
-			},
-		]
-
-		const repo = await mockRepo()
-		const fs = repo.nodeishFs
-
-		await fs.mkdir("/user/project.inlang", { recursive: true })
-		await fs.writeFile(
-			"/user/project.inlang/settings.json",
-			JSON.stringify({
-				sourceLanguageTag: "en",
-				languageTags: ["en", "de"],
-				modules: ["./plugin.js"],
-			} satisfies ProjectSettings)
-		)
-
-		const _mockPlugin: Plugin = {
-			id: "plugin.inlang.json",
-			description: { en: "Mock plugin description" },
-			displayName: { en: "Mock Plugin" },
-			loadMessages: () => exampleMessages,
-			saveMessages: () => undefined as any,
-		}
-
-		const _import = async () => {
-			return {
-				default: _mockPlugin,
-			} satisfies InlangModule
-		}
-
-		const project = await loadProject({
-			projectPath: "/user/project.inlang",
-			repo,
-			_import,
-		})
-
-		await translateCommandAction({ project })
-
-		const messages = project.query.messages.getAll()
-
-		expect(messages[0]?.variants.length).toBe(2)
-		expect(messages[0]?.variants.map((variant) => variant.languageTag).sort()).toStrictEqual([
-			"de",
-			"en",
+		expect(bundles[0]?.id).toBe("mock")
+		expect(messages?.find((m) => m.locale === "en")).toBeDefined()
+		expect(messages?.find((m) => m.locale === "de")).toBeDefined()
+		expect(variants).toBe([
+			expect.objectContaining({
+				pattern: {
+					type: "text",
+					value: "Hello World",
+				},
+			}),
+			expect.objectContaining({
+				pattern: {
+					type: "text",
+					value: "Hello Welt",
+				},
+			}),
 		])
-
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- we expected the message to exist earlier
-		for (const variant of messages[0]!.variants) {
-			expect(
-				variant.pattern.some(
-					(value) => value.type === "VariableReference" && value.name === "username"
-				)
-			).toBeTruthy()
-		}
 	},
 	{ timeout: 10000 }
 )
-
-// Only test with valid sourceLanguageTag and targetLanguageTags
-test("hasMissingTranslations", () => {
-	expect(hasMissingTranslations(createMessage("a", { en: "test" }), "en", ["en"])).toBe(false)
-	expect(hasMissingTranslations(createMessage("a", { en: "test" }), "en", ["en", "de"])).toBe(true)
-	expect(
-		hasMissingTranslations(createMessage("a", { en: "test", de: "Test" }), "en", ["en", "de"])
-	).toBe(false)
-})
