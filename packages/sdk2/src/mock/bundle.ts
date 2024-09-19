@@ -14,35 +14,14 @@ export const pluralBundle: BundleNested = {
 				{
 					type: "input",
 					name: "numProducts",
-					value: {
-						type: "expression",
-						arg: {
-							type: "variable",
-							name: "numProducts",
-						},
-					},
 				},
 				{
 					type: "input",
 					name: "count",
-					value: {
-						type: "expression",
-						arg: {
-							type: "variable",
-							name: "count",
-						},
-					},
 				},
 				{
 					type: "input",
 					name: "projectCount",
-					value: {
-						type: "expression",
-						arg: {
-							type: "variable",
-							name: "projectCount",
-						},
-					},
 				},
 			],
 			selectors: [
@@ -110,13 +89,6 @@ export const pluralBundle: BundleNested = {
 				{
 					type: "input",
 					name: "numProducts",
-					value: {
-						type: "expression",
-						arg: {
-							type: "variable",
-							name: "numProducts",
-						},
-					},
 				},
 			],
 			selectors: [
