@@ -19,7 +19,6 @@ test("it handles single variants without expressions", async () => {
 
 	const mockBundle = {
 		id: "some_happy_cat",
-		alias: {},
 		messages: [
 			{
 				id: "some_happy_cat_en",
@@ -76,7 +75,6 @@ test("it handles multi variants", async () => {
 
 	const mockBundle: BundleNested = {
 		id: "some_happy_cat",
-		alias: {},
 		messages: [
 			{
 				id: "some_happy_cat_en",
@@ -169,7 +167,6 @@ test("it handles variable expressions in patterns", async () => {
 
 	const mockBundle = {
 		id: "some_happy_cat",
-		alias: {},
 		messages: [
 			{
 				id: "some_happy_cat_en",
@@ -220,7 +217,6 @@ test("it assigns the correct locales to files", async () => {
 
 	const mockBundle: BundleNested = {
 		id: "some_happy_cat",
-		alias: {},
 		messages: [
 			{
 				id: "some_happy_cat_en",
