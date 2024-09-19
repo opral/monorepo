@@ -55,6 +55,7 @@ const skipWhitespaces = (jsonString: string | any[], startIndex: number) => {
 			return index;
 		}
 	}
+	return;
 };
 
 // JSON defines only those are valid whitespaces
