@@ -5,7 +5,6 @@ import type {
 	Bundle,
 	NewBundleNested,
 	NewMessageNested,
-	NewVariant,
 	Variant,
 } from "./database/schema.js";
 import type { Expression, Text } from "./json-schema/pattern.js";
