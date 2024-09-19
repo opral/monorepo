@@ -19,8 +19,6 @@ export const upsertBundleNestedMatchByProperties = async (
 		.onConflict((oc) => oc.column("id").doUpdateSet(bundleToInsert))
 		.executeTakeFirstOrThrow();
 
-	console.log(bundleToInsert);
-	console.log(insertedBundleResult);
 
 	const insertedBundleId = insertedBundleResult.insertId;
 
