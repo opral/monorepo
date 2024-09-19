@@ -1,5 +1,5 @@
 import { Command } from "commander"
-import nodeFsPromises from "node:fs/promises"
+import fs from "node:fs"
 import { resolve } from "node:path"
 import { Logger } from "~/services/logger/index.js"
 import { runCompiler } from "~/cli/steps/run-compiler2.js"
@@ -25,7 +25,7 @@ export const compileCommand2 = new Command()
 
 		const project = await loadProjectFromDirectoryInMemory({
 			path,
-			fs: nodeFsPromises,
+			fs,
 		})
 
 		const errors = await project.errors.get()
@@ -50,7 +50,7 @@ export const compileCommand2 = new Command()
 
 		await runCompiler({
 			project,
-			fs: nodeFsPromises,
+			fs: fs.promises,
 			outdir: options.outdir,
 		})
 

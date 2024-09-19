@@ -1,5 +1,5 @@
 import { Command } from "commander"
-import nodeFsPromises from "node:fs/promises"
+import fs from "node:fs"
 import { resolve } from "node:path"
 import { Logger } from "~/services/logger/index.js"
 import { runCompiler } from "~/cli/steps/run-compiler.js"
@@ -25,7 +25,7 @@ export const compileCommand = new Command()
 
 		const project = await loadProjectFromDirectoryInMemory({
 			path,
-			fs: nodeFsPromises,
+			fs,
 			// providePlugins: [icu1Importer],
 		})
 
@@ -51,7 +51,7 @@ export const compileCommand = new Command()
 
 		await runCompiler({
 			project,
-			fs: nodeFsPromises,
+			fs: fs.promises,
 			outdir: options.outdir,
 		})
 
