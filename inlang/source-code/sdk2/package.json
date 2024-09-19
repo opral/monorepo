@@ -15,6 +15,8 @@
 		"./dist",
 		"./src"
 	],
+	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
+	"sideEffects": false,
 	"scripts": {
 		"prepublish": "npm run sentry:sourcemaps",
 		"build": "npm run env-variables && tsc --build",
