@@ -3,7 +3,6 @@ import { toBeImportedFiles } from "./toBeImportedFiles.js"
 
 test("toBeImportedFiles should work with locale as setting", async () => {
 	const result = await toBeImportedFiles({
-		nodeFs: {} as any,
 		settings: {
 			baseLocale: "en",
 			locales: ["en", "de"],
@@ -44,7 +43,6 @@ test("toBeImportedFiles returns [] if the pathPattern is not provided", async ()
 
 test("toBeImportedFiles should work with languageTag as setting for backward compatibility", async () => {
 	const result = await toBeImportedFiles({
-		nodeFs: {} as any,
 		settings: {
 			baseLocale: "en",
 			locales: ["en", "de"],
