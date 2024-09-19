@@ -17,7 +17,7 @@ export function fromMessageV1(
 	messageV1: MessageV1,
 	pluginKey: NonNullable<InlangPlugin["key"] | InlangPlugin["id"]>
 ): BundleNested {
-	const bundleId = stableHumanId(messageV1.id);
+	const bundleId = messageV1.id;
 
 	const languages = [
 		...new Set(messageV1.variants.map((variant) => variant.languageTag)),

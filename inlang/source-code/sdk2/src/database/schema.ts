@@ -59,6 +59,7 @@ type MessageTable = {
 type VariantTable = {
 	id: Generated<string>;
 	messageId: string;
+	
 	match: Generated<Record<string, string>>;
 	pattern: Generated<Pattern>;
 };
