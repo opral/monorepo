@@ -184,16 +184,6 @@ export default class InlangBundle extends LitElement {
 				<div class=${`header`} part="base">
 					<div class="header-left">
 						<span># ${this.bundle?.id}</span>
-						${this.bundle?.alias && Object.keys(this.bundle.alias).length > 0
-							? html` <div class="alias-wrapper">
-									<span class="alias">Alias: ${this.bundle?.alias?.default}</span>
-									${Object.keys(this.bundle.alias).length > 1
-										? html`<div class="alias-counter">
-												+${Object.keys(this.bundle.alias).length - 1}
-										  </div>`
-										: ``}
-							  </div>`
-							: ``}
 					</div>
 
 					<div class="header-right">
