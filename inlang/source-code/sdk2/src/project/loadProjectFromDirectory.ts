@@ -15,6 +15,7 @@ import type { ProjectSettings } from "../json-schema/settings.js";
 import type { PreprocessPluginBeforeImportFunction } from "../plugin/importPlugins.js";
 import { PluginImportError } from "../plugin/errors.js";
 import type { InlangProject, ResourceFile } from "./api.js";
+import { upsertBundleNestedMatchByProperties } from "../query-utilities/upsertBundleNestedMatchByProperties.js";
 
 /**
  * Loads a project from a directory.
@@ -178,14 +179,17 @@ async function loadLegacyMessages(args: {
 		// @ts-ignore
 		nodeishFs: withAbsolutePaths(args.fs.promises, args.projectPath),
 	});
-	const insertQueries = [];
+	const upsertQueries = [];
 
 	for (const legacyMessage of loadedLegacyMessages) {
 		const messageBundle = fromMessageV1(legacyMessage, args.pluginKey);
-		insertQueries.push(insertBundleNested(args.project.db, messageBundle));
+		
+		upsertQueries.push(
+			upsertBundleNestedMatchByProperties(args.project.db, messageBundle)
+		);
 	}
 
-	return Promise.all(insertQueries);
+	return await Promise.all(upsertQueries);
 }
 
 type FsFileState = Record<
