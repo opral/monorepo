@@ -3,6 +3,7 @@
  */
 
 import { context } from "esbuild"
+import esbuild from "esbuild"
 import fs from "node:fs/promises"
 import path from "node:path"
 
@@ -11,10 +12,20 @@ const isDev = process?.env?.DEV !== undefined
 
 const defaultEntryPoints = [{ in: "./src/main.ts", out: "./main" }]
 const packagesToCopy = [
-	{ src: "node_modules/lit-html/lit-html.js", dest: "./assets/lit-html.js" },
 	{
-		src: "node_modules/@inlang/settings-component/dist/index.mjs",
+		src: "node_modules/lit-html/lit-html.js",
+		dest: "./assets/lit-html.js",
+		transpile: false,
+	},
+	{
+		src: "node_modules/@inlang/settings-component2/dist/index.js",
 		dest: "./assets/settings-component.mjs",
+		transpile: true,
+	},
+	{
+		src: "node_modules/@inlang/bundle-component/dist/index.js",
+		dest: "./assets/bundle-component.mjs",
+		transpile: true,
 	},
 ]
 
@@ -63,17 +74,30 @@ if (isDev) {
 
 // Function to copy required files to assets folder
 async function copyDependencies() {
-	for (const { src, dest } of packagesToCopy) {
+	for (const { src, dest, transpile } of packagesToCopy) {
 		try {
 			// Ensure the destination directory exists
 			const destDir = path.dirname(dest)
 			await fs.mkdir(destDir, { recursive: true })
 
-			// Copy the file, resolving the symlink if necessary
-			const resolvedPath = await fs.realpath(src)
-			await fs.copyFile(resolvedPath, dest)
+			if (transpile) {
+				// Transpile from js to mjs
+				await esbuild.build({
+					entryPoints: [src],
+					outfile: dest,
+					format: "esm",
+					bundle: true,
+					platform: "node",
+					sourcemap: false,
+					external: [],
+				})
+			} else {
+				// Copy the file, resolving the symlink if necessary
+				const resolvedPath = await fs.realpath(src)
+				await fs.copyFile(resolvedPath, dest)
+			}
 		} catch (err) {
-			console.error(`Error copying ${src} to ${dest}:`, err) // eslint-disable-line no-undef
+			console.error(`Error processing ${src} to ${dest}:`, err) // eslint-disable-line no-undef
 		}
 	}
 }

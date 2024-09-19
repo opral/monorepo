@@ -14,5 +14,6 @@ export type TelemetryEvents =
 	| "IDE-EXTENSION loaded project"
 	| "IDE-EXTENSION Editor opened via tooltip"
 	| "IDE-EXTENSION Settings View opened"
+	| "IDE-EXTENSION Editor View opened"
 	| "IDE-EXTENSION recommendation: add Sherlock to workspace"
 	| "IDE-EXTENSION recommendation: add Ninja Github Action workflow to repository"

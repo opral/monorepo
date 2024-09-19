@@ -239,7 +239,8 @@
 	},
 	"dependencies": {
 		"@inlang/sdk2": "workspace:*",
-		"@inlang/settings-component": "workspace:*",
+		"@inlang/settings-component2": "workspace:*",
+		"@inlang/bundle-component": "workspace:*",
 		"@inlang/recommend-sherlock": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@vitest/coverage-v8": "0.34.6",
