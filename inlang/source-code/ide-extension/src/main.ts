@@ -21,7 +21,6 @@ import fg from "fast-glob"
 import type { IdeExtensionConfig } from "@inlang/sdk2"
 import path from "node:path"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
-import { editorView } from "./utilities/editor/editorView.js"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
@@ -97,9 +96,6 @@ async function main(args: {
 
 		// TODO: Replace by reactive settings API?
 		setupFileSystemWatcher(args)
-
-		// TEST: Bundle Panel
-		//await editorView({ bundleId: "1", context: args.context })
 
 		return
 	} else {

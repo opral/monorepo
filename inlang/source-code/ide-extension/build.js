@@ -87,9 +87,11 @@ async function copyDependencies() {
 					outfile: dest,
 					format: "esm",
 					bundle: true,
-					platform: "node",
+					platform: "browser",
 					sourcemap: false,
 					external: [],
+					// treeShaking: true,
+					// conditions: ["browser"],
 				})
 			} else {
 				// Copy the file, resolving the symlink if necessary
