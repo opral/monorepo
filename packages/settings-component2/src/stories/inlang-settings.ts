@@ -4,7 +4,6 @@ import { baseStyling } from "../styling/base.js"
 import { ProjectSettings } from "@inlang/sdk2"
 import checkRequired from "./../helper/checkRequired.js"
 import overridePrimitiveColors from "./../helper/overridePrimitiveColors.js"
-import { registry } from "@inlang/marketplace-registry"
 
 import "./input-fields/general-input.js"
 

@@ -103,23 +103,34 @@ export async function loadProjectFromDirectory(
 		);
 	} else if (importPlugins[0]) {
 		const importer = importPlugins[0];
-		const filePaths = importer.toBeImportedFiles
-			? await importer.toBeImportedFiles({
-					settings: await project.settings.get(),
-					nodeFs: args.fs.promises,
-			  })
-			: [];
 		const files: ResourceFile[] = [];
 
-		for (const path of filePaths) {
-			const absolute = absolutePathFromProject(args.path, path);
-			try {
-				const data = await args.fs.promises.readFile(absolute);
-				files.push({ path, content: data, pluginKey: importer.key });
-			} catch (e) {
-				importedResourceFileErrors.push(
-					new ResourceFileImportError({ cause: e as Error, path })
-				);
+		if (importer.toBeImportedFiles) {
+			const toBeImportedFiles = await importer.toBeImportedFiles({
+				settings: await project.settings.get(),
+			});
+			for (const toBeImported of toBeImportedFiles) {
+				const absolute = absolutePathFromProject(args.path, toBeImported.path);
+				try {
+					const data = await args.fs.promises.readFile(absolute);
+					files.push({
+						path: toBeImported.path,
+						locale: toBeImported.locale,
+						content: data,
+						pluginKey: importer.key,
+					});
+				} catch (e) {
+					// https://github.com/opral/inlang-sdk/issues/202
+					if ((e as any)?.code === "ENOENT") {
+						continue;
+					}
+					importedResourceFileErrors.push(
+						new ResourceFileImportError({
+							cause: e as Error,
+							path: toBeImported.path,
+						})
+					);
+				}
 			}
 		}
 
@@ -127,17 +138,14 @@ export async function loadProjectFromDirectory(
 			pluginKey: importer.key,
 			files,
 		});
-	}
-
-	const chosenLegacyPlugin = loadMessagesPlugins[0];
-
-	if (chosenLegacyPlugin) {
+	} else if (loadMessagesPlugins[0] !== undefined) {
+		// TODO create resource files from loadMessageFn call - to poll?
 		await loadLegacyMessages({
 			project,
 			projectPath: args.path,
 			fs: args.fs,
-			pluginKey: chosenLegacyPlugin.key ?? chosenLegacyPlugin.id,
-			loadMessagesFn: chosenLegacyPlugin.loadMessages,
+			pluginKey: loadMessagesPlugins[0].key ?? loadMessagesPlugins[0].id,
+			loadMessagesFn: loadMessagesPlugins[0].loadMessages,
 		});
 	}
 
@@ -183,7 +191,7 @@ async function loadLegacyMessages(args: {
 
 	for (const legacyMessage of loadedLegacyMessages) {
 		const messageBundle = fromMessageV1(legacyMessage, args.pluginKey);
-		
+
 		upsertQueries.push(
 			upsertBundleNestedMatchByProperties(args.project.db, messageBundle)
 		);

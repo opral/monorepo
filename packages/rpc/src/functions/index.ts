@@ -4,10 +4,6 @@ import { machineTranslateBundle } from "./machineTranslateBundle.js"
 
 export const allRpcs = {
 	machineTranslateBundle,
-	/**
-	 * @deprecated renamed to `machineTranslateBundle`
-	 */
-	machineTranslateMessage: machineTranslateBundle,
 	subscribeNewsletter,
 	subscribeCategory,
 }

@@ -27,6 +27,7 @@ vi.mock("../state.js", () => ({
 
 vi.mock("@inlang/sdk2", () => ({
 	selectBundleNested: vi.fn(),
+	bundleIdOrAliasIs: vi.fn(),
 }))
 
 vi.mock("vscode", () => ({

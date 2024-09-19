@@ -10,8 +10,8 @@
 		"./dist"
 	],
 	"scripts": {
-		"dev": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",
-		"build": "tsc --noEmit && inlang module build --entry ./src/index.ts --outdir ./dist",
+		"dev": "inlang plugin build --entry ./src/index.ts --outdir ./dist --watch",
+		"build": "tsc --noEmit && inlang plugin build --entry ./src/index.ts --outdir ./dist",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",

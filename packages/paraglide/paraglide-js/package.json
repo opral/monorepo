@@ -51,8 +51,7 @@
 		"check": "tsc --noEmit --emitDeclarationOnly false"
 	},
 	"bundleDependencies": [
-		"@inlang/sdk2",
-		"@inlang/plugin-icu1"
+		"@inlang/sdk2"
 	],
 	"dependencies": {
 		"@inlang/detect-json-formatting": "workspace:*",
@@ -71,7 +70,6 @@
 		"@lix-js/fs": "workspace:*",
 		"@inlang/recommend-ninja": "workspace:*",
 		"@inlang/recommend-sherlock": "workspace:*",
-		"@inlang/plugin-icu1": "workspace:*",
 		"@inlang/sdk2": "workspace:*",
 		"@rollup/plugin-terser": "0.4.3",
 		"@rollup/plugin-virtual": "3.0.1",

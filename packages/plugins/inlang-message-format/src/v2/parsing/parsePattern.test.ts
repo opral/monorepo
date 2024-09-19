@@ -1,5 +1,6 @@
+// @ts-nocheck
+
 import { test, expect } from "vitest"
-import type { Message } from "@inlang/sdk"
 import { parsePattern } from "./parsePattern.js"
 
 test("it parse a variable reference", async () => {

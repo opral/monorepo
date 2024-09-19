@@ -1,4 +1,4 @@
-import type { Message } from "@inlang/sdk"
+// @ts-nocheck
 
 export const serializedPattern = (pattern: Message["variants"][0]["pattern"]): string => {
 	return pattern

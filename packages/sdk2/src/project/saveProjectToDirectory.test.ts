@@ -82,7 +82,7 @@ test("a roundtrip should work", async () => {
 	const mockPlugin: InlangPlugin = {
 		key: "mock-plugin",
 		toBeImportedFiles: async () => {
-			return ["/mock-file.json"];
+			return [{ path: "/mock-file.json", locale: "mock" }];
 		},
 		importFiles: async ({ files }) => {
 			const bundles = JSON.parse(new TextDecoder().decode(files[0]?.content));
@@ -93,6 +93,7 @@ test("a roundtrip should work", async () => {
 				{
 					content: new TextEncoder().encode(JSON.stringify(bundles)),
 					path: "./mock-file.json",
+					locale: "mock",
 				},
 			];
 		},
@@ -251,4 +252,56 @@ test("a roundtrip with legacy load and save messages should work", async () => {
 
 	// TODO deactivated since the ids must not be equal for separate imports - matching happens on language and matcher now
 	// expect(bundles1).toStrictEqual(bundles2);
+});
+
+
+test("it should preserve the formatting of existing json resource files", async () => {
+	const mockJson =
+		JSON.stringify(
+			{ key: "value" },
+			undefined,
+			// tab spacing
+			"\t"
+		) +
+		// ends with new line
+		"\n";
+
+	const mockPlugin: InlangPlugin = {
+		key: "mock",
+		exportFiles: async () => {
+			return [
+				{
+					path: "/i18n/en.json",
+					// no beautified json
+					content: new TextEncoder().encode(JSON.stringify({ key: "value" })),
+					locale: "en",
+				},
+			];
+		},
+	};
+
+	const volume = Volume.fromJSON({
+		"/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en"],
+		} satisfies ProjectSettings),
+		"/i18n/en.json": mockJson,
+	});
+
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+		providePlugins: [mockPlugin],
+	});
+
+	await saveProjectToDirectory({
+		path: "/project.inlang",
+		fs: volume.promises as any,
+		project,
+	});
+
+	const fileAfterSave = await volume.promises.readFile(
+		"/i18n/en.json",
+		"utf-8"
+	);
+	expect(fileAfterSave).toBe(mockJson);
 });
