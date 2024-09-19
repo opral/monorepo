@@ -11,7 +11,7 @@ export function applySchema(args: { sqlite: SqliteDatabase }) {
 	args.sqlite.exec(`
 CREATE TABLE IF NOT EXISTS bundle (
   id TEXT PRIMARY KEY DEFAULT (human_id()),
-  alias BLOB NOT NULL DEFAULT (jsonb('{}'))
+  alias BLOB
 ) strict;
 
 CREATE TABLE IF NOT EXISTS message (
@@ -45,7 +45,6 @@ export type InlangDatabaseSchema = {
 
 type BundleTable = {
 	id: Generated<string>;
-	alias: Generated<Record<string, string>>;
 };
 
 type MessageTable = {

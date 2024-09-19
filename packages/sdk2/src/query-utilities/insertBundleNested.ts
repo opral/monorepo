@@ -13,7 +13,6 @@ export const insertBundleNested = async (
 			.insertInto("bundle")
 			.values({
 				id: bundle.id,
-				alias: bundle.alias,
 			})
 			.returning("id")
 			.executeTakeFirstOrThrow();
