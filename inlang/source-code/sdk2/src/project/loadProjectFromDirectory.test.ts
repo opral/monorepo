@@ -404,7 +404,12 @@ test("plugin calls that use fs should be intercepted to use an absolute path", a
 				"{locale}",
 				"en"
 			) as string;
-			return pathPattern;
+			return [
+				{
+					path: pathPattern,
+					locale: "en",
+				},
+			];
 		},
 	};
 
