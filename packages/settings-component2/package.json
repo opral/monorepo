@@ -15,8 +15,7 @@
 	],
 	"scripts": {
 		"dev": "tsc --watch",
-		"build": "tsc && npm run bundle",
-		"bundle": "rollup --config rollup.config.js",
+		"build": "tsc && rollup --config rollup.config.js",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"format": "prettier --write **/*.ts",
 		"storybook": "storybook dev -p 6006"
