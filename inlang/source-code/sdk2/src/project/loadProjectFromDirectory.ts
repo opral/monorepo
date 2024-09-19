@@ -103,7 +103,6 @@ export async function loadProjectFromDirectoryInMemory(
 		if (importer.toBeImportedFiles) {
 			const toBeImportedFiles = await importer.toBeImportedFiles({
 				settings: await project.settings.get(),
-				nodeFs: args.fs,
 			});
 			for (const toBeImported of toBeImportedFiles) {
 				const absolute = absolutePathFromProject(args.path, toBeImported.path);
