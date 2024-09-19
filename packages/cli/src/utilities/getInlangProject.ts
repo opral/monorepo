@@ -1,4 +1,4 @@
-import fs from "node:fs/promises"
+import fs from "node:fs"
 import { loadProjectFromDirectoryInMemory, type InlangProject } from "@inlang/sdk2"
 import { resolve } from "node:path"
 import { id } from "../../marketplace-manifest.json"
