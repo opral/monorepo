@@ -41,6 +41,11 @@ vi.mock("../utilities/messages/msg", () => ({
 	msg: vi.fn(),
 }))
 
+vi.mock("../utilities/messages/query.js", () => ({
+	getPatternFromString: vi.fn(),
+	getStringFromPattern: vi.fn(),
+}))
+
 vi.mock("../utilities/state", () => ({
 	state: vi.fn(() => ({
 		project: {
@@ -51,6 +56,7 @@ vi.mock("../utilities/state", () => ({
 
 vi.mock("@inlang/sdk2", () => ({
 	selectBundleNested: vi.fn(),
+	bundleIdOrAliasIs: vi.fn(),
 }))
 
 const mockBundle: BundleNested = {

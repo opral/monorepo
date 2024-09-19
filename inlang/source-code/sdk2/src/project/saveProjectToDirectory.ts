@@ -8,6 +8,7 @@ import {
 	absolutePathFromProject,
 	withAbsolutePaths,
 } from "./loadProjectFromDirectory.js";
+import { detectJsonFormatting } from "../utilities/detectJsonFormatting.js";
 
 export async function saveProjectToDirectory(args: {
 	fs: typeof fs;
@@ -59,7 +60,24 @@ export async function saveProjectToDirectory(args: {
 				if ((await args.fs.stat(dirname)).isDirectory() === false) {
 					await args.fs.mkdir(dirname, { recursive: true });
 				}
-				await args.fs.writeFile(p, new Uint8Array(file.content));
+				if (p.endsWith(".json")) {
+					try {
+						const existing = await args.fs.readFile(p, "utf-8");
+						const stringify = detectJsonFormatting(existing);
+						await args.fs.writeFile(
+							p,
+							new TextEncoder().encode(
+								stringify(JSON.parse(new TextDecoder().decode(file.content)))
+							)
+						);
+					} catch {
+						// write the file to disk (json doesn't exist yet)
+						// yeah ugly duplication of write file but it works.
+						await args.fs.writeFile(p, new Uint8Array(file.content));
+					}
+				} else {
+					await args.fs.writeFile(p, new Uint8Array(file.content));
+				}
 			}
 		}
 	}

@@ -160,6 +160,12 @@ export function createMessageWebviewProvider(args: {
 					if (message.command === "executeCommand") {
 						const commandName = message.commandName
 						const commandArgs = message.commandArgs
+
+						// Add context to openEditorView command
+						if (commandName === "sherlock.openEditorView") {
+							commandArgs.context = args.context
+						}
+
 						vscode.commands.executeCommand(commandName, commandArgs)
 					}
 				},
@@ -342,6 +348,8 @@ export function getHtml(args: {
 				let collapsibles = [];
 				let copyButtons = [];
 				const vscode = acquireVsCodeApi();
+
+				console.log('vscode', vscode);
 			
 				document.addEventListener('DOMContentLoaded', () => {
 					collapsibles = document.querySelectorAll('.collapsible');
@@ -423,11 +431,11 @@ export function getHtml(args: {
 					});
 				}
 
-				function editMessage(bundleId, locale) {
+				function openEditorView(bundleId) {
 					vscode.postMessage({
 						command: 'executeCommand',
-						commandName: 'sherlock.editMessage',
-						commandArgs: { bundleId, locale },
+						commandName: 'sherlock.openEditorView',
+						commandArgs: { bundleId, context: vscode.context },
 					});
 				}
 			
@@ -473,7 +481,7 @@ export async function getTranslationsTableHtml(args: {
 		// Handle missing translation scenario
 		if (!message) {
 			const missingTranslationMessage = CONFIGURATION.STRINGS.MISSING_TRANSLATION_MESSAGE
-			const editCommand = `editMessage('${args.bundle.id}', '${escapeHtml(locale)}')`
+			const editCommand = `openEditorView('${args.bundle.id}')`
 			const machineTranslateCommand = `machineTranslate('${args.bundle.id}', '${
 				settings.baseLocale
 			}', ['${locale}'])`
@@ -497,7 +505,7 @@ export async function getTranslationsTableHtml(args: {
 				messageId: message.id,
 			})
 
-			const editCommand = `editMessage('${args.bundle.id}', '${escapeHtml(locale)}')`
+			const editCommand = `openEditorView('${args.bundle.id}')`
 
 			return `
 				<div class="section">

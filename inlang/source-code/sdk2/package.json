@@ -15,6 +15,8 @@
 		"./dist",
 		"./src"
 	],
+	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
+	"sideEffects": false,
 	"scripts": {
 		"prepublish": "npm run sentry:sourcemaps",
 		"build": "npm run env-variables && tsc --build",
@@ -22,7 +24,7 @@
 		"env-variables": "node ./src/services/env-variables/createIndexFile.js",
 		"test": "npm run env-variables && tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "npm run env-variables && vitest",
-		"lint": "eslint ./src --fix",
+		"lint": "eslint ./src",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules",
 		"sentry:sourcemaps": "sentry-cli sourcemaps inject --org opral --project inlang-sdk ./dist && sentry-cli sourcemaps upload --org opral --project inlang-sdk ./dist"
@@ -52,6 +54,7 @@
 		"@types/node": "^22.5.1",
 		"@types/uuid": "^10.0.0",
 		"@vitest/coverage-v8": "^2.0.5",
+		"eslint-plugin-tree-shaking": "^1.12.2",
 		"memfs": "4.6.0",
 		"typescript": "^5.5.2",
 		"vitest": "^2.0.5"

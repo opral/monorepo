@@ -34,10 +34,13 @@ import {
 	type InlangProjectWithSolidAdapter,
 } from "@inlang/sdk"
 import { posthog as telemetryBrowser } from "posthog-js"
-import type { Result } from "@inlang/result"
 import { id } from "../../../../../marketplace-manifest.json"
 import * as Ninja from "@inlang/recommend-ninja"
 import { publicEnv } from "#src/services/env-variables/index.js"
+
+type SuccessResult<Data> = { data: Data; error?: never }
+type ErrorResult<Error> = { data?: never; error: Error }
+type Result<Data, Error> = SuccessResult<Data> | ErrorResult<Error>
 
 type EditorStateSchema = {
 	/**

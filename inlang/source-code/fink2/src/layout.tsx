@@ -15,12 +15,13 @@ import {
 	SlDropdown,
 	SlMenu,
 	SlMenuItem,
-	SlDialog
+	SlDialog,
 } from "@shoelace-style/shoelace/dist/react";
 import { SlSelectEvent } from "@shoelace-style/shoelace";
 import SubNavigation from "./components/SubNavigation.tsx";
 import { handleDownload } from "./helper/utils.ts";
 import Footer, { getFinkResourcesLinks } from "./components/Footer.tsx";
+import { getOriginPrivateDirectory } from "native-file-system-adapter";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [, setWithPolling] = useAtom(withPollingAtom);
@@ -40,14 +41,14 @@ export default function Layout(props: { children: React.ReactNode }) {
 	useEffect(() => {
 		if (selectedProjectPath && !authorName) {
 			setShowAuthorDialog(true);
-		} 
+		}
 	}, [authorName, project?.lix.currentAuthor, selectedProjectPath]);
 
 	useEffect(() => {
 		if (authorName && project?.lix.currentAuthor.get() !== authorName) {
 			project?.lix.currentAuthor.set(authorName);
 		}
-	}, [authorName, project?.lix.currentAuthor])
+	}, [authorName, project?.lix.currentAuthor]);
 
 	return (
 		<>
@@ -227,8 +228,11 @@ export const CreateProjectDialog = (props: {
 
 	const handleCreateNewProject = async () => {
 		setLoading(true);
-		const opfsRoot = await navigator.storage.getDirectory();
-		const fileHandle = await opfsRoot.getFileHandle(fileName, { create: true });
+
+		const rootHandle = await getOriginPrivateDirectory();
+		const fileHandle = await rootHandle.getFileHandle(fileName, {
+			create: true,
+		});
 		const writable = await fileHandle.createWritable();
 		const file = await newProject();
 		await writable.write(file);
@@ -281,19 +285,21 @@ const HelpMenu = () => {
 			</button>
 			<SlMenu className="w-fit">
 				{getFinkResourcesLinks().map((link) => (
-					<SlMenuItem>
+					<>
+						<SlMenuItem>
 						<a href={link.href} target="_blank">
 							{link.name}
 						</a>
+						</SlMenuItem>
 						{link.name === "About the ecosystem" && (
-							<div className="w-full border-b border-surface-200 my-1" />
+							<div className="w-full border-b border-zinc-200 my-1" />
 						)}
-					</SlMenuItem>
+					</>
 				))}
 			</SlMenu>
 		</SlDropdown>
-	)
-}
+	);
+};
 
 const DownloadButton = () => {
 	const [project] = useAtom(projectAtom);

@@ -28,7 +28,7 @@ export const machineTranslateMessageCommand = {
 
 		// Call machine translation RPC function
 
-		const result = await rpc.machineTranslateMessage({
+		const result = await rpc.machineTranslateBundle({
 			bundle,
 			// TODO: refactor machine translation to use baseLocale and targetLocales
 			sourceLocale: baseLocale,

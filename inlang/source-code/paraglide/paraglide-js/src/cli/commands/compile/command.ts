@@ -6,7 +6,6 @@ import { runCompiler } from "~/cli/steps/run-compiler.js"
 import { DEFAULT_OUTDIR } from "~/cli/defaults.js"
 import { classifyProjectErrors } from "~/services/error-handling.js"
 import { loadProjectFromDirectoryInMemory } from "@inlang/sdk2"
-// import icu1Importer from "@inlang/plugin-icu1"
 
 export const compileCommand = new Command()
 	.name("compile")

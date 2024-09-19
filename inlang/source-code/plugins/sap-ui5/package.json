@@ -19,8 +19,8 @@
 	],
 	"scripts": {
 		"postinstall": "patch-package --error-on-fail",
-		"dev": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",
-		"build": "inlang module build --entry ./src/index.ts --outdir ./dist",
+		"dev": "inlang plugin build --entry ./src/index.ts --outdir ./dist --watch",
+		"build": "inlang plugin build --entry ./src/index.ts --outdir ./dist",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
