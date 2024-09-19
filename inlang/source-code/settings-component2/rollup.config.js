@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { nodeResolve } from "@rollup/plugin-node-resolve"
 import commonjs from "@rollup/plugin-commonjs"
 
@@ -9,6 +10,18 @@ export default {
 	output: {
 		file: "dist/bundled/index.js",
 		format: "es",
+	},
+	onwarn: function (message, next) {
+		// if dependencies have circular dependencies, we can't do nothing about it
+		if (message.code === "CIRCULAR_DEPENDENCY") {
+			return
+		}
+		// typescript compiles experimental decorators with this
+		// the component works regardless. hence, surpressing this warning
+		else if (message.code === "THIS_IS_UNDEFINED") {
+			return
+		}
+		next(message)
 	},
 	preserveEntrySignatures: false,
 	plugins: [commonjs(), nodeResolve()],
