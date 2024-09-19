@@ -6,15 +6,12 @@ import { escapeHtml } from "../utils.js"
 // TODO: Uncomment when bundle subscribe is implemented
 // import { throttle } from "throttle-debounce"
 import {
-	type ProjectSettings,
 	selectBundleNested,
-	type Bundle,
 	type BundleNested,
 	type IdeExtensionConfig,
 	type InlangProject,
 	pollQuery,
 } from "@inlang/sdk2"
-import { getSelectedBundleByBundleIdOrAlias } from "../helper.js"
 
 export function createMessageWebviewProvider(args: {
 	context: vscode.ExtensionContext
@@ -88,7 +85,7 @@ export function createMessageWebviewProvider(args: {
 			matchedBundles.map(async (bundle) => {
 				// @ts-ignore TODO: Introduce deprecation message for messageId
 				bundle.bundleId = bundle.bundleId || bundle.messageId
-				const bundleData = await getSelectedBundleByBundleIdOrAlias(bundle.bundleId)
+				const bundleData = await selectBundleNested(state().project.db).where("id", "=", bundle.bundleId).executeTakeFirst()
 				return bundleData
 			})
 		)
@@ -236,31 +233,6 @@ export async function createMessageHtml(args: {
 	isHighlighted: boolean
 	workspaceFolder: vscode.WorkspaceFolder
 }): Promise<string> {
-	// Function to check if the record has any keys
-	const hasAliases = (aliases: Bundle["alias"]): boolean => {
-		return Object.keys(aliases).length > 0
-	}
-
-	const isExperimentalAliasesEnabled = ((await state().project.settings.get()) as ProjectSettings)
-		.experimental?.aliases
-
-	const aliasHtml =
-		isExperimentalAliasesEnabled && hasAliases(args.bundle.alias)
-			? `<div class="aliases" title="Alias">
-                <span><strong>@</strong></span>
-                <div>
-                ${Object.entries(args.bundle.alias)
-									.map(
-										([key, value]) =>
-											`<span data-alias="${escapeHtml(value)}"><i>${escapeHtml(key)}</i>: ${escapeHtml(
-												value
-											)}</span>`
-									)
-									.join("")}
-                </div>
-            </div>`
-			: ""
-
 	const translationsTableHtml = await getTranslationsTableHtml({
 		bundle: args.bundle,
 		workspaceFolder: args.workspaceFolder,
@@ -295,7 +267,6 @@ export async function createMessageHtml(args: {
         </div>
         <div class="content" style="display: none;">
             ${translationsTableHtml}
-            ${aliasHtml}
         </div>
     </div>
     `
