@@ -11,7 +11,6 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 			targetLocales: ["de", "fr", "en"],
 			bundle: {
 				id: "mock-bundle-id",
-				alias: {},
 				messages: [
 					{
 						id: "mock-message-id",
@@ -139,7 +138,6 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 			targetLocales: ["de"],
 			bundle: {
 				id: "mock-bundle-id",
-				alias: {},
 				messages: [
 					{
 						id: "mock-message-id",

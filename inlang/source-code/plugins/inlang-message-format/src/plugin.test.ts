@@ -80,7 +80,6 @@ test("roundtrip with new variants that have been created by apps", async () => {
 	// simulating adding a new bundle, message, and variant
 	imported1.bundles.push({
 		id: "green_box_atari",
-		alias: {},
 		messages: [
 			{
 				id: "0j299j-3si02j0j4=s02-3js2",
