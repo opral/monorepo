@@ -10,8 +10,7 @@ export function applySchema(args: { sqlite: SqliteDatabase }) {
 
 	args.sqlite.exec(`
 CREATE TABLE IF NOT EXISTS bundle (
-  id TEXT PRIMARY KEY DEFAULT (human_id()),
-  alias BLOB
+  id TEXT PRIMARY KEY DEFAULT (human_id())
 ) strict;
 
 CREATE TABLE IF NOT EXISTS message (
