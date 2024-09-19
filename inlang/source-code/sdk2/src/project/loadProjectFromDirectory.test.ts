@@ -553,15 +553,22 @@ test("errors from importing translation files should be shown", async () => {
 
 	const proxiedFs = new Proxy(fs, {
 		get: (target, prop) => {
-			if (prop === "readFile") {
-				// @ts-expect-error - we are mocking the fs
-				return (path, ...args) => {
-					console.log("ERRORR!!!!");
-					if (path.endsWith("some-file.json")) {
-						throw new Error("MOCK ERROR ");
-					}
-					return fs.promises.readFile(path, ...args);
-				};
+			if (prop === "promises") {
+				// Intercept the 'promises' object
+				return new Proxy(target.promises, {
+					get: (promisesTarget, promisesProp) => {
+						if (promisesProp === "readFile") {
+							// @ts-expect-error - we are mocking the fs
+							return (path, ...args) => {
+								if (path.endsWith("some-file.json")) {
+									throw new Error("MOCK ERROR");
+								}
+								return promisesTarget.readFile(path, ...args);
+							};
+						}
+						return Reflect.get(promisesTarget, promisesProp);
+					},
+				});
 			}
 			return Reflect.get(target, prop);
 		},
@@ -585,8 +592,8 @@ test("errors from importing translation files should be shown", async () => {
 
 	const errors = await project.errors.get();
 	// TODO deactivated for now - we need to proxy fs.promises or change the signature of loadProject
-	// expect(errors).toHaveLength(1);
-	// expect(errors[0]).toBeInstanceOf(ResourceFileImportError);
+	expect(errors).toHaveLength(1);
+	expect(errors[0]).toBeInstanceOf(ResourceFileImportError);
 });
 
 // it happens often that a resource file doesn't exist yet on import
