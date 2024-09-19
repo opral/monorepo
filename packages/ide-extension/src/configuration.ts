@@ -13,7 +13,7 @@ import { jumpToPositionCommand } from "./commands/jumpToPosition.js"
 import { machineTranslateMessageCommand } from "./commands/machineTranslate.js"
 import { openSettingsViewCommand } from "./commands/openSettingsView.js"
 import { toggleInlineAnnotationsCommand } from "./commands/toggleInlineAnnotation.js"
-import { openEditorViewCommand } from "./commands/openBundleEditorView.js"
+import { openEditorViewCommand } from "./commands/openEditorView.js"
 
 export const CONFIGURATION = {
 	EVENTS: {
