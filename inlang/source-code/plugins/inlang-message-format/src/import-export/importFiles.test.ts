@@ -29,7 +29,6 @@ test("it handles single variants without expressions", async () => {
 		bundles: [
 			{
 				id: "some_happy_cat",
-				alias: {},
 				messages: [
 					{
 						id: "some_happy_cat_en",
@@ -79,7 +78,6 @@ test("it handles variable expressions in patterns", async () => {
 		bundles: [
 			{
 				id: "some_happy_cat",
-				alias: {},
 				messages: [
 					{
 						id: "some_happy_cat_en",
@@ -183,7 +181,6 @@ test("it assigns the correct locales to messages", async () => {
 		bundles: [
 			{
 				id: "some_happy_cat",
-				alias: {},
 				messages: [
 					{
 						id: "some_happy_cat_en",
@@ -256,7 +253,6 @@ test("it handles multi variant messages", async () => {
 		bundles: [
 			{
 				id: "some_happy_cat",
-				alias: {},
 				messages: [
 					{
 						id: "some_happy_cat_en",

@@ -77,7 +77,6 @@ describe("editMessageCommand", () => {
 			},
 		})
 
-		// @ts-expect-error
 		vi.mocked(getSelectedBundleByBundleIdOrAlias).mockResolvedValueOnce(mockBundle)
 
 		await editMessageCommand.callback({ bundleId: "testBundle", locale: "en" })

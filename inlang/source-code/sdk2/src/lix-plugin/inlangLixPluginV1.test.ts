@@ -14,7 +14,6 @@ describe("plugin.diff.file", () => {
 			.insertInto("bundle")
 			.values({
 				id: "1",
-				alias: {},
 			})
 			.execute();
 		const path = "/db.sqlite";
@@ -32,23 +31,22 @@ describe("plugin.diff.file", () => {
 				type: "bundle",
 				operation: "create",
 				old: undefined,
-				neu: { id: "1", alias: {} },
+				neu: { id: "1" },
 			} satisfies DiffReport,
 		]);
 	});
 
-	test("update of bundle", async () => {
+	// reanble with declarations
+	test.todo("update of bundle", async () => {
 		const oldProject = await loadProjectInMemory({ blob: await newProject() });
 		await oldProject.db
 			.insertInto("bundle")
 			.values([
 				{
 					id: "1",
-					alias: {},
 				},
 				{
 					id: "2",
-					alias: {},
 				},
 			])
 			.execute();
@@ -58,13 +56,9 @@ describe("plugin.diff.file", () => {
 			.values([
 				{
 					id: "1",
-					alias: {
-						default: "Peter Parker",
-					},
 				},
 				{
 					id: "2",
-					alias: {},
 				},
 			])
 			.execute();
@@ -91,8 +85,8 @@ describe("plugin.diff.file", () => {
 				},
 				type: "bundle",
 				operation: "update",
-				old: { id: "1", alias: {} },
-				neu: { id: "1", alias: { default: "Peter Parker" } },
+				old: { id: "1" },
+				neu: { id: "1" },
 			} satisfies DiffReport,
 		]);
 	});
@@ -324,7 +318,6 @@ describe("plugin.diff.file", () => {
 			.insertInto("bundle")
 			.values({
 				id: "1",
-				alias: {},
 			})
 			.execute();
 

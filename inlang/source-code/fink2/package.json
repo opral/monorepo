@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "node ./scripts/updateVersion.js && vite --host",
 		"build": "node ./scripts/updateVersion.js && vite build",
+		"test": "tsc --noEmit",
 		"preview": "vite preview",
 		"generate": "node ./scripts/generateDemoData.js",
 		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
