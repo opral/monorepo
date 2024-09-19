@@ -9,7 +9,6 @@ import type {
 	InlangPlugin,
 	NodeFsPromisesSubsetLegacy,
 } from "../plugin/schema.js";
-import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
 import { fromMessageV1 } from "../json-schema/old-v1-message/fromMessageV1.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import type { PreprocessPluginBeforeImportFunction } from "../plugin/importPlugins.js";
