@@ -31,25 +31,24 @@ const messageV1: MessageV1 = {
 	selectors: [],
 };
 
-const humanReadableId = "awful_lamb_mend_smooth";
 
 const bundle = {
 	alias: {
 		mock: "hello_world",
 	},
-	id: "awful_lamb_mend_smooth",
+	id: "hello_world",
 	messages: [
 		{
-			bundleId: humanReadableId,
+			bundleId: "hello_world",
 			declarations: [],
-			id: humanReadableId + "_en",
+			id: "hello_world" + "_en",
 			locale: "en",
 			selectors: [],
 			variants: [
 				{
-					id: humanReadableId + "_en_1",
+					id: "hello_world" + "_en_1",
 					match: [],
-					messageId: humanReadableId + "_en",
+					messageId: "hello_world" + "_en",
 					pattern: [
 						{
 							type: "text",
@@ -60,16 +59,16 @@ const bundle = {
 			],
 		},
 		{
-			bundleId: humanReadableId,
+			bundleId: "hello_world",
 			declarations: [],
-			id: humanReadableId + "_de",
+			id: "hello_world" + "_de",
 			locale: "de",
 			selectors: [],
 			variants: [
 				{
-					id: humanReadableId + "_de_1",
+					id: "hello_world" + "_de_1",
 					match: [],
-					messageId: humanReadableId + "_de",
+					messageId: "hello_world" + "_de",
 					pattern: [
 						{
 							type: "text",

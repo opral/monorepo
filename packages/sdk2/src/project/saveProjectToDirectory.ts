@@ -41,7 +41,7 @@ export async function saveProjectToDirectory(args: {
 		// old legacy remove with v3
 		if (plugin.saveMessages) {
 			await plugin.saveMessages({
-				messages: bundles.map((b) => toMessageV1(b, plugin.key)),
+				messages: bundles.map((b) => toMessageV1(b)),
 				// @ts-expect-error - legacy
 				nodeishFs: withAbsolutePaths(args.fs, args.path),
 				settings,
