@@ -14,7 +14,6 @@ describe("plugin.diff.file", () => {
 			.insertInto("bundle")
 			.values({
 				id: "1",
-				alias: {},
 			})
 			.execute();
 		const path = "/db.sqlite";
@@ -32,7 +31,7 @@ describe("plugin.diff.file", () => {
 				type: "bundle",
 				operation: "create",
 				old: undefined,
-				neu: { id: "1", alias: {} },
+				neu: { id: "1", alias: null },
 			} satisfies DiffReport,
 		]);
 	});
@@ -324,7 +323,6 @@ describe("plugin.diff.file", () => {
 			.insertInto("bundle")
 			.values({
 				id: "1",
-				alias: {},
 			})
 			.execute();
 

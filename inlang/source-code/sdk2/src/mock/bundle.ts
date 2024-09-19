@@ -5,9 +5,6 @@ import type { BundleNested } from "../database/schema.js";
  */
 export const pluralBundle: BundleNested = {
 	id: "mock_bundle_human_id",
-	alias: {
-		default: "mock_bundle_alias",
-	},
 	messages: [
 		{
 			bundleId: "mock_bundle_human_id",

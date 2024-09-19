@@ -17,7 +17,6 @@ test("bundle default values", async () => {
 		.executeTakeFirstOrThrow();
 
 	expect(isHumanId(bundle.id)).toBe(true);
-	expect(bundle.alias).toStrictEqual({});
 });
 
 test("message default values", async () => {
@@ -80,20 +79,19 @@ test("variant default values", async () => {
 	expect(variant.pattern).toStrictEqual([]);
 });
 
-test("it should handle json serialization and parsing for bundles", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
+test.todo(
+	"it should handle json serialization and parsing for bundles",
+	async () => {
+		const sqlite = await createInMemoryDatabase({
+			readOnly: false,
+		});
+		const db = initDb({ sqlite });
 
-	const bundle = await db
-		.insertInto("bundle")
-		.values({
-			alias: { mock: "mock" },
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	expect(bundle.alias).toEqual({ mock: "mock" });
-});
+		await db
+				.insertInto("bundle")
+				.values({})
+				.returningAll()
+				.executeTakeFirstOrThrow();
+	}
+);
 

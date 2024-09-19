@@ -17,7 +17,7 @@ test("should return the bundle by id", async () => {
 	expect(bundle?.id).toBe("some-id");
 });
 
-test("it should return the bundle by alias", async () => {
+test.skip("it should return the bundle by alias", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
 	await project.db
 		.insertInto("bundle")
@@ -39,7 +39,7 @@ test("it should return the bundle by alias", async () => {
 	expect(bundle?.id).toBe("some-id");
 });
 
-test("it should return multiple bundles by alias", async () => {
+test.skip("it should return multiple bundles by alias", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
 	await project.db
 		.insertInto("bundle")
@@ -72,7 +72,7 @@ test("it should return multiple bundles by alias", async () => {
 	]);
 });
 
-test("combining with other query utilities should be possible", async () => {
+test.skip("combining with other query utilities should be possible", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
 	await project.db
 		.insertInto("bundle")

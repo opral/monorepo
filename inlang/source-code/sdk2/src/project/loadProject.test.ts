@@ -8,9 +8,7 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 	const project1 = await loadProjectInMemory({ blob: file1 });
 	const bundle = await project1.db
 		.insertInto("bundle")
-		.values({
-			alias: { default: "bundle1" },
-		})
+		.defaultValues()
 		.returning("id")
 		.executeTakeFirstOrThrow();
 
