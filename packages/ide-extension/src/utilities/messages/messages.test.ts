@@ -64,7 +64,6 @@ describe("Message Webview Provider Tests", () => {
 		const html = await createMessageHtml({
 			bundle: {
 				id: "message-id",
-				alias: { aliasKey: "aliasValue" },
 				messages: [
 					{
 						id: "message-id",
@@ -91,7 +90,6 @@ describe("Message Webview Provider Tests", () => {
 
 		// Validating that the created HTML contains the expected content
 		expect(html).toContain("message-id")
-		expect(html).toContain("aliasValue")
 		expect(html).toContain("Hello")
 	})
 
@@ -113,7 +111,6 @@ describe("Message Webview Provider Tests", () => {
 		const html = await createMessageHtml({
 			bundle: {
 				id: "message-id",
-				alias: { aliasKey: "aliasValue" },
 				messages: [],
 			},
 			isHighlighted: false,
@@ -146,7 +143,6 @@ describe("Message Webview Provider Tests", () => {
 		const html = await getTranslationsTableHtml({
 			bundle: {
 				id: "message-id",
-				alias: {},
 				messages: [
 					{
 						id: "message-id",
@@ -197,7 +193,6 @@ describe("Message Webview Provider Tests", () => {
 		const html = await getTranslationsTableHtml({
 			bundle: {
 				id: "message-id",
-				alias: {},
 				messages: [], // No messages for any locale
 			},
 			workspaceFolder: {

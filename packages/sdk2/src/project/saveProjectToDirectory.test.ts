@@ -63,7 +63,6 @@ test("it should overwrite all files to the directory except the db.sqlite file",
 test("a roundtrip should work", async () => {
 	const mockBundleNested: NewBundleNested = {
 		id: "mock-bundle",
-		alias: { "mock-plugin": "peter-gruen" },
 		messages: [
 			{
 				bundleId: "mock-bundle",
@@ -205,9 +204,6 @@ test.todo(
 
 		const bundles1 = await selectBundleNested(project.db).execute();
 
-		expect(bundles1[0]?.alias["mock-legacy-plugin"]).toBe(
-			"mock-legacy-message"
-		);
 		expect(bundles1[0]?.messages).lengthOf(1);
 		expect(bundles1[0]?.messages[0]?.variants).toEqual([
 			expect.objectContaining({

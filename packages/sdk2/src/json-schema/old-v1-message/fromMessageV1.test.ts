@@ -33,9 +33,6 @@ const messageV1: MessageV1 = {
 
 
 const bundle = {
-	alias: {
-		mock: "hello_world",
-	},
 	id: "hello_world",
 	messages: [
 		{
@@ -83,7 +80,7 @@ const bundle = {
 
 test("fromMessageV1", () => {
 	expect(Value.Check(MessageV1, messageV1)).toBe(true);
-	const nestedBundle: unknown = fromMessageV1(messageV1, "mock");
+	const nestedBundle: unknown = fromMessageV1(messageV1);
 
 	expect(nestedBundle).toEqual(bundle);
 });

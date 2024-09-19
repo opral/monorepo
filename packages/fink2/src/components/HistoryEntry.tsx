@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Change, isInSimulatedCurrentBranch } from "@inlang/sdk2";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
@@ -5,7 +6,7 @@ import { projectAtom } from "../state.ts";
 import timeAgo from "../helper/timeAgo.ts";
 import { InlangPatternEditor, InlangVariant } from "./SingleDiffBundle.tsx";
 
-const HistoryEntry = ({ commit }) => {
+const HistoryEntry = ({ commit }: { commit: any}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [project] = useAtom(projectAtom);
   const [changeHistory, setChangeHistory] = useState([] as { current: Change; previous: Change | null }[]);

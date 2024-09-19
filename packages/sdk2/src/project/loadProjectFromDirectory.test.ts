@@ -190,9 +190,6 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 
 	await insertBundleNested(project.db, {
 		id: "key-id",
-		alias: {
-			"mock-legacy-plugin": "key-id",
-		},
 		messages: [
 			{
 				id: "mock-message",
@@ -229,19 +226,9 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 
 	const bundles = await selectBundleNested(project.db).execute();
 
-	const bundlesOrdered = bundles.sort((a, b) =>
-		a.alias[mockLegacyPlugin.id!]!.localeCompare(b.alias[mockLegacyPlugin.id!]!)
-	);
-
-	// expect the alias to be the key or id (as fallback) of the plugin
-	// see https://github.com/opral/monorepo/pull/3048#discussion_r1707395555
-	for (const bundle of bundles) {
-		expect(Object.keys(bundle.alias)).toEqual([mockLegacyPlugin.id!]);
-	}
+	const bundlesOrdered = bundles.sort((a, b) => a.id.localeCompare(b.id));
 
 	expect(bundles.length).toBe(3);
-	expect(bundlesOrdered[0]?.alias[mockLegacyPlugin.id!]).toBe("key-id");
-	expect(bundlesOrdered[1]?.alias[mockLegacyPlugin.id!]).toBe("key1");
 	expect(bundlesOrdered[0]?.messages[0]?.locale).toBe("en");
 	expect(
 		(bundlesOrdered[0]?.messages[0]?.variants[0]?.pattern[0] as Text)?.value

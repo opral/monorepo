@@ -21,7 +21,6 @@ for (const key in enData) {
 const ast = [];
 for (const key in combinedData) {
 	const bundle = createBundle({
-		alias: { default: key },
 		messages: [
 			createMessage({
 				locale: "en",
@@ -44,7 +43,6 @@ const sqliteConformAst = [];
 for (const bundle of ast) {
 	const newBundle = {};
 	newBundle["id"] = bundle.id;
-	newBundle["alias"] = bundle.alias;
 	newBundle["messages"] = [];
 
 	for (const message of bundle.messages) {
@@ -88,7 +86,7 @@ console.log(JSON.stringify(sqliteConformAst, null, 2));
 
 // Add one variant bundle
 const variantBundle = sqliteConformAst.find(
-	(bundle) => bundle.alias.default === "app_nrOfTodos"
+	(bundle) => bundle.id === "app_nrOfTodos"
 );
 
 for (const message of variantBundle.messages) {

@@ -9,7 +9,6 @@ export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({
 		if (bundlesIndex[message.bundleId] === undefined) {
 			bundlesIndex[message.bundleId] = {
 				id: message.bundleId,
-				alias: {},
 				messages: [message],
 			}
 		} else {
