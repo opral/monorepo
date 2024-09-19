@@ -23,7 +23,7 @@ vi.mock("vscode", () => ({
 
 vi.mock("@inlang/rpc", () => ({
 	rpc: {
-		machineTranslateMessage: vi.fn(),
+		machineTranslateBundle: vi.fn(),
 	},
 }))
 
@@ -61,7 +61,6 @@ vi.mock("@inlang/sdk2", () => ({
 
 const mockBundle: BundleNested = {
 	id: "validId",
-	alias: { alias: "alias" },
 	messages: [
 		{
 			id: "messageId",
@@ -115,7 +114,7 @@ describe("machineTranslateMessageCommand", () => {
 			executeTakeFirst: vi.fn().mockResolvedValueOnce(mockBundle),
 		})
 		// @ts-expect-error
-		rpc.machineTranslateMessage.mockResolvedValueOnce({ error: "RPC Error" })
+		rpc.machineTranslateBundle.mockResolvedValueOnce({ error: "RPC Error" })
 
 		await machineTranslateMessageCommand.callback({
 			bundleId: "validId",
@@ -133,7 +132,7 @@ describe("machineTranslateMessageCommand", () => {
 			executeTakeFirst: vi.fn().mockResolvedValueOnce(mockBundle),
 		})
 		// @ts-expect-error
-		rpc.machineTranslateMessage.mockResolvedValueOnce({ data: undefined })
+		rpc.machineTranslateBundle.mockResolvedValueOnce({ data: undefined })
 
 		await machineTranslateMessageCommand.callback({
 			bundleId: "validId",
@@ -153,7 +152,7 @@ describe("machineTranslateMessageCommand", () => {
 		})
 		const mockTranslation = { translatedText: "Translated content" }
 		// @ts-expect-error
-		rpc.machineTranslateMessage.mockResolvedValueOnce({ data: mockTranslation })
+		rpc.machineTranslateBundle.mockResolvedValueOnce({ data: mockTranslation })
 
 		await machineTranslateMessageCommand.callback({
 			bundleId: "validId",
@@ -173,7 +172,7 @@ describe("machineTranslateMessageCommand", () => {
 		})
 		const mockTranslation = { translatedText: "Translated content" }
 		// @ts-expect-error
-		rpc.machineTranslateMessage.mockResolvedValueOnce({ data: mockTranslation })
+		rpc.machineTranslateBundle.mockResolvedValueOnce({ data: mockTranslation })
 
 		await machineTranslateMessageCommand.callback({
 			bundleId: "validId",
