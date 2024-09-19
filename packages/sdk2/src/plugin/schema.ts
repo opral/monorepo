@@ -37,8 +37,7 @@ export type InlangPlugin<
 	 */
 	toBeImportedFiles?: (args: {
 		settings: ProjectSettings & ExternalSettings;
-		nodeFs: NodeFsPromisesSubset;
-	}) => MaybePromise<Array<Pick<ResourceFile, "path" | "locale">>>;
+	}) => MaybePromise<Array<{ path: string; locale: string }>>;
 	importFiles?: (args: {
 		files: Array<Omit<ResourceFile, "pluginKey">>;
 		settings: ProjectSettings & ExternalSettings; // we expose the settings in case the importFunction needs to access the plugin config
