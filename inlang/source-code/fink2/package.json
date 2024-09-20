@@ -4,8 +4,8 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "node ./scripts/updateVersion.js && vite --host",
-		"build": "node ./scripts/updateVersion.js && vite build",
+		"dev": "vite --host",
+		"build": "vite build",
 		"test": "tsc --noEmit",
 		"preview": "vite preview",
 		"generate": "node ./scripts/generateDemoData.js",

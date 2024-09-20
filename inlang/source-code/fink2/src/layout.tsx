@@ -285,7 +285,7 @@ const HelpMenu = () => {
 			</button>
 			<SlMenu className="w-fit">
 				{getFinkResourcesLinks().map((link) => (
-					<>
+					<div key={link.name}>
 						<SlMenuItem>
 						<a href={link.href} target="_blank">
 							{link.name}
@@ -294,7 +294,7 @@ const HelpMenu = () => {
 						{link.name === "About the ecosystem" && (
 							<div className="w-full border-b border-zinc-200 my-1" />
 						)}
-					</>
+					</div>
 				))}
 			</SlMenu>
 		</SlDropdown>

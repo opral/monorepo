@@ -1,5 +1,5 @@
-import version from "../../version.json"
-import { SlDropdown, SlMenu } from "@shoelace-style/shoelace/dist/react"
+// import package version
+import { version } from "../../package.json"
 
 export const getFinkResourcesLinks = () => {
   return [
@@ -71,6 +71,7 @@ const Footer = () => {
         <div className="flex gap-4">
           {socialMediaLinks.map((link) => (
             <a
+              key={link.name}
               target="_blank"
               className={"link link-primary flex space-x-2 items-center text-xs"}
               href={link.href}
@@ -80,32 +81,8 @@ const Footer = () => {
             </a>
           ))}
         </div>
-        <div className="flex items-center justify-end w-24">
-          <SlDropdown distance={8}>
-            <button slot="trigger" className="text-sm text-zinc-500">
-              v{version["@inlang/fink2"]}
-            </button>
-            <SlMenu className="flex flex-col px-4 py-3 text-sm w-60">
-              <div className="flex justify-between font-medium mb-2">
-                <span>Deployed version:</span>
-                <span>{version["@inlang/fink2"]}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Commit hash:</span>
-                <a
-                  href={`https://github.com/opral/monorepo/commit/${version["commit-hash"]}`}
-                  target="_blank"
-                  className="text-primary"
-                >
-                  {version["commit-hash"].slice(0, 7)}
-                </a>
-              </div>
-              <div className="flex justify-between">
-                <span>SDK version:</span>
-                <span>{version["@inlang/sdk"]}</span>
-              </div>
-            </SlMenu>
-          </SlDropdown>
+        <div className="flex items-center justify-end w-24 text-sm text-zinc-500">
+          v{version}
         </div>
       </div>
     </footer>
@@ -119,7 +96,7 @@ export function IconX() {
     <svg
       className="w-5 h-5 hover:text-blue-700"
       width="19"
-      height="auto"
+      height="19"
       viewBox="0 0 24 23"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
