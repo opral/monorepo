@@ -85,6 +85,27 @@ export const bundlesNestedAtom = atom(async (get) => {
 	return await selectBundleNested(project.db).execute();
 });
 
+export const filteredLocalesAtom = atom<string[]>([]);
+export const searchQueryAtom = atom("");
+export const filterMissingTranslationAtom = atom<boolean>(false);
+
+export const bundlesNestedFilteredAtom = atom(async (get) => {
+	const query = get(searchQueryAtom).toLowerCase();
+	const items = await get(bundlesNestedAtom);
+	// filter out bundles with empty variant patterns [""] or missing locale
+	// items.find((bundle) =>
+	// 	bundle.messages.filter((message) => {
+	// 		message.variants.find(
+	// 			(variant) =>
+	// 				JSON.stringify(variant.pattern) === `[{"type":"Text","value":""}]`
+	// 		);
+	// 	})
+	// );
+	return items.filter((item) =>
+		JSON.stringify(item).toLowerCase().includes(query)
+	);
+});
+
 export const committedChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);

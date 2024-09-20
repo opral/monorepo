@@ -1,6 +1,7 @@
 import Layout, { Grid } from "../../layout.tsx";
 import {
 	bundlesNestedAtom,
+	bundlesNestedFilteredAtom,
 	projectAtom,
 	selectedProjectPathAtom,
 } from "../../state.ts";
@@ -13,11 +14,14 @@ import NoProjectView from "../../components/NoProjectView.tsx";
 import { demoBundles } from "../../../demo/bundles.ts";
 import { insertBundleNested } from "@inlang/sdk2";
 import LixFloat from "../../components/LixFloat.tsx";
+import TableHeader from "../../components/TableHeader.tsx";
+import FilterSection from "../../components/FilterSection.tsx";
 
 export default function App() {
 	const [project] = useAtom(projectAtom);
 	const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
 	const [bundlesNested] = useAtom(bundlesNestedAtom);
+	const [bundlesNestedFiltered] = useAtom(bundlesNestedFilteredAtom);
 	const [historyModalOpen, setHistoryModalOpen] = useState(false);
 	const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
 		null
@@ -36,38 +40,22 @@ export default function App() {
 		}
 	};
 
-	// create new empty bundle
-	// const handleNewBundle = () => {
-	// 	if (project) {
-	// 		insertBundleNested(project.db, createBundle({ messages: [] }));
-	// 	}
-	// };
 	return (
 		<>
 			<Layout>
 				<Grid>
-					{/* new bundle button */}
+					<FilterSection />
+					{bundlesNestedFiltered.length !== 0 && (<TableHeader />)}
 					{project && selectedProjectPath && (
 						<>
-							{/* <div className="flex mb-3 justify-end mt-3">
-								<SlButton
-									size="small"
-									className="btn btn-primary"
-									onClick={() => handleNewBundle()}
-								>
-									New bundle
-								</SlButton>
-							</div> */}
-							<div className="mt-8">
-								{bundlesNested.length > 0 &&
-									bundlesNested.map((bundle) => (
+							{bundlesNestedFiltered.length > 0 &&
+								bundlesNestedFiltered.map((bundle) => (
 										<InlangBundle
 											key={bundle.id}
 											bundle={bundle}
 											setShowHistory={handleOpenHistoryModal}
 										/>
-									))}
-							</div>
+								))}
 						</>
 					)}
 					{(!project || !selectedProjectPath) && <NoProjectView />}
