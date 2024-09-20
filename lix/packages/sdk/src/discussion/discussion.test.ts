@@ -1,6 +1,7 @@
+/* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { expect, expectTypeOf, test } from "vitest";
+import { expect, test } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import type { LixPlugin } from "../plugin.js";
@@ -9,7 +10,7 @@ const mockPlugin: LixPlugin = {
 	key: "mock-plugin",
 	glob: "*",
 	diff: {
-		file: async ({ old, neu }) => {
+		file: async ({ old }) => {
 			return [
 				!old
 					? {
@@ -104,7 +105,7 @@ test("should be able to start a discussion on changes", async () => {
 
 	expect(commentsAfterOneComment).toHaveLength(1);
 
-	const commentOnAComment = await lix.addComment({
+	await lix.addComment({
 		parentCommentId: commentsAfterOneComment[0]!.id,
 		body: "comment on a comment on a change",
 	});
@@ -157,17 +158,10 @@ test("should fail to create a disussion on non existing changes", async () => {
 		},
 	]);
 
-	let err;
-	await lix
-		.createDiscussion({
-			changeIds: [
-				
-					"I DON’T EXIST",
-				
-			],
-			body: "comment on a change",
-		})
-		.catch((e) => (err = e));
+	await lix.createDiscussion({
+		changeIds: ["I DON'T EXIST"],
+		body: "comment on a change",
+	});
 
 	// TODO check for error
 	// .toThrowError ... https://vitest.dev/api/expect.html#tothrowerror

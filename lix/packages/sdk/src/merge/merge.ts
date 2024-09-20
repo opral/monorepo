@@ -3,7 +3,6 @@
 import type { LixPlugin } from "../plugin.js";
 import type { Lix } from "../types.js";
 import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-only-in-source.js";
-import { addComment } from "../discussion/add-comment.js";
 
 /**
  * Combined the changes of the source lix into the target lix.

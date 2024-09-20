@@ -7,11 +7,10 @@ export async function createDiscussion(args: {
 	changeIds?: string[];
 	body: string;
 }) {
-
 	return args.db.transaction().execute(async (trx) => {
 		const changeIds =
 			args.changeIds && args.changeIds.length > 0 ? args.changeIds : undefined;
-		
+
 		const discussion = await trx
 			.insertInto("discussion")
 			.defaultValues()
@@ -27,7 +26,7 @@ export async function createDiscussion(args: {
 						change_id: changeId,
 						discussion_id: discussion.id,
 					})
-					.executeTakeFirstOrThrow();
+					.execute();
 			}
 		}
 

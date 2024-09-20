@@ -511,7 +511,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
-			file: async ({ old, neu }) => {
+			file: async ({ old }) => {
 				return [
 					!old
 						? {
@@ -588,7 +588,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 		},
 	]);
 
-	const discussion = await lix1.createDiscussion({
+	await lix1.createDiscussion({
 		changeIds: [changes[0]!.id],
 		body: "comment on a change",
 	});
