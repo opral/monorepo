@@ -2,14 +2,14 @@
 
 import type { Bundle, Message, Variant } from "@inlang/sdk2"
 
-export type DispatchChangeInterface = {
+export type ChangeEventProps = {
 	type: "Bundle" | "Message" | "Variant"
 	operation: "create" | "update" | "delete"
 	newData: Bundle | Message | Variant | undefined
 	meta?: Record<string, any>
 }
 
-export const createChangeEvent = (props: DispatchChangeInterface) => {
+export const createChangeEvent = (props: ChangeEventProps) => {
 	const onChangeEvent = new CustomEvent("change", {
 		bubbles: true,
 		composed: true,

@@ -9,7 +9,7 @@ import { useArgs } from "@storybook/preview-api"
 import { html } from "lit"
 import { type Message, pluralBundle, type Variant } from "@inlang/sdk2"
 import { mockSettings } from "./../../mock/settings.ts"
-import { type DispatchChangeInterface } from "../../helper/event.ts"
+import { type ChangeEventProps } from "../../helper/event.ts"
 
 const meta: Meta = {
 	component: "inlang-message",
@@ -31,7 +31,7 @@ export const Example: StoryObj = {
 	render: () => {
 		const [{ message, settings }, updateArgs] = useArgs()
 		const handleChange = (e) => {
-			const data = e.detail.argument as DispatchChangeInterface
+			const data = e.detail.argument as ChangeEventProps
 			const newMessage = structuredClone(bufferMessage)
 			switch (data.type) {
 				case "Message":
@@ -77,7 +77,7 @@ export const MessageInBundle: StoryObj = {
 	render: () => {
 		const [{ message, settings }, updateArgs] = useArgs()
 		const handleChange = (e) => {
-			const data = e.detail.argument as DispatchChangeInterface
+			const data = e.detail.argument as ChangeEventProps
 			const newMessage = structuredClone(bufferMessage)
 			switch (data.type) {
 				case "Message":

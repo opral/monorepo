@@ -7,3 +7,6 @@ export { default as InlangPatternEditor } from "./stories/pattern-editor/inlang-
 //modals & actions
 export { default as InlangBundleAction } from "./stories/actions/bundle-action/inlang-bundle-action.js"
 export { default as InlangAddSelector } from "./stories/actions/add-selector/inlang-add-selector.js"
+
+// types
+export type { ChangeEventProps } from "./helper/event.js"
