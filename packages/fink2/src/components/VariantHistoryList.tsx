@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAtom } from "jotai";
 import { projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
@@ -12,7 +13,7 @@ const VariantHistoryList = (props: {
 	setSelectedVariantId: (value: string | null) => void;
 }) => {
 	const [project] = useAtom(projectAtom);
-	const [changes, setChanges] = useState<never[]>([]);
+	const [changes, setChanges] = useState<any[]>([]);
 	const [loading, setLoading] = useState<string | undefined>(undefined);
 
 	const getChanges = async () => {

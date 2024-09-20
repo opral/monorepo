@@ -1,56 +1,64 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Change, isInSimulatedCurrentBranch } from "@inlang/sdk2";
+import { Change, isInSimulatedCurrentBranch, Variant } from "@inlang/sdk2";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { projectAtom } from "../state.ts";
 import timeAgo from "../helper/timeAgo.ts";
 import { InlangPatternEditor, InlangVariant } from "./SingleDiffBundle.tsx";
 
-const HistoryEntry = ({ commit }: { commit: any}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [project] = useAtom(projectAtom);
-  const [changeHistory, setChangeHistory] = useState([] as { current: Change; previous: Change | null }[]);
+const HistoryEntry = ({ commit }: { commit: any }) => {
+	const [isOpen, setIsOpen] = useState(false);
+	const [project] = useAtom(projectAtom);
+	const [changeHistory, setChangeHistory] = useState(
+		[] as { current: Change; previous: Change | null }[]
+	);
 
-  const getCommitRelatedChanges = async () => {
-    const changes = await project?.lix.db
-      .selectFrom("change")
-      .selectAll()
-      .where("commit_id", "=", commit.id)
-      .execute();
+	const getCommitRelatedChanges = async () => {
+		const changes = await project?.lix.db
+			.selectFrom("change")
+			.selectAll()
+			.where("commit_id", "=", commit.id)
+			.execute();
 
-    if (changes) {
-      const history = [];
-      for (const change of changes) {
-        const previousChange = await project?.lix.db
-          .selectFrom("change")
-          .selectAll()
-          .where("change.type", "=", "variant")
-          .where((eb) => eb.ref("value", "->>").key("id"), "=", change.value?.id)
-          .where("change.created_at", "<", change.created_at)
-          .innerJoin("commit", "commit.id", "change.commit_id")
-          // TODO remove after branching concept on lix
-          // https://linear.app/opral/issue/LIX-126/branching
-          .where(isInSimulatedCurrentBranch)
-          .orderBy("commit.created_at", "desc")
-          .executeTakeFirst();
+		if (changes) {
+			const history = [];
+			for (const change of changes) {
+				const previousChange = await project?.lix.db
+					.selectFrom("change")
+					.selectAll()
+					.where("change.type", "=", "variant")
+					.where(
+						(eb) => eb.ref("value", "->>").key("id"),
+						"=",
+						change.value?.id
+					)
+					.where("change.created_at", "<", change.created_at)
+					.innerJoin("commit", "commit.id", "change.commit_id")
+					// TODO remove after branching concept on lix
+					// https://linear.app/opral/issue/LIX-126/branching
+					.where(isInSimulatedCurrentBranch)
+					.orderBy("commit.created_at", "desc")
+					.executeTakeFirst();
 
-        history.push({ current: change, previous: previousChange });
-      }
-      setChangeHistory(history as { current: Change; previous: Change | null }[]);
-    }
-  };
+				history.push({ current: change, previous: previousChange });
+			}
+			setChangeHistory(
+				history as { current: Change; previous: Change | null }[]
+			);
+		}
+	};
 
-  useEffect(() => {
-    if (isOpen) {
-      getCommitRelatedChanges();
-      const interval = setInterval(async () => {
-        await getCommitRelatedChanges();
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [isOpen]);
+	useEffect(() => {
+		if (isOpen) {
+			getCommitRelatedChanges();
+			const interval = setInterval(async () => {
+				await getCommitRelatedChanges();
+			}, 1000);
+			return () => clearInterval(interval);
+		}
+	}, [isOpen]);
 
-  return (
+	return (
 		<div
 			className="flex flex-col cursor-pointer group"
 			onClick={() => setIsOpen(!isOpen)}
@@ -119,13 +127,14 @@ const HistoryEntry = ({ commit }: { commit: any}) => {
 											{previous && previous.value && (
 												<InlangVariant
 													slot="variant"
-													variant={previous.value}
+													variant={previous.value as Variant}
 													className="pointer-events-none"
+													// @ts-expect-error - noHistory is not a valid prop
 													noHistory={true}
 												>
 													<InlangPatternEditor
 														slot="pattern-editor"
-														variant={previous.value}
+														variant={previous.value as Variant}
 														className={"inlang-pattern-editor-old"}
 													></InlangPatternEditor>
 												</InlangVariant>
@@ -141,13 +150,14 @@ const HistoryEntry = ({ commit }: { commit: any}) => {
 											{current && current.value && (
 												<InlangVariant
 													slot="variant"
-													variant={current.value}
+													variant={current.value as Variant}
 													className="pointer-events-none"
+													// @ts-expect-error - noHistory is not a valid prop
 													noHistory={true}
 												>
 													<InlangPatternEditor
 														slot="pattern-editor"
-														variant={current.value}
+														variant={current.value as Variant}
 														className={"inlang-pattern-editor-neu"}
 													></InlangPatternEditor>
 												</InlangVariant>
