@@ -4,7 +4,7 @@ import type { Pattern } from "@inlang/sdk2"
 
 describe("stringToPattern", () => {
 	it("Should transform string to pattern", () => {
-		const text = "Hello, {{name}}!"
+		const text = "Hello, {name}!"
 
 		const pattern = stringToPattern({ text })
 
