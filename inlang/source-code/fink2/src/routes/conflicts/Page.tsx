@@ -12,7 +12,7 @@ import {
 	InlangPatternEditor,
 	InlangVariant,
 } from "../../components/SingleDiffBundle.tsx";
-import { resolveConflictBySelecting } from "@inlang/sdk2";
+import { resolveConflictBySelecting, Variant } from "@inlang/sdk2";
 import { useEffect } from "react";
 
 export default function Page() {
@@ -93,14 +93,14 @@ export default function Page() {
 												)}`}</p>
 												<div className="relative border border-zinc-300 rounded-lg overflow-hidden">
 													<InlangVariant
-														bundleId={bundleId}
-														variant={change.value}
+														variant={change.value as Variant}
 														className="pointer-events-none conflict-variant"
+														// @ts-expect-error - noHistory is not a valid prop
 														noHistory={true}
 													>
 														<InlangPatternEditor
 															slot="pattern-editor"
-															variant={change.value}
+															variant={change.value as Variant}
 															className={"conflict-pattern"}
 														></InlangPatternEditor>
 													</InlangVariant>
@@ -141,14 +141,14 @@ export default function Page() {
 												)}`}</p>
 												<div className="relative border border-zinc-300 rounded-lg overflow-hidden">
 													<InlangVariant
-														bundleId={bundleId}
-														variant={conflictingChange.value}
+														variant={conflictingChange.value as Variant}
 														className={"pointer-events-none conflict-variant"}
+														// @ts-expect-error - noHistory is not a valid prop
 														noHistory={true}
 													>
 														<InlangPatternEditor
 															slot="pattern-editor"
-															variant={conflictingChange.value}
+															variant={conflictingChange.value as Variant}
 															className={"conflict-pattern"}
 														></InlangPatternEditor>
 													</InlangVariant>
