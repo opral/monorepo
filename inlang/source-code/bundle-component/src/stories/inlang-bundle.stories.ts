@@ -7,7 +7,7 @@ if (!customElements.get("sl-dialog")) customElements.define("sl-dialog", SlDialo
 //@ts-ignore
 import { useArgs } from "@storybook/preview-api"
 import { type Bundle, type Message, type Variant } from "@inlang/sdk2"
-import { type DispatchChangeInterface } from "../helper/event.ts"
+import { type ChangeEventProps } from "../helper/event.ts"
 
 //components
 import "./inlang-bundle.ts"
@@ -49,7 +49,7 @@ export const Example: StoryObj = {
 		}
 
 		const handleChange = (e) => {
-			const data = e.detail.argument as DispatchChangeInterface
+			const data = e.detail.argument as ChangeEventProps
 			updateArgs({
 				state: updateState({ state: args.state, change: data }),
 			})
@@ -129,7 +129,7 @@ export const Complex: StoryObj = {
 		}
 
 		const handleChange = (e) => {
-			const data = e.detail.argument as DispatchChangeInterface
+			const data = e.detail.argument as ChangeEventProps
 			updateArgs({
 				state: updateState({ state: args.state, change: data }),
 			})
@@ -282,7 +282,7 @@ const updateState = (args: {
 		messages: Message[]
 		variants: Variant[]
 	}
-	change: DispatchChangeInterface
+	change: ChangeEventProps
 }) => {
 	const newState = structuredClone(args.state)
 	const type = args.change.type.toLowerCase() + "s" // Message -> messages
