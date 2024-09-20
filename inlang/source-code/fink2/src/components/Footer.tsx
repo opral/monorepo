@@ -1,44 +1,4 @@
-// import package version
 import { version } from "../../package.json"
-
-export const getFinkResourcesLinks = () => {
-  return [
-    {
-      name: "About Fink",
-      href: import.meta.env.PROD
-        ? "https://inlang.com/m/tdozzpar"
-        : "http://localhost:3000/m/tdozzpar",
-    },
-    {
-      name: "User Guide",
-      href: import.meta.env.PROD
-        ? "https://inlang.com/g/6ddyhpoi"
-        : "http://localhost:3000/g/6ddyhpoi",
-    },
-    {
-      name: "About the ecosystem",
-      href: import.meta.env.PROD
-        ? "https://inlang.com/documentation"
-        : "http://localhost:3000/documentation",
-    },
-    {
-      name: "Support Forum",
-      href: "https://discord.gg/gdMPPWy57R",
-    },
-    {
-      name: "Report a Bug",
-      href: "https://github.com/opral/inlang-fink/issues/new",
-    },
-    {
-      name: "Feature Request",
-      href: "https://github.com/opral/monorepo/discussions/categories/-fink-general",
-    },
-    {
-      name: "Submit Feedback",
-      href: "https://github.com/orgs/opral/discussions/categories/-fink-general",
-    },
-  ]
-}
 
 const Footer = () => {
   const socialMediaLinks = [
