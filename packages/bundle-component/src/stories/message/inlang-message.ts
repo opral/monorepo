@@ -217,8 +217,8 @@ export default class InlangMessage extends LitElement {
 
 															this.dispatchEvent(
 																createChangeEvent({
-																	type: "Variant",
-																	operation: "update",
+																	entityId: variant.id,
+																	entity: "variant",
 																	newData: {
 																		...variant,
 																		match: matchObj,
@@ -229,8 +229,8 @@ export default class InlangMessage extends LitElement {
 														// remove selector from message
 														this.dispatchEvent(
 															createChangeEvent({
-																type: "Message",
-																operation: "update",
+																entityId: this.message.id,
+																entity: "message",
 																newData: {
 																	...this.message,
 
@@ -276,11 +276,11 @@ export default class InlangMessage extends LitElement {
 								part="new-variant"
 								@click=${() => {
 									const variant = createVariant({
-										messageId: this.message!.id,
+										messageId: this.message.id,
 										// combine the matches that are already present with the new category -> like a matrix
 										match: (() => {
 											const match: Record<string, string> = {}
-											for (const selector of this.message!.selectors) {
+											for (const selector of this.message.selectors) {
 												match[selector.arg.name] = "*"
 											}
 											return match
@@ -288,8 +288,8 @@ export default class InlangMessage extends LitElement {
 									})
 									this.dispatchEvent(
 										createChangeEvent({
-											type: "Variant",
-											operation: "create",
+											entityId: variant.id,
+											entity: "variant",
 											newData: variant,
 										})
 									)

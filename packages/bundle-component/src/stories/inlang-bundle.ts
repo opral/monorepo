@@ -191,8 +191,8 @@ export default class InlangBundle extends LitElement {
 																)
 																this.dispatchEvent(
 																	createChangeEvent({
-																		type: "Bundle",
-																		operation: "update",
+																		entityId: this.bundle.id,
+																		entity: "bundle",
 																		newData: {
 																			...this.bundle,
 																			declarations: filtered,

@@ -103,7 +103,7 @@ export default class InlangVariant extends LitElement {
 	]
 
 	@property()
-	variant: Variant | undefined
+	variant: Variant
 
 	private _updateMatch = (selectorName: string, value: string) => {
 		//TODO improve this function
@@ -118,8 +118,8 @@ export default class InlangVariant extends LitElement {
 
 			this.dispatchEvent(
 				createChangeEvent({
-					type: "Variant",
-					operation: "update",
+					entityId: this.variant.id,
+					entity: "variant",
 					newData: newVariant,
 				})
 			)
@@ -141,14 +141,12 @@ export default class InlangVariant extends LitElement {
 						? Object.entries(this.variant.match).map(([selectorName, match]) => {
 								return html`
 									<sl-input
-										id="${this.variant!.id}-${match}"
+										id="${this.variant.id}-${match}"
 										class="match"
 										size="small"
 										value=${match}
 										@sl-blur=${(e: Event) => {
-											const element = this.shadowRoot?.getElementById(
-												`${this.variant!.id}-${match}`
-											)
+											const element = this.shadowRoot?.getElementById(`${this.variant.id}-${match}`)
 											if (element && e.target === element) {
 												this._updateMatch(selectorName, (e.target as HTMLInputElement).value)
 											}

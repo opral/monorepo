@@ -17,7 +17,7 @@ export const Example: StoryObj = {
 	render: () => {
 		return html`<inlang-pattern-editor
 			.variant=${pluralBundle.messages[1].variants[0]}
-			@change=${(e) => console.info(e.detail.argument)}
+			@change=${(e) => console.info(e.detail)}
 			@pattern-editor-focus=${(e) => console.info("focus", e.detail)}
 			@pattern-editor-blur=${(e) => console.info("blur", e.detail)}
 		></inlang-pattern-editor>`

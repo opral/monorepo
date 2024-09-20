@@ -20,7 +20,7 @@ export const Example: StoryObj = {
 			<inlang-add-selector
 				.message=${pluralBundle.messages[0]}
 				.messages=${pluralBundle.messages}
-				@change=${(e) => console.info(e.detail.argument)}
+				@change=${(e) => console.info(e.detail)}
 			></inlang-add-selector>
 		`
 	},
