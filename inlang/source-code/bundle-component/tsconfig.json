@@ -8,6 +8,8 @@
 		"moduleResolution": "Node16",
 		"declarationMap": true,
 		"experimentalDecorators": true,
+		// lit uses decorators. in order to avoid errors, we need to set this to true
+		"strictPropertyInitialization": false,
 		"useDefineForClassFields": false,
 		"types": [],
 		"outDir": "./dist",
