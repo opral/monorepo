@@ -2,7 +2,7 @@ import { Type, type Static } from "@sinclair/typebox";
 
 export type VariableReference = Static<typeof VariableReference>;
 export const VariableReference = Type.Object({
-	type: Type.Literal("variable"),
+	type: Type.Literal("variable-reference"),
 	name: Type.String(),
 });
 
@@ -20,7 +20,7 @@ export const Option = Type.Object({
 
 export type FunctionReference = Static<typeof FunctionReference>;
 export const FunctionReference = Type.Object({
-	type: Type.Literal("function"),
+	type: Type.Literal("function-reference"),
 	name: Type.String(),
 	options: Type.Array(Option),
 });
@@ -38,17 +38,22 @@ export const Text = Type.Object({
 	value: Type.String(),
 });
 
-export type Input = Static<typeof Input>;
-export const Input = Type.Object({
-	type: Type.Literal("input"),
+export type LocalVariable = Static<typeof VariableReference>;
+export const LocalVariable = Type.Object({
+	type: Type.Literal("local-variable"),
 	name: Type.String(),
-	// future
-	// registryType: Type.String(),
+	value: Expression,
 });
 
+export type InputVariable = Static<typeof InputVariable>;
+export const InputVariable = Type.Object({
+	type: Type.Literal("input-variable"),
+	name: Type.String(),
+	annotation: Type.Optional(FunctionReference),
+});
 
 export type Declaration = Static<typeof Declaration>;
-export const Declaration = Type.Union([Input]);
+export const Declaration = Type.Union([InputVariable, LocalVariable]);
 
 export type Pattern = Static<typeof Pattern>;
 export const Pattern = Type.Array(Type.Union([Text, Expression]));
