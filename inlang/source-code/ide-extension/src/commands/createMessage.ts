@@ -2,7 +2,7 @@ import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
-import { createMessage, humanId } from "@inlang/sdk2"
+import { humanId } from "@inlang/sdk2"
 import { CONFIGURATION } from "../configuration.js"
 import { getSetting } from "../utilities/settings/index.js"
 
@@ -39,12 +39,6 @@ export const createMessageCommand = {
 			return
 		}
 
-		const message = createMessage({
-			bundleId,
-			locale: baseLocale,
-			text: messageValue,
-		})
-
 		try {
 			await state()
 				.project.db.transaction()
@@ -59,11 +53,8 @@ export const createMessageCommand = {
 					return await trx
 						.insertInto("message")
 						.values({
-							id: message.id,
-							bundleId: message.bundleId,
-							locale: message.locale,
-							declarations: message.declarations,
-							selectors: message.selectors,
+							bundleId,
+							locale: baseLocale,
 						})
 						.returningAll()
 						.execute()
