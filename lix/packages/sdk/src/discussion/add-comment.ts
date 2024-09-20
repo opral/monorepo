@@ -1,6 +1,5 @@
 import { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import { v4 } from "uuid";
 
 export async function addComment(args: {
 	db: Kysely<LixDatabaseSchema>;
