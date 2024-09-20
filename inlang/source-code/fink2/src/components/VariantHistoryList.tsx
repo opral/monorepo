@@ -12,7 +12,7 @@ const VariantHistoryList = (props: {
 	setSelectedVariantId: (value: string | null) => void;
 }) => {
 	const [project] = useAtom(projectAtom);
-	const [changes, setChanges] = useState<any[]>([]);
+	const [changes, setChanges] = useState<never[]>([]);
 	const [loading, setLoading] = useState<string | undefined>(undefined);
 
 	const getChanges = async () => {
@@ -125,7 +125,10 @@ const patternToString = (props: { pattern: Pattern }): string => {
 		.map((p) => {
 			if ("value" in p) {
 				return p.value;
-			} else if (p.type === "expression" && p.arg.type === "variable") {
+			} else if (
+				p.type === "expression" &&
+				p.arg.type === "variable-reference"
+			) {
 				return `{{${p.arg.name}}}`;
 			}
 			return "";

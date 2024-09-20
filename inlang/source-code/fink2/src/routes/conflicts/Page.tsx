@@ -5,7 +5,6 @@ import {
 	unresolvedConflictsAtom,
 	projectAtom,
 	conflictingChangesAtom,
-	forceReloadProjectAtom,
 } from "../../state.ts";
 import { useNavigate } from "react-router-dom";
 import timeAgo from "../../helper/timeAgo.ts";
@@ -15,14 +14,12 @@ import {
 } from "../../components/SingleDiffBundle.tsx";
 import { resolveConflictBySelecting } from "@inlang/sdk2";
 import { useEffect } from "react";
-import { Variant } from "@inlang/sdk2";
 
 export default function Page() {
 	const [project] = useAtom(projectAtom);
 	const [unresolvedConflicts] = useAtom(unresolvedConflictsAtom);
 	const [bundlesNested] = useAtom(bundlesNestedAtom);
 	const [conflictingChanges] = useAtom(conflictingChangesAtom);
-	const [, setForceReloadProject] = useAtom(forceReloadProjectAtom);
 
 	const navigate = useNavigate();
 
