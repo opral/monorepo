@@ -31,7 +31,7 @@ describe("plugin.diff.file", () => {
 				type: "bundle",
 				operation: "create",
 				old: undefined,
-				neu: { id: "1" },
+				neu: expect.objectContaining({ id: "1" }),
 			} satisfies DiffReport,
 		]);
 	});
@@ -117,7 +117,6 @@ describe("plugin.diff.file", () => {
 				old: undefined,
 				neu: {
 					id: "1",
-					declarations: [],
 					bundleId: "unknown",
 					selectors: [],
 					locale: "en",
@@ -181,14 +180,12 @@ describe("plugin.diff.file", () => {
 				operation: "update",
 				old: {
 					id: "1",
-					declarations: [],
 					bundleId: "unknown",
 					selectors: [],
 					locale: "en",
 				},
 				neu: {
 					id: "1",
-					declarations: [],
 					bundleId: "unknown",
 					selectors: [],
 					locale: "de",

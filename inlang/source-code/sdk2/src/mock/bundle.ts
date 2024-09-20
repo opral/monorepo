@@ -5,34 +5,34 @@ import type { BundleNested } from "../database/schema.js";
  */
 export const pluralBundle: BundleNested = {
 	id: "mock_bundle_human_id",
+	declarations: [
+		{
+			type: "input-variable",
+			name: "numProducts",
+		},
+		{
+			type: "input-variable",
+			name: "count",
+		},
+		{
+			type: "input-variable",
+			name: "projectCount",
+		},
+	],
 	messages: [
 		{
 			bundleId: "mock_bundle_human_id",
 			id: "mock_message_id_de",
 			locale: "de",
-			declarations: [
-				{
-					type: "input",
-					name: "numProducts",
-				},
-				{
-					type: "input",
-					name: "count",
-				},
-				{
-					type: "input",
-					name: "projectCount",
-				},
-			],
 			selectors: [
 				{
 					type: "expression",
 					arg: {
-						type: "variable",
+						type: "variable-reference",
 						name: "numProducts",
 					},
 					annotation: {
-						type: "function",
+						type: "function-reference",
 						name: "plural",
 						options: [],
 					},
@@ -69,7 +69,7 @@ export const pluralBundle: BundleNested = {
 						{
 							type: "expression",
 							arg: {
-								type: "variable",
+								type: "variable-reference",
 								name: "numProducts",
 							},
 						},
@@ -85,21 +85,15 @@ export const pluralBundle: BundleNested = {
 			bundleId: "mock_bundle_human_id",
 			id: "mock_message_id_en",
 			locale: "en",
-			declarations: [
-				{
-					type: "input",
-					name: "numProducts",
-				},
-			],
 			selectors: [
 				{
 					type: "expression",
 					arg: {
-						type: "variable",
+						type: "variable-reference",
 						name: "numProducts",
 					},
 					annotation: {
-						type: "function",
+						type: "function-reference",
 						name: "plural",
 						options: [],
 					},
@@ -136,7 +130,7 @@ export const pluralBundle: BundleNested = {
 						{
 							type: "expression",
 							arg: {
-								type: "variable",
+								type: "variable-reference",
 								name: "numProducts",
 							},
 						},

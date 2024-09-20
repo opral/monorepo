@@ -195,7 +195,6 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 				id: "mock-message",
 				bundleId: "mock-bundle",
 				locale: "en",
-				declarations: [],
 				selectors: [],
 				variants: [
 					{

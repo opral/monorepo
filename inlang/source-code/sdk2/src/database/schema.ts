@@ -28,7 +28,6 @@ CREATE TABLE IF NOT EXISTS message (
   id TEXT PRIMARY KEY DEFAULT (uuid_v7()), 
   bundle_id TEXT NOT NULL,
   locale TEXT NOT NULL,
-  declarations BLOB NOT NULL DEFAULT (jsonb('[]')),
   selectors BLOB NOT NULL DEFAULT (jsonb('[]')),
   FOREIGN KEY (bundle_id) REFERENCES bundle(id) ON DELETE CASCADE
 ) strict;

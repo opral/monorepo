@@ -98,7 +98,7 @@ async function insertMessageDeep(
 		...message,
 		id: undefined, // let the db create the id here
 		variants: undefined,
-		bundleId: bundle.id,
+		bundleId: bundle.id!,
 	};
 	const insertedMessage = await db
 		.insertInto("message")
