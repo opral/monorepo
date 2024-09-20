@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { createComponent } from "@lit/react";
 
-import { InlangBundle as LitInlangBundle } from "@inlang/bundle-component";
+import { ChangeEventProps, InlangBundle as LitInlangBundle } from "@inlang/bundle-component";
 import { InlangMessage as LitInlangMessage } from "@inlang/bundle-component";
 import { InlangVariant as LitInlangVariant } from "@inlang/bundle-component";
 import { InlangPatternEditor as LitInlangPatternEditor } from "@inlang/bundle-component";
@@ -12,11 +12,10 @@ import { useAtom } from "jotai";
 import { filteredLocalesAtom, pendingChangesAtom, projectAtom, settingsAtom } from "../state.ts";
 import {
 	BundleNested,
-	createMessage,
-	createVariant,
 	Message,
 	MessageNested,
 	ProjectSettings,
+	uuidv4,
 	Variant,
 } from "@inlang/sdk2";
 import {
@@ -88,10 +87,7 @@ const InlangBundle = (props: {
 
 	const onMesageInsert = async (message: Message) => {
 		if (project) {
-			await project.db
-				.insertInto("message")
-				.values(message)
-				.execute();
+			await project.db.insertInto("message").values(message).execute();
 		}
 	};
 	const onMesageUpdate = async (message: Message) => {
@@ -105,10 +101,7 @@ const InlangBundle = (props: {
 	};
 	const onVariantInsert = async (variant: Variant) => {
 		if (project) {
-			await project.db
-				.insertInto("variant")
-				.values(variant)
-				.execute();
+			await project.db.insertInto("variant").values(variant).execute();
 		}
 	};
 	const onVariantUpdate = async (variant: Variant) => {
@@ -130,7 +123,7 @@ const InlangBundle = (props: {
 	};
 
 	const handleChange = (e: Event) => {
-		const data = (e as CustomEvent).detail.argument;
+		const data = (e as CustomEvent).detail.argument as ChangeEventProps;
 		switch (data.type) {
 			case "Message":
 				if (data.operation === "create") {
@@ -153,21 +146,20 @@ const InlangBundle = (props: {
 
 	const visibleLocales = () => {
 		if (filteredLocales.length === 0) {
-			return settings.locales // nothing selected -> show all languages
+			return settings.locales; // nothing selected -> show all languages
 		} else {
-			return settings?.locales.filter((locale) => filteredLocales.includes(locale) || locale === settings.baseLocale) // show only selected languages + base language
+			return settings?.locales.filter(
+				(locale) =>
+					filteredLocales.includes(locale) || locale === settings.baseLocale
+			); // show only selected languages + base language
 		}
-	}
+	};
 
 	return (
 		<>
 			{props.bundle && (
 				<div className="relative">
-					<ReactInlangBundle
-						bundle={props.bundle}
-						messages={props.bundle.messages}
-						change={handleChange}
-					>
+					<ReactInlangBundle bundle={props.bundle} change={handleChange}>
 						{visibleLocales().map(
 							(locale: ProjectSettings["locales"][number]) => {
 								const message = props.bundle.messages.find(
@@ -354,11 +346,12 @@ const InlangBundle = (props: {
 										</ReactInlangMessage>
 									);
 								} else {
-									const message = createMessage({
+									const message: Message = {
+										id: uuidv4(),
+										selectors: [],
+										locale,
 										bundleId: props.bundle.id,
-										locale: locale,
-										text: "",
-									});
+									};
 									return (
 										<ReactInlangMessage
 											slot="message"
@@ -377,7 +370,9 @@ const InlangBundle = (props: {
 
 														await project.db
 															.insertInto("variant")
-															.values(createVariant({ messageId: message.id }))
+															.values({
+																messageId: message.id!,
+															})
 															.execute();
 													}
 												}}

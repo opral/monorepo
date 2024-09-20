@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BundleNested, ProjectSettings } from "@inlang/sdk2";
 import { createComponent } from "@lit/react";
 import {
