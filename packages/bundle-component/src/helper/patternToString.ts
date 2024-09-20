@@ -8,7 +8,7 @@ import type { Pattern } from "@inlang/sdk2"
  * @returns The pattern as a string.
  *
  * @example
- * patternToString({ pattern: [{ value: "Hello" }, { type: "expression", arg: { type: "variable", name: "name" } }] }) -> "Hello {{name}}"
+ * patternToString({ pattern: [{ value: "Hello" }, { type: "expression", arg: { type: "variable-reference", name: "name" } }] }) -> "Hello {name}"
  */
 
 const patternToString = (props: { pattern: Pattern }): string => {
@@ -19,10 +19,8 @@ const patternToString = (props: { pattern: Pattern }): string => {
 		.map((p) => {
 			if ("value" in p) {
 				return p.value
-				// @ts-ignore
-			} else if (p.type === "expression" && p.arg.type === "variable") {
-				// @ts-ignore
-				return `{{${p.arg.name}}}`
+			} else if (p.type === "expression" && p.arg.type === "variable-reference") {
+				return `{${p.arg.name}}`
 			}
 			return ""
 		})

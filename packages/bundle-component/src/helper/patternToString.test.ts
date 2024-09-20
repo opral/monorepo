@@ -24,7 +24,7 @@ describe("patternToString", () => {
 
 		const text = patternToString({ pattern })
 
-		const correspondingText = "Hello, {{name}}!"
+		const correspondingText = "Hello, {name}!"
 
 		expect(text).toStrictEqual(correspondingText)
 	})
