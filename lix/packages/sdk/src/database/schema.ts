@@ -9,6 +9,11 @@ export type LixDatabaseSchema = {
 	file_internal: LixFileTable;
 	change_queue: ChangeQueueTable;
 	conflict: ConflictTable;
+
+	// discussion
+	discussion: DiscussionTable;
+	comment: CommentTable;
+	discussion_change_map: DiscussionChangeMapTable;
 };
 
 export type Ref = Selectable<RefTable>;
@@ -132,4 +137,33 @@ type ConflictTable = {
 	 * that resulted from a merge.
 	 */
 	resolved_with_change_id?: ChangeTable["id"];
+};
+
+// ------ discussions ------
+
+export type Discussion = Selectable<DiscussionTable>;
+export type NewDiscussion = Insertable<CommitTable>;
+export type DiscussionUpdate = Updateable<DiscussionTable>;
+type DiscussionTable = {
+	id: Generated<string>;
+};
+
+export type DiscussionChangeMap = Selectable<DiscussionChangeMapTable>;
+export type NewDiscussionChangeMap = Insertable<DiscussionChangeMapTable>;
+export type DiscussionChangeMapUpdate = Updateable<DiscussionChangeMapTable>;
+type DiscussionChangeMapTable = {
+	change_id: string;
+	discussion_id: string;
+};
+
+export type Comment = Selectable<CommentTable>;
+export type NewComment = Insertable<CommentTable>;
+export type CommentUpdate = Updateable<CommentTable>;
+type CommentTable = {
+	id: Generated<string>;
+	parent_id?: string;
+	discussion_id: string;
+	author_id: string;
+	created_at: Generated<string>;
+	body: string;
 };

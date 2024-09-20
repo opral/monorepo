@@ -77,5 +77,38 @@ export async function createSchema(args: { db: Kysely<any> }) {
   BEGIN
     insert or replace into file_internal(id, path, data, metadata) values(OLD.file_id, OLD.path, OLD.data, OLD.metadata);
   END;
+
+
+  -- change discussions 
+
+  CREATE TABLE discussion (
+    -- TODO https://github.com/opral/lix-sdk/issues/74 replace with uuid_v7
+    id TEXT PRIMARY KEY DEFAULT (uuid_v4())
+  ) strict;
+
+  CREATE TABLE discussion_change_map (
+    discussion_id TEXT NOT NULL,
+    change_id TEXT NOT NULL,
+
+    FOREIGN KEY(discussion_id) REFERENCES discussion(id),
+    
+    -- NOTE this will prevent us from dropping changes 
+    FOREIGN KEY(change_id) REFERENCES change(id)
+  ) strict;
+
+
+  CREATE TABLE comment (
+    --- TODO in inlang i saw we replace uuid_v3 with uuid_v7 any reason we use v4 in lix?
+    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    parent_id TEXT,
+    discussion_id TEXT NULL,
+    author_id TEXT NOT NULL, 
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    body TEXT NOT NULL,
+
+    FOREIGN KEY(discussion_id) REFERENCES discussion(id)
+  ) strict;
+
 `.execute(args.db);
 }
+
