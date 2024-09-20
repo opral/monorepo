@@ -3,15 +3,24 @@ import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import { Declaration, Expression, Pattern } from "../json-schema/pattern.js";
 
 export function applySchema(args: { sqlite: SqliteDatabase }) {
-	const foreignKeys: any = args.sqlite.exec("PRAGMA foreign_keys");
-	if (foreignKeys["foreign_keys"] === 0) {
-		args.sqlite.exec("PRAGMA foreign_keys = ON");
+	const foreignKeyActivated: any = args.sqlite.exec("PRAGMA foreign_keys", {
+		returnValue: "resultRows",
+	});
+	if (
+		// first row that is returned
+		// first column of the first row
+		// is equal to 0, then foreign keys are disabled
+		foreignKeyActivated[0][0] === 0
+	) {
+		args.sqlite.exec("PRAGMA foreign_keys = ON", {
+			returnValue: "resultRows",
+		});
 	}
 
 	args.sqlite.exec(`
 CREATE TABLE IF NOT EXISTS bundle (
   id TEXT PRIMARY KEY DEFAULT (human_id()),
-	declarations: BLOB NOT NULL DEFAULT (jsonb('[]'))
+	declarations BLOB NOT NULL DEFAULT (jsonb('[]'))
 ) strict;
 
 CREATE TABLE IF NOT EXISTS message (
@@ -50,7 +59,7 @@ type BundleTable = {
 
 type MessageTable = {
 	id: Generated<string>;
-	bundleId: Generated<string>;
+	bundleId: string;
 	locale: string;
 	selectors: Generated<Array<Expression>>;
 };
