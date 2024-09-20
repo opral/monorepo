@@ -1,4 +1,4 @@
-import type { MessageNested, ProjectSettings } from "@inlang/sdk2"
+import type { Message, ProjectSettings, Variant } from "@inlang/sdk2"
 import { createVariant } from "@inlang/sdk2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
@@ -165,7 +165,10 @@ export default class InlangMessage extends LitElement {
 	]
 
 	@property()
-	message: MessageNested | undefined
+	message: Message
+
+	@property()
+	variants: Variant[]
 
 	@property({ type: Object })
 	settings: ProjectSettings | undefined
@@ -184,13 +187,11 @@ export default class InlangMessage extends LitElement {
 			</div>
 			<div class="message-body">
 				${(this.message && this.message.selectors.length > 0) ||
-				(this.message && this.message.variants.length > 1 && this.message.selectors.length === 0)
+				(this.message && this.variants.length > 1 && this.message.selectors.length === 0)
 					? html`<div
 							class=${`message-header` +
 							` ` +
-							(this.message.variants && this.message.variants.length === 0
-								? `no-bottom-border`
-								: ``)}
+							(this.variants && this.variants.length === 0 ? `no-bottom-border` : ``)}
 					  >
 							<div class="selector-container">
 								${this.message.selectors.map(
@@ -207,7 +208,7 @@ export default class InlangMessage extends LitElement {
 												@click=${() => {
 													if (this.message) {
 														// remove matches from underlying variants
-														for (const variant of this.message.variants) {
+														for (const variant of this.variants) {
 															const matchObj = Object.fromEntries(
 																Object.entries(variant.match).filter(
 																	([key]) => key !== selector.arg.name

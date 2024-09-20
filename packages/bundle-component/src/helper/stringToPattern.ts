@@ -30,7 +30,7 @@ const stringToPattern = (props: { text: string }): Pattern => {
 			pattern.push({
 				type: "expression",
 				arg: {
-					type: "variable",
+					type: "variable-reference",
 					name: match[1],
 				},
 			})
