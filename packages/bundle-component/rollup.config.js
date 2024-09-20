@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import { nodeResolve } from "@rollup/plugin-node-resolve"
 import commonjs from "@rollup/plugin-commonjs"
+import replace from "@rollup/plugin-replace"
 
 export default {
 	// taking the compiled output from typescript to avoid duplicate
@@ -24,5 +25,13 @@ export default {
 		next(message)
 	},
 	preserveEntrySignatures: false,
-	plugins: [commonjs(), nodeResolve()],
+	plugins: [
+		commonjs(),
+		nodeResolve(),
+		replace({
+			preventAssignment: true,
+			// this is to ensure that the production build of lexical is used
+			"process.env.NODE_ENV": JSON.stringify("production"),
+		}),
+	],
 }
