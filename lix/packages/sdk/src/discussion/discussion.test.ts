@@ -79,7 +79,7 @@ test("should be able to start a discussion on changes", async () => {
 	]);
 
 	const discussion = await lix.createDiscussion({
-		changes: [changes[0]!],
+		changeIds: [changes[0]!.id],
 		body: "comment on a change",
 	});
 
@@ -104,8 +104,8 @@ test("should be able to start a discussion on changes", async () => {
 
 	expect(commentsAfterOneComment).toHaveLength(1);
 
-	const commentOnAComment = await lix.comment({
-		parentComment: commentsAfterOneComment[0]!,
+	const commentOnAComment = await lix.addComment({
+		parentCommentId: commentsAfterOneComment[0]!.id,
 		body: "comment on a comment on a change",
 	});
 

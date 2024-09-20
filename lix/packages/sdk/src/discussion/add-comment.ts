@@ -2,10 +2,10 @@ import { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import { v4 } from "uuid";
 
-export async function comment(args: {
+export async function addComment(args: {
 	db: Kysely<LixDatabaseSchema>;
 	currentAuthor: string;
-	parentComment: { id: string };
+	parentCommentId: string;
 	body: string;
 }) {
 	return args.db.transaction().execute(async (trx) => {
@@ -13,13 +13,13 @@ export async function comment(args: {
 		const { discussion_id } = await trx
 			.selectFrom("comment")
 			.select("discussion_id")
-			.where("id", "=", args.parentComment.id)
+			.where("id", "=", args.parentCommentId)
 			.executeTakeFirstOrThrow();
 
 		const comment = await trx
 			.insertInto("comment")
 			.values({
-				parent_id: args.parentComment.id,
+				parent_id: args.parentCommentId,
 				discussion_id,
 				author_id: args.currentAuthor,
 				body: args.body,

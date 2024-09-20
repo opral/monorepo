@@ -8,32 +8,14 @@ export async function createDiscussion(args: {
 	changeIds?: string[];
 	body: string;
 }) {
-	const newDiscussionId = v4();
-	const newCommentId = v4();
 
 	return args.db.transaction().execute(async (trx) => {
 		const changeIds =
 			args.changeIds && args.changeIds.length > 0 ? args.changeIds : undefined;
-		// verify changes exists
-		if (changeIds) {
-			console.log("checking changes");
-			const { count } = (await trx
-				.selectFrom("change")
-				.select(trx.fn.countAll().as("count"))
-				// NOTE: for high amount of changes this will be extremly costy since its a huge or clause
-				.where("change.id", "in", changeIds) // NOTE: this will need to be batched if the amount of changes passed is bigger than sqlite max parameter count
-				.executeTakeFirstOrThrow()) as { count: number }; // TODO check if this cast is ok - it coult be a string/bigint or number
-
-			if (count !== changeIds.length) {
-				throw new Error("unknown changes passed");
-			}
-		}
-
+		
 		const discussion = await trx
 			.insertInto("discussion")
-			.values({
-				id: newDiscussionId,
-			})
+			.defaultValues()
 			.returning("id")
 			.executeTakeFirstOrThrow();
 
@@ -44,7 +26,7 @@ export async function createDiscussion(args: {
 					.insertInto("discussion_change_map")
 					.values({
 						change_id: changeId,
-						discussion_id: newDiscussionId,
+						discussion_id: discussion.id,
 					})
 					.executeTakeFirstOrThrow();
 			}
@@ -53,14 +35,12 @@ export async function createDiscussion(args: {
 		await trx
 			.insertInto("comment")
 			.values({
-				id: newCommentId,
 				parent_id: undefined,
-				discussion_id: newDiscussionId,
+				discussion_id: discussion.id,
 				author_id: args.currentAuthor,
-				// todo - use zoned datetime
 				body: args.body,
 			})
-			.executeTakeFirstOrThrow();
+			.execute();
 
 		return discussion;
 	});

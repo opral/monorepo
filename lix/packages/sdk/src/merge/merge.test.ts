@@ -607,12 +607,12 @@ test("it should copy discussion and related comments and mappings", async () => 
 	// lix 2 has no comments yet so after lix 1 into 2 we should be in sync
 	expect(commentsLix1).toEqual(commentsLix2AfterMerge);
 
-	await lix2.comment({
-		parentComment: commentsLix2AfterMerge[0]!,
+	await lix2.addComment({
+		parentCommentId: commentsLix2AfterMerge[0]!.id,
 		body: "wrote in lix 2",
 	});
-	await lix1.comment({
-		parentComment: commentsLix2AfterMerge[0]!,
+	await lix1.addComment({
+		parentCommentId: commentsLix2AfterMerge[0]!.id,
 		body: "wrote in lix 1",
 	});
 
