@@ -43,7 +43,6 @@ export function createMessage(args: {
 		id: messageId,
 		locale: args.locale,
 		selectors: [],
-		declarations: [],
 		variants: [
 			createVariant({
 				messageId: messageId,

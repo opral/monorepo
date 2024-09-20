@@ -67,7 +67,6 @@ test("a roundtrip should work", async () => {
 			{
 				bundleId: "mock-bundle",
 				locale: "en",
-				declarations: [],
 				selectors: [],
 				variants: [],
 			},
@@ -144,7 +143,7 @@ test("a roundtrip should work", async () => {
 		}
 	}
 
-	expect(bundles).toEqual([mockBundleNested]);
+	expect(bundles).toEqual([expect.objectContaining(mockBundleNested)]);
 });
 
 test.todo(

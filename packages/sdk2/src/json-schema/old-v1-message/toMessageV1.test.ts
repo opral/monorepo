@@ -41,13 +41,12 @@ const messageV1: MessageV1 = {
 	selectors: [],
 };
 
-const bundle = {
+const bundle: BundleNested = {
 	id: "hello_world",
-	alias: {},
+	declarations: [],
 	messages: [
 		{
 			bundleId: "hello_world",
-			declarations: [],
 			id: "hello_world" + "_en",
 			locale: "en",
 			selectors: [],
@@ -67,14 +66,13 @@ const bundle = {
 		},
 		{
 			bundleId: "hello_world",
-			declarations: [],
 			id: "hello_world" + "_de",
 			locale: "de",
 			selectors: [],
 			variants: [
 				{
 					id: "hello_world" + "_de_1",
-					match: [],
+					match: {},
 					messageId: "hello_world" + "_de",
 					pattern: [
 						{
@@ -86,4 +84,4 @@ const bundle = {
 			],
 		},
 	],
-} as BundleNested;
+};  ;
