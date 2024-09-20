@@ -39,7 +39,6 @@ export const Example: StoryObj = {
 		}
 		const handleChange = (e) => {
 			const change = e.detail as ChangeEventDetail
-			debugger
 			updateArgs({
 				entities: updateEntities({
 					entities: { bundles: [], messages: [message], variants },
