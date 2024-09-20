@@ -9,7 +9,7 @@ import { InlangAddSelector as LitInlangAddSelector } from "@inlang/bundle-compon
 
 import React, { useState } from "react";
 import { useAtom } from "jotai";
-import { pendingChangesAtom, projectAtom, settingsAtom } from "../state.ts";
+import { filteredLocalesAtom, pendingChangesAtom, projectAtom, settingsAtom } from "../state.ts";
 import {
 	BundleNested,
 	createMessage,
@@ -77,6 +77,7 @@ const InlangBundle = (props: {
 	const [project] = useAtom(projectAtom);
 	const [pendingChanges] = useAtom(pendingChangesAtom);
 	const [settings] = useAtom(settingsAtom);
+	const [filteredLocales] = useAtom(filteredLocalesAtom);
 
 	const [patternEditorFocused, setPatternEditorFocused] = useState<
 		string | undefined
@@ -150,6 +151,14 @@ const InlangBundle = (props: {
 		}
 	};
 
+	const visibleLocales = () => {
+		if (filteredLocales.length === 0) {
+			return settings.locales // nothing selected -> show all languages
+		} else {
+			return settings?.locales.filter((locale) => filteredLocales.includes(locale) || locale === settings.baseLocale) // show only selected languages + base language
+		}
+	}
+
 	return (
 		<>
 			{props.bundle && (
@@ -159,7 +168,7 @@ const InlangBundle = (props: {
 						messages={props.bundle.messages}
 						change={handleChange}
 					>
-						{settings.locales.map(
+						{visibleLocales().map(
 							(locale: ProjectSettings["locales"][number]) => {
 								const message = props.bundle.messages.find(
 									(message) => message.locale === locale
