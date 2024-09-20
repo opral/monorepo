@@ -106,3 +106,19 @@ test("it should handle json serialization and parsing for bundles", async () => 
 	]);
 });
 
+test("it should enable foreign key constraints", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	expect(() =>
+		db
+			.insertInto("message")
+			.values({
+				bundleId: "non-existent",
+				locale: "en",
+			})
+			.execute()
+	).rejects.toThrow();
+});
