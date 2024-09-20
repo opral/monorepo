@@ -49,6 +49,7 @@
 	"devDependencies": {
 		"@types/node": "20.9.3",
 		"typescript": "^5.5.2",
-		"vitest": "0.34.3"
+		"vitest": "0.34.3",
+		"prettier": "^3.3.3"
 	}
 }

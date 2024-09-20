@@ -34,7 +34,6 @@ export const bundleWithoutSelectors: BundleNested = {
 			],
 		},
 	],
-	alias: {},
 	// 	default: "frontend_button_text",
 	// 	ios: "frontendButtonText",
 	// },

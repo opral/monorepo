@@ -9,8 +9,7 @@
 		"useDefineForClassFields": false,
 		"types": [],
 		"outDir": "./dist",
-		"rootDir": "./src",
-		"resolveJsonModule": true
+		"rootDir": "./src"
 	},
 	"exclude": ["**/*.stories.ts", "**/*.stories.js", "**/*.mdx", "dist"],
 	"references": []

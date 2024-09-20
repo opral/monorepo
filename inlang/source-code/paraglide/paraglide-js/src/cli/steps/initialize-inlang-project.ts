@@ -8,6 +8,7 @@ import consola from "consola"
 import dedent from "dedent"
 import type { NodeishFilesystem } from "~/services/file-handling/types.js"
 import fg from "fast-glob"
+import fs from "node:fs"
 
 export const initializeInlangProject: CliStep<
 	{ fs: NodeishFilesystem; logger: Logger; root: string; appId: string },
@@ -23,6 +24,7 @@ export const initializeInlangProject: CliStep<
 		const { project, projectPath } = await existingProjectFlow({
 			existingProjectPaths,
 			fs: ctx.fs,
+			syncFs: fs,
 			logger: ctx.logger,
 			appId: ctx.appId,
 		})
@@ -45,7 +47,8 @@ export const initializeInlangProject: CliStep<
 export const existingProjectFlow = async (ctx: {
 	/** An array of absolute paths to existing projects. */
 	existingProjectPaths: string[]
-	fs: NodeishFilesystem
+	fs: typeof fs.promises
+	syncFs: typeof fs
 	logger: Logger
 	appId: string
 }): Promise<{ project: InlangProject; projectPath: string }> => {
@@ -73,7 +76,7 @@ export const existingProjectFlow = async (ctx: {
 	const projectPath = selection
 	const project = await loadProjectFromDirectoryInMemory({
 		path: projectPath,
-		fs: ctx.fs,
+		fs: ctx.syncFs,
 		// appId: ctx.appId,
 	})
 
@@ -147,7 +150,8 @@ async function promptForLanguageTags(initialLanguageTags: string[] = []): Promis
 	return validLanguageTags
 }
 export const createNewProjectFlow = async (ctx: {
-	fs: NodeishFilesystem
+	fs: typeof fs.promises
+	syncFs: typeof fs
 	logger: Logger
 	appId: string
 }): Promise<{
@@ -199,7 +203,7 @@ export const createNewProjectFlow = async (ctx: {
 
 	const project = await loadProjectFromDirectoryInMemory({
 		path: projectPath,
-		fs: ctx.fs,
+		fs: ctx.syncFs,
 		// appId: ctx.appId,
 	})
 

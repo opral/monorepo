@@ -3,8 +3,6 @@ import type {
 	MessageNested,
 	Variant,
 } from "../../database/schema.js";
-import { stableHumanId } from "../../human-id/human-id.js";
-import type { InlangPlugin } from "../../plugin/schema.js";
 import type { Declaration, Expression, Pattern } from "../pattern.js";
 import type { MessageV1, PatternV1 } from "./schemaV1.js";
 
@@ -13,11 +11,8 @@ import type { MessageV1, PatternV1 } from "./schemaV1.js";
  *
  * @throws If the message cannot be represented in the v1 format
  */
-export function fromMessageV1(
-	messageV1: MessageV1,
-	pluginKey: NonNullable<InlangPlugin["key"] | InlangPlugin["id"]>
-): BundleNested {
-	const bundleId = stableHumanId(messageV1.id);
+export function fromMessageV1(messageV1: MessageV1): BundleNested {
+	const bundleId = messageV1.id;
 
 	const languages = [
 		...new Set(messageV1.variants.map((variant) => variant.languageTag)),
@@ -91,9 +86,6 @@ export function fromMessageV1(
 
 	return {
 		id: bundleId,
-		alias: {
-			[pluginKey]: messageV1.id,
-		},
 		messages,
 	};
 }

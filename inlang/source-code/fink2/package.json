@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "node ./scripts/updateVersion.js && vite --host",
 		"build": "node ./scripts/updateVersion.js && vite build",
+		"test": "tsc --noEmit",
 		"preview": "vite preview",
 		"generate": "node ./scripts/generateDemoData.js",
 		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -22,6 +23,7 @@
 		"clsx": "^2.1.1",
 		"jotai": "^2.9.1",
 		"kysely": "^0.27.4",
+		"native-file-system-adapter": "^3.0.1",
 		"posthog-js": "^1.91.1",
 		"react": "19.0.0-rc-941e1b4a-20240729",
 		"react-dom": "19.0.0-rc-941e1b4a-20240729",

@@ -8,38 +8,39 @@ export const insertBundleNested = async (
 	db: Kysely<InlangDatabaseSchema>,
 	bundle: NewBundleNested
 ): Promise<void> => {
-	const insertedBundle = await db
-		.insertInto("bundle")
-		.values({
-			id: bundle.id,
-			alias: bundle.alias,
-		})
-		.returning("id")
-		.executeTakeFirstOrThrow();
-
-	for (const message of bundle.messages) {
-		const insertedMessage = await db
-			.insertInto("message")
+	await db.transaction().execute(async (trx) => {
+		const insertedBundle = await trx
+			.insertInto("bundle")
 			.values({
-				id: message.id,
-				bundleId: insertedBundle.id,
-				declarations: message.declarations,
-				locale: message.locale,
-				selectors: message.selectors,
+				id: bundle.id,
 			})
 			.returning("id")
 			.executeTakeFirstOrThrow();
 
-		for (const variant of message.variants) {
-			await db
-				.insertInto("variant")
+		for (const message of bundle.messages) {
+			const insertedMessage = await trx
+				.insertInto("message")
 				.values({
-					id: variant.id,
-					messageId: insertedMessage.id,
-					match: variant.match,
-					pattern: variant.pattern,
+					id: message.id,
+					bundleId: insertedBundle.id,
+					declarations: message.declarations,
+					locale: message.locale,
+					selectors: message.selectors,
 				})
-				.execute();
+				.returning("id")
+				.executeTakeFirstOrThrow();
+
+			for (const variant of message.variants) {
+				await trx
+					.insertInto("variant")
+					.values({
+						id: variant.id,
+						messageId: insertedMessage.id,
+						match: variant.match,
+						pattern: variant.pattern,
+					})
+					.execute();
+			}
 		}
-	}
+	});
 };
