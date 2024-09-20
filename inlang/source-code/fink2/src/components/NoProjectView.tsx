@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { CreateProjectDialog } from "../layout.tsx";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
 import { selectedProjectPathAtom } from "../state.ts";
 import Dropzone from "./Dropzone.tsx";
+import CreateProjectDialog from "./layout/CreateProjectDialog.tsx";
 
 const NoProjectView = () => {
 	const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
