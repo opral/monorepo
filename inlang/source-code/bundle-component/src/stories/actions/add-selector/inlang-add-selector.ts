@@ -240,13 +240,13 @@ export default class InlangAddSelector extends LitElement {
 				newMessage.declarations.push({
 					type: "input",
 					name: this._newInputSting,
-					value: {
-						type: "expression",
-						arg: {
-							type: "variable",
-							name: this._newInputSting,
-						},
-					},
+					// value: {
+					// 	type: "expression",
+					// 	arg: {
+					// 		type: "variable",
+					// 		name: this._newInputSting,
+					// 	},
+					// },
 				})
 
 				this.dispatchEvent(
