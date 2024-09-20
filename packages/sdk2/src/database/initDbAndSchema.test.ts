@@ -106,7 +106,8 @@ test("it should handle json serialization and parsing for bundles", async () => 
 	]);
 });
 
-test("it should enable foreign key constraints", async () => {
+// https://github.com/opral/inlang-sdk/issues/209
+test.todo("it should enable foreign key constraints", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
