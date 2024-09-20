@@ -1,12 +1,12 @@
 import { Kysely } from "kysely";
-import type { LixDatabaseSchema } from "../database/schema.js";
+import type { Comment, LixDatabaseSchema } from "../database/schema.js";
 
 export async function addComment(args: {
 	db: Kysely<LixDatabaseSchema>;
 	currentAuthor: string;
 	parentCommentId: string;
 	body: string;
-}) {
+}): Promise<{ id: Comment["id"] }> {
 	return args.db.transaction().execute(async (trx) => {
 		// verify that the parent comment exists and fetch the discussion_id
 		const { discussion_id } = await trx
