@@ -2,25 +2,25 @@
 
 import type { Bundle, Message, Variant } from "@inlang/sdk2"
 
-export type ChangeEventProps = {
-	type: "Bundle" | "Message" | "Variant"
-	operation: "create" | "update" | "delete"
-	newData: Bundle | Message | Variant | undefined
-	meta?: Record<string, any>
+/**
+ * This event is dispatched when a change is made to a bundle, message or variant.
+ *
+ * - `entityId` is the id of the entity that was changed.
+ * - `entity` is the type of entity that was changed.
+ * - `newData` is the new data of the entity.
+ * - `newData` is `undefined` if the entity was deleted.
+ */
+export type ChangeEventDetail = {
+	entityId: string
+	entity: "bundle" | "message" | "variant"
+	newData?: Bundle | Message | Variant
 }
 
-export const createChangeEvent = (props: ChangeEventProps) => {
+export const createChangeEvent = (detail: ChangeEventDetail) => {
 	const onChangeEvent = new CustomEvent("change", {
 		bubbles: true,
 		composed: true,
-		detail: {
-			argument: {
-				type: props.type,
-				operation: props.operation,
-				newData: props.newData,
-				meta: props.meta,
-			},
-		},
+		detail,
 	})
 	return onChangeEvent
 }

@@ -241,8 +241,8 @@ export default class InlangAddSelector extends LitElement {
 		if (this._isNewInput && this._newInputSting && this._newInputSting.length > 0) {
 			this.dispatchEvent(
 				createChangeEvent({
-					type: "Bundle",
-					operation: "update",
+					entity: "bundle",
+					entityId: this.bundle.id,
 					newData: {
 						...this.bundle,
 						declarations: [
@@ -274,8 +274,8 @@ export default class InlangAddSelector extends LitElement {
 			})
 			this.dispatchEvent(
 				createChangeEvent({
-					type: "Message",
-					operation: "update",
+					entityId: this.message.id,
+					entity: "message",
 					newData: this.message,
 				})
 			)
@@ -289,8 +289,8 @@ export default class InlangAddSelector extends LitElement {
 
 				this.dispatchEvent(
 					createChangeEvent({
-						type: "Variant",
-						operation: "update",
+						entityId: variant.id,
+						entity: "variant",
 						newData: variant,
 					})
 				)
@@ -311,8 +311,8 @@ export default class InlangAddSelector extends LitElement {
 
 				this.dispatchEvent(
 					createChangeEvent({
-						type: "Variant",
-						operation: "create",
+						entityId: newVariant.id,
+						entity: "variant",
 						newData: newVariant,
 					})
 				)

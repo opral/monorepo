@@ -7,7 +7,8 @@ if (!customElements.get("sl-dialog")) customElements.define("sl-dialog", SlDialo
 //@ts-ignore
 import { useArgs } from "@storybook/preview-api"
 import { type Bundle, type Message, type Variant } from "@inlang/sdk2"
-import { type ChangeEventProps } from "../helper/event.ts"
+import { type ChangeEventDetail } from "../helper/event.ts"
+import { updateEntities } from "../mock/updateEntities.ts"
 
 //components
 import "./inlang-bundle.ts"
@@ -49,9 +50,9 @@ export const Example: StoryObj = {
 		}
 
 		const handleChange = (e) => {
-			const data = e.detail.argument as ChangeEventProps
+			const data = e.detail as ChangeEventDetail
 			updateArgs({
-				state: updateState({ state: args.state, change: data }),
+				state: updateEntities({ entities: args.state, change: data }),
 			})
 		}
 
@@ -73,8 +74,8 @@ export const Example: StoryObj = {
 								? html` <div slot="variant-action" @click=${handleSelectorModal}>Add selector</div>
 										<sl-dialog slot="variant-action" label="Add Selector">
 											<inlang-add-selector
+												.bundle=${bundles[0]}
 												.message=${message}
-												.messages=${[]}
 											></inlang-add-selector>
 										</sl-dialog>
 										<style>
@@ -108,7 +109,7 @@ export const Example: StoryObj = {
 						Add selector
 					</div>
 					<sl-dialog slot="selector-button" label="Add Selector">
-						<inlang-add-selector .message=${message} .messages=${[]}></inlang-add-selector>
+						<inlang-add-selector .message=${message} .bundle=${bundles[0]}></inlang-add-selector>
 					</sl-dialog>
 				</inlang-message>`
 			})}
@@ -129,9 +130,9 @@ export const Complex: StoryObj = {
 		}
 
 		const handleChange = (e) => {
-			const data = e.detail.argument as ChangeEventProps
+			const data = e.detail as ChangeEventDetail
 			updateArgs({
-				state: updateState({ state: args.state, change: data }),
+				state: updateEntities({ entities: args.state, change: data }),
 			})
 		}
 
@@ -274,33 +275,4 @@ export const Themed: StoryObj = {
 				})}
 			</inlang-bundle>`
 	},
-}
-
-const updateState = (args: {
-	state: {
-		bundles: Bundle[]
-		messages: Message[]
-		variants: Variant[]
-	}
-	change: ChangeEventProps
-}) => {
-	const newState = structuredClone(args.state)
-	const type = args.change.type.toLowerCase() + "s" // Message -> messages
-
-	if (args.change.newData === undefined) {
-		throw Error("Deletions are unimplemented")
-	}
-	// update or insert
-	newState[type] = newState[type].map((entity: any) => {
-		// replace the entity with the new data
-		if (entity.id === args.change.newData?.id) {
-			return args.change.newData
-		}
-		// return the entity if it is not the one to be updated
-		return entity
-	})
-
-	// updateArgs({ bundle: newBundle, messages: newBundle.messages })
-	console.info(args.change.type, args.change.operation, args.change.newData, newState)
-	return newState
 }

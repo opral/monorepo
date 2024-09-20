@@ -116,8 +116,8 @@ export default class InlangAddInput extends LitElement {
 									if (this._newInput && this._newInput.trim() !== "") {
 										this.dispatchEvent(
 											createChangeEvent({
-												type: "Bundle",
-												operation: "update",
+												entityId: this.bundle.id,
+												entity: "bundle",
 												newData: {
 													...this.bundle,
 													declarations: [

@@ -9,4 +9,4 @@ export { default as InlangBundleAction } from "./stories/actions/bundle-action/i
 export { default as InlangAddSelector } from "./stories/actions/add-selector/inlang-add-selector.js"
 
 // types
-export type { ChangeEventProps } from "./helper/event.js"
+export type { ChangeEventDetail } from "./helper/event.js"
