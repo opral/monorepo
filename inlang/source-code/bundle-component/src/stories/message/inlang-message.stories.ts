@@ -37,7 +37,6 @@ export const Example: StoryObj = {
 				case "Message":
 					if (!data.newData) break
 					newMessage["selectors"] = (data.newData as Message).selectors
-					newMessage["declarations"] = (data.newData as Message).declarations
 					break
 				case "Variant":
 					if (data.operation === "delete") {
@@ -84,7 +83,6 @@ export const MessageInBundle: StoryObj = {
 				case "Message":
 					if (!data.newData) break
 					newMessage["selectors"] = (data.newData as Message).selectors
-					newMessage["declarations"] = (data.newData as Message).declarations
 					break
 				case "Variant":
 					if (data.operation === "delete") {
