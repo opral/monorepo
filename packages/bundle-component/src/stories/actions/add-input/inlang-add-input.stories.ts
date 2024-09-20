@@ -1,8 +1,8 @@
-import { pluralBundle } from "@inlang/sdk2"
 import "./inlang-add-input.ts"
 import "./../../inlang-bundle.ts"
 import type { Meta, StoryObj } from "@storybook/web-components"
 import { html } from "lit"
+import { examplePlural } from "../../../mock/pluralBundle.ts"
 
 const meta: Meta = {
 	component: "inlang-add-input",
@@ -22,7 +22,7 @@ export const Example: StoryObj = {
 				}
 			</style>
 			<div class="container">
-				<inlang-add-input messages=${pluralBundle.messages}>Press me</inlang-add-input>
+				<inlang-add-input bundle=${examplePlural.bundles[0]}>Press me</inlang-add-input>
 			</div>`
 	},
 }

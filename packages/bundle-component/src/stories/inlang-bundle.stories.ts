@@ -1,14 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/web-components"
 import { html } from "lit"
 import { mockSettings } from "../mock/settings.ts"
-import { bundleWithoutSelectors } from "../mock/messageBundle.ts"
-
+import { exampleWithoutSelectors } from "../mock/messageBundle.ts"
 import SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.component.js"
 if (!customElements.get("sl-dialog")) customElements.define("sl-dialog", SlDialog)
-
 //@ts-ignore
 import { useArgs } from "@storybook/preview-api"
-import { pluralBundle, type Message, type MessageNested, type Variant } from "@inlang/sdk2"
+import { type Bundle, type Message, type Variant } from "@inlang/sdk2"
 import { type DispatchChangeInterface } from "../helper/event.ts"
 
 //components
@@ -18,6 +16,7 @@ import "./variant/inlang-variant.ts"
 import "./pattern-editor/inlang-pattern-editor.ts"
 import "./actions/bundle-action/inlang-bundle-action.ts"
 import "./actions/add-selector/inlang-add-selector.ts"
+import { examplePlural } from "../mock/pluralBundle.ts"
 
 const meta: Meta = {
 	component: "inlang-bundle",
@@ -32,64 +31,16 @@ const meta: Meta = {
 
 export default meta
 
-let simpleBundleBuffer = bundleWithoutSelectors
-
 export const Example: StoryObj = {
 	args: {
-		bundle: bundleWithoutSelectors,
-		messages: bundleWithoutSelectors.messages,
+		state: exampleWithoutSelectors,
 	},
 	render: () => {
-		const [{ bundle, messages }, updateArgs] = useArgs()
-
-		const handleChange = (e) => {
-			const data = e.detail.argument as DispatchChangeInterface
-			const newBundle = structuredClone(simpleBundleBuffer)
-			switch (data.type) {
-				case "Message":
-					if (data.newData) {
-						const message = newBundle.messages.find((m) => m.id === (data.newData as Message).id)
-						if (message) {
-							message.selectors = (data.newData as Message).selectors
-							message.declarations = (data.newData as Message).declarations
-						}
-					}
-					break
-				case "Variant":
-					if (
-						data.operation === "delete" &&
-						newBundle.messages.some((m) => m.id === (data.newData as Variant).messageId)
-					) {
-						// delete variant
-						const message = newBundle.messages.find(
-							(m) => m.id === (data.newData as Variant).messageId
-						)
-						if (message) {
-							message.variants = message.variants.filter((v) => v.id !== data.newData!.id)
-						}
-					} else if (
-						data.newData &&
-						newBundle.messages.some((m) => m.id === (data.newData as Variant).messageId)
-					) {
-						const message = newBundle.messages.find(
-							(m) => m.id === (data.newData as Variant).messageId
-						)
-						if (message) {
-							const index = message.variants.findIndex((v) => v.id === data.newData!.id)
-							if (index === -1) {
-								// create new variant
-								message.variants.push(data.newData as Variant)
-							} else {
-								// update variant
-								message.variants[index] = data.newData as Variant
-							}
-						}
-					}
-					break
-			}
-			simpleBundleBuffer = newBundle
-			updateArgs({ bundle: newBundle, messages: newBundle.messages })
-			console.info(data.type, data.operation, data.newData, newBundle)
+		const [args, updateArgs] = useArgs()
+		const { bundles, messages, variants } = args.state as {
+			bundles: Bundle[]
+			messages: Message[]
+			variants: Variant[]
 		}
 
 		const handleSelectorModal = () => {
@@ -97,16 +48,36 @@ export const Example: StoryObj = {
 			dialog.show()
 		}
 
-		return html`<inlang-bundle .bundle=${bundle} .messages=${messages} @change=${handleChange}>
-			${messages.map((message: MessageNested) => {
-				return html`<inlang-message slot="message" .message=${message} .settings=${mockSettings}>
-					${message.variants.map((variant) => {
-						return html`<inlang-variant slot="variant" .variant=${variant}>
+		const handleChange = (e) => {
+			const data = e.detail.argument as DispatchChangeInterface
+			updateArgs({
+				state: updateState({ state: args.state, change: data }),
+			})
+		}
+
+		return html`<inlang-bundle .bundle=${bundles[0]} @change=${handleChange}>
+			${messages.map((message) => {
+				const variantsOfMessage = variants.filter((v) => v.messageId === message.id)
+				return html`<inlang-message
+					slot="message"
+					.message=${message}
+					.variants=${variantsOfMessage}
+					.settings=${mockSettings}
+				>
+					${variantsOfMessage.map((variant) => {
+						return html` <inlang-variant slot="variant" .variant=${variant}>
 							<inlang-pattern-editor slot="pattern-editor" .variant=${variant}>
 							</inlang-pattern-editor>
-							${(message.selectors.length === 0 && message.variants.length <= 1) ||
+							${(message.selectors.length === 0 && variantsOfMessage.length <= 1) ||
 							!message.selectors
-								? html`<style>
+								? html` <div slot="variant-action" @click=${handleSelectorModal}>Add selector</div>
+										<sl-dialog slot="variant-action" label="Add Selector">
+											<inlang-add-selector
+												.message=${message}
+												.messages=${[]}
+											></inlang-add-selector>
+										</sl-dialog>
+										<style>
 											sl-dialog::part(body) {
 												padding: 0;
 												margin-top: -16px;
@@ -114,14 +85,7 @@ export const Example: StoryObj = {
 											sl-dialog::part(panel) {
 												border-radius: 8px;
 											}
-										</style>
-										<div slot="variant-action" @click=${handleSelectorModal}>Add selector</div>
-										<sl-dialog slot="variant-action" label="Add Selector">
-											<inlang-add-selector
-												.message=${message}
-												.messages=${messages}
-											></inlang-add-selector>
-										</sl-dialog>`
+										</style>`
 								: ``}
 						</inlang-variant>`
 					})}
@@ -144,7 +108,7 @@ export const Example: StoryObj = {
 						Add selector
 					</div>
 					<sl-dialog slot="selector-button" label="Add Selector">
-						<inlang-add-selector .message=${message} .messages=${messages}></inlang-add-selector>
+						<inlang-add-selector .message=${message} .messages=${[]}></inlang-add-selector>
 					</sl-dialog>
 				</inlang-message>`
 			})}
@@ -152,70 +116,35 @@ export const Example: StoryObj = {
 	},
 }
 
-let bundleBuffer = pluralBundle
-
 export const Complex: StoryObj = {
 	args: {
-		bundle: pluralBundle,
-		messages: pluralBundle.messages,
+		state: examplePlural,
 	},
 	render: () => {
-		const [{ bundle, messages }, updateArgs] = useArgs()
+		const [args, updateArgs] = useArgs()
+		const { bundles, messages, variants } = args.state as {
+			bundles: Bundle[]
+			messages: Message[]
+			variants: Variant[]
+		}
 
 		const handleChange = (e) => {
 			const data = e.detail.argument as DispatchChangeInterface
-			const newBundle = structuredClone(bundleBuffer)
-			switch (data.type) {
-				case "Message":
-					if (data.newData) {
-						const message = newBundle.messages.find((m) => m.id === (data.newData as Message).id)
-						if (message) {
-							message.selectors = (data.newData as Message).selectors
-							message.declarations = (data.newData as Message).declarations
-						}
-					}
-					break
-				case "Variant":
-					if (
-						data.operation === "delete" &&
-						newBundle.messages.some((m) => m.id === (data.newData as Variant).messageId)
-					) {
-						// delete variant
-						const message = newBundle.messages.find(
-							(m) => m.id === (data.newData as Variant).messageId
-						)
-						if (message) {
-							message.variants = message.variants.filter((v) => v.id !== data.newData!.id)
-						}
-					} else if (
-						data.newData &&
-						newBundle.messages.some((m) => m.id === (data.newData as Variant).messageId)
-					) {
-						const message = newBundle.messages.find(
-							(m) => m.id === (data.newData as Variant).messageId
-						)
-						if (message) {
-							const index = message.variants.findIndex((v) => v.id === data.newData!.id)
-							if (index === -1) {
-								// create new variant
-								message.variants.push(data.newData as Variant)
-							} else {
-								// update variant
-								message.variants[index] = data.newData as Variant
-							}
-						}
-					}
-					break
-			}
-			bundleBuffer = newBundle
-			updateArgs({ bundle: newBundle, messages: newBundle.messages })
-			console.info(data.type, data.operation, data.newData, newBundle)
+			updateArgs({
+				state: updateState({ state: args.state, change: data }),
+			})
 		}
 
-		return html`<inlang-bundle .bundle=${bundle} .messages=${messages} @change=${handleChange}>
-			${messages.map((message: MessageNested) => {
-				return html`<inlang-message slot="message" .message=${message} .settings=${mockSettings}>
-					${message.variants.map((variant) => {
+		return html`<inlang-bundle .bundle=${bundles[0]} @change=${handleChange}>
+			${messages.map((message) => {
+				const variantsOfMessage = variants.filter((v) => v.messageId === message.id)
+				return html`<inlang-message
+					slot="message"
+					.message=${message}
+					.variants=${variantsOfMessage}
+					.settings=${mockSettings}
+				>
+					${variantsOfMessage.map((variant) => {
 						return html`<inlang-variant slot="variant" .variant=${variant}>
 							<inlang-pattern-editor slot="pattern-editor" .variant=${variant}>
 							</inlang-pattern-editor>
@@ -229,11 +158,15 @@ export const Complex: StoryObj = {
 
 export const Themed: StoryObj = {
 	args: {
-		bundle: pluralBundle,
-		messages: pluralBundle.messages,
+		state: examplePlural,
 	},
 	render: () => {
-		const [{ bundle, messages }] = useArgs()
+		const [args] = useArgs()
+		const { bundles, messages, variants } = args.state as {
+			bundles: Bundle[]
+			messages: Message[]
+			variants: Variant[]
+		}
 
 		return html` <style>
 				.inlang-pattern-editor-contenteditable {
@@ -284,14 +217,20 @@ export const Themed: StoryObj = {
 					background-color: #18161a;
 				}
 			</style>
-			<inlang-bundle .bundle=${bundle} .messages=${messages}>
-				${messages.map((message: MessageNested) => {
-					return html`<inlang-message slot="message" .message=${message} .settings=${mockSettings}>
-						${message.variants.map((variant) => {
+			<inlang-bundle .bundle=${bundles[0]}>
+				${messages.map((message) => {
+					const variantsOfMessage = variants.filter((v) => v.messageId === message.id)
+					return html`<inlang-message
+						slot="message"
+						.message=${message}
+						.variants=${variantsOfMessage}
+						.settings=${mockSettings}
+					>
+						${variantsOfMessage.map((variant) => {
 							return html`<inlang-variant slot="variant" .variant=${variant}>
 								<inlang-pattern-editor slot="pattern-editor" .variant=${variant}>
 								</inlang-pattern-editor>
-								${(message.selectors.length === 0 && message.variants.length <= 1) ||
+								${(message.selectors.length === 0 && variantsOfMessage.length <= 1) ||
 								!message.selectors
 									? html`<style>
 												sl-dialog::part(body) {
@@ -335,4 +274,33 @@ export const Themed: StoryObj = {
 				})}
 			</inlang-bundle>`
 	},
+}
+
+const updateState = (args: {
+	state: {
+		bundles: Bundle[]
+		messages: Message[]
+		variants: Variant[]
+	}
+	change: DispatchChangeInterface
+}) => {
+	const newState = structuredClone(args.state)
+	const type = args.change.type.toLowerCase() + "s" // Message -> messages
+
+	if (args.change.newData === undefined) {
+		throw Error("Deletions are unimplemented")
+	}
+	// update or insert
+	newState[type] = newState[type].map((entity: any) => {
+		// replace the entity with the new data
+		if (entity.id === args.change.newData?.id) {
+			return args.change.newData
+		}
+		// return the entity if it is not the one to be updated
+		return entity
+	})
+
+	// updateArgs({ bundle: newBundle, messages: newBundle.messages })
+	console.info(args.change.type, args.change.operation, args.change.newData, newState)
+	return newState
 }

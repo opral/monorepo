@@ -12,7 +12,7 @@ describe("patternToString", () => {
 			{
 				type: "expression",
 				arg: {
-					type: "variable",
+					type: "variable-reference",
 					name: "name",
 				},
 			},
