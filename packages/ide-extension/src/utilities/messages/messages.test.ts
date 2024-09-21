@@ -64,12 +64,12 @@ describe("Message Webview Provider Tests", () => {
 		const html = await createMessageHtml({
 			bundle: {
 				id: "message-id",
+				declarations: [],
 				messages: [
 					{
 						id: "message-id",
 						bundleId: "bundle-id",
 						locale: "en",
-						declarations: [],
 						selectors: [],
 						variants: [
 							{
@@ -110,6 +110,7 @@ describe("Message Webview Provider Tests", () => {
 		// Creating a message HTML without aliases enabled
 		const html = await createMessageHtml({
 			bundle: {
+				declarations: [],
 				id: "message-id",
 				messages: [],
 			},
@@ -143,12 +144,12 @@ describe("Message Webview Provider Tests", () => {
 		const html = await getTranslationsTableHtml({
 			bundle: {
 				id: "message-id",
+				declarations: [],
 				messages: [
 					{
 						id: "message-id",
 						bundleId: "bundle-id",
 						locale: "en",
-						declarations: [],
 						selectors: [],
 						variants: [
 							{
@@ -192,6 +193,7 @@ describe("Message Webview Provider Tests", () => {
 		// Creating a translations table HTML with no translations available
 		const html = await getTranslationsTableHtml({
 			bundle: {
+				declarations: [],
 				id: "message-id",
 				messages: [], // No messages for any locale
 			},
