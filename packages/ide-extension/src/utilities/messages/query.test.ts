@@ -32,7 +32,7 @@ describe("getStringFromPattern", () => {
 
 	it("should handle VariableReference elements", () => {
 		const result = getStringFromPattern({
-			pattern: [{ type: "expression", arg: { type: "variable", name: "name" } }],
+			pattern: [{ type: "expression", arg: { type: "variable-reference", name: "name" } }],
 			locale: "en-US",
 			messageId: "2",
 		})
@@ -43,7 +43,7 @@ describe("getStringFromPattern", () => {
 		const result = getStringFromPattern({
 			pattern: [
 				{ type: "text", value: "Hello " },
-				{ type: "expression", arg: { type: "variable", name: "name" } },
+				{ type: "expression", arg: { type: "variable-reference", name: "name" } },
 			],
 			locale: "en-US",
 			messageId: "3",
@@ -60,14 +60,16 @@ describe("getPatternFromString", () => {
 
 	it("should convert string to pattern with VariableReference elements", () => {
 		const result = getPatternFromString({ string: "{name}" })
-		expect(result).toEqual([{ type: "expression", arg: { type: "variable", name: "name" } }])
+		expect(result).toEqual([
+			{ type: "expression", arg: { type: "variable-reference", name: "name" } },
+		])
 	})
 
 	it("should convert string to mixed pattern", () => {
 		const result = getPatternFromString({ string: "Hello {name}" })
 		expect(result).toEqual([
 			{ type: "text", value: "Hello " },
-			{ type: "expression", arg: { type: "variable", name: "name" } },
+			{ type: "expression", arg: { type: "variable-reference", name: "name" } },
 		])
 	})
 
@@ -77,9 +79,9 @@ describe("getPatternFromString", () => {
 		})
 		expect(result).toEqual([
 			{ type: "text", value: "Hello " },
-			{ type: "expression", arg: { type: "variable", name: "name" } },
+			{ type: "expression", arg: { type: "variable-reference", name: "name" } },
 			{ type: "text", value: ", welcome to " },
-			{ type: "expression", arg: { type: "variable", name: "place" } },
+			{ type: "expression", arg: { type: "variable-reference", name: "place" } },
 		])
 	})
 })
