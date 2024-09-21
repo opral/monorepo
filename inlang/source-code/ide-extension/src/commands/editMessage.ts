@@ -54,7 +54,6 @@ export const editMessageCommand = {
 					await trx
 						.updateTable("message")
 						.set({
-							declarations: message.declarations,
 							selectors: message.selectors,
 						})
 						.where("message.id", "=", message.id)
