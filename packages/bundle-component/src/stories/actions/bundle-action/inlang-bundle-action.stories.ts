@@ -5,7 +5,7 @@ import { html } from "lit"
 
 import SlMenu from "@shoelace-style/shoelace/dist/components/menu/menu.component.js"
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
-import { pluralBundle } from "@inlang/sdk2"
+import { examplePlural } from "../../../mock/pluralBundle.ts"
 if (!customElements.get("sl-menu")) customElements.define("sl-menu", SlMenu)
 if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)
 
@@ -25,6 +25,9 @@ export const Example: StoryObj = {
 	},
 }
 
+const bundle = examplePlural.bundles[0]
+const messages = examplePlural.messages.filter((m) => m.bundleId === bundle.id)
+
 export const ActionInBundle: StoryObj = {
 	render: () => {
 		return html`
@@ -34,7 +37,7 @@ export const ActionInBundle: StoryObj = {
 				}
 			</style>
 			<div class="container">
-				<inlang-bundle .bundle=${pluralBundle} .messages=${[]}>
+				<inlang-bundle .bundle=${bundle} .messages=${messages}>
 					<inlang-bundle-action actionTitle=${"Share"} slot="bundle-action"></inlang-bundle-action>
 					<inlang-bundle-action actionTitle=${"Delete"} slot="bundle-action"></inlang-bundle-action>
 					<inlang-bundle-action actionTitle=${"Rename"} slot="bundle-action"></inlang-bundle-action>
