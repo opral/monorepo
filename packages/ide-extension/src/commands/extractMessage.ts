@@ -5,7 +5,7 @@ import { telemetry } from "../services/telemetry/index.js"
 import { CONFIGURATION } from "../configuration.js"
 import { isQuoted, stripQuotes } from "../utilities/messages/isQuoted.js"
 import { getSetting } from "../utilities/settings/index.js"
-import { createMessage, humanId, type IdeExtensionConfig } from "@inlang/sdk2"
+import { humanId, type IdeExtensionConfig } from "@inlang/sdk2"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -103,12 +103,6 @@ export const extractMessageCommand = {
 			return msg("Couldn't find choosen extract option.", "warn", "notification")
 		}
 
-		const message = createMessage({
-			bundleId: selectedExtractOption.bundleId,
-			locale: baseLocale,
-			text: isQuoted(messageValue) ? stripQuotes(messageValue) : messageValue,
-		})
-
 		try {
 			await state()
 				.project.db.transaction()
@@ -120,16 +114,26 @@ export const extractMessageCommand = {
 						})
 						.execute()
 
-					return await trx
+					const message = await trx
 						.insertInto("message")
 						.values({
-							id: message.id,
-							bundleId: message.bundleId,
-							locale: message.locale,
-							declarations: message.declarations,
-							selectors: message.selectors,
+							bundleId: selectedExtractOption.bundleId,
+							locale: baseLocale,
 						})
 						.returningAll()
+						.executeTakeFirstOrThrow()
+
+					await trx
+						.insertInto("variant")
+						.values({
+							messageId: message.id,
+							pattern: [
+								{
+									type: "text",
+									value: isQuoted(messageValue) ? stripQuotes(messageValue) : messageValue,
+								},
+							],
+						})
 						.execute()
 				})
 
