@@ -144,16 +144,8 @@ export const demoBundles: BundleNested[] = [
 				locale: "en",
 				selectors: [
 					{
-						type: "expression",
-						arg: {
-							type: "variable-reference",
-							name: "numTodos",
-						},
-						annotation: {
-							type: "function-reference",
-							name: "plural",
-							options: [],
-						},
+						type: "variable-reference",
+						name: "numTodos",
 					},
 				],
 				variants: [
@@ -205,16 +197,8 @@ export const demoBundles: BundleNested[] = [
 				locale: "de",
 				selectors: [
 					{
-						type: "expression",
-						arg: {
-							type: "variable-reference",
-							name: "numTodos",
-						},
-						annotation: {
-							type: "function-reference",
-							name: "plural",
-							options: [],
-						},
+						type: "variable-reference",
+						name: "numTodos",
 					},
 				],
 				variants: [

@@ -261,16 +261,8 @@ export default class InlangAddSelector extends LitElement {
 	private _updateSelector = () => {
 		if (this.message && this._input) {
 			this.message.selectors.push({
-				type: "expression",
-				arg: {
-					type: "variable-reference",
-					name: this._input,
-				},
-				annotation: {
-					type: "function-reference",
-					name: this._function || "plural",
-					options: [],
-				},
+				type: "variable-reference",
+				name: this._input,
 			})
 			this.dispatchEvent(
 				createChangeEvent({

@@ -1,5 +1,5 @@
 import type { BundleNested } from "../../database/schema.js";
-import type { Expression, Pattern } from "../pattern.js";
+import type { Pattern } from "../pattern.js";
 import type {
 	ExpressionV1,
 	MessageV1,
@@ -18,7 +18,10 @@ export function toMessageV1(bundle: BundleNested): MessageV1 {
 
 	for (const message of bundle.messages) {
 		// collect all selector names
-		for (const selector of message.selectors.map(toV1Expression)) {
+		for (const selector of message.selectors.map((s) => ({
+			type: "variable-reference",
+			name: s.name,
+		}))) {
 			selectorNames.add(selector.name);
 		}
 
@@ -59,7 +62,10 @@ function toV1Pattern(pattern: Pattern): PatternV1 {
 			}
 
 			case "expression": {
-				return toV1Expression(element);
+				return {
+					type: "VariableReference",
+					name: element.arg.name,
+				};
 			}
 
 			default: {
@@ -67,20 +73,4 @@ function toV1Pattern(pattern: Pattern): PatternV1 {
 			}
 		}
 	});
-}
-
-function toV1Expression(expression: Expression): ExpressionV1 {
-	if (expression.annotation !== undefined)
-		throw new Error(
-			"Cannot convert an expression with an annotation to the v1 format"
-		);
-
-	if (expression.arg.type !== "variable-reference") {
-		throw new Error("Can only convert variable references to the v1 format");
-	}
-
-	return {
-		type: "VariableReference",
-		name: expression.arg.name,
-	};
 }

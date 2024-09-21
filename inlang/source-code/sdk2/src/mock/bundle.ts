@@ -26,16 +26,8 @@ export const pluralBundle: BundleNested = {
 			locale: "de",
 			selectors: [
 				{
-					type: "expression",
-					arg: {
-						type: "variable-reference",
-						name: "numProducts",
-					},
-					annotation: {
-						type: "function-reference",
-						name: "plural",
-						options: [],
-					},
+					type: "variable-reference",
+					name: "numProducts",
 				},
 			],
 			variants: [
@@ -87,16 +79,8 @@ export const pluralBundle: BundleNested = {
 			locale: "en",
 			selectors: [
 				{
-					type: "expression",
-					arg: {
-						type: "variable-reference",
-						name: "numProducts",
-					},
-					annotation: {
-						type: "function-reference",
-						name: "plural",
-						options: [],
-					},
+					type: "variable-reference",
+					name: "numProducts",
 				},
 			],
 			variants: [
