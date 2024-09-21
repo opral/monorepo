@@ -53,14 +53,12 @@ export const machineTranslateMessageCommand = {
 					id: updatedMessage.id,
 					bundleId: updatedMessage.bundleId,
 					locale: updatedMessage.locale,
-					declarations: updatedMessage.declarations,
 					selectors: updatedMessage.selectors,
 				})
 				.onConflict((oc) =>
 					oc.column("id").doUpdateSet({
 						bundleId: updatedMessage.bundleId,
 						locale: updatedMessage.locale,
-						declarations: updatedMessage.declarations,
 						selectors: updatedMessage.selectors,
 					})
 				)
