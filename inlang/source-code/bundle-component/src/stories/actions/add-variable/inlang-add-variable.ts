@@ -74,12 +74,7 @@ export default class InlangAddVariable extends LitElement {
 
 	//state
 	@state()
-	private _newInput: string | undefined
-
-	override async firstUpdated() {
-		await this.updateComplete
-		this._newInput = ""
-	}
+	private _newInput: string = ""
 
 	override render() {
 		return html`
