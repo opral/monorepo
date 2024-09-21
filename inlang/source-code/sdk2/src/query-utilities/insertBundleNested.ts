@@ -13,6 +13,7 @@ export const insertBundleNested = async (
 			.insertInto("bundle")
 			.values({
 				id: bundle.id,
+				declarations: bundle.declarations,
 			})
 			.returning("id")
 			.executeTakeFirstOrThrow();
@@ -23,7 +24,6 @@ export const insertBundleNested = async (
 				.values({
 					id: message.id,
 					bundleId: insertedBundle.id,
-					declarations: message.declarations,
 					locale: message.locale,
 					selectors: message.selectors,
 				})

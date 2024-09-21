@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BundleNested, ProjectSettings } from "@inlang/sdk2";
 import { createComponent } from "@lit/react";
 import {
@@ -42,7 +43,7 @@ const SingleDiffBundle = (props: {
 }) => {
 	return (
 		<div className="pointer-events-none">
-			<InlangBundle bundle={props.bundle} messages={props.bundle.messages}>
+			<InlangBundle bundle={props.bundle}>
 				{/* <InlangBundleHeader bundle={props.bundle} settings={props.settings} /> */}
 				{props.bundle.messages.map((message) => {
 					const oldMessage = props.oldBundle.messages.find(
@@ -53,6 +54,7 @@ const SingleDiffBundle = (props: {
 							slot="message"
 							key={message.id}
 							message={message}
+							variants={message.variants}
 							settings={props.settings}
 							className="hide-new-variant"
 						>

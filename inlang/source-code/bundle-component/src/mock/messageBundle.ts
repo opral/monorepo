@@ -1,40 +1,42 @@
-import type { BundleNested } from "@inlang/sdk2"
+import type { Bundle, Message, Variant } from "@inlang/sdk2"
 
-export const bundleWithoutSelectors: BundleNested = {
-	id: "message-bundle-id",
+export const exampleWithoutSelectors: {
+	bundles: Bundle[]
+	messages: Message[]
+	variants: Variant[]
+} = {
+	bundles: [
+		{
+			id: "message-bundle-id",
+			declarations: [],
+		},
+	],
 	messages: [
 		{
 			bundleId: "message-bundle-id",
 			id: "message-id-en",
 			locale: "en",
 			selectors: [],
-			declarations: [],
-			variants: [
-				{
-					messageId: "message-id-en",
-					id: "variant-id-en-*",
-					match: {},
-					pattern: [{ type: "text", value: "{count} new messages" }],
-				},
-			],
 		},
 		{
 			bundleId: "message-bundle-id",
 			id: "message-id-de",
 			locale: "de",
 			selectors: [],
-			declarations: [],
-			variants: [
-				{
-					messageId: "message-id-de",
-					id: "variant-id-de-*",
-					match: {},
-					pattern: [{ type: "text", value: "{count} neue Nachrichten" }],
-				},
-			],
 		},
 	],
-	// 	default: "frontend_button_text",
-	// 	ios: "frontendButtonText",
-	// },
+	variants: [
+		{
+			messageId: "message-id-en",
+			id: "variant-id-en-*",
+			match: {},
+			pattern: [{ type: "text", value: "{count} new messages" }],
+		},
+		{
+			messageId: "message-id-de",
+			id: "variant-id-de-*",
+			match: {},
+			pattern: [{ type: "text", value: "{count} neue Nachrichten" }],
+		},
+	],
 }

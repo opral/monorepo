@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { fromMessageV1 } from "./fromMessageV1.js";
 import { Value } from "@sinclair/typebox/value";
 import { MessageV1 } from "./schemaV1.js";
+import type { BundleNested } from "../../database/schema.js";
 
 const messageV1: MessageV1 = {
 	id: "hello_world",
@@ -31,20 +32,19 @@ const messageV1: MessageV1 = {
 	selectors: [],
 };
 
-
-const bundle = {
+const bundle: BundleNested = {
 	id: "hello_world",
+	declarations: [],
 	messages: [
 		{
 			bundleId: "hello_world",
-			declarations: [],
 			id: "hello_world" + "_en",
 			locale: "en",
 			selectors: [],
 			variants: [
 				{
 					id: "hello_world" + "_en_1",
-					match: [],
+					match: {},
 					messageId: "hello_world" + "_en",
 					pattern: [
 						{
@@ -57,14 +57,13 @@ const bundle = {
 		},
 		{
 			bundleId: "hello_world",
-			declarations: [],
 			id: "hello_world" + "_de",
 			locale: "de",
 			selectors: [],
 			variants: [
 				{
 					id: "hello_world" + "_de_1",
-					match: [],
+					match: {},
 					messageId: "hello_world" + "_de",
 					pattern: [
 						{

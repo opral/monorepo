@@ -23,6 +23,7 @@ test("it should be able to delete", async () => {
 			meta: { id: "mock" },
 			value: {
 				id: "mock",
+				declarations: [],
 			} satisfies Bundle,
 		},
 		{
@@ -37,6 +38,7 @@ test("it should be able to delete", async () => {
 			},
 			value: {
 				id: "mock",
+				declarations: [],
 			} satisfies Bundle,
 		},
 		{
@@ -97,6 +99,7 @@ test("it should be able to upsert (insert & update)", async () => {
 			meta: { id: "mock" },
 			value: {
 				id: "mock",
+				declarations: [],
 			} satisfies Bundle,
 		},
 		{
@@ -111,6 +114,7 @@ test("it should be able to upsert (insert & update)", async () => {
 			},
 			value: {
 				id: "mock",
+				declarations: [],
 			} satisfies Bundle,
 		},
 	];

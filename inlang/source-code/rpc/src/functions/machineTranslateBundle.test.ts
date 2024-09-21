@@ -11,12 +11,12 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 			targetLocales: ["de", "fr", "en"],
 			bundle: {
 				id: "mock-bundle-id",
+				declarations: [],
 				messages: [
 					{
 						id: "mock-message-id",
 						bundleId: "mock-bundle-id",
 						locale: "en",
-						declarations: [],
 						selectors: [],
 						variants: [
 							{
@@ -138,12 +138,12 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 			targetLocales: ["de"],
 			bundle: {
 				id: "mock-bundle-id",
+				declarations: [],
 				messages: [
 					{
 						id: "mock-message-id",
 						bundleId: "mock-bundle-id",
 						locale: "en",
-						declarations: [],
 						selectors: [],
 						variants: [
 							{
@@ -283,13 +283,12 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 			targetLocales: ["de"],
 			bundle: {
 				id: "mockBundle",
-				alias: {},
+				declarations: [],
 				messages: [
 					{
 						id: "mockMessage",
 						bundleId: "mockBundle",
 						locale: "en",
-						declarations: [],
 						selectors: [],
 						variants: [
 							{
@@ -306,7 +305,7 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 						],
 					},
 				],
-			} as BundleNested,
+			},
 		})
 		const messages = result.data?.messages
 		const variants = messages?.flatMap((m) => m.variants)

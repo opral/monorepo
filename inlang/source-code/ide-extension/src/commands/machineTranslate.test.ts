@@ -60,12 +60,12 @@ vi.mock("@inlang/sdk2", () => ({
 
 const mockBundle: BundleNested = {
 	id: "validId",
+	declarations: [],
 	messages: [
 		{
 			id: "messageId",
 			bundleId: "validId",
 			locale: "en",
-			declarations: [],
 			selectors: [],
 			variants: [
 				{

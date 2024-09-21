@@ -22,7 +22,7 @@ export default class InlangPatternEditor extends LitElement {
 
 	// props
 	@property({ type: Object })
-	variant: Variant | undefined
+	variant: Variant
 
 	//state
 	@state()
@@ -119,8 +119,8 @@ export default class InlangPatternEditor extends LitElement {
 		this._patternState = stringToPattern({ text: textContent })
 		this.dispatchEvent(
 			createChangeEvent({
-				type: "Variant",
-				operation: "update",
+				entityId: this.variant.id,
+				entity: "variant",
 				newData: { ...this.variant, pattern: this._patternState } as Variant,
 			})
 		)

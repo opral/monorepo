@@ -3,10 +3,11 @@ import { customElement, property, state } from "lit/decorators.js"
 import { createChangeEvent } from "../../../helper/event.js"
 import { baseStyling } from "../../../styling/base.js"
 import {
-	createVariant,
 	type Message,
-	type MessageNested,
 	type Expression,
+	type Bundle,
+	type Variant,
+	uuidv4,
 	Declaration,
 } from "@inlang/sdk2"
 
@@ -161,10 +162,13 @@ export default class InlangAddSelector extends LitElement {
 	]
 
 	@property()
-	message?: MessageNested | undefined
+	bundle: Bundle
 
 	@property()
-	messages?: MessageNested | undefined
+	message: Message
+
+	@property()
+	variants: Variant[]
 
 	@state()
 	private _input: string | undefined
@@ -189,15 +193,16 @@ export default class InlangAddSelector extends LitElement {
 
 	private _getInputs = () => {
 		const inputs: Declaration[] = []
-		if (this.messages) {
-			for (const message of this.messages as unknown as Message[]) {
-				for (const declaration of message.declarations) {
-					if (declaration.type === "input" && !inputs.some((d) => d.name === declaration.name)) {
-						inputs.push(declaration)
-					}
-				}
+
+		for (const declaration of this.bundle.declarations) {
+			if (
+				declaration.type === "input-variable" &&
+				!inputs.some((d) => d.name === declaration.name)
+			) {
+				inputs.push(declaration)
 			}
 		}
+
 		return inputs
 	}
 
@@ -212,7 +217,7 @@ export default class InlangAddSelector extends LitElement {
 		if (this._input && this.message) {
 			// get variant matcher
 			const message = structuredClone(this.message)
-			const _variantsMatcher = (message ? message.variants : []).map((variant) => variant.match)
+			const _variantsMatcher = (message ? this.variants : []).map((variant) => variant.match)
 
 			// Step 1 | add selector to message
 			this._updateSelector()
@@ -234,30 +239,22 @@ export default class InlangAddSelector extends LitElement {
 
 	private _addInput = () => {
 		if (this._isNewInput && this._newInputSting && this._newInputSting.length > 0) {
-			for (const message of (this.messages as any as Message[]) || []) {
-				const newMessage = structuredClone(message)
-
-				newMessage.declarations.push({
-					type: "input",
-					name: this._newInputSting,
-					// value: {
-					// 	type: "expression",
-					// 	arg: {
-					// 		type: "variable",
-					// 		name: this._newInputSting,
-					// 	},
-					// },
+			this.dispatchEvent(
+				createChangeEvent({
+					entity: "bundle",
+					entityId: this.bundle.id,
+					newData: {
+						...this.bundle,
+						declarations: [
+							...this.bundle.declarations,
+							{
+								name: this._newInputSting,
+								type: "input-variable",
+							},
+						],
+					},
 				})
-
-				this.dispatchEvent(
-					createChangeEvent({
-						type: "Message",
-						operation: "update",
-						newData: newMessage,
-					})
-				)
-			}
-			this._input = this._newInputSting
+			)
 		}
 	}
 
@@ -266,19 +263,19 @@ export default class InlangAddSelector extends LitElement {
 			this.message.selectors.push({
 				type: "expression",
 				arg: {
-					type: "variable",
+					type: "variable-reference",
 					name: this._input,
 				},
 				annotation: {
-					type: "function",
+					type: "function-reference",
 					name: this._function || "plural",
 					options: [],
 				},
 			})
 			this.dispatchEvent(
 				createChangeEvent({
-					type: "Message",
-					operation: "update",
+					entityId: this.message.id,
+					entity: "message",
 					newData: this.message,
 				})
 			)
@@ -287,13 +284,13 @@ export default class InlangAddSelector extends LitElement {
 
 	private _addMatchToExistingVariants = () => {
 		if (this.message && this._input) {
-			for (const variant of this.message.variants) {
+			for (const variant of this.variants) {
 				variant.match[this._input] = "*"
 
 				this.dispatchEvent(
 					createChangeEvent({
-						type: "Variant",
-						operation: "update",
+						entityId: variant.id,
+						entity: "variant",
 						newData: variant,
 					})
 				)
@@ -301,19 +298,21 @@ export default class InlangAddSelector extends LitElement {
 		}
 	}
 
+	// TODO verify if this is needed from UX perspective.
 	private _addVariantsFromNewCombinations = (newCombinations: Array<Record<string, string>>) => {
 		if (this.message) {
 			for (const combination of newCombinations) {
-				const newVariant = createVariant({
+				const newVariant: Variant = {
+					id: uuidv4(),
+					pattern: [],
 					messageId: this.message.id,
 					match: combination,
-					text: "",
-				})
+				}
 
 				this.dispatchEvent(
 					createChangeEvent({
-						type: "Variant",
-						operation: "create",
+						entityId: newVariant.id,
+						entity: "variant",
 						newData: newVariant,
 					})
 				)

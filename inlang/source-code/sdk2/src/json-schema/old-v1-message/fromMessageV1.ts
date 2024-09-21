@@ -3,7 +3,7 @@ import type {
 	MessageNested,
 	Variant,
 } from "../../database/schema.js";
-import type { Declaration, Expression, Pattern } from "../pattern.js";
+import type { Declaration, Pattern } from "../pattern.js";
 import type { MessageV1, PatternV1 } from "./schemaV1.js";
 
 /**
@@ -18,6 +18,8 @@ export function fromMessageV1(messageV1: MessageV1): BundleNested {
 		...new Set(messageV1.variants.map((variant) => variant.languageTag)),
 	];
 
+	const declarations = new Set<Declaration>();
+
 	const messages: MessageNested[] = languages.map((language): MessageNested => {
 		const messageId = bundleId + "_" + language;
 		//All variants that will be part of this message
@@ -30,14 +32,6 @@ export function fromMessageV1(messageV1: MessageV1): BundleNested {
 		for (const v1Selector of messageV1.selectors ?? []) {
 			selectorNames.add(v1Selector.name);
 		}
-		const selectors: Expression[] = [...selectorNames].map((name) => ({
-			type: "expression",
-			annotation: undefined,
-			arg: {
-				type: "variable",
-				name: name,
-			},
-		}));
 
 		//The set of variables that need to be defined - Certainly includes the selectors
 		const variableNames = new Set<string>(selectorNames);
@@ -51,8 +45,8 @@ export function fromMessageV1(messageV1: MessageV1): BundleNested {
 			}
 
 			variants.push({
-				// @ts-expect-error - matching was not supported. no problem should arise
-				match: v1Variant.match,
+				// matching was not supported. no problem should arise
+				match: {},
 				pattern: fromPatternV1(v1Variant.pattern),
 				id: messageId + "_" + variantIndex,
 				messageId: messageId,
@@ -61,31 +55,25 @@ export function fromMessageV1(messageV1: MessageV1): BundleNested {
 		}
 
 		//Create an input declaration for each variable and selector we need
-		const declarations: Declaration[] = [...variableNames].map((name) => ({
-			type: "input",
-			name,
-			value: {
-				type: "expression",
-				annotation: undefined,
-				arg: {
-					type: "variable",
-					name,
-				},
-			},
-		}));
+		for (const variable of variableNames) {
+			declarations.add({
+				type: "input-variable",
+				name: variable,
+			});
+		}
 
 		return {
 			id: messageId,
 			bundleId: bundleId,
 			locale: language,
-			declarations,
-			selectors,
+			selectors: [],
 			variants,
 		};
 	});
 
 	return {
 		id: bundleId,
+		declarations: [...declarations],
 		messages,
 	};
 }
@@ -102,7 +90,7 @@ function fromPatternV1(pattern: PatternV1): Pattern {
 				return {
 					type: "expression",
 					arg: {
-						type: "variable",
+						type: "variable-reference",
 						name: element.name,
 					},
 				};

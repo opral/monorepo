@@ -3,21 +3,31 @@ import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import { Declaration, Expression, Pattern } from "../json-schema/pattern.js";
 
 export function applySchema(args: { sqlite: SqliteDatabase }) {
-	const foreignKeys: any = args.sqlite.exec("PRAGMA foreign_keys");
-	if (foreignKeys["foreign_keys"] === 0) {
-		args.sqlite.exec("PRAGMA foreign_keys = ON");
-	}
+	// TODO re-enable https://github.com/opral/inlang-sdk/issues/209
+	// const foreignKeyActivated: any = args.sqlite.exec("PRAGMA foreign_keys", {
+	// 	returnValue: "resultRows",
+	// });
+	// if (
+	// 	// first row that is returned
+	// 	// first column of the first row
+	// 	// is equal to 0, then foreign keys are disabled
+	// 	foreignKeyActivated[0][0] === 0
+	// ) {
+	// 	args.sqlite.exec("PRAGMA foreign_keys = ON", {
+	// 		returnValue: "resultRows",
+	// 	});
+	// }
 
 	args.sqlite.exec(`
 CREATE TABLE IF NOT EXISTS bundle (
-  id TEXT PRIMARY KEY DEFAULT (human_id())
+  id TEXT PRIMARY KEY DEFAULT (human_id()),
+	declarations BLOB NOT NULL DEFAULT (jsonb('[]'))
 ) strict;
 
 CREATE TABLE IF NOT EXISTS message (
   id TEXT PRIMARY KEY DEFAULT (uuid_v7()), 
   bundle_id TEXT NOT NULL,
   locale TEXT NOT NULL,
-  declarations BLOB NOT NULL DEFAULT (jsonb('[]')),
   selectors BLOB NOT NULL DEFAULT (jsonb('[]')),
   FOREIGN KEY (bundle_id) REFERENCES bundle(id) ON DELETE CASCADE
 ) strict;
@@ -44,20 +54,19 @@ export type InlangDatabaseSchema = {
 
 type BundleTable = {
 	id: Generated<string>;
+	declarations: Generated<Array<Declaration>>;
 };
 
 type MessageTable = {
 	id: Generated<string>;
-	bundleId: Generated<string>;
+	bundleId: string;
 	locale: string;
-	declarations: Generated<Array<Declaration>>;
 	selectors: Generated<Array<Expression>>;
 };
 
 type VariantTable = {
 	id: Generated<string>;
 	messageId: string;
-	
 	match: Generated<Record<string, string>>;
 	pattern: Generated<Pattern>;
 };
