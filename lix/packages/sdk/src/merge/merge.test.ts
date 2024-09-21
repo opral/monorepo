@@ -505,3 +505,135 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 	expect(commits.length).toBe(1);
 	expect(changes[0]?.commit_id).toBe("commit-1");
 });
+
+test("it should copy discussion and related comments and mappings", async () => {
+	const mockPlugin: LixPlugin = {
+		key: "mock-plugin",
+		glob: "*",
+		diff: {
+			file: async ({ old }) => {
+				return [
+					!old
+						? {
+								type: "text",
+								operation: "create",
+								old: undefined,
+								neu: {
+									id: "test",
+									text: "inserted text",
+								},
+							}
+						: {
+								type: "text",
+								operation: "update",
+								old: {
+									id: "test",
+									text: "inserted text",
+								},
+								neu: {
+									id: "test",
+									text: "updated text",
+								},
+							},
+				];
+			},
+		},
+		detectConflicts: vi.fn().mockResolvedValue([]),
+		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
+	};
+	const lix1 = await openLixInMemory({
+		blob: await newLixFile(),
+		providePlugins: [mockPlugin],
+	});
+
+	lix1.currentAuthor.set("Test User");
+
+	const enc = new TextEncoder();
+
+	await lix1.db
+		.insertInto("file")
+		.values({ id: "test", path: "test.txt", data: enc.encode("test") })
+		.execute();
+
+	await lix1.settled();
+
+	// The files have to be there before we merge
+	const lix2 = await openLixInMemory({
+		blob: await lix1.toBlob(),
+		providePlugins: [mockPlugin],
+	});
+
+	lix2.currentAuthor.set("Test User 2");
+
+	const changes = await lix1.db.selectFrom("change").selectAll().execute();
+
+	// console.log(await lix.db.selectFrom("queue").selectAll().execute());
+
+	expect(changes).toEqual([
+		{
+			id: changes[0]?.id,
+			author: "Test User",
+			created_at: changes[0]?.created_at,
+			parent_id: null,
+			type: "text",
+			file_id: "test",
+			plugin_key: "mock-plugin",
+			value: {
+				id: "test",
+				text: "inserted text",
+			},
+			meta: null,
+			commit_id: null,
+			operation: "create",
+		},
+	]);
+
+	await lix1.createDiscussion({
+		changeIds: [changes[0]!.id],
+		body: "comment on a change",
+	});
+
+	await merge({ sourceLix: lix1, targetLix: lix2 });
+
+	const commentsLix2AfterMerge = await lix2.db
+		.selectFrom("comment")
+		.selectAll()
+		.execute();
+	const commentsLix1 = await lix1.db
+		.selectFrom("comment")
+		.selectAll()
+		.execute();
+
+	// lix 2 has no comments yet so after lix 1 into 2 we should be in sync
+	expect(commentsLix1).toEqual(commentsLix2AfterMerge);
+
+	await lix2.addComment({
+		parentCommentId: commentsLix2AfterMerge[0]!.id,
+		body: "wrote in lix 2",
+	});
+	await lix1.addComment({
+		parentCommentId: commentsLix2AfterMerge[0]!.id,
+		body: "wrote in lix 1",
+	});
+
+	const commentsLix1OnSecondMerge = await lix1.db
+		.selectFrom("comment")
+		.selectAll()
+		.execute();
+
+	await merge({ sourceLix: lix1, targetLix: lix2 });
+
+	const commentsLix2AfterSecondMerge = await lix2.db
+		.selectFrom("comment")
+		.selectAll()
+		.execute();
+
+	// lix should know the ne comment from lix 1 but lix 1 should miss the new comment in lix2
+	expect(commentsLix2AfterSecondMerge.length).toBe(
+		commentsLix1OnSecondMerge.length + 1,
+	);
+
+	await merge({ sourceLix: lix1, targetLix: lix2 });
+
+	// TODO add test for discussions and discussion maps
+});
