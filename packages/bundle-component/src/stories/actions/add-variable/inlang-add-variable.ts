@@ -10,8 +10,8 @@ import SlInput from "@shoelace-style/shoelace/dist/components/input/input.compon
 if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)
 if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
 
-@customElement("inlang-add-input")
-export default class InlangAddInput extends LitElement {
+@customElement("inlang-add-variable")
+export default class InlangAddVariable extends LitElement {
 	static override styles = [
 		baseStyling,
 		css`
@@ -74,12 +74,7 @@ export default class InlangAddInput extends LitElement {
 
 	//state
 	@state()
-	private _newInput: string | undefined
-
-	override async firstUpdated() {
-		await this.updateComplete
-		this._newInput = ""
-	}
+	private _newInput: string = ""
 
 	override render() {
 		return html`
@@ -102,7 +97,7 @@ export default class InlangAddInput extends LitElement {
 				<div class="dropdown-container">
 					<div class="dropdown-item">
 						<div class="dropdown-header">
-							<p class="dropdown-title">Add input</p>
+							<p class="dropdown-title">Add variable</p>
 						</div>
 						<sl-input
 							size="small"
@@ -163,7 +158,7 @@ export default class InlangAddInput extends LitElement {
 								d="M140 180a12 12 0 1 1-12-12a12 12 0 0 1 12 12M128 72c-22.06 0-40 16.15-40 36v4a8 8 0 0 0 16 0v-4c0-11 10.77-20 24-20s24 9 24 20s-10.77 20-24 20a8 8 0 0 0-8 8v8a8 8 0 0 0 16 0v-.72c18.24-3.35 32-17.9 32-35.28c0-19.85-17.94-36-40-36m104 56A104 104 0 1 1 128 24a104.11 104.11 0 0 1 104 104m-16 0a88 88 0 1 0-88 88a88.1 88.1 0 0 0 88-88"
 							/>
 						</svg>
-						<p>As soon as added this input can be used in all messages of the bundle.</p>
+						<p>The variable can be be used in all messages of this bundle.</p>
 					</div>
 				</div>
 			</sl-dropdown>
@@ -173,6 +168,6 @@ export default class InlangAddInput extends LitElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		"inlang-add-input": InlangAddInput
+		"inlang-add-variable": InlangAddVariable
 	}
 }
