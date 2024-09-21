@@ -4,7 +4,7 @@ import type { Pattern } from "@inlang/sdk2"
 
 describe("stringToPattern", () => {
 	it("Should transform string to pattern", () => {
-		const text = "Hello, {{name}}!"
+		const text = "Hello, {name}!"
 
 		const pattern = stringToPattern({ text })
 
@@ -16,7 +16,7 @@ describe("stringToPattern", () => {
 			{
 				type: "expression",
 				arg: {
-					type: "variable",
+					type: "variable-reference",
 					name: "name",
 				},
 			},

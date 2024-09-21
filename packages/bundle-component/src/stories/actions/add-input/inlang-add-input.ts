@@ -1,7 +1,7 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { createChangeEvent } from "../../../helper/event.js"
-import type { Message } from "@inlang/sdk2"
+import type { Bundle } from "@inlang/sdk2"
 import { baseStyling } from "../../../styling/base.js"
 
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
@@ -69,8 +69,8 @@ export default class InlangAddInput extends LitElement {
 		`,
 	]
 
-	@property({ type: Array })
-	messages: Message[] | undefined
+	@property({ type: Object })
+	bundle: Bundle
 
 	//state
 	@state()
@@ -114,29 +114,22 @@ export default class InlangAddInput extends LitElement {
 							@keydown=${(e: KeyboardEvent) => {
 								if (e.key === "Enter") {
 									if (this._newInput && this._newInput.trim() !== "") {
-										for (const message of this.messages ?? []) {
-											const newMessage = structuredClone(message)
-
-											newMessage.declarations.push({
-												type: "input",
-												name: this._newInput!,
-												// value: {
-												// 	type: "expression",
-												// 	arg: {
-												// 		type: "variable",
-												// 		name: this._newInput!,
-												// 	},
-												// },
+										this.dispatchEvent(
+											createChangeEvent({
+												entityId: this.bundle.id,
+												entity: "bundle",
+												newData: {
+													...this.bundle,
+													declarations: [
+														...this.bundle.declarations,
+														{
+															name: this._newInput,
+															type: "input-variable",
+														},
+													],
+												},
 											})
-
-											this.dispatchEvent(
-												createChangeEvent({
-													type: "Message",
-													operation: "update",
-													newData: newMessage,
-												})
-											)
-										}
+										)
 									}
 
 									this._newInput = ""

@@ -10,6 +10,14 @@ import type { Expression, Text } from "./json-schema/pattern.js";
 
 /**
  * create v2 Bundle with a random human ID
+ * 
+ * @deprecated
+ * 
+ * use the database directly
+ * 
+ * - less code because the database has default values
+ * - `createMessage` is misleading because it does not treat expressions in the text
+ * 
  * @example createBundle({
  *   messages: [
  * 		 createMessage({locale: "en", text: "Hello world!"})
@@ -28,6 +36,22 @@ export function createBundle(args: {
 }
 
 /**
+ * 
+ * @deprecated 
+ * use the database directly
+ * 
+ * - text will always be a string, no matter
+ *   if an expression is provided like hello "{username}"
+ * - the database has default values 
+ * 
+ * ```
+ * await project.db.insertInto("message").values({
+ * 		bundleId: "bundleId",
+ *    pattern: []
+ * 		...
+ * })
+ * ```
+ * 
  * create v2 Messsage AST with a randomId, and text-only pattern
  * @example createMessage({locale: "en", text: "Hello world"})
  */
@@ -43,7 +67,6 @@ export function createMessage(args: {
 		id: messageId,
 		locale: args.locale,
 		selectors: [],
-		declarations: [],
 		variants: [
 			createVariant({
 				messageId: messageId,
@@ -55,6 +78,14 @@ export function createMessage(args: {
 }
 
 /**
+ * 
+ * @deprecated
+ * 
+ * use the database directly
+ * 
+ * - less code because the database has default values
+ * - `text` is misleading because it does not treat expressions in the text
+ * 
  * create v2 Variant AST with text-only pattern
  * @example createVariant({match: ["*"], text: "Hello world"})
  */

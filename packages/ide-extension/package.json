@@ -228,7 +228,7 @@
 		"vscode:prepublish": "npm run build",
 		"---- TEST ----------------------------------------------------------": "",
 		"pretest": "node ./build.js",
-		"test": "vitest run",
+		"test": "tsc --noEmit && vitest run",
 		"test:watch": "vitest",
 		"test:e2e": "npm run pretest && wdio run ./test/wdio.conf.ts",
 		"---- LINT ----------------------------------------------------------": "",

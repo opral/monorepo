@@ -66,7 +66,7 @@ describe("editMessageCommand", () => {
 	})
 
 	it("should show a message if the message is not found", async () => {
-		const mockBundle = { id: "testBundle", messages: [] }
+		const mockBundle = { id: "testBundle", declarations: [], messages: [] }
 
 		vi.mocked(state).mockReturnValue({
 			project: {

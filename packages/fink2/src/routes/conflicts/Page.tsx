@@ -5,7 +5,6 @@ import {
 	unresolvedConflictsAtom,
 	projectAtom,
 	conflictingChangesAtom,
-	forceReloadProjectAtom,
 } from "../../state.ts";
 import { useNavigate } from "react-router-dom";
 import timeAgo from "../../helper/timeAgo.ts";
@@ -13,16 +12,14 @@ import {
 	InlangPatternEditor,
 	InlangVariant,
 } from "../../components/SingleDiffBundle.tsx";
-import { resolveConflictBySelecting } from "@inlang/sdk2";
+import { resolveConflictBySelecting, Variant } from "@inlang/sdk2";
 import { useEffect } from "react";
-import { Variant } from "@inlang/sdk2";
 
 export default function Page() {
 	const [project] = useAtom(projectAtom);
 	const [unresolvedConflicts] = useAtom(unresolvedConflictsAtom);
 	const [bundlesNested] = useAtom(bundlesNestedAtom);
 	const [conflictingChanges] = useAtom(conflictingChangesAtom);
-	const [, setForceReloadProject] = useAtom(forceReloadProjectAtom);
 
 	const navigate = useNavigate();
 
@@ -96,14 +93,14 @@ export default function Page() {
 												)}`}</p>
 												<div className="relative border border-zinc-300 rounded-lg overflow-hidden">
 													<InlangVariant
-														bundleId={bundleId}
-														variant={change.value}
+														variant={change.value as Variant}
 														className="pointer-events-none conflict-variant"
+														// @ts-expect-error - noHistory is not a valid prop
 														noHistory={true}
 													>
 														<InlangPatternEditor
 															slot="pattern-editor"
-															variant={change.value}
+															variant={change.value as Variant}
 															className={"conflict-pattern"}
 														></InlangPatternEditor>
 													</InlangVariant>
@@ -144,14 +141,14 @@ export default function Page() {
 												)}`}</p>
 												<div className="relative border border-zinc-300 rounded-lg overflow-hidden">
 													<InlangVariant
-														bundleId={bundleId}
-														variant={conflictingChange.value}
+														variant={conflictingChange.value as Variant}
 														className={"pointer-events-none conflict-variant"}
+														// @ts-expect-error - noHistory is not a valid prop
 														noHistory={true}
 													>
 														<InlangPatternEditor
 															slot="pattern-editor"
-															variant={conflictingChange.value}
+															variant={conflictingChange.value as Variant}
 															className={"conflict-pattern"}
 														></InlangPatternEditor>
 													</InlangVariant>

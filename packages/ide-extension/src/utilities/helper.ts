@@ -6,6 +6,8 @@ export const getExtensionApi = async (): Promise<IdeExtensionConfig | undefined>
 		?.meta?.["app.inlang.ideExtension"] as IdeExtensionConfig | undefined
 
 /**
+ *
+ * @deprecated
  * Not needed anymore but left in to reduce refactoring https://github.com/opral/monorepo/pull/3137
  */
 export const getSelectedBundleByBundleIdOrAlias = async (bundleIdOrAlias: string) => {

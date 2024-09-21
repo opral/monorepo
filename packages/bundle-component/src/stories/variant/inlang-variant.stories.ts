@@ -5,8 +5,9 @@ import type { Meta, StoryObj } from "@storybook/web-components"
 //@ts-ignore
 import { useArgs } from "@storybook/preview-api"
 import { html } from "lit"
-import { pluralBundle, type Variant } from "@inlang/sdk2"
-import { type DispatchChangeInterface } from "../../helper/event.ts"
+import { type Variant } from "@inlang/sdk2"
+import { type ChangeEventDetail } from "../../helper/event.ts"
+import { examplePlural } from "../../mock/pluralBundle.ts"
 
 const meta: Meta = {
 	component: "inlang-variant",
@@ -20,19 +21,19 @@ export default meta
 
 export const Example: StoryObj = {
 	args: {
-		variant: pluralBundle.messages[0].variants[2],
+		variant: examplePlural.variants[2],
 	},
 	render: () => {
 		const [{ variant }, updateArgs] = useArgs()
 		const handleChange = (e) => {
-			const data = e.detail.argument as DispatchChangeInterface
-			if (data.operation === "delete") {
-				// delete variant
+			const change = e.detail as ChangeEventDetail
+			// delete variant
+			if (change.newData === undefined) {
 				updateArgs({ variant: undefined })
-			} else if (data.newData) {
-				updateArgs({ variant: data.newData as Variant })
+			} else {
+				updateArgs({ variant: change.newData as Variant })
 			}
-			console.info(data.type, data.operation, data.newData)
+			console.info(change)
 		}
 
 		return html`<inlang-variant .variant=${variant} @change=${handleChange}>
@@ -43,19 +44,19 @@ export const Example: StoryObj = {
 
 export const VariantInMessage: StoryObj = {
 	args: {
-		variant: pluralBundle.messages[0].variants[2],
+		variant: examplePlural.variants[2],
 	},
 	render: () => {
 		const [{ variant }, updateArgs] = useArgs()
 		const handleChange = (e) => {
-			const data = e.detail.argument as DispatchChangeInterface
-			if (data.operation === "delete") {
-				// delete variant
+			const change = e.detail as ChangeEventDetail
+			// delete variant
+			if (change.newData === undefined) {
 				updateArgs({ variant: undefined })
-			} else if (data.newData) {
-				updateArgs({ variant: data.newData as Variant })
+			} else {
+				updateArgs({ variant: change.newData as Variant })
 			}
-			console.info(data.type, data.operation, data.newData)
+			console.info(change)
 		}
 
 		return html`<inlang-message>

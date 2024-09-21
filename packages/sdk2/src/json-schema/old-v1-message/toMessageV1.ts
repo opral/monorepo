@@ -1,5 +1,4 @@
 import type { BundleNested } from "../../database/schema.js";
-import type { InlangPlugin } from "../../plugin/schema.js";
 import type { Expression, Pattern } from "../pattern.js";
 import type {
 	ExpressionV1,
@@ -76,7 +75,7 @@ function toV1Expression(expression: Expression): ExpressionV1 {
 			"Cannot convert an expression with an annotation to the v1 format"
 		);
 
-	if (expression.arg.type !== "variable") {
+	if (expression.arg.type !== "variable-reference") {
 		throw new Error("Can only convert variable references to the v1 format");
 	}
 
