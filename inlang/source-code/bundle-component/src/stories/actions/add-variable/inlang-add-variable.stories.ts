@@ -1,12 +1,12 @@
-import "./inlang-add-input.ts"
-import "./../../inlang-bundle.ts"
+import "./inlang-add-variable.ts"
+import "../../inlang-bundle.ts"
 import type { Meta, StoryObj } from "@storybook/web-components"
 import { html } from "lit"
 import { examplePlural } from "../../../mock/pluralBundle.ts"
 
 const meta: Meta = {
-	component: "inlang-add-input",
-	title: "Public/Actions/inlang-add-input",
+	component: "inlang-add-variable",
+	title: "Public/Actions/inlang-add-variable",
 	argTypes: {
 		messages: { control: "object" },
 	},
@@ -22,7 +22,7 @@ export const Example: StoryObj = {
 				}
 			</style>
 			<div class="container">
-				<inlang-add-input bundle=${examplePlural.bundles[0]}>Press me</inlang-add-input>
+				<inlang-add-variable bundle=${examplePlural.bundles[0]}>Press me</inlang-add-variable>
 			</div>`
 	},
 }

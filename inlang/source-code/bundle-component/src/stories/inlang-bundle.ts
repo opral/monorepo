@@ -17,7 +17,7 @@ if (!customElements.get("sl-menu")) customElements.define("sl-menu", SlMenu)
 if (!customElements.get("sl-menu-item")) customElements.define("sl-menu-item", SlMenuItem)
 
 //components
-import "./actions/add-input/inlang-add-input.js"
+import "./actions/add-variable/inlang-add-variable.js"
 
 //helpers
 import { baseStyling } from "../styling/base.js"
@@ -63,20 +63,20 @@ export default class InlangBundle extends LitElement {
 				display: flex;
 				flex-direction: column;
 			}
-			.inputs-wrapper {
+			.variables-wrapper {
 				display: flex;
 				align-items: center;
 				min-height: 44px;
 				gap: 8px;
 				color: var(--sl-input-color);
 			}
-			.inputs {
+			.variables {
 				display: flex;
 				align-items: center;
 				min-height: 44px;
 				gap: 1px;
 			}
-			.input-tag::part(base) {
+			.variable-tag::part(base) {
 				height: 28px;
 				font-weight: 500;
 				cursor: pointer;
@@ -170,15 +170,15 @@ export default class InlangBundle extends LitElement {
 
 					<div class="header-right">
 						${this.bundle.declarations.length > 0
-							? html`<div class="inputs-wrapper">
-									Inputs:
-									<div class="inputs">
+							? html`<div class="variables-wrapper">
+									Variables:
+									<div class="variables">
 										${this.bundle.declarations.map(
 											(declaration) =>
 												html`<sl-dropdown
 													><sl-button
 														slot="trigger"
-														class="input-tag"
+														class="variable-tag"
 														variant="neutral"
 														size="small"
 														>${declaration.name}</sl-button
@@ -205,8 +205,8 @@ export default class InlangBundle extends LitElement {
 													</sl-menu>
 												</sl-dropdown>`
 										)}
-										<inlang-add-input .bundle=${this.bundle}>
-											<sl-tooltip content="Add input to message bundle">
+										<inlang-add-variable .bundle=${this.bundle}>
+											<sl-tooltip content="Add a variable to this bundle">
 												<sl-button class="text-button" variant="neutral" size="small"
 													><svg
 														viewBox="0 0 24 24"
@@ -221,12 +221,12 @@ export default class InlangBundle extends LitElement {
 														></path></svg
 												></sl-button>
 											</sl-tooltip>
-										</inlang-add-input>
+										</inlang-add-variable>
 									</div>
 							  </div>`
-							: html`<div class="inputs-wrapper">
-									<inlang-add-input .bundle=${this.bundle}>
-										<sl-tooltip content="Add input to message bundle">
+							: html`<div class="variables-wrapper">
+									<inlang-add-variable .bundle=${this.bundle}>
+										<sl-tooltip content="Add a variable to this bundle">
 											<sl-button class="text-button" variant="text" size="small"
 												><svg
 													viewBox="0 0 24 24"
@@ -239,10 +239,10 @@ export default class InlangBundle extends LitElement {
 														fill="currentColor"
 														d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"
 													></path></svg
-												>Input</sl-button
+												>New variable</sl-button
 											>
 										</sl-tooltip>
-									</inlang-add-input>
+									</inlang-add-variable>
 							  </div>`}
 						${this._bundleActionsPresent
 							? html`<div class="separator"></div>
