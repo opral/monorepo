@@ -31,16 +31,8 @@ export const examplePlural: {
 			locale: "de",
 			selectors: [
 				{
-					type: "expression",
-					arg: {
-						type: "variable-reference",
-						name: "numProducts",
-					},
-					annotation: {
-						type: "function-reference",
-						name: "plural",
-						options: [],
-					},
+					type: "variable-reference",
+					name: "numProducts",
 				},
 			],
 		},
@@ -50,16 +42,8 @@ export const examplePlural: {
 			locale: "en",
 			selectors: [
 				{
-					type: "expression",
-					arg: {
-						type: "variable-reference",
-						name: "numProducts",
-					},
-					annotation: {
-						type: "function-reference",
-						name: "plural",
-						options: [],
-					},
+					type: "variable-reference",
+					name: "numProducts",
 				},
 			],
 		},

@@ -1,6 +1,10 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
-import { Declaration, Expression, Pattern } from "../json-schema/pattern.js";
+import {
+	Declaration,
+	Pattern,
+	VariableReference,
+} from "../json-schema/pattern.js";
 
 export function applySchema(args: { sqlite: SqliteDatabase }) {
 	// TODO re-enable https://github.com/opral/inlang-sdk/issues/209
@@ -61,7 +65,7 @@ type MessageTable = {
 	id: Generated<string>;
 	bundleId: string;
 	locale: string;
-	selectors: Generated<Array<Expression>>;
+	selectors: Generated<Array<VariableReference>>;
 };
 
 type VariantTable = {
