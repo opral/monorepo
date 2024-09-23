@@ -29,13 +29,13 @@ export const exampleWithoutSelectors: {
 		{
 			messageId: "message-id-en",
 			id: "variant-id-en-*",
-			match: {},
+			matches: [],
 			pattern: [{ type: "text", value: "{count} new messages" }],
 		},
 		{
 			messageId: "message-id-de",
 			id: "variant-id-de-*",
-			match: {},
+			matches: [],
 			pattern: [{ type: "text", value: "{count} neue Nachrichten" }],
 		},
 	],

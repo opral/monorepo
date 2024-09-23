@@ -71,7 +71,7 @@ const mockBundle: BundleNested = {
 				{
 					id: "variantId",
 					messageId: "messageId",
-					match: {},
+					matches: [],
 					pattern: [
 						{
 							type: "text",

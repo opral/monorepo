@@ -75,7 +75,7 @@ test("variant default values", async () => {
 		.executeTakeFirstOrThrow();
 
 	expect(isUuid(variant.id)).toBe(true);
-	expect(variant.match).toStrictEqual({});
+	expect(variant.matches).toStrictEqual([]);
 	expect(variant.pattern).toStrictEqual([]);
 });
 

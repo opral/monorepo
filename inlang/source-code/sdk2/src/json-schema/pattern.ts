@@ -9,7 +9,7 @@ export const VariableReference = Type.Object({
 export type Literal = Static<typeof Literal>;
 export const Literal = Type.Object({
 	type: Type.Literal("literal"),
-	name: Type.String(),
+	value: Type.String(),
 });
 
 export type Option = Static<typeof Option>;

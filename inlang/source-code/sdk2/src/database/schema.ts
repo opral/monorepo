@@ -2,6 +2,7 @@ import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import {
 	Declaration,
+	Literal,
 	Pattern,
 	VariableReference,
 } from "../json-schema/pattern.js";
@@ -40,7 +41,7 @@ CREATE TABLE IF NOT EXISTS message (
 CREATE TABLE IF NOT EXISTS variant (
   id TEXT PRIMARY KEY DEFAULT (uuid_v7()), 
   message_id TEXT NOT NULL,
-  match BLOB NOT NULL DEFAULT (jsonb('{}')),
+  matches BLOB NOT NULL DEFAULT (jsonb('[]')),
   pattern BLOB NOT NULL DEFAULT (jsonb('[]')),
   FOREIGN KEY (message_id) REFERENCES message(id) ON DELETE CASCADE
 ) strict;
@@ -71,8 +72,22 @@ type MessageTable = {
 type VariantTable = {
 	id: Generated<string>;
 	messageId: string;
-	match: Generated<Record<string, string>>;
+	matches: Generated<Array<Match>>;
 	pattern: Generated<Pattern>;
+};
+
+/**
+ * A match is a variable reference that is either a literal or a catch-all.
+ *
+ * https://github.com/opral/inlang-sdk/issues/205
+ *
+ * @example
+ *   match = { type: "match", name: "gender", value: { type: "literal", value: "male"  }}
+ */
+export type Match = {
+	type: "match";
+	name: VariableReference["name"];
+	value: Literal | { type: "catch-all" };
 };
 
 export type Bundle = Selectable<BundleTable>;
