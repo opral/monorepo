@@ -1,6 +1,11 @@
 import Layout from "../../layout.tsx";
 import { useAtom } from "jotai";
-import { authorNameAtom, csvDataAtom, projectAtom } from "../../state.ts";
+import {
+	authorNameAtom,
+	csvDataAtom,
+	projectAtom,
+	// selectedProjectPathAtom,
+} from "../../state.ts";
 import TableEditor from "../../components/TableEditor.tsx";
 import { useEffect, useState } from "react";
 import { UserAuthDialog } from "../../components/UserAuthDialog.tsx";
@@ -12,6 +17,7 @@ export default function App() {
 	const [csvData] = useAtom(csvDataAtom);
 	// const [commits] = useAtom(commitsAtom);
 	const [authorName] = useAtom(authorNameAtom);
+	// const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
 	const [project] = useAtom(projectAtom);
 
 	const [showAuthorDialog, setShowAuthorDialog] = useState(false);
@@ -36,6 +42,23 @@ export default function App() {
 		}
 	}, [authorName, project, csvData]);
 
+	// const handleDownload = async () => {
+	// 	const blob = await project!.toBlob();
+	// 	const blobUrl = URL.createObjectURL(blob);
+	// 	const link = document.createElement("a");
+	// 	link.href = blobUrl;
+	// 	link.download = selectedProjectPath!;
+	// 	document.body.appendChild(link);
+	// 	link.dispatchEvent(
+	// 		new MouseEvent("click", {
+	// 			bubbles: true,
+	// 			cancelable: true,
+	// 			view: window,
+	// 		})
+	// 	);
+	// 	document.body.removeChild(link);
+	// };
+
 	return (
 		<>
 			<Layout setShowImportDialog={setShowImportDialog}>
@@ -53,6 +76,7 @@ export default function App() {
 				showWelcomeDialog={showWelcomeDialog}
 				setShowWelcomeDialog={setShowWelcomeDialog}
 			/>
+			{/* <button onClick={handleDownload}>Download</button> */}
 		</>
 	);
 }
