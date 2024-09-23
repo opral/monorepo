@@ -1,4 +1,4 @@
-import type { MessageNested, NewBundleNested, Variant } from "@inlang/sdk2"
+import { type MessageNested, type NewBundleNested, type Variant } from "@inlang/sdk2"
 import { type plugin } from "../plugin.js"
 
 export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({ files }) => {
@@ -9,6 +9,7 @@ export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({
 		if (bundlesIndex[message.bundleId] === undefined) {
 			bundlesIndex[message.bundleId] = {
 				id: message.bundleId,
+				declarations: [],
 				messages: [message],
 			}
 		} else {
@@ -53,7 +54,6 @@ function parseMessage(args: {
 	return {
 		id: messageId,
 		bundleId: args.key,
-		declarations: [],
 		selectors: [],
 		locale: args.locale,
 		variants,
@@ -101,7 +101,7 @@ function parsePattern(value: string): Variant["pattern"] {
 		// it's an expression (only supporting variables for now)
 		else {
 			const variableName = part.slice(1, -1)
-			pattern.push({ type: "expression", arg: { type: "variable", name: variableName } })
+			pattern.push({ type: "expression", arg: { type: "variable-reference", name: variableName } })
 		}
 	}
 

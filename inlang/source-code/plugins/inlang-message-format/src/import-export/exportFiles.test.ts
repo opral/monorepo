@@ -19,13 +19,13 @@ test("it handles single variants without expressions", async () => {
 
 	const mockBundle = {
 		id: "some_happy_cat",
+		declarations: [],
 		messages: [
 			{
 				id: "some_happy_cat_en",
 				bundleId: "some_happy_cat",
 				locale: "en",
 				selectors: [],
-				declarations: [],
 				variants: [
 					{
 						id: "some_happy_cat_en",
@@ -75,13 +75,13 @@ test("it handles multi variants", async () => {
 
 	const mockBundle: BundleNested = {
 		id: "some_happy_cat",
+		declarations: [],
 		messages: [
 			{
 				id: "some_happy_cat_en",
 				bundleId: "some_happy_cat",
 				locale: "en",
 				selectors: [],
-				declarations: [],
 				variants: [
 					{
 						id: "some_happy_cat_en;platform=android,userGender=male",
@@ -93,7 +93,7 @@ test("it handles multi variants", async () => {
 						pattern: [
 							{
 								type: "expression",
-								arg: { type: "variable", name: "username" },
+								arg: { type: "variable-reference", name: "username" },
 							},
 							{
 								type: "text",
@@ -111,7 +111,7 @@ test("it handles multi variants", async () => {
 						pattern: [
 							{
 								type: "expression",
-								arg: { type: "variable", name: "username" },
+								arg: { type: "variable-reference", name: "username" },
 							},
 							{
 								type: "text",
@@ -167,13 +167,13 @@ test("it handles variable expressions in patterns", async () => {
 
 	const mockBundle = {
 		id: "some_happy_cat",
+		declarations: [],
 		messages: [
 			{
 				id: "some_happy_cat_en",
 				bundleId: "some_happy_cat",
 				locale: "en",
 				selectors: [],
-				declarations: [],
 				variants: [
 					{
 						id: "some_happy_cat_en",
@@ -181,9 +181,9 @@ test("it handles variable expressions in patterns", async () => {
 						messageId: "some_happy_cat_en",
 						pattern: [
 							{ type: "text", value: "Used by " },
-							{ type: "expression", arg: { type: "variable", name: "count" } },
+							{ type: "expression", arg: { type: "variable-reference", name: "count" } },
 							{ type: "text", value: " devs, " },
-							{ type: "expression", arg: { type: "variable", name: "numDesigners" } },
+							{ type: "expression", arg: { type: "variable-reference", name: "numDesigners" } },
 							{ type: "text", value: " designers and translators" },
 						],
 					},
@@ -217,13 +217,13 @@ test("it assigns the correct locales to files", async () => {
 
 	const mockBundle: BundleNested = {
 		id: "some_happy_cat",
+		declarations: [],
 		messages: [
 			{
 				id: "some_happy_cat_en",
 				bundleId: "some_happy_cat",
 				locale: "en",
 				selectors: [],
-				declarations: [],
 				variants: [
 					{
 						id: "some_happy_cat_en",
@@ -238,7 +238,6 @@ test("it assigns the correct locales to files", async () => {
 				bundleId: "some_happy_cat",
 				locale: "de",
 				selectors: [],
-				declarations: [],
 				variants: [
 					{
 						id: "some_happy_cat_de",

@@ -29,13 +29,13 @@ test("it handles single variants without expressions", async () => {
 		bundles: [
 			{
 				id: "some_happy_cat",
+				declarations: [],
 				messages: [
 					{
 						id: "some_happy_cat_en",
 						bundleId: "some_happy_cat",
 						locale: "en",
 						selectors: [],
-						declarations: [],
 						variants: [
 							{
 								id: "some_happy_cat_en",
@@ -78,13 +78,13 @@ test("it handles variable expressions in patterns", async () => {
 		bundles: [
 			{
 				id: "some_happy_cat",
+				declarations: [],
 				messages: [
 					{
 						id: "some_happy_cat_en",
 						bundleId: "some_happy_cat",
 						locale: "en",
 						selectors: [],
-						declarations: [],
 						variants: [
 							{
 								id: "some_happy_cat_en",
@@ -94,13 +94,13 @@ test("it handles variable expressions in patterns", async () => {
 									{ type: "text", value: "Used by " },
 									{
 										type: "expression",
-										arg: { type: "variable", name: "count" },
+										arg: { type: "variable-reference", name: "count" },
 									},
 									{
 										type: "text",
 										value: " devs, ",
 									},
-									{ type: "expression", arg: { type: "variable", name: "numDesigners" } },
+									{ type: "expression", arg: { type: "variable-reference", name: "numDesigners" } },
 									{
 										type: "text",
 										value: " designers and translators",
@@ -181,13 +181,13 @@ test("it assigns the correct locales to messages", async () => {
 		bundles: [
 			{
 				id: "some_happy_cat",
+				declarations: [],
 				messages: [
 					{
 						id: "some_happy_cat_en",
 						bundleId: "some_happy_cat",
 						locale: "en",
 						selectors: [],
-						declarations: [],
 						variants: [
 							{
 								id: "some_happy_cat_en",
@@ -202,7 +202,6 @@ test("it assigns the correct locales to messages", async () => {
 						bundleId: "some_happy_cat",
 						locale: "de",
 						selectors: [],
-						declarations: [],
 						variants: [
 							{
 								id: "some_happy_cat_de",
@@ -253,13 +252,13 @@ test("it handles multi variant messages", async () => {
 		bundles: [
 			{
 				id: "some_happy_cat",
+				declarations: [],
 				messages: [
 					{
 						id: "some_happy_cat_en",
 						bundleId: "some_happy_cat",
 						locale: "en",
 						selectors: [],
-						declarations: [],
 						variants: [
 							{
 								id: "some_happy_cat_en;platform=android,userGender=male",
@@ -271,7 +270,7 @@ test("it handles multi variant messages", async () => {
 								pattern: [
 									{
 										type: "expression",
-										arg: { type: "variable", name: "username" },
+										arg: { type: "variable-reference", name: "username" },
 									},
 									{
 										type: "text",
@@ -289,7 +288,7 @@ test("it handles multi variant messages", async () => {
 								pattern: [
 									{
 										type: "expression",
-										arg: { type: "variable", name: "username" },
+										arg: { type: "variable-reference", name: "username" },
 									},
 									{
 										type: "text",
