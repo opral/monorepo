@@ -110,10 +110,21 @@ export default class InlangVariant extends LitElement {
 		if (this.variant) {
 			const newVariant = structuredClone(this.variant)
 
+			const existingMatch = newVariant.matches.find((m) => m.name === selectorName)
+
 			// if matchName is not in variant, return
-			if (newVariant.match[selectorName]) {
+			if (existingMatch) {
 				// update the match with value (mutates variant)
-				newVariant.match[selectorName] = value
+				if (value === "*") {
+					existingMatch.value = {
+						type: "catch-all",
+					}
+				} else {
+					existingMatch.value = {
+						type: "literal",
+						value,
+					}
+				}
 			}
 
 			this.dispatchEvent(
@@ -138,17 +149,17 @@ export default class InlangVariant extends LitElement {
 		return this.variant
 			? html`<div class="variant">
 					${this.variant
-						? Object.entries(this.variant.match).map(([selectorName, match]) => {
+						? this.variant.matches.map((match) => {
 								return html`
 									<sl-input
-										id="${this.variant.id}-${match}"
+										id="${this.variant.id}-${match.name}"
 										class="match"
 										size="small"
-										value=${match}
+										value=${match.value.type === "literal" ? match.value.value : "*"}
 										@sl-blur=${(e: Event) => {
 											const element = this.shadowRoot?.getElementById(`${this.variant.id}-${match}`)
 											if (element && e.target === element) {
-												this._updateMatch(selectorName, (e.target as HTMLInputElement).value)
+												this._updateMatch(match.name, (e.target as HTMLInputElement).value)
 											}
 										}}
 									></sl-input>

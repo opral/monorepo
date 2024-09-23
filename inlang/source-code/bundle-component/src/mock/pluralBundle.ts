@@ -52,7 +52,13 @@ export const examplePlural: {
 		{
 			messageId: "mock_message_id_de",
 			id: "mock_variant_id_de_zero",
-			matches: [{ "variable-reference": "numProducts", type: "literal", value: "zero" }],
+			matches: [
+				{
+					type: "match",
+					name: "numProducts",
+					value: { type: "literal", value: "zero" },
+				},
+			],
 			pattern: [
 				{
 					type: "text",
@@ -63,7 +69,13 @@ export const examplePlural: {
 		{
 			messageId: "mock_message_id_de",
 			id: "mock_variant_id_de_one",
-			matches: [{ "variable-reference": "numProducts", type: "literal", value: "one" }],
+			matches: [
+				{
+					type: "match",
+					name: "numProducts",
+					value: { type: "literal", value: "one" },
+				},
+			],
 			pattern: [
 				{
 					type: "text",
@@ -74,7 +86,13 @@ export const examplePlural: {
 		{
 			messageId: "mock_message_id_de",
 			id: "mock_variant_id_de_other",
-			matches: [{ "variable-reference": "numProducts", type: "literal", value: "other" }],
+			matches: [
+				{
+					type: "match",
+					name: "numProducts",
+					value: { type: "literal", value: "other" },
+				},
+			],
 			pattern: [
 				{
 					type: "expression",
@@ -92,7 +110,13 @@ export const examplePlural: {
 		{
 			messageId: "mock_message_id_en",
 			id: "mock_variant_id_en_zero",
-			matches: [{ "variable-reference": "numProducts", type: "literal", value: "zero" }],
+			matches: [
+				{
+					type: "match",
+					name: "numProducts",
+					value: { type: "literal", value: "zero" },
+				},
+			],
 			pattern: [
 				{
 					type: "text",
@@ -103,7 +127,13 @@ export const examplePlural: {
 		{
 			messageId: "mock_message_id_en",
 			id: "mock_variant_id_en_one",
-			matches: [{ "variable-reference": "numProducts", type: "literal", value: "one" }],
+			matches: [
+				{
+					type: "match",
+					name: "numProducts",
+					value: { type: "literal", value: "one" },
+				},
+			],
 			pattern: [
 				{
 					type: "text",
@@ -114,7 +144,13 @@ export const examplePlural: {
 		{
 			messageId: "mock_message_id_en",
 			id: "mock_variant_id_en_other",
-			matches: [{ "variable-reference": "numProducts", type: "literal", value: "other" }],
+			matches: [
+				{
+					type: "match",
+					name: "numProducts",
+					value: { type: "literal", value: "other" },
+				},
+			],
 			pattern: [
 				{
 					type: "expression",
