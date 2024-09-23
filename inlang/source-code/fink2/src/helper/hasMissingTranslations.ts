@@ -7,17 +7,29 @@ export const hasMissingTranslations = (
 ): boolean => {
 	return (
 		hasMissingLocales(bundle, filteredLocales, settings) ||
-		hasEmptyPattern(bundle)
+		hasEmptyPattern(bundle, filteredLocales, settings.baseLocale)
 	);
 };
 
 export default hasMissingTranslations;
 
 // check if pattern is empty
-const hasEmptyPattern = (bundle: BundleNested): boolean => {
-	return bundle.messages.some((message) =>
-		message.variants.some((variant) => variant.pattern.length === 0)
-	);
+const hasEmptyPattern = (
+	bundle: BundleNested,
+	filteredLocales: string[],
+	baseLocale: string
+): boolean => {
+	return bundle.messages.some((message) => {
+		const isLocaleRelevant =
+			filteredLocales.length > 0
+				? [...filteredLocales, baseLocale].includes(message.locale)
+				: true;
+
+		return (
+			isLocaleRelevant &&
+			message.variants.some((variant) => variant.pattern.length === 0)
+		);
+	});
 };
 
 // check if filtered locale is missing or base locale is missing
