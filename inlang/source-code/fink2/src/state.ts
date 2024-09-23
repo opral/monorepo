@@ -8,6 +8,7 @@ import {
 import { atomWithStorage } from "jotai/utils";
 import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { Change, isInSimulatedCurrentBranch } from "@inlang/sdk2";
+import hasMissingTranslations from "./helper/hasMissingTranslations.ts";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -91,18 +92,15 @@ export const filterMissingTranslationAtom = atom<boolean>(false);
 
 export const bundlesNestedFilteredAtom = atom(async (get) => {
 	const query = get(searchQueryAtom).toLowerCase();
-	const items = await get(bundlesNestedAtom);
-	// filter out bundles with empty variant patterns [""] or missing locale
-	// items.find((bundle) =>
-	// 	bundle.messages.filter((message) => {
-	// 		message.variants.find(
-	// 			(variant) =>
-	// 				JSON.stringify(variant.pattern) === `[{"type":"Text","value":""}]`
-	// 		);
-	// 	})
-	// );
-	return items.filter((item) =>
-		JSON.stringify(item).toLowerCase().includes(query)
+	const settings = await get(settingsAtom);
+	let bundles = await get(bundlesNestedAtom);
+	if (get(filterMissingTranslationAtom)) {
+		bundles = bundles.filter((bundle) =>
+			hasMissingTranslations(bundle, get(filteredLocalesAtom), settings)
+		);
+	}
+	return bundles.filter((bundle) =>
+		JSON.stringify(bundle).toLowerCase().includes(query)
 	);
 });
 
