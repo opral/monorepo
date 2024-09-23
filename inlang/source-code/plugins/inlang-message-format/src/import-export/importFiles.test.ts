@@ -39,7 +39,7 @@ test("it handles single variants without expressions", async () => {
 						variants: [
 							{
 								id: "some_happy_cat_en",
-								match: {},
+								matches: [],
 								messageId: "some_happy_cat_en",
 								pattern: [{ type: "text", value: "Read more about Lix" }],
 							},
@@ -88,7 +88,7 @@ test("it handles variable expressions in patterns", async () => {
 						variants: [
 							{
 								id: "some_happy_cat_en",
-								match: {},
+								matches: [],
 								messageId: "some_happy_cat_en",
 								pattern: [
 									{ type: "text", value: "Used by " },
@@ -191,7 +191,7 @@ test("it assigns the correct locales to messages", async () => {
 						variants: [
 							{
 								id: "some_happy_cat_en",
-								match: {},
+								matches: [],
 								messageId: "some_happy_cat_en",
 								pattern: [{ type: "text", value: "Read more about Lix" }],
 							},
@@ -205,7 +205,7 @@ test("it assigns the correct locales to messages", async () => {
 						variants: [
 							{
 								id: "some_happy_cat_de",
-								match: {},
+								matches: [],
 								messageId: "some_happy_cat_de",
 								pattern: [{ type: "text", value: "Lese mehr über Lix" }],
 							},
@@ -262,10 +262,24 @@ test("it handles multi variant messages", async () => {
 						variants: [
 							{
 								id: "some_happy_cat_en;platform=android,userGender=male",
-								match: {
-									platform: "android",
-									userGender: "male",
-								},
+								matches: [
+									{
+										type: "match",
+										name: "platform",
+										value: {
+											type: "literal",
+											value: "android",
+										},
+									},
+									{
+										type: "match",
+										name: "userGender",
+										value: {
+											type: "literal",
+											value: "male",
+										},
+									},
+								],
 								messageId: "some_happy_cat_en",
 								pattern: [
 									{
@@ -280,10 +294,24 @@ test("it handles multi variant messages", async () => {
 							},
 							{
 								id: "some_happy_cat_en;platform=ios,userGender=female",
-								match: {
-									platform: "ios",
-									userGender: "female",
-								},
+								matches: [
+									{
+										type: "match",
+										name: "platform",
+										value: {
+											type: "literal",
+											value: "ios",
+										},
+									},
+									{
+										type: "match",
+										name: "userGender",
+										value: {
+											type: "literal",
+											value: "female",
+										},
+									},
+								],
 								messageId: "some_happy_cat_en",
 								pattern: [
 									{
@@ -298,10 +326,24 @@ test("it handles multi variant messages", async () => {
 							},
 							{
 								id: "some_happy_cat_en;platform=*,userGender=*",
-								match: {
-									platform: "*",
-									userGender: "*",
-								},
+								matches: [
+									{
+										type: "match",
+										name: "platform",
+										value: {
+											type: "literal",
+											value: "android",
+										},
+									},
+									{
+										type: "match",
+										name: "userGender",
+										value: {
+											type: "literal",
+											value: "male",
+										},
+									},
+								],
 								messageId: "some_happy_cat_en",
 								pattern: [
 									{
