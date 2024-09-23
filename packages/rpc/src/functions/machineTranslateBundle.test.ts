@@ -22,17 +22,30 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 							{
 								id: "mock-variant-id-name-john",
 								messageId: "mock-message-id",
-								match: {
-									name: "John",
-								},
+								matches: [
+									{
+										type: "match",
+										name: "name",
+										value: {
+											type: "literal",
+											value: "John",
+										},
+									},
+								],
 								pattern: [{ type: "text", value: "Hello world, John" }],
 							},
 							{
 								id: "mock-variant-id-*",
 								messageId: "mock-message-id",
-								match: {
-									name: "*",
-								},
+								matches: [
+									{
+										type: "match",
+										name: "name",
+										value: {
+											type: "catch-all",
+										},
+									},
+								],
 								pattern: [{ type: "text", value: "Hello world" }],
 							},
 						],
@@ -86,43 +99,82 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 				expect.objectContaining({
 					id: "mock-variant-id-name-john",
 					messageId: "mock-message-id",
-					match: {
-						name: "John",
-					},
+					matches: [
+						{
+							type: "match",
+							name: "name",
+							value: {
+								type: "literal",
+								value: "John",
+							},
+						},
+					],
 					pattern: [{ type: "text", value: "Hello world, John" }],
 				}),
 				expect.objectContaining({
 					id: "mock-variant-id-*",
 					messageId: "mock-message-id",
-					match: {
-						name: "*",
-					},
+					matches: [
+						{
+							type: "match",
+							name: "name",
+							value: {
+								type: "catch-all",
+							},
+						},
+					],
 					pattern: [{ type: "text", value: "Hello world" }],
 				}),
 				// a german variant should exist
 				expect.objectContaining({
-					match: {
-						name: "John",
-					},
+					matches: [
+						{
+							type: "match",
+							name: "name",
+							value: {
+								type: "literal",
+								value: "John",
+							},
+						},
+					],
 					pattern: [{ type: "text", value: "Hallo Welt, John" }],
 				}),
 				expect.objectContaining({
-					match: {
-						name: "*",
-					},
+					matches: [
+						{
+							type: "match",
+							name: "name",
+							value: {
+								type: "catch-all",
+							},
+						},
+					],
 					pattern: [{ type: "text", value: "Hallo Welt" }],
 				}),
 				// a french variant should exist
 				expect.objectContaining({
-					match: {
-						name: "John",
-					},
+					matches: [
+						{
+							type: "match",
+							name: "name",
+							value: {
+								type: "literal",
+								value: "John",
+							},
+						},
+					],
 					pattern: [{ type: "text", value: "Bonjour tout le monde, John" }],
 				}),
 				expect.objectContaining({
-					match: {
-						name: "*",
-					},
+					matches: [
+						{
+							type: "match",
+							name: "name",
+							value: {
+								type: "catch-all",
+							},
+						},
+					],
 					pattern: [{ type: "text", value: "Bonjour le monde" }],
 				}),
 			])
@@ -149,7 +201,7 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 							{
 								id: "mock-variant-id",
 								messageId: "mock-message-id",
-								match: {},
+								matches: [],
 								pattern: [
 									{ type: "text", value: "There are " },
 									{ type: "expression", arg: { type: "variable", name: "num" } },
@@ -294,7 +346,7 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 							{
 								id: "internal-dummy-id",
 								messageId: "dummy-id",
-								match: {},
+								matches: [],
 								pattern: [
 									{
 										type: "text",
