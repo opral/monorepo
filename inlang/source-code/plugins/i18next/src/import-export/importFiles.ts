@@ -85,7 +85,7 @@ function parseMessage(args: {
 	const variant: Variant = {
 		id: args.key,
 		messageId: args.key,
-		match: {},
+		matches: [],
 		pattern: parsePattern(args.value),
 	}
 
@@ -98,13 +98,17 @@ function parseMessage(args: {
 		args.key.endsWith("_many") ||
 		args.key.endsWith("_other")
 	) {
-		variant.match = {
-			// i18next only allows matching against a count variable
-			// suffixing plural because the inlang sdk v2 purposefully
-			// did not allow using a variable with a function like `plural`
-			// without declaring a new variable to reduce complexity
-			countPlural: args.key.split("_").at(-1)!,
-		}
+		variant.matches = [
+			{
+				// i18next only allows matching against a count variable
+				// suffixing plural because the inlang sdk v2 purposefully
+				// did not allow using a variable with a function like `plural`
+				// without declaring a new variable to reduce complexity
+				type: "match",
+				name: "countPlural",
+				value: { type: "literal", value: args.key.split("_").at(-1)! },
+			},
+		]
 		bundle.declarations.push({
 			type: "local-variable",
 			name: "countPlural",
