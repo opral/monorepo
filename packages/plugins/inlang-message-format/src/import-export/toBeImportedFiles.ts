@@ -9,17 +9,10 @@ export const toBeImportedFiles: NonNullable<(typeof plugin)["toBeImportedFiles"]
 		return []
 	}
 	for (const locale of settings.locales) {
-		if (pathPattern.includes("{languageTag}")) {
-			result.push({
-				locale,
-				path: pathPattern.replace("{languageTag}", locale),
-			})
-		} else {
-			result.push({
-				locale,
-				path: pathPattern.replace("{locale}", locale),
-			})
-		}
+		result.push({
+			locale,
+			path: pathPattern.replace(/{(locale|languageTag)}/, locale),
+		})
 	}
 	return result
 }
