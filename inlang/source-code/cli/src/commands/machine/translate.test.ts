@@ -24,6 +24,7 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 			messages: [
 				{
 					id: "mock_en",
+					bundleId: "mock",
 					locale: "en",
 					variants: [
 						{
