@@ -7,7 +7,7 @@ import type { Meta, StoryObj } from "@storybook/web-components"
 //@ts-ignore
 import { useArgs } from "@storybook/preview-api"
 import { html } from "lit"
-import { type Message, pluralBundle, type Variant } from "@inlang/sdk2"
+import { type Message, type Variant } from "@inlang/sdk2"
 import { mockSettings } from "./../../mock/settings.ts"
 import { type ChangeEventDetail } from "../../helper/event.ts"
 import { updateEntities } from "../../mock/updateEntities.ts"
@@ -89,7 +89,7 @@ export const MessageInBundle: StoryObj = {
 			})
 		}
 
-		return html`<inlang-bundle .bundle=${pluralBundle}>
+		return html`<inlang-bundle .bundle=${examplePlural.bundles[0]}>
 			<inlang-message
 				slot="message"
 				.message=${message}
