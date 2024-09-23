@@ -104,9 +104,9 @@ function parseMessage(args: {
 				// suffixing plural because the inlang sdk v2 purposefully
 				// did not allow using a variable with a function like `plural`
 				// without declaring a new variable to reduce complexity
-				type: "match",
-				name: "countPlural",
-				value: { type: "literal", value: args.key.split("_").at(-1)! },
+				type: "literal-match",
+				key: "countPlural",
+				value: args.key.split("_").at(-1)!,
 			},
 		]
 		bundle.declarations.push({
