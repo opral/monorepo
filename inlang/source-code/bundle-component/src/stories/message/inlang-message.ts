@@ -187,7 +187,10 @@ export default class InlangMessage extends LitElement {
 			</div>
 			<div class="message-body">
 				${(this.message && this.message.selectors.length > 0) ||
-				(this.message && this.variants.length > 1 && this.message.selectors.length === 0)
+				(this.message &&
+					this.variants &&
+					this.variants.length > 1 &&
+					this.message.selectors.length === 0)
 					? html`<div
 							class=${`message-header` +
 							` ` +

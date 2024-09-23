@@ -158,6 +158,46 @@ export const pendingChangesAtom = atom(async (get) => {
 	return result;
 });
 
+export const groupedPendingChangesAtom = atom(async (get) => {
+	// TODO: there is for sure a better way to do this, but it should unblock Fink2 diff ui
+	get(withPollingAtom);
+	const project = await get(projectAtom);
+	if (!project) return [];
+	const result = await project.lix.db
+		.selectFrom("change")
+		.selectAll()
+		.where("commit_id", "is", null)
+		// TODO remove after sequence concept on lix
+		// https://linear.app/opral/issue/LIX-126/branching
+		.where(isInSimulatedCurrentBranch)
+		.execute();
+	// console.log("group", result);
+
+	const latestChangesPerEntity: Change[] = [];
+
+	for (const change of result) {
+		const entityId = change.value?.id;
+		if (!entityId) return undefined;
+
+		const latestChange = await project.lix.db
+			.selectFrom("change")
+			.selectAll()
+			.where("commit_id", "is", null)
+			.where((eb) => eb.ref("value", "->>").key("id"), "=", entityId)
+			.orderBy("created_at desc")
+			.executeTakeFirst();
+
+		if (
+			latestChange &&
+			!latestChangesPerEntity.some((change) => change.value?.id === entityId)
+		) {
+			latestChangesPerEntity.push(latestChange);
+		}
+	}
+
+	return latestChangesPerEntity;
+});
+
 export const unresolvedConflictsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
