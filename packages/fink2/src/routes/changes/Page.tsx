@@ -53,10 +53,6 @@ export default function App() {
 		}
 	});
 
-	useEffect(() => {
-		console.log("group", groupedPendingChanges);
-	}, [groupedPendingChanges]);
-
 	const getScopedChangesByBundle = (bundle: BundleNested) => {
 		const pendingChangesForBundle = pendingChanges.filter((change) => {
 			const variantId = change.value?.id;
