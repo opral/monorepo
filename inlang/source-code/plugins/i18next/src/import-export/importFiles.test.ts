@@ -275,6 +275,46 @@ test("keyWithObjectValue", async () => {
 	] satisfies Pattern)
 })
 
+// https://www.i18next.com/translation-function/context#combining-with-plurals
+test("key with context, plural, and catch all", async () => {
+	const result = await runImportFiles({
+		friend: "A friend",
+		friend_male_other: "{{count}} boyfriends",
+		friend_female_other: "{{count}} girlfriends",
+	})
+
+	const bundle = result.bundles.find((bundle) => bundle.id === "friend")
+
+	expect(bundle?.declarations).toStrictEqual(
+		expect.arrayContaining([
+			{
+				type: "input-variable",
+				name: "context",
+			},
+			{
+				type: "input-variable",
+				name: "count",
+			},
+			expect.objectContaining({
+				type: "local-variable",
+				name: "countPlural",
+			}),
+		])
+	)
+
+	expect(bundle?.messages[0]?.variants[0]).toStrictEqual(
+		expect.objectContaining({
+			matches: [
+				{
+					type: "catchall-match",
+					key: "context",
+				},
+			],
+			pattern: [{ type: "text", value: "A friend" }],
+		} satisfies Partial<Variant>)
+	)
+})
+
 // convenience wrapper for less testing code
 function runImportFiles(json: Record<string, any>) {
 	return importFiles({
