@@ -62,10 +62,13 @@ function toV1Pattern(pattern: Pattern): PatternV1 {
 			}
 
 			case "expression": {
-				return {
-					type: "VariableReference",
-					name: element.arg.name,
-				};
+				if (element.arg.type === "variable-reference") {
+					return {
+						type: "VariableReference",
+						name: element.arg.name,
+					};
+				}
+				throw new Error(`Unsupported expression argument type`);
 			}
 
 			default: {
