@@ -15,7 +15,7 @@ export const getStringFromPattern = (args: {
 				if (expression.arg.type === "variable-reference") {
 					return `{${expression.arg.name}}` // Handle VariableReference within Expression
 				} else if (expression.arg.type === "literal") {
-					return expression.arg.name // Handle Literal within Expression
+					return expression.arg.value // Handle Literal within Expression
 				} else {
 					return msg(
 						`Unknown expression type in variant with message id ${args.messageId} for locale ${args.locale}.`

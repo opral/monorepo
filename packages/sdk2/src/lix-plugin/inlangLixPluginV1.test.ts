@@ -201,7 +201,7 @@ describe("plugin.diff.file", () => {
 				id: "1",
 				messageId: "1",
 				pattern: [{ type: "text", value: "hello world" }],
-				match: {},
+				matches: [],
 			})
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
@@ -222,7 +222,7 @@ describe("plugin.diff.file", () => {
 					id: "1",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world" }],
-					match: {},
+					matches: [],
 				},
 			} satisfies DiffReport,
 		]);
@@ -236,13 +236,13 @@ describe("plugin.diff.file", () => {
 					id: "1",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world" }],
-					match: {},
+					matches: [],
 				},
 				{
 					id: "2",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world" }],
-					match: {},
+					matches: [],
 				},
 			])
 			.execute();
@@ -254,13 +254,13 @@ describe("plugin.diff.file", () => {
 					id: "1",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world from Berlin" }],
-					match: {},
+					matches: [],
 				},
 				{
 					id: "2",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world" }],
-					match: {},
+					matches: [],
 				},
 			])
 			.execute();
@@ -289,13 +289,13 @@ describe("plugin.diff.file", () => {
 					id: "1",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world" }],
-					match: {},
+					matches: [],
 				},
 				neu: {
 					id: "1",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world from Berlin" }],
-					match: {},
+					matches: [],
 				},
 			} satisfies DiffReport,
 		]);
@@ -338,13 +338,13 @@ describe("plugin.diff.variant", () => {
 	test("old and neu are the same should not report a diff", async () => {
 		const old: Variant = {
 			id: "1",
-			match: {},
+			matches: [],
 			messageId: "5",
 			pattern: [{ type: "text", value: "hello world" }],
 		};
 		const neu: Variant = {
 			id: "1",
-			match: {},
+			matches: [],
 			messageId: "5",
 			pattern: [{ type: "text", value: "hello world" }],
 		};
@@ -355,13 +355,13 @@ describe("plugin.diff.variant", () => {
 	test("old and neu are different should yield a diff report", async () => {
 		const old: Variant = {
 			id: "1",
-			match: {},
+			matches: [],
 			messageId: "5",
 			pattern: [{ type: "text", value: "hello world" }],
 		};
 		const neu: Variant = {
 			id: "1",
-			match: {},
+			matches: [],
 			messageId: "5",
 			pattern: [{ type: "text", value: "hello world from Berlin" }],
 		};
@@ -381,7 +381,7 @@ describe("plugin.diff.variant", () => {
 		const old = undefined;
 		const neu: Variant = {
 			id: "1",
-			match: {},
+			matches: [],
 			messageId: "5",
 			pattern: [{ type: "text", value: "hello world" }],
 		};

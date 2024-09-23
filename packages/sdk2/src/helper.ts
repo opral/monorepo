@@ -2,22 +2,23 @@ import { v4 as uuid } from "uuid";
 import type { ProjectSettings } from "./json-schema/settings.js";
 import { humanId } from "./human-id/human-id.js";
 import type {
+	Match,
 	NewBundleNested,
 	NewMessageNested,
 	Variant,
 } from "./database/schema.js";
-import type { Expression, Text } from "./json-schema/pattern.js";
+import type { Text } from "./json-schema/pattern.js";
 
 /**
  * create v2 Bundle with a random human ID
- * 
+ *
  * @deprecated
- * 
+ *
  * use the database directly
- * 
+ *
  * - less code because the database has default values
  * - `createMessage` is misleading because it does not treat expressions in the text
- * 
+ *
  * @example createBundle({
  *   messages: [
  * 		 createMessage({locale: "en", text: "Hello world!"})
@@ -36,14 +37,14 @@ export function createBundle(args: {
 }
 
 /**
- * 
- * @deprecated 
+ *
+ * @deprecated
  * use the database directly
- * 
+ *
  * - text will always be a string, no matter
  *   if an expression is provided like hello "{username}"
- * - the database has default values 
- * 
+ * - the database has default values
+ *
  * ```
  * await project.db.insertInto("message").values({
  * 		bundleId: "bundleId",
@@ -51,7 +52,7 @@ export function createBundle(args: {
  * 		...
  * })
  * ```
- * 
+ *
  * create v2 Messsage AST with a randomId, and text-only pattern
  * @example createMessage({locale: "en", text: "Hello world"})
  */
@@ -59,7 +60,7 @@ export function createMessage(args: {
 	bundleId: string;
 	locale: ProjectSettings["locales"][number];
 	text: string;
-	match?: Record<Expression["arg"]["name"], string>;
+	matches?: Match[];
 }): NewMessageNested {
 	const messageId = uuid();
 	return {
@@ -71,21 +72,21 @@ export function createMessage(args: {
 			createVariant({
 				messageId: messageId,
 				text: args.text,
-				match: args.match,
+				matches: args.matches,
 			}),
 		],
 	};
 }
 
 /**
- * 
+ *
  * @deprecated
- * 
+ *
  * use the database directly
- * 
+ *
  * - less code because the database has default values
  * - `text` is misleading because it does not treat expressions in the text
- * 
+ *
  * create v2 Variant AST with text-only pattern
  * @example createVariant({match: ["*"], text: "Hello world"})
  */
@@ -93,13 +94,13 @@ export function createVariant(args: {
 	messageId: string;
 	id?: string;
 	text?: string;
-	match?: Record<Expression["arg"]["name"], string>;
+	matches?: Match[];
 	pattern?: Variant["pattern"];
 }): Variant {
 	return {
 		messageId: args.messageId,
 		id: args.id ? args.id : uuid(),
-		match: args.match ? args.match : {},
+		matches: args.matches ? args.matches : [],
 		pattern: args.pattern ? args.pattern : [toTextElement(args.text ?? "")],
 	};
 }

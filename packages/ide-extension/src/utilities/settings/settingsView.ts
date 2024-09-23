@@ -37,7 +37,7 @@ export async function getWebviewContent(args: {
 	)
 
 	const scriptUri = args.webview.asWebviewUri(
-		vscode.Uri.joinPath(args.context.extensionUri, "assets", "settings-component.mjs")
+		vscode.Uri.joinPath(args.context.extensionUri, "assets", "settings-component.js")
 	)
 
 	const litHtmlUri = args.webview.asWebviewUri(

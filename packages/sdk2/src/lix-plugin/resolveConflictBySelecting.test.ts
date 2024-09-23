@@ -60,7 +60,7 @@ test("it should resolve a conflict with the selected change", async () => {
 				value: {
 					id: "6a860f96-0cf3-477c-80ad-7893d8fde852",
 					messageId: "c2684c3d-3e14-47e4-96b7-8d33579bb7e9",
-					match: {},
+					matches: [],
 					pattern: [
 						{
 							type: "text",
@@ -81,7 +81,7 @@ test("it should resolve a conflict with the selected change", async () => {
 				value: {
 					id: "6a860f96-0cf3-477c-80ad-7893d8fde852",
 					messageId: "c2684c3d-3e14-47e4-96b7-8d33579bb7e9",
-					match: {},
+					matches: [],
 					pattern: [
 						{
 							type: "text",
@@ -105,7 +105,7 @@ test("it should resolve a conflict with the selected change", async () => {
 				value: {
 					id: "6a860f96-0cf3-477c-80ad-7893d8fde852",
 					messageId: "c2684c3d-3e14-47e4-96b7-8d33579bb7e9",
-					match: {},
+					matches: [],
 					pattern: [
 						{
 							type: "text",

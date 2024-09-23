@@ -37,6 +37,12 @@ export default function App() {
 			for (const bundle of demoBundles) {
 				await insertBundleNested(project.db, bundle);
 			}
+			// update settings by adding the new de locale
+			const settings = await project.settings.get();
+			await project.settings.set({
+				...settings,
+				locales: [...settings.locales, "de"],
+			});
 		}
 	};
 

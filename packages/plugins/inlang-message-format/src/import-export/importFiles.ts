@@ -1,4 +1,4 @@
-import type { MessageNested, NewBundleNested, Variant } from "@inlang/sdk2"
+import { type Match, type MessageNested, type NewBundleNested, type Variant } from "@inlang/sdk2"
 import { type plugin } from "../plugin.js"
 
 export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({ files }) => {
@@ -9,6 +9,7 @@ export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({
 		if (bundlesIndex[message.bundleId] === undefined) {
 			bundlesIndex[message.bundleId] = {
 				id: message.bundleId,
+				declarations: [],
 				messages: [message],
 			}
 		} else {
@@ -53,7 +54,6 @@ function parseMessage(args: {
 	return {
 		id: messageId,
 		bundleId: args.key,
-		declarations: [],
 		selectors: [],
 		locale: args.locale,
 		variants,
@@ -67,7 +67,7 @@ function parseVariants(messageId: string, value: string | Record<string, string>
 			{
 				id: messageId,
 				messageId,
-				match: {},
+				matches: [],
 				pattern: parsePattern(value),
 			},
 		]
@@ -79,7 +79,7 @@ function parseVariants(messageId: string, value: string | Record<string, string>
 			// "some_happy_cat_en;platform=ios,userGender=female"
 			id: messageId + ";" + matcher.replaceAll(" ", ""),
 			messageId,
-			match: parseMatcher(matcher),
+			matches: parseMatcher(matcher),
 			pattern: parsePattern(pattern),
 		})
 	}
@@ -101,7 +101,7 @@ function parsePattern(value: string): Variant["pattern"] {
 		// it's an expression (only supporting variables for now)
 		else {
 			const variableName = part.slice(1, -1)
-			pattern.push({ type: "expression", arg: { type: "variable", name: variableName } })
+			pattern.push({ type: "expression", arg: { type: "variable-reference", name: variableName } })
 		}
 	}
 
@@ -110,16 +110,23 @@ function parsePattern(value: string): Variant["pattern"] {
 
 // input: `platform=android,userGender=male`
 // output: { platform: "android", userGender: "male" }
-function parseMatcher(value: string): Record<string, string> {
+function parseMatcher(value: string): Match[] {
 	const stripped = value.replace(" ", "")
-	const match: Record<string, string> = {}
+	const matches: Match[] = []
 	const parts = stripped.split(",")
 	for (const part of parts) {
 		const [key, value] = part.split("=")
 		if (!key || !value) {
 			continue
 		}
-		match[key] = value
+		matches.push({
+			type: "match",
+			name: key,
+			value: {
+				type: "literal",
+				value,
+			},
+		})
 	}
-	return match
+	return matches
 }
