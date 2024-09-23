@@ -93,14 +93,27 @@ export const filterMissingTranslationAtom = atom<boolean>(false);
 export const bundlesNestedFilteredAtom = atom(async (get) => {
 	const query = get(searchQueryAtom).toLowerCase();
 	const settings = await get(settingsAtom);
+	const filteredLocales = get(filteredLocalesAtom);
+	const relevantLocales =
+		filteredLocales.length > 0
+			? [...filteredLocales, settings.baseLocale]
+			: settings?.locales;
 	let bundles = await get(bundlesNestedAtom);
+
+	// Filter by missing translations if the flag is set
 	if (get(filterMissingTranslationAtom)) {
 		bundles = bundles.filter((bundle) =>
-			hasMissingTranslations(bundle, get(filteredLocalesAtom), settings)
+			hasMissingTranslations(bundle, relevantLocales)
 		);
 	}
+
+	// Filter bundles by query, only considering relevant locales
 	return bundles.filter((bundle) =>
-		JSON.stringify(bundle).toLowerCase().includes(query)
+		bundle.messages.some(
+			(message) =>
+				relevantLocales.includes(message.locale) &&
+				JSON.stringify(message).toLowerCase().includes(query)
+		)
 	);
 });
 
