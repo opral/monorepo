@@ -2,6 +2,7 @@ import {
 	pendingChangesAtom,
 	projectAtom,
 	bundlesNestedAtom,
+	groupedPendingChangesAtom,
 } from "../../state.ts";
 import { atom, useAtom } from "jotai";
 import Layout, { Grid } from "../../layout.tsx";
@@ -32,6 +33,7 @@ const bundleIdsWithPendingChangesAtom = atom(async (get) => {
 export default function App() {
 	const [project] = useAtom(projectAtom);
 	const [pendingChanges] = useAtom(pendingChangesAtom);
+	const [groupedPendingChanges] = useAtom(groupedPendingChangesAtom);
 	const [bundlesWithChanges] = useAtom(bundleIdsWithPendingChangesAtom);
 	const [commitDescription, setCommitDescription] = useState<string>("");
 	const [showDialog, setShowDialog] = useState(false);
@@ -50,6 +52,10 @@ export default function App() {
 			navigate("/");
 		}
 	});
+
+	useEffect(() => {
+		console.log("group", groupedPendingChanges);
+	}, [groupedPendingChanges]);
 
 	const getScopedChangesByBundle = (bundle: BundleNested) => {
 		const pendingChangesForBundle = pendingChanges.filter((change) => {
