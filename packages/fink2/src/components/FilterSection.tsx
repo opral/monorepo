@@ -33,7 +33,7 @@ const LanguageFilter = () => {
         (e) => setFilteredLocales(e.target.value)
       }>
       {settings?.locales.map((locale) => (
-        <SlOption value={locale}>
+        <SlOption value={locale} key={locale}>
           {locale}
           {locale === settings?.baseLocale && (
             <div className="inline-block ml-2 bg-[--sl-input-placeholder-color] rounded px-2 py-0.5">
