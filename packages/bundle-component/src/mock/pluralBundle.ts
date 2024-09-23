@@ -52,7 +52,7 @@ export const examplePlural: {
 		{
 			messageId: "mock_message_id_de",
 			id: "mock_variant_id_de_zero",
-			match: { numProducts: "zero" },
+			matches: [{ "variable-reference": "numProducts", type: "literal", value: "zero" }],
 			pattern: [
 				{
 					type: "text",
@@ -63,7 +63,7 @@ export const examplePlural: {
 		{
 			messageId: "mock_message_id_de",
 			id: "mock_variant_id_de_one",
-			match: { numProducts: "one" },
+			matches: [{ "variable-reference": "numProducts", type: "literal", value: "one" }],
 			pattern: [
 				{
 					type: "text",
@@ -74,7 +74,7 @@ export const examplePlural: {
 		{
 			messageId: "mock_message_id_de",
 			id: "mock_variant_id_de_other",
-			match: { numProducts: "other" },
+			matches: [{ "variable-reference": "numProducts", type: "literal", value: "other" }],
 			pattern: [
 				{
 					type: "expression",
@@ -92,7 +92,7 @@ export const examplePlural: {
 		{
 			messageId: "mock_message_id_en",
 			id: "mock_variant_id_en_zero",
-			match: { numProducts: "zero" },
+			matches: [{ "variable-reference": "numProducts", type: "literal", value: "zero" }],
 			pattern: [
 				{
 					type: "text",
@@ -103,7 +103,7 @@ export const examplePlural: {
 		{
 			messageId: "mock_message_id_en",
 			id: "mock_variant_id_en_one",
-			match: { numProducts: "one" },
+			matches: [{ "variable-reference": "numProducts", type: "literal", value: "one" }],
 			pattern: [
 				{
 					type: "text",
@@ -114,7 +114,7 @@ export const examplePlural: {
 		{
 			messageId: "mock_message_id_en",
 			id: "mock_variant_id_en_other",
-			match: { numProducts: "other" },
+			matches: [{ "variable-reference": "numProducts", type: "literal", value: "other" }],
 			pattern: [
 				{
 					type: "expression",
