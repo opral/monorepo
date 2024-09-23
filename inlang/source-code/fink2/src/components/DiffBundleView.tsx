@@ -145,7 +145,7 @@ const queryNewBundle = async (
 							if (latestCommitedChange?.value?.pattern) {
 								//update
 								variant.pattern = latestCommitedChange.value.pattern;
-								variant.match = latestCommitedChange.value.match;
+								variant.matches = latestCommitedChange.value.matches;
 							} else {
 								//insert
 								message.variants = message.variants.filter(
