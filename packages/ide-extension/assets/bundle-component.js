@@ -3007,100 +3007,12 @@ const getPalette = (unformattedColor) => {
     return palette;
 };
 
-/**
- * Convert array of 16 byte values to UUID string format of the form:
- * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
- */
-var byteToHex = [];
-for (var i$2 = 0; i$2 < 256; ++i$2) {
-  byteToHex.push((i$2 + 0x100).toString(16).slice(1));
-}
-function unsafeStringify(arr, offset = 0) {
-  // Note: Be careful editing this code!  It's been tuned for performance
-  // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
-  //
-  // Note to future-self: No, you can't remove the `toLowerCase()` call.
-  // REF: https://github.com/uuidjs/uuid/pull/677#issuecomment-1757351351
-  return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + '-' + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + '-' + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + '-' + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + '-' + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
-}
-
-// Unique ID creation requires a high quality random # generator. In the browser we therefore
-// require the crypto API and do not support built-in fallback to lower quality random number
-// generators (like Math.random()).
-
-var getRandomValues;
-var rnds8 = new Uint8Array(16);
-function rng() {
-  // lazy load so that environments that need to polyfill have a chance to do so
-  if (!getRandomValues) {
-    // getRandomValues needs to be invoked in a context where "this" is a Crypto implementation.
-    getRandomValues = typeof crypto !== 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
-    if (!getRandomValues) {
-      throw new Error('crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported');
-    }
-  }
-  return getRandomValues(rnds8);
-}
-
-var randomUUID = typeof crypto !== 'undefined' && crypto.randomUUID && crypto.randomUUID.bind(crypto);
-var native = {
-  randomUUID
-};
-
-function v4(options, buf, offset) {
-  if (native.randomUUID && !buf && !options) {
-    return native.randomUUID();
-  }
-  options = options || {};
-  var rnds = options.random || (options.rng || rng)();
-
-  // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
-  rnds[6] = rnds[6] & 0x0f | 0x40;
-  rnds[8] = rnds[8] & 0x3f | 0x80;
-
-  // Copy bytes to buffer, if provided
-  if (buf) {
-    offset = offset || 0;
-    for (var i = 0; i < 16; ++i) {
-      buf[offset + i] = rnds[i];
-    }
-    return buf;
-  }
-  return unsafeStringify(rnds);
-}
-
-/**
- * create v2 Variant AST with text-only pattern
- * @example createVariant({match: ["*"], text: "Hello world"})
- */
-function createVariant(args) {
-    return {
-        messageId: args.messageId,
-        id: args.id ? args.id : v4(),
-        match: args.match ? args.match : {},
-        pattern: args.pattern ? args.pattern : [toTextElement(args.text ?? "")],
-    };
-}
-function toTextElement(text) {
-    return {
-        type: "text",
-        value: text,
-    };
-}
-
 //generalized event dispatcher
-const createChangeEvent = (props) => {
+const createChangeEvent = (detail) => {
     const onChangeEvent = new CustomEvent("change", {
         bubbles: true,
         composed: true,
-        detail: {
-            argument: {
-                type: props.type,
-                operation: props.operation,
-                newData: props.newData,
-                meta: props.meta,
-            },
-        },
+        detail,
     });
     return onChangeEvent;
 };
@@ -4749,13 +4661,13 @@ __decorateClass([
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const t$1={ATTRIBUTE:1,CHILD:2,PROPERTY:3,BOOLEAN_ATTRIBUTE:4,EVENT:5,ELEMENT:6},e$1=t=>(...e)=>({_$litDirective$:t,values:e});let i$1 = class i{constructor(t){}get _$AU(){return this._$AM._$AU}_$AT(t,e,i){this.t=t,this._$AM=e,this.i=i;}_$AS(t,e){return this.update(t,e)}update(t,e){return this.render(...e)}};
+const t$1={ATTRIBUTE:1,CHILD:2,PROPERTY:3,BOOLEAN_ATTRIBUTE:4,EVENT:5,ELEMENT:6},e$1=t=>(...e)=>({_$litDirective$:t,values:e});let i$2 = class i{constructor(t){}get _$AU(){return this._$AM._$AU}_$AT(t,e,i){this.t=t,this._$AM=e,this.i=i;}_$AS(t,e){return this.update(t,e)}update(t,e){return this.render(...e)}};
 
 /**
  * @license
  * Copyright 2018 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */const Rt$1=e$1(class extends i$1{constructor(s){if(super(s),s.type!==t$1.ATTRIBUTE||"class"!==s.name||s.strings?.length>2)throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.")}render(t){return " "+Object.keys(t).filter((s=>t[s])).join(" ")+" "}update(t,[s]){if(void 0===this.st){this.st=new Set,void 0!==t.strings&&(this.nt=new Set(t.strings.join(" ").split(/\s/).filter((t=>""!==t))));for(const t in s)s[t]&&!this.nt?.has(t)&&this.st.add(t);return this.render(s)}const i=t.element.classList;for(const t of this.st)t in s||(i.remove(t),this.st.delete(t));for(const t in s){const r=!!s[t];r===this.st.has(t)||this.nt?.has(t)||(r?(i.add(t),this.st.add(t)):(i.remove(t),this.st.delete(t)));}return R$5}});
+ */const Rt$1=e$1(class extends i$2{constructor(s){if(super(s),s.type!==t$1.ATTRIBUTE||"class"!==s.name||s.strings?.length>2)throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.")}render(t){return " "+Object.keys(t).filter((s=>t[s])).join(" ")+" "}update(t,[s]){if(void 0===this.st){this.st=new Set,void 0!==t.strings&&(this.nt=new Set(t.strings.join(" ").split(/\s/).filter((t=>""!==t))));for(const t in s)s[t]&&!this.nt?.has(t)&&this.st.add(t);return this.render(s)}const i=t.element.classList;for(const t of this.st)t in s||(i.remove(t),this.st.delete(t));for(const t in s){const r=!!s[t];r===this.st.has(t)||this.nt?.has(t)||(r?(i.add(t),this.st.add(t)):(i.remove(t),this.st.delete(t)));}return R$5}});
 
 /**
  * @license
@@ -7978,7 +7890,7 @@ var menu_item_styles_default = i$4`
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */const mt$1=(i,t)=>{const e=i._$AN;if(void 0===e)return !1;for(const i of e)i._$AO?.(t,!1),mt$1(i,t);return !0},_t$1=i=>{let t,e;do{if(void 0===(t=i._$AM))break;e=t._$AN,e.delete(i),i=t;}while(0===e?.size)},wt$1=i=>{for(let t;t=i._$AM;i=t){let e=t._$AN;if(void 0===e)t._$AN=e=new Set;else if(e.has(i))break;e.add(i),gt$1(t);}};function bt$1(i){void 0!==this._$AN?(_t$1(this),this._$AM=i,wt$1(this)):this._$AM=i;}function yt$1(i,t=!1,e=0){const s=this._$AH,o=this._$AN;if(void 0!==o&&0!==o.size)if(t)if(Array.isArray(s))for(let i=e;i<s.length;i++)mt$1(s[i],!1),_t$1(s[i]);else null!=s&&(mt$1(s,!1),_t$1(s));else mt$1(this,i);}const gt$1=i=>{i.type==t$1.CHILD&&(i._$AP??=yt$1,i._$AQ??=bt$1);};let $t$1 = class $t extends i$1{constructor(){super(...arguments),this._$AN=void 0;}_$AT(i,t,e){super._$AT(i,t,e),wt$1(this),this.isConnected=i._$AU;}_$AO(i,t=!0){i!==this.isConnected&&(this.isConnected=i,i?this.reconnected?.():this.disconnected?.()),t&&(mt$1(this,i),_t$1(this));}setValue(i){if(rt$1(this.t))this.t._$AI(i,this);else {const t=[...this.t._$AH];t[this.i]=i,this.t._$AI(t,this,0);}}disconnected(){}reconnected(){}};
+ */const mt$1=(i,t)=>{const e=i._$AN;if(void 0===e)return !1;for(const i of e)i._$AO?.(t,!1),mt$1(i,t);return !0},_t$1=i=>{let t,e;do{if(void 0===(t=i._$AM))break;e=t._$AN,e.delete(i),i=t;}while(0===e?.size)},wt$1=i=>{for(let t;t=i._$AM;i=t){let e=t._$AN;if(void 0===e)t._$AN=e=new Set;else if(e.has(i))break;e.add(i),gt$1(t);}};function bt$1(i){void 0!==this._$AN?(_t$1(this),this._$AM=i,wt$1(this)):this._$AM=i;}function yt$1(i,t=!1,e=0){const s=this._$AH,o=this._$AN;if(void 0!==o&&0!==o.size)if(t)if(Array.isArray(s))for(let i=e;i<s.length;i++)mt$1(s[i],!1),_t$1(s[i]);else null!=s&&(mt$1(s,!1),_t$1(s));else mt$1(this,i);}const gt$1=i=>{i.type==t$1.CHILD&&(i._$AP??=yt$1,i._$AQ??=bt$1);};let $t$1 = class $t extends i$2{constructor(){super(...arguments),this._$AN=void 0;}_$AT(i,t,e){super._$AT(i,t,e),wt$1(this),this.isConnected=i._$AU;}_$AO(i,t=!0){i!==this.isConnected&&(this.isConnected=i,i?this.reconnected?.():this.disconnected?.()),t&&(mt$1(this,i),_t$1(this));}setValue(i){if(rt$1(this.t))this.t._$AI(i,this);else {const t=[...this.t._$AH];t[this.i]=i,this.t._$AI(t,this,0);}}disconnected(){}reconnected(){}};
 
 /**
  * @license
@@ -9280,7 +9192,7 @@ var defaultValue = (propertyName = "value") => (proto, key) => {
  * @license
  * Copyright 2020 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */const Ft$1=e$1(class extends i$1{constructor(r){if(super(r),r.type!==t$1.PROPERTY&&r.type!==t$1.ATTRIBUTE&&r.type!==t$1.BOOLEAN_ATTRIBUTE)throw Error("The `live` directive is not allowed on child or event bindings");if(!rt$1(r))throw Error("`live` bindings can only contain a single expression")}render(r){return r}update(r,[e]){if(e===R$5||e===D$4)return e;const i=r.element,n=r.name;if(r.type===t$1.PROPERTY){if(e===i[n])return R$5}else if(r.type===t$1.BOOLEAN_ATTRIBUTE){if(!!e===i.hasAttribute(n))return R$5}else if(r.type===t$1.ATTRIBUTE&&i.getAttribute(n)===e+"")return R$5;return dt$1(r),e}});
+ */const Ft$1=e$1(class extends i$2{constructor(r){if(super(r),r.type!==t$1.PROPERTY&&r.type!==t$1.ATTRIBUTE&&r.type!==t$1.BOOLEAN_ATTRIBUTE)throw Error("The `live` directive is not allowed on child or event bindings");if(!rt$1(r))throw Error("`live` bindings can only contain a single expression")}render(r){return r}update(r,[e]){if(e===R$5||e===D$4)return e;const i=r.element,n=r.name;if(r.type===t$1.PROPERTY){if(e===i[n])return R$5}else if(r.type===t$1.BOOLEAN_ATTRIBUTE){if(!!e===i.hasAttribute(n))return R$5}else if(r.type===t$1.ATTRIBUTE&&i.getAttribute(n)===e+"")return R$5;return dt$1(r),e}});
 
 var SlInput = class extends ShoelaceElement {
   constructor() {
@@ -9741,7 +9653,12 @@ if (!customElements.get("sl-dropdown"))
     customElements.define("sl-dropdown", SlDropdown);
 if (!customElements.get("sl-input"))
     customElements.define("sl-input", SlInput);
-let InlangAddInput = class InlangAddInput extends h$3 {
+let InlangAddVariable = class InlangAddVariable extends h$3 {
+    constructor() {
+        super(...arguments);
+        //state
+        this._newInput = "";
+    }
     static { this.styles = [
         baseStyling,
         i$4 `
@@ -9798,10 +9715,6 @@ let InlangAddInput = class InlangAddInput extends h$3 {
 			}
 		`,
     ]; }
-    async firstUpdated() {
-        await this.updateComplete;
-        this._newInput = "";
-    }
     render() {
         return ke$2 `
 			<sl-dropdown
@@ -9824,7 +9737,7 @@ let InlangAddInput = class InlangAddInput extends h$3 {
 				<div class="dropdown-container">
 					<div class="dropdown-item">
 						<div class="dropdown-header">
-							<p class="dropdown-title">Add input</p>
+							<p class="dropdown-title">Add variable</p>
 						</div>
 						<sl-input
 							size="small"
@@ -9836,25 +9749,20 @@ let InlangAddInput = class InlangAddInput extends h$3 {
 							@keydown=${(e) => {
             if (e.key === "Enter") {
                 if (this._newInput && this._newInput.trim() !== "") {
-                    for (const message of this.messages ?? []) {
-                        const newMessage = structuredClone(message);
-                        newMessage.declarations.push({
-                            type: "input",
-                            name: this._newInput,
-                            // value: {
-                            // 	type: "expression",
-                            // 	arg: {
-                            // 		type: "variable",
-                            // 		name: this._newInput!,
-                            // 	},
-                            // },
-                        });
-                        this.dispatchEvent(createChangeEvent({
-                            type: "Message",
-                            operation: "update",
-                            newData: newMessage,
-                        }));
-                    }
+                    this.dispatchEvent(createChangeEvent({
+                        entityId: this.bundle.id,
+                        entity: "bundle",
+                        newData: {
+                            ...this.bundle,
+                            declarations: [
+                                ...this.bundle.declarations,
+                                {
+                                    name: this._newInput,
+                                    type: "input-variable",
+                                },
+                            ],
+                        },
+                    }));
                 }
                 this._newInput = "";
                 const dropdown = this.shadowRoot?.querySelector(".dropdown");
@@ -9886,7 +9794,7 @@ let InlangAddInput = class InlangAddInput extends h$3 {
 								d="M140 180a12 12 0 1 1-12-12a12 12 0 0 1 12 12M128 72c-22.06 0-40 16.15-40 36v4a8 8 0 0 0 16 0v-4c0-11 10.77-20 24-20s24 9 24 20s-10.77 20-24 20a8 8 0 0 0-8 8v8a8 8 0 0 0 16 0v-.72c18.24-3.35 32-17.9 32-35.28c0-19.85-17.94-36-40-36m104 56A104 104 0 1 1 128 24a104.11 104.11 0 0 1 104 104m-16 0a88 88 0 1 0-88 88a88.1 88.1 0 0 0 88-88"
 							/>
 						</svg>
-						<p>As soon as added this input can be used in all messages of the bundle.</p>
+						<p>The variable can be be used in all messages of this bundle.</p>
 					</div>
 				</div>
 			</sl-dropdown>
@@ -9894,14 +9802,14 @@ let InlangAddInput = class InlangAddInput extends h$3 {
     }
 };
 __decorate$6([
-    n$1({ type: Array })
-], InlangAddInput.prototype, "messages", void 0);
+    n$1({ type: Object })
+], InlangAddVariable.prototype, "bundle", void 0);
 __decorate$6([
     r$1()
-], InlangAddInput.prototype, "_newInput", void 0);
-InlangAddInput = __decorate$6([
-    t$2("inlang-add-input")
-], InlangAddInput);
+], InlangAddVariable.prototype, "_newInput", void 0);
+InlangAddVariable = __decorate$6([
+    t$2("inlang-add-variable")
+], InlangAddVariable);
 
 var __decorate$5 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -9922,19 +9830,6 @@ let InlangBundle = class InlangBundle extends h$3 {
     constructor() {
         super(...arguments);
         this._bundleActionsPresent = false;
-        this._inputs = () => {
-            const inputs = [];
-            if (this.messages) {
-                for (const message of this.messages) {
-                    for (const declaration of message.declarations) {
-                        if (declaration.type === "input" && !inputs.some((d) => d.name === declaration.name)) {
-                            inputs.push(declaration);
-                        }
-                    }
-                }
-            }
-            return inputs;
-        };
     }
     static { this.styles = [
         baseStyling,
@@ -9975,20 +9870,20 @@ let InlangBundle = class InlangBundle extends h$3 {
 				display: flex;
 				flex-direction: column;
 			}
-			.inputs-wrapper {
+			.variables-wrapper {
 				display: flex;
 				align-items: center;
 				min-height: 44px;
 				gap: 8px;
 				color: var(--sl-input-color);
 			}
-			.inputs {
+			.variables {
 				display: flex;
 				align-items: center;
 				min-height: 44px;
 				gap: 1px;
 			}
-			.input-tag::part(base) {
+			.variable-tag::part(base) {
 				height: 28px;
 				font-weight: 500;
 				cursor: pointer;
@@ -10067,42 +9962,41 @@ let InlangBundle = class InlangBundle extends h$3 {
 			<div>
 				<div class=${`header`} part="base">
 					<div class="header-left">
-						<span># ${this.bundle?.id}</span>
+						<span># ${this.bundle.id}</span>
 					</div>
 
 					<div class="header-right">
-						${this._inputs() && this._inputs().length > 0
-            ? ke$2 `<div class="inputs-wrapper">
-									Inputs:
-									<div class="inputs">
-										${this._inputs()?.map((input) => ke$2 `<sl-dropdown
+						${this.bundle.declarations.length > 0
+            ? ke$2 `<div class="variables-wrapper">
+									Variables:
+									<div class="variables">
+										${this.bundle.declarations.map((declaration) => ke$2 `<sl-dropdown
 													><sl-button
 														slot="trigger"
-														class="input-tag"
+														class="variable-tag"
 														variant="neutral"
 														size="small"
-														>${input.name}</sl-button
+														>${declaration.name}</sl-button
 													><sl-menu>
 														<sl-menu-item
 															value="delete"
 															@click=${() => {
-                for (const message of this.messages) {
-                    const newMessage = structuredClone(message);
-                    const index = newMessage.declarations.findIndex((declaration) => declaration.name === input.name);
-                    newMessage.declarations.splice(index, 1);
-                    this.dispatchEvent(createChangeEvent({
-                        type: "Message",
-                        operation: "update",
-                        newData: newMessage,
-                    }));
-                }
+                const filtered = this.bundle.declarations.filter((d) => d.name !== declaration.name);
+                this.dispatchEvent(createChangeEvent({
+                    entityId: this.bundle.id,
+                    entity: "bundle",
+                    newData: {
+                        ...this.bundle,
+                        declarations: filtered,
+                    },
+                }));
             }}
 															>Delete</sl-menu-item
 														>
 													</sl-menu>
 												</sl-dropdown>`)}
-										<inlang-add-input .messages=${this.messages}>
-											<sl-tooltip content="Add input to message bundle">
+										<inlang-add-variable .bundle=${this.bundle}>
+											<sl-tooltip content="Add a variable to this bundle">
 												<sl-button class="text-button" variant="neutral" size="small"
 													><svg
 														viewBox="0 0 24 24"
@@ -10117,12 +10011,12 @@ let InlangBundle = class InlangBundle extends h$3 {
 														></path></svg
 												></sl-button>
 											</sl-tooltip>
-										</inlang-add-input>
+										</inlang-add-variable>
 									</div>
 							  </div>`
-            : ke$2 `<div class="inputs-wrapper">
-									<inlang-add-input .messages=${this.messages}>
-										<sl-tooltip content="Add input to message bundle">
+            : ke$2 `<div class="variables-wrapper">
+									<inlang-add-variable .bundle=${this.bundle}>
+										<sl-tooltip content="Add a variable to this bundle">
 											<sl-button class="text-button" variant="text" size="small"
 												><svg
 													viewBox="0 0 24 24"
@@ -10135,10 +10029,10 @@ let InlangBundle = class InlangBundle extends h$3 {
 														fill="currentColor"
 														d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"
 													></path></svg
-												>Input</sl-button
+												>New variable</sl-button
 											>
 										</sl-tooltip>
-									</inlang-add-input>
+									</inlang-add-variable>
 							  </div>`}
 						${this._bundleActionsPresent
             ? ke$2 `<div class="separator"></div>
@@ -10175,14 +10069,100 @@ __decorate$5([
     n$1({ type: Object })
 ], InlangBundle.prototype, "bundle", void 0);
 __decorate$5([
-    n$1({ type: Array })
-], InlangBundle.prototype, "messages", void 0);
-__decorate$5([
     r$1()
 ], InlangBundle.prototype, "_bundleActionsPresent", void 0);
 InlangBundle = __decorate$5([
     t$2("inlang-bundle")
 ], InlangBundle);
+
+/**
+ * Convert array of 16 byte values to UUID string format of the form:
+ * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+ */
+var byteToHex = [];
+for (var i$1 = 0; i$1 < 256; ++i$1) {
+  byteToHex.push((i$1 + 0x100).toString(16).slice(1));
+}
+function unsafeStringify(arr, offset = 0) {
+  // Note: Be careful editing this code!  It's been tuned for performance
+  // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
+  //
+  // Note to future-self: No, you can't remove the `toLowerCase()` call.
+  // REF: https://github.com/uuidjs/uuid/pull/677#issuecomment-1757351351
+  return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + '-' + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + '-' + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + '-' + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + '-' + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
+}
+
+// Unique ID creation requires a high quality random # generator. In the browser we therefore
+// require the crypto API and do not support built-in fallback to lower quality random number
+// generators (like Math.random()).
+
+var getRandomValues;
+var rnds8 = new Uint8Array(16);
+function rng() {
+  // lazy load so that environments that need to polyfill have a chance to do so
+  if (!getRandomValues) {
+    // getRandomValues needs to be invoked in a context where "this" is a Crypto implementation.
+    getRandomValues = typeof crypto !== 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
+    if (!getRandomValues) {
+      throw new Error('crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported');
+    }
+  }
+  return getRandomValues(rnds8);
+}
+
+var randomUUID = typeof crypto !== 'undefined' && crypto.randomUUID && crypto.randomUUID.bind(crypto);
+var native = {
+  randomUUID
+};
+
+function v4(options, buf, offset) {
+  if (native.randomUUID && !buf && !options) {
+    return native.randomUUID();
+  }
+  options = options || {};
+  var rnds = options.random || (options.rng || rng)();
+
+  // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+  rnds[6] = rnds[6] & 0x0f | 0x40;
+  rnds[8] = rnds[8] & 0x3f | 0x80;
+
+  // Copy bytes to buffer, if provided
+  if (buf) {
+    offset = offset || 0;
+    for (var i = 0; i < 16; ++i) {
+      buf[offset + i] = rnds[i];
+    }
+    return buf;
+  }
+  return unsafeStringify(rnds);
+}
+
+/**
+ *
+ * @deprecated
+ *
+ * use the database directly
+ *
+ * - less code because the database has default values
+ * - `text` is misleading because it does not treat expressions in the text
+ *
+ * create v2 Variant AST with text-only pattern
+ * @example createVariant({match: ["*"], text: "Hello world"})
+ */
+function createVariant(args) {
+    return {
+        messageId: args.messageId,
+        id: args.id ? args.id : v4(),
+        match: args.match ? args.match : {},
+        pattern: args.pattern ? args.pattern : [toTextElement(args.text ?? "")],
+    };
+}
+function toTextElement(text) {
+    return {
+        type: "text",
+        value: text,
+    };
+}
 
 // src/components/tag/tag.styles.ts
 var tag_styles_default = i$4`
@@ -10696,32 +10676,26 @@ let InlangMessage = class InlangMessage extends h$3 {
 			</div>
 			<div class="message-body">
 				${(this.message && this.message.selectors.length > 0) ||
-            (this.message && this.message.variants.length > 1 && this.message.selectors.length === 0)
+            (this.message && this.variants.length > 1 && this.message.selectors.length === 0)
             ? ke$2 `<div
 							class=${`message-header` +
                 ` ` +
-                (this.message.variants && this.message.variants.length === 0
-                    ? `no-bottom-border`
-                    : ``)}
+                (this.variants && this.variants.length === 0 ? `no-bottom-border` : ``)}
 					  >
 							<div class="selector-container">
 								${this.message.selectors.map((selector, index) => ke$2 `<sl-dropdown>
-										<div class="selector" slot="trigger">
-											${
-            // @ts-ignore
-            selector.arg.name}
-										</div>
+										<div class="selector" slot="trigger">${selector.name}</div>
 										<sl-menu>
 											<sl-menu-item
 												value="delete"
 												@click=${() => {
                 if (this.message) {
                     // remove matches from underlying variants
-                    for (const variant of this.message.variants) {
-                        const matchObj = Object.fromEntries(Object.entries(variant.match).filter(([key]) => key !== selector.arg.name));
+                    for (const variant of this.variants) {
+                        const matchObj = Object.fromEntries(Object.entries(variant.match).filter(([key]) => key !== selector.name));
                         this.dispatchEvent(createChangeEvent({
-                            type: "Variant",
-                            operation: "update",
+                            entityId: variant.id,
+                            entity: "variant",
                             newData: {
                                 ...variant,
                                 match: matchObj,
@@ -10730,8 +10704,8 @@ let InlangMessage = class InlangMessage extends h$3 {
                     }
                     // remove selector from message
                     this.dispatchEvent(createChangeEvent({
-                        type: "Message",
-                        operation: "update",
+                        entityId: this.message.id,
+                        entity: "message",
                         newData: {
                             ...this.message,
                             selectors: this.message.selectors.filter((_, i) => i !== index),
@@ -10779,14 +10753,14 @@ let InlangMessage = class InlangMessage extends h$3 {
                     match: (() => {
                         const match = {};
                         for (const selector of this.message.selectors) {
-                            match[selector.arg.name] = "*";
+                            match[selector.name] = "*";
                         }
                         return match;
                     })(),
                 });
                 this.dispatchEvent(createChangeEvent({
-                    type: "Variant",
-                    operation: "create",
+                    entityId: variant.id,
+                    entity: "variant",
                     newData: variant,
                 }));
             }}
@@ -10806,6 +10780,9 @@ let InlangMessage = class InlangMessage extends h$3 {
 __decorate$4([
     n$1()
 ], InlangMessage.prototype, "message", void 0);
+__decorate$4([
+    n$1()
+], InlangMessage.prototype, "variants", void 0);
 __decorate$4([
     n$1({ type: Object })
 ], InlangMessage.prototype, "settings", void 0);
@@ -11123,8 +11100,8 @@ let InlangVariant = class InlangVariant extends h$3 {
                     newVariant.match[selectorName] = value;
                 }
                 this.dispatchEvent(createChangeEvent({
-                    type: "Variant",
-                    operation: "update",
+                    entityId: this.variant.id,
+                    entity: "variant",
                     newData: newVariant,
                 }));
             }
@@ -11665,7 +11642,7 @@ const registerPlainText = mod.registerPlainText;
  * @returns The pattern as a string.
  *
  * @example
- * patternToString({ pattern: [{ value: "Hello" }, { type: "expression", arg: { type: "variable", name: "name" } }] }) -> "Hello {{name}}"
+ * patternToString({ pattern: [{ value: "Hello" }, { type: "expression", arg: { type: "variable-reference", name: "name" } }] }) -> "Hello {name}"
  */
 const patternToString = (props) => {
     if (!props.pattern) {
@@ -11675,11 +11652,9 @@ const patternToString = (props) => {
         .map((p) => {
         if ("value" in p) {
             return p.value;
-            // @ts-ignore
         }
-        else if (p.type === "expression" && p.arg.type === "variable") {
-            // @ts-ignore
-            return `{{${p.arg.name}}}`;
+        else if (p.type === "expression" && p.arg.type === "variable-reference") {
+            return `{${p.arg.name}}`;
         }
         return "";
     })
@@ -11694,11 +11669,11 @@ const patternToString = (props) => {
  * @returns The pattern of the text.
  *
  * @example
- * stringToPattern({ text: "Hello {{name}}" }) -> [{ value: "Hello" }, { type: "expression", arg: { type: "variable", name: "name" } }]
+ * stringToPattern({ text: "Hello {name}" }) -> [{ value: "Hello" }, { type: "expression", arg: { type: "variable-reference", name: "name" } }]
  */
 const stringToPattern = (props) => {
     const pattern = [];
-    const regex = /{{(.*?)}}/g;
+    const regex = /{(.*?)}/g;
     let lastIndex = 0;
     let match;
     while ((match = regex.exec(props.text)) !== null) {
@@ -11714,7 +11689,7 @@ const stringToPattern = (props) => {
             pattern.push({
                 type: "expression",
                 arg: {
-                    type: "variable",
+                    type: "variable-reference",
                     name: match[1],
                 },
             });
@@ -11783,8 +11758,8 @@ let InlangPatternEditor = class InlangPatternEditor extends h$3 {
         this._handleListenToTextContent = (textContent) => {
             this._patternState = stringToPattern({ text: textContent });
             this.dispatchEvent(createChangeEvent({
-                type: "Variant",
-                operation: "update",
+                entityId: this.variant.id,
+                entity: "variant",
                 newData: { ...this.variant, pattern: this._patternState },
             }));
         };
@@ -12298,7 +12273,7 @@ function scrollIntoView(element, container, direction = "vertical", behavior = "
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */class le extends i$1{constructor(i){if(super(i),this.it=D$4,i.type!==t$1.CHILD)throw Error(this.constructor.directiveName+"() can only be used in child bindings")}render(t){if(t===D$4||null==t)return this._t=void 0,this.it=t;if(t===R$5)return t;if("string"!=typeof t)throw Error(this.constructor.directiveName+"() called with a non-string value");if(t===this.it)return this._t;this.it=t;const i=[t];return i.raw=i,this._t={_$litType$:this.constructor.resultType,strings:i,values:[]}}}le.directiveName="unsafeHTML",le.resultType=1;const ae=e$1(le);
+ */class le extends i$2{constructor(i){if(super(i),this.it=D$4,i.type!==t$1.CHILD)throw Error(this.constructor.directiveName+"() can only be used in child bindings")}render(t){if(t===D$4||null==t)return this._t=void 0,this.it=t;if(t===R$5)return t;if("string"!=typeof t)throw Error(this.constructor.directiveName+"() called with a non-string value");if(t===this.it)return this._t;this.it=t;const i=[t];return i.raw=i,this._t={_$litType$:this.constructor.resultType,strings:i,values:[]}}}le.directiveName="unsafeHTML",le.resultType=1;const ae=e$1(le);
 
 var SlSelect = class extends ShoelaceElement {
   constructor() {
@@ -13243,13 +13218,10 @@ let InlangAddSelector = class InlangAddSelector extends h$3 {
         };
         this._getInputs = () => {
             const inputs = [];
-            if (this.messages) {
-                for (const message of this.messages) {
-                    for (const declaration of message.declarations) {
-                        if (declaration.type === "input" && !inputs.some((d) => d.name === declaration.name)) {
-                            inputs.push(declaration);
-                        }
-                    }
+            for (const declaration of this.bundle.declarations) {
+                if (declaration.type === "input-variable" &&
+                    !inputs.some((d) => d.name === declaration.name)) {
+                    inputs.push(declaration);
                 }
             }
             return inputs;
@@ -13264,7 +13236,7 @@ let InlangAddSelector = class InlangAddSelector extends h$3 {
             if (this._input && this.message) {
                 // get variant matcher
                 const message = structuredClone(this.message);
-                const _variantsMatcher = (message ? message.variants : []).map((variant) => variant.match);
+                const _variantsMatcher = (message ? this.variants : []).map((variant) => variant.match);
                 // Step 1 | add selector to message
                 this._updateSelector();
                 // Step 2 | add "*" to existing variants
@@ -13281,72 +13253,60 @@ let InlangAddSelector = class InlangAddSelector extends h$3 {
         };
         this._addInput = () => {
             if (this._isNewInput && this._newInputSting && this._newInputSting.length > 0) {
-                for (const message of this.messages || []) {
-                    const newMessage = structuredClone(message);
-                    newMessage.declarations.push({
-                        type: "input",
-                        name: this._newInputSting,
-                        // value: {
-                        // 	type: "expression",
-                        // 	arg: {
-                        // 		type: "variable",
-                        // 		name: this._newInputSting,
-                        // 	},
-                        // },
-                    });
-                    this.dispatchEvent(createChangeEvent({
-                        type: "Message",
-                        operation: "update",
-                        newData: newMessage,
-                    }));
-                }
-                this._input = this._newInputSting;
+                this.dispatchEvent(createChangeEvent({
+                    entity: "bundle",
+                    entityId: this.bundle.id,
+                    newData: {
+                        ...this.bundle,
+                        declarations: [
+                            ...this.bundle.declarations,
+                            {
+                                name: this._newInputSting,
+                                type: "input-variable",
+                            },
+                        ],
+                    },
+                }));
             }
         };
         this._updateSelector = () => {
             if (this.message && this._input) {
                 this.message.selectors.push({
-                    type: "expression",
-                    arg: {
-                        type: "variable",
-                        name: this._input,
-                    },
-                    annotation: {
-                        type: "function",
-                        name: this._function || "plural",
-                        options: [],
-                    },
+                    type: "variable-reference",
+                    name: this._input,
                 });
                 this.dispatchEvent(createChangeEvent({
-                    type: "Message",
-                    operation: "update",
+                    entityId: this.message.id,
+                    entity: "message",
                     newData: this.message,
                 }));
             }
         };
         this._addMatchToExistingVariants = () => {
             if (this.message && this._input) {
-                for (const variant of this.message.variants) {
+                for (const variant of this.variants) {
                     variant.match[this._input] = "*";
                     this.dispatchEvent(createChangeEvent({
-                        type: "Variant",
-                        operation: "update",
+                        entityId: variant.id,
+                        entity: "variant",
                         newData: variant,
                     }));
                 }
             }
         };
+        // TODO verify if this is needed from UX perspective.
         this._addVariantsFromNewCombinations = (newCombinations) => {
             if (this.message) {
                 for (const combination of newCombinations) {
-                    const newVariant = createVariant({
+                    const newVariant = {
+                        id: v4(),
+                        pattern: [],
                         messageId: this.message.id,
                         match: combination,
-                        text: "",
-                    });
+                    };
                     this.dispatchEvent(createChangeEvent({
-                        type: "Variant",
-                        operation: "create",
+                        entityId: newVariant.id,
+                        entity: "variant",
                         newData: newVariant,
                     }));
                 }
@@ -13722,10 +13682,13 @@ let InlangAddSelector = class InlangAddSelector extends h$3 {
 };
 __decorate([
     n$1()
+], InlangAddSelector.prototype, "bundle", void 0);
+__decorate([
+    n$1()
 ], InlangAddSelector.prototype, "message", void 0);
 __decorate([
     n$1()
-], InlangAddSelector.prototype, "messages", void 0);
+], InlangAddSelector.prototype, "variants", void 0);
 __decorate([
     r$1()
 ], InlangAddSelector.prototype, "_input", void 0);
