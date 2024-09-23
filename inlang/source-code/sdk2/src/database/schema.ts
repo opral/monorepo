@@ -2,7 +2,6 @@ import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import {
 	Declaration,
-	Literal,
 	Pattern,
 	VariableReference,
 } from "../json-schema/pattern.js";
@@ -84,10 +83,16 @@ type VariantTable = {
  * @example
  *   match = { type: "match", name: "gender", value: { type: "literal", value: "male"  }}
  */
-export type Match = {
-	type: "match";
-	name: VariableReference["name"];
-	value: Literal | { type: "catch-all" };
+export type Match = LiteralMatch | CatchAllMatch;
+
+export type LiteralMatch = {
+	type: "literal-match";
+	key: VariableReference["name"];
+	value: string;
+};
+export type CatchAllMatch = {
+	type: "catchall-match";
+	key: VariableReference["name"];
 };
 
 export type Bundle = Selectable<BundleTable>;
