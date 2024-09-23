@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, it, describe } from "vitest"
 import type { PluginSettings } from "./settings.js"
-import { createVariant, getVariant, ProjectSettings, type Message, type Variant } from "@inlang/sdk"
 import { plugin } from "./plugin.js"
-import { createNodeishMemoryFs } from "@lix-js/fs"
 
 const pluginId = "plugin.inlang.i18next"
 
