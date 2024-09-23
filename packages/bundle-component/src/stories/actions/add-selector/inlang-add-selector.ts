@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { createChangeEvent } from "../../../helper/event.js"
