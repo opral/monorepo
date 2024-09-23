@@ -125,7 +125,13 @@ describe("editMessageCommand", () => {
 					variants: [
 						{
 							id: "testVariant",
-							match: { locale: "en" },
+							matches: [
+								{
+									type: "match",
+									name: "locale",
+									value: { type: "literal", value: "en" },
+								},
+							],
 							pattern: "mock-pattern",
 						},
 					],
@@ -175,7 +181,7 @@ describe("editMessageCommand", () => {
 									value: "Current content",
 								},
 							],
-							match: [],
+							matches: [],
 						},
 					],
 				},
@@ -230,7 +236,7 @@ describe("editMessageCommand", () => {
 					variants: [
 						{
 							id: "testVariant",
-							match: [],
+							matches: [],
 							pattern: "mock-pattern",
 						},
 					],

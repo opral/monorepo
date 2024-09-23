@@ -1,4 +1,4 @@
-import type { MessageNested, ResourceFile, Variant } from "@inlang/sdk2"
+import type { Match, MessageNested, ResourceFile, Variant } from "@inlang/sdk2"
 import { PLUGIN_KEY, type plugin } from "../plugin.js"
 import type { FileSchema } from "../fileSchema.js"
 
@@ -24,7 +24,7 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 		result.push({
 			locale,
 			// beautify the json
-			content: new TextEncoder().encode(JSON.stringify(files[locale], undefined, '\t')),
+			content: new TextEncoder().encode(JSON.stringify(files[locale], undefined, "\t")),
 			path: pathPattern.replace("{locale}", locale),
 			pluginKey: PLUGIN_KEY,
 		})
@@ -50,7 +50,7 @@ function serializeVariants(variants: Variant[]): string | Record<string, string>
 	}
 	const entries = []
 	for (const variant of variants) {
-		const match = serializeMatcher(variant.match)
+		const match = serializeMatcher(variant.matches)
 		const pattern = serializePattern(variant.pattern)
 		entries.push([match, pattern])
 	}
@@ -66,7 +66,7 @@ function serializePattern(pattern: Variant["pattern"]): string {
 	for (const part of pattern) {
 		if (part.type === "text") {
 			result += part.value
-		} else if (part.arg.type === "variable") {
+		} else if (part.arg.type === "variable-reference") {
 			result += `{${part.arg.name}}`
 		} else {
 			throw new Error("Unsupported expression type")
@@ -77,7 +77,14 @@ function serializePattern(pattern: Variant["pattern"]): string {
 
 // input: { platform: "android", userGender: "male" }
 // output: `platform=android,userGender=male`
-function serializeMatcher(match: Record<string, string>): string {
-	const parts = Object.entries(match).map(([key, value]) => `${key}=${value}`)
+function serializeMatcher(matches: Match[]): string {
+	const parts = []
+	for (const match of matches) {
+		if (match.value.type === "literal") {
+			parts.push(`${match.name}=${match.value.value}`)
+		} else {
+			parts.push(`${match.name}=*`)
+		}
+	}
 	return parts.join(", ")
 }

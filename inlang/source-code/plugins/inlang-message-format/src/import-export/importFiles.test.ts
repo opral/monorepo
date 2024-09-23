@@ -29,17 +29,17 @@ test("it handles single variants without expressions", async () => {
 		bundles: [
 			{
 				id: "some_happy_cat",
+				declarations: [],
 				messages: [
 					{
 						id: "some_happy_cat_en",
 						bundleId: "some_happy_cat",
 						locale: "en",
 						selectors: [],
-						declarations: [],
 						variants: [
 							{
 								id: "some_happy_cat_en",
-								match: {},
+								matches: [],
 								messageId: "some_happy_cat_en",
 								pattern: [{ type: "text", value: "Read more about Lix" }],
 							},
@@ -78,29 +78,29 @@ test("it handles variable expressions in patterns", async () => {
 		bundles: [
 			{
 				id: "some_happy_cat",
+				declarations: [],
 				messages: [
 					{
 						id: "some_happy_cat_en",
 						bundleId: "some_happy_cat",
 						locale: "en",
 						selectors: [],
-						declarations: [],
 						variants: [
 							{
 								id: "some_happy_cat_en",
-								match: {},
+								matches: [],
 								messageId: "some_happy_cat_en",
 								pattern: [
 									{ type: "text", value: "Used by " },
 									{
 										type: "expression",
-										arg: { type: "variable", name: "count" },
+										arg: { type: "variable-reference", name: "count" },
 									},
 									{
 										type: "text",
 										value: " devs, ",
 									},
-									{ type: "expression", arg: { type: "variable", name: "numDesigners" } },
+									{ type: "expression", arg: { type: "variable-reference", name: "numDesigners" } },
 									{
 										type: "text",
 										value: " designers and translators",
@@ -181,17 +181,17 @@ test("it assigns the correct locales to messages", async () => {
 		bundles: [
 			{
 				id: "some_happy_cat",
+				declarations: [],
 				messages: [
 					{
 						id: "some_happy_cat_en",
 						bundleId: "some_happy_cat",
 						locale: "en",
 						selectors: [],
-						declarations: [],
 						variants: [
 							{
 								id: "some_happy_cat_en",
-								match: {},
+								matches: [],
 								messageId: "some_happy_cat_en",
 								pattern: [{ type: "text", value: "Read more about Lix" }],
 							},
@@ -202,11 +202,10 @@ test("it assigns the correct locales to messages", async () => {
 						bundleId: "some_happy_cat",
 						locale: "de",
 						selectors: [],
-						declarations: [],
 						variants: [
 							{
 								id: "some_happy_cat_de",
-								match: {},
+								matches: [],
 								messageId: "some_happy_cat_de",
 								pattern: [{ type: "text", value: "Lese mehr über Lix" }],
 							},
@@ -253,25 +252,39 @@ test("it handles multi variant messages", async () => {
 		bundles: [
 			{
 				id: "some_happy_cat",
+				declarations: [],
 				messages: [
 					{
 						id: "some_happy_cat_en",
 						bundleId: "some_happy_cat",
 						locale: "en",
 						selectors: [],
-						declarations: [],
 						variants: [
 							{
 								id: "some_happy_cat_en;platform=android,userGender=male",
-								match: {
-									platform: "android",
-									userGender: "male",
-								},
+								matches: [
+									{
+										type: "match",
+										name: "platform",
+										value: {
+											type: "literal",
+											value: "android",
+										},
+									},
+									{
+										type: "match",
+										name: "userGender",
+										value: {
+											type: "literal",
+											value: "male",
+										},
+									},
+								],
 								messageId: "some_happy_cat_en",
 								pattern: [
 									{
 										type: "expression",
-										arg: { type: "variable", name: "username" },
+										arg: { type: "variable-reference", name: "username" },
 									},
 									{
 										type: "text",
@@ -281,15 +294,29 @@ test("it handles multi variant messages", async () => {
 							},
 							{
 								id: "some_happy_cat_en;platform=ios,userGender=female",
-								match: {
-									platform: "ios",
-									userGender: "female",
-								},
+								matches: [
+									{
+										type: "match",
+										name: "platform",
+										value: {
+											type: "literal",
+											value: "ios",
+										},
+									},
+									{
+										type: "match",
+										name: "userGender",
+										value: {
+											type: "literal",
+											value: "female",
+										},
+									},
+								],
 								messageId: "some_happy_cat_en",
 								pattern: [
 									{
 										type: "expression",
-										arg: { type: "variable", name: "username" },
+										arg: { type: "variable-reference", name: "username" },
 									},
 									{
 										type: "text",
@@ -299,10 +326,24 @@ test("it handles multi variant messages", async () => {
 							},
 							{
 								id: "some_happy_cat_en;platform=*,userGender=*",
-								match: {
-									platform: "*",
-									userGender: "*",
-								},
+								matches: [
+									{
+										type: "match",
+										name: "platform",
+										value: {
+											type: "literal",
+											value: "android",
+										},
+									},
+									{
+										type: "match",
+										name: "userGender",
+										value: {
+											type: "literal",
+											value: "male",
+										},
+									},
+								],
 								messageId: "some_happy_cat_en",
 								pattern: [
 									{

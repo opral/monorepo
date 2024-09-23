@@ -8,6 +8,7 @@ import {
 import { atomWithStorage } from "jotai/utils";
 import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { Change, isInSimulatedCurrentBranch } from "@inlang/sdk2";
+import hasMissingTranslations from "./helper/hasMissingTranslations.ts";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -91,18 +92,28 @@ export const filterMissingTranslationAtom = atom<boolean>(false);
 
 export const bundlesNestedFilteredAtom = atom(async (get) => {
 	const query = get(searchQueryAtom).toLowerCase();
-	const items = await get(bundlesNestedAtom);
-	// filter out bundles with empty variant patterns [""] or missing locale
-	// items.find((bundle) =>
-	// 	bundle.messages.filter((message) => {
-	// 		message.variants.find(
-	// 			(variant) =>
-	// 				JSON.stringify(variant.pattern) === `[{"type":"Text","value":""}]`
-	// 		);
-	// 	})
-	// );
-	return items.filter((item) =>
-		JSON.stringify(item).toLowerCase().includes(query)
+	const settings = await get(settingsAtom);
+	const filteredLocales = get(filteredLocalesAtom);
+	const relevantLocales =
+		filteredLocales.length > 0
+			? [...filteredLocales, settings.baseLocale]
+			: settings?.locales;
+	let bundles = await get(bundlesNestedAtom);
+
+	// Filter by missing translations if the flag is set
+	if (get(filterMissingTranslationAtom)) {
+		bundles = bundles.filter((bundle) =>
+			hasMissingTranslations(bundle, relevantLocales)
+		);
+	}
+
+	// Filter bundles by query, only considering relevant locales
+	return bundles.filter((bundle) =>
+		bundle.messages.some(
+			(message) =>
+				relevantLocales.includes(message.locale) &&
+				JSON.stringify(message).toLowerCase().includes(query)
+		)
 	);
 });
 
@@ -156,6 +167,46 @@ export const pendingChangesAtom = atom(async (get) => {
 		.execute();
 	//console.log(result);
 	return result;
+});
+
+export const groupedPendingChangesAtom = atom(async (get) => {
+	// TODO: there is for sure a better way to do this, but it should unblock Fink2 diff ui
+	get(withPollingAtom);
+	const project = await get(projectAtom);
+	if (!project) return [];
+	const result = await project.lix.db
+		.selectFrom("change")
+		.selectAll()
+		.where("commit_id", "is", null)
+		// TODO remove after sequence concept on lix
+		// https://linear.app/opral/issue/LIX-126/branching
+		.where(isInSimulatedCurrentBranch)
+		.execute();
+	// console.log("group", result);
+
+	const latestChangesPerEntity: Change[] = [];
+
+	for (const change of result) {
+		const entityId = change.value?.id;
+		if (!entityId) return undefined;
+
+		const latestChange = await project.lix.db
+			.selectFrom("change")
+			.selectAll()
+			.where("commit_id", "is", null)
+			.where((eb) => eb.ref("value", "->>").key("id"), "=", entityId)
+			.orderBy("created_at desc")
+			.executeTakeFirst();
+
+		if (
+			latestChange &&
+			!latestChangesPerEntity.some((change) => change.value?.id === entityId)
+		) {
+			latestChangesPerEntity.push(latestChange);
+		}
+	}
+
+	return latestChangesPerEntity;
 });
 
 export const unresolvedConflictsAtom = atom(async (get) => {

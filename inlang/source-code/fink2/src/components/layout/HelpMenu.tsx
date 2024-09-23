@@ -44,7 +44,7 @@ const HelpMenu = () => {
     <SlDropdown placement="bottom-end" className="peer">
       <button
         slot="trigger"
-        className="h-8 px-2 flex justify-center items-center text-zinc-500 hover:text-zinc-950 cursor-pointer"
+        className="h-8 px-2 flex justify-center items-center text-sm text-zinc-500 hover:text-zinc-950 cursor-pointer"
       >
         Need Help?
       </button>
