@@ -33,7 +33,6 @@ const bundleIdsWithPendingChangesAtom = atom(async (get) => {
 export default function App() {
 	const [project] = useAtom(projectAtom);
 	const [pendingChanges] = useAtom(pendingChangesAtom);
-	const [groupedPendingChanges] = useAtom(groupedPendingChangesAtom);
 	const [bundlesWithChanges] = useAtom(bundleIdsWithPendingChangesAtom);
 	const [commitDescription, setCommitDescription] = useState<string>("");
 	const [showDialog, setShowDialog] = useState(false);
