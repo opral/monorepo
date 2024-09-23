@@ -106,19 +106,20 @@ function parseMessage(args: {
 	}
 
 	// plurals, see https://www.i18next.com/misc/json-format#i18next-json-v4
-	const hasPlurals =
-		args.key.endsWith("_zero") ||
-		args.key.endsWith("_one") ||
-		args.key.endsWith("_two") ||
-		args.key.endsWith("_few") ||
-		args.key.endsWith("_many") ||
-		args.key.endsWith("_other")
+	const hasPlurals = testForPlurals(args.key)
 	// context is used see https://www.i18next.com/translation-function/context
 	const hasContext = hasPlurals
 		? args.key.split("_").length === 3
 		: args.key.split("_").length === 2
 
-	if (hasContext && hasPlurals === false) {
+	// the key itself has no plurals, but the resource has plurals
+	// hence, it must be the catch all variant
+	// https://www.i18next.com/translation-function/context#combining-with-plurals
+	const isCatchAll =
+		testForPlurals(args.key) === false &&
+		Object.keys(args.resource).some((key) => testForPlurals(key))
+
+	if (hasContext && hasPlurals === false && isCatchAll === false) {
 		// "friend_male" -> ["friend", "male"]
 		const [, context] = args.key.split("_")
 		bundle.declarations.push({
@@ -133,7 +134,7 @@ function parseMessage(args: {
 				value: context!,
 			},
 		]
-	} else if (hasContext && hasPlurals) {
+	} else if (hasContext && hasPlurals && isCatchAll === false) {
 		// "friend_female_one": "A girlfriend" -> ["friend", "female", "one"]
 		const [, context, plural] = args.key.split("_")
 		bundle.declarations.push({
@@ -176,7 +177,7 @@ function parseMessage(args: {
 				value: plural!,
 			},
 		]
-	} else if (hasPlurals) {
+	} else if (hasPlurals && isCatchAll === false) {
 		variant.matches = [
 			{
 				// i18next only allows matching against a count variable
@@ -208,6 +209,13 @@ function parseMessage(args: {
 				},
 			},
 		})
+	} else if (isCatchAll) {
+		variant.matches = [
+			{
+				type: "catchall-match",
+				key: "context",
+			},
+		]
 	}
 
 	bundle.declarations = removeDuplicates(bundle.declarations)
@@ -275,3 +283,11 @@ function parsePattern(value: string | string[]): {
 }
 const removeDuplicates = <T extends any[]>(arr: T) =>
 	[...new Set(arr.map((item) => JSON.stringify(item)))].map((item) => JSON.parse(item))
+
+const testForPlurals = (key: string) =>
+	key.endsWith("_zero") ||
+	key.endsWith("_one") ||
+	key.endsWith("_two") ||
+	key.endsWith("_few") ||
+	key.endsWith("_many") ||
+	key.endsWith("_other")
