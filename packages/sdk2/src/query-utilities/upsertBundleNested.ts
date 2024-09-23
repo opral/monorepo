@@ -50,7 +50,7 @@ export const upsertBundleNested = async (
 					.values({
 						id: variant.id,
 						messageId: insertedMessage.id,
-						match: variant.match,
+						matches: variant.matches,
 						pattern: variant.pattern,
 					})
 					.onConflict((oc) => oc.column("id").doUpdateSet(variant))

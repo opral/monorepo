@@ -36,7 +36,7 @@ export const selectBundleNested = (db: Kysely<InlangDatabaseSchema>) => {
 					jsonArrayFrom(
 						eb
 							.selectFrom("variant")
-							.select(["id", "messageId", "match", "pattern"])
+							.select(["id", "messageId", "matches", "pattern"])
 							.whereRef("variant.messageId", "=", "message.id")
 					).as("variants"),
 				])

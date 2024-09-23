@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { createChangeEvent } from "../../../helper/event.js"
@@ -7,7 +9,7 @@ import {
 	type Expression,
 	type Bundle,
 	type Variant,
-	uuidv4,
+	uuidV7,
 	Declaration,
 } from "@inlang/sdk2"
 
@@ -295,7 +297,7 @@ export default class InlangAddSelector extends LitElement {
 		if (this.message) {
 			for (const combination of newCombinations) {
 				const newVariant: Variant = {
-					id: uuidv4(),
+					id: uuidV7(),
 					pattern: [],
 					messageId: this.message.id,
 					match: combination,

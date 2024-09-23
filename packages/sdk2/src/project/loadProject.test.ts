@@ -25,8 +25,6 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 		.insertInto("variant")
 		.values({
 			messageId: message.id,
-			match: {},
-			pattern: [],
 		})
 		.execute();
 

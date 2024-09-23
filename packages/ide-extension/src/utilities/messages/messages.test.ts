@@ -74,7 +74,7 @@ describe("Message Webview Provider Tests", () => {
 						variants: [
 							{
 								id: "variant-id",
-								match: {},
+								matches: [],
 								messageId: "message-id",
 								pattern: [{ type: "text", value: "Hello" }],
 							},
@@ -154,7 +154,7 @@ describe("Message Webview Provider Tests", () => {
 						variants: [
 							{
 								id: "variant-id",
-								match: {},
+								matches: [],
 								messageId: "message-id",
 								pattern: [{ type: "text", value: "Hello" }],
 							},

@@ -1,11 +1,10 @@
 import {
-	createVariant,
 	Text,
 	VariableReference,
 	type Variant,
 	type BundleNested,
 	type NewBundleNested,
-	uuidv4,
+	uuidV7,
 } from "@inlang/sdk2"
 import type { Result } from "../types.js"
 import { ENV_VARIABLES } from "../services/env-variables/index.js"
@@ -59,27 +58,25 @@ export async function machineTranslateBundle(args: {
 				const targetMessage = copy.messages.find((m) => m.locale === targetLocale)
 
 				if (targetMessage) {
-					targetMessage.variants.push(
-						createVariant({
-							id: uuidv4(),
-							messageId: targetMessage.id,
-							match: sourceVariant.match,
-							pattern,
-						}) as Variant
-					)
+					targetMessage.variants.push({
+						id: uuidV7(),
+						messageId: targetMessage.id,
+						matches: sourceVariant.matches,
+						pattern,
+					} satisfies Variant)
 				} else {
-					const newMessageId = uuidv4()
+					const newMessageId = uuidV7()
 					copy.messages.push({
 						...sourceMessage,
 						id: newMessageId,
 						locale: targetLocale,
 						variants: [
-							createVariant({
-								id: uuidv4(),
+							{
+								id: uuidV7(),
 								messageId: newMessageId,
-								match: sourceVariant.match,
+								matches: sourceVariant.matches,
 								pattern,
-							}) as Variant,
+							} satisfies Variant,
 						],
 					})
 				}
