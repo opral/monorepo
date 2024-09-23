@@ -110,28 +110,31 @@ export default class InlangVariant extends LitElement {
 		if (this.variant) {
 			const newVariant = structuredClone(this.variant)
 
-			const existingMatch = newVariant.matches.find((m) => m.name === selectorName)
+			// filter the match if it already exists
+			const matches = newVariant.matches.filter((m) => m.key !== selectorName)
 
-			// if matchName is not in variant, return
-			if (existingMatch) {
-				// update the match with value (mutates variant)
-				if (value === "*") {
-					existingMatch.value = {
-						type: "catch-all",
-					}
-				} else {
-					existingMatch.value = {
-						type: "literal",
-						value,
-					}
-				}
+			// update the match with value (mutates variant)
+			if (value === "*") {
+				matches.push({
+					type: "catchall-match",
+					key: selectorName,
+				})
+			} else {
+				matches.push({
+					type: "literal-match",
+					key: selectorName,
+					value,
+				})
 			}
 
 			this.dispatchEvent(
 				createChangeEvent({
 					entityId: this.variant.id,
 					entity: "variant",
-					newData: newVariant,
+					newData: {
+						...newVariant,
+						matches,
+					},
 				})
 			)
 		}
@@ -152,14 +155,14 @@ export default class InlangVariant extends LitElement {
 						? this.variant.matches.map((match) => {
 								return html`
 									<sl-input
-										id="${this.variant.id}-${match.name}"
+										id="${this.variant.id}-${match.key}"
 										class="match"
 										size="small"
-										value=${match.value.type === "literal" ? match.value.value : "*"}
+										value=${match.type === "literal-match" ? match.value : "*"}
 										@sl-blur=${(e: Event) => {
 											const element = this.shadowRoot?.getElementById(`${this.variant.id}-${match}`)
 											if (element && e.target === element) {
-												this._updateMatch(match.name, (e.target as HTMLInputElement).value)
+												this._updateMatch(match.key, (e.target as HTMLInputElement).value)
 											}
 										}}
 									></sl-input>

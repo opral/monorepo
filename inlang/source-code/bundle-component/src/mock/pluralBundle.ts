@@ -54,9 +54,9 @@ export const examplePlural: {
 			id: "mock_variant_id_de_zero",
 			matches: [
 				{
-					type: "match",
-					name: "numProducts",
-					value: { type: "literal", value: "zero" },
+					type: "literal-match",
+					key: "numProducts",
+					value: "zero",
 				},
 			],
 			pattern: [
@@ -71,9 +71,9 @@ export const examplePlural: {
 			id: "mock_variant_id_de_one",
 			matches: [
 				{
-					type: "match",
-					name: "numProducts",
-					value: { type: "literal", value: "one" },
+					type: "literal-match",
+					key: "numProducts",
+					value: "one",
 				},
 			],
 			pattern: [
@@ -88,9 +88,9 @@ export const examplePlural: {
 			id: "mock_variant_id_de_other",
 			matches: [
 				{
-					type: "match",
-					name: "numProducts",
-					value: { type: "literal", value: "other" },
+					type: "literal-match",
+					key: "numProducts",
+					value: "other",
 				},
 			],
 			pattern: [
@@ -112,9 +112,9 @@ export const examplePlural: {
 			id: "mock_variant_id_en_zero",
 			matches: [
 				{
-					type: "match",
-					name: "numProducts",
-					value: { type: "literal", value: "zero" },
+					type: "literal-match",
+					key: "numProducts",
+					value: "zero",
 				},
 			],
 			pattern: [
@@ -129,9 +129,9 @@ export const examplePlural: {
 			id: "mock_variant_id_en_one",
 			matches: [
 				{
-					type: "match",
-					name: "numProducts",
-					value: { type: "literal", value: "one" },
+					type: "literal-match",
+					key: "numProducts",
+					value: "one",
 				},
 			],
 			pattern: [
@@ -146,9 +146,9 @@ export const examplePlural: {
 			id: "mock_variant_id_en_other",
 			matches: [
 				{
-					type: "match",
-					name: "numProducts",
-					value: { type: "literal", value: "other" },
+					type: "literal-match",
+					key: "numProducts",
+					value: "other",
 				},
 			],
 			pattern: [

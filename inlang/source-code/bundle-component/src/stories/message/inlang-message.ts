@@ -214,7 +214,7 @@ export default class InlangMessage extends LitElement {
 																	newData: {
 																		...variant,
 																		matches: variant.matches.filter(
-																			(match) => match["name"] !== selector.name
+																			(match) => match["key"] !== selector.name
 																		),
 																	},
 																})
@@ -274,9 +274,8 @@ export default class InlangMessage extends LitElement {
 										messageId: this.message.id,
 										// combine the matches that are already present with the new category -> like a matrix
 										matches: this.message.selectors.map((selector) => ({
-											type: "match",
-											name: selector.name,
-											value: { type: "catch-all" },
+											type: "catchall-match",
+											key: selector.name,
 										})),
 										pattern: [],
 									}
