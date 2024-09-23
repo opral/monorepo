@@ -2,6 +2,7 @@ import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import {
 	Declaration,
+	Literal,
 	Pattern,
 	VariableReference,
 } from "../json-schema/pattern.js";
@@ -79,10 +80,15 @@ type VariantTable = {
  * A match is a variable reference that is either a literal or a catch-all.
  *
  * https://github.com/opral/inlang-sdk/issues/205
+ *
+ * @example
+ *   match = { type: "match", name: "gender", value: { type: "literal", value: "male"  }}
  */
-export type Match =
-	| { "variable-reference": string; type: "literal"; value: string }
-	| { "variable-reference": string; type: "catch-all" };
+export type Match = {
+	type: "match";
+	name: VariableReference["name"];
+	value: Literal | { type: "catch-all" };
+};
 
 export type Bundle = Selectable<BundleTable>;
 export type NewBundle = Insertable<BundleTable>;

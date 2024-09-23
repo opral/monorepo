@@ -1,5 +1,5 @@
 import type { Message, ProjectSettings, Variant } from "@inlang/sdk2"
-import { createVariant } from "@inlang/sdk2"
+import { uuidV7 } from "@inlang/sdk2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../../styling/base.js"
@@ -207,19 +207,15 @@ export default class InlangMessage extends LitElement {
 													if (this.message) {
 														// remove matches from underlying variants
 														for (const variant of this.variants) {
-															const matchObj = Object.fromEntries(
-																Object.entries(variant.match).filter(
-																	([key]) => key !== selector.name
-																)
-															)
-
 															this.dispatchEvent(
 																createChangeEvent({
 																	entityId: variant.id,
 																	entity: "variant",
 																	newData: {
 																		...variant,
-																		match: matchObj,
+																		matches: variant.matches.filter(
+																			(match) => match["name"] !== selector.name
+																		),
 																	},
 																})
 															)
@@ -273,17 +269,17 @@ export default class InlangMessage extends LitElement {
 						? html`<p
 								part="new-variant"
 								@click=${() => {
-									const variant = createVariant({
+									const variant: Variant = {
+										id: uuidV7(),
 										messageId: this.message.id,
 										// combine the matches that are already present with the new category -> like a matrix
-										match: (() => {
-											const match: Record<string, string> = {}
-											for (const selector of this.message.selectors) {
-												match[selector.name] = "*"
-											}
-											return match
-										})(),
-									})
+										matches: this.message.selectors.map((selector) => ({
+											type: "match",
+											name: selector.name,
+											value: { type: "catch-all" },
+										})),
+										pattern: [],
+									}
 									this.dispatchEvent(
 										createChangeEvent({
 											entityId: variant.id,
