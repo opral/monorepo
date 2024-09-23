@@ -46,7 +46,7 @@ export function fromMessageV1(messageV1: MessageV1): BundleNested {
 
 			variants.push({
 				// matching was not supported. no problem should arise
-				match: {},
+				matches: [],
 				pattern: fromPatternV1(v1Variant.pattern),
 				id: messageId + "_" + variantIndex,
 				messageId: messageId,

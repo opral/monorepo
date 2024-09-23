@@ -43,8 +43,8 @@ export const upsertBundleNestedMatchByProperties = async (
 				for (const importedVariant of importedMessage.variants) {
 					const existingVariant = variantsOnMatchingMessage.find(
 						(existingVariant) =>
-							JSON.stringify(existingVariant.match) ===
-							JSON.stringify(importedVariant.match)
+							JSON.stringify(existingVariant.matches) ===
+							JSON.stringify(importedVariant.matches)
 					);
 					if (existingVariant) {
 						// make sure we don't have an id set on the import that could override the id in the db

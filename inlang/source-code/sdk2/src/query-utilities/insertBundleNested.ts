@@ -36,7 +36,7 @@ export const insertBundleNested = async (
 					.values({
 						id: variant.id,
 						messageId: insertedMessage.id,
-						match: variant.match,
+						matches: variant.matches,
 						pattern: variant.pattern,
 					})
 					.execute();
