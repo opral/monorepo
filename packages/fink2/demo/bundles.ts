@@ -154,12 +154,9 @@ export const demoBundles: BundleNested[] = [
 						id: "1458e8e3-c2e2-409c-949c-b4b214f4d094",
 						matches: [
 							{
-								type: "match",
-								name: "numTodos",
-								value: {
-									type: "literal",
-									value: "one",
-								},
+								type: "literal-match",
+								key: "numTodos",
+								value: "one",
 							},
 						],
 						pattern: [
@@ -181,12 +178,9 @@ export const demoBundles: BundleNested[] = [
 						id: "f0890476-ef1d-460f-8b17-bff2613c3fcb",
 						matches: [
 							{
-								type: "match",
-								name: "numTodos",
-								value: {
-									type: "literal",
-									value: "other",
-								},
+								type: "literal-match",
+								key: "numTodos",
+								value: "other",
 							},
 						],
 						pattern: [
@@ -221,12 +215,9 @@ export const demoBundles: BundleNested[] = [
 						id: "fc8c80af-0e34-47bf-bf49-7540bfa67531",
 						matches: [
 							{
-								type: "match",
-								name: "numTodos",
-								value: {
-									type: "literal",
-									value: "one",
-								},
+								type: "literal-match",
+								key: "numTodos",
+								value: "one",
 							},
 						],
 						pattern: [
@@ -241,12 +232,9 @@ export const demoBundles: BundleNested[] = [
 						id: "a63a9762-a86d-4c50-9cef-2dd1e91da424",
 						matches: [
 							{
-								type: "match",
-								name: "numTodos",
-								value: {
-									type: "literal",
-									value: "other",
-								},
+								type: "literal-match",
+								key: "numTodos",
+								value: "other",
 							},
 						],
 						pattern: [
