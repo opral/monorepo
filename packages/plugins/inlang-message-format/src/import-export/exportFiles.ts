@@ -24,7 +24,7 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 		result.push({
 			locale,
 			// beautify the json
-			content: new TextEncoder().encode(JSON.stringify(files[locale], undefined, '\t')),
+			content: new TextEncoder().encode(JSON.stringify(files[locale], undefined, "\t")),
 			path: pathPattern.replace("{locale}", locale),
 			pluginKey: PLUGIN_KEY,
 		})
@@ -66,7 +66,7 @@ function serializePattern(pattern: Variant["pattern"]): string {
 	for (const part of pattern) {
 		if (part.type === "text") {
 			result += part.value
-		} else if (part.arg.type === "variable") {
+		} else if (part.arg.type === "variable-reference") {
 			result += `{${part.arg.name}}`
 		} else {
 			throw new Error("Unsupported expression type")
