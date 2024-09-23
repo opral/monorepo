@@ -16,6 +16,7 @@
 		"dev": "inlang plugin build --entry ./src/index.ts --outdir ./dist --watch",
 		"build": "inlang plugin build --entry ./src/index.ts --outdir ./dist",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test:watch": "vitest",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
@@ -31,7 +32,7 @@
 		"@types/lodash.merge": "^4.6.7",
 		"@types/parsimmon": "1.10.6",
 		"@vitest/coverage-v8": "^2.0.5",
-		"flat": "^5.0.2",
+		"flat": "^6.0.1",
 		"parsimmon": "^1.18.1",
 		"patch-package": "6.5.1",
 		"prettier": "^3.3.3",
