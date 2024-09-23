@@ -53,7 +53,7 @@ const bundle: BundleNested = {
 			variants: [
 				{
 					id: "hello_world" + "_en_1",
-					match: {},
+					matches: [],
 					messageId: "hello_world" + "_en",
 					pattern: [
 						{
@@ -72,7 +72,7 @@ const bundle: BundleNested = {
 			variants: [
 				{
 					id: "hello_world" + "_de_1",
-					match: {},
+					matches: [],
 					messageId: "hello_world" + "_de",
 					pattern: [
 						{
