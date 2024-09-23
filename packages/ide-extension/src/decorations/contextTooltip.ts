@@ -65,7 +65,7 @@ export async function contextTooltip(
 			// Get the variant from the message
 			const variant = message?.variants.find((v) =>
 				v.matches.find(
-					(m) => m.name === "locale" && m.value.type === "literal" && m.value?.value === locale
+					(m) => m.type === "literal-match" && m.key === "locale" && m.value === locale
 				)
 			)
 
