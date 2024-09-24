@@ -117,6 +117,7 @@ export async function loadProjectFromDirectory(
 						locale: toBeImported.locale,
 						content: data,
 						pluginKey: importer.key,
+						toBeImportedFilesMetadata: toBeImported.metadata,
 					});
 				} catch (e) {
 					// https://github.com/opral/inlang-sdk/issues/202
