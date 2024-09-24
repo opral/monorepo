@@ -90,7 +90,7 @@ test("a roundtrip should work", async () => {
 			return [
 				{
 					content: new TextEncoder().encode(JSON.stringify(bundles)),
-					path: "./mock-file.json",
+					name: "mock-file.json",
 					locale: "mock",
 				},
 			];
@@ -254,7 +254,6 @@ test.todo(
 	}
 );
 
-
 test("it should preserve the formatting of existing json resource files", async () => {
 	const mockJson =
 		JSON.stringify(
@@ -271,7 +270,7 @@ test("it should preserve the formatting of existing json resource files", async 
 		exportFiles: async () => {
 			return [
 				{
-					path: "/i18n/en.json",
+					name: "en.json",
 					// no beautified json
 					content: new TextEncoder().encode(JSON.stringify({ key: "value" })),
 					locale: "en",
@@ -281,11 +280,11 @@ test("it should preserve the formatting of existing json resource files", async 
 	};
 
 	const volume = Volume.fromJSON({
-		"/project.inlang/settings.json": JSON.stringify({
+		"/foo/project.inlang/settings.json": JSON.stringify({
 			baseLocale: "en",
 			locales: ["en"],
 		} satisfies ProjectSettings),
-		"/i18n/en.json": mockJson,
+		"/foo/en.json": mockJson,
 	});
 
 	const project = await loadProjectInMemory({
@@ -294,14 +293,11 @@ test("it should preserve the formatting of existing json resource files", async 
 	});
 
 	await saveProjectToDirectory({
-		path: "/project.inlang",
+		path: "/foo/project.inlang",
 		fs: volume.promises as any,
 		project,
 	});
 
-	const fileAfterSave = await volume.promises.readFile(
-		"/i18n/en.json",
-		"utf-8"
-	);
+	const fileAfterSave = await volume.promises.readFile("/foo/en.json", "utf-8");
 	expect(fileAfterSave).toBe(mockJson);
 });

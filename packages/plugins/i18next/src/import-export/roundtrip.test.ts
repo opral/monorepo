@@ -353,12 +353,12 @@ test("im- and exporting multiple files should succeed", async () => {
 			{
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(en)),
-				path: "mock/en.json",
+				name: "en.json",
 			},
 			{
 				locale: "de",
 				content: new TextEncoder().encode(JSON.stringify(de)),
-				path: "mock/de.json",
+				name: "de.json",
 			},
 		],
 	})
@@ -395,7 +395,7 @@ test("it should handle namespaces", async () => {
 			{
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(enCommon)),
-				path: "common/en.json",
+				name: "en.json",
 				toBeImportedFilesMetadata: {
 					namespace: "common",
 				},
@@ -403,7 +403,7 @@ test("it should handle namespaces", async () => {
 			{
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(enLogin)),
-				path: "login/en.json",
+				name: "en.json",
 				toBeImportedFilesMetadata: {
 					namespace: "login",
 				},
@@ -415,10 +415,10 @@ test("it should handle namespaces", async () => {
 		bundles: imported.bundles as BundleNested[],
 	})
 	const exportedCommon = JSON.parse(
-		new TextDecoder().decode(exported.find((e) => e.path.includes("common"))?.content)
+		new TextDecoder().decode(exported.find((e) => e.name === "common-en.json")?.content)
 	)
 	const exportedLogin = JSON.parse(
-		new TextDecoder().decode(exported.find((e) => e.path.includes("login"))?.content)
+		new TextDecoder().decode(exported.find((e) => e.name === "login-en.json")?.content)
 	)
 
 	expect(exportedCommon).toStrictEqual({
@@ -444,12 +444,12 @@ test("it should put new entities into the resource file without a namespace", as
 			{
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(enNoNamespace)),
-				path: "en.json",
+				name: "en.json",
 			},
 			{
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(enCommon)),
-				path: "common-en.json",
+				name: "en.json",
 				toBeImportedFilesMetadata: {
 					namespace: "common",
 				},
@@ -484,11 +484,11 @@ test("it should put new entities into the resource file without a namespace", as
 	})
 
 	const exportedNoNamespace = JSON.parse(
-		new TextDecoder().decode(exported.find((e) => e.path.includes("en.json"))?.content)
+		new TextDecoder().decode(exported.find((e) => e.name === "en.json")?.content)
 	)
 
 	const exportedCommon = JSON.parse(
-		new TextDecoder().decode(exported.find((e) => e.path.includes("common"))?.content)
+		new TextDecoder().decode(exported.find((e) => e.name === "common-en.json")?.content)
 	)
 
 	expect(exportedNoNamespace).toStrictEqual({
@@ -509,7 +509,7 @@ function runImportFiles(json: Record<string, any>) {
 			{
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(json)),
-				path: "mock/en.json",
+				name: "en.json",
 			},
 		],
 	})
