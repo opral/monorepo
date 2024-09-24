@@ -36,7 +36,6 @@ export async function importFiles(opts: {
 	);
 
 	await Promise.all(insertPromises);
-	return bundles;
 }
 
 export async function exportFiles(opts: {
@@ -54,8 +53,11 @@ export async function exportFiles(opts: {
 		});
 	}
 
-	const bundles = await selectBundleNested(opts.db).selectAll().execute();
-	const files = plugin.exportFiles({
+	const bundles = await selectBundleNested(opts.db)
+		.orderBy("id asc")
+		.selectAll()
+		.execute();
+	const files = await plugin.exportFiles({
 		bundles: bundles,
 		settings: structuredClone(opts.settings),
 	});
