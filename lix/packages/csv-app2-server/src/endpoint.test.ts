@@ -77,34 +77,59 @@ describe("hono app tes", () => {
 			])
 			.execute();
 
-		const resUser2Push = await app.request("/lix-file/" + projectName, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/octet-stream",
-			},
-			body: await user2Lix.toBlob(),
-		});
+        await user2Lix.db
+					.insertInto("file")
+					.values([
+						{
+							id: "Demo User2_position",
+							path: "/Demo User2_position.json",
+							data: new TextEncoder().encode(
+								JSON.stringify({
+									position: { rowId: "test", cellName: "column-name" },
+								})
+							),
+						},
+					])
+					.execute();
 
-		const resUser1Push = await app.request("/lix-file/" + projectName, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/octet-stream",
-			},
-			body: await user1newProject.toBlob(),
-		});
+				await user2Lix.settled();
+				const resUser2Push = await app.request("/lix-file/" + projectName, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/octet-stream",
+					},
+					body: await user2Lix.toBlob(),
+				});
 
-		await merge({
-			sourceLix: await openLixInMemory({
-				blob: new Blob([await resUser1Push.arrayBuffer()]),
-				providePlugins: [plugin],
-			}),
-			targetLix: user1newProject,
-		});
+				const resUser1Push = await app.request("/lix-file/" + projectName, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/octet-stream",
+					},
+					body: await user1newProject.toBlob(),
+				});
 
-		const changes = await user1newProject.db
-			.selectFrom("change")
-			.selectAll()
-			.where("change.file_id", "=", "demo1")
-			.execute();
+				const user1PushResult = await openLixInMemory({
+					blob: new Blob([await resUser1Push.arrayBuffer()]),
+					providePlugins: [plugin],
+				});
+
+				// await merge({
+				// 	sourceLix: user1PushResult,
+				// 	targetLix: user1newProject,
+				// });
+
+				const changes = await user1newProject.db
+					.selectFrom("change")
+					.selectAll()
+					.where("change.file_id", "=", "demo1")
+					.execute();
+				console.log(await 
+					user1PushResult
+						.db.selectFrom("file")
+						.selectAll()
+						// .where("path", "like", "%.json")
+						.execute()
+				);
 	});
 });

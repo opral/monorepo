@@ -65,7 +65,7 @@ function getChangedKeys<T extends Record<string, string>>(
 
 export const plugin: LixPlugin = {
 	key: "csv",
-	glob: "*.csv",
+	glob: "*",
 
 	detectConflicts: async ({
 		sourceLix,
@@ -84,6 +84,7 @@ export const plugin: LixPlugin = {
 
 			if (lowestCommonAncestor === undefined) {
 				// no common parent, no conflict. must be an insert
+				console.log("detectConflicts insert");
 				continue;
 			}
 
@@ -93,6 +94,7 @@ export const plugin: LixPlugin = {
 			});
 
 			if (lowestCommonAncestor.id === leafChangeInTarget.id) {
+				console.log("detectConflicts known change");
 				// no conflict. the lowest common ancestor is
 				// the leaf change in the target. aka, no changes
 				// in target have been made that could conflict with the source
@@ -103,8 +105,11 @@ export const plugin: LixPlugin = {
 				JSON.stringify(change.value) !==
 				JSON.stringify(leafChangeInTarget.value);
 			if (hasDiff === false) {
+				console.log("detectConflicts no change");
 				continue;
 			}
+
+			console.log("conflict detected no change");
 			// naive raise any snapshot difference as a conflict for now
 			// more sophisticated conflict reporting can be incrementally added
 			result.push({
@@ -185,111 +190,205 @@ export const plugin: LixPlugin = {
 	// 	},
 
 	applyChanges: async ({ changes, file, lix }) => {
-		const parsed = papaparse.parse(new TextDecoder().decode(file.data), {
-			header: true,
-		});
+		console.log("applying json" + file.path);
+		if (file.path?.endsWith(".csv")) {
+			const parsed = papaparse.parse(new TextDecoder().decode(file.data), {
+				header: true,
+			});
 
-		const uniqueColumn = file.metadata!.unique_column;
+			const uniqueColumn = file.metadata!.unique_column;
 
-		// console.log({ changes, parsed });
-		for (const change of changes) {
-			// console.log("change", change);
-			if (change.value) {
-				const changedRow = change.value as unknown as Record<string, string>;
+			// console.log({ changes, parsed });
+			for (const change of changes) {
+				// console.log("change", change);
+				if (change.value) {
+					const changedRow = change.value as unknown as Record<string, string>;
 
-				let existingRow = parsed.data.find(
-					(row: any) => row[uniqueColumn] === change.value![uniqueColumn]
-				);
+					let existingRow = parsed.data.find(
+						(row: any) => row[uniqueColumn] === change.value![uniqueColumn]
+					);
 
-				// console.log({ id, existingRow, change, parsed, column })
+					// console.log({ id, existingRow, change, parsed, column })
 
-				// create the row if it doesn't exist
-				if (!existingRow) {
-					existingRow = {};
-					parsed.data.push(existingRow);
-				}
+					// create the row if it doesn't exist
+					if (!existingRow) {
+						existingRow = {};
+						parsed.data.push(existingRow);
+					}
 
-				for (const [key, value] of Object.entries(changedRow)) {
-					existingRow[key] = value;
+					for (const [key, value] of Object.entries(changedRow)) {
+						existingRow[key] = value;
+					}
 				}
 			}
+
+			// console.log({ parsed });
+			const csv = papaparse.unparse(parsed as any);
+
+			return {
+				fileData: new TextEncoder().encode(csv),
+			};
+		} else if (file.path?.endsWith("_position.json")) {
+			console.log("applying json" + file.path);
+			const leafChange = [
+				...new Set(
+					await Promise.all(
+						changes.map(async (change) => {
+							const leafChange = await getLeafChange({ change, lix });
+							// enable string comparison to avoid duplicates
+							return JSON.stringify(leafChange);
+						})
+					)
+				),
+			].map((v) => JSON.parse(v));
+
+			if (leafChange.length === 0) {
+				return { fileData: file.data };
+			}
+			if (leafChange.length !== 1) {
+				throw new Error(
+					"we only save a snapshot from the settings file - there must be only one change " +
+						leafChange.length +
+						" found" +
+						JSON.stringify(changes)
+				);
+			}
+			if (leafChange[0].operation === "create") {
+				return {
+					fileData: new TextEncoder().encode(
+						JSON.stringify(leafChange[0].value.data)
+					),
+				};
+			} else if (leafChange[0].operation === "update") {
+				return {
+					fileData: new TextEncoder().encode(
+						JSON.stringify(leafChange[0].value.data)
+					),
+				};
+			} else {
+				throw new Error(
+					`Operation ${leafChange[0].operation} on settings file currently not supported`
+				);
+			}
+		} else {
+			throw new Error(
+				"Unimplemented. Only the db.sqlite file can be handled for now."
+			);
 		}
-
-		// console.log({ parsed });
-		const csv = papaparse.unparse(parsed as any);
-
-		return {
-			fileData: new TextEncoder().encode(csv),
-		};
 	},
 
 	diff: {
 		file: async ({ old, neu }) => {
-			/** @type {import("@lix-js/sdk").DiffReport[]} */
-			const result: DiffReport[] = [];
-
-			const oldParsed = old
-				? papaparse.parse(new TextDecoder().decode(old.data), {
-						header: true,
-				  })
-				: undefined;
-
-			const oldColumns = Object.keys(
-				(oldParsed?.data[0] as Record<string, string>) || {}
-			);
-			let uniqueColumn: string = oldColumns[0];
-			const oldUniqueColumn = (old as LixFile)?.metadata?.unique_column;
-			if (oldUniqueColumn) {
-				uniqueColumn = oldUniqueColumn;
+			console.log("diff called!");
+			if (neu === undefined) {
+				return [];
 			}
-			const newUniqueColumn = (neu as LixFile)?.metadata?.unique_column;
-			if (newUniqueColumn) {
-				uniqueColumn = newUniqueColumn;
-			}
-			// console.log("uniqueColumn", uniqueColumn);
-			const oldById =
-				oldParsed?.data.reduce((agg: Record<string, unknown>, row) => {
-					if (!(row as Record<string, string>)[uniqueColumn]) {
+
+			if (neu.path?.endsWith(".csv")) {
+				console.log("diff csv" + neu.path);
+				/** @type {import("@lix-js/sdk").DiffReport[]} */
+				const result: DiffReport[] = [];
+
+				const oldParsed = old
+					? papaparse.parse(new TextDecoder().decode(old.data), {
+							header: true,
+					  })
+					: undefined;
+
+				const oldColumns = Object.keys(
+					(oldParsed?.data[0] as Record<string, string>) || {}
+				);
+				let uniqueColumn: string = oldColumns[0];
+				const oldUniqueColumn = (old as LixFile)?.metadata?.unique_column;
+				if (oldUniqueColumn) {
+					uniqueColumn = oldUniqueColumn;
+				}
+				const newUniqueColumn = (neu as LixFile)?.metadata?.unique_column;
+				if (newUniqueColumn) {
+					uniqueColumn = newUniqueColumn;
+				}
+				// console.log("uniqueColumn", uniqueColumn);
+				const oldById =
+					oldParsed?.data.reduce((agg: Record<string, unknown>, row) => {
+						if (!(row as Record<string, string>)[uniqueColumn]) {
+							return agg;
+						}
+						agg[(row as Record<string, string>)[uniqueColumn]] = row;
 						return agg;
-					}
-					agg[(row as Record<string, string>)[uniqueColumn]] = row;
-					return agg;
-				}, {}) || {};
+					}, {}) || {};
 
-			const newParsed = neu
-				? papaparse.parse(new TextDecoder().decode(neu.data), {
-						header: true,
-				  })
-				: undefined;
+				const newParsed = neu
+					? papaparse.parse(new TextDecoder().decode(neu.data), {
+							header: true,
+					  })
+					: undefined;
 
-			if (newParsed) {
-				for (const row of newParsed.data.values() as IterableIterator<
-					Record<string, string>
-				>) {
-					const oldRow = oldById[
-						(row as Record<string, string>)[uniqueColumn]
-					] as Record<string, string>;
+				if (newParsed) {
+					for (const row of newParsed.data.values() as IterableIterator<
+						Record<string, string>
+					>) {
+						const oldRow = oldById[
+							(row as Record<string, string>)[uniqueColumn]
+						] as Record<string, string>;
 
-					const isEqual = oldRow ? compareObjects(oldRow, row) : false;
-					if (!isEqual) {
-						const cols = getChangedKeys(oldRow, row);
-						const diff = {
-							type: "row",
-							operation:
-								oldRow && row ? "update" : oldRow ? "delete" : "create",
-							old: oldRow as DiffReport["old"],
-							neu: row as DiffReport["neu"],
-							meta: {
-								col_name: JSON.stringify(cols),
-							},
-						};
+						const isEqual = oldRow ? compareObjects(oldRow, row) : false;
+						if (!isEqual) {
+							const cols = getChangedKeys(oldRow, row);
+							const diff = {
+								type: "row",
+								operation:
+									oldRow && row ? "update" : oldRow ? "delete" : "create",
+								old: oldRow as DiffReport["old"],
+								neu: row as DiffReport["neu"],
+								meta: {
+									col_name: JSON.stringify(cols),
+								},
+							};
 
-						result.push(diff as DiffReport);
+							result.push(diff as DiffReport);
+						}
 					}
 				}
+				// console.log(result);
+				return result;
+			} else if (neu.path?.endsWith("_position.json")) {
+				console.log("diff json" + neu.path);
+				if (old === undefined) {
+					const diffResult = [
+						{
+							type: "file",
+							operation: "create",
+							old,
+							neu: {
+								id: "-",
+								data: JSON.parse(new TextDecoder().decode(neu.data)),
+							},
+						} satisfies DiffReport,
+					];
+					console.log(diffResult);
+					return diffResult;
+				} else if (JSON.stringify(old) !== JSON.stringify(neu)) {
+					return [
+						{
+							type: "file",
+							operation: "update",
+							old: {
+								id: "-",
+								data: JSON.parse(new TextDecoder().decode(old.data)),
+							},
+							neu: {
+								id: "-",
+								data: JSON.parse(new TextDecoder().decode(neu.data)),
+							},
+						} satisfies DiffReport,
+					];
+				} else {
+					return [];
+				}
+			} else {
+				// for all other files we don't detect changes
+				return [];
 			}
-			// console.log(result);
-			return result;
 		},
 	},
 
