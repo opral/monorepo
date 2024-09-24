@@ -2,7 +2,7 @@
 import { Type, type Static } from "@sinclair/typebox"
 
 const PathPattern = Type.String({
-	pattern: "^(\\./|\\../|/)[^*]*\\{languageTag|locale\\}[^*]*\\.json",
+	pattern: "^(\\./|\\../|/)[^*]*\\{(languageTag|locale)\\}[^*]*\\.json$",
 	title: "Path to language files",
 	description:
 		"Specify the pathPattern to locate language files in your repository. It must include `{locale}` and end with `.json`.",
