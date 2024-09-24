@@ -64,7 +64,8 @@ export async function merge(args: {
 			.filter((c) => c.file_id === fileId);
 
 		console.log(fileId, nonConflictingLeafChangesInSourceForFile[0]);
-		const file = await args.targetLix.db
+
+		let file = await args.targetLix.db
 			.selectFrom("file")
 			.selectAll()
 			.where("id", "=", fileId)
@@ -72,7 +73,15 @@ export async function merge(args: {
 
 		// todo: how to deal with missing files?
 		if (!file) {
-			throw new Error("File not found");
+			file = await args.sourceLix.db
+				.selectFrom("file")
+				.selectAll()
+				.where("id", "=", fileId)
+				.executeTakeFirstOrThrow();
+			await args.targetLix.db
+				.insertInto("file")
+				.values(file)
+				.executeTakeFirst();
 		}
 
 		if (!plugin.applyChanges) {
@@ -155,7 +164,8 @@ export async function merge(args: {
 			await trx
 				.updateTable("file_internal")
 				.set("data", fileData)
-				.where("id", "=", fileId);
+				.where("id", "=", fileId)
+				.execute();
 		}
 
 		// 5. add discussions, comments and discsussion_change_mappings
