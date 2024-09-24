@@ -47,13 +47,12 @@ export const upsertBundleNestedMatchByProperties = async (
 							JSON.stringify(importedVariant.matches)
 					);
 					if (existingVariant) {
-						// make sure we don't have an id set on the import that could override the id in the db
-						delete importedVariant.id;
 						// update existing variant
 						await db
 							.updateTable("variant")
 							.set({
 								...importedVariant,
+								id: undefined,
 							})
 							.where("id", "=", existingVariant.id)
 							.execute();
@@ -93,21 +92,19 @@ async function insertMessageDeep(
 	bundle: NewBundleNested,
 	message: NewMessageNested
 ) {
-	const messageToInsert = {
-		// don't provide an identifier since we match by locale in the future
-		...message,
-		id: undefined, // let the db create the id here
-		variants: undefined,
-		bundleId: bundle.id!,
-	};
 	const insertedMessage = await db
 		.insertInto("message")
-		.values(messageToInsert)
+		.values({
+			...message,
+			id: undefined,
+			bundleId: bundle.id!,
+			// @ts-expect-error - the type has no variants
+			variants: undefined,
+		})
 		.returning("id")
 		.executeTakeFirstOrThrow();
 
 	for (const variant of message.variants) {
-		delete variant.id;
 		await db
 			.insertInto("variant")
 			.values({
