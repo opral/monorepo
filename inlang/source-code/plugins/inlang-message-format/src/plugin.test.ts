@@ -34,7 +34,7 @@ test("roundtrip of import and export", async () => {
 			{
 				content: new TextEncoder().encode(JSON.stringify(mockEnFileParsed)),
 				locale: "en",
-				path: "/i18n/en.json",
+				name: "en.json",
 			},
 		],
 	})
@@ -45,7 +45,7 @@ test("roundtrip of import and export", async () => {
 	})
 
 	expect(exported).lengthOf(1)
-	expect(exported[0]?.path).toBe("/i18n/en.json")
+	expect(exported[0]?.name).toBe("en.json")
 	expect(exported[0]?.locale).toBe("en")
 
 	const parsed = JSON.parse(new TextDecoder().decode(exported[0]?.content))
@@ -72,7 +72,7 @@ test("roundtrip with new variants that have been created by apps", async () => {
 			{
 				content: new TextEncoder().encode(JSON.stringify(mockEnFileParsed)),
 				locale: "en",
-				path: "/i18n/en.json",
+				name: "en.json",
 			},
 		],
 	})
@@ -90,7 +90,7 @@ test("roundtrip with new variants that have been created by apps", async () => {
 				variants: [
 					{
 						id: "929s",
-						match: {},
+						matches: [],
 						messageId: "0j299j-3si02j0j4=s02-3js2",
 						pattern: [{ type: "text", value: "New variant" }],
 					},
