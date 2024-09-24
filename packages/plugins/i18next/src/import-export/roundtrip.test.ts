@@ -353,12 +353,10 @@ test("im- and exporting multiple files should succeed", async () => {
 			{
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(en)),
-				name: "en.json",
 			},
 			{
 				locale: "de",
 				content: new TextEncoder().encode(JSON.stringify(de)),
-				name: "de.json",
 			},
 		],
 	})
@@ -395,7 +393,6 @@ test("it should handle namespaces", async () => {
 			{
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(enCommon)),
-				name: "en.json",
 				toBeImportedFilesMetadata: {
 					namespace: "common",
 				},
@@ -403,7 +400,6 @@ test("it should handle namespaces", async () => {
 			{
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(enLogin)),
-				name: "en.json",
 				toBeImportedFilesMetadata: {
 					namespace: "login",
 				},
@@ -444,12 +440,10 @@ test("it should put new entities into the resource file without a namespace", as
 			{
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(enNoNamespace)),
-				name: "en.json",
 			},
 			{
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(enCommon)),
-				name: "en.json",
 				toBeImportedFilesMetadata: {
 					namespace: "common",
 				},
@@ -509,7 +503,6 @@ function runImportFiles(json: Record<string, any>) {
 			{
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(json)),
-				name: "en.json",
 			},
 		],
 	})

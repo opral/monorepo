@@ -34,7 +34,6 @@ test("roundtrip of import and export", async () => {
 			{
 				content: new TextEncoder().encode(JSON.stringify(mockEnFileParsed)),
 				locale: "en",
-				name: "en.json",
 			},
 		],
 	})
@@ -72,7 +71,6 @@ test("roundtrip with new variants that have been created by apps", async () => {
 			{
 				content: new TextEncoder().encode(JSON.stringify(mockEnFileParsed)),
 				locale: "en",
-				name: "en.json",
 			},
 		],
 	})
