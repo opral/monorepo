@@ -2,7 +2,7 @@ import { describe, test, expect } from "vitest";
 import { app } from "./index";
 import fs from "node:fs/promises";
 import { newLixFile, openLixInMemory, merge } from "@lix-js/sdk";
-import { plugin } from "./csv-plugin.js";
+import { plugin } from "@lix-js/csv-app2/lix-csv-plugin";
 
 describe("hono app tes", () => {
 	test("get /lix-file/:id non existing", async () => {
@@ -77,59 +77,59 @@ describe("hono app tes", () => {
 			])
 			.execute();
 
-        await user2Lix.db
-					.insertInto("file")
-					.values([
-						{
-							id: "Demo User2_position",
-							path: "/Demo User2_position.json",
-							data: new TextEncoder().encode(
-								JSON.stringify({
-									position: { rowId: "test", cellName: "column-name" },
-								})
-							),
-						},
-					])
-					.execute();
+		await user2Lix.db
+			.insertInto("file")
+			.values([
+				{
+					id: "Demo User2_position",
+					path: "/Demo User2_position.json",
+					data: new TextEncoder().encode(
+						JSON.stringify({
+							position: { rowId: "test", cellName: "column-name" },
+						})
+					),
+				},
+			])
+			.execute();
 
-				await user2Lix.settled();
-				const resUser2Push = await app.request("/lix-file/" + projectName, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/octet-stream",
-					},
-					body: await user2Lix.toBlob(),
-				});
+		await user2Lix.settled();
+		const resUser2Push = await app.request("/lix-file/" + projectName, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/octet-stream",
+			},
+			body: await user2Lix.toBlob(),
+		});
 
-				const resUser1Push = await app.request("/lix-file/" + projectName, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/octet-stream",
-					},
-					body: await user1newProject.toBlob(),
-				});
+		const resUser1Push = await app.request("/lix-file/" + projectName, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/octet-stream",
+			},
+			body: await user1newProject.toBlob(),
+		});
 
-				const user1PushResult = await openLixInMemory({
-					blob: new Blob([await resUser1Push.arrayBuffer()]),
-					providePlugins: [plugin],
-				});
+		const user1PushResult = await openLixInMemory({
+			blob: new Blob([await resUser1Push.arrayBuffer()]),
+			providePlugins: [plugin],
+		});
 
-				// await merge({
-				// 	sourceLix: user1PushResult,
-				// 	targetLix: user1newProject,
-				// });
+		// await merge({
+		// 	sourceLix: user1PushResult,
+		// 	targetLix: user1newProject,
+		// });
 
-				const changes = await user1newProject.db
-					.selectFrom("change")
-					.selectAll()
-					.where("change.file_id", "=", "demo1")
-					.execute();
-				console.log(await 
-					user1PushResult
-						.db.selectFrom("file")
-						.selectAll()
-						// .where("path", "like", "%.json")
-						.execute()
-				);
+		const changes = await user1newProject.db
+			.selectFrom("change")
+			.selectAll()
+			.where("change.file_id", "=", "demo1")
+			.execute();
+		// console.log(await
+		// 	user1PushResult
+		// 		.db.selectFrom("file")
+		// 		.selectAll()
+		// 		// .where("path", "like", "%.json")
+		// 		.execute()
+		// );
 	});
 });

@@ -63,8 +63,6 @@ export async function merge(args: {
 			)
 			.filter((c) => c.file_id === fileId);
 
-		console.log(fileId, nonConflictingLeafChangesInSourceForFile[0]);
-
 		let file = await args.targetLix.db
 			.selectFrom("file")
 			.selectAll()
@@ -78,9 +76,16 @@ export async function merge(args: {
 				.selectAll()
 				.where("id", "=", fileId)
 				.executeTakeFirstOrThrow();
+
+			const fileToInsert = {
+				id: file.id,
+				path: file.path,
+				data: file.data,
+				metadata: file.metadata,
+			};
 			await args.targetLix.db
 				.insertInto("file_internal")
-				.values(file)
+				.values(fileToInsert)
 				.executeTakeFirst();
 		}
 

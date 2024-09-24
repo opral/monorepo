@@ -83,7 +83,6 @@ export const plugin: LixPlugin = {
 
 			if (lowestCommonAncestor === undefined) {
 				// no common parent, no conflict. must be an insert
-				console.log("detectConflicts insert");
 				continue;
 			}
 
@@ -93,7 +92,6 @@ export const plugin: LixPlugin = {
 			});
 
 			if (lowestCommonAncestor.id === leafChangeInTarget.id) {
-				console.log("detectConflicts known change");
 				// no conflict. the lowest common ancestor is
 				// the leaf change in the target. aka, no changes
 				// in target have been made that could conflict with the source
@@ -104,11 +102,9 @@ export const plugin: LixPlugin = {
 				JSON.stringify(change.value) !==
 				JSON.stringify(leafChangeInTarget.value);
 			if (hasDiff === false) {
-				console.log("detectConflicts no change");
 				continue;
 			}
 
-			console.log("conflict detected no change");
 			// naive raise any snapshot difference as a conflict for now
 			// more sophisticated conflict reporting can be incrementally added
 			result.push({
@@ -189,7 +185,6 @@ export const plugin: LixPlugin = {
 	// 	},
 
 	applyChanges: async ({ changes, file, lix }) => {
-		console.log("applying json" + file.path);
 		if (file.path?.endsWith(".csv")) {
 			const parsed = papaparse.parse(new TextDecoder().decode(file.data), {
 				header: true,
@@ -203,8 +198,8 @@ export const plugin: LixPlugin = {
 				if (change.value) {
 					const changedRow = change.value as unknown as Record<string, string>;
 
-					let existingRow = parsed.data.find(
-						(row: any) => row[uniqueColumn] === change.value![uniqueColumn]
+					let existingRow = (parsed.data as Record<string, unknown>[]).find(
+						(row) => row[uniqueColumn] === change.value![uniqueColumn]
 					);
 
 					// console.log({ id, existingRow, change, parsed, column })
@@ -221,14 +216,12 @@ export const plugin: LixPlugin = {
 				}
 			}
 
-			// console.log({ parsed });
 			const csv = papaparse.unparse(parsed as any);
 
 			return {
 				fileData: new TextEncoder().encode(csv),
 			};
 		} else if (file.path?.endsWith("_position.json")) {
-			console.log("applying json" + file.path);
 			const leafChange = [
 				...new Set(
 					await Promise.all(
@@ -278,13 +271,11 @@ export const plugin: LixPlugin = {
 
 	diff: {
 		file: async ({ old, neu }) => {
-			console.log("diff called!");
 			if (neu === undefined) {
 				return [];
 			}
 
 			if (neu.path?.endsWith(".csv")) {
-				console.log("diff csv" + neu.path);
 				/** @type {import("@lix-js/sdk").DiffReport[]} */
 				const result: DiffReport[] = [];
 
@@ -306,7 +297,7 @@ export const plugin: LixPlugin = {
 				if (newUniqueColumn) {
 					uniqueColumn = newUniqueColumn;
 				}
-				// console.log("uniqueColumn", uniqueColumn);
+
 				const oldById =
 					oldParsed?.data.reduce((agg: Record<string, unknown>, row) => {
 						if (!(row as Record<string, string>)[uniqueColumn]) {
@@ -348,10 +339,9 @@ export const plugin: LixPlugin = {
 						}
 					}
 				}
-				// console.log(result);
+
 				return result;
 			} else if (neu.path?.endsWith("_position.json")) {
-				console.log("diff json" + neu.path);
 				if (old === undefined) {
 					const diffResult = [
 						{
@@ -364,7 +354,7 @@ export const plugin: LixPlugin = {
 							},
 						} satisfies DiffReport,
 					];
-					console.log(diffResult);
+
 					return diffResult;
 				} else if (JSON.stringify(old) !== JSON.stringify(neu)) {
 					return [
