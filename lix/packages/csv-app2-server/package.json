@@ -8,8 +8,8 @@
 	"dependencies": {
 		"@hono/node-server": "^1.13.1",
 		"@lix-js/sdk": "workspace:*",
-		"hono": "^4.6.3",
-		"papaparse": "^5.4.1"
+		"@lix-js/csv-app2": "workspace:*",
+		"hono": "^4.6.3"
 	},
 	"devDependencies": {
 		"@types/node": "^20.11.17",

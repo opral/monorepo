@@ -3,6 +3,9 @@
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
+	"exports": {
+		"./lix-csv-plugin": "./src/csv-plugin.ts"
+	},
 	"scripts": {
 		"dev": "vite --host",
 		"build": "vite build",

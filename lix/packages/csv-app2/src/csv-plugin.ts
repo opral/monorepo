@@ -18,7 +18,6 @@ import {
 	getLowestCommonAncestor,
 	LixFile,
 } from "@lix-js/sdk";
-import { parse } from "node:path";
 
 // await resolveConflict({
 // 	lix: lix,
