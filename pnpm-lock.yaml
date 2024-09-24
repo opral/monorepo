@@ -1300,7 +1300,7 @@ importers:
         version: 3.1.6
       '@astrojs/svelte':
         specifier: ^5.6.0
-        version: 5.7.0(astro@4.13.2(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)(typescript@5.5.4))(svelte@4.2.18)(typescript@5.5.4)(vite@5.4.0(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))
+        version: 5.7.0(astro@4.13.2(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)(typescript@5.5.4))(svelte@4.2.18)(typescript@5.5.4)(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))
       astro:
         specifier: ^4.11.3
         version: 4.13.2(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)(typescript@5.5.4)
@@ -3364,15 +3364,15 @@ importers:
       '@hono/node-server':
         specifier: ^1.13.1
         version: 1.13.1(hono@4.6.3)
+      '@lix-js/csv-app2':
+        specifier: workspace:*
+        version: link:../csv-app2
       '@lix-js/sdk':
         specifier: workspace:*
         version: link:../sdk
       hono:
         specifier: ^4.6.3
         version: 4.6.3
-      papaparse:
-        specifier: ^5.4.1
-        version: 5.4.1
     devDependencies:
       '@types/node':
         specifier: ^20.11.17
@@ -17645,9 +17645,9 @@ snapshots:
       stream-replace-string: 2.0.0
       zod: 3.23.8
 
-  '@astrojs/svelte@5.7.0(astro@4.13.2(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)(typescript@5.5.4))(svelte@4.2.18)(typescript@5.5.4)(vite@5.4.0(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))':
+  '@astrojs/svelte@5.7.0(astro@4.13.2(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)(typescript@5.5.4))(svelte@4.2.18)(typescript@5.5.4)(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 3.1.1(svelte@4.2.18)(vite@5.4.0(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))
+      '@sveltejs/vite-plugin-svelte': 3.1.1(svelte@4.2.18)(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))
       astro: 4.13.2(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)(typescript@5.5.4)
       svelte: 4.2.18
       svelte2tsx: 0.7.15(svelte@4.2.18)(typescript@5.5.4)
@@ -22596,6 +22596,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@sveltejs/vite-plugin-svelte-inspector@2.1.0(@sveltejs/vite-plugin-svelte@3.1.1(svelte@4.2.18)(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)))(svelte@4.2.18)(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))':
+    dependencies:
+      '@sveltejs/vite-plugin-svelte': 3.1.1(svelte@4.2.18)(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))
+      debug: 4.3.6(supports-color@8.1.1)
+      svelte: 4.2.18
+      vite: 5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)
+    transitivePeerDependencies:
+      - supports-color
+
   '@sveltejs/vite-plugin-svelte-inspector@2.1.0(@sveltejs/vite-plugin-svelte@3.1.1(svelte@5.0.0-next.210)(vite@5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.6)))(svelte@5.0.0-next.210)(vite@5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.6))':
     dependencies:
       '@sveltejs/vite-plugin-svelte': 3.1.1(svelte@5.0.0-next.210)(vite@5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.6))
@@ -22630,6 +22639,20 @@ snapshots:
       svelte-hmr: 0.16.0(svelte@4.2.18)
       vite: 5.4.0(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)
       vitefu: 0.2.5(vite@5.4.0(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))
+    transitivePeerDependencies:
+      - supports-color
+
+  '@sveltejs/vite-plugin-svelte@3.1.1(svelte@4.2.18)(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))':
+    dependencies:
+      '@sveltejs/vite-plugin-svelte-inspector': 2.1.0(@sveltejs/vite-plugin-svelte@3.1.1(svelte@4.2.18)(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)))(svelte@4.2.18)(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))
+      debug: 4.3.6(supports-color@8.1.1)
+      deepmerge: 4.3.1
+      kleur: 4.1.5
+      magic-string: 0.30.11
+      svelte: 4.2.18
+      svelte-hmr: 0.16.0(svelte@4.2.18)
+      vite: 5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)
+      vitefu: 0.2.5(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))
     transitivePeerDependencies:
       - supports-color
 
@@ -35616,6 +35639,10 @@ snapshots:
   vitefu@0.2.5(vite@5.4.1(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.6)):
     optionalDependencies:
       vite: 5.4.1(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.6)
+
+  vitefu@0.2.5(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)):
+    optionalDependencies:
+      vite: 5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)
 
   vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.6)(webdriverio@8.40.3):
     dependencies:

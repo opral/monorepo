@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { openLixInMemory, merge } from "@lix-js/sdk";
 import { Hono } from "hono";
-import { plugin } from "./csv-plugin.js";
+import { plugin } from "@lix-js/csv-app2/lix-csv-plugin";
 
 export const app = new Hono();
 const lixFiles = new Map<string, Blob>();
