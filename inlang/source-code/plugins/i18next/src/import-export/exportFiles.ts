@@ -41,8 +41,7 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 	const withoutNamespace = Object.entries(result).map(([locale, messages]) => ({
 		locale,
 		content: new TextEncoder().encode(JSON.stringify(unflatten(messages), undefined, "\t") + "\n"),
-		// TODO the path should be configurable
-		path: `${locale}.json`,
+		name: `${locale}.json`,
 	}))
 	const withNamespace = Object.entries(resultNamespaces).flatMap(([namespace, locales]) =>
 		Object.entries(locales).map(([locale, messages]) => ({
@@ -50,8 +49,7 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 			content: new TextEncoder().encode(
 				JSON.stringify(unflatten(messages), undefined, "\t") + "\n"
 			),
-			// TODO the path should be configurable
-			path: `${namespace}-${locale}.json`,
+			name: `${namespace}-${locale}.json`,
 		}))
 	)
 	return [...withoutNamespace, ...withNamespace]
