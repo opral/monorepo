@@ -25,7 +25,7 @@ test("it should work for a single namespace", async () => {
 	])
 })
 
-test("it should work for a multiple namespace", async () => {
+test("it should work for multiple namespaces", async () => {
 	const result = await toBeImportedFiles({
 		settings: {
 			baseLocale: "en",
