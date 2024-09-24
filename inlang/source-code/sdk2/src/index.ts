@@ -18,7 +18,7 @@ export * from "./query-utilities/index.js";
 export * from "./plugin/errors.js";
 export { humanId } from "./human-id/human-id.js";
 export type { InlangDatabaseSchema } from "./database/schema.js";
-export type { ResourceFile } from "./project/api.js";
+export type { ImportFile, ExportFile } from "./project/api.js";
 export type { InlangPlugin } from "./plugin/schema.js";
 export type { IdeExtensionConfig } from "./plugin/meta/ideExtension.js";
 export * from "./database/schema.js";

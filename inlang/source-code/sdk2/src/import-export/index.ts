@@ -7,11 +7,11 @@ import type { ProjectSettings } from "../json-schema/settings.js";
 import type { InlangDatabaseSchema } from "../database/schema.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import type { InlangPlugin } from "../plugin/schema.js";
-import type { ResourceFile } from "../project/api.js";
+import type { ImportFile } from "../project/api.js";
 import { upsertBundleNestedMatchByProperties } from "../query-utilities/upsertBundleNestedMatchByProperties.js";
 
 export async function importFiles(opts: {
-	files: ResourceFile[];
+	files: ImportFile[];
 	readonly pluginKey: string;
 	readonly settings: ProjectSettings;
 	readonly plugins: readonly InlangPlugin[];
