@@ -1882,12 +1882,9 @@ importers:
 
   inlang/source-code/plugins/i18next:
     dependencies:
-      '@inlang/detect-json-formatting':
+      '@inlang/sdk2':
         specifier: workspace:*
-        version: link:../../detect-json-formatting
-      '@inlang/sdk':
-        specifier: workspace:*
-        version: link:../../sdk
+        version: link:../../sdk2
       '@sinclair/typebox':
         specifier: 0.31.28
         version: 0.31.28
@@ -1895,12 +1892,6 @@ importers:
       '@inlang/cli':
         specifier: workspace:*
         version: link:../../cli
-      '@inlang/plugin':
-        specifier: workspace:*
-        version: link:../../versioned-interfaces/plugin
-      '@lix-js/fs':
-        specifier: workspace:*
-        version: link:../../../../lix/packages/fs
       '@size-limit/preset-small-lib':
         specifier: ^8.2.4
         version: 8.2.6(size-limit@8.2.6)
@@ -1914,23 +1905,26 @@ importers:
         specifier: 1.10.6
         version: 1.10.6
       '@vitest/coverage-v8':
-        specifier: ^0.33.0
-        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.6)(webdriverio@8.40.3))
+        specifier: ^2.0.5
+        version: 2.0.5(vitest@2.0.5(@types/node@22.5.2)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6))
       flat:
-        specifier: ^5.0.2
-        version: 5.0.2
+        specifier: ^6.0.1
+        version: 6.0.1
       parsimmon:
         specifier: ^1.18.1
         version: 1.18.1
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
       typescript:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.33.0
-        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.6)(webdriverio@8.40.3)
+        specifier: ^2.0.5
+        version: 2.0.5(@types/node@22.5.2)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6)
 
   inlang/source-code/plugins/icu1:
     dependencies:
@@ -10813,6 +10807,11 @@ packages:
 
   flat@5.0.2:
     resolution: {integrity: sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==}
+    hasBin: true
+
+  flat@6.0.1:
+    resolution: {integrity: sha512-/3FfIa8mbrg3xE7+wAhWeV+bd7L2Mof+xtZb5dRDKZ+wDvYJK4WDYeIOuOhre5Yv5aQObZrlbRmk3RTSiuQBtw==}
+    engines: {node: '>=18'}
     hasBin: true
 
   flatted@3.3.1:
@@ -27438,6 +27437,8 @@ snapshots:
       keyv: 4.5.4
 
   flat@5.0.2: {}
+
+  flat@6.0.1: {}
 
   flatted@3.3.1: {}
 
