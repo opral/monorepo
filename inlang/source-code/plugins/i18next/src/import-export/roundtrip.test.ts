@@ -2,6 +2,7 @@ import { expect, test } from "vitest"
 import { importFiles } from "./importFiles.js"
 import type { BundleNested, LiteralMatch, Pattern, Variant } from "@inlang/sdk2"
 import { exportFiles } from "./exportFiles.js"
+import { PLUGIN_KEY } from "../plugin.js"
 
 test("single key value", async () => {
 	const imported = await runImportFiles({
@@ -359,6 +360,60 @@ test("im- and exporting multiple files should succeed", async () => {
 	})
 	expect(exportedDe).toStrictEqual({
 		key: "Wert",
+	})
+})
+
+test("it should handle namespaces", async () => {
+	const enCommon = {
+		confirm: "value1",
+	}
+	const enLogin = {
+		button: "value2",
+	}
+
+	const imported = await importFiles({
+		settings: {} as any,
+		files: [
+			{
+				locale: "en",
+				content: new TextEncoder().encode(JSON.stringify(enCommon)),
+				path: "common/en.json",
+				// @ts-expect-error
+				meta: {
+					[PLUGIN_KEY]: {
+						namespace: "common",
+					},
+				},
+			},
+			{
+				locale: "en",
+				content: new TextEncoder().encode(JSON.stringify(enLogin)),
+				path: "login/en.json",
+				// @ts-expect-error
+				meta: {
+					[PLUGIN_KEY]: {
+						namespace: "login",
+					},
+				},
+			},
+		],
+	})
+	const exported = await exportFiles({
+		settings: {} as any,
+		bundles: imported.bundles as BundleNested[],
+	})
+	const exportedCommon = JSON.parse(
+		new TextDecoder().decode(exported.find((e) => e.path.includes("common"))?.content)
+	)
+	const exportedLogin = JSON.parse(
+		new TextDecoder().decode(exported.find((e) => e.path.includes("login"))?.content)
+	)
+
+	expect(exportedCommon).toStrictEqual({
+		confirm: "value1",
+	})
+	expect(exportedLogin).toStrictEqual({
+		button: "value2",
 	})
 })
 

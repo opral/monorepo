@@ -5,6 +5,7 @@ import { unflatten } from "flat"
 
 export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({ bundles }) => {
 	const result: Record<string, Record<string, any>> = {}
+	const resultNamespaces: Record<string, Record<string, Record<string, any>>> = {}
 
 	const messages = bundles.flatMap((bundle) => bundle.messages)
 
@@ -16,19 +17,44 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 		)
 
 		for (const message of serializedMessages) {
-			if (result[message.locale] === undefined) {
-				result[message.locale] = {}
+			// no namespace
+			if (message.key.includes(":") === false) {
+				if (result[message.locale] === undefined) {
+					result[message.locale] = {}
+				}
+				result[message.locale]![message.key] = message.value
 			}
-			result[message.locale]![message.key] = message.value
+			// namespaces
+			else {
+				const [namespace, key] = message.key.split(":")
+				if (resultNamespaces[namespace!] === undefined) {
+					resultNamespaces[namespace!] = {}
+				}
+				if (resultNamespaces[namespace!]?.[message.locale] === undefined) {
+					resultNamespaces[namespace!]![message.locale] = {}
+				}
+				resultNamespaces[namespace!]![message.locale]![key!] = message.value
+			}
 		}
 	}
 
-	return Object.entries(result).map(([locale, messages]) => ({
+	const withoutNamespace = Object.entries(result).map(([locale, messages]) => ({
 		locale,
 		content: new TextEncoder().encode(JSON.stringify(unflatten(messages), undefined, "\t") + "\n"),
 		// TODO the path should be configurable
-		path: `mock/${locale}.json`,
+		path: `${locale}.json`,
 	}))
+	const withNamespace = Object.entries(resultNamespaces).flatMap(([namespace, locales]) =>
+		Object.entries(locales).map(([locale, messages]) => ({
+			locale,
+			content: new TextEncoder().encode(
+				JSON.stringify(unflatten(messages), undefined, "\t") + "\n"
+			),
+			// TODO the path should be configurable
+			path: `${namespace}-${locale}.json`,
+		}))
+	)
+	return [...withoutNamespace, ...withNamespace]
 }
 
 function serializeMessage(
