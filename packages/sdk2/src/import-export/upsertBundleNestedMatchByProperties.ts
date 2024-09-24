@@ -2,7 +2,6 @@ import type { Kysely } from "kysely";
 import type {
 	InlangDatabaseSchema,
 	NewBundleNested,
-	NewMessageNested,
 } from "../database/schema.js";
 
 export const upsertBundleNestedMatchByProperties = async (
@@ -13,105 +12,63 @@ export const upsertBundleNestedMatchByProperties = async (
 		throw new Error("upsert expets a bundle id for matching");
 	}
 	const bundleToInsert = { ...bundle, messages: undefined };
-	const insertedBundleResult = await db
-		.insertInto("bundle")
-		.values(bundleToInsert)
-		.onConflict((oc) => oc.column("id").doUpdateSet(bundleToInsert))
-		.executeTakeFirstOrThrow();
 
+	await db.transaction().execute(async (trx) => {
+		const insertedBundle = await trx
+			.insertInto("bundle")
+			.values(bundleToInsert)
+			.onConflict((oc) => oc.column("id").doUpdateSet(bundleToInsert))
+			.returning("id")
+			.executeTakeFirstOrThrow();
 
-	const insertedBundleId = insertedBundleResult.insertId;
-
-	if (insertedBundleId !== undefined) {
-		const messagesOnBundle = await db
+		const existingMessages = await trx
 			.selectFrom("message")
+			.where("bundleId", "=", insertedBundle.id)
 			.selectAll()
-			.where("bundleId", "=", bundle.id)
 			.execute();
-
-		for (const importedMessage of bundle.messages) {
-			// try to find the messages by language and the variants by there matchers
-			const exisitngMessage = messagesOnBundle.find(
-				(existingMessage) => existingMessage.locale === importedMessage.locale
-			);
-			if (exisitngMessage) {
-				const variantsOnMatchingMessage = await db
-					.selectFrom("variant")
-					.selectAll()
-					.where("messageId", "=", exisitngMessage.id)
-					.execute();
-				for (const importedVariant of importedMessage.variants) {
-					const existingVariant = variantsOnMatchingMessage.find(
-						(existingVariant) =>
-							JSON.stringify(existingVariant.matches) ===
-							JSON.stringify(importedVariant.matches)
-					);
-					if (existingVariant) {
-						// update existing variant
-						await db
-							.updateTable("variant")
-							.set({
-								...importedVariant,
-								id: undefined,
-							})
-							.where("id", "=", existingVariant.id)
-							.execute();
-					} else {
-						await db
-							.insertInto("variant")
-							.values({
-								...importedVariant,
-								messageId: exisitngMessage.id,
-								id: undefined, // let the db create the id for us
-							})
-							.execute();
-					}
-				}
-			} else {
-				// message did not exist - no need to match just insert the messages/variants
-				await insertMessageDeep(db, bundle, importedMessage);
-			}
-		}
-	} else {
-		// bundle did not exist - no need to match just insert the messages/variants
 
 		for (const message of bundle.messages) {
-			await insertMessageDeep(db, bundle, message);
+			// match by locale
+			const existingMessage = existingMessages.find(
+				(m) => m.locale === message.locale
+			);
+
+			const messageToInsert = {
+				...message,
+				id: existingMessage?.id,
+				bundleId: insertedBundle.id,
+				variants: undefined,
+			};
+			const insertedMessage = await trx
+				.insertInto("message")
+				.values(messageToInsert)
+				.onConflict((oc) => oc.column("id").doUpdateSet(messageToInsert))
+				.returning("id")
+				.executeTakeFirstOrThrow();
+
+			const existingVariants = await trx
+				.selectFrom("variant")
+				.where("messageId", "=", insertedMessage.id)
+				.selectAll()
+				.execute();
+
+			for (const variant of message.variants) {
+				// match by matches
+				const existingVariant = existingVariants.find(
+					(v) => JSON.stringify(v.matches) === JSON.stringify(variant.matches)
+				);
+
+				const variantToInsert = {
+					...variant,
+					id: existingVariant?.id,
+					messageId: insertedMessage.id,
+				};
+				await trx
+					.insertInto("variant")
+					.values(variantToInsert)
+					.onConflict((oc) => oc.column("id").doUpdateSet(variantToInsert))
+					.execute();
+			}
 		}
-	}
+	});
 };
-
-/**
- * Helper mehtod that allows to insert a message deeply
- * @param db
- * @param bundle
- * @param message
- */
-async function insertMessageDeep(
-	db: Kysely<InlangDatabaseSchema>,
-	bundle: NewBundleNested,
-	message: NewMessageNested
-) {
-	const insertedMessage = await db
-		.insertInto("message")
-		.values({
-			...message,
-			id: undefined,
-			bundleId: bundle.id!,
-			// @ts-expect-error - the type has no variants
-			variants: undefined,
-		})
-		.returning("id")
-		.executeTakeFirstOrThrow();
-
-	for (const variant of message.variants) {
-		await db
-			.insertInto("variant")
-			.values({
-				...variant,
-				id: undefined, // let the db create the id here
-				messageId: insertedMessage.id,
-			})
-			.execute();
-	}
-}
