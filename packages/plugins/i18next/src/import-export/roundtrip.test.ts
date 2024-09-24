@@ -417,6 +417,81 @@ test("it should handle namespaces", async () => {
 	})
 })
 
+test("it should put new entities into the resource file without a namespace", async () => {
+	const enNoNamespace = {
+		blue_box: "value1",
+	}
+
+	const enCommon = {
+		foo_bar: "value2",
+	}
+
+	const imported = await importFiles({
+		settings: {} as any,
+		files: [
+			{
+				locale: "en",
+				content: new TextEncoder().encode(JSON.stringify(enNoNamespace)),
+				path: "en.json",
+			},
+			{
+				locale: "en",
+				content: new TextEncoder().encode(JSON.stringify(enCommon)),
+				path: "common-en.json",
+				// @ts-expect-error
+				meta: {
+					[PLUGIN_KEY]: {
+						namespace: "common",
+					},
+				},
+			},
+		],
+	})
+
+	const newBundle: BundleNested = {
+		id: "happy_elephant",
+		declarations: [],
+		messages: [
+			{
+				id: "happy_elephant_en",
+				bundleId: "happy_elephant",
+				locale: "en",
+				selectors: [],
+				variants: [
+					{
+						id: "happy_elephant_en_*",
+						matches: [],
+						messageId: "happy_elephant_en",
+						pattern: [{ type: "text", value: "elephant" }],
+					},
+				],
+			},
+		],
+	}
+
+	const exported = await exportFiles({
+		settings: {} as any,
+		bundles: [...(imported.bundles as BundleNested[]), newBundle],
+	})
+
+	const exportedNoNamespace = JSON.parse(
+		new TextDecoder().decode(exported.find((e) => e.path.includes("en.json"))?.content)
+	)
+
+	const exportedCommon = JSON.parse(
+		new TextDecoder().decode(exported.find((e) => e.path.includes("common"))?.content)
+	)
+
+	expect(exportedNoNamespace).toStrictEqual({
+		blue_box: "value1",
+		happy_elephant: "elephant",
+	})
+
+	expect(exportedCommon).toStrictEqual({
+		foo_bar: "value2",
+	})
+})
+
 // convenience wrapper for less testing code
 function runImportFiles(json: Record<string, any>) {
 	return importFiles({
