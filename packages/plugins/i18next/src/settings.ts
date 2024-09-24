@@ -1,15 +1,12 @@
 // Settings for i18next plugin
 import { Type, type Static } from "@sinclair/typebox"
+
 const PathPattern = Type.String({
-	pattern: "^(\\./|\\../|/)[^*]*\\{languageTag\\}[^*]*\\.json",
+	pattern: "^(\\./|\\../|/)[^*]*\\{(languageTag|locale)\\}[^*]*\\.json$",
 	title: "Path to language files",
 	description:
-		"Specify the pathPattern to locate language files in your repository. It must include `{languageTag}` and end with `.json`.",
-	examples: [
-		"./{languageTag}/file.json",
-		"../folder/{languageTag}/file.json",
-		"./{languageTag}.json",
-	],
+		"Specify the pathPattern to locate language files in your repository. It must include `{locale}` and end with `.json`.",
+	examples: ["./{locale}/file.json", "../folder/{locale}/file.json", "./{locale}.json"],
 })
 const NameSpacePathPattern = Type.Record(
 	Type.String({
