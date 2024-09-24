@@ -18,11 +18,15 @@ export const Example: StoryObj = {
 	render: () => {
 		return html`<style>
 				.container {
-					padding-bottom: 200px;
+					padding-bottom: 400px;
 				}
 			</style>
 			<div class="container">
-				<inlang-add-variable bundle=${examplePlural.bundles[0]}>Press me</inlang-add-variable>
+				<inlang-add-variable
+					.bundle=${examplePlural.bundles[0]}
+					@change=${(e) => console.info(e.detail.newData.declarations)}
+					>Press me</inlang-add-variable
+				>
 			</div>`
 	},
 }

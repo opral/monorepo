@@ -614,6 +614,61 @@ test("errors from importing translation files that are ENOENT should not be show
 	expect(errors).toHaveLength(0);
 });
 
+// it happens often that a resource file doesn't exist yet on import
+test("it should pass toBeImportedMetadata on import", async () => {
+	const mock = {
+		"/foo/en.json": JSON.stringify({}),
+		"/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en", "de"],
+		} satisfies ProjectSettings),
+	};
+
+	const fs = Volume.fromJSON(mock);
+
+	const mockPlugin: InlangPlugin = {
+		key: "mock-plugin",
+		toBeImportedFiles: async () => {
+			return [
+				{
+					path: "/foo/en.json",
+					locale: "mock",
+					metadata: {
+						foo: "bar",
+					},
+				},
+			];
+		},
+		importFiles: async () => {
+			return { bundles: [] };
+		},
+	};
+
+	const toBeSpy = vi.spyOn(mockPlugin, "toBeImportedFiles");
+	const importSpy = vi.spyOn(mockPlugin, "importFiles");
+
+	const project = await loadProjectFromDirectory({
+		fs: fs as any,
+		path: "/project.inlang",
+		providePlugins: [mockPlugin],
+	});
+
+	expect(toBeSpy).toHaveBeenCalled();
+
+	expect(importSpy).toHaveBeenCalledWith(
+		expect.objectContaining({
+			files: [
+				expect.objectContaining({
+					name: "en.json",
+					toBeImportedFilesMetadata: {
+						foo: "bar",
+					},
+				}),
+			],
+		})
+	);
+});
+
 test("it should provide plugins from disk for backwards compatibility but warn that those plugins are not portable", async () => {
 	const mockRepo = {
 		"/local-plugins/mock-plugin.js": "export default { key: 'mock-plugin' }",

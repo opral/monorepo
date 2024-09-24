@@ -25,7 +25,7 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 			locale,
 			// beautify the json
 			content: new TextEncoder().encode(JSON.stringify(files[locale], undefined, "\t")),
-			path: pathPattern.replace("{locale}", locale),
+			name: locale + ".json",
 			pluginKey: PLUGIN_KEY,
 		})
 	}
@@ -80,10 +80,10 @@ function serializePattern(pattern: Variant["pattern"]): string {
 function serializeMatcher(matches: Match[]): string {
 	const parts = []
 	for (const match of matches) {
-		if (match.value.type === "literal") {
-			parts.push(`${match.name}=${match.value.value}`)
+		if (match.type === "literal-match") {
+			parts.push(`${match.key}=${match.value}`)
 		} else {
-			parts.push(`${match.name}=*`)
+			parts.push(`${match.key}=*`)
 		}
 	}
 	return parts.join(", ")

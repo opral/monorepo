@@ -112,11 +112,13 @@ export async function loadProjectFromDirectory(
 				const absolute = absolutePathFromProject(args.path, toBeImported.path);
 				try {
 					const data = await args.fs.promises.readFile(absolute);
+					const name = nodePath.basename(toBeImported.path);
 					files.push({
-						path: toBeImported.path,
+						name,
 						locale: toBeImported.locale,
 						content: data,
 						pluginKey: importer.key,
+						toBeImportedFilesMetadata: toBeImported.metadata,
 					});
 				} catch (e) {
 					// https://github.com/opral/inlang-sdk/issues/202

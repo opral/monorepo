@@ -1,4 +1,4 @@
-import { createBundle, insertBundleNested } from "@inlang/sdk2";
+import { humanId, insertBundleNested } from "@inlang/sdk2";
 import { useAtom } from "jotai";
 import { bundlesNestedFilteredAtom, projectAtom } from "../state.ts";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
@@ -19,7 +19,7 @@ const NewBundleButton = () => {
   const [project] = useAtom(projectAtom);
   const handleNewBundle = () => {
     if (project) {
-      insertBundleNested(project.db, createBundle({ messages: [] }));
+      insertBundleNested(project.db, { id: humanId(), messages: [] });
     }
   }
   return (

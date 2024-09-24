@@ -32,6 +32,8 @@ const meta: Meta = {
 
 export default meta
 
+let stateBuffer = exampleWithoutSelectors
+
 export const Example: StoryObj = {
 	args: {
 		state: exampleWithoutSelectors,
@@ -51,9 +53,12 @@ export const Example: StoryObj = {
 
 		const handleChange = (e) => {
 			const data = e.detail as ChangeEventDetail
+			const newBufferData = structuredClone(stateBuffer)
+			const newData = updateEntities({ entities: newBufferData, change: data })
 			updateArgs({
-				state: updateEntities({ entities: args.state, change: data }),
+				state: newData,
 			})
+			stateBuffer = newData
 		}
 
 		return html`<inlang-bundle .bundle=${bundles[0]} @change=${handleChange}>
@@ -76,6 +81,7 @@ export const Example: StoryObj = {
 											<inlang-add-selector
 												.bundle=${bundles[0]}
 												.message=${message}
+												.variants=${variantsOfMessage}
 											></inlang-add-selector>
 										</sl-dialog>
 										<style>
@@ -109,7 +115,11 @@ export const Example: StoryObj = {
 						Add selector
 					</div>
 					<sl-dialog slot="selector-button" label="Add Selector">
-						<inlang-add-selector .message=${message} .bundle=${bundles[0]}></inlang-add-selector>
+						<inlang-add-selector
+							.message=${message}
+							.bundle=${bundles[0]}
+							.variants=${variantsOfMessage}
+						></inlang-add-selector>
 					</sl-dialog>
 				</inlang-message>`
 			})}

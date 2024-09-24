@@ -1,7 +1,7 @@
-import { BundleNested } from "@inlang/sdk2";
+import { NewBundleNested } from "@inlang/sdk2";
 
 export const hasMissingTranslations = (
-	bundle: BundleNested,
+	bundle: NewBundleNested,
 	relevantLocales: string[]
 ): boolean => {
 	return (
@@ -14,18 +14,21 @@ export default hasMissingTranslations;
 
 // Check if pattern is empty
 const hasEmptyPattern = (
-	bundle: BundleNested,
+	bundle: NewBundleNested,
 	relevantLocales: string[]
 ): boolean =>
 	bundle.messages.some(
 		(message) =>
 			relevantLocales.includes(message.locale) &&
-			message.variants.some((variant) => variant.pattern.length === 0)
+			message.variants.some(
+				(variant) =>
+					variant.pattern === undefined || variant.pattern.length === 0
+			)
 	);
 
 // Check if any relevant locale is missing from the bundle
 const hasMissingLocales = (
-	bundle: BundleNested,
+	bundle: NewBundleNested,
 	relevantLocales: string[]
 ): boolean =>
 	relevantLocales.some(

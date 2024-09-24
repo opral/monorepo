@@ -49,12 +49,21 @@ export type InlangProject = {
 export type ResourceFile = {
 	/** The locale of the resource file */
 	locale: string;
-	/** The absolute filepath of the resource */
-	path: string;
+	/**
+	 * The name of the file.
+	 *
+	 * @example
+	 *   "en.json"
+	 *   "common-de.json"
+	 *
+	 */
+	name: string;
 	/** The binary content of the resource */
 	content: ArrayBuffer;
 	/** The plugin which loaded this resource */
 	pluginKey: InlangPlugin["key"];
+	/** The meta data of the resource as provided by toBeImportedFiles */
+	toBeImportedFilesMetadata?: Record<string, any>;
 };
 
 /**
