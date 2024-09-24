@@ -1,24 +1,37 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
-import { Declaration, Expression, Pattern } from "../json-schema/pattern.js";
+import {
+	Declaration,
+	Pattern,
+	VariableReference,
+} from "../json-schema/pattern.js";
 
 export function applySchema(args: { sqlite: SqliteDatabase }) {
-	const foreignKeys: any = args.sqlite.exec("PRAGMA foreign_keys");
-	if (foreignKeys["foreign_keys"] === 0) {
-		args.sqlite.exec("PRAGMA foreign_keys = ON");
-	}
+	// TODO re-enable https://github.com/opral/inlang-sdk/issues/209
+	// const foreignKeyActivated: any = args.sqlite.exec("PRAGMA foreign_keys", {
+	// 	returnValue: "resultRows",
+	// });
+	// if (
+	// 	// first row that is returned
+	// 	// first column of the first row
+	// 	// is equal to 0, then foreign keys are disabled
+	// 	foreignKeyActivated[0][0] === 0
+	// ) {
+	// 	args.sqlite.exec("PRAGMA foreign_keys = ON", {
+	// 		returnValue: "resultRows",
+	// 	});
+	// }
 
 	args.sqlite.exec(`
 CREATE TABLE IF NOT EXISTS bundle (
   id TEXT PRIMARY KEY DEFAULT (human_id()),
-  alias BLOB NOT NULL DEFAULT (jsonb('{}'))
+	declarations BLOB NOT NULL DEFAULT (jsonb('[]'))
 ) strict;
 
 CREATE TABLE IF NOT EXISTS message (
   id TEXT PRIMARY KEY DEFAULT (uuid_v7()), 
   bundle_id TEXT NOT NULL,
   locale TEXT NOT NULL,
-  declarations BLOB NOT NULL DEFAULT (jsonb('[]')),
   selectors BLOB NOT NULL DEFAULT (jsonb('[]')),
   FOREIGN KEY (bundle_id) REFERENCES bundle(id) ON DELETE CASCADE
 ) strict;
@@ -27,7 +40,7 @@ CREATE TABLE IF NOT EXISTS message (
 CREATE TABLE IF NOT EXISTS variant (
   id TEXT PRIMARY KEY DEFAULT (uuid_v7()), 
   message_id TEXT NOT NULL,
-  match BLOB NOT NULL DEFAULT (jsonb('{}')),
+  matches BLOB NOT NULL DEFAULT (jsonb('[]')),
   pattern BLOB NOT NULL DEFAULT (jsonb('[]')),
   FOREIGN KEY (message_id) REFERENCES message(id) ON DELETE CASCADE
 ) strict;
@@ -45,22 +58,41 @@ export type InlangDatabaseSchema = {
 
 type BundleTable = {
 	id: Generated<string>;
-	alias: Generated<Record<string, string>>;
+	declarations: Generated<Array<Declaration>>;
 };
 
 type MessageTable = {
 	id: Generated<string>;
-	bundleId: Generated<string>;
+	bundleId: string;
 	locale: string;
-	declarations: Generated<Array<Declaration>>;
-	selectors: Generated<Array<Expression>>;
+	selectors: Generated<Array<VariableReference>>;
 };
 
 type VariantTable = {
 	id: Generated<string>;
 	messageId: string;
-	match: Generated<Record<string, string>>;
+	matches: Generated<Array<Match>>;
 	pattern: Generated<Pattern>;
+};
+
+/**
+ * A match is a variable reference that is either a literal or a catch-all.
+ *
+ * https://github.com/opral/inlang-sdk/issues/205
+ *
+ * @example
+ *   match = { type: "match", name: "gender", value: { type: "literal", value: "male"  }}
+ */
+export type Match = LiteralMatch | CatchAllMatch;
+
+export type LiteralMatch = {
+	type: "literal-match";
+	key: VariableReference["name"];
+	value: string;
+};
+export type CatchAllMatch = {
+	type: "catchall-match";
+	key: VariableReference["name"];
 };
 
 export type Bundle = Selectable<BundleTable>;

@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAtom } from "jotai";
 import { projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
-import type { Change, Pattern, Variant } from "@inlang/sdk2";
+import type { Pattern, Variant } from "@inlang/sdk2";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import timeAgo from "../helper/timeAgo.ts";
 import { isInSimulatedCurrentBranch } from "@inlang/sdk2";
@@ -125,7 +126,10 @@ const patternToString = (props: { pattern: Pattern }): string => {
 		.map((p) => {
 			if ("value" in p) {
 				return p.value;
-			} else if (p.type === "expression" && p.arg.type === "variable") {
+			} else if (
+				p.type === "expression" &&
+				p.arg.type === "variable-reference"
+			) {
 				return `{{${p.arg.name}}}`;
 			}
 			return "";

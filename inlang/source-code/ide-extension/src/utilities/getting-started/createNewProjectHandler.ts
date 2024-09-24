@@ -12,7 +12,7 @@ import path from "node:path"
 export async function createNewProjectHandler(args: { workspaceFolderPath: string }) {
 	try {
 		const workspaceFolderPath = args.workspaceFolderPath
-		const nodeishFs = createFileSystemMapper(path.normalize(workspaceFolderPath), fs)
+		const mappedFs = createFileSystemMapper(path.normalize(workspaceFolderPath), fs)
 
 		// The path to the project directory
 		const projectPath = path.normalize(`${workspaceFolderPath}/project.inlang`)
@@ -24,7 +24,7 @@ export async function createNewProjectHandler(args: { workspaceFolderPath: strin
 
 		// Save the project blob as a directory
 		await saveProjectToDirectory({
-			fs: nodeishFs,
+			fs: mappedFs,
 			project,
 			path: projectPath,
 		})

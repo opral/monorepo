@@ -6,7 +6,8 @@
 		"access": "public"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./bundled": "./dist/bundled/index.js"
 	},
 	"files": [
 		"dist",
@@ -14,18 +15,18 @@
 	],
 	"scripts": {
 		"dev": "tsc --watch",
-		"build": "tsc",
+		"build": "tsc && rollup --config rollup.config.js",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"format": "prettier --write **/*.ts",
 		"storybook": "storybook dev -p 6006"
 	},
 	"dependencies": {
-		"lit": "^3.1.2",
+		"@inlang/marketplace-registry": "workspace:^",
 		"@lit/task": "^1.0.0",
 		"@shoelace-style/shoelace": "2.14.0",
+		"@sinclair/typebox": "0.31.28",
 		"chroma-js": "^2.4.2",
-		"@inlang/marketplace-registry": "workspace:^",
-		"@sinclair/typebox": "0.31.28"
+		"lit": "^3.1.2"
 	},
 	"peerDependencies": {
 		"@inlang/sdk2": "*"
@@ -33,17 +34,20 @@
 	"devDependencies": {
 		"@inlang/sdk2": "workspace:^",
 		"@nx/storybook": "^18.0.4",
+		"@rollup/plugin-commonjs": "^25.0.7",
+		"@rollup/plugin-node-resolve": "^15.2.3",
 		"@storybook/addon-essentials": "^7.6.16",
 		"@storybook/addon-links": "^7.6.16",
 		"@storybook/blocks": "^7.6.16",
 		"@storybook/web-components": "^7.6.16",
 		"@storybook/web-components-vite": "^7.6.16",
 		"@types/chroma-js": "^2.4.4",
+		"@vitest/coverage-v8": "^0.33.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
+		"rollup": "3.29.1",
 		"storybook": "^7.6.16",
-		"vitest": "0.33.0",
-		"@vitest/coverage-v8": "^0.33.0",
-		"typescript": "5.4.5"
+		"typescript": "5.4.5",
+		"vitest": "0.33.0"
 	}
 }

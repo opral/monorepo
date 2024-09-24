@@ -1,6 +1,5 @@
 import type { BundleNested } from "../../database/schema.js";
-import type { InlangPlugin } from "../../plugin/schema.js";
-import type { Expression, Pattern } from "../pattern.js";
+import type { Pattern } from "../pattern.js";
 import type {
 	ExpressionV1,
 	MessageV1,
@@ -13,16 +12,16 @@ import type {
  *
  * @throws If the message cannot be represented in the v1 format
  */
-export function toMessageV1(
-	bundle: BundleNested,
-	pluginKey: NonNullable<InlangPlugin["key"] | InlangPlugin["id"]>
-): MessageV1 {
+export function toMessageV1(bundle: BundleNested): MessageV1 {
 	const variants: VariantV1[] = [];
 	const selectorNames = new Set<string>();
 
 	for (const message of bundle.messages) {
 		// collect all selector names
-		for (const selector of message.selectors.map(toV1Expression)) {
+		for (const selector of message.selectors.map((s) => ({
+			type: "variable-reference",
+			name: s.name,
+		}))) {
 			selectorNames.add(selector.name);
 		}
 
@@ -41,14 +40,8 @@ export function toMessageV1(
 		name,
 	}));
 
-	const alias = bundle.alias[pluginKey];
-
-	if (alias === undefined) {
-		throw new Error(`Missing alias for plugin key "${pluginKey}"`);
-	}
-
 	return {
-		id: alias,
+		id: bundle.id,
 		alias: {},
 		variants,
 		selectors,
@@ -69,7 +62,13 @@ function toV1Pattern(pattern: Pattern): PatternV1 {
 			}
 
 			case "expression": {
-				return toV1Expression(element);
+				if (element.arg.type === "variable-reference") {
+					return {
+						type: "VariableReference",
+						name: element.arg.name,
+					};
+				}
+				throw new Error(`Unsupported expression argument type`);
 			}
 
 			default: {
@@ -77,20 +76,4 @@ function toV1Pattern(pattern: Pattern): PatternV1 {
 			}
 		}
 	});
-}
-
-function toV1Expression(expression: Expression): ExpressionV1 {
-	if (expression.annotation !== undefined)
-		throw new Error(
-			"Cannot convert an expression with an annotation to the v1 format"
-		);
-
-	if (expression.arg.type !== "variable") {
-		throw new Error("Can only convert variable references to the v1 format");
-	}
-
-	return {
-		type: "VariableReference",
-		name: expression.arg.name,
-	};
 }

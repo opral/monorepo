@@ -88,6 +88,29 @@ export async function merge(args: {
 		changesPerFile[fileId] = fileData;
 	}
 
+	// DISCUSSIONS
+
+	/**
+	 * NOTE:
+	 * this is a naiv implementation that selects just all discussions
+	 * and passes them to the target
+	 **/
+	// selecting all discussion related entries for later upsert
+	const sourceDiscussions = await args.sourceLix.db
+		.selectFrom("discussion")
+		.selectAll()
+		.execute();
+
+	const sourceDiscsussionChangeMappings = await args.sourceLix.db
+		.selectFrom("discussion_change_map")
+		.selectAll()
+		.execute();
+
+	const sourceComments = await args.sourceLix.db
+		.selectFrom("comment")
+		.selectAll()
+		.execute();
+
 	await args.targetLix.db.transaction().execute(async (trx) => {
 		if (sourceChanges.length > 0) {
 			// 1. copy the changes from source
@@ -132,7 +155,36 @@ export async function merge(args: {
 			await trx
 				.updateTable("file_internal")
 				.set("data", fileData)
-				.where("id", "=", fileId)
+				.where("id", "=", fileId);
+		}
+
+		// 5. add discussions, comments and discsussion_change_mappings
+
+		if (sourceDiscussions.length > 0) {
+			await trx
+				.insertInto("discussion")
+				.values(sourceDiscussions)
+				// ignore if already exists
+				.onConflict((oc) => oc.doNothing())
+				.execute();
+		}
+
+		if (sourceDiscsussionChangeMappings.length > 0) {
+			await trx
+				.insertInto("discussion_change_map")
+				.values(sourceDiscsussionChangeMappings)
+				// ignore if already exists
+				.onConflict((oc) => oc.doNothing())
+				.execute();
+		}
+
+		if (sourceComments.length > 0) {
+			await trx
+				.insertInto("comment")
+				.values(sourceComments)
+				// ignore if already exists
+				.onConflict((oc) => oc.doNothing())
+
 				.execute();
 		}
 	});

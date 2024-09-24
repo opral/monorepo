@@ -1,7 +1,6 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import overridePrimitiveColors from "../helper/overridePrimitiveColors.js"
-import { type Message, type Declaration } from "@inlang/sdk2"
 import type { Bundle } from "@inlang/sdk2"
 import { createChangeEvent } from "../helper/event.js"
 
@@ -18,7 +17,7 @@ if (!customElements.get("sl-menu")) customElements.define("sl-menu", SlMenu)
 if (!customElements.get("sl-menu-item")) customElements.define("sl-menu-item", SlMenuItem)
 
 //components
-import "./actions/add-input/inlang-add-input.js"
+import "./actions/add-variable/inlang-add-variable.js"
 
 //helpers
 import { baseStyling } from "../styling/base.js"
@@ -64,20 +63,20 @@ export default class InlangBundle extends LitElement {
 				display: flex;
 				flex-direction: column;
 			}
-			.inputs-wrapper {
+			.variables-wrapper {
 				display: flex;
 				align-items: center;
 				min-height: 44px;
 				gap: 8px;
 				color: var(--sl-input-color);
 			}
-			.inputs {
+			.variables {
 				display: flex;
 				align-items: center;
 				min-height: 44px;
 				gap: 1px;
 			}
-			.input-tag::part(base) {
+			.variable-tag::part(base) {
 				height: 28px;
 				font-weight: 500;
 				cursor: pointer;
@@ -144,27 +143,10 @@ export default class InlangBundle extends LitElement {
 	]
 	//props
 	@property({ type: Object })
-	bundle: Bundle | undefined
-
-	@property({ type: Array })
-	messages: Message[] | undefined
+	bundle: Bundle
 
 	@state()
 	private _bundleActionsPresent = false
-
-	private _inputs = (): Declaration[] | undefined => {
-		const inputs: Declaration[] = []
-		if (this.messages) {
-			for (const message of this.messages as unknown as Message[]) {
-				for (const declaration of message.declarations) {
-					if (declaration.type === "input" && !inputs.some((d) => d.name === declaration.name)) {
-						inputs.push(declaration)
-					}
-				}
-			}
-		}
-		return inputs
-	}
 
 	override async firstUpdated() {
 		await this.updateComplete
@@ -183,59 +165,48 @@ export default class InlangBundle extends LitElement {
 			<div>
 				<div class=${`header`} part="base">
 					<div class="header-left">
-						<span># ${this.bundle?.id}</span>
-						${this.bundle?.alias && Object.keys(this.bundle.alias).length > 0
-							? html` <div class="alias-wrapper">
-									<span class="alias">Alias: ${this.bundle?.alias?.default}</span>
-									${Object.keys(this.bundle.alias).length > 1
-										? html`<div class="alias-counter">
-												+${Object.keys(this.bundle.alias).length - 1}
-										  </div>`
-										: ``}
-							  </div>`
-							: ``}
+						<span># ${this.bundle.id}</span>
 					</div>
 
 					<div class="header-right">
-						${this._inputs() && this._inputs()!.length > 0
-							? html`<div class="inputs-wrapper">
-									Inputs:
-									<div class="inputs">
-										${this._inputs()?.map(
-											(input) =>
+						${this.bundle.declarations.length > 0
+							? html`<div class="variables-wrapper">
+									Variables:
+									<div class="variables">
+										${this.bundle.declarations.map(
+											(declaration) =>
 												html`<sl-dropdown
 													><sl-button
 														slot="trigger"
-														class="input-tag"
+														class="variable-tag"
 														variant="neutral"
 														size="small"
-														>${input.name}</sl-button
+														>${declaration.name}</sl-button
 													><sl-menu>
 														<sl-menu-item
 															value="delete"
 															@click=${() => {
-																for (const message of this.messages!) {
-																	const newMessage = structuredClone(message)
-																	const index = newMessage.declarations.findIndex(
-																		(declaration) => declaration.name === input.name
-																	)
-																	newMessage.declarations.splice(index, 1)
-																	this.dispatchEvent(
-																		createChangeEvent({
-																			type: "Message",
-																			operation: "update",
-																			newData: newMessage,
-																		})
-																	)
-																}
+																const filtered = this.bundle.declarations.filter(
+																	(d) => d.name !== declaration.name
+																)
+																this.dispatchEvent(
+																	createChangeEvent({
+																		entityId: this.bundle.id,
+																		entity: "bundle",
+																		newData: {
+																			...this.bundle,
+																			declarations: filtered,
+																		},
+																	})
+																)
 															}}
 															>Delete</sl-menu-item
 														>
 													</sl-menu>
 												</sl-dropdown>`
 										)}
-										<inlang-add-input .messages=${this.messages}>
-											<sl-tooltip content="Add input to message bundle">
+										<inlang-add-variable .bundle=${this.bundle}>
+											<sl-tooltip content="Add a variable to this bundle">
 												<sl-button class="text-button" variant="neutral" size="small"
 													><svg
 														viewBox="0 0 24 24"
@@ -250,12 +221,12 @@ export default class InlangBundle extends LitElement {
 														></path></svg
 												></sl-button>
 											</sl-tooltip>
-										</inlang-add-input>
+										</inlang-add-variable>
 									</div>
 							  </div>`
-							: html`<div class="inputs-wrapper">
-									<inlang-add-input .messages=${this.messages}>
-										<sl-tooltip content="Add input to message bundle">
+							: html`<div class="variables-wrapper">
+									<inlang-add-variable .bundle=${this.bundle}>
+										<sl-tooltip content="Add a variable to this bundle">
 											<sl-button class="text-button" variant="text" size="small"
 												><svg
 													viewBox="0 0 24 24"
@@ -268,10 +239,10 @@ export default class InlangBundle extends LitElement {
 														fill="currentColor"
 														d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"
 													></path></svg
-												>Input</sl-button
+												>New variable</sl-button
 											>
 										</sl-tooltip>
-									</inlang-add-input>
+									</inlang-add-variable>
 							  </div>`}
 						${this._bundleActionsPresent
 							? html`<div class="separator"></div>

@@ -21,7 +21,7 @@ export const selectBundleNested = (db: Kysely<InlangDatabaseSchema>) => {
 	return db.selectFrom("bundle").select((eb) => [
 		// select all columns from bundle
 		"id",
-		"alias",
+		"declarations",
 		// select all columns from messages as "messages"
 		jsonArrayFrom(
 			eb
@@ -31,13 +31,12 @@ export const selectBundleNested = (db: Kysely<InlangDatabaseSchema>) => {
 					"id",
 					"bundleId",
 					"locale",
-					"declarations",
 					"selectors",
 					// select all columns from variants as "variants"
 					jsonArrayFrom(
 						eb
 							.selectFrom("variant")
-							.select(["id", "messageId", "match", "pattern"])
+							.select(["id", "messageId", "matches", "pattern"])
 							.whereRef("variant.messageId", "=", "message.id")
 					).as("variants"),
 				])

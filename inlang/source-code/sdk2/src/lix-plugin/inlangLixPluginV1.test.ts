@@ -14,7 +14,6 @@ describe("plugin.diff.file", () => {
 			.insertInto("bundle")
 			.values({
 				id: "1",
-				alias: {},
 			})
 			.execute();
 		const path = "/db.sqlite";
@@ -32,23 +31,22 @@ describe("plugin.diff.file", () => {
 				type: "bundle",
 				operation: "create",
 				old: undefined,
-				neu: { id: "1", alias: {} },
+				neu: expect.objectContaining({ id: "1" }),
 			} satisfies DiffReport,
 		]);
 	});
 
-	test("update of bundle", async () => {
+	// reanble with declarations
+	test.todo("update of bundle", async () => {
 		const oldProject = await loadProjectInMemory({ blob: await newProject() });
 		await oldProject.db
 			.insertInto("bundle")
 			.values([
 				{
 					id: "1",
-					alias: {},
 				},
 				{
 					id: "2",
-					alias: {},
 				},
 			])
 			.execute();
@@ -58,13 +56,9 @@ describe("plugin.diff.file", () => {
 			.values([
 				{
 					id: "1",
-					alias: {
-						default: "Peter Parker",
-					},
 				},
 				{
 					id: "2",
-					alias: {},
 				},
 			])
 			.execute();
@@ -91,8 +85,8 @@ describe("plugin.diff.file", () => {
 				},
 				type: "bundle",
 				operation: "update",
-				old: { id: "1", alias: {} },
-				neu: { id: "1", alias: { default: "Peter Parker" } },
+				old: { id: "1" },
+				neu: { id: "1" },
 			} satisfies DiffReport,
 		]);
 	});
@@ -123,7 +117,6 @@ describe("plugin.diff.file", () => {
 				old: undefined,
 				neu: {
 					id: "1",
-					declarations: [],
 					bundleId: "unknown",
 					selectors: [],
 					locale: "en",
@@ -187,14 +180,12 @@ describe("plugin.diff.file", () => {
 				operation: "update",
 				old: {
 					id: "1",
-					declarations: [],
 					bundleId: "unknown",
 					selectors: [],
 					locale: "en",
 				},
 				neu: {
 					id: "1",
-					declarations: [],
 					bundleId: "unknown",
 					selectors: [],
 					locale: "de",
@@ -210,7 +201,7 @@ describe("plugin.diff.file", () => {
 				id: "1",
 				messageId: "1",
 				pattern: [{ type: "text", value: "hello world" }],
-				match: {},
+				matches: [],
 			})
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
@@ -231,7 +222,7 @@ describe("plugin.diff.file", () => {
 					id: "1",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world" }],
-					match: {},
+					matches: [],
 				},
 			} satisfies DiffReport,
 		]);
@@ -245,13 +236,13 @@ describe("plugin.diff.file", () => {
 					id: "1",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world" }],
-					match: {},
+					matches: [],
 				},
 				{
 					id: "2",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world" }],
-					match: {},
+					matches: [],
 				},
 			])
 			.execute();
@@ -263,13 +254,13 @@ describe("plugin.diff.file", () => {
 					id: "1",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world from Berlin" }],
-					match: {},
+					matches: [],
 				},
 				{
 					id: "2",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world" }],
-					match: {},
+					matches: [],
 				},
 			])
 			.execute();
@@ -298,13 +289,13 @@ describe("plugin.diff.file", () => {
 					id: "1",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world" }],
-					match: {},
+					matches: [],
 				},
 				neu: {
 					id: "1",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world from Berlin" }],
-					match: {},
+					matches: [],
 				},
 			} satisfies DiffReport,
 		]);
@@ -324,7 +315,6 @@ describe("plugin.diff.file", () => {
 			.insertInto("bundle")
 			.values({
 				id: "1",
-				alias: {},
 			})
 			.execute();
 
@@ -348,13 +338,13 @@ describe("plugin.diff.variant", () => {
 	test("old and neu are the same should not report a diff", async () => {
 		const old: Variant = {
 			id: "1",
-			match: {},
+			matches: [],
 			messageId: "5",
 			pattern: [{ type: "text", value: "hello world" }],
 		};
 		const neu: Variant = {
 			id: "1",
-			match: {},
+			matches: [],
 			messageId: "5",
 			pattern: [{ type: "text", value: "hello world" }],
 		};
@@ -365,13 +355,13 @@ describe("plugin.diff.variant", () => {
 	test("old and neu are different should yield a diff report", async () => {
 		const old: Variant = {
 			id: "1",
-			match: {},
+			matches: [],
 			messageId: "5",
 			pattern: [{ type: "text", value: "hello world" }],
 		};
 		const neu: Variant = {
 			id: "1",
-			match: {},
+			matches: [],
 			messageId: "5",
 			pattern: [{ type: "text", value: "hello world from Berlin" }],
 		};
@@ -391,7 +381,7 @@ describe("plugin.diff.variant", () => {
 		const old = undefined;
 		const neu: Variant = {
 			id: "1",
-			match: {},
+			matches: [],
 			messageId: "5",
 			pattern: [{ type: "text", value: "hello world" }],
 		};

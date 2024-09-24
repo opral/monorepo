@@ -63,7 +63,11 @@ export async function contextTooltip(
 			const message = bundle.messages.find((m) => m.locale === locale)
 
 			// Get the variant from the message
-			const variant = message?.variants.find((v) => v.match.locale === locale)
+			const variant = message?.variants.find((v) =>
+				v.matches.find(
+					(m) => m.type === "literal-match" && m.key === "locale" && m.value === locale
+				)
+			)
 
 			let m = MISSING_TRANSLATION_MESSAGE
 

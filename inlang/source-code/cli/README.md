@@ -12,15 +12,6 @@ npx @inlang/cli [command]
 
 See all available commands [here](#commands).
 
-# Let's get started
-
-1. Add a `project.inlang` folder to your repository
-2. Create a `settings.json` file to that new dir `project.inlang/settings.json`
-3. Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins)
----
-4. **Optional** Install [lint rules](https://inlang.com/c/lint-rules) to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
-
-
 # Core features
 
 <doc-features>
@@ -89,10 +80,8 @@ If one of the commands can't be found, you probably use an outdated CLI version.
 | --------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | **CLI Version** | `npx @inlang/cli@latest [command]`                   | Get the latest version of the inlang CLI.                                                                     |
 | **Validate**     | `npx @inlang/cli validate [options]`                  | Validate if the project is working correctly.                          |
-| **Lint**        | `npx @inlang/cli lint [options]`                     | Lint translations using configured rules. Options include `--no-fail`, `--project`, and `--languageTags`.      |
 | **Machine**     | `npx @inlang/cli machine translate [options]`        | Automate translation processes. Options include `-f, --force`, `--project <path>`, `--sourceLanguageTag <source>` and `--targetLanguageTags <targets...>`                          |
-| **Open**        | `npx @inlang/cli open editor`                     | Open parts of the Inlang infrastructure in your default browser, including the [editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor).                        |
-| **Module**      | `npx @inlang/cli module [command]`                   | Interact with Inlang modules, including initialization and building. Commands:  `init [options]`   Initialize a new inlang module codebase,   `build [options]`  build an inlang module. Options include `--type`, `--entry`, and `--outdir`. |
+| **Plugin**      | `npx @inlang/cli plugin [command]`                   | Interact with Inlang plugins, including initialization and building. `build [options]`  build an inlang module. Options include `--type`, `--entry`, and `--outdir`. |
 
 ---
 
@@ -166,13 +155,6 @@ The validate command has the following options:
 
 This will launch an interactive prompt that will guide you through the process of migrating the inlang configuration file.
 
-## `lint`
-
-The lint command lints the translation with the configured [lint rules](https://inlang.com/c/lint-rules), for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules).
-
-```sh
-npx @inlang/cli lint
-```
 
 **Options**
 
@@ -186,49 +168,19 @@ The translate command has the following options:
 
 However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules) as a starter template.
 
-## `open`
 
-The open command opens parts of the Inlang infrastructure in your default browser.
+## `plugin`
 
-### `open editor`
+The plugin command is used to interact with the Inlang module. It allows to initialize a new module or run the modules build commands.
 
-The editor command opens the Inlang editor for the current repository.
+### `plugin build`
 
-To open the Inlang editor, run the following command:
+If you are developing an inlang module, the `plugin build` command builds your Inlang module for development & in production.
 
-```sh
-npx @inlang/cli open editor
-```
-
-This command retrieves the remote URL of the repository and constructs the URL for the Inlang editor by appending the GitHub user and repository to https://fink.inlang.com/. The editor will be opened in your default browser.
-
-## `module`
-
-The module command is used to interact with the Inlang module. It allows to initialize a new module or run the modules build commands.
-
-### `module init`
-
-The `module init` command initialize a new Inlang module in the current directory. This works only if the current directory is empty, so make sure to create a new folder.
-
-To initialize a new module, run the following command:
+To build a plugin, run the following command:
 
 ```sh
-npx @inlang/cli module init
-```
-
-**Options**
-
-The init command has the following options:
-`--type <type>`: The module type. Currently, `lintRule` or `plugin` is supported.
-
-### `module build`
-
-If you are developing an inlang module, the `module build` command builds your Inlang module for development & in production.
-
-To build a module, run the following command:
-
-```sh
-npx @inlang/cli module build --entry ./path/to/index.ts --outdir ./path/to/dist
+npx @inlang/cli plugin build --entry ./path/to/index.ts --outdir ./path/to/dist
 ```
 
 **Options**
@@ -245,8 +197,4 @@ If something isn't working as expected or you are getting errors, make sure to r
 You can always get the latest version by executing `npx @inlang/cli@latest`.
 
 If the error persists, [please create an issue](https://github.com/opral/monorepo/issues/new/choose) – we're happy to help.
-
-# Pricing 
-
-<doc-pricing></doc-pricing>
 

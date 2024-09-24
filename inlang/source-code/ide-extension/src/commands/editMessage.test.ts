@@ -4,8 +4,8 @@ import { editMessageCommand } from "./editMessage.js" // Adjust the import path 
 import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { CONFIGURATION } from "../configuration.js"
-import { selectBundleNested } from "@inlang/sdk2"
 import { getPatternFromString, getStringFromPattern } from "../utilities/messages/query.js"
+import { getSelectedBundleByBundleIdOrAlias } from "../utilities/helper.js" // Import the function to be mocked
 
 vi.mock("vscode", () => ({
 	commands: {
@@ -25,10 +25,6 @@ vi.mock("../utilities/messages/msg.js", () => ({
 	msg: vi.fn(),
 }))
 
-vi.mock("@inlang/sdk2", () => ({
-	selectBundleNested: vi.fn(),
-}))
-
 vi.mock("../configuration.js", () => ({
 	CONFIGURATION: {
 		EVENTS: {
@@ -40,6 +36,11 @@ vi.mock("../configuration.js", () => ({
 vi.mock("../utilities/messages/query.js", () => ({
 	getPatternFromString: vi.fn(),
 	getStringFromPattern: vi.fn(),
+}))
+
+// Mock the helper module
+vi.mock("../utilities/helper.js", () => ({
+	getSelectedBundleByBundleIdOrAlias: vi.fn(),
 }))
 
 describe("editMessageCommand", () => {
@@ -56,11 +57,8 @@ describe("editMessageCommand", () => {
 				},
 			},
 		})
-		// @ts-expect-error
-		vi.mocked(selectBundleNested).mockReturnValueOnce({
-			where: vi.fn().mockReturnThis(),
-			executeTakeFirst: vi.fn().mockResolvedValueOnce(undefined),
-		})
+
+		vi.mocked(getSelectedBundleByBundleIdOrAlias).mockResolvedValueOnce(undefined)
 
 		await editMessageCommand.callback({ bundleId: "testBundle", locale: "en" })
 
@@ -68,7 +66,7 @@ describe("editMessageCommand", () => {
 	})
 
 	it("should show a message if the message is not found", async () => {
-		const mockBundle = { id: "testBundle", messages: [] }
+		const mockBundle = { id: "testBundle", declarations: [], messages: [] }
 
 		vi.mocked(state).mockReturnValue({
 			project: {
@@ -79,11 +77,7 @@ describe("editMessageCommand", () => {
 			},
 		})
 
-		// @ts-expect-error
-		vi.mocked(selectBundleNested).mockReturnValueOnce({
-			where: vi.fn().mockReturnThis(),
-			executeTakeFirst: vi.fn().mockResolvedValueOnce(mockBundle),
-		})
+		vi.mocked(getSelectedBundleByBundleIdOrAlias).mockResolvedValueOnce(mockBundle)
 
 		await editMessageCommand.callback({ bundleId: "testBundle", locale: "en" })
 
@@ -114,10 +108,7 @@ describe("editMessageCommand", () => {
 		})
 
 		// @ts-expect-error
-		vi.mocked(selectBundleNested).mockReturnValueOnce({
-			where: vi.fn().mockReturnThis(),
-			executeTakeFirst: vi.fn().mockResolvedValueOnce(mockBundle),
-		})
+		vi.mocked(getSelectedBundleByBundleIdOrAlias).mockResolvedValueOnce(mockBundle)
 
 		await editMessageCommand.callback({ bundleId: "testBundle", locale: "en" })
 
@@ -134,7 +125,13 @@ describe("editMessageCommand", () => {
 					variants: [
 						{
 							id: "testVariant",
-							match: { locale: "en" },
+							matches: [
+								{
+									type: "match",
+									name: "locale",
+									value: { type: "literal", value: "en" },
+								},
+							],
 							pattern: "mock-pattern",
 						},
 					],
@@ -154,10 +151,7 @@ describe("editMessageCommand", () => {
 		})
 
 		// @ts-expect-error
-		vi.mocked(selectBundleNested).mockReturnValueOnce({
-			where: vi.fn().mockReturnThis(),
-			executeTakeFirst: vi.fn().mockResolvedValueOnce(mockBundle),
-		})
+		vi.mocked(getSelectedBundleByBundleIdOrAlias).mockResolvedValueOnce(mockBundle)
 
 		vi.mocked(window.showInputBox).mockResolvedValueOnce(undefined)
 
@@ -187,7 +181,7 @@ describe("editMessageCommand", () => {
 									value: "Current content",
 								},
 							],
-							match: { locale: "en" },
+							matches: [],
 						},
 					],
 				},
@@ -195,10 +189,7 @@ describe("editMessageCommand", () => {
 		}
 
 		// @ts-expect-error
-		vi.mocked(selectBundleNested).mockReturnValue({
-			where: vi.fn().mockReturnThis(),
-			executeTakeFirst: vi.fn().mockResolvedValue(mockBundle),
-		})
+		vi.mocked(getSelectedBundleByBundleIdOrAlias).mockResolvedValue(mockBundle)
 
 		const mockTransaction = {
 			execute: vi.fn().mockResolvedValue({}),
@@ -245,7 +236,7 @@ describe("editMessageCommand", () => {
 					variants: [
 						{
 							id: "testVariant",
-							match: { locale: "en" },
+							matches: [],
 							pattern: "mock-pattern",
 						},
 					],
@@ -269,10 +260,7 @@ describe("editMessageCommand", () => {
 		})
 
 		// @ts-expect-error
-		vi.mocked(selectBundleNested).mockReturnValue({
-			where: vi.fn().mockReturnThis(),
-			executeTakeFirst: vi.fn().mockResolvedValue(mockBundle),
-		})
+		vi.mocked(getSelectedBundleByBundleIdOrAlias).mockResolvedValue(mockBundle)
 		vi.mocked(window.showInputBox).mockResolvedValue("Updated content")
 
 		await editMessageCommand.callback({ bundleId: mockBundle.id, locale: "en" })

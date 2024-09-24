@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { createComponent } from "@lit/react";
 
-import { InlangBundle as LitInlangBundle } from "@inlang/bundle-component";
+import {
+	ChangeEventDetail,
+	InlangBundle as LitInlangBundle,
+} from "@inlang/bundle-component";
 import { InlangMessage as LitInlangMessage } from "@inlang/bundle-component";
 import { InlangVariant as LitInlangVariant } from "@inlang/bundle-component";
 import { InlangPatternEditor as LitInlangPatternEditor } from "@inlang/bundle-component";
@@ -9,14 +12,17 @@ import { InlangAddSelector as LitInlangAddSelector } from "@inlang/bundle-compon
 
 import React, { useState } from "react";
 import { useAtom } from "jotai";
-import { pendingChangesAtom, projectAtom, settingsAtom } from "../state.ts";
+import {
+	filteredLocalesAtom,
+	pendingChangesAtom,
+	projectAtom,
+	settingsAtom,
+} from "../state.ts";
 import {
 	BundleNested,
-	createMessage,
-	createVariant,
 	Message,
-	MessageNested,
 	ProjectSettings,
+	uuidv4,
 	Variant,
 } from "@inlang/sdk2";
 import {
@@ -77,6 +83,7 @@ const InlangBundle = (props: {
 	const [project] = useAtom(projectAtom);
 	const [pendingChanges] = useAtom(pendingChangesAtom);
 	const [settings] = useAtom(settingsAtom);
+	const [filteredLocales] = useAtom(filteredLocalesAtom);
 
 	const [patternEditorFocused, setPatternEditorFocused] = useState<
 		string | undefined
@@ -85,68 +92,42 @@ const InlangBundle = (props: {
 		string | undefined
 	>(undefined);
 
-	const onMesageInsert = async (message: Message) => {
-		if (project) {
-			await project.db
-				.insertInto("message")
-				.values(message)
+	const handleChangeEvent = (e: Event) => {
+		const change = (e as CustomEvent).detail as ChangeEventDetail;
+		if (change.newData) {
+			project?.db
+				.insertInto(change.entity)
+				.values({
+					...change.newData,
+					// @ts-expect-error - we need to remove the nesting
+					messages: undefined,
+					variants: undefined,
+				})
+				.onConflict((oc) =>
+					oc.column("id").doUpdateSet({
+						...change.newData,
+						// @ts-expect-error - we need to remove the nesting
+						messages: undefined,
+						variants: undefined,
+					})
+				)
 				.execute();
-		}
-	};
-	const onMesageUpdate = async (message: Message) => {
-		if (project) {
-			await project.db
-				.updateTable("message")
-				.set(message)
-				.where("message.id", "=", message.id)
+		} else {
+			project?.db
+				.deleteFrom(change.entity)
+				.where("id", "=", change.entityId)
 				.execute();
-		}
-	};
-	const onVariantInsert = async (variant: Variant) => {
-		if (project) {
-			await project.db
-				.insertInto("variant")
-				.values(variant)
-				.execute();
-		}
-	};
-	const onVariantUpdate = async (variant: Variant) => {
-		if (project) {
-			await project.db
-				.updateTable("variant")
-				.set(variant)
-				.where("variant.id", "=", variant.id)
-				.execute();
-		}
-	};
-	const onVariantDelete = async (variant: Variant) => {
-		if (project) {
-			await project.db
-				.deleteFrom("variant")
-				.where("variant.id", "=", variant.id)
-				.executeTakeFirst();
 		}
 	};
 
-	const handleChange = (e: Event) => {
-		const data = (e as CustomEvent).detail.argument;
-		switch (data.type) {
-			case "Message":
-				if (data.operation === "create") {
-					onMesageInsert(data.newData as Message);
-				} else if (data.operation === "update") {
-					onMesageUpdate(data.newData as Message);
-				}
-				break;
-			case "Variant":
-				if (data.operation === "create") {
-					onVariantInsert(data.newData as Variant);
-				} else if (data.operation === "update") {
-					onVariantUpdate(data.newData as Variant);
-				} else if (data.operation === "delete") {
-					onVariantDelete(data.newData as Variant);
-				}
-				break;
+	const visibleLocales = () => {
+		if (filteredLocales.length === 0) {
+			return settings.locales; // nothing selected -> show all languages
+		} else {
+			return settings?.locales.filter(
+				(locale) =>
+					filteredLocales.includes(locale) || locale === settings.baseLocale
+			); // show only selected languages + base language
 		}
 	};
 
@@ -154,12 +135,8 @@ const InlangBundle = (props: {
 		<>
 			{props.bundle && (
 				<div className="relative">
-					<ReactInlangBundle
-						bundle={props.bundle}
-						messages={props.bundle.messages}
-						change={handleChange}
-					>
-						{settings.locales.map(
+					<ReactInlangBundle bundle={props.bundle} change={handleChangeEvent}>
+						{visibleLocales().map(
 							(locale: ProjectSettings["locales"][number]) => {
 								const message = props.bundle.messages.find(
 									(message) => message.locale === locale
@@ -170,6 +147,7 @@ const InlangBundle = (props: {
 											slot="message"
 											key={message.id}
 											message={message}
+											variants={message.variants}
 											settings={settings}
 										>
 											{message.variants.map((variant) => {
@@ -268,7 +246,10 @@ const InlangBundle = (props: {
 																		message.variants.length > 1 && (
 																			<SlMenuItem
 																				onClick={() => {
-																					onVariantDelete(variant as Variant);
+																					project?.db
+																						.deleteFrom("variant")
+																						.where("id", "=", variant.id)
+																						.execute();
 																				}}
 																			>
 																				Delete
@@ -345,11 +326,12 @@ const InlangBundle = (props: {
 										</ReactInlangMessage>
 									);
 								} else {
-									const message = createMessage({
+									const message: Message = {
+										id: uuidv4(),
+										selectors: [],
+										locale,
 										bundleId: props.bundle.id,
-										locale: locale,
-										text: "",
-									});
+									};
 									return (
 										<ReactInlangMessage
 											slot="message"
@@ -368,7 +350,9 @@ const InlangBundle = (props: {
 
 														await project.db
 															.insertInto("variant")
-															.values(createVariant({ messageId: message.id }))
+															.values({
+																messageId: message.id!,
+															})
 															.execute();
 													}
 												}}
@@ -398,7 +382,7 @@ const InlangBundle = (props: {
 						label="Add selector"
 					>
 						<ReactInlangAddSelector
-							change={handleChange}
+							change={handleChangeEvent}
 							onSubmit={() => {
 								const dialog = document.getElementById(
 									`selector-button-dialog-${props.bundle.id}`
@@ -406,8 +390,8 @@ const InlangBundle = (props: {
 								) as SlDialog;
 								dialog.hide();
 							}}
-							// @ts-ignore
-							messages={props.bundle.messages as MessageNested[]}
+							bundle={props.bundle}
+							// message={message}
 						/>
 					</SlDialog>
 				</div>

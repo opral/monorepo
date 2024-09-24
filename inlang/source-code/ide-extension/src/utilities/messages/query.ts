@@ -12,10 +12,10 @@ export const getStringFromPattern = (args: {
 				return (element as Text).value
 			} else if (element.type === "expression") {
 				const expression = element as Expression
-				if (expression.arg.type === "variable") {
+				if (expression.arg.type === "variable-reference") {
 					return `{${expression.arg.name}}` // Handle VariableReference within Expression
 				} else if (expression.arg.type === "literal") {
-					return expression.arg.name // Handle Literal within Expression
+					return expression.arg.value // Handle Literal within Expression
 				} else {
 					return msg(
 						`Unknown expression type in variant with message id ${args.messageId} for locale ${args.locale}.`
@@ -38,7 +38,7 @@ export const getPatternFromString = (args: { string: string }): Pattern => {
 				return {
 					type: "expression" as const,
 					arg: {
-						type: "variable" as const,
+						type: "variable-reference" as const,
 						name: element.slice(1, -1),
 					},
 				} as Expression // Return as an Expression with a VariableReference

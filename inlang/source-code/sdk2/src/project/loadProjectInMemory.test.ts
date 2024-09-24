@@ -14,7 +14,7 @@ test("roundtrip should succeed", async () => {
 	const insertedBundle = await project1.db
 		.insertInto("bundle")
 		.values({
-			alias: { default: "bundle1" },
+			id: "mock245",
 		})
 		.returning("id")
 		.executeTakeFirstOrThrow();

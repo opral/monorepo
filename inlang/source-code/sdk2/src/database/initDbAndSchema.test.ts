@@ -17,7 +17,7 @@ test("bundle default values", async () => {
 		.executeTakeFirstOrThrow();
 
 	expect(isHumanId(bundle.id)).toBe(true);
-	expect(bundle.alias).toStrictEqual({});
+	expect(bundle.declarations).toStrictEqual([]);
 });
 
 test("message default values", async () => {
@@ -42,7 +42,6 @@ test("message default values", async () => {
 		.executeTakeFirstOrThrow();
 
 	expect(isUuid(message.id)).toBe(true);
-	expect(message.declarations).toStrictEqual([]);
 	expect(message.selectors).toStrictEqual([]);
 });
 
@@ -76,7 +75,7 @@ test("variant default values", async () => {
 		.executeTakeFirstOrThrow();
 
 	expect(isUuid(variant.id)).toBe(true);
-	expect(variant.match).toStrictEqual({});
+	expect(variant.matches).toStrictEqual([]);
 	expect(variant.pattern).toStrictEqual([]);
 });
 
@@ -89,11 +88,38 @@ test("it should handle json serialization and parsing for bundles", async () => 
 	const bundle = await db
 		.insertInto("bundle")
 		.values({
-			alias: { mock: "mock" },
+			declarations: [
+				{
+					type: "input-variable",
+					name: "mock",
+				},
+			],
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	expect(bundle.alias).toEqual({ mock: "mock" });
+	expect(bundle.declarations).toStrictEqual([
+		{
+			type: "input-variable",
+			name: "mock",
+		},
+	]);
 });
 
+// https://github.com/opral/inlang-sdk/issues/209
+test.todo("it should enable foreign key constraints", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	expect(() =>
+		db
+			.insertInto("message")
+			.values({
+				bundleId: "non-existent",
+				locale: "en",
+			})
+			.execute()
+	).rejects.toThrow();
+});

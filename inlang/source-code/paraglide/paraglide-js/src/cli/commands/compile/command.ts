@@ -1,12 +1,11 @@
 import { Command } from "commander"
-import nodeFsPromises from "node:fs/promises"
+import fs from "node:fs"
 import { resolve } from "node:path"
 import { Logger } from "~/services/logger/index.js"
 import { runCompiler } from "~/cli/steps/run-compiler.js"
 import { DEFAULT_OUTDIR } from "~/cli/defaults.js"
 import { classifyProjectErrors } from "~/services/error-handling.js"
 import { loadProjectFromDirectoryInMemory } from "@inlang/sdk2"
-// import icu1Importer from "@inlang/plugin-icu1"
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -26,7 +25,7 @@ export const compileCommand = new Command()
 
 		const project = await loadProjectFromDirectoryInMemory({
 			path,
-			fs: nodeFsPromises,
+			fs,
 			// providePlugins: [icu1Importer],
 		})
 
@@ -52,7 +51,7 @@ export const compileCommand = new Command()
 
 		await runCompiler({
 			project,
-			fs: nodeFsPromises,
+			fs: fs.promises,
 			outdir: options.outdir,
 		})
 

@@ -1,4 +1,5 @@
 {
+	"plugins": ["tree-shaking"],
 	"overrides": [
 		{
 			"files": ["**/*.ts"],

@@ -8,12 +8,12 @@ import type { Pattern } from "@inlang/sdk2"
  * @returns The pattern of the text.
  *
  * @example
- * stringToPattern({ text: "Hello {{name}}" }) -> [{ value: "Hello" }, { type: "expression", arg: { type: "variable", name: "name" } }]
+ * stringToPattern({ text: "Hello {name}" }) -> [{ value: "Hello" }, { type: "expression", arg: { type: "variable-reference", name: "name" } }]
  */
 
 const stringToPattern = (props: { text: string }): Pattern => {
 	const pattern: Pattern = []
-	const regex = /{{(.*?)}}/g
+	const regex = /{(.*?)}/g
 	let lastIndex = 0
 	let match
 
@@ -30,7 +30,7 @@ const stringToPattern = (props: { text: string }): Pattern => {
 			pattern.push({
 				type: "expression",
 				arg: {
-					type: "variable",
+					type: "variable-reference",
 					name: match[1],
 				},
 			})

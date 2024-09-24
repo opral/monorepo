@@ -23,9 +23,7 @@ test("it should be able to delete", async () => {
 			meta: { id: "mock" },
 			value: {
 				id: "mock",
-				alias: {
-					foo: "mock-alias",
-				},
+				declarations: [],
 			} satisfies Bundle,
 		},
 		{
@@ -40,9 +38,7 @@ test("it should be able to delete", async () => {
 			},
 			value: {
 				id: "mock",
-				alias: {
-					foo: "mock-alias-updated",
-				},
+				declarations: [],
 			} satisfies Bundle,
 		},
 		{
@@ -63,9 +59,6 @@ test("it should be able to delete", async () => {
 		.insertInto("bundle")
 		.values({
 			id: "mock",
-			alias: {
-				foo: "mock-alias",
-			},
 		})
 		.execute();
 
@@ -106,9 +99,7 @@ test("it should be able to upsert (insert & update)", async () => {
 			meta: { id: "mock" },
 			value: {
 				id: "mock",
-				alias: {
-					foo: "mock-alias",
-				},
+				declarations: [],
 			} satisfies Bundle,
 		},
 		{
@@ -123,9 +114,7 @@ test("it should be able to upsert (insert & update)", async () => {
 			},
 			value: {
 				id: "mock",
-				alias: {
-					foo: "mock-alias-updated",
-				},
+				declarations: [],
 			} satisfies Bundle,
 		},
 	];
@@ -134,9 +123,6 @@ test("it should be able to upsert (insert & update)", async () => {
 		.insertInto("bundle")
 		.values({
 			id: "mock",
-			alias: {
-				foo: "mock-alias",
-			},
 		})
 		.execute();
 
@@ -159,5 +145,4 @@ test("it should be able to upsert (insert & update)", async () => {
 	const bundles = await db.selectFrom("bundle").selectAll().execute();
 
 	expect(bundles).toHaveLength(1);
-	expect(bundles[0]?.alias).toEqual({ foo: "mock-alias-updated" });
 });

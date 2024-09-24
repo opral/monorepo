@@ -1,7 +1,7 @@
 import "./inlang-pattern-editor.ts"
 import type { Meta, StoryObj } from "@storybook/web-components"
 import { html } from "lit"
-import { pluralBundle } from "@inlang/sdk2"
+import { examplePlural } from "../../mock/pluralBundle.ts"
 
 const meta: Meta = {
 	component: "inlang-pattern-editor",
@@ -16,8 +16,8 @@ export default meta
 export const Example: StoryObj = {
 	render: () => {
 		return html`<inlang-pattern-editor
-			.variant=${pluralBundle.messages[1].variants[0]}
-			@change=${(e) => console.info(e.detail.argument)}
+			.variant=${examplePlural.variants[0]}
+			@change=${(e) => console.info(e.detail)}
 			@pattern-editor-focus=${(e) => console.info("focus", e.detail)}
 			@pattern-editor-blur=${(e) => console.info("blur", e.detail)}
 		></inlang-pattern-editor>`

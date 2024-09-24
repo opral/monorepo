@@ -1,4 +1,4 @@
-import { getLeafChange, type Change, type LixPlugin } from "@lix-js/sdk";
+import { getLeafChange, type LixPlugin } from "@lix-js/sdk";
 import { contentFromDatabase, loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
 
@@ -18,19 +18,45 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	const sqlite = await loadDatabaseInMemory(file.data);
 	const db = initDb({ sqlite });
 
-	const leafChanges = new Set(
-		await Promise.all(
-			changes.map(async (change) => {
-				const leafChange = await getLeafChange({ change, lix });
-				// enable string comparison and avoid duplicates
-				return JSON.stringify(leafChange);
-			})
-		)
-	);
+	// the award for the most inefficient deduplication goes to...
+	const leafChanges = [
+		...new Set(
+			await Promise.all(
+				changes.map(async (change) => {
+					const leafChange = await getLeafChange({ change, lix });
+					// enable string comparison to avoid duplicates
+					return JSON.stringify(leafChange);
+				})
+			)
+		),
+	].map((v) => JSON.parse(v));
 
-	for (const unparsedLeafChange of leafChanges) {
-		const leafChange: Change = JSON.parse(unparsedLeafChange);
+	// changes need to be applied in order of foreign keys to avoid constraint violations
+	// 1. bundles
+	// 2. messages
+	// 3. variants
+	const applyOrder: Record<string, number> = {
+		bundle: 1,
+		message: 2,
+		variant: 3,
+	};
 
+	// future optimization potential here but sorting in one go
+	const orderedLeafChanges = [...leafChanges].sort((a, b) => {
+		const orderA = applyOrder[a.type];
+		const orderB = applyOrder[b.type];
+
+		if (orderA === undefined || orderB === undefined) {
+			throw new Error(
+				`Received an unknown entity type: ${a.type} && ${
+					b.type
+				}. Expected one of: ${Object.keys(applyOrder)}`
+			);
+		}
+
+		return orderA - orderB;
+	});
+	for (const leafChange of orderedLeafChanges) {
 		// deletion
 		if (leafChange.value === undefined) {
 			await db
