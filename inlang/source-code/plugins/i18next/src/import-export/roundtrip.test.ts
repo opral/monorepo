@@ -297,27 +297,46 @@ test("keyPluralMultipleEgArabic", async () => {
 })
 
 test("keyWithObjectValue", async () => {
-	const result = await runImportFiles({
+	const imported = await runImportFiles({
 		keyWithObjectValue: {
 			valueA: "return this with valueB",
 			valueB: "more text",
 		},
 	})
-	expect(await runExportFiles(result)).toStrictEqual({
+	expect(await runExportFiles(imported)).toStrictEqual({
 		keyWithObjectValue: {
 			valueA: "return this with valueB",
 			valueB: "more text",
 		},
 	})
 
-	const valueA = result.bundles.find((bundle) => bundle.id === "keyWithObjectValue.valueA")
-	const valueB = result.bundles.find((bundle) => bundle.id === "keyWithObjectValue.valueB")
+	const valueA = imported.bundles.find((bundle) => bundle.id === "keyWithObjectValue.valueA")
+	const valueB = imported.bundles.find((bundle) => bundle.id === "keyWithObjectValue.valueB")
 
 	expect(valueA?.messages[0]?.variants[0]?.pattern).toStrictEqual([
 		{ type: "text", value: "return this with valueB" },
 	] satisfies Pattern)
 	expect(valueB?.messages[0]?.variants[0]?.pattern).toStrictEqual([
 		{ type: "text", value: "more text" },
+	] satisfies Pattern)
+})
+
+test("keyWithArrayValue", async () => {
+	const imported = await runImportFiles({
+		keyWithArrayValue: ["multiple", "things"],
+	})
+	expect(await runExportFiles(imported)).toStrictEqual({
+		keyWithArrayValue: ["multiple", "things"],
+	})
+
+	const bundle1 = imported.bundles.find((bundle) => bundle.id === "keyWithArrayValue.0")
+	const bundle2 = imported.bundles.find((bundle) => bundle.id === "keyWithArrayValue.1")
+
+	expect(bundle1?.messages[0]?.variants[0]?.pattern).toStrictEqual([
+		{ type: "text", value: "multiple" },
+	] satisfies Pattern)
+	expect(bundle2?.messages[0]?.variants[0]?.pattern).toStrictEqual([
+		{ type: "text", value: "things" },
 	] satisfies Pattern)
 })
 

@@ -55,7 +55,7 @@ function parseFile(args: { namespace?: string; locale: string; content: ArrayBuf
 	messages: Message[]
 	variants: Variant[]
 } {
-	const resource: Record<string, string | string[]> = flatten(
+	const resource: Record<string, string> = flatten(
 		JSON.parse(new TextDecoder().decode(args.content))
 	)
 
@@ -82,7 +82,7 @@ function parseFile(args: { namespace?: string; locale: string; content: ArrayBuf
 function parseMessage(args: {
 	namespace?: string
 	key: string
-	value: string | string[]
+	value: string
 	locale: string
 	resource: Record<string, any>
 }): { bundle: Bundle; message: Message; variant: Variant } {
@@ -243,22 +243,12 @@ function parseMessage(args: {
 	return { bundle, message, variant }
 }
 
-function parsePattern(value: string | string[]): {
+function parsePattern(value: string): {
 	variableReferences: VariableReference[]
 	result: Pattern
 } {
 	const result: Variant["pattern"] = []
 	const variableReferences: VariableReference[] = []
-
-	if (Array.isArray(value)) {
-		// i18next allows arrays as values
-		// https://www.i18next.com/translation-function/objects-and-arrays#arrays
-		//
-		// odd choice, hard to support in an e2e localization workflow. hence,
-		// we're just going to convert arrays to strings, assuming that a tiny
-		// minority of users are using arrays as values and having them as string is fine
-		value = value.toString()
-	}
 
 	// splits a pattern like "Hello {{name}}!" into an array of parts
 	// "hello {{name}}, how are you?" -> ["hello ", "{{name}}", ", how are you?"]
