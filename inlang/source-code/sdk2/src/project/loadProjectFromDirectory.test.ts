@@ -617,7 +617,7 @@ test("errors from importing translation files that are ENOENT should not be show
 // it happens often that a resource file doesn't exist yet on import
 test("it should pass toBeImportedMetadata on import", async () => {
 	const mock = {
-		"/en.json": JSON.stringify({}),
+		"/foo/en.json": JSON.stringify({}),
 		"/project.inlang/settings.json": JSON.stringify({
 			baseLocale: "en",
 			locales: ["en", "de"],
@@ -631,7 +631,7 @@ test("it should pass toBeImportedMetadata on import", async () => {
 		toBeImportedFiles: async () => {
 			return [
 				{
-					path: "/en.json",
+					path: "/foo/en.json",
 					locale: "mock",
 					metadata: {
 						foo: "bar",
@@ -639,7 +639,7 @@ test("it should pass toBeImportedMetadata on import", async () => {
 				},
 			];
 		},
-		importFiles: async ({files}) => {
+		importFiles: async () => {
 			return { bundles: [] };
 		},
 	};
@@ -659,6 +659,7 @@ test("it should pass toBeImportedMetadata on import", async () => {
 		expect.objectContaining({
 			files: [
 				expect.objectContaining({
+					name: "en.json",
 					toBeImportedFilesMetadata: {
 						foo: "bar",
 					},

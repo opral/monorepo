@@ -55,7 +55,7 @@ export async function saveProjectToDirectory(args: {
 				settings,
 			});
 			for (const file of files) {
-				const p = absolutePathFromProject(args.path, file.path);
+				const p = absolutePathFromProject(args.path, file.name);
 				const dirname = path.dirname(p);
 				if ((await args.fs.stat(dirname)).isDirectory() === false) {
 					await args.fs.mkdir(dirname, { recursive: true });
