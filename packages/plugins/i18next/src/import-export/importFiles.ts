@@ -92,15 +92,15 @@ function parseMessage(args: {
 	}
 
 	const message: Message = {
-		id: keyWithoutContextOrPlurals,
+		id: "",
 		bundleId: keyWithoutContextOrPlurals,
 		selectors: [],
 		locale: args.locale,
 	}
 
 	const variant: Variant = {
-		id: keyWithoutContextOrPlurals,
-		messageId: keyWithoutContextOrPlurals,
+		id: "",
+		messageId: "",
 		matches: [],
 		pattern: pattern.result,
 	}
@@ -219,6 +219,12 @@ function parseMessage(args: {
 	}
 
 	bundle.declarations = removeDuplicates(bundle.declarations)
+
+	// i18next suffixes keys with context or plurals
+	// "friend_female_one" -> "friend"
+	message.id = `${bundle.id};;locale=${args.locale};;`
+	variant.id = `${message.id};;match=${variant.matches.join(",")};;`
+	variant.messageId = message.id
 
 	return { bundle, message, variant }
 }
