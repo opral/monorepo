@@ -1,14 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { atom } from "jotai";
-import {
-	loadProjectInMemory,
-	ProjectSettings,
-	selectBundleNested,
-} from "@inlang/sdk2";
+import { loadProjectInMemory, ProjectSettings } from "@inlang/sdk2";
 import { atomWithStorage } from "jotai/utils";
 import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { Change, isInSimulatedCurrentBranch } from "@inlang/sdk2";
 import hasMissingTranslations from "./helper/hasMissingTranslations.ts";
+import getSortedBundles from "./helper/sortBundles.ts";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -83,7 +80,7 @@ export const bundlesNestedAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];
-	return await selectBundleNested(project.db).execute();
+	return await getSortedBundles(project);
 });
 
 export const filteredLocalesAtom = atom<string[]>([]);
@@ -108,13 +105,16 @@ export const bundlesNestedFilteredAtom = atom(async (get) => {
 	}
 
 	// Filter bundles by query, only considering relevant locales
-	return bundles.filter((bundle) =>
-		bundle.messages.some(
-			(message) =>
-				relevantLocales.includes(message.locale) &&
-				JSON.stringify(message).toLowerCase().includes(query)
-		)
-	);
+	if (query !== "") {
+		bundles = bundles.filter((bundle) => {
+			return bundle.messages.some(
+				(message) =>
+					relevantLocales.includes(message.locale) &&
+					JSON.stringify(message).toLowerCase().includes(query)
+			);
+		});
+	}
+	return bundles;
 });
 
 export const committedChangesAtom = atom(async (get) => {
