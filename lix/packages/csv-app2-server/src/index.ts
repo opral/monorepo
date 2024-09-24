@@ -1,9 +1,19 @@
 import { serve } from "@hono/node-server";
 import { openLixInMemory, merge } from "@lix-js/sdk";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { plugin } from "@lix-js/csv-app2/lix-csv-plugin";
 
 export const app = new Hono();
+
+// Apply CORS middleware globally
+app.use('*', cors({
+  origin: '*', 
+  allowMethods: ['GET', 'POST', 'OPTIONS'], 
+  allowHeaders: ['Content-Type', 'Authorization'], 
+}));
+
+
 const lixFiles = new Map<string, Blob>();
 
 // A Map to track locks for each ID to ensure synchronization
