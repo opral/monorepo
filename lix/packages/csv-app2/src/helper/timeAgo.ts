@@ -22,7 +22,18 @@ function timeAgo(dateString: string): string {
 	for (const [unit, secondsInUnit] of Object.entries(intervals)) {
 		const interval = Math.floor(secondsAgo / secondsInUnit);
 		if (interval >= 1) {
-			return `${interval} ${unit}${interval > 1 ? "s" : ""} ago`;
+			if (unit === "year") {
+				// If the interval is greater than or equal to 1 year, format the date as "DD, Month YYYY"
+				const formattedDate = pastDate.toLocaleDateString("en", {
+					day: "numeric",
+					month: "long",
+					year: "numeric",
+				});
+				return formattedDate;
+			} else {
+				// For other intervals, return the time ago string
+				return `${interval} ${unit}${interval > 1 ? "s" : ""} ago`;
+			}
 		}
 	}
 

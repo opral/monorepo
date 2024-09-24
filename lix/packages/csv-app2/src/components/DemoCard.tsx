@@ -1,5 +1,5 @@
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
-import { newLixFile, openLixInMemory } from "@lix-js/sdk";
+import { Commit, newLixFile, openLixInMemory } from "@lix-js/sdk";
 import { plugin } from "./../csv-plugin.js";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -25,7 +25,9 @@ export const DemoCard = () => {
 			providePlugins: [plugin],
 		});
 
-		const csvContent = await fetch("/cap-table.csv").then((res) => res.text());
+		const csvContent = await fetch("/cap-table/latestFile.csv").then((res) =>
+			res.text()
+		);
 
 		if (newProject) {
 			newProject.currentAuthor.set("Demo User");
@@ -44,38 +46,45 @@ export const DemoCard = () => {
 				])
 				.execute();
 		}
-		setTimeout(async () => {
-			await newProject?.commit({
-				description: "Inital demo imported",
-			});
 
-			const csvContent2 = await fetch("/cap-table02.csv").then((res) =>
-				res.text()
-			);
-
-			if (newProject) {
+		// add commits
+		const rawCommits = await fetch("/cap-table/commits.json").then((res) =>
+			res.text()
+		);
+		if (!rawCommits) return;
+		const commits: Commit[] = JSON.parse(rawCommits);
+		if (commits) {
+			for (const commit of commits) {
 				await newProject.db
-					.updateTable("file")
-					.set("data", await new Blob([csvContent2]).arrayBuffer())
-					.where("path", "=", "/data.csv")
+					.insertInto("commit")
+					.values([{ ...commit }])
 					.execute();
 			}
+		}
 
-			setTimeout(async () => {
-				await newProject?.commit({
-					description: "Update July 2024",
-				});
+		// add changes
+		const rawChanges = await fetch("/cap-table/changes.json").then((res) =>
+			res.text()
+		);
+		if (!rawChanges) return;
+		const changes = JSON.parse(rawChanges);
+		if (changes) {
+			for (const change of changes) {
+				await newProject.db
+					.insertInto("change")
+					.values([{ ...change }])
+					.execute();
+			}
+		}
 
-				const file = await newProject.toBlob();
-				await writable.write(file);
-				await writable.close();
+		const file = await newProject.toBlob();
+		await writable.write(file);
+		await writable.close();
 
-				setSelectedProjectPath("cap-table.lix");
-				setLoading(false);
+		setSelectedProjectPath("cap-table.lix");
+		setLoading(false);
 
-				navigate("/editor");
-			}, 1000);
-		}, 1000);
+		navigate("/editor");
 	};
 
 	return (
