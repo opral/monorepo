@@ -1,14 +1,22 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { createChangeEvent } from "../../../helper/event.js"
-import type { Bundle } from "@inlang/sdk2"
+import type { Bundle, Declaration } from "@inlang/sdk2"
 import { baseStyling } from "../../../styling/base.js"
 
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
+import SlCheckbox from "@shoelace-style/shoelace/dist/components/checkbox/checkbox.component.js"
+import SlSelect from "@shoelace-style/shoelace/dist/components/select/select.component.js"
+import SlOption from "@shoelace-style/shoelace/dist/components/option/option.component.js"
+import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
 
 if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)
 if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
+if (!customElements.get("sl-checkbox")) customElements.define("sl-checkbox", SlCheckbox)
+if (!customElements.get("sl-select")) customElements.define("sl-select", SlSelect)
+if (!customElements.get("sl-option")) customElements.define("sl-option", SlOption)
+if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
 
 @customElement("inlang-add-variable")
 export default class InlangAddVariable extends LitElement {
@@ -22,11 +30,11 @@ export default class InlangAddVariable extends LitElement {
 				justify-content: center;
 			}
 			.dropdown-container {
-				font-size: 13px;
+				font-size: 14px;
 				width: 240px;
 				background-color: var(--sl-panel-background-color);
 				border: 1px solid var(--sl-input-border-color);
-				padding: 12px;
+				padding: 12px 0;
 				border-radius: 6px;
 				display: flex;
 				flex-direction: column;
@@ -36,6 +44,14 @@ export default class InlangAddVariable extends LitElement {
 				display: flex;
 				flex-direction: column;
 				gap: 2px;
+				padding: 0 12px;
+			}
+			.dropdown-item.nested {
+				padding-left: 24px;
+			}
+			.dropdown-item.disable {
+				opacity: 0.5;
+				pointer-events: none;
 			}
 			.dropdown-header {
 				display: flex;
@@ -66,6 +82,38 @@ export default class InlangAddVariable extends LitElement {
 				flex-direction: column;
 				gap: 4px;
 			}
+			.separator {
+				height: 1px;
+				background-color: var(--sl-input-border-color);
+			}
+			sl-checkbox::part(form-control-help-text) {
+				font-size: 13px;
+				padding-top: 6px;
+				line-height: 1.3;
+				color: var(--sl-input-help-text-color);
+			}
+			sl-checkbox::part(base) {
+				font-size: 14px;
+			}
+			sl-input::part(input) {
+				height: 32px;
+				font-size: 14px;
+				padding-bottom: 2px;
+			}
+			sl-input::part(base) {
+				height: 32px;
+			}
+			sl-select::part(form-control-label) {
+				font-size: 14px;
+				padding-bottom: 4px;
+			}
+			sl-select::part(combobox) {
+				height: 32px;
+				min-height: 32px;
+			}
+			sl-select::part(display-input) {
+				font-size: 14px;
+			}
 		`,
 	]
 
@@ -74,21 +122,32 @@ export default class InlangAddVariable extends LitElement {
 
 	//state
 	@state()
-	private _newInput: string = ""
+	private _newVariable: string = ""
+
+	//state
+	@state()
+	private _localVariableDerivedFrom: Declaration | undefined = undefined
+
+	//state
+	@state()
+	private _isLocalVariable: boolean = false
+
+	override async firstUpdated() {
+		await this.updateComplete
+		if (this.bundle) {
+			this._localVariableDerivedFrom = this.bundle.declarations[0]
+			this._newVariable = ""
+			this._isLocalVariable = false
+		}
+	}
 
 	override render() {
 		return html`
 			<sl-dropdown
 				distance="-4"
 				class="dropdown"
-				@sl-show=${(e: CustomEvent) => {
-					const dropdown = this.shadowRoot?.querySelector("sl-dropdown")
-					if (dropdown && e.target === dropdown) {
-						const input: SlInput | undefined | null = this.shadowRoot?.querySelector("sl-input")
-						setTimeout(() => {
-							if (input) input.focus()
-						})
-					}
+				@sl-show=${() => {
+					this._localVariableDerivedFrom = this.bundle.declarations[0]
 				}}
 			>
 				<div slot="trigger" class="button-wrapper">
@@ -96,19 +155,96 @@ export default class InlangAddVariable extends LitElement {
 				</div>
 				<div class="dropdown-container">
 					<div class="dropdown-item">
-						<div class="dropdown-header">
-							<p class="dropdown-title">Add variable</p>
-						</div>
 						<sl-input
 							size="small"
-							value=${this._newInput}
+							value=${this._newVariable}
 							placeholder="Enter name"
 							@input=${(e: Event) => {
-								this._newInput = (e.target as HTMLInputElement).value
+								this._newVariable = (e.target as HTMLInputElement).value
 							}}
-							@keydown=${(e: KeyboardEvent) => {
-								if (e.key === "Enter") {
-									if (this._newInput && this._newInput.trim() !== "") {
+						>
+						</sl-input>
+					</div>
+					<div class="separator"></div>
+					<div
+						class=${this.bundle?.declarations && this.bundle?.declarations.length > 0
+							? "dropdown-item"
+							: "dropdown-item disable"}
+					>
+						<sl-checkbox
+							?checked=${this._isLocalVariable}
+							help-text=${this.bundle?.declarations && this.bundle?.declarations.length > 0
+								? "Set to true, if you want to derive a local variable from a input variable."
+								: "No input variables available."}
+							@sl-change=${(e: Event) => {
+								const target = e.target as HTMLInputElement
+								this._isLocalVariable = target.checked
+							}}
+							>local</sl-checkbox
+						>
+					</div>
+					${this._isLocalVariable
+						? html`<div class="dropdown-item">
+								<sl-select
+									label="Derive from"
+									value=${this._localVariableDerivedFrom?.name}
+									@sl-change=${(e: Event) => {
+										this._localVariableDerivedFrom = this.bundle.declarations.find(
+											(declaration) => declaration.name === (e.target as HTMLSelectElement).value
+										)
+									}}
+								>
+									${this.bundle.declarations.map((declaration) => {
+										return html`<sl-option value=${declaration.name}
+											>${declaration.name}</sl-option
+										>`
+									})}
+								</sl-select>
+						  </div>`
+						: ``}
+					${this._isLocalVariable
+						? html`<div class="dropdown-item nested">
+								<sl-checkbox checked disabled>plural</sl-checkbox>
+						  </div>`
+						: ``}
+					<div class="separator"></div>
+					<div class="dropdown-item">
+						<sl-button
+							variant="primary"
+							@click=${() => {
+								if (this._isLocalVariable && this._localVariableDerivedFrom) {
+									if (this._newVariable && this._newVariable.trim() !== "" && this.bundle) {
+										this.dispatchEvent(
+											createChangeEvent({
+												entityId: this.bundle.id,
+												entity: "bundle",
+												newData: {
+													...this.bundle,
+													declarations: [
+														...(this.bundle.declarations as Declaration[]),
+														{
+															type: "local-variable",
+															name: this._newVariable,
+															value: {
+																type: "expression",
+																arg: {
+																	type: "variable-reference",
+																	name: this._localVariableDerivedFrom.name,
+																},
+																annotation: {
+																	type: "function-reference",
+																	name: "plural",
+																	options: [],
+																},
+															},
+														} as Declaration,
+													],
+												},
+											})
+										)
+									}
+								} else {
+									if (this._newVariable && this._newVariable.trim() !== "" && this.bundle) {
 										this.dispatchEvent(
 											createChangeEvent({
 												entityId: this.bundle.id,
@@ -118,7 +254,7 @@ export default class InlangAddVariable extends LitElement {
 													declarations: [
 														...this.bundle.declarations,
 														{
-															name: this._newInput,
+															name: this._newVariable,
 															type: "input-variable",
 														},
 													],
@@ -126,39 +262,17 @@ export default class InlangAddVariable extends LitElement {
 											})
 										)
 									}
-
-									this._newInput = ""
-
-									const dropdown = this.shadowRoot?.querySelector(".dropdown") as SlDropdown
-									dropdown.hide()
 								}
+
+								this._newVariable = ""
+								this._isLocalVariable = false
+								this._localVariableDerivedFrom = undefined
+
+								const dropdown = this.shadowRoot?.querySelector(".dropdown") as SlDropdown
+								dropdown.hide()
 							}}
-							><svg
-								slot="suffix"
-								xmlns="http://www.w3.org/2000/svg"
-								width="20"
-								height="20"
-								viewBox="0 0 24 24"
-							>
-								<path
-									fill="currentColor"
-									d="M19 6a1 1 0 0 0-1 1v4a1 1 0 0 1-1 1H7.41l1.3-1.29a1 1 0 0 0-1.42-1.42l-3 3a1 1 0 0 0-.21.33a1 1 0 0 0 0 .76a1 1 0 0 0 .21.33l3 3a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.42L7.41 14H17a3 3 0 0 0 3-3V7a1 1 0 0 0-1-1"
-								/></svg
-						></sl-input>
-					</div>
-					<div class="help-text">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="24px"
-							height="24px"
-							viewBox="0 0 256 256"
+							>Add variable</sl-button
 						>
-							<path
-								fill="currentColor"
-								d="M140 180a12 12 0 1 1-12-12a12 12 0 0 1 12 12M128 72c-22.06 0-40 16.15-40 36v4a8 8 0 0 0 16 0v-4c0-11 10.77-20 24-20s24 9 24 20s-10.77 20-24 20a8 8 0 0 0-8 8v8a8 8 0 0 0 16 0v-.72c18.24-3.35 32-17.9 32-35.28c0-19.85-17.94-36-40-36m104 56A104 104 0 1 1 128 24a104.11 104.11 0 0 1 104 104m-16 0a88 88 0 1 0-88 88a88.1 88.1 0 0 0 88-88"
-							/>
-						</svg>
-						<p>The variable can be be used in all messages of this bundle.</p>
 					</div>
 				</div>
 			</sl-dropdown>
