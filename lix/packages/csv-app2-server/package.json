@@ -1,5 +1,5 @@
 {
-	"name": "my-app",
+	"name": "csv-app2-server",
 	"type": "module",
 	"scripts": {
 		"dev": "tsx watch src/index.ts",

@@ -141,3 +141,18 @@ services:
         - inlang/source-code/telemetry-proxy-parrot/**
     domains:
       - telemetry.inlang.com
+
+  - name: csv-app2-server
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: starter
+    branch: csv-app2
+    pullRequestPreviewsEnabled: true
+    buildCommand: pnpm install && pnpm run --filter csv-app2-server... build 
+    startCommand: pnpm run --filter csv-app2-server dev
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - lix/packages/csv-app2/**
+        - lix/packages/csv-app2-server/**
