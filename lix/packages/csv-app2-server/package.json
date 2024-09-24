@@ -1,0 +1,19 @@
+{
+	"name": "my-app",
+	"type": "module",
+	"scripts": {
+		"dev": "tsx watch src/index.ts",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@hono/node-server": "^1.13.1",
+		"@lix-js/sdk": "workspace:*",
+		"hono": "^4.6.3",
+		"papaparse": "^5.4.1"
+	},
+	"devDependencies": {
+		"@types/node": "^20.11.17",
+		"tsx": "^4.7.1",
+		"vitest": "^2.0.5"
+	}
+}

@@ -231,7 +231,7 @@ export const plugin: LixPlugin = {
 			const oldParsed = old
 				? papaparse.parse(new TextDecoder().decode(old.data), {
 						header: true,
-					})
+				  })
 				: undefined;
 
 			const oldColumns = Object.keys(
@@ -259,7 +259,7 @@ export const plugin: LixPlugin = {
 			const newParsed = neu
 				? papaparse.parse(new TextDecoder().decode(neu.data), {
 						header: true,
-					})
+				  })
 				: undefined;
 
 			if (newParsed) {

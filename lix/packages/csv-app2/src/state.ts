@@ -41,6 +41,8 @@ export const projectAtom = atom(async (get) => {
 	get(forceReloadProjectAtom);
 
 	if (safeProjectToOpfsInterval) {
+
+		// TODO refactor - use timeout instead of interval
 		clearInterval(safeProjectToOpfsInterval);
 	}
 
@@ -55,12 +57,25 @@ export const projectAtom = atom(async (get) => {
 			providePlugins: [plugin],
 		});
 		// @ts-ignore
-		safeProjectToOpfsInterval = setInterval(async () => {
+		// safeProjectToOpfsInterval = setInterval(
+		const syncLixFile = async () => {
 			const writable = await fileHandle.createWritable();
 			const file = await project.toBlob();
+			
+			// TODO post to server and merge response 
+			// const serverMergeResult = postLixFile(file)
+			// lix.merge({source: serverMergeResult, target: localState})
+			// const mergedState = = await project.toBlob();
+			// await writable.write(mergedState);
+			
 			await writable.write(file);
 			await writable.close();
-		}, 2000);
+
+			setTimeout(syncLixFile, 2000)
+		}	
+		
+		syncLixFile()
+		// }, 2000);
 
 		return project;
 	} catch (e) {
