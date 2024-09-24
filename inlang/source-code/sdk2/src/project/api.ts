@@ -55,6 +55,8 @@ export type ResourceFile = {
 	content: ArrayBuffer;
 	/** The plugin which loaded this resource */
 	pluginKey: InlangPlugin["key"];
+	/** The meta data of the resource as provided by toBeImportedFiles */
+	toBeImportedFilesMetadata?: Record<string, any>;
 };
 
 /**

@@ -2,7 +2,6 @@ import { expect, test } from "vitest"
 import { importFiles } from "./importFiles.js"
 import type { BundleNested, LiteralMatch, Pattern, Variant } from "@inlang/sdk2"
 import { exportFiles } from "./exportFiles.js"
-import { PLUGIN_KEY } from "../plugin.js"
 
 test("single key value", async () => {
 	const imported = await runImportFiles({
@@ -397,22 +396,16 @@ test("it should handle namespaces", async () => {
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(enCommon)),
 				path: "common/en.json",
-				// @ts-expect-error
-				meta: {
-					[PLUGIN_KEY]: {
-						namespace: "common",
-					},
+				toBeImportedFilesMetadata: {
+					namespace: "common",
 				},
 			},
 			{
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(enLogin)),
 				path: "login/en.json",
-				// @ts-expect-error
-				meta: {
-					[PLUGIN_KEY]: {
-						namespace: "login",
-					},
+				toBeImportedFilesMetadata: {
+					namespace: "login",
 				},
 			},
 		],
@@ -457,11 +450,8 @@ test("it should put new entities into the resource file without a namespace", as
 				locale: "en",
 				content: new TextEncoder().encode(JSON.stringify(enCommon)),
 				path: "common-en.json",
-				// @ts-expect-error
-				meta: {
-					[PLUGIN_KEY]: {
-						namespace: "common",
-					},
+				toBeImportedFilesMetadata: {
+					namespace: "common",
 				},
 			},
 		],

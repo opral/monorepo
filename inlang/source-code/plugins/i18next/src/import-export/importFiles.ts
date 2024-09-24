@@ -7,7 +7,7 @@ import type {
 	VariableReference,
 	Variant,
 } from "@inlang/sdk2"
-import { PLUGIN_KEY, type plugin } from "../plugin.js"
+import { type plugin } from "../plugin.js"
 import { flatten } from "flat"
 
 export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({ files }) => {
@@ -17,8 +17,7 @@ export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({
 	const variants: Variant[] = []
 
 	for (const file of files) {
-		// @ts-expect-error - the namespace is only used in the meta object
-		const namespace = file.meta?.[PLUGIN_KEY]?.namespace
+		const namespace = file.toBeImportedFilesMetadata?.namespace
 		const result = parseFile({ namespace, locale: file.locale, content: file.content })
 		bundles.push(...result.bundles)
 		messages.push(...result.messages)

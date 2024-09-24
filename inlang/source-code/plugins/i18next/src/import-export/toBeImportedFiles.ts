@@ -25,10 +25,8 @@ export const toBeImportedFiles: NonNullable<(typeof plugin)["toBeImportedFiles"]
 			result.push({
 				locale,
 				path: pathPattern[namespace]!.replace(/{(locale|languageTag)}/, locale),
-				meta: {
-					[PLUGIN_KEY]: {
-						namespace,
-					},
+				metadata: {
+					namespace,
 				},
 			})
 		}
