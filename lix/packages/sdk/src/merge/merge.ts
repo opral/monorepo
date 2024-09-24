@@ -50,39 +50,43 @@ export async function merge(args: {
 		leafChangesOnlyInSource,
 	});
 
-	// 3. apply non conflicting leaf changes
-	// TODO inefficient double looping
-	const nonConflictingLeafChangesInSource = leafChangesOnlyInSource.filter(
-		(c) =>
-			conflicts.every((conflict) => conflict.conflicting_change_id !== c.id),
-	);
+	const changesPerFile: Record<string, ArrayBuffer> = {};
 
-	const file = await args.targetLix.db
-		.selectFrom("file")
-		.selectAll()
-		// todo fix changes for one plugin can belong to different files
-		.where(
-			"id",
-			"=",
-			// todo handle multiple files
-			sourceChanges[0]!.file_id,
-		)
-		.executeTakeFirst();
+	const fileIds = new Set(sourceChanges.map((c) => c.file_id));
 
-	// todo: how to deal with missing files?
-	if (!file) {
-		throw new Error("File not found");
+	for (const fileId of fileIds) {
+		// 3. apply non conflicting leaf changes
+		// TODO inefficient double looping
+		const nonConflictingLeafChangesInSourceForFile = leafChangesOnlyInSource
+			.filter((c) =>
+				conflicts.every((conflict) => conflict.conflicting_change_id !== c.id),
+			)
+			.filter((c) => c.file_id === fileId);
+
+		console.log(fileId, nonConflictingLeafChangesInSourceForFile[0]);
+		const file = await args.targetLix.db
+			.selectFrom("file")
+			.selectAll()
+			.where("id", "=", fileId)
+			.executeTakeFirst();
+
+		// todo: how to deal with missing files?
+		if (!file) {
+			throw new Error("File not found");
+		}
+
+		if (!plugin.applyChanges) {
+			throw new Error("Plugin does not support applying changes");
+		}
+
+		const { fileData } = await plugin.applyChanges({
+			changes: nonConflictingLeafChangesInSourceForFile,
+			file,
+			lix: args.targetLix,
+		});
+
+		changesPerFile[fileId] = fileData;
 	}
-
-	if (!plugin.applyChanges) {
-		throw new Error("Plugin does not support applying changes");
-	}
-
-	const { fileData } = await plugin.applyChanges({
-		changes: nonConflictingLeafChangesInSource,
-		file,
-		lix: args.targetLix,
-	});
 
 	await args.targetLix.db.transaction().execute(async (trx) => {
 		if (sourceChanges.length > 0) {
@@ -123,11 +127,13 @@ export async function merge(args: {
 				.execute();
 		}
 
-		// 4. update the file data with the applied changes
-		await trx
-			.updateTable("file_internal")
-			.set("data", fileData)
-			.where("id", "=", file.id)
-			.execute();
+		for (const [fileId, fileData] of Object.entries(changesPerFile)) {
+			// 4. update the file data with the applied changes
+			await trx
+				.updateTable("file_internal")
+				.set("data", fileData)
+				.where("id", "=", fileId)
+				.execute();
+		}
 	});
 }
