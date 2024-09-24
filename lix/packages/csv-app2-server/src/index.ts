@@ -78,7 +78,7 @@ app.get("/lix-file/:id", async (c) => {
 	});
 });
 
-const port = Number(process.env.PORT) ?? 3000;
+const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 serve({
 	fetch: app.fetch,
