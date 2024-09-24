@@ -1,6 +1,7 @@
 import { test, expect } from "vitest"
 import { toBeImportedFiles } from "./toBeImportedFiles.js"
 import type { PluginSettings } from "../settings.js"
+import { PLUGIN_KEY } from "../plugin.js"
 
 test("it should work for a single namespace", async () => {
 	const result = await toBeImportedFiles({
@@ -44,18 +45,38 @@ test("it should work for multiple namespaces", async () => {
 			{
 				locale: "en",
 				path: "/resources/en/common.json",
+				meta: {
+					[PLUGIN_KEY]: {
+						namespace: "common",
+					},
+				},
 			},
 			{
 				locale: "de",
 				path: "/resources/de/common.json",
+				meta: {
+					[PLUGIN_KEY]: {
+						namespace: "common",
+					},
+				},
 			},
 			{
 				locale: "en",
 				path: "/resources/en/vital.json",
+				meta: {
+					[PLUGIN_KEY]: {
+						namespace: "vital",
+					},
+				},
 			},
 			{
 				locale: "de",
 				path: "/resources/de/vital.json",
+				meta: {
+					[PLUGIN_KEY]: {
+						namespace: "vital",
+					},
+				},
 			},
 		])
 	)

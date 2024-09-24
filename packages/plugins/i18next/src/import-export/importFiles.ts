@@ -7,7 +7,7 @@ import type {
 	VariableReference,
 	Variant,
 } from "@inlang/sdk2"
-import { type plugin } from "../plugin.js"
+import { PLUGIN_KEY, type plugin } from "../plugin.js"
 import { flatten } from "flat"
 
 export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({ files }) => {
@@ -17,7 +17,9 @@ export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({
 	const variants: Variant[] = []
 
 	for (const file of files) {
-		const result = parseFile({ locale: file.locale, content: file.content })
+		// @ts-expect-error - the namespace is only used in the meta object
+		const namespace = file.meta?.[PLUGIN_KEY]?.namespace
+		const result = parseFile({ namespace, locale: file.locale, content: file.content })
 		bundles.push(...result.bundles)
 		messages.push(...result.messages)
 		variants.push(...result.variants)
@@ -48,7 +50,7 @@ export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({
 	return { bundles: result }
 }
 
-function parseFile(args: { locale: string; content: ArrayBuffer }): {
+function parseFile(args: { namespace?: string; locale: string; content: ArrayBuffer }): {
 	bundles: Bundle[]
 	messages: Message[]
 	variants: Variant[]
@@ -63,7 +65,13 @@ function parseFile(args: { locale: string; content: ArrayBuffer }): {
 
 	for (const key in resource) {
 		const value = resource[key]!
-		const { bundle, message, variant } = parseMessage({ key, value, locale: args.locale, resource })
+		const { bundle, message, variant } = parseMessage({
+			namespace: args.namespace,
+			key,
+			value,
+			locale: args.locale,
+			resource,
+		})
 		bundles.push(bundle)
 		messages.push(message)
 		variants.push(variant)
@@ -72,6 +80,7 @@ function parseFile(args: { locale: string; content: ArrayBuffer }): {
 }
 
 function parseMessage(args: {
+	namespace?: string
 	key: string
 	value: string | string[]
 	locale: string
@@ -81,10 +90,15 @@ function parseMessage(args: {
 
 	// i18next suffixes keys with context or plurals
 	// "friend_female_one" -> "friend"
-	const keyWithoutContextOrPlurals = args.key.split("_")[0]!
+	let bundleId = args.key.split("_")[0]!
+	if (args.namespace) {
+		// following i18next's convention
+		// https://www.i18next.com/principles/namespaces#sample
+		bundleId = `${args.namespace}:${bundleId}`
+	}
 
 	const bundle: Bundle = {
-		id: keyWithoutContextOrPlurals,
+		id: bundleId,
 		declarations: pattern.variableReferences.map((variableReference) => ({
 			type: "input-variable",
 			name: variableReference.name,
@@ -93,7 +107,7 @@ function parseMessage(args: {
 
 	const message: Message = {
 		id: "",
-		bundleId: keyWithoutContextOrPlurals,
+		bundleId: bundleId,
 		selectors: [],
 		locale: args.locale,
 	}
