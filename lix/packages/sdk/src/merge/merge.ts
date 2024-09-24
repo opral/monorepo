@@ -79,7 +79,7 @@ export async function merge(args: {
 				.where("id", "=", fileId)
 				.executeTakeFirstOrThrow();
 			await args.targetLix.db
-				.insertInto("file")
+				.insertInto("file_internal")
 				.values(file)
 				.executeTakeFirst();
 		}
