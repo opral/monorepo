@@ -136,36 +136,36 @@ export const HistoryEntry = (props: { commit: Commit }) => {
 															{changed_col}
 														</p>
 													</SlTooltip>
-													{change.previous?.value?.[changed_col] ? (
-														<SlTooltip
-															content={change.previous.value?.[changed_col]}
-														>
-															<p className="px-3 py-1.5 bg-zinc-200 flex-1 md:w-[140px] overflow-hidden whitespace-nowrap text-ellipsis">
-																{change.previous.value?.[changed_col]}
-															</p>
-														</SlTooltip>
-													) : (
-														<p className="px-3 py-1.5 min-h-[38px] bg-zinc-100 border border-zinc-400 border-dashed flex-1 md:w-[140px]"></p>
-													)}
-
-													<svg
-														xmlns="http://www.w3.org/2000/svg"
-														width="18"
-														height="18"
-														viewBox="0 0 24 24"
-														className="text-zinc-400 m-1 -rotate-90 md:rotate-0"
-													>
-														<path
-															fill="currentColor"
-															d="M11 4h2v12l5.5-5.5l1.42 1.42L12 19.84l-7.92-7.92L5.5 10.5L11 16z"
-														/>
-													</svg>
 													{change.current.value?.[changed_col] ? (
 														<SlTooltip
 															content={change.current.value?.[changed_col]}
 														>
 															<p className="px-3 py-1.5 bg-white border border-zinc-200 flex-1 md:w-[140px] overflow-hidden whitespace-nowrap text-ellipsis">
 																{change.current.value?.[changed_col]}
+															</p>
+														</SlTooltip>
+													) : (
+														<p className="px-3 py-1.5 min-h-[38px] bg-zinc-100 border border-zinc-400 border-dashed flex-1 md:w-[140px]"></p>
+													)}
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														width="18"
+														height="18"
+														viewBox="0 0 24 24"
+														rotate="180deg"
+														className="text-zinc-400 m-1 -rotate-90 md:rotate-0"
+													>
+														<path
+															fill="currentColor"
+															d="M11 20h2V8l5.5 5.5l1.42-1.42L12 4.16l-7.92 7.92L5.5 13.5L11 8z"
+														/>
+													</svg>
+													{change.previous?.value?.[changed_col] ? (
+														<SlTooltip
+															content={change.previous.value?.[changed_col]}
+														>
+															<p className="px-3 py-1.5 bg-zinc-200 flex-1 md:w-[140px] overflow-hidden whitespace-nowrap text-ellipsis">
+																{change.previous.value?.[changed_col]}
 															</p>
 														</SlTooltip>
 													) : (
