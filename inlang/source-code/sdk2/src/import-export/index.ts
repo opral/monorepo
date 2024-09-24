@@ -8,7 +8,7 @@ import type { InlangDatabaseSchema } from "../database/schema.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ImportFile } from "../project/api.js";
-import { upsertBundleNestedMatchByProperties } from "../query-utilities/upsertBundleNestedMatchByProperties.js";
+import { upsertBundleNestedMatchByProperties } from "./upsertBundleNestedMatchByProperties.js";
 
 export async function importFiles(opts: {
 	files: ImportFile[];
