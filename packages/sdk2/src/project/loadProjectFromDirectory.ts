@@ -14,7 +14,7 @@ import type { ProjectSettings } from "../json-schema/settings.js";
 import type { PreprocessPluginBeforeImportFunction } from "../plugin/importPlugins.js";
 import { PluginImportError } from "../plugin/errors.js";
 import type { InlangProject } from "./api.js";
-import { upsertBundleNestedMatchByProperties } from "../query-utilities/upsertBundleNestedMatchByProperties.js";
+import { upsertBundleNestedMatchByProperties } from "../import-export/upsertBundleNestedMatchByProperties.js";
 
 /**
  * Loads a project from a directory.
