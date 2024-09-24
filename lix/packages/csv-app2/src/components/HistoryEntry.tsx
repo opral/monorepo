@@ -152,7 +152,6 @@ export const HistoryEntry = (props: { commit: Commit }) => {
 														width="18"
 														height="18"
 														viewBox="0 0 24 24"
-														rotate="180deg"
 														className="text-zinc-400 m-1 -rotate-90 md:rotate-0"
 													>
 														<path
