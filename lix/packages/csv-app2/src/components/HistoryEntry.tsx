@@ -61,6 +61,10 @@ export const HistoryEntry = (props: { commit: Commit }) => {
 		}
 	}, [isOpen]);
 
+	useEffect(() => {
+		console.log("changeHistory", changeHistory);
+	}, [changeHistory]);
+
 	return (
 		<div
 			className={clsx(
@@ -104,6 +108,7 @@ export const HistoryEntry = (props: { commit: Commit }) => {
 			<div className={clsx(isOpen ? "block" : "hidden")}>
 				<div className="flex flex-col gap-2 px-3 pb-3">
 					{changeHistory.map((change) => {
+						console.log("change", change);
 						// TODO: when importing new file one change contains every change of a row. When doing manual change, it contains more changes that belong to one row -> so do the grouping here when needed
 						return (
 							<div

@@ -152,14 +152,14 @@ export default function App() {
 							>
 								<div className="flex items-center gap-3">
 									<div className="border border-zinc-200 bg-zinc-50 rounded-full flex items-center justify-center text-2xl h-12 w-12">
-										{project.path[0].toUpperCase()}
+										{project.path.split("___")[1][0].toUpperCase()}
 									</div>
 									<div className="flex flex-col gap-2">
 										<p className="text-lg font-medium">
-											{project.path.replace(".lix", "")}
+											{project.path.split("___")[1].replace(".lix", "")}
 										</p>
 										<p className="bg-zinc-100 border border-zinc-200 px-2 py-1">
-											/{project.path}
+											/{project.path.split("___")[1]}
 										</p>
 									</div>
 								</div>

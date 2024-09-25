@@ -9,6 +9,7 @@ import {
 import "react-datasheet-grid/dist/style.css";
 import Papa from "papaparse";
 import {
+	authorNameAtom,
 	csvDataAtom,
 	editorSelectionAtom,
 	projectAtom,
@@ -20,6 +21,7 @@ import { useEffect, useState } from "react";
 const TableEditor = () => {
 	const [csvData] = useAtom(csvDataAtom);
 	const [project] = useAtom(projectAtom);
+	const [authorName] = useAtom(authorNameAtom);
 	const [uniqueColumn] = useAtom(uniqueColumnAtom);
 	const [showDrawer, setShowDrawer] = useState(false);
 	const [screenHeight, setScreenHeight] = useState<number>(800);
@@ -54,7 +56,6 @@ const TableEditor = () => {
 				columns.push({
 					...keyColumn(key, textColumn),
 					title: key,
-					disabled: true,
 					maxWidth: 200,
 				});
 			}
@@ -64,6 +65,29 @@ const TableEditor = () => {
 	useEffect(() => {
 		setScreenHeight(window.innerHeight - 82);
 	}, [window.innerHeight]);
+
+	const getUserPositions = async () => {
+		const files = await project!.db
+			.selectFrom("file")
+			.where("path", "like", "%_position.json%")
+			.select("data")
+			.execute();
+
+		if (files && files.length > 0) {
+			const userPositions = [];
+			for (const file of files) {
+				const data = JSON.parse(new TextDecoder().decode(file.data));
+				userPositions.push(data);
+			}
+			console.log("userPositions", JSON.stringify(userPositions, null, 2));
+		}
+	};
+
+	useEffect(() => {
+		if (project) {
+			getUserPositions();
+		}
+	});
 
 	return (
 		<div className="relative h-[calc(100vh_-_82px)]">

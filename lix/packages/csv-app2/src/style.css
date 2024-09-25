@@ -71,27 +71,42 @@ padding: 0;
 
 sl-button[variant="default"]::part(base) {
     transition: all 0.2s;
+    font-size: 13px;
 }
 
 sl-button[variant="default"]::part(base):hover {
     background-color: white;
     border-color: grey;
-    color: black
+    color: black;
+    font-size: 13px;
 }
 
 sl-button[variant="primary"]::part(base) {
     transition: all 0.2s;
     color: white;
     background-color: black;
-    border: none
+    border: none;
+    font-size: 13px;
 }
 sl-button[variant="primary"]::part(base):hover {
     background-color: rgb(63, 63, 63);
     border: none
 }
 
+sl-button[variant="text"]::part(base) {
+    color: rgb(63, 63, 63);
+    font-size: 13px;
+}
+sl-button[variant="text"]::part(base):hover {
+    color: rgb(0, 0, 0);
+}
+
 sl-button[size="medium"]::part(base) {
     border-radius: 8px;
+}
+
+sl-tag::part(base) {
+    height: 30px
 }
 
 p {

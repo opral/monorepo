@@ -4,12 +4,18 @@
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 import {
+	authorNameAtom,
+	isProjectSyncedAtom,
 	projectAtom,
 	selectedProjectPathAtom,
 	withPollingAtom,
 } from "./state.ts";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { SlButton, SlTooltip } from "@shoelace-style/shoelace/dist/react";
+import {
+	SlButton,
+	SlTag,
+	SlTooltip,
+} from "@shoelace-style/shoelace/dist/react";
 import SubNavigation from "./components/SubNavigation.tsx";
 
 export default function Layout(props: {
@@ -18,7 +24,9 @@ export default function Layout(props: {
 }) {
 	const [, setWithPolling] = useAtom(withPollingAtom);
 	const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
+	const [authorName] = useAtom(authorNameAtom);
 	const [project] = useAtom(projectAtom);
+	const [isProjectSynced] = useAtom(isProjectSyncedAtom);
 
 	const navigate = useNavigate();
 	const [, setSearchParams] = useSearchParams();
@@ -40,16 +48,13 @@ export default function Layout(props: {
 		);
 
 		const file = await project.toBlob();
-		const response = await fetch(
-			"https://localhost:3000/lix-file/" + project_id,
-			{
-				method: "POST",
-				headers: {
-					"Content-Type": "application/octet-stream",
-				},
-				body: file,
-			}
-		);
+		await fetch("http://localhost:3000/lix-file/" + project_id, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/octet-stream",
+			},
+			body: file,
+		});
 	};
 
 	const handleDownload = async () => {
@@ -87,7 +92,7 @@ export default function Layout(props: {
 				.select("data")
 				.executeTakeFirst();
 
-			console.log("handle", file);
+			//console.log("handle", file);
 
 			if (file) {
 				const projectMeta = JSON.parse(new TextDecoder().decode(file.data));
@@ -109,7 +114,6 @@ export default function Layout(props: {
 	});
 
 	useEffect(() => {
-		console.log("selectedProjectPath", selectedProjectPath, project);
 		if (selectedProjectPath && project) {
 			handleSetSearchParams();
 		}
@@ -139,20 +143,34 @@ export default function Layout(props: {
 
 						<p className="font-medium opacity-30">/</p>
 						<div className="flex justify-center items-center text-zinc-950 h-9 rounded-lg px-2">
-							<h1 className="font-medium">{selectedProjectPath}</h1>
+							<h1 className="font-medium">
+								{selectedProjectPath?.split("___")[1]}
+							</h1>
 						</div>
 					</div>
 					<div className="mr-1 flex items-center gap-1.5">
-						<SlTooltip content="Learn more about Lix">
-							<p className="md:hidden text-zinc-500 hover:text-black text-[14px] pr-2 cursor-pointer">
+						<SlTooltip content="Discover lix change control">
+							<SlButton
+								size="small"
+								variant="text"
+								className="md:hidden"
+								onClick={() => navigate("https://lix.opral.com/")}
+							>
 								SDK
-							</p>
-							<p className="hidden md:block text-zinc-500 hover:text-black text-[14px] pr-2 cursor-pointer">
-								Discover SDK
-							</p>
+							</SlButton>
 						</SlTooltip>
-						<SlTooltip content="Share with your team">
-							<p className="text-zinc-500 hover:text-black text-[14px] pr-2 cursor-pointer">
+						<SlTooltip content="Discover lix change control">
+							<SlButton
+								size="small"
+								variant="text"
+								className="hidden md:block"
+								onClick={() => navigate("https://lix.opral.com/")}
+							>
+								Discover SDK
+							</SlButton>
+						</SlTooltip>
+						{authorName === "Nils" && !isProjectSynced && (
+							<SlTooltip content="Press to share with your team">
 								<SlButton
 									size="small"
 									variant="default"
@@ -160,8 +178,16 @@ export default function Layout(props: {
 								>
 									Share
 								</SlButton>
-							</p>
-						</SlTooltip>
+							</SlTooltip>
+						)}
+						{isProjectSynced && (
+							<SlTag>
+								<div className="flex gap-2 items-center">
+									<div className="w-2 h-2 rounded-full bg-blue-500" />
+									synced
+								</div>
+							</SlTag>
+						)}
 						<SlTooltip content="Download .csv">
 							<SlButton
 								size="small"

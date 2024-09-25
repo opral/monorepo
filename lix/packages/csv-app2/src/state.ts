@@ -7,6 +7,7 @@ import Papa from "papaparse";
 import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
 import { plugin } from "./csv-plugin.js";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
+import { generateColor } from "./helper/gernerateUserColor/generateUserColor.ts";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -45,7 +46,7 @@ export const projectAtom = atom(async (get) => {
 	try {
 		const fallbackPath = get(selectedProjectPathAtom);
 		const rootHandle = await getOriginPrivateDirectory();
-		console.log("Check for available projects");
+		// console.log("Check for available projects");
 
 		let path: undefined | string = undefined;
 
@@ -53,10 +54,10 @@ export const projectAtom = atom(async (get) => {
 		const project_id_search_param = urlParams.get("project");
 
 		if (project_id_search_param) {
-			console.log(
-				"Project id in search parameter found ... try to match local project CURRENT STATE:" +
-					fallbackPath
-			);
+			// console.log(
+			// 	"Project id in search parameter found ... try to match local project CURRENT STATE:" +
+			// 		fallbackPath
+			// );
 			// try to find a project locally
 			for await (const entry of rootHandle.keys()) {
 				if (!(entry as string).includes("___")) {
@@ -71,27 +72,27 @@ export const projectAtom = atom(async (get) => {
 			}
 
 			if (path) {
-				console.log(
-					"Project id in search parameter found ... try to match local project -> Project found localy"
-				);
+				// console.log(
+				// 	"Project id in search parameter found ... try to match local project -> Project found localy"
+				// );
 			} else {
-				console.log(
-					"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote"
-				);
+				// console.log(
+				// 	"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote"
+				// );
 
 				const lixServerRequest = await fetch(
-					"https://localhost:3000/lix-file/" + project_id_search_param
+					"http://localhost:3000/lix-file/" + project_id_search_param
 				);
 				if (!lixServerRequest.ok) {
-					console.log(
-						"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote -> NOT FOUND"
-					);
+					// console.log(
+					// 	"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote -> NOT FOUND"
+					// );
 					return;
 				}
 
-				console.log(
-					"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote -> NOT FOUND"
-				);
+				// console.log(
+				// 	"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote -> NOT FOUND"
+				// );
 
 				// we don't have the project localy yet - try to fetch it from remote
 				const projectBlobFromRemote = await lixServerRequest.arrayBuffer();
@@ -107,17 +108,17 @@ export const projectAtom = atom(async (get) => {
 					.where("path", "=", "/project_meta")
 					.executeTakeFirstOrThrow();
 				const projectMetaRaw = new TextDecoder().decode(projectMetaFile.data);
-				console.log(projectMetaRaw);
+				//console.log(projectMetaRaw);
 
 				const projectId = JSON.parse(projectMetaRaw).project_id;
 				const projectFileName = JSON.parse(projectMetaRaw).initial_file_name;
 
 				path = projectId + "___" + projectFileName;
 
-				console.log(
-					"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote -> FOUND - writing to " +
-						path
-				);
+				// console.log(
+				// 	"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote -> FOUND - writing to " +
+				// 		path
+				// );
 				// write file locally
 				const fileHandle = await rootHandle.getFileHandle(path, {
 					create: true,
@@ -128,26 +129,55 @@ export const projectAtom = atom(async (get) => {
 				await writable.close();
 			}
 		} else {
-			console.log(
-				"No project found in search parameter - checking state" + fallbackPath
-			);
+			// console.log(
+			// 	"No project found in search parameter - checking state" + fallbackPath
+			// );
 			if (fallbackPath === undefined) {
-				console.log(
-					"No project found in search parameter - checking state -> no state return"
-				);
+				// console.log(
+				// 	"No project found in search parameter - checking state -> no state return"
+				// );
 				return;
 			}
 			path = fallbackPath;
 		}
 
-		console.log("rootHandle.getFileHandle(path)");
+		//console.log("rootHandle.getFileHandle(path)");
 		const fileHandle = await rootHandle.getFileHandle(path);
-		console.log("const file = await fileHandle.getFile();");
+		//console.log("const file = await fileHandle.getFile();");
 		const file = await fileHandle.getFile();
 		const project = await openLixInMemory({
 			blob: file,
 			providePlugins: [plugin],
 		});
+
+		// userPosition
+		const userPosition = get(editorSelectionAtom);
+		const userName = get(authorNameAtom);
+		if (userPosition && userName) {
+			console.log("updatePosition");
+			// create a file in the project and store the position in it
+			await project.db
+				.insertInto("file")
+				.values([
+					{
+						id: userName + "_position",
+						path: userName + "_position.json",
+						data: new TextEncoder().encode(
+							JSON.stringify({
+								position: {
+									...userPosition,
+									userName: userName,
+									color: generateColor(userName),
+								},
+							})
+						),
+					},
+				])
+				.execute();
+		}
+
+		await project.settled();
+
 		const projectMetaRaw = new TextDecoder().decode(
 			(
 				await project.db
@@ -169,8 +199,8 @@ export const projectAtom = atom(async (get) => {
 				"http://localhost:3000/lix-file/" + project_id
 			);
 
-			console.log("projectId: ", project_id);
-			console.log("response state: ", checkIfExists.ok);
+			// console.log("projectId: ", project_id);
+			// console.log("response state: ", checkIfExists.ok);
 
 			if (checkIfExists.ok) {
 				// the file does exist remotely - trigger sync
@@ -196,7 +226,7 @@ export const projectAtom = atom(async (get) => {
 					providePlugins: [plugin],
 				});
 
-				console.log("serverLix", serverLix);
+				// console.log("serverLix", serverLix);
 
 				await merge({
 					sourceLix: serverLix,
@@ -218,6 +248,25 @@ export const projectAtom = atom(async (get) => {
 		console.error(e);
 		return undefined;
 	}
+});
+
+export const isProjectSyncedAtom = atom(async (get) => {
+	const project = await get(projectAtom);
+	if (!project) return false;
+	const projectMetaRaw = new TextDecoder().decode(
+		(
+			await project.db
+				.selectFrom("file")
+				.where("path", "=", "/project_meta")
+				.select("data")
+				.executeTakeFirstOrThrow()
+		).data
+	);
+	const { project_id } = JSON.parse(projectMetaRaw);
+	const checkIfExists = await fetch(
+		"http://localhost:3000/lix-file/" + project_id
+	);
+	return checkIfExists.ok;
 });
 
 // export const settingsAtom = atom(async (get) => {
