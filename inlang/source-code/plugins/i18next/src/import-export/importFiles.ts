@@ -139,6 +139,12 @@ function parseMessage(args: {
 			type: "input-variable",
 			name: "context",
 		})
+		message.selectors = [
+			{
+				type: "variable-reference",
+				name: "context",
+			},
+		]
 		variant.matches = [
 			{
 				type: "literal-match",
@@ -174,6 +180,16 @@ function parseMessage(args: {
 				},
 			},
 		})
+		message.selectors = [
+			{
+				type: "variable-reference",
+				name: "context",
+			},
+			{
+				type: "variable-reference",
+				name: "countPlural",
+			},
+		]
 		variant.matches = [
 			{
 				type: "literal-match",
@@ -200,6 +216,12 @@ function parseMessage(args: {
 				type: "literal-match",
 				key: "countPlural",
 				value: args.key.split("_").at(-1)!,
+			},
+		]
+		message.selectors = [
+			{
+				type: "variable-reference",
+				name: "countPlural",
 			},
 		]
 		bundle.declarations.push({
