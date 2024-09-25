@@ -2,13 +2,13 @@
 import type fs from "node:fs/promises";
 import type { InlangProject } from "./api.js";
 import path from "node:path";
-import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import { toMessageV1 } from "../json-schema/old-v1-message/toMessageV1.js";
 import {
 	absolutePathFromProject,
 	withAbsolutePaths,
 } from "./loadProjectFromDirectory.js";
 import { detectJsonFormatting } from "../utilities/detectJsonFormatting.js";
+import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 
 export async function saveProjectToDirectory(args: {
 	fs: typeof fs;
@@ -36,13 +36,15 @@ export async function saveProjectToDirectory(args: {
 	// run exporters
 	const plugins = await args.project.plugins.get();
 	const settings = await args.project.settings.get();
-	const bundles = await selectBundleNested(args.project.db).execute();
 
 	for (const plugin of plugins) {
 		// old legacy remove with v3
 		if (plugin.saveMessages) {
+			// in-efficient re-qeuery but it's a legacy function that will be removed.
+			// the effort of adjusting the code to not re-query is not worth it.
+			const bundlesNested = await selectBundleNested(args.project.db).execute();
 			await plugin.saveMessages({
-				messages: bundles.map((b) => toMessageV1(b)),
+				messages: bundlesNested.map((b) => toMessageV1(b)),
 				// @ts-expect-error - legacy
 				nodeishFs: withAbsolutePaths(args.fs, args.path),
 				settings,
@@ -50,8 +52,22 @@ export async function saveProjectToDirectory(args: {
 		}
 
 		if (plugin.exportFiles) {
+			const bundles = await args.project.db
+				.selectFrom("bundle")
+				.selectAll()
+				.execute();
+			const messages = await args.project.db
+				.selectFrom("message")
+				.selectAll()
+				.execute();
+			const variants = await args.project.db
+				.selectFrom("variant")
+				.selectAll()
+				.execute();
 			const files = await plugin.exportFiles({
 				bundles,
+				messages,
+				variants,
 				settings,
 			});
 			for (const file of files) {
