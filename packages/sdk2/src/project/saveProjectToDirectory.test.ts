@@ -4,8 +4,7 @@ import { Volume } from "memfs";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
 import { newProject } from "./newProject.js";
 import type { InlangPlugin } from "../plugin/schema.js";
-import type { NewBundleNested } from "../database/schema.js";
-import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
+import type { Bundle, NewMessage, Variant } from "../database/schema.js";
 import { loadProjectFromDirectory } from "./loadProjectFromDirectory.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
@@ -61,20 +60,12 @@ test("it should overwrite all files to the directory except the db.sqlite file",
 });
 
 test("a roundtrip should work", async () => {
-	const mockBundleNested: NewBundleNested = {
-		id: "mock-bundle",
-		messages: [
-			{
-				bundleId: "mock-bundle",
-				locale: "en",
-				selectors: [],
-				variants: [],
-			},
-		],
-	};
+	const bundles: Bundle[] = [{ id: "mock-bundle", declarations: [] }];
+	const messages: NewMessage[] = [{ bundleId: "mock-bundle", locale: "en" }];
+	const variants: Variant[] = [];
 
 	const volume = Volume.fromJSON({
-		"/mock-file.json": JSON.stringify([mockBundleNested]),
+		"/mock-file.json": JSON.stringify({ bundles, messages, variants }),
 	});
 
 	const mockPlugin: InlangPlugin = {
@@ -83,8 +74,10 @@ test("a roundtrip should work", async () => {
 			return [{ path: "/mock-file.json", locale: "mock" }];
 		},
 		importFiles: async ({ files }) => {
-			const bundles = JSON.parse(new TextDecoder().decode(files[0]?.content));
-			return { bundles };
+			const { bundles, messages, variants } = JSON.parse(
+				new TextDecoder().decode(files[0]?.content)
+			);
+			return { bundles, messages, variants };
 		},
 		exportFiles: async ({ bundles }) => {
 			return [
@@ -105,7 +98,8 @@ test("a roundtrip should work", async () => {
 		providePlugins: [mockPlugin],
 	});
 
-	await insertBundleNested(project.db, mockBundleNested);
+	await project.db.insertInto("bundle").values(bundles).execute();
+	await project.db.insertInto("message").values(messages).execute();
 
 	await saveProjectToDirectory({
 		fs: volume.promises as any,
@@ -135,15 +129,27 @@ test("a roundtrip should work", async () => {
 
 	expect(mockPlugin.importFiles).toHaveBeenCalled();
 
-	const bundles = await selectBundleNested(project2.db).execute();
+	const bundlesAfter = await project2.db
+		.selectFrom("bundle")
+		.selectAll()
+		.execute();
+	const messagesAfter = await project2.db
+		.selectFrom("message")
+		.selectAll()
+		.execute();
+	const variantsAfter = await project2.db
+		.selectFrom("variant")
+		.selectAll()
+		.execute();
 
-	for (const bundle of bundles) {
-		for (const message of bundle.messages) {
-			delete (message as any).id; // Remove the dynamic id field
-		}
-	}
+	expect(bundlesAfter).lengthOf(1);
+	expect(messagesAfter).lengthOf(1);
+	expect(variantsAfter).lengthOf(0);
 
-	expect(bundles).toEqual([expect.objectContaining(mockBundleNested)]);
+	expect(bundlesAfter[0]).toStrictEqual(expect.objectContaining(bundles[0]));
+	expect(messagesAfter[0]).toStrictEqual(
+		expect.objectContaining(messagesAfter[0])
+	);
 });
 
 test.todo(
