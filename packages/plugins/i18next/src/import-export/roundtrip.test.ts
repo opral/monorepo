@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { importFiles } from "./importFiles.js"
-import type { BundleNested, LiteralMatch, Pattern, Variant } from "@inlang/sdk2"
+import type { BundleNested, LiteralMatch, Message, Pattern, Variant } from "@inlang/sdk2"
 import { exportFiles } from "./exportFiles.js"
 
 test("single key value", async () => {
@@ -136,6 +136,12 @@ test("keyContext", async () => {
 			name: "context",
 		},
 	])
+	expect(bundle?.messages[0]?.selectors).toStrictEqual([
+		{
+			type: "variable-reference",
+			name: "context",
+		},
+	])
 	expect(bundle?.messages[0]?.variants[0]).toStrictEqual(
 		expect.objectContaining({
 			matches: [
@@ -199,6 +205,13 @@ test("keyPluralSimple", async () => {
 		])
 	)
 
+	expect(bundle?.messages[0]?.selectors).toStrictEqual([
+		{
+			type: "variable-reference",
+			name: "countPlural",
+		},
+	])
+
 	expect(bundle?.messages[0]?.variants[0]).toStrictEqual(
 		expect.objectContaining({
 			matches: [
@@ -245,6 +258,13 @@ test("keyPluralMultipleEgArabic", async () => {
 	})
 
 	const bundle = result.bundles.find((bundle) => bundle.id === "keyPluralMultipleEgArabic")
+
+	expect(bundle?.messages[0]?.selectors).toStrictEqual([
+		{
+			type: "variable-reference",
+			name: "countPlural",
+		},
+	])
 
 	expect(bundle?.declarations).toStrictEqual(
 		expect.arrayContaining([
