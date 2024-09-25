@@ -1,4 +1,4 @@
-import { InlangProject } from "@inlang/sdk2";
+import { InlangProject, loadProjectInMemory, merge } from "@inlang/sdk2";
 
 export const handleDownload = async (
 	project: InlangProject | undefined,
@@ -9,6 +9,112 @@ export const handleDownload = async (
 	const link = document.createElement("a");
 	link.href = blobUrl;
 	link.download = selectedProjectPath!;
+	document.body.appendChild(link);
+	link.dispatchEvent(
+		new MouseEvent("click", {
+			bubbles: true,
+			cancelable: true,
+			view: window,
+		})
+	);
+	document.body.removeChild(link);
+};
+
+export const handleMerge = async (
+	project: InlangProject | undefined,
+	selectedProjectPath: string | undefined,
+	setForceReloadProject: (value: number) => void
+) => {
+	const input = document.createElement("input");
+	input.type = "file";
+	input.accept = ".inlang";
+	input.onchange = async (e) => {
+		const file = (e.target as HTMLInputElement).files?.[0];
+		if (file) {
+			const reader = new FileReader();
+			reader.onload = async () => {
+				const blob = new Blob([reader.result as ArrayBuffer]);
+				const incoming = await loadProjectInMemory({ blob });
+				// TODO remove workaround for https://github.com/opral/lix-sdk/issues/47
+				const opfsRoot = await navigator.storage.getDirectory();
+				const fileHandle = await opfsRoot.getFileHandle(selectedProjectPath!, {
+					create: true,
+				});
+				const writable = await fileHandle.createWritable();
+				await merge({
+					sourceLix: incoming.lix,
+					targetLix: project!.lix,
+				});
+				const mergedBlob = await project!.toBlob();
+				await writable.write(mergedBlob);
+				await writable.close();
+				setForceReloadProject(Date.now());
+			};
+
+			reader.readAsArrayBuffer(file);
+		}
+	};
+	input.click();
+};
+
+export const handleOpenProject = async (
+	setSelectedProjectPath: (fileName: string) => void
+) => {
+	const input = document.createElement("input");
+	input.type = "file";
+	input.accept = ".inlang";
+	input.onchange = async (e) => {
+		const file = (e.target as HTMLInputElement).files?.[0];
+		if (file) {
+			const reader = new FileReader();
+			reader.onload = async () => {
+				const blob = new Blob([reader.result as ArrayBuffer]);
+				const opfsRoot = await navigator.storage.getDirectory();
+				const fileHandle = await opfsRoot.getFileHandle(file.name, {
+					create: true,
+				});
+				const writable = await fileHandle.createWritable();
+				await writable.write(blob);
+				await writable.close();
+				setSelectedProjectPath(file!.name);
+			};
+			reader.readAsArrayBuffer(file);
+		}
+	};
+	input.click();
+};
+
+export const importFromJSON = async (project: InlangProject | undefined) => {
+	// using project.importFiles
+	const input = document.createElement("input");
+	input.type = "file";
+	input.accept = ".json";
+	input.onchange = async (e) => {
+		const file = (e.target as HTMLInputElement).files?.[0];
+		if (file) {
+			const reader = new FileReader();
+			reader.onload = async () => {
+				const json = JSON.parse(reader.result as string);
+				await project!.importFiles({
+					pluginKey: "plugin.inlang.i18next",
+					files: json,
+				});
+			};
+			reader.readAsText(file);
+		}
+	};
+	input.click();
+};
+
+export const exportToJSON = async (project: InlangProject | undefined) => {
+	const json = await project!.exportFiles({
+		pluginKey: "plugin.inlang.i18next",
+	});
+	const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
+	const blobUrl = URL.createObjectURL(blob);
+	const link = document.createElement("a");
+	link.href = blobUrl;
+	link.download = "inlang-export.json";
 	document.body.appendChild(link);
 	link.dispatchEvent(
 		new MouseEvent("click", {
