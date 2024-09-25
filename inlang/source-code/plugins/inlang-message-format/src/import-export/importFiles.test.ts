@@ -20,7 +20,6 @@ test("it handles single variants without expressions", async () => {
 			{
 				locale: "en",
 				content: mockEnFile,
-				name: "en.json",
 			},
 		],
 	})
@@ -69,7 +68,6 @@ test("it handles variable expressions in patterns", async () => {
 			{
 				locale: "en",
 				content: mockEnFile,
-				name: "en.json",
 			},
 		],
 	})
@@ -133,7 +131,6 @@ test("it ingores the $schema property that is used for typesafety", async () => 
 			{
 				locale: "en",
 				content: mockEnFile,
-				name: "en.json",
 			},
 		],
 	})
@@ -167,12 +164,10 @@ test("it assigns the correct locales to messages", async () => {
 			{
 				locale: "en",
 				content: mockEnFile,
-				name: "en.json",
 			},
 			{
 				locale: "de",
 				content: mockDeFile,
-				name: "de.json",
 			},
 		],
 	})
@@ -243,7 +238,6 @@ test("it handles multi variant messages", async () => {
 			{
 				locale: "en",
 				content: mockEnFile,
-				name: "en.json",
 			},
 		],
 	})

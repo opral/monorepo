@@ -1,4 +1,4 @@
-import type { Match, MessageNested, ResourceFile, Variant } from "@inlang/sdk2"
+import type { ExportFile, Match, MessageNested, Variant } from "@inlang/sdk2"
 import { PLUGIN_KEY, type plugin } from "../plugin.js"
 import type { FileSchema } from "../fileSchema.js"
 
@@ -18,7 +18,7 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 		files[message.locale] = { ...files[message.locale], ...serializeMessage(message) }
 	}
 
-	const result: ResourceFile[] = []
+	const result: ExportFile[] = []
 
 	for (const locale in files) {
 		result.push({
@@ -26,7 +26,6 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 			// beautify the json
 			content: new TextEncoder().encode(JSON.stringify(files[locale], undefined, "\t")),
 			name: locale + ".json",
-			pluginKey: PLUGIN_KEY,
 		})
 	}
 
