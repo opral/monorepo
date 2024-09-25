@@ -119,14 +119,18 @@ function parseMatcher(value: string): Match[] {
 		if (!key || !value) {
 			continue
 		}
-		matches.push({
-			type: "match",
-			name: key,
-			value: {
-				type: "literal",
+		if (value === "*") {
+			matches.push({
+				type: "catchall-match",
+				key: key,
+			})
+		} else {
+			matches.push({
+				type: "literal-match",
+				key,
 				value,
-			},
-		})
+			})
+		}
 	}
 	return matches
 }

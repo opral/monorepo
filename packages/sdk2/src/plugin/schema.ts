@@ -1,8 +1,8 @@
 import type { TObject } from "@sinclair/typebox";
 import type { MessageV1 } from "../json-schema/old-v1-message/schemaV1.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
-import type { ResourceFile } from "../project/api.js";
 import type { BundleNested, NewBundleNested } from "../database/schema.js";
+import type { ExportFile } from "../project/api.js";
 
 export type InlangPlugin<
 	ExternalSettings extends Record<string, any> | unknown = unknown
@@ -32,14 +32,24 @@ export type InlangPlugin<
 		nodeishFs: NodeFsPromisesSubsetLegacy;
 	}) => Promise<void> | void;
 	/**
-	 * Import / Export files.
-	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
+	 * Files that should be imported by the inlang SDK.
+	 *
+	 * - `metadata` is optional and can be used to store additional information
+	 *   that is accessible in `importFiles` via `toBeImportedMetadata`. See
+	 *   https://github.com/opral/inlang-sdk/issues/218 for more info.
+	 *
 	 */
 	toBeImportedFiles?: (args: {
 		settings: ProjectSettings & ExternalSettings;
-	}) => MaybePromise<Array<{ path: string; locale: string }>>;
+	}) => MaybePromise<
+		Array<{ path: string; locale: string; metadata?: Record<string, any> }>
+	>;
 	importFiles?: (args: {
-		files: Array<Omit<ResourceFile, "pluginKey">>;
+		files: Array<{
+			locale: string;
+			content: ArrayBuffer;
+			toBeImportedFilesMetadata?: Record<string, any>;
+		}>;
 		settings: ProjectSettings & ExternalSettings; // we expose the settings in case the importFunction needs to access the plugin config
 	}) => MaybePromise<{
 		bundles: NewBundleNested[];
@@ -47,7 +57,7 @@ export type InlangPlugin<
 	exportFiles?: (args: {
 		bundles: BundleNested[];
 		settings: ProjectSettings & ExternalSettings;
-	}) => MaybePromise<Array<Omit<ResourceFile, "pluginKey">>>;
+	}) => MaybePromise<Array<ExportFile>>;
 	/**
 	 * @deprecated Use the `meta` field instead.
 	 */
