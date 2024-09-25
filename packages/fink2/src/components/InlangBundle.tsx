@@ -364,6 +364,7 @@ const InlangBundle = (props: {
 										<ReactInlangMessage
 											slot="message"
 											message={message}
+											settings={settings}
 											key={`${props.bundle.id}-${locale}-empty`}
 										>
 											<p
