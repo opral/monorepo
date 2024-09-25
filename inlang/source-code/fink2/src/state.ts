@@ -6,6 +6,7 @@ import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { Change, isInSimulatedCurrentBranch } from "@inlang/sdk2";
 import hasMissingTranslations from "./helper/hasMissingTranslations.ts";
 import getSortedBundles from "./helper/sortBundles.ts";
+// @ts-expect-error - the plugin ships with no declaration file
 import i18nextPlugin from "@inlang/plugin-i18next";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
