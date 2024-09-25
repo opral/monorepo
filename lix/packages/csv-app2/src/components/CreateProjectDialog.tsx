@@ -10,6 +10,7 @@ import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import plugin from "../csv-plugin.ts";
 import { useNavigate } from "react-router-dom";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
+import { humanId } from "../helper/human-id/human-id.ts";
 
 export const CreateProjectDialog = (props: {
 	showNewProjectDialog: boolean;
@@ -25,17 +26,32 @@ export const CreateProjectDialog = (props: {
 	const handleCreateNewProject = async () => {
 		setLoading(true);
 		console.log("create new project", fileName);
+		const projectId = humanId();
 
 		const rootHandle = await getOriginPrivateDirectory();
-		const fileHandle = await rootHandle.getFileHandle(fileName, {
-			create: true,
-		});
+		const fileHandle = await rootHandle.getFileHandle(
+			projectId + "___" + fileName,
+			{
+				create: true,
+			}
+		);
 		const writable = await fileHandle.createWritable();
 		const blob = await newLixFile();
 		const newProject = await openLixInMemory({
 			blob,
 			providePlugins: [plugin],
 		});
+
+		await newProject.db
+			.insertInto("file")
+			.values({
+				path: "/project_meta",
+				data: new TextEncoder().encode(
+					JSON.stringify({ project_id: humanId(), initial_file_name: fileName })
+				),
+			})
+			.execute();
+
 		const file = await newProject.toBlob();
 		await writable.write(file);
 		await writable.close();

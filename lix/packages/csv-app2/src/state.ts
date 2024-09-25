@@ -10,7 +10,9 @@ import { getOriginPrivateDirectory } from "native-file-system-adapter";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
-	undefined
+	undefined,
+	createJSONStorage(),
+	{ getOnInit: true }
 );
 
 export const authorNameAtom = atomWithStorage<string | undefined>(
@@ -46,48 +48,103 @@ export const projectAtom = atom(async (get) => {
 	}
 
 	try {
-		const path = get(selectedProjectPathAtom);
-		if (!path) return undefined;
+		const fallbackPath = get(selectedProjectPathAtom);
 		const rootHandle = await getOriginPrivateDirectory();
+		console.log("Check for available projects");
+
+		const urlParams = new URLSearchParams(window.location.search);
+		const project_id = urlParams.get("project");
+		if (!project_id) return undefined;
+
+		let path: undefined | string = undefined;
+
+		for await (const entry of rootHandle.keys()) {
+			if (!(entry as string).includes("___")) {
+				// skip all files in opfs that don't have the separator yet
+				continue;
+			}
+			const [entry_project_id] = entry.split("___");
+
+			if (project_id === entry_project_id) {
+				path = entry;
+			}
+		}
+
+		if (!path) {
+			// we don't have the project locally yet - try to fetch it from remote
+			const projectBlobFromRemote = await (
+				await fetch("https://monorepo-6hl2.onrender.com/lix-file/" + project_id)
+			).arrayBuffer();
+
+			const serverLix = await openLixInMemory({
+				blob: new Blob([projectBlobFromRemote]),
+				providePlugins: [plugin],
+			});
+
+			return undefined;
+		}
 		const fileHandle = await rootHandle.getFileHandle(path);
 		const file = await fileHandle.getFile();
 		const project = await openLixInMemory({
 			blob: file,
 			providePlugins: [plugin],
 		});
+		const projectMetaRaw = new TextDecoder().decode(
+			(
+				await project.db
+					.selectFrom("file")
+					.where("path", "=", "/project_meta")
+					.select("data")
+					.executeTakeFirstOrThrow()
+			).data
+		);
+
+		projectMetaRaw;
 		// @ts-ignore
 		// safeProjectToOpfsInterval = setInterval(
 		const syncLixFile = async () => {
-			const writable = await fileHandle.createWritable();
 			const file = await project.toBlob();
+			const writable = await fileHandle.createWritable();
 
-			// TODO make url configurable
-			const response = await fetch(
-				"https://monorepo-6hl2.onrender.com/lix-file/test",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/octet-stream",
-					},
-					body: file,
-				}
+			const checkIfExists = await fetch(
+				"https://monorepo-6hl2.onrender.com/lix-file/" + projectId
 			);
 
-			if (!response.ok) {
-				throw new Error("Network response was not ok " + response.statusText);
+			console.log("projectId: ", projectId);
+			console.log("response state: ", checkIfExists.ok);
+
+			if (checkIfExists.ok) {
+				// the file does exist remotely - trigger sync
+				const response = await fetch(
+					"https://monorepo-6hl2.onrender.com/lix-file/" + projectId,
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/octet-stream",
+						},
+						body: file,
+					}
+				);
+
+				if (!response.ok) {
+					throw new Error("Network response was not ok " + response.statusText);
+				}
+
+				const content = await response.arrayBuffer();
+
+				const serverLix = await openLixInMemory({
+					blob: new Blob([content]),
+					providePlugins: [plugin],
+				});
+
+				console.log("serverLix", serverLix);
+
+				await merge({
+					sourceLix: serverLix,
+					targetLix: project,
+				});
 			}
-			console.log("response", response);
-			const content = await response.arrayBuffer();
-
-			const serverLix = await openLixInMemory({
-				blob: new Blob([content]),
-				providePlugins: [plugin],
-			});
-
-			await merge({
-				sourceLix: serverLix,
-				targetLix: project,
-			});
+			// TODO make url configurable
 
 			// return response.json(); // Or .text() depending on the response format
 

@@ -8,7 +8,7 @@ import {
 	selectedProjectPathAtom,
 	withPollingAtom,
 } from "./state.ts";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { SlButton, SlTooltip } from "@shoelace-style/shoelace/dist/react";
 import SubNavigation from "./components/SubNavigation.tsx";
 
@@ -21,6 +21,34 @@ export default function Layout(props: {
 	const [project] = useAtom(projectAtom);
 
 	const navigate = useNavigate();
+	const [, setSearchParams] = useSearchParams();
+
+	const handleShare = async () => {
+		if (project === undefined) {
+			return;
+		}
+		const projectId = new TextDecoder().decode(
+			(
+				await project!.db
+					.selectFrom("file")
+					.where("path", "=", "/project_meta")
+					.select("data")
+					.executeTakeFirstOrThrow()
+			).data
+		);
+
+		const file = await project.toBlob();
+		const response = await fetch(
+			"https://monorepo-6hl2.onrender.com/lix-file/" + projectId,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/octet-stream",
+				},
+				body: file,
+			}
+		);
+	};
 
 	const handleDownload = async () => {
 		const file = await project?.db
@@ -49,6 +77,27 @@ export default function Layout(props: {
 		document.body.removeChild(link);
 	};
 
+	const handleSetSearchParams = async () => {
+		if (selectedProjectPath && project) {
+			const file = await project.db
+				.selectFrom("file")
+				.where("path", "=", "/project_meta")
+				.select("data")
+				.executeTakeFirst();
+
+			console.log("handle", file);
+
+			if (file) {
+				const projectMeta = JSON.parse(new TextDecoder().decode(file.data));
+				if (projectMeta) {
+					setSearchParams(
+						new URLSearchParams({ project: projectMeta.project_id })
+					);
+				}
+			}
+		}
+	};
+
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setWithPolling(Date.now());
@@ -56,6 +105,13 @@ export default function Layout(props: {
 		}, 500);
 		return () => clearInterval(interval);
 	});
+
+	useEffect(() => {
+		console.log("selectedProjectPath", selectedProjectPath, project);
+		if (selectedProjectPath && project) {
+			handleSetSearchParams();
+		}
+	}, [selectedProjectPath, project]);
 
 	return (
 		<div className="w-full min-h-screen bg-zinc-50">
@@ -91,6 +147,17 @@ export default function Layout(props: {
 							</p>
 							<p className="hidden md:block text-zinc-500 hover:text-black text-[14px] pr-2 cursor-pointer">
 								Discover SDK
+							</p>
+						</SlTooltip>
+						<SlTooltip content="Share with your team">
+							<p className="text-zinc-500 hover:text-black text-[14px] pr-2 cursor-pointer">
+								<SlButton
+									size="small"
+									variant="default"
+									onClick={() => handleShare()}
+								>
+									Share
+								</SlButton>
 							</p>
 						</SlTooltip>
 						<SlTooltip content="Download .csv">

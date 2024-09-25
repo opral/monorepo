@@ -70,6 +70,10 @@ export default function App() {
 		getProjects();
 	}, [project]);
 
+	useEffect(() => {
+		setSelectedProjectPath(undefined);
+	}, []);
+
 	return (
 		<div className="w-full">
 			<div className="w-full border-b border-zinc-200 bg-white flex items-center px-4 min-h-[54px] gap-2">
