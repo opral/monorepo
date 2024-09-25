@@ -94,6 +94,10 @@ describe("plugin.diff.file", () => {
 	test("insert of message", async () => {
 		const neuProject = await loadProjectInMemory({ blob: await newProject() });
 		await neuProject.db
+			.insertInto("bundle")
+			.values({ id: "unknown" })
+			.execute();
+		await neuProject.db
 			.insertInto("message")
 			.values({
 				id: "1",
@@ -110,22 +114,29 @@ describe("plugin.diff.file", () => {
 				metadata: {},
 			},
 		});
-		expect(diffReports).toEqual([
-			{
-				type: "message",
-				operation: "create",
-				old: undefined,
-				neu: {
-					id: "1",
-					bundleId: "unknown",
-					selectors: [],
-					locale: "en",
-				},
-			} satisfies DiffReport,
-		]);
+		expect(diffReports).toEqual(
+			expect.arrayContaining([
+				{
+					type: "message",
+					operation: "create",
+					old: undefined,
+					neu: {
+						id: "1",
+						bundleId: "unknown",
+						selectors: [],
+						locale: "en",
+					},
+				} satisfies DiffReport,
+			])
+		);
 	});
+
 	test("update of message", async () => {
 		const oldProject = await loadProjectInMemory({ blob: await newProject() });
+		await oldProject.db
+			.insertInto("bundle")
+			.values({ id: "unknown" })
+			.execute();
 		await oldProject.db
 			.insertInto("message")
 			.values([
@@ -142,6 +153,10 @@ describe("plugin.diff.file", () => {
 			])
 			.execute();
 		const neuProject = await loadProjectInMemory({ blob: await newProject() });
+		await neuProject.db
+			.insertInto("bundle")
+			.values({ id: "unknown" })
+			.execute();
 		await neuProject.db
 			.insertInto("message")
 			.values([
@@ -171,30 +186,41 @@ describe("plugin.diff.file", () => {
 				metadata: {},
 			},
 		});
-		expect(diffReports).toEqual([
-			{
-				meta: {
-					id: "1",
-				},
-				type: "message",
-				operation: "update",
-				old: {
-					id: "1",
-					bundleId: "unknown",
-					selectors: [],
-					locale: "en",
-				},
-				neu: {
-					id: "1",
-					bundleId: "unknown",
-					selectors: [],
-					locale: "de",
-				},
-			} satisfies DiffReport,
-		]);
+		expect(diffReports).toEqual(
+			expect.arrayContaining([
+				{
+					meta: {
+						id: "1",
+					},
+					type: "message",
+					operation: "update",
+					old: {
+						id: "1",
+						bundleId: "unknown",
+						selectors: [],
+						locale: "en",
+					},
+					neu: {
+						id: "1",
+						bundleId: "unknown",
+						selectors: [],
+						locale: "de",
+					},
+				} satisfies DiffReport,
+			])
+		);
 	});
 	test("insert of variant", async () => {
 		const neuProject = await loadProjectInMemory({ blob: await newProject() });
+		await neuProject.db
+			.insertInto("bundle")
+			.values({ id: "bundle1" })
+			.execute();
+		await neuProject.db
+			.insertInto("message")
+			.values({ id: "1", bundleId: "bundle1", locale: "en" })
+			.execute();
+
 		await neuProject.db
 			.insertInto("variant")
 			.values({
@@ -213,22 +239,32 @@ describe("plugin.diff.file", () => {
 				metadata: {},
 			},
 		});
-		expect(diffReports).toEqual([
-			{
-				type: "variant",
-				operation: "create",
-				old: undefined,
-				neu: {
-					id: "1",
-					messageId: "1",
-					pattern: [{ type: "text", value: "hello world" }],
-					matches: [],
-				},
-			} satisfies DiffReport,
-		]);
+		expect(diffReports).toEqual(
+			expect.arrayContaining([
+				{
+					type: "variant",
+					operation: "create",
+					old: undefined,
+					neu: {
+						id: "1",
+						messageId: "1",
+						pattern: [{ type: "text", value: "hello world" }],
+						matches: [],
+					},
+				} satisfies DiffReport,
+			])
+		);
 	});
 	test("update of variant", async () => {
 		const oldProject = await loadProjectInMemory({ blob: await newProject() });
+		await oldProject.db
+			.insertInto("bundle")
+			.values({ id: "bundle1" })
+			.execute();
+		await oldProject.db
+			.insertInto("message")
+			.values({ id: "1", bundleId: "bundle1", locale: "en" })
+			.execute();
 		await oldProject.db
 			.insertInto("variant")
 			.values([
@@ -247,6 +283,14 @@ describe("plugin.diff.file", () => {
 			])
 			.execute();
 		const neuProject = await loadProjectInMemory({ blob: await newProject() });
+		await neuProject.db
+			.insertInto("bundle")
+			.values({ id: "bundle1" })
+			.execute();
+		await neuProject.db
+			.insertInto("message")
+			.values({ id: "1", bundleId: "bundle1", locale: "en" })
+			.execute();
 		await neuProject.db
 			.insertInto("variant")
 			.values([
