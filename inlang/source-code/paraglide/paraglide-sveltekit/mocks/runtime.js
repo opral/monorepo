@@ -50,7 +50,7 @@ export let languageTag = () => sourceLanguageTag
  *   // a getter function is useful for resolving a language tag
  *   // on the server where every request has a different language tag
  *   setLanguageTag(() => {
- *     return request.langaugeTag
+ *     return request.languageTag
  *   })
  *
  * @param {AvailableLanguageTag | (() => AvailableLanguageTag)} tag
