@@ -27,19 +27,21 @@ export default function Layout(props: {
 		if (project === undefined) {
 			return;
 		}
-		const projectId = new TextDecoder().decode(
-			(
-				await project!.db
-					.selectFrom("file")
-					.where("path", "=", "/project_meta")
-					.select("data")
-					.executeTakeFirstOrThrow()
-			).data
+		const { project_id } = JSON.parse(
+			new TextDecoder().decode(
+				(
+					await project!.db
+						.selectFrom("file")
+						.where("path", "=", "/project_meta")
+						.select("data")
+						.executeTakeFirstOrThrow()
+				).data
+			)
 		);
 
 		const file = await project.toBlob();
 		const response = await fetch(
-			"https://monorepo-6hl2.onrender.com/lix-file/" + projectId,
+			"https://localhost:3000/lix-file/" + project_id,
 			{
 				method: "POST",
 				headers: {

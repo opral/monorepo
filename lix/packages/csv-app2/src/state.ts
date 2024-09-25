@@ -42,48 +42,107 @@ export const projectAtom = atom(async (get) => {
 	// workaround for https://github.com/opral/lix-sdk/issues/47
 	get(forceReloadProjectAtom);
 
-	if (safeProjectToOpfsInterval) {
-		// TODO refactor - use timeout instead of interval
-		clearInterval(safeProjectToOpfsInterval);
-	}
-
 	try {
 		const fallbackPath = get(selectedProjectPathAtom);
 		const rootHandle = await getOriginPrivateDirectory();
 		console.log("Check for available projects");
 
-		const urlParams = new URLSearchParams(window.location.search);
-		const project_id = urlParams.get("project");
-		if (!project_id) return undefined;
-
 		let path: undefined | string = undefined;
 
-		for await (const entry of rootHandle.keys()) {
-			if (!(entry as string).includes("___")) {
-				// skip all files in opfs that don't have the separator yet
-				continue;
-			}
-			const [entry_project_id] = entry.split("___");
+		const urlParams = new URLSearchParams(window.location.search);
+		const project_id_search_param = urlParams.get("project");
 
-			if (project_id === entry_project_id) {
-				path = entry;
+		if (project_id_search_param) {
+			console.log(
+				"Project id in search parameter found ... try to match local project CURRENT STATE:" +
+					fallbackPath
+			);
+			// try to find a project locally
+			for await (const entry of rootHandle.keys()) {
+				if (!(entry as string).includes("___")) {
+					// skip all files in opfs that don't have the separator yet
+					continue;
+				}
+				const [entry_project_id] = entry.split("___");
+
+				if (project_id_search_param === entry_project_id) {
+					path = entry;
+				}
 			}
+
+			if (path) {
+				console.log(
+					"Project id in search parameter found ... try to match local project -> Project found localy"
+				);
+			} else {
+				console.log(
+					"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote"
+				);
+
+				const lixServerRequest = await fetch(
+					"https://localhost:3000/lix-file/" + project_id_search_param
+				);
+				if (!lixServerRequest.ok) {
+					console.log(
+						"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote -> NOT FOUND"
+					);
+					return;
+				}
+
+				console.log(
+					"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote -> NOT FOUND"
+				);
+
+				// we don't have the project localy yet - try to fetch it from remote
+				const projectBlobFromRemote = await lixServerRequest.arrayBuffer();
+
+				const serverLix = await openLixInMemory({
+					blob: new Blob([projectBlobFromRemote]),
+					providePlugins: [plugin],
+				});
+
+				const projectMetaFile = await serverLix.db
+					.selectFrom("file")
+					.select("data")
+					.where("path", "=", "/project_meta")
+					.executeTakeFirstOrThrow();
+				const projectMetaRaw = new TextDecoder().decode(projectMetaFile.data);
+				console.log(projectMetaRaw);
+
+				const projectId = JSON.parse(projectMetaRaw).project_id;
+				const projectFileName = JSON.parse(projectMetaRaw).initial_file_name;
+
+				path = projectId + "___" + projectFileName;
+
+				console.log(
+					"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote -> FOUND - writing to " +
+						path
+				);
+				// write file locally
+				const fileHandle = await rootHandle.getFileHandle(path, {
+					create: true,
+				});
+
+				const writable = await fileHandle.createWritable();
+				await writable.write(await serverLix.toBlob());
+				await writable.close();
+			}
+		} else {
+			console.log(
+				"No project found in search parameter - checking state" + fallbackPath
+			);
+			if (fallbackPath === undefined) {
+				console.log(
+					"No project found in search parameter - checking state -> no state return"
+				);
+				return;
+			}
+			path = fallbackPath;
 		}
 
-		if (!path) {
-			// we don't have the project locally yet - try to fetch it from remote
-			const projectBlobFromRemote = await (
-				await fetch("https://monorepo-6hl2.onrender.com/lix-file/" + project_id)
-			).arrayBuffer();
-
-			const serverLix = await openLixInMemory({
-				blob: new Blob([projectBlobFromRemote]),
-				providePlugins: [plugin],
-			});
-
-			return undefined;
-		}
+		console.log("rootHandle.getFileHandle(path)");
 		const fileHandle = await rootHandle.getFileHandle(path);
+		console.log("const file = await fileHandle.getFile();");
 		const file = await fileHandle.getFile();
 		const project = await openLixInMemory({
 			blob: file,
@@ -99,7 +158,7 @@ export const projectAtom = atom(async (get) => {
 			).data
 		);
 
-		projectMetaRaw;
+		const { project_id } = JSON.parse(projectMetaRaw);
 		// @ts-ignore
 		// safeProjectToOpfsInterval = setInterval(
 		const syncLixFile = async () => {
@@ -107,16 +166,16 @@ export const projectAtom = atom(async (get) => {
 			const writable = await fileHandle.createWritable();
 
 			const checkIfExists = await fetch(
-				"https://monorepo-6hl2.onrender.com/lix-file/" + projectId
+				"http://localhost:3000/lix-file/" + project_id
 			);
 
-			console.log("projectId: ", projectId);
+			console.log("projectId: ", project_id);
 			console.log("response state: ", checkIfExists.ok);
 
 			if (checkIfExists.ok) {
 				// the file does exist remotely - trigger sync
 				const response = await fetch(
-					"https://monorepo-6hl2.onrender.com/lix-file/" + projectId,
+					"http://localhost:3000/lix-file/" + project_id,
 					{
 						method: "POST",
 						headers: {
@@ -144,15 +203,6 @@ export const projectAtom = atom(async (get) => {
 					targetLix: project,
 				});
 			}
-			// TODO make url configurable
-
-			// return response.json(); // Or .text() depending on the response format
-
-			// TODO post to server and merge response
-			// const serverMergeResult = postLixFile(file)
-			// lix.merge({source: serverMergeResult, target: localState})
-			// const mergedState = = await project.toBlob();
-			// await writable.write(mergedState);
 
 			await writable.write(await project.toBlob());
 			await writable.close();

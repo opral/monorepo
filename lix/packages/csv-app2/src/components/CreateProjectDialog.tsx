@@ -47,7 +47,7 @@ export const CreateProjectDialog = (props: {
 			.values({
 				path: "/project_meta",
 				data: new TextEncoder().encode(
-					JSON.stringify({ project_id: humanId(), initial_file_name: fileName })
+					JSON.stringify({ project_id: projectId, initial_file_name: fileName })
 				),
 			})
 			.execute();
@@ -56,7 +56,7 @@ export const CreateProjectDialog = (props: {
 		await writable.write(file);
 		await writable.close();
 
-		setSelectedProjectPath(fileName);
+		setSelectedProjectPath(projectId + "___" + fileName);
 		setLoading(false);
 		props.setShowNewProjectDialog(false);
 

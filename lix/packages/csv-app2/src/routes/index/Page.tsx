@@ -34,7 +34,7 @@ export default function App() {
 		}
 		// @ts-expect-error - TS doesn't know about the keys method
 		for await (const path of opfsRoot.keys()) {
-			if (path.endsWith(".lix")) {
+			if (path.endsWith(".lix") && path.includes("___")) {
 				if (!path) return undefined;
 
 				try {
