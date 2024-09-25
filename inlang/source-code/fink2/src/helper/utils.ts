@@ -1,4 +1,9 @@
-import { InlangProject, loadProjectInMemory, merge } from "@inlang/sdk2";
+import {
+	ImportFile,
+	InlangProject,
+	loadProjectInMemory,
+	merge,
+} from "@inlang/sdk2";
 
 export const handleDownload = async (
 	project: InlangProject | undefined,
@@ -94,10 +99,16 @@ export const importFromJSON = async (project: InlangProject | undefined) => {
 		if (file) {
 			const reader = new FileReader();
 			reader.onload = async () => {
-				const json = JSON.parse(reader.result as string);
+				const file: ImportFile = {
+					content:
+						typeof reader.result === "string"
+							? new TextEncoder().encode(reader.result)
+							: new Uint8Array(reader.result as ArrayBuffer),
+					locale: "en",
+				};
 				await project!.importFiles({
 					pluginKey: "plugin.inlang.i18next",
-					files: json,
+					files: [file],
 				});
 			};
 			reader.readAsText(file);
