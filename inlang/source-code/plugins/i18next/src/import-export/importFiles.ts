@@ -130,7 +130,11 @@ function parseMessage(args: {
 	// https://www.i18next.com/translation-function/context#combining-with-plurals
 	const isCatchAll =
 		testForPlurals(args.key) === false &&
-		Object.keys(args.resource).some((key) => testForPlurals(key))
+		Object.keys(args.resource).some(
+			// the first part of the key is identical e.g.
+			// ["friend"] -> ["friend", "one"]
+			(key) => args.key.split("_")[0] === key.split("_")[0] && testForPlurals(key)
+		)
 
 	if (hasContext && hasPlurals === false && isCatchAll === false) {
 		// "friend_male" -> ["friend", "male"]

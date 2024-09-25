@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { importFiles } from "./importFiles.js"
-import type { BundleNested, LiteralMatch, Message, Pattern, Variant } from "@inlang/sdk2"
+import type { BundleNested, LiteralMatch, Pattern, Variant } from "@inlang/sdk2"
 import { exportFiles } from "./exportFiles.js"
 
 test("single key value", async () => {
@@ -12,6 +12,9 @@ test("single key value", async () => {
 	})
 
 	const bundle = imported.bundles.find((bundle) => bundle.id === "key")
+
+	expect(bundle?.messages[0]?.selectors).toStrictEqual([])
+	expect(bundle?.messages[0]?.variants[0]?.matches).toStrictEqual([])
 
 	expect(bundle?.messages[0]?.variants[0]?.pattern).toStrictEqual([
 		{ type: "text", value: "value" },
@@ -513,6 +516,28 @@ test("it should put new entities into the resource file without a namespace", as
 	expect(exportedCommon).toStrictEqual({
 		foo_bar: "value2",
 	})
+})
+
+test("a key with a single variant should have no matches even if other keys are multi variant", async () => {
+	const imported = await runImportFiles({
+		key: "value",
+		keyPluralSimple_one: "the singular",
+		keyPluralSimple_other: "the plural",
+	})
+
+	expect(await runExportFiles(imported)).toStrictEqual({
+		key: "value",
+		keyPluralSimple_one: "the singular",
+		keyPluralSimple_other: "the plural",
+	})
+
+	const bundle = imported.bundles.find((bundle) => bundle.id === "key")
+
+	expect(bundle?.messages[0]?.selectors).toStrictEqual([])
+	expect(bundle?.messages[0]?.variants[0]?.matches).toStrictEqual([])
+	expect(bundle?.messages[0]?.variants[0]?.pattern).toStrictEqual([
+		{ type: "text", value: "value" },
+	])
 })
 
 // convenience wrapper for less testing code
