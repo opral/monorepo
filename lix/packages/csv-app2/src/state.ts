@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { openLixInMemory } from "@lix-js/sdk";
+import { merge, openLixInMemory } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import Papa from "papaparse";
@@ -41,7 +41,6 @@ export const projectAtom = atom(async (get) => {
 	get(forceReloadProjectAtom);
 
 	if (safeProjectToOpfsInterval) {
-
 		// TODO refactor - use timeout instead of interval
 		clearInterval(safeProjectToOpfsInterval);
 	}
@@ -61,20 +60,50 @@ export const projectAtom = atom(async (get) => {
 		const syncLixFile = async () => {
 			const writable = await fileHandle.createWritable();
 			const file = await project.toBlob();
-			
-			// TODO post to server and merge response 
+
+			// TODO make url configurable
+			const response = await fetch(
+				"https://monorepo-6hl2.onrender.com/lix-file/test",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/octet-stream",
+					},
+					body: file,
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error("Network response was not ok " + response.statusText);
+			}
+			console.log("response", response);
+			const content = await response.arrayBuffer();
+
+			const serverLix = await openLixInMemory({
+				blob: new Blob([content]),
+				providePlugins: [plugin],
+			});
+
+			await merge({
+				sourceLix: serverLix,
+				targetLix: project,
+			});
+
+			// return response.json(); // Or .text() depending on the response format
+
+			// TODO post to server and merge response
 			// const serverMergeResult = postLixFile(file)
 			// lix.merge({source: serverMergeResult, target: localState})
 			// const mergedState = = await project.toBlob();
 			// await writable.write(mergedState);
-			
-			await writable.write(file);
+
+			await writable.write(await project.toBlob());
 			await writable.close();
 
-			setTimeout(syncLixFile, 2000)
-		}	
-		
-		syncLixFile()
+			setTimeout(syncLixFile, 2000);
+		};
+
+		syncLixFile();
 		// }, 2000);
 
 		return project;
