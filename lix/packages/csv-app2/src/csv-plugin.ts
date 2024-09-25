@@ -345,7 +345,7 @@ export const plugin: LixPlugin = {
 				if (old === undefined) {
 					const diffResult = [
 						{
-							type: "file",
+							type: "fileSnapshot",
 							operation: "create",
 							old,
 							neu: {
@@ -359,7 +359,7 @@ export const plugin: LixPlugin = {
 				} else if (JSON.stringify(old) !== JSON.stringify(neu)) {
 					return [
 						{
-							type: "file",
+							type: "fileSnapshot",
 							operation: "update",
 							old: {
 								id: "-",
