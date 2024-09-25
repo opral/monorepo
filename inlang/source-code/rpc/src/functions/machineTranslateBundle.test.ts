@@ -24,12 +24,9 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 								messageId: "mock-message-id",
 								matches: [
 									{
-										type: "match",
-										name: "name",
-										value: {
-											type: "literal",
-											value: "John",
-										},
+										type: "literal-match",
+										key: "name",
+										value: "John",
 									},
 								],
 								pattern: [{ type: "text", value: "Hello world, John" }],
@@ -39,11 +36,8 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 								messageId: "mock-message-id",
 								matches: [
 									{
-										type: "match",
-										name: "name",
-										value: {
-											type: "catch-all",
-										},
+										type: "catchall-match",
+										key: "name",
 									},
 								],
 								pattern: [{ type: "text", value: "Hello world" }],
