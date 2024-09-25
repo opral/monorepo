@@ -15,6 +15,7 @@
 	},
 	"dependencies": {
 		"@inlang/bundle-component": "workspace:*",
+		"@inlang/plugin-i18next": "workspace:*",
 		"@inlang/sdk2": "workspace:*",
 		"@inlang/settings-component2": "workspace:*",
 		"@lit/react": "^1.0.5",

@@ -6,6 +6,7 @@ import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { Change, isInSimulatedCurrentBranch } from "@inlang/sdk2";
 import hasMissingTranslations from "./helper/hasMissingTranslations.ts";
 import getSortedBundles from "./helper/sortBundles.ts";
+import i18nextPlugin from "@inlang/plugin-i18next";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -43,7 +44,10 @@ export const projectAtom = atom(async (get) => {
 		const opfsRoot = await navigator.storage.getDirectory();
 		const fileHandle = await opfsRoot.getFileHandle(path);
 		const file = await fileHandle.getFile();
-		const project = await loadProjectInMemory({ blob: file });
+		const project = await loadProjectInMemory({
+			blob: file,
+			providePlugins: [i18nextPlugin],
+		});
 		safeProjectToOpfsInterval = setInterval(async () => {
 			const writable = await fileHandle.createWritable();
 			const file = await project.toBlob();
