@@ -93,6 +93,7 @@ export default function App() {
 									<div className="flex flex-col gap-4">
 										<SlInput
 											required
+											autoFocus
 											label="Description"
 											helpText="Add a description of the changes"
 											placeholder="I updated the german translations"
