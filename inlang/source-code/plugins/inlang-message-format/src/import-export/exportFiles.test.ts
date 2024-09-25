@@ -29,7 +29,7 @@ test("it handles single variants without expressions", async () => {
 				variants: [
 					{
 						id: "some_happy_cat_en",
-						match: {},
+						matches: [],
 						messageId: "some_happy_cat_en",
 						pattern: [{ type: "text", value: "Read more about Lix" }],
 					},
@@ -44,7 +44,7 @@ test("it handles single variants without expressions", async () => {
 	})
 
 	expect(result).lengthOf(1)
-	expect(result[0]?.path).toBe("/i18n/en.json")
+	expect(result[0]?.name).toBe("en.json")
 	expect(result[0]?.locale).toBe("en")
 
 	const parsed = JSON.parse(new TextDecoder().decode(result[0]?.content))
@@ -85,10 +85,18 @@ test("it handles multi variants", async () => {
 				variants: [
 					{
 						id: "some_happy_cat_en;platform=android,userGender=male",
-						match: {
-							platform: "android",
-							userGender: "male",
-						},
+						matches: [
+							{
+								type: "literal-match",
+								key: "platform",
+								value: "android",
+							},
+							{
+								type: "literal-match",
+								key: "userGender",
+								value: "male",
+							},
+						],
 						messageId: "some_happy_cat_en",
 						pattern: [
 							{
@@ -103,10 +111,18 @@ test("it handles multi variants", async () => {
 					},
 					{
 						id: "some_happy_cat_en;platform=ios,userGender=female",
-						match: {
-							platform: "ios",
-							userGender: "female",
-						},
+						matches: [
+							{
+								type: "literal-match",
+								key: "platform",
+								value: "ios",
+							},
+							{
+								type: "literal-match",
+								key: "userGender",
+								value: "female",
+							},
+						],
 						messageId: "some_happy_cat_en",
 						pattern: [
 							{
@@ -121,10 +137,16 @@ test("it handles multi variants", async () => {
 					},
 					{
 						id: "some_happy_cat_en;platform=*,userGender=*",
-						match: {
-							platform: "*",
-							userGender: "*",
-						},
+						matches: [
+							{
+								type: "catchall-match",
+								key: "platform",
+							},
+							{
+								type: "catchall-match",
+								key: "userGender",
+							},
+						],
 						messageId: "some_happy_cat_en",
 						pattern: [
 							{
@@ -144,7 +166,7 @@ test("it handles multi variants", async () => {
 	})
 
 	expect(result).lengthOf(1)
-	expect(result[0]?.path).toBe("/i18n/en.json")
+	expect(result[0]?.name).toBe("en.json")
 	expect(result[0]?.locale).toBe("en")
 
 	const parsed = JSON.parse(new TextDecoder().decode(result[0]?.content))
@@ -177,7 +199,7 @@ test("it handles variable expressions in patterns", async () => {
 				variants: [
 					{
 						id: "some_happy_cat_en",
-						match: {},
+						matches: [],
 						messageId: "some_happy_cat_en",
 						pattern: [
 							{ type: "text", value: "Used by " },
@@ -198,7 +220,7 @@ test("it handles variable expressions in patterns", async () => {
 	})
 
 	expect(result).lengthOf(1)
-	expect(result[0]?.path).toBe("/i18n/en.json")
+	expect(result[0]?.name).toBe("en.json")
 	expect(result[0]?.locale).toBe("en")
 
 	const parsed = JSON.parse(new TextDecoder().decode(result[0]?.content))
@@ -227,7 +249,7 @@ test("it assigns the correct locales to files", async () => {
 				variants: [
 					{
 						id: "some_happy_cat_en",
-						match: {},
+						matches: [],
 						messageId: "some_happy_cat_en",
 						pattern: [{ type: "text", value: "Read more about Lix" }],
 					},
@@ -241,7 +263,7 @@ test("it assigns the correct locales to files", async () => {
 				variants: [
 					{
 						id: "some_happy_cat_de",
-						match: {},
+						matches: [],
 						messageId: "some_happy_cat_de",
 						pattern: [{ type: "text", value: "Lese mehr über Lix" }],
 					},
@@ -259,11 +281,11 @@ test("it assigns the correct locales to files", async () => {
 	expect(result).toStrictEqual([
 		expect.objectContaining({
 			locale: "en",
-			path: "/i18n/en.json",
+			name: "en.json",
 		}),
 		expect.objectContaining({
 			locale: "de",
-			path: "/i18n/de.json",
+			name: "de.json",
 		}),
 	])
 })

@@ -26,6 +26,7 @@ import {
 	Variant,
 } from "@inlang/sdk2";
 import {
+	SlButton,
 	SlDialog,
 	SlDropdown,
 	SlMenu,
@@ -34,6 +35,7 @@ import {
 } from "@shoelace-style/shoelace/dist/react";
 import clsx from "clsx";
 import VariantHistory from "./VariantHistory.tsx";
+import { deleteBundleNested } from "../helper/deleteBundleNested.ts";
 
 const ReactInlangBundle = createComponent({
 	tagName: "inlang-bundle",
@@ -136,6 +138,30 @@ const InlangBundle = (props: {
 			{props.bundle && (
 				<div className="relative">
 					<ReactInlangBundle bundle={props.bundle} change={handleChangeEvent}>
+						{/* <SlTooltip
+							slot="bundle-action"
+							content="Delete bundle"
+						>
+							<SlButton
+								className="absolute top-0 right-0 pt-[1px] mt-1.5 mr-2"
+								variant="default"
+								size="small"
+								onClick={() => deleteBundleNested(project!.db, props.bundle.id)}
+							>
+								<svg
+									// @ts-expect-error - shoelace slot prop
+									slot="suffix"
+									className="w-5 h-5 -mx-1"
+									xmlns="http://www.w3.org/2000/svg"
+									height="24px"
+									viewBox="0 -960 960 960"
+									width="24px"
+									fill={"currentColor"}
+								>
+									<path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
+								</svg>
+							</SlButton>
+						</SlTooltip> */}
 						{visibleLocales().map(
 							(locale: ProjectSettings["locales"][number]) => {
 								const message = props.bundle.messages.find(

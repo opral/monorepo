@@ -13,8 +13,8 @@ import { fromMessageV1 } from "../json-schema/old-v1-message/fromMessageV1.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import type { PreprocessPluginBeforeImportFunction } from "../plugin/importPlugins.js";
 import { PluginImportError } from "../plugin/errors.js";
-import type { InlangProject, ResourceFile } from "./api.js";
-import { upsertBundleNestedMatchByProperties } from "../query-utilities/upsertBundleNestedMatchByProperties.js";
+import type { InlangProject } from "./api.js";
+import { upsertBundleNestedMatchByProperties } from "../import-export/upsertBundleNestedMatchByProperties.js";
 
 /**
  * Loads a project from a directory.
@@ -102,7 +102,7 @@ export async function loadProjectFromDirectory(
 		);
 	} else if (importPlugins[0]) {
 		const importer = importPlugins[0];
-		const files: ResourceFile[] = [];
+		const files = [];
 
 		if (importer.toBeImportedFiles) {
 			const toBeImportedFiles = await importer.toBeImportedFiles({
@@ -112,11 +112,13 @@ export async function loadProjectFromDirectory(
 				const absolute = absolutePathFromProject(args.path, toBeImported.path);
 				try {
 					const data = await args.fs.promises.readFile(absolute);
+					const name = nodePath.basename(toBeImported.path);
 					files.push({
-						path: toBeImported.path,
+						name,
 						locale: toBeImported.locale,
 						content: data,
 						pluginKey: importer.key,
+						toBeImportedFilesMetadata: toBeImported.metadata,
 					});
 				} catch (e) {
 					// https://github.com/opral/inlang-sdk/issues/202

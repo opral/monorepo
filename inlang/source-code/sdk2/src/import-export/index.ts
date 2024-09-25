@@ -7,11 +7,11 @@ import type { ProjectSettings } from "../json-schema/settings.js";
 import type { InlangDatabaseSchema } from "../database/schema.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import type { InlangPlugin } from "../plugin/schema.js";
-import type { ResourceFile } from "../project/api.js";
-import { upsertBundleNestedMatchByProperties } from "../query-utilities/upsertBundleNestedMatchByProperties.js";
+import type { ImportFile } from "../project/api.js";
+import { upsertBundleNestedMatchByProperties } from "./upsertBundleNestedMatchByProperties.js";
 
 export async function importFiles(opts: {
-	files: ResourceFile[];
+	files: ImportFile[];
 	readonly pluginKey: string;
 	readonly settings: ProjectSettings;
 	readonly plugins: readonly InlangPlugin[];
@@ -36,7 +36,6 @@ export async function importFiles(opts: {
 	);
 
 	await Promise.all(insertPromises);
-	return bundles;
 }
 
 export async function exportFiles(opts: {
@@ -54,8 +53,11 @@ export async function exportFiles(opts: {
 		});
 	}
 
-	const bundles = await selectBundleNested(opts.db).selectAll().execute();
-	const files = plugin.exportFiles({
+	const bundles = await selectBundleNested(opts.db)
+		.orderBy("id asc")
+		.selectAll()
+		.execute();
+	const files = await plugin.exportFiles({
 		bundles: bundles,
 		settings: structuredClone(opts.settings),
 	});

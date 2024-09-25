@@ -1,4 +1,4 @@
-import type { Match, MessageNested, ResourceFile, Variant } from "@inlang/sdk2"
+import type { ExportFile, Match, MessageNested, Variant } from "@inlang/sdk2"
 import { PLUGIN_KEY, type plugin } from "../plugin.js"
 import type { FileSchema } from "../fileSchema.js"
 
@@ -18,15 +18,14 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 		files[message.locale] = { ...files[message.locale], ...serializeMessage(message) }
 	}
 
-	const result: ResourceFile[] = []
+	const result: ExportFile[] = []
 
 	for (const locale in files) {
 		result.push({
 			locale,
 			// beautify the json
 			content: new TextEncoder().encode(JSON.stringify(files[locale], undefined, "\t")),
-			path: pathPattern.replace("{locale}", locale),
-			pluginKey: PLUGIN_KEY,
+			name: locale + ".json",
 		})
 	}
 
@@ -80,10 +79,10 @@ function serializePattern(pattern: Variant["pattern"]): string {
 function serializeMatcher(matches: Match[]): string {
 	const parts = []
 	for (const match of matches) {
-		if (match.value.type === "literal") {
-			parts.push(`${match.name}=${match.value.value}`)
+		if (match.type === "literal-match") {
+			parts.push(`${match.key}=${match.value}`)
 		} else {
-			parts.push(`${match.name}=*`)
+			parts.push(`${match.key}=*`)
 		}
 	}
 	return parts.join(", ")
