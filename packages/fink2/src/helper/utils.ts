@@ -118,14 +118,14 @@ export const importFromJSON = async (project: InlangProject | undefined) => {
 };
 
 export const exportToJSON = async (project: InlangProject | undefined) => {
-	const json = await project!.exportFiles({
+	const files = await project!.exportFiles({
 		pluginKey: "plugin.inlang.i18next",
 	});
-	const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
+	const blob = new Blob([files[0].content]);
 	const blobUrl = URL.createObjectURL(blob);
 	const link = document.createElement("a");
 	link.href = blobUrl;
-	link.download = "inlang-export.json";
+	link.download = files[0].name;
 	document.body.appendChild(link);
 	link.dispatchEvent(
 		new MouseEvent("click", {
