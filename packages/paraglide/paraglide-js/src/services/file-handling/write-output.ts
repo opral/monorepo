@@ -1,13 +1,13 @@
 import path from "node:path"
 import crypto from "node:crypto"
-import type { NodeishFilesystem } from "./types.js"
+import type nodeFs from "node:fs/promises"
 
 let previousOutputHash: string | undefined
 
 export async function writeOutput(
 	outputDirectory: string,
 	output: Record<string, string>,
-	fs: NodeishFilesystem
+	fs: typeof nodeFs
 ) {
 	// if the output hasn't changed, don't write it
 	const currentOutputHash = hashOutput(output, outputDirectory)

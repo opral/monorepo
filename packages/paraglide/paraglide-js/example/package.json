@@ -1,6 +1,7 @@
 {
-	"name": "@inlang/paraglide-js-example-typescript",
+	"name": "paraglide-js-example-typescript",
 	"type": "module",
+	"version": "0.0.0",
 	"private": true,
 	"scripts": {
 		"_dev": "paraglide-js compile --project ./project.inlang --watch",
@@ -8,13 +9,10 @@
 		"pretest": "paraglide-js compile --project ./project.inlang",
 		"test": "pnpm build && vitest run"
 	},
-	"dependencies": {
-		"@inlang/paraglide-js": "workspace:*"
-	},
 	"devDependencies": {
+		"@inlang/paraglide-js": "workspace:*",
+		"@inlang/plugin-message-format": "workspace:*",
 		"typescript": "^5.5.2",
-		"vitest": "^0.34.6",
-		"@inlang/paraglide-js": "1.2.5"
-	},
-	"version": null
+		"vitest": "^2.0.5"
+	}
 }
