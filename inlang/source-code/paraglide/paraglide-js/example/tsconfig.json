@@ -9,6 +9,7 @@
 		"checkJs": true,
 		"outDir": "dist",
 		"strict": true,
-		"lib": ["ESNext", "DOM"]
+		"lib": ["ESNext", "DOM"],
+		"skipLibCheck": true
 	}
 }

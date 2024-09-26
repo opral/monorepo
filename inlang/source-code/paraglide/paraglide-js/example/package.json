@@ -5,9 +5,9 @@
 	"private": true,
 	"scripts": {
 		"_dev": "paraglide-js compile --project ./project.inlang --watch",
-		"build": "paraglide-js compile --project ./project.inlang && tsc",
+		"build": "paraglide-js compile --project ./project.inlang",
 		"pretest": "paraglide-js compile --project ./project.inlang",
-		"test": "pnpm build && vitest run"
+		"test": "tsc --noEmit && vitest run"
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
