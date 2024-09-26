@@ -1,6 +1,6 @@
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { Link } from "react-router-dom";
-import { bundlesNestedAtom, pendingChangesAtom, projectAtom, selectedProjectPathAtom } from "../state.ts";
+import { bundlesNestedAtom, groupedPendingChangesAtom, projectAtom, selectedProjectPathAtom } from "../state.ts";
 import { useAtom } from "jotai";
 import clsx from "clsx";
 import { handleDownload } from "../helper/utils.ts";
@@ -10,13 +10,13 @@ const LixFloat = () => {
   const [project] = useAtom(projectAtom);
   const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
   const [bundlesNested] = useAtom(bundlesNestedAtom)
-  const [pendingChanges] = useAtom(pendingChangesAtom);
+  const [groupedPendingChanges] = useAtom(groupedPendingChangesAtom);
 
-  const [pendingChangesWasEmpty, setPendingChangesWasEmpty] = useState(pendingChanges.length === 0);
+  const [pendingChangesWasEmpty, setPendingChangesWasEmpty] = useState(groupedPendingChanges.length === 0);
 
   // SlideOut Animation for the LixFloat
   useEffect(() => {
-    if (pendingChanges.length === 0 && !pendingChangesWasEmpty && bundlesNested.length > 0) {
+    if (groupedPendingChanges.length === 0 && !pendingChangesWasEmpty && bundlesNested.length > 0) {
       const lixfloat = document.querySelector(".lixfloat")
       lixfloat?.classList.remove("opacity-0")
       lixfloat?.classList.add("animate-slideOut")
@@ -26,15 +26,15 @@ const LixFloat = () => {
         setPendingChangesWasEmpty(true);
       }, 500)
     } else {
-      setPendingChangesWasEmpty(pendingChanges.length === 0);
+      setPendingChangesWasEmpty(groupedPendingChanges.length === 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingChanges]);
+  }, [groupedPendingChanges]);
 
   return (
     <div className={clsx(
       "lixfloat z-30 sticky mx-auto top-[calc(100%_-_74px)] bottom-8 w-[300px] my-8 opacity-0",
-      pendingChanges.length > 0 && "animate-slideIn opacity-100",
+      groupedPendingChanges.length > 0 && "animate-slideIn opacity-100",
       // "transition-all translate-y-8 duration-500"
     )}>
       <div className="z-20 p-1.5 w-full flex justify-between items-center rounded-lg bg-zinc-700 text-white shadow-xl">
@@ -42,7 +42,7 @@ const LixFloat = () => {
           <div className="flex items-center gap-2 flex-grow text-xs font-medium text-left text-white px-2 py-1 rounded transition-colors duration-150 hover:bg-[--sl-color-neutral-500] hover:cursor-pointer">
             <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 h-5 min-w-[1.25rem] gap-2 py-2 px-1 rounded bg-[--sl-color-neutral-600]">
               <p className="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-white">
-                {pendingChanges.length}
+                {groupedPendingChanges.length}
               </p>
             </div>
             Changes

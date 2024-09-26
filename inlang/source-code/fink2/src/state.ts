@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { atom } from "jotai";
-import { loadProjectInMemory, ProjectSettings } from "@inlang/sdk2";
+import { Bundle, loadProjectInMemory, ProjectSettings } from "@inlang/sdk2";
 import { atomWithStorage } from "jotai/utils";
 import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { Change, isInSimulatedCurrentBranch } from "@inlang/sdk2";
@@ -172,7 +172,6 @@ export const pendingChangesAtom = atom(async (get) => {
 		// https://linear.app/opral/issue/LIX-126/branching
 		.where(isInSimulatedCurrentBranch)
 		.execute();
-	//console.log(result);
 	return result;
 });
 
@@ -189,13 +188,12 @@ export const groupedPendingChangesAtom = atom(async (get) => {
 		// https://linear.app/opral/issue/LIX-126/branching
 		.where(isInSimulatedCurrentBranch)
 		.execute();
-	// console.log("group", result);
 
 	const latestChangesPerEntity: Change[] = [];
 
 	for (const change of result) {
 		const entityId = change.value?.id;
-		if (!entityId) return undefined;
+		if (!entityId) continue;
 
 		const latestChange = await project.lix.db
 			.selectFrom("change")
@@ -214,6 +212,24 @@ export const groupedPendingChangesAtom = atom(async (get) => {
 	}
 
 	return latestChangesPerEntity;
+});
+
+export const bundlesWithPendingChangesAtom = atom(async (get) => {
+	const bundlesNested = await get(bundlesNestedAtom);
+	const groupedPendingChanges = await get(groupedPendingChangesAtom);
+	const hasPendingChange = (id: Bundle["id"]) =>
+		groupedPendingChanges.some((change) => change.value?.id === id);
+	const bundleNestedWithChanges = bundlesNested.filter(
+		(bundle) =>
+			hasPendingChange(bundle.id) ||
+			bundle.messages.some(
+				(message) =>
+					hasPendingChange(message.id) ||
+					message.variants.some((variant) => hasPendingChange(variant.id))
+			)
+	);
+
+	return bundleNestedWithChanges;
 });
 
 export const unresolvedConflictsAtom = atom(async (get) => {
