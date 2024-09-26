@@ -98,7 +98,15 @@ function generateRegularOutput(
 	// generate message files
 	for (const locale of settings.locales) {
 		const filename = `messages/${locale}.js`
-		let file = ["/* eslint-disable */", "import * as registry from '../registry.js' "].join("\n")
+		let file = `
+/* eslint-disable */ 
+/** 
+ * This file contains language specific functions for tree-shaking. 
+ * 
+ *! WARNING: Only import from this file if you want to manually
+ *! optimize your bundle. Else, import from the \`messages.js\` file. 
+ */
+import * as registry from '../registry.js'`
 
 		for (const resource of resources) {
 			const compiledMessage = resource.messages[locale]
