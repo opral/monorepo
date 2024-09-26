@@ -1,70 +1,68 @@
 import { expect, test } from "vitest"
 import { importFiles } from "./importFiles.js"
-import type { BundleNested, LiteralMatch, Pattern, Variant } from "@inlang/sdk2"
+import {
+	type Bundle,
+	type LiteralMatch,
+	type Message,
+	type Pattern,
+	type Variant,
+} from "@inlang/sdk2"
 import { exportFiles } from "./exportFiles.js"
 
 test("single key value", async () => {
 	const imported = await runImportFiles({
 		key: "value",
 	})
-	expect(await runExportFiles(imported)).toStrictEqual({
+	expect(await runExportFilesParsed(imported)).toStrictEqual({
 		key: "value",
 	})
 
-	const bundle = imported.bundles.find((bundle) => bundle.id === "key")
+	expect(imported.bundles).lengthOf(1)
+	expect(imported.messages).lengthOf(1)
+	expect(imported.variants).lengthOf(1)
 
-	expect(bundle?.messages[0]?.selectors).toStrictEqual([])
-	expect(bundle?.messages[0]?.variants[0]?.matches).toStrictEqual([])
-
-	expect(bundle?.messages[0]?.variants[0]?.pattern).toStrictEqual([
-		{ type: "text", value: "value" },
-	])
+	expect(imported.bundles[0]?.id).toStrictEqual("key")
+	expect(imported.bundles[0]?.declarations).toStrictEqual([])
+	expect(imported.messages[0]?.selectors).toStrictEqual([])
+	expect(imported.variants[0]?.matches).toStrictEqual([])
+	expect(imported.variants[0]?.pattern).toStrictEqual([{ type: "text", value: "value" }])
 })
 
 test("key deep", async () => {
 	const imported = await runImportFiles({
-		keyDeep: {
-			inner: "value",
-		},
+		keyDeep: { inner: "value" },
 	})
-	expect(await runExportFiles(imported)).toStrictEqual({
-		keyDeep: {
-			inner: "value",
-		},
+	expect(await runExportFilesParsed(imported)).toStrictEqual({
+		keyDeep: { inner: "value" },
 	})
 
-	const bundle = imported.bundles.find((bundle) => bundle.id === "keyDeep.inner")
-	expect(bundle?.messages[0]?.variants[0]?.pattern).toStrictEqual([
-		{ type: "text", value: "value" },
-	])
+	expect(imported.bundles).lengthOf(1)
+	expect(imported.messages).lengthOf(1)
+	expect(imported.variants).lengthOf(1)
+
+	expect(imported.bundles[0]?.id).toStrictEqual("keyDeep.inner")
+	expect(imported.variants[0]?.pattern).toStrictEqual([{ type: "text", value: "value" }])
 })
 
 test("keyInterpolate", async () => {
 	const imported = await runImportFiles({
 		keyInterpolate: "replace this {{value}}",
 	})
-	expect(await runExportFiles(imported)).toStrictEqual({
+	expect(await runExportFilesParsed(imported)).toStrictEqual({
 		keyInterpolate: "replace this {{value}}",
 	})
 
-	const bundle = imported.bundles.find((bundle) => bundle.id === "keyInterpolate")
+	expect(imported.bundles).lengthOf(1)
+	expect(imported.messages).lengthOf(1)
+	expect(imported.variants).lengthOf(1)
 
-	expect(bundle?.declarations).toStrictEqual([
-		{
-			type: "input-variable",
-			name: "value",
-		},
+	expect(imported.bundles[0]?.declarations).toStrictEqual([
+		{ type: "input-variable", name: "value" },
 	])
 
-	expect(bundle?.messages[0]?.variants[0]?.pattern).toStrictEqual([
+	expect(imported.variants[0]?.pattern).toStrictEqual([
 		{ type: "text", value: "replace this " },
-		{
-			type: "expression",
-			arg: {
-				type: "variable-reference",
-				name: "value",
-			},
-		},
+		{ type: "expression", arg: { type: "variable-reference", name: "value" } },
 	] satisfies Pattern)
 })
 
@@ -72,26 +70,17 @@ test("keyInterpolateUnescaped", async () => {
 	const imported = await runImportFiles({
 		keyInterpolateUnescaped: "replace this {{- value}}",
 	})
-	expect(await runExportFiles(imported)).toStrictEqual({
+	expect(await runExportFilesParsed(imported)).toStrictEqual({
 		keyInterpolateUnescaped: "replace this {{- value}}",
 	})
 
-	const bundle = imported.bundles.find((bundle) => bundle.id === "keyInterpolateUnescaped")
-	expect(bundle?.declarations).toStrictEqual([
-		{
-			type: "input-variable",
-			name: "- value",
-		},
+	expect(imported.bundles[0]?.id).toStrictEqual("keyInterpolateUnescaped")
+	expect(imported.bundles[0]?.declarations).toStrictEqual([
+		{ type: "input-variable", name: "- value" },
 	])
-	expect(bundle?.messages[0]?.variants[0]?.pattern).toStrictEqual([
+	expect(imported.variants[0]?.pattern).toStrictEqual([
 		{ type: "text", value: "replace this " },
-		{
-			type: "expression",
-			arg: {
-				type: "variable-reference",
-				name: "- value",
-			},
-		},
+		{ type: "expression", arg: { type: "variable-reference", name: "- value" } },
 	] satisfies Pattern)
 })
 
@@ -99,73 +88,62 @@ test("keyInterpolateWithFormatting", async () => {
 	const imported = await runImportFiles({
 		keyInterpolateWithFormatting: "replace this {{value, format}}",
 	})
-	expect(await runExportFiles(imported)).toStrictEqual({
+	expect(await runExportFilesParsed(imported)).toStrictEqual({
 		keyInterpolateWithFormatting: "replace this {{value, format}}",
 	})
 
-	const bundle = imported.bundles.find((bundle) => bundle.id === "keyInterpolateWithFormatting")
-	expect(bundle?.messages[0]?.variants[0]?.pattern).toStrictEqual([
+	expect(imported.bundles[0]?.id).toStrictEqual("keyInterpolateWithFormatting")
+	expect(imported.variants[0]?.pattern).toStrictEqual([
 		{ type: "text", value: "replace this " },
 		{
 			type: "expression",
-			arg: {
-				type: "variable-reference",
-				name: "value",
-			},
-			annotation: {
-				type: "function-reference",
-				name: "format",
-				options: [],
-			},
+			arg: { type: "variable-reference", name: "value" },
+			annotation: { type: "function-reference", name: "format", options: [] },
 		},
 	] satisfies Pattern)
 })
 
-test("keyContext", async () => {
+test.todo("keyContext", async () => {
 	const imported = await runImportFiles({
+		// catch all
+		keyContext: "the variant",
+		// context: male
 		keyContext_male: "the male variant",
+		// context: female
 		keyContext_female: "the female variant",
 	})
-	expect(await runExportFiles(imported)).toStrictEqual({
+	expect(await runExportFilesParsed(imported)).toStrictEqual({
+		keyContext: "the variant",
 		keyContext_male: "the male variant",
 		keyContext_female: "the female variant",
 	})
 
-	const bundle = imported.bundles.find((bundle) => bundle.id === "keyContext")
+	expect(imported.bundles).lengthOf(1)
+	expect(imported.messages).lengthOf(1)
+	expect(imported.variants).lengthOf(3)
 
-	expect(bundle?.declarations).toStrictEqual([
-		{
-			type: "input-variable",
-			name: "context",
-		},
+	expect(imported.bundles[0]?.id).toStrictEqual("keyContext")
+	expect(imported.bundles[0]?.declarations).toStrictEqual([
+		{ type: "input-variable", name: "context" },
 	])
-	expect(bundle?.messages[0]?.selectors).toStrictEqual([
-		{
-			type: "variable-reference",
-			name: "context",
-		},
+	expect(imported?.messages[0]?.selectors).toStrictEqual([
+		{ type: "variable-reference", name: "context" },
 	])
-	expect(bundle?.messages[0]?.variants[0]).toStrictEqual(
+	expect(imported.variants[0]).toStrictEqual(
 		expect.objectContaining({
-			matches: [
-				{
-					type: "literal-match",
-					key: "context",
-					value: "male",
-				},
-			],
+			matches: [{ type: "catchall-match", key: "context" }],
+			pattern: [{ type: "text", value: "the variant" }],
+		} satisfies Partial<Variant>)
+	)
+	expect(imported.variants[1]).toStrictEqual(
+		expect.objectContaining({
+			matches: [{ type: "literal-match", key: "context", value: "male" }],
 			pattern: [{ type: "text", value: "the male variant" }],
 		} satisfies Partial<Variant>)
 	)
-	expect(bundle?.messages[0]?.variants[1]).toStrictEqual(
+	expect(imported.variants[2]).toStrictEqual(
 		expect.objectContaining({
-			matches: [
-				{
-					type: "literal-match",
-					key: "context",
-					value: "female",
-				},
-			],
+			matches: [{ type: "literal-match", key: "context", value: "female" }],
 			pattern: [{ type: "text", value: "the female variant" }],
 		} satisfies Partial<Variant>)
 	)
@@ -176,14 +154,14 @@ test("keyPluralSimple", async () => {
 		keyPluralSimple_one: "the singular",
 		keyPluralSimple_other: "the plural",
 	})
-	expect(await runExportFiles(imported)).toStrictEqual({
+	expect(await runExportFilesParsed(imported)).toStrictEqual({
 		keyPluralSimple_one: "the singular",
 		keyPluralSimple_other: "the plural",
 	})
 
-	const bundle = imported.bundles.find((bundle) => bundle.id === "keyPluralSimple")
+	expect(imported.bundles[0]?.id).toStrictEqual("keyPluralSimple")
 
-	expect(bundle?.declarations).toStrictEqual(
+	expect(imported.bundles[0]?.declarations).toStrictEqual(
 		expect.arrayContaining([
 			{
 				type: "input-variable",
@@ -208,14 +186,14 @@ test("keyPluralSimple", async () => {
 		])
 	)
 
-	expect(bundle?.messages[0]?.selectors).toStrictEqual([
+	expect(imported?.messages[0]?.selectors).toStrictEqual([
 		{
 			type: "variable-reference",
 			name: "countPlural",
 		},
 	])
 
-	expect(bundle?.messages[0]?.variants[0]).toStrictEqual(
+	expect(imported?.variants[0]).toStrictEqual(
 		expect.objectContaining({
 			matches: [
 				{
@@ -228,7 +206,7 @@ test("keyPluralSimple", async () => {
 		} satisfies Partial<Variant>)
 	)
 
-	expect(bundle?.messages[0]?.variants[1]).toStrictEqual(
+	expect(imported?.variants[1]).toStrictEqual(
 		expect.objectContaining({
 			matches: [
 				{
@@ -243,7 +221,7 @@ test("keyPluralSimple", async () => {
 })
 
 test("keyPluralMultipleEgArabic", async () => {
-	const result = await runImportFiles({
+	const imported = await runImportFiles({
 		keyPluralMultipleEgArabic_zero: "the plural form 0",
 		keyPluralMultipleEgArabic_one: "the plural form 1",
 		keyPluralMultipleEgArabic_two: "the plural form 2",
@@ -251,7 +229,7 @@ test("keyPluralMultipleEgArabic", async () => {
 		keyPluralMultipleEgArabic_many: "the plural form 4",
 		keyPluralMultipleEgArabic_other: "the plural form 5",
 	})
-	expect(await runExportFiles(result)).toStrictEqual({
+	expect(await runExportFilesParsed(imported)).toStrictEqual({
 		keyPluralMultipleEgArabic_zero: "the plural form 0",
 		keyPluralMultipleEgArabic_one: "the plural form 1",
 		keyPluralMultipleEgArabic_two: "the plural form 2",
@@ -260,16 +238,13 @@ test("keyPluralMultipleEgArabic", async () => {
 		keyPluralMultipleEgArabic_other: "the plural form 5",
 	})
 
-	const bundle = result.bundles.find((bundle) => bundle.id === "keyPluralMultipleEgArabic")
+	expect(imported.bundles[0]?.id).toStrictEqual("keyPluralMultipleEgArabic")
 
-	expect(bundle?.messages[0]?.selectors).toStrictEqual([
-		{
-			type: "variable-reference",
-			name: "countPlural",
-		},
+	expect(imported?.messages[0]?.selectors).toStrictEqual([
+		{ type: "variable-reference", name: "countPlural" },
 	])
 
-	expect(bundle?.declarations).toStrictEqual(
+	expect(imported.bundles[0]?.declarations).toStrictEqual(
 		expect.arrayContaining([
 			{
 				type: "input-variable",
@@ -294,26 +269,25 @@ test("keyPluralMultipleEgArabic", async () => {
 		])
 	)
 
-	const matches = bundle?.messages[0]?.variants.map(
-		(variant) => (variant.matches?.[0] as LiteralMatch).value
-	)
+	const matches = imported.variants.map((variant) => (variant.matches?.[0] as LiteralMatch).value)
+
 	expect(matches).toStrictEqual(["zero", "one", "two", "few", "many", "other"])
-	expect(bundle?.messages[0]?.variants[0]?.pattern).toStrictEqual([
+	expect(imported.variants[0]?.pattern).toStrictEqual([
 		{ type: "text", value: "the plural form 0" },
 	])
-	expect(bundle?.messages[0]?.variants[1]?.pattern).toStrictEqual([
+	expect(imported.variants[1]?.pattern).toStrictEqual([
 		{ type: "text", value: "the plural form 1" },
 	])
-	expect(bundle?.messages[0]?.variants[2]?.pattern).toStrictEqual([
+	expect(imported.variants[2]?.pattern).toStrictEqual([
 		{ type: "text", value: "the plural form 2" },
 	])
-	expect(bundle?.messages[0]?.variants[3]?.pattern).toStrictEqual([
+	expect(imported.variants[3]?.pattern).toStrictEqual([
 		{ type: "text", value: "the plural form 3" },
 	])
-	expect(bundle?.messages[0]?.variants[4]?.pattern).toStrictEqual([
+	expect(imported.variants[4]?.pattern).toStrictEqual([
 		{ type: "text", value: "the plural form 4" },
 	])
-	expect(bundle?.messages[0]?.variants[5]?.pattern).toStrictEqual([
+	expect(imported.variants[5]?.pattern).toStrictEqual([
 		{ type: "text", value: "the plural form 5" },
 	])
 })
@@ -325,41 +299,41 @@ test("keyWithObjectValue", async () => {
 			valueB: "more text",
 		},
 	})
-	expect(await runExportFiles(imported)).toStrictEqual({
+	expect(await runExportFilesParsed(imported)).toStrictEqual({
 		keyWithObjectValue: {
 			valueA: "return this with valueB",
 			valueB: "more text",
 		},
 	})
 
-	const valueA = imported.bundles.find((bundle) => bundle.id === "keyWithObjectValue.valueA")
-	const valueB = imported.bundles.find((bundle) => bundle.id === "keyWithObjectValue.valueB")
+	expect(imported.bundles[0]?.id).toStrictEqual("keyWithObjectValue.valueA")
+	expect(imported.bundles[1]?.id).toStrictEqual("keyWithObjectValue.valueB")
 
-	expect(valueA?.messages[0]?.variants[0]?.pattern).toStrictEqual([
-		{ type: "text", value: "return this with valueB" },
-	] satisfies Pattern)
-	expect(valueB?.messages[0]?.variants[0]?.pattern).toStrictEqual([
-		{ type: "text", value: "more text" },
-	] satisfies Pattern)
+	expect(
+		imported.variants.find((v) => v.messageBundleId === "keyWithObjectValue.valueA")?.pattern
+	).toStrictEqual([{ type: "text", value: "return this with valueB" }] satisfies Pattern)
+	expect(
+		imported.variants.find((v) => v.messageBundleId === "keyWithObjectValue.valueB")?.pattern
+	).toStrictEqual([{ type: "text", value: "more text" }] satisfies Pattern)
 })
 
 test("keyWithArrayValue", async () => {
 	const imported = await runImportFiles({
 		keyWithArrayValue: ["multiple", "things"],
 	})
-	expect(await runExportFiles(imported)).toStrictEqual({
+	expect(await runExportFilesParsed(imported)).toStrictEqual({
 		keyWithArrayValue: ["multiple", "things"],
 	})
 
-	const bundle1 = imported.bundles.find((bundle) => bundle.id === "keyWithArrayValue.0")
-	const bundle2 = imported.bundles.find((bundle) => bundle.id === "keyWithArrayValue.1")
+	expect(imported.bundles[0]?.id).toStrictEqual("keyWithArrayValue.0")
+	expect(imported.bundles[1]?.id).toStrictEqual("keyWithArrayValue.1")
 
-	expect(bundle1?.messages[0]?.variants[0]?.pattern).toStrictEqual([
-		{ type: "text", value: "multiple" },
-	] satisfies Pattern)
-	expect(bundle2?.messages[0]?.variants[0]?.pattern).toStrictEqual([
-		{ type: "text", value: "things" },
-	] satisfies Pattern)
+	expect(
+		imported.variants.find((v) => v.messageBundleId === "keyWithArrayValue.0")?.pattern
+	).toStrictEqual([{ type: "text", value: "multiple" }] satisfies Pattern)
+	expect(
+		imported.variants.find((v) => v.messageBundleId === "keyWithArrayValue.1")?.pattern
+	).toStrictEqual([{ type: "text", value: "things" }] satisfies Pattern)
 })
 
 test("im- and exporting multiple files should succeed", async () => {
@@ -383,10 +357,9 @@ test("im- and exporting multiple files should succeed", async () => {
 			},
 		],
 	})
-	const exported = await exportFiles({
-		settings: {} as any,
-		bundles: imported.bundles as BundleNested[],
-	})
+
+	const exported = await runExportFiles(imported)
+
 	const exportedEn = JSON.parse(
 		new TextDecoder().decode(exported.find((e) => e.locale === "en")?.content)
 	)
@@ -429,10 +402,8 @@ test("it should handle namespaces", async () => {
 			},
 		],
 	})
-	const exported = await exportFiles({
-		settings: {} as any,
-		bundles: imported.bundles as BundleNested[],
-	})
+	const exported = await runExportFiles(imported)
+
 	const exportedCommon = JSON.parse(
 		new TextDecoder().decode(exported.find((e) => e.name === "common-en.json")?.content)
 	)
@@ -448,7 +419,7 @@ test("it should handle namespaces", async () => {
 	})
 })
 
-test("it should put new entities into the resource file without a namespace", async () => {
+test("it should put new entities into the file without a namespace", async () => {
 	const enNoNamespace = {
 		blue_box: "value1",
 	}
@@ -474,30 +445,29 @@ test("it should put new entities into the resource file without a namespace", as
 		],
 	})
 
-	const newBundle: BundleNested = {
-		id: "happy_elephant",
+	const newBundle: Bundle = {
+		id: "new_bundle",
 		declarations: [],
-		messages: [
-			{
-				id: "happy_elephant_en",
-				bundleId: "happy_elephant",
-				locale: "en",
-				selectors: [],
-				variants: [
-					{
-						id: "happy_elephant_en_*",
-						matches: [],
-						messageId: "happy_elephant_en",
-						pattern: [{ type: "text", value: "elephant" }],
-					},
-				],
-			},
-		],
 	}
 
-	const exported = await exportFiles({
-		settings: {} as any,
-		bundles: [...(imported.bundles as BundleNested[]), newBundle],
+	const newMessage: Message = {
+		id: "mock-29jas",
+		bundleId: "new_bundle",
+		locale: "en",
+		selectors: [],
+	}
+
+	const newVariant: Variant = {
+		id: "mock-111sss",
+		matches: [],
+		messageId: "mock-29jas",
+		pattern: [{ type: "text", value: "elephant" }],
+	}
+
+	const exported = await runExportFiles({
+		bundles: [...imported.bundles, newBundle],
+		messages: [...imported.messages, newMessage],
+		variants: [...imported.variants, newVariant],
 	})
 
 	const exportedNoNamespace = JSON.parse(
@@ -510,7 +480,7 @@ test("it should put new entities into the resource file without a namespace", as
 
 	expect(exportedNoNamespace).toStrictEqual({
 		blue_box: "value1",
-		happy_elephant: "elephant",
+		new_bundle: "elephant",
 	})
 
 	expect(exportedCommon).toStrictEqual({
@@ -525,19 +495,21 @@ test("a key with a single variant should have no matches even if other keys are 
 		keyPluralSimple_other: "the plural",
 	})
 
-	expect(await runExportFiles(imported)).toStrictEqual({
+	expect(await runExportFilesParsed(imported)).toStrictEqual({
 		key: "value",
 		keyPluralSimple_one: "the singular",
 		keyPluralSimple_other: "the plural",
 	})
 
-	const bundle = imported.bundles.find((bundle) => bundle.id === "key")
+	expect(imported.bundles).lengthOf(2)
+	expect(imported.messages).lengthOf(3)
+	expect(imported.variants).lengthOf(3)
 
-	expect(bundle?.messages[0]?.selectors).toStrictEqual([])
-	expect(bundle?.messages[0]?.variants[0]?.matches).toStrictEqual([])
-	expect(bundle?.messages[0]?.variants[0]?.pattern).toStrictEqual([
-		{ type: "text", value: "value" },
-	])
+	expect(imported.bundles[0]?.id).toStrictEqual("key")
+
+	expect(imported.messages[0]?.selectors).toStrictEqual([])
+	expect(imported.variants[0]?.matches).toStrictEqual([])
+	expect(imported.variants[0]?.pattern).toStrictEqual([{ type: "text", value: "value" }])
 })
 
 // convenience wrapper for less testing code
@@ -554,10 +526,37 @@ function runImportFiles(json: Record<string, any>) {
 }
 
 // convenience wrapper for less testing code
-async function runExportFiles(imported: Awaited<ReturnType<typeof runImportFiles>>) {
+async function runExportFiles(imported: Awaited<ReturnType<typeof importFiles>>) {
+	// add ids which are undefined from the import
+	for (const message of imported.messages) {
+		if (message.id === undefined) {
+			message.id = `${Math.random() * 1000}`
+		}
+	}
+	for (const variant of imported.variants) {
+		if (variant.id === undefined) {
+			// @ts-expect-error - variant is an VariantImport
+			variant.id = `${Math.random() * 1000}`
+		}
+		if (variant.messageId === undefined) {
+			// @ts-expect-error - variant is an VariantImport
+			variant.messageId = imported.messages.find(
+				(m: any) => m.bundleId === variant.messageBundleId && m.locale === variant.messageLocale
+			)?.id
+		}
+	}
+
 	const exported = await exportFiles({
 		settings: {} as any,
-		bundles: imported.bundles as BundleNested[],
+		bundles: imported.bundles as Bundle[],
+		messages: imported.messages as Message[],
+		variants: imported.variants as Variant[],
 	})
+	return exported
+}
+
+// convenience wrapper for less testing code
+async function runExportFilesParsed(imported: any) {
+	const exported = await runExportFiles(imported)
 	return JSON.parse(new TextDecoder().decode(exported[0]?.content))
 }

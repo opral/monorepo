@@ -563,7 +563,7 @@ test("errors from importing translation files should be shown", async () => {
 	const mockPlugin: InlangPlugin = {
 		key: "mock-plugin",
 		importFiles: async () => {
-			return { bundles: [] };
+			return { bundles: [], messages: [], variants: [] };
 		},
 		toBeImportedFiles: async () => {
 			return [{ path: "./some-file.json", locale: "mock" }];
@@ -597,7 +597,7 @@ test("errors from importing translation files that are ENOENT should not be show
 	const mockPlugin: InlangPlugin = {
 		key: "mock-plugin",
 		importFiles: async () => {
-			return { bundles: [] };
+			return { bundles: [], messages: [], variants: [] };
 		},
 		toBeImportedFiles: async () => {
 			return [{ path: "./some-non-existing-file.json", locale: "mock" }];
@@ -640,7 +640,7 @@ test("it should pass toBeImportedMetadata on import", async () => {
 			];
 		},
 		importFiles: async () => {
-			return { bundles: [] };
+			return { bundles: [], messages: [], variants: [] };
 		},
 	};
 
