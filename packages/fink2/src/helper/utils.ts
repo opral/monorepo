@@ -4,6 +4,7 @@ import {
 	loadProjectInMemory,
 	merge,
 } from "@inlang/sdk2";
+import JSZip from "jszip";
 
 export const handleDownload = async (
 	project: InlangProject | undefined,
@@ -89,6 +90,7 @@ export const handleOpenProject = async (
 	input.click();
 };
 
+// Import
 export const selectImportFile = async (
 	acceptedImport: HTMLInputElement["accept"]
 ) => {
@@ -130,15 +132,11 @@ export const handleImportedFile = async (
 	reader.readAsText(file);
 };
 
-export const exportToJSON = async (project: InlangProject | undefined) => {
-	const files = await project!.exportFiles({
-		pluginKey: "plugin.inlang.i18next",
-	});
-	const blob = new Blob([files[0].content]);
-	const blobUrl = URL.createObjectURL(blob);
+// Export
+const createDownloadLink = (blobUrl: string, fileName: string) => {
 	const link = document.createElement("a");
 	link.href = blobUrl;
-	link.download = files[0].name;
+	link.download = fileName;
 	document.body.appendChild(link);
 	link.dispatchEvent(
 		new MouseEvent("click", {
@@ -148,4 +146,33 @@ export const exportToJSON = async (project: InlangProject | undefined) => {
 		})
 	);
 	document.body.removeChild(link);
+};
+
+const downloadZip = async (files: ImportFile[], fileEnding: string) => {
+	const zip = new JSZip();
+	files.forEach((file) => {
+		zip.file(file.locale + fileEnding, file.content);
+	});
+	const blob = await zip.generateAsync({ type: "blob" });
+	const blobUrl = URL.createObjectURL(blob);
+	createDownloadLink(blobUrl, "export.zip");
+};
+
+const downloadFile = (file: ImportFile, fileEnding: string) => {
+	const blob = new Blob([file.content]);
+	const blobUrl = URL.createObjectURL(blob);
+	createDownloadLink(blobUrl, file.locale + fileEnding);
+};
+
+export const exportFiles = async (
+	project: InlangProject | undefined,
+	pluginKey: string,
+	fileEnding: string
+) => {
+	const files = await project!.exportFiles({ pluginKey });
+	if (files.length > 1) {
+		downloadZip(files, fileEnding);
+	} else {
+		downloadFile(files[0], fileEnding);
+	}
 };
