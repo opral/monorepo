@@ -1,21 +1,19 @@
-import type { ExportFile, Match, MessageNested, Variant } from "@inlang/sdk2"
-import { PLUGIN_KEY, type plugin } from "../plugin.js"
+import type { ExportFile, Match, Message, Variant } from "@inlang/sdk2"
+import { type plugin } from "../plugin.js"
 import type { FileSchema } from "../fileSchema.js"
 
 export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
-	bundles,
-	settings,
+	messages,
+	variants,
 }) => {
-	const pathPattern = settings[PLUGIN_KEY]?.pathPattern
-	if (pathPattern === undefined) {
-		throw new Error("pathPattern is not defined")
-	}
-
 	const files: Record<string, FileSchema> = {}
 
-	const messages = bundles.flatMap((bundle) => bundle.messages)
 	for (const message of messages) {
-		files[message.locale] = { ...files[message.locale], ...serializeMessage(message) }
+		const variantsOfMessage = variants.filter((v) => v.messageId === message.id)
+		files[message.locale] = {
+			...files[message.locale],
+			...serializeMessage(message, variantsOfMessage),
+		}
 	}
 
 	const result: ExportFile[] = []
@@ -32,11 +30,12 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 	return result
 }
 
-function serializeMessage(message: MessageNested): {
-	[key: string]: string | Record<string, string>
-} {
+function serializeMessage(
+	message: Message,
+	variants: Variant[]
+): Record<string, string | Record<string, string>> {
 	const key = message.bundleId
-	const value = serializeVariants(message.variants)
+	const value = serializeVariants(variants)
 	return { [key]: value }
 }
 
@@ -45,6 +44,7 @@ function serializeVariants(variants: Variant[]): string | Record<string, string>
 	// todo add logic for handling if a variant has a match even if it's
 	// the only variant
 	if (variants.length === 1) {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		return serializePattern(variants[0]!.pattern)
 	}
 	const entries = []
