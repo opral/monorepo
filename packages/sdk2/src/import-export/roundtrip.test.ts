@@ -1,13 +1,17 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from "vitest";
-import type { InlangPlugin } from "../plugin/schema.js";
-import type { BundleNested, Message } from "../database/schema.js";
+import type {
+	BundleImport,
+	InlangPlugin,
+	MessageImport,
+	VariantImport,
+} from "../plugin/schema.js";
+import type { Message } from "../database/schema.js";
 import type { Text } from "../json-schema/pattern.js";
-import { exportFiles, importFiles } from "./index.js";
+import { exportFiles } from "./index.js";
 import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
 import { newProject } from "../project/newProject.js";
-import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
-import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
+import { importFiles } from "./importFiles.js";
 
 test("the file should be identical after a roundtrip if no modifications occured", async () => {
 	const project = await loadProjectInMemory({
@@ -26,19 +30,25 @@ test("the file should be identical after a roundtrip if no modifications occured
 		db: project.db,
 	});
 
-	const importedBundles = await selectBundleNested(project.db)
+	const importedBundles = await project.db
+		.selectFrom("bundle")
 		.selectAll()
 		.execute();
-	const importedMessages = importedBundles.flatMap((bundle) => bundle.messages);
-	const importedVariants = importedMessages.flatMap(
-		(message) => message.variants
-	);
+	const importedMessages = await project.db
+		.selectFrom("message")
+		.selectAll()
+		.execute();
+	const importedVariants = await project.db
+		.selectFrom("variant")
+		.selectAll()
+		.execute();
 
 	expect(importedBundles.length).toBe(1);
 	expect(importedMessages.length).toBe(1);
 	expect(importedVariants.length).toBe(1);
 	expect(importedBundles[0]?.id).toBe("hello_world");
 	expect(importedMessages[0]?.bundleId).toBe("hello_world");
+	expect(importedVariants[0]?.messageId).toBe(importedMessages[0]?.id);
 
 	const exportedFiles = await exportFiles({
 		pluginKey: "mock",
@@ -57,44 +67,47 @@ test("a variant with an existing match should update the existing variant and no
 		blob: await newProject(),
 	});
 
-	const bundleWithMatches: BundleNested = {
-		id: "mock-bundle-id",
-		declarations: [],
+	const existing = {
+		bundles: [
+			{
+				id: "mock-bundle-id",
+				declarations: [],
+			},
+		],
 		messages: [
 			{
 				id: "mock-message-id",
 				locale: "en",
 				selectors: [],
 				bundleId: "mock-bundle-id",
-				variants: [
+			},
+		],
+		variants: [
+			{
+				id: "mock-variant-id",
+				messageId: "mock-message-id",
+				matches: [
 					{
-						id: "mock-variant-id",
-						messageId: "mock-message-id",
-						matches: [
-							{
-								type: "literal-match",
-								key: "color",
-								value: "blue",
-							},
-						],
-						pattern: [
-							{
-								type: "text",
-								value: "You have blue eyes.",
-							},
-						],
+						type: "literal-match",
+						key: "color",
+						value: "blue",
+					},
+				],
+				pattern: [
+					{
+						type: "text",
+						value: "You have blue eyes.",
 					},
 				],
 			},
 		],
 	};
 
-	const updatedBundleWithMatches = structuredClone(bundleWithMatches);
+	const updated = structuredClone(existing);
 	// @ts-expect-error - we know this is a text pattern
-	updatedBundleWithMatches.messages[0].variants[0].pattern[0].value =
-		"You have beautiful blue eyes.";
+	updated.variants[0].pattern[0].value = "You have beautiful blue eyes.";
 
-	const enResource = JSON.stringify([updatedBundleWithMatches]);
+	const enResource = JSON.stringify(updated);
 
 	await importFiles({
 		files: [{ content: new TextEncoder().encode(enResource), locale: "en" }],
@@ -120,37 +133,31 @@ test("if a message for the bundle id and locale already exists, update it. don't
 		blob: await newProject(),
 	});
 
-	const existingBundle: BundleNested = {
-		id: "mock-bundle-id",
-		declarations: [],
+	const existing: any = {
+		bundles: [{ id: "mock-bundle-id", declarations: [] }],
 		messages: [
 			{
 				id: "mock-message-id",
 				locale: "en",
-				selectors: [
-					{
-						type: "variable-reference",
-						name: "variable1",
-					},
-				],
+				selectors: [],
 				bundleId: "mock-bundle-id",
-				variants: [],
 			},
 		],
+		variants: [],
 	};
 
-	const updatedBundle = structuredClone(existingBundle);
-	updatedBundle.messages[0]!.selectors = [
+	const updated = structuredClone(existing);
+	updated.messages[0]!.selectors = [
 		{
 			type: "variable-reference",
 			name: "variable2",
 		},
 	] satisfies Message["selectors"];
 
-	const enResource = JSON.stringify([updatedBundle]);
+	const enResource = new TextEncoder().encode(JSON.stringify(updated));
 
 	await importFiles({
-		files: [{ content: new TextEncoder().encode(enResource), locale: "en" }],
+		files: [{ content: enResource, locale: "en" }],
 		pluginKey: "mock",
 		plugins: [mockPluginAst],
 		settings: await project.settings.get(),
@@ -190,14 +197,15 @@ test("keys should be ordered alphabetically for .json to minimize git diffs", as
 		db: project.db,
 	});
 
-	await insertBundleNested(
-		project.db,
-		mockBundle({
-			id: "c",
-			locale: "en",
-			text: "value3",
-		})
-	);
+	await project.db.insertInto("bundle").values({ id: "c" }).execute();
+	await project.db
+		.insertInto("message")
+		.values({ id: "c-en", bundleId: "c", locale: "en" })
+		.execute();
+	await project.db
+		.insertInto("variant")
+		.values({ messageId: "c-en", pattern: [{ type: "text", value: "value3" }] })
+		.execute();
 
 	const exportedFiles = await exportFiles({
 		pluginKey: "mock",
@@ -218,21 +226,28 @@ test("keys should be ordered alphabetically for .json to minimize git diffs", as
 
 const mockPluginAst: InlangPlugin = {
 	key: "mock",
-	exportFiles: async ({ bundles }) => {
+	exportFiles: async ({ bundles, messages, variants }) => {
 		return [
 			{
 				locale: "every",
-				name: "bundles.json",
-				content: new TextEncoder().encode(JSON.stringify(bundles)),
+				name: "x.json",
+				content: new TextEncoder().encode(
+					JSON.stringify({ bundles, messages, variants })
+				),
 			},
 		];
 	},
 	importFiles: async ({ files }) => {
-		return {
-			bundles: files.flatMap((file) =>
-				JSON.parse(new TextDecoder().decode(file.content))
-			),
-		};
+		let bundles: any[] = [];
+		let messages: any[] = [];
+		let variants: any[] = [];
+		for (const file of files) {
+			const parsed = JSON.parse(new TextDecoder().decode(file.content));
+			bundles = [...bundles, ...parsed.bundles];
+			messages = [...messages, ...parsed.messages];
+			variants = [...variants, ...parsed.variants];
+		}
+		return { bundles, messages, variants };
 	},
 };
 
@@ -243,12 +258,13 @@ const mockPluginAst: InlangPlugin = {
 // increase maintainability
 const mockPluginSimple: InlangPlugin = {
 	key: "mock",
-	exportFiles: async ({ bundles }) => {
+	exportFiles: async ({ messages, variants }) => {
 		const jsons: any = {};
-		const messages = bundles.flatMap((bundle) => bundle.messages);
 		for (const message of messages) {
 			const key = message.bundleId;
-			const value = (message.variants[0]?.pattern[0] as Text).value;
+			const value = (
+				variants.find((v) => v.messageId === message.id)?.pattern[0] as Text
+			).value;
 			if (!jsons[message.locale]) {
 				jsons[message.locale] = {};
 			}
@@ -261,49 +277,38 @@ const mockPluginSimple: InlangPlugin = {
 		}));
 	},
 	importFiles: async ({ files }) => {
-		const bundles: BundleNested[] = [];
+		const bundles: BundleImport[] = [];
+		const messages: MessageImport[] = [];
+		const variants: VariantImport[] = [];
 		for (const file of files) {
 			const parsed = JSON.parse(new TextDecoder().decode(file.content));
 			for (const key in parsed) {
-				bundles.push(
-					mockBundle({ id: key, locale: file.locale, text: parsed[key] })
-				);
+				bundles.push({
+					id: key,
+					declarations: [],
+				});
+				messages.push({
+					bundleId: key,
+					locale: file.locale,
+					selectors: [],
+				});
+				variants.push({
+					messageBundleId: key,
+					messageLocale: file.locale,
+					matches: [],
+					pattern: [
+						{
+							type: "text",
+							value: parsed[key],
+						},
+					],
+				});
 			}
 		}
 		return {
 			bundles,
+			messages,
+			variants,
 		};
 	},
 };
-
-function mockBundle(args: {
-	id: string;
-	locale: string;
-	text: string;
-}): BundleNested {
-	return {
-		id: args.id,
-		declarations: [],
-		messages: [
-			{
-				id: args.id + args.locale,
-				locale: args.locale,
-				selectors: [],
-				bundleId: args.id,
-				variants: [
-					{
-						id: args.id + args.locale,
-						messageId: args.id + args.locale,
-						matches: [],
-						pattern: [
-							{
-								type: "text",
-								value: args.text,
-							},
-						],
-					},
-				],
-			},
-		],
-	};
-}
