@@ -194,13 +194,17 @@ export const projectAtom = atom(async (get) => {
 			const file = await project.toBlob();
 			const writable = await fileHandle.createWritable();
 
+			const currentProjectMeta = get(selectedProjectPathAtom);
 			// if the project is not the fallback path, we don't want to sync it
-			if (project_id !== get(selectedProjectPathAtom)?.split("___")?.[0]) {
+			if (
+				currentProjectMeta &&
+				project_id !== currentProjectMeta?.split("___")?.[0]
+			) {
 				return;
 			}
 
 			const checkIfExists = await fetch(
-				"https://monorepo-6hl2.onrender.com/lix-file/" + project_id
+				"http://localhost:3000/lix-file/" + project_id
 			);
 
 			// console.log("projectId: ", project_id);
@@ -209,7 +213,7 @@ export const projectAtom = atom(async (get) => {
 			if (checkIfExists.ok) {
 				// the file does exist remotely - trigger sync
 				const response = await fetch(
-					"https://monorepo-6hl2.onrender.com/lix-file/" + project_id,
+					"http://localhost:3000/lix-file/" + project_id,
 					{
 						method: "POST",
 						headers: {
@@ -267,7 +271,7 @@ export const isProjectSyncedAtom = atom(async (get) => {
 	);
 	const { project_id } = JSON.parse(projectMetaRaw);
 	const checkIfExists = await fetch(
-		"https://monorepo-6hl2.onrender.com/lix-file/" + project_id
+		"http://localhost:3000/lix-file/" + project_id
 	);
 	return checkIfExists.ok;
 });
