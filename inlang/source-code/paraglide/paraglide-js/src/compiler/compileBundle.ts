@@ -1,12 +1,11 @@
 import type { Bundle, BundleNested, Message } from "@inlang/sdk2"
 import { compileMessage } from "./compileMessage.js"
 import type { Registry } from "./registry.js"
-import { inputsType, type InputTypeMap } from "./inputsType.js"
-import { optionsType } from "./optionsType.js"
 import { jsIdentifier } from "~/services/codegen/identifier.js"
 import { isValidJSIdentifier } from "~/services/valid-js-identifier/index.js"
 import { escapeForDoubleQuoteString } from "~/services/codegen/escape.js"
 import type { Compiled } from "./types.js"
+import { jsDocBundleComment, jsDocMessageComment } from "./jsDocComment.js"
 
 export type Resource = {
 	/** The compilation result for the bundle index */
@@ -38,6 +37,10 @@ export const compileBundle = (args: {
 			message.variants,
 			args.registry
 		)
+		// add types to the compiled message function
+		const inputs = args.bundle.declarations.filter((decl) => decl.type === "input-variable")
+		compiledMessage.code = `${jsDocMessageComment({ inputs })}\n${compiledMessage.code}`
+
 		// set the pattern for the language tag
 		compiledMessages[message.locale] = compiledMessage
 	}
@@ -45,7 +48,6 @@ export const compileBundle = (args: {
 	return {
 		bundle: compileBundleFunction({
 			bundle: args.bundle,
-			typeRestrictions: {},
 			availableLanguageTags: Object.keys(args.fallbackMap),
 		}),
 		messages: compiledMessages,
@@ -58,39 +60,27 @@ const compileBundleFunction = (args: {
 	 */
 	bundle: BundleNested
 	/**
-	 * The type-restrictions acquired from compiling the messages in this bundle
-	 */
-	typeRestrictions: InputTypeMap
-	/**
 	 * The language tags which are available
 	 */
 	availableLanguageTags: string[]
 }): Compiled<Bundle> => {
-	const hasInputs = args.bundle.declarations.some((decl) => decl.type === "input-variable")
+	const inputs = args.bundle.declarations.filter((decl) => decl.type === "input-variable")
+	const hasInputs = inputs.length > 0
 
-	let code = `/**
- * This translation has been compiled by [@inlang/paraglide-js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
- *
- * - Don't edit this code. Instead use [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) or
- *   [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) to edit the translation instead, or edit the translation files manually.
- * 
- * ${inputsType(args.typeRestrictions, true)}
- * ${optionsType({ languageTags: args.availableLanguageTags })}
- * @returns {string}
- */
+	let code = `
+${jsDocBundleComment({ inputs, locales: args.availableLanguageTags })}
 /* @__NO_SIDE_EFFECTS__ */
 const ${jsIdentifier(args.bundle.id)} = (inputs ${hasInputs ? "" : "= {}"}, options = {}) => {
-	return {
-${args.availableLanguageTags
-	// sort language tags alphabetically to make the generated code more readable
-	.sort((a, b) => a.localeCompare(b))
-	.map(
-		(tag) =>
-			`\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${jsIdentifier(tag)}.${args.bundle.id}`
-	)
-	.join(",\n")}
-	}[options.languageTag ?? languageTag()](${hasInputs ? "inputs" : ""})
-}`
+	const locale = options.locale ?? languageTag()
+	${args.availableLanguageTags
+		.map(
+			(locale) =>
+				`if (locale === "${locale}") return ${jsIdentifier(locale)}.${args.bundle.id}(inputs)`
+		)
+		.join("\n")}
+	return "${args.bundle.id}"
+	}
+`
 
 	// export the index function
 	if (isValidJSIdentifier(args.bundle.id)) {

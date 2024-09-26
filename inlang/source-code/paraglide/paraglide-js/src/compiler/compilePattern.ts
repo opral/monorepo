@@ -10,7 +10,7 @@ import type { Registry } from "./registry.js"
  *
  * @example
  *  const { compiled, params } = compilePattern([{ type: "Text", value: "Hello " }, { type: "VariableReference", name: "name" }])
- *  >> compiled === "`Hello ${params.name}`"
+ *  >> compiled === "`Hello ${i.name}`"
  */
 export const compilePattern = (
 	lang: string,

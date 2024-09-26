@@ -24,11 +24,10 @@ export const compileMessage = (
 	const hasMultipleVariants = variants.length > 1
 	return hasMultipleVariants
 		? compileMessageWithMultipleVariants(declarations, message, variants, registry)
-		: compileMessageWithOneVariant(declarations, message, variants, registry)
+		: compileMessageWithOneVariant(message, variants, registry)
 }
 
 function compileMessageWithOneVariant(
-	declarations: Declaration[],
 	message: Message,
 	variants: Variant[],
 	registry: Registry
@@ -37,9 +36,8 @@ function compileMessageWithOneVariant(
 	if (!variant || variants.length !== 1) {
 		throw new Error("Message must have exactly one variant")
 	}
-	const hasInputs = declarations.some((decl) => decl.type === "input-variable")
 	const compiledPattern = compilePattern(message.locale, variant.pattern, registry)
-	const code = `export const ${message.bundleId} = (${hasInputs ? "i" : ""}) => ${compiledPattern.code}`
+	const code = `export const ${message.bundleId} = (i) => ${compiledPattern.code}`
 	return { code, node: message }
 }
 
@@ -50,8 +48,6 @@ function compileMessageWithMultipleVariants(
 	registry: Registry
 ): Compiled<Message> {
 	if (variants.length <= 1) throw new Error("Message must have more than one variant")
-
-	const hasInputs = declarations.some((decl) => decl.type === "input-variable")
 
 	// TODO make sure that matchers use keys instead of indexes
 	const compiledVariants = []
@@ -86,7 +82,7 @@ function compileMessageWithMultipleVariants(
 	}
 
 	const code = `
-		export const ${message.bundleId} = (${hasInputs ? "i" : ""}) => {
+		export const ${message.bundleId} = (i) => {
 				${compiledVariants.join("\n\n")}
 		}`
 
