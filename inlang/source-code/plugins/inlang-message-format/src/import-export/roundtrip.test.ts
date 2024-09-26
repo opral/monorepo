@@ -161,6 +161,93 @@ test("it handles multi variant messages", async () => {
 	)
 })
 
+test.todo("matching by plural is possible", async () => {
+	const imported = await runImportFiles({
+		some_happy_cat: {
+			localVariables: {
+				countPlural: "count -> count",
+			},
+			selectors: ["countPlural"],
+			match: {
+				"countPlural=one": "There is one cat.",
+				"countPlural=other": "There are many cats.",
+			},
+		},
+	})
+	expect(await runExportFilesParsed(imported)).toStrictEqual({
+		some_happy_cat: {
+			match: {
+				"platform=android, userGender=male":
+					"{username} has to download the app on his phone from the Google Play Store.",
+				"platform=ios, userGender=female":
+					"{username} has to download the app on her iPhone from the App Store.",
+				"platform=*, userGender=*": "The person has to download the app.",
+			},
+		},
+	})
+
+	expect(imported.bundles).lengthOf(1)
+	expect(imported.messages).lengthOf(1)
+	expect(imported.variants).lengthOf(3)
+
+	expect(imported.bundles[0]?.id).toStrictEqual("some_happy_cat")
+	expect(imported.bundles[0]?.declarations).toStrictEqual(
+		expect.arrayContaining([
+			{ type: "input-variable", name: "username" },
+			{ type: "input-variable", name: "platform" },
+			{ type: "input-variable", name: "userGender" },
+		] satisfies Declaration[])
+	)
+
+	expect(imported.messages[0]?.selectors).toStrictEqual(
+		expect.arrayContaining([
+			{ type: "variable-reference", name: "platform" },
+			{ type: "variable-reference", name: "userGender" },
+		] satisfies Message["selectors"])
+	)
+	expect(imported.messages[0]?.bundleId).toStrictEqual("some_happy_cat")
+
+	expect(imported.variants[0]).toStrictEqual(
+		expect.objectContaining({
+			matches: [
+				{ type: "literal-match", key: "platform", value: "android" },
+				{ type: "literal-match", key: "userGender", value: "male" },
+			],
+			pattern: [
+				{ type: "expression", arg: { type: "variable-reference", name: "username" } },
+				{
+					type: "text",
+					value: " has to download the app on his phone from the Google Play Store.",
+				},
+			],
+		} satisfies Partial<Variant>)
+	)
+	expect(imported.variants[1]).toStrictEqual(
+		expect.objectContaining({
+			matches: [
+				{ type: "literal-match", key: "platform", value: "ios" },
+				{ type: "literal-match", key: "userGender", value: "female" },
+			],
+			pattern: [
+				{ type: "expression", arg: { type: "variable-reference", name: "username" } },
+				{
+					type: "text",
+					value: " has to download the app on her iPhone from the App Store.",
+				},
+			],
+		} satisfies Partial<Variant>)
+	)
+	expect(imported.variants[2]).toStrictEqual(
+		expect.objectContaining({
+			matches: [
+				{ type: "catchall-match", key: "platform" },
+				{ type: "catchall-match", key: "userGender" },
+			],
+			pattern: [{ type: "text", value: "The person has to download the app." }],
+		} satisfies Partial<Variant>)
+	)
+})
+
 test("roundtrip with new variants that have been created by apps", async () => {
 	const imported1 = await runImportFiles({
 		some_happy_cat: "Read more about Lix",
