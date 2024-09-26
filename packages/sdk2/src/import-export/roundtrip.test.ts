@@ -293,8 +293,8 @@ const mockPluginSimple: InlangPlugin = {
 					selectors: [],
 				});
 				variants.push({
-					bundleId: key,
-					locale: file.locale,
+					messageBundleId: key,
+					messageLocale: file.locale,
 					matches: [],
 					pattern: [
 						{
