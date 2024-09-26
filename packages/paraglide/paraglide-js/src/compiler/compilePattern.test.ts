@@ -24,7 +24,7 @@ it("should compile a pattern with multiple VariableReference's", () => {
 		{ type: "text", value: " messages." },
 	]
 	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY)
-	expect(code).toBe("`Hello ${inputs.name}! You have ${inputs.count} messages.`")
+	expect(code).toBe("`Hello ${i.name}! You have ${i.count} messages.`")
 })
 
 it("should escape backticks", () => {
@@ -60,7 +60,7 @@ it("should compile a pattern with multiple VariableReference's", () => {
 		{ type: "text", value: " messages." },
 	]
 	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY)
-	expect(code).toBe("`Hello ${inputs.name}! You have ${inputs.count} messages.`")
+	expect(code).toBe("`Hello ${i.name}! You have ${i.count} messages.`")
 })
 
 it("should compile a pattern with a variableReference that isn't a valid JS identifier", () => {
@@ -72,5 +72,5 @@ it("should compile a pattern with a variableReference that isn't a valid JS iden
 		},
 	]
 	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY)
-	expect(code).toBe("`Hello ${inputs['000']}`")
+	expect(code).toBe("`Hello ${i['000']}`")
 })

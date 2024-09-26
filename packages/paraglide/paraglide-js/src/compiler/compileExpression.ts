@@ -53,8 +53,8 @@ function compileArg(arg: Expression["arg"]): string {
 			return `"${escapeForDoubleQuoteString(arg.value)}"`
 		case "variable-reference": {
 			return !isValidJSIdentifier(arg.name)
-				? `inputs['${escapeForSingleQuoteString(arg.name)}']`
-				: `inputs.${arg.name}`
+				? `i['${escapeForSingleQuoteString(arg.name)}']`
+				: `i.${arg.name}`
 		}
 	}
 }
