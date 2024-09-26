@@ -81,7 +81,8 @@ export const projectAtom = atom(async (get) => {
 				// );
 
 				const lixServerRequest = await fetch(
-					"http://localhost:3000/lix-file/" + project_id_search_param
+					"https://monorepo-6hl2.onrender.com/lix-file/" +
+						project_id_search_param
 				);
 				if (!lixServerRequest.ok) {
 					// console.log(
