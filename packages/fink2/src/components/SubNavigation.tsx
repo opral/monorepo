@@ -3,7 +3,7 @@ import clsx from "clsx";
 import {
 	commitsAtom,
 	unresolvedConflictsAtom,
-	pendingChangesAtom,
+	groupedPendingChangesAtom,
 } from "../state.ts";
 import { useAtom } from "jotai";
 
@@ -28,7 +28,7 @@ const data: { path: string; name: string }[] = [
 ];
 
 const SubNavigation = () => {
-	const [pendingChanges] = useAtom(pendingChangesAtom);
+	const [groupedPendingChanges] = useAtom(groupedPendingChangesAtom);
 	const [unresolvedConflicts] = useAtom(unresolvedConflictsAtom);
 	const [commits] = useAtom(commitsAtom);
 
@@ -41,16 +41,16 @@ const SubNavigation = () => {
 							key={item.path}
 							path={item.path}
 							name={item.name}
-							numUncommittedChanges={pendingChanges.length}
+							numUncommittedChanges={groupedPendingChanges.length}
 						/>
 					);
-				} else if (item.path === "/changes" && pendingChanges.length > 0) {
+				} else if (item.path === "/changes" && groupedPendingChanges.length > 0) {
 					return (
 						<NavItem
 							key={item.path}
 							path={item.path}
 							name={item.name}
-							numUncommittedChanges={pendingChanges.length}
+							numUncommittedChanges={groupedPendingChanges.length}
 						/>
 					);
 				} else if (item.path === "/history" && commits.length > 0) {
@@ -59,7 +59,7 @@ const SubNavigation = () => {
 							key={item.path}
 							path={item.path}
 							name={item.name}
-							numUncommittedChanges={pendingChanges.length}
+							numUncommittedChanges={groupedPendingChanges.length}
 						/>
 					);
 				} else if (item.path === "/settings") {
@@ -68,7 +68,7 @@ const SubNavigation = () => {
 							key={item.path}
 							path={item.path}
 							name={item.name}
-							numUncommittedChanges={pendingChanges.length}
+							numUncommittedChanges={groupedPendingChanges.length}
 						/>
 					);
 				} else if (item.path === "/") {
@@ -77,7 +77,7 @@ const SubNavigation = () => {
 							key={item.path}
 							path={item.path}
 							name={item.name}
-							numUncommittedChanges={pendingChanges.length}
+							numUncommittedChanges={groupedPendingChanges.length}
 						/>
 					);
 				}
