@@ -199,7 +199,7 @@ export const projectAtom = atom(async (get) => {
 			// cancel interval if project_id != selectedProjectPath
 
 			const checkIfExists = await fetch(
-				"http://localhost:3000/lix-file/" + project_id
+				"https://monorepo-6hl2.onrender.com/lix-file/" + project_id
 			);
 
 			// console.log("projectId: ", project_id);
@@ -208,7 +208,7 @@ export const projectAtom = atom(async (get) => {
 			if (checkIfExists.ok) {
 				// the file does exist remotely - trigger sync
 				const response = await fetch(
-					"http://localhost:3000/lix-file/" + project_id,
+					"https://monorepo-6hl2.onrender.com/lix-file/" + project_id,
 					{
 						method: "POST",
 						headers: {
@@ -267,7 +267,7 @@ export const isProjectSyncedAtom = atom(async (get) => {
 	);
 	const { project_id } = JSON.parse(projectMetaRaw);
 	const checkIfExists = await fetch(
-		"http://localhost:3000/lix-file/" + project_id
+		"https://monorepo-6hl2.onrender.com/lix-file/" + project_id
 	);
 	return checkIfExists.ok;
 });

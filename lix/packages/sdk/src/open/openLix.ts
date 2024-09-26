@@ -31,6 +31,8 @@ export async function openLix(args: {
 }) {
 	const db = initDb({ sqlite: args.database });
 
+	let closed = false;
+
 	const plugins = await loadPlugins(db);
 	if (args.providePlugins && args.providePlugins.length > 0) {
 		plugins.push(...args.providePlugins);
@@ -55,6 +57,9 @@ export async function openLix(args: {
 	// If a queue trigger happens during an existing queue run we might miss updates and use hasMoreEntriesSince to make sure there is always a final immediate queue worker execution
 	let hasMoreEntriesSince: number | undefined = undefined;
 	async function queueWorker(trail = false) {
+		if (closed) {
+			return;
+		}
 		try {
 			if (pending && !trail) {
 				hasMoreEntriesSince = runNumber;
@@ -167,6 +172,8 @@ export async function openLix(args: {
 		},
 		plugins,
 		close: async () => {
+			closed = true;
+			await settled();
 			args.database.close();
 			await db.destroy();
 		},

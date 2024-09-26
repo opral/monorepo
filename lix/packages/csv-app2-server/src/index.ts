@@ -56,7 +56,6 @@ app.post("/lix-file/:id", async (c) => {
 
 			lixFiles.set(id, await serverLix.toBlob());
 
-			await serverLix.settled();
 			await serverLix.close();
 			// Return the new binary data
 			return c.body(await lixFiles.get(id)!.arrayBuffer(), 200, {
@@ -79,9 +78,8 @@ app.post("/lix-file/:id", async (c) => {
 		await merge({ sourceLix: clientLix, targetLix: serverLix });
 		lixFiles.set(id, await serverLix.toBlob());
 
-		await serverLix.settled();
 		await serverLix.close();
-		await clientLix.settled();
+
 		await clientLix.close();
 		// Return the new binary data
 		return c.body(await lixFiles.get(id)!.arrayBuffer(), 200, {
