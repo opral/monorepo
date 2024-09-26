@@ -12,6 +12,7 @@ import {
 } from "./state.ts";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
+	SlAvatar,
 	SlButton,
 	SlTag,
 	SlTooltip,
@@ -223,6 +224,9 @@ export default function Layout(props: {
 						>
 							Import .csv
 						</SlButton>
+						<SlTooltip content={authorName}>
+							<SlAvatar initials={authorName?.slice(0, 2)} />
+						</SlTooltip>
 					</div>
 				</div>
 				<div className="w-full -mt-2 px-3">

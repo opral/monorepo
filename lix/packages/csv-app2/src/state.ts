@@ -195,6 +195,8 @@ export const projectAtom = atom(async (get) => {
 			const file = await project.toBlob();
 			const writable = await fileHandle.createWritable();
 
+			// cancel interval if project_id != selectedProjectPath
+
 			const checkIfExists = await fetch(
 				"http://localhost:3000/lix-file/" + project_id
 			);
@@ -269,6 +271,29 @@ export const isProjectSyncedAtom = atom(async (get) => {
 	return checkIfExists.ok;
 });
 
+export const userPositionsAtom = atom<
+	Promise<{ col: string; row: string; userName: string; color: string }[]>
+>(async (get) => {
+	get(withPollingAtom);
+	const project = await get(projectAtom);
+	if (!project) return [];
+	const files = await project.db
+		.selectFrom("file")
+		.where("path", "like", "%_position.json%")
+		.select("data")
+		.execute();
+
+	if (files && files.length > 0) {
+		const userPositions = [];
+		for (const file of files) {
+			const data = JSON.parse(new TextDecoder().decode(file.data));
+			userPositions.push(data.position);
+		}
+		return userPositions;
+	}
+	return [];
+});
+
 // export const settingsAtom = atom(async (get) => {
 // 	get(withPollingAtom);
 // 	const project = await get(projectAtom);
@@ -301,7 +326,7 @@ export const csvDataAtom = atom(async (get) => {
 	}).data as [{ [key: string]: string }];
 });
 
-export const uniqueColumnAtom = atom(async (get) => {
+export const uniqueColumnAtom = atom<Promise<string>>(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];

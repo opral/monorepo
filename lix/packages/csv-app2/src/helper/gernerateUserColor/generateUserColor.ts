@@ -1,12 +1,28 @@
+const availableColors = [
+	"red",
+	"orange",
+	"amber",
+	"yellow",
+	"lime",
+	"green",
+	"emerald",
+	"teal",
+	"cyan",
+	"sky",
+	"blue",
+	"indigo",
+	"violet",
+	"purple",
+	"pink",
+	"rose",
+];
+
+//generate random color name from userName
 export const generateColor = (userName: string) => {
-	let hash = 0;
-	for (let i = 0; i < userName.length; i++) {
-		hash = userName.charCodeAt(i) + ((hash << 5) - hash);
-	}
-	let color = "#";
-	for (let i = 0; i < 3; i++) {
-		const value = (hash >> (i * 8)) & 0xff;
-		color += ("00" + value.toString(16)).substr(-2);
-	}
+	const userNameHash = userName
+		.split("")
+		.reduce((acc, char) => acc + char.charCodeAt(0), 0);
+	const colorIndex = userNameHash % availableColors.length;
+	const color = availableColors[colorIndex];
 	return color;
 };

@@ -14,6 +14,7 @@ import {
 	editorSelectionAtom,
 	projectAtom,
 	uniqueColumnAtom,
+	userPositionsAtom,
 } from "../state.ts";
 import { CellDrawer } from "./CellDrawer.tsx";
 import { useEffect, useState } from "react";
@@ -26,6 +27,7 @@ const TableEditor = () => {
 	const [showDrawer, setShowDrawer] = useState(false);
 	const [screenHeight, setScreenHeight] = useState<number>(800);
 	const [selection, setSelection] = useAtom(editorSelectionAtom);
+	const [userPositions] = useAtom(userPositionsAtom);
 
 	const handleUpdateCsvData = async (
 		newData: [
@@ -66,28 +68,9 @@ const TableEditor = () => {
 		setScreenHeight(window.innerHeight - 82);
 	}, [window.innerHeight]);
 
-	const getUserPositions = async () => {
-		const files = await project!.db
-			.selectFrom("file")
-			.where("path", "like", "%_position.json%")
-			.select("data")
-			.execute();
-
-		if (files && files.length > 0) {
-			const userPositions = [];
-			for (const file of files) {
-				const data = JSON.parse(new TextDecoder().decode(file.data));
-				userPositions.push(data);
-			}
-			console.log("userPositions", JSON.stringify(userPositions, null, 2));
-		}
-	};
-
 	useEffect(() => {
-		if (project) {
-			getUserPositions();
-		}
-	});
+		console.log(userPositions);
+	}, [userPositions]);
 
 	return (
 		<div className="relative h-[calc(100vh_-_82px)]">
@@ -102,6 +85,65 @@ const TableEditor = () => {
 				}
 				height={screenHeight}
 				columns={columns}
+				cellClassName={({ rowData, columnId }) => {
+					const currentRow = (rowData as { [key: string]: string })[
+						uniqueColumn
+					];
+
+					if (
+						userPositions.some(
+							(pos) => pos.row === currentRow && pos.col === columnId
+						)
+					) {
+						const userPos = userPositions.find(
+							(pos) => pos.row === currentRow && pos.col === columnId
+						);
+
+						if (userPos?.userName === authorName) {
+							return undefined;
+						}
+
+						switch (userPos?.color) {
+							case "red":
+								return "bg-red-100! outline outline-red-500! relative z-10";
+							case "orange":
+								return "bg-orange-100! outline outline-orange-500! relative z-10";
+							case "amber":
+								return "bg-amber-100! outline outline-amber-500! relative z-10";
+							case "yellow":
+								return "bg-yellow-100! outline outline-yellow-500! relative z-10";
+							case "lime":
+								return "bg-lime-100! outline outline-lime-500! relative z-10";
+							case "green":
+								return "bg-green-100! outline outline-green-500! relative z-10";
+							case "emerald":
+								return "bg-emerald-100! outline outline-emerald-500! relative z-10";
+							case "teal":
+								return "bg-teal-100! outline outline-teal-500! relative z-10";
+							case "cyan":
+								return "bg-cyan-100! outline outline-cyan-500! relative z-10";
+							case "sky":
+								return "bg-sky-100! outline outline-sky-500! relative z-10";
+							case "blue":
+								return "bg-blue-100! outline outline-blue-500! relative z-10";
+							case "indigo":
+								return "bg-indigo-100! outline outline-indigo-500! relative z-10";
+							case "violet":
+								return "bg-violet-100! outline outline-violet-500! relative z-10";
+							case "purple":
+								return "bg-purple-100! outline outline-purple-500! relative z-10";
+							case "pink":
+								return "bg-pink-100! outline outline-pink-500! relative z-10";
+							case "rose":
+								return "bg-rose-100! outline outline-rose-500! relative z-10";
+							default:
+								break;
+						}
+						return "bg-blue-100! outline outline-blue-500! relative z-10";
+					}
+
+					return undefined;
+				}}
 				onChange={(newData) =>
 					handleUpdateCsvData(
 						newData as [
