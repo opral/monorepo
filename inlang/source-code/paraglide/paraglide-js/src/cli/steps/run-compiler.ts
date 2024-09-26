@@ -3,13 +3,13 @@ import type { CliStep } from "../utils.js"
 import path from "node:path"
 import { compile } from "~/compiler/compile.js"
 import { writeOutput } from "~/services/file-handling/write-output.js"
-import type { NodeishFilesystem } from "~/services/file-handling/types.js"
+import fs from "node:fs"
 
 export const runCompiler: CliStep<
 	{
 		project: InlangProject
 		outdir: string
-		fs: NodeishFilesystem
+		fs: typeof fs.promises
 	},
 	unknown
 > = async (ctx) => {
@@ -20,9 +20,8 @@ export const runCompiler: CliStep<
 	const output = await compile({
 		bundles,
 		settings,
-		outputStructure: "regular",
 	})
 
 	await writeOutput(absoluteOutdir, output, ctx.fs)
-	return ctx
+	return { ...ctx, bundles }
 }

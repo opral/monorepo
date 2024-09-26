@@ -4,7 +4,6 @@ import { resolve } from "node:path"
 import { Logger } from "~/services/logger/index.js"
 import { runCompiler } from "~/cli/steps/run-compiler.js"
 import { DEFAULT_OUTDIR } from "~/cli/defaults.js"
-import { classifyProjectErrors } from "~/services/error-handling.js"
 import { loadProjectFromDirectory } from "@inlang/sdk2"
 
 export const compileCommand = new Command()
@@ -23,31 +22,7 @@ export const compileCommand = new Command()
 
 		logger.info(`Compiling inlang project at "${options.project}".`)
 
-		const project = await loadProjectFromDirectory({
-			path,
-			fs,
-			// providePlugins: [icu1Importer],
-		})
-
-		const errors = await project.errors.get()
-
-		if (errors.length > 0) {
-			const { nonFatalErrors, fatalErrors } = classifyProjectErrors(errors as any)
-			if (fatalErrors.length > 0) {
-				logger.error(`The project has fatal errors:`)
-				for (const error of [...fatalErrors, ...nonFatalErrors]) {
-					logger.error(error)
-				}
-				process.exit(1)
-			}
-
-			if (nonFatalErrors.length > 0) {
-				logger.warn(`The project has warnings:`)
-				for (const error of nonFatalErrors) {
-					logger.warn(error)
-				}
-			}
-		}
+		const project = await loadProjectFromDirectory({ path, fs })
 
 		await runCompiler({
 			project,
@@ -55,6 +30,18 @@ export const compileCommand = new Command()
 			outdir: options.outdir,
 		})
 
-		logger.info("Successfully compiled the project.")
+		logger.success("Successfully compiled the project.")
+
+		const errors = await project.errors.get()
+
+		if (errors.length > 0) {
+			logger.warn(
+				`But the project reported the following warnings and/or errors that might have influenced compilation:`
+			)
+			for (const error of errors) {
+				logger.log(`${error}`)
+			}
+		}
+
 		process.exit(0)
 	})

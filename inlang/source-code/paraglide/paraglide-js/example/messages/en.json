@@ -1,10 +1,12 @@
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"currentLanguageTag": "The current language tag is \"{languageTag}\".",
-	"greeting": "Welcome {name}! You have {count, plural, other {# messages} one {one message} =0 {no messages}}.",
-	"hello": "Hello World!",
-	"with_backtick": "`Hello World!`",
-	"with_nonjs_variable": "Hello {000}",
-	"missing_in_german": "This is missing in German",
-	"progress": "Progress: {n, number, percent}"
+	"some_happy_cat": "Read more about Lix",
+	"blue_horse_shoe": "Hello {username}, welcome to the {placename}!",
+	"jojo_mountain_day": {
+		"match": {
+			"platform=android, userGender=male": "{username} has to download the app on his phone from the Google Play Store.",
+			"platform=ios, userGender=female": "{username} has to download the app on her iPhone from the App Store.",
+			"platform=*, userGender=*": "The person has to download the app."
+		}
+	}
 }
