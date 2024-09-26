@@ -39,7 +39,7 @@ function compileMessageWithOneVariant(
 	}
 	const hasInputs = declarations.some((decl) => decl.type === "input-variable")
 	const compiledPattern = compilePattern(message.locale, variant.pattern, registry)
-	const code = `export const ${message.bundleId} = (${hasInputs ? "inputs" : ""}) => ${compiledPattern.code}`
+	const code = `export const ${message.bundleId} = (${hasInputs ? "i" : ""}) => ${compiledPattern.code}`
 	return { code, node: message }
 }
 
@@ -75,7 +75,7 @@ function compileMessageWithMultipleVariants(
 			}
 			const variableType = declarations.find((decl) => decl.name === match.key)?.type
 			if (variableType === "input-variable") {
-				conditions.push(`inputs.${match.key} == ${doubleQuote(match.value)}`)
+				conditions.push(`i.${match.key} == ${doubleQuote(match.value)}`)
 			} else if (variableType === "local-variable") {
 				conditions.push(`${match.key} == ${doubleQuote(match.value)}`)
 			}
@@ -86,7 +86,7 @@ function compileMessageWithMultipleVariants(
 	}
 
 	const code = `
-		export const ${message.bundleId} = (${hasInputs ? "inputs" : ""}) => {
+		export const ${message.bundleId} = (${hasInputs ? "i" : ""}) => {
 				${compiledVariants.join("\n\n")}
 		}`
 
