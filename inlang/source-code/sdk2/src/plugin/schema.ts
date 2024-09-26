@@ -136,24 +136,44 @@ export type MessageImport = Omit<NewMessage, "id"> & {
  * - The `bundleId` and `locale` properties are added to the import variant to match the variant
  *   with a message.
  */
-export type VariantImport = Omit<NewVariant, "id" | "messageId"> & {
-	/**
-	 * If the id is not provided, the SDK will generate one.
-	 */
-	id?: string;
-	/**
-	 * If the messageId is not provided, the SDK will match the variant
-	 * with a message based on the `bundleId` and `locale` properties.
-	 */
-	messageId?: string;
-	/**
-	 * Required to match the variant with a message in case the `id` and `messageId` are undefined.
-	 */
-	bundleId: string;
-	/**
-	 * Required to match the variant with a message in case the `id` and `messageId` are undefined.
-	 */
-	locale: string;
-};
+export type VariantImport =
+	| (NewVariant & {
+			/**
+			 * If the id is not provided, the SDK will generate one.
+			 */
+			id: string;
+			/**
+			 * If the messageId is not provided, the SDK will match the variant
+			 * with a message based on the `messageBundleId` and `messageLocale` properties.
+			 */
+			messageId: string;
+			/**
+			 * Required to match the variant with a message in case the `id` and `messageId` are undefined.
+			 */
+			messageBundleId?: undefined;
+			/**
+			 * Required to match the variant with a message in case the `id` and `messageId` are undefined.
+			 */
+			messageLocale?: undefined;
+	  })
+	| (Omit<NewVariant, "id" | "messageId"> & {
+			/**
+			 * If the id is not provided, the SDK will generate one.
+			 */
+			id?: undefined;
+			/**
+			 * If the messageId is not provided, the SDK will match the variant
+			 * with a message based on the `messageBundleId` and `messageLocale` properties.
+			 */
+			messageId?: undefined;
+			/**
+			 * Required to match the variant with a message in case the `id` and `messageId` are undefined.
+			 */
+			messageBundleId: string;
+			/**
+			 * Required to match the variant with a message in case the `id` and `messageId` are undefined.
+			 */
+			messageLocale: string;
+	  });
 
 type MaybePromise<T> = T | Promise<T>;
