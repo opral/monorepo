@@ -115,7 +115,7 @@ function generateRegularOutput(
 				continue
 			}
 
-			file += `\n${compiledMessage.code}`
+			file += `\n\n${compiledMessage.code}`
 		}
 
 		output[filename] = file
