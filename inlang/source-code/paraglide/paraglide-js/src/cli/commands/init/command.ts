@@ -13,7 +13,7 @@ import { promptForOutdir } from "~/cli/steps/prompt-for-outdir.js"
 import { updatePackageJson } from "~/cli/steps/update-package-json.js"
 import { runCompiler } from "~/cli/steps/run-compiler.js"
 import type { CliStep } from "../../utils.js"
-import nodeFs from "node:fs/promises"
+import nodeFs from "node:fs"
 import type { NodeishFilesystem } from "~/services/file-handling/types.js"
 
 export const initCommand = new Command()
@@ -30,7 +30,8 @@ export const initCommand = new Command()
 
 		const ctx = {
 			logger,
-			fs: nodeFs,
+			fs: nodeFs.promises,
+			syncFs: nodeFs,
 			root: process.cwd(),
 			appId: PARJS_MARKTEPLACE_ID,
 		} as const

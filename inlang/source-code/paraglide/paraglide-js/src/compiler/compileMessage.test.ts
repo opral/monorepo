@@ -8,13 +8,12 @@ it("compiles a message with a single variant", async () => {
 		locale: "en",
 		id: "mock_message",
 		bundleId: "mock_bundle",
-		declarations: [],
 		selectors: [],
 		variants: [
 			{
 				id: "1",
 				messageId: "some_message",
-				match: {},
+				matches: [],
 				pattern: [{ type: "text", value: "Hello" }],
 			},
 		],
@@ -32,48 +31,33 @@ it("compiles a message with variants", async () => {
 		locale: "en",
 		id: "some_message",
 		bundleId: "some_bundle",
-		declarations: [
-			{
-				type: "input",
-				name: "fistInput",
-				value: { type: "expression", arg: { type: "variable", name: "fistInput" } },
-			},
-			{
-				type: "input",
-				name: "secondInput",
-				value: { type: "expression", arg: { type: "variable", name: "second Input" } },
-			},
-		],
 		selectors: [
-			{ type: "expression", arg: { type: "variable", name: "fistInput" } },
-			{
-				type: "expression",
-				arg: { type: "variable", name: "second Input" },
-				annotation: { type: "function", name: "plural", options: [] },
-			},
+			{ type: "variable-reference", name: "fistInput" },
+			{ type: "variable-reference", name: "secondInput" },
 		],
 		variants: [
 			{
 				id: "1",
 				messageId: "some_message",
-				match: { firstInput: "1", secondInput: "2" },
+				matches: [
+					{ type: "literal-match", key: "fistInput", value: "1" },
+					{ type: "literal-match", key: "secondInput", value: "2" },
+				],
 				pattern: [
 					{ type: "text", value: "One" },
 					{
 						type: "expression",
-						arg: { type: "variable", name: "fistInput" },
-						annotation: {
-							type: "function",
-							name: "number",
-							options: [],
-						},
+						arg: { type: "variable-reference", name: "fistInput" },
 					},
 				],
 			},
 			{
 				id: "2",
 				messageId: "some_message",
-				match: { firstInput: "*", secondInput: "*" },
+				matches: [
+					{ type: "catchall-match", key: "fistInput" },
+					{ type: "catchall-match", key: "secondInput" },
+				],
 				pattern: [{ type: "text", value: "Many" }],
 			},
 		],

@@ -5,7 +5,7 @@ import { Logger } from "~/services/logger/index.js"
 import { runCompiler } from "~/cli/steps/run-compiler.js"
 import { DEFAULT_OUTDIR } from "~/cli/defaults.js"
 import { classifyProjectErrors } from "~/services/error-handling.js"
-import { loadProjectFromDirectoryInMemory } from "@inlang/sdk2"
+import { loadProjectFromDirectory } from "@inlang/sdk2"
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -23,7 +23,7 @@ export const compileCommand = new Command()
 
 		logger.info(`Compiling inlang project at "${options.project}".`)
 
-		const project = await loadProjectFromDirectoryInMemory({
+		const project = await loadProjectFromDirectory({
 			path,
 			fs,
 			// providePlugins: [icu1Importer],

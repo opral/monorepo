@@ -9,20 +9,17 @@ import terser from "@rollup/plugin-terser"
 const mockBundles: BundleNested[] = [
 	{
 		id: "happy_elephant_bundle",
-		alias: {
-			inlang: "missingInGerman",
-		},
+		declarations: [],
 		messages: [
 			{
 				id: "happy_elephant_message_en",
 				bundleId: "happy_elephant_bundle",
 				locale: "en",
-				declarations: [],
 				selectors: [],
 				variants: [
 					{
 						id: "happy_elephant_message_en_variant_one",
-						match: {},
+						matches: [],
 						messageId: "happy_elephant_message_en",
 						pattern: [{ type: "text", value: "A simple message." }],
 					},
@@ -32,21 +29,18 @@ const mockBundles: BundleNested[] = [
 	},
 	{
 		id: "sad_penguin_bundle",
-		alias: {
-			inlang: "onlyText",
-		},
+		declarations: [],
 		messages: [
 			{
 				id: "sad_penguin_message_en",
 				bundleId: "sad_penguin_bundle",
 				locale: "en",
 				selectors: [],
-				declarations: [],
 				variants: [
 					{
 						id: "sad_penguin_message_en_variant_one",
 						messageId: "sad_penguin_message_en",
-						match: {},
+						matches: [],
 						pattern: [{ type: "text", value: "A simple message." }],
 					},
 				],
@@ -56,12 +50,11 @@ const mockBundles: BundleNested[] = [
 				bundleId: "sad_penguin_bundle",
 				locale: "en-US",
 				selectors: [],
-				declarations: [],
 				variants: [
 					{
 						id: "sad_penguin_message_en_us_variant_one",
 						messageId: "sad_penguin_message_en_us",
-						match: {},
+						matches: [],
 						pattern: [
 							{ type: "text", value: "FUCKTARD. I am from New York. This is a simple message!" },
 						],
@@ -73,12 +66,11 @@ const mockBundles: BundleNested[] = [
 				bundleId: "sad_penguin_bundle",
 				locale: "de",
 				selectors: [],
-				declarations: [],
 				variants: [
 					{
 						id: "sad_penguin_message_de_variant_one",
 						messageId: "sad_penguin_message_de",
-						match: {},
+						matches: [],
 						pattern: [{ type: "text", value: "Eine einfache Nachricht." }],
 					},
 				],
@@ -87,30 +79,26 @@ const mockBundles: BundleNested[] = [
 	},
 	{
 		id: "depressed_dog",
-		alias: {
-			inlang: "oneParam",
-		},
+		declarations: [
+			{
+				type: "input-variable",
+				name: "name",
+			},
+		],
 		messages: [
 			{
 				id: "depressed_dog_en",
 				bundleId: "depressed_dog",
 				locale: "en",
 				selectors: [],
-				declarations: [
-					{
-						type: "input",
-						name: "name",
-						value: { type: "expression", arg: { type: "variable", name: "name" } },
-					},
-				],
 				variants: [
 					{
 						id: "depressed_dog_en_variant_one",
 						messageId: "depressed_dog_en",
-						match: {},
+						matches: [],
 						pattern: [
 							{ type: "text", value: "Good morning " },
-							{ type: "expression", arg: { type: "variable", name: "name" } },
+							{ type: "expression", arg: { type: "variable-reference", name: "name" } },
 							{ type: "text", value: "!" },
 						],
 					},
@@ -121,21 +109,15 @@ const mockBundles: BundleNested[] = [
 				bundleId: "depressed_dog",
 				locale: "de",
 				selectors: [],
-				declarations: [
-					{
-						type: "input",
-						name: "name",
-						value: { type: "expression", arg: { type: "variable", name: "name" } },
-					},
-				],
+
 				variants: [
 					{
 						id: "depressed_dog_de_variant_one",
 						messageId: "depressed_dog_de",
-						match: {},
+						matches: [],
 						pattern: [
 							{ type: "text", value: "Guten Morgen " },
-							{ type: "expression", arg: { type: "variable", name: "name" } },
+							{ type: "expression", arg: { type: "variable-reference", name: "name" } },
 							{ type: "text", value: "!" },
 						],
 					},
@@ -145,37 +127,33 @@ const mockBundles: BundleNested[] = [
 	},
 	{
 		id: "insane_cats",
-		alias: {
-			input: "multipleParams",
-		},
+		declarations: [
+			{
+				type: "input-variable",
+				name: "name",
+			},
+			{
+				type: "input-variable",
+				name: "count",
+			},
+		],
 		messages: [
 			{
 				id: "insane_cats_en",
 				bundleId: "insane_cats",
 				locale: "en",
-				declarations: [
-					{
-						type: "input",
-						name: "name",
-						value: { type: "expression", arg: { type: "variable", name: "name" } },
-					},
-					{
-						type: "input",
-						name: "name",
-						value: { type: "expression", arg: { type: "variable", name: "count" } },
-					},
-				],
+
 				selectors: [],
 				variants: [
 					{
 						id: "insane_cats_en_variant_one",
 						messageId: "insane_cats_en",
-						match: {},
+						matches: [],
 						pattern: [
 							{ type: "text", value: "Hello " },
-							{ type: "expression", arg: { type: "variable", name: "name" } },
+							{ type: "expression", arg: { type: "variable-reference", name: "name" } },
 							{ type: "text", value: "! You have " },
-							{ type: "expression", arg: { type: "variable", name: "count" } },
+							{ type: "expression", arg: { type: "variable-reference", name: "count" } },
 							{ type: "text", value: " messages." },
 						],
 					},
@@ -185,29 +163,17 @@ const mockBundles: BundleNested[] = [
 				id: "insane_cats_de",
 				bundleId: "insane_cats",
 				locale: "de",
-				declarations: [
-					{
-						type: "input",
-						name: "name",
-						value: { type: "expression", arg: { type: "variable", name: "name" } },
-					},
-					{
-						type: "input",
-						name: "name",
-						value: { type: "expression", arg: { type: "variable", name: "count" } },
-					},
-				],
 				selectors: [],
 				variants: [
 					{
 						id: "insane_cats_de_variant_one",
 						messageId: "insane_cats_de",
-						match: {},
+						matches: [],
 						pattern: [
 							{ type: "text", value: "Hallo " },
-							{ type: "expression", arg: { type: "variable", name: "name" } },
+							{ type: "expression", arg: { type: "variable-reference", name: "name" } },
 							{ type: "text", value: "! Du hast " },
-							{ type: "expression", arg: { type: "variable", name: "count" } },
+							{ type: "expression", arg: { type: "variable-reference", name: "count" } },
 							{ type: "text", value: " Nachrichten." },
 						],
 					},
