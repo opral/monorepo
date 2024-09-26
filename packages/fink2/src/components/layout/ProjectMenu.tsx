@@ -5,6 +5,7 @@ import { useAtom } from "jotai";
 import CreateProjectDialog from "./CreateProjectDialog.tsx";
 import ImportLocaleDialog from "./ImportLocaleDialog.tsx";
 import { useState } from "react";
+import { supportedPluginKeyType } from "../../helper/types.ts";
 
 const ProjectMenu = () => {
   const [project] = useAtom(projectAtom);
@@ -12,7 +13,7 @@ const ProjectMenu = () => {
   const [, setForceReloadProject] = useAtom(forceReloadProjectAtom);
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [importedFile, setImportedFile] = useState<File | undefined>(undefined);
-  const [importPlugin, setImportPlugin] = useState<"plugin.inlang.i18next" | "plugin.inlang.messageFormat" | undefined>(undefined);
+  const [importPlugin, setImportPlugin] = useState<supportedPluginKeyType | undefined>(undefined);
 
   return (
     <div className="flex items-center gap-1">
@@ -50,12 +51,12 @@ const ProjectMenu = () => {
                 JSON
                 <SlBadge pill variant="neutral" className="ml-2">i18next</SlBadge>
               </SlMenuItem>
-              {/* <SlMenuItem value="import JSON" onClick={async () => {
+              <SlMenuItem value="import message format" onClick={async () => {
                 setImportedFile(await selectImportFile(".json"))
                 setImportPlugin("plugin.inlang.messageFormat")
               }}>
                 Message format
-              </SlMenuItem> */}
+              </SlMenuItem>
             </SlMenu>
           </SlMenuItem>
           <SlMenuItem>
@@ -65,9 +66,9 @@ const ProjectMenu = () => {
                 JSON
                 <SlBadge pill variant="neutral" className="ml-2">i18next</SlBadge>
               </SlMenuItem>
-              {/* <SlMenuItem value="export message format" onClick={() => exportToJSON(project)}>
+              <SlMenuItem value="export message format" onClick={() => exportFiles(project, "plugin.inlang.messageFormat", ".json")}>
                 Message format
-              </SlMenuItem> */}
+              </SlMenuItem>
             </SlMenu>
           </SlMenuItem>
         </SlMenu>

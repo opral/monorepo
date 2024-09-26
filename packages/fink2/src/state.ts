@@ -8,6 +8,8 @@ import hasMissingTranslations from "./helper/hasMissingTranslations.ts";
 import getSortedBundles from "./helper/sortBundles.ts";
 // @ts-expect-error - the plugin ships with no declaration file
 import i18nextPlugin from "@inlang/plugin-i18next";
+// @ts-expect-error - the plugin ships with no declaration file
+import messageFormatPlugin from "@inlang/plugin-message-format";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -19,7 +21,7 @@ export const authorNameAtom = atomWithStorage<string | undefined>(
 	undefined
 );
 
-let safeProjectToOpfsInterval: number;
+let safeProjectToOpfsInterval: NodeJS.Timeout;
 
 /**
  * Force reload the project.
@@ -47,7 +49,7 @@ export const projectAtom = atom(async (get) => {
 		const file = await fileHandle.getFile();
 		const project = await loadProjectInMemory({
 			blob: file,
-			providePlugins: [i18nextPlugin],
+			providePlugins: [i18nextPlugin, messageFormatPlugin],
 		});
 		safeProjectToOpfsInterval = setInterval(async () => {
 			const writable = await fileHandle.createWritable();
