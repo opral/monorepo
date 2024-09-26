@@ -166,6 +166,7 @@ export const projectAtom = atom(async (get) => {
 									...userPosition,
 									userName: userName,
 									color: generateColor(userName),
+									date: new Date().toISOString(),
 								},
 							})
 						),
@@ -245,7 +246,7 @@ export const projectAtom = atom(async (get) => {
 			await writable.write(await project.toBlob());
 			await writable.close();
 
-			setTimeout(syncLixFile, 2000);
+			setTimeout(syncLixFile, 500);
 		};
 
 		syncLixFile();
@@ -277,7 +278,15 @@ export const isProjectSyncedAtom = atom(async (get) => {
 });
 
 export const userPositionsAtom = atom<
-	Promise<{ col: string; row: string; userName: string; color: string }[]>
+	Promise<
+		{
+			col: string;
+			row: string;
+			userName: string;
+			color: string;
+			date: string;
+		}[]
+	>
 >(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);

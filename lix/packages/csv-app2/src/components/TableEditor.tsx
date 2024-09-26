@@ -18,7 +18,6 @@ import {
 } from "../state.ts";
 import { CellDrawer } from "./CellDrawer.tsx";
 import { useEffect, useState } from "react";
-import { SlInput } from "@shoelace-style/shoelace/dist/react";
 
 const TableEditor = () => {
 	const [csvData] = useAtom(csvDataAtom);
@@ -45,31 +44,24 @@ const TableEditor = () => {
 			.execute();
 	};
 
-	// const cellComponentWithAvatar = ({ rowData, setRowData }) => {
-	// 	console.log(rowData);
-	// 	return (
-	// 		<SlInput value={rowData} onChange={(e) => setRowData(e.target.value)} />
-	// 	);
-	// };
-
 	const columns: Array<Record<string, unknown>> = [];
 	if (csvData.length > 0) {
 		for (const key in csvData[0]) {
 			if (key === uniqueColumn) {
-				columns.push({
+				const column = {
 					...keyColumn(key, textColumn),
 					title: key,
 					disabled: true,
 					maxWidth: 200,
-					//component: cellComponentWithAvatar,
-				});
+				};
+				columns.push(column);
 			} else {
-				columns.push({
+				const column = {
 					...keyColumn(key, textColumn),
 					title: key,
 					maxWidth: 200,
-					//component: cellComponentWithAvatar,
-				});
+				};
+				columns.push(column);
 			}
 		}
 	}
@@ -79,7 +71,29 @@ const TableEditor = () => {
 	}, [window.innerHeight]);
 
 	useEffect(() => {
-		console.log(userPositions);
+		for (const userPos of userPositions) {
+			const style = document.createElement("style");
+			style.innerHTML = `
+				.style-${userPos.userName}::before {
+					content: "${userPos.userName.slice(0, 2).toUpperCase()}";
+					position: absolute;
+					top: 50%;
+					transform: translateY(-50%);
+					right: 4px;
+					width: 32px;
+					height: 32px;
+					border-radius: 50%;
+					background-color: #FFF;
+					text-align: center;
+					line-height: 30px;
+					font-size: 13px;
+					font-weight: 400;
+					border: 1px solid #cdd0d4;
+					opacity: 0.8
+				}
+			`;
+			document.head.appendChild(style);
+		}
 	}, [userPositions]);
 
 	return (
@@ -113,43 +127,105 @@ const TableEditor = () => {
 							return undefined;
 						}
 
+						if (userPos?.date) {
+							// check if isoTimeString is older the 30 sec and if so return undefined
+							const date = new Date(userPos.date);
+							const now = new Date();
+							const diff = now.getTime() - date.getTime();
+
+							if (diff > 60000) {
+								return undefined;
+							}
+						}
+
 						switch (userPos?.color) {
 							case "red":
-								return "bg-red-100! outline outline-red-500! relative z-10";
+								return (
+									"bg-red-100! outline outline-red-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "orange":
-								return "bg-orange-100! outline outline-orange-500! relative z-10";
+								return (
+									"bg-orange-100! outline outline-orange-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "amber":
-								return "bg-amber-100! outline outline-amber-500! relative z-10";
+								return (
+									"bg-amber-100! outline outline-amber-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "yellow":
-								return "bg-yellow-100! outline outline-yellow-500! relative z-10";
+								return (
+									"bg-yellow-100! outline outline-yellow-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "lime":
-								return "bg-lime-100! outline outline-lime-500! relative z-10";
+								return (
+									"bg-lime-100! outline outline-lime-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "green":
-								return "bg-green-100! outline outline-green-500! relative z-10";
+								return (
+									"bg-green-100! outline outline-green-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "emerald":
-								return "bg-emerald-100! outline outline-emerald-500! relative z-10";
+								return (
+									"bg-emerald-100! outline outline-emerald-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "teal":
-								return "bg-teal-100! outline outline-teal-500! relative z-10";
+								return (
+									"bg-teal-100! outline outline-teal-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "cyan":
-								return "bg-cyan-100! outline outline-cyan-500! relative z-10";
+								return (
+									"bg-cyan-100! outline outline-cyan-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "sky":
-								return "bg-sky-100! outline outline-sky-500! relative z-10";
+								return (
+									"bg-sky-100! outline outline-sky-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "blue":
-								return "bg-blue-100! outline outline-blue-500! relative z-10";
+								return (
+									"bg-blue-100! outline outline-blue-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "indigo":
-								return "bg-indigo-100! outline outline-indigo-500! relative z-10";
+								return (
+									"bg-indigo-100! outline outline-indigo-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "violet":
-								return "bg-violet-100! outline outline-violet-500! relative z-10";
+								return (
+									"bg-violet-100! outline outline-violet-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "purple":
-								return "bg-purple-100! outline outline-purple-500! relative z-10";
+								return (
+									"bg-purple-100! outline outline-purple-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "pink":
-								return "bg-pink-100! outline outline-pink-500! relative z-10";
+								return (
+									"bg-pink-100! outline outline-pink-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							case "rose":
-								return "bg-rose-100! outline outline-rose-500! relative z-10";
+								return (
+									"bg-rose-100! outline outline-rose-500! relative z-10 " +
+									`style-${userPos?.userName}`
+								);
 							default:
 								break;
 						}
-						return "bg-blue-100! outline outline-blue-500! relative z-10";
+						return (
+							"bg-blue-100! outline outline-blue-500! relative z-10 " +
+							`style-${userPos?.userName}`
+						);
 					}
 
 					return undefined;
@@ -185,13 +261,6 @@ const TableEditor = () => {
 							}
 							if (!showDrawer) setShowDrawer(true);
 						}
-					} else {
-						// if (selection !== null) {
-						// 	setSelection(null);
-						// }
-						// if (showDrawer) {
-						// 	setShowDrawer(false);
-						// }
 					}
 				}}
 				addRowsComponent={() => <div></div>}
