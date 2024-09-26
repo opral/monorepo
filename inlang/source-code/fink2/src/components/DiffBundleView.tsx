@@ -6,11 +6,12 @@ import {
 	InlangProject,
 	updateBundleNested,
 	selectBundleNested,
+	Change,
 } from "@inlang/sdk2";
 import SingleDiffBundle from "./SingleDiffBundle.tsx";
-import { SlButton } from "@shoelace-style/shoelace/dist/react";
+import { SlButton, SlDetails } from "@shoelace-style/shoelace/dist/react";
 
-const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
+const DiffBundleView = (props: { changes: Change[]; bundleId: string }) => {
 	const [project] = useAtom(projectAtom);
 	const [settings] = useAtom(settingsAtom);
 	const [bundle, setBundle] = useState<BundleNested | undefined>(undefined);
@@ -37,10 +38,21 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 
 	return (
 		<div className="bg-white border-x border-zinc-200 p-4">
-			<div className="flex justify-between items-center mb-3">
+			<div className="flex flex-col gap-2 mb-3 w-full">
 				<h3 className="font-medium text-[14px]!">{props.bundleId}</h3>
 				<div className="flex items-center gap-3">
-					<div className="text-xs! text-zinc-700 bg-zinc-300 h-5 rounded flex items-center px-2 font-medium">
+					<SlDetails
+						className="w-full"
+						summary={`${props.changes.length} ${props.changes.length === 1 ? "change" : "changes"}`}
+					>
+						{props.changes.map((change) => (
+							<div key={change.id}>
+								{/* <pre>{JSON.stringify(change, null, 2)}</pre> */}
+								<div>{change.operation} {change.type}</div>
+							</div>
+						))}
+					</SlDetails>
+					{/* <div className="text-xs! text-zinc-700 bg-zinc-300 h-5 rounded flex items-center px-2 font-medium">
 						{props.changes.length}{" "}
 						{props.changes.length === 1 ? "change" : "changes"}
 					</div>
@@ -50,7 +62,7 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 						onClick={() => handleDiscard()}
 					>
 						Discard
-					</SlButton>
+					</SlButton> */}
 				</div>
 			</div>
 
@@ -149,7 +161,7 @@ const queryNewBundle = async (
 							} else {
 								//insert
 								message.variants = message.variants.filter(
-									(variant) => variant.id !== change.value.id
+									(variant) => variant.id !== change.value?.id
 								);
 							}
 						}
@@ -161,7 +173,7 @@ const queryNewBundle = async (
 	}
 };
 
-const getLatestCommitedChange = async (project: InlangProject, change: any) => {
+const getLatestCommitedChange = async (project: InlangProject, change: Change) => {
 	const latestCommitedChange = await project.lix.db
 		.selectFrom("change")
 		.selectAll()

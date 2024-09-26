@@ -14,7 +14,7 @@ import React, { useState } from "react";
 import { useAtom } from "jotai";
 import {
 	filteredLocalesAtom,
-	pendingChangesAtom,
+	groupedPendingChangesAtom,
 	projectAtom,
 	settingsAtom,
 } from "../state.ts";
@@ -83,7 +83,7 @@ const InlangBundle = (props: {
 	setShowHistory: (variantId: string) => void;
 }) => {
 	const [project] = useAtom(projectAtom);
-	const [pendingChanges] = useAtom(pendingChangesAtom);
+	const [groupedPendingChanges] = useAtom(groupedPendingChangesAtom);
 	const [settings] = useAtom(settingsAtom);
 	const [filteredLocales] = useAtom(filteredLocalesAtom);
 
@@ -177,7 +177,7 @@ const InlangBundle = (props: {
 											settings={settings}
 										>
 											{message.variants.map((variant) => {
-												const change = pendingChanges.find(
+												const change = groupedPendingChanges.find(
 													// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 													// @ts-ignore
 													(change) =>
