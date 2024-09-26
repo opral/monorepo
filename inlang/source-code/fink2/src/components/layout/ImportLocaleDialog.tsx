@@ -3,12 +3,13 @@ import { SetStateAction, useState } from "react";
 import { projectAtom, settingsAtom } from "../../state.ts";
 import { useAtom } from "jotai";
 import { handleImportedFile } from "../../helper/utils.ts";
+import { supportedPluginKeyType } from "../../helper/types.ts";
 
 const ImportLocaleDialog = (props: {
   importedFile: File | undefined;
   setImportedFile: React.Dispatch<SetStateAction<File | undefined>>;
-  importPlugin: "plugin.inlang.i18next" | "plugin.inlang.messageFormat" | undefined;
-  setImportPlugin: React.Dispatch<React.SetStateAction<"plugin.inlang.i18next" | "plugin.inlang.messageFormat" | undefined>>;
+  importPlugin: supportedPluginKeyType | undefined;
+  setImportPlugin: React.Dispatch<React.SetStateAction<supportedPluginKeyType | undefined>>;
 }) => {
   const [project] = useAtom(projectAtom);
   const [settings] = useAtom(settingsAtom);

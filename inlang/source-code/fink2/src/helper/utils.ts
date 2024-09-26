@@ -5,6 +5,7 @@ import {
 	merge,
 } from "@inlang/sdk2";
 import JSZip from "jszip";
+import { supportedPluginKeyType } from "./types.ts";
 
 export const handleDownload = async (
 	project: InlangProject | undefined,
@@ -166,7 +167,7 @@ const downloadFile = (file: ImportFile, fileEnding: string) => {
 
 export const exportFiles = async (
 	project: InlangProject | undefined,
-	pluginKey: string,
+	pluginKey: supportedPluginKeyType,
 	fileEnding: string
 ) => {
 	const files = await project!.exportFiles({ pluginKey });
