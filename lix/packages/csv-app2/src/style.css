@@ -112,3 +112,15 @@ sl-tag::part(base) {
 p {
     line-height: 150%;
 }
+
+sl-avatar::part(base) {
+    height: 30px;
+    width: 30px;
+    background: #FFF;
+    border: 1px solid #cdd0d4;
+}
+
+sl-avatar::part(initials) {
+   font-size: 14px;
+   color: #000
+}
