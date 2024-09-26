@@ -7,7 +7,6 @@ import type { ProjectSettings } from "../json-schema/settings.js";
 import type { InlangDatabaseSchema, NewVariant } from "../database/schema.js";
 import type { InlangPlugin, VariantImport } from "../plugin/schema.js";
 import type { ImportFile } from "../project/api.js";
-import { SQLite3Error } from "sqlite-wasm-kysely";
 
 export async function importFiles(args: {
 	files: ImportFile[];
@@ -65,7 +64,7 @@ export async function importFiles(args: {
 				// handle foreign key violation
 				// e.g. a message references a bundle that doesn't exist
 				// by creating the bundle
-				if ((e as SQLite3Error)?.resultCode === 787) {
+				if ((e as any)?.resultCode === 787) {
 					await trx
 						.insertInto("bundle")
 						.values({ id: message.bundleId })
