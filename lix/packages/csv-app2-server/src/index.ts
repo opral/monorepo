@@ -13,6 +13,12 @@ app.use('*', cors({
   allowHeaders: ['Content-Type', 'Authorization'], 
 }));
 
+setInterval(() => {
+	const before = process.memoryUsage().heapUsed / 1024 / 1024;
+	global.gc?.();
+	const after = process.memoryUsage().heapUsed / 1024 / 1024;
+	console.log({ before: before.toFixed(2), after: after.toFixed(2) });
+}, 10_000);
 
 const lixFiles = new Map<string, Blob>();
 
@@ -49,6 +55,9 @@ app.post("/lix-file/:id", async (c) => {
 			});
 
 			lixFiles.set(id, await serverLix.toBlob());
+
+			await serverLix.settled();
+			await serverLix.close();
 			// Return the new binary data
 			return c.body(await lixFiles.get(id)!.arrayBuffer(), 200, {
 				"Content-Type": "application/octet-stream",
@@ -69,6 +78,11 @@ app.post("/lix-file/:id", async (c) => {
 
 		await merge({ sourceLix: clientLix, targetLix: serverLix });
 		lixFiles.set(id, await serverLix.toBlob());
+
+		await serverLix.settled();
+		await serverLix.close();
+		await clientLix.settled();
+		await clientLix.close();
 		// Return the new binary data
 		return c.body(await lixFiles.get(id)!.arrayBuffer(), 200, {
 			"Content-Type": "application/octet-stream",
