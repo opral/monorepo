@@ -1,5 +1,5 @@
 {
-	"name": "paraglide-js-example-typescript",
+	"name": "@inlang/paraglide-js-example-typescript",
 	"type": "module",
 	"version": "0.0.0",
 	"private": true,
