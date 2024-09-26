@@ -1,85 +1,86 @@
-import { type Match, type MessageNested, type NewBundleNested, type Variant } from "@inlang/sdk2"
+import type { Match, Variant, MessageImport, VariantImport, Bundle } from "@inlang/sdk2"
 import { type plugin } from "../plugin.js"
 
 export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({ files }) => {
-	const messages = files.flatMap(parseFile)
-	const bundlesIndex: Record<string, any> = {}
+	const bundles: Bundle[] = []
+	const messages: MessageImport[] = []
+	const variants: VariantImport[] = []
 
-	for (const message of messages) {
-		if (bundlesIndex[message.bundleId] === undefined) {
-			bundlesIndex[message.bundleId] = {
-				id: message.bundleId,
-				declarations: [],
-				messages: [message],
+	for (const file of files) {
+		const json = JSON.parse(new TextDecoder().decode(file.content))
+
+		for (const key in json) {
+			if (key === "$schema") {
+				continue
 			}
-		} else {
-			bundlesIndex[message.bundleId].messages.push(message)
+			const result = parseMessage(key, file.locale, json[key])
+			messages.push(result.message)
+			variants.push(...result.variants)
+
+			const existingBundle = bundles.find((b) => b.id === result.bundle.id)
+			if (existingBundle === undefined) {
+				bundles.push(result.bundle)
+			} else {
+				// merge declarations without duplicates
+				existingBundle.declarations = removeDuplicates([
+					existingBundle.declarations,
+					...result.bundle.declarations,
+				])
+			}
 		}
 	}
 
-	const bundles = Object.values(bundlesIndex) as NewBundleNested[]
-
-	return { bundles }
+	return { bundles, messages, variants }
 }
 
-function parseFile(args: { locale: string; content: ArrayBuffer }): MessageNested[] {
-	const json = JSON.parse(new TextDecoder().decode(args.content))
-
-	const messages: MessageNested[] = []
-
-	for (const key in json) {
-		if (key === "$schema") {
-			continue
-		}
-		messages.push(
-			parseMessage({
-				key,
-				value: json[key],
-				locale: args.locale,
-			})
-		)
-	}
-	return messages
-}
-
-function parseMessage(args: {
-	key: string
+function parseMessage(
+	key: string,
+	locale: string,
 	value: string | Record<string, string>
-	locale: string
-}): MessageNested {
-	// happy_sky_eye + _ + en
-	const messageId = args.key + "_" + args.locale
-	const variants = parseVariants(messageId, args.value)
+): {
+	bundle: Bundle
+	message: MessageImport
+	variants: VariantImport[]
+} {
+	const variants = parseVariants(key, locale, value)
 
 	return {
-		id: messageId,
-		bundleId: args.key,
-		selectors: [],
-		locale: args.locale,
+		bundle: {
+			id: key,
+			declarations: [],
+		},
+		message: {
+			bundleId: key,
+			selectors: [],
+			locale: locale,
+		},
 		variants,
 	}
 }
 
-function parseVariants(messageId: string, value: string | Record<string, string>): Variant[] {
+function parseVariants(
+	bundleId: string,
+	locale: string,
+	value: string | Record<string, string>
+): VariantImport[] {
 	// single variant
 	if (typeof value === "string") {
 		return [
 			{
-				id: messageId,
-				messageId,
+				messageBundleId: bundleId,
+				messageLocale: locale,
 				matches: [],
 				pattern: parsePattern(value),
 			},
 		]
 	}
 	// multi variant
-	const variants: Variant[] = []
-	for (const [matcher, pattern] of Object.entries(value["match"] as string)) {
+	const variants: VariantImport[] = []
+	for (const [match, pattern] of Object.entries(value["match"] as string)) {
 		variants.push({
-			// "some_happy_cat_en;platform=ios,userGender=female"
-			id: messageId + ";" + matcher.replaceAll(" ", ""),
-			messageId,
-			matches: parseMatcher(matcher),
+			messageBundleId: bundleId,
+			messageLocale: locale,
+			matches: parseMatch(match),
 			pattern: parsePattern(pattern),
 		})
 	}
@@ -110,7 +111,7 @@ function parsePattern(value: string): Variant["pattern"] {
 
 // input: `platform=android,userGender=male`
 // output: { platform: "android", userGender: "male" }
-function parseMatcher(value: string): Match[] {
+function parseMatch(value: string): Match[] {
 	const stripped = value.replace(" ", "")
 	const matches: Match[] = []
 	const parts = stripped.split(",")
@@ -134,3 +135,6 @@ function parseMatcher(value: string): Match[] {
 	}
 	return matches
 }
+
+const removeDuplicates = <T extends any[]>(arr: T) =>
+	[...new Set(arr.map((item) => JSON.stringify(item)))].map((item) => JSON.parse(item))
