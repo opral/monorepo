@@ -1,4 +1,4 @@
-import type { Expression, FunctionAnnotation } from "@inlang/sdk2"
+import type { Expression, FunctionReference } from "@inlang/sdk2"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import {
 	escapeForDoubleQuoteString,
@@ -23,13 +23,13 @@ export function compileExpression(
 			throw new Error(`Function ${fn.name} not found in registry`)
 		}
 
-		if (registryFunction.typeRestriction && expression.arg.type === "variable") {
+		if (registryFunction.typeRestriction && expression.arg.type === "variable-reference") {
 			typeRestrictions[expression.arg.name] = registryFunction.typeRestriction
 		}
 
 		const args = [`"${lang}"`, compileArg(expression.arg)]
 		if (hasOptions) {
-			const options = compileOptions(fn.options, registryFunction)
+			const options = compileOptions(fn.options)
 			args.push(options.code)
 			typeRestrictions = mergeTypeRestrictions(typeRestrictions, options.typeRestrictions)
 		}
@@ -45,9 +45,8 @@ export function compileExpression(
 }
 
 function compileOptions(
-	options: FunctionAnnotation["options"],
-	registryFn: Registry[string]
-): Compilation<FunctionAnnotation["options"]> {
+	options: FunctionReference["options"]
+): Compilation<FunctionReference["options"]> {
 	const entires: string[] = options.map((option) => `${option.name}: ${compileArg(option.value)}`)
 	const code = "{" + entires.join(", ") + "}"
 
@@ -58,8 +57,8 @@ function compileOptions(
 function compileArg(arg: Expression["arg"]): string {
 	switch (arg.type) {
 		case "literal":
-			return `"${escapeForDoubleQuoteString(arg.name)}"`
-		case "variable": {
+			return `"${escapeForDoubleQuoteString(arg.value)}"`
+		case "variable-reference": {
 			return !isValidJSIdentifier(arg.name)
 				? `inputs['${escapeForSingleQuoteString(arg.name)}']`
 				: `inputs.${arg.name}`

@@ -42,8 +42,8 @@
 	],
 	"scripts": {
 		"dev": "vite build --mode development --watch",
-		"build": "tsc --noEmit && vite build --mode production",
-		"test": "vitest run --coverage ./src/**/*",
+		"build": "vite build --mode production",
+		"test": "tsc --noEmit && vitest run --coverage ./src/**/*",
 		"test:watch": "vitest --watch ./src/**/*",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
