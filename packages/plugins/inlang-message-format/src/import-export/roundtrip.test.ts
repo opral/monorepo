@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { importFiles } from "./importFiles.js"
-import { type Bundle, type Message, type Pattern, type Variant } from "@inlang/sdk2"
+import { Declaration, type Bundle, type Message, type Pattern, type Variant } from "@inlang/sdk2"
 import { exportFiles } from "./exportFiles.js"
 
 test("it handles single variants without expressions", async () => {
@@ -39,7 +39,10 @@ test("it handles variable expressions in patterns", async () => {
 	expect(imported.variants).lengthOf(1)
 
 	expect(imported.bundles[0]?.id).toStrictEqual("some_happy_cat")
-	expect(imported.bundles[0]?.declarations).toStrictEqual([])
+	expect(imported.bundles[0]?.declarations).toStrictEqual([
+		{ type: "input-variable", name: "count" },
+		{ type: "input-variable", name: "numDesigners" },
+	] satisfies Declaration[])
 
 	expect(imported.messages[0]?.selectors).toStrictEqual([])
 
@@ -101,9 +104,20 @@ test("it handles multi variant messages", async () => {
 	expect(imported.variants).lengthOf(3)
 
 	expect(imported.bundles[0]?.id).toStrictEqual("some_happy_cat")
-	expect(imported.bundles[0]?.declarations).toStrictEqual([])
+	expect(imported.bundles[0]?.declarations).toStrictEqual(
+		expect.arrayContaining([
+			{ type: "input-variable", name: "username" },
+			{ type: "input-variable", name: "platform" },
+			{ type: "input-variable", name: "userGender" },
+		] satisfies Declaration[])
+	)
 
-	expect(imported.messages[0]?.selectors).toStrictEqual([])
+	expect(imported.messages[0]?.selectors).toStrictEqual(
+		expect.arrayContaining([
+			{ type: "variable-reference", name: "platform" },
+			{ type: "variable-reference", name: "userGender" },
+		] satisfies Message["selectors"])
+	)
 	expect(imported.messages[0]?.bundleId).toStrictEqual("some_happy_cat")
 
 	expect(imported.variants[0]).toStrictEqual(
