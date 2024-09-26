@@ -1,7 +1,5 @@
 {
-	"currentLanguageTag": "Der aktuelle Sprachtag ist \"{languageTag}\".",
-	"some_happy_cat": "Lesen Sie mehr über Lix",
-	"blue_horse_shoe": "Hallo {username} , willkommen bei {placename} !",
+	"blue_horse_shoe": "Hallo {username}! Willkommen in {placename}.",
 	"jojo_mountain_day": {
 		"match": {
 			"platform=android, userGender=male": "{username} muss die App aus dem Google Play Store auf sein Telefon herunterladen.",
