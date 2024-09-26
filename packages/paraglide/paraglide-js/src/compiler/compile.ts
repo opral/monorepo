@@ -84,8 +84,7 @@ function generateRegularOutput(
 		settings.locales
 			.map((locale) => `import * as ${jsIdentifier(locale)} from "./messages/${locale}.js"`)
 			.join("\n"),
-		"\n",
-		resources.map(({ bundle }) => bundle.code).join("\n\n"),
+		resources.map(({ bundle }) => bundle.code).join("\n"),
 	].join("\n")
 
 	const output: Record<string, string> = {
@@ -103,22 +102,20 @@ function generateRegularOutput(
 
 		for (const resource of resources) {
 			const compiledMessage = resource.messages[locale]
+			const id = jsIdentifier(resource.bundle.node.id)
 			if (!compiledMessage) {
-				// add fallback
 				const fallbackLocale = fallbackMap[locale]
 				if (fallbackLocale) {
-					file += `\nexport { ${jsIdentifier(resource.bundle.source.id)} } from "./${fallbackLocale}.js"`
+					// use the fall back locale e.g. render the message in English if the German message is missing
+					file += `\nexport { ${id} } from "./${fallbackLocale}.js"`
 				} else {
-					file += `\nexport const ${jsIdentifier(resource.bundle.source.id)} = () => '${escapeForSingleQuoteString(
-						resource.bundle.source.id
-					)}'`
+					// no fallback exists, render the bundleId
+					file += `\nexport const ${id} = () => '${id}'`
 				}
-
 				continue
 			}
 
 			file += `\n${compiledMessage.code}`
-			file += `\nexport { ${jsIdentifier(compiledMessage.source.id)} as ${resource.bundle.source.id} }`
 		}
 
 		output[filename] = file
@@ -141,11 +138,11 @@ function generateModuleOutput(
 	// index messages
 	output["messages.js"] = [
 		"/* eslint-disable */",
-		...resources.map(({ bundle }) => `export * from './messages/index/${bundle.source.id}.js'`),
+		...resources.map(({ bundle }) => `export * from './messages/index/${bundle.node.id}.js'`),
 	].join("\n")
 
 	for (const resource of resources) {
-		const filename = `messages/index/${resource.bundle.source.id}.js`
+		const filename = `messages/index/${resource.bundle.node.id}.js`
 		const code = [
 			"/* eslint-disable */",
 			"import * as registry from '../../registry.js'",
@@ -163,7 +160,7 @@ function generateModuleOutput(
 	for (const locale of settings.locales) {
 		const messageIndexFile = [
 			"/* eslint-disable */",
-			...resources.map(({ bundle }) => `export * from './${locale}/${bundle.source.id}.js'`),
+			...resources.map(({ bundle }) => `export * from './${locale}/${bundle.node.id}.js'`),
 		].join("\n")
 		output[`messages/${locale}.js`] = messageIndexFile
 
@@ -174,22 +171,22 @@ function generateModuleOutput(
 			)
 
 			const compiledMessage = resource.messages[locale]
+			const id = jsIdentifier(resource.bundle.node.id)
 			if (!compiledMessage) {
 				// add fallback
 				const fallbackLocale = fallbackMap[locale]
 				if (fallbackLocale) {
-					file += `\nexport { ${jsIdentifier(resource.bundle.source.id)} } from "../${fallbackLocale}.js"`
+					file += `\nexport { ${id} } from "../${fallbackLocale}.js"`
 				} else {
-					file += `\nexport const ${jsIdentifier(resource.bundle.source.id)} = () => '${escapeForSingleQuoteString(
-						resource.bundle.source.id
+					file += `\nexport const ${id} = () => '${escapeForSingleQuoteString(
+						resource.bundle.node.id
 					)}'`
 				}
 			} else {
 				file += `\n${compiledMessage.code}`
-				file += `\nexport { ${jsIdentifier(compiledMessage.source.id)} as ${resource.bundle.source.id} }`
 			}
 
-			output[`messages/${locale}/${resource.bundle.source.id}.js`] = file
+			output[`messages/${locale}/${resource.bundle.node.id}.js`] = file
 		}
 	}
 	return output

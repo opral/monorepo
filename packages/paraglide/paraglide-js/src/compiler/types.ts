@@ -1,10 +1,8 @@
-export type Compilation<Node> = {
+export type Compiled<Node> = {
 	/** The original AST node */
-	source: Node
+	node: Node
 	/** The code generated to implement the AST node */
 	code: string
-	/** The type-Restrictions discovered by compiling the node */
-	typeRestrictions: Record<string, string>
 }
 
 /**

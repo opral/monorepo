@@ -2,7 +2,7 @@ import type { Pattern } from "@inlang/sdk2"
 import { escapeForTemplateLiteral } from "../services/codegen/escape.js"
 import { backtick } from "../services/codegen/quotes.js"
 import { compileExpression } from "./compileExpression.js"
-import { mergeTypeRestrictions, type Compilation } from "./types.js"
+import type { Compiled } from "./types.js"
 import type { Registry } from "./registry.js"
 
 /**
@@ -16,27 +16,22 @@ export const compilePattern = (
 	lang: string,
 	pattern: Pattern,
 	registry: Registry
-): Compilation<Pattern> => {
-	const compiledPatternElements = pattern.map((element): Compilation<Pattern[number]> => {
+): Compiled<Pattern> => {
+	const compiledPatternElements = pattern.map((element): Compiled<Pattern[number]> => {
 		switch (element.type) {
 			case "text":
 				return {
 					code: escapeForTemplateLiteral(element.value),
-					typeRestrictions: {},
-					source: element,
+					node: element,
 				}
 			case "expression": {
 				const compiledExpression = compileExpression(lang, element, registry)
 				const code = "${" + compiledExpression.code + "}"
-				return { code, typeRestrictions: compiledExpression.typeRestrictions, source: element }
+				return { code, node: element }
 			}
 		}
 	})
 	const code = backtick(compiledPatternElements.map((res) => res.code).join(""))
 
-	const typeRestrictions: Record<string, string> = compiledPatternElements
-		.map((el) => el.typeRestrictions)
-		.reduce(mergeTypeRestrictions, {})
-
-	return { code, typeRestrictions, source: pattern }
+	return { code, node: pattern }
 }
