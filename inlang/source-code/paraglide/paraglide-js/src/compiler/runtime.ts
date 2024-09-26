@@ -3,93 +3,82 @@ import type { ProjectSettings } from "@inlang/sdk2"
 /**
  * Returns the code for the `runtime.js` module
  */
-export function createRuntime(opts: Pick<ProjectSettings, "baseLocale" | "locales">): string {
+export function createRuntime(args: Pick<ProjectSettings, "baseLocale" | "locales">): string {
 	return `/* eslint-disable */
-/** @type {((tag: AvailableLanguageTag) => void) | undefined} */ 
-let _onSetLanguageTag
+/** @type {((locale: AvailableLocale) => void) | undefined} */ 
+let _onSetLocale
 
 /**
- * The project's source language tag.
+ * The project's base locale.
  * 
  * @example
- *   if (newlySelectedLanguageTag === sourceLanguageTag){
- *     // do nothing as the source language tag is the default language
- *     return
+ *   if (locale === baseLocale){
+ *     // do something
  *   }
  */
-export const sourceLanguageTag = "${opts.baseLocale}"
+export const baseLocale = "${args.baseLocale}"
 
 /**
- * The project's available language tags.
+ * The project's locales.
  * 
  * @example 
- *   if (availableLanguageTags.includes(userSelectedLanguageTag) === false){
- *     throw new Error("Language tag not available")
+ *   if (locales.includes(userSelectedLocale) === false){
+ *     throw new Error("Locale is not available")
  *   }
  */
-export const availableLanguageTags = /** @type {const} */ (${JSON.stringify(opts.locales)})
+export const locales = /** @type {const} */ (${JSON.stringify(args.locales)})
 
 /**
- * Get the current language tag.
+ * Get the current locale.
  * 
  * @example
- *   if (languageTag() === "de"){
+ *   if (locale() === "de"){
  *     console.log("Germany 🇩🇪")
- *   } else if (languageTag() === "nl"){
+ *   } else if (locale() === "nl"){
  *     console.log("Netherlands 🇳🇱")
  *   }
  * 
- * @type {() => AvailableLanguageTag}
+ * @type {() => AvailableLocale}
  */
-export let languageTag = () => sourceLanguageTag
+export let getLocale = () => baseLocale
+
 
 /**
- * Set the language tag.
+ * Set the locale to either a value or a getter function.
+ * 
+ * Setting the locale to a getter function enables dynamic locale resolution.
+ * For example, you can resolve the locale on the server where every request 
+ * has a different locale with \`setLocale(() => request.locale)\`.
  * 
  * @example 
  * 
- *   // changing to language 
- *   setLanguageTag("en")
+ *   // changing to a locale 
+ *   setLocale("en")
  * 
  *   // passing a getter function also works. 
  *   // 
- *   // a getter function is useful for resolving a language tag 
- *   // on the server where every request has a different language tag
- *   setLanguageTag(() => {
- *     return request.langaugeTag
+ *   // a getter function is useful for resolving a locale
+ *   // on the server where every request has a different locale
+ *   setLocale(() => {
+ *     return request.locale
  *   }) 
  *
- * @param {AvailableLanguageTag | (() => AvailableLanguageTag)} tag
+ * @param {AvailableLocale | (() => AvailableLocale)} locale
  */
-export const setLanguageTag = (tag) => {
-    if (typeof tag === "function") {
-        languageTag = enforceLanguageTag(tag)
+export const setLocale = (locale) => {
+    if (typeof locale === "function") {
+        getLocale = locale
     } else {
-        languageTag = enforceLanguageTag(() => tag)
+        getLocale = () => locale
     }
     // call the callback function if it has been defined
-    if (_onSetLanguageTag !== undefined) {
-        _onSetLanguageTag(languageTag())
+    if (_onSetLocale !== undefined) {
+        _onSetLocale(getLocale())
     }
 }
 
 /**
- * Wraps an untrusted function and enforces that it returns a language tag.
- * @param {() => AvailableLanguageTag} unsafeLanguageTag
- * @returns {() => AvailableLanguageTag}
- */
-function enforceLanguageTag(unsafeLanguageTag) {
-    return () => {
-        const tag = unsafeLanguageTag()
-        if(!isAvailableLanguageTag(tag)) {
-            throw new Error(\`languageTag() didn't return a valid language tag. Check your setLanguageTag call\`)
-        }
-        return tag
-    }
-}
-
-/**
- * Set the \`onSetLanguageTag()\` callback function.
+ * Set the \`onSetLocale()\` callback function.
  *
  * The function can be used to trigger client-side side-effects such as 
  * making a new request to the server with the updated language tag, 
@@ -99,50 +88,97 @@ function enforceLanguageTag(unsafeLanguageTag) {
  *   Triggering a side-effect is only useful on the client because a server-side
  *   environment doesn't need to re-render the UI. 
  *     
- * - The \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior.
+ * - The \`onSetLocale()\` callback can only be defined once to avoid unexpected behavior.
  * 
  * @example
  *   // if you use inlang paraglide on the server, make sure 
- *   // to not call \`onSetLanguageTag()\` on the server
+ *   // to not call \`onSetLocale()\` on the server
  *   if (isServer === false) {
- *     onSetLanguageTag((tag) => {
+ *     onSetLocale((locale) => {
  *       // (for example) make a new request to the 
- *       // server with the updated language tag
- *       window.location.href = \`/\${tag}/\${window.location.pathname}\`
+ *       // server with the updated locale
+ *       window.location.href = \`/\${locale}/\${window.location.pathname}\`
  *     })
  *   }
  *
- * @param {(languageTag: AvailableLanguageTag) => void} fn
+ * @param {(locale: AvailableLocale) => void} fn
  */
-export const onSetLanguageTag = (fn) => {
-    _onSetLanguageTag = fn
+export const onSetLocale = (fn) => {
+    _onSetLocale = fn
 }
 
 /**
- * Check if something is an available language tag.
+ * Check if something is an available locale.
  * 
  * @example
- * 	if (isAvailableLanguageTag(params.locale)) {
- * 		setLanguageTag(params.locale)
+ * 	if (isLocale(params.locale)) {
+ * 		setLocale(params.locale)
  * 	} else {
- * 		setLanguageTag("en")
+ * 		setLocale("en")
  * 	}
  * 
- * @param {any} thing
- * @returns {thing is AvailableLanguageTag}
+ * @param {any} locale
+ * @returns {locale is AvailableLocale}
  */
-export function isAvailableLanguageTag(thing) {
-    return availableLanguageTags.includes(thing)
+export function isAvailableLocale(locale) {
+    return locales.includes(locale)
 }
 
 // ------ TYPES ------
 
 /**
- * A language tag that is available in the project.
+ * A locale that is available in the project.
  * 
  * @example
- *   setLanguageTag(request.languageTag as AvailableLanguageTag)
+ *   setLocale(request.locale as AvailableLocale)
  * 
- * @typedef {typeof availableLanguageTags[number]} AvailableLanguageTag
- */`
+ * @typedef {typeof locales[number]} AvailableLocale
+ */
+
+
+// ------ LEGACY RUNTIME (will be removed in the next major version) ------
+${legacyLanguageTagRuntime()}
+`
 }
+
+// remove with paraglide v3
+const legacyLanguageTagRuntime = () => `
+
+/**
+ * @deprecated use \`baseLocale\` instead
+ */
+export const sourceLanguageTag = baseLocale
+
+/**
+ * @deprecated use \`locales\` instead
+ */
+export const availableLanguageTags = locales
+
+/** 
+ * @deprecated use \`getLocale()\` instead
+ */
+export let languageTag = () => baseLocale
+
+/**
+ * @deprecated use \`setLocale()\` instead
+ */
+export const setLanguageTag = setLocale
+
+/**
+ * @deprecated use \`onSetLocale()\` instead
+ */
+export const onSetLanguageTag = _onSetLocale
+
+/**
+ * @deprecated use \`isAvailableLocale()\` instead
+ * 
+ * @returns {thing is AvailableLanguageTag}
+ */
+export const isAvailableLanguageTag = isAvailableLocale
+
+
+/**
+ * @deprecated use \`AvailableLocale\` instead
+ * 
+ * @typedef {typeof locales[number]} AvailableLanguageTag
+ */`
