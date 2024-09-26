@@ -51,7 +51,7 @@ export class PluginSettingsAreInvalidError extends PluginError {
 export class PluginDoesNotImplementFunctionError extends PluginError {
 	constructor(options: { plugin: string; function: string }) {
 		super(
-			`The plugin "${options.plugin}" does not implement the "${options.function}" function`,
+			`The plugin "${options.plugin}" does not implement the "${options.function}" function.`,
 			options
 		);
 		this.name = "PluginDoesNotImplementFunction";
