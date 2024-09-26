@@ -87,7 +87,7 @@ function compileMessageWithMultipleVariants(
 
 	const code = `
 		export const ${message.bundleId} = (${hasInputs ? "inputs" : ""}) => {
-				${compiledVariants.join("\n")}
+				${compiledVariants.join("\n\n")}
 		}`
 
 	return { code, node: message }
