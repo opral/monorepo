@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { Pattern, VariableReference, Variant } from "@inlang/sdk2"
+import type { Bundle, Pattern, VariableReference, Variant } from "@inlang/sdk2"
 import { type plugin } from "../plugin.js"
 import { flatten } from "flat"
 import type {
@@ -79,7 +79,7 @@ function parseMessage(args: {
 		bundleId = `${args.namespace}:${bundleId}`
 	}
 
-	const bundle: BundleImport = {
+	const bundle: Bundle = {
 		id: bundleId,
 		declarations: pattern.variableReferences.map((variableReference) => ({
 			type: "input-variable",
@@ -94,8 +94,8 @@ function parseMessage(args: {
 	}
 
 	const variant: VariantImport = {
-		bundleId: bundleId,
-		locale: args.locale,
+		messageBundleId: bundleId,
+		messageLocale: args.locale,
 		matches: [],
 		pattern: pattern.result,
 	}

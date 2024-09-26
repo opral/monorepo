@@ -310,10 +310,10 @@ test("keyWithObjectValue", async () => {
 	expect(imported.bundles[1]?.id).toStrictEqual("keyWithObjectValue.valueB")
 
 	expect(
-		imported.variants.find((v) => v.bundleId === "keyWithObjectValue.valueA")?.pattern
+		imported.variants.find((v) => v.messageBundleId === "keyWithObjectValue.valueA")?.pattern
 	).toStrictEqual([{ type: "text", value: "return this with valueB" }] satisfies Pattern)
 	expect(
-		imported.variants.find((v) => v.bundleId === "keyWithObjectValue.valueB")?.pattern
+		imported.variants.find((v) => v.messageBundleId === "keyWithObjectValue.valueB")?.pattern
 	).toStrictEqual([{ type: "text", value: "more text" }] satisfies Pattern)
 })
 
@@ -329,10 +329,10 @@ test("keyWithArrayValue", async () => {
 	expect(imported.bundles[1]?.id).toStrictEqual("keyWithArrayValue.1")
 
 	expect(
-		imported.variants.find((v) => v.bundleId === "keyWithArrayValue.0")?.pattern
+		imported.variants.find((v) => v.messageBundleId === "keyWithArrayValue.0")?.pattern
 	).toStrictEqual([{ type: "text", value: "multiple" }] satisfies Pattern)
 	expect(
-		imported.variants.find((v) => v.bundleId === "keyWithArrayValue.1")?.pattern
+		imported.variants.find((v) => v.messageBundleId === "keyWithArrayValue.1")?.pattern
 	).toStrictEqual([{ type: "text", value: "things" }] satisfies Pattern)
 })
 
@@ -467,7 +467,6 @@ test("it should put new entities into the file without a namespace", async () =>
 	const exported = await runExportFiles({
 		bundles: [...imported.bundles, newBundle],
 		messages: [...imported.messages, newMessage],
-		//@ts-expect-error - variants are VariantImport which differs from the Variant type
 		variants: [...imported.variants, newVariant],
 	})
 
@@ -536,18 +535,20 @@ async function runExportFiles(imported: Awaited<ReturnType<typeof importFiles>>)
 	}
 	for (const variant of imported.variants) {
 		if (variant.id === undefined) {
+			// @ts-expect-error - variant is an VariantImport
 			variant.id = `${Math.random() * 1000}`
 		}
 		if (variant.messageId === undefined) {
+			// @ts-expect-error - variant is an VariantImport
 			variant.messageId = imported.messages.find(
-				(m: any) => m.bundleId === variant.bundleId && m.locale === variant.locale
+				(m: any) => m.bundleId === variant.messageBundleId && m.locale === variant.messageLocale
 			)?.id
 		}
 	}
 
 	const exported = await exportFiles({
 		settings: {} as any,
-		bundles: imported.bundles,
+		bundles: imported.bundles as Bundle[],
 		messages: imported.messages as Message[],
 		variants: imported.variants as Variant[],
 	})
