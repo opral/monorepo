@@ -1,19 +1,19 @@
-import type { BundleNested, MessageNested } from "@inlang/sdk2"
+import type { Bundle, BundleNested, Message } from "@inlang/sdk2"
 import { compileMessage } from "./compileMessage.js"
-import { mergeTypeRestrictions, type Compilation } from "./types.js"
 import type { Registry } from "./registry.js"
 import { inputsType, type InputTypeMap } from "./inputsType.js"
 import { optionsType } from "./optionsType.js"
 import { jsIdentifier } from "~/services/codegen/identifier.js"
 import { isValidJSIdentifier } from "~/services/valid-js-identifier/index.js"
 import { escapeForDoubleQuoteString } from "~/services/codegen/escape.js"
+import type { Compiled } from "./types.js"
 
 export type Resource = {
 	/** The compilation result for the bundle index */
-	bundle: Compilation<BundleNested>
+	bundle: Compiled<Bundle>
 	/** The compilation results for the languages */
 	messages: {
-		[languageTag: string]: Compilation<MessageNested>
+		[locale: string]: Compiled<Message>
 	}
 }
 
@@ -25,37 +25,34 @@ export const compileBundle = (args: {
 	fallbackMap: Record<string, string | undefined>
 	registry: Registry
 }): Resource => {
-	const compiledMessages: Record<string, Compilation<MessageNested>> = {}
+	const compiledMessages: Record<string, Compiled<Message>> = {}
 
-	let typeRestrictions = {}
 	for (const message of args.bundle.messages) {
 		if (compiledMessages[message.locale]) {
 			throw new Error(`Duplicate language tag: ${message.locale}`)
 		}
 
-		const compiledMessage = compileMessage(message, args.registry)
+		const compiledMessage = compileMessage(
+			args.bundle.declarations,
+			message,
+			message.variants,
+			args.registry
+		)
 		// set the pattern for the language tag
 		compiledMessages[message.locale] = compiledMessage
-		typeRestrictions = mergeTypeRestrictions(compiledMessage.typeRestrictions, typeRestrictions)
-	}
-
-	const compiledBundle: Compilation<BundleNested> = {
-		code: bundleFunction({
-			bundle: args.bundle,
-			typeRestrictions,
-			availableLanguageTags: Object.keys(args.fallbackMap),
-		}),
-		typeRestrictions,
-		source: args.bundle,
 	}
 
 	return {
-		bundle: compiledBundle,
+		bundle: compileBundleFunction({
+			bundle: args.bundle,
+			typeRestrictions: {},
+			availableLanguageTags: Object.keys(args.fallbackMap),
+		}),
 		messages: compiledMessages,
 	}
 }
 
-const bundleFunction = (args: {
+const compileBundleFunction = (args: {
 	/**
 	 * The bundle to compile
 	 */
@@ -68,9 +65,8 @@ const bundleFunction = (args: {
 	 * The language tags which are available
 	 */
 	availableLanguageTags: string[]
-}) => {
-	// TODO implement inputs
-	const hasInputs = false
+}): Compiled<Bundle> => {
+	const hasInputs = args.bundle.declarations.some((decl) => decl.type === "input-variable")
 
 	let code = `/**
  * This translation has been compiled by [@inlang/paraglide-js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
@@ -103,5 +99,8 @@ ${args.availableLanguageTags
 		code += `\nexport { ${jsIdentifier(args.bundle.id)} as "${escapeForDoubleQuoteString(args.bundle.id)}" }`
 	}
 
-	return code
+	return {
+		code,
+		node: args.bundle,
+	}
 }
