@@ -89,32 +89,45 @@ export const handleOpenProject = async (
 	input.click();
 };
 
-export const importFromJSON = async (project: InlangProject | undefined) => {
-	// using project.importFiles
+export const selectImportFile = async (
+	acceptedImport: HTMLInputElement["accept"]
+) => {
 	const input = document.createElement("input");
 	input.type = "file";
-	input.accept = ".json";
-	input.onchange = async (e) => {
-		const file = (e.target as HTMLInputElement).files?.[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = async () => {
-				const file: ImportFile = {
-					content:
-						typeof reader.result === "string"
-							? new TextEncoder().encode(reader.result)
-							: new Uint8Array(reader.result as ArrayBuffer),
-					locale: "en",
-				};
-				await project!.importFiles({
-					pluginKey: "plugin.inlang.i18next",
-					files: [file],
-				});
-			};
-			reader.readAsText(file);
-		}
-	};
+	input.accept = acceptedImport;
+	const file = new Promise<File>((resolve) => {
+		input.onchange = async (e) => {
+			const selectedFile = (e.target as HTMLInputElement).files?.[0];
+			if (selectedFile) {
+				resolve(selectedFile);
+			}
+		};
+	});
 	input.click();
+	return file;
+};
+
+export const handleImportedFile = async (
+	project: InlangProject | undefined,
+	file: File,
+	locale: string,
+	pluginKey: string
+) => {
+	const reader = new FileReader();
+	reader.onload = async () => {
+		const file: ImportFile = {
+			content:
+				typeof reader.result === "string"
+					? new TextEncoder().encode(reader.result)
+					: new Uint8Array(reader.result as ArrayBuffer),
+			locale: locale,
+		};
+		await project!.importFiles({
+			pluginKey,
+			files: [file],
+		});
+	};
+	reader.readAsText(file);
 };
 
 export const exportToJSON = async (project: InlangProject | undefined) => {
