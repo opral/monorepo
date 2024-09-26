@@ -91,14 +91,5 @@ export type NodeFsPromisesSubsetLegacy = {
 	mkdir: (path: string) => Promise<void>;
 };
 
-/**
- * Exposing only a subset to ease mapping of fs functions.
- *
- * https://github.com/opral/inlang-sdk/issues/136
- */
-export type NodeFsPromisesSubset = {
-	readFile: (path: string) => Promise<ArrayBuffer>;
-	readdir: (path: string) => Promise<string[]>;
-};
 
 type MaybePromise<T> = T | Promise<T>;
