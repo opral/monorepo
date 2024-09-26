@@ -31,6 +31,7 @@ export default function App() {
 	}, [authorName, project, project?.currentAuthor]);
 
 	useEffect(() => {
+		//console.log(project, csvData, authorName);
 		if (project && csvData && csvData.length === 0 && authorName) {
 			setShowWelcomeDialog(true);
 		}

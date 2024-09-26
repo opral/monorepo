@@ -49,7 +49,7 @@ export default function Layout(props: {
 		);
 
 		const file = await project.toBlob();
-		await fetch("https://monorepo-6hl2.onrender.com/lix-file/" + project_id, {
+		await fetch("http://localhost:3000/lix-file/" + project_id, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/octet-stream",

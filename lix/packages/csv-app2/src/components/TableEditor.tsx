@@ -18,6 +18,7 @@ import {
 } from "../state.ts";
 import { CellDrawer } from "./CellDrawer.tsx";
 import { useEffect, useState } from "react";
+import { SlInput } from "@shoelace-style/shoelace/dist/react";
 
 const TableEditor = () => {
 	const [csvData] = useAtom(csvDataAtom);
@@ -44,6 +45,13 @@ const TableEditor = () => {
 			.execute();
 	};
 
+	// const cellComponentWithAvatar = ({ rowData, setRowData }) => {
+	// 	console.log(rowData);
+	// 	return (
+	// 		<SlInput value={rowData} onChange={(e) => setRowData(e.target.value)} />
+	// 	);
+	// };
+
 	const columns: Array<Record<string, unknown>> = [];
 	if (csvData.length > 0) {
 		for (const key in csvData[0]) {
@@ -53,12 +61,14 @@ const TableEditor = () => {
 					title: key,
 					disabled: true,
 					maxWidth: 200,
+					//component: cellComponentWithAvatar,
 				});
 			} else {
 				columns.push({
 					...keyColumn(key, textColumn),
 					title: key,
 					maxWidth: 200,
+					//component: cellComponentWithAvatar,
 				});
 			}
 		}

@@ -46,7 +46,6 @@ export const projectAtom = atom(async (get) => {
 	try {
 		const fallbackPath = get(selectedProjectPathAtom);
 		const rootHandle = await getOriginPrivateDirectory();
-		// console.log("Check for available projects");
 
 		let path: undefined | string = undefined;
 
@@ -81,8 +80,7 @@ export const projectAtom = atom(async (get) => {
 				// );
 
 				const lixServerRequest = await fetch(
-					"https://monorepo-6hl2.onrender.com/lix-file/" +
-						project_id_search_param
+					"http://localhost:3000/lix-file/" + project_id_search_param
 				);
 				if (!lixServerRequest.ok) {
 					// console.log(
@@ -155,7 +153,6 @@ export const projectAtom = atom(async (get) => {
 		const userPosition = get(editorSelectionAtom);
 		const userName = get(authorNameAtom);
 		if (userPosition && userName) {
-			console.log("updatePosition");
 			// create a file in the project and store the position in it
 			await project.db
 				.insertInto("file")
@@ -190,13 +187,17 @@ export const projectAtom = atom(async (get) => {
 		);
 
 		const { project_id } = JSON.parse(projectMetaRaw);
+
 		// @ts-ignore
 		// safeProjectToOpfsInterval = setInterval(
 		const syncLixFile = async () => {
 			const file = await project.toBlob();
 			const writable = await fileHandle.createWritable();
 
-			// cancel interval if project_id != selectedProjectPath
+			// if the project is not the fallback path, we don't want to sync it
+			if (project_id !== get(selectedProjectPathAtom)?.split("___")?.[0]) {
+				return;
+			}
 
 			const checkIfExists = await fetch(
 				"https://monorepo-6hl2.onrender.com/lix-file/" + project_id
@@ -244,7 +245,6 @@ export const projectAtom = atom(async (get) => {
 		};
 
 		syncLixFile();
-		// }, 2000);
 
 		return project;
 	} catch (e) {

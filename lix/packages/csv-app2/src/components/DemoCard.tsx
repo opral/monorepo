@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAtom } from "jotai";
 import { selectedProjectPathAtom } from "../state.ts";
+import { humanId } from "../helper/human-id/human-id.ts";
 
 export const DemoCard = () => {
 	const [loading, setLoading] = useState(false);
@@ -44,6 +45,19 @@ export const DemoCard = () => {
 						},
 					},
 				])
+				.execute();
+
+			await newProject.db
+				.insertInto("file")
+				.values({
+					path: "/project_meta",
+					data: new TextEncoder().encode(
+						JSON.stringify({
+							project_id: humanId(),
+							initial_file_name: "cap-table.lix",
+						})
+					),
+				})
 				.execute();
 		}
 
