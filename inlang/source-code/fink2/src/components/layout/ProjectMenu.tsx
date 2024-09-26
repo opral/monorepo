@@ -1,5 +1,5 @@
 import { SlDropdown, SlMenu, SlMenuItem, SlBadge } from "@shoelace-style/shoelace/dist/react";
-import { exportToJSON, handleDownload, handleMerge, handleOpenProject, selectImportFile } from "../../helper/utils.ts";
+import { exportFiles, handleDownload, handleMerge, handleOpenProject, selectImportFile } from "../../helper/utils.ts";
 import { forceReloadProjectAtom, projectAtom, selectedProjectPathAtom } from "../../state.ts";
 import { useAtom } from "jotai";
 import CreateProjectDialog from "./CreateProjectDialog.tsx";
@@ -61,7 +61,7 @@ const ProjectMenu = () => {
           <SlMenuItem>
             Export
             <SlMenu slot="submenu">
-              <SlMenuItem value="export JSON" onClick={() => exportToJSON(project)}>
+              <SlMenuItem value="export JSON" onClick={() => exportFiles(project, "plugin.inlang.i18next", ".json")}>
                 JSON
                 <SlBadge pill variant="neutral" className="ml-2">i18next</SlBadge>
               </SlMenuItem>
