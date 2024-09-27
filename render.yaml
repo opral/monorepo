@@ -48,7 +48,7 @@ services:
     staticPublishPath: ./inlang/source-code/fink2/dist
     routes: 
       - type: rewrite
-        source: /.*
+        source: /*
         destination: /index.html
     buildCommand: pnpm install && pnpm run --filter @inlang/fink2... build
     buildFilter:
