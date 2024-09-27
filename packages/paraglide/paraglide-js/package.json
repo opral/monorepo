@@ -71,7 +71,6 @@
 		"@inlang/recommend-ninja": "workspace:*",
 		"@inlang/recommend-sherlock": "workspace:*",
 		"@inlang/sdk2": "workspace:*",
-		"@rollup/plugin-terser": "0.4.3",
 		"@rollup/plugin-virtual": "3.0.1",
 		"@ts-morph/bootstrap": "0.20.0",
 		"@types/node": "^20.12.7",

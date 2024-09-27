@@ -71,7 +71,7 @@ const compileBundleFunction = (args: {
 ${jsDocBundleComment({ inputs, locales: args.availableLanguageTags })}
 /* @__NO_SIDE_EFFECTS__ */
 const ${jsIdentifier(args.bundle.id)} = (inputs ${hasInputs ? "" : "= {}"}, options = {}) => {
-	const locale = options.locale ?? languageTag()
+	const locale = options.locale ?? options.languageTag ?? getLocale()
 	${args.availableLanguageTags
 		.map(
 			(locale) =>
