@@ -7,9 +7,10 @@ import {
 	updateBundleNested,
 	selectBundleNested,
 	Change,
+	Bundle,
 } from "@inlang/sdk2";
 import SingleDiffBundle from "./SingleDiffBundle.tsx";
-import { SlButton, SlDetails } from "@shoelace-style/shoelace/dist/react";
+import { SlButton, SlDetails, SlTooltip } from "@shoelace-style/shoelace/dist/react";
 
 const DiffBundleView = (props: { changes: Change[]; bundleId: string }) => {
 	const [project] = useAtom(projectAtom);
@@ -18,6 +19,7 @@ const DiffBundleView = (props: { changes: Change[]; bundleId: string }) => {
 	const [oldBundle, setOldBundle] = useState<BundleNested | undefined>(
 		undefined
 	);
+
 	const [loadingDiscard, setLoadingDiscard] = useState(false);
 
 	useEffect(() => {
@@ -29,26 +31,69 @@ const DiffBundleView = (props: { changes: Change[]; bundleId: string }) => {
 		return () => clearInterval(interval);
 	}, [project, props]);
 
-	const handleDiscard = async () => {
+	const handleDiscard = async (changes: Change[]) => {
 		if (project && oldBundle) {
 			setLoadingDiscard(true);
-			await updateBundleNested(project?.db, oldBundle);
+			await updateBundleNested(project.db, oldBundle);
 		}
 	};
 
 	return (
 		<div className="bg-white border-x border-zinc-200 p-4">
 			<div className="flex flex-col gap-2 mb-3 w-full">
-				<h3 className="font-medium text-[14px]!">{props.bundleId}</h3>
+				<div className="flex justify-between items-center">
+					<h3 className="font-medium text-[14px]!">{props.bundleId}</h3>
+					{/* <SlButton
+						size="small"
+						loading={loadingDiscard}
+						onClick={() => handleDiscard()}
+					>
+						<svg
+							// @ts-expect-error - shoelace slot prop
+							slot="prefix"
+							className="-mx-1"
+							xmlns="http://www.w3.org/2000/svg"
+							height="20px"
+							viewBox="0 -960 960 960"
+							width="20px"
+							fill="currentColor"
+						>
+							<path d="m291-240-51-51 189-189-189-189 51-51 189 189 189-189 51 51-189 189 189 189-51 51-189-189-189 189Z" />
+						</svg>
+					</SlButton> */}
+				</div>
 				<div className="flex items-center gap-3">
 					<SlDetails
 						className="w-full"
 						summary={`${props.changes.length} ${props.changes.length === 1 ? "change" : "changes"}`}
 					>
-						{props.changes.map((change) => (
+						{props.changes.map((change, index) => (
 							<div key={change.id}>
 								{/* <pre>{JSON.stringify(change, null, 2)}</pre> */}
-								<div>{change.operation} {change.type}</div>
+								<div className="flex justify-between items-center">
+									<span>{change.operation} {change.type} {change.value?.locale && `- ${change.value.locale}`}</span>
+									{/* <SlTooltip content={`Revert ${change.type} change`}>
+										<SlButton
+											size="small"
+											loading={loadingDiscard}
+											onClick={() => handleDiscard()}
+										>
+											<svg
+												// @ts-expect-error - shoelace slot prop
+												slot="prefix"
+												className="-mx-1"
+												xmlns="http://www.w3.org/2000/svg"
+												height="20px"
+												viewBox="0 -960 960 960"
+												width="20px"
+												fill="currentColor"
+											>
+												<path d="m291-240-51-51 189-189-189-189 51-51 189 189 189-189 51 51-189 189 189 189-51 51-189-189-189 189Z" />
+											</svg>
+										</SlButton>
+									</SlTooltip> */}
+								</div>
+								{(index < props.changes.length - 1) && <div className="w-full border-b border-zinc-200 my-1" />}
 							</div>
 						))}
 					</SlDetails>
@@ -65,42 +110,6 @@ const DiffBundleView = (props: { changes: Change[]; bundleId: string }) => {
 					</SlButton> */}
 				</div>
 			</div>
-
-			{/* 
-			* TODO unbundle
-			- change `type` to `show`
-
-			<div className="flex">
-				<inlang-bundle old neu show="old">
-					{messages.map((message) => {
-						const previousMessage = lix.db
-							.selectFrom("change")
-							.where("type", "=", "message");
-						return (
-							<inlang-message old={previousMessage} neu={message} show="neu">
-								<inlang-variant old neu show="old"></inlang-variant>
-							</inlang-message>
-						);
-					})}
-				</inlang-bundle>
-				<inlang-bundle old neu show="neu">
-					{messages.map((message) => {
-						const previousMessage = lix.db
-							.selectFrom("change")
-							.where("type", "=", "message");
-						return (
-							<inlang-message old={previousMessage} neu={message} show="neu" editable>
-								{variants.map((variant) => {
-									if (pendingChange === false && variant.isRef === false){
-										return ""
-									}
-									return <inlang-variant old neu show="neu" editable></inlang-variant>;
-								})}
-							</inlang-message>
-						);
-					})}
-				</inlang-bundle>
-			</div> */}
 			<div className="flex gap-4">
 				<div className="flex-1">
 					{oldBundle && bundle && project && (

@@ -24,13 +24,35 @@
     }
 }
 
-.inlang-pattern-editor-neu .inlang-pattern-editor-contenteditable {
+/* .inlang-pattern-editor-neu .inlang-pattern-editor-contenteditable {
     background-color: #B2F4D4;
     border: 1px solid #16A34B;
 }
 .inlang-pattern-editor-old .inlang-pattern-editor-contenteditable {
     background-color: #F3C9CD;
     border: 1px solid #DA2728;
+} */
+
+.highlighted-bundle inlang-message::part(new-variant) {
+    display: none;
+}
+.highlighted-bundle::part(add-variable) {
+    display: none;
+}
+.highlighted-bundle .highlight-red .inlang-pattern-editor-contenteditable,
+.highlighted-bundle .highlight-match-red::part(match),
+.highlighted-bundle .highlight-selector-red::part(selector),
+.highlighted-bundle.highlight-variables-red::part(variable) {
+    background-color: #F3C9CD !important;
+    border: 1px solid #DA2728 !important;
+}
+
+.highlighted-bundle .highlight-green .inlang-pattern-editor-contenteditable,
+.highlighted-bundle .highlight-match-green::part(match),
+.highlighted-bundle .highlight-selector-green::part(selector),
+.highlighted-bundle.highlight-variables-green::part(variable) {
+    background-color: #B2F4D4 !important;
+    border: 1px solid #16A34B !important;
 }
 
 .conflict-pattern .inlang-pattern-editor-contenteditable{
@@ -51,4 +73,9 @@ p {
 
 sl-dialog::part(panel) {
     border-radius: 8px;
+}
+
+sl-details::part(header) {
+    padding-block: 0.5rem;
+    padding-inline: 0.75rem;
 }

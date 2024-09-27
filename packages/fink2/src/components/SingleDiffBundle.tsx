@@ -9,6 +9,8 @@ import {
 } from "@inlang/bundle-component";
 import React from "react";
 import clsx from "clsx";
+import { useAtom } from "jotai";
+import { authorNameAtom } from "../state.ts";
 
 export const InlangBundle = createComponent({
 	tagName: "inlang-bundle",
@@ -41,10 +43,18 @@ const SingleDiffBundle = (props: {
 	changes: any[];
 	show: "neu" | "old";
 }) => {
+	const [authorName] = useAtom(authorNameAtom);
+	// change in variables
+	// change in 
 	return (
 		<div className="pointer-events-none">
-			<InlangBundle bundle={props.bundle}>
-				{/* <InlangBundleHeader bundle={props.bundle} settings={props.settings} /> */}
+			<InlangBundle
+				bundle={props.show === "old" ? props.oldBundle : props.bundle}
+				className={clsx(
+					"highlighted-bundle",
+					// props.show === "old" ? "highlight-variables-red" : "highlight-variables-green"
+				)}
+			>
 				{props.bundle.messages.map((message) => {
 					const oldMessage = props.oldBundle.messages.find(
 						(oldMessage) => oldMessage.id === message.id
@@ -53,8 +63,8 @@ const SingleDiffBundle = (props: {
 						<InlangMessage
 							slot="message"
 							key={message.id}
-							message={message}
-							variants={message.variants}
+							message={props.show === "old" ? oldMessage : message}
+							variants={props.show === "old" ? oldMessage?.variants : message.variants}
 							settings={props.settings}
 							className="hide-new-variant"
 						>
@@ -73,18 +83,18 @@ const SingleDiffBundle = (props: {
 										<InlangVariant
 											slot="variant"
 											key={variant.id}
-											variant={variant}
+											variant={props.show === "old" ? oldVariant : variant}
 											className={clsx(!change ? "opacity-30" : "")}
 										>
 											<InlangPatternEditor
 												slot="pattern-editor"
-												variant={props.show === "neu" ? variant : oldVariant}
+												variant={props.show === "old" ? oldVariant : variant}
 												className={clsx(
 													change &&
 														clsx(
 															props.show === "neu"
-																? "inlang-pattern-editor-neu"
-																: "inlang-pattern-editor-old"
+																? "highlight-green"
+																: "highlight-red"
 														)
 												)}
 											></InlangPatternEditor>
@@ -93,7 +103,7 @@ const SingleDiffBundle = (props: {
 													slot="pattern-editor"
 													className="absolute right-4 h-full flex items-center text-green-800"
 												>
-													by {change.author}
+													by {(change.author === authorName) ? "You" : change.author}
 												</div>
 											)}
 										</InlangVariant>
