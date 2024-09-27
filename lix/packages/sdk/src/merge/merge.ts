@@ -69,7 +69,7 @@ export async function merge(args: {
 			.where("id", "=", fileId)
 			.executeTakeFirst();
 
-		// todo: how to deal with missing files?
+		// If the file does not exist in the target lix - we just copy the whole file over
 		if (!file) {
 			file = await args.sourceLix.db
 				.selectFrom("file")
