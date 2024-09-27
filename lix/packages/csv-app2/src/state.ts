@@ -259,7 +259,7 @@ export const projectAtom = atom(async (get) => {
 			await writable.close();
 
 			isPolling = false;
-			setTimeout(syncLixFile, 500);
+			setTimeout(syncLixFile, 1000);
 		};
 
 		syncLixFile();
