@@ -57,7 +57,7 @@ services:
     type: web
     runtime: static
     autoDeploy: true
-    branch: csv-app2
+    branch: lix-integration
     staticPublishPath: ./lix/packages/csv-app2/dist
     buildCommand: pnpm install && pnpm run --filter @lix-js/csv-app2... build
     buildFilter:
