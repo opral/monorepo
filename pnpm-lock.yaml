@@ -1372,9 +1372,6 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../../lix/packages/fs
-      '@rollup/plugin-terser':
-        specifier: 0.4.3
-        version: 0.4.3(rollup@3.29.1)
       '@rollup/plugin-virtual':
         specifier: 3.0.1
         version: 3.0.1(rollup@3.29.1)
@@ -6592,15 +6589,6 @@ packages:
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
-    peerDependenciesMeta:
-      rollup:
-        optional: true
-
-  '@rollup/plugin-terser@0.4.3':
-    resolution: {integrity: sha512-EF0oejTMtkyhrkwCdg0HJ0IpkcaVg1MMSf2olHb2Jp+1mnLM04OhjpJWGma4HobiDTF0WCyViWuvadyE9ch2XA==}
-    engines: {node: '>=14.0.0'}
-    peerDependencies:
-      rollup: ^2.x || ^3.x
     peerDependenciesMeta:
       rollup:
         optional: true
@@ -21004,14 +20992,6 @@ snapshots:
       magic-string: 0.30.11
     optionalDependencies:
       rollup: 4.21.2
-
-  '@rollup/plugin-terser@0.4.3(rollup@3.29.1)':
-    dependencies:
-      serialize-javascript: 6.0.2
-      smob: 1.5.0
-      terser: 5.31.5
-    optionalDependencies:
-      rollup: 3.29.1
 
   '@rollup/plugin-terser@0.4.4(rollup@4.21.2)':
     dependencies:

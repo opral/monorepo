@@ -80,7 +80,7 @@ function generateRegularOutput(
 ): Record<string, string> {
 	const indexFile = [
 		"/* eslint-disable */",
-		'import { languageTag } from "./runtime.js"',
+		'import { getLocale } from "./runtime.js"',
 		settings.locales
 			.map((locale) => `import * as ${jsIdentifier(locale)} from "./messages/${locale}.js"`)
 			.join("\n"),

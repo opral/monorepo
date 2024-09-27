@@ -67,13 +67,31 @@ export let getLocale = () => baseLocale
  */
 export const setLocale = (locale) => {
     if (typeof locale === "function") {
-        getLocale = locale
+        getLocale = throwIfUnavailableLocale(locale)
     } else {
-        getLocale = () => locale
+        getLocale = throwIfUnavailableLocale(() => locale)
     }
     // call the callback function if it has been defined
     if (_onSetLocale !== undefined) {
         _onSetLocale(getLocale())
+    }
+}
+
+/** 
+ * 
+ *
+ * @param {() => AvailableLocale} getLocale
+ * @returns {() => AvailableLocale}
+ */
+function throwIfUnavailableLocale(getLocale) {
+    return () => {
+        const locale = getLocale()
+        if(isAvailableLocale(locale) === false) {
+            throw new Error(
+                \`The locale "\${locale}" is not available. Add the locale "\${locale}" to the inlang project settings.\`
+            )
+        }
+        return locale
     }
 }
 
@@ -157,7 +175,7 @@ export const availableLanguageTags = locales
 /** 
  * @deprecated use \`getLocale()\` instead
  */
-export let languageTag = () => baseLocale
+export let languageTag = getLocale
 
 /**
  * @deprecated use \`setLocale()\` instead
