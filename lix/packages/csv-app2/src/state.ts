@@ -8,6 +8,7 @@ import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
 import { plugin } from "./csv-plugin.js";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { generateColor } from "./helper/gernerateUserColor/generateUserColor.ts";
+import { SlAlert } from "@shoelace-style/shoelace";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -259,8 +260,11 @@ export const projectAtom = atom(async (get) => {
 	}
 });
 
+let lastStateIsProjectSynced = false;
+
 export const isProjectSyncedAtom = atom(async (get) => {
 	const project = await get(projectAtom);
+	get(withPollingAtom);
 	if (!project) return false;
 	const projectMetaRaw = new TextDecoder().decode(
 		(
@@ -275,6 +279,15 @@ export const isProjectSyncedAtom = atom(async (get) => {
 	const checkIfExists = await fetch(
 		"https://monorepo-6hl2.onrender.com/lix-file/" + project_id
 	);
+	if (lastStateIsProjectSynced !== checkIfExists.ok) {
+		const alert: SlAlert | null = document.querySelector(".copied-link-alert");
+		if (alert) {
+			navigator.clipboard.writeText(window.location.href).then(() => {
+				alert.show();
+			});
+		}
+	}
+	lastStateIsProjectSynced = checkIfExists.ok;
 	return checkIfExists.ok;
 });
 
