@@ -15,6 +15,8 @@
 	},
 	"dependencies": {
 		"@inlang/bundle-component": "workspace:*",
+		"@inlang/plugin-i18next": "workspace:*",
+		"@inlang/plugin-message-format": "workspace:*",
 		"@inlang/sdk2": "workspace:*",
 		"@inlang/settings-component2": "workspace:*",
 		"@lit/react": "^1.0.5",
@@ -22,6 +24,7 @@
 		"@sqlite.org/sqlite-wasm": "^3.46.0-build2",
 		"clsx": "^2.1.1",
 		"jotai": "^2.9.1",
+		"jszip": "^3.10.1",
 		"kysely": "^0.27.4",
 		"native-file-system-adapter": "^3.0.1",
 		"posthog-js": "^1.91.1",

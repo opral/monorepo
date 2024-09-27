@@ -1,11 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { atom } from "jotai";
-import { loadProjectInMemory, ProjectSettings } from "@inlang/sdk2";
+import { Bundle, loadProjectInMemory, ProjectSettings } from "@inlang/sdk2";
 import { atomWithStorage } from "jotai/utils";
 import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { Change, isInSimulatedCurrentBranch } from "@inlang/sdk2";
 import hasMissingTranslations from "./helper/hasMissingTranslations.ts";
 import getSortedBundles from "./helper/sortBundles.ts";
+// @ts-expect-error - the plugin ships with no declaration file
+import i18nextPlugin from "@inlang/plugin-i18next";
+// @ts-expect-error - the plugin ships with no declaration file
+import messageFormatPlugin from "@inlang/plugin-message-format";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -17,7 +21,7 @@ export const authorNameAtom = atomWithStorage<string | undefined>(
 	undefined
 );
 
-let safeProjectToOpfsInterval: number;
+let safeProjectToOpfsInterval: NodeJS.Timeout;
 
 /**
  * Force reload the project.
@@ -43,7 +47,10 @@ export const projectAtom = atom(async (get) => {
 		const opfsRoot = await navigator.storage.getDirectory();
 		const fileHandle = await opfsRoot.getFileHandle(path);
 		const file = await fileHandle.getFile();
-		const project = await loadProjectInMemory({ blob: file });
+		const project = await loadProjectInMemory({
+			blob: file,
+			providePlugins: [i18nextPlugin, messageFormatPlugin],
+		});
 		safeProjectToOpfsInterval = setInterval(async () => {
 			const writable = await fileHandle.createWritable();
 			const file = await project.toBlob();
@@ -165,7 +172,6 @@ export const pendingChangesAtom = atom(async (get) => {
 		// https://linear.app/opral/issue/LIX-126/branching
 		.where(isInSimulatedCurrentBranch)
 		.execute();
-	//console.log(result);
 	return result;
 });
 
@@ -182,13 +188,12 @@ export const groupedPendingChangesAtom = atom(async (get) => {
 		// https://linear.app/opral/issue/LIX-126/branching
 		.where(isInSimulatedCurrentBranch)
 		.execute();
-	// console.log("group", result);
 
 	const latestChangesPerEntity: Change[] = [];
 
 	for (const change of result) {
 		const entityId = change.value?.id;
-		if (!entityId) return undefined;
+		if (!entityId) continue;
 
 		const latestChange = await project.lix.db
 			.selectFrom("change")
@@ -207,6 +212,24 @@ export const groupedPendingChangesAtom = atom(async (get) => {
 	}
 
 	return latestChangesPerEntity;
+});
+
+export const bundlesWithPendingChangesAtom = atom(async (get) => {
+	const bundlesNested = await get(bundlesNestedAtom);
+	const groupedPendingChanges = await get(groupedPendingChangesAtom);
+	const hasPendingChange = (id: Bundle["id"]) =>
+		groupedPendingChanges.some((change) => change.value?.id === id);
+	const bundleNestedWithChanges = bundlesNested.filter(
+		(bundle) =>
+			hasPendingChange(bundle.id) ||
+			bundle.messages.some(
+				(message) =>
+					hasPendingChange(message.id) ||
+					message.variants.some((variant) => hasPendingChange(variant.id))
+			)
+	);
+
+	return bundleNestedWithChanges;
 });
 
 export const unresolvedConflictsAtom = atom(async (get) => {

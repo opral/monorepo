@@ -3,17 +3,19 @@ import type { Bundle, LiteralMatch, Message, Pattern, Variant } from "@inlang/sd
 import { type plugin } from "../plugin.js"
 import { unflatten } from "flat"
 
-export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({ bundles }) => {
+export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
+	bundles,
+	messages,
+	variants,
+}) => {
 	const result: Record<string, Record<string, any>> = {}
 	const resultNamespaces: Record<string, Record<string, Record<string, any>>> = {}
-
-	const messages = bundles.flatMap((bundle) => bundle.messages)
 
 	for (const message of messages) {
 		const serializedMessages = serializeMessage(
 			bundles.find((b) => b.id === message.bundleId)!,
 			message,
-			message.variants
+			variants.filter((v) => v.messageId === message.id)
 		)
 
 		for (const message of serializedMessages) {

@@ -21,16 +21,19 @@ export const build = new Command()
 	// such as manifest.json, code-splitting, json schema etc.
 	.option("--outdir <path>", "The output directory.", "./dist")
 	.option("--watch", "Watch for changes and rebuild.", false)
+	.option("--minify", "Minifies the plugin. Recommend for distribution.", false)
 	.action(buildCommandAction)
 
-export async function buildCommandAction(args: { entry: string; outdir: string; watch: boolean }) {
+export async function buildCommandAction(args: {
+	entry: string
+	outdir: string
+	watch: boolean
+	minify: boolean
+}) {
 	try {
 		const ctx = await context(
 			moduleBuildOptions({
 				...args,
-				// increase debugging experience by not minifying
-				// in assumed dev mode
-				minify: args.watch ? false : true,
 				plugins: [
 					{
 						name: "logger",

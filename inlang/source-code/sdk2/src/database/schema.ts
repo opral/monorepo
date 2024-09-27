@@ -7,20 +7,19 @@ import {
 } from "../json-schema/pattern.js";
 
 export function applySchema(args: { sqlite: SqliteDatabase }) {
-	// TODO re-enable https://github.com/opral/inlang-sdk/issues/209
-	// const foreignKeyActivated: any = args.sqlite.exec("PRAGMA foreign_keys", {
-	// 	returnValue: "resultRows",
-	// });
-	// if (
-	// 	// first row that is returned
-	// 	// first column of the first row
-	// 	// is equal to 0, then foreign keys are disabled
-	// 	foreignKeyActivated[0][0] === 0
-	// ) {
-	// 	args.sqlite.exec("PRAGMA foreign_keys = ON", {
-	// 		returnValue: "resultRows",
-	// 	});
-	// }
+	const foreignKeyActivated: any = args.sqlite.exec("PRAGMA foreign_keys", {
+		returnValue: "resultRows",
+	});
+	if (
+		// first row that is returned
+		// first column of the first row
+		// is equal to 0, then foreign keys are disabled
+		foreignKeyActivated[0][0] === 0
+	) {
+		args.sqlite.exec("PRAGMA foreign_keys = ON", {
+			returnValue: "resultRows",
+		});
+	}
 
 	args.sqlite.exec(`
 CREATE TABLE IF NOT EXISTS bundle (

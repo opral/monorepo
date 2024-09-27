@@ -1,11 +1,8 @@
-import type { MessageNested, Variant } from "@inlang/sdk2"
+import type { Declaration, Message, Variant } from "@inlang/sdk2"
 import type { Registry } from "./registry.js"
 import { compilePattern } from "./compilePattern.js"
-import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
-import { compileExpression } from "./compileExpression.js"
-import { mergeTypeRestrictions, type Compilation } from "./types.js"
-import { inputsType } from "./inputsType.js"
-import { jsIdentifier } from "~/services/codegen/identifier.js"
+import { doubleQuote } from "~/services/codegen/quotes.js"
+import type { Compiled } from "./types.js"
 
 /**
  * Returns the compiled message as a string
@@ -15,132 +12,79 @@ import { jsIdentifier } from "~/services/codegen/identifier.js"
  * @returns (inputs) => string
  */
 export const compileMessage = (
-	message: MessageNested,
+	declarations: Declaration[],
+	message: Message,
+	variants: Variant[],
 	registry: Registry
-): Compilation<MessageNested> => {
+): Compiled<Message> => {
 	// return empty string instead?
-	if (message.variants.length == 0) throw new Error("Message must have at least one variant")
-	const hasMultipleVariants = message.variants.length > 1
-	return addTypes(
-		hasMultipleVariants
-			? compileMessageWithMultipleVariants(message, registry)
-			: compileMessageWithOneVariant(message, registry)
-	)
+	if (variants.length == 0) {
+		throw new Error("Message must have at least one variant")
+	}
+	const hasMultipleVariants = variants.length > 1
+	return hasMultipleVariants
+		? compileMessageWithMultipleVariants(declarations, message, variants, registry)
+		: compileMessageWithOneVariant(message, variants, registry)
 }
 
 function compileMessageWithOneVariant(
-	message: MessageNested,
+	message: Message,
+	variants: Variant[],
 	registry: Registry
-): Compilation<MessageNested> {
-	const variant = message.variants[0]
-	if (!variant || message.variants.length !== 1)
+): Compiled<Message> {
+	const variant = variants[0]
+	if (!variant || variants.length !== 1) {
 		throw new Error("Message must have exactly one variant")
-	const hasInputs = message.declarations.some((decl) => decl.type === "input")
+	}
 	const compiledPattern = compilePattern(message.locale, variant.pattern, registry)
-	const code = `export const ${jsIdentifier(message.id)} = (${hasInputs ? "inputs" : ""}) => ${compiledPattern.code}`
-	return { code, typeRestrictions: compiledPattern.typeRestrictions, source: message }
+	const code = `export const ${message.bundleId} = (i) => ${compiledPattern.code}`
+	return { code, node: message }
 }
 
 function compileMessageWithMultipleVariants(
-	message: MessageNested,
+	declarations: Declaration[],
+	message: Message,
+	variants: Variant[],
 	registry: Registry
-): Compilation<MessageNested> {
-	if (message.variants.length <= 1) throw new Error("Message must have more than one variant")
-	const hasInputs = message.declarations.some((decl) => decl.type === "input")
-
-	const compiledSelectors = message.selectors.map((selector) =>
-		compileExpression(message.locale, selector, registry)
-	)
-
-	const selectorCode = `const selectors = [ ${compiledSelectors
-		.map((sel) => sel.code)
-		.join(", ")} ]`
+): Compiled<Message> {
+	if (variants.length <= 1) throw new Error("Message must have more than one variant")
 
 	// TODO make sure that matchers use keys instead of indexes
-	const compiledVariants = sortVariants(message.variants).map((variant): Compilation<Variant> => {
+	const compiledVariants = []
+
+	for (const variant of variants) {
 		const compiledPattern = compilePattern(message.locale, variant.pattern, registry)
-		const typeRestrictions = compiledPattern.typeRestrictions
 
-		const allWildcards: boolean = Object.values(variant.match).every((value) => value === "*")
+		// todo account for all matches in the selector (if a match is missing, it should be the catchall)
+		const isCatchAll = variant.matches.every((match) => match.type === "catchall-match")
 
-		if (allWildcards) {
-			return { code: `return ${compiledPattern.code}`, typeRestrictions, source: variant }
+		if (isCatchAll) {
+			compiledVariants.push(`return ${compiledPattern.code}`)
 		}
 
-		const conditions: string[] = Object.values(variant.match)
-			.map((value, i) => {
-				if (value === "*") return undefined
-				// we use == instead of === to automatically convert to string if necessary
-				return `selectors[${i}] == "${escapeForDoubleQuoteString(value)}"`
-			})
-			.filter((m) => m !== undefined)
+		const conditions: string[] = []
 
-		return {
-			code: `if (${conditions.join(" && ")}) return ${compiledPattern.code}`,
-			typeRestrictions,
-			source: variant,
+		for (const match of variant.matches) {
+			// catch all matches are not used in the conditions
+			if (match.type !== "literal-match") {
+				continue
+			}
+			const variableType = declarations.find((decl) => decl.name === match.key)?.type
+			if (variableType === "input-variable") {
+				conditions.push(`i.${match.key} == ${doubleQuote(match.value)}`)
+			} else if (variableType === "local-variable") {
+				conditions.push(`${match.key} == ${doubleQuote(match.value)}`)
+			}
 		}
-	})
 
-	const tr = [
-		...compiledVariants.map((v) => v.typeRestrictions),
-		...compiledSelectors.map((v) => v.typeRestrictions),
-	].reduce(mergeTypeRestrictions, {})
-
-	const code = `export const ${jsIdentifier(message.id)} = (${hasInputs ? "inputs" : ""}) => {
-	${selectorCode}
-	${compiledVariants.map((l) => `\t${l.code}`).join("\n")}
-}`
-
-	return { code, typeRestrictions: tr, source: message }
-}
-
-function addTypes(compilation: Compilation<MessageNested>): Compilation<MessageNested> {
-	// add types for the inputs
-	const tr = structuredClone(compilation.typeRestrictions)
-	for (const decl of compilation.source.declarations) {
-		const name = decl.value.arg.name
-		if (name in tr) continue
-		tr[name] = "NonNullable<unknown>"
+		if (conditions.length === 0) continue
+		compiledVariants.push(`if (${conditions.join(" && ")}) return ${compiledPattern.code};`)
 	}
 
-	const code = `/**
- * ${inputsType(tr, false)}
- * @returns {string}
- */
-/* @__NO_SIDE_EFFECTS__ */
-${compilation.code}`
+	const code = `
+		export const ${message.bundleId} = (i) => {
+				${compiledVariants.join("\n\n")}
+		}`
 
-	return {
-		...compilation,
-		typeRestrictions: tr,
-		code,
-	}
-}
-
-/**
- * Sorts variants from most-specific to least-specific.
- *
- * @param variants
- */
-function sortVariants(variants: Variant[]): Variant[] {
-	function compareMatches(a: string, b: string): number {
-		if (a === "*" && b === "*") return 0
-		if (a === "*") 1
-		if (b === "*") return -1
-		return 0
-	}
-	// not using .toSorted() because node js 18 doesn't have it
-	const copy = [...variants]
-	return copy.sort((a, b) => {
-		let i = 0
-		// @ts-ignore
-		while (i < Math.min(a.match.length, b.match.length)) {
-			// @ts-ignore
-			const cmp = compareMatches(a.match[i], b.match[i])
-			if (cmp !== 0) return cmp
-			i += 1
-		}
-		return 0
-	})
+	return { code, node: message }
 }

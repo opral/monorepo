@@ -1,20 +1,17 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type {
-	Bundle,
-	BundleNested,
-	Message,
-	Pattern,
-	VariableReference,
-	Variant,
-} from "@inlang/sdk2"
+import type { Bundle, Pattern, VariableReference, Variant } from "@inlang/sdk2"
 import { type plugin } from "../plugin.js"
 import { flatten } from "flat"
+import type {
+	BundleImport,
+	MessageImport,
+	VariantImport,
+} from "../../../../sdk2/dist/plugin/schema.js"
 
 export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({ files }) => {
-	const result: BundleNested[] = []
-	const bundles: Bundle[] = []
-	const messages: Message[] = []
-	const variants: Variant[] = []
+	const bundles: BundleImport[] = []
+	const messages: MessageImport[] = []
+	const variants: VariantImport[] = []
 
 	for (const file of files) {
 		const namespace = file.toBeImportedFilesMetadata?.namespace
@@ -26,41 +23,27 @@ export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({
 
 	// merge the bundle declarations
 	const uniqueBundleIds = [...new Set(bundles.map((bundle) => bundle.id))]
-	const uniqueBundles: Bundle[] = uniqueBundleIds.map((id) => {
+	const uniqueBundles: BundleImport[] = uniqueBundleIds.map((id) => {
 		const _bundles = bundles.filter((bundle) => bundle.id === id)
 		const declarations = removeDuplicates(_bundles.flatMap((bundle) => bundle.declarations))
 		return { id, declarations }
 	})
 
-	// establishing nesting
-	for (const bundle of uniqueBundles) {
-		const bundleNested: BundleNested = { ...bundle, messages: [] }
-
-		// @ts-expect-error - casting the type here
-		bundleNested.messages = messages.filter((message) => message.bundleId === bundle.id)
-
-		for (const message of bundleNested.messages) {
-			message.variants = variants.filter((variant) => variant.messageId === message.id)
-		}
-
-		result.push(bundleNested)
-	}
-
-	return { bundles: result }
+	return { bundles: uniqueBundles, messages, variants }
 }
 
 function parseFile(args: { namespace?: string; locale: string; content: ArrayBuffer }): {
-	bundles: Bundle[]
-	messages: Message[]
-	variants: Variant[]
+	bundles: BundleImport[]
+	messages: MessageImport[]
+	variants: VariantImport[]
 } {
 	const resource: Record<string, string> = flatten(
 		JSON.parse(new TextDecoder().decode(args.content))
 	)
 
-	const bundles: Bundle[] = []
-	const messages: Message[] = []
-	const variants: Variant[] = []
+	const bundles: BundleImport[] = []
+	const messages: MessageImport[] = []
+	const variants: VariantImport[] = []
 
 	for (const key in resource) {
 		const value = resource[key]!
@@ -84,7 +67,7 @@ function parseMessage(args: {
 	value: string
 	locale: string
 	resource: Record<string, any>
-}): { bundle: Bundle; message: Message; variant: Variant } {
+}): { bundle: BundleImport; message: MessageImport; variant: VariantImport } {
 	const pattern = parsePattern(args.value)
 
 	// i18next suffixes keys with context or plurals
@@ -104,16 +87,15 @@ function parseMessage(args: {
 		})),
 	}
 
-	const message: Message = {
-		id: "",
+	const message: MessageImport = {
 		bundleId: bundleId,
 		selectors: [],
 		locale: args.locale,
 	}
 
-	const variant: Variant = {
-		id: "",
-		messageId: "",
+	const variant: VariantImport = {
+		messageBundleId: bundleId,
+		messageLocale: args.locale,
 		matches: [],
 		pattern: pattern.result,
 	}
@@ -130,7 +112,11 @@ function parseMessage(args: {
 	// https://www.i18next.com/translation-function/context#combining-with-plurals
 	const isCatchAll =
 		testForPlurals(args.key) === false &&
-		Object.keys(args.resource).some((key) => testForPlurals(key))
+		Object.keys(args.resource).some(
+			// the first part of the key is identical e.g.
+			// ["friend"] -> ["friend", "one"]
+			(key) => args.key.split("_")[0] === key.split("_")[0] && testForPlurals(key)
+		)
 
 	if (hasContext && hasPlurals === false && isCatchAll === false) {
 		// "friend_male" -> ["friend", "male"]
@@ -139,6 +125,12 @@ function parseMessage(args: {
 			type: "input-variable",
 			name: "context",
 		})
+		message.selectors = [
+			{
+				type: "variable-reference",
+				name: "context",
+			},
+		]
 		variant.matches = [
 			{
 				type: "literal-match",
@@ -174,6 +166,16 @@ function parseMessage(args: {
 				},
 			},
 		})
+		message.selectors = [
+			{
+				type: "variable-reference",
+				name: "context",
+			},
+			{
+				type: "variable-reference",
+				name: "countPlural",
+			},
+		]
 		variant.matches = [
 			{
 				type: "literal-match",
@@ -200,6 +202,12 @@ function parseMessage(args: {
 				type: "literal-match",
 				key: "countPlural",
 				value: args.key.split("_").at(-1)!,
+			},
+		]
+		message.selectors = [
+			{
+				type: "variable-reference",
+				name: "countPlural",
 			},
 		]
 		bundle.declarations.push({
@@ -232,12 +240,6 @@ function parseMessage(args: {
 	}
 
 	bundle.declarations = removeDuplicates(bundle.declarations)
-
-	// i18next suffixes keys with context or plurals
-	// "friend_female_one" -> "friend"
-	message.id = `${bundle.id};;locale=${args.locale};;`
-	variant.id = `${message.id};;match=${variant.matches.join(",")};;`
-	variant.messageId = message.id
 
 	return { bundle, message, variant }
 }

@@ -1,93 +1,141 @@
-import { type Match, type MessageNested, type NewBundleNested, type Variant } from "@inlang/sdk2"
+import type {
+	Match,
+	Variant,
+	MessageImport,
+	VariantImport,
+	Bundle,
+	Pattern,
+	Declaration,
+	Message,
+	VariableReference,
+} from "@inlang/sdk2"
 import { type plugin } from "../plugin.js"
 
 export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({ files }) => {
-	const messages = files.flatMap(parseFile)
-	const bundlesIndex: Record<string, any> = {}
+	const bundles: Bundle[] = []
+	const messages: MessageImport[] = []
+	const variants: VariantImport[] = []
 
-	for (const message of messages) {
-		if (bundlesIndex[message.bundleId] === undefined) {
-			bundlesIndex[message.bundleId] = {
-				id: message.bundleId,
-				declarations: [],
-				messages: [message],
+	for (const file of files) {
+		const json = JSON.parse(new TextDecoder().decode(file.content))
+
+		for (const key in json) {
+			if (key === "$schema") {
+				continue
 			}
-		} else {
-			bundlesIndex[message.bundleId].messages.push(message)
+			const result = parseBundle(key, file.locale, json[key])
+			messages.push(result.message)
+			variants.push(...result.variants)
+
+			const existingBundle = bundles.find((b) => b.id === result.bundle.id)
+			if (existingBundle === undefined) {
+				bundles.push(result.bundle)
+			} else {
+				// merge declarations without duplicates
+				existingBundle.declarations = unique([
+					existingBundle.declarations,
+					...result.bundle.declarations,
+				])
+			}
 		}
 	}
 
-	const bundles = Object.values(bundlesIndex) as NewBundleNested[]
-
-	return { bundles }
+	return { bundles, messages, variants }
 }
 
-function parseFile(args: { locale: string; content: ArrayBuffer }): MessageNested[] {
-	const json = JSON.parse(new TextDecoder().decode(args.content))
-
-	const messages: MessageNested[] = []
-
-	for (const key in json) {
-		if (key === "$schema") {
-			continue
-		}
-		messages.push(
-			parseMessage({
-				key,
-				value: json[key],
-				locale: args.locale,
-			})
-		)
-	}
-	return messages
-}
-
-function parseMessage(args: {
-	key: string
+function parseBundle(
+	key: string,
+	locale: string,
 	value: string | Record<string, string>
-	locale: string
-}): MessageNested {
-	// happy_sky_eye + _ + en
-	const messageId = args.key + "_" + args.locale
-	const variants = parseVariants(messageId, args.value)
+): {
+	bundle: Bundle
+	message: MessageImport
+	variants: VariantImport[]
+} {
+	const parsed = parseVariants(key, locale, value)
+	const declarations = unique(parsed.declarations)
+	const selectors = unique(parsed.selectors)
 
-	return {
-		id: messageId,
-		bundleId: args.key,
-		selectors: [],
-		locale: args.locale,
-		variants,
-	}
-}
+	const undeclaredSelectors = selectors.filter(
+		(selector) => declarations.find((d) => d.name === selector.name) === undefined
+	)
 
-function parseVariants(messageId: string, value: string | Record<string, string>): Variant[] {
-	// single variant
-	if (typeof value === "string") {
-		return [
-			{
-				id: messageId,
-				messageId,
-				matches: [],
-				pattern: parsePattern(value),
-			},
-		]
-	}
-	// multi variant
-	const variants: Variant[] = []
-	for (const [matcher, pattern] of Object.entries(value["match"] as string)) {
-		variants.push({
-			// "some_happy_cat_en;platform=ios,userGender=female"
-			id: messageId + ";" + matcher.replaceAll(" ", ""),
-			messageId,
-			matches: parseMatcher(matcher),
-			pattern: parsePattern(pattern),
+	for (const undeclaredSelector of undeclaredSelectors) {
+		declarations.push({
+			type: "input-variable",
+			name: undeclaredSelector.name,
 		})
 	}
-	return variants
+
+	return {
+		bundle: {
+			id: key,
+			declarations,
+		},
+		message: {
+			bundleId: key,
+			selectors,
+			locale: locale,
+		},
+		variants: parsed.variants,
+	}
 }
 
-function parsePattern(value: string): Variant["pattern"] {
+function parseVariants(
+	bundleId: string,
+	locale: string,
+	value: string | Record<string, string>
+): {
+	variants: VariantImport[]
+	declarations: Declaration[]
+	selectors: VariableReference[]
+} {
+	// single variant
+	if (typeof value === "string") {
+		const parsed = parsePattern(value)
+		return {
+			variants: [
+				{
+					messageBundleId: bundleId,
+					messageLocale: locale,
+					matches: [],
+					pattern: parsed.pattern,
+				},
+			],
+			declarations: parsed.declarations,
+			selectors: [],
+		}
+	}
+	// multi variant
+	const declarations: Declaration[] = []
+	const selectors: VariableReference[] = []
+	const variants: VariantImport[] = []
+
+	for (const [match, pattern] of Object.entries(value["match"] as string)) {
+		const parsed = parsePattern(pattern)
+		const parsedMatches = parseMatches(match)
+		variants.push({
+			messageBundleId: bundleId,
+			messageLocale: locale,
+			matches: parsedMatches.matches,
+			pattern: parsed.pattern,
+		})
+		declarations.push(...parsed.declarations)
+		selectors.push(...parsedMatches.selectors)
+	}
+	return {
+		variants,
+		declarations,
+		selectors,
+	}
+}
+
+function parsePattern(value: string): {
+	declarations: Declaration[]
+	pattern: Pattern
+} {
 	const pattern: Variant["pattern"] = []
+	const declarations: Declaration[] = []
 
 	// splits a pattern like "Hello {name}!" into an array of parts
 	// "hello {name}, how are you?" -> ["hello ", "{name}", ", how are you?"]
@@ -101,18 +149,31 @@ function parsePattern(value: string): Variant["pattern"] {
 		// it's an expression (only supporting variables for now)
 		else {
 			const variableName = part.slice(1, -1)
+			declarations.push({
+				type: "input-variable",
+				name: variableName,
+			})
 			pattern.push({ type: "expression", arg: { type: "variable-reference", name: variableName } })
 		}
 	}
 
-	return pattern
+	return {
+		declarations,
+		pattern,
+	}
 }
 
 // input: `platform=android,userGender=male`
 // output: { platform: "android", userGender: "male" }
-function parseMatcher(value: string): Match[] {
+function parseMatches(value: string): {
+	matches: Match[]
+	selectors: Message["selectors"]
+} {
 	const stripped = value.replace(" ", "")
+
 	const matches: Match[] = []
+	const selectors: Message["selectors"] = []
+
 	const parts = stripped.split(",")
 	for (const part of parts) {
 		const [key, value] = part.split("=")
@@ -131,6 +192,13 @@ function parseMatcher(value: string): Match[] {
 				value,
 			})
 		}
+		selectors.push({
+			type: "variable-reference",
+			name: key,
+		})
 	}
-	return matches
+	return { matches, selectors }
 }
+
+const unique = (arr: Array<any>) =>
+	[...new Set(arr.map((item) => JSON.stringify(item)))].map((item) => JSON.parse(item))

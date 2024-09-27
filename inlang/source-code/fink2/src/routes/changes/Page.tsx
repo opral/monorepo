@@ -1,9 +1,9 @@
 import {
-	pendingChangesAtom,
+	groupedPendingChangesAtom,
 	projectAtom,
-	bundlesNestedAtom,
+	bundlesWithPendingChangesAtom,
 } from "../../state.ts";
-import { atom, useAtom } from "jotai";
+import { useAtom } from "jotai";
 import Layout, { Grid } from "../../layout.tsx";
 import { FormEvent, useEffect, useState } from "react";
 import {
@@ -15,24 +15,10 @@ import DiffBundleView from "../../components/DiffBundleView.tsx";
 import { BundleNested } from "@inlang/sdk2";
 import { useNavigate } from "react-router-dom";
 
-const bundleIdsWithPendingChangesAtom = atom(async (get) => {
-	const bundlesNested = await get(bundlesNestedAtom);
-	const pendingChanges = await get(pendingChangesAtom);
-	const pendingChangesVariantIds = pendingChanges.map((c) => c.value!.id);
-	const bundleNestedWithChanges = bundlesNested.filter((bundle) =>
-		bundle.messages.some((message) =>
-			message.variants.some((variant) =>
-				pendingChangesVariantIds.includes(variant.id)
-			)
-		)
-	);
-	return bundleNestedWithChanges;
-});
-
 export default function App() {
 	const [project] = useAtom(projectAtom);
-	const [pendingChanges] = useAtom(pendingChangesAtom);
-	const [bundlesWithChanges] = useAtom(bundleIdsWithPendingChangesAtom);
+	const [groupedPendingChanges] = useAtom(groupedPendingChangesAtom);
+	const [bundlesWithPendingChanges] = useAtom(bundlesWithPendingChangesAtom);
 	const [commitDescription, setCommitDescription] = useState<string>("");
 	const [showDialog, setShowDialog] = useState(false);
 	const navigate = useNavigate();
@@ -45,20 +31,23 @@ export default function App() {
 
 	useEffect(() => {
 		// close dialog after commit
-		if (pendingChanges.length === 0) {
+		if (groupedPendingChanges.length === 0) {
 			setShowDialog(false);
 			navigate("/");
 		}
 	});
 
 	const getScopedChangesByBundle = (bundle: BundleNested) => {
-		const pendingChangesForBundle = pendingChanges.filter((change) => {
-			const variantId = change.value?.id;
-			if (!variantId) return false;
-			return bundle.messages.some((message) =>
-				message.variants.some((variant) => variant.id === variantId)
+		const pendingChangesForBundle = groupedPendingChanges.filter((change) => {
+			const changeId = change.value?.id;
+			if (!changeId) return false;
+			if (bundle.id === changeId) return true;
+			return bundle.messages.some((message) => 
+				message.id === changeId ||
+				message.variants.some((variant) => variant.id === changeId)
 			);
 		});
+
 		return pendingChangesForBundle;
 	};
 
@@ -72,7 +61,7 @@ export default function App() {
 							<SlButton
 								size="small"
 								variant="default"
-								disabled={pendingChanges.length === 0}
+								disabled={groupedPendingChanges.length === 0}
 								onClick={() => {
 									setShowDialog(true);
 								}}
@@ -93,6 +82,7 @@ export default function App() {
 									<div className="flex flex-col gap-4">
 										<SlInput
 											required
+											autoFocus
 											label="Description"
 											helpText="Add a description of the changes"
 											placeholder="I updated the german translations"
@@ -111,9 +101,9 @@ export default function App() {
 					</Grid>
 				</div>
 				<Grid>
-					{bundlesWithChanges.length > 0 && (
+					{bundlesWithPendingChanges.length > 0 && (
 						<div className="relative mb-8 mt-8 divide-y divide-zinc-200 border-y border-zinc-200">
-							{bundlesWithChanges.map((bundle) => (
+							{bundlesWithPendingChanges.map((bundle) => (
 								<DiffBundleView
 									changes={getScopedChangesByBundle(bundle)}
 									bundleId={bundle.id}
