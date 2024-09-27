@@ -124,7 +124,7 @@ export default function Layout(props: {
 	return (
 		<div className="w-full min-h-screen bg-zinc-50 relative">
 			<div className="w-full border-b border-zinc-200 bg-white relative z-90 -mb-[1px]">
-				<div className="w-full flex items-center justify-between px-3 min-h-[54px] gap-1">
+				<div className="w-full flex items-center justify-between px-3 min-h-[54px] gap-1 overflow-x-scroll">
 					<div className="flex items-center gap-1">
 						<div
 							className="flex justify-center items-center text-zinc-500 w-9 h-9 hover:bg-zinc-100 hover:text-zinc-950 rounded-lg cursor-pointer"
