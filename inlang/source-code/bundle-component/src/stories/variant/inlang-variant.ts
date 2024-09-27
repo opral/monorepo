@@ -155,6 +155,7 @@ export default class InlangVariant extends LitElement {
 						? this.variant.matches.map((match) => {
 								return html`
 									<sl-input
+										exportparts="input:match"
 										id="${this.variant.id}-${match.key}"
 										class="match"
 										size="small"
@@ -169,6 +170,7 @@ export default class InlangVariant extends LitElement {
 								`
 						  })
 						: undefined}
+
 					<slot name="pattern-editor" class="pattern-editor"></slot>
 					<div class="actions">
 						<slot name="variant-action"></slot>

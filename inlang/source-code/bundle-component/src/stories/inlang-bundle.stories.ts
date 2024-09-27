@@ -167,6 +167,134 @@ export const Complex: StoryObj = {
 	},
 }
 
+export const Complex_Highlighted: StoryObj = {
+	args: {
+		state: examplePlural,
+	},
+	render: () => {
+		const [args, updateArgs] = useArgs()
+		const { bundles, messages, variants } = args.state as {
+			bundles: Bundle[]
+			messages: Message[]
+			variants: Variant[]
+		}
+
+		const handleChange = (e) => {
+			const data = e.detail as ChangeEventDetail
+			updateArgs({
+				state: updateEntities({ entities: args.state, change: data }),
+			})
+		}
+
+		return html`
+			<style>
+				.highlighted-bundle inlang-message::part(new-variant) {
+					display: none;
+				}
+				.highlighted-bundle::part(add-variable) {
+					display: none;
+				}
+				.highlighted-bundle .highlight-red .inlang-pattern-editor-contenteditable,
+				.highlighted-bundle .highlight-match-red::part(match),
+				.highlighted-bundle .highlight-selector-red::part(selector),
+				.highlighted-bundle.highlight-variables-red::part(variable) {
+					background-color: #ffe8e8 !important;
+					border: 1px solid red !important;
+				}
+			</style>
+			<h2>Highlighted pattern</h2>
+			<inlang-bundle class="highlighted-bundle" .bundle=${bundles[0]} @change=${handleChange}>
+				${messages.map((message) => {
+					const variantsOfMessage = variants.filter((v) => v.messageId === message.id)
+					return html` <inlang-message
+						slot="message"
+						.message=${message}
+						.variants=${variantsOfMessage}
+						.settings=${mockSettings}
+					>
+						${variantsOfMessage.map((variant) => {
+							return html`<inlang-variant slot="variant" .variant=${variant}>
+								<inlang-pattern-editor
+									class="highlight-red"
+									slot="pattern-editor"
+									.variant=${variant}
+								>
+								</inlang-pattern-editor>
+							</inlang-variant>`
+						})}
+					</inlang-message>`
+				})}
+			</inlang-bundle>
+			<h2>Highlighted match</h2>
+			<inlang-bundle class="highlighted-bundle" .bundle=${bundles[0]} @change=${handleChange}>
+				${messages.map((message) => {
+					const variantsOfMessage = variants.filter((v) => v.messageId === message.id)
+					return html` <inlang-message
+						slot="message"
+						.message=${message}
+						.variants=${variantsOfMessage}
+						.settings=${mockSettings}
+					>
+						${variantsOfMessage.map((variant) => {
+							return html`<inlang-variant
+								class="highlight-match-red"
+								slot="variant"
+								.variant=${variant}
+							>
+								<inlang-pattern-editor slot="pattern-editor" .variant=${variant}>
+								</inlang-pattern-editor>
+							</inlang-variant>`
+						})}
+					</inlang-message>`
+				})}
+			</inlang-bundle>
+			<h2>Highlighted selector</h2>
+			<inlang-bundle class="highlighted-bundle" .bundle=${bundles[0]} @change=${handleChange}>
+				${messages.map((message) => {
+					const variantsOfMessage = variants.filter((v) => v.messageId === message.id)
+					return html` <inlang-message
+						class="highlight-selector-red"
+						slot="message"
+						.message=${message}
+						.variants=${variantsOfMessage}
+						.settings=${mockSettings}
+					>
+						${variantsOfMessage.map((variant) => {
+							return html`<inlang-variant slot="variant" .variant=${variant}>
+								<inlang-pattern-editor slot="pattern-editor" .variant=${variant}>
+								</inlang-pattern-editor>
+							</inlang-variant>`
+						})}
+					</inlang-message>`
+				})}
+			</inlang-bundle>
+			<h2>Highlighted variables</h2>
+			<inlang-bundle
+				class="highlighted-bundle highlight-variables-red"
+				.bundle=${bundles[0]}
+				@change=${handleChange}
+			>
+				${messages.map((message) => {
+					const variantsOfMessage = variants.filter((v) => v.messageId === message.id)
+					return html` <inlang-message
+						slot="message"
+						.message=${message}
+						.variants=${variantsOfMessage}
+						.settings=${mockSettings}
+					>
+						${variantsOfMessage.map((variant) => {
+							return html`<inlang-variant slot="variant" .variant=${variant}>
+								<inlang-pattern-editor slot="pattern-editor" .variant=${variant}>
+								</inlang-pattern-editor>
+							</inlang-variant>`
+						})}
+					</inlang-message>`
+				})}
+			</inlang-bundle>
+		`
+	},
+}
+
 export const Themed: StoryObj = {
 	args: {
 		state: examplePlural,
