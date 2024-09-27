@@ -1,0 +1,74 @@
+[
+	{
+		"author": "Nils",
+		"created": "2023-08-09 14:12:29",
+		"created_at": "2023-08-09 14:12:29",
+		"description": "Initial .csv upload in empty project",
+		"id": "87ee2d6c-d17d-4fad-a2db-4d2a9ba8114d",
+		"parent_id": "00000000-0000-0000-0000-000000000000"
+	},
+	{
+		"author": "Nils",
+		"created": "2023-09-04 14:17:03",
+		"created_at": "2023-09-04 14:17:03",
+		"description": "Raised 600k Pre-Seed from 2 investors",
+		"id": "7ebafca6-d2f7-44be-9c97-69b3860db6a0",
+		"parent_id": "87ee2d6c-d17d-4fad-a2db-4d2a9ba8114d"
+	},
+	{
+		"author": "Nils",
+		"created": "2023-12-25 14:19:44",
+		"created_at": "2023-12-25 14:19:44",
+		"description": "First employees hired",
+		"id": "a9df4b88-26cd-4139-9438-c6fd77c0f283",
+		"parent_id": "7ebafca6-d2f7-44be-9c97-69b3860db6a0"
+	},
+	{
+		"author": "Nils",
+		"created": "2024-03-10 14:29:27",
+		"created_at": "2024-03-10 14:29:27",
+		"description": "New employees hired",
+		"id": "7f633ac6-d3a0-47d7-89a3-5ca9b6c50d2e",
+		"parent_id": "a9df4b88-26cd-4139-9438-c6fd77c0f283"
+	},
+	{
+		"author": "Nils",
+		"created": "2024-04-17 14:32:19",
+		"created_at": "2024-04-17 14:32:19",
+		"description": "Jane Doe left the company",
+		"id": "47a7b4a2-0e3b-4939-a566-a06f654d4783",
+		"parent_id": "7f633ac6-d3a0-47d7-89a3-5ca9b6c50d2e"
+	},
+	{
+		"author": "Nils",
+		"created": "2024-05-26 14:35:10",
+		"created_at": "2024-05-26 14:35:10",
+		"description": "Raising total 2.3M Seed",
+		"id": "83743d86-3e45-456e-832a-523c0dca67e7",
+		"parent_id": "47a7b4a2-0e3b-4939-a566-a06f654d4783"
+	},
+	{
+		"author": "Nils",
+		"created": "2024-07-15 14:38:51",
+		"created_at": "2024-07-15 14:38:51",
+		"description": "First employee exercised stock options",
+		"id": "ef35e728-04e3-410e-9441-23a3f5653469",
+		"parent_id": "83743d86-3e45-456e-832a-523c0dca67e7"
+	},
+	{
+		"author": "Nils",
+		"created": "2024-08-19 14:41:21",
+		"created_at": "2024-08-19 14:41:21",
+		"description": "Policy adjustment - ESOP: Employee stock option plan",
+		"id": "1afd01b3-8d17-4c9a-9660-dc9559d62e38",
+		"parent_id": "ef35e728-04e3-410e-9441-23a3f5653469"
+	},
+	{
+		"author": "Nils",
+		"created": "2024-09-18 14:42:36",
+		"created_at": "2024-09-18 14:42:36",
+		"description": "Irene joined the team & existing employees exercised options",
+		"id": "c66d9e5d-2843-4404-8e1b-7d53a329a484",
+		"parent_id": "1afd01b3-8d17-4c9a-9660-dc9559d62e38"
+	}
+]

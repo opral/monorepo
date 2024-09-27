@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+    /* Animations */
+    --animate-slideIn: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1;
+    --animate-slideOut: slideOut 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    --animate-blendIn: blendIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1;
+
+    @keyframes slideIn {
+        0% { transform: translate(0px, 80px) }
+        75% { transform: translate(0px, -8px) }
+        100% { transform: translate(0px, 0) }
+    }
+
+    @keyframes slideOut {
+        0% { transform: translate(0px, 0) }
+        25% { transform: translate(0px, -8px) }
+        100% { transform: translate(0px, 80px) }
+    }
+
+    @keyframes blendIn {
+        0% { opacity: 0 }
+        100% { opacity: 1 }
+    }
+}
+
+.inlang-pattern-editor-neu .inlang-pattern-editor-contenteditable {
+    background-color: #B2F4D4;
+    border: 1px solid #16A34B;
+}
+.inlang-pattern-editor-old .inlang-pattern-editor-contenteditable {
+    background-color: #F3C9CD;
+    border: 1px solid #DA2728;
+}
+
+.conflict-pattern .inlang-pattern-editor-contenteditable{
+    background-color: #FAFAFA;
+}
+
+.hide-new-variant::part(new-variant) {
+    display: none;
+}
+
+p {
+    line-height: 15px;
+}
+
+.add-selector-dialog::part(body) {
+    padding: 0;
+}
+
+sl-dialog::part(panel) {
+    border-radius: 8px;
+}
+
+.cellDrawer::part(panel) {
+    border-left: 1px solid lightgrey;
+    width: 400px;
+}
+.cellDrawer::part(body) {
+padding: 0;
+}
+
+@media screen and (max-width: 768px) {
+    .cellDrawer::part(panel) {
+        border-top: 1px solid lightgrey;
+        border-radius: 20px 20px 0 0;
+        width: 100%;
+    }
+}
+
+sl-button[variant="default"]::part(base) {
+    transition: all 0.2s;
+    font-size: 13px;
+}
+
+sl-button[variant="default"]::part(base):hover {
+    background-color: white;
+    border-color: grey;
+    color: black;
+    font-size: 13px;
+}
+
+sl-button[variant="primary"]::part(base) {
+    transition: all 0.2s;
+    color: white;
+    background-color: black;
+    border: none;
+    font-size: 13px;
+}
+sl-button[variant="primary"]::part(base):hover {
+    background-color: rgb(63, 63, 63);
+    border: none
+}
+
+sl-button[variant="text"]::part(base) {
+    color: rgb(63, 63, 63);
+    font-size: 13px;
+}
+sl-button[variant="text"]::part(base):hover {
+    color: rgb(0, 0, 0);
+}
+
+sl-button[size="medium"]::part(base) {
+    border-radius: 8px;
+}
+
+sl-tag::part(base) {
+    height: 30px
+}
+
+p {
+    line-height: 150%;
+}
+
+sl-avatar::part(base) {
+    height: 30px;
+    width: 30px;
+    background: #FFF;
+    border: 1px solid #cdd0d4;
+}
+
+sl-avatar::part(initials) {
+   font-size: 14px;
+   color: #000
+}
