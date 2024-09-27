@@ -199,7 +199,7 @@ export default class InlangMessage extends LitElement {
 							<div class="selector-container">
 								${this.message.selectors.map(
 									(selector, index) => html`<sl-dropdown>
-										<div class="selector" slot="trigger">${selector.name}</div>
+										<div class="selector" part="selector" slot="trigger">${selector.name}</div>
 										<sl-menu>
 											<sl-menu-item
 												value="delete"

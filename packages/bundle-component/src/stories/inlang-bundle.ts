@@ -177,6 +177,7 @@ export default class InlangBundle extends LitElement {
 											(declaration) =>
 												html`<sl-dropdown
 													><sl-button
+														exportparts="base:variable"
 														slot="trigger"
 														class="variable-tag"
 														variant="neutral"
@@ -205,7 +206,7 @@ export default class InlangBundle extends LitElement {
 													</sl-menu>
 												</sl-dropdown>`
 										)}
-										<inlang-add-variable .bundle=${this.bundle}>
+										<inlang-add-variable .bundle=${this.bundle} part="add-variable">
 											<sl-tooltip content="Add a variable to this bundle">
 												<sl-button class="text-button" variant="neutral" size="small"
 													><svg
