@@ -46,6 +46,9 @@ services:
     autoDeploy: true
     branch: lix-integration
     staticPublishPath: ./inlang/source-code/fink2/dist
+    routes: 
+      - path: /.*
+        destination: /index.html
     buildCommand: pnpm install && pnpm run --filter @inlang/fink2... build
     buildFilter:
       paths:
