@@ -25,7 +25,7 @@ export const CreateProjectDialog = (props: {
 
 	const handleCreateNewProject = async () => {
 		setLoading(true);
-		console.log("create new project", fileName);
+		//console.log("create new project", fileName);
 		const projectId = humanId();
 
 		const rootHandle = await getOriginPrivateDirectory();

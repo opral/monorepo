@@ -6,6 +6,9 @@ import { useState } from "react";
 import { useAtom } from "jotai";
 import { selectedProjectPathAtom } from "../state.ts";
 import { humanId } from "../helper/human-id/human-id.ts";
+import { getOriginPrivateDirectory } from "native-file-system-adapter";
+
+const fileName = "cap-table.lix";
 
 export const DemoCard = () => {
 	const [loading, setLoading] = useState(false);
@@ -15,10 +18,15 @@ export const DemoCard = () => {
 
 	const handleCreateDemo = async () => {
 		setLoading(true);
-		const opfsRoot = await navigator.storage.getDirectory();
-		const fileHandle = await opfsRoot.getFileHandle("cap-table.lix", {
-			create: true,
-		});
+		const projectId = humanId();
+
+		const rootHandle = await getOriginPrivateDirectory();
+		const fileHandle = await rootHandle.getFileHandle(
+			projectId + "___" + fileName,
+			{
+				create: true,
+			}
+		);
 		const writable = await fileHandle.createWritable();
 		const blob = await newLixFile();
 		const newProject = await openLixInMemory({
@@ -53,8 +61,8 @@ export const DemoCard = () => {
 					path: "/project_meta",
 					data: new TextEncoder().encode(
 						JSON.stringify({
-							project_id: humanId(),
-							initial_file_name: "cap-table.lix",
+							project_id: projectId,
+							initial_file_name: fileName,
 						})
 					),
 				})
@@ -95,10 +103,10 @@ export const DemoCard = () => {
 		await writable.write(file);
 		await writable.close();
 
-		setSelectedProjectPath("cap-table.lix");
+		setSelectedProjectPath(projectId + "___" + fileName);
 		setLoading(false);
 
-		navigate("/editor");
+		navigate("/editor?project=" + projectId);
 	};
 
 	return (
