@@ -25,15 +25,13 @@ export default function Layout(props: {
 	setShowImportDialog: (value: boolean) => void;
 }) {
 	const [, setWithPolling] = useAtom(withPollingAtom);
-	const [selectedProjectPath, setSelectedProjectPath] = useAtom(
-		selectedProjectPathAtom
-	);
+	const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
 	const [authorName] = useAtom(authorNameAtom);
 	const [project] = useAtom(projectAtom);
 	const [isProjectSynced] = useAtom(isProjectSyncedAtom);
 
 	const navigate = useNavigate();
-	const [searchParams, setSearchParams] = useSearchParams();
+	const [, setSearchParams] = useSearchParams();
 
 	const handleShare = async () => {
 		if (project === undefined) {
@@ -122,13 +120,6 @@ export default function Layout(props: {
 			handleSetSearchParams();
 		}
 	}, [selectedProjectPath, project]);
-
-	useEffect(() => {
-		if (searchParams.get("project") && !selectedProjectPath) {
-			const project_id = searchParams.get("project");
-			setSelectedProjectPath(project_id + "___" + "test.lix");
-		}
-	});
 
 	return (
 		<div className="w-full min-h-screen bg-zinc-50 relative">

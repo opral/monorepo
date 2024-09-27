@@ -39,6 +39,8 @@ export const forceReloadProjectAtom = atom<
 	ReturnType<typeof Date.now> | undefined
 >(undefined);
 
+let isPolling = false; // Flag to track if polling is already in progress
+
 export const projectAtom = atom(async (get) => {
 	// listen to forceReloadProjectAtom to reload the project
 	// workaround for https://github.com/opral/lix-sdk/issues/47
@@ -194,10 +196,16 @@ export const projectAtom = atom(async (get) => {
 		// @ts-ignore
 		// safeProjectToOpfsInterval = setInterval(
 		const syncLixFile = async () => {
+			console.log("sync instance", isPolling);
 			const file = await project.toBlob();
 			const writable = await fileHandle.createWritable();
 
 			const currentProjectMeta = get(selectedProjectPathAtom);
+
+			// If polling is already in progress, do nothing
+			if (isPolling) return;
+			isPolling = true; // Set the polling flag to true when polling starts
+
 			// if the project is not the fallback path, we don't want to sync it
 			if (
 				currentProjectMeta &&
@@ -205,6 +213,8 @@ export const projectAtom = atom(async (get) => {
 			) {
 				return;
 			}
+
+			console.log("sync instance -- ", project_id);
 
 			const checkIfExists = await fetch(
 				"https://monorepo-6hl2.onrender.com/lix-file/" + project_id
@@ -248,6 +258,7 @@ export const projectAtom = atom(async (get) => {
 			await writable.write(await project.toBlob());
 			await writable.close();
 
+			isPolling = false;
 			setTimeout(syncLixFile, 500);
 		};
 
