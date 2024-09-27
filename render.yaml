@@ -47,7 +47,7 @@ services:
     branch: lix-integration
     staticPublishPath: ./inlang/source-code/fink2/dist
     routes: 
-      - type: redirect
+      - type: rewrite
         source: /.*
         destination: /index.html
     buildCommand: pnpm install && pnpm run --filter @inlang/fink2... build
