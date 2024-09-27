@@ -14,7 +14,7 @@ import React, { useState } from "react";
 import { useAtom } from "jotai";
 import {
 	filteredLocalesAtom,
-	pendingChangesAtom,
+	groupedPendingChangesAtom,
 	projectAtom,
 	settingsAtom,
 } from "../state.ts";
@@ -83,7 +83,7 @@ const InlangBundle = (props: {
 	setShowHistory: (variantId: string) => void;
 }) => {
 	const [project] = useAtom(projectAtom);
-	const [pendingChanges] = useAtom(pendingChangesAtom);
+	const [groupedPendingChanges] = useAtom(groupedPendingChangesAtom);
 	const [settings] = useAtom(settingsAtom);
 	const [filteredLocales] = useAtom(filteredLocalesAtom);
 
@@ -177,7 +177,7 @@ const InlangBundle = (props: {
 											settings={settings}
 										>
 											{message.variants.map((variant) => {
-												const change = pendingChanges.find(
+												const change = groupedPendingChanges.find(
 													// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 													// @ts-ignore
 													(change) =>
@@ -292,6 +292,7 @@ const InlangBundle = (props: {
 																					.children[0] as LitInlangAddSelector;
 																				if (child) {
 																					child.message = message;
+																					child.variants = message.variants;
 																				}
 																				setTimeout(() => {
 																					dialog.show();
@@ -315,7 +316,6 @@ const InlangBundle = (props: {
 													</ReactInlangVariant>
 												);
 											})}
-
 											<div
 												slot="selector-button"
 												className="px-2 h-8 mt-[6px] ml-[1px] border border-zinc-300 bg-white rounded text-zinc-600 flex items-center justify-center hover:bg-zinc-100 hover:border-zinc-400 cursor-pointer"
@@ -329,6 +329,7 @@ const InlangBundle = (props: {
 															.children[0] as LitInlangAddSelector;
 														if (child) {
 															child.message = message;
+															child.variants = message.variants;
 														}
 														setTimeout(() => {
 															dialog.show();
@@ -349,6 +350,7 @@ const InlangBundle = (props: {
 													/>
 												</svg>
 											</div>
+											;
 										</ReactInlangMessage>
 									);
 								} else {
@@ -362,6 +364,7 @@ const InlangBundle = (props: {
 										<ReactInlangMessage
 											slot="message"
 											message={message}
+											settings={settings}
 											key={`${props.bundle.id}-${locale}-empty`}
 										>
 											<p
@@ -418,6 +421,7 @@ const InlangBundle = (props: {
 							}}
 							bundle={props.bundle}
 							// message={message}
+							// variants={message?.variants}
 						/>
 					</SlDialog>
 				</div>

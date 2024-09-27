@@ -20,7 +20,7 @@ export default async function getSortedBundles(project: InlangProject) {
 		}
 	}
 
-	console.log(bundleIdToCreationDate);
+	// console.log(bundleIdToCreationDate);
 
 	// Step 3: Sort the bundles by their creation dates newest to oldest
 	const sortedBundles = bundles.sort((a, b) => {

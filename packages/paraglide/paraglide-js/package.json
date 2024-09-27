@@ -42,8 +42,8 @@
 	],
 	"scripts": {
 		"dev": "vite build --mode development --watch",
-		"build": "tsc --noEmit && vite build --mode production",
-		"test": "vitest run --coverage ./src/**/*",
+		"build": "vite build --mode production",
+		"test": "tsc --noEmit && vitest run --coverage ./src/**/*",
 		"test:watch": "vitest --watch ./src/**/*",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
@@ -71,7 +71,6 @@
 		"@inlang/recommend-ninja": "workspace:*",
 		"@inlang/recommend-sherlock": "workspace:*",
 		"@inlang/sdk2": "workspace:*",
-		"@rollup/plugin-terser": "0.4.3",
 		"@rollup/plugin-virtual": "3.0.1",
 		"@ts-morph/bootstrap": "0.20.0",
 		"@types/node": "^20.12.7",

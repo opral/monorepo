@@ -23,7 +23,7 @@ export const Example: StoryObj = {
 		return html`
 			<inlang-add-selector
 				.bundle=${bundle}
-				.messages=${message}
+				.message=${message}
 				.variants=${variants}
 				@change=${(e) => console.info(e.detail)}
 			></inlang-add-selector>

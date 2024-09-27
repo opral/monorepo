@@ -1,100 +1,79 @@
 import { it, expect } from "vitest"
 import { compileMessage } from "./compileMessage.js"
-import type { MessageNested } from "@inlang/sdk2"
+import type { Declaration, Message, Variant } from "@inlang/sdk2"
 import { DEFAULT_REGISTRY } from "./registry.js"
 
 it("compiles a message with a single variant", async () => {
-	const mockMessage: MessageNested = {
+	const declarations: Declaration[] = []
+	const message: Message = {
 		locale: "en",
-		id: "mock_message",
-		bundleId: "mock_bundle",
-		declarations: [],
+		bundleId: "some_message",
+		id: "message-id",
 		selectors: [],
-		variants: [
-			{
-				id: "1",
-				messageId: "some_message",
-				match: {},
-				pattern: [{ type: "text", value: "Hello" }],
-			},
-		],
 	}
+	const variants: Variant[] = [
+		{
+			id: "1",
+			messageId: "message-id",
+			matches: [],
+			pattern: [{ type: "text", value: "Hello" }],
+		},
+	]
 
-	const compiled = compileMessage(mockMessage, DEFAULT_REGISTRY)
+	const compiled = compileMessage(declarations, message, variants, DEFAULT_REGISTRY)
 
-	const { mock_message } = await import("data:text/javascript;base64," + btoa(compiled.code))
+	const { some_message } = await import("data:text/javascript;base64," + btoa(compiled.code))
 
-	expect(mock_message({})).toBe("Hello")
+	expect(some_message()).toBe("Hello")
 })
 
 it("compiles a message with variants", async () => {
-	const msg: MessageNested = {
+	const declarations: Declaration[] = [
+		{ type: "input-variable", name: "fistInput" },
+		{ type: "input-variable", name: "secondInput" },
+	]
+
+	const message: Message = {
 		locale: "en",
 		id: "some_message",
-		bundleId: "some_bundle",
-		declarations: [
-			{
-				type: "input",
-				name: "fistInput",
-				value: { type: "expression", arg: { type: "variable", name: "fistInput" } },
-			},
-			{
-				type: "input",
-				name: "secondInput",
-				value: { type: "expression", arg: { type: "variable", name: "second Input" } },
-			},
-		],
+		bundleId: "some_message",
 		selectors: [
-			{ type: "expression", arg: { type: "variable", name: "fistInput" } },
-			{
-				type: "expression",
-				arg: { type: "variable", name: "second Input" },
-				annotation: { type: "function", name: "plural", options: [] },
-			},
-		],
-		variants: [
-			{
-				id: "1",
-				messageId: "some_message",
-				match: { firstInput: "1", secondInput: "2" },
-				pattern: [
-					{ type: "text", value: "One" },
-					{
-						type: "expression",
-						arg: { type: "variable", name: "fistInput" },
-						annotation: {
-							type: "function",
-							name: "number",
-							options: [],
-						},
-					},
-				],
-			},
-			{
-				id: "2",
-				messageId: "some_message",
-				match: { firstInput: "*", secondInput: "*" },
-				pattern: [{ type: "text", value: "Many" }],
-			},
+			{ type: "variable-reference", name: "fistInput" },
+			{ type: "variable-reference", name: "secondInput" },
 		],
 	}
 
-	const compiled = compileMessage(msg, DEFAULT_REGISTRY)
+	const variants: Variant[] = [
+		{
+			id: "1",
+			messageId: "some_message",
+			matches: [
+				{ type: "literal-match", key: "fistInput", value: "1" },
+				{ type: "literal-match", key: "secondInput", value: "2" },
+			],
+			pattern: [
+				{ type: "text", value: "The inputs are " },
+				{ type: "expression", arg: { type: "variable-reference", name: "fistInput" } },
+				{ type: "text", value: " and " },
+				{ type: "expression", arg: { type: "variable-reference", name: "secondInput" } },
+			],
+		},
+		{
+			id: "2",
+			messageId: "some_message",
+			matches: [
+				{ type: "catchall-match", key: "fistInput" },
+				{ type: "catchall-match", key: "secondInput" },
+			],
+			pattern: [{ type: "text", value: "Catch all" }],
+		},
+	]
 
-	expect(compiled.typeRestrictions).toEqual({
-		fistInput: "number",
-		"second Input": "number",
-	})
-	expect(compiled.code).toMatchInlineSnapshot(`
-			"/**
-			 * @param {{ fistInput: number, 'second Input': number }} inputs
-			 * @returns {string}
-			 */
-			/* @__NO_SIDE_EFFECTS__ */
-			export const some_message = (inputs) => {
-				const selectors = [ inputs.fistInput, registry.plural("en", inputs['second Input']) ]
-					if (selectors[0] == "1" && selectors[1] == "2") return \`One\${registry.number("en", inputs.fistInput)}\`
-				return \`Many\`
-			}"
-		`)
+	const compiled = compileMessage(declarations, message, variants, DEFAULT_REGISTRY)
+
+	const { some_message } = await import("data:text/javascript;base64," + btoa(compiled.code))
+
+	expect(some_message({ fistInput: 1, secondInput: 2 })).toBe("The inputs are 1 and 2")
+	expect(some_message({ fistInput: 3, secondInput: 4 })).toBe("Catch all")
+	expect(some_message({ fistInput: 1, secondInput: 5 })).toBe("Catch all")
 })

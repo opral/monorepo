@@ -6,6 +6,7 @@ import {
 	isInSimulatedCurrentBranch,
 	resolveConflictBySelecting,
 } from "@lix-js/sdk";
+import { contentFromDatabase } from "sqlite-wasm-kysely";
 
 test("it should resolve a conflict with the selected change", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
@@ -28,9 +29,6 @@ test("it should resolve a conflict with the selected change", async () => {
 				type: "bundle",
 				value: {
 					id: "even_hour_mule_drum",
-					alias: {
-						default: "title",
-					},
 				},
 				created_at: "2024-08-28 20:58:04",
 			},
@@ -45,7 +43,6 @@ test("it should resolve a conflict with the selected change", async () => {
 					id: "c2684c3d-3e14-47e4-96b7-8d33579bb7e9",
 					bundleId: "even_hour_mule_drum",
 					locale: "en",
-					declarations: [],
 					selectors: [],
 				},
 				created_at: "2024-08-28 20:58:04",
@@ -122,6 +119,25 @@ test("it should resolve a conflict with the selected change", async () => {
 		.returningAll()
 		.execute();
 
+	// ---------------
+	// Todo inlang sdk should auto write file to lix and differ must be
+	// fault tolerant. without this code, the differ captures an old
+	// change again
+
+	for (const change of changes) {
+		await project.db
+			.insertInto(change.type as any)
+			.values(change.value as any)
+			.onConflict((c) => c.doNothing())
+			.execute();
+	}
+	await project.lix.db
+		.updateTable("file_internal")
+		.set({ data: contentFromDatabase(project._sqlite) })
+		.where("path", "=", "/db.sqlite")
+		.execute();
+	// ---------------
+
 	const conflicts = await project.lix.db
 		.insertInto("conflict")
 		.values([
@@ -133,6 +149,19 @@ test("it should resolve a conflict with the selected change", async () => {
 		])
 		.returningAll()
 		.execute();
+
+	const changesInCurrentBranchBefore = await project.lix.db
+		.selectFrom("change")
+		.selectAll()
+		.where(isInSimulatedCurrentBranch)
+		.execute();
+
+	expect(changesInCurrentBranchBefore.map((c) => c.id)).toEqual([
+		changes[0]?.id,
+		changes[1]?.id,
+		changes[2]?.id,
+		"samuels-change",
+	]);
 
 	await resolveConflictBySelecting({
 		lix: project.lix,

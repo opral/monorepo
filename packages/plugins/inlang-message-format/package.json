@@ -3,6 +3,7 @@
 	"version": "2.2.0",
 	"type": "module",
 	"exports": {
+		".": "./dist/index.js",
 		"./file-schema": "./src/fileSchema.ts"
 	},
 	"files": [

@@ -1,4 +1,4 @@
-import { loadProjectFromDirectoryInMemory, type InlangProject } from "@inlang/sdk2"
+import { loadProjectFromDirectory, type InlangProject } from "@inlang/sdk2"
 import type { Logger } from "~/services/logger/index.js"
 import type { CliStep } from "../utils.js"
 import { prompt } from "~/cli/utils.js"
@@ -6,12 +6,11 @@ import { DEFAULT_PROJECT_PATH, getNewProjectTemplate } from "~/cli/defaults.js"
 import nodePath from "node:path"
 import consola from "consola"
 import dedent from "dedent"
-import type { NodeishFilesystem } from "~/services/file-handling/types.js"
 import fg from "fast-glob"
 import fs from "node:fs"
 
 export const initializeInlangProject: CliStep<
-	{ fs: NodeishFilesystem; logger: Logger; root: string; appId: string },
+	{ fs: typeof fs.promises; syncFs: typeof fs; logger: Logger; root: string; appId: string },
 	{
 		project: InlangProject
 		/** Relative path to the project */
@@ -74,7 +73,7 @@ export const existingProjectFlow = async (ctx: {
 	if (selection === NEW_PROJECT_VALUE) return createNewProjectFlow(ctx)
 
 	const projectPath = selection
-	const project = await loadProjectFromDirectoryInMemory({
+	const project = await loadProjectFromDirectory({
 		path: projectPath,
 		fs: ctx.syncFs,
 		// appId: ctx.appId,
@@ -201,10 +200,10 @@ export const createNewProjectFlow = async (ctx: {
 		JSON.stringify(settings, undefined, 2)
 	)
 
-	const project = await loadProjectFromDirectoryInMemory({
+	const project = await loadProjectFromDirectory({
 		path: projectPath,
 		fs: ctx.syncFs,
-		// appId: ctx.appId,
+		appId: ctx.appId,
 	})
 
 	if ((await project.errors.get()).length > 0) {

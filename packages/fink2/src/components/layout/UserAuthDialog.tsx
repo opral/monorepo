@@ -36,6 +36,7 @@ const UserAuthDialog = (props: {
         className="rounded-lg pb-8"
       />
       <SlInput
+        autoFocus
         label="Username"
         placeholder="Max Mustermann"
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

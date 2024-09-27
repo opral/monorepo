@@ -38,6 +38,7 @@ export const CreateProjectDialog = (props: {
       onSlRequestClose={() => props.setShowNewProjectDialog(false)}
     >
       <SlInput
+        autoFocus
         label="Filename"
         helpText={
           fileName

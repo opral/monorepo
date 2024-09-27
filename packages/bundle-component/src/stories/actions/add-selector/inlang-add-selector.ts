@@ -192,6 +192,9 @@ export default class InlangAddSelector extends LitElement {
 	@state()
 	private _matchers: string[] | undefined
 
+	@state()
+	private _oldDeclarations: Declaration[] | undefined
+
 	private _getPluralCategories = (): string[] | undefined => {
 		return this.message?.locale
 			? [...new Intl.PluralRules(this.message.locale).resolvedOptions().pluralCategories, "*"]
@@ -321,8 +324,17 @@ export default class InlangAddSelector extends LitElement {
 	}
 
 	override updated(changedProperties: Map<string, any>) {
-		if (changedProperties.has("bundle")) {
+		if (
+			changedProperties.has("bundle") &&
+			JSON.stringify(this.bundle.declarations) !== JSON.stringify(this._oldDeclarations)
+		) {
+			//check if bundle.declarations has changed
+			this._oldDeclarations = this.bundle.declarations
 			this._variable = this._getAvailablevariables()?.[0]
+		}
+		if (changedProperties.has("message")) {
+			//check if message has changed
+			this._matchers = this._getPluralCategories() || ["*"]
 		}
 	}
 

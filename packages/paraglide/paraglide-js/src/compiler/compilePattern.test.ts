@@ -15,16 +15,16 @@ it("should compile a pattern with multiple VariableReference's", () => {
 		{
 			type: "expression",
 			arg: {
-				type: "variable",
+				type: "variable-reference",
 				name: "name",
 			},
 		},
 		{ type: "text", value: "! You have " },
-		{ type: "expression", arg: { type: "variable", name: "count" } },
+		{ type: "expression", arg: { type: "variable-reference", name: "count" } },
 		{ type: "text", value: " messages." },
 	]
 	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY)
-	expect(code).toBe("`Hello ${inputs.name}! You have ${inputs.count} messages.`")
+	expect(code).toBe("`Hello ${i.name}! You have ${i.count} messages.`")
 })
 
 it("should escape backticks", () => {
@@ -54,13 +54,13 @@ it("should escape variable interpolation ( ${} )", () => {
 it("should compile a pattern with multiple VariableReference's", () => {
 	const pattern: Pattern = [
 		{ type: "text", value: "Hello " },
-		{ type: "expression", arg: { type: "variable", name: "name" } },
+		{ type: "expression", arg: { type: "variable-reference", name: "name" } },
 		{ type: "text", value: "! You have " },
-		{ type: "expression", arg: { type: "variable", name: "count" } },
+		{ type: "expression", arg: { type: "variable-reference", name: "count" } },
 		{ type: "text", value: " messages." },
 	]
 	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY)
-	expect(code).toBe("`Hello ${inputs.name}! You have ${inputs.count} messages.`")
+	expect(code).toBe("`Hello ${i.name}! You have ${i.count} messages.`")
 })
 
 it("should compile a pattern with a variableReference that isn't a valid JS identifier", () => {
@@ -68,12 +68,9 @@ it("should compile a pattern with a variableReference that isn't a valid JS iden
 		{ type: "text", value: "Hello " },
 		{
 			type: "expression",
-			arg: {
-				type: "variable",
-				name: "000",
-			},
+			arg: { type: "variable-reference", name: "000" },
 		},
 	]
 	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY)
-	expect(code).toBe("`Hello ${inputs['000']}`")
+	expect(code).toBe("`Hello ${i['000']}`")
 })
