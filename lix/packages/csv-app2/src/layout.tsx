@@ -171,17 +171,20 @@ export default function Layout(props: {
 								Discover SDK
 							</SlButton>
 						</SlTooltip>
-						{authorName === "Nils" && !isProjectSynced && (
-							<SlTooltip content="Press to share with your team">
-								<SlButton
-									size="small"
-									variant="default"
-									onClick={() => handleShare()}
-								>
-									Share
-								</SlButton>
-							</SlTooltip>
-						)}
+						{
+							// authorName === "Nils" &&
+							!isProjectSynced && (
+								<SlTooltip content="Press to share with your team">
+									<SlButton
+										size="small"
+										variant="default"
+										onClick={() => handleShare()}
+									>
+										Share
+									</SlButton>
+								</SlTooltip>
+							)
+						}
 						{isProjectSynced && (
 							<SlTag>
 								<div className="flex gap-2 items-center">
