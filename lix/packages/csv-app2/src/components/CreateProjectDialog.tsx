@@ -60,7 +60,7 @@ export const CreateProjectDialog = (props: {
 		setLoading(false);
 		props.setShowNewProjectDialog(false);
 
-		navigate("/editor");
+		navigate("/editor?project=" + projectId);
 	};
 
 	return (
