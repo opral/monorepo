@@ -6,12 +6,14 @@ import type { LixDatabaseSchema } from "./schema.js";
 
 export function initDb(args: { sqlite: SqliteDatabase }) {
 	initDefaultValueFunctions({ sqlite: args.sqlite });
+	
 	const db = new Kysely<LixDatabaseSchema>({
 		dialect: createDialect({
 			database: args.sqlite,
 		}),
 		plugins: [new ParseJSONResultsPlugin(), new SerializeJsonPlugin()],
 	});
+	
 	return db;
 }
 

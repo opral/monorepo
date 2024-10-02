@@ -4,7 +4,6 @@ import { atom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import Papa from "papaparse";
 // import { jsonObjectFrom } from "kysely/helpers/sqlite";
-import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
 import { plugin } from "./csv-plugin.js";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { generateColor } from "./helper/gernerateUserColor/generateUserColor.ts";
@@ -402,7 +401,6 @@ export const uniqueColumnAtom = atom<Promise<string>>(async (get) => {
 // 		.where("commit_id", "is not", null)
 // 		// TODO remove after sequence concept on lix
 // 		// https://linear.app/opral/issue/LIX-126/branching
-// 		.where(isInSimulatedCurrentBranch)
 // 		.innerJoin("commit", "commit.id", "change.commit_id")
 // 		.orderBy("commit.created_at desc")
 // 		.execute();

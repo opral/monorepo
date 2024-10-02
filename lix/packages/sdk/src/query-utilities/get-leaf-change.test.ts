@@ -41,6 +41,33 @@ test("it should find the latest child of a given change", async () => {
 		},
 	];
 
+	const currentBranch = await lix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
+
+	await lix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentBranch.id,
+				change_id: "1",
+				seq: 1,
+			},
+			{
+				branch_id: currentBranch.id,
+				change_id: "2",
+				seq: 2,
+			},
+			{
+				branch_id: currentBranch.id,
+				change_id: "3",
+				seq: 3,
+			},
+		])
+		.execute();
+
 	await lix.db.insertInto("change").values(mockChanges).executeTakeFirst();
 
 	const leafOfChange01 = await getLeafChange({

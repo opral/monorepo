@@ -3,7 +3,7 @@ import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import { merge } from "./merge.js";
-import type { NewChange, NewCommit, NewConflict } from "../database/schema.js";
+import type { NewChange, NewConflict } from "../database/schema.js";
 import type { LixPlugin } from "../plugin.js";
 
 test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
@@ -49,17 +49,60 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		providePlugins: [mockPlugin],
 	});
 
+	const currentSourceBranch = await sourceLix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
+
 	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
+	const currentTargetBranch = await targetLix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
 
 	await sourceLix.db
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[1]!, mockChanges[2]!])
 		.execute();
 
+	await sourceLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: mockChanges[0]!.id,
+				seq: 1,
+			},
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: mockChanges[1]!.id,
+				seq: 2,
+			},
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: mockChanges[2]!.id,
+				seq: 3,
+			},
+		])
+		.execute();
+
 	await targetLix.db.insertInto("change").values([mockChanges[0]!]).execute();
+
+	await targetLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: mockChanges[0]!.id,
+				seq: 1,
+			},
+		])
+		.execute();
 
 	await targetLix.db
 		.insertInto("file")
@@ -134,20 +177,61 @@ test("it should save change conflicts", async () => {
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
+	const currentSourceBranch = await sourceLix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
 
 	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
+	const currentTargetBranch = await targetLix.db
+		.selectFrom("branch")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	await sourceLix.db
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[2]!])
 		.execute();
 
+	await sourceLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: mockChanges[0]!.id,
+				seq: 1,
+			},
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: mockChanges[2]!.id,
+				seq: 2,
+			},
+		])
+		.execute();
+
 	await targetLix.db
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[1]!])
+		.execute();
+
+	await targetLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: mockChanges[0]!.id,
+				seq: 1,
+			},
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: mockChanges[1]!.id,
+				seq: 2,
+			},
+		])
 		.execute();
 
 	await targetLix.db
@@ -221,20 +305,57 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 		blob: await newLixFile(),
 		providePlugins: [mockPluginInSourceLix],
 	});
+	const currentSourceBranch = await sourceLix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPluginInTargetLix],
 	});
+	const currentTargetBranch = await targetLix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	await sourceLix.db
 		.insertInto("change")
 		.values([...commonChanges, ...changesOnlyInSourceLix])
 		.execute();
 
+	await sourceLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: commonChanges[0]!.id,
+				seq: 1,
+			},
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: changesOnlyInSourceLix[0]!.id,
+				seq: 2,
+			},
+		])
+		.execute();
+
 	await targetLix.db
 		.insertInto("change")
 		.values([...commonChanges, ...changesOnlyInTargetLix])
+		.execute();
+
+	await targetLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: commonChanges[0]!.id,
+				seq: 1,
+			},
+		])
 		.execute();
 
 	await targetLix.db
@@ -300,18 +421,54 @@ test("it should apply changes that are not conflicting", async () => {
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
+	const currentSourceBranch = await sourceLix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
+	const currentTargetBranch = await targetLix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	await sourceLix.db
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.execute();
 
+	await sourceLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: mockChanges[0]!.id,
+				seq: 1,
+			},
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: mockChanges[1]!.id,
+				seq: 2,
+			},
+		])
+		.execute();
+
 	await targetLix.db.insertInto("change").values([mockChanges[0]!]).execute();
+	await targetLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: mockChanges[0]!.id,
+				seq: 1,
+			},
+		])
+		.execute();
 
 	await targetLix.db
 		.insertInto("file")
@@ -387,20 +544,57 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
+	const currentSourceBranch = await sourceLix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
+	const currentTargetBranch = await targetLix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	await sourceLix.db
 		.insertInto("change")
 		.values([...commonChanges, ...changesOnlyInSourceLix])
 		.execute();
 
+	await sourceLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: commonChanges[0]!.id,
+				seq: 1,
+			},
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: changesOnlyInSourceLix[0]!.id,
+				seq: 2,
+			},
+		])
+		.execute();
+
 	await targetLix.db
 		.insertInto("change")
 		.values([...commonChanges, ...changesOnlyInTargetLix])
+		.execute();
+
+	await targetLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: commonChanges[0]!.id,
+				seq: 1,
+			},
+		])
 		.execute();
 
 	await targetLix.db
@@ -445,19 +639,10 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 		{
 			id: "2",
 			operation: "update",
-			commit_id: "commit-1",
 			type: "mock",
 			value: { id: "mock-id", color: "blue" },
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
-		},
-	];
-
-	const commitsOnlyInSourceLix: NewCommit[] = [
-		{
-			id: "commit-1",
-			description: "",
-			parent_id: "0",
 		},
 	];
 
@@ -475,11 +660,21 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
+	const currentSourceBranch = await sourceLix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
+	const currentTargetBranch = await targetLix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	await targetLix.db
 		.insertInto("file")
@@ -490,20 +685,22 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 		.insertInto("change")
 		.values(changesOnlyInSourceLix)
 		.execute();
-
 	await sourceLix.db
-		.insertInto("commit")
-		.values(commitsOnlyInSourceLix)
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: changesOnlyInSourceLix[0]!.id,
+				seq: 1,
+			},
+		])
 		.execute();
 
 	await merge({ sourceLix, targetLix });
 
 	const changes = await targetLix.db.selectFrom("change").selectAll().execute();
-	const commits = await targetLix.db.selectFrom("commit").selectAll().execute();
 
 	expect(changes.length).toBe(1);
-	expect(commits.length).toBe(1);
-	expect(changes[0]?.commit_id).toBe("commit-1");
 });
 
 test("it should copy discussion and related comments and mappings", async () => {
@@ -583,7 +780,6 @@ test("it should copy discussion and related comments and mappings", async () => 
 				text: "inserted text",
 			},
 			meta: null,
-			commit_id: null,
 			operation: "create",
 		},
 	]);

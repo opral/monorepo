@@ -1,11 +1,12 @@
 import type { LixPlugin } from "../plugin.js";
-import { commit } from "../commit.js";
 import { createDiscussion } from "../discussion/create-discussion.js";
 import { addComment } from "../discussion/add-comment.js";
 import { handleFileChange, handleFileInsert } from "../file-handlers.js";
 import { loadPlugins } from "../load-plugin.js";
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
+import { createBranch } from "../branch/create.js";
+import { switchBranch } from "../branch/switch.js";
 
 // TODO: fix in fink to not use time ordering!
 // .orderBy("commit.created desc")
@@ -156,7 +157,7 @@ export async function openLix(args: {
 		await pending;
 	}
 
-	return {
+	const lix = {
 		db,
 		settled,
 		currentAuthor: {
@@ -177,9 +178,6 @@ export async function openLix(args: {
 			args.database.close();
 			await db.destroy();
 		},
-		commit: (args: { description: string }) => {
-			return commit({ ...args, db, currentAuthor });
-		},
 		createDiscussion: (args: { changeIds?: string[]; body: string }) => {
 			if (currentAuthor === undefined) {
 				throw new Error("current author not set");
@@ -196,7 +194,21 @@ export async function openLix(args: {
 			}
 			return addComment({ ...args, db, currentAuthor });
 		},
+		createBranch: ({ branchId, name }: { branchId?: string; name: string }) =>
+			createBranch({
+				db,
+				name,
+				branchId,
+			}),
+		switchBranch: ({ branchId }: { branchId: string }) =>
+			switchBranch({
+				db,
+				plugins: plugins,
+				branchId: branchId,
+			}),
 	};
+
+	return lix;
 }
 
 // // TODO register on behalf of apps or leave it up to every app?
@@ -205,7 +217,7 @@ export async function openLix(args: {
 // 	for (const plugin of plugins) {
 // 		for (const type in plugin.diffComponent) {
 // 			const component = plugin.diffComponent[type]?.()
-// 			const name = "lix-plugin-" + plugin.key + "-diff-" + type
+// 			const named = "lix-plugin-" + plugin.key + "-diff-" + type
 // 			if (customElements.get(name) === undefined) {
 // 				// @ts-ignore
 // 				customElements.define(name, component)

@@ -50,6 +50,12 @@ test("it should throw if the to be resolved with change already exists", async (
 		providePlugins: [mockPlugin],
 	});
 
+	const currentBranch = await lix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	await lix.db
 		.insertInto("file")
 		.values({ id: "mock", path: "mock", data: new Uint8Array() })
@@ -61,11 +67,28 @@ test("it should throw if the to be resolved with change already exists", async (
 		.returningAll()
 		.execute();
 
+	await lix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				change_id: changes[0]!.id,
+				branch_id: currentBranch.id,
+				seq: 0,
+			},
+			{
+				change_id: changes[1]!.id,
+				branch_id: currentBranch.id,
+				seq: 1,
+			},
+		])
+		.execute();
+
 	const conflict = await lix.db
 		.insertInto("conflict")
 		.values({
 			change_id: changes[0]!.id,
 			conflicting_change_id: changes[1]!.id,
+			branch_id: currentBranch!.id,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -121,6 +144,12 @@ test("resolving a conflict should throw if the to be resolved with change is not
 		providePlugins: [mockPlugin],
 	});
 
+	const currentBranch = await lix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	await lix.db
 		.insertInto("file")
 		.values({ id: "mock", path: "mock", data: new Uint8Array() })
@@ -132,11 +161,28 @@ test("resolving a conflict should throw if the to be resolved with change is not
 		.returningAll()
 		.execute();
 
+	await lix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				change_id: changes[0]!.id,
+				branch_id: currentBranch.id,
+				seq: 0,
+			},
+			{
+				change_id: changes[1]!.id,
+				branch_id: currentBranch.id,
+				seq: 1,
+			},
+		])
+		.execute();
+
 	const conflict = await lix.db
 		.insertInto("conflict")
 		.values({
 			change_id: changes[0]!.id,
 			conflicting_change_id: changes[1]!.id,
+			branch_id: currentBranch.id,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -198,6 +244,12 @@ test("resolving a conflict should throw if the change to resolve with does not b
 		providePlugins: [mockPlugin],
 	});
 
+	const currentBranch = await lix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	await lix.db
 		.insertInto("file")
 		.values({ id: "mock", path: "mock", data: new Uint8Array() })
@@ -209,11 +261,28 @@ test("resolving a conflict should throw if the change to resolve with does not b
 		.returningAll()
 		.execute();
 
+	await lix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				change_id: changes[0]!.id,
+				branch_id: currentBranch.id,
+				seq: 0,
+			},
+			{
+				change_id: changes[1]!.id,
+				branch_id: currentBranch.id,
+				seq: 1,
+			},
+		])
+		.execute();
+
 	const conflict = await lix.db
 		.insertInto("conflict")
 		.values({
 			change_id: changes[0]!.id,
 			conflicting_change_id: changes[1]!.id,
+			branch_id: currentBranch.id,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -274,6 +343,12 @@ test("resolving a conflict with a new change should insert the change and mark t
 		providePlugins: [mockPlugin],
 	});
 
+	const currentBranch = await lix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	await lix.db
 		.insertInto("file")
 		.values({ id: "mock", path: "mock", data: new Uint8Array() })
@@ -285,11 +360,28 @@ test("resolving a conflict with a new change should insert the change and mark t
 		.returningAll()
 		.execute();
 
+	await lix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				change_id: changes[0]!.id,
+				branch_id: currentBranch.id,
+				seq: 0,
+			},
+			{
+				change_id: changes[1]!.id,
+				branch_id: currentBranch.id,
+				seq: 1,
+			},
+		])
+		.execute();
+
 	const conflict = await lix.db
 		.insertInto("conflict")
 		.values({
 			change_id: changes[0]!.id,
 			conflicting_change_id: changes[1]!.id,
+			branch_id: currentBranch.id,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

@@ -1,15 +1,26 @@
-/* eslint-disable unicorn/no-null */
-import { expect, test, vi } from "vitest";
-import { openLixInMemory } from "./open/openLixInMemory.js";
-import { newLixFile } from "./newLix.js";
-import type { DiffReport, LixPlugin } from "./plugin.js";
+import { expect, test } from "vitest";
+import { openLixInMemory } from "../open/openLixInMemory.js";
+import type { LixPlugin } from "../plugin.js";
+import { newLixFile } from "../newLix.js";
 
-test("should use queue and settled correctly", async () => {
+test("should use branches correctly", async () => {
 	const mockPlugin: LixPlugin<{
 		text: { id: string; text: string };
 	}> = {
 		key: "mock-plugin",
 		glob: "*",
+		applyChanges: async ({ file, lix, changes }) => {
+			const enc = new TextEncoder();
+			if (changes.length > 1) {
+				throw new Error("cannot apply more than one change per text file");
+			}
+
+			// console.log(JSON.stringify({ changes }, null, 4));
+
+			return {
+				fileData: enc.encode(changes[0]?.value!.text),
+			};
+		},
 		diff: {
 			file: async ({ old, neu }) => {
 				const dec = new TextDecoder();
@@ -37,7 +48,6 @@ test("should use queue and settled correctly", async () => {
 				});
 			},
 			text: async ({ old, neu }) => {
-				// console.log("text", old, neu);
 				if (old?.text === neu?.text) {
 					return [];
 				}
@@ -86,6 +96,25 @@ test("should use queue and settled correctly", async () => {
 		},
 	]);
 
+	await lix.createBranch({ branchId: "test_branch", name: "test_branch" });
+
+	const branches2 = await lix.db.selectFrom("branch").selectAll().execute();
+
+	expect(branches2).toEqual([
+		{
+			id: branches[0]?.id,
+			name: "main",
+			base_branch: null,
+			active: 1,
+		},
+		{
+			active: 0,
+			base_branch: branches[0]?.id,
+			id: branches2[1]!.id,
+			name: "test_branch",
+		},
+	]);
+
 	const enc = new TextEncoder();
 
 	await lix.db
@@ -93,43 +122,11 @@ test("should use queue and settled correctly", async () => {
 		.values({ id: "test", path: "test.txt", data: enc.encode("test orig") })
 		.execute();
 
-	const internalFiles = await lix.db
-		.selectFrom("file_internal")
-		.selectAll()
-		.execute();
-
-	expect(internalFiles).toEqual([]);
-
-	const queue = await lix.db.selectFrom("change_queue").selectAll().execute();
-
-	expect(queue).toEqual([
-		{
-			id: 1,
-			file_id: "test",
-			metadata: null,
-			path: "test.txt",
-			data: queue[0]?.data,
-		},
-	]);
 	await lix.settled();
 
 	expect(
 		(await lix.db.selectFrom("change_queue").selectAll().execute()).length,
 	).toBe(0);
-
-	const internalFilesAfter = await lix.db
-		.selectFrom("file_internal")
-		.selectAll()
-		.execute();
-
-	expect(internalFilesAfter).toEqual([
-		{
-			data: internalFilesAfter[0]?.data,
-			id: "test",
-			path: "test.txt",
-			metadata: null,
-		},
-	]);
 
 	const changes = await lix.db.selectFrom("change").selectAll().execute();
 
@@ -191,36 +188,36 @@ test("should use queue and settled correctly", async () => {
 		.where("id", "=", "test")
 		.execute();
 
-	const queue2 = await lix.db.selectFrom("change_queue").selectAll().execute();
-	expect(queue2).toEqual([
-		{
-			id: 3,
-			file_id: "test",
-			path: "test.txt",
-			metadata: null,
-			data: queue2[0]?.data,
-		},
-		{
-			id: 4,
-			file_id: "test",
-			path: "test.txt",
-			metadata: null,
-			data: queue2[1]?.data,
-		},
-		{
-			id: 5,
-			file_id: "test",
-			path: "test.txt",
-			metadata: null,
-			data: queue2[2]?.data,
-		},
-	]);
-
 	await lix.settled();
 
-	expect(
-		(await lix.db.selectFrom("change_queue").selectAll().execute()).length,
-	).toBe(0);
+	await lix.createBranch({ name: "test_branch_2", branchId: "test_branch_2" });
+
+	const branches3 = await lix.db
+		.selectFrom("branch")
+		.orderBy("name")
+		.selectAll()
+		.execute();
+
+	expect(branches3).toEqual([
+		{
+			id: branches[0]?.id,
+			name: "main",
+			base_branch: null,
+			active: 1,
+		},
+		{
+			active: 0,
+			base_branch: branches[0]?.id,
+			id: branches3[1]!.id,
+			name: "test_branch",
+		},
+		{
+			active: 0,
+			base_branch: branches[0]?.id,
+			id: branches3[2]!.id,
+			name: "test_branch_2",
+		},
+	]);
 
 	const updatedChanges = await lix.db
 		.selectFrom("change")
@@ -274,6 +271,7 @@ test("should use queue and settled correctly", async () => {
 
 	const branchChanges2 = await lix.db
 		.selectFrom("branch_change")
+		.orderBy(["branch_id", "seq"])
 		.selectAll()
 		.execute();
 
@@ -296,10 +294,28 @@ test("should use queue and settled correctly", async () => {
 			id: branchChanges2[2]?.id,
 			seq: 3,
 		},
+
+		{
+			branch_id: branches3[2]?.id,
+			change_id: updatedChanges[0]?.id,
+			id: branchChanges2[0]?.id,
+			seq: 1,
+		},
+		{
+			branch_id: branches3[2]?.id,
+			change_id: updatedChanges[1]?.id,
+			id: branchChanges2[1]?.id,
+			seq: 2,
+		},
+		{
+			branch_id: branches3[2]?.id,
+			change_id: updatedChanges[2]?.id,
+			id: branchChanges2[2]?.id,
+			seq: 3,
+		},
 	]);
 
 	// test change_view
-
 	const changesFromView = await lix.db
 		.selectFrom("change_view")
 		.where("branch_id", "=", branches[0]!.id)
@@ -351,78 +367,94 @@ test("should use queue and settled correctly", async () => {
 		},
 	]);
 
-		
-});
+	await lix.db
+		.updateTable("file")
+		.set({ data: enc.encode("test updated text  xyz") })
+		.where("id", "=", "test")
+		.execute();
 
-test("changes should contain the author", async () => {
-	const mockPlugin: LixPlugin = {
-		key: "mock-plugin",
-		glob: "*",
-		diff: {
-			file: vi.fn().mockResolvedValue([
-				{
-					type: "mock",
-					operation: "create",
-					old: undefined,
-					neu: {} as any,
-				},
-			] satisfies DiffReport[]),
+	await lix.settled();
+
+	const branchChanges3 = await lix.db
+		.selectFrom("branch_change")
+		.orderBy(["branch_id", "seq"])
+		.selectAll()
+		.execute();
+
+	expect(branchChanges3).toEqual([
+		{
+			branch_id: branches[0]?.id,
+			change_id: updatedChanges[0]?.id,
+			id: branchChanges2[0]?.id,
+			seq: 1,
 		},
-	};
-	const lix = await openLixInMemory({
-		blob: await newLixFile(),
-		providePlugins: [mockPlugin],
-	});
+		{
+			branch_id: branches[0]?.id,
+			change_id: updatedChanges[1]?.id,
+			id: branchChanges2[1]?.id,
+			seq: 2,
+		},
+		{
+			branch_id: branches[0]?.id,
+			change_id: updatedChanges[2]?.id,
+			id: branchChanges2[2]?.id,
+			seq: 3,
+		},
 
-	await lix.currentAuthor.set("some-id");
+		{
+			branch_id: branches[0]?.id,
+			change_id: branchChanges3[3]?.change_id,
+			id: branchChanges3[3]?.id,
+			seq: 4,
+		},
 
-	// testing an insert
+		{
+			branch_id: branches3[2]?.id,
+			change_id: updatedChanges[0]?.id,
+			id: branchChanges2[0]?.id,
+			seq: 1,
+		},
+		{
+			branch_id: branches3[2]?.id,
+			change_id: updatedChanges[1]?.id,
+			id: branchChanges2[1]?.id,
+			seq: 2,
+		},
+		{
+			branch_id: branches3[2]?.id,
+			change_id: updatedChanges[2]?.id,
+			id: branchChanges2[2]?.id,
+			seq: 3,
+		},
+	]);
 
-	await lix.db
-		.insertInto("file")
-		.values({
-			id: "mock",
-			data: new Uint8Array(),
-			path: "/mock-file.json",
-		})
-		.execute();
+	const newBranch = await lix.db
+		.selectFrom("branch")
+		.where("name", "=", "test_branch_2")
+		.select("id")
+		.executeTakeFirstOrThrow();
 
-	await lix.settled();
-
-	const changes1 = await lix.db.selectFrom("change").selectAll().execute();
-
-	expect(changes1[0]?.author).toBe("some-id");
-
-	// testing an update
-
-	await lix.db
-		.updateTable("file")
-		.set({
-			data: new Uint8Array(),
-		})
-		.where("id", "=", "mock")
-		.execute();
-
-	await lix.settled();
-
-	const changes2 = await lix.db.selectFrom("change").selectAll().execute();
-
-	expect(changes2[1]?.author).toBe("some-id");
-
-	// testing setting the author
-	await lix.currentAuthor.set("some-other-id");
-
-	await lix.db
-		.updateTable("file")
-		.set({
-			data: new Uint8Array(),
-		})
-		.where("id", "=", "mock")
-		.execute();
+	await lix.switchBranch({ branchId: newBranch.id });
 
 	await lix.settled();
 
-	const changes3 = await lix.db.selectFrom("change").selectAll().execute();
+	const afterSwitchBranch = await lix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
 
-	expect(changes3.at(-1)?.author).toBe("some-other-id");
+	const afterSwitchContent = await lix.db
+		.selectFrom("file")
+		.selectAll()
+		.where("path", "=", "test.txt")
+		.executeTakeFirstOrThrow();
+
+	expect(afterSwitchBranch.name).toEqual("test_branch_2");
+
+	const dec = new TextDecoder();
+
+	expect(dec.decode(afterSwitchContent.data)).toEqual(
+		"test updated text second update",
+	);
 });

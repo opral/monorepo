@@ -46,6 +46,12 @@ test("it should resolve a conflict by applying the change and marking the confli
 		providePlugins: [mockPlugin],
 	});
 
+	const currentBranch = await lix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirst();
+
 	await lix.db
 		.insertInto("file")
 		.values({ id: "mock", path: "mock", data: new Uint8Array() })
@@ -57,11 +63,23 @@ test("it should resolve a conflict by applying the change and marking the confli
 		.returningAll()
 		.execute();
 
+	await lix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				seq: 1,
+				branch_id: currentBranch!.id,
+				change_id: changes[0]!.id,
+			},
+		])
+		.execute();
+
 	const conflict = await lix.db
 		.insertInto("conflict")
 		.values({
 			change_id: changes[0]!.id,
 			conflicting_change_id: changes[1]!.id,
+			branch_id: currentBranch!.id,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -96,6 +114,7 @@ test("it should throw if the change id does not belong to the conflict", async (
 		resolveConflictBySelecting({
 			lix: {} as any,
 			conflict: {
+				branch_id: "my-branch",
 				change_id: "change1",
 				conflicting_change_id: "change2",
 				meta: undefined,

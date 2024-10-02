@@ -10,19 +10,38 @@ export async function getLeafChange(args: {
 	const _true = true;
 
 	let nextChange = args.change;
+	const currentBranch = await args.lix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", _true)
+		.executeTakeFirstOrThrow();
 
 	while (_true) {
 		const childChange = await args.lix.db
-			.selectFrom("change")
+			.selectFrom("branch_change")
+			.fullJoin("change", "branch_change.change_id", "change.id")
 			.selectAll()
-			.where("parent_id", "=", nextChange.id)
+			.select([
+				"author",
+				"change.id as id",
+				"change.parent_id as parent_id",
+				"type",
+				"file_id",
+				"plugin_key",
+				"operation",
+				"value",
+				"meta",
+				"created_at",
+			])
+			.where("branch_id", "=", currentBranch.id)
+			.where("change.parent_id", "=", nextChange?.id)
 			.executeTakeFirst();
 
 		if (!childChange) {
 			break;
 		}
 
-		nextChange = childChange;
+		nextChange = childChange as Change;
 	}
 
 	return nextChange;
