@@ -12,7 +12,7 @@ import {
 	SlInput,
 } from "@shoelace-style/shoelace/dist/react";
 import DiffBundleView from "../../components/DiffBundleView.tsx";
-import { BundleNested } from "@inlang/sdk2";
+import { BundleNested, humanId } from "@inlang/sdk2";
 import { useNavigate } from "react-router-dom";
 
 export default function App() {
@@ -24,6 +24,13 @@ export default function App() {
 	const navigate = useNavigate();
 
 	const handleCommit = async () => {
+		for (const change of groupedPendingChanges) {
+			await project?.lix.db
+				.updateTable("change")
+				.where("id", "=", change.id)
+				.set("meta", { ...change.meta, tag: "confirmed", change_set: humanId() })
+				.executeTakeFirst();
+		}
 		await project?.lix.commit({
 			description: commitDescription,
 		});
@@ -66,7 +73,7 @@ export default function App() {
 									setShowDialog(true);
 								}}
 							>
-								Commit changes
+								Confirm changes
 							</SlButton>
 							<SlDialog
 								label="Add commit details"
@@ -92,7 +99,7 @@ export default function App() {
 									</div>
 									<div className="mt-6 flex justify-end">
 										<SlButton variant="primary" slot="footer" type="submit">
-											Commit changes
+											Confirm changes
 										</SlButton>
 									</div>
 								</form>

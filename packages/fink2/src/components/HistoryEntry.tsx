@@ -63,6 +63,7 @@ const HistoryEntry = ({ commit }: { commit: any }) => {
 			className="flex flex-col cursor-pointer group"
 			onClick={() => setIsOpen(!isOpen)}
 		>
+			{/* <pre>{JSON.stringify(changeHistory, null, 2)}</pre> */}
 			<div className="flex gap-3 items-center">
 				<div className="w-5 h-5 bg-zinc-100 flex items-center justify-center rounded-full ml-4">
 					<div className="w-2 h-2 bg-zinc-700 rounded-full"></div>
