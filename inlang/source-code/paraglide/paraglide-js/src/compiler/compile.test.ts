@@ -283,7 +283,8 @@ describe("e2e", async () => {
 	})
 })
 
-test("types", async () => {
+// remove with v3 of paraglide js
+test("./runtime.js types", async () => {
 	const project = await typescriptProject({
 		useInMemoryFileSystem: true,
 		compilerOptions: {
@@ -304,7 +305,67 @@ test("types", async () => {
 	project.createSourceFile(
 		"test.ts",
 		`
-    import * as m from "./messages.js"
+    import * as runtime from "./runtime.js"
+
+    // --------- RUNTIME ---------
+
+    // getLocale() should return type should be a union of language tags, not a generic string
+    runtime.getLocale() satisfies "de" | "en" | "en-US"
+
+    // availableLocales should have a narrow type, not a generic string
+    runtime.locales satisfies Readonly<Array<"de" | "en" | "en-US">>
+
+    // setLocale() should fail if the given language tag is not included in availableLocales
+    // @ts-expect-error
+    runtime.setLocale("fr")
+
+    // setLocale() should not fail if the given language tag is included in availableLocales
+    runtime.setLocale("de")
+
+		// setting the locale as a getter function should be possible
+		runtime.setLocale(() => "en")
+
+		// isAvailableLocale should narrow the type of it's argument
+		const thing = 5;
+		if(runtime.isAvailableLocale(thing)) {
+			const a : "de" | "en" | "en-US" = thing
+		} else {
+			// @ts-expect-error - thing is not a language tag
+			const a : "de" | "en" | "en-US" = thing
+		}
+  `
+	)
+
+	const program = project.createProgram()
+	const diagnostics = ts.getPreEmitDiagnostics(program)
+	for (const diagnostic of diagnostics) {
+		console.error(diagnostic.messageText, diagnostic.file?.fileName)
+	}
+	expect(diagnostics.length).toEqual(0)
+})
+
+// remove with v3 of paraglide js
+test("./runtime.js (legacy) types", async () => {
+	const project = await typescriptProject({
+		useInMemoryFileSystem: true,
+		compilerOptions: {
+			outDir: "dist",
+			declaration: true,
+			allowJs: true,
+			checkJs: true,
+			module: ts.ModuleKind.Node16,
+			strict: true,
+		},
+	})
+
+	for (const [fileName, code] of Object.entries(output)) {
+		if (fileName.endsWith(".js")) {
+			project.createSourceFile(fileName, code)
+		}
+	}
+	project.createSourceFile(
+		"test.ts",
+		`
     import * as runtime from "./runtime.js"
 
     // --------- RUNTIME ---------
@@ -326,43 +387,75 @@ test("types", async () => {
     // languageTag should return type should be a union of language tags, not a generic string
     runtime.languageTag() satisfies "de" | "en" | "en-US"
 
-	// setting the language tag as a getter function should be possible
-	runtime.setLanguageTag(() => "en")
+		// setting the language tag as a getter function should be possible
+		runtime.setLanguageTag(() => "en")
 
-	// isAvailableLocale should narrow the type of it's argument
-	const thing = 5;
-	if(runtime.isAvailableLocale(thing)) {
-		const a : "de" | "en" | "en-US" = thing
-	} else {
-		// @ts-expect-error - thing is not a language tag
-		const a : "de" | "en" | "en-US" = thing
+		// isAvailableLocale should narrow the type of it's argument
+		const thing = 5;
+		if(runtime.isAvailableLocale(thing)) {
+			const a : "de" | "en" | "en-US" = thing
+		} else {
+			// @ts-expect-error - thing is not a language tag
+			const a : "de" | "en" | "en-US" = thing
+		}
+  `
+	)
+
+	const program = project.createProgram()
+	const diagnostics = ts.getPreEmitDiagnostics(program)
+	for (const diagnostic of diagnostics) {
+		console.error(diagnostic.messageText, diagnostic.file?.fileName)
 	}
+	expect(diagnostics.length).toEqual(0)
+})
+
+test("./messages.js types", async () => {
+	const project = await typescriptProject({
+		useInMemoryFileSystem: true,
+		compilerOptions: {
+			outDir: "dist",
+			declaration: true,
+			allowJs: true,
+			checkJs: true,
+			module: ts.ModuleKind.Node16,
+			strict: true,
+		},
+	})
+
+	for (const [fileName, code] of Object.entries(output)) {
+		if (fileName.endsWith(".js")) {
+			project.createSourceFile(fileName, code)
+		}
+	}
+	project.createSourceFile(
+		"test.ts",
+		`
+    import * as m from "./messages.js"
 
     // --------- MESSAGES ---------
 
     // the return value of a message should be a string
-    m.multipleParams({ name: "John", count: 5 }) satisfies string
+    m.insane_cats({ name: "John", count: 5 }) satisfies string
       
     // @ts-expect-error - missing all params
-    m.multipleParams()
+    m.insane_cats()
       
     // @ts-expect-error - one param missing
-    m.multipleParams({ name: "John" })
+    m.insane_cats({ name: "John" })
 
     // a message without params shouldn't require params
     m.sad_penguin_bundle() satisfies string
 
+		// --------- MESSAGE OPTIONS ---------
+		// the languageTag option should be optional
+		m.sad_penguin_bundle({}, {}) satisfies string
 
-	// --------- MESSAGE OPTIONS ---------
-	// the languageTag option should be optional
-	m.sad_penguin_bundle({}, {}) satisfies string
+		// the languageTag option should be allowed
+		m.sad_penguin_bundle({}, { languageTag: "en" }) satisfies string
 
-	// the languageTag option should be allowed
-	m.sad_penguin_bundle({}, { languageTag: "en" }) satisfies string
-
-	// the languageTag option must be a valid language tag
-	// @ts-expect-error - invalid language tag
-	m.sad_penguin_bundle({}, { languageTag: "---" })
+		// the languageTag option must be a valid language tag
+		// @ts-expect-error - invalid language tag
+		m.sad_penguin_bundle({}, { languageTag: "---" })
   `
 	)
 

@@ -32,9 +32,9 @@ export const locales = /** @type {const} */ (${JSON.stringify(args.locales)})
  * Get the current locale.
  * 
  * @example
- *   if (locale() === "de"){
+ *   if (getLocale() === "de"){
  *     console.log("Germany 🇩🇪")
- *   } else if (locale() === "nl"){
+ *   } else if (getLocale() === "nl"){
  *     console.log("Netherlands 🇳🇱")
  *   }
  * 
