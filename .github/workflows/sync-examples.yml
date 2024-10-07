@@ -1,13 +1,13 @@
 name: Sync Examples
 
 on:
-  push:
-    # Trigger if an example CHANGELOG is changed on main -> usually after a release
-    branches:
-      - "main"
-    paths:
-      - "**/example/CHANGELOG.md"
-      - "**/examples/*/CHANGELOG.md"
+  # push:
+  #   # Trigger if an example CHANGELOG is changed on main -> usually after a release
+  #   branches:
+  #     - "main"
+  #   paths:
+  #     - "**/example/CHANGELOG.md"
+  #     - "**/examples/*/CHANGELOG.md"
 
   workflow_dispatch:
 
