@@ -1,5 +1,12 @@
 # @inlang/paraglide-next-e2e
 
+## 0.0.27
+
+### Patch Changes
+
+- Updated dependencies [d42bc1a]
+  - @inlang/paraglide-next@0.6.0
+
 ## 0.0.26
 
 ### Patch Changes

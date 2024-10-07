@@ -1,5 +1,29 @@
 # @inlang/paraglide-sveltekit
 
+## 0.11.1
+
+### Patch Changes
+
+- f8565fa: Fixes https://github.com/opral/inlang-paraglide-js/issues/234.
+
+  Paraglide SvelteKit used the cookie name `paraglide:lang` which is
+  not compliant with rfc6265 standards for cookie names. SvelteKit
+  recently introduced strict cookie parsing which caused
+  `paraglide:lang` to be rejected.
+
+  The cookie name has been updated to `paraglide_lang` to be compliant.
+
+  ```diff
+  -paraglide:lang
+  +paraglide_lang
+  ```
+
+- Updated dependencies [e04d5fe]
+- Updated dependencies [a1ea1ff]
+- Updated dependencies [fa42a3a]
+  - @inlang/paraglide-js@1.11.3
+  - @inlang/paraglide-vite@1.2.75
+
 ## 0.11.0
 
 ### Minor Changes

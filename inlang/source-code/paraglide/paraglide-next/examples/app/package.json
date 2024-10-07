@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-next-example-app",
-	"version": "0.2.27",
+	"version": "0.2.28",
 	"private": true,
 	"scripts": {
 		"_dev": "next dev",

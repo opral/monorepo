@@ -1,5 +1,32 @@
 # @inlang/paraglide-next
 
+## 0.6.0
+
+### Minor Changes
+
+- d42bc1a: [Typed routes](https://nextjs.org/docs/app/api-reference/next-config-js/typedRoutes) are now supported. This adds typesafety to functions that expect an internal link.
+
+  - `<Link>`s now have typesafe `href` attributes
+  - `useRouter` now has has typesafe path arguments
+
+  ```ts
+  import { paraglide } from "@inlang/paraglide-next/plugin"
+
+  export default paraglide({
+  	experimental: {
+  		typedRoutes: true, // enable this
+  	},
+      paraglide: { ... },
+  })
+  ```
+
+### Patch Changes
+
+- Updated dependencies [e04d5fe]
+- Updated dependencies [a1ea1ff]
+- Updated dependencies [fa42a3a]
+  - @inlang/paraglide-js@1.11.3
+
 ## 0.5.2
 
 ### Patch Changes
