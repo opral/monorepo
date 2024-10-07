@@ -2,7 +2,7 @@
 export const NO_TRANSLATE_ATTRIBUTE = "data-no-translate"
 
 /** The key with which `invalidate` is called when the language changes */
-export const LANGUAGE_CHANGE_INVALIDATION_KEY = "paraglide:lang"
+export const LANGUAGE_CHANGE_INVALIDATION_KEY = "paraglide_lang"
 
 /** The name of the cookie in which the language is stored */
 export const LANG_COOKIE_NAME = "paraglide_lang"
