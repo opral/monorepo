@@ -1,18 +1,20 @@
-import type { ExportFile, Match, Message, Variant } from "@inlang/sdk2"
+import type { Bundle, Declaration, ExportFile, Match, Message, Variant } from "@inlang/sdk2"
 import { type plugin } from "../plugin.js"
 import type { FileSchema } from "../fileSchema.js"
 
 export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
+	bundles,
 	messages,
 	variants,
 }) => {
 	const files: Record<string, FileSchema> = {}
 
 	for (const message of messages) {
+		const bundle = bundles.find((b) => b.id === message.bundleId)
 		const variantsOfMessage = variants.filter((v) => v.messageId === message.id)
 		files[message.locale] = {
 			...files[message.locale],
-			...serializeMessage(message, variantsOfMessage),
+			...serializeMessage(bundle!, message, variantsOfMessage),
 		}
 	}
 
@@ -31,15 +33,20 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 }
 
 function serializeMessage(
+	bundle: Bundle,
 	message: Message,
 	variants: Variant[]
 ): Record<string, string | Record<string, string>> {
 	const key = message.bundleId
-	const value = serializeVariants(variants)
+	const value = serializeVariants(bundle, message, variants)
 	return { [key]: value }
 }
 
-function serializeVariants(variants: Variant[]): string | Record<string, string> {
+function serializeVariants(
+	bundle: Bundle,
+	message: Message,
+	variants: Variant[]
+): string | Record<string, any> {
 	// single variant
 	// todo add logic for handling if a variant has a match even if it's
 	// the only variant
@@ -55,6 +62,10 @@ function serializeVariants(variants: Variant[]): string | Record<string, string>
 	}
 
 	return {
+		// naively adding all declarations, even if unused in the variants
+		// can be optimized later.
+		declarations: bundle.declarations.map(serializeDeclaration),
+		selectors: message.selectors.map((s) => s.name),
 		match: Object.fromEntries(entries),
 	}
 }
@@ -86,4 +97,22 @@ function serializeMatcher(matches: Match[]): string {
 		}
 	}
 	return parts.join(", ")
+}
+
+function serializeDeclaration(declaration: Declaration): string {
+	if (declaration.type === "input-variable") {
+		return `input ${declaration.name}`
+	} else if (declaration.type === "local-variable") {
+		let result = ""
+		if (declaration.value.arg.type === "variable-reference") {
+			result = `local ${declaration.name} = ${declaration.value.arg.name}`
+		} else if (declaration.value.arg.type === "literal") {
+			result = `local ${declaration.name} = "${declaration.value.arg.value}"`
+		}
+		if (declaration.value.annotation) {
+			result += `: ${declaration.value.annotation.name}`
+		}
+		return result
+	}
+	throw new Error("Unsupported declaration type")
 }

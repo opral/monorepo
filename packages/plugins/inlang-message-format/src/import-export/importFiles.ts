@@ -6,8 +6,8 @@ import type {
 	Bundle,
 	Pattern,
 	Declaration,
-	Message,
 	VariableReference,
+	Message,
 } from "@inlang/sdk2"
 import { type plugin } from "../plugin.js"
 
@@ -84,7 +84,7 @@ function parseBundle(
 function parseVariants(
 	bundleId: string,
 	locale: string,
-	value: string | Record<string, string>
+	value: string | Record<string, string | string[]>
 ): {
 	variants: VariantImport[]
 	declarations: Declaration[]
@@ -102,31 +102,46 @@ function parseVariants(
 					pattern: parsed.pattern,
 				},
 			],
+			// legacy reasons that input variables are derived from the pattern
 			declarations: parsed.declarations,
 			selectors: [],
 		}
 	}
 	// multi variant
-	const declarations: Declaration[] = []
-	const selectors: VariableReference[] = []
 	const variants: VariantImport[] = []
+	const selectors: VariableReference[] = ((value["selectors"] as string[]) ?? []).map((name) => ({
+		type: "variable-reference",
+		name,
+	}))
+
+	const declarations = new Set<Declaration>()
+
+	for (const declaration of value["declarations"] ?? ([] as string[])) {
+		declarations.add(parseDeclaration(declaration))
+	}
+
+	const detectedSelectors = new Set<VariableReference>()
 
 	for (const [match, pattern] of Object.entries(value["match"] as string)) {
 		const parsed = parsePattern(pattern)
 		const parsedMatches = parseMatches(match)
+		for (const declaration of parsed.declarations) {
+			declarations.add(declaration)
+		}
+		for (const selector of parsedMatches.selectors) {
+			detectedSelectors.add(selector)
+		}
 		variants.push({
 			messageBundleId: bundleId,
 			messageLocale: locale,
 			matches: parsedMatches.matches,
 			pattern: parsed.pattern,
 		})
-		declarations.push(...parsed.declarations)
-		selectors.push(...parsedMatches.selectors)
 	}
 	return {
 		variants,
-		declarations,
-		selectors,
+		declarations: Array.from(declarations),
+		selectors: unique([...selectors, ...Array.from(detectedSelectors)]),
 	}
 }
 
@@ -202,3 +217,44 @@ function parseMatches(value: string): {
 
 const unique = (arr: Array<any>) =>
 	[...new Set(arr.map((item) => JSON.stringify(item)))].map((item) => JSON.parse(item))
+
+function parseDeclaration(value: string): Declaration {
+	if (value.startsWith("input")) {
+		return {
+			type: "input-variable",
+			name: value.slice(6).trim(),
+		}
+	}
+	// local countPlural = count : plural
+	else if (value.startsWith("local")) {
+		// ["countPlural", "count : plural"]
+		const [name, expression] = value.trim().slice(6).split("=")
+		if (name === undefined || expression === undefined) {
+			throw new Error("Local variable must have a name and an expression")
+		}
+		// ["count", "plural"]
+		const [refName, maybeFunctionName] = expression.split(":")
+		if (refName === undefined) {
+			throw new Error("Referenced variable name is undefined")
+		}
+		return {
+			type: "local-variable",
+			name: name.trim(),
+			value: {
+				type: "expression",
+				arg: {
+					type: "variable-reference",
+					name: refName.trim(),
+				},
+				annotation: maybeFunctionName
+					? {
+							type: "function-reference",
+							name: maybeFunctionName.trim(),
+							options: [],
+						}
+					: undefined,
+			},
+		}
+	}
+	throw new Error("Unsupported declaration type")
+}

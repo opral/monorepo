@@ -75,7 +75,7 @@ test("it removes the $schema property (to reduce inter-dependencies and the requ
 	})
 })
 
-test("it handles multi variant messages", async () => {
+test("it handles detecting and adding selectors and declarations for multi variant messages", async () => {
 	const imported = await runImportFiles({
 		some_happy_cat: {
 			match: {
@@ -87,17 +87,21 @@ test("it handles multi variant messages", async () => {
 			},
 		},
 	})
-	expect(await runExportFilesParsed(imported)).toStrictEqual({
-		some_happy_cat: {
-			match: {
-				"platform=android, userGender=male":
-					"{username} has to download the app on his phone from the Google Play Store.",
-				"platform=ios, userGender=female":
-					"{username} has to download the app on her iPhone from the App Store.",
-				"platform=*, userGender=*": "The person has to download the app.",
+	expect(await runExportFilesParsed(imported)).toStrictEqual(
+		expect.objectContaining({
+			some_happy_cat: {
+				declarations: ["input username", "input platform", "input userGender"],
+				selectors: ["platform", "userGender"],
+				match: {
+					"platform=android, userGender=male":
+						"{username} has to download the app on his phone from the Google Play Store.",
+					"platform=ios, userGender=female":
+						"{username} has to download the app on her iPhone from the App Store.",
+					"platform=*, userGender=*": "The person has to download the app.",
+				},
 			},
-		},
-	})
+		})
+	)
 
 	expect(imported.bundles).lengthOf(1)
 	expect(imported.messages).lengthOf(1)
@@ -161,12 +165,10 @@ test("it handles multi variant messages", async () => {
 	)
 })
 
-test.todo("matching by plural is possible", async () => {
+test("variants with a plural function are parsed correctly", async () => {
 	const imported = await runImportFiles({
 		some_happy_cat: {
-			localVariables: {
-				countPlural: "count -> count",
-			},
+			declarations: ["input count", "local countPlural = count: plural"],
 			selectors: ["countPlural"],
 			match: {
 				"countPlural=one": "There is one cat.",
@@ -176,74 +178,59 @@ test.todo("matching by plural is possible", async () => {
 	})
 	expect(await runExportFilesParsed(imported)).toStrictEqual({
 		some_happy_cat: {
+			declarations: ["input count", "local countPlural = count: plural"],
+			selectors: ["countPlural"],
 			match: {
-				"platform=android, userGender=male":
-					"{username} has to download the app on his phone from the Google Play Store.",
-				"platform=ios, userGender=female":
-					"{username} has to download the app on her iPhone from the App Store.",
-				"platform=*, userGender=*": "The person has to download the app.",
+				"countPlural=one": "There is one cat.",
+				"countPlural=other": "There are many cats.",
 			},
 		},
 	})
 
 	expect(imported.bundles).lengthOf(1)
 	expect(imported.messages).lengthOf(1)
-	expect(imported.variants).lengthOf(3)
+	expect(imported.variants).lengthOf(2)
 
 	expect(imported.bundles[0]?.id).toStrictEqual("some_happy_cat")
 	expect(imported.bundles[0]?.declarations).toStrictEqual(
 		expect.arrayContaining([
-			{ type: "input-variable", name: "username" },
-			{ type: "input-variable", name: "platform" },
-			{ type: "input-variable", name: "userGender" },
+			{ type: "input-variable", name: "count" },
+			{
+				type: "local-variable",
+				name: "countPlural",
+				value: {
+					type: "expression",
+					arg: {
+						name: "count",
+						type: "variable-reference",
+					},
+					annotation: {
+						type: "function-reference",
+						name: "plural",
+						options: [],
+					},
+				},
+			},
 		] satisfies Declaration[])
 	)
 
 	expect(imported.messages[0]?.selectors).toStrictEqual(
 		expect.arrayContaining([
-			{ type: "variable-reference", name: "platform" },
-			{ type: "variable-reference", name: "userGender" },
+			{ type: "variable-reference", name: "countPlural" },
 		] satisfies Message["selectors"])
 	)
 	expect(imported.messages[0]?.bundleId).toStrictEqual("some_happy_cat")
 
 	expect(imported.variants[0]).toStrictEqual(
 		expect.objectContaining({
-			matches: [
-				{ type: "literal-match", key: "platform", value: "android" },
-				{ type: "literal-match", key: "userGender", value: "male" },
-			],
-			pattern: [
-				{ type: "expression", arg: { type: "variable-reference", name: "username" } },
-				{
-					type: "text",
-					value: " has to download the app on his phone from the Google Play Store.",
-				},
-			],
+			matches: [{ type: "literal-match", key: "countPlural", value: "one" }],
+			pattern: [{ type: "text", value: "There is one cat." }],
 		} satisfies Partial<Variant>)
 	)
 	expect(imported.variants[1]).toStrictEqual(
 		expect.objectContaining({
-			matches: [
-				{ type: "literal-match", key: "platform", value: "ios" },
-				{ type: "literal-match", key: "userGender", value: "female" },
-			],
-			pattern: [
-				{ type: "expression", arg: { type: "variable-reference", name: "username" } },
-				{
-					type: "text",
-					value: " has to download the app on her iPhone from the App Store.",
-				},
-			],
-		} satisfies Partial<Variant>)
-	)
-	expect(imported.variants[2]).toStrictEqual(
-		expect.objectContaining({
-			matches: [
-				{ type: "catchall-match", key: "platform" },
-				{ type: "catchall-match", key: "userGender" },
-			],
-			pattern: [{ type: "text", value: "The person has to download the app." }],
+			matches: [{ type: "literal-match", key: "countPlural", value: "other" }],
+			pattern: [{ type: "text", value: "There are many cats." }],
 		} satisfies Partial<Variant>)
 	)
 })
