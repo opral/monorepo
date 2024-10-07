@@ -65,4 +65,6 @@ graph TB
 
 ### Why not call it change history?
 
-The term "history" implies a linear sequence of changes which is incorrect. A lix change graph visualizes the relationships between changes, which includes the history but also includes other relationships such as dependencies and merges.
+A lix change graph provides more than history.
+
+The term "history" implies a linear sequence of changes. That holds true in most apps like Google Docs that provide a "history" feature. In lix however, changes are tracked as graph. The graph includes the history but also includes the relationships between changes, such as dependencies and merges.
