@@ -5,4 +5,4 @@ export const NO_TRANSLATE_ATTRIBUTE = "data-no-translate"
 export const LANGUAGE_CHANGE_INVALIDATION_KEY = "paraglide:lang"
 
 /** The name of the cookie in which the language is stored */
-export const LANG_COOKIE_NAME = "paraglide:lang"
+export const LANG_COOKIE_NAME = "paraglide_lang"
