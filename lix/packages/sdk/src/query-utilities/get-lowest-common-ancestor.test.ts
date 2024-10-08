@@ -7,9 +7,19 @@ test("it should find the common parent of two changes recursively", async () => 
 	const sourceLix = await openLixInMemory({
 		blob: await newLixFile(),
 	});
+	const currentSourceBranch = await sourceLix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
 	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 	});
+	const currentTargetBranch = await targetLix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
 
 	const mockChanges: Change[] = [
 		{
@@ -49,11 +59,43 @@ test("it should find the common parent of two changes recursively", async () => 
 		.values([mockChanges[0]!])
 		.executeTakeFirst();
 
+	await targetLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: "0",
+				seq: 1,
+			},
+		])
+		.execute();
+
 	await sourceLix.db
 		.insertInto("change")
 		// lix b has two update changes
 		.values([mockChanges[0]!, mockChanges[1]!, mockChanges[2]!])
 		.executeTakeFirst();
+
+	await sourceLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: "0",
+				seq: 1,
+			},
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: "1",
+				seq: 2,
+			},
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: "2",
+				seq: 3,
+			},
+		])
+		.execute();
 
 	const commonParent = await getLowestCommonAncestor({
 		sourceChange: mockChanges[2]!,
@@ -128,9 +170,20 @@ test("it should return the source change if its the common parent", async () => 
 	const sourceLix = await openLixInMemory({
 		blob: await newLixFile(),
 	});
+	const currentSourceBranch = await sourceLix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
+
 	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 	});
+	const currentTargetBranch = await targetLix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
 
 	const mockChanges: Change[] = [
 		{
@@ -160,10 +213,42 @@ test("it should return the source change if its the common parent", async () => 
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.executeTakeFirst();
 
+	await targetLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: "0",
+				seq: 1,
+			},
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: "1",
+				seq: 2,
+			},
+		])
+		.execute();
+
 	await sourceLix.db
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.executeTakeFirst();
+
+	await sourceLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: "0",
+				seq: 1,
+			},
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: "1",
+				seq: 2,
+			},
+		])
+		.execute();
 
 	const commonParent = await getLowestCommonAncestor({
 		sourceChange: mockChanges[1]!,

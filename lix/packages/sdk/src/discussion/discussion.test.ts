@@ -74,7 +74,6 @@ test("should be able to start a discussion on changes", async () => {
 				text: "inserted text",
 			},
 			meta: null,
-			commit_id: null,
 			operation: "create",
 		},
 	]);
@@ -153,7 +152,6 @@ test("should fail to create a disussion on non existing changes", async () => {
 				text: "inserted text",
 			},
 			meta: null,
-			commit_id: null,
 			operation: "create",
 		},
 	]);

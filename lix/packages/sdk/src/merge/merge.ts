@@ -8,24 +8,41 @@ import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-
  * Combined the changes of the source lix into the target lix.
  */
 export async function merge(args: {
-	targetLix: Lix;
 	sourceLix: Lix;
+	targetLix: Lix;
+	sourceBranchId?: string;
+	targetBranchId?: string;
 	// TODO selectively merge changes
 	// onlyTheseChanges
 }): Promise<void> {
 	// TODO increase performance by using attach mode
 	//      and only get the changes and commits that
 	//      are not in target.
-	const sourceChanges = await args.sourceLix.db
-		.selectFrom("change")
-		.selectAll()
-		.execute();
 
-	// TODO increase performance by only getting commits
-	//      that are not in target in the future.
-	const sourceCommits = await args.sourceLix.db
-		.selectFrom("commit")
+	const sourceBranchId =
+		args.sourceBranchId ||
+		(
+			await args.sourceLix.db
+				.selectFrom("branch")
+				.select("id")
+				.where("active", "=", true)
+				.executeTakeFirstOrThrow()
+		).id;
+
+	const targetBranchId =
+		args.targetBranchId ||
+		(
+			await args.targetLix.db
+				.selectFrom("branch")
+				.select("id")
+				.where("active", "=", true)
+				.executeTakeFirstOrThrow()
+		).id;
+
+	const sourceChanges = await args.sourceLix.db
+		.selectFrom("change_view")
 		.selectAll()
+		.where("branch_id", "=", sourceBranchId)
 		.execute();
 
 	// TODO don't query the changes again. inefficient.
@@ -33,7 +50,6 @@ export async function merge(args: {
 		sourceLix: args.sourceLix,
 		targetLix: args.targetLix,
 	});
-
 	// 2. Let the plugin detect conflicts
 
 	const plugin = args.sourceLix.plugins[0] as LixPlugin;
@@ -44,24 +60,28 @@ export async function merge(args: {
 	} else if (plugin.detectConflicts === undefined) {
 		throw new Error("Plugin does not support conflict detection");
 	}
-	const conflicts = await plugin.detectConflicts({
-		sourceLix: args.sourceLix,
-		targetLix: args.targetLix,
-		leafChangesOnlyInSource,
-	});
+	const conflicts = (
+		await plugin.detectConflicts({
+			sourceLix: args.sourceLix,
+			targetLix: args.targetLix,
+			leafChangesOnlyInSource,
+		})
+	).map((c) => ({ ...c, branch_id: targetBranchId }));
 
 	const changesPerFile: Record<string, ArrayBuffer> = {};
 
 	const fileIds = new Set(sourceChanges.map((c) => c.file_id));
 
+	const nonConflictingLeafChangesInSource = leafChangesOnlyInSource.filter(
+		(c) =>
+			conflicts.every((conflict) => conflict.conflicting_change_id !== c.id),
+	);
+
 	for (const fileId of fileIds) {
 		// 3. apply non conflicting leaf changes
 		// TODO inefficient double looping
-		const nonConflictingLeafChangesInSourceForFile = leafChangesOnlyInSource
-			.filter((c) =>
-				conflicts.every((conflict) => conflict.conflicting_change_id !== c.id),
-			)
-			.filter((c) => c.file_id === fileId);
+		const nonConflictingLeafChangesInSourceForFile =
+			nonConflictingLeafChangesInSource.filter((c) => c.file_id === fileId);
 
 		let file = await args.targetLix.db
 			.selectFrom("file")
@@ -77,15 +97,14 @@ export async function merge(args: {
 				.where("id", "=", fileId)
 				.executeTakeFirstOrThrow();
 
-			const fileToInsert = {
-				id: file.id,
-				path: file.path,
-				data: file.data,
-				metadata: file.metadata,
-			};
 			await args.targetLix.db
 				.insertInto("file_internal")
-				.values(fileToInsert)
+				.values({
+					id: file.id,
+					path: file.path,
+					data: file.data,
+					metadata: file.metadata,
+				})
 				.executeTakeFirst();
 		}
 
@@ -128,30 +147,53 @@ export async function merge(args: {
 	await args.targetLix.db.transaction().execute(async (trx) => {
 		if (sourceChanges.length > 0) {
 			// 1. copy the changes from source
-			await trx
-				.insertInto("change")
-				.values(
-					// @ts-expect-error - todo auto serialize values
-					// https://github.com/opral/inlang-message-sdk/issues/123
-					sourceChanges.map((change) => ({
-						...change,
-						value: JSON.stringify(change.value),
-						meta: JSON.stringify(change.meta),
-					})),
-				)
-				// ignore if already exists
-				.onConflict((oc) => oc.doNothing())
-				.execute();
-		}
+			let lastSeq = await trx
+				.selectFrom("branch_change")
+				.select("seq")
+				.where("branch_change.branch_id", "=", targetBranchId)
+				.executeTakeFirst();
 
-		// 2. copy the commits from source
-		if (sourceCommits.length > 0) {
-			await trx
-				.insertInto("commit")
-				.values(sourceCommits)
-				// ignore if already exists
-				.onConflict((oc) => oc.doNothing())
-				.execute();
+			for (const toCopyChange of sourceChanges.map((change) => ({
+				...change,
+				branch_id: undefined,
+				seq: undefined,
+				value: JSON.stringify(change.value),
+				meta: JSON.stringify(change.meta),
+			}))) {
+				const existing = await trx
+					.selectFrom("change")
+					.select("id")
+					.where("id", "=", toCopyChange.id)
+					.executeTakeFirst();
+
+				if (!existing) {
+					await trx
+						.insertInto("change")
+						.values(
+							// @ts-expect-error - todo auto serialize values
+							// https://github.com/opral/inlang-message-sdk/issues/123
+							toCopyChange,
+						)
+						.execute();
+				}
+
+				if (
+					!existing &&
+					nonConflictingLeafChangesInSource.find(
+						(entry) => entry.id === toCopyChange.id,
+					)
+				) {
+					await trx
+						.insertInto("branch_change")
+						.values({
+							id: toCopyChange.id,
+							branch_id: targetBranchId, // todo: only for leaf change
+							change_id: toCopyChange.id,
+							seq: (lastSeq?.seq || 0) + 1,
+						})
+						.execute();
+				}
+			}
 		}
 
 		// 3. insert the conflicts of those changes
