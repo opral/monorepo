@@ -27,16 +27,16 @@ const Header = () => {
       <div className="flex items-center gap-4">
         <IconLix />
         <a
-          className="px-2 py-1 font-semibold text-zinc-500 hover:text-cyan-600 bg-white"
+          className="px-2 py-1 font-semibold text-slate-500 hover:text-cyan-600 bg-white"
           href="https://opral.substack.com">
           Blog
         </a>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-6">
         {socialLinks.map((socialLink, index) => (
           <a
             key={index}
-            className="p-2 text-zinc-900 hover:text-cyan-600"
+            className="p-2 text-slate-900 hover:text-cyan-600"
             href={socialLink.href}
             target="_blank"
             rel="noopener noreferrer"
