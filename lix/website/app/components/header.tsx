@@ -3,16 +3,19 @@ import IconGitHub from "./icons/github";
 import IconLix from "./icons/lix";
 import IconX from "./icons/x";
 
-const socialLinks = [
+export const socialLinks = [
   {
+    text: "GitHub",
     href: "https://github.com/opral/monorepo",
     icon: <IconGitHub />,
   },
   {
+    text: "Discord",
     href: "https://discord.gg/gdMPPWy57R",
     icon: <IconDiscord />,
   },
   {
+    text: "Twitter",
     href: "https://x.com/lixCCS",
     icon: <IconX />,
   },
@@ -24,7 +27,7 @@ const Header = () => {
       <div className="flex items-center gap-4">
         <IconLix />
         <a
-          className="px-2 py-1 font-medium text-zinc-500 hover:text-cyan-600 bg-white"
+          className="px-2 py-1 font-semibold text-zinc-500 hover:text-cyan-600 bg-white"
           href="https://opral.substack.com">
           Blog
         </a>
@@ -33,7 +36,7 @@ const Header = () => {
         {socialLinks.map((socialLink, index) => (
           <a
             key={index}
-            className="p-2 text-black hover:text-cyan-600"
+            className="p-2 text-zinc-900 hover:text-cyan-600"
             href={socialLink.href}
             target="_blank"
             rel="noopener noreferrer"

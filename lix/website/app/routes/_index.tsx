@@ -1,6 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
-import Footer from "../components/footer";
 import Header from "../components/header";
+import Footer from "../components/footer";
 
 export const meta: MetaFunction = () => {
   return [
@@ -13,7 +13,7 @@ export default function Index() {
   return (
     <div className="min-h-screen">
       <Header />
-      {/* <Footer /> */}
+      <Footer />
     </div>
   );
 }

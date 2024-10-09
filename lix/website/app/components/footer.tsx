@@ -1,47 +1,56 @@
+import { socialLinks } from "./header";
+import IconCopyright from "./icons/copyright";
 import IconSubstack from "./icons/substack";
-
-const footerLinks = [
-  {
-    title: "GitHub",
-    link: "https://lix.opral.com",
-  },
-  {
-    title: "Twitter",
-    link: "https://x.com/lixCCS",
-  },
-  {
-    title: "Email",
-    link: "mailto:hello@opral.com",
-  },
-]
 
 export const Footer = () => {
   return (
     <>
-      <div className="w-full h-[1px] bg-slate-200 my-16"></div><div className="w-full max-w-2xl px-4 mx-auto my-16">
-        <p className="mt-12 mb-4 text-slate-950 font-medium">© Lix by Opral</p>
-        <ul className="leading-[1.7] pl-0 list-none flex gap-2">
-          {footerLinks.map(
-            (link) =>
-              <li key={link.link}>
-                <a
-                  className="text-slate-600 underline decoration-slate-300 font-medium hover:decoration-slate-950"
-                  href={link.link}
-                >
-                  {link.title}
-                </a>
-              </li>
-          )}
-        </ul>
-        <a
-          href="https://opral.substack.com/"
-          target="_blanc"
-          className="mt-2 w-fit text-[16px] px-4 py-3 text-slate-700 font-medium rounded-lg bg-slate-100 hover:bg-slate-200 border-none cursor-pointer flex items-center gap-2 no-underline"
-        >
-          <IconSubstack />
-          Subscribe our Substack
-        </a>
-      </div></>
+      <footer className="mt-12 mb-4 w-full max-w-5xl px-4 py-3 mx-auto flex flex-col gap-4">
+        <div className="bg-zinc-100 p-6 rounded-lg flex justify-between items-center gap-4">
+          <p className="flex flex-col gap-0.5 text-zinc-800">
+            <span className="font-semibold">Stay in the loop!</span>
+            Get regular updates and be the first who can use Lix.
+          </p>
+          <a
+            href="https://opral.substack.com/"
+            target="_blanc"
+            className="px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded font-semibold flex items-center gap-2"
+          >
+            <IconSubstack />
+            Subscribe
+          </a>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-8">
+            <div className="flex gap-0.5 items-center text-zinc-900 font-semibold">
+              <IconCopyright />
+              Lix by Opral
+            </div>
+            <a
+              href="https://opral.substack.com"
+              target="_blank"
+              className="px-2 py-1 text-zinc-500 hover:text-cyan-600 bg-white"
+            >
+              Blog
+            </a>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {socialLinks.map((socialLink, index) => (
+              <a
+                key={index}
+                className="p-2 text-zinc-500 hover:text-cyan-600"
+                href={socialLink.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {socialLink.text}
+              </a>
+            ))}
+          </div>
+        </div>
+      </footer>
+    </>
   )
 }
 

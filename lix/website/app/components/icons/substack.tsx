@@ -2,10 +2,10 @@ const IconSubstack = () => {
   return (
     <svg
       role="img"
-      width="24"
-      height="24"
+      width="20"
+      height="20"
       viewBox="0 0 1000 1000"
-      fill="#FF6719"
+      fill="currentColor"
       strokeWidth="1.8"
       stroke="none"
       xmlns="http://www.w3.org/2000/svg"
