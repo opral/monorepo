@@ -1,8 +1,8 @@
 const IconLix = () => {
   return (
     <svg
-      width="40"
-      height="auto"
+      width="26.48"
+      height="18"
       viewBox="0 0 189 129"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

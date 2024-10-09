@@ -1,8 +1,7 @@
 import type { MetaFunction } from "@remix-run/node";
-import Footer from "../../components/footer";
-import Header from "../../components/header";
-import { LixCover, LixCoverMobile } from "../../components/lixCover";
-import IconLix from "components/icons/lix";
+import Footer from "../components/footer";
+import Header from "../components/header";
+import IconLix from "~/components/icons/lix";
 
 type UseCase = {
   title: string
@@ -65,9 +64,9 @@ const blogPosts: Array<BlogPost> = [
 
 export default function Index() {
   return (
-    <>
+    <div className="min-h-screen">
       <Header />
-      <div className="w-full max-w-2xl px-4 mx-auto">
+      {/* <div className="w-full max-w-2xl px-4 mx-auto">
         <h1 className="w-full md:w-[55%] mt-12 mb-8 text-3xl leading-[1.3] text-slate-950 font-medium">
           <IconLix />
           <br />
@@ -139,8 +138,8 @@ export default function Index() {
             Lix SDK<span className="bg-slate-300 rounded px-2 py-1 ml-3">Coming soon</span>
           </div>
         </div>
-      </div >
-      <Footer />
-    </>
+      </div > */}
+      {/* <Footer /> */}
+    </div>
   );
 }

@@ -23,7 +23,7 @@ export const Footer = () => {
         <ul className="leading-[1.7] pl-0 list-none flex gap-2">
           {footerLinks.map(
             (link) =>
-              <li>
+              <li key={link.link}>
                 <a
                   className="text-slate-600 underline decoration-slate-300 font-medium hover:decoration-slate-950"
                   href={link.link}

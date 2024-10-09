@@ -1,11 +1,14 @@
-import IconDiscord from "./icons/discord";
-import IconGitHub from "./icons/github";
-import IconSubstack from "./icons/substack";
+import IconLix from "./icons/lix";
+import { Button } from "./ui/button";
 
 const Header = () => {
   return (
     <header>
-      <div className="w-full max-w-2xl px-4 mx-auto my-8 flex items-center justify-end gap-4">
+      <div className="w-full max-w-5xl px-4 mx-auto my-2 flex items-center justify-between gap-4">
+        <IconLix />
+        <Button>Blog</Button>
+      </div>
+      {/* <div className="w-full max-w-2xl px-4 mx-auto my-8 flex items-center justify-end gap-4">
         <a
           href="https://github.com/opral/monorepo"
           target="_blanc"
@@ -30,7 +33,7 @@ const Header = () => {
           <IconSubstack />
           Blog
         </a>
-      </div>
+      </div> */}
     </header>
   );
 }

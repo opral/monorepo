@@ -6,7 +6,7 @@ const IconSubstack = () => {
       height="24"
       viewBox="0 0 1000 1000"
       fill="#FF6719"
-      stroke-width="1.8"
+      strokeWidth="1.8"
       stroke="none"
       xmlns="http://www.w3.org/2000/svg"
     >
