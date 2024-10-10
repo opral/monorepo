@@ -130,17 +130,19 @@ export default function Index() {
           <h2 className="text-3xl font-semibold">How to experience the system?</h2>
           <p className="max-w-md text-center mt-2 mb-8">The lix change control system allows storing, tracking, querying, and reviewing changes in different file.</p>
           <div className="card relative w-full">
-            <img src="/images/file-manager.svg" alt="Simlified sketch of the lix file manager" className="w-[724x] h-[300px] mt-4 mx-auto" />
+            <img src="/images/file-manager.svg" alt="Simlified sketch of the lix file manager" className="w-[724x] h-[300px] mt-4 -mb-10 mx-auto" />
             <span className="font-semibold">Lix file manager</span>
             <p>The lix change control system allows storing, tracking, querying.</p>
             <p className="absolute right-6 bottom-6 w-fit bg-white ring ring-1 ring-slate-200 px-4 py-2 rounded-full">Coming soon</p>
           </div>
+
           <div className="w-full my-16 relative flex items-center">
             <div className="absolute w-fit left-0 right-0 mx-auto bg-white font-semibold text-slate-500 px-6">
               Apps that built on top of Lix
             </div>
             <div className="w-full border-b border-slate-200"></div>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
             {appsBuiltOnTopOfLix.map((app, index) =>
               <a
@@ -155,12 +157,15 @@ export default function Index() {
               </a>
             )}
           </div>
+
           <div className="card relative w-full mt-4">
             <span className="font-semibold">SDK to build Apps on Lix</span>
             <p>The lix change control system allows storing, tracking, querying.</p>
             <p className="absolute right-6 bottom-6 w-fit bg-white ring ring-1 ring-slate-200 px-4 py-2 rounded-full">Coming soon</p>
           </div>
         </div>
+
+
       </main>
       <Footer />
     </div>
