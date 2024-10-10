@@ -220,7 +220,7 @@ export default function Index() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-24">
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <h2 className="text-3xl font-semibold">Open questions?</h2>
             <div className="mt-4 flex gap-2">
