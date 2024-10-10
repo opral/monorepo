@@ -3,6 +3,7 @@ import Header, { socialLinks } from "../components/header";
 import Footer from "../components/footer";
 import Check from "~/components/ui/check";
 import IconArrowExternal from "~/components/icons/arrow-external";
+import Details from "~/components/ui/details";
 
 export const meta: MetaFunction = () => {
   return [
@@ -93,7 +94,7 @@ export default function Index() {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="w-full max-w-5xl px-4 mx-auto space-y-20">
+      <main className="w-full max-w-5xl px-4 mx-auto space-y-24">
         <div className="grid grid-cols-2 gap-24 mt-12 mb-12">
           <div>
             <div>
@@ -169,7 +170,7 @@ export default function Index() {
                 href={app.link}
                 className="relative card font-semibold gap-4 w-full group"
               >
-                <div className="absolute top-6 right-6 flex justify-center items-center w-10 h-10 rounded-full bg-white text-slate-500 ring ring-1 ring-slate-200 group-hover:text-cyan-500  group-hover:ring-cyan-500">
+                <div className="absolute top-6 right-6 flex justify-center items-center w-10 h-10 rounded-full bg-white text-slate-500 ring-1 ring-slate-200 group-hover:text-cyan-500  group-hover:ring-cyan-500">
                   <div className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
                     <IconArrowExternal />
                   </div>
@@ -182,7 +183,7 @@ export default function Index() {
           <div className="card relative w-full mt-4">
             <span className="font-semibold">SDK to build Apps on Lix</span>
             <p>The lix change control system allows storing, tracking, querying.</p>
-            <p className="absolute right-6 bottom-6 w-fit bg-white ring ring-1 ring-slate-200 px-4 py-2 rounded-full">Coming soon</p>
+            <p className="absolute right-6 bottom-6 w-fit bg-white ring-1 ring-slate-200 px-4 py-2 rounded-full">Coming soon</p>
           </div>
         </div>
 
@@ -196,7 +197,7 @@ export default function Index() {
                   href={socialLink.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 border border-1 border-slate-20 rounded-md text-slate-500 hover:text-cyan-600"
+                  className="px-4 py-2 ring-1 ring-slate-200 rounded-md text-slate-500 hover:text-cyan-600 hover:ring-cyan-600"
                 >
                   {socialLink.text}
                 </a>
@@ -204,20 +205,20 @@ export default function Index() {
             </div>
           </div>
           <div className="col-span-2 space-y-4">
-            {faq.map((question, index) => (
-              <div key={index} className="card">
-                <h3 className="font-semibold">{question.question}</h3>
-                <p>{question.answer}</p>
+            {faq.map((question, index) =>
+              <div key={index}>
+                <Details summary={question.question} content={question.answer} />
+                {faq.length - 1 !== index && <div className="mt-3 border-b border-slate-200"></div>}
               </div>
-            ))}
+            )}
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 max-w-xl mx-auto pl-20 border-l border-surface-200">
-          <p className="italic">
+        <div className="flex flex-col gap-4 max-w-xl mx-auto pl-20 border-l-2 border-surface-200">
+          <p className="italic text-slate-800">
             "Every work that we create, every time we collaborate, everything we automate, it revolves around changes. A system, that can understand changes and inform you about that these changes happened, means that you have a system to collaborate, validate, automate and create."
           </p>
-          <p>- Samuel Stroschein, Founder of Opral (lix & inlang)</p>
+          <p>Samuel Stroschein, Founder of Opral (lix & inlang)</p>
         </div>
       </main>
       <Footer />
