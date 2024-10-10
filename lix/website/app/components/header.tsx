@@ -27,7 +27,7 @@ const Header = () => {
 			<div className="flex items-center gap-4">
 				<IconLix />
 				<a
-					className="px-2 py-1 font-semibold text-slate-500 hover:text-cyan-600 bg-white"
+					className="px-2 py-1 font-medium text-slate-500 hover:text-cyan-600 bg-white"
 					href="https://opral.substack.com"
 				>
 					Blog
