@@ -68,7 +68,7 @@ const appsBuiltOnTopOfLix = [
 	},
 	{
 		title: "Translation-App",
-		link: "fink2.onrender.com",
+		link: "https://fink2.onrender.com",
 		icon: <IconLogoInlang />,
 		description: "Collaborate on translations with change control.",
 	},
