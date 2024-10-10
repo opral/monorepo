@@ -194,3 +194,17 @@ services:
         - inlang/source-code/telemetry-proxy-parrot/**
     domains:
       - telemetry.inlang.com
+
+  - name: lix-website-preview
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: starter
+    branch: update-lix-website
+    staticPublishPath: ./lix/website/build
+    buildCommand: pnpm i && pnpm --filter lix-website build
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter lix-website start
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - lix/website/**
