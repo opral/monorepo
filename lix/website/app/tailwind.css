@@ -6,3 +6,11 @@ html,
 body {
   @apply bg-white;
 }
+
+p {
+  @apply text-slate-500;
+}
+
+.card {
+  @apply p-6 bg-slate-100 ring ring-1 ring-slate-200 rounded-lg;
+}

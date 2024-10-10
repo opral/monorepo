@@ -2,6 +2,7 @@ import type { MetaFunction } from "@remix-run/node";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import Check from "~/components/ui/check";
+import IconArrowExternal from "~/components/icons/arrow-external";
 
 export const meta: MetaFunction = () => {
   return [
@@ -54,6 +55,21 @@ const enabledByChangeControl = [
   }
 ];
 
+const appsBuiltOnTopOfLix = [
+  {
+    title: "Table-App",
+    link: "https://csv-n2qj.onrender.com/"
+  },
+  {
+    title: "Text-Editor",
+    link: "https://opral.substack.com/p/collaborative-markdown-with-lix-change"
+  },
+  {
+    title: "Translation-App",
+    link: "fink2.onrender.com"
+  }
+];
+
 export default function Index() {
   return (
     <div className="min-h-screen">
@@ -68,7 +84,7 @@ export default function Index() {
                 files
               </span> */}
             </div>
-            <p className="text-slate-500 mt-8 mb-6">
+            <p className="mt-8 mb-6">
               The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.
             </p>
             <a
@@ -81,39 +97,69 @@ export default function Index() {
           </div>
           <div>
             {coreFeatures.map((feature, index) => (
-              <div key={index} className="mb-4 max-w-md flex items-start gap-5">
+              <div key={index} className="mb-4 max-w-sm flex items-start gap-5">
                 <Check />
                 <div className="space-y-1">
                   <h2 className="font-semibold">{feature.title}</h2>
-                  <p className="text-slate-500">{feature.description}</p>
+                  <p>{feature.description}</p>
                 </div>
               </div>
             ))}
           </div>
-
         </div>
+
         <div className="flex flex-col items-center">
           <h2 className="text-3xl font-semibold">Enabled by change control</h2>
-          <p className="max-w-md text-slate-500 text-center mt-2 mb-8">The lix change control system allows storing, tracking, querying, and reviewing changes in different file.</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <p className="max-w-md text-center mt-2 mb-8">The lix change control system allows storing, tracking, querying, and reviewing changes in different file.</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
             {enabledByChangeControl.map((feature, index) => (
-              <div key={index} className="flex flex-col items-start gap-4 p-8 bg-slate-100 rounded">
+              <div key={index} className="card flex flex-col items-start gap-3 w-full">
                 <img src={feature.image} alt={feature.title} className="w-[240px] h-[200px]" />
                 <h3 className="font-semibold">{feature.title}</h3>
-                <ul className="list-disc flex flex-col gap-2">
+                <ul className="list-disc list-inside flex flex-col gap-0.5">
                   {feature.list.map((item, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <p className="text-slate-500">{item}</p>
-                    </li>
+                    <li key={index} className="list-item text-slate-500">{item}</li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
         </div>
+
         <div className="flex flex-col items-center">
           <h2 className="text-3xl font-semibold">How to experience the system?</h2>
-          <p className="max-w-md text-slate-500 text-center mt-2 mb-6">The lix change control system allows storing, tracking, querying, and reviewing changes in different file.</p>
+          <p className="max-w-md text-center mt-2 mb-8">The lix change control system allows storing, tracking, querying, and reviewing changes in different file.</p>
+          <div className="card relative w-full">
+            <img src="/images/file-manager.svg" alt="Simlified sketch of the lix file manager" className="w-[724x] h-[300px] mt-4 mx-auto" />
+            <span className="font-semibold">Lix file manager</span>
+            <p>The lix change control system allows storing, tracking, querying.</p>
+            <p className="absolute right-6 bottom-6 w-fit bg-white ring ring-1 ring-slate-200 px-4 py-2 rounded-full">Coming soon</p>
+          </div>
+          <div className="w-full my-16 relative flex items-center">
+            <div className="absolute w-fit left-0 right-0 mx-auto bg-white font-semibold text-slate-500 px-6">
+              Apps that built on top of Lix
+            </div>
+            <div className="w-full border-b border-slate-200"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+            {appsBuiltOnTopOfLix.map((app, index) =>
+              <a
+                key={index}
+                href={app.link}
+                className="relative card font-semibold gap-4 w-full"
+              >
+                <div className="absolute top-4 right-4 flex justify-center items-center w-10 h-10 rounded-full bg-white text-slate-500 ring ring-1 ring-slate-200">
+                  <IconArrowExternal />
+                </div>
+                <div className="mt-10">{app.title}</div>
+              </a>
+            )}
+          </div>
+          <div className="card relative w-full mt-4">
+            <span className="font-semibold">SDK to build Apps on Lix</span>
+            <p>The lix change control system allows storing, tracking, querying.</p>
+            <p className="absolute right-6 bottom-6 w-fit bg-white ring ring-1 ring-slate-200 px-4 py-2 rounded-full">Coming soon</p>
+          </div>
         </div>
       </main>
       <Footer />
