@@ -110,13 +110,22 @@ export default function Index() {
 							The lix change control system allows storing, tracking, querying, and reviewing
 							changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.
 						</p>
-						<a
-							href="https://opral.substack.com/"
-							target="_blanc"
-							className="w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-semibold flex items-center gap-2"
-						>
-							Get updates
-						</a>
+						<div className="flex items-center gap-2">
+							<a
+								href="https://opral.substack.com/"
+								target="_blanc"
+								className="w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-semibold flex items-center gap-2 transition-all"
+							>
+								Get updates
+							</a>
+							<a
+								href="https://x.com/FabianHiller/status/1839301632888131814"
+								target="_blanc"
+								className="w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex items-center gap-2 border border-slate-300 hover:border-slate-400 transition-all"
+							>
+								Lix talk at Web Dev Meetup NY
+							</a>
+						</div>
 					</div>
 					<div>
 						{coreFeatures.map((feature, index) => (
@@ -210,7 +219,7 @@ export default function Index() {
 				<div className="grid grid-cols-3 gap-24">
 					<div>
 						<h2 className="text-3xl font-semibold">Open questions?</h2>
-						<div className="mt-4 flex gap-4">
+						<div className="mt-4 flex gap-2">
 							{socialLinks
 								.map((socialLink, index) => (
 									<a
@@ -218,7 +227,7 @@ export default function Index() {
 										href={socialLink.href}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="px-4 py-2 ring-1 ring-slate-200 rounded-md text-slate-500 hover:text-cyan-600 hover:ring-cyan-600"
+										className="transition-all w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex items-center gap-2 border border-slate-300 hover:border-slate-400"
 									>
 										{socialLink.text}
 									</a>
