@@ -102,7 +102,7 @@ export default function Index() {
           <div>
             <div>
               <h1 className="text-5xl leading-tight font-semibold">The change control system for
-                <span className="inline-flex items-center w-fit -mt-2.5 ml-3 translate-y-[14px] pr-2 py-0.5 ring ring-slate-200 rounded-xl text-5xl font-semibold">
+                <span className="inline-flex items-center w-fit -mt-2.5 ml-3 translate-y-[14px] pr-2.5 py-0.5 ring ring-slate-200 rounded-xl text-5xl font-semibold">
                   <div className="text-cyan-500">
                     <IconFile />
                   </div>
