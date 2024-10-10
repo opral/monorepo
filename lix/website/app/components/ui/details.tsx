@@ -1,10 +1,12 @@
 const Details = (props: { summary: string, content: string }) => {
   return (
     <details>
-      <summary className="cursor-pointer font-semibold text-slate-500 list-none after:content-['']">
+      <summary className="flex cursor-pointer font-semibold text-slate-500 list-none hover:text-cyan-500 
+        after:inline-block after:w-6 after:h-6 after:ml-auto after:bg-contain after:bg-[url('/images/chevron-down.svg')] after:transform after:rotate-0 after:transition-transform after:duration-200 after:ease-in-out"
+      >
         {props.summary}
       </summary>
-      <p className="mt-2">{props.content}</p>
+      <p className="my-3">{props.content}</p>
     </details>
   );
 }
