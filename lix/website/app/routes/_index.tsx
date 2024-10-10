@@ -90,26 +90,6 @@ const faq = [
 		answer:
 			"No. Lix is designed to change control non-text files and build apps, not version source code.",
 	},
-	{
-		question: "What is the difference between a Lix app and a conventional file in a Lix system?",
-		answer:
-			"Changes in conventional files are only tracked when saved to the Lix file system. Therefore, features are only available via the Lix file system, while editing happens only in conventional apps. Lix apps are built on the system and define their file format. This allows them to use all the functions in the app to improve the editing process and collaboration workflow. If conventional apps have a plug-in interface, it could be used to integrate Lix features.",
-	},
-	{
-		question: "How is it different from my current file-sharing solution?",
-		answer:
-			"Your current file-sharing solution may show which of your colleagues made the last change to a file, but you don't know what changed, what the previous version was and what the context of the changes was.",
-	},
-	{
-		question: "How does it compare to versioning I know from other apps?",
-		answer:
-			"There are apps with versioning, but in many cases, they only save versions of the entire project at specific points in time. Lix tracks and understands the context of every change in a file, giving you more context and allowing you to set automations. Furthermore, Lix provides a generalized system that allows all files and apps to work together.",
-	},
-	{
-		question: "Is lix replacing git?",
-		answer:
-			"No. Lix is designed to change control non-text files and build apps, not version source code.",
-	},
 ]
 
 export default function Index() {
