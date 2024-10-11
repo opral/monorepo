@@ -7,6 +7,10 @@ body {
   @apply bg-white;
 }
 
+a {
+  @apply transition-colors;
+}
+
 p {
   @apply text-slate-500;
 }

@@ -8,6 +8,7 @@ import IconLogoTabelle from "~/components/icons/logo-tabelle"
 import IconLogoPapier from "~/components/icons/logo-papier"
 import IconLogoInlang from "~/components/icons/logo-inlang"
 import IconDate from "~/components/icons/date"
+import IconFile from "~/components/icons/file"
 
 export const meta: MetaFunction = () => {
   return [
@@ -98,14 +99,17 @@ export default function Index() {
     <div className="min-h-screen">
       <Header />
       <main className="w-full max-w-5xl px-4 mx-auto space-y-24">
-        <div className="grid grid-cols-2 gap-24 mt-12 mb-12">
+        <div className="grid sm:grid-cols-2 gap-24 mt-12 mb-12">
           <div>
             <div>
-              <h1 className="text-5xl font-semibold">The change control system for files</h1>
-              {/* files */}
-              {/* <span className="text-5xl font-semibold">
-                files
-              </span> */}
+              <h1 className="text-5xl leading-tight font-semibold">The change control system for
+                <span className="inline-flex items-center w-fit -mt-2.5 ml-3 translate-y-[14px] pr-2 py-0.5 ring ring-slate-200 rounded-xl text-5xl font-semibold">
+                  <div className="text-cyan-500">
+                    <IconFile />
+                  </div>
+                  files
+                </span>
+              </h1>
             </div>
             <p className="mt-8 mb-6">
               The lix change control system allows storing, tracking, querying, and reviewing
