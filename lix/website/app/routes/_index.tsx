@@ -266,7 +266,7 @@ export default function Index() {
 								href={app.link}
 								className="relative card font-semibold gap-4 w-full group"
 							>
-								<div className="absolute top-[14px] md:top-6 right-[14px] md:right-6 flex justify-center items-center w-10 h-10 rounded-full bg-white text-slate-500 ring-1 ring-slate-200 group-hover:text-cyan-500  group-hover:ring-cyan-500">
+								<div className="absolute top-[14px] md:top-6 right-[14px] md:right-6 flex justify-center items-center w-10 h-10 rounded-full bg-white text-slate-500 transition-all ring-1 ring-slate-200 group-hover:text-cyan-500  group-hover:ring-cyan-500">
 									<div className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
 										<IconArrowExternal />
 									</div>

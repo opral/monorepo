@@ -1,14 +1,15 @@
-const Details = (props: { summary: string, content: string }) => {
-  return (
-    <details>
-      <summary className="flex gap-2 justify-between cursor-pointer font-medium text-slate-500 list-none hover:text-cyan-500
+const Details = (props: { summary: string; content: string }) => {
+	return (
+		<details>
+			<summary
+				className="flex gap-2 justify-between cursor-pointer font-medium list-none transition-colors text-slate-500 hover:text-cyan-500
         after:inline-block after:w-6 after:h-6 after:p-3 after:bg-contain after:bg-[url('/images/chevron-down.svg')] after:bg-no-repeat after:transform after:rotate-0 after:transition-transform after:duration-200 after:ease-in-out"
-      >
-        {props.summary}
-      </summary>
-      <p className="my-3">{props.content}</p>
-    </details>
-  );
+			>
+				{props.summary}
+			</summary>
+			<p className="my-3">{props.content}</p>
+		</details>
+	)
 }
 
 export default Details
