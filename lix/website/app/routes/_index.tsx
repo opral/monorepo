@@ -193,9 +193,9 @@ export default function Index() {
 						<img
 							src="/images/file-manager.svg"
 							alt="Simlified sketch of the lix file manager"
-							className="mb-2 sm:mb-0 w-[724x] md:h-[300px] mt-4 -mb-10 mx-auto"
+							className="mb-2 sm:-mb-10 w-[724x] md:h-[300px] mt-4 mx-auto"
 						/>
-						<div className="flex justify-between items-center gap-2">
+						<div className="flex justify-between items-end gap-2">
 							<div>
 								<span className="font-semibold">Lix File Manager</span>
 								<p className="mt-1">All your files under change control.</p>
@@ -233,7 +233,7 @@ export default function Index() {
 					</div>
 
 					<div className="card relative w-full mt-4">
-						<div className="flex justify-between items-center gap-2">
+						<div className="flex justify-between items-end sm:items-center gap-2">
 							<div>
 								<span className="font-semibold">SDK to build Apps on Lix</span>
 								<p className="pt-1">
