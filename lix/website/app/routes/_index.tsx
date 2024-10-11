@@ -11,21 +11,7 @@ import IconDate from "~/components/icons/date"
 import IconFile from "~/components/icons/file"
 
 export const meta: MetaFunction = () => {
-	return [
-		{ title: "Lix - Change Control System" },
-		{
-			name: "description",
-			content:
-				"The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
-		},
-		{
-			name: "viewport",
-			content: "width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0",
-		},
-		{
-			name: "keywords",
-			content: "change control, file-based apps, collaboration, automation, change graph",
-		},
+	const ogImage = [
 		{
 			property: "og:url",
 			content: "https://lix.opral.com",
@@ -45,15 +31,11 @@ export const meta: MetaFunction = () => {
 		},
 		{
 			property: "og:image",
-			content: "/images/og-image-lix.png",
+			content: "https://lix-website-preview.onrender.com/images/og-image-lix.png",
 		},
 		{
 			name: "twitter:card",
-			content: "summary_large_image",
-		},
-		{
-			property: "twitter:domain",
-			content: "lix-website-preview.onrender.com",
+			content: "Change graph of the lix change control system",
 		},
 		{
 			property: "twitter:url",
@@ -70,8 +52,26 @@ export const meta: MetaFunction = () => {
 		},
 		{
 			name: "twitter:image",
-			content: "/images/og-image-lix.png",
+			content: "https://lix-website-preview.onrender.com/images/og-image-lix.png",
 		},
+	]
+
+	return [
+		{ title: "Lix - Change Control System" },
+		{
+			name: "description",
+			content:
+				"The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
+		},
+		{
+			name: "viewport",
+			content: "width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0",
+		},
+		{
+			name: "keywords",
+			content: "change control, file-based apps, collaboration, automation, change graph",
+		},
+		...ogImage,
 	]
 }
 
