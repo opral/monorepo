@@ -22,6 +22,56 @@ export const meta: MetaFunction = () => {
 			name: "viewport",
 			content: "width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0",
 		},
+		{
+			name: "keywords",
+			content: "change control, file-based apps, collaboration, automation, change graph",
+		},
+		{
+			property: "og:url",
+			content: "https://lix.opral.com",
+		},
+		{
+			property: "og:type",
+			content: "website",
+		},
+		{
+			property: "og:title",
+			content: "Lix - Change Control System",
+		},
+		{
+			property: "og:description",
+			content:
+				"The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
+		},
+		{
+			property: "og:image",
+			content: "/images/og-image-lix.png",
+		},
+		{
+			name: "twitter:card",
+			content: "summary_large_image",
+		},
+		{
+			property: "twitter:domain",
+			content: "lix-website-preview.onrender.com",
+		},
+		{
+			property: "twitter:url",
+			content: "https://lix.opral.com",
+		},
+		{
+			name: "twitter:title",
+			content: "Lix - Change Control System",
+		},
+		{
+			name: "twitter:description",
+			content:
+				"The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
+		},
+		{
+			name: "twitter:image",
+			content: "/images/og-image-lix.png",
+		},
 	]
 }
 
