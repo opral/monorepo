@@ -177,7 +177,7 @@ export default function Index() {
 
         <div className="flex flex-col items-center">
           <h2 className="text-center">How to experience the system?</h2>
-          <p className="max-w-2xl text-center mt-2 mb-8">
+          <p className="max-w-md text-center mt-2 mb-8">
             Change control can be accessed in file-based applications that are already built on Lix
             or the Lix File Manager, which can track changes of conventional files.
           </p>
@@ -198,7 +198,7 @@ export default function Index() {
             </div>
           </div>
 
-          <div className="w-full my-16 relative flex items-center">
+          <div className="w-full my-12 md:my-16 relative flex items-center">
             <div className="absolute w-fit left-0 right-0 mx-auto bg-white font-semibold text-slate-500 px-6">
               Apps that built on top of Lix
             </div>
@@ -238,7 +238,7 @@ export default function Index() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 md:gap-4">
-          <div className="col-span-2">
+          <div className="col-span-2 md:col-span-1">
             <h2>Open questions?</h2>
             <div className="mt-4 flex gap-2">
               {socialLinks
@@ -273,7 +273,9 @@ export default function Index() {
             these changes happened, means that you have a system to collaborate, validate, automate
             and create."
           </p>
-          <p>Samuel Stroschein, Founder of Opral (lix & inlang)</p>
+          <p>Samuel Stroschein,{" "}
+            <span className="whitespace-nowrap">Founder of Opral (lix & inlang)</span>
+          </p>
         </div>
       </main>
       <Footer />
