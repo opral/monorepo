@@ -151,10 +151,10 @@ export default function Index() {
           <p className="max-w-md text-center mt-2 mb-8">
             Every app built on top of Lix comes with differentiating features out of the box.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 w-full">
             {enabledByChangeControl.map((feature, index) => (
               <div key={index} className="card flex flex-col items-start gap-3 w-fit mx-auto md:w-full">
-                <img src={feature.image} alt={feature.title} className="w-[240px] h-[200px]" />
+                <img src={feature.image} alt={feature.title} className="self-center w-[240px] h-[200px]" />
                 <h3 className="font-semibold">{feature.title}</h3>
                 <ul className="list-disc list-inside flex flex-col gap-0.5">
                   {feature.list.map((item, index) => (
@@ -230,7 +230,7 @@ export default function Index() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 md:gap-24">
+        <div className="grid md:grid-cols-3 gap-8 md:gap-4">
           <div>
             <h2 className="text-3xl font-semibold">Open questions?</h2>
             <div className="mt-4 flex gap-2">
