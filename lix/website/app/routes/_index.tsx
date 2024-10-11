@@ -163,7 +163,7 @@ export default function Index() {
 						{enabledByChangeControl.map((feature, index) => (
 							<div
 								key={index}
-								className="card flex flex-col items-start gap-3 mx-auto w-full sm:w-fit md:w-full"
+								className="card flex flex-col items-start gap-2 mx-auto w-full sm:w-fit md:w-full"
 							>
 								<img
 									src={feature.image}
@@ -193,12 +193,12 @@ export default function Index() {
 						<img
 							src="/images/file-manager.svg"
 							alt="Simlified sketch of the lix file manager"
-							className="w-[724x] md:h-[300px] mt-4 -mb-10 mx-auto"
+							className="mb-2 sm:mb-0 w-[724x] md:h-[300px] mt-4 -mb-10 mx-auto"
 						/>
-						<div className="flex justify-between items-end gap-2">
+						<div className="flex justify-between items-center gap-2">
 							<div>
 								<span className="font-semibold">Lix File Manager</span>
-								<p>All your files under change control.</p>
+								<p className="mt-1">All your files under change control.</p>
 							</div>
 							<p className="w-fit whitespace-nowrap bg-white ring-1 ring-slate-200 px-4 py-2 rounded-full">
 								Coming soon
@@ -227,16 +227,18 @@ export default function Index() {
 								</div>
 								<div>{app.icon}</div>
 								<div className="mt-4">{app.title}</div>
-								<p className="font-normal mt-2">{app.description}</p>
+								<p className="font-normal mt-1">{app.description}</p>
 							</a>
 						))}
 					</div>
 
 					<div className="card relative w-full mt-4">
-						<div className="flex justify-between items-end gap-2">
+						<div className="flex justify-between items-center gap-2">
 							<div>
 								<span className="font-semibold">SDK to build Apps on Lix</span>
-								<p>Build your own apps with the Lix SDK to access change control features.</p>
+								<p className="pt-1">
+									Build your own apps with the Lix SDK to access change control features.
+								</p>
 							</div>
 							<p className="w-fit whitespace-nowrap bg-white ring-1 ring-slate-200 px-4 py-2 rounded-full">
 								Coming soon
