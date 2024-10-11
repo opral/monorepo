@@ -142,7 +142,7 @@ export default function Index() {
           </div>
           <div>
             {coreFeatures.map((feature, index) => (
-              <div key={index} className="mb-4 max-w-sm flex items-start gap-5">
+              <div key={index} className="my-4 max-w-sm flex items-start gap-5">
                 <Check />
                 <div className="space-y-1">
                   <h3 className="font-semibold">{feature.title}</h3>
@@ -256,7 +256,7 @@ export default function Index() {
                 .slice(0, 2)}
             </div>
           </div>
-          <div className="col-span-2 space-y-3 md:space-y-6">
+          <div className="md:mt-3 col-span-2 space-y-3 md:space-y-6">
             {faq.map((question, index) => (
               <div key={index}>
                 <Details summary={question.question} content={question.answer} />
