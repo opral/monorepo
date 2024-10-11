@@ -185,7 +185,7 @@ export default function Index() {
             <img
               src="/images/file-manager.svg"
               alt="Simlified sketch of the lix file manager"
-              className="w-[724x] h-[300px] mt-4 -mb-10 mx-auto"
+              className="w-[724x] md:h-[300px] mt-4 -mb-10 mx-auto"
             />
             <div className="flex justify-between items-end gap-2">
               <div>
