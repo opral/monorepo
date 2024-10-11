@@ -34,6 +34,18 @@ export const meta: MetaFunction = () => {
 			content: "https://lix-website-preview.onrender.com/images/og-image-lix.png",
 		},
 		{
+			property: "og:image:type",
+			content: "image/png",
+		},
+		{
+			property: "og:image:width",
+			content: "1200",
+		},
+		{
+			property: "og:image:height",
+			content: "630",
+		},
+		{
 			name: "twitter:card",
 			content: "Change graph of the lix change control system",
 		},
