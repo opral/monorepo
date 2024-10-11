@@ -50,7 +50,7 @@
 		"@inlang/paraglide-js": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@inlang/sdk": "workspace:*",
-		"unplugin": "1.5.1"
+		"unplugin": "^1.14.1"
 	},
 	"devDependencies": {
 		"@types/node": "20.9.3",
