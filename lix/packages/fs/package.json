@@ -23,15 +23,13 @@
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
-		"eslint": "9.0.0",
-		"prettier": "2.8.3",
+		"@lix-js/code-style": "workspace:*",
 		"@types/node": "20.12.7",
 		"@vitest/coverage-v8": "0.34.3",
-		"vitest": "0.34.3",
+		"eslint": "9.0.0",
+		"prettier": "2.8.3",
 		"tsd": "0.31.0",
-		"@lix-js/code-style": "workspace:*"
-	},
-	"dependencies": {
-		"typescript": "5.2.2"
+		"typescript": "5.2.2",
+		"vitest": "0.34.3"
 	}
 }
