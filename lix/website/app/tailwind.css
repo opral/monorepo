@@ -7,6 +7,14 @@ body {
   @apply bg-white;
 }
 
+h1 {
+  @apply text-5xl font-semibold;
+}
+
+h2 {
+  @apply text-2xl md:text-3xl font-semibold;
+}
+
 a {
   @apply transition-colors;
 }

@@ -23,17 +23,10 @@ export const Footer = () => {
 					</div>
 					<div className="flex items-center justify-between gap-4">
 						<div className="flex items-center gap-8">
-							<div className="flex gap-0.5 items-center text-slate-900 font-semibold">
+							<div className="flex whitespace-nowrap gap-0.5 items-center text-slate-900 font-semibold">
 								<IconCopyright />
 								Lix by Opral
 							</div>
-							<a
-								href="https://opral.substack.com"
-								target="_blank"
-								className="px-2 py-1 text-slate-500 hover:text-cyan-600 bg-white"
-							>
-								Blog
-							</a>
 						</div>
 
 						<div className="flex items-center gap-2">

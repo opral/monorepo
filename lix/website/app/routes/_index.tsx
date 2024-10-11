@@ -18,6 +18,10 @@ export const meta: MetaFunction = () => {
       content:
         "The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
     },
+    {
+      name: "viewport",
+      content: "width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0"
+    }
   ]
 }
 
@@ -102,12 +106,15 @@ export default function Index() {
         <div className="grid md:grid-cols-2 justify-center md:justify-start gap-16 md:gap-8 lg:gap-24 mt-12 mb-12">
           <div className="max-w-md">
             <div>
-              <h1 className="text-5xl leading-tight font-semibold">The change control system for
-                <span className="inline-flex items-center w-fit -mt-2.5 ml-3 translate-y-[14px] pr-2 py-0.5 ring ring-slate-200 rounded-xl text-5xl font-semibold">
+              <h1 className="text-5xl leading-[1.3] font-semibold">The change control system {" "}
+                <span className="inline-flex mt-3 items-center gap-3">
+                  for
+                  <span className="flex items-center w-fit -mt-7 translate-y-[14px] pr-2 py-0.5 ring ring-slate-200 rounded-xl text-5xl font-semibold">
                   <div className="text-cyan-500">
                     <IconFile />
                   </div>
                   files
+                </span>
                 </span>
               </h1>
             </div>
@@ -138,7 +145,7 @@ export default function Index() {
               <div key={index} className="mb-4 max-w-sm flex items-start gap-5">
                 <Check />
                 <div className="space-y-1">
-                  <h2 className="font-semibold">{feature.title}</h2>
+                  <h3 className="font-semibold">{feature.title}</h3>
                   <p>{feature.description}</p>
                 </div>
               </div>
@@ -147,13 +154,13 @@ export default function Index() {
         </div>
 
         <div className="flex flex-col items-center">
-          <h2 className="text-3xl font-semibold">Enabled by change control</h2>
+          <h2 className="text-center">Enabled by change control</h2>
           <p className="max-w-md text-center mt-2 mb-8">
             Every app built on top of Lix comes with differentiating features out of the box.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
             {enabledByChangeControl.map((feature, index) => (
-              <div key={index} className="card flex flex-col items-start gap-3 w-fit mx-auto md:w-full">
+              <div key={index} className="card flex flex-col items-start gap-3 mx-auto w-full sm:w-fit md:w-full">
                 <img src={feature.image} alt={feature.title} className="self-center w-[240px] h-[200px]" />
                 <h3 className="font-semibold">{feature.title}</h3>
                 <ul className="list-disc list-inside flex flex-col gap-0.5">
@@ -169,7 +176,7 @@ export default function Index() {
         </div>
 
         <div className="flex flex-col items-center">
-          <h2 className="text-3xl font-semibold">How to experience the system?</h2>
+          <h2 className="text-center">How to experience the system?</h2>
           <p className="max-w-2xl text-center mt-2 mb-8">
             Change control can be accessed in file-based applications that are already built on Lix
             or the Lix File Manager, which can track changes of conventional files.
@@ -231,8 +238,8 @@ export default function Index() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 md:gap-4">
-          <div>
-            <h2 className="text-3xl font-semibold">Open questions?</h2>
+          <div className="col-span-2">
+            <h2>Open questions?</h2>
             <div className="mt-4 flex gap-2">
               {socialLinks
                 .map((socialLink, index) => (
@@ -259,7 +266,7 @@ export default function Index() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 max-w-xl mx-auto pl-4 md:pl-16 border-l-2 border-surface-200">
+        <div className="flex flex-col gap-4 max-w-xl md:mx-auto pl-4 md:pl-16 border-l-2 border-surface-200">
           <p className="italic text-slate-800">
             "Every work that we create, every time we collaborate, everything we automate, it
             revolves around changes. A system, that can understand changes and inform you about that
