@@ -30,3 +30,7 @@ p {
 details[open] > summary::after {
   transform: rotate(180deg);
 }
+
+details summary::-webkit-details-marker {
+  display: none;
+}
