@@ -48,5 +48,8 @@
 	"git.mergeEditor": true,
 	"[xml]": {
 		"editor.defaultFormatter": "redhat.vscode-xml"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
 }
