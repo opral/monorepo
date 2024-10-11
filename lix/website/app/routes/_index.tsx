@@ -63,7 +63,7 @@ export const meta: MetaFunction = () => {
 				"The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
 		},
 		{
-			name: "twitter:image",
+			name: "twitter:image:src",
 			content: "https://lix-website-preview.onrender.com/images/og-image-lix.png",
 		},
 	]
