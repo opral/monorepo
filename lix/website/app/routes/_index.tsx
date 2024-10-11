@@ -98,9 +98,9 @@ export default function Index() {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="w-full max-w-5xl px-4 mx-auto space-y-24">
-        <div className="grid sm:grid-cols-2 gap-24 mt-12 mb-12">
-          <div>
+      <main className="w-full max-w-5xl px-4 mx-auto space-y-16 md:space-y-24">
+        <div className="grid md:grid-cols-2 justify-center md:justify-start gap-16 md:gap-8 lg:gap-24 mt-12 mb-12">
+          <div className="max-w-md">
             <div>
               <h1 className="text-5xl leading-tight font-semibold">The change control system for
                 <span className="inline-flex items-center w-fit -mt-2.5 ml-3 translate-y-[14px] pr-2 py-0.5 ring ring-slate-200 rounded-xl text-5xl font-semibold">
@@ -115,7 +115,7 @@ export default function Index() {
               The lix change control system allows storing, tracking, querying, and reviewing
               changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap-reverse items-center gap-2">
               <a
                 href="https://opral.substack.com/"
                 target="_blanc"
@@ -153,7 +153,7 @@ export default function Index() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
             {enabledByChangeControl.map((feature, index) => (
-              <div key={index} className="card flex flex-col items-start gap-3 w-full">
+              <div key={index} className="card flex flex-col items-start gap-3 w-fit mx-auto md:w-full">
                 <img src={feature.image} alt={feature.title} className="w-[240px] h-[200px]" />
                 <h3 className="font-semibold">{feature.title}</h3>
                 <ul className="list-disc list-inside flex flex-col gap-0.5">
@@ -180,11 +180,15 @@ export default function Index() {
               alt="Simlified sketch of the lix file manager"
               className="w-[724x] h-[300px] mt-4 -mb-10 mx-auto"
             />
-            <span className="font-semibold">Lix File Manager</span>
-            <p>All your files under change control.</p>
-            <p className="absolute right-6 bottom-6 w-fit bg-white ring-1 ring-slate-200 px-4 py-2 rounded-full">
+            <div className="flex justify-between items-end gap-2">
+              <div>
+                <span className="font-semibold">Lix File Manager</span>
+                <p>All your files under change control.</p>
+              </div>
+              <p className="w-fit whitespace-nowrap bg-white ring-1 ring-slate-200 px-4 py-2 rounded-full">
               Coming soon
             </p>
+            </div>
           </div>
 
           <div className="w-full my-16 relative flex items-center">
@@ -201,7 +205,7 @@ export default function Index() {
                 href={app.link}
                 className="relative card font-semibold gap-4 w-full group"
               >
-                <div className="absolute top-6 right-6 flex justify-center items-center w-10 h-10 rounded-full bg-white text-slate-500 ring-1 ring-slate-200 group-hover:text-cyan-500  group-hover:ring-cyan-500">
+                <div className="absolute top-[14px] md:top-6 right-[14px] md:right-6 flex justify-center items-center w-10 h-10 rounded-full bg-white text-slate-500 ring-1 ring-slate-200 group-hover:text-cyan-500  group-hover:ring-cyan-500">
                   <div className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
                     <IconArrowExternal />
                   </div>
@@ -214,15 +218,19 @@ export default function Index() {
           </div>
 
           <div className="card relative w-full mt-4">
-            <span className="font-semibold">SDK to build Apps on Lix</span>
-            <p>Build your own apps with the Lix SDK to access change control features.</p>
-            <p className="absolute right-6 bottom-6 w-fit bg-white ring-1 ring-slate-200 px-4 py-2 rounded-full">
-              Coming soon
-            </p>
+            <div className="flex justify-between items-end gap-2">
+              <div>
+                <span className="font-semibold">SDK to build Apps on Lix</span>
+                <p>Build your own apps with the Lix SDK to access change control features.</p>
+              </div>
+              <p className="w-fit whitespace-nowrap bg-white ring-1 ring-slate-200 px-4 py-2 rounded-full">
+                Coming soon
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-24">
+        <div className="grid md:grid-cols-3 gap-8 md:gap-24">
           <div>
             <h2 className="text-3xl font-semibold">Open questions?</h2>
             <div className="mt-4 flex gap-2">
@@ -241,17 +249,17 @@ export default function Index() {
                 .slice(0, 2)}
             </div>
           </div>
-          <div className="col-span-2 space-y-6">
+          <div className="col-span-2 space-y-3 md:space-y-6">
             {faq.map((question, index) => (
               <div key={index}>
                 <Details summary={question.question} content={question.answer} />
-                {faq.length - 1 !== index && <div className="mt-6 border-b border-slate-200"></div>}
+                {faq.length - 1 !== index && <div className="mt-3 md:mt-6 border-b border-slate-200"></div>}
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 max-w-xl mx-auto pl-20 border-l-2 border-surface-200">
+        <div className="flex flex-col gap-4 max-w-xl mx-auto pl-4 md:pl-16 border-l-2 border-surface-200">
           <p className="italic text-slate-800">
             "Every work that we create, every time we collaborate, everything we automate, it
             revolves around changes. A system, that can understand changes and inform you about that

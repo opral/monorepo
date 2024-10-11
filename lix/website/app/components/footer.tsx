@@ -7,7 +7,7 @@ export const Footer = () => {
 		<>
 			<div className="w-full mt-20 mb-4 border-t border-surface-200">
 				<footer className="mt-8 w-full max-w-5xl px-4 py-3 mx-auto flex flex-col gap-4">
-					<div className="card flex justify-between items-center gap-4">
+					<div className="card flex justify-between items-end md:items-center gap-4">
 						<p className="flex flex-col gap-0.5 text-slate-800">
 							<span className="font-semibold">Stay in the loop!</span>
 							Get regular updates and be the first who can use Lix.

@@ -16,7 +16,7 @@ p {
 }
 
 .card {
-  @apply p-6 bg-slate-100 ring-1 ring-slate-200 rounded-lg;
+  @apply p-4 md:p-6 bg-slate-100 ring-1 ring-slate-200 rounded-lg;
 }
 
 details[open] > summary::after {
