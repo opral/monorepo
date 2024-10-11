@@ -106,7 +106,7 @@ export default function Index() {
 				<div className="grid md:grid-cols-2 justify-center md:justify-start gap-16 md:gap-8 lg:gap-24 mt-12 mb-12">
 					<div className="max-w-md">
 						<div>
-							<h1 className="text-5xl leading-[1.3] font-semibold">
+							<h1 className="text-5xl leading-[1.2] font-semibold">
 								The change control system{" "}
 								<span className="inline-flex mt-3 items-center gap-3">
 									for
@@ -127,14 +127,14 @@ export default function Index() {
 							<a
 								href="https://opral.substack.com/"
 								target="_blanc"
-								className="w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex items-center gap-2 transition-all"
+								className="w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all"
 							>
 								Get updates
 							</a>
 							<a
 								href="https://x.com/FabianHiller/status/1839301632888131814"
 								target="_blanc"
-								className="w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex items-center gap-2 border border-slate-300 hover:border-slate-400 transition-all"
+								className="w-full sm:w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex justify-center items-center gap-2 border border-slate-300 hover:border-slate-400 transition-all"
 							>
 								<IconDate />
 								Talk at Web Dev Meetup NY
