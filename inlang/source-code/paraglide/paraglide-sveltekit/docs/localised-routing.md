@@ -63,7 +63,7 @@ This does make it ambigous which language should be used on `/` so language nego
 
 Whenever the language cannot be determined from the URL alone the language negotiation is triggered. This happens in the following steps:
 
-1. Check if the `paraglide:lang` cookie is set from previous visits, if so, use it
+1. Check if the `paraglide_lang` cookie is set from previous visits, if so, use it
 2. Negotiate the language from the `Accept-Language` header
 3. Use the default language
 
@@ -178,16 +178,16 @@ Use this to create a language switcher.
 
 ## Re-Loading Language-Dependent data
 
-If you have a `load` function that returns data that depends on the language you can tell it to re-run on language changes by calling `depends("paraglide:lang")`.
+If you have a `load` function that returns data that depends on the language you can tell it to re-run on language changes by calling `depends("paraglide_lang")`.
 
 ```ts
 // src/routes/+page.server.js
 export async function load({ depends }) {
-  // Paraglide-SvelteKit automatically calls `invalidate("paraglide:lang")` whenever the langauge changes
+  // Paraglide-SvelteKit automatically calls `invalidate("paraglide_lang")` whenever the langauge changes
   // This tells SvelteKit to re-run this function whenever that happens
-  depends("paraglide:lang") 
+  depends("paraglide_lang") 
   return await myLanguageSpecificData();
 }
 ```
 
-Paraglide-SvelteKit automatically calls `invalidate("paraglide:lang")` when the language changes.
+Paraglide-SvelteKit automatically calls `invalidate("paraglide_lang")` when the language changes.
