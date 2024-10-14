@@ -165,16 +165,7 @@ export default function Index() {
 					<div className="max-w-md">
 						<div>
 							<h1 className="text-5xl leading-[1.2] font-semibold">
-								The change control system{" "}
-								<span className="inline-flex mt-3 items-center gap-3">
-									for
-									<span className="flex items-center w-fit -mt-7 translate-y-[14px] pr-2 py-0.5 ring ring-slate-200 rounded-xl text-5xl font-semibold">
-										<div className="text-cyan-500">
-											<IconFile />
-										</div>
-										files
-									</span>
-								</span>
+								The worlds first change control system
 							</h1>
 						</div>
 						<p className="mt-8 mb-6">
