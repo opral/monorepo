@@ -4,8 +4,9 @@ import type { LixPlugin } from "../plugin.js";
 export type LixDatabaseSchema = {
 	file: LixFileTable;
 	change: ChangeTable;
-	commit: CommitTable;
-	ref: RefTable;
+	change_view: ChangeView;
+	branch: BranchTable;
+	branch_change: BranchChangeMappingTable;
 	file_internal: LixFileTable;
 	change_queue: ChangeQueueTable;
 	conflict: ConflictTable;
@@ -16,12 +17,21 @@ export type LixDatabaseSchema = {
 	discussion_change_map: DiscussionChangeMapTable;
 };
 
-export type Ref = Selectable<RefTable>;
-export type NewRef = Insertable<RefTable>;
-export type RefUpdate = Updateable<RefTable>;
-type RefTable = {
+export type Ref = Selectable<BranchTable>;
+export type NewRef = Insertable<BranchTable>;
+export type RefUpdate = Updateable<BranchTable>;
+type BranchTable = {
+	id: Generated<string>;
 	name: string;
-	commit_id: string;
+	base_branch?: string;
+	active: boolean;
+};
+
+type BranchChangeMappingTable = {
+	id: Generated<string>;
+	change_id: ChangeTable["id"];
+	branch_id: BranchTable["id"];
+	seq: number;
 };
 
 export type ChangeQueueEntry = Selectable<ChangeQueueTable>;
@@ -46,25 +56,6 @@ type LixFileTable = {
 	metadata: Record<string, any> | null;
 };
 
-export type Commit = Selectable<CommitTable>;
-export type NewCommit = Insertable<CommitTable>;
-export type CommitUpdate = Updateable<CommitTable>;
-type CommitTable = {
-	id: Generated<string>;
-	// todo:
-	//  multiple authors can commit one change
-	//  think of real-time collaboration scenarios
-	author?: string;
-	description: string;
-	/**
-	 * @deprecated use created_at instead
-	 * todo remove before release
-	 */
-	created: Generated<string>;
-	created_at: Generated<string>;
-	parent_id: string;
-};
-
 export type Change = Selectable<ChangeTable>;
 export type NewChange = Insertable<ChangeTable>;
 export type ChangeUpdate = Updateable<ChangeTable>;
@@ -73,11 +64,6 @@ type ChangeTable = {
 	parent_id?: ChangeTable["id"];
 	author?: string;
 	file_id: string;
-	/**
-	 * If no commit id exists on a change,
-	 * the change is considered uncommitted.
-	 */
-	commit_id?: CommitTable["id"];
 	/**
 	 * The plugin key that contributed the change.
 	 *
@@ -122,6 +108,11 @@ type ChangeTable = {
 	created_at: Generated<string>;
 };
 
+export type ChangeView = ChangeTable & {
+	branch_id: BranchTable["id"];
+	seq: BranchChangeMappingTable["seq"];
+};
+
 export type Conflict = Selectable<ConflictTable>;
 export type NewConflict = Insertable<ConflictTable>;
 export type ConflictUpdate = Updateable<ConflictTable>;
@@ -129,6 +120,7 @@ type ConflictTable = {
 	meta?: Record<string, any>;
 	reason?: string;
 	change_id: ChangeTable["id"];
+	branch_id: BranchTable["id"];
 	conflicting_change_id: ChangeTable["id"];
 	/**
 	 * The change id that the conflict was resolved with.
@@ -142,7 +134,6 @@ type ConflictTable = {
 // ------ discussions ------
 
 export type Discussion = Selectable<DiscussionTable>;
-export type NewDiscussion = Insertable<CommitTable>;
 export type DiscussionUpdate = Updateable<DiscussionTable>;
 type DiscussionTable = {
 	id: Generated<string>;

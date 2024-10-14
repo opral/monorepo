@@ -16,38 +16,95 @@ export async function getLowestCommonAncestor(args: {
 		return undefined;
 	}
 
-	const changeExistsInTarget = await args.targetLix.db
-		.selectFrom("change")
+	const currentTargetBranch = await args.targetLix.db
+		.selectFrom("branch")
 		.selectAll()
-		.where("id", "=", args.sourceChange.id)
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
+
+	const currentSourceBranch = await args.sourceLix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
+
+	const changeExistsInTarget = await args.targetLix.db
+		.selectFrom("branch_change")
+		.leftJoin("change", "branch_change.change_id", "change.id")
+		.select([
+			"author",
+			"change.id as id",
+			"change.parent_id as parent_id",
+			"type",
+			"file_id",
+			"plugin_key",
+			"operation",
+			"value",
+			"meta",
+			"created_at",
+		])
+		.orderBy("seq", "desc")
+		.where("branch_id", "=", currentTargetBranch.id)
+		.where("change.id", "=", args.sourceChange.id)
 		.executeTakeFirst();
 
 	if (changeExistsInTarget) {
-		return changeExistsInTarget;
+		return changeExistsInTarget as Change;
 	}
 
-	let nextChange: Change | undefined;
+	let nextChange: Change | undefined = args.sourceChange;
 	const _true = true;
 	while (_true) {
-		nextChange = await args.sourceLix.db
-			.selectFrom("change")
-			.selectAll()
-			.where("id", "=", nextChange?.parent_id ?? args.sourceChange.parent_id)
-			.executeTakeFirst();
+		if (!nextChange?.parent_id) {
+			// end of the change sequence. No common parent found.
+			return undefined;
+		}
+		nextChange = (await args.sourceLix.db
+			.selectFrom("branch_change")
+			.leftJoin("change", "branch_change.change_id", "change.id")
+			.select([
+				"author",
+				"change.id as id",
+				"change.parent_id as parent_id",
+				"type",
+				"file_id",
+				"plugin_key",
+				"operation",
+				"value",
+				"meta",
+				"created_at",
+			])
+			.where("branch_id", "=", currentSourceBranch.id)
+			.orderBy("seq", "desc")
+			.where("change.id", "=", nextChange.parent_id)
+			.executeTakeFirst()) as Change;
 
-		if (!nextChange || !nextChange.parent_id) {
+		if (!nextChange) {
 			// end of the change sequence. No common parent found.
 			return undefined;
 		}
 
 		const changeExistsInTarget = await args.targetLix.db
-			.selectFrom("change")
-			.selectAll()
-			.where("id", "=", nextChange.id)
+			.selectFrom("branch_change")
+			.leftJoin("change", "branch_change.change_id", "change.id")
+			.select([
+				"author",
+				"change.id as id",
+				"change.parent_id as parent_id",
+				"type",
+				"file_id",
+				"plugin_key",
+				"operation",
+				"value",
+				"meta",
+				"created_at",
+			])
+			.where("branch_id", "=", currentTargetBranch.id)
+			.where("change.id", "=", nextChange.id)
 			.executeTakeFirst();
 
 		if (changeExistsInTarget) {
-			return changeExistsInTarget;
+			return changeExistsInTarget as Change;
 		}
 	}
 	return;

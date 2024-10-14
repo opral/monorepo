@@ -34,6 +34,7 @@ export type LixPlugin<
 		lix: LixReadonly;
 		file: LixFile;
 		changes: Array<Change>;
+		obsoleteChanges?: Array<Change>;
 	}) => Promise<{
 		fileData: LixFile["data"];
 	}>;

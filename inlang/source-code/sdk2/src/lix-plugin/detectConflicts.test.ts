@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from "vitest";
 import { inlangLixPluginV1 } from "./inlangLixPluginV1.js";
+
 import {
 	newLixFile,
 	openLixInMemory,
@@ -11,6 +12,13 @@ import {
 test("a create operation should not report a conflict given that the change does not exist in target", async () => {
 	const targetLix = await openLixInMemory({ blob: await newLixFile() });
 	const sourceLix = await openLixInMemory({ blob: await newLixFile() });
+
+	const currentBranch = await sourceLix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
+
 	const changes = await sourceLix.db
 		.insertInto("change")
 		.values([
@@ -26,6 +34,16 @@ test("a create operation should not report a conflict given that the change does
 		])
 		.returningAll()
 		.execute();
+
+	await sourceLix.db
+		.insertInto("branch_change")
+		.values({
+			branch_id: currentBranch.id,
+			change_id: "1",
+			seq: 1,
+		})
+		.execute();
+
 	const conflicts = await inlangLixPluginV1.detectConflicts!({
 		sourceLix,
 		targetLix,
@@ -90,6 +108,17 @@ test("it should report an UPDATE as a conflict if leaf changes are conflicting",
 	const targetLix = await openLixInMemory({ blob: await newLixFile() });
 	const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
 
+	const currentTargetBranch = await targetLix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
+	const currentSourceBranch = await sourceLix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
+
 	const commonChanges: NewChange[] = [
 		{
 			id: "12s",
@@ -137,9 +166,41 @@ test("it should report an UPDATE as a conflict if leaf changes are conflicting",
 		.values([...commonChanges, ...changesOnlyInSource])
 		.execute();
 
+	await sourceLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: "12s",
+				seq: 1,
+			},
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: "2qa",
+				seq: 2,
+			},
+		])
+		.execute();
+
 	await targetLix.db
 		.insertInto("change")
 		.values([...commonChanges, ...changesOnlyInTarget])
+		.execute();
+
+	await targetLix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: "12s",
+				seq: 1,
+			},
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: "3sd",
+				seq: 2,
+			},
+		])
 		.execute();
 
 	const conflicts = await inlangLixPluginV1.detectConflicts!({
@@ -223,6 +284,13 @@ test("it should NOT report an UPDATE as a conflict if the common ancestor is the
 
 test("it should NOT report a DELETE as a conflict if the parent of the target and source are identical", async () => {
 	const targetLix = await openLixInMemory({ blob: await newLixFile() });
+
+	const currentTargetBranch = await targetLix.db
+		.selectFrom("branch")
+		.where("active", "=", true)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	await targetLix.db
 		.insertInto("change")
 		.values([
@@ -238,6 +306,15 @@ test("it should NOT report a DELETE as a conflict if the parent of the target an
 				},
 			},
 		])
+		.execute();
+
+	await targetLix.db
+		.insertInto("branch_change")
+		.values({
+			branch_id: currentTargetBranch.id,
+			change_id: "12s",
+			seq: 1,
+		})
 		.execute();
 
 	const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
@@ -270,7 +347,25 @@ test("it should NOT report a DELETE as a conflict if the parent of the target an
 
 	await sourceLix.db.insertInto("change").values(changesNotInTarget).execute();
 
+	await sourceLix.db
+		.insertInto("branch_change")
+		.values({
+			branch_id: currentTargetBranch.id,
+			change_id: "3sd",
+			seq: 2,
+		})
+		.execute();
+
 	await targetLix.db.insertInto("change").values(changesNotInSource).execute();
+
+	await targetLix.db
+		.insertInto("branch_change")
+		.values({
+			branch_id: currentTargetBranch.id,
+			change_id: "2qa",
+			seq: 2,
+		})
+		.execute();
 
 	const conflicts = await inlangLixPluginV1.detectConflicts!({
 		sourceLix,
