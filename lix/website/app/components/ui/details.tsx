@@ -7,7 +7,7 @@ const Details = (props: { summary: string; content: string }) => {
 			>
 				{props.summary}
 			</summary>
-			<p className="my-3">{props.content}</p>
+			<p className="my-3 sm:pr-8 lg:w-11/12">{props.content}</p>
 		</details>
 	)
 }
