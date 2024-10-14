@@ -1,11 +1,13 @@
 import { v4 } from "uuid";
-import { afterEach, beforeEach, bench, describe } from "vitest";
+import { afterEach, beforeEach, bench, describe, expect } from "vitest";
 import {
 	getLeafChange,
 	newLixFile,
 	openLixInMemory,
 	type Change,
 } from "../index.js";
+import { getLeafChangeRecursive } from "../query-utilities/get-leaf-change.js";
+import { sql } from "kysely";
 
 const createChange = (
 	type: "bundle" | "message" | "variant",
@@ -21,11 +23,14 @@ const createChange = (
 		type: type,
 		// @ts-expect-error - type error in lix
 		value: JSON.stringify(payload[type]),
+		valueB: sql`cast (${JSON.stringify(payload[type])} as jsonb)`
+
 	};
 	return change;
 };
 
 const setupLix = async (nMessages: number) => {
+	console.log('setting up lix with ' + nMessages)
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
 	});
@@ -36,7 +41,7 @@ const setupLix = async (nMessages: number) => {
 		const payloads = getPayloadsForId(v4());
 		
 		// lets asume we create a bundle once and don't change it to much over its lifetime
-		createChange("bundle", payloads);
+		mockChanges.push(createChange("bundle", payloads));
 
 		// lets asume we add 4 languages to the message and don't change it to much
 		// -> 6 changes
@@ -67,6 +72,7 @@ const setupLix = async (nMessages: number) => {
 		await lix.db.insertInto("change").values(batch).executeTakeFirst();
 	}
 	// await lix.db.insertInto("change").values(mockChanges).executeTakeFirst();
+	console.log('setting up lix with ' + nMessages + '.... done')
 
 	return { lix, firstChangeId };
 };
@@ -79,7 +85,7 @@ async function wait(ms: number): Promise<void> {
 	});
 }
 
-for (let i = 0; i < 4; i++) {
+for (let i = 0; i < 5; i++) {
 	const nMessages = Math.pow(10, i);
 	describe(
 		"select changes via on " +
@@ -88,12 +94,27 @@ for (let i = 0; i < 4; i++) {
 		async () => {
 			let project = await setupLix(nMessages);
 
-			bench("payload->property", async () => {
+			bench("payload JSON ->property", async () => {
 				let result = await project.lix.db
 					.selectFrom("change")
 					.selectAll()
 					.where(
-						(eb) => eb.ref("value", "->>").key("resizingConstraint"),
+						(eb) => eb.ref("value", "->>").key("id"),
+						"=",
+						100,
+					)
+
+					.executeTakeFirst();
+
+				// console.log(result)
+			});
+
+			bench("payload JSON B ->property", async () => {
+				let result = await project.lix.db
+					.selectFrom("change")
+					.selectAll()
+					.where(
+						(eb) => eb.ref("valueB", "->>").key("id"),
 						"=",
 						100,
 					)
@@ -113,7 +134,17 @@ for (let i = 0; i < 4; i++) {
 
 				// console.log(result)
 			});
+		}
+	);
+}
 
+for (let i = 0; i < 4; i++) {
+	const nMessages = Math.pow(10, i);
+	describe(
+		"get Leaf Node " +
+			nMessages +
+			" messages -> " + nMessages * (1+6+100) + " changes",
+		async () => {
 			bench(
 				"getLeafNode",
 				async () => {
@@ -127,6 +158,30 @@ for (let i = 0; i < 4; i++) {
 				{
 					iterations: 2,
 				},
+			);
+
+			bench(
+				"getLeafNodeRecursive",
+				async () => {
+
+
+					const result = await getLeafChangeRecursive({
+						lix: project.lix,
+						change: { id: project.firstChangeId } as Change,
+					});
+
+					// const result2 = await getLeafChange({
+					// 	lix: project.lix,
+					// 	change: { id: project.firstChangeId } as Change,
+					// });
+
+					// expect(result).toStrictEqual(result2)
+
+					// console.log('RESULTS:', result, result2)
+					
+
+					// console.log(result)
+				}
 			);
 		},
 	);

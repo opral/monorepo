@@ -6,6 +6,13 @@ import {
 	openLixInMemory,
 	type Change,
 } from "../index.js";
+import { getLeafChangeRecursive } from "../query-utilities/get-leaf-change.js";
+import { sql, type RawBuilder } from "kysely";
+import fs from 'fs'
+
+function json<T> (object: T): RawBuilder<T> {
+	return sql`jsonb(${JSON.stringify(object)})`
+  }
 
 const createChange = (parentChangeId?: string) => {
 	samplePaylod.resizingConstraint += 1;
@@ -19,11 +26,14 @@ const createChange = (parentChangeId?: string) => {
 		type: "mock",
 		// @ts-expect-error - type error in lix
 		value: JSON.stringify(samplePaylod),
+		valueB: json(samplePaylod) as any,
+		commit_id: 'abuse_for_column_in_overflow'
 	};
 	return change;
 };
 
 const setupLix = async (nChanges: number) => {
+	console.log('setting up lix for ' + nChanges + ' changes' )
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
 	});
@@ -40,13 +50,26 @@ const setupLix = async (nChanges: number) => {
 		mockChanges.push(change);
 	}
 
-	const batchSize = 256;
+	const batchSize = 1;
 	// Insert changes in batches
 	for (let i = 0; i < mockChanges.length; i += batchSize) {
 		const batch = mockChanges.slice(i, i + batchSize);
+		
+		// console.log(lix.db.insertInto("change").values(batch).compile())
 		await lix.db.insertInto("change").values(batch).executeTakeFirst();
 	}
 	// await lix.db.insertInto("change").values(mockChanges).executeTakeFirst();
+	console.log('setting up lix for ' + nChanges + ' changes.... done' )
+
+
+	const dbContent = await lix.toBlob()
+	const ab = await dbContent.arrayBuffer()
+	const buffer =  Buffer.from(ab)
+
+	fs.writeFile('output.db', buffer, (err) => {
+        if (err) throw err;
+        console.log('Blob has been written to output.txt');
+    });
 
 	return { lix, firstChangeId };
 };
@@ -68,14 +91,31 @@ for (let i = 0; i < 5; i++) {
 		async () => {
 			let project = await setupLix(nChanges);
 
-			bench.skip("payload->property", async () => {
+			bench("JSON payload-> first property", async () => {
 				let result = await project.lix.db
 					.selectFrom("change")
 					.selectAll()
 					.where(
-						(eb) => eb.ref("value", "->>").key("resizingConstraint"),
+						(eb) => eb.ref("value", "->>").key("firstProperty"),
 						"=",
-						100,
+						"rectangle",
+					)
+
+					.executeTakeFirst();
+
+				// console.log(result)
+
+				// console.log(result)
+			});
+
+			bench("JSONB payload->first property", async () => {
+				let result = await project.lix.db
+					.selectFrom("change")
+					.selectAll()
+					.where(
+						(eb) => eb.ref("valueB", "->>").key("firstProperty"),
+						"=",
+						"rectangle",
 					)
 
 					.executeTakeFirst();
@@ -83,7 +123,37 @@ for (let i = 0; i < 5; i++) {
 				// console.log(result)
 			});
 
-			bench.skip("column", async () => {
+			bench.skip("JSON payload-> last property", async () => {
+				let result = await project.lix.db
+					.selectFrom("change")
+					.selectAll()
+					.where(
+						(eb) => eb.ref("value", "->>").key("lastProperty"),
+						"=",
+						"teststring",
+					)
+
+					.executeTakeFirst();
+
+				// console.log(result)
+			});
+
+			bench("JSONB payload-> last property", async () => {
+				let result = await project.lix.db
+					.selectFrom("change")
+					.selectAll()
+					.where(
+						(eb) => eb.ref("valueB", "->>").key("lastProperty"),
+						"=",
+						"teststring",
+					)
+
+					.executeTakeFirst();
+
+				// console.log(result)
+			});
+
+			bench("column", async () => {
 				let result = await project.lix.db
 					.selectFrom("change")
 					.selectAll()
@@ -94,26 +164,24 @@ for (let i = 0; i < 5; i++) {
 				// console.log(result)
 			});
 
-			bench.skip(
-				"getLeafNode",
-				async () => {
-					await getLeafChange({
-						lix: project.lix,
-						change: { id: project.firstChangeId } as Change,
-					});
+			bench("column in overflow", async () => {
+				let result = await project.lix.db
+					.selectFrom("change")
+					.selectAll()
+					.where("commit_id", "=", "abuse_for_column_in_overflow")
 
-					// console.log(result)
-				},
-				{
-					iterations: 2,
-				},
-			);
-		},
+					.executeTakeFirst();
+
+				// console.log(result)
+			});
+
+			
+		} 
 	);
 }
 
 const samplePaylod = {
-	_class: "rectangle",
+	firstProperty: "rectangle",
 	do_objectID: "AEB63D36-FA90-4F68-90B0-BFEC297D1AF0",
 	booleanOperation: -1,
 	isFixedToViewport: false,
@@ -283,7 +351,7 @@ const samplePaylod = {
 			point: "{1, 1}",
 		},
 		{
-			_class: "curvePoint",
+			_class: "cur",
 			cornerRadius: 10,
 			cornerStyle: 0,
 			curveFrom: "{0, 1}",
@@ -297,4 +365,5 @@ const samplePaylod = {
 	fixedRadius: 0,
 	needsConvertionToNewRoundCorners: false,
 	hasConvertedToNewRoundCorners: true,
+	lastProperty: "teststring"
 };
