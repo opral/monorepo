@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { merge, openLixInMemory } from "@lix-js/sdk";
+import { openLixInMemory } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import Papa from "papaparse";
@@ -7,14 +7,10 @@ import Papa from "papaparse";
 import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
 import { plugin } from "./csv-plugin.js";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
-import { generateColor } from "./helper/gernerateUserColor/generateUserColor.ts";
-import { SlAlert } from "@shoelace-style/shoelace";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
-	undefined,
-	createJSONStorage(),
-	{ getOnInit: true }
+	undefined
 );
 
 export const authorNameAtom = atomWithStorage<string | undefined>(
@@ -44,285 +40,33 @@ export const projectAtom = atom(async (get) => {
 	// workaround for https://github.com/opral/lix-sdk/issues/47
 	get(forceReloadProjectAtom);
 
+	if (safeProjectToOpfsInterval) {
+		clearInterval(safeProjectToOpfsInterval);
+	}
+
 	try {
-		const fallbackPath = get(selectedProjectPathAtom);
+		const path = get(selectedProjectPathAtom);
+		if (!path) return undefined;
 		const rootHandle = await getOriginPrivateDirectory();
-
-		let path: undefined | string = undefined;
-
-		const urlParams = new URLSearchParams(window.location.search);
-		const project_id_search_param = urlParams.get("project");
-
-		if (project_id_search_param) {
-			// console.log(
-			// 	"Project id in search parameter found ... try to match local project CURRENT STATE:" +
-			// 		fallbackPath
-			// );
-			// try to find a project locally
-			for await (const entry of rootHandle.keys()) {
-				if (!(entry as string).includes("___")) {
-					// skip all files in opfs that don't have the separator yet
-					continue;
-				}
-				const [entry_project_id] = entry.split("___");
-
-				if (project_id_search_param === entry_project_id) {
-					path = entry;
-				}
-			}
-
-			if (path) {
-				// console.log(
-				// 	"Project id in search parameter found ... try to match local project -> Project found localy"
-				// );
-			} else {
-				// console.log(
-				// 	"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote"
-				// );
-
-				const lixServerRequest = await fetch(
-					"https://monorepo-6hl2.onrender.com/lix-file/" +
-						project_id_search_param
-				);
-				if (!lixServerRequest.ok) {
-					// console.log(
-					// 	"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote -> NOT FOUND"
-					// );
-					return;
-				}
-
-				// console.log(
-				// 	"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote -> NOT FOUND"
-				// );
-
-				// we don't have the project localy yet - try to fetch it from remote
-				const projectBlobFromRemote = await lixServerRequest.arrayBuffer();
-
-				const serverLix = await openLixInMemory({
-					blob: new Blob([projectBlobFromRemote]),
-					providePlugins: [plugin],
-				});
-
-				const projectMetaFile = await serverLix.db
-					.selectFrom("file")
-					.select("data")
-					.where("path", "=", "/project_meta")
-					.executeTakeFirstOrThrow();
-				const projectMetaRaw = new TextDecoder().decode(projectMetaFile.data);
-				//console.log(projectMetaRaw);
-
-				const projectId = JSON.parse(projectMetaRaw).project_id;
-				const projectFileName = JSON.parse(projectMetaRaw).initial_file_name;
-
-				path = projectId + "___" + projectFileName;
-
-				// console.log(
-				// 	"Project id in search parameter found ... try to match local project -> Project not found -> try to fetch it from remote -> FOUND - writing to " +
-				// 		path
-				// );
-				// write file locally
-				const fileHandle = await rootHandle.getFileHandle(path, {
-					create: true,
-				});
-
-				const writable = await fileHandle.createWritable();
-				await writable.write(await serverLix.toBlob());
-				await writable.close();
-			}
-		} else {
-			// console.log(
-			// 	"No project found in search parameter - checking state" + fallbackPath
-			// );
-			if (fallbackPath === undefined) {
-				// console.log(
-				// 	"No project found in search parameter - checking state -> no state return"
-				// );
-				return;
-			}
-			path = fallbackPath;
-		}
-
-		//console.log("rootHandle.getFileHandle(path)");
 		const fileHandle = await rootHandle.getFileHandle(path);
-		//console.log("const file = await fileHandle.getFile();");
 		const file = await fileHandle.getFile();
 		const project = await openLixInMemory({
 			blob: file,
 			providePlugins: [plugin],
 		});
-
-		// userPosition
-		const userPosition = get(editorSelectionAtom);
-		const userName = get(authorNameAtom);
-		if (userPosition && userName) {
-			// create a file in the project and store the position in it
-			await project.db
-				.insertInto("file")
-				.values([
-					{
-						id: userName + "_position",
-						path: userName + "_position.json",
-						data: new TextEncoder().encode(
-							JSON.stringify({
-								position: {
-									...userPosition,
-									userName: userName,
-									color: generateColor(userName),
-									date: new Date().toISOString(),
-								},
-							})
-						),
-					},
-				])
-				.execute();
-		}
-
-		await project.settled();
-
-		const projectMetaRaw = new TextDecoder().decode(
-			(
-				await project.db
-					.selectFrom("file")
-					.where("path", "=", "/project_meta")
-					.select("data")
-					.executeTakeFirstOrThrow()
-			).data
-		);
-
-		const { project_id } = JSON.parse(projectMetaRaw);
-
 		// @ts-ignore
-		// safeProjectToOpfsInterval = setInterval(
-		const syncLixFile = async () => {
-			const file = await project.toBlob();
+		safeProjectToOpfsInterval = setInterval(async () => {
 			const writable = await fileHandle.createWritable();
-
-			const currentProjectMeta = get(selectedProjectPathAtom);
-
-			// if the project is not the fallback path, we don't want to sync it
-			if (
-				currentProjectMeta &&
-				project_id !== currentProjectMeta?.split("___")?.[0]
-			) {
-				return;
-			}
-
-			console.log("sync instance -- ", project_id);
-
-			const checkIfExists = await fetch(
-				"https://monorepo-6hl2.onrender.com/lix-file/" + project_id
-			);
-
-			// console.log("projectId: ", project_id);
-			// console.log("response state: ", checkIfExists.ok);
-
-			if (checkIfExists.ok) {
-				// the file does exist remotely - trigger sync
-				const response = await fetch(
-					"https://monorepo-6hl2.onrender.com/lix-file/" + project_id,
-					{
-						method: "POST",
-						headers: {
-							"Content-Type": "application/octet-stream",
-						},
-						body: file,
-					}
-				);
-
-				if (!response.ok) {
-					throw new Error("Network response was not ok " + response.statusText);
-				}
-
-				const content = await response.arrayBuffer();
-
-				const serverLix = await openLixInMemory({
-					blob: new Blob([content]),
-					providePlugins: [plugin],
-				});
-
-				// console.log("serverLix", serverLix);
-
-				await merge({
-					sourceLix: serverLix,
-					targetLix: project,
-				});
-			}
-
-			await writable.write(await project.toBlob());
+			const file = await project.toBlob();
+			await writable.write(file);
 			await writable.close();
-
-			setTimeout(syncLixFile, 1000);
-		};
-
-		syncLixFile();
+		}, 2000);
 
 		return project;
 	} catch (e) {
 		console.error(e);
 		return undefined;
 	}
-});
-
-let lastStateIsProjectSynced = false;
-
-export const isProjectSyncedAtom = atom(async (get) => {
-	const project = await get(projectAtom);
-	get(withPollingAtom);
-	if (!project) return false;
-	const projectMetaRaw = new TextDecoder().decode(
-		(
-			await project.db
-				.selectFrom("file")
-				.where("path", "=", "/project_meta")
-				.select("data")
-				.executeTakeFirstOrThrow()
-		).data
-	);
-	const { project_id } = JSON.parse(projectMetaRaw);
-	const checkIfExists = await fetch(
-		"https://monorepo-6hl2.onrender.com/lix-file/" + project_id
-	);
-	if (lastStateIsProjectSynced !== checkIfExists.ok) {
-		const alert: SlAlert | null = document.querySelector(".copied-link-alert");
-		if (alert) {
-			navigator.clipboard.writeText(window.location.href).then(() => {
-				alert.show();
-			});
-		}
-	}
-	lastStateIsProjectSynced = checkIfExists.ok;
-	return checkIfExists.ok;
-});
-
-export const userPositionsAtom = atom<
-	Promise<
-		{
-			col: string;
-			row: string;
-			userName: string;
-			color: string;
-			date: string;
-		}[]
-	>
->(async (get) => {
-	get(withPollingAtom);
-	const project = await get(projectAtom);
-	if (!project) return [];
-	const files = await project.db
-		.selectFrom("file")
-		.where("path", "like", "%_position.json%")
-		.select("data")
-		.execute();
-
-	if (files && files.length > 0) {
-		const userPositions = [];
-		for (const file of files) {
-			const data = JSON.parse(new TextDecoder().decode(file.data));
-			userPositions.push(data.position);
-		}
-		return userPositions;
-	}
-	return [];
 });
 
 // export const settingsAtom = atom(async (get) => {
@@ -357,7 +101,7 @@ export const csvDataAtom = atom(async (get) => {
 	}).data as [{ [key: string]: string }];
 });
 
-export const uniqueColumnAtom = atom<Promise<string>>(async (get) => {
+export const uniqueColumnAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];

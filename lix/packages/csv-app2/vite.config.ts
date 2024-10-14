@@ -15,14 +15,8 @@ export default defineConfig({
 	optimizeDeps: {
 		exclude: [
 			"@lix-js/sdk",
-			"@inlang/sdk2",
 			"@sqlite.org/sqlite-wasm",
 			"@eliaspourquoi/sqlite-node-wasm",
 		],
-	},
-	build: {
-		// target is es2022 to support top level await
-		// https://caniuse.com/?search=top%20level%20await
-		target: "es2022",
 	},
 });

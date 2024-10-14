@@ -5,7 +5,6 @@ import { useAtom } from "jotai";
 import { useEffect } from "react";
 import {
 	authorNameAtom,
-	isProjectSyncedAtom,
 	projectAtom,
 	selectedProjectPathAtom,
 	withPollingAtom,
@@ -15,7 +14,6 @@ import {
 	SlAlert,
 	SlAvatar,
 	SlButton,
-	SlTag,
 	SlTooltip,
 } from "@shoelace-style/shoelace/dist/react";
 import SubNavigation from "./components/SubNavigation.tsx";
@@ -28,36 +26,9 @@ export default function Layout(props: {
 	const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
 	const [authorName] = useAtom(authorNameAtom);
 	const [project] = useAtom(projectAtom);
-	const [isProjectSynced] = useAtom(isProjectSyncedAtom);
 
 	const navigate = useNavigate();
 	const [, setSearchParams] = useSearchParams();
-
-	const handleShare = async () => {
-		if (project === undefined) {
-			return;
-		}
-		const { project_id } = JSON.parse(
-			new TextDecoder().decode(
-				(
-					await project!.db
-						.selectFrom("file")
-						.where("path", "=", "/project_meta")
-						.select("data")
-						.executeTakeFirstOrThrow()
-				).data
-			)
-		);
-
-		const file = await project.toBlob();
-		await fetch("https://monorepo-6hl2.onrender.com/lix-file/" + project_id, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/octet-stream",
-			},
-			body: file,
-		});
-	};
 
 	const handleDownload = async () => {
 		const file = await project?.db
@@ -171,28 +142,6 @@ export default function Layout(props: {
 								Discover SDK
 							</SlButton>
 						</SlTooltip>
-						{
-							// authorName === "Nils" &&
-							!isProjectSynced && (
-								<SlTooltip content="Press to share with your team">
-									<SlButton
-										size="small"
-										variant="default"
-										onClick={() => handleShare()}
-									>
-										Share
-									</SlButton>
-								</SlTooltip>
-							)
-						}
-						{isProjectSynced && (
-							<SlTag>
-								<div className="flex gap-2 items-center">
-									<div className="w-2 h-2 rounded-full bg-blue-500" />
-									synced
-								</div>
-							</SlTag>
-						)}
 						<SlTooltip content="Download .csv">
 							<SlButton
 								size="small"
@@ -248,6 +197,7 @@ export default function Layout(props: {
 					closable
 				>
 					<svg
+						// @ts-ignore
 						slot="icon"
 						xmlns="http://www.w3.org/2000/svg"
 						width="20px"
