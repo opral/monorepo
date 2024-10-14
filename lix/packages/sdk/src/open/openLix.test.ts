@@ -24,14 +24,14 @@ test.todo(
 			key: "mock-plugin",
 			glob: "*",
 			diff: {
-				file: async ({ neu }) => {
-					const json = JSON.parse(new TextDecoder().decode(neu?.data));
+				file: async ({ after }) => {
+					const json = JSON.parse(new TextDecoder().decode(after?.data));
 					return [
 						{
 							type: "mock",
 							operation: "create",
-							old: undefined,
-							neu: {
+							before: undefined,
+							after: {
 								id: "uuid",
 								name: json["name"],
 							},
