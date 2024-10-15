@@ -366,15 +366,13 @@ test("it should apply changes that are not conflicting", async () => {
 			file: vi.fn(),
 		},
 		detectConflicts: vi.fn().mockResolvedValue([]),
-		applyChanges: async ({ changes, lix }) => {
-            
-			const lastChange = changes[changes.length - 1]
-            const fileData = new TextEncoder().encode(
-                JSON.stringify(lastChange!.value ?? {}),
-            );
-            return { fileData };
-        },
-
+		applyChanges: async ({ changes }) => {
+			const lastChange = changes[changes.length - 1];
+			const fileData = new TextEncoder().encode(
+				JSON.stringify(lastChange!.value ?? {}),
+			);
+			return { fileData };
+		},
 	};
 
 	const sourceLix = await openLixInMemory({
