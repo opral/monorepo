@@ -111,6 +111,8 @@ type ChangeTable = {
 	 *   - For an inlang message change, the value would be the new message.
 	 */
 	value?: Record<string, any> & { id: string };
+
+	valueB?: Record<string, any> & { id: string };
 	/**
 	 * Additional metadata for the change used by the plugin
 	 * to process changes.

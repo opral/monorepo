@@ -36,11 +36,14 @@ export async function createSchema(args: { db: Kysely<any> }) {
     plugin_key TEXT NOT NULL,
     operation TEXT NOT NULL,
     value TEXT,
+    valueB BLOB,
+
     meta TEXT,
     commit_id TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
   ) strict;
 
+  CREATE INDEX IF NOT EXISTS idx_change_parent_id ON change (parent_id);
   CREATE TABLE conflict (
     change_id TEXT NOT NULL,
     conflicting_change_id TEXT NOT NULL,

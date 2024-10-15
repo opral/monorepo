@@ -8,6 +8,7 @@
 	},
 	"scripts": {
 		"build": "tsc --build",
+		"bench": "vitest bench",
 		"test": "tsc --noEmit && vitest run --coverage",
 		"test:watch": "vitest",
 		"dev": "tsc --watch",
