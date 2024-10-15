@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-null */
 import { expect, test, vi } from "vitest";
 import { openLixInMemory } from "./open/openLixInMemory.js";
 import { newLixFile } from "./newLix.js";
@@ -46,7 +45,6 @@ test("should use queue and settled correctly", async () => {
 					!before
 						? {
 								type: "text",
-								operation: "create",
 								before: undefined,
 								after: {
 									id: "test",
@@ -55,7 +53,6 @@ test("should use queue and settled correctly", async () => {
 							}
 						: {
 								type: "text",
-								operation: "update",
 								before: {
 									id: "test",
 									text: before?.text,
@@ -75,7 +72,6 @@ test("should use queue and settled correctly", async () => {
 		providePlugins: [mockPlugin],
 	});
 
-
 	const enc = new TextEncoder();
 	await lix.db
 		.insertInto("file")
@@ -88,7 +84,7 @@ test("should use queue and settled correctly", async () => {
 		.execute();
 
 	expect(internalFiles).toEqual([]);
-	
+
 	const queue = await lix.db.selectFrom("change_queue").selectAll().execute();
 	expect(queue).toEqual([
 		{
@@ -100,7 +96,6 @@ test("should use queue and settled correctly", async () => {
 		},
 	]);
 	await lix.settled();
-
 
 	expect(
 		(await lix.db.selectFrom("change_queue").selectAll().execute()).length,
@@ -120,14 +115,18 @@ test("should use queue and settled correctly", async () => {
 		},
 	]);
 
-	const changes = await lix.db.selectFrom("change").innerJoin("snapshot", "snapshot.id", "change.snapshot_id").selectAll().execute();
+	const changes = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.selectAll()
+		.execute();
 
 	expect(changes).toEqual([
 		{
 			id: changes[0]?.id,
 			author: null,
 			created_at: changes[0]?.created_at,
-			snapshot_id:  changes[0]?.snapshot_id,
+			snapshot_id: changes[0]?.snapshot_id,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -138,7 +137,6 @@ test("should use queue and settled correctly", async () => {
 			},
 			meta: null,
 			commit_id: null,
-			operation: "create",
 		},
 	]);
 
@@ -201,7 +199,6 @@ test("should use queue and settled correctly", async () => {
 			parent_id: null,
 			type: "text",
 			file_id: "test",
-			operation: "create",
 			plugin_key: "mock-plugin",
 			value: {
 				id: "test",
@@ -218,7 +215,6 @@ test("should use queue and settled correctly", async () => {
 			file_id: "test",
 			id: updatedChanges[1]?.id,
 			meta: null,
-			operation: "update",
 			parent_id: updatedChanges[0]?.id,
 			plugin_key: "mock-plugin",
 			type: "text",
@@ -235,7 +231,6 @@ test("should use queue and settled correctly", async () => {
 			file_id: "test",
 			id: updatedChanges[2]?.id,
 			meta: null,
-			operation: "update",
 			parent_id: updatedChanges[1]?.id,
 			plugin_key: "mock-plugin",
 			type: "text",
@@ -257,7 +252,6 @@ test("changes should contain the author", async () => {
 			file: vi.fn().mockResolvedValue([
 				{
 					type: "mock",
-					operation: "create",
 					before: undefined,
 					after: {} as any,
 				},

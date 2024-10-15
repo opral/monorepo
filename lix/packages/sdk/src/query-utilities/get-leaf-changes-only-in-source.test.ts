@@ -24,60 +24,58 @@ test("it should get the leaf changes that only exist in source", async () => {
 		{
 			id: "c1",
 			file_id: "mock",
-			operation: "create",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: 'snc1',
+			snapshot_id: "snc1",
 		},
 		{
 			id: "c2",
 			file_id: "mock",
 			parent_id: "c1",
-			operation: "create",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: 'snc2',
+			snapshot_id: "snc2",
 		},
 	];
 
-	const snapshotsOnlyInSource = [{
-		id: 'sns1',
-		value: { id: "mock-id", color: "pink" },
-	},{
-		id: 'sns2',
-		value: { id: "mock-id", color: "orange" },
-	},{
-		id: 'sns3',
-		value: { id: "mock-id", color: "yellow" },
-	}]
-	
+	const snapshotsOnlyInSource = [
+		{
+			id: "sns1",
+			value: { id: "mock-id", color: "pink" },
+		},
+		{
+			id: "sns2",
+			value: { id: "mock-id", color: "orange" },
+		},
+		{
+			id: "sns3",
+			value: { id: "mock-id", color: "yellow" },
+		},
+	];
 
 	const changesOnlyInSource: NewChange[] = [
 		{
 			id: "s1",
 			file_id: "mock",
-			operation: "create",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: 'sns1',
+			snapshot_id: "sns1",
 		},
 		{
 			id: "s2",
 			parent_id: "s1",
 			file_id: "mock",
-			operation: "update",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: 'sns2',
+			snapshot_id: "sns2",
 		},
 		{
 			id: "s3",
 			parent_id: "s2",
 			file_id: "mock",
-			operation: "update",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: 'sns3',
+			snapshot_id: "sns3",
 		},
 	];
 
@@ -92,10 +90,9 @@ test("it should get the leaf changes that only exist in source", async () => {
 			id: "t1",
 			parent_id: "c2",
 			file_id: "mock",
-			operation: "create",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: 'snt1',
+			snapshot_id: "snt1",
 		},
 	];
 

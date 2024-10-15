@@ -29,14 +29,12 @@ test("it should throw if the to be resolved with change already exists", async (
 
 	const mockChanges: NewChange[] = [
 		{
-			operation: "create",
 			plugin_key: "plugin1",
 			type: "mock",
 			file_id: "mock",
 			snapshot_id: "sn1",
 		},
 		{
-			operation: "create",
 			file_id: "mock",
 			plugin_key: "plugin1",
 			type: "mock",
@@ -121,14 +119,12 @@ test("resolving a conflict should throw if the to be resolved with change is not
 
 	const mockChanges: NewChange[] = [
 		{
-			operation: "create",
 			plugin_key: "plugin1",
 			type: "mock",
 			file_id: "mock",
 			snapshot_id: "sn1",
 		},
 		{
-			operation: "create",
 			file_id: "mock",
 			plugin_key: "plugin1",
 			type: "mock",
@@ -185,7 +181,6 @@ test("resolving a conflict should throw if the to be resolved with change is not
 			lix: lix,
 			conflict: conflict,
 			newChange: {
-				operation: "create",
 				author: undefined,
 				file_id: "mock",
 				parent_id: null,
@@ -219,14 +214,12 @@ test("resolving a conflict should throw if the change to resolve with does not b
 
 	const mockChanges: NewChange[] = [
 		{
-			operation: "create",
 			plugin_key: "plugin1",
 			type: "mock",
 			file_id: "mock",
 			snapshot_id: "sn1",
 		},
 		{
-			operation: "create",
 			file_id: "mock",
 			plugin_key: "plugin1",
 			type: "mock",
@@ -276,7 +269,6 @@ test("resolving a conflict should throw if the change to resolve with does not b
 			lix: lix,
 			conflict: conflict,
 			newChange: {
-				operation: "create",
 				file_id: "other-mock-file",
 				parent_id: changes[0]!.id,
 				plugin_key: "plugin1",
@@ -308,14 +300,12 @@ test("resolving a conflict with a new change should insert the change and mark t
 
 	const mockChanges: NewChange[] = [
 		{
-			operation: "create",
 			plugin_key: "plugin1",
 			type: "mock",
 			file_id: "mock",
 			snapshot_id: "sn1",
 		},
 		{
-			operation: "create",
 			file_id: "mock",
 			plugin_key: "plugin1",
 			type: "mock",
@@ -345,10 +335,10 @@ test("resolving a conflict with a new change should insert the change and mark t
 		.execute();
 
 	await lix.db
-			.insertInto("snapshot")
-			.values(mockSnapshots)
-			.returningAll()
-			.execute();
+		.insertInto("snapshot")
+		.values(mockSnapshots)
+		.returningAll()
+		.execute();
 
 	const changes = await lix.db
 		.insertInto("change")
@@ -369,7 +359,6 @@ test("resolving a conflict with a new change should insert the change and mark t
 		lix: lix,
 		conflict: conflict,
 		newChange: {
-			operation: "create",
 			file_id: "mock",
 			parent_id: changes[0]!.id,
 			plugin_key: "plugin1",

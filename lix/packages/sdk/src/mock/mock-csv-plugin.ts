@@ -120,7 +120,6 @@ export const mockCsvPlugin: LixPlugin<{
 				return [
 					{
 						type: "cell",
-						operation: before && after ? "update" : before ? "delete" : "create",
 						before,
 						after,
 					},

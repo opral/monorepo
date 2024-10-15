@@ -15,7 +15,6 @@ test("should be able to add and commit changes", async () => {
 					!old
 						? {
 								type: "text",
-								operation: "create",
 								before: undefined,
 								after: {
 									id: "test",
@@ -24,7 +23,6 @@ test("should be able to add and commit changes", async () => {
 							}
 						: {
 								type: "text",
-								operation: "update",
 								before: {
 									id: "test",
 									text: "inserted text",
@@ -63,7 +61,8 @@ test("should be able to add and commit changes", async () => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll().execute();
+		.selectAll()
+		.execute();
 
 	// console.log(await lix.db.selectFrom("queue").selectAll().execute());
 
@@ -81,9 +80,8 @@ test("should be able to add and commit changes", async () => {
 				id: "test",
 				text: "inserted text",
 			},
-			meta: null,
 			commit_id: null,
-			operation: "create",
+			meta: null,
 		},
 	]);
 
@@ -120,7 +118,6 @@ test("should be able to add and commit changes", async () => {
 			},
 			meta: null,
 			commit_id: commits[0]?.id!,
-			operation: "create",
 		},
 	]);
 
@@ -165,7 +162,6 @@ test("should be able to add and commit changes", async () => {
 			},
 			meta: null,
 			commit_id: commits[0]?.id,
-			operation: "create",
 		},
 		{
 			id: updatedChanges[1]?.id!,
@@ -182,7 +178,6 @@ test("should be able to add and commit changes", async () => {
 			},
 			meta: null,
 			commit_id: null,
-			operation: "update",
 		},
 	]);
 

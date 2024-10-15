@@ -75,34 +75,6 @@ type MaybePromise<T> = T | Promise<T>;
  */
 export type DiffReport = {
 	type: string;
-	operation: "create" | "update" | "delete";
 	before?: Record<string, any> & { id: string };
 	after?: Record<string, any> & { id: string };
-	meta?: Record<string, any>;
-} & (DiffReportCreate | DiffReportUpdate | DiffReportDeletion);
-
-type DiffReportCreate = {
-	operation: "create";
-	before: undefined;
-	after: Record<string, any> & {
-		id: string;
-	};
-};
-
-type DiffReportUpdate = {
-	operation: "update";
-	before: Record<string, any> & {
-		id: string;
-	};
-	after: Record<string, any> & {
-		id: string;
-	};
-};
-
-type DiffReportDeletion = {
-	operation: "delete";
-	before: Record<string, any> & {
-		id: string;
-	};
-	after: undefined;
 };

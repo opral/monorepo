@@ -31,7 +31,6 @@ test("it should find the common parent of two changes recursively", async () => 
 		{
 			id: "0",
 			parent_id: undefined,
-			operation: "create",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
@@ -40,7 +39,6 @@ test("it should find the common parent of two changes recursively", async () => 
 		{
 			id: "1",
 			parent_id: "0",
-			operation: "update",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
@@ -49,7 +47,6 @@ test("it should find the common parent of two changes recursively", async () => 
 		{
 			id: "2",
 			parent_id: "1",
-			operation: "update",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
@@ -121,7 +118,6 @@ test("it should return undefined if no common parent exists", async () => {
 		{
 			id: "0",
 			parent_id: undefined,
-			operation: "create",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
@@ -130,7 +126,6 @@ test("it should return undefined if no common parent exists", async () => {
 		{
 			id: "1",
 			parent_id: "0",
-			operation: "update",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
@@ -139,7 +134,6 @@ test("it should return undefined if no common parent exists", async () => {
 		{
 			id: "2",
 			parent_id: undefined,
-			operation: "create",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
@@ -209,7 +203,6 @@ test("it should return the source change if its the common parent", async () => 
 		{
 			id: "0",
 			parent_id: undefined,
-			operation: "create",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
@@ -218,7 +211,6 @@ test("it should return the source change if its the common parent", async () => 
 		{
 			id: "1",
 			parent_id: "0",
-			operation: "update",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",

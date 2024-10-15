@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-null */
 import { newLixFile } from "../newLix.js";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { mockCsvPlugin } from "./mock-csv-plugin.js";
@@ -11,14 +10,8 @@ describe("applyChanges()", () => {
 			"Name,Age\nAnna,20\nPeter,50\nJohn,30",
 		);
 		const changes = [
-			{
-				operation: "create",
-				value: { rowIndex: 3, columnIndex: 0, text: "John" },
-			},
-			{
-				operation: "create",
-				value: { rowIndex: 3, columnIndex: 1, text: "30" },
-			},
+			{ value: { rowIndex: 3, columnIndex: 0, text: "John" } },
+			{ value: { rowIndex: 3, columnIndex: 1, text: "30" } },
 		];
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const { fileData } = await mockCsvPlugin.applyChanges!({
@@ -33,12 +26,7 @@ describe("applyChanges()", () => {
 	test("it should apply an update change", async () => {
 		const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 		const after = new TextEncoder().encode("Name,Age\nAnna,21\nPeter,50");
-		const changes = [
-			{
-				operation: "update",
-				value: { rowIndex: 1, columnIndex: 1, text: "21" },
-			},
-		];
+		const changes = [{ value: { rowIndex: 1, columnIndex: 1, text: "21" } }];
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const { fileData } = await mockCsvPlugin.applyChanges!({
 			file: { id: "mock", path: "x.csv", data: before, metadata: null },
@@ -54,36 +42,30 @@ describe("applyChanges()", () => {
 		const lix = await openLixInMemory({ blob: await newLixFile() });
 
 		await lix.db
-		.insertInto("snapshot")
-		.values({
-			id: "parent_change_snapshot_id",
-			// @ts-expect-error - database expects stringified json
-			value: JSON.stringify({
-				columnIndex: 1,
-				rowIndex: 2,
-				text: "50",
-			}),
-		})
-		.execute();
+			.insertInto("snapshot")
+			.values({
+				id: "parent_change_snapshot_id",
+				// @ts-expect-error - database expects stringified json
+				value: JSON.stringify({
+					columnIndex: 1,
+					rowIndex: 2,
+					text: "50",
+				}),
+			})
+			.execute();
 
 		await lix.db
 			.insertInto("change")
 			.values({
 				id: "parent_change_id",
 				file_id: "random",
-				operation: "create",
 				plugin_key: "csv",
 				type: "cell",
-				snapshot_id: "parent_change_snapshot_id"
+				snapshot_id: "parent_change_snapshot_id",
 			})
 			.execute();
 
-		const changes = [
-			{
-				operation: "delete",
-				parent_id: "parent_change_id",
-			},
-		];
+		const changes = [{ parent_id: "parent_change_id" }];
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const { fileData } = await mockCsvPlugin.applyChanges!({
 			file: { id: "mock", path: "x.csv", data: before, metadata: null },
@@ -117,13 +99,11 @@ describe("diff.file()", () => {
 		expect(diffs).toEqual([
 			{
 				type: "cell",
-				operation: "create",
 				before: undefined,
 				after: { rowIndex: 3, columnIndex: 0, text: "John" },
 			},
 			{
 				type: "cell",
-				operation: "create",
 				before: undefined,
 				after: { rowIndex: 3, columnIndex: 1, text: "30" },
 			},
@@ -140,7 +120,6 @@ describe("diff.file()", () => {
 		expect(diffs).toEqual([
 			{
 				type: "cell",
-				operation: "update",
 				before: { rowIndex: 1, columnIndex: 1, text: "20" },
 				after: { rowIndex: 1, columnIndex: 1, text: "21" },
 			},
@@ -157,13 +136,11 @@ describe("diff.file()", () => {
 		expect(diffs).toEqual([
 			{
 				type: "cell",
-				operation: "delete",
 				before: { rowIndex: 2, columnIndex: 0, text: "Peter" },
 				after: undefined,
 			},
 			{
 				type: "cell",
-				operation: "delete",
 				before: { rowIndex: 2, columnIndex: 1, text: "50" },
 				after: undefined,
 			},
