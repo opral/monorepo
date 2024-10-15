@@ -3,9 +3,11 @@ import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { v4 } from "uuid";
 import { SerializeJsonPlugin } from "./serializeJsonPlugin.js";
 import type { LixDatabaseSchema } from "./schema.js";
+import { applySchema } from "./applySchema.js";
 
 export function initDb(args: { sqlite: SqliteDatabase }) {
 	initDefaultValueFunctions({ sqlite: args.sqlite });
+	applySchema({ sqlite: args.sqlite });
 	const db = new Kysely<LixDatabaseSchema>({
 		dialect: createDialect({
 			database: args.sqlite,

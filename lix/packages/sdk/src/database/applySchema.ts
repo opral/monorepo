@@ -1,20 +1,23 @@
-import { sql, type Kysely } from "kysely";
+import type { SqliteDatabase } from "sqlite-wasm-kysely";
 
-export async function createSchema(args: { db: Kysely<any> }) {
-	return await sql`
-  CREATE TABLE ref (
+/**
+ * Applies the database schema to the given sqlite database.
+ */
+export async function applySchema(args: { sqlite: SqliteDatabase }) {
+	return args.sqlite.exec`
+  CREATE TABLE IF NOT EXISTS ref (
     name TEXT PRIMARY KEY,
     commit_id TEXT
   );
 
-  CREATE TABLE file_internal (
+  CREATE TABLE IF NOT EXISTS file_internal (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL,
     metadata TEXT  -- Added metadata field
   ) strict;
 
-  CREATE TABLE change_queue (
+  CREATE TABLE IF NOT EXISTS change_queue (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     file_id TEXT,
     path TEXT NOT NULL,
@@ -22,12 +25,12 @@ export async function createSchema(args: { db: Kysely<any> }) {
     metadata TEXT  -- Added metadata field
   ) strict;
 
-  create view file as
+  create view IF NOT EXISTS file as
     select z.id as id, z.path as path, z.data as data, z.metadata as metadata, MAX(z.mx) as queue_id from 
       (select file_id as id, path, data, metadata, id as mx from change_queue UNION select id, path, data, metadata, 0 as mx from file_internal) as z
     group by z.id;
   
-  CREATE TABLE change (
+  CREATE TABLE IF NOT EXISTS change (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     author TEXT,
     parent_id TEXT,
@@ -41,12 +44,12 @@ export async function createSchema(args: { db: Kysely<any> }) {
     meta TEXT
   ) strict;
 
-  create TABLE snapshot (
+  create TABLE IF NOT EXISTS snapshot (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     value TEXT
   ) strict;
 
-  CREATE TABLE conflict (
+  CREATE TABLE IF NOT EXISTS conflict (
     change_id TEXT NOT NULL,
     conflicting_change_id TEXT NOT NULL,
     reason TEXT,
@@ -55,7 +58,7 @@ export async function createSchema(args: { db: Kysely<any> }) {
     PRIMARY KEY (change_id, conflicting_change_id)
   ) strict;
     
-  CREATE TABLE 'commit' (
+  CREATE TABLE IF NOT EXISTS 'commit' (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     author TEXT,
     parent_id TEXT NOT NULL,
@@ -64,21 +67,21 @@ export async function createSchema(args: { db: Kysely<any> }) {
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
   ) strict;
 
-  INSERT INTO ref values ('current', '00000000-0000-0000-0000-000000000000');
+  INSERT OR IGNORE INTO ref values ('current', '00000000-0000-0000-0000-000000000000');
 
-  CREATE TRIGGER file_update INSTEAD OF UPDATE ON file
+  CREATE TRIGGER IF NOT EXISTS file_update INSTEAD OF UPDATE ON file
   BEGIN
     insert into change_queue(file_id, path, data, metadata) values(NEW.id, NEW.path, NEW.data, NEW.metadata);
     select triggerWorker();
   END;
 
-  CREATE TRIGGER file_insert INSTEAD OF INSERT ON file
+  CREATE TRIGGER IF NOT EXISTS file_insert INSTEAD OF INSERT ON file
   BEGIN
     insert into change_queue(file_id, path, data, metadata) values(NEW.id, NEW.path, NEW.data, NEW.metadata);
     select triggerWorker();
   END;
 
-  CREATE TRIGGER change_queue_remove BEFORE DELETE ON change_queue
+  CREATE TRIGGER IF NOT EXISTS change_queue_remove BEFORE DELETE ON change_queue
   BEGIN
     insert or replace into file_internal(id, path, data, metadata) values(OLD.file_id, OLD.path, OLD.data, OLD.metadata);
   END;
@@ -86,12 +89,12 @@ export async function createSchema(args: { db: Kysely<any> }) {
 
   -- change discussions 
 
-  CREATE TABLE discussion (
+  CREATE TABLE IF NOT EXISTS discussion (
     -- TODO https://github.com/opral/lix-sdk/issues/74 replace with uuid_v7
     id TEXT PRIMARY KEY DEFAULT (uuid_v4())
   ) strict;
 
-  CREATE TABLE discussion_change_map (
+  CREATE TABLE IF NOT EXISTS discussion_change_map (
     discussion_id TEXT NOT NULL,
     change_id TEXT NOT NULL,
 
@@ -102,7 +105,7 @@ export async function createSchema(args: { db: Kysely<any> }) {
   ) strict;
 
 
-  CREATE TABLE comment (
+  CREATE TABLE IF NOT EXISTS comment (
     --- TODO in inlang i saw we replace uuid_v3 with uuid_v7 any reason we use v4 in lix?
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     parent_id TEXT,
@@ -114,6 +117,5 @@ export async function createSchema(args: { db: Kysely<any> }) {
     FOREIGN KEY(discussion_id) REFERENCES discussion(id)
   ) strict;
 
-`.execute(args.db);
+`;
 }
-

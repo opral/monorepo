@@ -1,10 +1,8 @@
-import { Kysely } from "kysely";
 import {
-	createDialect,
 	createInMemoryDatabase,
 	contentFromDatabase,
 } from "sqlite-wasm-kysely";
-import { createSchema } from "./database/createSchema.js";
+import { initDb } from "./database/initDb.js";
 
 /**
  * Creates a new lix file.
@@ -17,14 +15,10 @@ export async function newLixFile(): Promise<Blob> {
 		readOnly: false,
 	});
 
-	const db = new Kysely({
-		dialect: createDialect({
-			database: sqlite,
-		}),
-	});
+	// applying the schema etc.
+	const db = initDb({ sqlite });
 
 	try {
-		await createSchema({ db });
 		return new Blob([contentFromDatabase(sqlite)]);
 	} catch (e) {
 		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e });

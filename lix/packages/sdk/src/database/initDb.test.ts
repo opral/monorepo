@@ -1,7 +1,6 @@
 import { createInMemoryDatabase } from "sqlite-wasm-kysely";
 import { test, expect } from "vitest";
 import { initDb } from "./initDb.js";
-import { createSchema } from "./createSchema.js";
 import { validate } from "uuid";
 
 test("file ids should default to uuid", async () => {
@@ -9,7 +8,6 @@ test("file ids should default to uuid", async () => {
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
-	await createSchema({ db });
 
 	const file = await db
 		.insertInto("file_internal")
@@ -25,7 +23,6 @@ test("commit ids should default to uuid", async () => {
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
-	await createSchema({ db });
 
 	const commit = await db
 		.insertInto("commit")
@@ -41,7 +38,6 @@ test("change ids should default to uuid", async () => {
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
-	await createSchema({ db });
 
 	const change = await db
 		.insertInto("change")
@@ -51,7 +47,7 @@ test("change ids should default to uuid", async () => {
 			file_id: "mock",
 			plugin_key: "mock-plugin",
 			operation: "create",
-			snapshot_id: 'sn1'
+			snapshot_id: "sn1",
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -65,7 +61,6 @@ test("files should be able to have metadata", async () => {
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
-	await createSchema({ db });
 
 	const file = await db
 		.insertInto("file_internal")

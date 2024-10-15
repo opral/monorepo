@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { newLixFile, openLixInMemory, type Change, type NewChange } from "@lix-js/sdk";
+import { newLixFile, openLixInMemory, type NewChange } from "@lix-js/sdk";
 import { test, expect } from "vitest";
 import { getLowestCommonAncestor } from "./get-lowest-common-ancestor.js";
-import { snakeCase } from "lodash-es";
 
 test("it should find the common parent of two changes recursively", async () => {
 	const sourceLix = await openLixInMemory({

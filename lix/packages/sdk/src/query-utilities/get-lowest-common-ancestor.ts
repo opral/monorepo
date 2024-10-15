@@ -27,7 +27,7 @@ export async function getLowestCommonAncestor(args: {
 	}
 
 	let nextChange: Change | undefined;
-	let parentId: string | undefined = args.sourceChange.parent_id
+	let parentId: string | undefined | null = args.sourceChange.parent_id;
 
 	if (!parentId) {
 		return // ok the change was not part of the target but also has no parent (no common ancestor!)
