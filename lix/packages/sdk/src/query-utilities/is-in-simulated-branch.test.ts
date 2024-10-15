@@ -16,6 +16,7 @@ test("as long as a conflict is unresolved, the conflicting change should not app
 				operation: "create",
 				plugin_key: "mock",
 				type: "mock",
+				snapshot_id: 'sn0',
 			},
 			{
 				id: "change1",
@@ -23,6 +24,7 @@ test("as long as a conflict is unresolved, the conflicting change should not app
 				operation: "create",
 				plugin_key: "mock",
 				type: "mock",
+				snapshot_id: 'sn2',
 			},
 			{
 				id: "change2",
@@ -30,6 +32,7 @@ test("as long as a conflict is unresolved, the conflicting change should not app
 				operation: "create",
 				plugin_key: "mock",
 				type: "mock",
+				snapshot_id: 'sn2',
 			},
 		])
 		.returningAll()
@@ -72,6 +75,7 @@ test(`if the conflict has been resolved by selecting the 'original' change,
 				operation: "create",
 				plugin_key: "mock",
 				type: "mock",
+				snapshot_id: 'sn0',
 			},
 			{
 				id: "change1",
@@ -79,6 +83,7 @@ test(`if the conflict has been resolved by selecting the 'original' change,
 				operation: "create",
 				plugin_key: "mock",
 				type: "mock",
+				snapshot_id: 'sn1',
 			},
 			{
 				id: "change2",
@@ -86,6 +91,7 @@ test(`if the conflict has been resolved by selecting the 'original' change,
 				operation: "create",
 				plugin_key: "mock",
 				type: "mock",
+				snapshot_id: 'sn2',
 			},
 		])
 		.returningAll()
@@ -130,6 +136,7 @@ test(`
 				operation: "create",
 				plugin_key: "mock",
 				type: "mock",
+				snapshot_id: 'sn0',
 			},
 			{
 				id: "change1",
@@ -137,6 +144,7 @@ test(`
 				operation: "create",
 				plugin_key: "mock",
 				type: "mock",
+				snapshot_id: 'sn1',
 			},
 			{
 				id: "change2",
@@ -144,6 +152,7 @@ test(`
 				operation: "create",
 				plugin_key: "mock",
 				type: "mock",
+				snapshot_id: 'sn2',
 			},
 		])
 		.returningAll()

@@ -40,6 +40,7 @@ export const mockCsvPlugin: LixPlugin<{
 				// TODO possibility to avoid querying the parent change?
 				const parent = await lix.db
 					.selectFrom("change")
+					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 					.selectAll()
 					.where("change.id", "=", change.parent_id)
 					.executeTakeFirstOrThrow();

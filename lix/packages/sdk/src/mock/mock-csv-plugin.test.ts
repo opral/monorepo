@@ -54,6 +54,19 @@ describe("applyChanges()", () => {
 		const lix = await openLixInMemory({ blob: await newLixFile() });
 
 		await lix.db
+		.insertInto("snapshot")
+		.values({
+			id: "parent_change_snapshot_id",
+			// @ts-expect-error - database expects stringified json
+			value: JSON.stringify({
+				columnIndex: 1,
+				rowIndex: 2,
+				text: "50",
+			}),
+		})
+		.execute();
+
+		await lix.db
 			.insertInto("change")
 			.values({
 				id: "parent_change_id",
@@ -61,12 +74,7 @@ describe("applyChanges()", () => {
 				operation: "create",
 				plugin_key: "csv",
 				type: "cell",
-				// @ts-expect-error - database expects stringified json
-				value: JSON.stringify({
-					columnIndex: 1,
-					rowIndex: 2,
-					text: "50",
-				}),
+				snapshot_id: "parent_change_snapshot_id"
 			})
 			.execute();
 

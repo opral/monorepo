@@ -51,6 +51,7 @@ test("change ids should default to uuid", async () => {
 			file_id: "mock",
 			plugin_key: "mock-plugin",
 			operation: "create",
+			snapshot_id: 'sn1'
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

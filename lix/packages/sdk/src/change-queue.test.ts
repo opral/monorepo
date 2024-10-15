@@ -118,13 +118,14 @@ test("should use queue and settled correctly", async () => {
 		},
 	]);
 
-	const changes = await lix.db.selectFrom("change").selectAll().execute();
+	const changes = await lix.db.selectFrom("change").innerJoin("snapshot", "snapshot.id", "change.snapshot_id").selectAll().execute();
 
 	expect(changes).toEqual([
 		{
 			id: changes[0]?.id,
 			author: null,
 			created_at: changes[0]?.created_at,
+			snapshot_id:  changes[0]?.snapshot_id,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -185,6 +186,7 @@ test("should use queue and settled correctly", async () => {
 
 	const updatedChanges = await lix.db
 		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll()
 		.execute();
 
@@ -193,6 +195,7 @@ test("should use queue and settled correctly", async () => {
 			author: null,
 			id: updatedChanges[0]?.id,
 			created_at: updatedChanges[0]?.created_at,
+			snapshot_id: updatedChanges[0]?.snapshot_id,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -209,6 +212,7 @@ test("should use queue and settled correctly", async () => {
 			author: null,
 			commit_id: null,
 			created_at: updatedChanges[1]?.created_at,
+			snapshot_id: updatedChanges[1]?.snapshot_id,
 			file_id: "test",
 			id: updatedChanges[1]?.id,
 			meta: null,
@@ -225,6 +229,7 @@ test("should use queue and settled correctly", async () => {
 			author: null,
 			commit_id: null,
 			created_at: updatedChanges[2]?.created_at,
+			snapshot_id: updatedChanges[2]?.snapshot_id,
 			file_id: "test",
 			id: updatedChanges[2]?.id,
 			meta: null,

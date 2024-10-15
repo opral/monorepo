@@ -3,6 +3,7 @@
 import type { LixPlugin } from "../plugin.js";
 import type { Lix } from "../types.js";
 import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-only-in-source.js";
+import { RawNode } from "kysely";
 
 /**
  * Combined the changes of the source lix into the target lix.
@@ -18,7 +19,9 @@ export async function merge(args: {
 	//      are not in target.
 	const sourceChanges = await args.sourceLix.db
 		.selectFrom("change")
-		.selectAll()
+        .innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+        .selectAll('change')
+        .select("snapshot.value as value")
 		.execute();
 
 	// TODO increase performance by only getting commits
@@ -98,6 +101,8 @@ export async function merge(args: {
 			file,
 			lix: args.targetLix,
 		});
+		// TODO #167 - seems to not call the function from the test?
+		// console.log(plugin.applyChanges, nonConflictingLeafChangesInSourceForFile, fileData)
 
 		changesPerFile[fileId] = fileData;
 	}
@@ -127,17 +132,34 @@ export async function merge(args: {
 
 	await args.targetLix.db.transaction().execute(async (trx) => {
 		if (sourceChanges.length > 0) {
-			// 1. copy the changes from source
+
+			// 1. copy the snapshots from source
+			await trx
+				.insertInto("snapshot")
+				.values(
+					// https://github.com/opral/inlang-message-sdk/issues/123
+					sourceChanges.map((change) => ({
+						id: change.snapshot_id,
+						value: JSON.stringify(change.value),
+					})),
+				)
+				// ignore if already exists
+				.onConflict((oc) => oc.doNothing())
+				.execute();
+
 			await trx
 				.insertInto("change")
 				.values(
 					// @ts-expect-error - todo auto serialize values
 					// https://github.com/opral/inlang-message-sdk/issues/123
-					sourceChanges.map((change) => ({
-						...change,
-						value: JSON.stringify(change.value),
-						meta: JSON.stringify(change.meta),
-					})),
+					sourceChanges.map((change) => {
+						const rawChange = {
+							...change,
+							meta: JSON.stringify(change.meta),
+						}
+						delete rawChange.value
+						return rawChange
+					}),
 				)
 				// ignore if already exists
 				.onConflict((oc) => oc.doNothing())

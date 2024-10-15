@@ -38,6 +38,7 @@ test("should be able to add and commit changes", async () => {
 			},
 		},
 	};
+
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
@@ -59,7 +60,10 @@ test("should be able to add and commit changes", async () => {
 
 	await lix.settled();
 
-	const changes = await lix.db.selectFrom("change").selectAll().execute();
+	const changes = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.selectAll().execute();
 
 	// console.log(await lix.db.selectFrom("queue").selectAll().execute());
 
@@ -68,6 +72,7 @@ test("should be able to add and commit changes", async () => {
 			id: changes[0]?.id,
 			author: null,
 			created_at: changes[0]?.created_at,
+			snapshot_id: changes[0]?.snapshot_id,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -95,6 +100,7 @@ test("should be able to add and commit changes", async () => {
 	const commits = await lix.db.selectFrom("commit").selectAll().execute();
 	const commitedChanges = await lix.db
 		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll()
 		.execute();
 
@@ -103,6 +109,7 @@ test("should be able to add and commit changes", async () => {
 			id: commitedChanges[0]?.id,
 			author: null,
 			created_at: changes[0]?.created_at,
+			snapshot_id: changes[0]?.snapshot_id,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -138,6 +145,7 @@ test("should be able to add and commit changes", async () => {
 
 	const updatedChanges = await lix.db
 		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll()
 		.execute();
 
@@ -146,6 +154,7 @@ test("should be able to add and commit changes", async () => {
 			id: updatedChanges[0]?.id!,
 			author: null,
 			created_at: updatedChanges[0]?.created_at,
+			snapshot_id: updatedChanges[0]?.snapshot_id,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -162,7 +171,8 @@ test("should be able to add and commit changes", async () => {
 			id: updatedChanges[1]?.id!,
 			author: null,
 			parent_id: updatedChanges[0]?.id!,
-			created_at: updatedChanges[0]?.created_at,
+			created_at: updatedChanges[1]?.created_at,
+			snapshot_id: updatedChanges[1]?.snapshot_id,
 			type: "text",
 			file_id: "test",
 			plugin_key: "mock-plugin",

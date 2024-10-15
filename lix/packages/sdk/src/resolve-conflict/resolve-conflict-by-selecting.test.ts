@@ -3,30 +3,39 @@
 import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
-import type { NewChange } from "../database/schema.js";
+import type { NewChange, NewSnapshot } from "../database/schema.js";
 import type { LixPlugin } from "../plugin.js";
 import { SelectedChangeNotInConflictError } from "./errors.js";
 import { resolveConflictBySelecting } from "./resolve-conflict-by-selecting.js";
 
 test("it should resolve a conflict by applying the change and marking the conflict as resolved with the applied change", async () => {
+
+	const mockSnapshots: NewSnapshot[] = [{
+		id: 'sn1',
+		value: {
+			id: "value1",
+		},
+	},{
+		id: 'sn2',
+		value: {
+			id: "value2",
+		},
+	}] 
+
 	const mockChanges: NewChange[] = [
 		{
 			operation: "create",
 			plugin_key: "plugin1",
 			type: "mock",
 			file_id: "mock",
-			value: {
-				id: "value1",
-			},
+			snapshot_id: 'sn1',
 		},
 		{
 			operation: "create",
 			plugin_key: "plugin1",
 			file_id: "mock",
 			type: "mock",
-			value: {
-				id: "value2",
-			},
+			snapshot_id: 'sn2',
 		},
 	];
 
@@ -34,7 +43,7 @@ test("it should resolve a conflict by applying the change and marking the confli
 		key: "plugin1",
 		glob: "*",
 		applyChanges: vi.fn().mockResolvedValue({
-			fileData: new TextEncoder().encode(JSON.stringify(mockChanges[0]?.value)),
+			fileData: new TextEncoder().encode(JSON.stringify(mockSnapshots[0]?.value)),
 		}),
 		diff: {
 			file: vi.fn(),
@@ -51,12 +60,20 @@ test("it should resolve a conflict by applying the change and marking the confli
 		.values({ id: "mock", path: "mock", data: new Uint8Array() })
 		.execute();
 
+	
+	
+	const snapshots = await lix.db
+		.insertInto("snapshot")
+		.values(mockSnapshots)
+		.returningAll()
+		.execute();
+		
 	const changes = await lix.db
 		.insertInto("change")
 		.values(mockChanges)
 		.returningAll()
 		.execute();
-
+		
 	const conflict = await lix.db
 		.insertInto("conflict")
 		.values({
@@ -65,13 +82,13 @@ test("it should resolve a conflict by applying the change and marking the confli
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
-
+		
 	await resolveConflictBySelecting({
 		lix: lix,
 		conflict: conflict,
 		selectChangeId: changes[0]!.id,
 	});
-
+	
 	const resolvedConflict = await lix.db
 		.selectFrom("conflict")
 		.selectAll()
@@ -87,7 +104,7 @@ test("it should resolve a conflict by applying the change and marking the confli
 
 	const parsed = JSON.parse(new TextDecoder().decode(fileAfterResolve.data));
 
-	expect(parsed).toStrictEqual(mockChanges[0]!.value);
+	expect(parsed).toStrictEqual(snapshots[0]!.value);
 	expect(resolvedConflict.resolved_with_change_id).toBe(changes[0]!.id);
 });
 

@@ -11,6 +11,15 @@ test("it should get the leaf changes that only exist in source", async () => {
 	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 	});
+
+	const commonSnapshots = [{
+		id: 'snc1',
+		value: { id: "mock-id", color: "red" },
+	},{
+		id: 'snc2',
+		value: { id: "mock-id", color: "blue" },
+	}]
+
 	const commonChanges: NewChange[] = [
 		{
 			id: "c1",
@@ -18,6 +27,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			operation: "create",
 			plugin_key: "mock",
 			type: "mock",
+			snapshot_id: 'snc1',
 		},
 		{
 			id: "c2",
@@ -26,8 +36,22 @@ test("it should get the leaf changes that only exist in source", async () => {
 			operation: "create",
 			plugin_key: "mock",
 			type: "mock",
+			snapshot_id: 'snc2',
 		},
 	];
+
+	const snapshotsOnlyInSource = [{
+		id: 'sns1',
+		value: { id: "mock-id", color: "pink" },
+	},{
+		id: 'sns2',
+		value: { id: "mock-id", color: "orange" },
+	},{
+		id: 'sns3',
+		value: { id: "mock-id", color: "yellow" },
+	}]
+	
+
 	const changesOnlyInSource: NewChange[] = [
 		{
 			id: "s1",
@@ -35,6 +59,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			operation: "create",
 			plugin_key: "mock",
 			type: "mock",
+			snapshot_id: 'sns1',
 		},
 		{
 			id: "s2",
@@ -43,6 +68,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			operation: "update",
 			plugin_key: "mock",
 			type: "mock",
+			snapshot_id: 'sns2',
 		},
 		{
 			id: "s3",
@@ -51,8 +77,16 @@ test("it should get the leaf changes that only exist in source", async () => {
 			operation: "update",
 			plugin_key: "mock",
 			type: "mock",
+			snapshot_id: 'sns3',
 		},
 	];
+
+	const snapshotsOnlyInTarget = [{
+		id: 'snt1',
+		value: { id: "mock-id", color: "black" },
+	}]
+	
+
 	const changesOnlyInTarget: NewChange[] = [
 		{
 			id: "t1",
@@ -61,12 +95,23 @@ test("it should get the leaf changes that only exist in source", async () => {
 			operation: "create",
 			plugin_key: "mock",
 			type: "mock",
+			snapshot_id: 'snt1',
 		},
 	];
 
 	await targetLix.db
+		.insertInto("snapshot")
+		.values([...commonSnapshots, ...snapshotsOnlyInTarget])
+		.execute();
+
+	await targetLix.db
 		.insertInto("change")
 		.values([...commonChanges, ...changesOnlyInTarget])
+		.execute();
+
+	await sourceLix.db
+		.insertInto("snapshot")
+		.values([...commonSnapshots, ...snapshotsOnlyInSource])
 		.execute();
 
 	await sourceLix.db

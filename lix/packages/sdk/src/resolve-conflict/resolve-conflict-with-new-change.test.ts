@@ -4,7 +4,7 @@ import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import { resolveConflictWithNewChange } from "./resolve-conflict-with-new-change.js";
-import type { NewChange } from "../database/schema.js";
+import type { NewChange, NewSnapshot } from "../database/schema.js";
 import type { LixPlugin } from "../plugin.js";
 import {
 	ChangeAlreadyExistsError,
@@ -13,24 +13,33 @@ import {
 } from "./errors.js";
 
 test("it should throw if the to be resolved with change already exists", async () => {
+
+	const mockSnapshots: NewSnapshot[] = [{
+		id: 'sn1',
+		value: {
+			id: "value1",
+		},
+	},{
+		id: 'sn2',
+		value: {
+			id: "value2",
+		},
+	}] 
+	
 	const mockChanges: NewChange[] = [
 		{
 			operation: "create",
 			plugin_key: "plugin1",
 			type: "mock",
 			file_id: "mock",
-			value: {
-				id: "value1",
-			},
+			snapshot_id: "sn1"
 		},
 		{
 			operation: "create",
 			file_id: "mock",
 			plugin_key: "plugin1",
 			type: "mock",
-			value: {
-				id: "value2",
-			},
+			snapshot_id: "sn2"
 		},
 	];
 
@@ -38,7 +47,7 @@ test("it should throw if the to be resolved with change already exists", async (
 		key: "plugin1",
 		glob: "*",
 		applyChanges: vi.fn().mockResolvedValue({
-			fileData: new TextEncoder().encode(JSON.stringify(mockChanges[0]?.value)),
+			fileData: new TextEncoder().encode(JSON.stringify(mockSnapshots[0]?.value)),
 		}),
 		diff: {
 			file: vi.fn(),
@@ -53,6 +62,12 @@ test("it should throw if the to be resolved with change already exists", async (
 	await lix.db
 		.insertInto("file")
 		.values({ id: "mock", path: "mock", data: new Uint8Array() })
+		.execute();
+
+	const snapshots = await lix.db
+		.insertInto("snapshot")
+		.values(mockSnapshots)
+		.returningAll()
 		.execute();
 
 	const changes = await lix.db
@@ -77,6 +92,8 @@ test("it should throw if the to be resolved with change already exists", async (
 			newChange: {
 				...changes[0]!,
 				parent_id: changes[0]!.id,
+				snapshot_id: mockSnapshots[0]!.id!,
+				value: mockSnapshots[0]?.value
 			},
 		}),
 	).rejects.toThrowError(ChangeAlreadyExistsError);
@@ -84,24 +101,33 @@ test("it should throw if the to be resolved with change already exists", async (
 
 // the sequence of changes will be broken otherwise
 test("resolving a conflict should throw if the to be resolved with change is not a direct child of the conflicting changes", async () => {
+	
+	const mockSnapshots: NewSnapshot[] = [{
+		id: 'sn1',
+		value: {
+			id: "value1",
+		},
+	},{
+		id: 'sn2',
+		value: {
+			id: "value2",
+		},
+	}] 
+	
 	const mockChanges: NewChange[] = [
 		{
 			operation: "create",
 			plugin_key: "plugin1",
 			type: "mock",
 			file_id: "mock",
-			value: {
-				id: "value1",
-			},
+			snapshot_id: "sn1"
 		},
 		{
 			operation: "create",
 			file_id: "mock",
 			plugin_key: "plugin1",
 			type: "mock",
-			value: {
-				id: "value2",
-			},
+			snapshot_id: "sn2"
 		},
 	];
 
@@ -109,7 +135,7 @@ test("resolving a conflict should throw if the to be resolved with change is not
 		key: "plugin1",
 		glob: "*",
 		applyChanges: vi.fn().mockResolvedValue({
-			fileData: new TextEncoder().encode(JSON.stringify(mockChanges[0]?.value)),
+			fileData: new TextEncoder().encode(JSON.stringify(mockSnapshots[0]?.value)),
 		}),
 		diff: {
 			file: vi.fn(),
@@ -124,6 +150,12 @@ test("resolving a conflict should throw if the to be resolved with change is not
 	await lix.db
 		.insertInto("file")
 		.values({ id: "mock", path: "mock", data: new Uint8Array() })
+		.execute();
+
+	const snapshots = await lix.db
+		.insertInto("snapshot")
+		.values(mockSnapshots)
+		.returningAll()
 		.execute();
 
 	const changes = await lix.db
@@ -151,6 +183,7 @@ test("resolving a conflict should throw if the to be resolved with change is not
 				parent_id: undefined,
 				plugin_key: "plugin1",
 				type: "mock",
+				snapshot_id: "sn3",	
 				value: {
 					id: "value3",
 				},
@@ -161,32 +194,39 @@ test("resolving a conflict should throw if the to be resolved with change is not
 
 // the sequence of changes will be broken otherwise
 test("resolving a conflict should throw if the change to resolve with does not belong to the same file as the conflicting changes", async () => {
+	const mockSnapshots: NewSnapshot[] = [{
+		id: 'sn1',
+		value: {
+			id: "value1",
+		},
+	},{
+		id: 'sn2',
+		value: {
+			id: "value2",
+		},
+	}] 
+	
 	const mockChanges: NewChange[] = [
 		{
 			operation: "create",
 			plugin_key: "plugin1",
 			type: "mock",
 			file_id: "mock",
-			value: {
-				id: "value1",
-			},
+			snapshot_id: "sn1"
 		},
 		{
 			operation: "create",
 			file_id: "mock",
 			plugin_key: "plugin1",
 			type: "mock",
-			value: {
-				id: "value2",
-			},
+			snapshot_id: "sn2"
 		},
 	];
-
 	const mockPlugin: LixPlugin = {
 		key: "plugin1",
 		glob: "*",
 		applyChanges: vi.fn().mockResolvedValue({
-			fileData: new TextEncoder().encode(JSON.stringify(mockChanges[0]?.value)),
+			fileData: new TextEncoder().encode(JSON.stringify(mockSnapshots[0]?.value)),
 		}),
 		diff: {
 			file: vi.fn(),
@@ -228,6 +268,7 @@ test("resolving a conflict should throw if the change to resolve with does not b
 				parent_id: changes[0]!.id,
 				plugin_key: "plugin1",
 				type: "mock",
+				snapshot_id: 'sn3',
 				value: {
 					id: "value3",
 				},
@@ -237,24 +278,33 @@ test("resolving a conflict should throw if the change to resolve with does not b
 });
 
 test("resolving a conflict with a new change should insert the change and mark the conflict as resolved with the new change", async () => {
+
+	const mockSnapshots: NewSnapshot[] = [{
+		id: 'sn1',
+		value: {
+			id: "value1",
+		},
+	},{
+		id: 'sn2',
+		value: {
+			id: "value2",
+		},
+	}] 
+	
 	const mockChanges: NewChange[] = [
 		{
 			operation: "create",
 			plugin_key: "plugin1",
 			type: "mock",
 			file_id: "mock",
-			value: {
-				id: "value1",
-			},
+			snapshot_id: "sn1"
 		},
 		{
 			operation: "create",
 			file_id: "mock",
 			plugin_key: "plugin1",
 			type: "mock",
-			value: {
-				id: "value2",
-			},
+			snapshot_id: "sn2"
 		},
 	];
 
@@ -277,14 +327,21 @@ test("resolving a conflict with a new change should insert the change and mark t
 	await lix.db
 		.insertInto("file")
 		.values({ id: "mock", path: "mock", data: new Uint8Array() })
+	.execute();
+
+	const snapshots = await lix.db
+		.insertInto("snapshot")
+		.values(mockSnapshots)
+		.returningAll()
 		.execute();
+
 
 	const changes = await lix.db
 		.insertInto("change")
 		.values(mockChanges)
 		.returningAll()
 		.execute();
-
+	
 	const conflict = await lix.db
 		.insertInto("conflict")
 		.values({
@@ -303,6 +360,7 @@ test("resolving a conflict with a new change should insert the change and mark t
 			parent_id: changes[0]!.id,
 			plugin_key: "plugin1",
 			type: "mock",
+			snapshot_id: "sn3",
 			value: {
 				id: "value3",
 			},
@@ -324,7 +382,9 @@ test("resolving a conflict with a new change should insert the change and mark t
 
 	const changesAfterResolve = await lix.db
 		.selectFrom("change")
-		.selectAll()
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.selectAll('change')
+		.select("snapshot.value as value")
 		.execute();
 
 	expect(changesAfterResolve.length).toBe(3);

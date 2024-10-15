@@ -1,4 +1,4 @@
-import type { Change, LixReadonly } from "@lix-js/sdk";
+import type { Change, ChangeWithSnapshot, LixReadonly } from "@lix-js/sdk";
 
 /**
  * Gets the leaf changes that only exist in the source lix.
@@ -12,14 +12,16 @@ import type { Change, LixReadonly } from "@lix-js/sdk";
 export async function getLeafChangesOnlyInSource(args: {
 	sourceLix: LixReadonly;
 	targetLix: LixReadonly;
-}): Promise<Change[]> {
-	const result: Change[] = [];
+}): Promise<ChangeWithSnapshot[]> {
+	const result: ChangeWithSnapshot[] = [];
 
 	const leafChangesInSource = await args.sourceLix.db
 		.selectFrom("change")
-		.selectAll()
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.selectAll('change')
+		.select("snapshot.value as value")
 		.where(
-			"id",
+			"change.id",
 			"not in",
 			// @ts-ignore - no idea what the type issue is
 			args.sourceLix.db

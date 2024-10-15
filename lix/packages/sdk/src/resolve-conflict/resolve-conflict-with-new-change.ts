@@ -1,4 +1,4 @@
-import type { Conflict, NewChange } from "../database/schema.js";
+import type { ChangeWithSnapshot, Conflict } from "../database/schema.js";
 import type { Lix } from "../types.js";
 import {
 	ChangeAlreadyExistsError,
@@ -12,7 +12,7 @@ import {
 export async function resolveConflictWithNewChange(args: {
 	lix: Lix;
 	conflict: Conflict;
-	newChange: NewChange;
+	newChange: ChangeWithSnapshot;
 }): Promise<void> {
 	if (args.lix.plugins.length !== 1) {
 		throw new Error("Unimplemented. Only one plugin is supported for now");
@@ -72,12 +72,26 @@ export async function resolveConflictWithNewChange(args: {
 			.where("id", "=", change.file_id)
 			.execute();
 
-		const insertedChange = await trx
-			.insertInto("change")
-			.values(args.newChange)
+		const rawChange = args.newChange
+		const newSnapshot = {
+			id: rawChange.snapshot_id,
+			value: args.newChange.value
+		}
+
+		delete rawChange.value
+		
+		const insertSnapshot = await trx
+			.insertInto("snapshot")
+			.values(newSnapshot)
 			.returning("id")
 			.executeTakeFirstOrThrow();
 
+		const insertedChange = await trx
+			.insertInto("change")
+			.values(rawChange)
+			.returning("id")
+			.executeTakeFirstOrThrow();
+		
 		await trx
 			.updateTable("conflict")
 			.where((eb) =>
