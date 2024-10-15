@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { newLixFile, openLixInMemory, type NewChange } from "@lix-js/sdk";
 import { test, expect } from "vitest";
 import { getLeafChange } from "./get-leaf-change.js";
+import { openLixInMemory } from "../open/openLixInMemory.js";
+import { newLixFile } from "../newLix.js";
+import type { NewChange } from "../database/schema.js";
 
 test("it should find the latest child of a given change", async () => {
 	const lix = await openLixInMemory({
@@ -52,7 +54,7 @@ test("it should find the latest child of a given change", async () => {
 			snapshot_id: "sn3",
 		},
 	];
-	// await lix.db.insertInto("snapshot").values(mockSnapshots).execute();
+	await lix.db.insertInto("snapshot").values(mockSnapshots).execute();
 	await lix.db.insertInto("change").values(mockChanges).execute();
 
 	const changes = await lix.db.selectFrom("change").selectAll().execute();

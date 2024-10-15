@@ -1,4 +1,5 @@
-import type { Change, LixReadonly } from "@lix-js/sdk";
+import type { Change } from "../database/schema.js";
+import type { LixReadonly } from "../types.js";
 
 /**
  * Find the last "child" change of the given change.
