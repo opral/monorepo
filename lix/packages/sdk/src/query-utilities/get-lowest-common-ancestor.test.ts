@@ -165,7 +165,18 @@ test("it should return the source change if its the common parent", async () => 
 		blob: await newLixFile(),
 	});
 
-	const mockChanges: Change[] = [
+	const mockSnapshots = [{
+		id: 'sn1',
+		value: ["change 1"],
+	},{
+		id: 'sn2',
+		value: ["change 2"],
+	},{
+		id: 'sn3',
+		value: ["change 3"],
+	}]
+
+	const mockChanges: NewChange[] = [
 		{
 			id: "0",
 			parent_id: undefined,
@@ -173,8 +184,7 @@ test("it should return the source change if its the common parent", async () => 
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			// @ts-expect-error - type error in lix
-			value: JSON.stringify(["change 0"]),
+			snapshot_id: 'sn1',
 		},
 		{
 			id: "1",
@@ -183,23 +193,35 @@ test("it should return the source change if its the common parent", async () => 
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			// @ts-expect-error - type error in lix
-			value: JSON.stringify(["change 1"]),
-		},
+			snapshot_id: 'sn2',
+		}
 	];
+
+
+	await targetLix.db
+		.insertInto("snapshot")
+		.values([mockSnapshots[0]!, mockSnapshots[1]!])
+		.execute();
 
 	await targetLix.db
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.executeTakeFirst();
+	
+	await sourceLix.db
+		.insertInto("snapshot")
+		.values([mockSnapshots[0]!, mockSnapshots[1]!])
+		.execute();
 
 	await sourceLix.db
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.executeTakeFirst();
 
+	const changeOne = await sourceLix.db.selectFrom('change').selectAll().where('id', '=', mockChanges[1]!.id!).executeTakeFirstOrThrow()
+
 	const commonParent = await getLowestCommonAncestor({
-		sourceChange: mockChanges[1]!,
+		sourceChange: changeOne!,
 		targetLix,
 		sourceLix,
 	});

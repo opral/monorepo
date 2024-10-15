@@ -55,13 +55,12 @@ test("it should resolve a conflict by applying the change and marking the confli
 		providePlugins: [mockPlugin],
 	});
 
+
 	await lix.db
 		.insertInto("file")
 		.values({ id: "mock", path: "mock", data: new Uint8Array() })
 		.execute();
 
-	
-	
 	const snapshots = await lix.db
 		.insertInto("snapshot")
 		.values(mockSnapshots)
@@ -82,6 +81,7 @@ test("it should resolve a conflict by applying the change and marking the confli
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
+		
 		
 	await resolveConflictBySelecting({
 		lix: lix,

@@ -31,13 +31,12 @@ export async function resolveConflictBySelecting(args: {
 			"Plugin does not support applying changes and therefore cannot resolve conflicts",
 		);
 	}
-
 	const selectedChange = await args.lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
 		.select("snapshot.value as value")
-		.where("id", "=", args.selectChangeId)
+		.where("change.id", "=", args.selectChangeId)
 		.executeTakeFirst();
 
 	if (selectedChange === undefined) {
