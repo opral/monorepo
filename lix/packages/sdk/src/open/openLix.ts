@@ -93,11 +93,11 @@ export async function openLix(args: {
 					await handleFileChange({
 						currentAuthor,
 						queueEntry: entry,
-						old: {
+						before: {
 							...existingFile,
 							id: entry.file_id,
 						},
-						neu: {
+						after: {
 							...entry,
 							id: entry.file_id,
 						},
@@ -108,7 +108,7 @@ export async function openLix(args: {
 					await handleFileInsert({
 						currentAuthor,
 						queueEntry: entry,
-						neu: {
+						after: {
 							...entry,
 							id: entry.file_id,
 						},

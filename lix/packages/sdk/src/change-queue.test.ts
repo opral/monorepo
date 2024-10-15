@@ -11,58 +11,58 @@ test("should use queue and settled correctly", async () => {
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
-			file: async ({ old, neu }) => {
+			file: async ({ before, after }) => {
 				const dec = new TextDecoder();
-				// console.log("diff", neu, old?.data, neu?.data);
-				const newText = dec.decode(neu?.data);
-				const oldText = dec.decode(old?.data);
+				// console.log("diff", after, before?.data, after?.data);
+				const textBefore = dec.decode(after?.data);
+				const textAfter = dec.decode(before?.data);
 
-				if (newText === oldText) {
+				if (textBefore === textAfter) {
 					return [];
 				}
 
 				return await mockPlugin.diff.text({
-					old: old
+					before: before
 						? {
 								id: "test",
-								text: oldText,
+								text: textAfter,
 							}
 						: undefined,
-					neu: neu
+					after: after
 						? {
 								id: "test",
-								text: newText,
+								text: textBefore,
 							}
 						: undefined,
 				});
 			},
-			text: async ({ old, neu }) => {
-				// console.log("text", old, neu);
-				if (old?.text === neu?.text) {
+			text: async ({ before, after }) => {
+				// console.log("text", before, after);
+				if (before?.text === after?.text) {
 					return [];
 				}
 
 				return [
-					!old
+					!before
 						? {
 								type: "text",
 								operation: "create",
-								old: undefined,
-								neu: {
+								before: undefined,
+								after: {
 									id: "test",
-									text: neu?.text,
+									text: after?.text,
 								},
 							}
 						: {
 								type: "text",
 								operation: "update",
-								old: {
+								before: {
 									id: "test",
-									text: old?.text,
+									text: before?.text,
 								},
-								neu: {
+								after: {
 									id: "test",
-									text: neu?.text,
+									text: after?.text,
 								},
 							},
 				];
@@ -74,6 +74,7 @@ test("should use queue and settled correctly", async () => {
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
+
 
 	const enc = new TextEncoder();
 	await lix.db
@@ -87,7 +88,7 @@ test("should use queue and settled correctly", async () => {
 		.execute();
 
 	expect(internalFiles).toEqual([]);
-
+	
 	const queue = await lix.db.selectFrom("change_queue").selectAll().execute();
 	expect(queue).toEqual([
 		{
@@ -99,6 +100,7 @@ test("should use queue and settled correctly", async () => {
 		},
 	]);
 	await lix.settled();
+
 
 	expect(
 		(await lix.db.selectFrom("change_queue").selectAll().execute()).length,
@@ -251,8 +253,8 @@ test("changes should contain the author", async () => {
 				{
 					type: "mock",
 					operation: "create",
-					old: undefined,
-					neu: {} as any,
+					before: undefined,
+					after: {} as any,
 				},
 			] satisfies DiffReport[]),
 		},

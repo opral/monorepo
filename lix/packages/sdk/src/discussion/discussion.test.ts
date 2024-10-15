@@ -10,14 +10,14 @@ const mockPlugin: LixPlugin = {
 	key: "mock-plugin",
 	glob: "*",
 	diff: {
-		file: async ({ old }) => {
+		file: async ({ before }) => {
 			return [
-				!old
+				!before
 					? {
 							type: "text",
 							operation: "create",
-							old: undefined,
-							neu: {
+							before: undefined,
+							after: {
 								id: "test",
 								text: "inserted text",
 							},
@@ -25,11 +25,11 @@ const mockPlugin: LixPlugin = {
 					: {
 							type: "text",
 							operation: "update",
-							old: {
+							before: {
 								id: "test",
 								text: "inserted text",
 							},
-							neu: {
+							after: {
 								id: "test",
 								text: "updated text",
 							},
@@ -78,6 +78,7 @@ test("should be able to start a discussion on changes", async () => {
 			operation: "create",
 		},
 	]);
+	
 
 	const discussion = await lix.createDiscussion({
 		changeIds: [changes[0]!.id],
