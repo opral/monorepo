@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
@@ -9,33 +8,33 @@ import { SelectedChangeNotInConflictError } from "./errors.js";
 import { resolveConflictBySelecting } from "./resolve-conflict-by-selecting.js";
 
 test("it should resolve a conflict by applying the change and marking the conflict as resolved with the applied change", async () => {
-
-	const mockSnapshots: NewSnapshot[] = [{
-		id: 'sn1',
-		value: {
-			id: "value1",
+	const mockSnapshots: NewSnapshot[] = [
+		{
+			id: "sn1",
+			value: {
+				id: "value1",
+			},
 		},
-	},{
-		id: 'sn2',
-		value: {
-			id: "value2",
+		{
+			id: "sn2",
+			value: {
+				id: "value2",
+			},
 		},
-	}] 
+	];
 
 	const mockChanges: NewChange[] = [
 		{
-			operation: "create",
 			plugin_key: "plugin1",
 			type: "mock",
 			file_id: "mock",
-			snapshot_id: 'sn1',
+			snapshot_id: "sn1",
 		},
 		{
-			operation: "create",
 			plugin_key: "plugin1",
 			file_id: "mock",
 			type: "mock",
-			snapshot_id: 'sn2',
+			snapshot_id: "sn2",
 		},
 	];
 
@@ -43,7 +42,9 @@ test("it should resolve a conflict by applying the change and marking the confli
 		key: "plugin1",
 		glob: "*",
 		applyChanges: vi.fn().mockResolvedValue({
-			fileData: new TextEncoder().encode(JSON.stringify(mockSnapshots[0]?.value)),
+			fileData: new TextEncoder().encode(
+				JSON.stringify(mockSnapshots[0]?.value),
+			),
 		}),
 		diff: {
 			file: vi.fn(),
@@ -55,7 +56,6 @@ test("it should resolve a conflict by applying the change and marking the confli
 		providePlugins: [mockPlugin],
 	});
 
-
 	await lix.db
 		.insertInto("file")
 		.values({ id: "mock", path: "mock", data: new Uint8Array() })
@@ -66,13 +66,13 @@ test("it should resolve a conflict by applying the change and marking the confli
 		.values(mockSnapshots)
 		.returningAll()
 		.execute();
-		
+
 	const changes = await lix.db
 		.insertInto("change")
 		.values(mockChanges)
 		.returningAll()
 		.execute();
-		
+
 	const conflict = await lix.db
 		.insertInto("conflict")
 		.values({
@@ -81,14 +81,13 @@ test("it should resolve a conflict by applying the change and marking the confli
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
-		
-		
+
 	await resolveConflictBySelecting({
 		lix: lix,
 		conflict: conflict,
 		selectChangeId: changes[0]!.id,
 	});
-	
+
 	const resolvedConflict = await lix.db
 		.selectFrom("conflict")
 		.selectAll()

@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, test } from "vitest";
@@ -15,7 +14,6 @@ const mockPlugin: LixPlugin = {
 				!before
 					? {
 							type: "text",
-							operation: "create",
 							before: undefined,
 							after: {
 								id: "test",
@@ -24,7 +22,6 @@ const mockPlugin: LixPlugin = {
 						}
 					: {
 							type: "text",
-							operation: "update",
 							before: {
 								id: "test",
 								text: "inserted text",
@@ -56,7 +53,8 @@ test("should be able to start a discussion on changes", async () => {
 
 	await lix.settled();
 
-	const changes = await lix.db.selectFrom("change")
+	const changes = await lix.db
+		.selectFrom("change")
 		.selectAll()
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.execute();
@@ -79,10 +77,8 @@ test("should be able to start a discussion on changes", async () => {
 			},
 			meta: null,
 			commit_id: null,
-			operation: "create",
 		},
 	]);
-	
 
 	const discussion = await lix.createDiscussion({
 		changeIds: [changes[0]!.id],
@@ -140,7 +136,8 @@ test("should fail to create a disussion on non existing changes", async () => {
 
 	await lix.settled();
 
-	const changes = await lix.db.selectFrom("change")
+	const changes = await lix.db
+		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll()
 		.execute();
@@ -163,7 +160,6 @@ test("should fail to create a disussion on non existing changes", async () => {
 			},
 			meta: null,
 			commit_id: null,
-			operation: "create",
 		},
 	]);
 

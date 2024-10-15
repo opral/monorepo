@@ -1,4 +1,4 @@
-import type { DiffReport, LixPlugin } from "./plugin.js";
+import type { LixPlugin } from "./plugin.js";
 
 type Types = {
 	bundle: { id: string; name: string };
@@ -42,25 +42,3 @@ const plugin: LixPlugin<Types> = {
 		},
 	},
 };
-
-// ------------------- DIFF REPORT -------------------
-
-const diffReport: DiffReport = {} as any;
-
-// expect that old is undefined and neu is defined
-if (diffReport.operation === "create") {
-	diffReport.before satisfies undefined;
-	diffReport.after satisfies Record<string, any>;
-}
-
-// expect that old and neu are both defined
-if (diffReport.operation === "update") {
-	diffReport.before satisfies Record<string, any>;
-	diffReport.after satisfies Record<string, any>;
-}
-
-// expect that neu is undefined and old is defined
-if (diffReport.operation === "delete") {
-	diffReport.before satisfies Record<string, any>;
-	diffReport.after satisfies undefined;
-}

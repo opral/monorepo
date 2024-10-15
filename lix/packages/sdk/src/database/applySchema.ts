@@ -37,7 +37,6 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     type TEXT NOT NULL,
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
-    operation TEXT NOT NULL,
     snapshot_id TEXT NOT NULL,
     commit_id TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,

@@ -43,15 +43,17 @@ export async function handleFileInsert(args: {
 			for (const diff of diffs ?? []) {
 				const value = diff.before ?? diff.after;
 
-				const snapshotId = (await trx
-					.insertInto("snapshot")
-					.values({
-						id: v4(),
-						// @ts-expect-error - database expects stringified json
-						value: JSON.stringify(value)
-					})
-					.returning("id")
-					.executeTakeFirstOrThrow()).id
+				const snapshotId = (
+					await trx
+						.insertInto("snapshot")
+						.values({
+							id: v4(),
+							// @ts-expect-error - database expects stringified json
+							value: JSON.stringify(value),
+						})
+						.returning("id")
+						.executeTakeFirstOrThrow()
+				).id;
 
 				await trx
 					.insertInto("change")
@@ -61,7 +63,6 @@ export async function handleFileInsert(args: {
 						file_id: args.after.id,
 						author: args.currentAuthor,
 						plugin_key: pluginKey,
-						operation: diff.operation,
 						snapshot_id: snapshotId,
 						// @ts-expect-error - database expects stringified json
 						meta: JSON.stringify(diff.meta),
@@ -160,15 +161,17 @@ export async function handleFileChange(args: {
 					}
 				}
 
-				const snapshotId = (await trx
-					.insertInto("snapshot")
-					.values({
-						id: v4(),
-						// @ts-expect-error - database expects stringified json
-						value: JSON.stringify(value),
-					})
-					.returning('id')
-					.executeTakeFirstOrThrow()).id;
+				const snapshotId = (
+					await trx
+						.insertInto("snapshot")
+						.values({
+							id: v4(),
+							// @ts-expect-error - database expects stringified json
+							value: JSON.stringify(value),
+						})
+						.returning("id")
+						.executeTakeFirstOrThrow()
+				).id;
 
 				await trx
 					.insertInto("change")
@@ -180,9 +183,6 @@ export async function handleFileChange(args: {
 						author: args.currentAuthor,
 						parent_id: previousChange?.id,
 						snapshot_id: snapshotId,
-						// @ts-expect-error - database expects stringified json
-						meta: JSON.stringify(diff.meta),
-						operation: diff.operation,
 					})
 					.execute();
 			}

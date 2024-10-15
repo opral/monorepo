@@ -85,12 +85,6 @@ type ChangeTable = {
 	 * in case the user changes the plugin configuration.
 	 */
 	plugin_key: LixPlugin["key"];
-	/**
-	 * The operation that was performed.
-	 *
-	 * The operation is taken from the diff reports.
-	 */
-	operation: "create" | "update" | "delete";
 
 	/**
 	 * The type of change that was made.
