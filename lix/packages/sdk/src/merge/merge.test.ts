@@ -291,27 +291,22 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 		providePlugins: [mockPluginInTargetLix],
 	});
 
-	console.log('works')
-
 
 	await sourceLix.db
 		.insertInto("snapshot")
 		.values([...commonSnapshots, ...snapshotsOnlyInSourceLix])
 		.execute();
 
-		console.log('works2')
 	await sourceLix.db
 		.insertInto("change")
 		.values([...commonChanges, ...changesOnlyInSourceLix])
 		.execute();
 
-		console.log('works3')
 	await targetLix.db
 		.insertInto("snapshot")
 		.values([...commonSnapshots, ...snapshotsOnlyInTargetLix])
 		.execute();
 
-		console.log('works4')
 	await targetLix.db
 		.insertInto("change")
 		.values([...commonChanges, ...changesOnlyInTargetLix])
@@ -334,16 +329,13 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 	expect(mockPluginInTargetLix.diff.file).toHaveBeenCalledTimes(1);
 });
 
-test.todo("it should apply changes that are not conflicting", async () => {
+test("it should apply changes that are not conflicting", async () => {
 	const mockSnapshots: NewSnapshot[] = [{
 		id: 'sn1',
 		value: { id: "mock-id", color: "red" },
 	},{
 		id: 'sn2',
 		value: { id: "mock-id", color: "blue" },
-	},{
-		id: 'sn3',
-		value: { id: "mock-id", color: "green" },
 	}] 
 	
 	const mockChanges: NewChange[] = [
@@ -364,15 +356,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
-		{
-			id: "3",
-			parent_id: "2",
-			operation: "update",
-			type: "mock",
-			snapshot_id: 'sn3',
-			file_id: "mock-file",
-			plugin_key: "mock-plugin",
-		},
+		
 	];
 
 	const mockPlugin: LixPlugin = {
@@ -382,13 +366,15 @@ test.todo("it should apply changes that are not conflicting", async () => {
 			file: vi.fn(),
 		},
 		detectConflicts: vi.fn().mockResolvedValue([]),
-		// TODO #167 - what is the purpose of this
-		applyChanges: vi.fn().mockResolvedValue({
-			fileData: new TextEncoder().encode(
-				// @ts-expect-error - expects parsed json
-				mockSnapshots[1]!.value,
-			),
-		}),
+		applyChanges: async ({ changes, lix }) => {
+            
+			const lastChange = changes[changes.length - 1]
+            const fileData = new TextEncoder().encode(
+                JSON.stringify(lastChange!.value ?? {}),
+            );
+            return { fileData };
+        },
+
 	};
 
 	const sourceLix = await openLixInMemory({
@@ -424,12 +410,13 @@ test.todo("it should apply changes that are not conflicting", async () => {
 		.execute();
 
 	await targetLix.settled()
+	
 	await merge({ sourceLix, targetLix });
-
 	const changes = await targetLix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll().execute();
+
 	const conflicts = await targetLix.db
 		.selectFrom("conflict")
 		.selectAll()
@@ -440,14 +427,11 @@ test.todo("it should apply changes that are not conflicting", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	console.log(changes)
-
 	expect(changes.length).toBe(2);
 	expect(conflicts.length).toBe(0);
 	expect(file.data).toEqual(
 		new TextEncoder().encode(
-			// @ts-expect-error - expects parsed json
-			mockChanges[1]!.value,
+			JSON.stringify(mockSnapshots[1]!.value!),
 		),
 	);
 });
@@ -712,7 +696,6 @@ test("it should copy discussion and related comments and mappings", async () => 
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll().execute();
 
-	// console.log(await lix.db.selectFrom("queue").selectAll().execute());
 
 	expect(changes).toEqual([
 		{

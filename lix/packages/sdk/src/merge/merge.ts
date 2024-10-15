@@ -17,7 +17,7 @@ export async function merge(args: {
 	// TODO increase performance by using attach mode
 	//      and only get the changes and commits that
 	//      are not in target.
-	const sourceChanges = await args.sourceLix.db
+	const sourceChangesWithSnapshot = await args.sourceLix.db
 		.selectFrom("change")
         .innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
         .selectAll('change')
@@ -55,7 +55,7 @@ export async function merge(args: {
 
 	const changesPerFile: Record<string, ArrayBuffer> = {};
 
-	const fileIds = new Set(sourceChanges.map((c) => c.file_id));
+	const fileIds = new Set(sourceChangesWithSnapshot.map((c) => c.file_id));
 
 	for (const fileId of fileIds) {
 		// 3. apply non conflicting leaf changes
@@ -101,9 +101,7 @@ export async function merge(args: {
 			file,
 			lix: args.targetLix,
 		});
-		// TODO #167 - seems to not call the function from the test?
-		// console.log(plugin.applyChanges, nonConflictingLeafChangesInSourceForFile, fileData)
-
+		
 		changesPerFile[fileId] = fileData;
 	}
 
@@ -131,14 +129,14 @@ export async function merge(args: {
 		.execute();
 
 	await args.targetLix.db.transaction().execute(async (trx) => {
-		if (sourceChanges.length > 0) {
+		if (sourceChangesWithSnapshot.length > 0) {
 
 			// 1. copy the snapshots from source
 			await trx
 				.insertInto("snapshot")
 				.values(
 					// https://github.com/opral/inlang-message-sdk/issues/123
-					sourceChanges.map((change) => ({
+					sourceChangesWithSnapshot.map((change) => ({
 						id: change.snapshot_id,
 						value: JSON.stringify(change.value),
 					})),
@@ -152,7 +150,7 @@ export async function merge(args: {
 				.values(
 					// @ts-expect-error - todo auto serialize values
 					// https://github.com/opral/inlang-message-sdk/issues/123
-					sourceChanges.map((change) => {
+					sourceChangesWithSnapshot.map((change) => {
 						const rawChange = {
 							...change,
 							meta: JSON.stringify(change.meta),
@@ -187,6 +185,7 @@ export async function merge(args: {
 		}
 
 		for (const [fileId, fileData] of Object.entries(changesPerFile)) {
+
 			// 4. update the file data with the applied changes
 			await trx
 				.updateTable("file_internal")

@@ -70,7 +70,7 @@ export type Change = Selectable<ChangeTable>;
 export type NewChange = Insertable<ChangeTable>;
 type ChangeTable = {
 	id: Generated<string>;
-	parent_id?: ChangeTable["id"];
+	parent_id: Generated<string> | null;
 	author?: string;
 	file_id: string;
 	/**
@@ -129,7 +129,8 @@ type SnapshotTable = {
 	value?: Record<string, any> & { id: string };
 }
 
-export type ChangeWithSnapshot = Insertable<ChangeTable> & { value: SnapshotTable['value'] };
+// TODO #185 rename value to snapshot_value
+export type ChangeWithSnapshot = Change & { value: SnapshotTable['value'] };
 
 
 export type Conflict = Selectable<ConflictTable>;
