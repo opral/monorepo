@@ -131,6 +131,9 @@ type SnapshotTable = {
 
 // TODO #185 rename value to snapshot_value
 export type ChangeWithSnapshot = Change & { value: SnapshotTable['value'] };
+export type NewChangeWithSnapshot = NewChange & {
+	value: SnapshotTable["value"];
+};
 
 
 export type Conflict = Selectable<ConflictTable>;

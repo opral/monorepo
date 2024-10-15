@@ -1,4 +1,8 @@
-import type { ChangeWithSnapshot, Conflict } from "../database/schema.js";
+import type {
+	Conflict,
+	NewChangeWithSnapshot,
+	NewSnapshot,
+} from "../database/schema.js";
 import type { Lix } from "../types.js";
 import {
 	ChangeAlreadyExistsError,
@@ -12,7 +16,7 @@ import {
 export async function resolveConflictWithNewChange(args: {
 	lix: Lix;
 	conflict: Conflict;
-	newChange: ChangeWithSnapshot;
+	newChange: NewChangeWithSnapshot;
 }): Promise<void> {
 	if (args.lix.plugins.length !== 1) {
 		throw new Error("Unimplemented. Only one plugin is supported for now");
@@ -65,6 +69,13 @@ export async function resolveConflictWithNewChange(args: {
 		],
 	});
 
+	const snapshot: NewSnapshot = {
+		id: args.newChange.snapshot_id,
+		value: args.newChange.value,
+	};
+
+	delete args.newChange.value;
+
 	await args.lix.db.transaction().execute(async (trx) => {
 		await trx
 			.updateTable("file")
@@ -72,26 +83,14 @@ export async function resolveConflictWithNewChange(args: {
 			.where("id", "=", change.file_id)
 			.execute();
 
-		const rawChange = args.newChange
-		const newSnapshot = {
-			id: rawChange.snapshot_id,
-			value: args.newChange.value
-		}
-
-		delete rawChange.value
-		
-		const insertSnapshot = await trx
-			.insertInto("snapshot")
-			.values(newSnapshot)
-			.returning("id")
-			.executeTakeFirstOrThrow();
-
 		const insertedChange = await trx
 			.insertInto("change")
-			.values(rawChange)
+			.values(args.newChange)
 			.returning("id")
 			.executeTakeFirstOrThrow();
-		
+
+		await trx.insertInto("snapshot").values(snapshot).execute();
+
 		await trx
 			.updateTable("conflict")
 			.where((eb) =>
