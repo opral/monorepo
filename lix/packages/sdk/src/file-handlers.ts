@@ -3,7 +3,6 @@ import type { LixDatabaseSchema, LixFile } from "./database/schema.js";
 import type { LixPlugin } from "./plugin.js";
 import { minimatch } from "minimatch";
 import { Kysely } from "kysely";
-import { getLeafChange } from "./query-utilities/get-leaf-change.js";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {
