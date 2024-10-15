@@ -58,9 +58,15 @@ test.todo(
 		// workaround for settled
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 		// TODO selectFrom change doesn't resolve
-		const changes = await lix.db.selectFrom("change").selectAll().execute();
-		expect(changes.length).toBe(1);
-		expect(changes[1]?.operation).toBe("insert");
-		expect(changes[1]?.value?.name).toBe("Darth Vader");
+		const changes1 = await lix.db.selectFrom("change").selectAll().execute();
+		expect(changes1.length).toBe(1);
+		expect(changes1[1]?.operation).toBe("insert");
+
+		const changes2 = await lix.db
+			.selectFrom("change")
+			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+			.selectAll()
+			.selectAll().execute();
+		expect(changes2[1]?.value?.name).toBe("Darth Vader");
 	},
 );

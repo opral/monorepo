@@ -3,6 +3,7 @@
 import type { LixPlugin } from "../plugin.js";
 import type { Lix } from "../types.js";
 import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-only-in-source.js";
+import { RawNode } from "kysely";
 
 /**
  * Combined the changes of the source lix into the target lix.
@@ -16,9 +17,11 @@ export async function merge(args: {
 	// TODO increase performance by using attach mode
 	//      and only get the changes and commits that
 	//      are not in target.
-	const sourceChanges = await args.sourceLix.db
+	const sourceChangesWithSnapshot = await args.sourceLix.db
 		.selectFrom("change")
-		.selectAll()
+        .innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+        .selectAll('change')
+        .select("snapshot.value as value")
 		.execute();
 
 	// TODO increase performance by only getting commits
@@ -52,7 +55,7 @@ export async function merge(args: {
 
 	const changesPerFile: Record<string, ArrayBuffer> = {};
 
-	const fileIds = new Set(sourceChanges.map((c) => c.file_id));
+	const fileIds = new Set(sourceChangesWithSnapshot.map((c) => c.file_id));
 
 	for (const fileId of fileIds) {
 		// 3. apply non conflicting leaf changes
@@ -98,7 +101,7 @@ export async function merge(args: {
 			file,
 			lix: args.targetLix,
 		});
-
+		
 		changesPerFile[fileId] = fileData;
 	}
 
@@ -126,18 +129,35 @@ export async function merge(args: {
 		.execute();
 
 	await args.targetLix.db.transaction().execute(async (trx) => {
-		if (sourceChanges.length > 0) {
-			// 1. copy the changes from source
+		if (sourceChangesWithSnapshot.length > 0) {
+
+			// 1. copy the snapshots from source
+			await trx
+				.insertInto("snapshot")
+				.values(
+					// https://github.com/opral/inlang-message-sdk/issues/123
+					sourceChangesWithSnapshot.map((change) => ({
+						id: change.snapshot_id,
+						value: JSON.stringify(change.value),
+					})),
+				)
+				// ignore if already exists
+				.onConflict((oc) => oc.doNothing())
+				.execute();
+
 			await trx
 				.insertInto("change")
 				.values(
 					// @ts-expect-error - todo auto serialize values
 					// https://github.com/opral/inlang-message-sdk/issues/123
-					sourceChanges.map((change) => ({
-						...change,
-						value: JSON.stringify(change.value),
-						meta: JSON.stringify(change.meta),
-					})),
+					sourceChangesWithSnapshot.map((change) => {
+						const rawChange = {
+							...change,
+							meta: JSON.stringify(change.meta),
+						}
+						delete rawChange.value
+						return rawChange
+					}),
 				)
 				// ignore if already exists
 				.onConflict((oc) => oc.doNothing())
@@ -165,6 +185,7 @@ export async function merge(args: {
 		}
 
 		for (const [fileId, fileData] of Object.entries(changesPerFile)) {
+
 			// 4. update the file data with the applied changes
 			await trx
 				.updateTable("file_internal")

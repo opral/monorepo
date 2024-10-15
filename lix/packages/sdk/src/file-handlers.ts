@@ -44,6 +44,16 @@ export async function handleFileInsert(args: {
 			for (const diff of diffs ?? []) {
 				const value = diff.before ?? diff.after;
 
+				const snapshotId = (await trx
+					.insertInto("snapshot")
+					.values({
+						id: v4(),
+						// @ts-expect-error - database expects stringified json
+						value: JSON.stringify(value)
+					})
+					.returning("id")
+					.executeTakeFirstOrThrow()).id
+
 				await trx
 					.insertInto("change")
 					.values({
@@ -53,8 +63,7 @@ export async function handleFileInsert(args: {
 						author: args.currentAuthor,
 						plugin_key: pluginKey,
 						operation: diff.operation,
-						// @ts-expect-error - database expects stringified json
-						value: JSON.stringify(value),
+						snapshot_id: snapshotId,
 						// @ts-expect-error - database expects stringified json
 						meta: JSON.stringify(diff.meta),
 						// add queueId interesting for debugging or knowning what changes were generated in same worker run
@@ -112,6 +121,7 @@ export async function handleFileChange(args: {
 
 				const previousChanges = await trx
 					.selectFrom("change")
+					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 					.selectAll()
 					.where("file_id", "=", fileId)
 					.where("plugin_key", "=", pluginKey)
@@ -151,6 +161,16 @@ export async function handleFileChange(args: {
 					}
 				}
 
+				const snapshotId = (await trx
+					.insertInto("snapshot")
+					.values({
+						id: v4(),
+						// @ts-expect-error - database expects stringified json
+						value: JSON.stringify(value),
+					})
+					.returning('id')
+					.executeTakeFirstOrThrow()).id;
+
 				await trx
 					.insertInto("change")
 					.values({
@@ -160,8 +180,7 @@ export async function handleFileChange(args: {
 						plugin_key: pluginKey,
 						author: args.currentAuthor,
 						parent_id: previousChange?.id,
-						// @ts-expect-error - database expects stringified json
-						value: JSON.stringify(value),
+						snapshot_id: snapshotId,
 						// @ts-expect-error - database expects stringified json
 						meta: JSON.stringify(diff.meta),
 						operation: diff.operation,

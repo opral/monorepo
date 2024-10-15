@@ -1,4 +1,4 @@
-import type { Change, LixFile, NewConflict } from "./database/schema.js";
+import type { Change, ChangeWithSnapshot, LixFile, NewConflict } from "./database/schema.js";
 import type { LixReadonly } from "./types.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
@@ -28,12 +28,12 @@ export type LixPlugin<
 		 * You can traverse the parents of the leaf changes to find
 		 * conflicting changes in the target lix.
 		 */
-		leafChangesOnlyInSource: Change[];
+		leafChangesOnlyInSource: ChangeWithSnapshot[];
 	}) => Promise<NewConflict[]>;
 	applyChanges?: (args: {
 		lix: LixReadonly;
 		file: LixFile;
-		changes: Array<Change>;
+		changes: Array<ChangeWithSnapshot>;
 	}) => Promise<{
 		fileData: LixFile["data"];
 	}>;

@@ -56,7 +56,10 @@ test("should be able to start a discussion on changes", async () => {
 
 	await lix.settled();
 
-	const changes = await lix.db.selectFrom("change").selectAll().execute();
+	const changes = await lix.db.selectFrom("change")
+		.selectAll()
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.execute();
 
 	// console.log(await lix.db.selectFrom("queue").selectAll().execute());
 
@@ -65,6 +68,7 @@ test("should be able to start a discussion on changes", async () => {
 			id: changes[0]?.id,
 			author: "Test User",
 			created_at: changes[0]?.created_at,
+			snapshot_id: changes[0]?.snapshot_id,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -136,7 +140,10 @@ test("should fail to create a disussion on non existing changes", async () => {
 
 	await lix.settled();
 
-	const changes = await lix.db.selectFrom("change").selectAll().execute();
+	const changes = await lix.db.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.selectAll()
+		.execute();
 
 	// console.log(await lix.db.selectFrom("queue").selectAll().execute());
 
@@ -145,6 +152,7 @@ test("should fail to create a disussion on non existing changes", async () => {
 			id: changes[0]?.id,
 			author: "Test User",
 			created_at: changes[0]?.created_at,
+			snapshot_id: changes[0]?.snapshot_id,
 			parent_id: null,
 			type: "text",
 			file_id: "test",

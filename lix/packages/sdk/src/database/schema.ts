@@ -9,6 +9,7 @@ export type LixDatabaseSchema = {
 	file_internal: LixFileTable;
 	change_queue: ChangeQueueTable;
 	conflict: ConflictTable;
+	snapshot: SnapshotTable;
 
 	// discussion
 	discussion: DiscussionTable;
@@ -67,10 +68,9 @@ type CommitTable = {
 
 export type Change = Selectable<ChangeTable>;
 export type NewChange = Insertable<ChangeTable>;
-export type ChangeUpdate = Updateable<ChangeTable>;
 type ChangeTable = {
 	id: Generated<string>;
-	parent_id?: ChangeTable["id"];
+	parent_id: Generated<string> | null;
 	author?: string;
 	file_id: string;
 	/**
@@ -101,16 +101,7 @@ type ChangeTable = {
 	 *   - "user" for a user change
 	 */
 	type: string;
-	/**
-	 * The value of the change.
-	 *
-	 * The value is `undefined` for a delete operation.
-	 *
-	 * @example
-	 *   - For a csv cell change, the value would be the new cell value.
-	 *   - For an inlang message change, the value would be the new message.
-	 */
-	value?: Record<string, any> & { id: string };
+	snapshot_id: string;
 	/**
 	 * Additional metadata for the change used by the plugin
 	 * to process changes.
@@ -121,6 +112,26 @@ type ChangeTable = {
 	 */
 	created_at: Generated<string>;
 };
+
+export type Snapshot = Selectable<SnapshotTable>;
+export type NewSnapshot = Insertable<SnapshotTable>;
+type SnapshotTable = {
+	id: Generated<string>
+	/**
+	 * The value of the change.
+	 *
+	 * The value is `undefined` for a delete operation.
+	 *
+	 * @example
+	 *   - For a csv cell change, the value would be the new cell value.
+	 *   - For an inlang message change, the value would be the new message.
+	 */
+	value?: Record<string, any> & { id: string };
+}
+
+// TODO #185 rename value to snapshot_value
+export type ChangeWithSnapshot = Change & { value: SnapshotTable['value'] };
+
 
 export type Conflict = Selectable<ConflictTable>;
 export type NewConflict = Insertable<ConflictTable>;

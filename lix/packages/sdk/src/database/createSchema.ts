@@ -35,10 +35,15 @@ export async function createSchema(args: { db: Kysely<any> }) {
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
     operation TEXT NOT NULL,
-    value TEXT,
-    meta TEXT,
+    snapshot_id TEXT NOT NULL,
     commit_id TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    meta TEXT
+  ) strict;
+
+  create TABLE snapshot (
+    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    value TEXT
   ) strict;
 
   CREATE TABLE conflict (
