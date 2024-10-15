@@ -27,15 +27,20 @@ export async function getLowestCommonAncestor(args: {
 	}
 
 	let nextChange: Change | undefined;
-	const _true = true;
-	while (_true) {
+	let parentId: string | undefined = args.sourceChange.parent_id
+
+	if (!parentId) {
+		return // ok the change was not part of the target but also has no parent (no common ancestor!)
+	}
+	
+	while (parentId !== undefined && parentId !== null) {
 		nextChange = await args.sourceLix.db
 			.selectFrom("change")
 			.selectAll()
-			.where("id", "=", nextChange?.parent_id ?? args.sourceChange.parent_id)
+			.where("id", "=", parentId!)
 			.executeTakeFirst();
 
-		if (!nextChange || !nextChange.parent_id) {
+		if (!nextChange) {
 			// end of the change sequence. No common parent found.
 			return undefined;
 		}
@@ -49,6 +54,8 @@ export async function getLowestCommonAncestor(args: {
 		if (changeExistsInTarget) {
 			return changeExistsInTarget;
 		}
+
+		parentId = nextChange.parent_id
 	}
 	return;
 }

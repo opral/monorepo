@@ -15,7 +15,7 @@ function normalizePath(path: string) {
 
 // creates initial changes for new files
 export async function handleFileInsert(args: {
-	neu: LixFile;
+	after: LixFile;
 	plugins: LixPlugin[];
 	db: Kysely<LixDatabaseSchema>;
 	currentAuthor?: string;
@@ -26,13 +26,13 @@ export async function handleFileInsert(args: {
 	// console.log({ args });
 	for (const plugin of args.plugins) {
 		// glob expressions are expressed relative without leading / but path has leading /
-		if (!minimatch(normalizePath(args.neu.path), "/" + plugin.glob)) {
+		if (!minimatch(normalizePath(args.after.path), "/" + plugin.glob)) {
 			break;
 		}
 
 		const diffs = await plugin.diff!.file!({
-			old: undefined,
-			neu: args.neu,
+			before: undefined,
+			after: args.after,
 		});
 		// console.log({ diffs });
 
@@ -42,7 +42,7 @@ export async function handleFileInsert(args: {
 	await args.db.transaction().execute(async (trx) => {
 		for (const { diffs, pluginKey } of pluginDiffs) {
 			for (const diff of diffs ?? []) {
-				const value = diff.neu ?? diff.old;
+				const value = diff.before ?? diff.after;
 
 				const snapshotId = (await trx
 					.insertInto("snapshot")
@@ -59,7 +59,7 @@ export async function handleFileInsert(args: {
 					.values({
 						id: v4(),
 						type: diff.type,
-						file_id: args.neu.id,
+						file_id: args.after.id,
 						author: args.currentAuthor,
 						plugin_key: pluginKey,
 						operation: diff.operation,
@@ -82,25 +82,25 @@ export async function handleFileInsert(args: {
 
 export async function handleFileChange(args: {
 	queueEntry: any;
-	old: LixFile;
-	neu: LixFile;
+	before: LixFile;
+	after: LixFile;
 	plugins: LixPlugin[];
 	currentAuthor?: string;
 	db: Kysely<LixDatabaseSchema>;
 }) {
-	const fileId = args.neu?.id ?? args.old?.id;
+	const fileId = args.after?.id ?? args.before?.id;
 
 	const pluginDiffs: any[] = [];
 
 	for (const plugin of args.plugins) {
 		// glob expressions are expressed relative without leading / but path has leading /
-		if (!minimatch(normalizePath(args.neu.path), "/" + plugin.glob)) {
+		if (!minimatch(normalizePath(args.after.path), "/" + plugin.glob)) {
 			break;
 		}
 
 		const diffs = await plugin.diff!.file!({
-			old: args.old,
-			neu: args.neu,
+			before: args.before,
+			after: args.after,
 		});
 
 		pluginDiffs.push({
@@ -115,7 +115,7 @@ export async function handleFileChange(args: {
 			for (const diff of diffs ?? []) {
 				// assume an insert or update operation as the default
 				// if diff.neu is not present, it's a delete operationd
-				const value = diff.neu ?? diff.old;
+				const value = diff.after ?? diff.before;
 
 				// TODO: save hash of changed fles in every commit to discover inconsistent commits with blob?
 
@@ -151,8 +151,8 @@ export async function handleFileChange(args: {
 				// working change exists but is identical to previously committed change
 				if (previousChange) {
 					previousCommittedDiff = await pluginDiffFunction?.[diff.type]?.({
-						old: previousChange?.value,
-						neu: diff.neu,
+						before: previousChange?.value,
+						after: diff.after,
 					});
 
 					if (previousCommittedDiff?.length === 0) {

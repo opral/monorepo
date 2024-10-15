@@ -55,15 +55,15 @@ export type LixPlugin<
 	>;
 	diff: {
 		file?: (args: {
-			old?: LixFile;
-			neu?: LixFile;
+			before?: LixFile;
+			after?: LixFile;
 		}) => MaybePromise<Array<DiffReport>>;
 	} & Record<
 		// other primitives
 		keyof T,
 		(args: {
-			old?: T[keyof T];
-			neu?: T[keyof T];
+			before?: T[keyof T];
+			after?: T[keyof T];
 		}) => MaybePromise<Array<DiffReport>>
 	>;
 };
@@ -76,33 +76,33 @@ type MaybePromise<T> = T | Promise<T>;
 export type DiffReport = {
 	type: string;
 	operation: "create" | "update" | "delete";
-	old?: Record<string, any> & { id: string };
-	neu?: Record<string, any> & { id: string };
+	before?: Record<string, any> & { id: string };
+	after?: Record<string, any> & { id: string };
 	meta?: Record<string, any>;
 } & (DiffReportCreate | DiffReportUpdate | DiffReportDeletion);
 
 type DiffReportCreate = {
 	operation: "create";
-	old: undefined;
-	neu: Record<string, any> & {
+	before: undefined;
+	after: Record<string, any> & {
 		id: string;
 	};
 };
 
 type DiffReportUpdate = {
 	operation: "update";
-	old: Record<string, any> & {
+	before: Record<string, any> & {
 		id: string;
 	};
-	neu: Record<string, any> & {
+	after: Record<string, any> & {
 		id: string;
 	};
 };
 
 type DiffReportDeletion = {
 	operation: "delete";
-	old: Record<string, any> & {
+	before: Record<string, any> & {
 		id: string;
 	};
-	neu: undefined;
+	after: undefined;
 };

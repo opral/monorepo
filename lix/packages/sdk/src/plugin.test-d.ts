@@ -16,28 +16,28 @@ const plugin: LixPlugin<Types> = {
 		file: () => {
 			throw new Error("Not implemented");
 		},
-		bundle: ({ old, neu }) => {
+		bundle: ({ before, after }) => {
 			// expect old and neu to be of type Types["bundle"]
 			// @ts-expect-error - TODO
-			old satisfies Types["bundle"];
+			before satisfies Types["bundle"];
 			// @ts-expect-error - TODO
-			neu satisfies Types["bundle"];
+			after satisfies Types["bundle"];
 			throw new Error("Not implemented");
 		},
-		message: ({ old, neu }) => {
+		message: ({ before, after }) => {
 			// expect old and neu to be of type Types["message"]
 			// @ts-expect-error - TODO
-			old satisfies Types["message"];
+			before satisfies Types["message"];
 			// @ts-expect-error - TODO
-			neu satisfies Types["message"];
+			after satisfies Types["message"];
 			throw new Error("Not implemented");
 		},
-		variant: ({ old, neu }) => {
+		variant: ({ before, after }) => {
 			// expect old and neu to be of type Types["variant"]
 			// @ts-expect-error - TODO
-			old satisfies Types["variant"];
+			before satisfies Types["variant"];
 			// @ts-expect-error - TODO
-			neu satisfies Types["variant"];
+			after satisfies Types["variant"];
 			throw new Error("Not implemented");
 		},
 	},
@@ -49,18 +49,18 @@ const diffReport: DiffReport = {} as any;
 
 // expect that old is undefined and neu is defined
 if (diffReport.operation === "create") {
-	diffReport.old satisfies undefined;
-	diffReport.neu satisfies Record<string, any>;
+	diffReport.before satisfies undefined;
+	diffReport.after satisfies Record<string, any>;
 }
 
 // expect that old and neu are both defined
 if (diffReport.operation === "update") {
-	diffReport.old satisfies Record<string, any>;
-	diffReport.neu satisfies Record<string, any>;
+	diffReport.before satisfies Record<string, any>;
+	diffReport.after satisfies Record<string, any>;
 }
 
 // expect that neu is undefined and old is defined
 if (diffReport.operation === "delete") {
-	diffReport.old satisfies Record<string, any>;
-	diffReport.neu satisfies undefined;
+	diffReport.before satisfies Record<string, any>;
+	diffReport.after satisfies undefined;
 }

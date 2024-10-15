@@ -10,14 +10,14 @@ test("should be able to add and commit changes", async () => {
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
-			file: async ({ old }) => {
+			file: async ({ before: old }) => {
 				return [
 					!old
 						? {
 								type: "text",
 								operation: "create",
-								old: undefined,
-								neu: {
+								before: undefined,
+								after: {
 									id: "test",
 									text: "inserted text",
 								},
@@ -25,11 +25,11 @@ test("should be able to add and commit changes", async () => {
 						: {
 								type: "text",
 								operation: "update",
-								old: {
+								before: {
 									id: "test",
 									text: "inserted text",
 								},
-								neu: {
+								after: {
 									id: "test",
 									text: "updated text",
 								},

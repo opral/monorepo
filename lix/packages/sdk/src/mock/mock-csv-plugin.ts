@@ -65,41 +65,41 @@ export const mockCsvPlugin: LixPlugin<{
 		};
 	},
 	diff: {
-		file: async ({ old, neu }) => {
+		file: async ({ before, after }) => {
 			const result: DiffReport[] = [];
-			const oldParsed = old
-				? papaparse.parse(new TextDecoder().decode(old.data))
+			const beforeParsed = before
+				? papaparse.parse(new TextDecoder().decode(before.data))
 				: undefined;
-			const newParsed = neu
-				? papaparse.parse(new TextDecoder().decode(neu.data))
+			const afterParsed = after
+				? papaparse.parse(new TextDecoder().decode(after.data))
 				: undefined;
 
 			const numRows = Math.max(
-				oldParsed?.data.length ?? 0,
-				newParsed?.data.length ?? 0,
+				beforeParsed?.data.length ?? 0,
+				afterParsed?.data.length ?? 0,
 			);
 
-			if (newParsed) {
+			if (afterParsed) {
 				for (let i = 0; i < numRows; i++) {
-					const oldRow = oldParsed?.data[i] as string[];
-					const neuRow = newParsed.data[i] as string[];
-					const numColumns = Math.max(oldRow?.length ?? 0, neuRow?.length ?? 0);
+					const beforeRow = beforeParsed?.data[i] as string[];
+					const afterRow = afterParsed.data[i] as string[];
+					const numColumns = Math.max(beforeRow?.length ?? 0, afterRow?.length ?? 0);
 					for (let j = 0; j < numColumns; j++) {
-						const oldText = oldRow?.[j];
-						const neuText = neuRow?.[j];
+						const beforeText = beforeRow?.[j];
+						const afterText = afterRow?.[j];
 						const diff = await mockCsvPlugin.diff.cell({
-							old: oldText
+							before: beforeText
 								? {
 										rowIndex: i,
 										columnIndex: j,
-										text: oldText,
+										text: beforeText,
 									}
 								: undefined,
-							neu: neuText
+							after: afterText
 								? {
 										rowIndex: i,
 										columnIndex: j,
-										text: neuText,
+										text: afterText,
 									}
 								: undefined,
 						});
@@ -113,16 +113,16 @@ export const mockCsvPlugin: LixPlugin<{
 			return result;
 		},
 		// @ts-expect-error type narrowing bug
-		cell: async ({ old, neu }) => {
-			if (old?.text === neu?.text) {
+		cell: async ({ before, after }) => {
+			if (before?.text === after?.text) {
 				return [];
 			} else {
 				return [
 					{
 						type: "cell",
-						operation: old && neu ? "update" : old ? "delete" : "create",
-						old: old,
-						neu: neu,
+						operation: before && after ? "update" : before ? "delete" : "create",
+						before,
+						after,
 					},
 				];
 			}
