@@ -75,6 +75,7 @@ type MaybePromise<T> = T | Promise<T>;
  */
 export type DiffReport = {
 	type: string;
-	before?: Record<string, any> & { id: string };
-	after?: Record<string, any> & { id: string };
+	entity_id: string;
+	before?: Record<string, any>;
+	after?: Record<string, any>;
 };

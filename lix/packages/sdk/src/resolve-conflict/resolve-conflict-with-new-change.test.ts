@@ -33,9 +33,11 @@ test("it should throw if the to be resolved with change already exists", async (
 			type: "mock",
 			file_id: "mock",
 			snapshot_id: "sn1",
+			entity_id: "value1",
 		},
 		{
 			file_id: "mock",
+			entity_id: "value2",
 			plugin_key: "plugin1",
 			type: "mock",
 			snapshot_id: "sn2",
@@ -120,12 +122,14 @@ test("resolving a conflict should throw if the to be resolved with change is not
 	const mockChanges: NewChange[] = [
 		{
 			plugin_key: "plugin1",
+			entity_id: "value1",
 			type: "mock",
 			file_id: "mock",
 			snapshot_id: "sn1",
 		},
 		{
 			file_id: "mock",
+			entity_id: "value2",
 			plugin_key: "plugin1",
 			type: "mock",
 			snapshot_id: "sn2",
@@ -187,6 +191,7 @@ test("resolving a conflict should throw if the to be resolved with change is not
 				plugin_key: "plugin1",
 				type: "mock",
 				snapshot_id: "sn3",
+				entity_id: "value3",
 				value: {
 					id: "value3",
 				},
@@ -216,11 +221,13 @@ test("resolving a conflict should throw if the change to resolve with does not b
 		{
 			plugin_key: "plugin1",
 			type: "mock",
+			entity_id: "value1",
 			file_id: "mock",
 			snapshot_id: "sn1",
 		},
 		{
 			file_id: "mock",
+			entity_id: "value2",
 			plugin_key: "plugin1",
 			type: "mock",
 			snapshot_id: "sn2",
@@ -274,6 +281,7 @@ test("resolving a conflict should throw if the change to resolve with does not b
 				plugin_key: "plugin1",
 				type: "mock",
 				snapshot_id: "sn3",
+				entity_id: "value3",
 				value: {
 					id: "value3",
 				},
@@ -301,12 +309,14 @@ test("resolving a conflict with a new change should insert the change and mark t
 	const mockChanges: NewChange[] = [
 		{
 			plugin_key: "plugin1",
+			entity_id: "value1",
 			type: "mock",
 			file_id: "mock",
 			snapshot_id: "sn1",
 		},
 		{
 			file_id: "mock",
+			entity_id: "value2",
 			plugin_key: "plugin1",
 			type: "mock",
 			snapshot_id: "sn2",
@@ -362,6 +372,7 @@ test("resolving a conflict with a new change should insert the change and mark t
 			file_id: "mock",
 			parent_id: changes[0]!.id,
 			plugin_key: "plugin1",
+			entity_id: "value3",
 			type: "mock",
 			snapshot_id: "sn3",
 			value: {

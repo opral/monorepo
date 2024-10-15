@@ -4,64 +4,28 @@ import { newLixFile } from "./newLix.js";
 import type { DiffReport, LixPlugin } from "./plugin.js";
 
 test("should use queue and settled correctly", async () => {
-	const mockPlugin: LixPlugin<{
-		text: { id: string; text: string };
-	}> = {
+	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
 			file: async ({ before, after }) => {
-				const dec = new TextDecoder();
-				// console.log("diff", after, before?.data, after?.data);
-				const textBefore = dec.decode(after?.data);
-				const textAfter = dec.decode(before?.data);
+				const textBefore = before
+					? new TextDecoder().decode(before?.data)
+					: undefined;
+				const textAfter = after
+					? new TextDecoder().decode(after.data)
+					: undefined;
 
 				if (textBefore === textAfter) {
 					return [];
 				}
-
-				return await mockPlugin.diff.text({
-					before: before
-						? {
-								id: "test",
-								text: textAfter,
-							}
-						: undefined,
-					after: after
-						? {
-								id: "test",
-								text: textBefore,
-							}
-						: undefined,
-				});
-			},
-			text: async ({ before, after }) => {
-				// console.log("text", before, after);
-				if (before?.text === after?.text) {
-					return [];
-				}
-
 				return [
-					!before
-						? {
-								type: "text",
-								before: undefined,
-								after: {
-									id: "test",
-									text: after?.text,
-								},
-							}
-						: {
-								type: "text",
-								before: {
-									id: "test",
-									text: before?.text,
-								},
-								after: {
-									id: "test",
-									text: after?.text,
-								},
-							},
+					{
+						type: "text",
+						entity_id: "test",
+						before: textBefore ? { text: textBefore } : undefined,
+						after: textAfter ? { text: textAfter } : undefined,
+					},
 				];
 			},
 		},
@@ -118,7 +82,20 @@ test("should use queue and settled correctly", async () => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll()
+		.select([
+			"change.id",
+			"change.author",
+			"change.created_at",
+			"change.snapshot_id",
+			"change.parent_id",
+			"change.entity_id",
+			"change.type",
+			"change.file_id",
+			"change.plugin_key",
+			"snapshot.value as value",
+			"change.meta",
+			"change.commit_id",
+		])
 		.execute();
 
 	expect(changes).toEqual([
@@ -128,11 +105,11 @@ test("should use queue and settled correctly", async () => {
 			created_at: changes[0]?.created_at,
 			snapshot_id: changes[0]?.snapshot_id,
 			parent_id: null,
+			entity_id: "test",
 			type: "text",
 			file_id: "test",
 			plugin_key: "mock-plugin",
 			value: {
-				id: "test",
 				text: "test",
 			},
 			meta: null,
@@ -187,7 +164,20 @@ test("should use queue and settled correctly", async () => {
 	const updatedChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll()
+		.select([
+			"change.id",
+			"change.author",
+			"change.created_at",
+			"change.snapshot_id",
+			"change.parent_id",
+			"change.entity_id",
+			"change.type",
+			"change.file_id",
+			"change.plugin_key",
+			"snapshot.value as value",
+			"change.meta",
+			"change.commit_id",
+		])
 		.execute();
 
 	expect(updatedChanges).toEqual([
@@ -197,11 +187,11 @@ test("should use queue and settled correctly", async () => {
 			created_at: updatedChanges[0]?.created_at,
 			snapshot_id: updatedChanges[0]?.snapshot_id,
 			parent_id: null,
+			entity_id: "test",
 			type: "text",
 			file_id: "test",
 			plugin_key: "mock-plugin",
 			value: {
-				id: "test",
 				text: "test",
 			},
 			meta: null,
@@ -210,6 +200,7 @@ test("should use queue and settled correctly", async () => {
 		{
 			author: null,
 			commit_id: null,
+			entity_id: "test",
 			created_at: updatedChanges[1]?.created_at,
 			snapshot_id: updatedChanges[1]?.snapshot_id,
 			file_id: "test",
@@ -219,7 +210,6 @@ test("should use queue and settled correctly", async () => {
 			plugin_key: "mock-plugin",
 			type: "text",
 			value: {
-				id: "test",
 				text: "test updated text",
 			},
 		},
@@ -232,10 +222,10 @@ test("should use queue and settled correctly", async () => {
 			id: updatedChanges[2]?.id,
 			meta: null,
 			parent_id: updatedChanges[1]?.id,
+			entity_id: "test",
 			plugin_key: "mock-plugin",
 			type: "text",
 			value: {
-				id: "test",
 				text: "test updated text second update",
 			},
 		},
@@ -252,8 +242,21 @@ test("changes should contain the author", async () => {
 			file: vi.fn().mockResolvedValue([
 				{
 					type: "mock",
+					entity_id: "mock",
 					before: undefined,
-					after: {} as any,
+					after: {
+						text: "value1",
+					},
+				},
+				{
+					type: "mock",
+					entity_id: "mock",
+					before: {
+						text: "value1",
+					},
+					after: {
+						text: "value2",
+					},
 				},
 			] satisfies DiffReport[]),
 		},

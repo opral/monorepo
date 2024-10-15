@@ -25,6 +25,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 	const mockChanges: NewChange[] = [
 		{
 			id: "1",
+			entity_id: "value1",
 			type: "mock",
 			snapshot_id: "sn1",
 			file_id: "mock-file",
@@ -32,6 +33,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		},
 		{
 			id: "2",
+			entity_id: "value1",
 			type: "mock",
 			snapshot_id: "sn2",
 			file_id: "mock-file",
@@ -39,6 +41,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		},
 		{
 			id: "3",
+			entity_id: "value1",
 			type: "mock",
 			snapshot_id: "sn3",
 			file_id: "mock-file",
@@ -139,6 +142,7 @@ test("it should save change conflicts", async () => {
 		{
 			id: "1",
 			type: "mock",
+			entity_id: "value1",
 			snapshot_id: "sn1",
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
@@ -146,6 +150,7 @@ test("it should save change conflicts", async () => {
 		{
 			id: "2",
 			type: "mock",
+			entity_id: "value1",
 			snapshot_id: "sn2",
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
@@ -153,6 +158,7 @@ test("it should save change conflicts", async () => {
 		{
 			id: "3",
 			type: "mock",
+			entity_id: "value1",
 			snapshot_id: "sn3",
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
@@ -239,6 +245,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 			id: "1",
 			type: "mock",
 			snapshot_id: "sn1",
+			entity_id: "value1",
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -257,6 +264,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 		{
 			id: "2",
 			type: "mock",
+			entity_id: "value1",
 			snapshot_id: "sn2",
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
@@ -333,11 +341,11 @@ test("it should apply changes that are not conflicting", async () => {
 	const mockSnapshots: NewSnapshot[] = [
 		{
 			id: "sn1",
-			value: { id: "mock-id", color: "red" },
+			value: { color: "red" },
 		},
 		{
 			id: "sn2",
-			value: { id: "mock-id", color: "blue" },
+			value: { color: "blue" },
 		},
 	];
 
@@ -345,6 +353,7 @@ test("it should apply changes that are not conflicting", async () => {
 		{
 			id: "1",
 			type: "mock",
+			entity_id: "value1",
 			snapshot_id: "sn1",
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
@@ -352,6 +361,7 @@ test("it should apply changes that are not conflicting", async () => {
 		{
 			id: "2",
 			parent_id: "1",
+			entity_id: "value1",
 			type: "mock",
 			snapshot_id: "sn2",
 			file_id: "mock-file",
@@ -447,6 +457,7 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 		{
 			id: "1",
 			type: "mock",
+			entity_id: "value1",
 			snapshot_id: "sn1",
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
@@ -465,6 +476,7 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 		{
 			id: "2",
 			type: "mock",
+			entity_id: "value1",
 			snapshot_id: "sn2",
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
@@ -564,6 +576,7 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 		{
 			id: "2",
 			commit_id: "commit-1",
+			entity_id: "value1",
 			type: "mock",
 			snapshot_id: "sn2",
 			file_id: "mock-file",
@@ -640,19 +653,18 @@ test("it should copy discussion and related comments and mappings", async () => 
 						? {
 								type: "text",
 								before: undefined,
+								entity_id: "test",
 								after: {
-									id: "test",
 									text: "inserted text",
 								},
 							}
 						: {
 								type: "text",
+								entity_id: "test",
 								before: {
-									id: "test",
 									text: "inserted text",
 								},
 								after: {
-									id: "test",
 									text: "updated text",
 								},
 							},
@@ -689,8 +701,8 @@ test("it should copy discussion and related comments and mappings", async () => 
 	const changes = await lix1.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll().execute();
-
+		.selectAll()
+		.execute();
 
 	expect(changes).toEqual([
 		{
@@ -701,9 +713,9 @@ test("it should copy discussion and related comments and mappings", async () => 
 			parent_id: null,
 			type: "text",
 			file_id: "test",
+			entity_id: "test",
 			plugin_key: "mock-plugin",
 			value: {
-				id: "test",
 				text: "inserted text",
 			},
 			meta: null,

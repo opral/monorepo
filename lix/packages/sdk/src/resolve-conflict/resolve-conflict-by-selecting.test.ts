@@ -28,11 +28,13 @@ test("it should resolve a conflict by applying the change and marking the confli
 			plugin_key: "plugin1",
 			type: "mock",
 			file_id: "mock",
+			entity_id: "value1",
 			snapshot_id: "sn1",
 		},
 		{
 			plugin_key: "plugin1",
 			file_id: "mock",
+			entity_id: "value2",
 			type: "mock",
 			snapshot_id: "sn2",
 		},

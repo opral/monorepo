@@ -9,6 +9,7 @@ test("inserting a change should auto fill the created_at column", async () => {
 		.insertInto("change")
 		.values({
 			id: "test",
+			entity_id: "test",
 			commit_id: "test",
 			type: "file",
 			file_id: "mock",

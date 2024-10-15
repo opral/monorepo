@@ -72,6 +72,10 @@ type ChangeTable = {
 	id: Generated<string>;
 	parent_id: Generated<string> | null;
 	author?: string;
+	/**
+	 * The entity the change refers to.
+	 */
+	entity_id: string;
 	file_id: string;
 	/**
 	 * If no commit id exists on a change,
@@ -110,18 +114,18 @@ type ChangeTable = {
 export type Snapshot = Selectable<SnapshotTable>;
 export type NewSnapshot = Insertable<SnapshotTable>;
 type SnapshotTable = {
-	id: Generated<string>
+	id: Generated<string>;
 	/**
 	 * The value of the change.
 	 *
-	 * The value is `undefined` for a delete operation.
+	 * Lix interprets an undefined value as delete operation.
 	 *
 	 * @example
 	 *   - For a csv cell change, the value would be the new cell value.
 	 *   - For an inlang message change, the value would be the new message.
 	 */
-	value?: Record<string, any> & { id: string };
-}
+	value?: Record<string, any>;
+};
 
 // TODO #185 rename value to snapshot_value
 export type ChangeWithSnapshot = Change & { value: SnapshotTable['value'] };
