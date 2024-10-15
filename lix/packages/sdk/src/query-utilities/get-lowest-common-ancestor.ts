@@ -33,7 +33,7 @@ export async function getLowestCommonAncestor(args: {
 		return // ok the change was not part of the target but also has no parent (no common ancestor!)
 	}
 	
-	while (!parentId) {
+	while (parentId) {
 		nextChange = await args.sourceLix.db
 			.selectFrom("change")
 			.selectAll()
@@ -55,7 +55,7 @@ export async function getLowestCommonAncestor(args: {
 			return changeExistsInTarget;
 		}
 
-		parentId = nextChange.parent_id
+		parentId = nextChange.parent_id;
 	}
 	return;
 }

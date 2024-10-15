@@ -15,15 +15,15 @@ test("it should find the common parent of two changes recursively", async () => 
 	const mockSnapshots = [
 		{
 			id: "sn1",
-			value: ["change 1"],
+			value: ["snapshot 1"],
 		},
 		{
 			id: "sn2",
-			value: ["change 2"],
+			value: ["snaptshot 3"],
 		},
 		{
 			id: "sn3",
-			value: ["change 3"],
+			value: ["snapshot 4"],
 		},
 	];
 
@@ -79,19 +79,19 @@ test("it should find the common parent of two changes recursively", async () => 
 		.values([mockChanges[0]!, mockChanges[1]!, mockChanges[2]!])
 		.execute();
 
-	const changeTwo = await sourceLix.db
+	const secondChange = await sourceLix.db
 		.selectFrom("change")
 		.selectAll()
 		.where("id", "=", mockChanges[2]!.id!)
 		.executeTakeFirstOrThrow();
 
-	const commonParent = await getLowestCommonAncestor({
-		sourceChange: changeTwo,
+	const commonAncestor = await getLowestCommonAncestor({
+		sourceChange: secondChange,
 		sourceLix,
 		targetLix,
 	});
 
-	expect(commonParent?.id).toBe("0");
+	expect(commonAncestor?.id).toBe("0");
 });
 
 test("it should return undefined if no common parent exists", async () => {
@@ -138,8 +138,8 @@ test("it should return undefined if no common parent exists", async () => {
 		},
 		{
 			id: "2",
-			parent_id: "1",
-			operation: "update",
+			parent_id: undefined,
+			operation: "create",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
@@ -173,13 +173,13 @@ test("it should return undefined if no common parent exists", async () => {
 		.where("id", "=", mockChanges[2]!.id!)
 		.executeTakeFirstOrThrow();
 
-	const commonParent = await getLowestCommonAncestor({
+	const commonAncestor = await getLowestCommonAncestor({
 		sourceChange: insertedChange,
 		targetLix,
 		sourceLix,
 	});
 
-	expect(commonParent?.id).toBe("1");
+	expect(commonAncestor?.id).toBe(undefined);
 });
 
 test("it should return the source change if its the common parent", async () => {
