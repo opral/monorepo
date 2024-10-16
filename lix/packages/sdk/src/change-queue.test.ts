@@ -100,7 +100,6 @@ test("should use queue and settled correctly", async () => {
 			value: {
 				text: "test",
 			},
-			meta: null,
 			commit_id: null,
 		},
 	]);
@@ -152,8 +151,8 @@ test("should use queue and settled correctly", async () => {
 	const updatedChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll('change')
-		.select('snapshot.value')
+		.selectAll("change")
+		.select("snapshot.value")
 		.execute();
 
 	expect(updatedChanges).toEqual([
@@ -170,7 +169,6 @@ test("should use queue and settled correctly", async () => {
 			value: {
 				text: "test",
 			},
-			meta: null,
 			commit_id: null,
 		},
 		{
@@ -181,7 +179,6 @@ test("should use queue and settled correctly", async () => {
 			snapshot_id: updatedChanges[1]?.snapshot_id,
 			file_id: "test",
 			id: updatedChanges[1]?.id,
-			meta: null,
 			parent_id: updatedChanges[0]?.id,
 			plugin_key: "mock-plugin",
 			type: "text",
@@ -196,7 +193,6 @@ test("should use queue and settled correctly", async () => {
 			snapshot_id: updatedChanges[2]?.snapshot_id,
 			file_id: "test",
 			id: updatedChanges[2]?.id,
-			meta: null,
 			parent_id: updatedChanges[1]?.id,
 			entity_id: "test",
 			plugin_key: "mock-plugin",
