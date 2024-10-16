@@ -724,7 +724,6 @@ test("it should copy discussion and related comments and mappings", async () => 
 			value: {
 				text: "inserted text",
 			},
-			meta: null,
 			commit_id: null,
 		},
 	]);
