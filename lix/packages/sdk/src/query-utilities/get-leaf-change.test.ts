@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from "vitest";
 import { getLeafChange } from "./get-leaf-change.js";
 import { openLixInMemory } from "../open/openLixInMemory.js";

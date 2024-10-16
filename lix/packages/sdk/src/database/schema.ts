@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { LixPlugin } from "../plugin.js";
 
@@ -89,7 +90,6 @@ type ChangeTable = {
 	 * in case the user changes the plugin configuration.
 	 */
 	plugin_key: LixPlugin["key"];
-
 	/**
 	 * The type of change that was made.
 	 *
@@ -100,11 +100,6 @@ type ChangeTable = {
 	 */
 	type: string;
 	snapshot_id: string;
-	/**
-	 * Additional metadata for the change used by the plugin
-	 * to process changes.
-	 */
-	meta?: Record<string, any>; // JSONB
 	/**
 	 * The time the change was created.
 	 */

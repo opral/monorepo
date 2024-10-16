@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
@@ -725,7 +724,6 @@ test("it should copy discussion and related comments and mappings", async () => 
 			value: {
 				text: "inserted text",
 			},
-			meta: null,
 			commit_id: null,
 		},
 	]);

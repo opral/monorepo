@@ -50,7 +50,6 @@ export async function resolveConflictWithNewChange(args: {
 		: undefined;
 
 	if (newChangeAlreadyExists) {
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		throw new ChangeAlreadyExistsError({ id: args.newChange.id! });
 	}
 
@@ -64,7 +63,7 @@ export async function resolveConflictWithNewChange(args: {
 		lix: args.lix,
 		file: file,
 		changes: [
-			// @ts-ignore
+			// @ts-expect-error - this will need fixing (setting up eslint atm)
 			args.resolveWithChange,
 		],
 	});

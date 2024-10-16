@@ -40,8 +40,7 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     plugin_key TEXT NOT NULL,
     snapshot_id TEXT NOT NULL,
     commit_id TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    meta TEXT
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
   ) strict;
 
   CREATE INDEX IF NOT EXISTS idx_change_parent_id ON change (parent_id);

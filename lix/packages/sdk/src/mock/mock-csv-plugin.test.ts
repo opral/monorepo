@@ -13,7 +13,7 @@ describe("applyChanges()", () => {
 			{ value: { rowIndex: 3, columnIndex: 0, text: "John" } },
 			{ value: { rowIndex: 3, columnIndex: 1, text: "30" } },
 		];
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
 		const { fileData } = await mockCsvPlugin.applyChanges!({
 			file: { id: "mock", path: "x.csv", data: before, metadata: null },
 			changes: changes as any,
@@ -27,7 +27,7 @@ describe("applyChanges()", () => {
 		const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 		const after = new TextEncoder().encode("Name,Age\nAnna,21\nPeter,50");
 		const changes = [{ value: { rowIndex: 1, columnIndex: 1, text: "21" } }];
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
 		const { fileData } = await mockCsvPlugin.applyChanges!({
 			file: { id: "mock", path: "x.csv", data: before, metadata: null },
 			changes: changes as any,
@@ -67,7 +67,7 @@ describe("applyChanges()", () => {
 			.execute();
 
 		const changes = [{ parent_id: "parent_change_id" }];
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
 		const { fileData } = await mockCsvPlugin.applyChanges!({
 			file: { id: "mock", path: "x.csv", data: before, metadata: null },
 			changes: changes as any,

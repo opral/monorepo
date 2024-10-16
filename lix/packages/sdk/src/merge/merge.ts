@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { LixPlugin } from "../plugin.js";
 import type { Lix } from "../types.js";
 import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-only-in-source.js";
@@ -145,15 +144,10 @@ export async function merge(args: {
 			await trx
 				.insertInto("change")
 				.values(
-					// @ts-expect-error - todo auto serialize values
 					// https://github.com/opral/inlang-message-sdk/issues/123
 					sourceChangesWithSnapshot.map((change) => {
-						const rawChange = {
-							...change,
-							meta: JSON.stringify(change.meta),
-						};
-						delete rawChange.value;
-						return rawChange;
+						delete change.value;
+						return change;
 					}),
 				)
 				// ignore if already exists
