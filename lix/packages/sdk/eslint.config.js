@@ -17,4 +17,11 @@ export default [
 			],
 		},
 	},
+	{
+		files: ["**/*.test.ts"],
+		rules: {
+			// any makes testing sometimes easier
+			"@typescript-eslint/no-explicit-any": "off",
+		},
+	},
 ];
