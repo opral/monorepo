@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-null */
 import type { ExpressionBuilder } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 

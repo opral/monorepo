@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from "vitest";
 import { getLowestCommonAncestor } from "./get-lowest-common-ancestor.js";
 import { openLixInMemory } from "../open/openLixInMemory.js";

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
 	OperationNodeTransformer,
 	sql,
@@ -43,7 +44,7 @@ class ParseJsonTransformer extends OperationNodeTransformer {
 					return listNodeItem;
 				}
 
-				// @ts-ignore
+				// @ts-expect-error - type mismatch
 				const { value } = listNodeItem;
 
 				const serializedValue = maybeSerializeJson(value);

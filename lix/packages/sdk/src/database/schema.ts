@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { LixPlugin } from "../plugin.js";
 
