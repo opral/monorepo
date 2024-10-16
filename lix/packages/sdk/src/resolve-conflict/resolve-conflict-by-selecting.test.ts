@@ -41,7 +41,6 @@ test("it should resolve a conflict by applying the change and marking the confli
 
 	const mockPlugin: LixPlugin = {
 		key: "plugin1",
-		glob: "*",
 		applyChanges: vi.fn().mockResolvedValue({
 			fileData: new TextEncoder().encode(
 				JSON.stringify(mockSnapshots[0]?.value),

@@ -55,8 +55,6 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
-		detectChanges: vi.fn(),
 		detectConflicts: vi.fn().mockResolvedValue([]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
@@ -169,8 +167,6 @@ test("it should save change conflicts", async () => {
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
-		detectChanges: vi.fn(),
 		detectConflicts: vi.fn().mockResolvedValue([
 			{
 				change_id: mockChanges[1]!.id,
@@ -273,8 +269,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 
 	const mockPluginInSourceLix: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
-		detectChanges: vi.fn(),
+		detectChanges: vi.fn().mockRejectedValue([]),
 		detectConflicts: vi.fn().mockResolvedValue([]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
@@ -282,7 +277,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 	const mockPluginInTargetLix: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
-		detectChanges: vi.fn(),
+		detectChanges: vi.fn().mockResolvedValue([]),
 		detectConflicts: vi.fn().mockResolvedValue([]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
@@ -471,8 +466,6 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
-		detectChanges: vi.fn(),
 		detectConflicts: vi.fn().mockResolvedValue([
 			{
 				change_id: commonChanges[0]!.id,
@@ -578,8 +571,6 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
-		detectChanges: vi.fn(),
 		detectConflicts: vi.fn().mockResolvedValue([]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
