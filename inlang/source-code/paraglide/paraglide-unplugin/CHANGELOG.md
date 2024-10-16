@@ -1,5 +1,11 @@
 # @inlang/paraglide-unplugin
 
+## 1.8.7
+
+### Patch Changes
+
+- 6713ca0: upgraded the unplugin dependency
+
 ## 1.8.6
 
 ### Patch Changes
