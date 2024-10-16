@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { DiffReport, LixPlugin } from "../plugin.js";
 import papaparse from "papaparse";
 

@@ -63,7 +63,7 @@ export async function resolveConflictWithNewChange(args: {
 		lix: args.lix,
 		file: file,
 		changes: [
-			// @ts-ignore
+			// @ts-expect-error - this will need fixing (setting up eslint atm)
 			args.resolveWithChange,
 		],
 	});
