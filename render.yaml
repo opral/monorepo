@@ -30,10 +30,14 @@ services:
 
   - name: lix-website
     type: web
-    runtime: static
+    runtime: node
+    region: frankfurt
+    plan: starter
+    branch: main
+    pullRequestPreviewsEnabled: false
+    buildCommand: pnpm --filter lix-website i && pnpm --filter lix-website build
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter lix-website start
     autoDeploy: true
-    staticPublishPath: ./lix/website/dist/client
-    buildCommand: pnpm install && pnpm --filter lix-website run build
     buildFilter:
       paths:
         - lix/website/**
