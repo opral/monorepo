@@ -33,14 +33,12 @@ export function isInSimulatedCurrentBranch(
 			subquery
 				.selectFrom("conflict")
 				.select("conflict.change_id")
-				.where("conflict.resolved_with_change_id", "is", null),
+				.where("conflict.resolved_change_id", "is", null),
 		),
 		// change is in a conflict and is the resolved one
 		// @ts-expect-error - no idea why
 		eb("change.id", "in", (subquery) =>
-			subquery
-				.selectFrom("conflict")
-				.select("conflict.resolved_with_change_id"),
+			subquery.selectFrom("conflict").select("conflict.resolved_change_id"),
 		),
 	]);
 }

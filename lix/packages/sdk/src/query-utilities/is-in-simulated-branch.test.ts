@@ -43,7 +43,7 @@ test("as long as a conflict is unresolved, the conflicting change should not app
 			{
 				change_id: "change0",
 				conflicting_change_id: "change2",
-				resolved_with_change_id: null,
+				resolved_change_id: null,
 			},
 		])
 		.returningAll()
@@ -102,7 +102,7 @@ test(`if the conflict has been resolved by selecting the 'original' change,
 			{
 				change_id: "change0",
 				conflicting_change_id: "change2",
-				resolved_with_change_id: "change0",
+				resolved_change_id: "change0",
 			},
 		])
 		.returningAll()
@@ -163,7 +163,7 @@ test(`
 			{
 				change_id: "change0",
 				conflicting_change_id: "change2",
-				resolved_with_change_id: "change2",
+				resolved_change_id: "change2",
 			},
 		])
 		.returningAll()

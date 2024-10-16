@@ -55,7 +55,7 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     conflicting_change_id TEXT NOT NULL,
     reason TEXT,
     meta TEXT,
-    resolved_with_change_id TEXT,
+    resolved_change_id TEXT,
     PRIMARY KEY (change_id, conflicting_change_id)
   ) strict;
     
