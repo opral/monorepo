@@ -10,6 +10,7 @@
 		"build": "tsc --build",
 		"test": "tsc --noEmit && vitest run --coverage",
 		"test:watch": "vitest",
+		"bench": "vitest bench",
 		"lint": "eslint src/**/* --fix",
 		"dev": "tsc --watch",
 		"format": "prettier ./src --write"

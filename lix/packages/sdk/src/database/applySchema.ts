@@ -43,6 +43,8 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
   ) strict;
 
+  CREATE INDEX IF NOT EXISTS idx_change_parent_id ON change (parent_id);
+
   create TABLE IF NOT EXISTS snapshot (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     value TEXT

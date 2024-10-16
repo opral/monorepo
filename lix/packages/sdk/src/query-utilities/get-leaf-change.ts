@@ -1,3 +1,4 @@
+import { sql } from "kysely";
 import type { Change } from "../database/schema.js";
 import type { LixReadonly } from "../types.js";
 
