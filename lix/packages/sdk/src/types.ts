@@ -5,5 +5,6 @@ export type Lix = Awaited<ReturnType<typeof openLix>>;
 export type LixReadonly = Pick<Lix, "plugins"> & {
 	db: {
 		selectFrom: Lix["db"]["selectFrom"];
+		withRecursive: Lix["db"]["withRecursive"];
 	};
 };
