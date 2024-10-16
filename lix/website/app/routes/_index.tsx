@@ -30,7 +30,7 @@ export const meta: MetaFunction = () => {
 		},
 		{
 			property: "og:image",
-			content: "https://lix-website-preview.onrender.com/images/og-image-lix.png",
+			content: "https://lix.opral.com/images/og-image-lix.png",
 		},
 		{
 			property: "og:image:type",
@@ -63,7 +63,7 @@ export const meta: MetaFunction = () => {
 		},
 		{
 			name: "twitter:image:src",
-			content: "https://lix-website-preview.onrender.com/images/og-image-lix.png",
+			content: "https://lix.opral.com/images/og-image-lix.png",
 		},
 	]
 
@@ -179,14 +179,14 @@ export default function Index() {
 							>
 								Get updates
 							</a>
-							<a
+							{/* <a
 								href="https://x.com/FabianHiller/status/1839301632888131814"
 								target="_blanc"
 								className="w-full sm:w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex justify-center items-center gap-2 border border-slate-300 hover:border-slate-400 transition-all"
 							>
 								<IconDate />
 								Talk at Web Dev Meetup NY
-							</a>
+							</a> */}
 						</div>
 					</div>
 					<div>
