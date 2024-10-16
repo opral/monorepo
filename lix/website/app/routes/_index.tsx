@@ -7,7 +7,6 @@ import Details from "~/components/ui/details"
 import IconLogoTabelle from "~/components/icons/logo-tabelle"
 import IconLogoPapier from "~/components/icons/logo-papier"
 import IconLogoInlang from "~/components/icons/logo-inlang"
-import IconDate from "~/components/icons/date"
 
 export const meta: MetaFunction = () => {
 	const ogImage = [
