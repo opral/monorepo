@@ -6,5 +6,15 @@ export default [
 	...tseslint.configs.recommended,
 	{
 		files: ["**/*.{js,ts}"],
+		rules: {
+			"no-restricted-imports": [
+				"error",
+				{
+					name: "@lix-js/sdk",
+					message:
+						"Importing from the compiled dist is not allowed (and you likely did this by accident). Import from source directly instead e.g. `./file.js`",
+				},
+			],
+		},
 	},
 ];
