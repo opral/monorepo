@@ -58,6 +58,7 @@ describe("applyChanges()", () => {
 			.insertInto("change")
 			.values({
 				id: "parent_change_id",
+				entity_id: "value1",
 				file_id: "random",
 				plugin_key: "csv",
 				type: "cell",

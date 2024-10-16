@@ -29,6 +29,7 @@ test("it should find the latest child of a given change", async () => {
 		{
 			id: "1",
 			parent_id: undefined,
+			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
@@ -37,6 +38,7 @@ test("it should find the latest child of a given change", async () => {
 		{
 			id: "2",
 			parent_id: "1",
+			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
@@ -45,6 +47,7 @@ test("it should find the latest child of a given change", async () => {
 		{
 			id: "3",
 			parent_id: "2",
+			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",

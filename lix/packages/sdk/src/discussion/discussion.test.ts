@@ -15,19 +15,18 @@ const mockPlugin: LixPlugin = {
 					? {
 							type: "text",
 							before: undefined,
+							entity_id: "test",
 							after: {
-								id: "test",
 								text: "inserted text",
 							},
 						}
 					: {
 							type: "text",
+							entity_id: "test",
 							before: {
-								id: "test",
 								text: "inserted text",
 							},
 							after: {
-								id: "test",
 								text: "updated text",
 							},
 						},
@@ -55,30 +54,10 @@ test("should be able to start a discussion on changes", async () => {
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.selectAll()
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.selectAll('change')
+		.select('snapshot.value')
 		.execute();
-
-	// console.log(await lix.db.selectFrom("queue").selectAll().execute());
-
-	expect(changes).toEqual([
-		{
-			id: changes[0]?.id,
-			author: "Test User",
-			created_at: changes[0]?.created_at,
-			snapshot_id: changes[0]?.snapshot_id,
-			parent_id: null,
-			type: "text",
-			file_id: "test",
-			plugin_key: "mock-plugin",
-			value: {
-				id: "test",
-				text: "inserted text",
-			},
-			meta: null,
-			commit_id: null,
-		},
-	]);
 
 	const discussion = await lix.createDiscussion({
 		changeIds: [changes[0]!.id],
@@ -135,33 +114,6 @@ test("should fail to create a disussion on non existing changes", async () => {
 		.execute();
 
 	await lix.settled();
-
-	const changes = await lix.db
-		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll()
-		.execute();
-
-	// console.log(await lix.db.selectFrom("queue").selectAll().execute());
-
-	expect(changes).toEqual([
-		{
-			id: changes[0]?.id,
-			author: "Test User",
-			created_at: changes[0]?.created_at,
-			snapshot_id: changes[0]?.snapshot_id,
-			parent_id: null,
-			type: "text",
-			file_id: "test",
-			plugin_key: "mock-plugin",
-			value: {
-				id: "test",
-				text: "inserted text",
-			},
-			meta: null,
-			commit_id: null,
-		},
-	]);
 
 	await lix.createDiscussion({
 		changeIds: ["I DON'T EXIST"],

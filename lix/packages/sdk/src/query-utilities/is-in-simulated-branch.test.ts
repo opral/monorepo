@@ -11,6 +11,7 @@ test("as long as a conflict is unresolved, the conflicting change should not app
 		.values([
 			{
 				id: "change0",
+				entity_id: "value1",
 				file_id: "mock",
 				plugin_key: "mock",
 				type: "mock",
@@ -18,6 +19,7 @@ test("as long as a conflict is unresolved, the conflicting change should not app
 			},
 			{
 				id: "change1",
+				entity_id: "value1",
 				file_id: "mock",
 				plugin_key: "mock",
 				type: "mock",
@@ -26,6 +28,7 @@ test("as long as a conflict is unresolved, the conflicting change should not app
 			{
 				id: "change2",
 				file_id: "mock",
+				entity_id: "value1",
 				plugin_key: "mock",
 				type: "mock",
 				snapshot_id: "sn2",
@@ -68,6 +71,7 @@ test(`if the conflict has been resolved by selecting the 'original' change,
 			{
 				id: "change0",
 				file_id: "mock",
+				entity_id: "value1",
 				plugin_key: "mock",
 				type: "mock",
 				snapshot_id: "sn0",
@@ -75,6 +79,7 @@ test(`if the conflict has been resolved by selecting the 'original' change,
 			{
 				id: "change1",
 				file_id: "mock",
+				entity_id: "value1",
 				plugin_key: "mock",
 				type: "mock",
 				snapshot_id: "sn1",
@@ -82,6 +87,7 @@ test(`if the conflict has been resolved by selecting the 'original' change,
 			{
 				id: "change2",
 				file_id: "mock",
+				entity_id: "value1",
 				plugin_key: "mock",
 				type: "mock",
 				snapshot_id: "sn2",
@@ -126,6 +132,7 @@ test(`
 			{
 				id: "change0",
 				file_id: "mock",
+				entity_id: "value1",
 				plugin_key: "mock",
 				type: "mock",
 				snapshot_id: "sn0",
@@ -133,6 +140,7 @@ test(`
 			{
 				id: "change1",
 				file_id: "mock",
+				entity_id: "value1",
 				plugin_key: "mock",
 				type: "mock",
 				snapshot_id: "sn1",
@@ -140,6 +148,7 @@ test(`
 			{
 				id: "change2",
 				file_id: "mock",
+				entity_id: "value1",
 				plugin_key: "mock",
 				type: "mock",
 				snapshot_id: "sn2",

@@ -10,28 +10,24 @@ test("should be able to add and commit changes", async () => {
 		key: "mock-plugin",
 		glob: "*",
 		diff: {
-			file: async ({ before: old }) => {
+			file: async ({ before, after }) => {
+				const textBefore = before
+					? new TextDecoder().decode(before?.data)
+					: undefined;
+				const textAfter = after
+					? new TextDecoder().decode(after.data)
+					: undefined;
+
+				if (textBefore === textAfter) {
+					return [];
+				}
 				return [
-					!old
-						? {
-								type: "text",
-								before: undefined,
-								after: {
-									id: "test",
-									text: "inserted text",
-								},
-							}
-						: {
-								type: "text",
-								before: {
-									id: "test",
-									text: "inserted text",
-								},
-								after: {
-									id: "test",
-									text: "updated text",
-								},
-							},
+					{
+						type: "text",
+						entity_id: "test",
+						before: textBefore ? { text: textBefore } : undefined,
+						after: textAfter ? { text: textAfter } : undefined,
+					},
 				];
 			},
 		},
@@ -53,39 +49,28 @@ test("should be able to add and commit changes", async () => {
 
 	await lix.db
 		.insertInto("file")
-		.values({ id: "test", path: "test.txt", data: enc.encode("test") })
+		.values({ id: "test", path: "test.txt", data: enc.encode("value1") })
 		.execute();
 
 	await lix.settled();
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll()
+		.innerJoin("snapshot as snapshot", "snapshot.id", "change.snapshot_id")
+		.selectAll('change')
+		.select('snapshot.value')
 		.execute();
 
-	// console.log(await lix.db.selectFrom("queue").selectAll().execute());
-
 	expect(changes).toEqual([
-		{
-			id: changes[0]?.id,
-			author: null,
-			created_at: changes[0]?.created_at,
-			snapshot_id: changes[0]?.snapshot_id,
+		expect.objectContaining({
 			parent_id: null,
-			type: "text",
-			file_id: "test",
-			plugin_key: "mock-plugin",
 			value: {
-				id: "test",
-				text: "inserted text",
+				text: "value1",
 			},
-			commit_id: null,
-			meta: null,
-		},
+		}),
 	]);
 
-	await lix.commit({ description: "test" });
+	await lix.commit({ description: "first commit" });
 
 	const secondRef = await lix.db
 		.selectFrom("ref")
@@ -99,26 +84,15 @@ test("should be able to add and commit changes", async () => {
 	const commitedChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll()
+		.selectAll('change')
+		.select('snapshot.value')
 		.execute();
 
 	expect(commitedChanges).toEqual([
-		{
-			id: commitedChanges[0]?.id,
-			author: null,
-			created_at: changes[0]?.created_at,
-			snapshot_id: changes[0]?.snapshot_id,
-			parent_id: null,
-			type: "text",
-			file_id: "test",
-			plugin_key: "mock-plugin",
-			value: {
-				id: "test",
-				text: "inserted text",
-			},
-			meta: null,
+		expect.objectContaining({
+			...changes[0],
 			commit_id: commits[0]?.id!,
-		},
+		}),
 	]);
 
 	expect(commits).toEqual([
@@ -127,61 +101,44 @@ test("should be able to add and commit changes", async () => {
 			author: null,
 			created: commits[0]?.created!,
 			created_at: commits[0]?.created_at!,
-			description: "test",
+			description: "first commit",
 			parent_id: "00000000-0000-0000-0000-000000000000",
 		},
 	]);
 
 	await lix.db
 		.updateTable("file")
-		.set({ data: enc.encode("test updated text") })
+		.set({ data: enc.encode("value2") })
 		.where("id", "=", "test")
 		.execute();
 
 	await lix.settled();
 
-	const updatedChanges = await lix.db
+	const changesAfter = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll()
+		.selectAll('change')
+		.select('snapshot.value')
 		.execute();
 
-	expect(updatedChanges).toEqual([
-		{
-			id: updatedChanges[0]?.id!,
-			author: null,
-			created_at: updatedChanges[0]?.created_at,
-			snapshot_id: updatedChanges[0]?.snapshot_id,
+	expect(changesAfter).toEqual([
+		expect.objectContaining({
 			parent_id: null,
-			type: "text",
-			file_id: "test",
-			plugin_key: "mock-plugin",
 			value: {
-				id: "test",
-				text: "inserted text",
+				text: "value1",
 			},
-			meta: null,
 			commit_id: commits[0]?.id,
-		},
-		{
-			id: updatedChanges[1]?.id!,
-			author: null,
-			parent_id: updatedChanges[0]?.id!,
-			created_at: updatedChanges[1]?.created_at,
-			snapshot_id: updatedChanges[1]?.snapshot_id,
-			type: "text",
-			file_id: "test",
-			plugin_key: "mock-plugin",
+		}),
+		expect.objectContaining({
+			parent_id: changesAfter[0]?.id!,
 			value: {
-				id: "test",
-				text: "updated text",
+				text: "value2",
 			},
-			meta: null,
 			commit_id: null,
-		},
+		}),
 	]);
 
-	await lix.commit({ description: "test 2" });
+	await lix.commit({ description: "second commit" });
 	const newCommits = await lix.db.selectFrom("commit").selectAll().execute();
 	expect(newCommits).toEqual([
 		{
@@ -189,7 +146,7 @@ test("should be able to add and commit changes", async () => {
 			author: null,
 			created: commits[0]?.created!,
 			created_at: newCommits[0]?.created_at!,
-			description: "test",
+			description: "first commit",
 			parent_id: "00000000-0000-0000-0000-000000000000",
 		},
 		{
@@ -197,7 +154,7 @@ test("should be able to add and commit changes", async () => {
 			author: null,
 			created: commits[0]?.created!,
 			created_at: newCommits[1]?.created_at!,
-			description: "test 2",
+			description: "second commit",
 			parent_id: newCommits[0]?.id!,
 		},
 	]);

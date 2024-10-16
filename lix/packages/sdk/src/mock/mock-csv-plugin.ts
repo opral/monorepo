@@ -41,7 +41,8 @@ export const mockCsvPlugin: LixPlugin<{
 				const parent = await lix.db
 					.selectFrom("change")
 					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-					.selectAll()
+					.selectAll('change')
+					.select('snapshot.value')
 					.where("change.id", "=", change.parent_id)
 					.executeTakeFirstOrThrow();
 

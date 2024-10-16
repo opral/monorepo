@@ -34,6 +34,7 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     author TEXT,
     parent_id TEXT,
+    entity_id TEXT NOT NULL,
     type TEXT NOT NULL,
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,

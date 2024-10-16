@@ -1,6 +1,5 @@
-import { v4 } from "uuid";
 import type { LixDatabaseSchema, LixFile } from "./database/schema.js";
-import type { LixPlugin } from "./plugin.js";
+import type { DiffReport, LixPlugin } from "./plugin.js";
 import { minimatch } from "minimatch";
 import { Kysely } from "kysely";
 
@@ -20,8 +19,10 @@ export async function handleFileInsert(args: {
 	currentAuthor?: string;
 	queueEntry: any;
 }) {
-	const pluginDiffs: any[] = [];
-
+	const pluginDiffs: {
+		diffs: DiffReport[];
+		pluginKey: string;
+	}[] = [];
 	// console.log({ args });
 	for (const plugin of args.plugins) {
 		// glob expressions are expressed relative without leading / but path has leading /
@@ -29,13 +30,12 @@ export async function handleFileInsert(args: {
 			break;
 		}
 
-		const diffs = await plugin.diff!.file!({
+		const diffs = await plugin.diff?.file?.({
 			before: undefined,
 			after: args.after,
 		});
-		// console.log({ diffs });
 
-		pluginDiffs.push({ diffs, pluginKey: plugin.key });
+		pluginDiffs.push({ diffs: diffs ?? [], pluginKey: plugin.key });
 	}
 
 	await args.db.transaction().execute(async (trx) => {
@@ -43,27 +43,24 @@ export async function handleFileInsert(args: {
 			for (const diff of diffs ?? []) {
 				const value = diff.before ?? diff.after;
 
-				const snapshotId = (
-					await trx
-						.insertInto("snapshot")
-						.values({
-							id: v4(),
-							// @ts-expect-error - database expects stringified json
-							value: JSON.stringify(value),
-						})
-						.returning("id")
-						.executeTakeFirstOrThrow()
-				).id;
+				const snapshot = await trx
+					.insertInto("snapshot")
+					.values({
+						// @ts-expect-error - database expects stringified json
+						value: JSON.stringify(value),
+					})
+					.returning("id")
+					.executeTakeFirstOrThrow();
 
 				await trx
 					.insertInto("change")
 					.values({
-						id: v4(),
 						type: diff.type,
 						file_id: args.after.id,
 						author: args.currentAuthor,
+						entity_id: diff.entity_id,
 						plugin_key: pluginKey,
-						snapshot_id: snapshotId,
+						snapshot_id: snapshot.id,
 						// @ts-expect-error - database expects stringified json
 						meta: JSON.stringify(diff.meta),
 						// add queueId interesting for debugging or knowning what changes were generated in same worker run
@@ -90,7 +87,10 @@ export async function handleFileChange(args: {
 }) {
 	const fileId = args.after?.id ?? args.before?.id;
 
-	const pluginDiffs: any[] = [];
+	const pluginDiffs: {
+		diffs: DiffReport[];
+		pluginKey: string;
+	}[] = [];
 
 	for (const plugin of args.plugins) {
 		// glob expressions are expressed relative without leading / but path has leading /
@@ -98,20 +98,19 @@ export async function handleFileChange(args: {
 			break;
 		}
 
-		const diffs = await plugin.diff!.file!({
+		const diffs = await plugin.diff?.file?.({
 			before: args.before,
 			after: args.after,
 		});
 
 		pluginDiffs.push({
-			diffs,
+			diffs: diffs ?? [],
 			pluginKey: plugin.key,
-			pluginDiffFunction: plugin.diff,
 		});
 	}
 
 	await args.db.transaction().execute(async (trx) => {
-		for (const { diffs, pluginKey, pluginDiffFunction } of pluginDiffs) {
+		for (const { diffs, pluginKey } of pluginDiffs) {
 			for (const diff of diffs ?? []) {
 				// assume an insert or update operation as the default
 				// if diff.neu is not present, it's a delete operationd
@@ -121,13 +120,11 @@ export async function handleFileChange(args: {
 
 				const previousChanges = await trx
 					.selectFrom("change")
-					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 					.selectAll()
 					.where("file_id", "=", fileId)
 					.where("plugin_key", "=", pluginKey)
 					.where("type", "=", diff.type)
-					.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
-					// TODO don't rely on created at. a plugin should report the parent id.
+					.where("entity_id", "=", diff.entity_id)
 					.execute();
 
 				// we need to finde the real leaf change as multiple changes can be set in the same created timestamp second or clockskew
@@ -142,47 +139,42 @@ export async function handleFileChange(args: {
 					break;
 				}
 
-				// working change exists but is different from previously committed change
-				// -> update the working change or delete if it is the same as previous uncommitted change
-				// overwrite the (uncomitted) change
-				// to avoid (potentially) saving every keystroke change
-				let previousCommittedDiff = [];
-
 				// working change exists but is identical to previously committed change
 				if (previousChange) {
-					previousCommittedDiff = await pluginDiffFunction?.[diff.type]?.({
-						before: previousChange?.value,
-						after: diff.after,
-					});
+					const previousSnapshot = await trx
+						.selectFrom("snapshot")
+						.selectAll()
+						.where("id", "=", previousChange.snapshot_id)
+						.executeTakeFirstOrThrow();
 
-					if (previousCommittedDiff?.length === 0) {
+					if (
+						// json stringify should be good enough if the plugin diff function is deterministic
+						JSON.stringify(previousSnapshot.value) === JSON.stringify(value)
+					) {
 						// drop the change because it's identical
 						continue;
 					}
 				}
 
-				const snapshotId = (
-					await trx
-						.insertInto("snapshot")
-						.values({
-							id: v4(),
-							// @ts-expect-error - database expects stringified json
-							value: JSON.stringify(value),
-						})
-						.returning("id")
-						.executeTakeFirstOrThrow()
-				).id;
+				const snapshot = await trx
+					.insertInto("snapshot")
+					.values({
+						// @ts-expect-error - database expects stringified json
+						value: JSON.stringify(value),
+					})
+					.returning("id")
+					.executeTakeFirstOrThrow();
 
 				await trx
 					.insertInto("change")
 					.values({
-						id: v4(),
 						type: diff.type,
 						file_id: fileId,
 						plugin_key: pluginKey,
+						entity_id: diff.entity_id,
 						author: args.currentAuthor,
 						parent_id: previousChange?.id,
-						snapshot_id: snapshotId,
+						snapshot_id: snapshot.id,
 					})
 					.execute();
 			}
