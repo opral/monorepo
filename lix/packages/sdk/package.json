@@ -21,7 +21,6 @@
 		"lodash-es": "^4.17.21",
 		"minimatch": "^10.0.1",
 		"papaparse": "^5.4.1",
-		"prettier": "^3.3.3",
 		"sqlite-wasm-kysely": "workspace: *",
 		"uuid": "^10.0.0"
 	},
@@ -30,6 +29,7 @@
 		"@types/papaparse": "^5.3.14",
 		"@types/uuid": "^10.0.0",
 		"@vitest/coverage-v8": "^2.0.5",
+		"prettier": "^3.3.3",
 		"typescript": "^5.5.4",
 		"vitest": "^2.0.5"
 	}

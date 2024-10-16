@@ -3428,9 +3428,6 @@ importers:
       papaparse:
         specifier: ^5.4.1
         version: 5.4.1
-      prettier:
-        specifier: ^3.3.3
-        version: 3.3.3
       sqlite-wasm-kysely:
         specifier: 'workspace: *'
         version: link:../sqlite-wasm-kysely
@@ -3450,6 +3447,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^2.0.5
         version: 2.0.5(vitest@2.0.5(@types/node@22.5.2)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6))
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
       typescript:
         specifier: ^5.5.4
         version: 5.5.4
