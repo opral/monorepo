@@ -198,4 +198,4 @@ services:
         - inlang/source-code/telemetry-proxy-parrot/**
     domains:
       - telemetry.inlang.com
-      
+    
