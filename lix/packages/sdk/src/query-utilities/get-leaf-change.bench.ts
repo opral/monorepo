@@ -9,8 +9,6 @@ import {
 	type NewSnapshot,
 	type Snapshot,
 } from "../index.js";
-import { getLeafChangeSQLite } from "../query-utilities/get-leaf-change.js";
-import { sql } from "kysely";
 
 const createChange = (
 	type: "bundle" | "message" | "variant",
@@ -115,22 +113,15 @@ const setupLix = async (nMessages: number) => {
 for (let i = 0; i < 5; i++) {
 	const nMessages = Math.pow(10, i);
 	describe(
-		"get Leaf Node " +
+		"get Leaf Change " +
 			nMessages +
 			" messages -> " +
 			nMessages * (1 + 6 + 100) +
 			" changes",
 		async () => {
 			let project = await setupLix(nMessages);
-			bench("getLeafNode", async () => {
+			bench("getLeafChange", async () => {
 				await getLeafChange({
-					lix: project.lix,
-					change: { id: project.firstChangeId } as Change,
-				});
-			});
-
-			bench("getLeafChangeSQLite", async () => {
-				const result = await getLeafChangeSQLite({
 					lix: project.lix,
 					change: { id: project.firstChangeId } as Change,
 				});
