@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { v4 } from "uuid";
-import { afterEach, beforeEach, bench, describe, expect } from "vitest";
+import { bench, describe } from "vitest";
 import {
 	getLeafChange,
 	newLixFile,
@@ -7,7 +8,6 @@ import {
 	type Change,
 	type NewChange,
 	type NewSnapshot,
-	type Snapshot,
 } from "../index.js";
 
 const createChange = (
@@ -15,7 +15,6 @@ const createChange = (
 	payload: any,
 	parentChangeId: string | null,
 ): { change: NewChange; snapshot: NewSnapshot } => {
-	const changeId = v4();
 	const entityId = payload[type].id;
 	const snapshotId = v4();
 	const snapshot: NewSnapshot = {
@@ -31,7 +30,6 @@ const createChange = (
 		snapshot_id: snapshotId,
 		entity_id: entityId,
 		commit_id: undefined,
-		meta: undefined,
 		created_at: "",
 	};
 	return {
@@ -87,8 +85,6 @@ const setupLix = async (nMessages: number) => {
 	const batchSize = 256;
 	// Insert changes in batches
 	for (let i = 0; i < mockChanges.length; i += batchSize) {
-		const batch = mockChanges.slice(i, i + batchSize);
-
 		// Extract the changes
 		const changesArray = mockChanges
 			.slice(i, i + batchSize)
@@ -119,7 +115,7 @@ for (let i = 0; i < 5; i++) {
 			nMessages * (1 + 6 + 100) +
 			" changes",
 		async () => {
-			let project = await setupLix(nMessages);
+			const project = await setupLix(nMessages);
 			bench("getLeafChange", async () => {
 				await getLeafChange({
 					lix: project.lix,

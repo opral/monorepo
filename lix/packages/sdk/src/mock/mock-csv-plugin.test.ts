@@ -1,5 +1,6 @@
 import { newLixFile } from "../newLix.js";
 import { openLixInMemory } from "../open/openLixInMemory.js";
+import type { DetectedChange } from "../plugin.js";
 import { mockCsvPlugin } from "./mock-csv-plugin.js";
 import { describe, expect, test } from "vitest";
 
@@ -77,15 +78,15 @@ describe("applyChanges()", () => {
 	});
 });
 
-describe("diff.file()", () => {
+describe("detectChanges()", () => {
 	test("it should report no changes for identical files", async () => {
 		const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 		const after = before;
-		const diffs = await mockCsvPlugin.diff.file?.({
+		const changes = await mockCsvPlugin.detectChanges?.({
 			before: { id: "random", path: "x.csv", data: before, metadata: null },
 			after: { id: "random", path: "x.csv", data: after, metadata: null },
 		});
-		expect(diffs).toEqual([]);
+		expect(changes).toEqual([]);
 	});
 
 	test("it should report a create diff", async () => {
@@ -93,58 +94,50 @@ describe("diff.file()", () => {
 		const after = new TextEncoder().encode(
 			"Name,Age\nAnna,20\nPeter,50\nJohn,30",
 		);
-		const diffs = await mockCsvPlugin.diff.file?.({
+		const changes = await mockCsvPlugin.detectChanges?.({
 			before: { id: "random", path: "x.csv", data: before, metadata: null },
 			after: { id: "random", path: "x.csv", data: after, metadata: null },
 		});
-		expect(diffs).toEqual([
+		expect(changes).toEqual([
 			{
+				entity_id: "3-0",
 				type: "cell",
-				before: undefined,
-				after: { rowIndex: 3, columnIndex: 0, text: "John" },
+				snapshot: { rowIndex: 3, columnIndex: 0, text: "John" },
 			},
 			{
+				entity_id: "3-1",
 				type: "cell",
-				before: undefined,
-				after: { rowIndex: 3, columnIndex: 1, text: "30" },
+				snapshot: { rowIndex: 3, columnIndex: 1, text: "30" },
 			},
-		]);
+		] satisfies DetectedChange[]);
 	});
 
 	test("it should an update diff", async () => {
 		const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 		const after = new TextEncoder().encode("Name,Age\nAnna,21\nPeter,50");
-		const diffs = await mockCsvPlugin.diff.file?.({
+		const diffs = await mockCsvPlugin.detectChanges?.({
 			before: { id: "random", path: "x.csv", data: before, metadata: null },
 			after: { id: "random", path: "x.csv", data: after, metadata: null },
 		});
 		expect(diffs).toEqual([
 			{
 				type: "cell",
-				before: { rowIndex: 1, columnIndex: 1, text: "20" },
-				after: { rowIndex: 1, columnIndex: 1, text: "21" },
+				entity_id: "1-1",
+				snapshot: { rowIndex: 1, columnIndex: 1, text: "21" },
 			},
-		]);
+		] satisfies DetectedChange[]);
 	});
 
 	test("it should report a delete diff", async () => {
 		const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 		const after = new TextEncoder().encode("Name,Age\nAnna,20");
-		const diffs = await mockCsvPlugin.diff.file?.({
+		const diffs = await mockCsvPlugin.detectChanges?.({
 			before: { id: "random", path: "x.csv", data: before, metadata: null },
 			after: { id: "random", path: "x.csv", data: after, metadata: null },
 		});
 		expect(diffs).toEqual([
-			{
-				type: "cell",
-				before: { rowIndex: 2, columnIndex: 0, text: "Peter" },
-				after: undefined,
-			},
-			{
-				type: "cell",
-				before: { rowIndex: 2, columnIndex: 1, text: "50" },
-				after: undefined,
-			},
-		]);
+			{ entity_id: "2-0", type: "cell", snapshot: undefined },
+			{ entity_id: "2-1", type: "cell", snapshot: undefined },
+		] satisfies DetectedChange[]);
 	});
 });

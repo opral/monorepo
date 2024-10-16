@@ -1,33 +1,30 @@
 import { expect, test, vi } from "vitest";
 import { openLixInMemory } from "./open/openLixInMemory.js";
 import { newLixFile } from "./newLix.js";
-import type { DiffReport, LixPlugin } from "./plugin.js";
+import type { DetectedChange, LixPlugin } from "./plugin.js";
 
 test("should use queue and settled correctly", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
-		diff: {
-			file: async ({ before, after }) => {
-				const textBefore = before
-					? new TextDecoder().decode(before?.data)
-					: undefined;
-				const textAfter = after
-					? new TextDecoder().decode(after.data)
-					: undefined;
+		detectChanges: async ({ before, after }) => {
+			const textBefore = before
+				? new TextDecoder().decode(before?.data)
+				: undefined;
+			const textAfter = after
+				? new TextDecoder().decode(after.data)
+				: undefined;
 
-				if (textBefore === textAfter) {
-					return [];
-				}
-				return [
-					{
-						type: "text",
-						entity_id: "test",
-						before: textBefore ? { text: textBefore } : undefined,
-						after: textAfter ? { text: textAfter } : undefined,
-					},
-				];
-			},
+			if (textBefore === textAfter) {
+				return [];
+			}
+			return [
+				{
+					type: "text",
+					entity_id: "test",
+					snapshot: textAfter ? { text: textAfter } : undefined,
+				},
+			];
 		},
 	};
 
@@ -210,28 +207,22 @@ test("changes should contain the author", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
-		diff: {
-			file: vi.fn().mockResolvedValue([
-				{
-					type: "mock",
-					entity_id: "mock",
-					before: undefined,
-					after: {
-						text: "value1",
-					},
+		detectChanges: vi.fn().mockResolvedValue([
+			{
+				type: "mock",
+				entity_id: "mock",
+				snapshot: {
+					text: "value1",
 				},
-				{
-					type: "mock",
-					entity_id: "mock",
-					before: {
-						text: "value1",
-					},
-					after: {
-						text: "value2",
-					},
+			},
+			{
+				type: "mock",
+				entity_id: "mock",
+				snapshot: {
+					text: "value2",
 				},
-			] satisfies DiffReport[]),
-		},
+			},
+		] satisfies DetectedChange[]),
 	};
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),

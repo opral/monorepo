@@ -47,9 +47,6 @@ test("it should resolve a conflict by applying the change and marking the confli
 				JSON.stringify(mockSnapshots[0]?.value),
 			),
 		}),
-		diff: {
-			file: vi.fn(),
-		},
 	};
 
 	const lix = await openLixInMemory({
