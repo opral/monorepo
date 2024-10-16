@@ -76,10 +76,10 @@ export async function resolveConflictBySelecting(args: {
 				eb.and({
 					change_id: args.conflict.change_id,
 					conflicting_change_id: args.conflict.conflicting_change_id,
-					resolved_with_change_id: undefined,
+					resolved_change_id: undefined,
 				}),
 			)
-			.set("resolved_with_change_id", selectedChange.id)
+			.set("resolved_change_id", selectedChange.id)
 			.executeTakeFirstOrThrow();
 	});
 }
