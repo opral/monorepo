@@ -12,13 +12,16 @@ test("it should get the leaf changes that only exist in source", async () => {
 		blob: await newLixFile(),
 	});
 
-	const commonSnapshots = [{
-		id: 'snc1',
-		value: { id: "mock-id", color: "red" },
-	},{
-		id: 'snc2',
-		value: { id: "mock-id", color: "blue" },
-	}]
+	const commonSnapshots = [
+		{
+			id: "snc1",
+			value: { id: "mock-id", color: "red" },
+		},
+		{
+			id: "snc2",
+			value: { id: "mock-id", color: "blue" },
+		},
+	];
 
 	const commonChanges: NewChange[] = [
 		{

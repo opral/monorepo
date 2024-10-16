@@ -1,4 +1,9 @@
-import type { Change, ChangeWithSnapshot, LixFile, NewConflict } from "./database/schema.js";
+import type {
+	Change,
+	ChangeWithSnapshot,
+	LixFile,
+	NewConflict,
+} from "./database/schema.js";
 import type { LixReadonly } from "./types.js";
 
 // named lixplugin to avoid conflict with built-in plugin type

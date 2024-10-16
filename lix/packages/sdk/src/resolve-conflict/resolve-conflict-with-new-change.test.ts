@@ -397,8 +397,8 @@ test("resolving a conflict with a new change should insert the change and mark t
 	const changesAfterResolve = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll('change')
-		.select('snapshot.value')
+		.selectAll("change")
+		.select("snapshot.value")
 		.execute();
 
 	expect(changesAfterResolve.length).toBe(3);

@@ -55,8 +55,8 @@ test("should be able to start a discussion on changes", async () => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll('change')
-		.select('snapshot.value')
+		.selectAll("change")
+		.select("snapshot.value")
 		.execute();
 
 	const discussion = await lix.createDiscussion({

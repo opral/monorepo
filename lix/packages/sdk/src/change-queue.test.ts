@@ -82,8 +82,8 @@ test("should use queue and settled correctly", async () => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll('change')
-		.select('snapshot.value')
+		.selectAll("change")
+		.select("snapshot.value")
 		.execute();
 
 	expect(changes).toEqual([
@@ -152,8 +152,8 @@ test("should use queue and settled correctly", async () => {
 	const updatedChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll('change')
-		.select('snapshot.value')
+		.selectAll("change")
+		.select("snapshot.value")
 		.execute();
 
 	expect(updatedChanges).toEqual([

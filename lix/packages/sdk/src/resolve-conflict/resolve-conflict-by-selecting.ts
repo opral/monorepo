@@ -34,8 +34,8 @@ export async function resolveConflictBySelecting(args: {
 	const selectedChange = await args.lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll('change')
-		.select('snapshot.value')
+		.selectAll("change")
+		.select("snapshot.value")
 		.where("change.id", "=", args.selectChangeId)
 		.executeTakeFirst();
 

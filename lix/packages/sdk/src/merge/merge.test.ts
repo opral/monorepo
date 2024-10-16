@@ -3,7 +3,12 @@ import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import { merge } from "./merge.js";
-import type { NewChange, NewCommit, NewConflict, NewSnapshot } from "../database/schema.js";
+import type {
+	NewChange,
+	NewCommit,
+	NewConflict,
+	NewSnapshot,
+} from "../database/schema.js";
 import type { LixPlugin } from "../plugin.js";
 
 test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
@@ -426,8 +431,8 @@ test("it should apply changes that are not conflicting", async () => {
 	const changes = await targetLix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll('change')
-		.select('snapshot.value')
+		.selectAll("change")
+		.select("snapshot.value")
 		.execute();
 
 	const conflicts = await targetLix.db
@@ -702,8 +707,8 @@ test("it should copy discussion and related comments and mappings", async () => 
 	const changes = await lix1.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll('change')
-		.select('snapshot.value')
+		.selectAll("change")
+		.select("snapshot.value")
 		.execute();
 
 	expect(changes).toEqual([
