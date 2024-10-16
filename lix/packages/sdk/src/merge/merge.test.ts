@@ -269,7 +269,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 
 	const mockPluginInSourceLix: LixPlugin = {
 		key: "mock-plugin",
-		detectChanges: vi.fn().mockRejectedValue([]),
+		detectChanges: vi.fn().mockResolvedValue([]),
 		detectConflicts: vi.fn().mockResolvedValue([]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
