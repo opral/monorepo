@@ -1,4 +1,5 @@
-import type { Change, LixReadonly } from "@lix-js/sdk";
+import type { Change } from "../database/schema.js";
+import type { LixReadonly } from "../types.js";
 
 /**
  * Finds the lowest common change of the source
@@ -30,9 +31,9 @@ export async function getLowestCommonAncestor(args: {
 	let parentId: string | undefined | null = args.sourceChange.parent_id;
 
 	if (!parentId) {
-		return // ok the change was not part of the target but also has no parent (no common ancestor!)
+		return; // ok the change was not part of the target but also has no parent (no common ancestor!)
 	}
-	
+
 	while (parentId) {
 		nextChange = await args.sourceLix.db
 			.selectFrom("change")

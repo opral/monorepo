@@ -1,4 +1,5 @@
-import type { ChangeWithSnapshot, LixReadonly } from "@lix-js/sdk";
+import type { ChangeWithSnapshot } from "../database/schema.js";
+import type { LixReadonly } from "../types.js";
 
 /**
  * Gets the leaf changes that only exist in the source lix.
@@ -18,8 +19,8 @@ export async function getLeafChangesOnlyInSource(args: {
 	const leafChangesInSource = await args.sourceLix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll('change')
-		.select('snapshot.value')
+		.selectAll("change")
+		.select("snapshot.value")
 		.where(
 			"change.id",
 			"not in",
