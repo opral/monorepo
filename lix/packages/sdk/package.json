@@ -32,7 +32,6 @@
 		"@types/uuid": "^10.0.0",
 		"@vitest/coverage-v8": "^2.0.5",
 		"eslint": "^9.12.0",
-		"globals": "^15.0.0",
 		"prettier": "^3.3.3",
 		"typescript": "^5.5.4",
 		"typescript-eslint": "7.7.0",
