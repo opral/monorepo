@@ -120,8 +120,6 @@ export async function handleFileChange(args: {
 
 	await args.db.transaction().execute(async (trx) => {
 		for (const detectedChange of detectedChanges) {
-			// TODO: save hash of changed fles in every commit to discover inconsistent commits with blob?
-
 			const previousChanges = await trx
 				.selectFrom("change")
 				.selectAll()
@@ -143,7 +141,6 @@ export async function handleFileChange(args: {
 				break;
 			}
 
-			// working change exists but is identical to previously committed change
 			if (previousChange) {
 				const previousSnapshot = await trx
 					.selectFrom("snapshot")

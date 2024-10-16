@@ -29,7 +29,6 @@ const createChange = (
 		type: type,
 		snapshot_id: snapshotId,
 		entity_id: entityId,
-		commit_id: undefined,
 		created_at: "",
 	};
 	return {

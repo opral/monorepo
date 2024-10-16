@@ -5,10 +5,6 @@ import type { SqliteDatabase } from "sqlite-wasm-kysely";
  */
 export async function applySchema(args: { sqlite: SqliteDatabase }) {
 	return args.sqlite.exec`
-  CREATE TABLE IF NOT EXISTS ref (
-    name TEXT PRIMARY KEY,
-    commit_id TEXT
-  );
 
   CREATE TABLE IF NOT EXISTS file_internal (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
@@ -39,7 +35,6 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
     snapshot_id TEXT NOT NULL,
-    commit_id TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
   ) strict;
 
@@ -58,17 +53,6 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     resolved_with_change_id TEXT,
     PRIMARY KEY (change_id, conflicting_change_id)
   ) strict;
-    
-  CREATE TABLE IF NOT EXISTS 'commit' (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
-    author TEXT,
-    parent_id TEXT NOT NULL,
-    description TEXT NOT NULL,
-    created TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
-  ) strict;
-
-  INSERT OR IGNORE INTO ref values ('current', '00000000-0000-0000-0000-000000000000');
 
   CREATE TRIGGER IF NOT EXISTS file_update INSTEAD OF UPDATE ON file
   BEGIN

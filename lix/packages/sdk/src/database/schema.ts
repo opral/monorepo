@@ -5,8 +5,6 @@ import type { LixPlugin } from "../plugin.js";
 export type LixDatabaseSchema = {
 	file: LixFileTable;
 	change: ChangeTable;
-	commit: CommitTable;
-	ref: RefTable;
 	file_internal: LixFileTable;
 	change_queue: ChangeQueueTable;
 	conflict: ConflictTable;
@@ -16,14 +14,6 @@ export type LixDatabaseSchema = {
 	discussion: DiscussionTable;
 	comment: CommentTable;
 	discussion_change_map: DiscussionChangeMapTable;
-};
-
-export type Ref = Selectable<RefTable>;
-export type NewRef = Insertable<RefTable>;
-export type RefUpdate = Updateable<RefTable>;
-type RefTable = {
-	name: string;
-	commit_id: string;
 };
 
 export type ChangeQueueEntry = Selectable<ChangeQueueTable>;
@@ -48,25 +38,6 @@ type LixFileTable = {
 	metadata: Record<string, any> | null;
 };
 
-export type Commit = Selectable<CommitTable>;
-export type NewCommit = Insertable<CommitTable>;
-export type CommitUpdate = Updateable<CommitTable>;
-type CommitTable = {
-	id: Generated<string>;
-	// todo:
-	//  multiple authors can commit one change
-	//  think of real-time collaboration scenarios
-	author?: string;
-	description: string;
-	/**
-	 * @deprecated use created_at instead
-	 * todo remove before release
-	 */
-	created: Generated<string>;
-	created_at: Generated<string>;
-	parent_id: string;
-};
-
 export type Change = Selectable<ChangeTable>;
 export type NewChange = Insertable<ChangeTable>;
 type ChangeTable = {
@@ -78,11 +49,6 @@ type ChangeTable = {
 	 */
 	entity_id: string;
 	file_id: string;
-	/**
-	 * If no commit id exists on a change,
-	 * the change is considered uncommitted.
-	 */
-	commit_id?: CommitTable["id"];
 	/**
 	 * The plugin key that contributed the change.
 	 *
@@ -148,7 +114,7 @@ type ConflictTable = {
 // ------ discussions ------
 
 export type Discussion = Selectable<DiscussionTable>;
-export type NewDiscussion = Insertable<CommitTable>;
+export type NewDiscussion = Insertable<DiscussionTable>;
 export type DiscussionUpdate = Updateable<DiscussionTable>;
 type DiscussionTable = {
 	id: Generated<string>;

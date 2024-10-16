@@ -12,20 +12,12 @@ export async function merge(args: {
 	// onlyTheseChanges
 }): Promise<void> {
 	// TODO increase performance by using attach mode
-	//      and only get the changes and commits that
-	//      are not in target.
+	//      and only get the changes that are not in target.
 	const sourceChangesWithSnapshot = await args.sourceLix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
 		.select("snapshot.value")
-		.execute();
-
-	// TODO increase performance by only getting commits
-	//      that are not in target in the future.
-	const sourceCommits = await args.sourceLix.db
-		.selectFrom("commit")
-		.selectAll()
 		.execute();
 
 	// TODO don't query the changes again. inefficient.
@@ -155,17 +147,7 @@ export async function merge(args: {
 				.execute();
 		}
 
-		// 2. copy the commits from source
-		if (sourceCommits.length > 0) {
-			await trx
-				.insertInto("commit")
-				.values(sourceCommits)
-				// ignore if already exists
-				.onConflict((oc) => oc.doNothing())
-				.execute();
-		}
-
-		// 3. insert the conflicts of those changes
+		// 2. insert the conflicts of those changes
 		if (conflicts.length > 0) {
 			await trx
 				.insertInto("conflict")
@@ -176,7 +158,7 @@ export async function merge(args: {
 		}
 
 		for (const [fileId, fileData] of Object.entries(changesPerFile)) {
-			// 4. update the file data with the applied changes
+			// 3. update the file data with the applied changes
 			await trx
 				.updateTable("file_internal")
 				.set("data", fileData)
@@ -184,7 +166,7 @@ export async function merge(args: {
 				.execute();
 		}
 
-		// 5. add discussions, comments and discsussion_change_mappings
+		// 4. add discussions, comments and discsussion_change_mappings
 
 		if (sourceDiscussions.length > 0) {
 			await trx

@@ -97,11 +97,9 @@ test("should use queue and settled correctly", async () => {
 			value: {
 				text: "test",
 			},
-			commit_id: null,
 		},
 	]);
 
-	// Test replacing uncommitted changes and multiple changes processing
 	await lix.db
 		.updateTable("file")
 		.set({ data: enc.encode("test updated text") })
@@ -166,11 +164,9 @@ test("should use queue and settled correctly", async () => {
 			value: {
 				text: "test",
 			},
-			commit_id: null,
 		},
 		{
 			author: null,
-			commit_id: null,
 			entity_id: "test",
 			created_at: updatedChanges[1]?.created_at,
 			snapshot_id: updatedChanges[1]?.snapshot_id,
@@ -185,7 +181,6 @@ test("should use queue and settled correctly", async () => {
 		},
 		{
 			author: null,
-			commit_id: null,
 			created_at: updatedChanges[2]?.created_at,
 			snapshot_id: updatedChanges[2]?.snapshot_id,
 			file_id: "test",
@@ -199,8 +194,6 @@ test("should use queue and settled correctly", async () => {
 			},
 		},
 	]);
-
-	await lix.commit({ description: "test commit" });
 });
 
 test("changes should contain the author", async () => {
