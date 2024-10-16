@@ -18,8 +18,8 @@ export async function getLeafChangesOnlyInSource(args: {
 	const leafChangesInSource = await args.sourceLix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll("change")
-		.select("snapshot.value as value")
+		.selectAll('change')
+		.select('snapshot.value')
 		.where(
 			"change.id",
 			"not in",

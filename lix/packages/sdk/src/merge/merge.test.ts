@@ -426,7 +426,8 @@ test("it should apply changes that are not conflicting", async () => {
 	const changes = await targetLix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll()
+		.selectAll('change')
+		.select('snapshot.value')
 		.execute();
 
 	const conflicts = await targetLix.db
@@ -701,7 +702,8 @@ test("it should copy discussion and related comments and mappings", async () => 
 	const changes = await lix1.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll()
+		.selectAll('change')
+		.select('snapshot.value')
 		.execute();
 
 	expect(changes).toEqual([

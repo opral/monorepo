@@ -57,7 +57,8 @@ test("should be able to add and commit changes", async () => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot as snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll()
+		.selectAll('change')
+		.select('snapshot.value')
 		.execute();
 
 	expect(changes).toEqual([
@@ -83,7 +84,8 @@ test("should be able to add and commit changes", async () => {
 	const commitedChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll()
+		.selectAll('change')
+		.select('snapshot.value')
 		.execute();
 
 	expect(commitedChanges).toEqual([
@@ -115,12 +117,8 @@ test("should be able to add and commit changes", async () => {
 	const changesAfter = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.select([
-			"change.id",
-			"snapshot.value",
-			"change.commit_id",
-			"change.parent_id",
-		])
+		.selectAll('change')
+		.select('snapshot.value')
 		.execute();
 
 	expect(changesAfter).toEqual([

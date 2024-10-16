@@ -18,8 +18,8 @@ export async function merge(args: {
 	const sourceChangesWithSnapshot = await args.sourceLix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll("change")
-		.select("snapshot.value as value")
+		.selectAll('change')
+		.select('snapshot.value')
 		.execute();
 
 	// TODO increase performance by only getting commits
