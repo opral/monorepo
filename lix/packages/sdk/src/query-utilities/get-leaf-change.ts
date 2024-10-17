@@ -7,7 +7,7 @@ import { isInSimulatedCurrentBranch } from "./is-in-simulated-branch.js";
  */
 export async function getLeafChange(args: {
 	change: Change;
-	lix: LixReadonly;
+	lix: Pick<LixReadonly, "db">;
 }): Promise<Change> {
 	const _true = true;
 
