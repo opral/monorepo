@@ -3,7 +3,6 @@ import type { Comment, LixDatabaseSchema } from "../database/schema.js";
 
 export async function addComment(args: {
 	db: Kysely<LixDatabaseSchema>;
-	currentAuthor: string;
 	parentCommentId: string;
 	body: string;
 }): Promise<{ id: Comment["id"] }> {
@@ -20,7 +19,6 @@ export async function addComment(args: {
 			.values({
 				parent_id: args.parentCommentId,
 				discussion_id,
-				author_id: args.currentAuthor,
 				body: args.body,
 			})
 			.returning("id")

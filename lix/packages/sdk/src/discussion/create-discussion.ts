@@ -3,7 +3,6 @@ import type { LixDatabaseSchema } from "../database/schema.js";
 
 export async function createDiscussion(args: {
 	db: Kysely<LixDatabaseSchema>;
-	currentAuthor: string;
 	changeIds?: string[];
 	body: string;
 }) {
@@ -35,7 +34,6 @@ export async function createDiscussion(args: {
 			.values({
 				parent_id: undefined,
 				discussion_id: discussion.id,
-				author_id: args.currentAuthor,
 				body: args.body,
 			})
 			.execute();

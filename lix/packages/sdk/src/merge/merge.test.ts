@@ -620,8 +620,6 @@ test("it should copy discussion and related comments and mappings", async () => 
 		providePlugins: [mockPlugin],
 	});
 
-	lix1.currentAuthor.set("Test User");
-
 	const enc = new TextEncoder();
 
 	await lix1.db
@@ -637,8 +635,6 @@ test("it should copy discussion and related comments and mappings", async () => 
 		providePlugins: [mockPlugin],
 	});
 
-	lix2.currentAuthor.set("Test User 2");
-
 	const changes = await lix1.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
@@ -649,7 +645,6 @@ test("it should copy discussion and related comments and mappings", async () => 
 	expect(changes).toEqual([
 		{
 			id: changes[0]?.id,
-			author: "Test User",
 			created_at: changes[0]?.created_at,
 			snapshot_id: changes[0]?.snapshot_id,
 			parent_id: null,
