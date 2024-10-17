@@ -231,9 +231,9 @@ test.todo("changes should contain the author", async () => {
 
 	await lix.settled();
 
-	const changes1 = await lix.db.selectFrom("change").selectAll().execute();
+	// const changes1 = await lix.db.selectFrom("change").selectAll().execute();
 
-	expect(changes1[0]?.author).toBe("some-id");
+	// expect(changes1[0]?.author).toBe("some-id");
 
 	// testing an update
 
@@ -247,9 +247,9 @@ test.todo("changes should contain the author", async () => {
 
 	await lix.settled();
 
-	const changes2 = await lix.db.selectFrom("change").selectAll().execute();
+	// const changes2 = await lix.db.selectFrom("change").selectAll().execute();
 
-	expect(changes2[1]?.author).toBe("some-id");
+	// expect(changes2[1]?.author).toBe("some-id");
 
 	await lix.db
 		.updateTable("file")
@@ -261,7 +261,7 @@ test.todo("changes should contain the author", async () => {
 
 	await lix.settled();
 
-	const changes3 = await lix.db.selectFrom("change").selectAll().execute();
+	// const changes3 = await lix.db.selectFrom("change").selectAll().execute();
 
-	expect(changes3.at(-1)?.author).toBe("some-other-id");
+	// expect(changes3.at(-1)?.author).toBe("some-other-id");
 });
