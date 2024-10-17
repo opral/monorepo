@@ -101,7 +101,7 @@ test("it should resolve a conflict by applying the change and marking the confli
 	const parsed = JSON.parse(new TextDecoder().decode(fileAfterResolve.data));
 
 	expect(parsed).toStrictEqual(snapshots[0]!.value);
-	expect(resolvedConflict.resolved_with_change_id).toBe(changes[0]!.id);
+	expect(resolvedConflict.resolved_change_id).toBe(changes[0]!.id);
 });
 
 test("it should throw if the change id does not belong to the conflict", async () => {
@@ -113,7 +113,7 @@ test("it should throw if the change id does not belong to the conflict", async (
 				conflicting_change_id: "change2",
 				meta: undefined,
 				reason: undefined,
-				resolved_with_change_id: undefined,
+				resolved_change_id: undefined,
 			},
 			selectChangeId: "change3",
 		}),

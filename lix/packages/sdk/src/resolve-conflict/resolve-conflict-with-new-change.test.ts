@@ -385,9 +385,7 @@ test("resolving a conflict with a new change should insert the change and mark t
 		.execute();
 
 	expect(changesAfterResolve.length).toBe(3);
-	expect(resolvedConflict.resolved_with_change_id).toBe(
-		changesAfterResolve[2]?.id,
-	);
+	expect(resolvedConflict.resolved_change_id).toBe(changesAfterResolve[2]?.id);
 	expect(changesAfterResolve[2]!.value).toStrictEqual({
 		id: "value3",
 	});

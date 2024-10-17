@@ -108,7 +108,7 @@ type ConflictTable = {
 	 * Can be the change_id, conflicting_change_id, or another change_id
 	 * that resulted from a merge.
 	 */
-	resolved_with_change_id?: ChangeTable["id"];
+	resolved_change_id?: ChangeTable["id"];
 };
 
 // ------ discussions ------
