@@ -3,6 +3,8 @@ import type { LixDatabaseSchema, LixFile } from "./database/schema.js";
 import type { DetectedChange, LixPlugin } from "./plugin.js";
 import { minimatch } from "minimatch";
 import { Kysely } from "kysely";
+import { getLeafChange } from "./query-utilities/get-leaf-change.js";
+import { isInSimulatedCurrentBranch } from "./query-utilities/is-in-simulated-branch.js";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {
@@ -120,46 +122,27 @@ export async function handleFileChange(args: {
 
 	await args.db.transaction().execute(async (trx) => {
 		for (const detectedChange of detectedChanges) {
-			// TODO: save hash of changed fles in every commit to discover inconsistent commits with blob?
-
-			const previousChanges = await trx
+			// heuristic to find the previous change
+			// there is no guarantee that the previous change is the leaf change
+			// because sorting by time is unreliable in a distributed system
+			const previousChange = await trx
 				.selectFrom("change")
 				.selectAll()
 				.where("file_id", "=", fileId)
-				.where("plugin_key", "=", detectedChange.pluginKey)
 				.where("type", "=", detectedChange.type)
 				.where("entity_id", "=", detectedChange.entity_id)
-				.execute();
+				.where(isInSimulatedCurrentBranch)
+				// walk from the end of the tree to minimize the amount of changes to walk
+				.orderBy("id", "desc")
+				.executeTakeFirst();
 
-			// we need to finde the real leaf change as multiple changes can be set in the same created timestamp second or clockskew
-			let previousChange; // = previousChanges.at(-1);
-			for (let i = previousChanges.length - 1; i >= 0; i--) {
-				for (const change of previousChanges) {
-					if (change.parent_id === previousChanges[i]?.id) {
-						break;
-					}
-				}
-				previousChange = previousChanges[i];
-				break;
-			}
-
-			// working change exists but is identical to previously committed change
-			if (previousChange) {
-				const previousSnapshot = await trx
-					.selectFrom("snapshot")
-					.selectAll()
-					.where("id", "=", previousChange.snapshot_id)
-					.executeTakeFirstOrThrow();
-
-				if (
-					// json stringify should be good enough if the plugin diff function is deterministic
-					JSON.stringify(previousSnapshot.value) ===
-					JSON.stringify(detectedChange.snapshot)
-				) {
-					// drop the change because it's identical
-					continue;
-				}
-			}
+			// get the leaf change of the assumed previous change
+			const leafChange = !previousChange
+				? undefined
+				: await getLeafChange({
+						lix: { db: trx },
+						change: previousChange,
+					});
 
 			const snapshot = await trx
 				.insertInto("snapshot")
@@ -181,7 +164,7 @@ export async function handleFileChange(args: {
 					plugin_key: detectedChange.pluginKey,
 					entity_id: detectedChange.entity_id,
 					author: args.currentAuthor,
-					parent_id: previousChange?.id,
+					parent_id: leafChange?.id,
 					snapshot_id: snapshot.id,
 				})
 				.execute();
