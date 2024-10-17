@@ -18,21 +18,6 @@ test("file ids should default to uuid", async () => {
 	expect(validate(file.id)).toBe(true);
 });
 
-test("commit ids should default to uuid", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-
-	const commit = await db
-		.insertInto("commit")
-		.values({ parent_id: "mock", description: "mock" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	expect(validate(commit.id)).toBe(true);
-});
-
 test("change ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
@@ -42,7 +27,6 @@ test("change ids should default to uuid", async () => {
 	const change = await db
 		.insertInto("change")
 		.values({
-			commit_id: "mock",
 			type: "file",
 			entity_id: "value1",
 			file_id: "mock",

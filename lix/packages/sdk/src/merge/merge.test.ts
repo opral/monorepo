@@ -4,7 +4,6 @@ import { newLixFile } from "../newLix.js";
 import { merge } from "./merge.js";
 import type {
 	NewChange,
-	NewCommit,
 	NewConflict,
 	NewSnapshot,
 } from "../database/schema.js";
@@ -552,20 +551,11 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 	const changesOnlyInSourceLix: NewChange[] = [
 		{
 			id: "2",
-			commit_id: "commit-1",
 			entity_id: "value1",
 			type: "mock",
 			snapshot_id: "sn2",
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
-		},
-	];
-
-	const commitsOnlyInSourceLix: NewCommit[] = [
-		{
-			id: "commit-1",
-			description: "",
-			parent_id: "0",
 		},
 	];
 
@@ -600,19 +590,11 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 		.values(changesOnlyInSourceLix)
 		.execute();
 
-	await sourceLix.db
-		.insertInto("commit")
-		.values(commitsOnlyInSourceLix)
-		.execute();
-
 	await merge({ sourceLix, targetLix });
 
 	const changes = await targetLix.db.selectFrom("change").selectAll().execute();
-	const commits = await targetLix.db.selectFrom("commit").selectAll().execute();
 
 	expect(changes.length).toBe(1);
-	expect(commits.length).toBe(1);
-	expect(changes[0]?.commit_id).toBe("commit-1");
 });
 
 test("it should copy discussion and related comments and mappings", async () => {
@@ -678,7 +660,6 @@ test("it should copy discussion and related comments and mappings", async () => 
 			value: {
 				text: "inserted text",
 			},
-			commit_id: null,
 		},
 	]);
 

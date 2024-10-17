@@ -1,14 +1,10 @@
 import type { LixPlugin } from "../plugin.js";
-import { commit } from "../commit.js";
 import { createDiscussion } from "../discussion/create-discussion.js";
 import { addComment } from "../discussion/add-comment.js";
 import { handleFileChange, handleFileInsert } from "../file-handlers.js";
 import { loadPlugins } from "../load-plugin.js";
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
-
-// TODO: fix in fink to not use time ordering!
-// .orderBy("commit.created desc")
 
 /**
  * Common setup between different lix environments.
@@ -176,9 +172,6 @@ export async function openLix(args: {
 			await settled();
 			args.database.close();
 			await db.destroy();
-		},
-		commit: (args: { description: string }) => {
-			return commit({ ...args, db, currentAuthor });
 		},
 		createDiscussion: (args: { changeIds?: string[]; body: string }) => {
 			if (currentAuthor === undefined) {
