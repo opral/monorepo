@@ -8,7 +8,7 @@ export const trailingSlash = "always"
  */
 export function load({ depends }) {
 	// This tells SvelteKit to re-run this load function when the language changes
-	depends("paraglide:lang")
+	depends("paraglide_lang")
 
 	return {
 		serverLang: `The language on the server is ${languageTag()}`,
