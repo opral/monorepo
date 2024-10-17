@@ -19,7 +19,6 @@ export async function handleFileInsert(args: {
 	after: LixFile;
 	plugins: LixPlugin[];
 	db: Kysely<LixDatabaseSchema>;
-	currentAuthor?: string;
 	queueEntry: any;
 }) {
 	const detectedChanges: Array<DetectedChange & { pluginKey: string }> = [];
@@ -68,7 +67,6 @@ export async function handleFileInsert(args: {
 				.values({
 					type: detectedChange.type,
 					file_id: args.after.id,
-					author: args.currentAuthor,
 					entity_id: detectedChange.entity_id,
 					plugin_key: detectedChange.pluginKey,
 					snapshot_id: snapshot.id,
@@ -89,7 +87,6 @@ export async function handleFileChange(args: {
 	before: LixFile;
 	after: LixFile;
 	plugins: LixPlugin[];
-	currentAuthor?: string;
 	db: Kysely<LixDatabaseSchema>;
 }) {
 	const fileId = args.after?.id ?? args.before?.id;
@@ -163,7 +160,6 @@ export async function handleFileChange(args: {
 					file_id: fileId,
 					plugin_key: detectedChange.pluginKey,
 					entity_id: detectedChange.entity_id,
-					author: args.currentAuthor,
 					parent_id: leafChange?.id,
 					snapshot_id: snapshot.id,
 				})

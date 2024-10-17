@@ -25,8 +25,6 @@ test("should be able to start a discussion on changes", async () => {
 		providePlugins: [mockPlugin],
 	});
 
-	lix.currentAuthor.set("Test User");
-
 	const enc = new TextEncoder();
 
 	await lix.db
@@ -85,8 +83,6 @@ test("should fail to create a disussion on non existing changes", async () => {
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
-
-	lix.currentAuthor.set("Test User");
 
 	const enc = new TextEncoder();
 

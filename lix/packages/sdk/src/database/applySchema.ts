@@ -28,7 +28,6 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
   
   CREATE TABLE IF NOT EXISTS change (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
-    author TEXT,
     parent_id TEXT,
     entity_id TEXT NOT NULL,
     type TEXT NOT NULL,
@@ -95,7 +94,6 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     parent_id TEXT,
     discussion_id TEXT NULL,
-    author_id TEXT NOT NULL, 
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
     body TEXT NOT NULL,
 

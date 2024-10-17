@@ -86,7 +86,6 @@ test("should use queue and settled correctly", async () => {
 	expect(changes).toEqual([
 		{
 			id: changes[0]?.id,
-			author: null,
 			created_at: changes[0]?.created_at,
 			snapshot_id: changes[0]?.snapshot_id,
 			parent_id: null,
@@ -152,7 +151,6 @@ test("should use queue and settled correctly", async () => {
 
 	expect(updatedChanges).toEqual([
 		{
-			author: null,
 			id: updatedChanges[0]?.id,
 			created_at: updatedChanges[0]?.created_at,
 			snapshot_id: updatedChanges[0]?.snapshot_id,
@@ -166,7 +164,6 @@ test("should use queue and settled correctly", async () => {
 			},
 		},
 		{
-			author: null,
 			entity_id: "test",
 			created_at: updatedChanges[1]?.created_at,
 			snapshot_id: updatedChanges[1]?.snapshot_id,
@@ -180,7 +177,6 @@ test("should use queue and settled correctly", async () => {
 			},
 		},
 		{
-			author: null,
 			created_at: updatedChanges[2]?.created_at,
 			snapshot_id: updatedChanges[2]?.snapshot_id,
 			file_id: "test",
@@ -196,7 +192,7 @@ test("should use queue and settled correctly", async () => {
 	]);
 });
 
-test("changes should contain the author", async () => {
+test.todo("changes should contain the author", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
@@ -221,8 +217,6 @@ test("changes should contain the author", async () => {
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
-
-	await lix.currentAuthor.set("some-id");
 
 	// testing an insert
 
@@ -256,9 +250,6 @@ test("changes should contain the author", async () => {
 	const changes2 = await lix.db.selectFrom("change").selectAll().execute();
 
 	expect(changes2[1]?.author).toBe("some-id");
-
-	// testing setting the author
-	await lix.currentAuthor.set("some-other-id");
 
 	await lix.db
 		.updateTable("file")
