@@ -1,6 +1,6 @@
-import { sql } from "kysely";
 import type { Change } from "../database/schema.js";
 import type { LixReadonly } from "../types.js";
+import { isInSimulatedCurrentBranch } from "./is-in-simulated-branch.js";
 
 /**
  * Find the last "child" change of the given change.
@@ -17,6 +17,7 @@ export async function getLeafChange(args: {
 		const childChange = await args.lix.db
 			.selectFrom("change")
 			.selectAll()
+			.where(isInSimulatedCurrentBranch)
 			.where("parent_id", "=", nextChange.id)
 			.executeTakeFirst();
 
