@@ -54,10 +54,10 @@ export async function handleFileInsert(args: {
 			const snapshot = await trx
 				.insertInto("snapshot")
 				.values({
-					// TODO use empty snapshot id const https://github.com/opral/lix-sdk/issues/101
-					id: detectedChange.snapshot ? undefined : "EMPTY_SNAPSHOT_ID",
-					// @ts-expect-error - database expects stringified json
-					value: JSON.stringify(detectedChange.snapshot),
+					// @ts-expect-error- database expects stringified json
+					value: detectedChange.snapshot
+						? JSON.stringify(detectedChange.snapshot)
+						: null,
 				})
 				.onConflict((oc) => oc.doNothing())
 				.returning("id")
@@ -147,10 +147,10 @@ export async function handleFileChange(args: {
 			const snapshot = await trx
 				.insertInto("snapshot")
 				.values({
-					// TODO use empty snapshot id const https://github.com/opral/lix-sdk/issues/101
-					id: detectedChange.snapshot ? undefined : "EMPTY_SNAPSHOT_ID",
-					// @ts-expect-error - database expects stringified json
-					value: JSON.stringify(detectedChange.snapshot),
+					// @ts-expect-error- database expects stringified json
+					value: detectedChange.snapshot
+						? JSON.stringify(detectedChange.snapshot)
+						: null,
 				})
 				.onConflict((oc) => oc.doNothing())
 				.returning("id")
