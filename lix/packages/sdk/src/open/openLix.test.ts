@@ -7,7 +7,6 @@ test("providing plugins should be possible", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
-		diff: {},
 	};
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),

@@ -5,6 +5,7 @@
 		"esbenp.prettier-vscode",
 		"inlang.vs-code-extension",
 		"vitest.explorer",
-		"aaron-bond.better-comments"
+		"aaron-bond.better-comments",
+		"yoavbls.pretty-ts-errors"
 	]
 }

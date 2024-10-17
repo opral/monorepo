@@ -1,18 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
 	Change,
 	ChangeWithSnapshot,
 	LixFile,
 	NewConflict,
+	Snapshot,
 } from "./database/schema.js";
 import type { LixReadonly } from "./types.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
-export type LixPlugin<
-	T extends Record<string, Record<string, unknown>> = Record<string, any>,
-> = {
+export type LixPlugin = {
 	key: string;
-	glob: string;
+	glob?: string;
 	// TODO https://github.com/opral/lix-sdk/issues/37
 	// idea:
 	//   1. runtime reflection for lix on the change schema
@@ -22,6 +20,15 @@ export type LixPlugin<
 	// 	message: Message,
 	// 	variant: Variant,
 	// },
+	/**
+	 * Detects changes between the `before` and `after` file update(s).
+	 *
+	 * The function is invoked by lix based on the plugin's `glob` pattern.
+	 */
+	detectChanges?: (args: {
+		before?: LixFile;
+		after?: LixFile;
+	}) => Promise<Array<DetectedChange>>;
 	/**
 	 * Detects changes from the source lix that conflict with changes in the target lix.
 	 */
@@ -50,38 +57,18 @@ export type LixPlugin<
 	tryResolveConflict?: () => Promise<
 		{ success: true; change: Change } | { success: false }
 	>;
-	// getting around bundling for the prototype
-	setup?: () => Promise<void>;
-	diffComponent?: {
-		file?: () => HTMLElement;
-	} & Record<
-		// other primitives
-		keyof T,
-		(() => HTMLElement) | undefined
-	>;
-	diff: {
-		file?: (args: {
-			before?: LixFile;
-			after?: LixFile;
-		}) => MaybePromise<Array<DiffReport>>;
-	} & Record<
-		// other primitives
-		keyof T,
-		(args: {
-			before?: T[keyof T];
-			after?: T[keyof T];
-		}) => MaybePromise<Array<DiffReport>>
-	>;
 };
 
-type MaybePromise<T> = T | Promise<T>;
-
 /**
- * A diff report is a report if a change has been made.
+ * A detected change that lix ingests in to the database.
+ *
+ * If the snapshot is `undefined`, the change is considered to be a deletion.
  */
-export type DiffReport = {
+export type DetectedChange = {
 	type: string;
 	entity_id: string;
-	before?: Record<string, any>;
-	after?: Record<string, any>;
+	/**
+	 * The change is considered a deletion if `snapshot` is `undefined`.
+	 */
+	snapshot?: Snapshot["value"];
 };

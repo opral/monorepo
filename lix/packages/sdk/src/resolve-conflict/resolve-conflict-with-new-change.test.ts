@@ -45,15 +45,11 @@ test("it should throw if the to be resolved with change already exists", async (
 
 	const mockPlugin: LixPlugin = {
 		key: "plugin1",
-		glob: "*",
 		applyChanges: vi.fn().mockResolvedValue({
 			fileData: new TextEncoder().encode(
 				JSON.stringify(mockSnapshots[0]?.value),
 			),
 		}),
-		diff: {
-			file: vi.fn(),
-		},
 	};
 
 	const lix = await openLixInMemory({
@@ -137,15 +133,11 @@ test("resolving a conflict should throw if the to be resolved with change is not
 
 	const mockPlugin: LixPlugin = {
 		key: "plugin1",
-		glob: "*",
 		applyChanges: vi.fn().mockResolvedValue({
 			fileData: new TextEncoder().encode(
 				JSON.stringify(mockSnapshots[0]?.value),
 			),
 		}),
-		diff: {
-			file: vi.fn(),
-		},
 	};
 
 	const lix = await openLixInMemory({
@@ -234,15 +226,11 @@ test("resolving a conflict should throw if the change to resolve with does not b
 	];
 	const mockPlugin: LixPlugin = {
 		key: "plugin1",
-		glob: "*",
 		applyChanges: vi.fn().mockResolvedValue({
 			fileData: new TextEncoder().encode(
 				JSON.stringify(mockSnapshots[0]?.value),
 			),
 		}),
-		diff: {
-			file: vi.fn(),
-		},
 	};
 
 	const lix = await openLixInMemory({
@@ -324,13 +312,9 @@ test("resolving a conflict with a new change should insert the change and mark t
 
 	const mockPlugin: LixPlugin = {
 		key: "plugin1",
-		glob: "*",
 		applyChanges: vi.fn().mockResolvedValue({
 			fileData: new TextEncoder().encode('{"id":"value3"}'),
 		}),
-		diff: {
-			file: vi.fn(),
-		},
 	};
 
 	const lix = await openLixInMemory({

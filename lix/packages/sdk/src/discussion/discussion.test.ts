@@ -6,30 +6,16 @@ import type { LixPlugin } from "../plugin.js";
 const mockPlugin: LixPlugin = {
 	key: "mock-plugin",
 	glob: "*",
-	diff: {
-		file: async ({ before }) => {
-			return [
-				!before
-					? {
-							type: "text",
-							before: undefined,
-							entity_id: "test",
-							after: {
-								text: "inserted text",
-							},
-						}
-					: {
-							type: "text",
-							entity_id: "test",
-							before: {
-								text: "inserted text",
-							},
-							after: {
-								text: "updated text",
-							},
-						},
-			];
-		},
+	detectChanges: async ({ after }) => {
+		return [
+			{
+				type: "text",
+				entity_id: "test",
+				snapshot: {
+					text: after ? new TextDecoder().decode(after.data) : undefined,
+				},
+			},
+		];
 	},
 };
 
@@ -52,9 +38,7 @@ test("should be able to start a discussion on changes", async () => {
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
-		.select("snapshot.value")
 		.execute();
 
 	const discussion = await lix.createDiscussion({

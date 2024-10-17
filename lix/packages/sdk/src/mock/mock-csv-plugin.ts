@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { DiffReport, LixPlugin } from "../plugin.js";
+import type { DetectedChange, LixPlugin } from "../plugin.js";
 import papaparse from "papaparse";
 
 type Cell = { rowIndex: number; columnIndex: number; text: string };
@@ -7,9 +7,7 @@ type Cell = { rowIndex: number; columnIndex: number; text: string };
 /**
  * A mock plugin that can be used for testing purposes.
  */
-export const mockCsvPlugin: LixPlugin<{
-	cell: Cell;
-}> = {
+export const mockCsvPlugin: LixPlugin = {
 	key: "csv",
 	glob: "*.csv",
 	applyChanges: async ({ file, changes, lix }) => {
@@ -66,41 +64,36 @@ export const mockCsvPlugin: LixPlugin<{
 			fileData: new TextEncoder().encode(csv),
 		};
 	},
-	diff: {
-		file: async ({ before, after }) => {
-			const result: DiffReport[] = [];
-			const beforeParsed = before
-				? papaparse.parse(new TextDecoder().decode(before.data))
-				: undefined;
-			const afterParsed = after
-				? papaparse.parse(new TextDecoder().decode(after.data))
-				: undefined;
+	detectChanges: async ({ before, after }) => {
+		const result: DetectedChange[] = [];
+		const beforeParsed = before
+			? papaparse.parse(new TextDecoder().decode(before.data))
+			: undefined;
+		const afterParsed = after
+			? papaparse.parse(new TextDecoder().decode(after.data))
+			: undefined;
 
-			const numRows = Math.max(
-				beforeParsed?.data.length ?? 0,
-				afterParsed?.data.length ?? 0,
-			);
+		const numRows = Math.max(
+			beforeParsed?.data.length ?? 0,
+			afterParsed?.data.length ?? 0,
+		);
 
-			if (afterParsed) {
-				for (let i = 0; i < numRows; i++) {
-					const beforeRow = beforeParsed?.data[i] as string[];
-					const afterRow = afterParsed.data[i] as string[];
-					const numColumns = Math.max(
-						beforeRow?.length ?? 0,
-						afterRow?.length ?? 0,
-					);
-					for (let j = 0; j < numColumns; j++) {
-						const beforeText = beforeRow?.[j];
-						const afterText = afterRow?.[j];
-						const diff = await mockCsvPlugin.diff.cell({
-							before: beforeText
-								? {
-										rowIndex: i,
-										columnIndex: j,
-										text: beforeText,
-									}
-								: undefined,
-							after: afterText
+		if (afterParsed) {
+			for (let i = 0; i < numRows; i++) {
+				const beforeRow = beforeParsed?.data[i] as string[];
+				const afterRow = afterParsed.data[i] as string[];
+				const numColumns = Math.max(
+					beforeRow?.length ?? 0,
+					afterRow?.length ?? 0,
+				);
+				for (let j = 0; j < numColumns; j++) {
+					const beforeText = beforeRow?.[j];
+					const afterText = afterRow?.[j];
+					if (beforeText !== afterText) {
+						result.push({
+							type: "cell",
+							entity_id: `${i}-${j}`,
+							snapshot: afterText
 								? {
 										rowIndex: i,
 										columnIndex: j,
@@ -108,28 +101,10 @@ export const mockCsvPlugin: LixPlugin<{
 									}
 								: undefined,
 						});
-
-						if (diff.length > 0) {
-							result.push(...diff);
-						}
 					}
 				}
 			}
-			return result;
-		},
-		// @ts-expect-error type narrowing bug
-		cell: async ({ before, after }) => {
-			if (before?.text === after?.text) {
-				return [];
-			} else {
-				return [
-					{
-						type: "cell",
-						before,
-						after,
-					},
-				];
-			}
-		},
+		}
+		return result;
 	},
 };

@@ -55,10 +55,6 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
-		diff: {
-			file: vi.fn(),
-		},
 		detectConflicts: vi.fn().mockResolvedValue([]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
@@ -171,10 +167,6 @@ test("it should save change conflicts", async () => {
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
-		diff: {
-			file: vi.fn(),
-		},
 		detectConflicts: vi.fn().mockResolvedValue([
 			{
 				change_id: mockChanges[1]!.id,
@@ -277,10 +269,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 
 	const mockPluginInSourceLix: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
-		diff: {
-			file: vi.fn(),
-		},
+		detectChanges: vi.fn().mockResolvedValue([]),
 		detectConflicts: vi.fn().mockResolvedValue([]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
@@ -288,9 +277,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 	const mockPluginInTargetLix: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
-		diff: {
-			file: vi.fn(),
-		},
+		detectChanges: vi.fn().mockResolvedValue([]),
 		detectConflicts: vi.fn().mockResolvedValue([]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
@@ -336,21 +323,15 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 
 	await merge({ sourceLix, targetLix });
 
-	expect(mockPluginInSourceLix.diff.file).toHaveBeenCalledTimes(0);
+	expect(mockPluginInSourceLix.detectChanges).toHaveBeenCalledTimes(0);
 	// once for the mock file insert
-	expect(mockPluginInTargetLix.diff.file).toHaveBeenCalledTimes(1);
+	expect(mockPluginInTargetLix.detectChanges).toHaveBeenCalledTimes(1);
 });
 
 test("it should apply changes that are not conflicting", async () => {
 	const mockSnapshots: NewSnapshot[] = [
-		{
-			id: "sn1",
-			value: { color: "red" },
-		},
-		{
-			id: "sn2",
-			value: { color: "blue" },
-		},
+		{ id: "sn1", value: { color: "red" } },
+		{ id: "sn2", value: { color: "blue" } },
 	];
 
 	const mockChanges: NewChange[] = [
@@ -375,11 +356,6 @@ test("it should apply changes that are not conflicting", async () => {
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
-		diff: {
-			file: vi.fn(),
-		},
-		detectConflicts: vi.fn().mockResolvedValue([]),
 		applyChanges: async ({ changes }) => {
 			const lastChange = changes[changes.length - 1];
 			const fileData = new TextEncoder().encode(
@@ -490,10 +466,6 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
-		diff: {
-			file: vi.fn(),
-		},
 		detectConflicts: vi.fn().mockResolvedValue([
 			{
 				change_id: commonChanges[0]!.id,
@@ -599,10 +571,6 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
-		diff: {
-			file: vi.fn(),
-		},
 		detectConflicts: vi.fn().mockResolvedValue([]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
@@ -651,34 +619,20 @@ test("it should copy discussion and related comments and mappings", async () => 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
-		diff: {
-			file: async ({ before: old }) => {
-				return [
-					!old
-						? {
-								type: "text",
-								before: undefined,
-								entity_id: "test",
-								after: {
-									text: "inserted text",
-								},
-							}
-						: {
-								type: "text",
-								entity_id: "test",
-								before: {
-									text: "inserted text",
-								},
-								after: {
-									text: "updated text",
-								},
-							},
-				];
-			},
+		detectChanges: async ({ after }) => {
+			return [
+				{
+					type: "text",
+					entity_id: "test",
+					snapshot: after
+						? { text: new TextDecoder().decode(after?.data) }
+						: undefined,
+				},
+			];
 		},
-		detectConflicts: vi.fn().mockResolvedValue([]),
-		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
+		applyChanges: async () => ({ fileData: new Uint8Array() }),
 	};
+
 	const lix1 = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
@@ -690,7 +644,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 
 	await lix1.db
 		.insertInto("file")
-		.values({ id: "test", path: "test.txt", data: enc.encode("test") })
+		.values({ id: "test", path: "test.txt", data: enc.encode("inserted text") })
 		.execute();
 
 	await lix1.settled();

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+ 
 import { expect, test } from "vitest";
 import { openLixInMemory } from "./open/openLixInMemory.js";
 import { newLixFile } from "./newLix.js";
@@ -9,27 +9,24 @@ test("should be able to add and commit changes", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		glob: "*",
-		diff: {
-			file: async ({ before, after }) => {
-				const textBefore = before
-					? new TextDecoder().decode(before?.data)
-					: undefined;
-				const textAfter = after
-					? new TextDecoder().decode(after.data)
-					: undefined;
+		detectChanges: async ({ before, after }) => {
+			const textBefore = before
+				? new TextDecoder().decode(before?.data)
+				: undefined;
+			const textAfter = after
+				? new TextDecoder().decode(after.data)
+				: undefined;
 
-				if (textBefore === textAfter) {
-					return [];
-				}
-				return [
-					{
-						type: "text",
-						entity_id: "test",
-						before: textBefore ? { text: textBefore } : undefined,
-						after: textAfter ? { text: textAfter } : undefined,
-					},
-				];
-			},
+			if (textBefore === textAfter) {
+				return [];
+			}
+			return [
+				{
+					type: "text",
+					entity_id: "test",
+					snapshot: textAfter ? { text: textAfter } : undefined,
+				},
+			];
 		},
 	};
 

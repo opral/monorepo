@@ -41,14 +41,14 @@ export async function merge(args: {
 	// TODO function assumes that all changes belong to the same file
 	if (args.sourceLix.plugins.length !== 1) {
 		throw new Error("Unimplemented. Only one plugin is supported for now");
-	} else if (plugin.detectConflicts === undefined) {
-		throw new Error("Plugin does not support conflict detection");
 	}
-	const conflicts = await plugin.detectConflicts({
-		sourceLix: args.sourceLix,
-		targetLix: args.targetLix,
-		leafChangesOnlyInSource,
-	});
+
+	const conflicts =
+		(await plugin.detectConflicts?.({
+			sourceLix: args.sourceLix,
+			targetLix: args.targetLix,
+			leafChangesOnlyInSource,
+		})) ?? [];
 
 	const changesPerFile: Record<string, ArrayBuffer> = {};
 
