@@ -108,7 +108,7 @@ export async function handleFileChange(args: {
 			throw error;
 		}
 		for (const change of await plugin.detectChanges({
-			before: undefined,
+			before: args.before,
 			after: args.after,
 		})) {
 			detectedChanges.push({
