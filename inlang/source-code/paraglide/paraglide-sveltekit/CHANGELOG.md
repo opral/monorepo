@@ -1,5 +1,13 @@
 # @inlang/paraglide-sveltekit
 
+## 0.11.3
+
+### Patch Changes
+
+- 559bc44: Fixed https://github.com/opral/inlang-paraglide-js/issues/243.
+
+  Regression bug after 0.11.1 release. The cookie has been renamed from `paraglide:lang` to `paraglide_lang` but the SvelteKit load function was not updated from the old cookie name.
+
 ## 0.11.2
 
 ### Patch Changes
