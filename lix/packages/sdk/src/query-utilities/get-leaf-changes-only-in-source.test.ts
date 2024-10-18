@@ -3,7 +3,7 @@ import { getLeafChangesOnlyInSource } from "./get-leaf-changes-only-in-source.js
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import type { NewChange } from "../database/schema.js";
-import { createPhantomSnapshot } from "./create-phantom-snapshot.js";
+import { mockJsonSnapshot } from "./mock-json-snapshot.js";
 
 test("it should get the leaf changes that only exist in source", async () => {
 	const sourceLix = await openLixInMemory({
@@ -14,8 +14,8 @@ test("it should get the leaf changes that only exist in source", async () => {
 	});
 
 	const commonSnapshots = [
-		createPhantomSnapshot({ id: "mock-id", color: "red" }),
-		createPhantomSnapshot({ id: "mock-id", color: "blue" }),
+		mockJsonSnapshot({ id: "mock-id", color: "red" }),
+		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
 	];
 
 	const commonChanges: NewChange[] = [
@@ -39,9 +39,9 @@ test("it should get the leaf changes that only exist in source", async () => {
 	];
 
 	const snapshotsOnlyInSource = [
-		createPhantomSnapshot({ id: "mock-id", color: "pink" }),
-		createPhantomSnapshot({ id: "mock-id", color: "orange" }),
-		createPhantomSnapshot({ id: "mock-id", color: "yellow" }),
+		mockJsonSnapshot({ id: "mock-id", color: "pink" }),
+		mockJsonSnapshot({ id: "mock-id", color: "orange" }),
+		mockJsonSnapshot({ id: "mock-id", color: "yellow" }),
 	];
 
 	const changesOnlyInSource: NewChange[] = [
@@ -74,7 +74,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 	];
 
 	const snapshotsOnlyInTarget = [
-		createPhantomSnapshot({ id: "mock-id", color: "black" }),
+		mockJsonSnapshot({ id: "mock-id", color: "black" }),
 	];
 
 	const changesOnlyInTarget: NewChange[] = [

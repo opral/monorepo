@@ -3,7 +3,7 @@ import { getLeafChange } from "./get-leaf-change.js";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import type { NewChange } from "../database/schema.js";
-import { createPhantomSnapshot } from "./create-phantom-snapshot.js";
+import { mockJsonSnapshot } from "./mock-json-snapshot.js";
 
 test("it should find the latest child of a given change", async () => {
 	const lix = await openLixInMemory({
@@ -11,9 +11,9 @@ test("it should find the latest child of a given change", async () => {
 	});
 
 	const mockSnapshots = [
-		createPhantomSnapshot(["change 1"]),
-		createPhantomSnapshot(["change 2"]),
-		createPhantomSnapshot(["change 3"]),
+		mockJsonSnapshot(["change 1"]),
+		mockJsonSnapshot(["change 2"]),
+		mockJsonSnapshot(["change 3"]),
 	];
 
 	const mockChanges: NewChange[] = [

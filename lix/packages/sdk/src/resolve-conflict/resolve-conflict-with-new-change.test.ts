@@ -9,14 +9,14 @@ import {
 	ChangeDoesNotBelongToFileError,
 	ChangeNotDirectChildOfConflictError,
 } from "./errors.js";
-import { createPhantomSnapshot } from "../query-utilities/create-phantom-snapshot.js";
+import { mockJsonSnapshot } from "../query-utilities/mock-json-snapshot.js";
 
 test("it should throw if the to be resolved with change already exists", async () => {
 	const mockSnapshots: Snapshot[] = [
-		createPhantomSnapshot({
+		mockJsonSnapshot({
 			id: "value1",
 		}),
-		createPhantomSnapshot({
+		mockJsonSnapshot({
 			id: "value2",
 		}),
 	];
@@ -98,10 +98,10 @@ test("it should throw if the to be resolved with change already exists", async (
 // the sequence of changes will be broken otherwise
 test("resolving a conflict should throw if the to be resolved with change is not a direct child of the conflicting changes", async () => {
 	const mockSnapshots: Snapshot[] = [
-		createPhantomSnapshot({
+		mockJsonSnapshot({
 			id: "value1",
 		}),
-		createPhantomSnapshot({
+		mockJsonSnapshot({
 			id: "value2",
 		}),
 	];
@@ -188,10 +188,10 @@ test("resolving a conflict should throw if the to be resolved with change is not
 // the sequence of changes will be broken otherwise
 test("resolving a conflict should throw if the change to resolve with does not belong to the same file as the conflicting changes", async () => {
 	const mockSnapshots: Snapshot[] = [
-		createPhantomSnapshot({
+		mockJsonSnapshot({
 			id: "value1",
 		}),
-		createPhantomSnapshot({
+		mockJsonSnapshot({
 			id: "value2",
 		}),
 	];
@@ -266,10 +266,10 @@ test("resolving a conflict should throw if the change to resolve with does not b
 
 test("resolving a conflict with a new change should insert the change and mark the conflict as resolved with the new change", async () => {
 	const mockSnapshots: Snapshot[] = [
-		createPhantomSnapshot({
+		mockJsonSnapshot({
 			id: "value1",
 		}),
-		createPhantomSnapshot({
+		mockJsonSnapshot({
 			id: "value2",
 		}),
 	];

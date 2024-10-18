@@ -7,7 +7,7 @@ import { sha256 } from "js-sha256";
  * @returns
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createPhantomSnapshot = function (content: Record<string, any>) {
+export const mockJsonSnapshot = function (content: Record<string, any>) {
 	return {
 		id: sha256(JSON.stringify(content)),
 		content: content,

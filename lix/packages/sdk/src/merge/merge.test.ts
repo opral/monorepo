@@ -9,13 +9,13 @@ import type {
 	Snapshot,
 } from "../database/schema.js";
 import type { LixPlugin } from "../plugin.js";
-import { createPhantomSnapshot } from "../query-utilities/create-phantom-snapshot.js";
+import { mockJsonSnapshot } from "../query-utilities/mock-json-snapshot.js";
 
 test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const mockSnapshots = [
-		createPhantomSnapshot({ id: "mock-id", color: "red" }),
-		createPhantomSnapshot({ id: "mock-id", color: "blue" }),
-		createPhantomSnapshot({ id: "mock-id", color: "green" }),
+		mockJsonSnapshot({ id: "mock-id", color: "red" }),
+		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
+		mockJsonSnapshot({ id: "mock-id", color: "green" }),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -125,9 +125,9 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 
 test("it should save change conflicts", async () => {
 	const mockSnapshots = [
-		createPhantomSnapshot({ id: "mock-id", color: "red" }),
-		createPhantomSnapshot({ id: "mock-id", color: "blue" }),
-		createPhantomSnapshot({ id: "mock-id", color: "green" }),
+		mockJsonSnapshot({ id: "mock-id", color: "red" }),
+		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
+		mockJsonSnapshot({ id: "mock-id", color: "green" }),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -229,9 +229,7 @@ test("it should save change conflicts", async () => {
 });
 
 test("diffing should not be invoked to prevent the generation of duplicate changes", async () => {
-	const commonSnapshots = [
-		createPhantomSnapshot({ id: "mock-id", color: "red" }),
-	];
+	const commonSnapshots = [mockJsonSnapshot({ id: "mock-id", color: "red" })];
 
 	const commonChanges: NewChange[] = [
 		{
@@ -248,7 +246,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 	const changesOnlyInTargetLix: NewChange[] = [];
 
 	const snapshotsOnlyInSourceLix: Snapshot[] = [
-		createPhantomSnapshot({ id: "mock-id", color: "blue" }),
+		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
 	];
 	const changesOnlyInSourceLix: NewChange[] = [
 		{
@@ -332,8 +330,8 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 
 test("it should apply changes that are not conflicting", async () => {
 	const mockSnapshots: Snapshot[] = [
-		createPhantomSnapshot({ color: "red" }),
-		createPhantomSnapshot({ color: "blue" }),
+		mockJsonSnapshot({ color: "red" }),
+		mockJsonSnapshot({ color: "blue" }),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -438,9 +436,7 @@ test("it should apply changes that are not conflicting", async () => {
 });
 
 test("subsequent merges should not lead to duplicate changes and/or conflicts", async () => {
-	const commonSnapshots = [
-		createPhantomSnapshot({ id: "mock-id", color: "red" }),
-	];
+	const commonSnapshots = [mockJsonSnapshot({ id: "mock-id", color: "red" })];
 	const commonChanges: NewChange[] = [
 		{
 			id: "1",
@@ -455,7 +451,7 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 	const changesOnlyInTargetLix: NewChange[] = [];
 
 	const snapshotsOnlyInSourceLix: Snapshot[] = [
-		createPhantomSnapshot({ id: "mock-id", color: "blue" }),
+		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
 	];
 	const changesOnlyInSourceLix: NewChange[] = [
 		{
@@ -556,7 +552,7 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 
 test("it should naively copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const snapshotsOnlyInSourceLix: Snapshot[] = [
-		createPhantomSnapshot({ id: "mock-id", color: "blue" }),
+		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
 	];
 	const changesOnlyInSourceLix: NewChange[] = [
 		{

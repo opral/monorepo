@@ -3,7 +3,7 @@ import { getLowestCommonAncestor } from "./get-lowest-common-ancestor.js";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import type { NewChange } from "../database/schema.js";
-import { createPhantomSnapshot } from "./create-phantom-snapshot.js";
+import { mockJsonSnapshot } from "./mock-json-snapshot.js";
 
 test("it should find the common parent of two changes recursively", async () => {
 	const sourceLix = await openLixInMemory({
@@ -14,9 +14,9 @@ test("it should find the common parent of two changes recursively", async () => 
 	});
 
 	const mockSnapshots = [
-		createPhantomSnapshot(["change 1"]),
-		createPhantomSnapshot(["change 2"]),
-		createPhantomSnapshot(["change 3"]),
+		mockJsonSnapshot(["change 1"]),
+		mockJsonSnapshot(["change 2"]),
+		mockJsonSnapshot(["change 3"]),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -103,9 +103,9 @@ test("it should return undefined if no common parent exists", async () => {
 	});
 
 	const mockSnapshots = [
-		createPhantomSnapshot(["change 1"]),
-		createPhantomSnapshot(["change 2"]),
-		createPhantomSnapshot(["change 3"]),
+		mockJsonSnapshot(["change 1"]),
+		mockJsonSnapshot(["change 2"]),
+		mockJsonSnapshot(["change 3"]),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -192,9 +192,9 @@ test("it should return the source change if its the common parent", async () => 
 	});
 
 	const mockSnapshots = [
-		createPhantomSnapshot(["change 1"]),
-		createPhantomSnapshot(["change "]),
-		createPhantomSnapshot(["change 3"]),
+		mockJsonSnapshot(["change 1"]),
+		mockJsonSnapshot(["change "]),
+		mockJsonSnapshot(["change 3"]),
 	];
 
 	const mockChanges: NewChange[] = [
