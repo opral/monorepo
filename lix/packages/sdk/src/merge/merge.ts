@@ -140,11 +140,10 @@ export async function merge(args: {
 			await trx
 				.insertInto("change")
 				.values(
-					// https://github.com/opral/inlang-message-sdk/issues/123
-					sourceChangesWithSnapshot.map((change) => {
-						delete change.content;
-						return change;
-					}),
+					sourceChangesWithSnapshot.map((c) => ({
+						...c,
+						content: undefined,
+					})),
 				)
 				// ignore if already exists
 				.onConflict((oc) => oc.doNothing())

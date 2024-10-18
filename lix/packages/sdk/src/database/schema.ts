@@ -91,7 +91,7 @@ type SnapshotTable = {
 	 *   - For a csv cell change, the value would be the new cell value.
 	 *   - For an inlang message change, the value would be the new message.
 	 */
-	content?: Record<string, any>;
+	content: Record<string, any> | null;
 };
 
 // TODO #185 rename content to snapshot_content
@@ -104,8 +104,8 @@ export type Conflict = Selectable<ConflictTable>;
 export type NewConflict = Insertable<ConflictTable>;
 export type ConflictUpdate = Updateable<ConflictTable>;
 type ConflictTable = {
-	meta?: Record<string, any>;
-	reason?: string;
+	meta: Record<string, any> | null;
+	reason: string | null;
 	change_id: ChangeTable["id"];
 	conflicting_change_id: ChangeTable["id"];
 	/**
@@ -114,7 +114,7 @@ type ConflictTable = {
 	 * Can be the change_id, conflicting_change_id, or another change_id
 	 * that resulted from a merge.
 	 */
-	resolved_change_id?: ChangeTable["id"];
+	resolved_change_id: ChangeTable["id"] | null;
 };
 
 // ------ discussions ------
@@ -139,7 +139,7 @@ export type NewComment = Insertable<CommentTable>;
 export type CommentUpdate = Updateable<CommentTable>;
 type CommentTable = {
 	id: Generated<string>;
-	parent_id?: string;
+	parent_id: string | null;
 	discussion_id: string;
 	created_at: Generated<string>;
 	body: string;

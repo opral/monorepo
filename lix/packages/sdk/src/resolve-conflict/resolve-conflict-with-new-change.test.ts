@@ -89,7 +89,7 @@ test("it should throw if the to be resolved with change already exists", async (
 			parentIds: [changes[0]!.id],
 			newChange: {
 				...changes[0]!,
-				content: mockSnapshots[0]?.content,
+				content: mockSnapshots[0]?.content ?? null,
 			},
 		}),
 	).rejects.toThrowError(ChangeAlreadyExistsError);
@@ -310,11 +310,7 @@ test("resolving a conflict with a new change should insert the change and mark t
 
 	await lix.db
 		.insertInto("snapshot")
-		.values(
-			mockSnapshots.map((s) => {
-				return { content: s.content };
-			}),
-		)
+		.values(mockSnapshots.map((s) => ({ content: s.content })))
 		.returningAll()
 		.execute();
 
