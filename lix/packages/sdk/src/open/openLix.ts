@@ -44,8 +44,6 @@ export async function openLix(args: {
 		},
 	});
 
-	let currentAuthor: string | undefined;
-
 	let pending: Promise<void> | undefined;
 	let resolve: () => void;
 	// run number counts the worker runs in a current batch and is used to prevent race conditions where a trigger is missed because a previous run is just about to reset the hasMoreEntriesSince flag
@@ -87,7 +85,6 @@ export async function openLix(args: {
 
 			if (existingFile?.data) {
 				await handleFileChange({
-					currentAuthor,
 					queueEntry: entry,
 					before: {
 						...existingFile,
@@ -102,7 +99,6 @@ export async function openLix(args: {
 				});
 			} else {
 				await handleFileInsert({
-					currentAuthor,
 					queueEntry: entry,
 					after: {
 						...entry,
@@ -155,13 +151,6 @@ export async function openLix(args: {
 	return {
 		db,
 		settled,
-		currentAuthor: {
-			get: () => currentAuthor,
-			// async setter for future proofing
-			set: async (author: string) => {
-				currentAuthor = author;
-			},
-		},
 		toBlob: async () => {
 			await settled();
 			return new Blob([contentFromDatabase(args.database)]);
@@ -174,20 +163,13 @@ export async function openLix(args: {
 			await db.destroy();
 		},
 		createDiscussion: (args: { changeIds?: string[]; body: string }) => {
-			if (currentAuthor === undefined) {
-				throw new Error("current author not set");
-			}
 			return createDiscussion({
 				...args,
 				db,
-				currentAuthor,
 			});
 		},
 		addComment: (args: { parentCommentId: string; body: string }) => {
-			if (!currentAuthor) {
-				throw new Error("current author not set");
-			}
-			return addComment({ ...args, db, currentAuthor });
+			return addComment({ ...args, db });
 		},
 	};
 }

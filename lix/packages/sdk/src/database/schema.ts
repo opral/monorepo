@@ -43,7 +43,6 @@ export type NewChange = Insertable<ChangeTable>;
 type ChangeTable = {
 	id: Generated<string>;
 	parent_id: Generated<string> | null;
-	author?: string;
 	/**
 	 * The entity the change refers to.
 	 */
@@ -135,7 +134,6 @@ type CommentTable = {
 	id: Generated<string>;
 	parent_id?: string;
 	discussion_id: string;
-	author_id: string;
 	created_at: Generated<string>;
 	body: string;
 };

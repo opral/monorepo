@@ -172,7 +172,6 @@ test("resolving a conflict should throw if the to be resolved with change is not
 			lix: lix,
 			conflict: conflict,
 			newChange: {
-				author: undefined,
 				file_id: "mock",
 				parent_id: null,
 				plugin_key: "plugin1",
