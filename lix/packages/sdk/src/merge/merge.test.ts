@@ -6,23 +6,16 @@ import type {
 	NewChange,
 	NewConflict,
 	NewSnapshot,
+	Snapshot,
 } from "../database/schema.js";
 import type { LixPlugin } from "../plugin.js";
+import { mockJsonSnapshot } from "../query-utilities/mock-json-snapshot.js";
 
 test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const mockSnapshots = [
-		{
-			id: "sn1",
-			value: { id: "mock-id", color: "red" },
-		},
-		{
-			id: "sn2",
-			value: { id: "mock-id", color: "blue" },
-		},
-		{
-			id: "sn3",
-			value: { id: "mock-id", color: "green" },
-		},
+		mockJsonSnapshot({ id: "mock-id", color: "red" }),
+		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
+		mockJsonSnapshot({ id: "mock-id", color: "green" }),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -30,7 +23,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 			id: "1",
 			entity_id: "value1",
 			type: "mock",
-			snapshot_id: "sn1",
+			snapshot_id: mockSnapshots[0]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -38,7 +31,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 			id: "2",
 			entity_id: "value1",
 			type: "mock",
-			snapshot_id: "sn2",
+			snapshot_id: mockSnapshots[1]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -46,7 +39,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 			id: "3",
 			entity_id: "value1",
 			type: "mock",
-			snapshot_id: "sn3",
+			snapshot_id: mockSnapshots[2]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -70,7 +63,12 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 
 	await sourceLix.db
 		.insertInto("snapshot")
-		.values([mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!])
+
+		.values(
+			[mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await sourceLix.db
@@ -80,7 +78,11 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 
 	await targetLix.db
 		.insertInto("snapshot")
-		.values([mockSnapshots[0]!])
+		.values(
+			[mockSnapshots[0]!].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 	await targetLix.db.insertInto("change").values([mockChanges[0]!]).execute();
 
@@ -123,18 +125,9 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 
 test("it should save change conflicts", async () => {
 	const mockSnapshots = [
-		{
-			id: "sn1",
-			value: { id: "mock-id", color: "red" },
-		},
-		{
-			id: "sn2",
-			value: { id: "mock-id", color: "blue" },
-		},
-		{
-			id: "sn3",
-			value: { id: "mock-id", color: "green" },
-		},
+		mockJsonSnapshot({ id: "mock-id", color: "red" }),
+		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
+		mockJsonSnapshot({ id: "mock-id", color: "green" }),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -142,7 +135,7 @@ test("it should save change conflicts", async () => {
 			id: "1",
 			type: "mock",
 			entity_id: "value1",
-			snapshot_id: "sn1",
+			snapshot_id: mockSnapshots[0]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -150,7 +143,7 @@ test("it should save change conflicts", async () => {
 			id: "2",
 			type: "mock",
 			entity_id: "value1",
-			snapshot_id: "sn2",
+			snapshot_id: mockSnapshots[1]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -158,7 +151,7 @@ test("it should save change conflicts", async () => {
 			id: "3",
 			type: "mock",
 			entity_id: "value1",
-			snapshot_id: "sn3",
+			snapshot_id: mockSnapshots[2]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -191,7 +184,11 @@ test("it should save change conflicts", async () => {
 
 	await sourceLix.db
 		.insertInto("snapshot")
-		.values([mockSnapshots[0]!, mockSnapshots[2]!])
+		.values(
+			[mockSnapshots[0]!, mockSnapshots[2]!].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await targetLix.db
@@ -201,7 +198,11 @@ test("it should save change conflicts", async () => {
 
 	await targetLix.db
 		.insertInto("snapshot")
-		.values([mockSnapshots[0]!, mockSnapshots[2]!])
+		.values(
+			[mockSnapshots[0]!, mockSnapshots[2]!].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await targetLix.db
@@ -228,18 +229,13 @@ test("it should save change conflicts", async () => {
 });
 
 test("diffing should not be invoked to prevent the generation of duplicate changes", async () => {
-	const commonSnapshots = [
-		{
-			id: "sn1",
-			value: { id: "mock-id", color: "red" },
-		},
-	];
+	const commonSnapshots = [mockJsonSnapshot({ id: "mock-id", color: "red" })];
 
 	const commonChanges: NewChange[] = [
 		{
 			id: "1",
 			type: "mock",
-			snapshot_id: "sn1",
+			snapshot_id: commonSnapshots[0]!.id,
 			entity_id: "value1",
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
@@ -249,18 +245,15 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 	const snapshotsOnlyInTargetLix: NewSnapshot[] = [];
 	const changesOnlyInTargetLix: NewChange[] = [];
 
-	const snapshotsOnlyInSourceLix: NewSnapshot[] = [
-		{
-			id: "sn2",
-			value: { id: "mock-id", color: "blue" },
-		},
+	const snapshotsOnlyInSourceLix: Snapshot[] = [
+		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
 	];
 	const changesOnlyInSourceLix: NewChange[] = [
 		{
 			id: "2",
 			type: "mock",
 			entity_id: "value1",
-			snapshot_id: "sn2",
+			snapshot_id: snapshotsOnlyInSourceLix[0]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -293,7 +286,11 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 
 	await sourceLix.db
 		.insertInto("snapshot")
-		.values([...commonSnapshots, ...snapshotsOnlyInSourceLix])
+		.values(
+			[...commonSnapshots, ...snapshotsOnlyInSourceLix].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await sourceLix.db
@@ -303,7 +300,11 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 
 	await targetLix.db
 		.insertInto("snapshot")
-		.values([...commonSnapshots, ...snapshotsOnlyInTargetLix])
+		.values(
+			[...commonSnapshots, ...snapshotsOnlyInTargetLix].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await targetLix.db
@@ -328,9 +329,9 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 });
 
 test("it should apply changes that are not conflicting", async () => {
-	const mockSnapshots: NewSnapshot[] = [
-		{ id: "sn1", value: { color: "red" } },
-		{ id: "sn2", value: { color: "blue" } },
+	const mockSnapshots: Snapshot[] = [
+		mockJsonSnapshot({ color: "red" }),
+		mockJsonSnapshot({ color: "blue" }),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -338,7 +339,7 @@ test("it should apply changes that are not conflicting", async () => {
 			id: "1",
 			type: "mock",
 			entity_id: "value1",
-			snapshot_id: "sn1",
+			snapshot_id: mockSnapshots[0]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -347,7 +348,7 @@ test("it should apply changes that are not conflicting", async () => {
 			parent_id: "1",
 			entity_id: "value1",
 			type: "mock",
-			snapshot_id: "sn2",
+			snapshot_id: mockSnapshots[1]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -358,7 +359,7 @@ test("it should apply changes that are not conflicting", async () => {
 		applyChanges: async ({ changes }) => {
 			const lastChange = changes[changes.length - 1];
 			const fileData = new TextEncoder().encode(
-				JSON.stringify(lastChange!.value ?? {}),
+				JSON.stringify(lastChange!.content ?? {}),
 			);
 			return { fileData };
 		},
@@ -376,7 +377,11 @@ test("it should apply changes that are not conflicting", async () => {
 
 	await sourceLix.db
 		.insertInto("snapshot")
-		.values([mockSnapshots[0]!, mockSnapshots[1]!])
+		.values(
+			[mockSnapshots[0]!, mockSnapshots[1]!].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await sourceLix.db
@@ -386,7 +391,11 @@ test("it should apply changes that are not conflicting", async () => {
 
 	await targetLix.db
 		.insertInto("snapshot")
-		.values([mockSnapshots[0]!])
+		.values(
+			[mockSnapshots[0]!].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 	await targetLix.db.insertInto("change").values([mockChanges[0]!]).execute();
 
@@ -406,7 +415,7 @@ test("it should apply changes that are not conflicting", async () => {
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
-		.select("snapshot.value")
+		.select("snapshot.content")
 		.execute();
 
 	const conflicts = await targetLix.db
@@ -422,23 +431,18 @@ test("it should apply changes that are not conflicting", async () => {
 	expect(changes.length).toBe(2);
 	expect(conflicts.length).toBe(0);
 	expect(file.data).toEqual(
-		new TextEncoder().encode(JSON.stringify(mockSnapshots[1]!.value!)),
+		new TextEncoder().encode(JSON.stringify(mockSnapshots[1]!.content!)),
 	);
 });
 
 test("subsequent merges should not lead to duplicate changes and/or conflicts", async () => {
-	const commonSnapshots = [
-		{
-			id: "sn1",
-			value: { id: "mock-id", color: "red" },
-		},
-	];
+	const commonSnapshots = [mockJsonSnapshot({ id: "mock-id", color: "red" })];
 	const commonChanges: NewChange[] = [
 		{
 			id: "1",
 			type: "mock",
 			entity_id: "value1",
-			snapshot_id: "sn1",
+			snapshot_id: commonSnapshots[0]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -446,18 +450,15 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 	const snapshotsOnlyInTargetLix: NewSnapshot[] = [];
 	const changesOnlyInTargetLix: NewChange[] = [];
 
-	const snapshotsOnlyInSourceLix: NewSnapshot[] = [
-		{
-			id: "sn2",
-			value: { id: "mock-id", color: "blue" },
-		},
+	const snapshotsOnlyInSourceLix: Snapshot[] = [
+		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
 	];
 	const changesOnlyInSourceLix: NewChange[] = [
 		{
 			id: "2",
 			type: "mock",
 			entity_id: "value1",
-			snapshot_id: "sn2",
+			snapshot_id: snapshotsOnlyInSourceLix[0]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -486,7 +487,11 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 
 	await sourceLix.db
 		.insertInto("snapshot")
-		.values([...commonSnapshots, ...snapshotsOnlyInSourceLix])
+		.values(
+			[...commonSnapshots, ...snapshotsOnlyInSourceLix].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await sourceLix.db
@@ -496,7 +501,11 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 
 	await targetLix.db
 		.insertInto("snapshot")
-		.values([...commonSnapshots, ...snapshotsOnlyInTargetLix])
+		.values(
+			[...commonSnapshots, ...snapshotsOnlyInTargetLix].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await targetLix.db
@@ -542,18 +551,15 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 });
 
 test("it should naively copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
-	const snapshotsOnlyInSourceLix: NewSnapshot[] = [
-		{
-			id: "sn2",
-			value: { id: "mock-id", color: "blue" },
-		},
+	const snapshotsOnlyInSourceLix: Snapshot[] = [
+		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
 	];
 	const changesOnlyInSourceLix: NewChange[] = [
 		{
 			id: "2",
 			entity_id: "value1",
 			type: "mock",
-			snapshot_id: "sn2",
+			snapshot_id: snapshotsOnlyInSourceLix[0]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -582,7 +588,11 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 
 	await sourceLix.db
 		.insertInto("snapshot")
-		.values(snapshotsOnlyInSourceLix)
+		.values(
+			snapshotsOnlyInSourceLix.map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await sourceLix.db
@@ -639,7 +649,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
-		.select("snapshot.value")
+		.select("snapshot.content")
 		.execute();
 
 	expect(changes).toEqual([
@@ -652,7 +662,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 			file_id: "test",
 			entity_id: "test",
 			plugin_key: "mock-plugin",
-			value: {
+			content: {
 				text: "inserted text",
 			},
 		},

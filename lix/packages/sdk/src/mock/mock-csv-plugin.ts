@@ -13,8 +13,9 @@ export const mockCsvPlugin: LixPlugin = {
 	applyChanges: async ({ file, changes, lix }) => {
 		const parsed = papaparse.parse(new TextDecoder().decode(file.data));
 		for (const change of changes) {
-			if (change.value) {
-				const { rowIndex, columnIndex, text } = change.value as unknown as Cell;
+			if (change.content) {
+				const { rowIndex, columnIndex, text } =
+					change.content as unknown as Cell;
 				// create the row if it doesn't exist
 				if (!parsed.data[rowIndex]) {
 					parsed.data[rowIndex] = [];
@@ -41,11 +42,11 @@ export const mockCsvPlugin: LixPlugin = {
 					.selectFrom("change")
 					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 					.selectAll("change")
-					.select("snapshot.value")
+					.select("snapshot.content")
 					.where("change.id", "=", change.parent_id)
 					.executeTakeFirstOrThrow();
 
-				const { rowIndex, columnIndex } = parent.value as unknown as Cell;
+				const { rowIndex, columnIndex } = parent.content as unknown as Cell;
 				(parsed.data as any)[rowIndex][columnIndex] = "";
 				// if the row is empty after deleting the cell, remove it
 				if (

@@ -3,8 +3,8 @@ import type { LixDatabaseSchema, LixFile } from "./database/schema.js";
 import type { DetectedChange, LixPlugin } from "./plugin.js";
 import { minimatch } from "minimatch";
 import { Kysely } from "kysely";
-import { getLeafChange } from "./query-utilities/get-leaf-change.js";
 import { isInSimulatedCurrentBranch } from "./query-utilities/is-in-simulated-branch.js";
+import { getLeafChange } from "./query-utilities/get-leaf-change.js";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {
@@ -53,10 +53,8 @@ export async function handleFileInsert(args: {
 			const snapshot = await trx
 				.insertInto("snapshot")
 				.values({
-					// @ts-expect-error- database expects stringified json
-					value: detectedChange.snapshot
-						? JSON.stringify(detectedChange.snapshot)
-						: null,
+					// @ts-expect-error - database expects stringified json
+					content: JSON.stringify(detectedChange.snapshot),
 				})
 				.onConflict((oc) => oc.doNothing())
 				.returning("id")
@@ -145,11 +143,15 @@ export async function handleFileChange(args: {
 				.insertInto("snapshot")
 				.values({
 					// @ts-expect-error- database expects stringified json
-					value: detectedChange.snapshot
+					content: detectedChange.snapshot
 						? JSON.stringify(detectedChange.snapshot)
 						: null,
 				})
-				.onConflict((oc) => oc.doNothing())
+				.onConflict((oc) =>
+					oc.doUpdateSet((eb) => ({
+						content: eb.ref("excluded.content"),
+					})),
+				)
 				.returning("id")
 				.executeTakeFirstOrThrow();
 

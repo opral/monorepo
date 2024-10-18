@@ -39,10 +39,12 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
 
   CREATE INDEX IF NOT EXISTS idx_change_parent_id ON change (parent_id);
 
-  create TABLE IF NOT EXISTS snapshot (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
-    value TEXT
+  CREATE TABLE IF NOT EXISTS snapshot (
+    id TEXT GENERATED ALWAYS AS (sha256(content)) STORED UNIQUE,
+    content TEXT
   ) strict;
+
+  CREATE INDEX IF NOT EXISTS idx_content_hash ON snapshot (id);
 
   CREATE TABLE IF NOT EXISTS conflict (
     change_id TEXT NOT NULL,

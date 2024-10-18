@@ -18,6 +18,7 @@ test("should use queue and settled correctly", async () => {
 			if (textBefore === textAfter) {
 				return [];
 			}
+
 			return [
 				{
 					type: "text",
@@ -80,7 +81,7 @@ test("should use queue and settled correctly", async () => {
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
-		.select("snapshot.value")
+		.select("snapshot.content")
 		.execute();
 
 	expect(changes).toEqual([
@@ -93,7 +94,7 @@ test("should use queue and settled correctly", async () => {
 			type: "text",
 			file_id: "test",
 			plugin_key: "mock-plugin",
-			value: {
+			content: {
 				text: "test",
 			},
 		},
@@ -146,7 +147,7 @@ test("should use queue and settled correctly", async () => {
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
-		.select("snapshot.value")
+		.select("snapshot.content")
 		.execute();
 
 	expect(updatedChanges).toEqual([
@@ -159,7 +160,7 @@ test("should use queue and settled correctly", async () => {
 			type: "text",
 			file_id: "test",
 			plugin_key: "mock-plugin",
-			value: {
+			content: {
 				text: "test",
 			},
 		},
@@ -172,7 +173,7 @@ test("should use queue and settled correctly", async () => {
 			parent_id: updatedChanges[0]?.id,
 			plugin_key: "mock-plugin",
 			type: "text",
-			value: {
+			content: {
 				text: "test updated text",
 			},
 		},
@@ -185,7 +186,7 @@ test("should use queue and settled correctly", async () => {
 			entity_id: "test",
 			plugin_key: "mock-plugin",
 			type: "text",
-			value: {
+			content: {
 				text: "test updated text second update",
 			},
 		},

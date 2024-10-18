@@ -2,28 +2,23 @@ import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import { resolveConflictWithNewChange } from "./resolve-conflict-with-new-change.js";
-import type { NewChange, NewSnapshot } from "../database/schema.js";
+import type { NewChange, Snapshot } from "../database/schema.js";
 import type { LixPlugin } from "../plugin.js";
 import {
 	ChangeAlreadyExistsError,
 	ChangeDoesNotBelongToFileError,
 	ChangeNotDirectChildOfConflictError,
 } from "./errors.js";
+import { mockJsonSnapshot } from "../query-utilities/mock-json-snapshot.js";
 
 test("it should throw if the to be resolved with change already exists", async () => {
-	const mockSnapshots: NewSnapshot[] = [
-		{
-			id: "sn1",
-			value: {
-				id: "value1",
-			},
-		},
-		{
-			id: "sn2",
-			value: {
-				id: "value2",
-			},
-		},
+	const mockSnapshots: Snapshot[] = [
+		mockJsonSnapshot({
+			id: "value1",
+		}),
+		mockJsonSnapshot({
+			id: "value2",
+		}),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -31,7 +26,7 @@ test("it should throw if the to be resolved with change already exists", async (
 			plugin_key: "plugin1",
 			type: "mock",
 			file_id: "mock",
-			snapshot_id: "sn1",
+			snapshot_id: mockSnapshots[0]!.id,
 			entity_id: "value1",
 		},
 		{
@@ -39,7 +34,7 @@ test("it should throw if the to be resolved with change already exists", async (
 			entity_id: "value2",
 			plugin_key: "plugin1",
 			type: "mock",
-			snapshot_id: "sn2",
+			snapshot_id: mockSnapshots[1]!.id,
 		},
 	];
 
@@ -47,7 +42,7 @@ test("it should throw if the to be resolved with change already exists", async (
 		key: "plugin1",
 		applyChanges: vi.fn().mockResolvedValue({
 			fileData: new TextEncoder().encode(
-				JSON.stringify(mockSnapshots[0]?.value),
+				JSON.stringify(mockSnapshots[0]?.content),
 			),
 		}),
 	};
@@ -64,7 +59,11 @@ test("it should throw if the to be resolved with change already exists", async (
 
 	await lix.db
 		.insertInto("snapshot")
-		.values(mockSnapshots)
+		.values(
+			mockSnapshots.map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.returningAll()
 		.execute();
 
@@ -90,8 +89,7 @@ test("it should throw if the to be resolved with change already exists", async (
 			newChange: {
 				...changes[0]!,
 				parent_id: changes[0]!.id,
-				snapshot_id: mockSnapshots[0]!.id!,
-				value: mockSnapshots[0]?.value,
+				content: mockSnapshots[0]?.content,
 			},
 		}),
 	).rejects.toThrowError(ChangeAlreadyExistsError);
@@ -99,19 +97,13 @@ test("it should throw if the to be resolved with change already exists", async (
 
 // the sequence of changes will be broken otherwise
 test("resolving a conflict should throw if the to be resolved with change is not a direct child of the conflicting changes", async () => {
-	const mockSnapshots: NewSnapshot[] = [
-		{
-			id: "sn1",
-			value: {
-				id: "value1",
-			},
-		},
-		{
-			id: "sn2",
-			value: {
-				id: "value2",
-			},
-		},
+	const mockSnapshots: Snapshot[] = [
+		mockJsonSnapshot({
+			id: "value1",
+		}),
+		mockJsonSnapshot({
+			id: "value2",
+		}),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -120,14 +112,14 @@ test("resolving a conflict should throw if the to be resolved with change is not
 			entity_id: "value1",
 			type: "mock",
 			file_id: "mock",
-			snapshot_id: "sn1",
+			snapshot_id: mockSnapshots[0]!.id,
 		},
 		{
 			file_id: "mock",
 			entity_id: "value2",
 			plugin_key: "plugin1",
 			type: "mock",
-			snapshot_id: "sn2",
+			snapshot_id: mockSnapshots[1]!.id,
 		},
 	];
 
@@ -135,7 +127,7 @@ test("resolving a conflict should throw if the to be resolved with change is not
 		key: "plugin1",
 		applyChanges: vi.fn().mockResolvedValue({
 			fileData: new TextEncoder().encode(
-				JSON.stringify(mockSnapshots[0]?.value),
+				JSON.stringify(mockSnapshots[0]?.content),
 			),
 		}),
 	};
@@ -152,7 +144,11 @@ test("resolving a conflict should throw if the to be resolved with change is not
 
 	await lix.db
 		.insertInto("snapshot")
-		.values(mockSnapshots)
+		.values(
+			mockSnapshots.map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.returningAll()
 		.execute();
 
@@ -180,9 +176,8 @@ test("resolving a conflict should throw if the to be resolved with change is not
 				parent_id: null,
 				plugin_key: "plugin1",
 				type: "mock",
-				snapshot_id: "sn3",
 				entity_id: "value3",
-				value: {
+				content: {
 					id: "value3",
 				},
 			},
@@ -192,19 +187,13 @@ test("resolving a conflict should throw if the to be resolved with change is not
 
 // the sequence of changes will be broken otherwise
 test("resolving a conflict should throw if the change to resolve with does not belong to the same file as the conflicting changes", async () => {
-	const mockSnapshots: NewSnapshot[] = [
-		{
-			id: "sn1",
-			value: {
-				id: "value1",
-			},
-		},
-		{
-			id: "sn2",
-			value: {
-				id: "value2",
-			},
-		},
+	const mockSnapshots: Snapshot[] = [
+		mockJsonSnapshot({
+			id: "value1",
+		}),
+		mockJsonSnapshot({
+			id: "value2",
+		}),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -213,21 +202,21 @@ test("resolving a conflict should throw if the change to resolve with does not b
 			type: "mock",
 			entity_id: "value1",
 			file_id: "mock",
-			snapshot_id: "sn1",
+			snapshot_id: mockSnapshots[0]!.id,
 		},
 		{
 			file_id: "mock",
 			entity_id: "value2",
 			plugin_key: "plugin1",
 			type: "mock",
-			snapshot_id: "sn2",
+			snapshot_id: mockSnapshots[1]!.id,
 		},
 	];
 	const mockPlugin: LixPlugin = {
 		key: "plugin1",
 		applyChanges: vi.fn().mockResolvedValue({
 			fileData: new TextEncoder().encode(
-				JSON.stringify(mockSnapshots[0]?.value),
+				JSON.stringify(mockSnapshots[0]?.content),
 			),
 		}),
 	};
@@ -266,9 +255,8 @@ test("resolving a conflict should throw if the change to resolve with does not b
 				parent_id: changes[0]!.id,
 				plugin_key: "plugin1",
 				type: "mock",
-				snapshot_id: "sn3",
 				entity_id: "value3",
-				value: {
+				content: {
 					id: "value3",
 				},
 			},
@@ -277,19 +265,13 @@ test("resolving a conflict should throw if the change to resolve with does not b
 });
 
 test("resolving a conflict with a new change should insert the change and mark the conflict as resolved with the new change", async () => {
-	const mockSnapshots: NewSnapshot[] = [
-		{
-			id: "sn1",
-			value: {
-				id: "value1",
-			},
-		},
-		{
-			id: "sn2",
-			value: {
-				id: "value2",
-			},
-		},
+	const mockSnapshots: Snapshot[] = [
+		mockJsonSnapshot({
+			id: "value1",
+		}),
+		mockJsonSnapshot({
+			id: "value2",
+		}),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -298,14 +280,14 @@ test("resolving a conflict with a new change should insert the change and mark t
 			entity_id: "value1",
 			type: "mock",
 			file_id: "mock",
-			snapshot_id: "sn1",
+			snapshot_id: mockSnapshots[0]!.id,
 		},
 		{
 			file_id: "mock",
 			entity_id: "value2",
 			plugin_key: "plugin1",
 			type: "mock",
-			snapshot_id: "sn2",
+			snapshot_id: mockSnapshots[1]!.id,
 		},
 	];
 
@@ -328,7 +310,11 @@ test("resolving a conflict with a new change should insert the change and mark t
 
 	await lix.db
 		.insertInto("snapshot")
-		.values(mockSnapshots)
+		.values(
+			mockSnapshots.map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.returningAll()
 		.execute();
 
@@ -356,8 +342,7 @@ test("resolving a conflict with a new change should insert the change and mark t
 			plugin_key: "plugin1",
 			entity_id: "value3",
 			type: "mock",
-			snapshot_id: "sn3",
-			value: {
+			content: {
 				id: "value3",
 			},
 		},
@@ -380,12 +365,12 @@ test("resolving a conflict with a new change should insert the change and mark t
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
-		.select("snapshot.value")
+		.select("snapshot.content")
 		.execute();
 
 	expect(changesAfterResolve.length).toBe(3);
 	expect(resolvedConflict.resolved_change_id).toBe(changesAfterResolve[2]?.id);
-	expect(changesAfterResolve[2]!.value).toStrictEqual({
+	expect(changesAfterResolve[2]!.content).toStrictEqual({
 		id: "value3",
 	});
 	expect(new TextDecoder().decode(fileAfterResolve.data)).toBe(
