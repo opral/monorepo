@@ -73,3 +73,26 @@ test("files should be able to have metadata", async () => {
 
 	expect(updatedFile.metadata?.primary_key).toBe("something-else");
 });
+
+test("change edges can't reference themselves", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	try {
+		await db
+			.insertInto("change_edge")
+			.values({
+				parent_id: "change1",
+				child_id: "change1",
+			})
+			.returningAll()
+			.execute();
+	} catch (error) {
+		// the sqite3 error is not exposed
+		expect((error as any).name).toBe("SQLite3Error");
+		// error code 275 = SQLITE_CONSTRAINT_CHECK
+		expect((error as any).resultCode).toBe(275);
+	}
+});

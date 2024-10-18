@@ -41,7 +41,9 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     child_id TEXT NOT NULL,
     PRIMARY KEY (parent_id, child_id),
     FOREIGN KEY(parent_id) REFERENCES change(id),
-    FOREIGN KEY(child_id) REFERENCES change(id)
+    FOREIGN KEY(child_id) REFERENCES change(id),
+    -- Prevent self referencing edges
+    CHECK (parent_id != child_id)
   ) strict;
 
   create TABLE IF NOT EXISTS snapshot (
