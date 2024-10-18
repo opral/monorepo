@@ -162,7 +162,10 @@ test("it should return undefined if no common parent exists", async () => {
 		.values([mockSnapshots[0]!, mockSnapshots[1]!])
 		.execute();
 
-	await targetLix.db.insertInto("change_edge").values([edges[0]]).execute();
+	await targetLix.db
+		.insertInto("change_edge")
+		.values([{ parent_id: "0", child_id: "1" }])
+		.execute();
 
 	await sourceLix.db
 		.insertInto("change")
@@ -176,7 +179,7 @@ test("it should return undefined if no common parent exists", async () => {
 
 	await sourceLix.db
 		.insertInto("change_edge")
-		.values([{ parent_id: "1", child_id: "2" }])
+		.values([{ parent_id: "0", child_id: "1" }])
 		.execute();
 
 	const insertedChange = await sourceLix.db

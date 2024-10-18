@@ -1,4 +1,4 @@
-import type { Change, ChangeEdge } from "../database/schema.js";
+import type { Change } from "../database/schema.js";
 import type { LixReadonly } from "../types.js";
 
 /**
@@ -12,7 +12,7 @@ export async function getLowestCommonAncestor(args: {
 	sourceLix: LixReadonly;
 	targetLix: LixReadonly;
 }): Promise<Change | undefined> {
-	const parents = await args.sourceLix.db
+	const parentEdges = await args.sourceLix.db
 		.selectFrom("change_edge")
 		.selectAll()
 		.where("child_id", "=", args.sourceChange.id)
@@ -21,7 +21,7 @@ export async function getLowestCommonAncestor(args: {
 		.execute();
 
 	// the change has no parents (it is the root change)
-	if (parents.length === 0) {
+	if (parentEdges.length === 0) {
 		return undefined;
 	}
 
@@ -35,10 +35,10 @@ export async function getLowestCommonAncestor(args: {
 		return changeExistsInTarget;
 	}
 
-	let nextChange: (Change & ChangeEdge) | undefined;
+	let nextChange: Change | undefined;
 	// TODO assumes that only one parent exists
 	// https://github.com/opral/lix-sdk/issues/105
-	let parentId = parents[0]?.parent_id;
+	let parentId = parentEdges[0]?.parent_id;
 
 	if (!parentId) {
 		return undefined;
@@ -47,7 +47,6 @@ export async function getLowestCommonAncestor(args: {
 	while (parentId) {
 		nextChange = await args.sourceLix.db
 			.selectFrom("change")
-			.innerJoin("change_edge", "change_edge.child_id", "change.id")
 			.selectAll()
 			.where("id", "=", parentId!)
 			.executeTakeFirst();
@@ -68,7 +67,19 @@ export async function getLowestCommonAncestor(args: {
 			return changeExistsInTarget;
 		}
 
-		parentId = nextChange.parent_id;
+		const parentEdges = await args.sourceLix.db
+			.selectFrom("change_edge")
+			.selectAll()
+			.where("child_id", "=", nextChange.id)
+			.execute();
+		// TODO assumes that only one parent exists
+		if (parentEdges.length > 1) {
+			// https://github.com/opral/inlang-sdk/issues/134
+			throw new Error(
+				"Unimplemented. Multiple parents not supported until the branch feature exists.",
+			);
+		}
+		parentId = parentEdges[0]?.parent_id;
 	}
 	return;
 }
