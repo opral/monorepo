@@ -18,6 +18,7 @@ test("should use queue and settled correctly", async () => {
 			if (textBefore === textAfter) {
 				return [];
 			}
+
 			return [
 				{
 					type: "text",
