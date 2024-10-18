@@ -1,25 +1,20 @@
 import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
-import type { NewChange, NewSnapshot } from "../database/schema.js";
+import type { NewChange, Snapshot } from "../database/schema.js";
 import type { LixPlugin } from "../plugin.js";
 import { SelectedChangeNotInConflictError } from "./errors.js";
 import { resolveConflictBySelecting } from "./resolve-conflict-by-selecting.js";
+import { createPhantomSnapshot } from "../query-utilities/create-phantom-snapshot.js";
 
 test("it should resolve a conflict by applying the change and marking the conflict as resolved with the applied change", async () => {
-	const mockSnapshots: NewSnapshot[] = [
-		{
-			id: "sn1",
-			value: {
-				id: "value1",
-			},
-		},
-		{
-			id: "sn2",
-			value: {
-				id: "value2",
-			},
-		},
+	const mockSnapshots: Snapshot[] = [
+		createPhantomSnapshot({
+			id: "value1",
+		}),
+		createPhantomSnapshot({
+			id: "value2",
+		}),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -28,14 +23,14 @@ test("it should resolve a conflict by applying the change and marking the confli
 			type: "mock",
 			file_id: "mock",
 			entity_id: "value1",
-			snapshot_id: "sn1",
+			snapshot_id: mockSnapshots[0]!.id,
 		},
 		{
 			plugin_key: "plugin1",
 			file_id: "mock",
 			entity_id: "value2",
 			type: "mock",
-			snapshot_id: "sn2",
+			snapshot_id: mockSnapshots[1]!.id,
 		},
 	];
 
@@ -43,7 +38,7 @@ test("it should resolve a conflict by applying the change and marking the confli
 		key: "plugin1",
 		applyChanges: vi.fn().mockResolvedValue({
 			fileData: new TextEncoder().encode(
-				JSON.stringify(mockSnapshots[0]?.value),
+				JSON.stringify(mockSnapshots[0]?.content),
 			),
 		}),
 	};
@@ -60,7 +55,11 @@ test("it should resolve a conflict by applying the change and marking the confli
 
 	const snapshots = await lix.db
 		.insertInto("snapshot")
-		.values(mockSnapshots)
+		.values(
+			mockSnapshots.map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.returningAll()
 		.execute();
 
@@ -100,7 +99,7 @@ test("it should resolve a conflict by applying the change and marking the confli
 
 	const parsed = JSON.parse(new TextDecoder().decode(fileAfterResolve.data));
 
-	expect(parsed).toStrictEqual(snapshots[0]!.value);
+	expect(parsed).toStrictEqual(snapshots[0]!.content);
 	expect(resolvedConflict.resolved_change_id).toBe(changes[0]!.id);
 });
 

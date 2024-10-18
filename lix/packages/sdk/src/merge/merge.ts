@@ -17,7 +17,7 @@ export async function merge(args: {
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
-		.select("snapshot.value")
+		.select("snapshot.content")
 		.execute();
 
 	// TODO don't query the changes again. inefficient.
@@ -125,8 +125,7 @@ export async function merge(args: {
 				.values(
 					// https://github.com/opral/inlang-message-sdk/issues/123
 					sourceChangesWithSnapshot.map((change) => ({
-						id: change.snapshot_id,
-						value: JSON.stringify(change.value),
+						content: JSON.stringify(change.content),
 					})),
 				)
 				// ignore if already exists
@@ -138,7 +137,7 @@ export async function merge(args: {
 				.values(
 					// https://github.com/opral/inlang-message-sdk/issues/123
 					sourceChangesWithSnapshot.map((change) => {
-						delete change.value;
+						delete change.content;
 						return change;
 					}),
 				)

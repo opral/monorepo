@@ -3,6 +3,7 @@ import { getLowestCommonAncestor } from "./get-lowest-common-ancestor.js";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import type { NewChange } from "../database/schema.js";
+import { createPhantomSnapshot } from "./create-phantom-snapshot.js";
 
 test("it should find the common parent of two changes recursively", async () => {
 	const sourceLix = await openLixInMemory({
@@ -11,19 +12,11 @@ test("it should find the common parent of two changes recursively", async () => 
 	const targetLix = await openLixInMemory({
 		blob: await newLixFile(),
 	});
+
 	const mockSnapshots = [
-		{
-			id: "sn1",
-			value: ["snapshot 1"],
-		},
-		{
-			id: "sn2",
-			value: ["snaptshot 3"],
-		},
-		{
-			id: "sn3",
-			value: ["snapshot 4"],
-		},
+		createPhantomSnapshot(["change 1"]),
+		createPhantomSnapshot(["change 2"]),
+		createPhantomSnapshot(["change 3"]),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -34,7 +27,7 @@ test("it should find the common parent of two changes recursively", async () => 
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sn1",
+			snapshot_id: mockSnapshots[0]!.id,
 		},
 		{
 			id: "1",
@@ -43,7 +36,7 @@ test("it should find the common parent of two changes recursively", async () => 
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sn2",
+			snapshot_id: mockSnapshots[1]!.id,
 		},
 		{
 			id: "2",
@@ -52,13 +45,17 @@ test("it should find the common parent of two changes recursively", async () => 
 			entity_id: "value1",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sn3",
+			snapshot_id: mockSnapshots[2]!.id,
 		},
 	];
 
 	await targetLix.db
 		.insertInto("snapshot")
-		.values([mockSnapshots[0]!])
+		.values(
+			[mockSnapshots[0]!].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.executeTakeFirst();
 
 	await targetLix.db
@@ -69,7 +66,11 @@ test("it should find the common parent of two changes recursively", async () => 
 	await sourceLix.db
 		.insertInto("snapshot")
 		// lix b has two update changes
-		.values([mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!])
+		.values(
+			[mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await sourceLix.db
@@ -102,18 +103,9 @@ test("it should return undefined if no common parent exists", async () => {
 	});
 
 	const mockSnapshots = [
-		{
-			id: "sn1",
-			value: ["change 1"],
-		},
-		{
-			id: "sn2",
-			value: ["change 2"],
-		},
-		{
-			id: "sn3",
-			value: ["change 3"],
-		},
+		createPhantomSnapshot(["change 1"]),
+		createPhantomSnapshot(["change 2"]),
+		createPhantomSnapshot(["change 3"]),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -125,7 +117,7 @@ test("it should return undefined if no common parent exists", async () => {
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sn1",
+			snapshot_id: mockSnapshots[0]!.id,
 		},
 		{
 			id: "1",
@@ -134,7 +126,7 @@ test("it should return undefined if no common parent exists", async () => {
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sn2",
+			snapshot_id: mockSnapshots[1]!.id,
 		},
 		{
 			id: "2",
@@ -144,7 +136,7 @@ test("it should return undefined if no common parent exists", async () => {
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sn3",
+			snapshot_id: mockSnapshots[2]!.id,
 		},
 	];
 
@@ -155,7 +147,11 @@ test("it should return undefined if no common parent exists", async () => {
 
 	await targetLix.db
 		.insertInto("snapshot")
-		.values([mockSnapshots[0]!, mockSnapshots[1]!])
+		.values(
+			[mockSnapshots[0]!, mockSnapshots[1]!].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await sourceLix.db
@@ -165,7 +161,11 @@ test("it should return undefined if no common parent exists", async () => {
 
 	await sourceLix.db
 		.insertInto("snapshot")
-		.values([mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!])
+		.values(
+			[mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	const insertedChange = await sourceLix.db
@@ -192,18 +192,9 @@ test("it should return the source change if its the common parent", async () => 
 	});
 
 	const mockSnapshots = [
-		{
-			id: "sn1",
-			value: ["change 1"],
-		},
-		{
-			id: "sn2",
-			value: ["change 2"],
-		},
-		{
-			id: "sn3",
-			value: ["change 3"],
-		},
+		createPhantomSnapshot(["change 1"]),
+		createPhantomSnapshot(["change "]),
+		createPhantomSnapshot(["change 3"]),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -214,7 +205,7 @@ test("it should return the source change if its the common parent", async () => 
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sn1",
+			snapshot_id: mockSnapshots[0]!.id,
 		},
 		{
 			id: "1",
@@ -223,13 +214,17 @@ test("it should return the source change if its the common parent", async () => 
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sn2",
+			snapshot_id: mockSnapshots[1]!.id,
 		},
 	];
 
 	await targetLix.db
 		.insertInto("snapshot")
-		.values([mockSnapshots[0]!, mockSnapshots[1]!])
+		.values(
+			[mockSnapshots[0]!, mockSnapshots[1]!].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await targetLix.db
@@ -239,7 +234,11 @@ test("it should return the source change if its the common parent", async () => 
 
 	await sourceLix.db
 		.insertInto("snapshot")
-		.values([mockSnapshots[0]!, mockSnapshots[1]!])
+		.values(
+			[mockSnapshots[0]!, mockSnapshots[1]!].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await sourceLix.db

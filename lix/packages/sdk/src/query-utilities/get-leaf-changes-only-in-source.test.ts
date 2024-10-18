@@ -3,6 +3,7 @@ import { getLeafChangesOnlyInSource } from "./get-leaf-changes-only-in-source.js
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import type { NewChange } from "../database/schema.js";
+import { createPhantomSnapshot } from "./create-phantom-snapshot.js";
 
 test("it should get the leaf changes that only exist in source", async () => {
 	const sourceLix = await openLixInMemory({
@@ -13,14 +14,8 @@ test("it should get the leaf changes that only exist in source", async () => {
 	});
 
 	const commonSnapshots = [
-		{
-			id: "snc1",
-			value: { id: "mock-id", color: "red" },
-		},
-		{
-			id: "snc2",
-			value: { id: "mock-id", color: "blue" },
-		},
+		createPhantomSnapshot({ id: "mock-id", color: "red" }),
+		createPhantomSnapshot({ id: "mock-id", color: "blue" }),
 	];
 
 	const commonChanges: NewChange[] = [
@@ -30,7 +25,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			entity_id: "value1",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "snc1",
+			snapshot_id: commonSnapshots[0]!.id,
 		},
 		{
 			id: "c2",
@@ -39,23 +34,14 @@ test("it should get the leaf changes that only exist in source", async () => {
 			parent_id: "c1",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "snc2",
+			snapshot_id: commonSnapshots[1]!.id,
 		},
 	];
 
 	const snapshotsOnlyInSource = [
-		{
-			id: "sns1",
-			value: { id: "mock-id", color: "pink" },
-		},
-		{
-			id: "sns2",
-			value: { id: "mock-id", color: "orange" },
-		},
-		{
-			id: "sns3",
-			value: { id: "mock-id", color: "yellow" },
-		},
+		createPhantomSnapshot({ id: "mock-id", color: "pink" }),
+		createPhantomSnapshot({ id: "mock-id", color: "orange" }),
+		createPhantomSnapshot({ id: "mock-id", color: "yellow" }),
 	];
 
 	const changesOnlyInSource: NewChange[] = [
@@ -65,7 +51,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			entity_id: "value1",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sns1",
+			snapshot_id: snapshotsOnlyInSource[0]!.id,
 		},
 		{
 			id: "s2",
@@ -74,7 +60,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sns2",
+			snapshot_id: snapshotsOnlyInSource[1]!.id,
 		},
 		{
 			id: "s3",
@@ -83,15 +69,12 @@ test("it should get the leaf changes that only exist in source", async () => {
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sns3",
+			snapshot_id: snapshotsOnlyInSource[2]!.id,
 		},
 	];
 
 	const snapshotsOnlyInTarget = [
-		{
-			id: "snt1",
-			value: { id: "mock-id", color: "black" },
-		},
+		createPhantomSnapshot({ id: "mock-id", color: "black" }),
 	];
 
 	const changesOnlyInTarget: NewChange[] = [
@@ -102,13 +85,17 @@ test("it should get the leaf changes that only exist in source", async () => {
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "snt1",
+			snapshot_id: snapshotsOnlyInTarget[0]!.id,
 		},
 	];
 
 	await targetLix.db
 		.insertInto("snapshot")
-		.values([...commonSnapshots, ...snapshotsOnlyInTarget])
+		.values(
+			[...commonSnapshots, ...snapshotsOnlyInTarget].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await targetLix.db
@@ -118,7 +105,11 @@ test("it should get the leaf changes that only exist in source", async () => {
 
 	await sourceLix.db
 		.insertInto("snapshot")
-		.values([...commonSnapshots, ...snapshotsOnlyInSource])
+		.values(
+			[...commonSnapshots, ...snapshotsOnlyInSource].map((s) => {
+				return { content: s.content };
+			}),
+		)
 		.execute();
 
 	await sourceLix.db

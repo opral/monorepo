@@ -39,25 +39,45 @@ test("change ids should default to uuid", async () => {
 	expect(validate(change.id)).toBe(true);
 });
 
-
 test("snapshot ids should default to sha256", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
-	const change = await db
+	const snapshot = await db
 		.insertInto("snapshot")
 		.values({
-			// @ts-ignore
-
-			content: "value from insert statement",
+			content: { a: "value from insert statement" },
 		})
 		.returningAll()
-		.executeTakeFirst();
+		.executeTakeFirstOrThrow();
 
-	expect(change.id).toBe(
-		"776ab63a23fdc5f93ab1dced9c8b102571b4da01f90660cdf0c96ce572a0d002",
+	expect(snapshot.id).toBe(
+		"19ce22178013c4a047e8c90135ed57bfe4cc6451917dbb75f5b838922cf10b19",
 	);
+});
+
+test("snapshot - inserting the same snapshot should lead to a conflict", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+	const snapshot1 = await db
+		.insertInto("snapshot")
+		.values({
+			content: { a: "value from insert statement" },
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const snapshot2 = await db
+		.insertInto("snapshot")
+		.values({
+			content: { a: "value from insert statement" },
+		})
+		.onConflict((e) => e.doNothing())
+		.returningAll()
+		.executeTakeFirst();
 });
 
 // https://github.com/opral/lix-sdk/issues/71

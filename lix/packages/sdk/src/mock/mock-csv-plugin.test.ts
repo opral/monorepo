@@ -1,3 +1,4 @@
+import type { ChangeWithSnapshot } from "../database/schema.js";
 import { newLixFile } from "../newLix.js";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import type { DetectedChange } from "../plugin.js";
@@ -11,8 +12,8 @@ describe("applyChanges()", () => {
 			"Name,Age\nAnna,20\nPeter,50\nJohn,30",
 		);
 		const changes = [
-			{ value: { rowIndex: 3, columnIndex: 0, text: "John" } },
-			{ value: { rowIndex: 3, columnIndex: 1, text: "30" } },
+			{ content: { rowIndex: 3, columnIndex: 0, text: "John" } },
+			{ content: { rowIndex: 3, columnIndex: 1, text: "30" } },
 		];
 
 		const { fileData } = await mockCsvPlugin.applyChanges!({
@@ -27,7 +28,7 @@ describe("applyChanges()", () => {
 	test("it should apply an update change", async () => {
 		const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 		const after = new TextEncoder().encode("Name,Age\nAnna,21\nPeter,50");
-		const changes = [{ value: { rowIndex: 1, columnIndex: 1, text: "21" } }];
+		const changes = [{ content: { rowIndex: 1, columnIndex: 1, text: "21" } }];
 
 		const { fileData } = await mockCsvPlugin.applyChanges!({
 			file: { id: "mock", path: "x.csv", data: before, metadata: null },
@@ -42,18 +43,18 @@ describe("applyChanges()", () => {
 		const after = new TextEncoder().encode("Name,Age\nAnna,20");
 		const lix = await openLixInMemory({ blob: await newLixFile() });
 
-		await lix.db
+		const snapshot = await lix.db
 			.insertInto("snapshot")
 			.values({
-				id: "parent_change_snapshot_id",
 				// @ts-expect-error - database expects stringified json
-				value: JSON.stringify({
+				content: JSON.stringify({
 					columnIndex: 1,
 					rowIndex: 2,
 					text: "50",
 				}),
 			})
-			.execute();
+			.returningAll()
+			.executeTakeFirstOrThrow();
 
 		await lix.db
 			.insertInto("change")
@@ -63,7 +64,7 @@ describe("applyChanges()", () => {
 				file_id: "random",
 				plugin_key: "csv",
 				type: "cell",
-				snapshot_id: "parent_change_snapshot_id",
+				snapshot_id: snapshot.id,
 			})
 			.execute();
 

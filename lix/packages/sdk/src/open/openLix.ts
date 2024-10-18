@@ -56,94 +56,94 @@ export async function openLix(args: {
 		if (closed) {
 			return;
 		}
-		try {
-			if (pending && !trail) {
-				hasMoreEntriesSince = runNumber;
-				// console.log({ hasMoreEntriesSince });
-				return;
-			}
-			runNumber++;
+		// try {
+		if (pending && !trail) {
+			hasMoreEntriesSince = runNumber;
+			// console.log({ hasMoreEntriesSince });
+			return;
+		}
+		runNumber++;
 
-			if (!pending) {
-				pending = new Promise((res) => {
-					resolve = res;
-				});
-			}
+		if (!pending) {
+			pending = new Promise((res) => {
+				resolve = res;
+			});
+		}
 
-			const entry = await db
-				.selectFrom("change_queue")
+		const entry = await db
+			.selectFrom("change_queue")
+			.selectAll()
+			.orderBy("id asc")
+			.limit(1)
+			.executeTakeFirst();
+
+		if (entry) {
+			const existingFile = await db
+				.selectFrom("file_internal")
 				.selectAll()
-				.orderBy("id asc")
+				.where("id", "=", entry.file_id)
 				.limit(1)
 				.executeTakeFirst();
 
-			if (entry) {
-				const existingFile = await db
-					.selectFrom("file_internal")
-					.selectAll()
-					.where("id", "=", entry.file_id)
-					.limit(1)
-					.executeTakeFirst();
-
-				if (existingFile?.data) {
-					await handleFileChange({
-						currentAuthor,
-						queueEntry: entry,
-						before: {
-							...existingFile,
-							id: entry.file_id,
-						},
-						after: {
-							...entry,
-							id: entry.file_id,
-						},
-						plugins,
-						db,
-					});
-				} else {
-					await handleFileInsert({
-						currentAuthor,
-						queueEntry: entry,
-						after: {
-							...entry,
-							id: entry.file_id,
-						},
-						plugins,
-						db,
-					});
-				}
+			if (existingFile?.data) {
+				await handleFileChange({
+					currentAuthor,
+					queueEntry: entry,
+					before: {
+						...existingFile,
+						id: entry.file_id,
+					},
+					after: {
+						...entry,
+						id: entry.file_id,
+					},
+					plugins,
+					db,
+				});
+			} else {
+				await handleFileInsert({
+					currentAuthor,
+					queueEntry: entry,
+					after: {
+						...entry,
+						id: entry.file_id,
+					},
+					plugins,
+					db,
+				});
 			}
-
-			// console.log("getrting { numEntries }");
-
-			const { numEntries } = await db
-				.selectFrom("change_queue")
-				.select((eb) => eb.fn.count<number>("id").as("numEntries"))
-				.executeTakeFirstOrThrow();
-
-			// console.log({ numEntries });
-
-			if (
-				!hasMoreEntriesSince ||
-				(numEntries === 0 && hasMoreEntriesSince < runNumber)
-			) {
-				resolve!(); // TODO: fix type
-				pending = undefined;
-				hasMoreEntriesSince = undefined;
-				// console.log("resolving");
-			}
-
-			// TODO: handle endless tries on failing quee entries
-			// we either execute the queue immediately if we know there is more work or fall back to polling
-			setTimeout(() => queueWorker(true), hasMoreEntriesSince ? 0 : 1000);
-		} catch (e) {
-			// https://linear.app/opral/issue/LIXDK-102/re-visit-simplifying-the-change-queue-implementation
-
-			console.error(
-				"change queue failed (will remain so until rework of change queue): ",
-				e,
-			);
 		}
+
+		// console.log("getrting { numEntries }");
+
+		const { numEntries } = await db
+			.selectFrom("change_queue")
+			.select((eb) => eb.fn.count<number>("id").as("numEntries"))
+			.executeTakeFirstOrThrow();
+
+		// console.log({ numEntries });
+
+		if (
+			!hasMoreEntriesSince ||
+			(numEntries === 0 && hasMoreEntriesSince < runNumber)
+		) {
+			resolve!(); // TODO: fix type
+			pending = undefined;
+			hasMoreEntriesSince = undefined;
+			// console.log("resolving");
+		}
+
+		// TODO: handle endless tries on failing quee entries
+		// we either execute the queue immediately if we know there is more work or fall back to polling
+		setTimeout(() => queueWorker(true), hasMoreEntriesSince ? 0 : 1000);
+		// } catch (e) {
+		// 	// https://linear.app/opral/issue/LIXDK-102/re-visit-simplifying-the-change-queue-implementation
+
+		// 	console.error(
+		// 		"change queue failed (will remain so until rework of change queue): ",
+		// 		e,
+		// 	);
+		// }
 	}
 
 	queueWorker();
