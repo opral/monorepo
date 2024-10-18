@@ -3416,6 +3416,9 @@ importers:
       dedent:
         specifier: 1.5.1
         version: 1.5.1
+      js-sha256:
+        specifier: ^0.11.0
+        version: 0.11.0
       kysely:
         specifier: ^0.27.4
         version: 0.27.4
@@ -12353,6 +12356,9 @@ packages:
 
   jpeg-js@0.4.4:
     resolution: {integrity: sha512-WZzeDOEtTOBK4Mdsar0IqEU5sMr3vSV2RqkAIzUEV2BHnUfKGyswWFPFwK5EeDo93K3FohSHbLAjj0s1Wzd+dg==}
+
+  js-sha256@0.11.0:
+    resolution: {integrity: sha512-6xNlKayMZvds9h1Y1VWc0fQHQ82BxTXizWPEtEeGvmOUYpBRy4gbWroHLpzowe6xiQhHpelCQiE7HEdznyBL9Q==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -29511,6 +29517,8 @@ snapshots:
       react: 19.0.0-rc-941e1b4a-20240729
 
   jpeg-js@0.4.4: {}
+
+  js-sha256@0.11.0: {}
 
   js-tokens@4.0.0: {}
 

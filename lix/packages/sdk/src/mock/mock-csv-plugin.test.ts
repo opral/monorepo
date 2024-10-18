@@ -10,8 +10,8 @@ describe("applyChanges()", () => {
 			"Name,Age\nAnna,20\nPeter,50\nJohn,30",
 		);
 		const changes = [
-			{ value: { rowIndex: 3, columnIndex: 0, text: "John" } },
-			{ value: { rowIndex: 3, columnIndex: 1, text: "30" } },
+			{ content: { rowIndex: 3, columnIndex: 0, text: "John" } },
+			{ content: { rowIndex: 3, columnIndex: 1, text: "30" } },
 		];
 
 		const { fileData } = await mockCsvPlugin.applyChanges!({
@@ -26,7 +26,7 @@ describe("applyChanges()", () => {
 	test("it should apply an update change", async () => {
 		const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 		const after = new TextEncoder().encode("Name,Age\nAnna,21\nPeter,50");
-		const changes = [{ value: { rowIndex: 1, columnIndex: 1, text: "21" } }];
+		const changes = [{ content: { rowIndex: 1, columnIndex: 1, text: "21" } }];
 
 		const { fileData } = await mockCsvPlugin.applyChanges!({
 			file: { id: "mock", path: "x.csv", data: before, metadata: null },
@@ -43,7 +43,7 @@ describe("applyChanges()", () => {
 			{
 				entity_id: "2-1",
 				type: "cell",
-				value: undefined,
+				content: undefined,
 			},
 		];
 

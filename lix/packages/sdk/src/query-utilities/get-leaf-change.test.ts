@@ -3,6 +3,7 @@ import { getLeafChange } from "./get-leaf-change.js";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import type { ChangeEdge, NewChange } from "../database/schema.js";
+import { mockJsonSnapshot } from "./mock-json-snapshot.js";
 
 test("it should find the latest child of a given change", async () => {
 	const lix = await openLixInMemory({
@@ -10,18 +11,9 @@ test("it should find the latest child of a given change", async () => {
 	});
 
 	const mockSnapshots = [
-		{
-			id: "sn1",
-			value: ["change 1"],
-		},
-		{
-			id: "sn2",
-			value: ["change 2"],
-		},
-		{
-			id: "sn3",
-			value: ["change 3"],
-		},
+		mockJsonSnapshot(["change 1"]),
+		mockJsonSnapshot(["change 2"]),
+		mockJsonSnapshot(["change 3"]),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -31,7 +23,7 @@ test("it should find the latest child of a given change", async () => {
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sn1",
+			snapshot_id: mockSnapshots[0]!.id,
 		},
 		{
 			id: "2",
@@ -39,7 +31,7 @@ test("it should find the latest child of a given change", async () => {
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sn2",
+			snapshot_id: mockSnapshots[1]!.id,
 		},
 		{
 			id: "3",
@@ -47,7 +39,7 @@ test("it should find the latest child of a given change", async () => {
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
-			snapshot_id: "sn3",
+			snapshot_id: mockSnapshots[2]!.id,
 		},
 	];
 
@@ -56,7 +48,10 @@ test("it should find the latest child of a given change", async () => {
 		{ parent_id: "2", child_id: "3" },
 	];
 
-	await lix.db.insertInto("snapshot").values(mockSnapshots).execute();
+	await lix.db
+		.insertInto("snapshot")
+		.values(mockSnapshots.map((s) => ({ content: s.content })))
+		.execute();
 	await lix.db.insertInto("change").values(mockChanges).execute();
 	await lix.db.insertInto("change_edge").values(edges).execute();
 

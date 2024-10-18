@@ -13,8 +13,9 @@ export const mockCsvPlugin: LixPlugin = {
 	applyChanges: async ({ file, changes }) => {
 		const parsed = papaparse.parse(new TextDecoder().decode(file.data));
 		for (const change of changes) {
-			if (change.value) {
-				const { rowIndex, columnIndex, text } = change.value as unknown as Cell;
+			if (change.content) {
+				const { rowIndex, columnIndex, text } =
+					change.content as unknown as Cell;
 				// create the row if it doesn't exist
 				if (!parsed.data[rowIndex]) {
 					parsed.data[rowIndex] = [];

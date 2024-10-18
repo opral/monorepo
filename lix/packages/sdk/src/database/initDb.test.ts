@@ -39,6 +39,24 @@ test("change ids should default to uuid", async () => {
 	expect(validate(change.id)).toBe(true);
 });
 
+test("snapshot ids should default to sha256", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+	const snapshot = await db
+		.insertInto("snapshot")
+		.values({
+			content: { a: "value from insert statement" },
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(snapshot.id).toBe(
+		"19ce22178013c4a047e8c90135ed57bfe4cc6451917dbb75f5b838922cf10b19",
+	);
+});
+
 // https://github.com/opral/lix-sdk/issues/71
 test("files should be able to have metadata", async () => {
 	const sqlite = await createInMemoryDatabase({

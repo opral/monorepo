@@ -20,7 +20,7 @@ export async function getLeafChangesOnlyInSource(args: {
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
-		.select("snapshot.value")
+		.select("snapshot.content")
 		.where(
 			"change.id",
 			"not in",

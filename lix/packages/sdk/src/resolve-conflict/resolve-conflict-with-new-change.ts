@@ -1,8 +1,5 @@
-import type {
-	Conflict,
-	NewChangeWithSnapshot,
-	NewSnapshot,
-} from "../database/schema.js";
+import type { Conflict, NewChangeWithSnapshot } from "../database/schema.js";
+
 import type { Lix } from "../types.js";
 import {
 	ChangeAlreadyExistsError,
@@ -69,12 +66,8 @@ export async function resolveConflictWithNewChange(args: {
 		],
 	});
 
-	const snapshot: NewSnapshot = {
-		id: args.newChange.snapshot_id,
-		value: args.newChange.value,
-	};
-
-	delete args.newChange.value;
+	const snapshotContent = args.newChange.content!;
+	delete args.newChange.content;
 
 	await args.lix.db.transaction().execute(async (trx) => {
 		await trx
@@ -83,13 +76,27 @@ export async function resolveConflictWithNewChange(args: {
 			.where("id", "=", change.file_id)
 			.execute();
 
-		const insertedChange = await trx
-			.insertInto("change")
-			.values(args.newChange)
-			.returning("id")
+		const snapshot = await trx
+			.insertInto("snapshot")
+			.values({ content: snapshotContent })
+			.onConflict((oc) =>
+				oc.doUpdateSet((eb) => ({
+					content: eb.ref("excluded.content"),
+				})),
+			)
+			.returningAll()
 			.executeTakeFirstOrThrow();
 
-		await trx.insertInto("snapshot").values(snapshot).execute();
+		delete args.newChange.content;
+
+		const insertedChange = await trx
+			.insertInto("change")
+			.values({
+				...args.newChange,
+				snapshot_id: snapshot.id,
+			})
+			.returning("id")
+			.executeTakeFirstOrThrow();
 
 		for (const id of args.parentIds) {
 			await trx

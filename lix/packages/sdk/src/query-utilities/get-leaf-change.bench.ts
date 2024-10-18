@@ -20,7 +20,7 @@ const createChange = (
 	const snapshotId = v4();
 	const snapshot: NewSnapshot = {
 		id: snapshotId,
-		value: payload[type],
+		content: payload[type],
 	};
 	const change: Change = {
 		id: v4(),
@@ -49,7 +49,6 @@ const createChange = (
 };
 
 const setupLix = async (nMessages: number) => {
-	console.log("setting up lix with " + nMessages);
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
 	});

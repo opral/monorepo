@@ -91,13 +91,13 @@ type SnapshotTable = {
 	 *   - For a csv cell change, the value would be the new cell value.
 	 *   - For an inlang message change, the value would be the new message.
 	 */
-	value?: Record<string, any>;
+	content?: Record<string, any>;
 };
 
-// TODO #185 rename value to snapshot_value
-export type ChangeWithSnapshot = Change & { value: SnapshotTable["value"] };
-export type NewChangeWithSnapshot = NewChange & {
-	value: SnapshotTable["value"];
+// TODO #185 rename content to snapshot_content
+export type ChangeWithSnapshot = Change & { content: SnapshotTable["content"] };
+export type NewChangeWithSnapshot = Omit<NewChange, "snapshot_id"> & {
+	content: SnapshotTable["content"];
 };
 
 export type Conflict = Selectable<ConflictTable>;

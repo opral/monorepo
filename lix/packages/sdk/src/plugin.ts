@@ -70,5 +70,5 @@ export type DetectedChange = {
 	/**
 	 * The change is considered a deletion if `snapshot` is `undefined`.
 	 */
-	snapshot?: Snapshot["value"];
+	snapshot?: Snapshot["content"];
 };
