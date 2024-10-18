@@ -14,6 +14,7 @@ export async function resolveConflictWithNewChange(args: {
 	lix: Lix;
 	conflict: Conflict;
 	newChange: NewChangeWithSnapshot;
+	parentIds: string[];
 }): Promise<void> {
 	if (args.lix.plugins.length !== 1) {
 		throw new Error("Unimplemented. Only one plugin is supported for now");
@@ -34,7 +35,7 @@ export async function resolveConflictWithNewChange(args: {
 
 	if (change.file_id !== args.newChange.file_id) {
 		throw new ChangeDoesNotBelongToFileError();
-	} else if (change.id !== args.newChange.parent_id) {
+	} else if (args.parentIds.includes(change.id) === false) {
 		throw new ChangeNotDirectChildOfConflictError();
 	}
 
@@ -96,6 +97,16 @@ export async function resolveConflictWithNewChange(args: {
 			})
 			.returning("id")
 			.executeTakeFirstOrThrow();
+
+		for (const id of args.parentIds) {
+			await trx
+				.insertInto("change_edge")
+				.values({
+					parent_id: id,
+					child_id: insertedChange.id,
+				})
+				.execute();
+		}
 
 		await trx
 			.updateTable("conflict")

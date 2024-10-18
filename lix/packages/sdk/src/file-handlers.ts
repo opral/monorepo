@@ -120,9 +120,11 @@ export async function handleFileChange(args: {
 			// heuristic to find the previous change
 			// there is no guarantee that the previous change is the leaf change
 			// because sorting by time is unreliable in a distributed system
-			const previousChange = await trx
+			const maybeParentChange = await trx
 				.selectFrom("change")
-				.selectAll()
+				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+				.selectAll("change")
+				.select("snapshot.content")
 				.where("file_id", "=", fileId)
 				.where("type", "=", detectedChange.type)
 				.where("entity_id", "=", detectedChange.entity_id)
@@ -132,11 +134,11 @@ export async function handleFileChange(args: {
 				.executeTakeFirst();
 
 			// get the leaf change of the assumed previous change
-			const leafChange = !previousChange
+			const parentChange = !maybeParentChange
 				? undefined
 				: await getLeafChange({
 						lix: { db: trx },
-						change: previousChange,
+						change: maybeParentChange,
 					});
 
 			const snapshot = await trx
@@ -155,17 +157,28 @@ export async function handleFileChange(args: {
 				.returning("id")
 				.executeTakeFirstOrThrow();
 
-			await trx
+			const insertedChange = await trx
 				.insertInto("change")
 				.values({
 					type: detectedChange.type,
 					file_id: fileId,
 					plugin_key: detectedChange.pluginKey,
 					entity_id: detectedChange.entity_id,
-					parent_id: leafChange?.id,
 					snapshot_id: snapshot.id,
 				})
-				.execute();
+				.returning("id")
+				.executeTakeFirstOrThrow();
+
+			// If a parent exists, the change is a child of the parent
+			if (parentChange) {
+				await trx
+					.insertInto("change_edge")
+					.values({
+						parent_id: parentChange.id,
+						child_id: insertedChange.id,
+					})
+					.execute();
+			}
 		}
 
 		await trx

@@ -31,12 +31,13 @@ test("it should get the leaf changes that only exist in source", async () => {
 			id: "c2",
 			file_id: "mock",
 			entity_id: "value1",
-			parent_id: "c1",
 			plugin_key: "mock",
 			type: "mock",
 			snapshot_id: commonSnapshots[1]!.id,
 		},
 	];
+
+	const commonChangesEdges = [{ parent_id: "c1", child_id: "c2" }];
 
 	const snapshotsOnlyInSource = [
 		mockJsonSnapshot({ id: "mock-id", color: "pink" }),
@@ -55,7 +56,6 @@ test("it should get the leaf changes that only exist in source", async () => {
 		},
 		{
 			id: "s2",
-			parent_id: "s1",
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
@@ -64,13 +64,17 @@ test("it should get the leaf changes that only exist in source", async () => {
 		},
 		{
 			id: "s3",
-			parent_id: "s2",
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
 			snapshot_id: snapshotsOnlyInSource[2]!.id,
 		},
+	];
+
+	const changesOnlyInSourceEdges = [
+		{ parent_id: "s1", child_id: "s2" },
+		{ parent_id: "s2", child_id: "s3" },
 	];
 
 	const snapshotsOnlyInTarget = [
@@ -80,7 +84,6 @@ test("it should get the leaf changes that only exist in source", async () => {
 	const changesOnlyInTarget: NewChange[] = [
 		{
 			id: "t1",
-			parent_id: "c2",
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
@@ -88,6 +91,8 @@ test("it should get the leaf changes that only exist in source", async () => {
 			snapshot_id: snapshotsOnlyInTarget[0]!.id,
 		},
 	];
+
+	const changesOnlyInTargetEdges = [{ parent_id: "c2", child_id: "t1" }];
 
 	await targetLix.db
 		.insertInto("snapshot")
@@ -103,6 +108,11 @@ test("it should get the leaf changes that only exist in source", async () => {
 		.values([...commonChanges, ...changesOnlyInTarget])
 		.execute();
 
+	await targetLix.db
+		.insertInto("change_edge")
+		.values([...commonChangesEdges, ...changesOnlyInTargetEdges])
+		.execute();
+
 	await sourceLix.db
 		.insertInto("snapshot")
 		.values(
@@ -115,6 +125,11 @@ test("it should get the leaf changes that only exist in source", async () => {
 	await sourceLix.db
 		.insertInto("change")
 		.values([...commonChanges, ...changesOnlyInSource])
+		.execute();
+
+	await sourceLix.db
+		.insertInto("change_edge")
+		.values([...commonChangesEdges, ...changesOnlyInSourceEdges])
 		.execute();
 
 	const result = await getLeafChangesOnlyInSource({

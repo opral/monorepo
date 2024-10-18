@@ -91,3 +91,23 @@ test("files should be able to have metadata", async () => {
 
 	expect(updatedFile.metadata?.primary_key).toBe("something-else");
 });
+
+test("change edges can't reference themselves", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	await expect(
+		db
+			.insertInto("change_edge")
+			.values({
+				parent_id: "change1",
+				child_id: "change1",
+			})
+			.returningAll()
+			.execute(),
+	).rejects.toThrowErrorMatchingInlineSnapshot(
+		`[SQLite3Error: SQLITE_CONSTRAINT_CHECK: sqlite3 result code 275: CHECK constraint failed: parent_id != child_id]`,
+	);
+});

@@ -37,7 +37,7 @@ test("should use queue and settled correctly", async () => {
 	const enc = new TextEncoder();
 	await lix.db
 		.insertInto("file")
-		.values({ id: "test", path: "test.txt", data: enc.encode("test") })
+		.values({ id: "test", path: "test.txt", data: enc.encode("insert text") })
 		.execute();
 
 	const internalFiles = await lix.db
@@ -85,19 +85,15 @@ test("should use queue and settled correctly", async () => {
 		.execute();
 
 	expect(changes).toEqual([
-		{
-			id: changes[0]?.id,
-			created_at: changes[0]?.created_at,
-			snapshot_id: changes[0]?.snapshot_id,
-			parent_id: null,
+		expect.objectContaining({
 			entity_id: "test",
 			type: "text",
 			file_id: "test",
 			plugin_key: "mock-plugin",
 			content: {
-				text: "test",
+				text: "insert text",
 			},
-		},
+		}),
 	]);
 
 	await lix.db
@@ -150,46 +146,46 @@ test("should use queue and settled correctly", async () => {
 		.select("snapshot.content")
 		.execute();
 
+	const updatedEdges = await lix.db
+		.selectFrom("change_edge")
+		.selectAll()
+		.execute();
+
 	expect(updatedChanges).toEqual([
-		{
-			id: updatedChanges[0]?.id,
-			created_at: updatedChanges[0]?.created_at,
-			snapshot_id: updatedChanges[0]?.snapshot_id,
-			parent_id: null,
+		expect.objectContaining({
 			entity_id: "test",
 			type: "text",
 			file_id: "test",
 			plugin_key: "mock-plugin",
 			content: {
-				text: "test",
+				text: "insert text",
 			},
-		},
-		{
+		}),
+		expect.objectContaining({
 			entity_id: "test",
-			created_at: updatedChanges[1]?.created_at,
-			snapshot_id: updatedChanges[1]?.snapshot_id,
 			file_id: "test",
-			id: updatedChanges[1]?.id,
-			parent_id: updatedChanges[0]?.id,
 			plugin_key: "mock-plugin",
 			type: "text",
 			content: {
 				text: "test updated text",
 			},
-		},
-		{
-			created_at: updatedChanges[2]?.created_at,
-			snapshot_id: updatedChanges[2]?.snapshot_id,
+		}),
+		expect.objectContaining({
 			file_id: "test",
-			id: updatedChanges[2]?.id,
-			parent_id: updatedChanges[1]?.id,
 			entity_id: "test",
 			plugin_key: "mock-plugin",
 			type: "text",
 			content: {
 				text: "test updated text second update",
 			},
-		},
+		}),
+	]);
+
+	expect(updatedEdges).toEqual([
+		// 0 is the parent of 1
+		// 1 is the parent of 2
+		{ parent_id: updatedChanges[0]?.id, child_id: updatedChanges[1]?.id },
+		{ parent_id: updatedChanges[1]?.id, child_id: updatedChanges[2]?.id },
 	]);
 });
 

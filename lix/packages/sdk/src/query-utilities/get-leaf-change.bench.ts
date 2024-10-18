@@ -6,6 +6,7 @@ import {
 	newLixFile,
 	openLixInMemory,
 	type Change,
+	type ChangeEdge,
 	type NewChange,
 	type NewSnapshot,
 } from "../index.js";
@@ -14,16 +15,15 @@ const createChange = (
 	type: "bundle" | "message" | "variant",
 	payload: any,
 	parentChangeId: string | null,
-): { change: NewChange; snapshot: NewSnapshot } => {
+): { change: NewChange; snapshot: NewSnapshot; edges: ChangeEdge[] } => {
 	const entityId = payload[type].id;
 	const snapshotId = v4();
 	const snapshot: NewSnapshot = {
 		id: snapshotId,
 		content: payload[type],
 	};
-	const change: NewChange = {
+	const change: Change = {
 		id: v4(),
-		parent_id: parentChangeId,
 		file_id: "mock",
 		plugin_key: "inlang",
 		type: type,
@@ -31,9 +31,20 @@ const createChange = (
 		entity_id: entityId,
 		created_at: "",
 	};
+
+	const edges: ChangeEdge[] = [];
+
+	if (parentChangeId) {
+		edges.push({
+			parent_id: parentChangeId,
+			child_id: change.id,
+		});
+	}
+
 	return {
 		change,
 		snapshot,
+		edges,
 	};
 };
 
@@ -42,7 +53,11 @@ const setupLix = async (nMessages: number) => {
 		blob: await newLixFile(),
 	});
 
-	const mockChanges: { change: NewChange; snapshot: NewSnapshot }[] = [];
+	const mockChanges: {
+		change: NewChange;
+		snapshot: NewSnapshot;
+		edges: ChangeEdge[];
+	}[] = [];
 
 	for (let i = 0; i < nMessages; i++) {
 		const payloads = getPayloadsForId(v4());
@@ -93,11 +108,13 @@ const setupLix = async (nMessages: number) => {
 			.slice(i, i + batchSize)
 			.map((item) => item.snapshot);
 
-		await lix.db
-			.insertInto("snapshot")
-			.values(snapshotsArray)
-			.executeTakeFirst();
-		await lix.db.insertInto("change").values(changesArray).executeTakeFirst();
+		const edgesArray = mockChanges
+			.slice(i, i + batchSize)
+			.flatMap((item) => item.edges);
+
+		await lix.db.insertInto("snapshot").values(snapshotsArray).execute();
+		await lix.db.insertInto("change").values(changesArray).execute();
+		await lix.db.insertInto("change_edge").values(edgesArray).execute();
 	}
 	// console.log("setting up lix with " + nMessages + ".... done");
 

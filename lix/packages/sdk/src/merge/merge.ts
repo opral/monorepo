@@ -117,9 +117,14 @@ export async function merge(args: {
 		.selectAll()
 		.execute();
 
+	const sourceEdges = await args.sourceLix.db
+		.selectFrom("change_edge")
+		.selectAll()
+		.execute();
+
 	await args.targetLix.db.transaction().execute(async (trx) => {
 		if (sourceChangesWithSnapshot.length > 0) {
-			// 1. copy the snapshots from source
+			// copy the snapshots from source
 			await trx
 				.insertInto("snapshot")
 				.values(
@@ -146,7 +151,7 @@ export async function merge(args: {
 				.execute();
 		}
 
-		// 2. insert the conflicts of those changes
+		// insert the conflicts of those changes
 		if (conflicts.length > 0) {
 			await trx
 				.insertInto("conflict")
@@ -157,7 +162,7 @@ export async function merge(args: {
 		}
 
 		for (const [fileId, fileData] of Object.entries(changesPerFile)) {
-			// 3. update the file data with the applied changes
+			// update the file data with the applied changes
 			await trx
 				.updateTable("file_internal")
 				.set("data", fileData)
@@ -165,7 +170,17 @@ export async function merge(args: {
 				.execute();
 		}
 
-		// 4. add discussions, comments and discsussion_change_mappings
+		// copy edges
+		if (sourceEdges.length > 0) {
+			await trx
+				.insertInto("change_edge")
+				.values(sourceEdges)
+				// ignore if already exists
+				.onConflict((oc) => oc.doNothing())
+				.execute();
+		}
+
+		// add discussions, comments and discsussion_change_mappings
 
 		if (sourceDiscussions.length > 0) {
 			await trx

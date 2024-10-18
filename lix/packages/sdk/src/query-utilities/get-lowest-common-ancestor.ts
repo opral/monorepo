@@ -12,8 +12,16 @@ export async function getLowestCommonAncestor(args: {
 	sourceLix: LixReadonly;
 	targetLix: LixReadonly;
 }): Promise<Change | undefined> {
-	// the change has no parent (it is the root change)
-	if (!args.sourceChange?.parent_id) {
+	const parentEdges = await args.sourceLix.db
+		.selectFrom("change_edge")
+		.selectAll()
+		.where("child_id", "=", args.sourceChange.id)
+		// TODO https://github.com/opral/lix-sdk/issues/105
+		// .where(isInSimulatedCurrentBranch)
+		.execute();
+
+	// the change has no parents (it is the root change)
+	if (parentEdges.length === 0) {
 		return undefined;
 	}
 
@@ -28,10 +36,12 @@ export async function getLowestCommonAncestor(args: {
 	}
 
 	let nextChange: Change | undefined;
-	let parentId: string | undefined | null = args.sourceChange.parent_id;
+	// TODO assumes that only one parent exists
+	// https://github.com/opral/lix-sdk/issues/105
+	let parentId = parentEdges[0]?.parent_id;
 
 	if (!parentId) {
-		return; // ok the change was not part of the target but also has no parent (no common ancestor!)
+		return undefined;
 	}
 
 	while (parentId) {
@@ -50,13 +60,26 @@ export async function getLowestCommonAncestor(args: {
 			.selectFrom("change")
 			.selectAll()
 			.where("id", "=", nextChange.id)
+			// TODO account for multiple parents
 			.executeTakeFirst();
 
 		if (changeExistsInTarget) {
 			return changeExistsInTarget;
 		}
 
-		parentId = nextChange.parent_id;
+		const parentEdges = await args.sourceLix.db
+			.selectFrom("change_edge")
+			.selectAll()
+			.where("child_id", "=", nextChange.id)
+			.execute();
+		// TODO assumes that only one parent exists
+		if (parentEdges.length > 1) {
+			// https://github.com/opral/inlang-sdk/issues/134
+			throw new Error(
+				"Unimplemented. Multiple parents not supported until the branch feature exists.",
+			);
+		}
+		parentId = parentEdges[0]?.parent_id;
 	}
 	return;
 }
