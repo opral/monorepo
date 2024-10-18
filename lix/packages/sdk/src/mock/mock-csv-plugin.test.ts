@@ -1,4 +1,3 @@
-import type { ChangeWithSnapshot } from "../database/schema.js";
 import { newLixFile } from "../newLix.js";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import type { DetectedChange } from "../plugin.js";

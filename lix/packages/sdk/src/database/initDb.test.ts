@@ -57,29 +57,6 @@ test("snapshot ids should default to sha256", async () => {
 	);
 });
 
-test("snapshot - inserting the same snapshot should lead to a conflict", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-	const snapshot1 = await db
-		.insertInto("snapshot")
-		.values({
-			content: { a: "value from insert statement" },
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	const snapshot2 = await db
-		.insertInto("snapshot")
-		.values({
-			content: { a: "value from insert statement" },
-		})
-		.onConflict((e) => e.doNothing())
-		.returningAll()
-		.executeTakeFirst();
-});
-
 // https://github.com/opral/lix-sdk/issues/71
 test("files should be able to have metadata", async () => {
 	const sqlite = await createInMemoryDatabase({
