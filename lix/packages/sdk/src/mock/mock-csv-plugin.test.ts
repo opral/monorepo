@@ -63,7 +63,12 @@ describe("applyChanges()", () => {
 
 		await lix.settled();
 
-		const changes = await lix.db.selectFrom("change").selectAll().execute();
+		const changes = await lix.db
+			.selectFrom("change")
+			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+			.selectAll("change")
+			.select("snapshot.value")
+			.execute();
 
 		const { fileData } = await mockCsvPlugin.applyChanges!({
 			file,
