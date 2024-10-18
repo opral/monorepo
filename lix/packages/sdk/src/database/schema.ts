@@ -7,6 +7,7 @@ export type LixDatabaseSchema = {
 	change: ChangeTable;
 	file_internal: LixFileTable;
 	change_queue: ChangeQueueTable;
+	change_edge: ChangeEdgeTable;
 	conflict: ConflictTable;
 	snapshot: SnapshotTable;
 
@@ -42,7 +43,6 @@ export type Change = Selectable<ChangeTable>;
 export type NewChange = Insertable<ChangeTable>;
 type ChangeTable = {
 	id: Generated<string>;
-	parent_id: Generated<string> | null;
 	/**
 	 * The entity the change refers to.
 	 */
@@ -69,6 +69,13 @@ type ChangeTable = {
 	 * The time the change was created.
 	 */
 	created_at: Generated<string>;
+};
+
+export type ChangeEdge = Selectable<ChangeEdgeTable>;
+export type NewChangeEdge = Insertable<ChangeEdgeTable>;
+type ChangeEdgeTable = {
+	parent_id: ChangeTable["id"];
+	child_id: ChangeTable["id"];
 };
 
 export type Snapshot = Selectable<SnapshotTable>;

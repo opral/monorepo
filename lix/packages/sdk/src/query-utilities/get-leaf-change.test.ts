@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { getLeafChange } from "./get-leaf-change.js";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
-import type { NewChange } from "../database/schema.js";
+import type { ChangeEdge, NewChange } from "../database/schema.js";
 
 test("it should find the latest child of a given change", async () => {
 	const lix = await openLixInMemory({
@@ -27,7 +27,6 @@ test("it should find the latest child of a given change", async () => {
 	const mockChanges: NewChange[] = [
 		{
 			id: "1",
-			parent_id: undefined,
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
@@ -36,7 +35,6 @@ test("it should find the latest child of a given change", async () => {
 		},
 		{
 			id: "2",
-			parent_id: "1",
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
@@ -45,7 +43,6 @@ test("it should find the latest child of a given change", async () => {
 		},
 		{
 			id: "3",
-			parent_id: "2",
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
@@ -53,8 +50,15 @@ test("it should find the latest child of a given change", async () => {
 			snapshot_id: "sn3",
 		},
 	];
+
+	const edges: ChangeEdge[] = [
+		{ parent_id: "1", child_id: "2" },
+		{ parent_id: "2", child_id: "3" },
+	];
+
 	await lix.db.insertInto("snapshot").values(mockSnapshots).execute();
 	await lix.db.insertInto("change").values(mockChanges).execute();
+	await lix.db.insertInto("change_edge").values(edges).execute();
 
 	const changes = await lix.db.selectFrom("change").selectAll().execute();
 

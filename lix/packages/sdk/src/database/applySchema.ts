@@ -28,7 +28,6 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
   
   CREATE TABLE IF NOT EXISTS change (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
-    parent_id TEXT,
     entity_id TEXT NOT NULL,
     type TEXT NOT NULL,
     file_id TEXT NOT NULL,
@@ -37,7 +36,13 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
   ) strict;
 
-  CREATE INDEX IF NOT EXISTS idx_change_parent_id ON change (parent_id);
+  CREATE TABLE IF NOT EXISTS change_edge (
+    parent_id TEXT NOT NULL,
+    child_id TEXT NOT NULL,
+    PRIMARY KEY (parent_id, child_id),
+    FOREIGN KEY(parent_id) REFERENCES change(id),
+    FOREIGN KEY(child_id) REFERENCES change(id)
+  ) strict;
 
   create TABLE IF NOT EXISTS snapshot (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),

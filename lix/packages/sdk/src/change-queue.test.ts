@@ -88,7 +88,6 @@ test("should use queue and settled correctly", async () => {
 			id: changes[0]?.id,
 			created_at: changes[0]?.created_at,
 			snapshot_id: changes[0]?.snapshot_id,
-			parent_id: null,
 			entity_id: "test",
 			type: "text",
 			file_id: "test",
@@ -149,12 +148,21 @@ test("should use queue and settled correctly", async () => {
 		.select("snapshot.value")
 		.execute();
 
+	const updatedEdges = await lix.db
+		.selectFrom("change_edge")
+		.selectAll()
+		.execute();
+
+	expect(updatedEdges).toEqual([
+		{ parent_id: updatedChanges[0]?.id, child_id: updatedChanges[1]?.id },
+		{ parent_id: updatedChanges[1]?.id, child_id: updatedChanges[2]?.id },
+	]);
+
 	expect(updatedChanges).toEqual([
 		{
 			id: updatedChanges[0]?.id,
 			created_at: updatedChanges[0]?.created_at,
 			snapshot_id: updatedChanges[0]?.snapshot_id,
-			parent_id: null,
 			entity_id: "test",
 			type: "text",
 			file_id: "test",
@@ -169,7 +177,6 @@ test("should use queue and settled correctly", async () => {
 			snapshot_id: updatedChanges[1]?.snapshot_id,
 			file_id: "test",
 			id: updatedChanges[1]?.id,
-			parent_id: updatedChanges[0]?.id,
 			plugin_key: "mock-plugin",
 			type: "text",
 			value: {
@@ -181,7 +188,6 @@ test("should use queue and settled correctly", async () => {
 			snapshot_id: updatedChanges[2]?.snapshot_id,
 			file_id: "test",
 			id: updatedChanges[2]?.id,
-			parent_id: updatedChanges[1]?.id,
 			entity_id: "test",
 			plugin_key: "mock-plugin",
 			type: "text",

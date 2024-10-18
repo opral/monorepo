@@ -3,6 +3,7 @@ import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import { merge } from "./merge.js";
 import type {
+	ChangeEdge,
 	NewChange,
 	NewConflict,
 	NewSnapshot,
@@ -52,6 +53,8 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		},
 	];
 
+	const mockEdges: ChangeEdge[] = [{ parent_id: "2", child_id: "3" }];
+
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		detectConflicts: vi.fn().mockResolvedValue([]),
@@ -77,6 +80,8 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[1]!, mockChanges[2]!])
 		.execute();
+
+	await sourceLix.db.insertInto("change_edge").values([mockEdges[0]]).execute();
 
 	await targetLix.db
 		.insertInto("snapshot")
@@ -116,6 +121,13 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		mockSnapshots[1]?.id,
 		mockSnapshots[2]?.id,
 	]);
+
+	const edges = await targetLix.db
+		.selectFrom("change_edge")
+		.selectAll()
+		.execute();
+
+	expect(edges).toEqual(mockEdges);
 
 	expect(mockPlugin.applyChanges).toHaveBeenCalledTimes(1);
 	expect(mockPlugin.detectConflicts).toHaveBeenCalledTimes(1);
@@ -344,7 +356,6 @@ test("it should apply changes that are not conflicting", async () => {
 		},
 		{
 			id: "2",
-			parent_id: "1",
 			entity_id: "value1",
 			type: "mock",
 			snapshot_id: "sn2",
@@ -352,6 +363,8 @@ test("it should apply changes that are not conflicting", async () => {
 			plugin_key: "mock-plugin",
 		},
 	];
+
+	const edges: ChangeEdge[] = [{ parent_id: "1", child_id: "2" }];
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
@@ -384,10 +397,13 @@ test("it should apply changes that are not conflicting", async () => {
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.execute();
 
+	await sourceLix.db.insertInto("change_edge").values([edges[0]]).execute();
+
 	await targetLix.db
 		.insertInto("snapshot")
 		.values([mockSnapshots[0]!])
 		.execute();
+
 	await targetLix.db.insertInto("change").values([mockChanges[0]!]).execute();
 
 	await targetLix.db
@@ -647,7 +663,6 @@ test("it should copy discussion and related comments and mappings", async () => 
 			id: changes[0]?.id,
 			created_at: changes[0]?.created_at,
 			snapshot_id: changes[0]?.snapshot_id,
-			parent_id: null,
 			type: "text",
 			file_id: "test",
 			entity_id: "test",

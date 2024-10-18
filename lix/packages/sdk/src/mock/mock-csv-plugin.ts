@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { DetectedChange, LixPlugin } from "../plugin.js";
 import papaparse from "papaparse";
+import { getParentChange } from "../query-utilities/get-parent-change.js";
 
 type Cell = { rowIndex: number; columnIndex: number; text: string };
 
@@ -31,21 +32,21 @@ export const mockCsvPlugin: LixPlugin = {
 				// update the cell
 				(parsed.data[rowIndex] as any)[columnIndex] = text;
 			} else {
-				if (change.parent_id === undefined) {
+				const parent = await getParentChange({ lix, change });
+				if (parent === undefined) {
 					throw new Error(
 						"Expected a previous change to exist if a value is undefined (a deletion)",
 					);
 				}
 				// TODO possibility to avoid querying the parent change?
-				const parent = await lix.db
-					.selectFrom("change")
-					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-					.selectAll("change")
-					.select("snapshot.value")
-					.where("change.id", "=", change.parent_id)
+				const parentSnapshot = await lix.db
+					.selectFrom("snapshot")
+					.where("id", "=", parent.snapshot_id)
+					.select("value")
 					.executeTakeFirstOrThrow();
 
-				const { rowIndex, columnIndex } = parent.value as unknown as Cell;
+				const { rowIndex, columnIndex } =
+					parentSnapshot.value as unknown as Cell;
 				(parsed.data as any)[rowIndex][columnIndex] = "";
 				// if the row is empty after deleting the cell, remove it
 				if (

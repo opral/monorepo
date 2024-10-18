@@ -29,7 +29,6 @@ test("it should find the common parent of two changes recursively", async () => 
 	const mockChanges: NewChange[] = [
 		{
 			id: "0",
-			parent_id: undefined,
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
@@ -38,7 +37,6 @@ test("it should find the common parent of two changes recursively", async () => 
 		},
 		{
 			id: "1",
-			parent_id: "0",
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
@@ -47,13 +45,17 @@ test("it should find the common parent of two changes recursively", async () => 
 		},
 		{
 			id: "2",
-			parent_id: "1",
 			file_id: "mock",
 			entity_id: "value1",
 			plugin_key: "mock",
 			type: "mock",
 			snapshot_id: "sn3",
 		},
+	];
+
+	const edges = [
+		{ parent_id: "0", child_id: "1" },
+		{ parent_id: "1", child_id: "2" },
 	];
 
 	await targetLix.db
@@ -76,6 +78,11 @@ test("it should find the common parent of two changes recursively", async () => 
 		.insertInto("change")
 		// lix b has two update changes
 		.values([mockChanges[0]!, mockChanges[1]!, mockChanges[2]!])
+		.execute();
+
+	await sourceLix.db
+		.insertInto("change_edge")
+		.values([edges[0], edges[1]])
 		.execute();
 
 	const secondChange = await sourceLix.db
@@ -119,8 +126,6 @@ test("it should return undefined if no common parent exists", async () => {
 	const mockChanges: NewChange[] = [
 		{
 			id: "0",
-			// no parent == create change
-			parent_id: undefined,
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
@@ -129,7 +134,6 @@ test("it should return undefined if no common parent exists", async () => {
 		},
 		{
 			id: "1",
-			parent_id: "0",
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
@@ -139,14 +143,14 @@ test("it should return undefined if no common parent exists", async () => {
 		{
 			id: "2",
 			entity_id: "value2",
-			// no parent == create change
-			parent_id: undefined,
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
 			snapshot_id: "sn3",
 		},
 	];
+
+	const edges = [{ parent_id: "0", child_id: "1" }];
 
 	await targetLix.db
 		.insertInto("change")
@@ -158,6 +162,8 @@ test("it should return undefined if no common parent exists", async () => {
 		.values([mockSnapshots[0]!, mockSnapshots[1]!])
 		.execute();
 
+	await targetLix.db.insertInto("change_edge").values([edges[0]]).execute();
+
 	await sourceLix.db
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[1]!, mockChanges[2]!])
@@ -166,6 +172,11 @@ test("it should return undefined if no common parent exists", async () => {
 	await sourceLix.db
 		.insertInto("snapshot")
 		.values([mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!])
+		.execute();
+
+	await sourceLix.db
+		.insertInto("change_edge")
+		.values([{ parent_id: "1", child_id: "2" }])
 		.execute();
 
 	const insertedChange = await sourceLix.db
@@ -210,7 +221,6 @@ test("it should return the source change if its the common parent", async () => 
 		{
 			id: "0",
 			entity_id: "value1",
-			parent_id: undefined,
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
@@ -219,7 +229,6 @@ test("it should return the source change if its the common parent", async () => 
 		{
 			id: "1",
 			entity_id: "value1",
-			parent_id: "0",
 			file_id: "mock",
 			plugin_key: "mock",
 			type: "mock",
@@ -227,6 +236,8 @@ test("it should return the source change if its the common parent", async () => 
 		},
 	];
 
+	const mockEdges = [{ parent_id: "0", child_id: "1" }];
+
 	await targetLix.db
 		.insertInto("snapshot")
 		.values([mockSnapshots[0]!, mockSnapshots[1]!])
@@ -237,6 +248,8 @@ test("it should return the source change if its the common parent", async () => 
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.executeTakeFirst();
 
+	await targetLix.db.insertInto("change_edge").values(mockEdges).execute();
+
 	await sourceLix.db
 		.insertInto("snapshot")
 		.values([mockSnapshots[0]!, mockSnapshots[1]!])
@@ -246,6 +259,8 @@ test("it should return the source change if its the common parent", async () => 
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.executeTakeFirst();
+
+	await sourceLix.db.insertInto("change_edge").values(mockEdges).execute();
 
 	const changeOne = await sourceLix.db
 		.selectFrom("change")

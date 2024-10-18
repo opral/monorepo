@@ -1,4 +1,4 @@
-import type { Change } from "../database/schema.js";
+import type { Change, ChangeEdge } from "../database/schema.js";
 import type { LixReadonly } from "../types.js";
 
 /**
@@ -12,8 +12,16 @@ export async function getLowestCommonAncestor(args: {
 	sourceLix: LixReadonly;
 	targetLix: LixReadonly;
 }): Promise<Change | undefined> {
-	// the change has no parent (it is the root change)
-	if (!args.sourceChange?.parent_id) {
+	const parents = await args.sourceLix.db
+		.selectFrom("change_edge")
+		.selectAll()
+		.where("child_id", "=", args.sourceChange.id)
+		// TODO https://github.com/opral/lix-sdk/issues/105
+		// .where(isInSimulatedCurrentBranch)
+		.execute();
+
+	// the change has no parents (it is the root change)
+	if (parents.length === 0) {
 		return undefined;
 	}
 
@@ -27,16 +35,19 @@ export async function getLowestCommonAncestor(args: {
 		return changeExistsInTarget;
 	}
 
-	let nextChange: Change | undefined;
-	let parentId: string | undefined | null = args.sourceChange.parent_id;
+	let nextChange: (Change & ChangeEdge) | undefined;
+	// TODO assumes that only one parent exists
+	// https://github.com/opral/lix-sdk/issues/105
+	let parentId = parents[0]?.parent_id;
 
 	if (!parentId) {
-		return; // ok the change was not part of the target but also has no parent (no common ancestor!)
+		return undefined;
 	}
 
 	while (parentId) {
 		nextChange = await args.sourceLix.db
 			.selectFrom("change")
+			.innerJoin("change_edge", "change_edge.child_id", "change.id")
 			.selectAll()
 			.where("id", "=", parentId!)
 			.executeTakeFirst();
@@ -50,6 +61,7 @@ export async function getLowestCommonAncestor(args: {
 			.selectFrom("change")
 			.selectAll()
 			.where("id", "=", nextChange.id)
+			// TODO account for multiple parents
 			.executeTakeFirst();
 
 		if (changeExistsInTarget) {

@@ -17,8 +17,9 @@ export async function getLeafChange(args: {
 		const childChange = await args.lix.db
 			.selectFrom("change")
 			.selectAll()
-			.where(isInSimulatedCurrentBranch)
+			.innerJoin("change_edge", "change_edge.child_id", "change.id")
 			.where("parent_id", "=", nextChange.id)
+			.where(isInSimulatedCurrentBranch)
 			.executeTakeFirst();
 
 		if (!childChange) {

@@ -40,38 +40,34 @@ describe("applyChanges()", () => {
 	test("it should apply a delete change", async () => {
 		const before = new TextEncoder().encode("Name,Age\nAnna,20\n,50");
 		const after = new TextEncoder().encode("Name,Age\nAnna,20");
-		const lix = await openLixInMemory({ blob: await newLixFile() });
+		const lix = await openLixInMemory({
+			blob: await newLixFile(),
+			providePlugins: [mockCsvPlugin],
+		});
 
 		await lix.db
-			.insertInto("snapshot")
+			.insertInto("file")
 			.values({
-				id: "parent_change_snapshot_id",
-				// @ts-expect-error - database expects stringified json
-				value: JSON.stringify({
-					columnIndex: 1,
-					rowIndex: 2,
-					text: "50",
-				}),
+				path: "x.csv",
+				data: before,
 			})
-			.execute();
+			.returningAll()
+			.executeTakeFirstOrThrow();
 
-		await lix.db
-			.insertInto("change")
-			.values({
-				id: "parent_change_id",
-				entity_id: "value1",
-				file_id: "random",
-				plugin_key: "csv",
-				type: "cell",
-				snapshot_id: "parent_change_snapshot_id",
-			})
-			.execute();
+		const file = await lix.db
+			.updateTable("file")
+			.set({ data: after })
+			.where("path", "=", "x.csv")
+			.returningAll()
+			.executeTakeFirstOrThrow();
 
-		const changes = [{ parent_id: "parent_change_id" }];
+		await lix.settled();
+
+		const changes = await lix.db.selectFrom("change").selectAll().execute();
 
 		const { fileData } = await mockCsvPlugin.applyChanges!({
-			file: { id: "mock", path: "x.csv", data: before, metadata: null },
-			changes: changes as any,
+			file,
+			changes: changes,
 			lix,
 		});
 		expect(fileData).toEqual(after);
@@ -112,14 +108,14 @@ describe("detectChanges()", () => {
 		] satisfies DetectedChange[]);
 	});
 
-	test("it should an update diff", async () => {
+	test("it detect update changes", async () => {
 		const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 		const after = new TextEncoder().encode("Name,Age\nAnna,21\nPeter,50");
-		const diffs = await mockCsvPlugin.detectChanges?.({
+		const detectedChanges = await mockCsvPlugin.detectChanges?.({
 			before: { id: "random", path: "x.csv", data: before, metadata: null },
 			after: { id: "random", path: "x.csv", data: after, metadata: null },
 		});
-		expect(diffs).toEqual([
+		expect(detectedChanges).toEqual([
 			{
 				type: "cell",
 				entity_id: "1-1",
@@ -128,14 +124,14 @@ describe("detectChanges()", () => {
 		] satisfies DetectedChange[]);
 	});
 
-	test("it should report a delete diff", async () => {
+	test("it should detect a deletion", async () => {
 		const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 		const after = new TextEncoder().encode("Name,Age\nAnna,20");
-		const diffs = await mockCsvPlugin.detectChanges?.({
+		const detectedChanges = await mockCsvPlugin.detectChanges?.({
 			before: { id: "random", path: "x.csv", data: before, metadata: null },
 			after: { id: "random", path: "x.csv", data: after, metadata: null },
 		});
-		expect(diffs).toEqual([
+		expect(detectedChanges).toEqual([
 			{ entity_id: "2-0", type: "cell", snapshot: undefined },
 			{ entity_id: "2-1", type: "cell", snapshot: undefined },
 		] satisfies DetectedChange[]);

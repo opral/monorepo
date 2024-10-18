@@ -87,9 +87,9 @@ test("it should throw if the to be resolved with change already exists", async (
 		resolveConflictWithNewChange({
 			lix: lix,
 			conflict: conflict,
+			parentIds: [changes[0]!.id],
 			newChange: {
 				...changes[0]!,
-				parent_id: changes[0]!.id,
 				snapshot_id: mockSnapshots[0]!.id!,
 				value: mockSnapshots[0]?.value,
 			},
@@ -175,9 +175,9 @@ test("resolving a conflict should throw if the to be resolved with change is not
 		resolveConflictWithNewChange({
 			lix: lix,
 			conflict: conflict,
+			parentIds: [],
 			newChange: {
 				file_id: "mock",
-				parent_id: null,
 				plugin_key: "plugin1",
 				type: "mock",
 				snapshot_id: "sn3",
@@ -261,9 +261,9 @@ test("resolving a conflict should throw if the change to resolve with does not b
 		resolveConflictWithNewChange({
 			lix: lix,
 			conflict: conflict,
+			parentIds: [changes[0]!.id],
 			newChange: {
 				file_id: "other-mock-file",
-				parent_id: changes[0]!.id,
 				plugin_key: "plugin1",
 				type: "mock",
 				snapshot_id: "sn3",
@@ -350,9 +350,9 @@ test("resolving a conflict with a new change should insert the change and mark t
 	await resolveConflictWithNewChange({
 		lix: lix,
 		conflict: conflict,
+		parentIds: [changes[0]!.id],
 		newChange: {
 			file_id: "mock",
-			parent_id: changes[0]!.id,
 			plugin_key: "plugin1",
 			entity_id: "value3",
 			type: "mock",
