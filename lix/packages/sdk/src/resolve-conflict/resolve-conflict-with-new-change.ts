@@ -67,7 +67,6 @@ export async function resolveConflictWithNewChange(args: {
 	});
 
 	const snapshotContent = args.newChange.content!;
-	delete args.newChange.content;
 
 	await args.lix.db.transaction().execute(async (trx) => {
 		await trx
@@ -87,12 +86,12 @@ export async function resolveConflictWithNewChange(args: {
 			.returningAll()
 			.executeTakeFirstOrThrow();
 
-		delete args.newChange.content;
-
 		const insertedChange = await trx
 			.insertInto("change")
 			.values({
 				...args.newChange,
+				// @ts-expect-error - newChange is a change with a snapshot
+				content: undefined,
 				snapshot_id: snapshot.id,
 			})
 			.returning("id")
