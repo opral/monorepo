@@ -1,5 +1,4 @@
-import { newLixFile } from "../newLix.js";
-import { openLixInMemory } from "../open/openLixInMemory.js";
+import type { ChangeWithSnapshot } from "../database/schema.js";
 import type { DetectedChange } from "../plugin.js";
 import { mockCsvPlugin } from "./mock-csv-plugin.js";
 import { describe, expect, test } from "vitest";
@@ -40,40 +39,18 @@ describe("applyChanges()", () => {
 	test("it should apply a delete change", async () => {
 		const before = new TextEncoder().encode("Name,Age\nAnna,20\n,50");
 		const after = new TextEncoder().encode("Name,Age\nAnna,20");
-		const lix = await openLixInMemory({
-			blob: await newLixFile(),
-			providePlugins: [mockCsvPlugin],
-		});
-
-		await lix.db
-			.insertInto("file")
-			.values({
-				path: "x.csv",
-				data: before,
-			})
-			.returningAll()
-			.executeTakeFirstOrThrow();
-
-		const file = await lix.db
-			.updateTable("file")
-			.set({ data: after })
-			.where("path", "=", "x.csv")
-			.returningAll()
-			.executeTakeFirstOrThrow();
-
-		await lix.settled();
-
-		const changes = await lix.db
-			.selectFrom("change")
-			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-			.selectAll("change")
-			.select("snapshot.value")
-			.execute();
+		const changes: Partial<ChangeWithSnapshot>[] = [
+			{
+				entity_id: "2-1",
+				type: "cell",
+				value: undefined,
+			},
+		];
 
 		const { fileData } = await mockCsvPlugin.applyChanges!({
-			file,
-			changes: changes,
-			lix,
+			file: { id: "mock", path: "x.csv", data: before, metadata: null },
+			changes: changes as any,
+			lix: {} as any,
 		});
 		expect(fileData).toEqual(after);
 	});

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { DetectedChange, LixPlugin } from "../plugin.js";
 import papaparse from "papaparse";
-import { getParentChange } from "../query-utilities/get-parent-change.js";
 
 type Cell = { rowIndex: number; columnIndex: number; text: string };
 
@@ -11,7 +10,7 @@ type Cell = { rowIndex: number; columnIndex: number; text: string };
 export const mockCsvPlugin: LixPlugin = {
 	key: "csv",
 	glob: "*.csv",
-	applyChanges: async ({ file, changes, lix }) => {
+	applyChanges: async ({ file, changes }) => {
 		const parsed = papaparse.parse(new TextDecoder().decode(file.data));
 		for (const change of changes) {
 			if (change.value) {
@@ -32,27 +31,13 @@ export const mockCsvPlugin: LixPlugin = {
 				// update the cell
 				(parsed.data[rowIndex] as any)[columnIndex] = text;
 			} else {
-				const parent = await getParentChange({ lix, change });
-				if (parent === undefined) {
-					throw new Error(
-						"Expected a previous change to exist if a value is undefined (a deletion)",
-					);
-				}
-				// TODO possibility to avoid querying the parent change?
-				const parentSnapshot = await lix.db
-					.selectFrom("snapshot")
-					.where("id", "=", parent.snapshot_id)
-					.select("value")
-					.executeTakeFirstOrThrow();
-
-				const { rowIndex, columnIndex } =
-					parentSnapshot.value as unknown as Cell;
-				(parsed.data as any)[rowIndex][columnIndex] = "";
-				// if the row is empty after deleting the cell, remove it
+				const [rowIndex, columnIndex] = change.entity_id.split("-").map(Number);
+				(parsed.data as any)[rowIndex!][columnIndex!] = "";
+				// if the row is empty after deleting the cell, delete the row
 				if (
-					(parsed.data[rowIndex] as any).every((cell: string) => cell === "")
+					(parsed.data[rowIndex!] as any).every((cell: string) => cell === "")
 				) {
-					parsed.data.splice(rowIndex, 1);
+					parsed.data.splice(rowIndex!, 1);
 				}
 			}
 		}
