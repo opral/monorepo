@@ -150,8 +150,6 @@ test("it should return undefined if no common parent exists", async () => {
 		},
 	];
 
-	const edges = [{ parent_id: "0", child_id: "1" }];
-
 	await targetLix.db
 		.insertInto("change")
 		.values([mockChanges[0]!, mockChanges[1]!])
