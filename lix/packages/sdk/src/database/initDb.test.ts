@@ -98,19 +98,16 @@ test("change edges can't reference themselves", async () => {
 	});
 	const db = initDb({ sqlite });
 
-	try {
-		await db
+	await expect(
+		db
 			.insertInto("change_edge")
 			.values({
 				parent_id: "change1",
 				child_id: "change1",
 			})
 			.returningAll()
-			.execute();
-	} catch (error) {
-		// the sqite3 error is not exposed
-		expect((error as any).name).toBe("SQLite3Error");
-		// error code 275 = SQLITE_CONSTRAINT_CHECK
-		expect((error as any).resultCode).toBe(275);
-	}
+			.execute(),
+	).rejects.toThrowErrorMatchingInlineSnapshot(
+		`[SQLite3Error: SQLITE_CONSTRAINT_CHECK: sqlite3 result code 275: CHECK constraint failed: parent_id != child_id]`,
+	);
 });
