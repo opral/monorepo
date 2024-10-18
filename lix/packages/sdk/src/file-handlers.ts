@@ -119,6 +119,30 @@ export async function handleFileChange(args: {
 
 	await args.db.transaction().execute(async (trx) => {
 		for (const detectedChange of detectedChanges) {
+			// heuristic to find the previous change
+			// there is no guarantee that the previous change is the leaf change
+			// because sorting by time is unreliable in a distributed system
+			const maybeParentChange = await trx
+				.selectFrom("change")
+				.selectAll("change")
+				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+				.select("snapshot.value")
+				.where("file_id", "=", fileId)
+				.where("type", "=", detectedChange.type)
+				.where("entity_id", "=", detectedChange.entity_id)
+				.where(isInSimulatedCurrentBranch)
+				// walk from the end of the tree to minimize the amount of changes to walk
+				.orderBy("id", "desc")
+				.executeTakeFirst();
+
+			// get the leaf change of the assumed previous change
+			const parentChange = !maybeParentChange
+				? undefined
+				: await getLeafChange({
+						lix: { db: trx },
+						change: maybeParentChange,
+					});
+
 			const snapshot = await trx
 				.insertInto("snapshot")
 				.values({
@@ -142,28 +166,6 @@ export async function handleFileChange(args: {
 				})
 				.returning("id")
 				.executeTakeFirstOrThrow();
-
-			// heuristic to find the previous change
-			// there is no guarantee that the previous change is the leaf change
-			// because sorting by time is unreliable in a distributed system
-			const maybeParentChange = await trx
-				.selectFrom("change")
-				.selectAll()
-				.where("file_id", "=", fileId)
-				.where("type", "=", detectedChange.type)
-				.where("entity_id", "=", detectedChange.entity_id)
-				.where(isInSimulatedCurrentBranch)
-				// walk from the end of the tree to minimize the amount of changes to walk
-				.orderBy("id", "desc")
-				.executeTakeFirst();
-
-			// get the leaf change of the assumed previous change
-			const parentChange = !maybeParentChange
-				? undefined
-				: await getLeafChange({
-						lix: { db: trx },
-						change: maybeParentChange,
-					});
 
 			// If a parent exists, the change is a child of the parent
 			if (parentChange) {
