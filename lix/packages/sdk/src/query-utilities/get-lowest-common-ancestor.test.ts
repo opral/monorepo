@@ -83,7 +83,7 @@ test("it should find the common parent of two changes recursively", async () => 
 
 	await sourceLix.db
 		.insertInto("change_edge")
-		.values([edges[0], edges[1]])
+		.values([edges[0]!, edges[1]!])
 		.execute();
 
 	const secondChange = await sourceLix.db

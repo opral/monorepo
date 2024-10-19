@@ -110,7 +110,7 @@ test("it should throw if the change id does not belong to the conflict", async (
 			conflict: {
 				change_id: "change1",
 				conflicting_change_id: "change2",
-				meta: null,
+				metadata: null,
 				reason: null,
 				resolved_change_id: null,
 			},

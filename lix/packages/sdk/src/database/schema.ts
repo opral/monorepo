@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
-import type { LixPlugin } from "../plugin.js";
 
 export type LixDatabaseSchema = {
 	file: LixFileTable;
@@ -23,7 +22,7 @@ export type ChangeQueueEntryUpdate = Updateable<ChangeQueueTable>;
 type ChangeQueueTable = {
 	id: Generated<number>;
 	path: string;
-	file_id: LixFileTable["id"];
+	file_id: string;
 	metadata: Record<string, any> | null;
 	data: ArrayBuffer;
 };
@@ -54,7 +53,7 @@ type ChangeTable = {
 	 * Exists to ease querying for changes by plugin,
 	 * in case the user changes the plugin configuration.
 	 */
-	plugin_key: LixPlugin["key"];
+	plugin_key: string;
 	/**
 	 * The type of change that was made.
 	 *
@@ -74,8 +73,8 @@ type ChangeTable = {
 export type ChangeEdge = Selectable<ChangeEdgeTable>;
 export type NewChangeEdge = Insertable<ChangeEdgeTable>;
 type ChangeEdgeTable = {
-	parent_id: ChangeTable["id"];
-	child_id: ChangeTable["id"];
+	parent_id: string;
+	child_id: string;
 };
 
 export type Snapshot = Selectable<SnapshotTable>;
@@ -104,17 +103,17 @@ export type Conflict = Selectable<ConflictTable>;
 export type NewConflict = Insertable<ConflictTable>;
 export type ConflictUpdate = Updateable<ConflictTable>;
 type ConflictTable = {
-	meta: Record<string, any> | null;
+	change_id: string;
+	conflicting_change_id: string;
+	metadata: Record<string, any> | null;
 	reason: string | null;
-	change_id: ChangeTable["id"];
-	conflicting_change_id: ChangeTable["id"];
 	/**
 	 * The change id that the conflict was resolved with.
 	 *
 	 * Can be the change_id, conflicting_change_id, or another change_id
 	 * that resulted from a merge.
 	 */
-	resolved_change_id: ChangeTable["id"] | null;
+	resolved_change_id: string | null;
 };
 
 // ------ discussions ------

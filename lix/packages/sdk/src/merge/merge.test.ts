@@ -79,7 +79,10 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		.values([mockChanges[0]!, mockChanges[1]!, mockChanges[2]!])
 		.execute();
 
-	await sourceLix.db.insertInto("change_edge").values([mockEdges[0]]).execute();
+	await sourceLix.db
+		.insertInto("change_edge")
+		.values([mockEdges[0]!])
+		.execute();
 
 	await targetLix.db
 		.insertInto("snapshot")
@@ -173,8 +176,8 @@ test("it should save change conflicts", async () => {
 		key: "mock-plugin",
 		detectConflicts: vi.fn().mockResolvedValue([
 			{
-				change_id: mockChanges[1]!.id,
-				conflicting_change_id: mockChanges[2]!.id,
+				change_id: mockChanges[1]!.id!,
+				conflicting_change_id: mockChanges[2]!.id!,
 			} satisfies NewConflict,
 		]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
@@ -402,7 +405,7 @@ test("it should apply changes that are not conflicting", async () => {
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.execute();
 
-	await sourceLix.db.insertInto("change_edge").values([edges[0]]).execute();
+	await sourceLix.db.insertInto("change_edge").values([edges[0]!]).execute();
 
 	await targetLix.db
 		.insertInto("snapshot")
@@ -484,8 +487,8 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 		key: "mock-plugin",
 		detectConflicts: vi.fn().mockResolvedValue([
 			{
-				change_id: commonChanges[0]!.id,
-				conflicting_change_id: changesOnlyInSourceLix[0]!.id,
+				change_id: commonChanges[0]!.id!,
+				conflicting_change_id: changesOnlyInSourceLix[0]!.id!,
 			} satisfies NewConflict,
 		]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
