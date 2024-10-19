@@ -1,91 +1,55 @@
 import { getLeafChange, type LixPlugin } from "@lix-js/sdk";
 import papaparse from "papaparse";
+import { parseCsv } from "./utilities/parseCsv.js";
 
 export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	lix,
 	file,
 	changes,
 }) => {
-	if (file.path?.endsWith(".csv")) {
-		const parsed = papaparse.parse(new TextDecoder().decode(file.data), {
-			header: true,
-		});
+	const uniqueColumn = file.metadata?.unique_column;
 
-		const uniqueColumn = file.metadata!.unique_column;
-
-		// console.log({ changes, parsed });
-		for (const change of changes) {
-			// console.log("change", change);
-			if (change.content) {
-				const changedRow = change.content as unknown as Record<string, string>;
-
-				let existingRow = (parsed.data as Record<string, unknown>[]).find(
-					(row) => row[uniqueColumn] === change.content![uniqueColumn],
-				);
-
-				// console.log({ id, existingRow, change, parsed, column })
-
-				// create the row if it doesn't exist
-				if (!existingRow) {
-					existingRow = {};
-					parsed.data.push(existingRow);
-				}
-
-				for (const [key, value] of Object.entries(changedRow)) {
-					existingRow[key] = value;
-				}
-			}
-		}
-
-		const csv = papaparse.unparse(parsed as any);
-
-		return {
-			fileData: new TextEncoder().encode(csv),
-		};
-	} else if (file.path?.endsWith("_position.json")) {
-		const leafChange = [
-			...new Set(
-				await Promise.all(
-					changes.map(async (change) => {
-						const leafChange = await getLeafChange({ change, lix });
-						// enable string comparison to avoid duplicates
-						return JSON.stringify(leafChange);
-					}),
-				),
-			),
-		].map((v) => JSON.parse(v));
-
-		if (leafChange.length === 0) {
-			return { fileData: file.data };
-		}
-		if (leafChange.length !== 1) {
-			throw new Error(
-				"we only save a snapshot from the settings file - there must be only one change " +
-					leafChange.length +
-					" found" +
-					JSON.stringify(changes),
-			);
-		}
-		if (leafChange[0].operation === "create") {
-			return {
-				fileData: new TextEncoder().encode(
-					JSON.stringify(leafChange[0].value.data),
-				),
-			};
-		} else if (leafChange[0].operation === "update") {
-			return {
-				fileData: new TextEncoder().encode(
-					JSON.stringify(leafChange[0].value.data),
-				),
-			};
-		} else {
-			throw new Error(
-				`Operation ${leafChange[0].operation} on settings file currently not supported`,
-			);
-		}
-	} else {
-		throw new Error(
-			"Unimplemented. Only the db.sqlite file can be handled for now.",
-		);
+	if (uniqueColumn === undefined) {
+		throw new Error("The unique_column metadata is required to apply changes");
 	}
+
+	const [parsed, headerRow] = parseCsv(file.data, uniqueColumn);
+
+	if (parsed === undefined) {
+		throw new Error("Failed to parse csv");
+	}
+
+	const leafChanges = await Promise.all(
+		changes.map((change) => getLeafChange({ change, lix })),
+	);
+
+	for (const change of leafChanges) {
+		const snapshot = await lix.db
+			.selectFrom("snapshot")
+			.where("id", "=", change.snapshot_id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		// change is a deletion
+		if (snapshot.content === null) {
+			delete parsed[change.entity_id];
+		}
+		// change is an update or create
+		// the update will overwrite the row in place
+		// the create will append a new key to the object
+		else {
+			// @ts-expect-error - wrong snapshot type see https://github.com/opral/lix-sdk/issues/110
+			parsed[change.entity_id] = snapshot.content;
+		}
+	}
+
+	const csv = papaparse.unparse([headerRow, ...Object.values(parsed)], {
+		// using '\n' as the default newline assuming that windows
+		// treats '\n' as a newline character nowadays
+		newline: "\n",
+	});
+
+	return {
+		fileData: new TextEncoder().encode(csv),
+	};
 };

@@ -7,7 +7,7 @@ test("it should not detect changes if the csv did not update", async () => {
 	// same file
 	const after = before;
 
-	const metadata = { csv_plugin_unique_column: "Name" };
+	const metadata = { unique_column: "Name" };
 
 	const detectedChanges = await detectChanges?.({
 		before: { id: "random", path: "x.csv", data: before, metadata },
@@ -25,7 +25,7 @@ test("it should detect an insert", async () => {
 		"Name,Age\nAnna,20\nPeter,50\nJohn,30",
 	);
 
-	const metadata = { csv_plugin_unique_column: "Name" };
+	const metadata = { unique_column: "Name" };
 
 	const detectedChanges = await detectChanges?.({
 		before: { id: "random", path: "x.csv", data: before, metadata },
@@ -45,7 +45,7 @@ test("it should detect updates", async () => {
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = new TextEncoder().encode("Name,Age\nAnna,21\nPeter,50");
 
-	const metadata = { csv_plugin_unique_column: "Name" };
+	const metadata = { unique_column: "Name" };
 
 	const detectedChanges = await detectChanges?.({
 		before: { id: "mock", path: "x.csv", data: before, metadata },
@@ -65,7 +65,7 @@ test("it should detect a deletion", async () => {
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = new TextEncoder().encode("Name,Age\nAnna,20");
 
-	const metadata = { csv_plugin_unique_column: "Name" };
+	const metadata = { unique_column: "Name" };
 
 	const detectedChanges = await detectChanges?.({
 		before: { id: "random", path: "x.csv", data: before, metadata },
@@ -81,7 +81,7 @@ test("it should throw an error if the unique column is not set", async () => {
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = before;
 
-	const metadata = { csv_plugin_unique_column: undefined };
+	const metadata = { unique_column: undefined };
 
 	await expect(
 		detectChanges?.({
@@ -98,8 +98,8 @@ test("changing the unique column should lead to a new entity_id to avoid bugs", 
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 
-	const metaBefore = { csv_plugin_unique_column: "Name" };
-	const metaAfter = { csv_plugin_unique_column: "Age" };
+	const metaBefore = { unique_column: "Name" };
+	const metaAfter = { unique_column: "Age" };
 
 	const detectedChanges = await detectChanges?.({
 		before: { id: "random", path: "x.csv", data: before, metadata: metaBefore },
