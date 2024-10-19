@@ -1,6 +1,6 @@
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { Commit, newLixFile, openLixInMemory } from "@lix-js/sdk";
-import { plugin } from "./../csv-plugin.js";
+import { plugin } from "../csv-plugin.ts";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAtom } from "jotai";

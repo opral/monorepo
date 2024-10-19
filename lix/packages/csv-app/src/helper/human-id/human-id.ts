@@ -1,4 +1,4 @@
-import { adjectives, animals, verbs } from "./words.js";
+import { adjectives, animals, verbs } from "./words.ts";
 
 export function humanId() {
 	return `${adjectives[Math.floor(Math.random() * 256)]}_${

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { adjectives, animals, adverbs, verbs } from "./words.js";
+import { adjectives, animals, adverbs, verbs } from "./words.ts";
 
 const wordlists = [adjectives, animals, adverbs, verbs];
 const allwords = [...adjectives, ...animals, ...adverbs, ...verbs];

@@ -5,7 +5,7 @@ import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import Papa from "papaparse";
 // import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
-import { plugin } from "./csv-plugin.js";
+import { plugin } from "./csv-plugin.ts";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(

@@ -1,8 +1,0 @@
-{
-    "_id": "5f3f5e3e5e5e5e5e5e5e5e5e",
-    "permissions": {
-        // users, manage repo permissions, repo owner
-        // read sparseset a
-        "foldera/sdf":  ["read", "write", "append", "delete", "create", "share", "approve", "delegate", "merge"]
-    }
-}
