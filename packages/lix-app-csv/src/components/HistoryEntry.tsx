@@ -1,24 +1,26 @@
-import { Change, Commit, isInSimulatedCurrentBranch } from "@lix-js/sdk";
+import { Change, isInSimulatedCurrentBranch, Snapshot } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { projectAtom, uniqueColumnAtom } from "../state.ts";
-import timeAgo from "../helper/timeAgo.ts";
+// import timeAgo from "../helper/timeAgo.ts";
 import clsx from "clsx";
 import { SlTooltip } from "@shoelace-style/shoelace/dist/react";
 
-export const HistoryEntry = (props: { commit: Commit }) => {
+export const HistoryEntry = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [project] = useAtom(projectAtom);
 	const [uniqueColumn] = useAtom(uniqueColumnAtom);
 	const [changeHistory, setChangeHistory] = useState(
-		[] as { current: Change; previous: Change | null }[]
+		[] as { current: Change & Snapshot; previous: (Change & Snapshot) | null }[]
 	);
 
 	const getCommitRelatedChanges = async () => {
 		const changes = await project?.db
 			.selectFrom("change")
-			.selectAll()
-			.where("commit_id", "=", props.commit.id)
+			.selectAll("change")
+			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+			.select("snapshot.content")
+			// .where("commit_id", "=", props.commit.id)
 			.execute();
 
 		if (changes) {
@@ -26,19 +28,21 @@ export const HistoryEntry = (props: { commit: Commit }) => {
 			for (const change of changes) {
 				const previousChange = await project?.db
 					.selectFrom("change")
-					.selectAll()
+					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+					.selectAll("change")
+					.select("snapshot.content")
 					.where("change.type", "=", "row")
-					.where(
-						(eb) => eb.ref("value", "->>").key(uniqueColumn),
-						"=",
-						change.value?.[uniqueColumn]
-					)
+					// TODO https://linear.app/opral/issue/LIXDK-183/update-csv-app-to-latest-stand
+					// .where(
+					// 	(eb) => eb.ref("content", "->>").key(uniqueColumn),
+					// 	"=",
+					// 	change.content?.[uniqueColumn]
+					// )
 					.where("change.created_at", "<", change.created_at)
-					.innerJoin("commit", "commit.id", "change.commit_id")
 					// TODO remove after branching concept on lix
 					// https://linear.app/opral/issue/LIX-126/branching
 					.where(isInSimulatedCurrentBranch)
-					.orderBy("commit.created_at", "desc")
+					.orderBy("change.created_at", "desc")
 					.executeTakeFirst();
 
 				//console.log("previousChange", previousChange);
@@ -46,7 +50,10 @@ export const HistoryEntry = (props: { commit: Commit }) => {
 				history.push({ current: change, previous: previousChange });
 			}
 			setChangeHistory(
-				history as { current: Change; previous: Change | null }[]
+				history as {
+					current: Change & Snapshot;
+					previous: (Change & Snapshot) | null;
+				}[]
 			);
 		}
 	};
@@ -79,13 +86,13 @@ export const HistoryEntry = (props: { commit: Commit }) => {
 				</div>
 				<div className="flex-1 flex gap-2 items-center justify-between py-3 rounded md:h-[46px]">
 					<div className="flex flex-col md:flex-row md:gap-2 md:items-center flex-1">
-						<p className="text-zinc-950 text-sm! font-semibold">
+						{/* <p className="text-zinc-950 text-sm! font-semibold">
 							By {props.commit.author}
-						</p>
-						<p className="text-sm! text-zinc-600">{props.commit.description}</p>
+						</p> */}
+						{/* <p className="text-sm! text-zinc-600">{props.commit.description}</p> */}
 					</div>
 					<p className="text-sm! pr-5 flex items-center gap-4 flex-1]">
-						{timeAgo(props.commit.created_at)}
+						{/* {timeAgo(change.created_at)} */}
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							width="1em"
@@ -108,7 +115,6 @@ export const HistoryEntry = (props: { commit: Commit }) => {
 			<div className={clsx(isOpen ? "block" : "hidden")}>
 				<div className="flex flex-col gap-2 px-3 pb-3">
 					{changeHistory.map((change) => {
-						console.log("change", change);
 						// TODO: when importing new file one change contains every change of a row. When doing manual change, it contains more changes that belong to one row -> so do the grouping here when needed
 						return (
 							<div
@@ -123,13 +129,15 @@ export const HistoryEntry = (props: { commit: Commit }) => {
 										<p className="hidden md:block text-zinc-500 md:py-1.5 w-[140px] line-clamp-1 whitespace-nowrap text-[14px]">
 											{"UNIQUE VALUE"}
 										</p>
-										<SlTooltip content={change.current?.value?.[uniqueColumn]}>
+										<SlTooltip
+											content={change.current?.content?.[uniqueColumn]}
+										>
 											<p className="md:px-4 md:py-1.5 md:bg-white md:border border-zinc-200 md:w-[140px] rounded-full md:mr-4 overflow-hidden whitespace-nowrap text-ellipsis">
-												{change.current?.value?.[uniqueColumn]}
+												{change.current?.content?.[uniqueColumn]}
 											</p>
 										</SlTooltip>
 									</div>
-									{change.current.meta?.col_name.map((changed_col: string) => {
+									{/* {change.current.meta?.col_name.map((changed_col: string) => {
 										if (changed_col) {
 											return (
 												<div
@@ -164,12 +172,12 @@ export const HistoryEntry = (props: { commit: Commit }) => {
 															d="M11 20h2V8l5.5 5.5l1.42-1.42L12 4.16l-7.92 7.92L5.5 13.5L11 8z"
 														/>
 													</svg>
-													{change.previous?.value?.[changed_col] ? (
+													{change.previous?.content?.[changed_col] ? (
 														<SlTooltip
-															content={change.previous.value?.[changed_col]}
+															content={change.previous.content?.[changed_col]}
 														>
 															<p className="px-3 py-1.5 bg-zinc-200 flex-1 md:w-[140px] overflow-hidden whitespace-nowrap text-ellipsis">
-																{change.previous.value?.[changed_col]}
+																{change.previous.content?.[changed_col]}
 															</p>
 														</SlTooltip>
 													) : (
@@ -178,7 +186,7 @@ export const HistoryEntry = (props: { commit: Commit }) => {
 												</div>
 											);
 										}
-									})}
+									})} */}
 								</div>
 							</div>
 						);

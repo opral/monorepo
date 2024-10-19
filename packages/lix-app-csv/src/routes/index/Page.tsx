@@ -4,16 +4,15 @@ import { useAtom } from "jotai";
 import { projectAtom, selectedProjectPathAtom } from "../../state.ts";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { openLixInMemory } from "@lix-js/sdk";
 import timeAgo from "../../helper/timeAgo.ts";
 import { CreateProjectDialog } from "../../components/CreateProjectDialog.tsx";
 import { DemoCard } from "../../components/DemoCard.tsx";
 
 type ProjectPreview = {
 	path: string;
-	lastModified: string | undefined;
-	lastAuthoredBy: string | undefined;
-	lastCommitAnnotation: string | undefined;
+	lastModified?: string;
+	lastAuthoredBy?: string;
+	lastCommitAnnotation?: string;
 };
 
 export default function App() {
@@ -38,24 +37,24 @@ export default function App() {
 				if (!path) return undefined;
 
 				try {
-					const fileHandle = await opfsRoot.getFileHandle(path);
-					const file = await fileHandle.getFile();
-					const lixProject = await openLixInMemory({
-						blob: file,
-					});
-					const lastCommit = await lixProject.db
-						.selectFrom("commit")
-						.selectAll()
-						.orderBy("created_at", "desc")
-						.executeTakeFirst();
+					// const fileHandle = await opfsRoot.getFileHandle(path);
+					// const file = await fileHandle.getFile();
+					// const lixProject = await openLixInMemory({
+					// 	blob: file,
+					// });
+					// const lastCommit = await lixProject.db
+					// 	.selectFrom("commit")
+					// 	.selectAll()
+					// 	.orderBy("created_at", "desc")
+					// 	.executeTakeFirst();
 
 					projects.push({
 						path: path,
-						lastModified: lastCommit ? lastCommit.created_at : undefined,
-						lastAuthoredBy: lastCommit ? `${lastCommit.author}` : undefined,
-						lastCommitAnnotation: lastCommit
-							? `${lastCommit?.description}`
-							: undefined,
+						// lastModified: lastCommit ? lastCommit.created_at : undefined,
+						// lastAuthoredBy: lastCommit ? `${lastCommit.author}` : undefined,
+						// lastCommitAnnotation: lastCommit
+						// 	? `${lastCommit?.description}`
+						// 	: undefined,
 					});
 				} catch (e) {
 					// console.error(e);

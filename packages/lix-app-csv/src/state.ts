@@ -118,42 +118,6 @@ export const uniqueColumnAtom = atom(async (get) => {
 	return uniqueColumn;
 });
 
-// export const committedChangesAtom = atom(async (get) => {
-// 	get(withPollingAtom);
-// 	const project = await get(projectAtom);
-// 	if (!project) return [];
-// 	const result = await project.lix.db
-// 		.selectFrom("change")
-// 		.select((eb) => [
-// 			"change.id",
-// 			"change.commit_id",
-// 			"change.file_id",
-// 			"change.operation",
-// 			"change.type",
-// 			"change.value",
-// 			jsonObjectFrom(
-// 				eb
-// 					.selectFrom("commit")
-// 					.select([
-// 						"commit.id",
-// 						"commit.author",
-// 						"commit.description",
-// 						"commit.created_at",
-// 					])
-// 					.whereRef("change.commit_id", "=", "commit.id")
-// 			).as("commit"),
-// 		])
-// 		.where("commit_id", "is not", null)
-// 		// TODO remove after sequence concept on lix
-// 		// https://linear.app/opral/issue/LIX-126/branching
-// 		.where(isInSimulatedCurrentBranch)
-// 		.innerJoin("commit", "commit.id", "change.commit_id")
-// 		.orderBy("commit.created_at desc")
-// 		.execute();
-
-// 	return result;
-// });
-
 export const pendingChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
@@ -161,7 +125,7 @@ export const pendingChangesAtom = atom(async (get) => {
 	const result = await project.db
 		.selectFrom("change")
 		.selectAll()
-		.where("commit_id", "is", null)
+		// .where("commit_id", "is", null)
 		// TODO remove after sequence concept on lix
 		// https://linear.app/opral/issue/LIX-126/branching
 		.where(isInSimulatedCurrentBranch)
@@ -217,16 +181,6 @@ export const pendingChangesAtom = atom(async (get) => {
 // 	return [...result];
 // });
 
-export const commitsAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const project = await get(projectAtom);
-	if (!project) return [];
-	return await project.db
-		.selectFrom("commit")
-		.selectAll()
-		.orderBy("commit.created_at desc")
-		.execute();
-});
 
 // @ts-ignore
 const humanFileSize = (bytes, si = false, dp = 1) => {

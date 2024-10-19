@@ -3427,7 +3427,7 @@ importers:
         specifier: ^5.3.4
         version: 5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)
 
-  packages/csv-app:
+  packages/lix-app-csv:
     dependencies:
       '@lix-js/sdk':
         specifier: workspace:*
@@ -3514,6 +3514,40 @@ importers:
       vite:
         specifier: ^5.3.4
         version: 5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)
+
+  packages/lix-plugin-csv:
+    dependencies:
+      '@lix-js/sdk':
+        specifier: workspace:*
+        version: link:../../lix/packages/sdk
+      papaparse:
+        specifier: ^5.4.1
+        version: 5.4.1
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.12.0
+        version: 9.12.0
+      '@types/papaparse':
+        specifier: ^5.3.14
+        version: 5.3.14
+      '@vitest/coverage-v8':
+        specifier: ^2.0.5
+        version: 2.0.5(vitest@2.0.5(@types/node@22.5.2)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6))
+      eslint:
+        specifier: ^9.12.0
+        version: 9.12.0(jiti@1.21.6)
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
+      typescript:
+        specifier: ^5.5.4
+        version: 5.5.4
+      typescript-eslint:
+        specifier: ^8.9.0
+        version: 8.9.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.5.4)
+      vitest:
+        specifier: ^2.0.5
+        version: 2.0.5(@types/node@22.5.2)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.6)
 
 packages:
 
