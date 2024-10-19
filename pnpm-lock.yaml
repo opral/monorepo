@@ -1440,7 +1440,7 @@ importers:
         version: 10.4.5
       next:
         specifier: ^13.0.0 || ^14.0.0 || ^15.0.0
-        version: 14.1.3(react-dom@19.0.0-rc-941e1b4a-20240729(react@18.3.1))(react@18.3.1)
+        version: 14.1.3(@babel/core@7.25.2)(react-dom@19.0.0-rc-941e1b4a-20240729(react@18.3.1))(react@18.3.1)
       qs:
         specifier: ^6.12.1
         version: 6.13.0
@@ -3215,94 +3215,6 @@ importers:
         specifier: 7.7.0
         version: 7.7.0(eslint@9.0.0)(typescript@5.2.2)
 
-  lix/packages/csv-app:
-    dependencies:
-      '@lix-js/sdk':
-        specifier: workspace:*
-        version: link:../sdk
-      '@shoelace-style/shoelace':
-        specifier: ^2.16.0
-        version: 2.16.0(@types/react@18.3.3)
-      '@sqlite.org/sqlite-wasm':
-        specifier: ^3.46.0-build2
-        version: 3.46.0-build2
-      '@types/papaparse':
-        specifier: ^5.3.14
-        version: 5.3.14
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
-      jotai:
-        specifier: ^2.9.1
-        version: 2.9.2(@types/react@18.3.3)(react@19.0.0-rc-941e1b4a-20240729)
-      kysely:
-        specifier: ^0.27.4
-        version: 0.27.4
-      native-file-system-adapter:
-        specifier: ^3.0.1
-        version: 3.0.1
-      react:
-        specifier: 19.0.0-rc-941e1b4a-20240729
-        version: 19.0.0-rc-941e1b4a-20240729
-      react-datasheet-grid:
-        specifier: ^4.11.4
-        version: 4.11.4(react-dom@19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729))(react@19.0.0-rc-941e1b4a-20240729)
-      react-dom:
-        specifier: 19.0.0-rc-941e1b4a-20240729
-        version: 19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729)
-      react-dropzone:
-        specifier: ^14.2.3
-        version: 14.2.3(react@19.0.0-rc-941e1b4a-20240729)
-      react-router-dom:
-        specifier: ^6.25.1
-        version: 6.26.0(react-dom@19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729))(react@19.0.0-rc-941e1b4a-20240729)
-    devDependencies:
-      '@tailwindcss/vite':
-        specifier: ^4.0.0-alpha.17
-        version: 4.0.0-alpha.18(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))
-      '@types/react':
-        specifier: ^18.3.3
-        version: 18.3.3
-      '@types/react-dom':
-        specifier: ^18.3.0
-        version: 18.3.0
-      '@typescript-eslint/eslint-plugin':
-        specifier: ^7.15.0
-        version: 7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)
-      '@typescript-eslint/parser':
-        specifier: ^7.15.0
-        version: 7.18.0(eslint@8.57.0)(typescript@5.5.4)
-      '@vitejs/plugin-react':
-        specifier: ^4.3.1
-        version: 4.3.1(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))
-      eslint:
-        specifier: ^8.57.0
-        version: 8.57.0
-      eslint-plugin-react-hooks:
-        specifier: ^4.6.2
-        version: 4.6.2(eslint@8.57.0)
-      eslint-plugin-react-refresh:
-        specifier: ^0.4.7
-        version: 0.4.9(eslint@8.57.0)
-      eslint-plugin-unicorn:
-        specifier: ^55.0.0
-        version: 55.0.0(eslint@8.57.0)
-      papaparse:
-        specifier: ^5.4.1
-        version: 5.4.1
-      prettier:
-        specifier: ^3.3.3
-        version: 3.3.3
-      tailwindcss:
-        specifier: ^4.0.0-alpha.17
-        version: 4.0.0-alpha.18
-      typescript:
-        specifier: ^5.2.2
-        version: 5.5.4
-      vite:
-        specifier: ^5.3.4
-        version: 5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)
-
   lix/packages/fs:
     dependencies:
       typescript:
@@ -3510,6 +3422,94 @@ importers:
         version: 4.0.0-alpha.18
       typescript:
         specifier: ^5.5.3
+        version: 5.5.4
+      vite:
+        specifier: ^5.3.4
+        version: 5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)
+
+  packages/csv-app:
+    dependencies:
+      '@lix-js/sdk':
+        specifier: workspace:*
+        version: link:../../lix/packages/sdk
+      '@shoelace-style/shoelace':
+        specifier: ^2.16.0
+        version: 2.16.0(@types/react@18.3.3)
+      '@sqlite.org/sqlite-wasm':
+        specifier: ^3.46.0-build2
+        version: 3.46.0-build2
+      '@types/papaparse':
+        specifier: ^5.3.14
+        version: 5.3.14
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      jotai:
+        specifier: ^2.9.1
+        version: 2.9.2(@types/react@18.3.3)(react@19.0.0-rc-941e1b4a-20240729)
+      kysely:
+        specifier: ^0.27.4
+        version: 0.27.4
+      native-file-system-adapter:
+        specifier: ^3.0.1
+        version: 3.0.1
+      react:
+        specifier: 19.0.0-rc-941e1b4a-20240729
+        version: 19.0.0-rc-941e1b4a-20240729
+      react-datasheet-grid:
+        specifier: ^4.11.4
+        version: 4.11.4(react-dom@19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729))(react@19.0.0-rc-941e1b4a-20240729)
+      react-dom:
+        specifier: 19.0.0-rc-941e1b4a-20240729
+        version: 19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729)
+      react-dropzone:
+        specifier: ^14.2.3
+        version: 14.2.3(react@19.0.0-rc-941e1b4a-20240729)
+      react-router-dom:
+        specifier: ^6.25.1
+        version: 6.26.0(react-dom@19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729))(react@19.0.0-rc-941e1b4a-20240729)
+    devDependencies:
+      '@tailwindcss/vite':
+        specifier: ^4.0.0-alpha.17
+        version: 4.0.0-alpha.18(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))
+      '@types/react':
+        specifier: ^18.3.3
+        version: 18.3.3
+      '@types/react-dom':
+        specifier: ^18.3.0
+        version: 18.3.0
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^7.15.0
+        version: 7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)
+      '@typescript-eslint/parser':
+        specifier: ^7.15.0
+        version: 7.18.0(eslint@8.57.0)(typescript@5.5.4)
+      '@vitejs/plugin-react':
+        specifier: ^4.3.1
+        version: 4.3.1(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))
+      eslint:
+        specifier: ^8.57.0
+        version: 8.57.0
+      eslint-plugin-react-hooks:
+        specifier: ^4.6.2
+        version: 4.6.2(eslint@8.57.0)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.7
+        version: 0.4.9(eslint@8.57.0)
+      eslint-plugin-unicorn:
+        specifier: ^55.0.0
+        version: 55.0.0(eslint@8.57.0)
+      papaparse:
+        specifier: ^5.4.1
+        version: 5.4.1
+      prettier:
+        specifier: ^3.3.3
+        version: 3.3.3
+      tailwindcss:
+        specifier: ^4.0.0-alpha.17
+        version: 4.0.0-alpha.18
+      typescript:
+        specifier: ^5.2.2
         version: 5.5.4
       vite:
         specifier: ^5.3.4
@@ -7393,14 +7393,14 @@ packages:
     peerDependencies:
       vite: ^5.2.0
 
-  '@tanstack/react-virtual@3.10.7':
-    resolution: {integrity: sha512-yeP+M0G8D+15ZFPivpuQ5hoM4Fa/PzERBx8P8EGcfEsXX3JOb9G9UUrqc47ZXAxvK+YqzM9T5qlJUYUFOwCZJw==}
+  '@tanstack/react-virtual@3.10.8':
+    resolution: {integrity: sha512-VbzbVGSsZlQktyLrP5nxE+vE1ZR+U0NFAWPbJLoG2+DKPwd2D7dVICTVIIaYlJqX1ZCEnYDbaOpmMwbsyhBoIA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
 
-  '@tanstack/virtual-core@3.10.7':
-    resolution: {integrity: sha512-ND5dfsU0n9F4gROzwNNDJmg6y8n9pI8YWxtgbfJ5UcNn7Hx+MxEXtXcQ189tS7sh8pmCObgz2qSiyRKTZxT4dg==}
+  '@tanstack/virtual-core@3.10.8':
+    resolution: {integrity: sha512-PBu00mtt95jbKFi6Llk9aik8bnR3tR/oQP1o3TSi+iG//+Q2RTIzCEgKkHG8BB86kxMNW6O8wku+Lmi+QFR6jA==}
 
   '@testim/chrome-version@1.1.4':
     resolution: {integrity: sha512-kIhULpw9TrGYnHp/8VfdcneIcxKnLixmADtukQRtJUmsVlMg0niMkwV0xZmi8hqa57xqilIHjWFA0GKvEjVU5g==}
@@ -22575,13 +22575,13 @@ snapshots:
       tailwindcss: 4.0.0-alpha.18
       vite: 5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)
 
-  '@tanstack/react-virtual@3.10.7(react-dom@19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729))(react@19.0.0-rc-941e1b4a-20240729)':
+  '@tanstack/react-virtual@3.10.8(react-dom@19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729))(react@19.0.0-rc-941e1b4a-20240729)':
     dependencies:
-      '@tanstack/virtual-core': 3.10.7
+      '@tanstack/virtual-core': 3.10.8
       react: 19.0.0-rc-941e1b4a-20240729
       react-dom: 19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729)
 
-  '@tanstack/virtual-core@3.10.7': {}
+  '@tanstack/virtual-core@3.10.8': {}
 
   '@testim/chrome-version@1.1.4': {}
 
@@ -30782,7 +30782,7 @@ snapshots:
       postcss: 8.4.31
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.1(react@18.3.1)
+      styled-jsx: 5.1.1(@babel/core@7.25.2)(react@18.3.1)
     optionalDependencies:
       '@next/swc-darwin-arm64': 14.1.2-canary.4
       '@next/swc-darwin-x64': 14.1.2-canary.4
@@ -30793,6 +30793,31 @@ snapshots:
       '@next/swc-win32-arm64-msvc': 14.1.2-canary.4
       '@next/swc-win32-ia32-msvc': 14.1.2-canary.4
       '@next/swc-win32-x64-msvc': 14.1.2-canary.4
+    transitivePeerDependencies:
+      - '@babel/core'
+      - babel-plugin-macros
+
+  next@14.1.3(@babel/core@7.25.2)(react-dom@19.0.0-rc-941e1b4a-20240729(react@18.3.1))(react@18.3.1):
+    dependencies:
+      '@next/env': 14.1.3
+      '@swc/helpers': 0.5.2
+      busboy: 1.6.0
+      caniuse-lite: 1.0.30001651
+      graceful-fs: 4.2.11
+      postcss: 8.4.31
+      react: 18.3.1
+      react-dom: 19.0.0-rc-941e1b4a-20240729(react@18.3.1)
+      styled-jsx: 5.1.1(@babel/core@7.25.2)(react@18.3.1)
+    optionalDependencies:
+      '@next/swc-darwin-arm64': 14.1.3
+      '@next/swc-darwin-x64': 14.1.3
+      '@next/swc-linux-arm64-gnu': 14.1.3
+      '@next/swc-linux-arm64-musl': 14.1.3
+      '@next/swc-linux-x64-gnu': 14.1.3
+      '@next/swc-linux-x64-musl': 14.1.3
+      '@next/swc-win32-arm64-msvc': 14.1.3
+      '@next/swc-win32-ia32-msvc': 14.1.3
+      '@next/swc-win32-x64-msvc': 14.1.3
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
@@ -30832,32 +30857,7 @@ snapshots:
       postcss: 8.4.31
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.1(react@18.3.1)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.1.3
-      '@next/swc-darwin-x64': 14.1.3
-      '@next/swc-linux-arm64-gnu': 14.1.3
-      '@next/swc-linux-arm64-musl': 14.1.3
-      '@next/swc-linux-x64-gnu': 14.1.3
-      '@next/swc-linux-x64-musl': 14.1.3
-      '@next/swc-win32-arm64-msvc': 14.1.3
-      '@next/swc-win32-ia32-msvc': 14.1.3
-      '@next/swc-win32-x64-msvc': 14.1.3
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-
-  next@14.1.3(react-dom@19.0.0-rc-941e1b4a-20240729(react@18.3.1))(react@18.3.1):
-    dependencies:
-      '@next/env': 14.1.3
-      '@swc/helpers': 0.5.2
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001651
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 18.3.1
-      react-dom: 19.0.0-rc-941e1b4a-20240729(react@18.3.1)
-      styled-jsx: 5.1.1(react@18.3.1)
+      styled-jsx: 5.1.1(@babel/core@7.25.2)(react@18.3.1)
     optionalDependencies:
       '@next/swc-darwin-arm64': 14.1.3
       '@next/swc-darwin-x64': 14.1.3
@@ -32304,7 +32304,7 @@ snapshots:
 
   react-datasheet-grid@4.11.4(react-dom@19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729))(react@19.0.0-rc-941e1b4a-20240729):
     dependencies:
-      '@tanstack/react-virtual': 3.10.7(react-dom@19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729))(react@19.0.0-rc-941e1b4a-20240729)
+      '@tanstack/react-virtual': 3.10.8(react-dom@19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729))(react@19.0.0-rc-941e1b4a-20240729)
       classnames: 2.5.1
       fast-deep-equal: 3.1.3
       react: 19.0.0-rc-941e1b4a-20240729
@@ -33607,15 +33607,17 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.3
 
+  styled-jsx@5.1.1(@babel/core@7.25.2)(react@18.3.1):
+    dependencies:
+      client-only: 0.0.1
+      react: 18.3.1
+    optionalDependencies:
+      '@babel/core': 7.25.2
+
   styled-jsx@5.1.1(react@18.2.0):
     dependencies:
       client-only: 0.0.1
       react: 18.2.0
-
-  styled-jsx@5.1.1(react@18.3.1):
-    dependencies:
-      client-only: 0.0.1
-      react: 18.3.1
 
   sucrase@3.35.0:
     dependencies:

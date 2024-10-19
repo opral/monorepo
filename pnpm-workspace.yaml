@@ -1,7 +1,7 @@
 packages:
+  - 'packages/*'
   - 'lix/packages/*'
   - 'lix/website'
-  - '!lix/packages/exp'
   - 'inlang/development-projects/*'
   - 'inlang/source-code/*'
   - 'inlang/source-code/recommendations/*'
