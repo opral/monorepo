@@ -1,0 +1,30 @@
+import { test, expect } from "vitest";
+import { openLixInMemory } from "./openLixInMemory.js";
+
+test("it should open a lix in memory", async () => {
+	const lix = await openLixInMemory({});
+	// querying a table to see if the schema is applied
+	const changes = await lix.db.selectFrom("change").selectAll().execute();
+	expect(changes).toEqual([]);
+});
+
+test("it should open a lix in memory from a blob", async () => {
+	const lix1 = await openLixInMemory({});
+	await lix1.db
+		.insertInto("file")
+		.values({
+			id: "1",
+			path: "a.txt",
+			data: new TextEncoder().encode("hello"),
+		})
+		.execute();
+	const lix2 = await openLixInMemory({ blob: await lix1.toBlob() });
+	const files = await lix2.db.selectFrom("file").selectAll().execute();
+	expect(files).toEqual([
+		expect.objectContaining({
+			id: "1",
+			path: "a.txt",
+			data: new TextEncoder().encode("hello"),
+		}),
+	]);
+});
