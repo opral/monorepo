@@ -39,7 +39,6 @@ export async function merge(args: {
 		(await plugin.detectConflicts?.({
 			sourceLix: args.sourceLix,
 			targetLix: args.targetLix,
-			leafChangesOnlyInSource,
 		})) ?? [];
 
 	const changesPerFile: Record<string, ArrayBuffer> = {};

@@ -35,13 +35,6 @@ export type LixPlugin = {
 	detectConflicts?: (args: {
 		sourceLix: LixReadonly;
 		targetLix: LixReadonly;
-		/**
-		 * Leaf changes that are only in the source lix.
-		 *
-		 * You can traverse the parents of the leaf changes to find
-		 * conflicting changes in the target lix.
-		 */
-		leafChangesOnlyInSource: ChangeWithSnapshot[];
 	}) => Promise<NewConflict[]>;
 	applyChanges?: (args: {
 		lix: LixReadonly;
