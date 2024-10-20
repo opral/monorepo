@@ -57,6 +57,22 @@ test("snapshot ids should default to sha256", async () => {
 	);
 });
 
+test("an empty snapshot should default to the special 'no-content' snapshot to store disk space", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+	const snapshot = await db
+		.insertInto("snapshot")
+		.values({
+			content: null,
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(snapshot.id).toBe("no-content");
+});
+
 // https://github.com/opral/lix-sdk/issues/71
 test("files should be able to have metadata", async () => {
 	const sqlite = await createInMemoryDatabase({

@@ -29,7 +29,7 @@ function initDefaultValueFunctions(args: { sqlite: SqliteDatabase }) {
 		name: "sha256",
 		arity: 1,
 		xFunc: (_ctx: number, value) => {
-			return value ? sha256(value as string) : "no-value";
+			return value ? sha256(value as string) : "no-content";
 		},
 		deterministic: true,
 	});
