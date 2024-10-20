@@ -1,4 +1,4 @@
-import { v4 as uuid } from "uuid";
+import { v7 as uuid } from "uuid";
 import type { ProjectSettings } from "./json-schema/settings.js";
 import { humanId } from "./human-id/human-id.js";
 import type {
