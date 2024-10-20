@@ -1,6 +1,6 @@
 # Contributing
 
-This repository is set up as a [monorepo](https://monorepo.tools/) with [Nx](https://nx.dev/) (with caching some compile process for better dev/build performance).
+This repository is set up as a [monorepo](https://monorepo.tools/) with [pnpm](https://pnpm.io/) and [Nx](https://nx.dev/) for caching.
 
 ## Getting started
 
