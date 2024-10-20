@@ -1,54 +1,38 @@
 {
-	"private": true,
-	"name": "monorepo",
-	"type": "module",
-	"scripts": {
-		"dev": "pnpm exec nx run-many --nx-bail --target=dev --parallel 1000 --output-style stream",
-		"dev:ide": "pnpm exec nx run-many --nx-bail --target=dev --parallel=10 --verbose --projects=vs-code-extension --output-style=stream",
-		"production": "pnpm exec nx run-many --nx-bail --target=production --parallel 1000 --projects=@inlang/website --projects=@inlang/server --output-style=stream",
-		"build": "pnpm exec nx run-many --nx-bail --target=build --parallel",
-		"dev:lix": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter \"@lix-js/*\" --filter @inlang/server dev",
-		"dev:lix-fink": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter \"@lix-js/*\" --filter @inlang/server --filter @inlang/manage --filter @inlang/editor --filter @inlang/sdk --filter @inlang/website --filter @inlang/telemetry-proxy --filter @inlang/telemetry-proxy-parrot dev",
-		"---- TEST ----------------------------------------------------------": "",
-		"test": "pnpm exec nx run-many --target=test --parallel",
-		"---- LINT ----------------------------------------------------------": "",
-		"lint": "pnpm exec nx run-many --target=lint --parallel",
-		"format": "pnpm exec nx run-many --target=format --parallel",
-		"---- OTHER ---------------------------------------------------------": "",
-		"build:no-nx": "pnpm --stream --parallel build",
-		"dev:no-nx": "pnpm --stream --parallel dev",
-		"dev:no-clear": "pnpm dev:no-nx | sed -u 's/\\x1Bc//g'",
-		"fetch-env:internal": "doppler secrets download --no-file --format env > .env",
-		"changeset": "changeset",
-		"clean": "pnpm recursive run clean && rm -rf ./.env ./node_modules",
-		"----- CI ---- used to test the codebase on every commit": "",
-		"ci": "pnpm install && pnpm check-all",
-		"check-all": "pnpm audit --audit-level=high && pnpm format && pnpm lint && pnpm build && pnpm test",
-		"ci:publish": "pnpm --filter !vs-code-extension publish -r"
-	},
-	"engines": {
-		"node": ">=18.17.0",
-		"pnpm": ">=9.8.0 <10"
-	},
-	"pnpm": {
-		"overrides": {
-			"http-cache-semantics": "4.1.1",
-			"follow-redirects": "1.15.4"
-		},
-		"auditConfig": {
-			"ignoreCves": [
-				"CVE-2023-42282",
-				"CVE-2024-29415",
-				"CVE-2024-4068",
-				"CVE-2024-37890",
-				"CVE-2024-41818",
-				"CVE-2024-39338"
-			]
-		}
-	},
-	"devDependencies": {
-		"@changesets/cli": "^2.27.7",
-		"nx": "18.3.3",
-		"nx-cloud": "16.5.2"
-	}
+  "private": true,
+  "name": "monorepo",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm exec nx run-many --nx-bail --target=dev --parallel 1000 --output-style stream",
+    "dev:ide": "pnpm exec nx run-many --nx-bail --target=dev --parallel=10 --verbose --projects=vs-code-extension --output-style=stream",
+    "production": "pnpm exec nx run-many --nx-bail --target=production --parallel 1000 --projects=@inlang/website --projects=@inlang/server --output-style=stream",
+    "build": "pnpm exec nx run-many --nx-bail --target=build --parallel",
+    "dev:lix": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter \"@lix-js/*\" --filter @inlang/server dev",
+    "dev:lix-fink": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter \"@lix-js/*\" --filter @inlang/server --filter @inlang/manage --filter @inlang/editor --filter @inlang/sdk --filter @inlang/website --filter @inlang/telemetry-proxy --filter @inlang/telemetry-proxy-parrot dev",
+    "---- TEST ----------------------------------------------------------": "",
+    "test": "pnpm exec nx run-many --target=test --parallel",
+    "---- LINT ----------------------------------------------------------": "",
+    "lint": "pnpm exec nx run-many --target=lint --parallel",
+    "format": "pnpm exec nx run-many --target=format --parallel",
+    "---- OTHER ---------------------------------------------------------": "",
+    "build:no-nx": "pnpm --stream --parallel build",
+    "dev:no-nx": "pnpm --stream --parallel dev",
+    "dev:no-clear": "pnpm dev:no-nx | sed -u 's/\\x1Bc//g'",
+    "fetch-env:internal": "doppler secrets download --no-file --format env > .env",
+    "changeset": "changeset",
+    "clean": "pnpm recursive run clean && rm -rf ./.env ./node_modules",
+    "----- CI ---- used to test the codebase on every commit": "",
+    "ci": "pnpm install && pnpm check-all",
+    "check-all": "pnpm audit --audit-level=high && pnpm format && pnpm lint && pnpm build && pnpm test",
+    "ci:publish": "pnpm --filter !vs-code-extension publish -r"
+  },
+  "engines": {
+    "node": ">=18.17.0",
+    "pnpm": ">=9.8.0 <10"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.7",
+    "nx": "18.3.3",
+    "nx-cloud": "16.5.2"
+  }
 }
