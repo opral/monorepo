@@ -68,4 +68,3 @@ test("it should apply a delete change", async () => {
 	});
 	expect(applied).toEqual(after);
 });
-

@@ -28,9 +28,9 @@ let safeProjectToOpfsInterval: NodeJS.Timeout;
  *
  * Search for `setReloadProject` to see where this atom is set.
  */
-export const forceReloadProjectAtom = atom<
-	ReturnType<typeof Date.now> | undefined
->(undefined);
+export const forceReloadProjectAtom = atom<ReturnType<typeof Date.now> | undefined>(
+	undefined
+);
 
 export const projectAtom = atom(async (get) => {
 	// listen to forceReloadProjectAtom to reload the project
@@ -106,9 +106,7 @@ export const bundlesNestedFilteredAtom = atom(async (get) => {
 
 	// Filter by missing translations if the flag is set
 	if (get(filterMissingTranslationAtom)) {
-		bundles = bundles.filter((bundle) =>
-			hasMissingTranslations(bundle, relevantLocales)
-		);
+		bundles = bundles.filter((bundle) => hasMissingTranslations(bundle, relevantLocales));
 	}
 
 	// Filter bundles by query, only considering relevant locales
@@ -305,10 +303,7 @@ const humanFileSize = (bytes, si = false, dp = 1) => {
 	do {
 		bytes /= thresh;
 		++u;
-	} while (
-		Math.round(Math.abs(bytes) * r) / r >= thresh &&
-		u < units.length - 1
-	);
+	} while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
 
 	return bytes.toFixed(dp) + " " + units[u];
 };

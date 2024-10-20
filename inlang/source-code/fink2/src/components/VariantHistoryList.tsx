@@ -34,10 +34,7 @@ const VariantHistoryList = (props: {
 		setChanges(result);
 	};
 
-	const handleRollback = async (
-		revertedVariant: Variant,
-		zoned_date_time: string
-	) => {
+	const handleRollback = async (revertedVariant: Variant, zoned_date_time: string) => {
 		if (project) {
 			setLoading(zoned_date_time);
 			await project.db
@@ -70,14 +67,10 @@ const VariantHistoryList = (props: {
 					<div key={change.id} className="py-6 px-1">
 						<div className="flex items-center justify-between">
 							<h3 className="text-[16px] text-zinc-500">
-								<span className="font-medium text-zinc-950">
-									{change.author}
-								</span>{" "}
-								changed variant
+								<span className="font-medium text-zinc-950">{change.author}</span> changed
+								variant
 							</h3>
-							<p className="text-[16px] text-zinc-700">
-								{timeAgo(change.created_at)}
-							</p>
+							<p className="text-[16px] text-zinc-700">{timeAgo(change.created_at)}</p>
 						</div>
 						<div className="flex gap-2 mt-1">
 							<svg
@@ -91,9 +84,7 @@ const VariantHistoryList = (props: {
 									d="M12 17q-1.825 0-3.187-1.137T7.1 13H2v-2h5.1q.35-1.725 1.713-2.863T12 7t3.188 1.138T16.9 11H22v2h-5.1q-.35 1.725-1.712 2.863T12 17m0-2q1.25 0 2.125-.875T15 12t-.875-2.125T12 9t-2.125.875T9 12t.875 2.125T12 15"
 								/>
 							</svg>
-							<p className="text-zinc-500 flex-1 py-[2px]">
-								{change.description}
-							</p>
+							<p className="text-zinc-500 flex-1 py-[2px]">{change.description}</p>
 						</div>
 						<div className="flex gap-2">
 							<div className="flex-1 rounded border border-zinc-200 bg-zinc-50 px-3 py-[10px] text-[13px]! font-medium mt-4 text-zinc-700">
@@ -126,10 +117,7 @@ const patternToString = (props: { pattern: Pattern }): string => {
 		.map((p) => {
 			if ("value" in p) {
 				return p.value;
-			} else if (
-				p.type === "expression" &&
-				p.arg.type === "variable-reference"
-			) {
+			} else if (p.type === "expression" && p.arg.type === "variable-reference") {
 				return `{{${p.arg.name}}}`;
 			}
 			return "";

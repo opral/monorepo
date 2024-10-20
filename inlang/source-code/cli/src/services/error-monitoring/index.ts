@@ -1,1 +1,1 @@
-export { captureException, initErrorMonitoring } from "./implementation.js"
+export { captureException, initErrorMonitoring } from "./implementation.js";

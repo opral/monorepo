@@ -12,7 +12,7 @@ import type {
 import type { ExportFile } from "../project/api.js";
 
 export type InlangPlugin<
-	ExternalSettings extends Record<string, any> | unknown = unknown
+	ExternalSettings extends Record<string, any> | unknown = unknown,
 > = {
 	/**
 	 * @deprecated Use `key` instead.
@@ -101,7 +101,6 @@ export type NodeFsPromisesSubsetLegacy = {
 	writeFile: (path: string, data: ArrayBuffer | string) => Promise<void>;
 	mkdir: (path: string) => Promise<void>;
 };
-
 
 /**
  * A to be imported bundle.

@@ -11,10 +11,13 @@
  *   assertUsage(argument.startsWith("hello"), "The argument must start with 'hello'. Otherwise, the function crashes.")
  *  }
  */
-export function assertUsage(condition: unknown, message?: string): asserts condition {
-	// if production environment, do nothing -> vite will remove assert calls in production
-	if (import.meta.env?.PROD) return
-	if (!condition) {
-		throw new Error(message)
-	}
+export function assertUsage(
+  condition: unknown,
+  message?: string,
+): asserts condition {
+  // if production environment, do nothing -> vite will remove assert calls in production
+  if (import.meta.env?.PROD) return;
+  if (!condition) {
+    throw new Error(message);
+  }
 }

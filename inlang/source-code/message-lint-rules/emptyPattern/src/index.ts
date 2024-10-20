@@ -1,3 +1,3 @@
-import { emptyPatternRule } from "./emptyPattern.js"
+import { emptyPatternRule } from "./emptyPattern.js";
 
-export default emptyPatternRule
+export default emptyPatternRule;

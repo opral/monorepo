@@ -1,44 +1,44 @@
 export type Registry = Record<
-	string,
-	{
-		/** The Type-Restriction that should be added to the argument of the function */
-		typeRestriction?: string
-		options: Record<
-			string,
-			{
-				/** If a variable is used to provide a value for this option, it should be of this type */
-				typeRestriction?: string
-			}
-		>
-	}
->
+  string,
+  {
+    /** The Type-Restriction that should be added to the argument of the function */
+    typeRestriction?: string;
+    options: Record<
+      string,
+      {
+        /** If a variable is used to provide a value for this option, it should be of this type */
+        typeRestriction?: string;
+      }
+    >;
+  }
+>;
 
 export const DEFAULT_REGISTRY: Registry = {
-	plural: {
-		typeRestriction: "number",
-		options: {
-			type: { typeRestriction: "string" },
-		},
-	},
+  plural: {
+    typeRestriction: "number",
+    options: {
+      type: { typeRestriction: "string" },
+    },
+  },
 
-	number: {
-		typeRestriction: "number",
-		options: {
-			type: { typeRestriction: "string" },
-		},
-	},
+  number: {
+    typeRestriction: "number",
+    options: {
+      type: { typeRestriction: "string" },
+    },
+  },
 
-	datetime: {
-		typeRestriction: "Date",
-		options: {},
-	},
-}
+  datetime: {
+    typeRestriction: "Date",
+    options: {},
+  },
+};
 
 /**
  * Creates the Registry implementation file
  */
 export function createRegistry() {
-	return `/* eslint-disable */
+  return `/* eslint-disable */
 
 /**
  * @param {import("./runtime.js").AvailableLanguageTag} locale
@@ -69,5 +69,5 @@ export function number(locale, input, options) {
 export function datetime(locale, input, options) {
 	return new Intl.DateTimeFormat(locale, options).format(input)
 }
-`
+`;
 }

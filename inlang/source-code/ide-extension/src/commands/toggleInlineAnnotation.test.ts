@@ -38,7 +38,9 @@ describe("toggleInlineAnnotationsCommand", () => {
 	})
 
 	it('should enable inline annotations when "Enable" is selected', async () => {
-		vi.mocked(vscode.window.showQuickPick).mockResolvedValue({ label: "Enable" })
+		vi.mocked(vscode.window.showQuickPick).mockResolvedValue({
+			label: "Enable",
+		})
 
 		await toggleInlineAnnotationsCommand.callback()
 
@@ -46,7 +48,9 @@ describe("toggleInlineAnnotationsCommand", () => {
 	})
 
 	it('should disable inline annotations when "Disable" is selected', async () => {
-		vi.mocked(vscode.window.showQuickPick).mockResolvedValue({ label: "Disable" })
+		vi.mocked(vscode.window.showQuickPick).mockResolvedValue({
+			label: "Disable",
+		})
 
 		await toggleInlineAnnotationsCommand.callback()
 

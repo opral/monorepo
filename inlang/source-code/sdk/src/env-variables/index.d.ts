@@ -9,5 +9,5 @@
  * - assume that each env variable might be undefined (to ease development/contributions)
  */
 export declare const ENV_VARIABLES: Partial<{
-	PUBLIC_POSTHOG_TOKEN: string
-}>
+  PUBLIC_POSTHOG_TOKEN: string;
+}>;

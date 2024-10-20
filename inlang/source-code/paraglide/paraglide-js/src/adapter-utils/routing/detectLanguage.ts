@@ -16,25 +16,27 @@
  *
  */
 export function detectLanguageFromPath<T extends string>({
-	path,
-	availableLanguageTags,
-	base,
+  path,
+  availableLanguageTags,
+  base,
 }: {
-	/** The absolute path including the base */
-	path: string
-	availableLanguageTags: readonly T[]
-	/** The base path */
-	base?: string
+  /** The absolute path including the base */
+  path: string;
+  availableLanguageTags: readonly T[];
+  /** The base path */
+  base?: string;
 }): T | undefined {
-	base ??= ""
-	if (base === "/") base = ""
-	if (!path.startsWith(base)) return undefined
-	const pathWithoutBase = path.replace(base, "")
+  base ??= "";
+  if (base === "/") base = "";
+  if (!path.startsWith(base)) return undefined;
+  const pathWithoutBase = path.replace(base, "");
 
-	const maybeLang = pathWithoutBase.split("/")[1]
-	if (!maybeLang) return undefined
+  const maybeLang = pathWithoutBase.split("/")[1];
+  if (!maybeLang) return undefined;
 
-	return availableLanguageTags.map(lower).includes(lower(maybeLang)) ? (maybeLang as T) : undefined
+  return availableLanguageTags.map(lower).includes(lower(maybeLang))
+    ? (maybeLang as T)
+    : undefined;
 }
 
-const lower = (s: string) => s.toLowerCase()
+const lower = (s: string) => s.toLowerCase();

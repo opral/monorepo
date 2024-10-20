@@ -1,3 +1,3 @@
-export type PluginSettings = object
+export type PluginSettings = object;
 
-export const PluginSettings = {}
+export const PluginSettings = {};

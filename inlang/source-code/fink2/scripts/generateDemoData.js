@@ -85,9 +85,7 @@ for (const bundle of ast) {
 console.log(JSON.stringify(sqliteConformAst, null, 2));
 
 // Add one variant bundle
-const variantBundle = sqliteConformAst.find(
-	(bundle) => bundle.id === "app_nrOfTodos"
-);
+const variantBundle = sqliteConformAst.find((bundle) => bundle.id === "app_nrOfTodos");
 
 for (const message of variantBundle.messages) {
 	if (message.locale === "en") {

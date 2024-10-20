@@ -1,9 +1,4 @@
-import {
-	ImportFile,
-	InlangProject,
-	loadProjectInMemory,
-	merge,
-} from "@inlang/sdk2";
+import { ImportFile, InlangProject, loadProjectInMemory, merge } from "@inlang/sdk2";
 import JSZip from "jszip";
 import { supportedPluginKeyType } from "./types.ts";
 
@@ -92,9 +87,7 @@ export const handleOpenProject = async (
 };
 
 // Import
-export const selectImportFile = async (
-	acceptedImport: HTMLInputElement["accept"]
-) => {
+export const selectImportFile = async (acceptedImport: HTMLInputElement["accept"]) => {
 	const input = document.createElement("input");
 	input.type = "file";
 	input.accept = acceptedImport;

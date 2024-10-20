@@ -1,3 +1,3 @@
-import { messageWithoutSourceRule } from "./messageWithoutSource.js"
+import { messageWithoutSourceRule } from "./messageWithoutSource.js";
 
-export default messageWithoutSourceRule
+export default messageWithoutSourceRule;

@@ -49,7 +49,10 @@ describe("jumpToPositionCommand", () => {
 
 		await jumpToPositionCommand.callback({
 			bundleId: "test-message",
-			position: { start: { line: 1, character: 5 }, end: { line: 1, character: 10 } },
+			position: {
+				start: { line: 1, character: 5 },
+				end: { line: 1, character: 10 },
+			},
 		})
 		expect(vscode.window.activeTextEditor).toBeUndefined()
 		expect(captureSpy).not.toHaveBeenCalled()
@@ -69,7 +72,10 @@ describe("jumpToPositionCommand", () => {
 
 		const args = {
 			bundleId: "test-message",
-			position: { start: { line: 1, character: 5 }, end: { line: 1, character: 10 } },
+			position: {
+				start: { line: 1, character: 5 },
+				end: { line: 1, character: 10 },
+			},
 		}
 
 		await jumpToPositionCommand.callback(args)

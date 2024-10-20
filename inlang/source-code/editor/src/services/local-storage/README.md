@@ -8,7 +8,7 @@ The localStorage [context](https://www.solidjs.com/tutorial/stores_context) must
 
 ```ts
 function Component() {
-	const [localStorage] = useLocalStorage()
+  const [localStorage] = useLocalStorage();
 }
 ```
 
@@ -17,5 +17,5 @@ function Component() {
 Use `getLocalStorage()` like
 
 ```ts
-const localStorage = getLocalStorage()
+const localStorage = getLocalStorage();
 ```

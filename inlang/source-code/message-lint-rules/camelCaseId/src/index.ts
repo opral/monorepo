@@ -1,3 +1,3 @@
-import { camelCaseId } from "./camelCaseId.js"
+import { camelCaseId } from "./camelCaseId.js";
 
-export default camelCaseId
+export default camelCaseId;

@@ -1,11 +1,11 @@
-import { subscribeNewsletter } from "./subscribeNewsletter.js"
-import { subscribeCategory } from "./subscribeCategory.js"
-import { machineTranslateBundle } from "./machineTranslateBundle.js"
+import { subscribeNewsletter } from "./subscribeNewsletter.js";
+import { subscribeCategory } from "./subscribeCategory.js";
+import { machineTranslateBundle } from "./machineTranslateBundle.js";
 
 export const allRpcs = {
-	machineTranslateBundle,
-	subscribeNewsletter,
-	subscribeCategory,
-}
+  machineTranslateBundle,
+  subscribeNewsletter,
+  subscribeCategory,
+};
 
-export type AllRpcs = typeof allRpcs
+export type AllRpcs = typeof allRpcs;

@@ -1,5 +1,5 @@
-import { redirect } from "vike/abort"
+import { redirect } from "vike/abort";
 
 export default async function onBeforeRender() {
-	throw redirect("https://fink.inlang.com/", 301)
+  throw redirect("https://fink.inlang.com/", 301);
 }

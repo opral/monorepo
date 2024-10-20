@@ -1,1 +1,1 @@
-export { detectJsonFormatting } from "./detectJsonFormatting.js"
+export { detectJsonFormatting } from "./detectJsonFormatting.js";

@@ -127,14 +127,14 @@ export class DocHero extends LitElement {
 								(company) => html`<img class="company" src=${company} alt=${company} />`
 							)}
 						</ul>
-				  </div>`
+					</div>`
 				: ``}
 			<div class="button-wrapper">
 				<a class="button primary" href=${this["primary-link"]}>${this["primary-text"]}</a>
 				${this["secondary-link"] && this["secondary-text"]
 					? html`<a class="button secondary" href=${this["secondary-link"]}
 							>${this["secondary-text"]}</a
-					  >`
+						>`
 					: ""}
 			</div>
 		</div>`

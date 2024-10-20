@@ -25,7 +25,9 @@ vi.mock("@inlang/sdk2", () => ({
 
 describe("createNewProjectHandler", () => {
 	it("should create a new project successfully", async () => {
-		await createNewProjectHandler({ workspaceFolderPath: "/path/to/workspace" })
+		await createNewProjectHandler({
+			workspaceFolderPath: "/path/to/workspace",
+		})
 
 		// Check if newProject was called
 		expect(newProject).toHaveBeenCalled()
@@ -50,7 +52,9 @@ describe("createNewProjectHandler", () => {
 		const errorMessage = "Failed to create project"
 		;(newProject as Mock).mockRejectedValueOnce(new Error(errorMessage))
 
-		await createNewProjectHandler({ workspaceFolderPath: "/path/to/workspace" })
+		await createNewProjectHandler({
+			workspaceFolderPath: "/path/to/workspace",
+		})
 
 		// Check if error message is shown when newProject fails
 		expect(vscode.window.showErrorMessage).toHaveBeenCalledWith(

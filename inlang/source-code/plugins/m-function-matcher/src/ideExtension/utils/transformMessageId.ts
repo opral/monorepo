@@ -1,13 +1,13 @@
 export default function transformMessageId(messageId: string): string {
-	let transformedId = messageId
-		.trim()
-		.replace(/[^a-zA-Z0-9\s_.]/g, "")
-		.replace(/[\s.]+/g, "_")
+  let transformedId = messageId
+    .trim()
+    .replace(/[^a-zA-Z0-9\s_.]/g, "")
+    .replace(/[\s.]+/g, "_");
 
-	// Check if the transformed ID starts with a number
-	if (/^[0-9]/.test(transformedId)) {
-		transformedId = "_" + transformedId
-	}
+  // Check if the transformed ID starts with a number
+  if (/^[0-9]/.test(transformedId)) {
+    transformedId = "_" + transformedId;
+  }
 
-	return transformedId
+  return transformedId;
 }

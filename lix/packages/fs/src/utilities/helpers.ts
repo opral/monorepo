@@ -9,67 +9,85 @@
  * 	assertIsAbsolutePath("/absolute/path")
  */
 export function assertIsAbsolutePath(path: string) {
-	// tests whether a path starts with a forward slash (/) or a Windows-style
-	// drive letter (C:\ or D:\, etc.) followed by a backslash (\)
-	if ((path.startsWith("/") || /^[A-Za-z]:[\\/]/.test(path)) === false) {
-		{
-			throw new Error(`Path is not absolute: ${path}. All paths should be absolute to avoid bugs.`)
-		}
-	}
+  // tests whether a path starts with a forward slash (/) or a Windows-style
+  // drive letter (C:\ or D:\, etc.) followed by a backslash (\)
+  if ((path.startsWith("/") || /^[A-Za-z]:[\\/]/.test(path)) === false) {
+    {
+      throw new Error(
+        `Path is not absolute: ${path}. All paths should be absolute to avoid bugs.`
+      );
+    }
+  }
 }
 
 export function normalizePath(
-	path: string,
-	{
-		trailingSlash,
-		leadingSlash,
-	}: { trailingSlash?: "always" | "strip"; leadingSlash?: "always" } = {}
+  path: string,
+  {
+    trailingSlash,
+    leadingSlash,
+  }: { trailingSlash?: "always" | "strip"; leadingSlash?: "always" } = {}
 ): string {
-	path = path.replace(/^\.\//, "/")
+  path = path.replace(/^\.\//, "/");
 
-	if (path === "\\" || path === "" || path === "/" || path === "." || path === "//.") {
-		return "/"
-	}
+  if (
+    path === "\\" ||
+    path === "" ||
+    path === "/" ||
+    path === "." ||
+    path === "//."
+  ) {
+    return "/";
+  }
 
-	if (path.length <= 1) {
-		return path
-	}
+  if (path.length <= 1) {
+    return path;
+  }
 
-	const hadTrailingSlash = path[path.length - 1] === "/" || path[path.length - 1] === "\\"
-	const addleadingSlash = leadingSlash === "always" || path[0] === "/" || path[0] === "\\"
+  const hadTrailingSlash =
+    path[path.length - 1] === "/" || path[path.length - 1] === "\\";
+  const addleadingSlash =
+    leadingSlash === "always" || path[0] === "/" || path[0] === "\\";
 
-	const segs = path.split(/[/\\]+/)
-	const stack: string[] = []
-	for (const seg of segs) {
-		if (seg === "..") {
-			stack.pop()
-		} else if (seg && seg !== ".") {
-			stack.push(seg)
-		}
-	}
+  const segs = path.split(/[/\\]+/);
+  const stack: string[] = [];
+  for (const seg of segs) {
+    if (seg === "..") {
+      stack.pop();
+    } else if (seg && seg !== ".") {
+      stack.push(seg);
+    }
+  }
 
-	if (trailingSlash !== "strip" && (hadTrailingSlash || trailingSlash === "always")) {
-		stack.push("")
-	}
+  if (
+    trailingSlash !== "strip" &&
+    (hadTrailingSlash || trailingSlash === "always")
+  ) {
+    stack.push("");
+  }
 
-	return addleadingSlash ? "/" + stack.join("/") : stack.join("/")
+  return addleadingSlash ? "/" + stack.join("/") : stack.join("/");
 }
 
 export function getDirname(path: string): string {
-	const dirname = path
-		.split("/")
-		.filter((x) => x)
-		.slice(0, -1)
-		.join("/")
+  const dirname = path
+    .split("/")
+    .filter((x) => x)
+    .slice(0, -1)
+    .join("/");
 
-	return normalizePath(dirname, { leadingSlash: "always", trailingSlash: "always" }) ?? path
+  return (
+    normalizePath(dirname, {
+      leadingSlash: "always",
+      trailingSlash: "always",
+    }) ?? path
+  );
 }
 
 export function getBasename(path: string): string {
-	return (
-		path
-			.split("/")
-			.filter((x) => x)
-			.at(-1) ?? ""
-	)
+  return (
+    path
+      .split("/")
+      .filter((x) => x)
+      .at(-1) ?? ""
+  );
 }

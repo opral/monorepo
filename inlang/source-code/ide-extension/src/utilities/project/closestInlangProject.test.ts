@@ -23,7 +23,9 @@ describe("closestInlangProject", () => {
 		// Create inlang project directories
 		await fs.mkdir(path.join(rootPath, "folder1.inlang"), { recursive: true })
 		await fs.mkdir(path.join(rootPath, "folder2.inlang"), { recursive: true })
-		await fs.mkdir(path.join(rootPath, "folder2", "project.inlang"), { recursive: true })
+		await fs.mkdir(path.join(rootPath, "folder2", "project.inlang"), {
+			recursive: true,
+		})
 
 		// Write some test files
 		await fs.writeFile(path.join(rootPath, "file1.txt"), "")
@@ -40,7 +42,9 @@ describe("closestInlangProject", () => {
 			projects,
 		})
 
-		expect(result).toEqual({ projectPath: path.join(rootPath, "folder1.inlang") })
+		expect(result).toEqual({
+			projectPath: path.join(rootPath, "folder1.inlang"),
+		})
 	})
 
 	it("should return undefined if no inlang project is found", async () => {

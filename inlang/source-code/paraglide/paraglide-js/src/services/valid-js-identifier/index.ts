@@ -1,11 +1,11 @@
-import { KEYWORDS } from "./reservedWords.js"
+import { KEYWORDS } from "./reservedWords.js";
 
 /**
  * Checks if a string is a valid JS identifier.
  * This is more reliable than just using regexes or `new Function()`.s
  */
 export function isValidJSIdentifier(str: string): boolean {
-	return !KEYWORDS.includes(str) && canBeUsedAsVariableName(str)
+  return !KEYWORDS.includes(str) && canBeUsedAsVariableName(str);
 }
 
 /**
@@ -13,15 +13,15 @@ export function isValidJSIdentifier(str: string): boolean {
  * https://github.com/shinnn/is-var-name
  */
 function canBeUsedAsVariableName(str: string): boolean {
-	if (str.trim() !== str) {
-		return false
-	}
+  if (str.trim() !== str) {
+    return false;
+  }
 
-	try {
-		new Function(str, "var " + str)
-	} catch (_) {
-		return false
-	}
+  try {
+    new Function(str, "var " + str);
+  } catch (_) {
+    return false;
+  }
 
-	return true
+  return true;
 }

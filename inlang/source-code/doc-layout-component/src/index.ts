@@ -1,1 +1,1 @@
-export { default as InlangDocLayout } from "./stories/inlang-doc-layout.js"
+export { default as InlangDocLayout } from "./stories/inlang-doc-layout.js";

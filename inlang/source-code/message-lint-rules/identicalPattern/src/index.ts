@@ -1,3 +1,3 @@
-import { identicalPatternRule } from "./identicalPattern.js"
+import { identicalPatternRule } from "./identicalPattern.js";
 
-export default identicalPatternRule
+export default identicalPatternRule;

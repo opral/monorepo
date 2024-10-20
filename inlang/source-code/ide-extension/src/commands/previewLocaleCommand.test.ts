@@ -10,7 +10,9 @@ vi.mock("vscode", () => ({
 	commands: { registerCommand: vi.fn() },
 }))
 vi.mock("../utilities/settings/index.js", () => ({ updateSetting: vi.fn() }))
-vi.mock("../utilities/settings/statusBar.js", () => ({ showStatusBar: vi.fn() }))
+vi.mock("../utilities/settings/statusBar.js", () => ({
+	showStatusBar: vi.fn(),
+}))
 vi.mock("../utilities/state.js", () => ({
 	state: vi.fn(),
 }))

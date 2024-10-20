@@ -1,1 +1,1 @@
-export default "/documentation/*"
+export default "/documentation/*";

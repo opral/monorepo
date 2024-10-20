@@ -1,22 +1,30 @@
-import { _FileSystem, _assertParameter, _join } from "../../vendored/isomorphic-git/index.js"
-import { __checkout } from "./__checkout.js"
-import type { RepoContext, RepoState } from "../openRepository.js"
+import {
+  _FileSystem,
+  _assertParameter,
+  _join,
+} from "../../vendored/isomorphic-git/index.js";
+import { __checkout } from "./__checkout.js";
+import type { RepoContext, RepoState } from "../openRepository.js";
 
-export async function checkout(ctx: RepoContext, state: RepoState, { branch }: { branch: string }) {
-	state.branchName = branch
+export async function checkout(
+  ctx: RepoContext,
+  state: RepoState,
+  { branch }: { branch: string }
+) {
+  state.branchName = branch;
 
-	if (ctx.useLazyFS) {
-		throw new Error(
-			"not implemented for lazy lix mode yet, use openRepo with different branch instead"
-		)
-	}
+  if (ctx.useLazyFS) {
+    throw new Error(
+      "not implemented for lazy lix mode yet, use openRepo with different branch instead"
+    );
+  }
 
-	return await _checkout({
-		fs: ctx.rawFs,
-		cache: ctx.cache,
-		dir: ctx.dir,
-		ref: state.branchName,
-	})
+  return await _checkout({
+    fs: ctx.rawFs,
+    cache: ctx.cache,
+    dir: ctx.dir,
+    ref: state.branchName,
+  });
 }
 
 /**
@@ -73,44 +81,44 @@ export async function checkout(ctx: RepoContext, state: RepoState, { branch }: {
  * console.log('done')
  */
 export async function _checkout({
-	fs,
-	onProgress,
-	dir,
-	gitdir = _join(dir, ".git"),
-	remote = "origin",
-	ref: _ref,
-	filepaths,
-	noCheckout = false,
-	noUpdateHead = _ref === undefined,
-	dryRun = false,
-	force = false,
-	track = true,
-	cache = {},
+  fs,
+  onProgress,
+  dir,
+  gitdir = _join(dir, ".git"),
+  remote = "origin",
+  ref: _ref,
+  filepaths,
+  noCheckout = false,
+  noUpdateHead = _ref === undefined,
+  dryRun = false,
+  force = false,
+  track = true,
+  cache = {},
 }: any) {
-	try {
-		_assertParameter("fs", fs)
-		_assertParameter("dir", dir)
-		_assertParameter("gitdir", gitdir)
+  try {
+    _assertParameter("fs", fs);
+    _assertParameter("dir", dir);
+    _assertParameter("gitdir", gitdir);
 
-		const ref = _ref || "HEAD"
-		return await __checkout({
-			fs: new _FileSystem(fs),
-			cache,
-			onProgress,
-			dir,
-			gitdir,
-			remote,
-			ref,
-			filepaths,
-			noCheckout,
-			noUpdateHead,
-			dryRun,
-			force,
-			track,
-		})
-	} catch (err) {
-		// @ts-ignore
-		err.caller = "git.checkout"
-		throw err
-	}
+    const ref = _ref || "HEAD";
+    return await __checkout({
+      fs: new _FileSystem(fs),
+      cache,
+      onProgress,
+      dir,
+      gitdir,
+      remote,
+      ref,
+      filepaths,
+      noCheckout,
+      noUpdateHead,
+      dryRun,
+      force,
+      track,
+    });
+  } catch (err) {
+    // @ts-ignore
+    err.caller = "git.checkout";
+    throw err;
+  }
 }

@@ -1,5 +1,5 @@
-import { createStore, type SetStoreFunction } from "solid-js/store"
-import type { PageContext, PageContextRenderer } from "./types.js"
+import { createStore, type SetStoreFunction } from "solid-js/store";
+import type { PageContext, PageContextRenderer } from "./types.js";
 
 /**
  * The current page context.
@@ -12,6 +12,6 @@ import type { PageContext, PageContextRenderer } from "./types.js"
  */
 // eslint-disable-next-line solid/reactivity
 export const [currentPageContext, setCurrentPageContext] = createStore({}) as [
-	PageContext,
-	SetStoreFunction<PageContextRenderer>
-]
+  PageContext,
+  SetStoreFunction<PageContextRenderer>,
+];

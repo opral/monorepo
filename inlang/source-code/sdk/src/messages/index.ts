@@ -1,2 +1,2 @@
-export * from "./variant.js"
-export * from "./errors.js"
+export * from "./variant.js";
+export * from "./errors.js";

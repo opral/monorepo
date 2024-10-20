@@ -1,24 +1,24 @@
-export { data }
-export type Data = Awaited<ReturnType<typeof data>>
+export { data };
+export type Data = Awaited<ReturnType<typeof data>>;
 
-let cachedProjectCount: string | number | undefined = undefined
-let cacheLastSet: number | undefined = undefined
+let cachedProjectCount: string | number | undefined = undefined;
+let cacheLastSet: number | undefined = undefined;
 
 async function data() {
-	if (
-		cachedProjectCount &&
-		cacheLastSet &&
-		Date.now() - cacheLastSet < 24 * 60 * 60 * 1000 &&
-		cachedProjectCount !== "20000+"
-	) {
-		return {
-			projectCount: cachedProjectCount,
-		}
-	} else {
-		let projectCount: string | number | undefined = undefined
-		try {
-			// prettier-ignore
-			const raw = JSON.stringify({
+  if (
+    cachedProjectCount &&
+    cacheLastSet &&
+    Date.now() - cacheLastSet < 24 * 60 * 60 * 1000 &&
+    cachedProjectCount !== "20000+"
+  ) {
+    return {
+      projectCount: cachedProjectCount,
+    };
+  } else {
+    let projectCount: string | number | undefined = undefined;
+    try {
+      // prettier-ignore
+      const raw = JSON.stringify({
 				"refresh": true,
 				"query": {
 					"kind": "InsightVizNode",
@@ -85,40 +85,40 @@ async function data() {
 				}
 			})
 
-			const response = await fetch(
-				`https://eu.posthog.com/api/projects/${privateEnv.PUBLIC_POSTHOG_PROJECT_ID}/query`,
-				{
-					method: "POST",
-					headers: {
-						Authorization: "Bearer " + process.env.POSTHOG_API_KEY,
-						"Content-Type": "application/json",
-					},
-					body: raw,
-					redirect: "follow",
-					cache: "no-cache",
-				}
-			)
+      const response = await fetch(
+        `https://eu.posthog.com/api/projects/${privateEnv.PUBLIC_POSTHOG_PROJECT_ID}/query`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + process.env.POSTHOG_API_KEY,
+            "Content-Type": "application/json",
+          },
+          body: raw,
+          redirect: "follow",
+          cache: "no-cache",
+        },
+      );
 
-			const json = await response.json()
-			projectCount = json.results[0].data.at(-1)
-		} catch (error) {
-			if (cachedProjectCount) {
-				projectCount = cachedProjectCount
-			} else {
-				projectCount = "20000+"
-			}
-		}
+      const json = await response.json();
+      projectCount = json.results[0].data.at(-1);
+    } catch (error) {
+      if (cachedProjectCount) {
+        projectCount = cachedProjectCount;
+      } else {
+        projectCount = "20000+";
+      }
+    }
 
-		if (projectCount) {
-			cachedProjectCount = Number(projectCount) + 8000
-			cacheLastSet = Date.now()
-			return {
-				projectCount: cachedProjectCount,
-			}
-		} else {
-			return {
-				projectCount: "20000+",
-			}
-		}
-	}
+    if (projectCount) {
+      cachedProjectCount = Number(projectCount) + 8000;
+      cacheLastSet = Date.now();
+      return {
+        projectCount: cachedProjectCount,
+      };
+    } else {
+      return {
+        projectCount: "20000+",
+      };
+    }
+  }
 }

@@ -11,4 +11,4 @@ const Settings = createComponent({
 	},
 });
 
-export default Settings
+export default Settings;

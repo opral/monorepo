@@ -1,1 +1,1 @@
-export { JSONObject, JSON } from "./interface.js"
+export { JSONObject, JSON } from "./interface.js";

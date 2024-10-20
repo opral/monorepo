@@ -32,7 +32,12 @@ describe("getStringFromPattern", () => {
 
 	it("should handle VariableReference elements", () => {
 		const result = getStringFromPattern({
-			pattern: [{ type: "expression", arg: { type: "variable-reference", name: "name" } }],
+			pattern: [
+				{
+					type: "expression",
+					arg: { type: "variable-reference", name: "name" },
+				},
+			],
 			locale: "en-US",
 			messageId: "2",
 		})
@@ -43,7 +48,10 @@ describe("getStringFromPattern", () => {
 		const result = getStringFromPattern({
 			pattern: [
 				{ type: "text", value: "Hello " },
-				{ type: "expression", arg: { type: "variable-reference", name: "name" } },
+				{
+					type: "expression",
+					arg: { type: "variable-reference", name: "name" },
+				},
 			],
 			locale: "en-US",
 			messageId: "3",
@@ -81,7 +89,10 @@ describe("getPatternFromString", () => {
 			{ type: "text", value: "Hello " },
 			{ type: "expression", arg: { type: "variable-reference", name: "name" } },
 			{ type: "text", value: ", welcome to " },
-			{ type: "expression", arg: { type: "variable-reference", name: "place" } },
+			{
+				type: "expression",
+				arg: { type: "variable-reference", name: "place" },
+			},
 		])
 	})
 })

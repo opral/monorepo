@@ -1,6 +1,6 @@
-import * as solid from "solid-js"
-import * as solid_web from "solid-js/web"
-import * as router from "@solidjs/router"
+import * as solid from "solid-js";
+import * as solid_web from "solid-js/web";
+import * as router from "@solidjs/router";
 
 /**
  * Normalize a pathname.
@@ -8,7 +8,7 @@ import * as router from "@solidjs/router"
  * (e.g. "foo" → "/foo")
  */
 export function normalizePathname(pathname: string): string {
-	return pathname[0] === "/" ? pathname : "/" + pathname
+  return pathname[0] === "/" ? pathname : "/" + pathname;
 }
 
 /**
@@ -19,18 +19,18 @@ export function normalizePathname(pathname: string): string {
  * @returns The language tag from the URL, or `undefined` if no language tag was found.
  */
 export function languageTagFromPathname<T extends string>(
-	pathname: string,
-	all_language_tags: readonly T[]
+  pathname: string,
+  all_language_tags: readonly T[],
 ): T | undefined {
-	for (const tag of all_language_tags) {
-		if (
-			pathname.startsWith(tag, 1) &&
-			(pathname.length === tag.length + 1 || pathname[tag.length + 1] === "/")
-		) {
-			return tag
-		}
-	}
-	return undefined
+  for (const tag of all_language_tags) {
+    if (
+      pathname.startsWith(tag, 1) &&
+      (pathname.length === tag.length + 1 || pathname[tag.length + 1] === "/")
+    ) {
+      return tag;
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -47,16 +47,19 @@ export function languageTagFromPathname<T extends string>(
  * @returns The translated pathname. (e.g. "/en/bar")
  */
 export function translateHref<T extends string>(
-	pathname: string,
-	page_language_tag: T,
-	available_language_tags: readonly T[]
+  pathname: string,
+  page_language_tag: T,
+  available_language_tags: readonly T[],
 ): string {
-	const to_normal_pathname = normalizePathname(pathname)
-	const to_language_tag = languageTagFromPathname(to_normal_pathname, available_language_tags)
+  const to_normal_pathname = normalizePathname(pathname);
+  const to_language_tag = languageTagFromPathname(
+    to_normal_pathname,
+    available_language_tags,
+  );
 
-	return to_language_tag
-		? to_normal_pathname.replace(to_language_tag, page_language_tag)
-		: "/" + page_language_tag + to_normal_pathname
+  return to_language_tag
+    ? to_normal_pathname.replace(to_language_tag, page_language_tag)
+    : "/" + page_language_tag + to_normal_pathname;
 }
 
 /**
@@ -71,10 +74,10 @@ export function translateHref<T extends string>(
  * ```
  */
 export function useLocationPathname(): string {
-	return solid_web.isServer
-		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		  new URL(solid_web.getRequestEvent()!.request.url).pathname
-		: window.location.pathname
+  return solid_web.isServer
+    ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      new URL(solid_web.getRequestEvent()!.request.url).pathname
+    : window.location.pathname;
 }
 
 /**
@@ -82,17 +85,17 @@ export function useLocationPathname(): string {
  * (e.g. "paraglide/runtime.js")
  */
 export interface Paraglide<T extends string> {
-	readonly setLanguageTag: (language_tag: T | (() => T)) => void
-	readonly languageTag: () => T
-	readonly onSetLanguageTag: (callback: (language_tag: T) => void) => void
-	readonly availableLanguageTags: readonly T[]
-	readonly sourceLanguageTag: T
+  readonly setLanguageTag: (language_tag: T | (() => T)) => void;
+  readonly languageTag: () => T;
+  readonly onSetLanguageTag: (callback: (language_tag: T) => void) => void;
+  readonly availableLanguageTags: readonly T[];
+  readonly sourceLanguageTag: T;
 }
 
 export interface I18n<T extends string> {
-	readonly languageTag: solid.Accessor<T>
-	readonly setLanguageTag: (language_tag: T) => void
-	readonly LanguageTagProvider: solid.ContextProviderComponent<T>
+  readonly languageTag: solid.Accessor<T>;
+  readonly setLanguageTag: (language_tag: T) => void;
+  readonly LanguageTagProvider: solid.ContextProviderComponent<T>;
 }
 
 /**
@@ -108,90 +111,94 @@ export interface I18n<T extends string> {
  * ```
  */
 export function createI18n<T extends string>(paraglide: Paraglide<T>): I18n<T> {
-	let languageTag: I18n<T>["languageTag"]
-	let setLanguageTag: I18n<T>["setLanguageTag"]
-	let LanguageTagProvider: I18n<T>["LanguageTagProvider"]
+  let languageTag: I18n<T>["languageTag"];
+  let setLanguageTag: I18n<T>["setLanguageTag"];
+  let LanguageTagProvider: I18n<T>["LanguageTagProvider"];
 
-	// SERVER
-	if (solid_web.isServer) {
-		const LanguageTagCtx = solid.createContext<T>()
-		LanguageTagProvider = LanguageTagCtx.Provider
+  // SERVER
+  if (solid_web.isServer) {
+    const LanguageTagCtx = solid.createContext<T>();
+    LanguageTagProvider = LanguageTagCtx.Provider;
 
-		setLanguageTag = () => {
-			throw new Error("setLanguageTag not available on server")
-		}
-		languageTag = () => {
-			const ctx = solid.useContext(LanguageTagCtx)
-			if (!ctx) {
-				throw new Error("LanguageTagCtx not found")
-			}
-			return ctx
-		}
+    setLanguageTag = () => {
+      throw new Error("setLanguageTag not available on server");
+    };
+    languageTag = () => {
+      const ctx = solid.useContext(LanguageTagCtx);
+      if (!ctx) {
+        throw new Error("LanguageTagCtx not found");
+      }
+      return ctx;
+    };
 
-		paraglide.setLanguageTag(languageTag)
-	}
-	// BROWSER
-	else {
-		let language_tag: T
+    paraglide.setLanguageTag(languageTag);
+  }
+  // BROWSER
+  else {
+    let language_tag: T;
 
-		LanguageTagProvider = (props) => {
-			language_tag = props.value
-			paraglide.setLanguageTag(language_tag)
+    LanguageTagProvider = (props) => {
+      language_tag = props.value;
+      paraglide.setLanguageTag(language_tag);
 
-			const navigate = router.useNavigate()
+      const navigate = router.useNavigate();
 
-			/*
+      /*
 			Keep the language tag in the URL
 			*/
-			router.useBeforeLeave((e) => {
-				if (typeof e.to !== "string") return
+      router.useBeforeLeave((e) => {
+        if (typeof e.to !== "string") return;
 
-				const from_pathname = normalizePathname(e.from.pathname)
-				const from_language_tag = languageTagFromPathname(
-					from_pathname,
-					paraglide.availableLanguageTags
-				)
-				const to_pathname = normalizePathname(e.to)
-				const to_language_tag = languageTagFromPathname(
-					to_pathname,
-					paraglide.availableLanguageTags
-				)
+        const from_pathname = normalizePathname(e.from.pathname);
+        const from_language_tag = languageTagFromPathname(
+          from_pathname,
+          paraglide.availableLanguageTags,
+        );
+        const to_pathname = normalizePathname(e.to);
+        const to_language_tag = languageTagFromPathname(
+          to_pathname,
+          paraglide.availableLanguageTags,
+        );
 
-				//  /en/foo → /en/bar  |  /foo → /bar
-				if (to_language_tag === from_language_tag) return
+        //  /en/foo → /en/bar  |  /foo → /bar
+        if (to_language_tag === from_language_tag) return;
 
-				e.preventDefault()
+        e.preventDefault();
 
-				//  /en/foo → /bar  |  /de/foo → /bar
-				if (!to_language_tag) {
-					navigate("/" + from_language_tag + to_pathname, e.options)
-				}
-				//  /foo → /en/bar
-				else if (to_language_tag === paraglide.sourceLanguageTag && !from_language_tag) {
-					navigate(to_pathname.slice(to_language_tag.length + 1), e.options)
-				}
-				//  /de/foo → /en/bar  |  /foo → /de/bar
-				else {
-					location.pathname = to_pathname
-				}
-			})
+        //  /en/foo → /bar  |  /de/foo → /bar
+        if (!to_language_tag) {
+          navigate("/" + from_language_tag + to_pathname, e.options);
+        }
+        //  /foo → /en/bar
+        else if (
+          to_language_tag === paraglide.sourceLanguageTag &&
+          !from_language_tag
+        ) {
+          navigate(to_pathname.slice(to_language_tag.length + 1), e.options);
+        }
+        //  /de/foo → /en/bar  |  /foo → /de/bar
+        else {
+          location.pathname = to_pathname;
+        }
+      });
 
-			return props.children
-		}
+      return props.children;
+    };
 
-		setLanguageTag = paraglide.setLanguageTag
-		languageTag = () => language_tag
+    setLanguageTag = paraglide.setLanguageTag;
+    languageTag = () => language_tag;
 
-		paraglide.onSetLanguageTag((new_language_tag) => {
-			if (new_language_tag === language_tag) return
-			const pathname = normalizePathname(location.pathname)
-			location.pathname = "/" + new_language_tag + pathname.replace("/" + language_tag, "")
-		})
-	}
+    paraglide.onSetLanguageTag((new_language_tag) => {
+      if (new_language_tag === language_tag) return;
+      const pathname = normalizePathname(location.pathname);
+      location.pathname =
+        "/" + new_language_tag + pathname.replace("/" + language_tag, "");
+    });
+  }
 
-	return {
-		languageTag,
-		setLanguageTag,
-		LanguageTagProvider,
-	}
+  return {
+    languageTag,
+    setLanguageTag,
+    LanguageTagProvider,
+  };
 }

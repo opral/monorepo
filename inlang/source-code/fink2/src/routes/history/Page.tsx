@@ -18,9 +18,9 @@ export default function App() {
 				</div>
 				<Grid>
 					<div className="relative bg-white divide-y divide-zinc-200 border border-zinc-200 my-8 rounded-lg">
-						{commits.map((commit) =>
+						{commits.map((commit) => (
 							<HistoryEntry commit={commit} key={commit.id} />
-						)}
+						))}
 					</div>
 				</Grid>
 			</Layout>

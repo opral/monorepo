@@ -85,7 +85,9 @@ export function createMessageWebviewProvider(args: {
 			matchedBundles.map(async (bundle) => {
 				// @ts-ignore TODO: Introduce deprecation message for messageId
 				bundle.bundleId = bundle.bundleId || bundle.messageId
-				const bundleData = await selectBundleNested(state().project.db).where("id", "=", bundle.bundleId).executeTakeFirst()
+				const bundleData = await selectBundleNested(state().project.db)
+					.where("id", "=", bundle.bundleId)
+					.executeTakeFirst()
 				return bundleData
 			})
 		)

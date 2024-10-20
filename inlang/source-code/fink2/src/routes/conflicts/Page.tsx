@@ -52,9 +52,7 @@ export default function Page() {
 
 							const bundleId = bundlesNested.find((bundle) =>
 								bundle.messages.filter((message) =>
-									message.variants.find(
-										(variant) => variant.id === conflict.change_id
-									)
+									message.variants.find((variant) => variant.id === conflict.change_id)
 								)
 							)?.id;
 							return (

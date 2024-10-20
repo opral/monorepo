@@ -1,20 +1,20 @@
-import type { Component } from "solid-js"
-import type { PageContextBuiltIn } from "vike/types"
-import type { passToClient } from "./+onRenderHtml.jsx"
+import type { Component } from "solid-js";
+import type { PageContextBuiltIn } from "vike/types";
+import type { passToClient } from "./+onRenderHtml.jsx";
 
 /**
  * The page context available during rendering.
  */
 export type PageContextRenderer<PageProps = Record<string, unknown>> =
-	PageContextBuiltIn<Component> & {
-		/**
-		 * The properties of a page.
-		 */
-		pageProps: PageProps
-		languageTag: string
-		meta: any
-		data: any
-	}
+  PageContextBuiltIn<Component> & {
+    /**
+     * The properties of a page.
+     */
+    pageProps: PageProps;
+    languageTag: string;
+    meta: any;
+    data: any;
+  };
 
 /**
  * The page context that is available on the client.
@@ -33,9 +33,9 @@ export type PageContextRenderer<PageProps = Record<string, unknown>> =
  */
 // urlParsed is available by default #246
 export type PageContext<PageProps = Record<string, unknown>> = Pick<
-	PageContextRenderer<PageProps>,
-	(typeof passToClient)[number]
-> & { urlParsed: PageContextRenderer["urlParsed"] }
+  PageContextRenderer<PageProps>,
+  (typeof passToClient)[number]
+> & { urlParsed: PageContextRenderer["urlParsed"] };
 
 /**
  * The return of a `onBeforeRender` hook.
@@ -47,9 +47,11 @@ export type PageContext<PageProps = Record<string, unknown>> = Pick<
  * 		}
  * ```
  */
-export type OnBeforeRender<PageProps> = (pageContext: PageContextRenderer) => Promise<{
-	pageContext: {
-		pageProps: PageProps
-		data: any
-	}
-}>
+export type OnBeforeRender<PageProps> = (
+  pageContext: PageContextRenderer,
+) => Promise<{
+  pageContext: {
+    pageProps: PageProps;
+    data: any;
+  };
+}>;

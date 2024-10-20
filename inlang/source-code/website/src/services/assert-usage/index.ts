@@ -5,4 +5,4 @@
  * --------------------------------
  */
 
-export { assertUsage } from "./src/implementation.js"
+export { assertUsage } from "./src/implementation.js";

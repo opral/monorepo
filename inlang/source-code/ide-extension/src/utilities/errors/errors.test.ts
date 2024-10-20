@@ -122,7 +122,9 @@ describe("error handling", () => {
 
 	it("registers error view", async () => {
 		const mockContext = { subscriptions: [] }
-		await errorView({ context: mockContext as unknown as vscode.ExtensionContext })
+		await errorView({
+			context: mockContext as unknown as vscode.ExtensionContext,
+		})
 		expect(mockContext.subscriptions).toHaveLength(1)
 		expect(vscode.window.registerTreeDataProvider).toHaveBeenCalledWith(
 			"errorView",

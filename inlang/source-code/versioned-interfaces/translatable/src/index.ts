@@ -1,1 +1,1 @@
-export { Translatable } from "./interface.js"
+export { Translatable } from "./interface.js";

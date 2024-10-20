@@ -16,9 +16,7 @@ const DiffBundleView = (props: { changes: Change[]; bundleId: string }) => {
 	const [project] = useAtom(projectAtom);
 	const [settings] = useAtom(settingsAtom);
 	const [bundle, setBundle] = useState<BundleNested | undefined>(undefined);
-	const [oldBundle, setOldBundle] = useState<BundleNested | undefined>(
-		undefined
-	);
+	const [oldBundle, setOldBundle] = useState<BundleNested | undefined>(undefined);
 
 	const [loadingDiscard, setLoadingDiscard] = useState(false);
 
@@ -71,7 +69,10 @@ const DiffBundleView = (props: { changes: Change[]; bundleId: string }) => {
 							<div key={change.id}>
 								{/* <pre>{JSON.stringify(change, null, 2)}</pre> */}
 								<div className="flex justify-between items-center">
-									<span>{change.operation} {change.type} {change.value?.locale && `- ${change.value.locale}`}</span>
+									<span>
+										{change.operation} {change.type}{" "}
+										{change.value?.locale && `- ${change.value.locale}`}
+									</span>
 									{/* <SlTooltip content={`Revert ${change.type} change`}>
 										<SlButton
 											size="small"
@@ -93,7 +94,9 @@ const DiffBundleView = (props: { changes: Change[]; bundleId: string }) => {
 										</SlButton>
 									</SlTooltip> */}
 								</div>
-								{(index < props.changes.length - 1) && <div className="w-full border-b border-zinc-200 my-1" />}
+								{index < props.changes.length - 1 && (
+									<div className="w-full border-b border-zinc-200 my-1" />
+								)}
 							</div>
 						))}
 					</SlDetails>
@@ -155,10 +158,7 @@ const queryNewBundle = async (
 		const oldBundle = structuredClone(bundle);
 		// TODO proper query
 		for (const change of props.changes) {
-			const latestCommitedChange = await getLatestCommitedChange(
-				project,
-				change
-			);
+			const latestCommitedChange = await getLatestCommitedChange(project, change);
 			if (change && change.value && change.type === "variant") {
 				for (const message of oldBundle.messages) {
 					for (const variant of message.variants) {
