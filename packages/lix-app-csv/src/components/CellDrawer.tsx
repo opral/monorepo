@@ -19,7 +19,7 @@ export const CellDrawer = (props: {
 	const [csvData] = useAtom(csvDataAtom);
 	const [uniqueColumn] = useAtom(uniqueColumnAtom);
 	const [row, setRow] = useState<{ [key: string]: string } | undefined>();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	 
 	const [relevantChangesOfRow, setRelevantChangesOfRow] = useState<any[]>([]);
 
 	const getPlacement = () => {

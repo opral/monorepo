@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 import {
@@ -172,7 +170,6 @@ export default function Layout(props: {
 							size="small"
 							variant="primary"
 							onClick={() => props.setShowImportDialog(true)}
-							// eslint-disable-next-line @typescript-eslint/no-explicit-any
 							style={{ "--sl-button-font-size-small": "13px" } as any}
 						>
 							Import .csv

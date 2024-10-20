@@ -127,7 +127,7 @@ export const WelcomeDialog = (props: {
 							placeholder="Enter unique column name"
 							value={uniqueColumn}
 							helpText="To trace all the changes correctly we need to know which column is used as unique identifier in your .csv file."
-							// eslint-disable-next-line @typescript-eslint/no-explicit-any
+							 
 							onInput={(e: any) =>
 								setUniqueColumn(e.target.value ? e.target.value : "")
 							}

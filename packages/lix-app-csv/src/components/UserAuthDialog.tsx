@@ -38,7 +38,7 @@ export const UserAuthDialog = (props: {
 			<SlInput
 				label="Username"
 				placeholder="Max Mustermann"
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				 
 				onInput={(e: any) => setAuthor(e.target.value)}
 			></SlInput>
 			<SlButton

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+ 
 import {
 	SlButton,
 	SlDialog,
@@ -90,7 +90,7 @@ export const ImportDialog = (props: {
 							<SlInput
 								label="Description"
 								placeholder="What did you import?"
-								// eslint-disable-next-line @typescript-eslint/no-explicit-any
+								 
 								onInput={(e: any) =>
 									setDescription(e.target.value ? e.target.value : "")
 								}

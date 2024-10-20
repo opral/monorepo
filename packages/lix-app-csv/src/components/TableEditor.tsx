@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+ 
 import { useAtom } from "jotai";
 // import { useState } from "react";
 import {
@@ -90,7 +90,7 @@ const TableEditor = () => {
 				}
 				rowKey={uniqueColumn}
 				// onFocus={(cell) => console.log("onFocus", cell)}
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				 
 				onSelectionChange={(e: { selection: any }) => {
 					if (e.selection) {
 						if (

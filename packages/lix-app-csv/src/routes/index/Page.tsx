@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
 import { projectAtom, selectedProjectPathAtom } from "../../state.ts";

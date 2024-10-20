@@ -77,7 +77,7 @@ export const CreateProjectDialog = (props: {
 						: "Enter the name of your project"
 				}
 				placeholder="my-website"
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				 
 				onInput={(e: any) =>
 					setFileName(e.target.value ? e.target.value + ".lix" : "")
 				}
