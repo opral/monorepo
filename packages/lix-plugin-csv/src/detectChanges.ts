@@ -39,7 +39,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			detectedChanges.push({
 				type: "row",
 				entity_id,
-				snapshot: afterParsed[entity_id],
+				snapshot: { text: afterParsed[entity_id]!.join(",") },
 			});
 		}
 		return detectedChanges;
@@ -56,7 +56,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 				detectedChanges.push({
 					type: "row",
 					entity_id,
-					snapshot: afterRow,
+					snapshot: { text: afterRow.join(",") },
 				});
 			}
 		}
@@ -73,7 +73,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			detectedChanges.push({
 				type: "row",
 				entity_id,
-				snapshot: afterRow,
+				snapshot: { text: afterRow.join(",") },
 			});
 		}
 	}

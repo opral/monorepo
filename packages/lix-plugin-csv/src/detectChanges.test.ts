@@ -36,7 +36,7 @@ test("it should detect an insert", async () => {
 		{
 			entity_id: "Name:John",
 			type: "row",
-			snapshot: ["John", "30"],
+			snapshot: { text: "John,30" },
 		},
 	] satisfies DetectedChange[]);
 });
@@ -56,7 +56,7 @@ test("it should detect updates", async () => {
 		{
 			type: "row",
 			entity_id: "Name:Anna",
-			snapshot: ["Anna", "21"],
+			snapshot: { text: "Anna,21" },
 		},
 	] satisfies DetectedChange[]);
 });
@@ -112,8 +112,8 @@ test("changing the unique column should lead to a new entity_id to avoid bugs", 
 			{ entity_id: "Name:Anna", type: "row", snapshot: undefined },
 			{ entity_id: "Name:Peter", type: "row", snapshot: undefined },
 			// detect the insertion of the new unique column
-			{ entity_id: "Age:20", type: "row", snapshot: ["Anna", "20"] },
-			{ entity_id: "Age:50", type: "row", snapshot: ["Peter", "50"] },
+			{ entity_id: "Age:20", type: "row", snapshot: { text: "Anna,20" } },
+			{ entity_id: "Age:50", type: "row", snapshot: { text: "Peter,50" } },
 		]),
 	);
 });

@@ -38,8 +38,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		// the update will overwrite the row in place
 		// the create will append a new key to the object
 		else {
-			// @ts-expect-error - wrong snapshot type see https://github.com/opral/lix-sdk/issues/110
-			parsed[change.entity_id] = snapshot.content;
+			parsed[change.entity_id] = snapshot.content.text.split(",");
 		}
 	}
 

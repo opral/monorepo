@@ -3,14 +3,18 @@ import {
 	getLeafChange,
 	type LixPlugin,
 	type Conflict,
+	getLeafChangesOnlyInSource,
 } from "@lix-js/sdk";
 
-export const detectConflicts: LixPlugin["detectConflicts"] = async ({
-	sourceLix,
-	targetLix,
-	leafChangesOnlyInSource,
-}) => {
+export const detectConflicts: NonNullable<
+	LixPlugin["detectConflicts"]
+> = async ({ sourceLix, targetLix }) => {
 	const result: Conflict[] = [];
+
+	const leafChangesOnlyInSource = await getLeafChangesOnlyInSource({
+		sourceLix,
+		targetLix,
+	});
 
 	for (const change of leafChangesOnlyInSource) {
 		const lowestCommonAncestor = await getLowestCommonAncestor({
@@ -36,8 +40,15 @@ export const detectConflicts: LixPlugin["detectConflicts"] = async ({
 			continue;
 		}
 
+		const targetSnapshot = await targetLix.db
+			.selectFrom("snapshot")
+			.selectAll()
+			.where("id", "=", leafChangeInTarget.snapshot_id)
+			.executeTakeFirstOrThrow();
+
 		const hasDiff =
-			JSON.stringify(change.value) !== JSON.stringify(leafChangeInTarget.value);
+			JSON.stringify(change.content) !== JSON.stringify(targetSnapshot.content);
+
 		if (hasDiff === false) {
 			continue;
 		}
@@ -49,8 +60,8 @@ export const detectConflicts: LixPlugin["detectConflicts"] = async ({
 			conflicting_change_id: change.id,
 			reason:
 				"The snapshots of the change do not match. More sophisticated reasoning will be added later.",
-			meta: undefined,
-			resolved_with_change_id: undefined,
+			metadata: null,
+			resolved_change_id: null,
 		});
 	}
 
