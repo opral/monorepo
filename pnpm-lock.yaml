@@ -3321,6 +3321,9 @@ importers:
 
   packages/lix-app-csv:
     dependencies:
+      '@lix-js/plugin-csv':
+        specifier: workspace:*
+        version: link:../lix-plugin-csv
       '@lix-js/sdk':
         specifier: workspace:*
         version: link:../lix-sdk
@@ -3330,21 +3333,18 @@ importers:
       '@sqlite.org/sqlite-wasm':
         specifier: ^3.46.0-build2
         version: 3.46.0-build2
-      '@types/papaparse':
-        specifier: ^5.3.14
-        version: 5.3.14
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
       jotai:
         specifier: ^2.9.1
         version: 2.9.2(@types/react@18.3.3)(react@19.0.0-rc-941e1b4a-20240729)
-      kysely:
-        specifier: ^0.27.4
-        version: 0.27.4
       native-file-system-adapter:
         specifier: ^3.0.1
         version: 3.0.1
+      papaparse:
+        specifier: ^5.4.1
+        version: 5.4.1
       react:
         specifier: 19.0.0-rc-941e1b4a-20240729
         version: 19.0.0-rc-941e1b4a-20240729
@@ -3364,6 +3364,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.0.0-alpha.17
         version: 4.0.0-alpha.18(vite@5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6))
+      '@types/papaparse':
+        specifier: ^5.3.14
+        version: 5.3.14
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
@@ -3391,9 +3394,6 @@ importers:
       eslint-plugin-unicorn:
         specifier: ^55.0.0
         version: 55.0.0(eslint@8.57.0)
-      papaparse:
-        specifier: ^5.4.1
-        version: 5.4.1
       prettier:
         specifier: ^3.3.3
         version: 3.3.3
