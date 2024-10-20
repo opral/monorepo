@@ -11,7 +11,6 @@ export class PluginError extends Error {
 	}
 }
 
-
 /**
  * Error when a plugin cannot be imported.
  */
@@ -24,7 +23,6 @@ export class PluginImportError extends PluginError {
 		this.name = "PluginImportError";
 	}
 }
-
 
 export class PluginSettingsAreInvalidError extends PluginError {
 	constructor(options: { plugin: string; errors: ValueError[] }) {
@@ -63,10 +61,7 @@ export class PluginDoesNotImplementFunctionError extends PluginError {
  */
 export class PluginMissingError extends PluginError {
 	constructor(options: { plugin: string }) {
-		super(
-			`The plugin "${options.plugin}" does not exist`,
-			options
-		);
+		super(`The plugin "${options.plugin}" does not exist`, options);
 		this.name = "PluginMissingError";
 	}
 }

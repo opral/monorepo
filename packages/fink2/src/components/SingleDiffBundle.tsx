@@ -45,13 +45,13 @@ const SingleDiffBundle = (props: {
 }) => {
 	const [authorName] = useAtom(authorNameAtom);
 	// change in variables
-	// change in 
+	// change in
 	return (
 		<div className="pointer-events-none">
 			<InlangBundle
 				bundle={props.show === "old" ? props.oldBundle : props.bundle}
 				className={clsx(
-					"highlighted-bundle",
+					"highlighted-bundle"
 					// props.show === "old" ? "highlight-variables-red" : "highlight-variables-green"
 				)}
 			>
@@ -92,9 +92,7 @@ const SingleDiffBundle = (props: {
 												className={clsx(
 													change &&
 														clsx(
-															props.show === "neu"
-																? "highlight-green"
-																: "highlight-red"
+															props.show === "neu" ? "highlight-green" : "highlight-red"
 														)
 												)}
 											></InlangPatternEditor>
@@ -103,7 +101,7 @@ const SingleDiffBundle = (props: {
 													slot="pattern-editor"
 													className="absolute right-4 h-full flex items-center text-green-800"
 												>
-													by {(change.author === authorName) ? "You" : change.author}
+													by {change.author === authorName ? "You" : change.author}
 												</div>
 											)}
 										</InlangVariant>

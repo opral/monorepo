@@ -165,10 +165,10 @@ export async function convert(markdown: string): Promise<{ data: any; html: stri
 										(node.tagName === "h1"
 											? "-doc-left-6"
 											: node.tagName === "h2"
-											? "-doc-left-5"
-											: node.tagName === "h3"
-											? "-doc-left-4"
-											: "-doc-left-3"),
+												? "-doc-left-5"
+												: node.tagName === "h3"
+													? "-doc-left-4"
+													: "-doc-left-3"),
 								},
 								children: [{ type: "text", value: "#" }],
 							},

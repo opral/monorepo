@@ -1,4 +1,4 @@
-import guessJsonSpacing from "guess-json-indent"
+import guessJsonSpacing from "guess-json-indent";
 
 /**
  * Detects the formatting of a JSON file and returns a function
@@ -10,15 +10,15 @@ import guessJsonSpacing from "guess-json-indent"
  *   const newFile = stringify(json)
  */
 export const detectJsonFormatting = (
-	file: string
+  file: string,
 ): ((
-	value: Parameters<typeof JSON.stringify>[0],
-	replacer?: Parameters<typeof JSON.stringify>[1]
-	// space is provided by the function
+  value: Parameters<typeof JSON.stringify>[0],
+  replacer?: Parameters<typeof JSON.stringify>[1],
+  // space is provided by the function
 ) => string) => {
-	const endsWithNewLine = file.endsWith("\n")
-	const spacing = guessJsonSpacing(file)
+  const endsWithNewLine = file.endsWith("\n");
+  const spacing = guessJsonSpacing(file);
 
-	return (value, replacer) =>
-		JSON.stringify(value, replacer, spacing) + (endsWithNewLine ? "\n" : "")
-}
+  return (value, replacer) =>
+    JSON.stringify(value, replacer, spacing) + (endsWithNewLine ? "\n" : "");
+};

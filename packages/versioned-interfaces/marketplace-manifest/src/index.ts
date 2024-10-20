@@ -1,1 +1,1 @@
-export { MarketplaceManifest } from "./interface.js"
+export { MarketplaceManifest } from "./interface.js";

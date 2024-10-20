@@ -15,7 +15,7 @@ settings.locales = undefined;
 // expect no error
 settings["plugin.mock"] = {
 	key: "value",
-  nested: {
-    moreNested: {}
-  },
+	nested: {
+		moreNested: {},
+	},
 };

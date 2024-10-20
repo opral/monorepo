@@ -1,1 +1,1 @@
-export { search } from "./src/search.js"
+export { search } from "./src/search.js";

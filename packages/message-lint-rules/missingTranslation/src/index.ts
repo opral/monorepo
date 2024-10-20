@@ -1,3 +1,3 @@
-import { missingTranslationRule } from "./missingTranslation.js"
+import { missingTranslationRule } from "./missingTranslation.js";
 
-export default missingTranslationRule
+export default missingTranslationRule;

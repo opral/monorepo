@@ -1,7 +1,10 @@
 import type { Lix } from "@lix-js/sdk";
 import type { ProjectSettings } from "../../json-schema/settings.js";
 
-export async function setSettings(args: { newSettings: ProjectSettings; lix: Lix }) {
+export async function setSettings(args: {
+	newSettings: ProjectSettings;
+	lix: Lix;
+}) {
 	const cloned = structuredClone(args.newSettings);
 	cloned.languageTags = cloned.locales;
 	cloned.sourceLanguageTag = cloned.baseLocale;

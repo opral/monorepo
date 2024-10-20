@@ -35,7 +35,10 @@ describe("openInFinkCommand", () => {
 	})
 
 	it.skip("should open the editor with message id in URL", async () => {
-		const mockArgs = { messageId: "testMessageId", selectedProjectPath: "/test/path" }
+		const mockArgs = {
+			messageId: "testMessageId",
+			selectedProjectPath: "/test/path",
+		}
 
 		await openInFinkCommand.callback(mockArgs)
 
@@ -51,7 +54,10 @@ describe("openInFinkCommand", () => {
 	})
 
 	it.skip("should handle failure to get Git origin", async () => {
-		const mockArgs = { messageId: "testMessageId", selectedProjectPath: "/test/path" }
+		const mockArgs = {
+			messageId: "testMessageId",
+			selectedProjectPath: "/test/path",
+		}
 		vi.mocked(getGitOrigin).mockResolvedValue(undefined) // Simulate failure
 
 		await openInFinkCommand.callback(mockArgs)

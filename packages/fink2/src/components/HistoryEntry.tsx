@@ -27,11 +27,7 @@ const HistoryEntry = ({ commit }: { commit: any }) => {
 					.selectFrom("change")
 					.selectAll()
 					.where("change.type", "=", "variant")
-					.where(
-						(eb) => eb.ref("value", "->>").key("id"),
-						"=",
-						change.value?.id
-					)
+					.where((eb) => eb.ref("value", "->>").key("id"), "=", change.value?.id)
 					.where("change.created_at", "<", change.created_at)
 					.innerJoin("commit", "commit.id", "change.commit_id")
 					// TODO remove after branching concept on lix
@@ -42,9 +38,7 @@ const HistoryEntry = ({ commit }: { commit: any }) => {
 
 				history.push({ current: change, previous: previousChange });
 			}
-			setChangeHistory(
-				history as { current: Change; previous: Change | null }[]
-			);
+			setChangeHistory(history as { current: Change; previous: Change | null }[]);
 		}
 	};
 
@@ -70,9 +64,7 @@ const HistoryEntry = ({ commit }: { commit: any }) => {
 				</div>
 				<div className="flex-1 flex gap-2 items-center justify-between py-3 rounded h-[46px]">
 					<div className="flex gap-2 items-center">
-						<p className="text-zinc-950 text-sm! font-semibold">
-							By {commit.author}
-						</p>
+						<p className="text-zinc-950 text-sm! font-semibold">By {commit.author}</p>
 						<p className="text-sm! text-zinc-600">{commit.description}</p>
 					</div>
 					<p className="text-sm!">{timeAgo(commit.created_at)}</p>

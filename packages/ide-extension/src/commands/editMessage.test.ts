@@ -220,7 +220,9 @@ describe("editMessageCommand", () => {
 			title: "Enter new value:",
 			value: "Current content",
 		})
-		expect(getPatternFromString).toHaveBeenCalledWith({ string: "Updated content" })
+		expect(getPatternFromString).toHaveBeenCalledWith({
+			string: "Updated content",
+		})
 		expect(mockTransaction.execute).toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).toHaveBeenCalled()
 		expect(msg).toHaveBeenCalledWith("Message updated.")
@@ -263,7 +265,10 @@ describe("editMessageCommand", () => {
 		vi.mocked(getSelectedBundleByBundleIdOrAlias).mockResolvedValue(mockBundle)
 		vi.mocked(window.showInputBox).mockResolvedValue("Updated content")
 
-		await editMessageCommand.callback({ bundleId: mockBundle.id, locale: "en" })
+		await editMessageCommand.callback({
+			bundleId: mockBundle.id,
+			locale: "en",
+		})
 
 		expect(mockTransaction.execute).toHaveBeenCalled()
 		expect(msg).toHaveBeenCalledWith(

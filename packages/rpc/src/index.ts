@@ -1,1 +1,1 @@
-export { rpc } from "./client.js"
+export { rpc } from "./client.js";

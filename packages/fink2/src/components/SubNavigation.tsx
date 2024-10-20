@@ -100,9 +100,7 @@ const NavItem = (props: {
 			<div
 				className={clsx(
 					"h-8 items-center px-2 flex text-[14px]! box-border text-zinc-500 hover:bg-zinc-100 rounded",
-					window && window.location.pathname === props.path
-						? "text-zinc-950"
-						: ""
+					window && window.location.pathname === props.path ? "text-zinc-950" : ""
 				)}
 			>
 				{props.name}

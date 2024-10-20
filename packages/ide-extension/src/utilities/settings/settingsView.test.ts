@@ -41,7 +41,9 @@ vi.mock("../state.js", () => ({
 
 describe("settingsPanel", () => {
 	it("should create a webview panel with the correct properties", async () => {
-		const mockContext = { extensionPath: "path/to/extension" } as unknown as vscode.ExtensionContext
+		const mockContext = {
+			extensionPath: "path/to/extension",
+		} as unknown as vscode.ExtensionContext
 		await settingsPanel({ context: mockContext })
 		expect(vscode.window.createWebviewPanel).toHaveBeenCalledWith(
 			"settingsPanel",
@@ -58,11 +60,16 @@ describe("settingsPanel", () => {
 describe("getWebviewContent", async () => {
 	it("should return expected HTML content", async () => {
 		const mockWebview = { asWebviewUri: vi.fn() } as unknown as vscode.Webview
-		const mockContext = { extensionUri: "uri" } as unknown as vscode.ExtensionContext
+		const mockContext = {
+			extensionUri: "uri",
+		} as unknown as vscode.ExtensionContext
 		// @ts-expect-error
 		mockWebview.asWebviewUri.mockImplementation((uri: any) => uri)
 
-		const htmlContent = await getWebviewContent({ context: mockContext, webview: mockWebview })
+		const htmlContent = await getWebviewContent({
+			context: mockContext,
+			webview: mockWebview,
+		})
 		expect(htmlContent).toContain("<title>Settings</title>")
 	})
 })

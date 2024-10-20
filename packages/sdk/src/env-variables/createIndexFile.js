@@ -9,20 +9,20 @@
  * - Must be ran before building the SDK
  */
 
-import fs from "node:fs/promises"
-import url from "node:url"
-import path from "node:path"
+import fs from "node:fs/promises";
+import url from "node:url";
+import path from "node:path";
 
-const dirname = path.dirname(url.fileURLToPath(import.meta.url))
+const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 await fs.writeFile(
-	dirname + "/index.ts",
-	`
+  dirname + "/index.ts",
+  `
 export const ENV_VARIABLES = {
   PUBLIC_POSTHOG_TOKEN: "${process.env.PUBLIC_POSTHOG_TOKEN}",
 }
-`
-)
+`,
+);
 
 // eslint-disable-next-line no-console
-console.log("✅ Created env variable index file.")
+console.log("✅ Created env variable index file.");

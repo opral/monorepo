@@ -8,9 +8,7 @@ import { Commit } from "@inlang/sdk2";
 const VariantHistory = (props: { variantId: string }) => {
 	const [project] = useAtom(projectAtom);
 	const [authenticatedUser] = useAtom(authorNameAtom);
-	const [latestCommit, setLatestCommit] = useState<Commit | undefined>(
-		undefined
-	);
+	const [latestCommit, setLatestCommit] = useState<Commit | undefined>(undefined);
 
 	useEffect(() => {
 		if (!project) return;
@@ -28,11 +26,8 @@ const VariantHistory = (props: { variantId: string }) => {
 		<div className="flex items-center text-zinc-400 text-[14px]! font-normal">
 			{latestCommit?.author && (
 				<p>
-					by{" "}
-					{latestCommit?.author === authenticatedUser
-						? "You"
-						: authenticatedUser}
-					, {timeAgo(latestCommit.created_at)}
+					by {latestCommit?.author === authenticatedUser ? "You" : authenticatedUser},{" "}
+					{timeAgo(latestCommit.created_at)}
 				</p>
 			)}
 		</div>

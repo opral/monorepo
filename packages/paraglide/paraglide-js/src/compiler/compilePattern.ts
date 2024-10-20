@@ -1,9 +1,9 @@
-import type { Pattern } from "@inlang/sdk2"
-import { escapeForTemplateLiteral } from "../services/codegen/escape.js"
-import { backtick } from "../services/codegen/quotes.js"
-import { compileExpression } from "./compileExpression.js"
-import type { Compiled } from "./types.js"
-import type { Registry } from "./registry.js"
+import type { Pattern } from "@inlang/sdk2";
+import { escapeForTemplateLiteral } from "../services/codegen/escape.js";
+import { backtick } from "../services/codegen/quotes.js";
+import { compileExpression } from "./compileExpression.js";
+import type { Compiled } from "./types.js";
+import type { Registry } from "./registry.js";
 
 /**
  * Compiles a pattern into a template literal string.
@@ -13,25 +13,29 @@ import type { Registry } from "./registry.js"
  *  >> compiled === "`Hello ${i.name}`"
  */
 export const compilePattern = (
-	lang: string,
-	pattern: Pattern,
-	registry: Registry
+  lang: string,
+  pattern: Pattern,
+  registry: Registry,
 ): Compiled<Pattern> => {
-	const compiledPatternElements = pattern.map((element): Compiled<Pattern[number]> => {
-		switch (element.type) {
-			case "text":
-				return {
-					code: escapeForTemplateLiteral(element.value),
-					node: element,
-				}
-			case "expression": {
-				const compiledExpression = compileExpression(lang, element, registry)
-				const code = "${" + compiledExpression.code + "}"
-				return { code, node: element }
-			}
-		}
-	})
-	const code = backtick(compiledPatternElements.map((res) => res.code).join(""))
+  const compiledPatternElements = pattern.map(
+    (element): Compiled<Pattern[number]> => {
+      switch (element.type) {
+        case "text":
+          return {
+            code: escapeForTemplateLiteral(element.value),
+            node: element,
+          };
+        case "expression": {
+          const compiledExpression = compileExpression(lang, element, registry);
+          const code = "${" + compiledExpression.code + "}";
+          return { code, node: element };
+        }
+      }
+    },
+  );
+  const code = backtick(
+    compiledPatternElements.map((res) => res.code).join(""),
+  );
 
-	return { code, node: pattern }
-}
+  return { code, node: pattern };
+};

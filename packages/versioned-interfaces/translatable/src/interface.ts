@@ -1,4 +1,4 @@
-import { Type, type TString, type TTemplateLiteral } from "@sinclair/typebox"
+import { Type, type TString, type TTemplateLiteral } from "@sinclair/typebox";
 
 /**
  * Translatable type.
@@ -41,10 +41,16 @@ import { Type, type TString, type TTemplateLiteral } from "@sinclair/typebox"
  *
  */
 export type Translatable<T extends string> =
-	| T
-	| {
-			en: T
-			[locale: string]: T
-	  }
+  | T
+  | {
+      en: T;
+      [locale: string]: T;
+    };
 export const Translatable = <T extends TString | TTemplateLiteral>(type: T) =>
-	Type.Union([type, Type.Intersect([Type.Object({ en: type }), Type.Record(Type.String(), type)])])
+  Type.Union([
+    type,
+    Type.Intersect([
+      Type.Object({ en: type }),
+      Type.Record(Type.String(), type),
+    ]),
+  ]);

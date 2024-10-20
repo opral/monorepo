@@ -105,7 +105,9 @@ export class DocSlider extends LitElement {
 			}
 
 			article {
-				box-shadow: 0 0 0 1px rgba(63, 63, 68, 0.05), 0 1px 3px 0 rgba(63, 63, 68, 0.15);
+				box-shadow:
+					0 0 0 1px rgba(63, 63, 68, 0.05),
+					0 1px 3px 0 rgba(63, 63, 68, 0.15);
 				box-sizing: border-box;
 				flex-shrink: 0;
 				margin: var(--item-margin);
@@ -177,9 +179,9 @@ export class DocSlider extends LitElement {
 							@click=${() => {
 								this.popupIndex = -1
 							}}
-					  >
+						>
 							<img src="${itemsArray[this.popupIndex]}" />
-					  </div>`
+						</div>`
 					: undefined}
 				<button class="btn-next" @click=${() => this._move("right")}>
 					<doc-icon height="40" icon="mdi:chevron-right"></doc-icon>

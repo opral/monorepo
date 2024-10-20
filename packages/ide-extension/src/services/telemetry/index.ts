@@ -20,18 +20,17 @@ const posthog = ENV_VARIABLES.PUBLIC_POSTHOG_TOKEN
  * @deprecated use `capture()` directly
  */
 // @ts-expect-error - capture omits the event type distinct it
-export const telemetry: Omit<typeof posthog, "capture"> & { capture: typeof capture } = new Proxy(
-	posthog,
-	{
-		get(target, prop) {
-			if (prop === "capture") {
-				return capture
-			}
-			// @ts-expect-error - the posthog instance is a proxy
-			return target[prop]
-		},
-	}
-)
+export const telemetry: Omit<typeof posthog, "capture"> & {
+	capture: typeof capture
+} = new Proxy(posthog, {
+	get(target, prop) {
+		if (prop === "capture") {
+			return capture
+		}
+		// @ts-expect-error - the posthog instance is a proxy
+		return target[prop]
+	},
+})
 /**
  * Typesafe wrapper around the `telemetryNode.capture` method.
  *

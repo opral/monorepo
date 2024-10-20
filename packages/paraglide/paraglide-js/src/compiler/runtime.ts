@@ -1,10 +1,12 @@
-import type { ProjectSettings } from "@inlang/sdk2"
+import type { ProjectSettings } from "@inlang/sdk2";
 
 /**
  * Returns the code for the `runtime.js` module
  */
-export function createRuntime(args: Pick<ProjectSettings, "baseLocale" | "locales">): string {
-	return `/* eslint-disable */
+export function createRuntime(
+  args: Pick<ProjectSettings, "baseLocale" | "locales">,
+): string {
+  return `/* eslint-disable */
 /** @type {((locale: AvailableLocale) => void) | undefined} */ 
 let _onSetLocale
 
@@ -156,7 +158,7 @@ export function isAvailableLocale(locale) {
 
 // ------ LEGACY RUNTIME (will be removed in the next major version) ------
 ${legacyLanguageTagRuntime()}
-`
+`;
 }
 
 // remove with paraglide v3
@@ -199,4 +201,4 @@ export const isAvailableLanguageTag = isAvailableLocale
  * @deprecated use \`AvailableLocale\` instead
  * 
  * @typedef {typeof locales[number]} AvailableLanguageTag
- */`
+ */`;

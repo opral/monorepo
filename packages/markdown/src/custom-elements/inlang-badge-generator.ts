@@ -224,7 +224,9 @@ export class InlangBadgeGenerator extends LitElement {
 	override render() {
 		return html`<div class="generator-wrapper">
 			${this.loading
-				? html`<div class="loading"><sl-spinner style="font-size: 3rem;"></sl-spinner></div>`
+				? html`<div class="loading">
+						<sl-spinner style="font-size: 3rem;"></sl-spinner>
+					</div>`
 				: ""}
 			<div class="options-wrapper">
 				<div class="options">
@@ -279,19 +281,19 @@ export class InlangBadgeGenerator extends LitElement {
 						${this.badgeURL === ""
 							? html`<div class="empty-card">
 									<img width="56px" src="http://inlang.com/favicon/safari-pinned-tab.svg" />
-							  </div>`
+								</div>`
 							: html`<img src=${this.badgeURL} />`}
 						${this.badgeURL !== "" && this.loading === false
 							? html`<span @click=${() => this.handleCopyMarkdown()} class="copy-badge">
 									${this.copyMarkdownText}
-							  </span>`
+								</span>`
 							: ""}
 						${this.badgeURL !== "" && this.loading === false
 							? html`<div @click=${() => this.handleCopyImage()} class="copy-badge image">
 									${this.copyImageText}
-							  </div>`
+								</div>`
 							: ""}
-				  </div>`}
+					</div>`}
 		</div>`
 	}
 }

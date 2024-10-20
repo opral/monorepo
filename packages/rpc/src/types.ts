@@ -1,6 +1,6 @@
-export type SuccessResult<Data> = { data: Data; error?: never }
+export type SuccessResult<Data> = { data: Data; error?: never };
 
-export type ErrorResult<Error> = { data?: never; error: Error }
+export type ErrorResult<Error> = { data?: never; error: Error };
 
 /**
  *
@@ -25,4 +25,4 @@ export type ErrorResult<Error> = { data?: never; error: Error }
  *
  */
 // MOVED OUT OF @inlang/result because @inlang/result is going to be removed.
-export type Result<Data, Error> = SuccessResult<Data> | ErrorResult<Error>
+export type Result<Data, Error> = SuccessResult<Data> | ErrorResult<Error>;

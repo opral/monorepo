@@ -23,9 +23,7 @@ export default function App() {
 	const [bundlesNested] = useAtom(bundlesNestedAtom);
 	const [bundlesNestedFiltered] = useAtom(bundlesNestedFilteredAtom);
 	const [historyModalOpen, setHistoryModalOpen] = useState(false);
-	const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
-		null
-	);
+	const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
 
 	const handleOpenHistoryModal = (variantId: string) => {
 		setSelectedVariantId(variantId);
@@ -51,16 +49,16 @@ export default function App() {
 			<Layout>
 				<Grid>
 					<FilterSection />
-					{bundlesNestedFiltered.length !== 0 && (<TableHeader />)}
+					{bundlesNestedFiltered.length !== 0 && <TableHeader />}
 					{project && selectedProjectPath && (
 						<>
 							{bundlesNestedFiltered.length > 0 &&
 								bundlesNestedFiltered.map((bundle) => (
-										<InlangBundle
-											key={bundle.id}
-											bundle={bundle}
-											setShowHistory={handleOpenHistoryModal}
-										/>
+									<InlangBundle
+										key={bundle.id}
+										bundle={bundle}
+										setShowHistory={handleOpenHistoryModal}
+									/>
 								))}
 						</>
 					)}

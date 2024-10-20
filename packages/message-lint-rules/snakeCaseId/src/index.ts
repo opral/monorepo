@@ -1,3 +1,3 @@
-import { snakeCaseId } from "./snakeCaseId.js"
+import { snakeCaseId } from "./snakeCaseId.js";
 
-export default snakeCaseId
+export default snakeCaseId;

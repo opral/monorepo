@@ -75,4 +75,3 @@ export type ExportFile = {
 export type Subscription<T> = (callback: (value: T) => void) => {
 	unsubscribe: () => void;
 };
-

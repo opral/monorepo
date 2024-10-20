@@ -1,35 +1,41 @@
-import type { PageContextRenderer } from "./types.js"
-import { escapeInject, dangerouslySkipEscape } from "vike/server"
-import { setCurrentPageContext } from "./state.js"
+import type { PageContextRenderer } from "./types.js";
+import { escapeInject, dangerouslySkipEscape } from "vike/server";
+import { setCurrentPageContext } from "./state.js";
 
 // import the css
-import "./app.css"
+import "./app.css";
 
 // See https://vike.dev/data-fetching
-export const passToClient = ["pageProps", "routeParams", "languageTag"] as const
+export const passToClient = [
+  "pageProps",
+  "routeParams",
+  "languageTag",
+] as const;
 
-export default async function onRenderHtml(pageContext: PageContextRenderer): Promise<unknown> {
-	//! TODO most likely cross request state pollution
-	//! Need to look into this in the future
-	setCurrentPageContext(pageContext)
+export default async function onRenderHtml(
+  pageContext: PageContextRenderer,
+): Promise<unknown> {
+  //! TODO most likely cross request state pollution
+  //! Need to look into this in the future
+  setCurrentPageContext(pageContext);
 
-	const metaInfo = {
-		title:
-			pageContext.urlParsed.pathname === "/"
-				? "Fink Project Launcher for Translators"
-				: pageContext.urlParsed.pathname.split("/")[2] +
-				  " / " +
-				  pageContext.urlParsed.pathname.split("/")[3] +
-				  " | Fink Project Launcher for Translators",
-		description:
-			pageContext.urlParsed.pathname === "/"
-				? "Fink is an localization editor for managing translations of your application."
-				: `Fink is an localization editor for managing translations of your application. Edit ${
-						pageContext.urlParsed.pathname.split("/")[2]
-				  } / ${pageContext.urlParsed.pathname.split("/")[3]} translations here.`,
-	}
+  const metaInfo = {
+    title:
+      pageContext.urlParsed.pathname === "/"
+        ? "Fink Project Launcher for Translators"
+        : pageContext.urlParsed.pathname.split("/")[2] +
+          " / " +
+          pageContext.urlParsed.pathname.split("/")[3] +
+          " | Fink Project Launcher for Translators",
+    description:
+      pageContext.urlParsed.pathname === "/"
+        ? "Fink is an localization editor for managing translations of your application."
+        : `Fink is an localization editor for managing translations of your application. Edit ${
+            pageContext.urlParsed.pathname.split("/")[2]
+          } / ${pageContext.urlParsed.pathname.split("/")[3]} translations here.`,
+  };
 
-	return escapeInject`<!DOCTYPE html>
+  return escapeInject`<!DOCTYPE html>
     <html lang="en" class="min-h-screen min-w-screen">
       <head>
 	  		<title>${dangerouslySkipEscape(metaInfo.title)}</title>
@@ -50,7 +56,7 @@ export default async function onRenderHtml(pageContext: PageContextRenderer): Pr
       <body class="editor min-h-screen min-w-screen bg-surface-50 text-on-background" id="root">
 		    ${""}
       </body>
-    </html>`
+    </html>`;
 }
 
 const favicons = `
@@ -61,7 +67,7 @@ const favicons = `
 <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
 <meta name="msapplication-TileColor" content="#da532c">
 <meta name="theme-color" content="#ffffff">
-`
+`;
 
 const analytics = `
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-5H3SDF7TVZ"></script>
@@ -72,4 +78,4 @@ gtag('js', new Date());
 
 gtag('config', 'G-5H3SDF7TVZ');
 </script>
-`
+`;

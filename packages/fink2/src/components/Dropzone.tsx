@@ -17,9 +17,7 @@ const Dropzone = (props: { handleOpen: (value: File[]) => void }) => {
 			<div
 				className={clsx(
 					"border  flex flex-col items-center w-[340px] rounded-xl px-4 py-12 gap-3 border-dashed cursor-pointer hover:border-zinc-600 hover:bg-zinc-100",
-					isDragActive
-						? "bg-blue-50 border-blue-500"
-						: "bg-zinc-50 border-zinc-300"
+					isDragActive ? "bg-blue-50 border-blue-500" : "bg-zinc-50 border-zinc-300"
 				)}
 			>
 				<div className="bg-zinc-200 h-12 w-12 rounded-xl text-zinc-500 flex justify-center items-center">

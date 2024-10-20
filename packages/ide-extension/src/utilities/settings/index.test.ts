@@ -16,7 +16,9 @@ describe("Settings functions", () => {
 		it("updates a setting successfully", async () => {
 			const mockUpdate = vi.fn()
 			// @ts-expect-error
-			vi.mocked(vscode.workspace.getConfiguration).mockReturnValue({ update: mockUpdate })
+			vi.mocked(vscode.workspace.getConfiguration).mockReturnValue({
+				update: mockUpdate,
+			})
 
 			await updateSetting("userId", "new-value")
 
@@ -29,7 +31,9 @@ describe("Settings functions", () => {
 			const mockValue = "some-value"
 			const mockGet = vi.fn().mockReturnValue(mockValue)
 			// @ts-expect-error
-			vi.mocked(vscode.workspace.getConfiguration).mockReturnValue({ get: mockGet })
+			vi.mocked(vscode.workspace.getConfiguration).mockReturnValue({
+				get: mockGet,
+			})
 
 			const result = await getSetting("userId")
 
@@ -40,7 +44,9 @@ describe("Settings functions", () => {
 		it("throws an error if the setting is not found", async () => {
 			const mockGet = vi.fn().mockReturnValue(undefined)
 			// @ts-expect-error
-			vi.mocked(vscode.workspace.getConfiguration).mockReturnValue({ get: mockGet })
+			vi.mocked(vscode.workspace.getConfiguration).mockReturnValue({
+				get: mockGet,
+			})
 
 			// @ts-expect-error
 			await expect(getSetting("nonexistentSetting")).rejects.toThrow(

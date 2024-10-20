@@ -141,9 +141,16 @@ export function createTreeDataProvider(args: {
 }): vscode.TreeDataProvider<ProjectViewNode> {
 	return {
 		getTreeItem: (element: ProjectViewNode) =>
-			getTreeItem({ element, fs: args.fs, workspaceFolder: args.workspaceFolder }),
+			getTreeItem({
+				element,
+				fs: args.fs,
+				workspaceFolder: args.workspaceFolder,
+			}),
 		getChildren: () =>
-			createProjectViewNodes({ context: args.context, workspaceFolder: args.workspaceFolder }),
+			createProjectViewNodes({
+				context: args.context,
+				workspaceFolder: args.workspaceFolder,
+			}),
 		onDidChangeTreeData: CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event,
 	}
 }

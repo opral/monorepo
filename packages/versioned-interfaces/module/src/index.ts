@@ -1,1 +1,1 @@
-export { InlangModule } from "./interface.js"
+export { InlangModule } from "./interface.js";

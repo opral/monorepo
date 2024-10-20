@@ -23,10 +23,7 @@ export const deleteBundleNested = async (
 		.execute();
 
 	// Step 2: Delete messages associated with the bundle
-	await db
-		.deleteFrom("message")
-		.where("message.bundleId", "=", bundleId)
-		.execute();
+	await db.deleteFrom("message").where("message.bundleId", "=", bundleId).execute();
 
 	// Step 3: Delete the bundle itself
 	await db.deleteFrom("bundle").where("bundle.id", "=", bundleId).execute();

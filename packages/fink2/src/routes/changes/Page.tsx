@@ -6,11 +6,7 @@ import {
 import { useAtom } from "jotai";
 import Layout, { Grid } from "../../layout.tsx";
 import { FormEvent, useEffect, useState } from "react";
-import {
-	SlButton,
-	SlDialog,
-	SlInput,
-} from "@shoelace-style/shoelace/dist/react";
+import { SlButton, SlDialog, SlInput } from "@shoelace-style/shoelace/dist/react";
 import DiffBundleView from "../../components/DiffBundleView.tsx";
 import { BundleNested, humanId } from "@inlang/sdk2";
 import { useNavigate } from "react-router-dom";
@@ -28,7 +24,11 @@ export default function App() {
 			await project?.lix.db
 				.updateTable("change")
 				.where("id", "=", change.id)
-				.set("meta", { ...change.meta, tag: "confirmed", change_set: humanId() })
+				.set("meta", {
+					...change.meta,
+					tag: "confirmed",
+					change_set: humanId(),
+				})
 				.executeTakeFirst();
 		}
 		await project?.lix.commit({
@@ -49,9 +49,10 @@ export default function App() {
 			const changeId = change.value?.id;
 			if (!changeId) return false;
 			if (bundle.id === changeId) return true;
-			return bundle.messages.some((message) => 
-				message.id === changeId ||
-				message.variants.some((variant) => variant.id === changeId)
+			return bundle.messages.some(
+				(message) =>
+					message.id === changeId ||
+					message.variants.some((variant) => variant.id === changeId)
 			);
 		});
 

@@ -57,7 +57,11 @@ export async function resolveLintRules() {
 			const wrappedRuleFn = wrapLintRuleWithSeverity(customRule.ruleFn, severity)
 
 			// Ensure that 'name' is present and not undefined
-			activeRules.push({ ...customRule, ruleFn: wrappedRuleFn, name: customRule.name })
+			activeRules.push({
+				...customRule,
+				ruleFn: wrappedRuleFn,
+				name: customRule.name,
+			})
 		}
 	}
 

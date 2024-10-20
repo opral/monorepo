@@ -52,7 +52,9 @@ describe("statusBar", () => {
 	})
 
 	it("should subscribe to the appropriate events", async () => {
-		const context = { subscriptions: { push: vi.fn() } } as unknown as vscode.ExtensionContext
+		const context = {
+			subscriptions: { push: vi.fn() },
+		} as unknown as vscode.ExtensionContext
 		await statusBar({ context })
 
 		expect(context.subscriptions.push).toHaveBeenCalledTimes(2)
