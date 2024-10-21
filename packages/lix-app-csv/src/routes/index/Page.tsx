@@ -1,10 +1,10 @@
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { atom, useAtom } from "jotai";
 import { lixAtom, withPollingAtom } from "../../state.ts";
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CreateProjectDialog } from "../../components/CreateProjectDialog.tsx";
-import { DemoCard } from "../../components/DemoCard.tsx";
+import { DemoCard } from "./DemoCard.tsx";
 
 const filesAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -40,26 +40,10 @@ export default function Page() {
 				}}
 			/>
 			<div className="max-w-5xl mx-auto mt-8 px-4">
-				<h2 className="text-4xl md:text-5xl max-w-[500px] text-center mx-auto leading-[44px] md:leading-[54px]">
-					Lix brings change control to your{" "}
-					<span className="bg-zinc-200 text-zinc-700 px-1">.csv</span> files
-				</h2>
 				<DemoCard />
 				<div className="flex items-end mt-6 w-full justify-between">
 					<div className="flex items-center gap-2">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="22"
-							height="22"
-							viewBox="0 0 24 24"
-							className="text-zinc-500"
-						>
-							<path
-								fill="currentColor"
-								d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5z"
-							/>
-						</svg>
-						<p className="text-md text-zinc-700 font-medium">Your files</p>
+						<p className="text-md text-zinc-700 font-medium">Files</p>
 					</div>
 					<SlButton
 						size="medium"
@@ -70,9 +54,7 @@ export default function Page() {
 					</SlButton>
 				</div>
 			</div>
-			<Suspense fallback={<p>Loading</p>}>
-				<FileExplorer></FileExplorer>
-			</Suspense>
+			<FileExplorer></FileExplorer>
 			<CreateProjectDialog
 				showNewProjectDialog={showNewProjectDialog}
 				setShowNewProjectDialog={setShowNewProjectDialog}
@@ -104,11 +86,25 @@ function FileExplorer() {
 					</svg>
 				</div>
 			)}
-			<div className="border w-full border-zinc-200 px-4 py-2 rounded">
+			<div className="border w-full border-zinc-200 p-2 rounded">
 				{files.map((file) => {
 					return (
 						<Link key={file.id} to={"/editor?fileId=" + file.id}>
-							{file.path}
+							<div className="w-full flex gap-2">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="22"
+									height="22"
+									viewBox="0 0 24 24"
+									className="text-zinc-500"
+								>
+									<path
+										fill="currentColor"
+										d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5z"
+									/>
+								</svg>
+								<p>{file.path}</p>
+							</div>
 						</Link>
 					);
 				})}

@@ -2,7 +2,7 @@ import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { humanId } from "../helper/human-id/human-id.ts";
+import { humanId } from "../../helper/human-id/human-id.ts";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { plugin } from "@lix-js/plugin-csv";
 
@@ -109,14 +109,12 @@ export const DemoCard = () => {
 					className="w-full mt-8"
 				/>
 			</div>
-			<div className="flex flex-col md:flex-row px-10 pt-8 relative z-10">
-				<div className="flex-1">
-					<p className="text-zinc-500">CAP TABLE DEMO</p>
-					<h2 className="text-2xl max-w-[500px] mt-2">
-						Never again burden yourself with manually storing .csv files to
-						track changes.
-					</h2>
-				</div>
+			<div className="flex flex-col md:flex-row px-10 pt-8 items-center relative z-10">
+				<h2 className="text-2xl max-w-[500px]">
+					Lix brings change control to{" "}
+					<span className="bg-zinc-300 text-zinc-800 rounded-sm">.csv</span>{" "}
+					(and many other) file formats.
+				</h2>
 				<SlButton
 					loading={loading}
 					size="medium"
@@ -126,7 +124,7 @@ export const DemoCard = () => {
 						handleCreateDemo();
 					}}
 				>
-					Open Demo
+					Open example csv
 				</SlButton>
 			</div>
 			<div className="hidden md:block rounded-lg overflow-hidden grayscale-100">

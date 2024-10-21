@@ -1,5 +1,3 @@
-import { SlIcon } from "@shoelace-style/shoelace/dist/react";
-
 export default function RootLayout(props: { children: JSX.Element }) {
 	return (
 		<>
