@@ -39,11 +39,6 @@ export default function Page() {
 					}
 				}}
 			/>
-			<div className="w-full border-b border-zinc-200 bg-white flex items-center px-4 min-h-[54px] gap-2">
-				<img src="/lix.svg" alt="logo" className="w-8 h-8" />
-				<h1 className="font-medium">CSV Demo App</h1>
-			</div>
-
 			<div className="max-w-5xl mx-auto mt-8 px-4">
 				<h2 className="text-4xl md:text-5xl max-w-[500px] text-center mx-auto leading-[44px] md:leading-[54px]">
 					Lix brings change control to your{" "}

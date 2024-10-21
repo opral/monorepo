@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import "./style.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { routes } from "./routes/routes.tsx";
+import { routes } from "./routes.tsx";
 import "@shoelace-style/shoelace/dist/themes/light.css";
 import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js";
 
