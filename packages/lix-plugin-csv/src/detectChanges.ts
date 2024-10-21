@@ -10,7 +10,8 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	const uniqueColumnAfter = after?.metadata?.unique_column;
 
 	if (uniqueColumnBefore === undefined && uniqueColumnAfter === undefined) {
-		throw new Error("The unique_column metadata is required to detect changes");
+		console.warn("The unique_column metadata is required to detect changes");
+		return [];
 	}
 
 	const detectedChanges: DetectedChange[] = [];

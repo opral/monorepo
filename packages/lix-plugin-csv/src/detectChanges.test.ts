@@ -77,18 +77,21 @@ test("it should detect a deletion", async () => {
 	] satisfies DetectedChange[]);
 });
 
-test("it should throw an error if the unique column is not set", async () => {
+// throwing an error leads to abysmal UX on potentially every save
+// of a csv file in lix. It's better to just ignore the change
+// and let an app or user define the unique column later.
+test("it should return [] if the unique column is not set", async () => {
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = before;
 
 	const metadata = { unique_column: undefined };
 
-	await expect(
-		detectChanges?.({
-			before: { id: "random", path: "x.csv", data: before, metadata },
-			after: { id: "random", path: "x.csv", data: after, metadata },
-		}),
-	).rejects.toThrowError();
+	const detectedChanges = await detectChanges({
+		before: { id: "random", path: "x.csv", data: before, metadata },
+		after: { id: "random", path: "x.csv", data: after, metadata },
+	});
+
+	expect(detectedChanges).toEqual([]);
 });
 
 // 1. if the entity id would remain identical, the change graph would be messed up
