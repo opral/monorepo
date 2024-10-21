@@ -3,11 +3,9 @@ import clsx from "clsx";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
-const Dropzone = (props: {
+export default function Dropzone(props: {
 	handleOpen: (value: File[]) => void;
-	fileLable: string;
-	icon?: JSX.Element;
-}) => {
+}) {
 	//@ts-ignore
 	const onDrop = useCallback((acceptedFiles) => {
 		// Do something with the files
@@ -16,34 +14,42 @@ const Dropzone = (props: {
 	const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
 	return (
-		<div {...getRootProps()}>
+		<div {...getRootProps()} className="w-full">
 			<input {...getInputProps()} />
 			<div
 				className={clsx(
-					"border  flex flex-col items-center w-full rounded-xl px-4 py-12 gap-3 border-dashed cursor-pointer hover:border-zinc-600 hover:bg-zinc-100",
+					"border  flex flex-col items-center w-full rounded px-2 py-6 gap-3 border-dashed cursor-pointer hover:border-zinc-600 hover:bg-zinc-100",
 					isDragActive
 						? "bg-blue-50 border-blue-500"
 						: "bg-zinc-50 border-zinc-300"
 				)}
 			>
 				<div className="bg-zinc-200 h-12 w-12 rounded-xl text-zinc-500 flex justify-center items-center">
-					{props.icon}
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="28"
+						viewBox="0 0 15 15"
+					>
+						<path
+							fill="none"
+							stroke="currentColor"
+							d="M.5 4.5h14m-10-4v14m-3-14h12a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-12a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1Z"
+						/>
+					</svg>
 				</div>
-				<p className="text-[20px] pt-4 text-gray-500 text-center">
-					{props.fileLable}
+				<p className="text-lg pt-2 text-gray-500 text-center font-medium">
+					Import .csv file
 				</p>
 				{isDragActive ? (
-					<p className="text-[14px] text-gray-950 text-center pt-4 font-medium">
-						Release to upload file
+					<p className=" text-gray-950 text-center font-medium">
+						Release to import
 					</p>
 				) : (
-					<p className="text-[14px] text-gray-950 text-center pt-4 font-medium">
-						Drag and drop or click to choose file
+					<p className=" text-gray-500 text-center">
+						Drag and drop or click to choose .csv file
 					</p>
 				)}
 			</div>
 		</div>
 	);
-};
-
-export default Dropzone;
+}

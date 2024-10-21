@@ -2,7 +2,7 @@
 import { SlButton, SlDialog } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
 import { pendingChangesAtom, lixAtom } from "../state.ts";
-import Dropzone from "./Dropzone.tsx";
+import Dropzone from "../routes/index/Dropzone.tsx";
 import { useState } from "react";
 
 export const ImportDialog = (props: {

@@ -6,7 +6,7 @@ import {
 } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
 import { lixAtom } from "../state.ts";
-import Dropzone from "./Dropzone.tsx";
+import Dropzone from "../routes/index/Dropzone.tsx";
 import { useState } from "react";
 import Papa from "papaparse";
 import { LixFile } from "@lix-js/sdk";
@@ -98,7 +98,6 @@ export const WelcomeDialog = (props: {
 			{!importedArrayBuffer ? (
 				<Dropzone
 					handleOpen={(files) => handleRead(files)}
-					fileLable=".csv"
 					icon={
 						<svg
 							xmlns="http://www.w3.org/2000/svg"

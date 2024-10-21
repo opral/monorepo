@@ -5,6 +5,7 @@ import { atom } from "jotai";
 import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
 import { plugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
+import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
 
 export const selectedFileIdAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -43,10 +44,13 @@ export const lixAtom = atom(async (get) => {
 	}
 
 	const rootHandle = await getOriginPrivateDirectory();
-	const fileHandle = await rootHandle.getFileHandle("csv-demo.lix");
+	const fileHandle = await rootHandle.getFileHandle("demo.lix", {
+		create: true,
+	});
 	const file = await fileHandle.getFile();
+	const isNewLix = file.size === 0;
 	const lix = await openLixInMemory({
-		blob: file,
+		blob: isNewLix ? await lixCsvDemoFile() : file,
 		providePlugins: [plugin],
 	});
 
