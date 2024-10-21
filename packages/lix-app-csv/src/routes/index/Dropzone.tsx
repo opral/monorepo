@@ -47,7 +47,7 @@ export default function Dropzone() {
 					</svg>
 				</div>
 				<p className="text-lg pt-2 text-gray-500 text-center font-medium">
-					Import .csv file
+					Import your own .csv file
 				</p>
 				{isDragActive ? (
 					<p className=" text-gray-950 text-center font-medium">
@@ -55,7 +55,7 @@ export default function Dropzone() {
 					</p>
 				) : (
 					<p className=" text-gray-500 text-center">
-						Drag and drop or click to choose .csv file
+						Import your own .csv file to experience lix change control.
 					</p>
 				)}
 			</div>
