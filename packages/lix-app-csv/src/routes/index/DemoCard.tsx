@@ -19,7 +19,7 @@ export const DemoCard = () => {
 					<h2 className="text-2xl max-w-[500px]">
 						Lix brings change control to{" "}
 						<span className="bg-zinc-300 text-zinc-800 rounded-sm">.csv</span>{" "}
-						(and many other) file formats.
+						(and many other) files.
 					</h2>
 					<a href="https://lix.opral.com/" target="_blank" className="">
 						<h3 className="text-lg text-zinc-500 underline">
