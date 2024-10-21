@@ -1,27 +1,27 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useAtom } from "jotai";
 import { useEffect } from "react";
-import { lixAtom, withPollingAtom } from "./state.ts";
+import { lixAtom, withPollingAtom } from "../../state.ts";
 import { useNavigate } from "react-router-dom";
 import {
 	SlAlert,
 	SlButton,
 	SlTooltip,
 } from "@shoelace-style/shoelace/dist/react";
-import SubNavigation from "./components/SubNavigation.tsx";
+import SubNavigation from "../../components/SubNavigation.tsx";
 
 export default function Layout(props: {
 	children: React.ReactNode;
 	setShowImportDialog: (value: boolean) => void;
 }) {
+	const [lix] = useAtom(lixAtom);
 	const [, setWithPolling] = useAtom(withPollingAtom);
-	const [project] = useAtom(lixAtom);
 
 	const navigate = useNavigate();
 	// const [, setSearchParams] = useSearchParams();
 
 	const handleDownload = async () => {
-		const file = await project?.db
+		const file = await lix.db
 			.selectFrom("file")
 			.selectAll()
 			.where("path", "=", "/data.csv")

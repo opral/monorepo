@@ -1,4 +1,4 @@
-import Layout from "../../layout.tsx";
+import Layout from "./layout.tsx";
 import TableEditor from "../../components/TableEditor.tsx";
 import { useState } from "react";
 import { UserAuthDialog } from "../../components/UserAuthDialog.tsx";

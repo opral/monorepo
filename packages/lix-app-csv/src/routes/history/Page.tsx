@@ -1,6 +1,6 @@
 // import { useAtom } from "jotai";
 import PageHeader from "../../components/PageHeader.tsx";
-import Layout from "../../layout.tsx";
+import Layout from "../editor/layout.tsx";
 // import { commitsAtom } from "../../state.ts";
 // import { HistoryEntry } from "../../components/HistoryEntry.tsx";
 
