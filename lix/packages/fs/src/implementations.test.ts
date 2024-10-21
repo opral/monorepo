@@ -24,7 +24,12 @@ describe.skipIf(process.platform === "win32")("node fs", async () => {
   await fs.mkdir(tempDir, { recursive: true });
   // @ts-ignore
   const isNodeFs = true;
-  await runFsTestSuite("node fs", tempDir, fs as NodeishFilesystem, isNodeFs);
+  await runFsTestSuite(
+    "node fs",
+    tempDir,
+    fs as unknown as NodeishFilesystem,
+    isNodeFs
+  );
 });
 
 describe("memory fs", async () => {
@@ -388,8 +393,8 @@ const runFsTestSuite = async (
     });
 
     test.skipIf(isNodeFs)("write empty File", async () => {
-      // @ts-expect-error
       await expect(
+        // @ts-expect-error
         async () => await fs.writeFile(`${tempDir}/file3`, undefined)
       ).rejects.toThrow(
         'The "data" argument must be of type string/Uint8Array'
