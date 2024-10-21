@@ -7,7 +7,7 @@ export default function RootLayout(props: { children: JSX.Element }) {
 					<a href="https://lix.opral.com" target="_blank">
 						<img src="/lix.svg" alt="logo" className="w-8 h-8" />
 					</a>
-					<h1 className="font-medium">CSV Demo App</h1>
+					<h1 className="font-medium">CSV Demo</h1>
 				</div>
 				<div className="flex gap-3 items-center">
 					<a href="https://discord.gg/gdMPPWy57R" target="_blank">
