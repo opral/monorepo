@@ -55,7 +55,7 @@ function FileExplorer() {
 					);
 				})}
 			</div>
-			<Dropzone handleOpen={(files) => console.log(files)} />{" "}
+			<Dropzone />
 		</div>
 	);
 }

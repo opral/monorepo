@@ -1,15 +1,24 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import clsx from "clsx";
+import { useAtom } from "jotai";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import { lixAtom } from "../../state.ts";
 
-export default function Dropzone(props: {
-	handleOpen: (value: File[]) => void;
-}) {
-	//@ts-ignore
-	const onDrop = useCallback((acceptedFiles) => {
-		// Do something with the files
-		props.handleOpen(acceptedFiles);
+export default function Dropzone() {
+	const [lix] = useAtom(lixAtom);
+
+	const onDrop = useCallback(async (acceptedFiles: any) => {
+		await lix.db
+			.insertInto("file")
+			.values(
+				await Promise.all(
+					acceptedFiles.map(async (file: File) => ({
+						path: "/" + file.name,
+						data: await file.arrayBuffer(),
+					}))
+				)
+			)
+			.execute();
 	}, []);
 	const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 

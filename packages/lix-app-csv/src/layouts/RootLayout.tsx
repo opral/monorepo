@@ -1,4 +1,17 @@
+import { useAtom } from "jotai";
+import { withPollingAtom } from "../state.ts";
+import { useEffect } from "react";
+
 export default function RootLayout(props: { children: JSX.Element }) {
+	const [, setPolling] = useAtom(withPollingAtom);
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setPolling(Date.now());
+		}, 1000);
+		return () => clearInterval(interval);
+	}, []);
+
 	return (
 		<>
 			{/* Header with socials */}
