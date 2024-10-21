@@ -1,9 +1,5 @@
  
-import {
-	SlButton,
-	SlDialog,
-	SlInput,
-} from "@shoelace-style/shoelace/dist/react";
+import { SlButton, SlDialog } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
 import { pendingChangesAtom, projectAtom } from "../state.ts";
 import Dropzone from "./Dropzone.tsx";
@@ -16,7 +12,6 @@ export const ImportDialog = (props: {
 	const [project] = useAtom(projectAtom);
 	const [pendingChanges] = useAtom(pendingChangesAtom);
 	const [importInitialized, setImportInitialized] = useState(false);
-	const [description, setDescription] = useState("");
 
 	const handleImport = async (files: File[]) => {
 		const file = files[0];
@@ -38,15 +33,6 @@ export const ImportDialog = (props: {
 			};
 			reader.readAsArrayBuffer(file);
 		}
-	};
-
-	const handleCommit = async () => {
-		await project?.commit({
-			description: description,
-		});
-		setImportInitialized(false);
-		setDescription("");
-		props.setShowImportDialog(false);
 	};
 
 	return (
@@ -87,25 +73,21 @@ export const ImportDialog = (props: {
 					</div>
 					{pendingChanges.length > 0 && (
 						<div className="mb-8 mt-4">
-							<SlInput
+							TODO
+							{/* <SlInput
 								label="Description"
 								placeholder="What did you import?"
 								 
 								onInput={(e: any) =>
 									setDescription(e.target.value ? e.target.value : "")
 								}
-							></SlInput>
+							></SlInput> */}
 						</div>
 					)}
 
 					{pendingChanges.length > 0 ? (
-						<SlButton
-							variant="primary"
-							slot="footer"
-							onClick={handleCommit}
-							className="w-full"
-						>
-							Save
+						<SlButton variant="primary" slot="footer" className="w-full">
+							Save (TODO was commit before)
 						</SlButton>
 					) : (
 						<SlButton
@@ -115,7 +97,6 @@ export const ImportDialog = (props: {
 								props.setShowImportDialog(false);
 								setTimeout(() => {
 									setImportInitialized(false);
-									setDescription("");
 								}, 200);
 							}}
 							className="w-full"

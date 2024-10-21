@@ -1,12 +1,12 @@
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
-import { Commit, newLixFile, openLixInMemory } from "@lix-js/sdk";
-import { plugin } from "../csv-plugin.ts";
+import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAtom } from "jotai";
 import { selectedProjectPathAtom } from "../state.ts";
 import { humanId } from "../helper/human-id/human-id.ts";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
+import { plugin } from "@lix-js/plugin-csv";
 
 const fileName = "cap-table.lix";
 
@@ -39,7 +39,7 @@ export const DemoCard = () => {
 		);
 
 		if (newProject) {
-			newProject.currentAuthor.set("Demo User");
+			// newProject.currentAuthor.set("Demo User");
 			await newProject.db
 				.insertInto("file")
 				.values([
@@ -74,15 +74,10 @@ export const DemoCard = () => {
 			res.text()
 		);
 		if (!rawCommits) return;
-		const commits: Commit[] = JSON.parse(rawCommits);
-		if (commits) {
-			for (const commit of commits) {
-				await newProject.db
-					.insertInto("commit")
-					.values([{ ...commit }])
-					.execute();
-			}
-		}
+		// const commits: Commit[] = JSON.parse(rawCommits);
+		// if (commits) {
+
+		// }
 
 		// add changes
 		const rawChanges = await fetch("/cap-table/changes.json").then((res) =>

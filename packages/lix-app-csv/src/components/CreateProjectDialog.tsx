@@ -7,10 +7,10 @@ import {
 	SlInput,
 } from "@shoelace-style/shoelace/dist/react";
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
-import plugin from "../csv-plugin.ts";
 import { useNavigate } from "react-router-dom";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { humanId } from "../helper/human-id/human-id.ts";
+import { plugin } from "@lix-js/plugin-csv";
 
 export const CreateProjectDialog = (props: {
 	showNewProjectDialog: boolean;

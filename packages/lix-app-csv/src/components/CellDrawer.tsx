@@ -4,23 +4,23 @@ import React, { useEffect, useState } from "react";
 import {
 	csvDataAtom,
 	editorSelectionAtom,
-	projectAtom,
+	// projectAtom,
 	uniqueColumnAtom,
 } from "../state.ts";
-import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
-import timeAgo from "../helper/timeAgo.ts";
+// import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
+// import timeAgo from "../helper/timeAgo.ts";
 
 export const CellDrawer = (props: {
 	showDrawer: boolean;
 	setShowDrawer: React.Dispatch<SetStateAction<boolean>>;
 }) => {
 	const [selection] = useAtom(editorSelectionAtom);
-	const [project] = useAtom(projectAtom);
+	// const [project] = useAtom(projectAtom);
 	const [csvData] = useAtom(csvDataAtom);
 	const [uniqueColumn] = useAtom(uniqueColumnAtom);
 	const [row, setRow] = useState<{ [key: string]: string } | undefined>();
-	 
-	const [relevantChangesOfRow, setRelevantChangesOfRow] = useState<any[]>([]);
+
+	// const [relevantChangesOfRow, setRelevantChangesOfRow] = useState<any[]>([]);
 
 	const getPlacement = () => {
 		if (window.innerWidth < 768) {
@@ -38,34 +38,35 @@ export const CellDrawer = (props: {
 	};
 
 	const getHistoryOfRow = async () => {
-		const relevantChanges = [];
-		const commits = await project?.db
-			.selectFrom("commit")
-			.selectAll()
-			.orderBy("created_at desc")
-			.execute();
+		// const relevantChanges = [];
+		const commits = undefined;
+		// const commits = await project?.db
+		// 	.selectFrom("commit")
+		// 	.selectAll()
+		// 	.orderBy("created_at desc")
+		// 	.execute();
 
 		if (!commits) return;
-		for await (const commit of commits) {
-			const change = await project?.db
-				.selectFrom("change")
-				.selectAll()
-				.where("change.commit_id", "==", commit.id)
-				.where(
-					(eb) => eb.ref("value", "->>").key(uniqueColumn),
-					"=",
-					selection?.row
-				)
-				.innerJoin("commit", "commit.id", "change.commit_id")
-				.where(isInSimulatedCurrentBranch)
-				.orderBy("change.created_at desc")
-				.executeTakeFirst();
+		// for await (const commit of commits) {
+		// 	const change = await project?.db
+		// 		.selectFrom("change")
+		// 		.selectAll()
+		// 		.where("change.commit_id", "==", commit.id)
+		// 		.where(
+		// 			(eb) => eb.ref("value", "->>").key(uniqueColumn),
+		// 			"=",
+		// 			selection?.row
+		// 		)
+		// 		.innerJoin("commit", "commit.id", "change.commit_id")
+		// 		.where(isInSimulatedCurrentBranch)
+		// 		.orderBy("change.created_at desc")
+		// 		.executeTakeFirst();
 
-			if (change) {
-				relevantChanges.push(change);
-			}
-		}
-		setRelevantChangesOfRow(relevantChanges);
+		// 	if (change) {
+		// 		relevantChanges.push(change);
+		// 	}
+		// }
+		// setRelevantChangesOfRow(relevantChanges);
 	};
 
 	useEffect(() => {
@@ -144,7 +145,8 @@ export const CellDrawer = (props: {
 
 				{selection && (
 					<div className="mb-12 relative flex flex-col gap-3">
-						{relevantChangesOfRow
+						TODO
+						{/* {relevantChangesOfRow
 							.filter((cell) => cell.meta.col_name.includes(selection.col))
 							.map((change) => {
 								return (
@@ -185,7 +187,7 @@ export const CellDrawer = (props: {
 										</div>
 									</div>
 								);
-							})}
+							})} */}
 						<div className="absolute w-[2px] h-[calc(100%_-_100px)] top-[20px] left-[21px] bg-zinc-200"></div>
 					</div>
 				)}

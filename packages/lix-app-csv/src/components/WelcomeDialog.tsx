@@ -80,11 +80,6 @@ export const WelcomeDialog = (props: {
 				} as LixFile,
 			])
 			.execute();
-		setTimeout(() => {
-			project?.commit({
-				description: "Initial .csv upload in empty project",
-			});
-		}, 500);
 	};
 
 	return (
