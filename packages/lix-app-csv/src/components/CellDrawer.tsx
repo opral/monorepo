@@ -2,11 +2,11 @@ import { SlDrawer } from "@shoelace-style/shoelace/dist/react";
 import { SetStateAction, useAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import {
-	csvDataAtom,
 	editorSelectionAtom,
 	// projectAtom,
 	uniqueColumnAtom,
 } from "../state.ts";
+import { parsedCsvAtom } from "../routes/editor/state.ts";
 // import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
 // import timeAgo from "../helper/timeAgo.ts";
 
@@ -16,7 +16,7 @@ export const CellDrawer = (props: {
 }) => {
 	const [selection] = useAtom(editorSelectionAtom);
 	// const [project] = useAtom(projectAtom);
-	const [csvData] = useAtom(csvDataAtom);
+	const [csvData] = useAtom(parsedCsvAtom);
 	const [uniqueColumn] = useAtom(uniqueColumnAtom);
 	const [row, setRow] = useState<{ [key: string]: string } | undefined>();
 

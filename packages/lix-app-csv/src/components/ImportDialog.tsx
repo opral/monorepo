@@ -1,7 +1,7 @@
  
 import { SlButton, SlDialog } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
-import { pendingChangesAtom, projectAtom } from "../state.ts";
+import { pendingChangesAtom, lixAtom } from "../state.ts";
 import Dropzone from "./Dropzone.tsx";
 import { useState } from "react";
 
@@ -9,7 +9,7 @@ export const ImportDialog = (props: {
 	showImportDialog: boolean;
 	setShowImportDialog: (value: boolean) => void;
 }) => {
-	const [project] = useAtom(projectAtom);
+	const [project] = useAtom(lixAtom);
 	const [pendingChanges] = useAtom(pendingChangesAtom);
 	const [importInitialized, setImportInitialized] = useState(false);
 

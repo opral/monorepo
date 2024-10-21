@@ -1,16 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useAtom } from "jotai";
 import { useEffect } from "react";
-import {
-	authorNameAtom,
-	projectAtom,
-	selectedProjectPathAtom,
-	withPollingAtom,
-} from "./state.ts";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { lixAtom, withPollingAtom } from "./state.ts";
+import { useNavigate } from "react-router-dom";
 import {
 	SlAlert,
-	SlAvatar,
 	SlButton,
 	SlTooltip,
 } from "@shoelace-style/shoelace/dist/react";
@@ -21,12 +15,10 @@ export default function Layout(props: {
 	setShowImportDialog: (value: boolean) => void;
 }) {
 	const [, setWithPolling] = useAtom(withPollingAtom);
-	const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
-	const [authorName] = useAtom(authorNameAtom);
-	const [project] = useAtom(projectAtom);
+	const [project] = useAtom(lixAtom);
 
 	const navigate = useNavigate();
-	const [, setSearchParams] = useSearchParams();
+	// const [, setSearchParams] = useSearchParams();
 
 	const handleDownload = async () => {
 		const file = await project?.db
@@ -43,7 +35,6 @@ export default function Layout(props: {
 		const blobUrl = URL.createObjectURL(blob);
 		const link = document.createElement("a");
 		link.href = blobUrl;
-		link.download = selectedProjectPath!.replace("lix", "csv");
 		document.body.appendChild(link);
 		link.dispatchEvent(
 			new MouseEvent("click", {
@@ -55,26 +46,26 @@ export default function Layout(props: {
 		document.body.removeChild(link);
 	};
 
-	const handleSetSearchParams = async () => {
-		if (selectedProjectPath && project) {
-			const file = await project.db
-				.selectFrom("file")
-				.where("path", "=", "/project_meta")
-				.select("data")
-				.executeTakeFirst();
+	// const handleSetSearchParams = async () => {
+	// 	if (selectedProjectPath && project) {
+	// 		const file = await project.db
+	// 			.selectFrom("file")
+	// 			.where("path", "=", "/project_meta")
+	// 			.select("data")
+	// 			.executeTakeFirst();
 
-			//console.log("handle", file);
+	// 		//console.log("handle", file);
 
-			if (file) {
-				const projectMeta = JSON.parse(new TextDecoder().decode(file.data));
-				if (projectMeta) {
-					setSearchParams(
-						new URLSearchParams({ project: projectMeta.project_id })
-					);
-				}
-			}
-		}
-	};
+	// 		if (file) {
+	// 			const projectMeta = JSON.parse(new TextDecoder().decode(file.data));
+	// 			if (projectMeta) {
+	// 				setSearchParams(
+	// 					new URLSearchParams({ project: projectMeta.project_id })
+	// 				);
+	// 			}
+	// 		}
+	// 	}
+	// };
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -84,11 +75,11 @@ export default function Layout(props: {
 		return () => clearInterval(interval);
 	});
 
-	useEffect(() => {
-		if (selectedProjectPath && project) {
-			handleSetSearchParams();
-		}
-	}, [selectedProjectPath, project]);
+	// useEffect(() => {
+	// 	if (selectedProjectPath && project) {
+	// 		handleSetSearchParams();
+	// 	}
+	// }, [selectedProjectPath, project]);
 
 	return (
 		<div className="w-full min-h-screen bg-zinc-50 relative">
@@ -115,7 +106,7 @@ export default function Layout(props: {
 						<p className="font-medium opacity-30">/</p>
 						<div className="flex justify-center items-center text-zinc-950 h-9 rounded-lg px-2">
 							<h1 className="font-medium">
-								{selectedProjectPath?.split("___")[1]}
+								{/* {selectedProjectPath?.split("___")[1]} */}
 							</h1>
 						</div>
 					</div>
@@ -174,9 +165,9 @@ export default function Layout(props: {
 						>
 							Import .csv
 						</SlButton>
-						<SlTooltip content={authorName}>
+						{/* <SlTooltip content={authorName}>
 							<SlAvatar initials={authorName?.slice(0, 2)} />
-						</SlTooltip>
+						</SlTooltip> */}
 					</div>
 				</div>
 				<div className="w-full -mt-2 px-3">

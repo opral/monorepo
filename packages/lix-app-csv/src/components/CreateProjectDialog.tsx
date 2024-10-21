@@ -1,6 +1,5 @@
-import { SetStateAction, useAtom } from "jotai";
+import { SetStateAction } from "jotai";
 import { useMemo, useState } from "react";
-import { selectedProjectPathAtom } from "../state.ts";
 import {
 	SlButton,
 	SlDialog,
@@ -19,7 +18,6 @@ export const CreateProjectDialog = (props: {
 	const [fileName, setFileName] = useState("");
 	const [loading, setLoading] = useState(false);
 	const isValid = useMemo(() => fileName.endsWith(".lix"), [fileName]);
-	const [, setSelectedProjectPath] = useAtom(selectedProjectPathAtom);
 
 	const navigate = useNavigate();
 
@@ -56,7 +54,6 @@ export const CreateProjectDialog = (props: {
 		await writable.write(file);
 		await writable.close();
 
-		setSelectedProjectPath(projectId + "___" + fileName);
 		setLoading(false);
 		props.setShowNewProjectDialog(false);
 
@@ -77,7 +74,6 @@ export const CreateProjectDialog = (props: {
 						: "Enter the name of your project"
 				}
 				placeholder="my-website"
-				 
 				onInput={(e: any) =>
 					setFileName(e.target.value ? e.target.value + ".lix" : "")
 				}

@@ -2,8 +2,6 @@ import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useAtom } from "jotai";
-import { selectedProjectPathAtom } from "../state.ts";
 import { humanId } from "../helper/human-id/human-id.ts";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { plugin } from "@lix-js/plugin-csv";
@@ -12,7 +10,6 @@ const fileName = "cap-table.lix";
 
 export const DemoCard = () => {
 	const [loading, setLoading] = useState(false);
-	const [, setSelectedProjectPath] = useAtom(selectedProjectPathAtom);
 
 	const navigate = useNavigate();
 
@@ -98,7 +95,6 @@ export const DemoCard = () => {
 		await writable.write(file);
 		await writable.close();
 
-		setSelectedProjectPath(projectId + "___" + fileName);
 		setLoading(false);
 
 		navigate("/editor?project=" + projectId);

@@ -1,81 +1,52 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { openLixInMemory } from "@lix-js/sdk";
 import { atom } from "jotai";
-import { atomWithStorage, createJSONStorage } from "jotai/utils";
-import Papa from "papaparse";
 // import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
 import { plugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 
-export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
-	"selected-project-path",
-	undefined
-);
-
-export const authorNameAtom = atomWithStorage<string | undefined>(
-	"author-name",
-	undefined,
-	createJSONStorage(),
-	{ getOnInit: true }
-);
-
 export const editorSelectionAtom = atom<{ row: string; col: string } | null>(
 	null
 );
 
-let safeProjectToOpfsInterval: number;
+let existingSafeLixToOpfsInterval: ReturnType<typeof setInterval> | undefined;
 
 /**
  * Force reload the project.
  *
  * Search for `setReloadProject` to see where this atom is set.
  */
-export const forceReloadProjectAtom = atom<
-	ReturnType<typeof Date.now> | undefined
->(undefined);
+export const forceReloadLixAtom = atom<ReturnType<typeof Date.now> | undefined>(
+	undefined
+);
 
-export const projectAtom = atom(async (get) => {
+export const lixAtom = atom(async (get) => {
 	// listen to forceReloadProjectAtom to reload the project
 	// workaround for https://github.com/opral/lix-sdk/issues/47
-	get(forceReloadProjectAtom);
+	get(forceReloadLixAtom);
 
-	if (safeProjectToOpfsInterval) {
-		clearInterval(safeProjectToOpfsInterval);
+	if (existingSafeLixToOpfsInterval) {
+		clearInterval(existingSafeLixToOpfsInterval);
 	}
 
-	try {
-		const path = get(selectedProjectPathAtom);
-		if (!path) return undefined;
-		const rootHandle = await getOriginPrivateDirectory();
-		const fileHandle = await rootHandle.getFileHandle(path);
-		const file = await fileHandle.getFile();
-		const project = await openLixInMemory({
-			blob: file,
-			providePlugins: [plugin],
-		});
-		// @ts-ignore
-		safeProjectToOpfsInterval = setInterval(async () => {
-			const writable = await fileHandle.createWritable();
-			const file = await project.toBlob();
-			await writable.write(file);
-			await writable.close();
-		}, 2000);
+	const rootHandle = await getOriginPrivateDirectory();
+	const fileHandle = await rootHandle.getFileHandle("csv-demo.lix");
+	const file = await fileHandle.getFile();
+	const lix = await openLixInMemory({
+		blob: file,
+		providePlugins: [plugin],
+	});
 
-		return project;
-	} catch (e) {
-		console.error(e);
-		return undefined;
-	}
+	existingSafeLixToOpfsInterval = setInterval(async () => {
+		const writable = await fileHandle.createWritable();
+		const file = await lix.toBlob();
+		await writable.write(file);
+		await writable.close();
+	}, 2000);
+
+	return lix;
 });
-
-// export const settingsAtom = atom(async (get) => {
-// 	get(withPollingAtom);
-// 	const project = await get(projectAtom);
-// 	// assuming that the project is always defined when the settings are read
-// 	if (!project) return undefined as unknown as ProjectSettings;
-// 	return await project?.settings.get();
-// });
 
 /**
  * Ugly ass workaround to get polled derived state.
@@ -84,26 +55,9 @@ export const projectAtom = atom(async (get) => {
  */
 export const withPollingAtom = atom(Date.now());
 
-export const csvDataAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const project = await get(projectAtom);
-	if (!project) return [];
-
-	const csvFile = await project.db
-		.selectFrom("file")
-		.select("data")
-		.where("path", "=", "/data.csv")
-		.executeTakeFirst();
-	if (!csvFile) return [];
-	return Papa.parse(new TextDecoder().decode(csvFile.data), {
-		header: true,
-		skipEmptyLines: true,
-	}).data as [{ [key: string]: string }];
-});
-
 export const uniqueColumnAtom = atom(async (get) => {
 	get(withPollingAtom);
-	const project = await get(projectAtom);
+	const project = await get(lixAtom);
 	if (!project) return [];
 
 	const result = await project.db
@@ -120,7 +74,7 @@ export const uniqueColumnAtom = atom(async (get) => {
 
 export const pendingChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
-	const project = await get(projectAtom);
+	const project = await get(lixAtom);
 	if (!project) return [];
 	const result = await project.db
 		.selectFrom("change")
@@ -132,7 +86,7 @@ export const pendingChangesAtom = atom(async (get) => {
 		.execute();
 	//console.log(result);
 	// @ts-expect-error
-	window.lix = projectAtom;
+	window.lix = lixAtom;
 	return result;
 });
 
@@ -180,93 +134,3 @@ export const pendingChangesAtom = atom(async (get) => {
 // 	}
 // 	return [...result];
 // });
-
-
-// @ts-ignore
-const humanFileSize = (bytes, si = false, dp = 1) => {
-	const thresh = si ? 1000 : 1024;
-
-	if (Math.abs(bytes) < thresh) {
-		return bytes + " B";
-	}
-
-	const units = si
-		? ["kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
-		: ["KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
-	let u = -1;
-	const r = 10 ** dp;
-
-	do {
-		bytes /= thresh;
-		++u;
-	} while (
-		Math.round(Math.abs(bytes) * r) / r >= thresh &&
-		u < units.length - 1
-	);
-
-	return bytes.toFixed(dp) + " " + units[u];
-};
-
-//@ts-ignore
-const getDirectoryEntriesRecursive = async (relativePath = ".") => {
-	// @ts-ignore
-	const directoryHandle = await navigator.storage.getDirectory();
-	const fileHandles = [];
-	const directoryHandles = [];
-
-	// Get an iterator of the files and folders in the directory.
-	// @ts-ignore
-	const directoryIterator = directoryHandle.values();
-	const directoryEntryPromises = [];
-	for await (const handle of directoryIterator) {
-		const nestedPath = `${relativePath}/${handle.name}`;
-		if (handle.kind === "file") {
-			// @ts-ignore
-			fileHandles.push({ handle, nestedPath });
-			directoryEntryPromises.push(
-				// @ts-ignore
-				handle.getFile().then((file) => {
-					return {
-						name: handle.name,
-						file,
-						size: humanFileSize(file.size),
-						relativePath: nestedPath,
-						handle,
-					};
-				})
-			);
-		} else if (handle.kind === "directory") {
-			// @ts-ignore
-			directoryHandles.push({ handle, nestedPath });
-			directoryEntryPromises.push(
-				// @ts-ignore
-				(async () => {
-					return {
-						name: handle.name,
-						// @ts-ignore
-						file,
-						// @ts-ignore
-						size: humanFileSize(file.size),
-						relativePath: nestedPath,
-						// @ts-ignore
-						entries: await getDirectoryEntriesRecursive(handle, nestedPath),
-						handle,
-					};
-				})()
-			);
-		}
-	}
-	return await Promise.all(directoryEntryPromises);
-};
-
-// //@ts-ignore
-// window.databases = await getDirectoryEntriesRecursive();
-
-//@ts-ignore
-window.deleteAll = async () => {
-	clearInterval(safeProjectToOpfsInterval);
-	const databases = await getDirectoryEntriesRecursive();
-	for (const database of databases) {
-		await database.handle.remove();
-	}
-};

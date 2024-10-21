@@ -1,41 +1,21 @@
 import Layout from "../../layout.tsx";
 import { useAtom } from "jotai";
-import {
-	authorNameAtom,
-	csvDataAtom,
-	projectAtom,
-	// selectedProjectPathAtom,
-} from "../../state.ts";
 import TableEditor from "../../components/TableEditor.tsx";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { UserAuthDialog } from "../../components/UserAuthDialog.tsx";
 import { ImportDialog } from "../../components/ImportDialog.tsx";
 import { WelcomeDialog } from "../../components/WelcomeDialog.tsx";
+import { parsedCsvAtom } from "./state.ts";
 
 export default function App() {
 	// const [pendingChanges] = useAtom(pendingChangesAtom);
-	const [csvData] = useAtom(csvDataAtom);
+	const [csvData] = useAtom(parsedCsvAtom);
 	// const [commits] = useAtom(commitsAtom);
-	const [authorName] = useAtom(authorNameAtom);
 	// const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
-	const [project] = useAtom(projectAtom);
 
 	const [showAuthorDialog, setShowAuthorDialog] = useState(false);
 	const [showImportDialog, setShowImportDialog] = useState(false);
 	const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
-
-	useEffect(() => {
-		//console.log(project, csvData, authorName);
-		if (project && csvData && csvData.length === 0 && authorName) {
-			setShowWelcomeDialog(true);
-		}
-	}, [csvData, project, authorName]);
-
-	useEffect(() => {
-		if (!authorName && project && csvData) {
-			setShowAuthorDialog(true);
-		}
-	}, [authorName, project, csvData]);
 
 	// const handleDownload = async () => {
 	// 	const blob = await project!.toBlob();

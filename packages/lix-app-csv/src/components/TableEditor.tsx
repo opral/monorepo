@@ -1,4 +1,3 @@
- 
 import { useAtom } from "jotai";
 // import { useState } from "react";
 import {
@@ -8,18 +7,14 @@ import {
 } from "react-datasheet-grid";
 import "react-datasheet-grid/dist/style.css";
 import Papa from "papaparse";
-import {
-	csvDataAtom,
-	editorSelectionAtom,
-	projectAtom,
-	uniqueColumnAtom,
-} from "../state.ts";
+import { editorSelectionAtom, lixAtom, uniqueColumnAtom } from "../state.ts";
 import { CellDrawer } from "./CellDrawer.tsx";
 import { useEffect, useState } from "react";
+import { parsedCsvAtom } from "../routes/editor/state.ts";
 
 const TableEditor = () => {
-	const [csvData] = useAtom(csvDataAtom);
-	const [project] = useAtom(projectAtom);
+	const [csvData] = useAtom(parsedCsvAtom);
+	const [project] = useAtom(lixAtom);
 	const [uniqueColumn] = useAtom(uniqueColumnAtom);
 	const [showDrawer, setShowDrawer] = useState(false);
 	const [screenHeight, setScreenHeight] = useState<number>(800);
@@ -90,7 +85,7 @@ const TableEditor = () => {
 				}
 				rowKey={uniqueColumn}
 				// onFocus={(cell) => console.log("onFocus", cell)}
-				 
+
 				onSelectionChange={(e: { selection: any }) => {
 					if (e.selection) {
 						if (

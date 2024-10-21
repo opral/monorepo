@@ -5,7 +5,7 @@ import {
 	SlInput,
 } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
-import { projectAtom } from "../state.ts";
+import { lixAtom } from "../state.ts";
 import Dropzone from "./Dropzone.tsx";
 import { useState } from "react";
 import Papa from "papaparse";
@@ -15,7 +15,7 @@ export const WelcomeDialog = (props: {
 	showWelcomeDialog: boolean;
 	setShowWelcomeDialog: (value: boolean) => void;
 }) => {
-	const [project] = useAtom(projectAtom);
+	const [project] = useAtom(lixAtom);
 	const [uniqueColumn, setUniqueColumn] = useState("");
 	const [importedArrayBuffer, setImportedArrayBuffer] = useState<
 		ArrayBuffer | undefined
@@ -122,7 +122,6 @@ export const WelcomeDialog = (props: {
 							placeholder="Enter unique column name"
 							value={uniqueColumn}
 							helpText="To trace all the changes correctly we need to know which column is used as unique identifier in your .csv file."
-							 
 							onInput={(e: any) =>
 								setUniqueColumn(e.target.value ? e.target.value : "")
 							}

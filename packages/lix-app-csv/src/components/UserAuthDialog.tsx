@@ -1,21 +1,22 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
 	SlButton,
 	SlDialog,
 	SlInput,
 } from "@shoelace-style/shoelace/dist/react";
-import { useAtom } from "jotai";
+// import { useAtom } from "jotai";
 import { useState } from "react";
-import { authorNameAtom } from "../state.ts";
+// import { authorNameAtom } from "../state.ts";
 
 export const UserAuthDialog = (props: {
 	showAuthorDialog: boolean;
 	setShowAuthorDialog: (value: boolean) => void;
 }) => {
 	const [author, setAuthor] = useState("");
-	const [, setAuthorName] = useAtom(authorNameAtom);
+	// const [, setAuthorName] = useAtom(authorNameAtom);
 
 	const handleSetAuthor = async () => {
-		setAuthorName(author);
+		// setAuthorName(author);
 		props.setShowAuthorDialog(false);
 	};
 
@@ -38,7 +39,6 @@ export const UserAuthDialog = (props: {
 			<SlInput
 				label="Username"
 				placeholder="Max Mustermann"
-				 
 				onInput={(e: any) => setAuthor(e.target.value)}
 			></SlInput>
 			<SlButton
