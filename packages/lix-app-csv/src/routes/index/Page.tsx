@@ -1,8 +1,6 @@
 import { atom, useAtom } from "jotai";
 import { lixAtom, withPollingAtom } from "../../state.ts";
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { CreateProjectDialog } from "../../components/CreateProjectDialog.tsx";
 import { DemoCard } from "./DemoCard.tsx";
 import Dropzone from "./Dropzone.tsx";
 
@@ -13,8 +11,6 @@ const filesAtom = atom(async (get) => {
 });
 
 export default function Page() {
-	const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
-
 	return (
 		<div className="w-full max-w-5xl mx-auto">
 			<div className="mt-8 px-4">
@@ -26,10 +22,6 @@ export default function Page() {
 				</div>
 			</div>
 			<FileExplorer></FileExplorer>
-			<CreateProjectDialog
-				showNewProjectDialog={showNewProjectDialog}
-				setShowNewProjectDialog={setShowNewProjectDialog}
-			/>
 		</div>
 	);
 }
