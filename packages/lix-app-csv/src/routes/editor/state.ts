@@ -1,10 +1,17 @@
 import { atom } from "jotai";
-import { lixAtom, withPollingAtom } from "../../state.ts";
+import { lixAtom, selectedFileIdAtom, withPollingAtom } from "../../state.ts";
 import Papa from "papaparse";
 
 export const parsedCsvAtom = atom(async (get) => {
 	get(withPollingAtom);
-	const fileId = "";
+	const fileId = await get(selectedFileIdAtom);
+
+	if (!fileId) {
+		// Not the best UX to implicitly route to the root
+		// but fine for now.
+		window.location.href = "/";
+		return [];
+	}
 
 	const lix = await get(lixAtom);
 

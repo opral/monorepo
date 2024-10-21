@@ -1,9 +1,8 @@
- 
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { atom, useAtom } from "jotai";
 import { lixAtom, withPollingAtom } from "../../state.ts";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Suspense, useState } from "react";
+import { Link } from "react-router-dom";
 import { CreateProjectDialog } from "../../components/CreateProjectDialog.tsx";
 import { DemoCard } from "../../components/DemoCard.tsx";
 
@@ -13,13 +12,10 @@ const filesAtom = atom(async (get) => {
 	return await lix.db.selectFrom("file").selectAll().execute();
 });
 
-export default function App() {
-	const [files] = useAtom(filesAtom);
+export default function Page() {
 	const [lix] = useAtom(lixAtom);
 
 	const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
-
-	const navigate = useNavigate();
 
 	return (
 		<div className="w-full">
@@ -79,44 +75,49 @@ export default function App() {
 					</SlButton>
 				</div>
 			</div>
-			<div className="max-w-5xl mx-auto mt-6 px-4 flex flex-wrap gap-3 mb-16">
-				{files.length === 0 && (
-					<div
-						className="flex flex-col justify-center items-center gap-4 w-full md:w-[calc((100%_-_12px)_/_2)] bg-transparent border border-zinc-300 rounded-lg px-6 py-5 hover:border-zinc-700 hover:bg-zinc-100 transition-all cursor-pointer min-h-[140px] border-dashed text-zinc-400 hover:text-zinc-950"
-						onClick={() => document.getElementById("fileInput")?.click()}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-						>
-							<path
-								fill="currentColor"
-								d="M19 12.998h-6v6h-2v-6H5v-2h6v-6h2v6h6z"
-							/>
-						</svg>
-					</div>
-				)}
-				<div className="border w-full border-zinc-200 px-4 py-2 rounded">
-					{files.map((file) => {
-						return (
-							<div
-								key={file.id}
-								onClick={() => {
-									navigate("/editor");
-								}}
-							>
-								<p className="">{file.path}</p>
-							</div>
-						);
-					})}
-				</div>
-			</div>
+			<Suspense fallback={<p>Loading</p>}>
+				<FileExplorer></FileExplorer>
+			</Suspense>
 			<CreateProjectDialog
 				showNewProjectDialog={showNewProjectDialog}
 				setShowNewProjectDialog={setShowNewProjectDialog}
 			/>
+		</div>
+	);
+}
+
+function FileExplorer() {
+	const [files] = useAtom(filesAtom);
+
+	return (
+		<div className="max-w-5xl mx-auto mt-6 px-4 flex flex-wrap gap-3 mb-16">
+			{files.length === 0 && (
+				<div
+					className="flex flex-col justify-center items-center gap-4 w-full md:w-[calc((100%_-_12px)_/_2)] bg-transparent border border-zinc-300 rounded-lg px-6 py-5 hover:border-zinc-700 hover:bg-zinc-100 transition-all cursor-pointer min-h-[140px] border-dashed text-zinc-400 hover:text-zinc-950"
+					onClick={() => document.getElementById("fileInput")?.click()}
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+					>
+						<path
+							fill="currentColor"
+							d="M19 12.998h-6v6h-2v-6H5v-2h6v-6h2v6h6z"
+						/>
+					</svg>
+				</div>
+			)}
+			<div className="border w-full border-zinc-200 px-4 py-2 rounded">
+				{files.map((file) => {
+					return (
+						<Link key={file.id} to={"/editor?fileId=" + file.id}>
+							{file.path}
+						</Link>
+					);
+				})}
+			</div>
 		</div>
 	);
 }

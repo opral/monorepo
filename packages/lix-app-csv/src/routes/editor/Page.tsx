@@ -1,18 +1,11 @@
 import Layout from "../../layout.tsx";
-import { useAtom } from "jotai";
 import TableEditor from "../../components/TableEditor.tsx";
 import { useState } from "react";
 import { UserAuthDialog } from "../../components/UserAuthDialog.tsx";
 import { ImportDialog } from "../../components/ImportDialog.tsx";
 import { WelcomeDialog } from "../../components/WelcomeDialog.tsx";
-import { parsedCsvAtom } from "./state.ts";
 
-export default function App() {
-	// const [pendingChanges] = useAtom(pendingChangesAtom);
-	const [csvData] = useAtom(parsedCsvAtom);
-	// const [commits] = useAtom(commitsAtom);
-	// const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
-
+export default function Page() {
 	const [showAuthorDialog, setShowAuthorDialog] = useState(false);
 	const [showImportDialog, setShowImportDialog] = useState(false);
 	const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
@@ -37,7 +30,7 @@ export default function App() {
 	return (
 		<>
 			<Layout setShowImportDialog={setShowImportDialog}>
-				{csvData && csvData.length > 0 ? <TableEditor /> : <></>}
+				<TableEditor />
 			</Layout>
 			<UserAuthDialog
 				showAuthorDialog={showAuthorDialog}

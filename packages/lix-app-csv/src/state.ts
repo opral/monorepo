@@ -6,6 +6,18 @@ import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
 import { plugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 
+export const selectedFileIdAtom = atom(async (get) => {
+	get(withPollingAtom);
+	// Using window is a limitation of react router v6.
+	//
+	// No programmatic routing possibility exists outside of
+	// the react component tree. A better solution is to
+	// let react router handle the re-direct in the route
+	// config. But for now, this works.
+	const searchParams = new URL(window.location.href).searchParams;
+	return searchParams.get("fileId");
+});
+
 export const editorSelectionAtom = atom<{ row: string; col: string } | null>(
 	null
 );
