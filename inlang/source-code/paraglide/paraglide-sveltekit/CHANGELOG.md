@@ -1,5 +1,11 @@
 # @inlang/paraglide-sveltekit
 
+## 0.11.4
+
+### Patch Changes
+
+- https://github.com/opral/monorepo/pull/3183
+
 ## 0.11.3
 
 ### Patch Changes

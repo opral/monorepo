@@ -44,7 +44,8 @@
 	$: if (lang) numberOfLanugageChanges += 1
 
 	// on all but the first language change, invalidate language-dependent data
-	$: if (browser && lang && numberOfLanugageChanges > 1)
+	// the development mode always performs csr, therefore invalidate immediately
+	$: if (browser && lang && (numberOfLanugageChanges > 1 || dev))
 		invalidate(LANGUAGE_CHANGE_INVALIDATION_KEY)
 
 	function translateHref(href: string, hreflang: T | undefined): string {
