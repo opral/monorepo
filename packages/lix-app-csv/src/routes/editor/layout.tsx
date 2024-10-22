@@ -126,9 +126,10 @@ export default function Layout(props: {
 								size="small"
 								variant="text"
 								className="hidden md:block"
-								onClick={() => navigate("https://lix.opral.com/")}
+								target="_blank"
+								href="https://lix.opral.com/"
 							>
-								Discover SDK
+								Discover Lix
 							</SlButton>
 						</SlTooltip>
 						<SlTooltip content="Download .csv">
