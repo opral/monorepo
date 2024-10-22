@@ -1,7 +1,12 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react"
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react"
 import type { LinksFunction } from "@remix-run/node"
-
+import { useEffect } from "react"
+import { posthog } from "posthog-js"
 import "./tailwind.css"
+
+export async function loader() {
+	return { PUBLIC_POSTHOG_TOKEN: process.env.PUBLIC_POSTHOG_TOKEN }
+}
 
 export const links: LinksFunction = () => [
 	{ rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -22,20 +27,38 @@ export const links: LinksFunction = () => [
 ]
 
 export function Layout({ children }: { children: React.ReactNode }) {
+	const env = useLoaderData<typeof loader>()
+
+	useEffect(() => {
+		if (typeof window !== "undefined" && env.PUBLIC_POSTHOG_TOKEN) {
+			posthog.init(env.PUBLIC_POSTHOG_TOKEN ?? "", {
+				api_host: import.meta.env.PROD ? "https://tm.inlang.com" : "http://localhost:4005",
+				capture_performance: false,
+				autocapture: {
+					capture_copied_text: true,
+				},
+			})
+			posthog.capture("$pageview")
+		}
+		return () => posthog.reset()
+	}, [])
+
 	return (
-		<html lang="en">
-			<head>
-				<meta charSet="utf-8" />
-				<meta name="viewport" content="width=device-width, initial-scale=1" />
-				<Meta />
-				<Links />
-			</head>
-			<body>
-				{children}
-				<ScrollRestoration />
-				<Scripts />
-			</body>
-		</html>
+		<>
+			<html lang="en">
+				<head>
+					<meta charSet="utf-8" />
+					<meta name="viewport" content="width=device-width, initial-scale=1" />
+					<Meta />
+					<Links />
+				</head>
+				<body>
+					{children}
+					<ScrollRestoration />
+					<Scripts />
+				</body>
+			</html>
+		</>
 	)
 }
 
