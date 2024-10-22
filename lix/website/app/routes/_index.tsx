@@ -157,6 +157,16 @@ const faq = [
 export default function Index() {
 	return (
 		<div className="min-h-screen">
+			<div className="flex justify-center items-center h-[50px] text-[16px] px-3 bg-slate-100 border-b border-slate-200 text-black font-medium">
+				Public preview launching, Dec 16
+				<a
+					className="group text-cyan-600 hover:text-black border border-slate-200 mx-6 flex gap-2 items-center py-1 px-3 rounded-md bg-white"
+					href="https://opral.substack.com"
+				>
+					Get notified
+					<IconArrowExternal />
+				</a>
+			</div>
 			<Header />
 			<main className="w-full max-w-5xl px-4 mx-auto space-y-16 md:space-y-24">
 				<div className="grid md:grid-cols-2 justify-center md:justify-start gap-16 md:gap-8 lg:gap-24 mt-12 mb-12">
