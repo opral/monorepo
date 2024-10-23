@@ -1,28 +1,11 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useNavigate } from "react-router-dom";
-import { SlAlert } from "@shoelace-style/shoelace/dist/react";
+import { SlAlert, SlIconButton } from "@shoelace-style/shoelace/dist/react";
 import SubNavigation from "../components/SubNavigation.tsx";
-import { atom, useAtom } from "jotai";
-import { lixAtom, selectedFileIdAtom, withPollingAtom } from "../state.ts";
-
-const selectedFilePathAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const id = await get(selectedFileIdAtom);
-	const lix = await get(lixAtom);
-	if (!id) return;
-
-	const file = await lix.db
-		.selectFrom("file")
-		.where("id", "=", id)
-		.select("path")
-		.executeTakeFirstOrThrow();
-
-	// without root slash
-	return file.path.slice(1);
-});
+import { useAtom } from "jotai";
+import { selectedFileAtom } from "../routes/editor/state.ts";
 
 export default function Layout(props: { children: React.ReactNode }) {
-	const [selectedFilePath] = useAtom(selectedFilePathAtom);
+	const [selectedFile] = useAtom(selectedFileAtom);
 	const navigate = useNavigate();
 
 	return (
@@ -49,17 +32,15 @@ export default function Layout(props: { children: React.ReactNode }) {
 
 						<p className="font-medium opacity-30">/</p>
 						<div className="flex justify-center items-center text-zinc-950 h-9 rounded-lg px-2">
-							<h1 className="font-medium">{selectedFilePath}</h1>
+							{/* slice away the root slash */}
+							<h1 className="font-medium">{selectedFile?.path.slice(1)}</h1>
 						</div>
 					</div>
 					<div className="mr-1 flex items-center gap-1.5">
-						<a
-							className="hidden md:block text-sm text-gray-500 hover:text-gray-900"
-							target="_blank"
-							href="https://lix.opral.com/"
-						>
-							Learn more about lix
-						</a>
+						<SlIconButton
+							className="text-xl"
+							name="layout-sidebar-inset-reverse"
+						></SlIconButton>
 					</div>
 				</div>
 				<div className="w-full -mt-2 px-3">
@@ -77,7 +58,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 					closable
 				>
 					<svg
-						// @ts-ignore
+						// @ts-expect-error - ts types don't know that svg's have a slot
 						slot="icon"
 						xmlns="http://www.w3.org/2000/svg"
 						width="20px"

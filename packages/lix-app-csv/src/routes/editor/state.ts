@@ -2,7 +2,7 @@ import { atom } from "jotai";
 import { lixAtom, selectedFileIdAtom, withPollingAtom } from "../../state.ts";
 import Papa from "papaparse";
 
-export const parsedCsvAtom = atom(async (get) => {
+export const selectedFileAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const fileId = await get(selectedFileIdAtom);
 
@@ -10,19 +10,28 @@ export const parsedCsvAtom = atom(async (get) => {
 		// Not the best UX to implicitly route to the root
 		// but fine for now.
 		window.location.href = "/";
-		return [] as unknown as [{ [key: string]: string }];
+		return;
 	}
 
 	const lix = await get(lixAtom);
 
-	const csvFile = await lix.db
+	return await lix.db
 		.selectFrom("file")
-		.select("data")
+		.selectAll()
 		.where("id", "=", fileId)
 		.executeTakeFirstOrThrow();
+});
 
-	return Papa.parse(new TextDecoder().decode(csvFile.data), {
-		header: true,
-		skipEmptyLines: true,
-	}).data as [{ [key: string]: string }];
+export const parsedCsvAtom = atom<Promise<any>>(async (get) => {
+	const file = await get(selectedFileAtom);
+	if (!file) return [];
+	const data = await new Blob([file.data]).text();
+	const parsed = Papa.parse(data, { header: true });
+	return parsed.data;
+});
+
+export const uniqueColumnAtom = atom(async (get) => {
+	const file = await get(selectedFileAtom);
+	if (!file) return "";
+	return file.metadata?.unique_column;
 });

@@ -1,25 +1,17 @@
 import { SlDrawer } from "@shoelace-style/shoelace/dist/react";
-import { SetStateAction, useAtom } from "jotai";
-import React, { useEffect, useState } from "react";
-import {
-	editorSelectionAtom,
-	// projectAtom,
-} from "../state.ts";
+import { useAtom } from "jotai";
+import { useEffect, useState } from "react";
+import { editorSelectionAtom } from "../state.ts";
 import { parsedCsvAtom, uniqueColumnAtom } from "../routes/editor/state.ts";
-// import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
-// import timeAgo from "../helper/timeAgo.ts";
 
-export const CellDrawer = (props: {
-	showDrawer: boolean;
-	setShowDrawer: React.Dispatch<SetStateAction<boolean>>;
-}) => {
+export default function EntityGraph(props: {
+	entity_id: string;
+	file_id: string;
+}) {
 	const [selection] = useAtom(editorSelectionAtom);
-	// const [project] = useAtom(projectAtom);
 	const [csvData] = useAtom(parsedCsvAtom);
 	const [uniqueColumn] = useAtom(uniqueColumnAtom);
 	const [row, setRow] = useState<{ [key: string]: string } | undefined>();
-
-	// const [relevantChangesOfRow, setRelevantChangesOfRow] = useState<any[]>([]);
 
 	const getPlacement = () => {
 		if (window.innerWidth < 768) {
@@ -193,4 +185,4 @@ export const CellDrawer = (props: {
 			</SlDrawer>
 		</div>
 	);
-};
+}

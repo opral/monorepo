@@ -1,10 +1,11 @@
 import { Change, isInSimulatedCurrentBranch, Snapshot } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { lixAtom, uniqueColumnAtom } from "../state.ts";
+import { lixAtom } from "../state.ts";
 // import timeAgo from "../helper/timeAgo.ts";
 import clsx from "clsx";
 import { SlTooltip } from "@shoelace-style/shoelace/dist/react";
+import { uniqueColumnAtom } from "../routes/editor/state.ts";
 
 export const HistoryEntry = () => {
 	const [isOpen, setIsOpen] = useState(false);

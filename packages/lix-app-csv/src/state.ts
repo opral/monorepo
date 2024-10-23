@@ -72,22 +72,6 @@ export const lixAtom = atom(async (get) => {
 export const withPollingAtom = atom(Date.now());
 
 
-export const uniqueColumnAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const project = await get(lixAtom);
-	if (!project) return [];
-
-	const result = await project.db
-		.selectFrom("file")
-		.select("metadata")
-		.where("path", "=", "/data.csv")
-		.executeTakeFirst();
-	if (!result) return undefined;
-	// @ts-ignore
-	const uniqueColumn = result.metadata.unique_column;
-	if (!uniqueColumn) return undefined;
-	return uniqueColumn;
-});
 
 export const pendingChangesAtom = atom(async (get) => {
 	get(withPollingAtom);

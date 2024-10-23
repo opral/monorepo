@@ -7,15 +7,9 @@ import {
 } from "react-datasheet-grid";
 import "react-datasheet-grid/dist/style.css";
 import Papa from "papaparse";
-import {
-	editorSelectionAtom,
-	lixAtom,
-	selectedFileIdAtom,
-	uniqueColumnAtom,
-} from "../state.ts";
-import { CellDrawer } from "./CellDrawer.tsx";
+import { editorSelectionAtom, lixAtom, selectedFileIdAtom } from "../state.ts";
 import { useEffect, useState } from "react";
-import { parsedCsvAtom } from "../routes/editor/state.ts";
+import { parsedCsvAtom, uniqueColumnAtom } from "../routes/editor/state.ts";
 
 const TableEditor = () => {
 	const [csvData] = useAtom(parsedCsvAtom);
@@ -61,39 +55,43 @@ const TableEditor = () => {
 	}, [window.innerHeight]);
 
 	return (
-		<div className="relative h-[calc(100vh_-_82px)]">
-			<DynamicDataSheetGrid
-				disableContextMenu
-				value={csvData}
-				columns={columns}
-				height={screenHeight}
-				// @ts-expect-error - rowKey expects string
-				onChange={(newData) => handleUpdateCsvData(newData)}
-				rowKey={uniqueColumn}
-				// onFocus={(cell) => console.log("onFocus", cell)}
-				onSelectionChange={(e: { selection: any }) => {
-					if (e.selection) {
-						if (
-							JSON.stringify(e.selection.max) ===
-							JSON.stringify(e.selection.min)
-						) {
-							const selectedRow = csvData[e.selection.max.row];
-							const newSelection = {
-								row: selectedRow[uniqueColumn],
-								col: e.selection.max.colId,
-							};
-							if (JSON.stringify(newSelection) !== JSON.stringify(selection)) {
-								setSelection({
+		<div className="grid grid-cols-4">
+			<div className="col-span-4 md:col-span-3">
+				<DynamicDataSheetGrid
+					disableContextMenu
+					value={csvData}
+					columns={columns}
+					height={screenHeight}
+					// @ts-expect-error - rowKey expects string
+					onChange={(newData) => handleUpdateCsvData(newData)}
+					rowKey={uniqueColumn}
+					// onFocus={(cell) => console.log("onFocus", cell)}
+					onSelectionChange={(e: { selection: any }) => {
+						if (e.selection) {
+							if (
+								JSON.stringify(e.selection.max) ===
+								JSON.stringify(e.selection.min)
+							) {
+								const selectedRow = csvData[e.selection.max.row];
+								const newSelection = {
 									row: selectedRow[uniqueColumn],
 									col: e.selection.max.colId,
-								});
+								};
+								if (
+									JSON.stringify(newSelection) !== JSON.stringify(selection)
+								) {
+									setSelection({
+										row: selectedRow[uniqueColumn],
+										col: e.selection.max.colId,
+									});
+								}
+								if (!showDrawer) setShowDrawer(true);
 							}
-							if (!showDrawer) setShowDrawer(true);
 						}
-					}
-				}}
-			/>
-			<CellDrawer showDrawer={showDrawer} setShowDrawer={setShowDrawer} />
+					}}
+				/>
+			</div>
+			<div>TODO</div>
 		</div>
 	);
 };
