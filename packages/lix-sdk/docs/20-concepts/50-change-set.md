@@ -1,5 +1,17 @@
 # Change Set
 
+## Purpose
+
+Group related changes.
+
+## Description  
+
+Changes in a set are treated as a single unit. They are merged, applied, described (commentied) and undone together. 
+
+## Graph 
+
+Changes D and B are in a set.
+
 ```mermaid
 graph TB
     subgraph Set
@@ -19,15 +31,11 @@ graph TB
     D --> E
 ```
 
-## Purpose
-
-Group related changes.
-
-## Description  
-
-Changes in a set are treated as a single unit. They are merged, applied, described (commentied) and undone together. 
-
 ## Examples
+
+### Discussions/Commenting
+
+A [discussion](./90-discussion.md) points to a change set. A change set can contain 1 or many changes. 
 
 ### Inventory of a deparment store
 
