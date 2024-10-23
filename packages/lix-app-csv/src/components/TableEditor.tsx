@@ -7,31 +7,30 @@ import {
 } from "react-datasheet-grid";
 import "react-datasheet-grid/dist/style.css";
 import Papa from "papaparse";
-import { editorSelectionAtom, lixAtom, uniqueColumnAtom } from "../state.ts";
+import {
+	editorSelectionAtom,
+	lixAtom,
+	selectedFileIdAtom,
+	uniqueColumnAtom,
+} from "../state.ts";
 import { CellDrawer } from "./CellDrawer.tsx";
 import { useEffect, useState } from "react";
 import { parsedCsvAtom } from "../routes/editor/state.ts";
 
 const TableEditor = () => {
 	const [csvData] = useAtom(parsedCsvAtom);
-	const [project] = useAtom(lixAtom);
+	const [lix] = useAtom(lixAtom);
 	const [uniqueColumn] = useAtom(uniqueColumnAtom);
+	const [selectedFileId] = useAtom(selectedFileIdAtom);
 	const [showDrawer, setShowDrawer] = useState(false);
 	const [screenHeight, setScreenHeight] = useState<number>(800);
 	const [selection, setSelection] = useAtom(editorSelectionAtom);
 
-	const handleUpdateCsvData = async (
-		newData: [
-			{
-				[key: string]: string;
-			},
-		]
-	) => {
-		console.log("newData", newData);
-		project?.db
+	const handleUpdateCsvData = async (newData: Array<string[]>) => {
+		await lix.db
 			.updateTable("file")
 			.set("data", await new Blob([Papa.unparse(newData)]).arrayBuffer())
-			.where("path", "=", "/data.csv")
+			.where("id", "=", selectedFileId)
 			.execute();
 	};
 
@@ -65,27 +64,13 @@ const TableEditor = () => {
 		<div className="relative h-[calc(100vh_-_82px)]">
 			<DynamicDataSheetGrid
 				disableContextMenu
-				value={
-					csvData as [
-						{
-							[key: string]: string;
-						},
-					]
-				}
-				height={screenHeight}
+				value={csvData}
 				columns={columns}
-				onChange={(newData) =>
-					handleUpdateCsvData(
-						newData as [
-							{
-								[key: string]: string;
-							},
-						]
-					)
-				}
+				height={screenHeight}
+				// @ts-expect-error - rowKey expects string
+				onChange={(newData) => handleUpdateCsvData(newData)}
 				rowKey={uniqueColumn}
 				// onFocus={(cell) => console.log("onFocus", cell)}
-
 				onSelectionChange={(e: { selection: any }) => {
 					if (e.selection) {
 						if (
@@ -107,7 +92,6 @@ const TableEditor = () => {
 						}
 					}
 				}}
-				addRowsComponent={() => <div></div>}
 			/>
 			<CellDrawer showDrawer={showDrawer} setShowDrawer={setShowDrawer} />
 		</div>

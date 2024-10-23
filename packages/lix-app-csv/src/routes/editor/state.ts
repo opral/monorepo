@@ -10,7 +10,7 @@ export const parsedCsvAtom = atom(async (get) => {
 		// Not the best UX to implicitly route to the root
 		// but fine for now.
 		window.location.href = "/";
-		return [];
+		return [] as unknown as [{ [key: string]: string }];
 	}
 
 	const lix = await get(lixAtom);
