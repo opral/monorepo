@@ -1,55 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useAtom } from "jotai";
-import { useEffect } from "react";
-import { lixAtom, withPollingAtom } from "../../state.ts";
 import { useNavigate } from "react-router-dom";
-import {
-	SlAlert,
-	SlButton,
-	SlTooltip,
-} from "@shoelace-style/shoelace/dist/react";
+import { SlAlert } from "@shoelace-style/shoelace/dist/react";
 import SubNavigation from "../../components/SubNavigation.tsx";
 
 export default function Layout(props: { children: React.ReactNode }) {
-	const [lix] = useAtom(lixAtom);
-	const [, setWithPolling] = useAtom(withPollingAtom);
-
 	const navigate = useNavigate();
-	// const [, setSearchParams] = useSearchParams();
-
-	const handleDownload = async () => {
-		const file = await lix.db
-			.selectFrom("file")
-			.selectAll()
-			.where("path", "=", "/data.csv")
-			.executeTakeFirst();
-		if (!file) return;
-
-		const blob = new Blob([file.data]);
-		if (!blob) return;
-
-		//create download link
-		const blobUrl = URL.createObjectURL(blob);
-		const link = document.createElement("a");
-		link.href = blobUrl;
-		document.body.appendChild(link);
-		link.dispatchEvent(
-			new MouseEvent("click", {
-				bubbles: true,
-				cancelable: true,
-				view: window,
-			})
-		);
-		document.body.removeChild(link);
-	};
-
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setWithPolling(Date.now());
-			// put it down to 500 ms to show seamless loading
-		}, 500);
-		return () => clearInterval(interval);
-	});
 
 	return (
 		<div className="w-full min-h-screen bg-zinc-50 relative">
@@ -88,35 +43,6 @@ export default function Layout(props: { children: React.ReactNode }) {
 						>
 							Learn more about lix
 						</a>
-						<SlTooltip content="Download .csv">
-							<SlButton
-								size="small"
-								variant="default"
-								onClick={() => handleDownload()}
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="18"
-									height="18"
-									viewBox="0 0 16 16"
-									style={{ margin: "0 -1px" }}
-									// @ts-ignore
-									slot="prefix"
-								>
-									<path
-										fill="none"
-										stroke="currentColor"
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										strokeWidth="1.5"
-										d="M3.25 13.25h9m-8.5-6.5l4 3.5l4-3.5m-4-5v8.5"
-									/>
-								</svg>
-							</SlButton>
-						</SlTooltip>
-						{/* <SlTooltip content={authorName}>
-							<SlAvatar initials={authorName?.slice(0, 2)} />
-						</SlTooltip> */}
 					</div>
 				</div>
 				<div className="w-full -mt-2 px-3">

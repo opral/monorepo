@@ -24,6 +24,24 @@ export default function FileExplorer() {
 		await lix.db.deleteFrom("file_internal").where("id", "=", id).execute();
 	};
 
+	const handleDownload = async (fileId: string) => {
+		const file = await lix.db
+			.selectFrom("file")
+			.selectAll()
+			.where("id", "=", fileId)
+			.executeTakeFirstOrThrow();
+
+		const blob = new Blob([file.data]);
+
+		const a = document.createElement("a");
+		a.href = URL.createObjectURL(blob);
+		// remove prefixed root slash `/`
+		a.download = file.path.slice(1);
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	};
+
 	return (
 		<div className="max-w-5xl mx-auto mt-6 px-4 flex flex-wrap gap-3 mb-16">
 			<div
@@ -65,6 +83,12 @@ export default function FileExplorer() {
 											onClick={() => handleDeleteFile(file.id)}
 										></SlIconButton>
 									)}
+								{hoveredFileId === file.id && (
+									<SlIconButton
+										name="download"
+										onClick={() => handleDownload(file.id)}
+									></SlIconButton>
+								)}
 							</div>
 						</div>
 					);
