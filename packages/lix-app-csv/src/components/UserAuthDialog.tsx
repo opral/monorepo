@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
 	SlButton,
 	SlDialog,
@@ -12,7 +11,7 @@ export const UserAuthDialog = (props: {
 	showAuthorDialog: boolean;
 	setShowAuthorDialog: (value: boolean) => void;
 }) => {
-	const [author, setAuthor] = useState("");
+	const [, setAuthor] = useState("");
 	// const [, setAuthorName] = useAtom(authorNameAtom);
 
 	const handleSetAuthor = async () => {

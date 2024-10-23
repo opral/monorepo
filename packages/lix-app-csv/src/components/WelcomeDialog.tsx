@@ -8,7 +8,6 @@ import { useAtom } from "jotai";
 import { lixAtom } from "../state.ts";
 import Dropzone from "../routes/index/Dropzone.tsx";
 import { useState } from "react";
-import Papa from "papaparse";
 import { LixFile } from "@lix-js/sdk";
 
 export const WelcomeDialog = (props: {
@@ -20,48 +19,6 @@ export const WelcomeDialog = (props: {
 	const [importedArrayBuffer, setImportedArrayBuffer] = useState<
 		ArrayBuffer | undefined
 	>(undefined);
-
-	const handleRead = async (files: File[]) => {
-		const file = files[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = async () => {
-				setImportedArrayBuffer(reader.result as ArrayBuffer);
-				const newData = Papa.parse(
-					new TextDecoder().decode(reader.result as ArrayBuffer),
-					{
-						header: true,
-						skipEmptyLines: true,
-					}
-				).data as [{ [key: string]: string }];
-
-				if (newData[0]) {
-					setUniqueColumn(Object.keys(newData[0])[0]);
-				}
-				// await project?.db
-				// 	.insertInto("file")
-				// 	.values([
-				// 		{
-				// 			id: "demo",
-				// 			path: "/data.csv",
-				// 			// @ts-ignore
-				// 			metadata: {
-				// 				unique_column: "seq",
-				// 			},
-				// 			data: await new Blob([
-				// 				reader.result as ArrayBuffer,
-				// 			]).arrayBuffer(),
-				// 		},
-				// 	])
-				// 	.execute();
-
-				// setTimeout(() => {
-				// 	handleCommit();
-				// }, 500);
-			};
-			reader.readAsArrayBuffer(file);
-		}
-	};
 
 	const handleImport = async () => {
 		await project?.db
@@ -96,22 +53,7 @@ export const WelcomeDialog = (props: {
 			</p>
 
 			{!importedArrayBuffer ? (
-				<Dropzone
-					handleOpen={(files) => handleRead(files)}
-					icon={
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="28"
-							viewBox="0 0 15 15"
-						>
-							<path
-								fill="none"
-								stroke="currentColor"
-								d="M.5 4.5h14m-10-4v14m-3-14h12a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-12a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1Z"
-							/>
-						</svg>
-					}
-				/>
+				<Dropzone />
 			) : (
 				<div>
 					<p>✅ Successfully uploaded file</p>
