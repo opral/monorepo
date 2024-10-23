@@ -32,7 +32,7 @@ export const DemoCard = () => {
 					variant="primary"
 					className="mt-6 md:mt-0 mb-8 md:mb-0"
 					onClick={() => {
-						navigate(`/editor?fileId=${DEMO_CAP_TABLE_CSV_FILE_ID}`);
+						navigate(`/editor?f=${DEMO_CAP_TABLE_CSV_FILE_ID}`);
 					}}
 				>
 					Open example csv

@@ -56,7 +56,7 @@ export default function FileExplorer() {
 							onMouseEnter={() => setHoveredFileId(file.id)}
 						>
 							<Link
-								to={"/editor?fileId=" + file.id}
+								to={"/editor?f=" + file.id}
 								className="w-full flex gap-2 items-center"
 							>
 								<svg

@@ -16,7 +16,7 @@ export const selectedFileIdAtom = atom(async (get) => {
 	// let react router handle the re-direct in the route
 	// config. But for now, this works.
 	const searchParams = new URL(window.location.href).searchParams;
-	return searchParams.get("fileId");
+	return searchParams.get("f");
 });
 
 export const editorSelectionAtom = atom<{ row: string; col: string } | null>(
