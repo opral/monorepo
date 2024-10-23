@@ -2,7 +2,7 @@
 
 ## Purpose 
 
-Store information of what changed in a [file](./10-file.md). 
+Stores a change for an [entity](./21-entity.md) along with a [snapshot](./22-snapshot.md).
 
 ## Description
 
