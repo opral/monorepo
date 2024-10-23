@@ -74,7 +74,7 @@ export default function FileExplorer() {
 								{/* remove prefixed root slash `/` */}
 								<p>{file.path.slice(1)}</p>
 							</Link>
-							<div>
+							<div className="flex gap-1 items-center">
 								{hoveredFileId === file.id &&
 									// csv demo file can't be deleted
 									file.id !== DEMO_CAP_TABLE_CSV_FILE_ID && (
