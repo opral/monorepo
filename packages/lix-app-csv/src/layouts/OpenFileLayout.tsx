@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useNavigate } from "react-router-dom";
 import { SlAlert } from "@shoelace-style/shoelace/dist/react";
-import SubNavigation from "../../components/SubNavigation.tsx";
+import SubNavigation from "../components/SubNavigation.tsx";
 import { atom, useAtom } from "jotai";
-import { lixAtom, selectedFileIdAtom, withPollingAtom } from "../../state.ts";
+import { lixAtom, selectedFileIdAtom, withPollingAtom } from "../state.ts";
 
 const selectedFilePathAtom = atom(async (get) => {
 	get(withPollingAtom);

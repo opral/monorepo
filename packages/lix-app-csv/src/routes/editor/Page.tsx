@@ -1,27 +1,20 @@
-import Layout from "./layout.tsx";
+import OpenFileLayout from "../../layouts/OpenFileLayout.tsx";
 import TableEditor from "../../components/TableEditor.tsx";
 import { useState } from "react";
 import { UserAuthDialog } from "../../components/UserAuthDialog.tsx";
-import { WelcomeDialog } from "../../components/WelcomeDialog.tsx";
 
 export default function Page() {
 	const [showAuthorDialog, setShowAuthorDialog] = useState(false);
-	const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
 
 	return (
 		<>
-			<Layout>
+			<OpenFileLayout>
 				<TableEditor />
-			</Layout>
+			</OpenFileLayout>
 			<UserAuthDialog
 				showAuthorDialog={showAuthorDialog}
 				setShowAuthorDialog={setShowAuthorDialog}
 			/>
-			<WelcomeDialog
-				showWelcomeDialog={showWelcomeDialog}
-				setShowWelcomeDialog={setShowWelcomeDialog}
-			/>
-			{/* <button onClick={handleDownload}>Download</button> */}
 		</>
 	);
 }
