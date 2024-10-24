@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { SlAlert, SlIconButton } from "@shoelace-style/shoelace/dist/react";
+import { SlAlert } from "@shoelace-style/shoelace/dist/react";
 import SubNavigation from "../components/SubNavigation.tsx";
 import { useAtom } from "jotai";
 import { selectedFileAtom } from "../routes/editor/state.ts";
@@ -36,12 +36,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 							<h1 className="font-medium">{selectedFile?.path.slice(1)}</h1>
 						</div>
 					</div>
-					<div className="mr-1 flex items-center gap-1.5">
-						<SlIconButton
-							className="text-xl"
-							name="layout-sidebar-inset-reverse"
-						></SlIconButton>
-					</div>
+					<div className="mr-1 flex items-center gap-1.5">{/*  */}</div>
 				</div>
 				<div className="w-full -mt-2 px-3">
 					<SubNavigation />

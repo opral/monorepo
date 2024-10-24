@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
 import clsx from "clsx";
-import { pendingChangesAtom } from "../state.ts";
-import { useAtom } from "jotai";
 
 const data: { path: string; name: string }[] = [
 	{
@@ -15,7 +13,8 @@ const data: { path: string; name: string }[] = [
 ];
 
 const SubNavigation = () => {
-	const [pendingChanges] = useAtom(pendingChangesAtom);
+	// const [pendingChanges] = useAtom(pendingChangesAtom);
+	const pendingChanges = [];
 	// const [commits] = useAtom(commitsAtom);
 	const commits = [];
 

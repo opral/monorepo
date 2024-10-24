@@ -1,8 +1,5 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { openLixInMemory } from "@lix-js/sdk";
 import { atom } from "jotai";
-// import { jsonObjectFrom } from "kysely/helpers/sqlite";
-import { isInSimulatedCurrentBranch } from "@lix-js/sdk";
 import { plugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
@@ -19,10 +16,6 @@ export const selectedFileIdAtom = atom(async (get) => {
 	return searchParams.get("f");
 });
 
-export const editorSelectionAtom = atom<{ row: string; col: string } | null>(
-	null
-);
-
 let existingSafeLixToOpfsInterval: ReturnType<typeof setInterval> | undefined;
 
 /**
@@ -34,7 +27,7 @@ export const forceReloadLixAtom = atom<ReturnType<typeof Date.now> | undefined>(
 	undefined
 );
 
-export const lixAtom = atom(async (get) => {
+export const lixAtom = atom(async (get, set) => {
 	// listen to forceReloadProjectAtom to reload the project
 	// workaround for https://github.com/opral/lix-sdk/issues/47
 	get(forceReloadLixAtom);
@@ -59,7 +52,13 @@ export const lixAtom = atom(async (get) => {
 		const file = await lix.toBlob();
 		await writable.write(file);
 		await writable.close();
-	}, 2000);
+	}, 5000);
+
+	// @ts-expect-error - Expose for debugging.
+	window.deleteLix = async () => {
+		clearInterval(existingSafeLixToOpfsInterval);
+		await rootHandle.removeEntry("demo.lix");
+	};
 
 	return lix;
 });
@@ -70,68 +69,3 @@ export const lixAtom = atom(async (get) => {
  * Search where the atom is set (likely in the layout/root component).
  */
 export const withPollingAtom = atom(Date.now());
-
-
-
-export const pendingChangesAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const project = await get(lixAtom);
-	if (!project) return [];
-	const result = await project.db
-		.selectFrom("change")
-		.selectAll()
-		// .where("commit_id", "is", null)
-		// TODO remove after sequence concept on lix
-		// https://linear.app/opral/issue/LIX-126/branching
-		.where(isInSimulatedCurrentBranch)
-		.execute();
-	//console.log(result);
-	// @ts-expect-error
-	window.lix = lixAtom;
-	return result;
-});
-
-// export const unresolvedConflictsAtom = atom(async (get) => {
-// 	get(withPollingAtom);
-// 	const project = await get(projectAtom);
-// 	if (!project) return [];
-// 	const result = await project.lix.db
-// 		.selectFrom("conflict")
-// 		.where("resolved_with_change_id", "is", null)
-// 		.selectAll()
-// 		.execute();
-
-// 	//console.log(result);
-// 	return result;
-// });
-
-/**
- * Get all conflicting changes.
- *
- * @example
- *   const [conflictingChanges] = useAtom(conflictingChangesAtom);
- *   conflictingChanges.find((change) => change.id === id);
- */
-// export const conflictingChangesAtom = atom(async (get) => {
-// 	get(withPollingAtom);
-// 	const project = await get(projectAtom);
-// 	const unresolvedConflicts = await get(unresolvedConflictsAtom);
-// 	if (!project) return [];
-// 	const result: Set<Change> = new Set();
-
-// 	for (const conflict of unresolvedConflicts) {
-// 		const change = await project.lix.db
-// 			.selectFrom("change")
-// 			.selectAll()
-// 			.where("id", "=", conflict.change_id)
-// 			.executeTakeFirstOrThrow();
-// 		const conflicting = await project.lix.db
-// 			.selectFrom("change")
-// 			.selectAll()
-// 			.where("id", "=", conflict.conflicting_change_id)
-// 			.executeTakeFirstOrThrow();
-// 		result.add(change);
-// 		result.add(conflicting);
-// 	}
-// 	return [...result];
-// });

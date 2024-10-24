@@ -1,25 +1,11 @@
-import { SlDrawer } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { editorSelectionAtom } from "../state.ts";
 import { parsedCsvAtom, uniqueColumnAtom } from "../routes/editor/state.ts";
 
-export default function EntityGraph(props: {
-	entity_id: string;
-	file_id: string;
-}) {
-	const [selection] = useAtom(editorSelectionAtom);
+export default function EntityGraph() {
 	const [csvData] = useAtom(parsedCsvAtom);
 	const [uniqueColumn] = useAtom(uniqueColumnAtom);
 	const [row, setRow] = useState<{ [key: string]: string } | undefined>();
-
-	const getPlacement = () => {
-		if (window.innerWidth < 768) {
-			return "bottom";
-		} else {
-			return "end";
-		}
-	};
 
 	const getCsvRow = async (selection: { row: string; col: string }) => {
 		if (csvData && csvData.length > 0) {
@@ -74,36 +60,26 @@ export default function EntityGraph(props: {
 
 	return (
 		<div className="">
-			<SlDrawer
-				open={props.showDrawer}
-				contained
-				placement={getPlacement()}
-				noHeader
-				className="cellDrawer"
-			>
-				<div className="w-full flex items-center min-h-[54px] gap-1 border-b border-zinc-200">
-					<div className=" w-full flex justify-between items-center text-zinc-950 h-9 rounded-lg px-3">
-						<div className="flex items-center gap-2">
-							<div
-								onClick={() => props.setShowDrawer(false)}
-								className="flex rotate-90 md:rotate-0 bg-zinc-100 hover:bg-zinc-200 cursor-pointer w-7 h-7 items-center justify-center rounded"
+			<div className="w-full flex items-center min-h-[54px] gap-1 border-b border-zinc-200">
+				<div className=" w-full flex justify-between items-center text-zinc-950 h-9 rounded-lg px-3">
+					<div className="flex items-center gap-2">
+						<div className="flex rotate-90 md:rotate-0 bg-zinc-100 hover:bg-zinc-200 cursor-pointer w-7 h-7 items-center justify-center rounded">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
 							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="18"
-									height="18"
-									viewBox="0 0 24 24"
-								>
-									<path
-										fill="currentColor"
-										d="M10 6L8.59 7.41L13.17 12l-4.58 4.59L10 18l6-6z"
-									/>
-								</svg>
-							</div>
-
-							<h1 className="font-medium pl-1">{"Cell history"}</h1>
+								<path
+									fill="currentColor"
+									d="M10 6L8.59 7.41L13.17 12l-4.58 4.59L10 18l6-6z"
+								/>
+							</svg>
 						</div>
-						{/* <div className="flex items-center gap-1">
+
+						<h1 className="font-medium pl-1">{"Cell history"}</h1>
+					</div>
+					{/* <div className="flex items-center gap-1">
 							<p
 								onClick={() => setDrawerType("cell")}
 								className={clsx(
@@ -125,19 +101,19 @@ export default function EntityGraph(props: {
 								Row
 							</p>
 						</div> */}
-					</div>
 				</div>
-				<div className="flex px-3 h-[54px] items-center justify-between border-b border-zinc-200">
-					<p>Position: </p>
-					<p className="text-zinc-500 pr-1">
-						{selection?.row} - {selection?.col}
-					</p>
-				</div>
+			</div>
+			<div className="flex px-3 h-[54px] items-center justify-between border-b border-zinc-200">
+				<p>Position: </p>
+				<p className="text-zinc-500 pr-1">
+					{selection?.row} - {selection?.col}
+				</p>
+			</div>
 
-				{selection && (
-					<div className="mb-12 relative flex flex-col gap-3">
-						TODO
-						{/* {relevantChangesOfRow
+			{selection && (
+				<div className="mb-12 relative flex flex-col gap-3">
+					TODO
+					{/* {relevantChangesOfRow
 							.filter((cell) => cell.meta.col_name.includes(selection.col))
 							.map((change) => {
 								return (
@@ -179,10 +155,9 @@ export default function EntityGraph(props: {
 									</div>
 								);
 							})} */}
-						<div className="absolute w-[2px] h-[calc(100%_-_100px)] top-[20px] left-[21px] bg-zinc-200"></div>
-					</div>
-				)}
-			</SlDrawer>
+					<div className="absolute w-[2px] h-[calc(100%_-_100px)] top-[20px] left-[21px] bg-zinc-200"></div>
+				</div>
+			)}
 		</div>
 	);
 }
