@@ -69,6 +69,7 @@ export const activeRowEntityIdAtom = atom(async (get) => {
  * All changes for a given row.
  */
 export const activeRowChangesAtom = atom(async (get) => {
+	get(withPollingAtom);
 	const activeFile = await get(activeFileAtom);
 	const activeRowEntityId = await get(activeRowEntityIdAtom);
 	const lix = await get(lixAtom);

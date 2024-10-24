@@ -7,7 +7,7 @@ import {
 import "react-datasheet-grid/dist/style.css";
 import Papa from "papaparse";
 import { lixAtom } from "../state.ts";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	activeCellAtom,
 	activeFileAtom,
@@ -16,6 +16,8 @@ import {
 	uniqueColumnAtom,
 } from "../routes/editor/state.ts";
 import CellGraph from "./CellGraph.tsx";
+import { debounce } from "lodash-es";
+import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 
 export default function TableEditor() {
 	const [parsedCsv] = useAtom(parsedCsvAtom);
@@ -26,15 +28,22 @@ export default function TableEditor() {
 	const [activeRowChanges] = useAtom(activeRowChangesAtom);
 	const [screenHeight, setScreenHeight] = useState<number>(800);
 
-	const handleUpdateCsvData = async (
-		newData: Array<Record<string, string>>
-	) => {
-		await lix.db
-			.updateTable("file")
-			.set("data", await new Blob([Papa.unparse(newData)]).arrayBuffer())
-			.where("id", "=", activeFile.id)
-			.execute();
-	};
+	// useCallback because react shouldn't recreate the function on every render
+	// debounce because keystroke changes are not important for the lix 1.0 preview
+	// given that we do not have real-time collabroation and no feature yet to
+	// delete changes/disregard keystroke changes on merge
+	const handleUpdateCsvData = useCallback(
+		debounce(async (newData: Array<Record<string, string>>) => {
+			await lix.db
+				.updateTable("file")
+				.set("data", await new Blob([Papa.unparse(newData)]).arrayBuffer())
+				.where("id", "=", activeFile.id)
+				.execute();
+			// needed because lix is not writing to OPFS yet
+			await saveLixToOpfs({ lix });
+		}, 500),
+		[]
+	);
 
 	const columns = useMemo(
 		() =>

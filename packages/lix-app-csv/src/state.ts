@@ -47,12 +47,14 @@ export const lixAtom = atom(async (get) => {
 		providePlugins: [plugin],
 	});
 
-	existingSafeLixToOpfsInterval = setInterval(async () => {
-		const writable = await fileHandle.createWritable();
-		const file = await lix.toBlob();
-		await writable.write(file);
-		await writable.close();
-	}, 5000);
+	// * naive set interval leads to bugs.
+	// * search for `saveLixToOpfs` in the code base
+	// existingSafeLixToOpfsInterval = setInterval(async () => {
+	// 	const writable = await fileHandle.createWritable();
+	// 	const file = await lix.toBlob();
+	// 	await writable.write(file);
+	// 	await writable.close();
+	// }, 5000);
 
 	// @ts-expect-error - Expose for debugging.
 	window.deleteLix = async () => {
