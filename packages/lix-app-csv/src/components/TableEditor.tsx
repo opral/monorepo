@@ -6,20 +6,24 @@ import {
 } from "react-datasheet-grid";
 import "react-datasheet-grid/dist/style.css";
 import Papa from "papaparse";
-import { lixAtom, selectedFileIdAtom } from "../state.ts";
+import { lixAtom } from "../state.ts";
 import { useEffect, useMemo, useState } from "react";
 import {
-	activeEntityIdAtom,
+	activeCellAtom,
+	activeFileAtom,
+	activeRowChangesAtom,
 	parsedCsvAtom,
 	uniqueColumnAtom,
 } from "../routes/editor/state.ts";
+import CellGraph from "./CellGraph.tsx";
 
 export default function TableEditor() {
 	const [parsedCsv] = useAtom(parsedCsvAtom);
 	const [lix] = useAtom(lixAtom);
 	const [uniqueColumn] = useAtom(uniqueColumnAtom);
-	const [selectedFileId] = useAtom(selectedFileIdAtom);
-	const [, setActiveEntityId] = useAtom(activeEntityIdAtom);
+	const [activeFile] = useAtom(activeFileAtom);
+	const [activeCell, setActiveCell] = useAtom(activeCellAtom);
+	const [activeRowChanges] = useAtom(activeRowChangesAtom);
 	const [screenHeight, setScreenHeight] = useState<number>(800);
 
 	const handleUpdateCsvData = async (
@@ -28,7 +32,7 @@ export default function TableEditor() {
 		await lix.db
 			.updateTable("file")
 			.set("data", await new Blob([Papa.unparse(newData)]).arrayBuffer())
-			.where("id", "=", selectedFileId)
+			.where("id", "=", activeFile.id)
 			.execute();
 	};
 
@@ -55,19 +59,13 @@ export default function TableEditor() {
 					height={screenHeight}
 					onChange={(newData) => handleUpdateCsvData(newData)}
 					rowKey={uniqueColumn}
-					onActiveCellChange={(obj) => {
-						const row = obj.cell?.row;
-						const colKey = obj.cell?.colId;
-						// Crucial to check for undefined.
-						// Else index 0 will be considered as false.
-						if (row !== undefined && colKey !== undefined) {
-							const value = parsedCsv.data[row][colKey];
-							setActiveEntityId(`${uniqueColumn}:${value}`);
-						}
-					}}
+					onActiveCellChange={(obj) => setActiveCell(obj.cell)}
 				/>
 			</div>
-			<div>todo</div>
+			<CellGraph
+				activeCell={activeCell!}
+				activeRowChanges={activeRowChanges}
+			></CellGraph>
 		</div>
 	);
 }

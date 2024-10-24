@@ -3,18 +3,22 @@
  */
 
 import { atom } from "jotai";
-import { lixAtom, selectedFileIdAtom, withPollingAtom } from "../../state.ts";
+import {
+	lixAtom,
+	fileIdSearchParamsAtom,
+	withPollingAtom,
+} from "../../state.ts";
 import Papa from "papaparse";
 
-export const selectedFileAtom = atom(async (get) => {
+export const activeFileAtom = atom(async (get) => {
 	get(withPollingAtom);
-	const fileId = await get(selectedFileIdAtom);
+	const fileId = await get(fileIdSearchParamsAtom);
 
 	if (!fileId) {
 		// Not the best UX to implicitly route to the root
 		// but fine for now.
 		window.location.href = "/";
-		return;
+		throw new Error("no active file. reroute should avoid this throw");
 	}
 
 	const lix = await get(lixAtom);
@@ -27,7 +31,7 @@ export const selectedFileAtom = atom(async (get) => {
 });
 
 export const parsedCsvAtom = atom(async (get) => {
-	const file = await get(selectedFileAtom);
+	const file = await get(activeFileAtom);
 	if (!file) throw new Error("No file selected");
 	const data = await new Blob([file.data]).text();
 	const parsed = Papa.parse(data, { header: true });
@@ -35,7 +39,7 @@ export const parsedCsvAtom = atom(async (get) => {
 });
 
 export const uniqueColumnAtom = atom(async (get) => {
-	const file = await get(selectedFileAtom);
+	const file = await get(activeFileAtom);
 	if (!file) return undefined;
 	return file.metadata?.unique_column;
 });
@@ -43,4 +47,40 @@ export const uniqueColumnAtom = atom(async (get) => {
 /**
  * The entity id that is selected in the editor.
  */
-export const activeEntityIdAtom = atom<string | undefined>(undefined);
+export const activeCellAtom = atom<{
+	colId?: string;
+	col: number;
+	row: number;
+} | null>(null);
+
+/**
+ * The entity (row) id that is selected in the editor.
+ */
+export const activeRowEntityIdAtom = atom(async (get) => {
+	const activeCell = get(activeCellAtom);
+	const parsedCsv = await get(parsedCsvAtom);
+	const uniqueColumn = await get(uniqueColumnAtom);
+	if (!activeCell) return null;
+	const uniqueColumnValue = parsedCsv.data[activeCell.row][uniqueColumn];
+	return `${uniqueColumn}:${uniqueColumnValue}`;
+});
+
+/**
+ * All changes for a given row.
+ */
+export const activeRowChangesAtom = atom(async (get) => {
+	const activeFile = await get(activeFileAtom);
+	const activeRowEntityId = await get(activeRowEntityIdAtom);
+	const lix = await get(lixAtom);
+	if (!activeRowEntityId) return [];
+	return await lix.db
+		.selectFrom("change")
+		.where("change.type", "=", "row")
+		.where("change.entity_id", "=", activeRowEntityId)
+		.where("change.file_id", "=", activeFile.id)
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.selectAll("change")
+		.select("snapshot.content")
+		.orderBy("change.created_at", "desc")
+		.execute();
+});

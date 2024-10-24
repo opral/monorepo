@@ -2,10 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { SlAlert } from "@shoelace-style/shoelace/dist/react";
 import SubNavigation from "../components/SubNavigation.tsx";
 import { useAtom } from "jotai";
-import { selectedFileAtom } from "../routes/editor/state.ts";
+import { activeFileAtom } from "../routes/editor/state.ts";
 
 export default function Layout(props: { children: React.ReactNode }) {
-	const [selectedFile] = useAtom(selectedFileAtom);
+	const [activeFile] = useAtom(activeFileAtom);
 	const navigate = useNavigate();
 
 	return (
@@ -33,7 +33,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 						<p className="font-medium opacity-30">/</p>
 						<div className="flex justify-center items-center text-zinc-950 h-9 rounded-lg px-2">
 							{/* slice away the root slash */}
-							<h1 className="font-medium">{selectedFile?.path.slice(1)}</h1>
+							<h1 className="font-medium">{activeFile?.path.slice(1)}</h1>
 						</div>
 					</div>
 					<div className="mr-1 flex items-center gap-1.5">{/*  */}</div>

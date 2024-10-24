@@ -4,7 +4,7 @@ import { plugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
 
-export const selectedFileIdAtom = atom(async (get) => {
+export const fileIdSearchParamsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	// Using window is a limitation of react router v6.
 	//
@@ -27,7 +27,7 @@ export const forceReloadLixAtom = atom<ReturnType<typeof Date.now> | undefined>(
 	undefined
 );
 
-export const lixAtom = atom(async (get, set) => {
+export const lixAtom = atom(async (get) => {
 	// listen to forceReloadProjectAtom to reload the project
 	// workaround for https://github.com/opral/lix-sdk/issues/47
 	get(forceReloadLixAtom);
