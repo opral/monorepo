@@ -11,6 +11,7 @@ import type {
 } from "../database/schema.js";
 import type { LixPlugin } from "../plugin.js";
 import { mockJsonSnapshot } from "../query-utilities/mock-json-snapshot.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
 
 test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const mockSnapshots = [
@@ -734,4 +735,85 @@ test("it should copy discussion and related comments and mappings", async () => 
 	await merge({ sourceLix: lix1, targetLix: lix2 });
 
 	// TODO add test for discussions and discussion maps
+});
+
+test("it should copy change sets and merge memberships", async () => {
+	const targetLix = await openLixInMemory({});
+
+	const mockChanges = await targetLix.db
+		.insertInto("change")
+		.values([
+			{
+				type: "file",
+				entity_id: "value1",
+				file_id: "mock",
+				plugin_key: "mock-plugin",
+				snapshot_id: "sn1",
+			},
+			{
+				type: "file",
+				entity_id: "value2",
+				file_id: "mock",
+				plugin_key: "mock-plugin",
+				snapshot_id: "sn2",
+			},
+		])
+		.returningAll()
+		.execute();
+
+	const changeSet1 = await createChangeSet({
+		lix: targetLix,
+		changeIds: [mockChanges[0]!.id],
+	});
+
+	const sourceLix = await openLixInMemory({
+		blob: await targetLix.toBlob(),
+	});
+
+	// expand the change set to contain another change
+	// to test if the sets are merged
+	await targetLix.db
+		.insertInto("change_set_item")
+		.values({
+			change_set_id: changeSet1.id,
+			change_id: mockChanges[1]!.id,
+		})
+		.execute();
+
+	// create a new set just for change [1]
+	const changeSet2 = await createChangeSet({
+		lix: targetLix,
+		changeIds: [mockChanges[1]!.id],
+	});
+
+	await merge({ sourceLix, targetLix });
+
+	const changeSets = await targetLix.db
+		.selectFrom("change_set")
+		.selectAll()
+		.execute();
+
+	const changeSet1Items = await targetLix.db
+		.selectFrom("change_set_item")
+		.selectAll()
+		.where("change_set_id", "=", changeSet1.id)
+		.execute();
+	const changeSet2Items = await targetLix.db
+		.selectFrom("change_set_item")
+		.selectAll()
+		.where("change_set_id", "=", changeSet2.id)
+		.execute();
+
+	// expect two change sets
+	expect(changeSets.length).toBe(2);
+
+	// expect merger of the change set to contain both changes
+	expect(changeSet1Items.map((item) => item.change_id)).toEqual(
+		expect.arrayContaining([mockChanges[0]?.id, mockChanges[1]?.id]),
+	);
+
+	// expect the second change set to contain only the second change
+	expect(changeSet2Items.map((item) => item.change_id)).toEqual(
+		expect.arrayContaining([mockChanges[1]?.id]),
+	);
 });
