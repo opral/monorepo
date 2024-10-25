@@ -3,6 +3,7 @@ import { useAtom } from "jotai";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { lixAtom } from "../../state.ts";
+import { saveLixToOpfs } from "../../helper/saveLixToOpfs.ts";
 
 export default function Dropzone() {
 	const [lix] = useAtom(lixAtom);
@@ -19,6 +20,7 @@ export default function Dropzone() {
 				)
 			)
 			.execute();
+		await saveLixToOpfs({ lix });
 	}, []);
 	const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
