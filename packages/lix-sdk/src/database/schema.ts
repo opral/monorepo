@@ -11,7 +11,7 @@ export type LixDatabaseSchema = {
 	snapshot: SnapshotTable;
 	// change set
 	change_set: ChangeSetTable;
-	change_set_membership: ChangeSetMembershipTable;
+	change_set_item: ChangeSetItem;
 
 	// discussion
 	discussion: DiscussionTable;
@@ -128,10 +128,10 @@ type ChangeSetTable = {
 	id: Generated<string>;
 };
 
-export type ChangeSetMembership = Selectable<ChangeSetMembershipTable>;
-export type NewChangeSetMembership = Insertable<ChangeSetMembershipTable>;
-export type ChangeSetMembershipUpdate = Updateable<ChangeSetMembershipTable>;
-type ChangeSetMembershipTable = {
+export type ChangeSetItem = Selectable<ChangeSetItemTable>;
+export type NewChangeSetItem = Insertable<ChangeSetItemTable>;
+export type ChangeSetItemUpdate = Updateable<ChangeSetItemTable>;
+type ChangeSetItemTable = {
 	change_set_id: string;
 	change_id: string;
 };

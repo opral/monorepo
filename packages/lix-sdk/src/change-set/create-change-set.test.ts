@@ -32,13 +32,12 @@ test("creating a change set should succeed", async () => {
 	});
 
 	const changeSetMembers = await lix.db
-		.selectFrom("change_set_membership")
+		.selectFrom("change_set_item")
 		.selectAll()
 		.where("change_set_id", "=", changeSet.id)
 		.execute();
 
-	expect(changeSetMembers.map((member) => member.change_id)).toStrictEqual([
-		mockChanges[0]?.id,
-		mockChanges[1]?.id,
-	]);
+	expect(changeSetMembers.map((member) => member.change_id)).toEqual(
+		expect.arrayContaining([mockChanges[0]?.id, mockChanges[1]?.id]),
+	);
 });

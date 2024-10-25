@@ -14,7 +14,7 @@ export async function createChangeSet(args: {
 
 		for (const changeId of args.changeIds) {
 			await trx
-				.insertInto("change_set_membership")
+				.insertInto("change_set_item")
 				.values({
 					change_id: changeId,
 					change_set_id: changeSet.id,

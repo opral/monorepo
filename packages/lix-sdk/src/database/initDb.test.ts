@@ -128,7 +128,7 @@ test("change edges can't reference themselves", async () => {
 	);
 });
 
-test("change set memberships must be unique", async () => {
+test("change set items must be unique", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
@@ -141,7 +141,7 @@ test("change set memberships must be unique", async () => {
 		.executeTakeFirstOrThrow();
 
 	await db
-		.insertInto("change_set_membership")
+		.insertInto("change_set_item")
 		.values({
 			change_set_id: "change-set-1",
 			change_id: "change-1",
@@ -150,7 +150,7 @@ test("change set memberships must be unique", async () => {
 
 	await expect(
 		db
-			.insertInto("change_set_membership")
+			.insertInto("change_set_item")
 			.values({
 				change_set_id: "change-set-1",
 				change_id: "change-1",
@@ -158,6 +158,6 @@ test("change set memberships must be unique", async () => {
 			.returningAll()
 			.execute(),
 	).rejects.toThrowErrorMatchingInlineSnapshot(
-		`[SQLite3Error: SQLITE_CONSTRAINT_UNIQUE: sqlite3 result code 2067: UNIQUE constraint failed: change_set_membership.change_set_id, change_set_membership.change_id]`,
+		`[SQLite3Error: SQLITE_CONSTRAINT_UNIQUE: sqlite3 result code 2067: UNIQUE constraint failed: change_set_item.change_set_id, change_set_item.change_id]`,
 	);
 });

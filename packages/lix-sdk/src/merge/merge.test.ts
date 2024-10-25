@@ -773,7 +773,7 @@ test("it should copy change sets and merge memberships", async () => {
 	// expand the change set to contain another change
 	// to test if the sets are merged
 	await targetLix.db
-		.insertInto("change_set_membership")
+		.insertInto("change_set_item")
 		.values({
 			change_set_id: changeSet1.id,
 			change_id: mockChanges[1]!.id,
@@ -793,13 +793,13 @@ test("it should copy change sets and merge memberships", async () => {
 		.selectAll()
 		.execute();
 
-	const changeSet1Members = await targetLix.db
-		.selectFrom("change_set_membership")
+	const changeSet1Items = await targetLix.db
+		.selectFrom("change_set_item")
 		.selectAll()
 		.where("change_set_id", "=", changeSet1.id)
 		.execute();
-	const changeSet2Members = await targetLix.db
-		.selectFrom("change_set_membership")
+	const changeSet2Items = await targetLix.db
+		.selectFrom("change_set_item")
 		.selectAll()
 		.where("change_set_id", "=", changeSet2.id)
 		.execute();
@@ -808,12 +808,12 @@ test("it should copy change sets and merge memberships", async () => {
 	expect(changeSets.length).toBe(2);
 
 	// expect merger of the change set to contain both changes
-	expect(changeSet1Members.map((member) => member.change_id)).toEqual(
+	expect(changeSet1Items.map((item) => item.change_id)).toEqual(
 		expect.arrayContaining([mockChanges[0]?.id, mockChanges[1]?.id]),
 	);
 
 	// expect the second change set to contain only the second change
-	expect(changeSet2Members.map((member) => member.change_id)).toEqual(
+	expect(changeSet2Items.map((item) => item.change_id)).toEqual(
 		expect.arrayContaining([mockChanges[1]?.id]),
 	);
 });
