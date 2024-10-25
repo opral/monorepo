@@ -49,7 +49,7 @@ export default function TableEditor() {
 		() =>
 			parsedCsv.meta.fields!.map((field) => ({
 				...keyColumn(field, textColumn),
-				title: field,
+				title: field === uniqueColumn ? `${field} (unique column)` : field,
 			})),
 		[parsedCsv]
 	);
