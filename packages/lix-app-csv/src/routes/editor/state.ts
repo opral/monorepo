@@ -38,10 +38,10 @@ export const parsedCsvAtom = atom(async (get) => {
 	return parsed as Papa.ParseResult<Record<string, string>>;
 });
 
-export const uniqueColumnAtom = atom(async (get) => {
+export const uniqueColumnAtom = atom<Promise<string | undefined>>(async (get) => {
 	const file = await get(activeFileAtom);
 	if (!file) return undefined;
-	return file.metadata?.unique_column;
+	return file.metadata?.unique_column as string | undefined;
 });
 
 /**
@@ -60,7 +60,7 @@ export const activeRowEntityIdAtom = atom(async (get) => {
 	const activeCell = get(activeCellAtom);
 	const parsedCsv = await get(parsedCsvAtom);
 	const uniqueColumn = await get(uniqueColumnAtom);
-	if (!activeCell) return null;
+	if (!activeCell || !uniqueColumn) return null;
 	const uniqueColumnValue = parsedCsv.data[activeCell.row][uniqueColumn];
 	return `${uniqueColumn}:${uniqueColumnValue}`;
 });
