@@ -51,6 +51,8 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     content TEXT
   ) strict;
 
+  -- conflicts
+
   CREATE INDEX IF NOT EXISTS idx_content_hash ON snapshot (id);
 
   CREATE TABLE IF NOT EXISTS conflict (
@@ -79,11 +81,25 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     insert or replace into file_internal(id, path, data, metadata) values(OLD.file_id, OLD.path, OLD.data, OLD.metadata);
   END;
 
+  -- change sets
+
+  CREATE TABLE IF NOT EXISTS change_set (
+    id TEXT PRIMARY KEY DEFAULT (uuid_v4())
+  ) strict;
+
+  CREATE TABLE IF NOT EXISTS change_set_membership (
+    change_set_id TEXT NOT NULL,
+    change_id TEXT NOT NULL,
+
+    UNIQUE(change_set_id, change_id),
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id),    
+    FOREIGN KEY(change_id) REFERENCES change(id)
+  ) strict;
+
 
   -- change discussions 
 
   CREATE TABLE IF NOT EXISTS discussion (
-    -- TODO https://github.com/opral/lix-sdk/issues/74 replace with uuid_v7
     id TEXT PRIMARY KEY DEFAULT (uuid_v4())
   ) strict;
 
@@ -99,7 +115,6 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
 
 
   CREATE TABLE IF NOT EXISTS comment (
-    --- TODO in inlang i saw we replace uuid_v3 with uuid_v7 any reason we use v4 in lix?
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     parent_id TEXT,
     discussion_id TEXT NULL,

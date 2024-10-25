@@ -1,4 +1,3 @@
-import type { LixPlugin } from "../plugin.js";
 import type { Lix } from "../types.js";
 import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-only-in-source.js";
 
@@ -28,15 +27,15 @@ export async function merge(args: {
 
 	// 2. Let the plugin detect conflicts
 
-	const plugin = args.sourceLix.plugins[0] as LixPlugin;
+	const plugin = args.sourceLix.plugins[0];
 
 	// TODO function assumes that all changes belong to the same file
-	if (args.sourceLix.plugins.length !== 1) {
+	if (args.sourceLix.plugins.length > 1) {
 		throw new Error("Unimplemented. Only one plugin is supported for now");
 	}
 
 	const conflicts =
-		(await plugin.detectConflicts?.({
+		(await plugin?.detectConflicts?.({
 			sourceLix: args.sourceLix,
 			targetLix: args.targetLix,
 		})) ?? [];
@@ -80,7 +79,7 @@ export async function merge(args: {
 				.executeTakeFirst();
 		}
 
-		if (!plugin.applyChanges) {
+		if (!plugin?.applyChanges) {
 			throw new Error("Plugin does not support applying changes");
 		}
 
@@ -116,8 +115,22 @@ export async function merge(args: {
 		.selectAll()
 		.execute();
 
+	// change graph
+
 	const sourceEdges = await args.sourceLix.db
 		.selectFrom("change_edge")
+		.selectAll()
+		.execute();
+
+	// change sets
+
+	const sourceChangeSets = await args.sourceLix.db
+		.selectFrom("change_set")
+		.selectAll()
+		.execute();
+
+	const sourceChangeSetMemberships = await args.sourceLix.db
+		.selectFrom("change_set_membership")
 		.selectAll()
 		.execute();
 
@@ -173,6 +186,24 @@ export async function merge(args: {
 			await trx
 				.insertInto("change_edge")
 				.values(sourceEdges)
+				// ignore if already exists
+				.onConflict((oc) => oc.doNothing())
+				.execute();
+		}
+
+		// add change sets and change_set_memberships
+		if (sourceChangeSets.length > 0) {
+			await trx
+				.insertInto("change_set")
+				.values(sourceChangeSets)
+				// ignore if already exists
+				.onConflict((oc) => oc.doNothing())
+				.execute();
+		}
+		if (sourceChangeSetMemberships.length > 0) {
+			await trx
+				.insertInto("change_set_membership")
+				.values(sourceChangeSetMemberships)
 				// ignore if already exists
 				.onConflict((oc) => oc.doNothing())
 				.execute();
