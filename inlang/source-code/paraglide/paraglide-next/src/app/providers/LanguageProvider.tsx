@@ -4,11 +4,15 @@ import { ClientLanguageProvider } from "./ClientLanguageProvider"
 import { getLanguage } from "../getLanguage.server"
 
 // avoid flash of wrong language on startup
-setLanguageTag(getLanguage)
+;(async () => {
+	setLanguageTag(await getLanguage())
+})()
 
 //If we can reliably call setLanguageTag() from middleware.tsx, we can probably get rid of this component
-export default function LanguageProvider(props: { children: React.ReactNode }): React.ReactElement {
-	setLanguageTag(getLanguage)
+export default async function LanguageProvider(props: {
+	children: React.ReactNode
+}): Promise<React.ReactElement> {
+	setLanguageTag(await getLanguage())
 
 	//we make the client side language provider a sibling of the children
 	//That way the entire app isn't turned into a client component
