@@ -62,7 +62,6 @@ export default function TableEditor() {
 		<div className="grid grid-cols-4">
 			<div className="col-span-4 md:col-span-3">
 				<DynamicDataSheetGrid
-					disableContextMenu
 					value={parsedCsv.data}
 					columns={columns}
 					height={screenHeight}
