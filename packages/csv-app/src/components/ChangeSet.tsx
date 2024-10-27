@@ -1,77 +1,60 @@
-import { Change, isInSimulatedCurrentBranch, Snapshot } from "@lix-js/sdk";
+import { Change, isInSimulatedCurrentBranch, Lix, Snapshot } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { lixAtom } from "../state.ts";
 // import timeAgo from "../helper/timeAgo.ts";
 import clsx from "clsx";
 import { SlTooltip } from "@shoelace-style/shoelace/dist/react";
-import { uniqueColumnAtom } from "../routes/editor/state.ts";
+import { activeFileAtom } from "../routes/editor/state.ts";
 
-export const HistoryEntry = () => {
-	const [isOpen, setIsOpen] = useState(false);
-	const [project] = useAtom(lixAtom);
-	const [uniqueColumn] = useAtom(uniqueColumnAtom);
-	const [changeHistory, setChangeHistory] = useState(
-		[] as { current: Change & Snapshot; previous: (Change & Snapshot) | null }[]
-	);
+const getChanges = async (lix: Lix, changeSetId: string, fileId: string) => {
+	const result: Array<
+		Change & Snapshot["content"] & { parent?: Change & Snapshot }
+	> = [];
 
-	const getCommitRelatedChanges = async () => {
-		const changes = await project?.db
+	const changes = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.innerJoin("change_set_item", "change_set_item.change_id", "change.id")
+		.where("change_set_item.change_set_id", "=", changeSetId)
+		.where("change.file_id", "=", fileId)
+		.selectAll("change")
+		.select("snapshot.content")
+		.execute();
+
+	for (const change of changes) {
+		const parent = await lix.db
 			.selectFrom("change")
-			.selectAll("change")
 			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+			.innerJoin("change_graph_edge", "change_graph_edge.child_id", "change.id")
+			.where("change_graph_edge.child_id", "=", change.id)
+			.where(isInSimulatedCurrentBranch)
+			.selectAll("change")
 			.select("snapshot.content")
-			// .where("commit_id", "=", props.commit.id)
-			.execute();
+			.executeTakeFirstOrThrow();
 
-		if (changes) {
-			const history = [];
-			for (const change of changes) {
-				const previousChange = await project?.db
-					.selectFrom("change")
-					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-					.selectAll("change")
-					.select("snapshot.content")
-					.where("change.type", "=", "row")
-					// TODO https://linear.app/opral/issue/LIXDK-183/update-csv-app-to-latest-stand
-					// .where(
-					// 	(eb) => eb.ref("content", "->>").key(uniqueColumn),
-					// 	"=",
-					// 	change.content?.[uniqueColumn]
-					// )
-					.where("change.created_at", "<", change.created_at)
-					// TODO remove after branching concept on lix
-					// https://linear.app/opral/issue/LIX-126/branching
-					.where(isInSimulatedCurrentBranch)
-					.orderBy("change.created_at", "desc")
-					.executeTakeFirst();
+		result.push({ ...change, parent });
+	}
+	return result;
+};
 
-				//console.log("previousChange", previousChange);
-
-				history.push({ current: change, previous: previousChange });
-			}
-			setChangeHistory(
-				history as {
-					current: Change & Snapshot;
-					previous: (Change & Snapshot) | null;
-				}[]
-			);
-		}
-	};
+export default function ChangeSet(props: { id: string }) {
+	const [isOpen, setIsOpen] = useState(false);
+	const [lix] = useAtom(lixAtom);
+	const [activeFile] = useAtom(activeFileAtom);
+	const [changes, setChanges] = useState<
+		Awaited<ReturnType<typeof getChanges>>
+	>([]);
 
 	useEffect(() => {
 		if (isOpen) {
-			getCommitRelatedChanges();
+			getChanges(lix, props.id, activeFile.id).then(setChanges);
 			const interval = setInterval(async () => {
-				await getCommitRelatedChanges();
+				getChanges(lix, props.id, activeFile.id).then(setChanges);
 			}, 1000);
 			return () => clearInterval(interval);
 		}
-	}, [isOpen]);
-
-	useEffect(() => {
-		console.log("changeHistory", changeHistory);
-	}, [changeHistory]);
+	}, [lix, activeFile, props.id]);
 
 	return (
 		<div
@@ -87,10 +70,13 @@ export const HistoryEntry = () => {
 				</div>
 				<div className="flex-1 flex gap-2 items-center justify-between py-3 rounded md:h-[46px]">
 					<div className="flex flex-col md:flex-row md:gap-2 md:items-center flex-1">
-						{/* <p className="text-zinc-950 text-sm! font-semibold">
-							By {props.commit.author}
-						</p> */}
-						{/* <p className="text-sm! text-zinc-600">{props.commit.description}</p> */}
+						<p className="text-zinc-950 text-sm! font-semibold">
+							By TODO (add author)
+						</p>
+						<p className="text-sm! text-zinc-600">
+							By TODO (add discussion)
+							{/* {props.commit.description} */}
+						</p>
 					</div>
 					<p className="text-sm! pr-5 flex items-center gap-4 flex-1]">
 						{/* {timeAgo(change.created_at)} */}
@@ -115,7 +101,7 @@ export const HistoryEntry = () => {
 			</div>
 			<div className={clsx(isOpen ? "block" : "hidden")}>
 				<div className="flex flex-col gap-2 px-3 pb-3">
-					{changeHistory.map((change) => {
+					{changes.map((change) => {
 						// TODO: when importing new file one change contains every change of a row. When doing manual change, it contains more changes that belong to one row -> so do the grouping here when needed
 						return (
 							<div
@@ -130,11 +116,9 @@ export const HistoryEntry = () => {
 										<p className="hidden md:block text-zinc-500 md:py-1.5 w-[140px] line-clamp-1 whitespace-nowrap text-[14px]">
 											{"UNIQUE VALUE"}
 										</p>
-										<SlTooltip
-											content={change.current?.content?.[uniqueColumn]}
-										>
+										<SlTooltip content={change.current?.content}>
 											<p className="md:px-4 md:py-1.5 md:bg-white md:border border-zinc-200 md:w-[140px] rounded-full md:mr-4 overflow-hidden whitespace-nowrap text-ellipsis">
-												{change.current?.content?.[uniqueColumn]}
+												{change.current?.content}
 											</p>
 										</SlTooltip>
 									</div>
@@ -196,4 +180,4 @@ export const HistoryEntry = () => {
 			</div>
 		</div>
 	);
-};
+}

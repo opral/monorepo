@@ -10,15 +10,57 @@ import { useAtom } from "jotai";
 import {
 	activeFileAtom,
 	parsedCsvAtom,
+	unconfirmedChangesAtom,
 	uniqueColumnAtom,
 } from "../routes/editor/state.ts";
 import { useMemo, useState } from "react";
 import { lixAtom } from "../state.ts";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import clsx from "clsx";
+import { Change, Lix } from "@lix-js/sdk";
+
+const confirmChanges = async (lix: Lix, unconfirmedChanges: Change[]) => {
+	await lix.db.transaction().execute(async (trx) => {
+		// create a new set
+		const newChangeSet = await trx
+			.insertInto("change_set")
+			.defaultValues()
+			.returning("id")
+			.executeTakeFirstOrThrow();
+
+		// get the id of the confirmed tag
+		const confirmedTag = await trx
+			.selectFrom("tag")
+			.where("name", "=", "confirmed")
+			.select("id")
+			.executeTakeFirstOrThrow();
+
+		// tag the set as confirmed
+		await trx
+			.insertInto("change_set_tag")
+			.values({
+				change_set_id: newChangeSet.id,
+				tag_id: confirmedTag.id,
+			})
+			.execute();
+
+		// insert the changes into the set
+		for (const change of unconfirmedChanges) {
+			await trx
+				.insertInto("change_set_item")
+				.values({
+					change_set_id: newChangeSet.id,
+					change_id: change.id,
+				})
+				.execute();
+		}
+	});
+};
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
+	const [lix] = useAtom(lixAtom);
+	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
 
 	return (
 		<>
@@ -52,12 +94,29 @@ export default function Layout(props: { children: React.ReactNode }) {
 						</div>
 
 						<div className="mr-1 flex items-center gap-1.5">
-							<SlButton size="small">Confirm</SlButton>
+							{unconfirmedChanges.length > 0 && (
+								<SlButton
+									size="small"
+									variant="neutral"
+									disabled={unconfirmedChanges.length === 0}
+									onClick={() => confirmChanges(lix, unconfirmedChanges)}
+								>
+									Confirm Changes
+								</SlButton>
+							)}
 						</div>
 					</div>
 					<div className="px-3 flex gap-1">
 						<NavItem to={`/editor?f=${activeFile.id}`} name="Edit" />
-						<NavItem to={`/graph?f=${activeFile.id}`} name="Changes" />
+						<NavItem
+							to={`/graph?f=${activeFile.id}`}
+							counter={
+								unconfirmedChanges.length !== 0
+									? unconfirmedChanges.length
+									: undefined
+							}
+							name="Changes"
+						/>
 					</div>
 				</div>
 
@@ -78,7 +137,11 @@ const NavItem = (props: { to: string; name: string; counter?: number }) => {
 					isActive ? "text-zinc-950" : ""
 				)}
 			>
-				{props.counter && <SlBadge className="mr-2">{props.counter}</SlBadge>}
+				{props.counter && (
+					<SlBadge className="mr-2" pill variant="neutral">
+						{props.counter}
+					</SlBadge>
+				)}
 				{props.name}
 			</div>
 

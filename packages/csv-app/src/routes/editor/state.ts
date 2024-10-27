@@ -85,3 +85,17 @@ export const activeRowChangesAtom = atom(async (get) => {
 		.orderBy("change.created_at", "desc")
 		.execute();
 });
+
+// The CSV app treats changes that are not in a change set as unconfirmed changes.
+export const unconfirmedChangesAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	const activeFile = await get(activeFileAtom);
+	return await lix.db
+		.selectFrom("change")
+		.leftJoin("change_set_item", "change_set_item.change_id", "change.id")
+		.where("change_set_item.change_id", "is", null)
+		.where("change.file_id", "=", activeFile.id)
+		.selectAll("change")
+		.execute();
+});
