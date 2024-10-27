@@ -1,14 +1,12 @@
 import { Change, isInSimulatedCurrentBranch, Lix, Snapshot } from "@lix-js/sdk";
 import { useAtom } from "jotai";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { lixAtom } from "../state.ts";
 // import timeAgo from "../helper/timeAgo.ts";
 import clsx from "clsx";
-import { SlTooltip } from "@shoelace-style/shoelace/dist/react";
 import {
 	activeFileAtom,
 	parsedCsvAtom,
-	uniqueColumnAtom,
 	uniqueColumnIndexAtom,
 } from "../routes/editor/state.ts";
 
@@ -140,7 +138,7 @@ export default function ChangeSet(props: { id: string }) {
 										const parentValue = columnIndex
 											? change.parent?.content?.text.split(",")[columnIndex]
 											: undefined;
-										const hasDiff = value !== parentValue;
+
 										return (
 											<div
 												key={column}
