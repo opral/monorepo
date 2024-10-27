@@ -151,6 +151,12 @@ export default function ChangeSet(props: { id: string }) {
 												? change.parent?.content?.text.split(",")[columnIndex]
 												: undefined;
 
+										const hasDiff = value !== parentValue;
+
+										if (hasDiff === false) {
+											return undefined;
+										}
+
 										return (
 											<div
 												key={column}
