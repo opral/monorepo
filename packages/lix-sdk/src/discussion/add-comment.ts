@@ -1,29 +1,21 @@
-import { Kysely } from "kysely";
-import type { Comment, LixDatabaseSchema } from "../database/schema.js";
+import type { Comment } from "../database/schema.js";
+import type { Lix } from "../types.js";
 
 export async function addComment(args: {
-	db: Kysely<LixDatabaseSchema>;
-	parentCommentId: string;
+	lix: Partial<Lix> & { db: { transaction: Lix["db"]["transaction"] } };
+	parentComment: Partial<Comment> & {
+		id: Comment["id"];
+		discussion_id: Comment["discussion_id"];
+	};
 	body: string;
-}): Promise<{ id: Comment["id"] }> {
-	return args.db.transaction().execute(async (trx) => {
-		// verify that the parent comment exists and fetch the discussion_id
-		const { discussion_id } = await trx
-			.selectFrom("comment")
-			.select("discussion_id")
-			.where("id", "=", args.parentCommentId)
-			.executeTakeFirstOrThrow();
-
-		const comment = await trx
-			.insertInto("comment")
-			.values({
-				parent_id: args.parentCommentId,
-				discussion_id,
-				body: args.body,
-			})
-			.returning("id")
-			.executeTakeFirstOrThrow();
-
-		return comment;
-	});
+}): Promise<Comment> {
+	return args.lix.db
+		.insertInto("comment")
+		.values({
+			discussion_id: args.parentComment.discussion_id,
+			parent_id: args.parentComment.id,
+			body: args.body,
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
 }

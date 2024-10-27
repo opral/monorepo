@@ -105,11 +105,6 @@ export async function merge(args: {
 		.selectAll()
 		.execute();
 
-	const sourceDiscsussionChangeMappings = await args.sourceLix.db
-		.selectFrom("discussion_change_map")
-		.selectAll()
-		.execute();
-
 	const sourceComments = await args.sourceLix.db
 		.selectFrom("comment")
 		.selectAll()
@@ -215,15 +210,6 @@ export async function merge(args: {
 			await trx
 				.insertInto("discussion")
 				.values(sourceDiscussions)
-				// ignore if already exists
-				.onConflict((oc) => oc.doNothing())
-				.execute();
-		}
-
-		if (sourceDiscsussionChangeMappings.length > 0) {
-			await trx
-				.insertInto("discussion_change_map")
-				.values(sourceDiscsussionChangeMappings)
 				// ignore if already exists
 				.onConflict((oc) => oc.doNothing())
 				.execute();

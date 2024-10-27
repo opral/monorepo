@@ -28,7 +28,7 @@ test("creating a change set should succeed", async () => {
 
 	const changeSet = await createChangeSet({
 		lix,
-		changeIds: mockChanges.map((change) => change.id),
+		changes: mockChanges,
 	});
 
 	const changeSetMembers = await lix.db
