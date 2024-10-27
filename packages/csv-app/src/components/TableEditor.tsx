@@ -55,7 +55,7 @@ export default function TableEditor() {
 	);
 
 	useEffect(() => {
-		setScreenHeight(window.innerHeight - 82);
+		setScreenHeight(window.innerHeight - 200);
 	}, [window.innerHeight]);
 
 	return (

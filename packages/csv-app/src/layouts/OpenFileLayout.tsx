@@ -66,7 +66,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 	return (
 		<>
 			<UniqueColumnDialog />
-			<div className="w-full min-h-screen bg-zinc-50 relative">
+			<div className="w-full min-h-full bg-zinc-50 relative">
 				<div className="w-full border-b border-zinc-200 bg-white relative z-90 -mb-[1px]">
 					<div className="w-full flex items-center justify-between px-3 min-h-[54px] gap-1 overflow-x-scroll">
 						<div className="flex items-center gap-1">
