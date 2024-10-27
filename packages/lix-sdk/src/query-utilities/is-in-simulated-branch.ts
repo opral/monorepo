@@ -23,7 +23,7 @@ export function isInSimulatedCurrentBranch(
 			subquery.selectFrom("conflict").select("conflict.change_id").unionAll(
 				subquery
 					.selectFrom("conflict")
-					// cheers to sureglymop on hackernews for fixing typesafety
+					// cheers to surrealize on hackernews for fixing typesafety
 					// of this select https://news.ycombinator.com/item?id=41963996#41965137
 					.select("conflict.conflicting_change_id as change_id"),
 			),
