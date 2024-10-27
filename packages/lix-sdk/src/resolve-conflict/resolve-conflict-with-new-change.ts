@@ -99,7 +99,7 @@ export async function resolveConflictWithNewChange(args: {
 
 		for (const id of args.parentIds) {
 			await trx
-				.insertInto("change_edge")
+				.insertInto("change_graph_edge")
 				.values({
 					parent_id: id,
 					child_id: insertedChange.id,

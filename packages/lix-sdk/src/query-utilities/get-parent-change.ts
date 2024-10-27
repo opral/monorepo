@@ -24,10 +24,10 @@ export async function getParentChange(args: {
 	change: Pick<Change, "id"> & Partial<Change>;
 }): Promise<Change | undefined> {
 	const parents = await args.lix.db
-		.selectFrom("change_edge")
-		.innerJoin("change", "change.id", "change_edge.parent_id")
+		.selectFrom("change_graph_edge")
+		.innerJoin("change", "change.id", "change_graph_edge.parent_id")
 		.selectAll("change")
-		.where("change_edge.child_id", "=", args.change.id)
+		.where("change_graph_edge.child_id", "=", args.change.id)
 		.where(isInSimulatedCurrentBranch)
 		.execute();
 	if (parents.length > 1) {

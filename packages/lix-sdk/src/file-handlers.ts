@@ -172,7 +172,7 @@ export async function handleFileChange(args: {
 			// If a parent exists, the change is a child of the parent
 			if (parentChange) {
 				await trx
-					.insertInto("change_edge")
+					.insertInto("change_graph_edge")
 					.values({
 						parent_id: parentChange.id,
 						child_id: insertedChange.id,

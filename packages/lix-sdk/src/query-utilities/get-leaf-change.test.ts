@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { getLeafChange } from "./get-leaf-change.js";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
-import type { ChangeEdge, NewChange } from "../database/schema.js";
+import type { ChangeGraphEdge, NewChange } from "../database/schema.js";
 import { mockJsonSnapshot } from "./mock-json-snapshot.js";
 
 test("it should find the latest child of a given change", async () => {
@@ -43,7 +43,7 @@ test("it should find the latest child of a given change", async () => {
 		},
 	];
 
-	const edges: ChangeEdge[] = [
+	const edges: ChangeGraphEdge[] = [
 		{ parent_id: "1", child_id: "2" },
 		{ parent_id: "2", child_id: "3" },
 	];
@@ -53,7 +53,7 @@ test("it should find the latest child of a given change", async () => {
 		.values(mockSnapshots.map((s) => ({ content: s.content })))
 		.execute();
 	await lix.db.insertInto("change").values(mockChanges).execute();
-	await lix.db.insertInto("change_edge").values(edges).execute();
+	await lix.db.insertInto("change_graph_edge").values(edges).execute();
 
 	const changes = await lix.db.selectFrom("change").selectAll().execute();
 

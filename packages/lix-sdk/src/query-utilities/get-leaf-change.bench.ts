@@ -6,7 +6,7 @@ import {
 	newLixFile,
 	openLixInMemory,
 	type Change,
-	type ChangeEdge,
+	type ChangeGraphEdge,
 	type NewChange,
 	type NewSnapshot,
 } from "../index.js";
@@ -15,7 +15,7 @@ const createChange = (
 	type: "bundle" | "message" | "variant",
 	payload: any,
 	parentChangeId: string | null,
-): { change: NewChange; snapshot: NewSnapshot; edges: ChangeEdge[] } => {
+): { change: NewChange; snapshot: NewSnapshot; edges: ChangeGraphEdge[] } => {
 	const entityId = payload[type].id;
 	const snapshotId = v4();
 	const snapshot: NewSnapshot = {
@@ -32,7 +32,7 @@ const createChange = (
 		created_at: "",
 	};
 
-	const edges: ChangeEdge[] = [];
+	const edges: ChangeGraphEdge[] = [];
 
 	if (parentChangeId) {
 		edges.push({
@@ -56,7 +56,7 @@ const setupLix = async (nMessages: number) => {
 	const mockChanges: {
 		change: NewChange;
 		snapshot: NewSnapshot;
-		edges: ChangeEdge[];
+		edges: ChangeGraphEdge[];
 	}[] = [];
 
 	for (let i = 0; i < nMessages; i++) {
@@ -114,7 +114,7 @@ const setupLix = async (nMessages: number) => {
 
 		await lix.db.insertInto("snapshot").values(snapshotsArray).execute();
 		await lix.db.insertInto("change").values(changesArray).execute();
-		await lix.db.insertInto("change_edge").values(edgesArray).execute();
+		await lix.db.insertInto("change_graph_edge").values(edgesArray).execute();
 	}
 	// console.log("setting up lix with " + nMessages + ".... done");
 

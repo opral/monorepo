@@ -82,7 +82,7 @@ test("it should find the common parent of two changes recursively", async () => 
 		.execute();
 
 	await sourceLix.db
-		.insertInto("change_edge")
+		.insertInto("change_graph_edge")
 		.values([edges[0]!, edges[1]!])
 		.execute();
 
@@ -157,7 +157,7 @@ test("it should return undefined if no common parent exists", async () => {
 		.execute();
 
 	await targetLix.db
-		.insertInto("change_edge")
+		.insertInto("change_graph_edge")
 		.values([{ parent_id: "0", child_id: "1" }])
 		.execute();
 
@@ -176,7 +176,7 @@ test("it should return undefined if no common parent exists", async () => {
 		.execute();
 
 	await sourceLix.db
-		.insertInto("change_edge")
+		.insertInto("change_graph_edge")
 		.values([{ parent_id: "0", child_id: "1" }])
 		.execute();
 
@@ -244,7 +244,10 @@ test("it should return the source change if its the common parent", async () => 
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.executeTakeFirst();
 
-	await targetLix.db.insertInto("change_edge").values(mockEdges).execute();
+	await targetLix.db
+		.insertInto("change_graph_edge")
+		.values(mockEdges)
+		.execute();
 
 	await sourceLix.db
 		.insertInto("snapshot")
@@ -260,7 +263,10 @@ test("it should return the source change if its the common parent", async () => 
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.executeTakeFirst();
 
-	await sourceLix.db.insertInto("change_edge").values(mockEdges).execute();
+	await sourceLix.db
+		.insertInto("change_graph_edge")
+		.values(mockEdges)
+		.execute();
 
 	const changeOne = await sourceLix.db
 		.selectFrom("change")

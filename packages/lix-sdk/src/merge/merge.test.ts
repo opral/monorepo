@@ -3,7 +3,7 @@ import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import { merge } from "./merge.js";
 import type {
-	ChangeEdge,
+	ChangeGraphEdge,
 	NewChange,
 	NewConflict,
 	NewSnapshot,
@@ -49,7 +49,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		},
 	];
 
-	const mockEdges: ChangeEdge[] = [{ parent_id: "2", child_id: "3" }];
+	const mockEdges: ChangeGraphEdge[] = [{ parent_id: "2", child_id: "3" }];
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
@@ -83,7 +83,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		.execute();
 
 	await sourceLix.db
-		.insertInto("change_edge")
+		.insertInto("change_graph_edge")
 		.values([mockEdges[0]!])
 		.execute();
 
@@ -131,7 +131,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 	]);
 
 	const edges = await targetLix.db
-		.selectFrom("change_edge")
+		.selectFrom("change_graph_edge")
 		.selectAll()
 		.execute();
 
@@ -371,7 +371,7 @@ test("it should apply changes that are not conflicting", async () => {
 		},
 	];
 
-	const edges: ChangeEdge[] = [{ parent_id: "1", child_id: "2" }];
+	const edges: ChangeGraphEdge[] = [{ parent_id: "1", child_id: "2" }];
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
@@ -408,7 +408,10 @@ test("it should apply changes that are not conflicting", async () => {
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.execute();
 
-	await sourceLix.db.insertInto("change_edge").values([edges[0]!]).execute();
+	await sourceLix.db
+		.insertInto("change_graph_edge")
+		.values([edges[0]!])
+		.execute();
 
 	await targetLix.db
 		.insertInto("snapshot")

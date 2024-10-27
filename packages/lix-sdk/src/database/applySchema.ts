@@ -36,9 +36,10 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
   ) strict;
 
-  CREATE TABLE IF NOT EXISTS change_edge (
+  CREATE TABLE IF NOT EXISTS change_graph_edge (
     parent_id TEXT NOT NULL,
     child_id TEXT NOT NULL,
+    
     PRIMARY KEY (parent_id, child_id),
     FOREIGN KEY(parent_id) REFERENCES change(id),
     FOREIGN KEY(child_id) REFERENCES change(id),
