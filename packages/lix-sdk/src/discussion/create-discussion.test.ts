@@ -48,7 +48,7 @@ test("should be able to start a discussion on changes", async () => {
 	});
 
 	const discussions = await lix.db
-		.selectFrom("discussion")
+		.selectFrom("change_set_discussion")
 		.selectAll()
 		.execute();
 
@@ -57,7 +57,7 @@ test("should be able to start a discussion on changes", async () => {
 	const comments = await lix.db
 		.selectFrom("comment")
 		.selectAll()
-		.where("discussion_id", "=", discussions[0]!.id)
+		.where("discussion_id", "=", discussions[0]!.discussion_id)
 		.execute();
 
 	expect(comments).toHaveLength(1);

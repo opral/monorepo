@@ -97,7 +97,6 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     FOREIGN KEY(change_id) REFERENCES change(id)
   ) strict;
 
-  -- tags on change sets
   CREATE TABLE IF NOT EXISTS change_set_tag (
     change_set_id TEXT NOT NULL,
     tag_id TEXT NOT NULL,
@@ -107,14 +106,19 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     FOREIGN KEY(tag_id) REFERENCES tag(id)
   ) strict;
 
+  CREATE TABLE IF NOT EXISTS change_set_discussion (
+    change_set_id TEXT NOT NULL,
+    discussion_id TEXT NOT NULL,
+
+    UNIQUE(change_set_id, discussion_id),
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id),
+    FOREIGN KEY(discussion_id) REFERENCES discussion(id)
+  ) strict;
 
   -- discussions 
 
   CREATE TABLE IF NOT EXISTS discussion (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
-    change_set_id TEXT NOT NULL,
-
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
+    id TEXT PRIMARY KEY DEFAULT (uuid_v4())
   ) strict;
 
   CREATE TABLE IF NOT EXISTS comment (

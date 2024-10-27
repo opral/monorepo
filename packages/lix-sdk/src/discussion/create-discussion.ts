@@ -21,11 +21,17 @@ export async function createDiscussion(args: {
 	return args.lix.db.transaction().execute(async (trx) => {
 		const discussion = await trx
 			.insertInto("discussion")
-			.values({
-				change_set_id: args.changeSet.id,
-			})
+			.defaultValues()
 			.returningAll()
 			.executeTakeFirstOrThrow();
+
+		await trx
+			.insertInto("change_set_discussion")
+			.values({
+				change_set_id: args.changeSet.id,
+				discussion_id: discussion.id,
+			})
+			.execute();
 
 		await trx
 			.insertInto("comment")
