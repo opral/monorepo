@@ -16,7 +16,7 @@ const changeSetsAtom = atom(async (get) => {
 		.select("change_set.id")
 		.innerJoin("change", "change.id", "change_set_item.change_id")
 		.groupBy("change_set.id")
-		.orderBy("change.created_at", "asc")
+		.orderBy("change.created_at", "desc")
 		.distinct()
 		.execute();
 });
