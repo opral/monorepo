@@ -176,21 +176,20 @@ test("creating multiple discussions for one change set should be possible", asyn
 
 	await db
 		.insertInto("discussion")
-		.values([
-			{
-				id: "discussion-1",
-				change_set_id: changeSet.id,
-			},
-			{
-				id: "discussion-2",
-				change_set_id: changeSet.id,
-			},
-		])
+		.values([{ id: "discussion-1" }, { id: "discussion-2" }])
 		.returningAll()
 		.execute();
 
+	await db
+		.insertInto("change_set_discussion")
+		.values([
+			{ change_set_id: changeSet.id, discussion_id: "discussion-1" },
+			{ change_set_id: changeSet.id, discussion_id: "discussion-2" },
+		])
+		.execute();
+
 	const discussions = await db
-		.selectFrom("discussion")
+		.selectFrom("change_set_discussion")
 		.selectAll()
 		.where("change_set_id", "=", changeSet.id)
 		.execute();

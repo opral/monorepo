@@ -15,6 +15,7 @@ export type LixDatabaseSchema = {
 	change_set: ChangeSetTable;
 	change_set_item: ChangeSetItemTable;
 	change_set_tag: ChangeSetTagTable;
+	change_set_discussion: ChangeSetDiscussionTable;
 
 	// discussion
 	discussion: DiscussionTable;
@@ -145,7 +146,6 @@ export type NewDiscussion = Insertable<DiscussionTable>;
 export type DiscussionUpdate = Updateable<DiscussionTable>;
 type DiscussionTable = {
 	id: Generated<string>;
-	change_set_id: string;
 };
 
 export type Comment = Selectable<CommentTable>;
@@ -157,6 +157,14 @@ type CommentTable = {
 	discussion_id: string;
 	created_at: Generated<string>;
 	body: string;
+};
+
+export type ChangeSetDiscussion = Selectable<ChangeSetDiscussionTable>;
+export type NewChangeSetDiscussion = Insertable<ChangeSetDiscussionTable>;
+export type ChangeSetDiscussionUpdate = Updateable<ChangeSetDiscussionTable>;
+type ChangeSetDiscussionTable = {
+	change_set_id: string;
+	discussion_id: string;
 };
 
 // ----- tags -----
