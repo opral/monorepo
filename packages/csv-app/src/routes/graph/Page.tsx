@@ -1,7 +1,7 @@
 import PageHeader from "../../components/PageHeader.tsx";
 import OpenFileLayout from "../../layouts/OpenFileLayout.tsx";
 
-export default function HistoryPage() {
+export default function Page() {
 	return (
 		<OpenFileLayout>
 			<PageHeader title="Table History" />
