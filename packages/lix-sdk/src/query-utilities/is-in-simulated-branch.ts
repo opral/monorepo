@@ -21,10 +21,11 @@ export function isInSimulatedCurrentBranch(
 		// change is  not in a conflict
 		eb("change.id", "not in", (subquery) =>
 			subquery.selectFrom("conflict").select("conflict.change_id").unionAll(
-				// @ts-expect-error - no idea why
 				subquery
 					.selectFrom("conflict")
-					.select("conflict.conflicting_change_id"),
+					// cheers to sureglymop on hackernews for fixing typesafety
+					// of this select https://news.ycombinator.com/item?id=41963996#41965137
+					.select("conflict.conflicting_change_id as change_id"),
 			),
 		),
 		// change is in a conflict that has not been resolved
