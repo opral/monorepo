@@ -31,7 +31,11 @@ const getChanges = async (lix: Lix, changeSetId: string, fileId: string) => {
 		const parent = await lix.db
 			.selectFrom("change")
 			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-			.innerJoin("change_graph_edge", "change_graph_edge.child_id", "change.id")
+			.innerJoin(
+				"change_graph_edge",
+				"change_graph_edge.parent_id",
+				"change.id"
+			)
 			.where("change_graph_edge.child_id", "=", change.id)
 			.where(isInSimulatedCurrentBranch)
 			.selectAll("change")
