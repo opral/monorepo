@@ -1,15 +1,22 @@
 import { Change, isInSimulatedCurrentBranch, Lix, Snapshot } from "@lix-js/sdk";
 import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { lixAtom } from "../state.ts";
 // import timeAgo from "../helper/timeAgo.ts";
 import clsx from "clsx";
 import { SlTooltip } from "@shoelace-style/shoelace/dist/react";
-import { activeFileAtom } from "../routes/editor/state.ts";
+import {
+	activeFileAtom,
+	parsedCsvAtom,
+	uniqueColumnAtom,
+	uniqueColumnIndexAtom,
+} from "../routes/editor/state.ts";
 
 const getChanges = async (lix: Lix, changeSetId: string, fileId: string) => {
 	const result: Array<
-		Change & Snapshot["content"] & { parent?: Change & Snapshot }
+		Change & { content: Snapshot["content"] } & {
+			parent?: Change & { content: Snapshot["content"] };
+		}
 	> = [];
 
 	const changes = await lix.db
@@ -31,7 +38,7 @@ const getChanges = async (lix: Lix, changeSetId: string, fileId: string) => {
 			.where(isInSimulatedCurrentBranch)
 			.selectAll("change")
 			.select("snapshot.content")
-			.executeTakeFirstOrThrow();
+			.executeTakeFirst();
 
 		result.push({ ...change, parent });
 	}
@@ -45,6 +52,8 @@ export default function ChangeSet(props: { id: string }) {
 	const [changes, setChanges] = useState<
 		Awaited<ReturnType<typeof getChanges>>
 	>([]);
+	const [parsedCsv] = useAtom(parsedCsvAtom);
+	const [uniqueColumnIndex] = useAtom(uniqueColumnIndexAtom);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -90,9 +99,9 @@ export default function ChangeSet(props: { id: string }) {
 							<path
 								fill="none"
 								stroke="currentColor"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth="2"
 								d="m4 9l8 8l8-8"
 							/>
 						</svg>
@@ -105,73 +114,74 @@ export default function ChangeSet(props: { id: string }) {
 						// TODO: when importing new file one change contains every change of a row. When doing manual change, it contains more changes that belong to one row -> so do the grouping here when needed
 						return (
 							<div
-								key={change.current.id}
+								key={change.id}
 								className="bg-zinc-50 border border-zinc-200 rounded-md pt-2 px-3 pb-4"
 							>
 								<div className="flex flex-wrap md:flex-nowrap overflow-x-scroll gap-x-1 gap-y-2 md:gap-y-8">
-									<div
-										key={"id"}
-										className="flex md:flex-col items-center w-full md:w-auto"
-									>
+									<div className="flex md:flex-col items-center w-full md:w-auto">
 										<p className="hidden md:block text-zinc-500 md:py-1.5 w-[140px] line-clamp-1 whitespace-nowrap text-[14px]">
-											{"UNIQUE VALUE"}
+											UNIQUE VALUE
 										</p>
-										<SlTooltip content={change.current?.content}>
-											<p className="md:px-4 md:py-1.5 md:bg-white md:border border-zinc-200 md:w-[140px] rounded-full md:mr-4 overflow-hidden whitespace-nowrap text-ellipsis">
-												{change.current?.content}
-											</p>
-										</SlTooltip>
+										<p className="md:px-4 md:py-1.5 md:bg-white md:border border-zinc-200 md:w-[140px] rounded-full md:mr-4 overflow-hidden whitespace-nowrap text-ellipsis">
+											{uniqueColumnIndex ? (
+												<>
+													{change.content?.text.split(",")[uniqueColumnIndex]}
+												</>
+											) : (
+												<>ERROR NO UNIQUE COLUMN</>
+											)}
+										</p>
 									</div>
-									{/* {change.current.meta?.col_name.map((changed_col: string) => {
-										if (changed_col) {
-											return (
-												<div
-													key={changed_col}
-													className="flex md:flex-col flex-wrap md:flex-nowrap items-center w-full md:w-auto"
+									{parsedCsv.meta.fields?.map((column: string) => {
+										const columnIndex = parsedCsv.meta.fields?.indexOf(column);
+										const value = columnIndex
+											? change.content?.text.split(",")[columnIndex]
+											: undefined;
+										const parentValue = columnIndex
+											? change.parent?.content?.text.split(",")[columnIndex]
+											: undefined;
+										const hasDiff = value !== parentValue;
+										return (
+											<div
+												key={column}
+												className="flex md:flex-col flex-wrap md:flex-nowrap items-center w-full md:w-auto"
+											>
+												<p className="text-zinc-500 py-1 md:py-1.5 w-full md:w-[140px] uppercase text-[14px] overflow-hidden whitespace-nowrap text-ellipsis">
+													{column}
+												</p>
+												{value ? (
+													// insert or update
+													<p className="px-3 py-1.5 bg-white border border-zinc-200 flex-1 md:w-[140px] overflow-hidden whitespace-nowrap text-ellipsis">
+														{value}
+													</p>
+												) : (
+													// deletion
+													<p className="px-3 py-1.5 min-h-[38px] bg-zinc-100 border border-zinc-400 border-dashed flex-1 md:w-[140px]"></p>
+												)}
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="18"
+													height="18"
+													viewBox="0 0 24 24"
+													className="text-zinc-400 m-1 -rotate-90 md:rotate-0"
 												>
-													<SlTooltip content={changed_col}>
-														<p className="text-zinc-500 py-1 md:py-1.5 w-full md:w-[140px] uppercase text-[14px] overflow-hidden whitespace-nowrap text-ellipsis">
-															{changed_col}
-														</p>
-													</SlTooltip>
-													{change.current.value?.[changed_col] ? (
-														<SlTooltip
-															content={change.current.value?.[changed_col]}
-														>
-															<p className="px-3 py-1.5 bg-white border border-zinc-200 flex-1 md:w-[140px] overflow-hidden whitespace-nowrap text-ellipsis">
-																{change.current.value?.[changed_col]}
-															</p>
-														</SlTooltip>
-													) : (
-														<p className="px-3 py-1.5 min-h-[38px] bg-zinc-100 border border-zinc-400 border-dashed flex-1 md:w-[140px]"></p>
-													)}
-													<svg
-														xmlns="http://www.w3.org/2000/svg"
-														width="18"
-														height="18"
-														viewBox="0 0 24 24"
-														className="text-zinc-400 m-1 -rotate-90 md:rotate-0"
-													>
-														<path
-															fill="currentColor"
-															d="M11 20h2V8l5.5 5.5l1.42-1.42L12 4.16l-7.92 7.92L5.5 13.5L11 8z"
-														/>
-													</svg>
-													{change.previous?.content?.[changed_col] ? (
-														<SlTooltip
-															content={change.previous.content?.[changed_col]}
-														>
-															<p className="px-3 py-1.5 bg-zinc-200 flex-1 md:w-[140px] overflow-hidden whitespace-nowrap text-ellipsis">
-																{change.previous.content?.[changed_col]}
-															</p>
-														</SlTooltip>
-													) : (
-														<p className="px-3 py-1.5 min-h-[38px] bg-zinc-100 border border-zinc-400 border-dashed flex-1 md:w-[140px]"></p>
-													)}
-												</div>
-											);
-										}
-									})} */}
+													<path
+														fill="currentColor"
+														d="M11 20h2V8l5.5 5.5l1.42-1.42L12 4.16l-7.92 7.92L5.5 13.5L11 8z"
+													/>
+												</svg>
+												{parentValue ? (
+													// insert or update
+													<p className="px-3 py-1.5 bg-zinc-200 flex-1 md:w-[140px] overflow-hidden whitespace-nowrap text-ellipsis">
+														{parentValue}
+													</p>
+												) : (
+													// non-existent
+													<p className="px-3 py-1.5 min-h-[38px] bg-zinc-100 border border-zinc-400 border-dashed flex-1 md:w-[140px]"></p>
+												)}
+											</div>
+										);
+									})}
 								</div>
 							</div>
 						);

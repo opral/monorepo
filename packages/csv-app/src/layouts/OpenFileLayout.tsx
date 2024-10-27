@@ -55,6 +55,7 @@ const confirmChanges = async (lix: Lix, unconfirmedChanges: Change[]) => {
 				.execute();
 		}
 	});
+	await saveLixToOpfs({ lix });
 };
 
 export default function Layout(props: { children: React.ReactNode }) {
