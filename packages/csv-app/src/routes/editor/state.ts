@@ -68,7 +68,7 @@ export const activeRowEntityIdAtom = atom(async (get) => {
 	const parsedCsv = await get(parsedCsvAtom);
 	const uniqueColumn = await get(uniqueColumnAtom);
 	if (!activeCell || !uniqueColumn) return null;
-	const uniqueColumnValue = parsedCsv.data[activeCell.row][uniqueColumn];
+	const uniqueColumnValue = parsedCsv.data[activeCell.row]?.[uniqueColumn];
 	return `${uniqueColumn}:${uniqueColumnValue}`;
 });
 
