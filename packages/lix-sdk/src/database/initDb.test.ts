@@ -108,7 +108,7 @@ test("files should be able to have metadata", async () => {
 	expect(updatedFile.metadata?.primary_key).toBe("something-else");
 });
 
-test("change edges can't reference themselves", async () => {
+test("change graph edges can't reference themselves", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
@@ -116,7 +116,7 @@ test("change edges can't reference themselves", async () => {
 
 	await expect(
 		db
-			.insertInto("change_edge")
+			.insertInto("change_graph_edge")
 			.values({
 				parent_id: "change1",
 				child_id: "change1",

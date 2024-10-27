@@ -147,7 +147,7 @@ test("should use queue and settled correctly", async () => {
 		.execute();
 
 	const updatedEdges = await lix.db
-		.selectFrom("change_edge")
+		.selectFrom("change_graph_edge")
 		.selectAll()
 		.execute();
 
