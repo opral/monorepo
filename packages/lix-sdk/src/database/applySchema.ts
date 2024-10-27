@@ -97,22 +97,14 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
   ) strict;
 
 
-  -- change discussions 
+  -- discussions 
 
   CREATE TABLE IF NOT EXISTS discussion (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4())
+    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    change_set_id TEXT NOT NULL,
+
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) strict;
-
-  CREATE TABLE IF NOT EXISTS discussion_change_map (
-    discussion_id TEXT NOT NULL,
-    change_id TEXT NOT NULL,
-
-    FOREIGN KEY(discussion_id) REFERENCES discussion(id),
-    
-    -- NOTE this will prevent us from dropping changes 
-    FOREIGN KEY(change_id) REFERENCES change(id)
-  ) strict;
-
 
   CREATE TABLE IF NOT EXISTS comment (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),

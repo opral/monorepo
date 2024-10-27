@@ -12,6 +12,8 @@ import type {
 import type { LixPlugin } from "../plugin.js";
 import { mockJsonSnapshot } from "../query-utilities/mock-json-snapshot.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
+import { addComment } from "../discussion/add-comment.js";
+import { createDiscussion } from "../discussion/create-discussion.js";
 
 test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const mockSnapshots = [
@@ -687,8 +689,9 @@ test("it should copy discussion and related comments and mappings", async () => 
 		},
 	]);
 
-	await lix1.createDiscussion({
-		changeIds: [changes[0]!.id],
+	await createDiscussion({
+		lix: lix1,
+		changeSet: await createChangeSet({ lix: lix1, changes: [changes[0]!] }),
 		body: "comment on a change",
 	});
 
@@ -706,12 +709,14 @@ test("it should copy discussion and related comments and mappings", async () => 
 	// lix 2 has no comments yet so after lix 1 into 2 we should be in sync
 	expect(commentsLix1).toEqual(commentsLix2AfterMerge);
 
-	await lix2.addComment({
-		parentCommentId: commentsLix2AfterMerge[0]!.id,
+	await addComment({
+		lix: lix2,
+		parentComment: commentsLix2AfterMerge[0]!,
 		body: "wrote in lix 2",
 	});
-	await lix1.addComment({
-		parentCommentId: commentsLix2AfterMerge[0]!.id,
+	await addComment({
+		lix: lix1,
+		parentComment: commentsLix2AfterMerge[0]!,
 		body: "wrote in lix 1",
 	});
 
@@ -763,7 +768,7 @@ test("it should copy change sets and merge memberships", async () => {
 
 	const changeSet1 = await createChangeSet({
 		lix: targetLix,
-		changeIds: [mockChanges[0]!.id],
+		changes: [mockChanges[0]!],
 	});
 
 	const sourceLix = await openLixInMemory({
@@ -783,7 +788,7 @@ test("it should copy change sets and merge memberships", async () => {
 	// create a new set just for change [1]
 	const changeSet2 = await createChangeSet({
 		lix: targetLix,
-		changeIds: [mockChanges[1]!.id],
+		changes: [mockChanges[1]!],
 	});
 
 	await merge({ sourceLix, targetLix });

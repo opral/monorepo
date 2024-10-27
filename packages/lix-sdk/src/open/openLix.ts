@@ -1,6 +1,4 @@
 import type { LixPlugin } from "../plugin.js";
-import { createDiscussion } from "../discussion/create-discussion.js";
-import { addComment } from "../discussion/add-comment.js";
 import { handleFileChange, handleFileInsert } from "../file-handlers.js";
 import { loadPlugins } from "../load-plugin.js";
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
@@ -161,15 +159,6 @@ export async function openLix(args: {
 			await settled();
 			args.database.close();
 			await db.destroy();
-		},
-		createDiscussion: (args: { changeIds?: string[]; body: string }) => {
-			return createDiscussion({
-				...args,
-				db,
-			});
-		},
-		addComment: (args: { parentCommentId: string; body: string }) => {
-			return addComment({ ...args, db });
 		},
 	};
 }

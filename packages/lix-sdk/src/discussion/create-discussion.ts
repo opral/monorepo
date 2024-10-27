@@ -1,33 +1,31 @@
-import { Kysely } from "kysely";
-import type { LixDatabaseSchema } from "../database/schema.js";
+import type { ChangeSet, Comment, Discussion } from "../database/schema.js";
+import type { Lix } from "../types.js";
 
+/**
+ * Creates a new discussion with the first comment.
+ *
+ * @example
+ *   ```ts
+ *   const changeSet = await createChangeSet({ lix, changes: ["change1", "change2"] });
+ *   const discussion = await createDiscussion({ lix, changeSet, body: "first comment" });
+ *   ```
+ *
+ * @returns the created discussion
+ */
 export async function createDiscussion(args: {
-	db: Kysely<LixDatabaseSchema>;
-	changeIds?: string[];
-	body: string;
-}) {
-	return args.db.transaction().execute(async (trx) => {
-		const changeIds =
-			args.changeIds && args.changeIds.length > 0 ? args.changeIds : undefined;
-
+	lix: Partial<Lix> & { db: { transaction: Lix["db"]["transaction"] } };
+	changeSet: Partial<ChangeSet> & { id: ChangeSet["id"] };
+	body: Comment["body"];
+}): Promise<Discussion> {
+	// TODO how to use an open transaction?
+	return args.lix.db.transaction().execute(async (trx) => {
 		const discussion = await trx
 			.insertInto("discussion")
-			.defaultValues()
-			.returning("id")
+			.values({
+				change_set_id: args.changeSet.id,
+			})
+			.returningAll()
 			.executeTakeFirstOrThrow();
-
-		// create mapping from discussion to changes
-		if (changeIds) {
-			for (const changeId of changeIds ?? []) {
-				await trx
-					.insertInto("discussion_change_map")
-					.values({
-						change_id: changeId,
-						discussion_id: discussion.id,
-					})
-					.execute();
-			}
-		}
 
 		await trx
 			.insertInto("comment")

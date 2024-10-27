@@ -9,6 +9,7 @@ export type LixDatabaseSchema = {
 	change_edge: ChangeEdgeTable;
 	conflict: ConflictTable;
 	snapshot: SnapshotTable;
+
 	// change set
 	change_set: ChangeSetTable;
 	change_set_item: ChangeSetItem;
@@ -16,7 +17,6 @@ export type LixDatabaseSchema = {
 	// discussion
 	discussion: DiscussionTable;
 	comment: CommentTable;
-	discussion_change_map: DiscussionChangeMapTable;
 };
 
 export type ChangeQueueEntry = Selectable<ChangeQueueTable>;
@@ -136,7 +136,6 @@ type ChangeSetItemTable = {
 	change_id: string;
 };
 
-
 // ------ discussions ------
 
 export type Discussion = Selectable<DiscussionTable>;
@@ -144,14 +143,7 @@ export type NewDiscussion = Insertable<DiscussionTable>;
 export type DiscussionUpdate = Updateable<DiscussionTable>;
 type DiscussionTable = {
 	id: Generated<string>;
-};
-
-export type DiscussionChangeMap = Selectable<DiscussionChangeMapTable>;
-export type NewDiscussionChangeMap = Insertable<DiscussionChangeMapTable>;
-export type DiscussionChangeMapUpdate = Updateable<DiscussionChangeMapTable>;
-type DiscussionChangeMapTable = {
-	change_id: string;
-	discussion_id: string;
+	change_set_id: string;
 };
 
 export type Comment = Selectable<CommentTable>;

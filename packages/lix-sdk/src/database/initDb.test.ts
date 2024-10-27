@@ -161,3 +161,39 @@ test("change set items must be unique", async () => {
 		`[SQLite3Error: SQLITE_CONSTRAINT_UNIQUE: sqlite3 result code 2067: UNIQUE constraint failed: change_set_item.change_set_id, change_set_item.change_id]`,
 	);
 });
+
+test("creating multiple discussions for one change set should be possible", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const changeSet = await db
+		.insertInto("change_set")
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	await db
+		.insertInto("discussion")
+		.values([
+			{
+				id: "discussion-1",
+				change_set_id: changeSet.id,
+			},
+			{
+				id: "discussion-2",
+				change_set_id: changeSet.id,
+			},
+		])
+		.returningAll()
+		.execute();
+
+	const discussions = await db
+		.selectFrom("discussion")
+		.selectAll()
+		.where("change_set_id", "=", changeSet.id)
+		.execute();
+
+	expect(discussions).toHaveLength(2);
+});
