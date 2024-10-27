@@ -9,10 +9,12 @@ export type LixDatabaseSchema = {
 	change_graph_edge: ChangeGraphEdgeTable;
 	conflict: ConflictTable;
 	snapshot: SnapshotTable;
+	tag: TagTable;
 
 	// change set
 	change_set: ChangeSetTable;
-	change_set_item: ChangeSetItem;
+	change_set_item: ChangeSetItemTable;
+	change_set_tag: ChangeSetTagTable;
 
 	// discussion
 	discussion: DiscussionTable;
@@ -155,4 +157,22 @@ type CommentTable = {
 	discussion_id: string;
 	created_at: Generated<string>;
 	body: string;
+};
+
+// ----- tags -----
+
+export type Tag = Selectable<TagTable>;
+export type NewTag = Insertable<TagTable>;
+export type TagUpdate = Updateable<TagTable>;
+type TagTable = {
+	id: Generated<string>;
+	name: string;
+};
+
+export type ChangeSetTag = Selectable<ChangeSetTagTable>;
+export type NewChangeSetTag = Insertable<ChangeSetTagTable>;
+export type ChangeSetTagUpdate = Updateable<ChangeSetTagTable>;
+type ChangeSetTagTable = {
+	change_set_id: string;
+	tag_id: string;
 };

@@ -97,6 +97,16 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     FOREIGN KEY(change_id) REFERENCES change(id)
   ) strict;
 
+  -- tags on change sets
+  CREATE TABLE IF NOT EXISTS change_set_tag (
+    change_set_id TEXT NOT NULL,
+    tag_id TEXT NOT NULL,
+
+    UNIQUE(change_set_id, tag_id),
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id),
+    FOREIGN KEY(tag_id) REFERENCES tag(id)
+  ) strict;
+
 
   -- discussions 
 
@@ -117,5 +127,13 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     FOREIGN KEY(discussion_id) REFERENCES discussion(id)
   ) strict;
 
+  -- tags 
+  
+  CREATE TABLE IF NOT EXISTS tag (
+    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    name TEXT NOT NULL UNIQUE  -- e.g., 'confirmed', 'reviewed'
+  ) strict;
+
+  INSERT OR IGNORE INTO tag (name) VALUES ('confirmed');
 `;
 }

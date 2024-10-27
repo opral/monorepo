@@ -197,3 +197,21 @@ test("creating multiple discussions for one change set should be possible", asyn
 
 	expect(discussions).toHaveLength(2);
 });
+
+
+test("the confirmed tag should be created if it doesn't exist", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const tag = await db
+		.selectFrom("tag")
+		.selectAll()
+		.where("name", "=", "confirmed")
+		.executeTakeFirst();
+
+	expect(tag).toMatchObject({
+		name: "confirmed",
+	});
+});
