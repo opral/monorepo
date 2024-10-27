@@ -55,7 +55,9 @@ export default function ChangeSet(props: { id: string }) {
 
 	useEffect(() => {
 		if (isOpen) {
-			getChanges(lix, props.id, activeFile.id).then(setChanges);
+			getChanges(lix, props.id, activeFile.id).then((data) => {
+				setChanges(data);
+			});
 			const interval = setInterval(async () => {
 				getChanges(lix, props.id, activeFile.id).then(setChanges);
 			}, 1000);
@@ -132,12 +134,18 @@ export default function ChangeSet(props: { id: string }) {
 									</div>
 									{parsedCsv.meta.fields?.map((column: string) => {
 										const columnIndex = parsedCsv.meta.fields?.indexOf(column);
-										const value = columnIndex
-											? change.content?.text.split(",")[columnIndex]
-											: undefined;
-										const parentValue = columnIndex
-											? change.parent?.content?.text.split(",")[columnIndex]
-											: undefined;
+
+										// explicit check for undefined because 0 is a valid index
+										// and 0 is interpreted as false in JavaScript :/
+										const value =
+											columnIndex !== undefined
+												? change.content?.text.split(",")[columnIndex]
+												: undefined;
+
+										const parentValue =
+											columnIndex !== undefined
+												? change.parent?.content?.text.split(",")[columnIndex]
+												: undefined;
 
 										return (
 											<div
