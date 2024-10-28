@@ -161,7 +161,8 @@ export default function Index() {
 				Public preview launching, Dec 16
 				<a
 					className="group text-cyan-600 hover:text-black border border-slate-200 mx-6 flex gap-2 items-center py-1 px-3 rounded-md bg-white"
-					href="https://opral.substack.com"
+					href="https://forms.gle/FyWRB2nHRbYV3NVV7"
+					target="_blank"
 				>
 					Get notified
 					<IconArrowExternal />
