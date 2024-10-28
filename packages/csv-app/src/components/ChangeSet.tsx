@@ -86,9 +86,7 @@ export default function ChangeSet(props: {
 				</div>
 				<div className="flex-1 flex gap-2 items-center justify-between py-3 rounded md:h-[46px]">
 					<div className="flex flex-col md:flex-row md:gap-2 md:items-center flex-1">
-						<p className="text-zinc-950 text-sm! font-semibold">
-							By TODO (add author)
-						</p>
+						<p className="text-zinc-950 text-sm! font-semibold">By Author</p>
 						<p className="text-sm! text-zinc-600">{props.firstCommentBody}</p>
 					</div>
 					<p className="text-sm! pr-5 flex items-center gap-4 flex-1]">
