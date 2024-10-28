@@ -1,4 +1,10 @@
-import { Change, isInSimulatedCurrentBranch, Lix, Snapshot } from "@lix-js/sdk";
+import {
+	Change,
+	changeHasLabel,
+	isInSimulatedCurrentBranch,
+	Lix,
+	Snapshot,
+} from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { lixAtom } from "../state.ts";
@@ -38,6 +44,7 @@ const getChanges = async (lix: Lix, changeSetId: string, fileId: string) => {
 			)
 			.where("change_graph_edge.child_id", "=", change.id)
 			.where(isInSimulatedCurrentBranch)
+			.where(changeHasLabel("confirmed"))
 			.selectAll("change")
 			.select("snapshot.content")
 			.executeTakeFirst();
