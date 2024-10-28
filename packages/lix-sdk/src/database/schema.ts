@@ -156,7 +156,7 @@ type CommentTable = {
 	parent_id: string | null;
 	discussion_id: string;
 	created_at: Generated<string>;
-	body: string;
+	content: string;
 };
 
 export type ChangeSetDiscussion = Selectable<ChangeSetDiscussionTable>;

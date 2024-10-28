@@ -695,7 +695,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 	await createDiscussion({
 		lix: lix1,
 		changeSet: await createChangeSet({ lix: lix1, changes: [changes[0]!] }),
-		body: "comment on a change",
+		content: "comment on a change",
 	});
 
 	await merge({ sourceLix: lix1, targetLix: lix2 });
@@ -715,12 +715,12 @@ test("it should copy discussion and related comments and mappings", async () => 
 	await addComment({
 		lix: lix2,
 		parentComment: commentsLix2AfterMerge[0]!,
-		body: "wrote in lix 2",
+		content: "wrote in lix 2",
 	});
 	await addComment({
 		lix: lix1,
 		parentComment: commentsLix2AfterMerge[0]!,
-		body: "wrote in lix 1",
+		content: "wrote in lix 1",
 	});
 
 	const commentsLix1OnSecondMerge = await lix1.db

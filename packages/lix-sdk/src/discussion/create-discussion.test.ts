@@ -44,7 +44,7 @@ test("should be able to start a discussion on changes", async () => {
 	await createDiscussion({
 		lix,
 		changeSet: await createChangeSet({ lix, changes }),
-		body: "comment on a change",
+		content: "comment on a change",
 	});
 
 	const discussions = await lix.db

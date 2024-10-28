@@ -49,7 +49,7 @@ const getChanges = async (lix: Lix, changeSetId: string, fileId: string) => {
 
 export default function ChangeSet(props: {
 	id: string;
-	firstCommentBody: string | null;
+	firstComment: string | null;
 }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [lix] = useAtom(lixAtom);
@@ -87,7 +87,7 @@ export default function ChangeSet(props: {
 				<div className="flex-1 flex gap-2 items-center justify-between py-3 rounded md:h-[46px]">
 					<div className="flex flex-col md:flex-row md:gap-2 md:items-center flex-1">
 						<p className="text-zinc-950 text-sm! font-semibold">By Author</p>
-						<p className="text-sm! text-zinc-600">{props.firstCommentBody}</p>
+						<p className="text-sm! text-zinc-600">{props.firstComment}</p>
 					</div>
 					<p className="text-sm! pr-5 flex items-center gap-4 flex-1]">
 						{/* {timeAgo(change.created_at)} */}

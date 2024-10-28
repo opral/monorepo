@@ -15,7 +15,7 @@ import type { Lix } from "../types.js";
 export async function createDiscussion(args: {
 	lix: Partial<Lix> & { db: { transaction: Lix["db"]["transaction"] } };
 	changeSet: Partial<ChangeSet> & { id: ChangeSet["id"] };
-	body: Comment["body"];
+	content: Comment["content"];
 }): Promise<Discussion> {
 	// TODO how to use an open transaction?
 	return args.lix.db.transaction().execute(async (trx) => {
@@ -38,7 +38,7 @@ export async function createDiscussion(args: {
 			.values({
 				parent_id: undefined,
 				discussion_id: discussion.id,
-				body: args.body,
+				content: args.content,
 			})
 			.execute();
 

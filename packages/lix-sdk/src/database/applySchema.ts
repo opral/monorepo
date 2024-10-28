@@ -126,7 +126,7 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     parent_id TEXT,
     discussion_id TEXT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    body TEXT NOT NULL,
+    content TEXT NOT NULL,
 
     FOREIGN KEY(discussion_id) REFERENCES discussion(id)
   ) strict;

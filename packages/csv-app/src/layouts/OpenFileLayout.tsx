@@ -254,7 +254,7 @@ const confirmChanges = async (lix: Lix, unconfirmedChanges: Change[]) => {
 const addDiscussionToChangeSet = async (
 	lix: Lix,
 	changeSet: ChangeSet,
-	body: string
+	content: string
 ) => {
 	await lix.db.transaction().execute(async (trx) => {
 		const discussion = await trx
@@ -275,7 +275,7 @@ const addDiscussionToChangeSet = async (
 			.insertInto("comment")
 			.values({
 				discussion_id: discussion.id,
-				body,
+				content,
 			})
 			.execute();
 	});

@@ -7,14 +7,14 @@ export async function addComment(args: {
 		id: Comment["id"];
 		discussion_id: Comment["discussion_id"];
 	};
-	body: string;
+	content: string;
 }): Promise<Comment> {
 	return args.lix.db
 		.insertInto("comment")
 		.values({
 			discussion_id: args.parentComment.discussion_id,
 			parent_id: args.parentComment.id,
-			body: args.body,
+			content: args.content,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

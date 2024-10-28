@@ -30,7 +30,7 @@ const changeSetsAtom = atom(async (get) => {
 		.orderBy("change.created_at", "desc")
 		.select("change_set.id")
 		.select("change_set_discussion.discussion_id")
-		.select("comment.body as first_comment_content") // Get the first comment's content
+		.select("comment.content as first_comment_content") // Get the first comment's content
 		.distinct()
 		.execute();
 });
@@ -45,7 +45,7 @@ export default function Page() {
 						<ChangeSet
 							key={changeSet.id}
 							id={changeSet.id}
-							firstCommentBody={changeSet.first_comment_content}
+							firstComment={changeSet.first_comment_content}
 						/>
 					))}
 				</div>
