@@ -15,26 +15,17 @@ const changeSetsAtom = atom(async (get) => {
 			"change_set_item.change_set_id",
 			"change_set.id"
 		)
-		.innerJoin("change", "change.id", "change_set_item.change_id")
-		.leftJoin(
-			"change_set_discussion",
-			"change_set_discussion.change_set_id",
-			"change_set.id"
-		)
+		.leftJoin("change", "change.id", "change_set_item.change_id")
+		.leftJoin("discussion", "discussion.change_set_id", "change_set.id")
 		// Join with the `comment` table, filtering for first-level comments
-		.leftJoin(
-			"comment",
-			"comment.discussion_id",
-			"change_set_discussion.discussion_id"
-		)
+		.leftJoin("comment", "comment.discussion_id", "discussion.id")
 		.where("comment.parent_id", "is", null) // Filter to get only the first comment
 		.where("change.file_id", "=", activeFile.id)
 		.groupBy("change_set.id")
 		.orderBy("change.created_at", "desc")
 		.select("change_set.id")
-		.select("change_set_discussion.discussion_id")
+		.select("discussion.id as discussion_id")
 		.select("comment.content as first_comment_content") // Get the first comment's content
-		.distinct()
 		.execute();
 });
 

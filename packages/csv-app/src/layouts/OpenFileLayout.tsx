@@ -193,6 +193,7 @@ const ConfirmChangesDialog = (props: { onClose: () => void }) => {
 		const changeSet = await confirmChanges(lix, unconfirmedChanges);
 		if (description !== "") {
 			await addDiscussionToChangeSet(lix, changeSet, description);
+			await saveLixToOpfs({ lix });
 		}
 		props.onClose();
 	};
@@ -220,18 +221,18 @@ const confirmChanges = async (lix: Lix, unconfirmedChanges: Change[]) => {
 			.executeTakeFirstOrThrow();
 
 		// get the id of the confirmed tag
-		const confirmedTag = await trx
-			.selectFrom("tag")
+		const confirmedLabel = await trx
+			.selectFrom("label")
 			.where("name", "=", "confirmed")
 			.select("id")
 			.executeTakeFirstOrThrow();
 
 		// tag the set as confirmed
 		await trx
-			.insertInto("change_set_tag")
+			.insertInto("change_set_label")
 			.values({
 				change_set_id: newChangeSet.id,
-				tag_id: confirmedTag.id,
+				label_id: confirmedLabel.id,
 			})
 			.execute();
 
@@ -259,17 +260,11 @@ const addDiscussionToChangeSet = async (
 	await lix.db.transaction().execute(async (trx) => {
 		const discussion = await trx
 			.insertInto("discussion")
-			.defaultValues()
-			.returning("id")
-			.executeTakeFirstOrThrow();
-
-		await trx
-			.insertInto("change_set_discussion")
 			.values({
-				discussion_id: discussion.id,
 				change_set_id: changeSet.id,
 			})
-			.execute();
+			.returning("id")
+			.executeTakeFirstOrThrow();
 
 		await trx
 			.insertInto("comment")
