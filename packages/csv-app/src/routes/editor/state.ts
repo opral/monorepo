@@ -90,7 +90,12 @@ export const activeRowChangesAtom = atom(async (get) => {
 		.where("change.entity_id", "=", activeRowEntityId)
 		.where("change.file_id", "=", activeFile.id)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.selectAll("change")
+		// .innerJoin("change_set_item", "change_set_item.change_id", "change.id")
+		// .innerJoin("change_set", "change_set.id", "change_set_item.change_set_id")
+		// .innerJoin("discussion", "discussion.change_set_id", "change_set.id")
+		// .innerJoin("comment", "comment.discussion_id", "discussion.id")
+		// .selectAll("change")
+		// .select((eb) => eb.fn.count("comment.id").as("comment_count"))
 		.select("snapshot.content")
 		.orderBy("change.created_at", "desc")
 		.execute();

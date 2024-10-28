@@ -1,18 +1,14 @@
 import timeAgo from "../helper/timeAgo.ts";
-import { ChangeWithSnapshot } from "@lix-js/sdk";
-
-// mock
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function hasDiscussion(change: any) {
-	// change
-	return false;
-}
+import { Change, Snapshot } from "@lix-js/sdk";
 
 /**
  * Renders change control information for a row.
  */
 export default function CellGraph(props: {
-	activeRowChanges: ChangeWithSnapshot[];
+	activeRowChanges: (Change & {
+		content: Snapshot["content"];
+		comment_count?: string | number | bigint;
+	})[];
 	activeCell: { col: number; row: number };
 }) {
 	return (
@@ -45,20 +41,22 @@ export default function CellGraph(props: {
 									</div> */}
 									<p>{timeAgo(change.created_at)}</p>
 								</div>
-								{hasDiscussion(change) && (
+								{Number(change.comment_count) > 0 && (
 									<div className="flex items-center gap-2">
-										{/* <svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="1em"
-										height="1em"
-										viewBox="0 0 24 24"
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="1em"
+											height="1em"
+											viewBox="0 0 24 24"
 										>
-										<path
-										fill="currentColor"
-										d="M5.763 17H20V5H4v13.385zm.692 2L2 22.5V4a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1z"
-										/>
-										</svg> */}
-										{/* <p className="text-sm">{change.description}</p> */}
+											<path
+												fill="currentColor"
+												d="M5.763 17H20V5H4v13.385zm.692 2L2 22.5V4a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1z"
+											/>
+										</svg>
+										<p className="text-sm">
+											{change.comment_count?.toString()}
+										</p>
 									</div>
 								)}
 								<div className="mt-2 px-3 py-1.5 bg-zinc-100 border border-zinc-200 rounded">
