@@ -1,10 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import {
 	SlButton,
-	SlDialog,
 	SlSelect,
 	SlOption,
 	SlBadge,
+	SlDialog,
 } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
 import {
@@ -13,58 +13,28 @@ import {
 	unconfirmedChangesAtom,
 	uniqueColumnAtom,
 } from "../routes/editor/state.ts";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { lixAtom } from "../state.ts";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import clsx from "clsx";
-import { Change, Lix } from "@lix-js/sdk";
-
-const confirmChanges = async (lix: Lix, unconfirmedChanges: Change[]) => {
-	await lix.db.transaction().execute(async (trx) => {
-		// create a new set
-		const newChangeSet = await trx
-			.insertInto("change_set")
-			.defaultValues()
-			.returning("id")
-			.executeTakeFirstOrThrow();
-
-		// get the id of the confirmed tag
-		const confirmedTag = await trx
-			.selectFrom("tag")
-			.where("name", "=", "confirmed")
-			.select("id")
-			.executeTakeFirstOrThrow();
-
-		// tag the set as confirmed
-		await trx
-			.insertInto("change_set_tag")
-			.values({
-				change_set_id: newChangeSet.id,
-				tag_id: confirmedTag.id,
-			})
-			.execute();
-
-		// insert the changes into the set
-		for (const change of unconfirmedChanges) {
-			await trx
-				.insertInto("change_set_item")
-				.values({
-					change_set_id: newChangeSet.id,
-					change_id: change.id,
-				})
-				.execute();
-		}
-	});
-	await saveLixToOpfs({ lix });
-};
+import { Change, ChangeSet, Lix } from "@lix-js/sdk";
+import { SlInput } from "@shoelace-style/shoelace/dist/react";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
-	const [lix] = useAtom(lixAtom);
 	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
+	const [showConfirmChangesDialog, setShowConfirmChangesDialog] =
+		useState(false);
 
 	return (
 		<>
+			{showConfirmChangesDialog && (
+				<ConfirmChangesDialog
+					onClose={() => {
+						setShowConfirmChangesDialog(false);
+					}}
+				/>
+			)}
 			<UniqueColumnDialog />
 			<div className="w-full min-h-full bg-zinc-50 relative">
 				<div className="w-full border-b border-zinc-200 bg-white relative z-90 -mb-[1px]">
@@ -100,7 +70,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 									size="small"
 									variant="neutral"
 									disabled={unconfirmedChanges.length === 0}
-									onClick={() => confirmChanges(lix, unconfirmedChanges)}
+									onClick={() => setShowConfirmChangesDialog(true)}
 								>
 									Confirm Changes
 								</SlButton>
@@ -211,4 +181,102 @@ const UniqueColumnDialog = () => {
 			</SlButton>
 		</SlDialog>
 	);
+};
+
+const ConfirmChangesDialog = (props: { onClose: () => void }) => {
+	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
+	const [lix] = useAtom(lixAtom);
+	const [description, setDescription] = useState("");
+	const ref = useRef(null);
+
+	const handleConfirmChanges = async () => {
+		const changeSet = await confirmChanges(lix, unconfirmedChanges);
+		if (description !== "") {
+			await addDiscussionToChangeSet(lix, changeSet, description);
+		}
+		props.onClose();
+	};
+
+	return (
+		<SlDialog label="Confirm Changes" open={true} ref={ref}>
+			<SlInput
+				placeholder="Describe the changes"
+				onInput={(event: any) => setDescription(event.target?.value)}
+			></SlInput>
+			<SlButton slot="footer" variant="primary" onClick={handleConfirmChanges}>
+				{description === "" ? "Confirm without description" : "Confirm"}
+			</SlButton>
+		</SlDialog>
+	);
+};
+
+const confirmChanges = async (lix: Lix, unconfirmedChanges: Change[]) => {
+	const changeSet = await lix.db.transaction().execute(async (trx) => {
+		// create a new set
+		const newChangeSet = await trx
+			.insertInto("change_set")
+			.defaultValues()
+			.returning("id")
+			.executeTakeFirstOrThrow();
+
+		// get the id of the confirmed tag
+		const confirmedTag = await trx
+			.selectFrom("tag")
+			.where("name", "=", "confirmed")
+			.select("id")
+			.executeTakeFirstOrThrow();
+
+		// tag the set as confirmed
+		await trx
+			.insertInto("change_set_tag")
+			.values({
+				change_set_id: newChangeSet.id,
+				tag_id: confirmedTag.id,
+			})
+			.execute();
+
+		// insert the changes into the set
+		for (const change of unconfirmedChanges) {
+			await trx
+				.insertInto("change_set_item")
+				.values({
+					change_set_id: newChangeSet.id,
+					change_id: change.id,
+				})
+				.execute();
+		}
+		return newChangeSet;
+	});
+	await saveLixToOpfs({ lix });
+	return changeSet;
+};
+
+const addDiscussionToChangeSet = async (
+	lix: Lix,
+	changeSet: ChangeSet,
+	body: string
+) => {
+	await lix.db.transaction().execute(async (trx) => {
+		const discussion = await trx
+			.insertInto("discussion")
+			.defaultValues()
+			.returning("id")
+			.executeTakeFirstOrThrow();
+
+		await trx
+			.insertInto("change_set_discussion")
+			.values({
+				discussion_id: discussion.id,
+				change_set_id: changeSet.id,
+			})
+			.execute();
+
+		await trx
+			.insertInto("comment")
+			.values({
+				discussion_id: discussion.id,
+				body,
+			})
+			.execute();
+	});
 };

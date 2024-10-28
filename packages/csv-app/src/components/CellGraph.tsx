@@ -62,7 +62,7 @@ export default function CellGraph(props: {
 									</div>
 								)}
 								<div className="mt-2 px-3 py-1.5 bg-zinc-100 border border-zinc-200 rounded">
-									{change.content!.text.split(",")![props.activeCell.col]}
+									{change.content?.text?.split(",")![props.activeCell.col]}
 								</div>
 							</div>
 						</div>

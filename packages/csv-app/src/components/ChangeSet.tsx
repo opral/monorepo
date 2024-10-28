@@ -47,7 +47,10 @@ const getChanges = async (lix: Lix, changeSetId: string, fileId: string) => {
 	return result;
 };
 
-export default function ChangeSet(props: { id: string }) {
+export default function ChangeSet(props: {
+	id: string;
+	firstCommentBody: string | null;
+}) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [lix] = useAtom(lixAtom);
 	const [activeFile] = useAtom(activeFileAtom);
@@ -86,10 +89,7 @@ export default function ChangeSet(props: { id: string }) {
 						<p className="text-zinc-950 text-sm! font-semibold">
 							By TODO (add author)
 						</p>
-						<p className="text-sm! text-zinc-600">
-							By TODO (add discussion)
-							{/* {props.commit.description} */}
-						</p>
+						<p className="text-sm! text-zinc-600">{props.firstCommentBody}</p>
 					</div>
 					<p className="text-sm! pr-5 flex items-center gap-4 flex-1]">
 						{/* {timeAgo(change.created_at)} */}
