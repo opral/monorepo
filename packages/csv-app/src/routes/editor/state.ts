@@ -9,6 +9,7 @@ import {
 	withPollingAtom,
 } from "../../state.ts";
 import Papa from "papaparse";
+import { changeHasLabel, changeIsLeafChange } from "@lix-js/sdk";
 
 export const activeFileAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -38,11 +39,13 @@ export const parsedCsvAtom = atom(async (get) => {
 	return parsed as Papa.ParseResult<Record<string, string>>;
 });
 
-export const uniqueColumnAtom = atom<Promise<string | undefined>>(async (get) => {
-	const file = await get(activeFileAtom);
-	if (!file) return undefined;
-	return file.metadata?.unique_column as string | undefined;
-});
+export const uniqueColumnAtom = atom<Promise<string | undefined>>(
+	async (get) => {
+		const file = await get(activeFileAtom);
+		if (!file) return undefined;
+		return file.metadata?.unique_column as string | undefined;
+	}
+);
 
 export const uniqueColumnIndexAtom = atom(async (get) => {
 	const uniqueColumn = await get(uniqueColumnAtom);
@@ -98,11 +101,13 @@ export const unconfirmedChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
+
 	return await lix.db
 		.selectFrom("change")
-		.leftJoin("change_set_item", "change_set_item.change_id", "change.id")
-		.where("change_set_item.change_id", "is", null)
 		.where("change.file_id", "=", activeFile.id)
+		.where(changeIsLeafChange())
+		.where((eb) => eb.not(changeHasLabel("confirmed")))
 		.selectAll("change")
 		.execute();
 });
+
