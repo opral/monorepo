@@ -136,3 +136,4 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
 
 `;
 }
+
