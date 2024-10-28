@@ -176,20 +176,15 @@ test("creating multiple discussions for one change set should be possible", asyn
 
 	await db
 		.insertInto("discussion")
-		.values([{ id: "discussion-1" }, { id: "discussion-2" }])
+		.values([
+			{ id: "discussion-1", change_set_id: changeSet.id },
+			{ id: "discussion-2", change_set_id: changeSet.id },
+		])
 		.returningAll()
 		.execute();
 
-	await db
-		.insertInto("change_set_discussion")
-		.values([
-			{ change_set_id: changeSet.id, discussion_id: "discussion-1" },
-			{ change_set_id: changeSet.id, discussion_id: "discussion-2" },
-		])
-		.execute();
-
 	const discussions = await db
-		.selectFrom("change_set_discussion")
+		.selectFrom("discussion")
 		.selectAll()
 		.where("change_set_id", "=", changeSet.id)
 		.execute();
@@ -197,15 +192,14 @@ test("creating multiple discussions for one change set should be possible", asyn
 	expect(discussions).toHaveLength(2);
 });
 
-
-test("the confirmed tag should be created if it doesn't exist", async () => {
+test("the confirmed label should be created if it doesn't exist", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
 
 	const tag = await db
-		.selectFrom("tag")
+		.selectFrom("label")
 		.selectAll()
 		.where("name", "=", "confirmed")
 		.executeTakeFirst();

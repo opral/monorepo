@@ -97,28 +97,22 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     FOREIGN KEY(change_id) REFERENCES change(id)
   ) strict;
 
-  CREATE TABLE IF NOT EXISTS change_set_tag (
+  CREATE TABLE IF NOT EXISTS change_set_label (
+    label_id TEXT NOT NULL,
     change_set_id TEXT NOT NULL,
-    tag_id TEXT NOT NULL,
-
-    UNIQUE(change_set_id, tag_id),
+    
+    FOREIGN KEY(label_id) REFERENCES label(id),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id),
-    FOREIGN KEY(tag_id) REFERENCES tag(id)
-  ) strict;
-
-  CREATE TABLE IF NOT EXISTS change_set_discussion (
-    change_set_id TEXT NOT NULL,
-    discussion_id TEXT NOT NULL,
-
-    UNIQUE(change_set_id, discussion_id),
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id),
-    FOREIGN KEY(discussion_id) REFERENCES discussion(id)
+    PRIMARY KEY(label_id, change_set_id)
   ) strict;
 
   -- discussions 
 
   CREATE TABLE IF NOT EXISTS discussion (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4())
+    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    change_set_id TEXT NOT NULL,
+
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS comment (
@@ -131,13 +125,14 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     FOREIGN KEY(discussion_id) REFERENCES discussion(id)
   ) strict;
 
-  -- tags 
+  -- labels
   
-  CREATE TABLE IF NOT EXISTS tag (
+  CREATE TABLE IF NOT EXISTS label (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     name TEXT NOT NULL UNIQUE  -- e.g., 'confirmed', 'reviewed'
   ) strict;
 
-  INSERT OR IGNORE INTO tag (name) VALUES ('confirmed');
+  INSERT OR IGNORE INTO label (name) VALUES ('confirmed');
+
 `;
 }

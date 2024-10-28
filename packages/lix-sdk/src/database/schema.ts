@@ -9,13 +9,12 @@ export type LixDatabaseSchema = {
 	change_graph_edge: ChangeGraphEdgeTable;
 	conflict: ConflictTable;
 	snapshot: SnapshotTable;
-	tag: TagTable;
+	label: LabelTable;
 
 	// change set
 	change_set: ChangeSetTable;
 	change_set_item: ChangeSetItemTable;
-	change_set_tag: ChangeSetTagTable;
-	change_set_discussion: ChangeSetDiscussionTable;
+	change_set_label: ChangeSetLabelTable;
 
 	// discussion
 	discussion: DiscussionTable;
@@ -146,6 +145,7 @@ export type NewDiscussion = Insertable<DiscussionTable>;
 export type DiscussionUpdate = Updateable<DiscussionTable>;
 type DiscussionTable = {
 	id: Generated<string>;
+	change_set_id: string;
 };
 
 export type Comment = Selectable<CommentTable>;
@@ -159,28 +159,20 @@ type CommentTable = {
 	content: string;
 };
 
-export type ChangeSetDiscussion = Selectable<ChangeSetDiscussionTable>;
-export type NewChangeSetDiscussion = Insertable<ChangeSetDiscussionTable>;
-export type ChangeSetDiscussionUpdate = Updateable<ChangeSetDiscussionTable>;
-type ChangeSetDiscussionTable = {
-	change_set_id: string;
-	discussion_id: string;
-};
-
 // ----- tags -----
 
-export type Tag = Selectable<TagTable>;
-export type NewTag = Insertable<TagTable>;
-export type TagUpdate = Updateable<TagTable>;
-type TagTable = {
+export type Label = Selectable<LabelTable>;
+export type NewLabel = Insertable<LabelTable>;
+export type LabelUpdate = Updateable<LabelTable>;
+type LabelTable = {
 	id: Generated<string>;
 	name: string;
 };
 
-export type ChangeSetTag = Selectable<ChangeSetTagTable>;
-export type NewChangeSetTag = Insertable<ChangeSetTagTable>;
-export type ChangeSetTagUpdate = Updateable<ChangeSetTagTable>;
-type ChangeSetTagTable = {
+export type ChangeSetLabel = Selectable<ChangeSetLabelTable>;
+export type NewChangeSetLabel = Insertable<ChangeSetLabelTable>;
+export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelTable>;
+type ChangeSetLabelTable = {
 	change_set_id: string;
-	tag_id: string;
+	label_id: string;
 };
