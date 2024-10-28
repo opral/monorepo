@@ -17,7 +17,7 @@ import { useMemo, useRef, useState } from "react";
 import { lixAtom } from "../state.ts";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import clsx from "clsx";
-import { Change, ChangeSet, Lix } from "@lix-js/sdk";
+import { Change, ChangeSet, getLeafChange, Lix } from "@lix-js/sdk";
 import { SlInput } from "@shoelace-style/shoelace/dist/react";
 
 export default function Layout(props: { children: React.ReactNode }) {
@@ -236,14 +236,17 @@ const confirmChanges = async (lix: Lix, unconfirmedChanges: Change[]) => {
 			})
 			.execute();
 
-		// insert the changes into the set
+		// insert the leaf changes into the set
 		for (const change of unconfirmedChanges) {
+			const leafChange = await getLeafChange({ lix: { db: trx }, change });
 			await trx
 				.insertInto("change_set_item")
 				.values({
 					change_set_id: newChangeSet.id,
-					change_id: change.id,
+					change_id: leafChange.id,
 				})
+				// the leaf change is contained in the set already
+				.onConflict((oc) => oc.doNothing())
 				.execute();
 		}
 		return newChangeSet;
