@@ -2,10 +2,12 @@ import OpenFileLayout from "../../layouts/OpenFileLayout.tsx";
 import ChangeSet from "../../components/ChangeSet.tsx";
 import { atom, useAtom } from "jotai";
 import { lixAtom, withPollingAtom } from "../../state.ts";
+import { activeFileAtom } from "../editor/state.ts";
 
 const changeSetsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
+	const activeFile = await get(activeFileAtom);
 	return await lix.db
 		.selectFrom("change_set")
 		.innerJoin(
@@ -26,6 +28,7 @@ const changeSetsAtom = atom(async (get) => {
 			"change_set_discussion.discussion_id"
 		)
 		.where("comment.parent_id", "is", null) // Filter to get only the first comment
+		.where("change.file_id", "=", activeFile.id)
 		.groupBy("change_set.id")
 		.orderBy("change.created_at", "desc")
 		.select("change_set.id")
