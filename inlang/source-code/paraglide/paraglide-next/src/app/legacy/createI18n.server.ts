@@ -25,8 +25,8 @@ import { PrefixStrategy } from "../routing-strategy/strats/prefixStrategy"
  * @deprecated
  * Use `createMiddleware` and `createNavigation` instead
  */
-export function createI18n<T extends string = string>(userConfig: I18nUserConfig<T> = {}) {
-	setLanguageTag(getLanguage)
+export async function createI18n<T extends string = string>(userConfig: I18nUserConfig<T> = {}) {
+	setLanguageTag(await getLanguage())
 
 	const config: ResolvedI18nConfig<T> = {
 		exclude: createExclude(userConfig.exclude ?? []),
@@ -45,8 +45,8 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 
 	return {
 		/** @deprecated - Use getLocalisedHref instead */
-		localizePath: (canonicalPath: `/${string}`, lang: T) => {
-			return strategy.getLocalisedUrl(canonicalPath, lang, getLanguage() !== lang).pathname
+		localizePath: async (canonicalPath: `/${string}`, lang: T) => {
+			return strategy.getLocalisedUrl(canonicalPath, lang, (await getLanguage()) !== lang).pathname
 		},
 		getLocalisedUrl: strategy.getLocalisedUrl,
 		middleware,

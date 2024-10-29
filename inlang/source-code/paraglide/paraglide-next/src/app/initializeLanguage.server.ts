@@ -12,14 +12,14 @@ import { getLanguage } from "./getLanguage.server"
  * import { initializeLanguage } from "@inlang/paraglide-next"
  * import { languageTag } from "@/paraglide/runtime"
  *
- * initializeLanguage() //call it at the top of the file
+ * await initializeLanguage() //call it at the top of the file
  *
  * export function someAction() {
  *   languageTag() // "de"
  * }
  * ```
  */
-export function initializeLanguage() {
+export async function initializeLanguage() {
 	//for some reason we can't pass the function as a reference directly
-	setLanguageTag(() => getLanguage())
+	setLanguageTag(await getLanguage())
 }
