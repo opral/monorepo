@@ -84,7 +84,7 @@ export const activeRowChangesAtom = atom(async (get) => {
 	const activeRowEntityId = await get(activeRowEntityIdAtom);
 	const lix = await get(lixAtom);
 	if (!activeRowEntityId) return [];
-	return await lix.db
+	const changes = await lix.db
 		.selectFrom("change")
 		.where("change.type", "=", "row")
 		.where("change.entity_id", "=", activeRowEntityId)
@@ -97,8 +97,33 @@ export const activeRowChangesAtom = atom(async (get) => {
 		// .selectAll("change")
 		// .select((eb) => eb.fn.count("comment.id").as("comment_count"))
 		.select("snapshot.content")
+		.selectAll("change")
 		.orderBy("change.created_at", "desc")
 		.execute();
+
+	for (const change of changes) {
+		const labels = await lix.db
+			.selectFrom("label")
+			.innerJoin("change_set_label", "change_set_label.label_id", "label.id")
+			.innerJoin(
+				"change_set",
+				"change_set.id",
+				"change_set_label.change_set_id"
+			)
+			.innerJoin(
+				"change_set_item",
+				"change_set_item.change_set_id",
+				"change_set.id"
+			)
+			.where("change_set_item.change_id", "=", change.id)
+			.select("label.name")
+			.execute();
+
+		// @ts-expect-error - labels is not in the type
+		change.labels = labels.map((label) => label.name);
+	}
+	return changes;
+
 });
 
 // The CSV app treats changes that are not in a change set as unconfirmed changes.

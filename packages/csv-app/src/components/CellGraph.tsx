@@ -1,3 +1,4 @@
+import { SlIcon } from "@shoelace-style/shoelace/dist/react";
 import timeAgo from "../helper/timeAgo.ts";
 import { Change, Snapshot } from "@lix-js/sdk";
 
@@ -23,6 +24,7 @@ export default function CellGraph(props: {
 
 			<div className="mb-12 relative flex flex-col gap-3">
 				{props.activeRowChanges.map((change) => {
+					console.log(change);
 					return (
 						<div
 							key={change.id}
@@ -59,6 +61,20 @@ export default function CellGraph(props: {
 										</p>
 									</div>
 								)}
+								{
+									// @ts-expect-error - labels is not in the Change type
+									change.labels?.length > 0 && (
+										<div className="flex gap-1 items-center">
+											<SlIcon name="tag"></SlIcon>
+											<p>
+												{
+													// @ts-expect-error - labels is not in the Change type
+													change.labels
+												}
+											</p>
+										</div>
+									)
+								}
 								<div className="mt-2 px-3 py-1.5 bg-zinc-100 border border-zinc-200 rounded">
 									{change.content?.text?.split(",")![props.activeCell.col]}
 								</div>
