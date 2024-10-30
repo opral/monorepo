@@ -1,4 +1,4 @@
-import type { ChangeWithSnapshot } from "../database/schema.js";
+import type { Change } from "../database/schema.js";
 import type { LixReadonly } from "../types.js";
 
 /**
@@ -13,14 +13,12 @@ import type { LixReadonly } from "../types.js";
 export async function getLeafChangesOnlyInSource(args: {
 	sourceLix: LixReadonly;
 	targetLix: LixReadonly;
-}): Promise<ChangeWithSnapshot[]> {
-	const result: ChangeWithSnapshot[] = [];
+}): Promise<Change[]> {
+	const result: Change[] = [];
 
 	const leafChangesInSource = await args.sourceLix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
-		.select("snapshot.content")
 		.where(
 			"change.id",
 			"not in",

@@ -9,12 +9,17 @@ type Cell = { rowIndex: number; columnIndex: number; text: string };
  */
 export const mockCsvPlugin: LixPlugin = {
 	key: "csv",
-	applyChanges: async ({ file, changes }) => {
+	applyChanges: async ({ lix, file, changes }) => {
 		const parsed = papaparse.parse(new TextDecoder().decode(file.data));
 		for (const change of changes) {
-			if (change.content) {
+			const snapshot = await lix.db
+				.selectFrom("snapshot")
+				.where("id", "=", change.snapshot_id)
+				.selectAll()
+				.executeTakeFirstOrThrow();
+			if (snapshot.content) {
 				const { rowIndex, columnIndex, text } =
-					change.content as unknown as Cell;
+					snapshot.content as unknown as Cell;
 				// create the row if it doesn't exist
 				if (!parsed.data[rowIndex]) {
 					parsed.data[rowIndex] = [];

@@ -89,7 +89,7 @@ test("it should throw if the to be resolved with change already exists", async (
 			parentIds: [changes[0]!.id],
 			newChange: {
 				...changes[0]!,
-				content: mockSnapshots[0]?.content ?? null,
+				snapshot_content: mockSnapshots[0]?.content ?? null,
 			},
 		}),
 	).rejects.toThrowError(ChangeAlreadyExistsError);
@@ -177,7 +177,7 @@ test("resolving a conflict should throw if the to be resolved with change is not
 				plugin_key: "plugin1",
 				type: "mock",
 				entity_id: "value3",
-				content: {
+				snapshot_content: {
 					id: "value3",
 				},
 			},
@@ -256,7 +256,7 @@ test("resolving a conflict should throw if the change to resolve with does not b
 				plugin_key: "plugin1",
 				type: "mock",
 				entity_id: "value3",
-				content: {
+				snapshot_content: {
 					id: "value3",
 				},
 			},
@@ -338,7 +338,7 @@ test("resolving a conflict with a new change should insert the change and mark t
 			plugin_key: "plugin1",
 			entity_id: "value3",
 			type: "mock",
-			content: {
+			snapshot_content: {
 				id: "value3",
 			},
 		},
