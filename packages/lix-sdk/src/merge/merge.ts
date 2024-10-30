@@ -27,7 +27,7 @@ export async function merge(args: {
 
 	// 2. Let the plugin detect conflicts
 
-	const plugins = args.sourceLix.plugin.getAll();
+	const plugins = await args.sourceLix.plugin.getAll();
 	const plugin = plugins[0];
 
 	// TODO function assumes that all changes belong to the same file

@@ -156,7 +156,7 @@ export async function openLix(args: {
 			return new Blob([contentFromDatabase(args.database)]);
 		},
 		plugin: {
-			getAll: () => plugins,
+			getAll: async () => plugins,
 		},
 		close: async () => {
 			closed = true;

@@ -17,7 +17,7 @@ export async function resolveConflictWithNewChange(args: {
 	};
 	parentIds: string[];
 }): Promise<void> {
-	const plugins = args.lix.plugin.getAll();
+	const plugins = await args.lix.plugin.getAll();
 	if (plugins.length !== 1) {
 		throw new Error("Unimplemented. Only one plugin is supported for now");
 	}
