@@ -1,5 +1,11 @@
 # @inlang/paraglide-next
 
+## 0.7.1
+
+### Patch Changes
+
+- fix: The headers in `getLanguage()` where not awaited.
+
 ## 0.7.0
 
 ### Minor Changes
