@@ -3,7 +3,7 @@ import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import type { LixPlugin } from "../plugin.js";
 import { createDiscussion } from "./create-discussion.js";
-import { createChangeSet } from "../change-set/create-change-set.js";
+import { createChangeSet } from "./create-change-set.js";
 
 const mockPlugin: LixPlugin = {
 	key: "mock-plugin",
@@ -41,10 +41,12 @@ test("should be able to start a discussion on changes", async () => {
 		.selectAll("change")
 		.execute();
 
-	await createDiscussion({
-		lix,
-		changeSet: await createChangeSet({ lix, changes }),
-		content: "comment on a change",
+	await lix.db.transaction().execute(async (trx) => {
+		await createDiscussion({
+			lix: { db: trx },
+			changeSet: await createChangeSet({ lix: { db: trx }, changes }),
+			content: "comment on a change",
+		});
 	});
 
 	const discussions = await lix.db

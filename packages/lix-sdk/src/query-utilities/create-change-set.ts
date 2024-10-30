@@ -2,19 +2,19 @@ import type { Change, ChangeSet } from "../database/schema.js";
 import type { Lix } from "../types.js";
 
 /**
- * Creates a change set with the given changes.
+ * Creates a change set with the given changes, optionally within an open transaction.
  *
  * @example
  *   ```ts
  *   const changes = await lix.db.selectFrom("change").selectAll().execute();
- *   const changeSet = await createChangeSet({ lix, changes });
+ *   const changeSet = await createChangeSet({ db: lix.db, changes });
  *   ```
  */
 export async function createChangeSet(args: {
-	lix: Partial<Lix> & { db: { transaction: Lix["db"]["transaction"] } };
-	changes: Partial<Change> & { id: Change["id"] }[];
+	lix: Pick<Lix, "db">;
+	changes: Pick<Change, "id">[];
 }): Promise<ChangeSet> {
-	return await args.lix.db.transaction().execute(async (trx) => {
+	const executeInTransaction = async (trx: Lix["db"]) => {
 		const changeSet = await trx
 			.insertInto("change_set")
 			.defaultValues()
@@ -31,5 +31,11 @@ export async function createChangeSet(args: {
 			)
 			.execute();
 		return changeSet;
-	});
+	};
+
+	if (args.lix.db.isTransaction) {
+		return executeInTransaction(args.lix.db);
+	} else {
+		return args.lix.db.transaction().execute(executeInTransaction);
+	}
 }

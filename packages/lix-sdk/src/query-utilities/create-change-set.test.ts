@@ -27,7 +27,7 @@ test("creating a change set should succeed", async () => {
 		.execute();
 
 	const changeSet = await createChangeSet({
-		lix,
+		lix: lix,
 		changes: mockChanges,
 	});
 

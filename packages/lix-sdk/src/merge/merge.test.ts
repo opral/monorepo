@@ -11,9 +11,9 @@ import type {
 } from "../database/schema.js";
 import type { LixPlugin } from "../plugin.js";
 import { mockJsonSnapshot } from "../query-utilities/mock-json-snapshot.js";
-import { createChangeSet } from "../change-set/create-change-set.js";
-import { addComment } from "../discussion/add-comment.js";
-import { createDiscussion } from "../discussion/create-discussion.js";
+import { createChangeSet } from "../query-utilities/create-change-set.js";
+import { createDiscussion } from "../query-utilities/create-discussion.js";
+import { addComment } from "../query-utilities/create-comment.js";
 
 test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const mockSnapshots = [

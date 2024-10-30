@@ -13,12 +13,11 @@ import type { Lix } from "../types.js";
  * @returns the created discussion
  */
 export async function createDiscussion(args: {
-	lix: Partial<Lix> & { db: { transaction: Lix["db"]["transaction"] } };
-	changeSet: Partial<ChangeSet> & { id: ChangeSet["id"] };
+	lix: Pick<Lix, "db">;
+	changeSet: Pick<ChangeSet, "id">;
 	content: Comment["content"];
-}): Promise<Discussion> {
-	// TODO how to use an open transaction?
-	return args.lix.db.transaction().execute(async (trx) => {
+}): Promise<Discussion & { comment: Comment }> {
+	const executeInTransaction = async (trx: Lix["db"]) => {
 		const discussion = await trx
 			.insertInto("discussion")
 			.values({
@@ -27,15 +26,23 @@ export async function createDiscussion(args: {
 			.returningAll()
 			.executeTakeFirstOrThrow();
 
-		await trx
+		const comment = await trx
 			.insertInto("comment")
 			.values({
-				parent_id: undefined,
+				parent_id: null,
 				discussion_id: discussion.id,
 				content: args.content,
 			})
-			.execute();
+			.returningAll()
+			.executeTakeFirstOrThrow();
 
-		return discussion;
-	});
+		return { ...discussion, comment };
+	};
+
+	// user provided an open transaction
+	if (args.lix.db.isTransaction) {
+		return executeInTransaction(args.lix.db);
+	} else {
+		return args.lix.db.transaction().execute(executeInTransaction);
+	}
 }
