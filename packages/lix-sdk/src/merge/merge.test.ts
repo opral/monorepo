@@ -286,7 +286,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 
 	const mockPluginInTargetLix: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
+		detectChangesGlob: "*",
 		detectChanges: vi.fn().mockResolvedValue([]),
 		detectConflicts: vi.fn().mockResolvedValue([]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
@@ -635,7 +635,7 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 test("it should copy discussion and related comments and mappings", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
+		detectChangesGlob: "*",
 		detectChanges: async ({ after }) => {
 			return [
 				{

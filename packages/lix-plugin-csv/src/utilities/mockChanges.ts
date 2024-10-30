@@ -18,7 +18,7 @@ export async function mockChanges(args: {
 	const lix =
 		args.lix ??
 		(await openLixInMemory({
-			providePlugins: [{ key: "mock", detectChanges, glob: "*" }],
+			providePlugins: [{ key: "mock", detectChanges, detectChangesGlob: "*" }],
 		}));
 	for (const update of args.fileUpdates) {
 		try {

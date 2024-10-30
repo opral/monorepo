@@ -6,7 +6,6 @@ import type { LixPlugin } from "../plugin.js";
 test("providing plugins should be possible", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
 	};
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),

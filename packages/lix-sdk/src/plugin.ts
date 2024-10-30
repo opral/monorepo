@@ -10,7 +10,6 @@ import type { LixReadonly } from "./types.js";
 // named lixplugin to avoid conflict with built-in plugin type
 export type LixPlugin = {
 	key: string;
-	glob?: string;
 	// TODO https://github.com/opral/lix-sdk/issues/37
 	// idea:
 	//   1. runtime reflection for lix on the change schema
@@ -20,6 +19,14 @@ export type LixPlugin = {
 	// 	message: Message,
 	// 	variant: Variant,
 	// },
+	/**
+	 * The glob pattern that should invoke `detectChanges()`.
+	 *
+	 * @example
+	 *   `**\/*.json` for all JSON files
+	 *   `**\/*.inlang` for all inlang files
+	 */
+	detectChangesGlob?: string;
 	/**
 	 * Detects changes between the `before` and `after` file update(s).
 	 *

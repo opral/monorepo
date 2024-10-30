@@ -25,7 +25,9 @@ export async function handleFileInsert(args: {
 
 	for (const plugin of args.plugins) {
 		// glob expressions are expressed relative without leading / but path has leading /
-		if (!minimatch(normalizePath(args.after.path), "/" + plugin.glob)) {
+		if (
+			!minimatch(normalizePath(args.after.path), "/" + plugin.detectChangesGlob)
+		) {
 			break;
 		}
 
@@ -93,7 +95,9 @@ export async function handleFileChange(args: {
 
 	for (const plugin of args.plugins) {
 		// glob expressions are expressed relative without leading / but path has leading /
-		if (!minimatch(normalizePath(args.after.path), "/" + plugin.glob)) {
+		if (
+			!minimatch(normalizePath(args.after.path), "/" + plugin.detectChangesGlob)
+		) {
 			break;
 		}
 		if (plugin.detectChanges === undefined) {

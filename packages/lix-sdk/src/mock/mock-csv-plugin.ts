@@ -9,7 +9,6 @@ type Cell = { rowIndex: number; columnIndex: number; text: string };
  */
 export const mockCsvPlugin: LixPlugin = {
 	key: "csv",
-	glob: "*.csv",
 	applyChanges: async ({ file, changes }) => {
 		const parsed = papaparse.parse(new TextDecoder().decode(file.data));
 		for (const change of changes) {
@@ -51,6 +50,7 @@ export const mockCsvPlugin: LixPlugin = {
 			fileData: new TextEncoder().encode(csv),
 		};
 	},
+	detectChangesGlob: "*.csv",
 	detectChanges: async ({ before, after }) => {
 		const result: DetectedChange[] = [];
 		const beforeParsed = before
