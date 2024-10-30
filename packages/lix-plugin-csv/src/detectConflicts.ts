@@ -2,14 +2,14 @@ import {
 	getLowestCommonAncestor,
 	getLeafChange,
 	type LixPlugin,
-	type Conflict,
 	getLeafChangesOnlyInSource,
+	type DetectedConflict,
 } from "@lix-js/sdk";
 
 export const detectConflicts: NonNullable<
 	LixPlugin["detectConflicts"]
 > = async ({ sourceLix, targetLix }) => {
-	const result: Conflict[] = [];
+	const result: DetectedConflict[] = [];
 
 	const leafChangesOnlyInSource = await getLeafChangesOnlyInSource({
 		sourceLix,
@@ -67,8 +67,6 @@ export const detectConflicts: NonNullable<
 			conflicting_change_id: change.id,
 			reason:
 				"The snapshots of the change do not match. More sophisticated reasoning will be added later.",
-			metadata: null,
-			resolved_change_id: null,
 		});
 	}
 

@@ -1,9 +1,4 @@
-import type {
-	Change,
-	LixFile,
-	NewConflict,
-	Snapshot,
-} from "./database/schema.js";
+import type { Change, LixFile, Snapshot } from "./database/schema.js";
 import type { LixReadonly } from "./types.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
@@ -41,7 +36,7 @@ export type LixPlugin = {
 	detectConflicts?: (args: {
 		sourceLix: LixReadonly;
 		targetLix: LixReadonly;
-	}) => Promise<NewConflict[]>;
+	}) => Promise<DetectedConflict[]>;
 	applyChanges?: (args: {
 		lix: LixReadonly;
 		file: LixFile;
@@ -70,4 +65,10 @@ export type DetectedChange = {
 	 * The change is considered a deletion if `snapshot` is `undefined`.
 	 */
 	snapshot?: Snapshot["content"];
+};
+
+export type DetectedConflict = {
+	change_id: string;
+	conflicting_change_id: string;
+	reason?: string;
 };
