@@ -5,7 +5,7 @@ import { detectChanges } from "./detectChanges.js";
 
 export const plugin: LixPlugin = {
 	key: "lix-plugin-csv",
-	glob: "*.csv",
+	detectChangesGlob: "*.csv",
 	detectChanges,
 	detectConflicts,
 	applyChanges,

@@ -29,7 +29,7 @@ export async function mockConflicts(args: {
 }) {
 	const { lix: commonLix } = await mockChanges({
 		lix: await openLixInMemory({
-			providePlugins: [{ key: "mock", detectChanges, glob: "*" }],
+			providePlugins: [{ key: "mock", detectChanges, detectChangesGlob: "*" }],
 		}),
 		file: { path: "mock", metadata: args.metadata },
 		fileUpdates: [args.common],
@@ -40,7 +40,7 @@ export async function mockConflicts(args: {
 	const { lix: sourceLix } = await mockChanges({
 		lix: await openLixInMemory({
 			blob: commonLixBlob,
-			providePlugins: [{ key: "mock", detectChanges, glob: "*" }],
+			providePlugins: [{ key: "mock", detectChanges, detectChangesGlob: "*" }],
 		}),
 		file: { path: "mock", metadata: args.metadata },
 		fileUpdates: [args.source],
@@ -49,7 +49,7 @@ export async function mockConflicts(args: {
 	const { lix: targetLix } = await mockChanges({
 		lix: await openLixInMemory({
 			blob: commonLixBlob,
-			providePlugins: [{ key: "mock", detectChanges, glob: "*" }],
+			providePlugins: [{ key: "mock", detectChanges, detectChangesGlob: "*" }],
 		}),
 		fileUpdates: [args.target],
 		file: { path: "mock", metadata: args.metadata },

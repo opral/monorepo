@@ -7,7 +7,7 @@ import { createChangeSet } from "../change-set/create-change-set.js";
 
 const mockPlugin: LixPlugin = {
 	key: "mock-plugin",
-	glob: "*",
+	detectChangesGlob: "*",
 	detectChanges: async ({ after }) => {
 		return [
 			{

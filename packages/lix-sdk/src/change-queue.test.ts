@@ -6,7 +6,7 @@ import type { DetectedChange, LixPlugin } from "./plugin.js";
 test("should use queue and settled correctly", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
+		detectChangesGlob: "*",
 		detectChanges: async ({ before, after }) => {
 			const textBefore = before
 				? new TextDecoder().decode(before?.data)
@@ -192,7 +192,7 @@ test("should use queue and settled correctly", async () => {
 test.todo("changes should contain the author", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		glob: "*",
+		detectChangesGlob: "*",
 		detectChanges: vi.fn().mockResolvedValue([
 			{
 				type: "mock",
