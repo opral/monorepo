@@ -1,6 +1,5 @@
 import type {
 	Change,
-	ChangeWithSnapshot,
 	LixFile,
 	NewConflict,
 	Snapshot,
@@ -46,7 +45,7 @@ export type LixPlugin = {
 	applyChanges?: (args: {
 		lix: LixReadonly;
 		file: LixFile;
-		changes: Array<ChangeWithSnapshot>;
+		changes: Array<Change>;
 	}) => Promise<{
 		fileData: LixFile["data"];
 	}>;

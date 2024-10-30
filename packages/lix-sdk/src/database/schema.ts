@@ -98,12 +98,6 @@ type SnapshotTable = {
 	content: Record<string, any> | null;
 };
 
-// TODO #185 rename content to snapshot_content
-export type ChangeWithSnapshot = Change & { content: SnapshotTable["content"] };
-export type NewChangeWithSnapshot = Omit<NewChange, "snapshot_id"> & {
-	content: SnapshotTable["content"];
-};
-
 export type Conflict = Selectable<ConflictTable>;
 export type NewConflict = Insertable<ConflictTable>;
 export type ConflictUpdate = Updateable<ConflictTable>;

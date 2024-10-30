@@ -1,4 +1,4 @@
-import type { Conflict, NewChangeWithSnapshot } from "../database/schema.js";
+import type { Conflict, NewChange, Snapshot } from "../database/schema.js";
 
 import type { Lix } from "../types.js";
 import {
@@ -13,7 +13,9 @@ import {
 export async function resolveConflictWithNewChange(args: {
 	lix: Lix;
 	conflict: Conflict;
-	newChange: NewChangeWithSnapshot;
+	newChange: Omit<NewChange, "snapshot_id"> & {
+		snapshot_content: Snapshot["content"];
+	};
 	parentIds: string[];
 }): Promise<void> {
 	if (args.lix.plugins.length !== 1) {
@@ -61,12 +63,12 @@ export async function resolveConflictWithNewChange(args: {
 		lix: args.lix,
 		file: file,
 		changes: [
-			// @ts-expect-error - this will need fixing (setting up eslint atm)
-			args.resolveWithChange,
+			// @ts-expect-error - newChange is a change with a snapshot
+			args.newChange,
 		],
 	});
 
-	const snapshotContent = args.newChange.content!;
+	const snapshotContent = args.newChange.snapshot_content!;
 
 	await args.lix.db.transaction().execute(async (trx) => {
 		await trx
@@ -78,11 +80,7 @@ export async function resolveConflictWithNewChange(args: {
 		const snapshot = await trx
 			.insertInto("snapshot")
 			.values({ content: snapshotContent })
-			.onConflict((oc) =>
-				oc.doUpdateSet((eb) => ({
-					content: eb.ref("excluded.content"),
-				})),
-			)
+			.onConflict((oc) => oc.doNothing())
 			.returningAll()
 			.executeTakeFirstOrThrow();
 
@@ -91,7 +89,7 @@ export async function resolveConflictWithNewChange(args: {
 			.values({
 				...args.newChange,
 				// @ts-expect-error - newChange is a change with a snapshot
-				content: undefined,
+				snapshot_content: undefined,
 				snapshot_id: snapshot.id,
 			})
 			.returning("id")

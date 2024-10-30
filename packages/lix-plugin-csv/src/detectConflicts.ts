@@ -46,8 +46,15 @@ export const detectConflicts: NonNullable<
 			.where("id", "=", leafChangeInTarget.snapshot_id)
 			.executeTakeFirstOrThrow();
 
+		const snapshot = await sourceLix.db
+			.selectFrom("snapshot")
+			.selectAll()
+			.where("id", "=", change.snapshot_id)
+			.executeTakeFirstOrThrow();
+
 		const hasDiff =
-			JSON.stringify(change.content) !== JSON.stringify(targetSnapshot.content);
+			JSON.stringify(snapshot.content) !==
+			JSON.stringify(targetSnapshot.content);
 
 		if (hasDiff === false) {
 			continue;

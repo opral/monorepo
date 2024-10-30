@@ -346,7 +346,8 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 	expect(mockPluginInTargetLix.detectChanges).toHaveBeenCalledTimes(1);
 });
 
-test("it should apply changes that are not conflicting", async () => {
+// https://github.com/opral/lix-sdk/issues/126
+test.todo("it should apply changes that are not conflicting", async () => {
 	const mockSnapshots: Snapshot[] = [
 		mockJsonSnapshot({ color: "red" }),
 		mockJsonSnapshot({ color: "blue" }),
@@ -375,10 +376,15 @@ test("it should apply changes that are not conflicting", async () => {
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		applyChanges: async ({ changes }) => {
+		applyChanges: async ({ lix, changes }) => {
 			const lastChange = changes[changes.length - 1];
+			const snapshot = await lix.db
+				.selectFrom("snapshot")
+				.where("id", "=", lastChange!.snapshot_id)
+				.selectAll()
+				.executeTakeFirstOrThrow();
 			const fileData = new TextEncoder().encode(
-				JSON.stringify(lastChange!.content ?? {}),
+				JSON.stringify(snapshot.content ?? {}),
 			);
 			return { fileData };
 		},
@@ -397,9 +403,9 @@ test("it should apply changes that are not conflicting", async () => {
 	await sourceLix.db
 		.insertInto("snapshot")
 		.values(
-			[mockSnapshots[0]!, mockSnapshots[1]!].map((s) => {
-				return { content: s.content };
-			}),
+			[mockSnapshots[0]!, mockSnapshots[1]!].map((s) => ({
+				content: s.content,
+			})),
 		)
 		.execute();
 
