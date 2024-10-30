@@ -73,7 +73,7 @@ export type DetectedConflict = {
 	reason?: string;
 };
 
-export type LixReadonly = Pick<Lix, "plugins"> & {
+export type LixReadonly = Pick<Lix, "plugin"> & {
 	db: {
 		selectFrom: Lix["db"]["selectFrom"];
 	};

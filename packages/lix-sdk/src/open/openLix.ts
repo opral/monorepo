@@ -155,7 +155,9 @@ export async function openLix(args: {
 			await settled();
 			return new Blob([contentFromDatabase(args.database)]);
 		},
-		plugins,
+		plugin: {
+			getAll: () => plugins,
+		},
 		close: async () => {
 			closed = true;
 			await settled();

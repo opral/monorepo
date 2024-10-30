@@ -16,6 +16,6 @@ export function withTransaction(
 		db: {
 			selectFrom: trx.selectFrom,
 		},
-		plugins: lix.plugins,
+		plugin: lix.plugin,
 	};
 }

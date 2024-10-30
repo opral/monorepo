@@ -27,10 +27,11 @@ export async function merge(args: {
 
 	// 2. Let the plugin detect conflicts
 
-	const plugin = args.sourceLix.plugins[0];
+	const plugins = args.sourceLix.plugin.getAll();
+	const plugin = plugins[0];
 
 	// TODO function assumes that all changes belong to the same file
-	if (args.sourceLix.plugins.length > 1) {
+	if (plugins.length > 1) {
 		throw new Error("Unimplemented. Only one plugin is supported for now");
 	}
 

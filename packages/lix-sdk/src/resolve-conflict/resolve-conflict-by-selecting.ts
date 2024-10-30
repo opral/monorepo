@@ -21,11 +21,13 @@ export async function resolveConflictBySelecting(args: {
 		});
 	}
 
-	if (args.lix.plugins.length !== 1) {
+	const plugins = args.lix.plugin.getAll();
+
+	if (plugins.length !== 1) {
 		throw new Error("Unimplemented. Only one plugin is supported for now");
 	}
 
-	const plugin = args.lix.plugins[0];
+	const plugin = plugins[0];
 	if (plugin?.applyChanges === undefined) {
 		throw new Error(
 			"Plugin does not support applying changes and therefore cannot resolve conflicts",

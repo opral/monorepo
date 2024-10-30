@@ -11,5 +11,5 @@ test("providing plugins should be possible", async () => {
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
-	expect(lix.plugins).toContain(mockPlugin);
+	expect(lix.plugin.getAll()).toContain(mockPlugin);
 });
