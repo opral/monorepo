@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "./openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
-import type { LixPlugin } from "../plugin.js";
+import type { LixPlugin } from "../plugin/lix-plugin.js";
 
 test("providing plugins should be possible", async () => {
 	const mockPlugin: LixPlugin = {

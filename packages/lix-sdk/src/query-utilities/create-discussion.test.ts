@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
-import type { LixPlugin } from "../plugin.js";
+import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { createDiscussion } from "./create-discussion.js";
 import { createChangeSet } from "./create-change-set.js";
 

@@ -6,3 +6,6 @@ export { getParentChange } from "./get-parent-change.js";
 export { mockJsonSnapshot } from "./mock-json-snapshot.js";
 export { changeHasLabel } from "./change-has-label.js";
 export { changeIsLeafChange } from "./change-is-leaf-change.js";
+export { createDiscussion } from "./create-discussion.js";
+export { createChangeSet } from "./create-change-set.js";
+export { createComment } from "./create-comment.js";

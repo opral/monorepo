@@ -3,7 +3,7 @@ import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import { resolveConflictWithNewChange } from "./resolve-conflict-with-new-change.js";
 import type { NewChange, Snapshot } from "../database/schema.js";
-import type { LixPlugin } from "../plugin.js";
+import type { LixPlugin } from "../plugin/lix-plugin.js";
 import {
 	ChangeAlreadyExistsError,
 	ChangeDoesNotBelongToFileError,

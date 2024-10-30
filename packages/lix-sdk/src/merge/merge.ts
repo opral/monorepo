@@ -1,6 +1,5 @@
-import type { Lix } from "../types.js";
+import type { Lix } from "../open/openLix.js";
 import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-only-in-source.js";
-import { newLixFile } from "../newLix.js";
 
 /**
  * Combined the changes of the source lix into the target lix.

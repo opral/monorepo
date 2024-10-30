@@ -1,5 +1,5 @@
 import { openLixInMemory } from "../open/openLixInMemory.js";
-import type { DetectedChange } from "../plugin.js";
+import type { DetectedChange } from "../plugin/lix-plugin.js";
 import { mockCsvPlugin } from "./mock-csv-plugin.js";
 import { describe, expect, test } from "vitest";
 

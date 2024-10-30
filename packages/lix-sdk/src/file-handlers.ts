@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { LixDatabaseSchema, LixFile } from "./database/schema.js";
-import type { DetectedChange, LixPlugin } from "./plugin.js";
+import type { DetectedChange, LixPlugin } from "./plugin/lix-plugin.js";
 import { minimatch } from "minimatch";
 import { Kysely } from "kysely";
 import { isInSimulatedCurrentBranch } from "./query-utilities/is-in-simulated-branch.js";

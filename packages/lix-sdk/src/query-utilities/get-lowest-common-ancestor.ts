@@ -1,5 +1,5 @@
 import type { Change } from "../database/schema.js";
-import type { LixReadonly } from "../types.js";
+import type { LixReadonly } from "../plugin/lix-plugin.js";
 
 /**
  * Finds the lowest common change of the source

@@ -1,5 +1,5 @@
 import type { LixDatabaseSchema, LixFile } from "./database/schema.js";
-import type { LixPlugin } from "./plugin.js";
+import type { LixPlugin } from "./plugin/lix-plugin.js";
 import { Kysely, sql } from "kysely";
 
 export async function loadPlugins(db: Kysely<LixDatabaseSchema>) {

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { DetectedChange, LixPlugin } from "../plugin.js";
+import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
 import papaparse from "papaparse";
 
 type Cell = { rowIndex: number; columnIndex: number; text: string };

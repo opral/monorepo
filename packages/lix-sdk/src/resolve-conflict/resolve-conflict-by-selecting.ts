@@ -1,5 +1,5 @@
 import type { Change, Conflict } from "../database/schema.js";
-import type { Lix } from "../types.js";
+import type { Lix } from "../open/openLix.js";
 import { SelectedChangeNotInConflictError } from "./errors.js";
 
 /**

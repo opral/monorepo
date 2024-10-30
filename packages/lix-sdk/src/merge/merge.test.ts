@@ -9,11 +9,11 @@ import type {
 	NewSnapshot,
 	Snapshot,
 } from "../database/schema.js";
-import type { LixPlugin } from "../plugin.js";
+import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { mockJsonSnapshot } from "../query-utilities/mock-json-snapshot.js";
 import { createChangeSet } from "../query-utilities/create-change-set.js";
 import { createDiscussion } from "../query-utilities/create-discussion.js";
-import { addComment } from "../query-utilities/create-comment.js";
+import { createComment } from "../query-utilities/create-comment.js";
 
 test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const mockSnapshots = [
@@ -718,12 +718,12 @@ test("it should copy discussion and related comments and mappings", async () => 
 	// lix 2 has no comments yet so after lix 1 into 2 we should be in sync
 	expect(commentsLix1).toEqual(commentsLix2AfterMerge);
 
-	await addComment({
+	await createComment({
 		lix: lix2,
 		parentComment: commentsLix2AfterMerge[0]!,
 		content: "wrote in lix 2",
 	});
-	await addComment({
+	await createComment({
 		lix: lix1,
 		parentComment: commentsLix2AfterMerge[0]!,
 		content: "wrote in lix 1",

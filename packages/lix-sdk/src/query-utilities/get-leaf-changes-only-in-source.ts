@@ -1,5 +1,5 @@
 import type { Change } from "../database/schema.js";
-import type { LixReadonly } from "../types.js";
+import type { LixReadonly } from "../plugin/lix-plugin.js";
 
 /**
  * Gets the leaf changes that only exist in the source lix.
