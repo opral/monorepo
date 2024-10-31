@@ -1,5 +1,13 @@
 # @inlang/paraglide-next
 
+## 0.7.2
+
+### Patch Changes
+
+- fix "Error: `headers` was called outside a request scope."
+
+  - https://github.com/opral/inlang-paraglide-js/issues/245#issuecomment-2450130294
+
 ## 0.7.1
 
 ### Patch Changes
