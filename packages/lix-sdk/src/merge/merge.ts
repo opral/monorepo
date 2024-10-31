@@ -126,7 +126,7 @@ export async function merge(args: {
 		.execute();
 
 	const sourceChangeSetItems = await args.sourceLix.db
-		.selectFrom("change_set_item")
+		.selectFrom("change_set_element")
 		.selectAll()
 		.execute();
 
@@ -198,7 +198,7 @@ export async function merge(args: {
 		}
 		if (sourceChangeSetItems.length > 0) {
 			await trx
-				.insertInto("change_set_item")
+				.insertInto("change_set_element")
 				.values(sourceChangeSetItems)
 				// ignore if already exists
 				.onConflict((oc) => oc.doNothing())

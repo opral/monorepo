@@ -13,7 +13,7 @@ export type LixDatabaseSchema = {
 
 	// change set
 	change_set: ChangeSetTable;
-	change_set_item: ChangeSetItemTable;
+	change_set_element: ChangeSetElementTable;
 	change_set_label: ChangeSetLabelTable;
 
 	// discussion
@@ -124,10 +124,10 @@ type ChangeSetTable = {
 	id: Generated<string>;
 };
 
-export type ChangeSetItem = Selectable<ChangeSetItemTable>;
-export type NewChangeSetItem = Insertable<ChangeSetItemTable>;
-export type ChangeSetItemUpdate = Updateable<ChangeSetItemTable>;
-type ChangeSetItemTable = {
+export type ChangeSetElement = Selectable<ChangeSetElementTable>;
+export type NewChangeSetElement = Insertable<ChangeSetElementTable>;
+export type ChangeSetElementUpdate = Updateable<ChangeSetElementTable>;
+type ChangeSetElementTable = {
 	change_set_id: string;
 	change_id: string;
 };

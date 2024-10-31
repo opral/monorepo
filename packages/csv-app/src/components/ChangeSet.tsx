@@ -26,8 +26,12 @@ const getChanges = async (lix: Lix, changeSetId: string, fileId: string) => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.innerJoin("change_set_item", "change_set_item.change_id", "change.id")
-		.where("change_set_item.change_set_id", "=", changeSetId)
+		.innerJoin(
+			"change_set_element",
+			"change_set_element.change_id",
+			"change.id"
+		)
+		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where("change.file_id", "=", fileId)
 		.selectAll("change")
 		.select("snapshot.content")

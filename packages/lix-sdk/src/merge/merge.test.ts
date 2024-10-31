@@ -787,7 +787,7 @@ test("it should copy change sets and merge memberships", async () => {
 	// expand the change set to contain another change
 	// to test if the sets are merged
 	await targetLix.db
-		.insertInto("change_set_item")
+		.insertInto("change_set_element")
 		.values({
 			change_set_id: changeSet1.id,
 			change_id: mockChanges[1]!.id,
@@ -808,12 +808,12 @@ test("it should copy change sets and merge memberships", async () => {
 		.execute();
 
 	const changeSet1Items = await targetLix.db
-		.selectFrom("change_set_item")
+		.selectFrom("change_set_element")
 		.selectAll()
 		.where("change_set_id", "=", changeSet1.id)
 		.execute();
 	const changeSet2Items = await targetLix.db
-		.selectFrom("change_set_item")
+		.selectFrom("change_set_element")
 		.selectAll()
 		.where("change_set_id", "=", changeSet2.id)
 		.execute();

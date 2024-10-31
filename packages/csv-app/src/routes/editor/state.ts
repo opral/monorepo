@@ -111,11 +111,11 @@ export const activeRowChangesAtom = atom(async (get) => {
 				"change_set_label.change_set_id"
 			)
 			.innerJoin(
-				"change_set_item",
-				"change_set_item.change_set_id",
+				"change_set_element",
+				"change_set_element.change_set_id",
 				"change_set.id"
 			)
-			.where("change_set_item.change_id", "=", change.id)
+			.where("change_set_element.change_id", "=", change.id)
 			.select("label.name")
 			.execute();
 

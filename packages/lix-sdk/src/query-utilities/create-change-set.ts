@@ -22,7 +22,7 @@ export async function createChangeSet(args: {
 			.executeTakeFirstOrThrow();
 
 		await trx
-			.insertInto("change_set_item")
+			.insertInto("change_set_element")
 			.values(
 				args.changes.map((change) => ({
 					change_id: change.id,

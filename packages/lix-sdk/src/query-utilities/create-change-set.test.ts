@@ -32,7 +32,7 @@ test("creating a change set should succeed", async () => {
 	});
 
 	const changeSetMembers = await lix.db
-		.selectFrom("change_set_item")
+		.selectFrom("change_set_element")
 		.selectAll()
 		.where("change_set_id", "=", changeSet.id)
 		.execute();

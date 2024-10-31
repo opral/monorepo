@@ -88,7 +88,7 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     id TEXT PRIMARY KEY DEFAULT (uuid_v4())
   ) strict;
 
-  CREATE TABLE IF NOT EXISTS change_set_item (
+  CREATE TABLE IF NOT EXISTS change_set_element (
     change_set_id TEXT NOT NULL,
     change_id TEXT NOT NULL,
 

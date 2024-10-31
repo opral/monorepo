@@ -11,11 +11,11 @@ const changeSetsAtom = atom(async (get) => {
 	return await lix.db
 		.selectFrom("change_set")
 		.innerJoin(
-			"change_set_item",
-			"change_set_item.change_set_id",
+			"change_set_element",
+			"change_set_element.change_set_id",
 			"change_set.id"
 		)
-		.leftJoin("change", "change.id", "change_set_item.change_id")
+		.leftJoin("change", "change.id", "change_set_element.change_id")
 		.leftJoin("discussion", "discussion.change_set_id", "change_set.id")
 		// Join with the `comment` table, filtering for first-level comments
 		.leftJoin("comment", "comment.discussion_id", "discussion.id")

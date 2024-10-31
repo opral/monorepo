@@ -240,7 +240,7 @@ const confirmChanges = async (lix: Lix, unconfirmedChanges: Change[]) => {
 		for (const change of unconfirmedChanges) {
 			const leafChange = await getLeafChange({ lix: { db: trx }, change });
 			await trx
-				.insertInto("change_set_item")
+				.insertInto("change_set_element")
 				.values({
 					change_set_id: newChangeSet.id,
 					change_id: leafChange.id,
