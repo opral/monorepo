@@ -805,6 +805,8 @@ test("it should copy change sets and merge memberships", async () => {
 	const changeSets = await targetLix.db
 		.selectFrom("change_set")
 		.selectAll()
+		// the initial change set for a branch
+		.where("id", "is not", "00000000-0000-0000-0000-000000000000")
 		.execute();
 
 	const changeSet1Items = await targetLix.db

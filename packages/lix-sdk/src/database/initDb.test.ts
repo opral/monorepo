@@ -208,3 +208,40 @@ test("the confirmed label should be created if it doesn't exist", async () => {
 		name: "confirmed",
 	});
 });
+
+test("a default main branch should exist", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const branch = await db
+		.selectFrom("branch")
+		.selectAll()
+		.where("name", "=", "main")
+		.executeTakeFirst();
+
+	expect(branch).toBeDefined();
+});
+
+test("branch change set pointers should be unique", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const branch = await db
+		.selectFrom("branch")
+		.selectAll()
+		.where("name", "=", "main")
+		.executeTakeFirstOrThrow();
+
+	expect(
+		db
+			.insertInto("branch")
+			.values({ change_set_id: branch.change_set_id })
+			.execute(),
+	).rejects.toThrowErrorMatchingInlineSnapshot(
+		`[SQLite3Error: SQLITE_CONSTRAINT_UNIQUE: sqlite3 result code 2067: UNIQUE constraint failed: branch.change_set_id]`,
+	);
+});

@@ -134,6 +134,30 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
 
   INSERT OR IGNORE INTO label (name) VALUES ('confirmed');
 
+  -- branches
+
+  CREATE TABLE IF NOT EXISTS branch (
+    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+
+    change_set_id TEXT NOT NULL UNIQUE,
+
+    -- name is optional. 
+    -- 
+    -- "anonymous" branches can ease workflows. 
+    -- For example, a user can create a branch 
+    -- without a name to experiment with
+    -- changes with no mental overhead of 
+    -- naming the branch.
+    name TEXT,
+
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
+  ) strict;
+
+  -- Create a default branch (using a pre-defined id to avoid duplicate inserts)
+  -- (assuming here that the branch will not be deleted by the user. 
+  -- we should switch to a create new lix that doesn't have IF NOT EXISTS and OR IGNORE in the schema)
+  INSERT OR IGNORE INTO change_set (id) VALUES ('00000000-0000-0000-0000-000000000000');
+  INSERT OR IGNORE INTO branch (id, name, change_set_id) VALUES ('00000000-0000-0000-0000-000000000000','main', '00000000-0000-0000-0000-000000000000');
 `;
 }
 
