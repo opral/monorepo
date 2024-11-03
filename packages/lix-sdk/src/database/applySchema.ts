@@ -33,7 +33,9 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
     snapshot_id TEXT NOT NULL,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
+    UNIQUE (id, entity_id, file_id, type)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS change_graph_edge (
@@ -139,8 +141,6 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
   CREATE TABLE IF NOT EXISTS branch (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
 
-    change_set_id TEXT NOT NULL UNIQUE,
-
     -- name is optional. 
     -- 
     -- "anonymous" branches can ease workflows. 
@@ -148,16 +148,25 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     -- without a name to experiment with
     -- changes with no mental overhead of 
     -- naming the branch.
-    name TEXT,
+    name TEXT
+  
+  ) strict;
 
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
+  CREATE TABLE IF NOT EXISTS branch_change_pointer (
+    branch_id TEXT NOT NULL,
+    change_id TEXT NOT NULL,
+    change_file_id TEXT NOT NULL,
+    change_entity_id TEXT NOT NULL,
+    change_type TEXT NOT NULL,
+
+    PRIMARY KEY(branch_id, change_file_id, change_entity_id, change_type),
+
+    FOREIGN KEY(branch_id) REFERENCES branch(id),
+    FOREIGN KEY(change_id, change_file_id, change_entity_id, change_type) REFERENCES change(change_id, change_file_id, change_entity_id, change_type)
   ) strict;
 
   -- Create a default branch (using a pre-defined id to avoid duplicate inserts)
-  -- (assuming here that the branch will not be deleted by the user. 
-  -- we should switch to a create new lix that doesn't have IF NOT EXISTS and OR IGNORE in the schema)
-  INSERT OR IGNORE INTO change_set (id) VALUES ('00000000-0000-0000-0000-000000000000');
-  INSERT OR IGNORE INTO branch (id, name, change_set_id) VALUES ('00000000-0000-0000-0000-000000000000','main', '00000000-0000-0000-0000-000000000000');
+  INSERT OR IGNORE INTO branch (id, name) VALUES ('00000000-0000-0000-0000-000000000000','main');
 `;
 }
 

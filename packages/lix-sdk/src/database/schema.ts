@@ -22,6 +22,7 @@ export type LixDatabaseSchema = {
 
 	// branch
 	branch: BranchTable;
+	branch_change_pointer: BranchChangePointerTable;
 };
 
 export type ChangeQueueEntry = Selectable<ChangeQueueTable>;
@@ -182,5 +183,15 @@ export type BranchUpdate = Updateable<BranchTable>;
 type BranchTable = {
 	id: Generated<string>;
 	name: string | null;
-	change_set_id: string;
+};
+
+export type BranchChangePointer = Selectable<BranchChangePointerTable>;
+export type NewBranchChangePointer = Insertable<BranchChangePointerTable>;
+export type BranchChangePointerUpdate = Updateable<BranchChangePointerTable>;
+type BranchChangePointerTable = {
+	branch_id: string;
+	change_id: string;
+	change_file_id: string;
+	change_entity_id: string;
+	change_type: string;
 };
