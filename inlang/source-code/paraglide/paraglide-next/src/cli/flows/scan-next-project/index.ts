@@ -99,13 +99,13 @@ export const scanNextJSProject: CliStep<
 }
 
 /**
- * Attempts to find the next.config.js or next.config.mjs file in the current working directory.
+ * Attempts to find the next.config.js, next.config.mjs or next.config.ts file in the current working directory.
  */
 async function findNextConfig(
 	fs: NodeishFilesystem,
 	cwd: string
 ): Promise<NextConfigFile | undefined> {
-	const possibleNextConfigPaths = ["./next.config.js", "./next.config.mjs"].map(
+	const possibleNextConfigPaths = ["./next.config.js", "./next.config.mjs", "./next.config.ts"].map(
 		(possibleRelativePath) => path.resolve(cwd, possibleRelativePath)
 	)
 
@@ -113,7 +113,7 @@ async function findNextConfig(
 		if (await fileExists(fs, possibleNextConfigPath)) {
 			return {
 				path: possibleNextConfigPath,
-				type: possibleNextConfigPath.endsWith(".mjs") ? "esm" : "cjs",
+				type: possibleNextConfigPath.endsWith(".js") ? "cjs" : "esm",
 			}
 		}
 	}
