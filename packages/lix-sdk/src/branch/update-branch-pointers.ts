@@ -1,6 +1,9 @@
 import type { Branch, Change } from "../database/schema.js";
 import type { Lix } from "../open/openLix.js";
 
+/**
+ * Updates the branch pointers for the given branch with the given changes.
+ */
 export async function updateBranchPointers(args: {
 	lix: Pick<Lix, "db">;
 	branch: Pick<Branch, "id">;
