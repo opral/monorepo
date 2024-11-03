@@ -9,3 +9,4 @@ export { changeIsLeafChange } from "./change-is-leaf-change.js";
 export { createDiscussion } from "./create-discussion.js";
 export { createChangeSet } from "./create-change-set.js";
 export { createComment } from "./create-comment.js";
+export { changeInBranch } from "./change-in-branch.js";
