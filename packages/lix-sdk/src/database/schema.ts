@@ -21,6 +21,7 @@ export type LixDatabaseSchema = {
 	comment: CommentTable;
 
 	// branch
+	current_branch: CurrentBranchTable;
 	branch: BranchTable;
 	branch_change_pointer: BranchChangePointerTable;
 };
@@ -194,4 +195,11 @@ type BranchChangePointerTable = {
 	change_file_id: string;
 	change_entity_id: string;
 	change_type: string;
+};
+
+export type CurrentBranch = Selectable<CurrentBranchTable>;
+export type NewCurrentBranch = Insertable<CurrentBranchTable>;
+export type CurrentBranchUpdate = Updateable<CurrentBranchTable>;
+type CurrentBranchTable = {
+	branch_id: string;
 };

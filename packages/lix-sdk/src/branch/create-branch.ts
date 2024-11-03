@@ -18,11 +18,17 @@ export async function createBranch(args: {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const branch = await trx
 			.insertInto("branch")
-			.values({
-				name: args.name,
-			})
+			.defaultValues()
 			.returningAll()
 			.executeTakeFirstOrThrow();
+
+		if (args.name) {
+			await trx
+				.updateTable("branch")
+				.set({ name: args.name })
+				.where("id", "=", branch.id)
+				.execute();
+		}
 
 		// copy the change pointers from the parent branch
 		await trx

@@ -165,8 +165,17 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     FOREIGN KEY(change_id, change_file_id, change_entity_id, change_type) REFERENCES change(change_id, change_file_id, change_entity_id, change_type)
   ) strict;
 
+  -- only one branch can be active at a time
+  -- hence, the table has only one row
+  CREATE TABLE IF NOT EXISTS current_branch (
+    branch_id TEXT NOT NULL PRIMARY KEY,
+
+    FOREIGN KEY(branch_id) REFERENCES branch(id)
+  ) strict;
+
   -- Create a default branch (using a pre-defined id to avoid duplicate inserts)
   INSERT OR IGNORE INTO branch (id, name) VALUES ('00000000-0000-0000-0000-000000000000','main');
+  INSERT OR IGNORE INTO current_branch (branch_id) VALUES ('00000000-0000-0000-0000-000000000000');
 `;
 }
 
