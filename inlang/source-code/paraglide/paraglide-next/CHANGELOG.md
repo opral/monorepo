@@ -1,5 +1,11 @@
 # @inlang/paraglide-next
 
+## 0.7.3
+
+### Patch Changes
+
+- 49b54dc: allow for next.config.ts in paraglide cli init command https://github.com/opral/monorepo/pull/3199
+
 ## 0.7.2
 
 ### Patch Changes
