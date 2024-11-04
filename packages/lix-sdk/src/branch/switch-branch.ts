@@ -26,10 +26,7 @@ export async function switchBranch(args: {
 	to: Pick<Branch, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		await trx
-			.updateTable("current_branch")
-			.set({ branch_id: args.to.id })
-			.execute();
+		await trx.updateTable("current_branch").set({ id: args.to.id }).execute();
 	};
 
 	if (args.lix.db.isTransaction) {

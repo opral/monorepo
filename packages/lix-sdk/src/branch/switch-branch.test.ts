@@ -26,5 +26,5 @@ test("switching branches should update the branch pointer", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(currentBranch.branch_id).toBe(newBranch?.id);
+	expect(currentBranch.id).toBe(newBranch?.id);
 });

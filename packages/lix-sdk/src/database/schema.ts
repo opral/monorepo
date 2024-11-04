@@ -201,5 +201,5 @@ export type CurrentBranch = Selectable<CurrentBranchTable>;
 export type NewCurrentBranch = Insertable<CurrentBranchTable>;
 export type CurrentBranchUpdate = Updateable<CurrentBranchTable>;
 type CurrentBranchTable = {
-	branch_id: string;
+	id: string;
 };
