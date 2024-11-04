@@ -6,8 +6,7 @@ import type { Lix } from "../open/openLix.js";
  *
  * @example
  *   ```ts
- *   const changes = await lix.db.selectFrom("change").selectAll().execute();
- *   const changeSet = await createChangeSet({ db: lix.db, changes });
+ *   const branch = await createBranch({ lix, from: otherBranch });
  *   ```
  */
 export async function createBranch(args: {
