@@ -43,6 +43,10 @@ export type LixPlugin = {
 	}) => Promise<DetectedConflict[]>;
 	applyChanges?: (args: {
 		lix: LixReadonly;
+		// todo a file can be-non existent
+		// maybe it's better to remove the file from this api
+		// and let the plugin handle the file selection and
+		// , if needed, file creation
 		file: LixFile;
 		changes: Array<Change>;
 	}) => Promise<{
