@@ -17,6 +17,9 @@
 	},
 	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
 	"sideEffects": false,
+	"engines": {
+		"node": ">=21"
+	},
 	"dependencies": {
 		"dedent": "1.5.1",
 		"js-sha256": "^0.11.0",
