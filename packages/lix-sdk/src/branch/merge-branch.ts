@@ -141,7 +141,7 @@ async function getBranchChangePointerDiff(
 		)
 		.select([
 			"source.change_id as source_change_id",
-			"source.change_id as target_change_id",
+			"target.change_id as target_change_id",
 			"source.change_entity_id",
 			"source.change_file_id",
 			"source.change_type",
@@ -150,7 +150,7 @@ async function getBranchChangePointerDiff(
 }
 
 async function childOfCommonAncestorDiffers(args: {
-	lix: Lix;
+	lix: Pick<Lix, "db">;
 	changeA: Pick<Change, "id">;
 	changeB: Pick<Change, "id">;
 }): Promise<boolean> {

@@ -127,7 +127,7 @@ test("it should update the branch pointers for non-conflicting changes and inser
 
 // it is reasonable to assume that a conflict exists if the same (entity, file, type) change is updated in both branches.
 // in case a plugin does not detect a conflict, the system should automatically detect it.
-test.skip("it should automatically detect a conflict if a change exists that differs updates in both branches despite having a common ancestor", async () => {
+test("it should automatically detect a conflict if a change exists that differs updates in both branches despite having a common ancestor", async () => {
 	const lix = await openLixInMemory({});
 
 	// Initialize source and target branches
@@ -232,10 +232,12 @@ test.skip("it should automatically detect a conflict if a change exists that dif
 		.execute();
 
 	// Ensure that the change from `sourceBranch` is detected as a conflict
-	expect(conflicts).toContainEqual({
-		change_id: sourceChange.id,
-		conflicting_change_id: targetChange.id,
-	});
+	expect(conflicts).toEqual([
+		expect.objectContaining({
+			change_id: sourceChange.id,
+			conflicting_change_id: targetChange.id,
+		}),
+	]);
 
 	// ensure that the branch change pointer hasn't been updated
 	const targetPointers = await lix.db
