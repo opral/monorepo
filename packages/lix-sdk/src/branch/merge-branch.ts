@@ -60,7 +60,7 @@ export async function mergeBranch(args: {
 				const hasConflictingEntityChanges = !pointer.target_change_id
 					? false
 					: await childOfCommonAncestorDiffers({
-							lix: args.lix,
+							lix: { db: trx },
 							changeA: { id: pointer.source_change_id },
 							changeB: { id: pointer.target_change_id },
 						});
