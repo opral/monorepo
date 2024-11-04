@@ -80,5 +80,6 @@ export type DetectedConflict = {
 export type LixReadonly = Pick<Lix, "plugin"> & {
 	db: {
 		selectFrom: Lix["db"]["selectFrom"];
+		withRecursive: Lix["db"]["withRecursive"];
 	};
 };

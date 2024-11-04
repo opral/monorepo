@@ -1,5 +1,5 @@
 import type { Change } from "../database/schema.js";
-import type { Lix } from "../open/openLix.js";
+import type { LixReadonly } from "../plugin/lix-plugin.js";
 
 /**
  * Returns the lowest common ancestor of two changes.
@@ -7,7 +7,7 @@ import type { Lix } from "../open/openLix.js";
  * @returns Either the lowest common ancestor of the two changes or `undefined` if they do not share a common ancestor.
  */
 export async function getLowestCommonAncestorV2(args: {
-	lix: Pick<Lix, "db">;
+	lix: Pick<LixReadonly, "db">;
 	changeA: Pick<Change, "id">;
 	changeB: Pick<Change, "id">;
 }): Promise<Change | undefined> {
