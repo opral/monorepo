@@ -64,7 +64,10 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     reason TEXT,
     metadata TEXT,
     resolved_change_id TEXT,
-    PRIMARY KEY (change_id, conflicting_change_id)
+
+    PRIMARY KEY (change_id, conflicting_change_id),
+    -- Prevent self referencing conflicts
+    CHECK (change_id != conflicting_change_id)
   ) strict;
 
   CREATE TRIGGER IF NOT EXISTS file_update INSTEAD OF UPDATE ON file

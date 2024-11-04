@@ -80,15 +80,14 @@ test("it should update the branch pointers for non-conflicting changes and inser
 
 	const mockPlugin: LixPlugin = {
 		key: "mock",
-		detectConflictsV2: async ({ changes }) => {
-			// simulating a conflict with change2
-			return changes
-				.filter((change) => change.id === change2!.id)
-				.map((change) => ({
-					change_id: change.id,
-					// conflicts with itself for simplicity
-					conflicting_change_id: change.id,
-				}));
+		detectConflictsV2: async () => {
+			// simulating a conflict between change2 and change3
+			return [
+				{
+					change_id: change2!.id,
+					conflicting_change_id: change3!.id,
+				},
+			];
 		},
 	};
 
@@ -106,17 +105,17 @@ test("it should update the branch pointers for non-conflicting changes and inser
 
 	const conflicts = await lix.db.selectFrom("conflict").selectAll().execute();
 
-	// Ensure that non-conflicting pointers (change1 and change3) are in target branch
+	// Ensure that non-conflicting pointers (change1 and change2) are in target branch
 	expect(targetPointers.map((pointer) => pointer.change_id)).toContain(
 		change1?.id,
 	);
 	expect(targetPointers.map((pointer) => pointer.change_id)).toContain(
-		change3?.id,
+		change2?.id,
 	);
 
-	// Ensure that conflicting pointer (change2) is not in target branch
+	// Ensure that conflicting pointer (change3) is not in target branch
 	expect(targetPointers.map((pointer) => pointer.change_id)).not.toContain(
-		change2?.id,
+		change3?.id,
 	);
 
 	// Verify that a conflict for change2 was added to the `conflict` table

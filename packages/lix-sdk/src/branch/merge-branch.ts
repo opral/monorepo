@@ -44,10 +44,14 @@ export async function mergeBranch(args: {
 		await Promise.all(
 			diffingPointers.map(async (pointer) => {
 				// potentially expensive query
+				// TODO remove the meaning of detected "this one conflicts with that one"
+				//      to allow "bi-directional" conflicts that can be resolved on
+				//      one branch and reflected on others branches that have the same
+				//      conflict.
 				const pluginDetectedConflict = detectedConflicts.find(
 					(conflict) =>
-						conflict.change_id === pointer.target_change_id ||
-						conflict.change_id === pointer.source_change_id,
+						conflict.conflicting_change_id === pointer.target_change_id ||
+						conflict.conflicting_change_id === pointer.source_change_id,
 				);
 				if (pluginDetectedConflict) {
 					// don't update the branch change pointer

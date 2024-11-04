@@ -223,3 +223,24 @@ test("a default main branch should exist", async () => {
 
 	expect(branch).toBeDefined();
 });
+
+
+test("conflicts should not be able to reference themselves", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	expect(
+		db
+			.insertInto("conflict")
+			.values({
+				change_id: "change1",
+				conflicting_change_id: "change1",
+			})
+			.returningAll()
+			.execute(),
+	).rejects.toThrowErrorMatchingInlineSnapshot(
+		`[SQLite3Error: SQLITE_CONSTRAINT_CHECK: sqlite3 result code 275: CHECK constraint failed: change_id != conflicting_change_id]`,
+	);
+});
