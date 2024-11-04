@@ -8,6 +8,14 @@ test("it should return the parent change of a change", async () => {
 
 	const mockChanges: NewChange[] = [
 		{
+			id: "change0",
+			file_id: "mock",
+			entity_id: "value0",
+			plugin_key: "mock",
+			snapshot_id: "no-content",
+			type: "mock",
+		},
+		{
 			id: "change1",
 			file_id: "mock",
 			entity_id: "value1",
@@ -42,6 +50,10 @@ test("it should return the parent change of a change", async () => {
 	];
 
 	const mockEdges: ChangeGraphEdge[] = [
+		// including a grandparent to ensure the function is
+		// not including this as parent of change3
+		{ parent_id: "change0", child_id: "change1" },
+		// actual parents of change 3
 		{ parent_id: "change1", child_id: "change3" },
 		{ parent_id: "change2", child_id: "change3" },
 		// included for re-assurance that the function is
