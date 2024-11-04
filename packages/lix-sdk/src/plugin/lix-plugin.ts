@@ -37,6 +37,10 @@ export type LixPlugin = {
 		sourceLix: LixReadonly;
 		targetLix: LixReadonly;
 	}) => Promise<DetectedConflict[]>;
+	detectConflictsV2?: (args: {
+		lix: LixReadonly;
+		changes: Array<Change>;
+	}) => Promise<DetectedConflict[]>;
 	applyChanges?: (args: {
 		lix: LixReadonly;
 		file: LixFile;

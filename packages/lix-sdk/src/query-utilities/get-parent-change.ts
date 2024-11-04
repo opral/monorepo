@@ -4,6 +4,8 @@ import { isInSimulatedCurrentBranch } from "./is-in-simulated-branch.js";
 
 /**
  * Gets the parent change of a given change.
+ * 
+ * @deprecated Use `getParentChangesV2` instead.
  *
  * A change can have multiple parents. This function
  * returns the only parent of a change for a given
