@@ -10,3 +10,5 @@ export { createDiscussion } from "./create-discussion.js";
 export { createChangeSet } from "./create-change-set.js";
 export { createComment } from "./create-comment.js";
 export { changeInBranch } from "./change-in-branch.js";
+export { getLowestCommonAncestorV2 } from "./get-lowest-common-ancestor-v2.js";
+export { getParentChangesV2 } from "./get-parent-changes-v2.js";
