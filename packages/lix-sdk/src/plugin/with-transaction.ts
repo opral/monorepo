@@ -15,6 +15,7 @@ export function withTransaction(
 	return {
 		db: {
 			selectFrom: trx.selectFrom,
+			withRecursive: trx.withRecursive,
 		},
 		plugin: lix.plugin,
 	};
