@@ -34,6 +34,11 @@ test("should use queue and settled correctly", async () => {
 		providePlugins: [mockPlugin],
 	});
 
+	const currentBranch = await lix.db
+		.selectFrom("current_branch")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	const enc = new TextEncoder();
 	await lix.db
 		.insertInto("file")
@@ -151,6 +156,11 @@ test("should use queue and settled correctly", async () => {
 		.selectAll()
 		.execute();
 
+	const branchChangePointers = await lix.db
+		.selectFrom("branch_change_pointer")
+		.selectAll()
+		.execute();
+
 	expect(updatedChanges).toEqual([
 		expect.objectContaining({
 			entity_id: "test",
@@ -186,6 +196,14 @@ test("should use queue and settled correctly", async () => {
 		// 1 is the parent of 2
 		{ parent_id: updatedChanges[0]?.id, child_id: updatedChanges[1]?.id },
 		{ parent_id: updatedChanges[1]?.id, child_id: updatedChanges[2]?.id },
+	]);
+
+	// the branch change pointers points to the last change
+	expect(branchChangePointers).toEqual([
+		expect.objectContaining({
+			branch_id: currentBranch.id,
+			change_id: updatedChanges[2]?.id,
+		}),
 	]);
 });
 

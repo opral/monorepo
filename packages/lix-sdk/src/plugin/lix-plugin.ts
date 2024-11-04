@@ -37,6 +37,10 @@ export type LixPlugin = {
 		sourceLix: LixReadonly;
 		targetLix: LixReadonly;
 	}) => Promise<DetectedConflict[]>;
+	detectConflictsV2?: (args: {
+		lix: LixReadonly;
+		changes: Array<Change>;
+	}) => Promise<DetectedConflict[]>;
 	applyChanges?: (args: {
 		lix: LixReadonly;
 		file: LixFile;
@@ -76,5 +80,6 @@ export type DetectedConflict = {
 export type LixReadonly = Pick<Lix, "plugin"> & {
 	db: {
 		selectFrom: Lix["db"]["selectFrom"];
+		withRecursive: Lix["db"]["withRecursive"];
 	};
 };

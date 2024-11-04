@@ -5,6 +5,7 @@ import { minimatch } from "minimatch";
 import { Kysely } from "kysely";
 import { isInSimulatedCurrentBranch } from "./query-utilities/is-in-simulated-branch.js";
 import { getLeafChange } from "./query-utilities/get-leaf-change.js";
+import { updateBranchPointers } from "./branch/update-branch-pointers.js";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {
@@ -51,6 +52,11 @@ export async function handleFileInsert(args: {
 	}
 
 	await args.db.transaction().execute(async (trx) => {
+		const currentBranch = await trx
+			.selectFrom("current_branch")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
 		for (const detectedChange of detectedChanges) {
 			const snapshot = await trx
 				.insertInto("snapshot")
@@ -62,7 +68,7 @@ export async function handleFileInsert(args: {
 				.returning("id")
 				.executeTakeFirstOrThrow();
 
-			await trx
+			const insertedChange = await trx
 				.insertInto("change")
 				.values({
 					type: detectedChange.type,
@@ -71,7 +77,14 @@ export async function handleFileInsert(args: {
 					plugin_key: detectedChange.pluginKey,
 					snapshot_id: snapshot.id,
 				})
-				.execute();
+				.returningAll()
+				.executeTakeFirstOrThrow();
+
+			await updateBranchPointers({
+				lix: { db: trx },
+				changes: [insertedChange],
+				branch: currentBranch,
+			});
 		}
 
 		// TODO: decide if TRIGGER or in js land with await trx.insertInto('file_internal').values({ id: args.fileId, blob: args.newBlob, path: args.newPath }).execute()
@@ -120,6 +133,10 @@ export async function handleFileChange(args: {
 	}
 
 	await args.db.transaction().execute(async (trx) => {
+		const currentBranch = await trx
+			.selectFrom("current_branch")
+			.selectAll()
+			.executeTakeFirstOrThrow();
 		for (const detectedChange of detectedChanges) {
 			// heuristic to find the previous change
 			// there is no guarantee that the previous change is the leaf change
@@ -170,8 +187,14 @@ export async function handleFileChange(args: {
 					entity_id: detectedChange.entity_id,
 					snapshot_id: snapshot.id,
 				})
-				.returning("id")
+				.returningAll()
 				.executeTakeFirstOrThrow();
+
+			await updateBranchPointers({
+				lix: { db: trx },
+				changes: [insertedChange],
+				branch: currentBranch,
+			});
 
 			// If a parent exists, the change is a child of the parent
 			if (parentChange) {

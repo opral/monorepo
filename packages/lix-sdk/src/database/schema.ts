@@ -19,6 +19,11 @@ export type LixDatabaseSchema = {
 	// discussion
 	discussion: DiscussionTable;
 	comment: CommentTable;
+
+	// branch
+	current_branch: CurrentBranchTable;
+	branch: BranchTable;
+	branch_change_pointer: BranchChangePointerTable;
 };
 
 export type ChangeQueueEntry = Selectable<ChangeQueueTable>;
@@ -169,4 +174,32 @@ export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelTable>;
 type ChangeSetLabelTable = {
 	change_set_id: string;
 	label_id: string;
+};
+
+// ------ branches ------
+
+export type Branch = Selectable<BranchTable>;
+export type NewBranch = Insertable<BranchTable>;
+export type BranchUpdate = Updateable<BranchTable>;
+type BranchTable = {
+	id: Generated<string>;
+	name: string | null;
+};
+
+export type BranchChangePointer = Selectable<BranchChangePointerTable>;
+export type NewBranchChangePointer = Insertable<BranchChangePointerTable>;
+export type BranchChangePointerUpdate = Updateable<BranchChangePointerTable>;
+type BranchChangePointerTable = {
+	branch_id: string;
+	change_id: string;
+	change_file_id: string;
+	change_entity_id: string;
+	change_type: string;
+};
+
+export type CurrentBranch = Selectable<CurrentBranchTable>;
+export type NewCurrentBranch = Insertable<CurrentBranchTable>;
+export type CurrentBranchUpdate = Updateable<CurrentBranchTable>;
+type CurrentBranchTable = {
+	id: string;
 };
