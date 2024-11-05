@@ -11,6 +11,16 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  *      .selectAll()
  *      .execute();
  *   ```
+ * 
+ * @example 
+ *   You can use eb.not() to negate the filter.
+ *  
+ *   ```ts
+ *   await lix.db.selectFrom("change")
+ * 		.where((eb) => eb.not(changeHasLabel("confirmed")))
+ * 		.selectAll()
+ * 		.execute();
+ *   ```
  */
 export function changeHasLabel(name: string) {
 	return (eb: ExpressionBuilder<LixDatabaseSchema, "change">) =>
