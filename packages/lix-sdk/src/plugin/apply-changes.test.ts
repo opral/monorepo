@@ -3,15 +3,13 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { applyChanges } from "./apply-changes.js";
 import type { LixPlugin } from "./lix-plugin.js";
 
-test("applyChanges filters out non-leaf changes and applies leaf changes correctly", async () => {
+test("it applies the given changes", async () => {
 	const lix = await openLixInMemory({});
 
 	// Prepare mock plugin
 	const mockPlugin: LixPlugin = {
 		key: "plugin1",
 		applyChanges: vi.fn(async ({ changes }) => {
-			// only the leaf change should be applied
-			expect(changes).toHaveLength(1);
 			return {
 				fileData: new TextEncoder().encode(`updated-data-${changes[0]?.id}`),
 			};
@@ -22,7 +20,7 @@ test("applyChanges filters out non-leaf changes and applies leaf changes correct
 
 	// Insert a file and changes, marking only one as a leaf
 	const file = await lix.db
-		.insertInto("file")
+		.insertInto("file_internal")
 		.values({
 			id: "file1",
 			data: new TextEncoder().encode("initial-data"),
@@ -42,34 +40,11 @@ test("applyChanges filters out non-leaf changes and applies leaf changes correct
 				entity_id: "value1",
 				type: "mock",
 			},
-			{
-				id: "changeB",
-				file_id: file.id,
-				plugin_key: mockPlugin.key,
-				snapshot_id: "no-content",
-				entity_id: "value1",
-				type: "mock",
-			},
 		])
 		.returningAll()
 		.execute();
 
-	// model change B as child of A
-	// (we only expect changeB to be applied as it's the leaf change)
-	await lix.db
-		.insertInto("change_graph_edge")
-		.values([{ parent_id: "changeA", child_id: "changeB" }])
-		.execute();
-
 	await applyChanges({ lix, changes });
-
-	// verify plugin was called with only the leaf change
-	expect(mockPlugin.applyChanges).toHaveBeenCalledTimes(1);
-	expect(mockPlugin.applyChanges).toHaveBeenCalledWith(
-		expect.objectContaining({
-			changes: [expect.objectContaining({ id: "changeB" })],
-		}),
-	);
 
 	// Verify file data was updated
 	const updatedFile = await lix.db
@@ -79,7 +54,7 @@ test("applyChanges filters out non-leaf changes and applies leaf changes correct
 		.executeTakeFirstOrThrow();
 
 	expect(new TextDecoder().decode(updatedFile.data)).toBe(
-		"updated-data-changeB",
+		"updated-data-changeA",
 	);
 });
 

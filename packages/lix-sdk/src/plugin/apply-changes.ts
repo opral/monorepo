@@ -1,25 +1,33 @@
 import type { Change } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
-import { changeIsLeafChange } from "../query-utilities/change-is-leaf-change.js";
 
 /**
  * Applies the given changes to the lix.
  *
- * - filters out non-leaf changes
- * - calls the responsible plugin to apply the changes
+ * Calls the `applyChanges` method of the corresponding plugin for each change.
+ * **Carefull**, the changes are not validated before applying them. It is up to
+ * the caller to ensure that the changes are valid. Usually, only the leaf changes
+ * of a given branch should be applied.
+ *
+ * @example
+ *   ```ts
+ *   const changes = await lix.db.selectFrom("change")
+ *      .where(changeIsLeafInBranch(currentBranch))
+ *      .selectAll()
+ *      .execute();
+ *
+ *   await applyChanges({ lix, changes });
+ *   ```
  */
 export async function applyChanges(args: {
 	lix: Lix;
 	changes: Change[];
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		// in case the caller has not grouped the changes by leaf changes
-		const leafChanges = await groupByLeafChanges({
-			lix: { db: trx },
-			changes: args.changes,
-		});
-
-		const groupByFile = Object.groupBy(leafChanges, (change) => change.file_id);
+		const groupByFile = Object.groupBy(
+			args.changes,
+			(change) => change.file_id,
+		);
 
 		const plugins = await args.lix.plugin.getAll();
 
@@ -57,54 +65,15 @@ export async function applyChanges(args: {
 					changes,
 				});
 				await trx
-					.updateTable("file")
+					// avoiding the change queue here
+					// which is not duplicate tolerant
+					// yet. see https://linear.app/opral/issue/LIXDK-114/make-diff-and-change-generation-fault-tolerant
+					.updateTable("file_internal")
 					.set({ data: fileData })
 					.where("id", "=", fileId)
 					.execute();
 			}
 		}
-	};
-
-	if (args.lix.db.isTransaction) {
-		return executeInTransaction(args.lix.db);
-	} else {
-		return args.lix.db.transaction().execute(executeInTransaction);
-	}
-}
-
-/**
- * Groups the given changes by leaf changes.
- *
- * Grouping by leaf changes is useful a given
- * set of changes might or might not contain
- * changes in the same entity graph.
- *
- * Imagine applying a set of changes to a lix.
- * Only leaf changes of the given set of changes
- * should be applied. Hence, grouping by leaf
- * changes is a required step before applying.
- *
- * @example
- *   ```ts
- *   const leafChanges = await groupByLeafChanges({ lix, changes });
- *   ```
- *
- */
-async function groupByLeafChanges(args: {
-	lix: Pick<Lix, "db">;
-	changes: Change[];
-}): Promise<Change[]> {
-	const executeInTransaction = async (trx: Lix["db"]) => {
-		return await trx
-			.selectFrom("change")
-			.selectAll()
-			.where(
-				"id",
-				"in",
-				args.changes.map((change) => change.id),
-			)
-			.where(changeIsLeafChange())
-			.execute();
 	};
 
 	if (args.lix.db.isTransaction) {
