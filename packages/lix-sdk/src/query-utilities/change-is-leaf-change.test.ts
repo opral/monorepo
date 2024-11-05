@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { changeIsLeafChange } from "./change-is-leaf-change.js";
-import { openLixInMemory } from "../open/openLixInMemory.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 
 test("should only return the leaf change", async () => {
 	const lix = await openLixInMemory({});

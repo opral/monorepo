@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../open/openLixInMemory.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { switchBranch } from "./switch-branch.js";
 import { createBranch } from "./create-branch.js";
 

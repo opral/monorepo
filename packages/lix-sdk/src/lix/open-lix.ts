@@ -1,8 +1,8 @@
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { handleFileChange, handleFileInsert } from "../file-handlers.js";
-import { loadPlugins } from "../load-plugin.js";
+import { handleFileChange, handleFileInsert } from "./file-handlers.js";
+import { loadPlugins } from "../plugin/load-plugin.js";
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
-import { initDb } from "../database/initDb.js";
+import { initDb } from "../database/init-db.js";
 
 export type Lix = Awaited<ReturnType<typeof openLix>>;
 

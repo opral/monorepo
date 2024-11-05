@@ -1,5 +1,5 @@
 import type { Change } from "../database/schema.js";
-import type { Lix } from "../open/openLix.js";
+import type { Lix } from "../lix/open-lix.js";
 import { changeIsLeafChange } from "../query-utilities/change-is-leaf-change.js";
 
 /**

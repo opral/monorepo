@@ -2,7 +2,7 @@ import {
 	createInMemoryDatabase,
 	contentFromDatabase,
 } from "sqlite-wasm-kysely";
-import { initDb } from "./database/initDb.js";
+import { initDb } from "../database/init-db.js";
 
 /**
  * Creates a new lix file.

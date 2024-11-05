@@ -1,5 +1,5 @@
 import { test, expect, vi } from "vitest";
-import { openLixInMemory } from "../open/openLixInMemory.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { mergeBranch } from "./merge-branch.js";
 

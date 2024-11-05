@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest";
-import { openLixInMemory } from "./open/openLixInMemory.js";
-import { newLixFile } from "./newLix.js";
-import type { DetectedChange, LixPlugin } from "./plugin/lix-plugin.js";
+import { openLixInMemory } from "./open-lix-in-memory.js";
+import { newLixFile } from "./new-lix.js";
+import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
 
 test("should use queue and settled correctly", async () => {
 	const mockPlugin: LixPlugin = {

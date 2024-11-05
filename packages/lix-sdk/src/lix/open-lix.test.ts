@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "./openLixInMemory.js";
-import { newLixFile } from "../newLix.js";
+import { openLixInMemory } from "./open-lix-in-memory.js";
+import { newLixFile } from "./new-lix.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 
 test("providing plugins should be possible", async () => {

@@ -1,6 +1,6 @@
 import { test, expect, vi } from "vitest";
-import { openLixInMemory } from "../open/openLixInMemory.js";
-import { newLixFile } from "../newLix.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { newLixFile } from "../lix/new-lix.js";
 import { resolveConflictWithNewChange } from "./resolve-conflict-with-new-change.js";
 import type { NewChange, Snapshot } from "../database/schema.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";

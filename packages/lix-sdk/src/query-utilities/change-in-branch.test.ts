@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../open/openLixInMemory.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { changeInBranch } from "./change-in-branch.js";
 
 test("selectChangeInBranch should retrieve all changes in the branch including ancestors", async () => {

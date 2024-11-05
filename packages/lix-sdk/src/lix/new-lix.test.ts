@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "./open/openLixInMemory.js";
-import { newLixFile } from "./newLix.js";
+import { openLixInMemory } from "./open-lix-in-memory.js";
+import { newLixFile } from "./new-lix.js";
 
 test("inserting a change should auto fill the created_at column", async () => {
 	const lix = await openLixInMemory({ blob: await newLixFile() });

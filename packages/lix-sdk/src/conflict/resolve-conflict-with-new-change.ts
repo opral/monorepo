@@ -1,5 +1,5 @@
 import type { Conflict, NewChange, Snapshot } from "../database/schema.js";
-import type { Lix } from "../open/openLix.js";
+import type { Lix } from "../lix/open-lix.js";
 import {
 	ChangeAlreadyExistsError,
 	ChangeDoesNotBelongToFileError,

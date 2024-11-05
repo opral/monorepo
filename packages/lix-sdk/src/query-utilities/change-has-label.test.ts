@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { changeHasLabel } from "./change-has-label.js";
-import { openLixInMemory } from "../open/openLixInMemory.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 
 test("should only return changes with the given label", async () => {

@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../open/openLixInMemory.js";
-import { newLixFile } from "../newLix.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { newLixFile } from "../lix/new-lix.js";
 import type { Change, ChangeGraphEdge, NewChange } from "../database/schema.js";
 import { getLowestCommonAncestorV2 } from "./get-lowest-common-ancestor-v2.js";
 

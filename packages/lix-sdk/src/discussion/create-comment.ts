@@ -1,5 +1,5 @@
 import type { Comment } from "../database/schema.js";
-import type { Lix } from "../open/openLix.js";
+import type { Lix } from "../lix/open-lix.js";
 
 export async function createComment(args: {
 	lix: Pick<Lix, "db">;

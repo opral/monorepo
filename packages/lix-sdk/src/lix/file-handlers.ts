@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { LixDatabaseSchema, LixFile } from "./database/schema.js";
-import type { DetectedChange, LixPlugin } from "./plugin/lix-plugin.js";
+import type { LixDatabaseSchema, LixFile } from "../database/schema.js";
+import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
 import { minimatch } from "minimatch";
 import { Kysely } from "kysely";
-import { updateBranchPointers } from "./branch/update-branch-pointers.js";
-import { changeInBranch } from "./query-utilities/change-in-branch.js";
-import { changeIsLeafChangeOf } from "./query-utilities/change-is-leaf-change-of.js";
+import { updateBranchPointers } from "../branch/update-branch-pointers.js";
+import { changeInBranch } from "../query-utilities/change-in-branch.js";
+import { changeIsLeafChangeOf } from "../query-utilities/change-is-leaf-change-of.js";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {

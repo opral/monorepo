@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { updateBranchPointers } from "../branch/update-branch-pointers.js";
-import { openLixInMemory } from "../open/openLixInMemory.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createBranch } from "./create-branch.js";
 
 test("it should copy the change pointers from the parent branch", async () => {

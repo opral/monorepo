@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "./openLixInMemory.js";
+import { openLixInMemory } from "./open-lix-in-memory.js";
 
 test("it should open a lix in memory", async () => {
 	const lix = await openLixInMemory({});

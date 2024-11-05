@@ -1,5 +1,5 @@
 import type { Change, LixFile, Snapshot } from "../database/schema.js";
-import type { Lix } from "../open/openLix.js";
+import type { Lix } from "../lix/open-lix.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
 export type LixPlugin = {

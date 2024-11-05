@@ -1,6 +1,6 @@
 import { test, expect, vi } from "vitest";
-import { openLixInMemory } from "../open/openLixInMemory.js";
-import { newLixFile } from "../newLix.js";
+import { openLixInMemory } from "./open-lix-in-memory.js";
+import { newLixFile } from "./new-lix.js";
 import { merge } from "./merge.js";
 import type {
 	ChangeGraphEdge,

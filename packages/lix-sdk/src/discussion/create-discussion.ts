@@ -1,5 +1,5 @@
 import type { ChangeSet, Comment, Discussion } from "../database/schema.js";
-import type { Lix } from "../open/openLix.js";
+import type { Lix } from "../lix/open-lix.js";
 
 /**
  * Creates a new discussion with the first comment.

@@ -1,5 +1,5 @@
 import type { Branch, Change } from "../database/schema.js";
-import type { Lix } from "../open/openLix.js";
+import type { Lix } from "../lix/open-lix.js";
 
 /**
  * Updates the branch pointers for the given branch with the given changes.

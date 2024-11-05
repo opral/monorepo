@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../open/openLixInMemory.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeSet } from "./create-change-set.js";
 
 test("creating a change set should succeed", async () => {

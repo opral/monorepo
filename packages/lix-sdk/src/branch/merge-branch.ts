@@ -1,5 +1,5 @@
 import type { Branch, Change } from "../database/schema.js";
-import type { Lix } from "../open/openLix.js";
+import type { Lix } from "../lix/open-lix.js";
 import type { DetectedConflict } from "../plugin/lix-plugin.js";
 import { getLowestCommonAncestorV2 } from "../query-utilities/get-lowest-common-ancestor-v2.js";
 

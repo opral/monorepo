@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../open/openLixInMemory.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { updateBranchPointers } from "./update-branch-pointers.js";
 
 test("the branch pointer for a change should be updated", async () => {

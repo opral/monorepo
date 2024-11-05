@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { changeIsLeafChangeOf } from "./change-is-leaf-change-of.js";
-import { openLixInMemory } from "../open/openLixInMemory.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { Change, ChangeGraphEdge } from "../database/schema.js";
 import { updateBranchPointers } from "../branch/update-branch-pointers.js";
 

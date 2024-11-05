@@ -1,6 +1,6 @@
 import { createInMemoryDatabase } from "sqlite-wasm-kysely";
 import { test, expect } from "vitest";
-import { initDb } from "./initDb.js";
+import { initDb } from "./init-db.js";
 import { validate } from "uuid";
 
 test("file ids should default to uuid", async () => {

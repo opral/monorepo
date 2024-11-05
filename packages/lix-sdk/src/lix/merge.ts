@@ -1,4 +1,4 @@
-import type { Lix } from "../open/openLix.js";
+import type { Lix } from "./open-lix.js";
 import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-only-in-source.js";
 
 /**

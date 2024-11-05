@@ -1,9 +1,9 @@
 import { Kysely, ParseJSONResultsPlugin } from "kysely";
 import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { v4 } from "uuid";
-import { SerializeJsonPlugin } from "./serializeJsonPlugin.js";
+import { SerializeJsonPlugin } from "./serialize-json-plugin.js";
 import type { LixDatabaseSchema } from "./schema.js";
-import { applySchema } from "./applySchema.js";
+import { applySchema } from "./apply-schema.js";
 import { sha256 } from "js-sha256";
 
 export function initDb(args: { sqlite: SqliteDatabase }) {

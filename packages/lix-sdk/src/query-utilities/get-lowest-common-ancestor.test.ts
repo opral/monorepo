@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { getLowestCommonAncestor } from "./get-lowest-common-ancestor.js";
-import { openLixInMemory } from "../open/openLixInMemory.js";
-import { newLixFile } from "../newLix.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { newLixFile } from "../lix/new-lix.js";
 import type { NewChange } from "../database/schema.js";
 import { mockJsonSnapshot } from "./mock-json-snapshot.js";
 

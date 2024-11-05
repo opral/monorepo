@@ -1,5 +1,5 @@
 import { createInMemoryDatabase, importDatabase } from "sqlite-wasm-kysely";
-import { openLix } from "./openLix.js";
+import { openLix } from "./open-lix.js";
 
 /**
  * Opens a lix in memory.

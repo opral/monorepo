@@ -1,5 +1,5 @@
 import type { Branch } from "../database/schema.js";
-import type { Lix } from "../open/openLix.js";
+import type { Lix } from "../lix/open-lix.js";
 
 /**
  * Switches the current branch to the given branch.
