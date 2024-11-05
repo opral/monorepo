@@ -252,8 +252,6 @@ const BranchDropdown = () => {
 					.select("snapshot.content")
 					.execute();
 
-				console.log("changesOfBranch", changesOfBranch);
-
 				await applyChanges({
 					lix: { ...lix, db: trx },
 					changes: changesOfBranch,
@@ -264,7 +262,7 @@ const BranchDropdown = () => {
 			} else {
 				await lix.db.transaction().execute(executeInTransaction);
 			}
-			saveLixToOpfs({ lix });
+			await saveLixToOpfs({ lix });
 		},
 		[lix]
 	);
