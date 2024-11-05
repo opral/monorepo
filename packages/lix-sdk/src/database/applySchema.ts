@@ -176,9 +176,18 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     FOREIGN KEY(id) REFERENCES branch(id)
   ) strict;
 
-  -- Create a default branch (using a pre-defined id to avoid duplicate inserts)
-  INSERT OR IGNORE INTO branch (id, name) VALUES ('00000000-0000-0000-0000-000000000000','main');
-  INSERT OR IGNORE INTO current_branch (id) VALUES ('00000000-0000-0000-0000-000000000000');
+  -- Insert the default branch if missing
+  -- (this is a workaround for not having a separata creation and migration schema's)
+  INSERT INTO branch (id, name)
+  SELECT '00000000-0000-0000-0000-000000000000', 'main'
+  WHERE NOT EXISTS (SELECT 1 FROM branch);
+
+  -- Set the default current branch to 'main' if both tables are empty
+  -- (this is a workaround for not having a separata creation and migration schema's)
+  INSERT INTO current_branch (id)
+  SELECT '00000000-0000-0000-0000-000000000000'
+  WHERE NOT EXISTS (SELECT 1 FROM current_branch);
+
 `;
 }
 

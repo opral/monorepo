@@ -224,7 +224,6 @@ test("a default main branch should exist", async () => {
 	expect(branch).toBeDefined();
 });
 
-
 test("conflicts should not be able to reference themselves", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
@@ -243,4 +242,28 @@ test("conflicts should not be able to reference themselves", async () => {
 	).rejects.toThrowErrorMatchingInlineSnapshot(
 		`[SQLite3Error: SQLITE_CONSTRAINT_CHECK: sqlite3 result code 275: CHECK constraint failed: change_id != conflicting_change_id]`,
 	);
+});
+
+test("re-opening the same database shouldn't lead to duplicate insertion of the current branch", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const newBranch = await db
+		.insertInto("branch")
+		.values({ name: "mock" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	await db.updateTable("current_branch").set({ id: newBranch.id }).execute();
+
+	const db2 = initDb({ sqlite });
+
+	const currentBranch = await db2
+		.selectFrom("current_branch")
+		.selectAll()
+		.execute();
+
+	expect(currentBranch).toHaveLength(1);
 });
