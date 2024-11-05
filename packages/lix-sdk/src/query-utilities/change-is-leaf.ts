@@ -7,12 +7,12 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  * @example
  *   ```ts
  *   await lix.db.selectFrom("change")
- *     .where(changeIsLeafChange())
+ *     .where(changeIsLeaf())
  *     .selectAll()
  *     .execute();
  *   ```
  */
-export function changeIsLeafChange() {
+export function changeIsLeaf() {
 	return (eb: ExpressionBuilder<LixDatabaseSchema, "change">) =>
 		eb("change.id", "not in", (subquery) =>
 			subquery

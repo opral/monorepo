@@ -10,7 +10,7 @@ import type { Change } from "../database/schema.js";
  *
  *   ```ts
  *   await lix.db.selectFrom("change")
- *      .where(changeIsLeafChangeOf(someChange))
+ *      .where(changeIsLeafOf(someChange))
  *      .selectAll()
  *      .execute();
  *   ```
@@ -20,13 +20,13 @@ import type { Change } from "../database/schema.js";
  *
  *   ```ts
  *   await lix.db.selectFrom("change")
- *     .where(changeIsLeafChangeOf(someChange))
+ *     .where(changeIsLeafOf(someChange))
  *     .where(changeInBranch(someBranch))
  *     .selectAll()
  *     .execute();
  *   ```
  */
-export function changeIsLeafChangeOf(change: Pick<Change, 'id'>) {
+export function changeIsLeafOf(change: Pick<Change, "id">) {
 	return sql`
     change.id IN (
       WITH RECURSIVE descendants(id) AS (

@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { changeIsLeafChangeOf } from "./change-is-leaf-change-of.js";
+import { changeIsLeafOf } from "./change-is-leaf-of.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { Change, ChangeGraphEdge } from "../database/schema.js";
 import { updateBranchPointers } from "../branch/update-branch-pointers.js";
@@ -50,7 +50,7 @@ test("it should find the latest child of a given change", async () => {
 
 	const leafOfChange1 = await lix.db
 		.selectFrom("change")
-		.where(changeIsLeafChangeOf(mockChanges[0]))
+		.where(changeIsLeafOf(mockChanges[0]))
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -58,7 +58,7 @@ test("it should find the latest child of a given change", async () => {
 
 	const leafOfChange2 = await lix.db
 		.selectFrom("change")
-		.where(changeIsLeafChangeOf(mockChanges[1]))
+		.where(changeIsLeafOf(mockChanges[1]))
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -66,7 +66,7 @@ test("it should find the latest child of a given change", async () => {
 
 	const leafOfChange3 = await lix.db
 		.selectFrom("change")
-		.where(changeIsLeafChangeOf(mockChanges[2]))
+		.where(changeIsLeafOf(mockChanges[2]))
 		.selectAll()
 		.executeTakeFirstOrThrow();
 

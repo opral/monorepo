@@ -9,7 +9,7 @@ import {
 	type NewChange,
 	type NewSnapshot,
 } from "../index.js";
-import { changeIsLeafChangeOf } from "./change-is-leaf-change-of.js";
+import { changeIsLeafOf } from "./change-is-leaf-of.js";
 
 const createChange = (
 	type: "bundle" | "message" | "variant",
@@ -134,7 +134,7 @@ for (let i = 0; i < 5; i++) {
 			bench("getLeafChange", async () => {
 				await project.lix.db
 					.selectFrom("change")
-					.where(changeIsLeafChangeOf({ id: project.firstChangeId! }))
+					.where(changeIsLeafOf({ id: project.firstChangeId! }))
 					.selectAll()
 					.execute();
 			});

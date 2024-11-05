@@ -5,7 +5,7 @@ import { minimatch } from "minimatch";
 import { Kysely } from "kysely";
 import { updateBranchPointers } from "../branch/update-branch-pointers.js";
 import { changeInBranch } from "../query-utilities/change-in-branch.js";
-import { changeIsLeafChangeOf } from "../query-utilities/change-is-leaf-change-of.js";
+import { changeIsLeafOf } from "../query-utilities/change-is-leaf-of.js";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {
@@ -160,7 +160,7 @@ export async function handleFileChange(args: {
 				: await trx
 						.selectFrom("change")
 						.selectAll()
-						.where(changeIsLeafChangeOf(maybeParentChange))
+						.where(changeIsLeafOf(maybeParentChange))
 						.executeTakeFirst();
 
 			const snapshot = await trx
