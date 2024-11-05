@@ -106,3 +106,42 @@ test("the branch pointer for a change should be updated", async () => {
 	expect(updatedBranchChangePointers2[0]?.change_id).toBe("change-2");
 	expect(updatedBranchChangePointers2[1]?.change_id).toBe("change-3");
 });
+
+test("it should default to the current branch if no branch is provided", async () => {
+	const lix = await openLixInMemory({});
+
+	const currentBranch = await lix.db
+		.selectFrom("current_branch")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	await lix.db.transaction().execute(async (trx) => {
+		const changes = await trx
+			.insertInto("change")
+			.values({
+				id: "change-1",
+				type: "file",
+				entity_id: "value1",
+				file_id: "mock",
+				plugin_key: "mock-plugin",
+				snapshot_id: "no-content",
+			})
+			.returningAll()
+			.execute();
+
+		await updateBranchPointers({
+			lix: { db: trx },
+			changes,
+		});
+	});
+
+	const branchChangePointers = await lix.db
+		.selectFrom("branch_change_pointer")
+		.selectAll()
+		.where("branch_id", "=", currentBranch.id)
+		.execute();
+
+	// the head of the change is change-1
+	expect(branchChangePointers.length).toBe(1);
+	expect(branchChangePointers[0]?.change_id).toBe("change-1");
+});

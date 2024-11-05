@@ -3,18 +3,27 @@ import type { Lix } from "../open/openLix.js";
 
 /**
  * Updates the branch pointers for the given branch with the given changes.
+ * 
+ * @args branch - The branch to update the pointers for. If not provided, the current branch is used.
  */
 export async function updateBranchPointers(args: {
 	lix: Pick<Lix, "db">;
-	branch: Pick<Branch, "id">;
 	changes: Change[];
+	branch?: Pick<Branch, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
+		const branch =
+			args.branch ??
+			(await trx
+				.selectFrom("current_branch")
+				.selectAll()
+				.executeTakeFirstOrThrow());
+
 		await trx
 			.insertInto("branch_change_pointer")
 			.values(
 				args.changes.map((change) => ({
-					branch_id: args.branch.id,
+					branch_id: branch.id,
 					change_id: change.id,
 					change_entity_id: change.entity_id,
 					change_file_id: change.file_id,
