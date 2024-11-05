@@ -11,7 +11,7 @@ import * as papaparse from "papaparse";
  *   const data = new TextEncoder().encode("age,name\n23,alice\n56,bob");
  *   const parsed = parseCsv(data, "name");
  *
- *   console.log(parsed); // { "alice": ["23", "alice"], "bob": ["56", "bob"] }
+ *   console.log(parsed); // { "alice": { age: "23", name: "alice"}, "bob": { age: "56", name: "bob"} }
  *   console.log(parsed['bob']) // ["56", "bob"]
  *
  *   ```
@@ -19,13 +19,14 @@ import * as papaparse from "papaparse";
 export function parseCsv(
 	data: ArrayBuffer | undefined,
 	uniqueColumn: string,
-): [Record<string, string[]> | undefined, string[]] {
+): [Record<string, Record<string, string>> | undefined, string[]] {
 	const parsed = data
 		? papaparse.parse(new TextDecoder().decode(data), {
 				skipEmptyLines: true,
 			})
 		: undefined;
-	const index: Record<string, string[]> = {};
+
+	const index: Record<string, Record<string, string>> = {};
 	const headerRow = parsed?.data?.[0] as string[];
 	if (!headerRow) {
 		return [undefined, headerRow];
@@ -44,7 +45,13 @@ export function parseCsv(
 		const uniqueValue = row[uniqueColumnIndex];
 		if (uniqueValue) {
 			const entity_id = `${uniqueColumn}:${uniqueValue}`;
-			index[entity_id] = row;
+
+			for (const [columnI, value] of row.entries()) {
+				if (!index[entity_id]) {
+					index[entity_id] = {};
+				}
+				index[entity_id]![headerRow[columnI]!] = value;
+			}
 		}
 	}
 	return [index, headerRow];

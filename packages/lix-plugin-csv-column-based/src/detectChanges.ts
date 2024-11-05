@@ -1,6 +1,10 @@
 import type { DetectedChange, LixFile, LixPlugin } from "@lix-js/sdk";
 import { parseCsv } from "./utilities/parseCsv.js";
 
+function toEntityId(rowId: string, columnName: string) {
+	return rowId + "__" + columnName;
+}
+
 export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	before,
 	after,
@@ -19,71 +23,88 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	const [beforeParsed] = parseCsv(before?.data, uniqueColumnBefore);
 	const [afterParsed] = parseCsv(after?.data, uniqueColumnAfter);
 
-	const allEntityIds = new Set([
-		...Object.keys(beforeParsed ?? {}),
-		...Object.keys(afterParsed ?? {}),
-	]);
-
 	// mark all rows as deleted and newly inserted
 	// if the unique column changed
 	if (uniqueColumnChanged(before, after)) {
-		for (const entity_id in beforeParsed) {
-			// mark all rows as deleted
-			detectedChanges.push({
-				type: "row",
-				entity_id,
-				snapshot: undefined,
-			});
+		for (const row_id in beforeParsed) {
+			for (const column in beforeParsed[row_id]) {
+				const entity_id = toEntityId(row_id, column);
+				// mark all cells as deleted
+				detectedChanges.push({
+					type: "cell",
+					entity_id,
+					snapshot: undefined,
+				});
+			}
 		}
-		for (const entity_id in afterParsed) {
-			// mark all rows as newly inserted
-			detectedChanges.push({
-				type: "row",
-				entity_id,
-				snapshot: { text: afterParsed[entity_id]!.join(",") },
-			});
+		for (const row_id in afterParsed) {
+			// mark all columns as newly inserted
+			for (const column in afterParsed[row_id]) {
+				const entity_id = toEntityId(row_id, column);
+				// mark all cells as deleted
+				detectedChanges.push({
+					type: "cell",
+					entity_id,
+					snapshot: { text: afterParsed[row_id]![column] },
+				});
+			}
 		}
 		return detectedChanges;
 	}
 
-	// Loop over all unique IDs and detect changes
-	for (const entity_id of allEntityIds) {
-		const beforeRow = beforeParsed?.[entity_id];
-		const afterRow = afterParsed?.[entity_id];
+	const allRowIds = new Set([
+		...Object.keys(beforeParsed ?? {}),
+		...Object.keys(afterParsed ?? {}),
+	]);
 
-		// Row exists in both datasets -> check for update
-		if (beforeRow && afterRow) {
-			if (!isEqual(beforeRow, afterRow)) {
+	// Loop over all unique IDs and detect changes at the cell level
+	for (const rowId of allRowIds) {
+		const beforeRow = beforeParsed?.[rowId] ?? {};
+		const afterRow = afterParsed?.[rowId] ?? {};
+
+		// Gather all unique column names for this row
+		const allColumns = new Set([
+			...Object.keys(beforeRow),
+			...Object.keys(afterRow),
+		]);
+
+		for (const column of allColumns) {
+			const beforeCell = beforeRow[column];
+			const afterCell = afterRow[column];
+
+			const entity_id = toEntityId(rowId, column);
+
+			// Cell exists in both datasets -> check for update
+			if (beforeCell !== undefined && afterCell !== undefined) {
+				if (beforeCell !== afterCell) {
+					detectedChanges.push({
+						type: "cell",
+						entity_id,
+						snapshot: { text: afterCell },
+					});
+				}
+			}
+			// Cell exists only in before -> delete
+			else if (beforeCell !== undefined) {
 				detectedChanges.push({
-					type: "row",
+					type: "cell",
 					entity_id,
-					snapshot: { text: afterRow.join(",") },
+					snapshot: undefined,
+				});
+			}
+			// Cell exists only in after -> insert
+			else if (afterCell !== undefined) {
+				detectedChanges.push({
+					type: "cell",
+					entity_id,
+					snapshot: { text: afterCell },
 				});
 			}
 		}
-		// Row exists only in before -> delete
-		else if (beforeRow) {
-			detectedChanges.push({
-				type: "row",
-				entity_id,
-				snapshot: undefined,
-			});
-		}
-		// Row exists only in after -> insert
-		else if (afterRow) {
-			detectedChanges.push({
-				type: "row",
-				entity_id,
-				snapshot: { text: afterRow.join(",") },
-			});
-		}
 	}
+
 	return detectedChanges;
 };
-
-function isEqual(rowA: string[], rowB: string[]): boolean {
-	return rowA.join() === rowB.join();
-}
 
 function uniqueColumnChanged(before?: LixFile, after?: LixFile) {
 	return (

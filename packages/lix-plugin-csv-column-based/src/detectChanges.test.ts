@@ -34,9 +34,14 @@ test("it should detect an insert", async () => {
 
 	expect(detectedChanges).toEqual([
 		{
-			entity_id: "Name:John",
-			type: "row",
-			snapshot: { text: "John,30" },
+			entity_id: "Name:John__Name",
+			type: "cell",
+			snapshot: { text: "John" },
+		},
+		{
+			entity_id: "Name:John__Age",
+			type: "cell",
+			snapshot: { text: "30" },
 		},
 	] satisfies DetectedChange[]);
 });
@@ -54,9 +59,9 @@ test("it should detect updates", async () => {
 
 	expect(detectedChanges).toEqual([
 		{
-			type: "row",
-			entity_id: "Name:Anna",
-			snapshot: { text: "Anna,21" },
+			type: "cell",
+			entity_id: "Name:Anna__Age",
+			snapshot: { text: "21" },
 		},
 	] satisfies DetectedChange[]);
 });
@@ -73,7 +78,8 @@ test("it should detect a deletion", async () => {
 	});
 
 	expect(detectedChanges).toEqual([
-		{ entity_id: "Name:Peter", type: "row", snapshot: undefined },
+		{ entity_id: "Name:Peter__Name", type: "cell", snapshot: undefined },
+		{ entity_id: "Name:Peter__Age", type: "cell", snapshot: undefined },
 	] satisfies DetectedChange[]);
 });
 
@@ -112,11 +118,17 @@ test("changing the unique column should lead to a new entity_id to avoid bugs", 
 	expect(detectedChanges).toEqual(
 		expect.arrayContaining([
 			// detect the deletion of the old unique column
-			{ entity_id: "Name:Anna", type: "row", snapshot: undefined },
-			{ entity_id: "Name:Peter", type: "row", snapshot: undefined },
+			{ entity_id: "Name:Anna__Name", type: "cell", snapshot: undefined },
+			{ entity_id: "Name:Anna__Age", type: "cell", snapshot: undefined },
+			{ entity_id: "Name:Peter__Name", type: "cell", snapshot: undefined },
+			{ entity_id: "Name:Peter__Age", type: "cell", snapshot: undefined },
 			// detect the insertion of the new unique column
-			{ entity_id: "Age:20", type: "row", snapshot: { text: "Anna,20" } },
-			{ entity_id: "Age:50", type: "row", snapshot: { text: "Peter,50" } },
+
+			{ entity_id: "Age:50__Name", type: "cell", snapshot: { text: "Peter" } },
+			{ entity_id: "Age:50__Age", type: "cell", snapshot: { text: "50" } },
+
+			{ entity_id: "Age:20__Name", type: "cell", snapshot: { text: "Anna" } },
+			{ entity_id: "Age:20__Age", type: "cell", snapshot: { text: "20" } },
 		]),
 	);
 });
