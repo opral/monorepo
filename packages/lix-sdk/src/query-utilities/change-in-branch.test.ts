@@ -74,7 +74,7 @@ test("selectChangeInBranch should retrieve all changes in the branch including a
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.where(changeInBranch(branch.id))
+		.where(changeInBranch(branch))
 		.selectAll()
 		.execute();
 

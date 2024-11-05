@@ -9,7 +9,7 @@ import type { LixReadonly } from "../plugin/lix-plugin.js";
  *   const parents = await getParentChanges({ lix, change });
  *   ```
  */
-export async function getParentChangesV2(args: {
+export async function getParentChanges(args: {
 	lix: Pick<LixReadonly, "db">;
 	change: Pick<Change, "id">;
 }): Promise<Change[]> {

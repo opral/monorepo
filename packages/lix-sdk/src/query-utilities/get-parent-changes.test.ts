@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../open/openLixInMemory.js";
 import type { ChangeGraphEdge, NewChange } from "../database/schema.js";
-import { getParentChangesV2 } from "./get-parent-changes-v2.js";
+import { getParentChanges } from "./get-parent-changes.js";
 
 test("it should return the parent change of a change", async () => {
 	const lix = await openLixInMemory({});
@@ -64,7 +64,7 @@ test("it should return the parent change of a change", async () => {
 	await lix.db.insertInto("change").values(mockChanges).execute();
 	await lix.db.insertInto("change_graph_edge").values(mockEdges).execute();
 
-	const parentChanges = await getParentChangesV2({
+	const parentChanges = await getParentChanges({
 		lix,
 		change: { id: "change3" },
 	});

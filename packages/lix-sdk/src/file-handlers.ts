@@ -3,9 +3,9 @@ import type { LixDatabaseSchema, LixFile } from "./database/schema.js";
 import type { DetectedChange, LixPlugin } from "./plugin/lix-plugin.js";
 import { minimatch } from "minimatch";
 import { Kysely } from "kysely";
-import { isInSimulatedCurrentBranch } from "./query-utilities/is-in-simulated-branch.js";
-import { getLeafChange } from "./query-utilities/get-leaf-change.js";
 import { updateBranchPointers } from "./branch/update-branch-pointers.js";
+import { changeInBranch } from "./query-utilities/change-in-branch.js";
+import { changeIsLeafChangeOf } from "./query-utilities/change-is-leaf-change-of.js";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {
@@ -149,7 +149,7 @@ export async function handleFileChange(args: {
 				.where("file_id", "=", fileId)
 				.where("type", "=", detectedChange.type)
 				.where("entity_id", "=", detectedChange.entity_id)
-				.where(isInSimulatedCurrentBranch)
+				.where(changeInBranch(currentBranch))
 				// walk from the end of the tree to minimize the amount of changes to walk
 				.orderBy("id", "desc")
 				.executeTakeFirst();
@@ -157,10 +157,11 @@ export async function handleFileChange(args: {
 			// get the leaf change of the assumed previous change
 			const parentChange = !maybeParentChange
 				? undefined
-				: await getLeafChange({
-						lix: { db: trx },
-						change: maybeParentChange,
-					});
+				: await trx
+						.selectFrom("change")
+						.selectAll()
+						.where(changeIsLeafChangeOf(maybeParentChange))
+						.executeTakeFirst();
 
 			const snapshot = await trx
 				.insertInto("snapshot")

@@ -13,17 +13,17 @@ import type { SqlBool } from "kysely";
  *      .execute();
  *   ```
  */
-export function changeInBranch(branchId: Branch["id"]) {
+export function changeInBranch(branch: Pick<Branch, "id">) {
 	// Kysely does not support WITH RECURSIVE in a subquery, so we have to
 	// use a raw SQL expression here and map the type for TypeScript.
-	// 
-	// The return type cast was figured out by looking at another filter. 
+	//
+	// The return type cast was figured out by looking at another filter.
 	return sql`
     change.id IN (
 			WITH RECURSIVE recursive_changes(id) AS (
 				SELECT change_id AS id
 				FROM branch_change_pointer
-				WHERE branch_id = ${branchId}
+				WHERE branch_id = ${branch.id}
 				UNION ALL
 				SELECT change_graph_edge.parent_id AS id
 				FROM change_graph_edge

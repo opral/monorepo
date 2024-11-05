@@ -2,7 +2,6 @@
 import { v4 } from "uuid";
 import { bench, describe } from "vitest";
 import {
-	getLeafChange,
 	newLixFile,
 	openLixInMemory,
 	type Change,
@@ -10,6 +9,7 @@ import {
 	type NewChange,
 	type NewSnapshot,
 } from "../index.js";
+import { changeIsLeafChangeOf } from "./change-is-leaf-change-of.js";
 
 const createChange = (
 	type: "bundle" | "message" | "variant",
@@ -132,10 +132,11 @@ for (let i = 0; i < 5; i++) {
 		async () => {
 			const project = await setupLix(nMessages);
 			bench("getLeafChange", async () => {
-				await getLeafChange({
-					lix: project.lix,
-					change: { id: project.firstChangeId } as Change,
-				});
+				await project.lix.db
+					.selectFrom("change")
+					.where(changeIsLeafChangeOf({ id: project.firstChangeId! }))
+					.selectAll()
+					.execute();
 			});
 		},
 	);
