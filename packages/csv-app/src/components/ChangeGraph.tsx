@@ -13,8 +13,7 @@ import "@xyflow/react/dist/style.css";
 import { useMemo } from "react";
 import { Change, ChangeGraphEdge, Snapshot } from "@lix-js/sdk";
 
-const nodeWidth = 172;
-const nodeHeight = 36;
+
 
 export const ChangeGraph = (props: {
 	changes: Array<Change & { snapshot_content: Snapshot["content"] }>;
@@ -54,7 +53,9 @@ const layoutElements = (
 	dagreGraph.setGraph({ rankdir: direction });
 
 	for (const change of changes) {
-		const dimensions = calculateNodeDimensions(change.snapshot_content!.text);
+		const dimensions = calculateNodeDimensions(
+			change.snapshot_content?.text ?? "deleted"
+		);
 		dagreGraph.setNode(change.id, dimensions);
 	}
 	for (const edge of edges) {
@@ -65,15 +66,15 @@ const layoutElements = (
 
 	// need to map to node and edge type for the react flow component
 	const nodesMappedToFlow = changes.map((change) => {
-		const text = change.snapshot_content!.text;
+		const text = change.snapshot_content?.text;
 		const nodeWithPosition = dagreGraph.node(change.id);
 		return {
 			id: change.id,
 			data: { text },
 			type: "row",
 			position: {
-				x: nodeWithPosition.x - nodeWidth / 2,
-				y: nodeWithPosition.y - nodeHeight / 2,
+				x: nodeWithPosition.x - nodeWithPosition.width / 2,
+				y: nodeWithPosition.y - nodeWithPosition.height / 2,
 			},
 			style: {
 				width: nodeWithPosition.width,
@@ -106,8 +107,8 @@ const calculateNodeDimensions = (text: string) => {
 
 function Row({ data }: NodeProps<Node<{ text: string }>>) {
 	return (
-		<div className="p-2 flex items-center border-gray-400 border justify-between rounded">
-			{data.text}
+		<div className="p-2 flex items-center justify-center border-gray-400 border justify-between rounded">
+			{data.text ?? "deleted"}
 			<Handle
 				style={{ visibility: "hidden" }}
 				type="target"
