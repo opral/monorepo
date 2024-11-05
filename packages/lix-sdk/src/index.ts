@@ -5,6 +5,8 @@ export * from "./open/index.js";
 export * from "./database/index.js";
 export * from "./query-utilities/index.js";
 export * from "./branch/index.js";
+export * from "./discussion/index.js";
+export * from "./change-set/index.js";
 
 export { jsonObjectFrom, jsonArrayFrom } from "kysely/helpers/sqlite";
 export { v4 as uuidv4 } from "uuid";

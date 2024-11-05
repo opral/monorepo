@@ -3,7 +3,7 @@ import { openLixInMemory } from "../open/openLixInMemory.js";
 import { newLixFile } from "../newLix.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { createDiscussion } from "./create-discussion.js";
-import { createChangeSet } from "./create-change-set.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
 
 const mockPlugin: LixPlugin = {
 	key: "mock-plugin",
