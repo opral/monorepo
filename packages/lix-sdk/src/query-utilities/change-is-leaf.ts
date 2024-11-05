@@ -3,6 +3,9 @@ import type { LixDatabaseSchema } from "../database/schema.js";
 
 /**
  * Selects changes that are not a parent of any other change.
+ * 
+ * **Careful**: This filter is not specific to any branch.
+ * If you want to filter changes in a specific branch, use `changeIsLeafInBranch`.
  *
  * @example
  *   ```ts
