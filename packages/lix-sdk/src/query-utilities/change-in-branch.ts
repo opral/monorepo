@@ -8,7 +8,7 @@ import type { SqlBool } from "kysely";
  * @example
  *   ```ts
  *   const changes = await lix.db.selectFrom("change")
- *      .where(changeInBranch(currentBranch.id))
+ *      .where(changeInBranch(currentBranch))
  *      .selectAll()
  *      .execute();
  *   ```
