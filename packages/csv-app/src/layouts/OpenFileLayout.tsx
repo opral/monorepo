@@ -327,7 +327,10 @@ const BranchDropdown = () => {
 	);
 };
 
-const confirmChanges = async (lix: Lix, unconfirmedChanges: Change[]) => {
+export const confirmChanges = async (
+	lix: Lix,
+	unconfirmedChanges: Change[]
+) => {
 	const changeSet = await lix.db.transaction().execute(async (trx) => {
 		// create a new set
 		const newChangeSet = await trx

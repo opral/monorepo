@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import Dropzone from "./Dropzone.tsx";
 import { SlIconButton } from "@shoelace-style/shoelace/dist/react";
 import { useState } from "react";
-import { DEMO_CAP_TABLE_CSV_FILE_ID } from "../../helper/demo-lix-file/demoLixFile.ts";
+import { DEMO_FILE_IDS } from "../../helper/demo-lix-file/demoLixFile.ts";
 
 const filesAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -77,7 +77,7 @@ export default function FileExplorer() {
 							<div className="flex gap-1 items-center">
 								{hoveredFileId === file.id &&
 									// csv demo file can't be deleted
-									file.id !== DEMO_CAP_TABLE_CSV_FILE_ID && (
+									!DEMO_FILE_IDS.includes(file.id) && (
 										<SlIconButton
 											name="trash3"
 											onClick={() => handleDeleteFile(file.id)}
