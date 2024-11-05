@@ -1,4 +1,4 @@
-import { Branch, openLixInMemory } from "@lix-js/sdk";
+import { openLixInMemory } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { plugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
@@ -78,14 +78,11 @@ export const currentBranchAtom = atom(async (get) => {
 
 	const currentBranch = await lix.db
 		.selectFrom("current_branch")
-		// TODO innerJoin crashes on branch deletion
-		//      assumption: the current_branch pointer
-		//      is deleted somewhere.
-		.leftJoin("branch", "branch.id", "current_branch.id")
+		.innerJoin("branch", "branch.id", "current_branch.id")
 		.selectAll("branch")
 		.executeTakeFirstOrThrow();
 
-	return currentBranch as Branch;
+	return currentBranch;
 });
 
 export const existingBranchesAtom = atom(async (get) => {
