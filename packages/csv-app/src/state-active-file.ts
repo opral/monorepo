@@ -1,5 +1,5 @@
 /**
- * State atoms for the editor route.
+ * State atoms for an active file
  */
 
 import { atom } from "jotai";
@@ -8,7 +8,7 @@ import {
 	fileIdSearchParamsAtom,
 	withPollingAtom,
 	currentBranchAtom,
-} from "../../state.ts";
+} from "./state.ts";
 import Papa from "papaparse";
 import {
 	changeHasLabel,
@@ -148,3 +148,29 @@ export const unconfirmedChangesAtom = atom(async (get) => {
 		.execute();
 });
 
+export const allChangesAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	const activeFile = await get(activeFileAtom);
+	const currentBranch = await get(currentBranchAtom);
+	return await lix.db
+		.selectFrom("change")
+		.where("change.file_id", "=", activeFile.id)
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.where(changeInBranch(currentBranch))
+		.selectAll("change")
+		.select("snapshot.content as snapshot_content")
+		.execute();
+});
+
+export const allEdgesAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	const activeFile = await get(activeFileAtom);
+	return await lix.db
+		.selectFrom("change_graph_edge")
+		.innerJoin("change", "change.id", "change_graph_edge.parent_id")
+		.where("change.file_id", "=", activeFile.id)
+		.selectAll("change_graph_edge")
+		.execute();
+});

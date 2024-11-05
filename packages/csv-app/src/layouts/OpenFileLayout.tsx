@@ -18,7 +18,7 @@ import {
 	parsedCsvAtom,
 	unconfirmedChangesAtom,
 	uniqueColumnAtom,
-} from "../routes/editor/state.ts";
+} from "../state-active-file.ts";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { currentBranchAtom, existingBranchesAtom, lixAtom } from "../state.ts";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
@@ -98,7 +98,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 					<div className="px-3 flex gap-1">
 						<NavItem to={`/editor?f=${activeFile.id}`} name="Edit" />
 						<NavItem
-							to={`/graph?f=${activeFile.id}`}
+							to={`/changes?f=${activeFile.id}`}
 							counter={
 								unconfirmedChanges.length !== 0
 									? unconfirmedChanges.length
@@ -106,6 +106,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 							}
 							name="Changes"
 						/>
+						<NavItem to={`/graph?f=${activeFile.id}`} name="Graph" />
 					</div>
 				</div>
 

@@ -14,7 +14,7 @@ import {
 	activeRowChangesAtom,
 	parsedCsvAtom,
 	uniqueColumnAtom,
-} from "../routes/editor/state.ts";
+} from "../state-active-file.ts";
 import CellGraph from "./CellGraph.tsx";
 import { debounce } from "lodash-es";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
