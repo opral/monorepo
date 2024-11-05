@@ -5,6 +5,12 @@ import {
 	SlOption,
 	SlBadge,
 	SlDialog,
+	SlDropdown,
+	SlMenu,
+	SlMenuItem,
+	SlDivider,
+	SlIcon,
+	SlIconButton,
 } from "@shoelace-style/shoelace/dist/react";
 import { useAtom } from "jotai";
 import {
@@ -13,12 +19,23 @@ import {
 	unconfirmedChangesAtom,
 	uniqueColumnAtom,
 } from "../routes/editor/state.ts";
-import { useMemo, useRef, useState } from "react";
-import { lixAtom } from "../state.ts";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { currentBranchAtom, existingBranchesAtom, lixAtom } from "../state.ts";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import clsx from "clsx";
-import { Change, ChangeSet, getLeafChange, Lix } from "@lix-js/sdk";
+import {
+	applyChanges,
+	Branch,
+	Change,
+	changeIsLeafOf,
+	changeIsLeafInBranch,
+	ChangeSet,
+	createBranch,
+	Lix,
+	switchBranch,
+} from "@lix-js/sdk";
 import { SlInput } from "@shoelace-style/shoelace/dist/react";
+import { humanId } from "human-id";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
@@ -58,9 +75,10 @@ export default function Layout(props: { children: React.ReactNode }) {
 							</Link>
 
 							<p className="font-medium opacity-30">/</p>
-							<div className="flex justify-center items-center text-zinc-950 h-9 rounded-lg px-2">
+							<div className="flex gap-4 justify-center items-center text-zinc-950 h-9 rounded-lg px-2">
 								{/* slice away the root slash */}
 								<h1 className="font-medium">{activeFile?.path.slice(1)}</h1>
+								<BranchDropdown></BranchDropdown>
 							</div>
 						</div>
 
@@ -211,6 +229,104 @@ const ConfirmChangesDialog = (props: { onClose: () => void }) => {
 	);
 };
 
+const BranchDropdown = () => {
+	const [currentBranch] = useAtom(currentBranchAtom);
+	const [existingBranches] = useAtom(existingBranchesAtom);
+	const [lix] = useAtom(lixAtom);
+	const [activeFile] = useAtom(activeFileAtom);
+
+	// ideally, lix handles this internally.
+	// ticket exists https://linear.app/opral/issue/LIXDK-219/only-applychanges-on-filedata-read
+	const switchToBranch = useCallback(
+		async (branch: Branch, trx?: Lix["db"]) => {
+			const executeInTransaction = async (trx: Lix["db"]) => {
+				await switchBranch({ lix: { ...lix, db: trx }, to: branch });
+
+				const changesOfBranch = await trx
+					.selectFrom("change")
+					.where(changeIsLeafInBranch(branch))
+					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+					.where("file_id", "=", activeFile.id)
+					.selectAll("change")
+					.select("snapshot.content")
+					.execute();
+
+				console.log("changesOfBranch", changesOfBranch);
+
+				await applyChanges({
+					lix: { ...lix, db: trx },
+					changes: changesOfBranch,
+				});
+			};
+			if (trx) {
+				await executeInTransaction(trx);
+			} else {
+				await lix.db.transaction().execute(executeInTransaction);
+			}
+			saveLixToOpfs({ lix });
+		},
+		[lix]
+	);
+
+	return (
+		<SlDropdown>
+			<SlButton slot="trigger" size="small" caret>
+				<img slot="prefix" src="branch-icon.svg" className="w-4 h-4"></img>
+				{currentBranch.name}
+			</SlButton>
+			<SlMenu>
+				{existingBranches.map((branch) => (
+					<SlMenuItem key={branch.id} onClick={() => switchToBranch(branch)}>
+						{branch.name}
+						<SlIconButton
+							slot="suffix"
+							name="x"
+							label="delete"
+							className="ml-2"
+							onClick={async () => {
+								await lix.db.transaction().execute(async (trx) => {
+									if (currentBranch.id === branch.id) {
+										const mainBranch = await trx
+											.selectFrom("branch")
+											.selectAll()
+											.where("name", "=", "main")
+											.executeTakeFirstOrThrow();
+
+										await switchToBranch(mainBranch, trx);
+									}
+
+									await trx
+										.deleteFrom("branch")
+										.where("id", "=", branch.id)
+										.execute();
+								});
+							}}
+						></SlIconButton>
+					</SlMenuItem>
+				))}
+				<SlDivider className="w-full border-b border-gray-300"></SlDivider>
+				<SlMenuItem
+					onClick={async () => {
+						const newBranch = await createBranch({
+							lix,
+							from: currentBranch,
+							name: humanId({
+								separator: "-",
+								capitalize: false,
+								adjectiveCount: 0,
+							}),
+						});
+						await switchToBranch(newBranch);
+					}}
+				>
+					Create branch
+					<SlIcon slot="prefix" name="plus" className="mr-1 text-xl"></SlIcon>
+				</SlMenuItem>
+			</SlMenu>
+		</SlDropdown>
+	);
+};
+
 const confirmChanges = async (lix: Lix, unconfirmedChanges: Change[]) => {
 	const changeSet = await lix.db.transaction().execute(async (trx) => {
 		// create a new set
@@ -238,7 +354,11 @@ const confirmChanges = async (lix: Lix, unconfirmedChanges: Change[]) => {
 
 		// insert the leaf changes into the set
 		for (const change of unconfirmedChanges) {
-			const leafChange = await getLeafChange({ lix: { db: trx }, change });
+			const leafChange = await trx
+				.selectFrom("change")
+				.where(changeIsLeafOf(change))
+				.selectAll()
+				.executeTakeFirstOrThrow();
 			await trx
 				.insertInto("change_set_element")
 				.values({

@@ -1,9 +1,9 @@
 import {
 	getLowestCommonAncestor,
-	getLeafChange,
 	type LixPlugin,
 	getLeafChangesOnlyInSource,
 	type DetectedConflict,
+	changeIsLeafOf,
 } from "@lix-js/sdk";
 
 export const detectConflicts: NonNullable<
@@ -28,10 +28,11 @@ export const detectConflicts: NonNullable<
 			continue;
 		}
 
-		const leafChangeInTarget = await getLeafChange({
-			change: lowestCommonAncestor,
-			lix: targetLix,
-		});
+		const leafChangeInTarget = await targetLix.db
+			.selectFrom("change")
+			.selectAll()
+			.where(changeIsLeafOf(lowestCommonAncestor))
+			.executeTakeFirstOrThrow();
 
 		if (lowestCommonAncestor.id === leafChangeInTarget.id) {
 			// no conflict. the lowest common ancestor is

@@ -1,4 +1,4 @@
-import { getLeafChange, type LixPlugin } from "@lix-js/sdk";
+import { type LixPlugin } from "@lix-js/sdk";
 import papaparse from "papaparse";
 import { parseCsv } from "./utilities/parseCsv.js";
 
@@ -8,6 +8,10 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	changes,
 }) => {
 	const uniqueColumn = file.metadata?.unique_column;
+
+	const text = new TextDecoder().decode(file.data);
+
+	console.log("applyChanges", changes, "intial\n\n", text);
 
 	if (uniqueColumn === undefined) {
 		throw new Error("The unique_column metadata is required to apply changes");
@@ -19,11 +23,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		throw new Error("Failed to parse csv");
 	}
 
-	const leafChanges = await Promise.all(
-		changes.map((change) => getLeafChange({ change, lix })),
-	);
-
-	for (const change of leafChanges) {
+	for (const change of changes) {
 		const snapshot = await lix.db
 			.selectFrom("snapshot")
 			.where("id", "=", change.snapshot_id)
@@ -40,6 +40,8 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		else {
 			parsed[change.entity_id] = snapshot.content.text.split(",");
 		}
+
+		console.log("applied change", change, "to csv\n\n", parsed);
 	}
 
 	const csv = papaparse.unparse([headerRow, ...Object.values(parsed)], {
@@ -47,6 +49,8 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		// treats '\n' as a newline character nowadays
 		newline: "\n",
 	});
+
+	console.log("applied csv\n\n", csv);
 
 	return {
 		fileData: new TextEncoder().encode(csv),

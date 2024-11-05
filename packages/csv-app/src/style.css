@@ -24,26 +24,7 @@
     }
 }
 
-.inlang-pattern-editor-neu .inlang-pattern-editor-contenteditable {
-    background-color: #B2F4D4;
-    border: 1px solid #16A34B;
-}
-.inlang-pattern-editor-old .inlang-pattern-editor-contenteditable {
-    background-color: #F3C9CD;
-    border: 1px solid #DA2728;
-}
-
-.conflict-pattern .inlang-pattern-editor-contenteditable{
-    background-color: #FAFAFA;
-}
-
-.hide-new-variant::part(new-variant) {
-    display: none;
-}
-
-p {
-    line-height: 15px;
-}
+/* 
 
 .add-selector-dialog::part(body) {
     padding: 0;
@@ -67,8 +48,8 @@ padding: 0;
         border-radius: 20px 20px 0 0;
         width: 100%;
     }
-}
-
+} */
+/* 
 sl-button[variant="default"]::part(base) {
     transition: all 0.2s;
     font-size: 13px;
@@ -123,4 +104,4 @@ sl-avatar::part(base) {
 sl-avatar::part(initials) {
    font-size: 14px;
    color: #000
-}
+} */

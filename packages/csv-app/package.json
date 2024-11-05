@@ -16,6 +16,7 @@
 		"@lix-js/sdk": "workspace:*",
 		"@shoelace-style/shoelace": "^2.17.1",
 		"clsx": "^2.1.1",
+		"human-id": "^4.1.1",
 		"jotai": "^2.10.1",
 		"lodash-es": "^4.17.21",
 		"native-file-system-adapter": "^3.0.1",

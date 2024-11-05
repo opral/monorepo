@@ -7,9 +7,14 @@ import {
 	lixAtom,
 	fileIdSearchParamsAtom,
 	withPollingAtom,
+	currentBranchAtom,
 } from "../../state.ts";
 import Papa from "papaparse";
-import { changeHasLabel, changeIsLeafChange } from "@lix-js/sdk";
+import {
+	changeHasLabel,
+	changeInBranch,
+	changeIsLeafInBranch,
+} from "@lix-js/sdk";
 
 export const activeFileAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -82,6 +87,7 @@ export const activeRowChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const activeFile = await get(activeFileAtom);
 	const activeRowEntityId = await get(activeRowEntityIdAtom);
+	const currentBranch = await get(currentBranchAtom);
 	const lix = await get(lixAtom);
 	if (!activeRowEntityId) return [];
 	const changes = await lix.db
@@ -89,6 +95,7 @@ export const activeRowChangesAtom = atom(async (get) => {
 		.where("change.type", "=", "row")
 		.where("change.entity_id", "=", activeRowEntityId)
 		.where("change.file_id", "=", activeFile.id)
+		.where(changeInBranch(currentBranch))
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		// .innerJoin("change_set_item", "change_set_item.change_id", "change.id")
 		// .innerJoin("change_set", "change_set.id", "change_set_item.change_set_id")
@@ -123,7 +130,6 @@ export const activeRowChangesAtom = atom(async (get) => {
 		change.labels = labels.map((label) => label.name);
 	}
 	return changes;
-
 });
 
 // The CSV app treats changes that are not in a change set as unconfirmed changes.
@@ -131,11 +137,12 @@ export const unconfirmedChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
+	const currentBranch = await get(currentBranchAtom);
 
 	return await lix.db
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
-		.where(changeIsLeafChange())
+		.where(changeIsLeafInBranch(currentBranch))
 		.where((eb) => eb.not(changeHasLabel("confirmed")))
 		.selectAll("change")
 		.execute();

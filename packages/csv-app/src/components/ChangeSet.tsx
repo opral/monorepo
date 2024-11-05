@@ -1,13 +1,14 @@
 import {
+	Branch,
 	Change,
 	changeHasLabel,
-	isInSimulatedCurrentBranch,
+	changeInBranch,
 	Lix,
 	Snapshot,
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { lixAtom } from "../state.ts";
+import { currentBranchAtom, lixAtom } from "../state.ts";
 // import timeAgo from "../helper/timeAgo.ts";
 import clsx from "clsx";
 import {
@@ -16,7 +17,12 @@ import {
 	uniqueColumnIndexAtom,
 } from "../routes/editor/state.ts";
 
-const getChanges = async (lix: Lix, changeSetId: string, fileId: string) => {
+const getChanges = async (
+	lix: Lix,
+	changeSetId: string,
+	fileId: string,
+	currentBranch: Branch
+) => {
 	const result: Array<
 		Change & { content: Snapshot["content"] } & {
 			parent?: Change & { content: Snapshot["content"] };
@@ -47,7 +53,7 @@ const getChanges = async (lix: Lix, changeSetId: string, fileId: string) => {
 				"change.id"
 			)
 			.where("change_graph_edge.child_id", "=", change.id)
-			.where(isInSimulatedCurrentBranch)
+			.where(changeInBranch(currentBranch))
 			.where(changeHasLabel("confirmed"))
 			.selectAll("change")
 			.select("snapshot.content")
@@ -68,16 +74,19 @@ export default function ChangeSet(props: {
 	const [changes, setChanges] = useState<
 		Awaited<ReturnType<typeof getChanges>>
 	>([]);
+	const [currentBranch] = useAtom(currentBranchAtom);
 	const [parsedCsv] = useAtom(parsedCsvAtom);
 	const [uniqueColumnIndex] = useAtom(uniqueColumnIndexAtom);
 
 	useEffect(() => {
 		if (isOpen) {
-			getChanges(lix, props.id, activeFile.id).then((data) => {
+			getChanges(lix, props.id, activeFile.id, currentBranch).then((data) => {
 				setChanges(data);
 			});
 			const interval = setInterval(async () => {
-				getChanges(lix, props.id, activeFile.id).then(setChanges);
+				getChanges(lix, props.id, activeFile.id, currentBranch).then(
+					setChanges
+				);
 			}, 1000);
 			return () => clearInterval(interval);
 		}

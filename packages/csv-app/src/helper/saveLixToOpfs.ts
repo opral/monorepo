@@ -10,4 +10,5 @@ export async function saveLixToOpfs(args: { lix: Lix }) {
 	const file = await args.lix.toBlob();
 	await writable.write(file);
 	await writable.close();
+	console.log("done saving lix to opfs");
 }

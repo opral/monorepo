@@ -32,9 +32,9 @@ export const lixAtom = atom(async (get) => {
 	// workaround for https://github.com/opral/lix-sdk/issues/47
 	get(forceReloadLixAtom);
 
-	if (existingSafeLixToOpfsInterval) {
-		clearInterval(existingSafeLixToOpfsInterval);
-	}
+	// if (existingSafeLixToOpfsInterval) {
+	// 	clearInterval(existingSafeLixToOpfsInterval);
+	// }
 
 	const rootHandle = await getOriginPrivateDirectory();
 	const fileHandle = await rootHandle.getFileHandle("demo.lix", {
@@ -71,3 +71,23 @@ export const lixAtom = atom(async (get) => {
  * Search where the atom is set (likely in the layout/root component).
  */
 export const withPollingAtom = atom(Date.now());
+
+export const currentBranchAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+
+	const currentBranch = await lix.db
+		.selectFrom("current_branch")
+		.innerJoin("branch", "branch.id", "current_branch.id")
+		.selectAll("branch")
+		.executeTakeFirstOrThrow();
+
+	return currentBranch;
+});
+
+export const existingBranchesAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+
+	return await lix.db.selectFrom("branch").selectAll().execute();
+});

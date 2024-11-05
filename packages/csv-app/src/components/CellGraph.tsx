@@ -24,7 +24,6 @@ export default function CellGraph(props: {
 
 			<div className="mb-12 relative flex flex-col gap-3">
 				{props.activeRowChanges.map((change) => {
-					console.log(change);
 					return (
 						<div
 							key={change.id}
