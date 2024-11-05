@@ -49,3 +49,33 @@ test("should only return the leaf change", async () => {
 	expect(changes).toHaveLength(2);
 	expect(changes.map((c) => c.id)).toEqual(["change1", "change3"]);
 });
+
+
+test("should return the change even if it's the only one", async () => {
+	const lix = await openLixInMemory({});
+
+	await lix.db
+		.insertInto("change")
+		.values([
+			{
+				id: "change1",
+				snapshot_id: "empty-content",
+				entity_id: "mock1",
+				file_id: "mock",
+				plugin_key: "mock",
+				type: "mock",
+			},
+		])
+		.execute();
+
+	const changes = await lix.db
+		.selectFrom("change")
+		.where(changeIsLeaf())
+		.selectAll()
+		.execute();
+
+	expect(changes).toHaveLength(1);
+	expect(changes.map((c) => c.id)).toEqual(["change1"]);
+});
+
+
