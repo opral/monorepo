@@ -33,6 +33,7 @@ import {
 	createBranch,
 	Lix,
 	switchBranch,
+	mergeBranch,
 } from "@lix-js/sdk";
 import { SlInput } from "@shoelace-style/shoelace/dist/react";
 import { humanId } from "human-id";
@@ -274,35 +275,39 @@ const BranchDropdown = () => {
 				{currentBranch.name}
 			</SlButton>
 			<SlMenu>
-				{existingBranches.map((branch) => (
-					<SlMenuItem key={branch.id} onClick={() => switchToBranch(branch)}>
-						{branch.name}
-						<SlIconButton
-							slot="suffix"
-							name="x"
-							label="delete"
-							className="ml-2"
-							onClick={async () => {
-								await lix.db.transaction().execute(async (trx) => {
-									if (currentBranch.id === branch.id) {
-										const mainBranch = await trx
-											.selectFrom("branch")
-											.selectAll()
-											.where("name", "=", "main")
-											.executeTakeFirstOrThrow();
-
-										await switchToBranch(mainBranch, trx);
-									}
-
-									await trx
-										.deleteFrom("branch")
-										.where("id", "=", branch.id)
-										.execute();
-								});
-							}}
-						></SlIconButton>
-					</SlMenuItem>
-				))}
+				{existingBranches
+					.filter((b) => b.id !== currentBranch.id)
+					.map((branch) => (
+						<SlMenuItem key={branch.id}>
+							<p onClick={() => switchToBranch(branch)} className="w-full">
+								{branch.name}
+							</p>
+							<div slot="suffix" className="flex items-center ml-1">
+								<SlIconButton
+									name="sign-merge-right"
+									onClick={async () => {
+										await mergeBranch({
+											lix,
+											sourceBranch: branch,
+											targetBranch: currentBranch,
+										});
+									}}
+								></SlIconButton>
+								<SlIconButton
+									name="x"
+									label="delete"
+									onClick={async () => {
+										await lix.db.transaction().execute(async (trx) => {
+											await trx
+												.deleteFrom("branch")
+												.where("id", "=", branch.id)
+												.execute();
+										});
+									}}
+								></SlIconButton>
+							</div>
+						</SlMenuItem>
+					))}
 				<SlDivider className="w-full border-b border-gray-300"></SlDivider>
 				<SlMenuItem
 					onClick={async () => {
