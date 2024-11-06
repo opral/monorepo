@@ -152,6 +152,21 @@ export const allChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
+	// const currentBranch = await get(currentBranchAtom);
+	return await lix.db
+		.selectFrom("change")
+		.where("change.file_id", "=", activeFile.id)
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		// .where(changeInBranch(currentBranch))
+		.selectAll("change")
+		.select("snapshot.content as snapshot_content")
+		.execute();
+});
+
+export const changesCurrentBranchAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	const activeFile = await get(activeFileAtom);
 	const currentBranch = await get(currentBranchAtom);
 	return await lix.db
 		.selectFrom("change")
@@ -162,6 +177,7 @@ export const allChangesAtom = atom(async (get) => {
 		.select("snapshot.content as snapshot_content")
 		.execute();
 });
+
 
 export const allEdgesAtom = atom(async (get) => {
 	get(withPollingAtom);

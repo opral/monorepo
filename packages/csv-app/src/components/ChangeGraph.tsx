@@ -18,6 +18,7 @@ import { Change, ChangeGraphEdge, Snapshot } from "@lix-js/sdk";
 export const ChangeGraph = (props: {
 	changes: Array<Change & { snapshot_content: Snapshot["content"] }>;
 	edges: ChangeGraphEdge[];
+	highlightChanges: Array<Change>;
 }) => {
 	const dagreGraph = useMemo(
 		() => new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({})),
@@ -26,7 +27,8 @@ export const ChangeGraph = (props: {
 	const { nodes, edges } = layoutElements(
 		dagreGraph,
 		props.changes,
-		props.edges
+		props.edges,
+		props.highlightChanges
 	);
 	return (
 		<ReactFlow
@@ -48,6 +50,7 @@ const layoutElements = (
 	dagreGraph: dagre.graphlib.Graph,
 	changes: Array<Change & { snapshot_content: Snapshot["content"] }>,
 	edges: ChangeGraphEdge[],
+	highlightChanges: Array<Change>,
 	direction: "TB" | "LR" = "TB"
 ) => {
 	dagreGraph.setGraph({ rankdir: direction });
@@ -77,6 +80,9 @@ const layoutElements = (
 				y: nodeWithPosition.y - nodeWithPosition.height / 2,
 			},
 			style: {
+				opacity: highlightChanges.find((node) => node.id === change.id)
+					? 1
+					: 0.3,
 				width: nodeWithPosition.width,
 				height: nodeWithPosition.height,
 			},
@@ -90,6 +96,13 @@ const layoutElements = (
 			target: edge.parent_id,
 			markerEnd: {
 				type: MarkerType.ArrowClosed,
+			},
+			style: {
+				opacity:
+					highlightChanges.find((node) => node.id === edge.child_id) &&
+					highlightChanges.find((node) => node.id === edge.parent_id)
+						? 1
+						: 0.3,
 			},
 		} satisfies Edge;
 	});
