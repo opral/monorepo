@@ -1,10 +1,18 @@
 import { useAtom } from "jotai";
-import { withPollingAtom } from "../state.ts";
+import { lixAtom, withPollingAtom } from "../state.ts";
 import { useEffect } from "react";
-import { SlButton } from "@shoelace-style/shoelace/dist/react";
+import {
+	SlButton,
+	SlDropdown,
+	SlIcon,
+	SlMenu,
+	SlMenuItem,
+} from "@shoelace-style/shoelace/dist/react";
+import { Lix } from "@lix-js/sdk";
 
 export default function RootLayout(props: { children: JSX.Element }) {
 	const [, setPolling] = useAtom(withPollingAtom);
+	const [lix] = useAtom(lixAtom);
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -22,16 +30,43 @@ export default function RootLayout(props: { children: JSX.Element }) {
 						<img src="/lix.svg" alt="logo" className="w-8 h-8" />
 					</a>
 					<h1 className="font-medium">CSV Demo</h1>
-					<SlButton
-						size="small"
-						onClick={() => {
-							// @ts-expect-error - globally defined
-							window.deleteLix();
-							window.location.reload();
-						}}
-					>
-						reset
-					</SlButton>
+					<SlDropdown>
+						<SlButton slot="trigger" caret size="small">
+							Options
+						</SlButton>
+						<SlMenu>
+							<SlMenuItem>
+								<SlIcon
+									name="file-earmark"
+									slot="prefix"
+									className="mr-2"
+								></SlIcon>
+								Open
+							</SlMenuItem>
+							<SlMenuItem onClick={() => handleExportLixFile(lix)}>
+								<SlIcon
+									name="file-arrow-down"
+									slot="prefix"
+									className="mr-2"
+								></SlIcon>
+								Export
+							</SlMenuItem>
+							<SlMenuItem
+								onClick={() => {
+									// @ts-expect-error - globally defined
+									window.deleteLix();
+									window.location.reload();
+								}}
+							>
+								<SlIcon
+									name="arrow-counterclockwise"
+									slot="prefix"
+									className="mr-2"
+								></SlIcon>
+								Reset
+							</SlMenuItem>
+						</SlMenu>
+					</SlDropdown>
 				</div>
 				<div className="flex gap-3 items-center">
 					<a href="https://discord.gg/gdMPPWy57R" target="_blank">
@@ -49,3 +84,13 @@ export default function RootLayout(props: { children: JSX.Element }) {
 		</>
 	);
 }
+
+const handleExportLixFile = async (lix: Lix) => {
+	const blob = await lix.toBlob();
+	const a = document.createElement("a");
+	a.href = URL.createObjectURL(blob);
+	a.download = "demo.lix";
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+};
