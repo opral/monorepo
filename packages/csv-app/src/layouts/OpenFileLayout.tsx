@@ -15,6 +15,7 @@ import {
 import { useAtom } from "jotai";
 import {
 	activeFileAtom,
+	conflictsAtom,
 	parsedCsvAtom,
 	unconfirmedChangesAtom,
 	uniqueColumnAtom,
@@ -41,6 +42,7 @@ import { humanId } from "human-id";
 export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
+	const [conflicts] = useAtom(conflictsAtom);
 	const [showConfirmChangesDialog, setShowConfirmChangesDialog] =
 		useState(false);
 
@@ -106,6 +108,11 @@ export default function Layout(props: { children: React.ReactNode }) {
 									: undefined
 							}
 							name="Changes"
+						/>
+						<NavItem
+							to={`/conflicts?f=${activeFile.id}`}
+							counter={conflicts.length !== 0 ? conflicts.length : undefined}
+							name="Conflicts"
 						/>
 						<NavItem to={`/graph?f=${activeFile.id}`} name="Graph" />
 					</div>

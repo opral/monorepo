@@ -105,10 +105,13 @@ const calculateNodeDimensions = (text: string) => {
 	return { width, height };
 };
 
-function Row({ data }: NodeProps<Node<{ text: string }>>) {
+function Row({ id, data }: NodeProps<Node<{ text: string }>>) {
 	return (
 		<div className="p-2 flex items-center justify-center border-gray-400 border justify-between rounded">
-			{data.text ?? "deleted"}
+			<div>
+				{data.text ?? "deleted"}
+				<p className="mt-1 text-gray-300 text-xs">{id}</p>
+			</div>
 			<Handle
 				style={{ visibility: "hidden" }}
 				type="target"

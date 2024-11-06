@@ -174,3 +174,17 @@ export const allEdgesAtom = atom(async (get) => {
 		.selectAll("change_graph_edge")
 		.execute();
 });
+
+export const conflictsAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	const activeFile = await get(activeFileAtom);
+	const currentBranch = await get(currentBranchAtom);
+	return await lix.db
+		.selectFrom("conflict")
+		.innerJoin("change", "change.id", "conflict.change_id")
+		// .where(changeInBranch(currentBranch))
+		.where("change.file_id", "=", activeFile.id)
+		.selectAll("conflict")
+		.execute();
+});
