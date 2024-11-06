@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { lixAtom, withPollingAtom } from "../state.ts";
+import { LIX_FILE_NAME, lixAtom, withPollingAtom } from "../state.ts";
 import { useEffect } from "react";
 import {
 	SlButton,
@@ -21,6 +21,25 @@ export default function RootLayout(props: { children: JSX.Element }) {
 		return () => clearInterval(interval);
 	}, []);
 
+	const handleFileSelect = async (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
+		const file = event.target.files?.[0];
+		if (file) {
+			// Handle the file here
+			const fileContent = await file.arrayBuffer();
+
+			const opfsRoot = await navigator.storage.getDirectory();
+			const opfsFile = await opfsRoot.getFileHandle(LIX_FILE_NAME, {
+				create: true,
+			});
+			const writable = await opfsFile.createWritable();
+			await writable.write(fileContent);
+			await writable.close();
+			window.location.reload();
+		}
+	};
+
 	return (
 		<>
 			{/* Header with socials */}
@@ -35,13 +54,21 @@ export default function RootLayout(props: { children: JSX.Element }) {
 							Options
 						</SlButton>
 						<SlMenu>
-							<SlMenuItem>
+							<SlMenuItem
+								onClick={() => document.getElementById("file-input")?.click()}
+							>
 								<SlIcon
 									name="file-earmark"
 									slot="prefix"
 									className="mr-2"
 								></SlIcon>
 								Open
+								<input
+									id="file-input"
+									type="file"
+									style={{ display: "none" }}
+									onChange={handleFileSelect}
+								></input>
 							</SlMenuItem>
 							<SlMenuItem onClick={() => handleExportLixFile(lix)}>
 								<SlIcon

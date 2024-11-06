@@ -4,6 +4,9 @@ import { plugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
 
+
+export const LIX_FILE_NAME = "demo.lix";
+
 export const fileIdSearchParamsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	// Using window is a limitation of react router v6.
@@ -37,7 +40,7 @@ export const lixAtom = atom(async (get) => {
 	// }
 
 	const rootHandle = await getOriginPrivateDirectory();
-	const fileHandle = await rootHandle.getFileHandle("demo.lix", {
+	const fileHandle = await rootHandle.getFileHandle(LIX_FILE_NAME, {
 		create: true,
 	});
 	const file = await fileHandle.getFile();
@@ -59,7 +62,7 @@ export const lixAtom = atom(async (get) => {
 	// @ts-expect-error - Expose for debugging.
 	window.deleteLix = async () => {
 		clearInterval(existingSafeLixToOpfsInterval);
-		await rootHandle.removeEntry("demo.lix");
+		await rootHandle.removeEntry(LIX_FILE_NAME);
 	};
 
 	return lix;

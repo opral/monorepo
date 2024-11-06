@@ -75,14 +75,12 @@ export default function FileExplorer() {
 								<p>{file.path.slice(1)}</p>
 							</Link>
 							<div className="flex gap-1 items-center">
-								{hoveredFileId === file.id &&
-									// csv demo file can't be deleted
-									!DEMO_FILE_IDS.includes(file.id) && (
-										<SlIconButton
-											name="trash3"
-											onClick={() => handleDeleteFile(file.id)}
-										></SlIconButton>
-									)}
+								{hoveredFileId === file.id && (
+									<SlIconButton
+										name="trash3"
+										onClick={() => handleDeleteFile(file.id)}
+									></SlIconButton>
+								)}
 								{hoveredFileId === file.id && (
 									<SlIconButton
 										name="download"
