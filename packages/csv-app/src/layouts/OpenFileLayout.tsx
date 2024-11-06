@@ -15,10 +15,11 @@ import {
 import { useAtom } from "jotai";
 import {
 	activeFileAtom,
+	conflictsAtom,
 	parsedCsvAtom,
 	unconfirmedChangesAtom,
 	uniqueColumnAtom,
-} from "../routes/editor/state.ts";
+} from "../state-active-file.ts";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { currentBranchAtom, existingBranchesAtom, lixAtom } from "../state.ts";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
@@ -33,6 +34,7 @@ import {
 	createBranch,
 	Lix,
 	switchBranch,
+	mergeBranch,
 } from "@lix-js/sdk";
 import { SlInput } from "@shoelace-style/shoelace/dist/react";
 import { humanId } from "human-id";
@@ -40,6 +42,7 @@ import { humanId } from "human-id";
 export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
+	const [conflicts] = useAtom(conflictsAtom);
 	const [showConfirmChangesDialog, setShowConfirmChangesDialog] =
 		useState(false);
 
@@ -98,7 +101,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 					<div className="px-3 flex gap-1">
 						<NavItem to={`/editor?f=${activeFile.id}`} name="Edit" />
 						<NavItem
-							to={`/graph?f=${activeFile.id}`}
+							to={`/changes?f=${activeFile.id}`}
 							counter={
 								unconfirmedChanges.length !== 0
 									? unconfirmedChanges.length
@@ -106,6 +109,12 @@ export default function Layout(props: { children: React.ReactNode }) {
 							}
 							name="Changes"
 						/>
+						<NavItem
+							to={`/conflicts?f=${activeFile.id}`}
+							counter={conflicts.length !== 0 ? conflicts.length : undefined}
+							name="Conflicts"
+						/>
+						<NavItem to={`/graph?f=${activeFile.id}`} name="Graph" />
 					</div>
 				</div>
 
@@ -251,8 +260,6 @@ const BranchDropdown = () => {
 					.select("snapshot.content")
 					.execute();
 
-				console.log("changesOfBranch", changesOfBranch);
-
 				await applyChanges({
 					lix: { ...lix, db: trx },
 					changes: changesOfBranch,
@@ -263,7 +270,7 @@ const BranchDropdown = () => {
 			} else {
 				await lix.db.transaction().execute(executeInTransaction);
 			}
-			saveLixToOpfs({ lix });
+			await saveLixToOpfs({ lix });
 		},
 		[lix]
 	);
@@ -275,35 +282,39 @@ const BranchDropdown = () => {
 				{currentBranch.name}
 			</SlButton>
 			<SlMenu>
-				{existingBranches.map((branch) => (
-					<SlMenuItem key={branch.id} onClick={() => switchToBranch(branch)}>
-						{branch.name}
-						<SlIconButton
-							slot="suffix"
-							name="x"
-							label="delete"
-							className="ml-2"
-							onClick={async () => {
-								await lix.db.transaction().execute(async (trx) => {
-									if (currentBranch.id === branch.id) {
-										const mainBranch = await trx
-											.selectFrom("branch")
-											.selectAll()
-											.where("name", "=", "main")
-											.executeTakeFirstOrThrow();
-
-										await switchToBranch(mainBranch, trx);
-									}
-
-									await trx
-										.deleteFrom("branch")
-										.where("id", "=", branch.id)
-										.execute();
-								});
-							}}
-						></SlIconButton>
-					</SlMenuItem>
-				))}
+				{existingBranches
+					.filter((b) => b.id !== currentBranch.id)
+					.map((branch) => (
+						<SlMenuItem key={branch.id}>
+							<p onClick={() => switchToBranch(branch)} className="w-full">
+								{branch.name}
+							</p>
+							<div slot="suffix" className="flex items-center ml-1">
+								<SlIconButton
+									name="sign-merge-right"
+									onClick={async () => {
+										await mergeBranch({
+											lix,
+											sourceBranch: branch,
+											targetBranch: currentBranch,
+										});
+									}}
+								></SlIconButton>
+								<SlIconButton
+									name="x"
+									label="delete"
+									onClick={async () => {
+										await lix.db.transaction().execute(async (trx) => {
+											await trx
+												.deleteFrom("branch")
+												.where("id", "=", branch.id)
+												.execute();
+										});
+									}}
+								></SlIconButton>
+							</div>
+						</SlMenuItem>
+					))}
 				<SlDivider className="w-full border-b border-gray-300"></SlDivider>
 				<SlMenuItem
 					onClick={async () => {

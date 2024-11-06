@@ -12,9 +12,11 @@
 		"generate": "node ./scripts/generateDemoData.js"
 	},
 	"dependencies": {
+		"@dagrejs/dagre": "^1.1.4",
 		"@lix-js/plugin-csv": "workspace:*",
 		"@lix-js/sdk": "workspace:*",
 		"@shoelace-style/shoelace": "^2.17.1",
+		"@xyflow/react": "^12.3.4",
 		"clsx": "^2.1.1",
 		"human-id": "^4.1.1",
 		"jotai": "^2.10.1",

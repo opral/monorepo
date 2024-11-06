@@ -15,7 +15,7 @@ import {
 	activeFileAtom,
 	parsedCsvAtom,
 	uniqueColumnIndexAtom,
-} from "../routes/editor/state.ts";
+} from "../state-active-file.ts";
 
 const getChanges = async (
 	lix: Lix,

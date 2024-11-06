@@ -1,6 +1,7 @@
 import { useAtom } from "jotai";
 import { withPollingAtom } from "../state.ts";
 import { useEffect } from "react";
+import { SlButton } from "@shoelace-style/shoelace/dist/react";
 
 export default function RootLayout(props: { children: JSX.Element }) {
 	const [, setPolling] = useAtom(withPollingAtom);
@@ -21,6 +22,16 @@ export default function RootLayout(props: { children: JSX.Element }) {
 						<img src="/lix.svg" alt="logo" className="w-8 h-8" />
 					</a>
 					<h1 className="font-medium">CSV Demo</h1>
+					<SlButton
+						size="small"
+						onClick={() => {
+							// @ts-expect-error - globally defined
+							window.deleteLix();
+							window.location.reload();
+						}}
+					>
+						reset
+					</SlButton>
 				</div>
 				<div className="flex gap-3 items-center">
 					<a href="https://discord.gg/gdMPPWy57R" target="_blank">
