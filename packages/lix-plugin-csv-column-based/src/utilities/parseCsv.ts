@@ -44,7 +44,7 @@ export function parseCsv(
 		}
 		const uniqueValue = row[uniqueColumnIndex];
 		if (uniqueValue) {
-			const entity_id = `${uniqueColumn}:${uniqueValue}`;
+			const entity_id = `${uniqueColumn}|${uniqueValue}`;
 
 			for (const [columnI, value] of row.entries()) {
 				if (!index[entity_id]) {

@@ -2,7 +2,10 @@ import type { DetectedChange, LixFile, LixPlugin } from "@lix-js/sdk";
 import { parseCsv } from "./utilities/parseCsv.js";
 
 function toEntityId(rowId: string, columnName: string) {
-	return rowId + "__" + columnName;
+	// row id already is <unique column>|<unique value>
+	// so we can just append the column name to it
+	// <unique column>|<unique value>|<column name>
+	return rowId + "|" + columnName;
 }
 
 export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
@@ -103,12 +106,6 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		}
 	}
 
-	console.log(
-		"detectChanges",
-		before?.data ? new TextDecoder().decode(before!.data) : "NO (CONTENT)",
-		after?.data ? new TextDecoder().decode(after!.data) : "NO (CONTENT)",
-		detectedChanges,
-	);
 	return detectedChanges;
 };
 

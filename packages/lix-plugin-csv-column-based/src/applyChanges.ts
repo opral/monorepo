@@ -9,10 +9,6 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 }) => {
 	const uniqueColumn = file.metadata?.unique_column;
 
-	const text = new TextDecoder().decode(file.data);
-
-	// console.log("applyChanges", changes, "intial\n\n", text);
-
 	if (uniqueColumn === undefined) {
 		throw new Error("The unique_column metadata is required to apply changes");
 	}
@@ -30,7 +26,11 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
-		const [rowId, column] = change.entity_id.split("__") as [string, string];
+		const [uniqueColumn, uniqueColumnValue, column] = change.entity_id.split(
+			"|",
+		) as [string, string, string];
+
+		const rowId = `${uniqueColumn}|${uniqueColumnValue}`;
 
 		// console.log("processing change " + rowId + " col " + column, change);
 		// change is a deletion
