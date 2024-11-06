@@ -57,6 +57,41 @@ test("snapshot ids should default to sha256", async () => {
 	);
 });
 
+test("inserting the same snapshot multiple times should be possible and not lead to duplicates (content addressable)", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const initialSnapshots = await db
+		.selectFrom("snapshot")
+		.selectAll()
+		.execute();
+
+	const snapshot1 = await db
+		.insertInto("snapshot")
+		.values({
+			content: { a: "some data" },
+		})
+		.onConflict((oc) => oc.doNothing())
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const snapshot2 = await db
+		.insertInto("snapshot")
+		.values({
+			content: { a: "some data" },
+		})
+		.onConflict((oc) => oc.doUpdateSet({ content: { a: "some data" } }))
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const snapshots = await db.selectFrom("snapshot").selectAll().execute();
+
+	expect(snapshots).toHaveLength(initialSnapshots.length + 1);
+	expect(snapshot1.id).toBe(snapshot2.id);
+});
+
 test("an empty snapshot should default to the special 'no-content' snapshot to store disk space", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,

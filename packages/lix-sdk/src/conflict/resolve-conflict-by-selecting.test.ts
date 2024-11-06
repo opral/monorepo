@@ -5,7 +5,7 @@ import type { NewChange, Snapshot } from "../database/schema.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { SelectedChangeNotInConflictError } from "./errors.js";
 import { resolveConflictBySelecting } from "./resolve-conflict-by-selecting.js";
-import { mockJsonSnapshot } from "../query-utilities/mock-json-snapshot.js";
+import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 
 test("it should resolve a conflict by applying the change and marking the conflict as resolved with the applied change", async () => {
 	const mockSnapshots: Snapshot[] = [

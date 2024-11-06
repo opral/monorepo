@@ -9,7 +9,7 @@ import {
 	ChangeDoesNotBelongToFileError,
 	ChangeNotDirectChildOfConflictError,
 } from "./errors.js";
-import { mockJsonSnapshot } from "../query-utilities/mock-json-snapshot.js";
+import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 
 test("it should throw if the to be resolved with change already exists", async () => {
 	const mockSnapshots: Snapshot[] = [

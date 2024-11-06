@@ -5,6 +5,7 @@ import { minimatch } from "minimatch";
 import { Kysely } from "kysely";
 import { updateBranchPointers } from "../branch/update-branch-pointers.js";
 import { changeIsLeafInBranch } from "../query-utilities/change-is-leaf-in-branch.js";
+import { createSnapshot } from "../snapshot/create-snapshot.js";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {
@@ -57,15 +58,10 @@ export async function handleFileInsert(args: {
 			.executeTakeFirstOrThrow();
 
 		for (const detectedChange of detectedChanges) {
-			const snapshot = await trx
-				.insertInto("snapshot")
-				.values({
-					// @ts-expect-error - database expects stringified json
-					content: JSON.stringify(detectedChange.snapshot),
-				})
-				.onConflict((oc) => oc.doNothing())
-				.returning("id")
-				.executeTakeFirstOrThrow();
+			const snapshot = await createSnapshot({
+				lix: { db: trx },
+				content: detectedChange.snapshot,
+			});
 
 			const insertedChange = await trx
 				.insertInto("change")
@@ -148,21 +144,10 @@ export async function handleFileChange(args: {
 				.where(changeIsLeafInBranch(currentBranch))
 				.executeTakeFirst();
 
-			const snapshot = await trx
-				.insertInto("snapshot")
-				.values({
-					// @ts-expect-error- database expects stringified json
-					content: detectedChange.snapshot
-						? JSON.stringify(detectedChange.snapshot)
-						: null,
-				})
-				.onConflict((oc) =>
-					oc.doUpdateSet((eb) => ({
-						content: eb.ref("excluded.content"),
-					})),
-				)
-				.returning("id")
-				.executeTakeFirstOrThrow();
+			const snapshot = await createSnapshot({
+				lix: { db: trx },
+				content: detectedChange.snapshot,
+			});
 
 			const insertedChange = await trx
 				.insertInto("change")

@@ -10,7 +10,7 @@ import type {
 	Snapshot,
 } from "../database/schema.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { mockJsonSnapshot } from "../query-utilities/mock-json-snapshot.js";
+import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { createDiscussion } from "../discussion/create-discussion.js";
 import { createComment } from "../discussion/create-comment.js";

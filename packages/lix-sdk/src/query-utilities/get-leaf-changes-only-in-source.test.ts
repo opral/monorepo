@@ -3,7 +3,7 @@ import { getLeafChangesOnlyInSource } from "./get-leaf-changes-only-in-source.js
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { newLixFile } from "../lix/new-lix.js";
 import type { NewChange } from "../database/schema.js";
-import { mockJsonSnapshot } from "./mock-json-snapshot.js";
+import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 
 test("it should get the leaf changes that only exist in source", async () => {
 	const sourceLix = await openLixInMemory({
