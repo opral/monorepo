@@ -21,20 +21,7 @@ export const fileIdSearchParamsAtom = atom(async (get) => {
 
 let existingSafeLixToOpfsInterval: ReturnType<typeof setInterval> | undefined;
 
-/**
- * Force reload the project.
- *
- * Search for `setReloadProject` to see where this atom is set.
- */
-export const forceReloadLixAtom = atom<ReturnType<typeof Date.now> | undefined>(
-	undefined
-);
-
-export const lixAtom = atom(async (get) => {
-	// listen to forceReloadProjectAtom to reload the project
-	// workaround for https://github.com/opral/lix-sdk/issues/47
-	get(forceReloadLixAtom);
-
+export const lixAtom = atom(async () => {
 	// if (existingSafeLixToOpfsInterval) {
 	// 	clearInterval(existingSafeLixToOpfsInterval);
 	// }
