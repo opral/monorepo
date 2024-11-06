@@ -33,8 +33,8 @@ test("it should detect a conflict if the same row has been updated", async () =>
 
 	expect(snapshots).toEqual([
 		{
-			snapshot: { text: "Anna,25" },
-			conflicting_snapshot: { text: "Anna,31" },
+			snapshot: { text: "25" },
+			conflicting_snapshot: { text: "31" },
 		},
 	]);
 });

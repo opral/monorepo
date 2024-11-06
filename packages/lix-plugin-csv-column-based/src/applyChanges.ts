@@ -11,7 +11,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 
 	const text = new TextDecoder().decode(file.data);
 
-	console.log("applyChanges", changes, "intial\n\n", text);
+	// console.log("applyChanges", changes, "intial\n\n", text);
 
 	if (uniqueColumn === undefined) {
 		throw new Error("The unique_column metadata is required to apply changes");
@@ -30,27 +30,41 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
+		const [rowId, column] = change.entity_id.split("__") as [string, string];
+
+		// console.log("processing change " + rowId + " col " + column, change);
 		// change is a deletion
 		if (snapshot.content === null) {
-			delete parsed[change.entity_id];
+			// console.log("deltion change");
+			delete parsed[rowId]![column!];
+			// Check if the precvios delete of the column lead to an empty row - if so delete it
+			if (Object.keys(parsed[rowId]!).length === 0) {
+				delete parsed[rowId];
+			}
 		}
+
 		// change is an update or create
-		// the update will overwrite the row in place
+		// the update will overwrite the column in place
 		// the create will append a new key to the object
 		else {
-			parsed[change.entity_id] = snapshot.content.text.split(",");
+			if (!parsed[rowId]) {
+				parsed[rowId] = {} as Record<string, string>;
+			}
+			parsed[rowId]![column] = snapshot.content.text;
 		}
 
-		console.log("applied change", change, "to csv\n\n", parsed);
+		// console.log("applied change", change, "to csv\n\n", parsed);
 	}
 
-	const csv = papaparse.unparse([headerRow, ...Object.values(parsed)], {
-		// using '\n' as the default newline assuming that windows
-		// treats '\n' as a newline character nowadays
-		newline: "\n",
-	});
+	const csv = papaparse.unparse(
+		{ fields: headerRow, data: Object.values(parsed) },
+		{
+			// using '\n' as the default newline assuming that windows
+			// treats '\n' as a newline character nowadays
+			newline: "\n",
+		},
+	);
 
-	console.log("applied csv\n\n", csv);
 
 	return {
 		fileData: new TextEncoder().encode(csv),

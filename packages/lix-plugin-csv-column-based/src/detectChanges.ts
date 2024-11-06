@@ -103,6 +103,12 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		}
 	}
 
+	console.log(
+		"detectChanges",
+		before?.data ? new TextDecoder().decode(before!.data) : "NO (CONTENT)",
+		after?.data ? new TextDecoder().decode(after!.data) : "NO (CONTENT)",
+		detectedChanges,
+	);
 	return detectedChanges;
 };
 

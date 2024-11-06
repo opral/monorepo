@@ -19,6 +19,9 @@ test("it should apply an insert change", async () => {
 		fileUpdates: [before, after],
 	});
 
+	// TODO changes comming from mock changes contain ALL changes not only the changes from before to after - is this intended?
+	// TODO we ignore the ordering of the rows - FYI
+
 	const { fileData: applied } = await applyChanges({
 		file: { id: "mock", path: "mock", data: before, metadata },
 		changes,
