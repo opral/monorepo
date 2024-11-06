@@ -4,8 +4,7 @@ import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
 import { minimatch } from "minimatch";
 import { Kysely } from "kysely";
 import { updateBranchPointers } from "../branch/update-branch-pointers.js";
-import { changeInBranch } from "../query-utilities/change-in-branch.js";
-import { changeIsLeafOf } from "../query-utilities/change-is-leaf-of.js";
+import { changeIsLeafInBranch } from "../query-utilities/change-is-leaf-in-branch.js";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {
@@ -138,10 +137,7 @@ export async function handleFileChange(args: {
 			.selectAll()
 			.executeTakeFirstOrThrow();
 		for (const detectedChange of detectedChanges) {
-			// heuristic to find the previous change
-			// there is no guarantee that the previous change is the leaf change
-			// because sorting by time is unreliable in a distributed system
-			const maybeParentChange = await trx
+			const parentChange = await trx
 				.selectFrom("change")
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.selectAll("change")
@@ -149,19 +145,8 @@ export async function handleFileChange(args: {
 				.where("file_id", "=", fileId)
 				.where("type", "=", detectedChange.type)
 				.where("entity_id", "=", detectedChange.entity_id)
-				.where(changeInBranch(currentBranch))
-				// walk from the end of the tree to minimize the amount of changes to walk
-				.orderBy("id", "desc")
+				.where(changeIsLeafInBranch(currentBranch))
 				.executeTakeFirst();
-
-			// get the leaf change of the assumed previous change
-			const parentChange = !maybeParentChange
-				? undefined
-				: await trx
-						.selectFrom("change")
-						.selectAll()
-						.where(changeIsLeafOf(maybeParentChange))
-						.executeTakeFirst();
 
 			const snapshot = await trx
 				.insertInto("snapshot")
