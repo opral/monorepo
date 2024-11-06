@@ -57,7 +57,10 @@ const layoutElements = (
 
 	for (const change of changes) {
 		const dimensions = calculateNodeDimensions(
-			change.snapshot_content?.text ?? "deleted"
+			// simulate two line node where the bottom line
+			// is a uuid
+			(change.snapshot_content?.text ?? "deleted") +
+				"\n00000000-0000-0000-0000-000000000000"
 		);
 		dagreGraph.setNode(change.id, dimensions);
 	}
