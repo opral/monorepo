@@ -24,6 +24,11 @@ export type LixDatabaseSchema = {
 	current_branch: CurrentBranchTable;
 	branch: BranchTable;
 	branch_change_pointer: BranchChangePointerTable;
+
+	// change conflicts
+	change_conflict: ChangeConflictTable;
+	change_conflict_resolution: ChangeConflictResolutionTable;
+	change_conflict_edge: ChangeConflictEdgeTable;
 };
 
 export type ChangeQueueEntry = Selectable<ChangeQueueTable>;
@@ -202,4 +207,38 @@ export type NewCurrentBranch = Insertable<CurrentBranchTable>;
 export type CurrentBranchUpdate = Updateable<CurrentBranchTable>;
 type CurrentBranchTable = {
 	id: string;
+};
+
+// -------- change conflicts --------
+
+export type ChangeConflict = Selectable<ChangeConflictTable>;
+export type NewChangeConflict = Insertable<ChangeConflictTable>;
+export type ChangeConflictUpdate = Updateable<ChangeConflictTable>;
+type ChangeConflictTable = {
+	id: string;
+	/**
+	 * The key representing the type of conflict.
+	 *
+	 * This field is used to avoid re-reports of the same conflict.
+	 */
+	key: string;
+};
+
+export type ChangeConflictResolution =
+	Selectable<ChangeConflictResolutionTable>;
+export type NewChangeConflictResolution =
+	Insertable<ChangeConflictResolutionTable>;
+export type ChangeConflictResolutionUpdate =
+	Updateable<ChangeConflictResolutionTable>;
+type ChangeConflictResolutionTable = {
+	conflict_id: string;
+	resolved_change_id: string;
+};
+
+export type ChangeConflictEdge = Selectable<ChangeConflictEdgeTable>;
+export type NewChangeConflictEdge = Insertable<ChangeConflictEdgeTable>;
+export type ChangeConflictEdgeUpdate = Updateable<ChangeConflictEdgeTable>;
+type ChangeConflictEdgeTable = {
+	change_conflict_id: string;
+	change_id: string;
 };

@@ -58,16 +58,31 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
 
   CREATE INDEX IF NOT EXISTS idx_content_hash ON snapshot (id);
 
-  CREATE TABLE IF NOT EXISTS conflict (
-    change_id TEXT NOT NULL,
-    conflicting_change_id TEXT NOT NULL,
-    reason TEXT,
-    metadata TEXT,
-    resolved_change_id TEXT,
+  CREATE TABLE IF NOT EXISTS change_conflict (
+    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    key TEXT NOT NULL
+  ) strict;
 
-    PRIMARY KEY (change_id, conflicting_change_id),
-    -- Prevent self referencing conflicts
-    CHECK (change_id != conflicting_change_id)
+  CREATE TABLE IF NOT EXISTS change_conflict_edge (
+    change_conflict_id TEXT NOT NULL,
+    change_id TEXT NOT NULL,
+
+    PRIMARY_KEY(conflict_id, change_id),
+    FOREIGN KEY(conflict_id) REFERENCES conflict(id),
+    FOREIGN KEY(change_id) REFERENCES change(id)
+  ) strict;
+
+  CREATE TABLE IF NOT EXISTS change_conflict_resolution (
+    conflict_id TEXT NOT NULL,
+    resolved_change_id TEXT NOT NULL,
+
+    -- potential future columns
+    -- resolved_by <account_id>
+    -- resolved_at <timestamp>
+
+    PRIMARY_KEY(conflict_id, resolved_change_id),
+    FOREIGN KEY(conflict_id) REFERENCES conflict(id),
+    FOREIGN KEY(resolved_change_id) REFERENCES change(id)
   ) strict;
 
   CREATE TRIGGER IF NOT EXISTS file_update INSTEAD OF UPDATE ON file
