@@ -79,9 +79,9 @@ export default function RootLayout(props: { children: JSX.Element }) {
 								Export
 							</SlMenuItem>
 							<SlMenuItem
-								onClick={() => {
+								onClick={async () => {
 									// @ts-expect-error - globally defined
-									window.deleteLix();
+									await window.deleteLix();
 									window.location.reload();
 								}}
 							>
