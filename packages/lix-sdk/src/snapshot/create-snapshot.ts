@@ -18,29 +18,21 @@ export async function createSnapshot(args: {
 	content?: Snapshot["content"];
 }): Promise<Snapshot> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		try {
-			const snapshot = await trx
-				.insertInto("snapshot")
-				.values({
-					content: args.content ?? null,
-				})
-				.returningAll()
-				.executeTakeFirstOrThrow();
-			return snapshot;
-		} catch (error) {
-			// the snapshot already exists (content addressable)
-			// return the existing snapshot
+		const snapshot = await trx
+			.insertInto("snapshot")
+			.values({
+				content: args.content ?? null,
+			})
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			if ((error as unknown as any)?.resultCode === 2067) {
-				const id = sha256(JSON.stringify(args.content));
-				return await trx
-					.selectFrom("snapshot")
-					.where("id", "=", id)
-					.selectAll()
-					.executeTakeFirstOrThrow();
-			}
-			throw error;
-		}
+			.onConflict((oc: any) =>
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				oc.doUpdateSet((eb: any) => ({
+					content: eb.ref("excluded.content"),
+				})),
+			)
+			.returningAll()
+			.executeTakeFirstOrThrow();
+		return snapshot;
 	};
 
 	if (args.lix.db.isTransaction) {
