@@ -2,7 +2,6 @@ import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import { plugin as pluginV2 } from "@lix-js/plugin-csv-column-based";
 import capTableCsv from "./cap-table.csv?raw";
 import emailNewsletterCsv from "./email-newsletter.csv?raw";
-import { confirmChanges } from "../../layouts/OpenFileLayout.tsx";
 
 export const DEMO_CAP_TABLE_CSV_FILE_ID = "29jas9j-2sk2-cap";
 export const DEMO_EMAIL_NEWSLETTER_CSV_FILE_ID = "oj20a1-40ss-email";
@@ -46,13 +45,6 @@ export async function lixCsvDemoFile(): Promise<Blob> {
 		.execute();
 
 	await lix.settled();
-
-	const changes = await lix.db.selectFrom("change").selectAll().execute();
-
-	// confirm them to set the change counter to 0
-	// when opening the file in the editor for the
-	// first time.
-	await confirmChanges(lix, changes);
 
 	return await lix.toBlob();
 }

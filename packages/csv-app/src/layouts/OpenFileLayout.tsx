@@ -17,44 +17,29 @@ import {
 	activeFileAtom,
 	conflictsAtom,
 	parsedCsvAtom,
-	unconfirmedChangesAtom,
 	uniqueColumnAtom,
 } from "../state-active-file.ts";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { currentBranchAtom, existingBranchesAtom, lixAtom } from "../state.ts";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import clsx from "clsx";
 import {
 	applyChanges,
 	Branch,
-	Change,
-	changeIsLeafOf,
 	changeIsLeafInBranch,
-	ChangeSet,
 	createBranch,
 	Lix,
 	switchBranch,
 	mergeBranch,
 } from "@lix-js/sdk";
-import { SlInput } from "@shoelace-style/shoelace/dist/react";
 import { humanId } from "human-id";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
-	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
 	const [conflicts] = useAtom(conflictsAtom);
-	const [showConfirmChangesDialog, setShowConfirmChangesDialog] =
-		useState(false);
 
 	return (
 		<>
-			{showConfirmChangesDialog && (
-				<ConfirmChangesDialog
-					onClose={() => {
-						setShowConfirmChangesDialog(false);
-					}}
-				/>
-			)}
 			<UniqueColumnDialog />
 			<div className="w-full min-h-full bg-zinc-50 relative">
 				<div className="w-full border-b border-zinc-200 bg-white relative z-90 -mb-[1px]">
@@ -86,7 +71,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 						</div>
 
 						<div className="mr-1 flex items-center gap-1.5">
-							{unconfirmedChanges.length > 0 && (
+							{/* {unconfirmedChanges.length > 0 && (
 								<SlButton
 									size="small"
 									variant="neutral"
@@ -95,18 +80,22 @@ export default function Layout(props: { children: React.ReactNode }) {
 								>
 									Confirm Changes
 								</SlButton>
-							)}
+							)} */}
 						</div>
 					</div>
 					<div className="px-3 flex gap-1">
 						<NavItem to={`/editor?f=${activeFile.id}`} name="Edit" />
 						<NavItem
 							to={`/changes?f=${activeFile.id}`}
-							counter={
-								unconfirmedChanges.length !== 0
-									? unconfirmedChanges.length
-									: undefined
-							}
+							// outcommented to see how a non increasing counter feels like.
+							// we received feedback that confirm feels like a "save" button
+							// which assumes that nothing is auto saved
+							//
+							// counter={
+							// 	unconfirmedChanges.length !== 0
+							// 		? unconfirmedChanges.length
+							// 		: undefined
+							// }
 							name="Changes"
 						/>
 						<NavItem
@@ -210,34 +199,6 @@ const UniqueColumnDialog = () => {
 	);
 };
 
-const ConfirmChangesDialog = (props: { onClose: () => void }) => {
-	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
-	const [lix] = useAtom(lixAtom);
-	const [description, setDescription] = useState("");
-	const ref = useRef(null);
-
-	const handleConfirmChanges = async () => {
-		const changeSet = await confirmChanges(lix, unconfirmedChanges);
-		if (description !== "") {
-			await addDiscussionToChangeSet(lix, changeSet, description);
-			await saveLixToOpfs({ lix });
-		}
-		props.onClose();
-	};
-
-	return (
-		<SlDialog label="Confirm Changes" open={true} ref={ref}>
-			<SlInput
-				placeholder="Describe the changes"
-				onInput={(event: any) => setDescription(event.target?.value)}
-			></SlInput>
-			<SlButton slot="footer" variant="primary" onClick={handleConfirmChanges}>
-				{description === "" ? "Confirm without description" : "Confirm"}
-			</SlButton>
-		</SlDialog>
-	);
-};
-
 const BranchDropdown = () => {
 	const [currentBranch] = useAtom(currentBranchAtom);
 	const [existingBranches] = useAtom(existingBranchesAtom);
@@ -336,79 +297,4 @@ const BranchDropdown = () => {
 			</SlMenu>
 		</SlDropdown>
 	);
-};
-
-export const confirmChanges = async (
-	lix: Lix,
-	unconfirmedChanges: Change[]
-) => {
-	const changeSet = await lix.db.transaction().execute(async (trx) => {
-		// create a new set
-		const newChangeSet = await trx
-			.insertInto("change_set")
-			.defaultValues()
-			.returning("id")
-			.executeTakeFirstOrThrow();
-
-		// get the id of the confirmed tag
-		const confirmedLabel = await trx
-			.selectFrom("label")
-			.where("name", "=", "confirmed")
-			.select("id")
-			.executeTakeFirstOrThrow();
-
-		// tag the set as confirmed
-		await trx
-			.insertInto("change_set_label")
-			.values({
-				change_set_id: newChangeSet.id,
-				label_id: confirmedLabel.id,
-			})
-			.execute();
-
-		// insert the leaf changes into the set
-		for (const change of unconfirmedChanges) {
-			const leafChange = await trx
-				.selectFrom("change")
-				.where(changeIsLeafOf(change))
-				.selectAll()
-				.executeTakeFirstOrThrow();
-			await trx
-				.insertInto("change_set_element")
-				.values({
-					change_set_id: newChangeSet.id,
-					change_id: leafChange.id,
-				})
-				// the leaf change is contained in the set already
-				.onConflict((oc) => oc.doNothing())
-				.execute();
-		}
-		return newChangeSet;
-	});
-	await saveLixToOpfs({ lix });
-	return changeSet;
-};
-
-const addDiscussionToChangeSet = async (
-	lix: Lix,
-	changeSet: ChangeSet,
-	content: string
-) => {
-	await lix.db.transaction().execute(async (trx) => {
-		const discussion = await trx
-			.insertInto("discussion")
-			.values({
-				change_set_id: changeSet.id,
-			})
-			.returning("id")
-			.executeTakeFirstOrThrow();
-
-		await trx
-			.insertInto("comment")
-			.values({
-				discussion_id: discussion.id,
-				content,
-			})
-			.execute();
-	});
 };

@@ -4,6 +4,7 @@ import {
 	changeHasLabel,
 	changeInBranch,
 	changeIsLeafInBranch,
+	ChangeSet,
 	Lix,
 	Snapshot,
 } from "@lix-js/sdk";
@@ -11,9 +12,15 @@ import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { currentBranchAtom, lixAtom } from "../state.ts";
 import clsx from "clsx";
-import { activeFileAtom } from "../state-active-file.ts";
+import {
+	activeFileAtom,
+	unconfirmedChangesAtom,
+} from "../state-active-file.ts";
+import { SlButton, SlInput } from "@shoelace-style/shoelace/dist/react";
+import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
+import { confirmChanges } from "../helper/confirmChanges.ts";
 
-export default function ChangeSet(props: {
+export default function Component(props: {
 	id: string;
 	firstComment: string | null;
 }) {
@@ -65,9 +72,11 @@ export default function ChangeSet(props: {
 				"flex flex-col cursor-pointer group bg-white hover:bg-zinc-50",
 				isOpen && "bg-white!"
 			)}
-			onClick={() => setIsOpen(!isOpen)}
 		>
-			<div className="flex gap-3 items-center">
+			<div
+				className="flex gap-3 items-center"
+				onClick={() => setIsOpen(!isOpen)}
+			>
 				<div className="w-5 h-5 bg-zinc-100 flex items-center justify-center rounded-full ml-4">
 					<div className="w-2 h-2 bg-zinc-700 rounded-full"></div>
 				</div>
@@ -103,14 +112,12 @@ export default function ChangeSet(props: {
 			</div>
 			<div className={clsx(isOpen ? "block" : "hidden")}>
 				<div className="flex flex-col gap-2 px-3 pb-3">
+					{Object.keys(unconfirmedChanges).length > 0 && <ConfirmChangesBox />}
+
 					{Object.keys(
 						props.id === "unconfirmed-changes" ? unconfirmedChanges : changes
 					).map((rowId) => {
 						const uniqueColumnValue = rowId.split("|")[1];
-
-						console.log("changes", changes);
-						console.log("rowId", rowId);
-						console.log("unconfirmedChanges", unconfirmedChanges);
 
 						// TODO: when importing new file one change contains every change of a row. When doing manual change, it contains more changes that belong to one row -> so do the grouping here when needed
 						return (
@@ -190,6 +197,57 @@ export default function ChangeSet(props: {
 		</div>
 	);
 }
+
+const ConfirmChangesBox = () => {
+	const [description, setDescription] = useState("");
+	const [lix] = useAtom(lixAtom);
+	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
+
+	const handleConfirmChanges = async () => {
+		const changeSet = await confirmChanges(lix, unconfirmedChanges);
+		if (description !== "") {
+			await addDiscussionToChangeSet(lix, changeSet, description);
+			await saveLixToOpfs({ lix });
+		}
+	};
+
+	return (
+		<div className="flex gap-2">
+			<SlInput
+				className="w-full"
+				placeholder="Describe the changes"
+				onInput={(event: any) => setDescription(event.target?.value)}
+			></SlInput>
+			<SlButton slot="footer" variant="primary" onClick={handleConfirmChanges}>
+				{description === "" ? "Confirm without description" : "Confirm"}
+			</SlButton>
+		</div>
+	);
+};
+
+const addDiscussionToChangeSet = async (
+	lix: Lix,
+	changeSet: ChangeSet,
+	content: string
+) => {
+	await lix.db.transaction().execute(async (trx) => {
+		const discussion = await trx
+			.insertInto("discussion")
+			.values({
+				change_set_id: changeSet.id,
+			})
+			.returning("id")
+			.executeTakeFirstOrThrow();
+
+		await trx
+			.insertInto("comment")
+			.values({
+				discussion_id: discussion.id,
+				content,
+			})
+			.execute();
+	});
+};
 
 const getChanges = async (
 	lix: Lix,
