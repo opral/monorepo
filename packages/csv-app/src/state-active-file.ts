@@ -52,13 +52,6 @@ export const uniqueColumnAtom = atom<Promise<string | undefined>>(
 	}
 );
 
-export const uniqueColumnIndexAtom = atom(async (get) => {
-	const uniqueColumn = await get(uniqueColumnAtom);
-	const parsedCsv = await get(parsedCsvAtom);
-	if (!uniqueColumn) return undefined;
-	return parsedCsv.meta.fields!.indexOf(uniqueColumn);
-});
-
 /**
  * The entity id that is selected in the editor.
  */

@@ -9,26 +9,25 @@ import {
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { currentBranchAtom, lixAtom } from "../state.ts";
-// import timeAgo from "../helper/timeAgo.ts";
 import clsx from "clsx";
-import {
-	activeFileAtom,
-	parsedCsvAtom,
-	uniqueColumnIndexAtom,
-} from "../state-active-file.ts";
+import { activeFileAtom } from "../state-active-file.ts";
 
 const getChanges = async (
 	lix: Lix,
 	changeSetId: string,
 	fileId: string,
 	currentBranch: Branch
-) => {
-	const result: Array<
-		Change & { content: Snapshot["content"] } & {
-			parent?: Change & { content: Snapshot["content"] };
-		}
-	> = [];
-
+): Promise<
+	Record<
+		string,
+		Array<
+			Change & {
+				content: Snapshot["content"];
+				parent: Change & { content: Snapshot["content"] };
+			}
+		>
+	>
+> => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
@@ -43,25 +42,60 @@ const getChanges = async (
 		.select("snapshot.content")
 		.execute();
 
-	for (const change of changes) {
-		const parent = await lix.db
-			.selectFrom("change")
-			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-			.innerJoin(
-				"change_graph_edge",
-				"change_graph_edge.parent_id",
-				"change.id"
-			)
-			.where("change_graph_edge.child_id", "=", change.id)
-			.where(changeInBranch(currentBranch))
-			.where(changeHasLabel("confirmed"))
-			.selectAll("change")
-			.select("snapshot.content")
-			.executeTakeFirst();
+	// Group changes by row
+	//
+	// TODO this is a workaround for the fact that the changes are not groupable by row with SQL
+	//
+	//      this can be achieved by adding a row_entity to the snapshot but ...
+	//      then the snapshot === undefined can't be used to detect a deletion.
+	//
+	//      1. Snapshot === undefined is not good for deletions. It is probably
+	//         better to have a dedicated concept of deleted changes
+	//
+	//      2. The row_entity could be change metadata but what's the differenc to snapshot then?
+	//
+	//      3. Lix should probably have a concept of dependent changes that are linked.
+	//         e.g. a row change is dependent on N cell changes via detectedChange.dependsOn: [detectedCellChange1, detectedCellChange2]
+	//
+	//      EDIT regarding 3:
+	//      We can define an row and have as snapshot { dependsOn: [detectedCellChange1, detectedCellChange2] }
+	//      before introducing a first level concept in lix. Yes, foreign keys wouldn't work but that's OK at the moment.
+	const groupedByRow: any = {};
 
-		result.push({ ...change, parent });
+	for (const change of changes) {
+		const parts = change.entity_id.split("|");
+		const rowEntityId = parts[0] + "|" + parts[1];
+
+		if (!groupedByRow[rowEntityId]) {
+			groupedByRow[rowEntityId] = [];
+		}
+		groupedByRow[rowEntityId].push(change);
 	}
-	return result;
+
+	for (const id in groupedByRow) {
+		const row = groupedByRow[id];
+		console.log(row);
+
+		for (const change of row) {
+			const parent = await lix.db
+				.selectFrom("change")
+				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+				.innerJoin(
+					"change_graph_edge",
+					"change_graph_edge.parent_id",
+					"change.id"
+				)
+				.where("change_graph_edge.child_id", "=", change.id)
+				.where(changeInBranch(currentBranch))
+				.where(changeHasLabel("confirmed"))
+				.selectAll("change")
+				.select("snapshot.content")
+				.executeTakeFirst();
+
+			change.parent = parent;
+		}
+	}
+	return groupedByRow;
 };
 
 export default function ChangeSet(props: {
@@ -73,10 +107,8 @@ export default function ChangeSet(props: {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [changes, setChanges] = useState<
 		Awaited<ReturnType<typeof getChanges>>
-	>([]);
+	>({});
 	const [currentBranch] = useAtom(currentBranchAtom);
-	const [parsedCsv] = useAtom(parsedCsvAtom);
-	const [uniqueColumnIndex] = useAtom(uniqueColumnIndexAtom);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -106,7 +138,9 @@ export default function ChangeSet(props: {
 				</div>
 				<div className="flex-1 flex gap-2 items-center justify-between py-3 rounded md:h-[46px]">
 					<div className="flex flex-col md:flex-row md:gap-2 md:items-center flex-1">
-						<p className="text-zinc-950 text-sm! font-semibold">By Author</p>
+						<p className="text-zinc-950 text-sm! font-semibold">
+							(TODO author)
+						</p>
 						<p className="text-sm! text-zinc-600">{props.firstComment}</p>
 					</div>
 					<p className="text-sm! pr-5 flex items-center gap-4 flex-1]">
@@ -132,11 +166,13 @@ export default function ChangeSet(props: {
 			</div>
 			<div className={clsx(isOpen ? "block" : "hidden")}>
 				<div className="flex flex-col gap-2 px-3 pb-3">
-					{changes.map((change) => {
+					{Object.keys(changes).map((rowId) => {
+						const uniqueColumnValue = rowId.split("|")[1];
+
 						// TODO: when importing new file one change contains every change of a row. When doing manual change, it contains more changes that belong to one row -> so do the grouping here when needed
 						return (
 							<div
-								key={change.id}
+								key={rowId}
 								className="bg-zinc-50 border border-zinc-200 rounded-md pt-2 px-3 pb-4"
 							>
 								<div className="flex flex-wrap md:flex-nowrap overflow-x-scroll gap-x-1 gap-y-2 md:gap-y-8">
@@ -145,29 +181,13 @@ export default function ChangeSet(props: {
 											UNIQUE VALUE
 										</p>
 										<p className="md:px-4 md:py-1.5 md:bg-white md:border border-zinc-200 md:w-[140px] rounded-full md:mr-4 overflow-hidden whitespace-nowrap text-ellipsis">
-											{uniqueColumnIndex ? (
-												<>
-													{change.content?.text.split(",")[uniqueColumnIndex]}
-												</>
-											) : (
-												<>ERROR NO UNIQUE COLUMN</>
-											)}
+											{uniqueColumnValue}
 										</p>
 									</div>
-									{parsedCsv.meta.fields?.map((column: string) => {
-										const columnIndex = parsedCsv.meta.fields?.indexOf(column);
-
-										// explicit check for undefined because 0 is a valid index
-										// and 0 is interpreted as false in JavaScript :/
-										const value =
-											columnIndex !== undefined
-												? change.content?.text.split(",")[columnIndex]
-												: undefined;
-
-										const parentValue =
-											columnIndex !== undefined
-												? change.parent?.content?.text.split(",")[columnIndex]
-												: undefined;
+									{changes[rowId].map((change) => {
+										const column = change.entity_id.split("|")[2];
+										const value = change.content?.text;
+										const parentValue = change.parent?.content?.text;
 
 										const hasDiff = value !== parentValue;
 
