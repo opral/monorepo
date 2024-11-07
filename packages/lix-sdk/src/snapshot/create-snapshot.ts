@@ -1,4 +1,3 @@
-import { sha256 } from "js-sha256";
 import type { Snapshot } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
