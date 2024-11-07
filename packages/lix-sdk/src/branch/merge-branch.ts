@@ -98,11 +98,11 @@ export async function mergeBranch(args: {
 		// insert the detected conflicts
 		// (ignore if the conflict already exists)
 		if (detectedConflicts.length > 0) {
-			await trx
-				.insertInto("conflict")
-				.values(detectedConflicts)
-				.onConflict((oc) => oc.doNothing())
-				.execute();
+			// await trx
+			// 	.insertInto("conflict")
+			// 	.values(detectedConflicts)
+			// 	.onConflict((oc) => oc.doNothing())
+			// 	.execute();
 		}
 	};
 

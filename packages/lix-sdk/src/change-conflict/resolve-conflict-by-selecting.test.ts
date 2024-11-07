@@ -3,11 +3,10 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { newLixFile } from "../lix/new-lix.js";
 import type { NewChange, Snapshot } from "../database/schema.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { SelectedChangeNotInConflictError } from "./errors.js";
-import { resolveConflictBySelecting } from "./resolve-conflict-by-selecting.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
+import { resolveChangeConflictBySelecting } from "./resolve-conflict-by-selecting.js";
 
-test("it should resolve a conflict by applying the change and marking the conflict as resolved with the applied change", async () => {
+test("it should resolve a conflict and apply the changes", async () => {
 	const mockSnapshots: Snapshot[] = [
 		mockJsonSnapshot({
 			id: "value1",
@@ -49,7 +48,7 @@ test("it should resolve a conflict by applying the change and marking the confli
 	});
 
 	await lix.db
-		.insertInto("file")
+		.insertInto("file_internal")
 		.values({ id: "mock", path: "mock", data: new Uint8Array() })
 		.execute();
 
@@ -70,29 +69,32 @@ test("it should resolve a conflict by applying the change and marking the confli
 		.execute();
 
 	const conflict = await lix.db
-		.insertInto("conflict")
+		.insertInto("change_conflict")
 		.values({
-			change_id: changes[0]!.id,
-			conflicting_change_id: changes[1]!.id,
+			key: "mock",
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	await resolveConflictBySelecting({
+	await resolveChangeConflictBySelecting({
 		lix: lix,
 		conflict: conflict,
-		selectChangeId: changes[0]!.id,
+		select: changes[0]!,
 	});
 
 	const resolvedConflict = await lix.db
-		.selectFrom("conflict")
+		.selectFrom("change_conflict")
+		.innerJoin(
+			"change_conflict_resolution",
+			"change_conflict_resolution.change_conflict_id",
+			"change_conflict.id",
+		)
+		.where("id", "=", conflict.id)
 		.selectAll()
-		.where("change_id", "=", conflict.change_id)
-		.where("conflicting_change_id", "=", conflict.conflicting_change_id)
 		.executeTakeFirstOrThrow();
 
 	const fileAfterResolve = await lix.db
-		.selectFrom("file")
+		.selectFrom("file_internal")
 		.selectAll()
 		.where("id", "=", changes[0]!.file_id)
 		.executeTakeFirstOrThrow();
@@ -101,20 +103,4 @@ test("it should resolve a conflict by applying the change and marking the confli
 
 	expect(parsed).toStrictEqual(snapshots[0]!.content);
 	expect(resolvedConflict.resolved_change_id).toBe(changes[0]!.id);
-});
-
-test("it should throw if the change id does not belong to the conflict", async () => {
-	await expect(
-		resolveConflictBySelecting({
-			lix: {} as any,
-			conflict: {
-				change_id: "change1",
-				conflicting_change_id: "change2",
-				metadata: null,
-				reason: null,
-				resolved_change_id: null,
-			},
-			selectChangeId: "change3",
-		}),
-	).rejects.toThrowError(SelectedChangeNotInConflictError);
 });

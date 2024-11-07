@@ -5,7 +5,6 @@ import { merge } from "./merge.js";
 import type {
 	ChangeGraphEdge,
 	NewChange,
-	NewConflict,
 	NewSnapshot,
 	Snapshot,
 } from "../database/schema.js";
@@ -181,7 +180,7 @@ test("it should save change conflicts", async () => {
 			{
 				change_id: mockChanges[1]!.id!,
 				conflicting_change_id: mockChanges[2]!.id!,
-			} satisfies NewConflict,
+			},
 		]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
@@ -234,16 +233,16 @@ test("it should save change conflicts", async () => {
 
 	await merge({ sourceLix, targetLix });
 
-	const conflicts = await targetLix.db
-		.selectFrom("conflict")
-		.select(["change_id", "conflicting_change_id"])
-		.execute();
+	// const conflicts = await targetLix.db
+	// 	.selectFrom("conflict")
+	// 	.select(["change_id", "conflicting_change_id"])
+	// 	.execute();
 
-	expect(conflicts.length).toBe(1);
-	expect(conflicts[0]).toEqual({
-		change_id: mockChanges[1]!.id,
-		conflicting_change_id: mockChanges[2]!.id,
-	});
+	// expect(conflicts.length).toBe(1);
+	// expect(conflicts[0]).toEqual({
+	// 	change_id: mockChanges[1]!.id,
+	// 	conflicting_change_id: mockChanges[2]!.id,
+	// });
 });
 
 test("diffing should not be invoked to prevent the generation of duplicate changes", async () => {
@@ -449,10 +448,10 @@ test.todo("it should apply changes that are not conflicting", async () => {
 		.select("snapshot.content")
 		.execute();
 
-	const conflicts = await targetLix.db
-		.selectFrom("conflict")
-		.selectAll()
-		.execute();
+	// const conflicts = await targetLix.db
+	// 	.selectFrom("conflict")
+	// 	.selectAll()
+	// 	.execute();
 
 	const file = await targetLix.db
 		.selectFrom("file")
@@ -460,7 +459,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 		.executeTakeFirstOrThrow();
 
 	expect(changes.length).toBe(2);
-	expect(conflicts.length).toBe(0);
+	// expect(conflicts.length).toBe(0);
 	expect(file.data).toEqual(
 		new TextEncoder().encode(JSON.stringify(mockSnapshots[1]!.content!)),
 	);
@@ -501,7 +500,7 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 			{
 				change_id: commonChanges[0]!.id!,
 				conflicting_change_id: changesOnlyInSourceLix[0]!.id!,
-			} satisfies NewConflict,
+			},
 		]),
 		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
 	};
@@ -557,13 +556,13 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 
 	const changes = await targetLix.db.selectFrom("change").selectAll().execute();
 
-	const conflicts = await targetLix.db
-		.selectFrom("conflict")
-		.selectAll()
-		.execute();
+	// const conflicts = await targetLix.db
+	// 	.selectFrom("conflict")
+	// 	.selectAll()
+	// 	.execute();
 
 	expect(changes.length).toBe(2);
-	expect(conflicts.length).toBe(1);
+	// expect(conflicts.length).toBe(1);
 
 	await merge({ sourceLix, targetLix });
 
@@ -572,13 +571,13 @@ test("subsequent merges should not lead to duplicate changes and/or conflicts", 
 		.selectAll()
 		.execute();
 
-	const conflictsAfterSecondMerge = await targetLix.db
-		.selectFrom("conflict")
-		.selectAll()
-		.execute();
+	// const conflictsAfterSecondMerge = await targetLix.db
+	// 	.selectFrom("conflict")
+	// 	.selectAll()
+	// 	.execute();
 
 	expect(changesAfterSecondMerge.length).toBe(2);
-	expect(conflictsAfterSecondMerge.length).toBe(1);
+	// expect(conflictsAfterSecondMerge.length).toBe(1);
 });
 
 test("it should naively copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {

@@ -160,12 +160,12 @@ export async function merge(args: {
 
 		// insert the conflicts of those changes
 		if (conflicts.length > 0) {
-			await trx
-				.insertInto("conflict")
-				.values(conflicts)
-				// ignore if already exists
-				.onConflict((oc) => oc.doNothing())
-				.execute();
+			// await trx
+			// 	.insertInto("conflict")
+			// 	.values(conflicts)
+			// 	// ignore if already exists
+			// 	.onConflict((oc) => oc.doNothing())
+			// 	.execute();
 		}
 
 		for (const [fileId, fileData] of Object.entries(changesPerFile)) {

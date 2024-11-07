@@ -60,28 +60,30 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
 
   CREATE TABLE IF NOT EXISTS change_conflict (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
-    key TEXT NOT NULL
+    key TEXT NOT NULL,
+
+    CHECK (key = 'lix-diverging-entity-conflict' OR key NOT LIKE 'lix-%')
   ) strict;
 
   CREATE TABLE IF NOT EXISTS change_conflict_edge (
     change_conflict_id TEXT NOT NULL,
     change_id TEXT NOT NULL,
 
-    PRIMARY_KEY(conflict_id, change_id),
-    FOREIGN KEY(conflict_id) REFERENCES conflict(id),
+    PRIMARY KEY(change_conflict_id, change_id),
+    FOREIGN KEY(change_conflict_id) REFERENCES change_conflict(id),
     FOREIGN KEY(change_id) REFERENCES change(id)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS change_conflict_resolution (
-    conflict_id TEXT NOT NULL,
+    change_conflict_id TEXT NOT NULL,
     resolved_change_id TEXT NOT NULL,
 
     -- potential future columns
     -- resolved_by <account_id>
     -- resolved_at <timestamp>
 
-    PRIMARY_KEY(conflict_id, resolved_change_id),
-    FOREIGN KEY(conflict_id) REFERENCES conflict(id),
+    PRIMARY KEY(change_conflict_id, resolved_change_id),
+    FOREIGN KEY(change_conflict_id) REFERENCES change_conflict(id),
     FOREIGN KEY(resolved_change_id) REFERENCES change(id)
   ) strict;
 

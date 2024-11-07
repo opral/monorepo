@@ -7,7 +7,6 @@ export type LixDatabaseSchema = {
 	file_internal: LixFileTable;
 	change_queue: ChangeQueueTable;
 	change_graph_edge: ChangeGraphEdgeTable;
-	conflict: ConflictTable;
 	snapshot: SnapshotTable;
 	label: LabelTable;
 
@@ -108,23 +107,6 @@ type SnapshotTable = {
 	content: Record<string, any> | null;
 };
 
-export type Conflict = Selectable<ConflictTable>;
-export type NewConflict = Insertable<ConflictTable>;
-export type ConflictUpdate = Updateable<ConflictTable>;
-type ConflictTable = {
-	change_id: string;
-	conflicting_change_id: string;
-	metadata: Record<string, any> | null;
-	reason: string | null;
-	/**
-	 * The change id that the conflict was resolved with.
-	 *
-	 * Can be the change_id, conflicting_change_id, or another change_id
-	 * that resulted from a merge.
-	 */
-	resolved_change_id: string | null;
-};
-
 // ------ change sets ------
 
 export type ChangeSet = Selectable<ChangeSetTable>;
@@ -215,7 +197,7 @@ export type ChangeConflict = Selectable<ChangeConflictTable>;
 export type NewChangeConflict = Insertable<ChangeConflictTable>;
 export type ChangeConflictUpdate = Updateable<ChangeConflictTable>;
 type ChangeConflictTable = {
-	id: string;
+	id: Generated<string>;
 	/**
 	 * The key representing the type of conflict.
 	 *
@@ -231,7 +213,7 @@ export type NewChangeConflictResolution =
 export type ChangeConflictResolutionUpdate =
 	Updateable<ChangeConflictResolutionTable>;
 type ChangeConflictResolutionTable = {
-	conflict_id: string;
+	change_conflict_id: string;
 	resolved_change_id: string;
 };
 
