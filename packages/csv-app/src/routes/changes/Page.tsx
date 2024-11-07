@@ -2,7 +2,10 @@ import OpenFileLayout from "../../layouts/OpenFileLayout.tsx";
 import ChangeSet from "../../components/ChangeSet.tsx";
 import { atom, useAtom } from "jotai";
 import { lixAtom, withPollingAtom } from "../../state.ts";
-import { activeFileAtom } from "../../state-active-file.ts";
+import {
+	activeFileAtom,
+	unconfirmedChangesAtom,
+} from "../../state-active-file.ts";
 
 const changeSetsAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -31,11 +34,20 @@ const changeSetsAtom = atom(async (get) => {
 
 export default function Page() {
 	const [changeSets] = useAtom(changeSetsAtom);
+	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
 	return (
 		<>
 			<OpenFileLayout>
 				<div className="px-3 pb-6 pt-3 md:pt-5">
 					<div className="mx-auto max-w-7xl bg-white border border-zinc-200 rounded-lg divide-y divide-zinc-200 overflow-hidden">
+						{/* virtual change set for uncommitted changes */}
+						{unconfirmedChanges.length > 0 && (
+							<ChangeSet
+								key={"unconfirmed-changes"}
+								id={"unconfirmed-changes"}
+								firstComment={null}
+							/>
+						)}
 						{changeSets.map((changeSet) => (
 							<ChangeSet
 								key={changeSet.id}
