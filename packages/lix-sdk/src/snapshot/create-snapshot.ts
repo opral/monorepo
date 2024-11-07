@@ -22,10 +22,8 @@ export async function createSnapshot(args: {
 			.values({
 				content: args.content ?? null,
 			})
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			.onConflict((oc: any) =>
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				oc.doUpdateSet((eb: any) => ({
+			.onConflict((oc) =>
+				oc.doUpdateSet((eb) => ({
 					content: eb.ref("excluded.content"),
 				})),
 			)
