@@ -11,7 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	activeCellAtom,
 	activeFileAtom,
-	activeRowChangesAtom,
+	activeCellChangesAtom,
 	parsedCsvAtom,
 	uniqueColumnAtom,
 } from "../state-active-file.ts";
@@ -25,7 +25,7 @@ export default function TableEditor() {
 	const [uniqueColumn] = useAtom(uniqueColumnAtom);
 	const [activeFile] = useAtom(activeFileAtom);
 	const [activeCell, setActiveCell] = useAtom(activeCellAtom);
-	const [activeRowChanges] = useAtom(activeRowChangesAtom);
+	const [activeCellChanges] = useAtom(activeCellChangesAtom);
 	const [screenHeight, setScreenHeight] = useState<number>(800);
 
 	// useCallback because react shouldn't recreate the function on every render
@@ -72,7 +72,7 @@ export default function TableEditor() {
 			</div>
 			<CellGraph
 				activeCell={activeCell!}
-				activeRowChanges={activeRowChanges}
+				activeCellChanges={activeCellChanges}
 			></CellGraph>
 		</div>
 	);

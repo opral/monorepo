@@ -77,23 +77,35 @@ export const activeRowEntityIdAtom = atom(async (get) => {
 	const uniqueColumn = await get(uniqueColumnAtom);
 	if (!activeCell || !uniqueColumn) return null;
 	const uniqueColumnValue = parsedCsv.data[activeCell.row]?.[uniqueColumn];
-	return `${uniqueColumn}:${uniqueColumnValue}`;
+	return `${uniqueColumn}|${uniqueColumnValue}`;
+});
+
+/**
+ * The cell entity_id that is selected in the editor.
+ */
+export const activeCellEntityIdAtom = atom(async (get) => {
+	const activeCell = get(activeCellAtom);
+	const parsedCsv = await get(parsedCsvAtom);
+	const activeRowEntityId = await get(activeRowEntityIdAtom);
+	if (!activeCell || !activeRowEntityId) return null;
+	const columName = parsedCsv.meta.fields![activeCell.col];
+	return `${activeRowEntityId}|${columName}`;
 });
 
 /**
  * All changes for a given row.
  */
-export const activeRowChangesAtom = atom(async (get) => {
+export const activeCellChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const activeFile = await get(activeFileAtom);
-	const activeRowEntityId = await get(activeRowEntityIdAtom);
+	const cellEntityId = await get(activeCellEntityIdAtom);
 	const currentBranch = await get(currentBranchAtom);
 	const lix = await get(lixAtom);
-	if (!activeRowEntityId) return [];
+	if (!cellEntityId) return [];
 	const changes = await lix.db
 		.selectFrom("change")
-		.where("change.type", "=", "row")
-		.where("change.entity_id", "=", activeRowEntityId)
+		.where("change.type", "=", "cell")
+		.where("change.entity_id", "=", cellEntityId)
 		.where("change.file_id", "=", activeFile.id)
 		.where(changeInBranch(currentBranch))
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")

@@ -6,7 +6,7 @@ import { Change, Snapshot } from "@lix-js/sdk";
  * Renders change control information for a row.
  */
 export default function CellGraph(props: {
-	activeRowChanges: (Change & {
+	activeCellChanges: (Change & {
 		content: Snapshot["content"];
 		comment_count?: string | number | bigint;
 	})[];
@@ -23,7 +23,7 @@ export default function CellGraph(props: {
 			</div>
 
 			<div className="mb-12 relative flex flex-col gap-3">
-				{props.activeRowChanges.map((change) => {
+				{props.activeCellChanges.map((change) => {
 					return (
 						<div
 							key={change.id}
@@ -75,7 +75,7 @@ export default function CellGraph(props: {
 									)
 								}
 								<div className="mt-2 px-3 py-1.5 bg-zinc-100 border border-zinc-200 rounded">
-									{change.content?.text?.split(",")![props.activeCell.col]}
+									{change.content?.text}
 								</div>
 							</div>
 						</div>
