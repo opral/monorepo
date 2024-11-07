@@ -45,6 +45,8 @@ export async function lixCsvDemoFile(): Promise<Blob> {
 		})
 		.execute();
 
+	await lix.settled();
+
 	const changes = await lix.db.selectFrom("change").selectAll().execute();
 
 	// confirm them to set the change counter to 0
