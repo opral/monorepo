@@ -1,4 +1,4 @@
-import { openLixInMemory, type Lix, type NewLixFile } from "@lix-js/sdk";
+import { changeIsLeaf, openLixInMemory, type Lix, type NewLixFile } from "@lix-js/sdk";
 import { detectChanges } from "../detectChanges.js";
 
 /**
@@ -50,6 +50,7 @@ export async function mockChanges(args: {
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.selectAll("change")
+		.where(changeIsLeaf())
 		.select("snapshot.content")
 		.execute();
 

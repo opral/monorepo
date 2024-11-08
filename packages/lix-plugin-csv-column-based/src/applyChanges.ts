@@ -1,6 +1,10 @@
 import { type LixPlugin } from "@lix-js/sdk";
 import papaparse from "papaparse";
 import { parseCsv } from "./utilities/parseCsv.js";
+import type {
+	DetectedRowChange,
+	DetectedSchemaDefinitionChange,
+} from "./detectChanges.js";
 
 export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	lix,
@@ -19,7 +23,64 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		throw new Error("Failed to parse csv");
 	}
 
-	for (const change of changes) {
+	let fields = parsedFile.headerRow;
+	let rowOrder = parsedFile.rowOrder;
+
+	for (const change of changes.filter((c) => c.type === "csv-v2-schema")) {
+		const snapshot = await lix.db
+			.selectFrom("snapshot")
+			.where("id", "=", change.snapshot_id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		const schemaChange = {
+			...change,
+			snapshot: snapshot.content,
+		} as unknown as DetectedSchemaDefinitionChange;
+		fields = schemaChange.snapshot!.columnNames;
+	}
+
+	let rowChanges: DetectedRowChange[] = [];
+
+	for (const change of changes.filter((c) => c.type === "csv-v2-row")) {
+		const snapshot = await lix.db
+			.selectFrom("snapshot")
+			.where("id", "=", change.snapshot_id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		rowChanges.push({
+			...change,
+			snapshot: snapshot.content,
+		} as unknown as DetectedRowChange);
+	}
+
+	// sort with deleted rows first followed by rows by row index
+	// so that we can just splice the elements at there new position
+	rowChanges = rowChanges.sort((a, b) => {
+		if (!a.snapshot && b.snapshot) return -1;
+		if (a.snapshot && !b.snapshot) return 1;
+		if (a.snapshot && b.snapshot) {
+			return a.snapshot.rowIndex - b.snapshot.rowIndex;
+		}
+		return 0;
+	});
+
+	for (const rowChange of rowChanges) {
+		// remove the entry
+		rowOrder = rowOrder.filter((rowId) => rowId !== rowChange.entity_id);
+		if (rowChange.snapshot) {
+			// if it still exist insert it at the new position
+			rowOrder.splice(rowChange.snapshot!.rowIndex, 0, rowChange.entity_id);
+		}
+	}
+
+	for (const change of changes.filter((c) => c.type === "csv-v2-cell")) {
+		// We have three types of changes
+		// schema changes -> only affect the columns to be printed out and the order
+		// rows -> contain the information about the row index (the reference to the entity id is not relevant for parsing)
+		// cells -> the actual content of the cels
+
 		const snapshot = await lix.db
 			.selectFrom("snapshot")
 			.where("id", "=", change.snapshot_id)
@@ -56,10 +117,16 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		// console.log("applied change", change, "to csv\n\n", parsed);
 	}
 
+	const data = [];
+
+	for (const rowId of rowOrder) {
+		data.push(parsedFile.recordsById[rowId]);
+	}
+
 	const csv = papaparse.unparse(
 		{
-			fields: parsedFile.headerRow,
-			data: Object.values(parsedFile.recordsById),
+			fields: fields,
+			data,
 		},
 		{
 			// using '\n' as the default newline assuming that windows

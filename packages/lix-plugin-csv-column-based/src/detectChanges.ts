@@ -86,7 +86,6 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	// mark all rows as deleted and newly inserted
 	// if the unique column changed
 	if (uniqueColumnChanged(before, after)) {
-		console.log("uniqueColumnChanged");
 		for (const row_id in beforeParsed?.recordsById) {
 			for (const column in beforeParsed.recordsById[row_id]) {
 				const entity_id = toEntityId(row_id, column);
@@ -190,16 +189,16 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		const indexAfter = afterParsed ? afterParsed?.rowOrder.indexOf(rowId) : -1;
 
 		if (indexAfter === -1) {
-			console.log("ROWS DIFFER!" + indexAfter + " " + rowId);
-			console.log(beforeParsed?.rowOrder);
-			console.log(afterParsed?.rowOrder);
 			detectedRowChanges.push({
 				entity_id: rowId,
 				type: "csv-v2-row",
 				snapshot: null,
 			});
 		} else if (
-			stringArraysDiffer(Object.keys(beforeRow).sort(), Object.keys(afterRow).sort()) ||
+			stringArraysDiffer(
+				Object.keys(beforeRow).sort(),
+				Object.keys(afterRow).sort(),
+			) ||
 			indexAfter !== indexBefore
 		) {
 			detectedRowChanges.push({
@@ -212,11 +211,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 						.sort(),
 				},
 			});
-		} else  {
-			console.log('ROWS EAQUAL')
-			
 		}
-
 	}
 
 	return [

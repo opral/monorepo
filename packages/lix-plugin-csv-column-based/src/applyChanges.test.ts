@@ -20,13 +20,46 @@ test("it should apply an insert change", async () => {
 	});
 
 	// TODO changes comming from mock changes contain ALL changes not only the changes from before to after - is this intended?
-	// TODO we ignore the ordering of the rows - FYI
-
 	const { fileData: applied } = await applyChanges({
 		file: { id: "mock", path: "mock", data: before, metadata },
 		changes,
 		lix,
 	});
+	
+	expect(new TextDecoder().decode(applied)).toEqual(
+		new TextDecoder().decode(after),
+	);
+
+	expect(applied).toEqual(after);
+});
+
+test("it should apply an insert change in the middle", async () => {
+	const before = new TextEncoder().encode(
+		//
+		"Name,Age\nAnna,20\nPeter,50",
+	);
+	const after = new TextEncoder().encode(
+		// John, 30 is added between Anna and Peter
+		"Name,Age\nAnna,20\nJohn,30\nPeter,50",
+	);
+
+	const metadata = { unique_column: "Name" };
+
+	const { lix, changes } = await mockChanges({
+		file: { id: "mock", path: "mock", metadata },
+		fileUpdates: [before, after],
+	});
+
+	// TODO changes comming from mock changes contain ALL changes not only the changes from before to after - is this intended?
+	const { fileData: applied } = await applyChanges({
+		file: { id: "mock", path: "mock", data: before, metadata },
+		changes,
+		lix,
+	});
+	
+	expect(new TextDecoder().decode(applied)).toEqual(
+		new TextDecoder().decode(after),
+	);
 
 	expect(applied).toEqual(after);
 });

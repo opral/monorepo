@@ -71,6 +71,5 @@ export function parseCsv(data: ArrayBuffer, uniqueColumn: string) {
 		}
 	}
 
-	console.log(rowOrder);
 	return { recordsById, headerRow, rowOrder };
 }
