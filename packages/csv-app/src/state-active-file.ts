@@ -223,8 +223,5 @@ export const changeConflictsAtom = atom(async (get) => {
 		groupedByConflictId[conflictId].push(edge);
 	}
 
-	// Convert the grouped object to an array of arrays
-	const groupedArray = Object.values(groupedByConflictId);
-
-	return groupedArray;
+	return groupedByConflictId;
 });

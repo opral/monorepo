@@ -101,8 +101,8 @@ export default function Layout(props: { children: React.ReactNode }) {
 						<NavItem
 							to={`/conflicts?f=${activeFile.id}`}
 							counter={
-								changeConflicts.length !== 0
-									? changeConflicts.length
+								Object.values(changeConflicts).length !== 0
+									? Object.values(changeConflicts).length
 									: undefined
 							}
 							name="Conflicts"
