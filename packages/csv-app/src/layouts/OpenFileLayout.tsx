@@ -263,18 +263,18 @@ const BranchDropdown = () => {
 											sourceBranch: branch,
 											targetBranch: currentBranch,
 										});
+										await saveLixToOpfs({ lix });
 									}}
 								></SlIconButton>
 								<SlIconButton
 									name="x"
 									label="delete"
 									onClick={async () => {
-										await lix.db.transaction().execute(async (trx) => {
-											await trx
-												.deleteFrom("branch")
-												.where("id", "=", branch.id)
-												.execute();
-										});
+										await lix.db
+											.deleteFrom("branch")
+											.where("id", "=", branch.id)
+											.execute();
+										await saveLixToOpfs({ lix });
 									}}
 								></SlIconButton>
 							</div>
