@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { LIX_DIVERGING_ENTITY_CONFLICT_KEY } from "./detect-diverging-entity-conflict.js";
 
-test("it should throw if a change_conflict.key starts with 'lix-' and is not whitelisted", async () => {
+test.skip("it should throw if a change_conflict.key starts with 'lix-' and is not whitelisted", async () => {
 	const lix = await openLixInMemory({});
 
 	const whitelistedKeys = [LIX_DIVERGING_ENTITY_CONFLICT_KEY];

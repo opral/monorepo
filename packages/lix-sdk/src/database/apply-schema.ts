@@ -60,9 +60,7 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
 
   CREATE TABLE IF NOT EXISTS change_conflict (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
-    key TEXT NOT NULL,
-
-    CHECK (key = 'lix-diverging-entity-conflict' OR key NOT LIKE 'lix-%')
+    key TEXT NOT NULL
   ) strict;
 
   CREATE TABLE IF NOT EXISTS change_conflict_edge (
