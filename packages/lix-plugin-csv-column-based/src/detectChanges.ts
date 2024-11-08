@@ -8,6 +8,13 @@ function toEntityId(rowId: string, columnName: string) {
 	return rowId + "|" + columnName;
 }
 
+type DetectedCellChange = Omit<DetectedChange, "snaphot" | "type"> & {
+	type: "cell";
+	snapshot?: {
+		text: string;
+	} | null;
+};
+
 export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	before,
 	after,
@@ -21,8 +28,8 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		return [];
 	}
 
-	const detectedChanges: DetectedChange[] = [];
-
+	const detectedCellChanges: DetectedCellChange[] = [];
+	
 	const [beforeParsed] = parseCsv(before?.data, uniqueColumnBefore);
 	const [afterParsed] = parseCsv(after?.data, uniqueColumnAfter);
 
@@ -33,7 +40,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			for (const column in beforeParsed[row_id]) {
 				const entity_id = toEntityId(row_id, column);
 				// mark all cells as deleted
-				detectedChanges.push({
+				detectedCellChanges.push({
 					type: "cell",
 					entity_id,
 					snapshot: undefined,
@@ -45,14 +52,14 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			for (const column in afterParsed[row_id]) {
 				const entity_id = toEntityId(row_id, column);
 				// mark all cells as deleted
-				detectedChanges.push({
+				detectedCellChanges.push({
 					type: "cell",
 					entity_id,
-					snapshot: { text: afterParsed[row_id]![column] },
+					snapshot: { text: afterParsed[row_id]![column]! },
 				});
 			}
 		}
-		return detectedChanges;
+		return detectedCellChanges;
 	}
 
 	const allRowIds = new Set([
@@ -80,7 +87,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			// Cell exists in both datasets -> check for update
 			if (beforeCell !== undefined && afterCell !== undefined) {
 				if (beforeCell !== afterCell) {
-					detectedChanges.push({
+					detectedCellChanges.push({
 						type: "cell",
 						entity_id,
 						snapshot: { text: afterCell },
@@ -89,7 +96,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			}
 			// Cell exists only in before -> delete
 			else if (beforeCell !== undefined) {
-				detectedChanges.push({
+				detectedCellChanges.push({
 					type: "cell",
 					entity_id,
 					snapshot: undefined,
@@ -97,7 +104,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			}
 			// Cell exists only in after -> insert
 			else if (afterCell !== undefined) {
-				detectedChanges.push({
+				detectedCellChanges.push({
 					type: "cell",
 					entity_id,
 					snapshot: { text: afterCell },
@@ -106,7 +113,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		}
 	}
 
-	return detectedChanges;
+	return detectedCellChanges;
 };
 
 function uniqueColumnChanged(before?: LixFile, after?: LixFile) {
