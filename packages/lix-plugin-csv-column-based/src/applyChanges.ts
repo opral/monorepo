@@ -13,9 +13,9 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		throw new Error("The unique_column metadata is required to apply changes");
 	}
 
-	const [parsed, headerRow] = parseCsv(file.data, uniqueColumn);
+	const parsedFile = parseCsv(file.data, uniqueColumn);
 
-	if (parsed === undefined) {
+	if (parsedFile === undefined) {
 		throw new Error("Failed to parse csv");
 	}
 
@@ -36,10 +36,10 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		// change is a deletion
 		if (snapshot.content === null) {
 			// console.log("deltion change");
-			delete parsed[rowId]![column!];
+			delete parsedFile.recordsById[rowId]![column!];
 			// Check if the precvios delete of the column lead to an empty row - if so delete it
-			if (Object.keys(parsed[rowId]!).length === 0) {
-				delete parsed[rowId];
+			if (Object.keys(parsedFile.recordsById[rowId]!).length === 0) {
+				delete parsedFile.recordsById[rowId];
 			}
 		}
 
@@ -47,17 +47,20 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		// the update will overwrite the column in place
 		// the create will append a new key to the object
 		else {
-			if (!parsed[rowId]) {
-				parsed[rowId] = {} as Record<string, string>;
+			if (!parsedFile.recordsById[rowId]) {
+				parsedFile.recordsById[rowId] = {} as Record<string, string>;
 			}
-			parsed[rowId]![column] = snapshot.content.text;
+			parsedFile.recordsById[rowId]![column] = snapshot.content.text;
 		}
 
 		// console.log("applied change", change, "to csv\n\n", parsed);
 	}
 
 	const csv = papaparse.unparse(
-		{ fields: headerRow, data: Object.values(parsed) },
+		{
+			fields: parsedFile.headerRow,
+			data: Object.values(parsedFile.recordsById),
+		},
 		{
 			// using '\n' as the default newline assuming that windows
 			// treats '\n' as a newline character nowadays
