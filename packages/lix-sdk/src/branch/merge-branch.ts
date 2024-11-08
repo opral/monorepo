@@ -138,7 +138,7 @@ async function getBranchChangePointerDiff(
 				// Doesn't exist in targetBranch (new entity change)
 				eb("target.change_id", "is", null),
 				// Differs in targetBranch (different pointer)
-				eb("source.change_id", "!=", "target.change_id"),
+				eb("source.change_id", "!=", eb.ref("target.change_id")),
 			]),
 		)
 		.select([
