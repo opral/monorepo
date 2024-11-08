@@ -11,6 +11,7 @@ import {
 } from "./state.ts";
 import Papa from "papaparse";
 import {
+	ChangeConflictEdge,
 	changeHasLabel,
 	changeInBranch,
 	changeIsLeafInBranch,
@@ -183,7 +184,6 @@ export const changesCurrentBranchAtom = atom(async (get) => {
 		.execute();
 });
 
-
 export const allEdgesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
@@ -196,24 +196,11 @@ export const allEdgesAtom = atom(async (get) => {
 		.execute();
 });
 
-export const changeConflictsEdgesAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const lix = await get(lixAtom);
-	const activeFile = await get(activeFileAtom);
-	return await lix.db
-		.selectFrom("change_conflict_edge")
-		.innerJoin("change", "change.id", "change_conflict_edge.change_id")
-		// .where(changeInBranch(currentBranch))
-		.where("change.file_id", "=", activeFile.id)
-		.selectAll("change_conflict_edge")
-		.execute();
-});
-
 export const changeConflictsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	return await lix.db
+	const changeConflictEdges = await lix.db
 		.selectFrom("change_conflict_edge")
 		.innerJoin(
 			"change_conflict",
@@ -223,6 +210,21 @@ export const changeConflictsAtom = atom(async (get) => {
 		.innerJoin("change", "change.id", "change_conflict_edge.change_id")
 		// .where(changeInBranch(currentBranch))
 		.where("change.file_id", "=", activeFile.id)
-		.selectAll("change_conflict")
+		.selectAll("change_conflict_edge")
 		.execute();
+
+	const groupedByConflictId: { [key: string]: ChangeConflictEdge[] } = {};
+
+	for (const edge of changeConflictEdges) {
+		const conflictId = edge.change_conflict_id;
+		if (!groupedByConflictId[conflictId]) {
+			groupedByConflictId[conflictId] = [];
+		}
+		groupedByConflictId[conflictId].push(edge);
+	}
+
+	// Convert the grouped object to an array of arrays
+	const groupedArray = Object.values(groupedByConflictId);
+
+	return groupedArray;
 });
