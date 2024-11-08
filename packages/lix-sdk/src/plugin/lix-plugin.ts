@@ -76,9 +76,21 @@ export type DetectedChange = {
 };
 
 export type DetectedConflict = {
-	change_id: string;
-	conflicting_change_id: string;
-	reason?: string;
+	/**
+	 * The key is used to identify the conflict.
+	 *
+	 * The key should be unique for the plugin and the conflict
+	 * to avoid duplicate conflict reports.
+	 *
+	 * @example
+	 *   - `csv-row-order-changed`
+	 *   - `inlang-message-bundle-foreign-key-violation`
+	 */
+	key: string;
+	/**
+	 * The changes that are conflicting.
+	 */
+	conflicting_change_ids: Set<Change["id"]>;
 };
 
 export type LixReadonly = Pick<Lix, "plugin"> & {
