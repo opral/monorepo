@@ -196,15 +196,33 @@ export const allEdgesAtom = atom(async (get) => {
 		.execute();
 });
 
-export const conflictsAtom = atom(async (get) => {
+export const changeConflictsEdgesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
 	return await lix.db
-		.selectFrom("conflict")
-		.innerJoin("change", "change.id", "conflict.change_id")
+		.selectFrom("change_conflict_edge")
+		.innerJoin("change", "change.id", "change_conflict_edge.change_id")
 		// .where(changeInBranch(currentBranch))
 		.where("change.file_id", "=", activeFile.id)
-		.selectAll("conflict")
+		.selectAll("change_conflict_edge")
+		.execute();
+});
+
+export const changeConflictsAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	const activeFile = await get(activeFileAtom);
+	return await lix.db
+		.selectFrom("change_conflict_edge")
+		.innerJoin(
+			"change_conflict",
+			"change_conflict.id",
+			"change_conflict_edge.change_conflict_id"
+		)
+		.innerJoin("change", "change.id", "change_conflict_edge.change_id")
+		// .where(changeInBranch(currentBranch))
+		.where("change.file_id", "=", activeFile.id)
+		.selectAll("change_conflict")
 		.execute();
 });

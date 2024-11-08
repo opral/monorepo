@@ -15,7 +15,7 @@ import {
 import { useAtom } from "jotai";
 import {
 	activeFileAtom,
-	conflictsAtom,
+	changeConflictsAtom,
 	parsedCsvAtom,
 	uniqueColumnAtom,
 } from "../state-active-file.ts";
@@ -36,7 +36,7 @@ import { humanId } from "human-id";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
-	const [conflicts] = useAtom(conflictsAtom);
+	const [changeConflicts] = useAtom(changeConflictsAtom);
 
 	return (
 		<>
@@ -100,7 +100,11 @@ export default function Layout(props: { children: React.ReactNode }) {
 						/>
 						<NavItem
 							to={`/conflicts?f=${activeFile.id}`}
-							counter={conflicts.length !== 0 ? conflicts.length : undefined}
+							counter={
+								changeConflicts.length !== 0
+									? changeConflicts.length
+									: undefined
+							}
 							name="Conflicts"
 						/>
 						<NavItem to={`/graph?f=${activeFile.id}`} name="Graph" />
