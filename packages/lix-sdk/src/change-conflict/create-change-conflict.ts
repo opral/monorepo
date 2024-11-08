@@ -10,7 +10,7 @@ import type { Lix } from "../lix/open-lix.js";
 export async function createChangeConflict(args: {
 	lix: Lix;
 	key: string;
-	conflictingChanges: Pick<Change, "id">[];
+	conflictingChangeIds: Set<Change["id"]>;
 }): Promise<ChangeConflict> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const conflict = await trx
@@ -24,8 +24,8 @@ export async function createChangeConflict(args: {
 		await trx
 			.insertInto("change_conflict_edge")
 			.values(
-				args.conflictingChanges.map((change) => ({
-					change_id: change.id,
+				Array.from(args.conflictingChangeIds).map((id) => ({
+					change_id: id,
 					change_conflict_id: conflict.id,
 				})),
 			)

@@ -199,9 +199,14 @@ export type ChangeConflictUpdate = Updateable<ChangeConflictTable>;
 type ChangeConflictTable = {
 	id: Generated<string>;
 	/**
-	 * The key representing the type of conflict.
+	 * The key is used to identify the conflict.
 	 *
-	 * This field is used to avoid re-reports of the same conflict.
+	 * The key should be unique for the plugin and the conflict
+	 * to avoid duplicate conflict reports.
+	 *
+	 * @example
+	 *   - `csv-row-order-changed`
+	 *   - `inlang-message-bundle-foreign-key-violation`
 	 */
 	key: string;
 };

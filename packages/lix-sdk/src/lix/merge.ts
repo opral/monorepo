@@ -49,8 +49,11 @@ export async function merge(args: {
 		// 3. apply non conflicting leaf changes
 		// TODO inefficient double looping
 		const nonConflictingLeafChangesInSourceForFile = leafChangesOnlyInSource
-			.filter((c) =>
-				conflicts.every((conflict) => conflict.conflicting_change_id !== c.id),
+			.filter((sourceChange) =>
+				conflicts.every(
+					(conflict) =>
+						conflict.conflicting_change_ids.has(sourceChange.id) === false,
+				),
 			)
 			.filter((c) => c.file_id === fileId);
 

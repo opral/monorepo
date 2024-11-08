@@ -1,7 +1,8 @@
-import type { Branch, Change } from "../database/schema.js";
+import { createChangeConflict } from "../change-conflict/create-change-conflict.js";
+import { detectDivergingEntityConflict } from "../change-conflict/detect-diverging-entity-conflict.js";
+import type { Branch } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { DetectedConflict } from "../plugin/lix-plugin.js";
-import { getLowestCommonAncestorV2 } from "../query-utilities/get-lowest-common-ancestor-v2.js";
 
 export async function mergeBranch(args: {
 	lix: Lix;
@@ -43,38 +44,35 @@ export async function mergeBranch(args: {
 		// update the branch change pointers for non-conflicting changes
 		await Promise.all(
 			diffingPointers.map(async (pointer) => {
-				// potentially expensive query
-				// TODO remove the meaning of detected "this one conflicts with that one"
-				//      to allow "bi-directional" conflicts that can be resolved on
-				//      one branch and reflected on others branches that have the same
-				//      conflict.
-				const pluginDetectedConflict = detectedConflicts.find(
-					(conflict) =>
-						conflict.conflicting_change_id === pointer.target_change_id ||
-						conflict.conflicting_change_id === pointer.source_change_id,
-				);
-				if (pluginDetectedConflict) {
-					// don't update the branch change pointer
-					return;
-				}
+				// if the target branch has a pointer for the entity
+				// change, check if there is a conflict
+				if (pointer.target_change_id) {
+					const pluginDetectedConflict = detectedConflicts.find((conflict) =>
+						conflict.conflicting_change_ids.has(
+							pointer.target_change_id as string,
+						),
+					);
+					if (pluginDetectedConflict) {
+						// don't update the branch change pointer
+						return;
+					}
 
-				// if the entity change doesn't exist in the target
-				// it can't conflict (except if a plugin detected
-				// a semantic conflict)
-				const hasConflictingEntityChanges = !pointer.target_change_id
-					? false
-					: await childOfCommonAncestorDiffers({
-							lix: { db: trx },
-							changeA: { id: pointer.source_change_id },
-							changeB: { id: pointer.target_change_id },
-						});
+					// if the entity change doesn't exist in the target
+					// it can't conflict (except if a plugin detected
+					// a semantic conflict)
+					const hasDivergingEntityConflict = !pointer.target_change_id
+						? false
+						: await detectDivergingEntityConflict({
+								lix: { db: trx },
+								changeA: { id: pointer.source_change_id },
+								changeB: { id: pointer.target_change_id },
+							});
 
-				if (hasConflictingEntityChanges) {
-					detectedConflicts.push({
-						change_id: pointer.source_change_id,
-						conflicting_change_id: pointer.target_change_id!,
-					});
-					return;
+					if (hasDivergingEntityConflict) {
+						detectedConflicts.push(hasDivergingEntityConflict);
+						// return because the change is conflicting
+						return;
+					}
 				}
 
 				await trx
@@ -97,12 +95,12 @@ export async function mergeBranch(args: {
 
 		// insert the detected conflicts
 		// (ignore if the conflict already exists)
-		if (detectedConflicts.length > 0) {
-			// await trx
-			// 	.insertInto("conflict")
-			// 	.values(detectedConflicts)
-			// 	.onConflict((oc) => oc.doNothing())
-			// 	.execute();
+		for (const detectedConflict of detectedConflicts) {
+			await createChangeConflict({
+				lix: { ...args.lix, db: trx },
+				key: detectedConflict.key,
+				conflictingChangeIds: detectedConflict.conflicting_change_ids,
+			});
 		}
 	};
 
@@ -151,25 +149,4 @@ async function getBranchChangePointerDiff(
 			"source.change_type",
 		])
 		.execute();
-}
-
-async function childOfCommonAncestorDiffers(args: {
-	lix: Pick<Lix, "db">;
-	changeA: Pick<Change, "id">;
-	changeB: Pick<Change, "id">;
-}): Promise<boolean> {
-	const lowestCommonAncestor = await getLowestCommonAncestorV2(args);
-	if (lowestCommonAncestor === undefined) {
-		return false;
-	}
-	// change a or b is the lowest common ancestor, aka no divergence
-	if (
-		args.changeA.id === lowestCommonAncestor.id ||
-		args.changeB.id === lowestCommonAncestor.id
-	) {
-		return false;
-	}
-	// neither change a or b is the lowest common ancestor.
-	// hence, one change is diverged
-	return true;
 }

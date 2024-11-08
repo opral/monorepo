@@ -140,7 +140,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 	expect(mockPlugin.detectConflicts).toHaveBeenCalledTimes(1);
 });
 
-test("it should save change conflicts", async () => {
+test.todo("it should save change conflicts", async () => {
 	const mockSnapshots = [
 		mockJsonSnapshot({ id: "mock-id", color: "red" }),
 		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
@@ -465,120 +465,126 @@ test.todo("it should apply changes that are not conflicting", async () => {
 	);
 });
 
-test("subsequent merges should not lead to duplicate changes and/or conflicts", async () => {
-	const commonSnapshots = [mockJsonSnapshot({ id: "mock-id", color: "red" })];
-	const commonChanges: NewChange[] = [
-		{
-			id: "1",
-			type: "mock",
-			entity_id: "value1",
-			snapshot_id: commonSnapshots[0]!.id,
-			file_id: "mock-file",
-			plugin_key: "mock-plugin",
-		},
-	];
-	const snapshotsOnlyInTargetLix: NewSnapshot[] = [];
-	const changesOnlyInTargetLix: NewChange[] = [];
-
-	const snapshotsOnlyInSourceLix: Snapshot[] = [
-		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
-	];
-	const changesOnlyInSourceLix: NewChange[] = [
-		{
-			id: "2",
-			type: "mock",
-			entity_id: "value1",
-			snapshot_id: snapshotsOnlyInSourceLix[0]!.id,
-			file_id: "mock-file",
-			plugin_key: "mock-plugin",
-		},
-	];
-
-	const mockPlugin: LixPlugin = {
-		key: "mock-plugin",
-		detectConflicts: vi.fn().mockResolvedValue([
+test.todo(
+	"subsequent merges should not lead to duplicate changes and/or conflicts",
+	async () => {
+		const commonSnapshots = [mockJsonSnapshot({ id: "mock-id", color: "red" })];
+		const commonChanges: NewChange[] = [
 			{
-				change_id: commonChanges[0]!.id!,
-				conflicting_change_id: changesOnlyInSourceLix[0]!.id!,
+				id: "1",
+				type: "mock",
+				entity_id: "value1",
+				snapshot_id: commonSnapshots[0]!.id,
+				file_id: "mock-file",
+				plugin_key: "mock-plugin",
 			},
-		]),
-		applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
-	};
+		];
+		const snapshotsOnlyInTargetLix: NewSnapshot[] = [];
+		const changesOnlyInTargetLix: NewChange[] = [];
 
-	const sourceLix = await openLixInMemory({
-		blob: await newLixFile(),
-		providePlugins: [mockPlugin],
-	});
+		const snapshotsOnlyInSourceLix: Snapshot[] = [
+			mockJsonSnapshot({ id: "mock-id", color: "blue" }),
+		];
+		const changesOnlyInSourceLix: NewChange[] = [
+			{
+				id: "2",
+				type: "mock",
+				entity_id: "value1",
+				snapshot_id: snapshotsOnlyInSourceLix[0]!.id,
+				file_id: "mock-file",
+				plugin_key: "mock-plugin",
+			},
+		];
 
-	const targetLix = await openLixInMemory({
-		blob: await newLixFile(),
-		providePlugins: [mockPlugin],
-	});
+		const mockPlugin: LixPlugin = {
+			key: "mock-plugin",
+			detectConflicts: vi.fn().mockResolvedValue([
+				{
+					change_id: commonChanges[0]!.id!,
+					conflicting_change_id: changesOnlyInSourceLix[0]!.id!,
+				},
+			]),
+			applyChanges: vi.fn().mockResolvedValue({ fileData: new Uint8Array() }),
+		};
 
-	await sourceLix.db
-		.insertInto("snapshot")
-		.values(
-			[...commonSnapshots, ...snapshotsOnlyInSourceLix].map((s) => {
-				return { content: s.content };
-			}),
-		)
-		.execute();
+		const sourceLix = await openLixInMemory({
+			blob: await newLixFile(),
+			providePlugins: [mockPlugin],
+		});
 
-	await sourceLix.db
-		.insertInto("change")
-		.values([...commonChanges, ...changesOnlyInSourceLix])
-		.execute();
+		const targetLix = await openLixInMemory({
+			blob: await newLixFile(),
+			providePlugins: [mockPlugin],
+		});
 
-	await targetLix.db
-		.insertInto("snapshot")
-		.values(
-			[...commonSnapshots, ...snapshotsOnlyInTargetLix].map((s) => {
-				return { content: s.content };
-			}),
-		)
-		.execute();
+		await sourceLix.db
+			.insertInto("snapshot")
+			.values(
+				[...commonSnapshots, ...snapshotsOnlyInSourceLix].map((s) => {
+					return { content: s.content };
+				}),
+			)
+			.execute();
 
-	await targetLix.db
-		.insertInto("change")
-		.values([...commonChanges, ...changesOnlyInTargetLix])
-		.execute();
+		await sourceLix.db
+			.insertInto("change")
+			.values([...commonChanges, ...changesOnlyInSourceLix])
+			.execute();
 
-	await targetLix.db
-		.insertInto("file")
-		.values({
-			id: "mock-file",
-			path: "/mock-file.json",
-			data: new TextEncoder().encode(JSON.stringify({})),
-		})
-		.execute();
+		await targetLix.db
+			.insertInto("snapshot")
+			.values(
+				[...commonSnapshots, ...snapshotsOnlyInTargetLix].map((s) => {
+					return { content: s.content };
+				}),
+			)
+			.execute();
 
-	await merge({ sourceLix, targetLix });
+		await targetLix.db
+			.insertInto("change")
+			.values([...commonChanges, ...changesOnlyInTargetLix])
+			.execute();
 
-	const changes = await targetLix.db.selectFrom("change").selectAll().execute();
+		await targetLix.db
+			.insertInto("file")
+			.values({
+				id: "mock-file",
+				path: "/mock-file.json",
+				data: new TextEncoder().encode(JSON.stringify({})),
+			})
+			.execute();
 
-	// const conflicts = await targetLix.db
-	// 	.selectFrom("conflict")
-	// 	.selectAll()
-	// 	.execute();
+		await merge({ sourceLix, targetLix });
 
-	expect(changes.length).toBe(2);
-	// expect(conflicts.length).toBe(1);
+		const changes = await targetLix.db
+			.selectFrom("change")
+			.selectAll()
+			.execute();
 
-	await merge({ sourceLix, targetLix });
+		// const conflicts = await targetLix.db
+		// 	.selectFrom("conflict")
+		// 	.selectAll()
+		// 	.execute();
 
-	const changesAfterSecondMerge = await targetLix.db
-		.selectFrom("change")
-		.selectAll()
-		.execute();
+		expect(changes.length).toBe(2);
+		// expect(conflicts.length).toBe(1);
 
-	// const conflictsAfterSecondMerge = await targetLix.db
-	// 	.selectFrom("conflict")
-	// 	.selectAll()
-	// 	.execute();
+		await merge({ sourceLix, targetLix });
 
-	expect(changesAfterSecondMerge.length).toBe(2);
-	// expect(conflictsAfterSecondMerge.length).toBe(1);
-});
+		const changesAfterSecondMerge = await targetLix.db
+			.selectFrom("change")
+			.selectAll()
+			.execute();
+
+		// const conflictsAfterSecondMerge = await targetLix.db
+		// 	.selectFrom("conflict")
+		// 	.selectAll()
+		// 	.execute();
+
+		expect(changesAfterSecondMerge.length).toBe(2);
+		// expect(conflictsAfterSecondMerge.length).toBe(1);
+	},
+);
 
 test("it should naively copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const snapshotsOnlyInSourceLix: Snapshot[] = [

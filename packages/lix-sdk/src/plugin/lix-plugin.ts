@@ -1,4 +1,8 @@
-import type { Change, LixFile, Snapshot } from "../database/schema.js";
+import {
+	type Change,
+	type LixFile,
+	type Snapshot,
+} from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
@@ -77,14 +81,7 @@ export type DetectedChange = {
 
 export type DetectedConflict = {
 	/**
-	 * The key is used to identify the conflict.
-	 *
-	 * The key should be unique for the plugin and the conflict
-	 * to avoid duplicate conflict reports.
-	 *
-	 * @example
-	 *   - `csv-row-order-changed`
-	 *   - `inlang-message-bundle-foreign-key-violation`
+	 * @see {ChangeConflict.key}
 	 */
 	key: string;
 	/**
