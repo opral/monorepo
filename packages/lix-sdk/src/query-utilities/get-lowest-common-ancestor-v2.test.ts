@@ -46,14 +46,26 @@ test("it should find the common parent of two changes recursively", async () => 
 			created_at: "mock",
 			snapshot_id: "no-content",
 		},
+		{
+			id: "4",
+			file_id: "mock",
+			entity_id: "value1",
+			plugin_key: "mock",
+			type: "mock",
+			created_at: "mock",
+			snapshot_id: "no-content",
+		},
 	] as const satisfies Change[];
 
 	const edges = [
 		{ parent_id: "common", child_id: "1" },
-		{ parent_id: "common", child_id: "3" },
-		// for re-assurance that the function is not
-		// just yielding the first parent
-		{ parent_id: "1", child_id: "2" },
+		{ parent_id: "common", child_id: "2" },
+		// changes 1 and 2 are children of the common ancestor
+		// but changes 3 and 4 are children of 1 and 2 respectively
+		// finding the common ancestor needs to recursively crawl
+		// changes 1 and 2 to find the common ancestor
+		{ parent_id: "1", child_id: "3" },
+		{ parent_id: "2", child_id: "4" },
 	];
 
 	await lix.db.insertInto("change").values(mockChanges).execute();
@@ -62,8 +74,10 @@ test("it should find the common parent of two changes recursively", async () => 
 
 	const commonAncestor = await getLowestCommonAncestorV2({
 		lix,
-		changeA: mockChanges[1],
-		changeB: mockChanges[3],
+		// 1 is a child of the common ancestor
+		changeA: { id: "3" },
+		// 3 is a child of 2, which is a child of the common ancestor
+		changeB: { id: "4" },
 	});
 
 	expect(commonAncestor?.id).toBe("common");

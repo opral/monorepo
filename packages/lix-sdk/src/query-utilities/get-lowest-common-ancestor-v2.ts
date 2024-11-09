@@ -90,9 +90,6 @@ export async function getLowestCommonAncestorV2(args: {
 			"changeA_ancestors.parent_id",
 			"changeB_ancestors.parent_id",
 		)
-		// Return only if both changes directly diverge from a common ancestor
-		.where("changeA_ancestors.child_id", "=", args.changeA.id)
-		.where("changeB_ancestors.child_id", "=", args.changeB.id)
 		.select("changeA_ancestors.parent_id as common_ancestor_id")
 		.executeTakeFirst();
 
