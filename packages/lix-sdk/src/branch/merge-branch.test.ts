@@ -2,6 +2,8 @@ import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { mergeBranch } from "./merge-branch.js";
+import type { NewChange } from "../database/schema.js";
+import { updateBranchPointers } from "./update-branch-pointers.js";
 
 test("it should update the branch pointers in target that are not conflicting", async () => {
 	const lix = await openLixInMemory({});
@@ -437,4 +439,123 @@ test("it should automatically detect a conflict if a change exists that differs 
 	expect(targetPointers.map((pointer) => pointer.change_id)).toContain(
 		targetChange.id,
 	);
+});
+
+test("re-curring merges should not create a new conflict if the conflict already exists for the key and set of changes", async () => {
+	const mockChanges = [
+		{
+			id: "change0",
+			plugin_key: "mock-plugin",
+			type: "mock",
+			file_id: "mock",
+			entity_id: "value0",
+			snapshot_id: "no-content",
+		},
+		{
+			id: "change1",
+			plugin_key: "mock-plugin",
+			file_id: "mock",
+			entity_id: "value1",
+			type: "mock",
+			snapshot_id: "no-content",
+		},
+	] as const satisfies NewChange[];
+
+	const mockPlugin: LixPlugin = {
+		key: "mock-plugin",
+		applyChanges: async () => ({
+			fileData: new TextEncoder().encode("mock"),
+		}),
+		detectConflictsV2: async () => [
+			{
+				key: "mock-conflict",
+				conflicting_change_ids: new Set([
+					mockChanges[0]!.id,
+					mockChanges[1]!.id,
+				]),
+			},
+		],
+	};
+
+	const lix = await openLixInMemory({
+		providePlugins: [mockPlugin],
+	});
+
+	await lix.db
+		.insertInto("file_internal")
+		.values({ id: "mock", path: "mock", data: new Uint8Array() })
+		.execute();
+
+	const changes = await lix.db
+		.insertInto("change")
+		.values(mockChanges)
+		.returningAll()
+		.execute();
+
+	const sourceBranch = await lix.db
+		.insertInto("branch")
+		.values({ id: "source-branch" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const targetBranch = await lix.db
+		.insertInto("branch")
+		.values({ id: "target-branch" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// source branch points to change0
+	await updateBranchPointers({
+		lix,
+		branch: sourceBranch,
+		changes: [changes[0]!],
+	});
+
+	// target branch points to change1
+	await updateBranchPointers({
+		lix,
+		branch: targetBranch,
+		changes: [changes[1]!],
+	});
+
+	// First merge
+	await mergeBranch({
+		lix,
+		sourceBranch,
+		targetBranch,
+	});
+
+	// Check that no new conflict is created
+	const conflictsAfter1Merge = await lix.db
+		.selectFrom("change_conflict_edge")
+		.innerJoin(
+			"change_conflict",
+			"change_conflict.id",
+			"change_conflict_edge.change_conflict_id",
+		)
+		.where("change_conflict.key", "=", "mock-conflict")
+		.selectAll("change_conflict")
+		.execute();
+
+	expect(conflictsAfter1Merge.length).toBe(1);
+
+	// Second merge
+	await mergeBranch({
+		lix,
+		sourceBranch,
+		targetBranch,
+	});
+
+	const conflictsAfter2Merge = await lix.db
+		.selectFrom("change_conflict_edge")
+		.innerJoin(
+			"change_conflict",
+			"change_conflict.id",
+			"change_conflict_edge.change_conflict_id",
+		)
+		.where("change_conflict.key", "=", "mock-conflict")
+		.selectAll("change_conflict")
+		.execute();
+
+	expect(conflictsAfter2Merge.length).toBe(1);
 });
