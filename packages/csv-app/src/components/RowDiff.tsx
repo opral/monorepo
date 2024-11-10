@@ -23,12 +23,6 @@ export default function RowDiff(props: {
 					const value = change.snapshot_content?.text;
 					const parentValue = change.parent?.snapshot_content?.text;
 
-					const hasDiff = value !== parentValue;
-
-					if (hasDiff === false) {
-						return undefined;
-					}
-
 					return (
 						<div
 							key={column}

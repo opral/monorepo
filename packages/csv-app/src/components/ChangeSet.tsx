@@ -19,7 +19,7 @@ import {
 import { SlButton, SlInput } from "@shoelace-style/shoelace/dist/react";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import { confirmChanges } from "../helper/confirmChanges.ts";
-import RowDiff from "./DiffRow.tsx";
+import RowDiff from "./RowDiff.tsx";
 
 export default function Component(props: {
 	id: string;
