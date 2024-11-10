@@ -13,46 +13,64 @@ export async function createChangeConflict(args: {
 	conflictingChangeIds: Set<Change["id"]>;
 }): Promise<ChangeConflict> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		// Check if a conflict with the same key and one or more of the given change IDs already exists
+		// Check if a conflict with the same key and identical change IDs already exists
 		const existingConflict = await trx
 			.selectFrom("change_conflict")
-			.innerJoin(
-				"change_conflict_element",
-				"change_conflict.id",
-				"change_conflict_element.change_conflict_id",
-			)
 			.where("change_conflict.key", "=", args.key)
-			.where(
-				"change_conflict_element.change_id",
-				"in",
-				Array.from(args.conflictingChangeIds),
+			.where((eb) =>
+				eb.exists(
+					trx
+						.selectFrom("change_conflict_element")
+						.innerJoin("change_conflict", (join) =>
+							join.onRef(
+								"change_conflict_element.change_conflict_id",
+								"=",
+								"change_conflict.id",
+							),
+						)
+						.where(
+							"change_conflict_element.change_id",
+							"in",
+							Array.from(args.conflictingChangeIds),
+						)
+						.groupBy("change_conflict_element.change_conflict_id")
+						.having(
+							trx.fn.count("change_conflict_element.change_id"),
+							"=",
+							args.conflictingChangeIds.size,
+						)
+						.select("id"),
+				),
 			)
-			.selectAll("change_conflict")
+			.selectAll()
 			.executeTakeFirst();
 
-		const conflict =
-			existingConflict ??
-			(await trx
-				.insertInto("change_conflict")
-				.values({
-					key: args.key,
-				})
-				.returningAll()
-				.executeTakeFirstOrThrow());
+		if (existingConflict) {
+			// Return the existing conflict if it already exists
+			return existingConflict;
+		}
+
+		const newConflict = await trx
+			.insertInto("change_conflict")
+			.values({
+				key: args.key,
+			})
+			.returningAll()
+			.executeTakeFirstOrThrow();
 
 		await trx
 			.insertInto("change_conflict_element")
 			.values(
 				Array.from(args.conflictingChangeIds).map((id) => ({
 					change_id: id,
-					change_conflict_id: conflict.id,
+					change_conflict_id: newConflict.id,
 				})),
 			)
 			// Ignore if the conflict element already exists
 			.onConflict((oc) => oc.doNothing())
 			.execute();
 
-		return conflict;
+		return newConflict;
 	};
 
 	if (args.lix.db.isTransaction) {

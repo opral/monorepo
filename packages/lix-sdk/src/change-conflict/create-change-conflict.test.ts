@@ -65,7 +65,7 @@ test("conflicts should be de-duplicated based on the change_conflict.key", async
 
 // unsure about this behavior. might lead to unexpected behavior down the road.
 // we can leave it as is for now, but we should keep an eye on it
-test("if a conflict set contains one of the changes for the same key, the changes should be added to the same conflict to avoid duplicate conflicts", async () => {
+test("if a conflict set contains the same changes for a given key, no new conflict should be created", async () => {
 	const lix = await openLixInMemory({});
 
 	await lix.db
@@ -118,26 +118,10 @@ test("if a conflict set contains one of the changes for the same key, the change
 	const changeConflict2 = await createChangeConflict({
 		lix,
 		key: "mock-conflict",
-		// 2 was preivously not in the conflict
-		conflictingChangeIds: new Set(["change1", "change2"]),
+		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
 
-	// Check that no new conflict is created
-	const conflictsAfter2Creation = await lix.db
-		.selectFrom("change_conflict")
-		.where("change_conflict.key", "=", "mock-conflict")
-		.selectAll()
-		.execute();
-
-	const conflictElementsAfter2Creation = await lix.db
-		.selectFrom("change_conflict_element")
-		.where("change_conflict_id", "=", changeConflict2.id)
-		.selectAll()
-		.execute();
-
-	expect(conflictsAfter2Creation.length).toBe(1);
-	expect(conflictsAfter2Creation[0]?.id).toBe(changeConflict.id);
-	expect(conflictElementsAfter2Creation.length).toBe(3);
+	expect(changeConflict2.id).toBe(changeConflict.id);
 
 	const changeConflict3 = await createChangeConflict({
 		lix,
