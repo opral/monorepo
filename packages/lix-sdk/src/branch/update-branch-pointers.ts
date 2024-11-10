@@ -39,6 +39,12 @@ export async function updateBranchPointers(args: {
 					})),
 				)
 				.execute();
+		} else {
+			// if there are no changes, then delete all pointers for the branch
+			await trx
+				.deleteFrom("branch_change_pointer")
+				.where("branch_id", "=", branch.id)
+				.execute();
 		}
 	};
 
