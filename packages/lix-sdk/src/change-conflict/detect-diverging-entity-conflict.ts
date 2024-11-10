@@ -39,6 +39,6 @@ export async function detectDivergingEntityConflict(args: {
 	// hence, one change is diverged
 	return {
 		key: LIX_DIVERGING_ENTITY_CONFLICT_KEY,
-		conflicting_change_ids: new Set([args.changeA.id, args.changeB.id]),
+		conflictingChangeIds: new Set([args.changeA.id, args.changeB.id]),
 	};
 }

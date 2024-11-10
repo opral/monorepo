@@ -5,6 +5,7 @@ import {
 	detectDivergingEntityConflict,
 	LIX_DIVERGING_ENTITY_CONFLICT_KEY,
 } from "./detect-diverging-entity-conflict.js";
+import type { DetectedConflict } from "../plugin/lix-plugin.js";
 
 test("it should detect a diverging entity conflict", async () => {
 	const lix = await openLixInMemory({});
@@ -61,8 +62,8 @@ test("it should detect a diverging entity conflict", async () => {
 
 	expect(result).toEqual({
 		key: LIX_DIVERGING_ENTITY_CONFLICT_KEY,
-		conflicting_change_ids: new Set(["change2", "change3"]),
-	});
+		conflictingChangeIds: new Set(["change2", "change3"]),
+	} satisfies DetectedConflict);
 });
 
 test("it should return undefined if no conflict exists (determined by finding the lowest common ancestor)", async () => {

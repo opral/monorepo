@@ -63,7 +63,7 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     key TEXT NOT NULL
   ) strict;
 
-  CREATE TABLE IF NOT EXISTS change_conflict_edge (
+  CREATE TABLE IF NOT EXISTS change_conflict_element (
     change_conflict_id TEXT NOT NULL,
     change_id TEXT NOT NULL,
 

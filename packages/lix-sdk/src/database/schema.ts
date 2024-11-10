@@ -26,8 +26,8 @@ export type LixDatabaseSchema = {
 
 	// change conflicts
 	change_conflict: ChangeConflictTable;
+	change_conflict_element: ChangeConflictElementTable;
 	change_conflict_resolution: ChangeConflictResolutionTable;
-	change_conflict_edge: ChangeConflictEdgeTable;
 };
 
 export type ChangeQueueEntry = Selectable<ChangeQueueTable>;
@@ -222,10 +222,11 @@ type ChangeConflictResolutionTable = {
 	resolved_change_id: string;
 };
 
-export type ChangeConflictEdge = Selectable<ChangeConflictEdgeTable>;
-export type NewChangeConflictEdge = Insertable<ChangeConflictEdgeTable>;
-export type ChangeConflictEdgeUpdate = Updateable<ChangeConflictEdgeTable>;
-type ChangeConflictEdgeTable = {
+export type ChangeConflictElement = Selectable<ChangeConflictElementTable>;
+export type NewChangeConflictElement = Insertable<ChangeConflictElementTable>;
+export type ChangeConflictElementUpdate =
+	Updateable<ChangeConflictElementTable>;
+type ChangeConflictElementTable = {
 	change_conflict_id: string;
 	change_id: string;
 };

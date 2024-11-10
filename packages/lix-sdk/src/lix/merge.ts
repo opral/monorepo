@@ -52,7 +52,7 @@ export async function merge(args: {
 			.filter((sourceChange) =>
 				conflicts.every(
 					(conflict) =>
-						conflict.conflicting_change_ids.has(sourceChange.id) === false,
+						conflict.conflictingChangeIds.has(sourceChange.id) === false,
 				),
 			)
 			.filter((c) => c.file_id === fileId);

@@ -11,7 +11,7 @@ import {
 } from "./state.ts";
 import Papa from "papaparse";
 import {
-	ChangeConflictEdge,
+	ChangeConflictElement,
 	changeHasLabel,
 	changeInBranch,
 	changeIsLeafInBranch,
@@ -201,19 +201,19 @@ export const changeConflictsAtom = atom(async (get) => {
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
 	const changeConflictEdges = await lix.db
-		.selectFrom("change_conflict_edge")
+		.selectFrom("change_conflict_element")
 		.innerJoin(
 			"change_conflict",
 			"change_conflict.id",
-			"change_conflict_edge.change_conflict_id"
+			"change_conflict_element.change_conflict_id"
 		)
-		.innerJoin("change", "change.id", "change_conflict_edge.change_id")
+		.innerJoin("change", "change.id", "change_conflict_element.change_id")
 		// .where(changeInBranch(currentBranch))
 		.where("change.file_id", "=", activeFile.id)
-		.selectAll("change_conflict_edge")
+		.selectAll("change_conflict_element")
 		.execute();
 
-	const groupedByConflictId: { [key: string]: ChangeConflictEdge[] } = {};
+	const groupedByConflictId: { [key: string]: ChangeConflictElement[] } = {};
 
 	for (const edge of changeConflictEdges) {
 		const conflictId = edge.change_conflict_id;

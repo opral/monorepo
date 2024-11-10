@@ -58,7 +58,7 @@ export async function mergeBranch(args: {
 				// change, check if there is a conflict
 				if (pointer.target_change_id) {
 					const pluginDetectedConflict = detectedConflicts.find((conflict) =>
-						conflict.conflicting_change_ids.has(
+						conflict.conflictingChangeIds.has(
 							pointer.target_change_id as string,
 						),
 					);
@@ -115,7 +115,7 @@ export async function mergeBranch(args: {
 			await createChangeConflict({
 				lix: { ...args.lix, db: trx },
 				key: detectedConflict.key,
-				conflictingChangeIds: detectedConflict.conflicting_change_ids,
+				conflictingChangeIds: detectedConflict.conflictingChangeIds,
 			});
 		}
 	};

@@ -150,7 +150,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 			return [
 				{
 					key: "mock-conflict",
-					conflicting_change_ids: new Set([change2!.id, change3!.id]),
+					conflictingChangeIds: new Set([change2!.id, change3!.id]),
 				},
 			];
 		},
@@ -174,7 +174,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 		.execute();
 
 	const conflictEdges = await lix.db
-		.selectFrom("change_conflict_edge")
+		.selectFrom("change_conflict_element")
 		.selectAll()
 		.execute();
 
@@ -268,7 +268,7 @@ test("it should not update the target branch pointers of a conflicting change", 
 			return [
 				{
 					key: "mock-conflict",
-					conflicting_change_ids: new Set([change1!.id, change2!.id]),
+					conflictingChangeIds: new Set([change1!.id, change2!.id]),
 				},
 			];
 		},
@@ -292,7 +292,7 @@ test("it should not update the target branch pointers of a conflicting change", 
 		.execute();
 
 	const conflictEdges = await lix.db
-		.selectFrom("change_conflict_edge")
+		.selectFrom("change_conflict_element")
 		.selectAll()
 		.execute();
 
@@ -416,7 +416,7 @@ test("it should automatically detect a conflict if a change exists that differs 
 
 	// Validate results in `conflict` table
 	const conflictEdges = await lix.db
-		.selectFrom("change_conflict_edge")
+		.selectFrom("change_conflict_element")
 		.selectAll()
 		.execute();
 
@@ -469,10 +469,7 @@ test("re-curring merges should not create a new conflict if the conflict already
 		detectConflictsV2: async () => [
 			{
 				key: "mock-conflict",
-				conflicting_change_ids: new Set([
-					mockChanges[0]!.id,
-					mockChanges[1]!.id,
-				]),
+				conflictingChangeIds: new Set([mockChanges[0]!.id, mockChanges[1]!.id]),
 			},
 		],
 	};
@@ -527,12 +524,7 @@ test("re-curring merges should not create a new conflict if the conflict already
 
 	// Check that no new conflict is created
 	const conflictsAfter1Merge = await lix.db
-		.selectFrom("change_conflict_edge")
-		.innerJoin(
-			"change_conflict",
-			"change_conflict.id",
-			"change_conflict_edge.change_conflict_id",
-		)
+		.selectFrom("change_conflict")
 		.where("change_conflict.key", "=", "mock-conflict")
 		.selectAll("change_conflict")
 		.execute();
@@ -547,14 +539,9 @@ test("re-curring merges should not create a new conflict if the conflict already
 	});
 
 	const conflictsAfter2Merge = await lix.db
-		.selectFrom("change_conflict_edge")
-		.innerJoin(
-			"change_conflict",
-			"change_conflict.id",
-			"change_conflict_edge.change_conflict_id",
-		)
+		.selectFrom("change_conflict")
 		.where("change_conflict.key", "=", "mock-conflict")
-		.selectAll("change_conflict")
+		.selectAll()
 		.execute();
 
 	expect(conflictsAfter2Merge.length).toBe(1);

@@ -13,22 +13,43 @@ export async function createChangeConflict(args: {
 	conflictingChangeIds: Set<Change["id"]>;
 }): Promise<ChangeConflict> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const conflict = await trx
-			.insertInto("change_conflict")
-			.values({
-				key: args.key,
-			})
-			.returningAll()
-			.executeTakeFirstOrThrow();
+		// Check if a conflict with the same key and one or more of the given change IDs already exists
+		const existingConflict = await trx
+			.selectFrom("change_conflict")
+			.innerJoin(
+				"change_conflict_element",
+				"change_conflict.id",
+				"change_conflict_element.change_conflict_id",
+			)
+			.where("change_conflict.key", "=", args.key)
+			.where(
+				"change_conflict_element.change_id",
+				"in",
+				Array.from(args.conflictingChangeIds),
+			)
+			.selectAll("change_conflict")
+			.executeTakeFirst();
+
+		const conflict =
+			existingConflict ??
+			(await trx
+				.insertInto("change_conflict")
+				.values({
+					key: args.key,
+				})
+				.returningAll()
+				.executeTakeFirstOrThrow());
 
 		await trx
-			.insertInto("change_conflict_edge")
+			.insertInto("change_conflict_element")
 			.values(
 				Array.from(args.conflictingChangeIds).map((id) => ({
 					change_id: id,
 					change_conflict_id: conflict.id,
 				})),
 			)
+			// Ignore if the conflict element already exists
+			.onConflict((oc) => oc.doNothing())
 			.execute();
 
 		return conflict;

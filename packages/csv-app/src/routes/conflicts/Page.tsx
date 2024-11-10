@@ -16,7 +16,7 @@ export default function Page() {
 								<p className="italic">Changes</p>
 								{edges.map((edge) => (
 									<p key={`${edge.change_conflict_id}-${edge.change_id}`}>
-										<p>{edge.change_id}</p>
+										{edge.change_id}
 									</p>
 								))}
 							</div>

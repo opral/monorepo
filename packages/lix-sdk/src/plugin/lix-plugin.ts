@@ -87,7 +87,7 @@ export type DetectedConflict = {
 	/**
 	 * The changes that are conflicting.
 	 */
-	conflicting_change_ids: Set<Change["id"]>;
+	conflictingChangeIds: Set<Change["id"]>;
 };
 
 export type LixReadonly = Pick<Lix, "plugin"> & {
