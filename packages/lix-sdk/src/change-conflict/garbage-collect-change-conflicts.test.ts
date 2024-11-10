@@ -2,9 +2,8 @@ import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { garbageCollectChangeConflicts } from "./garbage-collect-change-conflicts.js";
 import { createChangeConflict } from "./create-change-conflict.js";
-import { updateBranchPointers } from "../branch/update-branch-pointers.js";
 
-test("should not garabage collect conflicts that branch change pointers reference", async () => {
+test("should garbage collect conflicts that no branch change pointers reference", async () => {
 	const lix = await openLixInMemory({});
 
 	await lix.db
@@ -30,24 +29,18 @@ test("should not garabage collect conflicts that branch change pointers referenc
 		.returningAll()
 		.execute();
 
-	const branch0 = await lix.db
-		.insertInto("branch")
-		.values({ id: "branch0" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
 	const mockConflict0 = await createChangeConflict({
 		lix,
 		key: "mock-conflict0",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
 
-	// branch 0 points to no changes
-	await updateBranchPointers({
-		lix,
-		branch: branch0,
-		changes: [],
-	});
+	const branchChangePointers = await lix.db
+		.selectFrom("branch_change_pointer")
+		.selectAll()
+		.execute();
+
+	expect(branchChangePointers.length).toBe(0);
 
 	// Run garbage collection
 	const gc = await garbageCollectChangeConflicts({ lix });
@@ -72,7 +65,7 @@ test("should not garabage collect conflicts that branch change pointers referenc
 	expect(remainingConflictElements.length).toBe(0);
 });
 
-test("should garbage collect conflicts that no branch change pointer references", async () => {
+test("should not garbage collect conflicts that branch change pointers reference", async () => {
 	const lix = await openLixInMemory({});
 
 	const changes = await lix.db
@@ -109,24 +102,34 @@ test("should garbage collect conflicts that no branch change pointer references"
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
 
-	// branch 0 points to change 0 and change 1
-	await updateBranchPointers({
-		lix,
-		branch: currentBranch,
-		changes: [changes[0]!, changes[1]!],
-	});
+	// current branch points to changes 0 and 1
+	await lix.db
+		.insertInto("branch_change_pointer")
+		.values([
+			{
+				branch_id: currentBranch.id,
+				change_id: changes[0]!.id,
+				change_entity_id: changes[0]!.entity_id,
+				change_file_id: changes[0]!.file_id,
+				change_type: changes[0]!.type,
+			},
+			{
+				branch_id: currentBranch.id,
+				change_id: changes[1]!.id,
+				change_entity_id: changes[1]!.entity_id,
+				change_file_id: changes[1]!.file_id,
+				change_type: changes[1]!.type,
+			},
+		])
+		.execute();
 
 	// Run garbage collection
 	const gc0 = await garbageCollectChangeConflicts({ lix });
 
 	expect(gc0.deletedChangeConflicts.length).toBe(0);
 
-	// branch points to no changes anymore
-	await updateBranchPointers({
-		lix,
-		branch: currentBranch,
-		changes: [],
-	});
+	// delete all branch change pointers
+	await lix.db.deleteFrom("branch_change_pointer").execute();
 
 	const gc1 = await garbageCollectChangeConflicts({ lix });
 	expect(gc1.deletedChangeConflicts.length).toBe(1);
