@@ -6,7 +6,7 @@ import type { Lix } from "../lix/open-lix.js";
  * that no branch change pointer references (anymore).
  */
 export async function garbageCollectChangeConflicts(args: {
-	lix: Lix;
+	lix: Pick<Lix, "db">;
 }): Promise<{
 	deletedChangeConflicts: ChangeConflict[];
 }> {

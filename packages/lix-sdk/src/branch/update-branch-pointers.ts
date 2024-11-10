@@ -1,9 +1,10 @@
+import { garbageCollectChangeConflicts } from "../change-conflict/garbage-collect-change-conflicts.js";
 import type { Branch, Change } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 /**
  * Updates the branch pointers for the given branch with the given changes.
- * 
+ *
  * @args branch - The branch to update the pointers for. If not provided, the current branch is used.
  */
 export async function updateBranchPointers(args: {
@@ -46,6 +47,7 @@ export async function updateBranchPointers(args: {
 				.where("branch_id", "=", branch.id)
 				.execute();
 		}
+		await garbageCollectChangeConflicts({ lix: { ...args.lix, db: trx } });
 	};
 
 	if (args.lix.db.isTransaction) {
