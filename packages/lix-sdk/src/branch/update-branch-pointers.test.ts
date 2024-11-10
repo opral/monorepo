@@ -145,3 +145,22 @@ test("it should default to the current branch if no branch is provided", async (
 	expect(branchChangePointers.length).toBe(1);
 	expect(branchChangePointers[0]?.change_id).toBe("change-1");
 });
+
+test("it should not fail if an empty array of changes is provided", async () => {
+	const lix = await openLixInMemory({});
+
+	await lix.db.transaction().execute(async (trx) => {
+		await updateBranchPointers({
+			lix: { db: trx },
+			changes: [],
+		});
+	});
+
+	const branchChangePointers = await lix.db
+		.selectFrom("branch_change_pointer")
+		.selectAll()
+		.execute();
+
+	// no change pointers should be created
+	expect(branchChangePointers.length).toBe(0);
+});

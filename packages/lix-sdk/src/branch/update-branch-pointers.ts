@@ -19,25 +19,27 @@ export async function updateBranchPointers(args: {
 				.selectAll()
 				.executeTakeFirstOrThrow());
 
-		await trx
-			.insertInto("branch_change_pointer")
-			.values(
-				args.changes.map((change) => ({
-					branch_id: branch.id,
-					change_id: change.id,
-					change_entity_id: change.entity_id,
-					change_file_id: change.file_id,
-					change_type: change.type,
-				})),
-			)
-			// pointer for this branch and change_entity, change_file, change_type
-			// already exists, then update the change_id
-			.onConflict((oc) =>
-				oc.doUpdateSet((eb) => ({
-					change_id: eb.ref("excluded.change_id"),
-				})),
-			)
-			.execute();
+		const pointers = args.changes.map((change) => ({
+			branch_id: branch.id,
+			change_id: change.id,
+			change_entity_id: change.entity_id,
+			change_file_id: change.file_id,
+			change_type: change.type,
+		}));
+
+		if (pointers.length > 0) {
+			await trx
+				.insertInto("branch_change_pointer")
+				.values(pointers)
+				// pointer for this branch and change_entity, change_file, change_type
+				// already exists, then update the change_id
+				.onConflict((oc) =>
+					oc.doUpdateSet((eb) => ({
+						change_id: eb.ref("excluded.change_id"),
+					})),
+				)
+				.execute();
+		}
 	};
 
 	if (args.lix.db.isTransaction) {
