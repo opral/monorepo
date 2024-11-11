@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { updateBranchPointers } from "./update-branch-pointers.js";
+import type { Change } from "../database/schema.js";
 
 test("the branch pointer for a change should be updated", async () => {
 	const lix = await openLixInMemory({});
@@ -26,7 +27,7 @@ test("the branch pointer for a change should be updated", async () => {
 			.execute();
 
 		await updateBranchPointers({
-			lix: { db: trx },
+			lix: { ...lix, db: trx },
 			branch: mainBranch,
 			changes,
 		});
@@ -57,7 +58,7 @@ test("the branch pointer for a change should be updated", async () => {
 			.execute();
 
 		await updateBranchPointers({
-			lix: { db: trx },
+			lix: { ...lix, db: trx },
 			branch: mainBranch,
 			changes,
 		});
@@ -88,7 +89,7 @@ test("the branch pointer for a change should be updated", async () => {
 			.execute();
 
 		await updateBranchPointers({
-			lix: { db: trx },
+			lix: { ...lix, db: trx },
 			branch: mainBranch,
 			changes,
 		});
@@ -130,7 +131,7 @@ test("it should default to the current branch if no branch is provided", async (
 			.execute();
 
 		await updateBranchPointers({
-			lix: { db: trx },
+			lix: { ...lix, db: trx },
 			changes,
 		});
 	});
@@ -151,7 +152,7 @@ test("it should not fail if an empty array of changes is provided", async () => 
 
 	await lix.db.transaction().execute(async (trx) => {
 		await updateBranchPointers({
-			lix: { db: trx },
+			lix: { ...lix, db: trx },
 			changes: [],
 		});
 	});
@@ -198,7 +199,7 @@ test("change conflicts should be garbage collected", async () => {
 			.execute();
 
 		await updateBranchPointers({
-			lix: { db: trx },
+			lix: { ...lix, db: trx },
 			branch: currentBranch,
 			changes,
 		});
@@ -243,4 +244,136 @@ test("change conflicts should be garbage collected", async () => {
 
 	// the change conflict should be garbage collected
 	expect(remainingChangeConflicts.length).toBe(0);
+});
+
+test("it raise a diverging entity conflict (based off a reproduction)", async () => {
+	const lix = await openLixInMemory({});
+
+	const sourceBranch = await lix.db
+		.insertInto("branch")
+		.values({ name: "moles-burn" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const targetBranch = await lix.db
+		.insertInto("branch")
+		.values({ name: "elephant" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const mockChanges = [
+		{
+			created_at: "2024-11-11 21:16:34",
+			entity_id: "email|peter.n@moon.mail|First name",
+			file_id: "oj20a1-40ss-email",
+			id: "b2bc8cb4-8491-4e3b-ba9e-2950f5ec4942",
+			plugin_key: "lix-plugin-csv-v2",
+			snapshot_id:
+				"c1c691266638c585ddf68c90c9255741b55cc6c152919368b27d74fbc6abc402",
+			type: "cell",
+		},
+		{
+			created_at: "2024-11-11 21:16:39",
+			entity_id: "email|peter.n@moon.mail|First name",
+			file_id: "oj20a1-40ss-email",
+			id: "654d91f1-6139-434c-9047-9fff751ed0c4",
+			plugin_key: "lix-plugin-csv-v2",
+			snapshot_id:
+				"0856f597848e8261147613b673b27b11b7d6065d8a37cef0466fa7c4444db286",
+			type: "cell",
+		},
+		{
+			created_at: "2024-11-11 21:16:44",
+			entity_id: "email|peter.n@moon.mail|First name",
+			file_id: "oj20a1-40ss-email",
+			id: "a4b48412-f809-49c9-83ce-77fe51831961",
+			plugin_key: "lix-plugin-csv-v2",
+			snapshot_id:
+				"078a7602380806c1cca81547dc9442c550e9d5051da3b68c495b776fc85fefcb",
+			type: "cell",
+		},
+		{
+			created_at: "2024-11-11 21:17:39",
+			entity_id: "email|peter.n@moon.mail|First name",
+			file_id: "oj20a1-40ss-email",
+			id: "4e9fd25f-ed9c-40ae-a2ad-1a75677a2668",
+			plugin_key: "lix-plugin-csv-v2",
+			snapshot_id:
+				"bf8b0881a7c85e6e16819a87e9124362b29926a30c04bd3149f5090535c671f0",
+			type: "cell",
+		},
+	] as const satisfies Change[];
+
+	const edges = [
+		// common ancestor is b2bc
+		{
+			parent_id: "b2bc8cb4-8491-4e3b-ba9e-2950f5ec4942",
+			child_id: "654d91f1-6139-434c-9047-9fff751ed0c4",
+		},
+		{
+			parent_id: "b2bc8cb4-8491-4e3b-ba9e-2950f5ec4942",
+			child_id: "a4b48412-f809-49c9-83ce-77fe51831961",
+		},
+		{
+			child_id: "4e9fd25f-ed9c-40ae-a2ad-1a75677a2668",
+			parent_id: "654d91f1-6139-434c-9047-9fff751ed0c4",
+		},
+	];
+
+	await lix.db.insertInto("change").values(mockChanges).execute();
+
+	await lix.db.insertInto("change_graph_edge").values(edges).execute();
+
+	await updateBranchPointers({
+		lix,
+		branch: sourceBranch,
+		changes: [
+			mockChanges.find(
+				(change) => change.id === "a4b48412-f809-49c9-83ce-77fe51831961",
+			)!,
+		],
+	});
+
+	await updateBranchPointers({
+		lix,
+		branch: targetBranch,
+		changes: [
+			mockChanges.find(
+				(change) => change.id === "654d91f1-6139-434c-9047-9fff751ed0c4",
+			)!,
+		],
+	});
+
+	await lix.db
+		.insertInto("branch_merge_intent")
+		.values({
+			source_branch_id: sourceBranch.id,
+			target_branch_id: targetBranch.id,
+		})
+		.execute();
+
+	await updateBranchPointers({
+		lix,
+		branch: targetBranch,
+		changes: [
+			mockChanges.find(
+				(change) => change.id === "4e9fd25f-ed9c-40ae-a2ad-1a75677a2668",
+			)!,
+		],
+	});
+
+	await lix.settled();
+
+	const conflicts = await lix.db
+		.selectFrom("change_conflict")
+		.selectAll()
+		.execute();
+
+	const conflictElements = await lix.db
+		.selectFrom("change_conflict_element")
+		.selectAll()
+		.execute();
+
+	expect(conflicts.length).toBe(1);
+	expect(conflictElements.length).toBe(2);
 });

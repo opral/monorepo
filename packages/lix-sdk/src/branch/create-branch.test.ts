@@ -35,7 +35,7 @@ test("it should copy the change pointers from the parent branch", async () => {
 			.execute();
 
 		await updateBranchPointers({
-			lix: { db: trx },
+			lix: { ...lix, db: trx },
 			branch: mainBranch,
 			changes,
 		});
@@ -62,7 +62,6 @@ test("it should copy the change pointers from the parent branch", async () => {
 	]);
 });
 
-
 test("if a parent branch is provided, a merge intent should be created to activate conflict detection", async () => {
 	const lix = await openLixInMemory({});
 
@@ -72,11 +71,11 @@ test("if a parent branch is provided, a merge intent should be created to activa
 	const mergeIntent = await lix.db
 		.selectFrom("branch_merge_intent")
 		.selectAll()
-		.where("source_branch_id", "=", branch1.id)
-		.where("target_branch_id", "=", branch0.id)
+		.where("source_branch_id", "=", branch0.id)
+		.where("target_branch_id", "=", branch1.id)
 		.execute();
 
 	expect(mergeIntent.length).toBe(1);
-	expect(mergeIntent[0]?.source_branch_id).toBe(branch1.id);
-	expect(mergeIntent[0]?.target_branch_id).toBe(branch0.id);
+	expect(mergeIntent[0]?.source_branch_id).toBe(branch0.id);
+	expect(mergeIntent[0]?.target_branch_id).toBe(branch1.id);
 });

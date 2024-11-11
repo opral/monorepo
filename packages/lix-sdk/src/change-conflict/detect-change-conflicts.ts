@@ -19,7 +19,7 @@ import { detectDivergingEntityConflict } from "./detect-diverging-entity-conflic
  *   });
  */
 export async function detectChangeConflicts(args: {
-	lix: LixReadonly;
+	lix: Pick<LixReadonly, "db" | "plugin">;
 	changes: Change[];
 }) {
 	const detectedConflicts: DetectedConflict[] = [];

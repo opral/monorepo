@@ -8,7 +8,7 @@ import type { Lix } from "../lix/open-lix.js";
  * @param args.conflictingChanges - The conflicting changes.
  */
 export async function createChangeConflict(args: {
-	lix: Lix;
+	lix: Pick<Lix, "db">;
 	key: string;
 	branch: Pick<Branch, "id">;
 	conflictingChangeIds: Set<Change["id"]>;

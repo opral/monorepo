@@ -175,8 +175,8 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     target_branch_id TEXT NOT NULL,
 
     PRIMARY KEY(source_branch_id, target_branch_id),
-    FOREIGN KEY(source_branch_id) REFERENCES branch(id) ON DELETE CASCADE,
-    FOREIGN KEY(target_branch_id) REFERENCES branch(id) ON DELETE CASCADE
+    FOREIGN KEY(source_branch_id) REFERENCES branch(id),
+    FOREIGN KEY(target_branch_id) REFERENCES branch(id)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS branch_change_pointer (

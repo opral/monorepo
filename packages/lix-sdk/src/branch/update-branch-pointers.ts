@@ -1,4 +1,5 @@
 import { garbageCollectChangeConflicts } from "../change-conflict/garbage-collect-change-conflicts.js";
+import { updateChangeConflicts } from "../change-conflict/update-change-conflicts.js";
 import type { Branch, Change, ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
@@ -8,12 +9,13 @@ import type { Lix } from "../lix/open-lix.js";
  * @args branch - The branch to update the pointers for. If not provided, the current branch is used.
  */
 export async function updateBranchPointers(args: {
-	lix: Pick<Lix, "db">;
+	lix: Pick<Lix, "db" | "plugin">;
 	changes?: Change[];
 	changeConflicts?: ChangeConflict[];
 	branch?: Pick<Branch, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
+		console.log("updating branch pointers");
 		const branch =
 			args.branch ??
 			(await trx
@@ -76,12 +78,17 @@ export async function updateBranchPointers(args: {
 			}
 		}
 
-		await garbageCollectChangeConflicts({ lix: { ...args.lix, db: trx } });
+		await updateChangeConflicts({
+			lix: { ...args.lix, db: trx },
+			branch,
+		});
 	};
 
 	if (args.lix.db.isTransaction) {
-		return executeInTransaction(args.lix.db);
+		await executeInTransaction(args.lix.db);
 	} else {
-		return args.lix.db.transaction().execute(executeInTransaction);
+		await args.lix.db.transaction().execute(executeInTransaction);
 	}
+
+	// await garbageCollectChangeConflicts({ lix: args.lix });
 }

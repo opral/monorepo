@@ -68,8 +68,21 @@ export async function createBranch(args: {
 			await trx
 				.insertInto("branch_merge_intent")
 				.values({
-					source_branch_id: branch.id,
-					target_branch_id: args.parent.id,
+					// before merging this branch into the parent branch,
+					// the source branch needs to be mergable into this branch
+					// hence, this branch is the target branch
+					//
+					// yes, that requires a bit of mental gymnastics
+					//
+					// the parent branch has no intention (and probably never will)
+					// to merge into this branch. but this branch has the intention
+					// to merge into the parent branch. to make this branch mergable
+					// into the parent branch, no conflicts between the parent branch
+					// and this branch should exist.
+					source_branch_id: args.parent.id,
+					target_branch_id: branch.id,
+					// source_branch_id: branch.id,
+					// target_branch_id: args.parent.id,
 				})
 				// ignore if the merge intent already exists
 				.onConflict((oc) => oc.doNothing())
