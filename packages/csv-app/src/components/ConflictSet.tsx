@@ -22,10 +22,10 @@ export default function Row(props: {
 				{props.changes.map((change) => {
 					const column = change.entity_id.split("|")[2];
 					const value = change.snapshot_content?.text;
-					console.log(change);
 					return (
 						<div
-							key={column}
+							// key can't be only the entity id in case of a conflict with the same entity id
+							key={change.entity_id + change.snapshot_id}
 							className="flex md:flex-col flex-wrap md:flex-nowrap items-center gap-2"
 						>
 							{change.is_current_branch_pointer === 1 ? (
