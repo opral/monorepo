@@ -247,39 +247,37 @@ const BranchDropdown = () => {
 				{currentBranch.name}
 			</SlButton>
 			<SlMenu>
-				{existingBranches
-					.filter((b) => b.id !== currentBranch.id)
-					.map((branch) => (
-						<SlMenuItem key={branch.id}>
-							<p onClick={() => switchToBranch(branch)} className="w-full">
-								{branch.name}
-							</p>
-							<div slot="suffix" className="flex items-center ml-1">
-								<SlIconButton
-									name="sign-merge-right"
-									onClick={async () => {
-										await mergeBranch({
-											lix,
-											sourceBranch: branch,
-											targetBranch: currentBranch,
-										});
-										await saveLixToOpfs({ lix });
-									}}
-								></SlIconButton>
-								<SlIconButton
-									name="x"
-									label="delete"
-									onClick={async () => {
-										await lix.db
-											.deleteFrom("branch")
-											.where("id", "=", branch.id)
-											.execute();
-										await saveLixToOpfs({ lix });
-									}}
-								></SlIconButton>
-							</div>
-						</SlMenuItem>
-					))}
+				{existingBranches.map((branch) => (
+					<SlMenuItem key={branch.id}>
+						<p onClick={() => switchToBranch(branch)} className="w-full">
+							{branch.name}
+						</p>
+						<div slot="suffix" className="flex items-center ml-1">
+							<SlIconButton
+								name="sign-merge-right"
+								onClick={async () => {
+									await mergeBranch({
+										lix,
+										sourceBranch: branch,
+										targetBranch: currentBranch,
+									});
+									await saveLixToOpfs({ lix });
+								}}
+							></SlIconButton>
+							<SlIconButton
+								name="x"
+								label="delete"
+								onClick={async () => {
+									await lix.db
+										.deleteFrom("branch")
+										.where("id", "=", branch.id)
+										.execute();
+									await saveLixToOpfs({ lix });
+								}}
+							></SlIconButton>
+						</div>
+					</SlMenuItem>
+				))}
 				<SlDivider className="w-full border-b border-gray-300"></SlDivider>
 				<SlMenuItem
 					onClick={async () => {
