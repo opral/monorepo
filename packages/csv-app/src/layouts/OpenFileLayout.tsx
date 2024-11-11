@@ -37,6 +37,7 @@ import { humanId } from "human-id";
 export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [changeConflicts] = useAtom(changeConflictsAtom);
+	const [currentBranch] = useAtom(currentBranchAtom);
 
 	return (
 		<>
@@ -67,6 +68,15 @@ export default function Layout(props: { children: React.ReactNode }) {
 								{/* slice away the root slash */}
 								<h1 className="font-medium">{activeFile?.path.slice(1)}</h1>
 								<BranchDropdown></BranchDropdown>
+								<div className="flex gap-2 items-center">
+									<p className="text-sm text-gray-400">targets [</p>
+									{currentBranch.targets.map((target) => (
+										<p className="text-sm text-gray-400" key={target.id}>
+											{target.name}
+										</p>
+									))}
+									<p className="text-sm text-gray-400">]</p>
+								</div>
 							</div>
 						</div>
 
