@@ -1,7 +1,7 @@
 import { Change, Snapshot } from "@lix-js/sdk";
 import { SlButton, SlTag } from "@shoelace-style/shoelace/dist/react";
 
-export default function Row(props: {
+export default function ConflictSet(props: {
 	uniqueColumnValue: string;
 	changes: (Change & {
 		snapshot_content: Snapshot["content"];
