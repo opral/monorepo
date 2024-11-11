@@ -11,12 +11,10 @@ export async function updateChangeConflicts(args: {
 		console.log("updateChangeConflicts", args.branch);
 
 		const targetBranches = await trx
-			.selectFrom("branch_merge_intent")
+			.selectFrom("branch_target")
 			.where("target_branch_id", "=", args.branch.id)
 			.selectAll()
 			.execute();
-
-		console.log(targetBranches);
 
 		for (const targetBranch of targetBranches) {
 			const diffingPointers = await getBranchChangePointerDiff(trx, {

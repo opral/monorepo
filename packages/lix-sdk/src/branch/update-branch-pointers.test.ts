@@ -345,7 +345,7 @@ test("it raise a diverging entity conflict (based off a reproduction)", async ()
 	});
 
 	await lix.db
-		.insertInto("branch_merge_intent")
+		.insertInto("branch_target")
 		.values({
 			source_branch_id: sourceBranch.id,
 			target_branch_id: targetBranch.id,

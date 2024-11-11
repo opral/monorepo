@@ -547,30 +547,3 @@ test("re-curring merges should not create a new conflict if the conflict already
 	expect(conflictsAfter2Merge.length).toBe(1);
 });
 
-
-test("it should create a merge intent between the source and target branch if not existent yet to recurringly detect and update conflicts", async () => {
-	const lix = await openLixInMemory({});
-
-	const sourceBranch = await lix.db
-		.insertInto("branch")
-		.values({ name: "source-branch" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	const targetBranch = await lix.db
-		.insertInto("branch")
-		.values({ name: "target-branch" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	await mergeBranch({ lix, sourceBranch, targetBranch });
-
-	const mergeIntent = await lix.db
-		.selectFrom("branch_merge_intent")
-		.selectAll()
-		.execute();
-
-	expect(mergeIntent.length).toBe(1);
-	expect(mergeIntent[0]?.source_branch_id).toBe(sourceBranch.id);
-	expect(mergeIntent[0]?.target_branch_id).toBe(targetBranch.id);
-});

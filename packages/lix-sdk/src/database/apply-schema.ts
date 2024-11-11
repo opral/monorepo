@@ -170,7 +170,7 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
   
   ) strict;
 
-  CREATE TABLE IF NOT EXISTS branch_merge_intent (
+  CREATE TABLE IF NOT EXISTS branch_target (
     source_branch_id TEXT NOT NULL,
     target_branch_id TEXT NOT NULL,
 

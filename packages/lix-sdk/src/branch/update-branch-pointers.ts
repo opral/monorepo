@@ -1,4 +1,3 @@
-import { garbageCollectChangeConflicts } from "../change-conflict/garbage-collect-change-conflicts.js";
 import { updateChangeConflicts } from "../change-conflict/update-change-conflicts.js";
 import type { Branch, Change, ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";

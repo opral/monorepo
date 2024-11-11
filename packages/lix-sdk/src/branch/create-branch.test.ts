@@ -62,14 +62,14 @@ test("it should copy the change pointers from the parent branch", async () => {
 	]);
 });
 
-test("if a parent branch is provided, a merge intent should be created to activate conflict detection", async () => {
+test("if a parent branch is provided, a merge target should be created to activate conflict detection", async () => {
 	const lix = await openLixInMemory({});
 
 	const branch0 = await createBranch({ lix, name: "branch0" });
 	const branch1 = await createBranch({ lix, parent: branch0, name: "branch1" });
 
 	const mergeIntent = await lix.db
-		.selectFrom("branch_merge_intent")
+		.selectFrom("branch_target")
 		.selectAll()
 		.where("source_branch_id", "=", branch0.id)
 		.where("target_branch_id", "=", branch1.id)

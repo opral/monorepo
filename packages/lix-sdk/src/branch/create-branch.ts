@@ -66,7 +66,7 @@ export async function createBranch(args: {
 				)
 				.execute();
 			await trx
-				.insertInto("branch_merge_intent")
+				.insertInto("branch_target")
 				.values({
 					// before merging this branch into the parent branch,
 					// the source branch needs to be mergable into this branch
