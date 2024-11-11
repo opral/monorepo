@@ -1,3 +1,4 @@
+export { changeConflictInBranch } from "./change-conflict-in-branch.js";
 export { getLowestCommonAncestor } from "./get-lowest-common-ancestor.js";
 export { getLeafChangesOnlyInSource } from "./get-leaf-changes-only-in-source.js";
 export { changeHasLabel } from "./change-has-label.js";
