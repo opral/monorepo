@@ -129,6 +129,18 @@ export async function mergeBranch(args: {
 				.onConflict((oc) => oc.doNothing())
 				.execute();
 		}
+
+		// in case no merge intent existed yet, create one
+		// for continuous conflict detection between the
+		// source and target branch
+		await trx
+			.insertInto("branch_merge_intent")
+			.values({
+				source_branch_id: args.sourceBranch.id,
+				target_branch_id: args.targetBranch.id,
+			})
+			.onConflict((oc) => oc.doNothing())
+			.execute();
 	};
 
 	if (args.lix.db.isTransaction) {

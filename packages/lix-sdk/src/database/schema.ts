@@ -22,6 +22,7 @@ export type LixDatabaseSchema = {
 	// branch
 	current_branch: CurrentBranchTable;
 	branch: BranchTable;
+	branch_merge_intent: BranchMergeIntentTable;
 	branch_change_pointer: BranchChangePointerTable;
 	branch_change_conflict_pointer: BranchChangeConflictPointerTable;
 
@@ -201,6 +202,14 @@ export type NewCurrentBranch = Insertable<CurrentBranchTable>;
 export type CurrentBranchUpdate = Updateable<CurrentBranchTable>;
 type CurrentBranchTable = {
 	id: string;
+};
+
+export type BranchMergeIntent = Selectable<BranchMergeIntentTable>;
+export type NewBranchMergeIntent = Insertable<BranchMergeIntentTable>;
+export type BranchMergeIntentUpdate = Updateable<BranchMergeIntentTable>;
+type BranchMergeIntentTable = {
+	source_branch_id: string;
+	target_branch_id: string;
 };
 
 // -------- change conflicts --------
