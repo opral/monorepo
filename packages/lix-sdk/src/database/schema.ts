@@ -7,7 +7,6 @@ export type LixDatabaseSchema = {
 	file_internal: LixFileTable;
 	change_queue: ChangeQueueTable;
 	change_graph_edge: ChangeGraphEdgeTable;
-	conflict: ConflictTable;
 	snapshot: SnapshotTable;
 	label: LabelTable;
 
@@ -23,7 +22,14 @@ export type LixDatabaseSchema = {
 	// branch
 	current_branch: CurrentBranchTable;
 	branch: BranchTable;
+	branch_target: BranchTargetTable;
 	branch_change_pointer: BranchChangePointerTable;
+	branch_change_conflict_pointer: BranchChangeConflictPointerTable;
+
+	// change conflicts
+	change_conflict: ChangeConflictTable;
+	change_conflict_element: ChangeConflictElementTable;
+	change_conflict_resolution: ChangeConflictResolutionTable;
 };
 
 export type ChangeQueueEntry = Selectable<ChangeQueueTable>;
@@ -103,23 +109,6 @@ type SnapshotTable = {
 	content: Record<string, any> | null;
 };
 
-export type Conflict = Selectable<ConflictTable>;
-export type NewConflict = Insertable<ConflictTable>;
-export type ConflictUpdate = Updateable<ConflictTable>;
-type ConflictTable = {
-	change_id: string;
-	conflicting_change_id: string;
-	metadata: Record<string, any> | null;
-	reason: string | null;
-	/**
-	 * The change id that the conflict was resolved with.
-	 *
-	 * Can be the change_id, conflicting_change_id, or another change_id
-	 * that resulted from a merge.
-	 */
-	resolved_change_id: string | null;
-};
-
 // ------ change sets ------
 
 export type ChangeSet = Selectable<ChangeSetTable>;
@@ -197,9 +186,69 @@ type BranchChangePointerTable = {
 	change_type: string;
 };
 
+export type BranchChangeConflictPointer =
+	Selectable<BranchChangeConflictPointerTable>;
+export type NewBranchChangeConflictPointer =
+	Insertable<BranchChangeConflictPointerTable>;
+export type BranchChangeConflictPointerUpdate =
+	Updateable<BranchChangeConflictPointerTable>;
+type BranchChangeConflictPointerTable = {
+	branch_id: string;
+	change_conflict_id: string;
+};
+
 export type CurrentBranch = Selectable<CurrentBranchTable>;
 export type NewCurrentBranch = Insertable<CurrentBranchTable>;
 export type CurrentBranchUpdate = Updateable<CurrentBranchTable>;
 type CurrentBranchTable = {
 	id: string;
 };
+
+export type BranchTarget = Selectable<BranchTargetTable>;
+export type NewBranchTarget = Insertable<BranchTargetTable>;
+export type BranchTargetUpdate = Updateable<BranchTargetTable>;
+type BranchTargetTable = {
+	source_branch_id: string;
+	target_branch_id: string;
+};
+
+// -------- change conflicts --------
+
+export type ChangeConflict = Selectable<ChangeConflictTable>;
+export type NewChangeConflict = Insertable<ChangeConflictTable>;
+export type ChangeConflictUpdate = Updateable<ChangeConflictTable>;
+type ChangeConflictTable = {
+	id: Generated<string>;
+	/**
+	 * The key is used to identify the conflict.
+	 *
+	 * The key should be unique for the plugin and the conflict
+	 * to avoid duplicate conflict reports.
+	 *
+	 * @example
+	 *   - `csv-row-order-changed`
+	 *   - `inlang-message-bundle-foreign-key-violation`
+	 */
+	key: string;
+};
+
+export type ChangeConflictResolution =
+	Selectable<ChangeConflictResolutionTable>;
+export type NewChangeConflictResolution =
+	Insertable<ChangeConflictResolutionTable>;
+export type ChangeConflictResolutionUpdate =
+	Updateable<ChangeConflictResolutionTable>;
+type ChangeConflictResolutionTable = {
+	change_conflict_id: string;
+	resolved_change_id: string;
+};
+
+export type ChangeConflictElement = Selectable<ChangeConflictElementTable>;
+export type NewChangeConflictElement = Insertable<ChangeConflictElementTable>;
+export type ChangeConflictElementUpdate =
+	Updateable<ChangeConflictElementTable>;
+type ChangeConflictElementTable = {
+	change_conflict_id: string;
+	change_id: string;
+};
+

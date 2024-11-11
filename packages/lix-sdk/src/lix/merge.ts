@@ -49,8 +49,11 @@ export async function merge(args: {
 		// 3. apply non conflicting leaf changes
 		// TODO inefficient double looping
 		const nonConflictingLeafChangesInSourceForFile = leafChangesOnlyInSource
-			.filter((c) =>
-				conflicts.every((conflict) => conflict.conflicting_change_id !== c.id),
+			.filter((sourceChange) =>
+				conflicts.every(
+					(conflict) =>
+						conflict.conflictingChangeIds.has(sourceChange.id) === false,
+				),
 			)
 			.filter((c) => c.file_id === fileId);
 
@@ -160,12 +163,12 @@ export async function merge(args: {
 
 		// insert the conflicts of those changes
 		if (conflicts.length > 0) {
-			await trx
-				.insertInto("conflict")
-				.values(conflicts)
-				// ignore if already exists
-				.onConflict((oc) => oc.doNothing())
-				.execute();
+			// await trx
+			// 	.insertInto("conflict")
+			// 	.values(conflicts)
+			// 	// ignore if already exists
+			// 	.onConflict((oc) => oc.doNothing())
+			// 	.execute();
 		}
 
 		for (const [fileId, fileData] of Object.entries(changesPerFile)) {

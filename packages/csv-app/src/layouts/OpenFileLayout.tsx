@@ -15,7 +15,7 @@ import {
 import { useAtom } from "jotai";
 import {
 	activeFileAtom,
-	conflictsAtom,
+	changeConflictsAtom,
 	parsedCsvAtom,
 	uniqueColumnAtom,
 } from "../state-active-file.ts";
@@ -36,7 +36,7 @@ import { humanId } from "human-id";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
-	const [conflicts] = useAtom(conflictsAtom);
+	const [changeConflicts] = useAtom(changeConflictsAtom);
 
 	return (
 		<>
@@ -100,7 +100,11 @@ export default function Layout(props: { children: React.ReactNode }) {
 						/>
 						<NavItem
 							to={`/conflicts?f=${activeFile.id}`}
-							counter={conflicts.length !== 0 ? conflicts.length : undefined}
+							counter={
+								Object.values(changeConflicts).length !== 0
+									? Object.values(changeConflicts).length
+									: undefined
+							}
 							name="Conflicts"
 						/>
 						<NavItem to={`/graph?f=${activeFile.id}`} name="Graph" />
@@ -243,45 +247,43 @@ const BranchDropdown = () => {
 				{currentBranch.name}
 			</SlButton>
 			<SlMenu>
-				{existingBranches
-					.filter((b) => b.id !== currentBranch.id)
-					.map((branch) => (
-						<SlMenuItem key={branch.id}>
-							<p onClick={() => switchToBranch(branch)} className="w-full">
-								{branch.name}
-							</p>
-							<div slot="suffix" className="flex items-center ml-1">
-								<SlIconButton
-									name="sign-merge-right"
-									onClick={async () => {
-										await mergeBranch({
-											lix,
-											sourceBranch: branch,
-											targetBranch: currentBranch,
-										});
-									}}
-								></SlIconButton>
-								<SlIconButton
-									name="x"
-									label="delete"
-									onClick={async () => {
-										await lix.db.transaction().execute(async (trx) => {
-											await trx
-												.deleteFrom("branch")
-												.where("id", "=", branch.id)
-												.execute();
-										});
-									}}
-								></SlIconButton>
-							</div>
-						</SlMenuItem>
-					))}
+				{existingBranches.map((branch) => (
+					<SlMenuItem key={branch.id}>
+						<p onClick={() => switchToBranch(branch)} className="w-full">
+							{branch.name}
+						</p>
+						<div slot="suffix" className="flex items-center ml-1">
+							<SlIconButton
+								name="sign-merge-right"
+								onClick={async () => {
+									await mergeBranch({
+										lix,
+										sourceBranch: branch,
+										targetBranch: currentBranch,
+									});
+									await saveLixToOpfs({ lix });
+								}}
+							></SlIconButton>
+							<SlIconButton
+								name="x"
+								label="delete"
+								onClick={async () => {
+									await lix.db
+										.deleteFrom("branch")
+										.where("id", "=", branch.id)
+										.execute();
+									await saveLixToOpfs({ lix });
+								}}
+							></SlIconButton>
+						</div>
+					</SlMenuItem>
+				))}
 				<SlDivider className="w-full border-b border-gray-300"></SlDivider>
 				<SlMenuItem
 					onClick={async () => {
 						const newBranch = await createBranch({
 							lix,
-							from: currentBranch,
+							parent: currentBranch,
 							name: humanId({
 								separator: "-",
 								capitalize: false,

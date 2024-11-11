@@ -34,6 +34,10 @@ export async function openLix(args: {
 		plugins.push(...args.providePlugins);
 	}
 
+	const plugin = {
+		getAll: async () => plugins,
+	};
+
 	args.database.createFunction({
 		name: "triggerWorker",
 		arity: 0,
@@ -95,7 +99,10 @@ export async function openLix(args: {
 							id: entry.file_id,
 						},
 						plugins,
-						db,
+						lix: {
+							db,
+							plugin,
+						},
 					});
 				} else {
 					await handleFileInsert({
@@ -105,7 +112,10 @@ export async function openLix(args: {
 							id: entry.file_id,
 						},
 						plugins,
-						db,
+						lix: {
+							db,
+							plugin,
+						},
 					});
 				}
 			}
@@ -155,9 +165,7 @@ export async function openLix(args: {
 			await settled();
 			return new Blob([contentFromDatabase(args.database)]);
 		},
-		plugin: {
-			getAll: async () => plugins,
-		},
+		plugin,
 		close: async () => {
 			closed = true;
 			await settled();

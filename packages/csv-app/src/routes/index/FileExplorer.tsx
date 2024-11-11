@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import Dropzone from "./Dropzone.tsx";
 import { SlIconButton } from "@shoelace-style/shoelace/dist/react";
 import { useState } from "react";
-import { DEMO_FILE_IDS } from "../../helper/demo-lix-file/demoLixFile.ts";
 
 const filesAtom = atom(async (get) => {
 	get(withPollingAtom);

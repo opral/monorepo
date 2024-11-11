@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { LixDatabaseSchema, LixFile } from "../database/schema.js";
+import type { LixFile } from "../database/schema.js";
 import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
 import { minimatch } from "minimatch";
-import { Kysely } from "kysely";
 import { updateBranchPointers } from "../branch/update-branch-pointers.js";
 import { changeIsLeafInBranch } from "../query-utilities/change-is-leaf-in-branch.js";
 import { createSnapshot } from "../snapshot/create-snapshot.js";
+import type { Lix } from "./open-lix.js";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {
@@ -19,7 +19,7 @@ function normalizePath(path: string) {
 export async function handleFileInsert(args: {
 	after: LixFile;
 	plugins: LixPlugin[];
-	db: Kysely<LixDatabaseSchema>;
+	lix: Pick<Lix, "db" | "plugin">;
 	queueEntry: any;
 }) {
 	const detectedChanges: Array<DetectedChange & { pluginKey: string }> = [];
@@ -51,7 +51,7 @@ export async function handleFileInsert(args: {
 		}
 	}
 
-	await args.db.transaction().execute(async (trx) => {
+	await args.lix.db.transaction().execute(async (trx) => {
 		const currentBranch = await trx
 			.selectFrom("current_branch")
 			.selectAll()
@@ -76,7 +76,7 @@ export async function handleFileInsert(args: {
 				.executeTakeFirstOrThrow();
 
 			await updateBranchPointers({
-				lix: { db: trx },
+				lix: { ...args.lix, db: trx },
 				changes: [insertedChange],
 				branch: currentBranch,
 			});
@@ -95,7 +95,7 @@ export async function handleFileChange(args: {
 	before: LixFile;
 	after: LixFile;
 	plugins: LixPlugin[];
-	db: Kysely<LixDatabaseSchema>;
+	lix: Pick<Lix, "db" | "plugin">;
 }) {
 	const fileId = args.after?.id ?? args.before?.id;
 
@@ -127,7 +127,7 @@ export async function handleFileChange(args: {
 		}
 	}
 
-	await args.db.transaction().execute(async (trx) => {
+	await args.lix.db.transaction().execute(async (trx) => {
 		const currentBranch = await trx
 			.selectFrom("current_branch")
 			.selectAll()
@@ -162,7 +162,7 @@ export async function handleFileChange(args: {
 				.executeTakeFirstOrThrow();
 
 			await updateBranchPointers({
-				lix: { db: trx },
+				lix: { ...args.lix, db: trx },
 				changes: [insertedChange],
 				branch: currentBranch,
 			});

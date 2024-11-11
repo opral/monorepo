@@ -3,99 +3,75 @@ import { detectChangeConflicts } from "../change-conflict/detect-change-conflict
 import type { Branch } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
-export async function mergeBranch(args: {
-	lix: Lix;
-	sourceBranch: Branch;
-	targetBranch: Branch;
+export async function updateChangeConflicts(args: {
+	lix: Pick<Lix, "db" | "plugin">;
+	branch: Pick<Branch, "id">;
 }) {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const diffingPointers = await getBranchChangePointerDiff(trx, args);
+		console.log("updateChangeConflicts", args.branch);
 
-		// the set all change ids that are diffing
-		const diffingChangeIds = new Set<string>();
-
-		for (const pointer of diffingPointers) {
-			if (pointer.source_change_id !== pointer.target_change_id) {
-				if (pointer.source_change_id) {
-					diffingChangeIds.add(pointer.source_change_id);
-				}
-				if (pointer.target_change_id) {
-					diffingChangeIds.add(pointer.target_change_id);
-				}
-			}
-		}
-
-		// could be queried in a single query with a join
-		// but decided to keep it simpler for now
-		const diffingChanges = await trx
-			.selectFrom("change")
-			.select(["id"])
-			.where("id", "in", [...diffingChangeIds])
+		const targetBranches = await trx
+			.selectFrom("branch_target")
+			.where("target_branch_id", "=", args.branch.id)
 			.selectAll()
 			.execute();
 
-		const detectedConflicts = await detectChangeConflicts({
-			lix: { ...args.lix, db: trx },
-			changes: diffingChanges,
-		});
-
-		// update the branch change pointers for non-conflicting changes
-		await Promise.all(
-			diffingPointers.map(async (pointer) => {
-				// if the target branch has a pointer for the entity
-				// change, check if there is a conflict
-				if (pointer.target_change_id) {
-					const detectedConflict = detectedConflicts.find((conflict) =>
-						conflict.conflictingChangeIds.has(
-							pointer.target_change_id as string,
-						),
-					);
-					if (detectedConflict) {
-						// don't update the branch change pointer
-						return;
-					}
-				}
-
-				// the change is not conflicting. the pointer can be updated
-				if (pointer.source_change_id) {
-					await trx
-						.insertInto("branch_change_pointer")
-						.values([
-							{
-								branch_id: args.targetBranch.id,
-								change_id: pointer.source_change_id,
-								change_file_id: pointer.change_file_id,
-								change_entity_id: pointer.change_entity_id,
-								change_type: pointer.change_type,
-							},
-						])
-						.onConflict((oc) =>
-							oc.doUpdateSet({ branch_id: args.targetBranch.id }),
-						)
-						.execute();
-				}
-			}),
-		);
-
-		// insert the detected conflicts
-		// (ignore if the conflict already exists)
-		for (const detectedConflict of detectedConflicts) {
-			const conflict = await createChangeConflict({
-				lix: { ...args.lix, db: trx },
-				branch: args.targetBranch,
-				key: detectedConflict.key,
-				conflictingChangeIds: detectedConflict.conflictingChangeIds,
+		for (const targetBranch of targetBranches) {
+			const diffingPointers = await getBranchChangePointerDiff(trx, {
+				sourceBranch: { id: targetBranch.source_branch_id },
+				targetBranch: { id: targetBranch.target_branch_id },
 			});
 
-			// todo move to createChangeConflict
-			await trx
-				.insertInto("branch_change_conflict_pointer")
-				.values({
-					branch_id: args.targetBranch.id,
-					change_conflict_id: conflict.id,
-				})
-				.onConflict((oc) => oc.doNothing())
+			// the set all change ids that are diffing
+			const diffingChangeIds = new Set<string>();
+
+			for (const pointer of diffingPointers) {
+				if (pointer.source_change_id !== pointer.target_change_id) {
+					if (pointer.source_change_id) {
+						diffingChangeIds.add(pointer.source_change_id);
+					}
+					if (pointer.target_change_id) {
+						diffingChangeIds.add(pointer.target_change_id);
+					}
+				}
+			}
+
+			// could be queried in a single query with a join
+			// but decided to keep it simpler for now
+			const diffingChanges = await trx
+				.selectFrom("change")
+				.select(["id"])
+				.where("id", "in", [...diffingChangeIds])
+				.selectAll()
 				.execute();
+
+			console.log("diffingChanges", diffingChanges);
+
+			const detectedConflicts = await detectChangeConflicts({
+				lix: { ...args.lix, db: trx },
+				changes: diffingChanges,
+			});
+
+			// insert the detected conflicts
+			// (ignore if the conflict already exists)
+			for (const detectedConflict of detectedConflicts) {
+				const conflict = await createChangeConflict({
+					lix: { ...args.lix, db: trx },
+					branch: args.branch,
+					key: detectedConflict.key,
+					conflictingChangeIds: detectedConflict.conflictingChangeIds,
+				});
+
+				// todo move to createChangeConflict
+				await trx
+					.insertInto("branch_change_conflict_pointer")
+					.values({
+						branch_id: args.branch.id,
+						change_conflict_id: conflict.id,
+					})
+					.onConflict((oc) => oc.doNothing())
+					.execute();
+			}
 		}
 	};
 
@@ -110,8 +86,8 @@ export async function mergeBranch(args: {
 async function getBranchChangePointerDiff(
 	trx: Lix["db"],
 	args: {
-		sourceBranch: Branch;
-		targetBranch: Branch;
+		sourceBranch: Pick<Branch, "id">;
+		targetBranch: Pick<Branch, "id">;
 	},
 ): Promise<
 	Array<{

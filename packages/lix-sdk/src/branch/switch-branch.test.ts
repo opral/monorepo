@@ -15,7 +15,7 @@ test("switching branches should update the branch pointer", async () => {
 	const newBranch = await lix.db.transaction().execute(async (trx) => {
 		const newBranch = await createBranch({
 			lix: { db: trx },
-			from: mainBranch,
+			parent: mainBranch,
 		});
 		await switchBranch({ lix: { db: trx }, to: newBranch });
 		return newBranch;

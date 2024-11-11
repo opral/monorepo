@@ -1,4 +1,8 @@
-import type { Change, LixFile, Snapshot } from "../database/schema.js";
+import {
+	type Change,
+	type LixFile,
+	type Snapshot,
+} from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
@@ -76,9 +80,14 @@ export type DetectedChange = {
 };
 
 export type DetectedConflict = {
-	change_id: string;
-	conflicting_change_id: string;
-	reason?: string;
+	/**
+	 * @see {ChangeConflict.key}
+	 */
+	key: string;
+	/**
+	 * The changes that are conflicting.
+	 */
+	conflictingChangeIds: Set<Change["id"]>;
 };
 
 export type LixReadonly = Pick<Lix, "plugin"> & {

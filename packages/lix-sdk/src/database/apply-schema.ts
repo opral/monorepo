@@ -58,16 +58,31 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
 
   CREATE INDEX IF NOT EXISTS idx_content_hash ON snapshot (id);
 
-  CREATE TABLE IF NOT EXISTS conflict (
-    change_id TEXT NOT NULL,
-    conflicting_change_id TEXT NOT NULL,
-    reason TEXT,
-    metadata TEXT,
-    resolved_change_id TEXT,
+  CREATE TABLE IF NOT EXISTS change_conflict (
+    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    key TEXT NOT NULL
+  ) strict;
 
-    PRIMARY KEY (change_id, conflicting_change_id),
-    -- Prevent self referencing conflicts
-    CHECK (change_id != conflicting_change_id)
+  CREATE TABLE IF NOT EXISTS change_conflict_element (
+    change_conflict_id TEXT NOT NULL,
+    change_id TEXT NOT NULL,
+
+    PRIMARY KEY(change_conflict_id, change_id),
+    FOREIGN KEY(change_conflict_id) REFERENCES change_conflict(id),
+    FOREIGN KEY(change_id) REFERENCES change(id)
+  ) strict;
+
+  CREATE TABLE IF NOT EXISTS change_conflict_resolution (
+    change_conflict_id TEXT NOT NULL,
+    resolved_change_id TEXT NOT NULL,
+
+    -- potential future columns
+    -- resolved_by <account_id>
+    -- resolved_at <timestamp>
+
+    PRIMARY KEY(change_conflict_id, resolved_change_id),
+    FOREIGN KEY(change_conflict_id) REFERENCES change_conflict(id),
+    FOREIGN KEY(resolved_change_id) REFERENCES change(id)
   ) strict;
 
   CREATE TRIGGER IF NOT EXISTS file_update INSTEAD OF UPDATE ON file
@@ -155,6 +170,15 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
   
   ) strict;
 
+  CREATE TABLE IF NOT EXISTS branch_target (
+    source_branch_id TEXT NOT NULL,
+    target_branch_id TEXT NOT NULL,
+
+    PRIMARY KEY(source_branch_id, target_branch_id),
+    FOREIGN KEY(source_branch_id) REFERENCES branch(id),
+    FOREIGN KEY(target_branch_id) REFERENCES branch(id)
+  ) strict;
+
   CREATE TABLE IF NOT EXISTS branch_change_pointer (
     branch_id TEXT NOT NULL,
     change_id TEXT NOT NULL,
@@ -166,6 +190,15 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
 
     FOREIGN KEY(branch_id) REFERENCES branch(id),
     FOREIGN KEY(change_id, change_file_id, change_entity_id, change_type) REFERENCES change(change_id, change_file_id, change_entity_id, change_type)
+  ) strict;
+
+  CREATE TABLE IF NOT EXISTS branch_change_conflict_pointer (
+    branch_id TEXT NOT NULL,
+    change_conflict_id TEXT NOT NULL,
+
+    PRIMARY KEY (branch_id, change_conflict_id),
+    FOREIGN KEY (branch_id) REFERENCES branch(id),
+    FOREIGN KEY (change_conflict_id) REFERENCES change_conflict(id)
   ) strict;
 
   -- only one branch can be active at a time
