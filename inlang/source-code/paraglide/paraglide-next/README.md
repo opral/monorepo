@@ -40,7 +40,7 @@ Use curly braces to add parameters.
 
 Learn more about the format in the [Inlang Message Format Documentation](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
 
-## Using Messages in Code
+## Using Messages in Code
 
 Use messages by importing them from `@/paraglide/messages.js`. By convention, we do a wildcard import as `m`.
 
