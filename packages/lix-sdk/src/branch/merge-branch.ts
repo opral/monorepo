@@ -1,8 +1,7 @@
 import { createChangeConflict } from "../change-conflict/create-change-conflict.js";
-import { detectDivergingEntityConflict } from "../change-conflict/detect-diverging-entity-conflict.js";
+import { detectChangeConflicts } from "../change-conflict/detect-change-conflicts.js";
 import type { Branch } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { DetectedConflict } from "../plugin/lix-plugin.js";
 
 export async function mergeBranch(args: {
 	lix: Lix;
@@ -35,21 +34,10 @@ export async function mergeBranch(args: {
 			.selectAll()
 			.execute();
 
-		const plugins = await args.lix.plugin.getAll();
-		const detectedConflicts: DetectedConflict[] = [];
-
-		// let plugin detect conflicts
-		await Promise.all(
-			plugins.map(async (plugin) => {
-				if (plugin.detectConflictsV2) {
-					const conflicts = await plugin.detectConflictsV2({
-						lix: args.lix,
-						changes: diffingChanges,
-					});
-					detectedConflicts.push(...conflicts);
-				}
-			}),
-		);
+		const detectedConflicts = await detectChangeConflicts({
+			lix: { ...args.lix, db: trx },
+			changes: diffingChanges,
+		});
 
 		// update the branch change pointers for non-conflicting changes
 		await Promise.all(
@@ -57,38 +45,18 @@ export async function mergeBranch(args: {
 				// if the target branch has a pointer for the entity
 				// change, check if there is a conflict
 				if (pointer.target_change_id) {
-					const pluginDetectedConflict = detectedConflicts.find((conflict) =>
+					const detectedConflict = detectedConflicts.find((conflict) =>
 						conflict.conflictingChangeIds.has(
 							pointer.target_change_id as string,
 						),
 					);
-					if (pluginDetectedConflict) {
+					if (detectedConflict) {
 						// don't update the branch change pointer
-						return;
-					}
-
-					// if the entity change doesn't exist in the target
-					// it can't conflict (except if a plugin detected
-					// a semantic conflict)
-					const hasDivergingEntityConflict =
-						// if no pointer for the entity in either branch does not exist,
-						// there can't be a diverging entity conflict
-						!pointer.source_change_id || !pointer.target_change_id
-							? false
-							: await detectDivergingEntityConflict({
-									lix: { db: trx },
-									changeA: { id: pointer.source_change_id },
-									changeB: { id: pointer.target_change_id },
-								});
-
-					if (hasDivergingEntityConflict) {
-						detectedConflicts.push(hasDivergingEntityConflict);
-						// return because the change is conflicting
 						return;
 					}
 				}
 
-				// the change is not conflicting and can the pointer can be updated
+				// the change is not conflicting. the pointer can be updated
 				if (pointer.source_change_id) {
 					await trx
 						.insertInto("branch_change_pointer")

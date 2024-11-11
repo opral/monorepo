@@ -1,6 +1,5 @@
 import type { Change } from "../database/schema.js";
-import type { Lix } from "../lix/open-lix.js";
-import type { DetectedConflict } from "../plugin/lix-plugin.js";
+import type { DetectedConflict, LixReadonly } from "../plugin/lix-plugin.js";
 import { getLowestCommonAncestorV2 } from "../query-utilities/get-lowest-common-ancestor-v2.js";
 
 export const LIX_DIVERGING_ENTITY_CONFLICT_KEY =
@@ -17,28 +16,70 @@ export const LIX_DIVERGING_ENTITY_CONFLICT_KEY =
  * are working on the same entity and both have made changes
  * to the entity but are not in sync.
  *
+ * @note
+ *   Filter out changes that are not based on the same entity
+ *   before calling this function to reduce the number of
+ *   comparisons.
+ *
+ * @example
+ *   const detectedConflict = await detectDivergingEntityConflict({
+ *      	lix: lix,
+ * 				changes: [changeA, changeB],
+ *   });
+ *
  * @returns The detected conflict or undefined if no conflict was detected.
  */
 export async function detectDivergingEntityConflict(args: {
-	lix: Pick<Lix, "db">;
-	changeA: Pick<Change, "id">;
-	changeB: Pick<Change, "id">;
+	lix: Pick<LixReadonly, "db">;
+	changes: Pick<Change, "id" | "entity_id" | "file_id" | "type">[];
 }): Promise<DetectedConflict | undefined> {
-	const lowestCommonAncestor = await getLowestCommonAncestorV2(args);
-	if (lowestCommonAncestor === undefined) {
+	const conflictingChangeIds = new Set<string>();
+
+	// iterate over all pairs of changes
+	for (let i = 0; i < args.changes.length; i++) {
+		for (let j = i + 1; j < args.changes.length; j++) {
+			const changeA = args.changes[i];
+			const changeB = args.changes[j];
+
+			if (changeA === undefined || changeB === undefined) {
+				continue;
+			}
+
+			// the primary key differs, the changes can't be diverging
+			// because they are based on different entities
+			if (
+				changeA.entity_id !== changeB.entity_id ||
+				changeA.file_id !== changeB.file_id ||
+				changeA.type !== changeB.type
+			) {
+				continue;
+			}
+
+			const lowestCommonAncestor = await getLowestCommonAncestorV2({
+				lix: args.lix,
+				changeA,
+				changeB,
+			});
+
+			if (lowestCommonAncestor === undefined) {
+				continue;
+			}
+			// change a or b is the lowest common ancestor, aka no divergence
+			if (
+				changeA.id === lowestCommonAncestor.id ||
+				changeB.id === lowestCommonAncestor.id
+			) {
+				continue;
+			}
+			conflictingChangeIds.add(changeA.id);
+			conflictingChangeIds.add(changeB.id);
+		}
+	}
+	if (conflictingChangeIds.size === 0) {
 		return undefined;
 	}
-	// change a or b is the lowest common ancestor, aka no divergence
-	if (
-		args.changeA.id === lowestCommonAncestor.id ||
-		args.changeB.id === lowestCommonAncestor.id
-	) {
-		return undefined;
-	}
-	// neither change a or b is the lowest common ancestor.
-	// hence, one change is diverged
 	return {
 		key: LIX_DIVERGING_ENTITY_CONFLICT_KEY,
-		conflictingChangeIds: new Set([args.changeA.id, args.changeB.id]),
+		conflictingChangeIds,
 	};
 }
