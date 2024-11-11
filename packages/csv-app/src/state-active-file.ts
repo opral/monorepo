@@ -11,6 +11,7 @@ import {
 } from "./state.ts";
 import Papa from "papaparse";
 import {
+	changeConflictInBranch,
 	changeHasLabel,
 	changeInBranch,
 	changeIsLeafInBranch,
@@ -216,6 +217,7 @@ export const changeConflictsAtom = atom(async (get) => {
 		)
 		// .where(changeInBranch(currentBranch))
 		.where("change.file_id", "=", activeFile.id)
+		.where(changeConflictInBranch(currentBranch))
 		.selectAll("change_conflict_element")
 		.selectAll("change")
 		.select((eb) =>

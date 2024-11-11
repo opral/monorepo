@@ -29,7 +29,7 @@ export default function ConflictSet(props: {
 							className="flex md:flex-col flex-wrap md:flex-nowrap items-center gap-2"
 						>
 							{change.is_current_branch_pointer === 1 ? (
-								<SlTag size="small">current branch pointer</SlTag>
+								<SlTag size="small">in current branch</SlTag>
 							) : (
 								// hidden tag to keep the layout consistent
 								<SlTag className="opacity-0" size="small"></SlTag>
