@@ -43,7 +43,7 @@ test("it should copy the change pointers from the parent branch", async () => {
 
 	const branch = await createBranch({
 		lix,
-		from: mainBranch,
+		parent: mainBranch,
 		name: "feature-branch",
 	});
 

@@ -23,6 +23,7 @@ export type LixDatabaseSchema = {
 	current_branch: CurrentBranchTable;
 	branch: BranchTable;
 	branch_change_pointer: BranchChangePointerTable;
+	branch_change_conflict_pointer: BranchChangeConflictPointerTable;
 
 	// change conflicts
 	change_conflict: ChangeConflictTable;
@@ -184,6 +185,17 @@ type BranchChangePointerTable = {
 	change_type: string;
 };
 
+export type BranchChangeConflictPointer =
+	Selectable<BranchChangeConflictPointerTable>;
+export type NewBranchChangeConflictPointer =
+	Insertable<BranchChangeConflictPointerTable>;
+export type BranchChangeConflictPointerUpdate =
+	Updateable<BranchChangeConflictPointerTable>;
+type BranchChangeConflictPointerTable = {
+	branch_id: string;
+	change_conflict_id: string;
+};
+
 export type CurrentBranch = Selectable<CurrentBranchTable>;
 export type NewCurrentBranch = Insertable<CurrentBranchTable>;
 export type CurrentBranchUpdate = Updateable<CurrentBranchTable>;
@@ -230,3 +242,4 @@ type ChangeConflictElementTable = {
 	change_conflict_id: string;
 	change_id: string;
 };
+

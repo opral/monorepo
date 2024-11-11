@@ -1,4 +1,4 @@
-import type { Change, ChangeConflict } from "../database/schema.js";
+import type { Branch, Change, ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 /**
@@ -10,6 +10,7 @@ import type { Lix } from "../lix/open-lix.js";
 export async function createChangeConflict(args: {
 	lix: Lix;
 	key: string;
+	branch: Pick<Branch, "id">;
 	conflictingChangeIds: Set<Change["id"]>;
 }): Promise<ChangeConflict> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
@@ -69,6 +70,15 @@ export async function createChangeConflict(args: {
 			// Ignore if the conflict element already exists
 			.onConflict((oc) => oc.doNothing())
 			.execute();
+
+		// TODO
+		// await trx
+		// 	.insertInto("branch_change_conflict_pointer")
+		// 	.values({
+		// 		branch_id: args.branch.id,
+		// 		change_conflict_id: newConflict.id,
+		// 	})
+		// 	.execute();
 
 		return newConflict;
 	};

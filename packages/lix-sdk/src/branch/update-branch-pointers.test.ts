@@ -164,3 +164,83 @@ test("it should not fail if an empty array of changes is provided", async () => 
 	// no change pointers should be created
 	expect(branchChangePointers.length).toBe(0);
 });
+
+test("change conflicts should be garbage collected", async () => {
+	const lix = await openLixInMemory({});
+
+	const currentBranch = await lix.db
+		.selectFrom("current_branch")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	await lix.db.transaction().execute(async (trx) => {
+		const changes = await trx
+			.insertInto("change")
+			.values([
+				{
+					id: "change-1",
+					type: "file",
+					entity_id: "value1",
+					file_id: "mock",
+					plugin_key: "mock-plugin",
+					snapshot_id: "no-content",
+				},
+				{
+					id: "change-2",
+					type: "file",
+					entity_id: "value2",
+					file_id: "mock",
+					plugin_key: "mock-plugin",
+					snapshot_id: "no-content",
+				},
+			])
+			.returningAll()
+			.execute();
+
+		await updateBranchPointers({
+			lix: { db: trx },
+			branch: currentBranch,
+			changes,
+		});
+	});
+
+	// no branch is pointing to the change conflict,
+	// so it should be garbage collected
+
+	const changeConflict = await lix.db
+		.insertInto("change_conflict")
+		.values({
+			id: "change-conflict-1",
+			key: "mock-conflict",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	await lix.db
+		.insertInto("change_conflict_element")
+		.values([
+			{
+				change_conflict_id: changeConflict.id,
+				change_id: "change-1",
+			},
+			{
+				change_conflict_id: changeConflict.id,
+				change_id: "change-2",
+			},
+		])
+		.execute();
+
+	await updateBranchPointers({
+		lix,
+		branch: currentBranch,
+		changes: [],
+	});
+
+	const remainingChangeConflicts = await lix.db
+		.selectFrom("change_conflict")
+		.selectAll()
+		.execute();
+
+	// the change conflict should be garbage collected
+	expect(remainingChangeConflicts.length).toBe(0);
+});

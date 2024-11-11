@@ -11,7 +11,7 @@ import type { Lix } from "../lix/open-lix.js";
  */
 export async function createBranch(args: {
 	lix: Pick<Lix, "db">;
-	from: Pick<Branch, "id">;
+	parent?: Pick<Branch, "id">;
 	name?: Branch["name"];
 }): Promise<Branch> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
@@ -30,28 +30,30 @@ export async function createBranch(args: {
 		}
 
 		// copy the change pointers from the parent branch
-		await trx
-			.insertInto("branch_change_pointer")
-			.columns([
-				"branch_id",
-				"change_id",
-				"change_file_id",
-				"change_entity_id",
-				"change_type",
-			])
-			.expression((eb) =>
-				trx
-					.selectFrom("branch_change_pointer")
-					.select([
-						eb.val(branch.id).as("branch_id"),
-						"change_id",
-						"change_file_id",
-						"change_entity_id",
-						"change_type",
-					])
-					.where("branch_id", "=", args.from.id),
-			)
-			.execute();
+		if (args.parent !== undefined) {
+			await trx
+				.insertInto("branch_change_pointer")
+				.columns([
+					"branch_id",
+					"change_id",
+					"change_file_id",
+					"change_entity_id",
+					"change_type",
+				])
+				.expression((eb) =>
+					trx
+						.selectFrom("branch_change_pointer")
+						.select([
+							eb.val(branch.id).as("branch_id"),
+							"change_id",
+							"change_file_id",
+							"change_entity_id",
+							"change_type",
+						])
+						.where("branch_id", "=", args.parent!.id),
+				)
+				.execute();
+		}
 
 		return branch;
 	};

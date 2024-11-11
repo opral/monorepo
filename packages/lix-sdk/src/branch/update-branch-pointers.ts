@@ -1,5 +1,5 @@
 import { garbageCollectChangeConflicts } from "../change-conflict/garbage-collect-change-conflicts.js";
-import type { Branch, Change } from "../database/schema.js";
+import type { Branch, Change, ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 /**
@@ -9,7 +9,8 @@ import type { Lix } from "../lix/open-lix.js";
  */
 export async function updateBranchPointers(args: {
 	lix: Pick<Lix, "db">;
-	changes: Change[];
+	changes?: Change[];
+	changeConflicts?: ChangeConflict[];
 	branch?: Pick<Branch, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
@@ -20,33 +21,61 @@ export async function updateBranchPointers(args: {
 				.selectAll()
 				.executeTakeFirstOrThrow());
 
-		const pointers = args.changes.map((change) => ({
-			branch_id: branch.id,
-			change_id: change.id,
-			change_entity_id: change.entity_id,
-			change_file_id: change.file_id,
-			change_type: change.type,
-		}));
+		if (args.changes) {
+			const changePointers = args.changes.map((change) => ({
+				branch_id: branch.id,
+				change_id: change.id,
+				change_entity_id: change.entity_id,
+				change_file_id: change.file_id,
+				change_type: change.type,
+			}));
 
-		if (pointers.length > 0) {
-			await trx
-				.insertInto("branch_change_pointer")
-				.values(pointers)
-				// pointer for this branch and change_entity, change_file, change_type
-				// already exists, then update the change_id
-				.onConflict((oc) =>
-					oc.doUpdateSet((eb) => ({
-						change_id: eb.ref("excluded.change_id"),
-					})),
-				)
-				.execute();
-		} else {
-			// if there are no changes, then delete all pointers for the branch
-			await trx
-				.deleteFrom("branch_change_pointer")
-				.where("branch_id", "=", branch.id)
-				.execute();
+			if (changePointers.length > 0) {
+				await trx
+					.insertInto("branch_change_pointer")
+					.values(changePointers)
+					// pointer for this branch and change_entity, change_file, change_type
+					// already exists, then update the change_id
+					.onConflict((oc) =>
+						oc.doUpdateSet((eb) => ({
+							change_id: eb.ref("excluded.change_id"),
+						})),
+					)
+					.execute();
+			} else {
+				// if there are no changes, then delete all pointers for the branch
+				await trx
+					.deleteFrom("branch_change_pointer")
+					.where("branch_id", "=", branch.id)
+					.execute();
+			}
 		}
+
+		if (args.changeConflicts) {
+			const changeConflictPointers = args.changeConflicts?.map((conflict) => ({
+				branch_id: branch.id,
+				change_conflict_id: conflict.id,
+			}));
+			if (changeConflictPointers.length > 0) {
+				await trx
+					.insertInto("branch_change_conflict_pointer")
+					.values(
+						args.changeConflicts?.map((conflict) => ({
+							branch_id: branch.id,
+							change_conflict_id: conflict.id,
+						})) ?? [],
+					)
+					.onConflict((oc) => oc.doNothing())
+					.execute();
+			} else if (changeConflictPointers.length === 0) {
+				// if there are no conflicts, then delete all pointers for the branch
+				await trx
+					.deleteFrom("branch_change_conflict_pointer")
+					.where("branch_id", "=", branch.id)
+					.execute();
+			}
+		}
+
 		await garbageCollectChangeConflicts({ lix: { ...args.lix, db: trx } });
 	};
 

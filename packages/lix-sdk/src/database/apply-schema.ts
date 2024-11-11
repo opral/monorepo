@@ -183,6 +183,15 @@ export async function applySchema(args: { sqlite: SqliteDatabase }) {
     FOREIGN KEY(change_id, change_file_id, change_entity_id, change_type) REFERENCES change(change_id, change_file_id, change_entity_id, change_type)
   ) strict;
 
+  CREATE TABLE IF NOT EXISTS branch_change_conflict_pointer (
+    branch_id TEXT NOT NULL,
+    change_conflict_id TEXT NOT NULL,
+
+    PRIMARY KEY (branch_id, change_conflict_id),
+    FOREIGN KEY (branch_id) REFERENCES branch(id),
+    FOREIGN KEY (change_conflict_id) REFERENCES change_conflict(id)
+  ) strict;
+
   -- only one branch can be active at a time
   -- hence, the table has only one row
   CREATE TABLE IF NOT EXISTS current_branch (

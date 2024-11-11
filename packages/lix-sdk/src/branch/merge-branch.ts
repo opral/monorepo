@@ -112,11 +112,22 @@ export async function mergeBranch(args: {
 		// insert the detected conflicts
 		// (ignore if the conflict already exists)
 		for (const detectedConflict of detectedConflicts) {
-			await createChangeConflict({
+			const conflict = await createChangeConflict({
 				lix: { ...args.lix, db: trx },
+				branch: args.targetBranch,
 				key: detectedConflict.key,
 				conflictingChangeIds: detectedConflict.conflictingChangeIds,
 			});
+
+			// todo move to createChangeConflict
+			await trx
+				.insertInto("branch_change_conflict_pointer")
+				.values({
+					branch_id: args.targetBranch.id,
+					change_conflict_id: conflict.id,
+				})
+				.onConflict((oc) => oc.doNothing())
+				.execute();
 		}
 	};
 

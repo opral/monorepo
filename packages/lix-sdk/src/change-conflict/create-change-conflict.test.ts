@@ -5,6 +5,11 @@ import { createChangeConflict } from "./create-change-conflict.js";
 test("conflicts should be de-duplicated based on the change_conflict.key", async () => {
 	const lix = await openLixInMemory({});
 
+	const currentBranch = await lix.db
+		.selectFrom("current_branch")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	await lix.db
 		.insertInto("change")
 		.values([
@@ -29,6 +34,7 @@ test("conflicts should be de-duplicated based on the change_conflict.key", async
 
 	const changeConflict = await createChangeConflict({
 		lix,
+		branch: currentBranch,
 		key: "mock-conflict",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
@@ -47,6 +53,7 @@ test("conflicts should be de-duplicated based on the change_conflict.key", async
 	// Create a second conflict
 	const changeConflict2 = await createChangeConflict({
 		lix,
+		branch: currentBranch,
 		key: "mock-conflict",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
@@ -67,6 +74,10 @@ test("conflicts should be de-duplicated based on the change_conflict.key", async
 // we can leave it as is for now, but we should keep an eye on it
 test("if a conflict set contains the same changes for a given key, no new conflict should be created", async () => {
 	const lix = await openLixInMemory({});
+	const currentBranch = await lix.db
+		.selectFrom("current_branch")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	await lix.db
 		.insertInto("change")
@@ -100,6 +111,7 @@ test("if a conflict set contains the same changes for a given key, no new confli
 
 	const changeConflict = await createChangeConflict({
 		lix,
+		branch: currentBranch,
 		key: "mock-conflict",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
@@ -117,6 +129,7 @@ test("if a conflict set contains the same changes for a given key, no new confli
 
 	const changeConflict2 = await createChangeConflict({
 		lix,
+		branch: currentBranch,
 		key: "mock-conflict",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
@@ -125,6 +138,7 @@ test("if a conflict set contains the same changes for a given key, no new confli
 
 	const changeConflict3 = await createChangeConflict({
 		lix,
+		branch: currentBranch,
 		key: "mock-conflict-other",
 		// 2 was preivously not in the conflict
 		conflictingChangeIds: new Set(["change1", "change2"]),

@@ -285,7 +285,7 @@ const BranchDropdown = () => {
 					onClick={async () => {
 						const newBranch = await createBranch({
 							lix,
-							from: currentBranch,
+							parent: currentBranch,
 							name: humanId({
 								separator: "-",
 								capitalize: false,
