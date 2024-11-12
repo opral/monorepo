@@ -42,7 +42,7 @@ export async function createBranch(args: {
 		}
 
 		// copy the change pointers from the parent branch
-		if (args.parent !== undefined) {
+		if (args.parent?.id) {
 			await trx
 				.insertInto("branch_change_pointer")
 				.columns([
@@ -53,7 +53,7 @@ export async function createBranch(args: {
 					"change_type",
 				])
 				.expression((eb) =>
-					trx
+					eb
 						.selectFrom("branch_change_pointer")
 						.select([
 							eb.val(branch.id).as("branch_id"),
@@ -65,6 +65,19 @@ export async function createBranch(args: {
 						.where("branch_id", "=", args.parent!.id),
 				)
 				.execute();
+
+			// copy the change conflict pointers from the parent branch
+			await trx
+				.insertInto("branch_change_conflict_pointer")
+				.columns(["branch_id", "change_conflict_id"])
+				.expression((eb) =>
+					eb
+						.selectFrom("branch_change_conflict_pointer")
+						.select([eb.val(branch.id).as("branch_id"), "change_conflict_id"])
+						.where("branch_id", "=", args.parent!.id),
+				)
+				.execute();
+
 			await trx
 				.insertInto("branch_target")
 				.values({
