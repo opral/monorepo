@@ -1,4 +1,4 @@
-import { openLixInMemory } from "@lix-js/sdk";
+import { Branch, openLixInMemory } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { plugin as csvPluginV2 } from "@lix-js/plugin-csv-column-based";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
@@ -61,18 +61,27 @@ export const lixAtom = atom(async () => {
  */
 export const withPollingAtom = atom(Date.now());
 
-export const currentBranchAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const lix = await get(lixAtom);
+export const currentBranchAtom = atom<Promise<Branch & { targets: Branch[] }>>(
+	async (get) => {
+		get(withPollingAtom);
+		const lix = await get(lixAtom);
 
-	const currentBranch = await lix.db
-		.selectFrom("current_branch")
-		.innerJoin("branch", "branch.id", "current_branch.id")
-		.selectAll("branch")
-		.executeTakeFirstOrThrow();
+		const currentBranch = await lix.db
+			.selectFrom("current_branch")
+			.innerJoin("branch", "branch.id", "current_branch.id")
+			.selectAll("branch")
+			.executeTakeFirstOrThrow();
 
-	return currentBranch;
-});
+		const targets = await lix.db
+			.selectFrom("branch_target")
+			.where("source_branch_id", "=", currentBranch.id)
+			.innerJoin("branch", "branch_target.target_branch_id", "branch.id")
+			.selectAll("branch")
+			.execute();
+
+		return { ...currentBranch, targets };
+	}
+);
 
 export const existingBranchesAtom = atom(async (get) => {
 	get(withPollingAtom);

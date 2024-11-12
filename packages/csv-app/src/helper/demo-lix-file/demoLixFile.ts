@@ -1,6 +1,5 @@
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import { plugin as pluginV2 } from "@lix-js/plugin-csv-column-based";
-import capTableCsv from "./cap-table.csv?raw";
 import emailNewsletterCsv from "./email-newsletter.csv?raw";
 
 export const DEMO_CAP_TABLE_CSV_FILE_ID = "29jas9j-2sk2-cap";
@@ -16,20 +15,20 @@ export async function lixCsvDemoFile(): Promise<Blob> {
 		providePlugins: [pluginV2],
 	});
 
-	await lix.db
-		.insertInto("file")
-		.values({
-			id: DEMO_CAP_TABLE_CSV_FILE_ID,
-			path: "/cap-table-example.csv",
-			data: new TextEncoder().encode(capTableCsv),
-			// @ts-expect-error - insert expects stringified json
-			metadata: JSON.stringify({
-				unique_column: "Stakeholder",
-			}),
-		})
-		.execute();
+	// await lix.db
+	// 	.insertInto("file")
+	// 	.values({
+	// 		id: DEMO_CAP_TABLE_CSV_FILE_ID,
+	// 		path: "/cap-table-example.csv",
+	// 		data: new TextEncoder().encode(capTableCsv),
+	// 		// @ts-expect-error - insert expects stringified json
+	// 		metadata: JSON.stringify({
+	// 			unique_column: "Stakeholder",
+	// 		}),
+	// 	})
+	// 	.execute();
 
-	await lix.settled();
+	// await lix.settled();
 
 	await lix.db
 		.insertInto("file")
