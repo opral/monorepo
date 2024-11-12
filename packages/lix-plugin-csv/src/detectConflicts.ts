@@ -63,12 +63,12 @@ export const detectConflicts: NonNullable<
 
 		// naive raise any snapshot difference as a conflict for now
 		// more sophisticated conflict reporting can be incrementally added
-		result.push({
-			change_id: leafChangeInTarget.id,
-			conflicting_change_id: change.id,
-			reason:
-				"The snapshots of the change do not match. More sophisticated reasoning will be added later.",
-		});
+		// result.push({
+		// 	change_id: leafChangeInTarget.id,
+		// 	conflicting_change_id: change.id,
+		// 	reason:
+		// 		"The snapshots of the change do not match. More sophisticated reasoning will be added later.",
+		// });
 	}
 
 	return result;

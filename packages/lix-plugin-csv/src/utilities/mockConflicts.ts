@@ -1,8 +1,4 @@
-import {
-	getLeafChangesOnlyInSource,
-	openLixInMemory,
-	type NewConflict,
-} from "@lix-js/sdk";
+import { getLeafChangesOnlyInSource, openLixInMemory } from "@lix-js/sdk";
 import { mockChanges } from "./mockChanges.js";
 import { detectChanges } from "../detectChanges.js";
 
@@ -60,7 +56,7 @@ export async function mockConflicts(args: {
 		targetLix,
 	});
 
-	const getSnapshotsOfConflict = async (conflict: NewConflict) => {
+	const getSnapshotsOfConflict = async (conflict: any) => {
 		const snapshot = await sourceLix.db
 			.selectFrom("change")
 			.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
