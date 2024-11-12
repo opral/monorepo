@@ -25,13 +25,27 @@ const Header = () => {
 	return (
 		<header className="w-full max-w-5xl px-4 py-3 mx-auto flex items-center justify-between gap-4">
 			<div className="flex items-center gap-4">
-				<IconLix />
-				<a
-					className="px-2 py-1 font-medium text-slate-500 hover:text-cyan-600 bg-white"
-					href="https://opral.substack.com"
-				>
-					Blog
+				<a href="/">
+					<IconLix />
 				</a>
+				{[
+					{
+						text: "File Manager",
+						href: "/file-manager",
+					},
+					{
+						text: "Blog",
+						href: "https://opral.substack.com",
+					},
+				].map((link, index) => (
+					<a
+						key={index}
+						className="px-2 py-1 font-medium text-slate-500 hover:text-cyan-600 bg-white"
+						href={link.href}
+					>
+						{link.text}
+					</a>
+				))}
 			</div>
 			<div className="flex items-center gap-3">
 				{socialLinks.map((socialLink, index) => (
