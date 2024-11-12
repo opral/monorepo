@@ -8,8 +8,6 @@ export async function updateChangeConflicts(args: {
 	branch: Pick<Branch, "id">;
 }) {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		console.log("updateChangeConflicts", args.branch);
-
 		const targetBranches = await trx
 			.selectFrom("branch_target")
 			.where("target_branch_id", "=", args.branch.id)
@@ -44,8 +42,6 @@ export async function updateChangeConflicts(args: {
 				.where("id", "in", [...diffingChangeIds])
 				.selectAll()
 				.execute();
-
-			console.log("diffingChanges", diffingChanges);
 
 			const detectedConflicts = await detectChangeConflicts({
 				lix: { ...args.lix, db: trx },

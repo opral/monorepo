@@ -14,7 +14,6 @@ export async function updateBranchPointers(args: {
 	branch?: Pick<Branch, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		console.log("updating branch pointers");
 		const branch =
 			args.branch ??
 			(await trx

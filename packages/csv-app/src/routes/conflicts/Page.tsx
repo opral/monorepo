@@ -125,6 +125,7 @@ export default function Page() {
 										</div>
 									</div>
 									<ConflictSet
+										lix={lix}
 										changes={changes}
 										uniqueColumnValue={uniqueColumnValue}
 									></ConflictSet>

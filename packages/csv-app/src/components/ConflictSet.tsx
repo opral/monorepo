@@ -1,9 +1,18 @@
-import { Change, Snapshot } from "@lix-js/sdk";
+import {
+	Change,
+	Lix,
+	resolveChangeConflictBySelecting,
+	Snapshot,
+} from "@lix-js/sdk";
 import { SlButton, SlTag } from "@shoelace-style/shoelace/dist/react";
+import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 
 export default function ConflictSet(props: {
+	lix: Lix;
 	uniqueColumnValue: string;
 	changes: (Change & {
+		change_conflict_id: string;
+		change_conflict_key: string;
 		snapshot_content: Snapshot["content"];
 		is_current_branch_pointer: number;
 		is_in_current_branch: number;
@@ -25,6 +34,7 @@ export default function ConflictSet(props: {
 				{props.changes.map((change) => {
 					const column = change.entity_id.split("|")[2];
 					const value = change.snapshot_content?.text;
+
 					return (
 						<div
 							// key can't be only the entity id in case of a conflict with the same entity id
@@ -51,7 +61,23 @@ export default function ConflictSet(props: {
 								// deletion
 								<p className="px-3 py-1.5 min-h-[38px] bg-zinc-100 border border-zinc-400 border-dashed flex-1 md:w-[140px]"></p>
 							)}
-							<SlButton className="w-full" size="small">
+							<SlButton
+								className="w-full"
+								size="small"
+								onClick={async () => {
+									props.lix.db.transaction().execute(async (trx) => {
+										await resolveChangeConflictBySelecting({
+											lix: { ...props.lix, db: trx },
+											conflict: {
+												id: change.change_conflict_id,
+												key: change.change_conflict_key,
+											},
+											select: change,
+										});
+										await saveLixToOpfs({ lix: { ...props.lix, db: trx } });
+									});
+								}}
+							>
 								{(() => {
 									if (change.is_current_branch_pointer === 1) {
 										return "Keep";
