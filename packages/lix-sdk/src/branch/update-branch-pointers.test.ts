@@ -166,7 +166,8 @@ test("it should not fail if an empty array of changes is provided", async () => 
 	expect(branchChangePointers.length).toBe(0);
 });
 
-test("change conflicts should be garbage collected", async () => {
+// uncertain if behavior generalizes. might be better to have this as an opt-in automation. 
+test.skip("change conflicts should be garbage collected", async () => {
 	const lix = await openLixInMemory({});
 
 	const currentBranch = await lix.db

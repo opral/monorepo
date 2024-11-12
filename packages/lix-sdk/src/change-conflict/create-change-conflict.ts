@@ -17,7 +17,16 @@ export async function createChangeConflict(args: {
 		// Check if a conflict with the same key and identical change IDs already exists
 		const existingConflict = await trx
 			.selectFrom("change_conflict")
+			.innerJoin(
+				"branch_change_conflict_pointer",
+				"branch_change_conflict_pointer.change_conflict_id",
+				"change_conflict.id",
+			)
+			// the branch should point to the conflict
+			.where("branch_change_conflict_pointer.branch_id", "=", args.branch.id)
+			// which has the identical key
 			.where("change_conflict.key", "=", args.key)
+			// and same set of changes
 			.where((eb) =>
 				eb.exists(
 					trx
@@ -71,7 +80,6 @@ export async function createChangeConflict(args: {
 			.onConflict((oc) => oc.doNothing())
 			.execute();
 
-		// TODO
 		await trx
 			.insertInto("branch_change_conflict_pointer")
 			.values({

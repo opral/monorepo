@@ -55,19 +55,13 @@ test("should find conflicts in the given branch", async () => {
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
 
-	// conflict in another branch that should not be found
+	// conflict in another branch that should not be returned
 	await createChangeConflict({
 		lix,
 		branch: branch1,
 		key: "mock-conflict1",
 		conflictingChangeIds: new Set(["change0"]),
 	});
-
-	// Insert branch change conflict pointers (only for mockConflict0)
-	await lix.db
-		.insertInto("branch_change_conflict_pointer")
-		.values([{ branch_id: branch0.id, change_conflict_id: mockConflict0.id }])
-		.execute();
 
 	// Query conflicts in the branch
 	const conflictsInBranch = await lix.db

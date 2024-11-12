@@ -6,9 +6,10 @@ import { createChangeConflict } from "./create-change-conflict.js";
 test("should garbage collect conflicts that contain one or more changes that no branch change pointer references (anymore)", async () => {
 	const lix = await openLixInMemory({});
 
-	const currentBranch = await lix.db
-		.selectFrom("current_branch")
-		.selectAll()
+	const branch0 = await lix.db
+		.insertInto("branch")
+		.values([{ id: "branch0", name: "branch0" }])
+		.returningAll()
 		.executeTakeFirstOrThrow();
 
 	const changes = await lix.db
@@ -45,14 +46,14 @@ test("should garbage collect conflicts that contain one or more changes that no 
 	// Create change conflicts
 	const mockConflict0 = await createChangeConflict({
 		lix,
-		branch: currentBranch,
+		branch: branch0,
 		key: "mock-conflict0",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
 
 	await createChangeConflict({
 		lix,
-		branch: currentBranch,
+		branch: branch0,
 		key: "mock-conflict1",
 		conflictingChangeIds: new Set(["change1", "change2"]),
 	});
@@ -62,26 +63,20 @@ test("should garbage collect conflicts that contain one or more changes that no 
 		.insertInto("branch_change_pointer")
 		.values([
 			{
-				branch_id: "branch0",
+				branch_id: branch0.id,
 				change_id: changes[0]!.id,
 				change_entity_id: changes[0]!.entity_id,
 				change_file_id: changes[0]!.file_id,
 				change_type: changes[0]!.type,
 			},
 			{
-				branch_id: "branch0",
+				branch_id: branch0.id,
 				change_id: changes[1]!.id,
 				change_entity_id: changes[1]!.entity_id,
 				change_file_id: changes[1]!.file_id,
 				change_type: changes[1]!.type,
 			},
 		])
-		.execute();
-
-	// Insert branch change conflict pointers (only for mockConflict0)
-	await lix.db
-		.insertInto("branch_change_conflict_pointer")
-		.values([{ branch_id: "branch0", change_conflict_id: mockConflict0.id }])
 		.execute();
 
 	// Run garbage collection
@@ -122,7 +117,7 @@ test("should garbage collect conflicts that contain one or more changes that no 
 	);
 });
 
-test("should garbage collect conflicts that no branch change conflict pointer references", async () => {
+test("should garbage collect conflicts that no branch conflict pointer references", async () => {
 	const lix = await openLixInMemory({});
 
 	const changes = await lix.db
@@ -148,38 +143,44 @@ test("should garbage collect conflicts that no branch change conflict pointer re
 		.returningAll()
 		.execute();
 
-	const currentBranch = await lix.db
-		.selectFrom("current_branch")
-		.selectAll()
+	const branch0 = await lix.db
+		.insertInto("branch")
+		.values([{ id: "branch0" }])
+		.returningAll()
 		.executeTakeFirstOrThrow();
 
 	const mockConflict0 = await createChangeConflict({
 		lix,
-		branch: currentBranch,
+		branch: branch0,
 		key: "mock-conflict0",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
 
 	// current branch points to changes 0 and 1
-	// but doesn't point to the conflict
 	await lix.db
 		.insertInto("branch_change_pointer")
 		.values([
 			{
-				branch_id: currentBranch.id,
+				branch_id: branch0.id,
 				change_id: changes[0]!.id,
 				change_entity_id: changes[0]!.entity_id,
 				change_file_id: changes[0]!.file_id,
 				change_type: changes[0]!.type,
 			},
 			{
-				branch_id: currentBranch.id,
+				branch_id: branch0.id,
 				change_id: changes[1]!.id,
 				change_entity_id: changes[1]!.entity_id,
 				change_file_id: changes[1]!.file_id,
 				change_type: changes[1]!.type,
 			},
 		])
+		.execute();
+
+	// delete the conflict pointers mockConflict0
+	await lix.db
+		.deleteFrom("branch_change_conflict_pointer")
+		.where("change_conflict_id", "=", mockConflict0.id)
 		.execute();
 
 	// Run garbage collection
@@ -246,14 +247,6 @@ test("should NOT garbage collect conflicts that a branch change conflict pointer
 				change_file_id: changes[1]!.file_id,
 				change_type: changes[1]!.type,
 			},
-		])
-		.execute();
-
-	// branch change conflict pointer points to the conflict
-	await lix.db
-		.insertInto("branch_change_conflict_pointer")
-		.values([
-			{ branch_id: currentBranch.id, change_conflict_id: mockConflict0.id },
 		])
 		.execute();
 

@@ -2,12 +2,13 @@ import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeConflict } from "./create-change-conflict.js";
 
-test("conflicts should be de-duplicated based on the change_conflict.key", async () => {
+test("conflicts should be de-duplicated based on the change_conflict.key and branch", async () => {
 	const lix = await openLixInMemory({});
 
-	const currentBranch = await lix.db
-		.selectFrom("current_branch")
-		.selectAll()
+	const branch0 = await lix.db
+		.insertInto("branch")
+		.values({ id: "branch0" })
+		.returningAll()
 		.executeTakeFirstOrThrow();
 
 	await lix.db
@@ -34,7 +35,7 @@ test("conflicts should be de-duplicated based on the change_conflict.key", async
 
 	const changeConflict = await createChangeConflict({
 		lix,
-		branch: currentBranch,
+		branch: branch0,
 		key: "mock-conflict",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
@@ -53,7 +54,7 @@ test("conflicts should be de-duplicated based on the change_conflict.key", async
 	// Create a second conflict
 	const changeConflict2 = await createChangeConflict({
 		lix,
-		branch: currentBranch,
+		branch: branch0,
 		key: "mock-conflict",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
@@ -70,13 +71,13 @@ test("conflicts should be de-duplicated based on the change_conflict.key", async
 	expect(conflictsAfter2Creation[0]?.key).toBe("mock-conflict");
 });
 
-// unsure about this behavior. might lead to unexpected behavior down the road.
-// we can leave it as is for now, but we should keep an eye on it
-test("if a conflict set contains the same changes for a given key, no new conflict should be created", async () => {
+test("if a conflict contains the same changes for a given key and branch, no new conflict should be created", async () => {
 	const lix = await openLixInMemory({});
-	const currentBranch = await lix.db
-		.selectFrom("current_branch")
-		.selectAll()
+
+	const branch0 = await lix.db
+		.insertInto("branch")
+		.values({ id: "branch0" })
+		.returningAll()
 		.executeTakeFirstOrThrow();
 
 	await lix.db
@@ -111,7 +112,7 @@ test("if a conflict set contains the same changes for a given key, no new confli
 
 	const changeConflict = await createChangeConflict({
 		lix,
-		branch: currentBranch,
+		branch: branch0,
 		key: "mock-conflict",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
@@ -129,7 +130,7 @@ test("if a conflict set contains the same changes for a given key, no new confli
 
 	const changeConflict2 = await createChangeConflict({
 		lix,
-		branch: currentBranch,
+		branch: branch0,
 		key: "mock-conflict",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
@@ -138,7 +139,7 @@ test("if a conflict set contains the same changes for a given key, no new confli
 
 	const changeConflict3 = await createChangeConflict({
 		lix,
-		branch: currentBranch,
+		branch: branch0,
 		key: "mock-conflict-other",
 		// 2 was preivously not in the conflict
 		conflictingChangeIds: new Set(["change1", "change2"]),
