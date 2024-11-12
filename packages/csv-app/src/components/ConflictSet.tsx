@@ -6,10 +6,13 @@ export default function ConflictSet(props: {
 	changes: (Change & {
 		snapshot_content: Snapshot["content"];
 		is_current_branch_pointer: number;
+		is_in_current_branch: number;
 	})[];
 }) {
 	return (
-		<div className="bg-zinc-50 border border-zinc-200 rounded-md pt-2 px-3 pb-4">
+		<div
+			className={"border border-zinc-200 rounded-md pt-2 px-3 pb-4 bg-zinc-50"}
+		>
 			<div className="flex flex-wrap md:flex-nowrap overflow-x-scroll gap-x-2 gap-y-2 md:gap-y-8">
 				<div className="flex md:flex-col">
 					<p className="hidden md:block text-zinc-500 md:py-1.5 text-sm">
@@ -26,10 +29,12 @@ export default function ConflictSet(props: {
 						<div
 							// key can't be only the entity id in case of a conflict with the same entity id
 							key={change.entity_id + change.snapshot_id}
-							className="flex md:flex-col flex-wrap md:flex-nowrap items-center gap-2"
+							className={"flex md:flex-col flex-wrap md:flex-nowrap gap-2"}
 						>
 							{change.is_current_branch_pointer === 1 ? (
-								<SlTag size="small">in current branch</SlTag>
+								<SlTag size="small">current value</SlTag>
+							) : change.is_in_current_branch ? (
+								<SlTag size="small">previous value</SlTag>
 							) : (
 								// hidden tag to keep the layout consistent
 								<SlTag className="opacity-0" size="small"></SlTag>
@@ -47,7 +52,14 @@ export default function ConflictSet(props: {
 								<p className="px-3 py-1.5 min-h-[38px] bg-zinc-100 border border-zinc-400 border-dashed flex-1 md:w-[140px]"></p>
 							)}
 							<SlButton className="w-full" size="small">
-								Select
+								{(() => {
+									if (change.is_current_branch_pointer === 1) {
+										return "Keep";
+									} else if (change.is_in_current_branch) {
+										return "Rollback";
+									}
+									return "Select";
+								})()}
 							</SlButton>
 						</div>
 					);

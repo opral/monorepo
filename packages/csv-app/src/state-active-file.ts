@@ -231,6 +231,15 @@ export const changeConflictsAtom = atom(async (get) => {
 				.end()
 				.as("is_current_branch_pointer")
 		)
+		.select((eb) =>
+			eb
+				.case()
+				.when(changeInBranch(currentBranch))
+				.then(1)
+				.else(0)
+				.end()
+				.as("is_in_current_branch")
+		)
 		.select("snapshot.content as snapshot_content")
 		.select("change_conflict.key as change_conflict_key")
 		.execute();

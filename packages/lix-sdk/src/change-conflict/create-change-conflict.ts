@@ -72,13 +72,13 @@ export async function createChangeConflict(args: {
 			.execute();
 
 		// TODO
-		// await trx
-		// 	.insertInto("branch_change_conflict_pointer")
-		// 	.values({
-		// 		branch_id: args.branch.id,
-		// 		change_conflict_id: newConflict.id,
-		// 	})
-		// 	.execute();
+		await trx
+			.insertInto("branch_change_conflict_pointer")
+			.values({
+				branch_id: args.branch.id,
+				change_conflict_id: newConflict.id,
+			})
+			.execute();
 
 		return newConflict;
 	};
