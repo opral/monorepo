@@ -3,9 +3,6 @@ import type { LinksFunction } from "@remix-run/node"
 import { useEffect } from "react"
 import { posthog } from "posthog-js"
 import "./tailwind.css"
-import Header from "./components/header"
-import Footer from "./components/footer"
-import IconArrowExternal from "./components/icons/arrow-external"
 
 export async function loader() {
 	return { PUBLIC_POSTHOG_TOKEN: process.env.PUBLIC_POSTHOG_TOKEN }
@@ -56,22 +53,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 					<Links />
 				</head>
 				<body>
-					<div className="min-h-screen">
-						<div className="flex justify-center items-center h-[50px] text-[16px] px-3 bg-slate-100 border-b border-slate-200 text-black font-medium">
-							Public preview launching, Dec 16
-							<a
-								className="group text-cyan-600 hover:text-black border border-slate-200 mx-6 flex gap-2 items-center py-1 px-3 rounded-md bg-white"
-								target="_blank"
-								href="https://forms.gle/cR3iDsUB7DEygJaZ8"
-							>
-								Get notified
-								<IconArrowExternal />
-							</a>
-						</div>
-						<Header />
-						{children}
-						<Footer />
-					</div>
+					<div className="min-h-screen">{children}</div>
 					<ScrollRestoration />
 					<Scripts />
 				</body>
