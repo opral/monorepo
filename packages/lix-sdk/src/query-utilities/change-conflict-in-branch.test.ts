@@ -13,7 +13,7 @@ test("should find conflicts in the given branch", async () => {
 			{
 				id: "change0",
 				plugin_key: "mock-plugin",
-				type: "mock",
+				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
 				snapshot_id: "no-content",
@@ -21,7 +21,7 @@ test("should find conflicts in the given branch", async () => {
 			{
 				id: "change1",
 				plugin_key: "mock-plugin",
-				type: "mock",
+				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value1",
 				snapshot_id: "no-content",

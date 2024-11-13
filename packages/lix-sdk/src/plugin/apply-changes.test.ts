@@ -38,7 +38,7 @@ test("it applies the given changes", async () => {
 				plugin_key: mockPlugin.key,
 				snapshot_id: "no-content",
 				entity_id: "value1",
-				type: "mock",
+				schema_key: "mock",
 			},
 		])
 		.returningAll()
@@ -80,7 +80,7 @@ test("applyChanges throws an error if plugin does not exist", async () => {
 				plugin_key: "non-existent",
 				snapshot_id: "no-content",
 				entity_id: "value1",
-				type: "mock",
+				schema_key: "mock",
 			},
 		])
 		.returningAll()
@@ -119,7 +119,7 @@ test("applyChanges throws an error if plugin does not support applying changes",
 				plugin_key: mockPlugin.key,
 				snapshot_id: "no-content",
 				entity_id: "value1",
-				type: "mock",
+				schema_key: "mock",
 			},
 		])
 		.returningAll()

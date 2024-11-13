@@ -15,7 +15,7 @@ test("should only return changes with the given label", async () => {
 				entity_id: "mock",
 				file_id: "mock",
 				plugin_key: "mock",
-				type: "mock",
+				schema_key: "mock",
 			},
 			{
 				id: "change2",
@@ -23,7 +23,7 @@ test("should only return changes with the given label", async () => {
 				entity_id: "mock",
 				file_id: "mock",
 				plugin_key: "mock",
-				type: "mock",
+				schema_key: "mock",
 			},
 		])
 		.execute();

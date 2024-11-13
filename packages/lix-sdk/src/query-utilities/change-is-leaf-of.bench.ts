@@ -12,21 +12,21 @@ import {
 import { changeIsLeafOf } from "./change-is-leaf-of.js";
 
 const createChange = (
-	type: "bundle" | "message" | "variant",
+	schema_key: "bundle" | "message" | "variant",
 	payload: any,
 	parentChangeId: string | null,
 ): { change: NewChange; snapshot: NewSnapshot; edges: ChangeGraphEdge[] } => {
-	const entityId = payload[type].id;
+	const entityId = payload[schema_key].id;
 	const snapshotId = v4();
 	const snapshot: NewSnapshot = {
 		id: snapshotId,
-		content: payload[type],
+		content: payload[schema_key],
 	};
 	const change: Change = {
 		id: v4(),
 		file_id: "mock",
 		plugin_key: "inlang",
-		type: type,
+		schema_key: schema_key,
 		snapshot_id: snapshotId,
 		entity_id: entityId,
 		created_at: "",

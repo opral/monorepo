@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { newLixFile } from "../lix/new-lix.js";
-import type { LixPlugin } from "../plugin/lix-plugin.js";
+import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
 import { createDiscussion } from "./create-discussion.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 
@@ -11,12 +11,15 @@ const mockPlugin: LixPlugin = {
 	detectChanges: async ({ after }) => {
 		return [
 			{
-				type: "text",
+				schema: {
+					key: "text",
+					type: "json",
+				},
 				entity_id: "test",
 				snapshot: {
 					text: after ? new TextDecoder().decode(after.data) : undefined,
 				},
-			},
+			} satisfies DetectedChange,
 		];
 	},
 };

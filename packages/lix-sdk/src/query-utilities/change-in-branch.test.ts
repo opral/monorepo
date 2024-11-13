@@ -18,7 +18,7 @@ test("selectChangeInBranch should retrieve all changes in the branch including a
 			{
 				id: "changeA",
 				entity_id: "entity1",
-				type: "type1",
+				schema_key: "type1",
 				file_id: "file1",
 				plugin_key: "plugin1",
 				snapshot_id: "no-content",
@@ -26,7 +26,7 @@ test("selectChangeInBranch should retrieve all changes in the branch including a
 			{
 				id: "changeB",
 				entity_id: "entity1",
-				type: "type1",
+				schema_key: "type1",
 				file_id: "file1",
 				plugin_key: "plugin1",
 				snapshot_id: "no-content",
@@ -34,7 +34,7 @@ test("selectChangeInBranch should retrieve all changes in the branch including a
 			{
 				id: "changeC",
 				entity_id: "entity1",
-				type: "type1",
+				schema_key: "type1",
 				file_id: "file1",
 				plugin_key: "plugin1",
 				snapshot_id: "no-content",
@@ -42,7 +42,7 @@ test("selectChangeInBranch should retrieve all changes in the branch including a
 			{
 				id: "changeD",
 				entity_id: "entity1",
-				type: "type1",
+				schema_key: "type1",
 				file_id: "file1",
 				plugin_key: "plugin1",
 				snapshot_id: "no-content",
@@ -68,7 +68,7 @@ test("selectChangeInBranch should retrieve all changes in the branch including a
 			change_id: "changeC",
 			change_file_id: changeC!.file_id,
 			change_entity_id: changeC!.entity_id,
-			change_type: changeC!.type,
+			change_type: changeC!.schema_key,
 		})
 		.execute();
 

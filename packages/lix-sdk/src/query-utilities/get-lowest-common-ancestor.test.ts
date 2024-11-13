@@ -25,7 +25,7 @@ test("it should find the common parent of two changes recursively", async () => 
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: mockSnapshots[0]!.id,
 		},
 		{
@@ -33,7 +33,7 @@ test("it should find the common parent of two changes recursively", async () => 
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: mockSnapshots[1]!.id,
 		},
 		{
@@ -41,7 +41,7 @@ test("it should find the common parent of two changes recursively", async () => 
 			file_id: "mock",
 			entity_id: "value1",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: mockSnapshots[2]!.id,
 		},
 	];
@@ -121,7 +121,7 @@ test("it should return undefined if no common parent exists", async () => {
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: mockSnapshots[0]!.id,
 		},
 		{
@@ -129,7 +129,7 @@ test("it should return undefined if no common parent exists", async () => {
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: mockSnapshots[1]!.id,
 		},
 		{
@@ -137,7 +137,7 @@ test("it should return undefined if no common parent exists", async () => {
 			entity_id: "value2",
 			file_id: "mock",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: mockSnapshots[2]!.id,
 		},
 	];
@@ -215,7 +215,7 @@ test("it should return the source change if its the common parent", async () => 
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: mockSnapshots[0]!.id,
 		},
 		{
@@ -223,7 +223,7 @@ test("it should return the source change if its the common parent", async () => 
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: mockSnapshots[1]!.id,
 		},
 	];

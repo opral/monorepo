@@ -24,7 +24,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			file_id: "mock",
 			entity_id: "value1",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: commonSnapshots[0]!.id,
 		},
 		{
@@ -32,7 +32,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			file_id: "mock",
 			entity_id: "value1",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: commonSnapshots[1]!.id,
 		},
 	];
@@ -51,7 +51,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			file_id: "mock",
 			entity_id: "value1",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: snapshotsOnlyInSource[0]!.id,
 		},
 		{
@@ -59,7 +59,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: snapshotsOnlyInSource[1]!.id,
 		},
 		{
@@ -67,7 +67,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: snapshotsOnlyInSource[2]!.id,
 		},
 	];
@@ -87,7 +87,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: snapshotsOnlyInTarget[0]!.id,
 		},
 	];

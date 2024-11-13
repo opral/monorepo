@@ -43,7 +43,7 @@ export async function detectChangeConflicts(args: {
 	// group by the primary key (entity_id, file_id, type)
 	const groupedByEntity = Object.groupBy(
 		args.changes,
-		(change) => `${change.entity_id}_${change.file_id}_${change.type}`,
+		(change) => `${change.entity_id}_${change.file_id}_${change.schema_key}`,
 	);
 	for (const changes of Object.values(groupedByEntity)) {
 		if (changes === undefined) {

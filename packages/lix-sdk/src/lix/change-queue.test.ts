@@ -21,7 +21,10 @@ test("should use queue and settled correctly", async () => {
 
 			return [
 				{
-					type: "text",
+					schema: {
+						key: "text",
+						type: "json",
+					},
 					entity_id: "test",
 					snapshot: textAfter ? { text: textAfter } : undefined,
 				},
@@ -92,7 +95,7 @@ test("should use queue and settled correctly", async () => {
 	expect(changes).toEqual([
 		expect.objectContaining({
 			entity_id: "test",
-			type: "text",
+			schema_key: "text",
 			file_id: "test",
 			plugin_key: "mock-plugin",
 			content: {
@@ -164,7 +167,7 @@ test("should use queue and settled correctly", async () => {
 	expect(updatedChanges).toEqual([
 		expect.objectContaining({
 			entity_id: "test",
-			type: "text",
+			schema_key: "text",
 			file_id: "test",
 			plugin_key: "mock-plugin",
 			content: {
@@ -175,7 +178,7 @@ test("should use queue and settled correctly", async () => {
 			entity_id: "test",
 			file_id: "test",
 			plugin_key: "mock-plugin",
-			type: "text",
+			schema_key: "text",
 			content: {
 				text: "test updated text",
 			},
@@ -184,7 +187,7 @@ test("should use queue and settled correctly", async () => {
 			file_id: "test",
 			entity_id: "test",
 			plugin_key: "mock-plugin",
-			type: "text",
+			schema_key: "text",
 			content: {
 				text: "test updated text second update",
 			},
@@ -213,14 +216,20 @@ test.todo("changes should contain the author", async () => {
 		detectChangesGlob: "*",
 		detectChanges: vi.fn().mockResolvedValue([
 			{
-				type: "mock",
+				schema: {
+					key: "mock",
+					type: "json",
+				},
 				entity_id: "mock",
 				snapshot: {
 					text: "value1",
 				},
 			},
 			{
-				type: "mock",
+				schema: {
+					key: "mock",
+					type: "json",
+				},
 				entity_id: "mock",
 				snapshot: {
 					text: "value2",

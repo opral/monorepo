@@ -19,7 +19,7 @@ test("it should resolve a conflict and apply the changes", async () => {
 	const mockChanges: NewChange[] = [
 		{
 			plugin_key: "plugin1",
-			type: "mock",
+			schema_key: "mock",
 			file_id: "mock",
 			entity_id: "value1",
 			snapshot_id: mockSnapshots[0]!.id,
@@ -28,7 +28,7 @@ test("it should resolve a conflict and apply the changes", async () => {
 			plugin_key: "plugin1",
 			file_id: "mock",
 			entity_id: "value2",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: mockSnapshots[1]!.id,
 		},
 	];

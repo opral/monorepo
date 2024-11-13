@@ -18,14 +18,14 @@ test("it should copy the change pointers from the parent branch", async () => {
 			.insertInto("change")
 			.values([
 				{
-					type: "file",
+					schema_key: "file",
 					entity_id: "value1",
 					file_id: "mock",
 					plugin_key: "mock-plugin",
 					snapshot_id: "sn1",
 				},
 				{
-					type: "file",
+					schema_key: "file",
 					entity_id: "value2",
 					file_id: "mock",
 					plugin_key: "mock-plugin",
@@ -92,14 +92,14 @@ test("it should copy change conflict pointers from the parent branch", async () 
 		.insertInto("change")
 		.values([
 			{
-				type: "file",
+				schema_key: "file",
 				entity_id: "value1",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
 				snapshot_id: "sn1",
 			},
 			{
-				type: "file",
+				schema_key: "file",
 				entity_id: "value2",
 				file_id: "mock",
 				plugin_key: "mock-plugin",

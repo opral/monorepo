@@ -9,14 +9,14 @@ test("creating a change set should succeed", async () => {
 		.insertInto("change")
 		.values([
 			{
-				type: "file",
+				schema_key: "file",
 				entity_id: "value1",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
 				snapshot_id: "sn1",
 			},
 			{
-				type: "file",
+				schema_key: "file",
 				entity_id: "value2",
 				file_id: "mock",
 				plugin_key: "mock-plugin",

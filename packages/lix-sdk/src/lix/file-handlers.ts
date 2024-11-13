@@ -66,7 +66,7 @@ export async function handleFileInsert(args: {
 			const insertedChange = await trx
 				.insertInto("change")
 				.values({
-					type: detectedChange.type,
+					schema_key: detectedChange.schema.key,
 					file_id: args.after.id,
 					entity_id: detectedChange.entity_id,
 					plugin_key: detectedChange.pluginKey,
@@ -139,7 +139,7 @@ export async function handleFileChange(args: {
 				.selectAll("change")
 				.select("snapshot.content")
 				.where("file_id", "=", fileId)
-				.where("type", "=", detectedChange.type)
+				.where("schema_key", "=", detectedChange.schema.key)
 				.where("entity_id", "=", detectedChange.entity_id)
 				.where(changeIsLeafInBranch(currentBranch))
 				.executeTakeFirst();
@@ -152,7 +152,7 @@ export async function handleFileChange(args: {
 			const insertedChange = await trx
 				.insertInto("change")
 				.values({
-					type: detectedChange.type,
+					schema_key: detectedChange.schema.key,
 					file_id: fileId,
 					plugin_key: detectedChange.pluginKey,
 					entity_id: detectedChange.entity_id,

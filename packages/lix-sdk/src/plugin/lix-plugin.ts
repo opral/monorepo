@@ -1,12 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
 	ExperimentalChangeSchema,
 	ExperimentalInferSnapshotContentType,
 } from "../change-schema/types.js";
-import {
-	type Change,
-	type LixFile,
-	type Snapshot,
-} from "../database/schema.js";
+import { type Change, type LixFile } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
@@ -99,7 +96,7 @@ export type DetectedChange<Schema extends ExperimentalChangeSchema = any> = {
 	entity_id: string;
 	schema: {
 		key: string;
-		type: string;
+		type: "json";
 		schema?: ExperimentalChangeSchema["schema"];
 	};
 	/**

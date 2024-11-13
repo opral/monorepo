@@ -17,7 +17,7 @@ test("the branch pointer for a change should be updated", async () => {
 			.insertInto("change")
 			.values({
 				id: "change-1",
-				type: "file",
+				schema_key: "file",
 				entity_id: "value1",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
@@ -48,7 +48,7 @@ test("the branch pointer for a change should be updated", async () => {
 			.insertInto("change")
 			.values({
 				id: "change-2",
-				type: "file",
+				schema_key: "file",
 				entity_id: "value1",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
@@ -79,7 +79,7 @@ test("the branch pointer for a change should be updated", async () => {
 			.insertInto("change")
 			.values({
 				id: "change-3",
-				type: "file",
+				schema_key: "file",
 				entity_id: "value2",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
@@ -121,7 +121,7 @@ test("it should default to the current branch if no branch is provided", async (
 			.insertInto("change")
 			.values({
 				id: "change-1",
-				type: "file",
+				schema_key: "file",
 				entity_id: "value1",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
@@ -166,7 +166,7 @@ test("it should not fail if an empty array of changes is provided", async () => 
 	expect(branchChangePointers.length).toBe(0);
 });
 
-// uncertain if behavior generalizes. might be better to have this as an opt-in automation. 
+// uncertain if behavior generalizes. might be better to have this as an opt-in automation.
 test.skip("change conflicts should be garbage collected", async () => {
 	const lix = await openLixInMemory({});
 
@@ -181,7 +181,7 @@ test.skip("change conflicts should be garbage collected", async () => {
 			.values([
 				{
 					id: "change-1",
-					type: "file",
+					schema_key: "file",
 					entity_id: "value1",
 					file_id: "mock",
 					plugin_key: "mock-plugin",
@@ -189,7 +189,7 @@ test.skip("change conflicts should be garbage collected", async () => {
 				},
 				{
 					id: "change-2",
-					type: "file",
+					schema_key: "file",
 					entity_id: "value2",
 					file_id: "mock",
 					plugin_key: "mock-plugin",
@@ -272,7 +272,7 @@ test.skip("it raise a diverging entity conflict (based off a reproduction)", asy
 			plugin_key: "lix-plugin-csv-v2",
 			snapshot_id:
 				"c1c691266638c585ddf68c90c9255741b55cc6c152919368b27d74fbc6abc402",
-			type: "cell",
+			schema_key: "cell",
 		},
 		{
 			created_at: "2024-11-11 21:16:39",
@@ -282,7 +282,7 @@ test.skip("it raise a diverging entity conflict (based off a reproduction)", asy
 			plugin_key: "lix-plugin-csv-v2",
 			snapshot_id:
 				"0856f597848e8261147613b673b27b11b7d6065d8a37cef0466fa7c4444db286",
-			type: "cell",
+			schema_key: "cell",
 		},
 		{
 			created_at: "2024-11-11 21:16:44",
@@ -292,7 +292,7 @@ test.skip("it raise a diverging entity conflict (based off a reproduction)", asy
 			plugin_key: "lix-plugin-csv-v2",
 			snapshot_id:
 				"078a7602380806c1cca81547dc9442c550e9d5051da3b68c495b776fc85fefcb",
-			type: "cell",
+			schema_key: "cell",
 		},
 		{
 			created_at: "2024-11-11 21:17:39",
@@ -302,7 +302,7 @@ test.skip("it raise a diverging entity conflict (based off a reproduction)", asy
 			plugin_key: "lix-plugin-csv-v2",
 			snapshot_id:
 				"bf8b0881a7c85e6e16819a87e9124362b29926a30c04bd3149f5090535c671f0",
-			type: "cell",
+			schema_key: "cell",
 		},
 	] as const satisfies Change[];
 

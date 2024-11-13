@@ -18,7 +18,7 @@ test("should garbage collect conflicts that contain one or more changes that no 
 			{
 				id: "change0",
 				plugin_key: "mock-plugin",
-				type: "mock",
+				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
 				snapshot_id: "no-content",
@@ -26,7 +26,7 @@ test("should garbage collect conflicts that contain one or more changes that no 
 			{
 				id: "change1",
 				plugin_key: "mock-plugin",
-				type: "mock",
+				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value1",
 				snapshot_id: "no-content",
@@ -34,7 +34,7 @@ test("should garbage collect conflicts that contain one or more changes that no 
 			{
 				id: "change2",
 				plugin_key: "mock-plugin",
-				type: "mock",
+				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value2",
 				snapshot_id: "no-content",
@@ -67,14 +67,14 @@ test("should garbage collect conflicts that contain one or more changes that no 
 				change_id: changes[0]!.id,
 				change_entity_id: changes[0]!.entity_id,
 				change_file_id: changes[0]!.file_id,
-				change_type: changes[0]!.type,
+				change_type: changes[0]!.schema_key,
 			},
 			{
 				branch_id: branch0.id,
 				change_id: changes[1]!.id,
 				change_entity_id: changes[1]!.entity_id,
 				change_file_id: changes[1]!.file_id,
-				change_type: changes[1]!.type,
+				change_type: changes[1]!.schema_key,
 			},
 		])
 		.execute();
@@ -126,7 +126,7 @@ test("should garbage collect conflicts that no branch conflict pointer reference
 			{
 				id: "change0",
 				plugin_key: "mock-plugin",
-				type: "mock",
+				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
 				snapshot_id: "no-content",
@@ -134,7 +134,7 @@ test("should garbage collect conflicts that no branch conflict pointer reference
 			{
 				id: "change1",
 				plugin_key: "mock-plugin",
-				type: "mock",
+				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value1",
 				snapshot_id: "no-content",
@@ -165,14 +165,14 @@ test("should garbage collect conflicts that no branch conflict pointer reference
 				change_id: changes[0]!.id,
 				change_entity_id: changes[0]!.entity_id,
 				change_file_id: changes[0]!.file_id,
-				change_type: changes[0]!.type,
+				change_type: changes[0]!.schema_key,
 			},
 			{
 				branch_id: branch0.id,
 				change_id: changes[1]!.id,
 				change_entity_id: changes[1]!.entity_id,
 				change_file_id: changes[1]!.file_id,
-				change_type: changes[1]!.type,
+				change_type: changes[1]!.schema_key,
 			},
 		])
 		.execute();
@@ -200,7 +200,7 @@ test("should NOT garbage collect conflicts that a branch change conflict pointer
 			{
 				id: "change0",
 				plugin_key: "mock-plugin",
-				type: "mock",
+				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
 				snapshot_id: "no-content",
@@ -208,7 +208,7 @@ test("should NOT garbage collect conflicts that a branch change conflict pointer
 			{
 				id: "change1",
 				plugin_key: "mock-plugin",
-				type: "mock",
+				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value1",
 				snapshot_id: "no-content",
@@ -238,14 +238,14 @@ test("should NOT garbage collect conflicts that a branch change conflict pointer
 				change_id: changes[0]!.id,
 				change_entity_id: changes[0]!.entity_id,
 				change_file_id: changes[0]!.file_id,
-				change_type: changes[0]!.type,
+				change_type: changes[0]!.schema_key,
 			},
 			{
 				branch_id: currentBranch.id,
 				change_id: changes[1]!.id,
 				change_entity_id: changes[1]!.entity_id,
 				change_file_id: changes[1]!.file_id,
-				change_type: changes[1]!.type,
+				change_type: changes[1]!.schema_key,
 			},
 		])
 		.execute();

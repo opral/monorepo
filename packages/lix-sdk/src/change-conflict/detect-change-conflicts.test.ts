@@ -19,8 +19,18 @@ test("should detect conflicts using plugins", async () => {
 	lix.plugin.getAll = vi.fn().mockResolvedValue([mockPlugin]);
 
 	const changes = [
-		{ id: "change0", entity_id: "entity0", file_id: "file0", type: "type0" },
-		{ id: "change1", entity_id: "entity1", file_id: "file1", type: "type1" },
+		{
+			id: "change0",
+			entity_id: "entity0",
+			file_id: "file0",
+			schema_key: "type0",
+		},
+		{
+			id: "change1",
+			entity_id: "entity1",
+			file_id: "file1",
+			schema_key: "type1",
+		},
 	] as const satisfies Partial<Change>[];
 
 	const detectedConflicts = await detectChangeConflicts({
@@ -50,8 +60,18 @@ test("should handle no conflicts detected by plugins", async () => {
 	lix.plugin.getAll = vi.fn().mockResolvedValue([mockPlugin]);
 
 	const changes = [
-		{ id: "change0", entity_id: "entity0", file_id: "file0", type: "type0" },
-		{ id: "change1", entity_id: "entity1", file_id: "file1", type: "type1" },
+		{
+			id: "change0",
+			entity_id: "entity0",
+			file_id: "file0",
+			schema_key: "type0",
+		},
+		{
+			id: "change1",
+			entity_id: "entity1",
+			file_id: "file1",
+			schema_key: "type1",
+		},
 	] as const satisfies Partial<Change>[];
 
 	const detectedConflicts = await detectChangeConflicts({
@@ -91,9 +111,24 @@ test("should handle multiple plugins detecting conflicts", async () => {
 	lix.plugin.getAll = vi.fn().mockResolvedValue([mockPlugin1, mockPlugin2]);
 
 	const changes = [
-		{ id: "change0", entity_id: "entity0", file_id: "file0", type: "type0" },
-		{ id: "change1", entity_id: "entity1", file_id: "file1", type: "type1" },
-		{ id: "change2", entity_id: "entity2", file_id: "file2", type: "type2" },
+		{
+			id: "change0",
+			entity_id: "entity0",
+			file_id: "file0",
+			schema_key: "type0",
+		},
+		{
+			id: "change1",
+			entity_id: "entity1",
+			file_id: "file1",
+			schema_key: "type1",
+		},
+		{
+			id: "change2",
+			entity_id: "entity2",
+			file_id: "file2",
+			schema_key: "type2",
+		},
 	] as const satisfies Partial<Change>[];
 
 	const detectedConflicts = await detectChangeConflicts({
@@ -129,7 +164,7 @@ test("it should auto detect diverging entity conflicts", async () => {
 			{
 				id: "change0",
 				plugin_key: "plugin1",
-				type: "mock",
+				schema_key: "mock",
 				file_id: "file0",
 				entity_id: "entity0",
 				snapshot_id: "no-content",
@@ -137,7 +172,7 @@ test("it should auto detect diverging entity conflicts", async () => {
 			{
 				id: "change1",
 				plugin_key: "plugin1",
-				type: "mock",
+				schema_key: "mock",
 				file_id: "file0",
 				entity_id: "entity0",
 				snapshot_id: "no-content",
@@ -147,7 +182,7 @@ test("it should auto detect diverging entity conflicts", async () => {
 				plugin_key: "plugin1",
 				file_id: "file0",
 				entity_id: "entity0",
-				type: "mock",
+				schema_key: "mock",
 				snapshot_id: "no-content",
 			},
 		])
