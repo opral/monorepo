@@ -1,7 +1,10 @@
 import Footer from "~/components/footer"
 import Header, { socialLinks } from "~/components/header"
 import IconArrowExternal from "~/components/icons/arrow-external"
+import IconBranch from "~/components/icons/branch"
+import IconConversation from "~/components/icons/conversation"
 import IconLix from "~/components/icons/lix"
+import IconSync from "~/components/icons/sync"
 import Banner from "~/components/ui/banner"
 import Check from "~/components/ui/check"
 import Details from "~/components/ui/details"
@@ -51,6 +54,25 @@ const automatedTasks = [
 	},
 ]
 
+const collaborationFeatures = [
+	{
+		title: "Sync your lix with others",
+		description: "Easily share your Lix with others to keep everyone on the same page.",
+		icon: <IconSync />,
+	},
+	{
+		title: "Create and share proposals",
+		description: "Draft proposals, gather feedback, and refine your ideas—all in one platform.",
+		icon: <IconBranch />,
+	},
+	{
+		title: "Achieve quality through review",
+		description:
+			"Collaborate with your team to review files, make edits, and ensure top-notch quality.",
+		icon: <IconConversation />,
+	},
+]
+
 export default function FileManager() {
 	return (
 		<>
@@ -95,7 +117,33 @@ export default function FileManager() {
 					</div>
 				</div>
 
-				<div className="w-full max-w-5xl mx-auto px-4 space-y-16 md:space-y-24">
+				<div className="w-full max-w-5xl mx-auto px-4 space-y-16 md:space-y-32">
+					<div>
+						<h2 className="text-center w-full">Effortless Collaboration</h2>
+						<p className="text-center mt-4">Sync, share, and succeed together.</p>
+						<div className="my-8 flex justify-center gap-4 bg-slate-100 col-span-7 rounded-lg border border-slate-200">
+							<img
+								className="ml-7 mt-7 w-fit border-t border-x border-slate-200 rounded-t-lg"
+								src="/images/fm-collaborate-1.svg"
+								alt="File Manager Automate"
+							/>
+							<img
+								className="mr-7 mt-7 w-fit border-t border-x border-slate-200 rounded-t-lg"
+								src="/images/fm-collaborate-2.svg"
+								alt="File Manager Automate"
+							/>
+						</div>
+						<div className="grid md:grid-cols-3 gap-8 md:gap-4">
+							{collaborationFeatures.map((feature, index) => (
+								<div key={index}>
+									{feature.icon}
+									<h3 className="mt-4">{feature.title}</h3>
+									<p className="mt-2">{feature.description}</p>
+								</div>
+							))}
+						</div>
+					</div>
+
 					<div className="grid md:grid-cols-12 gap-8 md:gap-4">
 						<div className="bg-slate-100 col-span-7 rounded-lg border border-slate-200">
 							<img
