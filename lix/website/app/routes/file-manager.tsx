@@ -7,16 +7,34 @@ import Details from "~/components/ui/details"
 
 const faq = [
 	{
-		question: "What is that in the air?",
-		answer: "It's superman.",
+		question: "When will this be available for general use?",
+		answer:
+			"Lix is currently in the closed beta phase, where we're actively refining features based on user feedback. We’re excited to announce a launch event on December 16th. Sign up to join and be among the first to experience the release!",
 	},
 	{
-		question: "Is it a bird?",
-		answer: "It's superman.",
+		question: "How does this integrate with my already existing software?",
+		answer:
+			"Lix is file-based, meaning you can seamlessly use your preferred applications alongside Lix’s internal tools. For instance, you can edit a CSV file in Numbers or Excel, and once you're done, simply upload it back to the Lix file manager. Lix will automatically understand the changes you made.",
 	},
 	{
-		question: "Is it a plane?",
-		answer: "It's superman.",
+		question: "Where does my data get stored?",
+		answer:
+			"By default, your data is stored locally on your device, allowing for full offline support out of the box. Your files are only synced with other users or cloud storage when you choose to do so, ensuring complete control over your data.",
+	},
+	{
+		question: "How Lix compare to Git / version control?",
+		answer:
+			"Lix focuses on simplifying file management and collaboration, especially for non-developers. Read more about that in on lix.opral.com",
+	},
+	{
+		question: "Is Lix free or do I need to buy it?",
+		answer:
+			"The public beta will be completely free to use. As we approach the official launch, we’re still finalizing future pricing plans.",
+	},
+	{
+		question: "Does Lix also work with AI?",
+		answer:
+			"Yes! Lix offers a flexible automation surface where you can connect any AI API of your choice. Additionally, native AI features are on our roadmap.",
 	},
 ]
 
@@ -94,6 +112,34 @@ export default function FileManager() {
 									)}
 								</div>
 							))}
+						</div>
+					</div>
+				</div>
+
+				<div className="w-full max-w-5xl mx-auto px-4 space-y-16 md:space-y-24 mt-24">
+					<div className="w-full border border-slate-200 rounded-xl grid md:grid-cols-3 gap-8 md:gap-4">
+						<div className="p-8 flex flex-col justify-between">
+							<div className="w-full">
+								<h2 className="text-xl pt-2">Join the waitlist!</h2>
+								<p className="mt-4">
+									Sign up now to be the first to experience the Lix File Manager as soon as it's
+									released!
+								</p>
+							</div>
+							<a
+								href="https://opral.substack.com/"
+								target="_blank"
+								className="mt-4 w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all"
+							>
+								Join waitlist
+							</a>
+						</div>
+						<div className="col-span-2 pt-8">
+							<img
+								className="w-full border-t border-l border-slate-200 rounded-tl-lg"
+								src="/images/fm_waitlist.svg"
+								alt="File Manager Waitlist"
+							/>
 						</div>
 					</div>
 				</div>
