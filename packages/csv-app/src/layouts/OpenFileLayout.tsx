@@ -118,6 +118,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 							name="Conflicts"
 						/>
 						<NavItem to={`/graph?f=${activeFile.id}`} name="Graph" />
+						{/* <NavItem to={`/proposal?f=${activeFile.id}`} name="Proposal" /> */}
 					</div>
 				</div>
 

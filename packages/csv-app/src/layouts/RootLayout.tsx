@@ -45,9 +45,9 @@ export default function RootLayout(props: { children: JSX.Element }) {
 			{/* Header with socials */}
 			<div className="w-full border-b border-zinc-200 bg-white flex items-center justify-between px-4 min-h-[54px] gap-2">
 				<div className="flex gap-2 items-center">
-					<a href="https://lix.opral.com" target="_blank">
-						<img src="/lix.svg" alt="logo" className="w-8 h-8" />
-					</a>
+					{/* <a href="https://lix.opral.com" target="_blank"> */}
+					<img src="/lix.svg" alt="logo" className="w-8 h-8" />
+					{/* </a> */}
 					<h1 className="font-medium">CSV Demo</h1>
 					<SlDropdown>
 						<SlButton slot="trigger" caret size="small">

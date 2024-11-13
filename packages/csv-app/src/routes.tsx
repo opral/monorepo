@@ -5,6 +5,7 @@ import ChangesPage from "./routes/changes/Page.tsx";
 import ConflictsPage from "./routes/conflicts/Page.tsx";
 import RootLayout from "./layouts/RootLayout.tsx";
 import GraphPage from "./routes/graph/Page.tsx";
+import ProposalPage from "./routes/proposal/Page.tsx";
 
 export const routes: RouteObject[] = [
 	{
@@ -38,6 +39,15 @@ export const routes: RouteObject[] = [
 			// @ts-expect-error - type mismatch?
 			<RootLayout>
 				<ConflictsPage />,
+			</RootLayout>
+		),
+	},
+	{
+		path: "/proposal",
+		element: (
+			// @ts-expect-error - type mismatch?
+			<RootLayout>
+				<ProposalPage />,
 			</RootLayout>
 		),
 	},
