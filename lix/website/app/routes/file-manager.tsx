@@ -3,6 +3,7 @@ import Header, { socialLinks } from "~/components/header"
 import IconArrowExternal from "~/components/icons/arrow-external"
 import IconLix from "~/components/icons/lix"
 import Banner from "~/components/ui/banner"
+import Check from "~/components/ui/check"
 import Details from "~/components/ui/details"
 
 const faq = [
@@ -35,6 +36,18 @@ const faq = [
 		question: "Does Lix also work with AI?",
 		answer:
 			"Yes! Lix offers a flexible automation surface where you can connect any AI API of your choice. Additionally, native AI features are on our roadmap.",
+	},
+]
+
+const automatedTasks = [
+	{
+		title: "Build pipelines",
+	},
+	{
+		title: "Quality checks",
+	},
+	{
+		title: "Connect external APIs",
 	},
 ]
 
@@ -84,26 +97,29 @@ export default function FileManager() {
 
 				<div className="w-full max-w-5xl mx-auto px-4 space-y-16 md:space-y-24">
 					<div className="grid md:grid-cols-12 gap-8 md:gap-4">
-						<div className="bg-slate-100 col-span-7">Test</div>
-						<div className="col-span-4 col-start-9">
-							<h2>Automate</h2>
-							<p className="mt-4">
-								Since Lix understands changes, you can use these events as triggers to initiate
-								specific actions.
-							</p>
+						<div className="bg-slate-100 col-span-7 rounded-lg border border-slate-200">
+							<img
+								className="mx-8 mt-7 w-fit border-t border-x border-slate-200 rounded-t-lg"
+								src="/images/fm-automate.svg"
+								alt="File Manager Automate"
+							/>
 						</div>
-					</div>
-				</div>
-
-				<div className="w-full max-w-5xl mx-auto px-4 space-y-16 md:space-y-24">
-					<div className="grid md:grid-cols-12 gap-8 md:gap-4">
-						<div className="bg-slate-100 col-span-7">Test</div>
 						<div className="col-span-4 col-start-9">
-							<h2>Automate</h2>
+							<h2 className="pt-2 pr-8">Automations for non-techies</h2>
 							<p className="mt-4">
-								Since Lix understands changes, you can use these events as triggers to initiate
-								specific actions.
+								Link automations to file changes, making it easy to configure pipelines, run quality
+								checks, and integrate APIs—all triggered automatically.
 							</p>
+							<div className="pt-4">
+								{automatedTasks.map((feature, index) => (
+									<div key={index} className="my-4 max-w-sm flex items-start gap-5">
+										<Check />
+										<div className="space-y-1">
+											<h3 className="font-semibold">{feature.title}</h3>
+										</div>
+									</div>
+								))}
+							</div>
 						</div>
 					</div>
 
