@@ -317,7 +317,7 @@ test("it should not update the target branch pointers of a conflicting change", 
 
 // it is reasonable to assume that a conflict exists if the same (entity, file, type) change is updated in both branches.
 // in case a plugin does not detect a conflict, the system should automatically detect it.
-test("it should automatically detect a conflict if a change exists that differs updates in both branches despite having a common ancestor", async () => {
+test("it should automatically a diverging entity conflict", async () => {
 	const lix = await openLixInMemory({});
 
 	// Initialize source and target branches
