@@ -50,7 +50,7 @@ export async function createBranch(args: {
 					"change_id",
 					"change_file_id",
 					"change_entity_id",
-					"change_type",
+					"change_schema_key",
 				])
 				.expression((eb) =>
 					eb
@@ -60,7 +60,7 @@ export async function createBranch(args: {
 							"change_id",
 							"change_file_id",
 							"change_entity_id",
-							"change_type",
+							"change_schema_key",
 						])
 						.where("branch_id", "=", args.parent!.id),
 				)

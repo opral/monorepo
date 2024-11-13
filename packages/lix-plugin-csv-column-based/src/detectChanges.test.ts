@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import { detectChanges } from "./detectChanges.js";
 import type { DetectedChange } from "@lix-js/sdk";
+import { CellSchema } from "./schemas/cellSchema.js";
 
 test("it should not detect changes if the csv did not update", async () => {
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
@@ -35,15 +36,15 @@ test("it should detect an insert", async () => {
 	expect(detectedChanges).toEqual([
 		{
 			entity_id: "Name|John|Name",
-			type: "cell",
+			schema: CellSchema,
 			snapshot: { text: "John" },
 		},
 		{
 			entity_id: "Name|John|Age",
-			type: "cell",
+			schema: CellSchema,
 			snapshot: { text: "30" },
 		},
-	] satisfies DetectedChange[]);
+	] satisfies DetectedChange<typeof CellSchema>[]);
 });
 
 test("it should detect updates", async () => {
@@ -59,11 +60,11 @@ test("it should detect updates", async () => {
 
 	expect(detectedChanges).toEqual([
 		{
-			type: "cell",
+			schema: CellSchema,
 			entity_id: "Name|Anna|Age",
 			snapshot: { text: "21" },
 		},
-	] satisfies DetectedChange[]);
+	] satisfies DetectedChange<typeof CellSchema>[]);
 });
 
 test("it should detect a deletion", async () => {
@@ -78,9 +79,9 @@ test("it should detect a deletion", async () => {
 	});
 
 	expect(detectedChanges).toEqual([
-		{ entity_id: "Name|Peter|Name", type: "cell", snapshot: undefined },
-		{ entity_id: "Name|Peter|Age", type: "cell", snapshot: undefined },
-	] satisfies DetectedChange[]);
+		{ entity_id: "Name|Peter|Name", schema: CellSchema, snapshot: undefined },
+		{ entity_id: "Name|Peter|Age", schema: CellSchema, snapshot: undefined },
+	] satisfies DetectedChange<typeof CellSchema>[]);
 });
 
 // throwing an error leads to abysmal UX on potentially every save
@@ -118,17 +119,25 @@ test("changing the unique column should lead to a new entity_id to avoid bugs", 
 	expect(detectedChanges).toEqual(
 		expect.arrayContaining([
 			// detect the deletion of the old unique column
-			{ entity_id: "Name|Anna|Name", type: "cell", snapshot: undefined },
-			{ entity_id: "Name|Anna|Age", type: "cell", snapshot: undefined },
-			{ entity_id: "Name|Peter|Name", type: "cell", snapshot: undefined },
-			{ entity_id: "Name|Peter|Age", type: "cell", snapshot: undefined },
+			{ entity_id: "Name|Anna|Name", schema: CellSchema, snapshot: undefined },
+			{ entity_id: "Name|Anna|Age", schema: CellSchema, snapshot: undefined },
+			{ entity_id: "Name|Peter|Name", schema: CellSchema, snapshot: undefined },
+			{ entity_id: "Name|Peter|Age", schema: CellSchema, snapshot: undefined },
 			// detect the insertion of the new unique column
 
-			{ entity_id: "Age|50|Name", type: "cell", snapshot: { text: "Peter" } },
-			{ entity_id: "Age|50|Age", type: "cell", snapshot: { text: "50" } },
+			{
+				entity_id: "Age|50|Name",
+				schema: CellSchema,
+				snapshot: { text: "Peter" },
+			},
+			{ entity_id: "Age|50|Age", schema: CellSchema, snapshot: { text: "50" } },
 
-			{ entity_id: "Age|20|Name", type: "cell", snapshot: { text: "Anna" } },
-			{ entity_id: "Age|20|Age", type: "cell", snapshot: { text: "20" } },
-		]),
+			{
+				entity_id: "Age|20|Name",
+				schema: CellSchema,
+				snapshot: { text: "Anna" },
+			},
+			{ entity_id: "Age|20|Age", schema: CellSchema, snapshot: { text: "20" } },
+		] satisfies DetectedChange<typeof CellSchema>[]),
 	);
 });

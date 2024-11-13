@@ -16,6 +16,7 @@ import {
 	changeInBranch,
 	changeIsLeafInBranch,
 } from "@lix-js/sdk";
+import { CellSchema } from "@lix-js/plugin-csv-column-based";
 
 export const activeFileAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -98,7 +99,7 @@ export const activeCellChangesAtom = atom(async (get) => {
 	if (!cellEntityId) return [];
 	const changes = await lix.db
 		.selectFrom("change")
-		.where("change.type", "=", "cell")
+		.where("change.schema_key", "=", CellSchema.key)
 		.where("change.entity_id", "=", cellEntityId)
 		.where("change.file_id", "=", activeFile.id)
 		.where(changeInBranch(currentBranch))

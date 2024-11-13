@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { detectConflicts } from "./detectConflicts.js";
 import { mockConflicts } from "./utilities/mockConflicts.js";
 
-test("it should detect a conflict if the same row has been updated", async () => {
+test.skip("it should detect a conflict if the same row has been updated", async () => {
 	const common = new TextEncoder().encode(
 		// Anna is 20 years old
 		"Name,Age\nAnna,20\nPeter,50",

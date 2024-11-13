@@ -31,13 +31,13 @@ export async function applySchema(args: {
   CREATE TABLE IF NOT EXISTS change (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     entity_id TEXT NOT NULL,
-    type TEXT NOT NULL,
+    schema_key TEXT NOT NULL,
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
     snapshot_id TEXT NOT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    UNIQUE (id, entity_id, file_id, type)
+    UNIQUE (id, entity_id, file_id, schema_key)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS change_graph_edge (
@@ -177,12 +177,12 @@ export async function applySchema(args: {
     change_id TEXT NOT NULL,
     change_file_id TEXT NOT NULL,
     change_entity_id TEXT NOT NULL,
-    change_type TEXT NOT NULL,
+    change_schema_key TEXT NOT NULL,
 
-    PRIMARY KEY(branch_id, change_file_id, change_entity_id, change_type),
+    PRIMARY KEY(branch_id, change_file_id, change_entity_id, change_schema_key),
 
     FOREIGN KEY(branch_id) REFERENCES branch(id),
-    FOREIGN KEY(change_id, change_file_id, change_entity_id, change_type) REFERENCES change(change_id, change_file_id, change_entity_id, change_type)
+    FOREIGN KEY(change_id, change_file_id, change_entity_id, change_schema_key) REFERENCES change(id, file_id, entity_id, schema_key)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS branch_change_conflict_pointer (

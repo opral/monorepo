@@ -16,7 +16,7 @@ test("should only return the leaf change", async () => {
 				entity_id: "mock1",
 				file_id: "mock",
 				plugin_key: "mock",
-				type: "mock",
+				schema_key: "mock",
 			},
 			{
 				id: "change2",
@@ -24,7 +24,7 @@ test("should only return the leaf change", async () => {
 				entity_id: "mock2",
 				file_id: "mock",
 				plugin_key: "mock",
-				type: "mock",
+				schema_key: "mock",
 			},
 			{
 				id: "change3",
@@ -32,7 +32,7 @@ test("should only return the leaf change", async () => {
 				entity_id: "mock2",
 				file_id: "mock",
 				plugin_key: "mock",
-				type: "mock",
+				schema_key: "mock",
 			},
 		])
 		.execute();
@@ -64,7 +64,7 @@ test("should return the change even if it's the only one", async () => {
 				entity_id: "mock1",
 				file_id: "mock",
 				plugin_key: "mock",
-				type: "mock",
+				schema_key: "mock",
 			},
 		])
 		.execute();
@@ -94,7 +94,7 @@ test.todo(
 					entity_id: "mock1",
 					file_id: "mock",
 					plugin_key: "mock",
-					type: "mock",
+					schema_key: "mock",
 				},
 				{
 					id: "change2",
@@ -102,7 +102,7 @@ test.todo(
 					entity_id: "mock1",
 					file_id: "mock",
 					plugin_key: "mock",
-					type: "mock",
+					schema_key: "mock",
 				},
 			])
 			.returningAll()

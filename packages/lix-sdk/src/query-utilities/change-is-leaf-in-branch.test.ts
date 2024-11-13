@@ -20,7 +20,7 @@ test("it should return the leaf change for the given branch", async () => {
 				entity_id: "mock1",
 				file_id: "mock",
 				plugin_key: "mock",
-				type: "mock",
+				schema_key: "mock",
 			},
 			{
 				id: "change2",
@@ -28,7 +28,7 @@ test("it should return the leaf change for the given branch", async () => {
 				entity_id: "mock1",
 				file_id: "mock",
 				plugin_key: "mock",
-				type: "mock",
+				schema_key: "mock",
 			},
 			{
 				id: "change3",
@@ -36,7 +36,7 @@ test("it should return the leaf change for the given branch", async () => {
 				entity_id: "mock1",
 				file_id: "mock",
 				plugin_key: "mock",
-				type: "mock",
+				schema_key: "mock",
 			},
 		])
 		.returningAll()

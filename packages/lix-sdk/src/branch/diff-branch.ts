@@ -13,7 +13,7 @@ export async function diffBranch(args: {
 		target_change_id: string | null;
 		change_entity_id: string;
 		change_file_id: string;
-		change_type: string;
+		change_schema_key: string;
 	}>;
 	detectedConflicts: DetectedConflict[];
 	changes: Array<Change>;
@@ -26,7 +26,7 @@ export async function diffBranch(args: {
 				join
 					.onRef("source.change_entity_id", "=", "target.change_entity_id")
 					.onRef("source.change_file_id", "=", "target.change_file_id")
-					.onRef("source.change_type", "=", "target.change_type")
+					.onRef("source.change_schema_key", "=", "target.change_schema_key")
 					.on("target.branch_id", "=", args.targetBranch.id),
 			)
 			.where("source.branch_id", "=", args.sourceBranch.id)
@@ -43,7 +43,7 @@ export async function diffBranch(args: {
 				"target.change_id as target_change_id",
 				"source.change_entity_id as change_entity_id",
 				"source.change_file_id as change_file_id",
-				"source.change_type as change_type",
+				"source.change_schema_key as change_schema_key",
 			]);
 
 		// Query to find changes in the target branch that do not exist in the source branch or differ from the source branch
@@ -53,7 +53,7 @@ export async function diffBranch(args: {
 				join
 					.onRef("target.change_entity_id", "=", "source.change_entity_id")
 					.onRef("target.change_file_id", "=", "source.change_file_id")
-					.onRef("target.change_type", "=", "source.change_type")
+					.onRef("target.change_schema_key", "=", "source.change_schema_key")
 					.on("source.branch_id", "=", args.sourceBranch.id),
 			)
 			.where("target.branch_id", "=", args.targetBranch.id)
@@ -70,7 +70,7 @@ export async function diffBranch(args: {
 				"target.change_id as target_change_id",
 				"target.change_entity_id as change_entity_id",
 				"target.change_file_id as change_file_id",
-				"target.change_type as change_type",
+				"target.change_schema_key as change_schema_key",
 			]);
 
 		// Combine the results of the source and target diffs using a union

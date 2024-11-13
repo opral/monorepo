@@ -27,7 +27,7 @@ test("change ids should default to uuid", async () => {
 	const change = await db
 		.insertInto("change")
 		.values({
-			type: "file",
+			schema_key: "file",
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock-plugin",

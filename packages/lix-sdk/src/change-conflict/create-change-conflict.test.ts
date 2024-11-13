@@ -17,7 +17,7 @@ test("conflicts should be de-duplicated based on the change_conflict.key and bra
 			{
 				id: "change0",
 				plugin_key: "mock-plugin",
-				type: "mock",
+				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
 				snapshot_id: "no-content",
@@ -27,7 +27,7 @@ test("conflicts should be de-duplicated based on the change_conflict.key and bra
 				plugin_key: "mock-plugin",
 				file_id: "mock",
 				entity_id: "value1",
-				type: "mock",
+				schema_key: "mock",
 				snapshot_id: "no-content",
 			},
 		])
@@ -86,7 +86,7 @@ test("if a conflict contains the same changes for a given key and branch, no new
 			{
 				id: "change0",
 				plugin_key: "mock-plugin",
-				type: "mock",
+				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
 				snapshot_id: "no-content",
@@ -96,7 +96,7 @@ test("if a conflict contains the same changes for a given key and branch, no new
 				plugin_key: "mock-plugin",
 				file_id: "mock",
 				entity_id: "value1",
-				type: "mock",
+				schema_key: "mock",
 				snapshot_id: "no-content",
 			},
 			{
@@ -104,7 +104,7 @@ test("if a conflict contains the same changes for a given key and branch, no new
 				plugin_key: "mock-plugin",
 				file_id: "mock",
 				entity_id: "value1",
-				type: "mock",
+				schema_key: "mock",
 				snapshot_id: "no-content",
 			},
 		])

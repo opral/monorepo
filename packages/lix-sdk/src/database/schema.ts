@@ -3,12 +3,13 @@ import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 
 export type LixDatabaseSchema = {
 	file: LixFileTable;
-	change: ChangeTable;
 	file_internal: LixFileTable;
 	change_queue: ChangeQueueTable;
 	change_graph_edge: ChangeGraphEdgeTable;
 	snapshot: SnapshotTable;
 	label: LabelTable;
+
+	change: ChangeTable;
 
 	// change set
 	change_set: ChangeSetTable;
@@ -71,14 +72,9 @@ type ChangeTable = {
 	 */
 	plugin_key: string;
 	/**
-	 * The type of change that was made.
-	 *
-	 * @example
-	 *   - "cell" for csv cell change
-	 *   - "message" for inlang message change
-	 *   - "user" for a user change
+	 * The schema key that the change refers to.
 	 */
-	type: string;
+	schema_key: string;
 	snapshot_id: string;
 	/**
 	 * The time the change was created.
@@ -183,7 +179,7 @@ type BranchChangePointerTable = {
 	change_id: string;
 	change_file_id: string;
 	change_entity_id: string;
-	change_type: string;
+	change_schema_key: string;
 };
 
 export type BranchChangeConflictPointer =

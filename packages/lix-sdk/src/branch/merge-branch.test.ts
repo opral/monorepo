@@ -27,7 +27,7 @@ test("it should update the branch pointers in target that are not conflicting", 
 		.values([
 			{
 				id: "change1",
-				type: "file",
+				schema_key: "file",
 				entity_id: "entity1",
 				file_id: "file1",
 				plugin_key: "mock-plugin",
@@ -46,7 +46,7 @@ test("it should update the branch pointers in target that are not conflicting", 
 				change_id: change1!.id,
 				change_entity_id: change1!.entity_id,
 				change_file_id: change1!.file_id,
-				change_type: change1!.type,
+				change_schema_key: change1!.schema_key,
 			},
 		])
 		.execute();
@@ -89,7 +89,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 		.values([
 			{
 				id: "change1",
-				type: "file",
+				schema_key: "file",
 				entity_id: "entity1",
 				file_id: "file1",
 				plugin_key: "mock-plugin",
@@ -97,7 +97,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 			},
 			{
 				id: "change2",
-				type: "file",
+				schema_key: "file",
 				entity_id: "entity2",
 				file_id: "file2",
 				plugin_key: "mock-plugin",
@@ -105,7 +105,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 			},
 			{
 				id: "change3",
-				type: "file",
+				schema_key: "file",
 				entity_id: "entity3",
 				file_id: "file3",
 				plugin_key: "mock-plugin",
@@ -123,21 +123,21 @@ test("if a previously undetected conflict is detected during merge, the conflict
 				change_id: change1!.id,
 				change_entity_id: change1!.entity_id,
 				change_file_id: change1!.file_id,
-				change_type: change1!.type,
+				change_schema_key: change1!.schema_key,
 			},
 			{
 				branch_id: sourceBranch.id,
 				change_id: change2!.id,
 				change_entity_id: change2!.entity_id,
 				change_file_id: change2!.file_id,
-				change_type: change2!.type,
+				change_schema_key: change2!.schema_key,
 			},
 			{
 				branch_id: sourceBranch.id,
 				change_id: change3!.id,
 				change_entity_id: change3!.entity_id,
 				change_file_id: change3!.file_id,
-				change_type: change3!.type,
+				change_schema_key: change3!.schema_key,
 			},
 		])
 		.execute();
@@ -220,7 +220,7 @@ test("it should not update the target branch pointers of a conflicting change", 
 		.values([
 			{
 				id: "change1",
-				type: "file",
+				schema_key: "file",
 				entity_id: "entity1",
 				file_id: "file1",
 				plugin_key: "mock-plugin",
@@ -228,7 +228,7 @@ test("it should not update the target branch pointers of a conflicting change", 
 			},
 			{
 				id: "change2",
-				type: "file",
+				schema_key: "file",
 				entity_id: "entity1",
 				file_id: "file1",
 				plugin_key: "mock-plugin",
@@ -247,7 +247,7 @@ test("it should not update the target branch pointers of a conflicting change", 
 				change_id: change1!.id,
 				change_entity_id: change1!.entity_id,
 				change_file_id: change1!.file_id,
-				change_type: change1!.type,
+				change_schema_key: change1!.schema_key,
 			},
 			// target points to change2
 			{
@@ -255,7 +255,7 @@ test("it should not update the target branch pointers of a conflicting change", 
 				change_id: change2!.id,
 				change_entity_id: change2!.entity_id,
 				change_file_id: change2!.file_id,
-				change_type: change2!.type,
+				change_schema_key: change2!.schema_key,
 			},
 		])
 		.execute();
@@ -337,7 +337,7 @@ test("it should automatically a diverging entity conflict", async () => {
 		.insertInto("change")
 		.values({
 			id: "ancestor-change",
-			type: "type1",
+			schema_key: "type1",
 			entity_id: "entity1",
 			file_id: "file1",
 			plugin_key: "mock",
@@ -351,7 +351,7 @@ test("it should automatically a diverging entity conflict", async () => {
 		.insertInto("change")
 		.values({
 			id: "source-change",
-			type: "type1",
+			schema_key: "type1",
 			entity_id: "entity1",
 			file_id: "file1",
 			plugin_key: "mock",
@@ -364,7 +364,7 @@ test("it should automatically a diverging entity conflict", async () => {
 		.insertInto("change")
 		.values({
 			id: "target-change",
-			type: "type1",
+			schema_key: "type1",
 			entity_id: "entity1",
 			file_id: "file1",
 			plugin_key: "mock",
@@ -391,14 +391,14 @@ test("it should automatically a diverging entity conflict", async () => {
 				change_id: sourceChange.id,
 				change_entity_id: "entity1",
 				change_file_id: "file1",
-				change_type: "type1",
+				change_schema_key: "type1",
 			},
 			{
 				branch_id: targetBranch.id,
 				change_id: targetChange.id,
 				change_entity_id: "entity1",
 				change_file_id: "file1",
-				change_type: "type1",
+				change_schema_key: "type1",
 			},
 		])
 		.execute();
@@ -446,7 +446,7 @@ test("re-curring merges should not create a new conflict if the conflict already
 		{
 			id: "change0",
 			plugin_key: "mock-plugin",
-			type: "mock",
+			schema_key: "mock",
 			file_id: "mock",
 			entity_id: "value0",
 			snapshot_id: "no-content",
@@ -456,7 +456,7 @@ test("re-curring merges should not create a new conflict if the conflict already
 			plugin_key: "mock-plugin",
 			file_id: "mock",
 			entity_id: "value1",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: "no-content",
 		},
 	] as const satisfies NewChange[];

@@ -25,7 +25,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		{
 			id: "1",
 			entity_id: "value1",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: mockSnapshots[0]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
@@ -33,7 +33,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		{
 			id: "2",
 			entity_id: "value1",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: mockSnapshots[1]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
@@ -41,7 +41,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		{
 			id: "3",
 			entity_id: "value1",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: mockSnapshots[2]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
@@ -150,7 +150,7 @@ test.todo("it should save change conflicts", async () => {
 	const mockChanges: NewChange[] = [
 		{
 			id: "1",
-			type: "mock",
+			schema_key: "mock",
 			entity_id: "value1",
 			snapshot_id: mockSnapshots[0]!.id,
 			file_id: "mock-file",
@@ -158,7 +158,7 @@ test.todo("it should save change conflicts", async () => {
 		},
 		{
 			id: "2",
-			type: "mock",
+			schema_key: "mock",
 			entity_id: "value1",
 			snapshot_id: mockSnapshots[1]!.id,
 			file_id: "mock-file",
@@ -166,7 +166,7 @@ test.todo("it should save change conflicts", async () => {
 		},
 		{
 			id: "3",
-			type: "mock",
+			schema_key: "mock",
 			entity_id: "value1",
 			snapshot_id: mockSnapshots[2]!.id,
 			file_id: "mock-file",
@@ -251,7 +251,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 	const commonChanges: NewChange[] = [
 		{
 			id: "1",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: commonSnapshots[0]!.id,
 			entity_id: "value1",
 			file_id: "mock-file",
@@ -268,7 +268,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 	const changesOnlyInSourceLix: NewChange[] = [
 		{
 			id: "2",
-			type: "mock",
+			schema_key: "mock",
 			entity_id: "value1",
 			snapshot_id: snapshotsOnlyInSourceLix[0]!.id,
 			file_id: "mock-file",
@@ -355,7 +355,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 	const mockChanges: NewChange[] = [
 		{
 			id: "1",
-			type: "mock",
+			schema_key: "mock",
 			entity_id: "value1",
 			snapshot_id: mockSnapshots[0]!.id,
 			file_id: "mock-file",
@@ -364,7 +364,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 		{
 			id: "2",
 			entity_id: "value1",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: mockSnapshots[1]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
@@ -472,7 +472,7 @@ test.todo(
 		const commonChanges: NewChange[] = [
 			{
 				id: "1",
-				type: "mock",
+				schema_key: "mock",
 				entity_id: "value1",
 				snapshot_id: commonSnapshots[0]!.id,
 				file_id: "mock-file",
@@ -488,7 +488,7 @@ test.todo(
 		const changesOnlyInSourceLix: NewChange[] = [
 			{
 				id: "2",
-				type: "mock",
+				schema_key: "mock",
 				entity_id: "value1",
 				snapshot_id: snapshotsOnlyInSourceLix[0]!.id,
 				file_id: "mock-file",
@@ -594,7 +594,7 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 		{
 			id: "2",
 			entity_id: "value1",
-			type: "mock",
+			schema_key: "mock",
 			snapshot_id: snapshotsOnlyInSourceLix[0]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
@@ -650,7 +650,10 @@ test("it should copy discussion and related comments and mappings", async () => 
 		detectChanges: async ({ after }) => {
 			return [
 				{
-					type: "text",
+					schema: {
+						key: "text",
+						type: "json",
+					},
 					entity_id: "test",
 					snapshot: after
 						? { text: new TextDecoder().decode(after?.data) }
@@ -693,7 +696,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 			id: changes[0]?.id,
 			created_at: changes[0]?.created_at,
 			snapshot_id: changes[0]?.snapshot_id,
-			type: "text",
+			schema_key: "text",
 			file_id: "test",
 			entity_id: "test",
 			plugin_key: "mock-plugin",
@@ -763,14 +766,14 @@ test("it should copy change sets and merge memberships", async () => {
 		.insertInto("change")
 		.values([
 			{
-				type: "file",
+				schema_key: "file",
 				entity_id: "value1",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
 				snapshot_id: "sn1",
 			},
 			{
-				type: "file",
+				schema_key: "file",
 				entity_id: "value2",
 				file_id: "mock",
 				plugin_key: "mock-plugin",

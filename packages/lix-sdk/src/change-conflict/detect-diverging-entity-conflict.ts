@@ -31,7 +31,7 @@ export const LIX_DIVERGING_ENTITY_CONFLICT_KEY =
  */
 export async function detectDivergingEntityConflict(args: {
 	lix: Pick<LixReadonly, "db">;
-	changes: Pick<Change, "id" | "entity_id" | "file_id" | "type">[];
+	changes: Pick<Change, "id" | "entity_id" | "file_id" | "schema_key">[];
 }): Promise<DetectedConflict | undefined> {
 	const conflictingChangeIds = new Set<string>();
 
@@ -50,7 +50,7 @@ export async function detectDivergingEntityConflict(args: {
 			if (
 				changeA.entity_id !== changeB.entity_id ||
 				changeA.file_id !== changeB.file_id ||
-				changeA.type !== changeB.type
+				changeA.schema_key !== changeB.schema_key
 			) {
 				continue;
 			}

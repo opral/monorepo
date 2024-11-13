@@ -10,3 +10,5 @@ export const plugin: LixPlugin = {
 	detectConflicts,
 	applyChanges,
 };
+
+export { CellSchema } from "./schemas/cellSchema.js";
