@@ -40,7 +40,7 @@ const Header = () => {
 				].map((link, index) => (
 					<a
 						key={index}
-						className="px-2 py-1 font-medium text-slate-500 hover:text-cyan-600 bg-white"
+						className="px-2 py-1 font-medium text-slate-500 hover:text-cyan-600"
 						href={link.href}
 					>
 						{link.text}

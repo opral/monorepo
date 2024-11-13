@@ -155,7 +155,7 @@ const faq = [
 
 export default function Index() {
 	return (
-		<>
+		<main className="w-full max-w-5xl px-4 mx-auto space-y-16 md:space-y-24">
 			<div className="grid md:grid-cols-2 justify-center md:justify-start gap-16 md:gap-8 lg:gap-24 mt-12 mb-12">
 				<div className="max-w-md">
 					<div>
@@ -334,6 +334,6 @@ export default function Index() {
 					<span className="whitespace-nowrap">Founder of Opral (lix & inlang)</span>
 				</p>
 			</div>
-		</>
+		</main>
 	)
 }

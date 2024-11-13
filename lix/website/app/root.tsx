@@ -69,9 +69,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 							</a>
 						</div>
 						<Header />
-						<main className="w-full max-w-5xl px-4 mx-auto space-y-16 md:space-y-24">
-							{children}
-						</main>
+						{children}
 						<Footer />
 					</div>
 					<ScrollRestoration />
