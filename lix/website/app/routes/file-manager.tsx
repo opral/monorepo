@@ -33,7 +33,7 @@ const faq = [
 	{
 		question: "Is Lix free or do I need to buy it?",
 		answer:
-			"The public beta will be completely free to use. As we approach the official launch, we’re still finalizing future pricing plans.",
+			"The private beta will be completely free to use. As we approach the official launch, we’re still finalizing future pricing plans.",
 	},
 	{
 		question: "Does Lix also work with AI?",
