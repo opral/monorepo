@@ -158,7 +158,7 @@ export default function FileManager() {
 						<div className="col-span-2 pt-8">
 							<img
 								className="w-full border-t border-l border-slate-200 rounded-tl-lg"
-								src="/images/fm_waitlist.svg"
+								src="/images/fm-waitlist.svg"
 								alt="File Manager Waitlist"
 							/>
 						</div>
