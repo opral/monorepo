@@ -46,7 +46,7 @@ test("it should update the branch pointers in target that are not conflicting", 
 				change_id: change1!.id,
 				change_entity_id: change1!.entity_id,
 				change_file_id: change1!.file_id,
-				change_type: change1!.schema_key,
+				change_schema_key: change1!.schema_key,
 			},
 		])
 		.execute();
@@ -123,21 +123,21 @@ test("if a previously undetected conflict is detected during merge, the conflict
 				change_id: change1!.id,
 				change_entity_id: change1!.entity_id,
 				change_file_id: change1!.file_id,
-				change_type: change1!.schema_key,
+				change_schema_key: change1!.schema_key,
 			},
 			{
 				branch_id: sourceBranch.id,
 				change_id: change2!.id,
 				change_entity_id: change2!.entity_id,
 				change_file_id: change2!.file_id,
-				change_type: change2!.schema_key,
+				change_schema_key: change2!.schema_key,
 			},
 			{
 				branch_id: sourceBranch.id,
 				change_id: change3!.id,
 				change_entity_id: change3!.entity_id,
 				change_file_id: change3!.file_id,
-				change_type: change3!.schema_key,
+				change_schema_key: change3!.schema_key,
 			},
 		])
 		.execute();
@@ -247,7 +247,7 @@ test("it should not update the target branch pointers of a conflicting change", 
 				change_id: change1!.id,
 				change_entity_id: change1!.entity_id,
 				change_file_id: change1!.file_id,
-				change_type: change1!.schema_key,
+				change_schema_key: change1!.schema_key,
 			},
 			// target points to change2
 			{
@@ -255,7 +255,7 @@ test("it should not update the target branch pointers of a conflicting change", 
 				change_id: change2!.id,
 				change_entity_id: change2!.entity_id,
 				change_file_id: change2!.file_id,
-				change_type: change2!.schema_key,
+				change_schema_key: change2!.schema_key,
 			},
 		])
 		.execute();
@@ -391,14 +391,14 @@ test("it should automatically a diverging entity conflict", async () => {
 				change_id: sourceChange.id,
 				change_entity_id: "entity1",
 				change_file_id: "file1",
-				change_type: "type1",
+				change_schema_key: "type1",
 			},
 			{
 				branch_id: targetBranch.id,
 				change_id: targetChange.id,
 				change_entity_id: "entity1",
 				change_file_id: "file1",
-				change_type: "type1",
+				change_schema_key: "type1",
 			},
 		])
 		.execute();

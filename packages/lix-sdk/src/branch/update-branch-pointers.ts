@@ -26,7 +26,7 @@ export async function updateBranchPointers(args: {
 				change_id: change.id,
 				change_entity_id: change.entity_id,
 				change_file_id: change.file_id,
-				change_type: change.schema_key,
+				change_schema_key: change.schema_key,
 			}));
 
 			if (changePointers.length > 0) {

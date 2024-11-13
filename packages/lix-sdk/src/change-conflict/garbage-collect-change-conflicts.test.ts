@@ -67,14 +67,14 @@ test("should garbage collect conflicts that contain one or more changes that no 
 				change_id: changes[0]!.id,
 				change_entity_id: changes[0]!.entity_id,
 				change_file_id: changes[0]!.file_id,
-				change_type: changes[0]!.schema_key,
+				change_schema_key: changes[0]!.schema_key,
 			},
 			{
 				branch_id: branch0.id,
 				change_id: changes[1]!.id,
 				change_entity_id: changes[1]!.entity_id,
 				change_file_id: changes[1]!.file_id,
-				change_type: changes[1]!.schema_key,
+				change_schema_key: changes[1]!.schema_key,
 			},
 		])
 		.execute();
@@ -165,14 +165,14 @@ test("should garbage collect conflicts that no branch conflict pointer reference
 				change_id: changes[0]!.id,
 				change_entity_id: changes[0]!.entity_id,
 				change_file_id: changes[0]!.file_id,
-				change_type: changes[0]!.schema_key,
+				change_schema_key: changes[0]!.schema_key,
 			},
 			{
 				branch_id: branch0.id,
 				change_id: changes[1]!.id,
 				change_entity_id: changes[1]!.entity_id,
 				change_file_id: changes[1]!.file_id,
-				change_type: changes[1]!.schema_key,
+				change_schema_key: changes[1]!.schema_key,
 			},
 		])
 		.execute();
@@ -238,14 +238,14 @@ test("should NOT garbage collect conflicts that a branch change conflict pointer
 				change_id: changes[0]!.id,
 				change_entity_id: changes[0]!.entity_id,
 				change_file_id: changes[0]!.file_id,
-				change_type: changes[0]!.schema_key,
+				change_schema_key: changes[0]!.schema_key,
 			},
 			{
 				branch_id: currentBranch.id,
 				change_id: changes[1]!.id,
 				change_entity_id: changes[1]!.entity_id,
 				change_file_id: changes[1]!.file_id,
-				change_type: changes[1]!.schema_key,
+				change_schema_key: changes[1]!.schema_key,
 			},
 		])
 		.execute();

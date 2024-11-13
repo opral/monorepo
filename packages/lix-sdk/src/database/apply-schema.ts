@@ -177,12 +177,12 @@ export async function applySchema(args: {
     change_id TEXT NOT NULL,
     change_file_id TEXT NOT NULL,
     change_entity_id TEXT NOT NULL,
-    change_type TEXT NOT NULL,
+    change_schema_key TEXT NOT NULL,
 
-    PRIMARY KEY(branch_id, change_file_id, change_entity_id, change_type),
+    PRIMARY KEY(branch_id, change_file_id, change_entity_id, change_schema_key),
 
     FOREIGN KEY(branch_id) REFERENCES branch(id),
-    FOREIGN KEY(change_id, change_file_id, change_entity_id, change_type) REFERENCES change(change_id, change_file_id, change_entity_id, change_type)
+    FOREIGN KEY(change_id, change_file_id, change_entity_id, change_schema_key) REFERENCES change(id, file_id, entity_id, schema_key)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS branch_change_conflict_pointer (

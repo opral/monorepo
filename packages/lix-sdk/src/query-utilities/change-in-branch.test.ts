@@ -68,7 +68,7 @@ test("selectChangeInBranch should retrieve all changes in the branch including a
 			change_id: "changeC",
 			change_file_id: changeC!.file_id,
 			change_entity_id: changeC!.entity_id,
-			change_type: changeC!.schema_key,
+			change_schema_key: changeC!.schema_key,
 		})
 		.execute();
 

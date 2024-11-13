@@ -179,7 +179,7 @@ type BranchChangePointerTable = {
 	change_id: string;
 	change_file_id: string;
 	change_entity_id: string;
-	change_type: string;
+	change_schema_key: string;
 };
 
 export type BranchChangeConflictPointer =

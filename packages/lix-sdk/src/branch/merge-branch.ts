@@ -42,7 +42,7 @@ export async function mergeBranch(args: {
 								change_id: pointer.source_change_id,
 								change_file_id: pointer.change_file_id,
 								change_entity_id: pointer.change_entity_id,
-								change_type: pointer.change_type,
+								change_schema_key: pointer.change_schema_key,
 							},
 						])
 						.onConflict((oc) =>
