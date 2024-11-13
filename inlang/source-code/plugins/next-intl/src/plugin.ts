@@ -30,7 +30,7 @@ export const plugin: Plugin<{
 
 	loadMessages: async ({ settings, nodeishFs }) => {
 		settings["plugin.inlang.nextIntl"].variableReferencePattern = settings["plugin.inlang.nextIntl"]
-			.variableReferencePattern || ["{{", "}}"]
+			.variableReferencePattern || ["{", "}"]
 		return loadMessages({
 			settings,
 			pluginSettings: settings["plugin.inlang.nextIntl"],
@@ -39,7 +39,7 @@ export const plugin: Plugin<{
 	},
 	saveMessages: async ({ messages, settings, nodeishFs }) => {
 		settings["plugin.inlang.nextIntl"].variableReferencePattern = settings["plugin.inlang.nextIntl"]
-			.variableReferencePattern || ["{{", "}}"]
+			.variableReferencePattern || ["{", "}"]
 		return saveMessages({
 			pluginSettings: settings["plugin.inlang.nextIntl"],
 			nodeishFs,
@@ -126,7 +126,7 @@ async function getFileToParse(
 						//replace dots in keys with unicode
 						return replaceAll(key, ".", "u002E")
 					},
-			  })
+				})
 			: json
 		return flattenedMessages
 	} catch (e) {
@@ -205,7 +205,7 @@ function parsePattern(text: string, variableReferencePattern: string[]): Variant
 		? new RegExp(
 				`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
 				"g"
-		  )
+			)
 		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
 
 	const pattern: Variant["pattern"] = text
@@ -220,7 +220,7 @@ function parsePattern(text: string, variableReferencePattern: string[]): Variant
 								variableReferencePattern[0].length,
 								// negative index, removing the trailing pattern
 								-variableReferencePattern[1].length
-						  )
+							)
 						: element.slice(variableReferencePattern[0].length),
 				}
 			} else {
