@@ -3,10 +3,6 @@ import IconGitHub from "./icons/github"
 import IconLix from "./icons/lix"
 import IconX from "./icons/x"
 
-interface HeaderProps {
-	className?: string
-}
-
 export const socialLinks = [
 	{
 		text: "GitHub",
@@ -25,14 +21,9 @@ export const socialLinks = [
 	},
 ]
 
-const Header = ({ className }: HeaderProps) => {
+const Header = () => {
 	return (
-		<header
-			className={
-				"w-full max-w-5xl px-4 py-3 mx-auto flex items-center justify-between gap-4" +
-				(className ? ` ${className}` : "")
-			}
-		>
+		<header className="w-full max-w-5xl px-4 py-3 mx-auto flex items-center justify-between gap-4">
 			<div className="flex items-center gap-4">
 				<a href="/">
 					<IconLix />

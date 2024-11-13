@@ -73,14 +73,28 @@ const collaborationFeatures = [
 	},
 ]
 
+const createFeatures = [
+	{
+		title: "Drop your files",
+		description: "Simply drag and drop your files into Lix's file manager.",
+	},
+	{
+		title: "Track every change",
+		description:
+			"Lix automatically tracks all changes, allowing you to trace edits, recover previous versions, and collaborate seamlessly.",
+	},
+]
+
 export default function FileManager() {
 	return (
 		<>
 			<Banner />
-			<Header className="bg-slate-50" />
+			<div className="w-full bg-slate-50">
+				<Header />
+			</div>
 			<main>
 				<div className="w-full h-fit bg-slate-50 p-4 slanted">
-					<div className="mx-auto max-w-2xl justify-center items-center text-center mt-16 mb-20">
+					<div className="mx-auto max-w-2xl justify-center items-center text-center mt-16 mb-48">
 						<div className="mx-auto flex items-center gap-2 w-fit p-2 text-slate-500 ring-1 ring-slate-200 rounded-md mb-3">
 							<div className="bg-slate-200 p-1.5 py-1 w-fit rounded">
 								<IconLix className="w-4 h-4 text-slate-500" />
@@ -118,6 +132,42 @@ export default function FileManager() {
 				</div>
 
 				<div className="w-full max-w-5xl mx-auto px-4 space-y-16 md:space-y-32">
+					<div className="w-full h-80 relative">
+						<div className="space-y-16 md:space-y-24 -mt-32 ring-1 ring-slate-200 bg-slate-100 rounded-2xl p-2 absolute">
+							<img
+								className="rounded-xl ring-1 ring-slate-200 mx-auto"
+								src="/images/lix-fm.svg"
+								alt="File Manager Waitlist"
+							/>
+						</div>
+					</div>
+
+					<div className="grid md:grid-cols-3 gap-8 md:gap-4">
+						<div className="col-span-1">
+							<h2>Create</h2>
+							<p className="mt-4">
+								Create with the freedom of change control. Trace, recover or simple read the history
+								like a book to be always on track.
+							</p>
+							{createFeatures.map((feature, index) => (
+								<div key={index} className="my-6 max-w-sm flex gap-5">
+									<div className="space-y-1">
+										<div className="rounded-sm py-1 bg-slate-100 w-8 text-center">0{index + 1}</div>
+										<h3 className="font-semibold">{feature.title}</h3>
+										<p>{feature.description}</p>
+									</div>
+								</div>
+							))}
+						</div>
+						<div className="bg-slate-100 col-span-2 rounded-lg ring-1 ring-slate-200 overflow-clip flex items-end">
+							<img
+								className="mr-8 mt-7 w-fit ring-1 ring-slate-200 rounded-tr-lg"
+								src="/images/fm-create.svg"
+								alt="File Manager Features"
+							/>
+						</div>
+					</div>
+
 					<div>
 						<h2 className="text-center w-full">Effortless Collaboration</h2>
 						<p className="text-center mt-4">Sync, share, and succeed together.</p>
