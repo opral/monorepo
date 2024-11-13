@@ -21,7 +21,7 @@ import { detectDivergingEntityConflict } from "./detect-diverging-entity-conflic
 export async function detectChangeConflicts(args: {
 	lix: Pick<LixReadonly, "db" | "plugin">;
 	changes: Change[];
-}) {
+}): Promise<DetectedConflict[]> {
 	const detectedConflicts: DetectedConflict[] = [];
 	const plugins = await args.lix.plugin.getAll();
 

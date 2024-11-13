@@ -1,4 +1,4 @@
-import type { ExpressionBuilder } from "kysely";
+import type { ExpressionBuilder, ExpressionWrapper, SqlBool } from "kysely";
 import type { Branch, LixDatabaseSchema } from "../database/schema.js";
 
 /**
@@ -13,7 +13,9 @@ import type { Branch, LixDatabaseSchema } from "../database/schema.js";
  *   ```
  */
 export function changeConflictInBranch(branch: Pick<Branch, "id">) {
-	return (eb: ExpressionBuilder<LixDatabaseSchema, "change_conflict">) =>
+	return (
+		eb: ExpressionBuilder<LixDatabaseSchema, "change_conflict">,
+	): ExpressionWrapper<LixDatabaseSchema, "change_conflict", SqlBool> =>
 		eb("change_conflict.id", "in", (subquery) =>
 			subquery
 				.selectFrom("branch_change_conflict_pointer")

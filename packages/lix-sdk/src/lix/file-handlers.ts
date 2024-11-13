@@ -21,7 +21,7 @@ export async function handleFileInsert(args: {
 	plugins: LixPlugin[];
 	lix: Pick<Lix, "db" | "plugin">;
 	queueEntry: any;
-}) {
+}): Promise<void> {
 	const detectedChanges: Array<DetectedChange & { pluginKey: string }> = [];
 
 	for (const plugin of args.plugins) {
@@ -96,7 +96,7 @@ export async function handleFileChange(args: {
 	after: LixFile;
 	plugins: LixPlugin[];
 	lix: Pick<Lix, "db" | "plugin">;
-}) {
+}): Promise<void> {
 	const fileId = args.after?.id ?? args.before?.id;
 
 	const detectedChanges: Array<DetectedChange & { pluginKey: string }> = [];

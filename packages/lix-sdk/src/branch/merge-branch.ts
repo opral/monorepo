@@ -7,7 +7,7 @@ export async function mergeBranch(args: {
 	lix: Lix;
 	sourceBranch: Branch;
 	targetBranch: Branch;
-}) {
+}): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const diff = await diffBranch({
 			lix: { ...args.lix, db: trx },

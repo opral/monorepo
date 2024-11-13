@@ -2,7 +2,9 @@ import type { LixDatabaseSchema, LixFile } from "../database/schema.js";
 import type { LixPlugin } from "./lix-plugin.js";
 import { Kysely, sql } from "kysely";
 
-export async function loadPlugins(db: Kysely<LixDatabaseSchema>) {
+export async function loadPlugins(
+	db: Kysely<LixDatabaseSchema>,
+): Promise<LixPlugin[]> {
 	const pluginFiles = (
 		await sql`
     SELECT * FROM file

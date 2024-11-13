@@ -4,7 +4,15 @@ import { loadPlugins } from "../plugin/load-plugin.js";
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 
-export type Lix = Awaited<ReturnType<typeof openLix>>;
+export type Lix = {
+	db: ReturnType<typeof initDb>;
+	settled: () => Promise<void>;
+	toBlob: () => Promise<Blob>;
+	plugin: {
+		getAll: () => Promise<LixPlugin[]>;
+	};
+	close: () => Promise<void>;
+};
 
 /**
  * Common setup between different lix environments.
@@ -24,7 +32,7 @@ export async function openLix(args: {
 	 *   const lix = await openLixInMemory({ blob: await newLixFile(), providePlugin: [myPlugin] })
 	 */
 	providePlugins?: LixPlugin[];
-}) {
+}): Promise<Lix> {
 	const db = initDb({ sqlite: args.database });
 
 	let closed = false;

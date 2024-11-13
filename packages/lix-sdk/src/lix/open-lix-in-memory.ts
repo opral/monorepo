@@ -8,7 +8,7 @@ import { openLix } from "./open-lix.js";
  */
 export async function openLixInMemory(
 	args: { blob?: Blob } & Omit<Parameters<typeof openLix>[0], "database">,
-) {
+): Promise<ReturnType<typeof openLix>> {
 	const database = await createInMemoryDatabase({
 		readOnly: false,
 	});

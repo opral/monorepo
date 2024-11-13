@@ -1,9 +1,9 @@
-import type { ExpressionBuilder } from "kysely";
+import type { ExpressionBuilder, ExpressionWrapper, SqlBool } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 
 /**
  * Selects changes that are not a parent of any other change.
- * 
+ *
  * **Careful**: This filter is not specific to any branch.
  * If you want to filter changes in a specific branch, use `changeIsLeafInBranch`.
  *
@@ -16,7 +16,9 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  *   ```
  */
 export function changeIsLeaf() {
-	return (eb: ExpressionBuilder<LixDatabaseSchema, "change">) =>
+	return (
+		eb: ExpressionBuilder<LixDatabaseSchema, "change">,
+	): ExpressionWrapper<LixDatabaseSchema, "change", SqlBool> =>
 		eb("change.id", "not in", (subquery) =>
 			subquery
 				.selectFrom("change_graph_edge")

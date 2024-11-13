@@ -2,6 +2,12 @@
 	"extends": "../tsconfig.base.json",
 	"include": ["src/**/*"],
 	"compilerOptions": {
+		"allowJs": false,
+		"checkJs": false,
+		// isolated declarations lead to substantially faster build times
+		// which is overproportionally useful in a monorepo
+		// https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/#isolated-declarations
+		"isolatedDeclarations": true,
 		"allowImportingTsExtensions": false,
 		"emitDeclarationOnly": false,
 		"module": "Node16",

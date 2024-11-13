@@ -3,7 +3,9 @@ import type { SqliteDatabase } from "sqlite-wasm-kysely";
 /**
  * Applies the database schema to the given sqlite database.
  */
-export async function applySchema(args: { sqlite: SqliteDatabase }) {
+export async function applySchema(args: {
+	sqlite: SqliteDatabase;
+}): Promise<unknown> {
 	return args.sqlite.exec`
 
   CREATE TABLE IF NOT EXISTS file_internal (

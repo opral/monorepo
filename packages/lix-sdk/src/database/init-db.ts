@@ -6,7 +6,9 @@ import type { LixDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
 import { sha256 } from "js-sha256";
 
-export function initDb(args: { sqlite: SqliteDatabase }) {
+export function initDb(args: {
+	sqlite: SqliteDatabase;
+}): Kysely<LixDatabaseSchema> {
 	initDefaultValueFunctions({ sqlite: args.sqlite });
 	applySchema({ sqlite: args.sqlite });
 	const db = new Kysely<LixDatabaseSchema>({

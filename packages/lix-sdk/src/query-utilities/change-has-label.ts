@@ -1,4 +1,4 @@
-import type { ExpressionBuilder } from "kysely";
+import type { ExpressionBuilder, ExpressionWrapper, SqlBool } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 
 /**
@@ -11,10 +11,10 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  *      .selectAll()
  *      .execute();
  *   ```
- * 
- * @example 
+ *
+ * @example
  *   You can use eb.not() to negate the filter.
- *  
+ *
  *   ```ts
  *   await lix.db.selectFrom("change")
  * 		.where((eb) => eb.not(changeHasLabel("confirmed")))
@@ -23,7 +23,9 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  *   ```
  */
 export function changeHasLabel(name: string) {
-	return (eb: ExpressionBuilder<LixDatabaseSchema, "change">) =>
+	return (
+		eb: ExpressionBuilder<LixDatabaseSchema, "change">,
+	): ExpressionWrapper<LixDatabaseSchema, "change", SqlBool> =>
 		eb("change.id", "in", (subquery) =>
 			subquery
 				.selectFrom("change_set_element")
