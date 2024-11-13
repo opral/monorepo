@@ -144,16 +144,18 @@ export default function FileManager() {
 
 					<div className="grid md:grid-cols-3 gap-8 md:gap-4">
 						<div className="col-span-1">
-							<h2>Create</h2>
+							<h2 className="mt-2">Create</h2>
 							<p className="mt-4">
 								Create with the freedom of change control. Trace, recover or simple read the history
 								like a book to be always on track.
 							</p>
 							{createFeatures.map((feature, index) => (
 								<div key={index} className="my-6 max-w-sm flex gap-5">
-									<div className="space-y-1">
-										<div className="rounded-sm py-1 bg-slate-100 w-8 text-center">0{index + 1}</div>
-										<h3 className="font-semibold">{feature.title}</h3>
+									<div className="space-y-1.5">
+										<div className="rounded-sm px-0.5 py-0.5 bg-slate-100 w-8 text-center text-slate-700 text-sm font-medium">
+											0{index + 1}
+										</div>
+										<h3 className="font-medium pt-2">{feature.title}</h3>
 										<p>{feature.description}</p>
 									</div>
 								</div>
@@ -187,7 +189,7 @@ export default function FileManager() {
 							{collaborationFeatures.map((feature, index) => (
 								<div key={index}>
 									{feature.icon}
-									<h3 className="mt-4">{feature.title}</h3>
+									<h3 className="mt-4 font-medium">{feature.title}</h3>
 									<p className="mt-2">{feature.description}</p>
 								</div>
 							))}
