@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type {
 	ExperimentalChangeSchema,
-	ExperimentalInferSnapshotContentType,
+	ExperimentalInferType,
 } from "./types.js";
 import { test, assertType } from "vitest";
 
@@ -20,7 +20,7 @@ test("a json change schema should be infer the properties", () => {
 		},
 	} as const satisfies ExperimentalChangeSchema;
 
-	const snapshot: ExperimentalInferSnapshotContentType<
+	const snapshot: ExperimentalInferType<
 		typeof jsonChangeSchema
 	> = {
 		name: "John",
@@ -47,7 +47,7 @@ test("a blob change schema should be infer the properties", () => {
 		type: "blob",
 	} as const satisfies ExperimentalChangeSchema;
 
-	const snapshot: ExperimentalInferSnapshotContentType<
+	const snapshot: ExperimentalInferType<
 		typeof blobChangeSchema
 	> = new ArrayBuffer(0);
 

@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
 	ExperimentalChangeSchema,
-	ExperimentalInferSnapshotContentType,
+	ExperimentalInferType,
 } from "../change-schema/types.js";
 import { type Change, type LixFile } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
@@ -92,17 +91,15 @@ export type LixPlugin = {
  *   detectedChange.snapshot.name // string
  *   ```
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type DetectedChange<Schema extends ExperimentalChangeSchema = any> = {
 	entity_id: string;
-	schema: {
-		key: string;
-		type: "json";
-		schema?: ExperimentalChangeSchema["schema"];
-	};
+	schema: Omit<ExperimentalChangeSchema, "schema">;
 	/**
 	 * The change is considered a deletion if `snapshot` is `undefined`.
 	 */
-	snapshot?: ExperimentalInferSnapshotContentType<Schema>;
+
+	snapshot?: ExperimentalInferType<Schema>;
 };
 
 export type DetectedConflict = {

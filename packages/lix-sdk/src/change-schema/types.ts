@@ -4,7 +4,7 @@ import type { FromSchema, JSONSchema } from "json-schema-to-ts";
 /**
  * Infers the snapshot content type from the schema.
  */
-export type ExperimentalInferSnapshotContentType<ChangeSchema> =
+export type ExperimentalInferType<ChangeSchema> =
 	// If the schema is a JSON schema and the schema is provided,
 	ChangeSchema extends {
 		type: "json";
@@ -13,7 +13,7 @@ export type ExperimentalInferSnapshotContentType<ChangeSchema> =
 		? // infer the type from the schema.
 			FromSchema<ChangeSchema["schema"]>
 		: // else if the schema is a JSON schema and the schema is not provided,
-			ChangeSchema extends { type: "json"; schema: undefined }
+			ChangeSchema extends { type: "json" }
 			? // infer the type as any.
 				any
 			: // else if the schema is a blob schema,
