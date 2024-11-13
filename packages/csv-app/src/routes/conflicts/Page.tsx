@@ -76,7 +76,11 @@ export default function Page() {
 																				)
 																				.selectAll()
 																				.where("change.file_id", "=", c.file_id)
-																				.where("change.type", "=", c.type)
+																				.where(
+																					"change.schema_key",
+																					"=",
+																					c.schema_key
+																				)
 																				.executeTakeFirstOrThrow();
 																		})
 																	);
