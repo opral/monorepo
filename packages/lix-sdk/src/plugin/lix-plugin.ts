@@ -1,3 +1,7 @@
+import type {
+	ExperimentalChangeSchema,
+	ExperimentalInferSnapshotContentType,
+} from "../change-schema/types.js";
 import {
 	type Change,
 	type LixFile,
@@ -68,15 +72,40 @@ export type LixPlugin = {
 /**
  * A detected change that lix ingests in to the database.
  *
- * If the snapshot is `undefined`, the change is considered to be a deletion.
+ * - If the `snapshot` is `undefined`, the change is considered to be a deletion.
+ * - The `schema` type can be narrowed by providing a change schema.
+ *
+ * @example
+ *   Type narrowing with a change schema:
+ *
+ *   ```
+ * 	 const FooV1Schema = {
+ *     key: "plugin-name-foo-v1",
+ *     type: "json",
+ *     schema: {
+ *       type: "object",
+ *       properties: {
+ *         name: { type: "string" },
+ * 		   }
+ *     }
+ *   } as const satisfies ChangeSchema;
+ *
+ *   const detectedChange: DetectedChange<typeof FooV1Schema>
+ *
+ *   detectedChange.snapshot.name // string
+ *   ```
  */
-export type DetectedChange = {
-	type: string;
+export type DetectedChange<Schema extends ExperimentalChangeSchema = any> = {
 	entity_id: string;
+	schema: {
+		key: string;
+		type: string;
+		schema?: ExperimentalChangeSchema["schema"];
+	};
 	/**
 	 * The change is considered a deletion if `snapshot` is `undefined`.
 	 */
-	snapshot?: Snapshot["content"];
+	snapshot?: ExperimentalInferSnapshotContentType<Schema>;
 };
 
 export type DetectedConflict = {

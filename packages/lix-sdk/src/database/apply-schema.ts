@@ -31,13 +31,13 @@ export async function applySchema(args: {
   CREATE TABLE IF NOT EXISTS change (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     entity_id TEXT NOT NULL,
-    type TEXT NOT NULL,
+    schema_key TEXT NOT NULL,
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
     snapshot_id TEXT NOT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    UNIQUE (id, entity_id, file_id, type)
+    UNIQUE (id, entity_id, file_id, schema_key)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS change_graph_edge (
