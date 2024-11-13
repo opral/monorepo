@@ -43,7 +43,7 @@ export default function FileManager() {
 		<>
 			<Banner />
 			<Header className="bg-slate-50" />
-			<main className="relative">
+			<main>
 				<div className="w-full h-fit bg-slate-50 p-4 slanted">
 					<div className="mx-auto max-w-2xl justify-center items-center text-center mt-16 mb-20">
 						<div className="mx-auto flex items-center gap-2 w-fit p-2 text-slate-500 ring-1 ring-slate-200 rounded-md mb-3">
@@ -83,7 +83,6 @@ export default function FileManager() {
 				</div>
 
 				<div className="w-full max-w-5xl mx-auto px-4 space-y-16 md:space-y-24">
-					{/* grid for  */}
 					<div className="grid md:grid-cols-3 gap-8 md:gap-4">
 						<div className="col-span-2 md:col-span-1">
 							<h2>Open questions?</h2>
@@ -114,9 +113,7 @@ export default function FileManager() {
 							))}
 						</div>
 					</div>
-				</div>
 
-				<div className="w-full max-w-5xl mx-auto px-4 space-y-16 md:space-y-24 mt-24">
 					<div className="w-full border border-slate-200 rounded-xl grid md:grid-cols-3 gap-8 md:gap-4">
 						<div className="p-8 flex flex-col justify-between">
 							<div className="w-full">
