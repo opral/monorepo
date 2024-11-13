@@ -1,4 +1,3 @@
-import { updateChangeConflicts } from "../change-conflict/update-change-conflicts.js";
 import type { Branch, Change, ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
@@ -76,10 +75,10 @@ export async function updateBranchPointers(args: {
 			}
 		}
 
-		await updateChangeConflicts({
-			lix: { ...args.lix, db: trx },
-			branch,
-		});
+		// await updateChangeConflicts({
+		// 	lix: { ...args.lix, db: trx },
+		// 	branch,
+		// });
 	};
 
 	if (args.lix.db.isTransaction) {

@@ -78,15 +78,15 @@ export async function createBranch(args: {
 				)
 				.execute();
 
-			await trx
-				.insertInto("branch_target")
-				.values({
-					source_branch_id: branch.id,
-					target_branch_id: args.parent.id,
-				})
-				// ignore if the merge intent already exists
-				.onConflict((oc) => oc.doNothing())
-				.execute();
+			// await trx
+			// 	.insertInto("branch_target")
+			// 	.values({
+			// 		source_branch_id: branch.id,
+			// 		target_branch_id: args.parent.id,
+			// 	})
+			// 	// ignore if the merge intent already exists
+			// 	.onConflict((oc) => oc.doNothing())
+			// 	.execute();
 		}
 
 		return branch;

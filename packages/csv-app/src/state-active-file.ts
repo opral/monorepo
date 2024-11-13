@@ -15,7 +15,6 @@ import {
 	changeHasLabel,
 	changeInBranch,
 	changeIsLeafInBranch,
-	diffBranch,
 } from "@lix-js/sdk";
 
 export const activeFileAtom = atom(async (get) => {
@@ -258,26 +257,3 @@ export const changeConflictsAtom = atom(async (get) => {
 
 	return groupedByConflictId;
 });
-
-export const branchDiffAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const lix = await get(lixAtom);
-	const currentBranch = await get(currentBranchAtom);
-	const targetBranch = await lix.db
-		.selectFrom("branch_target")
-		.innerJoin("branch", "branch.id", "branch_target.target_branch_id")
-		.selectAll("branch")
-		.where("source_branch_id", "=", currentBranch.id)
-		.executeTakeFirst();
-
-	if (!targetBranch) return null;
-
-	const diff = await diffBranch({
-		lix,
-		sourceBranch: currentBranch,
-		targetBranch,
-	});
-
-	return diff;
-});
-

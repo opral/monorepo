@@ -72,14 +72,14 @@ export const currentBranchAtom = atom<Promise<Branch & { targets: Branch[] }>>(
 			.selectAll("branch")
 			.executeTakeFirstOrThrow();
 
-		const targets = await lix.db
-			.selectFrom("branch_target")
-			.where("source_branch_id", "=", currentBranch.id)
-			.innerJoin("branch", "branch_target.target_branch_id", "branch.id")
-			.selectAll("branch")
-			.execute();
+		// const targets = await lix.db
+		// 	.selectFrom("branch_target")
+		// 	.where("source_branch_id", "=", currentBranch.id)
+		// 	.innerJoin("branch", "branch_target.target_branch_id", "branch.id")
+		// 	.selectAll("branch")
+		// 	.execute();
 
-		return { ...currentBranch, targets };
+		return { ...currentBranch, targets: [] };
 	}
 );
 

@@ -247,7 +247,8 @@ test.skip("change conflicts should be garbage collected", async () => {
 	expect(remainingChangeConflicts.length).toBe(0);
 });
 
-test("it raise a diverging entity conflict (based off a reproduction)", async () => {
+// uncertain if behavior generalizes. might be better to have this as an opt-in automation.
+test.skip("it raise a diverging entity conflict (based off a reproduction)", async () => {
 	const lix = await openLixInMemory({});
 
 	const sourceBranch = await lix.db
@@ -345,13 +346,13 @@ test("it raise a diverging entity conflict (based off a reproduction)", async ()
 		],
 	});
 
-	await lix.db
-		.insertInto("branch_target")
-		.values({
-			source_branch_id: sourceBranch.id,
-			target_branch_id: targetBranch.id,
-		})
-		.execute();
+	// await lix.db
+	// 	.insertInto("branch_target")
+	// 	.values({
+	// 		source_branch_id: sourceBranch.id,
+	// 		target_branch_id: targetBranch.id,
+	// 	})
+	// 	.execute();
 
 	await updateBranchPointers({
 		lix,
