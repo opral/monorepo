@@ -95,7 +95,7 @@ export default function FileManager() {
 			<main>
 				<div className="w-full h-fit bg-slate-50 p-4 slanted">
 					<div className="mx-auto max-w-2xl justify-center items-center text-center mt-16 mb-48">
-						<div className="mx-auto flex items-center gap-2 w-fit p-2 text-slate-500 ring-1 ring-slate-200 rounded-md mb-3">
+						<div className="mx-auto flex items-center gap-2 w-fit p-2 text-slate-500 ring-1 ring-slate-200 rounded-md mb-3 bg-white">
 							<div className="bg-slate-200 p-1.5 py-1 w-fit rounded">
 								<IconLix className="w-4 h-4 text-slate-500" />
 							</div>
