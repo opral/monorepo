@@ -83,6 +83,30 @@ export default function FileManager() {
 				</div>
 
 				<div className="w-full max-w-5xl mx-auto px-4 space-y-16 md:space-y-24">
+					<div className="grid md:grid-cols-12 gap-8 md:gap-4">
+						<div className="bg-slate-100 col-span-7">Test</div>
+						<div className="col-span-4 col-start-9">
+							<h2>Automate</h2>
+							<p className="mt-4">
+								Since Lix understands changes, you can use these events as triggers to initiate
+								specific actions.
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<div className="w-full max-w-5xl mx-auto px-4 space-y-16 md:space-y-24">
+					<div className="grid md:grid-cols-12 gap-8 md:gap-4">
+						<div className="bg-slate-100 col-span-7">Test</div>
+						<div className="col-span-4 col-start-9">
+							<h2>Automate</h2>
+							<p className="mt-4">
+								Since Lix understands changes, you can use these events as triggers to initiate
+								specific actions.
+							</p>
+						</div>
+					</div>
+
 					<div className="grid md:grid-cols-3 gap-8 md:gap-4">
 						<div className="col-span-2 md:col-span-1">
 							<h2>Open questions?</h2>
