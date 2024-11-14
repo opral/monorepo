@@ -113,7 +113,7 @@ export default function FileManager() {
 						</p>
 						<div className="flex justify-center w-full gap-2">
 							<a
-								href="https://opral.substack.com/"
+								href="https://forms.gle/cR3iDsUB7DEygJaZ8"
 								target="_blank"
 								className="w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all"
 							>
@@ -264,7 +264,7 @@ export default function FileManager() {
 								</p>
 							</div>
 							<a
-								href="https://opral.substack.com/"
+								href="https://forms.gle/cR3iDsUB7DEygJaZ8"
 								target="_blank"
 								className="mt-4 w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all"
 							>
