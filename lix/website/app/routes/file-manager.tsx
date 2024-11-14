@@ -340,7 +340,7 @@ export default function FileManager() {
 							<div className="w-full">
 								<h2 className="text-xl pt-2">Stay in the loop</h2>
 								<p className="mt-4 sm:w-4/5 md:w-full">
-									Sign up to receive updates and join us for the launch event on December 16th.
+									Sign up to receive updates and join us for the launch on December 16th.
 								</p>
 							</div>
 							<a
