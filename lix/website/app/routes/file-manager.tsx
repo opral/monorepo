@@ -1,3 +1,4 @@
+import { MetaFunction } from "@remix-run/node"
 import Footer from "~/components/footer"
 import Header, { socialLinks } from "~/components/header"
 import IconArrowExternal from "~/components/icons/arrow-external"
@@ -8,6 +9,79 @@ import IconSync from "~/components/icons/sync"
 import Banner from "~/components/ui/banner"
 import Check from "~/components/ui/check"
 import Details from "~/components/ui/details"
+
+export const meta: MetaFunction = () => {
+	const ogImage = [
+		{
+			property: "og:url",
+			content: "https://lix.opral.com/file-manager",
+		},
+		{
+			property: "og:type",
+			content: "website",
+		},
+		{
+			property: "og:title",
+			content: "Lix file manager",
+		},
+		{
+			property: "og:description",
+			content:
+				"Lix file manager understands changes in your files, making it easy to see detailed updates, collaborate, comment, and automate tasks directly within your documents.",
+		},
+		{
+			property: "og:image",
+			content: "https://lix.opral.com/images/og-image-lix.png",
+		},
+		{
+			property: "og:image:type",
+			content: "image/png",
+		},
+		{
+			property: "og:image:width",
+			content: "1200",
+		},
+		{
+			property: "og:image:height",
+			content: "630",
+		},
+		{
+			name: "twitter:card",
+			content: "Lix file manager with build-in change control",
+		},
+		{
+			property: "twitter:url",
+			content: "https://lix.opral.com/",
+		},
+		{
+			name: "twitter:title",
+			content: "Lix file manager",
+		},
+		{
+			name: "twitter:description",
+			content:
+				"Lix file manager understands changes in your files, making it easy to see detailed updates, collaborate, comment, and automate tasks directly within your documents.",
+		},
+		{
+			name: "twitter:image:src",
+			content: "https://lix.opral.com/images/og-image-lix.png",
+		},
+	]
+
+	return [
+		{ title: "Lix file manager" },
+		{
+			name: "description",
+			content:
+				"The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
+		},
+		{
+			name: "keywords",
+			content: "change control, file-based apps, collaboration, automation, change graph",
+		},
+		...ogImage,
+	]
+}
 
 const faq = [
 	{
