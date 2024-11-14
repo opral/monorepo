@@ -205,13 +205,13 @@ export async function applySchema(args: {
   -- Insert the default branch if missing
   -- (this is a workaround for not having a separata creation and migration schema's)
   INSERT INTO branch (id, name)
-  SELECT '00000000-0000-0000-0000-000000000000', 'main'
+  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6', 'main'
   WHERE NOT EXISTS (SELECT 1 FROM branch);
 
   -- Set the default current branch to 'main' if both tables are empty
   -- (this is a workaround for not having a separata creation and migration schema's)
   INSERT INTO current_branch (id)
-  SELECT '00000000-0000-0000-0000-000000000000'
+  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6'
   WHERE NOT EXISTS (SELECT 1 FROM current_branch);
 
 `;
