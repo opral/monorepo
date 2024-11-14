@@ -101,7 +101,7 @@ export default function FileManager() {
 							</div>
 							File Manager
 						</div>
-						<h1 className="text-5xl leading-[1.2] font-semibold">
+						<h1 className="text-3xl sm:text-5xl leading-[1.2] font-semibold">
 							<span className="relative inline-block after:block after:h-1 after:w-full after:absolute after:skew-y-[-0.5deg] after:-translate-y-1 after:bg-cyan-600">
 								Collaborate & automate
 							</span>{" "}
@@ -111,7 +111,7 @@ export default function FileManager() {
 							Lix file manager understands changes in your files, making it easy to see detailed
 							updates, collaborate, comment, and automate tasks directly within your documents.
 						</p>
-						<div className="flex justify-center w-full gap-2">
+						<div className="flex flex-col sm:flex-row justify-center w-full gap-2">
 							<a
 								href="https://forms.gle/cR3iDsUB7DEygJaZ8"
 								target="_blank"
@@ -122,7 +122,7 @@ export default function FileManager() {
 							<a
 								href="https://jsnation.us/#person-samuel-stroschein"
 								target="_blanc"
-								className="w-full sm:w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex justify-center items-center gap-2 border border-slate-300 hover:border-slate-400 transition-all"
+								className="w-full sm:w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex justify-center items-center gap-2 ring-1 ring-slate-300 hover:ring-slate-400 transition-all"
 							>
 								See our pitch at JS Nation US
 								<IconArrowExternal />
@@ -131,39 +131,46 @@ export default function FileManager() {
 					</div>
 				</div>
 
-				<div className="w-full max-w-5xl mx-auto px-4 space-y-16 md:space-y-32">
-					<div className="w-full h-80 relative">
-						<div className="space-y-16 md:space-y-24 -mt-32 ring-1 ring-slate-200 bg-slate-100 rounded-2xl p-2 absolute">
+				<div className="w-full max-w-5xl mx-auto px-4 space-y-16 sm:space-y-24 md:space-y-32">
+					<div className="w-full -mb-32 aspect-[1.48/1] sm:aspect-[2.1/1] relative">
+						<div className="-mt-32 ring-1 ring-slate-200 bg-slate-100 rounded-2xl p-2 absolute">
 							<img
-								className="rounded-xl ring-1 ring-slate-200 mx-auto"
+								className="hidden sm:block rounded-xl ring-1 ring-slate-200"
 								src="/images/lix-fm.svg"
-								alt="File Manager Waitlist"
+								alt="Lix File Manager"
+							/>
+							<img
+								className="sm:hidden rounded-xl ring-1 ring-slate-200"
+								src="/images/lix-fm-mobile.svg"
+								alt="Lix File Manager"
 							/>
 						</div>
 					</div>
 
-					<div className="grid md:grid-cols-3 gap-8 md:gap-4">
-						<div className="col-span-1">
+					<div className="flex flex-wrap md:grid grid-cols-12 gap-4 md:gap-8 sm:gap-4">
+						<div className="md:col-span-5">
 							<h2 className="mt-2">Create</h2>
-							<p className="mt-4">
+							<p className="mt-4 sm:w-4/5 md:w-full">
 								Create with the freedom of change control. Trace, recover or simple read the history
 								like a book to be always on track.
 							</p>
-							{createFeatures.map((feature, index) => (
-								<div key={index} className="my-6 max-w-sm flex gap-5">
-									<div className="space-y-1.5">
-										<div className="rounded-sm px-0.5 py-0.5 bg-slate-100 w-8 text-center text-slate-700 text-sm font-medium">
-											0{index + 1}
+							<div className="sm:grid md:block grid-cols-2 gap-4 md:gap-8">
+								{createFeatures.map((feature, index) => (
+									<div key={index} className="my-6 max-w-sm flex gap-5">
+										<div className="space-y-1.5">
+											<div className="rounded-sm px-0.5 py-0.5 bg-slate-100 w-8 text-center text-slate-700 text-sm font-medium">
+												0{index + 1}
+											</div>
+											<h3 className="font-medium pt-2">{feature.title}</h3>
+											<p>{feature.description}</p>
 										</div>
-										<h3 className="font-medium pt-2">{feature.title}</h3>
-										<p>{feature.description}</p>
 									</div>
-								</div>
-							))}
+								))}
+							</div>
 						</div>
-						<div className="bg-slate-100 col-span-2 rounded-lg ring-1 ring-slate-200 overflow-clip flex items-end">
+						<div className="col-span-7 pr-5 sm:pr-8 pt-5 sm:pt-7 h-fit self-end bg-slate-100 rounded-lg ring-1 ring-slate-200 overflow-clip flex items-end">
 							<img
-								className="mr-8 mt-7 w-fit ring-1 ring-slate-200 rounded-tr-lg"
+								className="ring-1 ring-slate-200 rounded-tr-lg"
 								src="/images/fm-create.svg"
 								alt="File Manager Features"
 							/>
@@ -173,19 +180,19 @@ export default function FileManager() {
 					<div>
 						<h2 className="text-center w-full">Effortless Collaboration</h2>
 						<p className="text-center mt-4">Sync, share, and succeed together.</p>
-						<div className="my-8 flex justify-center gap-4 bg-slate-100 col-span-7 rounded-lg border border-slate-200">
+						<div className="my-8 pt-5 sm:pt-7 sm:px-8 flex flex-col sm:flex-row justify-center items-end gap-5 sm:gap-4 bg-slate-100 rounded-lg ring-1 ring-slate-200">
 							<img
-								className="ml-7 mt-7 w-fit border-t border-x border-slate-200 rounded-t-lg"
+								className="ring-1 ring-slate-200 rounded-r-lg sm:rounded-t-lg sm:rounded-br-none mr-auto"
 								src="/images/fm-collaborate-1.svg"
 								alt="File Manager Automate"
 							/>
 							<img
-								className="mr-7 mt-7 w-fit border-t border-x border-slate-200 rounded-t-lg"
+								className="ring-1 ring-slate-200 rounded-l-lg sm:rounded-t-lg sm:rounded-bl-none ml-auto mb-5 sm:mb-0"
 								src="/images/fm-collaborate-2.svg"
 								alt="File Manager Automate"
 							/>
 						</div>
-						<div className="grid md:grid-cols-3 gap-8 md:gap-4">
+						<div className="grid sm:grid-cols-3 gap-8 sm:gap-4">
 							{collaborationFeatures.map((feature, index) => (
 								<div key={index}>
 									{feature.icon}
@@ -196,26 +203,26 @@ export default function FileManager() {
 						</div>
 					</div>
 
-					<div className="grid md:grid-cols-12 gap-8 md:gap-4">
-						<div className="bg-slate-100 col-span-7 rounded-lg border border-slate-200">
+					<div className="flex flex-col-reverse sm:grid sm:grid-cols-12 gap-8 sm:gap-4">
+						<div className="col-span-8 sm:mr-4 md:mr-0 md:col-span-7 py-5 sm:py-7 md:pb-0 h-fit flex justify-center items-end bg-slate-100 rounded-lg ring-1 ring-slate-200 overflow-clip self-end">
 							<img
-								className="mx-8 mt-7 w-fit border-t border-x border-slate-200 rounded-t-lg"
+								className="ring-1 ring-slate-200 rounded-lg md:rounded-b-none"
 								src="/images/fm-automate.svg"
 								alt="File Manager Automate"
 							/>
 						</div>
 						<div className="col-span-4 col-start-9">
-							<h2 className="pt-2 pr-8">Automations for non-techies</h2>
+							<h2 className="pt-2 md:pr-8">Automations for non-techies</h2>
 							<p className="mt-4">
 								Link automations to file changes, making it easy to configure pipelines, run quality
 								checks, and integrate APIs—all triggered automatically.
 							</p>
-							<div className="pt-4">
+							<div className="pt-4 flex flex-col gap-4">
 								{automatedTasks.map((feature, index) => (
-									<div key={index} className="my-4 max-w-sm flex items-start gap-5">
+									<div key={index} className="max-w-sm flex items-start gap-5">
 										<Check />
 										<div className="space-y-1">
-											<h3 className="font-semibold">{feature.title}</h3>
+											<h3 className="font-medium">{feature.title}</h3>
 										</div>
 									</div>
 								))}
@@ -223,8 +230,8 @@ export default function FileManager() {
 						</div>
 					</div>
 
-					<div className="grid md:grid-cols-3 gap-8 md:gap-4">
-						<div className="col-span-2 md:col-span-1">
+					<div className="grid sm:grid-cols-3 gap-8 sm:gap-4">
+						<div className="col-span-2 sm:col-span-1">
 							<h2>Open questions?</h2>
 							<div className="mt-4 flex gap-2">
 								{socialLinks
@@ -234,7 +241,7 @@ export default function FileManager() {
 											href={socialLink.href}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="transition-all w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex items-center gap-2 border border-slate-300 hover:border-slate-400"
+											className="transition-all w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex items-center gap-2 ring-1 ring-slate-300 hover:ring-slate-400"
 										>
 											{socialLink.text}
 										</a>
@@ -242,23 +249,23 @@ export default function FileManager() {
 									.slice(0, 2)}
 							</div>
 						</div>
-						<div className="md:mt-3 col-span-2 space-y-3 md:space-y-6">
+						<div className="sm:mt-3 col-span-2 space-y-3 sm:space-y-6">
 							{faq.map((question, index) => (
 								<div key={index}>
 									<Details summary={question.question} content={question.answer} />
 									{faq.length - 1 !== index && (
-										<div className="mt-3 md:mt-6 border-b border-slate-200"></div>
+										<div className="mt-3 sm:mt-6 border-b border-slate-200"></div>
 									)}
 								</div>
 							))}
 						</div>
 					</div>
 
-					<div className="w-full border border-slate-200 rounded-xl grid md:grid-cols-3 gap-8 md:gap-4">
-						<div className="p-8 flex flex-col justify-between">
+					<div className="w-full ring-1 ring-slate-200 rounded-xl flex flex-col md:grid md:grid-cols-3 gap-4 overflow-clip">
+						<div className="p-4 sm:p-8 flex flex-col justify-between">
 							<div className="w-full">
 								<h2 className="text-xl pt-2">Join the waitlist!</h2>
-								<p className="mt-4">
+								<p className="mt-4 sm:w-4/5 md:w-full">
 									Sign up now to be the first to experience the Lix File Manager as soon as it's
 									released!
 								</p>
@@ -271,9 +278,9 @@ export default function FileManager() {
 								Join waitlist
 							</a>
 						</div>
-						<div className="col-span-2 pt-8">
+						<div className="col-span-2 pl-4 sm:pl-8 md:pt-8 flex items-end">
 							<img
-								className="w-full border-t border-l border-slate-200 rounded-tl-lg"
+								className="w-full ring-1 ring-slate-200 rounded-tl-lg"
 								src="/images/fm-waitlist.svg"
 								alt="File Manager Waitlist"
 							/>

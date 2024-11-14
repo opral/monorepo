@@ -1,3 +1,4 @@
+import { Link } from "@remix-run/react"
 import IconDiscord from "./icons/discord"
 import IconGitHub from "./icons/github"
 import IconLix from "./icons/lix"
@@ -25,27 +26,21 @@ const Header = () => {
 	return (
 		<header className="w-full max-w-5xl px-4 py-3 mx-auto flex items-center justify-between gap-4">
 			<div className="flex items-center gap-4">
-				<a href="/">
+				<Link to="/">
 					<IconLix />
+				</Link>
+				<Link
+					className="md:px-2 py-1 font-medium text-slate-500 hover:text-cyan-600"
+					to="/file-manager"
+				>
+					File Manager
+				</Link>
+				<a
+					className="md:px-2 py-1 font-medium text-slate-500 hover:text-cyan-600"
+					href="https://opral.substack.com"
+				>
+					Blog
 				</a>
-				{[
-					{
-						text: "File Manager",
-						href: "/file-manager",
-					},
-					{
-						text: "Blog",
-						href: "https://opral.substack.com",
-					},
-				].map((link, index) => (
-					<a
-						key={index}
-						className="px-2 py-1 font-medium text-slate-500 hover:text-cyan-600"
-						href={link.href}
-					>
-						{link.text}
-					</a>
-				))}
 			</div>
 			<div className="flex items-center md:gap-3">
 				{socialLinks.map((socialLink, index) => (
