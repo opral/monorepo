@@ -21,10 +21,10 @@ export const handle = i18n.handle({
 
 ## Deployment on Cloudflare
 
-`Paraglide-SvelteKit` makes use of `AsyncLocalStorage`. `AsyncLocalStorage` is supported on Cloudflare, but you need to enable the `nodejs_compat` feature flag in `wrangler.toml`.
+`Paraglide-SvelteKit` makes use of `AsyncLocalStorage`. `AsyncLocalStorage` is supported on Cloudflare, but you need to enable the `nodejs_als` feature flag in `wrangler.toml`.
 
 ```toml
-compatibility_flags = [ "nodejs_compat" ]
+compatibility_flags = [ "nodejs_als" ]
 ```
 
 ## Issues on Vercel
