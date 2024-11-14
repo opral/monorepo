@@ -191,7 +191,7 @@ export default function FileManager() {
 								target="_blank"
 								className="w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all"
 							>
-								Join waitlist
+								Get notified
 							</a>
 							<a
 								href="https://jsnation.us/#person-samuel-stroschein"
@@ -338,10 +338,9 @@ export default function FileManager() {
 					<div className="w-full ring-1 ring-slate-200 rounded-xl flex flex-col md:grid md:grid-cols-3 gap-4 overflow-clip">
 						<div className="p-4 sm:p-8 flex flex-col justify-between">
 							<div className="w-full">
-								<h2 className="text-xl pt-2">Join the waitlist!</h2>
+								<h2 className="text-xl pt-2">Stay in the loop</h2>
 								<p className="mt-4 sm:w-4/5 md:w-full">
-									Sign up now to be the first to experience the Lix File Manager as soon as it's
-									released!
+									Sign up to receive updates and join us for the launch event on December 16th.
 								</p>
 							</div>
 							<a
@@ -349,7 +348,7 @@ export default function FileManager() {
 								target="_blank"
 								className="mt-4 w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all"
 							>
-								Join waitlist
+								Get notified
 							</a>
 						</div>
 						<div className="col-span-2 pl-4 sm:pl-8 md:pt-8 flex items-end">
