@@ -47,7 +47,7 @@ const Header = () => {
 					</a>
 				))}
 			</div>
-			<div className="flex items-center gap-3">
+			<div className="flex items-center md:gap-3">
 				{socialLinks.map((socialLink, index) => (
 					<a
 						key={index}
