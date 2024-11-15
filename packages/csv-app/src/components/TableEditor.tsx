@@ -34,11 +34,17 @@ export default function TableEditor() {
 	// delete changes/disregard keystroke changes on merge
 	const handleUpdateCsvData = useCallback(
 		debounce(async (newData: Array<Record<string, string>>) => {
+			const csv = Papa.unparse(newData);
+
 			await lix.db
 				.updateTable("file")
-				.set("data", await new Blob([Papa.unparse(newData)]).arrayBuffer())
+				.set("data", await new Blob([csv]).arrayBuffer())
+				// @ts-expect-error - improvemnts coming
+				.set("$skip_change_queue", null)
 				.where("id", "=", activeFile.id)
+				.returningAll()
 				.execute();
+
 			// needed because lix is not writing to OPFS yet
 			await saveLixToOpfs({ lix });
 		}, 500),
