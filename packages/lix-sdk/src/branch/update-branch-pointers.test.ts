@@ -2,23 +2,14 @@ import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { updateBranchPointers } from "./update-branch-pointers.js";
 import { changeInBranch } from "../query-utilities/change-in-branch.js";
+import { createBranch } from "./create-branch.js";
 
 test("the branch change set should be updated", async () => {
 	const lix = await openLixInMemory({});
 
-	const changeSet0 = await lix.db
-		.insertInto("change_set")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const branch0 = await createBranch({ lix, name: "branch0" });
 
-	const branch0 = await lix.db
-		.insertInto("branch")
-		.values({
-			change_set_id: changeSet0.id,
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const branch1 = await createBranch({ lix, name: "branch1" });
 
 	const changes = await lix.db
 		.insertInto("change")
@@ -39,15 +30,30 @@ test("the branch change set should be updated", async () => {
 		changes,
 	});
 
-	const changesInBranch = await lix.db
+	// branch 1 should remain as is
+	await updateBranchPointers({
+		lix,
+		branch: branch1,
+		changes,
+	});
+
+	const branch0Changes0 = await lix.db
 		.selectFrom("change")
 		.where(changeInBranch(branch0))
 		.selectAll()
 		.execute();
 
+	const branch1Changes0 = await lix.db
+		.selectFrom("change")
+		.where(changeInBranch(branch1))
+		.selectAll()
+		.execute();
+
 	// the branch should contain one change
-	expect(changesInBranch.length).toBe(1);
-	expect(changesInBranch[0]?.id).toBe("change-1");
+	expect(branch0Changes0.length).toBe(1);
+	expect(branch0Changes0[0]?.id).toBe("change-1");
+	expect(branch1Changes0.length).toBe(1);
+	expect(branch1Changes0[0]?.id).toBe("change-1");
 
 	const changes2 = await lix.db
 		.insertInto("change")
@@ -68,15 +74,15 @@ test("the branch change set should be updated", async () => {
 		changes: changes2,
 	});
 
-	const changesInBranch1 = await lix.db
+	const branch0Changes1 = await lix.db
 		.selectFrom("change")
 		.where(changeInBranch(branch0))
 		.selectAll()
 		.execute();
 
 	// the head of the change is updated to change-2
-	expect(changesInBranch1.length).toBe(1);
-	expect(changesInBranch1[0]?.id).toBe("change-2");
+	expect(branch0Changes1.length).toBe(1);
+	expect(branch0Changes1[0]?.id).toBe("change-2");
 
 	// adding a change with a different entity_id should add a new change set element
 	const changes3 = await lix.db
@@ -98,17 +104,26 @@ test("the branch change set should be updated", async () => {
 		changes: changes3,
 	});
 
-	const changesInBranch2 = await lix.db
+	const branch0Changes2 = await lix.db
 		.selectFrom("change")
 		.where(changeInBranch(branch0))
 		.selectAll()
 		.execute();
 
+	const branch1Changes1 = await lix.db
+		.selectFrom("change")
+		.where(changeInBranch(branch1))
+		.selectAll()
+		.execute();
+
 	// inserting a new entity should add a new change pointer
 	// while not updating the old one
-	expect(changesInBranch2.length).toBe(2);
-	expect(changesInBranch2[0]?.id).toBe("change-2");
-	expect(changesInBranch2[1]?.id).toBe("change-3");
+	expect(branch0Changes2.length).toBe(2);
+	expect(branch0Changes2[0]?.id).toBe("change-2");
+	expect(branch0Changes2[1]?.id).toBe("change-3");
+
+	// expecting that branch 1 didn't update.
+	expect(branch1Changes0).toStrictEqual(branch1Changes1);
 });
 
 

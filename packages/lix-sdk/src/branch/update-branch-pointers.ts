@@ -38,6 +38,7 @@ export async function updateBranchPointers(args: {
 				await trx
 					.updateTable("change_set_element")
 					.set("change_id", change.id)
+					.where("change_set_id", "=", args.branch.change_set_id)
 					.where("change_id", "=", existingEntityChange.id)
 					.execute();
 			} else {
