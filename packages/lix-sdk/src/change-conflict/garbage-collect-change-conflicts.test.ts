@@ -3,7 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { garbageCollectChangeConflicts } from "./garbage-collect-change-conflicts.js";
 import { createChangeConflict } from "./create-change-conflict.js";
 import { createVersion } from "../version/create-version.js";
-import { updateVersionPointers } from "../version/update-version-pointers.js";
+import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 
 // garbage collection is not used atm
 test.skip("should garbage collect conflicts that contain one or more changes that no version change pointer references (anymore)", async () => {
@@ -60,7 +60,7 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 	// Insert version change pointers (only for change0 and change1)
 	// change2 is not referenced by any version change pointer
 	// and should be garbage collected
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: version0,
 		changes: [changes[0]!, changes[1]!],
@@ -142,7 +142,7 @@ test("should garbage collect conflicts that no version references", async () => 
 
 	// version points to changes 0 and 1
 
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: version0,
 		changes: [changes[0]!, changes[1]!],
@@ -199,7 +199,7 @@ test("should NOT garbage collect conflicts that a version change conflict pointe
 
 	// version points to changes 0 and 1
 
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: version0,
 		changes: [changes[0]!, changes[1]!],

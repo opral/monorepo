@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { updateVersionPointers } from "./update-version-pointers.js";
+import { updateChangesInVersion } from "./update-changes-in-version.js";
 import { changeInVersion } from "../query-utilities/change-in-version.js";
 import { createVersion } from "./create-version.js";
 
@@ -24,14 +24,14 @@ test("the version change set should be updated", async () => {
 		.returningAll()
 		.execute();
 
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: version0,
 		changes,
 	});
 
 	// version 1 should remain as is
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: version1,
 		changes,
@@ -68,7 +68,7 @@ test("the version change set should be updated", async () => {
 		.returningAll()
 		.execute();
 
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: version0,
 		changes: changes2,
@@ -98,7 +98,7 @@ test("the version change set should be updated", async () => {
 		.returningAll()
 		.execute();
 
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: version0,
 		changes: changes3,
@@ -130,7 +130,7 @@ test("the version change set should be updated", async () => {
 // 	const lix = await openLixInMemory({});
 
 // 	await lix.db.transaction().execute(async (trx) => {
-// 		await updateVersionPointers({
+// 		await updateChangesInVersion({
 // 			lix: { ...lix, db: trx },
 // 			changes: [],
 // 		});
@@ -178,7 +178,7 @@ test("the version change set should be updated", async () => {
 // 			.returningAll()
 // 			.execute();
 
-// 		await updateVersionPointers({
+// 		await updateChangesInVersion({
 // 			lix: { ...lix, db: trx },
 // 			version: currentversion,
 // 			changes,
@@ -211,7 +211,7 @@ test("the version change set should be updated", async () => {
 // 		])
 // 		.execute();
 
-// 	await updateVersionPointers({
+// 	await updateChangesInVersion({
 // 		lix,
 // 		version: currentversion,
 // 		changes: [],
@@ -305,7 +305,7 @@ test("the version change set should be updated", async () => {
 
 // 	await lix.db.insertInto("change_edge").values(edges).execute();
 
-// 	await updateVersionPointers({
+// 	await updateChangesInVersion({
 // 		lix,
 // 		version: sourceversion,
 // 		changes: [
@@ -315,7 +315,7 @@ test("the version change set should be updated", async () => {
 // 		],
 // 	});
 
-// 	await updateVersionPointers({
+// 	await updateChangesInVersion({
 // 		lix,
 // 		version: targetversion,
 // 		changes: [
@@ -333,7 +333,7 @@ test("the version change set should be updated", async () => {
 // 	// 	})
 // 	// 	.execute();
 
-// 	await updateVersionPointers({
+// 	await updateChangesInVersion({
 // 		lix,
 // 		version: targetversion,
 // 		changes: [

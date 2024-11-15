@@ -3,7 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { mergeVersion } from "./merge-version.js";
 import type { NewChange } from "../database/schema.js";
-import { updateVersionPointers } from "./update-version-pointers.js";
+import { updateChangesInVersion } from "./update-changes-in-version.js";
 import { createVersion } from "./create-version.js";
 
 test("it should update the version pointers in target that are not conflicting", async () => {
@@ -28,7 +28,7 @@ test("it should update the version pointers in target that are not conflicting",
 		.execute();
 
 	// source points to change1
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: sourceVersion,
 		changes: [change1!],
@@ -84,7 +84,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 		.returningAll()
 		.execute();
 
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: sourceVersion,
 		changes: [change1!, change2!, change3!],
@@ -182,14 +182,14 @@ test("it should not update the target version pointers of a conflicting change",
 		.execute();
 
 	// source points to change1
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: sourceVersion,
 		changes: [change1!],
 	});
 
 	// target points to change2
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: targetVersion,
 		changes: [change2!],
@@ -312,13 +312,13 @@ test("it should automatically detect a diverging entity conflict", async () => {
 		])
 		.execute();
 
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: sourceVersion,
 		changes: [sourceChange],
 	});
 
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: targetVersion,
 		changes: [targetChange],
@@ -423,14 +423,14 @@ test("re-curring merges should not create a new conflict if the conflict already
 		.execute();
 
 	// source version points to change0
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: sourceVersion,
 		changes: [changes[0]!],
 	});
 
 	// target version points to change1
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: targetVersion,
 		changes: [changes[1]!],

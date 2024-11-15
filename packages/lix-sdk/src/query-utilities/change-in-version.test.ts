@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { changeInVersion } from "./change-in-version.js";
 import { createVersion } from "../version/create-version.js";
-import { updateVersionPointers } from "../version/update-version-pointers.js";
+import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 
 test("select changeInVersion should retrieve all changes in the version including ancestors", async () => {
 	const lix = await openLixInMemory({});
@@ -59,7 +59,7 @@ test("select changeInVersion should retrieve all changes in the version includin
 		.execute();
 
 	// Point the version to changeC, which should include changeA and changeB as ancestors
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version,
 		changes: [changeC!],

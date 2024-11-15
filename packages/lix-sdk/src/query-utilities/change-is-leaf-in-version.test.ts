@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { updateVersionPointers } from "../version/update-version-pointers.js";
+import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 import { changeIsLeafInVersion } from "./change-is-leaf-in-version.js";
 import { createVersion } from "../version/create-version.js";
 
@@ -50,7 +50,7 @@ test("it should return the leaf change for the given version", async () => {
 		])
 		.execute();
 
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: version0,
 		// only point to the second change even though
@@ -59,7 +59,7 @@ test("it should return the leaf change for the given version", async () => {
 	});
 
 	// letting another version (version1) point to the third change
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: version1,
 		changes: [insertedChanges[2]!],

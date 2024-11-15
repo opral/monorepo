@@ -1,7 +1,7 @@
 import type { Change, ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { applyChanges } from "../plugin/apply-changes.js";
-import { updateVersionPointers } from "../version/update-version-pointers.js";
+import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 
 /**
  * Resolves a conflict by selecting one of the two
@@ -45,7 +45,7 @@ export async function resolveChangeConflictBySelecting(args: {
 			.execute();
 
 		for (const version of versionsWithConflicts) {
-			await updateVersionPointers({
+			await updateChangesInVersion({
 				lix: { ...args.lix, db: trx },
 				changes: [args.select],
 				version,

@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createVersion } from "./create-version.js";
-import { updateVersionPointers } from "./update-version-pointers.js";
+import { updateChangesInVersion } from "./update-changes-in-version.js";
 import { createChangeConflict } from "../change-conflict/create-change-conflict.js";
 
 test("it should copy the changes from the parent version", async () => {
@@ -40,7 +40,7 @@ test("it should copy the changes from the parent version", async () => {
 		.returningAll()
 		.execute();
 
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: version0,
 		changes,
@@ -139,7 +139,7 @@ test("it should copy change conflict pointers from the parent version", async ()
 		.returningAll()
 		.execute();
 
-	await updateVersionPointers({
+	await updateChangesInVersion({
 		lix,
 		version: version0,
 		changes,

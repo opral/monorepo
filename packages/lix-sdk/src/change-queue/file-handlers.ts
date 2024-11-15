@@ -1,7 +1,7 @@
 import type { ChangeQueueEntry } from "../database/schema.js";
 import type { DetectedChange } from "../plugin/lix-plugin.js";
 import { minimatch } from "minimatch";
-import { updateVersionPointers } from "../version/update-version-pointers.js";
+import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 import { changeIsLeafInVersion } from "../query-utilities/change-is-leaf-in-version.js";
 import { createSnapshot } from "../snapshot/create-snapshot.js";
 import type { Lix } from "../lix/open-lix.js";
@@ -92,7 +92,7 @@ export async function handleFileInsert(args: {
 				.returningAll()
 				.executeTakeFirstOrThrow();
 
-			await updateVersionPointers({
+			await updateChangesInVersion({
 				lix: { ...args.lix, db: trx },
 				changes: [insertedChange],
 				version: currentVersion,
@@ -196,7 +196,7 @@ export async function handleFileChange(args: {
 				.returningAll()
 				.executeTakeFirstOrThrow();
 
-			await updateVersionPointers({
+			await updateChangesInVersion({
 				lix: { ...args.lix, db: trx },
 				changes: [insertedChange],
 				version: currentversion,

@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { changeIsLeaf } from "./change-is-leaf.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { updateVersionPointers } from "../version/update-version-pointers.js";
+import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 import { changeInVersion } from "./change-in-version.js";
 
 test("should only return the leaf change", async () => {
@@ -120,7 +120,7 @@ test.todo(
 			.executeTakeFirstOrThrow();
 
 		// let the version point only to the first change
-		await updateVersionPointers({
+		await updateChangesInVersion({
 			lix,
 			changes: [changes[0]!],
 			version: currentVersion,
