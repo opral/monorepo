@@ -7,12 +7,12 @@ import type { Lix } from "../lix/open-lix.js";
  * Calls the `applyChanges` method of the corresponding plugin for each change.
  * **Carefull**, the changes are not validated before applying them. It is up to
  * the caller to ensure that the changes are valid. Usually, only the leaf changes
- * of a given branch should be applied.
+ * of a given version should be applied.
  *
  * @example
  *   ```ts
  *   const changes = await lix.db.selectFrom("change")
- *      .where(changeIsLeafInBranch(currentBranch))
+ *      .where(changeIsLeafInVersion(currentVersion))
  *      .selectAll()
  *      .execute();
  *

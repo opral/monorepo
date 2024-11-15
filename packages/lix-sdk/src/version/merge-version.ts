@@ -1,6 +1,6 @@
 import { createChangeConflict } from "../change-conflict/create-change-conflict.js";
 import { detectChangeConflicts } from "../change-conflict/detect-change-conflicts.js";
-import { changeSetElementIsSymmetricDifference } from "../change-set/x.js";
+import { changeSetElementInSymmetricDifference } from "../change-set/change-set-element-in-symmetric-difference.js";
 import type { Version } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { changeInVersion } from "../query-utilities/change-in-version.js";
@@ -22,7 +22,7 @@ export async function mergeVersion(args: {
 				"change_set_element.change_id",
 			)
 			.where(
-				changeSetElementIsSymmetricDifference(sourceChangeSet, targetChangeSet),
+				changeSetElementInSymmetricDifference(sourceChangeSet, targetChangeSet),
 			)
 			.selectAll("change")
 			.select("change_set_element.change_set_id")

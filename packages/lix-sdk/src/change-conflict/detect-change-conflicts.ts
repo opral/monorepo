@@ -8,8 +8,8 @@ import { detectDivergingEntityConflict } from "./detect-diverging-entity-conflic
  * The caller is responsible for filtering out changes
  * that should not lead to conflicts before calling this function.
  *
- * For example, detecting conflicts between two branches should
- * only include changes that are different between the two branches
+ * For example, detecting conflicts between two versiones should
+ * only include changes that are different between the two versiones
  * when calling this function.
  *
  * @example

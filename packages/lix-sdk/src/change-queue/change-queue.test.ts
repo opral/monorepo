@@ -184,7 +184,7 @@ test("should use queue and settled correctly", async () => {
 		.selectAll()
 		.execute();
 
-	const branchChangeSetElements = await lix.db
+	const versionChangeSetElements = await lix.db
 		.selectFrom("change_set_element")
 		.where("change_set_id", "=", currentVersion.change_set_id)
 		.selectAll()
@@ -227,8 +227,8 @@ test("should use queue and settled correctly", async () => {
 		{ parent_id: updatedChanges[1]?.id, child_id: updatedChanges[2]?.id },
 	]);
 
-	// the branch change pointers points to the last change
-	expect(branchChangeSetElements).toEqual([
+	// the version change pointers points to the last change
+	expect(versionChangeSetElements).toEqual([
 		expect.objectContaining({
 			change_set_id: currentVersion.change_set_id,
 			change_id: updatedChanges[2]?.id,

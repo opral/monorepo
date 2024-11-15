@@ -817,7 +817,7 @@ test("it should copy change sets and merge memberships", async () => {
 	const changeSets = await targetLix.db
 		.selectFrom("change_set")
 		.selectAll()
-		// the initial change set for a branch
+		// the initial change set for a version
 		.where("id", "is not", "00000000-0000-0000-0000-000000000000")
 		.execute();
 
@@ -832,7 +832,7 @@ test("it should copy change sets and merge memberships", async () => {
 		.where("change_set_id", "=", changeSet2.id)
 		.execute();
 
-	// expect two change sets (exluding the current branches change set)
+	// expect two change sets (exluding the current versiones change set)
 	expect(
 		changeSets.filter((s) => s.id !== currentVersion.change_set_id).length,
 	).toBe(2);

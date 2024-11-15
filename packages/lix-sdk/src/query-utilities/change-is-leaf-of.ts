@@ -6,7 +6,7 @@ import type { Change } from "../database/schema.js";
  * Filter to select the last descendant of the specified change.
  *
  * @example
- *   Checking for the leaf of a change in all branches.
+ *   Checking for the leaf of a change in all versiones.
  *
  *   ```ts
  *   await lix.db.selectFrom("change")
@@ -16,12 +16,12 @@ import type { Change } from "../database/schema.js";
  *   ```
  *
  * @example
- *   Checking for the leaf of a change in a specific branch.
+ *   Checking for the leaf of a change in a specific version.
  *
  *   ```ts
  *   await lix.db.selectFrom("change")
  *     .where(changeIsLeafOf(someChange))
- *     .where(changeInBranch(someBranch))
+ *     .where(changeInVersion(someVersion))
  *     .selectAll()
  *     .execute();
  *   ```

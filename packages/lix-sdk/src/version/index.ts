@@ -1,5 +1,5 @@
 /**
- * Public API for the branches.
+ * Public API for the versiones.
  */
 
 export { createVersion } from "./create-version.js";

@@ -1,23 +1,23 @@
 // import { createChangeConflict } from "../change-conflict/create-change-conflict.js";
 // import { detectChangeConflicts } from "../change-conflict/detect-change-conflicts.js";
-// import type { Branch } from "../database/schema.js";
+// import type { version } from "../database/schema.js";
 // import type { Lix } from "../lix/open-lix.js";
 
 // export async function updateChangeConflicts(args: {
 // 	lix: Pick<Lix, "db" | "plugin">;
-// 	branch: Pick<Branch, "id">;
+// 	version: Pick<version, "id">;
 // }) {
 // 	const executeInTransaction = async (trx: Lix["db"]) => {
-// 		// const targetBranches = await trx
-// 		// 	.selectFrom("branch_target")
-// 		// 	.where("target_branch_id", "=", args.branch.id)
+// 		// const targetversiones = await trx
+// 		// 	.selectFrom("version_target")
+// 		// 	.where("target_version_id", "=", args.version.id)
 // 		// 	.selectAll()
 // 		// 	.execute();
 
-// 		for (const targetBranch of [args.branch]) {
-// 			const diffingPointers = await getBranchChangePointerDiff(trx, {
-// 				sourceBranch: { id: targetBranch.source_branch_id },
-// 				targetBranch: { id: targetBranch.target_branch_id },
+// 		for (const targetversion of [args.version]) {
+// 			const diffingPointers = await getversionChangePointerDiff(trx, {
+// 				sourceversion: { id: targetversion.source_version_id },
+// 				targetversion: { id: targetversion.target_version_id },
 // 			});
 
 // 			// the set all change ids that are diffing
@@ -53,16 +53,16 @@
 // 			for (const detectedConflict of detectedConflicts) {
 // 				const conflict = await createChangeConflict({
 // 					lix: { ...args.lix, db: trx },
-// 					branch: args.branch,
+// 					version: args.version,
 // 					key: detectedConflict.key,
 // 					conflictingChangeIds: detectedConflict.conflictingChangeIds,
 // 				});
 
 // 				// todo move to createChangeConflict
 // 				await trx
-// 					.insertInto("branch_change_conflict_pointer")
+// 					.insertInto("version_change_conflict_pointer")
 // 					.values({
-// 						branch_id: args.branch.id,
+// 						version_id: args.version.id,
 // 						change_conflict_id: conflict.id,
 // 					})
 // 					.onConflict((oc) => oc.doNothing())

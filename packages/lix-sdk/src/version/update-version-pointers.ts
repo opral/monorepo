@@ -54,7 +54,7 @@ export async function updateVersionPointers(args: {
 
 		if (args.changeConflicts) {
 			const changeConflictPointers = args.changeConflicts?.map((conflict) => ({
-				branch_id: args.version.id,
+				version_id: args.version.id,
 				change_conflict_id: conflict.id,
 			}));
 			if (changeConflictPointers.length > 0) {
@@ -69,7 +69,7 @@ export async function updateVersionPointers(args: {
 					.onConflict((oc) => oc.doNothing())
 					.execute();
 			} else if (changeConflictPointers.length === 0) {
-				// if there are no conflicts, then delete all pointers for the branch
+				// if there are no conflicts, then delete all pointers for the version
 				await trx
 					.deleteFrom("version_change_conflict_pointer")
 					.where("version_id", "=", args.version.id)
@@ -79,7 +79,7 @@ export async function updateVersionPointers(args: {
 
 		// await updateChangeConflicts({
 		// 	lix: { ...args.lix, db: trx },
-		// 	branch,
+		// 	version,
 		// });
 	};
 

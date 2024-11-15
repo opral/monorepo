@@ -4,7 +4,7 @@ import { updateVersionPointers } from "./update-version-pointers.js";
 import { changeInVersion } from "../query-utilities/change-in-version.js";
 import { createVersion } from "./create-version.js";
 
-test("the branch change set should be updated", async () => {
+test("the version change set should be updated", async () => {
 	const lix = await openLixInMemory({});
 
 	const version0 = await createVersion({ lix, name: "version0" });
@@ -30,7 +30,7 @@ test("the branch change set should be updated", async () => {
 		changes,
 	});
 
-	// branch 1 should remain as is
+	// version 1 should remain as is
 	await updateVersionPointers({
 		lix,
 		version: version1,
@@ -49,7 +49,7 @@ test("the branch change set should be updated", async () => {
 		.selectAll()
 		.execute();
 
-	// the branch should contain one change
+	// the version should contain one change
 	expect(version0Changes0.length).toBe(1);
 	expect(version0Changes0[0]?.id).toBe("change-1");
 	expect(version1Changes0.length).toBe(1);
@@ -122,7 +122,7 @@ test("the branch change set should be updated", async () => {
 	expect(version0Changes2[0]?.id).toBe("change-2");
 	expect(version0Changes2[1]?.id).toBe("change-3");
 
-	// expecting that branch 1 didn't update.
+	// expecting that version 1 didn't update.
 	expect(version1Changes0).toStrictEqual(version1Changes1);
 });
 
@@ -136,21 +136,21 @@ test("the branch change set should be updated", async () => {
 // 		});
 // 	});
 
-// 	const branchChangePointers = await lix.db
-// 		.selectFrom("branch_change_pointer")
+// 	const versionChangePointers = await lix.db
+// 		.selectFrom("version_change_pointer")
 // 		.selectAll()
 // 		.execute();
 
 // 	// no change pointers should be created
-// 	expect(branchChangePointers.length).toBe(0);
+// 	expect(versionChangePointers.length).toBe(0);
 // });
 
 // // uncertain if behavior generalizes. might be better to have this as an opt-in automation.
 // test.skip("change conflicts should be garbage collected", async () => {
 // 	const lix = await openLixInMemory({});
 
-// 	const currentBranch = await lix.db
-// 		.selectFrom("current_branch")
+// 	const currentversion = await lix.db
+// 		.selectFrom("current_version")
 // 		.selectAll()
 // 		.executeTakeFirstOrThrow();
 
@@ -180,12 +180,12 @@ test("the branch change set should be updated", async () => {
 
 // 		await updateVersionPointers({
 // 			lix: { ...lix, db: trx },
-// 			branch: currentBranch,
+// 			version: currentversion,
 // 			changes,
 // 		});
 // 	});
 
-// 	// no branch is pointing to the change conflict,
+// 	// no version is pointing to the change conflict,
 // 	// so it should be garbage collected
 
 // 	const changeConflict = await lix.db
@@ -213,7 +213,7 @@ test("the branch change set should be updated", async () => {
 
 // 	await updateVersionPointers({
 // 		lix,
-// 		branch: currentBranch,
+// 		version: currentversion,
 // 		changes: [],
 // 	});
 
@@ -230,14 +230,14 @@ test("the branch change set should be updated", async () => {
 // test.skip("it raise a diverging entity conflict (based off a reproduction)", async () => {
 // 	const lix = await openLixInMemory({});
 
-// 	const sourceBranch = await lix.db
-// 		.insertInto("branch")
+// 	const sourceversion = await lix.db
+// 		.insertInto("version")
 // 		.values({ name: "moles-burn" })
 // 		.returningAll()
 // 		.executeTakeFirstOrThrow();
 
-// 	const targetBranch = await lix.db
-// 		.insertInto("branch")
+// 	const targetversion = await lix.db
+// 		.insertInto("version")
 // 		.values({ name: "elephant" })
 // 		.returningAll()
 // 		.executeTakeFirstOrThrow();
@@ -307,7 +307,7 @@ test("the branch change set should be updated", async () => {
 
 // 	await updateVersionPointers({
 // 		lix,
-// 		branch: sourceBranch,
+// 		version: sourceversion,
 // 		changes: [
 // 			mockChanges.find(
 // 				(change) => change.id === "a4b48412-f809-49c9-83ce-77fe51831961",
@@ -317,7 +317,7 @@ test("the branch change set should be updated", async () => {
 
 // 	await updateVersionPointers({
 // 		lix,
-// 		branch: targetBranch,
+// 		version: targetversion,
 // 		changes: [
 // 			mockChanges.find(
 // 				(change) => change.id === "654d91f1-6139-434c-9047-9fff751ed0c4",
@@ -326,16 +326,16 @@ test("the branch change set should be updated", async () => {
 // 	});
 
 // 	// await lix.db
-// 	// 	.insertInto("branch_target")
+// 	// 	.insertInto("version_target")
 // 	// 	.values({
-// 	// 		source_branch_id: sourceBranch.id,
-// 	// 		target_branch_id: targetBranch.id,
+// 	// 		source_version_id: sourceversion.id,
+// 	// 		target_version_id: targetversion.id,
 // 	// 	})
 // 	// 	.execute();
 
 // 	await updateVersionPointers({
 // 		lix,
-// 		branch: targetBranch,
+// 		version: targetversion,
 // 		changes: [
 // 			mockChanges.find(
 // 				(change) => change.id === "4e9fd25f-ed9c-40ae-a2ad-1a75677a2668",

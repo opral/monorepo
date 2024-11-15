@@ -4,7 +4,7 @@ import { updateVersionPointers } from "../version/update-version-pointers.js";
 import { changeIsLeafInVersion } from "./change-is-leaf-in-version.js";
 import { createVersion } from "../version/create-version.js";
 
-test("it should return the leaf change for the given branch", async () => {
+test("it should return the leaf change for the given version", async () => {
 	const lix = await openLixInMemory({});
 
 	const version0 = await createVersion({ lix, name: "version0" });
@@ -58,7 +58,7 @@ test("it should return the leaf change for the given branch", async () => {
 		changes: [insertedChanges[1]!],
 	});
 
-	// letting another branch (version1) point to the third change
+	// letting another version (version1) point to the third change
 	await updateVersionPointers({
 		lix,
 		version: version1,
@@ -71,7 +71,7 @@ test("it should return the leaf change for the given branch", async () => {
 		.selectAll()
 		.execute();
 
-	// change 2 is the leaf change for the current branch
+	// change 2 is the leaf change for the current version
 	expect(changes).toHaveLength(1);
 	expect(changes[0]?.id).toBe("change2");
 });
