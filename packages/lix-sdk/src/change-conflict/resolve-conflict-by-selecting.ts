@@ -1,7 +1,7 @@
-import { updateBranchPointers } from "../branch/update-branch-pointers.js";
 import type { Change, ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { applyChanges } from "../plugin/apply-changes.js";
+import { updateVersionPointers } from "../version/update-version-pointers.js";
 
 /**
  * Resolves a conflict by selecting one of the two
@@ -29,31 +29,31 @@ export async function resolveChangeConflictBySelecting(args: {
 			changes: [args.select],
 		});
 
-		const branchesWithConflict = await trx
-			.selectFrom("branch")
+		const versionsWithConflicts = await trx
+			.selectFrom("version")
 			.innerJoin(
-				"branch_change_conflict_pointer",
-				"branch_change_conflict_pointer.branch_id",
-				"branch.id",
+				"version_change_conflict_pointer",
+				"version_change_conflict_pointer.version_id",
+				"version.id",
 			)
 			.where(
-				"branch_change_conflict_pointer.change_conflict_id",
+				"version_change_conflict_pointer.change_conflict_id",
 				"=",
 				args.conflict.id,
 			)
 			.selectAll()
 			.execute();
 
-		for (const branch of branchesWithConflict) {
-			await updateBranchPointers({
+		for (const version of versionsWithConflicts) {
+			await updateVersionPointers({
 				lix: { ...args.lix, db: trx },
 				changes: [args.select],
-				branch,
+				version,
 			});
 			// remove the conflict pointer
 			await trx
-				.deleteFrom("branch_change_conflict_pointer")
-				.where("branch_id", "=", branch.id)
+				.deleteFrom("version_change_conflict_pointer")
+				.where("version_id", "=", version.id)
 				.where("change_conflict_id", "=", args.conflict.id)
 				.execute();
 		}

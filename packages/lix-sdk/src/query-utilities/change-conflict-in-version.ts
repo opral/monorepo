@@ -1,25 +1,25 @@
 import type { ExpressionBuilder, ExpressionWrapper, SqlBool } from "kysely";
-import type { Branch, LixDatabaseSchema } from "../database/schema.js";
+import type { Version, LixDatabaseSchema } from "../database/schema.js";
 
 /**
- * Filters if a conflict is in the given branch.
+ * Filters if a conflict is in the given version.
  *
  * @example
  *   ```ts
  *   const conflicts = await lix.db.selectFrom("change_conflict")
- *      .where(changeConflictInBranch(currentBranch))
+ *      .where(changeConflictInVersion(currentVersion))
  *      .selectAll()
  *      .execute();
  *   ```
  */
-export function changeConflictInBranch(branch: Pick<Branch, "id">) {
+export function changeConflictInVersion(version: Pick<Version, "id">) {
 	return (
 		eb: ExpressionBuilder<LixDatabaseSchema, "change_conflict">,
 	): ExpressionWrapper<LixDatabaseSchema, "change_conflict", SqlBool> =>
 		eb("change_conflict.id", "in", (subquery) =>
 			subquery
-				.selectFrom("branch_change_conflict_pointer")
+				.selectFrom("version_change_conflict_pointer")
 				.select("change_conflict_id")
-				.where("branch_change_conflict_pointer.branch_id", "=", branch.id),
+				.where("version_change_conflict_pointer.version_id", "=", version.id),
 		);
 }

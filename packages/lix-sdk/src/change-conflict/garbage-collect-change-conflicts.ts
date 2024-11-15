@@ -14,17 +14,17 @@ export async function garbageCollectChangeConflicts(args: {
 	deletedChangeConflicts: ChangeConflict[];
 }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		// no branches are pointing to the change conflict anymore
+		// no versions are pointing to the change conflict anymore
 		// this can happen if a branch is deleted or if the conflict is outdated
 		// -> delete the conflict
-		const conflictsWithNoBranchPointer = await trx
+		const conflictsWithVersionPointer = await trx
 			.selectFrom("change_conflict")
 			.leftJoin(
-				"branch_change_conflict_pointer",
+				"version_change_conflict_pointer",
 				"change_conflict.id",
-				"branch_change_conflict_pointer.change_conflict_id",
+				"version_change_conflict_pointer.change_conflict_id",
 			)
-			.where("branch_change_conflict_pointer.change_conflict_id", "is", null)
+			.where("version_change_conflict_pointer.change_conflict_id", "is", null)
 			.selectAll()
 			.execute();
 
@@ -59,7 +59,7 @@ export async function garbageCollectChangeConflicts(args: {
 			.execute();
 
 		const conflictsToDelete = [
-			...conflictsWithNoBranchPointer,
+			...conflictsWithVersionPointer,
 			...outdatedConflicts,
 		];
 
@@ -81,7 +81,7 @@ export async function garbageCollectChangeConflicts(args: {
 				.execute();
 
 			await trx
-				.deleteFrom("branch_change_conflict_pointer")
+				.deleteFrom("version_change_conflict_pointer")
 				.where("change_conflict_id", "in", conflictIds)
 				.execute();
 		}

@@ -1,10 +1,10 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeConflict } from "../change-conflict/create-change-conflict.js";
-import { changeConflictInBranch } from "./change-conflict-in-branch.js";
-import { createBranch } from "../branch/create-branch.js";
+import { changeConflictInVersion } from "./change-conflict-in-version.js";
+import { createVersion } from "../version/create-version.js";
 
-test("should find conflicts in the given branch", async () => {
+test("should find conflicts in the given version", async () => {
 	const lix = await openLixInMemory({});
 
 	// Insert changes
@@ -30,33 +30,33 @@ test("should find conflicts in the given branch", async () => {
 		])
 		.execute();
 
-	const branch0 = await createBranch({ lix, name: "branch0" });
+	const version0 = await createVersion({ lix, name: "version0" });
 
-	const branch1 = await createBranch({ lix, name: "branch1" });
+	const version1 = await createVersion({ lix, name: "version1" });
 
 	// Create change conflicts
 	const mockConflict0 = await createChangeConflict({
 		lix,
-		branch: branch0,
+		version: version0,
 		key: "mock-conflict0",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
 
-	// conflict in another branch that should not be returned
+	// conflict in another version that should not be returned
 	await createChangeConflict({
 		lix,
-		branch: branch1,
+		version: version1,
 		key: "mock-conflict1",
 		conflictingChangeIds: new Set(["change0"]),
 	});
 
-	// Query conflicts in the branch
-	const conflictsInBranch = await lix.db
+	// Query conflicts in the version
+	const conflictsInversion = await lix.db
 		.selectFrom("change_conflict")
-		.where(changeConflictInBranch(branch0))
+		.where(changeConflictInVersion(version0))
 		.selectAll()
 		.execute();
 
-	expect(conflictsInBranch.length).toBe(1);
-	expect(conflictsInBranch[0]?.id).toBe(mockConflict0.id);
+	expect(conflictsInversion.length).toBe(1);
+	expect(conflictsInversion[0]?.id).toBe(mockConflict0.id);
 });

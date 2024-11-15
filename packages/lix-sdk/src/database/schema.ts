@@ -19,10 +19,10 @@ export type LixDatabaseSchema = {
 	discussion: DiscussionTable;
 	comment: CommentTable;
 
-	// branch
-	current_branch: CurrentBranchTable;
-	branch: BranchTable;
-	branch_change_conflict_pointer: BranchChangeConflictPointerTable;
+	// version
+	current_version: CurrentVersionTable;
+	version: VersionTable;
+	version_change_conflict_pointer: VersionChangeConflictPointerTable;
 
 	// change conflicts
 	change_conflict: ChangeConflictTable;
@@ -163,52 +163,52 @@ type ChangeSetLabelTable = {
 	label_id: string;
 };
 
-// ------ branches ------
+// ------ versiones ------
 
-export type Branch = Selectable<BranchTable>;
-export type NewBranch = Insertable<BranchTable>;
-export type BranchUpdate = Updateable<BranchTable>;
-type BranchTable = {
+export type Version = Selectable<VersionTable>;
+export type Newversion = Insertable<VersionTable>;
+export type VersionUpdate = Updateable<VersionTable>;
+type VersionTable = {
 	id: Generated<string>;
 	change_set_id: string;
 	name: string | null;
 };
 
-export type BranchChangePointer = Selectable<BranchChangePointerTable>;
-export type NewBranchChangePointer = Insertable<BranchChangePointerTable>;
-export type BranchChangePointerUpdate = Updateable<BranchChangePointerTable>;
-type BranchChangePointerTable = {
-	branch_id: string;
+export type VersionChangePointer = Selectable<VersionChangePointerTable>;
+export type NewVersionChangePointer = Insertable<VersionChangePointerTable>;
+export type VersionChangePointerUpdate = Updateable<VersionChangePointerTable>;
+type VersionChangePointerTable = {
+	version_id: string;
 	change_id: string;
 	change_file_id: string;
 	change_entity_id: string;
 	change_schema_key: string;
 };
 
-export type BranchChangeConflictPointer =
-	Selectable<BranchChangeConflictPointerTable>;
-export type NewBranchChangeConflictPointer =
-	Insertable<BranchChangeConflictPointerTable>;
-export type BranchChangeConflictPointerUpdate =
-	Updateable<BranchChangeConflictPointerTable>;
-type BranchChangeConflictPointerTable = {
-	branch_id: string;
+export type VersionChangeConflictPointer =
+	Selectable<VersionChangeConflictPointerTable>;
+export type NewversionChangeConflictPointer =
+	Insertable<VersionChangeConflictPointerTable>;
+export type VersionChangeConflictPointerUpdate =
+	Updateable<VersionChangeConflictPointerTable>;
+type VersionChangeConflictPointerTable = {
+	version_id: string;
 	change_conflict_id: string;
 };
 
-export type CurrentBranch = Selectable<CurrentBranchTable>;
-export type NewCurrentBranch = Insertable<CurrentBranchTable>;
-export type CurrentBranchUpdate = Updateable<CurrentBranchTable>;
-type CurrentBranchTable = {
+export type Currentversion = Selectable<CurrentVersionTable>;
+export type NewCurrentversion = Insertable<CurrentVersionTable>;
+export type CurrentversionUpdate = Updateable<CurrentVersionTable>;
+type CurrentVersionTable = {
 	id: string;
 };
 
-// export type BranchTarget = Selectable<BranchTargetTable>;
-// export type NewBranchTarget = Insertable<BranchTargetTable>;
-// export type BranchTargetUpdate = Updateable<BranchTargetTable>;
-// type BranchTargetTable = {
-// 	source_branch_id: string;
-// 	target_branch_id: string;
+// export type versionTarget = Selectable<versionTargetTable>;
+// export type NewversionTarget = Insertable<versionTargetTable>;
+// export type versionTargetUpdate = Updateable<versionTargetTable>;
+// type versionTargetTable = {
+// 	source_version_id: string;
+// 	target_version_id: string;
 // };
 
 // -------- change conflicts --------

@@ -173,19 +173,19 @@ export async function applySchema(args: {
 
   INSERT OR IGNORE INTO label (name) VALUES ('confirmed');
 
-  -- branches
+  -- versions
 
-  CREATE TABLE IF NOT EXISTS branch (
+  CREATE TABLE IF NOT EXISTS version (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     change_set_id TEXT NOT NULL,
 
     -- name is optional. 
     -- 
-    -- "anonymous" branches can ease workflows. 
-    -- For example, a user can create a branch 
+    -- "anonymous" versiones can ease workflows. 
+    -- For example, a user can create a version 
     -- without a name to experiment with
     -- changes with no mental overhead of 
-    -- naming the branch.
+    -- naming the version.
     name TEXT,
 
     FOREIGN KEY(change_set_id) REFERENCES change_set(id),
@@ -193,44 +193,44 @@ export async function applySchema(args: {
     -- Assuming mutable change sets. 
     -- If change sets are immutable,
     -- remove the UNIQUE constraint
-    -- and update branch pointers to 
+    -- and update version pointers to 
     -- create a new change set on updates
     UNIQUE (id, change_set_id)
   ) strict;
 
-  CREATE TABLE IF NOT EXISTS branch_change_conflict_pointer (
-    branch_id TEXT NOT NULL,
+  CREATE TABLE IF NOT EXISTS version_change_conflict_pointer (
+    version_id TEXT NOT NULL,
     change_conflict_id TEXT NOT NULL,
 
-    PRIMARY KEY (branch_id, change_conflict_id),
-    FOREIGN KEY (branch_id) REFERENCES branch(id),
+    PRIMARY KEY (version_id, change_conflict_id),
+    FOREIGN KEY (version_id) REFERENCES version(id),
     FOREIGN KEY (change_conflict_id) REFERENCES change_conflict(id)
   ) strict;
 
-  -- only one branch can be active at a time
+  -- only one version can be active at a time
   -- hence, the table has only one row
-  CREATE TABLE IF NOT EXISTS current_branch (
+  CREATE TABLE IF NOT EXISTS current_version (
     id TEXT NOT NULL PRIMARY KEY,
 
-    FOREIGN KEY(id) REFERENCES branch(id)
+    FOREIGN KEY(id) REFERENCES version(id)
   ) strict;
 
-  -- Insert the default branch if missing
+  -- Insert the default version if missing
   -- (this is a workaround for not having a separata creation and migration schema's)
 
   INSERT INTO change_set (id)
   SELECT '01932cf1-f717-75e5-8513-dc6a0867b1ee'
   WHERE NOT EXISTS (SELECT 1 FROM change_set);
 
-  INSERT INTO branch (id, change_set_id, name)
+  INSERT INTO version (id, change_set_id, name)
   SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6', '01932cf1-f717-75e5-8513-dc6a0867b1ee', 'main'
-  WHERE NOT EXISTS (SELECT 1 FROM branch);
+  WHERE NOT EXISTS (SELECT 1 FROM version);
 
-  -- Set the default current branch to 'main' if both tables are empty
+  -- Set the default current version to 'main' if both tables are empty
   -- (this is a workaround for not having a separata creation and migration schema's)
-  INSERT INTO current_branch (id)
+  INSERT INTO current_version (id)
   SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6'
-  WHERE NOT EXISTS (SELECT 1 FROM current_branch);
+  WHERE NOT EXISTS (SELECT 1 FROM current_version);
 
 `;
 }

@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
 import { changeIsLeaf } from "./change-is-leaf.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { updateBranchPointers } from "../branch/update-branch-pointers.js";
-import { changeInBranch } from "./change-in-branch.js";
+import { updateVersionPointers } from "../version/update-version-pointers.js";
+import { changeInVersion } from "./change-in-version.js";
 
 test("should only return the leaf change", async () => {
 	const lix = await openLixInMemory({});
@@ -81,7 +81,7 @@ test("should return the change even if it's the only one", async () => {
 
 // needs sql debugging why the query is not working as expected
 test.todo(
-	"it should work in combination with the `changeInBranch()` filter",
+	"it should work in combination with the `changeInVersion()` filter",
 	async () => {
 		const lix = await openLixInMemory({});
 
@@ -113,27 +113,27 @@ test.todo(
 			.values([{ parent_id: "change1", child_id: "change2" }])
 			.execute();
 
-		const currentBranch = await lix.db
-			.selectFrom("current_branch")
-			.innerJoin("branch", "branch.id", "current_branch.id")
-			.selectAll("branch")
+		const currentVersion = await lix.db
+			.selectFrom("current_version")
+			.innerJoin("version", "version.id", "current_version.id")
+			.selectAll("version")
 			.executeTakeFirstOrThrow();
 
-		// let the branch point only to the first change
-		await updateBranchPointers({
+		// let the version point only to the first change
+		await updateVersionPointers({
 			lix,
 			changes: [changes[0]!],
-			branch: currentBranch,
+			version: currentVersion,
 		});
 
 		const result = await lix.db
 			.selectFrom("change")
 			.where(changeIsLeaf())
-			.where(changeInBranch(currentBranch))
+			.where(changeInVersion(currentVersion))
 			.selectAll()
 			.execute();
 
-		// expecting the leaf change in the current branch to be change 1
+		// expecting the leaf change in the current version to be change 1
 		expect(result).toHaveLength(1);
 		expect(result.map((c) => c.id)).toEqual(["change1"]);
 	},

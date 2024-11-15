@@ -2,14 +2,14 @@ import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { garbageCollectChangeConflicts } from "./garbage-collect-change-conflicts.js";
 import { createChangeConflict } from "./create-change-conflict.js";
-import { createBranch } from "../branch/create-branch.js";
-import { updateBranchPointers } from "../branch/update-branch-pointers.js";
+import { createVersion } from "../version/create-version.js";
+import { updateVersionPointers } from "../version/update-version-pointers.js";
 
-// garbage collection is not used atm 
-test.skip("should garbage collect conflicts that contain one or more changes that no branch change pointer references (anymore)", async () => {
+// garbage collection is not used atm
+test.skip("should garbage collect conflicts that contain one or more changes that no version change pointer references (anymore)", async () => {
 	const lix = await openLixInMemory({});
 
-	const branch0 = await createBranch({ lix, name: "branch0" });
+	const version0 = await createVersion({ lix, name: "version0" });
 
 	const changes = await lix.db
 		.insertInto("change")
@@ -45,24 +45,24 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 	// Create change conflicts
 	const mockConflict0 = await createChangeConflict({
 		lix,
-		branch: branch0,
+		version: version0,
 		key: "mock-conflict0",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
 
 	await createChangeConflict({
 		lix,
-		branch: branch0,
+		version: version0,
 		key: "mock-conflict1",
 		conflictingChangeIds: new Set(["change1", "change2"]),
 	});
 
-	// Insert branch change pointers (only for change0 and change1)
-	// change2 is not referenced by any branch change pointer
+	// Insert version change pointers (only for change0 and change1)
+	// change2 is not referenced by any version change pointer
 	// and should be garbage collected
-	await updateBranchPointers({
+	await updateVersionPointers({
 		lix,
-		branch: branch0,
+		version: version0,
 		changes: [changes[0]!, changes[1]!],
 	});
 
@@ -93,19 +93,19 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 	expect(remainingConflictElements[0]?.change_id).toBe(mockConflict0.id);
 	expect(remainingConflictElements[1]?.change_id).toBe(mockConflict0.id);
 
-	// Check remaining branch change conflict pointers
-	const remainingBranchChangeConflictPointers = await lix.db
-		.selectFrom("branch_change_conflict_pointer")
+	// Check remaining version change conflict pointers
+	const remainingVersionChangeConflictPointers = await lix.db
+		.selectFrom("version_change_conflict_pointer")
 		.selectAll()
 		.execute();
 
-	expect(remainingBranchChangeConflictPointers.length).toBe(1);
-	expect(remainingBranchChangeConflictPointers[0]?.change_conflict_id).toBe(
+	expect(remainingVersionChangeConflictPointers.length).toBe(1);
+	expect(remainingVersionChangeConflictPointers[0]?.change_conflict_id).toBe(
 		mockConflict0.id,
 	);
 });
 
-test("should garbage collect conflicts that no branch conflict pointer references", async () => {
+test("should garbage collect conflicts that no version references", async () => {
 	const lix = await openLixInMemory({});
 
 	const changes = await lix.db
@@ -131,26 +131,26 @@ test("should garbage collect conflicts that no branch conflict pointer reference
 		.returningAll()
 		.execute();
 
-	const branch0 = await createBranch({ lix, name: "branch0" });
+	const version0 = await createVersion({ lix, name: "version0" });
 
 	const mockConflict0 = await createChangeConflict({
 		lix,
-		branch: branch0,
+		version: version0,
 		key: "mock-conflict0",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
 
-	// branch points to changes 0 and 1
+	// version points to changes 0 and 1
 
-	await updateBranchPointers({
+	await updateVersionPointers({
 		lix,
-		branch: branch0,
+		version: version0,
 		changes: [changes[0]!, changes[1]!],
 	});
 
 	// delete the conflict pointers mockConflict0
 	await lix.db
-		.deleteFrom("branch_change_conflict_pointer")
+		.deleteFrom("version_change_conflict_pointer")
 		.where("change_conflict_id", "=", mockConflict0.id)
 		.execute();
 
@@ -162,7 +162,7 @@ test("should garbage collect conflicts that no branch conflict pointer reference
 	expect(gc0.deletedChangeConflicts[0]?.id).toBe(mockConflict0.id);
 });
 
-test("should NOT garbage collect conflicts that a branch change conflict pointer references and where each change is referenced by a branch change pointer", async () => {
+test("should NOT garbage collect conflicts that a version change conflict pointer references and where each change is referenced by a version change pointer", async () => {
 	const lix = await openLixInMemory({});
 
 	const changes = await lix.db
@@ -188,20 +188,20 @@ test("should NOT garbage collect conflicts that a branch change conflict pointer
 		.returningAll()
 		.execute();
 
-	const branch0 = await createBranch({ lix, name: "branch0" });
+	const version0 = await createVersion({ lix, name: "version0" });
 
 	const mockConflict0 = await createChangeConflict({
 		lix,
-		branch: branch0,
+		version: version0,
 		key: "mock-conflict0",
 		conflictingChangeIds: new Set(["change0", "change1"]),
 	});
 
-	// branch points to changes 0 and 1
+	// version points to changes 0 and 1
 
-	await updateBranchPointers({
+	await updateVersionPointers({
 		lix,
-		branch: branch0,
+		version: version0,
 		changes: [changes[0]!, changes[1]!],
 	});
 
@@ -210,8 +210,8 @@ test("should NOT garbage collect conflicts that a branch change conflict pointer
 
 	expect(gc0.deletedChangeConflicts.length).toBe(0);
 
-	// delete all branch change pointers
-	await lix.db.deleteFrom("branch_change_conflict_pointer").execute();
+	// delete all version change pointers
+	await lix.db.deleteFrom("version_change_conflict_pointer").execute();
 
 	const gc1 = await garbageCollectChangeConflicts({ lix });
 	expect(gc1.deletedChangeConflicts.length).toBe(1);

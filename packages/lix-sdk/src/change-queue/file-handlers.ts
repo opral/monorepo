@@ -1,8 +1,8 @@
 import type { ChangeQueueEntry } from "../database/schema.js";
 import type { DetectedChange } from "../plugin/lix-plugin.js";
 import { minimatch } from "minimatch";
-import { updateBranchPointers } from "../branch/update-branch-pointers.js";
-import { changeIsLeafInBranch } from "../query-utilities/change-is-leaf-in-branch.js";
+import { updateVersionPointers } from "../version/update-version-pointers.js";
+import { changeIsLeafInVersion } from "../query-utilities/change-is-leaf-in-version.js";
 import { createSnapshot } from "../snapshot/create-snapshot.js";
 import type { Lix } from "../lix/open-lix.js";
 
@@ -68,9 +68,9 @@ export async function handleFileInsert(args: {
 	}
 
 	await args.lix.db.transaction().execute(async (trx) => {
-		const currentBranch = await trx
-			.selectFrom("current_branch")
-			.innerJoin("branch", "current_branch.id", "branch.id")
+		const currentVersion = await trx
+			.selectFrom("current_version")
+			.innerJoin("version", "current_version.id", "version.id")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
@@ -92,10 +92,10 @@ export async function handleFileInsert(args: {
 				.returningAll()
 				.executeTakeFirstOrThrow();
 
-			await updateBranchPointers({
+			await updateVersionPointers({
 				lix: { ...args.lix, db: trx },
 				changes: [insertedChange],
-				branch: currentBranch,
+				version: currentVersion,
 			});
 		}
 
@@ -162,9 +162,9 @@ export async function handleFileChange(args: {
 	}
 
 	await args.lix.db.transaction().execute(async (trx) => {
-		const currentBranch = await trx
-			.selectFrom("current_branch")
-			.innerJoin("branch", "current_branch.id", "branch.id")
+		const currentversion = await trx
+			.selectFrom("current_version")
+			.innerJoin("version", "current_version.id", "version.id")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 		for (const detectedChange of detectedChanges) {
@@ -176,7 +176,7 @@ export async function handleFileChange(args: {
 				.where("file_id", "=", args.changeQueueEntry.file_id)
 				.where("schema_key", "=", detectedChange.schema.key)
 				.where("entity_id", "=", detectedChange.entity_id)
-				.where(changeIsLeafInBranch(currentBranch))
+				.where(changeIsLeafInVersion(currentversion))
 				.executeTakeFirst();
 
 			const snapshot = await createSnapshot({
@@ -196,10 +196,10 @@ export async function handleFileChange(args: {
 				.returningAll()
 				.executeTakeFirstOrThrow();
 
-			await updateBranchPointers({
+			await updateVersionPointers({
 				lix: { ...args.lix, db: trx },
 				changes: [insertedChange],
-				branch: currentBranch,
+				version: currentversion,
 			});
 
 			// If a parent exists, the change is a child of the parent

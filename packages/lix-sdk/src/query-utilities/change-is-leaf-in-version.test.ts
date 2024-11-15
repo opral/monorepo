@@ -1,14 +1,14 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { updateBranchPointers } from "../branch/update-branch-pointers.js";
-import { changeIsLeafInBranch } from "./change-is-leaf-in-branch.js";
-import { createBranch } from "../branch/create-branch.js";
+import { updateVersionPointers } from "../version/update-version-pointers.js";
+import { changeIsLeafInVersion } from "./change-is-leaf-in-version.js";
+import { createVersion } from "../version/create-version.js";
 
 test("it should return the leaf change for the given branch", async () => {
 	const lix = await openLixInMemory({});
 
-	const branch0 = await createBranch({ lix, name: "branch0" });
-	const branch1 = await createBranch({ lix, name: "branch1" });
+	const version0 = await createVersion({ lix, name: "version0" });
+	const version1 = await createVersion({ lix, name: "version1" });
 
 	const insertedChanges = await lix.db
 		.insertInto("change")
@@ -50,24 +50,24 @@ test("it should return the leaf change for the given branch", async () => {
 		])
 		.execute();
 
-	await updateBranchPointers({
+	await updateVersionPointers({
 		lix,
-		branch: branch0,
+		version: version0,
 		// only point to the second change even though
 		// the third change is a child of the second change
 		changes: [insertedChanges[1]!],
 	});
 
-	// letting another branch (branch1) point to the third change
-	await updateBranchPointers({
+	// letting another branch (version1) point to the third change
+	await updateVersionPointers({
 		lix,
-		branch: branch1,
+		version: version1,
 		changes: [insertedChanges[2]!],
 	});
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.where(changeIsLeafInBranch(branch0))
+		.where(changeIsLeafInVersion(version0))
 		.selectAll()
 		.execute();
 

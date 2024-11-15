@@ -1,18 +1,18 @@
 import { createChangeConflict } from "../change-conflict/create-change-conflict.js";
 import { detectChangeConflicts } from "../change-conflict/detect-change-conflicts.js";
 import { changeSetElementIsSymmetricDifference } from "../change-set/x.js";
-import type { Branch } from "../database/schema.js";
+import type { Version } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
-import { changeInBranch } from "../query-utilities/change-in-branch.js";
+import { changeInVersion } from "../query-utilities/change-in-version.js";
 
-export async function mergeBranch(args: {
+export async function mergeVersion(args: {
 	lix: Lix;
-	sourceBranch: Branch;
-	targetBranch: Branch;
+	sourceVersion: Version;
+	targetVersion: Version;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const sourceChangeSet = { id: args.sourceBranch.change_set_id };
-		const targetChangeSet = { id: args.targetBranch.change_set_id };
+		const sourceChangeSet = { id: args.sourceVersion.change_set_id };
+		const targetChangeSet = { id: args.targetVersion.change_set_id };
 
 		const symmetricDifference = await trx
 			.selectFrom("change")
@@ -48,7 +48,7 @@ export async function mergeBranch(args: {
 				.where("file_id", "=", change.file_id)
 				.where("entity_id", "=", change.entity_id)
 				.where("schema_key", "=", change.schema_key)
-				.where(changeInBranch(args.targetBranch))
+				.where(changeInVersion(args.targetVersion))
 				.select("id")
 				.executeTakeFirst();
 
@@ -72,7 +72,7 @@ export async function mergeBranch(args: {
 				await trx
 					.insertInto("change_set_element")
 					.values({
-						change_set_id: args.targetBranch.change_set_id,
+						change_set_id: args.targetVersion.change_set_id,
 						change_id: change.id,
 					})
 					.execute();
@@ -84,7 +84,7 @@ export async function mergeBranch(args: {
 		for (const detectedConflict of detectedConflicts) {
 			await createChangeConflict({
 				lix: { ...args.lix, db: trx },
-				branch: args.targetBranch,
+				version: args.targetVersion,
 				key: detectedConflict.key,
 				conflictingChangeIds: detectedConflict.conflictingChangeIds,
 			});

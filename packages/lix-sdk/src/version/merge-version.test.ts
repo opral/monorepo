@@ -1,16 +1,16 @@
 import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { mergeBranch } from "./merge-branch.js";
+import { mergeVersion } from "./merge-version.js";
 import type { NewChange } from "../database/schema.js";
-import { updateBranchPointers } from "./update-branch-pointers.js";
-import { createBranch } from "./create-branch.js";
+import { updateVersionPointers } from "./update-version-pointers.js";
+import { createVersion } from "./create-version.js";
 
-test("it should update the branch pointers in target that are not conflicting", async () => {
+test("it should update the version pointers in target that are not conflicting", async () => {
 	const lix = await openLixInMemory({});
 
-	const sourceBranch = await createBranch({ lix });
-	const targetBranch = await createBranch({ lix });
+	const sourceVersion = await createVersion({ lix });
+	const targetVersion = await createVersion({ lix });
 
 	const [change1] = await lix.db
 		.insertInto("change")
@@ -28,17 +28,17 @@ test("it should update the branch pointers in target that are not conflicting", 
 		.execute();
 
 	// source points to change1
-	await updateBranchPointers({
+	await updateVersionPointers({
 		lix,
-		branch: sourceBranch,
+		version: sourceVersion,
 		changes: [change1!],
 	});
 
-	await mergeBranch({ lix, sourceBranch, targetBranch });
+	await mergeVersion({ lix, sourceVersion, targetVersion });
 
 	const targetChanges = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", targetBranch.change_set_id)
+		.where("change_set_id", "=", targetVersion.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -46,13 +46,13 @@ test("it should update the branch pointers in target that are not conflicting", 
 });
 
 // edge case scenario
-test("if a previously undetected conflict is detected during merge, the conflict should be inserted and the target branch change pointers updated (if the target branch does not point to the entity yet) ", async () => {
+test("if a previously undetected conflict is detected during merge, the conflict should be inserted and the target version change pointers updated (if the target version does not point to the entity yet) ", async () => {
 	const lix = await openLixInMemory({});
 
-	const sourceBranch = await createBranch({ lix, name: "source-branch" });
-	const targetBranch = await createBranch({ lix, name: "target-branch" });
+	const sourceVersion = await createVersion({ lix, name: "source-version" });
+	const targetVersion = await createVersion({ lix, name: "target-version" });
 
-	// Insert changes into `change` table and `branch_change_pointer` for source branch
+	// Insert changes into `change` table and `version_change_pointer` for source version
 	const [change1, change2, change3] = await lix.db
 		.insertInto("change")
 		.values([
@@ -84,9 +84,9 @@ test("if a previously undetected conflict is detected during merge, the conflict
 		.returningAll()
 		.execute();
 
-	await updateBranchPointers({
+	await updateVersionPointers({
 		lix,
-		branch: sourceBranch,
+		version: sourceVersion,
 		changes: [change1!, change2!, change3!],
 	});
 
@@ -106,13 +106,13 @@ test("if a previously undetected conflict is detected during merge, the conflict
 
 	lix.plugin.getAll = vi.fn().mockResolvedValue([mockPlugin]);
 
-	// Execute the mergeBranch function
-	await mergeBranch({ lix, sourceBranch, targetBranch });
+	// Execute the mergeVersion function
+	await mergeVersion({ lix, sourceVersion, targetVersion });
 
-	// Validate results in `branch_change_pointer` and `conflict` tables
+	// Validate results in `version_change_pointer` and `conflict` tables
 	const targetChanges = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", targetBranch.change_set_id)
+		.where("change_set_id", "=", targetVersion.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -131,7 +131,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 		.selectAll()
 		.execute();
 
-	// even though change2 and change3 are conflicting, the target branch
+	// even though change2 and change3 are conflicting, the target version
 	// should point to change2 and change3 as well given that the target
 	// hasn't seen those entities yet
 	expect(targetChanges.map((c) => c.change_id)).toEqual([
@@ -151,13 +151,13 @@ test("if a previously undetected conflict is detected during merge, the conflict
 	]);
 });
 
-test("it should not update the target branch pointers of a conflicting change", async () => {
+test("it should not update the target version pointers of a conflicting change", async () => {
 	const lix = await openLixInMemory({});
 
-	const sourceBranch = await createBranch({ lix, name: "source-branch" });
-	const targetBranch = await createBranch({ lix, name: "target-branch" });
+	const sourceVersion = await createVersion({ lix, name: "source-version" });
+	const targetVersion = await createVersion({ lix, name: "target-version" });
 
-	// Insert changes into `change` table and `branch_change_pointer` for source branch
+	// Insert changes into `change` table and `version_change_pointer` for source version
 	const [change1, change2] = await lix.db
 		.insertInto("change")
 		.values([
@@ -182,16 +182,16 @@ test("it should not update the target branch pointers of a conflicting change", 
 		.execute();
 
 	// source points to change1
-	await updateBranchPointers({
+	await updateVersionPointers({
 		lix,
-		branch: sourceBranch,
+		version: sourceVersion,
 		changes: [change1!],
 	});
 
 	// target points to change2
-	await updateBranchPointers({
+	await updateVersionPointers({
 		lix,
-		branch: targetBranch,
+		version: targetVersion,
 		changes: [change2!],
 	});
 
@@ -211,14 +211,14 @@ test("it should not update the target branch pointers of a conflicting change", 
 
 	lix.plugin.getAll = vi.fn().mockResolvedValue([mockPlugin]);
 
-	// Execute the mergeBranch function
-	await mergeBranch({ lix, sourceBranch, targetBranch });
+	// Execute the mergeVersion function
+	await mergeVersion({ lix, sourceVersion, targetVersion });
 
-	// Validate results in `branch_change_pointer` and `conflict` tables
+	// Validate results in `version_change_pointer` and `conflict` tables
 	const targetChanges = await lix.db
 		.selectFrom("change_set_element")
 		.selectAll()
-		.where("change_set_id", "=", targetBranch.change_set_id)
+		.where("change_set_id", "=", targetVersion.change_set_id)
 		.execute();
 
 	const conflicts = await lix.db
@@ -236,7 +236,7 @@ test("it should not update the target branch pointers of a conflicting change", 
 		.selectAll()
 		.execute();
 
-	// even though change2 and change3 are conflicting, the target branch
+	// even though change2 and change3 are conflicting, the target version
 	// should point to change2 and change3 as well given that the target
 	// hasn't seen those entities yet
 	expect(targetChanges.map((pointer) => pointer.change_id)).toEqual([
@@ -255,13 +255,13 @@ test("it should not update the target branch pointers of a conflicting change", 
 	]);
 });
 
-// it is reasonable to assume that a conflict exists if the same (entity, file, type) change is updated in both branches.
+// it is reasonable to assume that a conflict exists if the same (entity, file, type) change is updated in both versiones.
 // in case a plugin does not detect a conflict, the system should automatically detect it.
 test("it should automatically detect a diverging entity conflict", async () => {
 	const lix = await openLixInMemory({});
 
-	const sourceBranch = await createBranch({ lix, name: "source-branch" });
-	const targetBranch = await createBranch({ lix, name: "target-branch" });
+	const sourceVersion = await createVersion({ lix, name: "source-version" });
+	const targetVersion = await createVersion({ lix, name: "target-version" });
 
 	const ancestorChange = await lix.db
 		.insertInto("change")
@@ -276,7 +276,7 @@ test("it should automatically detect a diverging entity conflict", async () => {
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	// Simulate updates to the entity in both branches
+	// Simulate updates to the entity in both versiones
 	const sourceChange = await lix.db
 		.insertInto("change")
 		.values({
@@ -312,15 +312,15 @@ test("it should automatically detect a diverging entity conflict", async () => {
 		])
 		.execute();
 
-	await updateBranchPointers({
+	await updateVersionPointers({
 		lix,
-		branch: sourceBranch,
+		version: sourceVersion,
 		changes: [sourceChange],
 	});
 
-	await updateBranchPointers({
+	await updateVersionPointers({
 		lix,
-		branch: targetBranch,
+		version: targetVersion,
 		changes: [targetChange],
 	});
 
@@ -333,7 +333,7 @@ test("it should automatically detect a diverging entity conflict", async () => {
 	};
 	lix.plugin.getAll = vi.fn().mockResolvedValue([mockPlugin]);
 
-	await mergeBranch({ lix, sourceBranch, targetBranch });
+	await mergeVersion({ lix, sourceVersion, targetVersion });
 
 	// Validate results in `conflict` table
 	const conflictElements = await lix.db
@@ -346,17 +346,17 @@ test("it should automatically detect a diverging entity conflict", async () => {
 		.selectAll("change_set_element")
 		.execute();
 
-	// Ensure that the change from `sourceBranch` is detected as a conflict
+	// Ensure that the change from `sourceVersion` is detected as a conflict
 	expect(conflictElements.map((c) => c.change_id)).toEqual([
 		sourceChange.id,
 		targetChange.id,
 	]);
 
-	// ensure that the branch change pointer hasn't been updated
+	// ensure that the version change pointer hasn't been updated
 	const targetChanges = await lix.db
 		.selectFrom("change_set_element")
 		.selectAll()
-		.where("change_set_id", "=", targetBranch.change_set_id)
+		.where("change_set_id", "=", targetVersion.change_set_id)
 		.execute();
 
 	expect(targetChanges.map((pointer) => pointer.change_id)).not.toContain(
@@ -385,8 +385,8 @@ test("re-curring merges should not create a new conflict if the conflict already
 		providePlugins: [mockPlugin],
 	});
 
-	const sourceBranch = await createBranch({ lix, name: "source-branch" });
-	const targetBranch = await createBranch({ lix, name: "target-branch" });
+	const sourceVersion = await createVersion({ lix, name: "source-version" });
+	const targetVersion = await createVersion({ lix, name: "target-version" });
 
 	const mockChanges = [
 		{
@@ -422,25 +422,25 @@ test("re-curring merges should not create a new conflict if the conflict already
 		.returningAll()
 		.execute();
 
-	// source branch points to change0
-	await updateBranchPointers({
+	// source version points to change0
+	await updateVersionPointers({
 		lix,
-		branch: sourceBranch,
+		version: sourceVersion,
 		changes: [changes[0]!],
 	});
 
-	// target branch points to change1
-	await updateBranchPointers({
+	// target version points to change1
+	await updateVersionPointers({
 		lix,
-		branch: targetBranch,
+		version: targetVersion,
 		changes: [changes[1]!],
 	});
 
 	// First merge
-	await mergeBranch({
+	await mergeVersion({
 		lix,
-		sourceBranch,
-		targetBranch,
+		sourceVersion,
+		targetVersion,
 	});
 
 	// Check that no new conflict is created
@@ -453,10 +453,10 @@ test("re-curring merges should not create a new conflict if the conflict already
 	expect(conflictsAfter1Merge.length).toBe(1);
 
 	// Second merge
-	await mergeBranch({
+	await mergeVersion({
 		lix,
-		sourceBranch,
-		targetBranch,
+		sourceVersion,
+		targetVersion,
 	});
 
 	const conflictsAfter2Merge = await lix.db

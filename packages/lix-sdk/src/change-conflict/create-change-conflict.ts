@@ -1,4 +1,4 @@
-import type { Branch, Change, ChangeConflict } from "../database/schema.js";
+import type { Version, Change, ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 /**
@@ -10,7 +10,7 @@ import type { Lix } from "../lix/open-lix.js";
 export async function createChangeConflict(args: {
 	lix: Pick<Lix, "db">;
 	key: string;
-	branch: Pick<Branch, "id">;
+	version: Pick<Version, "id">;
 	conflictingChangeIds: Set<Change["id"]>;
 }): Promise<ChangeConflict> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
@@ -18,12 +18,12 @@ export async function createChangeConflict(args: {
 		const existingConflict = await trx
 			.selectFrom("change_conflict")
 			.innerJoin(
-				"branch_change_conflict_pointer",
-				"branch_change_conflict_pointer.change_conflict_id",
+				"version_change_conflict_pointer",
+				"version_change_conflict_pointer.change_conflict_id",
 				"change_conflict.id",
 			)
-			// the branch should point to the conflict
-			.where("branch_change_conflict_pointer.branch_id", "=", args.branch.id)
+			// the version should point to the conflict
+			.where("version_change_conflict_pointer.version_id", "=", args.version.id)
 			// which has the identical key
 			.where("change_conflict.key", "=", args.key)
 			// and same set of changes
@@ -88,9 +88,9 @@ export async function createChangeConflict(args: {
 			.execute();
 
 		await trx
-			.insertInto("branch_change_conflict_pointer")
+			.insertInto("version_change_conflict_pointer")
 			.values({
-				branch_id: args.branch.id,
+				version_id: args.version.id,
 				change_conflict_id: newConflict.id,
 			})
 			.execute();

@@ -269,22 +269,22 @@ test("the confirmed label should be created if it doesn't exist", async () => {
 	});
 });
 
-test("a default main branch should exist", async () => {
+test("a default main version should exist", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
 
-	const branch = await db
-		.selectFrom("branch")
+	const version = await db
+		.selectFrom("version")
 		.selectAll()
 		.where("name", "=", "main")
 		.executeTakeFirst();
 
-	expect(branch).toBeDefined();
+	expect(version).toBeDefined();
 });
 
-test("re-opening the same database shouldn't lead to duplicate insertion of the current branch", async () => {
+test("re-opening the same database shouldn't lead to duplicate insertion of the current version", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
@@ -296,20 +296,20 @@ test("re-opening the same database shouldn't lead to duplicate insertion of the 
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	const newBranch = await db
-		.insertInto("branch")
+	const newversion = await db
+		.insertInto("version")
 		.values({ name: "mock", change_set_id: changeSet.id })
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	await db.updateTable("current_branch").set({ id: newBranch.id }).execute();
+	await db.updateTable("current_version").set({ id: newversion.id }).execute();
 
 	const db2 = initDb({ sqlite });
 
-	const currentBranch = await db2
-		.selectFrom("current_branch")
+	const currentversion = await db2
+		.selectFrom("current_version")
 		.selectAll()
 		.execute();
 
-	expect(currentBranch).toHaveLength(1);
+	expect(currentversion).toHaveLength(1);
 });
