@@ -1,11 +1,15 @@
 import { useAtom } from "jotai";
 import { ChangeGraph } from "../../components/ChangeGraph.tsx";
-import { allChangesAtom, allEdgesAtom, changesCurrentBranchAtom } from "../../state-active-file.ts";
+import {
+	allChangesAtom,
+	allEdgesAtom,
+	changesCurrentVersionAtom,
+} from "../../state-active-file.ts";
 import OpenFileLayout from "../../layouts/OpenFileLayout.tsx";
 
 export default function Page() {
 	const [allChanges] = useAtom(allChangesAtom);
-	const [changesCurrentBranch] = useAtom(changesCurrentBranchAtom);
+	const [changesCurrentBranch] = useAtom(changesCurrentVersionAtom);
 	const [allEdges] = useAtom(allEdgesAtom);
 
 	return (

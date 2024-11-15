@@ -4,9 +4,9 @@ import { changeConflictsAtom } from "../../state-active-file.ts";
 import ConflictSet from "../../components/ConflictSet.tsx";
 import clsx from "clsx";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
-import { currentBranchAtom, lixAtom } from "../../state.ts";
+import { currentVersionAtom, lixAtom } from "../../state.ts";
 import {
-	changeIsLeafInBranch,
+	changeIsLeafInVersion,
 	createChangeConflict,
 	detectChangeConflicts,
 } from "@lix-js/sdk";
@@ -15,7 +15,7 @@ import { saveLixToOpfs } from "../../helper/saveLixToOpfs.ts";
 export default function Page() {
 	const [conflicts] = useAtom(changeConflictsAtom);
 	const [lix] = useAtom(lixAtom);
-	const [currentBranch] = useAtom(currentBranchAtom);
+	const [currentVersion] = useAtom(currentVersionAtom);
 
 	return (
 		<>
@@ -67,7 +67,7 @@ export default function Page() {
 																			return await trx
 																				.selectFrom("change")
 																				.where(
-																					changeIsLeafInBranch(currentBranch)
+																					changeIsLeafInVersion(currentVersion)
 																				)
 																				.where(
 																					"change.entity_id",
@@ -97,7 +97,7 @@ export default function Page() {
 																	for (const detectedConflict of detectedConflicts) {
 																		await createChangeConflict({
 																			lix: { ...lix, db: trx },
-																			branch: currentBranch,
+																			version: currentVersion,
 																			key: detectedConflict.key,
 																			conflictingChangeIds:
 																				detectedConflict.conflictingChangeIds,

@@ -1,16 +1,16 @@
 import {
-	Branch,
+	Version,
 	Change,
 	changeHasLabel,
-	changeInBranch,
-	changeIsLeafInBranch,
+	changeInVersion,
+	changeIsLeafInVersion,
 	ChangeSet,
 	Lix,
 	Snapshot,
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { currentBranchAtom, lixAtom } from "../state.ts";
+import { currentVersionAtom, lixAtom } from "../state.ts";
 import clsx from "clsx";
 import {
 	activeFileAtom,
@@ -39,26 +39,26 @@ export default function Component(props: {
 		Awaited<ReturnType<typeof getChanges>>
 	>({});
 
-	const [currentBranch] = useAtom(currentBranchAtom);
+	const [currentVersion] = useAtom(currentVersionAtom);
 
 	useEffect(() => {
 		if (isOpen) {
 			if (props.id !== "unconfirmed-changes") {
-				getChanges(lix, props.id, activeFile.id, currentBranch).then(
+				getChanges(lix, props.id, activeFile.id, currentVersion).then(
 					setChanges
 				);
 			} else {
-				getUnconfirmedChanges(lix, activeFile.id, currentBranch).then(
+				getUnconfirmedChanges(lix, activeFile.id, currentVersion).then(
 					setUnconfirmedChanges
 				);
 			}
 			const interval = setInterval(async () => {
 				if (props.id !== "unconfirmed-changes") {
-					getChanges(lix, props.id, activeFile.id, currentBranch).then(
+					getChanges(lix, props.id, activeFile.id, currentVersion).then(
 						setChanges
 					);
 				} else {
-					getUnconfirmedChanges(lix, activeFile.id, currentBranch).then(
+					getUnconfirmedChanges(lix, activeFile.id, currentVersion).then(
 						setUnconfirmedChanges
 					);
 				}
@@ -191,7 +191,7 @@ const getChanges = async (
 	lix: Lix,
 	changeSetId: string,
 	fileId: string,
-	currentBranch: Branch
+	currentVersion: Version
 ): Promise<
 	Record<
 		string,
@@ -254,13 +254,9 @@ const getChanges = async (
 			const parent = await lix.db
 				.selectFrom("change")
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-				.innerJoin(
-					"change_edge",
-					"change_edge.parent_id",
-					"change.id"
-				)
+				.innerJoin("change_edge", "change_edge.parent_id", "change.id")
 				.where("change_edge.child_id", "=", change.id)
-				.where(changeInBranch(currentBranch))
+				.where(changeInVersion(currentVersion))
 				.where(changeHasLabel("confirmed"))
 				.selectAll("change")
 				.select("snapshot.content as snapshot_content")
@@ -276,7 +272,7 @@ const getChanges = async (
 const getUnconfirmedChanges = async (
 	lix: Lix,
 	fileId: string,
-	currentBranch: Branch
+	currentVersion: Version
 ): Promise<
 	Record<
 		string,
@@ -292,7 +288,7 @@ const getUnconfirmedChanges = async (
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where("change.file_id", "=", fileId)
-		.where(changeIsLeafInBranch(currentBranch))
+		.where(changeIsLeafInVersion(currentVersion))
 		.where((eb) => eb.not(changeHasLabel("confirmed")))
 		.selectAll("change")
 		.select("snapshot.content as snapshot_content")
@@ -320,7 +316,7 @@ const getUnconfirmedChanges = async (
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.where(changeHasLabel("confirmed"))
 				.where("change.entity_id", "=", change.entity_id)
-				.where(changeInBranch(currentBranch))
+				.where(changeInVersion(currentVersion))
 				// todo don't rely on timestampt to traverse the graph
 				// use recursive graph traversal instead
 				.orderBy("change.created_at", "desc")

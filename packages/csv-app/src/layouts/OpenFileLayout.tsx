@@ -20,24 +20,24 @@ import {
 	uniqueColumnAtom,
 } from "../state-active-file.ts";
 import { useCallback, useMemo, useState } from "react";
-import { currentBranchAtom, existingBranchesAtom, lixAtom } from "../state.ts";
+import { currentVersionAtom, existingVersionsAtom, lixAtom } from "../state.ts";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import clsx from "clsx";
 import {
 	applyChanges,
-	Branch,
-	changeIsLeafInBranch,
-	createBranch,
+	Version,
+	changeIsLeafInVersion,
+	createVersion,
 	Lix,
-	switchBranch,
-	mergeBranch,
+	switchVersion,
+	mergeVersion,
 } from "@lix-js/sdk";
 import { humanId } from "human-id";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [changeConflicts] = useAtom(changeConflictsAtom);
-	const [currentBranch] = useAtom(currentBranchAtom);
+	const [currentVersion] = useAtom(currentVersionAtom);
 
 	return (
 		<>
@@ -67,10 +67,10 @@ export default function Layout(props: { children: React.ReactNode }) {
 							<div className="flex gap-4 justify-center items-center text-zinc-950 h-9 rounded-lg px-2">
 								{/* slice away the root slash */}
 								<h1 className="font-medium">{activeFile?.path.slice(1)}</h1>
-								<BranchDropdown></BranchDropdown>
+								<VersionDropdown></VersionDropdown>
 								<div className="flex gap-2 items-center">
 									<p className="text-sm text-gray-400">targets [</p>
-									{currentBranch.targets.map((target) => (
+									{currentVersion.targets.map((target) => (
 										<p className="text-sm text-gray-400" key={target.id}>
 											{target.name}
 										</p>
@@ -214,22 +214,22 @@ const UniqueColumnDialog = () => {
 	);
 };
 
-const BranchDropdown = () => {
-	const [currentBranch] = useAtom(currentBranchAtom);
-	const [existingBranches] = useAtom(existingBranchesAtom);
+const VersionDropdown = () => {
+	const [currentVersion] = useAtom(currentVersionAtom);
+	const [existingVersiones] = useAtom(existingVersionsAtom);
 	const [lix] = useAtom(lixAtom);
 	const [activeFile] = useAtom(activeFileAtom);
 
 	// ideally, lix handles this internally.
 	// ticket exists https://linear.app/opral/issue/LIXDK-219/only-applychanges-on-filedata-read
-	const switchToBranch = useCallback(
-		async (branch: Branch, trx?: Lix["db"]) => {
+	const switchToversion = useCallback(
+		async (version: Version, trx?: Lix["db"]) => {
 			const executeInTransaction = async (trx: Lix["db"]) => {
-				await switchBranch({ lix: { ...lix, db: trx }, to: branch });
+				await switchVersion({ lix: { ...lix, db: trx }, to: version });
 
-				const changesOfBranch = await trx
+				const changesOfversion = await trx
 					.selectFrom("change")
-					.where(changeIsLeafInBranch(branch))
+					.where(changeIsLeafInVersion(version))
 					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 					.where("file_id", "=", activeFile.id)
 					.selectAll("change")
@@ -238,7 +238,7 @@ const BranchDropdown = () => {
 
 				await applyChanges({
 					lix: { ...lix, db: trx },
-					changes: changesOfBranch,
+					changes: changesOfversion,
 				});
 			};
 			if (trx) {
@@ -255,23 +255,23 @@ const BranchDropdown = () => {
 		<SlDropdown>
 			<SlButton slot="trigger" size="small" caret>
 				<img slot="prefix" src="branch-icon.svg" className="w-4 h-4"></img>
-				{currentBranch.name}
+				{currentVersion.name}
 			</SlButton>
 			<SlMenu>
-				{existingBranches.map((branch) => (
-					<SlMenuItem key={branch.id}>
-						<p onClick={() => switchToBranch(branch)} className="w-full">
-							{branch.name}
+				{existingVersiones.map((version) => (
+					<SlMenuItem key={version.id}>
+						<p onClick={() => switchToversion(version)} className="w-full">
+							{version.name}
 						</p>
-						{branch.id !== currentBranch.id && (
+						{version.id !== currentVersion.id && (
 							<div slot="suffix" className="flex items-center ml-1">
 								<SlIconButton
 									name="sign-merge-right"
 									onClick={async () => {
-										await mergeBranch({
+										await mergeVersion({
 											lix,
-											sourceBranch: branch,
-											targetBranch: currentBranch,
+											sourceVersion: version,
+											targetVersion: currentVersion,
 										});
 										await saveLixToOpfs({ lix });
 									}}
@@ -281,8 +281,8 @@ const BranchDropdown = () => {
 									label="delete"
 									onClick={async () => {
 										await lix.db
-											.deleteFrom("branch")
-											.where("id", "=", branch.id)
+											.deleteFrom("version")
+											.where("id", "=", version.id)
 											.execute();
 										await saveLixToOpfs({ lix });
 									}}
@@ -294,19 +294,19 @@ const BranchDropdown = () => {
 				<SlDivider className="w-full border-b border-gray-300"></SlDivider>
 				<SlMenuItem
 					onClick={async () => {
-						const newBranch = await createBranch({
+						const newversion = await createVersion({
 							lix,
-							parent: currentBranch,
+							parent: currentVersion,
 							name: humanId({
 								separator: "-",
 								capitalize: false,
 								adjectiveCount: 0,
 							}),
 						});
-						await switchToBranch(newBranch);
+						await switchToversion(newversion);
 					}}
 				>
-					Create branch
+					Create version
 					<SlIcon slot="prefix" name="plus" className="mr-1 text-xl"></SlIcon>
 				</SlMenuItem>
 			</SlMenu>

@@ -7,14 +7,14 @@ import {
 	lixAtom,
 	fileIdSearchParamsAtom,
 	withPollingAtom,
-	currentBranchAtom,
+	currentVersionAtom,
 } from "./state.ts";
 import Papa from "papaparse";
 import {
-	changeConflictInBranch,
+	changeConflictInVersion,
 	changeHasLabel,
-	changeInBranch,
-	changeIsLeafInBranch,
+	changeInVersion,
+	changeIsLeafInVersion,
 } from "@lix-js/sdk";
 import { CellSchema } from "@lix-js/plugin-csv-column-based";
 
@@ -94,7 +94,7 @@ export const activeCellChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const activeFile = await get(activeFileAtom);
 	const cellEntityId = await get(activeCellEntityIdAtom);
-	const currentBranch = await get(currentBranchAtom);
+	const currentBranch = await get(currentVersionAtom);
 	const lix = await get(lixAtom);
 	if (!cellEntityId) return [];
 	const changes = await lix.db
@@ -102,7 +102,7 @@ export const activeCellChangesAtom = atom(async (get) => {
 		.where("change.schema_key", "=", CellSchema.key)
 		.where("change.entity_id", "=", cellEntityId)
 		.where("change.file_id", "=", activeFile.id)
-		.where(changeInBranch(currentBranch))
+		.where(changeInVersion(currentBranch))
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		// .innerJoin("change_set_item", "change_set_item.change_id", "change.id")
 		// .innerJoin("change_set", "change_set.id", "change_set_item.change_set_id")
@@ -144,12 +144,12 @@ export const unconfirmedChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	const currentBranch = await get(currentBranchAtom);
+	const currentBranch = await get(currentVersionAtom);
 
 	return await lix.db
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
-		.where(changeIsLeafInBranch(currentBranch))
+		.where(changeIsLeafInVersion(currentBranch))
 		.where((eb) => eb.not(changeHasLabel("confirmed")))
 		.selectAll("change")
 		.execute();
@@ -164,22 +164,22 @@ export const allChangesAtom = atom(async (get) => {
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		// .where(changeInBranch(currentBranch))
+		// .where(changeInVersion(currentBranch))
 		.selectAll("change")
 		.select("snapshot.content as snapshot_content")
 		.execute();
 });
 
-export const changesCurrentBranchAtom = atom(async (get) => {
+export const changesCurrentVersionAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	const currentBranch = await get(currentBranchAtom);
+	const currentBranch = await get(currentVersionAtom);
 	return await lix.db
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.where(changeInBranch(currentBranch))
+		.where(changeInVersion(currentBranch))
 		.selectAll("change")
 		.select("snapshot.content as snapshot_content")
 		.execute();
@@ -201,7 +201,7 @@ export const changeConflictsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	const currentBranch = await get(currentBranchAtom);
+	const currentBranch = await get(currentVersionAtom);
 	const changeConflictElements = await lix.db
 		.selectFrom("change_set_element")
 		.innerJoin(
@@ -217,7 +217,7 @@ export const changeConflictsAtom = atom(async (get) => {
 				.on("branch_change.change_set_id", "=", currentBranch.change_set_id)
 		)
 		.where("change.file_id", "=", activeFile.id)
-		.where(changeConflictInBranch(currentBranch))
+		.where(changeConflictInVersion(currentBranch))
 		.selectAll("change_set_element")
 		.select([
 			"change_conflict.id as change_conflict_id",
@@ -238,7 +238,7 @@ export const changeConflictsAtom = atom(async (get) => {
 		.select((eb) =>
 			eb
 				.case()
-				.when(changeInBranch(currentBranch))
+				.when(changeInVersion(currentBranch))
 				.then(1)
 				.else(0)
 				.end()
