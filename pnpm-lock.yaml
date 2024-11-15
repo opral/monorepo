@@ -1418,7 +1418,7 @@ importers:
         version: 10.4.5
       next:
         specifier: ^13.0.0 || ^14.0.0 || ^15.0.0
-        version: 14.2.15(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-941e1b4a-20240729(react@18.3.1))(react@18.3.1)
+        version: 14.2.15(@babel/core@7.25.8)(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-941e1b4a-20240729(react@18.3.1))(react@18.3.1)
       qs:
         specifier: ^6.12.1
         version: 6.13.0
@@ -3468,34 +3468,6 @@ importers:
       '@types/papaparse':
         specifier: ^5.3.14
         version: 5.3.15
-      '@vitest/coverage-v8':
-        specifier: ^2.0.5
-        version: 2.0.5(vitest@2.1.3(@types/node@22.7.7)(@vitest/browser@2.1.3)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.6.3))(terser@5.36.0))
-      eslint:
-        specifier: ^9.12.0
-        version: 9.13.0(jiti@2.3.3)
-      prettier:
-        specifier: ^3.3.3
-        version: 3.3.3
-      typescript:
-        specifier: ^5.5.4
-        version: 5.6.3
-      typescript-eslint:
-        specifier: ^8.9.0
-        version: 8.10.0(eslint@9.13.0(jiti@2.3.3))(typescript@5.6.3)
-      vitest:
-        specifier: ^2.0.5
-        version: 2.1.3(@types/node@22.7.7)(@vitest/browser@2.1.3)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.6.3))(terser@5.36.0)
-
-  packages/lix-plugin-jpeg:
-    dependencies:
-      '@lix-js/sdk':
-        specifier: workspace:*
-        version: link:../lix-sdk
-    devDependencies:
-      '@eslint/js':
-        specifier: ^9.12.0
-        version: 9.13.0
       '@vitest/coverage-v8':
         specifier: ^2.0.5
         version: 2.0.5(vitest@2.1.3(@types/node@22.7.7)(@vitest/browser@2.1.3)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.6.3))(terser@5.36.0))
@@ -32172,7 +32144,7 @@ snapshots:
       postcss: 8.4.31
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.1(react@18.3.1)
+      styled-jsx: 5.1.1(@babel/core@7.25.8)(react@18.3.1)
     optionalDependencies:
       '@next/swc-darwin-arm64': 14.1.2-canary.4
       '@next/swc-darwin-x64': 14.1.2-canary.4
@@ -32198,7 +32170,7 @@ snapshots:
       postcss: 8.4.31
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.1(react@18.3.1)
+      styled-jsx: 5.1.1(@babel/core@7.25.8)(react@18.3.1)
     optionalDependencies:
       '@next/swc-darwin-arm64': 14.1.3
       '@next/swc-darwin-x64': 14.1.3
@@ -32209,6 +32181,32 @@ snapshots:
       '@next/swc-win32-arm64-msvc': 14.1.3
       '@next/swc-win32-ia32-msvc': 14.1.3
       '@next/swc-win32-x64-msvc': 14.1.3
+      '@opentelemetry/api': 1.9.0
+    transitivePeerDependencies:
+      - '@babel/core'
+      - babel-plugin-macros
+
+  next@14.2.15(@babel/core@7.25.8)(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-941e1b4a-20240729(react@18.3.1))(react@18.3.1):
+    dependencies:
+      '@next/env': 14.2.15
+      '@swc/helpers': 0.5.5
+      busboy: 1.6.0
+      caniuse-lite: 1.0.30001651
+      graceful-fs: 4.2.11
+      postcss: 8.4.31
+      react: 18.3.1
+      react-dom: 19.0.0-rc-941e1b4a-20240729(react@18.3.1)
+      styled-jsx: 5.1.1(@babel/core@7.25.8)(react@18.3.1)
+    optionalDependencies:
+      '@next/swc-darwin-arm64': 14.2.15
+      '@next/swc-darwin-x64': 14.2.15
+      '@next/swc-linux-arm64-gnu': 14.2.15
+      '@next/swc-linux-arm64-musl': 14.2.15
+      '@next/swc-linux-x64-gnu': 14.2.15
+      '@next/swc-linux-x64-musl': 14.2.15
+      '@next/swc-win32-arm64-msvc': 14.2.15
+      '@next/swc-win32-ia32-msvc': 14.2.15
+      '@next/swc-win32-x64-msvc': 14.2.15
       '@opentelemetry/api': 1.9.0
     transitivePeerDependencies:
       - '@babel/core'
@@ -32250,33 +32248,7 @@ snapshots:
       postcss: 8.4.31
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.1(react@18.3.1)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.2.15
-      '@next/swc-darwin-x64': 14.2.15
-      '@next/swc-linux-arm64-gnu': 14.2.15
-      '@next/swc-linux-arm64-musl': 14.2.15
-      '@next/swc-linux-x64-gnu': 14.2.15
-      '@next/swc-linux-x64-musl': 14.2.15
-      '@next/swc-win32-arm64-msvc': 14.2.15
-      '@next/swc-win32-ia32-msvc': 14.2.15
-      '@next/swc-win32-x64-msvc': 14.2.15
-      '@opentelemetry/api': 1.9.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-
-  next@14.2.15(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-941e1b4a-20240729(react@18.3.1))(react@18.3.1):
-    dependencies:
-      '@next/env': 14.2.15
-      '@swc/helpers': 0.5.5
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001651
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 18.3.1
-      react-dom: 19.0.0-rc-941e1b4a-20240729(react@18.3.1)
-      styled-jsx: 5.1.1(react@18.3.1)
+      styled-jsx: 5.1.1(@babel/core@7.25.8)(react@18.3.1)
     optionalDependencies:
       '@next/swc-darwin-arm64': 14.2.15
       '@next/swc-darwin-x64': 14.2.15
@@ -35193,15 +35165,17 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.4
 
+  styled-jsx@5.1.1(@babel/core@7.25.8)(react@18.3.1):
+    dependencies:
+      client-only: 0.0.1
+      react: 18.3.1
+    optionalDependencies:
+      '@babel/core': 7.25.8
+
   styled-jsx@5.1.1(react@18.2.0):
     dependencies:
       client-only: 0.0.1
       react: 18.2.0
-
-  styled-jsx@5.1.1(react@18.3.1):
-    dependencies:
-      client-only: 0.0.1
-      react: 18.3.1
 
   sucrase@3.35.0:
     dependencies:
