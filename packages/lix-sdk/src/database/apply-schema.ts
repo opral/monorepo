@@ -37,7 +37,7 @@ export async function applySchema(args: {
     UNIQUE (id, entity_id, file_id, schema_key)
   ) strict;
 
-  CREATE TABLE IF NOT EXISTS change_graph_edge (
+  CREATE TABLE IF NOT EXISTS change_edge (
     parent_id TEXT NOT NULL,
     child_id TEXT NOT NULL,
     
@@ -59,16 +59,10 @@ export async function applySchema(args: {
 
   CREATE TABLE IF NOT EXISTS change_conflict (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
-    key TEXT NOT NULL
-  ) strict;
+    key TEXT NOT NULL,
+    change_set_id TEXT NOT NULL,
 
-  CREATE TABLE IF NOT EXISTS change_conflict_element (
-    change_conflict_id TEXT NOT NULL,
-    change_id TEXT NOT NULL,
-
-    PRIMARY KEY(change_conflict_id, change_id),
-    FOREIGN KEY(change_conflict_id) REFERENCES change_conflict(id),
-    FOREIGN KEY(change_id) REFERENCES change(id)
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS change_conflict_resolution (
@@ -165,6 +159,7 @@ export async function applySchema(args: {
 
   CREATE TABLE IF NOT EXISTS branch (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    change_set_id TEXT NOT NULL,
 
     -- name is optional. 
     -- 
@@ -173,21 +168,16 @@ export async function applySchema(args: {
     -- without a name to experiment with
     -- changes with no mental overhead of 
     -- naming the branch.
-    name TEXT
-  
-  ) strict;
+    name TEXT,
 
-  CREATE TABLE IF NOT EXISTS branch_change_pointer (
-    branch_id TEXT NOT NULL,
-    change_id TEXT NOT NULL,
-    change_file_id TEXT NOT NULL,
-    change_entity_id TEXT NOT NULL,
-    change_schema_key TEXT NOT NULL,
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id),
 
-    PRIMARY KEY(branch_id, change_file_id, change_entity_id, change_schema_key),
-
-    FOREIGN KEY(branch_id) REFERENCES branch(id),
-    FOREIGN KEY(change_id, change_file_id, change_entity_id, change_schema_key) REFERENCES change(id, file_id, entity_id, schema_key)
+    -- Assuming mutable change sets. 
+    -- If change sets are immutable,
+    -- remove the UNIQUE constraint
+    -- and update branch pointers to 
+    -- create a new change set on updates
+    UNIQUE (id, change_set_id)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS branch_change_conflict_pointer (
@@ -209,8 +199,13 @@ export async function applySchema(args: {
 
   -- Insert the default branch if missing
   -- (this is a workaround for not having a separata creation and migration schema's)
-  INSERT INTO branch (id, name)
-  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6', 'main'
+
+  INSERT INTO change_set (id)
+  SELECT '01932cf1-f717-75e5-8513-dc6a0867b1ee'
+  WHERE NOT EXISTS (SELECT 1 FROM change_set);
+
+  INSERT INTO branch (id, change_set_id, name)
+  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6', '01932cf1-f717-75e5-8513-dc6a0867b1ee', 'main'
   WHERE NOT EXISTS (SELECT 1 FROM branch);
 
   -- Set the default current branch to 'main' if both tables are empty

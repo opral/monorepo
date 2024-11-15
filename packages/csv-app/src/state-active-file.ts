@@ -190,10 +190,10 @@ export const allEdgesAtom = atom(async (get) => {
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
 	return await lix.db
-		.selectFrom("change_graph_edge")
-		.innerJoin("change", "change.id", "change_graph_edge.parent_id")
+		.selectFrom("change_edge")
+		.innerJoin("change", "change.id", "change_edge.parent_id")
 		.where("change.file_id", "=", activeFile.id)
-		.selectAll("change_graph_edge")
+		.selectAll("change_edge")
 		.execute();
 });
 
@@ -203,28 +203,31 @@ export const changeConflictsAtom = atom(async (get) => {
 	const activeFile = await get(activeFileAtom);
 	const currentBranch = await get(currentBranchAtom);
 	const changeConflictElements = await lix.db
-		.selectFrom("change_conflict_element")
+		.selectFrom("change_set_element")
 		.innerJoin(
 			"change_conflict",
-			"change_conflict.id",
-			"change_conflict_element.change_conflict_id"
+			"change_conflict.change_set_id",
+			"change_set_element.change_set_id"
 		)
-		.innerJoin("change", "change.id", "change_conflict_element.change_id")
+		.innerJoin("change", "change.id", "change_set_element.change_id")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.leftJoin("branch_change_pointer as bcp", (join) =>
+		.leftJoin("change_set_element as branch_change", (join) =>
 			join
-				.onRef("bcp.change_id", "=", "change.id")
-				.on("bcp.branch_id", "=", currentBranch.id)
+				.onRef("branch_change.change_id", "=", "change.id")
+				.on("branch_change.change_set_id", "=", currentBranch.change_set_id)
 		)
-		// .where(changeInBranch(currentBranch))
 		.where("change.file_id", "=", activeFile.id)
 		.where(changeConflictInBranch(currentBranch))
-		.selectAll("change_conflict_element")
+		.selectAll("change_set_element")
+		.select([
+			"change_conflict.id as change_conflict_id",
+			"change_conflict.change_set_id as change_conflict_change_set_id",
+		])
 		.selectAll("change")
 		.select((eb) =>
 			eb
 				.case()
-				.when("bcp.change_id", "is not", null)
+				.when("branch_change.change_id", "is not", null)
 				// using boolean still returns 0 or 1
 				// for typesafety, number is used
 				.then(1)

@@ -36,11 +36,11 @@ export function changeIsLeafOf(change: Pick<Change, "id">) {
         UNION ALL
         SELECT change.id
         FROM change
-        INNER JOIN change_graph_edge ON change_graph_edge.child_id = change.id
-        INNER JOIN descendants ON change_graph_edge.parent_id = descendants.id
+        INNER JOIN change_edge ON change_edge.child_id = change.id
+        INNER JOIN descendants ON change_edge.parent_id = descendants.id
       )
       SELECT id FROM descendants
-      WHERE id NOT IN (SELECT parent_id FROM change_graph_edge)
+      WHERE id NOT IN (SELECT parent_id FROM change_edge)
     )
   ` as unknown as ExpressionWrapper<LixDatabaseSchema, "change", SqlBool>;
 }

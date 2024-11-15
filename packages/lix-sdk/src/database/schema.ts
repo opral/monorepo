@@ -4,7 +4,7 @@ import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 export type LixDatabaseSchema = {
 	file: LixFileTable;
 	change_queue: ChangeQueueTable;
-	change_graph_edge: ChangeGraphEdgeTable;
+	change_edge: ChangeEdgeTable;
 	snapshot: SnapshotTable;
 	label: LabelTable;
 
@@ -22,13 +22,10 @@ export type LixDatabaseSchema = {
 	// branch
 	current_branch: CurrentBranchTable;
 	branch: BranchTable;
-	// branch_target: BranchTargetTable;
-	branch_change_pointer: BranchChangePointerTable;
 	branch_change_conflict_pointer: BranchChangeConflictPointerTable;
 
 	// change conflicts
 	change_conflict: ChangeConflictTable;
-	change_conflict_element: ChangeConflictElementTable;
 	change_conflict_resolution: ChangeConflictResolutionTable;
 };
 
@@ -83,9 +80,9 @@ type ChangeTable = {
 	created_at: Generated<string>;
 };
 
-export type ChangeGraphEdge = Selectable<ChangeGraphEdgeTable>;
-export type NewChangeGraphEdge = Insertable<ChangeGraphEdgeTable>;
-type ChangeGraphEdgeTable = {
+export type ChangeGraphEdge = Selectable<ChangeEdgeTable>;
+export type NewChangeGraphEdge = Insertable<ChangeEdgeTable>;
+type ChangeEdgeTable = {
 	parent_id: string;
 	child_id: string;
 };
@@ -169,6 +166,7 @@ export type NewBranch = Insertable<BranchTable>;
 export type BranchUpdate = Updateable<BranchTable>;
 type BranchTable = {
 	id: Generated<string>;
+	change_set_id: string;
 	name: string | null;
 };
 
@@ -227,6 +225,7 @@ type ChangeConflictTable = {
 	 *   - `inlang-message-bundle-foreign-key-violation`
 	 */
 	key: string;
+	change_set_id: string;
 };
 
 export type ChangeConflictResolution =
@@ -238,13 +237,4 @@ export type ChangeConflictResolutionUpdate =
 type ChangeConflictResolutionTable = {
 	change_conflict_id: string;
 	resolved_change_id: string;
-};
-
-export type ChangeConflictElement = Selectable<ChangeConflictElementTable>;
-export type NewChangeConflictElement = Insertable<ChangeConflictElementTable>;
-export type ChangeConflictElementUpdate =
-	Updateable<ChangeConflictElementTable>;
-type ChangeConflictElementTable = {
-	change_conflict_id: string;
-	change_id: string;
 };

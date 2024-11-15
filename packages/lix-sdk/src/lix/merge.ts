@@ -117,7 +117,7 @@ export async function merge(args: {
 	// change graph
 
 	const sourceEdges = await args.sourceLix.db
-		.selectFrom("change_graph_edge")
+		.selectFrom("change_edge")
 		.selectAll()
 		.execute();
 
@@ -184,7 +184,7 @@ export async function merge(args: {
 		// copy edges
 		if (sourceEdges.length > 0) {
 			await trx
-				.insertInto("change_graph_edge")
+				.insertInto("change_edge")
 				.values(sourceEdges)
 				// ignore if already exists
 				.onConflict((oc) => oc.doNothing())

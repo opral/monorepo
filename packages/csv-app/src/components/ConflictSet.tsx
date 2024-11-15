@@ -13,6 +13,7 @@ export default function ConflictSet(props: {
 	changes: (Change & {
 		change_conflict_id: string;
 		change_conflict_key: string;
+		change_conflict_change_set_id: string;
 		snapshot_content: Snapshot["content"];
 		is_current_branch_pointer: number;
 		is_in_current_branch: number;
@@ -71,6 +72,7 @@ export default function ConflictSet(props: {
 											conflict: {
 												id: change.change_conflict_id,
 												key: change.change_conflict_key,
+												change_set_id: change.change_conflict_change_set_id,
 											},
 											select: change,
 										});

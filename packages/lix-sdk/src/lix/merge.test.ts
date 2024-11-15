@@ -82,7 +82,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		.execute();
 
 	await sourceLix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([mockEdges[0]!])
 		.execute();
 
@@ -130,7 +130,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 	]);
 
 	const edges = await targetLix.db
-		.selectFrom("change_graph_edge")
+		.selectFrom("change_edge")
 		.selectAll()
 		.execute();
 
@@ -413,10 +413,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.execute();
 
-	await sourceLix.db
-		.insertInto("change_graph_edge")
-		.values([edges[0]!])
-		.execute();
+	await sourceLix.db.insertInto("change_edge").values([edges[0]!]).execute();
 
 	await targetLix.db
 		.insertInto("snapshot")
@@ -762,6 +759,12 @@ test("it should copy discussion and related comments and mappings", async () => 
 test("it should copy change sets and merge memberships", async () => {
 	const targetLix = await openLixInMemory({});
 
+	const currentBranch = await targetLix.db
+		.selectFrom("current_branch")
+		.innerJoin("branch", "current_branch.id", "branch.id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	const mockChanges = await targetLix.db
 		.insertInto("change")
 		.values([
@@ -828,8 +831,10 @@ test("it should copy change sets and merge memberships", async () => {
 		.where("change_set_id", "=", changeSet2.id)
 		.execute();
 
-	// expect two change sets
-	expect(changeSets.length).toBe(2);
+	// expect two change sets (exluding the current branches change set)
+	expect(
+		changeSets.filter((s) => s.id !== currentBranch.change_set_id).length,
+	).toBe(2);
 
 	// expect merger of the change set to contain both changes
 	expect(changeSet1Items.map((item) => item.change_id)).toEqual(

@@ -10,49 +10,52 @@ export async function updateBranchPointers(args: {
 	lix: Pick<Lix, "db" | "plugin">;
 	changes?: Change[];
 	changeConflicts?: ChangeConflict[];
-	branch?: Pick<Branch, "id">;
+	branch: Pick<Branch, "id" | "change_set_id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const branch =
-			args.branch ??
-			(await trx
-				.selectFrom("current_branch")
+		for (const change of args.changes ?? []) {
+			// Change for the same entity_id, schema_key and file_id should be unique
+			const existingEntityChange = await trx
+				.selectFrom("change")
+				.innerJoin(
+					"change_set_element",
+					"change.id",
+					"change_set_element.change_id",
+				)
+				.where(
+					"change_set_element.change_set_id",
+					"=",
+					args.branch.change_set_id,
+				)
+				.where("change.schema_key", "=", change.schema_key)
+				.where("change.entity_id", "=", change.entity_id)
+				.where("change.file_id", "=", change.file_id)
 				.selectAll()
-				.executeTakeFirstOrThrow());
+				.executeTakeFirst();
 
-		if (args.changes) {
-			const changePointers = args.changes.map((change) => ({
-				branch_id: branch.id,
-				change_id: change.id,
-				change_entity_id: change.entity_id,
-				change_file_id: change.file_id,
-				change_schema_key: change.schema_key,
-			}));
-
-			if (changePointers.length > 0) {
+			if (existingEntityChange) {
+				// update the existing pointer
 				await trx
-					.insertInto("branch_change_pointer")
-					.values(changePointers)
-					// pointer for this branch and change_entity, change_file, change_type
-					// already exists, then update the change_id
-					.onConflict((oc) =>
-						oc.doUpdateSet((eb) => ({
-							change_id: eb.ref("excluded.change_id"),
-						})),
-					)
+					.updateTable("change_set_element")
+					.set("change_id", change.id)
+					.where("change_set_id", "=", args.branch.change_set_id)
+					.where("change_id", "=", existingEntityChange.id)
 					.execute();
 			} else {
-				// if there are no changes, then delete all pointers for the branch
+				// create a new pointer
 				await trx
-					.deleteFrom("branch_change_pointer")
-					.where("branch_id", "=", branch.id)
+					.insertInto("change_set_element")
+					.values({
+						change_set_id: args.branch.change_set_id,
+						change_id: change.id,
+					})
 					.execute();
 			}
 		}
 
 		if (args.changeConflicts) {
 			const changeConflictPointers = args.changeConflicts?.map((conflict) => ({
-				branch_id: branch.id,
+				branch_id: args.branch.id,
 				change_conflict_id: conflict.id,
 			}));
 			if (changeConflictPointers.length > 0) {
@@ -60,7 +63,7 @@ export async function updateBranchPointers(args: {
 					.insertInto("branch_change_conflict_pointer")
 					.values(
 						args.changeConflicts?.map((conflict) => ({
-							branch_id: branch.id,
+							branch_id: args.branch.id,
 							change_conflict_id: conflict.id,
 						})) ?? [],
 					)
@@ -70,7 +73,7 @@ export async function updateBranchPointers(args: {
 				// if there are no conflicts, then delete all pointers for the branch
 				await trx
 					.deleteFrom("branch_change_conflict_pointer")
-					.where("branch_id", "=", branch.id)
+					.where("branch_id", "=", args.branch.id)
 					.execute();
 			}
 		}

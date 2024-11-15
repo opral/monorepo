@@ -23,46 +23,35 @@ import type { Lix } from "../lix/open-lix.js";
  */
 export async function createBranch(args: {
 	lix: Pick<Lix, "db">;
-	parent?: Pick<Branch, "id">;
+	parent?: Pick<Branch, "id" | "change_set_id">;
 	name?: Branch["name"];
 }): Promise<Branch> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const branch = await trx
-			.insertInto("branch")
+		const changeSet = await trx
+			.insertInto("change_set")
 			.defaultValues()
 			.returningAll()
 			.executeTakeFirstOrThrow();
 
-		if (args.name) {
-			await trx
-				.updateTable("branch")
-				.set({ name: args.name })
-				.where("id", "=", branch.id)
-				.execute();
-		}
+		const branch = await trx
+			.insertInto("branch")
+			.values({
+				change_set_id: changeSet.id,
+				name: args.name,
+			})
+			.returningAll()
+			.executeTakeFirstOrThrow();
 
 		// copy the change pointers from the parent branch
-		if (args.parent?.id) {
+		if (args.parent) {
 			await trx
-				.insertInto("branch_change_pointer")
-				.columns([
-					"branch_id",
-					"change_id",
-					"change_file_id",
-					"change_entity_id",
-					"change_schema_key",
-				])
+				.insertInto("change_set_element")
+				.columns(["change_set_id", "change_id"])
 				.expression((eb) =>
 					eb
-						.selectFrom("branch_change_pointer")
-						.select([
-							eb.val(branch.id).as("branch_id"),
-							"change_id",
-							"change_file_id",
-							"change_entity_id",
-							"change_schema_key",
-						])
-						.where("branch_id", "=", args.parent!.id),
+						.selectFrom("change_set_element")
+						.select([eb.val(changeSet.id).as("change_set_id"), "change_id"])
+						.where("change_set_id", "=", args.parent!.change_set_id),
 				)
 				.execute();
 
@@ -77,16 +66,6 @@ export async function createBranch(args: {
 						.where("branch_id", "=", args.parent!.id),
 				)
 				.execute();
-
-			// await trx
-			// 	.insertInto("branch_target")
-			// 	.values({
-			// 		source_branch_id: branch.id,
-			// 		target_branch_id: args.parent.id,
-			// 	})
-			// 	// ignore if the merge intent already exists
-			// 	.onConflict((oc) => oc.doNothing())
-			// 	.execute();
 		}
 
 		return branch;

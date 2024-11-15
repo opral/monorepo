@@ -30,26 +30,26 @@ export async function createChangeConflict(args: {
 			.where((eb) =>
 				eb.exists(
 					trx
-						.selectFrom("change_conflict_element")
+						.selectFrom("change_set_element")
 						.innerJoin("change_conflict", (join) =>
 							join.onRef(
-								"change_conflict_element.change_conflict_id",
+								"change_conflict.change_set_id",
 								"=",
-								"change_conflict.id",
+								"change_set_element.change_set_id",
 							),
 						)
 						.where(
-							"change_conflict_element.change_id",
+							"change_set_element.change_id",
 							"in",
 							Array.from(args.conflictingChangeIds),
 						)
-						.groupBy("change_conflict_element.change_conflict_id")
+						.groupBy("change_set_element.change_set_id")
 						.having(
-							trx.fn.count("change_conflict_element.change_id"),
+							trx.fn.count("change_set_element.change_id"),
 							"=",
 							args.conflictingChangeIds.size,
 						)
-						.select("id"),
+						.select("change_set_element.change_set_id"),
 				),
 			)
 			.selectAll()
@@ -60,20 +60,27 @@ export async function createChangeConflict(args: {
 			return existingConflict;
 		}
 
+		const newChangeSet = await trx
+			.insertInto("change_set")
+			.defaultValues()
+			.returning("id")
+			.executeTakeFirstOrThrow();
+
 		const newConflict = await trx
 			.insertInto("change_conflict")
 			.values({
 				key: args.key,
+				change_set_id: newChangeSet.id,
 			})
 			.returningAll()
 			.executeTakeFirstOrThrow();
 
 		await trx
-			.insertInto("change_conflict_element")
+			.insertInto("change_set_element")
 			.values(
 				Array.from(args.conflictingChangeIds).map((id) => ({
 					change_id: id,
-					change_conflict_id: newConflict.id,
+					change_set_id: newConflict.change_set_id,
 				})),
 			)
 			// Ignore if the conflict element already exists

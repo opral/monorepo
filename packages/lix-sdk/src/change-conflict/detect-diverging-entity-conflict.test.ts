@@ -47,7 +47,7 @@ test("it should detect a diverging entity conflict", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([
 			{ parent_id: "change0", child_id: "change1" },
 			{ parent_id: "change0", child_id: "change2" },
@@ -105,7 +105,7 @@ test("it should return undefined if no conflict exists (determined by finding th
 		.execute();
 
 	await lix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([
 			{ parent_id: "change0", child_id: "change1" },
 			// change3 has no parent
@@ -151,7 +151,7 @@ test("it should return undefined if one of either change is the lowest common an
 		.execute();
 
 	await lix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([
 			// change 1 is the lowest common ancestor of change2
 			{ parent_id: "change0", child_id: "change1" },
@@ -211,7 +211,7 @@ test("it should detect a diverging entity conflict with multiple divering entity
 	await lix.db.insertInto("change").values(mockChanges).execute();
 
 	await lix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([
 			// change 0 is the lowest common ancestor of change1, change2, and change3
 			// which means that 1,2,3 are diverging

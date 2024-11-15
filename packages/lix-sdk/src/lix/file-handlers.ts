@@ -54,6 +54,7 @@ export async function handleFileInsert(args: {
 	await args.lix.db.transaction().execute(async (trx) => {
 		const currentBranch = await trx
 			.selectFrom("current_branch")
+			.innerJoin("branch", "current_branch.id", "branch.id")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
@@ -129,6 +130,7 @@ export async function handleFileChange(args: {
 	await args.lix.db.transaction().execute(async (trx) => {
 		const currentBranch = await trx
 			.selectFrom("current_branch")
+			.innerJoin("branch", "current_branch.id", "branch.id")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 		for (const detectedChange of detectedChanges) {
@@ -169,7 +171,7 @@ export async function handleFileChange(args: {
 			// If a parent exists, the change is a child of the parent
 			if (parentChange) {
 				await trx
-					.insertInto("change_graph_edge")
+					.insertInto("change_edge")
 					.values({
 						parent_id: parentChange.id,
 						child_id: insertedChange.id,

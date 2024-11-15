@@ -255,11 +255,11 @@ const getChanges = async (
 				.selectFrom("change")
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.innerJoin(
-					"change_graph_edge",
-					"change_graph_edge.parent_id",
+					"change_edge",
+					"change_edge.parent_id",
 					"change.id"
 				)
-				.where("change_graph_edge.child_id", "=", change.id)
+				.where("change_edge.child_id", "=", change.id)
 				.where(changeInBranch(currentBranch))
 				.where(changeHasLabel("confirmed"))
 				.selectAll("change")

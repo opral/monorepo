@@ -70,7 +70,7 @@ test("it should find the common parent of two changes recursively", async () => 
 
 	await lix.db.insertInto("change").values(mockChanges).execute();
 
-	await lix.db.insertInto("change_graph_edge").values(edges).execute();
+	await lix.db.insertInto("change_edge").values(edges).execute();
 
 	const commonAncestor = await getLowestCommonAncestorV2({
 		lix,
@@ -121,7 +121,7 @@ test("it should return undefind if no common parent exists", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([{ parent_id: "0", child_id: "1" }])
 		.execute();
 
@@ -179,7 +179,7 @@ test("it should succeed if one of the given changes is the common ancestor", asy
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.execute();
 
-	await lix.db.insertInto("change_graph_edge").values(edges).execute();
+	await lix.db.insertInto("change_edge").values(edges).execute();
 
 	const commonAncestor = await getLowestCommonAncestorV2({
 		lix,

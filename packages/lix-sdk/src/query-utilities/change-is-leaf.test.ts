@@ -38,7 +38,7 @@ test("should only return the leaf change", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([{ parent_id: "change2", child_id: "change3" }])
 		.execute();
 
@@ -109,13 +109,14 @@ test.todo(
 			.execute();
 
 		await lix.db
-			.insertInto("change_graph_edge")
+			.insertInto("change_edge")
 			.values([{ parent_id: "change1", child_id: "change2" }])
 			.execute();
 
 		const currentBranch = await lix.db
 			.selectFrom("current_branch")
-			.selectAll()
+			.innerJoin("branch", "branch.id", "current_branch.id")
+			.selectAll("branch")
 			.executeTakeFirstOrThrow();
 
 		// let the branch point only to the first change
