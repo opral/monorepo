@@ -1,16 +1,15 @@
-import type { Branch, Change, ChangeConflict } from "../database/schema.js";
+import type { Version, Change, ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 /**
- * Updates the branch pointers for the given branch with the given changes.
+ * Updates the Version pointers for the given sersion with the given changes.
  *
- * @args branch - The branch to update the pointers for. If not provided, the current branch is used.
  */
-export async function updateBranchPointers(args: {
+export async function updateVersionPointers(args: {
 	lix: Pick<Lix, "db" | "plugin">;
 	changes?: Change[];
 	changeConflicts?: ChangeConflict[];
-	branch: Pick<Branch, "id" | "change_set_id">;
+	version: Pick<Version, "id" | "change_set_id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		for (const change of args.changes ?? []) {
@@ -25,7 +24,7 @@ export async function updateBranchPointers(args: {
 				.where(
 					"change_set_element.change_set_id",
 					"=",
-					args.branch.change_set_id,
+					args.version.change_set_id,
 				)
 				.where("change.schema_key", "=", change.schema_key)
 				.where("change.entity_id", "=", change.entity_id)
@@ -38,7 +37,7 @@ export async function updateBranchPointers(args: {
 				await trx
 					.updateTable("change_set_element")
 					.set("change_id", change.id)
-					.where("change_set_id", "=", args.branch.change_set_id)
+					.where("change_set_id", "=", args.version.change_set_id)
 					.where("change_id", "=", existingEntityChange.id)
 					.execute();
 			} else {
@@ -46,7 +45,7 @@ export async function updateBranchPointers(args: {
 				await trx
 					.insertInto("change_set_element")
 					.values({
-						change_set_id: args.branch.change_set_id,
+						change_set_id: args.version.change_set_id,
 						change_id: change.id,
 					})
 					.execute();
@@ -55,32 +54,32 @@ export async function updateBranchPointers(args: {
 
 		if (args.changeConflicts) {
 			const changeConflictPointers = args.changeConflicts?.map((conflict) => ({
-				branch_id: args.branch.id,
+				version_id: args.version.id,
 				change_conflict_id: conflict.id,
 			}));
 			if (changeConflictPointers.length > 0) {
 				await trx
-					.insertInto("branch_change_conflict_pointer")
+					.insertInto("version_change_conflict_pointer")
 					.values(
 						args.changeConflicts?.map((conflict) => ({
-							branch_id: args.branch.id,
+							version_id: args.version.id,
 							change_conflict_id: conflict.id,
 						})) ?? [],
 					)
 					.onConflict((oc) => oc.doNothing())
 					.execute();
 			} else if (changeConflictPointers.length === 0) {
-				// if there are no conflicts, then delete all pointers for the branch
+				// if there are no conflicts, then delete all pointers for the version
 				await trx
-					.deleteFrom("branch_change_conflict_pointer")
-					.where("branch_id", "=", args.branch.id)
+					.deleteFrom("version_change_conflict_pointer")
+					.where("version_id", "=", args.version.id)
 					.execute();
 			}
 		}
 
 		// await updateChangeConflicts({
 		// 	lix: { ...args.lix, db: trx },
-		// 	branch,
+		// 	version,
 		// });
 	};
 

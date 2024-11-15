@@ -1,19 +1,19 @@
 import { ExpressionWrapper, sql } from "kysely";
-import type { Branch, LixDatabaseSchema } from "../database/schema.js";
+import type { Version, LixDatabaseSchema } from "../database/schema.js";
 import type { SqlBool } from "kysely";
 
 /**
- * Filters if a change is in the given branch.
+ * Filters if a change is in the given Version.
  *
  * @example
  *   ```ts
  *   const changes = await lix.db.selectFrom("change")
- *      .where(changeInBranch(currentBranch))
+ *      .where(changeInVersion(currentVersion))
  *      .selectAll()
  *      .execute();
  *   ```
  */
-export function changeInBranch(branch: Pick<Branch, "change_set_id">) {
+export function changeInVersion(version: Pick<Version, "change_set_id">) {
 	// Kysely does not support WITH RECURSIVE in a subquery, so we have to
 	// use a raw SQL expression here and map the type for TypeScript.
 	//
@@ -23,7 +23,7 @@ export function changeInBranch(branch: Pick<Branch, "change_set_id">) {
 			WITH RECURSIVE recursive_changes(id) AS (
 				SELECT change_id AS id
 				FROM change_set_element
-				WHERE change_set_id = ${branch.change_set_id}
+				WHERE change_set_id = ${version.change_set_id}
 				UNION ALL
 				SELECT change_edge.parent_id AS id
 				FROM change_edge

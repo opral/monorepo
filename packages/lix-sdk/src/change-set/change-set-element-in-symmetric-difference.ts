@@ -5,7 +5,7 @@ import type { ChangeSet, LixDatabaseSchema } from "../database/schema.js";
  * Returns the symmetric difference between two change sets.
  *
  * The symmetric difference is the set of changes
- * that exist in either one branch but not both.
+ * that exist in either one version but not both.
  * Modeled after https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/symmetricDifference
  *
  * @example

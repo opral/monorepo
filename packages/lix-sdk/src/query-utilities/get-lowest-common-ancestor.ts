@@ -17,7 +17,7 @@ export async function getLowestCommonAncestor(args: {
 		.selectAll()
 		.where("child_id", "=", args.sourceChange.id)
 		// TODO https://github.com/opral/lix-sdk/issues/105
-		// .where(isInSimulatedCurrentBranch)
+		// .where(isInSimulatedCurrentversion)
 		.execute();
 
 	// the change has no parents (it is the root change)
@@ -76,7 +76,7 @@ export async function getLowestCommonAncestor(args: {
 		if (parentEdges.length > 1) {
 			// https://github.com/opral/inlang-sdk/issues/134
 			throw new Error(
-				"Unimplemented. Multiple parents not supported until the branch feature exists.",
+				"Unimplemented. Multiple parents not supported until the version feature exists.",
 			);
 		}
 		parentId = parentEdges[0]?.parent_id;

@@ -1,13 +1,13 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { changeInBranch } from "./change-in-branch.js";
-import { createBranch } from "../branch/create-branch.js";
-import { updateBranchPointers } from "../branch/update-branch-pointers.js";
+import { changeInVersion } from "./change-in-version.js";
+import { createVersion } from "../version/create-version.js";
+import { updateVersionPointers } from "../version/update-version-pointers.js";
 
-test("selectChangeInBranch should retrieve all changes in the branch including ancestors", async () => {
+test("select changeInVersion should retrieve all changes in the version including ancestors", async () => {
 	const lix = await openLixInMemory({});
 
-	const branch = await createBranch({ lix });
+	const version = await createVersion({ lix });
 
 	// Insert changes and create a parent-child chain in change_edge
 	const [, , changeC] = await lix.db
@@ -58,23 +58,23 @@ test("selectChangeInBranch should retrieve all changes in the branch including a
 		])
 		.execute();
 
-	// Point the branch to changeC, which should include changeA and changeB as ancestors
-	await updateBranchPointers({
+	// Point the version to changeC, which should include changeA and changeB as ancestors
+	await updateVersionPointers({
 		lix,
-		branch,
+		version,
 		changes: [changeC!],
 	});
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.where(changeInBranch(branch))
+		.where(changeInVersion(version))
 		.selectAll()
 		.execute();
 
 	// Verify the returned changes include changeC and its ancestors changeA and changeB
 	const changeIds = changes.map((change) => change.id);
 
-	// change D is not pointed at in th branch, so it should not be included
+	// change D is not pointed at in th version, so it should not be included
 	expect(changes).toHaveLength(3);
 	expect(changeIds).toContain("changeA");
 	expect(changeIds).toContain("changeB");

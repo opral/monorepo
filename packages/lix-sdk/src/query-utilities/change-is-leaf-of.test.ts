@@ -2,15 +2,15 @@ import { test, expect } from "vitest";
 import { changeIsLeafOf } from "./change-is-leaf-of.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { Change, ChangeGraphEdge } from "../database/schema.js";
-import { updateBranchPointers } from "../branch/update-branch-pointers.js";
+import { updateVersionPointers } from "../version/update-version-pointers.js";
 
 test("it should find the latest child of a given change", async () => {
 	const lix = await openLixInMemory({});
 
-	const currentBranch = await lix.db
-		.selectFrom("current_branch")
-		.innerJoin("branch", "current_branch.id", "branch.id")
-		.selectAll("branch")
+	const currentVersion = await lix.db
+		.selectFrom("current_version")
+		.innerJoin("version", "current_version.id", "version.id")
+		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
 	const mockChanges = [
@@ -52,9 +52,9 @@ test("it should find the latest child of a given change", async () => {
 
 	await lix.db.insertInto("change_edge").values(edges).execute();
 
-	await updateBranchPointers({
+	await updateVersionPointers({
 		lix,
-		branch: currentBranch,
+		version: currentVersion,
 		changes: mockChanges,
 	});
 

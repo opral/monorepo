@@ -1,10 +1,10 @@
 import { test, expect } from "vitest";
-import { updateBranchPointers } from "../branch/update-branch-pointers.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { createBranch } from "./create-branch.js";
+import { createVersion } from "./create-version.js";
+import { updateVersionPointers } from "./update-version-pointers.js";
 import { createChangeConflict } from "../change-conflict/create-change-conflict.js";
 
-test("it should copy the changes from the parent branch", async () => {
+test("it should copy the changes from the parent version", async () => {
 	const lix = await openLixInMemory({});
 
 	const changeSet0 = await lix.db
@@ -13,9 +13,9 @@ test("it should copy the changes from the parent branch", async () => {
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	const branch0 = await lix.db
-		.insertInto("branch")
-		.values({ name: "branch0", change_set_id: changeSet0.id })
+	const version0 = await lix.db
+		.insertInto("version")
+		.values({ name: "version0", change_set_id: changeSet0.id })
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
@@ -40,18 +40,18 @@ test("it should copy the changes from the parent branch", async () => {
 		.returningAll()
 		.execute();
 
-	await updateBranchPointers({
+	await updateVersionPointers({
 		lix,
-		branch: branch0,
+		version: version0,
 		changes,
 	});
 
-	const branch1 = await createBranch({
+	const version1 = await createVersion({
 		lix,
-		parent: branch0,
+		parent: version0,
 	});
 
-	const changesInBranch0 = await lix.db
+	const changesInversion0 = await lix.db
 		.selectFrom("change")
 		.innerJoin(
 			"change_set_element",
@@ -59,15 +59,15 @@ test("it should copy the changes from the parent branch", async () => {
 			"change_set_element.change_id",
 		)
 		.innerJoin(
-			"branch",
-			"branch.change_set_id",
+			"version",
+			"version.change_set_id",
 			"change_set_element.change_set_id",
 		)
 		.selectAll("change")
-		.where("branch.id", "=", branch0.id)
+		.where("version.id", "=", version0.id)
 		.execute();
 
-	const changesInBranch1 = await lix.db
+	const changesInversion1 = await lix.db
 		.selectFrom("change")
 		.innerJoin(
 			"change_set_element",
@@ -75,35 +75,35 @@ test("it should copy the changes from the parent branch", async () => {
 			"change_set_element.change_id",
 		)
 		.innerJoin(
-			"branch",
-			"branch.change_set_id",
+			"version",
+			"version.change_set_id",
 			"change_set_element.change_set_id",
 		)
 		.selectAll("change")
-		.where("branch.id", "=", branch1.id)
+		.where("version.id", "=", version1.id)
 		.execute();
 
-	// main and feature branch should have the same changes
-	expect(changesInBranch0).toStrictEqual(changesInBranch1);
+	// main and feature version should have the same changes
+	expect(changesInversion0).toStrictEqual(changesInversion1);
 });
 
-// test("if a parent branch is provided, a merge target should be created to activate conflict detection", async () => {
+// test("if a parent version is provided, a merge target should be created to activate conflict detection", async () => {
 // 	const lix = await openLixInMemory({});
 
-// 	const branch0 = await createBranch({ lix, name: "branch0" });
-// 	const branch1 = await createBranch({ lix, parent: branch0, name: "branch1" });
+// 	const version0 = await createVersion({ lix, name: "version0" });
+// 	const version1 = await createVersion({ lix, parent: version0, name: "version1" });
 
-// 	const branchTarget = await lix.db
-// 		.selectFrom("branch_target")
+// 	const versionTarget = await lix.db
+// 		.selectFrom("version_target")
 // 		.selectAll()
-// 		.where("source_branch_id", "=", branch1.id)
-// 		.where("target_branch_id", "=", branch0.id)
+// 		.where("source_version_id", "=", version1.id)
+// 		.where("target_version_id", "=", version0.id)
 // 		.execute();
 
-// 	expect(branchTarget.length).toBe(1);
+// 	expect(versionTarget.length).toBe(1);
 // });
 
-test("it should copy change conflict pointers from the parent branch", async () => {
+test("it should copy change conflict pointers from the parent version", async () => {
 	const lix = await openLixInMemory({});
 
 	const changeSet0 = await lix.db
@@ -112,9 +112,9 @@ test("it should copy change conflict pointers from the parent branch", async () 
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	const branch0 = await lix.db
-		.insertInto("branch")
-		.values({ name: "branch0", change_set_id: changeSet0.id })
+	const version0 = await lix.db
+		.insertInto("version")
+		.values({ name: "version0", change_set_id: changeSet0.id })
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
@@ -139,41 +139,41 @@ test("it should copy change conflict pointers from the parent branch", async () 
 		.returningAll()
 		.execute();
 
-	await updateBranchPointers({
+	await updateVersionPointers({
 		lix,
-		branch: branch0,
+		version: version0,
 		changes,
 	});
 
 	await createChangeConflict({
 		lix,
-		branch: branch0,
+		version: version0,
 		key: "mock-key",
 		conflictingChangeIds: new Set([changes[0]!.id, changes[1]!.id]),
 	});
 
-	const branch0Conflicts = await lix.db
-		.selectFrom("branch_change_conflict_pointer")
-		.where("branch_id", "=", branch0.id)
+	const version0Conflicts = await lix.db
+		.selectFrom("version_change_conflict_pointer")
+		.where("version_id", "=", version0.id)
 		.selectAll()
 		.execute();
 
-	expect(branch0Conflicts.length).toBe(1);
+	expect(version0Conflicts.length).toBe(1);
 
-	const branch1 = await createBranch({
+	const version1 = await createVersion({
 		lix,
-		parent: branch0,
-		name: "branch1",
+		parent: version0,
+		name: "version1",
 	});
 
-	const branch2Conflicts = await lix.db
-		.selectFrom("branch_change_conflict_pointer")
-		.where("branch_id", "=", branch1.id)
+	const version2Conflicts = await lix.db
+		.selectFrom("version_change_conflict_pointer")
+		.where("version_id", "=", version1.id)
 		.selectAll()
 		.execute();
 
-	expect(branch2Conflicts.length).toBe(1);
-	expect(branch2Conflicts[0]?.change_conflict_id).toBe(
-		branch0Conflicts[0]?.change_conflict_id,
+	expect(version2Conflicts.length).toBe(1);
+	expect(version2Conflicts[0]?.change_conflict_id).toBe(
+		version0Conflicts[0]?.change_conflict_id,
 	);
 });

@@ -1,4 +1,4 @@
-export * from "./branch/index.js";
+export * from "./version/index.js";
 export * from "./change-set/index.js";
 export * from "./change-conflict/index.js";
 export * from "./change-queue/index.js";
