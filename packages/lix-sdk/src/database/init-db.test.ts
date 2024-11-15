@@ -265,9 +265,15 @@ test("re-opening the same database shouldn't lead to duplicate insertion of the 
 	});
 	const db = initDb({ sqlite });
 
+	const changeSet = await db
+		.insertInto("change_set")
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
 	const newBranch = await db
 		.insertInto("branch")
-		.values({ name: "mock" })
+		.values({ name: "mock", change_set_id: changeSet.id })
 		.returningAll()
 		.executeTakeFirstOrThrow();
 

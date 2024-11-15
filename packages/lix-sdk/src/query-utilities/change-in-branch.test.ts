@@ -1,15 +1,13 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { changeInBranch } from "./change-in-branch.js";
+import { createBranch } from "../branch/create-branch.js";
+import { updateBranchPointers } from "../branch/update-branch-pointers.js";
 
 test("selectChangeInBranch should retrieve all changes in the branch including ancestors", async () => {
 	const lix = await openLixInMemory({});
 
-	const branch = await lix.db
-		.insertInto("branch")
-		.values({ name: "test-branch" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const branch = await createBranch({ lix });
 
 	// Insert changes and create a parent-child chain in change_graph_edge
 	const [, , changeC] = await lix.db
@@ -61,16 +59,11 @@ test("selectChangeInBranch should retrieve all changes in the branch including a
 		.execute();
 
 	// Point the branch to changeC, which should include changeA and changeB as ancestors
-	await lix.db
-		.insertInto("branch_change_pointer")
-		.values({
-			branch_id: branch.id,
-			change_id: "changeC",
-			change_file_id: changeC!.file_id,
-			change_entity_id: changeC!.entity_id,
-			change_schema_key: changeC!.schema_key,
-		})
-		.execute();
+	await updateBranchPointers({
+		lix,
+		branch,
+		changes: [changeC!],
+	});
 
 	const changes = await lix.db
 		.selectFrom("change")

@@ -4,24 +4,14 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { mergeBranch } from "./merge-branch.js";
 import type { NewChange } from "../database/schema.js";
 import { updateBranchPointers } from "./update-branch-pointers.js";
+import { createBranch } from "./create-branch.js";
 
 test("it should update the branch pointers in target that are not conflicting", async () => {
 	const lix = await openLixInMemory({});
 
-	// Initialize source and target branches
-	const sourceBranch = await lix.db
-		.insertInto("branch")
-		.values({ name: "source-branch" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const sourceBranch = await createBranch({ lix });
+	const targetBranch = await createBranch({ lix });
 
-	const targetBranch = await lix.db
-		.insertInto("branch")
-		.values({ name: "target-branch" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	// Insert changes into `change` table and `branch_change_pointer` for source branch
 	const [change1] = await lix.db
 		.insertInto("change")
 		.values([
@@ -37,51 +27,30 @@ test("it should update the branch pointers in target that are not conflicting", 
 		.returningAll()
 		.execute();
 
-	await lix.db
-		.insertInto("branch_change_pointer")
-		.values([
-			// only source points to change1
-			{
-				branch_id: sourceBranch.id,
-				change_id: change1!.id,
-				change_entity_id: change1!.entity_id,
-				change_file_id: change1!.file_id,
-				change_schema_key: change1!.schema_key,
-			},
-		])
-		.execute();
+	// source points to change1
+	await updateBranchPointers({
+		lix,
+		branch: sourceBranch,
+		changes: [change1!],
+	});
 
-	// Execute the mergeBranch function
 	await mergeBranch({ lix, sourceBranch, targetBranch });
 
-	// Validate results in `branch_change_pointer` and `conflict` tables
-	const targetPointers = await lix.db
-		.selectFrom("branch_change_pointer")
+	const targetChanges = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", targetBranch.change_set_id)
 		.selectAll()
-		.where("branch_id", "=", targetBranch.id)
 		.execute();
 
-	expect(targetPointers.map((pointer) => pointer.change_id)).toContain(
-		change1?.id,
-	);
+	expect(targetChanges.map((c) => c.change_id)).toContain(change1?.id);
 });
 
 // edge case scenario
 test("if a previously undetected conflict is detected during merge, the conflict should be inserted and the target branch change pointers updated (if the target branch does not point to the entity yet) ", async () => {
 	const lix = await openLixInMemory({});
 
-	// Initialize source and target branches
-	const sourceBranch = await lix.db
-		.insertInto("branch")
-		.values({ name: "source-branch" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	const targetBranch = await lix.db
-		.insertInto("branch")
-		.values({ name: "target-branch" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const sourceBranch = await createBranch({ lix, name: "source-branch" });
+	const targetBranch = await createBranch({ lix, name: "target-branch" });
 
 	// Insert changes into `change` table and `branch_change_pointer` for source branch
 	const [change1, change2, change3] = await lix.db
@@ -115,32 +84,11 @@ test("if a previously undetected conflict is detected during merge, the conflict
 		.returningAll()
 		.execute();
 
-	await lix.db
-		.insertInto("branch_change_pointer")
-		.values([
-			{
-				branch_id: sourceBranch.id,
-				change_id: change1!.id,
-				change_entity_id: change1!.entity_id,
-				change_file_id: change1!.file_id,
-				change_schema_key: change1!.schema_key,
-			},
-			{
-				branch_id: sourceBranch.id,
-				change_id: change2!.id,
-				change_entity_id: change2!.entity_id,
-				change_file_id: change2!.file_id,
-				change_schema_key: change2!.schema_key,
-			},
-			{
-				branch_id: sourceBranch.id,
-				change_id: change3!.id,
-				change_entity_id: change3!.entity_id,
-				change_file_id: change3!.file_id,
-				change_schema_key: change3!.schema_key,
-			},
-		])
-		.execute();
+	await updateBranchPointers({
+		lix,
+		branch: sourceBranch,
+		changes: [change1!, change2!, change3!],
+	});
 
 	const mockPlugin: LixPlugin = {
 		key: "mock",
@@ -162,10 +110,10 @@ test("if a previously undetected conflict is detected during merge, the conflict
 	await mergeBranch({ lix, sourceBranch, targetBranch });
 
 	// Validate results in `branch_change_pointer` and `conflict` tables
-	const targetPointers = await lix.db
-		.selectFrom("branch_change_pointer")
+	const targetChanges = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", targetBranch.change_set_id)
 		.selectAll()
-		.where("branch_id", "=", targetBranch.id)
 		.execute();
 
 	const conflicts = await lix.db
@@ -181,7 +129,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 	// even though change2 and change3 are conflicting, the target branch
 	// should point to change2 and change3 as well given that the target
 	// hasn't seen those entities yet
-	expect(targetPointers.map((pointer) => pointer.change_id)).toEqual([
+	expect(targetChanges.map((c) => c.change_id)).toEqual([
 		change1?.id,
 		change2?.id,
 		change3?.id,
@@ -201,18 +149,8 @@ test("if a previously undetected conflict is detected during merge, the conflict
 test("it should not update the target branch pointers of a conflicting change", async () => {
 	const lix = await openLixInMemory({});
 
-	// Initialize source and target branches
-	const sourceBranch = await lix.db
-		.insertInto("branch")
-		.values({ name: "source-branch" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	const targetBranch = await lix.db
-		.insertInto("branch")
-		.values({ name: "target-branch" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const sourceBranch = await createBranch({ lix, name: "source-branch" });
+	const targetBranch = await createBranch({ lix, name: "target-branch" });
 
 	// Insert changes into `change` table and `branch_change_pointer` for source branch
 	const [change1, change2] = await lix.db
@@ -238,27 +176,19 @@ test("it should not update the target branch pointers of a conflicting change", 
 		.returningAll()
 		.execute();
 
-	await lix.db
-		.insertInto("branch_change_pointer")
-		.values([
-			// source points to change1
-			{
-				branch_id: sourceBranch.id,
-				change_id: change1!.id,
-				change_entity_id: change1!.entity_id,
-				change_file_id: change1!.file_id,
-				change_schema_key: change1!.schema_key,
-			},
-			// target points to change2
-			{
-				branch_id: targetBranch.id,
-				change_id: change2!.id,
-				change_entity_id: change2!.entity_id,
-				change_file_id: change2!.file_id,
-				change_schema_key: change2!.schema_key,
-			},
-		])
-		.execute();
+	// source points to change1
+	await updateBranchPointers({
+		lix,
+		branch: sourceBranch,
+		changes: [change1!],
+	});
+
+	// target points to change2
+	await updateBranchPointers({
+		lix,
+		branch: targetBranch,
+		changes: [change2!],
+	});
 
 	const mockPlugin: LixPlugin = {
 		key: "mock",
@@ -280,10 +210,10 @@ test("it should not update the target branch pointers of a conflicting change", 
 	await mergeBranch({ lix, sourceBranch, targetBranch });
 
 	// Validate results in `branch_change_pointer` and `conflict` tables
-	const targetPointers = await lix.db
-		.selectFrom("branch_change_pointer")
+	const targetChanges = await lix.db
+		.selectFrom("change_set_element")
 		.selectAll()
-		.where("branch_id", "=", targetBranch.id)
+		.where("change_set_id", "=", targetBranch.change_set_id)
 		.execute();
 
 	const conflicts = await lix.db
@@ -299,7 +229,7 @@ test("it should not update the target branch pointers of a conflicting change", 
 	// even though change2 and change3 are conflicting, the target branch
 	// should point to change2 and change3 as well given that the target
 	// hasn't seen those entities yet
-	expect(targetPointers.map((pointer) => pointer.change_id)).toEqual([
+	expect(targetChanges.map((pointer) => pointer.change_id)).toEqual([
 		// change1 should not be pointed to
 		change2?.id,
 	]);
@@ -320,18 +250,8 @@ test("it should not update the target branch pointers of a conflicting change", 
 test("it should automatically a diverging entity conflict", async () => {
 	const lix = await openLixInMemory({});
 
-	// Initialize source and target branches
-	const sourceBranch = await lix.db
-		.insertInto("branch")
-		.values({ name: "source-branch" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	const targetBranch = await lix.db
-		.insertInto("branch")
-		.values({ name: "target-branch" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const sourceBranch = await createBranch({ lix, name: "source-branch" });
+	const targetBranch = await createBranch({ lix, name: "target-branch" });
 
 	const ancestorChange = await lix.db
 		.insertInto("change")
@@ -382,26 +302,17 @@ test("it should automatically a diverging entity conflict", async () => {
 		])
 		.execute();
 
-	// Insert head pointers for source and target branches
-	await lix.db
-		.insertInto("branch_change_pointer")
-		.values([
-			{
-				branch_id: sourceBranch.id,
-				change_id: sourceChange.id,
-				change_entity_id: "entity1",
-				change_file_id: "file1",
-				change_schema_key: "type1",
-			},
-			{
-				branch_id: targetBranch.id,
-				change_id: targetChange.id,
-				change_entity_id: "entity1",
-				change_file_id: "file1",
-				change_schema_key: "type1",
-			},
-		])
-		.execute();
+	await updateBranchPointers({
+		lix,
+		branch: sourceBranch,
+		changes: [sourceChange],
+	});
+
+	await updateBranchPointers({
+		lix,
+		branch: targetBranch,
+		changes: [targetChange],
+	});
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
@@ -427,21 +338,41 @@ test("it should automatically a diverging entity conflict", async () => {
 	]);
 
 	// ensure that the branch change pointer hasn't been updated
-	const targetPointers = await lix.db
-		.selectFrom("branch_change_pointer")
+	const targetChanges = await lix.db
+		.selectFrom("change_set_element")
 		.selectAll()
-		.where("branch_id", "=", targetBranch.id)
+		.where("change_set_id", "=", targetBranch.change_set_id)
 		.execute();
 
-	expect(targetPointers.map((pointer) => pointer.change_id)).not.toContain(
+	expect(targetChanges.map((pointer) => pointer.change_id)).not.toContain(
 		sourceChange.id,
 	);
-	expect(targetPointers.map((pointer) => pointer.change_id)).toContain(
+	expect(targetChanges.map((pointer) => pointer.change_id)).toContain(
 		targetChange.id,
 	);
 });
 
 test("re-curring merges should not create a new conflict if the conflict already exists for the key and set of changes", async () => {
+	const mockPlugin: LixPlugin = {
+		key: "mock-plugin",
+		applyChanges: async () => ({
+			fileData: new TextEncoder().encode("mock"),
+		}),
+		detectConflictsV2: async () => [
+			{
+				key: "mock-conflict",
+				conflictingChangeIds: new Set([mockChanges[0]!.id, mockChanges[1]!.id]),
+			},
+		],
+	};
+
+	const lix = await openLixInMemory({
+		providePlugins: [mockPlugin],
+	});
+
+	const sourceBranch = await createBranch({ lix, name: "source-branch" });
+	const targetBranch = await createBranch({ lix, name: "target-branch" });
+
 	const mockChanges = [
 		{
 			id: "change0",
@@ -461,23 +392,6 @@ test("re-curring merges should not create a new conflict if the conflict already
 		},
 	] as const satisfies NewChange[];
 
-	const mockPlugin: LixPlugin = {
-		key: "mock-plugin",
-		applyChanges: async () => ({
-			fileData: new TextEncoder().encode("mock"),
-		}),
-		detectConflictsV2: async () => [
-			{
-				key: "mock-conflict",
-				conflictingChangeIds: new Set([mockChanges[0]!.id, mockChanges[1]!.id]),
-			},
-		],
-	};
-
-	const lix = await openLixInMemory({
-		providePlugins: [mockPlugin],
-	});
-
 	await lix.db
 		.insertInto("file_internal")
 		.values({ id: "mock", path: "mock", data: new Uint8Array() })
@@ -488,18 +402,6 @@ test("re-curring merges should not create a new conflict if the conflict already
 		.values(mockChanges)
 		.returningAll()
 		.execute();
-
-	const sourceBranch = await lix.db
-		.insertInto("branch")
-		.values({ id: "source-branch" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	const targetBranch = await lix.db
-		.insertInto("branch")
-		.values({ id: "target-branch" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
 
 	// source branch points to change0
 	await updateBranchPointers({

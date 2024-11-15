@@ -8,7 +8,8 @@ test("it should return the leaf change for the given branch", async () => {
 
 	const currentBranch = await lix.db
 		.selectFrom("current_branch")
-		.selectAll()
+		.innerJoin("branch", "current_branch.id", "branch.id")
+		.selectAll("branch")
 		.executeTakeFirstOrThrow();
 
 	const insertedChanges = await lix.db

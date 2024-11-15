@@ -1,15 +1,12 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeConflict } from "./create-change-conflict.js";
+import { createBranch } from "../branch/create-branch.js";
 
 test("conflicts should be de-duplicated based on the change_conflict.key and branch", async () => {
 	const lix = await openLixInMemory({});
 
-	const branch0 = await lix.db
-		.insertInto("branch")
-		.values({ id: "branch0" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const branch0 = await createBranch({ lix, name: "branch0" });
 
 	await lix.db
 		.insertInto("change")
@@ -74,11 +71,7 @@ test("conflicts should be de-duplicated based on the change_conflict.key and bra
 test("if a conflict contains the same changes for a given key and branch, no new conflict should be created", async () => {
 	const lix = await openLixInMemory({});
 
-	const branch0 = await lix.db
-		.insertInto("branch")
-		.values({ id: "branch0" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const branch0 = await createBranch({ lix, name: "branch0" });
 
 	await lix.db
 		.insertInto("change")

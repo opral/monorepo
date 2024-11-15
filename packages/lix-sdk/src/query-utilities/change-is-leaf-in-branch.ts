@@ -12,13 +12,13 @@ import type { Branch, LixDatabaseSchema } from "../database/schema.js";
  *     .execute();
  *   ```
  */
-export function changeIsLeafInBranch(branch: Pick<Branch, "id">) {
+export function changeIsLeafInBranch(branch: Pick<Branch, "change_set_id">) {
 	return sql`
     change.id IN (
       WITH RECURSIVE branch_changes(id) AS (
         SELECT change_id AS id
-        FROM branch_change_pointer
-        WHERE branch_id = ${branch.id}
+        FROM change_set_element
+        WHERE change_set_id = ${branch.change_set_id}
         UNION ALL
         SELECT change_graph_edge.parent_id AS id
         FROM change_graph_edge

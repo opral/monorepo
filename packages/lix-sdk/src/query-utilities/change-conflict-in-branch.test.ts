@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeConflict } from "../change-conflict/create-change-conflict.js";
 import { changeConflictInBranch } from "./change-conflict-in-branch.js";
+import { createBranch } from "../branch/create-branch.js";
 
 test("should find conflicts in the given branch", async () => {
 	const lix = await openLixInMemory({});
@@ -29,23 +30,9 @@ test("should find conflicts in the given branch", async () => {
 		])
 		.execute();
 
-	const branch0 = await lix.db
-		.insertInto("branch")
-		.values({
-			id: "branch0",
-			name: "Test Branch",
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const branch0 = await createBranch({ lix, name: "branch0" });
 
-	const branch1 = await lix.db
-		.insertInto("branch")
-		.values({
-			id: "branch1",
-			name: "Test Branch",
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const branch1 = await createBranch({ lix, name: "branch1" });
 
 	// Create change conflicts
 	const mockConflict0 = await createChangeConflict({

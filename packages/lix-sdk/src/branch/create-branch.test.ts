@@ -4,63 +4,87 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createBranch } from "./create-branch.js";
 import { createChangeConflict } from "../change-conflict/create-change-conflict.js";
 
-test("it should copy the change pointers from the parent branch", async () => {
+test("it should copy the changes from the parent branch", async () => {
 	const lix = await openLixInMemory({});
 
-	const mainBranch = await lix.db
-		.selectFrom("branch")
-		.selectAll()
-		.where("name", "=", "main")
+	const changeSet0 = await lix.db
+		.insertInto("change_set")
+		.defaultValues()
+		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	await lix.db.transaction().execute(async (trx) => {
-		const changes = await trx
-			.insertInto("change")
-			.values([
-				{
-					schema_key: "file",
-					entity_id: "value1",
-					file_id: "mock",
-					plugin_key: "mock-plugin",
-					snapshot_id: "sn1",
-				},
-				{
-					schema_key: "file",
-					entity_id: "value2",
-					file_id: "mock",
-					plugin_key: "mock-plugin",
-					snapshot_id: "sn2",
-				},
-			])
-			.returningAll()
-			.execute();
+	const branch0 = await lix.db
+		.insertInto("branch")
+		.values({ name: "branch0", change_set_id: changeSet0.id })
+		.returningAll()
+		.executeTakeFirstOrThrow();
 
-		await updateBranchPointers({
-			lix: { ...lix, db: trx },
-			branch: mainBranch,
-			changes,
-		});
-	});
-
-	const branch = await createBranch({
-		lix,
-		parent: mainBranch,
-		name: "feature-branch",
-	});
-
-	const branchChangePointers = await lix.db
-		.selectFrom("branch_change_pointer")
-		.selectAll()
+	const changes = await lix.db
+		.insertInto("change")
+		.values([
+			{
+				schema_key: "file",
+				entity_id: "value1",
+				file_id: "mock",
+				plugin_key: "mock-plugin",
+				snapshot_id: "sn1",
+			},
+			{
+				schema_key: "file",
+				entity_id: "value2",
+				file_id: "mock",
+				plugin_key: "mock-plugin",
+				snapshot_id: "sn2",
+			},
+		])
+		.returningAll()
 		.execute();
 
-	// main and feature branch should have the same change pointers
-	expect(branchChangePointers.length).toBe(4);
-	expect(branchChangePointers.map((pointer) => pointer.branch_id)).toEqual([
-		mainBranch.id,
-		mainBranch.id,
-		branch.id,
-		branch.id,
-	]);
+	await updateBranchPointers({
+		lix,
+		branch: branch0,
+		changes,
+	});
+
+	const branch1 = await createBranch({
+		lix,
+		parent: branch0,
+	});
+
+	const changesInBranch0 = await lix.db
+		.selectFrom("change")
+		.innerJoin(
+			"change_set_element",
+			"change.id",
+			"change_set_element.change_id",
+		)
+		.innerJoin(
+			"branch",
+			"branch.change_set_id",
+			"change_set_element.change_set_id",
+		)
+		.selectAll("change")
+		.where("branch.id", "=", branch0.id)
+		.execute();
+
+	const changesInBranch1 = await lix.db
+		.selectFrom("change")
+		.innerJoin(
+			"change_set_element",
+			"change.id",
+			"change_set_element.change_id",
+		)
+		.innerJoin(
+			"branch",
+			"branch.change_set_id",
+			"change_set_element.change_set_id",
+		)
+		.selectAll("change")
+		.where("branch.id", "=", branch1.id)
+		.execute();
+
+	// main and feature branch should have the same changes
+	expect(changesInBranch0).toStrictEqual(changesInBranch1);
 });
 
 // test("if a parent branch is provided, a merge target should be created to activate conflict detection", async () => {
@@ -82,9 +106,15 @@ test("it should copy the change pointers from the parent branch", async () => {
 test("it should copy change conflict pointers from the parent branch", async () => {
 	const lix = await openLixInMemory({});
 
+	const changeSet0 = await lix.db
+		.insertInto("change_set")
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
 	const branch0 = await lix.db
 		.insertInto("branch")
-		.values({ name: "branch0" })
+		.values({ name: "branch0", change_set_id: changeSet0.id })
 		.returningAll()
 		.executeTakeFirstOrThrow();
 

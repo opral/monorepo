@@ -36,9 +36,9 @@ export async function garbageCollectChangeConflicts(args: {
 				"change_conflict_element.change_conflict_id",
 			)
 			.leftJoin(
-				"branch_change_pointer",
+				"change_set_element",
 				"change_conflict_element.change_id",
-				"branch_change_pointer.change_id",
+				"change_set_element.change_id",
 			)
 			.groupBy("change_conflict.id")
 			// TODO assumes that each change conflict element is a unique entity change
@@ -49,7 +49,7 @@ export async function garbageCollectChangeConflicts(args: {
 			// that no branch change pointer references, aka the conflict is outdated.
 			.having(
 				// the number of changes in the conflict that have a corresponding branch change pointer.
-				trx.fn.count("branch_change_pointer.change_id"),
+				trx.fn.count("change_set_element.change_id"),
 				"<",
 				// the total number of changes in the conflict.
 				trx.fn.count("change_conflict_element.change_id"),

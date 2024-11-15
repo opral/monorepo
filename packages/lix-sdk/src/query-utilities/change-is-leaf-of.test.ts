@@ -7,6 +7,12 @@ import { updateBranchPointers } from "../branch/update-branch-pointers.js";
 test("it should find the latest child of a given change", async () => {
 	const lix = await openLixInMemory({});
 
+	const currentBranch = await lix.db
+		.selectFrom("current_branch")
+		.innerJoin("branch", "current_branch.id", "branch.id")
+		.selectAll("branch")
+		.executeTakeFirstOrThrow();
+
 	const mockChanges = [
 		{
 			id: "1",
@@ -46,7 +52,11 @@ test("it should find the latest child of a given change", async () => {
 
 	await lix.db.insertInto("change_graph_edge").values(edges).execute();
 
-	await updateBranchPointers({ lix, changes: mockChanges });
+	await updateBranchPointers({
+		lix,
+		branch: currentBranch,
+		changes: mockChanges,
+	});
 
 	const leafOfChange1 = await lix.db
 		.selectFrom("change")

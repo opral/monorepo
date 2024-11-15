@@ -54,6 +54,7 @@ export async function handleFileInsert(args: {
 	await args.lix.db.transaction().execute(async (trx) => {
 		const currentBranch = await trx
 			.selectFrom("current_branch")
+			.innerJoin("branch", "current_branch.id", "branch.id")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
@@ -130,6 +131,7 @@ export async function handleFileChange(args: {
 	await args.lix.db.transaction().execute(async (trx) => {
 		const currentBranch = await trx
 			.selectFrom("current_branch")
+			.innerJoin("branch", "current_branch.id", "branch.id")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 		for (const detectedChange of detectedChanges) {

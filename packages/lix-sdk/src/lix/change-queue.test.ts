@@ -39,6 +39,7 @@ test("should use queue and settled correctly", async () => {
 
 	const currentBranch = await lix.db
 		.selectFrom("current_branch")
+		.innerJoin("branch", "current_branch.id", "branch.id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -159,8 +160,9 @@ test("should use queue and settled correctly", async () => {
 		.selectAll()
 		.execute();
 
-	const branchChangePointers = await lix.db
-		.selectFrom("branch_change_pointer")
+	const branchChangeSetElements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", currentBranch.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -202,9 +204,9 @@ test("should use queue and settled correctly", async () => {
 	]);
 
 	// the branch change pointers points to the last change
-	expect(branchChangePointers).toEqual([
+	expect(branchChangeSetElements).toEqual([
 		expect.objectContaining({
-			branch_id: currentBranch.id,
+			change_set_id: currentBranch.change_set_id,
 			change_id: updatedChanges[2]?.id,
 		}),
 	]);
