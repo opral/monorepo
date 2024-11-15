@@ -5,7 +5,7 @@ import { minimatch } from "minimatch";
 import { updateBranchPointers } from "../branch/update-branch-pointers.js";
 import { changeIsLeafInBranch } from "../query-utilities/change-is-leaf-in-branch.js";
 import { createSnapshot } from "../snapshot/create-snapshot.js";
-import type { Lix } from "./open-lix.js";
+import type { Lix } from "../lix/open-lix.js";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {

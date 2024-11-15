@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest";
-import { openLixInMemory } from "./open-lix-in-memory.js";
-import { newLixFile } from "./new-lix.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { newLixFile } from "../lix/new-lix.js";
 import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
 
 test("should use queue and settled correctly", async () => {
