@@ -8,7 +8,7 @@ import type { Lix } from "../lix/open-lix.js";
  *
  * @example
  *   ```ts
- *   await switchBranch({ lix, to: { id: "branch-1" } });
+ *   await switchBranch({ lix, to: currentBranch });
  *   ```
  *
  * @example
@@ -16,7 +16,7 @@ import type { Lix } from "../lix/open-lix.js";
  *
  *   ```ts
  *   await lix.db.transaction().execute(async (trx) => {
- *      const newBranch = await createBranch({ lix: { db: trx }, from: currentBranch });
+ *      const newBranch = await createBranch({ lix: { db: trx }, parent: currentBranch });
  *      await switchBranch({ lix: { db: trx }, to: newBranch });
  *   });
  *   ```
