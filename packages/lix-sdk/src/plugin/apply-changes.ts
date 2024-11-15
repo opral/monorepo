@@ -68,8 +68,8 @@ export async function applyChanges(args: {
 					// avoiding the change queue here
 					// which is not duplicate tolerant
 					// yet. see https://linear.app/opral/issue/LIXDK-114/make-diff-and-change-generation-fault-tolerant
-					.updateTable("file_internal")
-					.set({ data: fileData })
+					.updateTable("file")
+					.set({ data: fileData, skip_change_extraction: 1 })
 					.where("id", "=", fileId)
 					.execute();
 			}

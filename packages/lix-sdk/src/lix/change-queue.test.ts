@@ -43,17 +43,11 @@ test("should use queue and settled correctly", async () => {
 		.executeTakeFirstOrThrow();
 
 	const enc = new TextEncoder();
+	const dataInitial = enc.encode("insert text");
 	await lix.db
 		.insertInto("file")
-		.values({ id: "test", path: "test.txt", data: enc.encode("insert text") })
+		.values({ id: "test", path: "test.txt", data: dataInitial })
 		.execute();
-
-	const internalFiles = await lix.db
-		.selectFrom("file_internal")
-		.selectAll()
-		.execute();
-
-	expect(internalFiles).toEqual([]);
 
 	const queue = await lix.db.selectFrom("change_queue").selectAll().execute();
 	expect(queue).toEqual([
@@ -62,7 +56,8 @@ test("should use queue and settled correctly", async () => {
 			file_id: "test",
 			metadata: null,
 			path: "test.txt",
-			data: queue[0]?.data,
+			data_after: dataInitial,
+			data_before: null,
 		},
 	]);
 	await lix.settled();
@@ -71,8 +66,9 @@ test("should use queue and settled correctly", async () => {
 		(await lix.db.selectFrom("change_queue").selectAll().execute()).length,
 	).toBe(0);
 
+	// TODO QUEUE check if the replacement of file_internal was expected
 	const internalFilesAfter = await lix.db
-		.selectFrom("file_internal")
+		.selectFrom("file")
 		.selectAll()
 		.execute();
 
@@ -82,6 +78,7 @@ test("should use queue and settled correctly", async () => {
 			id: "test",
 			path: "test.txt",
 			metadata: null,
+			skip_change_extraction: null,
 		},
 	]);
 
@@ -104,22 +101,38 @@ test("should use queue and settled correctly", async () => {
 		}),
 	]);
 
+	const dataUpdate1 = enc.encode("updated text");
 	await lix.db
 		.updateTable("file")
-		.set({ data: enc.encode("test updated text") })
+		.set({ data: dataUpdate1 })
 		.where("id", "=", "test")
 		.execute();
 
+	const beforeQueueTick = await lix.db
+		.selectFrom("change_queue")
+		.selectAll()
+		.execute();
+
+	expect(beforeQueueTick.length).toBe(1);
+
+	const afterQueueTick = await lix.db
+		.selectFrom("change_queue")
+		.selectAll()
+		.execute();
+	expect(afterQueueTick.length).toBe(0);
+
+	const dataUpdate1Again = dataUpdate1;
 	// re apply same change
 	await lix.db
 		.updateTable("file")
-		.set({ data: enc.encode("test updated text") })
+		.set({ data: dataUpdate1Again })
 		.where("id", "=", "test")
 		.execute();
 
+	const dataUpdate2 = enc.encode("seond text update");
 	await lix.db
 		.updateTable("file")
-		.set({ data: enc.encode("test updated text second update") })
+		.set({ data: dataUpdate2 })
 		.where("id", "=", "test")
 		.execute();
 
@@ -130,14 +143,16 @@ test("should use queue and settled correctly", async () => {
 			file_id: "test",
 			path: "test.txt",
 			metadata: null,
-			data: queue2[0]?.data,
+			data_before: dataUpdate1,
+			data_after: dataUpdate1Again,
 		},
 		{
 			id: 4,
 			file_id: "test",
 			path: "test.txt",
 			metadata: null,
-			data: queue2[1]?.data,
+			data_before: dataUpdate1Again,
+			data_after: dataUpdate2,
 		},
 	]);
 
@@ -180,7 +195,7 @@ test("should use queue and settled correctly", async () => {
 			plugin_key: "mock-plugin",
 			schema_key: "text",
 			content: {
-				text: "test updated text",
+				text: "updated text",
 			},
 		}),
 		expect.objectContaining({
@@ -189,7 +204,7 @@ test("should use queue and settled correctly", async () => {
 			plugin_key: "mock-plugin",
 			schema_key: "text",
 			content: {
-				text: "test updated text second update",
+				text: "seond text update",
 			},
 		}),
 	]);

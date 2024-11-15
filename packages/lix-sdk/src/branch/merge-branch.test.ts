@@ -479,8 +479,13 @@ test("re-curring merges should not create a new conflict if the conflict already
 	});
 
 	await lix.db
-		.insertInto("file_internal")
-		.values({ id: "mock", path: "mock", data: new Uint8Array() })
+		.insertInto("file")
+		.values({
+			id: "mock",
+			path: "mock",
+			data: new Uint8Array(),
+			skip_change_extraction: 1,
+		})
 		.execute();
 
 	const changes = await lix.db
@@ -546,4 +551,3 @@ test("re-curring merges should not create a new conflict if the conflict already
 
 	expect(conflictsAfter2Merge.length).toBe(1);
 });
-

@@ -48,8 +48,13 @@ test("it should resolve a conflict and apply the changes", async () => {
 	});
 
 	await lix.db
-		.insertInto("file_internal")
-		.values({ id: "mock", path: "mock", data: new Uint8Array() })
+		.insertInto("file")
+		.values({
+			id: "mock",
+			path: "mock",
+			data: new Uint8Array(),
+			skip_change_extraction: 1,
+		})
 		.execute();
 
 	const snapshots = await lix.db
@@ -93,8 +98,9 @@ test("it should resolve a conflict and apply the changes", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
+	// TODO QUEUE check if the replacement of file_internal was expected
 	const fileAfterResolve = await lix.db
-		.selectFrom("file_internal")
+		.selectFrom("file")
 		.selectAll()
 		.where("id", "=", changes[0]!.file_id)
 		.executeTakeFirstOrThrow();

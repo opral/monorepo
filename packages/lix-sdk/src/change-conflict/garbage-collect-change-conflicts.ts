@@ -2,8 +2,8 @@ import type { ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 /**
- * Garbage collects change conflicts. 
- * 
+ * Garbage collects change conflicts.
+ *
  * A change conflict is considered garbage if the conflict
  * contains changes that no branch change pointer points to.
  */

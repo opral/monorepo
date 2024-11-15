@@ -20,9 +20,7 @@ test("a json change schema should be infer the properties", () => {
 		},
 	} as const satisfies ExperimentalChangeSchema;
 
-	const snapshot: ExperimentalInferType<
-		typeof jsonChangeSchema
-	> = {
+	const snapshot: ExperimentalInferType<typeof jsonChangeSchema> = {
 		name: "John",
 		age: 5,
 		location: {
@@ -47,9 +45,8 @@ test("a blob change schema should be infer the properties", () => {
 		type: "blob",
 	} as const satisfies ExperimentalChangeSchema;
 
-	const snapshot: ExperimentalInferType<
-		typeof blobChangeSchema
-	> = new ArrayBuffer(0);
+	const snapshot: ExperimentalInferType<typeof blobChangeSchema> =
+		new ArrayBuffer(0);
 
 	assertType<ArrayBuffer>(snapshot);
 });

@@ -8,26 +8,23 @@ export async function applySchema(args: {
 }): Promise<unknown> {
 	return args.sqlite.exec`
 
-  CREATE TABLE IF NOT EXISTS file_internal (
+  CREATE TABLE IF NOT EXISTS file (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL,
-    metadata TEXT  -- Added metadata field
+    metadata TEXT,  -- Added metadata field
+    skip_change_extraction INTEGER -- New column with default value
   ) strict;
 
   CREATE TABLE IF NOT EXISTS change_queue (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     file_id TEXT,
     path TEXT NOT NULL,
-    data BLOB,
+    data_before BLOB,
+    data_after BLOB,
     metadata TEXT  -- Added metadata field
   ) strict;
 
-  create view IF NOT EXISTS file as
-    select z.id as id, z.path as path, z.data as data, z.metadata as metadata, MAX(z.mx) as queue_id from 
-      (select file_id as id, path, data, metadata, id as mx from change_queue UNION select id, path, data, metadata, 0 as mx from file_internal) as z
-    group by z.id;
-  
   CREATE TABLE IF NOT EXISTS change (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     entity_id TEXT NOT NULL,
@@ -87,22 +84,30 @@ export async function applySchema(args: {
     FOREIGN KEY(resolved_change_id) REFERENCES change(id)
   ) strict;
 
-  CREATE TRIGGER IF NOT EXISTS file_update INSTEAD OF UPDATE ON file
+  CREATE TRIGGER IF NOT EXISTS file_insert BEFORE INSERT ON file
+  WHEN NEW.skip_change_extraction IS NULL
   BEGIN
-    insert into change_queue(file_id, path, data, metadata) values(NEW.id, NEW.path, NEW.data, NEW.metadata);
-    select triggerWorker();
+    INSERT INTO change_queue(file_id, path, data_before, data_after, metadata)
+      VALUES (NEW.id, NEW.path, NULL, NEW.data, NEW.metadata);
+    SELECT triggerWorker();
   END;
 
-  CREATE TRIGGER IF NOT EXISTS file_insert INSTEAD OF INSERT ON file
+  CREATE TRIGGER IF NOT EXISTS file_update BEFORE UPDATE ON file
+  WHEN NEW.skip_change_extraction IS NULL
   BEGIN
-    insert into change_queue(file_id, path, data, metadata) values(NEW.id, NEW.path, NEW.data, NEW.metadata);
-    select triggerWorker();
+    INSERT INTO change_queue(file_id, path, data_before, data_after, metadata)
+      VALUES (OLD.id, OLD.path, OLD.data, NEW.data, OLD.metadata);
+    SELECT triggerWorker();
   END;
 
-  CREATE TRIGGER IF NOT EXISTS change_queue_remove BEFORE DELETE ON change_queue
-  BEGIN
-    insert or replace into file_internal(id, path, data, metadata) values(OLD.file_id, OLD.path, OLD.data, OLD.metadata);
-  END;
+-- TODO Queue - handle deletion - the current queue doesn't handle delete starting with feature parity
+  -- CREATE TRIGGER IF NOT EXISTS file_delete BEFORE DELETE ON file
+  -- WHEN NEW.skip_change_extraction IS NULL
+  -- BEGIN
+  --     INSERT INTO change_queue(file_id, path, data_before, data_after, metadata)
+  --     VALUES (OLD.id, OLD.path, OLD.data, NULL, OLD.metadata);
+  --   SELECT triggerWorker();
+  -- END;
 
   -- change sets
 
@@ -216,4 +221,3 @@ export async function applySchema(args: {
 
 `;
 }
-

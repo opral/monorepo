@@ -78,8 +78,8 @@ export async function merge(args: {
 				metadata: file.metadata,
 			};
 			await args.targetLix.db
-				.insertInto("file_internal")
-				.values(fileToInsert)
+				.insertInto("file")
+				.values({ ...fileToInsert, skip_change_extraction: 1 })
 				.executeTakeFirst();
 		}
 
@@ -174,8 +174,9 @@ export async function merge(args: {
 		for (const [fileId, fileData] of Object.entries(changesPerFile)) {
 			// update the file data with the applied changes
 			await trx
-				.updateTable("file_internal")
+				.updateTable("file")
 				.set("data", fileData)
+				.set("skip_change_extraction", 1)
 				.where("id", "=", fileId)
 				.execute();
 		}

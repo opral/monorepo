@@ -3,20 +3,20 @@ import type { Lix } from "../lix/open-lix.js";
 
 /**
  * Creates a new branch.
- * 
+ *
  * If parent is provided, the new branch will copy the change pointers from the parent branch,
  * and create a merge intent from the new branch to the parent branch.
  *
  * @example
  *   _Without parent_
- * 
+ *
  *   ```ts
  *   const branch = await createBranch({ lix });
  *   ```
- *   
+ *
  * @example
  *   _With parent_
- * 
+ *
  *   ```ts
  *   const branch = await createBranch({ lix, parent: otherBranch });
  *   ```
