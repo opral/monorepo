@@ -9,9 +9,23 @@ test("file ids should default to uuid", async () => {
 	});
 	const db = initDb({ sqlite });
 
+	// init the trigger function (usually defined by lix only)
+	sqlite.createFunction({
+		name: "triggerWorker",
+		arity: 0,
+		// @ts-expect-error - dynamic function
+		xFunc: () => {
+			// console.log('test')
+		},
+	});
+
 	const file = await db
-		.insertInto("file_internal")
-		.values({ path: "/mock", data: new Uint8Array() })
+		.insertInto("file")
+		.values({
+			path: "/mock",
+			data: new Uint8Array(),
+			skip_change_extraction: 1,
+		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
@@ -115,14 +129,24 @@ test("files should be able to have metadata", async () => {
 	});
 	const db = initDb({ sqlite });
 
+	sqlite.createFunction({
+		name: "triggerWorker",
+		arity: 0,
+		// @ts-expect-error - dynamic function
+		xFunc: () => {
+			// console.log('test')
+		},
+	});
+
 	const file = await db
-		.insertInto("file_internal")
+		.insertInto("file")
 		.values({
 			path: "/mock.csv",
 			data: new Uint8Array(),
 			metadata: {
 				primary_key: "email",
 			},
+			skip_change_extraction: 1,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -130,12 +154,13 @@ test("files should be able to have metadata", async () => {
 	expect(file.metadata?.primary_key).toBe("email");
 
 	const updatedFile = await db
-		.updateTable("file_internal")
+		.updateTable("file")
 		.where("path", "=", "/mock.csv")
 		.set({
 			metadata: {
 				primary_key: "something-else",
 			},
+			skip_change_extraction: 1,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

@@ -88,23 +88,22 @@ export async function openLix(args: {
 				.executeTakeFirst();
 
 			if (entry) {
-				const existingFile = await db
-					.selectFrom("file_internal")
-					.selectAll()
-					.where("id", "=", entry.file_id)
-					.limit(1)
-					.executeTakeFirst();
-
-				if (existingFile?.data) {
+				if (entry.data_before && entry.data_after) {
 					await handleFileChange({
 						queueEntry: entry,
 						before: {
-							...existingFile,
 							id: entry.file_id,
+							path: entry.path,
+							metadata: null,
+							data: entry.data_before,
+							skip_change_extraction: null,
 						},
 						after: {
-							...entry,
 							id: entry.file_id,
+							path: entry.path,
+							metadata: null,
+							data: entry.data_after,
+							skip_change_extraction: null,
 						},
 						plugins,
 						lix: {
@@ -112,12 +111,16 @@ export async function openLix(args: {
 							plugin,
 						},
 					});
-				} else {
+				} else if (!entry.data_before && entry.data_after) {
 					await handleFileInsert({
 						queueEntry: entry,
 						after: {
-							...entry,
 							id: entry.file_id,
+							path: entry.path,
+							metadata: null,
+							// TODO Queue - handle deletion - until than this we have to bang here
+							data: entry.data_after,
+							skip_change_extraction: null,
 						},
 						plugins,
 						lix: {
@@ -125,6 +128,24 @@ export async function openLix(args: {
 							plugin,
 						},
 					});
+				} else if (entry.data_before && !entry.data_after) {
+					// TODO Queue - handle deletion - the current queue doesn't handle delete starting with feature parity
+					// await handleFileDelete({
+					// 	queueEntry: entry,
+					// before: {
+					// 	id: entry.file_id,
+					// 	path: entry.path,
+					// 	metadata: null,
+					// 	// TODO Queue - handle deletion - until than this we have to bang here
+					// 	data: entry.data_before,
+					// 	skip_change_extraction: null
+					// },
+					// 	plugins,
+					// 	lix: {
+					// 		db,
+					// 		plugin,
+					// 	},
+					// });
 				}
 			}
 

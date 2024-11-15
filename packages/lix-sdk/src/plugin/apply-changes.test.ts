@@ -20,11 +20,12 @@ test("it applies the given changes", async () => {
 
 	// Insert a file and changes, marking only one as a leaf
 	const file = await lix.db
-		.insertInto("file_internal")
+		.insertInto("file")
 		.values({
 			id: "file1",
 			data: new TextEncoder().encode("initial-data"),
 			path: "mock-path",
+			skip_change_extraction: 1,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

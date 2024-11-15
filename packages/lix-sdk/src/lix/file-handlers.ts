@@ -83,7 +83,6 @@ export async function handleFileInsert(args: {
 			});
 		}
 
-		// TODO: decide if TRIGGER or in js land with await trx.insertInto('file_internal').values({ id: args.fileId, blob: args.newBlob, path: args.newPath }).execute()
 		await trx
 			.deleteFrom("change_queue")
 			.where("id", "=", args.queueEntry.id)
