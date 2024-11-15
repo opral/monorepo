@@ -69,7 +69,7 @@ export async function applyChanges(args: {
 					// which is not duplicate tolerant
 					// yet. see https://linear.app/opral/issue/LIXDK-114/make-diff-and-change-generation-fault-tolerant
 					.updateTable("file")
-					.set({ data: fileData, skip_change_extraction: 1 })
+					.set({ data: fileData, $skip_change_queue: true })
 					.where("id", "=", fileId)
 					.execute();
 			}

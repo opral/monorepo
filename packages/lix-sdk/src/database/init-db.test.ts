@@ -24,7 +24,7 @@ test("file ids should default to uuid", async () => {
 		.values({
 			path: "/mock",
 			data: new Uint8Array(),
-			skip_change_extraction: 1,
+			$skip_change_queue: true,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -146,7 +146,7 @@ test("files should be able to have metadata", async () => {
 			metadata: {
 				primary_key: "email",
 			},
-			skip_change_extraction: 1,
+			$skip_change_queue: true,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -160,7 +160,7 @@ test("files should be able to have metadata", async () => {
 			metadata: {
 				primary_key: "something-else",
 			},
-			skip_change_extraction: 1,
+			$skip_change_queue: true,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

@@ -25,7 +25,6 @@ test("it applies the given changes", async () => {
 			id: "file1",
 			data: new TextEncoder().encode("initial-data"),
 			path: "mock-path",
-			skip_change_extraction: 1,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

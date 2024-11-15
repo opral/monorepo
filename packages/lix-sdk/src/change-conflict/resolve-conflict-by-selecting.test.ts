@@ -53,7 +53,6 @@ test("it should resolve a conflict and apply the changes", async () => {
 			id: "mock",
 			path: "mock",
 			data: new Uint8Array(),
-			skip_change_extraction: 1,
 		})
 		.execute();
 
