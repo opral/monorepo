@@ -2,6 +2,11 @@
 
 ## Excluding certain routes
 
+> ⚠️ The `exclude` option has been reported as buggy.
+> 
+> If you encounter any issues with it, please open a PR that fixes/
+> improves the exlusion mechanism. A PR will be reviewed promptly.
+
 Exclude routes from being translated with the `exclude` option.
 
 ```js
@@ -10,8 +15,9 @@ import { createI18n } from "@inlang/paraglide-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 
 export const i18n = createI18n(runtime, {
-	// don't include the language or base path
-	exclude: ["/admin", "/login", /^\/user\/\d+$/],
+	// don't include the /api/ routes
+	// this matches any route that starts with /api/
+	exclude: [/^\/api\//],
 })
 ```
 
