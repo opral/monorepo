@@ -211,12 +211,11 @@ export const changeConflictsAtom = atom(async (get) => {
 		)
 		.innerJoin("change", "change.id", "change_conflict_element.change_id")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.leftJoin("branch_change_pointer as bcp", (join) =>
+		.leftJoin("change_set_element as branch_change", (join) =>
 			join
-				.onRef("bcp.change_id", "=", "change.id")
-				.on("bcp.branch_id", "=", currentBranch.id)
+				.onRef("branch_change.change_id", "=", "change.id")
+				.on("branch_change.change_set_id", "=", currentBranch.change_set_id)
 		)
-		// .where(changeInBranch(currentBranch))
 		.where("change.file_id", "=", activeFile.id)
 		.where(changeConflictInBranch(currentBranch))
 		.selectAll("change_conflict_element")
@@ -224,7 +223,7 @@ export const changeConflictsAtom = atom(async (get) => {
 		.select((eb) =>
 			eb
 				.case()
-				.when("bcp.change_id", "is not", null)
+				.when("branch_change.change_id", "is not", null)
 				// using boolean still returns 0 or 1
 				// for typesafety, number is used
 				.then(1)
