@@ -1,4 +1,4 @@
-import { newLixFile, openLixInMemory } from "@lix-js/sdk";
+import { changeQueueSettled, newLixFile, openLixInMemory } from "@lix-js/sdk";
 import { plugin as pluginV2 } from "@lix-js/plugin-csv-column-based";
 import emailNewsletterCsv from "./email-newsletter.csv?raw";
 import captableCsv from "./cap-table.csv?raw";
@@ -59,7 +59,7 @@ export async function lixCsvDemoFile(): Promise<Blob> {
 			.execute();
 	}
 
-	await lix.settled();
+	await changeQueueSettled({ lix });
 
 	return await lix.toBlob();
 }

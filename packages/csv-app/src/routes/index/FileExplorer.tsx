@@ -20,7 +20,7 @@ export default function FileExplorer() {
 	);
 
 	const handleDeleteFile = async (id: string) => {
-		await lix.db.deleteFrom("file_internal").where("id", "=", id).execute();
+		await lix.db.deleteFrom("file").where("id", "=", id).execute();
 	};
 
 	const handleDownload = async (fileId: string) => {
