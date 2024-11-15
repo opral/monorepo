@@ -1,4 +1,9 @@
-import { openLixInMemory, type Lix, type NewLixFile } from "@lix-js/sdk";
+import {
+	changeQueueSettled,
+	openLixInMemory,
+	type Lix,
+	type NewLixFile,
+} from "@lix-js/sdk";
 import { detectChanges } from "../detectChanges.js";
 
 /**
@@ -44,7 +49,7 @@ export async function mockChanges(args: {
 		}
 	}
 
-	await lix.settled();
+	await changeQueueSettled({ lix });
 
 	const changes = await lix.db
 		.selectFrom("change")

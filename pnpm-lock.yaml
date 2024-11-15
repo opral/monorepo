@@ -3324,9 +3324,6 @@ importers:
       '@dagrejs/dagre':
         specifier: ^1.1.4
         version: 1.1.4
-      '@lix-js/plugin-csv':
-        specifier: workspace:*
-        version: link:../lix-plugin-csv
       '@lix-js/plugin-csv-column-based':
         specifier: workspace:*
         version: link:../lix-plugin-csv-column-based
