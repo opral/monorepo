@@ -24,11 +24,7 @@ export async function getLeafChangesOnlyInSource(args: {
 			"not in",
 			args.sourceLix.db
 				.selectFrom("change")
-				.innerJoin(
-					"change_graph_edge",
-					"change_graph_edge.child_id",
-					"change.id",
-				)
+				.innerJoin("change_edge", "change_edge.child_id", "change.id")
 				.select("parent_id")
 				.where("parent_id", "is not", null)
 				.distinct(),

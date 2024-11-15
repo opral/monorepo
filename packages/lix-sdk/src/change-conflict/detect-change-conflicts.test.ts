@@ -190,7 +190,7 @@ test("it should auto detect diverging entity conflicts", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([
 			{ parent_id: "change0", child_id: "change1" },
 			{ parent_id: "change0", child_id: "change2" },

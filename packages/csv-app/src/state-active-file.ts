@@ -190,10 +190,10 @@ export const allEdgesAtom = atom(async (get) => {
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
 	return await lix.db
-		.selectFrom("change_graph_edge")
-		.innerJoin("change", "change.id", "change_graph_edge.parent_id")
+		.selectFrom("change_edge")
+		.innerJoin("change", "change.id", "change_edge.parent_id")
 		.where("change.file_id", "=", activeFile.id)
-		.selectAll("change_graph_edge")
+		.selectAll("change_edge")
 		.execute();
 });
 

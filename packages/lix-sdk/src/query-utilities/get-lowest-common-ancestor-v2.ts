@@ -13,7 +13,7 @@ export async function getLowestCommonAncestorV2(args: {
 }): Promise<Change | undefined> {
 	// check for direct ancestors first before running the recursive query
 	const directAncestorA = await args.lix.db
-		.selectFrom("change_graph_edge")
+		.selectFrom("change_edge")
 		.where("parent_id", "=", args.changeA.id)
 		.where("child_id", "=", args.changeB.id)
 		.select("parent_id")
@@ -28,7 +28,7 @@ export async function getLowestCommonAncestorV2(args: {
 	}
 
 	const directAncestorB = await args.lix.db
-		.selectFrom("change_graph_edge")
+		.selectFrom("change_edge")
 		.where("parent_id", "=", args.changeB.id)
 		.where("child_id", "=", args.changeA.id)
 		.select("parent_id")
@@ -47,39 +47,33 @@ export async function getLowestCommonAncestorV2(args: {
 	const result = await args.lix.db
 		.withRecursive("changeA_ancestors", (eb) =>
 			eb
-				.selectFrom("change_graph_edge")
+				.selectFrom("change_edge")
 				.select(["parent_id", "child_id"])
 				.where("child_id", "=", args.changeA.id)
 				.unionAll(
 					eb
-						.selectFrom("change_graph_edge")
-						.select([
-							"change_graph_edge.parent_id",
-							"change_graph_edge.child_id",
-						])
+						.selectFrom("change_edge")
+						.select(["change_edge.parent_id", "change_edge.child_id"])
 						.innerJoin(
 							"changeA_ancestors",
 							"changeA_ancestors.parent_id",
-							"change_graph_edge.child_id",
+							"change_edge.child_id",
 						),
 				),
 		)
 		.withRecursive("changeB_ancestors", (eb) =>
 			eb
-				.selectFrom("change_graph_edge")
+				.selectFrom("change_edge")
 				.select(["parent_id", "child_id"])
 				.where("child_id", "=", args.changeB.id)
 				.unionAll(
 					eb
-						.selectFrom("change_graph_edge")
-						.select([
-							"change_graph_edge.parent_id",
-							"change_graph_edge.child_id",
-						])
+						.selectFrom("change_edge")
+						.select(["change_edge.parent_id", "change_edge.child_id"])
 						.innerJoin(
 							"changeB_ancestors",
 							"changeB_ancestors.parent_id",
-							"change_graph_edge.child_id",
+							"change_edge.child_id",
 						),
 				),
 		)

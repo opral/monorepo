@@ -109,7 +109,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 		.execute();
 
 	await targetLix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([...commonChangesEdges, ...changesOnlyInTargetEdges])
 		.execute();
 
@@ -128,7 +128,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 		.execute();
 
 	await sourceLix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([...commonChangesEdges, ...changesOnlyInSourceEdges])
 		.execute();
 

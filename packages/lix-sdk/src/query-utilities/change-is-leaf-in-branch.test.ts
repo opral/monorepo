@@ -42,7 +42,7 @@ test("it should return the leaf change for the given branch", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([
 			// including change1 for re-assurance
 			{ parent_id: "change1", child_id: "change2" },

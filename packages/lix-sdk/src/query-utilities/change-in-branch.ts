@@ -25,9 +25,9 @@ export function changeInBranch(branch: Pick<Branch, "change_set_id">) {
 				FROM change_set_element
 				WHERE change_set_id = ${branch.change_set_id}
 				UNION ALL
-				SELECT change_graph_edge.parent_id AS id
-				FROM change_graph_edge
-				INNER JOIN recursive_changes ON recursive_changes.id = change_graph_edge.child_id
+				SELECT change_edge.parent_id AS id
+				FROM change_edge
+				INNER JOIN recursive_changes ON recursive_changes.id = change_edge.child_id
 			)
 			SELECT id FROM recursive_changes
 		)

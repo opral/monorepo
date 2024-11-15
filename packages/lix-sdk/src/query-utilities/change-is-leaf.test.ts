@@ -38,7 +38,7 @@ test("should only return the leaf change", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([{ parent_id: "change2", child_id: "change3" }])
 		.execute();
 
@@ -109,7 +109,7 @@ test.todo(
 			.execute();
 
 		await lix.db
-			.insertInto("change_graph_edge")
+			.insertInto("change_edge")
 			.values([{ parent_id: "change1", child_id: "change2" }])
 			.execute();
 

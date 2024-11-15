@@ -5,7 +5,7 @@ export type LixDatabaseSchema = {
 	file: LixFileTable;
 	file_internal: LixFileTable;
 	change_queue: ChangeQueueTable;
-	change_graph_edge: ChangeGraphEdgeTable;
+	change_edge: ChangeEdgeTable;
 	snapshot: SnapshotTable;
 	label: LabelTable;
 
@@ -80,9 +80,9 @@ type ChangeTable = {
 	created_at: Generated<string>;
 };
 
-export type ChangeGraphEdge = Selectable<ChangeGraphEdgeTable>;
-export type NewChangeGraphEdge = Insertable<ChangeGraphEdgeTable>;
-type ChangeGraphEdgeTable = {
+export type ChangeGraphEdge = Selectable<ChangeEdgeTable>;
+export type NewChangeGraphEdge = Insertable<ChangeEdgeTable>;
+type ChangeEdgeTable = {
 	parent_id: string;
 	child_id: string;
 };

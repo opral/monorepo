@@ -82,7 +82,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		.execute();
 
 	await sourceLix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([mockEdges[0]!])
 		.execute();
 
@@ -130,7 +130,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 	]);
 
 	const edges = await targetLix.db
-		.selectFrom("change_graph_edge")
+		.selectFrom("change_edge")
 		.selectAll()
 		.execute();
 
@@ -413,10 +413,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 		.values([mockChanges[0]!, mockChanges[1]!])
 		.execute();
 
-	await sourceLix.db
-		.insertInto("change_graph_edge")
-		.values([edges[0]!])
-		.execute();
+	await sourceLix.db.insertInto("change_edge").values([edges[0]!]).execute();
 
 	await targetLix.db
 		.insertInto("snapshot")

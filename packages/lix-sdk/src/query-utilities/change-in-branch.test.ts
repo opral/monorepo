@@ -9,7 +9,7 @@ test("selectChangeInBranch should retrieve all changes in the branch including a
 
 	const branch = await createBranch({ lix });
 
-	// Insert changes and create a parent-child chain in change_graph_edge
+	// Insert changes and create a parent-child chain in change_edge
 	const [, , changeC] = await lix.db
 		.insertInto("change")
 		.values([
@@ -49,9 +49,9 @@ test("selectChangeInBranch should retrieve all changes in the branch including a
 		.returningAll()
 		.execute();
 
-	// Link changes in change_graph_edge (C <- B <- A)
+	// Link changes in change_edge (C <- B <- A)
 	await lix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([
 			{ parent_id: "changeA", child_id: "changeB" },
 			{ parent_id: "changeB", child_id: "changeC" },

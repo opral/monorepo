@@ -295,7 +295,7 @@ test("it should automatically a diverging entity conflict", async () => {
 
 	// insert edges to ancestor change
 	await lix.db
-		.insertInto("change_graph_edge")
+		.insertInto("change_edge")
 		.values([
 			{ parent_id: ancestorChange.id, child_id: sourceChange.id },
 			{ parent_id: ancestorChange.id, child_id: targetChange.id },

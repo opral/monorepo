@@ -304,7 +304,7 @@ test("the branch change set should be updated", async () => {
 
 // 	await lix.db.insertInto("change").values(mockChanges).execute();
 
-// 	await lix.db.insertInto("change_graph_edge").values(edges).execute();
+// 	await lix.db.insertInto("change_edge").values(edges).execute();
 
 // 	await updateBranchPointers({
 // 		lix,

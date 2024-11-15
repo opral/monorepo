@@ -151,7 +151,7 @@ test("change graph edges can't reference themselves", async () => {
 
 	await expect(
 		db
-			.insertInto("change_graph_edge")
+			.insertInto("change_edge")
 			.values({
 				parent_id: "change1",
 				child_id: "change1",

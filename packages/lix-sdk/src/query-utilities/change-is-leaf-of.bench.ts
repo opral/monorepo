@@ -114,7 +114,7 @@ const setupLix = async (nMessages: number) => {
 
 		await lix.db.insertInto("snapshot").values(snapshotsArray).execute();
 		await lix.db.insertInto("change").values(changesArray).execute();
-		await lix.db.insertInto("change_graph_edge").values(edgesArray).execute();
+		await lix.db.insertInto("change_edge").values(edgesArray).execute();
 	}
 	// console.log("setting up lix with " + nMessages + ".... done");
 

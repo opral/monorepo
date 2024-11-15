@@ -13,7 +13,7 @@ export async function getLowestCommonAncestor(args: {
 	targetLix: LixReadonly;
 }): Promise<Change | undefined> {
 	const parentEdges = await args.sourceLix.db
-		.selectFrom("change_graph_edge")
+		.selectFrom("change_edge")
 		.selectAll()
 		.where("child_id", "=", args.sourceChange.id)
 		// TODO https://github.com/opral/lix-sdk/issues/105
@@ -68,7 +68,7 @@ export async function getLowestCommonAncestor(args: {
 		}
 
 		const parentEdges = await args.sourceLix.db
-			.selectFrom("change_graph_edge")
+			.selectFrom("change_edge")
 			.selectAll()
 			.where("child_id", "=", nextChange.id)
 			.execute();

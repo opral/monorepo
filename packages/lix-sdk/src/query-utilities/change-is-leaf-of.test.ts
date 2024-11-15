@@ -50,7 +50,7 @@ test("it should find the latest child of a given change", async () => {
 
 	await lix.db.insertInto("change").values(mockChanges).execute();
 
-	await lix.db.insertInto("change_graph_edge").values(edges).execute();
+	await lix.db.insertInto("change_edge").values(edges).execute();
 
 	await updateBranchPointers({
 		lix,

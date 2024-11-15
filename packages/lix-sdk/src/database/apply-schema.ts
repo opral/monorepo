@@ -40,7 +40,7 @@ export async function applySchema(args: {
     UNIQUE (id, entity_id, file_id, schema_key)
   ) strict;
 
-  CREATE TABLE IF NOT EXISTS change_graph_edge (
+  CREATE TABLE IF NOT EXISTS change_edge (
     parent_id TEXT NOT NULL,
     child_id TEXT NOT NULL,
     
