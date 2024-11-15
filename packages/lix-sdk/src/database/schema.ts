@@ -52,7 +52,7 @@ type LixFileTable = {
 	path: string;
 	data: ArrayBuffer;
 	metadata: Record<string, any> | null;
-	skip_change_extraction?: number | null;
+	$skip_change_queue: number | null;
 };
 
 export type Change = Selectable<ChangeTable>;

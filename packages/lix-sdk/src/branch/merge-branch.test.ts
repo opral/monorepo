@@ -413,7 +413,6 @@ test("re-curring merges should not create a new conflict if the conflict already
 			id: "mock",
 			path: "mock",
 			data: new Uint8Array(),
-			skip_change_extraction: 1,
 		})
 		.execute();
 

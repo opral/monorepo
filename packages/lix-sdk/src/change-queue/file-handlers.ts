@@ -58,7 +58,7 @@ export async function handleFileInsert(args: {
 				path,
 				metadata: args.changeQueueEntry.metadata_after,
 				data: args.changeQueueEntry.data_after,
-				skip_change_extraction: null,
+				$skip_change_queue: null,
 			},
 		})) {
 			detectedChanges.push({
@@ -144,7 +144,7 @@ export async function handleFileChange(args: {
 						path: path,
 						metadata: args.changeQueueEntry.metadata_before,
 						data: args.changeQueueEntry.data_before,
-						skip_change_extraction: null,
+						$skip_change_queue: null,
 					}
 				: undefined,
 			after: args.changeQueueEntry.data_after
@@ -153,7 +153,7 @@ export async function handleFileChange(args: {
 						path,
 						metadata: args.changeQueueEntry.metadata_after,
 						data: args.changeQueueEntry.data_after,
-						skip_change_extraction: null,
+						$skip_change_queue: null,
 					}
 				: undefined,
 		})) {

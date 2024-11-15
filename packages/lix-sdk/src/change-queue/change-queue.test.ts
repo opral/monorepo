@@ -2,7 +2,7 @@ import { expect, test, vi } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { newLixFile } from "../lix/new-lix.js";
 import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
-import type { ChangeQueueEntry } from "../database/schema.js";
+import type { ChangeQueueEntry, LixFile } from "../database/schema.js";
 import { changeQueueSettled } from "./change-queue-settled.js";
 
 test("should use queue and settled correctly", async () => {
@@ -78,12 +78,12 @@ test("should use queue and settled correctly", async () => {
 
 	expect(internalFilesAfter).toEqual([
 		{
-			data: internalFilesAfter[0]?.data,
+			data: internalFilesAfter[0]!.data,
 			id: "test",
 			path: "test.txt",
 			metadata: null,
-			skip_change_extraction: null,
-		},
+			$skip_change_queue: null,
+		} satisfies LixFile,
 	]);
 
 	const changes = await lix.db
