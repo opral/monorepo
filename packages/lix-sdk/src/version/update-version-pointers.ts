@@ -59,7 +59,7 @@ export async function updateVersionPointers(args: {
 			}));
 			if (changeConflictPointers.length > 0) {
 				await trx
-					.insertInto("version_change_conflict_pointer")
+					.insertInto("version_change_conflict")
 					.values(
 						args.changeConflicts?.map((conflict) => ({
 							version_id: args.version.id,
@@ -71,7 +71,7 @@ export async function updateVersionPointers(args: {
 			} else if (changeConflictPointers.length === 0) {
 				// if there are no conflicts, then delete all pointers for the version
 				await trx
-					.deleteFrom("version_change_conflict_pointer")
+					.deleteFrom("version_change_conflict")
 					.where("version_id", "=", args.version.id)
 					.execute();
 			}

@@ -57,11 +57,11 @@ export async function createVersion(args: {
 
 			// copy the change conflict pointers from the parent Version
 			await trx
-				.insertInto("version_change_conflict_pointer")
+				.insertInto("version_change_conflict")
 				.columns(["version_id", "change_conflict_id"])
 				.expression((eb) =>
 					eb
-						.selectFrom("version_change_conflict_pointer")
+						.selectFrom("version_change_conflict")
 						.select([eb.val(Version.id).as("Version_id"), "change_conflict_id"])
 						.where("version_id", "=", args.parent!.id),
 				)

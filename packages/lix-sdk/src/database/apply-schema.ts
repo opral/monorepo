@@ -198,7 +198,7 @@ export async function applySchema(args: {
     UNIQUE (id, change_set_id)
   ) strict;
 
-  CREATE TABLE IF NOT EXISTS version_change_conflict_pointer (
+  CREATE TABLE IF NOT EXISTS version_change_conflict (
     version_id TEXT NOT NULL,
     change_conflict_id TEXT NOT NULL,
 

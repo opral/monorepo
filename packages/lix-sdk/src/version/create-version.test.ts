@@ -153,7 +153,7 @@ test("it should copy change conflict pointers from the parent version", async ()
 	});
 
 	const version0Conflicts = await lix.db
-		.selectFrom("version_change_conflict_pointer")
+		.selectFrom("version_change_conflict")
 		.where("version_id", "=", version0.id)
 		.selectAll()
 		.execute();
@@ -167,7 +167,7 @@ test("it should copy change conflict pointers from the parent version", async ()
 	});
 
 	const version2Conflicts = await lix.db
-		.selectFrom("version_change_conflict_pointer")
+		.selectFrom("version_change_conflict")
 		.where("version_id", "=", version1.id)
 		.selectAll()
 		.execute();

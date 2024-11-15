@@ -95,7 +95,7 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 
 	// Check remaining version change conflict pointers
 	const remainingVersionChangeConflictPointers = await lix.db
-		.selectFrom("version_change_conflict_pointer")
+		.selectFrom("version_change_conflict")
 		.selectAll()
 		.execute();
 
@@ -150,7 +150,7 @@ test("should garbage collect conflicts that no version references", async () => 
 
 	// delete the conflict pointers mockConflict0
 	await lix.db
-		.deleteFrom("version_change_conflict_pointer")
+		.deleteFrom("version_change_conflict")
 		.where("change_conflict_id", "=", mockConflict0.id)
 		.execute();
 
@@ -211,7 +211,7 @@ test("should NOT garbage collect conflicts that a version change conflict pointe
 	expect(gc0.deletedChangeConflicts.length).toBe(0);
 
 	// delete all version change pointers
-	await lix.db.deleteFrom("version_change_conflict_pointer").execute();
+	await lix.db.deleteFrom("version_change_conflict").execute();
 
 	const gc1 = await garbageCollectChangeConflicts({ lix });
 	expect(gc1.deletedChangeConflicts.length).toBe(1);

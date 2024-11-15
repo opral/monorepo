@@ -18,12 +18,12 @@ export async function createChangeConflict(args: {
 		const existingConflict = await trx
 			.selectFrom("change_conflict")
 			.innerJoin(
-				"version_change_conflict_pointer",
-				"version_change_conflict_pointer.change_conflict_id",
+				"version_change_conflict",
+				"version_change_conflict.change_conflict_id",
 				"change_conflict.id",
 			)
 			// the version should point to the conflict
-			.where("version_change_conflict_pointer.version_id", "=", args.version.id)
+			.where("version_change_conflict.version_id", "=", args.version.id)
 			// which has the identical key
 			.where("change_conflict.key", "=", args.key)
 			// and same set of changes
@@ -88,7 +88,7 @@ export async function createChangeConflict(args: {
 			.execute();
 
 		await trx
-			.insertInto("version_change_conflict_pointer")
+			.insertInto("version_change_conflict")
 			.values({
 				version_id: args.version.id,
 				change_conflict_id: newConflict.id,

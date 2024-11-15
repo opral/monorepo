@@ -22,7 +22,7 @@ export type LixDatabaseSchema = {
 	// version
 	current_version: CurrentVersionTable;
 	version: VersionTable;
-	version_change_conflict_pointer: VersionChangeConflictPointerTable;
+	version_change_conflict: VersionChangeConflictTable;
 
 	// change conflicts
 	change_conflict: ChangeConflictTable;
@@ -185,13 +185,11 @@ type VersionChangePointerTable = {
 	change_schema_key: string;
 };
 
-export type VersionChangeConflictPointer =
-	Selectable<VersionChangeConflictPointerTable>;
-export type NewversionChangeConflictPointer =
-	Insertable<VersionChangeConflictPointerTable>;
-export type VersionChangeConflictPointerUpdate =
-	Updateable<VersionChangeConflictPointerTable>;
-type VersionChangeConflictPointerTable = {
+export type VersionChangeConflict = Selectable<VersionChangeConflictTable>;
+export type NewversionChangeConflict = Insertable<VersionChangeConflictTable>;
+export type VersionChangeConflictUpdate =
+	Updateable<VersionChangeConflictTable>;
+type VersionChangeConflictTable = {
 	version_id: string;
 	change_conflict_id: string;
 };

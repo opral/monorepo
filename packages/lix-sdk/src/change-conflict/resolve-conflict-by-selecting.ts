@@ -32,12 +32,12 @@ export async function resolveChangeConflictBySelecting(args: {
 		const versionsWithConflicts = await trx
 			.selectFrom("version")
 			.innerJoin(
-				"version_change_conflict_pointer",
-				"version_change_conflict_pointer.version_id",
+				"version_change_conflict",
+				"version_change_conflict.version_id",
 				"version.id",
 			)
 			.where(
-				"version_change_conflict_pointer.change_conflict_id",
+				"version_change_conflict.change_conflict_id",
 				"=",
 				args.conflict.id,
 			)
@@ -52,7 +52,7 @@ export async function resolveChangeConflictBySelecting(args: {
 			});
 			// remove the conflict pointer
 			await trx
-				.deleteFrom("version_change_conflict_pointer")
+				.deleteFrom("version_change_conflict")
 				.where("version_id", "=", version.id)
 				.where("change_conflict_id", "=", args.conflict.id)
 				.execute();

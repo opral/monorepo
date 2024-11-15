@@ -18,8 +18,8 @@ export function changeConflictInVersion(version: Pick<Version, "id">) {
 	): ExpressionWrapper<LixDatabaseSchema, "change_conflict", SqlBool> =>
 		eb("change_conflict.id", "in", (subquery) =>
 			subquery
-				.selectFrom("version_change_conflict_pointer")
+				.selectFrom("version_change_conflict")
 				.select("change_conflict_id")
-				.where("version_change_conflict_pointer.version_id", "=", version.id),
+				.where("version_change_conflict.version_id", "=", version.id),
 		);
 }

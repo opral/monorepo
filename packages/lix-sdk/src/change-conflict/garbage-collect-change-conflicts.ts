@@ -20,11 +20,11 @@ export async function garbageCollectChangeConflicts(args: {
 		const conflictsWithVersionPointer = await trx
 			.selectFrom("change_conflict")
 			.leftJoin(
-				"version_change_conflict_pointer",
+				"version_change_conflict",
 				"change_conflict.id",
-				"version_change_conflict_pointer.change_conflict_id",
+				"version_change_conflict.change_conflict_id",
 			)
-			.where("version_change_conflict_pointer.change_conflict_id", "is", null)
+			.where("version_change_conflict.change_conflict_id", "is", null)
 			.selectAll()
 			.execute();
 
@@ -81,7 +81,7 @@ export async function garbageCollectChangeConflicts(args: {
 				.execute();
 
 			await trx
-				.deleteFrom("version_change_conflict_pointer")
+				.deleteFrom("version_change_conflict")
 				.where("change_conflict_id", "in", conflictIds)
 				.execute();
 		}
