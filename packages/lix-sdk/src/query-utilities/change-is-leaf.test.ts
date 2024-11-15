@@ -115,7 +115,8 @@ test.todo(
 
 		const currentBranch = await lix.db
 			.selectFrom("current_branch")
-			.selectAll()
+			.innerJoin("branch", "branch.id", "current_branch.id")
+			.selectAll("branch")
 			.executeTakeFirstOrThrow();
 
 		// let the branch point only to the first change
