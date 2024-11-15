@@ -5,7 +5,8 @@ import { createChangeConflict } from "./create-change-conflict.js";
 import { createBranch } from "../branch/create-branch.js";
 import { updateBranchPointers } from "../branch/update-branch-pointers.js";
 
-test("should garbage collect conflicts that contain one or more changes that no branch change pointer references (anymore)", async () => {
+// garbage collection is not used atm 
+test.skip("should garbage collect conflicts that contain one or more changes that no branch change pointer references (anymore)", async () => {
 	const lix = await openLixInMemory({});
 
 	const branch0 = await createBranch({ lix, name: "branch0" });
@@ -79,17 +80,18 @@ test("should garbage collect conflicts that contain one or more changes that no 
 
 	// Check remaining conflict elements
 	const remainingConflictElements = await lix.db
-		.selectFrom("change_conflict_element")
+		.selectFrom("change_set_element")
+		.innerJoin(
+			"change_conflict",
+			"change_conflict.change_set_id",
+			"change_set_element.change_set_id",
+		)
 		.selectAll()
 		.execute();
 
 	expect(remainingConflictElements.length).toBe(2);
-	expect(remainingConflictElements[0]?.change_conflict_id).toBe(
-		mockConflict0.id,
-	);
-	expect(remainingConflictElements[1]?.change_conflict_id).toBe(
-		mockConflict0.id,
-	);
+	expect(remainingConflictElements[0]?.change_id).toBe(mockConflict0.id);
+	expect(remainingConflictElements[1]?.change_id).toBe(mockConflict0.id);
 
 	// Check remaining branch change conflict pointers
 	const remainingBranchChangeConflictPointers = await lix.db

@@ -121,8 +121,13 @@ test("if a previously undetected conflict is detected during merge, the conflict
 		.selectAll()
 		.execute();
 
-	const conflictEdges = await lix.db
-		.selectFrom("change_conflict_element")
+	const conflictElements = await lix.db
+		.selectFrom("change_set_element")
+		.where(
+			"change_set_id",
+			"in",
+			conflicts.map((c) => c.change_set_id),
+		)
 		.selectAll()
 		.execute();
 
@@ -140,7 +145,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 	]);
 
 	// Verify that a conflict for change2 was added to the `conflict` table
-	expect(conflictEdges.map((edge) => edge.change_id)).toStrictEqual([
+	expect(conflictElements.map((element) => element.change_id)).toStrictEqual([
 		change2?.id,
 		change3?.id,
 	]);
@@ -221,8 +226,13 @@ test("it should not update the target branch pointers of a conflicting change", 
 		.selectAll()
 		.execute();
 
-	const conflictEdges = await lix.db
-		.selectFrom("change_conflict_element")
+	const conflictElements = await lix.db
+		.selectFrom("change_set_element")
+		.where(
+			"change_set_id",
+			"in",
+			conflicts.map((c) => c.change_set_id),
+		)
 		.selectAll()
 		.execute();
 
@@ -239,7 +249,7 @@ test("it should not update the target branch pointers of a conflicting change", 
 	]);
 
 	// Verify that a conflict for change2 was added to the `conflict` table
-	expect(conflictEdges.map((edge) => edge.change_id)).toStrictEqual([
+	expect(conflictElements.map((element) => element.change_id)).toStrictEqual([
 		change1?.id,
 		change2?.id,
 	]);
@@ -247,7 +257,7 @@ test("it should not update the target branch pointers of a conflicting change", 
 
 // it is reasonable to assume that a conflict exists if the same (entity, file, type) change is updated in both branches.
 // in case a plugin does not detect a conflict, the system should automatically detect it.
-test("it should automatically a diverging entity conflict", async () => {
+test("it should automatically detect a diverging entity conflict", async () => {
 	const lix = await openLixInMemory({});
 
 	const sourceBranch = await createBranch({ lix, name: "source-branch" });
@@ -326,13 +336,18 @@ test("it should automatically a diverging entity conflict", async () => {
 	await mergeBranch({ lix, sourceBranch, targetBranch });
 
 	// Validate results in `conflict` table
-	const conflictEdges = await lix.db
-		.selectFrom("change_conflict_element")
-		.selectAll()
+	const conflictElements = await lix.db
+		.selectFrom("change_conflict")
+		.innerJoin(
+			"change_set_element",
+			"change_set_element.change_set_id",
+			"change_conflict.change_set_id",
+		)
+		.selectAll("change_set_element")
 		.execute();
 
 	// Ensure that the change from `sourceBranch` is detected as a conflict
-	expect(conflictEdges.map((c) => c.change_id)).toEqual([
+	expect(conflictElements.map((c) => c.change_id)).toEqual([
 		sourceChange.id,
 		targetChange.id,
 	]);
@@ -448,4 +463,3 @@ test("re-curring merges should not create a new conflict if the conflict already
 
 	expect(conflictsAfter2Merge.length).toBe(1);
 });
-

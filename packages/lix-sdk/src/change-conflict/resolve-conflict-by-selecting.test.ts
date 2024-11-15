@@ -68,10 +68,17 @@ test("it should resolve a conflict and apply the changes", async () => {
 		.returningAll()
 		.execute();
 
+	const changeSet0 = await lix.db
+		.insertInto("change_set")
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
 	const conflict = await lix.db
 		.insertInto("change_conflict")
 		.values({
 			key: "mock",
+			change_set_id: changeSet0.id,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

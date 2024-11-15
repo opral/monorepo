@@ -203,13 +203,13 @@ export const changeConflictsAtom = atom(async (get) => {
 	const activeFile = await get(activeFileAtom);
 	const currentBranch = await get(currentBranchAtom);
 	const changeConflictElements = await lix.db
-		.selectFrom("change_conflict_element")
+		.selectFrom("change_set_element")
 		.innerJoin(
 			"change_conflict",
-			"change_conflict.id",
-			"change_conflict_element.change_conflict_id"
+			"change_conflict.change_set_id",
+			"change_set_element.change_set_id"
 		)
-		.innerJoin("change", "change.id", "change_conflict_element.change_id")
+		.innerJoin("change", "change.id", "change_set_element.change_id")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.leftJoin("change_set_element as branch_change", (join) =>
 			join
@@ -218,7 +218,11 @@ export const changeConflictsAtom = atom(async (get) => {
 		)
 		.where("change.file_id", "=", activeFile.id)
 		.where(changeConflictInBranch(currentBranch))
-		.selectAll("change_conflict_element")
+		.selectAll("change_set_element")
+		.select([
+			"change_conflict.id as change_conflict_id",
+			"change_conflict.change_set_id as change_conflict_change_set_id",
+		])
 		.selectAll("change")
 		.select((eb) =>
 			eb

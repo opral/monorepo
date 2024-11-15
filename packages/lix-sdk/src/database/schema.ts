@@ -27,7 +27,6 @@ export type LixDatabaseSchema = {
 
 	// change conflicts
 	change_conflict: ChangeConflictTable;
-	change_conflict_element: ChangeConflictElementTable;
 	change_conflict_resolution: ChangeConflictResolutionTable;
 };
 
@@ -225,6 +224,7 @@ type ChangeConflictTable = {
 	 *   - `inlang-message-bundle-foreign-key-violation`
 	 */
 	key: string;
+	change_set_id: string;
 };
 
 export type ChangeConflictResolution =
@@ -237,13 +237,3 @@ type ChangeConflictResolutionTable = {
 	change_conflict_id: string;
 	resolved_change_id: string;
 };
-
-export type ChangeConflictElement = Selectable<ChangeConflictElementTable>;
-export type NewChangeConflictElement = Insertable<ChangeConflictElementTable>;
-export type ChangeConflictElementUpdate =
-	Updateable<ChangeConflictElementTable>;
-type ChangeConflictElementTable = {
-	change_conflict_id: string;
-	change_id: string;
-};
-

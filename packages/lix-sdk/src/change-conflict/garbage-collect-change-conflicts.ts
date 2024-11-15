@@ -1,9 +1,10 @@
+import { sql } from "kysely";
 import type { ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 /**
- * Garbage collects change conflicts. 
- * 
+ * Garbage collects change conflicts.
+ *
  * A change conflict is considered garbage if the conflict
  * contains changes that no branch change pointer points to.
  */
@@ -31,14 +32,14 @@ export async function garbageCollectChangeConflicts(args: {
 		const outdatedConflicts = await trx
 			.selectFrom("change_conflict")
 			.leftJoin(
-				"change_conflict_element",
-				"change_conflict.id",
-				"change_conflict_element.change_conflict_id",
+				"change_set_element as conflict_elements",
+				"change_conflict.change_set_id",
+				"conflict_elements.change_set_id",
 			)
 			.leftJoin(
-				"change_set_element",
-				"change_conflict_element.change_id",
-				"change_set_element.change_id",
+				"change_set_element as branch_elements",
+				"conflict_elements.change_id",
+				"branch_elements.change_id",
 			)
 			.groupBy("change_conflict.id")
 			// TODO assumes that each change conflict element is a unique entity change
@@ -48,11 +49,11 @@ export async function garbageCollectChangeConflicts(args: {
 			// is less than the total number of changes in the conflict, then there is at least one change
 			// that no branch change pointer references, aka the conflict is outdated.
 			.having(
+				sql`count(branch_elements.change_id)`,
 				// the number of changes in the conflict that have a corresponding branch change pointer.
-				trx.fn.count("change_set_element.change_id"),
 				"<",
 				// the total number of changes in the conflict.
-				trx.fn.count("change_conflict_element.change_id"),
+				sql`count(conflict_elements.change_id)`,
 			)
 			.selectAll("change_conflict")
 			.execute();
@@ -71,8 +72,12 @@ export async function garbageCollectChangeConflicts(args: {
 				.execute();
 
 			await trx
-				.deleteFrom("change_conflict_element")
-				.where("change_conflict_id", "in", conflictIds)
+				.deleteFrom("change_set_element")
+				.where(
+					"change_set_element.change_set_id",
+					"in",
+					conflictsToDelete.map((conflict) => conflict.change_set_id),
+				)
 				.execute();
 
 			await trx

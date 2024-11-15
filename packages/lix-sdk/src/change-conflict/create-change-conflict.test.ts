@@ -112,8 +112,13 @@ test("if a conflict contains the same changes for a given key and branch, no new
 
 	// Check that no new conflict is created
 	const conflictElements = await lix.db
-		.selectFrom("change_conflict_element")
-		.where("change_conflict_id", "=", changeConflict.id)
+		.selectFrom("change_set_element")
+		.innerJoin(
+			"change_conflict",
+			"change_conflict.change_set_id",
+			"change_set_element.change_set_id",
+		)
+		.where("change_conflict.id", "=", changeConflict.id)
 		.selectAll()
 		.execute();
 
@@ -145,8 +150,13 @@ test("if a conflict contains the same changes for a given key and branch, no new
 		.execute();
 
 	const conflictElementsAfter3Creation = await lix.db
-		.selectFrom("change_conflict_element")
-		.where("change_conflict_id", "=", changeConflict3.id)
+		.selectFrom("change_set_element")
+		.innerJoin(
+			"change_conflict",
+			"change_conflict.change_set_id",
+			"change_set_element.change_set_id",
+		)
+		.where("change_conflict.id", "=", changeConflict.id)
 		.selectAll()
 		.execute();
 

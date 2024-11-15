@@ -62,16 +62,10 @@ export async function applySchema(args: {
 
   CREATE TABLE IF NOT EXISTS change_conflict (
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
-    key TEXT NOT NULL
-  ) strict;
+    key TEXT NOT NULL,
+    change_set_id TEXT NOT NULL,
 
-  CREATE TABLE IF NOT EXISTS change_conflict_element (
-    change_conflict_id TEXT NOT NULL,
-    change_id TEXT NOT NULL,
-
-    PRIMARY KEY(change_conflict_id, change_id),
-    FOREIGN KEY(change_conflict_id) REFERENCES change_conflict(id),
-    FOREIGN KEY(change_id) REFERENCES change(id)
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS change_conflict_resolution (
