@@ -34,11 +34,13 @@ export type NewChangeQueueEntry = Insertable<ChangeQueueTable>;
 export type ChangeQueueEntryUpdate = Updateable<ChangeQueueTable>;
 type ChangeQueueTable = {
 	id: Generated<number>;
-	path: string;
 	file_id: string;
-	metadata: Record<string, any> | null;
+	path_before: string | null;
+	path_after: string | null;
 	data_before: ArrayBuffer | null;
 	data_after: ArrayBuffer | null;
+	metadata_before: Record<string, any> | null;
+	metadata_after: Record<string, any> | null;
 };
 
 // named lix file to avoid conflict with built-in file type

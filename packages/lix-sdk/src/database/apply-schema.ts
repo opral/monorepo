@@ -18,11 +18,13 @@ export async function applySchema(args: {
 
   CREATE TABLE IF NOT EXISTS change_queue (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    file_id TEXT,
-    path TEXT NOT NULL,
+    file_id TEXT NOT NULL,
     data_before BLOB,
     data_after BLOB,
-    metadata TEXT  -- Added metadata field
+    path_before TEXT,
+    path_after TEXT,
+    metadata_before TEXT,
+    metadata_after TEXT
   ) strict;
 
   CREATE TABLE IF NOT EXISTS change (
@@ -81,16 +83,26 @@ export async function applySchema(args: {
   CREATE TRIGGER IF NOT EXISTS file_insert BEFORE INSERT ON file
   WHEN NEW.skip_change_extraction IS NULL
   BEGIN
-    INSERT INTO change_queue(file_id, path, data_before, data_after, metadata)
-      VALUES (NEW.id, NEW.path, NULL, NEW.data, NEW.metadata);
+    INSERT INTO change_queue(
+      file_id, path_after, data_after, metadata_after
+    )
+    VALUES (NEW.id, NEW.path, NEW.data, NEW.metadata);
     SELECT triggerWorker();
   END;
 
   CREATE TRIGGER IF NOT EXISTS file_update BEFORE UPDATE ON file
   WHEN NEW.skip_change_extraction IS NULL
   BEGIN
-    INSERT INTO change_queue(file_id, path, data_before, data_after, metadata)
-      VALUES (OLD.id, OLD.path, OLD.data, NEW.data, OLD.metadata);
+    INSERT INTO change_queue(
+      file_id, 
+      path_before, data_before, metadata_before, 
+      path_after, data_after, metadata_after
+    )
+    VALUES (
+      NEW.id, 
+      OLD.path, OLD.data, OLD.metadata,
+      NEW.path, NEW.data, NEW.metadata
+    );
     SELECT triggerWorker();
   END;
 

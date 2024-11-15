@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type { LixFile } from "../database/schema.js";
-import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
+import type { ChangeQueueEntry } from "../database/schema.js";
+import type { DetectedChange } from "../plugin/lix-plugin.js";
 import { minimatch } from "minimatch";
 import { updateBranchPointers } from "../branch/update-branch-pointers.js";
 import { changeIsLeafInBranch } from "../query-utilities/change-is-leaf-in-branch.js";
@@ -17,18 +16,25 @@ function normalizePath(path: string) {
 
 // creates initial changes for new files
 export async function handleFileInsert(args: {
-	after: LixFile;
-	plugins: LixPlugin[];
 	lix: Pick<Lix, "db" | "plugin">;
-	queueEntry: any;
+	changeQueueEntry: ChangeQueueEntry;
 }): Promise<void> {
 	const detectedChanges: Array<DetectedChange & { pluginKey: string }> = [];
 
-	for (const plugin of args.plugins) {
+	const plugins = await args.lix.plugin.getAll();
+
+	// the path of the file is either the after path or the before path
+	// depending on whether the file was deleted, updated, or created
+	const path =
+		args.changeQueueEntry.path_after ?? args.changeQueueEntry.path_before;
+
+	if (path === null) {
+		throw new Error("Both before and after paths are null");
+	}
+
+	for (const plugin of plugins) {
 		// glob expressions are expressed relative without leading / but path has leading /
-		if (
-			!minimatch(normalizePath(args.after.path), "/" + plugin.detectChangesGlob)
-		) {
+		if (!minimatch(normalizePath(path), "/" + plugin.detectChangesGlob)) {
 			break;
 		}
 
@@ -40,9 +46,20 @@ export async function handleFileInsert(args: {
 			console.error(error);
 			throw error;
 		}
+
+		if (args.changeQueueEntry.data_after === null) {
+			throw new Error("Data after is null");
+		}
+
 		for (const change of await plugin.detectChanges({
 			before: undefined,
-			after: args.after,
+			after: {
+				id: args.changeQueueEntry.file_id,
+				path,
+				metadata: args.changeQueueEntry.metadata_after,
+				data: args.changeQueueEntry.data_after,
+				skip_change_extraction: null,
+			},
 		})) {
 			detectedChanges.push({
 				...change,
@@ -68,7 +85,7 @@ export async function handleFileInsert(args: {
 				.insertInto("change")
 				.values({
 					schema_key: detectedChange.schema.key,
-					file_id: args.after.id,
+					file_id: args.changeQueueEntry.file_id,
 					entity_id: detectedChange.entity_id,
 					plugin_key: detectedChange.pluginKey,
 					snapshot_id: snapshot.id,
@@ -85,27 +102,31 @@ export async function handleFileInsert(args: {
 
 		await trx
 			.deleteFrom("change_queue")
-			.where("id", "=", args.queueEntry.id)
+			.where("id", "=", args.changeQueueEntry.id)
 			.execute();
 	});
 }
 
 export async function handleFileChange(args: {
-	queueEntry: any;
-	before: LixFile;
-	after: LixFile;
-	plugins: LixPlugin[];
 	lix: Pick<Lix, "db" | "plugin">;
+	changeQueueEntry: ChangeQueueEntry;
 }): Promise<void> {
-	const fileId = args.after?.id ?? args.before?.id;
-
 	const detectedChanges: Array<DetectedChange & { pluginKey: string }> = [];
 
-	for (const plugin of args.plugins) {
+	const plugins = await args.lix.plugin.getAll();
+
+	// the path of the file is either the after path or the before path
+	// depending on whether the file was deleted, updated, or created
+	const path =
+		args.changeQueueEntry.path_after ?? args.changeQueueEntry.path_before;
+
+	if (path === null) {
+		throw new Error("Both before and after paths are null");
+	}
+
+	for (const plugin of plugins) {
 		// glob expressions are expressed relative without leading / but path has leading /
-		if (
-			!minimatch(normalizePath(args.after.path), "/" + plugin.detectChangesGlob)
-		) {
+		if (!minimatch(normalizePath(path), "/" + plugin.detectChangesGlob)) {
 			break;
 		}
 		if (plugin.detectChanges === undefined) {
@@ -117,8 +138,24 @@ export async function handleFileChange(args: {
 			throw error;
 		}
 		for (const change of await plugin.detectChanges({
-			before: args.before,
-			after: args.after,
+			before: args.changeQueueEntry.data_before
+				? {
+						id: args.changeQueueEntry.file_id,
+						path: path,
+						metadata: args.changeQueueEntry.metadata_before,
+						data: args.changeQueueEntry.data_before,
+						skip_change_extraction: null,
+					}
+				: undefined,
+			after: args.changeQueueEntry.data_after
+				? {
+						id: args.changeQueueEntry.file_id,
+						path,
+						metadata: args.changeQueueEntry.metadata_after,
+						data: args.changeQueueEntry.data_after,
+						skip_change_extraction: null,
+					}
+				: undefined,
 		})) {
 			detectedChanges.push({
 				...change,
@@ -139,7 +176,7 @@ export async function handleFileChange(args: {
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.selectAll("change")
 				.select("snapshot.content")
-				.where("file_id", "=", fileId)
+				.where("file_id", "=", args.changeQueueEntry.file_id)
 				.where("schema_key", "=", detectedChange.schema.key)
 				.where("entity_id", "=", detectedChange.entity_id)
 				.where(changeIsLeafInBranch(currentBranch))
@@ -154,7 +191,7 @@ export async function handleFileChange(args: {
 				.insertInto("change")
 				.values({
 					schema_key: detectedChange.schema.key,
-					file_id: fileId,
+					file_id: args.changeQueueEntry.file_id,
 					plugin_key: detectedChange.pluginKey,
 					entity_id: detectedChange.entity_id,
 					snapshot_id: snapshot.id,
@@ -182,7 +219,7 @@ export async function handleFileChange(args: {
 
 		await trx
 			.deleteFrom("change_queue")
-			.where("id", "=", args.queueEntry.id)
+			.where("id", "=", args.changeQueueEntry.id)
 			.execute();
 	});
 }
