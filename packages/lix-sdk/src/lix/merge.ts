@@ -79,7 +79,7 @@ export async function merge(args: {
 			};
 			await args.targetLix.db
 				.insertInto("file")
-				.values({ ...fileToInsert, $skip_change_queue: 1 })
+				.values({ ...fileToInsert, $skip_change_queue: true })
 				.executeTakeFirst();
 		}
 
@@ -176,7 +176,7 @@ export async function merge(args: {
 			await trx
 				.updateTable("file")
 				.set("data", fileData)
-				.set("$skip_change_queue", 1)
+				.set("$skip_change_queue", true)
 				.where("id", "=", fileId)
 				.execute();
 		}

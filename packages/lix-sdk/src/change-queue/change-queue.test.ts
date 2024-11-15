@@ -77,13 +77,12 @@ test("should use queue and settled correctly", async () => {
 		.execute();
 
 	expect(internalFilesAfter).toEqual([
-		{
+		expect.objectContaining({
 			data: internalFilesAfter[0]!.data,
 			id: "test",
 			path: "test.txt",
 			metadata: null,
-			$skip_change_queue: null,
-		} satisfies LixFile,
+		}) satisfies LixFile,
 	]);
 
 	const changes = await lix.db
