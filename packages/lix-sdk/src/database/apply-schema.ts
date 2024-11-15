@@ -172,6 +172,7 @@ export async function applySchema(args: {
   ) strict;
 
   INSERT OR IGNORE INTO label (name) VALUES ('confirmed');
+  INSERT OR IGNORE INTO label (name) VALUES ('grouped');
 
   -- versions
 
