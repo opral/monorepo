@@ -8,7 +8,7 @@
 	},
 	"scripts": {
 		"build": "tsc --build",
-		"test": "vitest run",
+		"test": "tsc --noEmit && vitest run",
 		"test:watch": "vitest",
 		"lint": "eslint src/**/* --fix",
 		"dev": "tsc --watch",
