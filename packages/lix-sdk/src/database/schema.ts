@@ -2,7 +2,7 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 
 export type LixDatabaseSchema = {
-	file: LixFileTableWithQueryFlags;
+	file: LixFileTable;
 	change_queue: ChangeQueueTable;
 	change_edge: ChangeEdgeTable;
 	snapshot: SnapshotTable;
@@ -52,9 +52,6 @@ type LixFileTable = {
 	path: string;
 	data: ArrayBuffer;
 	metadata: Record<string, any> | null;
-};
-type LixFileTableWithQueryFlags = LixFileTable & {
-	$skip_change_queue?: boolean;
 };
 
 export type Change = Selectable<ChangeTable>;

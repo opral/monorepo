@@ -39,8 +39,6 @@ export default function TableEditor() {
 			await lix.db
 				.updateTable("file")
 				.set("data", await new Blob([csv]).arrayBuffer())
-				// @ts-expect-error - improvemnts coming
-				.set("$skip_change_queue", null)
 				.where("id", "=", activeFile.id)
 				.returningAll()
 				.execute();

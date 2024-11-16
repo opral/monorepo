@@ -1,3 +1,4 @@
+import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
 import type { Change } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
@@ -64,14 +65,14 @@ export async function applyChanges(args: {
 					file,
 					changes,
 				});
-				await trx
-					// avoiding the change queue here
-					// which is not duplicate tolerant
-					// yet. see https://linear.app/opral/issue/LIXDK-114/make-diff-and-change-generation-fault-tolerant
-					.updateTable("file")
-					.set({ data: fileData, $skip_change_queue: true })
-					.where("id", "=", fileId)
-					.execute();
+
+				await withSkipChangeQueue(trx, async (trx) => {
+					await trx
+						.updateTable("file")
+						.set({ data: fileData })
+						.where("id", "=", fileId)
+						.execute();
+				});
 			}
 		}
 	};
