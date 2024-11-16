@@ -2,7 +2,7 @@ import type { ChangeQueueEntry } from "../database/schema.js";
 import type { DetectedChange } from "../plugin/lix-plugin.js";
 import { minimatch } from "minimatch";
 import { updateChangesInVersion } from "../version/update-changes-in-version.js";
-import { changeIsLeafInVersion } from "../query-utilities/change-is-leaf-in-version.js";
+import { changeIsLeafInVersion } from "../query-filter/change-is-leaf-in-version.js";
 import { createSnapshot } from "../snapshot/create-snapshot.js";
 import type { Lix } from "../lix/open-lix.js";
 

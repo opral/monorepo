@@ -7,7 +7,7 @@ export * from "./database/index.js";
 export * from "./discussion/index.js";
 export * from "./lix/index.js";
 export * from "./plugin/index.js";
-export * from "./query-utilities/index.js";
+export * from "./query-filter/index.js";
 export * from "./snapshot/index.js";
 
 export { jsonObjectFrom, jsonArrayFrom } from "kysely/helpers/sqlite";
