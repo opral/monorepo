@@ -11,12 +11,10 @@ test("file ids should default to uuid", async () => {
 
 	// init the trigger function (usually defined by lix only)
 	sqlite.createFunction({
-		name: "triggerWorker",
+		name: "triggerChangeQueue",
 		arity: 0,
 		// @ts-expect-error - dynamic function
-		xFunc: () => {
-			// console.log('test')
-		},
+		xFunc: () => {},
 	});
 
 	const file = await db
@@ -24,7 +22,6 @@ test("file ids should default to uuid", async () => {
 		.values({
 			path: "/mock",
 			data: new Uint8Array(),
-			$skip_change_queue: true,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -130,7 +127,7 @@ test("files should be able to have metadata", async () => {
 	const db = initDb({ sqlite });
 
 	sqlite.createFunction({
-		name: "triggerWorker",
+		name: "triggerChangeQueue",
 		arity: 0,
 		// @ts-expect-error - dynamic function
 		xFunc: () => {
@@ -146,7 +143,6 @@ test("files should be able to have metadata", async () => {
 			metadata: {
 				primary_key: "email",
 			},
-			$skip_change_queue: true,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -160,7 +156,6 @@ test("files should be able to have metadata", async () => {
 			metadata: {
 				primary_key: "something-else",
 			},
-			$skip_change_queue: true,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

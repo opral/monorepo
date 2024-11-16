@@ -2,7 +2,7 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { loadPlugins } from "../plugin/load-plugin.js";
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
-import { initChangeQueue } from "../change-queue/change-queue.js";
+import { initChangeQueue } from "../change-queue/init-change-queue.js";
 import { changeQueueSettled } from "../change-queue/change-queue-settled.js";
 
 export type Lix = {

@@ -9,7 +9,7 @@ import { sha256 } from "js-sha256";
 export function initDb(args: {
 	sqlite: SqliteDatabase;
 }): Kysely<LixDatabaseSchema> {
-	initDefaultValueFunctions({ sqlite: args.sqlite });
+	initFunctions({ sqlite: args.sqlite });
 	applySchema({ sqlite: args.sqlite });
 	const db = new Kysely<LixDatabaseSchema>({
 		dialect: createDialect({
@@ -20,7 +20,7 @@ export function initDb(args: {
 	return db;
 }
 
-function initDefaultValueFunctions(args: { sqlite: SqliteDatabase }) {
+function initFunctions(args: { sqlite: SqliteDatabase }) {
 	args.sqlite.createFunction({
 		name: "uuid_v4",
 		arity: 0,

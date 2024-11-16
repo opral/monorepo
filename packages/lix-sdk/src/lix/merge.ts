@@ -1,5 +1,6 @@
 import type { Lix } from "./open-lix.js";
 import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-only-in-source.js";
+import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
 
 /**
  * Combined the changes of the source lix into the target lix.
@@ -77,10 +78,13 @@ export async function merge(args: {
 				data: file.data,
 				metadata: file.metadata,
 			};
-			await args.targetLix.db
-				.insertInto("file")
-				.values({ ...fileToInsert, $skip_change_queue: true })
-				.executeTakeFirst();
+
+			await withSkipChangeQueue(args.targetLix.db, async (trx) => {
+				await trx
+					.insertInto("file")
+					.values({ ...fileToInsert })
+					.executeTakeFirst();
+			});
 		}
 
 		if (!plugin?.applyChanges) {
@@ -173,12 +177,13 @@ export async function merge(args: {
 
 		for (const [fileId, fileData] of Object.entries(changesPerFile)) {
 			// update the file data with the applied changes
-			await trx
-				.updateTable("file")
-				.set("data", fileData)
-				.set("$skip_change_queue", true)
-				.where("id", "=", fileId)
-				.execute();
+			await withSkipChangeQueue(trx, async (trx) => {
+				await trx
+					.updateTable("file")
+					.set("data", fileData)
+					.where("id", "=", fileId)
+					.execute();
+			});
 		}
 
 		// copy edges

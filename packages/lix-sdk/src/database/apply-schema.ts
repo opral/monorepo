@@ -14,9 +14,7 @@ export async function applySchema(args: {
     id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
     path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL,
-    metadata TEXT,
-
-    '$skip_change_queue' INTEGER
+    metadata TEXT
   ) strict;
 
   -- TODO Queue - handle deletion - the current queue doesn't handle delete starting with feature parity
@@ -25,7 +23,7 @@ export async function applySchema(args: {
     -- BEGIN
     --     INSERT INTO change_queue(file_id, path, data_before, data_after, metadata)
     --     VALUES (OLD.id, OLD.path, OLD.data, NULL, OLD.metadata);
-    --   SELECT triggerWorker();
+    --   SELECT triggerChangeQueue();
     -- END;
 
   CREATE TABLE IF NOT EXISTS change_queue (
@@ -40,18 +38,17 @@ export async function applySchema(args: {
   ) strict;
 
   CREATE TRIGGER IF NOT EXISTS file_insert BEFORE INSERT ON file
-  WHEN NEW.'$skip_change_queue' IS NULL
   BEGIN
     INSERT INTO change_queue(
       file_id, path_after, data_after, metadata_after
     )
-    VALUES (NEW.id, NEW.path, NEW.data, NEW.metadata);
-
-    SELECT triggerWorker();
+    VALUES (
+      NEW.id, NEW.path, NEW.data, NEW.metadata
+    );
+    SELECT triggerChangeQueue();
   END;
 
   CREATE TRIGGER IF NOT EXISTS file_update BEFORE UPDATE ON file
-  WHEN NEW.'$skip_change_queue' IS NULL
   BEGIN
     INSERT INTO change_queue(
       file_id, 
@@ -65,7 +62,7 @@ export async function applySchema(args: {
       NEW.path, NEW.data, NEW.metadata
     );
 
-    SELECT triggerWorker();
+    SELECT triggerChangeQueue();
   END;
 
   CREATE TABLE IF NOT EXISTS change (

@@ -7,7 +7,7 @@ export async function initChangeQueue(args: {
 	rawDatabase: SqliteDatabase;
 }): Promise<void> {
 	args.rawDatabase.createFunction({
-		name: "triggerWorker",
+		name: "triggerChangeQueue",
 		arity: 0,
 		// @ts-expect-error - dynamic function
 		xFunc: () => {
