@@ -38,10 +38,6 @@ export type LixPlugin = {
 	 * Detects changes from the source lix that conflict with changes in the target lix.
 	 */
 	detectConflicts?: (args: {
-		sourceLix: LixReadonly;
-		targetLix: LixReadonly;
-	}) => Promise<DetectedConflict[]>;
-	detectConflictsV2?: (args: {
 		lix: LixReadonly;
 		changes: Array<Change>;
 	}) => Promise<DetectedConflict[]>;
@@ -56,13 +52,13 @@ export type LixPlugin = {
 	}) => Promise<{
 		fileData: LixFile["data"];
 	}>;
-	// TODO multiple resolution strategies should be reported to the user
-	// similar to fixable lint rules. We likely need to expose in
-	// detect conflicts how conflicts could potentially be resolved.
-	// `resolveConflict` would then be called with the selected strategy.
-	tryResolveConflict?: () => Promise<
-		{ success: true; change: Change } | { success: false }
-	>;
+	// // TODO multiple resolution strategies should be reported to the user
+	// // similar to fixable lint rules. We likely need to expose in
+	// // detect conflicts how conflicts could potentially be resolved.
+	// // `resolveConflict` would then be called with the selected strategy.
+	// tryResolveConflict?: () => Promise<
+	// 	{ success: true; change: Change } | { success: false }
+	// >;
 };
 
 /**

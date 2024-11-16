@@ -2,12 +2,14 @@ import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { Change } from "../database/schema.js";
 import { detectChangeConflicts } from "./detect-change-conflicts.js";
+import type { LixPlugin } from "../plugin/lix-plugin.js";
 
 test("should detect conflicts using plugins", async () => {
 	const lix = await openLixInMemory({});
 
-	const mockPlugin = {
-		detectConflictsV2: vi.fn().mockResolvedValue([
+	const mockPlugin: LixPlugin = {
+		key: "mock-plugin",
+		detectConflicts: vi.fn().mockResolvedValue([
 			{
 				key: "mock-conflict",
 				conflictingChangeIds: new Set(["change0", "change1"]),
@@ -43,7 +45,7 @@ test("should detect conflicts using plugins", async () => {
 	expect(detectedConflicts[0]?.conflictingChangeIds).toEqual(
 		new Set(["change0", "change1"]),
 	);
-	expect(mockPlugin.detectConflictsV2).toHaveBeenCalledWith({
+	expect(mockPlugin.detectConflicts).toHaveBeenCalledWith({
 		lix,
 		changes,
 	});
@@ -52,8 +54,9 @@ test("should detect conflicts using plugins", async () => {
 test("should handle no conflicts detected by plugins", async () => {
 	const lix = await openLixInMemory({});
 
-	const mockPlugin = {
-		detectConflictsV2: vi.fn().mockResolvedValue([]),
+	const mockPlugin: LixPlugin = {
+		key: "mock-plugin",
+		detectConflicts: vi.fn().mockResolvedValue([]),
 	};
 
 	// Mock the plugin.getAll method to return the mock plugin
@@ -80,7 +83,7 @@ test("should handle no conflicts detected by plugins", async () => {
 	});
 
 	expect(detectedConflicts.length).toBe(0);
-	expect(mockPlugin.detectConflictsV2).toHaveBeenCalledWith({
+	expect(mockPlugin.detectConflicts).toHaveBeenCalledWith({
 		lix,
 		changes,
 	});
@@ -89,8 +92,9 @@ test("should handle no conflicts detected by plugins", async () => {
 test("should handle multiple plugins detecting conflicts", async () => {
 	const lix = await openLixInMemory({});
 
-	const mockPlugin1 = {
-		detectConflictsV2: vi.fn().mockResolvedValue([
+	const mockPlugin1: LixPlugin = {
+		key: "mock-plugin1",
+		detectConflicts: vi.fn().mockResolvedValue([
 			{
 				key: "mock-conflict1",
 				conflictingChangeIds: new Set(["change0", "change1"]),
@@ -98,8 +102,9 @@ test("should handle multiple plugins detecting conflicts", async () => {
 		]),
 	};
 
-	const mockPlugin2 = {
-		detectConflictsV2: vi.fn().mockResolvedValue([
+	const mockPlugin2: LixPlugin = {
+		key: "mock-plugin2",
+		detectConflicts: vi.fn().mockResolvedValue([
 			{
 				key: "mock-conflict2",
 				conflictingChangeIds: new Set(["change1", "change2"]),
@@ -145,11 +150,11 @@ test("should handle multiple plugins detecting conflicts", async () => {
 	expect(detectedConflicts[1]?.conflictingChangeIds).toEqual(
 		new Set(["change1", "change2"]),
 	);
-	expect(mockPlugin1.detectConflictsV2).toHaveBeenCalledWith({
+	expect(mockPlugin1.detectConflicts).toHaveBeenCalledWith({
 		lix,
 		changes,
 	});
-	expect(mockPlugin2.detectConflictsV2).toHaveBeenCalledWith({
+	expect(mockPlugin2.detectConflicts).toHaveBeenCalledWith({
 		lix,
 		changes,
 	});

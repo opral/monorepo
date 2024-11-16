@@ -92,7 +92,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 
 	const mockPlugin: LixPlugin = {
 		key: "mock",
-		detectConflictsV2: async () => {
+		detectConflicts: async () => {
 			// simulating a conflict between change2 and change3
 			// that was previously undetected
 			return [
@@ -197,7 +197,7 @@ test("it should not update the target version pointers of a conflicting change",
 
 	const mockPlugin: LixPlugin = {
 		key: "mock",
-		detectConflictsV2: async () => {
+		detectConflicts: async () => {
 			// simulating a conflict between change2 and change3
 			// that was previously undetected
 			return [
@@ -326,7 +326,7 @@ test("it should automatically detect a diverging entity conflict", async () => {
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
-		detectConflictsV2: async () => {
+		detectConflicts: async () => {
 			// Simulate no conflicts; system should detect the diverging entity conflict automatically
 			return [];
 		},
@@ -373,7 +373,7 @@ test("re-curring merges should not create a new conflict if the conflict already
 		applyChanges: async () => ({
 			fileData: new TextEncoder().encode("mock"),
 		}),
-		detectConflictsV2: async () => [
+		detectConflicts: async () => [
 			{
 				key: "mock-conflict",
 				conflictingChangeIds: new Set([mockChanges[0]!.id, mockChanges[1]!.id]),

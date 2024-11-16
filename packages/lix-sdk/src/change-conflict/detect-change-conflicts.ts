@@ -28,8 +28,8 @@ export async function detectChangeConflicts(args: {
 	// let plugin detect conflicts
 	await Promise.all(
 		plugins.map(async (plugin) => {
-			if (plugin.detectConflictsV2) {
-				const conflicts = await plugin.detectConflictsV2({
+			if (plugin.detectConflicts) {
+				const conflicts = await plugin.detectConflicts({
 					lix: args.lix,
 					changes: args.changes,
 				});
