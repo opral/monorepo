@@ -3,7 +3,7 @@ import { detectChangeConflicts } from "../change-conflict/detect-change-conflict
 import { changeSetElementInSymmetricDifference } from "../change-set/change-set-element-in-symmetric-difference.js";
 import type { Version } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
-import { changeInVersion } from "../query-utilities/change-in-version.js";
+import { changeInVersion } from "../query-filter/change-in-version.js";
 
 export async function mergeVersion(args: {
 	lix: Lix;

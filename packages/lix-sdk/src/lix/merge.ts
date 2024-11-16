@@ -1,6 +1,7 @@
 import type { Lix } from "./open-lix.js";
-import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-only-in-source.js";
+import { getLeafChangesOnlyInSource } from "./merge.get-leaf-changes-only-in-source.js";
 import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
+import type { DetectedConflict } from "../plugin/lix-plugin.js";
 
 /**
  * Combined the changes of the source lix into the target lix.
@@ -36,11 +37,13 @@ export async function merge(args: {
 		throw new Error("Unimplemented. Only one plugin is supported for now");
 	}
 
-	const conflicts =
-		(await plugin?.detectConflicts?.({
-			sourceLix: args.sourceLix,
-			targetLix: args.targetLix,
-		})) ?? [];
+	const conflicts: DetectedConflict[] =
+		// (await plugin?.detectConflicts?.({
+		// 	sourceLix: args.sourceLix,
+		// 	targetLix: args.targetLix,
+		// })) ??
+
+		[];
 
 	const changesPerFile: Record<string, ArrayBuffer> = {};
 

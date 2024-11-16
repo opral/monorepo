@@ -1,4 +1,4 @@
-import { getLeafChangesOnlyInSource, openLixInMemory } from "@lix-js/sdk";
+import { openLixInMemory } from "@lix-js/sdk";
 import { mockChanges } from "./mockChanges.js";
 import { detectChanges } from "../detectChanges.js";
 
@@ -51,11 +51,6 @@ export async function mockConflicts(args: {
 		file: { path: "mock", metadata: args.metadata },
 	});
 
-	const leafChangesOnlyInSource = await getLeafChangesOnlyInSource({
-		sourceLix,
-		targetLix,
-	});
-
 	const getSnapshotsOfConflict = async (conflict: any) => {
 		const snapshot = await sourceLix.db
 			.selectFrom("change")
@@ -81,7 +76,6 @@ export async function mockConflicts(args: {
 		commonLix,
 		sourceLix,
 		targetLix,
-		leafChangesOnlyInSource,
 		getSnapshotsOfConflict,
 	};
 }

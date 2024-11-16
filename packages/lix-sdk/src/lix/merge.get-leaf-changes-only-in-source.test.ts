@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
-import { getLeafChangesOnlyInSource } from "./get-leaf-changes-only-in-source.js";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { newLixFile } from "../lix/new-lix.js";
+import { getLeafChangesOnlyInSource } from "./merge.get-leaf-changes-only-in-source.js";
+import { openLixInMemory } from "./open-lix-in-memory.js";
+import { newLixFile } from "./new-lix.js";
 import type { NewChange } from "../database/schema.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 

@@ -1,6 +1,6 @@
 import type { Change } from "../database/schema.js";
 import type { DetectedConflict, LixReadonly } from "../plugin/lix-plugin.js";
-import { getLowestCommonAncestorV2 } from "../query-utilities/get-lowest-common-ancestor-v2.js";
+import { changeIsLowestCommonAncestorOf } from "../query-filter/change-is-lowest-common-ancestor-of.js";
 
 export const LIX_DIVERGING_ENTITY_CONFLICT_KEY =
 	"lix-diverging-entity-conflict";
@@ -55,11 +55,11 @@ export async function detectDivergingEntityConflict(args: {
 				continue;
 			}
 
-			const lowestCommonAncestor = await getLowestCommonAncestorV2({
-				lix: args.lix,
-				changeA,
-				changeB,
-			});
+			const lowestCommonAncestor = await args.lix.db
+				.selectFrom("change")
+				.where(changeIsLowestCommonAncestorOf([changeA, changeB]))
+				.select("id")
+				.executeTakeFirst();
 
 			if (lowestCommonAncestor === undefined) {
 				continue;

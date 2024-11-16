@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { updateChangesInVersion } from "./update-changes-in-version.js";
-import { changeInVersion } from "../query-utilities/change-in-version.js";
+import { changeInVersion } from "../query-filter/change-in-version.js";
 import { createVersion } from "./create-version.js";
 
 test("the version change set should be updated", async () => {
