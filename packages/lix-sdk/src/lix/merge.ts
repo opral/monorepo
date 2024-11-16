@@ -1,5 +1,5 @@
 import type { Lix } from "./open-lix.js";
-import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-only-in-source.js";
+import { getLeafChangesOnlyInSource } from "./merge.get-leaf-changes-only-in-source.js";
 import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
 import type { DetectedConflict } from "../plugin/lix-plugin.js";
 
