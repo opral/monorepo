@@ -13,7 +13,7 @@ test("inserting a change should auto fill the created_at column", async () => {
 			schema_key: "file",
 			file_id: "mock",
 			plugin_key: "mock-plugin",
-			snapshot_id: "sn1",
+			snapshot_id: "no-content",
 		})
 		.execute();
 

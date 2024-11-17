@@ -27,14 +27,14 @@ test("it should copy the changes from the parent version", async () => {
 				entity_id: "value1",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
-				snapshot_id: "sn1",
+				snapshot_id: "no-content",
 			},
 			{
 				schema_key: "file",
 				entity_id: "value2",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
-				snapshot_id: "sn2",
+				snapshot_id: "no-content",
 			},
 		])
 		.returningAll()
@@ -126,14 +126,14 @@ test("it should copy change conflict pointers from the parent version", async ()
 				entity_id: "value1",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
-				snapshot_id: "sn1",
+				snapshot_id: "no-content",
 			},
 			{
 				schema_key: "file",
 				entity_id: "value2",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
-				snapshot_id: "sn2",
+				snapshot_id: "no-content",
 			},
 		])
 		.returningAll()

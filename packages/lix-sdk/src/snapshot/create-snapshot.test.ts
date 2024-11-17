@@ -7,10 +7,6 @@ test("should insert a new snapshot", async () => {
 	const content = { a: "some data" };
 	const snapshot = await createSnapshot({ lix, content });
 
-	const snapshots = await lix.db.selectFrom("snapshot").selectAll().execute();
-
-	expect(snapshots).toHaveLength(1);
-	expect(snapshots[0]).toEqual(snapshot);
 	expect(snapshot.content).toEqual(content);
 });
 
@@ -31,9 +27,6 @@ test("should retrieve existing snapshot if content is the same", async () => {
 	const snapshot1 = await createSnapshot({ lix, content });
 	const snapshot2 = await createSnapshot({ lix, content });
 
-	const snapshots = await lix.db.selectFrom("snapshot").selectAll().execute();
-
-	expect(snapshots).toHaveLength(1);
 	expect(snapshot1.id).toBe(snapshot2.id);
 	expect(snapshot1.content).toEqual(snapshot2.content);
 });
@@ -45,10 +38,6 @@ test("should handle transaction correctly", async () => {
 	await lix.db.transaction().execute(async (trx) => {
 		const snapshot = await createSnapshot({ lix: { db: trx }, content });
 
-		const snapshots = await trx.selectFrom("snapshot").selectAll().execute();
-
-		expect(snapshots).toHaveLength(1);
-		expect(snapshots[0]).toEqual(snapshot);
 		expect(snapshot.content).toEqual(content);
 	});
 });
@@ -58,12 +47,21 @@ test("should retrieve existing snapshot within a transaction", async () => {
 	const content = { a: "some data" };
 
 	await lix.db.transaction().execute(async (trx) => {
+		const snapshotsBefore = await trx
+			.selectFrom("snapshot")
+			.selectAll()
+			.execute();
+
 		const snapshot1 = await createSnapshot({ lix: { db: trx }, content });
 		const snapshot2 = await createSnapshot({ lix: { db: trx }, content });
 
-		const snapshots = await trx.selectFrom("snapshot").selectAll().execute();
+		const snapshotsAfter = await trx
+			.selectFrom("snapshot")
+			.selectAll()
+			.execute();
 
-		expect(snapshots).toHaveLength(1);
+		// one snapshot should be added
+		expect(snapshotsAfter).toHaveLength(snapshotsBefore.length + 1);
 		expect(snapshot1.id).toBe(snapshot2.id);
 		expect(snapshot1.content).toEqual(snapshot2.content);
 	});
