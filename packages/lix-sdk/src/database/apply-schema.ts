@@ -8,6 +8,8 @@ export async function applySchema(args: {
 }): Promise<unknown> {
 	return args.sqlite.exec`
 
+  PRAGMA foreign_keys = ON;
+
   -- file
 
   CREATE TABLE IF NOT EXISTS file (
