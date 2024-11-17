@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { v4 } from "uuid";
+import { v7 } from "uuid";
 import { bench, describe } from "vitest";
 import {
 	newLixFile,
@@ -17,13 +17,13 @@ const createChange = (
 	parentChangeId: string | null,
 ): { change: NewChange; snapshot: NewSnapshot; edges: ChangeGraphEdge[] } => {
 	const entityId = payload[schema_key].id;
-	const snapshotId = v4();
+	const snapshotId = v7();
 	const snapshot: NewSnapshot = {
 		id: snapshotId,
 		content: payload[schema_key],
 	};
 	const change: Change = {
-		id: v4(),
+		id: v7(),
 		file_id: "mock",
 		plugin_key: "inlang",
 		schema_key: schema_key,
@@ -60,7 +60,7 @@ const setupLix = async (nMessages: number) => {
 	}[] = [];
 
 	for (let i = 0; i < nMessages; i++) {
-		const payloads = getPayloadsForId(v4());
+		const payloads = getPayloadsForId(v7());
 
 		// lets asume we create a bundle once and don't change it to much over its lifetime
 		mockChanges.push(createChange("bundle", payloads, null));

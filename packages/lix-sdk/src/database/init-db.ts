@@ -1,6 +1,6 @@
 import { Kysely, ParseJSONResultsPlugin } from "kysely";
 import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely";
-import { v4 } from "uuid";
+import { v7 as uuid_v7 } from "uuid";
 import { SerializeJsonPlugin } from "./serialize-json-plugin.js";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
@@ -22,9 +22,9 @@ export function initDb(args: {
 
 function initFunctions(args: { sqlite: SqliteDatabase }) {
 	args.sqlite.createFunction({
-		name: "uuid_v4",
+		name: "uuid_v7",
 		arity: 0,
-		xFunc: () => v4(),
+		xFunc: () => uuid_v7(),
 	});
 
 	args.sqlite.createFunction({
