@@ -13,7 +13,7 @@ export async function applySchema(args: {
   -- file
 
   CREATE TABLE IF NOT EXISTS file (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL,
     metadata TEXT
@@ -68,7 +68,7 @@ export async function applySchema(args: {
   END;
 
   CREATE TABLE IF NOT EXISTS change (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     entity_id TEXT NOT NULL,
     schema_key TEXT NOT NULL,
     file_id TEXT NOT NULL,
@@ -105,7 +105,7 @@ export async function applySchema(args: {
   CREATE INDEX IF NOT EXISTS idx_content_hash ON snapshot (id);
 
   CREATE TABLE IF NOT EXISTS change_conflict (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     key TEXT NOT NULL,
     change_set_id TEXT NOT NULL,
 
@@ -128,7 +128,7 @@ export async function applySchema(args: {
   -- change sets
 
   CREATE TABLE IF NOT EXISTS change_set (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4())
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7())
   ) strict;
 
   CREATE TABLE IF NOT EXISTS change_set_element (
@@ -152,14 +152,14 @@ export async function applySchema(args: {
   -- discussions 
 
   CREATE TABLE IF NOT EXISTS discussion (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     change_set_id TEXT NOT NULL,
 
     FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS comment (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     parent_id TEXT,
     discussion_id TEXT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -172,7 +172,7 @@ export async function applySchema(args: {
   -- labels
   
   CREATE TABLE IF NOT EXISTS label (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     name TEXT NOT NULL UNIQUE  -- e.g., 'confirmed', 'reviewed'
   ) strict;
 
@@ -182,7 +182,7 @@ export async function applySchema(args: {
   -- versions
 
   CREATE TABLE IF NOT EXISTS version (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     change_set_id TEXT NOT NULL,
 
     -- name is optional. 
