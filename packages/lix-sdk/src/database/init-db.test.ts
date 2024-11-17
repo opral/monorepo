@@ -2,6 +2,7 @@ import { createInMemoryDatabase } from "sqlite-wasm-kysely";
 import { test, expect } from "vitest";
 import { initDb } from "./init-db.js";
 import { validate } from "uuid";
+import { mockChange } from "../change/mock-change.js";
 
 test("file ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
@@ -191,9 +192,20 @@ test("change set items must be unique", async () => {
 
 	await db
 		.insertInto("change_set")
-		.defaultValues()
+		.values({
+			id: "change-set-1",
+		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
+
+	await db
+		.insertInto("change")
+		.values(
+			mockChange({
+				id: "change-1",
+			}),
+		)
+		.execute();
 
 	await db
 		.insertInto("change_set_element")
@@ -203,7 +215,7 @@ test("change set items must be unique", async () => {
 		})
 		.execute();
 
-	await expect(
+	expect(
 		db
 			.insertInto("change_set_element")
 			.values({
