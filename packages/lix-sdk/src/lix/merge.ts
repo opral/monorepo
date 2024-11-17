@@ -73,21 +73,23 @@ export async function merge(args: {
 				.selectFrom("file")
 				.selectAll()
 				.where("id", "=", fileId)
-				.executeTakeFirstOrThrow();
+				.executeTakeFirst();
 
-			const fileToInsert = {
-				id: file.id,
-				path: file.path,
-				data: file.data,
-				metadata: file.metadata,
-			};
+			if (file) {
+				const fileToInsert = {
+					id: file.id,
+					path: file.path,
+					data: file.data,
+					metadata: file.metadata,
+				};
 
-			await withSkipChangeQueue(args.targetLix.db, async (trx) => {
-				await trx
-					.insertInto("file")
-					.values({ ...fileToInsert })
-					.executeTakeFirst();
-			});
+				await withSkipChangeQueue(args.targetLix.db, async (trx) => {
+					await trx
+						.insertInto("file")
+						.values({ ...fileToInsert })
+						.executeTakeFirst();
+				});
+			}
 		}
 
 		if (!plugin?.applyChanges) {
@@ -96,6 +98,7 @@ export async function merge(args: {
 
 		const { fileData } = await plugin.applyChanges({
 			changes: nonConflictingLeafChangesInSourceForFile,
+			// @ts-expect-error - TODO apply changes can be an undefined file
 			file,
 			lix: args.targetLix,
 		});

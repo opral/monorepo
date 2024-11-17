@@ -11,7 +11,7 @@ test("should only return changes with the given label", async () => {
 		.values([
 			{
 				id: "change1",
-				snapshot_id: "empty-content",
+				snapshot_id: "no-content",
 				entity_id: "mock",
 				file_id: "mock",
 				plugin_key: "mock",
@@ -19,7 +19,7 @@ test("should only return changes with the given label", async () => {
 			},
 			{
 				id: "change2",
-				snapshot_id: "empty-content",
+				snapshot_id: "no-content",
 				entity_id: "mock",
 				file_id: "mock",
 				plugin_key: "mock",

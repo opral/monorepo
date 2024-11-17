@@ -76,7 +76,8 @@ export async function applySchema(args: {
     snapshot_id TEXT NOT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    UNIQUE (id, entity_id, file_id, schema_key)
+    UNIQUE (id, entity_id, file_id, schema_key),
+    FOREIGN KEY(snapshot_id) REFERENCES snapshot(id)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS change_edge (
@@ -94,6 +95,10 @@ export async function applySchema(args: {
     id TEXT GENERATED ALWAYS AS (sha256(content)) STORED UNIQUE,
     content TEXT
   ) strict;
+
+  -- Create the default 'no-content' snapshot
+  -- to avoid foreign key constraint violations in tests
+  INSERT OR IGNORE INTO snapshot (content) VALUES (NULL);
 
   -- conflicts
 
@@ -160,7 +165,8 @@ export async function applySchema(args: {
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
     content TEXT NOT NULL,
 
-    FOREIGN KEY(discussion_id) REFERENCES discussion(id)
+    FOREIGN KEY(discussion_id) REFERENCES discussion(id),
+    FOREIGN KEY(parent_id) REFERENCES comment(id)
   ) strict;
 
   -- labels

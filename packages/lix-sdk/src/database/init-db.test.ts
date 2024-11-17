@@ -43,7 +43,7 @@ test("change ids should default to uuid", async () => {
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock-plugin",
-			snapshot_id: "sn1",
+			snapshot_id: "no-content",
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -114,6 +114,11 @@ test("an empty snapshot should default to the special 'no-content' snapshot to s
 		.values({
 			content: null,
 		})
+		.onConflict((oc) =>
+			oc.doUpdateSet((eb) => ({
+				content: eb.ref("excluded.content"),
+			})),
+		)
 		.returningAll()
 		.executeTakeFirstOrThrow();
 

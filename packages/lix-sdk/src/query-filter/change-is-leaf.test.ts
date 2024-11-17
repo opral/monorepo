@@ -12,7 +12,7 @@ test("should only return the leaf change", async () => {
 		.values([
 			{
 				id: "change1",
-				snapshot_id: "empty-content",
+				snapshot_id: "no-content",
 				entity_id: "mock1",
 				file_id: "mock",
 				plugin_key: "mock",
@@ -20,7 +20,7 @@ test("should only return the leaf change", async () => {
 			},
 			{
 				id: "change2",
-				snapshot_id: "empty-content",
+				snapshot_id: "no-content",
 				entity_id: "mock2",
 				file_id: "mock",
 				plugin_key: "mock",
@@ -28,7 +28,7 @@ test("should only return the leaf change", async () => {
 			},
 			{
 				id: "change3",
-				snapshot_id: "empty-content",
+				snapshot_id: "no-content",
 				entity_id: "mock2",
 				file_id: "mock",
 				plugin_key: "mock",
@@ -60,7 +60,7 @@ test("should return the change even if it's the only one", async () => {
 		.values([
 			{
 				id: "change1",
-				snapshot_id: "empty-content",
+				snapshot_id: "no-content",
 				entity_id: "mock1",
 				file_id: "mock",
 				plugin_key: "mock",
@@ -90,7 +90,7 @@ test.todo(
 			.values([
 				{
 					id: "change1",
-					snapshot_id: "empty-content",
+					snapshot_id: "no-content",
 					entity_id: "mock1",
 					file_id: "mock",
 					plugin_key: "mock",
@@ -98,7 +98,7 @@ test.todo(
 				},
 				{
 					id: "change2",
-					snapshot_id: "empty-content",
+					snapshot_id: "no-content",
 					entity_id: "mock1",
 					file_id: "mock",
 					plugin_key: "mock",
