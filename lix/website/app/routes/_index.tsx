@@ -1,12 +1,13 @@
 import type { MetaFunction } from "@remix-run/node"
 import Header, { socialLinks } from "../components/header"
-import Footer from "../components/footer"
 import Check from "~/components/ui/check"
 import IconArrowExternal from "~/components/icons/arrow-external"
 import Details from "~/components/ui/details"
 import IconLogoTabelle from "~/components/icons/logo-tabelle"
 import IconLogoPapier from "~/components/icons/logo-papier"
 import IconLogoInlang from "~/components/icons/logo-inlang"
+import Banner from "~/components/ui/banner"
+import Footer from "~/components/footer"
 
 export const meta: MetaFunction = () => {
 	const ogImage = [
@@ -156,18 +157,8 @@ const faq = [
 
 export default function Index() {
 	return (
-		<div className="min-h-screen">
-			<div className="flex justify-center items-center h-[50px] text-[16px] px-3 bg-slate-100 border-b border-slate-200 text-black font-medium">
-				Public preview launching, Dec 16
-				<a
-					className="group text-cyan-600 hover:text-black border border-slate-200 mx-6 flex gap-2 items-center py-1 px-3 rounded-md bg-white"
-					target="_blank"
-					href="https://forms.gle/cR3iDsUB7DEygJaZ8"
-				>
-					Get notified
-					<IconArrowExternal />
-				</a>
-			</div>
+		<>
+			<Banner />
 			<Header />
 			<main className="w-full max-w-5xl px-4 mx-auto space-y-16 md:space-y-24">
 				<div className="grid md:grid-cols-2 justify-center md:justify-start gap-16 md:gap-8 lg:gap-24 mt-12 mb-12">
@@ -190,13 +181,13 @@ export default function Index() {
 								Get updates
 							</a>
 							{/* <a
-								href="https://x.com/FabianHiller/status/1839301632888131814"
-								target="_blanc"
-								className="w-full sm:w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex justify-center items-center gap-2 border border-slate-300 hover:border-slate-400 transition-all"
-							>
-								<IconDate />
-								Talk at Web Dev Meetup NY
-							</a> */}
+							href="https://x.com/FabianHiller/status/1839301632888131814"
+							target="_blanc"
+							className="w-full sm:w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex justify-center items-center gap-2 border border-slate-300 hover:border-slate-400 transition-all"
+						>
+							<IconDate />
+							Talk at Web Dev Meetup NY
+						</a> */}
 						</div>
 					</div>
 					<div>
@@ -247,21 +238,25 @@ export default function Index() {
 						Change control can be accessed in file-based applications that are already built on Lix
 						or the Lix File Manager, which can track changes of conventional files.
 					</p>
-					<div className="card relative w-full">
-						<img
-							src="/images/file-manager.svg"
-							alt="Simlified sketch of the lix file manager"
-							className="mb-2 sm:-mb-10 w-[724x] md:h-[300px] mt-4 mx-auto"
-						/>
-						<div className="flex justify-between items-end gap-2">
-							<div>
-								<span className="font-semibold">Lix File Manager</span>
-								<p className="mt-1">All your files under change control.</p>
+					<div className="card relative w-full group cursor-pointer">
+						<a href="/file-manager">
+							<img
+								src="/images/file-manager.svg"
+								alt="Simlified sketch of the lix file manager"
+								className="mb-2 sm:-mb-10 w-[724x] md:h-[300px] mt-4 mx-auto"
+							/>
+							<div className="flex justify-between items-end gap-2">
+								<div>
+									<span className="font-semibold">Lix File Manager</span>
+									<p className="mt-1">All your files under change control.</p>
+								</div>
+								<div className="absolute bottom-[14px] md:bottom-6 right-[14px] md:right-6 flex justify-center items-center w-10 h-10 rounded-full bg-white text-slate-500 transition-all ring-1 ring-slate-200 group-hover:text-cyan-500  group-hover:ring-cyan-500">
+									<div className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+										<IconArrowExternal />
+									</div>
+								</div>
 							</div>
-							<p className="w-fit whitespace-nowrap bg-white ring-1 ring-slate-200 px-4 py-2 rounded-full">
-								Coming soon
-							</p>
-						</div>
+						</a>
 					</div>
 
 					<div className="w-full my-12 md:my-16 relative flex items-center">
@@ -350,6 +345,6 @@ export default function Index() {
 				</div>
 			</main>
 			<Footer />
-		</div>
+		</>
 	)
 }

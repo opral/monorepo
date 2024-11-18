@@ -34,3 +34,8 @@ details[open] > summary::after {
 details summary::-webkit-details-marker {
   display: none;
 }
+
+.slanted {
+  -webkit-clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+}

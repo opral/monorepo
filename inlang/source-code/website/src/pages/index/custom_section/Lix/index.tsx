@@ -2,6 +2,7 @@ import { Show, type JSXElement } from "solid-js"
 import LixCard from "./Card.jsx"
 import * as m from "#src/paraglide/messages.js"
 import { Button } from "../../components/Button.jsx"
+import { LixBadge } from "#src/interface/components/Card.jsx"
 
 const LixSection = () => {
 	const data: Array<{
@@ -47,19 +48,17 @@ const LixSection = () => {
 
 	return (
 		<div id="lix" class="pt-12 md:pt-20 flex flex-col items-center pb-20">
-			<p class="bg-background px-4 py-1.5 rounded-full text-sm font-medium w-fit border shadow border-surface-300">
-				{/* TODO: link to https://lix.opral.com */}
-				{m.home_lix_tag()}
-			</p>
+			<div class="bg-background px-4 py-1.5 rounded-full text-sm font-medium w-fit border shadow border-surface-300 flex items-center gap-3">
+				<div class="w-5 text-primary">
+					<LixBadge />
+				</div>
+				<p>{m.home_lix_tag()}</p>
+			</div>
 			<h2 class="font-bold text-2xl md:text-4xl text-surface-900 text-center mt-5">
 				{m.home_lix_title()}
 			</h2>
 			<p class="text-center text-lg max-w-[600px] text-surface-500 pt-5">{m.home_lix_desc()}</p>
-			<Button
-				class="w-fit rounded-lg mt-5"
-				type="secondary"
-				href="https://lix.opral.com"
-			>
+			<Button class="w-fit rounded-lg mt-5" type="secondary" href="https://lix.opral.com">
 				{m.home_lix_button_text()}
 			</Button>
 			<div class="w-full flex justify-center">
