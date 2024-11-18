@@ -19,7 +19,7 @@ test("it should not detect changes if the csv did not update", async () => {
 	expect(detectedChanges).toEqual([]);
 });
 
-test("it should detect an insert", async () => {
+test("it should detect a new row with its cells", async () => {
 	const before = new TextEncoder().encode(
 		//
 		"Name,Age\nAnna,20\nPeter,50",
@@ -35,7 +35,12 @@ test("it should detect an insert", async () => {
 		after: { id: "random", path: "x.csv", data: after, metadata },
 	});
 
-	expect(detectedChanges).toEqual([
+	expect(detectedChanges).toStrictEqual([
+		{
+			entity_id: "Name|John",
+			schema: RowSchema,
+			snapshot: { lineNumber: 2 },
+		},
 		{
 			entity_id: "Name|John|Name",
 			schema: CellSchema,
@@ -46,7 +51,7 @@ test("it should detect an insert", async () => {
 			schema: CellSchema,
 			snapshot: { text: "30" },
 		},
-	] satisfies DetectedChange<typeof CellSchema>[]);
+	] satisfies DetectedChange<typeof CellSchema | typeof RowSchema>[]);
 });
 
 test("it should detect updates", async () => {
@@ -69,7 +74,7 @@ test("it should detect updates", async () => {
 	] satisfies DetectedChange<typeof CellSchema>[]);
 });
 
-test("it should detect a deletion", async () => {
+test("it should detect a deletion of a row and its cells", async () => {
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = new TextEncoder().encode("Name,Age\nAnna,20");
 
@@ -80,10 +85,11 @@ test("it should detect a deletion", async () => {
 		after: { id: "random", path: "x.csv", data: after, metadata },
 	});
 
-	expect(detectedChanges).toEqual([
+	expect(detectedChanges).toStrictEqual([
+		{ entity_id: "Name|Peter", schema: RowSchema, snapshot: undefined },
 		{ entity_id: "Name|Peter|Name", schema: CellSchema, snapshot: undefined },
 		{ entity_id: "Name|Peter|Age", schema: CellSchema, snapshot: undefined },
-	] satisfies DetectedChange<typeof CellSchema>[]);
+	] satisfies DetectedChange<typeof CellSchema | typeof RowSchema>[]);
 });
 
 // throwing an error leads to abysmal UX on potentially every save
@@ -106,7 +112,7 @@ test("it should return [] if the unique column is not set", async () => {
 // 1. if the entity id would remain identical, the change graph would be messed up
 // 2. if no new changes are reported after a column change, the initial state
 //    is not tracked
-test("changing the unique column should lead to a new entity_id to avoid bugs", async () => {
+test("changing the unique column should lead to a new cell entity_ids to avoid bugs", async () => {
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 
@@ -186,18 +192,12 @@ test("row order changes should be detected", async () => {
 		{
 			entity_id: "Name|Anna",
 			schema: RowSchema,
-			snapshot: {
-				rowIndex: 1,
-				rowEntities: ["Name|Anna|Name", "Name|Anna|Age"].sort(),
-			},
+			snapshot: { lineNumber: 1 },
 		},
 		{
 			entity_id: "Name|Peter",
 			schema: RowSchema,
-			snapshot: {
-				rowIndex: 0,
-				rowEntities: ["Name|Peter|Name", "Name|Peter|Age"].sort(),
-			},
+			snapshot: { lineNumber: 0 },
 		},
 	] satisfies DetectedChange<typeof RowSchema>[]);
 });

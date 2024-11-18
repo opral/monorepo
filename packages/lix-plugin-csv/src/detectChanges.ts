@@ -1,6 +1,8 @@
-import type { DetectedChange, LixFile, LixPlugin } from "@lix-js/sdk";
-import { parseCsv } from "./utilities/parseCsv.js";
+import type { DetectedChange, LixPlugin } from "@lix-js/sdk";
 import { CellSchema } from "./schemas/cell.js";
+import { HeaderSchema } from "./schemas/header.js";
+import { parseCsv } from "./utilities/parseCsv.js";
+import { RowSchema } from "./schemas/row.js";
 
 function toEntityId(rowId: string, columnName: string) {
 	// row id already is <unique column>|<unique value>
@@ -23,51 +25,56 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		return [];
 	}
 
-	const detectedChanges: DetectedChange<typeof CellSchema>[] = [];
+	const detectedChanges: DetectedChange<
+		typeof CellSchema | typeof HeaderSchema | typeof RowSchema
+	>[] = [];
 
-	const [beforeParsed] = parseCsv(before?.data, uniqueColumnBefore);
-	const [afterParsed] = parseCsv(after?.data, uniqueColumnAfter);
+	const beforeParsed = parseCsv(before?.data, uniqueColumnBefore);
+	const afterParsed = parseCsv(after?.data, uniqueColumnAfter);
 
-	// mark all rows as deleted and newly inserted
-	// if the unique column changed
-	if (uniqueColumnChanged(before, after)) {
-		for (const row_id in beforeParsed) {
-			for (const column in beforeParsed[row_id]) {
-				const entity_id = toEntityId(row_id, column);
-				// mark all cells as deleted
-				detectedChanges.push({
-					schema: CellSchema,
-					entity_id,
-					snapshot: undefined,
-				});
-			}
-		}
-		for (const row_id in afterParsed) {
-			// mark all columns as newly inserted
-			for (const column in afterParsed[row_id]) {
-				const entity_id = toEntityId(row_id, column);
-				// mark all cells as deleted
-				detectedChanges.push({
-					schema: CellSchema,
-					entity_id,
-					snapshot: { text: afterParsed[row_id]![column]! },
-				});
-			}
-		}
-		return detectedChanges;
+	const headerChanged = checkHeaderChange(
+		beforeParsed.header,
+		afterParsed.header,
+	);
+
+	if (headerChanged) {
+		detectedChanges.push({
+			schema: HeaderSchema,
+			entity_id: "header",
+			snapshot: {
+				columnNames: afterParsed.header,
+			},
+		});
 	}
 
+	// detect row and cell changes
+
 	const allRowIds = new Set([
-		...Object.keys(beforeParsed ?? {}),
-		...Object.keys(afterParsed ?? {}),
+		...Object.keys(beforeParsed.index),
+		...Object.keys(afterParsed.index),
 	]);
 
 	// Loop over all unique IDs and detect changes at the cell level
 	for (const rowId of allRowIds) {
-		const beforeRow = beforeParsed?.[rowId] ?? {};
-		const afterRow = afterParsed?.[rowId] ?? {};
+		const beforeRow = beforeParsed.index[rowId] ?? {};
+		const afterRow = afterParsed.index[rowId] ?? {};
 
-		// Gather all unique column names for this row
+		const rowLineNumberBefore = beforeParsed.lineNumbers[rowId];
+		const rowLineNumberAfter = afterParsed.lineNumbers[rowId];
+
+		if (rowLineNumberBefore !== rowLineNumberAfter) {
+			detectedChanges.push({
+				schema: RowSchema,
+				entity_id: rowId,
+				// if the row was deleted, snapshot is undefined
+				snapshot:
+					rowLineNumberAfter === undefined
+						? undefined
+						: { lineNumber: rowLineNumberAfter },
+			});
+		}
+
+		// Gather all column names for this row
 		const allColumns = new Set([
 			...Object.keys(beforeRow),
 			...Object.keys(afterRow),
@@ -111,12 +118,8 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	return detectedChanges;
 };
 
-function uniqueColumnChanged(before?: LixFile, after?: LixFile) {
-	return (
-		// both files have a unique column
-		before?.metadata?.unique_column &&
-		after?.metadata?.unique_column &&
-		// check if unique columns differ
-		before.metadata.unique_column !== after.metadata.unique_column
-	);
+function checkHeaderChange(before?: string[], after?: string[]) {
+	const beforeHeaderRow = before?.join(",");
+	const afterHeaderRow = after?.join(",");
+	return beforeHeaderRow !== afterHeaderRow;
 }

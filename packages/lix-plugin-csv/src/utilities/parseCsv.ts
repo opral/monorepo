@@ -19,40 +19,57 @@ import * as papaparse from "papaparse";
 export function parseCsv(
 	data: ArrayBuffer | undefined,
 	uniqueColumn: string,
-): [Record<string, Record<string, string>> | undefined, string[]] {
+): {
+	index: Record<string, Record<string, string>>;
+	lineNumbers: Record<string, number>;
+	header: string[];
+} {
 	const parsed = data
 		? papaparse.parse(new TextDecoder().decode(data), {
 				skipEmptyLines: true,
+				header: true,
 			})
 		: undefined;
 
-	const index: Record<string, Record<string, string>> = {};
-	const headerRow = parsed?.data?.[0] as string[];
-	if (!headerRow) {
-		return [undefined, headerRow];
-	}
-	const uniqueColumnIndex = headerRow.indexOf(uniqueColumn);
-	if (uniqueColumnIndex === undefined) {
-		return [undefined, headerRow];
-	}
-	let isHeaderRow = true;
-	for (const row of (parsed?.data as Array<string[]>) ?? []) {
-		// don't index the header row
-		if (isHeaderRow) {
-			isHeaderRow = false;
-			continue;
-		}
-		const uniqueValue = row[uniqueColumnIndex];
-		if (uniqueValue) {
-			const entity_id = `${uniqueColumn}|${uniqueValue}`;
+	const index = parsed?.data ? createIndex(parsed, uniqueColumn) : {};
 
-			for (const [columnI, value] of row.entries()) {
-				if (!index[entity_id]) {
-					index[entity_id] = {};
-				}
-				index[entity_id]![headerRow[columnI]!] = value;
+	const lineNumbers: Record<string, number> = {};
+
+	if (parsed?.data) {
+		for (const [i, row] of (
+			parsed?.data as Record<string, string>[]
+		).entries()) {
+			const uniqueValue = row[uniqueColumn];
+			if (uniqueValue) {
+				const entity_id = `${uniqueColumn}|${uniqueValue}`;
+				lineNumbers[entity_id] = i;
 			}
 		}
 	}
-	return [index, headerRow];
+
+	return { index, header: parsed?.meta.fields ?? [], lineNumbers };
+}
+
+/**
+ * Creates an index of the csv based on the row entity id.
+ *
+ * The index eases applying and deleting changes to the csv.
+ */
+function createIndex(parsed: papaparse.ParseResult<any>, uniqueColumn: string) {
+	const index: Record<string, Record<string, string>> = {};
+
+	for (const row of (parsed?.data as Record<string, string>[]) ?? []) {
+		const uniqueValue = row[uniqueColumn];
+		if (uniqueValue) {
+			const entity_id = `${uniqueColumn}|${uniqueValue}`;
+			for (const column in row) {
+				if (!index[entity_id]) {
+					index[entity_id] = {};
+				}
+				index[entity_id]![column] = row[column]!;
+			}
+		}
+	}
+
+	return index;
 }

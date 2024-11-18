@@ -6,10 +6,9 @@ export const RowSchema = {
 	schema: {
 		type: "object",
 		properties: {
-			rowIndex: { type: "number" },
-			rowEntities: { type: "array", items: { type: "string" } },
+			lineNumber: { type: "number" },
 		},
-		required: ["rowIndex", "rowEntities"],
+		required: ["lineNumber"],
 		additionalProperties: false,
 	},
 } as const satisfies ExperimentalChangeSchema;
