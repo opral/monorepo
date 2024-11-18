@@ -282,7 +282,7 @@ export default function FileManager() {
 					<div className="flex flex-col-reverse sm:grid sm:grid-cols-12 gap-8 sm:gap-4">
 						<div className="col-span-8 px-4 pt-4 sm:px-7 sm:pt-7 sm:mr-5 h-fit w-fit flex justify-center items-end bg-slate-100 rounded-lg ring-1 ring-slate-200 overflow-clip self-end">
 							<img
-								className="ring-1 ring-slate-200 rounded-lg md:rounded-b-none"
+								className="ring-1 ring-slate-200 rounded-t-lg"
 								src="/images/fm-automate.svg"
 								alt="File Manager Automate"
 							/>
