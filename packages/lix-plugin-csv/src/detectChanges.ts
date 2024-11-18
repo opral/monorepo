@@ -50,14 +50,14 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	// detect row and cell changes
 
 	const allRowIds = new Set([
-		...Object.keys(beforeParsed.index),
-		...Object.keys(afterParsed.index),
+		...beforeParsed.index.keys(),
+		...afterParsed.index.keys(),
 	]);
 
 	// Loop over all unique IDs and detect changes at the cell level
 	for (const rowId of allRowIds) {
-		const beforeRow = beforeParsed.index[rowId] ?? {};
-		const afterRow = afterParsed.index[rowId] ?? {};
+		const beforeRow = beforeParsed.index.get(rowId) ?? {};
+		const afterRow = afterParsed.index.get(rowId) ?? {};
 
 		const rowLineNumberBefore = beforeParsed.lineNumbers[rowId];
 		const rowLineNumberAfter = afterParsed.lineNumbers[rowId];

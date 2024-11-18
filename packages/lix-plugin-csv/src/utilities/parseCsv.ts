@@ -20,7 +20,7 @@ export function parseCsv(
 	data: ArrayBuffer | undefined,
 	uniqueColumn: string,
 ): {
-	index: Record<string, Record<string, string>>;
+	index: Map<string, Record<string, string>>;
 	lineNumbers: Record<string, number>;
 	header: string[];
 } {
@@ -31,7 +31,7 @@ export function parseCsv(
 			})
 		: undefined;
 
-	const index = parsed?.data ? createIndex(parsed, uniqueColumn) : {};
+	const index = parsed?.data ? createIndex(parsed, uniqueColumn) : new Map();
 
 	const lineNumbers: Record<string, number> = {};
 
@@ -56,17 +56,15 @@ export function parseCsv(
  * The index eases applying and deleting changes to the csv.
  */
 function createIndex(parsed: papaparse.ParseResult<any>, uniqueColumn: string) {
-	const index: Record<string, Record<string, string>> = {};
+	const index = new Map<string, Record<string, string>>();
 
 	for (const row of (parsed?.data as Record<string, string>[]) ?? []) {
 		const uniqueValue = row[uniqueColumn];
 		if (uniqueValue) {
 			const entity_id = `${uniqueColumn}|${uniqueValue}`;
 			for (const column in row) {
-				if (!index[entity_id]) {
-					index[entity_id] = {};
-				}
-				index[entity_id]![column] = row[column]!;
+				const value = index.get(entity_id) ?? {};
+				index.set(entity_id, { ...value, [column]: row[column]! });
 			}
 		}
 	}

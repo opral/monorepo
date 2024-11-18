@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { applyChanges } from "./applyChanges.js";
 import { mockChanges } from "./utilities/mockChanges.js";
 
-test("it should apply an insert change", async () => {
+test("it applies an insert change", async () => {
 	const before = new TextEncoder().encode(
 		//
 		"Name,Age\nAnna,20\nPeter,50",
@@ -31,7 +31,7 @@ test("it should apply an insert change", async () => {
 	expect(applied).toEqual(after);
 });
 
-test("it should apply an update change", async () => {
+test("it applies an update change", async () => {
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = new TextEncoder().encode("Name,Age\nAnna,21\nPeter,50");
 
@@ -53,7 +53,7 @@ test("it should apply an update change", async () => {
 	);
 });
 
-test("it should apply a delete change", async () => {
+test("it applies a delete change", async () => {
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = new TextEncoder().encode("Name,Age\nAnna,20");
 
@@ -70,4 +70,30 @@ test("it should apply a delete change", async () => {
 		lix,
 	});
 	expect(applied).toEqual(after);
+});
+
+test("it applies a row order change", async () => {
+	const initial = new TextEncoder().encode(
+		//
+		"Name,Age\nAnna,20\nPeter,50\nJohn,30",
+	);
+	const update0 = new TextEncoder().encode(
+		// john has been moved to the top
+		"Name,Age\nJohn,30\nPeter,50\nAnna,20",
+	);
+
+	const metadata = { unique_column: "Name" };
+
+	const { lix, changes } = await mockChanges({
+		file: { id: "mock", path: "mock", metadata },
+		fileUpdates: [initial, update0],
+	});
+
+	const { fileData: applied } = await applyChanges({
+		file: { id: "mock", path: "mock", data: initial, metadata },
+		changes,
+		lix,
+	});
+
+	expect(applied).toEqual(update0);
 });
