@@ -16,42 +16,42 @@ import type { SqlBool } from "kysely";
 export function changeIsLowestCommonAncestorOf(changes: Pick<Change, "id">[]) {
 	return sql`
     change.id IN (
-      -- Start by getting all ancestors for the given changes
-      -- (can be optimized later to early exit if a common ancestor is found)
-      WITH RECURSIVE all_ancestors(change_id, ancestor_id) AS (
-        SELECT child_id as change_id, parent_id as ancestor_id
-        FROM change_edge
-        WHERE change_id IN (${sql.join(changes.map((c) => c.id))})
+      -- Recursive CTE to find ancestors level by level
+      WITH RECURSIVE step_ancestors(ancestor_id, originating_change, depth) AS (
+        -- Base case: Start with the input changes themselves
+        SELECT 
+          id AS ancestor_id, 
+          id AS originating_change, 
+          0 AS depth
+        FROM change
+        WHERE id IN (${sql.join(changes.map((c) => c.id))})
+
         UNION ALL
-        SELECT all_ancestors.change_id, change_edge.parent_id AS ancestor_id
+
+        -- Recursive step: Find the parents of the current ancestors
+        SELECT 
+          change_edge.parent_id AS ancestor_id, 
+          step_ancestors.originating_change, 
+          step_ancestors.depth + 1 AS depth
         FROM change_edge
-        INNER JOIN all_ancestors ON all_ancestors.ancestor_id = change_edge.child_id
+        INNER JOIN step_ancestors 
+          ON change_edge.child_id = step_ancestors.ancestor_id
       ),
-      -- the lowest common ancestor will have a change count equal 
-      -- to the number of changes that have been provided 
-      ancestor_counts(ancestor_id, count) AS (
-        SELECT ancestor_id, COUNT(DISTINCT change_id) AS count
-        FROM all_ancestors
+      -- Aggregate ancestors to find the first common one
+      common_ancestors AS (
+        SELECT 
+          ancestor_id, 
+          COUNT(DISTINCT originating_change) AS change_count, -- Count distinct input changes contributing to each ancestor
+          MIN(depth) AS min_depth -- The closest (lowest) ancestor has the smallest depth
+        FROM step_ancestors
         GROUP BY ancestor_id
-        HAVING COUNT(DISTINCT change_id) = ${changes.length} -- Only include ancestors common to all changes
+        HAVING COUNT(DISTINCT originating_change) = ${changes.length} -- Only include ancestors shared by all input changes
       )
-      -- Select the LCA
+      -- Select the lowest common ancestor
       SELECT ancestor_id
-      FROM ancestor_counts
-      -- filter common ancestors that are not the lowest common ancestor
-      -- by checking if the ancestor is not a child of another ancestor
-      WHERE ancestor_id NOT IN (
-        SELECT change_edge.child_id
-        FROM change_edge
-        INNER JOIN ancestor_counts ON ancestor_counts.ancestor_id = change_edge.parent_id
-      )
-      -- Direct parent check: include changes that are a direct parent of all other changes
-      UNION ALL
-      SELECT parent_id
-      FROM change_edge
-      WHERE parent_id IN (${sql.join(changes.map((c) => c.id))})
-      GROUP BY parent_id
-      HAVING COUNT(DISTINCT child_id) = ${changes.length - 1} -- -1 because one change must be parent of all other changes
+      FROM common_ancestors
+      ORDER BY min_depth ASC, ancestor_id ASC -- Prioritize closest ancestor, tie-break by ID
+      LIMIT 1 -- Return only the lowest common ancestor
     )
   ` as unknown as ExpressionWrapper<LixDatabaseSchema, "change", SqlBool>;
 }

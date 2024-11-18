@@ -1,14 +1,14 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { changeIsLowestCommonAncestorOf } from "./change-is-lowest-common-ancestor-of.js";
-import type { NewChange } from "../database/schema.js";
+import type { NewChange, NewChangeGraphEdge } from "../database/schema.js";
 
-test("it should find the common parent of multiple changes recursively", async () => {
+test("it find the lowest common ancestor", async () => {
 	const lix = await openLixInMemory({});
 
 	const mockChanges = [
 		{
-			id: "common",
+			id: "0",
 			entity_id: "value1",
 			file_id: "mock",
 			plugin_key: "mock",
@@ -18,8 +18,8 @@ test("it should find the common parent of multiple changes recursively", async (
 		},
 		{
 			id: "1",
-			entity_id: "value1",
 			file_id: "mock",
+			entity_id: "value1",
 			plugin_key: "mock",
 			schema_key: "mock",
 			created_at: "mock",
@@ -44,9 +44,18 @@ test("it should find the common parent of multiple changes recursively", async (
 			snapshot_id: "no-content",
 		},
 		{
-			id: "4",
-			file_id: "mock",
+			id: "common",
 			entity_id: "value1",
+			file_id: "mock",
+			plugin_key: "mock",
+			schema_key: "mock",
+			created_at: "mock",
+			snapshot_id: "no-content",
+		},
+		{
+			id: "lowest-common",
+			entity_id: "value1",
+			file_id: "mock",
 			plugin_key: "mock",
 			schema_key: "mock",
 			created_at: "mock",
@@ -55,23 +64,28 @@ test("it should find the common parent of multiple changes recursively", async (
 	] as const satisfies NewChange[];
 
 	const edges = [
-		{ parent_id: "common", child_id: "1" },
-		{ parent_id: "common", child_id: "2" },
+		{ parent_id: "common", child_id: "lowest-common" },
+		{ parent_id: "lowest-common", child_id: "0" },
+		{ parent_id: "lowest-common", child_id: "1" },
+		{ parent_id: "0", child_id: "2" },
 		{ parent_id: "1", child_id: "3" },
-		{ parent_id: "2", child_id: "4" },
-	];
+	] satisfies NewChangeGraphEdge[];
 
 	await lix.db.insertInto("change").values(mockChanges).execute();
 	await lix.db.insertInto("change_edge").values(edges).execute();
 
-	const lcaChanges = await lix.db
-		.selectFrom("change")
-		.where(changeIsLowestCommonAncestorOf([mockChanges[3], mockChanges[4]]))
-		.selectAll()
-		.execute();
+	// expect(commonAncestors).toHaveLength(2);
+	// expect(commonAncestors.map((a) => a.id)).toEqual(
+	// 	expect.arrayContaining(["lowest-common", "common"]),
+	// );
 
-	expect(lcaChanges).toHaveLength(1);
-	expect(lcaChanges[0]?.id).toBe("common");
+	const lowestCommonAncestor = await lix.db
+		.selectFrom("change")
+		.where(changeIsLowestCommonAncestorOf([mockChanges[2], mockChanges[3]]))
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(lowestCommonAncestor?.id).toBe("lowest-common");
 });
 
 test("it should return no results if no common parent exists", async () => {
@@ -110,13 +124,13 @@ test("it should return no results if no common parent exists", async () => {
 		.values([{ parent_id: "0", child_id: "1" }])
 		.execute();
 
-	const lcaChanges = await lix.db
+	const commonAncestors = await lix.db
 		.selectFrom("change")
 		.where(changeIsLowestCommonAncestorOf([mockChanges[1], mockChanges[2]]))
 		.selectAll()
 		.execute();
 
-	expect(lcaChanges).toHaveLength(0);
+	expect(commonAncestors).toHaveLength(0);
 });
 
 test("it should succeed if one of the given changes is the common ancestor", async () => {
@@ -148,12 +162,12 @@ test("it should succeed if one of the given changes is the common ancestor", asy
 	await lix.db.insertInto("change").values(mockChanges).execute();
 	await lix.db.insertInto("change_edge").values(edges).execute();
 
-	const lcaChanges = await lix.db
+	const commonAncestors = await lix.db
 		.selectFrom("change")
 		.where(changeIsLowestCommonAncestorOf([mockChanges[0], mockChanges[1]]))
 		.selectAll()
 		.execute();
 
-	expect(lcaChanges).toHaveLength(1);
-	expect(lcaChanges[0]?.id).toBe("0");
+	expect(commonAncestors).toHaveLength(1);
+	expect(commonAncestors[0]?.id).toBe("0");
 });
