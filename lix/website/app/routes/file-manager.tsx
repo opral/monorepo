@@ -242,7 +242,7 @@ export default function FileManager() {
 								))}
 							</div>
 						</div>
-						<div className="col-span-7 pr-5 sm:pr-8 pt-5 sm:pt-7 h-fit self-end bg-slate-100 rounded-lg ring-1 ring-slate-200 overflow-clip flex items-end">
+						<div className="col-span-7 pr-4 sm:pr-8 pt-4 sm:pt-7 h-fit self-end bg-slate-100 rounded-lg ring-1 ring-slate-200 overflow-clip flex items-end">
 							<img
 								className="ring-1 ring-slate-200 rounded-tr-lg"
 								src="/images/fm-create.svg"
@@ -254,17 +254,19 @@ export default function FileManager() {
 					<div>
 						<h2 className="text-center w-full">Effortless Collaboration</h2>
 						<p className="text-center mt-4">Sync, share, and succeed together.</p>
-						<div className="my-8 pt-5 sm:pt-7 sm:px-8 flex flex-col sm:flex-row justify-center items-end gap-5 sm:gap-4 bg-slate-100 rounded-lg ring-1 ring-slate-200">
-							<img
-								className="ring-1 ring-slate-200 rounded-r-lg sm:rounded-t-lg sm:rounded-br-none mr-auto"
-								src="/images/fm-collaborate-1.svg"
-								alt="File Manager Automate"
-							/>
-							<img
-								className="ring-1 ring-slate-200 rounded-l-lg sm:rounded-t-lg sm:rounded-bl-none ml-auto mb-5 sm:mb-0"
-								src="/images/fm-collaborate-2.svg"
-								alt="File Manager Automate"
-							/>
+						<div className="my-8 pt-4 sm:pt-7 px-4 sm:px-8 bg-slate-100 rounded-lg ring-1 ring-slate-200 overflow-x-auto flex justify-center pr-4">
+							<div className="flex gap-5 sm:gap-4">
+								<img
+									className="ring-1 ring-slate-200 rounded-t-lg sm:rounded-br-none"
+									src="/images/fm-collaborate-1.svg"
+									alt="File Manager Automate"
+								/>
+								<img
+									className="ring-1 ring-slate-200 rounded-t-lg sm:rounded-bl-none"
+									src="/images/fm-collaborate-2.svg"
+									alt="File Manager Automate"
+								/>
+							</div>
 						</div>
 						<div className="grid sm:grid-cols-3 gap-8 sm:gap-4">
 							{collaborationFeatures.map((feature, index) => (
@@ -278,7 +280,7 @@ export default function FileManager() {
 					</div>
 
 					<div className="flex flex-col-reverse sm:grid sm:grid-cols-12 gap-8 sm:gap-4">
-						<div className="col-span-8 sm:mr-4 md:mr-0 md:col-span-7 py-5 sm:py-7 md:pb-0 h-fit flex justify-center items-end bg-slate-100 rounded-lg ring-1 ring-slate-200 overflow-clip self-end">
+						<div className="col-span-8 px-4 pt-4 sm:px-7 sm:pt-7 sm:mr-5 h-fit w-fit flex justify-center items-end bg-slate-100 rounded-lg ring-1 ring-slate-200 overflow-clip self-end">
 							<img
 								className="ring-1 ring-slate-200 rounded-lg md:rounded-b-none"
 								src="/images/fm-automate.svg"
