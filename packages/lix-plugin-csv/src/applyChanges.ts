@@ -1,7 +1,7 @@
 import { type Change, type LixPlugin } from "@lix-js/sdk";
 import papaparse from "papaparse";
 import { parseCsv } from "./utilities/parseCsv.js";
-import { CellSchema } from "./schemas/cell.js";
+import { CellSchemaV1 } from "./schemas/cell.js";
 
 export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	lix,
@@ -28,7 +28,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 			rowOrderChanges.push(change);
 		}
 
-		if (change.schema_key === CellSchema.key) {
+		if (change.schema_key === CellSchemaV1.key) {
 			const snapshot = await lix.db
 				.selectFrom("snapshot")
 				.where("id", "=", change.snapshot_id)

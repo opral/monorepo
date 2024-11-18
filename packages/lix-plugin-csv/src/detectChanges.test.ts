@@ -1,9 +1,9 @@
 import { expect, test } from "vitest";
 import { detectChanges } from "./detectChanges.js";
 import type { DetectedChange } from "@lix-js/sdk";
-import { CellSchema } from "./schemas/cell.js";
-import { HeaderSchema } from "./schemas/header.js";
-import { RowSchema } from "./schemas/row.js";
+import { CellSchemaV1 } from "./schemas/cell.js";
+import { HeaderSchemaV1 } from "./schemas/header.js";
+import { RowSchemaV1 } from "./schemas/row.js";
 
 test("it should not detect changes if the csv did not update", async () => {
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
@@ -38,20 +38,20 @@ test("it should detect a new row with its cells", async () => {
 	expect(detectedChanges).toStrictEqual([
 		{
 			entity_id: "Name|John",
-			schema: RowSchema,
+			schema: RowSchemaV1,
 			snapshot: { lineNumber: 2 },
 		},
 		{
 			entity_id: "Name|John|Name",
-			schema: CellSchema,
+			schema: CellSchemaV1,
 			snapshot: { text: "John" },
 		},
 		{
 			entity_id: "Name|John|Age",
-			schema: CellSchema,
+			schema: CellSchemaV1,
 			snapshot: { text: "30" },
 		},
-	] satisfies DetectedChange<typeof CellSchema | typeof RowSchema>[]);
+	] satisfies DetectedChange<typeof CellSchemaV1 | typeof RowSchemaV1>[]);
 });
 
 test("it should detect updates", async () => {
@@ -67,11 +67,11 @@ test("it should detect updates", async () => {
 
 	expect(detectedChanges).toEqual([
 		{
-			schema: CellSchema,
+			schema: CellSchemaV1,
 			entity_id: "Name|Anna|Age",
 			snapshot: { text: "21" },
 		},
-	] satisfies DetectedChange<typeof CellSchema>[]);
+	] satisfies DetectedChange<typeof CellSchemaV1>[]);
 });
 
 test("it should detect a deletion of a row and its cells", async () => {
@@ -86,10 +86,10 @@ test("it should detect a deletion of a row and its cells", async () => {
 	});
 
 	expect(detectedChanges).toStrictEqual([
-		{ entity_id: "Name|Peter", schema: RowSchema, snapshot: undefined },
-		{ entity_id: "Name|Peter|Name", schema: CellSchema, snapshot: undefined },
-		{ entity_id: "Name|Peter|Age", schema: CellSchema, snapshot: undefined },
-	] satisfies DetectedChange<typeof CellSchema | typeof RowSchema>[]);
+		{ entity_id: "Name|Peter", schema: RowSchemaV1, snapshot: undefined },
+		{ entity_id: "Name|Peter|Name", schema: CellSchemaV1, snapshot: undefined },
+		{ entity_id: "Name|Peter|Age", schema: CellSchemaV1, snapshot: undefined },
+	] satisfies DetectedChange<typeof CellSchemaV1 | typeof RowSchemaV1>[]);
 });
 
 // throwing an error leads to abysmal UX on potentially every save
@@ -127,26 +127,46 @@ test("changing the unique column should lead to a new cell entity_ids to avoid b
 	expect(detectedChanges).toEqual(
 		expect.arrayContaining([
 			// detect the deletion of the old unique column
-			{ entity_id: "Name|Anna|Name", schema: CellSchema, snapshot: undefined },
-			{ entity_id: "Name|Anna|Age", schema: CellSchema, snapshot: undefined },
-			{ entity_id: "Name|Peter|Name", schema: CellSchema, snapshot: undefined },
-			{ entity_id: "Name|Peter|Age", schema: CellSchema, snapshot: undefined },
+			{
+				entity_id: "Name|Anna|Name",
+				schema: CellSchemaV1,
+				snapshot: undefined,
+			},
+			{ entity_id: "Name|Anna|Age", schema: CellSchemaV1, snapshot: undefined },
+			{
+				entity_id: "Name|Peter|Name",
+				schema: CellSchemaV1,
+				snapshot: undefined,
+			},
+			{
+				entity_id: "Name|Peter|Age",
+				schema: CellSchemaV1,
+				snapshot: undefined,
+			},
 			// detect the insertion of the new unique column
 
 			{
 				entity_id: "Age|50|Name",
-				schema: CellSchema,
+				schema: CellSchemaV1,
 				snapshot: { text: "Peter" },
 			},
-			{ entity_id: "Age|50|Age", schema: CellSchema, snapshot: { text: "50" } },
+			{
+				entity_id: "Age|50|Age",
+				schema: CellSchemaV1,
+				snapshot: { text: "50" },
+			},
 
 			{
 				entity_id: "Age|20|Name",
-				schema: CellSchema,
+				schema: CellSchemaV1,
 				snapshot: { text: "Anna" },
 			},
-			{ entity_id: "Age|20|Age", schema: CellSchema, snapshot: { text: "20" } },
-		] satisfies DetectedChange<typeof CellSchema>[]),
+			{
+				entity_id: "Age|20|Age",
+				schema: CellSchemaV1,
+				snapshot: { text: "20" },
+			},
+		] satisfies DetectedChange<typeof CellSchemaV1>[]),
 	);
 });
 
@@ -167,12 +187,12 @@ test("changing the header order should result in a change", async () => {
 	expect(detectedChanges).toEqual([
 		{
 			entity_id: "header",
-			schema: HeaderSchema,
+			schema: HeaderSchemaV1,
 			snapshot: {
 				columnNames: ["Age", "Name"],
 			},
 		},
-	] satisfies DetectedChange<typeof HeaderSchema>[]);
+	] satisfies DetectedChange<typeof HeaderSchemaV1>[]);
 });
 
 test("row order changes should be detected", async () => {
@@ -191,13 +211,13 @@ test("row order changes should be detected", async () => {
 	expect(detectedChanges).toEqual([
 		{
 			entity_id: "Name|Anna",
-			schema: RowSchema,
+			schema: RowSchemaV1,
 			snapshot: { lineNumber: 1 },
 		},
 		{
 			entity_id: "Name|Peter",
-			schema: RowSchema,
+			schema: RowSchemaV1,
 			snapshot: { lineNumber: 0 },
 		},
-	] satisfies DetectedChange<typeof RowSchema>[]);
+	] satisfies DetectedChange<typeof RowSchemaV1>[]);
 });

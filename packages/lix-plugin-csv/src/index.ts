@@ -9,4 +9,6 @@ export const plugin: LixPlugin = {
 	applyChanges,
 };
 
-export { CellSchema } from "./schemas/cell.js";
+export { CellSchemaV1 } from "./schemas/cell.js";
+export { HeaderSchemaV1 } from "./schemas/header.js";
+export { RowSchemaV1 } from "./schemas/row.js";

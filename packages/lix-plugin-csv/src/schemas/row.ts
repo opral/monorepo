@@ -1,7 +1,7 @@
 import type { ExperimentalChangeSchema } from "@lix-js/sdk";
 
-export const RowSchema = {
-	key: "lix-plugin-csv-v2" + "-row",
+export const RowSchemaV1 = {
+	key: "lix-plugin-csv" + "-row-v1",
 	type: "json",
 	schema: {
 		type: "object",
