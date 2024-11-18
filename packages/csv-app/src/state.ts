@@ -1,6 +1,6 @@
 import { Version, openLixInMemory } from "@lix-js/sdk";
 import { atom } from "jotai";
-import { plugin as csvPluginV2 } from "@lix-js/plugin-csv-column-based";
+import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
 
@@ -33,7 +33,7 @@ export const lixAtom = atom(async () => {
 	const isNewLix = file.size === 0;
 	const lix = await openLixInMemory({
 		blob: isNewLix ? await lixCsvDemoFile() : file,
-		providePlugins: [csvPluginV2],
+		providePlugins: [csvPlugin],
 	});
 
 	// * naive set interval leads to bugs.

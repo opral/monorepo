@@ -1,5 +1,5 @@
 import { changeQueueSettled, newLixFile, openLixInMemory } from "@lix-js/sdk";
-import { plugin as pluginV2 } from "@lix-js/plugin-csv-column-based";
+import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import emailNewsletterCsv from "./email-newsletter.csv?raw";
 import captableCsv from "./cap-table.csv?raw";
 import minimalCsv from "./minimal.csv?raw";
@@ -14,7 +14,7 @@ export const DEMO_FILE_IDS = [
 export async function lixCsvDemoFile(): Promise<Blob> {
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
-		providePlugins: [pluginV2],
+		providePlugins: [csvPlugin],
 	});
 
 	if (!import.meta.env.PROD) {
