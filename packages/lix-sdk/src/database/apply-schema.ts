@@ -9,7 +9,8 @@ export async function applySchema(args: {
 	return args.sqlite.exec`
 
   PRAGMA foreign_keys = ON;
-
+  PRAGMA auto_vacuum = 2; -- incremental https://www.sqlite.org/pragma.html#pragma_auto_vacuum
+ 
   -- file
 
   CREATE TABLE IF NOT EXISTS file (
