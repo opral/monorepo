@@ -3,7 +3,7 @@ import { openLixInMemory } from "./open-lix-in-memory.js";
 import { newLixFile } from "./new-lix.js";
 import { merge } from "./merge.js";
 import type {
-	ChangeGraphEdge,
+	ChangeEdge,
 	NewChange,
 	NewSnapshot,
 	Snapshot,
@@ -49,7 +49,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		},
 	];
 
-	const mockEdges: ChangeGraphEdge[] = [{ parent_id: "2", child_id: "3" }];
+	const mockEdges: ChangeEdge[] = [{ parent_id: "2", child_id: "3" }];
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
@@ -373,7 +373,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 		},
 	];
 
-	const edges: ChangeGraphEdge[] = [{ parent_id: "1", child_id: "2" }];
+	const edges: ChangeEdge[] = [{ parent_id: "1", child_id: "2" }];
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",

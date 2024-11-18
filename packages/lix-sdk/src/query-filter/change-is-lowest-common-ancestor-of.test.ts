@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { changeIsLowestCommonAncestorOf } from "./change-is-lowest-common-ancestor-of.js";
-import type { NewChange, NewChangeGraphEdge } from "../database/schema.js";
+import type { NewChange, NewChangeEdge } from "../database/schema.js";
 
 test("it find the lowest common ancestor", async () => {
 	const lix = await openLixInMemory({});
@@ -69,7 +69,7 @@ test("it find the lowest common ancestor", async () => {
 		{ parent_id: "lowest-common", child_id: "1" },
 		{ parent_id: "0", child_id: "2" },
 		{ parent_id: "1", child_id: "3" },
-	] satisfies NewChangeGraphEdge[];
+	] satisfies NewChangeEdge[];
 
 	await lix.db.insertInto("change").values(mockChanges).execute();
 	await lix.db.insertInto("change_edge").values(edges).execute();

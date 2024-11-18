@@ -81,8 +81,8 @@ type ChangeTable = {
 	created_at: Generated<string>;
 };
 
-export type ChangeGraphEdge = Selectable<ChangeEdgeTable>;
-export type NewChangeGraphEdge = Insertable<ChangeEdgeTable>;
+export type ChangeEdge = Selectable<ChangeEdgeTable>;
+export type NewChangeEdge = Insertable<ChangeEdgeTable>;
 type ChangeEdgeTable = {
 	parent_id: string;
 	child_id: string;

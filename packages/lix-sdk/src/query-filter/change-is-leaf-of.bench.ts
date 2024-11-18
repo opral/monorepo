@@ -5,7 +5,7 @@ import {
 	newLixFile,
 	openLixInMemory,
 	type Change,
-	type ChangeGraphEdge,
+	type ChangeEdge,
 	type NewChange,
 	type NewSnapshot,
 } from "../index.js";
@@ -15,7 +15,7 @@ const createChange = (
 	schema_key: "bundle" | "message" | "variant",
 	payload: any,
 	parentChangeId: string | null,
-): { change: NewChange; snapshot: NewSnapshot; edges: ChangeGraphEdge[] } => {
+): { change: NewChange; snapshot: NewSnapshot; edges: ChangeEdge[] } => {
 	const entityId = payload[schema_key].id;
 	const snapshotId = v7();
 	const snapshot: NewSnapshot = {
@@ -32,7 +32,7 @@ const createChange = (
 		created_at: "",
 	};
 
-	const edges: ChangeGraphEdge[] = [];
+	const edges: ChangeEdge[] = [];
 
 	if (parentChangeId) {
 		edges.push({
@@ -56,7 +56,7 @@ const setupLix = async (nMessages: number) => {
 	const mockChanges: {
 		change: NewChange;
 		snapshot: NewSnapshot;
-		edges: ChangeGraphEdge[];
+		edges: ChangeEdge[];
 	}[] = [];
 
 	for (let i = 0; i < nMessages; i++) {

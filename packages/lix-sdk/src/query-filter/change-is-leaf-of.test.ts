@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { changeIsLeafOf } from "./change-is-leaf-of.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import type { Change, ChangeGraphEdge } from "../database/schema.js";
+import type { Change, ChangeEdge } from "../database/schema.js";
 import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 
 test("it should find the latest child of a given change", async () => {
@@ -43,7 +43,7 @@ test("it should find the latest child of a given change", async () => {
 		},
 	] as const satisfies Change[];
 
-	const edges: ChangeGraphEdge[] = [
+	const edges: ChangeEdge[] = [
 		{ parent_id: "1", child_id: "2" },
 		{ parent_id: "2", child_id: "3" },
 	];
