@@ -1,6 +1,6 @@
 import type { DetectedChange, LixFile, LixPlugin } from "@lix-js/sdk";
 import { parseCsv } from "./utilities/parseCsv.js";
-import { CellSchema } from "./schemas/cellSchema.js";
+import { CellSchema } from "./schemas/cell.js";
 
 function toEntityId(rowId: string, columnName: string) {
 	// row id already is <unique column>|<unique value>

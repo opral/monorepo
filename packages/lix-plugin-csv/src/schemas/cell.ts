@@ -1,4 +1,9 @@
-import type { ExperimentalChangeSchema } from "@lix-js/sdk";
+import type {
+	ExperimentalChangeSchema,
+	ExperimentalInferType,
+} from "@lix-js/sdk";
+
+export type Cell = ExperimentalInferType<typeof CellSchema>;
 
 export const CellSchema = {
 	key: "lix-plugin-csv-v2" + "-cell",
@@ -9,5 +14,6 @@ export const CellSchema = {
 			text: { type: "string" },
 		},
 		required: ["text"],
+		additionalProperties: false,
 	},
 } as const satisfies ExperimentalChangeSchema;

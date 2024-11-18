@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { detectChanges } from "./detectChanges.js";
 import type { DetectedChange } from "@lix-js/sdk";
-import { CellSchema } from "./schemas/cellSchema.js";
+import { CellSchema } from "./schemas/cell.js";
 
 test("it should not detect changes if the csv did not update", async () => {
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
