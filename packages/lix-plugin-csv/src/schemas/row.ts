@@ -1,9 +1,4 @@
-import type {
-	ExperimentalChangeSchema,
-	ExperimentalInferType,
-} from "@lix-js/sdk";
-
-export type Row = ExperimentalInferType<typeof RowSchema>;
+import type { ExperimentalChangeSchema } from "@lix-js/sdk";
 
 export const RowSchema = {
 	key: "lix-plugin-csv-v2" + "-row",

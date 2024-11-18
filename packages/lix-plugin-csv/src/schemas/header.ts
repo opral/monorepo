@@ -1,9 +1,4 @@
-import type {
-	ExperimentalChangeSchema,
-	ExperimentalInferType,
-} from "@lix-js/sdk";
-
-export type Header = ExperimentalInferType<typeof HeaderSchema>;
+import type { ExperimentalChangeSchema } from "@lix-js/sdk";
 
 export const HeaderSchema = {
 	key: "lix-plugin-csv-v2" + "-header",
@@ -11,9 +6,9 @@ export const HeaderSchema = {
 	schema: {
 		type: "object",
 		properties: {
-			fields: { type: "string" },
+			columnNames: { type: "array", items: { type: "string" } },
 		},
-		required: ["text"],
+		required: ["columnNames"],
 		additionalProperties: false,
 	},
 } as const satisfies ExperimentalChangeSchema;
