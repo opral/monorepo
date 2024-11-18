@@ -257,12 +257,12 @@ export default function FileManager() {
 						<div className="my-8 pt-4 sm:pt-7 px-4 sm:px-8 bg-slate-100 rounded-lg ring-1 ring-slate-200 overflow-x-auto flex justify-center pr-4">
 							<div className="flex gap-5 sm:gap-4">
 								<img
-									className="ring-1 ring-slate-200 rounded-t-lg sm:rounded-br-none"
+									className="ring-1 ring-slate-200 rounded-t-lg sm:rounded-br-none h-[300px] sm:h-[359px]"
 									src="/images/fm-collaborate-1.svg"
 									alt="File Manager Automate"
 								/>
 								<img
-									className="ring-1 ring-slate-200 rounded-t-lg sm:rounded-bl-none"
+									className="ring-1 ring-slate-200 rounded-t-lg sm:rounded-bl-none h-[300px] sm:h-[359px]"
 									src="/images/fm-collaborate-2.svg"
 									alt="File Manager Automate"
 								/>
