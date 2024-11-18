@@ -3450,40 +3450,6 @@ importers:
         specifier: ^2.0.5
         version: 2.1.3(@types/node@22.7.7)(@vitest/browser@2.1.3)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.6.3))(terser@5.36.0)
 
-  packages/lix-plugin-csv-column-based:
-    dependencies:
-      '@lix-js/sdk':
-        specifier: workspace:*
-        version: link:../lix-sdk
-      papaparse:
-        specifier: ^5.4.1
-        version: 5.4.1
-    devDependencies:
-      '@eslint/js':
-        specifier: ^9.12.0
-        version: 9.13.0
-      '@types/papaparse':
-        specifier: ^5.3.14
-        version: 5.3.15
-      '@vitest/coverage-v8':
-        specifier: ^2.0.5
-        version: 2.0.5(vitest@2.1.3(@types/node@22.7.7)(@vitest/browser@2.1.3)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.6.3))(terser@5.36.0))
-      eslint:
-        specifier: ^9.12.0
-        version: 9.13.0(jiti@2.3.3)
-      prettier:
-        specifier: ^3.3.3
-        version: 3.3.3
-      typescript:
-        specifier: ^5.5.4
-        version: 5.6.3
-      typescript-eslint:
-        specifier: ^8.9.0
-        version: 8.10.0(eslint@9.13.0(jiti@2.3.3))(typescript@5.6.3)
-      vitest:
-        specifier: ^2.0.5
-        version: 2.1.3(@types/node@22.7.7)(@vitest/browser@2.1.3)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.6.3))(terser@5.36.0)
-
   packages/lix-sdk:
     dependencies:
       dedent:
@@ -20563,21 +20529,6 @@ snapshots:
       - typescript
       - verdaccio
 
-  '@nrwl/js@18.3.5(@babel/traverse@7.25.7)(@types/node@20.16.13)(nx@18.3.5)(typescript@5.6.3)':
-    dependencies:
-      '@nx/js': 18.3.5(@babel/traverse@7.25.7)(@types/node@20.16.13)(nx@18.3.5)(typescript@5.6.3)
-    transitivePeerDependencies:
-      - '@babel/traverse'
-      - '@swc-node/register'
-      - '@swc/core'
-      - '@swc/wasm'
-      - '@types/node'
-      - debug
-      - nx
-      - supports-color
-      - typescript
-      - verdaccio
-
   '@nrwl/js@18.3.5(@babel/traverse@7.25.7)(@types/node@22.7.7)(nx@20.0.3)(typescript@5.4.5)':
     dependencies:
       '@nx/js': 18.3.5(@babel/traverse@7.25.7)(@types/node@22.7.7)(nx@20.0.3)(typescript@5.4.5)
@@ -20878,7 +20829,7 @@ snapshots:
       '@babel/preset-env': 7.25.8(@babel/core@7.25.8)
       '@babel/preset-typescript': 7.25.7(@babel/core@7.25.8)
       '@babel/runtime': 7.25.7
-      '@nrwl/js': 18.3.5(@babel/traverse@7.25.7)(@types/node@20.16.13)(nx@18.3.5)(typescript@5.6.3)
+      '@nrwl/js': 18.3.5(@babel/traverse@7.25.7)(@types/node@20.16.13)(nx@18.3.5)(typescript@5.4.5)
       '@nx/devkit': 18.3.5(nx@18.3.5)
       '@nx/workspace': 18.3.5
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.6.3)
