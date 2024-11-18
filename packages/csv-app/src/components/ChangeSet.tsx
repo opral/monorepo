@@ -7,6 +7,7 @@ import {
 	ChangeSet,
 	Lix,
 	Snapshot,
+	changeIsLowestCommonAncestorOf,
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
@@ -322,9 +323,7 @@ const getUnconfirmedChanges = async (
 				.where("change.entity_id", "=", change.entity_id)
 				.where(changeInVersion(currentVersion))
 				.where("change.schema_key", "=", CellSchemaV1.key)
-				// todo don't rely on timestampt to traverse the graph
-				// use recursive graph traversal instead
-				.orderBy("change.created_at", "desc")
+				.where(changeIsLowestCommonAncestorOf([change]))
 				.selectAll("change")
 				.select("snapshot.content as snapshot_content")
 				.executeTakeFirst();
