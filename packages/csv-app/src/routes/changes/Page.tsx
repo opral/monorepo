@@ -6,6 +6,7 @@ import {
 	activeFileAtom,
 	unconfirmedChangesAtom,
 } from "../../state-active-file.ts";
+import { changeSetHasLabel } from "@lix-js/sdk";
 
 const changeSetsAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -24,6 +25,7 @@ const changeSetsAtom = atom(async (get) => {
 		.leftJoin("comment", "comment.discussion_id", "discussion.id")
 		.where("comment.parent_id", "is", null) // Filter to get only the first comment
 		.where("change.file_id", "=", activeFile.id)
+		.where(changeSetHasLabel("confirmed"))
 		.groupBy("change_set.id")
 		.orderBy("change.created_at", "desc")
 		.select("change_set.id")
@@ -35,6 +37,7 @@ const changeSetsAtom = atom(async (get) => {
 export default function Page() {
 	const [changeSets] = useAtom(changeSetsAtom);
 	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
+
 	return (
 		<>
 			<OpenFileLayout>

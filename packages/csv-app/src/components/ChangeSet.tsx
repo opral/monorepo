@@ -20,6 +20,7 @@ import { SlButton, SlInput } from "@shoelace-style/shoelace/dist/react";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import { confirmChanges } from "../helper/confirmChanges.ts";
 import RowDiff from "./RowDiff.tsx";
+import { CellSchemaV1 } from "@lix-js/plugin-csv";
 
 export default function Component(props: {
 	id: string;
@@ -36,7 +37,7 @@ export default function Component(props: {
 	>({});
 
 	const [unconfirmedChanges, setUnconfirmedChanges] = useState<
-		Awaited<ReturnType<typeof getChanges>>
+		Awaited<ReturnType<typeof getUnconfirmedChanges>>
 	>({});
 
 	const [currentVersion] = useAtom(currentVersionAtom);
@@ -211,6 +212,8 @@ const getChanges = async (
 			"change_set_element.change_id",
 			"change.id"
 		)
+		.where("change.schema_key", "=", CellSchemaV1.key)
+		.where(changeHasLabel("confirmed"))
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where("change.file_id", "=", fileId)
 		.selectAll("change")
@@ -290,6 +293,7 @@ const getUnconfirmedChanges = async (
 		.where("change.file_id", "=", fileId)
 		.where(changeIsLeafInVersion(currentVersion))
 		.where((eb) => eb.not(changeHasLabel("confirmed")))
+		.where("change.schema_key", "=", CellSchemaV1.key)
 		.selectAll("change")
 		.select("snapshot.content as snapshot_content")
 		.execute();
@@ -317,6 +321,7 @@ const getUnconfirmedChanges = async (
 				.where(changeHasLabel("confirmed"))
 				.where("change.entity_id", "=", change.entity_id)
 				.where(changeInVersion(currentVersion))
+				.where("change.schema_key", "=", CellSchemaV1.key)
 				// todo don't rely on timestampt to traverse the graph
 				// use recursive graph traversal instead
 				.orderBy("change.created_at", "desc")
@@ -327,6 +332,5 @@ const getUnconfirmedChanges = async (
 			change.parent = parent;
 		}
 	}
-	console.log("unconfirmed changes", groupedByRow);
 	return groupedByRow;
 };
