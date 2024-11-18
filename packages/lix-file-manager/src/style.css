@@ -1,6 +1,43 @@
 @import "tailwindcss";
 
 @theme {
+    --color-border: hsl(var(--border));
+    --color-input: hsl(var(--input));
+    --color-ring: hsl(var(--ring));
+    --color-background: hsl(var(--background));
+    --color-foreground: hsl(var(--foreground));
+    
+    --color-primary: hsl(var(--primary));
+    --color-primary-foreground: hsl(var(--primary-foreground));
+    
+    --color-secondary: hsl(var(--secondary));
+    --color-secondary-foreground: hsl(var(--secondary-foreground));
+    
+    --color-destructive: hsl(var(--destructive));
+    --color-destructive-foreground: hsl(var(--destructive-foreground));
+    
+    --color-muted: hsl(var(--muted));
+    --color-muted-foreground: hsl(var(--muted-foreground));
+    
+    --color-accent: hsl(var(--accent));
+    --color-accent-foreground: hsl(var(--accent-foreground));
+    
+    --color-popover: hsl(var(--popover));
+    --color-popover-foreground: hsl(var(--popover-foreground));
+    
+    --color-card: hsl(var(--card));
+    --color-card-foreground: hsl(var(--card-foreground));
+    
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    
+    --font-family-poppins: var(--font-poppins);
+    --font-family-inter: var(--font-inter);
+    
+    --animate-accordion-down: accordion-down 0.2s ease-out;
+    --animate-accordion-up: accordion-up 0.2s ease-out;
+
     /* Animations */
     --animate-slideIn: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1;
     --animate-slideOut: slideOut 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -21,6 +58,83 @@
     @keyframes blendIn {
         0% { opacity: 0 }
         100% { opacity: 1 }
+    }
+
+    @keyframes accordion-down {
+        from {
+          height: 0;
+        }
+    
+        to {
+          height: var(--radix-accordion-content-height);
+        }
+    }
+    
+    @keyframes accordion-up {
+        from {
+          height: var(--radix-accordion-content-height);
+        }
+    
+        to {
+          height: "0";
+        }
+    }
+}
+
+
+@layer base {
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 222.2 47.4% 11.2%;
+      --muted: 210 40% 96.1%;
+      --muted-foreground: 215.4 16.3% 46.9%;
+      --popover: 0 0% 100%;
+      --popover-foreground: 222.2 47.4% 11.2%;
+      --border: 214.3 31.8% 91.4%;
+      --input: 214.3 31.8% 91.4%;
+      --card: 0 0% 100%;
+      --card-foreground: 222.2 47.4% 11.2%;
+      --primary: 222.2 47.4% 11.2%;
+      --primary-foreground: 210 40% 98%;
+      --secondary: 210 40% 96.1%;
+      --secondary-foreground: 222.2 47.4% 11.2%;
+      --accent: 210 40% 96.1%;
+      --accent-foreground: 222.2 47.4% 11.2%;
+      --destructive: 0 100% 50%;
+      --destructive-foreground: 210 40% 98%;
+      --ring: 215 20.2% 65.1%;
+      --radius: 0.5rem;
+    }
+   
+    .dark {
+      --background: 224 71% 4%;
+      --foreground: 213 31% 91%;
+      --muted: 223 47% 11%;
+      --muted-foreground: 215.4 16.3% 56.9%;
+      --accent: 216 34% 17%;
+      --accent-foreground: 210 40% 98%;
+      --popover: 224 71% 4%;
+      --popover-foreground: 215 20.2% 65.1%;
+      --border: 216 34% 17%;
+      --input: 216 34% 17%;
+      --card: 224 71% 4%;
+      --card-foreground: 213 31% 91%;
+      --primary: 210 40% 98%;
+      --primary-foreground: 222.2 47.4% 1.2%;
+      --secondary: 222.2 47.4% 11.2%;
+      --secondary-foreground: 210 40% 98%;
+      --destructive: 0 63% 31%;
+      --destructive-foreground: 210 40% 98%;
+      --ring: 216 34% 17%;
+    }
+}
+   
+@layer base {
+    * {
+      @apply border-border;
+    }
+    body {
+      @apply font-sans antialiased bg-background text-foreground;
     }
 }
 

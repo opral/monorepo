@@ -17,17 +17,21 @@
 		"@lix-js/sdk": "workspace:*",
 		"@shoelace-style/shoelace": "^2.17.1",
 		"@xyflow/react": "^12.3.4",
+		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
 		"human-id": "^4.1.1",
 		"jotai": "^2.10.1",
 		"lodash-es": "^4.17.21",
+		"lucide-react": "^0.460.0",
 		"native-file-system-adapter": "^3.0.1",
 		"papaparse": "^5.4.1",
 		"react": "^18.3.1",
 		"react-datasheet-grid": "^4.11.4",
 		"react-dom": "^18.3.1",
 		"react-dropzone": "^14.2.10",
-		"react-router-dom": "^6.27.0"
+		"react-router-dom": "^6.27.0",
+		"tailwind-merge": "^2.5.4",
+		"tailwindcss-animate": "^1.0.7"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.12.0",
