@@ -238,21 +238,25 @@ export default function Index() {
 						Change control can be accessed in file-based applications that are already built on Lix
 						or the Lix File Manager, which can track changes of conventional files.
 					</p>
-					<div className="card relative w-full">
-						<img
-							src="/images/file-manager.svg"
-							alt="Simlified sketch of the lix file manager"
-							className="mb-2 sm:-mb-10 w-[724x] md:h-[300px] mt-4 mx-auto"
-						/>
-						<div className="flex justify-between items-end gap-2">
-							<div>
-								<span className="font-semibold">Lix File Manager</span>
-								<p className="mt-1">All your files under change control.</p>
+					<div className="card relative w-full group cursor-pointer">
+						<a href="/file-manager">
+							<img
+								src="/images/file-manager.svg"
+								alt="Simlified sketch of the lix file manager"
+								className="mb-2 sm:-mb-10 w-[724x] md:h-[300px] mt-4 mx-auto"
+							/>
+							<div className="flex justify-between items-end gap-2">
+								<div>
+									<span className="font-semibold">Lix File Manager</span>
+									<p className="mt-1">All your files under change control.</p>
+								</div>
+								<div className="absolute bottom-[14px] md:bottom-6 right-[14px] md:right-6 flex justify-center items-center w-10 h-10 rounded-full bg-white text-slate-500 transition-all ring-1 ring-slate-200 group-hover:text-cyan-500  group-hover:ring-cyan-500">
+									<div className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+										<IconArrowExternal />
+									</div>
+								</div>
 							</div>
-							<p className="w-fit whitespace-nowrap bg-white ring-1 ring-slate-200 px-4 py-2 rounded-full">
-								Coming soon
-							</p>
-						</div>
+						</a>
 					</div>
 
 					<div className="w-full my-12 md:my-16 relative flex items-center">

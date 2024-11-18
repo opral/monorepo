@@ -25,18 +25,17 @@ export const socialLinks = [
 const Header = () => {
 	return (
 		<header className="w-full max-w-5xl px-4 py-3 mx-auto flex items-center justify-between gap-4">
-			<div className="flex items-center gap-4">
+			<div className="flex items-center gap-3">
 				<Link to="/">
-					<IconLix />
+					<div className="pr-4">
+						<IconLix />
+					</div>
 				</Link>
-				<Link
-					className="md:px-2 py-1 font-medium text-slate-500 hover:text-cyan-600"
-					to="/file-manager"
-				>
+				<Link className="md:px-1 py-1 text-slate-500 hover:text-cyan-600" to="/file-manager">
 					File Manager
 				</Link>
 				<a
-					className="md:px-2 py-1 font-medium text-slate-500 hover:text-cyan-600"
+					className="md:px-1 py-1 text-slate-500 hover:text-cyan-600"
 					href="https://opral.substack.com"
 				>
 					Blog
