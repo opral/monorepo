@@ -160,6 +160,10 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 			vite: {
 				apply: "build",
 				resolveId(id, importer) {
+					// if the id contains a null char ignore it since it should be a rollup virtual module
+                    // this helps support other vite plugins (like sentry) that make heavy use of these types of file-namings
+                    if (id.includes("\0"))
+                        return undefined;
 					// resolve relative imports inside the output directory
 					// the importer is alwazs normalized
 					if (importer?.startsWith(normalizedOutdir)) {
