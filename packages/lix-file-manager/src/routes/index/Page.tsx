@@ -6,11 +6,13 @@ import { filesAtom, lixAtom } from "./../../state.ts";
 import { useAtom } from "jotai";
 import { saveLixToOpfs } from "./../../helper/saveLixToOpfs.ts";
 import { Button } from "./../../../components/ui/button.tsx"
+import { changesCurrentVersionAtom } from "./../../state-active-file.ts";
 
 export default function Page() {
 	// state atoms
 	const [lix] = useAtom(lixAtom);
 	const [files] = useAtom(filesAtom);
+	const [changesCurrentVersion] = useAtom(changesCurrentVersionAtom);
 
 	// handlers
 	const handleUpload = async () => {
@@ -37,7 +39,7 @@ export default function Page() {
 
 	return (
 		<div className="flex h-screen bg-white">
-			<div className="w-full">
+			<div className="flex-1">
 				<SectionHeader title="Files">
 					<Button variant="secondary" onClick={() => handleUpload()}>
 						<IconUpload />
@@ -57,8 +59,9 @@ export default function Page() {
 				})}
 			</div>
 			<Separator orientation="vertical" />
-			<div className="w-full">
+			<div className="flex-1">
 				<SectionHeader title="Graph" />
+				<p className="w-full break-all">{JSON.stringify(changesCurrentVersion, null, 2)}</p>
 			</div>
 		</div>
 	);

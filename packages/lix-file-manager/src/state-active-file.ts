@@ -25,8 +25,9 @@ export const activeFileAtom = atom(async (get) => {
 	if (!fileId) {
 		// Not the best UX to implicitly route to the root
 		// but fine for now.
-		window.location.href = "/";
-		throw new Error("no active file. reroute should avoid this throw");
+		// window.location.href = "/";
+		console.error("no active file. reroute should avoid this throw");
+		return []
 	}
 
 	const lix = await get(lixAtom);

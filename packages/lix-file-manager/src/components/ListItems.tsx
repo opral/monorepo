@@ -15,8 +15,12 @@ interface ListItemsProps {
 const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const handleSelectFile = () => {
+    setSearchParams({f: id});
+  }
+
   return (
-    <div onClick={() => setSearchParams({f: id})} className={clsx(
+    <div onClick={() => handleSelectFile()} className={clsx(
         searchParams.get("f") === id ? "bg-slate-100" : "",
         "group flex items-center justify-between mx-2.5 h-12 px-2.5 py-3 rounded-md hover:bg-slate-50 cursor-pointer"
       )}>

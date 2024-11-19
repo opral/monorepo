@@ -10,7 +10,7 @@ export function App({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setPolling(Date.now());
-		}, 1000);
+		}, 100);
 		return () => clearInterval(interval);
 	}, []);
 
