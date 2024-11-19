@@ -8,10 +8,10 @@ import { resolveChangeConflictBySelecting } from "./resolve-conflict-by-selectin
 
 test("it should resolve a conflict and apply the changes", async () => {
 	const mockSnapshots: Snapshot[] = [
-		mockJsonSnapshot({
+		await mockJsonSnapshot({
 			id: "value1",
 		}),
-		mockJsonSnapshot({
+		await mockJsonSnapshot({
 			id: "value2",
 		}),
 	];
@@ -111,8 +111,18 @@ test("it should resolve a conflict and apply the changes", async () => {
 		.where("id", "=", changes[0]!.file_id)
 		.executeTakeFirstOrThrow();
 
+	expect(isArrayBufferLike(fileAfterResolve.data)).toBe(true);
+
 	const parsed = JSON.parse(new TextDecoder().decode(fileAfterResolve.data));
 
 	expect(parsed).toStrictEqual(snapshots[0]!.content);
 	expect(resolvedConflict.resolved_change_id).toBe(changes[0]!.id);
 });
+
+function isArrayBufferLike(entity: unknown): boolean {
+	return (
+		entity instanceof SharedArrayBuffer ||
+		entity instanceof ArrayBuffer ||
+		ArrayBuffer.isView(entity) // Checks for ArrayBufferView (like Uint8Array, Int32Array, etc.)
+	);
+}

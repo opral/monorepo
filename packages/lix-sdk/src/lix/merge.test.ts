@@ -17,9 +17,9 @@ import { changeQueueSettled } from "../change-queue/change-queue-settled.js";
 
 test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const mockSnapshots = [
-		mockJsonSnapshot({ id: "mock-id", color: "red" }),
-		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
-		mockJsonSnapshot({ id: "mock-id", color: "green" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "red" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "blue" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "green" }),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -144,9 +144,9 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 
 test.todo("it should save change conflicts", async () => {
 	const mockSnapshots = [
-		mockJsonSnapshot({ id: "mock-id", color: "red" }),
-		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
-		mockJsonSnapshot({ id: "mock-id", color: "green" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "red" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "blue" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "green" }),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -248,7 +248,9 @@ test.todo("it should save change conflicts", async () => {
 });
 
 test("diffing should not be invoked to prevent the generation of duplicate changes", async () => {
-	const commonSnapshots = [mockJsonSnapshot({ id: "mock-id", color: "red" })];
+	const commonSnapshots = [
+		await mockJsonSnapshot({ id: "mock-id", color: "red" }),
+	];
 
 	const commonChanges: NewChange[] = [
 		{
@@ -265,7 +267,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 	const changesOnlyInTargetLix: NewChange[] = [];
 
 	const snapshotsOnlyInSourceLix: Snapshot[] = [
-		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "blue" }),
 	];
 	const changesOnlyInSourceLix: NewChange[] = [
 		{
@@ -350,8 +352,8 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 // https://github.com/opral/lix-sdk/issues/126
 test.todo("it should apply changes that are not conflicting", async () => {
 	const mockSnapshots: Snapshot[] = [
-		mockJsonSnapshot({ color: "red" }),
-		mockJsonSnapshot({ color: "blue" }),
+		await mockJsonSnapshot({ color: "red" }),
+		await mockJsonSnapshot({ color: "blue" }),
 	];
 
 	const mockChanges: NewChange[] = [
@@ -467,7 +469,9 @@ test.todo("it should apply changes that are not conflicting", async () => {
 test.todo(
 	"subsequent merges should not lead to duplicate changes and/or conflicts",
 	async () => {
-		const commonSnapshots = [mockJsonSnapshot({ id: "mock-id", color: "red" })];
+		const commonSnapshots = [
+			await mockJsonSnapshot({ id: "mock-id", color: "red" }),
+		];
 		const commonChanges: NewChange[] = [
 			{
 				id: "1",
@@ -482,7 +486,7 @@ test.todo(
 		const changesOnlyInTargetLix: NewChange[] = [];
 
 		const snapshotsOnlyInSourceLix: Snapshot[] = [
-			mockJsonSnapshot({ id: "mock-id", color: "blue" }),
+			await mockJsonSnapshot({ id: "mock-id", color: "blue" }),
 		];
 		const changesOnlyInSourceLix: NewChange[] = [
 			{
@@ -587,7 +591,7 @@ test.todo(
 
 test("it should naively copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const snapshotsOnlyInSourceLix: Snapshot[] = [
-		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "blue" }),
 	];
 	const changesOnlyInSourceLix: NewChange[] = [
 		{

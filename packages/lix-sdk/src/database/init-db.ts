@@ -5,6 +5,7 @@ import { SerializeJsonPlugin } from "./serialize-json-plugin.js";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
 import { sha256 } from "js-sha256";
+import { JsonbPlugin } from "./helper/jsonbPlugin.js";
 
 export function initDb(args: {
 	sqlite: SqliteDatabase;
@@ -15,7 +16,14 @@ export function initDb(args: {
 		dialect: createDialect({
 			database: args.sqlite,
 		}),
-		plugins: [new ParseJSONResultsPlugin(), new SerializeJsonPlugin()],
+		plugins: [
+			new JsonbPlugin({
+				database: args.sqlite,
+				nonJsonB: {
+					file: ["data"],
+				},
+			}),
+		],
 	});
 	return db;
 }

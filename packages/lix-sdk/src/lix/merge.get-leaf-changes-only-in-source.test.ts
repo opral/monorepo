@@ -14,8 +14,8 @@ test("it should get the leaf changes that only exist in source", async () => {
 	});
 
 	const commonSnapshots = [
-		mockJsonSnapshot({ id: "mock-id", color: "red" }),
-		mockJsonSnapshot({ id: "mock-id", color: "blue" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "red" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "blue" }),
 	];
 
 	const commonChanges: NewChange[] = [
@@ -40,9 +40,9 @@ test("it should get the leaf changes that only exist in source", async () => {
 	const commonChangesEdges = [{ parent_id: "c1", child_id: "c2" }];
 
 	const snapshotsOnlyInSource = [
-		mockJsonSnapshot({ id: "mock-id", color: "pink" }),
-		mockJsonSnapshot({ id: "mock-id", color: "orange" }),
-		mockJsonSnapshot({ id: "mock-id", color: "yellow" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "pink" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "orange" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "yellow" }),
 	];
 
 	const changesOnlyInSource: NewChange[] = [
@@ -78,7 +78,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 	];
 
 	const snapshotsOnlyInTarget = [
-		mockJsonSnapshot({ id: "mock-id", color: "black" }),
+		await mockJsonSnapshot({ id: "mock-id", color: "black" }),
 	];
 
 	const changesOnlyInTarget: NewChange[] = [

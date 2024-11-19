@@ -65,7 +65,7 @@ test("snapshot ids should default to sha256", async () => {
 		.executeTakeFirstOrThrow();
 
 	expect(snapshot.id).toBe(
-		"19ce22178013c4a047e8c90135ed57bfe4cc6451917dbb75f5b838922cf10b19",
+		"9c86fb39581eec0f91275f959322952545efca361fdc3c65a98d4263fdfd31e1",
 	);
 });
 
