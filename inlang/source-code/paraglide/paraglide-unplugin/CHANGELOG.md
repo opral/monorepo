@@ -1,5 +1,11 @@
 # @inlang/paraglide-unplugin
 
+## 1.8.8
+
+### Patch Changes
+
+- 25e1b40: Support for NULL character prefixed virtual modules
+
 ## 1.8.7
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # @inlang/paraglide-sveltekit
 
+## 0.12.0
+
+### Minor Changes
+
+- ca227dd: Add Vary header to redirects that invalidate cache if the cookie or accept language header changes.
+
+### Patch Changes
+
+- @inlang/paraglide-vite@1.2.77
+
 ## 0.11.5
 
 ### Patch Changes
