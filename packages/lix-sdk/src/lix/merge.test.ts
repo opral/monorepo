@@ -618,7 +618,7 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 
 	await targetLix.db
 		.insertInto("file")
-		.values({ id: "mock-file", path: "", data: new Uint8Array() })
+		.values({ id: "mock-file", path: "/mock", data: new Uint8Array() })
 		.execute();
 
 	await sourceLix.db
@@ -672,7 +672,11 @@ test("it should copy discussion and related comments and mappings", async () => 
 
 	await lix1.db
 		.insertInto("file")
-		.values({ id: "test", path: "test.txt", data: enc.encode("inserted text") })
+		.values({
+			id: "test",
+			path: "/test.txt",
+			data: enc.encode("inserted text"),
+		})
 		.execute();
 
 	await changeQueueSettled({ lix: lix1 });
