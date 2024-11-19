@@ -85,7 +85,10 @@ export function AppSidebar() {
 			<SidebarFooter className="p-3 flex justify-center items-center">
 				<Avatar className="w-8 h-8">
 					{/* INFO: If URL is not available, it uses the fallback */}
-					<AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+					<AvatarImage
+						src="https://github.com/felixhaeberle.png"
+						alt="@shadcn"
+					/>
 					<AvatarFallback className="bg-[#fff] text-[#141A21] border border-[#DBDFE7]">
 						FH
 					</AvatarFallback>
