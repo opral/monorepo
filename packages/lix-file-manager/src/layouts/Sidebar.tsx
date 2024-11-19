@@ -15,7 +15,7 @@ import {
 	AvatarImage,
 } from "../../components/ui/avatar.tsx";
 import { File, Workflow } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { usernameAtom } from "../state.ts";
 import { useAtomValue } from "jotai";
 
@@ -46,8 +46,8 @@ export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
 							isActive={location.pathname === "/"}
 							className="w-9 h-9"
 						>
-							<a
-								href="/"
+							<Link
+								to="/"
 								className={`flex items-center justify-center w-9 h-9 rounded-md ${
 									location.pathname === "/"
 										? "bg-[#E8EDF3]"
@@ -62,7 +62,7 @@ export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
 									}`}
 								/>
 								<span className="sr-only">Files</span>
-							</a>
+							</Link>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 
@@ -72,8 +72,8 @@ export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
 							isActive={location.pathname === "/automation"}
 							className="w-9 h-9"
 						>
-							<a
-								href="/automation"
+							<Link
+								to="/automation"
 								className={`flex items-center justify-center w-9 h-9 rounded-md ${
 									location.pathname === "/automation"
 										? "bg-[#E8EDF3]"
@@ -88,7 +88,7 @@ export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
 									}`}
 								/>
 								<span className="sr-only">Workflows</span>
-							</a>
+							</Link>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 				</SidebarMenu>
