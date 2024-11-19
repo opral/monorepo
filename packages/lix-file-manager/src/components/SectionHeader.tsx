@@ -1,4 +1,4 @@
-import { Button } from "./Button.tsx";
+import { Button } from "./../../components/ui/button.tsx";
 import IconArrowLeft from "./icons/IconArrowLeft.tsx";
 
 interface SectionHeaderProps {

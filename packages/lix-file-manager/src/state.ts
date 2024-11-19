@@ -89,3 +89,9 @@ export const existingVersionsAtom = atom(async (get) => {
 
 	return await lix.db.selectFrom("version").selectAll().execute();
 });
+
+export const filesAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	return await lix.db.selectFrom("file").selectAll().execute();
+});

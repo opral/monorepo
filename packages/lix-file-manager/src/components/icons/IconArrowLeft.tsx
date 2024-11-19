@@ -10,8 +10,8 @@ const IconArrowLeft = () => {
       preserveAspectRatio="xMidYMid meet"
     >
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M8.29326 11.2969L13.9503 5.63992L15.3643 7.05392L10.4143 12.0039L15.3643 16.9539L13.9503 18.3679L8.29326 12.7109C8.10579 12.5234 8.00047 12.2691 8.00047 12.0039C8.00047 11.7388 8.10579 11.4844 8.29326 11.2969Z"
         fill="currentColor"
       />
