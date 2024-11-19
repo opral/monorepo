@@ -61,7 +61,7 @@ export function AppSidebar() {
 							isActive={location.pathname === "/workflows"}
 						>
 							<a
-								href="/workflows"
+								href="/automation"
 								className={`flex items-center justify-center w-9 h-9 rounded-md ${
 									location.pathname === "/workflows"
 										? "bg-[#E8EDF3]"
