@@ -1,5 +1,6 @@
 import { Version, openLixInMemory } from "@lix-js/sdk";
 import { atom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
@@ -61,27 +62,27 @@ export const lixAtom = atom(async () => {
  */
 export const withPollingAtom = atom(Date.now());
 
-export const currentVersionAtom = atom<Promise<Version & { targets: Version[] }>>(
-	async (get) => {
-		get(withPollingAtom);
-		const lix = await get(lixAtom);
+export const currentVersionAtom = atom<
+	Promise<Version & { targets: Version[] }>
+>(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
 
-		const currentVersion = await lix.db
-			.selectFrom("current_version")
-			.innerJoin("version", "version.id", "current_version.id")
-			.selectAll("version")
-			.executeTakeFirstOrThrow();
+	const currentVersion = await lix.db
+		.selectFrom("current_version")
+		.innerJoin("version", "version.id", "current_version.id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
 
-		// const targets = await lix.db
-		// 	.selectFrom("branch_target")
-		// 	.where("source_branch_id", "=", currentVersion.id)
-		// 	.innerJoin("branch", "branch_target.target_branch_id", "branch.id")
-		// 	.selectAll("branch")
-		// 	.execute();
+	// const targets = await lix.db
+	// 	.selectFrom("branch_target")
+	// 	.where("source_branch_id", "=", currentVersion.id)
+	// 	.innerJoin("branch", "branch_target.target_branch_id", "branch.id")
+	// 	.selectAll("branch")
+	// 	.execute();
 
-		return { ...currentVersion, targets: [] };
-	}
-);
+	return { ...currentVersion, targets: [] };
+});
 
 export const existingVersionsAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -95,3 +96,8 @@ export const filesAtom = atom(async (get) => {
 	const lix = await get(lixAtom);
 	return await lix.db.selectFrom("file").selectAll().execute();
 });
+
+/**
+ * Username atom with storage.
+ */
+export const usernameAtom = atomWithStorage("username", "");

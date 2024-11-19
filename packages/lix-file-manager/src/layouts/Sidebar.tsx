@@ -16,13 +16,20 @@ import {
 } from "../../components/ui/avatar.tsx";
 import { File, Workflow } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import { usernameAtom } from "../state.ts";
+import { useAtomValue } from "jotai";
 
-export function AppSidebar() {
+interface AppSidebarProps {
+	onSettingsClick?: (open: boolean) => void;
+}
+
+export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
+	const [username] = useAtomValue(usernameAtom);
 	const location = useLocation();
 
 	return (
 		<Sidebar
-			className="w-[60px] h-screen border-r border-[#DBDFE7] bg-[#FCFCFD]"
+			className="w-[60px] h-full border-r border-[#DBDFE7] bg-[#FCFCFD]"
 			collapsible="none"
 		>
 			<SidebarHeader className="p-3 flex justify-center items-center">
@@ -34,7 +41,11 @@ export function AppSidebar() {
 			<SidebarContent className="flex-1">
 				<SidebarMenu className="flex flex-col items-center gap-2">
 					<SidebarMenuItem>
-						<SidebarMenuButton asChild isActive={location.pathname === "/"}>
+						<SidebarMenuButton
+							asChild
+							isActive={location.pathname === "/"}
+							className="w-9 h-9"
+						>
 							<a
 								href="/"
 								className={`flex items-center justify-center w-9 h-9 rounded-md ${
@@ -58,19 +69,20 @@ export function AppSidebar() {
 					<SidebarMenuItem>
 						<SidebarMenuButton
 							asChild
-							isActive={location.pathname === "/workflows"}
+							isActive={location.pathname === "/automation"}
+							className="w-9 h-9"
 						>
 							<a
 								href="/automation"
 								className={`flex items-center justify-center w-9 h-9 rounded-md ${
-									location.pathname === "/workflows"
+									location.pathname === "/automation"
 										? "bg-[#E8EDF3]"
 										: "hover:bg-[#E8EDF3]"
 								}`}
 							>
 								<Workflow
 									className={`h-4 w-4 ${
-										location.pathname === "/workflows"
+										location.pathname === "/automation"
 											? "text-[#141A21]"
 											: "text-[#8C9AAD]"
 									}`}
@@ -83,14 +95,16 @@ export function AppSidebar() {
 			</SidebarContent>
 
 			<SidebarFooter className="p-3 flex justify-center items-center">
-				<Avatar className="w-8 h-8">
-					{/* INFO: If URL is not available, it uses the fallback */}
+				<Avatar
+					className="w-8 h-8 cursor-pointer hover:opacity-90 transition-opacity"
+					onClick={() => onSettingsClick?.(true)}
+				>
 					<AvatarImage
 						src="https://github.com/felixhaeberle.png"
-						alt="@shadcn"
+						alt="@felixhaeberle"
 					/>
 					<AvatarFallback className="bg-[#fff] text-[#141A21] border border-[#DBDFE7]">
-						FH
+						{username ? username.substring(0, 2).toUpperCase() : "FH"}
 					</AvatarFallback>
 				</Avatar>
 			</SidebarFooter>

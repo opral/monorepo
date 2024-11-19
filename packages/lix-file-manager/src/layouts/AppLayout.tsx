@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { SidebarProvider } from "../../components/ui/sidebar.tsx";
 import { AppSidebar } from "./Sidebar.tsx";
-import { useAtom } from "jotai";
+import { Provider, useAtom } from "jotai";
 import { withPollingAtom } from "./../state.ts";
 
 export function App({ children }: { children: React.ReactNode }) {
@@ -15,11 +15,13 @@ export function App({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	return (
-		<SidebarProvider>
-			<div className="flex h-screen w-full">
-				<AppSidebar />
-				<main className="flex-1">{children}</main>
-			</div>
-		</SidebarProvider>
+		<Provider>
+			<SidebarProvider>
+				<div className="flex h-screen w-full">
+					<AppSidebar />
+					<main className="flex-1">{children}</main>
+				</div>
+			</SidebarProvider>
+		</Provider>
 	);
 }
