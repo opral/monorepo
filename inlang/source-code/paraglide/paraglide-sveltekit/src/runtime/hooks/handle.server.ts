@@ -15,6 +15,7 @@ import { getHrefBetween } from "../utils/diff-urls.js"
  * If this is present on the `<html>` attribute it most likely needs to be replaced.
  */
 const SVELTEKIT_DEFAULT_LANG_ATTRIBUTE = 'lang="en"'
+const VARY_HEADER = ["cookie", "accept-language"].join(", ")
 
 export type HandleOptions = {
 	/**
@@ -127,6 +128,7 @@ export const createHandle = <T extends string>(
 				status: 302,
 				headers: {
 					Location: href,
+					Vary: VARY_HEADER,
 				},
 			})
 		}
