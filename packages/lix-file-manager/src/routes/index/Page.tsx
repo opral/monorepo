@@ -1,12 +1,13 @@
 import IconUpload from "./../../components/icons/IconUpload.tsx";
 import SectionHeader from "./../../components/SectionHeader.tsx";
-import { Separator } from "./../../../components/ui/separator.tsx";
 import ListItems from "./../../components/ListItems.tsx";
 import { filesAtom, lixAtom } from "./../../state.ts";
 import { useAtom } from "jotai";
 import { saveLixToOpfs } from "./../../helper/saveLixToOpfs.ts";
 import { Button } from "./../../../components/ui/button.tsx"
+import { Separator } from "./../../../components/ui/separator.tsx"
 import { changesCurrentVersionAtom } from "./../../state-active-file.ts";
+import { Link } from "react-router-dom";
 
 export default function Page() {
 	// state atoms
@@ -29,17 +30,16 @@ export default function Page() {
 						data: await file.arrayBuffer(),
 					}
 				)
-				.execute()
-
-            	await saveLixToOpfs({ lix });
+					.execute()
+				await saveLixToOpfs({ lix });
 			}
         }
 		input.click();
     }
 
 	return (
-		<div className="flex h-screen bg-white">
-			<div className="flex-1">
+		<div className="flex bg-white">
+			<div className="flex-1 flex flex-col">
 				<SectionHeader title="Files">
 					<Button variant="secondary" onClick={() => handleUpload()}>
 						<IconUpload />
@@ -57,8 +57,9 @@ export default function Page() {
 						/>
 					);
 				})}
+				<Link to="/" className="flex-grow" />
 			</div>
-			<Separator orientation="vertical" />
+			<Separator orientation="vertical" className="h-screen" />
 			<div className="flex-1">
 				<SectionHeader title="Graph" />
 				<p className="w-full break-all">{JSON.stringify(changesCurrentVersion, null, 2)}</p>

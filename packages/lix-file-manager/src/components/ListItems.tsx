@@ -32,12 +32,14 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
         )}
         {name}
       </div>
-      <a className="hidden group-hover:block" href={appLink}>
-        <Button variant="ghost">
-          Open in app
-          <IconArrowRight />
-        </Button>
-      </a>
+      {type === "file" && (
+        <a className="opacity-0 transition-opacity group-hover:opacity-100" href={appLink}>
+          <Button variant="ghost">
+            Open in app
+            <IconArrowRight />
+          </Button>
+        </a>
+      )}
     </div>
   )
 }
