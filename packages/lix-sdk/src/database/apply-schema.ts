@@ -16,7 +16,9 @@ export async function applySchema(args: {
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL,
-    metadata TEXT
+    metadata TEXT,
+
+    CHECK (is_valid_file_path(path))
   ) WITHOUT ROWID, STRICT;
 
   -- TODO Queue - handle deletion - the current queue doesn't handle delete starting with feature parity

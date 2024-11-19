@@ -18,7 +18,7 @@ export function validateFilePath(path: string): void {
 
 	if (path[0] !== "/") {
 		throw new Error(
-			"File path must start with a slash\n\nOtherwise a path might be considered as relative.",
+			"File path must start with a slash.\n\nNot starting a file path with a slash `/` leads to ambiguity whether or not the path is a directory or a file.",
 		);
 	}
 
