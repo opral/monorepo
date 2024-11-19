@@ -325,3 +325,31 @@ test("re-opening the same database shouldn't lead to duplicate insertion of the 
 
 	expect(currentversion).toHaveLength(1);
 });
+
+test("invalid file paths should be rejected", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	// init the trigger function (usually defined by lix only)
+	sqlite.createFunction({
+		name: "triggerChangeQueue",
+		arity: 0,
+		// @ts-expect-error - dynamic function
+		xFunc: () => {},
+	});
+
+	await expect(
+		db
+			.insertInto("file")
+			.values({
+				path: "invalid-path",
+				data: new Uint8Array(),
+			})
+			.returningAll()
+			.execute(),
+	).rejects.toThrowErrorMatchingInlineSnapshot(
+		`[SQLite3Error: SQLITE_ERROR: sqlite3 result code 1: Error: File path must start with a slash.\n\nNot starting a file path with a slash \`/\` leads to ambiguity whether or not the path is a directory or a file.]`,
+	);
+});

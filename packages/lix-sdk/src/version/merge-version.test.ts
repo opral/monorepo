@@ -411,7 +411,7 @@ test("re-curring merges should not create a new conflict if the conflict already
 		.insertInto("file")
 		.values({
 			id: "mock",
-			path: "mock",
+			path: "/mock",
 			data: new Uint8Array(),
 		})
 		.execute();

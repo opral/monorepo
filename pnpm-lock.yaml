@@ -3461,9 +3461,6 @@ importers:
       kysely:
         specifier: ^0.27.4
         version: 0.27.4
-      minimatch:
-        specifier: ^10.0.1
-        version: 10.0.1
       sqlite-wasm-kysely:
         specifier: 'workspace: *'
         version: link:../sqlite-wasm-kysely
@@ -13616,10 +13613,6 @@ packages:
   minimalistic-crypto-utils@1.0.1:
     resolution: {integrity: sha512-JIYlbt6g8i5jKfJ3xz7rF0LXmv2TkDxBLUkiBeZ7bAx4GnnNMr8xFpGnOxn6GhTEHx3SjRrZEoU+j04prX1ktg==}
 
-  minimatch@10.0.1:
-    resolution: {integrity: sha512-ethXTt3SGGR+95gudmqJ1eNhRO7eGEGIgYA9vnPatK4/etz2MEVDno5GMCibdMTuBMyElzIlgxMna3K94XDIDQ==}
-    engines: {node: 20 || >=22}
-
   minimatch@3.0.8:
     resolution: {integrity: sha512-6FsRAQsxQ61mw+qP1ZzbL9Bc78x2p5OqNgNpnoAFLTrX8n5Kxph0CsnhmKKNXTWjXqU5L0pGPR7hYk+XWZr60Q==}
 
@@ -20529,6 +20522,21 @@ snapshots:
       - typescript
       - verdaccio
 
+  '@nrwl/js@18.3.5(@babel/traverse@7.25.7)(@types/node@20.16.13)(nx@18.3.5)(typescript@5.6.3)':
+    dependencies:
+      '@nx/js': 18.3.5(@babel/traverse@7.25.7)(@types/node@20.16.13)(nx@18.3.5)(typescript@5.6.3)
+    transitivePeerDependencies:
+      - '@babel/traverse'
+      - '@swc-node/register'
+      - '@swc/core'
+      - '@swc/wasm'
+      - '@types/node'
+      - debug
+      - nx
+      - supports-color
+      - typescript
+      - verdaccio
+
   '@nrwl/js@18.3.5(@babel/traverse@7.25.7)(@types/node@22.7.7)(nx@20.0.3)(typescript@5.4.5)':
     dependencies:
       '@nx/js': 18.3.5(@babel/traverse@7.25.7)(@types/node@22.7.7)(nx@20.0.3)(typescript@5.4.5)
@@ -20829,7 +20837,7 @@ snapshots:
       '@babel/preset-env': 7.25.8(@babel/core@7.25.8)
       '@babel/preset-typescript': 7.25.7(@babel/core@7.25.8)
       '@babel/runtime': 7.25.7
-      '@nrwl/js': 18.3.5(@babel/traverse@7.25.7)(@types/node@20.16.13)(nx@18.3.5)(typescript@5.4.5)
+      '@nrwl/js': 18.3.5(@babel/traverse@7.25.7)(@types/node@20.16.13)(nx@18.3.5)(typescript@5.6.3)
       '@nx/devkit': 18.3.5(nx@18.3.5)
       '@nx/workspace': 18.3.5
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.6.3)
@@ -31862,10 +31870,6 @@ snapshots:
   minimalistic-assert@1.0.1: {}
 
   minimalistic-crypto-utils@1.0.1: {}
-
-  minimatch@10.0.1:
-    dependencies:
-      brace-expansion: 2.0.1
 
   minimatch@3.0.8:
     dependencies:

@@ -24,7 +24,7 @@ test("it applies the given changes", async () => {
 		.values({
 			id: "file1",
 			data: new TextEncoder().encode("initial-data"),
-			path: "mock-path",
+			path: "/mock-path",
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -66,7 +66,7 @@ test("applyChanges throws an error if plugin does not exist", async () => {
 		.values({
 			id: "file1",
 			data: new TextEncoder().encode("initial-data"),
-			path: "mock-path",
+			path: "/mock-path",
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -105,7 +105,7 @@ test("applyChanges throws an error if plugin does not support applying changes",
 		.values({
 			id: "file1",
 			data: new TextEncoder().encode("initial-data"),
-			path: "mock-path",
+			path: "/mock-path",
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

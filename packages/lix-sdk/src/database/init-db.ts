@@ -5,6 +5,7 @@ import { SerializeJsonPlugin } from "./serialize-json-plugin.js";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
 import { sha256 } from "js-sha256";
+import { validateFilePath } from "../file/validate-file-path.js";
 import { JsonbPlugin } from "./helper/jsonbPlugin.js";
 
 export function initDb(args: {
@@ -40,6 +41,15 @@ function initFunctions(args: { sqlite: SqliteDatabase }) {
 		arity: 1,
 		xFunc: (_ctx: number, value) => {
 			return value ? sha256(value as string) : "no-content";
+		},
+		deterministic: true,
+	});
+
+	args.sqlite.createFunction({
+		name: "is_valid_file_path",
+		arity: 1,
+		xFunc: (_ctx: number, value) => {
+			return validateFilePath(value as string) as unknown as string;
 		},
 		deterministic: true,
 	});

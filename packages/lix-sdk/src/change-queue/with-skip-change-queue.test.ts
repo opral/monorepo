@@ -34,7 +34,7 @@ test("skipping the change queue should be possible", async () => {
 		.values({
 			id: "test",
 			data: new TextEncoder().encode("update0"),
-			path: "test.txt",
+			path: "/test.txt",
 		})
 		.execute();
 
@@ -102,7 +102,7 @@ test("skipping the change queue should be possible with multiple changes", async
 		.values({
 			id: "test",
 			data: new TextEncoder().encode("initial"),
-			path: "test.txt",
+			path: "/test.txt",
 		})
 		.execute();
 
