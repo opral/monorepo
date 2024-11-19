@@ -35,7 +35,7 @@ test("should be able to start a discussion on changes", async () => {
 
 	await lix.db
 		.insertInto("file")
-		.values({ id: "test", path: "test.txt", data: enc.encode("test") })
+		.values({ id: "test", path: "/test.txt", data: enc.encode("test") })
 		.execute();
 
 	await changeQueueSettled({ lix });

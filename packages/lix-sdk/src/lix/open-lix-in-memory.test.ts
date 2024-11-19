@@ -14,7 +14,7 @@ test("it should open a lix in memory from a blob", async () => {
 		.insertInto("file")
 		.values({
 			id: "1",
-			path: "a.txt",
+			path: "/a.txt",
 			data: new TextEncoder().encode("hello"),
 		})
 		.execute();
@@ -23,7 +23,7 @@ test("it should open a lix in memory from a blob", async () => {
 	expect(files).toEqual([
 		expect.objectContaining({
 			id: "1",
-			path: "a.txt",
+			path: "/a.txt",
 			data: new TextEncoder().encode("hello"),
 		}),
 	]);

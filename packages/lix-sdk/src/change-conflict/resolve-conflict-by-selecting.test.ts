@@ -51,7 +51,7 @@ test("it should resolve a conflict and apply the changes", async () => {
 		.insertInto("file")
 		.values({
 			id: "mock",
-			path: "mock",
+			path: "/mock",
 			data: new Uint8Array(),
 		})
 		.execute();

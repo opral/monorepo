@@ -49,7 +49,7 @@ test("should use queue and settled correctly", async () => {
 	const dataInitial = enc.encode("insert text");
 	await lix.db
 		.insertInto("file")
-		.values({ id: "test", path: "test.txt", data: dataInitial })
+		.values({ id: "test", path: "/test.txt", data: dataInitial })
 		.execute();
 
 	const queue = await lix.db.selectFrom("change_queue").selectAll().execute();
@@ -58,7 +58,7 @@ test("should use queue and settled correctly", async () => {
 		expect.objectContaining({
 			id: 1,
 			file_id: "test",
-			path_after: "test.txt",
+			path_after: "/test.txt",
 			data_after: dataInitial,
 			data_before: null,
 		} satisfies Partial<ChangeQueueEntry>),
@@ -80,7 +80,7 @@ test("should use queue and settled correctly", async () => {
 		expect.objectContaining({
 			data: internalFilesAfter[0]!.data,
 			id: "test",
-			path: "test.txt",
+			path: "/test.txt",
 			metadata: null,
 		}) satisfies LixFile,
 	]);
@@ -151,7 +151,7 @@ test("should use queue and settled correctly", async () => {
 		expect.objectContaining({
 			id: 3,
 			file_id: "test",
-			path_after: "test.txt",
+			path_after: "/test.txt",
 			metadata_after: null,
 			data_before: dataUpdate1,
 			data_after: dataUpdate2,
@@ -159,7 +159,7 @@ test("should use queue and settled correctly", async () => {
 		expect.objectContaining({
 			id: 4,
 			file_id: "test",
-			path_after: "test.txt",
+			path_after: "/test.txt",
 			metadata_after: null,
 			data_before: dataUpdate2,
 			data_after: dataUpdate3,
