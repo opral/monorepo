@@ -99,12 +99,9 @@ export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
 					className="w-8 h-8 cursor-pointer hover:opacity-90 transition-opacity"
 					onClick={() => onSettingsClick?.(true)}
 				>
-					<AvatarImage
-						src="https://github.com/felixhaeberle.png"
-						alt="@felixhaeberle"
-					/>
+					<AvatarImage src="#" alt="#" />
 					<AvatarFallback className="bg-[#fff] text-[#141A21] border border-[#DBDFE7]">
-						{username ? username.substring(0, 2).toUpperCase() : "FH"}
+						{username ? username.substring(0, 2).toUpperCase() : "XX"}
 					</AvatarFallback>
 				</Avatar>
 			</SidebarFooter>
