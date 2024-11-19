@@ -18,10 +18,14 @@ import {
 	changeConflictsAtom,
 	parsedCsvAtom,
 	uniqueColumnAtom,
-} from "../state-active-file.ts";
+} from "../../state-active-file.ts";
 import { useCallback, useMemo, useState } from "react";
-import { currentVersionAtom, existingVersionsAtom, lixAtom } from "../state.ts";
-import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
+import {
+	currentVersionAtom,
+	existingVersionsAtom,
+	lixAtom,
+} from "../../state.ts";
+import { saveLixToOpfs } from "../../helper/saveLixToOpfs.ts";
 import clsx from "clsx";
 import {
 	applyChanges,

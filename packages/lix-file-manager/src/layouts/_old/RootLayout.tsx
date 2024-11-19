@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { LIX_FILE_NAME, lixAtom, withPollingAtom } from "../state.ts";
+import { LIX_FILE_NAME, lixAtom, withPollingAtom } from "../../state.ts";
 import { useEffect } from "react";
 import {
 	SlButton,

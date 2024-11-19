@@ -1,5 +1,12 @@
 {
-	"include": ["src", "demo", "x"],
+	"include": [
+		"src/**/*",
+		"components/**/*",
+		"lib/**/*",
+		"hooks/**/*",
+		"demo",
+		"x"
+	],
 	"compilerOptions": {
 		"composite": true,
 		"target": "ES2023",
@@ -24,9 +31,6 @@
 		"noFallthroughCasesInSwitch": true,
 
 		/* Shadcn */
-		"baseUrl": ".",
-		"paths": {
-		"@/*": ["./*"]
-		}
+		"baseUrl": "."
 	}
 }
