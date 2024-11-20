@@ -1,6 +1,5 @@
 import { Version, openLixInMemory } from "@lix-js/sdk";
 import { atom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
@@ -97,7 +96,36 @@ export const filesAtom = atom(async (get) => {
 	return await lix.db.selectFrom("file").selectAll().execute();
 });
 
+interface User {
+	username: string;
+	updatedAt: string;
+}
+
 /**
- * Username atom with storage.
+ * User state management using localStorage
+ * TODO: Switch to Lix DB when user table is implemented
  */
-export const usernameAtom = atomWithStorage("username", "");
+export const userAtom = atom(
+	// getter
+	async (get) => {
+		get(withPollingAtom); // Keep polling for future Lix implementation
+		const storedUser = localStorage.getItem("lix-user");
+		return storedUser ? (JSON.parse(storedUser) as User) : null;
+
+		// Lix DB implementation (commented out for future use)
+		// const lix = await get(lixAtom);
+		// return await lix.db.selectFrom("user").selectAll().executeTakeFirst();
+	},
+	// setter
+	async (_get, _set, update: { username: string }) => {
+		const user: User = {
+			username: update.username,
+			updatedAt: new Date().toISOString(),
+		};
+		localStorage.setItem("lix-user", JSON.stringify(user));
+
+		// Lix DB implementation (commented out for future use)
+		// const lix = await get(lixAtom);
+		// await lix.db.updateTable("user").set(update).execute();
+	}
+);

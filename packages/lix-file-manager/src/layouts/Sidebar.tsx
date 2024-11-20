@@ -19,18 +19,18 @@ import {
 	AvatarImage,
 } from "../../components/ui/avatar.tsx";
 import { Link, useLocation } from "react-router-dom";
-import { usernameAtom } from "../state.ts";
-import { useAtomValue } from "jotai";
+import { useAtom } from "jotai";
 import clsx from "clsx";
 import IconFile from "./../components/icons/IconFile.tsx";
 import IconAutomation from "./../components/icons/IconAutomation.tsx";
+import { userAtom } from "../state.ts";
 
 interface AppSidebarProps {
 	onSettingsClick?: (open: boolean) => void;
 }
 
 export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
-	const [username] = useAtomValue(usernameAtom);
+	const [user] = useAtom(userAtom);
 	const location = useLocation();
 
 	return (
@@ -129,7 +129,9 @@ export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
 							>
 								<AvatarImage src="#" alt="#" />
 								<AvatarFallback className="bg-[#fff] text-[#141A21] border border-[#DBDFE7]">
-									{username ? username.substring(0, 2).toUpperCase() : "XX"}
+									{user?.username
+										? user.username.substring(0, 2).toUpperCase()
+										: "XX"}
 								</AvatarFallback>
 							</Avatar>
 						</TooltipTrigger>

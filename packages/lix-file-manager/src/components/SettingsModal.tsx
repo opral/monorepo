@@ -12,7 +12,7 @@ import {
 import { Input } from "../../components/ui/input.tsx";
 import { Label } from "../../components/ui/label.tsx";
 import { Button } from "../../components/ui/button.tsx";
-import { usernameAtom } from "../state.ts";
+import { userAtom } from "../state.ts";
 
 interface SettingsModalProps {
 	open?: boolean;
@@ -25,15 +25,15 @@ export function SettingsModal({
 	onOpenChange,
 	children,
 }: SettingsModalProps) {
-	const [username, setUsername] = useAtom(usernameAtom);
-	const [inputValue, setInputValue] = React.useState(username);
+	const [user, updateUser] = useAtom(userAtom);
+	const [inputValue, setInputValue] = React.useState(user?.username || "");
 
 	React.useEffect(() => {
-		setInputValue(username);
-	}, [username]);
+		setInputValue(user?.username || "");
+	}, [user]);
 
-	const handleSave = () => {
-		setUsername(inputValue);
+	const handleSave = async () => {
+		await updateUser({ username: inputValue });
 		onOpenChange?.(false);
 	};
 
