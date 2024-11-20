@@ -193,9 +193,9 @@ export async function applySchema(args: {
     discussion_id TEXT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
     content TEXT NOT NULL,
-    account_id TEXT NOT NULL,
+    created_by TEXT NOT NULL,
 
-    FOREIGN KEY(account_id) REFERENCES account(id),
+    FOREIGN KEY(created_by) REFERENCES account(id),
     FOREIGN KEY(discussion_id) REFERENCES discussion(id),
     FOREIGN KEY(parent_id) REFERENCES comment(id)
   ) WITHOUT ROWID, STRICT;
