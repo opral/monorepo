@@ -53,8 +53,8 @@ export const rewrite = ({
 				//Add the new spread attribute
 				code.appendRight(element.start + element.name.length + 1, " " + newSpreadAttributeString)
 
-				//add <!-- svelte-ignore a11y-missing-attribute --> just before the element
-				code.appendLeft(element.start, "<!-- svelte-ignore a11y-missing-attribute -->")
+				//add <!-- svelte-ignore a11y_missing_attribute --> just before the element
+				code.appendLeft(element.start, "<!-- svelte-ignore a11y_missing_attribute -->")
 			} else {
 				for (const element_translations of Object.entries(translations)) {
 					const attribute_translations = element_translations[1]
@@ -128,8 +128,8 @@ export const rewrite = ({
 
 			code.appendRight(element.start + element.name.length + 1, " " + newSpreadAttributeString)
 
-			//add <!-- svelte-ignore a11y-missing-attribute --> just before the element
-			code.appendLeft(element.start, "<!-- svelte-ignore a11y-missing-attribute -->")
+			//add <!-- svelte-ignore a11y_missing_attribute --> just before the element
+			code.appendLeft(element.start, "<!-- svelte-ignore a11y_missing_attribute -->")
 		} else {
 			for (const [element_name, attribute_translations] of Object.entries(translations)) {
 				for (const { attribute_name, lang_attribute_name } of attribute_translations) {
