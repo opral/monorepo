@@ -28,7 +28,7 @@ const dummyAutomations = [
 		action: () => <>
 			<span>Email</span>
 			<span className="text-slate-500 mx-1.5">{" "} to {" "}</span>
-			<span>tagged as "reviewed"</span>
+			<span>@Team</span>
 		</>
 	},
 	{
