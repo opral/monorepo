@@ -19,7 +19,7 @@ export async function applySchema(args: {
     metadata TEXT,
 
     CHECK (is_valid_file_path(path))
-  ) WITHOUT ROWID, STRICT;
+  ) STRICT;
 
   -- TODO Queue - handle deletion - the current queue doesn't handle delete starting with feature parity
     -- CREATE TRIGGER IF NOT EXISTS file_delete BEFORE DELETE ON file
@@ -80,7 +80,7 @@ export async function applySchema(args: {
 
     UNIQUE (id, entity_id, file_id, schema_key),
     FOREIGN KEY(snapshot_id) REFERENCES snapshot(id)
-  ) WITHOUT ROWID, STRICT;
+  ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_edge (
     parent_id TEXT NOT NULL,
@@ -91,7 +91,7 @@ export async function applySchema(args: {
     FOREIGN KEY(child_id) REFERENCES change(id),
     -- Prevent self referencing edges
     CHECK (parent_id != child_id)
-  ) WITHOUT ROWID, STRICT;
+  ) STRICT;
 
   CREATE TABLE IF NOT EXISTS snapshot (
     id TEXT GENERATED ALWAYS AS (sha256(content)) STORED UNIQUE,
@@ -112,7 +112,7 @@ export async function applySchema(args: {
     change_set_id TEXT NOT NULL,
 
     FOREIGN KEY(change_set_id) REFERENCES change_set(id)
-  ) WITHOUT ROWID, STRICT;
+  ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_conflict_resolution (
     change_conflict_id TEXT NOT NULL,
@@ -125,13 +125,13 @@ export async function applySchema(args: {
     PRIMARY KEY(change_conflict_id, resolved_change_id),
     FOREIGN KEY(change_conflict_id) REFERENCES change_conflict(id),
     FOREIGN KEY(resolved_change_id) REFERENCES change(id)
-  ) WITHOUT ROWID, STRICT;
+  ) STRICT;
 
   -- change sets
 
   CREATE TABLE IF NOT EXISTS change_set (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7())
-  ) WITHOUT ROWID, STRICT;
+  ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_element (
     change_set_id TEXT NOT NULL,
@@ -149,7 +149,7 @@ export async function applySchema(args: {
     FOREIGN KEY(label_id) REFERENCES label(id),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id),
     PRIMARY KEY(label_id, change_set_id)
-  ) WITHOUT ROWID, STRICT;
+  ) STRICT;
 
   -- discussions 
 
@@ -158,7 +158,7 @@ export async function applySchema(args: {
     change_set_id TEXT NOT NULL,
 
     FOREIGN KEY(change_set_id) REFERENCES change_set(id)
-  ) WITHOUT ROWID, STRICT;
+  ) STRICT;
 
   CREATE TABLE IF NOT EXISTS comment (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
@@ -169,14 +169,14 @@ export async function applySchema(args: {
 
     FOREIGN KEY(discussion_id) REFERENCES discussion(id),
     FOREIGN KEY(parent_id) REFERENCES comment(id)
-  ) WITHOUT ROWID, STRICT;
+  ) STRICT;
 
   -- labels
   
   CREATE TABLE IF NOT EXISTS label (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     name TEXT NOT NULL UNIQUE  -- e.g., 'confirmed', 'reviewed'
-  ) WITHOUT ROWID, STRICT;
+  ) STRICT;
 
   INSERT OR IGNORE INTO label (name) VALUES ('confirmed');
   INSERT OR IGNORE INTO label (name) VALUES ('grouped');
@@ -204,7 +204,7 @@ export async function applySchema(args: {
     -- and update version pointers to 
     -- create a new change set on updates
     UNIQUE (id, change_set_id)
-  ) WITHOUT ROWID, STRICT;
+  ) STRICT;
 
   CREATE TABLE IF NOT EXISTS version_change_conflict (
     version_id TEXT NOT NULL,
@@ -213,7 +213,7 @@ export async function applySchema(args: {
     PRIMARY KEY (version_id, change_conflict_id),
     FOREIGN KEY (version_id) REFERENCES version(id),
     FOREIGN KEY (change_conflict_id) REFERENCES change_conflict(id)
-  ) WITHOUT ROWID, STRICT;
+  ) STRICT;
 
   -- only one version can be active at a time
   -- hence, the table has only one row
@@ -221,7 +221,7 @@ export async function applySchema(args: {
     id TEXT NOT NULL PRIMARY KEY,
 
     FOREIGN KEY(id) REFERENCES version(id)
-  ) WITHOUT ROWID, STRICT;
+  ) STRICT;
 
   -- Insert the default version if missing
   -- (this is a workaround for not having a separata creation and migration schema's)
