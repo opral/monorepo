@@ -39,7 +39,7 @@ export default function Page() {
 
 	return (
 		<div className="flex bg-white">
-			<div className="flex-1 flex flex-col">
+			<div className="max-w-[340px] flex-1 flex flex-col">
 				<SectionHeader title="Files">
 					<Button variant="secondary" onClick={() => handleUpload()}>
 						<IconUpload />

@@ -5,6 +5,7 @@ import { saveLixToOpfs } from "./../../helper/saveLixToOpfs.ts";
 import { useSearchParams } from "react-router-dom";
 import clsx from "clsx";
 import { activeFileAtom } from "./../../state-active-file.ts";
+import { Button } from "./../../../components/ui/button.tsx";
 
 export default function Page() {
     // atoms
@@ -40,6 +41,11 @@ export default function Page() {
 		<div className="w-full">
 			{/* Test
             <InputTest /> */}
+            <Button variant="default" >Test</Button>
+            <Button variant="secondary" >Test</Button>
+            <Button variant="outline" >Test</Button>
+            <Button variant="ghost" >Test</Button>
+            <Button variant="link" >Test</Button>
             
             <div className="flex justify-between pt-8">
                 <p className="font-bold">Test render files</p>
