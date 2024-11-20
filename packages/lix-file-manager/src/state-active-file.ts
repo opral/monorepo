@@ -32,11 +32,17 @@ export const activeFileAtom = atom(async (get) => {
 
 	const lix = await get(lixAtom);
 
-	return await lix.db
+	const fileAtom = await lix.db
 		.selectFrom("file")
 		.selectAll()
 		.where("id", "=", fileId)
-		.executeTakeFirstOrThrow();
+		.execute()
+
+	if(!fileAtom) {
+		console.error("no file found")
+		return undefined
+	}
+	return fileAtom
 });
 
 export const parsedCsvAtom = atom(async (get) => {

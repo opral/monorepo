@@ -102,7 +102,7 @@ export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
 											}`}
 										>
 											<IconAutomation
-												class={`h-6 w-6 ${
+												className={`h-6 w-6 ${
 													location.pathname === "/automation"
 														? "text-slate-950"
 														: "text-slate-700"

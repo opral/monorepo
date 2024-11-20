@@ -18,7 +18,7 @@
     --primary-foreground: 0 0% 98%;
     --secondary: 204, 45%, 98%;
     --secondary-foreground: 0 0% 9%;
-    --accent: 0 0% 96.1%;
+    --accent: 210, 40%, 96%;
     --accent-foreground: 0 0% 9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -42,9 +42,9 @@
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
+    --muted: 210, 40%, 96%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
+    --accent: 210, 40%, 96%;
     --accent-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
