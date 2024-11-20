@@ -133,7 +133,7 @@ describe("saveMessage", () => {
 describe("variable reference", () => {
 	it("should correctly identify variable reference (at the end)", async () => {
 		const fs = createNodeishMemoryFs()
-		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello {{username}}" }))
+		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello {username}" }))
 		const pluginSettings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
@@ -159,7 +159,7 @@ describe("variable reference", () => {
 
 	it("should correctly identify variable reference (at the beginning)", async () => {
 		const fs = createNodeishMemoryFs()
-		await fs.writeFile("./en.json", JSON.stringify({ test: "{{username}} the great" }))
+		await fs.writeFile("./en.json", JSON.stringify({ test: "{username} the great" }))
 		const pluginSettings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
