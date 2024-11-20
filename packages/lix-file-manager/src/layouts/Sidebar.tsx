@@ -14,10 +14,12 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from "../../components/ui/avatar.tsx";
-import { File, Workflow } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { usernameAtom } from "../state.ts";
 import { useAtomValue } from "jotai";
+import clsx from "clsx";
+import IconFile from "./../components/icons/IconFile.tsx";
+import IconAutomation from "./../components/icons/IconAutomation.tsx";
 
 interface AppSidebarProps {
 	onSettingsClick?: (open: boolean) => void;
@@ -29,36 +31,41 @@ export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
 
 	return (
 		<Sidebar
-			className="w-[60px] h-full border-r border-[#DBDFE7] bg-[#FCFCFD]"
+			className="w-14 h-full border-r border-[#DBDFE7] bg-[#FCFCFD]"
 			collapsible="none"
 		>
-			<SidebarHeader className="p-3 flex justify-center items-center">
+			<SidebarHeader className="w-14 h-[60px] flex justify-center items-center">
 				<a href="/">
 					<img src="/lix.svg" alt="logo" className="w-6 h-6" />
 				</a>
 			</SidebarHeader>
 
-			<SidebarContent className="flex-1">
+			<SidebarContent className="flex-1 pt-1.5">
 				<SidebarMenu className="flex flex-col items-center gap-2">
 					<SidebarMenuItem>
 						<SidebarMenuButton
 							asChild
 							isActive={location.pathname === "/"}
-							className="w-9 h-9"
+							className={clsx(
+								"w-9 h-9", 
+								location.pathname === "/"
+									? "bg-slate-200"
+									: "hover:bg-slate-100"
+							)}
 						>
 							<Link
 								to="/"
 								className={`flex items-center justify-center w-9 h-9 rounded-md ${
 									location.pathname === "/"
-										? "bg-[#E8EDF3]"
-										: "hover:bg-[#E8EDF3]"
+										? " bg-slate-200"
+										: " hover:bg-slate-100"
 								}`}
 							>
-								<File
+								<IconFile
 									className={`h-4 w-4 ${
 										location.pathname === "/"
-											? "text-[#141A21]"
-											: "text-[#8C9AAD]"
+											? "text-slate-950"
+											: "text-slate-700"
 									}`}
 								/>
 								<span className="sr-only">Files</span>
@@ -76,15 +83,15 @@ export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
 								to="/automation"
 								className={`flex items-center justify-center w-9 h-9 rounded-md ${
 									location.pathname === "/automation"
-										? "bg-[#E8EDF3]"
-										: "hover:bg-[#E8EDF3]"
+										? " bg-slate-200"
+										: " hover:bg-slate-100"
 								}`}
 							>
-								<Workflow
-									className={`h-4 w-4 ${
+								<IconAutomation
+									class={`h-6 w-6 ${
 										location.pathname === "/automation"
-											? "text-[#141A21]"
-											: "text-[#8C9AAD]"
+											? "text-slate-950"
+											: "text-slate-700"
 									}`}
 								/>
 								<span className="sr-only">Workflows</span>

@@ -9,7 +9,7 @@ interface SectionHeaderProps {
 
 const SectionHeader = ({ title, backaction, children }: SectionHeaderProps) => {
   return (
-    <div className="flex items-center justify-between px-5 py-3">
+    <div className="flex items-center justify-between px-5 h-[60px]">
       <div className="flex items-center gap-3">
         {backaction && (
           <Button variant="ghost" size="icon" onClick={backaction}>
