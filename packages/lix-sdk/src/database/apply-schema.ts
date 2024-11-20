@@ -16,7 +16,7 @@ export async function applySchema(args: {
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL,
-    metadata TEXT,
+    metadata BLOB,
 
     CHECK (is_valid_file_path(path))
   ) STRICT;
@@ -37,8 +37,8 @@ export async function applySchema(args: {
     data_after BLOB,
     path_before TEXT,
     path_after TEXT,
-    metadata_before TEXT,
-    metadata_after TEXT
+    metadata_before BLOB,
+    metadata_after BLOB
   ) STRICT;
 
   CREATE TRIGGER IF NOT EXISTS file_insert BEFORE INSERT ON file
@@ -95,7 +95,7 @@ export async function applySchema(args: {
 
   CREATE TABLE IF NOT EXISTS snapshot (
     id TEXT GENERATED ALWAYS AS (sha256(content)) STORED UNIQUE,
-    content TEXT
+    content BLOB
   ) STRICT;
 
   -- Create the default 'no-content' snapshot
