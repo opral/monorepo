@@ -8,6 +8,7 @@ import { Button } from "./../../../components/ui/button.tsx"
 import { Separator } from "./../../../components/ui/separator.tsx"
 import { changesCurrentVersionAtom } from "./../../state-active-file.ts";
 import { Link } from "react-router-dom";
+import ChangeDot from "./../../components/ChangeDot.tsx";
 
 export default function Page() {
 	// state atoms
@@ -46,7 +47,6 @@ export default function Page() {
 						Upload
 					</Button>
 				</SectionHeader>
-				{/* <FileList /> */}
 				{files.map((file) => {
 					return (
 						<ListItems
@@ -62,7 +62,12 @@ export default function Page() {
 			<Separator orientation="vertical" className="h-screen" />
 			<div className="flex-1">
 				<SectionHeader title="Graph" />
-				<p className="w-full break-all">{JSON.stringify(changesCurrentVersion, null, 2)}</p>
+				<pre className="w-full break-all">{JSON.stringify(changesCurrentVersion, null, 2)}</pre>
+				<div className="p-4">
+					<ChangeDot bottom />
+					<ChangeDot top bottom />
+					<ChangeDot top />
+				</div>
 			</div>
 		</div>
 	);
