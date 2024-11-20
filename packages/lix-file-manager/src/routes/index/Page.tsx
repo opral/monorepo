@@ -9,6 +9,7 @@ import { Separator } from "./../../../components/ui/separator.tsx"
 import { changesCurrentVersionAtom } from "./../../state-active-file.ts";
 import { Link } from "react-router-dom";
 import ChangeDot from "./../../components/ChangeDot.tsx";
+import ChangeGroupDot from "./../../components/ChangeGroupDot.tsx";
 
 export default function Page() {
 	// state atoms
@@ -66,6 +67,7 @@ export default function Page() {
 				<div className="p-4">
 					<ChangeDot bottom />
 					<ChangeDot top bottom />
+					<ChangeGroupDot top bottom />
 					<ChangeDot top />
 				</div>
 			</div>
