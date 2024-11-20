@@ -1,5 +1,13 @@
 # @inlang/paraglide-sveltekit
 
+## 0.12.1
+
+### Patch Changes
+
+- 7857f62: fixes "`a11y-missing-attribute` is no longer valid — please use `a11y_missing_attribute` instead"
+
+  https://github.com/opral/inlang-paraglide-js/issues/259
+
 ## 0.12.0
 
 ### Minor Changes
