@@ -3,7 +3,86 @@ import { expect, test } from "vitest";
 import { createDialect, createInMemoryDatabase } from "sqlite-wasm-kysely";
 import { ParseJsonBPlugin } from "./parse-jsonb-plugin.js";
 
-test("should transform a selectAll that contains a json column", async () => {
+test("select()", async () => {
+	const db = await mockDatabase();
+
+	await db
+		.insertInto("mock_table")
+		.values({
+			json_column: new TextEncoder().encode(JSON.stringify({ a: 1 })),
+			other: "value",
+			just_blob: new TextEncoder().encode("{mock blob value that's not a json"),
+		})
+		.execute();
+
+	const result = await db
+		.selectFrom("mock_table")
+		.select("json_column")
+		.executeTakeFirst();
+
+	expect(result).toEqual({ json_column: { a: 1 } });
+});
+
+test("select() with alias", async () => {
+	const db = await mockDatabase();
+
+	await db
+		.insertInto("mock_table")
+		.values({
+			json_column: new TextEncoder().encode(JSON.stringify({ a: 1 })),
+			other: "value",
+			just_blob: new TextEncoder().encode("{mock blob value that's not a json"),
+		})
+		.execute();
+
+	const result = await db
+		.selectFrom("mock_table")
+		.select("json_column as jc")
+		.executeTakeFirst();
+
+	expect(result).toEqual({ jc: { a: 1 } });
+});
+
+test("select() with joins", async () => {
+	const db = await mockDatabase();
+
+	const insert = await db
+		.insertInto("mock_table")
+		.values({
+			json_column: new TextEncoder().encode(JSON.stringify({ a: 1 })),
+			other: "value",
+			just_blob: new TextEncoder().encode("{mock blob value that's not a json"),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	await db
+		.insertInto("other_table")
+		.values({
+			mock_table_id: insert.id,
+			json_column: new TextEncoder().encode(JSON.stringify({ b: 2 })),
+		})
+		.execute();
+
+	const result0 = await db
+		.selectFrom("mock_table")
+		.innerJoin("other_table", "mock_table.id", "other_table.mock_table_id")
+		.select("mock_table.json_column")
+		.executeTakeFirst();
+
+	expect(result0).toEqual({ json_column: { a: 1 } });
+
+	// other way around
+	const result1 = await db
+		.selectFrom("mock_table")
+		.innerJoin("other_table", "mock_table.id", "other_table.mock_table_id")
+		.select("other_table.json_column")
+		.executeTakeFirst();
+
+	expect(result1).toEqual({ json_column: { b: 2 } });
+});
+
+test("selectAll()", async () => {
 	const db = await mockDatabase();
 
 	await db
@@ -25,7 +104,7 @@ test("should transform a selectAll that contains a json column", async () => {
 	expect(result?.just_blob).toBeInstanceOf(Uint8Array);
 });
 
-test("should transform a selectAll that is aliased", async () => {
+test("selectAll() with alias", async () => {
 	const db = await mockDatabase();
 
 	await db
@@ -47,7 +126,7 @@ test("should transform a selectAll that is aliased", async () => {
 	expect(result?.just_blob).toBeInstanceOf(Uint8Array);
 });
 
-test("selectAll should work with joins", async () => {
+test("selectAll() with joins", async () => {
 	const db = await mockDatabase();
 
 	const insert = await db
@@ -73,8 +152,6 @@ test("selectAll should work with joins", async () => {
 		.innerJoin("other_table", "mock_table.id", "other_table.mock_table_id")
 		.selectAll("mock_table")
 		.executeTakeFirst();
-
-	console.log(result);
 
 	expect(result?.json_column).toStrictEqual({ a: 1 });
 	expect(result?.other).toBe("value");
