@@ -4,6 +4,7 @@ import IconArrowRight from "./icons/IconArrowRight.tsx";
 import IconAutomation from "./icons/IconAutomation.tsx";
 import IconFile from "./icons/IconFile.tsx";
 import clsx from "clsx";
+import IconMeatball from "./icons/IconMeatball.tsx";
 
 interface ListItemsProps {
   id: string;
@@ -33,12 +34,18 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
         {name}
       </div>
       {type === "file" && (
-        <a className="opacity-0 transition-opacity group-hover:opacity-100" href={appLink}>
-          <Button variant="ghost">
-            Open in app
-            <IconArrowRight />
-          </Button>
-        </a>
+        <div className="flex">
+          <a className="opacity-0 transition-opacity group-hover:opacity-100" href={appLink}>
+            <Button variant="ghost">
+              Open
+            </Button>
+          </a>
+          <div className="opacity-0 transition-opacity group-hover:opacity-100">
+            <Button variant="ghost" size="icon">
+              <IconMeatball />
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   )
