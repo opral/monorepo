@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+import { slate } from "tailwindcss/colors";
+
 export default {
 	darkMode: ["class", "class"],
 	content: [
@@ -9,6 +11,7 @@ export default {
 	theme: {
 		extend: {
 			colors: {
+				neutral: slate, // Use Tailwind's slate color palette for neutral
 				border: "hsl(var(--border))",
 				input: "hsl(var(--input))",
 				ring: "hsl(var(--ring))",
