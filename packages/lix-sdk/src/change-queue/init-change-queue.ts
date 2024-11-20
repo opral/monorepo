@@ -106,12 +106,7 @@ export async function initChangeQueue(args: {
 			// we either execute the queue immediately if we know there is more work or fall back to polling
 			setTimeout(() => queueWorker(true), hasMoreEntriesSince ? 0 : 1000);
 		} catch (e) {
-			// https://linear.app/opral/issue/LIXDK-102/re-visit-simplifying-the-change-queue-implementation
-
-			console.error(
-				"change queue failed (will remain so until rework of change queue): ",
-				e,
-			);
+			console.error("change queue failed ", e);
 		}
 	}
 	// start a worker in case there are entries
