@@ -5,10 +5,11 @@ import IconFile from "./icons/IconFile.tsx";
 import clsx from "clsx";
 import IconMeatball from "./icons/IconMeatball.tsx";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./../../components/ui/dropdown-menu.tsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { lixAtom } from "./../state.ts";
 import { useAtom } from "jotai";
 import { saveLixToOpfs } from "./../helper/saveLixToOpfs.ts";
+import { changesCurrentVersionAtom } from "./../state-active-file.ts";
 
 interface ListItemsProps {
   id: string;
@@ -26,6 +27,7 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 
   // global state
   const [lix] = useAtom(lixAtom);
+  const [changes] = useAtom(changesCurrentVersionAtom);
 
   //functions
   const handleSelectFile = () => {
@@ -54,6 +56,30 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 		a.click();
 		document.body.removeChild(a);
 	};
+
+  const handleOverrideFile = async () => {
+    
+    const input = document.createElement("input");
+    input.type = "file";
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        await lix.db
+          .updateTable("file")
+          .set("data", await file.arrayBuffer())
+          .where("id", "=", id)
+          .returningAll()
+          .execute();
+
+        await saveLixToOpfs({ lix });
+      } 
+    }
+    input.click();
+  }
+
+  // useEffect(() => {
+  //   console.log(changes)
+  // }, [changes])
 
   return (
     <div onClick={() => handleSelectFile()} className={clsx(
@@ -84,6 +110,7 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
             <DropdownMenuContent>
               <DropdownMenuItem onClick={() => handleDownload()}>Download</DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleDeleteFile()}>Delete</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleOverrideFile()}>Override</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

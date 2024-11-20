@@ -27,7 +27,7 @@ export const activeFileAtom = atom(async (get) => {
 		// but fine for now.
 		// window.location.href = "/";
 		console.error("no active file. reroute should avoid this throw");
-		return []
+		return undefined
 	}
 
 	const lix = await get(lixAtom);
@@ -36,7 +36,7 @@ export const activeFileAtom = atom(async (get) => {
 		.selectFrom("file")
 		.selectAll()
 		.where("id", "=", fileId)
-		.execute()
+		.executeTakeFirst()
 
 	if(!fileAtom) {
 		console.error("no file found")
@@ -100,6 +100,7 @@ export const activeCellEntityIdAtom = atom(async (get) => {
 export const activeCellChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const activeFile = await get(activeFileAtom);
+	if(!activeFile) return []
 	const cellEntityId = await get(activeCellEntityIdAtom);
 	const currentBranch = await get(currentVersionAtom);
 	const lix = await get(lixAtom);
@@ -151,6 +152,7 @@ export const unconfirmedChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
+	if(!activeFile) return []
 	const currentBranch = await get(currentVersionAtom);
 
 	return await lix.db
@@ -166,6 +168,7 @@ export const allChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
+	if(!activeFile) return []
 	// const currentBranch = await get(currentBranchAtom);
 	return await lix.db
 		.selectFrom("change")
@@ -181,6 +184,7 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
+	if(!activeFile) return []
 	const currentBranch = await get(currentVersionAtom);
 	return await lix.db
 		.selectFrom("change")
@@ -196,6 +200,7 @@ export const allEdgesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
+	if(!activeFile) return []
 	return await lix.db
 		.selectFrom("change_edge")
 		.innerJoin("change", "change.id", "change_edge.parent_id")
@@ -208,6 +213,7 @@ export const changeConflictsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
+	if(!activeFile) return []
 	const currentBranch = await get(currentVersionAtom);
 	const changeConflictElements = await lix.db
 		.selectFrom("change_set_element")
