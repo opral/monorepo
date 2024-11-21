@@ -354,20 +354,3 @@ test("invalid file paths should be rejected", async () => {
 	);
 });
 
-test("it should have a default anonymous account", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-
-	const account = await db
-		.selectFrom("account")
-		.selectAll()
-		.where("id", "=", "anonymous")
-		.executeTakeFirst();
-
-	expect(account).toMatchObject({
-		id: "anonymous",
-		name: "anonymous",
-	});
-});

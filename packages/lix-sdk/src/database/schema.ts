@@ -1,15 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
+import type {
+	AccountTable,
+	CurrentAccountTable,
+} from "../account/database-schema.js";
 
 export type LixDatabaseSchema = {
+	// account
 	account: AccountTable;
-	file: LixFileTable;
-	change_queue: ChangeQueueTable;
-	change_edge: ChangeEdgeTable;
+	current_account: CurrentAccountTable;
+
+	// snapshot
 	snapshot: SnapshotTable;
 	label: LabelTable;
 
+	// file
+	file: LixFileTable;
+	change_queue: ChangeQueueTable;
+
+	// change
 	change: ChangeTable;
+	change_edge: ChangeEdgeTable;
 	change_author: ChangeAuthorTable;
 
 	// change set
@@ -266,12 +277,3 @@ type ChangeConflictResolutionTable = {
 	resolved_change_id: string;
 };
 
-// ------ account
-
-export type Account = Selectable<AccountTable>;
-export type NewAccount = Insertable<AccountTable>;
-export type AccountUpdate = Updateable<AccountTable>;
-type AccountTable = {
-	id: Generated<string>;
-	name: string;
-};

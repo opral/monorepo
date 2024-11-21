@@ -1,4 +1,5 @@
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
+import { applyAccountDatabaseSchema } from "../account/database-schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -6,20 +7,11 @@ import type { SqliteDatabase } from "sqlite-wasm-kysely";
 export async function applySchema(args: {
 	sqlite: SqliteDatabase;
 }): Promise<unknown> {
+	applyAccountDatabaseSchema(args.sqlite);
+
 	return args.sqlite.exec`
 
   PRAGMA foreign_keys = ON;
-
-  -- account 
-
-  CREATE TABLE IF NOT EXISTS account (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
-    name TEXT NOT NULL
-  ) STRICT;
-
-  -- default anonymous account
-  INSERT OR IGNORE INTO account (id, name) 
-  VALUES ('anonymous', 'anonymous');
 
   -- file
 

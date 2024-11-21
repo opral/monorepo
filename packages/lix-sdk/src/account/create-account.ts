@@ -1,5 +1,5 @@
-import type { Account } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import type { Account } from "./database-schema.js";
 
 export async function createAccount(args: {
 	lix: Lix;

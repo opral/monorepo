@@ -1,4 +1,5 @@
-import type { Account, Comment } from "../database/schema.js";
+import type { Account } from "../account/database-schema.js";
+import type { Comment } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export async function createComment(args: {
