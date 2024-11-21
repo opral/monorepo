@@ -14,6 +14,7 @@ import { createChangeSet } from "../change-set/create-change-set.js";
 import { createDiscussion } from "../discussion/create-discussion.js";
 import { createComment } from "../discussion/create-comment.js";
 import { changeQueueSettled } from "../change-queue/change-queue-settled.js";
+import { sql } from "kysely";
 
 test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const mockSnapshots = [
@@ -69,11 +70,10 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 
 	await sourceLix.db
 		.insertInto("snapshot")
-
 		.values(
-			[mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!].map((s) => {
-				return { content: s.content };
-			}),
+			[mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!].map((s) => ({
+				content: s.content,
+			})),
 		)
 		.execute();
 

@@ -9,14 +9,15 @@ export async function applySchema(args: {
 	return args.sqlite.exec`
 
   PRAGMA foreign_keys = ON;
-
+  PRAGMA auto_vacuum = 2; -- incremental https://www.sqlite.org/pragma.html#pragma_auto_vacuum
+ 
   -- file
 
   CREATE TABLE IF NOT EXISTS file (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL,
-    metadata TEXT,
+    metadata BLOB,
 
     CHECK (is_valid_file_path(path))
   ) STRICT;
@@ -37,8 +38,8 @@ export async function applySchema(args: {
     data_after BLOB,
     path_before TEXT,
     path_after TEXT,
-    metadata_before TEXT,
-    metadata_after TEXT
+    metadata_before BLOB,
+    metadata_after BLOB
   ) STRICT;
 
   CREATE TRIGGER IF NOT EXISTS file_insert BEFORE INSERT ON file
@@ -94,8 +95,8 @@ export async function applySchema(args: {
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS snapshot (
-    id TEXT GENERATED ALWAYS AS (sha256(content)) STORED UNIQUE,
-    content TEXT
+    id TEXT GENERATED ALWAYS AS (json_sha256(content)) STORED UNIQUE,
+    content BLOB
   ) STRICT;
 
   -- Create the default 'no-content' snapshot
