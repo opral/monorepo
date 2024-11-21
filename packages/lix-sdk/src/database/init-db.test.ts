@@ -3,6 +3,7 @@ import { test, expect } from "vitest";
 import { initDb } from "./init-db.js";
 import { validate } from "uuid";
 import { mockChange } from "../change/mock-change.js";
+import { jsonSha256 } from "../snapshot/json-sha-256.js";
 
 test("file ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
@@ -56,17 +57,18 @@ test("snapshot ids should default to sha256", async () => {
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
+
+	const content = { a: "value" };
+
 	const snapshot = await db
 		.insertInto("snapshot")
 		.values({
-			content: { a: "value from insert statement" },
+			content,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	expect(snapshot.id).toBe(
-		"19ce22178013c4a047e8c90135ed57bfe4cc6451917dbb75f5b838922cf10b19",
-	);
+	expect(snapshot.id).toBe(jsonSha256(content));
 });
 
 test("inserting the same snapshot multiple times should be possible and not lead to duplicates (content addressable)", async () => {
@@ -94,7 +96,11 @@ test("inserting the same snapshot multiple times should be possible and not lead
 		.values({
 			content: { a: "some data" },
 		})
-		.onConflict((oc) => oc.doUpdateSet({ content: { a: "some data" } }))
+		.onConflict((oc) =>
+			oc.doUpdateSet((eb) => ({
+				content: eb.ref("excluded.content"),
+			})),
+		)
 		.returningAll()
 		.executeTakeFirstOrThrow();
 

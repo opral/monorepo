@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type {
 	AccountTable,
@@ -53,8 +52,8 @@ type ChangeQueueTable = {
 	path_after: string | null;
 	data_before: ArrayBuffer | null;
 	data_after: ArrayBuffer | null;
-	metadata_before: Record<string, any> | null;
-	metadata_after: Record<string, any> | null;
+	metadata_before: JSONObject | null;
+	metadata_after: JSONObject | null;
 };
 
 // named lix file to avoid conflict with built-in file type
@@ -74,7 +73,7 @@ type LixFileTable = {
 	 */
 	path: string;
 	data: ArrayBuffer;
-	metadata: Record<string, any> | null;
+	metadata: JSONObject | null;
 };
 
 export type Change = Selectable<ChangeTable>;
@@ -131,7 +130,7 @@ type SnapshotTable = {
 	 *   - For a csv cell change, the value would be the new cell value.
 	 *   - For an inlang message change, the value would be the new message.
 	 */
-	content: Record<string, any> | null;
+	content: JSONObject | null;
 };
 
 // ------ change sets ------
@@ -277,3 +276,17 @@ type ChangeConflictResolutionTable = {
 	resolved_change_id: string;
 };
 
+/**
+ * JSON object ensures serialization.  
+ * 
+ * JSON object's are a subset of JS objects. 
+ * JS stuff like functions or undefined are 
+ * not allowed in JSON objects. 
+ */
+export type JSONObject = {
+	[key: string]: JSONValue;
+};
+
+type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
+
+type JSONArray = JSONValue[];

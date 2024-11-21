@@ -69,11 +69,10 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 
 	await sourceLix.db
 		.insertInto("snapshot")
-
 		.values(
-			[mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!].map((s) => {
-				return { content: s.content };
-			}),
+			[mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!].map((s) => ({
+				content: s.content,
+			})),
 		)
 		.execute();
 

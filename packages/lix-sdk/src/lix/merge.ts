@@ -151,7 +151,7 @@ export async function merge(args: {
 				.values(
 					// https://github.com/opral/inlang-message-sdk/issues/123
 					sourceChangesWithSnapshot.map((change) => ({
-						content: JSON.stringify(change.content),
+						content: change.content,
 					})),
 				)
 				// ignore if already exists
