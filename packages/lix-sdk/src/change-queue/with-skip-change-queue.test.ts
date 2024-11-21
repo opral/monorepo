@@ -3,7 +3,6 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { changeQueueSettled } from "./change-queue-settled.js";
 import { withSkipChangeQueue } from "./with-skip-change-queue.js";
-import { sql } from "kysely";
 
 test("skipping the change queue should be possible", async () => {
 	const mockPlugin: LixPlugin = {

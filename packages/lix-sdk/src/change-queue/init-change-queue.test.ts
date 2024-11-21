@@ -4,7 +4,6 @@ import { newLixFile } from "../lix/new-lix.js";
 import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
 import type { ChangeQueueEntry, LixFile } from "../database/schema.js";
 import { changeQueueSettled } from "./change-queue-settled.js";
-import { sql } from "kysely";
 
 test("should use queue and settled correctly", async () => {
 	const mockPlugin: LixPlugin = {
