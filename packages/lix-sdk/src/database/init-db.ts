@@ -1,7 +1,7 @@
 import { Kysely, ParseJSONResultsPlugin } from "kysely";
 import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { v7 as uuid_v7 } from "uuid";
-import { SerializeJsonPlugin } from "./serialize-json-plugin.js";
+import { SerializeJsonPlugin } from "./kysely-plugin/jsonb-plugin-v1.js";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
 import { validateFilePath } from "../file/validate-file-path.js";

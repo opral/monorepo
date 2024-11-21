@@ -1,8 +1,20 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
+/**
+ * THIS WAS A PROTOYPE FOR DETECTING JSONB COLUMNS
+ * INSTEAD OF RELYING ON HEURISTICS BUT WAS TOO COMPLEX
+ * FOR v1 of lix.
+ *
+ * Code still exists for future reference.
+ *
+ *
+ */
+
 import {
 	AliasNode,
 	FromNode,
 	SelectionNode,
-	TableNode,
 	type KyselyPlugin,
 	type PluginTransformQueryArgs,
 } from "kysely";
