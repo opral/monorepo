@@ -14,11 +14,13 @@ test("inserts should work", async () => {
 			just_blob: new Uint8Array(),
 		})
 		.returningAll()
+		// no parsing json plugin is installed, hence select json from db instead
+		.returning(sql`json(metadata)`.as("metadata"))
 		.executeTakeFirstOrThrow();
 
 	expect(result).toEqual({
 		id: 1,
-		metadata: { a: 1 },
+		metadata: JSON.stringify({ a: 1 }),
 		other: "value",
 		just_blob: new Uint8Array(),
 	});
@@ -42,11 +44,13 @@ test("updates should work", async () => {
 		.set({ metadata: { b: 2 } })
 		.where("id", "=", insert.id)
 		.returningAll()
+		// no parsing json plugin is installed, hence select json from db instead
+		.returning(sql`json(metadata)`.as("metadata"))
 		.executeTakeFirstOrThrow();
 
 	expect(result).toEqual({
 		id: 1,
-		metadata: { b: 2 },
+		metadata: JSON.stringify({ b: 2 }),
 		other: "value",
 		just_blob: new Uint8Array(),
 	});
@@ -75,11 +79,13 @@ test("onConflict should work", async () => {
 		})
 		.onConflict((oc) => oc.doUpdateSet({ metadata: { b: 2 } }))
 		.returningAll()
+		// no parsing json plugin is installed, hence select json from db instead
+		.returning(sql`json(metadata)`.as("metadata"))
 		.executeTakeFirstOrThrow();
 
 	expect(result).toEqual({
 		id: 1,
-		metadata: { b: 2 },
+		metadata: JSON.stringify({ b: 2 }),
 		other: "value",
 		just_blob: new Uint8Array(),
 	});
@@ -103,12 +109,7 @@ const mockDatabase = async () => {
 		dialect: createDialect({
 			database,
 		}),
-		plugins: [
-			SerializeJsonBPlugin({
-				mock_table: ["metadata"],
-				other_table: ["content"],
-			}),
-		],
+		plugins: [SerializeJsonBPlugin()],
 	});
 
 	await sql`

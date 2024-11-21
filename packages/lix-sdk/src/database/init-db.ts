@@ -1,11 +1,12 @@
-import { Kysely, ParseJSONResultsPlugin } from "kysely";
+import { Kysely } from "kysely";
 import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { v7 as uuid_v7 } from "uuid";
-import { SerializeJsonPlugin } from "./kysely-plugin/jsonb-plugin-v1.js";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
 import { validateFilePath } from "../file/validate-file-path.js";
 import { jsonSha256 } from "../snapshot/json-sha-256.js";
+import { ParseJsonBPluginV1 } from "./kysely-plugin/parse-jsonb-plugin-v1.js";
+import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js";
 
 export function initDb(args: {
 	sqlite: SqliteDatabase;
@@ -16,7 +17,15 @@ export function initDb(args: {
 		dialect: createDialect({
 			database: args.sqlite,
 		}),
-		plugins: [new ParseJSONResultsPlugin(), new SerializeJsonPlugin()],
+		plugins: [
+			ParseJsonBPluginV1({
+				// jsonb columns
+				file: ["metadata"],
+				change_queue: ["metadata_before", "metadata_after"],
+				snapshot: ["content"],
+			}),
+			SerializeJsonBPlugin(),
+		],
 	});
 	return db;
 }

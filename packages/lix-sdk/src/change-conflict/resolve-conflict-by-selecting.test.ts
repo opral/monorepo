@@ -65,7 +65,6 @@ test("it should resolve a conflict and apply the changes", async () => {
 			}),
 		)
 		.returningAll()
-		.returning(sql`json("content")`.as("content"))
 		.execute();
 
 	const changes = await lix.db

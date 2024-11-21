@@ -95,7 +95,7 @@ export async function applySchema(args: {
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS snapshot (
-    id TEXT GENERATED ALWAYS AS (sha256(content)) STORED UNIQUE,
+    id TEXT GENERATED ALWAYS AS (json_sha256(content)) STORED UNIQUE,
     content BLOB
   ) STRICT;
 

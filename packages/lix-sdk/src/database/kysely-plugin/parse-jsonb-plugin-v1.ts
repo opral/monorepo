@@ -1,14 +1,16 @@
 import { type KyselyPlugin } from "kysely";
 import { createInMemoryDatabase } from "sqlite-wasm-kysely";
 
-export async function ParseJsonBPluginV1(
+// workaround for v1. v2 doesn't need to transform
+// jsonb columns during runtime
+const sqlite = await createInMemoryDatabase({});
+
+export function ParseJsonBPluginV1(
 	jsonbColumns: Record<string, string[]>,
-): Promise<KyselyPlugin> {
+): KyselyPlugin {
 	const jsonColumnNames = Object.keys(jsonbColumns).flatMap(
 		(key) => jsonbColumns[key]!,
 	);
-
-	const sqlite = await createInMemoryDatabase({});
 
 	return {
 		transformResult: async (args) => {

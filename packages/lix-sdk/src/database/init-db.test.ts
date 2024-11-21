@@ -3,7 +3,6 @@ import { test, expect } from "vitest";
 import { initDb } from "./init-db.js";
 import { validate } from "uuid";
 import { mockChange } from "../change/mock-change.js";
-import { sql } from "kysely";
 import { jsonSha256 } from "../snapshot/json-sha-256.js";
 
 test("file ids should default to uuid", async () => {
@@ -158,7 +157,6 @@ test("files should be able to have metadata", async () => {
 			},
 		})
 		.returningAll()
-		.returning(sql`json(metadata)`.as("metadata"))
 		.executeTakeFirstOrThrow();
 
 	expect(file.metadata?.primary_key).toBe("email");
@@ -172,7 +170,6 @@ test("files should be able to have metadata", async () => {
 			},
 		})
 		.returningAll()
-		.returning(sql`json(metadata)`.as("metadata"))
 		.executeTakeFirstOrThrow();
 
 	expect(updatedFile.metadata?.primary_key).toBe("something-else");

@@ -1,35 +1,122 @@
-import { ValuesNode, type KyselyPlugin } from "kysely";
+import {
+	OnConflictNode,
+	OperationNodeTransformer,
+	sql,
+	ValueListNode,
+	ValueNode,
+	ValuesNode,
+	type KyselyPlugin,
+} from "kysely";
 
-export function SerializeJsonBPlugin(
-	jsonbColumns: Record<string, string[]>,
-): KyselyPlugin {
-	const jsonColumnNames = Object.keys(jsonbColumns).flatMap(
-		(key) => jsonbColumns[key]!,
-	);
+export function SerializeJsonBPlugin(): KyselyPlugin {
+	const parseJsonTransformer = new SerializeJsonbTransformer();
 
 	return {
 		transformResult: async (args) => args.result,
-		transformQuery: (args) => {
-			const query = args.node;
+		transformQuery(args) {
+			if (
+				args.node.kind === "InsertQueryNode" ||
+				args.node.kind === "UpdateQueryNode"
+			) {
+				const result = parseJsonTransformer.transformNode(args.node);
 
-			if (query.kind !== "InsertQueryNode") {
-				return query;
+				return result;
 			}
-
-			const updatedValues = [];
-
-			for (const [i, value] of (
-				(query.values as ValuesNode).values[0]?.values ?? []
-			).entries()) {
-				if (!jsonColumnNames.includes(query.columns?.[i]?.column?.name ?? "")) {
-					updatedValues.push(value);
-					continue;
-				}
-				updatedValues.push(JSON.stringify(value));
-			}
-
-			// Return the updated query node
-			return query;
+			return args.node;
 		},
 	};
+}
+
+class SerializeJsonbTransformer extends OperationNodeTransformer {
+	override transformOnConflict(node: OnConflictNode): OnConflictNode {
+		return super.transformOnConflict({
+			...node,
+			updates: node.updates?.map((updateItem) => {
+				if (updateItem.kind !== "ColumnUpdateNode") {
+					return updateItem;
+				}
+				return {
+					kind: "ColumnUpdateNode",
+					column: updateItem.column,
+					value: this.transformValue(
+						// @ts-expect-error - type mismatch
+						updateItem.value,
+					),
+				};
+			}),
+		});
+	}
+
+	override transformValue(node: ValueNode): ValueNode {
+		const { value } = node;
+		const serializedValue = maybeSerializeJson(value);
+		if (value === serializedValue) {
+			return node;
+		}
+		// @ts-expect-error - type mismatch
+		return sql`jsonb(${serializedValue})`.toOperationNode();
+	}
+	/**
+	 * Transforms the value list node by replacing all JSON objects with `jsonb` function calls.
+	 */
+	override transformValueList(node: ValueListNode): ValueListNode {
+		return super.transformValueList({
+			...node,
+			values: node.values.map((listNodeItem) => {
+				if (listNodeItem.kind !== "ValueNode") {
+					return listNodeItem;
+				}
+				// @ts-expect-error - type mismatch
+				const { value } = listNodeItem;
+				const serializedValue = maybeSerializeJson(value);
+
+				if (value === serializedValue) {
+					return listNodeItem;
+				}
+				return sql`jsonb(${serializedValue})`.toOperationNode();
+			}),
+		});
+	}
+
+	/**
+	 * Why this function is needed or why this works remains a mystery.
+	 */
+	override transformValues(node: ValuesNode): ValuesNode {
+		return super.transformValues({
+			...node,
+			values: node.values.map((valueItemNode) => {
+				if (valueItemNode.kind !== "PrimitiveValueListNode") {
+					return valueItemNode;
+				}
+
+				// change PrimitiveValueListNode to ValueListNode
+				return {
+					kind: "ValueListNode",
+					values: valueItemNode.values.map(
+						(value) =>
+							({
+								kind: "ValueNode",
+								value,
+							}) as ValueNode,
+					),
+				} as ValueListNode;
+			}),
+		});
+	}
+}
+
+function maybeSerializeJson(value: any): any {
+	if (
+		// binary data
+		value instanceof ArrayBuffer ||
+		// uint8array, etc
+		ArrayBuffer.isView(value) ||
+		value === null ||
+		value === undefined
+	) {
+		return value;
+	} else if (typeof value === "object" || Array.isArray(value)) {
+		return JSON.stringify(value);
+	}
+	return value;
 }

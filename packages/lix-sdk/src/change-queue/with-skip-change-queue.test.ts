@@ -45,7 +45,6 @@ test("skipping the change queue should be possible", async () => {
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll()
-		.select(sql`json(snapshot.content)`.as("content"))
 		.execute();
 
 	expect(changes0).toHaveLength(1);
@@ -67,7 +66,6 @@ test("skipping the change queue should be possible", async () => {
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll()
-		.select(sql`json(snapshot.content)`.as("content"))
 		.execute();
 
 	// change is skipped, so no new change is created

@@ -21,7 +21,7 @@ import {
 
 type QueryId = PluginTransformQueryArgs["queryId"];
 
-export function ParseJsonBPlugin(
+export function ParseJsonBPluginV2(
 	jsonbColumns: Record<string, string[]>,
 ): KyselyPlugin {
 	const data = new WeakMap<QueryId, { jsonbColumNames: string[] }>();

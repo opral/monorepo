@@ -691,7 +691,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
-		.select(sql`json(snapshot.content)`.as("content"))
+		.select("snapshot.content")
 		.execute();
 
 	expect(changes).toEqual([
