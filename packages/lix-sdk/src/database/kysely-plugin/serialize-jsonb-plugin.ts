@@ -79,7 +79,7 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 	}
 
 	/**
-	 * Why this function is needed or why this works remains a mystery.
+	 * changes PrimitiveValueListNode to ValueListNode to allow kysely to process objects
 	 */
 	override transformValues(node: ValuesNode): ValuesNode {
 		return super.transformValues({
