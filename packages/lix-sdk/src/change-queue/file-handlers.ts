@@ -89,6 +89,11 @@ export async function handleFileInsert(args: {
 	}
 
 	await args.lix.db.transaction().execute(async (trx) => {
+		const currentAuthors = await trx
+			.selectFrom("current_account")
+			.selectAll()
+			.execute();
+
 		const currentVersion = await trx
 			.selectFrom("current_version")
 			.innerJoin("version", "current_version.id", "version.id")
@@ -112,6 +117,16 @@ export async function handleFileInsert(args: {
 				})
 				.returningAll()
 				.executeTakeFirstOrThrow();
+
+			for (const author of currentAuthors) {
+				await trx
+					.insertInto("change_author")
+					.values({
+						change_id: insertedChange.id,
+						account_id: author.id,
+					})
+					.execute();
+			}
 
 			await updateChangesInVersion({
 				lix: { ...args.lix, db: trx },
@@ -189,6 +204,10 @@ export async function handleFileChange(args: {
 	}
 
 	await args.lix.db.transaction().execute(async (trx) => {
+		const currentAuthors = await trx
+			.selectFrom("current_account")
+			.selectAll()
+			.execute();
 		const currentversion = await trx
 			.selectFrom("current_version")
 			.innerJoin("version", "current_version.id", "version.id")
@@ -222,6 +241,16 @@ export async function handleFileChange(args: {
 				})
 				.returningAll()
 				.executeTakeFirstOrThrow();
+
+			for (const author of currentAuthors) {
+				await trx
+					.insertInto("change_author")
+					.values({
+						change_id: insertedChange.id,
+						account_id: author.id,
+					})
+					.execute();
+			}
 
 			await updateChangesInVersion({
 				lix: { ...args.lix, db: trx },

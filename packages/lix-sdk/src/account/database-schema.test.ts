@@ -42,7 +42,7 @@ test("account table should have a default anonymous account", async () => {
 	});
 });
 
-test("current_account table should be empty on startup", async () => {
+test("current_account table default to anonymous on startup", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
@@ -54,42 +54,6 @@ test("current_account table should be empty on startup", async () => {
 			database: sqlite,
 		}),
 	});
-
-	const account = await db
-		.selectFrom("current_account")
-		.selectAll()
-		.executeTakeFirst();
-
-	expect(account).toBeUndefined();
-});
-
-test("current_account table should be able to be set", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-
-	applyAccountDatabaseSchema(sqlite);
-
-	const db = new Kysely<AccountSchema>({
-		dialect: createDialect({
-			database: sqlite,
-		}),
-	});
-
-	await db
-		.insertInto("account")
-		.values({
-			id: "test",
-			name: "test",
-		})
-		.execute();
-
-	await db
-		.insertInto("current_account")
-		.values({
-			id: "test",
-		})
-		.execute();
 
 	const account = await db
 		.selectFrom("current_account")
@@ -97,7 +61,7 @@ test("current_account table should be able to be set", async () => {
 		.executeTakeFirst();
 
 	expect(account).toMatchObject({
-		id: "test",
+		id: "anonymous",
 	});
 });
 
@@ -153,6 +117,8 @@ test('it should drop the temp "current_account" table on reboot to not persist t
 		})
 		.execute();
 
+	await db.deleteFrom("current_account").execute();
+
 	await db
 		.insertInto("current_account")
 		.values({
@@ -188,5 +154,7 @@ test('it should drop the temp "current_account" table on reboot to not persist t
 		.selectAll()
 		.executeTakeFirst();
 
-	expect(account2).toBeUndefined();
+	expect(account2).toMatchObject({
+		id: "anonymous",
+	});
 });

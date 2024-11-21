@@ -23,6 +23,11 @@ export function applyAccountDatabaseSchema(
     -- can't use foreign keys in temp tables... :(
   ) STRICT;
 
+  -- default to the anonymous account
+  INSERT INTO current_account (id)
+  SELECT 'anonymous'
+  WHERE NOT EXISTS (SELECT 1 FROM current_account);
+
 `;
 }
 
