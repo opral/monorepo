@@ -24,7 +24,8 @@ export async function openLix(args: {
 	 * like inlang (unlike a markdown, csv, or json plugin).
 	 *
 	 * (+) avoids separating app code from plugin code and
-	 *     resulting bundling logic.  
+	 *     resulting bundling logic.
+	 *
 	 * (-) such a file format must always be opened with the
 	 *     file format sdk. the file is not portable
 	 *
