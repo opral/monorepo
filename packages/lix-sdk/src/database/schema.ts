@@ -246,6 +246,13 @@ type ChangeConflictResolutionTable = {
 	resolved_change_id: string;
 };
 
+/**
+ * JSON object ensures serialization.  
+ * 
+ * JSON object's are a subset of JS objects. 
+ * JS stuff like functions or undefined are 
+ * not allowed in JSON objects. 
+ */
 export type JSONObject = {
 	[key: string]: JSONValue;
 };
