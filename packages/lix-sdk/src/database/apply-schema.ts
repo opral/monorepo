@@ -17,6 +17,10 @@ export async function applySchema(args: {
     name TEXT NOT NULL
   ) STRICT;
 
+  -- default anonymous account
+  INSERT OR IGNORE INTO account (id, name) 
+  VALUES ('anonymous', 'anonymous');
+
   -- file
 
   CREATE TABLE IF NOT EXISTS file (
@@ -159,11 +163,10 @@ export async function applySchema(args: {
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_label (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    id TEXT NOT NULL DEFAULT (uuid_v7()),
     label_id TEXT NOT NULL,
     change_set_id TEXT NOT NULL,
 
-    FOREIGN KEY(account_id) REFERENCES account(id),
     FOREIGN KEY(label_id) REFERENCES label(id),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id),
     PRIMARY KEY(label_id, change_set_id)

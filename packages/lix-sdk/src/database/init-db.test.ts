@@ -353,3 +353,21 @@ test("invalid file paths should be rejected", async () => {
 		`[SQLite3Error: SQLITE_ERROR: sqlite3 result code 1: Error: File path must start with a slash.\n\nNot starting a file path with a slash \`/\` leads to ambiguity whether or not the path is a directory or a file.]`,
 	);
 });
+
+test("it should have a default anonymous account", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const account = await db
+		.selectFrom("account")
+		.selectAll()
+		.where("id", "=", "anonymous")
+		.executeTakeFirst();
+
+	expect(account).toMatchObject({
+		id: "anonymous",
+		name: "anonymous",
+	});
+});

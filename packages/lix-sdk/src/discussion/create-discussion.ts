@@ -1,4 +1,9 @@
-import type { ChangeSet, Comment, Discussion } from "../database/schema.js";
+import type {
+	Account,
+	ChangeSet,
+	Comment,
+	Discussion,
+} from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 /**
@@ -16,6 +21,7 @@ export async function createDiscussion(args: {
 	lix: Pick<Lix, "db">;
 	changeSet: Pick<ChangeSet, "id">;
 	content: Comment["content"];
+	createdBy: Pick<Account, "id">;
 }): Promise<Discussion & { comment: Comment }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const discussion = await trx
@@ -32,6 +38,7 @@ export async function createDiscussion(args: {
 				parent_id: null,
 				discussion_id: discussion.id,
 				content: args.content,
+				created_by: args.createdBy.id,
 			})
 			.returningAll()
 			.executeTakeFirstOrThrow();

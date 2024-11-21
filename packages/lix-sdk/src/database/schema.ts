@@ -2,6 +2,7 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 
 export type LixDatabaseSchema = {
+	account: AccountTable;
 	file: LixFileTable;
 	change_queue: ChangeQueueTable;
 	change_edge: ChangeEdgeTable;
@@ -9,11 +10,13 @@ export type LixDatabaseSchema = {
 	label: LabelTable;
 
 	change: ChangeTable;
+	change_author: ChangeAuthorTable;
 
 	// change set
 	change_set: ChangeSetTable;
 	change_set_element: ChangeSetElementTable;
 	change_set_label: ChangeSetLabelTable;
+	change_set_label_author: ChangeSetLabelAuthorTable;
 
 	// discussion
 	discussion: DiscussionTable;
@@ -97,6 +100,13 @@ type ChangeEdgeTable = {
 	child_id: string;
 };
 
+export type ChangeAuthor = Selectable<ChangeAuthorTable>;
+export type NewChangeAuthor = Insertable<ChangeAuthorTable>;
+type ChangeAuthorTable = {
+	change_id: string;
+	account_id: string;
+};
+
 export type Snapshot = Selectable<SnapshotTable>;
 export type NewSnapshot = Insertable<SnapshotTable>;
 type SnapshotTable = {
@@ -148,6 +158,7 @@ type CommentTable = {
 	parent_id: string | null;
 	discussion_id: string;
 	created_at: Generated<string>;
+	created_by: string;
 	content: string;
 };
 
@@ -167,6 +178,14 @@ export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelTable>;
 type ChangeSetLabelTable = {
 	change_set_id: string;
 	label_id: string;
+};
+
+export type ChangeSetLabelAuthor = Selectable<ChangeSetLabelAuthorTable>;
+export type NewChangeSetLabelAuthor = Insertable<ChangeSetLabelAuthorTable>;
+export type ChangeSetLabelAuthorUpdate = Updateable<ChangeSetLabelAuthorTable>;
+type ChangeSetLabelAuthorTable = {
+	change_set_label_id: string;
+	account_id: string;
 };
 
 // ------ versiones ------
@@ -245,4 +264,14 @@ export type ChangeConflictResolutionUpdate =
 type ChangeConflictResolutionTable = {
 	change_conflict_id: string;
 	resolved_change_id: string;
+};
+
+// ------ account
+
+export type Account = Selectable<AccountTable>;
+export type NewAccount = Insertable<AccountTable>;
+export type AccountUpdate = Updateable<AccountTable>;
+type AccountTable = {
+	id: Generated<string>;
+	name: string;
 };
