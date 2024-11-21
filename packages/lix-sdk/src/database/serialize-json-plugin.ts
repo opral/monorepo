@@ -53,9 +53,7 @@ class ParseJsonTransformer extends OperationNodeTransformer {
 					return listNodeItem;
 				}
 
-				// TODO use jsonb. depends on parsing again
-				// https://github.com/opral/inlang-sdk/issues/132
-				return sql`json(${serializedValue})`.toOperationNode();
+				return sql`jsonb(${serializedValue})`.toOperationNode();
 			}),
 		});
 	}
@@ -74,7 +72,8 @@ class ParseJsonTransformer extends OperationNodeTransformer {
 		if (value === serializedValue) {
 			return node;
 		}
-		return { ...node, value: serializedValue };
+		// @ts-expect-error - type mismatch
+		return sql`jsonb(${serializedValue})`.toOperationNode();
 	}
 
 	override transformValues(node: ValuesNode): ValuesNode {

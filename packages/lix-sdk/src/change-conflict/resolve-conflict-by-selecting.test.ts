@@ -5,6 +5,7 @@ import type { NewChange, Snapshot } from "../database/schema.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { resolveChangeConflictBySelecting } from "./resolve-conflict-by-selecting.js";
+import { sql } from "kysely";
 
 test("it should resolve a conflict and apply the changes", async () => {
 	const mockSnapshots: Snapshot[] = [
@@ -64,6 +65,7 @@ test("it should resolve a conflict and apply the changes", async () => {
 			}),
 		)
 		.returningAll()
+		.returning(sql`json("content")`.as("content"))
 		.execute();
 
 	const changes = await lix.db

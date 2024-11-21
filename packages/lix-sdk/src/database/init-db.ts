@@ -4,8 +4,8 @@ import { v7 as uuid_v7 } from "uuid";
 import { SerializeJsonPlugin } from "./serialize-json-plugin.js";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
-import { sha256 } from "js-sha256";
 import { validateFilePath } from "../file/validate-file-path.js";
+import { jsonSha256 } from "../snapshot/json-sha-256.js";
 
 export function initDb(args: {
 	sqlite: SqliteDatabase;
@@ -29,10 +29,21 @@ function initFunctions(args: { sqlite: SqliteDatabase }) {
 	});
 
 	args.sqlite.createFunction({
-		name: "sha256",
+		name: "json_sha256",
 		arity: 1,
 		xFunc: (_ctx: number, value) => {
-			return value ? sha256(value as string) : "no-content";
+			if (!value) {
+				return "no-content";
+			}
+
+			const json = args.sqlite.exec("SELECT json(?)", {
+				bind: [value],
+				returnValue: "resultRows",
+			})[0]![0];
+
+			const parsed = JSON.parse(json as string);
+
+			return jsonSha256(parsed);
 		},
 		deterministic: true,
 	});

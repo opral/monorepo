@@ -1,3 +1,4 @@
+import { sql } from "kysely";
 import type { Snapshot } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
@@ -28,6 +29,7 @@ export async function createSnapshot(args: {
 				})),
 			)
 			.returningAll()
+			.returning(sql`json("content")`.as("content"))
 			.executeTakeFirstOrThrow();
 		return snapshot;
 	};
