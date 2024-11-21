@@ -21,6 +21,7 @@ export function ParseJsonBPluginV1(
 						// ! this is a heursitic. ideally, we invest into
 						// ! building ParseJsonBPluginV2 that detects
 						// ! json columns from the query itself
+						// see https://github.com/opral/lix-sdk/issues/145
 						continue;
 					}
 					try {
