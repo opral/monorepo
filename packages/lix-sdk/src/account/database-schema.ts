@@ -18,9 +18,9 @@ export function applyAccountDatabaseSchema(
   -- temp table because current accounts are session
   -- specific and should not be persisted
   CREATE TEMP TABLE IF NOT EXISTS current_account (
-    id TEXT PRIMARY KEY,
-
-    FOREIGN KEY(id) REFERENCES account(id)
+    id TEXT PRIMARY KEY
+  
+    -- can't use foreign keys in temp tables... :(
   ) STRICT;
 
 `;
