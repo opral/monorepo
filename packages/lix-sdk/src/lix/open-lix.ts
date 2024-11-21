@@ -29,7 +29,7 @@ export async function openLix(args: {
 	 *     file format sdk. the file is not portable
 	 *
 	 * @example
-	 *   const lix = await openLixInMemory({ blob: await newLixFile(), providePlugin: [myPlugin] })
+	 *   const lix = await openLixInMemory({ providePlugins: [myPlugin] })
 	 */
 	providePlugins?: LixPlugin[];
 }): Promise<Lix> {
