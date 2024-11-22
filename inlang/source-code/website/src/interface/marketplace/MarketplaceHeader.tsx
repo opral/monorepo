@@ -69,6 +69,13 @@ const MarketplaceHeader = (props: { withBorder: boolean }) => {
 					<div class="flex gap-8 items-center">
 						<a
 							class="hidden text-surface-700 hover:text-primary pointer-events-auto md:flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200"
+							href="https://opral.substack.com/t/inlang"
+							target="_blank"
+						>
+							Blog
+						</a>
+						<a
+							class="hidden text-surface-700 hover:text-primary pointer-events-auto md:flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200"
 							href="/documentation"
 						>
 							{m.marketplace_header_build_on_inlang_button()}
