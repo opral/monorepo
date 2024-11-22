@@ -3,7 +3,7 @@ info:
   title: Lix Server Protocol
   version: 1.0.0
 paths:
-  /lsp/v1/new:
+  /lsp/new:
     post:
       summary: Create a new lix on the server.
       requestBody:
@@ -30,7 +30,7 @@ paths:
                     description: Error message.
                     example: "Invalid Lix file format."
 
-  /lsp/v1/lix/{id}/query:
+  /lsp/lix/{id}/query:
     post:
       summary: Execute a SQL query on the server.
       parameters:
@@ -55,11 +55,15 @@ paths:
                   minLength: 1
                 parameters: 
                   type: array
-                  description: Query parameters.
-                  items:
-                    type: array
-                    description: Parameter values.
-                    example: [1, "example"]
+                  description: >
+                    The parameters to be used in the query.
+                  
+                    ```json
+                    {
+                      "query": "SELECT * FROM users WHERE id = ?;",
+                      "parameters": [1]
+                    }
+                    ```
               required:
                 - query
       responses:
