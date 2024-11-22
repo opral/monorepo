@@ -3,10 +3,45 @@ info:
   title: Lix Server Protocol
   version: 1.0.0
 paths:
-  /sql/select:
+  /lsp/v1/new:
     post:
-      summary: Execute a select SQL query against the server.
+      summary: Create a new lix on the server.
       requestBody:
+        description: The lix file.
+        required: true
+        content:
+          application/binary:
+            schema:
+              format: binary
+
+      responses:
+        '201':
+          description: Lix file created successfully.
+
+        '400':
+          description: Invalid Lix file.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: "Invalid Lix file format."
+
+  /lsp/v1/lix/{id}/query:
+    post:
+      summary: Execute a SQL query on the server.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the lix to query.
+          schema:
+            type: string
+            example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody: 
         required: true
         content:
           application/json:
@@ -16,16 +51,20 @@ paths:
                 query:
                   type: string
                   description: The SQL query to execute.
-                  example: "SELECT * FROM users WHERE id = ?"
-                parameters:
+                  example: "SELECT * FROM users;"
+                  minLength: 1
+                parameters: 
                   type: array
-                  description: Parameters for the SQL query (if any).
-                  example: ["1"]
+                  description: Query parameters.
+                  items:
+                    type: array
+                    description: Parameter values.
+                    example: [1, "example"]
               required:
                 - query
       responses:
         '200':
-          description: Query executed successfully
+          description: Query executed successfully.
           content:
             application/json:
               schema:
@@ -33,18 +72,18 @@ paths:
                 properties:
                   rows:
                     type: array
-                    description: The result rows of the query.
+                    description: Result rows of the query.
                     items:
                       type: object
                       example:
                         id: 1
                         name: "John Doe"
-                  rowCount:
+                  row_count:
                     type: integer
-                    description: The number of rows affected by the query.
+                    description: Number of rows affected.
                     example: 1
         '400':
-          description: Invalid SQL query
+          description: Invalid SQL query.
           content:
             application/json:
               schema:
@@ -59,17 +98,13 @@ paths:
                     description: A human-readable error message.
                     example: "The provided SQL query is invalid."
         '500':
-          description: Server error
+          description: Server error.
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  code:
+                  error:
                     type: string
-                    description: A machine-readable error code.
-                    example: "INTERNAL_SERVER_ERROR"
-                  message:
-                    type: string
-                    description: A human-readable error message.
-                    example: "An unexpected error occurred."
+                    description: Error message.
+                    example: "Internal server error."
