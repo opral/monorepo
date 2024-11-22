@@ -1,4 +1,5 @@
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
+import { applyAccountDatabaseSchema } from "../account/database-schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -6,6 +7,8 @@ import type { SqliteDatabase } from "sqlite-wasm-kysely";
 export async function applySchema(args: {
 	sqlite: SqliteDatabase;
 }): Promise<unknown> {
+	applyAccountDatabaseSchema(args.sqlite);
+
 	return args.sqlite.exec`
 
   PRAGMA foreign_keys = ON;
@@ -83,6 +86,15 @@ export async function applySchema(args: {
     FOREIGN KEY(snapshot_id) REFERENCES snapshot(id)
   ) STRICT;
 
+  CREATE TABLE IF NOT EXISTS change_author (
+    change_id TEXT NOT NULL,
+    account_id TEXT NOT NULL,
+
+    PRIMARY KEY (change_id, account_id),
+    FOREIGN KEY(change_id) REFERENCES change(id),
+    FOREIGN KEY(account_id) REFERENCES account(id)
+  ) strict;
+
   CREATE TABLE IF NOT EXISTS change_edge (
     parent_id TEXT NOT NULL,
     child_id TEXT NOT NULL,
@@ -144,12 +156,22 @@ export async function applySchema(args: {
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_label (
+    id TEXT NOT NULL DEFAULT (uuid_v7()),
     label_id TEXT NOT NULL,
     change_set_id TEXT NOT NULL,
-    
+
     FOREIGN KEY(label_id) REFERENCES label(id),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id),
     PRIMARY KEY(label_id, change_set_id)
+  ) STRICT;
+
+  CREATE TABLE IF NOT EXISTS change_set_label_author (
+    change_set_label_id TEXT NOT NULL,
+    account_id TEXT NOT NULL,
+
+    PRIMARY KEY(change_set_label_id, account_id),
+    FOREIGN KEY(change_set_label_id) REFERENCES change_set_label(id),
+    FOREIGN KEY(account_id) REFERENCES account(id)
   ) STRICT;
 
   -- discussions 
@@ -167,7 +189,9 @@ export async function applySchema(args: {
     discussion_id TEXT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
     content TEXT NOT NULL,
+    created_by TEXT NOT NULL,
 
+    FOREIGN KEY(created_by) REFERENCES account(id),
     FOREIGN KEY(discussion_id) REFERENCES discussion(id),
     FOREIGN KEY(parent_id) REFERENCES comment(id)
   ) STRICT;

@@ -25,11 +25,12 @@ export async function openLix(args: {
 	 *
 	 * (+) avoids separating app code from plugin code and
 	 *     resulting bundling logic.
+	 *
 	 * (-) such a file format must always be opened with the
 	 *     file format sdk. the file is not portable
 	 *
 	 * @example
-	 *   const lix = await openLixInMemory({ blob: await newLixFile(), providePlugin: [myPlugin] })
+	 *   const lix = await openLixInMemory({ providePlugins: [myPlugin] })
 	 */
 	providePlugins?: LixPlugin[];
 }): Promise<Lix> {

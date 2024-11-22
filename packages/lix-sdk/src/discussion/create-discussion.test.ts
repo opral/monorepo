@@ -50,6 +50,7 @@ test("should be able to start a discussion on changes", async () => {
 			lix: { db: trx },
 			changeSet: await createChangeSet({ lix: { db: trx }, changes }),
 			content: "comment on a change",
+			createdBy: { id: "anonymous" },
 		});
 	});
 

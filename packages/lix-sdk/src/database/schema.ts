@@ -1,18 +1,32 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
+import type {
+	AccountTable,
+	ActiveAccountTable,
+} from "../account/database-schema.js";
 
 export type LixDatabaseSchema = {
-	file: LixFileTable;
-	change_queue: ChangeQueueTable;
-	change_edge: ChangeEdgeTable;
+	// account
+	account: AccountTable;
+	active_account: ActiveAccountTable;
+
+	// snapshot
 	snapshot: SnapshotTable;
 	label: LabelTable;
 
+	// file
+	file: LixFileTable;
+	change_queue: ChangeQueueTable;
+
+	// change
 	change: ChangeTable;
+	change_edge: ChangeEdgeTable;
+	change_author: ChangeAuthorTable;
 
 	// change set
 	change_set: ChangeSetTable;
 	change_set_element: ChangeSetElementTable;
 	change_set_label: ChangeSetLabelTable;
+	change_set_label_author: ChangeSetLabelAuthorTable;
 
 	// discussion
 	discussion: DiscussionTable;
@@ -96,6 +110,13 @@ type ChangeEdgeTable = {
 	child_id: string;
 };
 
+export type ChangeAuthor = Selectable<ChangeAuthorTable>;
+export type NewChangeAuthor = Insertable<ChangeAuthorTable>;
+type ChangeAuthorTable = {
+	change_id: string;
+	account_id: string;
+};
+
 export type Snapshot = Selectable<SnapshotTable>;
 export type NewSnapshot = Insertable<SnapshotTable>;
 type SnapshotTable = {
@@ -147,6 +168,7 @@ type CommentTable = {
 	parent_id: string | null;
 	discussion_id: string;
 	created_at: Generated<string>;
+	created_by: string;
 	content: string;
 };
 
@@ -166,6 +188,14 @@ export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelTable>;
 type ChangeSetLabelTable = {
 	change_set_id: string;
 	label_id: string;
+};
+
+export type ChangeSetLabelAuthor = Selectable<ChangeSetLabelAuthorTable>;
+export type NewChangeSetLabelAuthor = Insertable<ChangeSetLabelAuthorTable>;
+export type ChangeSetLabelAuthorUpdate = Updateable<ChangeSetLabelAuthorTable>;
+type ChangeSetLabelAuthorTable = {
+	change_set_label_id: string;
+	account_id: string;
 };
 
 // ------ versiones ------
