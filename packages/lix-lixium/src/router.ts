@@ -1,5 +1,3 @@
-import { Hono } from "hono";
-import { createMiddleware } from "hono/factory";
 import type { Storage } from "./storage/storage.js";
 import type { paths } from "@lix-js/server-protocol";
 

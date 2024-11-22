@@ -22,8 +22,7 @@
 	},
 	"dependencies": {
 		"@lix-js/sdk": "workspace:*",
-		"@lix-js/server-protocol": "workspace:*",
-		"hono": "^4.6.11"
+		"@lix-js/server-protocol": "workspace:*"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.15.0",
