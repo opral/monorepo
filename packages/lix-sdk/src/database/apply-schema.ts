@@ -156,7 +156,6 @@ export async function applySchema(args: {
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_label (
-    id TEXT NOT NULL DEFAULT (uuid_v7()),
     label_id TEXT NOT NULL,
     change_set_id TEXT NOT NULL,
 
@@ -166,11 +165,12 @@ export async function applySchema(args: {
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_label_author (
-    change_set_label_id TEXT NOT NULL,
+    label_id TEXT NOT NULL,
+    change_set_id TEXT NOT NULL,
     account_id TEXT NOT NULL,
 
-    PRIMARY KEY(change_set_label_id, account_id),
-    FOREIGN KEY(change_set_label_id) REFERENCES change_set_label(id),
+    PRIMARY KEY(label_id, change_set_id, account_id),
+    FOREIGN KEY(label_id, change_set_id) REFERENCES change_set_label(label_id, change_set_id),
     FOREIGN KEY(account_id) REFERENCES account(id)
   ) STRICT;
 

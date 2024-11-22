@@ -194,7 +194,8 @@ export type ChangeSetLabelAuthor = Selectable<ChangeSetLabelAuthorTable>;
 export type NewChangeSetLabelAuthor = Insertable<ChangeSetLabelAuthorTable>;
 export type ChangeSetLabelAuthorUpdate = Updateable<ChangeSetLabelAuthorTable>;
 type ChangeSetLabelAuthorTable = {
-	change_set_label_id: string;
+	change_set_id: string;
+	label_id: string;
 	account_id: string;
 };
 
