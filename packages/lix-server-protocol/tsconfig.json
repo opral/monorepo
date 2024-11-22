@@ -10,6 +10,8 @@
 		"isolatedDeclarations": true,
 		"allowImportingTsExtensions": false,
 		"emitDeclarationOnly": false,
+		// recommended by openapi-typescript https://openapi-ts.dev/introduction#setup
+		"noUncheckedIndexedAccess": true,
 		"module": "Node16",
 		"lib": ["ESNext"],
 		"outDir": "./dist",

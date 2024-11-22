@@ -1,11 +1,12 @@
 {
 	"recommendations": [
-		"ms-vscode-remote.remote-containers",
-		"dbaeumer.vscode-eslint",
-		"esbenp.prettier-vscode",
-		"inlang.vs-code-extension",
-		"vitest.explorer",
-		"aaron-bond.better-comments",
-		"yoavbls.pretty-ts-errors"
-	]
+    "ms-vscode-remote.remote-containers",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "inlang.vs-code-extension",
+    "vitest.explorer",
+    "aaron-bond.better-comments",
+    "yoavbls.pretty-ts-errors",
+    "42crunch.vscode-openapi"
+  ]
 }

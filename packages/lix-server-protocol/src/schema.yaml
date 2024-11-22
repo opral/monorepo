@@ -1,0 +1,75 @@
+openapi: 3.0.3
+info:
+  title: Lix Server Protocol
+  version: 1.0.0
+paths:
+  /sql/select:
+    post:
+      summary: Execute a select SQL query against the server.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: The SQL query to execute.
+                  example: "SELECT * FROM users WHERE id = ?"
+                parameters:
+                  type: array
+                  description: Parameters for the SQL query (if any).
+                  example: ["1"]
+              required:
+                - query
+      responses:
+        '200':
+          description: Query executed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    description: The result rows of the query.
+                    items:
+                      type: object
+                      example:
+                        id: 1
+                        name: "John Doe"
+                  rowCount:
+                    type: integer
+                    description: The number of rows affected by the query.
+                    example: 1
+        '400':
+          description: Invalid SQL query
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: A machine-readable error code.
+                    example: "INVALID_SQL"
+                  message:
+                    type: string
+                    description: A human-readable error message.
+                    example: "The provided SQL query is invalid."
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: A machine-readable error code.
+                    example: "INTERNAL_SERVER_ERROR"
+                  message:
+                    type: string
+                    description: A human-readable error message.
+                    example: "An unexpected error occurred."

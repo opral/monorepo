@@ -1,0 +1,20 @@
+{
+	"name": "@lix-js/server-protocol",
+	"type": "module",
+	"version": "0.1.0",
+	"license": "Apache-2.0",
+	"exports": {
+		".": "./dist/schema.d.ts"
+	},
+	"scripts": {
+		"build": "npx openapi-typescript ./src/schema.yaml -o ./dist/schema.d.ts",
+		"format": "prettier ./src --write"
+	},
+	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
+	"sideEffects": false,
+	"devDependencies": {
+		"openapi-typescript": "^7.4.3",
+		"prettier": "^3.3.3",
+		"typescript": "^5.5.4"
+	}
+}
