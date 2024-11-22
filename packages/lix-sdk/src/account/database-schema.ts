@@ -17,16 +17,16 @@ export function applyAccountDatabaseSchema(
   -- current account(s)
   -- temp table because current accounts are session
   -- specific and should not be persisted
-  CREATE TEMP TABLE IF NOT EXISTS current_account (
+  CREATE TEMP TABLE IF NOT EXISTS active_account (
     id TEXT PRIMARY KEY
   
     -- can't use foreign keys in temp tables... :(
   ) STRICT;
 
   -- default to the anonymous account
-  INSERT INTO current_account (id)
+  INSERT INTO active_account (id)
   SELECT 'anonymous'
-  WHERE NOT EXISTS (SELECT 1 FROM current_account);
+  WHERE NOT EXISTS (SELECT 1 FROM active_account);
 
 `;
 }
@@ -39,9 +39,9 @@ export type AccountTable = {
 	name: string;
 };
 
-export type CurrentAccount = Selectable<CurrentAccountTable>;
-export type NewCurrentAccount = Insertable<CurrentAccountTable>;
-export type CurrentAccountUpdate = Updateable<CurrentAccountTable>;
-export type CurrentAccountTable = {
+export type ActiveAccount = Selectable<ActiveAccountTable>;
+export type NewActiveAccount = Insertable<ActiveAccountTable>;
+export type ActiveAccountUpdate = Updateable<ActiveAccountTable>;
+export type ActiveAccountTable = {
 	id: string;
 };

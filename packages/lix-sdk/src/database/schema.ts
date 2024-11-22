@@ -1,13 +1,13 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type {
 	AccountTable,
-	CurrentAccountTable,
+	ActiveAccountTable,
 } from "../account/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
 	account: AccountTable;
-	current_account: CurrentAccountTable;
+	active_account: ActiveAccountTable;
 
 	// snapshot
 	snapshot: SnapshotTable;

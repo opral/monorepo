@@ -9,12 +9,12 @@ import { expect, test } from "vitest";
 import {
 	applyAccountDatabaseSchema,
 	type AccountTable,
-	type CurrentAccountTable,
+	type ActiveAccountTable,
 } from "./database-schema.js";
 
 type AccountSchema = {
 	account: AccountTable;
-	current_account: CurrentAccountTable;
+	active_account: ActiveAccountTable;
 };
 
 test("account table should have a default anonymous account", async () => {
@@ -56,7 +56,7 @@ test("current_account table default to anonymous on startup", async () => {
 	});
 
 	const account = await db
-		.selectFrom("current_account")
+		.selectFrom("active_account")
 		.selectAll()
 		.executeTakeFirst();
 
@@ -117,17 +117,17 @@ test('it should drop the temp "current_account" table on reboot to not persist t
 		})
 		.execute();
 
-	await db.deleteFrom("current_account").execute();
+	await db.deleteFrom("active_account").execute();
 
 	await db
-		.insertInto("current_account")
+		.insertInto("active_account")
 		.values({
 			id: "test",
 		})
 		.execute();
 
 	const currentAccount = await db
-		.selectFrom("current_account")
+		.selectFrom("active_account")
 		.selectAll()
 		.executeTakeFirst();
 
@@ -150,7 +150,7 @@ test('it should drop the temp "current_account" table on reboot to not persist t
 	});
 
 	const account2 = await db2
-		.selectFrom("current_account")
+		.selectFrom("active_account")
 		.selectAll()
 		.executeTakeFirst();
 
