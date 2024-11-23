@@ -1,0 +1,114 @@
+openapi: 3.0.3
+info:
+  title: Lix Server Protocol
+  version: 1.0.0
+paths:
+  /lsp/new:
+    post:
+      summary: Create a new lix on the server.
+      requestBody:
+        description: The lix file.
+        required: true
+        content:
+          application/binary:
+            schema:
+              format: binary
+
+      responses:
+        '201':
+          description: Lix file created successfully.
+
+        '400':
+          description: Invalid Lix file.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: "Invalid Lix file format."
+
+  /lsp/lix/{id}/query:
+    post:
+      summary: Execute a SQL query on the server.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the lix to query.
+          schema:
+            type: string
+            example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody: 
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: The SQL query to execute.
+                  example: "SELECT * FROM users;"
+                  minLength: 1
+                parameters: 
+                  type: array
+                  description: >
+                    The parameters to be used in the query.
+                  
+                    ```json
+                    {
+                      "query": "SELECT * FROM users WHERE id = ?;",
+                      "parameters": [1]
+                    }
+                    ```
+              required:
+                - query
+      responses:
+        '200':
+          description: Query executed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    description: Result rows of the query.
+                    items:
+                      type: object
+                      example:
+                        id: 1
+                        name: "John Doe"
+                  row_count:
+                    type: integer
+                    description: Number of rows affected.
+                    example: 1
+        '400':
+          description: Invalid SQL query.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: A machine-readable error code.
+                    example: "INVALID_SQL"
+                  message:
+                    type: string
+                    description: A human-readable error message.
+                    example: "The provided SQL query is invalid."
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: "Internal server error."
