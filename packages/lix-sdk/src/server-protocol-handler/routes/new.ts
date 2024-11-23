@@ -1,6 +1,6 @@
-import type { RouteHandler } from "../create-lsp-handler.js";
+import type { LspRouteHandler } from "../create-lsp-handler.js";
 
-export const route: RouteHandler = async () => {
+export const route: LspRouteHandler = async () => {
 	// const body = await context.request.blob();
 
 	return new Response("hello world", {

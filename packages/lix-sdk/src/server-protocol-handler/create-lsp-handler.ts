@@ -1,14 +1,14 @@
 import type { Storage } from "./storage/storage.js";
 import { route } from "./routes/new.js";
 
-export type LixServerProtocolHandler = (request: Request) => Promise<Response>;
+export type LspHandler = (request: Request) => Promise<Response>;
 
-export type LixiumContext = {
+export type LspHandlerContext = {
 	request: Request;
 	storage: Storage;
 };
 
-export type RouteHandler = (context: LixiumContext) => Promise<Response>;
+export type LspRouteHandler = (context: LspHandlerContext) => Promise<Response>;
 
 /**
  * The handler for the lix server protocol.
@@ -48,7 +48,7 @@ export type RouteHandler = (context: LixiumContext) => Promise<Response>;
  */
 export async function createLspHandler(args: {
 	storage: Storage;
-}): Promise<LixServerProtocolHandler> {
+}): Promise<LspHandler> {
 	const context = { storage: args.storage };
 
 	return async (request) => {
