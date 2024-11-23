@@ -1,22 +1,13 @@
-import type { paths } from "@lix-js/server-protocol";
-import type { LixiumRouter } from "../router.js";
+import type { RouteHandler } from "../create-lsp-handler.js";
 
-export default function route(router: LixiumRouter): void {
-	router.post("/lsp/new", async (c) => {
-		const body = await c.req.blob();
+export const route: RouteHandler = async (context) => {
+	const body = await context.request.blob();
 
+	if (!body) {
+		return new Response(null, {
+			status: 400,
+		});
+	}
 
-    return 
-    
-    if (!body){
-      return c.res.status.json({error: "Invalid Lix file format."});
-      c.res.status.json({error: "Invalid Lix file format."});
-    }
-
-
-    try {
-
-    }
-
-	});
-}
+	throw new Error("Not implemented");
+};

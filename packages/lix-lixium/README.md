@@ -14,17 +14,18 @@ Headless lix server protocol handler.
 import { createHandler } from '@lix-js/lixium';
 
 // or any other server framework (express, koa, hono, etc.)
-const app = express();
+const app = new Hono();
 
-const lsp = createHandler({
+const lsp = createLspHandler({
   // options
 });
 
 // add the handler to your app
 // the handler will handle all requests to /lsp/*
-app.use('/lsp/*', (req, res) => {
+app.use('/lsp/*', (req) => {
   // depending on your server framework, 
   // the request and response need to be mapped
-  return lsp(req, res);
+  const response = await lsp(request);
+  return response;
 });
 ```

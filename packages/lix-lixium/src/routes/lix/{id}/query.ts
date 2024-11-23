@@ -1,5 +1,5 @@
 import type { paths } from "@lix-js/server-protocol";
-import type { LixiumRouter } from "../../../router.js";
+import type { LixiumRouter } from "../../../create-lsp-handler.js";
 
 export default function route(router: LixiumRouter): void {
 	router.post("/lsp/lix/:id/query", async (c) => {
