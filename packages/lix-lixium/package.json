@@ -7,12 +7,11 @@
 		".": "./dist/index.js"
 	},
 	"scripts": {
+		"dev": "tsc --watch",
 		"build": "tsc --build",
 		"test": "tsc --noEmit && vitest run --coverage",
 		"test:watch": "vitest",
-		"bench": "vitest bench",
 		"lint": "eslint src/**/* --fix",
-		"dev": "tsc --watch",
 		"format": "prettier ./src --write"
 	},
 	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",

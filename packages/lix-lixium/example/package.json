@@ -1,0 +1,23 @@
+{
+	"name": "@lix-js/lixium-example",
+	"type": "module",
+	"version": "0.0.1",
+	"license": "Apache-2.0",
+	"scripts": {
+		"dev": "node --experimental-strip-types ./src/main.ts",
+		"build": "tsc --build",
+		"format": "prettier ./src --write"
+	},
+	"engines": {
+		"node": ">=22.6"
+	},
+	"dependencies": {
+		"@hono/node-server": "^1.13.7",
+		"@lix-js/lixium": "workspace:*",
+		"hono": "^4.6.11"
+	},
+	"devDependencies": {
+		"prettier": "^3.3.3",
+		"typescript": "^5.7.2"
+	}
+}
