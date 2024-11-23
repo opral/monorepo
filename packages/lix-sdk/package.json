@@ -4,8 +4,7 @@
 	"version": "0.0.1",
 	"license": "Apache-2.0",
 	"exports": {
-		".": "./dist/index.js",
-		"./server-protocol-handler": "./dist/server-protocol-handler/index.js"
+		".": "./dist/index.js"
 	},
 	"scripts": {
 		"build": "tsc --build",
