@@ -1,17 +1,14 @@
-# Lixium
+# Lix Server Protocol Handler
 
-## What is Lixium?
+Embed the lix server protocol in your own application.
 
-Headless lix server protocol handler. 
-
-- embed the lix server protocol in your own application
 - works in any JS runtime (node, browser, deno) 
 - no UI, bells or whistles, just handling the lix server protocol
 
 ## Usage
 
 ```ts
-import { createHandler } from '@lix-js/lixium';
+import { createLspHandler } from '@lix-js/sdk';
 
 // or any other server framework (express, koa, hono, etc.)
 const app = new Hono();

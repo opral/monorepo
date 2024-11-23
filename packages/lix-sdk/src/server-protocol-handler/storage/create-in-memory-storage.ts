@@ -5,7 +5,7 @@ import type { Storage } from "./storage.js";
  *
  * Great for testing or quick prototyping.
  */
-export const createInMemoryStorage = (): Storage => {
+export const createInMemoryLspHandlerStorage = (): Storage => {
 	const store = new Map<string, Blob>();
 
 	return {

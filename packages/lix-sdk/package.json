@@ -4,7 +4,8 @@
 	"version": "0.0.1",
 	"license": "Apache-2.0",
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./server-protocol-handler": "./dist/server-protocol-handler/index.js"
 	},
 	"scripts": {
 		"build": "tsc --build",
@@ -20,6 +21,9 @@
 	"engines": {
 		"node": ">=21"
 	},
+	"bundleDependencies": [
+		"@lix-js/server-protocol"
+	],
 	"dependencies": {
 		"dedent": "1.5.1",
 		"js-sha256": "^0.11.0",
@@ -28,6 +32,7 @@
 		"uuid": "^10.0.0"
 	},
 	"devDependencies": {
+		"@lix-js/server-protocol": "workspace:*",
 		"@eslint/js": "^9.12.0",
 		"@types/uuid": "^10.0.0",
 		"@vitest/coverage-v8": "^2.0.5",

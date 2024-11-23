@@ -1,11 +1,14 @@
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
-import { createInMemoryStorage, createLspHandler } from "@lix-js/lixium";
+import {
+	createLspHandler,
+	createInMemoryLspHandlerStorage,
+} from "@lix-js/sdk/server-protocol-handler";
 
 const app = new Hono();
 
 const lsp = await createLspHandler({
-	storage: createInMemoryStorage(),
+	storage: createInMemoryLspHandlerStorage(),
 });
 
 app.get("/", (c) => c.text("Hono!"));

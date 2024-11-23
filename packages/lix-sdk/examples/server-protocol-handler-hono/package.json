@@ -1,5 +1,5 @@
 {
-	"name": "@lix-js/lixium-example",
+	"name": "@lix-js/sdk-example-server-protocol-handler-hono",
 	"type": "module",
 	"version": "0.0.1",
 	"license": "Apache-2.0",
@@ -13,7 +13,7 @@
 	},
 	"dependencies": {
 		"@hono/node-server": "^1.13.7",
-		"@lix-js/lixium": "workspace:*",
+		"@lix-js/sdk": "workspace:*",
 		"hono": "^4.6.11"
 	},
 	"devDependencies": {
