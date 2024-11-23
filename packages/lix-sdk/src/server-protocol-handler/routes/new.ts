@@ -1,7 +1,9 @@
 import type { LspRouteHandler } from "../create-lsp-handler.js";
 
-export const route: LspRouteHandler = async () => {
-	// const body = await context.request.blob();
+export const route: LspRouteHandler = async (context) => {
+	const body = await context.request.blob();
+
+	context.storage.set("new", body);
 
 	return new Response("hello world", {
 		status: 200,

@@ -1,5 +1,5 @@
 import type { Storage } from "./storage/storage.js";
-import { route } from "./routes/new.js";
+import { route as newRoute } from "./routes/new.js";
 
 export type LspHandler = (request: Request) => Promise<Response>;
 
@@ -54,7 +54,7 @@ export async function createLspHandler(args: {
 	return async (request) => {
 		const path = new URL(request.url).pathname;
 		if (path === "/lsp/new") {
-			return route({ ...context, request });
+			return newRoute({ ...context, request });
 		}
 		return Response.error();
 	};
