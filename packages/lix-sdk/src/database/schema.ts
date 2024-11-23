@@ -3,6 +3,7 @@ import type {
 	AccountTable,
 	ActiveAccountTable,
 } from "../account/database-schema.js";
+import type { KeyValueTable } from "../key-value/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -27,6 +28,9 @@ export type LixDatabaseSchema = {
 	change_set_element: ChangeSetElementTable;
 	change_set_label: ChangeSetLabelTable;
 	change_set_label_author: ChangeSetLabelAuthorTable;
+
+	// key value
+	key_value: KeyValueTable;
 
 	// discussion
 	discussion: DiscussionTable;
