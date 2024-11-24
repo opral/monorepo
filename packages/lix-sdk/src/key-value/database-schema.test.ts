@@ -1,27 +1,12 @@
-import { Kysely, sql } from "kysely";
-import { createDialect, createInMemoryDatabase } from "sqlite-wasm-kysely";
+import { sql } from "kysely";
 import { expect, test } from "vitest";
-import {
-	applyKeyValueDatabaseSchema,
-	type KeyValueTable,
-} from "./database-schema.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { validate as validateUuid } from "uuid";
 
 test("string values are accepted", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
+	const lix = await openLixInMemory({});
 
-	applyKeyValueDatabaseSchema(sqlite);
-
-	const db = new Kysely<{
-		key_value: KeyValueTable;
-	}>({
-		dialect: createDialect({
-			database: sqlite,
-		}),
-	});
-
-	const result = await db
+	const result = await lix.db
 		.insertInto("key_value")
 		.values({
 			key: "foo",
@@ -39,21 +24,9 @@ test("string values are accepted", async () => {
 });
 
 test("duplicate keys lead to an error", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
+	const lix = await openLixInMemory({});
 
-	applyKeyValueDatabaseSchema(sqlite);
-
-	const db = new Kysely<{
-		key_value: KeyValueTable;
-	}>({
-		dialect: createDialect({
-			database: sqlite,
-		}),
-	});
-
-	await db
+	await lix.db
 		.insertInto("key_value")
 		.values({
 			key: "foo",
@@ -63,7 +36,7 @@ test("duplicate keys lead to an error", async () => {
 		.execute();
 
 	expect(
-		db
+		lix.db
 			.insertInto("key_value")
 			.values({
 				key: "foo",
@@ -77,21 +50,9 @@ test("duplicate keys lead to an error", async () => {
 });
 
 test("using json as value should work", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
+	const lix = await openLixInMemory({});
 
-	applyKeyValueDatabaseSchema(sqlite);
-
-	const db = new Kysely<{
-		key_value: KeyValueTable;
-	}>({
-		dialect: createDialect({
-			database: sqlite,
-		}),
-	});
-
-	await db
+	await lix.db
 		.insertInto("key_value")
 		.values([
 			{
@@ -106,7 +67,7 @@ test("using json as value should work", async () => {
 		.returningAll()
 		.execute();
 
-	const onlyOneProperty = await db
+	const onlyOneProperty = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "foo")
 		.select(sql`json_extract(value, '$.bar')`.as("bar"))
@@ -131,4 +92,16 @@ test("using json as value should work", async () => {
 	expect(onlyOneProperty).toMatchObject({
 		bar: "baz",
 	});
+});
+
+test("it should default add a uuid lix-id if not exits", async () => {
+	const lix = await openLixInMemory({});
+
+	const result = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix-id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(validateUuid(result.value)).toBe(true);
 });
