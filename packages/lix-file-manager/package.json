@@ -27,6 +27,7 @@
 		"@xyflow/react": "^12.3.4",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
+		"date-fns": "^2.29.3",
 		"human-id": "^4.1.1",
 		"jotai": "^2.10.1",
 		"lodash-es": "^4.17.21",

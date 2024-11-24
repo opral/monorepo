@@ -4,8 +4,7 @@
 		"components/**/*",
 		"lib/**/*",
 		"hooks/**/*",
-		"demo",
-		"x"
+		"types/**/*"
 	],
 	"compilerOptions": {
 		"composite": true,
