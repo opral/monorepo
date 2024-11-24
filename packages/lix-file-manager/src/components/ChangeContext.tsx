@@ -71,7 +71,10 @@ export const ChangeContext: React.FC<ChangeContextProps & LineProps> = ({
 			<div className="w-full mt-4 px-3 py-2 rounded-lg bg-white border border-[#dbdfe7]">
 				<div
 					className="flex gap-[19px] cursor-pointer items-center"
-					onClick={() => onCommentClick?.()}
+					onClick={(e) => {
+						e.stopPropagation();
+						onCommentClick?.();
+					}}
 				>
 					<IconComment />
 					<div className="flex flex-col gap-1 flex-grow min-w-0">
