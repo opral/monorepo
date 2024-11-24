@@ -37,4 +37,6 @@ export interface ChangeContextProps {
 	className?: string;
 	timeFormatter?: (timestamp: string) => string;
 	showComments?: boolean;
+	showTopLine?: boolean;
+	showBottomLine?: boolean;
 }
