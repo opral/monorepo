@@ -13,7 +13,7 @@ import { createLspHandler } from '@lix-js/sdk';
 // or any other server framework (express, koa, hono, etc.)
 const app = new Hono();
 
-const lsp = createLspHandler({
+const lspHandler = createLspHandler({
   // options
 });
 
@@ -22,7 +22,7 @@ const lsp = createLspHandler({
 app.use('/lsp/*', (req) => {
   // depending on your server framework, 
   // the request and response need to be mapped
-  const response = await lsp(request);
+  const response = await lspHandler(request);
   return response;
 });
 ```
