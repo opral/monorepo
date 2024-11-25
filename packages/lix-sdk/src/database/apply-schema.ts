@@ -1,5 +1,6 @@
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import { applyAccountDatabaseSchema } from "../account/database-schema.js";
+import { applyKeyValueDatabaseSchema } from "../key-value/database-schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -8,6 +9,7 @@ export async function applySchema(args: {
 	sqlite: SqliteDatabase;
 }): Promise<unknown> {
 	applyAccountDatabaseSchema(args.sqlite);
+	applyKeyValueDatabaseSchema(args.sqlite);
 
 	return args.sqlite.exec`
 

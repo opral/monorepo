@@ -1,6 +1,6 @@
 import { Kysely } from "kysely";
 import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely";
-import { v7 as uuid_v7 } from "uuid";
+import { v7 as uuid_v7, v4 as uuid_v4 } from "uuid";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
 import { validateFilePath } from "../file/validate-file-path.js";
@@ -35,6 +35,12 @@ function initFunctions(args: { sqlite: SqliteDatabase }) {
 		name: "uuid_v7",
 		arity: 0,
 		xFunc: () => uuid_v7(),
+	});
+
+	args.sqlite.createFunction({
+		name: "uuid_v4",
+		arity: 0,
+		xFunc: () => uuid_v4(),
 	});
 
 	args.sqlite.createFunction({
