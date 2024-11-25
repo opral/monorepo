@@ -1,11 +1,13 @@
 import type { Storage } from "./storage/storage.js";
 import { route as newRoute } from "./routes/new.js";
+import { route as lixQueryRoute } from "./routes/lix/{id}/query.js";
 
 export type LspHandler = (request: Request) => Promise<Response>;
 
 export type LspHandlerContext = {
 	request: Request;
 	storage: Storage;
+	params?: Record<string, string | undefined>;
 };
 
 export type LspRouteHandler = (context: LspHandlerContext) => Promise<Response>;
@@ -56,6 +58,15 @@ export async function createLspHandler(args: {
 			const path = new URL(request.url).pathname;
 			if (path === "/lsp/new") {
 				return newRoute({ ...context, request });
+			}
+			// /lsp/lix/{id}/query
+			else if (path.match(/\/lsp\/lix\/[^/]+\/query/)) {
+				const id = path.split("/")[3]!;
+				return lixQueryRoute({
+					...context,
+					request,
+					params: { id },
+				});
 			}
 			return Response.error();
 		} catch (error) {
