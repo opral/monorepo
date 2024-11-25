@@ -39,8 +39,8 @@ export const ChangeComponent = (props: {change: Change, showTopLine: boolean, sh
 					</div>
 				</div>
 				{isExpandedState && <div className="pb-2">
-					<div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 px-2 sm:px-3 pt-2 pb-6 sm:pb-8">
-						<pre>{JSON.stringify(props.change, null, 2)}</pre>
+					<div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 px-2 sm:px-3 pt-2 pb-6 sm:pb-8 overflow-hidden">
+						<pre className="w-[400px]">{JSON.stringify(props.change, null, 2)}</pre>
 					</div>
 				</div>}
 			</div>

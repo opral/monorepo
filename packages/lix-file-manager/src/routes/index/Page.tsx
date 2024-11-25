@@ -60,7 +60,7 @@ export default function Page() {
 			<Separator orientation="vertical" className="h-screen" />
 			<div className="flex-1">
 				<SectionHeader title="Graph" />
-				<div className="px-4">
+				<div className="px-[10px]">
 					{changesCurrentVersion.map((change, i) => (
 						
 						<ChangeComponent
