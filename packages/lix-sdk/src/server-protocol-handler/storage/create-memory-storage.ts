@@ -20,5 +20,9 @@ export const createLspHandlerMemoryStorage = (): Storage => {
 		async delete(key: string): Promise<void> {
 			store.delete(key);
 		},
+
+		async has(key: string): Promise<boolean> {
+			return store.has(key);
+		},
 	};
 };
