@@ -8,7 +8,7 @@ const lspHandler = await createLspHandler({
 	storage: createLspHandlerMemoryStorage(),
 });
 
-app.get("/", (c) => c.text("Hono!"));
+app.get("/", (c) => c.text("Lix host server"));
 
 // @ts-expect-error - Hono provides a subset of the Request object
 app.use("/lsp/*", (c) => lspHandler(c.req));

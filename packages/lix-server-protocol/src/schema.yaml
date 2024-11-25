@@ -17,6 +17,15 @@ paths:
       responses:
         '201':
           description: Lix file created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The ID of the created lix.
+                    example: "123e4567-e89b-12d3-a456-426614174000"
 
         '400':
           description: Invalid Lix file.
@@ -28,11 +37,23 @@ paths:
                   error:
                     type: string
                     description: Error message.
-                    example: "Invalid Lix file format."
+                    example: "Invalid Lix file."
+        
+        '409': 
+          description: Lix file already exists.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: "Lix file already exists."
 
   /lsp/lix/{id}/query:
     post:
-      summary: Execute a SQL query on the server.
+      summary: Execute a select SQL query on the server.
       parameters:
         - name: id
           in: path
@@ -48,7 +69,7 @@ paths:
             schema:
               type: object
               properties:
-                query:
+                sql:
                   type: string
                   description: The SQL query to execute.
                   example: "SELECT * FROM users;"
@@ -77,12 +98,7 @@ paths:
                   rows:
                     type: array
                     description: Result rows of the query.
-                    items:
-                      type: object
-                      example:
-                        id: 1
-                        name: "John Doe"
-                  row_count:
+                  num_affected_rows:
                     type: integer
                     description: Number of rows affected.
                     example: 1
@@ -101,6 +117,10 @@ paths:
                     type: string
                     description: A human-readable error message.
                     example: "The provided SQL query is invalid."
+
+        '404':
+          description: Lix file not found.
+   
         '500':
           description: Server error.
           content:
@@ -108,7 +128,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  code:
                     type: string
                     description: Error message.
-                    example: "Internal server error."
+                    example: "INTERNAL_SERVER_ERROR"
+                  message: 
+                    type: string
+                    description: A human-readable error message.
+                    example: "An internal server error occurred."
