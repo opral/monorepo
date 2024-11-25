@@ -17,6 +17,15 @@ paths:
       responses:
         '201':
           description: Lix file created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The ID of the created lix.
+                    example: "123e4567-e89b-12d3-a456-426614174000"
 
         '400':
           description: Invalid Lix file.
@@ -28,7 +37,19 @@ paths:
                   error:
                     type: string
                     description: Error message.
-                    example: "Invalid Lix file format."
+                    example: "Invalid Lix file."
+        
+        '409': 
+          description: Lix file already exists.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: "Lix file already exists."
 
   /lsp/lix/{id}/query:
     post:
