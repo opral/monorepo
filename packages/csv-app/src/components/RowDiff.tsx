@@ -3,10 +3,11 @@ import { Change, Snapshot } from "@lix-js/sdk";
 export default function RowDiff(props: {
 	uniqueColumnValue: string;
 	changes: (Change & {
-		snapshot_content: Snapshot["content"];
-		parent: Change & { snapshot_content: Snapshot["content"] };
+		content: Snapshot["content"];
+		parent: Change & { content: Snapshot["content"] };
 	})[];
 }) {
+	console.log(props.changes);
 	return (
 		<div className="bg-zinc-50 border border-zinc-200 rounded-md pt-2 px-3 pb-4">
 			<div className="flex flex-wrap md:flex-nowrap overflow-x-scroll gap-x-1 gap-y-2 md:gap-y-8">
@@ -20,8 +21,8 @@ export default function RowDiff(props: {
 				</div>
 				{props.changes.map((change) => {
 					const column = change.entity_id.split("|")[2];
-					const value = change.snapshot_content?.text;
-					const parentValue = change.parent?.snapshot_content?.text;
+					const value = change.content?.text;
+					const parentValue = change.parent?.content?.text;
 
 					return (
 						<div

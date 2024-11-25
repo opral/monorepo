@@ -181,8 +181,8 @@ const getChanges = async (
 		string,
 		Array<
 			Change & {
-				snapshot_content: Snapshot["content"];
-				parent: Change & { snapshot_content: Snapshot["content"] };
+				content: Snapshot["content"];
+				parent: Change & { content: Snapshot["content"] };
 			}
 		>
 	>
@@ -200,7 +200,7 @@ const getChanges = async (
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where("change.file_id", "=", fileId)
 		.selectAll("change")
-		.select("snapshot.content as snapshot_content")
+		.select("snapshot.content")
 		.execute();
 
 	// Group changes by row
@@ -245,7 +245,7 @@ const getChanges = async (
 				.where(changeInVersion(currentVersion))
 				.where(changeHasLabel("confirmed"))
 				.selectAll("change")
-				.select("snapshot.content as snapshot_content")
+				.select("snapshot.content")
 				.executeTakeFirst();
 
 			change.parent = parent;
@@ -264,8 +264,8 @@ const getUnconfirmedChanges = async (
 		string,
 		Array<
 			Change & {
-				snapshot_content: Snapshot["content"];
-				parent: Change & { snapshot_content: Snapshot["content"] };
+				content: Snapshot["content"];
+				parent: Change & { content: Snapshot["content"] };
 			}
 		>
 	>
@@ -278,7 +278,7 @@ const getUnconfirmedChanges = async (
 		.where((eb) => eb.not(changeHasLabel("confirmed")))
 		.where("change.schema_key", "=", CellSchemaV1.key)
 		.selectAll("change")
-		.select("snapshot.content as snapshot_content")
+		.select("snapshot.content")
 		.execute();
 
 	const groupedByRow: any = {};
@@ -301,13 +301,15 @@ const getUnconfirmedChanges = async (
 			const parent = await lix.db
 				.selectFrom("change")
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-				.where(changeHasLabel("confirmed"))
 				.where("change.entity_id", "=", change.entity_id)
+				.where(changeHasLabel("confirmed"))
 				.where(changeInVersion(currentVersion))
+				// TODO fix the filter
+				// https://github.com/opral/lix-sdk/issues/151
+				// .where(changeIsLowestCommonAncestorOf([change]))
 				.where("change.schema_key", "=", CellSchemaV1.key)
-				.where(changeIsLowestCommonAncestorOf([change]))
 				.selectAll("change")
-				.select("snapshot.content as snapshot_content")
+				.select("snapshot.content")
 				.executeTakeFirst();
 
 			change.parent = parent;
