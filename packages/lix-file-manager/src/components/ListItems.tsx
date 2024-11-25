@@ -5,11 +5,10 @@ import IconFile from "./icons/IconFile.tsx";
 import clsx from "clsx";
 import IconMeatball from "./icons/IconMeatball.tsx";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./../../components/ui/dropdown-menu.tsx";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { lixAtom } from "./../state.ts";
 import { useAtom } from "jotai";
 import { saveLixToOpfs } from "./../helper/saveLixToOpfs.ts";
-import { changesCurrentVersionAtom } from "./../state-active-file.ts";
 
 interface ListItemsProps {
   id: string;
@@ -27,7 +26,6 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 
   // global state
   const [lix] = useAtom(lixAtom);
-  const [changes] = useAtom(changesCurrentVersionAtom);
 
   //functions
   const handleSelectFile = () => {
@@ -76,10 +74,6 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
     }
     input.click();
   }
-
-  // useEffect(() => {
-  //   console.log(changes)
-  // }, [changes])
 
   return (
     <div onClick={() => handleSelectFile()} className={clsx(
