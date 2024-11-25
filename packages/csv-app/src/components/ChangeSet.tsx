@@ -4,14 +4,14 @@ import {
 	changeHasLabel,
 	changeInVersion,
 	changeIsLeafInVersion,
-	ChangeSet,
 	Lix,
 	Snapshot,
 	changeIsLowestCommonAncestorOf,
+	createDiscussion,
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { currentVersionAtom, lixAtom } from "../state.ts";
+import { activeAccountsAtom, currentVersionAtom, lixAtom } from "../state.ts";
 import clsx from "clsx";
 import {
 	activeFileAtom,
@@ -142,11 +142,17 @@ const ConfirmChangesBox = () => {
 	const [description, setDescription] = useState("");
 	const [lix] = useAtom(lixAtom);
 	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
+	const [activeAccounts] = useAtom(activeAccountsAtom);
 
 	const handleConfirmChanges = async () => {
 		const changeSet = await confirmChanges(lix, unconfirmedChanges);
 		if (description !== "") {
-			await addDiscussionToChangeSet(lix, changeSet, description);
+			await createDiscussion({
+				lix,
+				changeSet,
+				content: description,
+				createdBy: activeAccounts[0],
+			});
 			await saveLixToOpfs({ lix });
 		}
 	};
@@ -163,30 +169,6 @@ const ConfirmChangesBox = () => {
 			</SlButton>
 		</div>
 	);
-};
-
-const addDiscussionToChangeSet = async (
-	lix: Lix,
-	changeSet: ChangeSet,
-	content: string
-) => {
-	await lix.db.transaction().execute(async (trx) => {
-		const discussion = await trx
-			.insertInto("discussion")
-			.values({
-				change_set_id: changeSet.id,
-			})
-			.returning("id")
-			.executeTakeFirstOrThrow();
-
-		await trx
-			.insertInto("comment")
-			.values({
-				discussion_id: discussion.id,
-				content,
-			})
-			.execute();
-	});
 };
 
 const getChanges = async (
