@@ -52,10 +52,16 @@ export async function createLspHandler(args: {
 	const context = { storage: args.storage };
 
 	return async (request) => {
-		const path = new URL(request.url).pathname;
-		if (path === "/lsp/new") {
-			return newRoute({ ...context, request });
+		try {
+			const path = new URL(request.url).pathname;
+			if (path === "/lsp/new") {
+				return newRoute({ ...context, request });
+			}
+			return Response.error();
+		} catch (error) {
+			return new Response(error as string, {
+				status: 500,
+			});
 		}
-		return Response.error();
 	};
 }
