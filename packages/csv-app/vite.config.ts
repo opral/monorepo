@@ -12,6 +12,9 @@ export default defineConfig({
 			"Cross-Origin-Embedder-Policy": "*",
 		},
 	},
+	build: {
+		target: "es2022",
+	},
 	optimizeDeps: {
 		exclude: [
 			"@lix-js/sdk",
