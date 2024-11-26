@@ -19,7 +19,31 @@ export async function pushRowsToServer(args: {
 			return;
 		}
 
-		const serverQuery = createInsertQuery(name, rows);
+		let columns: string[] = Object.keys(rows[0]!);
+		let columnFunctions: Record<string, string> = {};
+
+		// map column names that need special handling
+		if (name === "snapshot") {
+			columns = ["content"];
+			columnFunctions = {
+				content: "jsonb",
+			};
+			for (let i = 0; rows.length > i; i++) {
+				// delete the auto generated id
+				// @ts-expect-error - type mismatch
+				rows[i] = {
+					id: "ss",
+					content: !rows[i]?.content ? null : JSON.stringify(rows[i]!.content),
+				};
+			}
+		}
+
+		const serverQuery = createInsertQuery({
+			table: name,
+			columns,
+			columnFunctions,
+			rows,
+		});
 
 		const response = await fetch(
 			new Request(`${args.serverUrl}/lsp/lix/${args.id}/query`, {
@@ -42,26 +66,43 @@ export async function pushRowsToServer(args: {
 	}
 }
 
-function createInsertQuery(table: string, rows: Record<string, any>[]) {
-	if (rows.length === 0) {
+/**
+ * Creates a SQL query for inserting rows into a table.
+ */
+function createInsertQuery(args: {
+	table: string;
+	columns: string[];
+	columnFunctions: Record<string, string>;
+	rows: Record<string, unknown>[];
+}) {
+	if (args.rows.length === 0) {
 		throw new Error("No rows provided.");
 	}
 
-	const columns = Object.keys(rows[0]!);
+	// Generate placeholders for each row
+	const placeholders: string[] = [];
 
-	// Create placeholders and flatten values
-	const placeholders = rows
-		.map(() => `(${columns.map(() => "?").join(", ")})`)
-		.join(", ");
+	const values: unknown[] = [];
 
-	const values = rows.flatMap((row) => columns.map((col) => row[col]));
+	for (const row of args.rows) {
+		const rowPlaceholders = [];
+		for (const column of args.columns) {
+			values.push(row[column]);
+			if (args.columnFunctions[column]) {
+				rowPlaceholders.push(`${args.columnFunctions[column]}(?)`);
+			} else {
+				rowPlaceholders.push("?");
+			}
+		}
+		placeholders.push(` (${rowPlaceholders.join(", ")})`);
+	}
 
-	// Construct SQL as a string (for sending over the wire)
+	// Construct the SQL query
 	const query = `
-			INSERT INTO ${table} (${columns.map((col) => `"${col}"`).join(", ")})
-			VALUES ${placeholders}
-			ON CONFLICT DO NOTHING;
-	`;
+      INSERT INTO ${args.table} (${args.columns.join(", ")})
+      VALUES ${placeholders}
+      ON CONFLICT DO NOTHING;
+  `;
 
 	return { sql: query, parameters: values };
 }
