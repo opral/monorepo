@@ -4,6 +4,7 @@ import { initDb } from "./init-db.js";
 import { validate } from "uuid";
 import { mockChange } from "../change/mock-change.js";
 import { jsonSha256 } from "../snapshot/json-sha-256.js";
+import { sql } from "kysely";
 
 test("file ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
@@ -360,3 +361,25 @@ test("invalid file paths should be rejected", async () => {
 	);
 });
 
+test("vector clock functions", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = await initDb({ sqlite });
+
+	const vectorClockTick1 =
+		await sql`select vector_clock_session() as session, vector_clock_tick() as time`.execute(
+			db
+		);
+	const vectorClockTick2 =
+		await sql`select vector_clock_session() as session, vector_clock_tick() as time`.execute(
+			db
+		);
+
+	expect((vectorClockTick1.rows[0] as any)["session"]).toEqual(
+		(vectorClockTick2.rows[0] as any)["session"]
+	);
+	expect((vectorClockTick1.rows[0] as any)["time"]).toBeLessThan(
+		(vectorClockTick2.rows[0] as any)["time"]
+	);
+});
