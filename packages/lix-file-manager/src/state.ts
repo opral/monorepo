@@ -1,5 +1,10 @@
-import { Version, openLixInMemory } from "@lix-js/sdk";
-import type { Account } from "@lix-js/sdk";
+import {
+	Version,
+	openLixInMemory,
+	Account,
+	switchAccount,
+	Lix,
+} from "@lix-js/sdk";
 import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
@@ -97,40 +102,6 @@ export const filesAtom = atom(async (get) => {
 	return await lix.db.selectFrom("file").selectAll().execute();
 });
 
-interface User {
-	username: string;
-	updatedAt: string;
-}
-
-/**
- * User state management using localStorage
- * TODO: Switch to Lix DB when user table is implemented
- */
-export const userAtom = atom(
-	// getter
-	async (get) => {
-		get(withPollingAtom); // Keep polling for future Lix implementation
-		const storedUser = localStorage.getItem("lix-user");
-		return storedUser ? (JSON.parse(storedUser) as User) : null;
-
-		// Lix DB implementation (commented out for future use)
-		// const lix = await get(lixAtom);
-		// return await lix.db.selectFrom("user").selectAll().executeTakeFirst();
-	},
-	// setter
-	async (_get, _set, update: { username: string }) => {
-		const user: User = {
-			username: update.username,
-			updatedAt: new Date().toISOString(),
-		};
-		localStorage.setItem("lix-user", JSON.stringify(user));
-
-		// Lix DB implementation (commented out for future use)
-		// const lix = await get(lixAtom);
-		// await lix.db.updateTable("user").set(update).execute();
-	}
-);
-
 export const activeAccountAtom = atom<Account | null>(null);
 
 export const accountsAtom = atom(async (get) => {
@@ -139,3 +110,8 @@ export const accountsAtom = atom(async (get) => {
 
 	return await lix.db.selectFrom("account").selectAll().execute();
 });
+
+// Helper function to switch active account
+export const switchActiveAccount = async (lix: Lix, account: Account) => {
+	await switchAccount({ lix, to: [account] });
+};
