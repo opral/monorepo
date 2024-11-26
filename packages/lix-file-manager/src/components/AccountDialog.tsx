@@ -23,6 +23,7 @@ import {
 	lixAtom,
 	continueAsAnonymous,
 	ANONYMOUS_CLICKED_KEY,
+	saveAccountsToStorage,
 } from "../state.js";
 import { Avatar, AvatarFallback } from "../../components/ui/avatar.js";
 import { Check } from "lucide-react";
@@ -87,6 +88,12 @@ function AccountContent({
 				})
 				.returningAll()
 				.executeTakeFirstOrThrow();
+
+			const currentAccounts = await lix.db
+				.selectFrom("account")
+				.selectAll()
+				.execute();
+			saveAccountsToStorage(currentAccounts);
 
 			setNewAccountName("");
 			await setActiveAccount(newAccount);
