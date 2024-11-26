@@ -26,7 +26,7 @@ export const activeFileAtom = atom(async (get) => {
 		// Not the best UX to implicitly route to the root
 		// but fine for now.
 		// window.location.href = "/";
-		console.error("no active file. reroute should avoid this throw");
+		// console.error("no active file. reroute should avoid this throw");
 		return undefined
 	}
 

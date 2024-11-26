@@ -59,6 +59,13 @@ export default function Page() {
 		<div className="flex bg-white">
 			<div className="max-w-[340px] flex-1 flex flex-col">
 				<SectionHeader title="Files">
+					<Button variant="ghost" onClick={async () => {
+						// @ts-expect-error - globally defined
+						await window.deleteLix();
+						window.location.reload();
+					}}>
+						Reset
+					</Button>
 					<Button variant="secondary" onClick={() => handleUpload()}>
 						<IconUpload />
 						Upload

@@ -18,7 +18,9 @@ const SectionHeader = ({ title, backaction, children }: SectionHeaderProps) => {
         )}
         <h2 className="text-lg font-medium text-foreground">{title}</h2>
       </div>
-      {children}
+      <div className="flex items-center">
+        {children}
+      </div> 
     </div>
   )
 }

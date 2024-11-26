@@ -18,10 +18,10 @@ export const DynamicChangeGroup = (props: {changes: (Change & {snapshot_content:
 		>
 			<ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />
 			<div className="flex-1">
-				<div className="h-16 flex items-center w-full">
+				<div className="h-[68px] flex items-center w-full">
 					<div className="flex-1 flex flex-col">
                         {props.changes.map((change) => 
-                            <Button onClick={() => handlePathClicked(change.file_id)} variant="secondary" size="sm" className="w-fit">{change.file_path}</Button>
+                            <Button key={change.id} onClick={() => handlePathClicked(change.file_id)} variant="secondary" size="sm" className="w-fit">{change.file_path}</Button>
                         )}
 						<p className="text-sm font-medium text-slate-500 px-2 pt-0.5">
                             {timeAgo(props.changes[0].created_at)}{" - "}{props.changes.length}{" changes"}
