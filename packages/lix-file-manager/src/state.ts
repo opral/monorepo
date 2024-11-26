@@ -155,15 +155,55 @@ export const activeAccountAtom = atom(
 	}
 );
 
+export const ANONYMOUS_ACCOUNT_ID = "anonymous";
+
+export const ANONYMOUS_CLICKED_KEY = "lix-anonymous-clicked";
+
+export const resetAnonymousState = () => {
+	localStorage.removeItem(ANONYMOUS_CLICKED_KEY);
+};
+
 export const accountsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
+	const accounts = await lix.db.selectFrom("account").selectAll().execute();
 
-	return await lix.db.selectFrom("account").selectAll().execute();
+	// Reset anonymous clicked state if no anonymous account exists
+	if (!accounts.some((acc) => acc.id === ANONYMOUS_ACCOUNT_ID)) {
+		resetAnonymousState();
+	}
+
+	return accounts;
 });
 
 // Helper function to switch active account
 export const switchActiveAccount = async (lix: Lix, account: Account) => {
 	await switchAccount({ lix, to: [account] });
 	localStorage.setItem(ACTIVE_ACCOUNT_STORAGE_KEY, JSON.stringify(account));
+};
+
+export const continueAsAnonymous = async (lix: Lix) => {
+	// Check if anonymous account exists
+	const anonymousAccount = await lix.db
+		.selectFrom("account")
+		.where("id", "=", ANONYMOUS_ACCOUNT_ID)
+		.selectAll()
+		.executeTakeFirst();
+
+	// Create anonymous account if it doesn't exist
+	const account =
+		anonymousAccount ||
+		(await lix.db
+			.insertInto("account")
+			.values({
+				id: ANONYMOUS_ACCOUNT_ID,
+				name: "Anonymous",
+			})
+			.returningAll()
+			.executeTakeFirstOrThrow());
+
+	// Switch to anonymous account
+	await switchAccount({ lix, to: [account] });
+	localStorage.setItem(ACTIVE_ACCOUNT_STORAGE_KEY, JSON.stringify(account));
+	return account;
 };

@@ -16,9 +16,9 @@ const router = createBrowserRouter(
 		...route,
 		// Wrap each route's element with the App layout and Suspense
 		element: (
-			<App>
-				<Suspense fallback={null}>{route.element}</Suspense>
-			</App>
+			<Suspense fallback={null}>
+				<App>{route.element} </App>
+			</Suspense>
 		),
 	}))
 );

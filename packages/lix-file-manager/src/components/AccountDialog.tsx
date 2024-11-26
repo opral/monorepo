@@ -14,9 +14,16 @@ import {
 } from "../../components/ui/select.js";
 import { Button } from "../../components/ui/button.js";
 import { Input } from "../../components/ui/input.js";
-import { useState, useTransition, useCallback, Suspense } from "react";
+import { useState, useCallback, Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { useAtom } from "jotai";
-import { activeAccountAtom, accountsAtom, lixAtom } from "../state.js";
+import {
+	activeAccountAtom,
+	accountsAtom,
+	lixAtom,
+	continueAsAnonymous,
+	ANONYMOUS_CLICKED_KEY,
+} from "../state.js";
 import { Avatar, AvatarFallback } from "../../components/ui/avatar.js";
 import { Check } from "lucide-react";
 
@@ -26,18 +33,53 @@ interface AccountDialogProps {
 }
 
 export function AccountDialog({ open, onOpenChange }: AccountDialogProps) {
+	return (
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent
+				className="sm:max-w-[425px]"
+				aria-describedby="account-dialog-description"
+			>
+				<div id="account-dialog-description" className="sr-only">
+					Manage your accounts and continue anonymously
+				</div>
+				<Suspense
+					fallback={<div className="py-8 text-center">Loading accounts...</div>}
+				>
+					<ErrorBoundary fallback={<div>Something went wrong</div>}>
+						<AccountContent onOpenChange={onOpenChange} />
+					</ErrorBoundary>
+				</Suspense>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+function AccountContent({
+	onOpenChange,
+}: {
+	onOpenChange: (open: boolean) => void;
+}) {
 	const [accounts] = useAtom(accountsAtom);
 	const [newAccountName, setNewAccountName] = useState("");
 	const [activeAccount, setActiveAccount] = useAtom(activeAccountAtom);
 	const [lix] = useAtom(lixAtom);
 	const [isCreating, setIsCreating] = useState(false);
-	const [, startTransition] = useTransition();
+	const [error, setError] = useState<string | null>(null);
+
+	const hasAnonymousAccount = accounts?.some((acc) => acc.id === "anonymous");
+	const hasClickedAnonymous =
+		localStorage.getItem(ANONYMOUS_CLICKED_KEY) === "true";
+	const shouldShowAnonymousButton = !(
+		(hasAnonymousAccount && hasClickedAnonymous) ||
+		(accounts?.length ?? 0) > 1
+	);
 
 	const handleCreateAccount = useCallback(async () => {
 		if (!newAccountName.trim() || !lix) return;
 
-		setIsCreating(true);
 		try {
+			setError(null);
+			setIsCreating(true);
 			const newAccount = await lix.db
 				.insertInto("account")
 				.values({
@@ -46,16 +88,12 @@ export function AccountDialog({ open, onOpenChange }: AccountDialogProps) {
 				.returningAll()
 				.executeTakeFirstOrThrow();
 
-			await new Promise((resolve) => setTimeout(resolve, 0));
-
-			startTransition(() => {
-				setNewAccountName("");
-				setActiveAccount(newAccount);
-			});
-
-			setTimeout(() => onOpenChange(false), 0);
+			setNewAccountName("");
+			await setActiveAccount(newAccount);
+			onOpenChange(false);
 		} catch (error) {
 			console.error("Failed to create account:", error);
+			setError("Failed to create account. Please try again.");
 		} finally {
 			setIsCreating(false);
 		}
@@ -64,17 +102,17 @@ export function AccountDialog({ open, onOpenChange }: AccountDialogProps) {
 	const handleSwitchAccount = useCallback(
 		async (accountId: string) => {
 			const account = accounts?.find((a) => a.id === accountId);
+			if (!account) return;
 
 			try {
-				await new Promise((resolve) => setTimeout(resolve, 0));
-
-				startTransition(() => {
-					setActiveAccount(account || null);
-				});
-
-				setTimeout(() => onOpenChange(false), 0);
+				setIsCreating(true);
+				await setActiveAccount(account);
+				onOpenChange(false);
 			} catch (error) {
 				console.error("Failed to switch account:", error);
+				setError("Failed to switch account. Please try again.");
+			} finally {
+				setIsCreating(false);
 			}
 		},
 		[accounts, setActiveAccount, onOpenChange]
@@ -86,95 +124,138 @@ export function AccountDialog({ open, onOpenChange }: AccountDialogProps) {
 		}
 	};
 
+	const handleContinueAsAnonymous = useCallback(async () => {
+		if (!lix) return;
+
+		try {
+			setError(null);
+			setIsCreating(true);
+			const anonymousAccount = await continueAsAnonymous(lix);
+			await setActiveAccount(anonymousAccount);
+			localStorage.setItem(ANONYMOUS_CLICKED_KEY, "true");
+			onOpenChange(false);
+		} catch (error) {
+			console.error("Failed to continue as anonymous:", error);
+			setError("Failed to continue as anonymous. Please try again.");
+		} finally {
+			setIsCreating(false);
+		}
+	}, [lix, setActiveAccount, onOpenChange]);
+
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[425px]">
-				<Suspense fallback={<div>Loading...</div>}>
-					<DialogHeader>
-						<DialogTitle className="text-xl font-semibold">
-							Account Management
-						</DialogTitle>
-					</DialogHeader>
+		<>
+			<DialogHeader>
+				<DialogTitle className="text-xl font-semibold">
+					Account Management
+				</DialogTitle>
+			</DialogHeader>
 
-					<div className="space-y-6 py-4">
-						{accounts?.length === 0 ? (
-							<div className="text-center py-8 text-muted-foreground">
-								<p>No accounts found.</p>
-								<p className="text-sm">Create your first account below.</p>
-							</div>
-						) : (
-							<Select
-								value={activeAccount?.id}
-								onValueChange={handleSwitchAccount}
+			<div className="space-y-6 py-4">
+				{accounts?.length === 0 ? (
+					<div className="text-center py-8 text-muted-foreground">
+						<p>No accounts found.</p>
+						<p className="text-sm">
+							Create your first account below or continue anonymously.
+						</p>
+						{shouldShowAnonymousButton && (
+							<Button
+								variant="secondary"
+								onClick={handleContinueAsAnonymous}
+								className="mt-4"
+								disabled={isCreating}
 							>
-								<SelectTrigger className="w-full">
-									<SelectValue placeholder="Select an account">
-										{activeAccount && (
-											<div className="flex items-center gap-3">
-												<Avatar className="h-6 w-6">
-													<AvatarFallback className="bg-primary/10 text-sm">
-														{activeAccount.name.substring(0, 2).toUpperCase()}
-													</AvatarFallback>
-												</Avatar>
-												<span>{activeAccount.name}</span>
-											</div>
-										)}
-									</SelectValue>
-								</SelectTrigger>
-								<SelectContent>
-									{accounts?.map((account) => (
-										<SelectItem
-											key={account.id}
-											value={account.id}
-											className="p-2 [&>span:first-child]:hidden"
-										>
-											<div className="flex items-center gap-3">
-												<Avatar className="h-6 w-6">
-													<AvatarFallback className="bg-primary/10 text-sm">
-														{account.name.substring(0, 2).toUpperCase()}
-													</AvatarFallback>
-												</Avatar>
-												<span>{account.name}</span>
-												{account.id === activeAccount?.id && (
-													<Check className="h-4 w-4 ml-auto opacity-50" />
-												)}
-											</div>
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+								{isCreating ? "Setting up..." : "Continue as Anonymous"}
+							</Button>
 						)}
-
-						<div className="space-y-2 pt-4 border-t">
-							<h3 className="text-sm font-medium text-muted-foreground">
-								Create new account
-							</h3>
-							<div className="flex items-center gap-3">
-								<Input
-									placeholder="Enter account name"
-									value={newAccountName}
-									onChange={(e) => setNewAccountName(e.target.value)}
-									onKeyPress={handleKeyPress}
-									className="flex-1 h-9"
-								/>
-								<Button
-									onClick={handleCreateAccount}
-									disabled={!newAccountName.trim() || isCreating}
-									className="h-9 px-4"
-								>
-									{isCreating ? "Creating..." : "Create"}
-								</Button>
-							</div>
-						</div>
 					</div>
+				) : (
+					<>
+						<Select
+							value={activeAccount?.id}
+							onValueChange={handleSwitchAccount}
+							disabled={isCreating}
+						>
+							<SelectTrigger className="w-full">
+								<SelectValue placeholder="Select an account">
+									{activeAccount && (
+										<div className="flex items-center gap-3">
+											<Avatar className="h-6 w-6">
+												<AvatarFallback className="bg-primary/10 text-sm">
+													{activeAccount.name.substring(0, 2).toUpperCase()}
+												</AvatarFallback>
+											</Avatar>
+											<span>{activeAccount.name}</span>
+										</div>
+									)}
+								</SelectValue>
+							</SelectTrigger>
+							<SelectContent>
+								{accounts?.map((account) => (
+									<SelectItem
+										key={account.id}
+										value={account.id}
+										className="p-2 [&>span:first-child]:hidden"
+									>
+										<div className="flex items-center gap-3">
+											<Avatar className="h-6 w-6">
+												<AvatarFallback className="bg-primary/10 text-sm">
+													{account.name.substring(0, 2).toUpperCase()}
+												</AvatarFallback>
+											</Avatar>
+											<span>{account.name}</span>
+											{account.id === activeAccount?.id && (
+												<Check className="h-4 w-4 ml-auto opacity-50" />
+											)}
+										</div>
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						{shouldShowAnonymousButton && (
+							<Button
+								variant="secondary"
+								onClick={handleContinueAsAnonymous}
+								className="w-full"
+								disabled={isCreating}
+							>
+								{isCreating ? "Setting up..." : "Continue as Anonymous"}
+							</Button>
+						)}
+					</>
+				)}
 
-					<DialogFooter>
-						<Button variant="outline" onClick={() => onOpenChange(false)}>
-							Close
+				<div className="space-y-2 pt-4 border-t">
+					<h3 className="text-sm font-medium text-muted-foreground">
+						Create new account
+					</h3>
+					<div className="flex items-center gap-3">
+						<Input
+							placeholder="Enter account name"
+							value={newAccountName}
+							onChange={(e) => setNewAccountName(e.target.value)}
+							onKeyPress={handleKeyPress}
+							className="flex-1 h-9"
+						/>
+						<Button
+							onClick={handleCreateAccount}
+							disabled={!newAccountName.trim() || isCreating}
+							className="h-9 px-4"
+						>
+							{isCreating ? "Creating..." : "Create"}
 						</Button>
-					</DialogFooter>
-				</Suspense>
-			</DialogContent>
-		</Dialog>
+					</div>
+				</div>
+			</div>
+
+			<DialogFooter>
+				<Button variant="outline" onClick={() => onOpenChange(false)}>
+					Close
+				</Button>
+			</DialogFooter>
+
+			{error && (
+				<div className="text-destructive text-sm mt-2 text-center">{error}</div>
+			)}
+		</>
 	);
 }
