@@ -167,16 +167,15 @@ export const unconfirmedChangesAtom = atom(async (get) => {
 export const allChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
-	const activeFile = await get(activeFileAtom);
-	if(!activeFile) return []
-	// const currentBranch = await get(currentBranchAtom);
+	const currentBranch = await get(currentVersionAtom);
 	return await lix.db
 		.selectFrom("change")
-		.where("change.file_id", "=", activeFile.id)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		// .where(changeInVersion(currentBranch))
+		.innerJoin("file", "file.id", "change.file_id")
+		.where(changeInVersion(currentBranch))
 		.selectAll("change")
 		.select("snapshot.content as snapshot_content")
+		.select("file.path as file_path")
 		.execute();
 });
 
@@ -190,9 +189,11 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.innerJoin("file", "file.id", "change.file_id")
 		.where(changeInVersion(currentBranch))
 		.selectAll("change")
 		.select("snapshot.content as snapshot_content")
+		.select("file.path as file_path")
 		.execute();
 });
 

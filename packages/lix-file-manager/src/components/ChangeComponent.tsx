@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar.tsx";
-import { Change } from "@lix-js/sdk";
+import { Account, Change } from "@lix-js/sdk";
 import ChangeDot from "./ChangeDot.tsx";
 import IconChevron from "./icons/IconChevron.tsx";
 import { Button } from "./../../components/ui/button.tsx";
 import timeAgo from "./../helper/timeAgo.ts";
 import clsx from "clsx";
 
-export const ChangeComponent = (props: {change: Change, showTopLine: boolean, showBottomLine: boolean }) => {
+export const ChangeComponent = (props: {change: Change & {snapshot_content: Record<string, any> | null, file_path: string}, author: Account,showTopLine: boolean, showBottomLine: boolean }) => {
 	const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
 
 	return (
@@ -30,7 +30,9 @@ export const ChangeComponent = (props: {change: Change, showTopLine: boolean, sh
 						>
 							<AvatarImage src="#" alt="#" />
 							<AvatarFallback className="bg-[#fff] text-[#141A21] border border-[#DBDFE7]">
-								{"NI"}
+								{props.author.name
+									? props.author.name.substring(0, 2).toUpperCase()
+									: "XX"}
 							</AvatarFallback>
 						</Avatar>
 						<Button variant="ghost" size="icon">
