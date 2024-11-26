@@ -83,7 +83,6 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		for (const column of allColumns) {
 			const beforeCell = beforeRow[column];
 			const afterCell = afterRow[column];
-
 			const entity_id = toEntityId(rowId, column);
 
 			// Cell exists in both datasets -> check for update

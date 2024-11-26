@@ -93,10 +93,6 @@ export default function Page() {
 								<ChangeComponent
 									key={change.id}
 									change={change}
-									author={{
-										id: "test",
-										name: "Nils Jacobsen"
-									}}
 									showTopLine={i !== 0}
 									showBottomLine={i !== changesCurrentVersion.length - 1}
 								/>
@@ -111,10 +107,6 @@ export default function Page() {
 								<DynamicChangeGroup
 									key={change.id}
 									changes={[change]}
-									authors={[{
-										id: "test",
-										name: "Nils Jacobsen"
-									}]}
 									showTopLine={i !== 0}
 									showBottomLine={i !== allChanges.length - 1}
 								/>

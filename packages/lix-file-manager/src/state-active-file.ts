@@ -172,10 +172,13 @@ export const allChangesAtom = atom(async (get) => {
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin("file", "file.id", "change.file_id")
+		.innerJoin("change_author", "change_author.change_id", "change.id")
 		.where(changeInVersion(currentBranch))
 		.selectAll("change")
 		.select("snapshot.content as snapshot_content")
 		.select("file.path as file_path")
+		.select("change_author.account_id as account_id")
+		.orderBy('change.created_at', 'desc')
 		.execute();
 });
 
@@ -190,10 +193,13 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 		.where("change.file_id", "=", activeFile.id)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin("file", "file.id", "change.file_id")
+		.innerJoin("change_author", "change_author.change_id", "change.id")
 		.where(changeInVersion(currentBranch))
 		.selectAll("change")
 		.select("snapshot.content as snapshot_content")
 		.select("file.path as file_path")
+		.select("change_author.account_id as account_id")
+		.orderBy('change.created_at', 'desc')
 		.execute();
 });
 
