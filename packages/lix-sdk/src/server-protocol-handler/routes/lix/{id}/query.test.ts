@@ -2,6 +2,8 @@ import { test, expect } from "vitest";
 import { openLixInMemory } from "../../../../lix/open-lix-in-memory.js";
 import { createLspHandlerMemoryStorage } from "../../../storage/create-memory-storage.js";
 import { createLspHandler } from "../../../create-lsp-handler.js";
+import type { paths } from "@lix-js/server-protocol";
+import type { KeyValue } from "../../../../key-value/database-schema.js";
 
 test("it should execute a SELECT SQL query successfully", async () => {
 	const lix = await openLixInMemory({});
@@ -36,7 +38,7 @@ test("it should execute a SELECT SQL query successfully", async () => {
 	expect(responseJson.num_affected_rows).toBeDefined();
 });
 
-test("it should throw on a mutation SQL (INSERT, UPDATE) query", async () => {
+test("it should execute an INSERT, UPDATE query", async () => {
 	const lix = await openLixInMemory({});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
@@ -53,7 +55,7 @@ test("it should throw on a mutation SQL (INSERT, UPDATE) query", async () => {
 		new Request(`http://localhost:3000/lsp/lix/${id}/query`, {
 			method: "POST",
 			body: JSON.stringify({
-				sql: "INSERT INTO key_value (key, value) VALUES ('test', 'test')",
+				sql: "INSERT INTO key_value (key, value) VALUES ('test', 'test') RETURNING *",
 				parameters: [],
 			}),
 			headers: {
@@ -61,8 +63,13 @@ test("it should throw on a mutation SQL (INSERT, UPDATE) query", async () => {
 			},
 		}),
 	);
+	const json =
+		(await response.json()) as paths["/lsp/lix/{id}/query"]["post"]["responses"]["201"]["content"]["application/json"];
 
-	expect(response.status).toBe(400);
+	expect(response.status).toBe(201);
+	expect(json.rows?.length).toBe(1);
+	expect(json.num_affected_rows).toBe(1);
+	expect((json.rows?.[0] as KeyValue)?.key).toBe("test");
 });
 
 test("it should return 400 for an invalid SQL query", async () => {

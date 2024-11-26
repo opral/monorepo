@@ -89,13 +89,27 @@ paths:
                 - query
       responses:
         '200':
-          description: Query executed successfully.
+          description: Select query executed successfully.
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   rows:
+                    type: array
+                    description: Result rows of the query.
+                  num_affected_rows:
+                    type: integer
+                    description: Number of rows affected.
+                    example: 1
+        '201': 
+          description: Mutation query (INSERT, UPDATE, DELETE) executed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows: 
                     type: array
                     description: Result rows of the query.
                   num_affected_rows:

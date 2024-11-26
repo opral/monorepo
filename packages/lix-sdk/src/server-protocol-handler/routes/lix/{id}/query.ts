@@ -10,19 +10,8 @@ export const route: LspRouteHandler = async (context) => {
 	const { id } = context.params as { id: string };
 	const { sql, parameters } = await context.request.json();
 
-	if (isMutationQuery(sql)) {
-		return new Response(
-			JSON.stringify({
-				code: "MUTATION_QUERY_NOT_ALLOWED",
-				message: "Mutation queries are not allowed.",
-			} satisfies TypedResponse["400"]["content"]["application/json"]),
-			{
-				status: 400,
-			},
-		);
-	}
-
 	const blob = await context.storage.get(`lix-file-${id}`);
+
 	if (!blob) {
 		return new Response(null, { status: 404 });
 	}
@@ -54,7 +43,7 @@ export const route: LspRouteHandler = async (context) => {
 				num_affected_rows: Number(result.numAffectedRows),
 			} satisfies TypedResponse["200"]["content"]["application/json"]),
 			{
-				status: 200,
+				status: Number(result.numAffectedRows) === 0 ? 200 : 201,
 				headers: {
 					"Content-Type": "application/json",
 				},
@@ -75,10 +64,3 @@ export const route: LspRouteHandler = async (context) => {
 		);
 	}
 };
-
-// simple, good enough for now. bulletproof approach is
-// to use the kysely ast in the future.
-function isMutationQuery(sql: string): boolean {
-	const mutationRegex = /^\s*(INSERT|UPDATE)\b/i;
-	return mutationRegex.test(sql);
-}
