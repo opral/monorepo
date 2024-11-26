@@ -20,6 +20,7 @@ export const ChangeComponent = (props: {change: Change & {snapshot_content: Reco
 				<div className="h-12 flex items-center w-full">
 					<div className="flex-1">
 						Change <span className="text-slate-500">{
+							// TODO: this is hardcoded, we might want a more uniformed way to do this (but context is too important)
 							clsx(
 								props.change.entity_id.split("|").length > 1 
 									? `cell: ${props.change.entity_id.split("|")[1]} - ${props.change.entity_id.split("|")[2]}` 

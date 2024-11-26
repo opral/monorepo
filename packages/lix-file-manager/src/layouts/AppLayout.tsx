@@ -17,7 +17,7 @@ export function App({ children }: { children: React.ReactNode }) {
 		<SidebarProvider>
 			<div className="flex h-screen w-full">
 				<AppSidebar />
-				<main className="flex-1">{children}</main>
+				<main className="h-screen flex-1 overflow-hidden">{children}</main>
 			</div>
 		</SidebarProvider>
 	);

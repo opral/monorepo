@@ -56,8 +56,8 @@ export default function Page() {
 	// })
 
 	return (
-		<div className="flex bg-white">
-			<div className="max-w-[340px] flex-1 flex flex-col">
+		<div className="flex bg-white h-full">
+			<div className="max-w-[340px] flex-1 flex flex-col h-full">
 				<SectionHeader title="Files">
 					<Button variant="ghost" onClick={async () => {
 						// @ts-expect-error - globally defined
@@ -71,24 +71,26 @@ export default function Page() {
 						Upload
 					</Button>
 				</SectionHeader>
-				{files.map((file) => {
-					return (
-						<ListItems
-							key={file.id}
-							id={file.id}
-							type="file"
-							name={file.path.replace("/", "")}
-						/>
-					);
-				})}
+				<div className="h-[calc(100%_-_60px)] overflow-y-scroll">
+					{files.map((file) => {
+						return (
+							<ListItems
+								key={file.id}
+								id={file.id}
+								type="file"
+								name={file.path.replace("/", "")}
+							/>
+						);
+					})}
+				</div>
 				<Link to="/" className="flex-grow" />
 			</div>
 			<Separator orientation="vertical" className="h-screen" />
 			
 			{fileIdSearchParams 
-				? <div className="flex-1">
+				? <div className="flex-1 h-full">
 					<SectionHeader title={activeFile?.path || "Graph"} />
-					<div className="px-[10px]">
+					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-scroll">
 						{changesCurrentVersion.map((change, i) => (
 								<ChangeComponent
 									key={change.id}
@@ -100,19 +102,19 @@ export default function Page() {
 						}
 					</div> 
 				</div> 
-				: <div className="flex-1">
+				: <div className="flex-1 h-full">
 					<SectionHeader title="Overview" />
-					<div className="px-[10px]">
-						{allChanges.map((change, i) => (
-								<DynamicChangeGroup
-									key={change.id}
-									changes={[change]}
-									showTopLine={i !== 0}
-									showBottomLine={i !== allChanges.length - 1}
-								/>
-							))
-							
-						}
+					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-scroll">
+							{allChanges.map((change, i) => (
+									<DynamicChangeGroup
+										key={change.id}
+										changes={[change]}
+										showTopLine={i !== 0}
+										showBottomLine={i !== allChanges.length - 1}
+									/>
+								))
+								
+							}
 					</div> 
 				</div> 
 			}
