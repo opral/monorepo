@@ -7,7 +7,7 @@ import { saveLixToOpfs } from "./../../helper/saveLixToOpfs.ts";
 import { Button } from "./../../../components/ui/button.tsx"
 import { Separator } from "./../../../components/ui/separator.tsx"
 import { activeFileAtom, allChangesAtom, changesCurrentVersionAtom } from "./../../state-active-file.ts";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ChangeComponent } from "../../components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "./../../components/DynamicChangeGroup.tsx";
 
@@ -19,6 +19,9 @@ export default function Page() {
 	const [allChanges] = useAtom(allChangesAtom)
 	const [activeFile] = useAtom(activeFileAtom)
 	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom)
+
+	//hooks
+	const navigate = useNavigate();
 
 	// handlers
 	const handleUpload = async () => {
@@ -89,8 +92,8 @@ export default function Page() {
 			
 			{fileIdSearchParams 
 				? <div className="flex-1 h-full">
-					<SectionHeader title={activeFile?.path || "Graph"} />
-					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-scroll">
+					<SectionHeader backaction={() => navigate("/")}title={activeFile?.path.replace("/", "") ? `/ ${activeFile?.path.replace("/", "")}` : "Graph"} />
+					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-scroll flex-shrink-0">
 						{changesCurrentVersion.map((change, i) => (
 								<ChangeComponent
 									key={change.id}
