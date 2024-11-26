@@ -24,4 +24,7 @@ export default defineConfig({
 			"@": path.resolve(__dirname, "./"),
 		},
 	},
+	build: {
+		target: "esnext",
+	}
 });
