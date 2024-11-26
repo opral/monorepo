@@ -12,22 +12,21 @@ export const ChangeComponent = (props: {change: Change & {snapshot_content: Reco
 
 	return (
 		<div
-			className="flex group hover:bg-slate-50 rounded-md cursor-pointer"
+			className="flex group hover:bg-slate-50 rounded-md cursor-pointer flex-shrink-0"
 			onClick={() => isExpandedState ? setIsExpandedState(false) : setIsExpandedState(true)}
 		>
 			<ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />
 			<div className="flex-1">
 				<div className="h-12 flex items-center w-full">
-					<div className="flex-1">
+					<p className="flex-1 truncate text-ellipsis overflow-hidden">
 						Change <span className="text-slate-500">{
 							// TODO: this is hardcoded, we might want a more uniformed way to do this (but context is too important)
-							clsx(
-								props.change.entity_id.split("|").length > 1 
-									? `cell: ${props.change.entity_id.split("|")[1]} - ${props.change.entity_id.split("|")[2]}` 
-									: props.change.entity_id
-							)
+							props.change.entity_id.split("|").length > 1 
+								? `cell: ${props.change.entity_id.split("|")[1]} - ${props.change.entity_id.split("|")[2]}` 
+								: props.change.entity_id
+							
 						}</span>
-					</div>
+					</p>
 					<div className="flex gap-2 items-center pr-2">
 						<span className="text-sm font-medium text-slate-500 block pr-2">
 							{timeAgo(props.change.created_at)}
