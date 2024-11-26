@@ -102,7 +102,7 @@ export const filesAtom = atom(async (get) => {
 	return await lix.db.selectFrom("file").selectAll().execute();
 });
 
-const ACTIVE_ACCOUNT_STORAGE_KEY = "lix-active-account";
+export const ACTIVE_ACCOUNT_STORAGE_KEY = "lix-active-account";
 
 export const activeAccountsAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -120,6 +120,21 @@ export const activeAccountAtom = atom(
 	async (get) => {
 		get(withPollingAtom);
 		const activeAccounts = await get(activeAccountsAtom);
+
+		// Try to get account from localStorage first
+		const storedAccount = localStorage.getItem(ACTIVE_ACCOUNT_STORAGE_KEY);
+		if (storedAccount) {
+			const parsedAccount = JSON.parse(storedAccount);
+			// Verify the stored account still exists in the active accounts
+			const existingAccount = activeAccounts.find(
+				(acc) => acc.id === parsedAccount.id
+			);
+			if (existingAccount) {
+				return existingAccount;
+			}
+		}
+
+		// Fall back to first active account if no stored account found
 		return activeAccounts[0] || null;
 	},
 	// setter

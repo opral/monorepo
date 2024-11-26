@@ -1,11 +1,16 @@
 import { useAtom } from "jotai";
 import { useState, useEffect } from "react";
-import { activeAccountAtom, accountsAtom, lixAtom } from "../state.js";
+import {
+	activeAccountAtom,
+	accountsAtom,
+	lixAtom,
+	ACTIVE_ACCOUNT_STORAGE_KEY,
+} from "../state.js";
 
 export function useSidebarState() {
 	const [accountDialogOpen, setAccountDialogOpen] = useState(false);
 	const [accounts] = useAtom(accountsAtom);
-	const [activeAccount] = useAtom(activeAccountAtom);
+	const [activeAccount, setActiveAccount] = useAtom(activeAccountAtom);
 	const [lix] = useAtom(lixAtom);
 
 	useEffect(() => {
@@ -17,6 +22,22 @@ export function useSidebarState() {
 					(account) => account.name !== "anonymous"
 				);
 
+				if (!currentAccount) {
+					const storedAccount = localStorage.getItem(
+						ACTIVE_ACCOUNT_STORAGE_KEY
+					);
+					if (storedAccount) {
+						const parsedAccount = JSON.parse(storedAccount);
+						const existingAccount = accountsList?.find(
+							(acc) => acc.id === parsedAccount.id
+						);
+						if (existingAccount) {
+							setActiveAccount(existingAccount);
+							return;
+						}
+					}
+				}
+
 				if (!currentAccount || nonAnonymousAccounts?.length === 0) {
 					setAccountDialogOpen(true);
 				}
@@ -24,7 +45,7 @@ export function useSidebarState() {
 			.catch((error) => {
 				console.error("Error checking accounts:", error);
 			});
-	}, [lix, accounts, activeAccount]);
+	}, [lix, accounts, activeAccount, setActiveAccount]);
 
 	return {
 		accountDialogOpen,
