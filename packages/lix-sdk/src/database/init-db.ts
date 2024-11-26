@@ -7,12 +7,13 @@ import { validateFilePath } from "../file/validate-file-path.js";
 import { jsonSha256 } from "../snapshot/json-sha-256.js";
 import { ParseJsonBPluginV1 } from "./kysely-plugin/parse-jsonb-plugin-v1.js";
 import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js";
+import { vectorClockSession, vectorClockTick } from "./vector-clock/vector-clock.js";
 
-export function initDb(args: {
+export async function initDb(args: {
 	sqlite: SqliteDatabase;
-}): Kysely<LixDatabaseSchema> {
+}): Promise<Kysely<LixDatabaseSchema>> {
 	initFunctions({ sqlite: args.sqlite });
-	applySchema({ sqlite: args.sqlite });
+	await applySchema({ sqlite: args.sqlite });
 	const db = new Kysely<LixDatabaseSchema>({
 		dialect: createDialect({
 			database: args.sqlite,
