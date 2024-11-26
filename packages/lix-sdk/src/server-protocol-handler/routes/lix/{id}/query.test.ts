@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { openLixInMemory } from "../../../../lix/open-lix-in-memory.js";
 import { createLspHandlerMemoryStorage } from "../../../storage/create-memory-storage.js";
 import { createLspHandler } from "../../../create-lsp-handler.js";
-import type { paths } from "@lix-js/server-protocol";
+import type * as LixServerProtocol from "@lix-js/server-protocol";
 import type { KeyValue } from "../../../../key-value/database-schema.js";
 
 test("it should execute a SELECT SQL query successfully", async () => {
@@ -28,7 +28,7 @@ test("it should execute a SELECT SQL query successfully", async () => {
 			headers: {
 				"Content-Type": "application/json",
 			},
-		}),
+		})
 	);
 
 	const responseJson = await response.json();
@@ -61,15 +61,44 @@ test("it should execute an INSERT, UPDATE query", async () => {
 			headers: {
 				"Content-Type": "application/json",
 			},
-		}),
+		})
 	);
 	const json =
-		(await response.json()) as paths["/lsp/lix/{id}/query"]["post"]["responses"]["201"]["content"]["application/json"];
+		(await response.json()) as LixServerProtocol.paths["/lsp/lix/{id}/query"]["post"]["responses"]["201"]["content"]["application/json"];
 
 	expect(response.status).toBe(201);
 	expect(json.rows?.length).toBe(1);
 	expect(json.num_affected_rows).toBe(1);
 	expect((json.rows?.[0] as KeyValue)?.key).toBe("test");
+
+	const lixFromStorage = await openLixInMemory({
+		blob: await storage.get(`lix-file-${id}`),
+	});
+
+	const result = await lixFromStorage.db
+		.selectFrom("key_value")
+		.where("key", "=", "test")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(result.key).toBe("test");
+
+	// ensure that a subsequent select query returns the inserted row
+	const selectFromServer = await lsp(
+		new Request(`http://localhost:3000/lsp/lix/${id}/query`, {
+			method: "POST",
+			body: JSON.stringify({
+				sql: "SELECT * FROM key_value WHERE key = 'test'",
+				parameters: [],
+			}),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+	);
+	const selectFromServerJson = await selectFromServer.json();
+	expect(selectFromServerJson.rows?.length).toBe(1);
+	expect(selectFromServerJson.rows?.[0].key).toBe("test");
 });
 
 test("it should return 400 for an invalid SQL query", async () => {

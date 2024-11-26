@@ -2,9 +2,10 @@ import { CompiledQuery } from "kysely";
 import { openLixInMemory } from "../../../../lix/open-lix-in-memory.js";
 import type { LspRouteHandler } from "../../../create-lsp-handler.js";
 import type { Lix } from "../../../../lix/open-lix.js";
-import { type paths } from "@lix-js/server-protocol";
+import type * as LixServerProtocol from "@lix-js/server-protocol";
 
-type TypedResponse = paths["/lsp/lix/{id}/query"]["post"]["responses"];
+type TypedResponse =
+	LixServerProtocol.paths["/lsp/lix/{id}/query"]["post"]["responses"];
 
 export const route: LspRouteHandler = async (context) => {
 	const { id } = context.params as { id: string };
@@ -28,14 +29,20 @@ export const route: LspRouteHandler = async (context) => {
 			} satisfies TypedResponse["500"]["content"]["application/json"]),
 			{
 				status: 500,
-			},
+			}
 		);
 	}
 
 	try {
 		const result = await lix.db.executeQuery(
-			CompiledQuery.raw(sql, parameters),
+			CompiledQuery.raw(sql, parameters)
 		);
+
+		if (Number(result.numAffectedRows) > 0) {
+			// write lix file to storage
+			// TODO will need handling for concurrent writes
+			await context.storage.set(`lix-file-${id}`, await lix.toBlob());
+		}
 
 		return new Response(
 			JSON.stringify({
@@ -47,7 +54,7 @@ export const route: LspRouteHandler = async (context) => {
 				headers: {
 					"Content-Type": "application/json",
 				},
-			},
+			}
 		);
 	} catch (error) {
 		return new Response(
@@ -60,7 +67,7 @@ export const route: LspRouteHandler = async (context) => {
 				headers: {
 					"Content-Type": "application/json",
 				},
-			},
+			}
 		);
 	}
 };
