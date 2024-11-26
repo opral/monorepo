@@ -102,7 +102,43 @@ export const filesAtom = atom(async (get) => {
 	return await lix.db.selectFrom("file").selectAll().execute();
 });
 
-export const activeAccountAtom = atom<Account | null>(null);
+const ACTIVE_ACCOUNT_STORAGE_KEY = "lix-active-account";
+
+export const activeAccountsAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+
+	return await lix.db
+		.selectFrom("active_account")
+		.innerJoin("account", "active_account.id", "account.id")
+		.selectAll("account")
+		.execute();
+});
+
+export const activeAccountAtom = atom(
+	// getter
+	async (get) => {
+		get(withPollingAtom);
+		const activeAccounts = await get(activeAccountsAtom);
+		return activeAccounts[0] || null;
+	},
+	// setter
+	async (get, set, account: Account | null) => {
+		const lix = await get(lixAtom);
+
+		if (account) {
+			await switchAccount({ lix, to: [account] });
+			localStorage.setItem(ACTIVE_ACCOUNT_STORAGE_KEY, JSON.stringify(account));
+		} else {
+			localStorage.removeItem(ACTIVE_ACCOUNT_STORAGE_KEY);
+			await switchAccount({ lix, to: [] });
+		}
+
+		// Trigger a refresh of dependent atoms
+		set(withPollingAtom, Date.now());
+		return account;
+	}
+);
 
 export const accountsAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -114,4 +150,5 @@ export const accountsAtom = atom(async (get) => {
 // Helper function to switch active account
 export const switchActiveAccount = async (lix: Lix, account: Account) => {
 	await switchAccount({ lix, to: [account] });
+	localStorage.setItem(ACTIVE_ACCOUNT_STORAGE_KEY, JSON.stringify(account));
 };
