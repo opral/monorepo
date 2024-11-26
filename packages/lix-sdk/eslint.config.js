@@ -7,6 +7,7 @@ export default [
 	{
 		files: ["**/*.{js,ts}"],
 		rules: {
+			"@typescript-eslint/no-explicit-any": "off",
 			"no-restricted-imports": [
 				"error",
 				{

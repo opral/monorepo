@@ -49,7 +49,7 @@ test("should use queue and settled correctly", async () => {
 	const dataInitial = enc.encode("insert text");
 	await lix.db
 		.insertInto("file")
-		.values({ id: "test", path: "test.txt", data: dataInitial })
+		.values({ id: "test", path: "/test.txt", data: dataInitial })
 		.execute();
 
 	const queue = await lix.db.selectFrom("change_queue").selectAll().execute();
@@ -58,7 +58,7 @@ test("should use queue and settled correctly", async () => {
 		expect.objectContaining({
 			id: 1,
 			file_id: "test",
-			path_after: "test.txt",
+			path_after: "/test.txt",
 			data_after: dataInitial,
 			data_before: null,
 		} satisfies Partial<ChangeQueueEntry>),
@@ -80,7 +80,7 @@ test("should use queue and settled correctly", async () => {
 		expect.objectContaining({
 			data: internalFilesAfter[0]!.data,
 			id: "test",
-			path: "test.txt",
+			path: "/test.txt",
 			metadata: null,
 		}) satisfies LixFile,
 	]);
@@ -88,7 +88,9 @@ test("should use queue and settled correctly", async () => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.innerJoin("change_author", "change_author.change_id", "change.id")
 		.selectAll("change")
+		.select("change_author.account_id")
 		.select("snapshot.content")
 		.execute();
 
@@ -101,6 +103,8 @@ test("should use queue and settled correctly", async () => {
 			content: {
 				text: "insert text",
 			},
+			// handles the author (which defaults to anonymous)
+			account_id: "anonymous",
 		}),
 	]);
 
@@ -151,7 +155,7 @@ test("should use queue and settled correctly", async () => {
 		expect.objectContaining({
 			id: 3,
 			file_id: "test",
-			path_after: "test.txt",
+			path_after: "/test.txt",
 			metadata_after: null,
 			data_before: dataUpdate1,
 			data_after: dataUpdate2,
@@ -159,7 +163,7 @@ test("should use queue and settled correctly", async () => {
 		expect.objectContaining({
 			id: 4,
 			file_id: "test",
-			path_after: "test.txt",
+			path_after: "/test.txt",
 			metadata_after: null,
 			data_before: dataUpdate2,
 			data_after: dataUpdate3,
@@ -175,7 +179,9 @@ test("should use queue and settled correctly", async () => {
 	const updatedChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.innerJoin("change_author", "change_author.change_id", "change.id")
 		.selectAll("change")
+		.select("change_author.account_id")
 		.select("snapshot.content")
 		.execute();
 
@@ -199,6 +205,7 @@ test("should use queue and settled correctly", async () => {
 			content: {
 				text: "insert text",
 			},
+			account_id: "anonymous",
 		}),
 		expect.objectContaining({
 			entity_id: "test",
@@ -208,6 +215,7 @@ test("should use queue and settled correctly", async () => {
 			content: {
 				text: "updated text",
 			},
+			account_id: "anonymous",
 		}),
 		expect.objectContaining({
 			file_id: "test",
@@ -217,6 +225,7 @@ test("should use queue and settled correctly", async () => {
 			content: {
 				text: "second text update",
 			},
+			account_id: "anonymous",
 		}),
 	]);
 

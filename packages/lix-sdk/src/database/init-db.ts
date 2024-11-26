@@ -1,10 +1,12 @@
-import { Kysely, ParseJSONResultsPlugin } from "kysely";
+import { Kysely } from "kysely";
 import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely";
-import { v7 as uuid_v7 } from "uuid";
-import { SerializeJsonPlugin } from "./serialize-json-plugin.js";
+import { v7 as uuid_v7, v4 as uuid_v4 } from "uuid";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
-import { sha256 } from "js-sha256";
+import { validateFilePath } from "../file/validate-file-path.js";
+import { jsonSha256 } from "../snapshot/json-sha-256.js";
+import { ParseJsonBPluginV1 } from "./kysely-plugin/parse-jsonb-plugin-v1.js";
+import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js";
 
 export function initDb(args: {
 	sqlite: SqliteDatabase;
@@ -15,7 +17,15 @@ export function initDb(args: {
 		dialect: createDialect({
 			database: args.sqlite,
 		}),
-		plugins: [new ParseJSONResultsPlugin(), new SerializeJsonPlugin()],
+		plugins: [
+			ParseJsonBPluginV1({
+				// jsonb columns
+				file: ["metadata"],
+				change_queue: ["metadata_before", "metadata_after"],
+				snapshot: ["content"],
+			}),
+			SerializeJsonBPlugin(),
+		],
 	});
 	return db;
 }
@@ -28,10 +38,36 @@ function initFunctions(args: { sqlite: SqliteDatabase }) {
 	});
 
 	args.sqlite.createFunction({
-		name: "sha256",
+		name: "uuid_v4",
+		arity: 0,
+		xFunc: () => uuid_v4(),
+	});
+
+	args.sqlite.createFunction({
+		name: "json_sha256",
 		arity: 1,
 		xFunc: (_ctx: number, value) => {
-			return value ? sha256(value as string) : "no-content";
+			if (!value) {
+				return "no-content";
+			}
+
+			const json = args.sqlite.exec("SELECT json(?)", {
+				bind: [value],
+				returnValue: "resultRows",
+			})[0]![0];
+
+			const parsed = JSON.parse(json as string);
+
+			return jsonSha256(parsed);
+		},
+		deterministic: true,
+	});
+
+	args.sqlite.createFunction({
+		name: "is_valid_file_path",
+		arity: 1,
+		xFunc: (_ctx: number, value) => {
+			return validateFilePath(value as string) as unknown as string;
 		},
 		deterministic: true,
 	});

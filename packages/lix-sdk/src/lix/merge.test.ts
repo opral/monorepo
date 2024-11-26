@@ -69,11 +69,10 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 
 	await sourceLix.db
 		.insertInto("snapshot")
-
 		.values(
-			[mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!].map((s) => {
-				return { content: s.content };
-			}),
+			[mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!].map((s) => ({
+				content: s.content,
+			})),
 		)
 		.execute();
 
@@ -618,7 +617,7 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 
 	await targetLix.db
 		.insertInto("file")
-		.values({ id: "mock-file", path: "", data: new Uint8Array() })
+		.values({ id: "mock-file", path: "/mock", data: new Uint8Array() })
 		.execute();
 
 	await sourceLix.db
@@ -672,7 +671,11 @@ test("it should copy discussion and related comments and mappings", async () => 
 
 	await lix1.db
 		.insertInto("file")
-		.values({ id: "test", path: "test.txt", data: enc.encode("inserted text") })
+		.values({
+			id: "test",
+			path: "/test.txt",
+			data: enc.encode("inserted text"),
+		})
 		.execute();
 
 	await changeQueueSettled({ lix: lix1 });
@@ -709,6 +712,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 		lix: lix1,
 		changeSet: await createChangeSet({ lix: lix1, changes: [changes[0]!] }),
 		content: "comment on a change",
+		createdBy: { id: "anonymous" },
 	});
 
 	await merge({ sourceLix: lix1, targetLix: lix2 });
@@ -729,11 +733,13 @@ test("it should copy discussion and related comments and mappings", async () => 
 		lix: lix2,
 		parentComment: commentsLix2AfterMerge[0]!,
 		content: "wrote in lix 2",
+		createdBy: { id: "anonymous" },
 	});
 	await createComment({
 		lix: lix1,
 		parentComment: commentsLix2AfterMerge[0]!,
 		content: "wrote in lix 1",
+		createdBy: { id: "anonymous" },
 	});
 
 	const commentsLix1OnSecondMerge = await lix1.db

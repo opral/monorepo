@@ -35,7 +35,7 @@ test("should be able to start a discussion on changes", async () => {
 
 	await lix.db
 		.insertInto("file")
-		.values({ id: "test", path: "test.txt", data: enc.encode("test") })
+		.values({ id: "test", path: "/test.txt", data: enc.encode("test") })
 		.execute();
 
 	await changeQueueSettled({ lix });
@@ -50,6 +50,7 @@ test("should be able to start a discussion on changes", async () => {
 			lix: { db: trx },
 			changeSet: await createChangeSet({ lix: { db: trx }, changes }),
 			content: "comment on a change",
+			createdBy: { id: "anonymous" },
 		});
 	});
 

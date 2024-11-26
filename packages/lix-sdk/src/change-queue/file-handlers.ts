@@ -1,10 +1,10 @@
 import type { ChangeQueueEntry } from "../database/schema.js";
 import type { DetectedChange } from "../plugin/lix-plugin.js";
-import { minimatch } from "minimatch";
 import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 import { changeIsLeafInVersion } from "../query-filter/change-is-leaf-in-version.js";
 import { createSnapshot } from "../snapshot/create-snapshot.js";
 import type { Lix } from "../lix/open-lix.js";
+import { sql } from "kysely";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {
@@ -12,6 +12,21 @@ function normalizePath(path: string) {
 		return "/" + path;
 	}
 	return path;
+}
+
+async function glob(args: {
+	lix: Pick<Lix, "db">;
+	glob: string;
+	path: string;
+}) {
+	const result =
+		await sql`SELECT CASE WHEN ${args.path} GLOB ${args.glob} THEN 1 ELSE 0 END AS matches`.execute(
+			args.lix.db,
+		);
+
+	// Extract the result from the response
+
+	return (result.rows[0] as any)?.matches === 1;
 }
 
 // creates initial changes for new files
@@ -34,7 +49,13 @@ export async function handleFileInsert(args: {
 
 	for (const plugin of plugins) {
 		// glob expressions are expressed relative without leading / but path has leading /
-		if (!minimatch(normalizePath(path), "/" + plugin.detectChangesGlob)) {
+		if (
+			!(await glob({
+				lix: args.lix,
+				path: normalizePath(path),
+				glob: "/" + plugin.detectChangesGlob,
+			}))
+		) {
 			break;
 		}
 
@@ -68,6 +89,11 @@ export async function handleFileInsert(args: {
 	}
 
 	await args.lix.db.transaction().execute(async (trx) => {
+		const currentAuthors = await trx
+			.selectFrom("active_account")
+			.selectAll()
+			.execute();
+
 		const currentVersion = await trx
 			.selectFrom("current_version")
 			.innerJoin("version", "current_version.id", "version.id")
@@ -91,6 +117,16 @@ export async function handleFileInsert(args: {
 				})
 				.returningAll()
 				.executeTakeFirstOrThrow();
+
+			for (const author of currentAuthors) {
+				await trx
+					.insertInto("change_author")
+					.values({
+						change_id: insertedChange.id,
+						account_id: author.id,
+					})
+					.execute();
+			}
 
 			await updateChangesInVersion({
 				lix: { ...args.lix, db: trx },
@@ -125,7 +161,13 @@ export async function handleFileChange(args: {
 
 	for (const plugin of plugins) {
 		// glob expressions are expressed relative without leading / but path has leading /
-		if (!minimatch(normalizePath(path), "/" + plugin.detectChangesGlob)) {
+		if (
+			!(await glob({
+				lix: args.lix,
+				path: normalizePath(path),
+				glob: "/" + plugin.detectChangesGlob,
+			}))
+		) {
 			break;
 		}
 		if (plugin.detectChanges === undefined) {
@@ -162,6 +204,10 @@ export async function handleFileChange(args: {
 	}
 
 	await args.lix.db.transaction().execute(async (trx) => {
+		const currentAuthors = await trx
+			.selectFrom("active_account")
+			.selectAll()
+			.execute();
 		const currentversion = await trx
 			.selectFrom("current_version")
 			.innerJoin("version", "current_version.id", "version.id")
@@ -195,6 +241,16 @@ export async function handleFileChange(args: {
 				})
 				.returningAll()
 				.executeTakeFirstOrThrow();
+
+			for (const author of currentAuthors) {
+				await trx
+					.insertInto("change_author")
+					.values({
+						change_id: insertedChange.id,
+						account_id: author.id,
+					})
+					.execute();
+			}
 
 			await updateChangesInVersion({
 				lix: { ...args.lix, db: trx },

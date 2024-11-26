@@ -1,19 +1,36 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
+import type {
+	AccountTable,
+	ActiveAccountTable,
+} from "../account/database-schema.js";
+import type { KeyValueTable } from "../key-value/database-schema.js";
 
 export type LixDatabaseSchema = {
-	file: LixFileTable;
-	change_queue: ChangeQueueTable;
-	change_edge: ChangeEdgeTable;
+	// account
+	account: AccountTable;
+	active_account: ActiveAccountTable;
+
+	// snapshot
 	snapshot: SnapshotTable;
 	label: LabelTable;
 
+	// file
+	file: LixFileTable;
+	change_queue: ChangeQueueTable;
+
+	// change
 	change: ChangeTable;
+	change_edge: ChangeEdgeTable;
+	change_author: ChangeAuthorTable;
 
 	// change set
 	change_set: ChangeSetTable;
 	change_set_element: ChangeSetElementTable;
 	change_set_label: ChangeSetLabelTable;
+	change_set_label_author: ChangeSetLabelAuthorTable;
+
+	// key value
+	key_value: KeyValueTable;
 
 	// discussion
 	discussion: DiscussionTable;
@@ -49,6 +66,15 @@ export type NewLixFile = Insertable<LixFileTable>;
 export type LixFileUpdate = Updateable<LixFileTable>;
 type LixFileTable = {
 	id: Generated<string>;
+	/**
+	 * The path of the file.
+	 *
+	 * The path is currently defined as a subset of RFC 3986.
+	 * Any path can be tested with the `isValidFilePath()` function.
+	 *
+	 * @example
+	 *   - `/path/to/file.txt`
+	 */
 	path: string;
 	data: ArrayBuffer;
 	metadata: Record<string, any> | null;
@@ -86,6 +112,13 @@ export type NewChangeEdge = Insertable<ChangeEdgeTable>;
 type ChangeEdgeTable = {
 	parent_id: string;
 	child_id: string;
+};
+
+export type ChangeAuthor = Selectable<ChangeAuthorTable>;
+export type NewChangeAuthor = Insertable<ChangeAuthorTable>;
+type ChangeAuthorTable = {
+	change_id: string;
+	account_id: string;
 };
 
 export type Snapshot = Selectable<SnapshotTable>;
@@ -139,6 +172,7 @@ type CommentTable = {
 	parent_id: string | null;
 	discussion_id: string;
 	created_at: Generated<string>;
+	created_by: string;
 	content: string;
 };
 
@@ -158,6 +192,15 @@ export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelTable>;
 type ChangeSetLabelTable = {
 	change_set_id: string;
 	label_id: string;
+};
+
+export type ChangeSetLabelAuthor = Selectable<ChangeSetLabelAuthorTable>;
+export type NewChangeSetLabelAuthor = Insertable<ChangeSetLabelAuthorTable>;
+export type ChangeSetLabelAuthorUpdate = Updateable<ChangeSetLabelAuthorTable>;
+type ChangeSetLabelAuthorTable = {
+	change_set_id: string;
+	label_id: string;
+	account_id: string;
 };
 
 // ------ versiones ------
@@ -237,3 +280,4 @@ type ChangeConflictResolutionTable = {
 	change_conflict_id: string;
 	resolved_change_id: string;
 };
+

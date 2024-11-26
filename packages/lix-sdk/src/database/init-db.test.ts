@@ -3,6 +3,7 @@ import { test, expect } from "vitest";
 import { initDb } from "./init-db.js";
 import { validate } from "uuid";
 import { mockChange } from "../change/mock-change.js";
+import { jsonSha256 } from "../snapshot/json-sha-256.js";
 
 test("file ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
@@ -56,17 +57,18 @@ test("snapshot ids should default to sha256", async () => {
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
+
+	const content = { a: "value" };
+
 	const snapshot = await db
 		.insertInto("snapshot")
 		.values({
-			content: { a: "value from insert statement" },
+			content,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	expect(snapshot.id).toBe(
-		"19ce22178013c4a047e8c90135ed57bfe4cc6451917dbb75f5b838922cf10b19",
-	);
+	expect(snapshot.id).toBe(jsonSha256(content));
 });
 
 test("inserting the same snapshot multiple times should be possible and not lead to duplicates (content addressable)", async () => {
@@ -94,7 +96,11 @@ test("inserting the same snapshot multiple times should be possible and not lead
 		.values({
 			content: { a: "some data" },
 		})
-		.onConflict((oc) => oc.doUpdateSet({ content: { a: "some data" } }))
+		.onConflict((oc) =>
+			oc.doUpdateSet((eb) => ({
+				content: eb.ref("excluded.content"),
+			})),
+		)
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
@@ -325,3 +331,32 @@ test("re-opening the same database shouldn't lead to duplicate insertion of the 
 
 	expect(currentversion).toHaveLength(1);
 });
+
+test("invalid file paths should be rejected", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	// init the trigger function (usually defined by lix only)
+	sqlite.createFunction({
+		name: "triggerChangeQueue",
+		arity: 0,
+		// @ts-expect-error - dynamic function
+		xFunc: () => {},
+	});
+
+	await expect(
+		db
+			.insertInto("file")
+			.values({
+				path: "invalid-path",
+				data: new Uint8Array(),
+			})
+			.returningAll()
+			.execute(),
+	).rejects.toThrowErrorMatchingInlineSnapshot(
+		`[SQLite3Error: SQLITE_ERROR: sqlite3 result code 1: Error: File path must start with a slash.\n\nNot starting a file path with a slash \`/\` leads to ambiguity whether or not the path is a directory or a file.]`,
+	);
+});
+

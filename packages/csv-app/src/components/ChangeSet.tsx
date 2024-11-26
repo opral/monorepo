@@ -4,14 +4,14 @@ import {
 	changeHasLabel,
 	changeInVersion,
 	changeIsLeafInVersion,
-	ChangeSet,
 	Lix,
 	Snapshot,
 	changeIsLowestCommonAncestorOf,
+	createDiscussion,
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { currentVersionAtom, lixAtom } from "../state.ts";
+import { activeAccountsAtom, currentVersionAtom, lixAtom } from "../state.ts";
 import clsx from "clsx";
 import {
 	activeFileAtom,
@@ -142,11 +142,17 @@ const ConfirmChangesBox = () => {
 	const [description, setDescription] = useState("");
 	const [lix] = useAtom(lixAtom);
 	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
+	const [activeAccounts] = useAtom(activeAccountsAtom);
 
 	const handleConfirmChanges = async () => {
 		const changeSet = await confirmChanges(lix, unconfirmedChanges);
 		if (description !== "") {
-			await addDiscussionToChangeSet(lix, changeSet, description);
+			await createDiscussion({
+				lix,
+				changeSet,
+				content: description,
+				createdBy: activeAccounts[0],
+			});
 			await saveLixToOpfs({ lix });
 		}
 	};
@@ -165,30 +171,6 @@ const ConfirmChangesBox = () => {
 	);
 };
 
-const addDiscussionToChangeSet = async (
-	lix: Lix,
-	changeSet: ChangeSet,
-	content: string
-) => {
-	await lix.db.transaction().execute(async (trx) => {
-		const discussion = await trx
-			.insertInto("discussion")
-			.values({
-				change_set_id: changeSet.id,
-			})
-			.returning("id")
-			.executeTakeFirstOrThrow();
-
-		await trx
-			.insertInto("comment")
-			.values({
-				discussion_id: discussion.id,
-				content,
-			})
-			.execute();
-	});
-};
-
 const getChanges = async (
 	lix: Lix,
 	changeSetId: string,
@@ -199,8 +181,8 @@ const getChanges = async (
 		string,
 		Array<
 			Change & {
-				snapshot_content: Snapshot["content"];
-				parent: Change & { snapshot_content: Snapshot["content"] };
+				content: Snapshot["content"];
+				parent: Change & { content: Snapshot["content"] };
 			}
 		>
 	>
@@ -218,7 +200,7 @@ const getChanges = async (
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where("change.file_id", "=", fileId)
 		.selectAll("change")
-		.select("snapshot.content as snapshot_content")
+		.select("snapshot.content")
 		.execute();
 
 	// Group changes by row
@@ -263,7 +245,7 @@ const getChanges = async (
 				.where(changeInVersion(currentVersion))
 				.where(changeHasLabel("confirmed"))
 				.selectAll("change")
-				.select("snapshot.content as snapshot_content")
+				.select("snapshot.content")
 				.executeTakeFirst();
 
 			change.parent = parent;
@@ -282,8 +264,8 @@ const getUnconfirmedChanges = async (
 		string,
 		Array<
 			Change & {
-				snapshot_content: Snapshot["content"];
-				parent: Change & { snapshot_content: Snapshot["content"] };
+				content: Snapshot["content"];
+				parent: Change & { content: Snapshot["content"] };
 			}
 		>
 	>
@@ -296,7 +278,7 @@ const getUnconfirmedChanges = async (
 		.where((eb) => eb.not(changeHasLabel("confirmed")))
 		.where("change.schema_key", "=", CellSchemaV1.key)
 		.selectAll("change")
-		.select("snapshot.content as snapshot_content")
+		.select("snapshot.content")
 		.execute();
 
 	const groupedByRow: any = {};
@@ -319,13 +301,15 @@ const getUnconfirmedChanges = async (
 			const parent = await lix.db
 				.selectFrom("change")
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-				.where(changeHasLabel("confirmed"))
 				.where("change.entity_id", "=", change.entity_id)
+				.where(changeHasLabel("confirmed"))
 				.where(changeInVersion(currentVersion))
+				// TODO fix the filter
+				// https://github.com/opral/lix-sdk/issues/151
+				// .where(changeIsLowestCommonAncestorOf([change]))
 				.where("change.schema_key", "=", CellSchemaV1.key)
-				.where(changeIsLowestCommonAncestorOf([change]))
 				.selectAll("change")
-				.select("snapshot.content as snapshot_content")
+				.select("snapshot.content")
 				.executeTakeFirst();
 
 			change.parent = parent;

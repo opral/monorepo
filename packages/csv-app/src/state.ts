@@ -89,3 +89,13 @@ export const existingVersionsAtom = atom(async (get) => {
 
 	return await lix.db.selectFrom("version").selectAll().execute();
 });
+
+export const activeAccountsAtom = atom(async (get) => {
+	const lix = await get(lixAtom);
+
+	return await lix.db
+		.selectFrom("active_account")
+		.innerJoin("account", "active_account.id", "account.id")
+		.selectAll()
+		.execute();
+});
