@@ -23,15 +23,14 @@ import { useAtom } from "jotai";
 import clsx from "clsx";
 import IconFile from "./../components/icons/IconFile.tsx";
 import IconAutomation from "./../components/icons/IconAutomation.tsx";
-import { userAtom } from "../state.ts";
+import { activeAccountAtom } from "../state.ts";
+import { useState } from "react";
+import { AccountDialog } from "../components/AccountDialog.tsx";
 
-interface AppSidebarProps {
-	onSettingsClick?: (open: boolean) => void;
-}
-
-export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
-	const [user] = useAtom(userAtom);
+export function AppSidebar() {
+	const [activeAccount] = useAtom(activeAccountAtom);
 	const location = useLocation();
+	const [accountDialogOpen, setAccountDialogOpen] = useState(false);
 
 	return (
 		<Sidebar
@@ -125,12 +124,12 @@ export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
 						<TooltipTrigger asChild>
 							<Avatar
 								className="w-8 h-8 cursor-pointer hover:opacity-90 transition-opacity"
-								onClick={() => onSettingsClick?.(true)}
+								onClick={() => setAccountDialogOpen(true)}
 							>
 								<AvatarImage src="#" alt="#" />
 								<AvatarFallback className="bg-[#fff] text-[#141A21] border border-[#DBDFE7]">
-									{user?.username
-										? user.username.substring(0, 2).toUpperCase()
+									{activeAccount?.name
+										? activeAccount.name.substring(0, 2).toUpperCase()
 										: "XX"}
 								</AvatarFallback>
 							</Avatar>
@@ -141,6 +140,10 @@ export function AppSidebar({ onSettingsClick }: AppSidebarProps) {
 					</Tooltip>
 				</SidebarFooter>
 			</TooltipProvider>
+			<AccountDialog
+				open={accountDialogOpen}
+				onOpenChange={setAccountDialogOpen}
+			/>
 		</Sidebar>
 	);
 }

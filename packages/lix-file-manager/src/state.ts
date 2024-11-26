@@ -1,4 +1,5 @@
 import { Version, openLixInMemory } from "@lix-js/sdk";
+import type { Account } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
@@ -129,3 +130,12 @@ export const userAtom = atom(
 		// await lix.db.updateTable("user").set(update).execute();
 	}
 );
+
+export const activeAccountAtom = atom<Account | null>(null);
+
+export const accountsAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+
+	return await lix.db.selectFrom("account").selectAll().execute();
+});
