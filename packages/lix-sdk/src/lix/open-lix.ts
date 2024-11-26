@@ -4,9 +4,11 @@ import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { initChangeQueue } from "../change-queue/init-change-queue.js";
 import { changeQueueSettled } from "../change-queue/change-queue-settled.js";
+import type { Kysely } from "kysely";
+import type { LixDatabaseSchema } from "../database/schema.js";
 
 export type Lix = {
-	db: ReturnType<typeof initDb>;
+	db: Kysely<LixDatabaseSchema>;
 	toBlob: () => Promise<Blob>;
 	plugin: {
 		getAll: () => Promise<LixPlugin[]>;
