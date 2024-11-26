@@ -5,7 +5,7 @@ import type { LixDatabaseSchema } from "../database/schema.js";
 /**
  * Pushes rows to the server.
  */
-export async function pushRowsToServer(args: {
+export async function pushToServer(args: {
 	serverUrl: string;
 	lix: Lix;
 	id: string;

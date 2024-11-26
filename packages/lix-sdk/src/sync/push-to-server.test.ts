@@ -3,7 +3,7 @@ import { createLspHandler } from "../server-protocol-handler/create-lsp-handler.
 import { createLspHandlerMemoryStorage } from "../server-protocol-handler/storage/create-memory-storage.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type * as LixServerProtocol from "@lix-js/server-protocol";
-import { pushRowsToServer } from "./push-rows-to-server.js";
+import { pushToServer } from "./push-to-server.js";
 import type { LixFile } from "../database/schema.js";
 import type { Account } from "../account/database-schema.js";
 import { newLixFile } from "../lix/new-lix.js";
@@ -49,7 +49,7 @@ test("push rows of multiple tables to server successfully", async () => {
 		})
 		.execute();
 
-	await pushRowsToServer({
+	await pushToServer({
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
@@ -125,7 +125,7 @@ test("it should handle snapshots.content json binaries", async () => {
 		})
 		.execute();
 
-	await pushRowsToServer({
+	await pushToServer({
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
@@ -181,7 +181,7 @@ test.todo("it should handle binary values", async () => {
 		})
 		.execute();
 
-	await pushRowsToServer({
+	await pushToServer({
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
