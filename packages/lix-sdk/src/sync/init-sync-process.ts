@@ -1,5 +1,3 @@
-import createClient from "openapi-fetch";
-import { type paths } from "@lix-js/server-protocol";
 import type { Lix } from "../lix/open-lix.js";
 import { fetchRowsFromServer } from "./fetch-rows-from-server.js";
 import { pushRowsToServer } from "./push-rows-to-server.js";
@@ -16,7 +14,7 @@ export async function initSyncProcess(args: { lix: Lix }): Promise<void> {
 	const url = await args.lix.db
 		.selectFrom("key_value")
 		// saved in key value because simpler for experimentation
-		.where("key", "=", "lix-experimental-sync-url")
+		.where("key", "=", "lix-experimental-server-url")
 		.select("value")
 		.executeTakeFirst();
 
@@ -25,10 +23,6 @@ export async function initSyncProcess(args: { lix: Lix }): Promise<void> {
 	if (!url) {
 		return;
 	}
-
-	const client = createClient<paths>({
-		baseUrl: url.value,
-	});
 
 	const tables = await args.lix.db.introspection.getTables();
 	// only get relevant tables
@@ -42,13 +36,13 @@ export async function initSyncProcess(args: { lix: Lix }): Promise<void> {
 	// naive implementation that syncs every second
 	setInterval(() => {
 		fetchRowsFromServer({
-			client,
+			serverUrl: url.value,
 			lix: args.lix,
 			id,
 			tableNames: tableNamesToBeSynced,
 		});
 		pushRowsToServer({
-			client,
+			serverUrl: url.value,
 			lix: args.lix,
 			id,
 			tableNames: tableNamesToBeSynced,

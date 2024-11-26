@@ -27,7 +27,6 @@
 		"dedent": "1.5.1",
 		"js-sha256": "^0.11.0",
 		"kysely": "^0.27.4",
-		"openapi-fetch": "^0.13.0",
 		"sqlite-wasm-kysely": "workspace: *",
 		"uuid": "^10.0.0"
 	},
