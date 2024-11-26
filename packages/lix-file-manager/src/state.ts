@@ -42,6 +42,9 @@ export const lixAtom = atom(async () => {
 		providePlugins: [csvPlugin],
 	});
 
+	// Initialize accounts from localStorage
+	await initializeAccountsFromStorage(lix);
+
 	// * naive set interval leads to bugs.
 	// * search for `saveLixToOpfs` in the code base
 	// existingSafeLixToOpfsInterval = setInterval(async () => {
@@ -206,4 +209,60 @@ export const continueAsAnonymous = async (lix: Lix) => {
 	await switchAccount({ lix, to: [account] });
 	localStorage.setItem(ACTIVE_ACCOUNT_STORAGE_KEY, JSON.stringify(account));
 	return account;
+};
+
+export const ACCOUNTS_STORAGE_KEY = "lix-accounts";
+
+export const initializeAccountsFromStorage = async (lix: Lix) => {
+	const storedAccounts = loadAccountsFromStorage();
+	const storedActiveAccount = localStorage.getItem(ACTIVE_ACCOUNT_STORAGE_KEY);
+
+	if (storedAccounts.length > 0) {
+		// Insert stored accounts into database
+		await Promise.all(
+			storedAccounts.map(async (account) => {
+				try {
+					await lix.db
+						.insertInto("account")
+						.values(account)
+						.onConflict((oc) => oc.doNothing())
+						.execute();
+				} catch (error) {
+					console.error("Error restoring account:", error);
+				}
+			})
+		);
+
+		// Try to restore previous active account
+		if (storedActiveAccount) {
+			const parsedAccount = JSON.parse(storedActiveAccount);
+			const existingAccount = storedAccounts.find(
+				(acc) => acc.id === parsedAccount.id
+			);
+
+			if (existingAccount) {
+				await switchAccount({ lix, to: [existingAccount] });
+			} else {
+				// If previous account not found, try to find anonymous account
+				const anonymousAccount = storedAccounts.find(
+					(acc) => acc.id === ANONYMOUS_ACCOUNT_ID
+				);
+				if (anonymousAccount) {
+					await switchAccount({ lix, to: [anonymousAccount] });
+				} else {
+					// Create anonymous account as fallback
+					await continueAsAnonymous(lix);
+				}
+			}
+		}
+	}
+};
+
+export const saveAccountsToStorage = (accounts: Account[]) => {
+	localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts));
+};
+
+export const loadAccountsFromStorage = (): Account[] => {
+	const stored = localStorage.getItem(ACCOUNTS_STORAGE_KEY);
+	return stored ? JSON.parse(stored) : [];
 };
