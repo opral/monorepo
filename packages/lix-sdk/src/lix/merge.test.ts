@@ -135,7 +135,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		.selectAll()
 		.execute();
 
-	expect(edges).toEqual(mockEdges);
+	expect(edges).toEqual([expect.objectContaining(mockEdges[0])]);
 
 	expect(mockPlugin.applyChanges).toHaveBeenCalledTimes(1);
 	// expect(mockPlugin.detectConflicts).toHaveBeenCalledTimes(1);
@@ -694,7 +694,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 		.execute();
 
 	expect(changes).toEqual([
-		{
+		expect.objectContaining({
 			id: changes[0]?.id,
 			created_at: changes[0]?.created_at,
 			snapshot_id: changes[0]?.snapshot_id,
@@ -705,7 +705,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 			content: {
 				text: "inserted text",
 			},
-		},
+		}),
 	]);
 
 	await createDiscussion({
@@ -756,7 +756,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 
 	// lix should know the ne comment from lix 1 but lix 1 should miss the new comment in lix2
 	expect(commentsLix2AfterSecondMerge.length).toBe(
-		commentsLix1OnSecondMerge.length + 1,
+		commentsLix1OnSecondMerge.length + 1
 	);
 
 	await merge({ sourceLix: lix1, targetLix: lix2 });

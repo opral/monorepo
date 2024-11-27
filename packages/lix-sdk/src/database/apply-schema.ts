@@ -20,9 +20,11 @@ export async function applySchema(args: {
 
   CREATE TABLE IF NOT EXISTS file (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    -- TODO SYNC shall we also sync this table?
     path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL,
     metadata BLOB,
+    
 
     CHECK (is_valid_file_path(path))
   ) STRICT;
@@ -77,6 +79,10 @@ export async function applySchema(args: {
 
   CREATE TABLE IF NOT EXISTS change (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    -- vector clock
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+    
     entity_id TEXT NOT NULL,
     schema_key TEXT NOT NULL,
     file_id TEXT NOT NULL,
@@ -85,6 +91,7 @@ export async function applySchema(args: {
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
     UNIQUE (id, entity_id, file_id, schema_key),
+    UNIQUE (session, session_clock),
     FOREIGN KEY(snapshot_id) REFERENCES snapshot(id)
   ) STRICT;
 
@@ -92,25 +99,36 @@ export async function applySchema(args: {
     change_id TEXT NOT NULL,
     account_id TEXT NOT NULL,
 
+    -- vector clock
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+    
     PRIMARY KEY (change_id, account_id),
     FOREIGN KEY(change_id) REFERENCES change(id),
-    FOREIGN KEY(account_id) REFERENCES account(id)
+    FOREIGN KEY(account_id) REFERENCES account(id),
+    UNIQUE (session, session_clock)
   ) strict;
 
   CREATE TABLE IF NOT EXISTS change_edge (
     parent_id TEXT NOT NULL,
     child_id TEXT NOT NULL,
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
     
     PRIMARY KEY (parent_id, child_id),
     FOREIGN KEY(parent_id) REFERENCES change(id),
     FOREIGN KEY(child_id) REFERENCES change(id),
+    UNIQUE (session, session_clock),
     -- Prevent self referencing edges
     CHECK (parent_id != child_id)
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS snapshot (
     id TEXT GENERATED ALWAYS AS (json_sha256(content)) STORED UNIQUE,
-    content BLOB
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+    content BLOB,
+    UNIQUE (session, session_clock)
   ) STRICT;
 
   -- Create the default 'no-content' snapshot
@@ -123,21 +141,28 @@ export async function applySchema(args: {
 
   CREATE TABLE IF NOT EXISTS change_conflict (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+    
     key TEXT NOT NULL,
     change_set_id TEXT NOT NULL,
 
     FOREIGN KEY(change_set_id) REFERENCES change_set(id)
+    UNIQUE (session, session_clock)
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_conflict_resolution (
     change_conflict_id TEXT NOT NULL,
     resolved_change_id TEXT NOT NULL,
-
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+    
     -- potential future columns
     -- resolved_by <account_id>
     -- resolved_at <timestamp>
 
     PRIMARY KEY(change_conflict_id, resolved_change_id),
+    UNIQUE (session, session_clock),
     FOREIGN KEY(change_conflict_id) REFERENCES change_conflict(id),
     FOREIGN KEY(resolved_change_id) REFERENCES change(id)
   ) STRICT;
@@ -145,14 +170,23 @@ export async function applySchema(args: {
   -- change sets
 
   CREATE TABLE IF NOT EXISTS change_set (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7())
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+    UNIQUE (session, session_clock)
+    
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_element (
+    
     change_set_id TEXT NOT NULL,
     change_id TEXT NOT NULL,
 
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+    
     UNIQUE(change_set_id, change_id),
+    UNIQUE (session, session_clock),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id),    
     FOREIGN KEY(change_id) REFERENCES change(id)
   ) STRICT;
@@ -161,6 +195,10 @@ export async function applySchema(args: {
     label_id TEXT NOT NULL,
     change_set_id TEXT NOT NULL,
 
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+
+    UNIQUE (session, session_clock),
     FOREIGN KEY(label_id) REFERENCES label(id),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id),
     PRIMARY KEY(label_id, change_set_id)
@@ -171,6 +209,10 @@ export async function applySchema(args: {
     change_set_id TEXT NOT NULL,
     account_id TEXT NOT NULL,
 
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+
+    UNIQUE (session, session_clock),
     PRIMARY KEY(label_id, change_set_id, account_id),
     FOREIGN KEY(label_id, change_set_id) REFERENCES change_set_label(label_id, change_set_id),
     FOREIGN KEY(account_id) REFERENCES account(id)
@@ -182,6 +224,10 @@ export async function applySchema(args: {
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     change_set_id TEXT NOT NULL,
 
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+
+    UNIQUE (session, session_clock),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) STRICT;
 
@@ -193,6 +239,10 @@ export async function applySchema(args: {
     content TEXT NOT NULL,
     created_by TEXT NOT NULL,
 
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+
+    UNIQUE (session, session_clock),
     FOREIGN KEY(created_by) REFERENCES account(id),
     FOREIGN KEY(discussion_id) REFERENCES discussion(id),
     FOREIGN KEY(parent_id) REFERENCES comment(id)
@@ -202,7 +252,11 @@ export async function applySchema(args: {
   
   CREATE TABLE IF NOT EXISTS label (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
-    name TEXT NOT NULL UNIQUE  -- e.g., 'confirmed', 'reviewed'
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+
+    name TEXT NOT NULL UNIQUE,  -- e.g., 'confirmed', 'reviewed'
+    UNIQUE (session, session_clock)
   ) STRICT;
 
   INSERT OR IGNORE INTO label (name) VALUES ('confirmed');
@@ -213,6 +267,9 @@ export async function applySchema(args: {
   CREATE TABLE IF NOT EXISTS version (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     change_set_id TEXT NOT NULL,
+
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
 
     -- name is optional. 
     -- 
@@ -230,13 +287,18 @@ export async function applySchema(args: {
     -- remove the UNIQUE constraint
     -- and update version pointers to 
     -- create a new change set on updates
-    UNIQUE (id, change_set_id)
+    UNIQUE (id, change_set_id),
+    UNIQUE (session, session_clock)
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS version_change_conflict (
     version_id TEXT NOT NULL,
     change_conflict_id TEXT NOT NULL,
 
+    session TEXT NOT NULL DEFAULT (vector_clock_session()), 
+    session_clock INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+    
+    UNIQUE (session, session_clock),
     PRIMARY KEY (version_id, change_conflict_id),
     FOREIGN KEY (version_id) REFERENCES version(id),
     FOREIGN KEY (change_conflict_id) REFERENCES change_conflict(id)

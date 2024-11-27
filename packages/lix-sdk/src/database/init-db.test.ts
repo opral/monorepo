@@ -4,12 +4,13 @@ import { initDb } from "./init-db.js";
 import { validate } from "uuid";
 import { mockChange } from "../change/mock-change.js";
 import { jsonSha256 } from "../snapshot/json-sha-256.js";
+import { sql } from "kysely";
 
 test("file ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	const db = await initDb({ sqlite });
 
 	// init the trigger function (usually defined by lix only)
 	sqlite.createFunction({
@@ -35,7 +36,7 @@ test("change ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	const db = await initDb({ sqlite });
 
 	const change = await db
 		.insertInto("change")
@@ -56,7 +57,7 @@ test("snapshot ids should default to sha256", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	const db = await initDb({ sqlite });
 
 	const content = { a: "value" };
 
@@ -75,7 +76,7 @@ test("inserting the same snapshot multiple times should be possible and not lead
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	const db = await initDb({ sqlite });
 
 	const initialSnapshots = await db
 		.selectFrom("snapshot")
@@ -99,7 +100,7 @@ test("inserting the same snapshot multiple times should be possible and not lead
 		.onConflict((oc) =>
 			oc.doUpdateSet((eb) => ({
 				content: eb.ref("excluded.content"),
-			})),
+			}))
 		)
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -114,7 +115,7 @@ test("an empty snapshot should default to the special 'no-content' snapshot to s
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	const db = await initDb({ sqlite });
 	const snapshot = await db
 		.insertInto("snapshot")
 		.values({
@@ -123,7 +124,7 @@ test("an empty snapshot should default to the special 'no-content' snapshot to s
 		.onConflict((oc) =>
 			oc.doUpdateSet((eb) => ({
 				content: eb.ref("excluded.content"),
-			})),
+			}))
 		)
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -136,7 +137,7 @@ test("files should be able to have metadata", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	const db = await initDb({ sqlite });
 
 	sqlite.createFunction({
 		name: "triggerChangeQueue",
@@ -179,7 +180,7 @@ test("change graph edges can't reference themselves", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	const db = await initDb({ sqlite });
 
 	await expect(
 		db
@@ -189,9 +190,9 @@ test("change graph edges can't reference themselves", async () => {
 				child_id: "change1",
 			})
 			.returningAll()
-			.execute(),
+			.execute()
 	).rejects.toThrowErrorMatchingInlineSnapshot(
-		`[SQLite3Error: SQLITE_CONSTRAINT_CHECK: sqlite3 result code 275: CHECK constraint failed: parent_id != child_id]`,
+		`[SQLite3Error: SQLITE_CONSTRAINT_CHECK: sqlite3 result code 275: CHECK constraint failed: parent_id != child_id]`
 	);
 });
 
@@ -199,7 +200,7 @@ test("change set items must be unique", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	const db = await initDb({ sqlite });
 
 	await db
 		.insertInto("change_set")
@@ -214,7 +215,7 @@ test("change set items must be unique", async () => {
 		.values(
 			mockChange({
 				id: "change-1",
-			}),
+			})
 		)
 		.execute();
 
@@ -234,9 +235,9 @@ test("change set items must be unique", async () => {
 				change_id: "change-1",
 			})
 			.returningAll()
-			.execute(),
+			.execute()
 	).rejects.toThrowErrorMatchingInlineSnapshot(
-		`[SQLite3Error: SQLITE_CONSTRAINT_UNIQUE: sqlite3 result code 2067: UNIQUE constraint failed: change_set_element.change_set_id, change_set_element.change_id]`,
+		`[SQLite3Error: SQLITE_CONSTRAINT_UNIQUE: sqlite3 result code 2067: UNIQUE constraint failed: change_set_element.change_set_id, change_set_element.change_id]`
 	);
 });
 
@@ -244,7 +245,7 @@ test("creating multiple discussions for one change set should be possible", asyn
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	const db = await initDb({ sqlite });
 
 	const changeSet = await db
 		.insertInto("change_set")
@@ -274,7 +275,7 @@ test("the confirmed label should be created if it doesn't exist", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	const db = await initDb({ sqlite });
 
 	const tag = await db
 		.selectFrom("label")
@@ -291,7 +292,7 @@ test("a default main version should exist", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	const db = await initDb({ sqlite });
 
 	const version = await db
 		.selectFrom("version")
@@ -306,7 +307,7 @@ test("re-opening the same database shouldn't lead to duplicate insertion of the 
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	const db = await initDb({ sqlite });
 
 	const changeSet = await db
 		.insertInto("change_set")
@@ -322,7 +323,7 @@ test("re-opening the same database shouldn't lead to duplicate insertion of the 
 
 	await db.updateTable("current_version").set({ id: newversion.id }).execute();
 
-	const db2 = initDb({ sqlite });
+	const db2 = await initDb({ sqlite });
 
 	const currentversion = await db2
 		.selectFrom("current_version")
@@ -336,7 +337,7 @@ test("invalid file paths should be rejected", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	const db = await initDb({ sqlite });
 
 	// init the trigger function (usually defined by lix only)
 	sqlite.createFunction({
@@ -354,9 +355,31 @@ test("invalid file paths should be rejected", async () => {
 				data: new Uint8Array(),
 			})
 			.returningAll()
-			.execute(),
+			.execute()
 	).rejects.toThrowErrorMatchingInlineSnapshot(
-		`[SQLite3Error: SQLITE_ERROR: sqlite3 result code 1: Error: File path must start with a slash.\n\nNot starting a file path with a slash \`/\` leads to ambiguity whether or not the path is a directory or a file.]`,
+		`[SQLite3Error: SQLITE_ERROR: sqlite3 result code 1: Error: File path must start with a slash.\n\nNot starting a file path with a slash \`/\` leads to ambiguity whether or not the path is a directory or a file.]`
 	);
 });
 
+test("vector clock functions", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = await initDb({ sqlite });
+
+	const vectorClockTick1 =
+		await sql`select vector_clock_session() as session, vector_clock_tick() as time`.execute(
+			db
+		);
+	const vectorClockTick2 =
+		await sql`select vector_clock_session() as session, vector_clock_tick() as time`.execute(
+			db
+		);
+
+	expect((vectorClockTick1.rows[0] as any)["session"]).toEqual(
+		(vectorClockTick2.rows[0] as any)["session"]
+	);
+	expect((vectorClockTick1.rows[0] as any)["time"]).toBeLessThan(
+		(vectorClockTick2.rows[0] as any)["time"]
+	);
+});

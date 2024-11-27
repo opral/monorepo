@@ -232,8 +232,14 @@ test("should use queue and settled correctly", async () => {
 	expect(updatedEdges).toEqual([
 		// 0 is the parent of 1
 		// 1 is the parent of 2
-		{ parent_id: updatedChanges[0]?.id, child_id: updatedChanges[1]?.id },
-		{ parent_id: updatedChanges[1]?.id, child_id: updatedChanges[2]?.id },
+		expect.objectContaining({
+			parent_id: updatedChanges[0]?.id,
+			child_id: updatedChanges[1]?.id,
+		}),
+		expect.objectContaining({
+			parent_id: updatedChanges[1]?.id,
+			child_id: updatedChanges[2]?.id,
+		}),
 	]);
 
 	// the version change pointers points to the last change
