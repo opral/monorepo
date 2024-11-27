@@ -1,5 +1,5 @@
 {
-	"name": "@lix-js/server-protocol",
+	"name": "@lix-js/server-api-schema",
 	"type": "module",
 	"version": "0.1.0",
 	"license": "Apache-2.0",

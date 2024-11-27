@@ -1,13 +1,13 @@
 import { CompiledQuery } from "kysely";
 import { openLixInMemory } from "../../../../lix/open-lix-in-memory.js";
-import type { LspRouteHandler } from "../../../create-lsp-handler.js";
+import type { LixServerApiHandlerRoute } from "../../../create-server-api-handler.js";
 import type { Lix } from "../../../../lix/open-lix.js";
-import type * as LixServerProtocol from "@lix-js/server-protocol";
+import type * as LixServerProtocol from "../../../../../../lix-server-api-schema/dist/schema.js";
 
 type TypedResponse =
-	LixServerProtocol.paths["/lsp/lix/{id}/query"]["post"]["responses"];
+	LixServerProtocol.paths["/lsa/lix/{id}/query"]["post"]["responses"];
 
-export const route: LspRouteHandler = async (context) => {
+export const route: LixServerApiHandlerRoute = async (context) => {
 	const { id } = context.params as { id: string };
 	const { sql, parameters } = await context.request.json();
 

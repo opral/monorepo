@@ -1,9 +1,9 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../../../../lix/open-lix-in-memory.js";
-import { createLspHandlerMemoryStorage } from "../../../storage/create-memory-storage.js";
-import { createLspHandler } from "../../../create-lsp-handler.js";
-import type * as LixServerProtocol from "@lix-js/server-protocol";
+import { createServerApiMemoryStorage } from "../../../storage/create-memory-storage.js";
+import { createServerApiHandler } from "../../../create-server-api-handler.js";
 import type { KeyValue } from "../../../../key-value/database-schema.js";
+import * as LixServerApi from "@lix-js/server-api-schema";
 
 test("it should execute a SELECT SQL query successfully", async () => {
 	const lix = await openLixInMemory({});
@@ -13,13 +13,13 @@ test("it should execute a SELECT SQL query successfully", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createLspHandlerMemoryStorage();
+	const storage = createServerApiMemoryStorage();
 	await storage.set(`lix-file-${id}`, await lix.toBlob());
 
-	const lsp = await createLspHandler({ storage });
+	const lsa = await createServerApiHandler({ storage });
 
-	const response = await lsp(
-		new Request(`http://localhost:3000/lsp/lix/${id}/query`, {
+	const response = await lsa(
+		new Request(`http://localhost:3000/lsa/lix/${id}/query`, {
 			method: "POST",
 			body: JSON.stringify({
 				sql: "SELECT * FROM key_value",
@@ -46,13 +46,13 @@ test("it should execute an INSERT, UPDATE query", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createLspHandlerMemoryStorage();
+	const storage = createServerApiMemoryStorage();
 	await storage.set(`lix-file-${id}`, await lix.toBlob());
 
-	const lsp = await createLspHandler({ storage });
+	const lsa = await createServerApiHandler({ storage });
 
-	const response = await lsp(
-		new Request(`http://localhost:3000/lsp/lix/${id}/query`, {
+	const response = await lsa(
+		new Request(`http://localhost:3000/lsa/lix/${id}/query`, {
 			method: "POST",
 			body: JSON.stringify({
 				sql: "INSERT INTO key_value (key, value) VALUES ('test', 'test') RETURNING *",
@@ -64,7 +64,7 @@ test("it should execute an INSERT, UPDATE query", async () => {
 		})
 	);
 	const json =
-		(await response.json()) as LixServerProtocol.paths["/lsp/lix/{id}/query"]["post"]["responses"]["201"]["content"]["application/json"];
+		(await response.json()) as LixServerApi.paths["/lsa/lix/{id}/query"]["post"]["responses"]["201"]["content"]["application/json"];
 
 	expect(response.status).toBe(201);
 	expect(json.rows?.length).toBe(1);
@@ -84,8 +84,8 @@ test("it should execute an INSERT, UPDATE query", async () => {
 	expect(result.key).toBe("test");
 
 	// ensure that a subsequent select query returns the inserted row
-	const selectFromServer = await lsp(
-		new Request(`http://localhost:3000/lsp/lix/${id}/query`, {
+	const selectFromServer = await lsa(
+		new Request(`http://localhost:3000/lsa/lix/${id}/query`, {
 			method: "POST",
 			body: JSON.stringify({
 				sql: "SELECT * FROM key_value WHERE key = 'test'",
@@ -109,17 +109,17 @@ test("it should return 400 for an invalid SQL query", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createLspHandlerMemoryStorage();
+	const storage = createServerApiMemoryStorage();
 	await storage.set(`lix-file-${id}`, await lix.toBlob());
 
-	const lsp = await createLspHandler({ storage });
+	const lsa = await createServerApiHandler({ storage });
 
 	// Silence console.error for this test
 	const originalConsoleError = console.error;
 	console.error = () => {};
 
-	const response = await lsp(
-		new Request(`http://localhost:3000/lsp/lix/${id}/query`, {
+	const response = await lsa(
+		new Request(`http://localhost:3000/lsa/lix/${id}/query`, {
 			method: "POST",
 			body: JSON.stringify({
 				sql: "INVALID SQL QUERY",
@@ -128,7 +128,7 @@ test("it should return 400 for an invalid SQL query", async () => {
 			headers: {
 				"Content-Type": "application/json",
 			},
-		}),
+		})
 	);
 
 	// Restore console.error after the test
@@ -138,11 +138,11 @@ test("it should return 400 for an invalid SQL query", async () => {
 });
 
 test("it should return 404 if the Lix file is not found", async () => {
-	const storage = createLspHandlerMemoryStorage();
-	const lsp = await createLspHandler({ storage });
+	const storage = createServerApiMemoryStorage();
+	const lsa = await createServerApiHandler({ storage });
 
-	const response = await lsp(
-		new Request("http://localhost:3000/lsp/lix/nonexistent-id/query", {
+	const response = await lsa(
+		new Request("http://localhost:3000/lsa/lix/nonexistent-id/query", {
 			method: "POST",
 			body: JSON.stringify({
 				sql: "SELECT * FROM key_value",
@@ -151,7 +151,7 @@ test("it should return 404 if the Lix file is not found", async () => {
 			headers: {
 				"Content-Type": "application/json",
 			},
-		}),
+		})
 	);
 
 	expect(response.status).toBe(404);
