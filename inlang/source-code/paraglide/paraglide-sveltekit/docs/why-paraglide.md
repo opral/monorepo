@@ -24,7 +24,7 @@ Links are automatically translated to the current language. Write `<a href="/abo
 <doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
 </doc-comments>
 
-# When is Paraglide SvelteKit not the right choice?
+# When is the SvelteKit adapter for Paraglide JS not the right choice?
 
 Warning: Progress on feature development for Paraglide SvelteKit in on hold until lix 1.0 is released. See [this post](https://opral.substack.com/p/focus-shift-from-inlang-to-lix). Pull requests for bugfixes will be reviewed and merged ASAP.  
 
