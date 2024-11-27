@@ -2,6 +2,7 @@ import type { Storage } from "./storage/storage.js";
 import { route as newRoute } from "./routes/new.js";
 import { route as lixQueryRoute } from "./routes/lix/{id}/query.js";
 import { route as syncPushRouteV1 } from "./routes/sync/push-v1.js";
+import { route as syncPullRouteV1 } from "./routes/sync/pull-v1.js";
 
 export type LixServerApiHandler = (request: Request) => Promise<Response>;
 
@@ -63,6 +64,8 @@ export async function createServerApiHandler(args: {
 				return newRoute({ ...context, request });
 			} else if (path === "/lsa/sync/push-v1") {
 				return syncPushRouteV1({ ...context, request });
+			} else if (path === "/lsa/sync/pull-v1") {
+				return syncPullRouteV1({ ...context, request });
 			}
 			// /lsp/lix/{id}/query
 			else if (path.match(/\/lsa\/lix\/[^/]+\/query/)) {

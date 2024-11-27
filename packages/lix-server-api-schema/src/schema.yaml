@@ -145,6 +145,63 @@ paths:
                     type: string
                     description: A human-readable error message.
                     example: "An internal server error occurred."
+
+  /lsa/sync/pull-v1:
+    post:
+      summary: Pull all data for all tables from the server.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lix_id
+              properties:
+                lix_id:
+                  type: string
+                  description: The ID of the lix to pull from.
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Data fetched successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    description: The data from all tables.
+                    items:
+                      type: object
+                      required:
+                        - table_name
+                        - rows
+                      properties:
+                        table_name:
+                          type: string
+                          description: The name of the table.
+                        rows:
+                          type: array
+                          items:
+                            type: object
+                            additionalProperties: true
+        '404':
+          description: Lix file not found.
+        '500':
+          description: Failed to open the Lix file.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
       
 
   /lsa/lix/{id}/query:
