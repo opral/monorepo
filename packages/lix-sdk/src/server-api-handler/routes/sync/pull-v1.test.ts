@@ -114,7 +114,6 @@ test("it should specifically be able to handle snapshots which use json binary a
 	)!;
 	expect(snapshots).toBeDefined();
 	expect(snapshots.rows.length).toBeGreaterThan(0);
-	console.log(snapshots);
 	expect(snapshots.rows).toEqual(
 		expect.arrayContaining([
 			expect.objectContaining({
