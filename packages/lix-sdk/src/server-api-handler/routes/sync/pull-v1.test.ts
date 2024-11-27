@@ -5,6 +5,9 @@ import { createServerApiMemoryStorage } from "../../storage/create-memory-storag
 import { createServerApiHandler } from "../../create-server-api-handler.js";
 import { mockJsonSnapshot } from "../../../snapshot/mock-json-snapshot.js";
 
+type RequestBody =
+	LixServerApi.paths["/lsa/sync/pull-v1"]["post"]["requestBody"]["content"]["application/json"];
+
 test("it should fetch all rows from all tables successfully", async () => {
 	const lix = await openLixInMemory({});
 	const { value: id } = await lix.db
@@ -32,7 +35,11 @@ test("it should fetch all rows from all tables successfully", async () => {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
-			}),
+				vector_clock: {
+					session: "123e4567-e",
+					time: 123456789,
+				},
+			} satisfies RequestBody),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -86,7 +93,11 @@ test("it should specifically be able to handle snapshots which use json binary",
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
-			}),
+				vector_clock: {
+					session: "123e4567-e",
+					time: 123456789,
+				},
+			} satisfies RequestBody),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -117,7 +128,11 @@ test("it should return 404 if the Lix file is not found", async () => {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: "nonexistent-id",
-			}),
+				vector_clock: {
+					session: "123e4567-e",
+					time: 123456789,
+				},
+			} satisfies RequestBody),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -169,7 +184,11 @@ test("it should handle empty tables gracefully", async () => {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
-			}),
+				vector_clock: {
+					session: "123e4567-e",
+					time: 123456789,
+				},
+			} satisfies RequestBody),
 			headers: {
 				"Content-Type": "application/json",
 			},

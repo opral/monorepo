@@ -72,6 +72,9 @@ paths:
                 vector_clock: 
                   type: object
                   description: The vector clock of the client.
+                  required:
+                    - session
+                    - time
                   properties: 
                     session: 
                       type: string
@@ -157,11 +160,27 @@ paths:
               type: object
               required:
                 - lix_id
+                - vector_clock
               properties:
                 lix_id:
                   type: string
                   description: The ID of the lix to pull from.
                   example: "123e4567-e89b-12d3-a456-426614174000"
+                vector_clock:
+                  type: object
+                  description: The vector clock of the client.
+                  required:
+                    - session
+                    - time
+                  properties:
+                    session:
+                      type: string
+                      description: The session ID of the client.
+                      example: "123e4567-e"
+                    time:
+                      type: integer
+                      description: The time of the client.
+                      example: 123456789
       responses:
         '200':
           description: Data fetched successfully.
