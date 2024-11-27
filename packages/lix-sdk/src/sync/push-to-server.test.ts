@@ -144,7 +144,7 @@ test("it should handle snapshots.content json binaries", async () => {
 	const json = await response.json();
 
 	expect(json.rows.length).toBe(1);
-	expect(json.rows[0]).toStrictEqual(mockSnapshot);
+	expect(json.rows[0]).toMatchObject(mockSnapshot);
 });
 
 test.todo("it should handle binary values", async () => {

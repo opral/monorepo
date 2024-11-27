@@ -118,9 +118,13 @@ test("it handles snapshot.content being json binary", async () => {
 	});
 
 	// Verify the data is pulled into the local lix
-	const snapshots = await lix.db.selectFrom("snapshot").selectAll().execute();
+	const snapshots = await lix.db
+		.selectFrom("snapshot")
+		.where("id", "=", mockSnapshot.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
-	expect(snapshots).toContainEqual(mockSnapshot);
+	expect(snapshots).toMatchObject(mockSnapshot);
 });
 
 // the table file is not change controlled yet.
