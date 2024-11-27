@@ -24,6 +24,13 @@ Links are automatically translated to the current language. Write `<a href="/abo
 <doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
 </doc-comments>
 
+# When is the SvelteKit adapter for Paraglide JS not the right choice?
+
+Warning: Progress on feature development for Paraglide SvelteKit in on hold until lix 1.0 is released. See [this post](https://opral.substack.com/p/focus-shift-from-inlang-to-lix). Pull requests for bugfixes will be reviewed and merged ASAP.  
+
+- You don't want the route to contain the language tag (e.g. `/en/about`), see [Issue #217](https://github.com/opral/inlang-paraglide-js/issues/217). You can use [Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) (without an adapter) instead. 
+- Variant are not supported yet (pluralization, gendering) see [Issue #201](https://github.com/opral/inlang-paraglide-js/issues/201)
+- You have more than 10 languages and care about minimum bundle sizes, see [Scaling](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/scaling). A runtime based i18n library might be better for you until language splitting ships [issue #88](https://github.com/opral/inlang-paraglide-js/issues/88).
 
 ## Playground
 
