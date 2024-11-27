@@ -1,6 +1,7 @@
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import { applyAccountDatabaseSchema } from "../account/database-schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value/database-schema.js";
+import { sql } from "kysely";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -11,7 +12,8 @@ export function applySchema(args: {
 	applyAccountDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
 
-	return args.sqlite.exec`
+	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+	args.sqlite.exec`
 
   PRAGMA foreign_keys = ON;
   PRAGMA auto_vacuum = 2; -- incremental https://www.sqlite.org/pragma.html#pragma_auto_vacuum
@@ -269,5 +271,49 @@ export function applySchema(args: {
   SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6'
   WHERE NOT EXISTS (SELECT 1 FROM current_version);
 
-`;
+  `;
+
+  const triggerTables: string[] = ['change']
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  args.sqlite.exec`
+  -- vector clock
+  CREATE TABLE IF NOT EXISTS vector_clock (
+    row_id TEXT,
+    table_name TEXT,
+    operation INTEGER,
+    session TEXT NOT NULL DEFAULT (vector_clock_session()),
+    session_time INTEGER NOT NULL DEFAULT (vector_clock_tick())
+  ) STRICT;`;
+
+  for (const triggerTable of triggerTables) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    args.sqlite.exec(`
+    -- Trigger for INSERT operations
+    CREATE TRIGGER IF NOT EXISTS ${triggerTable}_after_insert_clock_tick
+    AFTER INSERT ON ${triggerTable}
+    BEGIN
+        INSERT INTO vector_clock (row_id, table_name, operation)
+        VALUES (NEW.id, '${triggerTable}', 0);
+    END;
+
+    -- Trigger for UPDATE operations
+    CREATE TRIGGER IF NOT EXISTS ${triggerTable}_after_update_clock_tick
+    AFTER UPDATE ON ${triggerTable}
+    BEGIN
+        INSERT INTO vector_clock (row_id, table_name, operation)
+        VALUES (NEW.id, '${triggerTable}', 1);
+    END;
+
+    -- Trigger for DELETE operations
+    CREATE TRIGGER IF NOT EXISTS ${triggerTable}_after_delete_clock_tick
+    AFTER DELETE ON ${triggerTable}
+    BEGIN
+        INSERT INTO vector_clock (row_id, table_name, operation)
+        VALUES (OLD.id, '${triggerTable}', -1);
+    END;
+    `)
+  }
+
+  return args.sqlite
 }
