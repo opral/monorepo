@@ -182,6 +182,36 @@ export const allChangesAtom = atom(async (get) => {
 		.execute();
 });
 
+export const allChangesDynamicGroupingAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	const currentBranch = await get(currentVersionAtom);
+	const allChanges = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.innerJoin("file", "file.id", "change.file_id")
+		.innerJoin("change_author", "change_author.change_id", "change.id")
+		.where(changeInVersion(currentBranch))
+		.selectAll("change")
+		.select("snapshot.content as snapshot_content")
+		.select("file.path as file_path")
+		.select("change_author.account_id as account_id")
+		.orderBy('change.created_at', 'desc')
+		.execute();
+
+	// groupe the changes array by same created_at dates
+	const groupedChanges: { [key: string]: typeof allChanges } = {};
+	for (const change of allChanges) {
+		const createdAt = change.created_at;
+		if (!groupedChanges[createdAt]) {
+			groupedChanges[createdAt] = [];
+		}
+		groupedChanges[createdAt].push(change);
+	}
+
+	return groupedChanges;
+});
+
 export const changesCurrentVersionAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);

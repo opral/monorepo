@@ -6,7 +6,7 @@ import { useAtom } from "jotai";
 import { saveLixToOpfs } from "./../../helper/saveLixToOpfs.ts";
 import { Button } from "./../../../components/ui/button.tsx"
 import { Separator } from "./../../../components/ui/separator.tsx"
-import { activeFileAtom, allChangesAtom, changesCurrentVersionAtom } from "./../../state-active-file.ts";
+import { activeFileAtom, allChangesAtom, allChangesDynamicGroupingAtom, changesCurrentVersionAtom } from "./../../state-active-file.ts";
 import { Link, useNavigate } from "react-router-dom";
 import { ChangeComponent } from "../../components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "./../../components/DynamicChangeGroup.tsx";
@@ -16,7 +16,7 @@ export default function Page() {
 	const [lix] = useAtom(lixAtom);
 	const [files] = useAtom(filesAtom);
 	const [changesCurrentVersion] = useAtom(changesCurrentVersionAtom);
-	const [allChanges] = useAtom(allChangesAtom)
+	const [allChangesDynamicGrouping] = useAtom(allChangesDynamicGroupingAtom)
 	const [activeFile] = useAtom(activeFileAtom)
 	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom)
 
@@ -108,16 +108,16 @@ export default function Page() {
 				: <div className="flex-1 h-full">
 					<SectionHeader title="Overview" />
 					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-scroll">
-							{allChanges.map((change, i) => (
+							{Object.entries(allChangesDynamicGrouping).map(([date, changes], i) => {
+								return (
 									<DynamicChangeGroup
-										key={change.id}
-										changes={[change]}
+										key={date}
+										changes={changes}
 										showTopLine={i !== 0}
-										showBottomLine={i !== allChanges.length - 1}
+										showBottomLine={i !== Object.keys(allChangesDynamicGrouping).length - 1}
 									/>
-								))
-								
-							}
+								)
+							})}
 					</div> 
 				</div> 
 			}
