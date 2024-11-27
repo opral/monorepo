@@ -35,3 +35,8 @@ A few recent comments.
 <doc-comment text="Awesome library 🙂 Thanks so much! 1) The docs were simple and straight forward 2) Everything just worked.. no headaches" author="Dimitry" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1083724234142011392/1225658097016766574"></doc-comment>
 <doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
 </doc-comments>
+
+# When is Paraglide JS not the right choice?
+
+- Variant are not supported yet (pluralization, gendering) see https://github.com/opral/inlang-paraglide-js/issues/201
+- You have more than 10 languages and care about minimum bundle sizes. A runtime based i18n library might be better for you. See https://inlang.com/m/gerre34r/library-inlang-paraglideJs/scaling.
