@@ -62,13 +62,15 @@ export async function createServerApiHandler(args: {
 			const path = new URL(request.url).pathname;
 			if (path === "/lsa/new") {
 				return newRoute({ ...context, request });
-			} else if (path === "/lsa/sync/push-v1") {
+			}
+			if (path === "/lsa/sync/push-v1") {
 				return syncPushRouteV1({ ...context, request });
-			} else if (path === "/lsa/sync/pull-v1") {
+			}
+			if (path === "/lsa/sync/pull-v1") {
 				return syncPullRouteV1({ ...context, request });
 			}
 			// /lsp/lix/{id}/query
-			else if (path.match(/\/lsa\/lix\/[^/]+\/query/)) {
+			if (path.match(/\/lsa\/lix\/[^/]+\/query/)) {
 				const id = path.split("/")[3]!;
 				return lixQueryRoute({
 					...context,
@@ -76,6 +78,7 @@ export async function createServerApiHandler(args: {
 					params: { id },
 				});
 			}
+
 			return Response.error();
 		} catch (error) {
 			return new Response(error as string, {
