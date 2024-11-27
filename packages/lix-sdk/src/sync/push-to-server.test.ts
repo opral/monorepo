@@ -3,11 +3,12 @@ import { createLspHandler } from "../server-protocol-handler/create-lsp-handler.
 import { createLspHandlerMemoryStorage } from "../server-protocol-handler/storage/create-memory-storage.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type * as LixServerProtocol from "@lix-js/server-protocol";
-import { pushRowsToServer } from "./push-rows-to-server.js";
+import { pushToServer } from "./push-to-server.js";
 import type { LixFile } from "../database/schema.js";
 import type { Account } from "../account/database-schema.js";
 import { newLixFile } from "../lix/new-lix.js";
 import type { KeyValue } from "../key-value/database-schema.js";
+import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 
 test("push rows of multiple tables to server successfully", async () => {
 	const lixBlob = await newLixFile();
@@ -48,7 +49,7 @@ test("push rows of multiple tables to server successfully", async () => {
 		})
 		.execute();
 
-	await pushRowsToServer({
+	await pushToServer({
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
@@ -90,6 +91,62 @@ test("push rows of multiple tables to server successfully", async () => {
 	] satisfies KeyValue[]);
 });
 
+test("it should handle snapshots.content json binaries", async () => {
+	const lix = await openLixInMemory({});
+
+	const { value: id } = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix-id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const storage = createLspHandlerMemoryStorage();
+	const lspHandler = await createLspHandler({ storage });
+
+	global.fetch = vi.fn((request) => lspHandler(request));
+
+	// initialize the lix on the server
+	await lspHandler(
+		new Request("http://localhost:3000/lsp/new", {
+			method: "POST",
+			body: await lix.toBlob(),
+		})
+	);
+
+	const mockSnapshot = mockJsonSnapshot({
+		location: "Berlin",
+	});
+
+	// insert a snapshot
+	await lix.db
+		.insertInto("snapshot")
+		.values({
+			content: mockSnapshot.content,
+		})
+		.execute();
+
+	await pushToServer({
+		id,
+		lix,
+		serverUrl: "http://localhost:3000",
+		tableNames: ["snapshot"],
+	});
+
+	const response = await fetch(
+		new Request(`http://localhost:3000/lsp/lix/${id}/query`, {
+			method: "POST",
+			body: JSON.stringify({
+				sql: `SELECT *, json(content) as content FROM snapshot WHERE id = '${mockSnapshot.id}'`,
+			}),
+		})
+	);
+
+	const json = await response.json();
+
+	expect(json.rows.length).toBe(1);
+	expect(json.rows[0]).toStrictEqual(mockSnapshot);
+});
+
 test.todo("it should handle binary values", async () => {
 	const lixBlob = await newLixFile();
 
@@ -124,7 +181,7 @@ test.todo("it should handle binary values", async () => {
 		})
 		.execute();
 
-	await pushRowsToServer({
+	await pushToServer({
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",

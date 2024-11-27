@@ -1,8 +1,13 @@
 import type { Lix } from "../lix/open-lix.js";
-import { fetchRowsFromServer } from "./fetch-rows-from-server.js";
-import { pushRowsToServer } from "./push-rows-to-server.js";
-import { NOT_TO_BE_SYNCED_TABLES } from "./constants.js";
 import type { LixDatabaseSchema } from "../database/schema.js";
+import { pushToServer } from "./push-to-server.js";
+import { pullFromServer } from "./pull-from-server.js";
+
+const notToBeSyncedTables = [
+	"active_account",
+	"current_version",
+	"change_queue",
+] as Array<keyof LixDatabaseSchema>;
 
 export async function initSyncProcess(args: { lix: Lix }): Promise<void> {
 	const { value: id } = await args.lix.db
@@ -28,20 +33,19 @@ export async function initSyncProcess(args: { lix: Lix }): Promise<void> {
 	// only get relevant tables
 	const tableNamesToBeSynced = tables
 		.filter(
-			(t) =>
-				!NOT_TO_BE_SYNCED_TABLES.includes(t.name as keyof LixDatabaseSchema),
+			(t) => !notToBeSyncedTables.includes(t.name as keyof LixDatabaseSchema)
 		)
 		.map((t) => t.name) as Array<keyof LixDatabaseSchema>;
 
 	// naive implementation that syncs every second
 	setInterval(() => {
-		fetchRowsFromServer({
+		pullFromServer({
 			serverUrl: url.value,
 			lix: args.lix,
 			id,
 			tableNames: tableNamesToBeSynced,
 		});
-		pushRowsToServer({
+		pushToServer({
 			serverUrl: url.value,
 			lix: args.lix,
 			id,
