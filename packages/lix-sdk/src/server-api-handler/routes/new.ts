@@ -1,8 +1,8 @@
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import type { Lix } from "../../lix/open-lix.js";
-import type { LspRouteHandler } from "../create-lsp-handler.js";
+import type { LixServerApiHandlerRoute } from "../create-server-api-handler.js";
 
-export const route: LspRouteHandler = async (context) => {
+export const route: LixServerApiHandlerRoute = async (context) => {
 	const blob = await context.request.blob();
 
 	let lix: Lix;

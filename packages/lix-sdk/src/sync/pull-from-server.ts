@@ -1,6 +1,6 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { LixDatabaseSchema, LixFile } from "../database/schema.js";
-import * as LixServerProtocol from "@lix-js/server-protocol";
+import * as LixServerProtocol from "@lix-js/server-api-schema";
 
 export async function pullFromServer(args: {
 	id: string;
@@ -19,7 +19,7 @@ export async function pullFromServer(args: {
 		}
 
 		const response = await fetch(
-			new Request(`${args.serverUrl}/lsp/lix/${args.id}/query`, {
+			new Request(`${args.serverUrl}/lsa/lix/${args.id}/query`, {
 				method: "POST",
 				body: JSON.stringify({
 					sql: sqlQuery,
@@ -33,7 +33,7 @@ export async function pullFromServer(args: {
 			throw new Error(`Failed to pull from server: ${response.statusText}`);
 		}
 		const data =
-			(await response.json()) as LixServerProtocol.paths["/lsp/lix/{id}/query"]["post"]["responses"]["200"]["content"]["application/json"];
+			(await response.json()) as LixServerProtocol.paths["/lsa/lix/{id}/query"]["post"]["responses"]["200"]["content"]["application/json"];
 
 		if (name === "file") {
 			// await sql`

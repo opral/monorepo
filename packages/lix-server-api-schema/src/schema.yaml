@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
-  title: Lix Server Protocol
+  title: Lix Server Api
   version: 1.0.0
 paths:
-  /lsp/new:
+  /lsa/new:
     post:
       summary: Create a new lix on the server.
       requestBody:
@@ -51,7 +51,7 @@ paths:
                     description: Error message.
                     example: "Lix file already exists."
 
-  /lsp/lix/{id}/query:
+  /lsa/lix/{id}/query:
     post:
       summary: Execute a select SQL query on the server.
       parameters:

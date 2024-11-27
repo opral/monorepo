@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest";
-import { createLspHandler } from "../server-protocol-handler/create-lsp-handler.js";
-import { createLspHandlerMemoryStorage } from "../server-protocol-handler/storage/create-memory-storage.js";
+import { createServerApiHandler } from "../server-api-handler/create-server-api-handler.js";
+import { createServerApiMemoryStorage } from "../server-api-handler/storage/create-memory-storage.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
@@ -17,10 +17,10 @@ test("pull rows of multiple tables from server successfully", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createLspHandlerMemoryStorage();
-	const lspHandler = await createLspHandler({ storage });
+	const storage = createServerApiMemoryStorage();
+	const lsaHandler = await createServerApiHandler({ storage });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	global.fetch = vi.fn((request) => lsaHandler(request));
 
 	// insert mock data into server lix
 	await lixOnServer.db
@@ -37,8 +37,8 @@ test("pull rows of multiple tables from server successfully", async () => {
 		.execute();
 
 	// initialize the lix on the server with the mock data
-	await lspHandler(
-		new Request("http://localhost:3000/lsp/new", {
+	await lsaHandler(
+		new Request("http://localhost:3000/lsa/new", {
 			method: "POST",
 			body: await lixOnServer.toBlob(),
 			headers: {
@@ -82,10 +82,10 @@ test("it handles snapshot.content being json binary", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createLspHandlerMemoryStorage();
-	const lspHandler = await createLspHandler({ storage });
+	const storage = createServerApiMemoryStorage();
+	const lsaHandler = await createServerApiHandler({ storage });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	global.fetch = vi.fn((request) => lsaHandler(request));
 
 	const mockSnapshot = mockJsonSnapshot({
 		location: "Berlin",
@@ -100,8 +100,8 @@ test("it handles snapshot.content being json binary", async () => {
 		.execute();
 
 	// initialize the lix on the server with the mock data
-	await lspHandler(
-		new Request("http://localhost:3000/lsp/new", {
+	await lsaHandler(
+		new Request("http://localhost:3000/lsa/new", {
 			method: "POST",
 			body: await lixOnServer.toBlob(),
 			headers: {
@@ -144,10 +144,10 @@ test("it should handle files without syncing the data column", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createLspHandlerMemoryStorage();
-	const lspHandler = await createLspHandler({ storage });
+	const storage = createServerApiMemoryStorage();
+	const lsaHandler = await createServerApiHandler({ storage });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	global.fetch = vi.fn((request) => lsaHandler(request));
 
 	const mockFile: LixFile = {
 		id: "file0",
@@ -162,8 +162,8 @@ test("it should handle files without syncing the data column", async () => {
 	await lixOnServer.db.insertInto("file").values(mockFile).execute();
 
 	// initialize the lix on the server with the mock data
-	await lspHandler(
-		new Request("http://localhost:3000/lsp/new", {
+	await lsaHandler(
+		new Request("http://localhost:3000/lsa/new", {
 			method: "POST",
 			body: await lixOnServer.toBlob(),
 			headers: {
@@ -200,14 +200,14 @@ test("it should handle files without syncing the data column", async () => {
 // 		.selectAll()
 // 		.executeTakeFirstOrThrow();
 
-// 	const storage = createLspHandlerMemoryStorage();
-// 	const lspHandler = await createLspHandler({ storage });
+// 	const storage = createServerApiMemoryStorage();
+// 	const lsaHandler = await createServerApiHandler({ storage });
 
-// 	global.fetch = vi.fn((request) => lspHandler(request));
+// 	global.fetch = vi.fn((request) => lsaHandler(request));
 
 // 	// initialize the lix on the server
-// 	await lspHandler(
-// 		new Request("http://localhost:3000/lsp/new", {
+// 	await lsaHandler(
+// 		new Request("http://localhost:3000/lsa/new", {
 // 			method: "POST",
 // 			body: await lix.toBlob(),
 // 		})

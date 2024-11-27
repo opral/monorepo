@@ -1,8 +1,8 @@
 import { expect, test, vi } from "vitest";
-import { createLspHandler } from "../server-protocol-handler/create-lsp-handler.js";
-import { createLspHandlerMemoryStorage } from "../server-protocol-handler/storage/create-memory-storage.js";
+import { createServerApiHandler } from "../server-api-handler/create-server-api-handler.js";
+import { createServerApiMemoryStorage } from "../server-api-handler/storage/create-memory-storage.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import type * as LixServerProtocol from "@lix-js/server-protocol";
+import type * as LixServerProtocol from "../../../lix-server-api-schema/dist/schema.js";
 import { pushToServer } from "./push-to-server.js";
 import type { LixFile } from "../database/schema.js";
 import type { Account } from "../account/database-schema.js";
@@ -21,14 +21,14 @@ test("push rows of multiple tables to server successfully", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createLspHandlerMemoryStorage();
-	const lspHandler = await createLspHandler({ storage });
+	const storage = createServerApiMemoryStorage();
+	const lsaHandler = await createServerApiHandler({ storage });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	global.fetch = vi.fn((request) => lsaHandler(request));
 
 	// initialize the lix on the server
-	await lspHandler(
-		new Request("http://localhost:3000/lsp/new", {
+	await lsaHandler(
+		new Request("http://localhost:3000/lsa/new", {
 			method: "POST",
 			body: await lix.toBlob(),
 		})
@@ -57,7 +57,7 @@ test("push rows of multiple tables to server successfully", async () => {
 	});
 
 	const keyValueOnServerResponse = await fetch(
-		new Request(`http://localhost:3000/lsp/lix/${id}/query`, {
+		new Request(`http://localhost:3000/lsa/lix/${id}/query`, {
 			method: "POST",
 			body: JSON.stringify({
 				sql: "SELECT * FROM key_value WHERE key = 'mock-key';",
@@ -66,7 +66,7 @@ test("push rows of multiple tables to server successfully", async () => {
 	);
 
 	const accountsOnServerResponse = await fetch(
-		new Request(`http://localhost:3000/lsp/lix/${id}/query`, {
+		new Request(`http://localhost:3000/lsa/lix/${id}/query`, {
 			method: "POST",
 			body: JSON.stringify({
 				sql: "SELECT * FROM account WHERE id = 'account0';",
@@ -75,10 +75,10 @@ test("push rows of multiple tables to server successfully", async () => {
 	);
 
 	const keyValueOnServer =
-		(await keyValueOnServerResponse.json()) as LixServerProtocol.paths["/lsp/lix/{id}/query"]["post"]["responses"]["200"]["content"]["application/json"];
+		(await keyValueOnServerResponse.json()) as LixServerProtocol.paths["/lsa/lix/{id}/query"]["post"]["responses"]["200"]["content"]["application/json"];
 
 	const accountsOnServer =
-		(await accountsOnServerResponse.json()) as LixServerProtocol.paths["/lsp/lix/{id}/query"]["post"]["responses"]["200"]["content"]["application/json"];
+		(await accountsOnServerResponse.json()) as LixServerProtocol.paths["/lsa/lix/{id}/query"]["post"]["responses"]["200"]["content"]["application/json"];
 
 	expect(accountsOnServer?.rows).toEqual([
 		{ id: "account0", name: "some account" } satisfies Account,
@@ -100,14 +100,14 @@ test("it should handle snapshots.content json binaries", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createLspHandlerMemoryStorage();
-	const lspHandler = await createLspHandler({ storage });
+	const storage = createServerApiMemoryStorage();
+	const lsaHandler = await createServerApiHandler({ storage });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	global.fetch = vi.fn((request) => lsaHandler(request));
 
 	// initialize the lix on the server
-	await lspHandler(
-		new Request("http://localhost:3000/lsp/new", {
+	await lsaHandler(
+		new Request("http://localhost:3000/lsa/new", {
 			method: "POST",
 			body: await lix.toBlob(),
 		})
@@ -133,7 +133,7 @@ test("it should handle snapshots.content json binaries", async () => {
 	});
 
 	const response = await fetch(
-		new Request(`http://localhost:3000/lsp/lix/${id}/query`, {
+		new Request(`http://localhost:3000/lsa/lix/${id}/query`, {
 			method: "POST",
 			body: JSON.stringify({
 				sql: `SELECT *, json(content) as content FROM snapshot WHERE id = '${mockSnapshot.id}'`,
@@ -158,14 +158,14 @@ test.todo("it should handle binary values", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createLspHandlerMemoryStorage();
-	const lspHandler = await createLspHandler({ storage });
+	const storage = createServerApiMemoryStorage();
+	const lsaHandler = await createServerApiHandler({ storage });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+	global.fetch = vi.fn((request) => lsaHandler(request));
 
 	// initialize the lix on the server
-	await lspHandler(
-		new Request("http://localhost:3000/lsp/new", {
+	await lsaHandler(
+		new Request("http://localhost:3000/lsa/new", {
 			method: "POST",
 			body: await lix.toBlob(),
 		})
@@ -189,7 +189,7 @@ test.todo("it should handle binary values", async () => {
 	});
 
 	const filesOnServerResponse = await fetch(
-		new Request(`http://localhost:3000/lsp/lix/${id}/query`, {
+		new Request(`http://localhost:3000/lsa/lix/${id}/query`, {
 			method: "POST",
 			body: JSON.stringify({
 				sql: "SELECT * FROM file WHERE id = 'file0';",
@@ -198,7 +198,7 @@ test.todo("it should handle binary values", async () => {
 	);
 
 	const filesOnServer =
-		(await filesOnServerResponse.json()) as LixServerProtocol.paths["/lsp/lix/{id}/query"]["post"]["responses"]["200"]["content"]["application/json"];
+		(await filesOnServerResponse.json()) as LixServerProtocol.paths["/lsa/lix/{id}/query"]["post"]["responses"]["200"]["content"]["application/json"];
 
 	expect(filesOnServer?.rows).toEqual([
 		{

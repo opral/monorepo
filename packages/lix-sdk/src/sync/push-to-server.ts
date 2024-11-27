@@ -1,4 +1,4 @@
-import type * as LixServerProtocol from "@lix-js/server-protocol";
+import type * as LixServerProtocol from "../../../lix-server-api-schema/dist/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixDatabaseSchema } from "../database/schema.js";
 
@@ -46,12 +46,12 @@ export async function pushToServer(args: {
 		});
 
 		const response = await fetch(
-			new Request(`${args.serverUrl}/lsp/lix/${args.id}/query`, {
+			new Request(`${args.serverUrl}/lsa/lix/${args.id}/query`, {
 				method: "POST",
 				body: JSON.stringify({
 					sql: serverQuery.sql,
 					parameters: serverQuery.parameters as unknown[],
-				} satisfies LixServerProtocol.paths["/lsp/lix/{id}/query"]["post"]["requestBody"]["content"]["application/json"]),
+				} satisfies LixServerProtocol.paths["/lsa/lix/{id}/query"]["post"]["requestBody"]["content"]["application/json"]),
 				headers: {
 					"Content-Type": "application/json",
 				},
