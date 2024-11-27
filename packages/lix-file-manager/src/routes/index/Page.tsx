@@ -48,10 +48,10 @@ export default function Page() {
 	// 	console
 	// }
 
-	useEffect(() => {
-		console.log("getAuthors")
-		console.log(changesCurrentVersion)
-	})
+	// useEffect(() => {
+	// 	console.log("getAuthors")
+	// 	console.log(changesCurrentVersion)
+	// })
 
 	return (
 		<div className="flex bg-white h-full">
