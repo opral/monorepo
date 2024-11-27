@@ -36,7 +36,7 @@ export async function openLix(args: {
 	 */
 	providePlugins?: LixPlugin[];
 }): Promise<Lix> {
-	const db = await initDb({ sqlite: args.database });
+	const db = initDb({ sqlite: args.database });
 
 	const plugins = await loadPlugins(db);
 	if (args.providePlugins && args.providePlugins.length > 0) {

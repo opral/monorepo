@@ -12,11 +12,11 @@ import {
 	vectorClockTick,
 } from "./vector-clock/vector-clock.js";
 
-export async function initDb(args: {
+export function initDb(args: {
 	sqlite: SqliteDatabase;
-}): Promise<Kysely<LixDatabaseSchema>> {
+}): Kysely<LixDatabaseSchema> {
 	initFunctions({ sqlite: args.sqlite });
-	await applySchema({ sqlite: args.sqlite });
+	applySchema({ sqlite: args.sqlite });
 	const db = new Kysely<LixDatabaseSchema>({
 		dialect: createDialect({
 			database: args.sqlite,

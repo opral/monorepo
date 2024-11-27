@@ -10,7 +10,7 @@ test("file ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	// init the trigger function (usually defined by lix only)
 	sqlite.createFunction({
@@ -36,7 +36,7 @@ test("change ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	const change = await db
 		.insertInto("change")
@@ -57,7 +57,7 @@ test("snapshot ids should default to sha256", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	const content = { a: "value" };
 
@@ -76,7 +76,7 @@ test("inserting the same snapshot multiple times should be possible and not lead
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	const initialSnapshots = await db
 		.selectFrom("snapshot")
@@ -115,7 +115,7 @@ test("an empty snapshot should default to the special 'no-content' snapshot to s
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 	const snapshot = await db
 		.insertInto("snapshot")
 		.values({
@@ -137,7 +137,7 @@ test("files should be able to have metadata", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	sqlite.createFunction({
 		name: "triggerChangeQueue",
@@ -180,7 +180,7 @@ test("change graph edges can't reference themselves", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	await expect(
 		db
@@ -200,7 +200,7 @@ test("change set items must be unique", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	await db
 		.insertInto("change_set")
@@ -245,7 +245,7 @@ test("creating multiple discussions for one change set should be possible", asyn
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	const changeSet = await db
 		.insertInto("change_set")
@@ -275,7 +275,7 @@ test("the confirmed label should be created if it doesn't exist", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	const tag = await db
 		.selectFrom("label")
@@ -292,7 +292,7 @@ test("a default main version should exist", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	const version = await db
 		.selectFrom("version")
@@ -307,7 +307,7 @@ test("re-opening the same database shouldn't lead to duplicate insertion of the 
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	const changeSet = await db
 		.insertInto("change_set")
@@ -323,7 +323,7 @@ test("re-opening the same database shouldn't lead to duplicate insertion of the 
 
 	await db.updateTable("current_version").set({ id: newversion.id }).execute();
 
-	const db2 = await initDb({ sqlite });
+	const db2 = initDb({ sqlite });
 
 	const currentversion = await db2
 		.selectFrom("current_version")
@@ -337,7 +337,7 @@ test("invalid file paths should be rejected", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	// init the trigger function (usually defined by lix only)
 	sqlite.createFunction({
@@ -365,7 +365,7 @@ test("vector clock functions", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	const vectorClockTick1 =
 		await sql`select vector_clock_session() as session, vector_clock_tick() as time`.execute(

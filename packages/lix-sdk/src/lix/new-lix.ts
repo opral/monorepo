@@ -16,7 +16,7 @@ export async function newLixFile(): Promise<Blob> {
 	});
 
 	// applying the schema etc.
-	const db = await initDb({ sqlite });
+	const db = initDb({ sqlite });
 
 	try {
 		return new Blob([contentFromDatabase(sqlite)]);
