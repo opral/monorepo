@@ -53,7 +53,6 @@ test("push rows of multiple tables to server successfully", async () => {
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
-		tableNames: ["account", "key_value"],
 	});
 
 	const keyValueOnServerResponse = await fetch(
@@ -129,7 +128,6 @@ test("it should handle snapshots.content json binaries", async () => {
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
-		tableNames: ["snapshot"],
 	});
 
 	const response = await fetch(
@@ -185,7 +183,6 @@ test.todo("it should handle binary values", async () => {
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
-		tableNames: ["file"],
 	});
 
 	const filesOnServerResponse = await fetch(

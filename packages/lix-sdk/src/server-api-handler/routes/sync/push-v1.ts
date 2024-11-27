@@ -37,11 +37,13 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 	try {
 		await lix.db.transaction().execute(async (trx) => {
 			for (const { table_name, rows } of body.data) {
-				await trx
-					.insertInto(table_name as keyof LixDatabaseSchema)
-					.values(rows)
-					.onConflict((oc) => oc.doNothing())
-					.execute();
+				if (rows.length > 0) {
+					await trx
+						.insertInto(table_name as keyof LixDatabaseSchema)
+						.values(rows)
+						.onConflict((oc) => oc.doNothing())
+						.execute();
+				}
 			}
 		});
 
