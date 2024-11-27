@@ -6,10 +6,11 @@ import { useAtom } from "jotai";
 import { saveLixToOpfs } from "./../../helper/saveLixToOpfs.ts";
 import { Button } from "./../../../components/ui/button.tsx"
 import { Separator } from "./../../../components/ui/separator.tsx"
-import { activeFileAtom, allChangesAtom, allChangesDynamicGroupingAtom, changesCurrentVersionAtom } from "./../../state-active-file.ts";
+import { activeFileAtom, allChangesDynamicGroupingAtom, changesCurrentVersionAtom } from "./../../state-active-file.ts";
 import { Link, useNavigate } from "react-router-dom";
 import { ChangeComponent } from "../../components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "./../../components/DynamicChangeGroup.tsx";
+import { useEffect } from "react";
 
 export default function Page() {
 	// state atoms
@@ -44,19 +45,13 @@ export default function Page() {
 	};
 
 	// const showChanges = async () => {
-	// 	const changes = await lix.db
-	// 		.selectFrom("change")
-	// 		//.where("change.id", "=", "01934402-465d-799c-85cd-d700ac0f91a2")
-	// 		.selectAll()
-	// 		.execute();
-
-	// 	console.log(changes);
+	// 	console
 	// }
 
-	// useEffect(() => {
-	// 	console.log("getAuthors")
-	// 	showChanges()
-	// })
+	useEffect(() => {
+		console.log("getAuthors")
+		console.log(changesCurrentVersion)
+	})
 
 	return (
 		<div className="flex bg-white h-full">

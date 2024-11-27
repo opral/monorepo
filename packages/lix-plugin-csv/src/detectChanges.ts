@@ -36,15 +36,8 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		typeof CellSchemaV1 | typeof HeaderSchemaV1 | typeof RowSchemaV1
 	>[] = [];
 
-
-	console.log("uniqueColumnBefore", uniqueColumnBefore);
-	console.log("uniqueColumnAfter", uniqueColumnAfter);
-
 	const beforeParsed = parseCsv(before?.data, uniqueColumnBefore);
 	const afterParsed = parseCsv(after?.data, uniqueColumnAfter);
-
-	console.log("beforeParsed", beforeParsed);
-	console.log("afterParsed", afterParsed);
 
 	const headerChanged = checkHeaderChange(
 		beforeParsed.header,

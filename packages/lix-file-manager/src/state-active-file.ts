@@ -173,11 +173,12 @@ export const allChangesAtom = atom(async (get) => {
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin("file", "file.id", "change.file_id")
 		.innerJoin("change_author", "change_author.change_id", "change.id")
+		.innerJoin("account", "account.id", "change_author.account_id")
 		.where(changeInVersion(currentBranch))
 		.selectAll("change")
 		.select("snapshot.content as snapshot_content")
 		.select("file.path as file_path")
-		.select("change_author.account_id as account_id")
+		.select("account.name as account_name")
 		.orderBy('change.created_at', 'desc')
 		.execute();
 });
@@ -191,11 +192,12 @@ export const allChangesDynamicGroupingAtom = atom(async (get) => {
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin("file", "file.id", "change.file_id")
 		.innerJoin("change_author", "change_author.change_id", "change.id")
+		.innerJoin("account", "account.id", "change_author.account_id")
 		.where(changeInVersion(currentBranch))
 		.selectAll("change")
 		.select("snapshot.content as snapshot_content")
 		.select("file.path as file_path")
-		.select("change_author.account_id as account_id")
+		.select("account.name as account_name")
 		.orderBy('change.created_at', 'desc')
 		.execute();
 
@@ -224,11 +226,12 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin("file", "file.id", "change.file_id")
 		.innerJoin("change_author", "change_author.change_id", "change.id")
+		.innerJoin("account", "account.id", "change_author.account_id")
 		.where(changeInVersion(currentBranch))
 		.selectAll("change")
 		.select("snapshot.content as snapshot_content")
 		.select("file.path as file_path")
-		.select("change_author.account_id as account_id")
+		.select("account.name as account_name")
 		.orderBy('change.created_at', 'desc')
 		.execute();
 });

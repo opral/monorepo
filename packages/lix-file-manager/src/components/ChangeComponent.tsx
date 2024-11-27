@@ -7,7 +7,7 @@ import { Button } from "./../../components/ui/button.tsx";
 import timeAgo from "./../helper/timeAgo.ts";
 import clsx from "clsx";
 
-export const ChangeComponent = (props: {change: Change & {snapshot_content: Record<string, any> | null, file_path: string, account_id: string}, showTopLine: boolean, showBottomLine: boolean }) => {
+export const ChangeComponent = (props: {change: Change & {snapshot_content: Record<string, any> | null, file_path: string, account_name: string}, showTopLine: boolean, showBottomLine: boolean }) => {
 	const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
 
 	return (
@@ -36,8 +36,8 @@ export const ChangeComponent = (props: {change: Change & {snapshot_content: Reco
 						>
 							<AvatarImage src="#" alt="#" />
 							<AvatarFallback className="bg-[#fff] text-[#141A21] border border-[#DBDFE7]">
-								{props.change.account_id
-									? props.change.account_id.substring(0, 2).toUpperCase()
+								{props.change.account_name
+									? props.change.account_name.substring(0, 2).toUpperCase()
 									: "XX"}
 							</AvatarFallback>
 						</Avatar>
