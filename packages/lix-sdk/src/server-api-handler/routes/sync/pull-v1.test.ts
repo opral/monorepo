@@ -3,6 +3,7 @@ import * as LixServerApi from "@lix-js/server-api-schema";
 import { openLixInMemory } from "../../../lix/open-lix-in-memory.js";
 import { createServerApiMemoryStorage } from "../../storage/create-memory-storage.js";
 import { createServerApiHandler } from "../../create-server-api-handler.js";
+import { mockJsonSnapshot } from "../../../snapshot/mock-json-snapshot.js";
 
 test("it should fetch all rows from all tables successfully", async () => {
 	const lix = await openLixInMemory({});
@@ -53,6 +54,57 @@ test("it should fetch all rows from all tables successfully", async () => {
 			expect.objectContaining({ key: "test-key-1", value: "test-value-1" }),
 			expect.objectContaining({ key: "test-key-2", value: "test-value-2" }),
 		])
+	);
+});
+
+test("it should specifically be able to handle snapshots which use json binary", async () => {
+	const lix = await openLixInMemory({});
+	const { value: id } = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix-id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const mockSnapshot = mockJsonSnapshot({
+		key: "test-key-1",
+		value: "test-value-1",
+	});
+
+	// Add data to multiple tables
+	await lix.db
+		.insertInto("snapshot")
+		.values([{ content: mockSnapshot.content }])
+		.execute();
+
+	const storage = createServerApiMemoryStorage();
+	await storage.set(`lix-file-${id}`, await lix.toBlob());
+
+	const lsa = await createServerApiHandler({ storage });
+
+	const response = await lsa(
+		new Request("http://localhost:3000/lsa/sync/pull-v1", {
+			method: "POST",
+			body: JSON.stringify({
+				lix_id: id,
+			}),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+	);
+
+	expect(response.status).toBe(200);
+	const responseJson =
+		(await response.json()) as LixServerApi.paths["/lsa/sync/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"];
+
+	expect(responseJson.data).toBeDefined();
+	const snapshots = responseJson.data.find(
+		(table: any) => table.table_name === "snapshot"
+	)!;
+	expect(snapshots).toBeDefined();
+	expect(snapshots.rows.length).toBeGreaterThan(0);
+	expect(snapshots.rows).toEqual(
+		expect.arrayContaining([expect.objectContaining(mockSnapshot)])
 	);
 });
 
