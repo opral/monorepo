@@ -1,7 +1,7 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import { pushToServer } from "./push-to-server.js";
-import { pullFromServer } from "./pull-rows-from-server.js";
+import { pullFromServer } from "./pull-from-server.js";
 
 const notToBeSyncedTables = [
 	"active_account",
