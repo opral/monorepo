@@ -51,6 +51,102 @@ paths:
                     description: Error message.
                     example: "Lix file already exists."
 
+  /lsa/sync/push-v1:
+    post: 
+      summary: Push data to the server.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lix_id
+                - vector_clock
+                - data
+              properties:
+                lix_id: 
+                  type: string
+                  description: The ID of the lix to push to.
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                vector_clock: 
+                  type: object
+                  description: The vector clock of the client.
+                  properties: 
+                    session: 
+                      type: string
+                      description: The session ID of the client.
+                      example: "123e4567-e"
+                    time:
+                      type: integer
+                      description: The time of the client.
+                      example: 123456789
+                  example: 
+                    123e4567-e89b-12d3-a456-426614174000: 1
+                data:
+                  type: array
+                  items:
+                    type: object
+                    description: The data to push.
+                    required:
+                      - table_name
+                      - rows
+                    properties:
+                      table_name: 
+                        type: string
+                        description: The name of the table.
+                        example: "change"
+                      rows:
+                        type: array
+                        description: The rows to push.
+                        items: 
+                          type: object
+                          additionalProperties: true
+                          example: > 
+                            {
+                              "id": 1,
+                              "name": "Alice"
+                            }
+      responses:
+        '201':
+          description: Rows pushed successfully.
+
+        '400':
+          description: Invalid row data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: A machine-readable error code.
+                    example: "INVALID_ROW_DATA"
+                  message:
+                    type: string
+                    description: A human-readable error message.
+                    example: "The provided row data is invalid."
+
+        '404':
+          description: Lix not found.
+   
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Error message.
+                    example: "INTERNAL_SERVER_ERROR"
+                  message: 
+                    type: string
+                    description: A human-readable error message.
+                    example: "An internal server error occurred."
+      
+
   /lsa/lix/{id}/query:
     post:
       summary: Execute a select SQL query on the server.
