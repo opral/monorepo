@@ -64,7 +64,7 @@ test("it should fetch all rows from all tables successfully", async () => {
 	);
 });
 
-test("it should specifically be able to handle snapshots which use json binary", async () => {
+test("it should specifically be able to handle snapshots which use json binary and should not transfer the id", async () => {
 	const lix = await openLixInMemory({});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
@@ -114,8 +114,14 @@ test("it should specifically be able to handle snapshots which use json binary",
 	)!;
 	expect(snapshots).toBeDefined();
 	expect(snapshots.rows.length).toBeGreaterThan(0);
+	console.log(snapshots);
 	expect(snapshots.rows).toEqual(
-		expect.arrayContaining([expect.objectContaining(mockSnapshot)])
+		expect.arrayContaining([
+			expect.objectContaining({
+				// expecting no id
+				content: mockSnapshot.content,
+			}),
+		])
 	);
 });
 

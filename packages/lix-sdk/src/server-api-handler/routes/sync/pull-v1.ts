@@ -37,7 +37,14 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 	try {
 		const data = await Promise.all(
 			TO_BE_SYNCED_TABLES.map(async (table_name) => {
-				const rows = await lix.db.selectFrom(table_name).selectAll().execute();
+				let query = lix.db.selectFrom(table_name);
+				if (table_name === "snapshot") {
+					// don't select the generated id column and ignore the no content column
+					query = query.select("content").where("id", "!=", "no-content");
+				} else {
+					query = query.selectAll();
+				}
+				const rows = await query.execute();
 				return { table_name, rows };
 			})
 		);
