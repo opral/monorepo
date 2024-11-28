@@ -27,7 +27,7 @@ export async function mergeTheirState(args: {
     
     return await args.lix.db.transaction().execute(async (trx) => {
         
-        const myVectorClock = await args.lix.db.selectFrom('vector_clock').select(({ fn }) => {
+        const myVectorClock = await trx.selectFrom('vector_clock').select(({ fn }) => {
             return ['session', fn.max<number>('session_time').as('time')]
         }).groupBy('session').execute()
 

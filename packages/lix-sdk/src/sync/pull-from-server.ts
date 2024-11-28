@@ -1,9 +1,6 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { LixDatabaseSchema } from "../database/schema.js";
 import * as LixServerApi from "@lix-js/server-api-schema";
-import { isFirstRun } from "vitest";
 import { mergeTheirState } from "./merge-state.js";
-import { ar } from "vitest/dist/chunks/reporters.C4ZHgdxQ.js";
 
 
 
@@ -14,7 +11,7 @@ export async function pullFromServer(args: {
 }): Promise<void> {
 	// TODO SYNC implement process:
 	// 1. get the current vector clock on the client "sessionStatesKnownByTheClient" and send it to the server
-	const sessionStatesClient = await args.lix.db.selectFrom('vector_clock').select(({ fn, val, ref }) => {
+	const sessionStatesClient = await args.lix.db.selectFrom('vector_clock').select(({ fn }) => {
 		return ['session', fn.max<number>('session_time').as('time')]
 	}).groupBy('session').execute()
 
