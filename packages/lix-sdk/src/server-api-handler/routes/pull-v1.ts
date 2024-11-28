@@ -50,10 +50,10 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 
 		return new Response(
 			JSON.stringify({
-				vector_clock: {
+				vector_clock: [{
 					session: "123e4567-e",
 					time: 123456789,
-				},
+				}],
 				data,
 			} satisfies ResponseBody["200"]["content"]["application/json"]),
 			{

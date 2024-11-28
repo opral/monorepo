@@ -298,6 +298,7 @@ type VectorClockTable = {
 	// TODO SYNC - we might not need the operation as long as we don't expect a delete operation since we utilize upsert queries anyway
 	operation: 'INSERT' | 'UPDATE' | 'DELETE';
 	session: string;
-	session_time: string; 
+	session_time: number; 
+	wall_time: number; 
 };
 

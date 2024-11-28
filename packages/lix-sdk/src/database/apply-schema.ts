@@ -156,7 +156,8 @@ export function applySchema(args: {
     
     change_set_id TEXT NOT NULL,
     change_id TEXT NOT NULL,
-    UNIQUE(change_set_id, change_id),
+
+    PRIMARY KEY(change_set_id, change_id),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id),    
     FOREIGN KEY(change_id) REFERENCES change(id)
   ) STRICT;
@@ -164,9 +165,9 @@ export function applySchema(args: {
   CREATE TABLE IF NOT EXISTS change_set_label (
     label_id TEXT NOT NULL,
     change_set_id TEXT NOT NULL,
+    PRIMARY KEY(label_id, change_set_id),
     FOREIGN KEY(label_id) REFERENCES label(id),
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id),
-    PRIMARY KEY(label_id, change_set_id)
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_label_author (
