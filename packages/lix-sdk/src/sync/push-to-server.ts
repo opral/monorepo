@@ -1,3 +1,4 @@
+import type { OperandExpression, SqlBool } from "kysely";
 import type * as LixServerProtocol from "../../../lix-server-api-schema/dist/schema.js";
 import type { SessionOperations } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
@@ -13,6 +14,28 @@ export async function pushToServer(args: {
 	lix: Lix;
 	targetVectorClock: VectorClock
 }): Promise<void> {
+
+	// TODO SYNC
+	// use the target vector clock to collect all changed rows the target is not aware of
+	// const operationsToPush = args.lix.db
+	// .selectFrom('vector_clock')
+	// .selectAll('vector_clock')
+
+	// if (args.targetVectorClock.length > 0) {
+	// 	operationsToPush.where((eb) => {
+	// 		const ors: any[] = []
+			
+	// 		ors.push(eb('session', 'not in', args.targetVectorClock.map(sessionTime => sessionTime.session)))
+	// 		for (const sessionTime of args.targetVectorClock) {
+	// 			ors.push(eb('session', '=', sessionTime.session).and("session_time", "=", sessionTime.time))
+	// 		}
+
+	// 		return ors as any
+	// 	})
+	// }
+
+	// await operationsToPush.execute()
+	
 	const data = await Promise.all(
 		TO_BE_SYNCED_TABLES.map(async (table_name) => {
 			let query = args.lix.db.selectFrom(table_name);
