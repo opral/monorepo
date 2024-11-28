@@ -50,6 +50,8 @@ export async function initSyncProcess(args: { lix: Lix }): Promise<{
 			schedulePullAndPush()
 		}, 1000);
 	}
+
+	schedulePullAndPush()
 	
 	return {
 		stop: () => {
