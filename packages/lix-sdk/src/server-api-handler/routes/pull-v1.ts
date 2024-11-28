@@ -32,8 +32,12 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 			}
 		);
 	}
-
+	
 	try {
+		// TODO SYNC implement server logic 
+		// this returns everything for now. But we should first filter all events from
+		// vector_clock that happend after the clients vector clock
+		// we can use the same query plus the table to get the data from the column
 		const data = await Promise.all(
 			TO_BE_SYNCED_TABLES.map(async (table_name) => {
 				let query = lix.db.selectFrom(table_name);
@@ -48,7 +52,7 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 			})
 		);
 
-
+		// TODO SYNC make this a helper function
 		const sessionStatesServer = await lix.db.selectFrom('vector_clock').select(({ fn, val, ref }) => {
 			return ['session', fn.max<number>('session_time').as('time')]
 		}).groupBy('session').execute()
