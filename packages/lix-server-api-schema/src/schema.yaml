@@ -191,8 +191,25 @@ paths:
               schema:
                 type: object
                 required:
+                  - vector_clock
                   - data
                 properties:
+                  vector_clock:
+                    type: object
+                    description: The vector clock of the server.
+                    required:
+                      - session
+                      - time
+                    properties:
+                      session:
+                        type: string
+                        description: The session ID of the server.
+                        example: "123e4567-e"
+                      time:
+                        type: integer
+                        description: The time of the server.
+                    example: 
+                      123e4567-e89b-12d3-a456-426614174000: 1
                   data:
                     type: array
                     description: The data from all tables.
