@@ -1,12 +1,12 @@
 import { test, expect } from "vitest";
 import * as LixServerApi from "@lix-js/server-api-schema";
-import { openLixInMemory } from "../../../lix/open-lix-in-memory.js";
-import { createServerApiMemoryStorage } from "../../storage/create-memory-storage.js";
-import { createServerApiHandler } from "../../create-server-api-handler.js";
-import { mockJsonSnapshot } from "../../../snapshot/mock-json-snapshot.js";
+import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import { createServerApiMemoryStorage } from "../storage/create-memory-storage.js";
+import { createServerApiHandler } from "../create-server-api-handler.js";
+import { mockJsonSnapshot } from "../../snapshot/mock-json-snapshot.js";
 
 type RequestBody =
-	LixServerApi.paths["/lsa/sync/pull-v1"]["post"]["requestBody"]["content"]["application/json"];
+	LixServerApi.paths["/lsa/pull-v1"]["post"]["requestBody"]["content"]["application/json"];
 
 test("it should fetch all rows from all tables successfully", async () => {
 	const lix = await openLixInMemory({});
@@ -31,7 +31,7 @@ test("it should fetch all rows from all tables successfully", async () => {
 	const lsa = await createServerApiHandler({ storage });
 
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/sync/pull-v1", {
+		new Request("http://localhost:3000/lsa/pull-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
@@ -48,7 +48,7 @@ test("it should fetch all rows from all tables successfully", async () => {
 
 	expect(response.status).toBe(200);
 	const responseJson =
-		(await response.json()) as LixServerApi.paths["/lsa/sync/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"];
+		(await response.json()) as LixServerApi.paths["/lsa/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"];
 
 	expect(responseJson.data).toBeDefined();
 	const keyValueTable = responseJson.data.find(
@@ -89,7 +89,7 @@ test("it should specifically be able to handle snapshots which use json binary a
 	const lsa = await createServerApiHandler({ storage });
 
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/sync/pull-v1", {
+		new Request("http://localhost:3000/lsa/pull-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
@@ -106,7 +106,7 @@ test("it should specifically be able to handle snapshots which use json binary a
 
 	expect(response.status).toBe(200);
 	const responseJson =
-		(await response.json()) as LixServerApi.paths["/lsa/sync/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"];
+		(await response.json()) as LixServerApi.paths["/lsa/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"];
 
 	expect(responseJson.data).toBeDefined();
 	const snapshots = responseJson.data.find(
@@ -129,7 +129,7 @@ test("it should return 404 if the Lix file is not found", async () => {
 	const lsa = await createServerApiHandler({ storage });
 
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/sync/pull-v1", {
+		new Request("http://localhost:3000/lsa/pull-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: "nonexistent-id",
@@ -154,7 +154,7 @@ test("it should return 500 if the Lix file is invalid", async () => {
 	const lsa = await createServerApiHandler({ storage });
 
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/sync/pull-v1", {
+		new Request("http://localhost:3000/lsa/pull-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: "invalid-id",
@@ -185,7 +185,7 @@ test("it should handle empty tables gracefully", async () => {
 	const lsa = await createServerApiHandler({ storage });
 
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/sync/pull-v1", {
+		new Request("http://localhost:3000/lsa/pull-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,

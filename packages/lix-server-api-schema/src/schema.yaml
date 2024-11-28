@@ -3,11 +3,13 @@ info:
   title: Lix Server Api
   version: 1.0.0
 paths:
-  /lsa/new:
+  /lsa/new-v1:
     post:
-      summary: Create a new lix on the server.
+      summary: Stores the lix on the server.
+      description: > 
+        Use sync if you want to push or pull data from the server.
       requestBody:
-        description: The lix file.
+        description: The lix binary.
         required: true
         content:
           application/binary:
@@ -51,7 +53,7 @@ paths:
                     description: Error message.
                     example: "Lix file already exists."
 
-  /lsa/sync/push-v1:
+  /lsa/push-v1:
     post: 
       summary: Push data to the server.
       requestBody:
@@ -149,7 +151,7 @@ paths:
                     description: A human-readable error message.
                     example: "An internal server error occurred."
 
-  /lsa/sync/pull-v1:
+  /lsa/pull-v1:
     post:
       summary: Pull all data for all tables from the server.
       requestBody:
@@ -221,104 +223,3 @@ paths:
                     type: string
                   message:
                     type: string
-      
-
-  /lsa/lix/{id}/query:
-    post:
-      summary: Execute a select SQL query on the server.
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: The ID of the lix to query.
-          schema:
-            type: string
-            example: "123e4567-e89b-12d3-a456-426614174000"
-      requestBody: 
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                sql:
-                  type: string
-                  description: The SQL query to execute.
-                  example: "SELECT * FROM users;"
-                  minLength: 1
-                parameters: 
-                  type: array
-                  description: >
-                    The parameters to be used in the query.
-                  
-                    ```json
-                    {
-                      "query": "SELECT * FROM users WHERE id = ?;",
-                      "parameters": [1]
-                    }
-                    ```
-              required:
-                - query
-      responses:
-        '200':
-          description: Select query executed successfully.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  rows:
-                    type: array
-                    description: Result rows of the query.
-                  num_affected_rows:
-                    type: integer
-                    description: Number of rows affected.
-                    example: 1
-        '201': 
-          description: Mutation query (INSERT, UPDATE, DELETE) executed successfully.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  rows: 
-                    type: array
-                    description: Result rows of the query.
-                  num_affected_rows:
-                    type: integer
-                    description: Number of rows affected.
-                    example: 1
-        '400':
-          description: Invalid SQL query.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    description: A machine-readable error code.
-                    example: "INVALID_SQL"
-                  message:
-                    type: string
-                    description: A human-readable error message.
-                    example: "The provided SQL query is invalid."
-
-        '404':
-          description: Lix file not found.
-   
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    description: Error message.
-                    example: "INTERNAL_SERVER_ERROR"
-                  message: 
-                    type: string
-                    description: A human-readable error message.
-                    example: "An internal server error occurred."

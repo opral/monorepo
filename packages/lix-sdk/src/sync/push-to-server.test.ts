@@ -2,7 +2,6 @@ import { expect, test, vi } from "vitest";
 import { createServerApiHandler } from "../server-api-handler/create-server-api-handler.js";
 import { createServerApiMemoryStorage } from "../server-api-handler/storage/create-memory-storage.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import type * as LixServerProtocol from "../../../lix-server-api-schema/dist/schema.js";
 import { pushToServer } from "./push-to-server.js";
 import type { LixFile } from "../database/schema.js";
 import type { Account } from "../account/database-schema.js";
@@ -28,7 +27,7 @@ test("push rows of multiple tables to server successfully", async () => {
 
 	// initialize the lix on the server
 	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new", {
+		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
 			body: await lix.toBlob(),
 		})
@@ -55,34 +54,26 @@ test("push rows of multiple tables to server successfully", async () => {
 		serverUrl: "http://localhost:3000",
 	});
 
-	const keyValueOnServerResponse = await fetch(
-		new Request(`http://localhost:3000/lsa/lix/${id}/query`, {
-			method: "POST",
-			body: JSON.stringify({
-				sql: "SELECT * FROM key_value WHERE key = 'mock-key';",
-			}),
-		})
-	);
+	const lixFromServer = await openLixInMemory({
+		blob: await storage.get(`lix-file-${id}`),
+	});
 
-	const accountsOnServerResponse = await fetch(
-		new Request(`http://localhost:3000/lsa/lix/${id}/query`, {
-			method: "POST",
-			body: JSON.stringify({
-				sql: "SELECT * FROM account WHERE id = 'account0';",
-			}),
-		})
-	);
+	const keyValueOnServer = await lixFromServer.db
+		.selectFrom("key_value")
+		.where("key", "=", "mock-key")
+		.selectAll()
+		.execute();
 
-	const keyValueOnServer =
-		(await keyValueOnServerResponse.json()) as LixServerProtocol.paths["/lsa/lix/{id}/query"]["post"]["responses"]["200"]["content"]["application/json"];
+	const accountsOnServer = await lixFromServer.db
+		.selectFrom("account")
+		.where("id", "=", "account0")
+		.selectAll()
+		.execute();
 
-	const accountsOnServer =
-		(await accountsOnServerResponse.json()) as LixServerProtocol.paths["/lsa/lix/{id}/query"]["post"]["responses"]["200"]["content"]["application/json"];
-
-	expect(accountsOnServer?.rows).toEqual([
+	expect(accountsOnServer).toEqual([
 		{ id: "account0", name: "some account" } satisfies Account,
 	]);
-	expect(keyValueOnServer?.rows).toEqual([
+	expect(keyValueOnServer).toEqual([
 		{
 			key: "mock-key",
 			value: "mock-value",
@@ -106,7 +97,7 @@ test("it should handle snapshots.content json binaries", async () => {
 
 	// initialize the lix on the server
 	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new", {
+		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
 			body: await lix.toBlob(),
 		})
@@ -130,19 +121,17 @@ test("it should handle snapshots.content json binaries", async () => {
 		serverUrl: "http://localhost:3000",
 	});
 
-	const response = await fetch(
-		new Request(`http://localhost:3000/lsa/lix/${id}/query`, {
-			method: "POST",
-			body: JSON.stringify({
-				sql: `SELECT *, json(content) as content FROM snapshot WHERE id = '${mockSnapshot.id}'`,
-			}),
-		})
-	);
+	const lixFromServer = await openLixInMemory({
+		blob: await storage.get(`lix-file-${id}`),
+	});
 
-	const json = await response.json();
+	const snapshot = await lixFromServer.db
+		.selectFrom("snapshot")
+		.where("id", "=", mockSnapshot.id)
+		.selectAll()
+		.executeTakeFirst();
 
-	expect(json.rows.length).toBe(1);
-	expect(json.rows[0]).toMatchObject(mockSnapshot);
+	expect(snapshot).toMatchObject(mockSnapshot);
 });
 
 test.todo("it should handle binary values", async () => {
@@ -185,19 +174,17 @@ test.todo("it should handle binary values", async () => {
 		serverUrl: "http://localhost:3000",
 	});
 
-	const filesOnServerResponse = await fetch(
-		new Request(`http://localhost:3000/lsa/lix/${id}/query`, {
-			method: "POST",
-			body: JSON.stringify({
-				sql: "SELECT * FROM file WHERE id = 'file0';",
-			}),
-		})
-	);
+	const lixFromServer = await openLixInMemory({
+		blob: await storage.get(`lix-file-${id}`),
+	});
 
-	const filesOnServer =
-		(await filesOnServerResponse.json()) as LixServerProtocol.paths["/lsa/lix/{id}/query"]["post"]["responses"]["200"]["content"]["application/json"];
+	const filesOnServer = await lixFromServer.db
+		.selectFrom("file")
+		.where("id", "=", "file0")
+		.selectAll()
+		.execute();
 
-	expect(filesOnServer?.rows).toEqual([
+	expect(filesOnServer).toEqual([
 		{
 			id: "file0",
 			path: "/hello.txt",

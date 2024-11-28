@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
 import * as LixServerApi from "@lix-js/server-api-schema";
-import { createServerApiMemoryStorage } from "../../storage/create-memory-storage.js";
-import { openLixInMemory } from "../../../lix/open-lix-in-memory.js";
-import { createServerApiHandler } from "../../create-server-api-handler.js";
+import { createServerApiMemoryStorage } from "../storage/create-memory-storage.js";
+import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import { createServerApiHandler } from "../create-server-api-handler.js";
 
 test("it should push data successfully", async () => {
 	const lix = await openLixInMemory({});
@@ -18,7 +18,7 @@ test("it should push data successfully", async () => {
 	const lsa = await createServerApiHandler({ storage });
 
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/sync/push-v1", {
+		new Request("http://localhost:3000/lsa/push-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
@@ -29,7 +29,7 @@ test("it should push data successfully", async () => {
 						rows: [{ key: "test", value: "test value" }],
 					},
 				],
-			} satisfies LixServerApi.paths["/lsa/sync/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -57,13 +57,13 @@ test("it should return 404 if the Lix file is not found", async () => {
 	const lsa = await createServerApiHandler({ storage });
 
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/sync/push-v1", {
+		new Request("http://localhost:3000/lsa/push-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: "nonexistent-id",
 				vector_clock: { session: "123e4567-e", time: 123456789 },
 				data: [],
-			} satisfies LixServerApi.paths["/lsa/sync/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -80,13 +80,13 @@ test("it should return 500 for an invalid Lix file", async () => {
 	const lsa = await createServerApiHandler({ storage });
 
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/sync/push-v1", {
+		new Request("http://localhost:3000/lsa/push-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: "invalid-id",
 				vector_clock: { session: "123e4567-e", time: 123456789 },
 				data: [],
-			} satisfies LixServerApi.paths["/lsa/sync/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -113,7 +113,7 @@ test("it should return 400 for a failed insert operation", async () => {
 	const lsa = await createServerApiHandler({ storage });
 
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/sync/push-v1", {
+		new Request("http://localhost:3000/lsa/push-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
@@ -124,7 +124,7 @@ test("it should return 400 for a failed insert operation", async () => {
 						rows: [{ key: "test", value: "test value" }],
 					},
 				],
-			} satisfies LixServerApi.paths["/lsa/sync/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},

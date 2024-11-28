@@ -18,7 +18,7 @@ test("it should store the lix file in storage", async () => {
 	const lsa = await createServerApiHandler({ storage });
 
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/new", {
+		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
 			body: await lix.toBlob(),
 		})
@@ -49,7 +49,7 @@ test.skip("it should return 400 for an invalid lix file", async () => {
 	const lsa = await createServerApiHandler({ storage });
 
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/new", {
+		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
 			body: invalidLixFile,
 		})
@@ -66,7 +66,7 @@ test("it should return 409 if the lix file already exists", async () => {
 
 	// First request to store the lix file
 	await lsa(
-		new Request("http://localhost:3000/lsa/new", {
+		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
 			body: lixFile,
 		})
@@ -74,7 +74,7 @@ test("it should return 409 if the lix file already exists", async () => {
 
 	// Second request to store the same lix file
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/new", {
+		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
 			body: lixFile,
 		})

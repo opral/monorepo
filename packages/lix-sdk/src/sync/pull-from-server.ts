@@ -8,7 +8,7 @@ export async function pullFromServer(args: {
 	serverUrl: string;
 }): Promise<void> {
 	const response = await fetch(
-		new Request(`${args.serverUrl}/lsa/sync/pull-v1`, {
+		new Request(`${args.serverUrl}/lsa/pull-v1`, {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: args.id,
@@ -16,7 +16,7 @@ export async function pullFromServer(args: {
 					session: "123e4567-e",
 					time: 123456789,
 				},
-			} satisfies LixServerApi.paths["/lsa/sync/pull-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerApi.paths["/lsa/pull-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -27,7 +27,7 @@ export async function pullFromServer(args: {
 		throw new Error(`Failed to pull from server: ${body.code} ${body.message}`);
 	}
 	const data = (
-		body as LixServerApi.paths["/lsa/sync/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"]
+		body as LixServerApi.paths["/lsa/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"]
 	).data;
 
 	await args.lix.db.transaction().execute(async (trx) => {

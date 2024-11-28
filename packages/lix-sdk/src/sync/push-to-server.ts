@@ -27,7 +27,7 @@ export async function pushToServer(args: {
 		})
 	);
 	const response = await fetch(
-		new Request(`${args.serverUrl}/lsa/sync/push-v1`, {
+		new Request(`${args.serverUrl}/lsa/push-v1`, {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: args.id,
@@ -36,7 +36,7 @@ export async function pushToServer(args: {
 					time: 123456789,
 				},
 				data,
-			} satisfies LixServerProtocol.paths["/lsa/sync/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerProtocol.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},

@@ -1,8 +1,7 @@
 import type { Storage } from "./storage/storage.js";
-import { route as newRoute } from "./routes/new.js";
-import { route as lixQueryRoute } from "./routes/lix/{id}/query.js";
-import { route as syncPushRouteV1 } from "./routes/sync/push-v1.js";
-import { route as syncPullRouteV1 } from "./routes/sync/pull-v1.js";
+import { route as newRoute } from "./routes/new-v1.js";
+import { route as syncPushRouteV1 } from "./routes/push-v1.js";
+import { route as syncPullRouteV1 } from "./routes/pull-v1.js";
 
 export type LixServerApiHandler = (request: Request) => Promise<Response>;
 
@@ -60,23 +59,14 @@ export async function createServerApiHandler(args: {
 	return async (request) => {
 		try {
 			const path = new URL(request.url).pathname;
-			if (path === "/lsa/new") {
+			if (path === "/lsa/new-v1") {
 				return newRoute({ ...context, request });
 			}
-			if (path === "/lsa/sync/push-v1") {
+			if (path === "/lsa/push-v1") {
 				return syncPushRouteV1({ ...context, request });
 			}
-			if (path === "/lsa/sync/pull-v1") {
+			if (path === "/lsa/pull-v1") {
 				return syncPullRouteV1({ ...context, request });
-			}
-			// /lsp/lix/{id}/query
-			if (path.match(/\/lsa\/lix\/[^/]+\/query/)) {
-				const id = path.split("/")[3]!;
-				return lixQueryRoute({
-					...context,
-					request,
-					params: { id },
-				});
 			}
 
 			return Response.error();

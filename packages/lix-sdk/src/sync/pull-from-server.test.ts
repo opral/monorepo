@@ -38,7 +38,7 @@ test("pull rows of multiple tables from server successfully", async () => {
 
 	// initialize the lix on the server with the mock data
 	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new", {
+		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
 			body: await lixOnServer.toBlob(),
 			headers: {
@@ -100,7 +100,7 @@ test("it handles snapshot.content being json binary", async () => {
 
 	// initialize the lix on the server with the mock data
 	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new", {
+		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
 			body: await lixOnServer.toBlob(),
 			headers: {

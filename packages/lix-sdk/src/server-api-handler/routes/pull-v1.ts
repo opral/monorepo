@@ -1,14 +1,13 @@
 import type * as LixServerApi from "@lix-js/server-api-schema";
-import type { LixServerApiHandlerRoute } from "../../create-server-api-handler.js";
-import { openLixInMemory } from "../../../lix/open-lix-in-memory.js";
-import type { Lix } from "../../../lix/open-lix.js";
-import { TO_BE_SYNCED_TABLES } from "../../../sync/to-be-synced-tables.js";
+import type { LixServerApiHandlerRoute } from "../create-server-api-handler.js";
+import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import type { Lix } from "../../lix/open-lix.js";
+import { TO_BE_SYNCED_TABLES } from "../../sync/to-be-synced-tables.js";
 
 type RequestBody =
-	LixServerApi.paths["/lsa/sync/pull-v1"]["post"]["requestBody"]["content"]["application/json"];
+	LixServerApi.paths["/lsa/pull-v1"]["post"]["requestBody"]["content"]["application/json"];
 
-type ResponseBody =
-	LixServerApi.paths["/lsa/sync/pull-v1"]["post"]["responses"];
+type ResponseBody = LixServerApi.paths["/lsa/pull-v1"]["post"]["responses"];
 
 export const route: LixServerApiHandlerRoute = async (context) => {
 	const body = (await context.request.json()) as RequestBody;
