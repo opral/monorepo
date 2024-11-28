@@ -22,7 +22,7 @@ test("it should push data successfully", async () => {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
-				vector_clock: { session: "123e4567-e", time: 123456789 },
+				vector_clock: [{ session: "123e4567-e", time: 123456789 }],
 				data: [
 					{
 						table_name: "key_value",

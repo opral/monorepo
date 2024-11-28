@@ -299,6 +299,6 @@ type VectorClockTable = {
 	operation: 'INSERT' | 'UPDATE' | 'DELETE';
 	session: string;
 	session_time: number; 
-	wall_time: number; 
+	wall_clock: number; 
 };
 

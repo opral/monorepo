@@ -276,6 +276,7 @@ export function applySchema(args: {
 
   const triggerTables: string[] = [
     'change',
+    'account',
     // 'change_author',
     // 'change_edge',
     // 'snapshot',
@@ -299,7 +300,7 @@ export function applySchema(args: {
     operation TEXT,
     session TEXT NOT NULL DEFAULT (vector_clock_session()),
     session_time INTEGER NOT NULL DEFAULT (vector_clock_tick()),
-    wall_clock INTEGER DEFAULT (unixepoch('now','subsec'))
+    wall_clock INTEGER DEFAULT (strftime('%s', 'now') * 1000 + (strftime('%f', 'now') - strftime('%S', 'now')) * 1000)
   ) STRICT;`;
 
   for (const triggerTable of triggerTables) {

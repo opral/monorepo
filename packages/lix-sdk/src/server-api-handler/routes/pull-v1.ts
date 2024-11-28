@@ -48,12 +48,14 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 			})
 		);
 
+
+		const sessionStatesServer = await lix.db.selectFrom('vector_clock').select(({ fn, val, ref }) => {
+			return ['session', fn.max<number>('session_time').as('time')]
+		}).groupBy('session').execute()
+
 		return new Response(
 			JSON.stringify({
-				vector_clock: [{
-					session: "123e4567-e",
-					time: 123456789,
-				}],
+				vector_clock: sessionStatesServer,
 				data,
 			} satisfies ResponseBody["200"]["content"]["application/json"]),
 			{
