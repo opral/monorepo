@@ -1,6 +1,6 @@
 import type { Lix } from "../lix/open-lix.js";
 import * as LixServerApi from "@lix-js/server-api-schema";
-import { mergeTheirState } from "./merge-state.js";
+import { mergeTheirState, type VectorClock } from "./merge-state.js";
 
 
 
@@ -8,7 +8,7 @@ export async function pullFromServer(args: {
 	id: string;
 	lix: Lix;
 	serverUrl: string;
-}): Promise<void> {
+}): Promise<VectorClock> {
 	// TODO SYNC implement process:
 	// 1. get the current vector clock on the client "sessionStatesKnownByTheClient" and send it to the server
 	const sessionStatesClient = await args.lix.db.selectFrom('vector_clock').select(({ fn }) => {
@@ -48,6 +48,8 @@ export async function pullFromServer(args: {
 		sourceVectorClock: sessionStateServer,
 		sourceData: data,
 	})
+
+	return sessionStateServer
 	
 	// 3A). prepare a filtered upsert only upsert those records that have not been written more recently on the client
 	//   - start a transaction (to be able to rollback)

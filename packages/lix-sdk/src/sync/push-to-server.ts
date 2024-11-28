@@ -1,5 +1,7 @@
 import type * as LixServerProtocol from "../../../lix-server-api-schema/dist/schema.js";
+import type { SessionOperations } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import type { VectorClock } from "./merge-state.js";
 import { TO_BE_SYNCED_TABLES } from "./to-be-synced-tables.js";
 
 /**
@@ -9,6 +11,7 @@ export async function pushToServer(args: {
 	id: string;
 	serverUrl: string;
 	lix: Lix;
+	targetVectorClock: VectorClock
 }): Promise<void> {
 	const data = await Promise.all(
 		TO_BE_SYNCED_TABLES.map(async (table_name) => {

@@ -45,8 +45,8 @@ export type LixDatabaseSchema = {
 	change_conflict: ChangeConflictTable;
 	change_conflict_resolution: ChangeConflictResolutionTable;
 
-	// vector clock
-	vector_clock: VectorClock;
+	// vector clock TODO SYNC - rename to session_operation
+	vector_clock: SessionOperationTable;
 };
 
 export type ChangeQueueEntry = Selectable<ChangeQueueTable>;
@@ -285,13 +285,13 @@ type ChangeConflictResolutionTable = {
 };
 
 
-export type VectorClock =
-	Selectable<VectorClockTable>;
+export type SessionOperations =
+	Selectable<SessionOperationTable>;
 export type NewVectorClock =
-	Insertable<VectorClockTable>;
+	Insertable<SessionOperationTable>;
 export type VectorClockUpdate =
-	Updateable<VectorClockTable>;
-type VectorClockTable = {
+	Updateable<SessionOperationTable>;
+type SessionOperationTable = {
 	row_id: string;
 	table_name: string;
 	// -1 = delete, 0 = insert, 1 = update

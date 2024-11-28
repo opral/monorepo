@@ -1,6 +1,6 @@
 import type { Lix } from "../lix/open-lix.js";
 
-type VectorClock = {
+export type VectorClock = {
     session: string,
     time: number
 }[]
