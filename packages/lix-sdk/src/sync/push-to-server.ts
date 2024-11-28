@@ -31,10 +31,12 @@ export async function pushToServer(args: {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: args.id,
-				vector_clock: {
-					session: "123e4567-e",
-					time: 123456789,
-				},
+				vector_clock: [
+					{
+						session: "123e4567-e",
+						time: 123456789,
+					},
+				],
 				data,
 			} satisfies LixServerProtocol.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {

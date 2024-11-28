@@ -7,15 +7,16 @@ export async function pullFromServer(args: {
 	lix: Lix;
 	serverUrl: string;
 }): Promise<void> {
+
 	const response = await fetch(
 		new Request(`${args.serverUrl}/lsa/pull-v1`, {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: args.id,
-				vector_clock: {
+				vector_clock: [{
 					session: "123e4567-e",
 					time: 123456789,
-				},
+				}],
 			} satisfies LixServerApi.paths["/lsa/pull-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",

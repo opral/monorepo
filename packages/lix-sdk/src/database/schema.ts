@@ -44,6 +44,9 @@ export type LixDatabaseSchema = {
 	// change conflicts
 	change_conflict: ChangeConflictTable;
 	change_conflict_resolution: ChangeConflictResolutionTable;
+
+	// vector clock
+	vector_clock: VectorClock;
 };
 
 export type ChangeQueueEntry = Selectable<ChangeQueueTable>;
@@ -279,5 +282,22 @@ export type ChangeConflictResolutionUpdate =
 type ChangeConflictResolutionTable = {
 	change_conflict_id: string;
 	resolved_change_id: string;
+};
+
+
+export type VectorClock =
+	Selectable<VectorClockTable>;
+export type NewVectorClock =
+	Insertable<VectorClockTable>;
+export type VectorClockUpdate =
+	Updateable<VectorClockTable>;
+type VectorClockTable = {
+	row_id: string;
+	table_name: string;
+	// -1 = delete, 0 = insert, 1 = update
+	// TODO SYNC - we might not need the operation as long as we don't expect a delete operation since we utilize upsert queries anyway
+	operation: 'INSERT' | 'UPDATE' | 'DELETE';
+	session: string;
+	session_time: string; 
 };
 

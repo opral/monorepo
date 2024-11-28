@@ -72,22 +72,24 @@ paths:
                   description: The ID of the lix to push to.
                   example: "123e4567-e89b-12d3-a456-426614174000"
                 vector_clock: 
-                  type: object
-                  description: The vector clock of the client.
-                  required:
-                    - session
-                    - time
-                  properties: 
-                    session: 
-                      type: string
-                      description: The session ID of the client.
-                      example: "123e4567-e"
-                    time:
-                      type: integer
-                      description: The time of the client.
-                      example: 123456789
-                  example: 
-                    123e4567-e89b-12d3-a456-426614174000: 1
+                  type: array
+                  items:
+                    type: object
+                    description: The vector clock of the client.
+                    required:
+                      - session
+                      - time
+                    properties: 
+                      session: 
+                        type: string
+                        description: The session ID of the client.
+                        example: "123e4567-e"
+                      time:
+                        type: integer
+                        description: The time of the client.
+                        example: 123456789
+                    example: 
+                      123e4567-e89b-12d3-a456-426614174000: 1
                 data:
                   type: array
                   items:
@@ -169,20 +171,22 @@ paths:
                   description: The ID of the lix to pull from.
                   example: "123e4567-e89b-12d3-a456-426614174000"
                 vector_clock:
-                  type: object
-                  description: The vector clock of the client.
-                  required:
-                    - session
-                    - time
-                  properties:
-                    session:
-                      type: string
-                      description: The session ID of the client.
-                      example: "123e4567-e"
-                    time:
-                      type: integer
-                      description: The time of the client.
-                      example: 123456789
+                  type: array
+                  items:
+                    type: object
+                    description: The vector clock of the client.
+                    required:
+                      - session
+                      - time
+                    properties:
+                      session:
+                        type: string
+                        description: The session ID of the client.
+                        example: "123e4567-e"
+                      time:
+                        type: integer
+                        description: The time of the client.
+                        example: 123456789
       responses:
         '200':
           description: Data fetched successfully.
@@ -195,21 +199,24 @@ paths:
                   - data
                 properties:
                   vector_clock:
-                    type: object
-                    description: The vector clock of the server.
-                    required:
-                      - session
-                      - time
-                    properties:
-                      session:
-                        type: string
-                        description: The session ID of the server.
-                        example: "123e4567-e"
-                      time:
-                        type: integer
-                        description: The time of the server.
-                    example: 
-                      123e4567-e89b-12d3-a456-426614174000: 1
+                    type: array
+                    items:
+                      type: object
+                      description: The vector clock of the server.
+                      required:
+                        - session
+                        - time
+                      properties:
+                        session:
+                          type: string
+                          description: The session ID of the server.
+                          example: "123e4567-e"
+                        time:
+                          type: integer
+                          description: The time of the server.
+                      example: 
+                        session: 123e4567-e89b-12d3-a456-426614174000
+                        time: 1
                   data:
                     type: array
                     description: The data from all tables.

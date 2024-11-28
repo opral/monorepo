@@ -273,17 +273,32 @@ export function applySchema(args: {
 
   `;
 
-  const triggerTables: string[] = ['change']
+  const triggerTables: string[] = [
+    'change',
+    // 'change_author',
+    // 'change_edge',
+    // 'snapshot',
+    // 'change_conflict',
+    // 'change_conflict_resolution',
+    // 'change_set',
+    // 'change_set_element',
+    // 'change_set_label_author',
+    // 'version',
+    // 'version_change_conflict',
+  ]
 
+  // TODO SYNC naming - operations might be a better name
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   args.sqlite.exec`
   -- vector clock
   CREATE TABLE IF NOT EXISTS vector_clock (
     row_id TEXT,
     table_name TEXT,
-    operation INTEGER,
+    -- TODO SYNC - we might not need the operation as long as we don't expect a delete operation since we utilize upsert queries anyway
+    operation TEXT,
     session TEXT NOT NULL DEFAULT (vector_clock_session()),
-    session_time INTEGER NOT NULL DEFAULT (vector_clock_tick())
+    session_time INTEGER NOT NULL DEFAULT (vector_clock_tick()),
+    wall_clock INTEGER DEFAULT (unixepoch('now','subsec'))
   ) STRICT;`;
 
   for (const triggerTable of triggerTables) {
@@ -294,7 +309,7 @@ export function applySchema(args: {
     AFTER INSERT ON ${triggerTable}
     BEGIN
         INSERT INTO vector_clock (row_id, table_name, operation)
-        VALUES (NEW.id, '${triggerTable}', 0);
+        VALUES (NEW.id, '${triggerTable}', 'INSERT');
     END;
 
     -- Trigger for UPDATE operations
@@ -302,7 +317,7 @@ export function applySchema(args: {
     AFTER UPDATE ON ${triggerTable}
     BEGIN
         INSERT INTO vector_clock (row_id, table_name, operation)
-        VALUES (NEW.id, '${triggerTable}', 1);
+        VALUES (NEW.id, '${triggerTable}', 'UPDATE');
     END;
 
     -- Trigger for DELETE operations
@@ -310,10 +325,12 @@ export function applySchema(args: {
     AFTER DELETE ON ${triggerTable}
     BEGIN
         INSERT INTO vector_clock (row_id, table_name, operation)
-        VALUES (OLD.id, '${triggerTable}', -1);
+        VALUES (OLD.id, '${triggerTable}', 'DELETE');
     END;
     `)
   }
 
   return args.sqlite
 }
+
+
