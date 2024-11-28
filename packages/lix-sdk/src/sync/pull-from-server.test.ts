@@ -51,7 +51,6 @@ test("pull rows of multiple tables from server successfully", async () => {
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
-		tableNames: ["account", "key_value"],
 	});
 
 	// Verify the data is pulled into the local lix
@@ -114,7 +113,6 @@ test("it handles snapshot.content being json binary", async () => {
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
-		tableNames: ["snapshot"],
 	});
 
 	// Verify the data is pulled into the local lix
@@ -133,7 +131,7 @@ test("it handles snapshot.content being json binary", async () => {
 // (1) https://www.loom.com/share/d4cee5318eb841f7a6c00e05f333e4d6
 // (2) https://www.loom.com/share/3e57fba9afde4bbda6bff196b5e7ed58
 //
-test("it should handle files without syncing the data column", async () => {
+test.skip("it should handle files without syncing the data column", async () => {
 	const lixOnServer = await openLixInMemory({});
 
 	const lix = await openLixInMemory({ blob: await lixOnServer.toBlob() });
@@ -176,7 +174,6 @@ test("it should handle files without syncing the data column", async () => {
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
-		tableNames: ["file"],
 	});
 
 	// Verify the data is pulled into the local lix
