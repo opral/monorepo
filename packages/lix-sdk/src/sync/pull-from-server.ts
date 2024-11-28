@@ -7,16 +7,17 @@ export async function pullFromServer(args: {
 	lix: Lix;
 	serverUrl: string;
 }): Promise<void> {
+	// 1. get the current vector clock on the client "sessionStatesKnownByTheClient" and send it to the server
+	const sessionStatesClient = await args.lix.db.selectFrom('vector_clock').select(({ fn, val, ref }) => {
+		return ['session', fn.max<number>('session_time').as('time')]
+	}).groupBy('session').execute()
 
 	const response = await fetch(
 		new Request(`${args.serverUrl}/lsa/pull-v1`, {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: args.id,
-				vector_clock: [{
-					session: "123e4567-e",
-					time: 123456789,
-				}],
+				vector_clock: sessionStatesClient,
 			} satisfies LixServerApi.paths["/lsa/pull-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
