@@ -1,6 +1,28 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import * as LixServerApi from "@lix-js/server-api-schema";
+function aheadSessions(
+    mine: Array<{ session: string, time: number }>,
+    theirs: Array<{ session: string, time: number }>
+): Array<{ session: string, time: number }> {
+    const mineSessionMap = new Map(mine.map(({ session, time }) => [session, time]));
+    const theirSessionMap = new Map(theirs.map(({ session, time }) => [session, time]));
+
+    const aheadSession: Array<{ session: string, time: number }> = [];
+
+    const allSessions = new Set([...mineSessionMap.keys(), ...theirSessionMap.keys()]);
+
+    allSessions.forEach(session => {
+        const myTime = mineSessionMap.get(session);
+        const theirTime = theirSessionMap.get(session);
+
+		if  (myTime && (theirTime === undefined || myTime > theirTime)) {
+			aheadSession.push({ session, time: theirTime ?? 0 });
+		}
+    });
+
+    return aheadSession;
+}
 
 export async function pullFromServer(args: {
 	id: string;

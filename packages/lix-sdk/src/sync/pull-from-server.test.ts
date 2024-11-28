@@ -188,6 +188,170 @@ test.skip("it should handle files without syncing the data column", async () => 
 	} satisfies LixFile);
 });
 
+test("rows changed on the client more recently should not be updated", async () => {
+	const lixOnServer = await openLixInMemory({});
+
+	const lix = await openLixInMemory({ blob: await lixOnServer.toBlob() });
+
+	const { value: id } = await lixOnServer.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix-id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const storage = createServerApiMemoryStorage();
+	const lsaHandler = await createServerApiHandler({ storage });
+
+	global.fetch = vi.fn((request) => lsaHandler(request));
+
+	// insert mock data into server lix
+	await lixOnServer.db
+		.insertInto("account")
+		.values({ id: "account0", name: "test account" })
+		.execute();
+
+	await lixOnServer.db
+		.insertInto("key_value")
+		.values({
+			key: "mock-key",
+			value: "mock-value",
+		})
+		.execute();
+
+	// let the wall clock move one ms forward
+	await new Promise(resolve => setTimeout(resolve, 1));
+	// insert mock data into server lix
+	await lix.db
+		.insertInto("account")
+		.values({ id: "account0", name: "test account updated more recently on client" })
+		.execute();
+
+	// initialize the lix on the server with the mock data
+	await lsaHandler(
+		new Request("http://localhost:3000/lsa/new-v1", {
+			method: "POST",
+			body: await lixOnServer.toBlob(),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+	);
+
+	await pullFromServer({
+		id,
+		lix,
+		serverUrl: "http://localhost:3000",
+	});
+
+	// Verify the data is pulled into the local lix
+	const account = await lix.db
+		.selectFrom("account")
+		.where("id", "=", "account0")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// TODO we don't sync tables without row id atm
+	// const mockKey = await lix.db
+	// 	.selectFrom("key_value")
+	// 	.where("key", "=", "mock-key")
+	// 	.selectAll()
+	// 	.executeTakeFirstOrThrow();
+
+	expect(account).toEqual({ id: "account0", name: "test account updated more recently on client" });
+
+	// expect(mockKey).toEqual({ key: "mock-key", value: "mock-value" });
+});
+
+
+test("rows changed on the server more recently should be updated on the client", async () => {
+	const lixOnServer = await openLixInMemory({});
+
+	const lix = await openLixInMemory({ blob: await lixOnServer.toBlob() });
+
+	const { value: id } = await lixOnServer.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix-id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const storage = createServerApiMemoryStorage();
+	const lsaHandler = await createServerApiHandler({ storage });
+
+	global.fetch = vi.fn((request) => lsaHandler(request));
+
+	// insert mock data into server lix
+	await lixOnServer.db
+		.insertInto("account")
+		.values({ id: "account0", name: "test account" })
+		.execute();
+
+	await lixOnServer.db
+		.insertInto("key_value")
+		.values({
+			key: "mock-key",
+			value: "mock-value",
+		})
+		.execute();
+
+	// let the wall clock move one ms forward
+	await new Promise(resolve => setTimeout(resolve, 1));
+	// insert mock data into server lix
+	await lix.db
+		.insertInto("account")
+		.values({ id: "account0", name: "test account updated more recently on client" })
+		.execute();
+
+	await new Promise(resolve => setTimeout(resolve, 1));
+	await lixOnServer.db
+		.updateTable("account")
+		.set({ name: "test account updated more recently on the server" }).where("account.id", "=", "account0")
+		.execute();
+
+	// initialize the lix on the server with the mock data
+	await lsaHandler(
+		new Request("http://localhost:3000/lsa/new-v1", {
+			method: "POST",
+			body: await lixOnServer.toBlob(),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+	);
+
+	await pullFromServer({
+		id,
+		lix,
+		serverUrl: "http://localhost:3000",
+	});
+
+	// Verify the data is pulled into the local lix
+	const account = await lix.db
+		.selectFrom("account")
+		.where("id", "=", "account0")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// TODO we don't sync tables without row id atm
+	// const mockKey = await lix.db
+	// 	.selectFrom("key_value")
+	// 	.where("key", "=", "mock-key")
+	// 	.selectAll()
+	// 	.executeTakeFirstOrThrow();
+
+	expect(account).toEqual({ id: "account0", name: "test account updated more recently on the server"});
+
+	
+
+	// TODO we don't sync tables without row id atm
+	// const mockKey = await lix.db
+	// 	.selectFrom("key_value")
+	// 	.where("key", "=", "mock-key")
+	// 	.selectAll()
+	// 	.executeTakeFirstOrThrow();
+
+	// expect(mockKey).toEqual({ key: "mock-key", value: "mock-value" });
+});
+
 // test("it should handle files without syncing the data column", async () => {
 // 	const lix = await openLixInMemory({});
 

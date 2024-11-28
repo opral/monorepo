@@ -18,4 +18,5 @@ export const TO_BE_SYNCED_TABLES: Array<keyof LixDatabaseSchema> = [
 	"snapshot",
 	"version",
 	"version_change_conflict",
+	"vector_clock",
 ];
