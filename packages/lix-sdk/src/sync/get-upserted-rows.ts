@@ -23,14 +23,15 @@ export async function getUpsertedRows(args: {
 
 		if (args.targetVectorClock.length > 0) {
 			operationsToPush.where((eb) => {
-				const ors: any[] = []
 				
-				ors.push(eb('session', 'not in', args.targetVectorClock.map(sessionTime => sessionTime.session)))
+				const ors: any[] = []
+				const knownSessions = args.targetVectorClock.map(sessionTime => sessionTime.session)
+				ors.push(eb('session', 'not in', knownSessions))
 				for (const sessionTime of args.targetVectorClock) {
 					ors.push(eb('session', '=', sessionTime.session).and("session_time", "=", sessionTime.time))
 				}
 
-				return ors as any
+				return eb.or(ors) as any
 			})
 		}
 
