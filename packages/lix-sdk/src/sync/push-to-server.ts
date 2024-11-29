@@ -1,9 +1,6 @@
-import type { OperandExpression, SqlBool } from "kysely";
 import type * as LixServerProtocol from "../../../lix-server-api-schema/dist/schema.js";
-import type { SessionOperations } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { VectorClock } from "./merge-state.js";
-import { TO_BE_SYNCED_TABLES } from "./to-be-synced-tables.js";
 import { getUpsertedRows } from "./get-upserted-rows.js";
 
 /**

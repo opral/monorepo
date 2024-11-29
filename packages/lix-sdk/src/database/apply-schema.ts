@@ -276,48 +276,101 @@ export function applySchema(args: {
 
   `;
 
-  const triggerTables: string[] = [
-    'change',
-    'account',
-    // 'change_author',
-    // 'change_edge',
-    'snapshot',
-    // 'change_conflict',
-    // 'change_conflict_resolution',
-    // 'change_set',
-    // 'change_set_element',
-    // 'change_set_label_author',
-    // 'version',
-    // 'version_change_conflict',
-  ]
+  // const triggerTables: string[] = [
+  //   'change',
+  //   'account',
+  //   'snapshot',
+  //   'change_set',
+  //   'change_conflict',
+  //   'version',
 
+    // TODO persist operations for:
+    // change_author -> PRIMARY KEY (change_id, account_id),
+    // change_edge -> PRIMARY KEY (parent_id, child_id),
+    // change_conflict_resolution -> PRIMARY KEY(change_conflict_id, resolved_change_id),
+    // change_set_element -> PRIMARY KEY(change_set_id, change_id),
+    // change_set_label -> PRIMARY KEY(label_id, change_set_id)
+    // change_set_label_author -> PRIMARY KEY(label_id, change_set_id, account_id),
+    // version_change_conflict -> PRIMARY KEY (version_id, change_conflict_id),
+    
+  // ]
+
+  const idMap = {
+    change: ['id'],
+    account: ['id'],
+    snapshot: ['id'],
+    change_set: ['id'],
+    change_conflict: ['id'],
+    version: ['id'],
+    change_author: ['change_id', 'account_id'],
+    change_edge: ['parent_id', 'child_id'],
+    change_conflict_resolution: ['change_conflict_id', 'resolved_change_id'],
+    change_set_element: ['change_set_id', 'change_id'],
+    change_set_label: ['label_id', 'change_set_id'],
+    change_set_label_author: ['label_id', 'change_set_id', 'account_id'],
+    version_change_conflict: ['version_id', 'change_conflict_id'],
+  }
  
-  for (const triggerTable of triggerTables) {
-		args.sqlite.exec(`
-    -- Trigger for INSERT operations
-    CREATE TRIGGER IF NOT EXISTS ${triggerTable}_after_insert_clock_tick
-    AFTER INSERT ON ${triggerTable}
-    BEGIN
-        INSERT INTO vector_clock (row_id, table_name, operation)
-        VALUES (NEW.id, '${triggerTable}', 'INSERT');
-    END;
-
-    -- Trigger for UPDATE operations
-    CREATE TRIGGER IF NOT EXISTS ${triggerTable}_after_update_clock_tick
-    AFTER UPDATE ON ${triggerTable}
-    BEGIN
-        INSERT INTO vector_clock (row_id, table_name, operation)
-        VALUES (NEW.id, '${triggerTable}', 'UPDATE');
-    END;
-
-    -- Trigger for DELETE operations
-    CREATE TRIGGER IF NOT EXISTS ${triggerTable}_after_delete_clock_tick
-    AFTER DELETE ON ${triggerTable}
-    BEGIN
-        INSERT INTO vector_clock (row_id, table_name, operation)
-        VALUES (OLD.id, '${triggerTable}', 'DELETE');
-    END;
-    `);
+  for (const [tableName, ids] of Object.entries(idMap)) {
+    // TODO change to json column instead?
+    if (ids.length === 0) {
+      throw new Error('at least one id required')
+    } else if (ids.length === 1) {
+      args.sqlite.exec(`
+        -- Trigger for INSERT operations
+        CREATE TRIGGER IF NOT EXISTS ${tableName}_after_insert_clock_tick
+        AFTER INSERT ON ${tableName}
+        BEGIN
+            INSERT INTO vector_clock (row_id, table_name, operation)
+            VALUES (NEW.id, '${tableName}', 'INSERT');
+        END;
+    
+        -- Trigger for UPDATE operations
+        CREATE TRIGGER IF NOT EXISTS ${tableName}_after_update_clock_tick
+        AFTER UPDATE ON ${tableName}
+        BEGIN
+            INSERT INTO vector_clock (row_id, table_name, operation)
+            VALUES (NEW.id, '${tableName}', 'UPDATE');
+        END;
+    
+        -- Trigger for DELETE operations
+        -- CREATE TRIGGER IF NOT EXISTS ${tableName}_after_delete_clock_tick
+        -- AFTER DELETE ON ${tableName}
+        -- BEGIN
+        --    INSERT INTO vector_clock (row_id, table_name, operation)
+        --    VALUES (OLD.id, '${tableName}', 'DELETE');
+        -- END;
+        `);
+    } else {
+      const idConcatOperation = ids.map(id => `NEW.${id}`).join(" || '__' || ");
+      args.sqlite.exec(`
+        -- Trigger for INSERT operations
+        CREATE TRIGGER IF NOT EXISTS ${tableName}_after_insert_clock_tick
+        AFTER INSERT ON ${tableName}
+        BEGIN
+            INSERT INTO vector_clock (row_id, table_name, operation)
+            VALUES (${idConcatOperation}, '${tableName}', 'INSERT');
+        END;
+    
+        -- Trigger for UPDATE operations
+        CREATE TRIGGER IF NOT EXISTS ${tableName}_after_update_clock_tick
+        AFTER UPDATE ON ${tableName}
+        BEGIN
+            INSERT INTO vector_clock (row_id, table_name, operation)
+            VALUES (${idConcatOperation}, '${tableName}', 'UPDATE');
+        END;
+    
+        -- Trigger for DELETE operations
+        -- CREATE TRIGGER IF NOT EXISTS ${tableName}_after_delete_clock_tick
+        -- AFTER DELETE ON ${tableName}
+        -- BEGIN
+        --    INSERT INTO vector_clock (row_id, table_name, operation)
+        --    VALUES (OLD.id, '${tableName}', 'DELETE');
+        -- END;
+        `);
+    
+    }
+		
 	}
 
   

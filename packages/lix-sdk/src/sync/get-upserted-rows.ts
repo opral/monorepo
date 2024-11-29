@@ -17,14 +17,13 @@ export async function getUpsertedRows(args: {
 	const upsertedRows: Record<string, any[]> = {
 	}
 
-	let clientState: VectorClock = []
+	let state: VectorClock = []
 
 	await args.lix.db.transaction().execute(async (trx) => {
 
-		clientState = await args.lix.db.selectFrom('vector_clock').select(({ fn }) => {
+		state = await trx.selectFrom('vector_clock').select(({ fn }) => {
 			return ['session', fn.max<number>('session_time').as('time')]
 		}).groupBy('session').execute()
-		// TODO SYNC
 		// use the target vector clock to collect all changed rows the target is not aware of
 		const operationsToPush = trx
 		.selectFrom('vector_clock')
