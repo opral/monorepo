@@ -21,8 +21,6 @@ import {
 	activeAccountAtom,
 	accountsAtom,
 	lixAtom,
-	continueAsAnonymous,
-	ANONYMOUS_CLICKED_KEY,
 	saveAccountsToStorage,
 } from "../state.js";
 import { Avatar, AvatarFallback } from "../../components/ui/avatar.js";
@@ -66,14 +64,6 @@ function AccountContent({
 	const [lix] = useAtom(lixAtom);
 	const [isCreating, setIsCreating] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-
-	const hasAnonymousAccount = accounts?.some((acc) => acc.id === "anonymous");
-	const hasClickedAnonymous =
-		localStorage.getItem(ANONYMOUS_CLICKED_KEY) === "true";
-	const shouldShowAnonymousButton = !(
-		(hasAnonymousAccount && hasClickedAnonymous) ||
-		(accounts?.length ?? 0) > 1
-	);
 
 	const handleCreateAccount = useCallback(async () => {
 		if (!newAccountName.trim() || !lix) return;
@@ -131,24 +121,6 @@ function AccountContent({
 		}
 	};
 
-	const handleContinueAsAnonymous = useCallback(async () => {
-		if (!lix) return;
-
-		try {
-			setError(null);
-			setIsCreating(true);
-			const anonymousAccount = await continueAsAnonymous(lix);
-			await setActiveAccount(anonymousAccount);
-			localStorage.setItem(ANONYMOUS_CLICKED_KEY, "true");
-			onOpenChange(false);
-		} catch (error) {
-			console.error("Failed to continue as anonymous:", error);
-			setError("Failed to continue as anonymous. Please try again.");
-		} finally {
-			setIsCreating(false);
-		}
-	}, [lix, setActiveAccount, onOpenChange]);
-
 	return (
 		<>
 			<DialogHeader>
@@ -158,77 +130,48 @@ function AccountContent({
 			</DialogHeader>
 
 			<div className="space-y-6 py-4">
-				{accounts?.length === 0 ? (
-					<div className="text-center py-8 text-muted-foreground">
-						<p>No accounts found.</p>
-						<p className="text-sm">
-							Create your first account below or continue anonymously.
-						</p>
-						{shouldShowAnonymousButton && (
-							<Button
-								variant="secondary"
-								onClick={handleContinueAsAnonymous}
-								className="mt-4"
-								disabled={isCreating}
-							>
-								{isCreating ? "Setting up..." : "Continue as Anonymous"}
-							</Button>
-						)}
-					</div>
-				) : (
-					<>
-						<Select
-							value={activeAccount?.id}
-							onValueChange={handleSwitchAccount}
-							disabled={isCreating}
-						>
-							<SelectTrigger className="w-full">
-								<SelectValue placeholder="Select an account">
-									{activeAccount && (
-										<div className="flex items-center gap-3">
-											<Avatar className="h-6 w-6">
-												<AvatarFallback className="bg-primary/10 text-sm">
-													{activeAccount.name.substring(0, 2).toUpperCase()}
-												</AvatarFallback>
-											</Avatar>
-											<span>{activeAccount.name}</span>
-										</div>
-									)}
-								</SelectValue>
-							</SelectTrigger>
-							<SelectContent>
-								{accounts?.map((account) => (
-									<SelectItem
-										key={account.id}
-										value={account.id}
-										className="p-2 [&>span:first-child]:hidden"
-									>
-										<div className="flex items-center gap-3">
-											<Avatar className="h-6 w-6">
-												<AvatarFallback className="bg-primary/10 text-sm">
-													{account.name.substring(0, 2).toUpperCase()}
-												</AvatarFallback>
-											</Avatar>
-											<span>{account.name}</span>
-											{account.id === activeAccount?.id && (
-												<Check className="h-4 w-4 ml-auto opacity-50" />
-											)}
-										</div>
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						{shouldShowAnonymousButton && (
-							<Button
-								variant="secondary"
-								onClick={handleContinueAsAnonymous}
-								className="w-full"
-								disabled={isCreating}
-							>
-								{isCreating ? "Setting up..." : "Continue as Anonymous"}
-							</Button>
-						)}
-					</>
+				{accounts?.length > 0 && (
+					<Select
+						value={activeAccount?.id}
+						onValueChange={handleSwitchAccount}
+						disabled={isCreating}
+					>
+						<SelectTrigger className="w-full">
+							<SelectValue placeholder="Select an account">
+								{activeAccount && (
+									<div className="flex items-center gap-3">
+										<Avatar className="h-6 w-6">
+											<AvatarFallback className="bg-primary/10 text-sm">
+												{activeAccount.name.substring(0, 2).toUpperCase()}
+											</AvatarFallback>
+										</Avatar>
+										<span>{activeAccount.name}</span>
+									</div>
+								)}
+							</SelectValue>
+						</SelectTrigger>
+						<SelectContent>
+							{accounts?.map((account) => (
+								<SelectItem
+									key={account.id}
+									value={account.id}
+									className="p-2 [&>span:first-child]:hidden"
+								>
+									<div className="flex items-center gap-3">
+										<Avatar className="h-6 w-6">
+											<AvatarFallback className="bg-primary/10 text-sm">
+												{account.name.substring(0, 2).toUpperCase()}
+											</AvatarFallback>
+										</Avatar>
+										<span>{account.name}</span>
+										{account.id === activeAccount?.id && (
+											<Check className="h-4 w-4 ml-auto opacity-50" />
+										)}
+									</div>
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				)}
 
 				<div className="space-y-2 pt-4 border-t">

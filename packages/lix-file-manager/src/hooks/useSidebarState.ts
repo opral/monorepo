@@ -5,9 +5,7 @@ import {
 	accountsAtom,
 	lixAtom,
 	ACTIVE_ACCOUNT_STORAGE_KEY,
-	ANONYMOUS_CLICKED_KEY,
 	continueAsAnonymous,
-	ANONYMOUS_ACCOUNT_ID,
 } from "../state.js";
 
 export function useSidebarState() {
@@ -37,19 +35,7 @@ export function useSidebarState() {
 								return;
 							}
 						}
-
 						await continueAsAnonymous(lix);
-						return;
-					}
-
-					const hasOnlyAnonymous =
-						accountsList?.length === 1 &&
-						accountsList[0].id === ANONYMOUS_ACCOUNT_ID;
-					const hasClickedAnonymous =
-						localStorage.getItem(ANONYMOUS_CLICKED_KEY) === "true";
-
-					if (hasOnlyAnonymous && !hasClickedAnonymous) {
-						setAccountDialogOpen(true);
 					}
 				})
 				.catch((error) => {
