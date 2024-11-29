@@ -281,7 +281,7 @@ export function applySchema(args: {
     'account',
     // 'change_author',
     // 'change_edge',
-    // 'snapshot',
+    'snapshot',
     // 'change_conflict',
     // 'change_conflict_resolution',
     // 'change_set',
