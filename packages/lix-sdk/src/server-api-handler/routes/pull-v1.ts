@@ -35,15 +35,12 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 	
 	try {
 		
-		const tableRowsToReturn = await getUpsertedRows({
+		const { upsertedRows: tableRowsToReturn,
+			state: sessionStatesServer
+		} = await getUpsertedRows({
 			lix: lix,
 			targetVectorClock: body.vector_clock,
 		})
-
-		// TODO SYNC make this a helper function
-		const sessionStatesServer = await lix.db.selectFrom('vector_clock').select(({ fn, val, ref }) => {
-			return ['session', fn.max<number>('session_time').as('time')]
-		}).groupBy('session').execute()
 
 		return new Response(
 			JSON.stringify({

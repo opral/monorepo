@@ -27,7 +27,7 @@ export type NewVectorClock =
 	Insertable<SessionOperationTable>;
 export type VectorClockUpdate =
 	Updateable<SessionOperationTable>;
-type SessionOperationTable = {
+export type SessionOperationTable = {
 	row_id: string;
 	table_name: string;
 	// -1 = delete, 0 = insert, 1 = update

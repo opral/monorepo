@@ -24,7 +24,7 @@ export function applySchema(args: {
 
   CREATE TABLE IF NOT EXISTS file (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
-    -- TODO SYNC shall we also sync this table?
+    -- TODO SYNC shall we also sync this table? -> we only sync the path?!
     path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL,
     metadata BLOB,
@@ -293,8 +293,7 @@ export function applySchema(args: {
 
  
   for (const triggerTable of triggerTables) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    args.sqlite.exec(`
+		args.sqlite.exec(`
     -- Trigger for INSERT operations
     CREATE TRIGGER IF NOT EXISTS ${triggerTable}_after_insert_clock_tick
     AFTER INSERT ON ${triggerTable}
@@ -318,8 +317,8 @@ export function applySchema(args: {
         INSERT INTO vector_clock (row_id, table_name, operation)
         VALUES (OLD.id, '${triggerTable}', 'DELETE');
     END;
-    `)
-  }
+    `);
+	}
 
   
 

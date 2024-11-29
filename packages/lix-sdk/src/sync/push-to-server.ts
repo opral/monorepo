@@ -16,7 +16,10 @@ export async function pushToServer(args: {
 	targetVectorClock: VectorClock
 }): Promise<void> {
 
-	const tableRowsToPush = await getUpsertedRows({
+	const {
+		upsertedRows: tableRowsToPush,
+		state
+	} = await getUpsertedRows({
 		lix: args.lix,
 		targetVectorClock: args.targetVectorClock,
 	})
@@ -26,13 +29,7 @@ export async function pushToServer(args: {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: args.id,
-				// TODO SYNC - check what vector clock to use
-				vector_clock: [
-					{
-						session: "123e4567-e",
-						time: 123456789,
-					},
-				],
+				vector_clock: state,
 				data: tableRowsToPush,
 			} satisfies LixServerProtocol.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {

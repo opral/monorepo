@@ -4,6 +4,7 @@ import type {
 	ActiveAccountTable,
 } from "../account/database-schema.js";
 import type { KeyValueTable } from "../key-value/database-schema.js";
+import type { SessionOperationTable } from "./vector-clock/database-schema.js"
 
 export type LixDatabaseSchema = {
 	// account

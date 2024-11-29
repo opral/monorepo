@@ -10,11 +10,20 @@ export async function getUpsertedRows(args: {
      * the the vector clock of the lix to merge in
      */
     targetVectorClock: VectorClock, 
-}): Promise<Record<string, any[]>> {
+}): Promise<{
+	state: any
+	upsertedRows: Record<string, any[]>
+}> {
 	const upsertedRows: Record<string, any[]> = {
 	}
 
+	let clientState: VectorClock = []
+
 	await args.lix.db.transaction().execute(async (trx) => {
+
+		clientState = await args.lix.db.selectFrom('vector_clock').select(({ fn }) => {
+			return ['session', fn.max<number>('session_time').as('time')]
+		}).groupBy('session').execute()
 		// TODO SYNC
 		// use the target vector clock to collect all changed rows the target is not aware of
 		const operationsToPush = trx
@@ -59,5 +68,9 @@ export async function getUpsertedRows(args: {
 			}
 		}
 	})	
-	return upsertedRows
+	return {
+		state,
+		upsertedRows
+	}
+
 }
