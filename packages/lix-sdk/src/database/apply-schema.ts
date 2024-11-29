@@ -1,6 +1,7 @@
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import { applyAccountDatabaseSchema } from "../account/database-schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value/database-schema.js";
+import { applySessionOperationsDatabaseSchema } from './vector-clock/database-schema.js'
 import { sql } from "kysely";
 
 /**
@@ -9,6 +10,7 @@ import { sql } from "kysely";
 export function applySchema(args: {
 	sqlite: SqliteDatabase;
 }): SqliteDatabase {
+  applySessionOperationsDatabaseSchema(args.sqlite)
 	applyAccountDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
 
@@ -289,20 +291,7 @@ export function applySchema(args: {
     // 'version_change_conflict',
   ]
 
-  // TODO SYNC naming - operations might be a better name
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  args.sqlite.exec`
-  -- vector clock
-  CREATE TABLE IF NOT EXISTS vector_clock (
-    row_id TEXT,
-    table_name TEXT,
-    -- TODO SYNC - we might not need the operation as long as we don't expect a delete operation since we utilize upsert queries anyway
-    operation TEXT,
-    session TEXT NOT NULL DEFAULT (vector_clock_session()),
-    session_time INTEGER NOT NULL DEFAULT (vector_clock_tick()),
-    wall_clock INTEGER DEFAULT (strftime('%s', 'now') * 1000 + (strftime('%f', 'now') - strftime('%S', 'now')) * 1000)
-  ) STRICT;`;
-
+ 
   for (const triggerTable of triggerTables) {
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     args.sqlite.exec(`
@@ -331,6 +320,8 @@ export function applySchema(args: {
     END;
     `)
   }
+
+  
 
   return args.sqlite
 }

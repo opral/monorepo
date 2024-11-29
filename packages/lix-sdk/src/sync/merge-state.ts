@@ -17,13 +17,8 @@ export async function mergeTheirState(args: {
     /**
      * the data to merge in
      */
-    sourceData: {
-        /** @description The name of the table. */
-        table_name: string;
-        rows: {
-            [key: string]: unknown;
-    }[];
-}[]}): Promise<void> {
+    sourceData: Record<string, Array<any>>
+}): Promise<void> {
     
     return await args.lix.db.transaction().execute(async (trx) => {
         
@@ -63,8 +58,8 @@ export async function mergeTheirState(args: {
 
 		// go through operation from the vetor clock and 
         // remove entries from the row block list where their have a more recent update
-		const sessionOperations =  args.sourceData.find(tableData => tableData.table_name === 'vector_clock')!
-		for (const opertionOnTheServer of sessionOperations.rows) {
+		
+		for (const opertionOnTheServer of args.sourceData['vector_clock']!) {
 			const tableName = opertionOnTheServer['table_name'] as string
 			const time = opertionOnTheServer['session_time'] as number
 			const row_id = opertionOnTheServer['row_id'] as string			
@@ -76,7 +71,7 @@ export async function mergeTheirState(args: {
 
 		const tablesWithId = ['account', 'file', 'change', 'snapshot',  'change_conflict', 'change_set', 'discussion', 'comment', 'label', 'version', 'current_version'  ]
 
-		for (const { table_name, rows } of args.sourceData) {
+		for (const [ table_name, rows ] of Object.entries(args.sourceData)) {
 			if (rows.length === 0) continue;
 			
 			if (table_name === 'vector_clock') {
@@ -108,8 +103,19 @@ export async function mergeTheirState(args: {
 						}
 					}
 				} else if (table_name === 'key_value') {
-					       // TODO SYNC handle tables key other than id
-                           // account -> PRIMARY KEY (key)
+                    // account -> PRIMARY KEY (key)
+                    for (const row of rows) {
+                        if (rowsIUpdatedLast[table_name]?.[row.key as string] === undefined) {
+                            await trx
+                            // TODO SYNC how shall we deal with types here?
+                            // TODO SYNC - why is eslint not complaining about any anymore???
+                            .insertInto("key_value")
+                            .values(row)
+                            .onConflict((oc) => oc.column("key").doUpdateSet(row))
+                            .execute();
+        
+                        }
+                    }
 				} else {
 
                     // TODO SYNC -> handle table with composite primary keys

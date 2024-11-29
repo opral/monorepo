@@ -341,15 +341,13 @@ test("rows changed on the server more recently should be updated on the client",
 	expect(account).toEqual({ id: "account0", name: "test account updated more recently on the server"});
 
 	
+	const mockKey = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "mock-key")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
-	// TODO we don't sync tables without row id atm
-	// const mockKey = await lix.db
-	// 	.selectFrom("key_value")
-	// 	.where("key", "=", "mock-key")
-	// 	.selectAll()
-	// 	.executeTakeFirstOrThrow();
-
-	// expect(mockKey).toEqual({ key: "mock-key", value: "mock-value" });
+	expect(mockKey).toEqual({ key: "mock-key", value: "mock-value" });
 });
 
 // test("it should handle files without syncing the data column", async () => {

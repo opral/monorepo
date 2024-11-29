@@ -52,6 +52,7 @@ test("push rows of multiple tables to server successfully", async () => {
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
+		targetVectorClock: [],
 	});
 
 	const lixFromServer = await openLixInMemory({
@@ -119,6 +120,7 @@ test("it should handle snapshots.content json binaries", async () => {
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
+		targetVectorClock: []
 	});
 
 	const lixFromServer = await openLixInMemory({

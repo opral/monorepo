@@ -284,21 +284,3 @@ type ChangeConflictResolutionTable = {
 	resolved_change_id: string;
 };
 
-
-export type SessionOperations =
-	Selectable<SessionOperationTable>;
-export type NewVectorClock =
-	Insertable<SessionOperationTable>;
-export type VectorClockUpdate =
-	Updateable<SessionOperationTable>;
-type SessionOperationTable = {
-	row_id: string;
-	table_name: string;
-	// -1 = delete, 0 = insert, 1 = update
-	// TODO SYNC - we might not need the operation as long as we don't expect a delete operation since we utilize upsert queries anyway
-	operation: 'INSERT' | 'UPDATE' | 'DELETE';
-	session: string;
-	session_time: number; 
-	wall_clock: number; 
-};
-
