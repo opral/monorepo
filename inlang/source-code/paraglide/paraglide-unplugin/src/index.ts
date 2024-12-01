@@ -1,27 +1,51 @@
 import { createUnplugin } from "unplugin"
-import {
-	Message,
-	ProjectSettings,
-	loadProject,
-	type InlangProject,
-	normalizeMessage,
-} from "@inlang/sdk"
+import { Message, ProjectSettings, loadProject, type InlangProject } from "@inlang/sdk"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import path from "node:path"
 import fs from "node:fs/promises"
 import { compile, writeOutput, Logger, classifyProjectErrors } from "@inlang/paraglide-js/internal"
-import crypto from "node:crypto"
+import { hashMessages } from "./hashMessages.js"
 
 const PLUGIN_NAME = "unplugin-paraglide"
 const VITE_BUILD_PLUGIN_NAME = "unplugin-paraglide-vite-virtual-message-modules"
 
+const VIRTUAL_MODULE_NAME = "$paraglide"
+const DTS_FILE_LOCATION = "./paraglide.d.ts"
+
 const isWindows = typeof process !== "undefined" && process.platform === "win32"
 
 export type UserConfig = {
+	/**
+	 * Path to the inlang project from which to take modules
+	 * @example `./project.inlang`
+	 */
 	project: string
-	outdir: string
+
+	/**
+	 * Disable console messages
+	 */
 	silent?: boolean
-}
+} & OutputConfig
+
+type OutputConfig =
+	| {
+			/**
+			 * Name of the virtual module to use instead of wirting compiled files to disk
+			 */
+			virtualModule?: undefined
+
+			/**
+			 * The output directory to place the compiled files in.
+			 * @example `./src/paraglide`
+			 */
+			outdir: string
+	  }
+	| {
+			/**
+			 * Name of the virtual module to use instead of wirting compiled files to disk
+			 */
+			virtualModule: string
+	  }
 
 export const paraglide = createUnplugin((config: UserConfig) => {
 	const options = {
@@ -70,7 +94,13 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		virtualModuleOutput = messageModulesOutput
 		const fsOutput = regularOutput
 
-		await writeOutput(outputDirectory, fsOutput, fs)
+		if (options.virtualModule === undefined) {
+			// if we're not using virtual modules
+			await writeOutput(outputDirectory, fsOutput, fs)
+		} else {
+			// update types
+			// TODO
+		}
 		numCompiles++
 	}
 
@@ -105,8 +135,6 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 		return project
 	}
-
-	// if build
 
 	return [
 		{
@@ -197,18 +225,3 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		},
 	]
 })
-
-export function hashMessages(messages: readonly Message[], settings: ProjectSettings): string {
-	const normalizedMessages = messages
-		.map(normalizeMessage)
-		.sort((a, b) => a.id.localeCompare(b.id, "en"))
-
-	try {
-		const hash = crypto.createHash("sha256")
-		hash.update(JSON.stringify(normalizedMessages))
-		hash.update(JSON.stringify(settings))
-		return hash.digest("hex")
-	} catch (e) {
-		return crypto.randomUUID()
-	}
-}
