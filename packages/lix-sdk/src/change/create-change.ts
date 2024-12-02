@@ -12,7 +12,7 @@ import { updateChangesInVersion } from "../version/update-changes-in-version.js"
  * with bypassing of file-based change detection.
  */
 export async function createChange(args: {
-	lix: Pick<Lix, "db" | "plugin">;
+	lix: Pick<Lix, "db">;
 	authors: Array<Pick<Account, "id">>;
 	version: Version;
 	entityId: Change["entity_id"];

@@ -7,7 +7,7 @@ import type { Lix } from "../lix/open-lix.js";
  * This function will update the change_set_element table to point to the new changes.
  */
 export async function updateChangesInVersion(args: {
-	lix: Pick<Lix, "db" | "plugin">;
+	lix: Pick<Lix, "db">;
 	version: Version;
 	changes: Change[];
 }): Promise<void> {
