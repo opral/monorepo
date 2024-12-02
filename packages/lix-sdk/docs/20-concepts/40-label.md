@@ -11,7 +11,6 @@ TODO
 ## Pre-defined Labels
 
 - `confirmed` - Confirming changes acts as filter for the graph. Seeing all changes is oftentimes overwhelming. Use confirmed as filter for the history. 
-- `grouped` - Changes in a group are treated as a single unit. They are merged, applied, and tested for conflicts together.
 
 ## Examples
 

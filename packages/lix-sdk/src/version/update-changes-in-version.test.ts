@@ -11,7 +11,7 @@ test("the version change set should be updated", async () => {
 
 	const version1 = await createVersion({ lix, name: "version1" });
 
-	const changes = await lix.db
+	const change1 = await lix.db
 		.insertInto("change")
 		.values({
 			id: "change-1",
@@ -22,19 +22,18 @@ test("the version change set should be updated", async () => {
 			snapshot_id: "no-content",
 		})
 		.returningAll()
-		.execute();
+		.executeTakeFirstOrThrow();
 
 	await updateChangesInVersion({
 		lix,
 		version: version0,
-		changes,
+		changes: [change1],
 	});
 
-	// version 1 should remain as is
 	await updateChangesInVersion({
 		lix,
 		version: version1,
-		changes,
+		changes: [change1],
 	});
 
 	const version0Changes0 = await lix.db
@@ -49,7 +48,7 @@ test("the version change set should be updated", async () => {
 		.selectAll()
 		.execute();
 
-	// the version should contain one change
+	// both versions should contain only change 1
 	expect(version0Changes0.length).toBe(1);
 	expect(version0Changes0[0]?.id).toBe("change-1");
 	expect(version1Changes0.length).toBe(1);
@@ -68,6 +67,7 @@ test("the version change set should be updated", async () => {
 		.returningAll()
 		.execute();
 
+	// version 0 is now updated to change 2
 	await updateChangesInVersion({
 		lix,
 		version: version0,
@@ -80,11 +80,21 @@ test("the version change set should be updated", async () => {
 		.selectAll()
 		.execute();
 
+	const version1Changes1 = await lix.db
+		.selectFrom("change")
+		.where(changeInVersion(version1))
+		.selectAll()
+		.execute();
+
 	// the head of the change is updated to change-2
 	expect(version0Changes1.length).toBe(1);
 	expect(version0Changes1[0]?.id).toBe("change-2");
+	// version 1 is not updated and should still point to change-1
+	expect(version1Changes1.length).toBe(1);
+	expect(version1Changes1[0]?.id).toBe("change-1");
 
 	// adding a change with a different entity_id should add a new change set element
+	// in version 0
 	const changes3 = await lix.db
 		.insertInto("change")
 		.values({
@@ -110,7 +120,7 @@ test("the version change set should be updated", async () => {
 		.selectAll()
 		.execute();
 
-	const version1Changes1 = await lix.db
+	const version1Changes2 = await lix.db
 		.selectFrom("change")
 		.where(changeInVersion(version1))
 		.selectAll()
@@ -122,8 +132,9 @@ test("the version change set should be updated", async () => {
 	expect(version0Changes2[0]?.id).toBe("change-2");
 	expect(version0Changes2[1]?.id).toBe("change-3");
 
-	// expecting that version 1 didn't update.
-	expect(version1Changes0).toStrictEqual(version1Changes1);
+	// expecting that version 1 didn't update while updating version 0
+	expect(version1Changes2.length).toBe(1);
+	expect(version1Changes2[0]?.id).toBe("change-1");
 });
 
 // test("it should not fail if an empty array of changes is provided", async () => {

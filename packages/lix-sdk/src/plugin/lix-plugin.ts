@@ -35,6 +35,15 @@ export type LixPlugin = {
 		after?: LixFile;
 	}) => Promise<Array<DetectedChange>>;
 	/**
+	 * UI components that are used to render the diff view.
+	 */
+	diffUiComponents?: [
+		{
+			schema_key: string;
+			component: HTMLElement;
+		},
+	];
+	/**
 	 * Detects changes from the source lix that conflict with changes in the target lix.
 	 */
 	detectConflicts?: (args: {
@@ -87,7 +96,7 @@ export type LixPlugin = {
  *   detectedChange.snapshot.name // string
  *   ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export type DetectedChange<Schema extends ExperimentalChangeSchema = any> = {
 	entity_id: string;
 	schema: Omit<ExperimentalChangeSchema, "schema">;
