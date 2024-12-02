@@ -17,7 +17,7 @@ export type UserConfig = {
 	 * If the `$paraglide` virtual module should be used instead of writing the output to disk.
 	 * This overrides the `outdir` property
 	 */
-	useVirtualModule: boolean
+	useVirtualModule?: boolean
 
 	/**
 	 * The output directory to place the compiled files in.
@@ -42,7 +42,7 @@ export function resolveConfig(options: UserConfig): PluginConfig {
 		"outdir" in options && options.outdir ? path.resolve(process.cwd(), options.outdir) : undefined
 
 	let normalizedOutdir = outputDirectory ? outputDirectory.replaceAll("\\", "/") : outputDirectory
-	if (!normalizedOutdir?.endsWith("/")) normalizedOutdir = normalizedOutdir + "/"
+	if (normalizedOutdir && !normalizedOutdir.endsWith("/")) normalizedOutdir = normalizedOutdir + "/"
 
 	const normalizedPorjectPath = path.resolve(process.cwd(), options.project)
 

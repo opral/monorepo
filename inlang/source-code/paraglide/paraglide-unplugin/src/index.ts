@@ -1,7 +1,7 @@
 import fs from "node:fs/promises"
 
 import { createUnplugin, type UnpluginFactory } from "unplugin"
-import { Message, ModuleError, ProjectSettings, loadProject, type InlangProject } from "@inlang/sdk"
+import { Message, ProjectSettings, loadProject, type InlangProject } from "@inlang/sdk"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import { compile, writeOutput, classifyProjectErrors } from "@inlang/paraglide-js/internal"
 
@@ -47,7 +47,6 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 			await writeOutput(c.outdir, regularOutput, fs)
 		} else {
 			const dts = generateDTS(regularOutput, VIRTUAL_MODULE_NAME)
-			console.log(DTS_FILE_LOCATION, dts)
 			await fs.writeFile(DTS_FILE_LOCATION, dts)
 		}
 		numCompiles++
@@ -148,3 +147,4 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 }
 
 export const paraglide = createUnplugin(plugin)
+export { type UserConfig }
