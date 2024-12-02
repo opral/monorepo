@@ -1,5 +1,5 @@
-import { Button } from "./../../components/ui/button.tsx";
-import IconArrowLeft from "./icons/IconArrowLeft.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import IconArrowLeft from "@/components/icons/IconArrowLeft.tsx";
 
 interface SectionHeaderProps {
   title: string;

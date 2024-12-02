@@ -1,5 +1,5 @@
 import { Comment as CommentType } from "../../types/change-context.ts";
-import IconComment from "./icons/IconComment.tsx";
+import IconComment from "@/components/icons/IconComment.tsx";
 
 interface CommentProps {
 	comment: CommentType;

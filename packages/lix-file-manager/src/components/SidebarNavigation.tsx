@@ -3,14 +3,14 @@ import {
 	SidebarMenu,
 	SidebarMenuItem,
 	SidebarMenuButton,
-} from "../../components/ui/sidebar.js";
+} from "@/components/ui/sidebar.js";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
-} from "../../components/ui/tooltip.js";
-import IconFile from "../components/icons/IconFile.js";
-import IconAutomation from "../components/icons/IconAutomation.js";
+} from "@/components/ui/tooltip.js";
+import IconFile from "@/components/icons/IconFile.js";
+import IconAutomation from "@/components/icons/IconAutomation.js";
 import clsx from "clsx";
 import React from "react";
 

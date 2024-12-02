@@ -1,14 +1,14 @@
-import { Button } from "./../../../components/ui/button.tsx";
-import { Separator } from "./../../../components/ui/separator.tsx"
-import { Tabs, TabsList, TabsTrigger } from "./../../../components/ui/tabs.tsx";
-import SectionHeader from "./../../components/SectionHeader.tsx";
-import IconMeatball from "./../../components/icons/IconMeatball.tsx";
-import IconFilter from "./../../components/icons/IconFilter.tsx";
-import AutomationConfig from "./../../components/AutomationConfig.tsx";
-import IconAutomation from "./../../components/icons/IconAutomation.tsx";
+import { Separator } from "@/components/ui/separator.tsx"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
+import SectionHeader from "@/components/SectionHeader.tsx";
+import IconMeatball from "@/components/icons/IconMeatball.tsx";
+import IconFilter from "@/components/icons/IconFilter.tsx";
+import AutomationConfig from "@/components/AutomationConfig.tsx";
+import IconAutomation from "@/components/icons/IconAutomation.tsx";
 import { useState } from "react";
-import { cn } from "./../../../lib/utils.ts";
-import { Badge } from "./../../../components/ui/badge.tsx";
+import { cn } from "@/lib/utils.ts";
+import { Badge } from "@/components/ui/badge.tsx";
+import { Button } from "@/components/ui/button.tsx";
 
 const dummyAutomations = [
 	{

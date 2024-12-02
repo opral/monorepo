@@ -1,5 +1,5 @@
-import { cn } from "./../../lib/utils.ts";
-import IconGroup from "./icons/IconGroup.tsx";
+import { cn } from "@/lib/utils.ts";
+import IconGroup from "@/components/icons/IconGroup.tsx";
 
 interface ChangeGroupDotProps {
   top?: boolean;

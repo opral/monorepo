@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { SidebarProvider } from "../../components/ui/sidebar.tsx";
+import { SidebarProvider } from "@/components/ui/sidebar.tsx";
 import { AppSidebar } from "./Sidebar.tsx";
 import { useAtom } from "jotai";
-import { withPollingAtom } from "./../state.ts";
+import { withPollingAtom } from "@/state.ts";
 export function App({ children }: { children: React.ReactNode }) {
 	const [, setPolling] = useAtom(withPollingAtom);
 

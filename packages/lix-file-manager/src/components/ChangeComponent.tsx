@@ -1,14 +1,14 @@
 import React, { useEffect, useState, JSX } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar.tsx";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import { Change } from "@lix-js/sdk";
-import ChangeDot from "./ChangeDot.tsx";
-import IconChevron from "./icons/IconChevron.tsx";
-import { Button } from "./../../components/ui/button.tsx";
-import timeAgo from "./../helper/timeAgo.ts";
+import IconChevron from "@/components/icons/IconChevron.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
-import { lixAtom } from "./../state.ts";
+import { lixAtom } from "@/state.ts";
 import { useAtom } from "jotai/react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./../../components/ui/tooltip.tsx";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip.tsx";
+import ChangeDot from "./ChangeDot.tsx";
 
 export const ChangeComponent = (props: {
 	change: Change & {

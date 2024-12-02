@@ -2,12 +2,12 @@ import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage,
-} from "../../components/ui/avatar.js";
+} from "@/components/ui/avatar.js";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
-} from "../../components/ui/tooltip.js";
+} from "@/components/ui/tooltip.js";
 import type { Account } from "@lix-js/sdk";
 
 interface UserAvatarProps {

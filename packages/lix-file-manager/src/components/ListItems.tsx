@@ -1,14 +1,14 @@
 import { useSearchParams } from "react-router-dom";
-import { Button } from "./../../components/ui/button.tsx";
-import IconAutomation from "./icons/IconAutomation.tsx";
-import IconFile from "./icons/IconFile.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import IconAutomation from "@/components/icons/IconAutomation.tsx";
+import IconFile from "@/components/icons/IconFile.tsx";
 import clsx from "clsx";
-import IconMeatball from "./icons/IconMeatball.tsx";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./../../components/ui/dropdown-menu.tsx";
+import IconMeatball from "@/components/icons/IconMeatball.tsx";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu.tsx";
 import { useState } from "react";
-import { lixAtom } from "./../state.ts";
+import { lixAtom } from "@/state.ts";
 import { useAtom } from "jotai";
-import { saveLixToOpfs } from "./../helper/saveLixToOpfs.ts";
+import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
 
 interface ListItemsProps {
   id: string;

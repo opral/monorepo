@@ -4,16 +4,16 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogFooter,
-} from "../../components/ui/dialog.js";
+} from "@/components/ui/dialog.js";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../../components/ui/select.js";
-import { Button } from "../../components/ui/button.js";
-import { Input } from "../../components/ui/input.js";
+} from "@/components/ui/select.js";
+import { Button } from "@/components/ui/button.js";
+import { Input } from "@/components/ui/input.js";
 import { useState, useCallback, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useAtom } from "jotai";
@@ -23,7 +23,7 @@ import {
 	lixAtom,
 	saveAccountsToStorage,
 } from "../state.js";
-import { Avatar, AvatarFallback } from "../../components/ui/avatar.js";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar.js";
 import { Check } from "lucide-react";
 
 interface AccountDialogProps {

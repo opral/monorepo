@@ -1,15 +1,15 @@
-import IconUpload from "./../../components/icons/IconUpload.tsx";
-import SectionHeader from "./../../components/SectionHeader.tsx";
-import ListItems from "./../../components/ListItems.tsx";
-import { fileIdSearchParamsAtom, filesAtom, lixAtom } from "./../../state.ts";
+import IconUpload from "@/components/icons/IconUpload.tsx";
+import SectionHeader from "@/components/SectionHeader.tsx";
+import ListItems from "@/components/ListItems.tsx";
+import { fileIdSearchParamsAtom, filesAtom, lixAtom } from "@/state.ts";
 import { useAtom } from "jotai";
-import { saveLixToOpfs } from "./../../helper/saveLixToOpfs.ts";
-import { Button } from "./../../../components/ui/button.tsx"
-import { Separator } from "./../../../components/ui/separator.tsx"
-import { activeFileAtom, allChangesDynamicGroupingAtom, changesCurrentVersionAtom } from "./../../state-active-file.ts";
+import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
+import { Button } from "@/components/ui/button.tsx"
+import { Separator } from "@/components/ui/separator.tsx"
+import { activeFileAtom, allChangesDynamicGroupingAtom, changesCurrentVersionAtom } from "@/state-active-file.ts";
 import { Link, useNavigate } from "react-router-dom";
-import { ChangeComponent } from "../../components/ChangeComponent.tsx";
-import { DynamicChangeGroup } from "./../../components/DynamicChangeGroup.tsx";
+import { ChangeComponent } from "@/components/ChangeComponent.tsx";
+import { DynamicChangeGroup } from "@/components/DynamicChangeGroup.tsx";
 // import { useEffect } from "react";
 
 export default function Page() {

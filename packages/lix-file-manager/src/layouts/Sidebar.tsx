@@ -3,12 +3,12 @@ import {
 	SidebarContent,
 	SidebarHeader,
 	SidebarFooter,
-} from "../../components/ui/sidebar.js";
-import { TooltipProvider } from "../../components/ui/tooltip.js";
-import { AccountDialog } from "../components/AccountDialog.js";
-import { SidebarNavigation } from "../components/SidebarNavigation.js";
-import { UserAvatar } from "../components/UserAvatar.js";
-import { useSidebarState } from "../hooks/useSidebarState.js";
+} from "@/components/ui/sidebar.js";
+import { TooltipProvider } from "@/components/ui/tooltip.js";
+import { AccountDialog } from "@/components/AccountDialog.js";
+import { SidebarNavigation } from "@/components/SidebarNavigation.js";
+import { UserAvatar } from "@/components/UserAvatar.js";
+import { useSidebarState } from "@/hooks/useSidebarState.js";
 
 export function AppSidebar() {
 	const { accountDialogOpen, setAccountDialogOpen, activeAccount } =

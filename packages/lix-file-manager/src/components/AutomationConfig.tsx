@@ -1,9 +1,9 @@
-import { Button } from "./../../components/ui/button.tsx";
-import IconLightning from "./icons/IconLightning.tsx";
-import IconAdd from "./icons/IconAdd.tsx";
-import IconCondition from "./icons/IconCondition.tsx";
-import IconCheckCircle from "./icons/IconCheckCircle.tsx";
-import IconMinus from "./icons/IconMinus.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import IconLightning from "@/components/icons/IconLightning.tsx";
+import IconAdd from "@/components/icons/IconAdd.tsx";
+import IconCondition from "@/components/icons/IconCondition.tsx";
+import IconCheckCircle from "@/components/icons/IconCheckCircle.tsx";
+import IconMinus from "@/components/icons/IconMinus.tsx";
 import React from "react";
 
 interface AutomationConfigProps {

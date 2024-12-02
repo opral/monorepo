@@ -1,10 +1,10 @@
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar.tsx";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import { Change } from "@lix-js/sdk";
-import timeAgo from "./../helper/timeAgo.ts";
-import { Button } from "./../../components/ui/button.tsx";
+import timeAgo from "@/helper/timeAgo.ts";
+import { Button } from "@/components/ui/button.tsx";
 import { useSearchParams } from "react-router-dom";
 import ChangeGroupDot from "./ChangeGroupDot.tsx";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./../../components/ui/tooltip.tsx";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip.tsx";
 
 export const DynamicChangeGroup = (props: {changes: (Change & {snapshot_content: Record<string, any> | null, file_path: string, account_name: string})[], showTopLine: boolean, showBottomLine: boolean }) => {
     const [, setSearchParams] = useSearchParams();
