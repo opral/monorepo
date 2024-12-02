@@ -17,8 +17,9 @@
 	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
 	"sideEffects": false,
 	"dependencies": {
-		"papaparse": "^5.4.1",
-		"@lix-js/sdk": "workspace:*"
+		"@lix-js/sdk": "workspace:*",
+		"lit": "^3.2.1",
+		"papaparse": "^5.4.1"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.12.0",
