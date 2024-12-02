@@ -37,7 +37,7 @@ export async function mergeTheirState(args: {
 		);
 
 		// search  the last updated at time stamp per row of rows with modifications unknown by them
-		const rowsUpdateUnknownByServer =
+		const moreRecentRowUpdatesUnknownBySource =
 			unrecognizedSesionTicks.length === 0
 				? []
 				: await trx
@@ -46,7 +46,7 @@ export async function mergeTheirState(args: {
 							return [
 								"table_name",
 								"row_id",
-								fn.max<number>("wall_clock").as("las_updated_wall_time"),
+								fn.max<number>("wall_clock").as("last_updated_wall_time"),
 							];
 						})
 						.where((eb) => {
@@ -64,12 +64,13 @@ export async function mergeTheirState(args: {
 						.execute();
 
 		// build a lookup map that allow us to get the last update using unknownUpdatesByTableAndRow[tableName]?.[rowId];
-		const rowsIUpdatedLast = rowsUpdateUnknownByServer.reduce(
-			(acc, { table_name, row_id, las_updated_wall_time }) => {
+		const rowsIUpdatedLast = moreRecentRowUpdatesUnknownBySource.reduce(
+			(acc, { table_name, row_id, last_updated_wall_time }) => {
 				if (!acc[table_name]) {
 					acc[table_name] = {};
 				}
-				acc[table_name][row_id] = las_updated_wall_time;
+                // TODO SYNC use different matching mechanism
+				acc[table_name][row_id] = last_updated_wall_time;
 				return acc;
 			},
 			{} as Record<string, Record<string, number>>
@@ -115,7 +116,6 @@ export async function mergeTheirState(args: {
 					await trx
 						.insertInto(table_name)
 						// TODO SYNC how shall we deal with types here?
-						// TODO SYNC - why is eslint not complaining about any anymore???
 						.values(row as any)
 						.onConflict((oc) => oc.doNothing())
 						.execute();
@@ -124,12 +124,12 @@ export async function mergeTheirState(args: {
 				if (tablesWithId.includes(table_name)) {
 					//	 - filter only my records (this is the records that i have changed more recently than the changes comming from the push)
 					for (const row of rows) {
+                        // use a compound id? -
 						if (
 							rowsIUpdatedLast[table_name]?.[row.id as string] === undefined
 						) {
 							await trx
 								// TODO SYNC how shall we deal with types here?
-								// TODO SYNC - why is eslint not complaining about any anymore???
 								.insertInto(table_name as any)
 								.values(row)
 								.onConflict((oc) => oc.column("id").doUpdateSet(row))

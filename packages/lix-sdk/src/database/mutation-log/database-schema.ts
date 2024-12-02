@@ -39,10 +39,11 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
 		// file - File is not synced. Is construcuted from the change table. (see https://github.com/opral/monorepo/pull/3242#discussion_r1863981413)
 		change: ["id"],
 		account: ["id"],
+		version: ["id"],
 		snapshot: ["id"],
+    
 		change_set: ["id"],
 		change_conflict: ["id"],
-		version: ["id"],
 		change_author: ["change_id", "account_id"],
 		change_edge: ["parent_id", "child_id"],
 		change_conflict_resolution: ["change_conflict_id", "resolved_change_id"],
@@ -69,9 +70,8 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
   }
 	
 
-	for (const [tableName, ids] of Object.entries(idMap)) {
-		// TODO change to json column instead?
-		if (ids.length === 0) {
+	for (const [tableName, idColumns] of Object.entries(idMap)) {
+		if (idColumns.length === 0) {
 			throw new Error("at least one id required");
 		} 
     sqlite.exec(`
@@ -80,7 +80,7 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
       AFTER INSERT ON ${tableName}
       BEGIN
           INSERT INTO mutation_log (row_id, table_name, operation)
-          VALUES (JSONB(${toSqliteJson(ids)}), '${tableName}', 'INSERT');
+          VALUES (JSONB(${toSqliteJson(idColumns)}), '${tableName}', 'INSERT');
       END;
   
       -- Trigger for UPDATE operations
@@ -88,7 +88,7 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
       AFTER UPDATE ON ${tableName}
       BEGIN
           INSERT INTO mutation_log (row_id, table_name, operation)
-          VALUES (JSONB(${toSqliteJson(ids)}), '${tableName}', 'UPDATE');
+          VALUES (JSONB(${toSqliteJson(idColumns)}), '${tableName}', 'UPDATE');
       END;
     `);
   }
@@ -103,7 +103,7 @@ export type MutationLogTable = {
 	table_name: string;
 	// -1 = delete, 0 = insert, 1 = update
 	// TODO SYNC - we might not need the operation as long as we don't expect a delete operation since we utilize upsert queries anyway
-	operation: "INSERT" | "UPDATE" | "DELETE";
+	operation: "INSERT" | "UPDATE";
 	session: string;
 	session_time: number;
 	wall_clock: number;

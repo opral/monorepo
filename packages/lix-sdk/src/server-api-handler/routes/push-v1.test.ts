@@ -31,11 +31,11 @@ test("it should push data successfully", async () => {
 				data: {
 					mutation_log: [
 						{
-							row_id: "test",
+							row_id: { "key": "test" },
 							table_name: "key_value",
 							operation: "insert",
 							session: "fake-session",
-							session_time: 1,
+							session_time: 2,
 							wall_clock: 1,
 						},
 					],
