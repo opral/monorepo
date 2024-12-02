@@ -3,7 +3,7 @@ import type { Lix } from "../lix/open-lix.js";
 import { createSnapshot } from "../snapshot/create-snapshot.js";
 
 /**
- * Creates a change in the database.
+ * Programatically create a change in the database.
  *
  * Use this function to directly create a change from a lix app
  * with bypassing of file-based change detection.
