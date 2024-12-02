@@ -15,8 +15,8 @@ export default function ConflictSet(props: {
 		change_conflict_key: string;
 		change_conflict_change_set_id: string;
 		snapshot_content: Snapshot["content"];
-		is_current_branch_pointer: number;
-		is_in_current_branch: number;
+		is_current_version_change: number;
+		is_in_current_version: number;
 	})[];
 }) {
 	return (
@@ -42,9 +42,9 @@ export default function ConflictSet(props: {
 							key={change.entity_id + change.snapshot_id}
 							className={"flex md:flex-col flex-wrap md:flex-nowrap gap-2"}
 						>
-							{change.is_current_branch_pointer === 1 ? (
+							{change.is_current_version_change === 1 ? (
 								<SlTag size="small">current value</SlTag>
-							) : change.is_in_current_branch ? (
+							) : change.is_in_current_version ? (
 								<SlTag size="small">previous value</SlTag>
 							) : (
 								// hidden tag to keep the layout consistent
@@ -81,9 +81,9 @@ export default function ConflictSet(props: {
 								}}
 							>
 								{(() => {
-									if (change.is_current_branch_pointer === 1) {
+									if (change.is_current_version_change === 1) {
 										return "Keep";
-									} else if (change.is_in_current_branch) {
+									} else if (change.is_in_current_version) {
 										return "Rollback";
 									}
 									return "Select";

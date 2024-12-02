@@ -26,7 +26,7 @@ export default function Page() {
 							const uniqueColumnValue = changes[0].entity_id.split("|")[1];
 							const isOutdated =
 								changes.some(
-									(change) => change.is_current_branch_pointer === 1
+									(change) => change.is_current_version_change === 1
 								) === false;
 							return (
 								<div
@@ -54,12 +54,12 @@ export default function Page() {
 																.transaction()
 																.execute(async (trx) => {
 																	const changesIncurrentBranch = changes.filter(
-																		(change) => change.is_in_current_branch
+																		(change) => change.is_in_current_version
 																	);
 
 																	const changesInOtherBranches = changes.filter(
 																		(change) =>
-																			change.is_in_current_branch === 0
+																			change.is_in_current_version === 0
 																	);
 
 																	const leafChanges = await Promise.all(
