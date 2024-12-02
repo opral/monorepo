@@ -767,12 +767,6 @@ test("it should copy discussion and related comments and mappings", async () => 
 test.skip("it should copy change sets and merge memberships", async () => {
 	const targetLix = await openLixInMemory({});
 
-	const currentVersion = await targetLix.db
-		.selectFrom("current_version")
-		.innerJoin("version", "current_version.id", "version.id")
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
 	const mockChanges = await targetLix.db
 		.insertInto("change")
 		.values([
@@ -840,9 +834,7 @@ test.skip("it should copy change sets and merge memberships", async () => {
 		.execute();
 
 	// expect two change sets (exluding the current versiones change set)
-	expect(
-		changeSets.filter((s) => s.id !== currentVersion.change_set_id).length,
-	).toBe(2);
+	expect(changeSets.length).toBe(2);
 
 	// expect merger of the change set to contain both changes
 	expect(changeSet1Items.map((item) => item.change_id)).toEqual(

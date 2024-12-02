@@ -211,10 +211,10 @@ export const changeConflictsAtom = atom(async (get) => {
 		)
 		.innerJoin("change", "change.id", "change_set_element.change_id")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.leftJoin("change_set_element as branch_change", (join) =>
+		.leftJoin("version_change", (join) =>
 			join
-				.onRef("branch_change.change_id", "=", "change.id")
-				.on("branch_change.change_set_id", "=", currentBranch.change_set_id)
+				.onRef("version_change.change_id", "=", "change.id")
+				.on("version_change.version_id", "=", currentBranch.id)
 		)
 		.where("change.file_id", "=", activeFile.id)
 		.where(changeConflictInVersion(currentBranch))
@@ -227,13 +227,13 @@ export const changeConflictsAtom = atom(async (get) => {
 		.select((eb) =>
 			eb
 				.case()
-				.when("branch_change.change_id", "is not", null)
+				.when("version_change.change_id", "is not", null)
 				// using boolean still returns 0 or 1
 				// for typesafety, number is used
 				.then(1)
 				.else(0)
 				.end()
-				.as("is_current_branch_pointer")
+				.as("is_current_version_change")
 		)
 		.select((eb) =>
 			eb
@@ -242,7 +242,7 @@ export const changeConflictsAtom = atom(async (get) => {
 				.then(1)
 				.else(0)
 				.end()
-				.as("is_in_current_branch")
+				.as("is_in_current_version")
 		)
 		.select("snapshot.content as snapshot_content")
 		.select("change_conflict.key as change_conflict_key")

@@ -212,7 +212,7 @@ export async function applySchema(args: {
 
   CREATE TABLE IF NOT EXISTS version (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
-    change_set_id TEXT NOT NULL,
+    change_set_id TEXT,
 
     -- name is optional. 
     -- 
@@ -231,6 +231,15 @@ export async function applySchema(args: {
     -- and update version pointers to 
     -- create a new change set on updates
     UNIQUE (id, change_set_id)
+  ) STRICT;
+
+  CREATE TABLE IF NOT EXISTS version_change (
+    version_id TEXT NOT NULL,
+    change_id TEXT NOT NULL,
+
+    PRIMARY KEY (version_id, change_id),
+    FOREIGN KEY (version_id) REFERENCES version(id),
+    FOREIGN KEY (change_id) REFERENCES change(id)
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS version_change_conflict (
