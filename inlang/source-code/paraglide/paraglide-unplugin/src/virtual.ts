@@ -1,4 +1,5 @@
 import { type UnpluginFactory } from "unplugin"
+import path from "node:path"
 
 type VirtualConfig = {
 	/**
@@ -26,18 +27,29 @@ export const virtual: UnpluginFactory<VirtualConfig> = ({
 	getModule,
 }: VirtualConfig) => {
 	const prefix = virtualModuleName + "/"
+	const resolvedPrefix = "\0" + prefix
 
 	return {
 		name: "@inlang/paraglide-unpligin:virtual",
-		transformInclude(id) {
-			// if the id contains a null char ignore it since it should be a rollup virtual module
-			// this helps support other vite plugins (like sentry) that make heavy use of these types of file-namings
-			if (id.includes("\0")) return false
-			return id.startsWith(prefix)
+		resolveId(id, importer, options) {
+			// Handle imports that are virtual modules
+			if (id.startsWith(prefix)) return "\0" + id
+			// Handle relative imports from a virtual module
+			if (importer?.startsWith(resolvedPrefix)) {
+				const from = importer.replace(resolvedPrefix, "")
+				const to = path.resolve(from, "..", id)
+				const resolvedTo = to.slice(process.cwd().length + 1)
+				return `${resolvedPrefix}${resolvedTo}`
+			}
+
+			// not ours
+			return undefined
 		},
+
 		load(id) {
-			if (!id.startsWith(prefix)) return undefined
-			const path = id.slice(prefix.length) // remove the path
+			const resolved = "\0" + prefix
+			if (!id.startsWith(resolved)) return undefined
+			const path = id.slice(resolved.length) // remove the path
 			const code = getModule(path)
 			return code
 		},

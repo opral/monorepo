@@ -1,24 +1,23 @@
-import path from "node:path"
 import fs from "node:fs/promises"
 
 import { createUnplugin, type UnpluginFactory } from "unplugin"
-import { Message, ProjectSettings, loadProject, type InlangProject } from "@inlang/sdk"
+import { Message, ModuleError, ProjectSettings, loadProject, type InlangProject } from "@inlang/sdk"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import { compile, writeOutput, classifyProjectErrors } from "@inlang/paraglide-js/internal"
 
 import { type UserConfig, resolveConfig } from "./config.js"
-import { virtual } from "./virtual.js"
 import { generateDTS } from "./dts.js"
 import { makeArray } from "./utils.js"
 import { memoized } from "./memo.js"
 
-const PLUGIN_NAME = "unplugin-paraglide"
-const VITE_BUILD_PLUGIN_NAME = "unplugin-paraglide-vite-virtual-message-modules"
+// Helper Plugins
+import { virtual } from "./virtual.js"
+import { build } from "./build.js"
 
+const PLUGIN_NAME = "unplugin-paraglide"
 const VIRTUAL_MODULE_NAME = "$paraglide"
 const DTS_FILE_LOCATION = "./paraglide.d.ts"
 
-const isWindows = typeof process !== "undefined" && process.platform === "win32"
 const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 	const c = resolveConfig(userConfig)
 
@@ -101,9 +100,9 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 			enforce: "pre",
 			async buildStart() {
 				const project = await getProject()
-
 				const initialMessages = project.query.messages.getAll()
 				const settings = project.settings()
+
 				await triggerCompile(initialMessages, settings, project.id)
 
 				project.errors.subscribe((errors) => {
@@ -126,7 +125,7 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 				let numInvocations = 0
 				project.query.messages.getAll.subscribe((messages) => {
 					numInvocations++
-					if (numInvocations === 1) return
+					if (numInvocations === 1) return // skip writing the first time, since we just called compile
 					triggerCompile(messages, project.settings(), project.id)
 				})
 			},
@@ -149,50 +148,7 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 				ctx
 			)
 		),
-		{
-			name: VITE_BUILD_PLUGIN_NAME,
-			vite: {
-				apply: "build",
-				resolveId(id, importer) {
-					if (!c.outdir) return
-					// if the id contains a null char ignore it since it should be a rollup virtual module
-					// this helps support other vite plugins (like sentry) that make heavy use of these types of file-namings
-					if (id.includes("\0")) return undefined
-					// resolve relative imports inside the output directory
-					// the importer is always normalized
-					if (importer?.startsWith(c.outdir)) {
-						const dirname = path.dirname(importer).replaceAll("\\", "/")
-						if (id.startsWith(dirname)) return id
-						//TODO: Return virtual module path instead
-						// should get rid of windows dependency aswell
-
-						if (isWindows) {
-							const resolvedPath = path
-								.resolve(dirname.replaceAll("/", "\\"), id.replaceAll("/", "\\"))
-								.replaceAll("\\", "/")
-							return resolvedPath
-						}
-
-						const resolvedPath = path.resolve(dirname, id)
-						return resolvedPath
-					}
-					return undefined
-				},
-
-				load(id) {
-					if (!c.outdir) return
-					id = id.replaceAll("\\", "/")
-					//if it starts with the outdir use the paraglideOutput virtual modules instead
-					if (id.startsWith(c.outdir)) {
-						const internal = id.slice(c.outdir.length)
-						const resolved = virtualModuleOutput[internal]
-						return resolved
-					}
-
-					return undefined
-				},
-			},
-		},
+		...makeArray(build(c, ctx)),
 	]
 }
 
