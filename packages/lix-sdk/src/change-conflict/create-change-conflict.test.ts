@@ -116,7 +116,7 @@ test("if a conflict contains the same changes for a given key and version, no ne
 		.innerJoin(
 			"change_conflict",
 			"change_conflict.change_set_id",
-			"change_set_element.change_set_id",
+			"change_set_element.change_set_id"
 		)
 		.where("change_conflict.id", "=", changeConflict.id)
 		.selectAll()
@@ -154,7 +154,7 @@ test("if a conflict contains the same changes for a given key and version, no ne
 		.innerJoin(
 			"change_conflict",
 			"change_conflict.change_set_id",
-			"change_set_element.change_set_id",
+			"change_set_element.change_set_id"
 		)
 		.where("change_conflict.id", "=", changeConflict.id)
 		.selectAll()

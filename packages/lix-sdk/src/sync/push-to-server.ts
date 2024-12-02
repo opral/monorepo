@@ -1,7 +1,7 @@
 import type * as LixServerProtocol from "../../../lix-server-api-schema/dist/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { VectorClock } from "./merge-state.js";
-import { getUpsertedRows } from "./get-upserted-rows.js";
+import { getDiffingRows } from "./get-diffing-rows.js";
 
 /**
  * Pushes rows to the server.
@@ -10,16 +10,12 @@ export async function pushToServer(args: {
 	id: string;
 	serverUrl: string;
 	lix: Lix;
-	targetVectorClock: VectorClock
+	targetVectorClock: VectorClock;
 }): Promise<void> {
-
-	const {
-		upsertedRows: tableRowsToPush,
-		state
-	} = await getUpsertedRows({
+	const { upsertedRows: tableRowsToPush, state } = await getDiffingRows({
 		lix: args.lix,
 		targetVectorClock: args.targetVectorClock,
-	})
+	});
 
 	const response = await fetch(
 		new Request(`${args.serverUrl}/lsa/push-v1`, {

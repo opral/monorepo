@@ -67,7 +67,7 @@ test("should use queue and settled correctly", async () => {
 	await changeQueueSettled({ lix });
 
 	expect(
-		(await lix.db.selectFrom("change_queue").selectAll().execute()).length,
+		(await lix.db.selectFrom("change_queue").selectAll().execute()).length
 	).toBe(0);
 
 	// TODO QUEUE check if the replacement of file_internal was expected
@@ -173,7 +173,7 @@ test("should use queue and settled correctly", async () => {
 	await changeQueueSettled({ lix });
 
 	expect(
-		(await lix.db.selectFrom("change_queue").selectAll().execute()).length,
+		(await lix.db.selectFrom("change_queue").selectAll().execute()).length
 	).toBe(0);
 
 	const updatedChanges = await lix.db

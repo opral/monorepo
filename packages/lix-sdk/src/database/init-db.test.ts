@@ -237,7 +237,7 @@ test("change set items must be unique", async () => {
 			.returningAll()
 			.execute()
 	).rejects.toThrowErrorMatchingInlineSnapshot(
-		`[SQLite3Error: SQLITE_CONSTRAINT_UNIQUE: sqlite3 result code 2067: UNIQUE constraint failed: change_set_element.change_set_id, change_set_element.change_id]`
+		`[SQLite3Error: SQLITE_CONSTRAINT_PRIMARYKEY: sqlite3 result code 1555: UNIQUE constraint failed: change_set_element.change_set_id, change_set_element.change_id]`
 	);
 });
 
@@ -368,11 +368,11 @@ test("vector clock functions", async () => {
 	const db = initDb({ sqlite });
 
 	const vectorClockTick1 =
-		await sql`select vector_clock_session() as session, vector_clock_tick() as time`.execute(
+		await sql`select lix_session() as session, lix_session_clock_tick() as time`.execute(
 			db
 		);
 	const vectorClockTick2 =
-		await sql`select vector_clock_session() as session, vector_clock_tick() as time`.execute(
+		await sql`select lix_session() as session, lix_session_clock_tick() as time`.execute(
 			db
 		);
 

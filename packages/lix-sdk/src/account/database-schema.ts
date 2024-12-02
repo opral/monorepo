@@ -2,7 +2,7 @@ import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 
 export function applyAccountDatabaseSchema(
-	sqlite: SqliteDatabase,
+	sqlite: SqliteDatabase
 ): SqliteDatabase {
 	return sqlite.exec`
   CREATE TABLE IF NOT EXISTS account (

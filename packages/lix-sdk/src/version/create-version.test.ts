@@ -56,12 +56,12 @@ test("it should copy the changes from the parent version", async () => {
 		.innerJoin(
 			"change_set_element",
 			"change.id",
-			"change_set_element.change_id",
+			"change_set_element.change_id"
 		)
 		.innerJoin(
 			"version",
 			"version.change_set_id",
-			"change_set_element.change_set_id",
+			"change_set_element.change_set_id"
 		)
 		.selectAll("change")
 		.where("version.id", "=", version0.id)
@@ -72,12 +72,12 @@ test("it should copy the changes from the parent version", async () => {
 		.innerJoin(
 			"change_set_element",
 			"change.id",
-			"change_set_element.change_id",
+			"change_set_element.change_id"
 		)
 		.innerJoin(
 			"version",
 			"version.change_set_id",
-			"change_set_element.change_set_id",
+			"change_set_element.change_set_id"
 		)
 		.selectAll("change")
 		.where("version.id", "=", version1.id)
@@ -174,6 +174,6 @@ test("it should copy change conflict pointers from the parent version", async ()
 
 	expect(version2Conflicts.length).toBe(1);
 	expect(version2Conflicts[0]?.change_conflict_id).toBe(
-		version0Conflicts[0]?.change_conflict_id,
+		version0Conflicts[0]?.change_conflict_id
 	);
 });

@@ -35,10 +35,7 @@ test("it should fetch all rows from all tables successfully", async () => {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
-				vector_clock: {
-					session: "123e4567-e",
-					time: 123456789,
-				},
+				vector_clock: [],
 			} satisfies RequestBody),
 			headers: {
 				"Content-Type": "application/json",
@@ -51,12 +48,13 @@ test("it should fetch all rows from all tables successfully", async () => {
 		(await response.json()) as LixServerApi.paths["/lsa/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"];
 
 	expect(responseJson.data).toBeDefined();
-	const keyValueTable = responseJson.data.find(
-		(table: any) => table.table_name === "key_value"
+
+	const keyValueTable = Object.entries(responseJson.data).find(
+		(table) => table[0] === "key_value"
 	)!;
 	expect(keyValueTable).toBeDefined();
-	expect(keyValueTable.rows.length).toBeGreaterThan(0);
-	expect(keyValueTable.rows).toEqual(
+	expect(keyValueTable[1].length).toBeGreaterThan(0);
+	expect(keyValueTable[1]).toEqual(
 		expect.arrayContaining([
 			expect.objectContaining({ key: "test-key-1", value: "test-value-1" }),
 			expect.objectContaining({ key: "test-key-2", value: "test-value-2" }),
@@ -93,10 +91,7 @@ test("it should specifically be able to handle snapshots which use json binary a
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
-				vector_clock: {
-					session: "123e4567-e",
-					time: 123456789,
-				},
+				vector_clock: [],
 			} satisfies RequestBody),
 			headers: {
 				"Content-Type": "application/json",
@@ -109,12 +104,13 @@ test("it should specifically be able to handle snapshots which use json binary a
 		(await response.json()) as LixServerApi.paths["/lsa/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"];
 
 	expect(responseJson.data).toBeDefined();
-	const snapshots = responseJson.data.find(
-		(table: any) => table.table_name === "snapshot"
+
+	const snapshots = Object.entries(responseJson.data).find(
+		(table) => table[0] === "snapshot"
 	)!;
 	expect(snapshots).toBeDefined();
-	expect(snapshots.rows.length).toBeGreaterThan(0);
-	expect(snapshots.rows).toEqual(
+	expect(snapshots[1].length).toBeGreaterThan(0);
+	expect(snapshots[1]).toEqual(
 		expect.arrayContaining([
 			expect.objectContaining({
 				// expecting no id
@@ -133,10 +129,7 @@ test("it should return 404 if the Lix file is not found", async () => {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: "nonexistent-id",
-				vector_clock: {
-					session: "123e4567-e",
-					time: 123456789,
-				},
+				vector_clock: [],
 			} satisfies RequestBody),
 			headers: {
 				"Content-Type": "application/json",
@@ -189,10 +182,7 @@ test("it should handle empty tables gracefully", async () => {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
-				vector_clock: {
-					session: "123e4567-e",
-					time: 123456789,
-				},
+				vector_clock: [],
 			} satisfies RequestBody),
 			headers: {
 				"Content-Type": "application/json",
@@ -204,8 +194,8 @@ test("it should handle empty tables gracefully", async () => {
 	const responseJson = await response.json();
 
 	expect(responseJson.data).toBeDefined();
-	responseJson.data.forEach((table: any) => {
-		expect(table.rows).toBeDefined();
-		expect(Array.isArray(table.rows)).toBe(true);
+	Object.entries(responseJson.data).forEach((table) => {
+		expect(table[0]).toBeDefined();
+		expect(Array.isArray(table[1])).toBe(true);
 	});
 });

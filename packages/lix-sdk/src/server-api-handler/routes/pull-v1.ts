@@ -2,7 +2,7 @@ import type * as LixServerApi from "@lix-js/server-api-schema";
 import type { LixServerApiHandlerRoute } from "../create-server-api-handler.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import type { Lix } from "../../lix/open-lix.js";
-import { getUpsertedRows } from "../../sync/get-upserted-rows.js";
+import { getDiffingRows } from "../../sync/get-diffing-rows.js";
 
 type RequestBody =
 	LixServerApi.paths["/lsa/pull-v1"]["post"]["requestBody"]["content"]["application/json"];
@@ -32,15 +32,13 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 			}
 		);
 	}
-	
+
 	try {
-		
-		const { upsertedRows: tableRowsToReturn,
-			state: sessionStatesServer
-		} = await getUpsertedRows({
-			lix: lix,
-			targetVectorClock: body.vector_clock,
-		})
+		const { upsertedRows: tableRowsToReturn, state: sessionStatesServer } =
+			await getDiffingRows({
+				lix: lix,
+				targetVectorClock: body.vector_clock,
+			});
 
 		return new Response(
 			JSON.stringify({

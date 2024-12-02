@@ -19,10 +19,10 @@ export async function mergeVersion(args: {
 			.innerJoin(
 				"change_set_element",
 				"change.id",
-				"change_set_element.change_id",
+				"change_set_element.change_id"
 			)
 			.where(
-				changeSetElementInSymmetricDifference(sourceChangeSet, targetChangeSet),
+				changeSetElementInSymmetricDifference(sourceChangeSet, targetChangeSet)
 			)
 			.selectAll("change")
 			.select("change_set_element.change_set_id")
@@ -40,7 +40,7 @@ export async function mergeVersion(args: {
 			}
 
 			const hasConflict = detectedConflicts.find((conflict) =>
-				conflict.conflictingChangeIds.has(change.id),
+				conflict.conflictingChangeIds.has(change.id)
 			);
 
 			const existingChangePointer = await trx

@@ -1,16 +1,12 @@
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import { applyAccountDatabaseSchema } from "../account/database-schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value/database-schema.js";
-import { applySessionOperationsDatabaseSchema } from './vector-clock/database-schema.js'
-import { sql } from "kysely";
+import { applyMutationLogDatabaseSchema } from "./mutation-log/database-schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
  */
-export function applySchema(args: {
-	sqlite: SqliteDatabase;
-}): SqliteDatabase {
-  applySessionOperationsDatabaseSchema(args.sqlite)
+export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
 	applyAccountDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
 
@@ -24,7 +20,6 @@ export function applySchema(args: {
 
   CREATE TABLE IF NOT EXISTS file (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
-    -- TODO SYNC shall we also sync this table? -> we only sync the path?!
     path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL,
     metadata BLOB,
@@ -276,106 +271,7 @@ export function applySchema(args: {
 
   `;
 
-  // const triggerTables: string[] = [
-  //   'change',
-  //   'account',
-  //   'snapshot',
-  //   'change_set',
-  //   'change_conflict',
-  //   'version',
+	applyMutationLogDatabaseSchema(args.sqlite);
 
-    // TODO persist operations for:
-    // change_author -> PRIMARY KEY (change_id, account_id),
-    // change_edge -> PRIMARY KEY (parent_id, child_id),
-    // change_conflict_resolution -> PRIMARY KEY(change_conflict_id, resolved_change_id),
-    // change_set_element -> PRIMARY KEY(change_set_id, change_id),
-    // change_set_label -> PRIMARY KEY(label_id, change_set_id)
-    // change_set_label_author -> PRIMARY KEY(label_id, change_set_id, account_id),
-    // version_change_conflict -> PRIMARY KEY (version_id, change_conflict_id),
-    
-  // ]
-
-  const idMap = {
-    change: ['id'],
-    account: ['id'],
-    snapshot: ['id'],
-    change_set: ['id'],
-    change_conflict: ['id'],
-    version: ['id'],
-    change_author: ['change_id', 'account_id'],
-    change_edge: ['parent_id', 'child_id'],
-    change_conflict_resolution: ['change_conflict_id', 'resolved_change_id'],
-    change_set_element: ['change_set_id', 'change_id'],
-    change_set_label: ['label_id', 'change_set_id'],
-    change_set_label_author: ['label_id', 'change_set_id', 'account_id'],
-    version_change_conflict: ['version_id', 'change_conflict_id'],
-  }
- 
-  for (const [tableName, ids] of Object.entries(idMap)) {
-    // TODO change to json column instead?
-    if (ids.length === 0) {
-      throw new Error('at least one id required')
-    } else if (ids.length === 1) {
-      args.sqlite.exec(`
-        -- Trigger for INSERT operations
-        CREATE TRIGGER IF NOT EXISTS ${tableName}_after_insert_clock_tick
-        AFTER INSERT ON ${tableName}
-        BEGIN
-            INSERT INTO vector_clock (row_id, table_name, operation)
-            VALUES (NEW.id, '${tableName}', 'INSERT');
-        END;
-    
-        -- Trigger for UPDATE operations
-        CREATE TRIGGER IF NOT EXISTS ${tableName}_after_update_clock_tick
-        AFTER UPDATE ON ${tableName}
-        BEGIN
-            INSERT INTO vector_clock (row_id, table_name, operation)
-            VALUES (NEW.id, '${tableName}', 'UPDATE');
-        END;
-    
-        -- Trigger for DELETE operations
-        -- CREATE TRIGGER IF NOT EXISTS ${tableName}_after_delete_clock_tick
-        -- AFTER DELETE ON ${tableName}
-        -- BEGIN
-        --    INSERT INTO vector_clock (row_id, table_name, operation)
-        --    VALUES (OLD.id, '${tableName}', 'DELETE');
-        -- END;
-        `);
-    } else {
-      const idConcatOperation = ids.map(id => `NEW.${id}`).join(" || '__' || ");
-      args.sqlite.exec(`
-        -- Trigger for INSERT operations
-        CREATE TRIGGER IF NOT EXISTS ${tableName}_after_insert_clock_tick
-        AFTER INSERT ON ${tableName}
-        BEGIN
-            INSERT INTO vector_clock (row_id, table_name, operation)
-            VALUES (${idConcatOperation}, '${tableName}', 'INSERT');
-        END;
-    
-        -- Trigger for UPDATE operations
-        CREATE TRIGGER IF NOT EXISTS ${tableName}_after_update_clock_tick
-        AFTER UPDATE ON ${tableName}
-        BEGIN
-            INSERT INTO vector_clock (row_id, table_name, operation)
-            VALUES (${idConcatOperation}, '${tableName}', 'UPDATE');
-        END;
-    
-        -- Trigger for DELETE operations
-        -- CREATE TRIGGER IF NOT EXISTS ${tableName}_after_delete_clock_tick
-        -- AFTER DELETE ON ${tableName}
-        -- BEGIN
-        --    INSERT INTO vector_clock (row_id, table_name, operation)
-        --    VALUES (OLD.id, '${tableName}', 'DELETE');
-        -- END;
-        `);
-    
-    }
-		
-	}
-
-  
-
-  return args.sqlite
+	return args.sqlite;
 }
-
-

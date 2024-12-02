@@ -103,8 +103,6 @@ paths:
                           "id": 1,
                           "name": "Alice"
                         }
-                  required:
-                    - vector_clock
                   example: > 
                             {
                               "table_name": [

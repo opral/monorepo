@@ -219,11 +219,14 @@ test("rows changed on the client more recently should not be updated", async () 
 		.execute();
 
 	// let the wall clock move one ms forward
-	await new Promise(resolve => setTimeout(resolve, 1));
+	await new Promise((resolve) => setTimeout(resolve, 1));
 	// insert mock data into server lix
 	await lix.db
 		.insertInto("account")
-		.values({ id: "account0", name: "test account updated more recently on client" })
+		.values({
+			id: "account0",
+			name: "test account updated more recently on client",
+		})
 		.execute();
 
 	// initialize the lix on the server with the mock data
@@ -257,11 +260,13 @@ test("rows changed on the client more recently should not be updated", async () 
 	// 	.selectAll()
 	// 	.executeTakeFirstOrThrow();
 
-	expect(account).toEqual({ id: "account0", name: "test account updated more recently on client" });
+	expect(account).toEqual({
+		id: "account0",
+		name: "test account updated more recently on client",
+	});
 
 	// expect(mockKey).toEqual({ key: "mock-key", value: "mock-value" });
 });
-
 
 test("rows changed on the server more recently should be updated on the client", async () => {
 	const lixOnServer = await openLixInMemory({});
@@ -294,17 +299,21 @@ test("rows changed on the server more recently should be updated on the client",
 		.execute();
 
 	// let the wall clock move one ms forward
-	await new Promise(resolve => setTimeout(resolve, 1));
+	await new Promise((resolve) => setTimeout(resolve, 1));
 	// insert mock data into server lix
 	await lix.db
 		.insertInto("account")
-		.values({ id: "account0", name: "test account updated more recently on client" })
+		.values({
+			id: "account0",
+			name: "test account updated more recently on client",
+		})
 		.execute();
 
-	await new Promise(resolve => setTimeout(resolve, 1));
+	await new Promise((resolve) => setTimeout(resolve, 1));
 	await lixOnServer.db
 		.updateTable("account")
-		.set({ name: "test account updated more recently on the server" }).where("account.id", "=", "account0")
+		.set({ name: "test account updated more recently on the server" })
+		.where("account.id", "=", "account0")
 		.execute();
 
 	// initialize the lix on the server with the mock data
@@ -338,9 +347,11 @@ test("rows changed on the server more recently should be updated on the client",
 	// 	.selectAll()
 	// 	.executeTakeFirstOrThrow();
 
-	expect(account).toEqual({ id: "account0", name: "test account updated more recently on the server"});
+	expect(account).toEqual({
+		id: "account0",
+		name: "test account updated more recently on the server",
+	});
 
-	
 	const mockKey = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "mock-key")

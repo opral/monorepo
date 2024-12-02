@@ -72,7 +72,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		.values(
 			[mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!].map((s) => ({
 				content: s.content,
-			})),
+			}))
 		)
 		.execute();
 
@@ -91,7 +91,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		.values(
 			[mockSnapshots[0]!].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 	await targetLix.db.insertInto("change").values([mockChanges[0]!]).execute();
@@ -205,7 +205,7 @@ test.todo("it should save change conflicts", async () => {
 		.values(
 			[mockSnapshots[0]!, mockSnapshots[2]!].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 
@@ -219,7 +219,7 @@ test.todo("it should save change conflicts", async () => {
 		.values(
 			[mockSnapshots[0]!, mockSnapshots[2]!].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 
@@ -307,7 +307,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 		.values(
 			[...commonSnapshots, ...snapshotsOnlyInSourceLix].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 
@@ -321,7 +321,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 		.values(
 			[...commonSnapshots, ...snapshotsOnlyInTargetLix].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 
@@ -384,7 +384,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 				.selectAll()
 				.executeTakeFirstOrThrow();
 			const fileData = new TextEncoder().encode(
-				JSON.stringify(snapshot.content ?? {}),
+				JSON.stringify(snapshot.content ?? {})
 			);
 			return { fileData };
 		},
@@ -405,7 +405,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 		.values(
 			[mockSnapshots[0]!, mockSnapshots[1]!].map((s) => ({
 				content: s.content,
-			})),
+			}))
 		)
 		.execute();
 
@@ -421,7 +421,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 		.values(
 			[mockSnapshots[0]!].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 
@@ -459,7 +459,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 	expect(changes.length).toBe(2);
 	// expect(conflicts.length).toBe(0);
 	expect(file.data).toEqual(
-		new TextEncoder().encode(JSON.stringify(mockSnapshots[1]!.content!)),
+		new TextEncoder().encode(JSON.stringify(mockSnapshots[1]!.content!))
 	);
 });
 
@@ -520,7 +520,7 @@ test.todo(
 			.values(
 				[...commonSnapshots, ...snapshotsOnlyInSourceLix].map((s) => {
 					return { content: s.content };
-				}),
+				})
 			)
 			.execute();
 
@@ -534,7 +534,7 @@ test.todo(
 			.values(
 				[...commonSnapshots, ...snapshotsOnlyInTargetLix].map((s) => {
 					return { content: s.content };
-				}),
+				})
 			)
 			.execute();
 
@@ -581,7 +581,7 @@ test.todo(
 
 		expect(changesAfterSecondMerge.length).toBe(2);
 		// expect(conflictsAfterSecondMerge.length).toBe(1);
-	},
+	}
 );
 
 test("it should naively copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
@@ -625,7 +625,7 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 		.values(
 			snapshotsOnlyInSourceLix.map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 
@@ -841,16 +841,16 @@ test.skip("it should copy change sets and merge memberships", async () => {
 
 	// expect two change sets (exluding the current versiones change set)
 	expect(
-		changeSets.filter((s) => s.id !== currentVersion.change_set_id).length,
+		changeSets.filter((s) => s.id !== currentVersion.change_set_id).length
 	).toBe(2);
 
 	// expect merger of the change set to contain both changes
 	expect(changeSet1Items.map((item) => item.change_id)).toEqual(
-		expect.arrayContaining([mockChanges[0]?.id, mockChanges[1]?.id]),
+		expect.arrayContaining([mockChanges[0]?.id, mockChanges[1]?.id])
 	);
 
 	// expect the second change set to contain only the second change
 	expect(changeSet2Items.map((item) => item.change_id)).toEqual(
-		expect.arrayContaining([mockChanges[1]?.id]),
+		expect.arrayContaining([mockChanges[1]?.id])
 	);
 });

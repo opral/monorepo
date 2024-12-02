@@ -19,12 +19,12 @@ export async function updateChangesInVersion(args: {
 				.innerJoin(
 					"change_set_element",
 					"change.id",
-					"change_set_element.change_id",
+					"change_set_element.change_id"
 				)
 				.where(
 					"change_set_element.change_set_id",
 					"=",
-					args.version.change_set_id,
+					args.version.change_set_id
 				)
 				.where("change.schema_key", "=", change.schema_key)
 				.where("change.entity_id", "=", change.entity_id)

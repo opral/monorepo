@@ -22,13 +22,25 @@ test("it should push data successfully", async () => {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
-				vector_clock: [{ session: "123e4567-e", time: 123456789 }],
-				data: [
+				vector_clock: [
 					{
-						table_name: "key_value",
-						rows: [{ key: "test", value: "test value" }],
+						session: "fake-session",
+						time: 1,
 					},
 				],
+				data: {
+					mutation_log: [
+						{
+							row_id: "test",
+							table_name: "key_value",
+							operation: "insert",
+							session: "fake-session",
+							session_time: 1,
+							wall_clock: 1,
+						},
+					],
+					key_value: [{ key: "test", value: "test value" }],
+				},
 			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
@@ -61,8 +73,8 @@ test("it should return 404 if the Lix file is not found", async () => {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: "nonexistent-id",
-				vector_clock: { session: "123e4567-e", time: 123456789 },
-				data: [],
+				vector_clock: [],
+				data: {},
 			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
@@ -84,8 +96,8 @@ test("it should return 500 for an invalid Lix file", async () => {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: "invalid-id",
-				vector_clock: { session: "123e4567-e", time: 123456789 },
-				data: [],
+				vector_clock: [],
+				data: {},
 			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
@@ -117,13 +129,10 @@ test("it should return 400 for a failed insert operation", async () => {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
-				vector_clock: { session: "123e4567-e", time: 123456789 },
-				data: [
-					{
-						table_name: "nonexistent_table",
-						rows: [{ key: "test", value: "test value" }],
-					},
-				],
+				vector_clock: [],
+				data: {
+					nonexistent_table: [{ key: "test", value: "test value" }],
+				},
 			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",

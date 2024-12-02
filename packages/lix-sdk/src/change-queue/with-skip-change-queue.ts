@@ -2,7 +2,7 @@ import type { Lix } from "../lix/open-lix.js";
 
 export async function withSkipChangeQueue<T>(
 	db: Lix["db"],
-	operation: (trx: Lix["db"]) => Promise<T>,
+	operation: (trx: Lix["db"]) => Promise<T>
 ): Promise<T> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const queryEntryBefore = await trx

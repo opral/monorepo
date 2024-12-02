@@ -43,7 +43,7 @@ test("should detect conflicts using plugins", async () => {
 	expect(detectedConflicts.length).toBe(1);
 	expect(detectedConflicts[0]?.key).toBe("mock-conflict");
 	expect(detectedConflicts[0]?.conflictingChangeIds).toEqual(
-		new Set(["change0", "change1"]),
+		new Set(["change0", "change1"])
 	);
 	expect(mockPlugin.detectConflicts).toHaveBeenCalledWith({
 		lix,
@@ -144,11 +144,11 @@ test("should handle multiple plugins detecting conflicts", async () => {
 	expect(detectedConflicts.length).toBe(2);
 	expect(detectedConflicts[0]?.key).toBe("mock-conflict1");
 	expect(detectedConflicts[0]?.conflictingChangeIds).toEqual(
-		new Set(["change0", "change1"]),
+		new Set(["change0", "change1"])
 	);
 	expect(detectedConflicts[1]?.key).toBe("mock-conflict2");
 	expect(detectedConflicts[1]?.conflictingChangeIds).toEqual(
-		new Set(["change1", "change2"]),
+		new Set(["change1", "change2"])
 	);
 	expect(mockPlugin1.detectConflicts).toHaveBeenCalledWith({
 		lix,
@@ -210,6 +210,6 @@ test("it should auto detect diverging entity conflicts", async () => {
 	expect(detectedConflicts.length).toBe(1);
 	expect(detectedConflicts[0]?.key).toBe("lix-diverging-entity-conflict");
 	expect(detectedConflicts[0]?.conflictingChangeIds).toEqual(
-		new Set(["change1", "change2"]),
+		new Set(["change1", "change2"])
 	);
 });

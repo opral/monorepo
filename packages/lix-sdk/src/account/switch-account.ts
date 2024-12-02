@@ -5,17 +5,17 @@ import type { Account } from "./database-schema.js";
  * Switch the current account to the provided account.
  *
  * @example
- * 
+ *
  *   One active account
- * 
+ *
  *   ```ts
  *   await switchAccount({ lix, to: [otherAccount] });
  *   ```
- * 
- * @example 
- * 
+ *
+ * @example
+ *
  *   Multiple active accounts
- * 
+ *
  *   ```ts
  *   await switchAccount({ lix, to: [account1, account2] });
  *   ```

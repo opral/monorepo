@@ -4,7 +4,7 @@ import type {
 	ActiveAccountTable,
 } from "../account/database-schema.js";
 import type { KeyValueTable } from "../key-value/database-schema.js";
-import type { SessionOperationTable } from "./vector-clock/database-schema.js"
+import type { MutationLogTable } from "./mutation-log/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -47,7 +47,7 @@ export type LixDatabaseSchema = {
 	change_conflict_resolution: ChangeConflictResolutionTable;
 
 	// vector clock TODO SYNC - rename to session_operation
-	vector_clock: SessionOperationTable;
+	mutation_log: MutationLogTable;
 };
 
 export type ChangeQueueEntry = Selectable<ChangeQueueTable>;
@@ -284,4 +284,3 @@ type ChangeConflictResolutionTable = {
 	change_conflict_id: string;
 	resolved_change_id: string;
 };
-

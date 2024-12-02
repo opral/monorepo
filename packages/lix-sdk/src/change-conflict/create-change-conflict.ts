@@ -20,7 +20,7 @@ export async function createChangeConflict(args: {
 			.innerJoin(
 				"version_change_conflict",
 				"version_change_conflict.change_conflict_id",
-				"change_conflict.id",
+				"change_conflict.id"
 			)
 			// the version should point to the conflict
 			.where("version_change_conflict.version_id", "=", args.version.id)
@@ -35,22 +35,22 @@ export async function createChangeConflict(args: {
 							join.onRef(
 								"change_conflict.change_set_id",
 								"=",
-								"change_set_element.change_set_id",
-							),
+								"change_set_element.change_set_id"
+							)
 						)
 						.where(
 							"change_set_element.change_id",
 							"in",
-							Array.from(args.conflictingChangeIds),
+							Array.from(args.conflictingChangeIds)
 						)
 						.groupBy("change_set_element.change_set_id")
 						.having(
 							trx.fn.count("change_set_element.change_id"),
 							"=",
-							args.conflictingChangeIds.size,
+							args.conflictingChangeIds.size
 						)
-						.select("change_set_element.change_set_id"),
-				),
+						.select("change_set_element.change_set_id")
+				)
 			)
 			.selectAll()
 			.executeTakeFirst();
@@ -81,7 +81,7 @@ export async function createChangeConflict(args: {
 				Array.from(args.conflictingChangeIds).map((id) => ({
 					change_id: id,
 					change_set_id: newConflict.change_set_id,
-				})),
+				}))
 			)
 			// Ignore if the conflict element already exists
 			.onConflict((oc) => oc.doNothing())

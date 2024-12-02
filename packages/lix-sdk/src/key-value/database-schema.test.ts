@@ -43,9 +43,9 @@ test("duplicate keys lead to an error", async () => {
 				value: "bar",
 			})
 			.returningAll()
-			.execute(),
+			.execute()
 	).rejects.toThrowErrorMatchingInlineSnapshot(
-		`[SQLite3Error: SQLITE_CONSTRAINT_PRIMARYKEY: sqlite3 result code 1555: UNIQUE constraint failed: key_value.key]`,
+		`[SQLite3Error: SQLITE_CONSTRAINT_PRIMARYKEY: sqlite3 result code 1555: UNIQUE constraint failed: key_value.key]`
 	);
 });
 

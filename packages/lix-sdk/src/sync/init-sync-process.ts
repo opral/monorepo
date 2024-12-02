@@ -2,9 +2,12 @@ import type { Lix } from "../lix/open-lix.js";
 import { pushToServer } from "./push-to-server.js";
 import { pullFromServer } from "./pull-from-server.js";
 
-export async function initSyncProcess(args: { lix: Lix }): Promise<{
-	stop: () => void;
-} | undefined> {
+export async function initSyncProcess(args: { lix: Lix }): Promise<
+	| {
+			stop: () => void;
+	  }
+	| undefined
+> {
 	const { value: id } = await args.lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix-id")
@@ -24,9 +27,9 @@ export async function initSyncProcess(args: { lix: Lix }): Promise<{
 		return;
 	}
 
-	let stoped = false
+	let stoped = false;
 
-	const pullAndPush = async() => {
+	const pullAndPush = async () => {
 		const serverState = await pullFromServer({
 			serverUrl: url.value,
 			lix: args.lix,
@@ -38,24 +41,24 @@ export async function initSyncProcess(args: { lix: Lix }): Promise<{
 			id,
 			targetVectorClock: serverState,
 		});
-	}
+	};
 
 	// naive implementation that syncs every second
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	async function schedulePullAndPush() {
 		if (!stoped) {
-			await pullAndPush()
+			await pullAndPush();
 		}
 		setTimeout(() => {
-			schedulePullAndPush()
+			schedulePullAndPush();
 		}, 1000);
 	}
 
-	schedulePullAndPush()
-	
+	schedulePullAndPush();
+
 	return {
 		stop: () => {
-			stoped = true
-		}
-	}
+			stoped = true;
+		},
+	};
 }

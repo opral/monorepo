@@ -11,7 +11,7 @@ export async function openLixInMemory(
 		 * The lix file to open. If not provided, an empty (new) lix will be opened.
 		 */
 		blob?: Blob;
-	} & Omit<Parameters<typeof openLix>[0], "database">,
+	} & Omit<Parameters<typeof openLix>[0], "database">
 ): Promise<ReturnType<typeof openLix>> {
 	const database = await createInMemoryDatabase({
 		readOnly: false,

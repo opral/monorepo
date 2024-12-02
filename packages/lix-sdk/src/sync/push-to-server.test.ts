@@ -120,7 +120,7 @@ test("it should handle snapshots.content json binaries", async () => {
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
-		targetVectorClock: []
+		targetVectorClock: [],
 	});
 
 	const lixFromServer = await openLixInMemory({
@@ -174,6 +174,7 @@ test.todo("it should handle binary values", async () => {
 		id,
 		lix,
 		serverUrl: "http://localhost:3000",
+		targetVectorClock: [], // initial push - server has no state
 	});
 
 	const lixFromServer = await openLixInMemory({
