@@ -8,7 +8,7 @@ export function memoized<T extends (...args: any[]) => Promise<any>>(
 	return async (...args) => {
 		const existingHash = hashes.get(fn)
 		const computedHash = hash(...args)
-		if (existingHash && existingHash !== computedHash) {
+		if (existingHash && existingHash === computedHash) {
 			return outputs.get(fn)
 		}
 		hashes.set(fn, computedHash)

@@ -24,8 +24,6 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 
 	//Keep track of how many times we've compiled
 	let numCompiles = 0
-	let previousMessagesHash: string | undefined = undefined
-
 	let virtualModuleOutput: Record<string, string> = {}
 
 	const triggerCompile = memoized(async function (
@@ -62,14 +60,9 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 
 	function logMessageChange() {
 		if (!c.logger) return
-
-		if (numCompiles === 0) {
-			c.logger.info(`Compiling Messages${c.outdir ? `into ${c.outdir}` : ""}`)
-		}
-
-		if (numCompiles >= 1) {
+		if (numCompiles === 0) c.logger.info(`Compiling Messages${c.outdir ? `into ${c.outdir}` : ""}`)
+		else if (numCompiles >= 1)
 			c.logger.info(`Messages changed - Recompiling${c.outdir ? `into ${c.outdir}` : ""}`)
-		}
 	}
 
 	let project: InlangProject | undefined = undefined
@@ -171,6 +164,7 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 						const dirname = path.dirname(importer).replaceAll("\\", "/")
 						if (id.startsWith(dirname)) return id
 						//TODO: Return virtual module path instead
+						// should get rid of windows dependency aswell
 
 						if (isWindows) {
 							const resolvedPath = path
