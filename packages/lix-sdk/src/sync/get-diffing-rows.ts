@@ -27,12 +27,12 @@ export async function getDiffingRows(args: {
 			.groupBy("session")
 			.execute();
 		// use the target vector clock to collect all changed rows the target is not aware of
-		const operationsToPush = trx
+		let operationsToPush = trx
 			.selectFrom("mutation_log")
 			.selectAll("mutation_log");
 
 		if (args.targetVectorClock.length > 0) {
-			operationsToPush.where((eb) => {
+			operationsToPush = operationsToPush.where((eb) => {
 				const ors: any[] = [];
 				const knownSessions = args.targetVectorClock.map(
 					(sessionTime) => sessionTime.session
@@ -65,26 +65,22 @@ export async function getDiffingRows(args: {
 					await trx
 						.selectFrom(tableName)
 						.select("content")
-						.where("id", "=", operation.row_id)
-						.executeTakeFirstOrThrow()
-				);
-			} else if (tableName === "key_value") {
-				upsertedRows[tableName].push(
-					await trx
-						.selectFrom(tableName)
-						.selectAll()
-						.where("key", "=", operation.row_id)
+						.where("id", "=", operation.row_id["id"])
 						.executeTakeFirstOrThrow()
 				);
 			} else {
+				let diffRow = trx
+					.selectFrom(tableName)
+					.selectAll()
+
+				for (const [key, value] of Object.entries(operation.row_id)) {
+					diffRow = diffRow.where(key, "=", value)
+				}
+
 				upsertedRows[tableName].push(
-					await trx
-						.selectFrom(tableName as any)
-						.selectAll()
-						.where("id", "=", operation.row_id)
-						.executeTakeFirstOrThrow()
+					await diffRow.executeTakeFirstOrThrow()
 				);
-			}
+			} 
 		}
 	};
 
