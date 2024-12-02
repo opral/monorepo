@@ -50,72 +50,49 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
 		change_set_label: ["label_id", "change_set_id"],
 		change_set_label_author: ["label_id", "change_set_id", "account_id"],
 		version_change_conflict: ["version_id", "change_conflict_id"],
+    key_value: ["key"],
 	};
 
-	sqlite.exec(`
-	-- Trigger for INSERT operations
-	CREATE TRIGGER IF NOT EXISTS key_value_after_insert_log
-	AFTER INSERT ON key_value
-	BEGIN
-		INSERT INTO mutation_log (row_id, table_name, operation)
-		VALUES (NEW.key, 'key_value', 'INSERT');
-	END;
 
-	-- Trigger for UPDATE operations
-	CREATE TRIGGER IF NOT EXISTS key_value_after_update_log
-	AFTER UPDATE ON key_value
-	BEGIN
-		INSERT INTO mutation_log (row_id, table_name, operation)
-		VALUES (NEW.key, 'key_value', 'UPDATE');
-	END;
-
-`);
+  function toSqliteJson(keyColumns: string[]) {
+    if (keyColumns.length === 0) {
+      throw new Error("Key columns array cannot be empty.");
+    }
+  
+    const jsonObjectArgs = keyColumns.map(
+      (keyColumnName) => `'${keyColumnName}', NEW.${keyColumnName}`
+    );
+  
+    
+    const jsonObjectExpression = "json_object(" + jsonObjectArgs.join(", ") + ")";
+    return jsonObjectExpression
+  }
+	
 
 	for (const [tableName, ids] of Object.entries(idMap)) {
 		// TODO change to json column instead?
 		if (ids.length === 0) {
 			throw new Error("at least one id required");
-		} else if (ids.length === 1) {
-			sqlite.exec(`
-        -- Trigger for INSERT operations
-        CREATE TRIGGER IF NOT EXISTS ${tableName}_after_insert_log
-        AFTER INSERT ON ${tableName}
-        BEGIN
-            INSERT INTO mutation_log (row_id, table_name, operation)
-            VALUES (NEW.id, '${tableName}', 'INSERT');
-        END;
-    
-        -- Trigger for UPDATE operations
-        CREATE TRIGGER IF NOT EXISTS ${tableName}_after_update_log
-        AFTER UPDATE ON ${tableName}
-        BEGIN
-            INSERT INTO mutation_log (row_id, table_name, operation)
-            VALUES (NEW.id, '${tableName}', 'UPDATE');
-        END;
-        `);
-		} else {
-			const idConcatOperation = ids
-				.map((id) => `NEW.${id}`)
-				.join(" || '__' || ");
-			sqlite.exec(`
-        -- Trigger for INSERT operations
-        CREATE TRIGGER IF NOT EXISTS ${tableName}_after_insert_log
-        AFTER INSERT ON ${tableName}
-        BEGIN
-            INSERT INTO mutation_log (row_id, table_name, operation)
-            VALUES (${idConcatOperation}, '${tableName}', 'INSERT');
-        END;
-    
-        -- Trigger for UPDATE operations
-        CREATE TRIGGER IF NOT EXISTS ${tableName}_after_update_log
-        AFTER UPDATE ON ${tableName}
-        BEGIN
-            INSERT INTO mutation_log (row_id, table_name, operation)
-            VALUES (${idConcatOperation}, '${tableName}', 'UPDATE');
-        END;
-        `);
-		}
-	}
+		} 
+    sqlite.exec(`
+      -- Trigger for INSERT operations
+      CREATE TRIGGER IF NOT EXISTS ${tableName}_after_insert_log
+      AFTER INSERT ON ${tableName}
+      BEGIN
+          INSERT INTO mutation_log (row_id, table_name, operation)
+          VALUES (${toSqliteJson(ids)}, '${tableName}', 'INSERT');
+      END;
+  
+      -- Trigger for UPDATE operations
+      CREATE TRIGGER IF NOT EXISTS ${tableName}_after_update_log
+      AFTER UPDATE ON ${tableName}
+      BEGIN
+          INSERT INTO mutation_log (row_id, table_name, operation)
+          VALUES (${toSqliteJson(ids)}, '${tableName}', 'UPDATE');
+      END;
+    `);
+  }
+	
 }
 
 export type MutationLog = Selectable<MutationLogTable>;
