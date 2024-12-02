@@ -90,6 +90,8 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 	 * ```
 	 */
 	function getModule(path: string): string | undefined {
+		console.log("getModule", path)
+		console.log(virtualModuleOutput)
 		return virtualModuleOutput[path]
 	}
 

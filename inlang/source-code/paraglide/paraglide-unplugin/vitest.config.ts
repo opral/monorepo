@@ -14,7 +14,6 @@ export default defineConfig({
 		virtualPlugin({
 			name: "$virtual",
 			getModule(path) {
-				console.log("getModule", path)
 				const files = {
 					"file1.js": "export { default } from './file2.js'",
 					"file2.js": "export default true",
@@ -24,13 +23,12 @@ export default defineConfig({
 		}),
 		// set up the vite plugin
 		// this is used to test the virtual modules in `e2e.test.ts`
-		/*
+
 		// @ts-ignore - vite plugin types are notoriously fragile
 		paraglide.vite({
 			silent: true,
 			project: "./project.inlang",
 			useVirtualModule: true,
 		}),
-		*/
 	],
 })
