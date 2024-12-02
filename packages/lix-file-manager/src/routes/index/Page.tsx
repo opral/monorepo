@@ -10,7 +10,7 @@ import { activeFileAtom, allChangesDynamicGroupingAtom, changesCurrentVersionAto
 import { Link, useNavigate } from "react-router-dom";
 import { ChangeComponent } from "../../components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "./../../components/DynamicChangeGroup.tsx";
-import { useEffect } from "react";
+// import { useEffect } from "react";
 
 export default function Page() {
 	// state atoms
