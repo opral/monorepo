@@ -1,3 +1,4 @@
+import type { Account } from "../account/database-schema.js";
 import type { Change, Snapshot, Version } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { changeIsLeafInVersion } from "../query-filter/change-is-leaf-in-version.js";
@@ -11,7 +12,8 @@ import { updateChangesInVersion } from "../version/update-changes-in-version.js"
  * with bypassing of file-based change detection.
  */
 export async function createChange(args: {
-	lix: Lix;
+	lix: Pick<Lix, "db" | "plugin">;
+	authors: Array<Pick<Account, "id">>;
 	version: Version;
 	entityId: Change["entity_id"];
 	fileId: Change["file_id"];
@@ -19,6 +21,10 @@ export async function createChange(args: {
 	schemaKey: Change["schema_key"];
 	snapshotContent: Snapshot["content"];
 }): Promise<Change> {
+	if (args.authors.length === 0) {
+		throw new Error("At least one author is required");
+	}
+
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const snapshot = await createSnapshot({
 			lix: { db: trx },
@@ -57,12 +63,7 @@ export async function createChange(args: {
 				.execute();
 		}
 
-		const currentAuthors = await trx
-			.selectFrom("active_account")
-			.selectAll()
-			.execute();
-
-		for (const author of currentAuthors) {
+		for (const author of args.authors) {
 			await trx
 				.insertInto("change_author")
 				.values({
