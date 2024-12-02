@@ -18,6 +18,11 @@ function timeAgo(dateString: string): string {
 		second: 1,
 	};
 
+	// Handle the special case for "a few seconds ago"
+	if (secondsAgo < intervals.minute) {
+		return "a few seconds ago";
+	}
+
 	// Loop through the intervals and determine the appropriate time unit
 	for (const [unit, secondsInUnit] of Object.entries(intervals)) {
 		const interval = Math.floor(secondsAgo / secondsInUnit);
