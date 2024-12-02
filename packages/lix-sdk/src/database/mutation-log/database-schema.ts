@@ -7,7 +7,7 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
 	sqlite.exec`
   -- vector clock
   CREATE TABLE IF NOT EXISTS mutation_log (
-    row_id TEXT,
+    row_id BLOB,
     table_name TEXT,
     -- TODO SYNC - we might not need the operation as long as we don't expect a delete operation since we utilize upsert queries anyway
     operation TEXT,
@@ -50,7 +50,7 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
 		change_set_label: ["label_id", "change_set_id"],
 		change_set_label_author: ["label_id", "change_set_id", "account_id"],
 		version_change_conflict: ["version_id", "change_conflict_id"],
-    key_value: ["key"],
+		key_value: ["key"],
 	};
 
 
@@ -80,7 +80,7 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
       AFTER INSERT ON ${tableName}
       BEGIN
           INSERT INTO mutation_log (row_id, table_name, operation)
-          VALUES (${toSqliteJson(ids)}, '${tableName}', 'INSERT');
+          VALUES (JSONB(${toSqliteJson(ids)}), '${tableName}', 'INSERT');
       END;
   
       -- Trigger for UPDATE operations
@@ -88,7 +88,7 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
       AFTER UPDATE ON ${tableName}
       BEGIN
           INSERT INTO mutation_log (row_id, table_name, operation)
-          VALUES (${toSqliteJson(ids)}, '${tableName}', 'UPDATE');
+          VALUES (JSONB(${toSqliteJson(ids)}), '${tableName}', 'UPDATE');
       END;
     `);
   }
@@ -99,7 +99,7 @@ export type MutationLog = Selectable<MutationLogTable>;
 export type NewMutationLog = Insertable<MutationLogTable>;
 
 export type MutationLogTable = {
-	row_id: string;
+	row_id: Record<string, string>;
 	table_name: string;
 	// -1 = delete, 0 = insert, 1 = update
 	// TODO SYNC - we might not need the operation as long as we don't expect a delete operation since we utilize upsert queries anyway
