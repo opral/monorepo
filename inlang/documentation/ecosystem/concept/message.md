@@ -43,7 +43,7 @@ _A message always has an auto-generated but human readable ID. The alias is an o
 ### When to use aliases? 
 
 1. You have pre-existing messages with keys and want to adopt parts of inlang ecosystem without refactoring code.
-2. You target multiple platforms that need a different syntax to reference the same message e.g. iOS must use `UPPERCASE_WITH_UNDERSCORES` and Android must use `kebap-case`.
+2. You target multiple platforms that need a different syntax to reference the same message e.g. iOS must use `UPPERCASE_WITH_UNDERSCORES` and Android must use `kebab-case`.
 
 ### When NOT to use aliases?
 
