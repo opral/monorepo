@@ -1,6 +1,8 @@
-import type { Change, Snapshot } from "../database/schema.js";
+import type { Change, Snapshot, Version } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import { changeIsLeafInVersion } from "../query-filter/change-is-leaf-in-version.js";
 import { createSnapshot } from "../snapshot/create-snapshot.js";
+import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 
 /**
  * Programatically create a change in the database.
@@ -9,7 +11,8 @@ import { createSnapshot } from "../snapshot/create-snapshot.js";
  * with bypassing of file-based change detection.
  */
 export async function createChange(args: {
-	lix: Pick<Lix, "db">;
+	lix: Lix;
+	version: Version;
 	entityId: Change["entity_id"];
 	fileId: Change["file_id"];
 	pluginKey: Change["plugin_key"];
@@ -34,6 +37,26 @@ export async function createChange(args: {
 			.returningAll()
 			.executeTakeFirstOrThrow();
 
+		const parentChange = await trx
+			.selectFrom("change")
+			.where("file_id", "=", change.file_id)
+			.where("schema_key", "=", change.schema_key)
+			.where("entity_id", "=", change.entity_id)
+			.where(changeIsLeafInVersion(args.version))
+			.select("id")
+			.executeTakeFirst();
+
+		// If a parent exists, the change is a child of the parent
+		if (parentChange) {
+			await trx
+				.insertInto("change_edge")
+				.values({
+					parent_id: parentChange.id,
+					child_id: change.id,
+				})
+				.execute();
+		}
+
 		const currentAuthors = await trx
 			.selectFrom("active_account")
 			.selectAll()
@@ -48,6 +71,14 @@ export async function createChange(args: {
 				})
 				.execute();
 		}
+
+		// update the version with the new change
+		await updateChangesInVersion({
+			lix: { ...args.lix, db: trx },
+			changes: [change],
+			version: args.version,
+		});
+
 		return change;
 	};
 	if (args.lix.db.isTransaction) {

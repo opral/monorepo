@@ -1,15 +1,22 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChange } from "./create-change.js";
-import type { Change, ChangeAuthor } from "../database/schema.js";
+import type { Change } from "../database/schema.js";
 import { createAccount } from "../account/create-account.js";
+import { createVersion } from "../version/create-version.js";
+import { switchVersion } from "../version/switch-version.js";
 
 test("should create a change with the correct values", async () => {
 	const lix = await openLixInMemory({});
 
+	const version0 = await createVersion({ lix, name: "version0" });
+
+	await switchVersion({ lix, to: version0 });
+
 	const change = await createChange({
 		lix,
 		entityId: "entity1",
+		version: version0,
 		fileId: "file1",
 		pluginKey: "plugin1",
 		schemaKey: "schema1",
@@ -33,8 +40,13 @@ test("should create a change with the correct values", async () => {
 test("should create a snapshot with the correct content", async () => {
 	const lix = await openLixInMemory({});
 
+	const version0 = await createVersion({ lix, name: "version0" });
+
+	await switchVersion({ lix, to: version0 });
+
 	const change = await createChange({
 		lix,
+		version: version0,
 		entityId: "entity1",
 		fileId: "file1",
 		pluginKey: "plugin1",
@@ -55,11 +67,16 @@ test("should create a snapshot with the correct content", async () => {
 test("should create a change and a snapshot in a transaction", async () => {
 	const lix = await openLixInMemory({});
 
+	const version0 = await createVersion({ lix, name: "version0" });
+
+	await switchVersion({ lix, to: version0 });
+
 	let change: Change;
 
 	await lix.db.transaction().execute(async (trx) => {
 		change = await createChange({
 			lix: { ...lix, db: trx },
+			version: version0,
 			entityId: "entity1",
 			fileId: "file1",
 			pluginKey: "plugin1",
@@ -88,6 +105,10 @@ test("should create a change and a snapshot in a transaction", async () => {
 test("should create the change authors", async () => {
 	const lix = await openLixInMemory({});
 
+	const version0 = await createVersion({ lix, name: "version0" });
+
+	await switchVersion({ lix, to: version0 });
+
 	// cleaning the table in case there are some data
 	await lix.db.deleteFrom("active_account").execute();
 
@@ -108,6 +129,7 @@ test("should create the change authors", async () => {
 
 	const change = await createChange({
 		lix,
+		version: version0,
 		entityId: "entity1",
 		fileId: "file1",
 		pluginKey: "plugin1",
@@ -126,4 +148,64 @@ test("should create the change authors", async () => {
 		{ change_id: change.id, account_id: account1.id },
 		{ change_id: change.id, account_id: account2.id },
 	]);
+});
+
+test("should correctly identify parentChange and create change_edge", async () => {
+	const lix = await openLixInMemory({});
+
+	const version0 = await createVersion({ lix, name: "version0" });
+
+	const parentChange = await createChange({
+		lix,
+		version: version0,
+		entityId: "entity1",
+		fileId: "file1",
+		pluginKey: "plugin1",
+		schemaKey: "schema1",
+		snapshotContent: { text: "parent-snapshot-content" },
+	});
+
+	const change = await createChange({
+		lix,
+		version: version0,
+		entityId: "entity1",
+		fileId: "file1",
+		pluginKey: "plugin1",
+		schemaKey: "schema1",
+		snapshotContent: { text: "child-snapshot-content" },
+	});
+
+	const changeEdges = await lix.db
+		.selectFrom("change_edge")
+		.where("change_edge.child_id", "=", change.id)
+		.selectAll()
+		.execute();
+
+	expect(changeEdges.length).toBe(1);
+	expect(changeEdges[0]?.parent_id).toBe(parentChange.id);
+});
+
+test("should update versionChanges with the new change", async () => {
+	const lix = await openLixInMemory({});
+
+	const version0 = await createVersion({ lix, name: "version0" });
+
+	const change = await createChange({
+		lix,
+		version: version0,
+		entityId: "entity1",
+		fileId: "file1",
+		pluginKey: "plugin1",
+		schemaKey: "schema1",
+		snapshotContent: { text: "snapshot-content" },
+	});
+
+	const versionChanges = await lix.db
+		.selectFrom("version_change")
+		.where("version_change.version_id", "=", version0.id)
+		.selectAll()
+		.execute();
+
+	expect(versionChanges.length).toBe(1);
+	expect(versionChanges[0]?.change_id).toBe(change.id);
 });
