@@ -3421,6 +3421,9 @@ importers:
       '@dagrejs/dagre':
         specifier: ^1.1.4
         version: 1.1.4
+      '@lit/react':
+        specifier: ^1.0.5
+        version: 1.0.6(@types/react@18.3.11)
       '@lix-js/plugin-csv':
         specifier: workspace:*
         version: link:../lix-plugin-csv
@@ -3475,6 +3478,9 @@ importers:
       jotai:
         specifier: ^2.10.1
         version: 2.10.1(@types/react@18.3.11)(react@18.3.1)
+      lit:
+        specifier: ^3.2.1
+        version: 3.2.1
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -3600,6 +3606,9 @@ importers:
       '@lix-js/sdk':
         specifier: workspace:*
         version: link:../lix-sdk
+      lit:
+        specifier: ^3.2.1
+        version: 3.2.1
       papaparse:
         specifier: ^5.4.1
         version: 5.4.1

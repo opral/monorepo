@@ -13,6 +13,7 @@
 	},
 	"dependencies": {
 		"@dagrejs/dagre": "^1.1.4",
+		"@lit/react": "^1.0.5",
 		"@lix-js/plugin-csv": "workspace:*",
 		"@lix-js/sdk": "workspace:*",
 		"@radix-ui/react-avatar": "^1.1.1",
@@ -31,6 +32,7 @@
 		"date-fns": "^2.29.3",
 		"human-id": "^4.1.1",
 		"jotai": "^2.10.1",
+		"lit": "^3.2.1",
 		"lodash-es": "^4.17.21",
 		"lucide-react": "^0.460.0",
 		"native-file-system-adapter": "^3.0.1",

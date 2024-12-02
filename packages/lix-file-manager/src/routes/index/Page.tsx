@@ -44,13 +44,8 @@ export default function Page() {
 		input.click();
 	};
 
-	// const showChanges = async () => {
-	// 	console
-	// }
-
 	// useEffect(() => {
-	// 	console.log("getAuthors")
-	// 	console.log(changesCurrentVersion)
+	// 	console.log({ changesCurrentVersion })
 	// })
 
 	return (
@@ -90,13 +85,13 @@ export default function Page() {
 					<SectionHeader backaction={() => navigate("/")}title={activeFile?.path.replace("/", "") ? `/ ${activeFile?.path.replace("/", "")}` : "Graph"} />
 					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-scroll flex-shrink-0">
 						{changesCurrentVersion.map((change, i) => (
-								<ChangeComponent
-									key={change.id}
-									change={change}
-									showTopLine={i !== 0}
-									showBottomLine={i !== changesCurrentVersion.length - 1}
-								/>
-							))
+							<ChangeComponent
+								key={change.id}
+								change={change}
+								showTopLine={i !== 0}
+								showBottomLine={i !== changesCurrentVersion.length - 1}
+							/>
+						))
 						}
 					</div> 
 				</div> 

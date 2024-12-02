@@ -15,6 +15,7 @@ import {
 	changeHasLabel,
 	changeInVersion,
 	changeIsLeafInVersion,
+	sql,
 } from "@lix-js/sdk";
 import { CellSchemaV1 } from "@lix-js/plugin-csv";
 
@@ -27,7 +28,7 @@ export const activeFileAtom = atom(async (get) => {
 		// but fine for now.
 		// window.location.href = "/";
 		// console.error("no active file. reroute should avoid this throw");
-		return undefined
+		return undefined;
 	}
 
 	const lix = await get(lixAtom);
@@ -36,13 +37,13 @@ export const activeFileAtom = atom(async (get) => {
 		.selectFrom("file")
 		.selectAll()
 		.where("id", "=", fileId)
-		.executeTakeFirst()
+		.executeTakeFirst();
 
-	if(!fileAtom) {
-		console.error("no file found")
-		return undefined
+	if (!fileAtom) {
+		console.error("no file found");
+		return undefined;
 	}
-	return fileAtom
+	return fileAtom;
 });
 
 export const parsedCsvAtom = atom(async (get) => {
@@ -100,7 +101,7 @@ export const activeCellEntityIdAtom = atom(async (get) => {
 export const activeCellChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const activeFile = await get(activeFileAtom);
-	if(!activeFile) return []
+	if (!activeFile) return [];
 	const cellEntityId = await get(activeCellEntityIdAtom);
 	const currentBranch = await get(currentVersionAtom);
 	const lix = await get(lixAtom);
@@ -152,7 +153,7 @@ export const unconfirmedChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	if(!activeFile) return []
+	if (!activeFile) return [];
 	const currentBranch = await get(currentVersionAtom);
 
 	return await lix.db
@@ -179,7 +180,7 @@ export const allChangesAtom = atom(async (get) => {
 		.select("snapshot.content as snapshot_content")
 		.select("file.path as file_path")
 		.select("account.name as account_name")
-		.orderBy('change.created_at', 'desc')
+		.orderBy("change.created_at", "desc")
 		.execute();
 });
 
@@ -198,7 +199,7 @@ export const allChangesDynamicGroupingAtom = atom(async (get) => {
 		.select("snapshot.content as snapshot_content")
 		.select("file.path as file_path")
 		.select("account.name as account_name")
-		.orderBy('change.created_at', 'desc')
+		.orderBy("change.created_at", "desc")
 		.execute();
 
 	// groupe the changes array by same created_at dates
@@ -218,7 +219,7 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	if(!activeFile) return []
+	if (!activeFile) return [];
 	const currentBranch = await get(currentVersionAtom);
 	return await lix.db
 		.selectFrom("change")
@@ -227,12 +228,24 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 		.innerJoin("file", "file.id", "change.file_id")
 		.innerJoin("change_author", "change_author.change_id", "change.id")
 		.innerJoin("account", "account.id", "change_author.account_id")
+		.leftJoin("change_edge", "change_edge.child_id", "change.id")
+		.leftJoin(
+			"change as parent_change",
+			"parent_change.id",
+			"change_edge.parent_id"
+		)
+		.leftJoin(
+			"snapshot as parent_snapshot",
+			"parent_snapshot.id",
+			"parent_change.snapshot_id"
+		)
 		.where(changeInVersion(currentBranch))
 		.selectAll("change")
-		.select("snapshot.content as snapshot_content")
+		.select(sql`json(snapshot.content)`.as("snapshot_content"))
 		.select("file.path as file_path")
 		.select("account.name as account_name")
-		.orderBy('change.created_at', 'desc')
+		.select(sql`json(parent_snapshot.content)`.as("parent_snapshot_content")) // This will be NULL if no parent exists
+		.orderBy("change.created_at", "desc")
 		.execute();
 });
 
