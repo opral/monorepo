@@ -3,7 +3,7 @@
 	"sourceLanguageTag": "en",
 	"languageTags": ["en", "de"],
 	"modules": [
-		"../../../plugins/inlang-message-format/dist/index.js",
+		"../../plugins/inlang-message-format/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
 	],
 	"plugin.inlang.messageFormat": {

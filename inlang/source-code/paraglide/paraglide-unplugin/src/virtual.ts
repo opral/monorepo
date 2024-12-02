@@ -11,7 +11,7 @@ type VirtualConfig = {
 	 * Getter function for module code
 	 *  @example ("runtime.js") => "export const languageTag = () => ..."
 	 */
-	getModule: (path: string) => string | undefined
+	getModule: (path: string) => string | undefined | Promise<string | undefined>
 }
 
 /**
@@ -44,10 +44,10 @@ export const virtual: UnpluginFactory<VirtualConfig> = ({
 			return undefined
 		},
 
-		load(id) {
+		async load(id) {
 			if (!id.startsWith(prefix)) return undefined
 			const path = id.slice(prefix.length) // remove the path
-			const code = getModule(path)
+			const code = await getModule(path)
 			return code
 		},
 	}

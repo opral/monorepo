@@ -37,12 +37,7 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 
 		logMessageChange()
 		const [regularOutput, messageModulesOutput] = await Promise.all([
-			compile({
-				messages,
-				settings,
-				outputStructure: "regular",
-				projectId,
-			}),
+			compile({ messages, settings, outputStructure: "regular", projectId }),
 			compile({ messages, settings, outputStructure: "message-modules", projectId }),
 		])
 
@@ -52,6 +47,7 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 			await writeOutput(c.outdir, regularOutput, fs)
 		} else {
 			const dts = generateDTS(regularOutput, VIRTUAL_MODULE_NAME)
+			console.log(DTS_FILE_LOCATION, dts)
 			await fs.writeFile(DTS_FILE_LOCATION, dts)
 		}
 		numCompiles++
@@ -89,16 +85,13 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 	 * getModule("messages/en.js")
 	 * ```
 	 */
-	function getModule(path: string): string | undefined {
-		console.log("getModule", path)
-		console.log(virtualModuleOutput)
+	async function getModule(path: string): Promise<string | undefined> {
 		return virtualModuleOutput[path]
 	}
 
 	return [
 		{
 			name: PLUGIN_NAME,
-
 			enforce: "pre",
 			async buildStart() {
 				const project = await getProject()

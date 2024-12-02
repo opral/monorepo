@@ -1,4 +1,4 @@
-/// <reference types="../test.d.ts" />
+// @ts-ignore
 import test from "$virtual/file1.js"
 import { describe, it, expect } from "vitest"
 
