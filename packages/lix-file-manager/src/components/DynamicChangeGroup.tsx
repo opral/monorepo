@@ -4,6 +4,7 @@ import timeAgo from "./../helper/timeAgo.ts";
 import { Button } from "./../../components/ui/button.tsx";
 import { useSearchParams } from "react-router-dom";
 import ChangeGroupDot from "./ChangeGroupDot.tsx";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./../../components/ui/tooltip.tsx";
 
 export const DynamicChangeGroup = (props: {changes: (Change & {snapshot_content: Record<string, any> | null, file_path: string, account_name: string})[], showTopLine: boolean, showBottomLine: boolean }) => {
     const [, setSearchParams] = useSearchParams();
@@ -41,6 +42,9 @@ export const DynamicChangeGroup = (props: {changes: (Change & {snapshot_content:
                         </p>
 					</div>
 					<div className="flex gap-2 items-center pr-2">
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger>
 						<Avatar
 							className="w-8 h-8 cursor-pointer hover:opacity-90 transition-opacity"
 						>
@@ -51,6 +55,10 @@ export const DynamicChangeGroup = (props: {changes: (Change & {snapshot_content:
 									: "XX"}
 							</AvatarFallback>
 						</Avatar>
+									</TooltipTrigger>
+									<TooltipContent>{props.changes[0].account_name}</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
 					</div>
 				</div>
 			</div>

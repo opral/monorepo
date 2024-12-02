@@ -64,7 +64,7 @@ export default function Page() {
 						Upload
 					</Button>
 				</SectionHeader>
-				<div className="max-h-[calc(100%_-_60px)] overflow-auto">
+				<div className="max-h-[calc(100%_-_60px)] overflow-y-auto">
 					{files.map((file) => {
 						return (
 							<ListItems
@@ -83,7 +83,7 @@ export default function Page() {
 			{fileIdSearchParams 
 				? <div className="flex-1 h-full">
 					<SectionHeader backaction={() => navigate("/")}title={activeFile?.path.replace("/", "") ? `/ ${activeFile?.path.replace("/", "")}` : "Graph"} />
-					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-scroll flex-shrink-0">
+					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
 						{changesCurrentVersion.map((change, i) => (
 							<ChangeComponent
 								key={change.id}
@@ -97,7 +97,7 @@ export default function Page() {
 				</div> 
 				: <div className="flex-1 h-full">
 					<SectionHeader title="Overview" />
-					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-scroll">
+					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
 							{Object.entries(allChangesDynamicGrouping).map(([date, changes], i) => {
 								return (
 									<DynamicChangeGroup

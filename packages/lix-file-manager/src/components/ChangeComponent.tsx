@@ -8,6 +8,7 @@ import timeAgo from "./../helper/timeAgo.ts";
 import clsx from "clsx";
 import { lixAtom } from "./../state.ts";
 import { useAtom } from "jotai/react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./../../components/ui/tooltip.tsx";
 
 export const ChangeComponent = (props: {
 	change: Change & {
@@ -72,12 +73,19 @@ export const ChangeComponent = (props: {
 					</p>
 					<div className="flex gap-2 items-center pr-2">
 						<span className="text-sm font-medium text-slate-500 block pr-2">{timeAgo(props.change.created_at)}</span>
-						<Avatar className="w-8 h-8 cursor-pointer hover:opacity-90 transition-opacity">
-							<AvatarImage src="#" alt="#" />
-							<AvatarFallback className="bg-[#fff] text-[#141A21] border border-[#DBDFE7]">
-								{props.change.account_name ? props.change.account_name.substring(0, 2).toUpperCase() : "XX"}
-							</AvatarFallback>
-						</Avatar>
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger>
+									<Avatar className="w-8 h-8 cursor-pointer hover:opacity-90 transition-opacity">
+										<AvatarImage src="#" alt="#" />
+										<AvatarFallback className="bg-[#fff] text-[#141A21] border border-[#DBDFE7]">
+											{props.change.account_name ? props.change.account_name.substring(0, 2).toUpperCase() : "XX"}
+										</AvatarFallback>
+									</Avatar>
+								</TooltipTrigger>
+								<TooltipContent>{props.change.account_name}</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
 						<Button variant="ghost" size="icon">
 							<IconChevron className={clsx(isExpandedState ? "rotate-180" : "rotate-0", "transition")} />
 						</Button>
