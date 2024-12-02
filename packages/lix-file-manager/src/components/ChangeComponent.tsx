@@ -36,13 +36,13 @@ export const ChangeComponent = (props: {
 					// Wrap the component as a React Web Component
 					const WrappedComponent = createComponent({
 						tagName: `diff-${schemaKey}`, // Ensure the tag matches your custom element
-						elementClass: component,
+						elementClass: component.constructor as typeof HTMLElement,
 						react: React,
 					});
 
 					// Dynamically define the custom element (if not already defined)
 					if (!customElements.get(`diff-${schemaKey}`)) {
-						customElements.define(`diff-${schemaKey}`, component);
+						customElements.define(`diff-${schemaKey}`, component.constructor as typeof HTMLElement);
 					}
 
 					setReactDiffComponent(() => WrappedComponent);
@@ -88,8 +88,8 @@ export const ChangeComponent = (props: {
 						<div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 px-2 sm:px-3 pt-2 pb-6 sm:pb-8 overflow-hidden">
 							{ReactDiffComponent && (
 								<ReactDiffComponent
-									snapshotBefore={JSON.parse(props.change.parent_snapshot_content)}
-									snapshotAfter={JSON.parse(props.change.snapshot_content)}
+									snapshotBefore={props.change.parent_snapshot_content ? (typeof props.change.parent_snapshot_content === 'string' ? JSON.parse(props.change.parent_snapshot_content) : props.change.parent_snapshot_content) : null}
+									snapshotAfter={props.change.snapshot_content ? (typeof props.change.snapshot_content === 'string' ? JSON.parse(props.change.snapshot_content) : props.change.snapshot_content) : null}
 								/>
 							)}
 							{/* <pre>{JSON.stringify(props.change, null, 2)}</pre> */}

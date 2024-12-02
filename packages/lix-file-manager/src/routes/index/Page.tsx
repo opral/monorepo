@@ -64,7 +64,7 @@ export default function Page() {
 						Upload
 					</Button>
 				</SectionHeader>
-				<div className="max-h-[calc(100%_-_60px)] overflow-y-scroll">
+				<div className="max-h-[calc(100%_-_60px)] overflow-auto">
 					{files.map((file) => {
 						return (
 							<ListItems
