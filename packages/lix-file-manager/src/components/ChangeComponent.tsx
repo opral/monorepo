@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, JSX } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar.tsx";
 import { Change } from "@lix-js/sdk";
 import ChangeDot from "./ChangeDot.tsx";
@@ -8,7 +8,6 @@ import timeAgo from "./../helper/timeAgo.ts";
 import clsx from "clsx";
 import { lixAtom } from "./../state.ts";
 import { useAtom } from "jotai/react";
-import { createComponent } from "@lit/react";
 
 export const ChangeComponent = (props: {
 	change: Change & {
@@ -21,38 +20,39 @@ export const ChangeComponent = (props: {
 }) => {
 	const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
 	const [lix] = useAtom(lixAtom);
-	const [ReactDiffComponent, setReactDiffComponent] = useState<React.ComponentType<any> | null>(null);
+	const [DiffComponent, setDiffComponent] = useState<JSX.Element | null>(null);
 
 	useEffect(() => {
-		const loadComponent = async () => {
-			if (lix) {
-				const schemaKey = props.change.schema_key;
-				const plugin = (await lix.plugin.getAll()).find((p) =>
-					p.diffUiComponents?.some((c) => c.schema_key === schemaKey)
-				);
-
-				const component = plugin?.diffUiComponents?.find((c) => c.schema_key === schemaKey)?.component;
-				if (component) {
-					// Wrap the component as a React Web Component
-					const WrappedComponent = createComponent({
-						tagName: `diff-${schemaKey}`, // Ensure the tag matches your custom element
-						elementClass: component.constructor as typeof HTMLElement,
-						react: React,
-					});
-
-					// Dynamically define the custom element (if not already defined)
-					if (!customElements.get(`diff-${schemaKey}`)) {
-						customElements.define(`diff-${schemaKey}`, component.constructor as typeof HTMLElement);
-					}
-
-					setReactDiffComponent(() => WrappedComponent);
-				}
-				// Todo: add fallback component
-			}
-		};
-
-		loadComponent();
+		loadDiffComponent();
 	}, [lix]);
+
+	const loadDiffComponent = async () => {
+		if (lix) {
+			const schemaKey = props.change.schema_key;
+			const plugin = (await lix.plugin.getAll()).find((p) =>
+				p.diffUiComponents?.some((c) => c.schema_key === schemaKey)
+			);
+			const component = plugin?.diffUiComponents?.find((c) => c.schema_key === schemaKey)?.component;
+			if (component) {
+				// Dynamically define the custom element (if not already defined)
+				if (!customElements.get(`diff-${schemaKey}`)) {
+					customElements.define(`diff-${schemaKey}`, component.constructor as typeof HTMLElement);
+				}
+
+				setDiffComponent(() => {
+					const WrappedComponent = (props: { snapshotBefore: Record<string, any> | null; snapshotAfter: Record<string, any> | null }) => {
+						return React.createElement(`diff-${schemaKey}`, props);
+					};
+
+					return React.createElement(WrappedComponent, {
+						snapshotBefore: props.change.parent_snapshot_content,
+						snapshotAfter: props.change.snapshot_content,
+					});
+				});
+			}
+			// Todo: add fallback component
+		}
+	};
 
 	return (
 		<div
@@ -86,12 +86,7 @@ export const ChangeComponent = (props: {
 				{isExpandedState && (
 					<div className="pb-2">
 						<div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 px-2 sm:px-3 pt-2 pb-6 sm:pb-8 overflow-hidden">
-							{ReactDiffComponent && (
-								<ReactDiffComponent
-									snapshotBefore={props.change.parent_snapshot_content ? (typeof props.change.parent_snapshot_content === 'string' ? JSON.parse(props.change.parent_snapshot_content) : props.change.parent_snapshot_content) : null}
-									snapshotAfter={props.change.snapshot_content ? (typeof props.change.snapshot_content === 'string' ? JSON.parse(props.change.snapshot_content) : props.change.snapshot_content) : null}
-								/>
-							)}
+							{DiffComponent && (<>{DiffComponent}</>)}
 							{/* <pre>{JSON.stringify(props.change, null, 2)}</pre> */}
 						</div>
 					</div>
