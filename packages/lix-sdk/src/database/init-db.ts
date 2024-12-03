@@ -7,7 +7,7 @@ import { validateFilePath } from "../file/validate-file-path.js";
 import { jsonSha256 } from "../snapshot/json-sha-256.js";
 import { ParseJsonBPluginV1 } from "./kysely-plugin/parse-jsonb-plugin-v1.js";
 import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js";
-import { lixSession, sessionClockTick } from "./mutation-log/lix-session.js";
+import { createSession } from "./mutation-log/lix-session.js";
 
 export function initDb(args: {
 	sqlite: SqliteDatabase;
@@ -74,15 +74,17 @@ function initFunctions(args: { sqlite: SqliteDatabase }) {
 		deterministic: true,
 	});
 
+	const lixSession = createSession();
+
 	args.sqlite.createFunction({
 		name: "lix_session",
 		arity: 0,
-		xFunc: () => lixSession(),
+		xFunc: () => lixSession.id(),
 	});
 
 	args.sqlite.createFunction({
 		name: "lix_session_clock_tick",
 		arity: 0,
-		xFunc: () => sessionClockTick(),
+		xFunc: () => lixSession.sessionClockTick(),
 	});
 }
