@@ -29,7 +29,7 @@ export const virtual: UnpluginFactory<VirtualConfig> = ({
 	const prefix = virtualModuleName + "/"
 	return {
 		name: "@inlang/paraglide-unpligin:virtual",
-		resolveId(id, importer, options) {
+		resolveId(id, importer) {
 			// Handle imports that are virtual modules
 			if (id.startsWith(prefix)) return id
 			// Handle relative imports from a virtual module

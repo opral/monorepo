@@ -11,7 +11,10 @@ const isWindows = typeof process !== "undefined" && process.platform === "win32"
  *
  * This plugin intercepts imports to the `outdir` folder & uses the virtal plugin instead
  */
-export const build: UnpluginFactory<Pick<PluginConfig, "outdir">> = (c, ctx) => {
+export const build: UnpluginFactory<Pick<PluginConfig, "outdir" | "virtualModuleName">> = (
+	c,
+	ctx
+) => {
 	return {
 		name: VITE_BUILD_PLUGIN_NAME,
 		vite: {

@@ -31,10 +31,7 @@ export interface Config extends VitePluginUserConfig {
  */
 export function resolveConfig(userConfig: UserConfig): Config {
 	const fullConfig: Config = {
-		project: userConfig.project,
-		outdir: userConfig.outdir,
-		silent: userConfig.silent,
-
+		...userConfig,
 		disablePreprocessor: userConfig.disablePreprocessor ?? false,
 	}
 

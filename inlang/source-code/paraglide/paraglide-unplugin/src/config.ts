@@ -28,8 +28,14 @@ export type UserConfig = {
 
 export type PluginConfig = {
 	logger: Logger
+	/** Absolute path to the project.inlang folder */
 	projectPath: string
+	/** Absolute path to the directory in which to write the paraglide files*/
 	outdir: string | undefined
+	/** Absolute path to write .d.ts files to if virtual modules are enabled */
+	dtsPath: string
+	/** Name of the virtual module to use */
+	virtualModuleName: string
 }
 
 /**
@@ -46,9 +52,15 @@ export function resolveConfig(options: UserConfig): PluginConfig {
 
 	const normalizedPorjectPath = path.resolve(process.cwd(), options.project)
 
+	if (options.outdir && options.useVirtualModule) {
+		logger.warn("`outdir` option is specified alongside `useVirtualModules`. It won't do anything")
+	}
+
 	return {
 		logger,
 		projectPath: normalizedPorjectPath,
-		outdir: normalizedOutdir,
+		outdir: options.useVirtualModule ? undefined : normalizedOutdir,
+		dtsPath: path.resolve(process.cwd(), "paraglide.d.ts"),
+		virtualModuleName: "$paraglide",
 	}
 }

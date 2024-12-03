@@ -15,8 +15,6 @@ import { virtual } from "./virtual.js"
 import { build } from "./build.js"
 
 const PLUGIN_NAME = "unplugin-paraglide"
-const VIRTUAL_MODULE_NAME = "$paraglide"
-const DTS_FILE_LOCATION = "./paraglide.d.ts"
 
 const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 	const c = resolveConfig(userConfig)
@@ -46,8 +44,9 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 		if (c.outdir) {
 			await writeOutput(c.outdir, regularOutput, fs)
 		} else {
-			const dts = generateDTS(regularOutput, VIRTUAL_MODULE_NAME)
-			await fs.writeFile(DTS_FILE_LOCATION, dts)
+			const dts = generateDTS(regularOutput, c.virtualModuleName)
+			console.log("writing types to ", c.dtsPath)
+			await fs.writeFile(c.dtsPath, dts)
 		}
 		numCompiles++
 	})
@@ -133,18 +132,18 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 				})
 			},
 		},
+		...makeArray(build(c, ctx)),
 		...makeArray(
 			virtual(
 				{
-					name: VIRTUAL_MODULE_NAME,
+					name: c.virtualModuleName,
 					getModule,
 				},
 				ctx
 			)
 		),
-		...makeArray(build(c, ctx)),
 	]
 }
 
 export const paraglide = createUnplugin(plugin)
-export { type UserConfig }
+export type { UserConfig }
