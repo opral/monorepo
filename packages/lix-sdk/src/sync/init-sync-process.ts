@@ -2,7 +2,9 @@ import type { Lix } from "../lix/open-lix.js";
 import { pushToServer } from "./push-to-server.js";
 import { pullFromServer } from "./pull-from-server.js";
 
-export async function initSyncProcess(args: { lix: Lix }): Promise<
+export async function initSyncProcess(args: {
+	lix: Pick<Lix, "db" | "plugin">;
+}): Promise<
 	| {
 			stop: () => void;
 	  }

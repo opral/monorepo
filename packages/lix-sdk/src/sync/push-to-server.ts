@@ -9,7 +9,7 @@ import { getDiffingRows } from "./get-diffing-rows.js";
 export async function pushToServer(args: {
 	id: string;
 	serverUrl: string;
-	lix: Lix;
+	lix: Pick<Lix, "db">;
 	targetVectorClock: VectorClock;
 }): Promise<void> {
 	const { upsertedRows: tableRowsToPush, state } = await getDiffingRows({

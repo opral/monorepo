@@ -4,7 +4,7 @@ import { mergeTheirState, type VectorClock } from "./merge-state.js";
 
 export async function pullFromServer(args: {
 	id: string;
-	lix: Lix;
+	lix: Pick<Lix, "db">;
 	serverUrl: string;
 }): Promise<VectorClock> {
 	// 1. get the current vector clock on the client "sessionStatesKnownByTheClient" and send it to the server

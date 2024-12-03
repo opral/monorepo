@@ -5,7 +5,7 @@ export async function getDiffingRows(args: {
 	/**
 	 * the lix to merge their state into
 	 */
-	lix: Lix;
+	lix: Pick<Lix, "db">;
 	/**
 	 * the the vector clock of the lix to merge in
 	 */
