@@ -205,7 +205,6 @@ test("rows changed on the client more recently should not be updated", async () 
 });
 
 test("rows changed on the server more recently should be updated on the client", async () => {
-
 	// setup mock server
 	const storage = createServerApiMemoryStorage();
 	const lsaHandler = await createServerApiHandler({ storage });

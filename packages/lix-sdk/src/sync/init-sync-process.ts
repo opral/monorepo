@@ -44,7 +44,7 @@ export async function initSyncProcess(args: { lix: Lix }): Promise<
 	};
 
 	// naive implementation that syncs every second
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	 
 	async function schedulePullAndPush() {
 		if (!stoped) {
 			await pullAndPush();

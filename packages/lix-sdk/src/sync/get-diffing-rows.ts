@@ -69,18 +69,14 @@ export async function getDiffingRows(args: {
 						.executeTakeFirstOrThrow()
 				);
 			} else {
-				let diffRow = trx
-					.selectFrom(tableName)
-					.selectAll()
+				let diffRow = trx.selectFrom(tableName).selectAll();
 
 				for (const [key, value] of Object.entries(operation.row_id)) {
-					diffRow = diffRow.where(key, "=", value)
+					diffRow = diffRow.where(key, "=", value);
 				}
 
-				upsertedRows[tableName].push(
-					await diffRow.executeTakeFirstOrThrow()
-				);
-			} 
+				upsertedRows[tableName].push(await diffRow.executeTakeFirstOrThrow());
+			}
 		}
 	};
 

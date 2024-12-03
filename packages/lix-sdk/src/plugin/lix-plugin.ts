@@ -87,7 +87,7 @@ export type LixPlugin = {
  *   detectedChange.snapshot.name // string
  *   ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export type DetectedChange<Schema extends ExperimentalChangeSchema = any> = {
 	entity_id: string;
 	schema: Omit<ExperimentalChangeSchema, "schema">;

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import type { FromSchema, JSONSchema } from "json-schema-to-ts";
 
 /**

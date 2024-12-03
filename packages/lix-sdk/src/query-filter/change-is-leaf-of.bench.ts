@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { v7 } from "uuid";
 import { bench, describe } from "vitest";
 import {
