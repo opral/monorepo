@@ -56,6 +56,10 @@ export function resolveConfig(options: UserConfig): PluginConfig {
 		logger.warn("`outdir` option is specified alongside `useVirtualModules`. It won't do anything")
 	}
 
+	if (!options.outdir && !options.useVirtualModule) {
+		throw new Error("[unplugin-paraglide] You must specify either `outdir` or `useVirtualModule`")
+	}
+
 	return {
 		logger,
 		projectPath: normalizedPorjectPath,
