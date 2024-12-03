@@ -46,7 +46,7 @@ export async function createVersion(args: {
 					eb
 						.selectFrom("version_change")
 						.select([eb.val(newVersion.id).as("version_id"), "change_id"])
-						.where("version_id", "=", args.parent!.id),
+						.where("version_id", "=", args.parent!.id)
 				)
 				.execute();
 
@@ -57,8 +57,11 @@ export async function createVersion(args: {
 				.expression((eb) =>
 					eb
 						.selectFrom("version_change_conflict")
-						.select([eb.val(Version.id).as("Version_id"), "change_conflict_id"])
-						.where("version_id", "=", args.parent!.id),
+						.select([
+							eb.val(newVersion.id).as("version_id"),
+							"change_conflict_id",
+						])
+						.where("version_id", "=", args.parent!.id)
 				)
 				.execute();
 		}

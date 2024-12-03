@@ -54,16 +54,7 @@ test("it should copy the changes from the parent version", async () => {
 
 	const changesInversion1 = await lix.db
 		.selectFrom("change")
-		.innerJoin(
-			"change_set_element",
-			"change.id",
-			"change_set_element.change_id",
-		)
-		.innerJoin(
-			"version",
-			"version.change_set_id",
-			"change_set_element.change_set_id",
-		)
+		.innerJoin("version_change", "change.id", "version_change.change_id")
 		.selectAll("change")
 		.where("version_id", "=", version1.id)
 		.execute();
