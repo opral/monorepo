@@ -1,0 +1,105 @@
+import { test, expect } from "vitest";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import type { VersionChange } from "../database/schema.js";
+import { mockChange } from "../change/mock-change.js";
+import { createVersion } from "../version/create-version.js";
+import { versionChangeInSymmetricDifference } from "./version-change-in-symmetric-difference.js";
+
+test("should return the symmetric difference between two change sets", async () => {
+	const lix = await openLixInMemory({});
+
+	const versionA = await createVersion({ lix });
+	const versionB = await createVersion({ lix });
+
+	await lix.db
+		.insertInto("change")
+		.values([
+			mockChange({ id: "change1" }),
+			mockChange({ id: "change2" }),
+			mockChange({ id: "change3" }),
+			mockChange({ id: "change4" }),
+		])
+		.returningAll()
+		.execute();
+
+	const changesA: VersionChange[] = [
+		{ version_id: versionA.id, change_id: "change1" },
+		{ version_id: versionA.id, change_id: "change2" },
+	];
+
+	const changesB: VersionChange[] = [
+		{ version_id: versionB.id, change_id: "change2" },
+		{ version_id: versionB.id, change_id: "change3" },
+	];
+
+	await lix.db
+		.insertInto("version_change")
+		.values([...changesA, ...changesB])
+		.execute();
+
+	const result = await lix.db
+		.selectFrom("version_change")
+		.where(versionChangeInSymmetricDifference(versionA, versionB))
+		.selectAll()
+		.execute();
+
+	expect(result).toEqual([
+		// change 1 is in A but not in B
+		{ version_id: versionA.id, change_id: "change1" },
+		// change 3 is in B but not in A
+		{ version_id: versionB.id, change_id: "change3" },
+		// change 4 is in neither A nor B
+		// hence not in the symmetric difference
+	] satisfies VersionChange[]);
+});
+
+test("should return an empty array if there are no differences", async () => {
+	const lix = await openLixInMemory({});
+
+	const versionA = await createVersion({ lix });
+	const versionB = await createVersion({ lix });
+
+	await lix.db
+		.insertInto("change")
+		.values([
+			mockChange({ id: "change1" }),
+			mockChange({ id: "change2" }),
+			mockChange({ id: "change3" }),
+			mockChange({ id: "change4" }),
+		])
+		.returningAll()
+		.execute();
+
+	const changes: VersionChange[] = [
+		{ version_id: versionA.id, change_id: "change1" },
+		{ version_id: versionA.id, change_id: "change2" },
+		{ version_id: versionB.id, change_id: "change1" },
+		{ version_id: versionB.id, change_id: "change2" },
+	];
+
+	await lix.db.insertInto("version_change").values(changes).execute();
+
+	const result = await lix.db
+		.selectFrom("version_change")
+		.where(versionChangeInSymmetricDifference(versionA, versionB))
+		.selectAll()
+		.execute();
+
+	expect(result).toEqual([]);
+});
+
+test("should handle empty versions", async () => {
+	const lix = await openLixInMemory({});
+
+	const versionA = await createVersion({ lix });
+	const versionB = await createVersion({ lix });
+
+	const result = await lix.db
+		.selectFrom("version_change")
+		.where(versionChangeInSymmetricDifference(versionA, versionB))
+		.selectAll()
+		.execute();
+
+	// Verify the results
+	expect(result).toEqual([]);
+});

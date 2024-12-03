@@ -6,7 +6,6 @@ import {
 	changeIsLeafInVersion,
 	Lix,
 	Snapshot,
-	changeIsLowestCommonAncestorOf,
 	createDiscussion,
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";

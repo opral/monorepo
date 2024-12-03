@@ -37,8 +37,8 @@ test("it should update the version pointers in target that are not conflicting",
 	await mergeVersion({ lix, sourceVersion, targetVersion });
 
 	const targetChanges = await lix.db
-		.selectFrom("change_set_element")
-		.where("change_set_id", "=", targetVersion.change_set_id)
+		.selectFrom("version_change")
+		.where("version_id", "=", targetVersion.id)
 		.selectAll()
 		.execute();
 
@@ -111,8 +111,8 @@ test("if a previously undetected conflict is detected during merge, the conflict
 
 	// Validate results in `version_change_pointer` and `conflict` tables
 	const targetChanges = await lix.db
-		.selectFrom("change_set_element")
-		.where("change_set_id", "=", targetVersion.change_set_id)
+		.selectFrom("version_change")
+		.where("version_id", "=", targetVersion.id)
 		.selectAll()
 		.execute();
 
@@ -216,9 +216,9 @@ test("it should not update the target version pointers of a conflicting change",
 
 	// Validate results in `version_change_pointer` and `conflict` tables
 	const targetChanges = await lix.db
-		.selectFrom("change_set_element")
+		.selectFrom("version_change")
 		.selectAll()
-		.where("change_set_id", "=", targetVersion.change_set_id)
+		.where("version_id", "=", targetVersion.id)
 		.execute();
 
 	const conflicts = await lix.db
@@ -354,9 +354,9 @@ test("it should automatically detect a diverging entity conflict", async () => {
 
 	// ensure that the version change pointer hasn't been updated
 	const targetChanges = await lix.db
-		.selectFrom("change_set_element")
+		.selectFrom("version_change")
 		.selectAll()
-		.where("change_set_id", "=", targetVersion.change_set_id)
+		.where("version_id", "=", targetVersion.id)
 		.execute();
 
 	expect(targetChanges.map((pointer) => pointer.change_id)).not.toContain(

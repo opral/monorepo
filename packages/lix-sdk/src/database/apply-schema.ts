@@ -215,7 +215,7 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
 
   CREATE TABLE IF NOT EXISTS version (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
-    change_set_id TEXT NOT NULL,
+
     -- name is optional. 
     -- 
     -- "anonymous" versiones can ease workflows. 
@@ -223,16 +223,16 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
     -- without a name to experiment with
     -- changes with no mental overhead of 
     -- naming the version.
-    name TEXT,
+    name TEXT
+  ) STRICT;
 
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id),
+  CREATE TABLE IF NOT EXISTS version_change (
+    version_id TEXT NOT NULL,
+    change_id TEXT NOT NULL,
 
-    -- Assuming mutable change sets. 
-    -- If change sets are immutable,
-    -- remove the UNIQUE constraint
-    -- and update version pointers to 
-    -- create a new change set on updates
-    UNIQUE (id, change_set_id)
+    PRIMARY KEY (version_id, change_id),
+    FOREIGN KEY (version_id) REFERENCES version(id),
+    FOREIGN KEY (change_id) REFERENCES change(id)
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS version_change_conflict (
@@ -255,12 +255,8 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
   -- Insert the default version if missing
   -- (this is a workaround for not having a separata creation and migration schema's)
 
-  INSERT INTO change_set (id)
-  SELECT '01932cf1-f717-75e5-8513-dc6a0867b1ee'
-  WHERE NOT EXISTS (SELECT 1 FROM change_set);
-
-  INSERT INTO version (id, change_set_id, name)
-  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6', '01932cf1-f717-75e5-8513-dc6a0867b1ee', 'main'
+  INSERT INTO version (id, name)
+  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6', 'main'
   WHERE NOT EXISTS (SELECT 1 FROM version);
 
   -- Set the default current version to 'main' if both tables are empty

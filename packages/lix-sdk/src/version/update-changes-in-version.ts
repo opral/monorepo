@@ -8,7 +8,7 @@ import type { Lix } from "../lix/open-lix.js";
  */
 export async function updateChangesInVersion(args: {
 	lix: Pick<Lix, "db" | "plugin">;
-	version: Pick<Version, "id" | "change_set_id">;
+	version: Version;
 	changes: Change[];
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
@@ -16,16 +16,8 @@ export async function updateChangesInVersion(args: {
 			// Change for the same entity_id, schema_key and file_id should be unique
 			const existingEntityChange = await trx
 				.selectFrom("change")
-				.innerJoin(
-					"change_set_element",
-					"change.id",
-					"change_set_element.change_id"
-				)
-				.where(
-					"change_set_element.change_set_id",
-					"=",
-					args.version.change_set_id
-				)
+				.innerJoin("version_change", "change.id", "version_change.change_id")
+				.where("version_change.version_id", "=", args.version.id)
 				.where("change.schema_key", "=", change.schema_key)
 				.where("change.entity_id", "=", change.entity_id)
 				.where("change.file_id", "=", change.file_id)
@@ -35,17 +27,17 @@ export async function updateChangesInVersion(args: {
 			if (existingEntityChange) {
 				// update the existing pointer
 				await trx
-					.updateTable("change_set_element")
+					.updateTable("version_change")
 					.set("change_id", change.id)
-					.where("change_set_id", "=", args.version.change_set_id)
 					.where("change_id", "=", existingEntityChange.id)
+					.where("version_id", "=", args.version.id)
 					.execute();
 			} else {
 				// create a new pointer
 				await trx
-					.insertInto("change_set_element")
+					.insertInto("version_change")
 					.values({
-						change_set_id: args.version.change_set_id,
+						version_id: args.version.id,
 						change_id: change.id,
 					})
 					.execute();

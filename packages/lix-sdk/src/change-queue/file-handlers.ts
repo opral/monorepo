@@ -1,10 +1,8 @@
 import type { ChangeQueueEntry } from "../database/schema.js";
 import type { DetectedChange } from "../plugin/lix-plugin.js";
-import { updateChangesInVersion } from "../version/update-changes-in-version.js";
-import { changeIsLeafInVersion } from "../query-filter/change-is-leaf-in-version.js";
-import { createSnapshot } from "../snapshot/create-snapshot.js";
 import type { Lix } from "../lix/open-lix.js";
 import { sql } from "kysely";
+import { createChange } from "../change/create-change.js";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {
@@ -100,40 +98,20 @@ export async function handleFileInsert(args: {
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
-		for (const detectedChange of detectedChanges) {
-			const snapshot = await createSnapshot({
-				lix: { db: trx },
-				content: detectedChange.snapshot,
-			});
-
-			const insertedChange = await trx
-				.insertInto("change")
-				.values({
-					schema_key: detectedChange.schema.key,
-					file_id: args.changeQueueEntry.file_id,
-					entity_id: detectedChange.entity_id,
-					plugin_key: detectedChange.pluginKey,
-					snapshot_id: snapshot.id,
-				})
-				.returningAll()
-				.executeTakeFirstOrThrow();
-
-			for (const author of currentAuthors) {
-				await trx
-					.insertInto("change_author")
-					.values({
-						change_id: insertedChange.id,
-						account_id: author.id,
-					})
-					.execute();
-			}
-
-			await updateChangesInVersion({
-				lix: { ...args.lix, db: trx },
-				changes: [insertedChange],
-				version: currentVersion,
-			});
-		}
+		await Promise.all(
+			detectedChanges.map(async (detectedChange) => {
+				await createChange({
+					lix: { ...args.lix, db: trx },
+					authors: currentAuthors,
+					version: currentVersion,
+					entityId: detectedChange.entity_id,
+					fileId: args.changeQueueEntry.file_id,
+					pluginKey: detectedChange.pluginKey,
+					schemaKey: detectedChange.schema.key,
+					snapshotContent: detectedChange.snapshot,
+				});
+			}),
+		);
 
 		await trx
 			.deleteFrom("change_queue")
@@ -208,67 +186,27 @@ export async function handleFileChange(args: {
 			.selectFrom("active_account")
 			.selectAll()
 			.execute();
-		const currentversion = await trx
+
+		const currentVersion = await trx
 			.selectFrom("current_version")
 			.innerJoin("version", "current_version.id", "version.id")
 			.selectAll()
 			.executeTakeFirstOrThrow();
-		for (const detectedChange of detectedChanges) {
-			const parentChange = await trx
-				.selectFrom("change")
-				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-				.selectAll("change")
-				.select("snapshot.content")
-				.where("file_id", "=", args.changeQueueEntry.file_id)
-				.where("schema_key", "=", detectedChange.schema.key)
-				.where("entity_id", "=", detectedChange.entity_id)
-				.where(changeIsLeafInVersion(currentversion))
-				.executeTakeFirst();
 
-			const snapshot = await createSnapshot({
-				lix: { db: trx },
-				content: detectedChange.snapshot,
-			});
-
-			const insertedChange = await trx
-				.insertInto("change")
-				.values({
-					schema_key: detectedChange.schema.key,
-					file_id: args.changeQueueEntry.file_id,
-					plugin_key: detectedChange.pluginKey,
-					entity_id: detectedChange.entity_id,
-					snapshot_id: snapshot.id,
-				})
-				.returningAll()
-				.executeTakeFirstOrThrow();
-
-			for (const author of currentAuthors) {
-				await trx
-					.insertInto("change_author")
-					.values({
-						change_id: insertedChange.id,
-						account_id: author.id,
-					})
-					.execute();
-			}
-
-			await updateChangesInVersion({
-				lix: { ...args.lix, db: trx },
-				changes: [insertedChange],
-				version: currentversion,
-			});
-
-			// If a parent exists, the change is a child of the parent
-			if (parentChange) {
-				await trx
-					.insertInto("change_edge")
-					.values({
-						parent_id: parentChange.id,
-						child_id: insertedChange.id,
-					})
-					.execute();
-			}
-		}
+		await Promise.all(
+			detectedChanges.map(async (detectedChange) => {
+				await createChange({
+					lix: { ...args.lix, db: trx },
+					authors: currentAuthors,
+					version: currentVersion,
+					entityId: detectedChange.entity_id,
+					fileId: args.changeQueueEntry.file_id,
+					pluginKey: detectedChange.pluginKey,
+					schemaKey: detectedChange.schema.key,
+					snapshotContent: detectedChange.snapshot,
+				});
+			}),
+		);
 
 		await trx
 			.deleteFrom("change_queue")

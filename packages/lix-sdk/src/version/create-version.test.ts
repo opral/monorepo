@@ -7,15 +7,9 @@ import { createChangeConflict } from "../change-conflict/create-change-conflict.
 test("it should copy the changes from the parent version", async () => {
 	const lix = await openLixInMemory({});
 
-	const changeSet0 = await lix.db
-		.insertInto("change_set")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
 	const version0 = await lix.db
 		.insertInto("version")
-		.values({ name: "version0", change_set_id: changeSet0.id })
+		.values({ name: "version0" })
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
@@ -53,18 +47,9 @@ test("it should copy the changes from the parent version", async () => {
 
 	const changesInversion0 = await lix.db
 		.selectFrom("change")
-		.innerJoin(
-			"change_set_element",
-			"change.id",
-			"change_set_element.change_id"
-		)
-		.innerJoin(
-			"version",
-			"version.change_set_id",
-			"change_set_element.change_set_id"
-		)
+		.innerJoin("version_change", "change.id", "version_change.change_id")
 		.selectAll("change")
-		.where("version.id", "=", version0.id)
+		.where("version_id", "=", version0.id)
 		.execute();
 
 	const changesInversion1 = await lix.db
@@ -72,15 +57,15 @@ test("it should copy the changes from the parent version", async () => {
 		.innerJoin(
 			"change_set_element",
 			"change.id",
-			"change_set_element.change_id"
+			"change_set_element.change_id",
 		)
 		.innerJoin(
 			"version",
 			"version.change_set_id",
-			"change_set_element.change_set_id"
+			"change_set_element.change_set_id",
 		)
 		.selectAll("change")
-		.where("version.id", "=", version1.id)
+		.where("version_id", "=", version1.id)
 		.execute();
 
 	// main and feature version should have the same changes
@@ -106,15 +91,9 @@ test("it should copy the changes from the parent version", async () => {
 test("it should copy change conflict pointers from the parent version", async () => {
 	const lix = await openLixInMemory({});
 
-	const changeSet0 = await lix.db
-		.insertInto("change_set")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
 	const version0 = await lix.db
 		.insertInto("version")
-		.values({ name: "version0", change_set_id: changeSet0.id })
+		.values({ name: "version0" })
 		.returningAll()
 		.executeTakeFirstOrThrow();
 

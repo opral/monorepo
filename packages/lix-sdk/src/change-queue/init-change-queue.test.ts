@@ -190,9 +190,9 @@ test("should use queue and settled correctly", async () => {
 		.selectAll()
 		.execute();
 
-	const versionChangeSetElements = await lix.db
-		.selectFrom("change_set_element")
-		.where("change_set_id", "=", currentVersion.change_set_id)
+	const versionChanges = await lix.db
+		.selectFrom("version_change")
+		.where("version_id", "=", currentVersion.id)
 		.selectAll()
 		.execute();
 
@@ -243,9 +243,9 @@ test("should use queue and settled correctly", async () => {
 	]);
 
 	// the version change pointers points to the last change
-	expect(versionChangeSetElements).toEqual([
+	expect(versionChanges).toEqual([
 		expect.objectContaining({
-			change_set_id: currentVersion.change_set_id,
+			version_id: currentVersion.id,
 			change_id: updatedChanges[2]?.id,
 		}),
 	]);
