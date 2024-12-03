@@ -67,7 +67,7 @@ test("should use queue and settled correctly", async () => {
 	await changeQueueSettled({ lix });
 
 	expect(
-		(await lix.db.selectFrom("change_queue").selectAll().execute()).length,
+		(await lix.db.selectFrom("change_queue").selectAll().execute()).length
 	).toBe(0);
 
 	// TODO QUEUE check if the replacement of file_internal was expected
@@ -173,7 +173,7 @@ test("should use queue and settled correctly", async () => {
 	await changeQueueSettled({ lix });
 
 	expect(
-		(await lix.db.selectFrom("change_queue").selectAll().execute()).length,
+		(await lix.db.selectFrom("change_queue").selectAll().execute()).length
 	).toBe(0);
 
 	const updatedChanges = await lix.db
@@ -232,8 +232,14 @@ test("should use queue and settled correctly", async () => {
 	expect(updatedEdges).toEqual([
 		// 0 is the parent of 1
 		// 1 is the parent of 2
-		{ parent_id: updatedChanges[0]?.id, child_id: updatedChanges[1]?.id },
-		{ parent_id: updatedChanges[1]?.id, child_id: updatedChanges[2]?.id },
+		expect.objectContaining({
+			parent_id: updatedChanges[0]?.id,
+			child_id: updatedChanges[1]?.id,
+		}),
+		expect.objectContaining({
+			parent_id: updatedChanges[1]?.id,
+			child_id: updatedChanges[2]?.id,
+		}),
 	]);
 
 	// the version change pointers points to the last change

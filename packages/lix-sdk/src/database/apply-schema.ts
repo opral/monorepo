@@ -1,17 +1,17 @@
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import { applyAccountDatabaseSchema } from "../account/database-schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value/database-schema.js";
+import { applyMutationLogDatabaseSchema } from "./mutation-log/database-schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
  */
-export async function applySchema(args: {
-	sqlite: SqliteDatabase;
-}): Promise<unknown> {
+export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
 	applyAccountDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
 
-	return args.sqlite.exec`
+	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+	args.sqlite.exec`
 
   PRAGMA foreign_keys = ON;
   PRAGMA auto_vacuum = 2; -- incremental https://www.sqlite.org/pragma.html#pragma_auto_vacuum
@@ -23,6 +23,7 @@ export async function applySchema(args: {
     path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL,
     metadata BLOB,
+    
 
     CHECK (is_valid_file_path(path))
   ) STRICT;
@@ -123,16 +124,16 @@ export async function applySchema(args: {
 
   CREATE TABLE IF NOT EXISTS change_conflict (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    
     key TEXT NOT NULL,
     change_set_id TEXT NOT NULL,
-
     FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_conflict_resolution (
     change_conflict_id TEXT NOT NULL,
     resolved_change_id TEXT NOT NULL,
-
+    
     -- potential future columns
     -- resolved_by <account_id>
     -- resolved_at <timestamp>
@@ -149,10 +150,11 @@ export async function applySchema(args: {
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_element (
+    
     change_set_id TEXT NOT NULL,
     change_id TEXT NOT NULL,
 
-    UNIQUE(change_set_id, change_id),
+    PRIMARY KEY(change_set_id, change_id),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id),    
     FOREIGN KEY(change_id) REFERENCES change(id)
   ) STRICT;
@@ -160,10 +162,9 @@ export async function applySchema(args: {
   CREATE TABLE IF NOT EXISTS change_set_label (
     label_id TEXT NOT NULL,
     change_set_id TEXT NOT NULL,
-
+    PRIMARY KEY(label_id, change_set_id),
     FOREIGN KEY(label_id) REFERENCES label(id),
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id),
-    PRIMARY KEY(label_id, change_set_id)
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_label_author (
@@ -192,7 +193,7 @@ export async function applySchema(args: {
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
     content TEXT NOT NULL,
     created_by TEXT NOT NULL,
-
+    
     FOREIGN KEY(created_by) REFERENCES account(id),
     FOREIGN KEY(discussion_id) REFERENCES discussion(id),
     FOREIGN KEY(parent_id) REFERENCES comment(id)
@@ -202,7 +203,9 @@ export async function applySchema(args: {
   
   CREATE TABLE IF NOT EXISTS label (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    
     name TEXT NOT NULL UNIQUE  -- e.g., 'confirmed', 'reviewed'
+    
   ) STRICT;
 
   INSERT OR IGNORE INTO label (name) VALUES ('confirmed');
@@ -262,5 +265,9 @@ export async function applySchema(args: {
   SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6'
   WHERE NOT EXISTS (SELECT 1 FROM current_version);
 
-`;
+  `;
+
+	applyMutationLogDatabaseSchema(args.sqlite);
+
+	return args.sqlite;
 }

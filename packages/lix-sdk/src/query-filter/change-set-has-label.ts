@@ -24,13 +24,13 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  */
 export function changeSetHasLabel(name: string) {
 	return (
-		eb: ExpressionBuilder<LixDatabaseSchema, "change_set">,
+		eb: ExpressionBuilder<LixDatabaseSchema, "change_set">
 	): ExpressionWrapper<LixDatabaseSchema, "change_set", SqlBool> =>
 		eb("change_set.id", "in", (subquery) =>
 			subquery
 				.selectFrom("change_set_label")
 				.innerJoin("label", "label.id", "change_set_label.label_id")
 				.select("change_set_label.change_set_id")
-				.where("label.name", "=", name),
+				.where("label.name", "=", name)
 		);
 }

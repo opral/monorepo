@@ -37,7 +37,7 @@ test("it should resolve a conflict and apply the changes", async () => {
 		key: "plugin1",
 		applyChanges: vi.fn().mockResolvedValue({
 			fileData: new TextEncoder().encode(
-				JSON.stringify(mockSnapshots[0]?.content),
+				JSON.stringify(mockSnapshots[0]?.content)
 			),
 		}),
 	};
@@ -61,7 +61,7 @@ test("it should resolve a conflict and apply the changes", async () => {
 		.values(
 			mockSnapshots.map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.returningAll()
 		.execute();
@@ -98,7 +98,7 @@ test("it should resolve a conflict and apply the changes", async () => {
 		.innerJoin(
 			"change_conflict_resolution",
 			"change_conflict_resolution.change_conflict_id",
-			"change_conflict.id",
+			"change_conflict.id"
 		)
 		.where("id", "=", conflict.id)
 		.selectAll()

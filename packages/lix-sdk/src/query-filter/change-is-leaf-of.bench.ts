@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { v7 } from "uuid";
 import { bench, describe } from "vitest";
 import {
@@ -14,7 +13,7 @@ import { changeIsLeafOf } from "./change-is-leaf-of.js";
 const createChange = (
 	schema_key: "bundle" | "message" | "variant",
 	payload: any,
-	parentChangeId: string | null,
+	parentChangeId: string | null
 ): { change: NewChange; snapshot: NewSnapshot; edges: ChangeEdge[] } => {
 	const entityId = payload[schema_key].id;
 	const snapshotId = v7();
@@ -72,7 +71,7 @@ const setupLix = async (nMessages: number) => {
 			const changeAndSnapshot = createChange(
 				"message",
 				payloads,
-				lastMessageChangeId,
+				lastMessageChangeId
 			);
 			mockChanges.push(changeAndSnapshot);
 			lastMessageChangeId = changeAndSnapshot.change.id!;
@@ -86,7 +85,7 @@ const setupLix = async (nMessages: number) => {
 			const changeAndSnapshot = createChange(
 				"variant",
 				payloads,
-				lastVariantChangeId,
+				lastVariantChangeId
 			);
 			mockChanges.push(changeAndSnapshot);
 			lastVariantChangeId = changeAndSnapshot.change.id!;
@@ -138,7 +137,7 @@ for (let i = 0; i < 5; i++) {
 					.selectAll()
 					.execute();
 			});
-		},
+		}
 	);
 }
 

@@ -17,9 +17,9 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  */
 export function changeIsLeaf() {
 	return (
-		eb: ExpressionBuilder<LixDatabaseSchema, "change">,
+		eb: ExpressionBuilder<LixDatabaseSchema, "change">
 	): ExpressionWrapper<LixDatabaseSchema, "change", SqlBool> =>
 		eb("change.id", "not in", (subquery) =>
-			subquery.selectFrom("change_edge").select("change_edge.parent_id"),
+			subquery.selectFrom("change_edge").select("change_edge.parent_id")
 		);
 }

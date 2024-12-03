@@ -18,7 +18,7 @@ export function validateFilePath(path: string): void {
 
 	if (path[0] !== "/") {
 		throw new Error(
-			"File path must start with a slash.\n\nNot starting a file path with a slash `/` leads to ambiguity whether or not the path is a directory or a file.",
+			"File path must start with a slash.\n\nNot starting a file path with a slash `/` leads to ambiguity whether or not the path is a directory or a file."
 		);
 	}
 
@@ -28,7 +28,7 @@ export function validateFilePath(path: string): void {
 
 	if (path.endsWith("/")) {
 		throw new Error(
-			"File path must not end with a slash.\n\nEnding a file with a slash leads to ambiguity whether or not the path is a directory or a file.",
+			"File path must not end with a slash.\n\nEnding a file with a slash leads to ambiguity whether or not the path is a directory or a file."
 		);
 	}
 
@@ -36,13 +36,13 @@ export function validateFilePath(path: string): void {
 
 	if (path.includes("//")) {
 		throw new Error(
-			"File path must not contain consecutive slashes.\n\nConsecutive slashes lead to ambiguity whether or not the path is a directory or a file.",
+			"File path must not contain consecutive slashes.\n\nConsecutive slashes lead to ambiguity whether or not the path is a directory or a file."
 		);
 	}
 
 	if (path.includes("\\")) {
 		throw new Error(
-			"File path must not contain backslashes.\n\nThe restriction might be loosened in the future.",
+			"File path must not contain backslashes.\n\nThe restriction might be loosened in the future."
 		);
 	}
 }

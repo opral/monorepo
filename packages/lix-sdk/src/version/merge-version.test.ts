@@ -126,7 +126,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 		.where(
 			"change_set_id",
 			"in",
-			conflicts.map((c) => c.change_set_id),
+			conflicts.map((c) => c.change_set_id)
 		)
 		.selectAll()
 		.execute();
@@ -231,7 +231,7 @@ test("it should not update the target version pointers of a conflicting change",
 		.where(
 			"change_set_id",
 			"in",
-			conflicts.map((c) => c.change_set_id),
+			conflicts.map((c) => c.change_set_id)
 		)
 		.selectAll()
 		.execute();
@@ -341,7 +341,7 @@ test("it should automatically detect a diverging entity conflict", async () => {
 		.innerJoin(
 			"change_set_element",
 			"change_set_element.change_set_id",
-			"change_conflict.change_set_id",
+			"change_conflict.change_set_id"
 		)
 		.selectAll("change_set_element")
 		.execute();
@@ -360,10 +360,10 @@ test("it should automatically detect a diverging entity conflict", async () => {
 		.execute();
 
 	expect(targetChanges.map((pointer) => pointer.change_id)).not.toContain(
-		sourceChange.id,
+		sourceChange.id
 	);
 	expect(targetChanges.map((pointer) => pointer.change_id)).toContain(
-		targetChange.id,
+		targetChange.id
 	);
 });
 

@@ -22,7 +22,7 @@ export async function garbageCollectChangeConflicts(args: {
 			.leftJoin(
 				"version_change_conflict",
 				"change_conflict.id",
-				"version_change_conflict.change_conflict_id",
+				"version_change_conflict.change_conflict_id"
 			)
 			.where("version_change_conflict.change_conflict_id", "is", null)
 			.selectAll()
@@ -34,12 +34,12 @@ export async function garbageCollectChangeConflicts(args: {
 			.leftJoin(
 				"change_set_element as conflict_elements",
 				"change_conflict.change_set_id",
-				"conflict_elements.change_set_id",
+				"conflict_elements.change_set_id"
 			)
 			.leftJoin(
 				"change_set_element as version_elements",
 				"conflict_elements.change_id",
-				"version_elements.change_id",
+				"version_elements.change_id"
 			)
 			.groupBy("change_conflict.id")
 			// TODO assumes that each change conflict element is a unique entity change
@@ -53,7 +53,7 @@ export async function garbageCollectChangeConflicts(args: {
 				// the number of changes in the conflict that have a corresponding version change pointer.
 				"<",
 				// the total number of changes in the conflict.
-				sql`count(conflict_elements.change_id)`,
+				sql`count(conflict_elements.change_id)`
 			)
 			.selectAll("change_conflict")
 			.execute();
@@ -76,7 +76,7 @@ export async function garbageCollectChangeConflicts(args: {
 				.where(
 					"change_set_element.change_set_id",
 					"in",
-					conflictsToDelete.map((conflict) => conflict.change_set_id),
+					conflictsToDelete.map((conflict) => conflict.change_set_id)
 				)
 				.execute();
 

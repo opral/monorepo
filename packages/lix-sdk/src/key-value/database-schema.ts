@@ -2,16 +2,17 @@ import type { Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 
 export function applyKeyValueDatabaseSchema(
-	sqlite: SqliteDatabase,
+	sqlite: SqliteDatabase
 ): SqliteDatabase {
 	return sqlite.exec`
-  CREATE TABLE IF NOT EXISTS key_value (
-    key TEXT PRIMARY KEY,
-    value TEXT NOT NULL
-  ) STRICT;
+	CREATE TABLE IF NOT EXISTS key_value (
+		key TEXT PRIMARY KEY,
+		value TEXT NOT NULL
+	) STRICT;
 
-  INSERT OR IGNORE INTO key_value (key, value)
-  VALUES ('lix-id', uuid_v4());
+	INSERT OR IGNORE INTO key_value (key, value)
+	VALUES ('lix-id', uuid_v4());
+
 `;
 }
 

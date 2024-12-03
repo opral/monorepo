@@ -14,12 +14,12 @@ import type { Version, LixDatabaseSchema } from "../database/schema.js";
  */
 export function changeConflictInVersion(version: Pick<Version, "id">) {
 	return (
-		eb: ExpressionBuilder<LixDatabaseSchema, "change_conflict">,
+		eb: ExpressionBuilder<LixDatabaseSchema, "change_conflict">
 	): ExpressionWrapper<LixDatabaseSchema, "change_conflict", SqlBool> =>
 		eb("change_conflict.id", "in", (subquery) =>
 			subquery
 				.selectFrom("version_change_conflict")
 				.select("change_conflict_id")
-				.where("version_change_conflict.version_id", "=", version.id),
+				.where("version_change_conflict.version_id", "=", version.id)
 		);
 }
