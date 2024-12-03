@@ -34,20 +34,6 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
     wall_clock INTEGER DEFAULT (strftime('%s', 'now') * 1000 + (strftime('%f', 'now') - strftime('%S', 'now')) * 1000)
   ) STRICT;`;
 
-	function toSqliteJson(keyColumns: string[]) {
-		if (keyColumns.length === 0) {
-			throw new Error("Key columns array cannot be empty.");
-		}
-
-		const jsonObjectArgs = keyColumns.map(
-			(keyColumnName) => `'${keyColumnName}', NEW.${keyColumnName}`
-		);
-
-		const jsonObjectExpression =
-			"json_object(" + jsonObjectArgs.join(", ") + ")";
-		return jsonObjectExpression;
-	}
-
 	for (const [tableName, idColumns] of Object.entries(tableIdColumns)) {
 		if (idColumns.length === 0) {
 			throw new Error("at least one id required");
@@ -85,3 +71,16 @@ export type MutationLogTable = {
 	session_time: number;
 	wall_clock: number;
 };
+
+function toSqliteJson(keyColumns: string[]) {
+	if (keyColumns.length === 0) {
+		throw new Error("Key columns array cannot be empty.");
+	}
+
+	const jsonObjectArgs = keyColumns.map(
+		(keyColumnName) => `'${keyColumnName}', NEW.${keyColumnName}`
+	);
+
+	const jsonObjectExpression = "json_object(" + jsonObjectArgs.join(", ") + ")";
+	return jsonObjectExpression;
+}

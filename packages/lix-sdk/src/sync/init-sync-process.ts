@@ -44,7 +44,7 @@ export async function initSyncProcess(args: { lix: Lix }): Promise<
 	};
 
 	// naive implementation that syncs every second
-	 
+
 	async function schedulePullAndPush() {
 		if (!stoped) {
 			await pullAndPush();

@@ -87,7 +87,7 @@ export type LixPlugin = {
  *   detectedChange.snapshot.name // string
  *   ```
  */
- 
+
 export type DetectedChange<Schema extends ExperimentalChangeSchema = any> = {
 	entity_id: string;
 	schema: Omit<ExperimentalChangeSchema, "schema">;

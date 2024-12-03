@@ -84,148 +84,149 @@ test("push rows of multiple tables to server successfully", async () => {
 });
 
 test("push-pull-push with two clients", async () => {
-    const lixBlob = await newLixFile();
+	const lixBlob = await newLixFile();
 
-    const client1 = await openLixInMemory({ blob: lixBlob });
-    const client2 = await openLixInMemory({ blob: lixBlob });
+	const client1 = await openLixInMemory({ blob: lixBlob });
+	const client2 = await openLixInMemory({ blob: lixBlob });
 
-    const { value: lixId } = await client1.db
-        .selectFrom("key_value")
-        .where("key", "=", "lix-id")
-        .selectAll()
-        .executeTakeFirstOrThrow();
+	const { value: lixId } = await client1.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix-id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
-    const storage = createServerApiMemoryStorage();
-    const lsaHandler = await createServerApiHandler({ storage });
+	const storage = createServerApiMemoryStorage();
+	const lsaHandler = await createServerApiHandler({ storage });
 
-    global.fetch = vi.fn((request) => lsaHandler(request));
+	global.fetch = vi.fn((request) => lsaHandler(request));
 
-    // Initialize the lix on the server
-    await lsaHandler(
-        new Request("http://localhost:3000/lsa/new-v1", {
-            method: "POST",
-            body: await client1.toBlob(),
-        })
-    );
-
-    // Client 1 inserts an account locally
-    await client1.db
-        .insertInto("account")
-        .values({ id: "account0", name: "account from client 1" })
-        .execute();
-
-    // Client 1 inserts into another table
-    await client1.db
-        .insertInto("key_value")
-        .values({
-            key: "mock-key",
-            value: "mock-value from client 1",
+	// Initialize the lix on the server
+	await lsaHandler(
+		new Request("http://localhost:3000/lsa/new-v1", {
+			method: "POST",
+			body: await client1.toBlob(),
 		})
-        .execute();
+	);
 
-    // Client 1 pushes to server
-    await pushToServer({
-        id: lixId,
-        lix: client1,
-        serverUrl: "http://localhost:3000",
-        targetVectorClock: [],
-    });
+	// Client 1 inserts an account locally
+	await client1.db
+		.insertInto("account")
+		.values({ id: "account0", name: "account from client 1" })
+		.execute();
 
-    // Client 2 pulls from server
-    const knownServerStateClient2 = await pullFromServer({
-        id: lixId,
-        lix: client2,
-        serverUrl: "http://localhost:3000",
-    });
+	// Client 1 inserts into another table
+	await client1.db
+		.insertInto("key_value")
+		.values({
+			key: "mock-key",
+			value: "mock-value from client 1",
+		})
+		.execute();
 
-    // Client 2 inserts an account locally
-    await client2.db
-        .insertInto("account")
-        .values({ id: "account1", name: "account from client 2" })
-        .execute();
+	// Client 1 pushes to server
+	await pushToServer({
+		id: lixId,
+		lix: client1,
+		serverUrl: "http://localhost:3000",
+		targetVectorClock: [],
+	});
 
-    // Client 2 inserts into another table
-    await client2.db
-        .insertInto("key_value")
-        .values({
-            key: "mock-key-2",
-            value: "mock-value from client 2",
-        })
-        .execute();
-	
+	// Client 2 pulls from server
+	const knownServerStateClient2 = await pullFromServer({
+		id: lixId,
+		lix: client2,
+		serverUrl: "http://localhost:3000",
+	});
+
+	// Client 2 inserts an account locally
 	await client2.db
-        .updateTable("key_value")
+		.insertInto("account")
+		.values({ id: "account1", name: "account from client 2" })
+		.execute();
+
+	// Client 2 inserts into another table
+	await client2.db
+		.insertInto("key_value")
+		.values({
+			key: "mock-key-2",
+			value: "mock-value from client 2",
+		})
+		.execute();
+
+	await client2.db
+		.updateTable("key_value")
 		.set({
-            value: "mock-value from client 1 - updated by client 2",
-		}).where("key", "=", "mock-key")
-		.execute();	
+			value: "mock-value from client 1 - updated by client 2",
+		})
+		.where("key", "=", "mock-key")
+		.execute();
 
-    // Client 2 pushes to server
-    await pushToServer({
-        id: lixId,
-        lix: client2,
-        serverUrl: "http://localhost:3000",
-        targetVectorClock: knownServerStateClient2,
-    });
+	// Client 2 pushes to server
+	await pushToServer({
+		id: lixId,
+		lix: client2,
+		serverUrl: "http://localhost:3000",
+		targetVectorClock: knownServerStateClient2,
+	});
 
-    // Verify the data on the server
-    const lixFromServer = await openLixInMemory({
-        blob: await storage.get(`lix-file-${lixId}`),
-    });
+	// Verify the data on the server
+	const lixFromServer = await openLixInMemory({
+		blob: await storage.get(`lix-file-${lixId}`),
+	});
 
-    const accountsOnServer = await lixFromServer.db
-        .selectFrom("account")
-        .selectAll()
-        .execute();
+	const accountsOnServer = await lixFromServer.db
+		.selectFrom("account")
+		.selectAll()
+		.execute();
 
 	expect(accountsOnServer).toEqual([
-		{
-			"id": "anonymous",
-			"name": "anonymous",
-		  },
+		{ id: "anonymous", name: "anonymous" },
 		{ id: "account0", name: "account from client 1" },
 		{ id: "account1", name: "account from client 2" },
 	]);
 
 	await pullFromServer({
-        id: lixId,
-        lix: client1,
-        serverUrl: "http://localhost:3000",
-    });
+		id: lixId,
+		lix: client1,
+		serverUrl: "http://localhost:3000",
+	});
 
 	const accountsOnClient1 = await client1.db
-        .selectFrom("account")
-        .selectAll()
-        .execute();
-	
+		.selectFrom("account")
+		.selectAll()
+		.execute();
+
 	expect(accountsOnServer).toEqual(accountsOnClient1);
 
 	await pullFromServer({
-        id: lixId,
-        lix: client2,
-        serverUrl: "http://localhost:3000",
-    });
+		id: lixId,
+		lix: client2,
+		serverUrl: "http://localhost:3000",
+	});
 
 	const accountsOnClient2 = await client2.db
-        .selectFrom("account")
-        .selectAll()
-        .execute();
-	
+		.selectFrom("account")
+		.selectAll()
+		.execute();
+
 	expect(accountsOnServer).toEqual(accountsOnClient2);
 
-    const keyValuesOnServer = await lixFromServer.db
-        .selectFrom("key_value")
-        .selectAll()
-        .execute();
+	const keyValuesOnServer = await lixFromServer.db
+		.selectFrom("key_value")
+		.selectAll()
+		.execute();
 
-    expect(keyValuesOnServer).toEqual([
+	expect(keyValuesOnServer).toEqual([
 		{
-			"key": "lix-id",
-			"value": lixId,
-		  },
-        { key: "mock-key", value: "mock-value from client 1 - updated by client 2" },
-        { key: "mock-key-2", value: "mock-value from client 2" },
-    ]);
+			key: "lix-id",
+			value: lixId,
+		},
+		{
+			key: "mock-key",
+			value: "mock-value from client 1 - updated by client 2",
+		},
+		{ key: "mock-key-2", value: "mock-value from client 2" },
+	]);
 });
 
 test("it should handle snapshots.content json binaries", async () => {
