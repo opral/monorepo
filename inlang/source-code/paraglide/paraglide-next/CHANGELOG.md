@@ -1,5 +1,11 @@
 # @inlang/paraglide-next
 
+## 0.7.4
+
+### Patch Changes
+
+- fix: first ssr render leading to a ReferenceError 'document' not defined error. https://github.com/opral/monorepo/pull/3248
+
 ## 0.7.3
 
 ### Patch Changes
