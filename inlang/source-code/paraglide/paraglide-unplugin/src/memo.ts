@@ -1,8 +1,10 @@
 import crypto from "node:crypto"
 
-const hashes = new Map<Function, string>()
-const outputs = new Map<Function, any>()
-export function memoized<T extends (...args: any[]) => Promise<any>>(
+type AnyAsyncFunction = (...args: any[]) => Promise<any>
+
+const hashes = new Map<AnyAsyncFunction, string>()
+const outputs = new Map<AnyAsyncFunction, any>()
+export function memoized<T extends AnyAsyncFunction>(
 	fn: T
 ): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
 	return async (...args) => {

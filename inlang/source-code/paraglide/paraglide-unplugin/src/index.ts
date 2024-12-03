@@ -45,7 +45,6 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 			await writeOutput(c.outdir, regularOutput, fs)
 		} else {
 			const dts = generateDTS(regularOutput, c.virtualModuleName)
-			console.log("writing types to ", c.dtsPath)
 			await fs.writeFile(c.dtsPath, dts)
 		}
 		numCompiles++
@@ -83,7 +82,7 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 	 * getModule("messages/en.js")
 	 * ```
 	 */
-	async function getModule(path: string): Promise<string | undefined> {
+	function getModule(path: string): string | undefined {
 		return virtualModuleOutput[path]
 	}
 
