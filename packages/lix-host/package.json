@@ -7,7 +7,7 @@
 		".": "./dist/index.js"
 	},
 	"scripts": {
-		"dev": "node --experimental-strip-types ./src/main.ts",
+		"dev": "node --watch --experimental-strip-types ./src/main.ts",
 		"build": "tsc --build",
 		"test": "tsc --noEmit && vitest run --coverage",
 		"test:watch": "vitest",

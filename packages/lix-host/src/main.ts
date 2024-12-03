@@ -4,6 +4,7 @@ import {
 	createServerApiHandler,
 	createServerApiMemoryStorage,
 } from "@lix-js/sdk";
+import { cors } from "hono/cors";
 
 const app = new Hono();
 
@@ -13,6 +14,7 @@ const lsaHandler = await createServerApiHandler({
 
 app.get("/", (c) => c.text("Lix host server"));
 
+app.use("/lsa/*", cors());
 // @ts-expect-error - Hono provides a subset of the Request object
 app.use("/lsa/*", (c) => lsaHandler(c.req));
 
