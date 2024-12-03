@@ -20,9 +20,7 @@ export const tableIdColumns: Record<string, Array<string>> = {
 	key_value: ["key"],
 };
 
-
 export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
-	
 	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	sqlite.exec`
   -- vector clock
@@ -36,47 +34,25 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
     wall_clock INTEGER DEFAULT (strftime('%s', 'now') * 1000 + (strftime('%f', 'now') - strftime('%S', 'now')) * 1000)
   ) STRICT;`;
 
-	// const triggerTables: string[] = [
-	//   'change',
-	//   'account',
-	//   'snapshot',
-	//   'change_set',
-	//   'change_conflict',
-	//   'version',
+	function toSqliteJson(keyColumns: string[]) {
+		if (keyColumns.length === 0) {
+			throw new Error("Key columns array cannot be empty.");
+		}
 
-	// TODO persist operations for:
-	// change_author -> PRIMARY KEY (change_id, account_id),
-	// change_edge -> PRIMARY KEY (parent_id, child_id),
-	// change_conflict_resolution -> PRIMARY KEY(change_conflict_id, resolved_change_id),
-	// change_set_element -> PRIMARY KEY(change_set_id, change_id),
-	// change_set_label -> PRIMARY KEY(label_id, change_set_id)
-	// change_set_label_author -> PRIMARY KEY(label_id, change_set_id, account_id),
-	// version_change_conflict -> PRIMARY KEY (version_id, change_conflict_id),
+		const jsonObjectArgs = keyColumns.map(
+			(keyColumnName) => `'${keyColumnName}', NEW.${keyColumnName}`
+		);
 
-	// ]
-
-
-
-  function toSqliteJson(keyColumns: string[]) {
-    if (keyColumns.length === 0) {
-      throw new Error("Key columns array cannot be empty.");
-    }
-  
-    const jsonObjectArgs = keyColumns.map(
-      (keyColumnName) => `'${keyColumnName}', NEW.${keyColumnName}`
-    );
-  
-    
-    const jsonObjectExpression = "json_object(" + jsonObjectArgs.join(", ") + ")";
-    return jsonObjectExpression
-  }
-	
+		const jsonObjectExpression =
+			"json_object(" + jsonObjectArgs.join(", ") + ")";
+		return jsonObjectExpression;
+	}
 
 	for (const [tableName, idColumns] of Object.entries(tableIdColumns)) {
 		if (idColumns.length === 0) {
 			throw new Error("at least one id required");
-		} 
-    sqlite.exec(`
+		}
+		sqlite.exec(`
       -- Trigger for INSERT operations
       CREATE TRIGGER IF NOT EXISTS ${tableName}_after_insert_log
       AFTER INSERT ON ${tableName}
@@ -93,8 +69,7 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
           VALUES (JSONB(${toSqliteJson(idColumns)}), '${tableName}', 'UPDATE');
       END;
     `);
-  }
-	
+	}
 }
 
 export type MutationLog = Selectable<MutationLogTable>;
