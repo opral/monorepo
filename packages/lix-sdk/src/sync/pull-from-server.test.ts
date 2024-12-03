@@ -4,7 +4,6 @@ import { createServerApiMemoryStorage } from "../server-api-handler/storage/crea
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
-import type { LixFile } from "../database/schema.js";
 
 test("pull rows of multiple tables from server successfully", async () => {
 	const lixOnServer = await openLixInMemory({});
@@ -125,69 +124,6 @@ test("it handles snapshot.content being json binary", async () => {
 	expect(snapshots).toMatchObject(mockSnapshot);
 });
 
-// the table file is not change controlled yet.
-// not syncing the data column because most times
-//
-// (1) https://www.loom.com/share/d4cee5318eb841f7a6c00e05f333e4d6
-// (2) https://www.loom.com/share/3e57fba9afde4bbda6bff196b5e7ed58
-//
-test.skip("it should handle files without syncing the data column", async () => {
-	const lixOnServer = await openLixInMemory({});
-
-	const lix = await openLixInMemory({ blob: await lixOnServer.toBlob() });
-
-	const { value: id } = await lixOnServer.db
-		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	const storage = createServerApiMemoryStorage();
-	const lsaHandler = await createServerApiHandler({ storage });
-
-	global.fetch = vi.fn((request) => lsaHandler(request));
-
-	const mockFile: LixFile = {
-		id: "file0",
-		path: "/path.txt",
-		data: new TextEncoder().encode("Hello, World!"),
-		metadata: {
-			mock: "metadata",
-		},
-	};
-
-	// insert mock data into server lix
-	await lixOnServer.db.insertInto("file").values(mockFile).execute();
-
-	// initialize the lix on the server with the mock data
-	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new", {
-			method: "POST",
-			body: await lixOnServer.toBlob(),
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-	);
-
-	await pullFromServer({
-		id,
-		lix,
-		serverUrl: "http://localhost:3000",
-	});
-
-	// Verify the data is pulled into the local lix
-	const snapshots = await lix.db.selectFrom("file").selectAll().execute();
-
-	expect(snapshots).toContainEqual({
-		id: mockFile.id,
-		metadata: mockFile.metadata,
-		path: mockFile.path,
-		// empty Uint8Array because we are not syncing the data column
-		data: new Uint8Array([]),
-	} satisfies LixFile);
-});
-
 test("rows changed on the client more recently should not be updated", async () => {
 	const lixOnServer = await openLixInMemory({});
 
@@ -269,28 +205,24 @@ test("rows changed on the client more recently should not be updated", async () 
 });
 
 test("rows changed on the server more recently should be updated on the client", async () => {
-	const lixOnServer = await openLixInMemory({});
 
-	const lix = await openLixInMemory({ blob: await lixOnServer.toBlob() });
-
-	const { value: id } = await lixOnServer.db
-		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
+	// setup mock server
 	const storage = createServerApiMemoryStorage();
 	const lsaHandler = await createServerApiHandler({ storage });
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
+	// create a lix and clone it for the client - so they share the same lix id
+	const remoteLix = await openLixInMemory({});
+	const localLix = await openLixInMemory({ blob: await remoteLix.toBlob() });
+
 	// insert mock data into server lix
-	await lixOnServer.db
+	await remoteLix.db
 		.insertInto("account")
 		.values({ id: "account0", name: "test account" })
 		.execute();
 
-	await lixOnServer.db
+	await remoteLix.db
 		.insertInto("key_value")
 		.values({
 			key: "mock-key",
@@ -300,8 +232,9 @@ test("rows changed on the server more recently should be updated on the client",
 
 	// let the wall clock move one ms forward
 	await new Promise((resolve) => setTimeout(resolve, 1));
-	// insert mock data into server lix
-	await lix.db
+
+	// insert conflicting mock data into local lix
+	await localLix.db
 		.insertInto("account")
 		.values({
 			id: "account0",
@@ -309,8 +242,11 @@ test("rows changed on the server more recently should be updated on the client",
 		})
 		.execute();
 
+	// let the wall clock move one ms forward
 	await new Promise((resolve) => setTimeout(resolve, 1));
-	await lixOnServer.db
+
+	// update the conflicting mock data on the server as well
+	await remoteLix.db
 		.updateTable("account")
 		.set({ name: "test account updated more recently on the server" })
 		.where("account.id", "=", "account0")
@@ -320,21 +256,27 @@ test("rows changed on the server more recently should be updated on the client",
 	await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
-			body: await lixOnServer.toBlob(),
+			body: await remoteLix.toBlob(),
 			headers: {
 				"Content-Type": "application/json",
 			},
 		})
 	);
 
+	const { value: id } = await localLix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix-id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	await pullFromServer({
 		id,
-		lix,
+		lix: localLix,
 		serverUrl: "http://localhost:3000",
 	});
 
 	// Verify the data is pulled into the local lix
-	const account = await lix.db
+	const account = await localLix.db
 		.selectFrom("account")
 		.where("id", "=", "account0")
 		.selectAll()
@@ -352,7 +294,7 @@ test("rows changed on the server more recently should be updated on the client",
 		name: "test account updated more recently on the server",
 	});
 
-	const mockKey = await lix.db
+	const mockKey = await localLix.db
 		.selectFrom("key_value")
 		.where("key", "=", "mock-key")
 		.selectAll()

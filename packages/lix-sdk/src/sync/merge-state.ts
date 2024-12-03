@@ -1,3 +1,4 @@
+import { tableIdColumns } from "../database/mutation-log/database-schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export type VectorClock = {
@@ -69,99 +70,76 @@ export async function mergeTheirState(args: {
 				if (!acc[table_name]) {
 					acc[table_name] = {};
 				}
-                // TODO SYNC use different matching mechanism
-				acc[table_name][row_id] = last_updated_wall_time;
+				// TODO SYNC use different matching mechanism
+				acc[table_name][rowIdToString(table_name, row_id)] =
+					last_updated_wall_time;
 				return acc;
 			},
 			{} as Record<string, Record<string, number>>
 		);
 
-		// go through operation from the vetor clock and
-		// remove entries from the row block list where their have a more recent update
+		const sourceMutationLog = args.sourceData["mutation_log"];
+		if (sourceMutationLog === undefined) {
+			throw new Error("Missing mutation log in source data");
+		}
 
-		for (const opertionOnTheServer of args.sourceData["mutation_log"]!) {
-			const tableName = opertionOnTheServer["table_name"] as string;
-			const time = opertionOnTheServer["session_time"] as number;
-			const row_id = opertionOnTheServer["row_id"] as string;
+		// go through operation from the vetor clock and
+		// remove entries from the row block list where we have a more recent update
+		for (let i = 0; i < sourceMutationLog.length; i++) {
+			const opertionInSource = sourceMutationLog[i];
+
+			const tableName = opertionInSource["table_name"] as string;
+			const time = opertionInSource["wall_clock"] as number;
+			const row_id = rowIdToString(tableName, opertionInSource["row_id"]);
 			// TODO SYNC undefined behaviour for two equal last writes -> fall back to session ID order for last write winn
 			if (
-				rowsIUpdatedLast[tableName]?.[row_id] &&
-				rowsIUpdatedLast[tableName]?.[row_id] < time
+				rowsIUpdatedLast[tableName] &&
+				rowsIUpdatedLast[tableName][row_id] &&
+				rowsIUpdatedLast[tableName][row_id] < time
 			) {
-				delete rowsIUpdatedLast[tableName]?.[row_id];
+				delete rowsIUpdatedLast[tableName][row_id];
 			}
 		}
 
-		const tablesWithId = [
-			"account",
-			"file",
-			"change",
-			"snapshot",
-			"change_conflict",
-			"change_set",
-			"discussion",
-			"comment",
-			"label",
-			"version",
-			"current_version",
-		];
+		// NOTE - dont step forward or set a breakpoint here! debugger crashes :-/
+		for (const [tableName, tableRows] of Object.entries(args.sourceData)) {
+			if (tableRows.length === 0) {
+				continue;
+			}
 
-		for (const [table_name, rows] of Object.entries(args.sourceData)) {
-			if (rows.length === 0) continue;
-
-			if (table_name === "mutation_log") {
+			if (tableName === "mutation_log") {
 				// the vector clock table has only imutable data and is append only
 				// --> just insert everything
-				for (const row of rows) {
+				for (const row of tableRows) {
 					await trx
-						.insertInto(table_name)
+						.insertInto(tableName)
 						// TODO SYNC how shall we deal with types here?
 						.values(row as any)
 						.onConflict((oc) => oc.doNothing())
 						.execute();
 				}
 			} else {
-				if (tablesWithId.includes(table_name)) {
-					//	 - filter only my records (this is the records that i have changed more recently than the changes comming from the push)
-					for (const row of rows) {
-                        // use a compound id? -
-						if (
-							rowsIUpdatedLast[table_name]?.[row.id as string] === undefined
-						) {
-							await trx
-								// TODO SYNC how shall we deal with types here?
-								.insertInto(table_name as any)
-								.values(row)
-								.onConflict((oc) => oc.column("id").doUpdateSet(row))
-								.execute();
-						}
+				//	 - filter only my records (this is the records that i have changed more recently than the changes comming from the push)
+				// NOTE - dont step forward or set a breakpoint here! debugger crashes :-/
+				for (const row of tableRows) {
+					// use a compound id? -
+					if (
+						rowsIUpdatedLast[tableName]?.[rowIdToString(tableName, row)] ===
+						undefined
+					) {
+						const statment = trx
+							// TODO SYNC how shall we deal with types here?
+							.insertInto(tableName as any)
+							.values(row)
+							.onConflict((oc) => {
+								// add all id columns to the conflict clause to match the primary key
+								for (const idColumn of tableIdColumns[tableName]!) {
+									oc = oc.column(idColumn);
+								}
+								return oc.doUpdateSet(row);
+							});
+						await statment.execute();
 					}
-				} else if (table_name === "key_value") {
-					// account -> PRIMARY KEY (key)
-					for (const row of rows) {
-						if (
-							rowsIUpdatedLast[table_name]?.[row.key as string] === undefined
-						) {
-							await trx
-								// TODO SYNC how shall we deal with types here?
-								// TODO SYNC - why is eslint not complaining about any anymore???
-								.insertInto("key_value")
-								.values(row)
-								.onConflict((oc) => oc.column("key").doUpdateSet(row))
-								.execute();
-						}
-					}
-				} else {
-					// TODO SYNC -> handle table with composite primary keys
-					// Open question do we need to implement each type because of the oncoflict clausE?
-					// .onConflict((oc) => oc.column("id").doUpdateSet(row))
-					// change_author -> PRIMARY KEY (change_id, account_id),
-					// change_edge -> PRIMARY KEY (parent_id, child_id),
-					// change_conflict_resolution -> PRIMARY KEY(change_conflict_id, resolved_change_id),
-					// change_set_element -> PRIMARY KEY(change_set_id, change_id),
-					// change_set_label -> PRIMARY KEY(label_id, change_set_id)
-					// change_set_label_author -> PRIMARY KEY(label_id, change_set_id, account_id),
-					// version_change_conflict -> PRIMARY KEY (version_id, change_conflict_id),
 				}
 			}
 		}
@@ -196,4 +174,19 @@ function aheadSessions(
 	});
 
 	return aheadSession;
+}
+
+function rowIdToString(
+	tableName: string,
+	rowId: Record<string, string>
+): string {
+	const idColumns = tableIdColumns[tableName]!;
+	let rowIdString = tableName;
+	for (const idColumn of idColumns) {
+		if (!rowId[idColumn]) {
+			throw new Error(`Missing id column ${idColumn} in row id`);
+		}
+		rowIdString += `_${rowId[idColumn]}`;
+	}
+	return rowIdString;
 }

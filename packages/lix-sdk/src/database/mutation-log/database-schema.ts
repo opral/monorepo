@@ -1,6 +1,26 @@
 import type { Insertable, Selectable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 
+export const tableIdColumns: Record<string, Array<string>> = {
+	// file - File is not synced. Is construcuted from the change table. (see https://github.com/opral/monorepo/pull/3242#discussion_r1863981413)
+	change: ["id"],
+	account: ["id"],
+	version: ["id"],
+	snapshot: ["id"],
+
+	change_set: ["id"],
+	change_conflict: ["id"],
+	change_author: ["change_id", "account_id"],
+	change_edge: ["parent_id", "child_id"],
+	change_conflict_resolution: ["change_conflict_id", "resolved_change_id"],
+	change_set_element: ["change_set_id", "change_id"],
+	change_set_label: ["label_id", "change_set_id"],
+	change_set_label_author: ["label_id", "change_set_id", "account_id"],
+	version_change_conflict: ["version_id", "change_conflict_id"],
+	key_value: ["key"],
+};
+
+
 export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
 	// TODO SYNC naming - operations might be a better name
 	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
@@ -35,24 +55,6 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
 
 	// ]
 
-	const idMap = {
-		// file - File is not synced. Is construcuted from the change table. (see https://github.com/opral/monorepo/pull/3242#discussion_r1863981413)
-		change: ["id"],
-		account: ["id"],
-		version: ["id"],
-		snapshot: ["id"],
-    
-		change_set: ["id"],
-		change_conflict: ["id"],
-		change_author: ["change_id", "account_id"],
-		change_edge: ["parent_id", "child_id"],
-		change_conflict_resolution: ["change_conflict_id", "resolved_change_id"],
-		change_set_element: ["change_set_id", "change_id"],
-		change_set_label: ["label_id", "change_set_id"],
-		change_set_label_author: ["label_id", "change_set_id", "account_id"],
-		version_change_conflict: ["version_id", "change_conflict_id"],
-		key_value: ["key"],
-	};
 
 
   function toSqliteJson(keyColumns: string[]) {
@@ -70,7 +72,7 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
   }
 	
 
-	for (const [tableName, idColumns] of Object.entries(idMap)) {
+	for (const [tableName, idColumns] of Object.entries(tableIdColumns)) {
 		if (idColumns.length === 0) {
 			throw new Error("at least one id required");
 		} 
