@@ -46,7 +46,6 @@ export type LixDatabaseSchema = {
 	change_conflict: ChangeConflictTable;
 	change_conflict_resolution: ChangeConflictResolutionTable;
 
-	// vector clock TODO SYNC - rename to session_operation
 	mutation_log: MutationLogTable;
 };
 

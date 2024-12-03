@@ -22,7 +22,7 @@ export const tableIdColumns: Record<string, Array<string>> = {
 
 
 export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
-	// TODO SYNC naming - operations might be a better name
+	
 	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	sqlite.exec`
   -- vector clock

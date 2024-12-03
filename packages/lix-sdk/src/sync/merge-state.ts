@@ -31,7 +31,6 @@ export async function mergeTheirState(args: {
 
 		// find the clocks in their vector clock that are behind mine
 		// (everything after their times happend without their recognition) - and we need to handle last write wins
-		// TODO SYNC - taff naming :-/
 		const unrecognizedSesionTicks = aheadSessions(
 			myVectorClock,
 			args.sourceVectorClock
@@ -70,7 +69,6 @@ export async function mergeTheirState(args: {
 				if (!acc[table_name]) {
 					acc[table_name] = {};
 				}
-				// TODO SYNC use different matching mechanism
 				acc[table_name][rowIdToString(table_name, row_id)] =
 					last_updated_wall_time;
 				return acc;
@@ -113,7 +111,6 @@ export async function mergeTheirState(args: {
 				for (const row of tableRows) {
 					await trx
 						.insertInto(tableName)
-						// TODO SYNC how shall we deal with types here?
 						.values(row as any)
 						.onConflict((oc) => oc.doNothing())
 						.execute();
@@ -128,7 +125,6 @@ export async function mergeTheirState(args: {
 						undefined
 					) {
 						const statment = trx
-							// TODO SYNC how shall we deal with types here?
 							.insertInto(tableName as any)
 							.values(row)
 							.onConflict((oc) => {
