@@ -4,7 +4,7 @@ import { createInMemoryDatabase } from "sqlite-wasm-kysely";
 import { handleLixOwnEntityChange } from "./handle-lix-own-entity-change.js";
 import { initDb } from "../database/init-db.js";
 
-test("should apply own entity change control triggers", async () => {
+test("should detect and create changes", async () => {
 	const sqlite = await createInMemoryDatabase({});
 	const db = initDb({ sqlite });
 
@@ -39,4 +39,40 @@ test("should apply own entity change control triggers", async () => {
 	expect(changes[0]?.plugin_key).toBe("lix-own-entity");
 	expect(changes[0]?.schema_key).toBe("lix-key-value-v1");
 	expect(snapshot.content).toStrictEqual({ key: "key1", value: "value1" });
+});
+
+test("rolls back if handleLixOwnEntityChange() throws ", async () => {
+	const sqlite = await createInMemoryDatabase({});
+	const db = initDb({ sqlite });
+
+	sqlite.createFunction({
+		name: "handle_lix_own_entity_change",
+		arity: -1,
+		xFunc: () => {
+			// simulating a throw
+			throw Error("Test error");
+		},
+	});
+
+	applyOwnEntityChangeControlTriggers(sqlite);
+
+	try {
+		await db
+			.insertInto("key_value")
+			.values({ key: "key1", value: "value1" })
+			.execute();
+	} catch (e) {
+		// noop
+	}
+
+	await new Promise((resolve) => setTimeout(resolve, 100));
+
+	const changes = await db.selectFrom("change").selectAll().execute();
+	const keyValues = await db
+		.selectFrom("key_value")
+		.where("key", "=", "key1")
+		.selectAll()
+		.execute();
+	expect(keyValues.length).toBe(0);
+	expect(changes.length).toBe(0);
 });
