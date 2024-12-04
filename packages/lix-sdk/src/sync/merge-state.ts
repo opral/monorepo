@@ -23,7 +23,7 @@ export async function mergeTheirState(args: {
 	 */
 	sourceData: Record<string, Array<any>>;
 }): Promise<void> {
-	return await args.lix.db.transaction().execute(async (trx) => {
+	const executeInTransaction = async (trx: Lix["db"]) => {
 		console.log(
 			"mutations before merge-state....",
 			(
@@ -154,9 +154,9 @@ export async function mergeTheirState(args: {
 			);
 			for (const row of args.sourceData["mutation_log"]!) {
 				await trx
-				.insertInto("mutation_log")
-				.values(row as any)
-				.execute();
+					.insertInto("mutation_log")
+					.values(row as any)
+					.execute();
 				console.log(
 					"mutations after insert....",
 					(
@@ -253,7 +253,13 @@ export async function mergeTheirState(args: {
 					.execute()
 			).length
 		);
-	});
+	};
+	if (args.lix.db.isTransaction) {
+		return await executeInTransaction(args.lix.db);
+	} else {
+		return await args.lix.db.transaction().execute(executeInTransaction);
+	}
+
 }
 
 function aheadSessions(
