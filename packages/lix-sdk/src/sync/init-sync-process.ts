@@ -2,6 +2,7 @@ import type { Lix } from "../lix/open-lix.js";
 import { pushToServer } from "./push-to-server.js";
 import { pullFromServer } from "./pull-from-server.js";
 
+
 export async function initSyncProcess(args: {
 	lix: Pick<Lix, "db" | "plugin">;
 }): Promise<
@@ -43,18 +44,24 @@ export async function initSyncProcess(args: {
 	let stoped = false;
 
 	const pullAndPush = async () => {
+		console.log("----------- PULL FROM SERVER -------------");
 		const serverState = await pullFromServer({
 			serverUrl: url.value,
 			lix: args.lix,
 			id,
 		});
+		console.log(
+			"----------- DONE PULL FROM SERVER ------------- New known Server state: ",
+			serverState
+		);
+		console.log("----------- PUSH TO SERVER -------------");
 		await pushToServer({
 			serverUrl: url.value,
 			lix: args.lix,
 			id,
 			targetVectorClock: serverState,
 		});
-		console.log("pushed and pulled from server");
+		console.log("----------- DONE PUSH TO SERVER -------------");
 	};
 
 	// naive implementation that syncs every second

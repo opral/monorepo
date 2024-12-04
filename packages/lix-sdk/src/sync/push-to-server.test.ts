@@ -180,7 +180,6 @@ test("push-pull-push with two clients", async () => {
 		.execute();
 
 	expect(accountsOnServer).toEqual([
-		{ id: "anonymous", name: "anonymous" },
 		{ id: "account0", name: "account from client 1" },
 		{ id: "account1", name: "account from client 2" },
 	]);
@@ -196,6 +195,7 @@ test("push-pull-push with two clients", async () => {
 		.selectAll()
 		.execute();
 
+	// TODO @samuel  - this seem to be broken because of asynchronous change managment ? how shall we test this?
 	expect(accountsOnServer).toEqual(accountsOnClient1);
 
 	await pullFromServer({

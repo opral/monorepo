@@ -22,7 +22,7 @@ import type { Account } from "./database-schema.js";
  */
 export async function switchAccount(args: {
 	lix: Pick<Lix, "db">;
-	to: Pick<Account, "id">[];
+	to: Account[];
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// delete all rows from the current_account table
@@ -30,7 +30,7 @@ export async function switchAccount(args: {
 		// insert the new account id into the current_account table
 		await trx
 			.insertInto("active_account")
-			.values(args.to.map((account) => ({ id: account.id })))
+			.values(args.to)
 			.execute();
 	};
 

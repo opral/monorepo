@@ -708,11 +708,14 @@ test("it should copy discussion and related comments and mappings", async () => 
 		}),
 	]);
 
+	// TODO how do know which author to use for the discussion - we can have multiple active accounts?
+	const currentAuthorLix1 = await lix1.db.selectFrom("active_account").selectAll().executeTakeFirstOrThrow();
+
 	await createDiscussion({
 		lix: lix1,
 		changeSet: await createChangeSet({ lix: lix1, changes: [changes[0]!] }),
 		content: "comment on a change",
-		createdBy: { id: "anonymous" },
+		createdBy: { id: currentAuthorLix1.id },
 	});
 
 	await merge({ sourceLix: lix1, targetLix: lix2 });
@@ -729,17 +732,18 @@ test("it should copy discussion and related comments and mappings", async () => 
 	// lix 2 has no comments yet so after lix 1 into 2 we should be in sync
 	expect(commentsLix1).toEqual(commentsLix2AfterMerge);
 
+	const currentAuthorLix2 = await lix1.db.selectFrom("active_account").selectAll().executeTakeFirstOrThrow();
 	await createComment({
 		lix: lix2,
 		parentComment: commentsLix2AfterMerge[0]!,
 		content: "wrote in lix 2",
-		createdBy: { id: "anonymous" },
+		createdBy: { id: currentAuthorLix2.id },
 	});
 	await createComment({
 		lix: lix1,
 		parentComment: commentsLix2AfterMerge[0]!,
 		content: "wrote in lix 1",
-		createdBy: { id: "anonymous" },
+		createdBy: { id: currentAuthorLix1.id },
 	});
 
 	const commentsLix1OnSecondMerge = await lix1.db

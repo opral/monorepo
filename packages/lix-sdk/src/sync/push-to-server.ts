@@ -2,6 +2,7 @@ import type * as LixServerProtocol from "../../../lix-server-api-schema/dist/sch
 import type { Lix } from "../lix/open-lix.js";
 import type { VectorClock } from "./merge-state.js";
 import { getDiffingRows } from "./get-diffing-rows.js";
+import { OnConflictBuilder } from "kysely";
 
 /**
  * Pushes rows to the server.
@@ -12,10 +13,20 @@ export async function pushToServer(args: {
 	lix: Pick<Lix, "db">;
 	targetVectorClock: VectorClock;
 }): Promise<void> {
+	console.log(
+		"collecting rows to push using known server state:",
+		args.targetVectorClock
+	);
 	const { upsertedRows: tableRowsToPush, state } = await getDiffingRows({
 		lix: args.lix,
 		targetVectorClock: args.targetVectorClock,
 	});
+	console.log("rows to push", tableRowsToPush);
+
+	if (Object.keys(tableRowsToPush).length === 0) {
+		console.log("nothing to push");
+		return;
+	}
 
 	const response = await fetch(
 		new Request(`${args.serverUrl}/lsa/push-v1`, {

@@ -142,7 +142,7 @@ test("should create the change authors", async () => {
 
 	await lix.db
 		.insertInto("active_account")
-		.values([{ id: account1.id }, { id: account2.id }])
+		.values([account1, account2])
 		.execute();
 
 	const change = await createChange({
