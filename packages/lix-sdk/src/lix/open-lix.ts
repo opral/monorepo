@@ -42,8 +42,8 @@ export async function openLix(args: {
 	sync?: boolean;
 }): Promise<Lix> {
 	const withDefaults = {
-		...args,
 		sync: true,
+		...args,
 	};
 
 	const db = initDb({ sqlite: args.database });
