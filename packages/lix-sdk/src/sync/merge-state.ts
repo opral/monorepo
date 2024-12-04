@@ -224,7 +224,7 @@ export async function mergeTheirState(args: {
 							}
 							return oc.doUpdateSet(row);
 						});
-					const result = await statment.execute();
+					await statment.execute();
 					// console.log(result);
 				} else {
 					console.log(
