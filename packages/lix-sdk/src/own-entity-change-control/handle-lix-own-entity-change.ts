@@ -7,26 +7,31 @@ export async function handleLixOwnEntityChange(
 	tableName: string,
 	...values: any[]
 ): Promise<void> {
-	const currentVersion = await db
-		.selectFrom("current_version")
-		.innerJoin("version", "current_version.id", "version.id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
+	await db.transaction().execute(async (trx) => {
+		const currentVersion = await trx
+			.selectFrom("current_version")
+			.innerJoin("version", "current_version.id", "version.id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
 
-	const authors = await db.selectFrom("active_account").selectAll().execute();
+		const authors = await trx
+			.selectFrom("active_account")
+			.selectAll()
+			.execute();
 
-	await createChange({
-		lix: { db },
-		authors: authors,
-		version: currentVersion,
-		entityId: values[0],
-		fileId: "null",
-		pluginKey: "lix-own-entity",
-		schemaKey: "lix-key-value-v1",
-		snapshotContent: {
-			key: values[0],
-			value: values[1],
-		},
+		await createChange({
+			lix: { db: trx },
+			authors: authors,
+			version: currentVersion,
+			entityId: values[0],
+			fileId: "null",
+			pluginKey: "lix-own-entity",
+			schemaKey: "lix-key-value-v1",
+			snapshotContent: {
+				key: values[0],
+				value: values[1],
+			},
+		});
 	});
 	console.log("Change created");
 }
