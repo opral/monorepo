@@ -21,13 +21,28 @@ export async function mergeTheirState(args: {
 	sourceData: Record<string, Array<any>>;
 }): Promise<void> {
 	return await args.lix.db.transaction().execute(async (trx) => {
+
+		// insert the trigger flag to ignore insertations during merge
+		await trx.insertInto("mutation_log")
+			.values({
+				session: "mock",
+				wall_clock: 0,
+				session_time: 0,
+				row_id: {"ignored": "ignored"},
+				table_name: "mutation_log",
+				operation: "INSERT",
+			}).execute()
+
 		const myVectorClock = await trx
 			.selectFrom("mutation_log")
 			.select(({ fn }) => {
 				return ["session", fn.max<number>("session_time").as("time")];
 			})
+			.where("mutation_log.table_name", "<>", "mutation_log")
 			.groupBy("session")
 			.execute();
+
+		
 
 		// find the clocks in their vector clock that are behind mine
 		// (everything after their times happend without their recognition) - and we need to handle last write wins
@@ -60,6 +75,8 @@ export async function mergeTheirState(args: {
 								})
 							);
 						})
+						// ignore the trigger flag
+						.where("mutation_log.table_name", "<>", "mutation_log")
 						.groupBy("row_id")
 						.execute();
 
@@ -139,6 +156,10 @@ export async function mergeTheirState(args: {
 				}
 			}
 		}
+
+		// remove the the trigger flag to enable insertation triggers again
+		await trx.deleteFrom("mutation_log").where("table_name", "=", "mutation_log").execute()
+			
 	});
 }
 

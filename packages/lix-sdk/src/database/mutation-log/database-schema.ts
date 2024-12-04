@@ -32,7 +32,17 @@ export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
     session TEXT NOT NULL DEFAULT (lix_session()),
     session_time INTEGER NOT NULL DEFAULT (lix_session_clock_tick()),
     wall_clock INTEGER DEFAULT (strftime('%s', 'now') * 1000 + (strftime('%f', 'now') - strftime('%S', 'now')) * 1000)
-  ) STRICT;`;
+  ) STRICT;
+   
+  CREATE TRIGGER IF NOT EXISTS ignore_mutation_during_sync
+  BEFORE INSERT ON mutation_log
+  FOR EACH ROW
+  WHEN EXISTS (SELECT 1 FROM mutation_log WHERE table_name = 'mutation_log')
+  BEGIN
+    SELECT RAISE(IGNORE);
+  END;
+ 
+  `;
 
 	for (const [tableName, idColumns] of Object.entries(tableIdColumns)) {
 		if (idColumns.length === 0) {

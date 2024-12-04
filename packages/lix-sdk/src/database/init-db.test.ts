@@ -377,3 +377,66 @@ test("vector clock functions", async () => {
 		(vectorClockTick2.rows[0] as any)["time"]
 	);
 });
+
+test("mutation should only be recorded if sync row is not present", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	await db
+		.insertInto("change")
+		.values({
+			schema_key: "file",
+			entity_id: "value1",
+			file_id: "mock",
+			plugin_key: "mock-plugin",
+			snapshot_id: "no-content",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+	const mutation = await db.selectFrom("mutation_log").selectAll().execute();	
+
+	expect(mutation).toHaveLength(1);
+
+	await db
+		.insertInto("mutation_log")
+		.values({
+			session: "mock",
+			wall_clock: 0,
+			session_time: 0,
+			row_id: {"ignored": "ignored"},
+			table_name: "mutation_log",
+			operation: "INSERT",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const mutationWithFlag = await db.selectFrom("mutation_log").selectAll().execute();	
+	expect(mutationWithFlag).toHaveLength(2);
+
+	await db
+		.insertInto("change")
+		.values({
+			schema_key: "file",
+			entity_id: "value1",
+			file_id: "mock",
+			plugin_key: "mock-plugin",
+			snapshot_id: "no-content",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+	
+	const mutationLogAfterIgnoredChange = await db.selectFrom("mutation_log").selectAll().execute();	
+	expect(mutationLogAfterIgnoredChange).toHaveLength(2);
+
+	// const vectorClockTick1 =
+	// 	await sql`select lix_session() as session, lix_session_clock_tick() as time`.execute(
+	// 		db
+	// 	);
+	// const vectorClockTick2 =
+	// 	await sql`select lix_session() as session, lix_session_clock_tick() as time`.execute(
+	// 		db
+	// 	);
+
+})
