@@ -20,7 +20,7 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 	let lix: Lix;
 
 	try {
-		lix = await openLixInMemory({ blob });
+		lix = await openLixInMemory({ blob, sync: false });
 	} catch {
 		return new Response(
 			JSON.stringify({

@@ -16,7 +16,7 @@ export async function initSyncProcess(args: {
 		.select("value")
 		.executeTakeFirstOrThrow();
 
-	const url = await args.lix.db
+	let url = await args.lix.db
 		.selectFrom("key_value")
 		// saved in key value because simpler for experimentation
 		.where("key", "=", "lix-experimental-server-url")
@@ -26,7 +26,17 @@ export async function initSyncProcess(args: {
 	// if you want to test sync, restart the lix app
 	// to make sure the experimental-sync-url is set
 	if (!url) {
-		return;
+		console.log(
+			'no "lix-experimental-server-url" set, setting it to "http://localhost:3000"'
+		);
+		url = await args.lix.db
+			.insertInto("key_value")
+			.values({
+				key: "lix-experimental-server-url",
+				value: "http://localhost:3000",
+			})
+			.returning("value")
+			.executeTakeFirstOrThrow();
 	}
 
 	let stoped = false;
