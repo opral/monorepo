@@ -10,6 +10,7 @@ import { activeFileAtom, allChangesDynamicGroupingAtom, changesCurrentVersionAto
 import { Link, useNavigate } from "react-router-dom";
 import { ChangeComponent } from "@/components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "@/components/DynamicChangeGroup.tsx";
+import FilterSelect from "@/components/FilterSelect.tsx";
 // import { useEffect } from "react";
 
 export default function Page() {
@@ -83,11 +84,16 @@ export default function Page() {
 			{fileIdSearchParams 
 				? <div className="flex-1 h-full">
 					<SectionHeader backaction={() => navigate("/")}title={activeFile?.path.replace("/", "") ? `/ ${activeFile?.path.replace("/", "")}` : "Graph"} />
-					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
+					<div className="px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
+						<FilterSelect />
 						{changesCurrentVersion.map((change, i) => (
 							<ChangeComponent
 								key={change.id}
-								change={change}
+								change={{
+									...change,
+									snapshot_content: change.snapshot_content as Record<string, any> | null,
+									parent_snapshot_content: change.parent_snapshot_content as Record<string, any> | null,
+								}}
 								showTopLine={i !== 0}
 								showBottomLine={i !== changesCurrentVersion.length - 1}
 							/>

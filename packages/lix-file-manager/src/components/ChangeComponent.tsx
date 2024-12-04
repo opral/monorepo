@@ -1,14 +1,16 @@
 import React, { useEffect, useState, JSX } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import { Change } from "@lix-js/sdk";
 import IconChevron from "@/components/icons/IconChevron.tsx";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import { Button } from "@/components/ui/button.tsx";
+import { Checkbox } from "@/components/ui/checkbox.tsx";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip.tsx";
 import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import { lixAtom } from "@/state.ts";
 import { useAtom } from "jotai/react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip.tsx";
 import ChangeDot from "./ChangeDot.tsx";
+import { selectedChangeIdsAtom } from "@/state-active-file.ts";
 
 export const ChangeComponent = (props: {
 	change: Change & {
@@ -22,6 +24,7 @@ export const ChangeComponent = (props: {
 	const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
 	const [lix] = useAtom(lixAtom);
 	const [DiffComponent, setDiffComponent] = useState<JSX.Element | null>(null);
+	const [selectedChangeIds, setSelectedChangeIds] = useAtom(selectedChangeIdsAtom);
 
 	useEffect(() => {
 		loadDiffComponent();
@@ -55,6 +58,17 @@ export const ChangeComponent = (props: {
 		}
 	};
 
+	const handleCheckboxClick = (event: React.MouseEvent) => {
+		event.stopPropagation();
+		// add or remove the change id from the selectedChangeIdsAtom
+		if (selectedChangeIds.includes(props.change.id)) {
+			setSelectedChangeIds(selectedChangeIds.filter((id) => id !== props.change.id));
+		} else {
+			setSelectedChangeIds([...selectedChangeIds, props.change.id]);
+		}
+	};
+
+
 	return (
 		<div
 			className="flex group hover:bg-slate-50 rounded-md cursor-pointer flex-shrink-0"
@@ -63,6 +77,7 @@ export const ChangeComponent = (props: {
 			<ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />
 			<div className="flex-1">
 				<div className="h-12 flex items-center w-full">
+					<Checkbox className="mr-3" onClick={handleCheckboxClick} checked={selectedChangeIds.includes(props.change.id)} />
 					<p className="flex-1 truncate text-ellipsis overflow-hidden">
 						Change{" "}
 						<span className="text-slate-500">
@@ -93,7 +108,7 @@ export const ChangeComponent = (props: {
 				</div>
 				{isExpandedState && (
 					<div className="pb-2">
-						<div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 px-2 sm:px-3 pt-2 pb-6 sm:pb-8 overflow-hidden">
+						<div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 pr-2 sm:pr-3 pt-2 pb-6 sm:pb-8 overflow-hidden">
 							{DiffComponent && (<>{DiffComponent}</>)}
 							{/* <pre>{JSON.stringify(props.change, null, 2)}</pre> */}
 						</div>

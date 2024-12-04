@@ -239,12 +239,22 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 			"parent_snapshot.id",
 			"parent_change.snapshot_id"
 		)
+		.leftJoin("change_set_element", "change_set_element.change_id", "change.id")
+		.leftJoin(
+			"discussion",
+			"discussion.change_set_id",
+			"change_set_element.change_set_id"
+		)
+		.leftJoin("comment", "comment.discussion_id", "discussion.id")
 		.where(changeInVersion(currentBranch))
 		.selectAll("change")
 		.select(sql`json(snapshot.content)`.as("snapshot_content"))
 		.select("file.path as file_path")
 		.select("account.name as account_name")
 		.select(sql`json(parent_snapshot.content)`.as("parent_snapshot_content")) // This will be NULL if no parent exists
+		.select((eb) => eb.fn.count("discussion.id").as("discussion_count"))
+		.select(sql`group_concat(discussion.id)`.as("discussion_ids"))
+		.groupBy("change.id")
 		.orderBy("change.created_at", "desc")
 		.execute();
 });
@@ -327,3 +337,5 @@ export const changeConflictsAtom = atom(async (get) => {
 
 	return groupedByConflictId;
 });
+
+export const selectedChangeIdsAtom = atom<string[]>([]);
