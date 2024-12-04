@@ -33,16 +33,17 @@ export async function getDiffingRows(args: {
 
 		if (args.targetVectorClock.length > 0) {
 			operationsToPush = operationsToPush.where((eb) => {
-				const ors: any[] = [];
 				const knownSessions = args.targetVectorClock.map(
 					(sessionTime) => sessionTime.session
 				);
+
+				const ors: any[] = [];
 				ors.push(eb("session", "not in", knownSessions));
 				for (const sessionTime of args.targetVectorClock) {
 					ors.push(
 						eb("session", "=", sessionTime.session).and(
 							"session_time",
-							"=",
+							">",
 							sessionTime.time
 						)
 					);
@@ -53,6 +54,9 @@ export async function getDiffingRows(args: {
 		}
 
 		upsertedRows["mutation_log"] = await operationsToPush.execute();
+
+		
+		console.log("upsertedRows", upsertedRows);
 
 		for (const operation of upsertedRows["mutation_log"]) {
 			const tableName = operation.table_name;

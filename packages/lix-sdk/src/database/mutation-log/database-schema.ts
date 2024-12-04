@@ -1,6 +1,45 @@
 import type { Insertable, Selectable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 
+export const tablesByDepencies: string[] = [
+	// no dependencies
+	'snapshot',
+	'label',
+	'version',
+	'account',
+	'file',
+	'change_set',
+	// Depends on: snapshot
+	'change',
+	
+	// Depends on: file
+	'change_queue',
+	// Depends on: change
+	'change_author',
+	// Depends on: change
+	'change_edge',
+	// Depends on: change_set
+	'change_conflict',
+	// Depends on: change_conflict, change
+	'change_conflict_resolution',
+	// Depends on: change_set, change
+	'change_set_element',
+	// Depends on: label, change_set
+	'change_set_label',
+	// Depends on: change_set_label
+	'change_set_label_author',
+	//Depends on: change_set
+	'discussion',
+	// Depends on: account, discussion, comment
+	'comment',
+	// Depends on: version, change
+	'version_change',
+	// Depends on: version, change_conflict
+	'version_change_conflict',
+	// Depends on: version
+	'current_version',
+]
+
 export const tableIdColumns: Record<string, Array<string>> = {
 	// file - File is not synced. Is construcuted from the change table. (see https://github.com/opral/monorepo/pull/3242#discussion_r1863981413)
 	change: ["id"],
@@ -17,6 +56,7 @@ export const tableIdColumns: Record<string, Array<string>> = {
 	change_set_label: ["label_id", "change_set_id"],
 	change_set_label_author: ["label_id", "change_set_id", "account_id"],
 	version_change_conflict: ["version_id", "change_conflict_id"],
+	version_change: ["version_id", "change_id"],
 	key_value: ["key"],
 };
 

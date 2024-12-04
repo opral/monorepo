@@ -104,7 +104,7 @@ test("should use queue and settled correctly", async () => {
 				text: "insert text",
 			},
 			// handles the author (which defaults to anonymous)
-			account_id: "anonymous",
+			account_id: expect.stringMatching(/^anonymous_/),
 		}),
 	]);
 
@@ -205,7 +205,7 @@ test("should use queue and settled correctly", async () => {
 			content: {
 				text: "insert text",
 			},
-			account_id: "anonymous",
+			account_id: expect.stringMatching(/^anonymous_/),
 		}),
 		expect.objectContaining({
 			entity_id: "test",
@@ -215,7 +215,7 @@ test("should use queue and settled correctly", async () => {
 			content: {
 				text: "updated text",
 			},
-			account_id: "anonymous",
+			account_id: expect.stringMatching(/^anonymous_/),
 		}),
 		expect.objectContaining({
 			file_id: "test",
@@ -225,7 +225,7 @@ test("should use queue and settled correctly", async () => {
 			content: {
 				text: "second text update",
 			},
-			account_id: "anonymous",
+			account_id: expect.stringMatching(/^anonymous_/),
 		}),
 	]);
 
