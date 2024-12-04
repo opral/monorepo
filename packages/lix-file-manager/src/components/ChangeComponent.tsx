@@ -11,12 +11,15 @@ import { lixAtom } from "@/state.ts";
 import { useAtom } from "jotai/react";
 import ChangeDot from "./ChangeDot.tsx";
 import { selectedChangeIdsAtom } from "@/state-active-file.ts";
+import IconDiscussion from "./icons/IconDiscussion.tsx";
 
 export const ChangeComponent = (props: {
 	change: Change & {
 		snapshot_content: Record<string, any> | null;
 		parent_snapshot_content: Record<string, any> | null;
 		file_path: string; account_name: string
+		discussion_count: number;
+		discussion_ids: string; // should be an array but is a comma separated string
 	};
 	showTopLine: boolean;
 	showBottomLine: boolean;
@@ -86,7 +89,12 @@ export const ChangeComponent = (props: {
 								: props.change.entity_id}
 						</span>
 					</p>
-					<div className="flex gap-2 items-center pr-2">
+					<div className="flex gap-3 items-center pr-2">
+						{props.change.discussion_count > 0 && (
+							<Button variant="ghost" size="sm" className="text-sm text-slate-500">
+								{props.change.discussion_count}<IconDiscussion />
+							</Button>
+						)}
 						<span className="text-sm font-medium text-slate-500 block pr-2">{timeAgo(props.change.created_at)}</span>
 						<TooltipProvider>
 							<Tooltip>
