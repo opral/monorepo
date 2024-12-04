@@ -10,6 +10,7 @@ export async function initSyncProcess(args: {
 	  }
 	| undefined
 > {
+	console.log("initializing sync process")
 	const { value: id } = await args.lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix-id")
@@ -53,6 +54,7 @@ export async function initSyncProcess(args: {
 			id,
 			targetVectorClock: serverState,
 		});
+		console.log("pushed and pulled from server");
 	};
 
 	// naive implementation that syncs every second
