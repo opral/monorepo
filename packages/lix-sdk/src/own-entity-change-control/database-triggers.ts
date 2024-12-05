@@ -56,16 +56,23 @@ export const changeControlledTables: Partial<{
 	[K in keyof LixDatabaseSchema]: TableColumns<LixDatabaseSchema[K]>;
 }> = {
 	account: ["id", "name"],
-	// comment: ['id', 'content', 'created_at', 'created_by', 'parent_id', 'discussion_id'],
-	// change_set: ["id"],
+	comment: [
+		"id",
+		"content",
+		"created_at",
+		"created_by",
+		"parent_id",
+		"discussion_id",
+	],
+	change_set: ["id"],
 	change_author: ["change_id", "account_id"],
-	// change_set_element: ["change_set_id", "change_id"],
-	// change_set_label: ["label_id", "change_set_id"],
-	// change_set_label_author: ["label_id", "change_set_id", "account_id"],
+	change_set_element: ["change_set_id", "change_id"],
+	change_set_label: ["label_id", "change_set_id"],
+	change_set_label_author: ["label_id", "change_set_id", "account_id"],
 	discussion: ["id", "change_set_id"],
 	// file: ["id", "path", "metadata"],
 	key_value: ["key", "value"],
-	// version: ["id", "name"],
+	version: ["id", "name"],
 };
 
 export const changeControlledTableIds: Partial<{
