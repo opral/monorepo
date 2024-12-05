@@ -8,6 +8,7 @@ import { jsonSha256 } from "../snapshot/json-sha-256.js";
 import { ParseJsonBPluginV1 } from "./kysely-plugin/parse-jsonb-plugin-v1.js";
 import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js";
 import { createSession } from "./mutation-log/lix-session.js";
+import { applyOwnEntityChangeControlTriggers } from "../own-entity-change-control/database-triggers.js";
 
 export function initDb(args: {
 	sqlite: SqliteDatabase;
@@ -29,6 +30,9 @@ export function initDb(args: {
 			SerializeJsonBPlugin(),
 		],
 	});
+
+	// need to apply it here because db object needs to be available
+	applyOwnEntityChangeControlTriggers(args.sqlite, db);
 	return db;
 }
 

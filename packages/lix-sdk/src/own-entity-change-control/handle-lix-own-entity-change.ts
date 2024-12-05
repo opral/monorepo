@@ -1,13 +1,28 @@
 import type { Kysely } from "kysely";
-import type { LixDatabaseSchema } from "../database/schema.js";
+import type { LixDatabaseSchema, Snapshot } from "../database/schema.js";
 import { createChange } from "../change/create-change.js";
+import {
+	changeControlledTableIds,
+	changeControlledTables,
+} from "./database-triggers.js";
 
 export async function handleLixOwnEntityChange(
 	db: Kysely<LixDatabaseSchema>,
-	tableName: string,
+	tableName: keyof LixDatabaseSchema,
+	operation: "insert" | "update" | "delete",
 	...values: any[]
 ): Promise<void> {
-	await db.transaction().execute(async (trx) => {
+	const executeInTransaction = async (trx: Kysely<LixDatabaseSchema>) => {
+		// need to break the loop if own changes are detected
+		const change = await trx
+			.selectFrom("change")
+			.where("id", "=", values[0])
+			.select("plugin_key")
+			.executeTakeFirst();
+
+		if (change?.plugin_key === "lix_own_entity") {
+			return;
+		}
 		const currentVersion = await trx
 			.selectFrom("current_version")
 			.innerJoin("version", "current_version.id", "version.id")
@@ -19,19 +34,60 @@ export async function handleLixOwnEntityChange(
 			.selectAll()
 			.execute();
 
+		if (authors.length === 0) {
+			console.error(tableName, change);
+			throw new Error("At least one author is required");
+		}
+
+		let snapshotContent: Snapshot["content"] | null;
+
+		if (operation === "delete") {
+			snapshotContent = null;
+		} else {
+			snapshotContent = {};
+			// construct the values as json for the snapshot
+			for (const [index, column] of changeControlledTables[
+				tableName
+			]!.entries()) {
+				snapshotContent[column] = values[index];
+			}
+		}
+
+		let entityId = "";
+
+		// only has one primary key
+		if (changeControlledTableIds[tableName]!.length === 1) {
+			const index = changeControlledTables[tableName]!.indexOf(
+				// @ts-expect-error - no clue why
+				changeControlledTableIds[tableName]![0]
+			);
+			entityId = values[index];
+		}
+		// has compound primary key that are joined with a comma.
+		else {
+			for (const column of changeControlledTableIds[tableName]!) {
+				const index = changeControlledTables[tableName]!.indexOf(
+					// @ts-expect-error - no clue why
+					column
+				);
+				entityId = [entityId, values[index]].join(",");
+			}
+		}
+
 		await createChange({
 			lix: { db: trx },
 			authors: authors,
 			version: currentVersion,
-			entityId: values[0],
+			entityId,
 			fileId: "null",
-			pluginKey: "lix-own-entity",
-			schemaKey: "lix-key-value-v1",
-			snapshotContent: {
-				key: values[0],
-				value: values[1],
-			},
+			pluginKey: "lix_own_entity",
+			schemaKey: `lix_${tableName}`,
+			snapshotContent,
 		});
-	});
-	console.log("Change created");
+	};
+	if (db.isTransaction) {
+		await executeInTransaction(db);
+	} else {
+		await db.transaction().execute(executeInTransaction);
+	}
 }
