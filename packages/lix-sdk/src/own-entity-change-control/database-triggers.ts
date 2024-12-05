@@ -7,12 +7,6 @@ export function applyOwnEntityChangeControlTriggers(
 	sqlite: SqliteDatabase,
 	db: Kysely<LixDatabaseSchema>
 ): void {
-	// TODO use pragma to get table info instead of hardcoded column names
-	// https://github.com/opral/lix-sdk/issues/176
-	//
-	// const tableInfo = sqlite.exec("PRAGMA table_info(key_value);");
-	// console.log(tableInfo);
-
 	sqlite.createFunction({
 		name: "handle_lix_own_entity_change",
 		arity: -1,
@@ -27,24 +21,30 @@ export function applyOwnEntityChangeControlTriggers(
 		},
 	});
 
-	for (const [table, columns] of Object.entries(changeControlledTables)) {
+	for (const [table] of Object.entries(changeControlledTables)) {
+		const tableInfoRows = sqlite.exec({
+			sql: `PRAGMA table_info("${table}");`,
+			returnValue: "resultRows",
+			rowMode: "object",
+		});
+
 		const sql = `
       CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_insert
       AFTER INSERT ON ${table}
       BEGIN
-        SELECT handle_lix_own_entity_change('${table}', 'insert', ${columns.map((c) => "NEW." + c).join(", ")});
+        SELECT handle_lix_own_entity_change('${table}', 'insert', ${tableInfoRows.map((c) => "NEW." + c.name).join(", ")});
       END;
       
       CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_update
       AFTER UPDATE ON ${table}
       BEGIN
-        SELECT handle_lix_own_entity_change('${table}', 'update', ${columns.map((c) => "NEW." + c).join(", ")});
+        SELECT handle_lix_own_entity_change('${table}', 'update', ${tableInfoRows.map((c) => "NEW." + c.name).join(", ")});
       END;
 
       CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_delete
       AFTER DELETE ON ${table}
       BEGIN
-        SELECT handle_lix_own_entity_change('${table}', 'delete', ${columns.map((c) => "OLD." + c).join(", ")});
+        SELECT handle_lix_own_entity_change('${table}', 'delete', ${tableInfoRows.map((c) => "NEW." + c.name).join(", ")});
       END;
       `;
 
@@ -89,12 +89,9 @@ export const changeControlledTableIds: Partial<{
 	file: ["id"],
 	key_value: ["key"],
 	version: ["id"],
-}; 
+};
 
-type TableColumns<T> = T extends Record<string, any>
-  ? (keyof T)[]
-  : never;
-
+type TableColumns<T> = T extends Record<string, any> ? (keyof T)[] : never;
 
 // const tables = new Map<keyof LixDatabaseSchema, string[]>([
 // 	["change", ["id"]],
