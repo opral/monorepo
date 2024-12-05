@@ -1,6 +1,11 @@
 import { useAtom } from "jotai";
-import { LIX_FILE_NAME, lixAtom, withPollingAtom } from "../state.ts";
-import { useEffect } from "react";
+import {
+	LIX_FILE_NAME,
+	lixAtom,
+	serverUrlAtom,
+	withPollingAtom,
+} from "../state.ts";
+import { useEffect, useState } from "react";
 import {
 	SlButton,
 	SlDropdown,
@@ -9,10 +14,12 @@ import {
 	SlMenuItem,
 } from "@shoelace-style/shoelace/dist/react";
 import { Lix } from "@lix-js/sdk";
+import { unconfirmedChangesAtom } from "../state-active-file.ts";
 
 export default function RootLayout(props: { children: JSX.Element }) {
 	const [, setPolling] = useAtom(withPollingAtom);
 	const [lix] = useAtom(lixAtom);
+	const [serverUrl] = useAtom(serverUrlAtom);
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -66,6 +73,9 @@ export default function RootLayout(props: { children: JSX.Element }) {
 					</a>
 				</div>
 				<div className="flex gap-2 items-center">
+					{serverUrl && (
+						<SyncStatus serverUrl={serverUrl} lix={lix}></SyncStatus>
+					)}
 					<SlDropdown>
 						<SlButton slot="trigger" caret size="small">
 							Options
@@ -111,6 +121,7 @@ export default function RootLayout(props: { children: JSX.Element }) {
 							</SlMenuItem>
 						</SlMenu>
 					</SlDropdown>
+					<SyncAndShare />
 				</div>
 			</div>
 			{props.children}
@@ -127,3 +138,59 @@ const handleExportLixFile = async (lix: Lix) => {
 	a.click();
 	document.body.removeChild(a);
 };
+
+function SyncAndShare() {
+	return <SyncButton></SyncButton>;
+}
+
+function SyncButton() {
+	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
+	const [serverUrl] = useAtom(serverUrlAtom);
+	const [lix] = useAtom(lixAtom);
+
+	if (unconfirmedChanges.length > 0 && !serverUrl) {
+		return (
+			<SlButton
+				variant="primary"
+				size="small"
+				className="animate-bounce"
+				onClick={() => {
+					lix.db
+						.insertInto("key_value")
+						.values({
+							key: "lix-experimental-server-url",
+							value: "http://localhost:3000",
+						})
+						.execute();
+				}}
+			>
+				Sync
+			</SlButton>
+		);
+	}
+}
+
+function SyncStatus(props: { serverUrl: string; lix: Lix }) {
+	const [isHovered, setIsHovered] = useState(false);
+
+	return (
+		<div
+			className="flex gap-3 items-center hover:cursor-pointer"
+			onClick={() => {
+				props.lix.db
+					.deleteFrom("key_value")
+					.where("key", "=", "lix-experimental-server-url")
+					.execute();
+			}}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
+		>
+			<div
+				className={`w-3 h-3 rounded-4xl ${isHovered ? "bg-red-700" : "bg-green-700"}`}
+			></div>
+			<p className="">
+				{isHovered ? "Stop syncing to" : "Syncing to"} {props.serverUrl}
+			</p>
+		</div>
+	);
+}
