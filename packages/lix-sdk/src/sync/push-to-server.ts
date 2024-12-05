@@ -2,7 +2,6 @@ import type * as LixServerProtocol from "../../../lix-server-api-schema/dist/sch
 import type { Lix } from "../lix/open-lix.js";
 import type { VectorClock } from "./merge-state.js";
 import { getDiffingRows } from "./get-diffing-rows.js";
-import { OnConflictBuilder } from "kysely";
 
 /**
  * Pushes rows to the server.
