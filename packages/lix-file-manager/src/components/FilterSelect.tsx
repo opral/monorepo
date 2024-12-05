@@ -9,10 +9,10 @@ import { createChangeSet, createDiscussion } from "@lix-js/sdk";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover.tsx";
 import { FormField, FormControl, FormItem, Form } from "./ui/form.tsx";
 import { FormProvider, useForm } from "react-hook-form";
-import IconCheck from "./icons/IconCheck.tsx";
 import { Textarea } from "./ui/textarea.tsx";
 import { useState } from "react";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
+import IconArrow from "./icons/IconArrow.tsx";
 
 const FilterSelect = () => {
   const [selectedChangeIds, setSelectedChangeIds] = useAtom(selectedChangeIdsAtom);
@@ -58,6 +58,7 @@ const FilterSelect = () => {
     await saveLixToOpfs({ lix });
     setIsPopoverOpen(false);
     form.reset();
+    setSelectedChangeIds([]);
     console.log(resolve);
   };
 
@@ -99,10 +100,11 @@ const FilterSelect = () => {
                         <FormControl>
                           <Textarea
                             {...field}
+                            rows={1}
                             placeholder="Add a comment"
                             className="border-none resize-none overflow-hidden shadow-none p-1 focus-visible:ring-0"
                             onInput={handleTextareaChange}
-                            style={{ minHeight: "40px" }}
+                            style={{ minHeight: "24px", fontSize: "1rem" }}
                           />
                         </FormControl>
                       </FormItem>
@@ -112,9 +114,10 @@ const FilterSelect = () => {
                     type="submit"
                     disabled={!isValid || discussionValue === ""}
                     size="sm"
+                    variant="ghost"
                     className="px-1 ml-auto mt-auto"
                   >
-                    <IconCheck />
+                    <IconArrow />
                   </Button>
                 </form>
               </Form>

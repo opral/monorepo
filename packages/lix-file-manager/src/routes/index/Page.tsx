@@ -1,7 +1,7 @@
 import IconUpload from "@/components/icons/IconUpload.tsx";
 import SectionHeader from "@/components/SectionHeader.tsx";
 import ListItems from "@/components/ListItems.tsx";
-import { fileIdSearchParamsAtom, filesAtom, lixAtom } from "@/state.ts";
+import { discussionSearchParamsAtom, fileIdSearchParamsAtom, filesAtom, lixAtom } from "@/state.ts";
 import { useAtom } from "jotai";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
 import { Button } from "@/components/ui/button.tsx"
@@ -11,6 +11,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { ChangeComponent } from "@/components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "@/components/DynamicChangeGroup.tsx";
 import FilterSelect from "@/components/FilterSelect.tsx";
+import IconArrowRight from "@/components/icons/IconArrowRight.tsx";
+import ChatInput from "@/components/ChatInput.tsx";
 // import { useEffect } from "react";
 
 export default function Page() {
@@ -21,6 +23,7 @@ export default function Page() {
 	const [allChangesDynamicGrouping] = useAtom(allChangesDynamicGroupingAtom)
 	const [activeFile] = useAtom(activeFileAtom)
 	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom)
+	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom)
 
 	//hooks
 	const navigate = useNavigate();
@@ -80,10 +83,22 @@ export default function Page() {
 				<Link to="/" className="flex-grow" />
 			</div>
 			<Separator orientation="vertical" className="h-screen" />
-			
-			{fileIdSearchParams 
-				? <div className="flex-1 h-full">
-					<SectionHeader backaction={() => navigate("/")}title={activeFile?.path.replace("/", "") ? `/ ${activeFile?.path.replace("/", "")}` : "Graph"} />
+
+			{
+				fileIdSearchParams && discussionSearchParams &&
+				<div className="flex-1 h-full">
+					<SectionHeader backaction={() => navigate(`/?f=${fileIdSearchParams}`)} title={`Discussion`} />
+					<div className="px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
+						{/* connected changes */}
+						{/* thread */}
+						<ChatInput />
+					</div>
+				</div>
+			}
+			{
+				fileIdSearchParams && !discussionSearchParams &&
+				<div className="flex-1 h-full">
+					<SectionHeader backaction={() => navigate("/")} title={activeFile?.path.replace("/", "") ? `/ ${activeFile?.path.replace("/", "")}` : "Graph"} />
 					<div className="px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
 						<FilterSelect />
 						{changesCurrentVersion.map((change, i) => (
@@ -101,7 +116,10 @@ export default function Page() {
 						}
 					</div> 
 				</div> 
-				: <div className="flex-1 h-full">
+			}
+			{
+				!fileIdSearchParams && !discussionSearchParams &&
+				< div className="flex-1 h-full">
 					<SectionHeader title="Overview" />
 					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
 							{Object.entries(allChangesDynamicGrouping).map(([date, changes], i) => {

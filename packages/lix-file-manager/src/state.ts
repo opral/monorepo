@@ -24,6 +24,12 @@ export const fileIdSearchParamsAtom = atom(async (get) => {
 	return searchParams.get("f");
 });
 
+export const discussionSearchParamsAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const searchParams = new URL(window.location.href).searchParams;
+	return searchParams.get("d");
+});
+
 let existingSafeLixToOpfsInterval: ReturnType<typeof setInterval> | undefined;
 
 export const lixAtom = atom(async () => {

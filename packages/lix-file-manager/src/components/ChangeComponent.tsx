@@ -12,6 +12,7 @@ import { useAtom } from "jotai/react";
 import ChangeDot from "./ChangeDot.tsx";
 import { selectedChangeIdsAtom } from "@/state-active-file.ts";
 import IconDiscussion from "./icons/IconDiscussion.tsx";
+import DiscussionPreview from "./DiscussionPreview.tsx";
 
 export const ChangeComponent = (props: {
 	change: Change & {
@@ -74,7 +75,7 @@ export const ChangeComponent = (props: {
 
 	return (
 		<div
-			className="flex group hover:bg-slate-50 rounded-md cursor-pointer flex-shrink-0"
+			className="flex group hover:bg-slate-50 rounded-md cursor-pointer flex-shrink-0 pr-2"
 			onClick={() => setIsExpandedState(!isExpandedState)}
 		>
 			<ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />
@@ -89,7 +90,7 @@ export const ChangeComponent = (props: {
 								: props.change.entity_id}
 						</span>
 					</p>
-					<div className="flex gap-3 items-center pr-2">
+					<div className="flex gap-3 items-center">
 						{props.change.discussion_count > 0 && (
 							<Button variant="ghost" size="sm" className="text-sm text-slate-500">
 								{props.change.discussion_count}<IconDiscussion />
@@ -115,11 +116,16 @@ export const ChangeComponent = (props: {
 					</div>
 				</div>
 				{isExpandedState && (
-					<div className="pb-2">
-						<div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 pr-2 sm:pr-3 pt-2 pb-6 sm:pb-8 overflow-hidden">
+					<div className="flex flex-col gap-2 pb-2">
+						<div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 pt-2 pb-4 sm:pb-6 overflow-hidden">
 							{DiffComponent && (<>{DiffComponent}</>)}
 							{/* <pre>{JSON.stringify(props.change, null, 2)}</pre> */}
 						</div>
+						{props.change.discussion_count > 0 && (
+							props.change.discussion_ids.split(",").map((discussionId) =>
+								<DiscussionPreview key={discussionId} discussionId={discussionId} />
+							)
+						)}
 					</div>
 				)}
 			</div>
