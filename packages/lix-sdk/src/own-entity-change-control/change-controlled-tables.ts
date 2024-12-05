@@ -1,31 +1,4 @@
-import type { LixDatabaseSchema } from "../database/schema.js";
-
-export const changeControlledTables: Partial<{
-	[K in keyof LixDatabaseSchema]: TableColumns<LixDatabaseSchema[K]>;
-}> = {
-	account: ["id", "name"],
-	comment: [
-		"id",
-		"content",
-		"created_at",
-		"created_by",
-		"parent_id",
-		"discussion_id",
-	],
-	change_set: ["id"],
-	change_author: ["change_id", "account_id"],
-	change_set_element: ["change_set_id", "change_id"],
-	change_set_label: ["label_id", "change_set_id"],
-	change_set_label_author: ["label_id", "change_set_id", "account_id"],
-	discussion: ["id", "change_set_id"],
-	// file: ["id", "path", "metadata"],
-	key_value: ["key", "value"],
-	version: ["id", "name"],
-};
-
-export const changeControlledTableIds: Partial<{
-	[K in keyof LixDatabaseSchema]: TableColumns<LixDatabaseSchema[K]>;
-}> = {
+export const changeControlledTableIds = {
 	account: ["id"],
 	comment: ["id"],
 	change_set: ["id"],
@@ -37,7 +10,30 @@ export const changeControlledTableIds: Partial<{
 	file: ["id"],
 	key_value: ["key"],
 	version: ["id"],
-};
+} as const;
+
+/**
+ * The result of a PRAGMA table_info call.
+ *
+ * @example
+ *   	const tableInfo = sqlite.exec({
+ *		  sql: `PRAGMA table_info(change_author);`,
+ *		  returnValue: "resultRows",
+ *		  rowMode: "object",
+ *	  }) as PragmaTableInfo;
+ */
+export type PragmaTableInfo = Array<{
+	/**
+	 * The column name
+	 */
+	name: string;
+	/**
+	 * 0 if not a primary key
+	 * 1 if primary key
+	 * 2... if part of a multi-column primary key
+	 */
+	pk: number;
+}>;
 
 /**
  * Returns the entity id for a row in a change controlled table.
@@ -46,7 +42,7 @@ export function entityIdForRow(
 	/**
 	 * The name of the table.
 	 */
-	tableName: keyof LixDatabaseSchema,
+	tableName: keyof typeof changeControlledTableIds,
 	/**
 	 * The values of the row.
 	 */
@@ -56,7 +52,7 @@ export function entityIdForRow(
 
 	// only has one primary key
 	if (changeControlledTableIds[tableName]!.length === 1) {
-		const index = changeControlledTables[tableName]!.indexOf(
+		const index = changeControlledTableIds[tableName]!.indexOf(
 			// @ts-expect-error - no clue why
 			changeControlledTableIds[tableName]![0]
 		);
@@ -65,7 +61,7 @@ export function entityIdForRow(
 	// has compound primary key that are joined with a comma.
 	else {
 		for (const column of changeControlledTableIds[tableName]!) {
-			const index = changeControlledTables[tableName]!.indexOf(
+			const index = changeControlledTableIds[tableName]!.indexOf(
 				// @ts-expect-error - no clue why
 				column
 			);
@@ -76,6 +72,7 @@ export function entityIdForRow(
 			}
 		}
 	}
+
 	return entityId;
 }
 
@@ -86,7 +83,7 @@ export function primaryKeysForEntityId(
 	/**
 	 * The name of the table.
 	 */
-	tableName: keyof LixDatabaseSchema,
+	tableName: keyof typeof changeControlledTableIds,
 	/**
 	 * The values of the row.
 	 */
@@ -100,5 +97,3 @@ export function primaryKeysForEntityId(
 		return entitiyId.split(",").map((id, index) => [primaryKeys[index]!, id]);
 	}
 }
-
-type TableColumns<T> = T extends Record<string, any> ? (keyof T)[] : never;

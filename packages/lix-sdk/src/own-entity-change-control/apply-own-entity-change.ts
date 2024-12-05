@@ -6,7 +6,10 @@ import type {
 } from "kysely";
 import type { Change, LixDatabaseSchema } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
-import { primaryKeysForEntityId } from "./change-controlled-tables.js";
+import {
+	changeControlledTableIds,
+	primaryKeysForEntityId,
+} from "./change-controlled-tables.js";
 
 /**
  * Applies own changes to lix itself.
@@ -30,7 +33,7 @@ export async function applyOwnEntityChange(args: {
 
 		const tableName = args.change.schema_key.slice(
 			"lix_".length
-		) as keyof LixDatabaseSchema;
+		) as keyof typeof changeControlledTableIds;
 
 		const primaryKeys = primaryKeysForEntityId(
 			tableName,
@@ -40,12 +43,12 @@ export async function applyOwnEntityChange(args: {
 		let query:
 			| DeleteQueryBuilder<
 					LixDatabaseSchema,
-					keyof LixDatabaseSchema,
+					keyof typeof changeControlledTableIds,
 					DeleteResult
 			  >
 			| InsertQueryBuilder<
 					LixDatabaseSchema,
-					keyof LixDatabaseSchema,
+					keyof typeof changeControlledTableIds,
 					InsertResult
 			  >;
 

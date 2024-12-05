@@ -2,8 +2,9 @@ import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import type { LixDatabaseSchema, Snapshot } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import {
-	changeControlledTables,
+	changeControlledTableIds,
 	entityIdForRow,
+	type PragmaTableInfo,
 } from "./change-controlled-tables.js";
 import { createChange } from "../change/create-change.js";
 
@@ -11,44 +12,50 @@ export function applyOwnEntityChangeControlTriggers(
 	sqlite: SqliteDatabase,
 	db: Kysely<LixDatabaseSchema>
 ): void {
+	const tableInfos: Record<string, PragmaTableInfo> = {};
+
+	for (const table of Object.keys(changeControlledTableIds)) {
+		tableInfos[table] = sqlite.exec({
+			sql: `PRAGMA table_info(${table});`,
+			returnValue: "resultRows",
+			rowMode: "object",
+		}) as PragmaTableInfo;
+	}
+
 	sqlite.createFunction({
 		name: "handle_lix_own_entity_change",
 		arity: -1,
 		// @ts-expect-error - dynamic function
 		xFunc: (
 			_ctx: number,
-			tableName: keyof LixDatabaseSchema,
+			tableName: keyof typeof changeControlledTableIds,
 			operation: "insert" | "update" | "delete",
 			...value
 		) => {
-			handleLixOwnEntityChange(db, tableName, operation, ...value);
+			handleLixOwnEntityChange(db, tableName, tableInfos, operation, ...value);
 		},
 	});
 
-	for (const [table] of Object.entries(changeControlledTables)) {
-		const tableInfoRows = sqlite.exec({
-			sql: `PRAGMA table_info("${table}");`,
-			returnValue: "resultRows",
-			rowMode: "object",
-		});
+	for (const table of Object.keys(changeControlledTableIds)) {
+		const tableInfo = tableInfos[table]!;
 
 		const sql = `
       CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_insert
       AFTER INSERT ON ${table}
       BEGIN
-        SELECT handle_lix_own_entity_change('${table}', 'insert', ${tableInfoRows.map((c) => "NEW." + c.name).join(", ")});
+        SELECT handle_lix_own_entity_change('${table}', 'insert', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
       END;
       
       CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_update
       AFTER UPDATE ON ${table}
       BEGIN
-        SELECT handle_lix_own_entity_change('${table}', 'update', ${tableInfoRows.map((c) => "NEW." + c.name).join(", ")});
+        SELECT handle_lix_own_entity_change('${table}', 'update', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
       END;
 
       CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_delete
       AFTER DELETE ON ${table}
       BEGIN
-        SELECT handle_lix_own_entity_change('${table}', 'delete', ${tableInfoRows.map((c) => "NEW." + c.name).join(", ")});
+        SELECT handle_lix_own_entity_change('${table}', 'delete', ${tableInfo.map((c) => "OLD." + c.name).join(", ")});
       END;
       `;
 
@@ -58,7 +65,8 @@ export function applyOwnEntityChangeControlTriggers(
 
 async function handleLixOwnEntityChange(
 	db: Kysely<LixDatabaseSchema>,
-	tableName: keyof LixDatabaseSchema,
+	tableName: keyof typeof changeControlledTableIds,
+	tableInfos: Record<keyof typeof changeControlledTableIds, PragmaTableInfo>,
 	operation: "insert" | "update" | "delete",
 	...values: any[]
 ): Promise<void> {
@@ -96,10 +104,8 @@ async function handleLixOwnEntityChange(
 		} else {
 			snapshotContent = {};
 			// construct the values as json for the snapshot
-			for (const [index, column] of changeControlledTables[
-				tableName
-			]!.entries()) {
-				snapshotContent[column] = values[index];
+			for (const [index, column] of tableInfos[tableName]!.entries()) {
+				snapshotContent[column.name] = values[index];
 			}
 		}
 
