@@ -40,7 +40,6 @@ test("should be able to start a discussion on changes", async () => {
 
 	await changeQueueSettled({ lix });
 
-
 	const current_author = await lix.db
 		.selectFrom("active_account")
 		.selectAll()

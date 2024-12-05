@@ -42,5 +42,5 @@ export type NewActiveAccount = Insertable<ActiveAccountTable>;
 export type ActiveAccountUpdate = Updateable<ActiveAccountTable>;
 export type ActiveAccountTable = {
 	id: string;
-  name: string;
+	name: string;
 };

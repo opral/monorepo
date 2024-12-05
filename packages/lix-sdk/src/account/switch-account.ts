@@ -28,10 +28,7 @@ export async function switchAccount(args: {
 		// delete all rows from the current_account table
 		await trx.deleteFrom("active_account").execute();
 		// insert the new account id into the current_account table
-		await trx
-			.insertInto("active_account")
-			.values(args.to)
-			.execute();
+		await trx.insertInto("active_account").values(args.to).execute();
 	};
 
 	if (args.lix.db.isTransaction) {

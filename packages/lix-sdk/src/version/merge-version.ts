@@ -16,8 +16,8 @@ export async function mergeVersion(args: {
 			.where(
 				versionChangeInSymmetricDifference(
 					args.sourceVersion,
-					args.targetVersion,
-				),
+					args.targetVersion
+				)
 			)
 			.selectAll("change")
 			.execute();

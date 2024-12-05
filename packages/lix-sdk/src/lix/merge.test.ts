@@ -711,7 +711,10 @@ test("it should copy discussion and related comments and mappings", async () => 
 	);
 
 	// TODO how do know which author to use for the discussion - we can have multiple active accounts?
-	const currentAuthorLix1 = await lix1.db.selectFrom("active_account").selectAll().executeTakeFirstOrThrow();
+	const currentAuthorLix1 = await lix1.db
+		.selectFrom("active_account")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	await createDiscussion({
 		lix: lix1,
@@ -734,7 +737,10 @@ test("it should copy discussion and related comments and mappings", async () => 
 	// lix 2 has no comments yet so after lix 1 into 2 we should be in sync
 	expect(commentsLix1).toEqual(commentsLix2AfterMerge);
 
-	const currentAuthorLix2 = await lix1.db.selectFrom("active_account").selectAll().executeTakeFirstOrThrow();
+	const currentAuthorLix2 = await lix1.db
+		.selectFrom("active_account")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 	await createComment({
 		lix: lix2,
 		parentComment: commentsLix2AfterMerge[0]!,

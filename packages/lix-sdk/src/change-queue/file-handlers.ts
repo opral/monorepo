@@ -110,7 +110,7 @@ export async function handleFileInsert(args: {
 					schemaKey: detectedChange.schema.key,
 					snapshotContent: detectedChange.snapshot,
 				});
-			}),
+			})
 		);
 
 		await trx
@@ -205,7 +205,7 @@ export async function handleFileChange(args: {
 					schemaKey: detectedChange.schema.key,
 					snapshotContent: detectedChange.snapshot,
 				});
-			}),
+			})
 		);
 
 		await trx

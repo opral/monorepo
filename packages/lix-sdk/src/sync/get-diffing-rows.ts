@@ -55,7 +55,6 @@ export async function getDiffingRows(args: {
 
 		upsertedRows["mutation_log"] = await operationsToPush.execute();
 
-		
 		console.log("upsertedRows", upsertedRows);
 
 		for (const operation of upsertedRows["mutation_log"]) {

@@ -259,7 +259,6 @@ export async function mergeTheirState(args: {
 	} else {
 		return await args.lix.db.transaction().execute(executeInTransaction);
 	}
-
 }
 
 function aheadSessions(
