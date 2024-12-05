@@ -3,9 +3,10 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createAccount } from "../account/create-account.js";
 import { createChange } from "../change/create-change.js";
 
-test("should detect and create changes", async () => {
+test("it works for inserts, updates and deletions", async () => {
 	const lix = await openLixInMemory({});
 
+	// insert
 	await lix.db
 		.insertInto("key_value")
 		.values({ key: "key1", value: "value1" })
@@ -13,23 +14,44 @@ test("should detect and create changes", async () => {
 
 	await new Promise((resolve) => setTimeout(resolve, 100));
 
-	const change = await lix.db
+	// update
+	await lix.db
+		.updateTable("key_value")
+		.set("value", "value2")
+		.where("key", "=", "key1")
+		.execute();
+
+	// delete
+	await lix.db.deleteFrom("key_value").where("key", "=", "key1").execute();
+
+	await new Promise((resolve) => setTimeout(resolve, 100));
+
+	const changes = await lix.db
 		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where("schema_key", "=", "lix_key_value")
 		.selectAll()
-		.executeTakeFirstOrThrow();
+		.execute();
 
-	const snapshot = await lix.db
-		.selectFrom("snapshot")
-		.where("id", "=", change.snapshot_id)
-		.selectAll()
-		.executeTakeFirstOrThrow();
+	const snapshots = changes.map((change) => change.content);
 
-	expect(change.entity_id).toBe("key1");
-	expect(change.file_id).toBe("null");
-	expect(change.plugin_key).toBe("lix_own_entity");
-	expect(change.schema_key).toBe("lix_key_value");
-	expect(snapshot.content).toStrictEqual({ key: "key1", value: "value1" });
+	expect(changes.length).toBe(3);
+
+	for (const change of changes) {
+		expect(change.entity_id).toBe("key1");
+		expect(change.file_id).toBe("null");
+		expect(change.plugin_key).toBe("lix_own_entity");
+		expect(change.schema_key).toBe("lix_key_value");
+	}
+
+	expect(snapshots).toStrictEqual([
+		// insert
+		{ key: "key1", value: "value1" },
+		// update
+		{ key: "key1", value: "value2" },
+		// delete
+		null,
+	]);
 });
 
 test("it works for compound entity ids like change_author", async () => {
