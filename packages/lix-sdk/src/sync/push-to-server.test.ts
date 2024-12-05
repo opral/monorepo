@@ -15,7 +15,7 @@ test("push rows of multiple tables to server successfully", async () => {
 
 	const lix = await openLixInMemory({ blob: lixBlob });
 
-	const { value: id } = await lix.db
+	const id = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix-id")
 		.selectAll()
@@ -34,7 +34,6 @@ test("push rows of multiple tables to server successfully", async () => {
 		})
 	);
 
-	// insert an account locally
 	await lix.db
 		.insertInto("account")
 		.values({ id: "account0", name: "some account" })
@@ -49,33 +48,43 @@ test("push rows of multiple tables to server successfully", async () => {
 		})
 		.execute();
 
+	// change control of own tables
+	// is async atm, need to await here
+	// see https://linear.app/opral/issue/LIXDK-263/sync-execution-of-queries
+	await new Promise((resolve) => setTimeout(resolve, 100));
+
 	await pushToServer({
-		id,
+		id: id.value,
 		lix,
 		serverUrl: "http://localhost:3000",
+		// empty vector clock means push all rows
 		targetVectorClock: [],
 	});
 
 	const lixFromServer = await openLixInMemory({
-		blob: await storage.get(`lix-file-${id}`),
+		blob: await storage.get(`lix-file-${id.value}`),
 	});
 
-	const keyValueOnServer = await lixFromServer.db
-		.selectFrom("key_value")
-		.where("key", "=", "mock-key")
+	const keyValueChangesOnServer = await lixFromServer.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("schema_key", "=", "lix_key_value")
+		.where("entity_id", "=", "mock-key")
 		.selectAll()
 		.execute();
 
-	const accountsOnServer = await lixFromServer.db
-		.selectFrom("account")
-		.where("id", "=", "account0")
+	const accountsChangesOnServer = await lixFromServer.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("schema_key", "=", "lix_account")
+		.where("entity_id", "=", "account0")
 		.selectAll()
 		.execute();
 
-	expect(accountsOnServer).toEqual([
+	expect(accountsChangesOnServer.map((c) => c.content)).toEqual([
 		{ id: "account0", name: "some account" } satisfies Account,
 	]);
-	expect(keyValueOnServer).toEqual([
+	expect(keyValueChangesOnServer.map((c) => c.content)).toEqual([
 		{
 			key: "mock-key",
 			value: "mock-value",
@@ -123,6 +132,11 @@ test("push-pull-push with two clients", async () => {
 		})
 		.execute();
 
+	// change control of own tables
+	// is async atm, need to await here
+	// see https://linear.app/opral/issue/LIXDK-263/sync-execution-of-queries
+	await new Promise((resolve) => setTimeout(resolve, 100));
+
 	// Client 1 pushes to server
 	await pushToServer({
 		id: lixId,
@@ -153,6 +167,11 @@ test("push-pull-push with two clients", async () => {
 		})
 		.execute();
 
+	// change control of own tables
+	// is async atm, need to await here
+	// see https://linear.app/opral/issue/LIXDK-263/sync-execution-of-queries
+	await new Promise((resolve) => setTimeout(resolve, 100));
+
 	await client2.db
 		.updateTable("key_value")
 		.set({
@@ -160,6 +179,11 @@ test("push-pull-push with two clients", async () => {
 		})
 		.where("key", "=", "mock-key")
 		.execute();
+
+	// change control of own tables
+	// is async atm, need to await here
+	// see https://linear.app/opral/issue/LIXDK-263/sync-execution-of-queries
+	await new Promise((resolve) => setTimeout(resolve, 100));
 
 	// Client 2 pushes to server
 	await pushToServer({
@@ -174,15 +198,19 @@ test("push-pull-push with two clients", async () => {
 		blob: await storage.get(`lix-file-${lixId}`),
 	});
 
-	const accountsOnServer = await lixFromServer.db
-		.selectFrom("account")
+	const accountsChangesOnServer = await lixFromServer.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("schema_key", "=", "lix_account")
 		.selectAll()
 		.execute();
 
-	expect(accountsOnServer).toEqual([
-		{ id: "account0", name: "account from client 1" },
-		{ id: "account1", name: "account from client 2" },
-	]);
+	expect(accountsChangesOnServer.map((c) => c.content)).toEqual(
+		expect.arrayContaining([
+			{ id: "account0", name: "account from client 1" },
+			{ id: "account1", name: "account from client 2" },
+		])
+	);
 
 	await pullFromServer({
 		id: lixId,
@@ -190,13 +218,15 @@ test("push-pull-push with two clients", async () => {
 		serverUrl: "http://localhost:3000",
 	});
 
-	const accountsOnClient1 = await client1.db
-		.selectFrom("account")
+	const accountChangesOnClient1 = await client1.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("schema_key", "=", "lix_account")
 		.selectAll()
 		.execute();
 
 	// TODO @samuel  - this seem to be broken because of asynchronous change managment ? how shall we test this?
-	expect(accountsOnServer).toEqual(accountsOnClient1);
+	expect(accountsChangesOnServer).toEqual(accountChangesOnClient1);
 
 	await pullFromServer({
 		id: lixId,
@@ -204,29 +234,35 @@ test("push-pull-push with two clients", async () => {
 		serverUrl: "http://localhost:3000",
 	});
 
-	const accountsOnClient2 = await client2.db
-		.selectFrom("account")
+	const accountChangesOnClient2 = await client2.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("schema_key", "=", "lix_account")
 		.selectAll()
 		.execute();
 
-	expect(accountsOnServer).toEqual(accountsOnClient2);
+	expect(accountsChangesOnServer).toEqual(accountChangesOnClient2);
 
-	const keyValuesOnServer = await lixFromServer.db
-		.selectFrom("key_value")
+	const keyValueChangesOnServer = await lixFromServer.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("schema_key", "=", "lix_key_value")
 		.selectAll()
 		.execute();
 
-	expect(keyValuesOnServer).toEqual([
-		{
-			key: "lix-id",
-			value: lixId,
-		},
-		{
-			key: "mock-key",
-			value: "mock-value from client 1 - updated by client 2",
-		},
-		{ key: "mock-key-2", value: "mock-value from client 2" },
-	]);
+	expect(keyValueChangesOnServer.map((c) => c.content)).toEqual(
+		expect.arrayContaining([
+			{
+				key: "mock-key",
+				value: "mock-value from client 1",
+			},
+			{
+				key: "mock-key",
+				value: "mock-value from client 1 - updated by client 2",
+			},
+			{ key: "mock-key-2", value: "mock-value from client 2" },
+		])
+	);
 });
 
 test("it should handle snapshots.content json binaries", async () => {
