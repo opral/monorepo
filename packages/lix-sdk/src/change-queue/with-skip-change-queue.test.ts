@@ -43,6 +43,7 @@ test("skipping the change queue should be possible", async () => {
 	const changes0 = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.where("schema_key", "=", "text")
 		.selectAll()
 		.execute();
 
@@ -65,6 +66,7 @@ test("skipping the change queue should be possible", async () => {
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll()
+		.where("schema_key", "=", "text")
 		.execute();
 
 	// change is skipped, so no new change is created
