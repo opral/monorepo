@@ -247,15 +247,20 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 			"discussion.change_set_id",
 			"change_set_element.change_set_id"
 		)
-		.leftJoin("comment", "comment.discussion_id", "discussion.id")
 		.where(changeInVersion(currentBranch))
 		.selectAll("change")
 		.select(sql`json(snapshot.content)`.as("snapshot_content"))
 		.select("file.path as file_path")
 		.select("account.name as account_name")
 		.select(sql`json(parent_snapshot.content)`.as("parent_snapshot_content")) // This will be NULL if no parent exists
-		.select((eb) => eb.fn.count("discussion.id").as("discussion_count"))
-		.select(sql`group_concat(discussion.id)`.as("discussion_ids"))
+		.select((eb) => [
+			jsonArrayFrom(
+				eb
+					.selectFrom("discussion")
+					.select("discussion.id")
+					.whereRef("discussion.id", "=", "discussion.id")
+			).as("discussion_ids"),
+		])
 		.groupBy("change.id")
 		.orderBy("change.created_at", "desc")
 		.execute();
@@ -364,7 +369,8 @@ export const activeDiscussionAtom = atom(async (get) => {
 						"comment.id",
 						"comment.content",
 						"comment.created_at",
-						"account.name as created_by",
+						"account.id as account_id",
+						"account.name as account_name",
 					])
 					.whereRef("comment.discussion_id", "=", "discussion.id")
 					.orderBy("comment.created_at", "asc")
