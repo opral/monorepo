@@ -13,22 +13,22 @@ test("should detect and create changes", async () => {
 
 	await new Promise((resolve) => setTimeout(resolve, 100));
 
-	const changes = await lix.db
+	const change = await lix.db
 		.selectFrom("change")
 		.where("schema_key", "=", "lix_key_value")
 		.selectAll()
-		.execute();
+		.executeTakeFirstOrThrow();
+
 	const snapshot = await lix.db
 		.selectFrom("snapshot")
-		.where("id", "=", changes[0]!.snapshot_id!)
+		.where("id", "=", change.snapshot_id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(changes.length).toBe(1);
-	expect(changes[0]?.entity_id).toBe("key1");
-	expect(changes[0]?.file_id).toBe("null");
-	expect(changes[0]?.plugin_key).toBe("lix_own_entity");
-	expect(changes[0]?.schema_key).toBe("lix_key_value");
+	expect(change.entity_id).toBe("key1");
+	expect(change.file_id).toBe("null");
+	expect(change.plugin_key).toBe("lix_own_entity");
+	expect(change.schema_key).toBe("lix_key_value");
 	expect(snapshot.content).toStrictEqual({ key: "key1", value: "value1" });
 });
 

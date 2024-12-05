@@ -103,7 +103,7 @@ async function handleLixOwnEntityChange(
 			}
 		}
 
-		const entityId = entityIdForRow(tableName, values);
+		const entityId = entityIdForRow(tableName, ...values);
 
 		await createChange({
 			lix: { db: trx },
