@@ -4,11 +4,15 @@ import { Form, FormControl, FormField, FormItem } from "./ui/form.tsx";
 import { useForm } from "react-hook-form";
 import { Button } from "./ui/button.tsx";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar.tsx";
-import { activeAccountAtom } from "@/state.ts";
+import { activeAccountAtom, discussionSearchParamsAtom, lixAtom } from "@/state.ts";
 import IconArrow from "./icons/IconArrow.tsx";
+import { createComment } from "@lix-js/sdk";
+import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
 
 const ChatInput = () => {
   const [activeAccount] = useAtom(activeAccountAtom);
+  const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
+  const [lix] = useAtom(lixAtom);
 
   const form = useForm({
     defaultValues: {
@@ -23,10 +27,31 @@ const ChatInput = () => {
     event.target.style.height = `${event.target.scrollHeight}px`;
   };
 
-  const handleAddComment = (data: { comment: string }) => {
-    // Handle the comment submission logic here
-    console.log("Comment submitted:", data.comment);
+  const handleAddComment = async () => {
+    const resolve = await lix.db.transaction().execute(
+      async (trx) => {
+        const parentComment = await trx
+          .selectFrom("comment")
+          .where("discussion_id", "=", discussionSearchParams)
+          .orderBy("created_at", "desc")
+          .selectAll()
+          .limit(1)
+          .executeTakeFirstOrThrow();
+        const createdBy = await trx
+          .selectFrom("active_account")
+          .selectAll()
+          .executeTakeFirstOrThrow();
+        return await createComment({
+          lix: { ...lix, db: trx },
+          parentComment,
+          content: commentValue,
+          createdBy,
+        });
+      }
+    );
+    await saveLixToOpfs({ lix });
     form.reset();
+    console.log(resolve);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -47,7 +72,7 @@ const ChatInput = () => {
       <Form {...form}>
         <form
           onSubmit={handleSubmit(handleAddComment)}
-          className="flex flex-1 items-center ring-1 ring-slate-100 rounded-md bg-white pl-3 pr-1 py-0.5"
+          className="flex flex-1 items-center ring-1 ring-slate-100 rounded-md pl-3 pr-1 py-0.5 bg-slate-50"
         >
           <FormField
             control={form.control}

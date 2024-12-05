@@ -364,7 +364,7 @@ export const activeDiscussionAtom = atom(async (get) => {
 						"comment.id",
 						"comment.content",
 						"comment.created_at",
-						"account.name as author_name",
+						"account.name as created_by",
 					])
 					.whereRef("comment.discussion_id", "=", "discussion.id")
 					.orderBy("comment.created_at", "asc")
@@ -376,7 +376,3 @@ export const activeDiscussionAtom = atom(async (get) => {
 
 	return discussionWithComments[0];
 });
-
-					// .select("comment.created_at as comment_created_at")
-					// .select("comment.content as comment_content")
-					// .select("account.name as comment_author_name")
