@@ -27,9 +27,6 @@ export async function initSyncProcess(args: {
 	// if you want to test sync, restart the lix app
 	// to make sure the experimental-sync-url is set
 	if (!url) {
-		console.log(
-			'no "lix-experimental-server-url" set, setting it to "http://localhost:3000"'
-		);
 		return;
 	}
 
