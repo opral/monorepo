@@ -14,7 +14,7 @@ import { updateChangesInVersion } from "../version/update-changes-in-version.js"
 export async function createChange(args: {
 	lix: Pick<Lix, "db">;
 	authors: Array<Pick<Account, "id">>;
-	version: Version;
+	version: Pick<Version, "id">;
 	entityId: Change["entity_id"];
 	fileId: Change["file_id"];
 	pluginKey: Change["plugin_key"];
@@ -64,7 +64,6 @@ export async function createChange(args: {
 		}
 
 		for (const author of args.authors) {
-			console.log("author", author);
 			try {
 				await trx
 					.insertInto("change_author")
@@ -73,9 +72,8 @@ export async function createChange(args: {
 						account_id: author.id,
 					})
 					.execute();
-
-			} catch(e) {
-				console.log(e)
+			} catch (e) {
+				console.log(e);
 			}
 		}
 
