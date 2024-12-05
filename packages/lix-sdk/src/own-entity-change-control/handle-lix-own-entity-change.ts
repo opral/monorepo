@@ -2,9 +2,9 @@ import type { Kysely } from "kysely";
 import type { LixDatabaseSchema, Snapshot } from "../database/schema.js";
 import { createChange } from "../change/create-change.js";
 import {
-	changeControlledTableIds,
 	changeControlledTables,
-} from "./database-triggers.js";
+	entityIdForRow,
+} from "./change-controlled-tables.js";
 
 export async function handleLixOwnEntityChange(
 	db: Kysely<LixDatabaseSchema>,
@@ -53,26 +53,7 @@ export async function handleLixOwnEntityChange(
 			}
 		}
 
-		let entityId = "";
-
-		// only has one primary key
-		if (changeControlledTableIds[tableName]!.length === 1) {
-			const index = changeControlledTables[tableName]!.indexOf(
-				// @ts-expect-error - no clue why
-				changeControlledTableIds[tableName]![0]
-			);
-			entityId = values[index];
-		}
-		// has compound primary key that are joined with a comma.
-		else {
-			for (const column of changeControlledTableIds[tableName]!) {
-				const index = changeControlledTables[tableName]!.indexOf(
-					// @ts-expect-error - no clue why
-					column
-				);
-				entityId = [entityId, values[index]].join(",");
-			}
-		}
+		const entityId = entityIdForRow(tableName, values);
 
 		await createChange({
 			lix: { db: trx },
