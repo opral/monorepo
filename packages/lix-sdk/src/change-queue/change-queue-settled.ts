@@ -26,6 +26,6 @@ export async function changeQueueSettled(args: {
 			// poll again in 50ms. This is a workaround until subscriptions
 			// or another mechanism is implemented to notify when the queue is settled
 			await new Promise((resolve) => setTimeout(resolve, 50));
-		} 
+		}
 	}
 }

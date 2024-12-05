@@ -257,6 +257,6 @@ test("should throw an error if authors array is empty", async () => {
 			pluginKey: "plugin1",
 			schemaKey: "schema1",
 			snapshotContent: { text: "snapshot-content" },
-		}),
+		})
 	).rejects.toThrow("At least one author is required");
 });

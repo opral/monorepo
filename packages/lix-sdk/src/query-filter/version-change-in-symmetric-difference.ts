@@ -18,7 +18,7 @@ import type { Version, LixDatabaseSchema } from "../database/schema.js";
  */
 export function versionChangeInSymmetricDifference(a: Version, b: Version) {
 	return (
-		eb: ExpressionBuilder<LixDatabaseSchema, "version_change">,
+		eb: ExpressionBuilder<LixDatabaseSchema, "version_change">
 	): ExpressionWrapper<LixDatabaseSchema, "version_change", SqlBool> =>
 		eb.or([
 			eb("version_change.change_id", "in", (subquery) =>
@@ -27,11 +27,11 @@ export function versionChangeInSymmetricDifference(a: Version, b: Version) {
 					.leftJoin("version_change as B", (join) =>
 						join
 							.onRef("A.change_id", "=", "B.change_id")
-							.on("B.version_id", "=", b.id),
+							.on("B.version_id", "=", b.id)
 					)
 					.where("A.version_id", "=", a.id)
 					.where("B.change_id", "is", null)
-					.select("A.change_id"),
+					.select("A.change_id")
 			),
 			eb("version_change.change_id", "in", (subquery) =>
 				subquery
@@ -39,11 +39,11 @@ export function versionChangeInSymmetricDifference(a: Version, b: Version) {
 					.leftJoin("version_change as A", (join) =>
 						join
 							.onRef("B.change_id", "=", "A.change_id")
-							.on("A.version_id", "=", a.id),
+							.on("A.version_id", "=", a.id)
 					)
 					.where("B.version_id", "=", b.id)
 					.where("A.change_id", "is", null)
-					.select("B.change_id"),
+					.select("B.change_id")
 			),
 		]);
 }

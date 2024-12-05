@@ -8,7 +8,7 @@ export async function applyLixOwnEntityChange(args: {
 	if (args.change.plugin_key !== "lix-own-entity") {
 		throw new Error(
 			"Expected 'lix-own-entity' as plugin key but received " +
-				args.change.plugin_key,
+				args.change.plugin_key
 		);
 	}
 	const executeInTransaction = async (trx: Lix["db"]) => {
