@@ -21,7 +21,7 @@ import type { Lix } from "../lix/open-lix.js";
  *   ```
  */
 export async function applyChanges(args: {
-	lix: Lix;
+	lix: Pick<Lix, "db" | "plugin">;
 	changes: Change[];
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {

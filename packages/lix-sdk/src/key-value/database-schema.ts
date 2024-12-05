@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import type { Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 
@@ -42,7 +43,7 @@ export type KeyValueTable = {
 	value: string;
 };
 
-type PredefinedKeys = "lix-id";
+type PredefinedKeys = "lix-id" | "lix-experimental-server-url";
 // The string & {} ensures TypeScript recognizes KeyValueKeys
 // as a superset of string, preventing conflicts when using other string values.
 type KeyType = string & {};

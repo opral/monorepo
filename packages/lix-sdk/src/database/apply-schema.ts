@@ -265,7 +265,59 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
   SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6'
   WHERE NOT EXISTS (SELECT 1 FROM current_version);
 
+
+  CREATE TEMP TRIGGER IF NOT EXISTS insert_account_if_not_exists_on_change_author
+  BEFORE INSERT ON change_author
+  FOR EACH ROW
+  WHEN NEW.account_id NOT IN (SELECT id FROM account) AND NEW.account_id IN (SELECT id FROM temp.active_account)
+  BEGIN
+    INSERT OR IGNORE INTO account
+      SELECT 
+      *
+      FROM active_account 
+      WHERE id = NEW.account_id;
+  END;
+  
+  CREATE TEMP TRIGGER IF NOT EXISTS insert_account_if_not_exists_on_change_set_label_author
+  BEFORE INSERT ON change_set_label_author
+  FOR EACH ROW
+  WHEN NEW.account_id NOT IN (SELECT id FROM account) AND NEW.account_id IN (SELECT id FROM temp.active_account)
+  BEGIN
+    INSERT OR IGNORE INTO account
+      SELECT 
+      *
+      FROM active_account 
+      WHERE id = NEW.account_id;
+  END;
+    
+  CREATE TEMP TRIGGER IF NOT EXISTS insert_account_if_not_exists_on_comment
+  BEFORE INSERT ON comment
+  FOR EACH ROW
+  WHEN NEW.created_by NOT IN (SELECT id FROM account) AND NEW.created_by IN (SELECT id FROM temp.active_account)
+  BEGIN
+    INSERT OR IGNORE INTO account
+      SELECT 
+      *
+      FROM active_account 
+      WHERE id = NEW.created_by;
+  END;
+  
+
   `;
+
+	// CREATE TRIGGER IF NOT EXISTS insert_account_if_not_exists_on_change_set_label_author
+	// BEFORE INSERT ON change_set_label_author
+	// FOR EACH ROW
+	// BEGIN
+	//   INSERT OR IGNORE INTO account (id, name)
+	//   VALUES (
+	//     NEW.account_id,
+	//     CASE
+	//       WHEN NEW.account_id LIKE 'anonymous_%' THEN 'anonymous'
+	//       ELSE NEW.account_id
+	//     END
+	//   );
+	// END;
 
 	applyMutationLogDatabaseSchema(args.sqlite);
 

@@ -20,7 +20,7 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 	let lix: Lix;
 
 	try {
-		lix = await openLixInMemory({ blob });
+		lix = await openLixInMemory({ blob, sync: false });
 	} catch {
 		return new Response(
 			JSON.stringify({
@@ -34,14 +34,40 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 	}
 
 	try {
+		console.log(
+			"----------- PROCESSING PUSH FROM CLIENT  --s----------- with state:",
+			body.vector_clock
+		);
 		await mergeTheirState({
 			lix,
 			sourceVectorClock: body.vector_clock,
 			sourceData: body.data,
 		});
 
+		const allmlog = await lix.db
+			.selectFrom("mutation_log")
+			.selectAll()
+			// .select(({ fn }) => {
+			// 	return ["session", fn.max<number>("session_time").as("time")];
+			// })
+			// .groupBy("session")
+			.execute();
+
+		const vcAfterPush = await lix.db
+			.selectFrom("mutation_log")
+			.select(({ fn }) => {
+				return ["session", fn.max<number>("session_time").as("time")];
+			})
+			.groupBy("session")
+			.execute();
+
 		await context.storage.set(`lix-file-${body.lix_id}`, await lix.toBlob());
 
+		console.log(
+			"----------- DONE PROCESSING PUSH FROM CLIENT  ---- ---------",
+			vcAfterPush,
+			allmlog.length
+		);
 		return new Response(null, {
 			status: 201,
 		});
