@@ -12,6 +12,9 @@ export const changeControlledTableIds = {
 	version: ["id"],
 } as const;
 
+//
+// uo28ns,-3-9u2h
+
 /**
  * The result of a PRAGMA table_info call.
  *
