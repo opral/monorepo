@@ -35,13 +35,19 @@ export async function applyChanges(args: {
 		// TODO make detection of which plugin to use easier
 		// https://linear.app/opral/issue/LIXDK-104/add-detectedchangeschema
 		for (const [fileId, changes] of Object.entries(groupByFile)) {
-			if (changes === undefined) {
+			if (changes === undefined || changes.length === 0) {
+				continue;
+			}
+			// Skip own entity changes which have a file id 'null' and
+			// plugin key 'lix_own_entity' as they are not associated with a file
+			if (fileId === "null" && changes[0]?.plugin_key === "lix_own_entity") {
 				continue;
 			}
 
 			const groupByPlugin = Object.groupBy(changes, (c) => c.plugin_key);
 
 			// TODO assumes that a file exists which is not necessarily true
+			// https://github.com/opral/lix-sdk/issues/181
 			const file = await trx
 				.selectFrom("file")
 				.where("id", "=", fileId)
