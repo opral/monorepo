@@ -8,7 +8,7 @@ import type { Lix } from "../lix/open-lix.js";
  */
 export async function updateChangesInVersion(args: {
 	lix: Pick<Lix, "db">;
-	version: Version;
+	version: Pick<Version, "id">;
 	changes: Change[];
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
