@@ -1,6 +1,11 @@
 import { useAtom } from "jotai";
-import { LIX_FILE_NAME, lixAtom, withPollingAtom } from "../state.ts";
-import { useEffect } from "react";
+import {
+	LIX_FILE_NAME,
+	lixAtom,
+	serverUrlAtom,
+	withPollingAtom,
+} from "../state.ts";
+import { useEffect, useState } from "react";
 import {
 	SlButton,
 	SlDropdown,
@@ -13,6 +18,7 @@ import { Lix } from "@lix-js/sdk";
 export default function RootLayout(props: { children: JSX.Element }) {
 	const [, setPolling] = useAtom(withPollingAtom);
 	const [lix] = useAtom(lixAtom);
+	const [serverUrl] = useAtom(serverUrlAtom);
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -45,10 +51,13 @@ export default function RootLayout(props: { children: JSX.Element }) {
 			{/* Header with socials */}
 			<div className="w-full border-b border-zinc-200 bg-white flex items-center justify-between px-4 min-h-[54px] gap-2">
 				<div className="flex gap-2 items-center">
-					{/* <a href="https://lix.opral.com" target="_blank"> */}
-					<img src="/lix.svg" alt="logo" className="w-8 h-8" />
-					{/* </a> */}
-					<h1 className="font-medium">CSV Demo</h1>
+					<div className="flex gap-2 items-center">
+						{/* <a href="https://lix.opral.com" target="_blank"> */}
+						<img src="/lix.svg" alt="logo" className="w-8 h-8" />
+						{/* </a> */}
+						<h1 className="font-medium">CSV Demo</h1>
+					</div>
+
 					<SlDropdown>
 						<SlButton slot="trigger" caret size="small">
 							Options
@@ -94,16 +103,24 @@ export default function RootLayout(props: { children: JSX.Element }) {
 							</SlMenuItem>
 						</SlMenu>
 					</SlDropdown>
+					{serverUrl && (
+						<SyncStatus serverUrl={serverUrl} lix={lix}></SyncStatus>
+					)}
+					<SyncAndShare />
 				</div>
 				<div className="flex gap-3 items-center">
+					<a href="https://github.com/opral/monorepo" target="_blank">
+						<img src="/github-icon.svg" alt="logo" className="w-5 h-5" />
+					</a>
 					<a href="https://discord.gg/gdMPPWy57R" target="_blank">
-						<img src="/discord-icon.svg" alt="logo" className="w-6 h-6" />
+						<img
+							src="/discord-icon.svg"
+							alt="logo"
+							className="w-6 h-6 filter grayscale"
+						/>
 					</a>
 					<a href="https://x.com/lixCCS" target="_blank">
 						<img src="/x-icon.svg" alt="logo" className="w-5 h-5" />
-					</a>
-					<a href="https://github.com/opral/monorepo" target="_blank">
-						<img src="/github-icon.svg" alt="logo" className="w-5 h-5" />
 					</a>
 				</div>
 			</div>
@@ -121,3 +138,58 @@ const handleExportLixFile = async (lix: Lix) => {
 	a.click();
 	document.body.removeChild(a);
 };
+
+function SyncAndShare() {
+	return <SyncButton></SyncButton>;
+}
+
+function SyncButton() {
+	const [serverUrl] = useAtom(serverUrlAtom);
+	const [lix] = useAtom(lixAtom);
+
+	if (!serverUrl) {
+		return (
+			<SlButton
+				variant="success"
+				size="small"
+				className=""
+				onClick={() => {
+					lix.db
+						.insertInto("key_value")
+						.values({
+							key: "lix-experimental-server-url",
+							value: "http://localhost:3000",
+						})
+						.execute();
+				}}
+			>
+				Sync
+			</SlButton>
+		);
+	}
+}
+
+function SyncStatus(props: { serverUrl: string; lix: Lix }) {
+	const [isHovered, setIsHovered] = useState(false);
+
+	return (
+		<div
+			className="flex gap-3 items-center hover:cursor-pointer"
+			onClick={() => {
+				props.lix.db
+					.deleteFrom("key_value")
+					.where("key", "=", "lix-experimental-server-url")
+					.execute();
+			}}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
+		>
+			<div
+				className={`w-3 h-3 rounded-4xl ${isHovered ? "bg-red-700" : "bg-green-700"}`}
+			></div>
+			<p className="">
+				{isHovered ? "Stop syncing to" : "Syncing to"} {props.serverUrl}
+			</p>
+		</div>
+	);
+}
