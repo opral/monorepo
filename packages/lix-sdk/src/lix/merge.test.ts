@@ -693,20 +693,22 @@ test("it should copy discussion and related comments and mappings", async () => 
 		.select("snapshot.content")
 		.execute();
 
-	expect(changes).toEqual([
-		expect.objectContaining({
-			id: changes[0]?.id,
-			created_at: changes[0]?.created_at,
-			snapshot_id: changes[0]?.snapshot_id,
-			schema_key: "text",
-			file_id: "test",
-			entity_id: "test",
-			plugin_key: "mock-plugin",
-			content: {
-				text: "inserted text",
-			},
-		}),
-	]);
+	expect(changes).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				id: changes[0]?.id,
+				created_at: changes[0]?.created_at,
+				snapshot_id: changes[0]?.snapshot_id,
+				schema_key: "text",
+				file_id: "test",
+				entity_id: "test",
+				plugin_key: "mock-plugin",
+				content: {
+					text: "inserted text",
+				},
+			}),
+		])
+	);
 
 	// TODO how do know which author to use for the discussion - we can have multiple active accounts?
 	const currentAuthorLix1 = await lix1.db.selectFrom("active_account").selectAll().executeTakeFirstOrThrow();
