@@ -22,7 +22,7 @@ import {
 type QueryId = PluginTransformQueryArgs["queryId"];
 
 export function ParseJsonBPluginV2(
-	jsonbColumns: Record<string, string[]>,
+	jsonbColumns: Record<string, string[]>
 ): KyselyPlugin {
 	const data = new WeakMap<QueryId, { jsonbColumNames: string[] }>();
 
@@ -50,7 +50,7 @@ export function ParseJsonBPluginV2(
 			const { transformedSelections, jsonbColumNames } = transformSelections(
 				query.selections,
 				query.from?.froms ?? [],
-				jsonbColumns,
+				jsonbColumns
 			);
 
 			// Store the transformed column aliases for result parsing
@@ -71,7 +71,7 @@ export function ParseJsonBPluginV2(
 function transformSelections(
 	selections: readonly SelectionNode[] | undefined,
 	fromNodes: readonly FromNode[] | undefined,
-	jsonbColumns: Record<string, string[]>,
+	jsonbColumns: Record<string, string[]>
 ): { transformedSelections: readonly any[]; jsonbColumNames: string[] } {
 	if (!fromNodes)
 		return { transformedSelections: selections ?? [], jsonbColumNames: [] };
@@ -104,7 +104,7 @@ function transformSelections(
 				selection.selection.table?.table?.identifier?.name || fallbackTableName;
 
 			const alias = fromNodes.find(
-				(n) => n.kind === "AliasNode" && n.alias.name === potentialTableName,
+				(n) => n.kind === "AliasNode" && n.alias.name === potentialTableName
 			);
 
 			if (alias) {
@@ -117,13 +117,13 @@ function transformSelections(
 			columnName = selection.selection.column?.column?.name;
 
 			const isAlias = fromNodes.some(
-				(n) => n.kind === "AliasNode" && n.alias.name === tableName,
+				(n) => n.kind === "AliasNode" && n.alias.name === tableName
 			);
 
 			// If the table name is an alias, find the real name
 			if (isAlias) {
 				const aliasNode = fromNodes.find(
-					(n) => n.kind === "AliasNode" && n.alias.name === tableName,
+					(n) => n.kind === "AliasNode" && n.alias.name === tableName
 				) as AliasNode;
 				tableName = aliasNode.node.table?.identifier.name;
 			}

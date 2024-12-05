@@ -10,7 +10,7 @@ import type { LixReadonly } from "./lix-plugin.js";
  */
 export function withTransaction(
 	lix: Lix,
-	trx: Transaction<LixDatabaseSchema>,
+	trx: Transaction<LixDatabaseSchema>
 ): LixReadonly {
 	return {
 		db: {

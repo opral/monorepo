@@ -27,7 +27,7 @@ export async function createChangeSet(args: {
 				args.changes.map((change) => ({
 					change_id: change.id,
 					change_set_id: changeSet.id,
-				})),
+				}))
 			)
 			.execute();
 		return changeSet;

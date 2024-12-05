@@ -4,9 +4,12 @@ import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { initChangeQueue } from "../change-queue/init-change-queue.js";
 import { changeQueueSettled } from "../change-queue/change-queue-settled.js";
+import type { Kysely } from "kysely";
+import type { LixDatabaseSchema } from "../database/schema.js";
+import { initSyncProcess } from "../sync/init-sync-process.js";
 
 export type Lix = {
-	db: ReturnType<typeof initDb>;
+	db: Kysely<LixDatabaseSchema>;
 	toBlob: () => Promise<Blob>;
 	plugin: {
 		getAll: () => Promise<LixPlugin[]>;
@@ -33,7 +36,16 @@ export async function openLix(args: {
 	 *   const lix = await openLixInMemory({ providePlugins: [myPlugin] })
 	 */
 	providePlugins?: LixPlugin[];
+	/**
+	 * Whether or not sync is enabled.
+	 */
+	sync?: boolean;
 }): Promise<Lix> {
+	const withDefaults = {
+		sync: true,
+		...args,
+	};
+
 	const db = initDb({ sqlite: args.database });
 
 	const plugins = await loadPlugins(db);
@@ -49,6 +61,10 @@ export async function openLix(args: {
 		lix: { db, plugin },
 		rawDatabase: args.database,
 	});
+
+	if (withDefaults.sync) {
+		initSyncProcess({ lix: { db, plugin } });
+	}
 
 	return {
 		db,

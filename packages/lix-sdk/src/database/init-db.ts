@@ -7,6 +7,7 @@ import { validateFilePath } from "../file/validate-file-path.js";
 import { jsonSha256 } from "../snapshot/json-sha-256.js";
 import { ParseJsonBPluginV1 } from "./kysely-plugin/parse-jsonb-plugin-v1.js";
 import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js";
+import { createSession } from "./mutation-log/lix-session.js";
 
 export function initDb(args: {
 	sqlite: SqliteDatabase;
@@ -23,6 +24,7 @@ export function initDb(args: {
 				file: ["metadata"],
 				change_queue: ["metadata_before", "metadata_after"],
 				snapshot: ["content"],
+				mutation_log: ["row_id"],
 			}),
 			SerializeJsonBPlugin(),
 		],
@@ -70,5 +72,19 @@ function initFunctions(args: { sqlite: SqliteDatabase }) {
 			return validateFilePath(value as string) as unknown as string;
 		},
 		deterministic: true,
+	});
+
+	const lixSession = createSession();
+
+	args.sqlite.createFunction({
+		name: "lix_session",
+		arity: 0,
+		xFunc: () => lixSession.id(),
+	});
+
+	args.sqlite.createFunction({
+		name: "lix_session_clock_tick",
+		arity: 0,
+		xFunc: () => lixSession.sessionClockTick(),
 	});
 }

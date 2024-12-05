@@ -54,7 +54,7 @@ test("it applies the given changes", async () => {
 		.executeTakeFirstOrThrow();
 
 	expect(new TextDecoder().decode(updatedFile.data)).toBe(
-		"updated-data-changeA",
+		"updated-data-changeA"
 	);
 });
 
@@ -88,7 +88,7 @@ test("applyChanges throws an error if plugin does not exist", async () => {
 
 	// Apply changes and verify error for missing plugin
 	expect(applyChanges({ lix, changes })).rejects.toThrow(
-		"Plugin with key non-existent not found",
+		"Plugin with key non-existent not found"
 	);
 });
 
@@ -127,6 +127,6 @@ test("applyChanges throws an error if plugin does not support applying changes",
 
 	// Apply changes and verify error for unsupported applyChanges
 	expect(applyChanges({ lix, changes })).rejects.toThrow(
-		"Plugin with key plugin1 does not support applying changes",
+		"Plugin with key plugin1 does not support applying changes"
 	);
 });

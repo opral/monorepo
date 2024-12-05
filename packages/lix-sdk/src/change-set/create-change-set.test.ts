@@ -38,6 +38,6 @@ test("creating a change set should succeed", async () => {
 		.execute();
 
 	expect(changeSetMembers.map((member) => member.change_id)).toEqual(
-		expect.arrayContaining([mockChanges[0]?.id, mockChanges[1]?.id]),
+		expect.arrayContaining([mockChanges[0]?.id, mockChanges[1]?.id])
 	);
 });

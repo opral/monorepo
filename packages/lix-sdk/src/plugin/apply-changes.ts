@@ -21,13 +21,13 @@ import type { Lix } from "../lix/open-lix.js";
  *   ```
  */
 export async function applyChanges(args: {
-	lix: Lix;
+	lix: Pick<Lix, "db" | "plugin">;
 	changes: Change[];
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const groupByFile = Object.groupBy(
 			args.changes,
-			(change) => change.file_id,
+			(change) => change.file_id
 		);
 
 		const plugins = await args.lix.plugin.getAll();
@@ -57,7 +57,7 @@ export async function applyChanges(args: {
 					throw new Error(`Plugin with key ${pluginKey} not found`);
 				} else if (!plugin.applyChanges) {
 					throw new Error(
-						`Plugin with key ${pluginKey} does not support applying changes`,
+						`Plugin with key ${pluginKey} does not support applying changes`
 					);
 				}
 				const { fileData } = await plugin.applyChanges({

@@ -61,27 +61,27 @@ export const lixAtom = atom(async () => {
  */
 export const withPollingAtom = atom(Date.now());
 
-export const currentVersionAtom = atom<Promise<Version & { targets: Version[] }>>(
-	async (get) => {
-		get(withPollingAtom);
-		const lix = await get(lixAtom);
+export const currentVersionAtom = atom<
+	Promise<Version & { targets: Version[] }>
+>(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
 
-		const currentVersion = await lix.db
-			.selectFrom("current_version")
-			.innerJoin("version", "version.id", "current_version.id")
-			.selectAll("version")
-			.executeTakeFirstOrThrow();
+	const currentVersion = await lix.db
+		.selectFrom("current_version")
+		.innerJoin("version", "version.id", "current_version.id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
 
-		// const targets = await lix.db
-		// 	.selectFrom("branch_target")
-		// 	.where("source_branch_id", "=", currentVersion.id)
-		// 	.innerJoin("branch", "branch_target.target_branch_id", "branch.id")
-		// 	.selectAll("branch")
-		// 	.execute();
+	// const targets = await lix.db
+	// 	.selectFrom("branch_target")
+	// 	.where("source_branch_id", "=", currentVersion.id)
+	// 	.innerJoin("branch", "branch_target.target_branch_id", "branch.id")
+	// 	.selectAll("branch")
+	// 	.execute();
 
-		return { ...currentVersion, targets: [] };
-	}
-);
+	return { ...currentVersion, targets: [] };
+});
 
 export const existingVersionsAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -98,4 +98,17 @@ export const activeAccountsAtom = atom(async (get) => {
 		.innerJoin("account", "active_account.id", "account.id")
 		.selectAll()
 		.execute();
+});
+
+export const serverUrlAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+
+	const syncServerUrl = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix-experimental-server-url")
+		.select("value")
+		.executeTakeFirst();
+
+	return syncServerUrl?.value;
 });

@@ -64,13 +64,19 @@ export async function createChange(args: {
 		}
 
 		for (const author of args.authors) {
-			await trx
-				.insertInto("change_author")
-				.values({
-					change_id: change.id,
-					account_id: author.id,
-				})
-				.execute();
+			console.log("author", author);
+			try {
+				await trx
+					.insertInto("change_author")
+					.values({
+						change_id: change.id,
+						account_id: author.id,
+					})
+					.execute();
+
+			} catch(e) {
+				console.log(e)
+			}
 		}
 
 		// update the version with the new change

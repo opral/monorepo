@@ -19,7 +19,7 @@ async function glob(args: {
 }) {
 	const result =
 		await sql`SELECT CASE WHEN ${args.path} GLOB ${args.glob} THEN 1 ELSE 0 END AS matches`.execute(
-			args.lix.db,
+			args.lix.db
 		);
 
 	// Extract the result from the response
@@ -59,7 +59,7 @@ export async function handleFileInsert(args: {
 
 		if (plugin.detectChanges === undefined) {
 			const error = new Error(
-				"Plugin does not support detecting changes even though the glob matches.",
+				"Plugin does not support detecting changes even though the glob matches."
 			);
 			// https://linear.app/opral/issue/LIXDK-195/await-change-queue-to-log-errors
 			console.error(error);
@@ -150,7 +150,7 @@ export async function handleFileChange(args: {
 		}
 		if (plugin.detectChanges === undefined) {
 			const error = new Error(
-				"Plugin does not support detecting changes even though the glob matches.",
+				"Plugin does not support detecting changes even though the glob matches."
 			);
 			// https://linear.app/opral/issue/LIXDK-195/await-change-queue-to-log-errors
 			console.error(error);

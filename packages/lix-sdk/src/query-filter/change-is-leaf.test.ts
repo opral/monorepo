@@ -136,5 +136,5 @@ test.todo(
 		// expecting the leaf change in the current version to be change 1
 		expect(result).toHaveLength(1);
 		expect(result.map((c) => c.id)).toEqual(["change1"]);
-	},
+	}
 );

@@ -34,12 +34,12 @@ export async function resolveChangeConflictBySelecting(args: {
 			.innerJoin(
 				"version_change_conflict",
 				"version_change_conflict.version_id",
-				"version.id",
+				"version.id"
 			)
 			.where(
 				"version_change_conflict.change_conflict_id",
 				"=",
-				args.conflict.id,
+				args.conflict.id
 			)
 			.selectAll()
 			.execute();

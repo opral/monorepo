@@ -6,10 +6,10 @@ import { createInMemoryDatabase } from "sqlite-wasm-kysely";
 const sqlite = await createInMemoryDatabase({});
 
 export function ParseJsonBPluginV1(
-	jsonbColumns: Record<string, string[]>,
+	jsonbColumns: Record<string, string[]>
 ): KyselyPlugin {
 	const jsonColumnNames = Object.keys(jsonbColumns).flatMap(
-		(key) => jsonbColumns[key]!,
+		(key) => jsonbColumns[key]!
 	);
 
 	return {
