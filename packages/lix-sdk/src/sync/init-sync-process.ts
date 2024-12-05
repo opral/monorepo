@@ -10,7 +10,6 @@ export async function initSyncProcess(args: {
 	  }
 	| undefined
 > {
-	console.log("initializing sync process");
 	const { value: id } = await args.lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix-id")
