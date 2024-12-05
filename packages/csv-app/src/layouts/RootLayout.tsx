@@ -14,7 +14,6 @@ import {
 	SlMenuItem,
 } from "@shoelace-style/shoelace/dist/react";
 import { Lix } from "@lix-js/sdk";
-import { unconfirmedChangesAtom } from "../state-active-file.ts";
 
 export default function RootLayout(props: { children: JSX.Element }) {
 	const [, setPolling] = useAtom(withPollingAtom);
@@ -52,30 +51,13 @@ export default function RootLayout(props: { children: JSX.Element }) {
 			{/* Header with socials */}
 			<div className="w-full border-b border-zinc-200 bg-white flex items-center justify-between px-4 min-h-[54px] gap-2">
 				<div className="flex gap-2 items-center">
-					{/* <a href="https://lix.opral.com" target="_blank"> */}
-					<img src="/lix.svg" alt="logo" className="w-8 h-8" />
-					{/* </a> */}
-					<h1 className="font-medium">CSV Demo</h1>
-				</div>
-				<div className="flex gap-3 items-center">
-					<a href="https://github.com/opral/monorepo" target="_blank">
-						<img src="/github-icon.svg" alt="logo" className="w-5 h-5" />
-					</a>
-					<a href="https://discord.gg/gdMPPWy57R" target="_blank">
-						<img
-							src="/discord-icon.svg"
-							alt="logo"
-							className="w-6 h-6 filter grayscale"
-						/>
-					</a>
-					<a href="https://x.com/lixCCS" target="_blank">
-						<img src="/x-icon.svg" alt="logo" className="w-5 h-5" />
-					</a>
-				</div>
-				<div className="flex gap-2 items-center">
-					{serverUrl && (
-						<SyncStatus serverUrl={serverUrl} lix={lix}></SyncStatus>
-					)}
+					<div className="flex gap-2 items-center">
+						{/* <a href="https://lix.opral.com" target="_blank"> */}
+						<img src="/lix.svg" alt="logo" className="w-8 h-8" />
+						{/* </a> */}
+						<h1 className="font-medium">CSV Demo</h1>
+					</div>
+
 					<SlDropdown>
 						<SlButton slot="trigger" caret size="small">
 							Options
@@ -121,7 +103,25 @@ export default function RootLayout(props: { children: JSX.Element }) {
 							</SlMenuItem>
 						</SlMenu>
 					</SlDropdown>
+					{serverUrl && (
+						<SyncStatus serverUrl={serverUrl} lix={lix}></SyncStatus>
+					)}
 					<SyncAndShare />
+				</div>
+				<div className="flex gap-3 items-center">
+					<a href="https://github.com/opral/monorepo" target="_blank">
+						<img src="/github-icon.svg" alt="logo" className="w-5 h-5" />
+					</a>
+					<a href="https://discord.gg/gdMPPWy57R" target="_blank">
+						<img
+							src="/discord-icon.svg"
+							alt="logo"
+							className="w-6 h-6 filter grayscale"
+						/>
+					</a>
+					<a href="https://x.com/lixCCS" target="_blank">
+						<img src="/x-icon.svg" alt="logo" className="w-5 h-5" />
+					</a>
 				</div>
 			</div>
 			{props.children}
@@ -144,16 +144,15 @@ function SyncAndShare() {
 }
 
 function SyncButton() {
-	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
 	const [serverUrl] = useAtom(serverUrlAtom);
 	const [lix] = useAtom(lixAtom);
 
-	if (unconfirmedChanges.length > 0 && !serverUrl) {
+	if (!serverUrl) {
 		return (
 			<SlButton
-				variant="primary"
+				variant="success"
 				size="small"
-				className="animate-bounce"
+				className=""
 				onClick={() => {
 					lix.db
 						.insertInto("key_value")
