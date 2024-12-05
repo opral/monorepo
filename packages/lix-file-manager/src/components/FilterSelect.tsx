@@ -62,6 +62,13 @@ const FilterSelect = () => {
     console.log(resolve);
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+      event.preventDefault();
+      handleSubmit(handleAddDiscussion)();
+    }
+  };
+
   const handleTextareaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     event.target.style.height = "auto";
     event.target.style.height = `${event.target.scrollHeight}px`;
@@ -104,6 +111,7 @@ const FilterSelect = () => {
                             placeholder="Add a comment"
                             className="border-none resize-none overflow-hidden shadow-none p-1 focus-visible:ring-0"
                             onInput={handleTextareaChange}
+                            onKeyDown={handleKeyDown}
                             style={{ minHeight: "24px", fontSize: "1rem" }}
                           />
                         </FormControl>

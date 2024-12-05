@@ -29,6 +29,13 @@ const ChatInput = () => {
     form.reset();
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+      event.preventDefault();
+      handleSubmit(handleAddComment)();
+    }
+  };
+
   return (
     <div className="flex items-end justify-between gap-1.5 px-2.5 py-5 border-t border-slate-100">
       <Avatar className="w-8 h-8 mb-1 cursor-pointer hover:opacity-90 transition-opacity">
@@ -55,6 +62,7 @@ const ChatInput = () => {
                     placeholder="Add a comment ..."
                     className="flex-1 border-none resize-none overflow-hidden shadow-none px-0 pt-2 focus-visible:ring-0"
                     onInput={handleTextareaChange}
+                    onKeyDown={handleKeyDown}
                     style={{ minHeight: "24px", fontSize: "1rem" }}
                   />
                 </FormControl>

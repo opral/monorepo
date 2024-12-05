@@ -11,8 +11,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { ChangeComponent } from "@/components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "@/components/DynamicChangeGroup.tsx";
 import FilterSelect from "@/components/FilterSelect.tsx";
-import IconArrowRight from "@/components/icons/IconArrowRight.tsx";
 import ChatInput from "@/components/ChatInput.tsx";
+import DiscussionThread from "@/components/DiscussionThread.tsx";
 // import { useEffect } from "react";
 
 export default function Page() {
@@ -88,9 +88,11 @@ export default function Page() {
 				fileIdSearchParams && discussionSearchParams &&
 				<div className="flex-1 h-full">
 					<SectionHeader backaction={() => navigate(`/?f=${fileIdSearchParams}`)} title={`Discussion`} />
-					<div className="px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
+						<div className="flex flex-col px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
 						{/* connected changes */}
-						{/* thread */}
+							<div className="flex-1 mt-12">
+								<DiscussionThread />
+							</div>
 						<ChatInput />
 					</div>
 				</div>

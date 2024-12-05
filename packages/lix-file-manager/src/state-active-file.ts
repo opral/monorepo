@@ -8,6 +8,7 @@ import {
 	fileIdSearchParamsAtom,
 	withPollingAtom,
 	currentVersionAtom,
+	discussionSearchParamsAtom,
 } from "./state.ts";
 import Papa from "papaparse";
 import {
@@ -15,6 +16,7 @@ import {
 	changeHasLabel,
 	changeInVersion,
 	changeIsLeafInVersion,
+	jsonArrayFrom,
 	sql,
 } from "@lix-js/sdk";
 import { CellSchemaV1 } from "@lix-js/plugin-csv";
@@ -339,3 +341,42 @@ export const changeConflictsAtom = atom(async (get) => {
 });
 
 export const selectedChangeIdsAtom = atom<string[]>([]);
+
+export const activeDiscussionAtom = atom(async (get) => {
+	const lix = await get(lixAtom);
+	const activeFile = await get(activeFileAtom);
+	const fileIdSearchParams = await get(fileIdSearchParamsAtom);
+	if (!activeFile || !fileIdSearchParams) return null;
+	const discussionSearchParams = await get(discussionSearchParamsAtom);
+	if (!discussionSearchParams) return null;
+
+	// Fetch the discussion and its comments in a single query
+	const discussionWithComments = await lix.db
+		.selectFrom("discussion")
+		.where("discussion.id", "=", discussionSearchParams)
+		.select((eb) => [
+			"discussion.id",
+			jsonArrayFrom(
+				eb
+					.selectFrom("comment")
+					.leftJoin("account", "account.id", "comment.created_by")
+					.select([
+						"comment.id",
+						"comment.content",
+						"comment.created_at",
+						"account.name as author_name",
+					])
+					.whereRef("comment.discussion_id", "=", "discussion.id")
+					.orderBy("comment.created_at", "asc")
+			).as("comments"),
+		])
+		.execute();
+
+	if (!discussionWithComments.length) return null;
+
+	return discussionWithComments[0];
+});
+
+					// .select("comment.created_at as comment_created_at")
+					// .select("comment.content as comment_content")
+					// .select("account.name as comment_author_name")
