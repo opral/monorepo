@@ -3,6 +3,8 @@ import * as LixServerApi from "@lix-js/server-api-schema";
 import { createServerApiMemoryStorage } from "../storage/create-memory-storage.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import { createServerApiHandler } from "../create-server-api-handler.js";
+import type { Change } from "../../database/schema.js";
+import { mockChange } from "../../change/mock-change.js";
 
 test("it should push data successfully", async () => {
 	const lix = await openLixInMemory({});
@@ -16,6 +18,8 @@ test("it should push data successfully", async () => {
 	await storage.set(`lix-file-${id}`, await lix.toBlob());
 
 	const lsa = await createServerApiHandler({ storage });
+
+	const mockChange0 = mockChange({ id: "change0" });
 
 	const response = await lsa(
 		new Request("http://localhost:3000/lsa/push-v1", {
@@ -31,15 +35,15 @@ test("it should push data successfully", async () => {
 				data: {
 					mutation_log: [
 						{
-							row_id: { key: "test" },
-							table_name: "key_value",
+							row_id: { id: mockChange0.id },
+							table_name: "change",
 							operation: "insert",
 							session: "fake-session",
 							session_time: 2,
 							wall_clock: 1,
 						},
 					],
-					key_value: [{ key: "test", value: "test value" }],
+					change: [mockChange0] satisfies Change[],
 				},
 			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
@@ -55,13 +59,12 @@ test("it should push data successfully", async () => {
 	});
 
 	const result = await lixFromStorage.db
-		.selectFrom("key_value")
-		.where("key", "=", "test")
+		.selectFrom("change")
+		.where("id", "=", mockChange0.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(result.key).toBe("test");
-	expect(result.value).toBe("test value");
+	expect(result).toEqual(mockChange0);
 });
 
 test("it should return 404 if the Lix file is not found", async () => {
