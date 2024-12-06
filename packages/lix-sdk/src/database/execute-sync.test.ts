@@ -102,3 +102,51 @@ test("using executeSync with a 'fake async' function should work", async () => {
 
 	expect(result).toEqual([{ key: "foo", value: "bar" }]);
 });
+
+test("it works with kysely transactions", async () => {
+	const lix = await openLixInMemory({});
+
+	// transaction that fails
+	try {
+		await lix.db.transaction().execute(async (trx) => {
+			await trx
+				.insertInto("key_value")
+				.values({ key: "foo", value: "bar" })
+				.execute();
+
+			executeSync({
+				lix,
+				query: trx
+					.insertInto("key_value")
+					.values({ key: "foo2", value: "bar2" }),
+			});
+
+			throw new Error("rollback");
+		});
+	} catch {
+		// ignore;
+	}
+
+	const keyValues = await lix.db.selectFrom("key_value").selectAll().execute();
+
+	expect(keyValues.find((kv) => kv.key === "foo")).toBeUndefined();
+	expect(keyValues.find((kv) => kv.key === "foo2")).toBeUndefined();
+
+	// transaction that succeeds
+	await lix.db.transaction().execute(async (trx) => {
+		await trx
+			.insertInto("key_value")
+			.values({ key: "foo", value: "bar" })
+			.execute();
+
+		executeSync({
+			lix,
+			query: trx.insertInto("key_value").values({ key: "foo2", value: "bar2" }),
+		});
+	});
+
+	const keyValues2 = await lix.db.selectFrom("key_value").selectAll().execute();
+
+	expect(keyValues2.find((kv) => kv.key === "foo")).toBeDefined();
+	expect(keyValues2.find((kv) => kv.key === "foo2")).toBeDefined();
+});
