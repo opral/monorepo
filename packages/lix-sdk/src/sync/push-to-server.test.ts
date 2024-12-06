@@ -132,11 +132,6 @@ test("push-pull-push with two clients", async () => {
 		})
 		.execute();
 
-	// change control of own tables
-	// is async atm, need to await here
-	// see https://linear.app/opral/issue/LIXDK-263/sync-execution-of-queries
-	await new Promise((resolve) => setTimeout(resolve, 100));
-
 	// Client 1 pushes to server
 	await pushToServer({
 		id: lixId,
@@ -151,6 +146,33 @@ test("push-pull-push with two clients", async () => {
 		lix: client2,
 		serverUrl: "http://localhost:3000",
 	});
+
+	// expect client2 to have the same data as client1
+	// after pulling from the server
+	const client2AccountAfterPull = await client2.db
+		.selectFrom("account")
+		.selectAll()
+		.execute();
+
+	const client2KeyValueAfterPull = await client2.db
+		.selectFrom("key_value")
+		.selectAll()
+		.execute();
+
+	expect(client2AccountAfterPull).toEqual(
+		expect.arrayContaining([
+			{ id: "account0", name: "account from client 1" } satisfies Account,
+		])
+	);
+
+	expect(client2KeyValueAfterPull).toEqual(
+		expect.arrayContaining([
+			{
+				key: "mock-key",
+				value: "mock-value from client 1",
+			} satisfies KeyValue,
+		])
+	);
 
 	// Client 2 inserts an account locally
 	await client2.db
@@ -167,11 +189,6 @@ test("push-pull-push with two clients", async () => {
 		})
 		.execute();
 
-	// change control of own tables
-	// is async atm, need to await here
-	// see https://linear.app/opral/issue/LIXDK-263/sync-execution-of-queries
-	await new Promise((resolve) => setTimeout(resolve, 100));
-
 	await client2.db
 		.updateTable("key_value")
 		.set({
@@ -179,11 +196,6 @@ test("push-pull-push with two clients", async () => {
 		})
 		.where("key", "=", "mock-key")
 		.execute();
-
-	// change control of own tables
-	// is async atm, need to await here
-	// see https://linear.app/opral/issue/LIXDK-263/sync-execution-of-queries
-	await new Promise((resolve) => setTimeout(resolve, 100));
 
 	// Client 2 pushes to server
 	await pushToServer({
@@ -201,7 +213,7 @@ test("push-pull-push with two clients", async () => {
 	const accountsChangesOnServer = await lixFromServer.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.where("schema_key", "=", "lix_account_table_table")
+		.where("schema_key", "=", "lix_account_table")
 		.selectAll()
 		.execute();
 
