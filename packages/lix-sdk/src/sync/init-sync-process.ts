@@ -10,33 +10,31 @@ export async function initSyncProcess(args: {
 	  }
 	| undefined
 > {
-	const { value: id } = await args.lix.db
+	const lixId = await args.lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix-id")
 		.select("value")
 		.executeTakeFirstOrThrow();
 
-	const url = await args.lix.db
-		.selectFrom("key_value")
-		// saved in key value because simpler for experimentation
-		.where("key", "=", "lix-experimental-server-url")
-		.select("value")
-		.executeTakeFirst();
-
-	// if you want to test sync, restart the lix app
-	// to make sure the experimental-sync-url is set
-	if (!url) {
-		return;
-	}
-
 	let stoped = false;
 
 	const pullAndPush = async () => {
+		const url = await args.lix.db
+			.selectFrom("key_value")
+			// saved in key value because simpler for experimentation
+			.where("key", "=", "lix-experimental-server-url")
+			.select("value")
+			.executeTakeFirst();
+		// if you want to test sync, restart the lix app
+		// to make sure the experimental-sync-url is set
+		if (!url) {
+			return;
+		}
 		console.log("----------- PULL FROM SERVER -------------");
 		const serverState = await pullFromServer({
 			serverUrl: url.value,
 			lix: args.lix,
-			id,
+			id: lixId.value,
 		});
 		console.log(
 			"----------- DONE PULL FROM SERVER ------------- New known Server state: ",
@@ -46,7 +44,7 @@ export async function initSyncProcess(args: {
 		await pushToServer({
 			serverUrl: url.value,
 			lix: args.lix,
-			id,
+			id: lixId.value,
 			targetVectorClock: serverState,
 		});
 		console.log("----------- DONE PUSH TO SERVER -------------");
