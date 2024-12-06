@@ -91,9 +91,9 @@ export const ChangeComponent = (props: {
 						</span>
 					</p>
 					<div className="flex gap-3 items-center">
-						{JSON.parse(props.change.discussion_ids).length > 0 && (
+						{props.change.discussion_count > 0 && (
 							<Button variant="ghost" size="sm" className="text-sm text-slate-500">
-								{JSON.parse(props.change.discussion_ids).length}<IconDiscussion />
+								{props.change.discussion_count}<IconDiscussion />
 							</Button>
 						)}
 						<span className="text-sm font-medium text-slate-500 block pr-2">{timeAgo(props.change.created_at)}</span>
@@ -120,9 +120,9 @@ export const ChangeComponent = (props: {
 						<div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 pt-2 pb-4 sm:pb-6 overflow-hidden">
 							{DiffComponent && (<>{DiffComponent}</>)}
 						</div>
-						{JSON.parse(props.change.discussion_ids).length > 0 && (
-							JSON.parse(props.change.discussion_ids).map((discussionId: { id: string; }) =>
-								<DiscussionPreview key={discussionId.id} discussionId={discussionId.id} />
+						{props.change.discussion_count > 0 && (
+							props.change.discussion_ids.split(",").map((discussionId) =>
+								<DiscussionPreview key={discussionId} discussionId={discussionId} />
 							)
 						)}
 					</div>

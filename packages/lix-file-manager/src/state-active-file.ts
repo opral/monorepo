@@ -253,14 +253,8 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 		.select("file.path as file_path")
 		.select("account.name as account_name")
 		.select(sql`json(parent_snapshot.content)`.as("parent_snapshot_content")) // This will be NULL if no parent exists
-		.select((eb) => [
-			jsonArrayFrom(
-				eb
-					.selectFrom("discussion")
-					.select("discussion.id")
-					.whereRef("discussion.id", "=", "discussion.id")
-			).as("discussion_ids"),
-		])
+		.select((eb) => eb.fn.count("discussion.id").as("discussion_count"))
+		.select(sql`group_concat(discussion.id)`.as("discussion_ids"))
 		.groupBy("change.id")
 		.orderBy("change.created_at", "desc")
 		.execute();
