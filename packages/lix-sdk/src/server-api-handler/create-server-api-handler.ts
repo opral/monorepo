@@ -71,6 +71,7 @@ export async function createServerApiHandler(args: {
 
 			return Response.error();
 		} catch (error) {
+			console.error(error);
 			return new Response(error as string, {
 				status: 500,
 			});
