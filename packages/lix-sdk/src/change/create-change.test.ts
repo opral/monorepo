@@ -127,9 +127,6 @@ test("should create the change authors", async () => {
 
 	await switchVersion({ lix, to: version0 });
 
-	// cleaning the table in case there are some data
-	await lix.db.deleteFrom("active_account").execute();
-
 	const account1 = await createAccount({
 		lix,
 		name: "account1",
