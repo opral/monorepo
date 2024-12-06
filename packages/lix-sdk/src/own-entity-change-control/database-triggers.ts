@@ -80,6 +80,12 @@ function handleLixOwnEntityChange(
 	...values: any[]
 ): void {
 	const lix = { db, sqlite };
+
+	// keys starting with `#` are not change controlled
+	if (tableName === "key_value" && values[0].startsWith("#")) {
+		return;
+	}
+
 	// need to break the loop if own changes are detected
 	const change = executeSync({
 		lix,
@@ -135,6 +141,4 @@ function handleLixOwnEntityChange(
 		schemaKey: `lix_${tableName}_table`,
 		snapshotContent,
 	});
-};
-
-
+}

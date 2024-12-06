@@ -124,3 +124,27 @@ test("if the trigger throws, the transaction is rolled back", async () => {
 	expect(account1AfterFailedDeleted).toStrictEqual(account1);
 	expect(deleteChange).toBeUndefined();
 });
+
+test("skips change control of key values if the key begins with `#`", async () => {
+	const lix = await openLixInMemory({});
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "#key1", value: "value1" })
+		.execute();
+
+	const key1 = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "#key1")
+		.selectAll()
+		.executeTakeFirst();
+
+	const key1Change = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "#key1")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(key1).toBeDefined();
+	expect(key1Change).toBeUndefined();
+});
