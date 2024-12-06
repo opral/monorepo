@@ -86,6 +86,19 @@ function handleLixOwnEntityChange(
 		return;
 	}
 
+	const shouldSkip =
+		executeSync({
+			lix,
+			query: db
+				.selectFrom("key_value")
+				.where("key", "=", "#lix_skip_own_change_control")
+				.select("value"),
+		})[0]?.value === "true";
+
+	if (shouldSkip) {
+		return;
+	}
+
 	// need to break the loop if own changes are detected
 	const change = executeSync({
 		lix,
