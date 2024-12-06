@@ -68,7 +68,7 @@ test("push rows of multiple tables to server successfully", async () => {
 	const keyValueChangesOnServer = await lixFromServer.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.where("schema_key", "=", "lix_key_value")
+		.where("schema_key", "=", "lix_key_value_table")
 		.where("entity_id", "=", "mock-key")
 		.selectAll()
 		.execute();
@@ -76,7 +76,7 @@ test("push rows of multiple tables to server successfully", async () => {
 	const accountsChangesOnServer = await lixFromServer.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.where("schema_key", "=", "lix_account")
+		.where("schema_key", "=", "lix_account_table")
 		.where("entity_id", "=", "account0")
 		.selectAll()
 		.execute();
@@ -201,7 +201,7 @@ test("push-pull-push with two clients", async () => {
 	const accountsChangesOnServer = await lixFromServer.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.where("schema_key", "=", "lix_account")
+		.where("schema_key", "=", "lix_account_table_table")
 		.selectAll()
 		.execute();
 
@@ -221,7 +221,7 @@ test("push-pull-push with two clients", async () => {
 	const accountChangesOnClient1 = await client1.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.where("schema_key", "=", "lix_account")
+		.where("schema_key", "=", "lix_account_table")
 		.selectAll()
 		.execute();
 
@@ -237,7 +237,7 @@ test("push-pull-push with two clients", async () => {
 	const accountChangesOnClient2 = await client2.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.where("schema_key", "=", "lix_account")
+		.where("schema_key", "=", "lix_account_table")
 		.selectAll()
 		.execute();
 
@@ -246,7 +246,7 @@ test("push-pull-push with two clients", async () => {
 	const keyValueChangesOnServer = await lixFromServer.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.where("schema_key", "=", "lix_key_value")
+		.where("schema_key", "=", "lix_key_value_table")
 		.selectAll()
 		.execute();
 

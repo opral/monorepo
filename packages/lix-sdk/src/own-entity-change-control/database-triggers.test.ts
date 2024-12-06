@@ -29,7 +29,7 @@ test("it works for inserts, updates and deletions", async () => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.where("schema_key", "=", "lix_key_value")
+		.where("schema_key", "=", "lix_key_value_table")
 		.selectAll()
 		.execute();
 
@@ -41,7 +41,7 @@ test("it works for inserts, updates and deletions", async () => {
 		expect(change.entity_id).toBe("key1");
 		expect(change.file_id).toBe("null");
 		expect(change.plugin_key).toBe("lix_own_entity");
-		expect(change.schema_key).toBe("lix_key_value");
+		expect(change.schema_key).toBe("lix_key_value_table");
 	}
 
 	expect(snapshots).toStrictEqual([
@@ -79,7 +79,7 @@ test("it works for compound entity ids like change_author", async () => {
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.where("schema_key", "=", "lix_change_author")
+		.where("schema_key", "=", "lix_change_author_table")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll()
 		.execute();

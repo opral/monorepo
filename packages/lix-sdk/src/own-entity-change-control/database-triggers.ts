@@ -118,7 +118,7 @@ async function handleLixOwnEntityChange(
 			entityId,
 			fileId: "null",
 			pluginKey: "lix_own_entity",
-			schemaKey: `lix_${tableName}`,
+			schemaKey: `lix_${tableName}_table`,
 			snapshotContent,
 		});
 	};
