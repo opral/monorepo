@@ -12,7 +12,10 @@ import type { Lix } from "../lix/open-lix.js";
  *   const query = lix.db.selectFrom("key_value").selectAll();
  *   const result = executeSync({ lix, query }) as KeyValue[];
  */
-export function executeSync(args: { lix: Lix; query: any }): Array<any> {
+export function executeSync(args: {
+	lix: Pick<Lix, "sqlite">;
+	query: any;
+}): Array<any> {
 	const compiledQuery = args.query.compile();
 
 	const columnNames: string[] = [];

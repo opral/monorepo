@@ -12,8 +12,6 @@ test("it works for inserts, updates and deletions", async () => {
 		.values({ key: "key1", value: "value1" })
 		.execute();
 
-	await new Promise((resolve) => setTimeout(resolve, 100));
-
 	// update
 	await lix.db
 		.updateTable("key_value")
@@ -23,8 +21,6 @@ test("it works for inserts, updates and deletions", async () => {
 
 	// delete
 	await lix.db.deleteFrom("key_value").where("key", "=", "key1").execute();
-
-	await new Promise((resolve) => setTimeout(resolve, 100));
 
 	const changes = await lix.db
 		.selectFrom("change")
@@ -75,8 +71,6 @@ test("it works for compound entity ids like change_author", async () => {
 		snapshotContent: null,
 	});
 
-	await new Promise((resolve) => setTimeout(resolve, 100));
-
 	const changes = await lix.db
 		.selectFrom("change")
 		.where("schema_key", "=", "lix_change_author_table")
@@ -85,4 +79,48 @@ test("it works for compound entity ids like change_author", async () => {
 		.execute();
 
 	expect(changes.length).toBe(1);
+});
+
+test("if the trigger throws, the transaction is rolled back", async () => {
+	const lix = await openLixInMemory({});
+
+	const account1 = await createAccount({ lix, name: "account1" });
+
+	const insertChange = await lix.db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_account_table")
+		.where("entity_id", "=", account1.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(insertChange).toBeDefined();
+
+	// deleting the active accounts aka there will be no change author
+	// which will lead to a throw in the trigger
+	await lix.db.deleteFrom("active_account").execute();
+
+	// now we are deleting the account we just created
+	try {
+		await lix.db.deleteFrom("account").where("id", "=", account1.id).execute();
+	} catch (e) {
+		expect(e).toBeDefined();
+	}
+
+	const account1AfterFailedDeleted = await lix.db
+		.selectFrom("account")
+		.where("id", "=", account1.id)
+		.selectAll()
+		.executeTakeFirst();
+
+	const deleteChange = await lix.db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_account_table")
+		.where("entity_id", "=", account1.id)
+		.where("snapshot_id", "=", "no-content")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(account1AfterFailedDeleted).toBeDefined();
+	expect(account1AfterFailedDeleted).toStrictEqual(account1);
+	expect(deleteChange).toBeUndefined();
 });
