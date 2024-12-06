@@ -182,7 +182,8 @@ test("rows changed on the client more recently should not be updated", async () 
 	expect(mockKey).toEqual({ key: "mock-key", value: "mock-value-updated" });
 });
 
-test("rows changed on the server more recently should be updated on the client", async () => {
+// the change table now models "change control". no more last edit wins needed
+test.skip("rows changed on the server more recently should be updated on the client", async () => {
 	// setup mock server
 	const storage = createServerApiMemoryStorage();
 	const lsaHandler = await createServerApiHandler({ storage });
@@ -326,3 +327,83 @@ test("rows changed on the server more recently should be updated on the client",
 // 		},
 // 	]);
 // });
+
+test("non-conflicting changes from another client should for the same version should be applied", async () => {
+	const lix = await openLixInMemory({});
+
+	const currentVersion = await lix.db
+		.selectFrom("current_version")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const lixId = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix-id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const storage = createServerApiMemoryStorage();
+	const lsaHandler = await createServerApiHandler({ storage });
+	global.fetch = vi.fn((request) => lsaHandler(request));
+
+	const lixOnServer = await openLixInMemory({ blob: await lix.toBlob() });
+
+	// insert data on the server that the client does not have yet
+	await lixOnServer.db
+		.insertInto("key_value")
+		.values({ key: "mock-key", value: "mock-value" })
+		.execute();
+
+	const serverVersionChanges = await lixOnServer.db
+		.selectFrom("version_change")
+		.innerJoin("change", "version_change.change_id", "change.id")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("version_id", "=", currentVersion.id)
+		.selectAll("version_change")
+		.select("snapshot.content as content")
+		.execute();
+
+	// the server should have the change we just made
+	expect(serverVersionChanges).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				version_id: currentVersion.id,
+				content: { key: "mock-key", value: "mock-value" },
+			}),
+		])
+	);
+
+	await lsaHandler(
+		new Request("http://localhost:3000/lsa/new-v1", {
+			method: "POST",
+			body: await lixOnServer.toBlob(),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+	);
+
+	await pullFromServer({
+		id: lixId.value,
+		lix,
+		serverUrl: "http://localhost:3000",
+	});
+
+	const mockKey = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "mock-key")
+		.selectAll()
+		.executeTakeFirst();
+
+	const versionChanges = await lix.db
+		.selectFrom("version_change")
+		.innerJoin("change", "version_change.change_id", "change.id")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("version_id", "=", currentVersion.id)
+		.selectAll("version_change")
+		.select("snapshot.content as content")
+		.execute();
+
+	expect(mockKey).toEqual({ key: "mock-key", value: "mock-value" });
+	expect(versionChanges).toEqual(expect.arrayContaining(serverVersionChanges));
+});
