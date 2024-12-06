@@ -61,8 +61,6 @@ test("the primary key order matches the order the primary keys in the database s
 			.sort((a, b) => a.pk - b.pk)
 			.map((c) => c.name);
 
-		console.log({ primaryKeys });
-
 		expect(primaryKeys).toEqual(
 			// @ts-expect-error - some type narrowing problem. not important
 			changeControlledTableIds[table]
