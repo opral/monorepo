@@ -67,7 +67,7 @@ export async function getDiffingRows(args: {
 				upsertedRows[tableName].push(
 					await trx
 						.selectFrom(tableName)
-						.select("content")
+						.selectAll()
 						.where("id", "=", operation.row_id["id"])
 						.executeTakeFirstOrThrow()
 				);
