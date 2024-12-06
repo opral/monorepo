@@ -5,7 +5,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 
-test("pull rows of multiple tables from server successfully", async () => {
+test("pull rows of multiple tables from server successfully and applies them", async () => {
 	const lixOnServer = await openLixInMemory({});
 
 	const lix = await openLixInMemory({ blob: await lixOnServer.toBlob() });
@@ -21,7 +21,6 @@ test("pull rows of multiple tables from server successfully", async () => {
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
-	// insert mock data into server lix
 	await lixOnServer.db
 		.insertInto("account")
 		.values({ id: "account0", name: "test account" })
@@ -53,6 +52,7 @@ test("pull rows of multiple tables from server successfully", async () => {
 	});
 
 	// Verify the data is pulled into the local lix
+	// and applied to the local database
 	const account = await lix.db
 		.selectFrom("account")
 		.where("id", "=", "account0")
@@ -164,6 +164,8 @@ test("rows changed on the client more recently should not be updated", async () 
 			name: "test account updated more recently on client",
 		})
 		.execute();
+
+	await new Promise((resolve) => setTimeout(resolve, 100));
 
 	// initialize the lix on the server with the mock data
 	await lsaHandler(
