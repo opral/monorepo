@@ -9,6 +9,17 @@ import type { LixDatabaseSchema } from "../database/schema.js";
 import { initSyncProcess } from "../sync/init-sync-process.js";
 
 export type Lix = {
+	/**
+	 * The raw SQLite instance.
+	 *
+	 * Required for advanced use cases that can't be
+	 * expressed with the db API.
+	 *
+	 * Use with caution, automatic transformation of
+	 * results like parsing json (similar to the db API)
+	 * is not guaranteed.
+	 */
+	sqlite: SqliteDatabase;
 	db: Kysely<LixDatabaseSchema>;
 	toBlob: () => Promise<Blob>;
 	plugin: {
@@ -68,6 +79,7 @@ export async function openLix(args: {
 
 	return {
 		db,
+		sqlite: args.database,
 		toBlob: async () => {
 			await changeQueueSettled({ lix: { db } });
 			return new Blob([contentFromDatabase(args.database)]);
