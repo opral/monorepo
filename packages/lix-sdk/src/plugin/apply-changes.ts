@@ -1,6 +1,7 @@
 import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
 import type { Change } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import { applyOwnEntityChanges } from "../own-entity-change-control/apply-own-entity-change.js";
 
 /**
  * Applies the given changes to the lix.
@@ -41,6 +42,7 @@ export async function applyChanges(args: {
 			// Skip own entity changes which have a file id 'null' and
 			// plugin key 'lix_own_entity' as they are not associated with a file
 			if (fileId === "null" && changes[0]?.plugin_key === "lix_own_entity") {
+				await applyOwnEntityChanges({ lix: { ...args.lix, db: trx }, changes });
 				continue;
 			}
 
