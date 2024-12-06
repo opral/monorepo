@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { Change } from "../database/schema.js";
-import { applyOwnEntityChange } from "./apply-own-entity-change.js";
+import { applyOwnEntityChanges } from "./apply-own-entity-change.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 
 test("it should apply insert changes correctly", async () => {
@@ -27,7 +27,7 @@ test("it should apply insert changes correctly", async () => {
 		.values({ content: snapshot.content })
 		.execute();
 
-	await applyOwnEntityChange({ lix, change });
+	await applyOwnEntityChanges({ lix, changes: [change] });
 
 	const result = await lix.db
 		.selectFrom("key_value")
@@ -68,7 +68,7 @@ test("it should apply update changes correctly", async () => {
 		})
 		.execute();
 
-	await applyOwnEntityChange({ lix, change });
+	await applyOwnEntityChanges({ lix, changes: [change] });
 
 	const result = await lix.db
 		.selectFrom("key_value")
@@ -97,7 +97,7 @@ test("it should apply delete changes correctly", async () => {
 		snapshot_id: "no-content",
 	};
 
-	await applyOwnEntityChange({ lix, change });
+	await applyOwnEntityChanges({ lix, changes: [change] });
 
 	const result = await lix.db
 		.selectFrom("key_value")
@@ -133,7 +133,9 @@ test("it should throw an error for invalid plugin key", async () => {
 		})
 		.execute();
 
-	await expect(applyOwnEntityChange({ lix, change })).rejects.toThrow(
+	await expect(
+		applyOwnEntityChanges({ lix, changes: [change] })
+	).rejects.toThrow(
 		"Expected 'lix_own_entity' as plugin key but received invalid-plugin"
 	);
 });
