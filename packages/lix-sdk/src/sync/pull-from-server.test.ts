@@ -127,45 +127,26 @@ test("it handles snapshot.content being json binary", async () => {
 test("rows changed on the client more recently should not be updated", async () => {
 	const lixOnServer = await openLixInMemory({});
 
-	const lix = await openLixInMemory({ blob: await lixOnServer.toBlob() });
-
-	const { value: id } = await lixOnServer.db
+	const lixId = await lixOnServer.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix-id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createServerApiMemoryStorage();
-	const lsaHandler = await createServerApiHandler({ storage });
-
-	global.fetch = vi.fn((request) => lsaHandler(request));
-
-	// insert mock data into server lix
-	await lixOnServer.db
-		.insertInto("account")
-		.values({ id: "account0", name: "test account" })
-		.execute();
-
 	await lixOnServer.db
 		.insertInto("key_value")
 		.values({
 			key: "mock-key",
-			value: "mock-value",
+			value: "mock-value-initial",
 		})
-		.execute();
+		.executeTakeFirstOrThrow();
 
-	// let the wall clock move one ms forward
-	await new Promise((resolve) => setTimeout(resolve, 1));
-	// insert mock data into server lix
-	await lix.db
-		.insertInto("account")
-		.values({
-			id: "account0",
-			name: "test account updated more recently on client",
-		})
-		.execute();
+	const lix = await openLixInMemory({ blob: await lixOnServer.toBlob() });
 
-	await new Promise((resolve) => setTimeout(resolve, 100));
+	const storage = createServerApiMemoryStorage();
+	const lsaHandler = await createServerApiHandler({ storage });
+
+	global.fetch = vi.fn((request) => lsaHandler(request));
 
 	// initialize the lix on the server with the mock data
 	await lsaHandler(
@@ -178,32 +159,27 @@ test("rows changed on the client more recently should not be updated", async () 
 		})
 	);
 
+	// update the mock data on the client
+	await lix.db
+		.updateTable("key_value")
+		.set({ value: "mock-value-updated" })
+		.where("key", "=", "mock-key")
+		.execute();
+
 	await pullFromServer({
-		id,
+		id: lixId.value,
 		lix,
 		serverUrl: "http://localhost:3000",
 	});
 
-	// Verify the data is pulled into the local lix
-	const account = await lix.db
-		.selectFrom("account")
-		.where("id", "=", "account0")
+	// verify data on client
+	const mockKey = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "mock-key")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	// TODO we don't sync tables without row id atm
-	// const mockKey = await lix.db
-	// 	.selectFrom("key_value")
-	// 	.where("key", "=", "mock-key")
-	// 	.selectAll()
-	// 	.executeTakeFirstOrThrow();
-
-	expect(account).toEqual({
-		id: "account0",
-		name: "test account updated more recently on client",
-	});
-
-	// expect(mockKey).toEqual({ key: "mock-key", value: "mock-value" });
+	expect(mockKey).toEqual({ key: "mock-key", value: "mock-value-updated" });
 });
 
 test("rows changed on the server more recently should be updated on the client", async () => {
