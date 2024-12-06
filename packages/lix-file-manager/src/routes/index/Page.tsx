@@ -12,6 +12,7 @@ import { ChangeComponent } from "@/components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "@/components/DynamicChangeGroup.tsx";
 import FilterSelect from "@/components/FilterSelect.tsx";
 import ChatInput from "@/components/ChatInput.tsx";
+import ConnectedChanges from "@/components/ConnectedChanges.tsx";
 import DiscussionThread from "@/components/DiscussionThread.tsx";
 // import { useEffect } from "react";
 
@@ -89,8 +90,8 @@ export default function Page() {
 				<div className="flex-1 h-full">
 					<SectionHeader backaction={() => navigate(`/?f=${fileIdSearchParams}`)} title={`Discussion`} />
 						<div className="flex flex-col px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
-						{/* connected changes */}
-							<div className="flex-1 mt-12">
+							<ConnectedChanges />
+							<div className="flex-1 mt-6">
 								<DiscussionThread />
 							</div>
 						<ChatInput />

@@ -24,6 +24,7 @@ export const ChangeComponent = (props: {
 	};
 	showTopLine: boolean;
 	showBottomLine: boolean;
+	reduced?: boolean;
 }) => {
 	const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
 	const [lix] = useAtom(lixAtom);
@@ -76,12 +77,18 @@ export const ChangeComponent = (props: {
 	return (
 		<div
 			className="flex group hover:bg-slate-50 rounded-md cursor-pointer flex-shrink-0 pr-2"
-			onClick={() => setIsExpandedState(!isExpandedState)}
+			onClick={(e) => {
+				e.stopPropagation();
+				setIsExpandedState(!isExpandedState)
+			}}
 		>
-			<ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />
+			{!props.reduced && <ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />}
 			<div className="flex-1">
-				<div className="h-12 flex items-center w-full">
-					<Checkbox className="mr-3" onClick={handleCheckboxClick} checked={selectedChangeIds.includes(props.change.id)} />
+				<div className={clsx(
+					"h-12 flex items-center w-full",
+					props.reduced && "pl-2"
+				)}>
+					{!props.reduced && <Checkbox className="mr-3" onClick={handleCheckboxClick} checked={selectedChangeIds.includes(props.change.id)} />}
 					<p className="flex-1 truncate text-ellipsis overflow-hidden">
 						Change{" "}
 						<span className="text-slate-500">
@@ -91,7 +98,7 @@ export const ChangeComponent = (props: {
 						</span>
 					</p>
 					<div className="flex gap-3 items-center">
-						{props.change.discussion_count > 0 && (
+						{props.change.discussion_count > 0 && !props.reduced && (
 							<Button variant="ghost" size="sm" className="text-sm text-slate-500">
 								{props.change.discussion_count}<IconDiscussion />
 							</Button>
@@ -116,11 +123,14 @@ export const ChangeComponent = (props: {
 					</div>
 				</div>
 				{isExpandedState && (
-					<div className="flex flex-col gap-2 pb-2">
+					<div className={clsx(
+						"flex flex-col gap-2 pb-2",
+						props.reduced && "pl-2"
+					)}>
 						<div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 pt-2 pb-4 sm:pb-6 overflow-hidden">
 							{DiffComponent && (<>{DiffComponent}</>)}
 						</div>
-						{props.change.discussion_count > 0 && (
+						{props.change.discussion_count > 0 && !props.reduced && (
 							props.change.discussion_ids.split(",").map((discussionId) =>
 								<DiscussionPreview key={discussionId} discussionId={discussionId} />
 							)
