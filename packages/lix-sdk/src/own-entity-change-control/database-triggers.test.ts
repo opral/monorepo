@@ -148,3 +148,54 @@ test("skips change control of key values if the key begins with `#`", async () =
 	expect(key1).toBeDefined();
 	expect(key1Change).toBeUndefined();
 });
+
+// the sqlite jsonb representation should not be used externally
+// hence, we need to store the metadata as string in the snapshot
+test("file.metadata is tracked as json string, not binary.", async () => {
+	const lix = await openLixInMemory({});
+
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			data: new Uint8Array(),
+			path: "/mock.txt",
+			metadata: { key: "value" },
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const change = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.where("schema_key", "=", "lix_file_table")
+		.where("entity_id", "=", file.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(change.content?.metadata).toStrictEqual({
+		key: "value",
+	});
+});
+
+test("file.data is not own change controlled as plugins handle the change control of file data", async () => {
+	const lix = await openLixInMemory({});
+
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			path: "/mock.txt",
+			data: new TextEncoder().encode("hello world"),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const change = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.where("schema_key", "=", "lix_file_table")
+		.where("entity_id", "=", file.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	
+	expect(change.content?.data).toBe(undefined);
+})

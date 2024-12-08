@@ -142,6 +142,21 @@ function handleLixOwnEntityChange(
 		}
 	}
 
+	if (tableName === "file" && snapshotContent) {
+		// sqlite has it's own jsonb format
+		// hence, need to query sqlite to convert
+		// to json
+		const json = sqlite.exec("SELECT json(?)", {
+			bind: [snapshotContent.metadata],
+			returnValue: "resultRows",
+		})[0]![0];
+
+		snapshotContent["metadata"] = JSON.parse(json as string);
+
+		// remove the data field which is change controlled by plugins, not lix itself
+		delete snapshotContent.data;
+	}
+
 	const entityId = entityIdForRow(tableName, ...values);
 
 	createChange({
