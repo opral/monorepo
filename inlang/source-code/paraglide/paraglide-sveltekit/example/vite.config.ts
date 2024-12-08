@@ -7,7 +7,7 @@ export default defineConfig({
 	plugins: [
 		paraglide({
 			project: "./project.inlang",
-			// outdir: "./src/lib/paraglide",
+			outdir: "./src/lib/paraglide",
 			useVirtualModule: true,
 		}),
 		sveltekit(),

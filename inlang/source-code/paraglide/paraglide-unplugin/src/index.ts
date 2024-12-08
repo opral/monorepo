@@ -13,6 +13,7 @@ import { memoized } from "./memo.js"
 // Helper Plugins
 import { virtual } from "./virtual.js"
 import { build } from "./build.js"
+import path from "node:path"
 
 const PLUGIN_NAME = "unplugin-paraglide"
 
@@ -45,7 +46,15 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 			await writeOutput(c.outdir, regularOutput, fs)
 		} else {
 			const dts = generateDTS(regularOutput, c.virtualModuleName)
-			await fs.writeFile(c.dtsPath, dts)
+
+			try {
+				await fs.writeFile(c.dtsPath, dts)
+			} catch (error) {
+				if (error instanceof Error && error.message.includes("ENOENT")) {
+					await fs.mkdir(path.dirname(c.dtsPath), { recursive: true })
+					await fs.writeFile(c.dtsPath, dts)
+				}
+			}
 		}
 		numCompiles++
 	})

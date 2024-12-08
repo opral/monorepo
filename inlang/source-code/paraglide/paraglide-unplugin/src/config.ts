@@ -15,15 +15,17 @@ export type UserConfig = {
 
 	/**
 	 * If the `$paraglide` virtual module should be used instead of writing the output to disk.
-	 * This overrides the `outdir` property
 	 */
 	useVirtualModule?: boolean
 
 	/**
 	 * The output directory to place the compiled files in.
+	 *
+	 * If `useVirtualModule` is `true`, then the type-declarations for the virtual module will be placed here
+	 *
 	 * @example `./src/paraglide`
 	 */
-	outdir?: string
+	outdir: string
 }
 
 export type PluginConfig = {
@@ -52,19 +54,15 @@ export function resolveConfig(options: UserConfig): PluginConfig {
 
 	const normalizedPorjectPath = path.resolve(process.cwd(), options.project)
 
-	if (options.outdir && options.useVirtualModule) {
-		logger.warn("`outdir` option is specified alongside `useVirtualModules`. It won't do anything")
-	}
-
-	if (!options.outdir && !options.useVirtualModule) {
-		throw new Error("[unplugin-paraglide] You must specify either `outdir` or `useVirtualModule`")
-	}
+	const dtsPath = normalizedOutdir
+		? path.resolve(normalizedOutdir, "paraglide.d.ts")
+		: path.resolve(process.cwd(), "paraglide.d.ts")
 
 	return {
 		logger,
 		projectPath: normalizedPorjectPath,
 		outdir: options.useVirtualModule ? undefined : normalizedOutdir,
-		dtsPath: path.resolve(process.cwd(), "paraglide.d.ts"),
+		dtsPath,
 		virtualModuleName: "$paraglide",
 	}
 }
