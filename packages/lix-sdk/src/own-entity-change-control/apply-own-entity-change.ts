@@ -62,6 +62,18 @@ export async function applyOwnEntityChanges(args: {
 				}
 				// upsert
 				else {
+					// take the current file data if the table is `file`
+					// (can be optimized later to adjust the query instead)
+					if (tableName === "file") {
+						const data = await trx
+							.selectFrom("file")
+							.where("id", "=", change.entity_id)
+							.select("data")
+							.executeTakeFirst();
+
+						snapshot.content.data = data?.data ?? new Uint8Array();
+					}
+
 					query = trx
 						.insertInto(tableName)
 						.values(snapshot.content)

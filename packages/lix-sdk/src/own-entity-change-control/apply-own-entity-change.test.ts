@@ -139,3 +139,70 @@ test("it should throw an error for invalid plugin key", async () => {
 		"Expected 'lix_own_entity' as plugin key but received invalid-plugin"
 	);
 });
+
+
+test("file.data is not changed by applyOwnEntityChanges", async () => {
+	const lix = await openLixInMemory({});
+
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			path: "/test.txt",
+			data: new TextEncoder().encode("hello"),
+			metadata: {
+				foo: "bar",
+			},
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const change = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.where("schema_key", "=", "lix_file_table")
+		.where("entity_id", "=", file.id)
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(change).toBeDefined();
+	expect(change?.content?.metadata).toEqual({ foo: "bar" });
+
+	const snapshot = await lix.db
+		.insertInto("snapshot")
+		.values({
+			content: {
+				id: file.id,
+				path: "/test.txt",
+				metadata: {
+					foo: "baz",
+				},
+			},
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const mockChange: Change = {
+		id: "change1",
+		entity_id: file.id,
+		schema_key: "lix_file_table",
+		plugin_key: "lix_own_entity",
+		file_id: "null",
+		snapshot_id: snapshot.id,
+		created_at: "2021-01-01T00:00:00.000Z",
+	};
+
+	await applyOwnEntityChanges({ lix, changes: [mockChange] });
+
+	const result = await lix.db
+		.selectFrom("file")
+		.where("id", "=", file.id)
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(result).toEqual({
+		id: file.id,
+		data: new TextEncoder().encode("hello"),
+		path: "/test.txt",
+		metadata: { foo: "baz" },
+	});
+});
