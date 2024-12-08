@@ -176,7 +176,7 @@ function SyncButton() {
 						})
 						.execute();
 
-					await saveLixToOpfs(lix);
+					await saveLixToOpfs({ lix });
 				}}
 			>
 				Sync
