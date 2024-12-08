@@ -142,13 +142,15 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 		},
 		...makeArray(build(c, ctx)),
 		...makeArray(
-			virtual(
-				{
-					name: c.virtualModuleName,
-					getModule,
-				},
-				ctx
-			)
+			c.outdir
+				? []
+				: virtual(
+						{
+							name: c.virtualModuleName,
+							getModule,
+						},
+						ctx
+				  )
 		),
 	]
 }
