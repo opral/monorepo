@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { applyChanges } from "./apply-changes.js";
-import type { LixPlugin } from "./lix-plugin.js";
+import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import type { KeyValue } from "../key-value/database-schema.js";
 

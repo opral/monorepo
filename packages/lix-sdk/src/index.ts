@@ -1,4 +1,5 @@
 export * from "./account/index.js";
+export * from "./change/index.js";
 export * from "./change-set/index.js";
 export * from "./change-conflict/index.js";
 export * from "./change-queue/index.js";

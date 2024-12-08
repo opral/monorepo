@@ -1,7 +1,7 @@
 import type { Lix } from "../lix/open-lix.js";
 import * as LixServerApi from "@lix-js/server-api-schema";
 import { mergeTheirState, type VectorClock } from "./merge-state.js";
-import { applyChanges } from "../plugin/apply-changes.js";
+import { applyChanges } from "../change/apply-changes.js";
 import type { Change, VersionChange } from "../database/schema.js";
 import { withSkipOwnChangeControl } from "../own-entity-change-control/with-skip-own-change-control.js";
 import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
