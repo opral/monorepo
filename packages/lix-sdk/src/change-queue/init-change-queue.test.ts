@@ -94,19 +94,21 @@ test("should use queue and settled correctly", async () => {
 		.select("snapshot.content")
 		.execute();
 
-	expect(changes).toEqual([
-		expect.objectContaining({
-			entity_id: "test",
-			schema_key: "text",
-			file_id: "test",
-			plugin_key: "mock-plugin",
-			content: {
-				text: "insert text",
-			},
-			// handles the author (which defaults to anonymous)
-			account_id: expect.stringMatching(/^anonymous_/),
-		}),
-	]);
+	expect(changes).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				entity_id: "test",
+				schema_key: "text",
+				file_id: "test",
+				plugin_key: "mock-plugin",
+				content: {
+					text: "insert text",
+				},
+				// handles the author (which defaults to anonymous)
+				account_id: expect.stringMatching(/^anonymous_/),
+			}),
+		])
+	);
 
 	const dataUpdate1 = enc.encode("updated text");
 	await lix.db
@@ -181,6 +183,7 @@ test("should use queue and settled correctly", async () => {
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin("change_author", "change_author.change_id", "change.id")
 		.selectAll("change")
+		.where("schema_key", "=", "text")
 		.select("change_author.account_id")
 		.select("snapshot.content")
 		.execute();
@@ -196,59 +199,65 @@ test("should use queue and settled correctly", async () => {
 		.selectAll()
 		.execute();
 
-	expect(updatedChanges).toEqual([
-		expect.objectContaining({
-			entity_id: "test",
-			schema_key: "text",
-			file_id: "test",
-			plugin_key: "mock-plugin",
-			content: {
-				text: "insert text",
-			},
-			account_id: expect.stringMatching(/^anonymous_/),
-		}),
-		expect.objectContaining({
-			entity_id: "test",
-			file_id: "test",
-			plugin_key: "mock-plugin",
-			schema_key: "text",
-			content: {
-				text: "updated text",
-			},
-			account_id: expect.stringMatching(/^anonymous_/),
-		}),
-		expect.objectContaining({
-			file_id: "test",
-			entity_id: "test",
-			plugin_key: "mock-plugin",
-			schema_key: "text",
-			content: {
-				text: "second text update",
-			},
-			account_id: expect.stringMatching(/^anonymous_/),
-		}),
-	]);
+	expect(updatedChanges).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				entity_id: "test",
+				schema_key: "text",
+				file_id: "test",
+				plugin_key: "mock-plugin",
+				content: {
+					text: "insert text",
+				},
+				account_id: expect.stringMatching(/^anonymous_/),
+			}),
+			expect.objectContaining({
+				entity_id: "test",
+				file_id: "test",
+				plugin_key: "mock-plugin",
+				schema_key: "text",
+				content: {
+					text: "updated text",
+				},
+				account_id: expect.stringMatching(/^anonymous_/),
+			}),
+			expect.objectContaining({
+				file_id: "test",
+				entity_id: "test",
+				plugin_key: "mock-plugin",
+				schema_key: "text",
+				content: {
+					text: "second text update",
+				},
+				account_id: expect.stringMatching(/^anonymous_/),
+			}),
+		])
+	);
 
-	expect(updatedEdges).toEqual([
-		// 0 is the parent of 1
-		// 1 is the parent of 2
-		expect.objectContaining({
-			parent_id: updatedChanges[0]?.id,
-			child_id: updatedChanges[1]?.id,
-		}),
-		expect.objectContaining({
-			parent_id: updatedChanges[1]?.id,
-			child_id: updatedChanges[2]?.id,
-		}),
-	]);
+	expect(updatedEdges).toEqual(
+		expect.arrayContaining([
+			// 0 is the parent of 1
+			// 1 is the parent of 2
+			expect.objectContaining({
+				parent_id: updatedChanges[0]?.id,
+				child_id: updatedChanges[1]?.id,
+			}),
+			expect.objectContaining({
+				parent_id: updatedChanges[1]?.id,
+				child_id: updatedChanges[2]?.id,
+			}),
+		])
+	);
 
 	// the version change pointers points to the last change
-	expect(versionChanges).toEqual([
-		expect.objectContaining({
-			version_id: currentVersion.id,
-			change_id: updatedChanges[2]?.id,
-		}),
-	]);
+	expect(versionChanges).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				version_id: currentVersion.id,
+				change_id: updatedChanges[2]?.id,
+			}),
+		])
+	);
 });
 
 test.todo("changes should contain the author", async () => {

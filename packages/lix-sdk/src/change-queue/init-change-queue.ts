@@ -3,7 +3,7 @@ import { handleFileChange, handleFileInsert } from "./file-handlers.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export async function initChangeQueue(args: {
-	lix: Pick<Lix, "db" | "plugin">;
+	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
 	rawDatabase: SqliteDatabase;
 }): Promise<void> {
 	args.rawDatabase.createFunction({

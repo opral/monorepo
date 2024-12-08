@@ -3,61 +3,52 @@ import type { SqliteDatabase } from "sqlite-wasm-kysely";
 
 export const tablesByDepencies: string[] = [
 	// no dependencies
-	'snapshot',
-	'label',
-	'version',
-	'account',
-	'file',
-	'change_set',
+	"snapshot",
+	"label",
+	"version",
+	"account",
+	"file",
+	"change_set",
 	// Depends on: snapshot
-	'change',
-	
+	"change",
+
 	// Depends on: file
-	'change_queue',
+	"change_queue",
 	// Depends on: change
-	'change_author',
+	"change_author",
 	// Depends on: change
-	'change_edge',
+	"change_edge",
 	// Depends on: change_set
-	'change_conflict',
+	"change_conflict",
 	// Depends on: change_conflict, change
-	'change_conflict_resolution',
+	"change_conflict_resolution",
 	// Depends on: change_set, change
-	'change_set_element',
+	"change_set_element",
 	// Depends on: label, change_set
-	'change_set_label',
+	"change_set_label",
 	// Depends on: change_set_label
-	'change_set_label_author',
+	"change_set_label_author",
 	//Depends on: change_set
-	'discussion',
+	"discussion",
 	// Depends on: account, discussion, comment
-	'comment',
+	"comment",
 	// Depends on: version, change
-	'version_change',
+	"version_change",
 	// Depends on: version, change_conflict
-	'version_change_conflict',
+	"version_change_conflict",
 	// Depends on: version
-	'current_version',
-]
+	"current_version",
+];
 
 export const tableIdColumns: Record<string, Array<string>> = {
 	// file - File is not synced. Is construcuted from the change table. (see https://github.com/opral/monorepo/pull/3242#discussion_r1863981413)
 	change: ["id"],
-	account: ["id"],
-	version: ["id"],
 	snapshot: ["id"],
-
-	change_set: ["id"],
 	change_conflict: ["id"],
-	change_author: ["change_id", "account_id"],
 	change_edge: ["parent_id", "child_id"],
 	change_conflict_resolution: ["change_conflict_id", "resolved_change_id"],
-	change_set_element: ["change_set_id", "change_id"],
-	change_set_label: ["label_id", "change_set_id"],
-	change_set_label_author: ["label_id", "change_set_id", "account_id"],
 	version_change_conflict: ["version_id", "change_conflict_id"],
 	version_change: ["version_id", "change_id"],
-	key_value: ["key"],
 };
 
 export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {

@@ -3,6 +3,8 @@ import * as LixServerApi from "@lix-js/server-api-schema";
 import { mergeTheirState, type VectorClock } from "./merge-state.js";
 import { applyChanges } from "../plugin/apply-changes.js";
 import type { Change, VersionChange } from "../database/schema.js";
+import { withSkipOwnChangeControl } from "../own-entity-change-control/with-skip-own-change-control.js";
+import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
 
 export async function pullFromServer(args: {
 	id: string;
@@ -70,9 +72,15 @@ export async function pullFromServer(args: {
 		});
 
 		if (changesToApply.length > 0) {
-			await applyChanges({
-				lix: { ...args.lix, db: trx },
-				changes: changesToApply,
+			// the changes already exists hence prevent own change control
+			// from creating new changes for the applied changes
+			await withSkipOwnChangeControl(trx, async (trx) => {
+				await withSkipChangeQueue(trx, async (trx) => {
+					await applyChanges({
+						lix: { ...args.lix, db: trx },
+						changes: changesToApply,
+					});
+				});
 			});
 		}
 	});

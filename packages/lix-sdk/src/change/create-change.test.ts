@@ -127,9 +127,6 @@ test("should create the change authors", async () => {
 
 	await switchVersion({ lix, to: version0 });
 
-	// cleaning the table in case there are some data
-	await lix.db.deleteFrom("active_account").execute();
-
 	const account1 = await createAccount({
 		lix,
 		name: "account1",
@@ -257,6 +254,6 @@ test("should throw an error if authors array is empty", async () => {
 			pluginKey: "plugin1",
 			schemaKey: "schema1",
 			snapshotContent: { text: "snapshot-content" },
-		}),
+		})
 	).rejects.toThrow("At least one author is required");
 });

@@ -29,7 +29,7 @@ async function glob(args: {
 
 // creates initial changes for new files
 export async function handleFileInsert(args: {
-	lix: Pick<Lix, "db" | "plugin">;
+	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
 	changeQueueEntry: ChangeQueueEntry;
 }): Promise<void> {
 	const detectedChanges: Array<DetectedChange & { pluginKey: string }> = [];
@@ -110,7 +110,7 @@ export async function handleFileInsert(args: {
 					schemaKey: detectedChange.schema.key,
 					snapshotContent: detectedChange.snapshot,
 				});
-			}),
+			})
 		);
 
 		await trx
@@ -121,7 +121,7 @@ export async function handleFileInsert(args: {
 }
 
 export async function handleFileChange(args: {
-	lix: Pick<Lix, "db" | "plugin">;
+	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
 	changeQueueEntry: ChangeQueueEntry;
 }): Promise<void> {
 	const detectedChanges: Array<DetectedChange & { pluginKey: string }> = [];
@@ -205,7 +205,7 @@ export async function handleFileChange(args: {
 					schemaKey: detectedChange.schema.key,
 					snapshotContent: detectedChange.snapshot,
 				});
-			}),
+			})
 		);
 
 		await trx

@@ -3,7 +3,7 @@ import type { Version, LixDatabaseSchema } from "../database/schema.js";
 
 /**
  * Selects changes that are not a parent of any other change within the specified version.
- * 
+ *
  *
  * @example
  *   ```ts
@@ -13,7 +13,7 @@ import type { Version, LixDatabaseSchema } from "../database/schema.js";
  *     .execute();
  *   ```
  */
-export function changeIsLeafInVersion(version: Version) {
+export function changeIsLeafInVersion(version: Pick<Version, "id">) {
 	return sql`
     change.id IN (
       WITH RECURSIVE version_changes(id) AS (

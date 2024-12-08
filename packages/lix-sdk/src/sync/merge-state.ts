@@ -214,6 +214,9 @@ export async function mergeTheirState(args: {
 					rowsIUpdatedLast[tableName]?.[rowIdToString(tableName, row)] ===
 					undefined
 				) {
+					if (tableName === "snapshot") {
+						delete row.id;
+					}
 					const statment = trx
 						.insertInto(tableName as any)
 						.values(row)
@@ -259,7 +262,6 @@ export async function mergeTheirState(args: {
 	} else {
 		return await args.lix.db.transaction().execute(executeInTransaction);
 	}
-
 }
 
 function aheadSessions(

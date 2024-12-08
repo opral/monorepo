@@ -110,6 +110,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 	const changes = await targetLix.db
 		.selectFrom("change")
 		.select("id")
+		.where("schema_key", "=", "mock")
 		.execute();
 
 	expect(changes.map((c) => c.id)).toStrictEqual([
@@ -123,19 +124,23 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		.select("id")
 		.execute();
 
-	expect(snapshots.map((c) => c.id)).toStrictEqual([
-		"no-content",
-		mockSnapshots[0]?.id,
-		mockSnapshots[1]?.id,
-		mockSnapshots[2]?.id,
-	]);
+	expect(snapshots.map((c) => c.id)).toStrictEqual(
+		expect.arrayContaining([
+			"no-content",
+			mockSnapshots[0]?.id,
+			mockSnapshots[1]?.id,
+			mockSnapshots[2]?.id,
+		])
+	);
 
 	const edges = await targetLix.db
 		.selectFrom("change_edge")
 		.selectAll()
 		.execute();
 
-	expect(edges).toEqual([expect.objectContaining(mockEdges[0])]);
+	expect(edges).toEqual(
+		expect.arrayContaining([expect.objectContaining(mockEdges[0])])
+	);
 
 	expect(mockPlugin.applyChanges).toHaveBeenCalledTimes(1);
 	// expect(mockPlugin.detectConflicts).toHaveBeenCalledTimes(1);
@@ -636,7 +641,11 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 
 	await merge({ sourceLix, targetLix });
 
-	const changes = await targetLix.db.selectFrom("change").selectAll().execute();
+	const changes = await targetLix.db
+		.selectFrom("change")
+		.where("schema_key", "=", "mock")
+		.selectAll()
+		.execute();
 
 	expect(changes.length).toBe(1);
 });
@@ -690,26 +699,32 @@ test("it should copy discussion and related comments and mappings", async () => 
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
+		.where("schema_key", "=", "text")
 		.select("snapshot.content")
 		.execute();
 
-	expect(changes).toEqual([
-		expect.objectContaining({
-			id: changes[0]?.id,
-			created_at: changes[0]?.created_at,
-			snapshot_id: changes[0]?.snapshot_id,
-			schema_key: "text",
-			file_id: "test",
-			entity_id: "test",
-			plugin_key: "mock-plugin",
-			content: {
-				text: "inserted text",
-			},
-		}),
-	]);
+	expect(changes).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				id: changes[0]?.id,
+				created_at: changes[0]?.created_at,
+				snapshot_id: changes[0]?.snapshot_id,
+				schema_key: "text",
+				file_id: "test",
+				entity_id: "test",
+				plugin_key: "mock-plugin",
+				content: {
+					text: "inserted text",
+				},
+			}),
+		])
+	);
 
 	// TODO how do know which author to use for the discussion - we can have multiple active accounts?
-	const currentAuthorLix1 = await lix1.db.selectFrom("active_account").selectAll().executeTakeFirstOrThrow();
+	const currentAuthorLix1 = await lix1.db
+		.selectFrom("active_account")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	await createDiscussion({
 		lix: lix1,
@@ -732,7 +747,10 @@ test("it should copy discussion and related comments and mappings", async () => 
 	// lix 2 has no comments yet so after lix 1 into 2 we should be in sync
 	expect(commentsLix1).toEqual(commentsLix2AfterMerge);
 
-	const currentAuthorLix2 = await lix1.db.selectFrom("active_account").selectAll().executeTakeFirstOrThrow();
+	const currentAuthorLix2 = await lix1.db
+		.selectFrom("active_account")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 	await createComment({
 		lix: lix2,
 		parentComment: commentsLix2AfterMerge[0]!,

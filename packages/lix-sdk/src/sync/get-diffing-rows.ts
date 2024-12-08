@@ -55,7 +55,6 @@ export async function getDiffingRows(args: {
 
 		upsertedRows["mutation_log"] = await operationsToPush.execute();
 
-		
 		console.log("upsertedRows", upsertedRows);
 
 		for (const operation of upsertedRows["mutation_log"]) {
@@ -68,7 +67,7 @@ export async function getDiffingRows(args: {
 				upsertedRows[tableName].push(
 					await trx
 						.selectFrom(tableName)
-						.select("content")
+						.selectAll()
 						.where("id", "=", operation.row_id["id"])
 						.executeTakeFirstOrThrow()
 				);

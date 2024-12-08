@@ -395,7 +395,7 @@ test("mutation should only be recorded if sync row is not present", async () => 
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
-	const mutation = await db.selectFrom("mutation_log").selectAll().execute();	
+	const mutation = await db.selectFrom("mutation_log").selectAll().execute();
 
 	expect(mutation).toHaveLength(1);
 
@@ -405,14 +405,17 @@ test("mutation should only be recorded if sync row is not present", async () => 
 			session: "mock",
 			wall_clock: 0,
 			session_time: 0,
-			row_id: {"ignored": "ignored"},
+			row_id: { ignored: "ignored" },
 			table_name: "mutation_log",
 			operation: "INSERT",
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	const mutationWithFlag = await db.selectFrom("mutation_log").selectAll().execute();	
+	const mutationWithFlag = await db
+		.selectFrom("mutation_log")
+		.selectAll()
+		.execute();
 	expect(mutationWithFlag).toHaveLength(2);
 
 	await db
@@ -426,8 +429,11 @@ test("mutation should only be recorded if sync row is not present", async () => 
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
-	
-	const mutationLogAfterIgnoredChange = await db.selectFrom("mutation_log").selectAll().execute();	
+
+	const mutationLogAfterIgnoredChange = await db
+		.selectFrom("mutation_log")
+		.selectAll()
+		.execute();
 	expect(mutationLogAfterIgnoredChange).toHaveLength(2);
 
 	// const vectorClockTick1 =
@@ -438,5 +444,4 @@ test("mutation should only be recorded if sync row is not present", async () => 
 	// 	await sql`select lix_session() as session, lix_session_clock_tick() as time`.execute(
 	// 		db
 	// 	);
-
-})
+});

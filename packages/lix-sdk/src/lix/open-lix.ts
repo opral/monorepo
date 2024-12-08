@@ -69,7 +69,7 @@ export async function openLix(args: {
 	};
 
 	initChangeQueue({
-		lix: { db, plugin },
+		lix: { db, plugin, sqlite: args.database },
 		rawDatabase: args.database,
 	});
 

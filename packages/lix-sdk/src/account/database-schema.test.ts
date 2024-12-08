@@ -28,7 +28,7 @@ test("account table should have no entry in the beginning and activte account sh
 		deterministic: true,
 		xFunc: () => "mock_uuid_v7",
 	});
-	
+
 	applyAccountDatabaseSchema(sqlite);
 
 	const db = new Kysely<AccountSchema>({
@@ -44,7 +44,6 @@ test("account table should have no entry in the beginning and activte account sh
 		.execute();
 	expect(account?.length).toBe(0);
 
-	
 	const active_account = await db
 		.selectFrom("active_account")
 		.selectAll()
@@ -52,7 +51,6 @@ test("account table should have no entry in the beginning and activte account sh
 
 	expect(active_account?.id).toBe("anonymous_mock_uuid_v7");
 });
-
 
 test("account.id should default to uuid_v7", async () => {
 	const sqlite = await createInMemoryDatabase({
@@ -96,7 +94,7 @@ test('it should drop the temp "current_account" table on reboot to not persist t
 		deterministic: true,
 		xFunc: () => "mock_uuid_v7",
 	});
-	
+
 	applyAccountDatabaseSchema(sqlite);
 
 	const db = new Kysely<AccountSchema>({
@@ -138,14 +136,13 @@ test('it should drop the temp "current_account" table on reboot to not persist t
 
 	const sqlite2 = await loadDatabaseInMemory(blob);
 
-
 	// the database has the propert definition for the uuid_v7 function
 	sqlite2.createFunction("uuid_v7", {
 		arity: 0,
 		deterministic: true,
 		xFunc: () => "mock_uuid_v7-2",
 	});
-	
+
 	applyAccountDatabaseSchema(sqlite2);
 
 	const db2 = new Kysely<AccountSchema>({
