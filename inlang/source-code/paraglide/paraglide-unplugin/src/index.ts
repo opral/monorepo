@@ -140,7 +140,7 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 				})
 			},
 		},
-		...makeArray(build(c, ctx)),
+		...makeArray(c.outdir ? build({ outdir: c.outdir, getModule }, ctx) : []),
 		...makeArray(
 			c.outdir
 				? []
