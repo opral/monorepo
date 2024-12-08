@@ -8,7 +8,6 @@ export default defineConfig({
 		paraglide({
 			project: "./project.inlang",
 			outdir: "./src/lib/paraglide",
-			useVirtualModule: true,
 		}),
 		sveltekit(),
 		visualizer({
