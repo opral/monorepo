@@ -28,7 +28,8 @@ export default defineConfig({
 		paraglide.vite({
 			silent: true,
 			project: "./project.inlang",
-			useVirtualModule: true,
+			experimentalUseVirtualModules: true,
+			outdir: ".",
 		}),
 	],
 })
