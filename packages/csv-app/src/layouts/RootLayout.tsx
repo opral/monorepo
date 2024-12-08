@@ -14,6 +14,7 @@ import {
 	SlMenuItem,
 } from "@shoelace-style/shoelace/dist/react";
 import { Lix } from "@lix-js/sdk";
+import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 
 export default function RootLayout(props: { children: JSX.Element }) {
 	const [, setPolling] = useAtom(withPollingAtom);
