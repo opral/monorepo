@@ -3,6 +3,9 @@ import { isAvailableLanguageTag, setLanguageTag, sourceLanguageTag } from "$para
 
 // needed for messages in module-scope code
 setLanguageTag(() => {
+	// in case it's run on the server during build, 
+	// just return the source language tag
+  if (typeof document === "undefined") return sourceLanguageTag
 	const documentLang = document.documentElement.lang
 	return isAvailableLanguageTag(documentLang) ? documentLang : sourceLanguageTag
 })
