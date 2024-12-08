@@ -16,7 +16,7 @@ export type UserConfig = {
 	/**
 	 * If the `$paraglide` virtual module should be used instead of writing the output to disk.
 	 */
-	useVirtualModule?: boolean
+	experimentalUseVirtualModules?: boolean
 
 	/**
 	 * The output directory to place the compiled files in.
@@ -61,7 +61,7 @@ export function resolveConfig(options: UserConfig): PluginConfig {
 	return {
 		logger,
 		projectPath: normalizedPorjectPath,
-		outdir: options.useVirtualModule ? undefined : normalizedOutdir,
+		outdir: options.experimentalUseVirtualModules ? undefined : normalizedOutdir,
 		dtsPath,
 		virtualModuleName: "$paraglide",
 	}
