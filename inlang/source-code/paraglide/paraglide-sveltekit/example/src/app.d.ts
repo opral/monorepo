@@ -1,3 +1,4 @@
+/// <reference types="../paraglide.d.ts" />
 import type { AvailableLanguageTag } from "$lib/paraglide/runtime"
 import type { ParaglideLocals } from "@inlang/paraglide-sveltekit"
 

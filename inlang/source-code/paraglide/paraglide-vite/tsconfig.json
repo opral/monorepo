@@ -6,6 +6,7 @@
 		"rootDir": "./src",
 		"declaration": true,
 		"sourceMap": false,
-		"checkJs": true
+		"checkJs": true,
+		"skipLibCheck": true
 	}
 }
