@@ -94,12 +94,12 @@ test("using json as value should work", async () => {
 	});
 });
 
-test("it should default add a uuid lix-id if not exits", async () => {
+test("it should default add a uuid lix_id if not exits", async () => {
 	const lix = await openLixInMemory({});
 
 	const result = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 

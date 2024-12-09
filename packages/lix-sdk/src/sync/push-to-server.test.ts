@@ -17,7 +17,7 @@ test("push rows of multiple tables to server successfully", async () => {
 
 	const id = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -100,7 +100,7 @@ test("push-pull-push with two clients", async () => {
 
 	const { value: lixId } = await client1.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -282,7 +282,7 @@ test("it should handle snapshots.content json binaries", async () => {
 
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -338,7 +338,7 @@ test.todo("it should handle binary values", async () => {
 
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 

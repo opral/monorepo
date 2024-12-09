@@ -17,7 +17,7 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
