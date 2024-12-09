@@ -8,6 +8,7 @@ export * from "./database/index.js";
 export * from "./discussion/index.js";
 export * from "./file/index.js";
 export * from "./lix/index.js";
+export * from "./own-entity-change-control/index.js";
 export * from "./plugin/index.js";
 export * from "./query-filter/index.js";
 export * from "./server-api-handler/index.js";
