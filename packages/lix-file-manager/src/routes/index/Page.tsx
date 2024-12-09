@@ -81,6 +81,7 @@ export default function Page() {
 								id={file.id}
 								type="file"
 								name={file.path.replace("/", "")}
+								appLink={file.path.endsWith(".csv") ? `/app/csv/editor?f=${file.id}` : ""}
 							/>
 						);
 					})}

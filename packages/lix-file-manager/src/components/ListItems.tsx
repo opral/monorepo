@@ -90,11 +90,11 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
       </div>
       {type === "file" && (
         <div className={clsx("flex opacity-0 transition-opacity group-hover:opacity-100", dropdownOpen ? "opacity-100" : "")}>
-          <a href={appLink}>
-            <Button variant="ghost">
+          <Button variant="ghost">
+            <a href={appLink} target="_blank">
               Open
-            </Button>
-          </a>
+            </a>
+          </Button>
           <DropdownMenu onOpenChange={(e) => e ? setDropdownOpen(true) : setDropdownOpen(false)}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
