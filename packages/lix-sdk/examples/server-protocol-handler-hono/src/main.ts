@@ -11,8 +11,6 @@ const lixServerApiHandler = await createServerApiHandler({
 	storage: createServerApiMemoryStorage(),
 });
 
-app.get("/", (c) => c.text("Hono!"));
-
 // @ts-expect-error - Hono provides a subset of the Request object
 app.use("/lsa/*", (c) => lixServerApiHandler(c.req));
 
