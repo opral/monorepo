@@ -12,7 +12,7 @@ export function applyKeyValueDatabaseSchema(
 	) STRICT;
 
 	INSERT OR IGNORE INTO key_value (key, value)
-	VALUES ('lix-id', uuid_v4());
+	VALUES ('lix_id', uuid_v4());
 
 `;
 }
@@ -43,7 +43,7 @@ export type KeyValueTable = {
 	value: string;
 };
 
-type PredefinedKeys = "lix-id" | "lix-experimental-server-url";
+type PredefinedKeys = "lix_id" | "lix_experimental_server_url";
 // The string & {} ensures TypeScript recognizes KeyValueKeys
 // as a superset of string, preventing conflicts when using other string values.
 type KeyType = string & {};

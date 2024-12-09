@@ -14,7 +14,7 @@ test("it should pull rows successfully", async () => {
 
 	const id = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -63,7 +63,7 @@ test("it should specifically be able to handle snapshots which use json binary a
 	const lix = await openLixInMemory({});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -165,7 +165,7 @@ test("it should handle empty tables gracefully", async () => {
 	const lix = await openLixInMemory({});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 

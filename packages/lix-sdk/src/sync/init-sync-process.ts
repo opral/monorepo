@@ -12,7 +12,7 @@ export async function initSyncProcess(args: {
 > {
 	const lixId = await args.lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.select("value")
 		.executeTakeFirstOrThrow();
 

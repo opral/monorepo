@@ -10,7 +10,7 @@ test("it should store the lix file in storage", async () => {
 	});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
