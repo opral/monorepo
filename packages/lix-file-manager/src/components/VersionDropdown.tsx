@@ -23,6 +23,7 @@ import {
 	changeIsLeafInVersion,
 	createVersion,
 	switchVersion,
+	withSkipOwnChangeControl,
 } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.js";
 import { humanId } from "human-id";
@@ -41,19 +42,21 @@ export function VersionDropdown() {
 			if (!lix) return;
 
 			await lix.db.transaction().execute(async (trx) => {
-				await switchVersion({ lix: { ...lix, db: trx }, to: version });
+				await withSkipOwnChangeControl(trx, async (trx) => {
+					await switchVersion({ lix: { ...lix, db: trx }, to: version });
 
-				const changesOfVersion = await trx
-					.selectFrom("change")
-					.where(changeIsLeafInVersion(version))
-					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-					.selectAll("change")
-					.select("snapshot.content")
-					.execute();
+					const changesOfVersion = await trx
+						.selectFrom("change")
+						.where(changeIsLeafInVersion(version))
+						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+						.selectAll("change")
+						.select("snapshot.content")
+						.execute();
 
-				await applyChanges({
-					lix: { ...lix, db: trx },
-					changes: changesOfVersion,
+					await applyChanges({
+						lix: { ...lix, db: trx },
+						changes: changesOfVersion,
+					});
 				});
 			});
 
@@ -139,7 +142,7 @@ export function VersionDropdown() {
 					<DropdownMenuSeparator />
 					<DropdownMenuItem onClick={handleCreateVersion}>
 						<Plus className="mr-2 h-4 w-4" />
-						Create branch
+						Create version
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
@@ -153,11 +156,11 @@ export function VersionDropdown() {
 			>
 				<DialogContent className="sm:max-w-[425px]">
 					<DialogHeader>
-						<DialogTitle>Delete Branch</DialogTitle>
+						<DialogTitle>Delete Version</DialogTitle>
 					</DialogHeader>
 					<div className="py-4 space-y-4">
 						<p className="text-sm text-muted-foreground">
-							Are you sure you want to delete the branch "
+							Are you sure you want to delete the version "
 							{versionToDelete?.name}"? This action cannot be undone.
 						</p>
 						<div className="space-y-2">
