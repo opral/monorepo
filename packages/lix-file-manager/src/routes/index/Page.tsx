@@ -14,6 +14,7 @@ import FilterSelect from "@/components/FilterSelect.tsx";
 import ChatInput from "@/components/ChatInput.tsx";
 import ConnectedChanges from "@/components/ConnectedChanges.tsx";
 import DiscussionThread from "@/components/DiscussionThread.tsx";
+import { VersionDropdown } from "@/components/VersionDropdown.tsx";
 // import { useEffect } from "react";
 
 export default function Page() {
@@ -21,10 +22,10 @@ export default function Page() {
 	const [lix] = useAtom(lixAtom);
 	const [files] = useAtom(filesAtom);
 	const [changesCurrentVersion] = useAtom(changesCurrentVersionAtom);
-	const [allChangesDynamicGrouping] = useAtom(allChangesDynamicGroupingAtom)
-	const [activeFile] = useAtom(activeFileAtom)
-	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom)
-	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom)
+	const [allChangesDynamicGrouping] = useAtom(allChangesDynamicGroupingAtom);
+	const [activeFile] = useAtom(activeFileAtom);
+	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
+	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
 
 	//hooks
 	const navigate = useNavigate();
@@ -57,11 +58,14 @@ export default function Page() {
 		<div className="flex bg-white h-full">
 			<div className="max-w-[340px] flex-1 flex flex-col h-full">
 				<SectionHeader title="Files">
-					<Button variant="ghost" onClick={async () => {
-						// @ts-expect-error - globally defined
-						await window.deleteLix();
-						window.location.reload();
-					}}>
+					<Button
+						variant="ghost"
+						onClick={async () => {
+							// @ts-expect-error - globally defined
+							await window.deleteLix();
+							window.location.reload();
+						}}
+					>
 						Reset
 					</Button>
 					<Button variant="secondary" onClick={() => handleUpload()}>
@@ -85,23 +89,32 @@ export default function Page() {
 			</div>
 			<Separator orientation="vertical" className="h-screen" />
 
-			{
-				fileIdSearchParams && discussionSearchParams &&
+			{fileIdSearchParams && discussionSearchParams && (
 				<div className="flex-1 h-full">
-					<SectionHeader backaction={() => navigate(`/?f=${fileIdSearchParams}`)} title={`Discussion`} />
-						<div className="flex flex-col px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
-							<ConnectedChanges />
-							<div className="flex-1 mt-6">
-								<DiscussionThread />
-							</div>
+					<SectionHeader
+						backaction={() => navigate(`/?f=${fileIdSearchParams}`)}
+						title={`Discussion`}
+					/>
+					<div className="flex flex-col px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
+						<ConnectedChanges />
+						<div className="flex-1 mt-6">
+							<DiscussionThread />
+						</div>
 						<ChatInput />
 					</div>
 				</div>
-			}
-			{
-				fileIdSearchParams && !discussionSearchParams &&
+			)}
+			{fileIdSearchParams && !discussionSearchParams && (
 				<div className="flex-1 h-full">
-					<SectionHeader backaction={() => navigate("/")} title={activeFile?.path.replace("/", "") ? `/ ${activeFile?.path.replace("/", "")}` : "Graph"} />
+					<SectionHeader
+						backaction={() => navigate("/")}
+						title={
+							activeFile?.path.replace("/", "")
+								? `/ ${activeFile?.path.replace("/", "")}`
+								: "Graph"
+						}
+						fileActions={[<VersionDropdown />]}
+					/>
 					<div className="px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
 						<FilterSelect />
 						{changesCurrentVersion.map((change, i) => (
@@ -109,35 +122,46 @@ export default function Page() {
 								key={change.id}
 								change={{
 									...change,
-									snapshot_content: change.snapshot_content as Record<string, any> | null,
-									parent_snapshot_content: change.parent_snapshot_content as Record<string, any> | null,
+									snapshot_content: change.snapshot_content as Record<
+										string,
+										any
+									> | null,
+									parent_snapshot_content:
+										change.parent_snapshot_content as Record<
+											string,
+											any
+										> | null,
+									discussion_count: Number(change.discussion_count),
+									discussion_ids: String(change.discussion_ids),
 								}}
 								showTopLine={i !== 0}
 								showBottomLine={i !== changesCurrentVersion.length - 1}
 							/>
-						))
-						}
-					</div> 
-				</div> 
-			}
-			{
-				!fileIdSearchParams && !discussionSearchParams &&
-				< div className="flex-1 h-full">
+						))}
+					</div>
+				</div>
+			)}
+			{!fileIdSearchParams && !discussionSearchParams && (
+				<div className="flex-1 h-full">
 					<SectionHeader title="Overview" />
 					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
-							{Object.entries(allChangesDynamicGrouping).map(([date, changes], i) => {
+						{Object.entries(allChangesDynamicGrouping).map(
+							([date, changes], i) => {
 								return (
 									<DynamicChangeGroup
 										key={date}
 										changes={changes}
 										showTopLine={i !== 0}
-										showBottomLine={i !== Object.keys(allChangesDynamicGrouping).length - 1}
+										showBottomLine={
+											i !== Object.keys(allChangesDynamicGrouping).length - 1
+										}
 									/>
-								)
-							})}
-					</div> 
-				</div> 
-			}
+								);
+							}
+						)}
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
