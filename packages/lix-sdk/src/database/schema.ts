@@ -4,6 +4,7 @@ import type {
 	ActiveAccountTable,
 } from "../account/database-schema.js";
 import type { KeyValueTable } from "../key-value/database-schema.js";
+import type { MutationLogTable } from "./mutation-log/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -45,6 +46,8 @@ export type LixDatabaseSchema = {
 	// change conflicts
 	change_conflict: ChangeConflictTable;
 	change_conflict_resolution: ChangeConflictResolutionTable;
+
+	mutation_log: MutationLogTable;
 };
 
 export type ChangeQueueEntry = Selectable<ChangeQueueTable>;
@@ -277,4 +280,3 @@ type ChangeConflictResolutionTable = {
 	change_conflict_id: string;
 	resolved_change_id: string;
 };
-

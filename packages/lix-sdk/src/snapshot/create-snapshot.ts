@@ -25,7 +25,7 @@ export async function createSnapshot(args: {
 			.onConflict((oc) =>
 				oc.doUpdateSet((eb) => ({
 					content: eb.ref("excluded.content"),
-				})),
+				}))
 			)
 			.returningAll()
 			.executeTakeFirstOrThrow();

@@ -72,7 +72,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		.values(
 			[mockSnapshots[0]!, mockSnapshots[1]!, mockSnapshots[2]!].map((s) => ({
 				content: s.content,
-			})),
+			}))
 		)
 		.execute();
 
@@ -91,7 +91,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		.values(
 			[mockSnapshots[0]!].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 	await targetLix.db.insertInto("change").values([mockChanges[0]!]).execute();
@@ -110,6 +110,7 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 	const changes = await targetLix.db
 		.selectFrom("change")
 		.select("id")
+		.where("schema_key", "=", "mock")
 		.execute();
 
 	expect(changes.map((c) => c.id)).toStrictEqual([
@@ -123,19 +124,23 @@ test("it should copy changes from the sourceLix into the targetLix that do not e
 		.select("id")
 		.execute();
 
-	expect(snapshots.map((c) => c.id)).toStrictEqual([
-		"no-content",
-		mockSnapshots[0]?.id,
-		mockSnapshots[1]?.id,
-		mockSnapshots[2]?.id,
-	]);
+	expect(snapshots.map((c) => c.id)).toStrictEqual(
+		expect.arrayContaining([
+			"no-content",
+			mockSnapshots[0]?.id,
+			mockSnapshots[1]?.id,
+			mockSnapshots[2]?.id,
+		])
+	);
 
 	const edges = await targetLix.db
 		.selectFrom("change_edge")
 		.selectAll()
 		.execute();
 
-	expect(edges).toEqual(mockEdges);
+	expect(edges).toEqual(
+		expect.arrayContaining([expect.objectContaining(mockEdges[0])])
+	);
 
 	expect(mockPlugin.applyChanges).toHaveBeenCalledTimes(1);
 	// expect(mockPlugin.detectConflicts).toHaveBeenCalledTimes(1);
@@ -205,7 +210,7 @@ test.todo("it should save change conflicts", async () => {
 		.values(
 			[mockSnapshots[0]!, mockSnapshots[2]!].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 
@@ -219,7 +224,7 @@ test.todo("it should save change conflicts", async () => {
 		.values(
 			[mockSnapshots[0]!, mockSnapshots[2]!].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 
@@ -307,7 +312,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 		.values(
 			[...commonSnapshots, ...snapshotsOnlyInSourceLix].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 
@@ -321,7 +326,7 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 		.values(
 			[...commonSnapshots, ...snapshotsOnlyInTargetLix].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 
@@ -384,7 +389,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 				.selectAll()
 				.executeTakeFirstOrThrow();
 			const fileData = new TextEncoder().encode(
-				JSON.stringify(snapshot.content ?? {}),
+				JSON.stringify(snapshot.content ?? {})
 			);
 			return { fileData };
 		},
@@ -405,7 +410,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 		.values(
 			[mockSnapshots[0]!, mockSnapshots[1]!].map((s) => ({
 				content: s.content,
-			})),
+			}))
 		)
 		.execute();
 
@@ -421,7 +426,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 		.values(
 			[mockSnapshots[0]!].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 
@@ -459,7 +464,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 	expect(changes.length).toBe(2);
 	// expect(conflicts.length).toBe(0);
 	expect(file.data).toEqual(
-		new TextEncoder().encode(JSON.stringify(mockSnapshots[1]!.content!)),
+		new TextEncoder().encode(JSON.stringify(mockSnapshots[1]!.content!))
 	);
 });
 
@@ -520,7 +525,7 @@ test.todo(
 			.values(
 				[...commonSnapshots, ...snapshotsOnlyInSourceLix].map((s) => {
 					return { content: s.content };
-				}),
+				})
 			)
 			.execute();
 
@@ -534,7 +539,7 @@ test.todo(
 			.values(
 				[...commonSnapshots, ...snapshotsOnlyInTargetLix].map((s) => {
 					return { content: s.content };
-				}),
+				})
 			)
 			.execute();
 
@@ -581,7 +586,7 @@ test.todo(
 
 		expect(changesAfterSecondMerge.length).toBe(2);
 		// expect(conflictsAfterSecondMerge.length).toBe(1);
-	},
+	}
 );
 
 test("it should naively copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
@@ -625,7 +630,7 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 		.values(
 			snapshotsOnlyInSourceLix.map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 
@@ -636,7 +641,11 @@ test("it should naively copy changes from the sourceLix into the targetLix that 
 
 	await merge({ sourceLix, targetLix });
 
-	const changes = await targetLix.db.selectFrom("change").selectAll().execute();
+	const changes = await targetLix.db
+		.selectFrom("change")
+		.where("schema_key", "=", "mock")
+		.selectAll()
+		.execute();
 
 	expect(changes.length).toBe(1);
 });
@@ -690,29 +699,38 @@ test("it should copy discussion and related comments and mappings", async () => 
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll("change")
+		.where("schema_key", "=", "text")
 		.select("snapshot.content")
 		.execute();
 
-	expect(changes).toEqual([
-		{
-			id: changes[0]?.id,
-			created_at: changes[0]?.created_at,
-			snapshot_id: changes[0]?.snapshot_id,
-			schema_key: "text",
-			file_id: "test",
-			entity_id: "test",
-			plugin_key: "mock-plugin",
-			content: {
-				text: "inserted text",
-			},
-		},
-	]);
+	expect(changes).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				id: changes[0]?.id,
+				created_at: changes[0]?.created_at,
+				snapshot_id: changes[0]?.snapshot_id,
+				schema_key: "text",
+				file_id: "test",
+				entity_id: "test",
+				plugin_key: "mock-plugin",
+				content: {
+					text: "inserted text",
+				},
+			}),
+		])
+	);
+
+	// TODO how do know which author to use for the discussion - we can have multiple active accounts?
+	const currentAuthorLix1 = await lix1.db
+		.selectFrom("active_account")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	await createDiscussion({
 		lix: lix1,
 		changeSet: await createChangeSet({ lix: lix1, changes: [changes[0]!] }),
 		content: "comment on a change",
-		createdBy: { id: "anonymous" },
+		createdBy: { id: currentAuthorLix1.id },
 	});
 
 	await merge({ sourceLix: lix1, targetLix: lix2 });
@@ -729,17 +747,21 @@ test("it should copy discussion and related comments and mappings", async () => 
 	// lix 2 has no comments yet so after lix 1 into 2 we should be in sync
 	expect(commentsLix1).toEqual(commentsLix2AfterMerge);
 
+	const currentAuthorLix2 = await lix1.db
+		.selectFrom("active_account")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 	await createComment({
 		lix: lix2,
 		parentComment: commentsLix2AfterMerge[0]!,
 		content: "wrote in lix 2",
-		createdBy: { id: "anonymous" },
+		createdBy: { id: currentAuthorLix2.id },
 	});
 	await createComment({
 		lix: lix1,
 		parentComment: commentsLix2AfterMerge[0]!,
 		content: "wrote in lix 1",
-		createdBy: { id: "anonymous" },
+		createdBy: { id: currentAuthorLix1.id },
 	});
 
 	const commentsLix1OnSecondMerge = await lix1.db
@@ -756,7 +778,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 
 	// lix should know the ne comment from lix 1 but lix 1 should miss the new comment in lix2
 	expect(commentsLix2AfterSecondMerge.length).toBe(
-		commentsLix1OnSecondMerge.length + 1,
+		commentsLix1OnSecondMerge.length + 1
 	);
 
 	await merge({ sourceLix: lix1, targetLix: lix2 });
@@ -838,11 +860,11 @@ test.skip("it should copy change sets and merge memberships", async () => {
 
 	// expect merger of the change set to contain both changes
 	expect(changeSet1Items.map((item) => item.change_id)).toEqual(
-		expect.arrayContaining([mockChanges[0]?.id, mockChanges[1]?.id]),
+		expect.arrayContaining([mockChanges[0]?.id, mockChanges[1]?.id])
 	);
 
 	// expect the second change set to contain only the second change
 	expect(changeSet2Items.map((item) => item.change_id)).toEqual(
-		expect.arrayContaining([mockChanges[1]?.id]),
+		expect.arrayContaining([mockChanges[1]?.id])
 	);
 });

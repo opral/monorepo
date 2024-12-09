@@ -17,9 +17,16 @@ type AccountSchema = {
 	active_account: ActiveAccountTable;
 };
 
-test("account table should have a default anonymous account", async () => {
+test("account table should have no entry in the beginning and activte account should be an anonymous account", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
+	});
+
+	// the database has the propert definition for the uuid_v7 function
+	sqlite.createFunction("uuid_v7", {
+		arity: 0,
+		deterministic: true,
+		xFunc: () => "mock_uuid_v7",
 	});
 
 	applyAccountDatabaseSchema(sqlite);
@@ -34,35 +41,15 @@ test("account table should have a default anonymous account", async () => {
 		.selectFrom("account")
 		.selectAll()
 		.where("id", "=", "anonymous")
-		.executeTakeFirst();
+		.execute();
+	expect(account?.length).toBe(0);
 
-	expect(account).toMatchObject({
-		id: "anonymous",
-		name: "anonymous",
-	});
-});
-
-test("current_account table default to anonymous on startup", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-
-	applyAccountDatabaseSchema(sqlite);
-
-	const db = new Kysely<AccountSchema>({
-		dialect: createDialect({
-			database: sqlite,
-		}),
-	});
-
-	const account = await db
+	const active_account = await db
 		.selectFrom("active_account")
 		.selectAll()
 		.executeTakeFirst();
 
-	expect(account).toMatchObject({
-		id: "anonymous",
-	});
+	expect(active_account?.id).toBe("anonymous_mock_uuid_v7");
 });
 
 test("account.id should default to uuid_v7", async () => {
@@ -101,6 +88,13 @@ test('it should drop the temp "current_account" table on reboot to not persist t
 		readOnly: false,
 	});
 
+	// the database has the propert definition for the uuid_v7 function
+	sqlite.createFunction("uuid_v7", {
+		arity: 0,
+		deterministic: true,
+		xFunc: () => "mock_uuid_v7",
+	});
+
 	applyAccountDatabaseSchema(sqlite);
 
 	const db = new Kysely<AccountSchema>({
@@ -123,6 +117,7 @@ test('it should drop the temp "current_account" table on reboot to not persist t
 		.insertInto("active_account")
 		.values({
 			id: "test",
+			name: "test",
 		})
 		.execute();
 
@@ -141,6 +136,13 @@ test('it should drop the temp "current_account" table on reboot to not persist t
 
 	const sqlite2 = await loadDatabaseInMemory(blob);
 
+	// the database has the propert definition for the uuid_v7 function
+	sqlite2.createFunction("uuid_v7", {
+		arity: 0,
+		deterministic: true,
+		xFunc: () => "mock_uuid_v7-2",
+	});
+
 	applyAccountDatabaseSchema(sqlite2);
 
 	const db2 = new Kysely<AccountSchema>({
@@ -155,6 +157,6 @@ test('it should drop the temp "current_account" table on reboot to not persist t
 		.executeTakeFirst();
 
 	expect(account2).toMatchObject({
-		id: "anonymous",
+		id: "anonymous_mock_uuid_v7-2",
 	});
 });

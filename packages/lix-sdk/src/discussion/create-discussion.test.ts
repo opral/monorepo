@@ -40,6 +40,11 @@ test("should be able to start a discussion on changes", async () => {
 
 	await changeQueueSettled({ lix });
 
+	const current_author = await lix.db
+		.selectFrom("active_account")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	const changes = await lix.db
 		.selectFrom("change")
 		.selectAll("change")
@@ -50,7 +55,7 @@ test("should be able to start a discussion on changes", async () => {
 			lix: { db: trx },
 			changeSet: await createChangeSet({ lix: { db: trx }, changes }),
 			content: "comment on a change",
-			createdBy: { id: "anonymous" },
+			createdBy: { id: current_author.id },
 		});
 	});
 

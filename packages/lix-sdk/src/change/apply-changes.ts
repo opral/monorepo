@@ -1,6 +1,7 @@
 import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
 import type { Change } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import { applyOwnEntityChanges } from "../own-entity-change-control/apply-own-entity-change.js";
 
 /**
  * Applies the given changes to the lix.
@@ -21,13 +22,13 @@ import type { Lix } from "../lix/open-lix.js";
  *   ```
  */
 export async function applyChanges(args: {
-	lix: Lix;
+	lix: Pick<Lix, "db" | "plugin">;
 	changes: Change[];
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const groupByFile = Object.groupBy(
 			args.changes,
-			(change) => change.file_id,
+			(change) => change.file_id
 		);
 
 		const plugins = await args.lix.plugin.getAll();
@@ -35,13 +36,20 @@ export async function applyChanges(args: {
 		// TODO make detection of which plugin to use easier
 		// https://linear.app/opral/issue/LIXDK-104/add-detectedchangeschema
 		for (const [fileId, changes] of Object.entries(groupByFile)) {
-			if (changes === undefined) {
+			if (changes === undefined || changes.length === 0) {
+				continue;
+			}
+			// Skip own entity changes which have a file id 'null' and
+			// plugin key 'lix_own_entity' as they are not associated with a file
+			if (fileId === "null" && changes[0]?.plugin_key === "lix_own_entity") {
+				await applyOwnEntityChanges({ lix: { ...args.lix, db: trx }, changes });
 				continue;
 			}
 
 			const groupByPlugin = Object.groupBy(changes, (c) => c.plugin_key);
 
 			// TODO assumes that a file exists which is not necessarily true
+			// https://github.com/opral/lix-sdk/issues/181
 			const file = await trx
 				.selectFrom("file")
 				.where("id", "=", fileId)
@@ -57,7 +65,7 @@ export async function applyChanges(args: {
 					throw new Error(`Plugin with key ${pluginKey} not found`);
 				} else if (!plugin.applyChanges) {
 					throw new Error(
-						`Plugin with key ${pluginKey} does not support applying changes`,
+						`Plugin with key ${pluginKey} does not support applying changes`
 					);
 				}
 				const { fileData } = await plugin.applyChanges({

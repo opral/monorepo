@@ -40,7 +40,7 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 					column: updateItem.column,
 					value: this.transformValue(
 						// @ts-expect-error - type mismatch
-						updateItem.value,
+						updateItem.value
 					),
 				};
 			}),
@@ -97,7 +97,7 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 							({
 								kind: "ValueNode",
 								value,
-							}) as ValueNode,
+							}) as ValueNode
 					),
 				} as ValueListNode;
 			}),

@@ -99,7 +99,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 		.values(
 			[...commonSnapshots, ...snapshotsOnlyInTarget].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 
@@ -118,7 +118,7 @@ test("it should get the leaf changes that only exist in source", async () => {
 		.values(
 			[...commonSnapshots, ...snapshotsOnlyInSource].map((s) => {
 				return { content: s.content };
-			}),
+			})
 		)
 		.execute();
 

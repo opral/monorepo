@@ -1,6 +1,6 @@
 import type { Change, ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
-import { applyChanges } from "../plugin/apply-changes.js";
+import { applyChanges } from "../change/apply-changes.js";
 import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 
 /**
@@ -34,12 +34,12 @@ export async function resolveChangeConflictBySelecting(args: {
 			.innerJoin(
 				"version_change_conflict",
 				"version_change_conflict.version_id",
-				"version.id",
+				"version.id"
 			)
 			.where(
 				"version_change_conflict.change_conflict_id",
 				"=",
-				args.conflict.id,
+				args.conflict.id
 			)
 			.selectAll()
 			.execute();

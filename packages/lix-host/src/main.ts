@@ -1,17 +1,22 @@
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
-import { createLspHandler, createLspHandlerMemoryStorage } from "@lix-js/sdk";
+import {
+	createServerApiHandler,
+	createServerApiMemoryStorage,
+} from "@lix-js/sdk";
+import { cors } from "hono/cors";
 
 const app = new Hono();
 
-const lspHandler = await createLspHandler({
-	storage: createLspHandlerMemoryStorage(),
+const lsaHandler = await createServerApiHandler({
+	storage: createServerApiMemoryStorage(),
 });
 
 app.get("/", (c) => c.text("Lix host server"));
 
+app.use("/lsa/*", cors());
 // @ts-expect-error - Hono provides a subset of the Request object
-app.use("/lsp/*", (c) => lspHandler(c.req));
+app.use("/lsa/*", (c) => lsaHandler(c.req));
 
 serve({
 	fetch: app.fetch,

@@ -16,7 +16,7 @@ export async function changeQueueSettled(args: {
 	while (hasEntries) {
 		const entries = await args.lix.db
 			.selectFrom("change_queue")
-			.select("id")
+			.selectAll()
 			.limit(1)
 			.execute();
 

@@ -1,16 +1,19 @@
 import type { Storage } from "./storage/storage.js";
-import { route as newRoute } from "./routes/new.js";
-import { route as lixQueryRoute } from "./routes/lix/{id}/query.js";
+import { route as newRoute } from "./routes/new-v1.js";
+import { route as syncPushRouteV1 } from "./routes/push-v1.js";
+import { route as syncPullRouteV1 } from "./routes/pull-v1.js";
 
-export type LspHandler = (request: Request) => Promise<Response>;
+export type LixServerApiHandler = (request: Request) => Promise<Response>;
 
-export type LspHandlerContext = {
+export type LixServerApiHandlerContext = {
 	request: Request;
 	storage: Storage;
 	params?: Record<string, string | undefined>;
 };
 
-export type LspRouteHandler = (context: LspHandlerContext) => Promise<Response>;
+export type LixServerApiHandlerRoute = (
+	context: LixServerApiHandlerContext
+) => Promise<Response>;
 
 /**
  * The handler for the lix server protocol.
@@ -26,10 +29,10 @@ export type LspRouteHandler = (context: LspHandlerContext) => Promise<Response>;
  *   // objects will need to be mapped.
  *   const app = new Hono();
  *
- *   const lsp = createLspHandler({ storage });
+ *   const lsaHandler = createServerApiHandler({ storage });
  *
  *   app.use('/lsp/*', async (req) => {
- *      await lsp(req);
+ *      await lsaHandler(req);
  *   });
  *   ```
  *
@@ -37,39 +40,38 @@ export type LspRouteHandler = (context: LspHandlerContext) => Promise<Response>;
  *   Testing the handler.
  *
  *   ```ts
- *   const lsp = createLspHandler({ storage });
+ *   const lsaHandler = createServerApiHandler({ storage });
  *   const request = new Request('/lsp/new', {
  *     method: 'POST',
  *     body: new Blob(['...']),
  *   });
  *
- *   const response = await lsp(request);
+ *   const response = await lsaHandler(request);
  *
  *   expect(response).to(...);
  *   ```
  */
-export async function createLspHandler(args: {
+export async function createServerApiHandler(args: {
 	storage: Storage;
-}): Promise<LspHandler> {
+}): Promise<LixServerApiHandler> {
 	const context = { storage: args.storage };
 
 	return async (request) => {
 		try {
 			const path = new URL(request.url).pathname;
-			if (path === "/lsp/new") {
+			if (path === "/lsa/new-v1") {
 				return newRoute({ ...context, request });
 			}
-			// /lsp/lix/{id}/query
-			else if (path.match(/\/lsp\/lix\/[^/]+\/query/)) {
-				const id = path.split("/")[3]!;
-				return lixQueryRoute({
-					...context,
-					request,
-					params: { id },
-				});
+			if (path === "/lsa/push-v1") {
+				return syncPushRouteV1({ ...context, request });
 			}
+			if (path === "/lsa/pull-v1") {
+				return syncPullRouteV1({ ...context, request });
+			}
+
 			return Response.error();
 		} catch (error) {
+			console.error(error);
 			return new Response(error as string, {
 				status: 500,
 			});

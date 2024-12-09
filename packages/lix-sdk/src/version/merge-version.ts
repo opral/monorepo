@@ -16,8 +16,8 @@ export async function mergeVersion(args: {
 			.where(
 				versionChangeInSymmetricDifference(
 					args.sourceVersion,
-					args.targetVersion,
-				),
+					args.targetVersion
+				)
 			)
 			.selectAll("change")
 			.execute();
@@ -29,7 +29,7 @@ export async function mergeVersion(args: {
 
 		for (const change of symmetricDifference) {
 			const hasConflict = detectedConflicts.find((conflict) =>
-				conflict.conflictingChangeIds.has(change.id),
+				conflict.conflictingChangeIds.has(change.id)
 			);
 
 			const existingTargetChange = await trx

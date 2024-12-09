@@ -56,8 +56,8 @@ export async function merge(args: {
 			.filter((sourceChange) =>
 				conflicts.every(
 					(conflict) =>
-						conflict.conflictingChangeIds.has(sourceChange.id) === false,
-				),
+						conflict.conflictingChangeIds.has(sourceChange.id) === false
+				)
 			)
 			.filter((c) => c.file_id === fileId);
 
@@ -152,7 +152,7 @@ export async function merge(args: {
 					// https://github.com/opral/inlang-message-sdk/issues/123
 					sourceChangesWithSnapshot.map((change) => ({
 						content: change.content,
-					})),
+					}))
 				)
 				// ignore if already exists
 				.onConflict((oc) => oc.doNothing())
@@ -164,7 +164,7 @@ export async function merge(args: {
 					sourceChangesWithSnapshot.map((c) => ({
 						...c,
 						content: undefined,
-					})),
+					}))
 				)
 				// ignore if already exists
 				.onConflict((oc) => oc.doNothing())

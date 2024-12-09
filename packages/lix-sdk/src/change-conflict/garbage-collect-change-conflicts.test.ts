@@ -84,7 +84,7 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 		.innerJoin(
 			"change_conflict",
 			"change_conflict.change_set_id",
-			"change_set_element.change_set_id",
+			"change_set_element.change_set_id"
 		)
 		.selectAll()
 		.execute();
@@ -101,7 +101,7 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 
 	expect(remainingVersionChangeConflictPointers.length).toBe(1);
 	expect(remainingVersionChangeConflictPointers[0]?.change_conflict_id).toBe(
-		mockConflict0.id,
+		mockConflict0.id
 	);
 });
 

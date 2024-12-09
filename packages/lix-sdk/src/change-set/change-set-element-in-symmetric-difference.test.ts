@@ -50,9 +50,15 @@ test("should return the symmetric difference between two change sets", async () 
 
 	expect(result).toEqual([
 		// change 1 is in A but not in B
-		{ change_set_id: "changeSetA", change_id: "change1" },
+		expect.objectContaining({
+			change_set_id: "changeSetA",
+			change_id: "change1",
+		}),
 		// change 3 is in B but not in A
-		{ change_set_id: "changeSetB", change_id: "change3" },
+		expect.objectContaining({
+			change_set_id: "changeSetB",
+			change_id: "change3",
+		}),
 		// change 4 is in neither A nor B
 		// hence not in the symmetric difference
 	]);

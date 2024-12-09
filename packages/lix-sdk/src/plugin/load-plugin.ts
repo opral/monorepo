@@ -3,7 +3,7 @@ import type { LixPlugin } from "./lix-plugin.js";
 import { Kysely, sql } from "kysely";
 
 export async function loadPlugins(
-	db: Kysely<LixDatabaseSchema>,
+	db: Kysely<LixDatabaseSchema>
 ): Promise<LixPlugin[]> {
 	const pluginFiles = (
 		await sql`

@@ -18,7 +18,7 @@ function deepSortObject(obj: Record<string, unknown>): any {
 		return obj.map((item) =>
 			typeof item === "object" && item !== null
 				? deepSortObject(item as Record<string, unknown>)
-				: item,
+				: item
 		);
 	} else if (typeof obj === "object" && obj !== null) {
 		return Object.keys(obj)
@@ -28,7 +28,7 @@ function deepSortObject(obj: Record<string, unknown>): any {
 					acc[key] = deepSortObject(obj[key] as Record<string, unknown>);
 					return acc;
 				},
-				{} as Record<string, unknown>,
+				{} as Record<string, unknown>
 			);
 	}
 	return obj;

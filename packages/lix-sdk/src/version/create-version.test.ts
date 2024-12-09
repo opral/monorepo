@@ -144,6 +144,6 @@ test("it should copy change conflict pointers from the parent version", async ()
 
 	expect(version2Conflicts.length).toBe(1);
 	expect(version2Conflicts[0]?.change_conflict_id).toBe(
-		version0Conflicts[0]?.change_conflict_id,
+		version0Conflicts[0]?.change_conflict_id
 	);
 });
