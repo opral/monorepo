@@ -38,10 +38,9 @@ export async function lixCsvDemoFile(): Promise<Blob> {
 				id: DEMO_CAP_TABLE_CSV_FILE_ID,
 				path: "/cap-table-example.csv",
 				data: new TextEncoder().encode(captableCsv),
-				// @ts-expect-error - insert expects stringified json
-				metadata: JSON.stringify({
+				metadata: {
 					unique_column: "Stakeholder",
-				}),
+				},
 			})
 			.execute();
 
@@ -51,10 +50,9 @@ export async function lixCsvDemoFile(): Promise<Blob> {
 				id: DEMO_EMAIL_NEWSLETTER_CSV_FILE_ID,
 				path: "/email-newsletter.csv",
 				data: new TextEncoder().encode(emailNewsletterCsv),
-				// @ts-expect-error - insert expects stringified json
-				metadata: JSON.stringify({
+				metadata: {
 					unique_column: "email",
-				}),
+				},
 			})
 			.execute();
 	}

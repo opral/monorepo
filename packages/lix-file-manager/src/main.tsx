@@ -14,7 +14,13 @@ const router = createBrowserRouter(
 				<App>{route.element} </App>
 			</Suspense>
 		),
-	}))
+	})),
+	{
+		// in case the app is running one lix origin
+		basename: window.location.pathname.startsWith("/app/fm")
+			? "/app/fm"
+			: undefined,
+	}
 );
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

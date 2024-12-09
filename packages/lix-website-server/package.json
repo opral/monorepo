@@ -1,0 +1,23 @@
+{
+  "name": "lix-website-server",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "node --experimental-strip-types --watch ./src/main.ts",
+    "production": "node --experimental-strip-types ./src/main.ts",
+    "test": "tsc --noEmit",
+    "lint": "eslint ./src --fix",
+    "format": "prettier ./src --write",
+    "clean": "rm -rf ./dist ./node_modules"
+  },
+  "dependencies": {
+    "csv-app": "workspace:*",
+    "lix-file-manager": "workspace:*"
+  },
+  "devDependencies": {
+    "express": "^4.21.1",
+    "prettier": "^3.4.1",
+    "typescript": "^5.5.2"
+  },
+  "license": "Apache-2.0"
+}

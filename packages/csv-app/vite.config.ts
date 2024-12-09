@@ -7,10 +7,14 @@ export default defineConfig({
 	plugins: [react(), tailwindcss()],
 	envPrefix: "PUBLIC_",
 	server: {
+		port: 3008,
 		headers: {
 			"Cross-Origin-Opener-Policy": "*",
 			"Cross-Origin-Embedder-Policy": "*",
 		},
+	},
+	preview: {
+		port: 3008,
 	},
 	build: {
 		target: "es2022",
