@@ -257,3 +257,40 @@ test("should throw an error if authors array is empty", async () => {
 		})
 	).rejects.toThrow("At least one author is required");
 });
+
+test("option to create a change without updating the version changes", async () => {
+	const lix = await openLixInMemory({});
+
+	const version0 = await createVersion({ lix, name: "version0" });
+
+	const author = await createAccount({
+		lix,
+		name: "author",
+	});
+
+	const change = await createChange(
+		{
+			lix,
+			version: version0,
+			authors: [author],
+			entityId: "entity1",
+			fileId: "file1",
+			pluginKey: "plugin1",
+			schemaKey: "schema1",
+			snapshotContent: { text: "snapshot-content" },
+		},
+		{
+			updateVersionChanges: false,
+		}
+	);
+
+	const versionChanges = await lix.db
+		.selectFrom("version_change")
+		.where("version_change.version_id", "=", version0.id)
+		.selectAll()
+		.execute();
+
+	expect(
+		versionChanges.find((vc) => vc.change_id === change.id)
+	).toBeUndefined();
+});

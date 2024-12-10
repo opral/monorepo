@@ -10,6 +10,7 @@ export const changeControlledTableIds = {
 	file: ["id"],
 	key_value: ["key"],
 	version: ["id"],
+	version_change: ["version_id", "change_id"],
 } as const;
 
 //
