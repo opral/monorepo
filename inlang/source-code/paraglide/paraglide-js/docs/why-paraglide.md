@@ -10,11 +10,11 @@
 </doc-features>
 
 
-With Paraglide's treeshakeable messages, each page only loads the messages it actually uses. Incremental loading like this would usually take forever to get right, with Paraglide you get it for free.
+With Paraglide's treeshakeable messages, each page only bundles the messages it actually uses with the exception that Paraglide JS loads all languages till [#88](https://github.com/opral/inlang-paraglide-js/issues/88) is solved. The inflection point of only bundling the used messages but for all languages is around 10-20 languages, dependent on the number of messages used. Read [scaling](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/scaling) for more information. 
 
 # Use it with your Favorite Framework
 
-Paraglide is framework agnostic, but there are framework-specific libraries available. If there is one for your framework you will want to follow its documentation instead. If there isn't, read on.
+Paraglide is framework agnostic, but there are framework-specific adapters available. 
 
 <doc-links>
 	<doc-link title="Paraglide-Next" icon="tabler:brand-nextjs" href="/m/osslbuzt/paraglide-next-i18n" description="Go to Library"></doc-link>

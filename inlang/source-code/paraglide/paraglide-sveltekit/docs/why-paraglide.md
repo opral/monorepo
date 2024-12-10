@@ -8,7 +8,7 @@
 
 `@inlang/paraglide-sveltekit` is the easiest way to internationalize your SvelteKit Project. It handles string translations, i18n routing and more! 	
 
-Thanks to Paraglide's Treeshakeable messages only messages that are _used_ on the _current page_ are part of the JS bundle. This results in the smallest size. They're also fully typesafe.
+Thanks to Paraglide's Treeshakeable messages only messages that are _used_ on the _current page_ are part of the JS bundle. This results in the smallest size with the exception that Paraglide JS loads all languages till [#88](https://github.com/opral/inlang-paraglide-js/issues/88) is solved. The inflection point of only bundling the used messages but for all languages is around 10-20 languages, dependent on the number of messages used. Read [scaling](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/scaling) for more information. 
 
 Paraglide-SvelteKit offers Localised routing with translated pathnames, without requiring a `[locale]` parameter in your routes.	
 
