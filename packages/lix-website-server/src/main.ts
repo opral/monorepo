@@ -50,7 +50,7 @@ const lixApps = [
   },
 ];
 
-lixApps.forEach((lixApp) => {
+for (const lixApp of lixApps) {
   app.use(
     `/app/${lixApp.route}`,
     express.static(`${node_modules}/${lixApp.module}/dist`)
@@ -63,7 +63,7 @@ lixApps.forEach((lixApp) => {
       res.status(404).send("File not found");
     }
   });
-});
+};
 
 // Fallback route for undefined routes
 app.get("*", (req, res) => {
