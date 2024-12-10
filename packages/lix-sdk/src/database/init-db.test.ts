@@ -5,6 +5,8 @@ import { validate } from "uuid";
 import { mockChange } from "../change/mock-change.js";
 import { jsonSha256 } from "../snapshot/json-sha-256.js";
 import { sql } from "kysely";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 
 test("file ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
@@ -444,4 +446,39 @@ test("mutation should only be recorded if sync row is not present", async () => 
 	// 	await sql`select lix_session() as session, lix_session_clock_tick() as time`.execute(
 	// 		db
 	// 	);
+});
+
+test("deleting a version cascades to version changes", async () => {
+	const lix = await openLixInMemory({});
+	const version = await lix.db
+		.insertInto("version")
+		.values({ name: "mock" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const changes = await lix.db
+		.insertInto("change")
+		.values(
+			mockChange({
+				entity_id: `mock`,
+			})
+		)
+		.returningAll()
+		.execute();
+
+	await updateChangesInVersion({
+		lix,
+		version,
+		changes,
+	});
+
+	await lix.db.deleteFrom("version").where("id", "=", version.id).execute();
+
+	const versionChangesAfterDelete = await lix.db
+		.selectFrom("version_change")
+		.where("version_change.version_id", "=", version.id)
+		.selectAll()
+		.execute();
+
+	expect(versionChangesAfterDelete).toHaveLength(0);
 });
