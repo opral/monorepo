@@ -171,7 +171,7 @@ function SyncButton() {
 					await lix.db
 						.insertInto("key_value")
 						.values({
-							key: "lix-experimental-server-url",
+							key: "lix_experimental_server_url",
 							value: "http://localhost:3000",
 						})
 						.execute();
@@ -194,7 +194,7 @@ function SyncStatus(props: { serverUrl: string; lix: Lix }) {
 			onClick={() => {
 				props.lix.db
 					.deleteFrom("key_value")
-					.where("key", "=", "lix-experimental-server-url")
+					.where("key", "=", "lix_experimental_server_url")
 					.execute();
 			}}
 			onMouseEnter={() => setIsHovered(true)}

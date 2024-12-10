@@ -12,7 +12,7 @@ paths:
         description: The lix binary.
         required: true
         content:
-          application/binary:
+          application/octet-stream:
             schema:
               format: binary
 
@@ -52,6 +52,41 @@ paths:
                     type: string
                     description: Error message.
                     example: "Lix file already exists."
+
+  /lsa/get-v1:
+    post:
+      summary: Get the lix from the server.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lix_id
+              properties:
+                lix_id:
+                  type: string
+                  description: The ID of the lix to get.
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Lix file fetched successfully.
+          content:
+            application/octet-stream:
+              schema:
+                format: binary
+        '404':
+          description: Lix file not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: "Lix file not found."
 
   /lsa/push-v1:
     post: 

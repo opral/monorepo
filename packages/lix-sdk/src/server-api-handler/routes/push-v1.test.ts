@@ -10,7 +10,7 @@ test("it should push data successfully", async () => {
 	const lix = await openLixInMemory({});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -118,7 +118,7 @@ test("it should return 400 for a failed insert operation", async () => {
 	const lix = await openLixInMemory({});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 

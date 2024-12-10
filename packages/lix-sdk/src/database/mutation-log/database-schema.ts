@@ -9,6 +9,7 @@ export const tablesByDepencies: string[] = [
 	"account",
 	"file",
 	"change_set",
+	"key_value",
 	// Depends on: snapshot
 	"change",
 

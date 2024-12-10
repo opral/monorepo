@@ -1,7 +1,8 @@
 import type { Storage } from "./storage/storage.js";
-import { route as newRoute } from "./routes/new-v1.js";
-import { route as syncPushRouteV1 } from "./routes/push-v1.js";
-import { route as syncPullRouteV1 } from "./routes/pull-v1.js";
+import { route as newRouteV1 } from "./routes/new-v1.js";
+import { route as pushRouteV1 } from "./routes/push-v1.js";
+import { route as pullRouteV1 } from "./routes/pull-v1.js";
+import { route as getRouteV1 } from "./routes/get-v1.js";
 
 export type LixServerApiHandler = (request: Request) => Promise<Response>;
 
@@ -59,14 +60,17 @@ export async function createServerApiHandler(args: {
 	return async (request) => {
 		try {
 			const path = new URL(request.url).pathname;
+			if (path === "/lsa/get-v1") {
+				return getRouteV1({ ...context, request });
+			}
 			if (path === "/lsa/new-v1") {
-				return newRoute({ ...context, request });
+				return newRouteV1({ ...context, request });
 			}
 			if (path === "/lsa/push-v1") {
-				return syncPushRouteV1({ ...context, request });
+				return pushRouteV1({ ...context, request });
 			}
 			if (path === "/lsa/pull-v1") {
-				return syncPullRouteV1({ ...context, request });
+				return pullRouteV1({ ...context, request });
 			}
 
 			return Response.error();

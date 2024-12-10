@@ -12,7 +12,7 @@ test("pull rows of multiple tables from server successfully and applies them", a
 
 	const { value: id } = await lixOnServer.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -76,7 +76,7 @@ test("it handles snapshot.content being json binary", async () => {
 
 	const { value: id } = await lixOnServer.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -129,7 +129,7 @@ test("rows changed on the client more recently should not be updated", async () 
 
 	const lixId = await lixOnServer.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -243,7 +243,7 @@ test.skip("rows changed on the server more recently should be updated on the cli
 
 	const { value: id } = await localLix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -286,7 +286,7 @@ test.skip("rows changed on the server more recently should be updated on the cli
 
 // 	const { value: id } = await lix.db
 // 		.selectFrom("key_value")
-// 		.where("key", "=", "lix-id")
+// 		.where("key", "=", "lix_id")
 // 		.selectAll()
 // 		.executeTakeFirstOrThrow();
 
@@ -338,7 +338,7 @@ test("non-conflicting changes from another client should for the same version sh
 
 	const lixId = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 

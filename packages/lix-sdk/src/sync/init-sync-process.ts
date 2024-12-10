@@ -12,7 +12,7 @@ export async function initSyncProcess(args: {
 > {
 	const lixId = await args.lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix-id")
+		.where("key", "=", "lix_id")
 		.select("value")
 		.executeTakeFirstOrThrow();
 
@@ -22,7 +22,7 @@ export async function initSyncProcess(args: {
 		const url = await args.lix.db
 			.selectFrom("key_value")
 			// saved in key value because simpler for experimentation
-			.where("key", "=", "lix-experimental-server-url")
+			.where("key", "=", "lix_experimental_server_url")
 			.select("value")
 			.executeTakeFirst();
 		// if you want to test sync, restart the lix app
