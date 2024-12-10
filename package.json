@@ -20,6 +20,8 @@
   "devDependencies": {
     "@changesets/cli": "^2.27.7",
     "nx": "18.3.3",
-    "nx-cloud": "16.5.2"
+    "nx-cloud": "16.5.2",
+    "vitest": "^2.1.8",
+    "@vitest/coverage-v8": "^2.0.5"
   }
 }
