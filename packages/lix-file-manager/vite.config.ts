@@ -1,23 +1,19 @@
-import { defineConfig } from "vite"
-import react from "@vitejs/plugin-react"
-import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-	plugins: [react(), tailwindcss()],
+	plugins: [react()],
 	envPrefix: "PUBLIC_",
 	server: {
-		port: 3008,
+		port: 3007,
 		headers: {
 			"Cross-Origin-Opener-Policy": "*",
 			"Cross-Origin-Embedder-Policy": "*",
 		},
 	},
 	preview: {
-		port: 3008,
-	},
-	build: {
-		target: "es2022",
+		port: 3007,
 	},
 	optimizeDeps: {
 		exclude: [
@@ -25,5 +21,13 @@ export default defineConfig({
 			"@sqlite.org/sqlite-wasm",
 			"@eliaspourquoi/sqlite-node-wasm",
 		],
+	},
+	resolve: {
+		alias: {
+			"@": "/src",
+		},
+	},
+	build: {
+		target: "esnext",
 	},
 });
