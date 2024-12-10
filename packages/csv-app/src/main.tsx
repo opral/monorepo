@@ -17,7 +17,13 @@ const router = createBrowserRouter(
 		// errors that "A component is async but wasn't wrapped in Suspense"
 		// The error is irrelevant for the demo. A 1ms white screen is OK.
 		element: <Suspense fallback={null}>{route.element}</Suspense>,
-	}))
+	})),
+	{
+		// in case the app is running one lix origin
+		basename: window.location.pathname.startsWith("/app/csv")
+			? "/app/csv"
+			: undefined,
+	}
 );
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

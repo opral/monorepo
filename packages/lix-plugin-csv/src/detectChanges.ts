@@ -1,8 +1,10 @@
+ 
 import type { DetectedChange, LixPlugin } from "@lix-js/sdk";
 import { CellSchemaV1 } from "./schemas/cell.js";
 import { HeaderSchemaV1 } from "./schemas/header.js";
 import { parseCsv } from "./utilities/parseCsv.js";
 import { RowSchemaV1 } from "./schemas/row.js";
+import { parseCsvFields } from "./utilities/parseCsvFields.js";
 
 function toEntityId(rowId: string, columnName: string) {
 	// row id already is <unique column>|<unique value>
@@ -18,11 +20,16 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 }) => {
 	// heuristic can be improved later by deriving a unique column
 	const uniqueColumnBefore = before?.metadata?.unique_column;
-	const uniqueColumnAfter = after?.metadata?.unique_column;
+	let uniqueColumnAfter = after?.metadata?.unique_column;
 
 	if (uniqueColumnBefore === undefined && uniqueColumnAfter === undefined) {
-		console.warn("The unique_column metadata is required to detect changes");
-		return [];
+		const fallbackUniqueColumn = parseCsvFields(after?.data)?.at(0);
+		if (!fallbackUniqueColumn) {
+			console.warn("The unique_column metadata is required to detect changes");
+			return [];
+		}
+		console.warn(`The unique_column metadata is required to detect changes, fallback ${fallbackUniqueColumn}`);
+		uniqueColumnAfter = fallbackUniqueColumn;
 	}
 
 	const detectedChanges: DetectedChange<
@@ -62,6 +69,8 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		const rowLineNumberBefore = beforeParsed.lineNumbers[rowId];
 		const rowLineNumberAfter = afterParsed.lineNumbers[rowId];
 
+		
+
 		if (rowLineNumberBefore !== rowLineNumberAfter) {
 			detectedChanges.push({
 				schema: RowSchemaV1,
@@ -83,7 +92,6 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		for (const column of allColumns) {
 			const beforeCell = beforeRow[column];
 			const afterCell = afterRow[column];
-
 			const entity_id = toEntityId(rowId, column);
 
 			// Cell exists in both datasets -> check for update
