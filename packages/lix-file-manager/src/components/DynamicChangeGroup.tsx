@@ -29,9 +29,9 @@ export const DynamicChangeGroup = (props: {changes: (Change & {snapshot_content:
 		>
 			<ChangeGroupDot top={props.showTopLine} bottom={props.showBottomLine} />
 			<div className="flex-1">
-				<div className="h-[68px] flex items-center w-full">
-					<div className="flex-1 flex flex-col">
-							<div>
+					<div className="h-[68px] flex items-start w-full">
+						<div className="flex-1 flex flex-col pt-2.5">
+							<div className="flex flex-wrap gap-1">
 								{getUniqueFiles(props.changes).map((change) =>
 									<Button key={change.file_id} onClick={() => handlePathClicked(change.file_id)} variant="secondary" size="sm" className="w-fit">{change.file_path}</Button>
 								)}
@@ -40,7 +40,7 @@ export const DynamicChangeGroup = (props: {changes: (Change & {snapshot_content:
 								{timeAgo(props.changes[0].created_at)}{" - "}{props.changes.length}{" changes"}
 							</p>
 					</div>
-					<div className="flex gap-2 items-center pr-2">
+						<div className="pt-1.5 pr-2 self-start">
 							<TooltipProvider>
 								<Tooltip>
 									<TooltipTrigger>
