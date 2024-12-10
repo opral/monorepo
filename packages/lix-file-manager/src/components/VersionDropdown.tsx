@@ -17,14 +17,7 @@ import {
 } from "@/components/ui/dialog.js";
 import IconBranch from "@/components/icons/IconBranch.js";
 import { currentVersionAtom, existingVersionsAtom, lixAtom } from "../state.js";
-import {
-	Version,
-	applyChanges,
-	changeIsLeafInVersion,
-	createVersion,
-	switchVersion,
-	withSkipOwnChangeControl,
-} from "@lix-js/sdk";
+import { Version, createVersion, switchVersion } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.js";
 import { humanId } from "human-id";
 import { Plus, Check, Trash2 } from "lucide-react";
@@ -41,25 +34,7 @@ export function VersionDropdown() {
 		async (version: Version) => {
 			if (!lix) return;
 
-			await lix.db.transaction().execute(async (trx) => {
-				await withSkipOwnChangeControl(trx, async (trx) => {
-					await switchVersion({ lix: { ...lix, db: trx }, to: version });
-
-					const changesOfVersion = await trx
-						.selectFrom("change")
-						.where(changeIsLeafInVersion(version))
-						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-						.selectAll("change")
-						.select("snapshot.content")
-						.execute();
-
-					await applyChanges({
-						lix: { ...lix, db: trx },
-						changes: changesOfVersion,
-					});
-				});
-			});
-
+			await switchVersion({ lix, to: version });
 			await saveLixToOpfs({ lix });
 		},
 		[lix]
