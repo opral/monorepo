@@ -17,6 +17,7 @@
 		"hono": "^4.6.11"
 	},
 	"devDependencies": {
+		"@types/node": "^22.10.1",
 		"prettier": "^3.3.3",
 		"typescript": "^5.7.2"
 	}
