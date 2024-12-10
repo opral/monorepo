@@ -328,7 +328,7 @@ test.skip("rows changed on the server more recently should be updated on the cli
 // 	]);
 // });
 
-test("non-conflicting changes from another client should for the same version should be applied", async () => {
+test("non-conflicting changes from the server should for the same version should be applied", async () => {
 	const lix = await openLixInMemory({});
 
 	const currentVersion = await lix.db

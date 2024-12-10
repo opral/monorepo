@@ -2,7 +2,7 @@ import type { Lix } from "../lix/open-lix.js";
 import * as LixServerApi from "@lix-js/server-api-schema";
 import { mergeTheirState, type VectorClock } from "./merge-state.js";
 import { applyChanges } from "../change/apply-changes.js";
-import type { Change, VersionChange } from "../database/schema.js";
+import type { Change } from "../database/schema.js";
 import { withSkipOwnChangeControl } from "../own-entity-change-control/with-skip-own-change-control.js";
 import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
 
@@ -56,14 +56,30 @@ export async function pullFromServer(args: {
 			.select("id")
 			.executeTakeFirstOrThrow();
 
-		const currentVersionChanges = (
-			(data["version_change"] ?? []) as VersionChange[]
-		).filter((vc) => vc.version_id === currentVersion.id);
+		// retrieve the version change updates from the changes
+		const currentVersionChanges = ((data["change"] ?? []) as Change[]).filter(
+			(change) => {
+				// retrieve the version id from the composite entity id
+				const [versionId] = change.entity_id.split(",") as [string, string];
+				return (
+					change.schema_key === "lix_version_change_table" &&
+					versionId === currentVersion.id
+				);
+			}
+		);
 
 		// only apply changes that are part of the current version
-		const changesToApply = changes.filter((c) =>
-			currentVersionChanges.some((vc) => vc.change_id === c.id)
-		);
+		const changesToApply = changes
+			// by getting the changes for the version (exlcuding the version change pointers)
+			.filter((c) =>
+				currentVersionChanges.some((vc) => {
+					// retrieve the change id from the composite entity id
+					const [, changeId] = vc.entity_id.split(",") as [string, string];
+					return changeId === c.id;
+				})
+			)
+			// and concat the current version change pointers
+			.concat(currentVersionChanges);
 
 		await mergeTheirState({
 			lix: { ...args.lix, db: trx },
