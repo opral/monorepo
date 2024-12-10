@@ -159,14 +159,19 @@ function handleLixOwnEntityChange(
 
 	const entityId = entityIdForRow(tableName, ...values);
 
-	createChange({
-		lix,
-		authors: authors,
-		version: currentVersion,
-		entityId,
-		fileId: "null",
-		pluginKey: "lix_own_entity",
-		schemaKey: `lix_${tableName}_table`,
-		snapshotContent,
-	});
+	createChange(
+		{
+			lix,
+			authors: authors,
+			version: currentVersion,
+			entityId,
+			fileId: "null",
+			pluginKey: "lix_own_entity",
+			schemaKey: `lix_${tableName}_table`,
+			snapshotContent,
+		},
+		{
+			updateVersionChanges: tableName === "version_change" ? false : true,
+		}
+	);
 }

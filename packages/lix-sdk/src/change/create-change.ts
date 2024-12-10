@@ -12,16 +12,31 @@ import { updateChangesInVersion } from "../version/update-changes-in-version.js"
  * Use this function to directly create a change from a lix app
  * with bypassing of file-based change detection.
  */
-export async function createChange(args: {
-	lix: Pick<Lix, "db" | "sqlite">;
-	authors: Array<Pick<Account, "id">>;
-	version: Pick<Version, "id">;
-	entityId: Change["entity_id"];
-	fileId: Change["file_id"];
-	pluginKey: Change["plugin_key"];
-	schemaKey: Change["schema_key"];
-	snapshotContent: Snapshot["content"];
-}): Promise<Change> {
+export async function createChange(
+	args: {
+		lix: Pick<Lix, "db" | "sqlite">;
+		authors: Array<Pick<Account, "id">>;
+		version: Pick<Version, "id">;
+		entityId: Change["entity_id"];
+		fileId: Change["file_id"];
+		pluginKey: Change["plugin_key"];
+		schemaKey: Change["schema_key"];
+		snapshotContent: Snapshot["content"];
+	},
+	options?: {
+		/**
+		 * When true, the version changes will be updated.
+		 *
+		 * Defaults to true.
+		 */
+		updateVersionChanges?: boolean;
+	}
+): Promise<Change> {
+	const optionsWithDefaults = {
+		updateVersionChanges: true,
+		...options,
+	};
+
 	if (args.authors.length === 0) {
 		throw new Error("At least one author is required");
 	}
@@ -96,11 +111,13 @@ export async function createChange(args: {
 	}
 
 	// update the version with the new change
-	updateChangesInVersion({
-		lix: { ...args.lix },
-		changes: [change],
-		version: args.version,
-	});
+	if (optionsWithDefaults.updateVersionChanges) {
+		updateChangesInVersion({
+			lix: { ...args.lix },
+			changes: [change],
+			version: args.version,
+		});
+	}
 
 	return change;
 }

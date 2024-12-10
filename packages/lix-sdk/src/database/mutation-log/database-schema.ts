@@ -49,7 +49,7 @@ export const tableIdColumns: Record<string, Array<string>> = {
 	change_edge: ["parent_id", "child_id"],
 	change_conflict_resolution: ["change_conflict_id", "resolved_change_id"],
 	version_change_conflict: ["version_id", "change_conflict_id"],
-	version_change: ["version_id", "change_id"],
+	// version_change: ["version_id", "change_id"],
 };
 
 export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
