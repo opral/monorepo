@@ -3,3 +3,4 @@ node_modules
 dist
 .vercel
 src/meta.js
+paraglide.d.ts

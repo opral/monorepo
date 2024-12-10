@@ -1828,6 +1828,9 @@ importers:
       '@inlang/paraglide-sveltekit':
         specifier: workspace:*
         version: link:..
+      typescript:
+        specifier: ^4||^5
+        version: 5.5.4
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
