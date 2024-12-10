@@ -1,75 +1,94 @@
 {
 	"version": "0.2.0",
 	"configurations": [
-		{
-			"name": "sdk multi-project-test translate4",
-			"type": "node",
-			"request": "launch",
-			"autoAttachChildProcesses": true,
-			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-			"program": "${workspaceRoot}/inlang/source-code/cli/bin/run.js",
-			"cwd": "${workspaceFolder}/inlang/source-code/sdk/multi-project-test",
-			"args": ["machine", "translate", "-n", "-f", "--project", "./project4-dir/project.inlang"],
-			"env": { "MOCK_TRANSLATE_LOCAL": "true", "DEBUG": "sdk:*" },
-			"smartStep": true,
-			"console": "integratedTerminal"
-		},
-		{
-			"name": "sdk load-test",
-			"type": "node",
-			"request": "launch",
-			"autoAttachChildProcesses": true,
-			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-			"program": "${workspaceRoot}/inlang/source-code/sdk/load-test/node_modules/tsx/dist/cli.mjs",
-			"cwd": "${workspaceFolder}/inlang/source-code/sdk/load-test",
-			"args": ["./main.ts", "10", "1", "1", "1"],
-			"env": { "MOCK_TRANSLATE_LOCAL": "true", "DEBUG": "sdk:*" },
-			"smartStep": true,
-			"console": "integratedTerminal"
-		},
-		{
-			"name": "debug current vitest",
-			"type": "node",
-			"request": "launch",
-			"autoAttachChildProcesses": true,
-			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-			"program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
-			"args": ["run", "--singleThread=true", "--testTimeout=2000000000", "${relativeFile}"],
-			"smartStep": true,
-			"console": "integratedTerminal"
-		},
-		{
-			"name": "debug vs-code-extension",
-			"type": "extensionHost",
-			"request": "launch",
-			"args": [
-				// uncomment if you have the problem that breakpoints don't bind, because the code is lazy loaded
-				//"--noLazy",
-				"--extensionDevelopmentPath=${workspaceFolder}/inlang/source-code/ide-extension",
-				// change this path to specify what folder should be opened upon running this configuration
-				"${workspaceFolder}/inlang/development-projects/inlang-nextjs"
-			],
-			"outFiles": [
-				"${workspaceFolder}/**/*.js",
-				"${workspaceFolder}/**/*.ts",
-				"!**/node_modules/**"
-			]
-		},
-		{
-			"name": "debug vs-code-extension e2e",
-			"request": "launch",
-			"command": "DEBUG=\"true\" pnpm run --filter vs-code-extension test:e2e",
-			"autoAttachChildProcesses": true,
-			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-			"type": "node-terminal",
-			"localRoot": "${workspaceFolder}"
-		},
-		{
-			"name": "debug @inlang/website",
-			"port": 3000,
-			"request": "launch",
-			"type": "chrome",
-			"webRoot": "${workspaceFolder}/inlang/source-code/website"
-		}
-	]
+    {
+      "name": "sdk multi-project-test translate4",
+      "type": "node",
+      "request": "launch",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "program": "${workspaceRoot}/inlang/source-code/cli/bin/run.js",
+      "cwd": "${workspaceFolder}/inlang/source-code/sdk/multi-project-test",
+      "args": [
+        "machine",
+        "translate",
+        "-n",
+        "-f",
+        "--project",
+        "./project4-dir/project.inlang"
+      ],
+      "env": { "MOCK_TRANSLATE_LOCAL": "true", "DEBUG": "sdk:*" },
+      "smartStep": true,
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "sdk load-test",
+      "type": "node",
+      "request": "launch",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "program": "${workspaceRoot}/inlang/source-code/sdk/load-test/node_modules/tsx/dist/cli.mjs",
+      "cwd": "${workspaceFolder}/inlang/source-code/sdk/load-test",
+      "args": ["./main.ts", "10", "1", "1", "1"],
+      "env": { "MOCK_TRANSLATE_LOCAL": "true", "DEBUG": "sdk:*" },
+      "smartStep": true,
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "debug current vitest",
+      "type": "node",
+      "request": "launch",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+      "args": [
+        "run",
+        "--singleThread=true",
+        "--testTimeout=2000000000",
+        "${relativeFile}"
+      ],
+      "smartStep": true,
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "debug vs-code-extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        // uncomment if you have the problem that breakpoints don't bind, because the code is lazy loaded
+        //"--noLazy",
+        "--extensionDevelopmentPath=${workspaceFolder}/inlang/source-code/ide-extension",
+        // change this path to specify what folder should be opened upon running this configuration
+        "${workspaceFolder}/inlang/development-projects/inlang-nextjs"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/**/*.js",
+        "${workspaceFolder}/**/*.ts",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "name": "debug vs-code-extension e2e",
+      "request": "launch",
+      "command": "DEBUG=\"true\" pnpm run --filter vs-code-extension test:e2e",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "type": "node-terminal",
+      "localRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "debug @inlang/website",
+      "port": 3000,
+      "request": "launch",
+      "type": "chrome",
+      "webRoot": "${workspaceFolder}/inlang/source-code/website"
+    },
+    {
+      "name": "debug csv-app on port 3008",
+      "port": 3008,
+      "request": "launch",
+      "type": "chrome",
+      "webRoot": "${workspaceFolder}/packages/csv-app"
+    }
+  ]
 }

@@ -231,8 +231,8 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
     change_id TEXT NOT NULL,
 
     PRIMARY KEY (version_id, change_id),
-    FOREIGN KEY (version_id) REFERENCES version(id),
-    FOREIGN KEY (change_id) REFERENCES change(id)
+    FOREIGN KEY (version_id) REFERENCES version(id) ON DELETE CASCADE,
+    FOREIGN KEY (change_id) REFERENCES change(id) ON DELETE CASCADE
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS version_change_conflict (
