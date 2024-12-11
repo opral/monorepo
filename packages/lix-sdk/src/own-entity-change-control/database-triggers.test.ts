@@ -196,6 +196,6 @@ test("file.data is not own change controlled as plugins handle the change contro
 		.where("entity_id", "=", file.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
-	
+
 	expect(change.content?.data).toBe(undefined);
-})
+});
