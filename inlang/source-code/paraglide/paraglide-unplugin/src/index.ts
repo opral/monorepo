@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import fs from "node:fs/promises"
 
 import { createUnplugin, type UnpluginFactory } from "unplugin"
@@ -40,7 +41,17 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 
 		virtualModuleOutput = messageModulesOutput
 
-		const files = c.useVirtualModules ? generateDTSFiles(regularOutput) : regularOutput
+		const dtsFiles = c.useVirtualModules ? generateDTSFiles(regularOutput) : undefined
+
+		const virtualModuleFiles = c.useVirtualModules
+			? // only emit the runtime.d.ts and messages.d.ts files to declutter the output directory
+			  {
+					"runtime.d.ts": dtsFiles!["runtime.d.ts"]!,
+					"messages.d.ts": dtsFiles!["messages.d.ts"]!,
+			  }
+			: undefined
+
+		const files = c.useVirtualModules ? virtualModuleFiles! : regularOutput
 		await writeOutput(c.outdir, files, fs)
 
 		numCompiles++
