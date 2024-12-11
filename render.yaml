@@ -81,10 +81,10 @@ services:
         value: 3005
     buildFilter:
       paths:
-        - packages/lix-website-server/*
-        - packages/lix-website/*
-        - packages/lix-file-manager/*
-        - packages/csv-app/*
+        - packages/lix-website-server/**
+        - packages/lix-website/**
+        - packages/lix-file-manager/**
+        - packages/csv-app/**
     # domains:
     #   - lix.opral.com
 
@@ -94,7 +94,7 @@ services:
     autoDeploy: true
     branch: lix-integration
     staticPublishPath: ./packages/csv-app/dist
-    buildCommand: pnpm install && pnpm run --filter @lix-js/csv-app... build
+    buildCommand: pnpm install && pnpm run --filter csv-app... build
     buildFilter:
       paths:
         - packages/csv-app/**
