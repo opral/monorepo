@@ -2,6 +2,8 @@
 "@inlang/paraglide-sveltekit": minor
 "@inlang/paraglide-vite": minor
 "@inlang/paraglide-unplugin": minor
+"@inlang/paraglide-astro": minor
+"@inlang/paraglide-webpack": minor
 ---
 
 Add `experimentalUseVirtualModules` option to use the `$paraglide` virtual module instead of writing files to disk. Closes https://github.com/opral/inlang-paraglide-js/issues/264
