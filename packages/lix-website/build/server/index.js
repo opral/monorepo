@@ -1178,15 +1178,25 @@ function Index() {
         /* @__PURE__ */ jsxs("div", { className: "max-w-md", children: [
           /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx("h1", { className: "text-5xl leading-[1.2] font-semibold", children: "The worlds first change control system" }) }),
           /* @__PURE__ */ jsx("p", { className: "mt-8 mb-6", children: "The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang." }),
-          /* @__PURE__ */ jsx("div", { className: "flex flex-wrap-reverse items-center gap-2", children: /* @__PURE__ */ jsx(
-            "a",
-            {
-              href: "https://opral.substack.com/",
-              target: "_blank",
-              className: "w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all",
-              children: "Get updates"
-            }
-          ) })
+          /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap-reverse items-center gap-2", children: [
+            /* @__PURE__ */ jsx(
+              "a",
+              {
+                href: "/app/fm",
+                className: "w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all",
+                children: "Open the system"
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              "a",
+              {
+                href: "https://github.com/opral/monorepo/tree/lix-integration/packages/lix-sdk",
+                target: "_blank",
+                className: "w-full sm:w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex justify-center items-center gap-2 border border-slate-300 hover:border-slate-400 transition-all",
+                children: "Explore the lix SDK"
+              }
+            )
+          ] })
         ] }),
         /* @__PURE__ */ jsx("div", { children: coreFeatures.map((feature, index) => /* @__PURE__ */ jsxs("div", { className: "my-4 max-w-sm flex items-start gap-5", children: [
           /* @__PURE__ */ jsx(Check, {}),
@@ -1302,7 +1312,7 @@ const route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   default: Index,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-const serverManifest = { "entry": { "module": "/assets/entry.client-CZKf3RLx.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/root-iPUA1yy4.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": ["/assets/root-D5TafMW6.css"] }, "routes/file-manager": { "id": "routes/file-manager", "parentId": "root", "path": "file-manager", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/file-manager-WIRaP1du.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-D1NAHDCL.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] } }, "url": "/assets/manifest-c579692d.js", "version": "c579692d" };
+const serverManifest = { "entry": { "module": "/assets/entry.client-CZKf3RLx.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/root-iPUA1yy4.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": ["/assets/root-D5TafMW6.css"] }, "routes/file-manager": { "id": "routes/file-manager", "parentId": "root", "path": "file-manager", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/file-manager-WIRaP1du.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-CxzJuLy1.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] } }, "url": "/assets/manifest-37b22780.js", "version": "37b22780" };
 const mode = "production";
 const assetsBuildDirectory = "build/client";
 const basename = "/";
