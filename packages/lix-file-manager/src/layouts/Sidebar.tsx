@@ -21,7 +21,7 @@ export function AppSidebar() {
 		>
 			<TooltipProvider>
 				<SidebarHeader className="w-14 h-[60px] flex justify-center items-center">
-					<a href="/">
+					<a href="https://lix.opral.com">
 						<img src="/lix.svg" alt="logo" className="w-6 h-6" />
 					</a>
 				</SidebarHeader>

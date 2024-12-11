@@ -187,19 +187,17 @@ export default function FileManager() {
 						</p>
 						<div className="flex flex-col sm:flex-row justify-center w-full gap-2">
 							<a
-								href="https://forms.gle/cR3iDsUB7DEygJaZ8"
-								target="_blank"
+								href="/app/fm"
 								className="w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all"
 							>
-								Get notified
+								Try it out
 							</a>
 							<a
-								href="https://jsnation.us/#person-samuel-stroschein"
-								target="_blanc"
+								href="https://opral.substack.com/"
+								target="_blank"
 								className="w-full sm:w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex justify-center items-center gap-2 ring-1 ring-slate-300 hover:ring-slate-400 transition-all"
 							>
-								See our pitch at JS Nation US
-								<IconArrowExternal />
+								Get updates
 							</a>
 						</div>
 					</div>
@@ -342,15 +340,15 @@ export default function FileManager() {
 							<div className="w-full">
 								<h2 className="text-xl pt-2">Stay in the loop</h2>
 								<p className="mt-4 sm:w-4/5 md:w-full">
-									Sign up to receive updates and join us for the launch on December 16th.
+									Sign up to receive updates about lix and its file manager.
 								</p>
 							</div>
 							<a
-								href="https://forms.gle/cR3iDsUB7DEygJaZ8"
+								href="https://opral.substack.com/"
 								target="_blank"
 								className="mt-4 w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all"
 							>
-								Get notified
+								Get update
 							</a>
 						</div>
 						<div className="col-span-2 pl-4 sm:pl-8 md:pt-8 flex items-end">

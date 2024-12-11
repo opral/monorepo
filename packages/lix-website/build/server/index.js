@@ -332,26 +332,6 @@ const Footer = () => {
     ] })
   ] }) }) });
 };
-const IconArrowExternal = () => {
-  return /* @__PURE__ */ jsx(
-    "svg",
-    {
-      xmlns: "http://www.w3.org/2000/svg",
-      width: "20px",
-      height: "20px",
-      viewBox: "0 0 15 15",
-      children: /* @__PURE__ */ jsx(
-        "path",
-        {
-          fill: "currentColor",
-          fillRule: "evenodd",
-          d: "M3.646 11.354a.5.5 0 0 1 0-.707L10.293 4H6a.5.5 0 0 1 0-1h5.5a.5.5 0 0 1 .5.5V9a.5.5 0 0 1-1 0V4.707l-6.646 6.647a.5.5 0 0 1-.708 0",
-          clipRule: "evenodd"
-        }
-      )
-    }
-  );
-};
 const IconBranch = () => /* @__PURE__ */ jsx("svg", { xmlns: "http://www.w3.org/2000/svg", width: "24", height: "24", fill: "none", viewBox: "0 0 24 24", children: /* @__PURE__ */ jsx(
   "path",
   {
@@ -374,18 +354,14 @@ const IconSync = () => /* @__PURE__ */ jsx("svg", { xmlns: "http://www.w3.org/20
   }
 ) });
 const Banner = () => {
-  return /* @__PURE__ */ jsxs("div", { className: "flex justify-center items-center gap-2 h-16 md:h-[50px] text-[16px] px-3 bg-slate-100 border-b border-slate-200 text-black font-medium", children: [
-    "Public preview launching, Dec 16",
-    /* @__PURE__ */ jsxs(
+  return /* @__PURE__ */ jsxs("div", { className: "flex justify-center items-center gap-3 h-16 md:h-[50px] text-[16px] px-3 bg-slate-100 border-b border-slate-200 text-black font-medium", children: [
+    "New: Lix File Manager (Preview)",
+    /* @__PURE__ */ jsx(
       "a",
       {
-        className: "group text-cyan-600 hover:text-black border border-slate-200 md:mx-6 flex gap-2 items-center py-1 px-3 rounded-md bg-white whitespace-nowrap",
-        target: "_blank",
-        href: "https://forms.gle/cR3iDsUB7DEygJaZ8",
-        children: [
-          "Get notified",
-          /* @__PURE__ */ jsx(IconArrowExternal, {})
-        ]
+        className: "group text-cyan-600 hover:text-black border border-slate-200 md:mx-3 flex gap-2 items-center py-1 px-3 rounded-md bg-white whitespace-nowrap",
+        href: "/app/fm",
+        children: "Take a look"
       }
     )
   ] });
@@ -557,22 +533,18 @@ function FileManager() {
           /* @__PURE__ */ jsx(
             "a",
             {
-              href: "https://forms.gle/cR3iDsUB7DEygJaZ8",
-              target: "_blank",
+              href: "/app/fm",
               className: "w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all",
-              children: "Get notified"
+              children: "Try it out"
             }
           ),
-          /* @__PURE__ */ jsxs(
+          /* @__PURE__ */ jsx(
             "a",
             {
-              href: "https://jsnation.us/#person-samuel-stroschein",
-              target: "_blanc",
+              href: "https://opral.substack.com/",
+              target: "_blank",
               className: "w-full sm:w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex justify-center items-center gap-2 ring-1 ring-slate-300 hover:ring-slate-400 transition-all",
-              children: [
-                "See our pitch at JS Nation US",
-                /* @__PURE__ */ jsx(IconArrowExternal, {})
-              ]
+              children: "Get updates"
             }
           )
         ] })
@@ -687,15 +659,15 @@ function FileManager() {
           /* @__PURE__ */ jsxs("div", { className: "p-4 sm:p-8 flex flex-col justify-between", children: [
             /* @__PURE__ */ jsxs("div", { className: "w-full", children: [
               /* @__PURE__ */ jsx("h2", { className: "text-xl pt-2", children: "Stay in the loop" }),
-              /* @__PURE__ */ jsx("p", { className: "mt-4 sm:w-4/5 md:w-full", children: "Sign up to receive updates and join us for the launch on December 16th." })
+              /* @__PURE__ */ jsx("p", { className: "mt-4 sm:w-4/5 md:w-full", children: "Sign up to receive updates about lix and its file manager." })
             ] }),
             /* @__PURE__ */ jsx(
               "a",
               {
-                href: "https://forms.gle/cR3iDsUB7DEygJaZ8",
+                href: "https://opral.substack.com/",
                 target: "_blank",
                 className: "mt-4 w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all",
-                children: "Get notified"
+                children: "Get update"
               }
             )
           ] }),
@@ -718,6 +690,26 @@ const route1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   default: FileManager,
   meta: meta$1
 }, Symbol.toStringTag, { value: "Module" }));
+const IconArrowExternal = () => {
+  return /* @__PURE__ */ jsx(
+    "svg",
+    {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: "20px",
+      height: "20px",
+      viewBox: "0 0 15 15",
+      children: /* @__PURE__ */ jsx(
+        "path",
+        {
+          fill: "currentColor",
+          fillRule: "evenodd",
+          d: "M3.646 11.354a.5.5 0 0 1 0-.707L10.293 4H6a.5.5 0 0 1 0-1h5.5a.5.5 0 0 1 .5.5V9a.5.5 0 0 1-1 0V4.707l-6.646 6.647a.5.5 0 0 1-.708 0",
+          clipRule: "evenodd"
+        }
+      )
+    }
+  );
+};
 function IconLogoTabelle() {
   return /* @__PURE__ */ jsxs("svg", { xmlns: "http://www.w3.org/2000/svg", height: "60", fill: "none", viewBox: "0 0 59 53", children: [
     /* @__PURE__ */ jsxs("g", { clipPath: "url(#clip0_43_216)", children: [
@@ -1310,7 +1302,7 @@ const route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   default: Index,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-const serverManifest = { "entry": { "module": "/assets/entry.client-CZKf3RLx.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/root-D076Uuf0.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": ["/assets/root-BEQOxDm8.css"] }, "routes/file-manager": { "id": "routes/file-manager", "parentId": "root", "path": "file-manager", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/file-manager-DFmM8GhE.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-BHktVy3M.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-CJ1v_0Do.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-BHktVy3M.js"], "css": [] } }, "url": "/assets/manifest-2f5035aa.js", "version": "2f5035aa" };
+const serverManifest = { "entry": { "module": "/assets/entry.client-CZKf3RLx.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/root-iPUA1yy4.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": ["/assets/root-D5TafMW6.css"] }, "routes/file-manager": { "id": "routes/file-manager", "parentId": "root", "path": "file-manager", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/file-manager-WIRaP1du.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-D1NAHDCL.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] } }, "url": "/assets/manifest-c579692d.js", "version": "c579692d" };
 const mode = "production";
 const assetsBuildDirectory = "build/client";
 const basename = "/";
