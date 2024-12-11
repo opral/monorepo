@@ -3,8 +3,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "node --experimental-strip-types --watch ./src/main.ts",
-    "production": "node --experimental-strip-types ./src/main.ts",
+    "dev": "tsx watch ./src/main.ts",
+    "production": "tsx ./src/main.ts",
     "test": "tsc --noEmit",
     "lint": "eslint ./src --fix",
     "format": "prettier ./src --write",
@@ -19,6 +19,7 @@
   "devDependencies": {
     "express": "^4.21.1",
     "prettier": "^3.4.1",
+    "tsx": "^4.19.2",
     "typescript": "^5.5.2"
   },
   "license": "Apache-2.0"
