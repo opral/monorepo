@@ -40,7 +40,6 @@ export function VersionDropdown() {
 	const switchToVersion = useCallback(
 		async (version: Version) => {
 			if (!lix) return;
-
 			await switchVersion({ lix, to: version });
 			await saveLixToOpfs({ lix });
 		},
