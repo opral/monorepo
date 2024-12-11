@@ -5,6 +5,7 @@ import { applyChanges } from "../change/apply-changes.js";
 import type { Change } from "../database/schema.js";
 import { withSkipOwnChangeControl } from "../own-entity-change-control/with-skip-own-change-control.js";
 import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
+import { CompiledQuery } from "kysely";
 
 export async function pullFromServer(args: {
 	id: string;
@@ -51,6 +52,10 @@ export async function pullFromServer(args: {
 	const changes = (data["change"] ?? []) as Change[];
 
 	await args.lix.db.transaction().execute(async (trx) => {
+		await trx.executeQuery(
+			CompiledQuery.raw("PRAGMA defer_foreign_keys = ON;")
+		);
+
 		const currentVersion = await trx
 			.selectFrom("current_version")
 			.select("id")
