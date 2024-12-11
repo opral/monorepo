@@ -33,7 +33,7 @@ export type PluginConfig = {
 	/** Absolute path to the project.inlang folder */
 	projectPath: string
 	/** Absolute path to the directory in which to write the paraglide files*/
-	outdir: string
+	outdir: `${string}/`
 	useVirtualModules: boolean
 }
 
@@ -53,7 +53,7 @@ export function resolveConfig(options: UserConfig): PluginConfig {
 	return {
 		logger,
 		projectPath: normalizedPorjectPath,
-		outdir: normalizedOutdir,
+		outdir: normalizedOutdir as `${string}/`,
 		useVirtualModules: options.experimentalUseVirtualModules ?? false,
 	}
 }

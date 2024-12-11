@@ -21,12 +21,24 @@ export const build: UnpluginFactory<{
 		name: "unplugin-paraglide-vite-virtual-message-modules",
 		enforce: "post",
 		vite: {
-			resolveId(id) {
+			apply: buildOnly ? "build" : undefined,
+			resolveId(id, importer) {
 				// if the id contains a null char ignore it since it should be a rollup virtual module
 				// this helps support other vite plugins (like sentry) that make heavy use of these types of file-namings
 				if (id.includes("\0")) return undefined
 
-				const normalizedId = isWindows ? id.replaceAll("\\", "/") : id
+				// if the impoter starts with `resolvedVirtualModuleName` we're looking at
+				// a relative import from within the virtual module
+				let normalizedId: string
+
+				if (importer?.startsWith(resolvedVirtualModuleName)) {
+					const importerPath = importer.replace(resolvedVirtualModuleName, outdir)
+					const importerDirname = path.dirname(importerPath)
+					normalizedId = path.posix.resolve(importerDirname, id)
+				} else {
+					// regular import
+					normalizedId = isWindows ? id.replaceAll("\\", "/") : id
+				}
 
 				// resolve relative imports inside the output directory
 				// the importer is alwazs normalized
@@ -38,7 +50,6 @@ export const build: UnpluginFactory<{
 					const internalPath = normalizedId.replace(normalizedOutdir, "")
 
 					const resolved = resolvedVirtualModuleName + internalPath
-					console.log("resolved", resolved)
 					return resolved
 				}
 				return undefined
@@ -47,7 +58,6 @@ export const build: UnpluginFactory<{
 			load(id) {
 				if (!id.startsWith(resolvedVirtualModuleName)) return undefined
 				const internalPath = id.slice(resolvedVirtualModuleName.length)
-				console.log("loading", id, internalPath)
 				return getModule(internalPath)
 			},
 		},

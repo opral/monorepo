@@ -132,7 +132,7 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 				{
 					outdir: c.outdir,
 					getModule,
-					buildOnly: c.useVirtualModules,
+					buildOnly: !c.useVirtualModules,
 				},
 				ctx
 			)
