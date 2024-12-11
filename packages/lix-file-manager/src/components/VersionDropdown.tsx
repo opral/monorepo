@@ -84,7 +84,7 @@ export function VersionDropdown() {
 		<>
 			<DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
 				<DropdownMenuTrigger asChild>
-					<Button variant="outline" size="sm" className="gap-2">
+					<Button variant="secondary" size="default" className="gap-2">
 						<IconBranch />
 						{currentVersion.name}
 					</Button>
