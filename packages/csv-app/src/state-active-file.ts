@@ -166,7 +166,7 @@ export const allChangesAtom = atom(async (get) => {
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		// .where(changeInVersion(currentBranch))
 		.selectAll("change")
-		.select("snapshot.content as snapshot_content")
+		.select("snapshot.content")
 		.execute();
 });
 
@@ -181,7 +181,7 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where(changeInVersion(currentBranch))
 		.selectAll("change")
-		.select("snapshot.content as snapshot_content")
+		.select("snapshot.content")
 		.execute();
 });
 
@@ -250,7 +250,7 @@ export const changeConflictsAtom = atom(async (get) => {
 				.end()
 				.as("is_in_current_version")
 		)
-		.select("snapshot.content as snapshot_content")
+		.select("snapshot.content")
 		.select("change_conflict.key as change_conflict_key")
 		.execute();
 

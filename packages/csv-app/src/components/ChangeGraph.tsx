@@ -14,7 +14,7 @@ import { useMemo } from "react";
 import { Change, ChangeEdge, Snapshot } from "@lix-js/sdk";
 
 export const ChangeGraph = (props: {
-	changes: Array<Change & { snapshot_content: Snapshot["content"] }>;
+	changes: Array<Change & { content: Snapshot["content"] }>;
 	edges: ChangeEdge[];
 	highlightChanges: Array<Change>;
 }) => {
@@ -46,7 +46,7 @@ export const ChangeGraph = (props: {
  */
 const layoutElements = (
 	dagreGraph: dagre.graphlib.Graph,
-	changes: Array<Change & { snapshot_content: Snapshot["content"] }>,
+	changes: Array<Change & { content: Snapshot["content"] }>,
 	edges: ChangeEdge[],
 	highlightChanges: Array<Change>,
 	direction: "TB" | "LR" = "TB"
@@ -57,7 +57,7 @@ const layoutElements = (
 		const dimensions = calculateNodeDimensions(
 			// simulate two line node where the bottom line
 			// is a uuid
-			(change.snapshot_content?.text ?? "deleted") +
+			(JSON.stringify(change.content) ?? "deleted") +
 				"\n00000000-0000-0000-0000-000000000000"
 		);
 		dagreGraph.setNode(change.id, dimensions);
@@ -70,11 +70,10 @@ const layoutElements = (
 
 	// need to map to node and edge type for the react flow component
 	const nodesMappedToFlow = changes.map((change) => {
-		const text = change.snapshot_content?.text;
 		const nodeWithPosition = dagreGraph.node(change.id);
 		return {
 			id: change.id,
-			data: { text },
+			data: change,
 			type: "row",
 			position: {
 				x: nodeWithPosition.x - nodeWithPosition.width / 2,
@@ -123,8 +122,9 @@ function Row({ id, data }: NodeProps<Node<{ text: string }>>) {
 	return (
 		<div className="p-2 flex items-center justify-center border-gray-400 border justify-between rounded">
 			<div>
-				{data.text ?? "deleted"}
-				<p className="mt-1 text-gray-300 text-xs">{id}</p>
+				<p className="text-sm mb-2 text-gray-500">{data.schema_key}</p>
+				{JSON.stringify(data.content, undefined, 2) ?? "deleted"}
+				<p className="mt-2 text-gray-400 text-xs">{id}</p>
 			</div>
 			<Handle
 				style={{ visibility: "hidden" }}
