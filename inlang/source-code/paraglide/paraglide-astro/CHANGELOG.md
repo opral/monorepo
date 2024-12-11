@@ -1,5 +1,11 @@
 # @inlang/paraglide-astro
 
+## 0.2.6
+
+### Patch Changes
+
+- Update the package.json to accept Astro ^5 as peer dependency. Closes https://github.com/opral/inlang-paraglide-js/issues/270
+
 ## 0.2.5
 
 ### Patch Changes

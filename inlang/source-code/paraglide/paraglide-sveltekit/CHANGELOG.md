@@ -1,5 +1,17 @@
 # @inlang/paraglide-sveltekit
 
+## 0.13.1
+
+### Patch Changes
+
+- reverts 0.13.0 because it leads to a crash in production https://github.com/opral/inlang-paraglide-js/issues/272
+
+## 0.13.0
+
+### Minor Changes
+
+- 1ea4bd8: Svelte 5 runes are used in the Paraglide component. Closes https://github.com/opral/inlang-paraglide-js/issues/262
+
 ## 0.12.1
 
 ### Patch Changes
