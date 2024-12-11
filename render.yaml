@@ -65,6 +65,46 @@ services:
     envVars:
       - fromGroup: production
 
+  - name: lix-website-server
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: starter
+    branch: lix-integration
+    pullRequestPreviewsEnabled: false
+    buildCommand: pnpm --filter lix-website-server... i && pnpm --filter lix-website-server... build
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter lix-website-server production
+    autoDeploy: true
+    envVars:
+      - fromGroup: production
+      - key: PORT
+        value: 3005
+    buildFilter:
+      paths:
+        - packages/lix-website-server/*
+        - packages/lix-website/*
+        - packages/lix-file-manager/*
+        - packages/csv-app/*
+    # domains:
+    #   - lix.opral.com
+
+  - name: fink2
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: lix-integration
+    staticPublishPath: ./inlang/source-code/fink2/dist
+    routes: 
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    buildCommand: pnpm install && pnpm run --filter @inlang/fink2... build
+    buildFilter:
+      paths:
+        - inlang/source-code/fink2/**
+    envVars:
+      - fromGroup: production
+
   - name: csv
     type: web
     runtime: static
