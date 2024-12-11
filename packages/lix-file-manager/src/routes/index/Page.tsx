@@ -18,6 +18,10 @@ import { VersionDropdown } from "@/components/VersionDropdown.tsx";
 import CustomLink from "@/components/CustomLink.tsx";
 // import { useEffect } from "react";
 
+const isCsvFile = (path: string) => {
+	return path.toLowerCase().endsWith(".csv");
+};
+
 export default function Page() {
 	// state atoms
 	const [lix] = useAtom(lixAtom);
@@ -126,6 +130,13 @@ export default function Page() {
 							size="default"
 							onClick={() =>
 								navigate(`/app/csv/editor?f=${fileIdSearchParams}`)
+							}
+							className={
+								activeFile?.path
+									? isCsvFile(activeFile.path)
+										? ""
+										: "hidden"
+									: "hidden"
 							}
 						>
 							Open in CSV app
