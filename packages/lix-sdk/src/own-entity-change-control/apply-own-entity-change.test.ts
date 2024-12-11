@@ -7,6 +7,7 @@ import type {
 } from "../database/schema.js";
 import { applyOwnEntityChanges } from "./apply-own-entity-change.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
+import { KeyValue } from "../key-value/database-schema.js";
 
 test("it should apply insert changes correctly", async () => {
 	const lix = await openLixInMemory({});
@@ -323,4 +324,42 @@ test("foreign key constraints are obeyed", async () => {
 	expect(
 		applyOwnEntityChanges({ lix, changes: mockChanges })
 	).rejects.toThrow();
+});
+
+// https://github.com/opral/lix-sdk/issues/185
+test("applying own entity changes doesn't lead to the creation of new changes", async () => {
+	const lix = await openLixInMemory({});
+
+	const snapshot = mockJsonSnapshot({
+		key: "mock-key",
+		value: "1+1=2",
+	} satisfies KeyValue);
+
+	await lix.db
+		.insertInto("snapshot")
+		.values({
+			content: snapshot.content,
+		})
+		.execute();
+
+	const changesBefore = await lix.db.selectFrom("change").selectAll().execute();
+
+	await applyOwnEntityChanges({
+		lix,
+		changes: [
+			{
+				id: "change0",
+				entity_id: "mock-key",
+				file_id: "null",
+				plugin_key: "lix_own_entity",
+				schema_key: "lix_key_value_table",
+				snapshot_id: snapshot.id,
+				created_at: "2021-01-01T00:00:00Z",
+			},
+		],
+	});
+
+	const changesAfter = await lix.db.selectFrom("change").selectAll().execute();
+
+	expect(changesBefore).toEqual(changesAfter);
 });
