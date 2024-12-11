@@ -7,7 +7,7 @@ import type {
 } from "../database/schema.js";
 import { applyOwnEntityChanges } from "./apply-own-entity-change.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
-import { KeyValue } from "../key-value/database-schema.js";
+import { type KeyValue } from "../key-value/database-schema.js";
 
 test("it should apply insert changes correctly", async () => {
 	const lix = await openLixInMemory({});
