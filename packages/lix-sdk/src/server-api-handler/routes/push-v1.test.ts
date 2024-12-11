@@ -240,4 +240,55 @@ test("it should detect conflicts", async () => {
 		.execute();
 
 	expect(conflictsOnClient).toEqual(conflictsOnServer);
+
+	const keyValueOnClient = await lixOnClient.db
+		.selectFrom("key_value")
+		.where("key", "=", "mock_key")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// the server state has been applied to the client
+	expect(keyValueOnClient.value).toBe("value0");
+
+	const versionChange = await lixOnClient.db
+		.selectFrom("version_change")
+		.innerJoin("change", "version_change.change_id", "change.id")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("change.entity_id", "=", keyValueOnClient.key)
+		.where("change.file_id", "=", "null")
+		.where("change.schema_key", "=", "lix_key_value_table")
+		.where("version_id", "=", version0.id)
+		.select("snapshot.content")
+		.executeTakeFirstOrThrow();
+
+	// the version change pointer of the client points to the server value
+	expect(versionChange.content).toEqual({ key: "mock_key", value: "value0" });
+
+	const conflictSnapshots = await lixOnClient.db
+		.selectFrom("snapshot")
+		.innerJoin("change", "snapshot.id", "change.snapshot_id")
+		.innerJoin(
+			"change_set_element",
+			"change.id",
+			"change_set_element.change_id"
+		)
+		.innerJoin(
+			"change_conflict",
+			"change_set_element.change_set_id",
+			"change_conflict.change_set_id"
+		)
+		.innerJoin(
+			"version_change_conflict",
+			"change_conflict.id",
+			"version_change_conflict.change_conflict_id"
+		)
+		.where("version_change_conflict.version_id", "=", version0.id)
+		.select("snapshot.content")
+		.execute();
+
+	// the conflicting value of the client should be in the conflict
+	expect(conflictSnapshots).toEqual([
+		{ content: { key: "mock_key", value: "value0" } },
+		{ content: { key: "mock_key", value: "value1" } },
+	]);
 });
