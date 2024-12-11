@@ -174,20 +174,18 @@ export default function Index() {
 						</p>
 						<div className="flex flex-wrap-reverse items-center gap-2">
 							<a
-								href="https://opral.substack.com/"
-								target="_blank"
+								href="/app/fm"
 								className="w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all"
 							>
-								Get updates
+								Open the system
 							</a>
-							{/* <a
-							href="https://x.com/FabianHiller/status/1839301632888131814"
-							target="_blanc"
-							className="w-full sm:w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex justify-center items-center gap-2 border border-slate-300 hover:border-slate-400 transition-all"
-						>
-							<IconDate />
-							Talk at Web Dev Meetup NY
-						</a> */}
+							<a
+								href="https://github.com/opral/monorepo/tree/lix-integration/packages/lix-sdk"
+								target="_blank"
+								className="w-full sm:w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex justify-center items-center gap-2 border border-slate-300 hover:border-slate-400 transition-all"
+							>
+								Explore the lix SDK
+							</a>
 						</div>
 					</div>
 					<div>
