@@ -170,7 +170,7 @@ export function VersionDropdown() {
 					</DropdownMenu>
 					{!serverUrl ? (
 						<Button
-							variant="default"
+							variant="secondary"
 							size="default"
 							onClick={handleSync}
 							className="gap-2"
