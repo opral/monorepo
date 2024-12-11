@@ -4,7 +4,7 @@ import IconDiscussion from "./icons/IconDiscussion.tsx"
 import { useAtom } from "jotai/react";
 import { useEffect, useState } from "react";
 import timeAgo from "@/helper/timeAgo.ts";
-import { Link } from "react-router-dom";
+import CustomLink from "./CustomLink.tsx";
 
 const DiscussionPreview = ({ discussionId }: { discussionId: string }) => {
   const [lix] = useAtom(lixAtom);
@@ -34,7 +34,7 @@ const DiscussionPreview = ({ discussionId }: { discussionId: string }) => {
   };
 
   return (
-    <Link to={`?f=${fileId}&d=${discussionId}`}>
+    <CustomLink to={`?f=${fileId}&d=${discussionId}`}>
       <div className="group/preview flex items-start gap-4 pl-3 pr-1.5 py-2 ring-1 ring-muted transition-all hover:ring-slate-500 rounded-sm bg-background">
         <IconDiscussion />
         <div className="flex-1">
@@ -49,10 +49,8 @@ const DiscussionPreview = ({ discussionId }: { discussionId: string }) => {
           <IconArrowRight />
         </div>
       </div >
-    </Link>
+    </CustomLink>
   )
 }
 
 export default DiscussionPreview
-
-{/* <Link to={`/${file}/${discussionId}`} className="text-sm text-slate-800"> */ }

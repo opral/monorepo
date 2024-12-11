@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import {
 	SlButton,
 	SlSelect,
@@ -33,6 +33,7 @@ import {
 	mergeVersion,
 } from "@lix-js/sdk";
 import { humanId } from "human-id";
+import CustomLink from "../components/CustomLink.tsx";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
@@ -46,8 +47,8 @@ export default function Layout(props: { children: React.ReactNode }) {
 				<div className="w-full border-b border-zinc-200 bg-white relative z-90 -mb-[1px]">
 					<div className="w-full flex items-center justify-between px-3 min-h-[54px] gap-1 overflow-x-scroll">
 						<div className="flex items-center gap-1">
-							<Link
-								to="/"
+							<CustomLink
+								to={`/app/fm?f=${activeFile.id}`}
 								className="flex justify-center items-center text-zinc-500 w-9 h-9 hover:bg-zinc-100 hover:text-zinc-950 rounded-lg cursor-pointer"
 							>
 								<svg
@@ -61,7 +62,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 										d="M21 20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.49a1 1 0 0 1 .386-.79l8-6.223a1 1 0 0 1 1.228 0l8 6.223a1 1 0 0 1 .386.79zm-2-1V9.978l-7-5.444l-7 5.444V19z"
 									/>
 								</svg>
-							</Link>
+							</CustomLink>
 
 							<p className="font-medium opacity-30">/</p>
 							<div className="flex gap-4 justify-center items-center text-zinc-950 h-9 rounded-lg px-2">
@@ -132,7 +133,7 @@ const NavItem = (props: { to: string; name: string; counter?: number }) => {
 	const location = useLocation();
 	const isActive = location.pathname + location.search === props.to;
 	return (
-		<Link to={props.to} className={clsx("pb-1 relative")}>
+		<CustomLink to={props.to} className={clsx("pb-1 relative")}>
 			<div
 				className={clsx(
 					"h-8 items-center px-2 flex text-[15px]! font-medium box-border text-zinc-500 hover:bg-zinc-100 rounded",
@@ -153,7 +154,7 @@ const NavItem = (props: { to: string; name: string; counter?: number }) => {
 					isActive ? "bg-zinc-950" : "bg-transparent"
 				)}
 			></div>
-		</Link>
+		</CustomLink>
 	);
 };
 

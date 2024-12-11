@@ -7,7 +7,7 @@ import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
 import { Button } from "@/components/ui/button.tsx"
 import { Separator } from "@/components/ui/separator.tsx"
 import { activeFileAtom, allChangesDynamicGroupingAtom, changesCurrentVersionAtom } from "@/state-active-file.ts";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ChangeComponent } from "@/components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "@/components/DynamicChangeGroup.tsx";
 import FilterSelect from "@/components/FilterSelect.tsx";
@@ -15,6 +15,7 @@ import ChatInput from "@/components/ChatInput.tsx";
 import ConnectedChanges from "@/components/ConnectedChanges.tsx";
 import DiscussionThread from "@/components/DiscussionThread.tsx";
 import { VersionDropdown } from "@/components/VersionDropdown.tsx";
+import CustomLink from "@/components/CustomLink.tsx";
 // import { useEffect } from "react";
 
 export default function Page() {
@@ -86,7 +87,7 @@ export default function Page() {
 						);
 					})}
 				</div>
-				<Link to="/" className="flex-grow" />
+				<CustomLink to="/" className="flex-grow" />
 			</div>
 			<Separator orientation="vertical" className="h-screen" />
 

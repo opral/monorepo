@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import {
 	SidebarMenu,
 	SidebarMenuItem,
@@ -13,6 +13,7 @@ import IconFile from "@/components/icons/IconFile.js";
 import IconAutomation from "@/components/icons/IconAutomation.js";
 import clsx from "clsx";
 import React from "react";
+import CustomLink from "./CustomLink.tsx";
 
 export function SidebarNavigation() {
 	return (
@@ -51,7 +52,7 @@ function NavigationItem({
 							isActive ? "bg-slate-200" : "hover:bg-slate-100"
 						)}
 					>
-						<Link
+						<CustomLink
 							to={path}
 							className={clsx(
 								"flex items-center justify-center w-9 h-9 rounded-md",
@@ -65,7 +66,7 @@ function NavigationItem({
 								),
 							})}
 							<span className="sr-only">{label}</span>
-						</Link>
+						</CustomLink>
 					</SidebarMenuButton>
 				</TooltipTrigger>
 				<TooltipContent side="right" sideOffset={20}>

@@ -1,9 +1,9 @@
 import { atom, useAtom } from "jotai";
 import { lixAtom, withPollingAtom } from "../../state.ts";
-import { Link } from "react-router-dom";
 import Dropzone from "./Dropzone.tsx";
 import { SlIconButton } from "@shoelace-style/shoelace/dist/react";
 import { useState } from "react";
+import CustomLink from "../../components/CustomLink.tsx";
 
 const filesAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -54,7 +54,7 @@ export default function FileExplorer() {
 							className="w-full flex gap-2 p-2 min-h-12 hover:bg-zinc-100"
 							onMouseEnter={() => setHoveredFileId(file.id)}
 						>
-							<Link
+							<CustomLink
 								to={"/editor?f=" + file.id}
 								className="w-full flex gap-2 items-center"
 							>
@@ -72,7 +72,7 @@ export default function FileExplorer() {
 								</svg>
 								{/* remove prefixed root slash `/` */}
 								<p>{file.path.slice(1)}</p>
-							</Link>
+							</CustomLink>
 							<div className="flex gap-1 items-center">
 								{hoveredFileId === file.id && (
 									<SlIconButton

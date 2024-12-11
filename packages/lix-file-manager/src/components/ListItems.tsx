@@ -9,6 +9,7 @@ import { useState } from "react";
 import { lixAtom } from "@/state.ts";
 import { useAtom } from "jotai";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
+import CustomLink from "./CustomLink.tsx";
 
 interface ListItemsProps {
   id: string;
@@ -91,9 +92,9 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
       {type === "file" && (
         <div className={clsx("flex opacity-0 transition-opacity group-hover:opacity-100", dropdownOpen ? "opacity-100" : "")}>
           <Button variant="ghost">
-            <a href={appLink} target="_blank">
+            <CustomLink to={appLink || ""} target="_blank">
               Open
-            </a>
+            </CustomLink>
           </Button>
           <DropdownMenu onOpenChange={(e) => e ? setDropdownOpen(true) : setDropdownOpen(false)}>
             <DropdownMenuTrigger asChild>
