@@ -16,19 +16,26 @@ import {
 	DialogFooter,
 } from "@/components/ui/dialog.js";
 import IconBranch from "@/components/icons/IconBranch.js";
-import { currentVersionAtom, existingVersionsAtom, lixAtom } from "../state.js";
+import {
+	currentVersionAtom,
+	existingVersionsAtom,
+	lixAtom,
+	serverUrlAtom,
+} from "../state.js";
 import { Version, createVersion, switchVersion } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.js";
 import { humanId } from "human-id";
-import { Plus, Check, Trash2 } from "lucide-react";
+import { Plus, Check, Trash2, Cloud } from "lucide-react";
 
 export function VersionDropdown() {
 	const [currentVersion] = useAtom(currentVersionAtom);
 	const [existingVersions] = useAtom(existingVersionsAtom);
 	const [lix] = useAtom(lixAtom);
+	const [serverUrl] = useAtom(serverUrlAtom);
 	const [versionToDelete, setVersionToDelete] = useState<Version | null>(null);
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const [deleteConfirmation, setDeleteConfirmation] = useState("");
+	const [isHovered, setIsHovered] = useState(false);
 
 	const switchToVersion = useCallback(
 		async (version: Version) => {
@@ -78,49 +85,116 @@ export function VersionDropdown() {
 		window.dispatchEvent(new Event("version-changed"));
 	};
 
+	const handleSync = async () => {
+		if (!lix) return;
+
+		try {
+			const response = await fetch(
+				new Request(`http://localhost:3000/lsa/new-v1`, {
+					method: "POST",
+					body: await lix.toBlob(),
+				})
+			);
+
+			if (response.ok === false && response.status !== 409) {
+				throw new Error(`Failed to sync: ${response.status}`);
+			}
+
+			await lix.db
+				.insertInto("key_value")
+				.values({
+					key: "lix_experimental_server_url",
+					value: "http://localhost:3000",
+				})
+				.execute();
+
+			await saveLixToOpfs({ lix });
+		} catch (error) {
+			console.error("Sync failed:", error);
+		}
+	};
+
+	const handleStopSync = async () => {
+		if (!lix) return;
+		await lix.db
+			.deleteFrom("key_value")
+			.where("key", "=", "lix_experimental_server_url")
+			.execute();
+		await saveLixToOpfs({ lix });
+	};
+
 	if (!currentVersion) return null;
 
 	return (
 		<>
-			<DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-				<DropdownMenuTrigger asChild>
-					<Button variant="secondary" size="default" className="gap-2">
-						<IconBranch />
-						{currentVersion.name}
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="w-56">
-					{existingVersions?.map((version) => (
-						<DropdownMenuItem
-							key={version.id}
-							onClick={() => switchToVersion(version)}
-							className="flex items-center justify-between group"
-						>
-							<span>{version.name}</span>
-							{version.id === currentVersion.id ? (
-								<Check className="h-4 w-4 opacity-50" />
-							) : version.name !== "main" ? (
-								<Button
-									variant="ghost"
-									size="sm"
-									className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-									onClick={(e) => {
-										e.stopPropagation();
-										setVersionToDelete(version);
-									}}
+			<div className="flex flex-col gap-2">
+				<div className="flex gap-2">
+					<DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+						<DropdownMenuTrigger asChild>
+							<Button variant="secondary" size="default" className="gap-2">
+								<IconBranch />
+								{currentVersion.name}
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end" className="w-56">
+							{existingVersions?.map((version) => (
+								<DropdownMenuItem
+									key={version.id}
+									onClick={() => switchToVersion(version)}
+									className="flex items-center justify-between group"
 								>
-									<Trash2 className="h-4 w-4" />
-								</Button>
-							) : null}
-						</DropdownMenuItem>
-					))}
-					<DropdownMenuSeparator />
-					<DropdownMenuItem onClick={handleCreateVersion}>
-						<Plus className="mr-2 h-4 w-4" />
-						Create version
-					</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
+									<span>{version.name}</span>
+									{version.id === currentVersion.id ? (
+										<Check className="h-4 w-4 opacity-50" />
+									) : version.name !== "main" ? (
+										<Button
+											variant="ghost"
+											size="sm"
+											className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+											onClick={(e) => {
+												e.stopPropagation();
+												setVersionToDelete(version);
+											}}
+										>
+											<Trash2 className="h-4 w-4" />
+										</Button>
+									) : null}
+								</DropdownMenuItem>
+							))}
+							<DropdownMenuSeparator />
+							<DropdownMenuItem onClick={handleCreateVersion}>
+								<Plus className="mr-2 h-4 w-4" />
+								Create version
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+					{!serverUrl ? (
+						<Button
+							variant="default"
+							size="default"
+							onClick={handleSync}
+							className="gap-2"
+						>
+							<Cloud className="h-4 w-4" />
+							Sync
+						</Button>
+					) : (
+						<div
+							className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-slate-100 cursor-pointer"
+							onClick={handleStopSync}
+							onMouseEnter={() => setIsHovered(true)}
+							onMouseLeave={() => setIsHovered(false)}
+						>
+							<div
+								className={`w-2 h-2 rounded-full ${isHovered ? "bg-red-600" : "bg-green-600"}`}
+							/>
+							<span className="text-sm text-slate-700">
+								{isHovered ? "Stop syncing to" : "Syncing to"} {serverUrl}
+							</span>
+						</div>
+					)}
+				</div>
+			</div>
 
 			<Dialog
 				open={!!versionToDelete}

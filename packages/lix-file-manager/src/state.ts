@@ -272,3 +272,5 @@ export const loadAccountsFromStorage = (): Account[] => {
 	const stored = localStorage.getItem(ACCOUNTS_STORAGE_KEY);
 	return stored ? JSON.parse(stored) : [];
 };
+
+export const serverUrlAtom = atom<string | null>(null);
