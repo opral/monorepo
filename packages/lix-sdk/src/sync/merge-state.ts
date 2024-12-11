@@ -24,19 +24,19 @@ export async function mergeTheirState(args: {
 	sourceData: Record<string, Array<any>>;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		console.log(
-			"mutations before merge-state....",
-			(
-				await trx
-					.selectFrom("mutation_log")
-					.selectAll()
-					// .select(({ fn }) => {
-					// 	return ["session", fn.max<number>("session_time").as("time")];
-					// })
-					// .groupBy("session")
-					.execute()
-			).length
-		);
+		// console.log(
+		// 	"mutations before merge-state....",
+		// 	(
+		// 		await trx
+		// 			.selectFrom("mutation_log")
+		// 			.selectAll()
+		// 			// .select(({ fn }) => {
+		// 			// 	return ["session", fn.max<number>("session_time").as("time")];
+		// 			// })
+		// 			// .groupBy("session")
+		// 			.execute()
+		// 	).length
+		// );
 
 		const myVectorClock = await trx
 			.selectFrom("mutation_log")
@@ -47,7 +47,7 @@ export async function mergeTheirState(args: {
 			.groupBy("session")
 			.execute();
 
-		console.log("getting my vector clock" + JSON.stringify(myVectorClock));
+		// console.log("getting my vector clock" + JSON.stringify(myVectorClock));
 
 		// find the clocks in their vector clock that are behind mine
 		// (everything after their times happend without their recognition) - and we need to handle last write wins
@@ -56,10 +56,10 @@ export async function mergeTheirState(args: {
 			args.sourceVectorClock
 		);
 
-		console.log(
-			"vector ticks they have not seen:" +
-				JSON.stringify(unrecognizedSesionTicks)
-		);
+		// console.log(
+		// 	"vector ticks they have not seen:" +
+		// 		JSON.stringify(unrecognizedSesionTicks)
+		// );
 
 		// search  the last updated at time stamp per row of rows with modifications unknown by them
 		const moreRecentRowUpdatesUnknownBySource =
@@ -103,10 +103,10 @@ export async function mergeTheirState(args: {
 			{} as Record<string, Record<string, number>>
 		);
 
-		console.log(
-			"rowsIUpdatedLast - before last write check:",
-			rowsIUpdatedLast
-		);
+		// console.log(
+		// 	"rowsIUpdatedLast - before last write check:",
+		// 	rowsIUpdatedLast
+		// );
 
 		const sourceMutationLog = args.sourceData["mutation_log"];
 		if (sourceMutationLog === undefined) {
@@ -131,45 +131,45 @@ export async function mergeTheirState(args: {
 			}
 		}
 
-		console.log("rowsIUpdatedLast - AFTER last write check:", rowsIUpdatedLast);
+		// console.log("rowsIUpdatedLast - AFTER last write check:", rowsIUpdatedLast);
 
-		console.log(
-			"mutations before insert....",
-			(
-				await trx
-					.selectFrom("mutation_log")
-					.selectAll()
-					// .select(({ fn }) => {
-					// 	return ["session", fn.max<number>("session_time").as("time")];
-					// })
-					// .groupBy("session")
-					.execute()
-			).length
-		);
+		// console.log(
+		// 	"mutations before insert....",
+		// 	(
+		// 		await trx
+		// 			.selectFrom("mutation_log")
+		// 			.selectAll()
+		// 			// .select(({ fn }) => {
+		// 			// 	return ["session", fn.max<number>("session_time").as("time")];
+		// 			// })
+		// 			// .groupBy("session")
+		// 			.execute()
+		// 	).length
+		// );
 		// the vector clock table has only imutable data and is append only
 		// --> just insert everything
 		if (args.sourceData["mutation_log"]) {
-			console.log(
-				"inserting mutation log - " + args.sourceData["mutation_log"]!.length
-			);
+			// console.log(
+			// 	"inserting mutation log - " + args.sourceData["mutation_log"]!.length
+			// );
 			for (const row of args.sourceData["mutation_log"]!) {
 				await trx
 					.insertInto("mutation_log")
 					.values(row as any)
 					.execute();
-				console.log(
-					"mutations after insert....",
-					(
-						await trx
-							.selectFrom("mutation_log")
-							.selectAll()
-							// .select(({ fn }) => {
-							// 	return ["session", fn.max<number>("session_time").as("time")];
-							// })
-							// .groupBy("session")
-							.execute()
-					).length
-				);
+				// console.log(
+				// 	"mutations after insert....",
+				// 	(
+				// 		await trx
+				// 			.selectFrom("mutation_log")
+				// 			.selectAll()
+				// 			// .select(({ fn }) => {
+				// 			// 	return ["session", fn.max<number>("session_time").as("time")];
+				// 			// })
+				// 			// .groupBy("session")
+				// 			.execute()
+				// 	).length
+				// );
 				// console.log(" mutation log ", row, result);
 			}
 		}
@@ -194,18 +194,18 @@ export async function mergeTheirState(args: {
 				continue;
 			}
 
-			if (tableRows.length === 0) {
-				console.log("no rows for table " + tableName + " received");
-				continue;
-			} else {
-				console.log(
-					"Processing " +
-						tableRows.length +
-						" rows for table - " +
-						tableName +
-						" received"
-				);
-			}
+			// if (tableRows.length === 0) {
+			// 	console.log("no rows for table " + tableName + " received");
+			// 	continue;
+			// } else {
+			// 	console.log(
+			// 		"Processing " +
+			// 			tableRows.length +
+			// 			" rows for table - " +
+			// 			tableName +
+			// 			" received"
+			// 	);
+			// }
 			//	 - filter only my records (this is the records that i have changed more recently than the changes comming from the push)
 			// NOTE - dont step forward or set a breakpoint here! debugger crashes :-/
 			for (const row of tableRows) {
@@ -243,19 +243,19 @@ export async function mergeTheirState(args: {
 			.where("table_name", "=", "mutation_log")
 			.execute();
 
-		console.log(
-			"in transaction mutations:",
-			(
-				await trx
-					.selectFrom("mutation_log")
-					.selectAll()
-					// .select(({ fn }) => {
-					// 	return ["session", fn.max<number>("session_time").as("time")];
-					// })
-					// .groupBy("session")
-					.execute()
-			).length
-		);
+		// console.log(
+		// 	"in transaction mutations:",
+		// 	(
+		// 		await trx
+		// 			.selectFrom("mutation_log")
+		// 			.selectAll()
+		// 			// .select(({ fn }) => {
+		// 			// 	return ["session", fn.max<number>("session_time").as("time")];
+		// 			// })
+		// 			// .groupBy("session")
+		// 			.execute()
+		// 	).length
+		// );
 	};
 	if (args.lix.db.isTransaction) {
 		return await executeInTransaction(args.lix.db);

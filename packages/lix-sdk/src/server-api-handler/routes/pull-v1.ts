@@ -34,14 +34,14 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 	}
 
 	try {
-		console.log("----------- PROCESSING PULL FROM CLIENT  -------------");
+		// console.log("----------- PROCESSING PULL FROM CLIENT  -------------");
 		const { upsertedRows: tableRowsToReturn, state: sessionStatesServer } =
 			await getDiffingRows({
 				lix: lix,
 				targetVectorClock: body.vector_clock,
 			});
 
-		console.log("----------- DONE PROCESSING PULL FROM CLIENT  -------------");
+		// console.log("----------- DONE PROCESSING PULL FROM CLIENT  -------------");
 		return new Response(
 			JSON.stringify({
 				vector_clock: sessionStatesServer,

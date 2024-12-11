@@ -344,6 +344,7 @@ test("non-conflicting changes from the server should for the same version should
 
 	const storage = createServerApiMemoryStorage();
 	const lsaHandler = await createServerApiHandler({ storage });
+
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
 	const lixOnServer = await openLixInMemory({ blob: await lix.toBlob() });

@@ -61,13 +61,10 @@ export async function detectDivergingEntityConflict(args: {
 				.select("id")
 				.executeTakeFirst();
 
-			if (lowestCommonAncestor === undefined) {
-				continue;
-			}
 			// change a or b is the lowest common ancestor, aka no divergence
 			if (
-				changeA.id === lowestCommonAncestor.id ||
-				changeB.id === lowestCommonAncestor.id
+				changeA.id === lowestCommonAncestor?.id ||
+				changeB.id === lowestCommonAncestor?.id
 			) {
 				continue;
 			}
