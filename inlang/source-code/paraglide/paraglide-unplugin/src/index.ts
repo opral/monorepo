@@ -79,7 +79,10 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 	 * ```
 	 */
 	function getModule(path: string): string | undefined {
-		return virtualModuleOutput[path]
+		if (path in virtualModuleOutput) return virtualModuleOutput[path]
+		if (path.endsWith(".js")) return // it simply doesn't exist.
+
+		return getModule(path + ".js") || getModule(path + "/index.js")
 	}
 
 	return [
