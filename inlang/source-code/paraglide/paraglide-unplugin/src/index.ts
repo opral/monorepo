@@ -11,7 +11,7 @@ import { makeArray } from "./utils.js"
 import { memoized } from "./memo.js"
 
 // Helper Plugins
-import { build } from "./build.js"
+import { virtualModules } from "./virtual.js"
 
 const PLUGIN_NAME = "unplugin-paraglide"
 
@@ -131,7 +131,7 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 			},
 		},
 		...makeArray(
-			build(
+			virtualModules(
 				{
 					outdir: c.outdir,
 					getModule,
