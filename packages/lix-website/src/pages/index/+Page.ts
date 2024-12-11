@@ -1,9 +1,9 @@
 import { html } from "lit"
-import { blogPosts } from "./blogPosts.ts"
-import { useCases } from "./use-cases.ts"
-import { lixCover, lixCoverMobile } from "./lixCover.ts"
-import { header } from "./header.ts"
-import { footer } from "./footer.ts"
+import { blogPosts } from "./blogPosts.js"
+import { useCases } from "./use-cases.js"
+import { lixCover, lixCoverMobile } from "./lixCover.js"
+import { header } from "./header.js"
+import { footer } from "./footer.js"
 
 export const Page = () => html` ${header}
 	<!-- main section -->
