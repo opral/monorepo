@@ -24,11 +24,8 @@ import { currentVersionAtom, existingVersionsAtom, lixAtom } from "../state.ts";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import clsx from "clsx";
 import {
-	applyChanges,
 	Version,
-	changeIsLeafInVersion,
 	createVersion,
-	Lix,
 	switchVersion,
 	mergeVersion,
 } from "@lix-js/sdk";
@@ -219,34 +216,10 @@ const VersionDropdown = () => {
 	const [currentVersion] = useAtom(currentVersionAtom);
 	const [existingVersiones] = useAtom(existingVersionsAtom);
 	const [lix] = useAtom(lixAtom);
-	const [activeFile] = useAtom(activeFileAtom);
 
-	// ideally, lix handles this internally.
-	// ticket exists https://linear.app/opral/issue/LIXDK-219/only-applychanges-on-filedata-read
 	const switchToversion = useCallback(
-		async (version: Version, trx?: Lix["db"]) => {
-			const executeInTransaction = async (trx: Lix["db"]) => {
-				await switchVersion({ lix: { ...lix, db: trx }, to: version });
-
-				const changesOfversion = await trx
-					.selectFrom("change")
-					.where(changeIsLeafInVersion(version))
-					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-					.where("file_id", "=", activeFile.id)
-					.selectAll("change")
-					.select("snapshot.content")
-					.execute();
-
-				await applyChanges({
-					lix: { ...lix, db: trx },
-					changes: changesOfversion,
-				});
-			};
-			if (trx) {
-				await executeInTransaction(trx);
-			} else {
-				await lix.db.transaction().execute(executeInTransaction);
-			}
+		async (version: Version) => {
+			await switchVersion({ lix, to: version });
 			await saveLixToOpfs({ lix });
 		},
 		[lix]
