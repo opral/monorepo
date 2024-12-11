@@ -92,7 +92,7 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
       {type === "file" && (
         <div className={clsx("flex opacity-0 transition-opacity group-hover:opacity-100", dropdownOpen ? "opacity-100" : "")}>
           <Button variant="ghost">
-            <CustomLink to={appLink || ""} target="_blank">
+            <CustomLink to={appLink || ""}>
               Open
             </CustomLink>
           </Button>
