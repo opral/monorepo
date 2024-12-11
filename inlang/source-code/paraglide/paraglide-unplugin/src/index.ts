@@ -6,14 +6,12 @@ import { openRepository, findRepoRoot } from "@lix-js/client"
 import { compile, writeOutput, classifyProjectErrors } from "@inlang/paraglide-js/internal"
 
 import { type UserConfig, resolveConfig } from "./config.js"
-import { generateDTS } from "./dts.js"
+import { generateDTSFiles } from "./dts.js"
 import { makeArray } from "./utils.js"
 import { memoized } from "./memo.js"
 
 // Helper Plugins
-import { virtual } from "./virtual.js"
 import { build } from "./build.js"
-import path from "node:path"
 
 const PLUGIN_NAME = "unplugin-paraglide"
 
@@ -42,20 +40,9 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 
 		virtualModuleOutput = messageModulesOutput
 
-		if (c.outdir) {
-			await writeOutput(c.outdir, regularOutput, fs)
-		} else {
-			const dts = generateDTS(regularOutput, c.virtualModuleName)
+		const files = c.useVirtualModules ? generateDTSFiles(regularOutput) : regularOutput
+		await writeOutput(c.outdir, files, fs)
 
-			try {
-				await fs.writeFile(c.dtsPath, dts)
-			} catch (error) {
-				if (error instanceof Error && error.message.includes("ENOENT")) {
-					await fs.mkdir(path.dirname(c.dtsPath), { recursive: true })
-					await fs.writeFile(c.dtsPath, dts)
-				}
-			}
-		}
 		numCompiles++
 	})
 
@@ -140,17 +127,15 @@ const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
 				})
 			},
 		},
-		...makeArray(c.outdir ? build({ outdir: c.outdir, getModule }, ctx) : []),
 		...makeArray(
-			c.outdir
-				? []
-				: virtual(
-						{
-							name: c.virtualModuleName,
-							getModule,
-						},
-						ctx
-				  )
+			build(
+				{
+					outdir: c.outdir,
+					getModule,
+					buildOnly: c.useVirtualModules,
+				},
+				ctx
+			)
 		),
 	]
 }

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest"
-import { generateDTS } from "./dts.js"
+import { generateDTSFiles } from "./dts.js"
 
-describe("generateDTS", () => {
+describe("generateDTSFiles", () => {
 	it("works", () => {
 		const inputs = {
 			"runtime.js": `
@@ -25,9 +25,13 @@ export const availableLanguageTags = /** @type {const} */ (["en","de"]);
             `,
 		}
 
-		const dts = generateDTS(inputs, "$paraglide")
+		const dts = generateDTSFiles(inputs)
+
 		expect(dts).toMatchInlineSnapshot(`
-			"declare module \\"$paraglide/runtime.js\\" {/**
+			{
+			  "messages.d.ts": "export function my_mesage(): string;
+			",
+			  "runtime.d.ts": "/**
 			 * The project's available language tags.
 			 *
 			 * @example
@@ -37,10 +41,8 @@ export const availableLanguageTags = /** @type {const} */ (["en","de"]);
 			 */
 			export const availableLanguageTags: readonly [\\"en\\", \\"de\\"];
 			export type AvailableLanguageTag = (typeof availableLanguageTags)[number];
+			",
 			}
-
-			declare module \\"$paraglide/messages.js\\" {export function my_mesage(): string;
-			}"
 		`)
 	})
 })

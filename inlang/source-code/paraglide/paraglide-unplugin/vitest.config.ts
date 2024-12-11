@@ -2,6 +2,7 @@ import { defineConfig } from "vitest/config"
 import { createVitePlugin } from "unplugin"
 import { paraglide } from "./src/index"
 import { virtual } from "./src/virtual"
+import path from "path"
 
 const virtualPlugin = createVitePlugin(virtual)
 
@@ -9,6 +10,11 @@ export default defineConfig({
 	test: {
 		exclude: [],
 		include: ["src/**/*.test.ts"],
+	},
+	resolve: {
+		alias: {
+			$paraglide: path.resolve(__dirname, "./src/outdir"),
+		},
 	},
 	plugins: [
 		virtualPlugin({
@@ -29,7 +35,7 @@ export default defineConfig({
 			silent: true,
 			project: "./project.inlang",
 			experimentalUseVirtualModules: true,
-			outdir: ".",
+			outdir: "./src/outdir",
 		}),
 	],
 })

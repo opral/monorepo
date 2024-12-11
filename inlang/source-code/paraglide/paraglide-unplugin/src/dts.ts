@@ -17,14 +17,10 @@ const compilerOptions: CompilerOptions = {
 }
 
 /**
- * @param inputFiles
- * @param virtualModuleNamespace The prefix used for the virtual module namespace. Eg: `$paralgide`
- * @returns A .d.ts file that uses `declare module` declarations to type the given input files
+ * @param inputFiles The files in the `outdir`
+ * @returns .d.ts files for each file in the `outdir`
  */
-export function generateDTS(
-	inputFiles: Record<string, string>,
-	virtualModuleNamespace: string
-): string {
+export function generateDTSFiles(inputFiles: Record<string, string>): Record<string, string> {
 	/**
 	 * Stores files that were emitted as `.d.ts` files during the output.
 	 * @example
@@ -53,37 +49,5 @@ export function generateDTS(
 	const program = createProgram(inputs, compilerOptions, host)
 	program.emit()
 
-	return createDeclarationFile(inputs, virtualModuleNamespace, outputFiles)
-}
-
-/**
- * Takes the output of the TS compiler and bundles all the
- * declarations into a single declaration file for the virtual modules
- */
-function createDeclarationFile(
-	inputs: string[],
-	virtualModuleNamespace: string,
-	outputFiles: Record<string, string>
-) {
-	const declarations: string[] = []
-
-	for (const input of inputs) {
-		const declarationPath = input.replace(/.ts$/, ".d.ts").replace(/.js$/, ".d.ts")
-		const declaration = outputFiles[declarationPath]
-		if (!declaration) continue
-
-		declarations.push(createDeclaration(`${virtualModuleNamespace}/${input}`, declaration))
-	}
-
-	return declarations.join("\n\n")
-}
-
-/**
- * Creates a declaration statement for a module & it's types
- * @param moduleName
- * @param dts
- * @returns
- */
-function createDeclaration(moduleName: string, dts: string) {
-	return `declare module "${moduleName}" {${dts}}`
+	return outputFiles
 }
