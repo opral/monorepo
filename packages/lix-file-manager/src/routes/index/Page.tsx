@@ -82,7 +82,11 @@ export default function Page() {
 								id={file.id}
 								type="file"
 								name={file.path.replace("/", "")}
-								appLink={file.path.endsWith(".csv") ? `/app/csv/editor?f=${file.id}` : ""}
+								appLink={
+									file.path.endsWith(".csv")
+										? `/app/csv/editor?f=${file.id}`
+										: ""
+								}
 							/>
 						);
 					})}
@@ -116,7 +120,17 @@ export default function Page() {
 								: "Graph"
 						}
 						fileActions={[<VersionDropdown />]}
-					/>
+					>
+						<Button
+							variant="default"
+							size="default"
+							onClick={() =>
+								navigate(`/app/csv/editor?f=${fileIdSearchParams}`)
+							}
+						>
+							Open in CSV app
+						</Button>
+					</SectionHeader>
 					<div className="px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
 						<FilterSelect />
 						{changesCurrentVersion.map((change, i) => (
