@@ -200,8 +200,9 @@ export const allEdgesAtom = atom(async (get) => {
 export const changeConflictsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
-	const activeFile = await get(activeFileAtom);
+	// const activeFile = await get(activeFileAtom);
 	const currentVersion = await get(currentVersionAtom);
+
 	const changeConflictElements = await lix.db
 		.selectFrom("change_set_element")
 		.innerJoin(
@@ -216,7 +217,12 @@ export const changeConflictsAtom = atom(async (get) => {
 				.onRef("version_change.change_id", "=", "change.id")
 				.on("version_change.version_id", "=", currentVersion.id)
 		)
-		.where("change.file_id", "=", activeFile.id)
+		// .where((eb) =>
+		// 	eb.or([
+		// 		eb("change.file_id", "=", activeFile.id),
+		// 		eb("change.file_id", "=", "null"),
+		// 	])
+		// )
 		.where(changeConflictInVersion(currentVersion))
 		.selectAll("change_set_element")
 		.select([
