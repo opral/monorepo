@@ -11,8 +11,10 @@
     "clean": "rm -rf ./dist ./node_modules"
   },
   "dependencies": {
+    "@remix-run/express": "^2.15.1",
     "csv-app": "workspace:*",
-    "lix-file-manager": "workspace:*"
+    "lix-file-manager": "workspace:*",
+    "lix-website": "workspace:*"
   },
   "devDependencies": {
     "express": "^4.21.1",

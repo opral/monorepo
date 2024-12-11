@@ -1,11 +1,16 @@
 import express from "express";
+import { createRequestHandler } from "@remix-run/express";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import { dirname, join } from "path";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
 // Define __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const node_modules = join(__dirname, "../node_modules");
+
 const app = express();
 // forward browser fetch requests to correct subpath
 // user is on site /app/fm -> app requests /asset/xyz.js -> /app/fm/asset/xyz.js
@@ -39,6 +44,7 @@ app.use((req, res, next) => {
   return next();
 });
 
+// Serve pre-built Lix apps
 const lixApps = [
   {
     route: "fm",
@@ -63,13 +69,21 @@ for (const lixApp of lixApps) {
       res.status(404).send("File not found");
     }
   });
-};
+}
 
-// Fallback route for undefined routes
-app.get("*", (req, res) => {
-  res.status(404).send("File not found");
-});
-const port = 3000;
+// Serve static files from client
+app.use(express.static(`${node_modules}/lix-website/build/client`));
+
+// Serve the website server routes
+app.all(
+  "*",
+  createRequestHandler({
+    build: require(`${node_modules}/lix-website/build/server`),
+  })
+);
+
+// Start the server
+const port = 3005;
 app.listen(port, () => {
   console.info(`Server running at http://localhost:${port}/`);
 });
