@@ -1,5 +1,11 @@
 # @inlang/paraglide-sveltekit
 
+## 0.13.1
+
+### Patch Changes
+
+- reverts 0.13.0 because it leads to a crash in production https://github.com/opral/inlang-paraglide-js/issues/272
+
 ## 0.13.0
 
 ### Minor Changes
