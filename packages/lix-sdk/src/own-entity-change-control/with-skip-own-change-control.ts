@@ -8,6 +8,7 @@ export async function withSkipOwnChangeControl<T>(
 		await trx
 			.insertInto("key_value")
 			.values({ key: "#lix_skip_own_change_control", value: "true" })
+			.onConflict((oc) => oc.doUpdateSet({ value: "true" }))
 			.execute();
 
 		// Perform the user's operation

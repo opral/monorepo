@@ -29,3 +29,29 @@ test("skipping works", async () => {
 	console.log(changes);
 	expect(changes).toHaveLength(0);
 });
+
+test("if an outside transaction sets the value to true, no conflict should arise", async () => {
+	const lix = await openLixInMemory({});
+
+	// simulating an outside transaction setting the value to true
+	await withSkipOwnChangeControl(lix.db, async (trx) => {
+		// and an inside transaction setting the value to true as well
+		await withSkipOwnChangeControl(trx, async (trx2) => {
+			await trx2
+				.insertInto("key_value")
+				.values({ key: "foo", value: "bar" })
+				.execute();
+		});
+	});
+
+	const keyValues = await lix.db.selectFrom("key_value").selectAll().execute();
+	const changes = await lix.db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_key_value_table")
+		.where("entity_id", "=", "foo")
+		.selectAll()
+		.execute();
+
+	expect(changes).toHaveLength(0);
+	expect(keyValues.find((kv) => kv.key === "foo")).toBeDefined();
+});
