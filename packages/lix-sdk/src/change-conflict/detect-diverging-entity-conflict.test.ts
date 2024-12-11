@@ -65,7 +65,7 @@ test("it should detect a diverging entity conflict", async () => {
 	} satisfies DetectedConflict);
 });
 
-test("it should return undefined if no conflict exists (determined by finding the lowest common ancestor)", async () => {
+test("it should return a conflict if no common ancestor is found (two clients created different entities without being aware of it (aka distributed system))", async () => {
 	const lix = await openLixInMemory({});
 
 	const mockChanges = [
@@ -82,18 +82,18 @@ test("it should return undefined if no conflict exists (determined by finding th
 			id: "change1",
 			created_at: "mock",
 			plugin_key: "plugin1",
+			schema_key: "mock",
 			file_id: "mock",
 			entity_id: "value1",
-			schema_key: "mock",
 			snapshot_id: "no-content",
 		},
 		{
 			id: "change2",
 			created_at: "mock",
 			plugin_key: "plugin1",
+			schema_key: "mock",
 			file_id: "mock",
 			entity_id: "value2",
-			schema_key: "mock",
 			snapshot_id: "no-content",
 		},
 	] as const satisfies Change[];
@@ -104,20 +104,15 @@ test("it should return undefined if no conflict exists (determined by finding th
 		.returningAll()
 		.execute();
 
-	await lix.db
-		.insertInto("change_edge")
-		.values([
-			{ parent_id: "change0", child_id: "change1" },
-			// change3 has no parent
-		])
-		.execute();
-
 	const result = await detectDivergingEntityConflict({
 		lix: lix,
-		changes: [mockChanges[1], mockChanges[2]],
+		changes: [mockChanges[0], mockChanges[1]],
 	});
 
-	expect(result).toBeUndefined();
+	expect(result).toEqual({
+		key: LIX_DIVERGING_ENTITY_CONFLICT_KEY,
+		conflictingChangeIds: new Set(["change0", "change1"]),
+	} satisfies DetectedConflict);
 });
 
 test("it should return undefined if one of either change is the lowest common ancestor", async () => {
