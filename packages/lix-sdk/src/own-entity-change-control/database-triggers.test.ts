@@ -199,3 +199,61 @@ test("file.data is not own change controlled as plugins handle the change contro
 
 	expect(change.content?.data).toBe(undefined);
 });
+
+test("updating file.data does not trigger own change control", async () => {
+	const lix = await openLixInMemory({});
+
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			id: "file1",
+			data: new TextEncoder().encode("hello world"),
+			path: "/mock.txt",
+			metadata: null,
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	let changes = await lix.db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_file_table")
+		.where("entity_id", "=", file.id)
+		.selectAll()
+		.execute();
+
+	expect(changes.length).toBe(1);
+
+	await lix.db
+		.updateTable("file")
+		.set({ data: new TextEncoder().encode("hello world 2") })
+		.where("id", "=", file.id)
+		.execute();
+
+	changes = await lix.db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_file_table")
+		.where("entity_id", "=", file.id)
+		.selectAll()
+		.execute();
+
+	expect(changes.length).toBe(1);
+
+	// the metadata should be change controlled
+	// hence, this should trigger a change
+	await lix.db
+		.updateTable("file")
+		.set({
+			data: new TextEncoder().encode("hello world 3"),
+			metadata: { key: "value" },
+		})
+		.execute();
+
+	changes = await lix.db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_file_table")
+		.where("entity_id", "=", file.id)
+		.selectAll()
+		.execute();
+
+	expect(changes.length).toBe(2);
+});

@@ -56,6 +56,18 @@ export function applyOwnEntityChangeControlTriggers(
       
       CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_update
       AFTER UPDATE ON ${table}
+			${
+				// ignore update trigger if the change controlled properties
+				// did not change (a plugin likely called apply changes on the file.data)
+				table === "file"
+					? `
+			WHEN (
+				OLD.id IS NOT NEW.id OR
+				OLD.path IS NOT NEW.path OR
+				OLD.metadata IS NOT NEW.metadata
+			)`
+					: ""
+			}
       BEGIN
         SELECT handle_lix_own_entity_change('${table}', 'update', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
       END;
