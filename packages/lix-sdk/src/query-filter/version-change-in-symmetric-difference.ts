@@ -16,7 +16,10 @@ import type { Version, LixDatabaseSchema } from "../database/schema.js";
  *     .execute();
  *   ```
  */
-export function versionChangeInSymmetricDifference(a: Version, b: Version) {
+export function versionChangeInSymmetricDifference(
+	a: Pick<Version, "id">,
+	b: Pick<Version, "id">
+) {
 	return (
 		eb: ExpressionBuilder<LixDatabaseSchema, "version_change">
 	): ExpressionWrapper<LixDatabaseSchema, "version_change", SqlBool> =>

@@ -5,7 +5,7 @@ import { mockChange } from "../change/mock-change.js";
 import { createVersion } from "../version/create-version.js";
 import { versionChangeInSymmetricDifference } from "./version-change-in-symmetric-difference.js";
 
-test("should return the symmetric difference between two change sets", async () => {
+test("should return the symmetric difference between two versions", async () => {
 	const lix = await openLixInMemory({});
 
 	const versionA = await createVersion({ lix });
