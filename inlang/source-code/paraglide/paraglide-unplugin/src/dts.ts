@@ -49,5 +49,10 @@ export function generateDTSFiles(inputFiles: Record<string, string>): Record<str
 	const program = createProgram(inputs, compilerOptions, host)
 	program.emit()
 
-	return outputFiles
+	const output: Record<string, string> = {}
+	for (const [path, content] of Object.entries(outputFiles)) {
+		output[path] = `/* eslint-disable */\n` + content
+	}
+
+	return output
 }

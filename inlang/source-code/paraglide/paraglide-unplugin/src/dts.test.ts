@@ -29,9 +29,11 @@ export const availableLanguageTags = /** @type {const} */ (["en","de"]);
 
 		expect(dts).toMatchInlineSnapshot(`
 			{
-			  "messages.d.ts": "export function my_mesage(): string;
+			  "messages.d.ts": "/* eslint-disable */
+			export function my_mesage(): string;
 			",
-			  "runtime.d.ts": "/**
+			  "runtime.d.ts": "/* eslint-disable */
+			/**
 			 * The project's available language tags.
 			 *
 			 * @example
