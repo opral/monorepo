@@ -1,5 +1,7 @@
-import type { Version } from "../database/schema.js";
+import { applyChanges } from "../change/apply-changes.js";
+import type { Change, Version } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import { versionChangeInSymmetricDifference } from "../query-filter/version-change-in-symmetric-difference.js";
 
 /**
  * Switches the current Version to the given Version.
@@ -22,11 +24,66 @@ import type { Lix } from "../lix/open-lix.js";
  *   ```
  */
 export async function switchVersion(args: {
-	lix: Pick<Lix, "db">;
+	lix: Pick<Lix, "db" | "plugin">;
 	to: Pick<Version, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
+		const currentVersion = await trx
+			.selectFrom("current_version")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
 		await trx.updateTable("current_version").set({ id: args.to.id }).execute();
+
+		const versionChangesSymmetricDifference = await trx
+			.selectFrom("version_change")
+			.innerJoin("change", "version_change.change_id", "change.id")
+			.where(versionChangeInSymmetricDifference(currentVersion, args.to))
+			.selectAll("change")
+			.execute();
+
+		const toBeAppliedChanges: Change[] = [];
+
+		await Promise.all(
+			versionChangesSymmetricDifference.map(async (change) => {
+				const existingEntityChange = await trx
+					.selectFrom("version_change")
+					.innerJoin("change", "change.id", "version_change.change_id")
+					.where("version_id", "=", args.to.id)
+					.where("change.entity_id", "=", change.entity_id)
+					.where("change.file_id", "=", change.file_id)
+					.where("change.schema_key", "=", change.schema_key)
+					.selectAll("change")
+					.executeTakeFirst();
+
+				if (existingEntityChange) {
+					return toBeAppliedChanges.push(existingEntityChange);
+				}
+				// need to remove the entity when switching the version
+				else {
+					if (
+						change.plugin_key === "lix_own_entity" &&
+						(change.schema_key === "lix_account_table" ||
+							change.schema_key === "lix_version_table")
+					) {
+						// deleting accounts and versions when switching is
+						// not desired. a version should be able to jump to a
+						// different version and the accounts are not affected
+						return;
+					}
+					// the entity does not exist in the switched to version
+					return toBeAppliedChanges.push({
+						...change,
+						snapshot_id: "no-content",
+					});
+				}
+			})
+		);
+
+		await applyChanges({
+			lix: { ...args.lix, db: trx },
+			changes: toBeAppliedChanges,
+		});
 	};
 
 	if (args.lix.db.isTransaction) {
