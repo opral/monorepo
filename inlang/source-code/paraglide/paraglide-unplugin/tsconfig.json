@@ -8,6 +8,9 @@
 		"sourceMap": true,
 		"checkJs": true,
 		"declarationMap": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"paths": {
+			"$paraglide/*": ["./src/outdir/*"]
+		}
 	}
 }

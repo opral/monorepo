@@ -1,123 +1,110 @@
-import { createUnplugin } from "unplugin"
-import {
-	Message,
-	ProjectSettings,
-	loadProject,
-	type InlangProject,
-	normalizeMessage,
-} from "@inlang/sdk"
-import { openRepository, findRepoRoot } from "@lix-js/client"
-import path from "node:path"
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import fs from "node:fs/promises"
-import { compile, writeOutput, Logger, classifyProjectErrors } from "@inlang/paraglide-js/internal"
-import crypto from "node:crypto"
+
+import { createUnplugin, type UnpluginFactory } from "unplugin"
+import { Message, ProjectSettings, loadProject, type InlangProject } from "@inlang/sdk"
+import { openRepository, findRepoRoot } from "@lix-js/client"
+import { compile, writeOutput, classifyProjectErrors } from "@inlang/paraglide-js/internal"
+
+import { type UserConfig, resolveConfig } from "./config.js"
+import { generateDTSFiles } from "./dts.js"
+import { makeArray } from "./utils.js"
+import { memoized } from "./memo.js"
+
+// Helper Plugins
+import { virtualModules } from "./virtual.js"
 
 const PLUGIN_NAME = "unplugin-paraglide"
-const VITE_BUILD_PLUGIN_NAME = "unplugin-paraglide-vite-virtual-message-modules"
 
-const isWindows = typeof process !== "undefined" && process.platform === "win32"
-
-export type UserConfig = {
-	project: string
-	outdir: string
-	silent?: boolean
-}
-
-export const paraglide = createUnplugin((config: UserConfig) => {
-	const options = {
-		silent: false,
-		...config,
-	}
-
-	const projectPath = path.resolve(process.cwd(), options.project)
-	const outputDirectory = path.resolve(process.cwd(), options.outdir)
-	let normalizedOutdir = outputDirectory.replaceAll("\\", "/")
-	if (!normalizedOutdir.endsWith("/")) normalizedOutdir = normalizedOutdir + "/"
-	const logger = new Logger({ silent: options.silent, prefix: true })
+const plugin: UnpluginFactory<UserConfig> = (userConfig, ctx) => {
+	const c = resolveConfig(userConfig)
 
 	//Keep track of how many times we've compiled
 	let numCompiles = 0
-	let previousMessagesHash: string | undefined = undefined
-
 	let virtualModuleOutput: Record<string, string> = {}
 
-	async function triggerCompile(
+	const triggerCompile = memoized(async function (
 		messages: readonly Message[],
 		settings: ProjectSettings,
 		projectId: string | undefined
 	) {
-		const currentMessagesHash = hashMessages(messages ?? [], settings)
-		if (currentMessagesHash === previousMessagesHash) return
-
 		if (messages.length === 0) {
-			logger.warn("No messages found - Skipping compilation")
+			c.logger.warn("No messages found - Skipping compilation")
 			return
 		}
 
 		logMessageChange()
-		previousMessagesHash = currentMessagesHash
-
 		const [regularOutput, messageModulesOutput] = await Promise.all([
-			compile({
-				messages,
-				settings,
-				outputStructure: "regular",
-				projectId,
-			}),
+			compile({ messages, settings, outputStructure: "regular", projectId }),
 			compile({ messages, settings, outputStructure: "message-modules", projectId }),
 		])
 
 		virtualModuleOutput = messageModulesOutput
-		const fsOutput = regularOutput
 
-		await writeOutput(outputDirectory, fsOutput, fs)
+		const dtsFiles = c.useVirtualModules ? generateDTSFiles(regularOutput) : undefined
+
+		const virtualModuleFiles = c.useVirtualModules
+			? // only emit the runtime.d.ts and messages.d.ts files to declutter the output directory
+			  {
+					"runtime.d.ts": dtsFiles!["runtime.d.ts"]!,
+					"messages.d.ts": dtsFiles!["messages.d.ts"]!,
+			  }
+			: undefined
+
+		const files = c.useVirtualModules ? virtualModuleFiles! : regularOutput
+		await writeOutput(c.outdir, files, fs)
+
 		numCompiles++
-	}
+	})
 
 	function logMessageChange() {
-		if (!logger) return
-		if (options.silent) return
-
-		if (numCompiles === 0) {
-			logger.info(`Compiling Messages into ${options.outdir}`)
-		}
-
-		if (numCompiles >= 1) {
-			logger.info(`Messages changed - Recompiling into ${options.outdir}`)
-		}
+		if (!c.logger) return
+		if (numCompiles === 0) c.logger.info(`Compiling Messages${c.outdir ? `into ${c.outdir}` : ""}`)
+		else if (numCompiles >= 1)
+			c.logger.info(`Messages changed - Recompiling${c.outdir ? `into ${c.outdir}` : ""}`)
 	}
 
 	let project: InlangProject | undefined = undefined
 	async function getProject(): Promise<InlangProject> {
 		if (project) return project
-
-		const repoRoot = await findRepoRoot({ nodeishFs: fs, path: projectPath })
-
+		const repoRoot = await findRepoRoot({ nodeishFs: fs, path: c.projectPath })
 		const repo = await openRepository(repoRoot || "file://" + process.cwd(), {
 			nodeishFs: fs,
 		})
 
 		project = await loadProject({
 			appId: "library.inlang.paraglideJs",
-			projectPath: path.resolve(process.cwd(), options.project),
+			projectPath: c.projectPath,
 			repo,
 		})
 
 		return project
 	}
 
-	// if build
+	/**
+	 * Returns the paraglide module at the given path:
+	 * @example
+	 * ```
+	 * getModule("runtime.js")
+	 * getModule("messages/en.js")
+	 * ```
+	 */
+	function getModule(path: string): string | undefined {
+		if (path in virtualModuleOutput) return virtualModuleOutput[path]
+		if (path.endsWith(".js")) return // it simply doesn't exist.
+
+		return getModule(path + ".js") || getModule(path + "/index.js")
+	}
 
 	return [
 		{
 			name: PLUGIN_NAME,
-
 			enforce: "pre",
 			async buildStart() {
 				const project = await getProject()
-
 				const initialMessages = project.query.messages.getAll()
 				const settings = project.settings()
+
 				await triggerCompile(initialMessages, settings, project.id)
 
 				project.errors.subscribe((errors) => {
@@ -125,14 +112,14 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 					const { fatalErrors, nonFatalErrors } = classifyProjectErrors(errors)
 					for (const error of nonFatalErrors) {
-						logger.warn(error.message)
+						c.logger.warn(error.message)
 					}
 
 					for (const error of fatalErrors) {
 						if (error instanceof Error) {
-							logger.error(error.message) // hide the stack trace
+							c.logger.error(error.message) // hide the stack trace
 						} else {
-							logger.error(error)
+							c.logger.error(error)
 						}
 					}
 				})
@@ -140,7 +127,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 				let numInvocations = 0
 				project.query.messages.getAll.subscribe((messages) => {
 					numInvocations++
-					if (numInvocations === 1) return
+					if (numInvocations === 1) return // skip writing the first time, since we just called compile
 					triggerCompile(messages, project.settings(), project.id)
 				})
 			},
@@ -151,64 +138,21 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 				compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
 					const project = await getProject()
 					await triggerCompile(project.query.messages.getAll(), project.settings(), project.id)
-					console.info(`Compiled Messages into ${options.outdir}`)
 				})
 			},
 		},
-		{
-			name: VITE_BUILD_PLUGIN_NAME,
-			vite: {
-				apply: "build",
-				resolveId(id, importer) {
-					// if the id contains a null char ignore it since it should be a rollup virtual module
-					// this helps support other vite plugins (like sentry) that make heavy use of these types of file-namings
-					if (id.includes("\0")) return undefined
-					// resolve relative imports inside the output directory
-					// the importer is alwazs normalized
-					if (importer?.startsWith(normalizedOutdir)) {
-						const dirname = path.dirname(importer).replaceAll("\\", "/")
-						if (id.startsWith(dirname)) return id
-
-						if (isWindows) {
-							const resolvedPath = path
-								.resolve(dirname.replaceAll("/", "\\"), id.replaceAll("/", "\\"))
-								.replaceAll("\\", "/")
-							return resolvedPath
-						}
-
-						const resolvedPath = path.resolve(dirname, id)
-						return resolvedPath
-					}
-					return undefined
+		...makeArray(
+			virtualModules(
+				{
+					outdir: c.outdir,
+					getModule,
+					buildOnly: !c.useVirtualModules,
 				},
-
-				load(id) {
-					id = id.replaceAll("\\", "/")
-					//if it starts with the outdir use the paraglideOutput virtual modules instead
-					if (id.startsWith(normalizedOutdir)) {
-						const internal = id.slice(normalizedOutdir.length)
-						const resolved = virtualModuleOutput[internal]
-						return resolved
-					}
-
-					return undefined
-				},
-			},
-		},
+				ctx
+			)
+		),
 	]
-})
-
-export function hashMessages(messages: readonly Message[], settings: ProjectSettings): string {
-	const normalizedMessages = messages
-		.map(normalizeMessage)
-		.sort((a, b) => a.id.localeCompare(b.id, "en"))
-
-	try {
-		const hash = crypto.createHash("sha256")
-		hash.update(JSON.stringify(normalizedMessages))
-		hash.update(JSON.stringify(settings))
-		return hash.digest("hex")
-	} catch (e) {
-		return crypto.randomUUID()
-	}
 }
+
+export const paraglide = createUnplugin(plugin)
+export type { UserConfig }
