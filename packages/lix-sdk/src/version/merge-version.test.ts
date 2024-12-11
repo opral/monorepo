@@ -223,6 +223,7 @@ test("it should not update the target version pointers of a conflicting change",
 
 	const conflicts = await lix.db
 		.selectFrom("change_conflict")
+		.where("key", "=", "mock-conflict")
 		.selectAll()
 		.execute();
 
