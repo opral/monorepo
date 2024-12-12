@@ -214,7 +214,7 @@ export default function Page() {
 				</div>
 				<div className="px-3 py-3 border-t border-slate-100">
 					<CustomLink
-						to="/website/file-manager"
+						to="/file-manager"
 						className="block p-4 bg-slate-50 hover:bg-slate-100 rounded-lg ring-1 ring-slate-200 transition-all"
 					>
 						<div className="flex items-center justify-between">

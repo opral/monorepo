@@ -15,7 +15,8 @@ const app = express();
 
 // Middleware to forward browser fetch requests to the correct subpath
 app.use((req, res, next) => {
-  if (req.url === "/file-manager") {
+  // Skip for /file-manager
+  if (req.url?.startsWith("/file-manager")) {
     return next();
   }
 
