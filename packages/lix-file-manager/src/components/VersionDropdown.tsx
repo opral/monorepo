@@ -25,6 +25,8 @@ import { Version, createVersion, switchVersion } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.js";
 import { humanId } from "human-id";
 import { Check, Trash2, ChevronDown, Plus } from "lucide-react";
+import { MergeDialog } from "./MergeDialog.js";
+import IconMerge from "./icons/IconMerge.js";
 
 export function VersionDropdown() {
 	const [currentVersion] = useAtom(currentVersionAtom);
@@ -35,6 +37,9 @@ export function VersionDropdown() {
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const [deleteConfirmation, setDeleteConfirmation] = useState("");
 	const [isHovered, setIsHovered] = useState(false);
+	const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
+	const [selectedSourceVersion, setSelectedSourceVersion] =
+		useState<Version | null>(null);
 
 	const switchToVersion = useCallback(
 		async (version: Version) => {
@@ -129,7 +134,11 @@ export function VersionDropdown() {
 				<div className="flex gap-2">
 					<DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
 						<DropdownMenuTrigger asChild>
-							<Button variant="secondary" size="default" className="gap-2">
+							<Button
+								variant="secondary"
+								size="default"
+								className="gap-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+							>
 								{currentVersion.name}
 								<ChevronDown className="h-4 w-4" />
 							</Button>
@@ -141,22 +150,42 @@ export function VersionDropdown() {
 									onClick={() => switchToVersion(version)}
 									className="flex items-center justify-between group"
 								>
-									<span>{version.name}</span>
-									{version.id === currentVersion.id ? (
-										<Check className="h-4 w-4 opacity-50" />
-									) : version.name !== "main" ? (
-										<Button
-											variant="ghost"
-											size="sm"
-											className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-											onClick={(e) => {
-												e.stopPropagation();
-												setVersionToDelete(version);
-											}}
-										>
-											<Trash2 className="h-4 w-4" />
-										</Button>
-									) : null}
+									<div className="flex items-center gap-2">
+										<span>{version.name}</span>
+									</div>
+									<div className="flex items-center gap-1">
+										{version.id === currentVersion.id ? (
+											<Check className="h-4 w-4 opacity-50" />
+										) : (
+											<>
+												<Button
+													variant="ghost"
+													size="sm"
+													className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+													onClick={(e) => {
+														e.stopPropagation();
+														setSelectedSourceVersion(version);
+														setMergeDialogOpen(true);
+													}}
+												>
+													<IconMerge />
+												</Button>
+												{version.name !== "main" && (
+													<Button
+														variant="ghost"
+														size="sm"
+														className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+														onClick={(e) => {
+															e.stopPropagation();
+															setVersionToDelete(version);
+														}}
+													>
+														<Trash2 className="h-4 w-4" />
+													</Button>
+												)}
+											</>
+										)}
+									</div>
 								</DropdownMenuItem>
 							))}
 							<DropdownMenuSeparator />
@@ -254,6 +283,23 @@ export function VersionDropdown() {
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
+
+			<MergeDialog
+				open={mergeDialogOpen}
+				onOpenChange={(open) => {
+					setMergeDialogOpen(open);
+					if (!open) setSelectedSourceVersion(null);
+				}}
+				versions={existingVersions}
+				currentVersion={currentVersion}
+				lix={lix}
+				initialSourceVersion={selectedSourceVersion}
+				onMergeComplete={() => {
+					setMergeDialogOpen(false);
+					setSelectedSourceVersion(null);
+					window.dispatchEvent(new Event("version-changed"));
+				}}
+			/>
 		</>
 	);
 }
