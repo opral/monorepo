@@ -3,6 +3,7 @@ import { createServerApiHandler } from "../create-server-api-handler.js";
 import { createServerApiMemoryStorage } from "../storage/create-memory-storage.js";
 import { newLixFile } from "../../lix/new-lix.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import { createLsaInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 
 test("it should fetch the lix file from the server", async () => {
 	const lix = await openLixInMemory({
@@ -20,10 +21,11 @@ test("it should fetch the lix file from the server", async () => {
 		.execute();
 
 	const storage = createServerApiMemoryStorage();
-	const lsa = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ storage, environment });
 
 	// Store the lix file
-	await lsa(
+	await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
 			body: await lix.toBlob(),
@@ -31,7 +33,7 @@ test("it should fetch the lix file from the server", async () => {
 	);
 
 	// Fetch the lix file
-	const response = await lsa(
+	const response = await lsaHandler(
 		new Request("http://localhost:3000/lsa/get-v1", {
 			method: "POST",
 			headers: {
@@ -64,9 +66,11 @@ test("it should fetch the lix file from the server", async () => {
 
 test("it should return 404 if the lix file does not exist", async () => {
 	const storage = createServerApiMemoryStorage();
-	const lsa = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
 
-	const response = await lsa(
+	const lsaHandler = await createServerApiHandler({ storage, environment });
+
+	const response = await lsaHandler(
 		new Request("http://localhost:3000/lsa/get-v1", {
 			method: "POST",
 			headers: {
@@ -79,14 +83,15 @@ test("it should return 404 if the lix file does not exist", async () => {
 	const responseJson = await response.json();
 
 	expect(response.status).toBe(404);
-	expect(responseJson.error).toBe("Lix file not found");
+	expect(responseJson.error).toBe("Lix not found");
 });
 
 test("it should return 400 for a request without lix_id", async () => {
 	const storage = createServerApiMemoryStorage();
-	const lsa = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ storage, environment });
 
-	const response = await lsa(
+	const response = await lsaHandler(
 		new Request("http://localhost:3000/lsa/get-v1", {
 			method: "POST",
 			headers: {

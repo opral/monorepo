@@ -9,6 +9,8 @@ export type LsaEnvironment = {
 	has(key: string): Promise<boolean>;
 	delete(key: string): Promise<void>;
 
+	getLix(args: { id: string }): Promise<Blob | undefined>;
+
 	/**
 	 * If a lix exists on the server.
 	 */
