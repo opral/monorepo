@@ -251,21 +251,20 @@ export default function Page() {
 						<Button
 							variant="default"
 							size="default"
-							onClick={() =>
-								activeFile?.path
-									? isCsvFile(activeFile.path)
-										? navigate(`/app/csv/editor?f=${fileIdSearchParams}`)
-										: window.open(
-												"https://github.com/opral/monorepo/tree/main/lix",
-												"_blank"
-											)
-									: null
-							}
 							className={activeFile?.path ? "" : "hidden"}
 						>
+							<CustomLink
+								to={
+									activeFile?.path && isCsvFile(activeFile.path)
+										? `/app/csv/editor?f=${fileIdSearchParams}`
+										: "https://github.com/opral/monorepo/tree/main/lix"
+								}
+								target={isCsvFile(activeFile?.path || "") ? "_self" : "_blank"}
+							>
 							{activeFile?.path && isCsvFile(activeFile.path)
 								? "Open in CSV app"
 								: "Build a Lix App"}
+							</CustomLink>
 						</Button>
 					</SectionHeader>
 					<div className="px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
