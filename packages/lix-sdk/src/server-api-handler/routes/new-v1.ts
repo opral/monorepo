@@ -15,13 +15,13 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 		});
 	}
 
-	const { value: id } = await lix.db
+	const lixId = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const exists = await context.storage.has(`lix-file-${id}`);
+	const exists = await context.environment.hasLix({ id: lixId.value });
 
 	if (exists) {
 		return new Response(null, {
@@ -29,9 +29,9 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 		});
 	}
 
-	await context.storage.set(`lix-file-${id}`, blob);
+	await context.environment.setLix({ id: lixId.value, blob });
 
-	return new Response(JSON.stringify({ id }), {
+	return new Response(JSON.stringify({ id: lixId.value }), {
 		status: 201,
 		headers: {
 			"Content-Type": "application/json",
