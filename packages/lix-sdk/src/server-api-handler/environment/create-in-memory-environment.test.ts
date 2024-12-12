@@ -16,9 +16,9 @@ test("opening a lix works", async () => {
 	// initialize the env with the lix file
 	environment.setLix({ id: lixId, blob: await mockLix.toBlob() });
 
-	const [lix, connectionId] = await environment.openLix({ id: lixId });
+	const open0 = await environment.openLix({ id: lixId });
 
-	const mockInsert = await lix.db
+	const mockInsert = await open0.lix.db
 		.insertInto("key_value")
 		.values({ key: "foo", value: "bar" })
 		.returningAll()
@@ -29,13 +29,16 @@ test("opening a lix works", async () => {
 		value: "bar",
 	});
 
-	await environment.closeLix({ id: lixId, connectionId });
+	await environment.closeLix({
+		id: lixId,
+		connectionId: open0.connectionId,
+	});
 
-	const [reopenedLix, connectionId2] = await environment.openLix({
+	const open1 = await environment.openLix({
 		id: lixId,
 	});
 
-	const mockSelect = await reopenedLix.db
+	const mockSelect = await open1.lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "foo")
 		.selectAll()
@@ -43,9 +46,8 @@ test("opening a lix works", async () => {
 
 	expect(mockSelect).toEqual({ key: "foo", value: "bar" });
 
-	await environment.closeLix({ id: lixId, connectionId: connectionId2 });
+	await environment.closeLix({ id: lixId, connectionId: open1.connectionId });
 });
-
 
 test("it handles concurrent connections", async () => {
 	const environment = createLsaInMemoryEnvironment();
@@ -61,10 +63,10 @@ test("it handles concurrent connections", async () => {
 	// initialize the env with the lix file
 	environment.setLix({ id: lixId, blob: await mockLix.toBlob() });
 
-	const [lix1, connectionId1] = await environment.openLix({ id: lixId });
-	const [lix2, connectionId2] = await environment.openLix({ id: lixId });
+	const open0 = await environment.openLix({ id: lixId });
+	const open1 = await environment.openLix({ id: lixId });
 
-	const mockInsert = await lix1.db
+	const mockInsert = await open0.lix.db
 		.insertInto("key_value")
 		.values({ key: "foo", value: "bar" })
 		.returningAll()
@@ -75,7 +77,7 @@ test("it handles concurrent connections", async () => {
 		value: "bar",
 	});
 
-	const mockSelect = await lix2.db
+	const mockSelect = await open1.lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "foo")
 		.selectAll()
@@ -86,7 +88,7 @@ test("it handles concurrent connections", async () => {
 	// test both writing at the same time
 
 	await Promise.all([
-		lix1.db.transaction().execute(async (trx) => {
+		open0.lix.db.transaction().execute(async (trx) => {
 			await trx
 				.updateTable("key_value")
 				.where("key", "=", "foo")
@@ -96,7 +98,7 @@ test("it handles concurrent connections", async () => {
 			// and keep the transaction open
 			return await new Promise((resolve) => setTimeout(resolve, 100));
 		}),
-		lix2.db.transaction().execute((trx) => {
+		open1.lix.db.transaction().execute((trx) => {
 			// expecting bar3 to be the final value
 			// even though it's processing faster than
 			// the other transaction but it's the last one to commit
@@ -108,15 +110,15 @@ test("it handles concurrent connections", async () => {
 		}),
 	]);
 
-	await environment.closeLix({ id: lixId, connectionId: connectionId1 });
+	await environment.closeLix({ id: lixId, connectionId: open0.connectionId });
 
-	await environment.closeLix({ id: lixId, connectionId: connectionId2 });
+	await environment.closeLix({ id: lixId, connectionId: open1.connectionId });
 
-	const [reopenedLix, connectionId3] = await environment.openLix({
+	const open2 = await environment.openLix({
 		id: lixId,
 	});
 
-	const mockSelect2 = await reopenedLix.db
+	const mockSelect2 = await open2.lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "foo")
 		.selectAll()
@@ -124,5 +126,5 @@ test("it handles concurrent connections", async () => {
 
 	expect(mockSelect2).toEqual({ key: "foo", value: "bar3" });
 
-	await environment.closeLix({ id: lixId, connectionId: connectionId3 });
+	await environment.closeLix({ id: lixId, connectionId: open2.connectionId });
 });
