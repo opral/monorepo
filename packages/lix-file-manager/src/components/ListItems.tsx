@@ -83,7 +83,7 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 	return (
 		<div
 			className={clsx(
-				"group flex items-center mx-2.5 my-1.5 px-1.5 my-1 hover:bg-slate-50 cursor-pointer rounded-md",
+				"group flex items-center mx-2.5 my-1.5 px-1.5 h-9 hover:bg-slate-50 cursor-pointer rounded-md",
 				searchParams.get("f") === id ? "bg-slate-100 hover:bg-slate-100" : ""
 			)}
 			onClick={() => handleSelectFile()}
