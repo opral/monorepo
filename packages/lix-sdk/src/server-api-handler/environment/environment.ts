@@ -26,7 +26,9 @@ export type LsaEnvironment = {
 	 *
 	 * The server will return a connection id that can be used to close the lix.
 	 */
-	openLix(args: { id: string }): Promise<{ lix: Lix; connectionId: string }>;
+	openLix(args: {
+		id: string;
+	}): Promise<{ lix: Lix; id: string; connectionId: string }>;
 	/**
 	 * Closes a lix.
 	 *

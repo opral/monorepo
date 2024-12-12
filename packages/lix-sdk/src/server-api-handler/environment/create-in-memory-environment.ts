@@ -79,7 +79,7 @@ export const createLsaInMemoryEnvironment = (): LsaEnvironment => {
 				openConnections.set(args.id, new Set([connectionId]));
 			}
 
-			return { lix, connectionId };
+			return { lix, id: args.id, connectionId };
 		},
 
 		async closeLix(args: { id: string; connectionId: string }): Promise<void> {

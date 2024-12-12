@@ -1,6 +1,5 @@
 import { test, expect } from "vitest";
 import { createServerApiHandler } from "../create-server-api-handler.js";
-import { createServerApiMemoryStorage } from "../storage/create-memory-storage.js";
 import { newLixFile } from "../../lix/new-lix.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import { createLsaInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
@@ -20,9 +19,8 @@ test("it should fetch the lix file from the server", async () => {
 		.values({ key: "mock_key", value: "hello world" })
 		.execute();
 
-	const storage = createServerApiMemoryStorage();
 	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ storage, environment });
+	const lsaHandler = await createServerApiHandler({ environment });
 
 	// Store the lix file
 	await lsaHandler(
@@ -65,10 +63,9 @@ test("it should fetch the lix file from the server", async () => {
 });
 
 test("it should return 404 if the lix file does not exist", async () => {
-	const storage = createServerApiMemoryStorage();
 	const environment = createLsaInMemoryEnvironment();
 
-	const lsaHandler = await createServerApiHandler({ storage, environment });
+	const lsaHandler = await createServerApiHandler({ environment });
 
 	const response = await lsaHandler(
 		new Request("http://localhost:3000/lsa/get-v1", {
@@ -87,9 +84,8 @@ test("it should return 404 if the lix file does not exist", async () => {
 });
 
 test("it should return 400 for a request without lix_id", async () => {
-	const storage = createServerApiMemoryStorage();
 	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ storage, environment });
+	const lsaHandler = await createServerApiHandler({ environment });
 
 	const response = await lsaHandler(
 		new Request("http://localhost:3000/lsa/get-v1", {

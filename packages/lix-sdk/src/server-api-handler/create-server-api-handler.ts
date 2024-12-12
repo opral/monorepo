@@ -1,4 +1,3 @@
-import type { Storage } from "./storage/storage.js";
 import { route as newRouteV1 } from "./routes/new-v1.js";
 import { route as pushRouteV1 } from "./routes/push-v1.js";
 import { route as pullRouteV1 } from "./routes/pull-v1.js";
@@ -9,7 +8,6 @@ export type LixServerApiHandler = (request: Request) => Promise<Response>;
 
 export type LixServerApiHandlerContext = {
 	request: Request;
-	storage?: Storage;
 	environment: LsaEnvironment;
 	params?: Record<string, string | undefined>;
 };
@@ -56,9 +54,8 @@ export type LixServerApiHandlerRoute = (
  */
 export async function createServerApiHandler(args: {
 	environment: LsaEnvironment;
-	storage?: Storage;
 }): Promise<LixServerApiHandler> {
-	const context = { environment: args.environment, storage: args.storage };
+	const context = { environment: args.environment };
 
 	return async (request) => {
 		try {
