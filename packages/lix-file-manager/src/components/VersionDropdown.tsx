@@ -170,7 +170,6 @@ export function VersionDropdown() {
 								<ChevronDown className="h-4 w-4" />
 							</Button>
 						</DropdownMenuTrigger>
-						å
 						<DropdownMenuContent align="start" className="w-56">
 							{existingVersions?.map((version) => (
 								<DropdownMenuItem
