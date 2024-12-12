@@ -15,7 +15,6 @@ import {
 	DialogTitle,
 	DialogFooter,
 } from "@/components/ui/dialog.js";
-import IconBranch from "@/components/icons/IconBranch.js";
 import {
 	currentVersionAtom,
 	existingVersionsAtom,
@@ -25,7 +24,7 @@ import {
 import { Version, createVersion, switchVersion } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.js";
 import { humanId } from "human-id";
-import { Plus, Check, Trash2, Cloud } from "lucide-react";
+import { Check, Trash2, ChevronDown } from "lucide-react";
 
 export function VersionDropdown() {
 	const [currentVersion] = useAtom(currentVersionAtom);
@@ -122,20 +121,57 @@ export function VersionDropdown() {
 		await saveLixToOpfs({ lix });
 	};
 
+	const handleMerge = async () => {
+		if (!lix) return;
+
+		try {
+			// Open file picker for .lix files
+			const input = document.createElement("input");
+			input.type = "file";
+			// TODO: Add .lix to accept
+			// input.accept = ".lix";
+
+			input.onchange = async (e) => {
+				const file = (e.target as HTMLInputElement).files?.[0];
+				if (!file) return;
+
+				// Read the file and merge it
+				const reader = new FileReader();
+				reader.onload = async (event) => {
+					const content = event.target?.result;
+					if (!content || typeof content !== "string") return;
+
+					try {
+						// TODO: Implement actual merge logic here
+						alert("Merge functionality not yet implemented");
+					} catch (error) {
+						console.error("Merge failed:", error);
+					}
+				};
+				reader.readAsText(file);
+			};
+
+			input.click();
+		} catch (error) {
+			console.error("Merge failed:", error);
+		}
+	};
+
 	if (!currentVersion) return null;
 
 	return (
 		<>
-			<div className="flex flex-col gap-2">
+			<div className="flex flex-col gap-2 mr-2">
 				<div className="flex gap-2">
 					<DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
 						<DropdownMenuTrigger asChild>
 							<Button variant="secondary" size="default" className="gap-2">
-								<IconBranch />
 								{currentVersion.name}
+								<ChevronDown className="h-4 w-4" />
 							</Button>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-56">
+						å
+						<DropdownMenuContent align="start" className="w-56">
 							{existingVersions?.map((version) => (
 								<DropdownMenuItem
 									key={version.id}
@@ -162,7 +198,6 @@ export function VersionDropdown() {
 							))}
 							<DropdownMenuSeparator />
 							<DropdownMenuItem onClick={handleCreateVersion}>
-								<Plus className="mr-2 h-4 w-4" />
 								Create version
 							</DropdownMenuItem>
 						</DropdownMenuContent>
@@ -172,10 +207,10 @@ export function VersionDropdown() {
 							variant="secondary"
 							size="default"
 							onClick={handleSync}
-							className="gap-2"
+							className="gap-2 relative pr-8"
 						>
-							<Cloud className="h-4 w-4" />
 							Sync
+							<div className="w-2 h-2 rounded-full bg-slate-400 absolute right-3" />
 						</Button>
 					) : (
 						<div
@@ -184,14 +219,22 @@ export function VersionDropdown() {
 							onMouseEnter={() => setIsHovered(true)}
 							onMouseLeave={() => setIsHovered(false)}
 						>
+							<span className="text-sm text-slate-700">
+								{isHovered ? "Stop syncing" : "Syncing"}
+							</span>
 							<div
 								className={`w-2 h-2 rounded-full ${isHovered ? "bg-red-600" : "bg-green-600"}`}
 							/>
-							<span className="text-sm text-slate-700">
-								{isHovered ? "Stop syncing to" : "Syncing to"} {serverUrl}
-							</span>
 						</div>
 					)}
+					<Button
+						variant="default"
+						size="default"
+						onClick={handleMerge}
+						className="gap-2"
+					>
+						Merge
+					</Button>
 				</div>
 			</div>
 

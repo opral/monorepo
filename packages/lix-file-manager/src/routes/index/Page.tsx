@@ -27,7 +27,13 @@ import { VersionDropdown } from "@/components/VersionDropdown.tsx";
 import CustomLink from "@/components/CustomLink.tsx";
 import { useCallback } from "react";
 import DropArea from "@/components/DropArea.js";
-import { Plug } from "lucide-react";
+import { Download, Ellipsis, Plug, TrashIcon } from "lucide-react";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu.tsx";
 
 const isCsvFile = (path: string) => {
 	return path.toLowerCase().endsWith(".csv");
@@ -105,35 +111,45 @@ export default function Page() {
 		<div className="flex bg-white h-full">
 			<div
 				// min 300px, max 600px – change also in JS beneath
-				className="min-w-[300px] max-w-[600px] w-[340px] flex flex-col h-full relative"
+				className="min-w-[300px] max-w-[600px] w-[450px] flex flex-col h-full relative"
 				ref={(el) => {
 					if (el) {
 						el.style.width = el.offsetWidth + "px";
 					}
 				}}
 			>
-				<SectionHeader title="Files">
-					<Button
-						variant="ghost"
-						onClick={async (e) => {
-							e.stopPropagation();
-							// @ts-expect-error - globally defined
-							await window.deleteLix();
-							window.location.href = "/";
-						}}
-					>
-						Reset
-					</Button>
-					<Button
-						variant="secondary"
-						onClick={(e) => {
-							e.stopPropagation();
-							handleUpload();
-						}}
-					>
-						<IconUpload />
-						Upload
-					</Button>
+				<SectionHeader title="Files" fileActions={[<VersionDropdown />]}>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="secondary" size="default">
+								<Ellipsis />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem onClick={handleUpload}>
+								<IconUpload />
+								Upload
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								onClick={async () => {
+									// @ts-expect-error - globally defined
+									await window.deleteLix();
+									window.location.href = "/";
+								}}
+							>
+								<TrashIcon />
+								Reset
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								onClick={() => {
+									alert("Not implemented");
+								}}
+							>
+								<Download />
+								Download Lix
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</SectionHeader>
 				<div className="flex-1 flex flex-col overflow-hidden">
 					<div className="flex-1 overflow-y-auto">
@@ -246,7 +262,6 @@ export default function Page() {
 								? `/ ${activeFile?.path.replace("/", "")}`
 								: "Graph"
 						}
-						fileActions={[<VersionDropdown />]}
 					>
 						<Button
 							variant="default"
