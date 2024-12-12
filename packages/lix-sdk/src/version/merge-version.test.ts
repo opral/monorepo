@@ -5,6 +5,7 @@ import { mergeVersion } from "./merge-version.js";
 import type { NewChange } from "../database/schema.js";
 import { updateChangesInVersion } from "./update-changes-in-version.js";
 import { createVersion } from "./create-version.js";
+import { switchVersion } from "./switch-version.js";
 
 test("it should update the version pointers in target that are not conflicting", async () => {
 	const lix = await openLixInMemory({});
@@ -467,4 +468,30 @@ test("re-curring merges should not create a new conflict if the conflict already
 		.execute();
 
 	expect(conflictsAfter2Merge.length).toBe(1);
+});
+
+test("it should apply the changes from the source version to the target version", async () => {
+	const lix = await openLixInMemory({});
+
+	const sourceVersion = await createVersion({ lix });
+	const targetVersion = await createVersion({ lix });
+
+	await switchVersion({ lix, to: sourceVersion });
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "foo", value: "bar" })
+		.execute();
+
+	await switchVersion({ lix, to: targetVersion });
+
+	await mergeVersion({ lix, sourceVersion, targetVersion });
+
+	const keyValue = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "foo")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(keyValue.value).toBe("bar");
 });
