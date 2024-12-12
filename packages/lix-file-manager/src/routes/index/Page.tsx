@@ -77,7 +77,7 @@ export default function Page() {
 	const navigate = useNavigate();
 
 	// handlers
-	const handleUpload = async () => {
+	const handleImport = async () => {
 		const input = document.createElement("input");
 		input.type = "file";
 		input.onchange = async (e) => {
@@ -126,9 +126,9 @@ export default function Page() {
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
-							<DropdownMenuItem onClick={handleUpload}>
+							<DropdownMenuItem onClick={handleImport}>
 								<IconUpload />
-								Upload
+								Import
 							</DropdownMenuItem>
 							<DropdownMenuItem
 								onClick={async () => {
