@@ -15,8 +15,8 @@ const SectionHeader = ({
 	children,
 }: SectionHeaderProps) => {
 	return (
-		<div className="flex items-center justify-between px-5 h-[60px]">
-			<div className="flex items-center gap-3">
+		<div className="flex items-center justify-between px-5 h-[60px] min-w-0">
+			<div className="flex items-center gap-3 min-w-0 overflow-hidden">
 				{backaction && (
 					<Button variant="ghost" size="icon" onClick={backaction}>
 						<IconArrowLeft />
@@ -24,14 +24,14 @@ const SectionHeader = ({
 				)}
 				<h2 className="text-lg font-medium text-foreground">{title}</h2>
 				{fileActions && fileActions.length > 0 && (
-					<div className="flex items-center gap-3">
+					<div className="flex items-center gap-3 flex-shrink-0">
 						{fileActions.map((action, index) => (
 							<div key={index}>{action}</div>
 						))}
 					</div>
 				)}
 			</div>
-			<div className="flex items-center">{children}</div>
+			<div className="flex items-center flex-shrink-0">{children}</div>
 		</div>
 	);
 };
