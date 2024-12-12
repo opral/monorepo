@@ -96,6 +96,43 @@ export default function Page() {
 		input.click();
 	};
 
+	const handleMerge = async () => {
+		if (!lix) return;
+
+		try {
+			// Open file picker for .lix files
+			const input = document.createElement("input");
+			input.type = "file";
+			// TODO: Add .lix to accept
+			// input.accept = ".lix";
+
+			input.onchange = async (e) => {
+				const file = (e.target as HTMLInputElement).files?.[0];
+				if (!file) return;
+
+				// Read the file and merge it
+				const reader = new FileReader();
+				reader.onload = async (event) => {
+					const content = event.target?.result;
+					if (!content || typeof content !== "string") return;
+
+					try {
+						// TODO: Implement actual merge logic here
+						alert("Merge functionality not yet implemented");
+					} catch (error) {
+						console.error("Merge failed:", error);
+					}
+				};
+				reader.readAsText(file);
+			};
+
+			input.click();
+		} catch (error) {
+			console.error("Merge failed:", error);
+			alert("Merge failed. See console for details.");
+		}
+	};
+
 	const handleBackgroundClick = useCallback(
 		(e: React.MouseEvent) => {
 			// Only trigger if clicking the background container itself
@@ -147,6 +184,10 @@ export default function Page() {
 							>
 								<Download />
 								Download Lix
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={handleMerge}>
+								<IconUpload />
+								Merge Lix
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>

@@ -121,42 +121,6 @@ export function VersionDropdown() {
 		await saveLixToOpfs({ lix });
 	};
 
-	const handleMerge = async () => {
-		if (!lix) return;
-
-		try {
-			// Open file picker for .lix files
-			const input = document.createElement("input");
-			input.type = "file";
-			// TODO: Add .lix to accept
-			// input.accept = ".lix";
-
-			input.onchange = async (e) => {
-				const file = (e.target as HTMLInputElement).files?.[0];
-				if (!file) return;
-
-				// Read the file and merge it
-				const reader = new FileReader();
-				reader.onload = async (event) => {
-					const content = event.target?.result;
-					if (!content || typeof content !== "string") return;
-
-					try {
-						// TODO: Implement actual merge logic here
-						alert("Merge functionality not yet implemented");
-					} catch (error) {
-						console.error("Merge failed:", error);
-					}
-				};
-				reader.readAsText(file);
-			};
-
-			input.click();
-		} catch (error) {
-			console.error("Merge failed:", error);
-		}
-	};
-
 	if (!currentVersion) return null;
 
 	return (
@@ -227,14 +191,6 @@ export function VersionDropdown() {
 							/>
 						</div>
 					)}
-					<Button
-						variant="default"
-						size="default"
-						onClick={handleMerge}
-						className="gap-2"
-					>
-						Merge
-					</Button>
 				</div>
 			</div>
 
