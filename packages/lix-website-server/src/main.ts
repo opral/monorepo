@@ -12,10 +12,13 @@ const __dirname = dirname(__filename);
 const node_modules = join(__dirname, "../node_modules");
 
 const app = express();
-// forward browser fetch requests to correct subpath
-// user is on site /app/fm -> app requests /asset/xyz.js -> /app/fm/asset/xyz.js
-// user is on site /app/csv -> app requests /asset/xyz.js -> /app/csv/asset/xyz.js
+
+// Middleware to forward browser fetch requests to the correct subpath
 app.use((req, res, next) => {
+  if (req.url === "/file-manager") {
+    return next();
+  }
+
   if (req.headers.referer === undefined) {
     return next();
   }
