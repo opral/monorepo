@@ -15,6 +15,7 @@ import {
 } from "@shoelace-style/shoelace/dist/react";
 import { Lix } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
+import { posthog } from "posthog-js";
 
 export default function RootLayout(props: { children: JSX.Element }) {
 	const [, setPolling] = useAtom(withPollingAtom);
@@ -27,6 +28,18 @@ export default function RootLayout(props: { children: JSX.Element }) {
 		}, 1000);
 		return () => clearInterval(interval);
 	}, []);
+
+	useEffect(() => {
+		posthog.init('phc_OZO78iL2JN2Je1ExWjBGdMxXu06VDwL4QDH9Z7EuUXv', {
+			api_host: "https://eu.i.posthog.com",
+			capture_performance: false,
+			autocapture: {
+				capture_copied_text: true,
+			},
+		})
+		posthog.capture("$pageview")
+		return () => posthog.reset()
+	}, [])
 
 	const handleFileSelect = async (
 		event: React.ChangeEvent<HTMLInputElement>

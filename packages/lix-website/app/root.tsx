@@ -30,16 +30,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	const env = useLoaderData<typeof loader>()
 
 	useEffect(() => {
-		if (typeof window !== "undefined" && env.PUBLIC_POSTHOG_TOKEN) {
-			posthog.init(env.PUBLIC_POSTHOG_TOKEN ?? "", {
-				api_host: import.meta.env.PROD ? "https://tm.inlang.com" : "http://localhost:4005",
+		posthog.init('phc_OZO78iL2JN2Je1ExWjBGdMxXu06VDwL4QDH9Z7EuUXv', {
+			api_host: "https://eu.i.posthog.com",
 				capture_performance: false,
 				autocapture: {
 					capture_copied_text: true,
 				},
 			})
-			posthog.capture("$pageview")
-		}
+		posthog.capture("$pageview")
 		return () => posthog.reset()
 	}, [])
 
