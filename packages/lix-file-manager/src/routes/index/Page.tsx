@@ -34,6 +34,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
+import IconMerge from "@/components/icons/IconMerge.tsx";
 
 const isCsvFile = (path: string) => {
 	return path.toLowerCase().endsWith(".csv");
@@ -186,7 +187,7 @@ export default function Page() {
 								Download Lix
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={handleMerge}>
-								<IconUpload />
+								<IconMerge />
 								Merge Lix
 							</DropdownMenuItem>
 						</DropdownMenuContent>
