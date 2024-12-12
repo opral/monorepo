@@ -18,11 +18,33 @@ import { VersionDropdown } from "@/components/VersionDropdown.tsx";
 import CustomLink from "@/components/CustomLink.tsx";
 import { useCallback } from "react";
 import DropArea from "@/components/DropArea.js";
-// import { useEffect } from "react";
+import { Plug } from "lucide-react";
 
 const isCsvFile = (path: string) => {
 	return path.toLowerCase().endsWith(".csv");
 };
+
+const getFileExtension = (path: string) => {
+	const parts = path.split(".");
+	return parts.length > 1 ? `.${parts[parts.length - 1]}` : "";
+};
+
+const NoPluginMessage = ({ extension }: { extension: string }) => (
+	<div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-lg border border-slate-200 h-[calc(100%_-_15px)]">
+		<Plug className="w-12 h-12 text-slate-400 mb-4" />
+		<div className="text-lg text-slate-700 mb-4">
+			There is no lix plugin for "{extension}" extension.
+		</div>
+		<Button
+			variant="default"
+			onClick={() =>
+				window.open("https://github.com/opral/monorepo/tree/main/lix", "_blank")
+			}
+		>
+			Get started building a plugin
+		</Button>
+	</div>
+);
 
 export default function Page() {
 	// state atoms
@@ -69,10 +91,6 @@ export default function Page() {
 		},
 		[setFileIdSearchParams, navigate]
 	);
-
-	// useEffect(() => {
-	// 	console.log({ changesCurrentVersion })
-	// })
 
 	return (
 		<div className="flex bg-white h-full">
@@ -187,42 +205,51 @@ export default function Page() {
 							variant="default"
 							size="default"
 							onClick={() =>
-								navigate(`/app/csv/editor?f=${fileIdSearchParams}`)
-							}
-							className={
 								activeFile?.path
 									? isCsvFile(activeFile.path)
-										? ""
-										: "hidden"
-									: "hidden"
+										? navigate(`/app/csv/editor?f=${fileIdSearchParams}`)
+										: window.open(
+												"https://github.com/opral/monorepo/tree/main/lix",
+												"_blank"
+											)
+									: null
 							}
+							className={activeFile?.path ? "" : "hidden"}
 						>
-							Open in CSV app
+							{activeFile?.path && isCsvFile(activeFile.path)
+								? "Open in CSV app"
+								: "Build a Lix App"}
 						</Button>
 					</SectionHeader>
 					<div className="px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
-						<FilterSelect />
-						{changesCurrentVersion.map((change, i) => (
-							<ChangeComponent
-								key={change.id}
-								change={{
-									...change,
-									snapshot_content: change.snapshot_content as Record<
-										string,
-										any
-									> | null,
-									parent_snapshot_content:
-										change.parent_snapshot_content as Record<
-											string,
-											any
-										> | null,
-									discussion_count: Number(change.discussion_count),
-									discussion_ids: String(change.discussion_ids),
-								}}
-								showTopLine={i !== 0}
-								showBottomLine={i !== changesCurrentVersion.length - 1}
-							/>
-						))}
+						{activeFile?.path && !isCsvFile(activeFile.path) ? (
+							<NoPluginMessage extension={getFileExtension(activeFile.path)} />
+						) : (
+							<>
+								<FilterSelect />
+								{changesCurrentVersion.map((change, i) => (
+									<ChangeComponent
+										key={change.id}
+										change={{
+											...change,
+											snapshot_content: change.snapshot_content as Record<
+												string,
+												any
+											> | null,
+											parent_snapshot_content:
+												change.parent_snapshot_content as Record<
+													string,
+													any
+												> | null,
+											discussion_count: Number(change.discussion_count),
+											discussion_ids: String(change.discussion_ids),
+										}}
+										showTopLine={i !== 0}
+										showBottomLine={i !== changesCurrentVersion.length - 1}
+									/>
+								))}
+							</>
+						)}
 					</div>
 				</div>
 			)}

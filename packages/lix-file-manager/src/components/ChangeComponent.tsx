@@ -29,7 +29,9 @@ export const ChangeComponent = (props: {
 	const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
 	const [lix] = useAtom(lixAtom);
 	const [DiffComponent, setDiffComponent] = useState<JSX.Element | null>(null);
-	const [selectedChangeIds, setSelectedChangeIds] = useAtom(selectedChangeIdsAtom);
+	const [selectedChangeIds, setSelectedChangeIds] = useAtom(
+		selectedChangeIdsAtom
+	);
 
 	useEffect(() => {
 		loadDiffComponent();
@@ -41,15 +43,23 @@ export const ChangeComponent = (props: {
 			const plugin = (await lix.plugin.getAll()).find((p) =>
 				p.diffUiComponents?.some((c) => c.schema_key === schemaKey)
 			);
-			const component = plugin?.diffUiComponents?.find((c) => c.schema_key === schemaKey)?.component;
+			const component = plugin?.diffUiComponents?.find(
+				(c) => c.schema_key === schemaKey
+			)?.component;
 			if (component) {
 				// Dynamically define the custom element (if not already defined)
 				if (!customElements.get(`diff-${schemaKey}`)) {
-					customElements.define(`diff-${schemaKey}`, component.constructor as typeof HTMLElement);
+					customElements.define(
+						`diff-${schemaKey}`,
+						component.constructor as typeof HTMLElement
+					);
 				}
 
 				setDiffComponent(() => {
-					const WrappedComponent = (props: { snapshotBefore: Record<string, any> | null; snapshotAfter: Record<string, any> | null }) => {
+					const WrappedComponent = (props: {
+						snapshotBefore: Record<string, any> | null;
+						snapshotAfter: Record<string, any> | null;
+					}) => {
 						return React.createElement(`diff-${schemaKey}`, props);
 					};
 
@@ -67,28 +77,44 @@ export const ChangeComponent = (props: {
 		event.stopPropagation();
 		// add or remove the change id from the selectedChangeIdsAtom
 		if (selectedChangeIds.includes(props.change.id)) {
-			setSelectedChangeIds(selectedChangeIds.filter((id) => id !== props.change.id));
+			setSelectedChangeIds(
+				selectedChangeIds.filter((id) => id !== props.change.id)
+			);
 		} else {
 			setSelectedChangeIds([...selectedChangeIds, props.change.id]);
 		}
 	};
 
+	// Don't render anything if there's no change data
+	if (!props.change || !props.change.id) {
+		return null;
+	}
 
 	return (
 		<div
 			className="flex group hover:bg-slate-50 rounded-md cursor-pointer flex-shrink-0 pr-2"
 			onClick={(e) => {
 				e.stopPropagation();
-				setIsExpandedState(!isExpandedState)
+				setIsExpandedState(!isExpandedState);
 			}}
 		>
-			{!props.reduced && <ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />}
+			{!props.reduced && (
+				<ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />
+			)}
 			<div className="flex-1">
-				<div className={clsx(
-					"h-12 flex items-center w-full",
-					props.reduced && "pl-2"
-				)}>
-					{!props.reduced && <Checkbox className="mr-3" onClick={handleCheckboxClick} checked={selectedChangeIds.includes(props.change.id)} />}
+				<div
+					className={clsx(
+						"h-12 flex items-center w-full",
+						props.reduced && "pl-2"
+					)}
+				>
+					{!props.reduced && (
+						<Checkbox
+							className="mr-3"
+							onClick={handleCheckboxClick}
+							checked={selectedChangeIds.includes(props.change.id)}
+						/>
+					)}
 					<p className="flex-1 truncate text-ellipsis overflow-hidden">
 						Change{" "}
 						<span className="text-slate-500">
@@ -99,18 +125,29 @@ export const ChangeComponent = (props: {
 					</p>
 					<div className="flex gap-3 items-center">
 						{props.change.discussion_count > 0 && !props.reduced && (
-							<Button variant="ghost" size="sm" className="text-sm text-slate-500">
-								{props.change.discussion_count}<IconDiscussion />
+							<Button
+								variant="ghost"
+								size="sm"
+								className="text-sm text-slate-500"
+							>
+								{props.change.discussion_count}
+								<IconDiscussion />
 							</Button>
 						)}
-						<span className="text-sm font-medium text-slate-500 block pr-2">{timeAgo(props.change.created_at)}</span>
+						<span className="text-sm font-medium text-slate-500 block pr-2">
+							{timeAgo(props.change.created_at)}
+						</span>
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger>
 									<Avatar className="w-8 h-8 cursor-pointer hover:opacity-90 transition-opacity">
 										<AvatarImage src="#" alt="#" />
 										<AvatarFallback className="bg-[#fff] text-[#141A21] border border-[#DBDFE7]">
-											{props.change.account_name ? props.change.account_name.substring(0, 2).toUpperCase() : "XX"}
+											{props.change.account_name
+												? props.change.account_name
+														.substring(0, 2)
+														.toUpperCase()
+												: "XX"}
 										</AvatarFallback>
 									</Avatar>
 								</TooltipTrigger>
@@ -118,23 +155,35 @@ export const ChangeComponent = (props: {
 							</Tooltip>
 						</TooltipProvider>
 						<Button variant="ghost" size="icon">
-							<IconChevron className={clsx(isExpandedState ? "rotate-180" : "rotate-0", "transition")} />
+							<IconChevron
+								className={clsx(
+									isExpandedState ? "rotate-180" : "rotate-0",
+									"transition"
+								)}
+							/>
 						</Button>
 					</div>
 				</div>
 				{isExpandedState && (
-					<div className={clsx(
-						"flex flex-col gap-2 pb-2",
-						props.reduced && "pl-2"
-					)}>
-						<div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 pt-2 pb-4 sm:pb-6 overflow-hidden">
-							{DiffComponent && (<>{DiffComponent}</>)}
-						</div>
-						{props.change.discussion_count > 0 && !props.reduced && (
-							props.change.discussion_ids.split(",").map((discussionId) =>
-								<DiscussionPreview key={discussionId} discussionId={discussionId} />
-							)
+					<div
+						className={clsx(
+							"flex flex-col gap-2 pb-2",
+							props.reduced && "pl-2"
 						)}
+					>
+						<div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 pt-2 pb-4 sm:pb-6 overflow-hidden">
+							{DiffComponent && <>{DiffComponent}</>}
+						</div>
+						{props.change.discussion_count > 0 &&
+							!props.reduced &&
+							props.change.discussion_ids
+								.split(",")
+								.map((discussionId) => (
+									<DiscussionPreview
+										key={discussionId}
+										discussionId={discussionId}
+									/>
+								))}
 					</div>
 				)}
 			</div>
