@@ -7,11 +7,11 @@ interface CustomLinkProps extends RouterLinkProps {
 
 const CustomLink: React.FC<CustomLinkProps> = ({ to, ...props }) => {
   const isCrossAppNavigation = to.startsWith('/app/');
-  const isHomePage = to.startsWith('/file-manager');
+  const isHomePage = to.startsWith('/file-manager') || to === '/website';
 
   if (isCrossAppNavigation || isHomePage) {
     return (
-      <a href={to} {...props}>
+      <a href={to === "/website" ? "/" : to} {...props}>
         {props.children}
       </a>
     );
