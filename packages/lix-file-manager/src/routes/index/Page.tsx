@@ -133,7 +133,7 @@ export default function Page() {
 								}
 							/>
 						))}
-						<div className="min-h-full" onClick={handleBackgroundClick}>
+						<div className="flex-1" onClick={handleBackgroundClick}>
 							<DropArea />
 						</div>
 					</div>
