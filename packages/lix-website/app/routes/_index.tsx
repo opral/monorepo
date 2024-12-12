@@ -177,7 +177,7 @@ export default function Index() {
 								href="/app/fm"
 								className="w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all"
 							>
-								Open the system
+								Open File Manager
 							</a>
 							<a
 								href="https://github.com/opral/monorepo/tree/lix-integration/packages/lix-sdk"
