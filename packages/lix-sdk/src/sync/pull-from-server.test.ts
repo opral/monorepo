@@ -1,9 +1,9 @@
 import { expect, test, vi } from "vitest";
 import { createServerApiHandler } from "../server-api-handler/create-server-api-handler.js";
-import { createServerApiMemoryStorage } from "../server-api-handler/storage/create-memory-storage.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
+import { createLsaInMemoryEnvironment } from "../server-api-handler/environment/create-in-memory-environment.js";
 
 test("pull rows of multiple tables from server successfully and applies them", async () => {
 	const lixOnServer = await openLixInMemory({});
@@ -16,8 +16,8 @@ test("pull rows of multiple tables from server successfully and applies them", a
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createServerApiMemoryStorage();
-	const lsaHandler = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ environment });
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
@@ -80,8 +80,8 @@ test("it handles snapshot.content being json binary", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createServerApiMemoryStorage();
-	const lsaHandler = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ environment });
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
@@ -143,8 +143,8 @@ test("rows changed on the client more recently should not be updated", async () 
 
 	const lix = await openLixInMemory({ blob: await lixOnServer.toBlob() });
 
-	const storage = createServerApiMemoryStorage();
-	const lsaHandler = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ environment });
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
@@ -185,8 +185,8 @@ test("rows changed on the client more recently should not be updated", async () 
 // the change table now models "change control". no more last edit wins needed
 test.skip("rows changed on the server more recently should be updated on the client", async () => {
 	// setup mock server
-	const storage = createServerApiMemoryStorage();
-	const lsaHandler = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ environment });
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
@@ -290,8 +290,8 @@ test.skip("rows changed on the server more recently should be updated on the cli
 // 		.selectAll()
 // 		.executeTakeFirstOrThrow();
 
-// 	const storage = createServerApiMemoryStorage();
-// 	const lsaHandler = await createServerApiHandler({ storage });
+// 	const environment = createLsaInMemoryEnvironment();
+// 	const lsaHandler = await createServerApiHandler({ environment });
 
 // 	global.fetch = vi.fn((request) => lsaHandler(request));
 
@@ -303,8 +303,8 @@ test.skip("rows changed on the server more recently should be updated on the cli
 // 		})
 // 	);
 
-// 	// Insert mock file data into the server's storage
-// 	await storage.executeSql(
+// 	// Insert mock file data into the server's environment
+// 	await environment.executeSql(
 // 		"INSERT INTO file (id, path, data, metadata) VALUES ('file0', '/path.txt', ?, 'mock-metadata')",
 // 		[new TextEncoder().encode("Hello, World!")]
 // 	);
@@ -342,8 +342,8 @@ test("non-conflicting changes from the server should for the same version should
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createServerApiMemoryStorage();
-	const lsaHandler = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ environment });
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
