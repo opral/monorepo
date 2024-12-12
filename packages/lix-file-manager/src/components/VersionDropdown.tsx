@@ -24,7 +24,7 @@ import {
 import { Version, createVersion, switchVersion } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.js";
 import { humanId } from "human-id";
-import { Check, Trash2, ChevronDown } from "lucide-react";
+import { Check, Trash2, ChevronDown, Plus } from "lucide-react";
 
 export function VersionDropdown() {
 	const [currentVersion] = useAtom(currentVersionAtom);
@@ -197,7 +197,8 @@ export function VersionDropdown() {
 							))}
 							<DropdownMenuSeparator />
 							<DropdownMenuItem onClick={handleCreateVersion}>
-								Create version
+								<Plus />
+								Create new version
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
