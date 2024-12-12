@@ -1,12 +1,21 @@
 import IconUpload from "@/components/icons/IconUpload.tsx";
 import SectionHeader from "@/components/SectionHeader.tsx";
 import ListItems from "@/components/ListItems.tsx";
-import { discussionSearchParamsAtom, fileIdSearchParamsAtom, filesAtom, lixAtom } from "@/state.ts";
+import {
+	discussionSearchParamsAtom,
+	fileIdSearchParamsAtom,
+	filesAtom,
+	lixAtom,
+} from "@/state.ts";
 import { useAtom } from "jotai";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
-import { Button } from "@/components/ui/button.tsx"
-import { Separator } from "@/components/ui/separator.tsx"
-import { activeFileAtom, allChangesDynamicGroupingAtom, changesCurrentVersionAtom } from "@/state-active-file.ts";
+import { Button } from "@/components/ui/button.tsx";
+import { Separator } from "@/components/ui/separator.tsx";
+import {
+	activeFileAtom,
+	allChangesDynamicGroupingAtom,
+	changesCurrentVersionAtom,
+} from "@/state-active-file.ts";
 import { useNavigate } from "react-router-dom";
 import { ChangeComponent } from "@/components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "@/components/DynamicChangeGroup.tsx";
@@ -30,7 +39,7 @@ const getFileExtension = (path: string) => {
 };
 
 const NoPluginMessage = ({ extension }: { extension: string }) => (
-	<div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-lg border border-slate-200 h-[calc(100%_-_15px)]">
+	<div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-lg border border-slate-200 h-[calc(100%_-_10px)]">
 		<Plug className="w-12 h-12 text-slate-400 mb-4" />
 		<div className="text-lg text-slate-700 mb-4">
 			There is no lix plugin for "{extension}" extension.
@@ -94,7 +103,15 @@ export default function Page() {
 
 	return (
 		<div className="flex bg-white h-full">
-			<div className="max-w-[340px] flex-1 flex flex-col h-full">
+			<div
+				// min 300px, max 600px – change also in JS beneath
+				className="min-w-[300px] max-w-[600px] w-[340px] flex flex-col h-full relative"
+				ref={(el) => {
+					if (el) {
+						el.style.width = el.offsetWidth + "px";
+					}
+				}}
+			>
 				<SectionHeader title="Files">
 					<Button
 						variant="ghost"
@@ -118,8 +135,8 @@ export default function Page() {
 						Upload
 					</Button>
 				</SectionHeader>
-				<div className="flex-1 flex flex-col overflow-hidden relative">
-					<div className="flex-1 overflow-y-auto relative">
+				<div className="flex-1 flex flex-col overflow-hidden">
+					<div className="flex-1 overflow-y-auto">
 						{files.map((file) => (
 							<ListItems
 								key={file.id}
@@ -137,40 +154,70 @@ export default function Page() {
 							<DropArea />
 						</div>
 					</div>
-					<div
-						className="p-4 mt-auto border-t border-slate-100 relative z-20"
-						onClick={(e) => e.stopPropagation()}
+				</div>
+				<div className="px-3 py-3 border-t border-slate-100">
+					<CustomLink
+						to="/file-manager"
+						className="block p-4 bg-slate-50 hover:bg-slate-100 rounded-lg ring-1 ring-slate-200 transition-all"
 					>
-						<CustomLink
-							to="/file-manager"
-							className="block p-4 bg-slate-50 hover:bg-slate-100 rounded-lg ring-1 ring-slate-200 transition-all"
-						>
-							<div className="flex items-center justify-between">
-								<div>
-									<h3 className="text-sm font-medium text-slate-900">
-										Learn more about Lix File Manager
-									</h3>
-									<p className="text-sm text-slate-500 mt-1">
-										Discover features and capabilities
-									</p>
-								</div>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="20"
-									height="20"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									className="text-slate-400"
-								>
-									<path d="M5 12h14M12 5l7 7-7 7" />
-								</svg>
+						<div className="flex items-center justify-between">
+							<div>
+								<h3 className="text-sm font-medium text-slate-900">
+									Learn more about Lix File Manager
+								</h3>
+								<p className="text-sm text-slate-500 mt-1">
+									Discover features and capabilities
+								</p>
 							</div>
-						</CustomLink>
-					</div>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								className="text-slate-400"
+							>
+								<path d="M5 12h14M12 5l7 7-7 7" />
+							</svg>
+						</div>
+					</CustomLink>
+				</div>
+
+				<div
+					className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-slate-300 group"
+					onMouseDown={(e) => {
+						e.preventDefault();
+						const container = e.currentTarget.parentElement;
+						if (!container) return;
+
+						const startX = e.clientX;
+						const startWidth = container.offsetWidth;
+
+						const handleMouseMove = (moveEvent: MouseEvent) => {
+							const delta = moveEvent.clientX - startX;
+							// min 300px, max 600px – change also in css
+							const newWidth = Math.min(Math.max(startWidth + delta, 300), 600);
+							if (container) {
+								container.style.width = `${newWidth}px`;
+							}
+						};
+
+						const handleMouseUp = () => {
+							document.removeEventListener("mousemove", handleMouseMove);
+							document.removeEventListener("mouseup", handleMouseUp);
+							document.body.style.cursor = "";
+						};
+
+						document.addEventListener("mousemove", handleMouseMove);
+						document.addEventListener("mouseup", handleMouseUp);
+						document.body.style.cursor = "col-resize";
+					}}
+				>
+					<div className="absolute right-0 top-0 bottom-0 w-1 bg-slate-200 opacity-0 group-hover:opacity-100" />
 				</div>
 			</div>
 			<Separator orientation="vertical" className="h-screen" />
