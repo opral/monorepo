@@ -9,10 +9,10 @@ export type LsaEnvironment = {
 	has(key: string): Promise<boolean>;
 	delete(key: string): Promise<void>;
 
-	// /**
-	//  * If a lix exists on the server.
-	//  */
-	// hasLix(id: string): Promise<boolean>;
+	/**
+	 * If a lix exists on the server.
+	 */
+	hasLix(args: { id: string }): Promise<boolean>;
 
 	/**
 	 * Set's a lix.

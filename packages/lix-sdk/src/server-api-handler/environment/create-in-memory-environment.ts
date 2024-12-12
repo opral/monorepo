@@ -48,6 +48,10 @@ export const createLsaInMemoryEnvironment = (): LsaEnvironment => {
 			return store.has(key);
 		},
 
+		async hasLix(args) {
+			return store.has(args.id);
+		},
+
 		async setLix(args) {
 			store.set(args.id, args.blob);
 		},
