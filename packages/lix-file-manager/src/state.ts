@@ -12,17 +12,24 @@ import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
 
 export const LIX_FILE_NAME = "demo.lix";
 
-export const fileIdSearchParamsAtom = atom(async (get) => {
-	get(withPollingAtom);
-	// Using window is a limitation of react router v6.
-	//
-	// No programmatic routing possibility exists outside of
-	// the react component tree. A better solution is to
-	// let react router handle the re-direct in the route
-	// config. But for now, this works.
-	const searchParams = new URL(window.location.href).searchParams;
-	return searchParams.get("f");
-});
+export const fileIdSearchParamsAtom = atom(
+	// getter
+	(get) => {
+		get(withPollingAtom);
+		const searchParams = new URL(window.location.href).searchParams;
+		return searchParams.get("f") || undefined;
+	},
+	// setter
+	(_get, _set, newValue: string | undefined) => {
+		const url = new URL(window.location.href);
+		if (newValue) {
+			url.searchParams.set("f", newValue);
+		} else {
+			url.searchParams.delete("f");
+		}
+		window.history.pushState({}, "", url.toString());
+	}
+);
 
 export const discussionSearchParamsAtom = atom(async (get) => {
 	get(withPollingAtom);

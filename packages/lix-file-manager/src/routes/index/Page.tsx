@@ -16,6 +16,8 @@ import ConnectedChanges from "@/components/ConnectedChanges.tsx";
 import DiscussionThread from "@/components/DiscussionThread.tsx";
 import { VersionDropdown } from "@/components/VersionDropdown.tsx";
 import CustomLink from "@/components/CustomLink.tsx";
+import { useCallback } from "react";
+import DropArea from "@/components/DropArea.js";
 // import { useEffect } from "react";
 
 const isCsvFile = (path: string) => {
@@ -29,7 +31,9 @@ export default function Page() {
 	const [changesCurrentVersion] = useAtom(changesCurrentVersionAtom);
 	const [allChangesDynamicGrouping] = useAtom(allChangesDynamicGroupingAtom);
 	const [activeFile] = useAtom(activeFileAtom);
-	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
+	const [fileIdSearchParams, setFileIdSearchParams] = useAtom(
+		fileIdSearchParamsAtom
+	);
 	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
 
 	//hooks
@@ -55,6 +59,17 @@ export default function Page() {
 		input.click();
 	};
 
+	const handleBackgroundClick = useCallback(
+		(e: React.MouseEvent) => {
+			// Only trigger if clicking the background container itself
+			if (e.target === e.currentTarget) {
+				setFileIdSearchParams(undefined);
+				navigate("/");
+			}
+		},
+		[setFileIdSearchParams, navigate]
+	);
+
 	// useEffect(() => {
 	// 	console.log({ changesCurrentVersion })
 	// })
@@ -65,22 +80,29 @@ export default function Page() {
 				<SectionHeader title="Files">
 					<Button
 						variant="ghost"
-						onClick={async () => {
+						onClick={async (e) => {
+							e.stopPropagation();
 							// @ts-expect-error - globally defined
 							await window.deleteLix();
-							window.location.reload();
+							window.location.href = "/";
 						}}
 					>
 						Reset
 					</Button>
-					<Button variant="secondary" onClick={() => handleUpload()}>
+					<Button
+						variant="secondary"
+						onClick={(e) => {
+							e.stopPropagation();
+							handleUpload();
+						}}
+					>
 						<IconUpload />
 						Upload
 					</Button>
 				</SectionHeader>
-				<div className="max-h-[calc(100%_-_60px)] overflow-y-auto">
-					{files.map((file) => {
-						return (
+				<div className="flex-1 flex flex-col overflow-hidden relative">
+					<div className="flex-1 overflow-y-auto relative">
+						{files.map((file) => (
 							<ListItems
 								key={file.id}
 								id={file.id}
@@ -92,10 +114,46 @@ export default function Page() {
 										: ""
 								}
 							/>
-						);
-					})}
+						))}
+						<div className="min-h-full" onClick={handleBackgroundClick}>
+							<DropArea />
+						</div>
+					</div>
+					<div
+						className="p-4 mt-auto border-t border-slate-100 relative z-20"
+						onClick={(e) => e.stopPropagation()}
+					>
+						<CustomLink
+							to="/file-manager"
+							className="block p-4 bg-slate-50 hover:bg-slate-100 rounded-lg ring-1 ring-slate-200 transition-all"
+						>
+							<div className="flex items-center justify-between">
+								<div>
+									<h3 className="text-sm font-medium text-slate-900">
+										Learn more about Lix File Manager
+									</h3>
+									<p className="text-sm text-slate-500 mt-1">
+										Discover features and capabilities
+									</p>
+								</div>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="20"
+									height="20"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									className="text-slate-400"
+								>
+									<path d="M5 12h14M12 5l7 7-7 7" />
+								</svg>
+							</div>
+						</CustomLink>
+					</div>
 				</div>
-				<CustomLink to="/" className="flex-grow" />
 			</div>
 			<Separator orientation="vertical" className="h-screen" />
 

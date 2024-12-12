@@ -35,7 +35,8 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 
   const handleDeleteFile = async () => {
 		await lix.db.deleteFrom("file").where("id", "=", id).execute();
-    await saveLixToOpfs({ lix });
+		await saveLixToOpfs({ lix });
+		window.location.href = "/";
 	};
 
 	const handleDownload = async () => {
