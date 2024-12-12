@@ -17,7 +17,7 @@ import CustomLink from "./CustomLink.tsx";
 
 export function SidebarNavigation() {
 	return (
-		<SidebarMenu className="flex flex-col items-center gap-1.5">
+		<SidebarMenu className="flex flex-col items-center gap-2">
 			<NavigationItem path="/" icon={<IconFile />} label="Files" />
 			<NavigationItem
 				path="/automation"

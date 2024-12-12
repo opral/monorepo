@@ -152,7 +152,7 @@ export default function Page() {
 					</DropdownMenu>
 				</SectionHeader>
 				<div className="flex-1 flex flex-col overflow-hidden">
-					<div className="flex-1 overflow-y-auto">
+					<div className="mt-1.5 flex-1 overflow-y-auto flex flex-col gap-2">
 						{files.map((file) => (
 							<ListItems
 								key={file.id}
@@ -276,9 +276,9 @@ export default function Page() {
 								}
 								target={isCsvFile(activeFile?.path || "") ? "_self" : "_blank"}
 							>
-							{activeFile?.path && isCsvFile(activeFile.path)
-								? "Open in CSV app"
-								: "Build a Lix App"}
+								{activeFile?.path && isCsvFile(activeFile.path)
+									? "Open in CSV app"
+									: "Build a Lix App"}
 							</CustomLink>
 						</Button>
 					</SectionHeader>

@@ -80,29 +80,40 @@ export default function Page() {
 						Create
 					</Button>
 				</SectionHeader>
-				{dummyAutomations.map((automation, index) => {
-					return (
-						<div
-							key={index}
-							onClick={() => setActiveAutomation(index)}
-							className={clsx(
-								"group flex items-center mx-2.5 mt-1.5 mb-0 px-1.5 py-0.5 hover:bg-slate-50 cursor-pointer rounded-md",
-								activeAutomation === automation.id
-									? "bg-slate-100 hover:bg-slate-100"
-									: ""
-							)}
-						>
-							<div className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-slate-500">
-								<IconAutomation />
+				<div className="flex flex-col gap-2 mt-1.5">
+					{dummyAutomations.map((automation, index) => {
+						return (
+							<div
+								key={index}
+								onClick={() => setActiveAutomation(index)}
+								className={clsx(
+									"group flex items-center mx-2 h-9 px-2 hover:bg-slate-50 cursor-pointer rounded-md",
+									activeAutomation === automation.id
+										? "bg-slate-100 hover:bg-slate-100"
+										: ""
+								)}
+							>
+								<div className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-slate-500">
+									<IconAutomation />
+								</div>
+								<div className="min-w-0 flex-1 ml-2">
+									<p className="text-md truncate" title={automation.name}>
+										{automation.name}
+									</p>
+								</div>
+								<div
+									className={clsx(
+										"flex opacity-0 transition-opacity group-hover:opacity-100"
+									)}
+								>
+									<Button variant="ghost" size="icon">
+										<IconMeatball />
+									</Button>
+								</div>
 							</div>
-							<div className="min-w-0 flex-1 ml-2">
-								<p className="text-sm truncate" title={automation.name}>
-									{automation.name}
-								</p>
-							</div>
-						</div>
-					);
-				})}
+						);
+					})}
+				</div>
 				<div className="flex-grow">
 					<div className="flex items-center justify-center h-full text-gray-400">
 						Coming soon
