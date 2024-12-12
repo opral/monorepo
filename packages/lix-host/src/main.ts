@@ -2,14 +2,14 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import {
 	createServerApiHandler,
-	createServerApiMemoryStorage,
+	createLsaInMemoryEnvironment,
 } from "@lix-js/sdk";
 import { cors } from "hono/cors";
 
 const app = new Hono();
 
 const lsaHandler = await createServerApiHandler({
-	storage: createServerApiMemoryStorage(),
+	environment: createLsaInMemoryEnvironment(),
 });
 
 app.get("/", (c) => c.text("Lix host server"));
