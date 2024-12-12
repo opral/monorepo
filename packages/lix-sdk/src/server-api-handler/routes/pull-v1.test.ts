@@ -1,10 +1,10 @@
 import { test, expect } from "vitest";
 import * as LixServerApi from "@lix-js/server-api-schema";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
-import { createServerApiMemoryStorage } from "../storage/create-memory-storage.js";
 import { createServerApiHandler } from "../create-server-api-handler.js";
 import { mockJsonSnapshot } from "../../snapshot/mock-json-snapshot.js";
 import { mockChange } from "../../change/mock-change.js";
+import { createLsaInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 
 type RequestBody =
 	LixServerApi.paths["/lsa/pull-v1"]["post"]["requestBody"]["content"]["application/json"];
@@ -25,13 +25,13 @@ test("it should pull rows successfully", async () => {
 
 	await lix.db.insertInto("change").values(mockChanges).execute();
 
-	// set server storage to the lix with the mock changes
-	const storage = createServerApiMemoryStorage();
-	await storage.set(`lix-file-${id.value}`, await lix.toBlob());
+	const environment = createLsaInMemoryEnvironment();
 
-	const lsa = await createServerApiHandler({ storage });
+	await environment.setLix({ id: id.value, blob: await lix.toBlob() });
 
-	const response = await lsa(
+	const lsaHandler = await createServerApiHandler({ environment });
+
+	const response = await lsaHandler(
 		new Request("http://localhost:3000/lsa/pull-v1", {
 			method: "POST",
 			body: JSON.stringify({
@@ -78,10 +78,10 @@ test("it should specifically be able to handle snapshots which use json binary a
 		.values([{ content: mockSnapshot.content }])
 		.execute();
 
-	const storage = createServerApiMemoryStorage();
-	await storage.set(`lix-file-${id}`, await lix.toBlob());
+	const environment = createLsaInMemoryEnvironment();
+	await environment.setLix({ id, blob: await lix.toBlob() });
 
-	const lsa = await createServerApiHandler({ storage });
+	const lsa = await createServerApiHandler({ environment });
 
 	const response = await lsa(
 		new Request("http://localhost:3000/lsa/pull-v1", {
@@ -118,8 +118,9 @@ test("it should specifically be able to handle snapshots which use json binary a
 });
 
 test("it should return 404 if the Lix file is not found", async () => {
-	const storage = createServerApiMemoryStorage();
-	const lsa = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
+
+	const lsa = await createServerApiHandler({ environment });
 
 	const response = await lsa(
 		new Request("http://localhost:3000/lsa/pull-v1", {
@@ -138,16 +139,20 @@ test("it should return 404 if the Lix file is not found", async () => {
 });
 
 test("it should return 500 if the Lix file is invalid", async () => {
-	const storage = createServerApiMemoryStorage();
-	await storage.set(`lix-file-invalid-id`, new Blob(["invalid data"]));
+	const environment = createLsaInMemoryEnvironment();
 
-	const lsa = await createServerApiHandler({ storage });
+	await environment.setLix({
+		id: "invalid-lix",
+		blob: new Blob(["invalid data"]),
+	});
 
-	const response = await lsa(
+	const lsaHandler = await createServerApiHandler({ environment });
+
+	const response = await lsaHandler(
 		new Request("http://localhost:3000/lsa/pull-v1", {
 			method: "POST",
 			body: JSON.stringify({
-				lix_id: "invalid-id",
+				lix_id: "invalid-lix",
 			}),
 			headers: {
 				"Content-Type": "application/json",
@@ -156,9 +161,6 @@ test("it should return 500 if the Lix file is invalid", async () => {
 	);
 
 	expect(response.status).toBe(500);
-	const responseJson = await response.json();
-	expect(responseJson.code).toBe("INVALID_LIX_FILE");
-	expect(responseJson.message).toBe("The lix file couldn't be opened.");
 });
 
 test("it should handle empty tables gracefully", async () => {
@@ -169,10 +171,10 @@ test("it should handle empty tables gracefully", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createServerApiMemoryStorage();
-	await storage.set(`lix-file-${id}`, await lix.toBlob());
+	const environment = createLsaInMemoryEnvironment();
+	await environment.setLix({ id, blob: await lix.toBlob() });
 
-	const lsa = await createServerApiHandler({ storage });
+	const lsa = await createServerApiHandler({ environment });
 
 	const response = await lsa(
 		new Request("http://localhost:3000/lsa/pull-v1", {

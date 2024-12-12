@@ -86,7 +86,6 @@ export async function openLix(args: {
 		},
 		plugin,
 		close: async () => {
-			closed = true;
 			await changeQueueSettled({ lix: { db } });
 			args.database.close();
 			await db.destroy();

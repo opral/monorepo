@@ -1,6 +1,5 @@
 import { expect, test, vi } from "vitest";
 import { createServerApiHandler } from "../server-api-handler/create-server-api-handler.js";
-import { createServerApiMemoryStorage } from "../server-api-handler/storage/create-memory-storage.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { pushToServer } from "./push-to-server.js";
 import type { LixFile } from "../database/schema.js";
@@ -9,6 +8,7 @@ import { newLixFile } from "../lix/new-lix.js";
 import type { KeyValue } from "../key-value/database-schema.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { pullFromServer } from "./pull-from-server.js";
+import { createLsaInMemoryEnvironment } from "../server-api-handler/environment/create-in-memory-environment.js";
 
 test("push rows of multiple tables to server successfully", async () => {
 	const lixBlob = await newLixFile();
@@ -21,8 +21,8 @@ test("push rows of multiple tables to server successfully", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createServerApiMemoryStorage();
-	const lsaHandler = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ environment });
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
@@ -61,11 +61,9 @@ test("push rows of multiple tables to server successfully", async () => {
 		targetVectorClock: [],
 	});
 
-	const lixFromServer = await openLixInMemory({
-		blob: await storage.get(`lix-file-${id.value}`),
-	});
+	const openOnServer = await environment.openLix({ id: id.value });
 
-	const keyValueChangesOnServer = await lixFromServer.db
+	const keyValueChangesOnServer = await openOnServer.lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("schema_key", "=", "lix_key_value_table")
@@ -73,7 +71,7 @@ test("push rows of multiple tables to server successfully", async () => {
 		.selectAll()
 		.execute();
 
-	const accountsChangesOnServer = await lixFromServer.db
+	const accountsChangesOnServer = await openOnServer.lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("schema_key", "=", "lix_account_table")
@@ -104,8 +102,8 @@ test("push-pull-push with two clients", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createServerApiMemoryStorage();
-	const lsaHandler = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ environment });
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
@@ -206,11 +204,9 @@ test("push-pull-push with two clients", async () => {
 	});
 
 	// Verify the data on the server
-	const lixFromServer = await openLixInMemory({
-		blob: await storage.get(`lix-file-${lixId}`),
-	});
+	const openOnServer = await environment.openLix({ id: lixId });
 
-	const accountsChangesOnServer = await lixFromServer.db
+	const accountsChangesOnServer = await openOnServer.lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("schema_key", "=", "lix_account_table")
@@ -255,7 +251,7 @@ test("push-pull-push with two clients", async () => {
 
 	expect(accountsChangesOnServer).toEqual(accountChangesOnClient2);
 
-	const keyValueChangesOnServer = await lixFromServer.db
+	const keyValueChangesOnServer = await openOnServer.lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("schema_key", "=", "lix_key_value_table")
@@ -286,8 +282,8 @@ test("it should handle snapshots.content json binaries", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createServerApiMemoryStorage();
-	const lsaHandler = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ environment });
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
@@ -318,11 +314,9 @@ test("it should handle snapshots.content json binaries", async () => {
 		targetVectorClock: [],
 	});
 
-	const lixFromServer = await openLixInMemory({
-		blob: await storage.get(`lix-file-${id}`),
-	});
+	const openOnServer = await environment.openLix({ id });
 
-	const snapshot = await lixFromServer.db
+	const snapshot = await openOnServer.lix.db
 		.selectFrom("snapshot")
 		.where("id", "=", mockSnapshot.id)
 		.selectAll()
@@ -342,8 +336,8 @@ test.todo("it should handle binary values", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createServerApiMemoryStorage();
-	const lsaHandler = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ environment });
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
@@ -373,7 +367,7 @@ test.todo("it should handle binary values", async () => {
 	});
 
 	const lixFromServer = await openLixInMemory({
-		blob: await storage.get(`lix-file-${id}`),
+		blob: await environment.get(`lix-file-${id}`),
 	});
 
 	const filesOnServer = await lixFromServer.db

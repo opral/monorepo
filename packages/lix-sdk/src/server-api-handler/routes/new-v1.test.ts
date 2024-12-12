@@ -1,39 +1,55 @@
 import { test, expect } from "vitest";
 import { createServerApiHandler } from "../create-server-api-handler.js";
-import { createServerApiMemoryStorage } from "../storage/create-memory-storage.js";
 import { newLixFile } from "../../lix/new-lix.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import { createLsaInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 
-test("it should store the lix file in storage", async () => {
-	const lix = await openLixInMemory({
+test("it should store the lix file", async () => {
+	const initLix = await openLixInMemory({
 		blob: await newLixFile(),
 	});
-	const { value: id } = await lix.db
+
+	const initLixId = await initLix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const storage = createServerApiMemoryStorage();
-	const lsa = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
 
-	const response = await lsa(
+	const lsaHandler = await createServerApiHandler({ environment });
+
+	const response = await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
-			body: await lix.toBlob(),
+			body: await initLix.toBlob(),
 		})
 	);
+	const json = await response.json();
 
-	const responseJson = await response.json();
-
-	const blob = await storage.get(`lix-file-${id}`);
-
-	const lixFromStorage = await openLixInMemory({ blob });
-
-	expect(blob).toBeDefined();
 	expect(response.status).toBe(201);
-	expect(responseJson.id).toBe(id);
-	expect(lixFromStorage).toBeDefined();
+	expect(json.id).toBe(initLixId.value);
+
+	const hasLix = await environment.hasLix({ id: initLixId.value });
+
+	expect(hasLix).toBe(true);
+
+	const open = await environment.openLix({
+		id: initLixId.value,
+	});
+
+	const lixId = await open.lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(lixId.value).toEqual(initLixId.value);
+
+	await environment.closeLix({
+		id: initLixId.value,
+		connectionId: open.connectionId,
+	});
 });
 
 // Test is skipped because it works as expected but
@@ -45,10 +61,11 @@ test.skip("it should return 400 for an invalid lix file", async () => {
 
 	console.error = () => {};
 
-	const storage = createServerApiMemoryStorage();
-	const lsa = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
 
-	const response = await lsa(
+	const lsaHandler = await createServerApiHandler({ environment });
+
+	const response = await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
 			body: invalidLixFile,
@@ -61,11 +78,12 @@ test.skip("it should return 400 for an invalid lix file", async () => {
 test("it should return 409 if the lix file already exists", async () => {
 	const lixFile = await newLixFile();
 
-	const storage = createServerApiMemoryStorage();
-	const lsa = await createServerApiHandler({ storage });
+	const environment = createLsaInMemoryEnvironment();
+
+	const lsaHandler = await createServerApiHandler({ environment });
 
 	// First request to store the lix file
-	await lsa(
+	await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
 			body: lixFile,
@@ -73,7 +91,7 @@ test("it should return 409 if the lix file already exists", async () => {
 	);
 
 	// Second request to store the same lix file
-	const response = await lsa(
+	const response = await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
 			body: lixFile,
