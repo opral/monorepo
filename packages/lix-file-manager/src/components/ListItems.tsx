@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { redirect, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button.tsx";
 import IconFile from "@/components/icons/IconFile.tsx";
 import clsx from "clsx";
@@ -37,10 +37,11 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 		setSearchParams({ f: id });
 	};
 
-	const handleDeleteFile = async () => {
+	const handleDeleteFile = async (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.stopPropagation();
 		await lix.db.deleteFrom("file").where("id", "=", id).execute();
 		await saveLixToOpfs({ lix });
-		window.location.href = "/";
+		return redirect("/");
 	};
 
 	const handleDownload = async () => {
@@ -120,7 +121,7 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 							<DropdownMenuItem onClick={() => handleDownload()}>
 								Download
 							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => handleDeleteFile()}>
+							<DropdownMenuItem onClick={(e: any) => handleDeleteFile(e)}>
 								Delete
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => handleOverrideFile()}>

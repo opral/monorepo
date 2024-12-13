@@ -20,17 +20,14 @@ import {
 	sql,
 } from "@lix-js/sdk";
 import { CellSchemaV1 } from "@lix-js/plugin-csv";
+import { redirect } from "react-router-dom";
 
 export const activeFileAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const fileId = await get(fileIdSearchParamsAtom);
 
 	if (!fileId) {
-		// Not the best UX to implicitly route to the root
-		// but fine for now.
-		// window.location.href = "/";
-		// console.error("no active file. reroute should avoid this throw");
-		return undefined;
+		redirect("/");
 	}
 
 	const lix = await get(lixAtom);
@@ -42,8 +39,7 @@ export const activeFileAtom = atom(async (get) => {
 		.executeTakeFirst();
 
 	if (!fileAtom) {
-		console.error("no file found");
-		return undefined;
+		redirect("/");
 	}
 	return fileAtom;
 });

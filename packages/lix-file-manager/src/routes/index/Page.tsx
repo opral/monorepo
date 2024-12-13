@@ -16,7 +16,7 @@ import {
 	allChangesDynamicGroupingAtom,
 	changesCurrentVersionAtom,
 } from "@/state-active-file.ts";
-import { useNavigate } from "react-router-dom";
+import { redirect, useNavigate } from "react-router-dom";
 import { ChangeComponent } from "@/components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "@/components/DynamicChangeGroup.tsx";
 import FilterSelect from "@/components/FilterSelect.tsx";
@@ -170,9 +170,19 @@ export default function Page() {
 							</DropdownMenuItem>
 							<DropdownMenuItem
 								onClick={async () => {
-									// @ts-expect-error - globally defined
-									await window.deleteLix();
-									window.location.href = "/";
+									try {
+										// Delete the Lix file
+										// @ts-expect-error - globally defined
+										await window.deleteLix();
+										// Clear file-related search params
+										setFileIdSearchParams(undefined);
+										// Use navigate instead of redirect
+										redirect("/");
+										// perform a full page reload
+										window.location.reload();
+									} catch (error) {
+										console.error("Error deleting Lix:", error);
+									}
 								}}
 							>
 								<TrashIcon />
