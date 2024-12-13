@@ -1,7 +1,7 @@
 import { applyChanges } from "../change/apply-changes.js";
 import type { Change, Version } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
-import { versionChangeInDifference } from "../query-filter/version-change-in-difference.js";
+import { versionChangeInSymmetricDifference } from "../query-filter/version-change-in-symmetric-difference.js";
 
 /**
  * Switches the current Version to the given Version.
@@ -28,61 +28,71 @@ export async function switchVersion(args: {
 	to: Pick<Version, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const currentVersion = await trx
+		const sourceVersion = await trx
 			.selectFrom("current_version")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
 		await trx.updateTable("current_version").set({ id: args.to.id }).execute();
 
-		const versionChangesDifference = await trx
+		// need symmetric difference to detect inserts and deletions
+		// that should occur when switching the version
+		const versionChangesSymmetricDifference = await trx
 			.selectFrom("version_change")
 			.innerJoin("change", "version_change.change_id", "change.id")
-			.where(versionChangeInDifference(currentVersion, args.to))
+			.where(versionChangeInSymmetricDifference(sourceVersion, args.to))
 			.selectAll("change")
 			.execute();
 
-		const toBeAppliedChanges: Change[] = [];
+		// because we use the symmetric difference, entity
+		// changes need to be de-duplicated. in the future,
+		// we could improve the symmetric difference query
+		const toBeAppliedChanges: Map<string, Change> = new Map();
 
-		await Promise.all(
-			versionChangesDifference.map(async (change) => {
-				const existingEntityChange = await trx
-					.selectFrom("version_change")
-					.innerJoin("change", "change.id", "version_change.change_id")
-					.where("version_id", "=", args.to.id)
-					.where("change.entity_id", "=", change.entity_id)
-					.where("change.file_id", "=", change.file_id)
-					.where("change.schema_key", "=", change.schema_key)
-					.selectAll("change")
-					.executeTakeFirst();
+		for (const change of versionChangesSymmetricDifference) {
+			const existingEntityChange = await trx
+				.selectFrom("version_change")
+				.innerJoin("change", "change.id", "version_change.change_id")
+				.where("version_id", "=", args.to.id)
+				.where("change.entity_id", "=", change.entity_id)
+				.where("change.file_id", "=", change.file_id)
+				.where("change.schema_key", "=", change.schema_key)
+				.selectAll("change")
+				.executeTakeFirst();
 
-				if (existingEntityChange) {
-					return toBeAppliedChanges.push(existingEntityChange);
+			if (existingEntityChange) {
+				toBeAppliedChanges.set(
+					`${change.file_id},${change.entity_id},${change.schema_key}`,
+					existingEntityChange
+				);
+				continue;
+			}
+			// need to remove the entity when switching the version
+			else {
+				if (
+					change.plugin_key === "lix_own_entity" &&
+					(change.schema_key === "lix_account_table" ||
+						change.schema_key === "lix_version_table")
+				) {
+					// deleting accounts and versions when switching is
+					// not desired. a version should be able to jump to a
+					// different version and the accounts are not affected
+					continue;
 				}
-				// need to remove the entity when switching the version
-				else {
-					if (
-						change.plugin_key === "lix_own_entity" &&
-						(change.schema_key === "lix_account_table" ||
-							change.schema_key === "lix_version_table")
-					) {
-						// deleting accounts and versions when switching is
-						// not desired. a version should be able to jump to a
-						// different version and the accounts are not affected
-						return;
-					}
-					// the entity does not exist in the switched to version
-					return toBeAppliedChanges.push({
+				// the entity does not exist in the switched to version
+				toBeAppliedChanges.set(
+					`${change.file_id},${change.entity_id},${change.schema_key}`,
+					{
 						...change,
 						snapshot_id: "no-content",
-					});
-				}
-			})
-		);
+					}
+				);
+			}
+		}
 
-		await applyChanges({
+		return await applyChanges({
 			lix: { ...args.lix, db: trx },
-			changes: toBeAppliedChanges,
+			changes: toBeAppliedChanges.values().toArray(),
 		});
 	};
 

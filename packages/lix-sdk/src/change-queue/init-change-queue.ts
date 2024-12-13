@@ -66,7 +66,7 @@ export async function initChangeQueue(args: {
 						changeQueueEntry: entry,
 						lix: args.lix,
 					});
-				} else if (entry.data_before && !entry.data_after) {
+				} else {
 					await handleFileDelete({
 						changeQueueEntry: entry,
 						lix: args.lix,

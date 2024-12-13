@@ -66,7 +66,13 @@ export async function applyChanges(args: {
 				.selectFrom("file")
 				.where("id", "=", fileId)
 				.selectAll()
-				.executeTakeFirstOrThrow();
+				.executeTakeFirst();
+
+			// lix own change control deleted the file
+			// no plugin needs to apply changes
+			if (file === undefined) {
+				continue;
+			}
 
 			for (const [pluginKey, changes] of Object.entries(groupByPlugin)) {
 				if (changes === undefined) {

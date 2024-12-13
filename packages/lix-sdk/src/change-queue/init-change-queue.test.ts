@@ -340,15 +340,13 @@ test.todo("changes should contain the author", async () => {
 	// expect(changes3.at(-1)?.author).toBe("some-other-id");
 });
 
-
+// lix own change control handles file deletions
 test("should handle file deletions correctly", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		detectChangesGlob: "*",
 		detectChanges: async ({ before, after }) => {
-			if (!before || after) {
-				return [];
-			}
+			const txt = new TextDecoder().decode(before ? before.data : after.data);
 
 			return [
 				{
@@ -357,7 +355,9 @@ test("should handle file deletions correctly", async () => {
 						type: "json",
 					},
 					entity_id: "test",
-					snapshot: undefined,
+					snapshot: {
+						text: txt,
+					},
 				},
 			];
 		},
@@ -374,22 +374,43 @@ test("should handle file deletions correctly", async () => {
 	// Insert initial file
 	await lix.db
 		.insertInto("file")
-		.values({ id: "delete-test", path: "/delete.txt", data: dataInitial })
+		.values({ id: "file0", path: "/delete.txt", data: dataInitial })
 		.execute();
 
 	// Queue deletion
 	await changeQueueSettled({ lix });
 
-	await lix.db.deleteFrom("file").where("id", "=", "delete-test").execute();
+	const changesAfterInsert = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.where("file_id", "=", "file0")
+		.selectAll()
+		.execute();
+
+	expect(changesAfterInsert).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				entity_id: "test",
+				file_id: "file0",
+				plugin_key: "mock-plugin",
+				schema_key: "text",
+				content: {
+					text: "file to be deleted",
+				},
+			}),
+		])
+	);
+
+	await lix.db.deleteFrom("file").where("id", "=", "file0").execute();
 
 	// Ensure the queue reflects the deletion entry
 	const queue = await lix.db.selectFrom("change_queue").selectAll().execute();
 
 	expect(queue).toEqual([
 		expect.objectContaining({
-			file_id: "delete-test",
-			path_before: "/delete.txt",
-			data_before: dataInitial,
+			file_id: "file0",
+			path_before: null,
+			data_before: null,
 			path_after: null,
 			data_after: null,
 		} satisfies Partial<ChangeQueueEntry>),
@@ -408,6 +429,7 @@ test("should handle file deletions correctly", async () => {
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin("change_author", "change_author.change_id", "change.id")
+		.where("file_id", "=", "file0")
 		.selectAll("change")
 		.select("change_author.account_id")
 		.select("snapshot.content")
@@ -417,7 +439,7 @@ test("should handle file deletions correctly", async () => {
 		expect.arrayContaining([
 			expect.objectContaining({
 				entity_id: "test",
-				file_id: "delete-test",
+				file_id: "file0",
 				plugin_key: "mock-plugin",
 				schema_key: "text",
 				content: null, // Content is null for deletions

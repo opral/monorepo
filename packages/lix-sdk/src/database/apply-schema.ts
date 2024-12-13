@@ -69,12 +69,8 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
 
   CREATE TRIGGER IF NOT EXISTS file_delete BEFORE DELETE ON file
   BEGIN
-    INSERT INTO change_queue(
-      file_id, path_before, data_before, metadata_before
-    )
-    VALUES (
-      OLD.id, OLD.path, OLD.data, OLD.metadata
-    );
+    INSERT INTO change_queue(file_id)
+    VALUES (OLD.id);
     SELECT triggerChangeQueue();
   END;
 

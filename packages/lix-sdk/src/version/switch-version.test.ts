@@ -157,16 +157,16 @@ test("a deleted file in one version does not impact a version which did not dele
 				.executeTakeFirstOrThrow();
 
 			return {
-				fileData: new TextEncoder().encode(snapshot.content!.text),
+				fileData: new TextEncoder().encode(snapshot.content?.text),
 			};
 		}),
 	};
 
 	const lix = await openLixInMemory({ providePlugins: [mockTxtPlugin] });
 
-	const sourceVersion = await createVersion({ lix });
+	const versionA = await createVersion({ lix });
 
-	await switchVersion({ lix, to: sourceVersion });
+	await switchVersion({ lix, to: versionA });
 
 	await lix.db
 		.insertInto("file")
@@ -181,22 +181,25 @@ test("a deleted file in one version does not impact a version which did not dele
 
 	expect(mockTxtPlugin.detectChanges).toHaveBeenCalledTimes(1);
 
-	const targetVersion = await createVersion({ lix, parent: sourceVersion });
+	const versionB = await createVersion({ lix, parent: versionA });
 
-	await switchVersion({ lix, to: targetVersion });
+	await switchVersion({ lix, to: versionB });
 
 	// there is no difference in both versions
 	expect(mockTxtPlugin.applyChanges).toHaveBeenCalledTimes(0);
 
-	// deleting the file in the target version
+	// deleting the file in version B
 	await lix.db.deleteFrom("file").where("id", "=", "file0").execute();
 
 	await changeQueueSettled({ lix });
 
-	expect(mockTxtPlugin.detectChanges).toHaveBeenCalledTimes(2);
+	// lix own change control handles file deletions
+	// expecting the plugin.detectChanges to not be invoked
+	expect(mockTxtPlugin.detectChanges).toHaveBeenCalledTimes(1);
 
-	// switching back to the source version
-	await switchVersion({ lix, to: sourceVersion });
+	// switching back to version A
+	// expecting file0 to be re-created
+	await switchVersion({ lix, to: versionA });
 
 	// the plugin re-applies the changes
 	expect(mockTxtPlugin.applyChanges).toHaveBeenCalledTimes(1);
@@ -210,4 +213,21 @@ test("a deleted file in one version does not impact a version which did not dele
 		.executeTakeFirstOrThrow();
 
 	expect(file.data).toEqual(new TextEncoder().encode("hello world"));
+
+	// going back to version B should remove the file again
+
+	await switchVersion({ lix, to: versionB });
+
+	// lix own change control handles the file deletion
+	// expecting the plugin.detectChanges to not be invoked
+	expect(mockTxtPlugin.applyChanges).toHaveBeenCalledTimes(1);
+
+	const fileAfterSwitch = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "file0")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(fileAfterSwitch).toBeUndefined();
 });
+
