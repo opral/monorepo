@@ -1,4 +1,3 @@
-import { CompiledQuery } from "kysely";
 import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
 import type { Change } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
@@ -67,7 +66,13 @@ export async function applyChanges(args: {
 				.selectFrom("file")
 				.where("id", "=", fileId)
 				.selectAll()
-				.executeTakeFirstOrThrow();
+				.executeTakeFirst();
+
+			// lix own change control deleted the file
+			// no plugin needs to apply changes
+			if (file === undefined) {
+				continue;
+			}
 
 			for (const [pluginKey, changes] of Object.entries(groupByPlugin)) {
 				if (changes === undefined) {

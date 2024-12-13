@@ -3,6 +3,7 @@ import type { DetectedChange } from "../plugin/lix-plugin.js";
 import type { Lix } from "../lix/open-lix.js";
 import { sql } from "kysely";
 import { createChange } from "../change/create-change.js";
+import { changeIsLeafInVersion } from "../query-filter/change-is-leaf-in-version.js";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {
@@ -120,7 +121,7 @@ export async function handleFileInsert(args: {
 	});
 }
 
-export async function handleFileChange(args: {
+export async function handleFileUpdate(args: {
 	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
 	changeQueueEntry: ChangeQueueEntry;
 }): Promise<void> {
@@ -165,14 +166,12 @@ export async function handleFileChange(args: {
 						data: args.changeQueueEntry.data_before,
 					}
 				: undefined,
-			after: args.changeQueueEntry.data_after
-				? {
-						id: args.changeQueueEntry.file_id,
-						path,
-						metadata: args.changeQueueEntry.metadata_after,
-						data: args.changeQueueEntry.data_after,
-					}
-				: undefined,
+			after: {
+				id: args.changeQueueEntry.file_id,
+				path,
+				metadata: args.changeQueueEntry.metadata_after,
+				data: args.changeQueueEntry.data_after!,
+			},
 		})) {
 			detectedChanges.push({
 				...change,
@@ -204,6 +203,62 @@ export async function handleFileChange(args: {
 					pluginKey: detectedChange.pluginKey,
 					schemaKey: detectedChange.schema.key,
 					snapshotContent: detectedChange.snapshot,
+				});
+			})
+		);
+
+		await trx
+			.deleteFrom("change_queue")
+			.where("id", "=", args.changeQueueEntry.id)
+			.execute();
+	});
+}
+
+/**
+ * File deletions don't need to invoke a plugin to detect changes.
+ *
+ * Instead, we can simply query the database for all changes that are related to the file
+ * and create the corresponding deletion changes for the current version.
+ *
+ * - simpler plugin API (because deletions don't need to be accounted for)
+ * - faster file deletion (because we don't need to invoke plugins)
+ */
+export async function handleFileDelete(args: {
+	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
+	changeQueueEntry: ChangeQueueEntry;
+}): Promise<void> {
+	await args.lix.db.transaction().execute(async (trx) => {
+		const currentVersion = await trx
+			.selectFrom("current_version")
+			.innerJoin("version", "current_version.id", "version.id")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		const toBeDeletedEntities = await trx
+			.selectFrom("change")
+			.where("file_id", "=", args.changeQueueEntry.file_id)
+			.where(changeIsLeafInVersion(currentVersion))
+			.select("entity_id")
+			.select("schema_key")
+			.select("plugin_key")
+			.execute();
+
+		const currentAuthors = await trx
+			.selectFrom("active_account")
+			.selectAll()
+			.execute();
+
+		await Promise.all(
+			toBeDeletedEntities.map(async (change) => {
+				await createChange({
+					lix: { ...args.lix, db: trx },
+					authors: currentAuthors,
+					version: currentVersion,
+					entityId: change.entity_id,
+					fileId: args.changeQueueEntry.file_id,
+					pluginKey: change.plugin_key,
+					schemaKey: change.schema_key,
+					snapshotContent: null, // Snapshot is null for deletions
 				});
 			})
 		);

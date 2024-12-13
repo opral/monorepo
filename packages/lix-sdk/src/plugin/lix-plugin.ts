@@ -28,11 +28,16 @@ export type LixPlugin = {
 	/**
 	 * Detects changes between the `before` and `after` file update(s).
 	 *
-	 * The function is invoked by lix based on the plugin's `glob` pattern.
+	 * `Before` is `undefined` if the file did not exist before (
+	 * the file was created).
+	 *
+	 * `After` is always defined. Either the file was updated, or
+	 * deleted. If the file is deleted, lix own change control
+	 * will handle the deletion. Hence, `after` is always be defined.
 	 */
 	detectChanges?: (args: {
 		before?: LixFile;
-		after?: LixFile;
+		after: LixFile;
 	}) => Promise<Array<DetectedChange>>;
 	/**
 	 * UI components that are used to render the diff view.
