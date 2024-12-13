@@ -84,7 +84,10 @@ export async function applyOwnEntityChanges(args: {
 								.select("data")
 								.executeTakeFirst();
 
-							snapshot.content.data = data?.data ?? new Uint8Array();
+							snapshot.content.data =
+								data?.data ??
+								// empty uint8array will trigger applyChanges() to pass an empty file to the plugin
+								new Uint8Array();
 						}
 
 						query = trx
