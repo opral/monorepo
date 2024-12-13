@@ -52,11 +52,18 @@ export type LixPlugin = {
 	}) => Promise<DetectedConflict[]>;
 	applyChanges?: (args: {
 		lix: LixReadonly;
-		// todo a file can be-non existent
-		// maybe it's better to remove the file from this api
-		// and let the plugin handle the file selection and
-		// , if needed, file creation
+		// maybe make lix file data optional (see comment below)
 		file: LixFile;
+		/**
+		 * The file to which the changes should be applied.
+		 *
+		 * The `file.data` might be undefined if the file does not
+		 * exist at the time of applying the changes. This can
+		 * happen when merging a version that created a new file
+		 * that did not exist in the target version. Or, a file
+		 * has been deleted and should be restored at a later point.
+		 */
+		// file: Omit<LixFile, "data"> & { data?: LixFile["data"] };
 		changes: Array<Change>;
 	}) => Promise<{
 		fileData: LixFile["data"];

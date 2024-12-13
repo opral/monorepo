@@ -1,7 +1,5 @@
 import type * as LixServerApi from "@lix-js/server-api-schema";
 import type { LixServerApiHandlerRoute } from "../create-server-api-handler.js";
-import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
-import type { Lix } from "../../lix/open-lix.js";
 import { getDiffingRows } from "../../sync/get-diffing-rows.js";
 
 type RequestBody =
@@ -11,33 +9,19 @@ type ResponseBody = LixServerApi.paths["/lsa/pull-v1"]["post"]["responses"];
 
 export const route: LixServerApiHandlerRoute = async (context) => {
 	const body = (await context.request.json()) as RequestBody;
-	const blob = await context.storage.get(`lix-file-${body.lix_id}`);
+	const exists = await context.environment.hasLix({ id: body.lix_id });
 
-	if (!blob) {
+	if (!exists) {
 		return new Response(null, { status: 404 });
 	}
 
-	let lix: Lix;
-
-	try {
-		lix = await openLixInMemory({ blob, sync: false });
-	} catch {
-		return new Response(
-			JSON.stringify({
-				code: "INVALID_LIX_FILE",
-				message: "The lix file couldn't be opened.",
-			} satisfies ResponseBody["500"]["content"]["application/json"]),
-			{
-				status: 500,
-			}
-		);
-	}
+	const open = await context.environment.openLix({ id: body.lix_id });
 
 	try {
 		// console.log("----------- PROCESSING PULL FROM CLIENT  -------------");
 		const { upsertedRows: tableRowsToReturn, state: sessionStatesServer } =
 			await getDiffingRows({
-				lix: lix,
+				lix: open.lix,
 				targetVectorClock: body.vector_clock,
 			});
 
@@ -67,5 +51,7 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 				},
 			}
 		);
+	} finally {
+		await context.environment.closeLix(open);
 	}
 };

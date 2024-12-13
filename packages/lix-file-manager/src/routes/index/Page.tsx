@@ -34,6 +34,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
+import IconMerge from "@/components/icons/IconMerge.tsx";
 
 const isCsvFile = (path: string) => {
 	return path.toLowerCase().endsWith(".csv");
@@ -186,7 +187,7 @@ export default function Page() {
 								Download Lix
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={handleMerge}>
-								<IconUpload />
+								<IconMerge />
 								Merge Lix
 							</DropdownMenuItem>
 						</DropdownMenuContent>
@@ -213,8 +214,8 @@ export default function Page() {
 					</div>
 				</div>
 				<div className="px-3 py-3 border-t border-slate-100">
-					<CustomLink
-						to="/website/file-manager"
+					<a
+						href="/file-manager"
 						className="block p-4 bg-slate-50 hover:bg-slate-100 rounded-lg ring-1 ring-slate-200 transition-all"
 					>
 						<div className="flex items-center justify-between">
@@ -241,7 +242,7 @@ export default function Page() {
 								<path d="M5 12h14M12 5l7 7-7 7" />
 							</svg>
 						</div>
-					</CustomLink>
+					</a>
 				</div>
 
 				<div

@@ -1,5 +1,6 @@
 import { createChangeConflict } from "../change-conflict/create-change-conflict.js";
 import { detectChangeConflicts } from "../change-conflict/detect-change-conflicts.js";
+import { applyChanges } from "../change/apply-changes.js";
 import type { Version } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { versionChangeInSymmetricDifference } from "../query-filter/version-change-in-symmetric-difference.js";
@@ -80,6 +81,11 @@ export async function mergeVersion(args: {
 				conflictingChangeIds: detectedConflict.conflictingChangeIds,
 			});
 		}
+
+		await applyChanges({
+			lix: { ...args.lix, db: trx },
+			changes: symmetricDifference,
+		});
 	};
 
 	if (args.lix.db.isTransaction) {
