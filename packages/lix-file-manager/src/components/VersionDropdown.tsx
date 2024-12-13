@@ -134,11 +134,7 @@ export function VersionDropdown() {
 				<div className="flex gap-2">
 					<DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
 						<DropdownMenuTrigger asChild>
-							<Button
-								variant="secondary"
-								size="default"
-								className="gap-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-							>
+							<Button variant="secondary" size="default" className="gap-2">
 								{currentVersion.name}
 								<ChevronDown className="h-4 w-4" />
 							</Button>

@@ -149,7 +149,7 @@ export default function Page() {
 		<div className="flex bg-white h-full">
 			<div
 				// min 300px, max 600px – change also in JS beneath
-				className="min-w-[300px] max-w-[600px] w-[450px] flex flex-col h-full relative"
+				className="min-w-[380px] max-w-[600px] w-[450px] flex flex-col h-full relative"
 				ref={(el) => {
 					if (el) {
 						el.style.width = el.offsetWidth + "px";
@@ -258,7 +258,7 @@ export default function Page() {
 						const handleMouseMove = (moveEvent: MouseEvent) => {
 							const delta = moveEvent.clientX - startX;
 							// min 300px, max 600px – change also in css
-							const newWidth = Math.min(Math.max(startWidth + delta, 300), 600);
+							const newWidth = Math.min(Math.max(startWidth + delta, 380), 600);
 							if (container) {
 								container.style.width = `${newWidth}px`;
 							}

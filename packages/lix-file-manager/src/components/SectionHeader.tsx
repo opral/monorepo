@@ -16,7 +16,7 @@ const SectionHeader = ({
 }: SectionHeaderProps) => {
 	return (
 		<div className="flex items-center justify-between px-5 h-[60px] min-w-0">
-			<div className="flex items-center gap-3 min-w-0 overflow-hidden">
+			<div className="flex items-center gap-3 min-w-0">
 				{backaction && (
 					<Button variant="ghost" size="icon" onClick={backaction}>
 						<IconArrowLeft />
