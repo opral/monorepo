@@ -75,16 +75,13 @@ export function MergeDialog({
 				<DialogHeader>
 					<DialogTitle>Merge Changes</DialogTitle>
 					<p className="text-sm text-muted-foreground">
-						You are about to merge changes from another version into your
-						current version ({currentVersion.name}). This will bring all changes
-						from the source version into your current version.
+						You are about to merge changes versions. This will bring all changes
+						from the source version into your target version.
 					</p>
 				</DialogHeader>
 				<div className="py-4 space-y-4">
 					<div className="space-y-2">
-						<label className="text-sm font-medium">
-							Target Version (Current)
-						</label>
+						<label className="text-sm font-medium">Target Version</label>
 						<Select value={targetVersion} onValueChange={setTargetVersion}>
 							<SelectTrigger>
 								<SelectValue>{currentVersion.name}</SelectValue>
@@ -102,7 +99,7 @@ export function MergeDialog({
 							</SelectContent>
 						</Select>
 						<p className="text-xs text-muted-foreground">
-							This is your current version that will receive the changes
+							This is the version that will receive the changes
 						</p>
 					</div>
 					<div className="space-y-2">
