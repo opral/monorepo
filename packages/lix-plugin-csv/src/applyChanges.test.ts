@@ -15,7 +15,7 @@ test("it applies an insert change", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const { lix, changes } = await mockChanges({
-		file: { id: "mock", path: "mock", metadata },
+		file: { id: "mock", path: "/mock", metadata },
 		fileUpdates: [before, after],
 	});
 
@@ -23,7 +23,7 @@ test("it applies an insert change", async () => {
 	// TODO we ignore the ordering of the rows - FYI
 
 	const { fileData: applied } = await applyChanges({
-		file: { id: "mock", path: "mock", data: before, metadata },
+		file: { id: "mock", path: "/mock", data: before, metadata },
 		changes,
 		lix,
 	});
@@ -38,12 +38,12 @@ test("it applies an update change", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const { lix, changes } = await mockChanges({
-		file: { id: "mock", path: "mock", metadata },
+		file: { id: "mock", path: "/mock", metadata },
 		fileUpdates: [before, after],
 	});
 
 	const { fileData: applied } = await applyChanges({
-		file: { id: "mock", path: "mock", data: before, metadata },
+		file: { id: "mock", path: "/mock", data: before, metadata },
 		changes,
 		lix,
 	});
@@ -60,12 +60,12 @@ test("it applies a delete change", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const { lix, changes } = await mockChanges({
-		file: { id: "mock", path: "mock", metadata },
+		file: { id: "mock", path: "/mock", metadata },
 		fileUpdates: [before, after],
 	});
 
 	const { fileData: applied } = await applyChanges({
-		file: { id: "mock", path: "mock", data: before, metadata },
+		file: { id: "mock", path: "/mock", data: before, metadata },
 		changes,
 		lix,
 	});
@@ -85,12 +85,12 @@ test("it applies a row order change", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const { lix, changes } = await mockChanges({
-		file: { id: "mock", path: "mock", metadata },
+		file: { id: "mock", path: "/mock", metadata },
 		fileUpdates: [initial, update0],
 	});
 
 	const { fileData: applied } = await applyChanges({
-		file: { id: "mock", path: "mock", data: initial, metadata },
+		file: { id: "mock", path: "/mock", data: initial, metadata },
 		changes,
 		lix,
 	});
