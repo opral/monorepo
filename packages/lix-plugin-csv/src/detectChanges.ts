@@ -20,16 +20,11 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 }) => {
 	// heuristic can be improved later by deriving a unique column
 	const uniqueColumnBefore = before?.metadata?.unique_column;
-	let uniqueColumnAfter = after?.metadata?.unique_column;
+	const uniqueColumnAfter = after?.metadata?.unique_column;
 
 	if (uniqueColumnBefore === undefined && uniqueColumnAfter === undefined) {
-		const fallbackUniqueColumn = parseCsvFields(after?.data)?.at(0);
-		if (!fallbackUniqueColumn) {
-			console.warn("The unique_column metadata is required to detect changes");
-			return [];
-		}
-		console.warn(`The unique_column metadata is required to detect changes, fallback ${fallbackUniqueColumn}`);
-		uniqueColumnAfter = fallbackUniqueColumn;
+		console.warn("The unique_column metadata is required to detect changes");
+		return [];
 	}
 
 	const detectedChanges: DetectedChange<
