@@ -43,10 +43,17 @@ export function MergeDialog({
 
 	useEffect(() => {
 		if (open) {
+			if (!targetVersion) {
+				setTargetVersion(currentVersion.id);
+			}
+			if (!sourceVersion && initialSourceVersion) {
+				setSourceVersion(initialSourceVersion.id);
+			}
+		} else {
 			setTargetVersion(currentVersion.id);
-			setSourceVersion(initialSourceVersion?.id || "");
+			setSourceVersion("");
 		}
-	}, [open, currentVersion, initialSourceVersion]);
+	}, [open]);
 
 	const handleMerge = async () => {
 		try {
@@ -75,16 +82,21 @@ export function MergeDialog({
 				<DialogHeader>
 					<DialogTitle>Merge Changes</DialogTitle>
 					<p className="text-sm text-muted-foreground">
-						You are about to merge changes versions. This will bring all changes
-						from the source version into your target version.
+						You are about to merge changes from one version into another.
 					</p>
 				</DialogHeader>
 				<div className="py-4 space-y-4">
 					<div className="space-y-2">
 						<label className="text-sm font-medium">Target Version</label>
-						<Select value={targetVersion} onValueChange={setTargetVersion}>
+						<Select
+							value={targetVersion}
+							onValueChange={(value) => setTargetVersion(value)}
+						>
 							<SelectTrigger>
-								<SelectValue>{currentVersion.name}</SelectValue>
+								<SelectValue>
+									{versions.find((v) => v.id === targetVersion)?.name ||
+										"Select target version"}
+								</SelectValue>
 							</SelectTrigger>
 							<SelectContent>
 								{versions.map((version) => (
@@ -99,14 +111,20 @@ export function MergeDialog({
 							</SelectContent>
 						</Select>
 						<p className="text-xs text-muted-foreground">
-							This is the version that will receive the changes
+							The version that will receive the changes
 						</p>
 					</div>
 					<div className="space-y-2">
 						<label className="text-sm font-medium">Source Version</label>
-						<Select value={sourceVersion} onValueChange={setSourceVersion}>
+						<Select
+							value={sourceVersion}
+							onValueChange={(value) => setSourceVersion(value)}
+						>
 							<SelectTrigger>
-								<SelectValue placeholder="Select version to merge from" />
+								<SelectValue>
+									{versions.find((v) => v.id === sourceVersion)?.name ||
+										"Select version to merge from"}
+								</SelectValue>
 							</SelectTrigger>
 							<SelectContent>
 								{versions.map((version) => (
@@ -121,7 +139,7 @@ export function MergeDialog({
 							</SelectContent>
 						</Select>
 						<p className="text-xs text-muted-foreground">
-							Select the version whose changes you want to merge
+							The version whose changes you want to merge
 						</p>
 					</div>
 				</div>
