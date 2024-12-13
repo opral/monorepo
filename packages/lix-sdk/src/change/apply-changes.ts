@@ -1,4 +1,3 @@
-import { CompiledQuery } from "kysely";
 import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
 import type { Change } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
