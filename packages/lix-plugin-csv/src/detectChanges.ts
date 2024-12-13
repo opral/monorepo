@@ -4,7 +4,6 @@ import { CellSchemaV1 } from "./schemas/cell.js";
 import { HeaderSchemaV1 } from "./schemas/header.js";
 import { parseCsv } from "./utilities/parseCsv.js";
 import { RowSchemaV1 } from "./schemas/row.js";
-import { parseCsvFields } from "./utilities/parseCsvFields.js";
 
 function toEntityId(rowId: string, columnName: string) {
 	// row id already is <unique column>|<unique value>
