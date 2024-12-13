@@ -11,31 +11,27 @@ export const DEMO_FILE_IDS = [
 	DEMO_EMAIL_NEWSLETTER_CSV_FILE_ID,
 ];
 
-export async function lixCsvDemoFile(): Promise<Blob> {
+export async function lixCsvDemoFile(lixId: string): Promise<Blob> {
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [csvPlugin],
 	});
 
-	if (!import.meta.env.PROD) {
+	// Store lix_id in database
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "lix_id",
+			value: lixId,
+		})
+		.execute();
+
+	// Load appropriate demo data based on lixId
+	if (lixId === DEMO_CAP_TABLE_CSV_FILE_ID) {
 		await lix.db
 			.insertInto("file")
 			.values({
-				id: "sjd9a9-2j2j-minimal",
-				metadata: {
-					unique_column: "email",
-				},
-				path: "/minimal.csv",
-				data: new TextEncoder().encode(minimalCsv),
-			})
-			.execute();
-	} else {
-		// only in production have the demo files been inserted
-		// to reduce the number of changes when debugging the app
-		await lix.db
-			.insertInto("file")
-			.values({
-				id: DEMO_CAP_TABLE_CSV_FILE_ID,
+				id: lixId,
 				path: "/cap-table-example.csv",
 				data: new TextEncoder().encode(captableCsv),
 				metadata: {
@@ -43,13 +39,26 @@ export async function lixCsvDemoFile(): Promise<Blob> {
 				},
 			})
 			.execute();
-
+	} else if (lixId === DEMO_EMAIL_NEWSLETTER_CSV_FILE_ID) {
 		await lix.db
 			.insertInto("file")
 			.values({
-				id: DEMO_EMAIL_NEWSLETTER_CSV_FILE_ID,
+				id: lixId,
 				path: "/email-newsletter.csv",
 				data: new TextEncoder().encode(emailNewsletterCsv),
+				metadata: {
+					unique_column: "email",
+				},
+			})
+			.execute();
+	} else {
+		// New files get minimal demo
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: lixId,
+				path: "/minimal.csv",
+				data: new TextEncoder().encode(minimalCsv),
 				metadata: {
 					unique_column: "email",
 				},
@@ -58,6 +67,5 @@ export async function lixCsvDemoFile(): Promise<Blob> {
 	}
 
 	await changeQueueSettled({ lix });
-
 	return await lix.toBlob();
 }

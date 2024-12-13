@@ -9,6 +9,7 @@ import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
+import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 
 export const LIX_FILE_NAME = "demo.lix";
 
@@ -37,43 +38,86 @@ export const discussionSearchParamsAtom = atom(async (get) => {
 	return searchParams.get("d");
 });
 
-let existingSafeLixToOpfsInterval: ReturnType<typeof setInterval> | undefined;
+// let existingSafeLixToOpfsInterval: ReturnType<typeof setInterval> | undefined;
 
-export const lixAtom = atom(async () => {
-	// if (existingSafeLixToOpfsInterval) {
-	// 	clearInterval(existingSafeLixToOpfsInterval);
-	// }
+export const lixIdAtom = atom(
+	// getter
+	() => {
+		const pathParts = window.location.pathname.split("/");
+		return pathParts[pathParts.length - 1] || undefined;
+	},
+	// setter
+	(_get, _set, newValue: string | undefined) => {
+		const newPath = newValue ? `/app/fm/${newValue}` : "/app/fm";
+		window.history.pushState({}, "", newPath);
+	}
+);
 
+export const lixAtom = atom(async (get) => {
+	const lixId = get(lixIdAtom);
 	const rootHandle = await getOriginPrivateDirectory();
-	const fileHandle = await rootHandle.getFileHandle(LIX_FILE_NAME, {
-		create: true,
-	});
-	const file = await fileHandle.getFile();
-	const isNewLix = file.size === 0;
-	const lix = await openLixInMemory({
-		blob: isNewLix ? await lixCsvDemoFile() : file,
-		providePlugins: [csvPlugin],
-	});
 
-	// Initialize accounts from localStorage
-	await initializeAccountsFromStorage(lix);
+	try {
+		// If no lixId, create a new demo lix and save it
+		if (!lixId) {
+			const lix = await openLixInMemory({
+				blob: await lixCsvDemoFile("demo"),
+				providePlugins: [csvPlugin],
+			});
+			try {
+				await saveLixToOpfs({ lix });
+			} catch (error) {
+				console.error("Failed to save demo lix:", error);
+			}
+			return lix;
+		}
 
-	// * naive set interval leads to bugs.
-	// * search for `saveLixToOpfs` in the code base
-	// existingSafeLixToOpfsInterval = setInterval(async () => {
-	// 	const writable = await fileHandle.createWritable();
-	// 	const file = await lix.toBlob();
-	// 	await writable.write(file);
-	// 	await writable.close();
-	// }, 5000);
+		// Try to load existing lix file
+		try {
+			const fileHandle = await rootHandle.getFileHandle(`${lixId}.lix`, {
+				create: true,
+			});
+			const file = await fileHandle.getFile();
+			const isNewLix = file.size === 0;
 
-	// @ts-expect-error - Expose for debugging.
-	window.deleteLix = async () => {
-		clearInterval(existingSafeLixToOpfsInterval);
-		await rootHandle.removeEntry(LIX_FILE_NAME);
-	};
+			// If file exists and has content, load it
+			if (!isNewLix) {
+				const lix = await openLixInMemory({
+					blob: file,
+					providePlugins: [csvPlugin],
+				});
+				await initializeAccountsFromStorage(lix);
+				return lix;
+			}
 
-	return lix;
+			// For new files, create a demo lix
+			const lix = await openLixInMemory({
+				blob: await lixCsvDemoFile(lixId),
+				providePlugins: [csvPlugin],
+			});
+			await saveLixToOpfs({ lix });
+			await initializeAccountsFromStorage(lix);
+			return lix;
+		} catch (error) {
+			console.error("Failed to load/create lix file:", error);
+			// Create fallback demo lix
+			const lix = await openLixInMemory({
+				blob: await lixCsvDemoFile("fallback"),
+				providePlugins: [csvPlugin],
+			});
+			await initializeAccountsFromStorage(lix);
+			return lix;
+		}
+	} catch (error) {
+		console.error("Error in lixAtom:", error);
+		// Final fallback - return in-memory demo lix
+		const lix = await openLixInMemory({
+			blob: await lixCsvDemoFile("fallback"),
+			providePlugins: [csvPlugin],
+		});
+		await initializeAccountsFromStorage(lix);
+		return lix;
+	}
 });
 
 /**
@@ -84,10 +128,11 @@ export const lixAtom = atom(async () => {
 export const withPollingAtom = atom(Date.now());
 
 export const currentVersionAtom = atom<
-	Promise<Version & { targets: Version[] }>
+	Promise<(Version & { targets: Version[] }) | null>
 >(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
+	if (!lix) return null;
 
 	const currentVersion = await lix.db
 		.selectFrom("current_version")
@@ -95,19 +140,13 @@ export const currentVersionAtom = atom<
 		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
-	// const targets = await lix.db
-	// 	.selectFrom("branch_target")
-	// 	.where("source_branch_id", "=", currentVersion.id)
-	// 	.innerJoin("branch", "branch_target.target_branch_id", "branch.id")
-	// 	.selectAll("branch")
-	// 	.execute();
-
 	return { ...currentVersion, targets: [] };
 });
 
 export const existingVersionsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
+	if (!lix) return [];
 
 	return await lix.db.selectFrom("version").selectAll().execute();
 });
@@ -115,6 +154,7 @@ export const existingVersionsAtom = atom(async (get) => {
 export const filesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
+	if (!lix) return [];
 	return await lix.db.selectFrom("file").selectAll().execute();
 });
 
@@ -123,6 +163,7 @@ export const ACTIVE_ACCOUNT_STORAGE_KEY = "lix-active-account";
 export const activeAccountsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
+	if (!lix) return [];
 
 	return await lix.db
 		.selectFrom("active_account")
@@ -156,7 +197,7 @@ export const activeAccountAtom = atom(
 	// setter
 	async (get, set, account: Account | null) => {
 		const lix = await get(lixAtom);
-
+		if (!lix) return;
 		if (account) {
 			await switchAccount({ lix, to: [account] });
 			localStorage.setItem(ACTIVE_ACCOUNT_STORAGE_KEY, JSON.stringify(account));
@@ -182,6 +223,7 @@ export const resetAnonymousState = () => {
 export const accountsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
+	if (!lix) return [];
 	const accounts = await lix.db.selectFrom("account").selectAll().execute();
 
 	// Reset anonymous clicked state if no anonymous account exists
