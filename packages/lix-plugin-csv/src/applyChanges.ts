@@ -1,4 +1,4 @@
-import { type Change, type LixPlugin } from "@lix-js/sdk";
+import { type Change, type LixPlugin, type LixReadonly } from "@lix-js/sdk";
 import papaparse from "papaparse";
 import { parseCsv } from "./utilities/parseCsv.js";
 import { CellSchemaV1 } from "./schemas/cell.js";
@@ -14,7 +14,10 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		throw new Error("The unique_column metadata is required to apply changes");
 	}
 
-	const parsed = parseCsv(file.data, uniqueColumn);
+	const parsed = parseCsv(
+		file.data ?? (await newCsvFile(lix, changes)),
+		uniqueColumn,
+	);
 
 	if (parsed === undefined) {
 		throw new Error("Failed to parse csv");
@@ -124,4 +127,25 @@ function insertIntoMapAtPosition<K, V>(
 	}
 
 	return newMap;
+}
+
+async function newCsvFile(lix: LixReadonly, changes: Change[]) {
+	const header = changes.find((c) => c.entity_id === "header");
+	if (header === undefined) {
+		throw new Error("No header change found. Can't reconstruct csv file.");
+	}
+	const headerSnapshot = await lix.db
+		.selectFrom("snapshot")
+		.where("id", "=", header.snapshot_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	if (headerSnapshot.content === null) {
+		throw new Error("Header snapshot is empty. Can't reconstruct csv file.");
+	}
+
+	// create a csv file that has the header column names
+	return new TextEncoder().encode(
+		headerSnapshot.content.columnNames.join(",") + "\n",
+	);
 }

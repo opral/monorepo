@@ -72,6 +72,7 @@ export async function handleFileInsert(args: {
 		}
 
 		for (const change of await plugin.detectChanges({
+			lix: args.lix,
 			before: undefined,
 			after: {
 				id: args.changeQueueEntry.file_id,
@@ -158,6 +159,7 @@ export async function handleFileUpdate(args: {
 			throw error;
 		}
 		for (const change of await plugin.detectChanges({
+			lix: args.lix,
 			before: args.changeQueueEntry.data_before
 				? {
 						id: args.changeQueueEntry.file_id,

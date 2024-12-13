@@ -34,12 +34,12 @@ test("json schema type of a detected change", () => {
 	assertType(change);
 });
 
-// test("file.data is potentially undefined", () => {
-// 	const plugin: LixPlugin = {
-// 		key: "plugin1",
-// 		applyChanges: async ({ file }) => {
-// 			assertType<ArrayBuffer | undefined>(file.data);
-// 			return { fileData: new Uint8Array() };
-// 		},
-// 	};
-// });
+test("file.data is potentially undefined", () => {
+	const plugin: LixPlugin = {
+		key: "plugin1",
+		applyChanges: async ({ file }) => {
+			assertType<ArrayBuffer | undefined>(file.data);
+			return { fileData: new Uint8Array() };
+		},
+	};
+});

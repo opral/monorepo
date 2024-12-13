@@ -8,15 +8,6 @@ import type { Lix } from "../lix/open-lix.js";
 // named lixplugin to avoid conflict with built-in plugin type
 export type LixPlugin = {
 	key: string;
-	// TODO https://github.com/opral/lix-sdk/issues/37
-	// idea:
-	//   1. runtime reflection for lix on the change schema
-	//   2. lix can validate the changes based on the schema
-	// schema: {
-	// 	bundle: Bundle,
-	// 	message: Message,
-	// 	variant: Variant,
-	// },
 	/**
 	 * The glob pattern that should invoke `detectChanges()`.
 	 *
@@ -36,6 +27,7 @@ export type LixPlugin = {
 	 * will handle the deletion. Hence, `after` is always be defined.
 	 */
 	detectChanges?: (args: {
+		lix: LixReadonly;
 		before?: LixFile;
 		after: LixFile;
 	}) => Promise<Array<DetectedChange>>;
@@ -57,8 +49,6 @@ export type LixPlugin = {
 	}) => Promise<DetectedConflict[]>;
 	applyChanges?: (args: {
 		lix: LixReadonly;
-		// maybe make lix file data optional (see comment below)
-		file: LixFile;
 		/**
 		 * The file to which the changes should be applied.
 		 *
@@ -68,7 +58,7 @@ export type LixPlugin = {
 		 * that did not exist in the target version. Or, a file
 		 * has been deleted and should be restored at a later point.
 		 */
-		// file: Omit<LixFile, "data"> & { data?: LixFile["data"] };
+		file: Omit<LixFile, "data"> & { data?: LixFile["data"] };
 		changes: Array<Change>;
 	}) => Promise<{
 		fileData: LixFile["data"];

@@ -231,3 +231,65 @@ test("a deleted file in one version does not impact a version which did not dele
 	expect(fileAfterSwitch).toBeUndefined();
 });
 
+test("doesn't trigger the change queue when switching versions which would lead to duplicate changes", async () => {
+	const mockTxtPlugin: LixPlugin = {
+		key: "mock_txt_plugin",
+		detectChangesGlob: "*.txt",
+		// @ts-expect-error - mocked
+		detectChanges: vi.fn(async ({ after }) => {
+			return [
+				{
+					entity_id: "txt_file",
+					snapshot: after
+						? {
+								text: new TextDecoder().decode(after?.data),
+							}
+						: null,
+					schema: {
+						type: "json",
+						key: "txt",
+					},
+				},
+			];
+		}),
+
+		applyChanges: vi.fn(async ({ lix, changes }) => {
+			const snapshot = await lix.db
+				.selectFrom("snapshot")
+				.where("id", "=", changes.at(-1)!.snapshot_id)
+				.selectAll()
+				.executeTakeFirstOrThrow();
+
+			return {
+				fileData: new TextEncoder().encode(snapshot.content?.text),
+			};
+		}),
+	};
+
+	const lix = await openLixInMemory({ providePlugins: [mockTxtPlugin] });
+
+	const versionA = await createVersion({ lix });
+	const versionB = await createVersion({ lix });
+
+	await switchVersion({ lix, to: versionA });
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "file0",
+			path: "/file0.txt",
+			data: new TextEncoder().encode("hello world"),
+		})
+		.execute();
+
+	await changeQueueSettled({ lix });
+
+	await switchVersion({ lix, to: versionB });
+
+	const changeQueue = await lix.db
+		.selectFrom("change_queue")
+		.selectAll()
+		.execute();
+
+	expect(changeQueue).toHaveLength(0);
+});

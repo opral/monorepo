@@ -23,6 +23,7 @@ export function parseCsv(
 	index: Map<string, Record<string, string>>;
 	lineNumbers: Record<string, number>;
 	header: string[];
+	delimeter: string;
 } {
 	const parsed = data
 		? papaparse.parse(new TextDecoder().decode(data), {
@@ -47,7 +48,12 @@ export function parseCsv(
 		}
 	}
 
-	return { index, header: parsed?.meta.fields ?? [], lineNumbers };
+	return {
+		index,
+		header: parsed?.meta.fields ?? [],
+		lineNumbers,
+		delimeter: parsed?.meta.delimiter ?? ",",
+	};
 }
 
 /**

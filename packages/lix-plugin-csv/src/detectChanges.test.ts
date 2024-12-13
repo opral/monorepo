@@ -1,11 +1,17 @@
 import { expect, test } from "vitest";
 import { detectChanges } from "./detectChanges.js";
-import type { DetectedChange } from "@lix-js/sdk";
+import {
+	openLixInMemory,
+	type DetectedChange,
+	type ExperimentalInferType,
+} from "@lix-js/sdk";
 import { CellSchemaV1 } from "./schemas/cell.js";
 import { HeaderSchemaV1 } from "./schemas/header.js";
 import { RowSchemaV1 } from "./schemas/row.js";
 
 test("it should not detect changes if the csv did not update", async () => {
+	const lix = await openLixInMemory({});
+
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	// same file
 	const after = before;
@@ -13,6 +19,7 @@ test("it should not detect changes if the csv did not update", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const detectedChanges = await detectChanges?.({
+		lix,
 		before: { id: "random", path: "x.csv", data: before, metadata },
 		after: { id: "random", path: "x.csv", data: after, metadata },
 	});
@@ -20,6 +27,8 @@ test("it should not detect changes if the csv did not update", async () => {
 });
 
 test("it should detect a new row with its cells", async () => {
+	const lix = await openLixInMemory({});
+
 	const before = new TextEncoder().encode(
 		//
 		"Name,Age\nAnna,20\nPeter,50",
@@ -31,6 +40,7 @@ test("it should detect a new row with its cells", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const detectedChanges = await detectChanges?.({
+		lix,
 		before: { id: "random", path: "x.csv", data: before, metadata },
 		after: { id: "random", path: "x.csv", data: after, metadata },
 	});
@@ -55,12 +65,15 @@ test("it should detect a new row with its cells", async () => {
 });
 
 test("it should detect updates", async () => {
+	const lix = await openLixInMemory({});
+
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = new TextEncoder().encode("Name,Age\nAnna,21\nPeter,50");
 
 	const metadata = { unique_column: "Name" };
 
 	const detectedChanges = await detectChanges?.({
+		lix,
 		before: { id: "mock", path: "x.csv", data: before, metadata },
 		after: { id: "mock", path: "x.csv", data: after, metadata },
 	});
@@ -75,12 +88,14 @@ test("it should detect updates", async () => {
 });
 
 test("it should detect a deletion of a row and its cells", async () => {
+	const lix = await openLixInMemory({});
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = new TextEncoder().encode("Name,Age\nAnna,20");
 
 	const metadata = { unique_column: "Name" };
 
 	const detectedChanges = await detectChanges?.({
+		lix,
 		before: { id: "random", path: "x.csv", data: before, metadata },
 		after: { id: "random", path: "x.csv", data: after, metadata },
 	});
@@ -96,12 +111,15 @@ test("it should detect a deletion of a row and its cells", async () => {
 // of a csv file in lix. It's better to just ignore the change
 // and let an app or user define the unique column later.
 test("it should return [] if the unique column is not set", async () => {
+	const lix = await openLixInMemory({});
+
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = before;
 
 	const metadata = { unique_column: undefined };
 
 	const detectedChanges = await detectChanges({
+		lix,
 		before: { id: "random", path: "x.csv", data: before, metadata },
 		after: { id: "random", path: "x.csv", data: after, metadata },
 	});
@@ -113,6 +131,8 @@ test("it should return [] if the unique column is not set", async () => {
 // 2. if no new changes are reported after a column change, the initial state
 //    is not tracked
 test("changing the unique column should lead to a new cell entity_ids to avoid bugs", async () => {
+	const lix = await openLixInMemory({});
+
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 
@@ -120,6 +140,7 @@ test("changing the unique column should lead to a new cell entity_ids to avoid b
 	const metaAfter = { unique_column: "Age" };
 
 	const detectedChanges = await detectChanges?.({
+		lix,
 		before: { id: "random", path: "x.csv", data: before, metadata: metaBefore },
 		after: { id: "random", path: "x.csv", data: after, metadata: metaAfter },
 	});
@@ -174,12 +195,15 @@ test("changing the unique column should lead to a new cell entity_ids to avoid b
 // 2. if no new changes are reported after a column change, the initial state
 //    is not tracked
 test("changing the header order should result in a change", async () => {
+	const lix = await openLixInMemory({});
+
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
 	const after = new TextEncoder().encode("Age,Name\n20,Anna\n50,Peter");
 
 	const meta = { unique_column: "Name" };
 
 	const detectedChanges = await detectChanges?.({
+		lix,
 		before: { id: "random", path: "x.csv", data: before, metadata: meta },
 		after: { id: "random", path: "x.csv", data: after, metadata: meta },
 	});
@@ -196,6 +220,8 @@ test("changing the header order should result in a change", async () => {
 });
 
 test("row order changes should be detected", async () => {
+	const lix = await openLixInMemory({});
+
 	// the row `Anna,20` is moved to the end
 	// while `Peter,50` is moved to the beginning
 	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
@@ -204,6 +230,7 @@ test("row order changes should be detected", async () => {
 	const meta = { unique_column: "Name" };
 
 	const detectedChanges = await detectChanges?.({
+		lix,
 		before: { id: "random", path: "x.csv", data: before, metadata: meta },
 		after: { id: "random", path: "x.csv", data: after, metadata: meta },
 	});
@@ -220,4 +247,24 @@ test("row order changes should be detected", async () => {
 			snapshot: { lineNumber: 0 },
 		},
 	] satisfies DetectedChange<typeof RowSchemaV1>[]);
+});
+
+test("it detects the header entity", async () => {
+	const lix = await openLixInMemory({});
+
+	const before = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
+	const after = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
+
+	const metadata = { unique_column: "Name" };
+
+	const detectedChanges = await detectChanges?.({
+		lix,
+		before: { id: "random", path: "x.csv", data: before, metadata: null },
+		after: { id: "random", path: "x.csv", data: after, metadata },
+	});
+
+	const header = detectedChanges.find((c) => c.entity_id === "header")
+		?.snapshot as ExperimentalInferType<typeof HeaderSchemaV1> | undefined;
+
+	expect(header?.columnNames).toEqual(["Name", "Age"]);
 });

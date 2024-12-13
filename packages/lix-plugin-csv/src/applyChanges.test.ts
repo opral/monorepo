@@ -1,6 +1,8 @@
 import { expect, test } from "vitest";
 import { applyChanges } from "./applyChanges.js";
 import { mockChanges } from "./utilities/mockChanges.js";
+import { changeQueueSettled, openLixInMemory } from "@lix-js/sdk";
+import { plugin } from "./index.js";
 
 test("it applies an insert change", async () => {
 	const before = new TextEncoder().encode(
@@ -97,3 +99,34 @@ test("it applies a row order change", async () => {
 
 	expect(applied).toEqual(update0);
 });
+
+test("applies changes to a new csv file", async () => {
+	const lix = await openLixInMemory({ providePlugins: [plugin] });
+
+	const initialCsv = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
+
+	const file = {
+		id: "file0",
+		path: "/mock.csv",
+		data: initialCsv,
+		metadata: { unique_column: "Name" },
+	};
+
+	await lix.db.insertInto("file").values(file).execute();
+
+	await changeQueueSettled({ lix });
+
+	const changes = await lix.db
+		.selectFrom("change")
+		.where("file_id", "=", "file0")
+		.selectAll()
+		.execute();
+
+	const { fileData: applied } = await applyChanges({
+		file: { ...file, data: undefined },
+		changes,
+		lix,
+	});
+
+	expect(applied).toEqual(initialCsv);
+}); 
