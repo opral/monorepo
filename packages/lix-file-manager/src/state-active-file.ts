@@ -28,6 +28,7 @@ export const activeFileAtom = atom(async (get) => {
 
 	if (!fileId) {
 		redirect("/");
+		return null;
 	}
 
 	const lix = await get(lixAtom);
@@ -40,6 +41,7 @@ export const activeFileAtom = atom(async (get) => {
 
 	if (!fileAtom) {
 		redirect("/");
+		return null;
 	}
 	return fileAtom;
 });
