@@ -4,6 +4,7 @@ import { applyChanges } from "./apply-changes.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import type { KeyValue } from "../key-value/database-schema.js";
+import { changeQueueSettled } from "../change-queue/change-queue-settled.js";
 
 test("it applies the given changes", async () => {
 	const lix = await openLixInMemory({});
@@ -173,4 +174,95 @@ test("it applies own entity changes", async () => {
 		key: "mock-key",
 		value: "1+1=2",
 	});
+});
+
+test("applies an insert change for a file if the file does not exist", async () => {
+	const mockTxtPlugin: LixPlugin = {
+		key: "mock_txt_plugin",
+		detectChangesGlob: "*.txt",
+		detectChanges: async ({ after }) => {
+			return [
+				{
+					entity_id: "txt_file",
+					snapshot: after
+						? {
+								text: new TextDecoder().decode(after?.data),
+							}
+						: null,
+					schema: {
+						type: "json",
+						key: "txt",
+					},
+				},
+			];
+		},
+
+		applyChanges: async ({ lix, changes }) => {
+			const snapshot = await lix.db
+				.selectFrom("snapshot")
+				.where("id", "=", changes.at(-1)!.snapshot_id)
+				.selectAll()
+				.executeTakeFirstOrThrow();
+
+			return {
+				fileData: new TextEncoder().encode(snapshot.content!.text),
+			};
+		},
+	};
+
+	const lix = await openLixInMemory({
+		providePlugins: [mockTxtPlugin],
+	});
+
+	// insertion change
+	const file1 = await lix.db
+		.insertInto("file")
+		.values({
+			path: "/test.txt",
+			data: new TextEncoder().encode("hello"),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	await changeQueueSettled({ lix });
+
+	const changes1 = await lix.db
+		.selectFrom("change")
+		.orderBy("id desc")
+		.selectAll()
+		.execute();
+
+	const snapshots1 = await lix.db.selectFrom("snapshot").selectAll().execute();
+
+	const lix2 = await openLixInMemory({
+		providePlugins: [mockTxtPlugin],
+	});
+
+	// the snapshots need to be in lix 2 to apply the changes
+	await lix2.db
+		.insertInto("snapshot")
+		.values(snapshots1.map((c) => ({ content: c.content })))
+		.onConflict((oc) => oc.doNothing())
+		.execute();
+
+	// the changes need to exist too to avoid foreign key constraint errors
+	// (applyChanges assumes that changes are existent in the lix)
+	await lix2.db.insertInto("change").values(changes1).execute();
+
+	await applyChanges({ lix: lix2, changes: changes1 });
+
+	const changes2 = await lix2.db
+		.selectFrom("change")
+		.orderBy("id desc")
+		.selectAll()
+		.execute();
+
+	const file2 = await lix2.db
+		.selectFrom("file")
+		.where("path", "=", "/test.txt")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(changes1).toEqual(changes2);
+	expect(file1).toEqual(file2);
 });

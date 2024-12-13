@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { assertType, test } from "vitest";
-import type { DetectedChange } from "./lix-plugin.js";
+import type { DetectedChange, LixPlugin } from "./lix-plugin.js";
 import type { ExperimentalChangeSchema } from "../change-schema/types.js";
 
 test("json schema type of a detected change", () => {
@@ -32,3 +33,13 @@ test("json schema type of a detected change", () => {
 
 	assertType(change);
 });
+
+// test("file.data is potentially undefined", () => {
+// 	const plugin: LixPlugin = {
+// 		key: "plugin1",
+// 		applyChanges: async ({ file }) => {
+// 			assertType<ArrayBuffer | undefined>(file.data);
+// 			return { fileData: new Uint8Array() };
+// 		},
+// 	};
+// });
