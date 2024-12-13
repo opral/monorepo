@@ -1,7 +1,7 @@
 import { applyChanges } from "../change/apply-changes.js";
 import type { Change, Version } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
-import { versionChangeInSymmetricDifference } from "../query-filter/version-change-in-symmetric-difference.js";
+import { versionChangeInDifference } from "../query-filter/version-change-in-difference.js";
 
 /**
  * Switches the current Version to the given Version.
@@ -10,7 +10,7 @@ import { versionChangeInSymmetricDifference } from "../query-filter/version-chan
  *
  * @example
  *   ```ts
- *   await switchVersion({ lix, to: currentVersion });
+ *   await switchVersion({ lix, to: otherVersion });
  *   ```
  *
  * @example
@@ -35,17 +35,17 @@ export async function switchVersion(args: {
 
 		await trx.updateTable("current_version").set({ id: args.to.id }).execute();
 
-		const versionChangesSymmetricDifference = await trx
+		const versionChangesDifference = await trx
 			.selectFrom("version_change")
 			.innerJoin("change", "version_change.change_id", "change.id")
-			.where(versionChangeInSymmetricDifference(currentVersion, args.to))
+			.where(versionChangeInDifference(currentVersion, args.to))
 			.selectAll("change")
 			.execute();
 
 		const toBeAppliedChanges: Change[] = [];
 
 		await Promise.all(
-			versionChangesSymmetricDifference.map(async (change) => {
+			versionChangesDifference.map(async (change) => {
 				const existingEntityChange = await trx
 					.selectFrom("version_change")
 					.innerJoin("change", "change.id", "version_change.change_id")
