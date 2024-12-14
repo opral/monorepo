@@ -69,7 +69,7 @@ export const createLsaInMemoryEnvironment = (): LsaEnvironment => {
 				lix = openLixes.get(args.id)!;
 			} else {
 				const blob = store.get(args.id);
-				lix = await openLixInMemory({ blob });
+				lix = await openLixInMemory({ blob, sync: false });
 				openLixes.set(args.id, lix);
 			}
 
