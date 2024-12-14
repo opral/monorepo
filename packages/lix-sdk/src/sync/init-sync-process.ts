@@ -30,24 +30,24 @@ export async function initSyncProcess(args: {
 		if (!url) {
 			return;
 		}
-		console.log("----------- PULL FROM SERVER -------------");
+		// console.log("----------- PULL FROM SERVER -------------");
 		const serverState = await pullFromServer({
 			serverUrl: url.value,
 			lix: args.lix,
 			id: lixId.value,
 		});
-		console.log(
-			"----------- DONE PULL FROM SERVER ------------- New known Server state: ",
-			serverState
-		);
-		console.log("----------- PUSH TO SERVER -------------");
+		// console.log(
+		// 	"----------- DONE PULL FROM SERVER ------------- New known Server state: ",
+		// 	serverState
+		// );
+		// console.log("----------- PUSH TO SERVER -------------");
 		await pushToServer({
 			serverUrl: url.value,
 			lix: args.lix,
 			id: lixId.value,
 			targetVectorClock: serverState,
 		});
-		console.log("----------- DONE PUSH TO SERVER -------------");
+		// console.log("----------- DONE PUSH TO SERVER -------------");
 	};
 
 	// naive implementation that syncs every second
