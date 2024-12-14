@@ -20,8 +20,6 @@ export async function initChangeQueue(args: {
 		},
 	});
 
-	const closed = false;
-
 	let pending: Promise<void> | undefined;
 
 	let resolve: () => void;
@@ -31,10 +29,6 @@ export async function initChangeQueue(args: {
 	let hasMoreEntriesSince: number | undefined = undefined;
 
 	async function queueWorker(trail = false) {
-		if (closed) {
-			return;
-		}
-
 		try {
 			if (pending && !trail) {
 				hasMoreEntriesSince = runNumber;

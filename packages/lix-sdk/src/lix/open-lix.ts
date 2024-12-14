@@ -68,6 +68,7 @@ export async function openLix(args: {
 		getAll: async () => plugins,
 	};
 
+
 	initChangeQueue({
 		lix: { db, plugin, sqlite: args.database },
 		rawDatabase: args.database,
@@ -87,8 +88,8 @@ export async function openLix(args: {
 		plugin,
 		close: async () => {
 			await changeQueueSettled({ lix: { db } });
-			args.database.close();
-			await db.destroy();
+			// args.database.close();
+			// await db.destroy();
 		},
 	};
 }
