@@ -89,6 +89,17 @@
       "request": "launch",
       "type": "chrome",
       "webRoot": "${workspaceFolder}/packages/csv-app"
+    },
+    {
+      "name": "lix-host",
+      "type": "node",
+      "request": "launch",
+      "autoAttachChildProcesses": true,
+      "args": ["${workspaceFolder}/packages/lix-host/src/main.ts"],
+      "runtimeArgs": ["--experimental-strip-types", "--watch"],
+      "smartStep": true,
+      "sourceMaps": true,
+      "console": "integratedTerminal"
     }
   ]
 }
