@@ -61,16 +61,37 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 			for (const [versionId, versionChanges] of Object.entries(
 				incomingVersionChanges
 			)) {
-				const incomingChanges = versionChanges.map((change) => {
-					const [, changeId] = change.entity_id.split(",");
-					const foundChange = allIncomingChanges.find((c) => c.id === changeId);
-					if (foundChange === undefined) {
-						throw new Error(
-							"Change not found. Expected to find a change for the version change in the incoming changes."
+				const incomingChanges = await Promise.all(
+					versionChanges.map(async (change) => {
+						const [, changeId] = change.entity_id.split(",");
+						const foundChange = allIncomingChanges.find(
+							(c) => c.id === changeId
 						);
-					}
-					return foundChange;
-				});
+						if (foundChange === undefined) {
+							// TODO unclear why the fallback is needed. waiting for simplification
+							// of sync before investigating further.
+							//
+							// Observation:
+							//
+							// The lix_server_url change existed on the server
+							// but the client didn't send it. Maybe due to the
+							// test environment in the e2e test "should sync versions".
+							const fallback = await trx
+								.selectFrom("change")
+								.where("id", "=", changeId!)
+								.selectAll()
+								.executeTakeFirst();
+							if (fallback) {
+								return fallback;
+							} else {
+								throw new Error(
+									"Change not found. Expected to find a change for the version change in the incoming changes."
+								);
+							}
+						}
+						return foundChange;
+					})
+				);
 				const existingChanges: Change[] = [];
 
 				// manually constructing the symmetric difference
