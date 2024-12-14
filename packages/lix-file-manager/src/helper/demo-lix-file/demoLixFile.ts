@@ -1,49 +1,24 @@
 import { changeQueueSettled, newLixFile, openLixInMemory } from "@lix-js/sdk";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import emailNewsletterCsv from "./email-newsletter.csv?raw";
-import captableCsv from "./cap-table.csv?raw";
 import minimalCsv from "./minimal.csv?raw";
 
-export const DEMO_CAP_TABLE_CSV_FILE_ID = "29jas9j-2sk2-cap";
-export const DEMO_EMAIL_NEWSLETTER_CSV_FILE_ID = "oj20a1-40ss-email";
-export const DEMO_FILE_IDS = [
-	DEMO_CAP_TABLE_CSV_FILE_ID,
-	DEMO_EMAIL_NEWSLETTER_CSV_FILE_ID,
-];
-
-export async function lixCsvDemoFile(lixId: string): Promise<Blob> {
+export async function lixCsvDemoFile(): Promise<{ blob: Blob; id: string }> {
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [csvPlugin],
 	});
 
-	// Store lix_id in database
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "lix_id",
-			value: lixId,
-		})
-		.execute();
+	const id = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.select("value")
+		.executeTakeFirstOrThrow();
 
-	// Load appropriate demo data based on lixId
-	if (lixId === DEMO_CAP_TABLE_CSV_FILE_ID) {
+	if (import.meta.env.PROD) {
 		await lix.db
 			.insertInto("file")
 			.values({
-				id: lixId,
-				path: "/cap-table-example.csv",
-				data: new TextEncoder().encode(captableCsv),
-				metadata: {
-					unique_column: "Stakeholder",
-				},
-			})
-			.execute();
-	} else if (lixId === DEMO_EMAIL_NEWSLETTER_CSV_FILE_ID) {
-		await lix.db
-			.insertInto("file")
-			.values({
-				id: lixId,
 				path: "/email-newsletter.csv",
 				data: new TextEncoder().encode(emailNewsletterCsv),
 				metadata: {
@@ -52,11 +27,10 @@ export async function lixCsvDemoFile(lixId: string): Promise<Blob> {
 			})
 			.execute();
 	} else {
-		// New files get minimal demo
+		// New files get minimal demo csv for development purposes
 		await lix.db
 			.insertInto("file")
 			.values({
-				id: lixId,
 				path: "/minimal.csv",
 				data: new TextEncoder().encode(minimalCsv),
 				metadata: {
@@ -67,5 +41,5 @@ export async function lixCsvDemoFile(lixId: string): Promise<Blob> {
 	}
 
 	await changeQueueSettled({ lix });
-	return await lix.toBlob();
+	return { blob: await lix.toBlob(), id: id.value };
 }

@@ -35,7 +35,6 @@
 		"jotai": "^2.10.1",
 		"lodash-es": "^4.17.21",
 		"lucide-react": "^0.460.0",
-		"nanoid": "^5.0.9",
 		"native-file-system-adapter": "^3.0.1",
 		"papaparse": "^5.4.1",
 		"react": "^18.3.1",

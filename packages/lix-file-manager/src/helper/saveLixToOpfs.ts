@@ -6,20 +6,15 @@ export async function saveLixToOpfs(args: { lix: Lix }) {
 		.selectFrom("key_value")
 		.where("key", "=", "lix_id")
 		.select("value")
-		.executeTakeFirst()
-		.then((result) => result?.value);
-
-	if (!lixId) {
-		throw new Error("No lix_id found");
-	}
+		.executeTakeFirstOrThrow();
 
 	const rootHandle = await getOriginPrivateDirectory();
-	const fileHandle = await rootHandle.getFileHandle(`${lixId}.lix`, {
+	const fileHandle = await rootHandle.getFileHandle(`${lixId.value}.lix`, {
 		create: true,
 	});
 	const writable = await fileHandle.createWritable();
 	const file = await args.lix.toBlob();
 	await writable.write(file);
 	await writable.close();
-	console.log(`done saving lix ${lixId} to opfs`);
+	console.log(`done saving lix ${lixId.value} to opfs`);
 }
