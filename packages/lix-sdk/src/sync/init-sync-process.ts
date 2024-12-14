@@ -52,16 +52,18 @@ export async function initSyncProcess(args: {
 
 	// naive implementation that syncs every second
 
-	async function schedulePullAndPush() {
+	function schedulePullAndPush() {
 		if (!stoped) {
-			await pullAndPush();
+			pullAndPush().catch((e) => {
+				console.error("Error in sync process", e);
+			});
 		}
 		setTimeout(() => {
 			schedulePullAndPush();
 		}, 1000);
 	}
 
-	schedulePullAndPush();
+	schedulePullAndPush();	
 
 	return {
 		stop: () => {

@@ -32,10 +32,19 @@ export async function pullFromServer(args: {
 			},
 		})
 	);
-	const body = await response.json();
 	if (response.ok === false) {
-		throw new Error(`Failed to pull from server: ${body.code} ${body.message}`);
+		try {
+			const body = await response.json();
+			throw new Error(
+				`Failed to pull from server: ${body.code} ${body.message}`
+			);
+		} catch {
+			throw new Error(
+				`Failed to pull from server: ${response.status} ${response.statusText}`
+			);
+		}
 	}
+	const body = await response.json();
 
 	// 3. Client receives the data (added/changed rows + vector clock) from the server
 	//   - client could have moved forward in the meantime!
