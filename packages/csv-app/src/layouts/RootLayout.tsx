@@ -12,11 +12,13 @@ import { Lix } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import { openLixInMemory } from "@lix-js/sdk";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
+import { useNavigate } from "react-router-dom";
 
 export default function RootLayout(props: { children: JSX.Element }) {
 	const [, setPolling] = useAtom(withPollingAtom);
 	const [lix] = useAtom(lixAtom);
 	const [serverUrl] = useAtom(serverUrlAtom);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -48,7 +50,7 @@ export default function RootLayout(props: { children: JSX.Element }) {
 			const writable = await opfsFile.createWritable();
 			await writable.write(fileContent);
 			await writable.close();
-			window.location.href = `?l=${lixId.value}`;
+			navigate("?l=" + lixId.value);
 		}
 	};
 
@@ -95,9 +97,19 @@ export default function RootLayout(props: { children: JSX.Element }) {
 							</SlMenuItem>
 							<SlMenuItem
 								onClick={async () => {
-									// @ts-expect-error - globally defined
-									await window.deleteLix();
-									window.location.reload();
+									try {
+										const root = await navigator.storage.getDirectory();
+										// @ts-expect-error - TS doesn't know about values() yet
+										for await (const entry of root.values()) {
+											if (entry.kind === "file") {
+												await root.removeEntry(entry.name);
+											}
+										}
+										navigate("/");
+										console.log("All files deleted from OPFS.");
+									} catch (error) {
+										console.error("Error deleting files from OPFS:", error);
+									}
 								}}
 							>
 								<SlIcon
@@ -105,7 +117,7 @@ export default function RootLayout(props: { children: JSX.Element }) {
 									slot="prefix"
 									className="mr-2"
 								></SlIcon>
-								Reset
+								Reset OPFS
 							</SlMenuItem>
 						</SlMenu>
 					</SlDropdown>

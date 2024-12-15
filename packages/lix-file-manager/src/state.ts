@@ -58,10 +58,17 @@ export const lixAtom = atom(async (get) => {
 			const file = await fileHandle.getFile();
 			lixBlob = new Blob([await file.arrayBuffer()]);
 		} catch {
-			// Try server if OPFS fails
+			// Try server if lix doesn't exist in OPFS
 			try {
 				const response = await fetch(
-					`http://localhost:3000/lsa/get-v1/${lixIdSearchParam}`
+					// TODO env variable for host
+					new Request("http://localhost:3000/lsa/get-v1", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({ lix_id: lixIdSearchParam }),
+					})
 				);
 				if (response.ok) {
 					const blob = await response.blob();

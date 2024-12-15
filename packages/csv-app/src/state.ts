@@ -35,7 +35,13 @@ export const lixAtom = atom(async (get) => {
 		} catch {
 			try {
 				const response = await fetch(
-					`http://localhost:3000/lsa/get-v1/${lixIdSearchParam}`
+					new Request("http://localhost:3000/lsa/get-v1", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({ lix_id: lixIdSearchParam }),
+					})
 				);
 				if (response.ok) {
 					const blob = await response.blob();
@@ -86,16 +92,6 @@ export const lixAtom = atom(async (get) => {
 		url.searchParams.set("l", lixId.value);
 		window.location.href = url.toString();
 	}
-
-	// @ts-expect-error - Expose for debugging.
-	window.deleteLix = async () => {
-		const rootHandle = await getOriginPrivateDirectory();
-		for await (const [name] of rootHandle) {
-			if (name.endsWith(".lix")) {
-				await rootHandle.removeEntry(name);
-			}
-		}
-	};
 
 	return lix;
 });
