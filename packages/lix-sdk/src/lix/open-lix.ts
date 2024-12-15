@@ -7,6 +7,7 @@ import { changeQueueSettled } from "../change-queue/change-queue-settled.js";
 import type { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import { initSyncProcess } from "../sync/sync-process.js";
+import type { KeyValue } from "../key-value/database-schema.js";
 
 export type Lix = {
 	/**
@@ -48,16 +49,24 @@ export async function openLix(args: {
 	 */
 	providePlugins?: LixPlugin[];
 	/**
-	 * Whether or not sync is enabled.
+	 * Set the key values when opening the lix.
+	 *
+	 * @example
+	 *   const lix = await openLix({ keyValues: [{ key: "#lix_sync", value: "false" }] })
 	 */
-	sync?: boolean;
+	keyValues?: KeyValue[];
 }): Promise<Lix> {
-	const withDefaults = {
-		sync: true,
-		...args,
-	};
-
 	const db = initDb({ sqlite: args.database });
+
+	if (args.keyValues && args.keyValues.length > 0) {
+		await db
+			.insertInto("key_value")
+			.values(args.keyValues)
+			.onConflict((oc) =>
+				oc.doUpdateSet((eb) => ({ value: eb.ref("excluded.value") }))
+			)
+			.execute();
+	}
 
 	const plugins = await loadPlugins(db);
 	if (args.providePlugins && args.providePlugins.length > 0) {
@@ -68,15 +77,12 @@ export async function openLix(args: {
 		getAll: async () => plugins,
 	};
 
-
 	initChangeQueue({
 		lix: { db, plugin, sqlite: args.database },
 		rawDatabase: args.database,
 	});
 
-	if (withDefaults.sync) {
-		initSyncProcess({ lix: { db, plugin } });
-	}
+	initSyncProcess({ lix: { db, plugin } });
 
 	return {
 		db,
