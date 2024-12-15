@@ -206,4 +206,17 @@ export const switchActiveAccount = async (lix: Lix, account: Account) => {
 };
 
 
-export const serverUrlAtom = atom<string | null>(null);
+export const serverUrlAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+
+	if (!lix) return undefined;
+
+	const serverUrl = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_experimental_server_url")
+		.select("value")
+		.executeTakeFirst();
+
+	return serverUrl?.value;
+});
