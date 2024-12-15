@@ -25,7 +25,6 @@ import ConnectedChanges from "@/components/ConnectedChanges.tsx";
 import DiscussionThread from "@/components/DiscussionThread.tsx";
 import { VersionDropdown } from "@/components/VersionDropdown.tsx";
 import CustomLink from "@/components/CustomLink.tsx";
-import { useCallback } from "react";
 import DropArea from "@/components/DropArea.js";
 import { Download, Ellipsis, Plug, TrashIcon, File } from "lucide-react";
 import {
@@ -163,17 +162,14 @@ export default function Page() {
 		}
 	};
 
-	const handleBackgroundClick = useCallback(
-		(e: React.MouseEvent) => {
-			// Only trigger if clicking the background container itself
-			if (e.target === e.currentTarget) {
-				const newParams = new URLSearchParams(searchParams);
-				const openLix = newParams.get("l");
-				navigate(`/?l=${openLix}`);
-			}
-		},
-		[navigate]
-	);
+	const handleBackgroundClick = async (e: React.MouseEvent) => {
+		// Only trigger if clicking the background container itself
+		if (e.target === e.currentTarget) {
+			const newParams = new URLSearchParams(searchParams);
+			const openLix = newParams.get("l");
+			navigate(`/?l=${openLix}`);
+		}
+	};
 
 	return (
 		<div className="flex bg-white h-full">
