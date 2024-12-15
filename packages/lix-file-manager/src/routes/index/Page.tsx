@@ -35,6 +35,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
 import IconMerge from "@/components/icons/IconMerge.tsx";
+import { Lix } from "@lix-js/sdk";
 
 const isCsvFile = (path: string) => {
 	return path.toLowerCase().endsWith(".csv");
@@ -188,11 +189,7 @@ export default function Page() {
 								<TrashIcon />
 								Reset OPFS
 							</DropdownMenuItem>
-							<DropdownMenuItem
-								onClick={() => {
-									alert("Not implemented");
-								}}
-							>
+							<DropdownMenuItem onClick={() => handleExportLixFile(lix)}>
 								<Download />
 								Export Lix
 							</DropdownMenuItem>
@@ -394,3 +391,19 @@ export default function Page() {
 		</div>
 	);
 }
+
+const handleExportLixFile = async (lix: Lix) => {
+	const lixId = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.select("value")
+		.executeTakeFirstOrThrow();
+
+	const blob = await lix.toBlob();
+	const a = document.createElement("a");
+	a.href = URL.createObjectURL(blob);
+	a.download = `${lixId.value}.lix`;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+};
