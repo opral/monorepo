@@ -27,7 +27,7 @@ export default function RootLayout(props: { children: JSX.Element }) {
 		return () => clearInterval(interval);
 	}, []);
 
-	const handleFileSelect = async (
+	const handleOpenLixFile = async (
 		event: React.ChangeEvent<HTMLInputElement>
 	) => {
 		const file = event.target.files?.[0];
@@ -84,7 +84,7 @@ export default function RootLayout(props: { children: JSX.Element }) {
 									id="file-input"
 									type="file"
 									style={{ display: "none" }}
-									onChange={handleFileSelect}
+									onChange={handleOpenLixFile}
 								></input>
 							</SlMenuItem>
 							<SlMenuItem onClick={() => handleExportLixFile(lix)}>

@@ -27,7 +27,7 @@ import { VersionDropdown } from "@/components/VersionDropdown.tsx";
 import CustomLink from "@/components/CustomLink.tsx";
 import { useCallback } from "react";
 import DropArea from "@/components/DropArea.js";
-import { Download, Ellipsis, Plug, TrashIcon } from "lucide-react";
+import { Download, Ellipsis, Plug, TrashIcon, File } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -35,7 +35,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
 import IconMerge from "@/components/icons/IconMerge.tsx";
-import { Lix } from "@lix-js/sdk";
+import { Lix, openLixInMemory } from "@lix-js/sdk";
 
 const isCsvFile = (path: string) => {
 	return path.toLowerCase().endsWith(".csv");
@@ -92,6 +92,35 @@ export default function Page() {
 					})
 					.execute();
 				await saveLixToOpfs({ lix });
+			}
+		};
+		input.click();
+	};
+
+	const handleOpenLixFile = async () => {
+		const input = document.createElement("input");
+		input.type = "file";
+		input.onchange = async (e) => {
+			const file = (e.target as HTMLInputElement).files?.[0];
+			if (file) {
+				const fileContent = await file.arrayBuffer();
+				const opfsRoot = await navigator.storage.getDirectory();
+				const lix = await openLixInMemory({
+					blob: new Blob([fileContent]),
+				});
+				const lixId = await lix.db
+					.selectFrom("key_value")
+					.where("key", "=", "lix_id")
+					.select("value")
+					.executeTakeFirstOrThrow();
+
+				const opfsFile = await opfsRoot.getFileHandle(`${lixId.value}.lix`, {
+					create: true,
+				});
+				const writable = await opfsFile.createWritable();
+				await writable.write(fileContent);
+				await writable.close();
+				navigate("?l=" + lixId.value);
 			}
 		};
 		input.click();
@@ -169,6 +198,18 @@ export default function Page() {
 								<IconUpload />
 								Import File
 							</DropdownMenuItem>
+							<DropdownMenuItem onClick={handleOpenLixFile}>
+								<File />
+								Open Lix
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => handleExportLixFile(lix)}>
+								<Download />
+								Export Lix
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={handleMerge}>
+								<IconMerge />
+								Merge Lix
+							</DropdownMenuItem>
 							<DropdownMenuItem
 								onClick={async () => {
 									try {
@@ -188,14 +229,6 @@ export default function Page() {
 							>
 								<TrashIcon />
 								Reset OPFS
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => handleExportLixFile(lix)}>
-								<Download />
-								Export Lix
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={handleMerge}>
-								<IconMerge />
-								Merge Lix
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
