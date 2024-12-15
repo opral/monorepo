@@ -100,6 +100,13 @@
       "smartStep": true,
       "sourceMaps": true,
       "console": "integratedTerminal"
+    },
+    {
+      "name": "lix-file-manager:3007",
+      "port": 3007,
+      "request": "launch",
+      "type": "chrome",
+      "webRoot": "${workspaceFolder}/packages/lix-file-manager"
     }
   ]
 }
