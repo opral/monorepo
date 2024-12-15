@@ -36,7 +36,9 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 
 	//functions
 	const handleSelectFile = () => {
-		setSearchParams({ f: id });
+		const newSearchParams = new URLSearchParams(searchParams);
+		newSearchParams.set("f", id);
+		setSearchParams(newSearchParams);
 	};
 
 	const handleDeleteFile = async (e: React.MouseEvent<HTMLButtonElement>) => {
