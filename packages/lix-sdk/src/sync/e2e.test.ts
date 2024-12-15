@@ -34,6 +34,11 @@ test("versions should be synced", async () => {
 		})
 	);
 
+	// create a second client
+	const lix1 = await openLixInMemory({
+		blob: await lix0.toBlob(),
+	});
+
 	// start syncing
 	await lix0.db
 		.insertInto("key_value")
@@ -43,10 +48,13 @@ test("versions should be synced", async () => {
 		})
 		.execute();
 
-	// create a second client
-	const lix1 = await openLixInMemory({
-		blob: await lix0.toBlob(),
-	});
+	await lix1.db
+		.insertInto("key_value")
+		.values({
+			key: "lix_experimental_server_url",
+			value: "http://mock.com",
+		})
+		.execute();
 
 	// @ts-expect-error - eases debugging
 	lix1.db.__name = "lix1";
@@ -104,11 +112,13 @@ test("versions should be synced", async () => {
 	// expecting both lix0 and lix1 to have the same version changes
 	const lix0VersionChanges = await lix0.db
 		.selectFrom("version_change")
+		.orderBy("change_id", "desc")
 		.selectAll()
 		.execute();
 
 	const lix1VersionChanges = await lix1.db
 		.selectFrom("version_change")
+		.orderBy("change_id", "desc")
 		.selectAll()
 		.execute();
 
