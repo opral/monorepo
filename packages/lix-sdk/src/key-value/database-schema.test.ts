@@ -105,3 +105,15 @@ test("it should default add a uuid lix_id if not exits", async () => {
 
 	expect(validateUuid(result.value)).toBe(true);
 });
+
+test("default value for #lix_sync to enable auto sync once a server url is set", async () => {
+	const lix = await openLixInMemory({});
+
+	const result = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "#lix_sync")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(result.value).toBe("true");
+});

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 import type { Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 
@@ -14,6 +13,9 @@ export function applyKeyValueDatabaseSchema(
 	INSERT OR IGNORE INTO key_value (key, value)
 	VALUES ('lix_id', uuid_v4());
 
+	-- default value for lix sync is true
+	INSERT OR IGNORE INTO key_value (key, value)
+	VALUES ('#lix_sync', 'true');
 `;
 }
 
@@ -43,7 +45,7 @@ export type KeyValueTable = {
 	value: string;
 };
 
-type PredefinedKeys = "lix_id" | "lix_server_url";
+type PredefinedKeys = "lix_id" | "lix_server_url" | "#lix_sync";
 // The string & {} ensures TypeScript recognizes KeyValueKeys
 // as a superset of string, preventing conflicts when using other string values.
 type KeyType = string & {};
