@@ -68,30 +68,63 @@ export async function pullFromServer(args: {
 			.select("id")
 			.executeTakeFirstOrThrow();
 
-		// retrieve the version change updates from the changes
-		const currentVersionChanges = ((data["change"] ?? []) as Change[]).filter(
-			(change) => {
-				// retrieve the version id from the composite entity id
-				const [versionId] = change.entity_id.split(",") as [string, string];
-				return (
-					change.schema_key === "lix_version_change_table" &&
-					versionId === currentVersion.id
-				);
-			}
-		);
+		/**
+		 * The version change (pointers) need to be applied to the version_change table.
+		 *
+		 * Without the version change pointers, switching between versiond and
+		 * seeing "what changes are in this version" would not be possible.
+		 */
+		const versionChanges: Change[] = [];
 
-		// only apply changes that are part of the current version
-		const changesToApply = changes
-			// by getting the changes for the version (exlcuding the version change pointers)
-			.filter((c) =>
-				currentVersionChanges.some((vc) => {
-					// retrieve the change id from the composite entity id
-					const [, changeId] = vc.entity_id.split(",") as [string, string];
-					return changeId === c.id;
-				})
-			)
-			// and concat the current version change pointers
-			.concat(currentVersionChanges);
+		/**
+		 * The version change conflict (pointers) need to be applied as well for
+		 * the same reason as applying version changes is necessary.
+		 *
+		 * Without the pointers, conflicts are not copied over.
+		 */
+		const versionChangeConflicts: Change[] = [];
+
+		/**
+		 * The changes that are part of the current version must all get applied.
+		 */
+		const changesInCurrentVersion: Change[] = [];
+
+		for (const change of changes) {
+			if (
+				change.schema_key === "lix_version_change_table" ||
+				change.schema_key === "lix_version_change_conflict_table"
+			) {
+				const [versionId] = change.entity_id.split(",") as [string, string];
+				if (change.schema_key === "lix_version_change_table") {
+					if (versionId === currentVersion.id) {
+						// the version change pointer of the current version updated.
+						// finding a matching change in the changes array
+						// and pushing it to the changesInCurrentVersion array
+						// to be applied in the next step.
+						const [, changeId] = change.entity_id.split(",");
+						// the find operation can be expensive. to be optimized later.
+						const matchingChange = changes.find((c) => c.id === changeId!);
+						if (!matchingChange) {
+							throw new Error("Expected matching change");
+						}
+						changesInCurrentVersion.push(matchingChange);
+					}
+					// in any case, push the version change to the version changes array
+					versionChanges.push(change);
+				} else if (change.schema_key === "lix_version_change_conflict_table") {
+					versionChangeConflicts.push(change);
+				} else {
+					throw new Error("Unexpected schema key");
+				}
+			}
+		}
+
+		// potential optimization by not creating a new array with immutability (spreading)
+		const changesToApply = [
+			...versionChanges,
+			...versionChangeConflicts,
+			...changesInCurrentVersion,
+		];
 
 		await mergeTheirState({
 			lix: { ...args.lix, db: trx },

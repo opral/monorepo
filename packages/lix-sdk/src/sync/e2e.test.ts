@@ -7,6 +7,7 @@ import {
 import { createVersion } from "../version/create-version.js";
 import { switchVersion } from "../version/switch-version.js";
 import type { Version } from "../database/schema.js";
+import { executeSync } from "../database/execute-sync.js";
 
 test("versions should be synced", async () => {
 	const environment = createLsaInMemoryEnvironment();
@@ -99,4 +100,131 @@ test("versions should be synced", async () => {
 		.execute();
 
 	expect(lix0Versions).toEqual(lix1Versions);
+
+	// expecting both lix0 and lix1 to have the same version changes
+	const lix0VersionChanges = await lix0.db
+		.selectFrom("version_change")
+		.selectAll()
+		.execute();
+
+	const lix1VersionChanges = await lix1.db
+		.selectFrom("version_change")
+		.selectAll()
+		.execute();
+
+	expect(lix0VersionChanges).toEqual(lix1VersionChanges);
+});
+
+test("switching synced versions should work", async () => {
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ environment });
+
+	global.fetch = vi.fn((request) => lsaHandler(request));
+	// @ts-expect-error - eases debugging
+	global.executeSync = executeSync;
+
+	const lix0 = await openLixInMemory({});
+	// @ts-expect-error - eases debugging
+	lix0.db.__name = "lix0";
+
+	const lixId = await lix0.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const server = await environment.openLix({ id: lixId.value });
+
+	// initialize lix on the server
+	await lsaHandler(
+		new Request("http://mock.com/lsa/new-v1", {
+			method: "POST",
+			body: await lix0.toBlob(),
+		})
+	);
+
+	// set sync server
+	await lix0.db
+		.insertInto("key_value")
+		.values({
+			key: "lix_experimental_server_url",
+			value: "http://mock.com",
+		})
+		.execute();
+
+	// create a second client
+	const lix1 = await openLixInMemory({
+		blob: await lix0.toBlob(),
+	});
+
+	// @ts-expect-error - eases debugging
+	lix1.db.__name = "lix1";
+
+	const currentVersion = await lix0.db
+		.selectFrom("current_version")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// lix0 creates and switches to a new version
+	// in which a new change is created that should be
+	// synced to lix1
+	const version0 = await createVersion({
+		lix: lix0,
+		name: "version0",
+		parent: currentVersion,
+	});
+
+	await switchVersion({ lix: lix0, to: version0 });
+
+	await lix0.db
+		.insertInto("key_value")
+		.values({
+			key: "mock-key",
+			value: "mock",
+		})
+		.execute();
+
+	// awaiting the polling sync
+	await new Promise((resolve) => setTimeout(resolve, 2004));
+
+	// expecting all changes to be the same across
+	// lix0, the server, and lix1
+	const keyValueChangesInLix0 = await lix0.db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_key_value_table")
+		.where("entity_id", "=", "mock-key")
+		.selectAll()
+		.execute();
+
+	const keyValueChangesOnServer = await server.lix.db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_key_value_table")
+		.where("entity_id", "=", "mock-key")
+		.selectAll()
+		.execute();
+
+	const keyValueChangesInLix1 = await lix1.db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_key_value_table")
+		.where("entity_id", "=", "mock-key")
+		.selectAll()
+		.execute();
+
+	expect(keyValueChangesInLix0).toEqual(keyValueChangesOnServer);
+	expect(keyValueChangesOnServer).toEqual(keyValueChangesInLix1);
+
+	// switch lix1 to the same version as lix0
+	// and expect key value to be mock
+	await switchVersion({ lix: lix1, to: version0 });
+
+	const keyValue = await lix1.db
+		.selectFrom("key_value")
+		.where("key", "=", "mock-key")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(keyValue).toEqual({
+		key: "mock-key",
+		value: "mock",
+	});
 });
