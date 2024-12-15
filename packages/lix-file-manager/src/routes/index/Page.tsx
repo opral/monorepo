@@ -318,7 +318,7 @@ export default function Page() {
 						<Button
 							variant="default"
 							size="default"
-							className={activeFile?.path ? "" : "hidden"}
+							className={activeFile?.path ? "relative" : "hidden"}
 						>
 							<CustomLink
 								to={
@@ -332,6 +332,10 @@ export default function Page() {
 									? "Open in CSV app"
 									: "Build a Lix App"}
 							</CustomLink>
+							{/* indicator for user to click on the button */}
+							{activeFile?.path && (
+								<span className="absolute top-0 right-0 w-2.5 h-2.5 bg-blue-900 rounded-full animate-ping" />
+							)}
 						</Button>
 					</SectionHeader>
 					<div className="px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
