@@ -3,63 +3,102 @@ import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
+import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 
-export const LIX_FILE_NAME = "demo.lix";
+export const withPollingAtom = atom(Date.now());
 
-export const fileIdSearchParamsAtom = atom(async (get) => {
+export const lixIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
-	// Using window is a limitation of react router v6.
-	//
-	// No programmatic routing possibility exists outside of
-	// the react component tree. A better solution is to
-	// let react router handle the re-direct in the route
-	// config. But for now, this works.
 	const searchParams = new URL(window.location.href).searchParams;
-	return searchParams.get("f");
+	return searchParams.get("l") || undefined;
 });
 
-let existingSafeLixToOpfsInterval: ReturnType<typeof setInterval> | undefined;
+export const fileIdSearchParamsAtom = atom((get) => {
+	get(withPollingAtom);
+	const searchParams = new URL(window.location.href).searchParams;
+	return searchParams.get("f") || undefined;
+});
 
-export const lixAtom = atom(async () => {
-	// if (existingSafeLixToOpfsInterval) {
-	// 	clearInterval(existingSafeLixToOpfsInterval);
-	// }
-
+export const lixAtom = atom(async (get) => {
+	const lixIdSearchParam = get(lixIdSearchParamsAtom);
 	const rootHandle = await getOriginPrivateDirectory();
-	const fileHandle = await rootHandle.getFileHandle(LIX_FILE_NAME, {
-		create: true,
-	});
-	const file = await fileHandle.getFile();
-	const isNewLix = file.size === 0;
+
+	let lixBlob: Blob;
+
+	if (lixIdSearchParam) {
+		try {
+			const fileHandle = await rootHandle.getFileHandle(
+				`${lixIdSearchParam}.lix`
+			);
+			const file = await fileHandle.getFile();
+			lixBlob = new Blob([await file.arrayBuffer()]);
+		} catch {
+			try {
+				const response = await fetch(
+					`http://localhost:3000/lsa/get-v1/${lixIdSearchParam}`
+				);
+				if (response.ok) {
+					const blob = await response.blob();
+					const lix = await openLixInMemory({
+						blob,
+						providePlugins: [csvPlugin],
+					});
+					await saveLixToOpfs({ lix });
+					return lix;
+				}
+			} catch (error) {
+				console.error("Failed to fetch from server:", error);
+			}
+		}
+	} else {
+		const availableLixFiles: FileSystemHandle[] = [];
+		for await (const [name, handle] of rootHandle) {
+			if (handle.kind === "file" && name.endsWith(".lix")) {
+				availableLixFiles.push(handle);
+			}
+		}
+		if (availableLixFiles.length > 0) {
+			const fileHandle = await rootHandle.getFileHandle(
+				availableLixFiles[0].name
+			);
+			const file = await fileHandle.getFile();
+			lixBlob = new Blob([await file.arrayBuffer()]);
+		} else {
+			lixBlob = await lixCsvDemoFile();
+		}
+	}
+
 	const lix = await openLixInMemory({
-		blob: isNewLix ? await lixCsvDemoFile() : file,
+		blob: lixBlob!,
 		providePlugins: [csvPlugin],
 	});
 
-	// * naive set interval leads to bugs.
-	// * search for `saveLixToOpfs` in the code base
-	// existingSafeLixToOpfsInterval = setInterval(async () => {
-	// 	const writable = await fileHandle.createWritable();
-	// 	const file = await lix.toBlob();
-	// 	await writable.write(file);
-	// 	await writable.close();
-	// }, 5000);
+	const lixId = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.select("value")
+		.executeTakeFirstOrThrow();
+
+	await saveLixToOpfs({ lix });
+
+	if (lixId.value !== lixIdSearchParam) {
+		const url = new URL(window.location.href);
+		url.searchParams.set("l", lixId.value);
+		window.location.href = url.toString();
+	}
 
 	// @ts-expect-error - Expose for debugging.
 	window.deleteLix = async () => {
-		clearInterval(existingSafeLixToOpfsInterval);
-		await rootHandle.removeEntry(LIX_FILE_NAME);
+		const rootHandle = await getOriginPrivateDirectory();
+		for await (const [name] of rootHandle) {
+			if (name.endsWith(".lix")) {
+				await rootHandle.removeEntry(name);
+			}
+		}
 	};
 
 	return lix;
 });
-
-/**
- * Ugly ass workaround to get polled derived state.
- *
- * Search where the atom is set (likely in the layout/root component).
- */
-export const withPollingAtom = atom(Date.now());
 
 export const currentVersionAtom = atom<
 	Promise<Version & { targets: Version[] }>

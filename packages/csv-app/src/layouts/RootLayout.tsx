@@ -1,10 +1,5 @@
 import { useAtom } from "jotai";
-import {
-	LIX_FILE_NAME,
-	lixAtom,
-	serverUrlAtom,
-	withPollingAtom,
-} from "../state.ts";
+import { lixAtom, serverUrlAtom, withPollingAtom } from "../state.ts";
 import { useEffect, useState } from "react";
 import {
 	SlButton,
@@ -15,6 +10,8 @@ import {
 } from "@shoelace-style/shoelace/dist/react";
 import { Lix } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
+import { openLixInMemory } from "@lix-js/sdk";
+import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 
 export default function RootLayout(props: { children: JSX.Element }) {
 	const [, setPolling] = useAtom(withPollingAtom);
@@ -33,17 +30,25 @@ export default function RootLayout(props: { children: JSX.Element }) {
 	) => {
 		const file = event.target.files?.[0];
 		if (file) {
-			// Handle the file here
 			const fileContent = await file.arrayBuffer();
-
 			const opfsRoot = await navigator.storage.getDirectory();
-			const opfsFile = await opfsRoot.getFileHandle(LIX_FILE_NAME, {
+			const lix = await openLixInMemory({
+				blob: new Blob([fileContent]),
+				providePlugins: [csvPlugin],
+			});
+			const lixId = await lix.db
+				.selectFrom("key_value")
+				.where("key", "=", "lix_id")
+				.select("value")
+				.executeTakeFirstOrThrow();
+
+			const opfsFile = await opfsRoot.getFileHandle(`${lixId.value}.lix`, {
 				create: true,
 			});
 			const writable = await opfsFile.createWritable();
 			await writable.write(fileContent);
 			await writable.close();
-			window.location.reload();
+			window.location.href = `?l=${lixId.value}`;
 		}
 	};
 
@@ -131,10 +136,16 @@ export default function RootLayout(props: { children: JSX.Element }) {
 }
 
 const handleExportLixFile = async (lix: Lix) => {
+	const lixId = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.select("value")
+		.executeTakeFirstOrThrow();
+
 	const blob = await lix.toBlob();
 	const a = document.createElement("a");
 	a.href = URL.createObjectURL(blob);
-	a.download = "demo.lix";
+	a.download = `${lixId.value}.lix`;
 	document.body.appendChild(a);
 	a.click();
 	document.body.removeChild(a);
