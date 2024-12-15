@@ -1,4 +1,4 @@
-import { redirect, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button.tsx";
 import IconFile from "@/components/icons/IconFile.tsx";
 import clsx from "clsx";
@@ -29,6 +29,8 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 	//local state
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 
+	const navigate = useNavigate();
+
 	// global state
 	const [lix] = useAtom(lixAtom);
 
@@ -41,7 +43,8 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 		e.stopPropagation();
 		await lix.db.deleteFrom("file").where("id", "=", id).execute();
 		await saveLixToOpfs({ lix });
-		return redirect("/");
+		const lixId = searchParams.get("l");
+		return navigate(`/?l=${lixId}`);
 	};
 
 	const handleDownload = async () => {
