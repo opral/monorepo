@@ -16,7 +16,7 @@ import {
 	allChangesDynamicGroupingAtom,
 	changesCurrentVersionAtom,
 } from "@/state-active-file.ts";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChangeComponent } from "@/components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "@/components/DynamicChangeGroup.tsx";
 import FilterSelect from "@/components/FilterSelect.tsx";
@@ -71,6 +71,7 @@ export default function Page() {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
 	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
+	const [searchParams] = useSearchParams();
 
 	//hooks
 	const navigate = useNavigate();
@@ -136,7 +137,9 @@ export default function Page() {
 		(e: React.MouseEvent) => {
 			// Only trigger if clicking the background container itself
 			if (e.target === e.currentTarget) {
-				navigate("/");
+				const newParams = new URLSearchParams(searchParams);
+				const openLix = newParams.get("l");
+				navigate(`/?l=${openLix}`);
 			}
 		},
 		[navigate]
