@@ -106,7 +106,7 @@ export function VersionDropdown() {
 			await lix.db
 				.insertInto("key_value")
 				.values({
-					key: "lix_experimental_server_url",
+					key: "lix_server_url",
 					value: "http://localhost:3000",
 				})
 				.execute();
@@ -121,7 +121,7 @@ export function VersionDropdown() {
 		if (!lix) return;
 		await lix.db
 			.deleteFrom("key_value")
-			.where("key", "=", "lix_experimental_server_url")
+			.where("key", "=", "lix_server_url")
 			.execute();
 		await saveLixToOpfs({ lix });
 	};

@@ -43,7 +43,7 @@ export type KeyValueTable = {
 	value: string;
 };
 
-type PredefinedKeys = "lix_id" | "lix_experimental_server_url";
+type PredefinedKeys = "lix_id" | "lix_server_url";
 // The string & {} ensures TypeScript recognizes KeyValueKeys
 // as a superset of string, preventing conflicts when using other string values.
 type KeyType = string & {};

@@ -221,7 +221,7 @@ export const serverUrlAtom = atom(async (get) => {
 
 	const serverUrl = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix_experimental_server_url")
+		.where("key", "=", "lix_server_url")
 		.select("value")
 		.executeTakeFirst();
 

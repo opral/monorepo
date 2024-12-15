@@ -43,7 +43,7 @@ test("versions should be synced", async () => {
 	await lix0.db
 		.insertInto("key_value")
 		.values({
-			key: "lix_experimental_server_url",
+			key: "lix_server_url",
 			value: "http://mock.com",
 		})
 		.execute();
@@ -51,7 +51,7 @@ test("versions should be synced", async () => {
 	await lix1.db
 		.insertInto("key_value")
 		.values({
-			key: "lix_experimental_server_url",
+			key: "lix_server_url",
 			value: "http://mock.com",
 		})
 		.execute();
@@ -157,7 +157,7 @@ test("switching synced versions should work", async () => {
 	await lix0.db
 		.insertInto("key_value")
 		.values({
-			key: "lix_experimental_server_url",
+			key: "lix_server_url",
 			value: "http://mock.com",
 		})
 		.execute();
