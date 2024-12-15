@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { lixAtom, serverUrlAtom, withPollingAtom } from "../state.ts";
+import { isSyncingAtom, lixAtom, withPollingAtom } from "../state.ts";
 import { useEffect, useState } from "react";
 import {
 	SlButton,
@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 export default function RootLayout(props: { children: JSX.Element }) {
 	const [, setPolling] = useAtom(withPollingAtom);
 	const [lix] = useAtom(lixAtom);
-	const [serverUrl] = useAtom(serverUrlAtom);
+	const [isSyncing] = useAtom(isSyncingAtom);
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -121,9 +121,7 @@ export default function RootLayout(props: { children: JSX.Element }) {
 							</SlMenuItem>
 						</SlMenu>
 					</SlDropdown>
-					{serverUrl && (
-						<SyncStatus serverUrl={serverUrl} lix={lix}></SyncStatus>
-					)}
+					{isSyncing && <SyncStatus lix={lix}></SyncStatus>}
 					<SyncAndShare />
 				</div>
 				<div className="flex gap-3 items-center">
@@ -168,10 +166,10 @@ function SyncAndShare() {
 }
 
 function SyncButton() {
-	const [serverUrl] = useAtom(serverUrlAtom);
+	const [isSyncing] = useAtom(isSyncingAtom);
 	const [lix] = useAtom(lixAtom);
 
-	if (!serverUrl) {
+	if (!isSyncing) {
 		return (
 			<SlButton
 				variant="success"
@@ -192,11 +190,11 @@ function SyncButton() {
 					}
 
 					await lix.db
-						.insertInto("key_value")
-						.values({
-							key: "lix_server_url",
-							value: "http://localhost:3000",
+						.updateTable("key_value")
+						.set({
+							value: "true",
 						})
+						.where("key", "=", "#lix_sync")
 						.execute();
 
 					await saveLixToOpfs({ lix });
@@ -208,7 +206,7 @@ function SyncButton() {
 	}
 }
 
-function SyncStatus(props: { serverUrl: string; lix: Lix }) {
+function SyncStatus(props: { lix: Lix }) {
 	const [isHovered, setIsHovered] = useState(false);
 
 	return (
@@ -216,8 +214,9 @@ function SyncStatus(props: { serverUrl: string; lix: Lix }) {
 			className="flex gap-3 items-center hover:cursor-pointer"
 			onClick={() => {
 				props.lix.db
-					.deleteFrom("key_value")
-					.where("key", "=", "lix_server_url")
+					.updateTable("key_value")
+					.where("key", "=", "#lix_sync")
+					.set({ value: "false" })
 					.execute();
 			}}
 			onMouseEnter={() => setIsHovered(true)}
@@ -226,9 +225,7 @@ function SyncStatus(props: { serverUrl: string; lix: Lix }) {
 			<div
 				className={`w-3 h-3 rounded-4xl ${isHovered ? "bg-red-700" : "bg-green-700"}`}
 			></div>
-			<p className="">
-				{isHovered ? "Stop syncing to" : "Syncing to"} {props.serverUrl}
-			</p>
+			<p className="">{isHovered ? "Stop syncing" : "Syncing"}</p>
 		</div>
 	);
 }

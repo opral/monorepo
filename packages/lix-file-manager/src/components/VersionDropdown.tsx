@@ -18,8 +18,8 @@ import {
 import {
 	currentVersionAtom,
 	existingVersionsAtom,
+	isSyncingAtom,
 	lixAtom,
-	serverUrlAtom,
 } from "../state.js";
 import { Version, createVersion, switchVersion } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.js";
@@ -32,7 +32,7 @@ export function VersionDropdown() {
 	const [currentVersion] = useAtom(currentVersionAtom);
 	const [existingVersions] = useAtom(existingVersionsAtom);
 	const [lix] = useAtom(lixAtom);
-	const [serverUrl] = useAtom(serverUrlAtom);
+	const [isSyncing] = useAtom(isSyncingAtom);
 	const [versionToDelete, setVersionToDelete] = useState<Version | null>(null);
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const [deleteConfirmation, setDeleteConfirmation] = useState("");
@@ -88,7 +88,7 @@ export function VersionDropdown() {
 		window.dispatchEvent(new Event("version-changed"));
 	};
 
-	const handleSync = async () => {
+	const handleStartSync = async () => {
 		if (!lix) return;
 
 		try {
@@ -100,15 +100,15 @@ export function VersionDropdown() {
 			);
 
 			if (response.ok === false && response.status !== 409) {
-				throw new Error(`Failed to sync: ${response.status}`);
+				throw new Error(`Failed to start sync: ${response.status}`);
 			}
 
 			await lix.db
-				.insertInto("key_value")
-				.values({
-					key: "lix_server_url",
-					value: "http://localhost:3000",
+				.updateTable("key_value")
+				.set({
+					value: "true",
 				})
+				.where("key", "=", "#lix_sync")
 				.execute();
 
 			await saveLixToOpfs({ lix });
@@ -120,8 +120,9 @@ export function VersionDropdown() {
 	const handleStopSync = async () => {
 		if (!lix) return;
 		await lix.db
-			.deleteFrom("key_value")
-			.where("key", "=", "lix_server_url")
+			.updateTable("key_value")
+			.set({ value: "false" })
+			.where("key", "=", "#lix_sync")
 			.execute();
 		await saveLixToOpfs({ lix });
 	};
@@ -191,11 +192,11 @@ export function VersionDropdown() {
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
-					{!serverUrl ? (
+					{!isSyncing ? (
 						<Button
 							variant="secondary"
 							size="default"
-							onClick={handleSync}
+							onClick={handleStartSync}
 							className="gap-2 relative pr-8"
 						>
 							Sync

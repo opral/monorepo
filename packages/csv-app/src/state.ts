@@ -85,6 +85,20 @@ export const lixAtom = atom(async (get) => {
 		.select("value")
 		.executeTakeFirstOrThrow();
 
+	// TODO use env varibale
+	const serverUrl = import.meta.env.PROD
+		? "https://lix.host"
+		: "http://localhost:3000";
+
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "lix_server_url",
+			value: serverUrl,
+		})
+		.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
+		.execute();
+
 	await saveLixToOpfs({ lix });
 
 	if (lixId.value !== lixIdSearchParam) {
@@ -135,15 +149,19 @@ export const activeAccountsAtom = atom(async (get) => {
 		.execute();
 });
 
-export const serverUrlAtom = atom(async (get) => {
+export const isSyncingAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 
-	const syncServerUrl = await lix.db
+	const sync = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix_server_url")
+		.where("key", "=", "#lix_sync")
 		.select("value")
 		.executeTakeFirst();
 
-	return syncServerUrl?.value;
+	if (sync?.value === "true") {
+		return true;
+	} else {
+		return false;
+	}
 });
