@@ -6,7 +6,7 @@ import { initChangeQueue } from "../change-queue/init-change-queue.js";
 import { changeQueueSettled } from "../change-queue/change-queue-settled.js";
 import type { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import { initSyncProcess } from "../sync/init-sync-process.js";
+import { initSyncProcess } from "../sync/sync-process.js";
 
 export type Lix = {
 	/**

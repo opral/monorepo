@@ -238,3 +238,84 @@ test("switching synced versions should work", async () => {
 		value: "mock",
 	});
 });
+
+test("doesnt sync if #lix_sync is not true", async () => {
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ environment });
+	global.fetch = vi.fn((request) => lsaHandler(request));
+
+	const lix = await openLixInMemory({});
+
+	const lixId = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// initialize lix on the server
+	await lsaHandler(
+		new Request("http://mock.com/lsa/new-v1", {
+			method: "POST",
+			body: await lix.toBlob(),
+		})
+	);
+
+	await lix.db
+		.updateTable("key_value")
+		.set({ value: "false" })
+		.where("key", "=", "#lix_sync")
+		.execute();
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "lix_server_url", value: "http://mock.com" })
+		.execute();
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "foo", value: "bar" })
+		.execute();
+
+	const server = await environment.openLix({ id: lixId.value });
+
+	// awaiting the polling sync
+	await new Promise((resolve) => setTimeout(resolve, 1010));
+
+	const keyValueChangesOnServer = await server.lix.db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_key_value_table")
+		.where("entity_id", "=", "foo")
+		.selectAll()
+		.execute();
+
+	expect(keyValueChangesOnServer).toEqual([]);
+
+	// turning sync on
+
+	await lix.db
+		.updateTable("key_value")
+		.set({ value: "true" })
+		.where("key", "=", "#lix_sync")
+		.execute();
+
+	await new Promise((resolve) => setTimeout(resolve, 1010));
+
+	const keyValueChangesOnServerAfterSync = await server.lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("schema_key", "=", "lix_key_value_table")
+		.where("entity_id", "=", "foo")
+		.selectAll()
+		.execute();
+
+	expect(keyValueChangesOnServerAfterSync).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				content: {
+					key: "foo",
+					value: "bar",
+				},
+			}),
+		])
+	);
+});
