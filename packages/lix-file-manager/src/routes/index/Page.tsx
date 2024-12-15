@@ -163,9 +163,9 @@ export default function Page() {
 						<DropdownMenuContent align="end">
 							<DropdownMenuItem onClick={handleImport}>
 								<IconUpload />
-								Import
+								Import File
 							</DropdownMenuItem>
-							<DropdownMenuItem
+							{/* <DropdownMenuItem
 								onClick={async () => {
 									try {
 										// Delete the Lix file
@@ -182,14 +182,14 @@ export default function Page() {
 							>
 								<TrashIcon />
 								Reset
-							</DropdownMenuItem>
+							</DropdownMenuItem> */}
 							<DropdownMenuItem
 								onClick={() => {
 									alert("Not implemented");
 								}}
 							>
 								<Download />
-								Download Lix
+								Export Lix
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={handleMerge}>
 								<IconMerge />
