@@ -16,7 +16,7 @@ import {
 	allChangesDynamicGroupingAtom,
 	changesCurrentVersionAtom,
 } from "@/state-active-file.ts";
-import { redirect, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ChangeComponent } from "@/components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "@/components/DynamicChangeGroup.tsx";
 import FilterSelect from "@/components/FilterSelect.tsx";
@@ -165,24 +165,26 @@ export default function Page() {
 								<IconUpload />
 								Import File
 							</DropdownMenuItem>
-							{/* <DropdownMenuItem
+							<DropdownMenuItem
 								onClick={async () => {
 									try {
-										// Delete the Lix file
-										// @ts-expect-error - globally defined
-										await window.deleteLix();
-										// Use navigate instead of redirect
-										redirect("/");
-										// perform a full page reload
-										window.location.reload();
+										const root = await navigator.storage.getDirectory();
+										// @ts-expect-error - TS doesn't know about values() yet
+										for await (const entry of root.values()) {
+											if (entry.kind === "file") {
+												await root.removeEntry(entry.name);
+											}
+										}
+										navigate("/");
+										console.log("All files deleted from OPFS.");
 									} catch (error) {
-										console.error("Error deleting Lix:", error);
+										console.error("Error deleting files from OPFS:", error);
 									}
 								}}
 							>
 								<TrashIcon />
-								Reset
-							</DropdownMenuItem> */}
+								Reset OPFS
+							</DropdownMenuItem>
 							<DropdownMenuItem
 								onClick={() => {
 									alert("Not implemented");
