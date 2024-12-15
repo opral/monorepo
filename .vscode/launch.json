@@ -77,14 +77,14 @@
       "localRoot": "${workspaceFolder}"
     },
     {
-      "name": "debug @inlang/website",
+      "name": "@inlang/website:3000",
       "port": 3000,
       "request": "launch",
       "type": "chrome",
       "webRoot": "${workspaceFolder}/inlang/source-code/website"
     },
     {
-      "name": "debug csv-app on port 3008",
+      "name": "csv-app:3008",
       "port": 3008,
       "request": "launch",
       "type": "chrome",
