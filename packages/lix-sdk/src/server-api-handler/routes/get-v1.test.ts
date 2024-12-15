@@ -102,3 +102,46 @@ test("it should return 400 for a request without lix_id", async () => {
 	expect(response.status).toBe(400);
 	expect(responseJson.error).toBe("Missing required field 'lix_id'");
 });
+
+
+test("#lix_sync is set to true", async () => {
+	const environment = createLsaInMemoryEnvironment();
+	const lsaHandler = await createServerApiHandler({ environment });
+
+	const lix = await openLixInMemory({
+		blob: await newLixFile(),
+		keyValues: [{ key: "#lix_sync", value: "false" }],
+	});
+
+	// Store the lix file
+	const response0 = await lsaHandler(
+		new Request("http://localhost:3000/lsa/new-v1", {
+			method: "POST",
+			body: await lix.toBlob(),
+		})
+	);
+
+	const id = (await response0.json()).id;
+
+	const response1 = await lsaHandler(
+		new Request("http://localhost:3000/lsa/get-v1", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ lix_id: id }),
+		})
+	);
+
+	const blob = await response1.blob();
+
+	const lixFromServer = await openLixInMemory({ blob });
+
+	const lixSync = await lixFromServer.db
+		.selectFrom("key_value")
+		.where("key", "=", "#lix_sync")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(lixSync.value).toBe("true");
+});
