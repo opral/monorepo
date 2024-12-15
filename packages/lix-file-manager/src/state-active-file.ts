@@ -104,6 +104,7 @@ export const activeCellChangesAtom = atom(async (get) => {
 	if (!activeFile) return [];
 	const cellEntityId = await get(activeCellEntityIdAtom);
 	const currentBranch = await get(currentVersionAtom);
+	if (!currentBranch) return [];
 	const lix = await get(lixAtom);
 	if (!cellEntityId) return [];
 	const changes = await lix.db
@@ -155,7 +156,7 @@ export const unconfirmedChangesAtom = atom(async (get) => {
 	const activeFile = await get(activeFileAtom);
 	if (!activeFile) return [];
 	const currentBranch = await get(currentVersionAtom);
-
+	if (!currentBranch) return [];
 	return await lix.db
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
@@ -169,6 +170,7 @@ export const allChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const currentBranch = await get(currentVersionAtom);
+	if (!currentBranch) return [];
 	return await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
@@ -188,6 +190,7 @@ export const allChangesDynamicGroupingAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const currentBranch = await get(currentVersionAtom);
+	if (!currentBranch) return [];
 	const allChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
@@ -221,6 +224,7 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 	const activeFile = await get(activeFileAtom);
 	if (!activeFile) return [];
 	const currentBranch = await get(currentVersionAtom);
+	if (!currentBranch) return [];
 	return await lix.db
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
@@ -277,6 +281,7 @@ export const changeConflictsAtom = atom(async (get) => {
 	const activeFile = await get(activeFileAtom);
 	if (!activeFile) return [];
 	const currentBranch = await get(currentVersionAtom);
+	if (!currentBranch) return [];
 	const changeConflictElements = await lix.db
 		.selectFrom("change_set_element")
 		.innerJoin(

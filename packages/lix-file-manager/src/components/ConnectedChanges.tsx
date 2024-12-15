@@ -8,15 +8,20 @@ import { clsx } from "clsx";
 import { discussionSearchParamsAtom } from "@/state.ts";
 
 const ConnectedChanges = () => {
-  const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
-  const [changesCurrentVersion] = useAtom(changesCurrentVersionAtom);
-  const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
-  const filteredChanges = changesCurrentVersion.filter((change) => {
-    if (!change.discussion_ids) return false;
-    return change.discussion_ids.split(",").includes(discussionSearchParams);
-  });
+	const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
+	const [changesCurrentVersion] = useAtom(changesCurrentVersionAtom);
+	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
+	const filteredChanges = changesCurrentVersion.filter((change) => {
+		if (
+			!change.discussion_ids ||
+			typeof change.discussion_ids !== "string" ||
+			!discussionSearchParams
+		)
+			return false;
+		return change.discussion_ids.split(",").includes(discussionSearchParams);
+	});
 
-  return (
+	return (
 		<div
 			className="flex-shrink -mx-2.5 px-2.5 border-y-[1px] border-slate-200 hover:bg-slate-50"
 			onClick={() => setIsExpandedState(!isExpandedState)}
@@ -52,6 +57,8 @@ const ConnectedChanges = () => {
 								> | null,
 								parent_snapshot_content:
 									change.parent_snapshot_content as Record<string, any> | null,
+								discussion_count: Number(change.discussion_count),
+								discussion_ids: String(change.discussion_ids || ""),
 							}}
 							showTopLine={i !== 0}
 							showBottomLine={i !== changesCurrentVersion.length - 1}

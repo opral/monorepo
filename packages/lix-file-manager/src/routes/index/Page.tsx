@@ -69,9 +69,7 @@ export default function Page() {
 	const [changesCurrentVersion] = useAtom(changesCurrentVersionAtom);
 	const [allChangesDynamicGrouping] = useAtom(allChangesDynamicGroupingAtom);
 	const [activeFile] = useAtom(activeFileAtom);
-	const [fileIdSearchParams, setFileIdSearchParams] = useAtom(
-		fileIdSearchParamsAtom
-	);
+	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
 	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
 
 	//hooks
@@ -138,11 +136,10 @@ export default function Page() {
 		(e: React.MouseEvent) => {
 			// Only trigger if clicking the background container itself
 			if (e.target === e.currentTarget) {
-				setFileIdSearchParams(undefined);
 				navigate("/");
 			}
 		},
-		[setFileIdSearchParams, navigate]
+		[navigate]
 	);
 
 	return (
@@ -174,8 +171,6 @@ export default function Page() {
 										// Delete the Lix file
 										// @ts-expect-error - globally defined
 										await window.deleteLix();
-										// Clear file-related search params
-										setFileIdSearchParams(undefined);
 										// Use navigate instead of redirect
 										redirect("/");
 										// perform a full page reload

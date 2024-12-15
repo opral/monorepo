@@ -1,7 +1,6 @@
 import { useCallback, useRef, useState, useEffect } from "react";
 import { useAtom } from "jotai";
 import { lixAtom } from "@/state.js";
-import { fileIdSearchParamsAtom, withPollingAtom } from "@/state.js";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.js";
 import clsx from "clsx";
 
@@ -9,8 +8,6 @@ export default function DropArea() {
 	const dragCounter = useRef(0);
 	const [isDragging, setIsDragging] = useState(false);
 	const [lix] = useAtom(lixAtom);
-	const [, setFileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
-	const [, setWithPolling] = useAtom(withPollingAtom);
 
 	const handleDrop = useCallback(
 		async (e: DragEvent) => {
@@ -20,43 +17,25 @@ export default function DropArea() {
 			dragCounter.current = 0;
 			setIsDragging(false);
 
-			const files = Array.from(e.dataTransfer?.files || []);
-			let lastInsertId: string | undefined;
+			const files = Array.from(e.dataTransfer?.files ?? []);
 
-			for (const file of files) {
-				const result = await lix.db
-					.insertInto("file")
-					.values({
-						path: "/" + file.name,
-						data: await file.arrayBuffer(),
-					})
-					.executeTakeFirst();
-
-				if (result && result.insertId) {
-					lastInsertId = String(result.insertId);
+			await lix.db.transaction().execute(async (trx) => {
+				for (const file of files) {
+					await trx
+						.insertInto("file")
+						.values({
+							path: "/" + file.name,
+							data: await file.arrayBuffer(),
+						})
+						.returningAll()
+						.executeTakeFirstOrThrow();
 				}
-			}
+			});
+			// setSearchParams({ f: result.id });
 
 			await saveLixToOpfs({ lix });
-			setWithPolling(Date.now());
-
-			// Wait for a tick to ensure DB operations are complete
-			await new Promise((resolve) => setTimeout(resolve, 100));
-
-			if (lastInsertId) {
-				// Get the latest file data
-				const file = await lix.db
-					.selectFrom("file")
-					.where("id", "=", lastInsertId)
-					.selectAll()
-					.executeTakeFirst();
-
-				if (file) {
-					setFileIdSearchParams(lastInsertId);
-				}
-			}
 		},
-		[lix, setFileIdSearchParams, setWithPolling]
+		[lix]
 	);
 
 	const handleDragEnter = useCallback((e: DragEvent) => {
