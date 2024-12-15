@@ -13,9 +13,11 @@ export function applyKeyValueDatabaseSchema(
 	INSERT OR IGNORE INTO key_value (key, value)
 	VALUES ('lix_id', uuid_v4());
 
-	-- default value for lix sync is true
+	-- default value for lix sync to false
+	-- if not exist to remove conditional logic
+	-- if the key exists or not
 	INSERT OR IGNORE INTO key_value (key, value)
-	VALUES ('#lix_sync', 'true');
+	VALUES ('#lix_sync', 'false');
 `;
 }
 
