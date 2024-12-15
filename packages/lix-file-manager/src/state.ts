@@ -58,8 +58,23 @@ export const lixAtom = atom(async (get) => {
 			const file = await fileHandle.getFile();
 			lixBlob = new Blob([await file.arrayBuffer()]);
 		} catch {
-			// fallback to get the lix file from the server
-			// TODO request from server via `/lsa/get-v1`
+			// Try server if OPFS fails
+			try {
+				const response = await fetch(
+					`http://localhost:3000/lsa/get-v1/${lixIdSearchParam}`
+				);
+				if (response.ok) {
+					const blob = await response.blob();
+					const lix = await openLixInMemory({
+						blob,
+						providePlugins: [csvPlugin],
+					});
+					await saveLixToOpfs({ lix });
+					return lix;
+				}
+			} catch (error) {
+				console.error("Failed to fetch from server:", error);
+			}
 		}
 	} else {
 		const availableLixFiles: FileSystemHandle[] = [];
