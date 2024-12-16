@@ -28,9 +28,6 @@ Apps that revolve around changes are prime use cases to be built on lix. Having 
 - data science (Jupyter Notebooks)
 - dashboards (Analytics, Infrastructure) 
 
-![use cases for lix](./assets/use_cases.png)
-
-
 ## Lix as backend for web apps 
 
 Developing a web app with lix is reduced to providing a user interface that opens and saves a file.
