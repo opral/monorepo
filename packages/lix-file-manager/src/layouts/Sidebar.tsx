@@ -8,7 +8,6 @@ import { TooltipProvider } from "@/components/ui/tooltip.js";
 import { AccountDialog } from "@/components/AccountDialog.js";
 import { SidebarNavigation } from "@/components/SidebarNavigation.js";
 import { UserAvatar } from "@/components/UserAvatar.js";
-import CustomLink from "@/components/CustomLink.tsx";
 import { useAtom } from "jotai";
 import { activeAccountAtom } from "@/state.ts";
 import { useState } from "react";
@@ -24,9 +23,9 @@ export function AppSidebar() {
 		>
 			<TooltipProvider>
 				<SidebarHeader className="w-14 h-[60px] flex justify-center items-center">
-					<CustomLink to="/">
+					<a href="/">
 						<img src="/lix.svg" alt="logo" className="w-6 h-6" />
-					</CustomLink>
+					</a>
 				</SidebarHeader>
 
 				<SidebarContent className="flex-1 pt-1.5">
