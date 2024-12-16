@@ -1,3 +1,6 @@
+> [!NOTE]  
+> We will release lix SDK docs soon. Join the [Discord](https://discord.gg/gSz7hDZ2BE) in the meantime. 
+
 # Lix - Change Control System
 
 With Lix you get full **traceability**.
