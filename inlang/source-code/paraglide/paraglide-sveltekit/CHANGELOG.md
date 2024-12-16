@@ -1,5 +1,11 @@
 # @inlang/paraglide-sveltekit
 
+## 0.15.0
+
+### Minor Changes
+
+- 88b87b9: Updates internal components to Svelte 5 rune syntax. Closes https://github.com/opral/inlang-paraglide-js/issues/262 and fixes https://github.com/opral/inlang-paraglide-js/issues/272.
+
 ## 0.14.0
 
 ### Minor Changes
