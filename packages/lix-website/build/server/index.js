@@ -509,7 +509,7 @@ const createFeatures = [
     description: "Simply drag and drop your files into Lix's file manager."
   },
   {
-    title: "Track every change",
+    title: "Get change control",
     description: "Lix automatically tracks all changes, allowing you to trace edits, recover previous versions, and collaborate seamlessly."
   }
 ];
@@ -519,16 +519,12 @@ function FileManager() {
     /* @__PURE__ */ jsx("div", { className: "w-full bg-slate-50", children: /* @__PURE__ */ jsx(Header, {}) }),
     /* @__PURE__ */ jsxs("main", { children: [
       /* @__PURE__ */ jsx("div", { className: "w-full h-fit bg-slate-50 p-4 slanted", children: /* @__PURE__ */ jsxs("div", { className: "mx-auto max-w-2xl justify-center items-center text-center mt-16 mb-48", children: [
-        /* @__PURE__ */ jsxs("div", { className: "mx-auto flex items-center gap-2 w-fit p-2 text-slate-500 ring-1 ring-slate-200 rounded-md mb-3 bg-white", children: [
+        /* @__PURE__ */ jsxs("div", { className: "mx-auto flex items-center gap-2 w-fit p-2 text-slate-500 ring-1 ring-slate-200 rounded-md mb-4 bg-white", children: [
           /* @__PURE__ */ jsx("div", { className: "bg-slate-200 p-1.5 py-1 w-fit rounded", children: /* @__PURE__ */ jsx(IconLix, { className: "w-4 h-4 text-slate-500" }) }),
-          "File Manager"
+          "The Lix File Manager App"
         ] }),
-        /* @__PURE__ */ jsxs("h1", { className: "text-3xl sm:text-5xl leading-[1.2] font-semibold", children: [
-          /* @__PURE__ */ jsx("span", { className: "relative inline-block after:block after:h-1 after:w-full after:absolute after:skew-y-[-0.5deg] after:-translate-y-1 after:bg-cyan-600", children: "Collaborate & automate" }),
-          " ",
-          "the $h!t🤬 out of your company"
-        ] }),
-        /* @__PURE__ */ jsx("p", { className: "mx-auto max-w-lg my-8", children: "Lix file manager understands changes in your files, making it easy to see detailed updates, collaborate, comment, and automate tasks directly within your documents." }),
+        /* @__PURE__ */ jsx("h1", { className: "text-3xl sm:text-5xl leading-[1.2] font-semibold", children: "Manage files, changes, and automations in your lix." }),
+        /* @__PURE__ */ jsx("p", { className: "mx-auto max-w-lg my-8" }),
         /* @__PURE__ */ jsxs("div", { className: "flex flex-col sm:flex-row justify-center w-full gap-2", children: [
           /* @__PURE__ */ jsx(
             "a",
@@ -591,8 +587,8 @@ function FileManager() {
           ) })
         ] }),
         /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("h2", { className: "text-center w-full", children: "Effortless Collaboration" }),
-          /* @__PURE__ */ jsx("p", { className: "text-center mt-4", children: "Sync, share, and succeed together." }),
+          /* @__PURE__ */ jsx("h2", { className: "text-center w-full", children: "Collaboration" }),
+          /* @__PURE__ */ jsx("p", { className: "text-center mt-4", children: "Sync, share, and work together." }),
           /* @__PURE__ */ jsx("div", { className: "my-8 pt-4 sm:pt-7 px-4 sm:px-8 bg-slate-100 rounded-lg ring-1 ring-slate-200 overflow-x-auto flex justify-center", children: /* @__PURE__ */ jsxs("div", { className: "flex gap-4 sm:gap-5", children: [
             /* @__PURE__ */ jsx(
               "img",
@@ -627,7 +623,7 @@ function FileManager() {
             }
           ) }),
           /* @__PURE__ */ jsxs("div", { className: "col-span-4 col-start-9", children: [
-            /* @__PURE__ */ jsx("h2", { className: "pt-2 md:pr-8", children: "Automations for non-techies" }),
+            /* @__PURE__ */ jsx("h2", { className: "pt-2 md:pr-8", children: "Automations" }),
             /* @__PURE__ */ jsx("p", { className: "mt-4", children: "Link automations to file changes, making it easy to configure pipelines, run quality checks, and integrate APIs—all triggered automatically." }),
             /* @__PURE__ */ jsx("div", { className: "pt-4 flex flex-col gap-4", children: automatedTasks.map((feature, index) => /* @__PURE__ */ jsxs("div", { className: "max-w-sm flex items-start gap-5", children: [
               /* @__PURE__ */ jsx(Check, {}),
@@ -651,7 +647,13 @@ function FileManager() {
             )).slice(0, 2) })
           ] }),
           /* @__PURE__ */ jsx("div", { className: "sm:mt-3 col-span-2 space-y-3 sm:space-y-6", children: faq$1.map((question, index) => /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx(Details, { summary: question.question, content: question.answer }),
+            /* @__PURE__ */ jsx(
+              Details,
+              {
+                summary: question.question,
+                content: question.answer
+              }
+            ),
             faq$1.length - 1 !== index && /* @__PURE__ */ jsx("div", { className: "mt-3 sm:mt-6 border-b border-slate-200" })
           ] }, index)) })
         ] }),
@@ -1106,15 +1108,15 @@ const meta = () => {
 };
 const coreFeatures = [
   {
-    title: "Fully understands changes",
-    description: "Lix does not save versions; it provides access to each individual change in a file."
+    title: "Tracks changes",
+    description: "Lix provides change control for every file stored in lix."
   },
   {
     title: "File agnostic",
     description: "Lix can understand any file format with the help of plugins."
   },
   {
-    title: "Apps with change control",
+    title: "Designed to build apps",
     description: "Lix enables file-based apps with change control features."
   }
 ];
@@ -1208,7 +1210,7 @@ function Index() {
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center", children: [
         /* @__PURE__ */ jsx("h2", { className: "text-center", children: "Enabled by change control" }),
-        /* @__PURE__ */ jsx("p", { className: "max-w-md text-center mt-2 mb-8", children: "Every app built on top of Lix comes with differentiating features out of the box." }),
+        /* @__PURE__ */ jsx("p", { className: "max-w-md text-center mt-2 mb-8", children: "The possibility to track and query changes is the foundation for many features." }),
         /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-4 w-full", children: enabledByChangeControl.map((feature, index) => /* @__PURE__ */ jsxs(
           "div",
           {
@@ -1291,7 +1293,13 @@ function Index() {
           )).slice(0, 2) })
         ] }),
         /* @__PURE__ */ jsx("div", { className: "md:mt-3 col-span-2 space-y-3 md:space-y-6", children: faq.map((question, index) => /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx(Details, { summary: question.question, content: question.answer }),
+          /* @__PURE__ */ jsx(
+            Details,
+            {
+              summary: question.question,
+              content: question.answer
+            }
+          ),
           faq.length - 1 !== index && /* @__PURE__ */ jsx("div", { className: "mt-3 md:mt-6 border-b border-slate-200" })
         ] }, index)) })
       ] }),
@@ -1312,7 +1320,7 @@ const route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   default: Index,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-const serverManifest = { "entry": { "module": "/assets/entry.client-CZKf3RLx.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/root-iPUA1yy4.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": ["/assets/root-D5TafMW6.css"] }, "routes/file-manager": { "id": "routes/file-manager", "parentId": "root", "path": "file-manager", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/file-manager-WIRaP1du.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-Cx8TPMky.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] } }, "url": "/assets/manifest-28cfd770.js", "version": "28cfd770" };
+const serverManifest = { "entry": { "module": "/assets/entry.client-CZKf3RLx.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/root-CF4dIowy.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": ["/assets/root-CCYitqI8.css"] }, "routes/file-manager": { "id": "routes/file-manager", "parentId": "root", "path": "file-manager", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/file-manager-Dwln8Q9U.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-D82fu1ea.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] } }, "url": "/assets/manifest-32dff2f2.js", "version": "32dff2f2" };
 const mode = "production";
 const assetsBuildDirectory = "build/client";
 const basename = "/";
