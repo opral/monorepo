@@ -86,9 +86,10 @@ export const lixAtom = atom(async (get) => {
 		.executeTakeFirstOrThrow();
 
 	// TODO use env varibale
-	const serverUrl = import.meta.env.PROD
-		? "https://lix.host"
-		: "http://localhost:3000";
+	// const serverUrl = import.meta.env.PROD
+	// ? "https://lix.host"
+	// : "http://localhost:3000";
+	const serverUrl = "http://localhost:3000";
 
 	await lix.db
 		.insertInto("key_value")
