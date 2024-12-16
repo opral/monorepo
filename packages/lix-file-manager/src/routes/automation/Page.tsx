@@ -151,7 +151,7 @@ export default function Page() {
 					<div className="absolute right-0 top-0 bottom-0 w-1 bg-slate-200 opacity-0 group-hover:opacity-100" />
 				</div>
 			</div>
-			<Separator orientation="vertical" className="h-screen" />
+			<Separator orientation="vertical" className="h-full" />
 			<div className="flex-1 flex flex-col">
 				<SectionHeader title={dummyAutomations[activeAutomation].name}>
 					<div className="flex gap-2 items-center">
