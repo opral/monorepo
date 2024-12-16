@@ -74,6 +74,9 @@ export const createLsaInMemoryEnvironment = (): LsaEnvironment => {
 					// don't sync the server with itself
 					keyValues: [{ key: "#lix_sync", value: "false" }],
 				});
+
+				lix.sqlite.exec("PRAGMA foreign_keys = OFF;");
+
 				openLixes.set(args.id, lix);
 			}
 
