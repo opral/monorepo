@@ -20,6 +20,13 @@ const changeSetsAtom = atom(async (get) => {
 			"change_set.id"
 		)
 		.leftJoin("change", "change.id", "change_set_element.change_id")
+		.innerJoin("change as own_change", (join) =>
+			join
+				.onRef("own_change.entity_id", "=", "change_set.id")
+				.on("own_change.schema_key", "=", "lix_change_set_table")
+		)
+		.innerJoin("change_author", "own_change.id", "change_author.change_id")
+		.innerJoin("account", "change_author.account_id", "account.id")
 		.leftJoin("discussion", "discussion.change_set_id", "change_set.id")
 		// Join with the `comment` table, filtering for first-level comments
 		.leftJoin("comment", "comment.discussion_id", "discussion.id")
@@ -31,6 +38,7 @@ const changeSetsAtom = atom(async (get) => {
 		.select("change_set.id")
 		.select("discussion.id as discussion_id")
 		.select("comment.content as first_comment_content") // Get the first comment's content
+		.select("account.name as author_name")
 		.execute();
 });
 
@@ -49,6 +57,7 @@ export default function Page() {
 								key={"unconfirmed-changes"}
 								id={"unconfirmed-changes"}
 								firstComment={null}
+								authorName={null}
 							/>
 						)}
 						{changeSets.map((changeSet) => (
@@ -56,6 +65,7 @@ export default function Page() {
 								key={changeSet.id}
 								id={changeSet.id}
 								firstComment={changeSet.first_comment_content}
+								authorName={changeSet.author_name}
 							/>
 						))}
 					</div>
