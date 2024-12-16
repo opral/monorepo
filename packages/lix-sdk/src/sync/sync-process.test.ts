@@ -15,7 +15,9 @@ test("versions should be synced", async () => {
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
-	const lix0 = await openLixInMemory({});
+	const lix0 = await openLixInMemory({
+		keyValues: [{ key: "#lix_sync", value: "true" }],
+	});
 
 	// @ts-expect-error - eases debugging
 	lix0.db.__name = "lix0";
@@ -37,6 +39,7 @@ test("versions should be synced", async () => {
 	// create a second client
 	const lix1 = await openLixInMemory({
 		blob: await lix0.toBlob(),
+		keyValues: [{ key: "#lix_sync", value: "true" }],
 	});
 
 	// start syncing
@@ -133,7 +136,9 @@ test("switching synced versions should work", async () => {
 	// @ts-expect-error - eases debugging
 	global.executeSync = executeSync;
 
-	const lix0 = await openLixInMemory({});
+	const lix0 = await openLixInMemory({
+		keyValues: [{ key: "#lix_sync", value: "true" }],
+	});
 	// @ts-expect-error - eases debugging
 	lix0.db.__name = "lix0";
 
@@ -165,6 +170,7 @@ test("switching synced versions should work", async () => {
 	// create a second client
 	const lix1 = await openLixInMemory({
 		blob: await lix0.toBlob(),
+		keyValues: [{ key: "#lix_sync", value: "true" }],
 	});
 
 	// @ts-expect-error - eases debugging
