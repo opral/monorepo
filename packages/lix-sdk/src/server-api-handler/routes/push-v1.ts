@@ -115,19 +115,23 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 					})
 				);
 
-				const detectedConflicts = await detectChangeConflicts({
-					lix: { ...open.lix, db: trx },
-					changes: [...incomingChanges, ...existingChanges],
-				});
+				//! Deactivated change conflict detection.
+				//!
+				//! Led to foreign key bugs etc. Will be reactivated
+				//! with the "conflicts" milestone
+				// const detectedConflicts = await detectChangeConflicts({
+				// 	lix: { ...open.lix, db: trx },
+				// 	changes: [...incomingChanges, ...existingChanges],
+				// });
 
-				for (const conflict of detectedConflicts) {
-					await createChangeConflict({
-						lix: { ...open.lix, db: trx },
-						key: conflict.key,
-						version: { id: versionId },
-						conflictingChangeIds: new Set(conflict.conflictingChangeIds),
-					});
-				}
+				// for (const conflict of detectedConflicts) {
+				// 	await createChangeConflict({
+				// 		lix: { ...open.lix, db: trx },
+				// 		key: conflict.key,
+				// 		version: { id: versionId },
+				// 		conflictingChangeIds: new Set(conflict.conflictingChangeIds),
+				// 	});
+				// }
 			}
 
 			// const allmlog = await trx

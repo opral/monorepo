@@ -156,7 +156,8 @@ test("it should return 400 for a failed insert operation", async () => {
 	expect(responseJson.message).toBeDefined();
 });
 
-test("it should detect conflicts", async () => {
+//! reactivate with conflict milestone https://linear.app/opral/project/lix-sdk-v10-7c08040ec223/overview#milestone-32b0f41c-63f7-4513-9b47-86ced752d5e0
+test.skip("it should detect conflicts", async () => {
 	let lixOnServer = await openLixInMemory({});
 
 	// ensure that both client and server create
