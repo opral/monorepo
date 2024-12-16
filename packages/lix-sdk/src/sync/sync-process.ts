@@ -62,14 +62,10 @@ export async function initSyncProcess(args: {
 		} catch (e) {
 			// likely that lix didn't exist on the server
 			const response = await fetch(
-				new Request(
-					"https://lix.host/lsa/new-v1",
-					// "http://localhost:3000/lsa/new-v1",
-					{
-						method: "POST",
-						body: await args.lix.toBlob(),
-					}
-				)
+				new Request(url.value + "/lsa/new-v1", {
+					method: "POST",
+					body: await args.lix.toBlob(),
+				})
 			);
 			if (!response.ok && response.status !== 409) {
 				throw e;
