@@ -77,20 +77,22 @@ export async function openLix(args: {
 		getAll: async () => plugins,
 	};
 
+	const toBlob = async () => {
+		await changeQueueSettled({ lix: { db } });
+		return new Blob([contentFromDatabase(args.database)]);
+	};
+
 	initChangeQueue({
 		lix: { db, plugin, sqlite: args.database },
 		rawDatabase: args.database,
 	});
 
-	initSyncProcess({ lix: { db, plugin } });
+	initSyncProcess({ lix: { db, plugin, toBlob } });
 
 	return {
 		db,
 		sqlite: args.database,
-		toBlob: async () => {
-			await changeQueueSettled({ lix: { db } });
-			return new Blob([contentFromDatabase(args.database)]);
-		},
+		toBlob,
 		plugin,
 		close: async () => {
 			await changeQueueSettled({ lix: { db } });

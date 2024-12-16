@@ -211,21 +211,6 @@ function SyncButton() {
 				size="small"
 				className=""
 				onClick={async () => {
-					const response = await fetch(
-						new Request(import.meta.env.PROD
-							? "https://lix.host/lsa/new-v1"
-							: "http://localhost:3000/lsa/new-v1", {
-							method: "POST",
-							body: await lix.toBlob(),
-						})
-					);
-
-					// if it's a 409, then the lix already exists on the server
-					// and will start to sync
-					if (response.ok === false && response.status !== 409) {
-						throw new Error(`Failed to send lix to server: ${response.status}`);
-					}
-
 					await lix.db
 						.updateTable("key_value")
 						.set({

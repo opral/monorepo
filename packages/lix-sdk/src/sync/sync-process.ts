@@ -3,7 +3,7 @@ import { pushToServer } from "./push-to-server.js";
 import { pullFromServer } from "./pull-from-server.js";
 
 export async function initSyncProcess(args: {
-	lix: Pick<Lix, "db" | "plugin">;
+	lix: Pick<Lix, "db" | "plugin" | "toBlob">;
 }): Promise<
 	| {
 			stop: () => void;
@@ -40,23 +40,41 @@ export async function initSyncProcess(args: {
 		if (!url) {
 			return;
 		}
-		// console.log("----------- PULL FROM SERVER -------------");
-		const serverState = await pullFromServer({
-			serverUrl: url.value,
-			lix: args.lix,
-			id: lixId.value,
-		});
-		// console.log(
-		// 	"----------- DONE PULL FROM SERVER ------------- New known Server state: ",
-		// 	serverState
-		// );
-		// console.log("----------- PUSH TO SERVER -------------");
-		await pushToServer({
-			serverUrl: url.value,
-			lix: args.lix,
-			id: lixId.value,
-			targetVectorClock: serverState,
-		});
+
+		try {
+			// console.log("----------- PULL FROM SERVER -------------");
+			const serverState = await pullFromServer({
+				serverUrl: url.value,
+				lix: args.lix,
+				id: lixId.value,
+			});
+			// console.log(
+			// 	"----------- DONE PULL FROM SERVER ------------- New known Server state: ",
+			// 	serverState
+			// );
+			// console.log("----------- PUSH TO SERVER -------------");
+			await pushToServer({
+				serverUrl: url.value,
+				lix: args.lix,
+				id: lixId.value,
+				targetVectorClock: serverState,
+			});
+		} catch (e) {
+			// likely that lix didn't exist on the server
+			const response = await fetch(
+				new Request(
+					// "https://lix.host/lsa/new-v1"
+					"http://localhost:3000/lsa/new-v1",
+					{
+						method: "POST",
+						body: await args.lix.toBlob(),
+					}
+				)
+			);
+			if (!response.ok && response.status !== 409) {
+				throw e;
+			}
+		}
 		// console.log("----------- DONE PUSH TO SERVER -------------");
 	};
 
@@ -73,7 +91,7 @@ export async function initSyncProcess(args: {
 		}, 1000);
 	}
 
-	schedulePullAndPush();	
+	schedulePullAndPush();
 
 	return {
 		stop: () => {

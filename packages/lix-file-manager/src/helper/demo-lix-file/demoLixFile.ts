@@ -16,16 +16,16 @@ export async function lixCsvDemoFile(): Promise<{ blob: Blob; id: string }> {
 		.executeTakeFirstOrThrow();
 
 	if (import.meta.env.PROD) {
-		await lix.db
-			.insertInto("file")
-			.values({
-				path: "/email-newsletter.csv",
-				data: new TextEncoder().encode(emailNewsletterCsv),
-				metadata: {
-					unique_column: "email",
-				},
-			})
-			.execute();
+		// await lix.db
+		// 	.insertInto("file")
+		// 	.values({
+		// 		path: "/email-newsletter.csv",
+		// 		data: new TextEncoder().encode(emailNewsletterCsv),
+		// 		metadata: {
+		// 			unique_column: "email",
+		// 		},
+		// 	})
+		// 	.execute();
 	} else {
 		// New files get minimal demo csv for development purposes
 		await lix.db
