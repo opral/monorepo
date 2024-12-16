@@ -41,13 +41,18 @@ export const lixAtom = atom(async (get) => {
 		} catch {
 			try {
 				const response = await fetch(
-					new Request("http://localhost:3000/lsa/get-v1", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({ lix_id: lixIdSearchParam }),
-					})
+					new Request(
+						import.meta.env.PROD
+							? "https://lix-host/lsa/get-v1"
+							: "http://localhost:3000/lsa/get-v1",
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({ lix_id: lixIdSearchParam }),
+						}
+					)
 				);
 				if (response.ok) {
 					const blob = await response.blob();
@@ -102,7 +107,9 @@ export const lixAtom = atom(async (get) => {
 	// const serverUrl = import.meta.env.PROD
 	// ? "https://lix.host"
 	// : "http://localhost:3000";
-	const serverUrl = "http://localhost:3000";
+	const serverUrl = import.meta.env.PROD
+		? "https://lix.host"
+		: "http://localhost:3000";
 
 	await lix.db
 		.insertInto("key_value")

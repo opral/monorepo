@@ -61,14 +61,18 @@ export const lixAtom = atom(async (get) => {
 			// Try server if lix doesn't exist in OPFS
 			try {
 				const response = await fetch(
-					// TODO env variable for host
-					new Request("http://localhost:3000/lsa/get-v1", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({ lix_id: lixIdSearchParam }),
-					})
+					new Request(
+						import.meta.env.PROD
+							? "https://lix.host/lsa/new-v1"
+							: "http://localhost:3000/lsa/new-v1",
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({ lix_id: lixIdSearchParam }),
+						}
+					)
 				);
 				if (response.ok) {
 					const blob = await response.blob();
@@ -127,7 +131,9 @@ export const lixAtom = atom(async (get) => {
 	// const serverUrl = import.meta.env.PROD
 	// ? "https://lix.host"
 	// : "http://localhost:3000";
-	const serverUrl = "http://localhost:3000";
+	const serverUrl = import.meta.env.PROD
+		? "https://lix.host"
+		: "http://localhost:3000";
 
 	await lix.db
 		.insertInto("key_value")

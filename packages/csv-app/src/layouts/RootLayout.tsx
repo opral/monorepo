@@ -177,7 +177,9 @@ function SyncButton() {
 				className=""
 				onClick={async () => {
 					const response = await fetch(
-						new Request(`http://localhost:3000/lsa/new-v1`, {
+						new Request(import.meta.env.PROD
+							? "https://lix.host/lsa/new-v1"
+							: "http://localhost:3000/lsa/new-v1", {
 							method: "POST",
 							body: await lix.toBlob(),
 						})
