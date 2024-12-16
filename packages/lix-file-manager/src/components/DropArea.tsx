@@ -26,6 +26,13 @@ export default function DropArea() {
 						.values({
 							path: "/" + file.name,
 							data: await file.arrayBuffer(),
+							metadata:
+								// hardcoded unique column for demo purposes
+								file.name === "email-newsletter.csv"
+									? {
+											unique_column: "email",
+										}
+									: undefined,
 						})
 						.returningAll()
 						.executeTakeFirstOrThrow();
