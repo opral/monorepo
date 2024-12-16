@@ -38,11 +38,11 @@ Apps that revolve around changes are prime use cases to be built on lix. Having 
 
 Developing a web app with lix is reduced to providing a user interface that opens and saves a file.
 
-![Open a file, provide a UI, done](./assets/open_file.png)
+![Open a file, provide a UI, done](../packages/lix-sdk/assets/open_file.png)
 
 Backend features like auth, permissions, change control, and automations are solved on a file rather than an application-specific level. Lix knows who the actors are (auth), allows actors to conduct changes (permissions), is aware of how data changes over time (change history), can merge changes (collaboration), and uses the knowledge of changes to trigger automations (automation pipelines).
 
-![Backend features for files](./assets/backend_features_to_files.png)
+![Backend features for files](../packages/lix-sdk/assets/backend_features_to_files.png)
 
 In contrast, cloud-based apps are substantially more difficult to build because they require:
 
@@ -58,17 +58,17 @@ In contrast, cloud-based apps are substantially more difficult to build because 
 
 Lix apps operate on (open) files. Any app can open the files and process the data. The need for integrations that transfer data from cloud app A to cloud app B is redundant. App 1 and app 2 can provide different UIs or services while operating on the same data. 
 
-![interop](./assets/interop.png)
+![interop](../packages/lix-sdk/assets/interop.png)
 
 #### Collaboration via change proposals
 
 Lix brings versions and change requests, thereby enabling permissionless collaboration in file formats other than source code. We will see an “open-sourceification” of music, video, architecture, public policy making, fashion, and who knows, maybe even automobiles.  
 
 
-![permissionless collaboration](./assets/permissionless_collaboration.svg)
+![permissionless collaboration](../packages/lix-sdk/assets/permissionless_collaboration.svg)
 
 #### Automation
 
 Lix can trigger automations based on changes in files. This is a powerful feature that allows for a new class of apps that are not possible with cloud-based apps.
 
-![automation](./assets/fm-automate.svg)
+![automation](../packages/lix-sdk/assets/fm-automate.svg)
