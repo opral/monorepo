@@ -4,8 +4,8 @@ import { adjectives, animals, adverbs, verbs } from "./words.js"
 
 export function randomHumanId() {
 	return `${adjectives[Math.floor(Math.random() * 256)]}_${
-		adjectives[Math.floor(Math.random() * 256)]
-	}_${animals[Math.floor(Math.random() * 256)]}_${verbs[Math.floor(Math.random() * 256)]}`
+		animals[Math.floor(Math.random() * 256)]
+	}_${verbs[Math.floor(Math.random() * 256)]}_${adverbs[Math.floor(Math.random() * 256)]}`
 }
 
 export function humanIdHash(value: string, offset: number = 0) {
