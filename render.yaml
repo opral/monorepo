@@ -86,6 +86,27 @@ services:
     domains:
       - lix.opral.com
 
+  - name: lix-host
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: starter
+    branch: lix-integration
+    pullRequestPreviewsEnabled: false
+    buildCommand: pnpm --filter @lix-js/host... i && pnpm --filter @lix-js/host... build
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @lix-js/host start
+    autoDeploy: true
+    envVars:
+      - fromGroup: production
+      - key: PORT
+        value: 3000
+    buildFilter:
+      paths:
+        - packages/lix-host/**
+        - packages/lix-sdk/**
+    domains:
+      - lix.host
+
   - name: csv
     type: web
     runtime: static
