@@ -15,14 +15,18 @@ export function App({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	useEffect(() => {
-		posthog.init('phc_OZO78iL2JN2Je1ExWjBGdMxXu06VDwL4QDH9Z7EuUXv', {
-			api_host: "https://eu.i.posthog.com",
-			capture_performance: false,
-			autocapture: {
-				capture_copied_text: true,
-			},
-		})
-		posthog.capture("$pageview")
+		if (import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN) {
+			posthog.init(import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN, {
+				api_host: "https://eu.i.posthog.com",
+				capture_performance: false,
+				autocapture: {
+					capture_copied_text: true,
+				},
+			})
+			posthog.capture("$pageview")
+		} else {
+			console.info("No posthog token found")
+		}
 		return () => posthog.reset()
 	}, [])
 

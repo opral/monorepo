@@ -105,7 +105,7 @@ const entryServer = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineP
   default: handleRequest
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader() {
-  return { PUBLIC_POSTHOG_TOKEN: process.env.PUBLIC_POSTHOG_TOKEN };
+  return { PUBLIC_LIX_POSTHOG_TOKEN: process.env.PUBLIC_LIX_POSTHOG_TOKEN };
 }
 const links = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -125,16 +125,20 @@ const links = () => [
   }
 ];
 function Layout({ children }) {
-  useLoaderData();
+  const env = useLoaderData();
   useEffect(() => {
-    posthog.init("phc_OZO78iL2JN2Je1ExWjBGdMxXu06VDwL4QDH9Z7EuUXv", {
-      api_host: "https://eu.i.posthog.com",
-      capture_performance: false,
-      autocapture: {
-        capture_copied_text: true
-      }
-    });
-    posthog.capture("$pageview");
+    if (env.PUBLIC_LIX_POSTHOG_TOKEN) {
+      posthog.init(env.PUBLIC_LIX_POSTHOG_TOKEN, {
+        api_host: "https://eu.i.posthog.com",
+        capture_performance: false,
+        autocapture: {
+          capture_copied_text: true
+        }
+      });
+      posthog.capture("$pageview");
+    } else {
+      console.info("No posthog token found");
+    }
     return () => posthog.reset();
   }, []);
   return /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsxs("html", { lang: "en", children: [
@@ -1310,7 +1314,7 @@ const route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   default: Index,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-const serverManifest = { "entry": { "module": "/assets/entry.client-CZKf3RLx.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/root-BMW0ugWA.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": ["/assets/root-D5TafMW6.css"] }, "routes/file-manager": { "id": "routes/file-manager", "parentId": "root", "path": "file-manager", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/file-manager-WIRaP1du.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-Cx8TPMky.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] } }, "url": "/assets/manifest-1b542e91.js", "version": "1b542e91" };
+const serverManifest = { "entry": { "module": "/assets/entry.client-CZKf3RLx.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/root-Da39WpLR.js", "imports": ["/assets/components-7JiR4bbM.js"], "css": ["/assets/root-D5TafMW6.css"] }, "routes/file-manager": { "id": "routes/file-manager", "parentId": "root", "path": "file-manager", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/file-manager-WIRaP1du.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-Cx8TPMky.js", "imports": ["/assets/components-7JiR4bbM.js", "/assets/details-B17gBefg.js"], "css": [] } }, "url": "/assets/manifest-da57ff2e.js", "version": "da57ff2e" };
 const mode = "production";
 const assetsBuildDirectory = "build/client";
 const basename = "/";

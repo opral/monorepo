@@ -30,7 +30,8 @@ export default function RootLayout(props: { children: JSX.Element }) {
 	}, []);
 
 	useEffect(() => {
-		posthog.init('phc_OZO78iL2JN2Je1ExWjBGdMxXu06VDwL4QDH9Z7EuUXv', {
+		if (import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN) {
+			posthog.init(import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN, {
 			api_host: "https://eu.i.posthog.com",
 			capture_performance: false,
 			autocapture: {
@@ -38,6 +39,9 @@ export default function RootLayout(props: { children: JSX.Element }) {
 			},
 		})
 		posthog.capture("$pageview")
+		} else {
+			console.info("No posthog token found")
+		}
 		return () => posthog.reset()
 	}, [])
 
