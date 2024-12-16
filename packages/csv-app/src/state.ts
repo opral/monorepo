@@ -1,4 +1,10 @@
-import { Version, openLixInMemory } from "@lix-js/sdk";
+import {
+	Account,
+	Lix,
+	Version,
+	openLixInMemory,
+	switchAccount,
+} from "@lix-js/sdk";
 import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
@@ -85,6 +91,13 @@ export const lixAtom = atom(async (get) => {
 		.select("value")
 		.executeTakeFirstOrThrow();
 
+	const storedActiveAccount = localStorage.getItem(ACTIVE_ACCOUNT_STORAGE_KEY);
+
+	if (storedActiveAccount) {
+		const activeAccount = JSON.parse(storedActiveAccount);
+		await switchActiveAccount(lix, activeAccount);
+	}
+
 	// TODO use env varibale
 	// const serverUrl = import.meta.env.PROD
 	// ? "https://lix.host"
@@ -166,3 +179,22 @@ export const isSyncingAtom = atom(async (get) => {
 		return false;
 	}
 });
+
+const ACTIVE_ACCOUNT_STORAGE_KEY = "active_account";
+
+// Helper function to switch active account
+export const switchActiveAccount = async (lix: Lix, account: Account) => {
+	await lix.db.transaction().execute(async (trx) => {
+		// in case the user switched the lix and this lix does not have
+		// the account yet, then insert it.
+		await trx
+			.insertInto("account")
+			.values(account)
+			.onConflict((oc) => oc.doNothing())
+			.execute();
+
+		// switch the active account
+		await switchAccount({ lix: { ...lix, db: trx }, to: [account] });
+	});
+	localStorage.setItem(ACTIVE_ACCOUNT_STORAGE_KEY, JSON.stringify(account));
+};
