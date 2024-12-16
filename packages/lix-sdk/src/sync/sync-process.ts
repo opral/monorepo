@@ -63,8 +63,8 @@ export async function initSyncProcess(args: {
 			// likely that lix didn't exist on the server
 			const response = await fetch(
 				new Request(
-					// "https://lix.host/lsa/new-v1"
-					"http://localhost:3000/lsa/new-v1",
+					"https://lix.host/lsa/new-v1",
+					// "http://localhost:3000/lsa/new-v1",
 					{
 						method: "POST",
 						body: await args.lix.toBlob(),
