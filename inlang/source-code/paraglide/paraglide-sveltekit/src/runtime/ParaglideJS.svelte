@@ -19,34 +19,49 @@
 	import AlternateLinks from "./AlternateLinks.svelte"
 	import { createLangCookie } from "./utils/cookie.js"
 
+	/**
+	 * Component props interface using Svelte 5's $props
+	 * @property {T | undefined} languageTag - Override the language detection with a specific language tag
+	 * @property {I18n<T>} i18n - The routing instance created with `createI18n()` from `@inlang/paraglide-sveltekit`
+	 */
+	 const { languageTag, i18n, children } = $props<{
+		languageTag?: T;
+		i18n: I18n<T>;
+		children?: () => any
+	}>()
+	
 	// The base path may be relative during SSR.
 	// To make sure it is absolute, we need to resolve it against the current page URL.
-	const absoluteBase = normaliseBase(maybe_relative_base, new URL($page.url)) || "/"
+	const absoluteBase = $derived(normaliseBase(maybe_relative_base, new URL($page.url)) || "/");
 
-	/**
-	 * Override the language detection with a specific language tag.
-	 */
-	export let languageTag: T | undefined = undefined
+	const lang = $derived(languageTag ?? i18n.getLanguageFromUrl($page.url));
 
-	/**
-	 * The routing instance to use.
-	 * You can create one with `createI18n()` from `@inlang/paraglide-sveltekit`.
-	 */
-	export let i18n: I18n<T>
+	// the effect needs to run before the DOM updates
+	// otherwise, the message function will render a
+	// stale language (becaus runtime.setLanguageTag)
+	// has not been called yet.
+	$effect.pre(() => {
+		if (browser) {
+			i18n.config.runtime.setLanguageTag(lang);
+			document.documentElement.lang = lang;
+			document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr";
+		}
+	});
 
-	$: lang = languageTag ?? i18n.getLanguageFromUrl($page.url)
-	$: if (browser) i18n.config.runtime.setLanguageTag(lang)
-	$: if (browser) document.documentElement.lang = lang
-	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"
-
-	// count the number of language changes.
-	let numberOfLanugageChanges = 0
-	$: if (lang) numberOfLanugageChanges += 1
+	let numberOfLanugageChanges = 0;
+	$effect(() => {
+		if (lang) {
+			numberOfLanugageChanges += 1;
+		}
+	});
 
 	// on all but the first language change, invalidate language-dependent data
 	// the development mode always performs csr, therefore invalidate immediately
-	$: if (browser && lang && (numberOfLanugageChanges > 1 || dev))
-		invalidate(LANGUAGE_CHANGE_INVALIDATION_KEY)
+	$effect(() => {
+		if (browser && lang && (numberOfLanugageChanges > 1 || dev)) {
+			invalidate(LANGUAGE_CHANGE_INVALIDATION_KEY);
+		}
+	});
 
 	function translateHref(href: string, hreflang: T | undefined): string {
 		try {
@@ -80,14 +95,11 @@
 		}
 	}
 
-	setParaglideContext({ translateHref })
+	setParaglideContext({ translateHref });
 
-	// In svelte 5 the #key block will re-render the second the key changes,
-	// not after the all the updates in the Component are done.
-	// We need to make sure that changing the key happens last.
-	// See https://github.com/sveltejs/svelte/issues/10597
-	$: langKey = lang
-	$: if (browser) document.cookie = createLangCookie(lang, absoluteBase)
+	$effect(() => {
+		if (browser) document.cookie = createLangCookie(lang, absoluteBase);
+	});
 </script>
 
 <svelte:head>
@@ -101,6 +113,6 @@
 </svelte:head>
 
 <!-- Trigger a Re-Render whenever the language changes -->
-{#key langKey}
-	<slot />
+{#key lang}
+	{@render children?.()}
 {/key}
