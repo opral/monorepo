@@ -15,6 +15,6 @@ A change control system allows storing, tracking, querying, and reviewing change
 
 **[💬 Discussions](https://github.com/opral/monorepo/discussions)** - Get help, ask questions, or request features.
 
-**[🗣️ Discord](https://discord.gg/CNPfhWpcAa)** - Hanging out with the community.
+**[🗣️ Discord](https://discord.gg/92HmxcDx)** - Hanging out with the community.
 
 **[𝕏 Twitter](https://discord.gg/CNPfhWpcAa)** - Get updates.
