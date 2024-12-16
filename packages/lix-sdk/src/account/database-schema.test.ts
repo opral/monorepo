@@ -182,8 +182,6 @@ test("should generate different anonymous account names", async () => {
 		.selectAll()
 		.executeTakeFirst();
 
-	console.log({ account0, account1, account2 });
-
 	expect(account0?.name).not.toBe(account1?.name);
 	expect(account1?.name).not.toBe(account2?.name);
 });
