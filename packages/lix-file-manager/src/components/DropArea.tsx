@@ -3,6 +3,7 @@ import { useAtom } from "jotai";
 import { lixAtom } from "@/state.js";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.js";
 import clsx from "clsx";
+import { posthog } from "posthog-js";
 
 export default function DropArea() {
 	const dragCounter = useRef(0);
@@ -36,6 +37,9 @@ export default function DropArea() {
 						})
 						.returningAll()
 						.executeTakeFirstOrThrow();
+					posthog.capture("File Imported", {
+						fileName: file.name,
+					});
 				}
 			});
 			// setSearchParams({ f: result.id });

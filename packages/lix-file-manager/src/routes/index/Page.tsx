@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dropdown-menu.tsx";
 import IconMerge from "@/components/icons/IconMerge.tsx";
 import { Lix, openLixInMemory } from "@lix-js/sdk";
+import { posthog } from "posthog-js";
 
 const isCsvFile = (path: string) => {
 	return path.toLowerCase().endsWith(".csv");
@@ -90,6 +91,9 @@ export default function Page() {
 						data: await file.arrayBuffer(),
 					})
 					.execute();
+				posthog.capture("File Imported", {
+					fileName: file.name,
+				});
 				await saveLixToOpfs({ lix });
 			}
 		};
