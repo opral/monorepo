@@ -40,7 +40,7 @@ export const DynamicChangeGroup = (props: {changes: (Change & {snapshot_content:
 								{timeAgo(props.changes[0].created_at)}{" - "}{props.changes.length}{" changes"}
 							</p>
 					</div>
-						<div className="pt-1.5 pr-2 self-start">
+						<div className="pt-2 pr-2 self-start">
 							<TooltipProvider>
 								<Tooltip>
 									<TooltipTrigger>
