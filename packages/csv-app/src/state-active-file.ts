@@ -26,7 +26,8 @@ export const activeFileAtom = atom(async (get) => {
 		// Not the best UX to implicitly route to the root
 		// but fine for now.
 		window.location.href = "/";
-		throw new Error("no active file. reroute should avoid this throw");
+		// throw new Error("no active file. reroute should avoid this throw");
+		return undefined;
 	}
 
 	const lix = await get(lixAtom);
@@ -96,7 +97,7 @@ export const activeCellChangesAtom = atom(async (get) => {
 	const cellEntityId = await get(activeCellEntityIdAtom);
 	const currentBranch = await get(currentVersionAtom);
 	const lix = await get(lixAtom);
-	if (!cellEntityId) return [];
+	if (!cellEntityId || !activeFile) return [];
 	const changes = await lix.db
 		.selectFrom("change")
 		.where("change.schema_key", "=", CellSchemaV1.key)
@@ -146,6 +147,8 @@ export const unconfirmedChangesAtom = atom(async (get) => {
 	const activeFile = await get(activeFileAtom);
 	const currentBranch = await get(currentVersionAtom);
 
+	if (!activeFile) return [];
+
 	return await lix.db
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
@@ -159,6 +162,8 @@ export const allChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
+
+	if (!activeFile) return [];
 	// const currentBranch = await get(currentBranchAtom);
 	return await lix.db
 		.selectFrom("change")
@@ -175,6 +180,9 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
 	const currentBranch = await get(currentVersionAtom);
+
+	if (!activeFile) return [];
+
 	return await lix.db
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
@@ -189,6 +197,9 @@ export const allEdgesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
+
+	if (!activeFile) return [];
+
 	return await lix.db
 		.selectFrom("change_edge")
 		.innerJoin("change", "change.id", "change_edge.parent_id")
