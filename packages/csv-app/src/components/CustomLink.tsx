@@ -8,7 +8,10 @@ interface CustomLinkProps
 
 const CustomLink = React.forwardRef<HTMLAnchorElement, CustomLinkProps>(
 	({ to, ...props }, ref) => {
-		const isCrossAppNavigation = to.startsWith("/app/csv") === false;
+		const isCrossAppNavigation =
+			// if /app route but the /app route is not /app/csv
+			to.startsWith("/app") && to.startsWith("/app/csv") === false;
+
 		if (isCrossAppNavigation) {
 			return (
 				<a href={to} ref={ref} {...props}>
