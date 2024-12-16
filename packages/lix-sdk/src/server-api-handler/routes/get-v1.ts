@@ -1,3 +1,4 @@
+import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import type { LixServerApiHandlerRoute } from "../create-server-api-handler.js";
 
 export const route: LixServerApiHandlerRoute = async (context) => {
@@ -28,7 +29,17 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 
 	const blob = await context.environment.getLix({ id: lix_id });
 
-	return new Response(blob, {
+	const lix = await openLixInMemory({ blob });
+
+	// setting the sync to true if a client requests the lix
+	// else, the client opens the lix and it's not syncing
+	await lix.db
+		.updateTable("key_value")
+		.set({ value: "true" })
+		.where("key", "=", "#lix_sync")
+		.execute();
+
+	return new Response(await lix.toBlob(), {
 		status: 200,
 		headers: {
 			"Content-Type": "application/octet-stream",
