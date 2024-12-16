@@ -28,24 +28,6 @@ services:
     domains:
       - inlang.com
 
-  - name: lix-website
-    type: web
-    runtime: node
-    region: frankfurt
-    plan: starter
-    branch: main
-    pullRequestPreviewsEnabled: false
-    buildCommand: pnpm --filter lix-website i && pnpm --filter lix-website build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter lix-website start
-    autoDeploy: true
-    envVars:
-      - fromGroup: production
-      - key: PORT
-        value: 3002
-    buildFilter:
-      paths:
-        - lix/website/**
-
   - name: fink2
     type: web
     runtime: static
