@@ -45,8 +45,6 @@ services:
     buildFilter:
       paths:
         - lix/website/**
-    domains:
-      - lix.opral.com
 
   - name: fink2
     type: web
@@ -85,8 +83,8 @@ services:
         - packages/lix-website/**
         - packages/lix-file-manager/**
         - packages/csv-app/**
-    # domains:
-    #   - lix.opral.com
+    domains:
+      - lix.opral.com
 
   - name: csv
     type: web
