@@ -5,7 +5,7 @@ import { posthog } from "posthog-js"
 import "./tailwind.css"
 
 export async function loader() {
-	return { PUBLIC_POSTHOG_TOKEN: process.env.PUBLIC_POSTHOG_TOKEN }
+	return { PUBLIC_LIX_POSTHOG_TOKEN: process.env.PUBLIC_LIX_POSTHOG_TOKEN }
 }
 
 export const links: LinksFunction = () => [
@@ -30,15 +30,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	const env = useLoaderData<typeof loader>()
 
 	useEffect(() => {
-		if (typeof window !== "undefined" && env.PUBLIC_POSTHOG_TOKEN) {
-			posthog.init(env.PUBLIC_POSTHOG_TOKEN ?? "", {
-				api_host: import.meta.env.PROD ? "https://tm.inlang.com" : "http://localhost:4005",
+		if (env.PUBLIC_LIX_POSTHOG_TOKEN) {
+			posthog.init(env.PUBLIC_LIX_POSTHOG_TOKEN, {
+				api_host: "https://eu.i.posthog.com",
 				capture_performance: false,
 				autocapture: {
 					capture_copied_text: true,
 				},
 			})
 			posthog.capture("$pageview")
+		} else {
+			console.info("No posthog token found")
 		}
 		return () => posthog.reset()
 	}, [])

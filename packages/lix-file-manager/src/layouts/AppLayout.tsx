@@ -3,6 +3,7 @@ import { SidebarProvider } from "@/components/ui/sidebar.tsx";
 import { AppSidebar } from "./Sidebar.tsx";
 import { useAtom } from "jotai";
 import { withPollingAtom } from "@/state.ts";
+import { posthog } from "posthog-js"
 export function App({ children }: { children: React.ReactNode }) {
 	const [, setPolling] = useAtom(withPollingAtom);
 
@@ -12,6 +13,22 @@ export function App({ children }: { children: React.ReactNode }) {
 		}, 100);
 		return () => clearInterval(interval);
 	}, []);
+
+	useEffect(() => {
+		if (import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN) {
+			posthog.init(import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN, {
+				api_host: "https://eu.i.posthog.com",
+				capture_performance: false,
+				autocapture: {
+					capture_copied_text: true,
+				},
+			})
+			posthog.capture("$pageview")
+		} else {
+			console.info("No posthog token found")
+		}
+		return () => posthog.reset()
+	}, [])
 
 	return (
 		<SidebarProvider>

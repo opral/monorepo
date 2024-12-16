@@ -13,6 +13,7 @@ import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import { openLixInMemory } from "@lix-js/sdk";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { useNavigate } from "react-router-dom";
+import { posthog } from "posthog-js";
 
 export default function RootLayout(props: { children: JSX.Element }) {
 	const [, setPolling] = useAtom(withPollingAtom);
@@ -26,6 +27,38 @@ export default function RootLayout(props: { children: JSX.Element }) {
 		}, 1000);
 		return () => clearInterval(interval);
 	}, []);
+
+	useEffect(() => {
+		if (import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN) {
+			posthog.init(import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN, {
+				api_host: "https://eu.i.posthog.com",
+				capture_performance: false,
+				autocapture: {
+					capture_copied_text: true,
+				},
+			})
+			posthog.capture("$pageview")
+		} else {
+			console.info("No posthog token found")
+		}
+		return () => posthog.reset()
+	}, [])
+
+	useEffect(() => {
+		if (import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN) {
+			posthog.init(import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN, {
+				api_host: "https://eu.i.posthog.com",
+				capture_performance: false,
+				autocapture: {
+					capture_copied_text: true,
+				},
+			})
+			posthog.capture("$pageview")
+		} else {
+			console.info("No posthog token found")
+		}
+		return () => posthog.reset()
+	}, [])
 
 	const handleOpenLixFile = async (
 		event: React.ChangeEvent<HTMLInputElement>
@@ -121,7 +154,9 @@ export default function RootLayout(props: { children: JSX.Element }) {
 							</SlMenuItem>
 						</SlMenu>
 					</SlDropdown>
-					{isSyncing && <SyncStatus lix={lix}></SyncStatus>}
+					{isSyncing && (
+						<SyncStatus lix={lix}></SyncStatus>
+					)}
 					<SyncAndShare />
 				</div>
 				<div className="flex gap-3 items-center">
