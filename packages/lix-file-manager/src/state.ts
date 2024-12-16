@@ -123,6 +123,21 @@ export const lixAtom = atom(async (get) => {
 		await switchActiveAccount(lix, activeAccount);
 	}
 
+	// TODO use env varibale
+	// const serverUrl = import.meta.env.PROD
+	// ? "https://lix.host"
+	// : "http://localhost:3000";
+	const serverUrl = "http://localhost:3000";
+
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "lix_server_url",
+			value: serverUrl,
+		})
+		.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
+		.execute();
+
 	await saveLixToOpfs({ lix });
 
 	// mismatch in id, load correct url
@@ -213,17 +228,19 @@ export const switchActiveAccount = async (lix: Lix, account: Account) => {
 };
 
 
-export const serverUrlAtom = atom(async (get) => {
+export const isSyncingAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 
-	if (!lix) return undefined;
-
-	const serverUrl = await lix.db
+	const sync = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix_experimental_server_url")
+		.where("key", "=", "#lix_sync")
 		.select("value")
 		.executeTakeFirst();
 
-	return serverUrl?.value;
+	if (sync?.value === "true") {
+		return true;
+	} else {
+		return false;
+	}
 });
