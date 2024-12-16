@@ -5,11 +5,13 @@
 	import { base as maybe_relative_base } from "$app/paths"
 	import { parseRoute, serializeRoute } from "./utils/route.js"
 
-	const absoluteBase = normaliseBase(maybe_relative_base, new URL($page.url)) || "/"
+	const absoluteBase = $derived(normaliseBase(maybe_relative_base, new URL($page.url)) || "/")
 
-	export let availableLanguageTags: readonly T[]
-	export let strategy: RoutingStrategy<T>
-	export let currentLang: T
+	const { availableLanguageTags, strategy, currentLang } = $props<{
+		availableLanguageTags?: readonly T[]
+		strategy:  RoutingStrategy<T>
+		currentLang: T
+	}>()
 
 	const getAlternateLinks = (canonicalPath: string, strategy: RoutingStrategy<T>) => {
 		const links: string[] = []
@@ -22,9 +24,9 @@
 		return links
 	}
 
-	$: localisedPath = parseRoute($page.url.pathname, absoluteBase)[0]
-	$: canonicalPath = strategy.getCanonicalPath(localisedPath, currentLang)
-	$: alternateLinks = getAlternateLinks(canonicalPath, strategy)
+	const localisedPath = $derived(parseRoute($page.url.pathname, absoluteBase)[0])
+	const canonicalPath = $derived(strategy.getCanonicalPath(localisedPath, currentLang))
+	const alternateLinks = $derived(getAlternateLinks(canonicalPath, strategy))
 </script>
 
 <!-- If there is more than one language, add alternate links -->
