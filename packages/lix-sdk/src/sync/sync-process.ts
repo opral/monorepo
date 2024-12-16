@@ -19,10 +19,20 @@ export async function initSyncProcess(args: {
 	let stoped = false;
 
 	const pullAndPush = async () => {
+		const shouldSync = await args.lix.db
+			.selectFrom("key_value")
+			.where("key", "=", "#lix_sync")
+			.select("value")
+			.executeTakeFirst();
+
+		if (shouldSync?.value !== "true") {
+			return;
+		}
+
 		const url = await args.lix.db
 			.selectFrom("key_value")
 			// saved in key value because simpler for experimentation
-			.where("key", "=", "lix_experimental_server_url")
+			.where("key", "=", "lix_server_url")
 			.select("value")
 			.executeTakeFirst();
 		// if you want to test sync, restart the lix app
