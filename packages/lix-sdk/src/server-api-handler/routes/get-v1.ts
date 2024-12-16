@@ -1,3 +1,8 @@
+import {
+	contentFromDatabase,
+	createInMemoryDatabase,
+	importDatabase,
+} from "sqlite-wasm-kysely";
 import type { LixServerApiHandlerRoute } from "../create-server-api-handler.js";
 
 export const route: LixServerApiHandlerRoute = async (context) => {
@@ -15,10 +20,10 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 		);
 	}
 
-	const exists = await context.storage.has(`lix-file-${lix_id}`);
+	const exists = await context.environment.hasLix({ id: lix_id });
 
 	if (!exists) {
-		return new Response(JSON.stringify({ error: "Lix file not found" }), {
+		return new Response(JSON.stringify({ error: "Lix not found" }), {
 			status: 404,
 			headers: {
 				"Content-Type": "application/json",
@@ -26,9 +31,29 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 		});
 	}
 
-	const blob = await context.storage.get(`lix-file-${lix_id}`);
+	const blob = await context.environment.getLix({ id: lix_id });
 
-	return new Response(blob, {
+	// setting the sync to true if a client requests the lix
+	// else, the client opens the lix and it's not syncing
+	//
+	// - not opening via openLix because that would trigger
+	//   the sync process
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+
+	importDatabase({
+		db: sqlite,
+		content: new Uint8Array(await blob!.arrayBuffer()),
+	});
+
+	sqlite.exec("UPDATE key_value SET value = 'true' WHERE key = '#lix_sync'");
+
+	const blob2 = new Blob([contentFromDatabase(sqlite)]);
+
+	sqlite.close();
+
+	return new Response(blob2, {
 		status: 200,
 		headers: {
 			"Content-Type": "application/octet-stream",

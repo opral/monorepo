@@ -11,6 +11,7 @@ import {
 	type AccountTable,
 	type ActiveAccountTable,
 } from "./database-schema.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 
 type AccountSchema = {
 	account: AccountTable;
@@ -159,4 +160,28 @@ test('it should drop the temp "current_account" table on reboot to not persist t
 	expect(account2).toMatchObject({
 		id: "anonymous_mock_uuid_v7-2",
 	});
+});
+
+test("should generate different anonymous account names", async () => {
+	const lix0 = await openLixInMemory({});
+	const lix1 = await openLixInMemory({});
+	const lix2 = await openLixInMemory({});
+
+	const account0 = await lix0.db
+		.selectFrom("active_account")
+		.selectAll()
+		.executeTakeFirst();
+
+	const account1 = await lix1.db
+		.selectFrom("active_account")
+		.selectAll()
+		.executeTakeFirst();
+
+	const account2 = await lix2.db
+		.selectFrom("active_account")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(account0?.name).not.toBe(account1?.name);
+	expect(account1?.name).not.toBe(account2?.name);
 });

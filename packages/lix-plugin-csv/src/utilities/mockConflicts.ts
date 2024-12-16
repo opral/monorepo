@@ -27,7 +27,7 @@ export async function mockConflicts(args: {
 		lix: await openLixInMemory({
 			providePlugins: [{ key: "mock", detectChanges, detectChangesGlob: "*" }],
 		}),
-		file: { path: "mock", metadata: args.metadata },
+		file: { path: "/mock", metadata: args.metadata },
 		fileUpdates: [args.common],
 	});
 
@@ -48,7 +48,7 @@ export async function mockConflicts(args: {
 			providePlugins: [{ key: "mock", detectChanges, detectChangesGlob: "*" }],
 		}),
 		fileUpdates: [args.target],
-		file: { path: "mock", metadata: args.metadata },
+		file: { path: "/mock", metadata: args.metadata },
 	});
 
 	const getSnapshotsOfConflict = async (conflict: any) => {

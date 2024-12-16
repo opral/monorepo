@@ -1,65 +1,135 @@
-import { Version, openLixInMemory } from "@lix-js/sdk";
+import {
+	Account,
+	Lix,
+	Version,
+	openLixInMemory,
+	switchAccount,
+} from "@lix-js/sdk";
 import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
+import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 
-export const LIX_FILE_NAME = "demo.lix";
+export const withPollingAtom = atom(Date.now());
 
-export const fileIdSearchParamsAtom = atom(async (get) => {
+export const lixIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
-	// Using window is a limitation of react router v6.
-	//
-	// No programmatic routing possibility exists outside of
-	// the react component tree. A better solution is to
-	// let react router handle the re-direct in the route
-	// config. But for now, this works.
 	const searchParams = new URL(window.location.href).searchParams;
-	return searchParams.get("f");
+	return searchParams.get("l") || undefined;
 });
 
-let existingSafeLixToOpfsInterval: ReturnType<typeof setInterval> | undefined;
+export const fileIdSearchParamsAtom = atom((get) => {
+	get(withPollingAtom);
+	const searchParams = new URL(window.location.href).searchParams;
+	return searchParams.get("f") || undefined;
+});
 
-export const lixAtom = atom(async () => {
-	// if (existingSafeLixToOpfsInterval) {
-	// 	clearInterval(existingSafeLixToOpfsInterval);
-	// }
-
+export const lixAtom = atom(async (get) => {
+	const lixIdSearchParam = get(lixIdSearchParamsAtom);
 	const rootHandle = await getOriginPrivateDirectory();
-	const fileHandle = await rootHandle.getFileHandle(LIX_FILE_NAME, {
-		create: true,
-	});
-	const file = await fileHandle.getFile();
-	const isNewLix = file.size === 0;
+
+	let lixBlob: Blob;
+
+	if (lixIdSearchParam) {
+		try {
+			const fileHandle = await rootHandle.getFileHandle(
+				`${lixIdSearchParam}.lix`
+			);
+			const file = await fileHandle.getFile();
+			lixBlob = new Blob([await file.arrayBuffer()]);
+		} catch {
+			try {
+				const response = await fetch(
+					new Request(
+						import.meta.env.PROD
+							? "https://lix-host/lsa/get-v1"
+							: "http://localhost:3000/lsa/get-v1",
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({ lix_id: lixIdSearchParam }),
+						}
+					)
+				);
+				if (response.ok) {
+					const blob = await response.blob();
+					const lix = await openLixInMemory({
+						blob,
+						providePlugins: [csvPlugin],
+					});
+					await saveLixToOpfs({ lix });
+					return lix;
+				}
+			} catch (error) {
+				console.error("Failed to fetch from server:", error);
+			}
+		}
+	} else {
+		const availableLixFiles: FileSystemHandle[] = [];
+		for await (const [name, handle] of rootHandle) {
+			if (handle.kind === "file" && name.endsWith(".lix")) {
+				availableLixFiles.push(handle);
+			}
+		}
+		if (availableLixFiles.length > 0) {
+			const fileHandle = await rootHandle.getFileHandle(
+				availableLixFiles[0].name
+			);
+			const file = await fileHandle.getFile();
+			lixBlob = new Blob([await file.arrayBuffer()]);
+		} else {
+			lixBlob = await lixCsvDemoFile();
+		}
+	}
+
 	const lix = await openLixInMemory({
-		blob: isNewLix ? await lixCsvDemoFile() : file,
+		blob: lixBlob!,
 		providePlugins: [csvPlugin],
 	});
 
-	// * naive set interval leads to bugs.
-	// * search for `saveLixToOpfs` in the code base
-	// existingSafeLixToOpfsInterval = setInterval(async () => {
-	// 	const writable = await fileHandle.createWritable();
-	// 	const file = await lix.toBlob();
-	// 	await writable.write(file);
-	// 	await writable.close();
-	// }, 5000);
+	const lixId = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.select("value")
+		.executeTakeFirstOrThrow();
 
-	// @ts-expect-error - Expose for debugging.
-	window.deleteLix = async () => {
-		clearInterval(existingSafeLixToOpfsInterval);
-		await rootHandle.removeEntry(LIX_FILE_NAME);
-	};
+	const storedActiveAccount = localStorage.getItem(ACTIVE_ACCOUNT_STORAGE_KEY);
+
+	if (storedActiveAccount) {
+		const activeAccount = JSON.parse(storedActiveAccount);
+		await switchActiveAccount(lix, activeAccount);
+	}
+
+	// TODO use env varibale
+	// const serverUrl = import.meta.env.PROD
+	// ? "https://lix.host"
+	// : "http://localhost:3000";
+	const serverUrl = import.meta.env.PROD
+		? "https://lix.host"
+		: "http://localhost:3000";
+
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "lix_server_url",
+			value: serverUrl,
+		})
+		.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
+		.execute();
+
+	await saveLixToOpfs({ lix });
+
+	if (lixId.value !== lixIdSearchParam) {
+		const url = new URL(window.location.href);
+		url.searchParams.set("l", lixId.value);
+		window.location.href = url.toString();
+	}
 
 	return lix;
 });
-
-/**
- * Ugly ass workaround to get polled derived state.
- *
- * Search where the atom is set (likely in the layout/root component).
- */
-export const withPollingAtom = atom(Date.now());
 
 export const currentVersionAtom = atom<
 	Promise<Version & { targets: Version[] }>
@@ -100,15 +170,38 @@ export const activeAccountsAtom = atom(async (get) => {
 		.execute();
 });
 
-export const serverUrlAtom = atom(async (get) => {
+export const isSyncingAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 
-	const syncServerUrl = await lix.db
+	const sync = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix_experimental_server_url")
+		.where("key", "=", "#lix_sync")
 		.select("value")
 		.executeTakeFirst();
 
-	return syncServerUrl?.value;
+	if (sync?.value === "true") {
+		return true;
+	} else {
+		return false;
+	}
 });
+
+const ACTIVE_ACCOUNT_STORAGE_KEY = "active_account";
+
+// Helper function to switch active account
+export const switchActiveAccount = async (lix: Lix, account: Account) => {
+	await lix.db.transaction().execute(async (trx) => {
+		// in case the user switched the lix and this lix does not have
+		// the account yet, then insert it.
+		await trx
+			.insertInto("account")
+			.values(account)
+			.onConflict((oc) => oc.doNothing())
+			.execute();
+
+		// switch the active account
+		await switchAccount({ lix: { ...lix, db: trx }, to: [account] });
+	});
+	localStorage.setItem(ACTIVE_ACCOUNT_STORAGE_KEY, JSON.stringify(account));
+};

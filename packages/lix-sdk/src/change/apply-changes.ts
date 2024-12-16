@@ -31,11 +31,23 @@ export async function applyChanges(args: {
 			(change) => change.file_id
 		);
 
+		// Lix own changes need to be applied first.
+		//
+		// Plugin changes depend on lix changes like the file
+		// data for example. Therefore, the lix changes need
+		// to be applied first.
+		const lixOwnChanges = groupByFile["null"] ?? [];
+		delete groupByFile["null"];
+
 		const plugins = await args.lix.plugin.getAll();
 
 		// TODO make detection of which plugin to use easier
 		// https://linear.app/opral/issue/LIXDK-104/add-detectedchangeschema
-		for (const [fileId, changes] of Object.entries(groupByFile)) {
+		for (const [fileId, changes] of [
+			// applying lix own changes first
+			["null", lixOwnChanges] as [string, Change[]],
+			...Object.entries(groupByFile),
+		]) {
 			if (changes === undefined || changes.length === 0) {
 				continue;
 			}
@@ -48,13 +60,22 @@ export async function applyChanges(args: {
 
 			const groupByPlugin = Object.groupBy(changes, (c) => c.plugin_key);
 
-			// TODO assumes that a file exists which is not necessarily true
-			// https://github.com/opral/lix-sdk/issues/181
+			// Applying lix own changes first ensures that the file
+			// exists when querying the file here.
 			const file = await trx
 				.selectFrom("file")
 				.where("id", "=", fileId)
 				.selectAll()
-				.executeTakeFirstOrThrow();
+				.executeTakeFirst();
+
+			// lix own change control deleted the file
+			// no plugin needs to apply changes
+			if (file === undefined) {
+				continue;
+			} else if (file.data.byteLength === 0) {
+				// @ts-expect-error - the plugin will handle undefined file.data
+				delete file.data
+			}
 
 			for (const [pluginKey, changes] of Object.entries(groupByPlugin)) {
 				if (changes === undefined) {
@@ -69,7 +90,7 @@ export async function applyChanges(args: {
 					);
 				}
 				const { fileData } = await plugin.applyChanges({
-					lix: args.lix,
+					lix: { ...args.lix, db: trx },
 					file,
 					changes,
 				});

@@ -24,6 +24,7 @@ import { CellSchemaV1 } from "@lix-js/plugin-csv";
 
 export default function Component(props: {
 	id: string;
+	authorName: string | null;
 	firstComment: string | null;
 }) {
 	const [isOpen, setIsOpen] = useState(
@@ -87,7 +88,7 @@ export default function Component(props: {
 						<p className="text-zinc-950 text-sm! font-semibold">
 							{props.id === "unconfirmed-changes"
 								? "Unconfirmed changes"
-								: "TODO (author name)"}
+								: props.authorName}
 						</p>
 						<p className="text-sm! text-zinc-600">{props.firstComment}</p>
 					</div>

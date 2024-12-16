@@ -1,21 +1,26 @@
 import React from 'react';
-import { Link as RouterLink, LinkProps as RouterLinkProps } from 'react-router-dom';
+import { Link as RouterLink } from "react-router-dom";
 
-interface CustomLinkProps extends RouterLinkProps {
-  to: string;
+interface CustomLinkProps
+	extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+	to: string;
 }
 
-const CustomLink: React.FC<CustomLinkProps> = ({ to, ...props }) => {
-  const isCrossAppNavigation = to.startsWith('/app/');
-  if (isCrossAppNavigation) {
-    return (
-      <a href={to} {...props}>
-        {props.children}
-      </a>
-    );
-  }
+const CustomLink = React.forwardRef<HTMLAnchorElement, CustomLinkProps>(
+	({ to, ...props }, ref) => {
+		const isCrossAppNavigation = to.startsWith("/app/fm") === false;
+		if (isCrossAppNavigation) {
+			return (
+				<a href={to} ref={ref} {...props}>
+					{props.children}
+				</a>
+			);
+		}
 
-  return <RouterLink to={to} {...props} />;
-};
+		return <RouterLink to={to} ref={ref} {...props} />;
+	}
+);
+
+CustomLink.displayName = "CustomLink";
 
 export default CustomLink;

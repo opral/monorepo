@@ -28,15 +28,6 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
     CHECK (is_valid_file_path(path))
   ) STRICT;
 
-  -- TODO Queue - handle deletion - the current queue doesn't handle delete starting with feature parity
-    -- CREATE TRIGGER IF NOT EXISTS file_delete BEFORE DELETE ON file
-    -- WHEN NEW.skip_change_extraction IS NULL
-    -- BEGIN
-    --     INSERT INTO change_queue(file_id, path, data_before, data_after, metadata)
-    --     VALUES (OLD.id, OLD.path, OLD.data, NULL, OLD.metadata);
-    --   SELECT triggerChangeQueue();
-    -- END;
-
   CREATE TABLE IF NOT EXISTS change_queue (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     file_id TEXT NOT NULL,
@@ -73,6 +64,13 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
       NEW.path, NEW.data, NEW.metadata
     );
 
+    SELECT triggerChangeQueue();
+  END;
+
+  CREATE TRIGGER IF NOT EXISTS file_delete BEFORE DELETE ON file
+  BEGIN
+    INSERT INTO change_queue(file_id)
+    VALUES (OLD.id);
     SELECT triggerChangeQueue();
   END;
 

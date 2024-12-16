@@ -77,18 +77,36 @@
       "localRoot": "${workspaceFolder}"
     },
     {
-      "name": "debug @inlang/website",
+      "name": "@inlang/website:3000",
       "port": 3000,
       "request": "launch",
       "type": "chrome",
       "webRoot": "${workspaceFolder}/inlang/source-code/website"
     },
     {
-      "name": "debug csv-app on port 3008",
+      "name": "csv-app:3008",
       "port": 3008,
       "request": "launch",
       "type": "chrome",
       "webRoot": "${workspaceFolder}/packages/csv-app"
+    },
+    {
+      "name": "lix-host",
+      "type": "node",
+      "request": "launch",
+      "autoAttachChildProcesses": true,
+      "args": ["${workspaceFolder}/packages/lix-host/src/main.ts"],
+      "runtimeArgs": ["--experimental-strip-types", "--watch"],
+      "smartStep": true,
+      "sourceMaps": true,
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "lix-file-manager:3007",
+      "port": 3007,
+      "request": "launch",
+      "type": "chrome",
+      "webRoot": "${workspaceFolder}/packages/lix-file-manager"
     }
   ]
 }

@@ -1,6 +1,8 @@
 import { expect, test } from "vitest";
 import { applyChanges } from "./applyChanges.js";
 import { mockChanges } from "./utilities/mockChanges.js";
+import { changeQueueSettled, openLixInMemory } from "@lix-js/sdk";
+import { plugin } from "./index.js";
 
 test("it applies an insert change", async () => {
 	const before = new TextEncoder().encode(
@@ -15,7 +17,7 @@ test("it applies an insert change", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const { lix, changes } = await mockChanges({
-		file: { id: "mock", path: "mock", metadata },
+		file: { id: "mock", path: "/mock", metadata },
 		fileUpdates: [before, after],
 	});
 
@@ -23,7 +25,7 @@ test("it applies an insert change", async () => {
 	// TODO we ignore the ordering of the rows - FYI
 
 	const { fileData: applied } = await applyChanges({
-		file: { id: "mock", path: "mock", data: before, metadata },
+		file: { id: "mock", path: "/mock", data: before, metadata },
 		changes,
 		lix,
 	});
@@ -38,12 +40,12 @@ test("it applies an update change", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const { lix, changes } = await mockChanges({
-		file: { id: "mock", path: "mock", metadata },
+		file: { id: "mock", path: "/mock", metadata },
 		fileUpdates: [before, after],
 	});
 
 	const { fileData: applied } = await applyChanges({
-		file: { id: "mock", path: "mock", data: before, metadata },
+		file: { id: "mock", path: "/mock", data: before, metadata },
 		changes,
 		lix,
 	});
@@ -60,12 +62,12 @@ test("it applies a delete change", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const { lix, changes } = await mockChanges({
-		file: { id: "mock", path: "mock", metadata },
+		file: { id: "mock", path: "/mock", metadata },
 		fileUpdates: [before, after],
 	});
 
 	const { fileData: applied } = await applyChanges({
-		file: { id: "mock", path: "mock", data: before, metadata },
+		file: { id: "mock", path: "/mock", data: before, metadata },
 		changes,
 		lix,
 	});
@@ -85,15 +87,46 @@ test("it applies a row order change", async () => {
 	const metadata = { unique_column: "Name" };
 
 	const { lix, changes } = await mockChanges({
-		file: { id: "mock", path: "mock", metadata },
+		file: { id: "mock", path: "/mock", metadata },
 		fileUpdates: [initial, update0],
 	});
 
 	const { fileData: applied } = await applyChanges({
-		file: { id: "mock", path: "mock", data: initial, metadata },
+		file: { id: "mock", path: "/mock", data: initial, metadata },
 		changes,
 		lix,
 	});
 
 	expect(applied).toEqual(update0);
 });
+
+test("applies changes to a new csv file", async () => {
+	const lix = await openLixInMemory({ providePlugins: [plugin] });
+
+	const initialCsv = new TextEncoder().encode("Name,Age\nAnna,20\nPeter,50");
+
+	const file = {
+		id: "file0",
+		path: "/mock.csv",
+		data: initialCsv,
+		metadata: { unique_column: "Name" },
+	};
+
+	await lix.db.insertInto("file").values(file).execute();
+
+	await changeQueueSettled({ lix });
+
+	const changes = await lix.db
+		.selectFrom("change")
+		.where("file_id", "=", "file0")
+		.selectAll()
+		.execute();
+
+	const { fileData: applied } = await applyChanges({
+		file: { ...file, data: undefined },
+		changes,
+		lix,
+	});
+
+	expect(applied).toEqual(initialCsv);
+}); 

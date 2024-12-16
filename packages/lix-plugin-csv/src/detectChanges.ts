@@ -4,7 +4,6 @@ import { CellSchemaV1 } from "./schemas/cell.js";
 import { HeaderSchemaV1 } from "./schemas/header.js";
 import { parseCsv } from "./utilities/parseCsv.js";
 import { RowSchemaV1 } from "./schemas/row.js";
-import { parseCsvFields } from "./utilities/parseCsvFields.js";
 
 function toEntityId(rowId: string, columnName: string) {
 	// row id already is <unique column>|<unique value>
@@ -20,16 +19,11 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 }) => {
 	// heuristic can be improved later by deriving a unique column
 	const uniqueColumnBefore = before?.metadata?.unique_column;
-	let uniqueColumnAfter = after?.metadata?.unique_column;
+	const uniqueColumnAfter = after?.metadata?.unique_column;
 
 	if (uniqueColumnBefore === undefined && uniqueColumnAfter === undefined) {
-		const fallbackUniqueColumn = parseCsvFields(after?.data)?.at(0);
-		if (!fallbackUniqueColumn) {
-			console.warn("The unique_column metadata is required to detect changes");
-			return [];
-		}
-		console.warn(`The unique_column metadata is required to detect changes, fallback ${fallbackUniqueColumn}`);
-		uniqueColumnAfter = fallbackUniqueColumn;
+		console.warn("The unique_column metadata is required to detect changes");
+		return [];
 	}
 
 	const detectedChanges: DetectedChange<
@@ -40,11 +34,17 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	const afterParsed = parseCsv(after?.data, uniqueColumnAfter);
 
 	const headerChanged = checkHeaderChange(
+		beforeParsed.delimeter,
+		afterParsed.delimeter,
 		beforeParsed.header,
 		afterParsed.header,
 	);
 
-	if (headerChanged) {
+	if (
+		headerChanged ||
+		// in case the unique column has been set, the change needs to be detected
+		before?.metadata?.unique_column !== after?.metadata?.unique_column
+	) {
 		detectedChanges.push({
 			schema: HeaderSchemaV1,
 			entity_id: "header",
@@ -68,8 +68,6 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 
 		const rowLineNumberBefore = beforeParsed.lineNumbers[rowId];
 		const rowLineNumberAfter = afterParsed.lineNumbers[rowId];
-
-		
 
 		if (rowLineNumberBefore !== rowLineNumberAfter) {
 			detectedChanges.push({
@@ -126,8 +124,13 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	return detectedChanges;
 };
 
-function checkHeaderChange(before?: string[], after?: string[]) {
-	const beforeHeaderRow = before?.join(",");
-	const afterHeaderRow = after?.join(",");
+function checkHeaderChange(
+	beforeDelimeter: string,
+	afterDelimeter: string,
+	before?: string[],
+	after?: string[],
+) {
+	const beforeHeaderRow = before?.join(beforeDelimeter);
+	const afterHeaderRow = after?.join(afterDelimeter);
 	return beforeHeaderRow !== afterHeaderRow;
 }

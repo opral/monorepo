@@ -1,10 +1,21 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
+import { humanId } from "human-id";
 
 export function applyAccountDatabaseSchema(
 	sqlite: SqliteDatabase
 ): SqliteDatabase {
-	return sqlite.exec`
+	const anonymousAccountName = `Anonymous ${humanId({
+		capitalize: true,
+		adjectiveCount: 0,
+		separator: "_",
+	})
+		// Human ID has two words, remove the last one
+		.split("_")[0]!
+		// Human ID uses plural, remove the last character to make it singular
+		.slice(0, -1)}`;
+
+	const sql = `
   CREATE TABLE IF NOT EXISTS account (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     name TEXT NOT NULL
@@ -24,9 +35,10 @@ export function applyAccountDatabaseSchema(
   ) STRICT;
 
   -- default to the anonymous account
-  INSERT INTO active_account (id, name) values ('anonymous_' || uuid_v7(), 'anonymous');
-  
+  INSERT INTO active_account (id, name) values ('anonymous_' || uuid_v7(), '${anonymousAccountName}');
 `;
+
+	return sqlite.exec(sql);
 }
 
 export type Account = Selectable<AccountTable>;

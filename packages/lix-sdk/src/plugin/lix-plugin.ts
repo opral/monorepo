@@ -8,15 +8,6 @@ import type { Lix } from "../lix/open-lix.js";
 // named lixplugin to avoid conflict with built-in plugin type
 export type LixPlugin = {
 	key: string;
-	// TODO https://github.com/opral/lix-sdk/issues/37
-	// idea:
-	//   1. runtime reflection for lix on the change schema
-	//   2. lix can validate the changes based on the schema
-	// schema: {
-	// 	bundle: Bundle,
-	// 	message: Message,
-	// 	variant: Variant,
-	// },
 	/**
 	 * The glob pattern that should invoke `detectChanges()`.
 	 *
@@ -28,11 +19,17 @@ export type LixPlugin = {
 	/**
 	 * Detects changes between the `before` and `after` file update(s).
 	 *
-	 * The function is invoked by lix based on the plugin's `glob` pattern.
+	 * `Before` is `undefined` if the file did not exist before (
+	 * the file was created).
+	 *
+	 * `After` is always defined. Either the file was updated, or
+	 * deleted. If the file is deleted, lix own change control
+	 * will handle the deletion. Hence, `after` is always be defined.
 	 */
 	detectChanges?: (args: {
+		lix: LixReadonly;
 		before?: LixFile;
-		after?: LixFile;
+		after: LixFile;
 	}) => Promise<Array<DetectedChange>>;
 	/**
 	 * UI components that are used to render the diff view.
@@ -52,11 +49,16 @@ export type LixPlugin = {
 	}) => Promise<DetectedConflict[]>;
 	applyChanges?: (args: {
 		lix: LixReadonly;
-		// todo a file can be-non existent
-		// maybe it's better to remove the file from this api
-		// and let the plugin handle the file selection and
-		// , if needed, file creation
-		file: LixFile;
+		/**
+		 * The file to which the changes should be applied.
+		 *
+		 * The `file.data` might be undefined if the file does not
+		 * exist at the time of applying the changes. This can
+		 * happen when merging a version that created a new file
+		 * that did not exist in the target version. Or, a file
+		 * has been deleted and should be restored at a later point.
+		 */
+		file: Omit<LixFile, "data"> & { data?: LixFile["data"] };
 		changes: Array<Change>;
 	}) => Promise<{
 		fileData: LixFile["data"];

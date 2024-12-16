@@ -1,3 +1,4 @@
+import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
 import { applyChanges } from "../change/apply-changes.js";
 import type { Change, Version } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
@@ -10,7 +11,7 @@ import { versionChangeInSymmetricDifference } from "../query-filter/version-chan
  *
  * @example
  *   ```ts
- *   await switchVersion({ lix, to: currentVersion });
+ *   await switchVersion({ lix, to: otherVersion });
  *   ```
  *
  * @example
@@ -28,24 +29,32 @@ export async function switchVersion(args: {
 	to: Pick<Version, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const currentVersion = await trx
-			.selectFrom("current_version")
-			.selectAll()
-			.executeTakeFirstOrThrow();
+		await withSkipChangeQueue(trx, async (trx) => {
+			const sourceVersion = await trx
+				.selectFrom("current_version")
+				.selectAll()
+				.executeTakeFirstOrThrow();
 
-		await trx.updateTable("current_version").set({ id: args.to.id }).execute();
+			await trx
+				.updateTable("current_version")
+				.set({ id: args.to.id })
+				.execute();
 
-		const versionChangesSymmetricDifference = await trx
-			.selectFrom("version_change")
-			.innerJoin("change", "version_change.change_id", "change.id")
-			.where(versionChangeInSymmetricDifference(currentVersion, args.to))
-			.selectAll("change")
-			.execute();
+			// need symmetric difference to detect inserts and deletions
+			// that should occur when switching the version
+			const versionChangesSymmetricDifference = await trx
+				.selectFrom("version_change")
+				.innerJoin("change", "version_change.change_id", "change.id")
+				.where(versionChangeInSymmetricDifference(sourceVersion, args.to))
+				.selectAll("change")
+				.execute();
 
-		const toBeAppliedChanges: Change[] = [];
+			// because we use the symmetric difference, entity
+			// changes need to be de-duplicated. in the future,
+			// we could improve the symmetric difference query
+			const toBeAppliedChanges: Map<string, Change> = new Map();
 
-		await Promise.all(
-			versionChangesSymmetricDifference.map(async (change) => {
+			for (const change of versionChangesSymmetricDifference) {
 				const existingEntityChange = await trx
 					.selectFrom("version_change")
 					.innerJoin("change", "change.id", "version_change.change_id")
@@ -57,7 +66,11 @@ export async function switchVersion(args: {
 					.executeTakeFirst();
 
 				if (existingEntityChange) {
-					return toBeAppliedChanges.push(existingEntityChange);
+					toBeAppliedChanges.set(
+						`${change.file_id},${change.entity_id},${change.schema_key}`,
+						existingEntityChange
+					);
+					continue;
 				}
 				// need to remove the entity when switching the version
 				else {
@@ -69,20 +82,23 @@ export async function switchVersion(args: {
 						// deleting accounts and versions when switching is
 						// not desired. a version should be able to jump to a
 						// different version and the accounts are not affected
-						return;
+						continue;
 					}
 					// the entity does not exist in the switched to version
-					return toBeAppliedChanges.push({
-						...change,
-						snapshot_id: "no-content",
-					});
+					toBeAppliedChanges.set(
+						`${change.file_id},${change.entity_id},${change.schema_key}`,
+						{
+							...change,
+							snapshot_id: "no-content",
+						}
+					);
 				}
-			})
-		);
+			}
 
-		await applyChanges({
-			lix: { ...args.lix, db: trx },
-			changes: toBeAppliedChanges,
+			return await applyChanges({
+				lix: { ...args.lix, db: trx },
+				changes: toBeAppliedChanges.values().toArray(),
+			});
 		});
 	};
 

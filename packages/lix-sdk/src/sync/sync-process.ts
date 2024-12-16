@@ -19,10 +19,20 @@ export async function initSyncProcess(args: {
 	let stoped = false;
 
 	const pullAndPush = async () => {
+		const shouldSync = await args.lix.db
+			.selectFrom("key_value")
+			.where("key", "=", "#lix_sync")
+			.select("value")
+			.executeTakeFirst();
+
+		if (shouldSync?.value !== "true") {
+			return;
+		}
+
 		const url = await args.lix.db
 			.selectFrom("key_value")
 			// saved in key value because simpler for experimentation
-			.where("key", "=", "lix_experimental_server_url")
+			.where("key", "=", "lix_server_url")
 			.select("value")
 			.executeTakeFirst();
 		// if you want to test sync, restart the lix app
@@ -30,38 +40,40 @@ export async function initSyncProcess(args: {
 		if (!url) {
 			return;
 		}
-		console.log("----------- PULL FROM SERVER -------------");
+		// console.log("----------- PULL FROM SERVER -------------");
 		const serverState = await pullFromServer({
 			serverUrl: url.value,
 			lix: args.lix,
 			id: lixId.value,
 		});
-		console.log(
-			"----------- DONE PULL FROM SERVER ------------- New known Server state: ",
-			serverState
-		);
-		console.log("----------- PUSH TO SERVER -------------");
+		// console.log(
+		// 	"----------- DONE PULL FROM SERVER ------------- New known Server state: ",
+		// 	serverState
+		// );
+		// console.log("----------- PUSH TO SERVER -------------");
 		await pushToServer({
 			serverUrl: url.value,
 			lix: args.lix,
 			id: lixId.value,
 			targetVectorClock: serverState,
 		});
-		console.log("----------- DONE PUSH TO SERVER -------------");
+		// console.log("----------- DONE PUSH TO SERVER -------------");
 	};
 
 	// naive implementation that syncs every second
 
-	async function schedulePullAndPush() {
+	function schedulePullAndPush() {
 		if (!stoped) {
-			await pullAndPush();
+			pullAndPush().catch((e) => {
+				console.error("Error in sync process", e);
+			});
 		}
 		setTimeout(() => {
 			schedulePullAndPush();
 		}, 1000);
 	}
 
-	schedulePullAndPush();
+	schedulePullAndPush();	
 
 	return {
 		stop: () => {

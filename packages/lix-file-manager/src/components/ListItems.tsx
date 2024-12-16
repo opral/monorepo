@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button.tsx";
 import IconFile from "@/components/icons/IconFile.tsx";
 import clsx from "clsx";
@@ -29,18 +29,24 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 	//local state
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 
+	const navigate = useNavigate();
+
 	// global state
 	const [lix] = useAtom(lixAtom);
 
 	//functions
 	const handleSelectFile = () => {
-		setSearchParams({ f: id });
+		const newSearchParams = new URLSearchParams(searchParams);
+		newSearchParams.set("f", id);
+		setSearchParams(newSearchParams);
 	};
 
-	const handleDeleteFile = async () => {
+	const handleDeleteFile = async (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.stopPropagation();
 		await lix.db.deleteFrom("file").where("id", "=", id).execute();
 		await saveLixToOpfs({ lix });
-		window.location.href = "/";
+		const lixId = searchParams.get("l");
+		return navigate(`/?l=${lixId}`);
 	};
 
 	const handleDownload = async () => {
@@ -120,7 +126,7 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 							<DropdownMenuItem onClick={() => handleDownload()}>
 								Download
 							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => handleDeleteFile()}>
+							<DropdownMenuItem onClick={(e: any) => handleDeleteFile(e)}>
 								Delete
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => handleOverrideFile()}>

@@ -1,5 +1,9 @@
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
-import { handleFileChange, handleFileInsert } from "./file-handlers.js";
+import {
+	handleFileUpdate,
+	handleFileInsert,
+	handleFileDelete,
+} from "./file-handlers.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export async function initChangeQueue(args: {
@@ -16,8 +20,6 @@ export async function initChangeQueue(args: {
 		},
 	});
 
-	const closed = false;
-
 	let pending: Promise<void> | undefined;
 
 	let resolve: () => void;
@@ -27,10 +29,6 @@ export async function initChangeQueue(args: {
 	let hasMoreEntriesSince: number | undefined = undefined;
 
 	async function queueWorker(trail = false) {
-		if (closed) {
-			return;
-		}
-
 		try {
 			if (pending && !trail) {
 				hasMoreEntriesSince = runNumber;
@@ -53,7 +51,7 @@ export async function initChangeQueue(args: {
 
 			if (entry) {
 				if (entry.data_before && entry.data_after) {
-					await handleFileChange({
+					await handleFileUpdate({
 						changeQueueEntry: entry,
 						lix: args.lix,
 					});
@@ -62,24 +60,11 @@ export async function initChangeQueue(args: {
 						changeQueueEntry: entry,
 						lix: args.lix,
 					});
-				} else if (entry.data_before && !entry.data_after) {
-					// TODO Queue - handle deletion - the current queue doesn't handle delete starting with feature parity
-					// await handleFileDelete({
-					// 	queueEntry: entry,
-					// before: {
-					// 	id: entry.file_id,
-					// 	path: entry.path,
-					// 	metadata: null,
-					// 	// TODO Queue - handle deletion - until than this we have to bang here
-					// 	data: entry.data_before,
-					// 	skip_change_extraction: null
-					// },
-					// 	plugins,
-					// 	lix: {
-					// 		db,
-					// 		plugin,
-					// 	},
-					// });
+				} else {
+					await handleFileDelete({
+						changeQueueEntry: entry,
+						lix: args.lix,
+					});
 				}
 			}
 

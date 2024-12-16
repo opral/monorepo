@@ -47,7 +47,7 @@ export async function createChange(
 		query: args.lix.db
 			.insertInto("snapshot")
 			.values({
-				content: args.snapshotContent,
+				content: args.snapshotContent ?? null,
 			})
 			.onConflict((oc) =>
 				oc.doUpdateSet((eb) => ({

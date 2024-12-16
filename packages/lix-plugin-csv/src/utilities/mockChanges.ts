@@ -26,27 +26,16 @@ export async function mockChanges(args: {
 			providePlugins: [{ key: "mock", detectChanges, detectChangesGlob: "*" }],
 		}));
 	for (const update of args.fileUpdates) {
-		try {
-			await lix.db
-				.insertInto("file")
-				.values({
-					id: args.file.id ?? "mock",
-					path: args.file.path,
-					data: update,
-					// @ts-expect-error - type error with metadata
-					metadata: JSON.stringify(args.file.metadata),
-				})
-				.execute();
-		} catch {
-			// because the file table is a view, upserts via sql are not possible
-			// manually updating to circumvent the problem.
-			// https://linear.app/opral/issue/LIXDK-102/re-visit-simplifying-the-change-queue-implementation
-			await lix.db
-				.updateTable("file")
-				.set("data", update)
-				.where("path", "=", args.file.path)
-				.execute();
-		}
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: args.file.id ?? "mock",
+				path: args.file.path,
+				data: update,
+				metadata: args.file.metadata,
+			})
+			.onConflict((oc) => oc.doUpdateSet({ data: update }))
+			.execute();
 	}
 
 	await changeQueueSettled({ lix });

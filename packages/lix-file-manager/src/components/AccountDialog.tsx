@@ -21,7 +21,7 @@ import {
 	activeAccountAtom,
 	accountsAtom,
 	lixAtom,
-	saveAccountsToStorage,
+	switchActiveAccount,
 } from "../state.js";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar.js";
 import { Check } from "lucide-react";
@@ -79,14 +79,9 @@ function AccountContent({
 				.returningAll()
 				.executeTakeFirstOrThrow();
 
-			const currentAccounts = await lix.db
-				.selectFrom("account")
-				.selectAll()
-				.execute();
-			saveAccountsToStorage(currentAccounts);
-
 			setNewAccountName("");
-			await setActiveAccount(newAccount);
+
+			await switchActiveAccount(lix, newAccount);
 			onOpenChange(false);
 		} catch (error) {
 			console.error("Failed to create account:", error);
@@ -103,7 +98,7 @@ function AccountContent({
 
 			try {
 				setIsCreating(true);
-				await setActiveAccount(account);
+				await switchActiveAccount(lix, account);
 				onOpenChange(false);
 			} catch (error) {
 				console.error("Failed to switch account:", error);

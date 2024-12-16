@@ -16,7 +16,7 @@ import {
 	allChangesDynamicGroupingAtom,
 	changesCurrentVersionAtom,
 } from "@/state-active-file.ts";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChangeComponent } from "@/components/ChangeComponent.tsx";
 import { DynamicChangeGroup } from "@/components/DynamicChangeGroup.tsx";
 import FilterSelect from "@/components/FilterSelect.tsx";
@@ -25,9 +25,8 @@ import ConnectedChanges from "@/components/ConnectedChanges.tsx";
 import DiscussionThread from "@/components/DiscussionThread.tsx";
 import { VersionDropdown } from "@/components/VersionDropdown.tsx";
 import CustomLink from "@/components/CustomLink.tsx";
-import { useCallback } from "react";
 import DropArea from "@/components/DropArea.js";
-import { Download, Ellipsis, Plug, TrashIcon } from "lucide-react";
+import { Download, Ellipsis, Plug, TrashIcon, File } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -35,6 +34,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
 import IconMerge from "@/components/icons/IconMerge.tsx";
+import { Lix, openLixInMemory } from "@lix-js/sdk";
 
 const isCsvFile = (path: string) => {
 	return path.toLowerCase().endsWith(".csv");
@@ -69,10 +69,9 @@ export default function Page() {
 	const [changesCurrentVersion] = useAtom(changesCurrentVersionAtom);
 	const [allChangesDynamicGrouping] = useAtom(allChangesDynamicGroupingAtom);
 	const [activeFile] = useAtom(activeFileAtom);
-	const [fileIdSearchParams, setFileIdSearchParams] = useAtom(
-		fileIdSearchParamsAtom
-	);
+	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
 	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
+	const [searchParams] = useSearchParams();
 
 	//hooks
 	const navigate = useNavigate();
@@ -92,6 +91,35 @@ export default function Page() {
 					})
 					.execute();
 				await saveLixToOpfs({ lix });
+			}
+		};
+		input.click();
+	};
+
+	const handleOpenLixFile = async () => {
+		const input = document.createElement("input");
+		input.type = "file";
+		input.onchange = async (e) => {
+			const file = (e.target as HTMLInputElement).files?.[0];
+			if (file) {
+				const fileContent = await file.arrayBuffer();
+				const opfsRoot = await navigator.storage.getDirectory();
+				const lix = await openLixInMemory({
+					blob: new Blob([fileContent]),
+				});
+				const lixId = await lix.db
+					.selectFrom("key_value")
+					.where("key", "=", "lix_id")
+					.select("value")
+					.executeTakeFirstOrThrow();
+
+				const opfsFile = await opfsRoot.getFileHandle(`${lixId.value}.lix`, {
+					create: true,
+				});
+				const writable = await opfsFile.createWritable();
+				await writable.write(fileContent);
+				await writable.close();
+				navigate("?l=" + lixId.value);
 			}
 		};
 		input.click();
@@ -134,22 +162,20 @@ export default function Page() {
 		}
 	};
 
-	const handleBackgroundClick = useCallback(
-		(e: React.MouseEvent) => {
-			// Only trigger if clicking the background container itself
-			if (e.target === e.currentTarget) {
-				setFileIdSearchParams(undefined);
-				navigate("/");
-			}
-		},
-		[setFileIdSearchParams, navigate]
-	);
+	const handleBackgroundClick = async (e: React.MouseEvent) => {
+		// Only trigger if clicking the background container itself
+		if (e.target === e.currentTarget) {
+			const newParams = new URLSearchParams(searchParams);
+			const openLix = newParams.get("l");
+			navigate(`/?l=${openLix}`);
+		}
+	};
 
 	return (
 		<div className="flex bg-white h-full">
 			<div
 				// min 300px, max 600px – change also in JS beneath
-				className="min-w-[300px] max-w-[600px] w-[450px] flex flex-col h-full relative"
+				className="min-w-[380px] max-w-[600px] w-[450px] flex flex-col h-full relative"
 				ref={(el) => {
 					if (el) {
 						el.style.width = el.offsetWidth + "px";
@@ -166,29 +192,39 @@ export default function Page() {
 						<DropdownMenuContent align="end">
 							<DropdownMenuItem onClick={handleImport}>
 								<IconUpload />
-								Import
+								Import File
 							</DropdownMenuItem>
-							<DropdownMenuItem
-								onClick={async () => {
-									// @ts-expect-error - globally defined
-									await window.deleteLix();
-									window.location.href = "/";
-								}}
-							>
-								<TrashIcon />
-								Reset
+							<DropdownMenuItem onClick={handleOpenLixFile}>
+								<File />
+								Open Lix
 							</DropdownMenuItem>
-							<DropdownMenuItem
-								onClick={() => {
-									alert("Not implemented");
-								}}
-							>
+							<DropdownMenuItem onClick={() => handleExportLixFile(lix)}>
 								<Download />
-								Download Lix
+								Export Lix
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={handleMerge}>
 								<IconMerge />
 								Merge Lix
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								onClick={async () => {
+									try {
+										const root = await navigator.storage.getDirectory();
+										// @ts-expect-error - TS doesn't know about values() yet
+										for await (const entry of root.values()) {
+											if (entry.kind === "file") {
+												await root.removeEntry(entry.name);
+											}
+										}
+										navigate("/");
+										console.log("All files deleted from OPFS.");
+									} catch (error) {
+										console.error("Error deleting files from OPFS:", error);
+									}
+								}}
+							>
+								<TrashIcon />
+								Reset OPFS
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
@@ -258,7 +294,7 @@ export default function Page() {
 						const handleMouseMove = (moveEvent: MouseEvent) => {
 							const delta = moveEvent.clientX - startX;
 							// min 300px, max 600px – change also in css
-							const newWidth = Math.min(Math.max(startWidth + delta, 300), 600);
+							const newWidth = Math.min(Math.max(startWidth + delta, 380), 600);
 							if (container) {
 								container.style.width = `${newWidth}px`;
 							}
@@ -308,7 +344,7 @@ export default function Page() {
 						<Button
 							variant="default"
 							size="default"
-							className={activeFile?.path ? "" : "hidden"}
+							className={activeFile?.path ? "relative" : "hidden"}
 						>
 							<CustomLink
 								to={
@@ -322,6 +358,10 @@ export default function Page() {
 									? "Open in CSV app"
 									: "Build a Lix App"}
 							</CustomLink>
+							{/* indicator for user to click on the button */}
+							{activeFile?.path && (
+								<span className="absolute top-0 right-0 w-2.5 h-2.5 bg-blue-900 rounded-full animate-ping" />
+							)}
 						</Button>
 					</SectionHeader>
 					<div className="px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
@@ -380,3 +420,19 @@ export default function Page() {
 		</div>
 	);
 }
+
+const handleExportLixFile = async (lix: Lix) => {
+	const lixId = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.select("value")
+		.executeTakeFirstOrThrow();
+
+	const blob = await lix.toBlob();
+	const a = document.createElement("a");
+	a.href = URL.createObjectURL(blob);
+	a.download = `${lixId.value}.lix`;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+};

@@ -12,18 +12,18 @@ export async function pushToServer(args: {
 	lix: Pick<Lix, "db">;
 	targetVectorClock: VectorClock;
 }): Promise<void> {
-	console.log(
-		"collecting rows to push using known server state:",
-		args.targetVectorClock
-	);
+	// console.log(
+	// 	"collecting rows to push using known server state:",
+	// 	args.targetVectorClock
+	// );
 	const { upsertedRows: tableRowsToPush, state } = await getDiffingRows({
 		lix: args.lix,
 		targetVectorClock: args.targetVectorClock,
 	});
-	console.log("rows to push", tableRowsToPush);
+	// console.log("rows to push", tableRowsToPush);
 
 	if (Object.keys(tableRowsToPush).length === 0) {
-		console.log("nothing to push");
+		// console.log("nothing to push");
 		return;
 	}
 

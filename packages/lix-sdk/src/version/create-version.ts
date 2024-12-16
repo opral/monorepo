@@ -4,8 +4,7 @@ import type { Lix } from "../lix/open-lix.js";
 /**
  * Creates a new Version.
  *
- * If parent is provided, the new Version will copy the change pointers from the parent Version,
- * and create a merge intent from the new Version to the parent Version.
+ * If parent is provided, the new Version will copy the change pointers from the parent version.
  *
  * @example
  *   _Without parent_
@@ -23,7 +22,7 @@ import type { Lix } from "../lix/open-lix.js";
  */
 export async function createVersion(args: {
 	lix: Pick<Lix, "db">;
-	parent?: Version;
+	parent?: Pick<Version, "id">;
 	name?: Version["name"];
 }): Promise<Version> {
 	const executeInTransaction = async (trx: Lix["db"]) => {

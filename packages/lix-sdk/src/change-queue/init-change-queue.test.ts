@@ -339,3 +339,119 @@ test.todo("changes should contain the author", async () => {
 
 	// expect(changes3.at(-1)?.author).toBe("some-other-id");
 });
+
+// lix own change control handles file deletions
+test("should handle file deletions correctly", async () => {
+	const mockPlugin: LixPlugin = {
+		key: "mock-plugin",
+		detectChangesGlob: "*",
+		detectChanges: async ({ before, after }) => {
+			const txt = new TextDecoder().decode(before ? before.data : after.data);
+
+			return [
+				{
+					schema: {
+						key: "text",
+						type: "json",
+					},
+					entity_id: "test",
+					snapshot: {
+						text: txt,
+					},
+				},
+			];
+		},
+	};
+
+	const lix = await openLixInMemory({
+		blob: await newLixFile(),
+		providePlugins: [mockPlugin],
+	});
+
+	const enc = new TextEncoder();
+	const dataInitial = enc.encode("file to be deleted");
+
+	// Insert initial file
+	await lix.db
+		.insertInto("file")
+		.values({ id: "file0", path: "/delete.txt", data: dataInitial })
+		.execute();
+
+	// Queue deletion
+	await changeQueueSettled({ lix });
+
+	const changesAfterInsert = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.where("file_id", "=", "file0")
+		.selectAll()
+		.execute();
+
+	expect(changesAfterInsert).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				entity_id: "test",
+				file_id: "file0",
+				plugin_key: "mock-plugin",
+				schema_key: "text",
+				content: {
+					text: "file to be deleted",
+				},
+			}),
+		])
+	);
+
+	await lix.db.deleteFrom("file").where("id", "=", "file0").execute();
+
+	// Ensure the queue reflects the deletion entry
+	const queue = await lix.db.selectFrom("change_queue").selectAll().execute();
+
+	expect(queue).toEqual([
+		expect.objectContaining({
+			file_id: "file0",
+			path_before: null,
+			data_before: null,
+			path_after: null,
+			data_after: null,
+		} satisfies Partial<ChangeQueueEntry>),
+	]);
+
+	// Run the change queue settlement process
+	await changeQueueSettled({ lix });
+
+	// Verify the change queue is empty
+	expect(
+		(await lix.db.selectFrom("change_queue").selectAll().execute()).length
+	).toBe(0);
+
+	// Verify the changes reflect the deletion
+	const changes = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.innerJoin("change_author", "change_author.change_id", "change.id")
+		.where("file_id", "=", "file0")
+		.selectAll("change")
+		.select("change_author.account_id")
+		.select("snapshot.content")
+		.execute();
+
+	expect(changes).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				entity_id: "test",
+				file_id: "file0",
+				plugin_key: "mock-plugin",
+				schema_key: "text",
+				content: null, // Content is null for deletions
+			}),
+		])
+	);
+
+	// Verify the file no longer exists in the database
+	const internalFilesAfter = await lix.db
+		.selectFrom("file")
+		.selectAll()
+		.execute();
+
+	expect(internalFilesAfter).toEqual([]);
+});

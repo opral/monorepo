@@ -1,7 +1,5 @@
 import type * as LixServerApi from "@lix-js/server-api-schema";
 import type { LixServerApiHandlerRoute } from "../create-server-api-handler.js";
-import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
-import type { Lix } from "../../lix/open-lix.js";
 import { mergeTheirState } from "../../sync/merge-state.js";
 import type { Change } from "../../database/schema.js";
 import { detectChangeConflicts } from "../../change-conflict/detect-change-conflicts.js";
@@ -15,27 +13,13 @@ type ResponseBody = LixServerApi.paths["/lsa/push-v1"]["post"]["responses"];
 
 export const route: LixServerApiHandlerRoute = async (context) => {
 	const body = (await context.request.json()) as RequestBody;
-	const blob = await context.storage.get(`lix-file-${body.lix_id}`);
+	const exists = await context.environment.hasLix({ id: body.lix_id });
 
-	if (!blob) {
+	if (!exists) {
 		return new Response(null, { status: 404 });
 	}
 
-	let lix: Lix;
-
-	try {
-		lix = await openLixInMemory({ blob, sync: false });
-	} catch {
-		return new Response(
-			JSON.stringify({
-				code: "INVALID_LIX_FILE",
-				message: "The lix file couldn't be opened.",
-			} satisfies ResponseBody["500"]["content"]["application/json"]),
-			{
-				status: 500,
-			}
-		);
-	}
+	const open = await context.environment.openLix({ id: body.lix_id });
 
 	try {
 		// console.log(
@@ -43,13 +27,13 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 		// 	body.vector_clock
 		// );
 
-		await lix.db.transaction().execute(async (trx) => {
+		await open.lix.db.transaction().execute(async (trx) => {
 			await trx.executeQuery(
 				CompiledQuery.raw("PRAGMA defer_foreign_keys = ON;")
 			);
 
 			await mergeTheirState({
-				lix: { ...lix, db: trx },
+				lix: { ...open.lix, db: trx },
 				sourceVectorClock: body.vector_clock,
 				sourceData: body.data,
 			});
@@ -77,16 +61,37 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 			for (const [versionId, versionChanges] of Object.entries(
 				incomingVersionChanges
 			)) {
-				const incomingChanges = versionChanges.map((change) => {
-					const [, changeId] = change.entity_id.split(",");
-					const foundChange = allIncomingChanges.find((c) => c.id === changeId);
-					if (foundChange === undefined) {
-						throw new Error(
-							"Change not found. Expected to find a change for the version change in the incoming changes."
+				const incomingChanges = await Promise.all(
+					versionChanges.map(async (change) => {
+						const [, changeId] = change.entity_id.split(",");
+						const foundChange = allIncomingChanges.find(
+							(c) => c.id === changeId
 						);
-					}
-					return foundChange;
-				});
+						if (foundChange === undefined) {
+							// TODO unclear why the fallback is needed. waiting for simplification
+							// of sync before investigating further.
+							//
+							// Observation:
+							//
+							// The lix_server_url change existed on the server
+							// but the client didn't send it. Maybe due to the
+							// test environment in the e2e test "should sync versions".
+							const fallback = await trx
+								.selectFrom("change")
+								.where("id", "=", changeId!)
+								.selectAll()
+								.executeTakeFirst();
+							if (fallback) {
+								return fallback;
+							} else {
+								throw new Error(
+									"Change not found. Expected to find a change for the version change in the incoming changes."
+								);
+							}
+						}
+						return foundChange;
+					})
+				);
 				const existingChanges: Change[] = [];
 
 				// manually constructing the symmetric difference
@@ -110,19 +115,23 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 					})
 				);
 
-				const detectedConflicts = await detectChangeConflicts({
-					lix: { ...lix, db: trx },
-					changes: [...incomingChanges, ...existingChanges],
-				});
+				//! Deactivated change conflict detection.
+				//!
+				//! Led to foreign key bugs etc. Will be reactivated
+				//! with the "conflicts" milestone
+				// const detectedConflicts = await detectChangeConflicts({
+				// 	lix: { ...open.lix, db: trx },
+				// 	changes: [...incomingChanges, ...existingChanges],
+				// });
 
-				for (const conflict of detectedConflicts) {
-					await createChangeConflict({
-						lix: { ...lix, db: trx },
-						key: conflict.key,
-						version: { id: versionId },
-						conflictingChangeIds: new Set(conflict.conflictingChangeIds),
-					});
-				}
+				// for (const conflict of detectedConflicts) {
+				// 	await createChangeConflict({
+				// 		lix: { ...open.lix, db: trx },
+				// 		key: conflict.key,
+				// 		version: { id: versionId },
+				// 		conflictingChangeIds: new Set(conflict.conflictingChangeIds),
+				// 	});
+				// }
 			}
 
 			// const allmlog = await trx
@@ -149,7 +158,7 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 			// );
 		});
 
-		await context.storage.set(`lix-file-${body.lix_id}`, await lix.toBlob());
+		await context.environment.closeLix(open);
 
 		return new Response(null, {
 			status: 201,

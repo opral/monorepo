@@ -18,8 +18,8 @@ import {
 import {
 	currentVersionAtom,
 	existingVersionsAtom,
+	isSyncingAtom,
 	lixAtom,
-	serverUrlAtom,
 } from "../state.js";
 import { Version, createVersion, switchVersion } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.js";
@@ -32,7 +32,7 @@ export function VersionDropdown() {
 	const [currentVersion] = useAtom(currentVersionAtom);
 	const [existingVersions] = useAtom(existingVersionsAtom);
 	const [lix] = useAtom(lixAtom);
-	const [serverUrl] = useAtom(serverUrlAtom);
+	const [isSyncing] = useAtom(isSyncingAtom);
 	const [versionToDelete, setVersionToDelete] = useState<Version | null>(null);
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const [deleteConfirmation, setDeleteConfirmation] = useState("");
@@ -88,27 +88,29 @@ export function VersionDropdown() {
 		window.dispatchEvent(new Event("version-changed"));
 	};
 
-	const handleSync = async () => {
+	const handleStartSync = async () => {
 		if (!lix) return;
 
 		try {
 			const response = await fetch(
-				new Request(`http://localhost:3000/lsa/new-v1`, {
+				new Request(import.meta.env.PROD
+					? "https://lix.host/lsa/new-v1"
+					: "http://localhost:3000/lsa/new-v1", {
 					method: "POST",
 					body: await lix.toBlob(),
 				})
 			);
 
 			if (response.ok === false && response.status !== 409) {
-				throw new Error(`Failed to sync: ${response.status}`);
+				throw new Error(`Failed to start sync: ${response.status}`);
 			}
 
 			await lix.db
-				.insertInto("key_value")
-				.values({
-					key: "lix_experimental_server_url",
-					value: "http://localhost:3000",
+				.updateTable("key_value")
+				.set({
+					value: "true",
 				})
+				.where("key", "=", "#lix_sync")
 				.execute();
 
 			await saveLixToOpfs({ lix });
@@ -120,8 +122,9 @@ export function VersionDropdown() {
 	const handleStopSync = async () => {
 		if (!lix) return;
 		await lix.db
-			.deleteFrom("key_value")
-			.where("key", "=", "lix_experimental_server_url")
+			.updateTable("key_value")
+			.set({ value: "false" })
+			.where("key", "=", "#lix_sync")
 			.execute();
 		await saveLixToOpfs({ lix });
 	};
@@ -134,11 +137,7 @@ export function VersionDropdown() {
 				<div className="flex gap-2">
 					<DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
 						<DropdownMenuTrigger asChild>
-							<Button
-								variant="secondary"
-								size="default"
-								className="gap-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-							>
+							<Button variant="secondary" size="default" className="gap-2">
 								{currentVersion.name}
 								<ChevronDown className="h-4 w-4" />
 							</Button>
@@ -195,11 +194,11 @@ export function VersionDropdown() {
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
-					{!serverUrl ? (
+					{!isSyncing ? (
 						<Button
 							variant="secondary"
 							size="default"
-							onClick={handleSync}
+							onClick={handleStartSync}
 							className="gap-2 relative pr-8"
 						>
 							Sync

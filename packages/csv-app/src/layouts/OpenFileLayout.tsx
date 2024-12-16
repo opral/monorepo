@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import {
 	SlButton,
 	SlSelect,
@@ -36,6 +36,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [changeConflicts] = useAtom(changeConflictsAtom);
 	const [currentVersion] = useAtom(currentVersionAtom);
+	const [searchParams] = useSearchParams();
 
 	return (
 		<>
@@ -45,7 +46,12 @@ export default function Layout(props: { children: React.ReactNode }) {
 					<div className="w-full flex items-center justify-between px-3 min-h-[54px] gap-1 overflow-x-scroll">
 						<div className="flex items-center gap-1">
 							<CustomLink
-								to={`/app/fm?f=${activeFile.id}`}
+								to={
+									// route to lix fm in production,
+									// else csv app root
+									(import.meta.env.PROD ? "/app/fm" : "/") +
+									`?l=${searchParams.get("l")}`
+								}
 								className="flex justify-center items-center text-zinc-500 w-9 h-9 hover:bg-zinc-100 hover:text-zinc-950 rounded-lg cursor-pointer"
 							>
 								<svg
@@ -92,9 +98,9 @@ export default function Layout(props: { children: React.ReactNode }) {
 						</div>
 					</div>
 					<div className="px-3 flex gap-1">
-						<NavItem to={`/editor?f=${activeFile.id}`} name="Edit" />
+						<NavItem to={`/editor?${searchParams.toString()}`} name="Edit" />
 						<NavItem
-							to={`/changes?f=${activeFile.id}`}
+							to={`/changes?${searchParams.toString()}`}
 							// outcommented to see how a non increasing counter feels like.
 							// we received feedback that confirm feels like a "save" button
 							// which assumes that nothing is auto saved
@@ -107,7 +113,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 							name="Changes"
 						/>
 						<NavItem
-							to={`/conflicts?f=${activeFile.id}`}
+							to={`/conflicts?${searchParams.toString()}`}
 							counter={
 								Object.values(changeConflicts).length !== 0
 									? Object.values(changeConflicts).length
@@ -115,7 +121,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 							}
 							name="Conflicts"
 						/>
-						<NavItem to={`/graph?f=${activeFile.id}`} name="Graph" />
+						<NavItem to={`/graph?${searchParams.toString()}`} name="Graph" />
 						{/* <NavItem to={`/proposal?f=${activeFile.id}`} name="Proposal" /> */}
 					</div>
 				</div>

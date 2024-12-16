@@ -5,6 +5,7 @@ import { mergeVersion } from "./merge-version.js";
 import type { NewChange } from "../database/schema.js";
 import { updateChangesInVersion } from "./update-changes-in-version.js";
 import { createVersion } from "./create-version.js";
+import { switchVersion } from "./switch-version.js";
 
 test("it should update the version pointers in target that are not conflicting", async () => {
 	const lix = await openLixInMemory({});
@@ -12,27 +13,22 @@ test("it should update the version pointers in target that are not conflicting",
 	const sourceVersion = await createVersion({ lix });
 	const targetVersion = await createVersion({ lix });
 
-	const [change1] = await lix.db
-		.insertInto("change")
-		.values([
-			{
-				id: "change1",
-				schema_key: "file",
-				entity_id: "entity1",
-				file_id: "file1",
-				plugin_key: "mock-plugin",
-				snapshot_id: "no-content",
-			},
-		])
-		.returningAll()
+	await switchVersion({ lix, to: sourceVersion });
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "file1",
+			path: "/mock.txt",
+			data: new TextEncoder().encode("hello world"),
+		})
 		.execute();
 
-	// source points to change1
-	await updateChangesInVersion({
-		lix,
-		version: sourceVersion,
-		changes: [change1!],
-	});
+	const sourceChanges = await lix.db
+		.selectFrom("version_change")
+		.where("version_id", "=", sourceVersion.id)
+		.selectAll()
+		.execute();
 
 	await mergeVersion({ lix, sourceVersion, targetVersion });
 
@@ -42,7 +38,9 @@ test("it should update the version pointers in target that are not conflicting",
 		.selectAll()
 		.execute();
 
-	expect(targetChanges.map((c) => c.change_id)).toContain(change1?.id);
+	expect(sourceChanges.map((vc) => vc.change_id)).toEqual(
+		targetChanges.map((vc) => vc.change_id)
+	);
 });
 
 // edge case scenario
@@ -51,6 +49,17 @@ test("if a previously undetected conflict is detected during merge, the conflict
 
 	const sourceVersion = await createVersion({ lix, name: "source-version" });
 	const targetVersion = await createVersion({ lix, name: "target-version" });
+
+	await switchVersion({ lix, to: sourceVersion });
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "file1",
+			path: "/file1.txt",
+			data: new TextEncoder().encode("hello"),
+		})
+		.execute();
 
 	// Insert changes into `change` table and `version_change_pointer` for source version
 	const [change1, change2, change3] = await lix.db
@@ -68,7 +77,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 				id: "change2",
 				schema_key: "file",
 				entity_id: "entity2",
-				file_id: "file2",
+				file_id: "file1",
 				plugin_key: "mock-plugin",
 				snapshot_id: "no-content",
 			},
@@ -76,7 +85,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 				id: "change3",
 				schema_key: "file",
 				entity_id: "entity3",
-				file_id: "file3",
+				file_id: "file1",
 				plugin_key: "mock-plugin",
 				snapshot_id: "no-content",
 			},
@@ -91,7 +100,10 @@ test("if a previously undetected conflict is detected during merge, the conflict
 	});
 
 	const mockPlugin: LixPlugin = {
-		key: "mock",
+		key: "mock-plugin",
+		applyChanges: async () => ({
+			fileData: new TextEncoder().encode("mock"),
+		}),
 		detectConflicts: async () => {
 			// simulating a conflict between change2 and change3
 			// that was previously undetected
@@ -134,11 +146,9 @@ test("if a previously undetected conflict is detected during merge, the conflict
 	// even though change2 and change3 are conflicting, the target version
 	// should point to change2 and change3 as well given that the target
 	// hasn't seen those entities yet
-	expect(targetChanges.map((c) => c.change_id)).toEqual([
-		change1?.id,
-		change2?.id,
-		change3?.id,
-	]);
+	expect(targetChanges.map((c) => c.change_id)).toEqual(
+		expect.arrayContaining([change1?.id, change2?.id, change3?.id])
+	);
 
 	expect(conflicts.map((conflict) => conflict.key)).toStrictEqual([
 		"mock-conflict",
@@ -156,6 +166,15 @@ test("it should not update the target version pointers of a conflicting change",
 
 	const sourceVersion = await createVersion({ lix, name: "source-version" });
 	const targetVersion = await createVersion({ lix, name: "target-version" });
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "file1",
+			path: "/file1.txt",
+			data: new TextEncoder().encode("hello"),
+		})
+		.execute();
 
 	// Insert changes into `change` table and `version_change_pointer` for source version
 	const [change1, change2] = await lix.db
@@ -196,7 +215,10 @@ test("it should not update the target version pointers of a conflicting change",
 	});
 
 	const mockPlugin: LixPlugin = {
-		key: "mock",
+		key: "mock-plugin",
+		applyChanges: async () => ({
+			fileData: new TextEncoder().encode("mock"),
+		}),
 		detectConflicts: async () => {
 			// simulating a conflict between change2 and change3
 			// that was previously undetected
@@ -264,6 +286,15 @@ test("it should automatically detect a diverging entity conflict", async () => {
 	const sourceVersion = await createVersion({ lix, name: "source-version" });
 	const targetVersion = await createVersion({ lix, name: "target-version" });
 
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "file1",
+			path: "/file1.txt",
+			data: new TextEncoder().encode("hello"),
+		})
+		.execute();
+
 	const ancestorChange = await lix.db
 		.insertInto("change")
 		.values({
@@ -326,7 +357,10 @@ test("it should automatically detect a diverging entity conflict", async () => {
 	});
 
 	const mockPlugin: LixPlugin = {
-		key: "mock-plugin",
+		key: "mock",
+		applyChanges: async () => ({
+			fileData: new TextEncoder().encode("mock"),
+		}),
 		detectConflicts: async () => {
 			// Simulate no conflicts; system should detect the diverging entity conflict automatically
 			return [];
@@ -467,4 +501,30 @@ test("re-curring merges should not create a new conflict if the conflict already
 		.execute();
 
 	expect(conflictsAfter2Merge.length).toBe(1);
+});
+
+test("it should apply the changes from the source version to the target version", async () => {
+	const lix = await openLixInMemory({});
+
+	const sourceVersion = await createVersion({ lix });
+	const targetVersion = await createVersion({ lix });
+
+	await switchVersion({ lix, to: sourceVersion });
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "foo", value: "bar" })
+		.execute();
+
+	await switchVersion({ lix, to: targetVersion });
+
+	await mergeVersion({ lix, sourceVersion, targetVersion });
+
+	const keyValue = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "foo")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(keyValue.value).toBe("bar");
 });

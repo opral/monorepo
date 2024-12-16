@@ -1,10 +1,5 @@
 import { useAtom } from "jotai";
-import {
-	LIX_FILE_NAME,
-	lixAtom,
-	serverUrlAtom,
-	withPollingAtom,
-} from "../state.ts";
+import { isSyncingAtom, lixAtom, withPollingAtom } from "../state.ts";
 import { useEffect, useState } from "react";
 import {
 	SlButton,
@@ -15,12 +10,16 @@ import {
 } from "@shoelace-style/shoelace/dist/react";
 import { Lix } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
+import { openLixInMemory } from "@lix-js/sdk";
+import { plugin as csvPlugin } from "@lix-js/plugin-csv";
+import { useNavigate } from "react-router-dom";
 import { posthog } from "posthog-js";
 
 export default function RootLayout(props: { children: JSX.Element }) {
 	const [, setPolling] = useAtom(withPollingAtom);
 	const [lix] = useAtom(lixAtom);
-	const [serverUrl] = useAtom(serverUrlAtom);
+	const [isSyncing] = useAtom(isSyncingAtom);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -32,35 +31,59 @@ export default function RootLayout(props: { children: JSX.Element }) {
 	useEffect(() => {
 		if (import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN) {
 			posthog.init(import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN, {
-			api_host: "https://eu.i.posthog.com",
-			capture_performance: false,
-			autocapture: {
-				capture_copied_text: true,
-			},
-		})
-		posthog.capture("$pageview")
+				api_host: "https://eu.i.posthog.com",
+				capture_performance: false,
+				autocapture: {
+					capture_copied_text: true,
+				},
+			})
+			posthog.capture("$pageview")
 		} else {
 			console.info("No posthog token found")
 		}
 		return () => posthog.reset()
 	}, [])
 
-	const handleFileSelect = async (
+	useEffect(() => {
+		if (import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN) {
+			posthog.init(import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN, {
+				api_host: "https://eu.i.posthog.com",
+				capture_performance: false,
+				autocapture: {
+					capture_copied_text: true,
+				},
+			})
+			posthog.capture("$pageview")
+		} else {
+			console.info("No posthog token found")
+		}
+		return () => posthog.reset()
+	}, [])
+
+	const handleOpenLixFile = async (
 		event: React.ChangeEvent<HTMLInputElement>
 	) => {
 		const file = event.target.files?.[0];
 		if (file) {
-			// Handle the file here
 			const fileContent = await file.arrayBuffer();
-
 			const opfsRoot = await navigator.storage.getDirectory();
-			const opfsFile = await opfsRoot.getFileHandle(LIX_FILE_NAME, {
+			const lix = await openLixInMemory({
+				blob: new Blob([fileContent]),
+				providePlugins: [csvPlugin],
+			});
+			const lixId = await lix.db
+				.selectFrom("key_value")
+				.where("key", "=", "lix_id")
+				.select("value")
+				.executeTakeFirstOrThrow();
+
+			const opfsFile = await opfsRoot.getFileHandle(`${lixId.value}.lix`, {
 				create: true,
 			});
 			const writable = await opfsFile.createWritable();
 			await writable.write(fileContent);
 			await writable.close();
-			window.location.reload();
+			navigate("?l=" + lixId.value);
 		}
 	};
 
@@ -94,7 +117,7 @@ export default function RootLayout(props: { children: JSX.Element }) {
 									id="file-input"
 									type="file"
 									style={{ display: "none" }}
-									onChange={handleFileSelect}
+									onChange={handleOpenLixFile}
 								></input>
 							</SlMenuItem>
 							<SlMenuItem onClick={() => handleExportLixFile(lix)}>
@@ -107,9 +130,19 @@ export default function RootLayout(props: { children: JSX.Element }) {
 							</SlMenuItem>
 							<SlMenuItem
 								onClick={async () => {
-									// @ts-expect-error - globally defined
-									await window.deleteLix();
-									window.location.reload();
+									try {
+										const root = await navigator.storage.getDirectory();
+										// @ts-expect-error - TS doesn't know about values() yet
+										for await (const entry of root.values()) {
+											if (entry.kind === "file") {
+												await root.removeEntry(entry.name);
+											}
+										}
+										navigate("/");
+										console.log("All files deleted from OPFS.");
+									} catch (error) {
+										console.error("Error deleting files from OPFS:", error);
+									}
 								}}
 							>
 								<SlIcon
@@ -117,12 +150,12 @@ export default function RootLayout(props: { children: JSX.Element }) {
 									slot="prefix"
 									className="mr-2"
 								></SlIcon>
-								Reset
+								Reset OPFS
 							</SlMenuItem>
 						</SlMenu>
 					</SlDropdown>
-					{serverUrl && (
-						<SyncStatus serverUrl={serverUrl} lix={lix}></SyncStatus>
+					{isSyncing && (
+						<SyncStatus lix={lix}></SyncStatus>
 					)}
 					<SyncAndShare />
 				</div>
@@ -148,10 +181,16 @@ export default function RootLayout(props: { children: JSX.Element }) {
 }
 
 const handleExportLixFile = async (lix: Lix) => {
+	const lixId = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.select("value")
+		.executeTakeFirstOrThrow();
+
 	const blob = await lix.toBlob();
 	const a = document.createElement("a");
 	a.href = URL.createObjectURL(blob);
-	a.download = "demo.lix";
+	a.download = `${lixId.value}.lix`;
 	document.body.appendChild(a);
 	a.click();
 	document.body.removeChild(a);
@@ -162,10 +201,10 @@ function SyncAndShare() {
 }
 
 function SyncButton() {
-	const [serverUrl] = useAtom(serverUrlAtom);
+	const [isSyncing] = useAtom(isSyncingAtom);
 	const [lix] = useAtom(lixAtom);
 
-	if (!serverUrl) {
+	if (!isSyncing) {
 		return (
 			<SlButton
 				variant="success"
@@ -173,7 +212,9 @@ function SyncButton() {
 				className=""
 				onClick={async () => {
 					const response = await fetch(
-						new Request(`http://localhost:3000/lsa/new-v1`, {
+						new Request(import.meta.env.PROD
+							? "https://lix.host/lsa/new-v1"
+							: "http://localhost:3000/lsa/new-v1", {
 							method: "POST",
 							body: await lix.toBlob(),
 						})
@@ -186,11 +227,11 @@ function SyncButton() {
 					}
 
 					await lix.db
-						.insertInto("key_value")
-						.values({
-							key: "lix_experimental_server_url",
-							value: "http://localhost:3000",
+						.updateTable("key_value")
+						.set({
+							value: "true",
 						})
+						.where("key", "=", "#lix_sync")
 						.execute();
 
 					await saveLixToOpfs({ lix });
@@ -202,7 +243,7 @@ function SyncButton() {
 	}
 }
 
-function SyncStatus(props: { serverUrl: string; lix: Lix }) {
+function SyncStatus(props: { lix: Lix }) {
 	const [isHovered, setIsHovered] = useState(false);
 
 	return (
@@ -210,8 +251,9 @@ function SyncStatus(props: { serverUrl: string; lix: Lix }) {
 			className="flex gap-3 items-center hover:cursor-pointer"
 			onClick={() => {
 				props.lix.db
-					.deleteFrom("key_value")
-					.where("key", "=", "lix_experimental_server_url")
+					.updateTable("key_value")
+					.where("key", "=", "#lix_sync")
+					.set({ value: "false" })
 					.execute();
 			}}
 			onMouseEnter={() => setIsHovered(true)}
@@ -220,9 +262,7 @@ function SyncStatus(props: { serverUrl: string; lix: Lix }) {
 			<div
 				className={`w-3 h-3 rounded-4xl ${isHovered ? "bg-red-700" : "bg-green-700"}`}
 			></div>
-			<p className="">
-				{isHovered ? "Stop syncing to" : "Syncing to"} {props.serverUrl}
-			</p>
+			<p className="">{isHovered ? "Stop syncing" : "Syncing"}</p>
 		</div>
 	);
 }
