@@ -8,7 +8,11 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 	let lix: Lix;
 
 	try {
-		lix = await openLixInMemory({ blob });
+		lix = await openLixInMemory({
+			blob,
+			// turn off sync for server
+			keyValues: [{ key: "#lix_sync", value: "false" }],
+		});
 	} catch {
 		return new Response(null, {
 			status: 400,
