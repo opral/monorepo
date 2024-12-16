@@ -92,19 +92,6 @@ export function VersionDropdown() {
 		if (!lix) return;
 
 		try {
-			const response = await fetch(
-				new Request(import.meta.env.PROD
-					? "https://lix.host/lsa/new-v1"
-					: "http://localhost:3000/lsa/new-v1", {
-					method: "POST",
-					body: await lix.toBlob(),
-				})
-			);
-
-			if (response.ok === false && response.status !== 409) {
-				throw new Error(`Failed to start sync: ${response.status}`);
-			}
-
 			await lix.db
 				.updateTable("key_value")
 				.set({
