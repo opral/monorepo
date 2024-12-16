@@ -9,6 +9,7 @@
 	"scripts": {
 		"dev": "node --watch --experimental-strip-types ./src/main.ts",
 		"build": "tsc --build",
+		"start": "node ./dist/index.js",
 		"test": "tsc --noEmit",
 		"test:watch": "vitest",
 		"lint": "eslint src/**/* --fix",
