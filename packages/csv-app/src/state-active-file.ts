@@ -36,7 +36,7 @@ export const activeFileAtom = atom(async (get) => {
 		.selectFrom("file")
 		.selectAll()
 		.where("id", "=", fileId)
-		.executeTakeFirstOrThrow();
+		.executeTakeFirst();
 });
 
 export const parsedCsvAtom = atom(async (get) => {
