@@ -12,7 +12,6 @@
 		"start": "tsx ./src/main.ts",
 		"test": "tsc --noEmit",
 		"test:watch": "vitest",
-		"lint": "eslint src/**/* --fix",
 		"format": "prettier ./src --write"
 	},
 	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",

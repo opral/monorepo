@@ -63,7 +63,7 @@ const lixApps = [
 for (const lixApp of lixApps) {
   app.use(
     `/app/${lixApp.route}`,
-    express.static(`${node_modules}/${lixApp.module}/dist`)
+    express.static(`${node_modules}/${lixApp.module}/dist`),
   );
   app.get(`/app/${lixApp.route}/*`, (req, res) => {
     const indexPath = join(node_modules, `${lixApp.module}/dist/index.html`);
@@ -83,7 +83,7 @@ app.all(
   "*",
   createRequestHandler({
     build: require(`${node_modules}/lix-website/build/server`),
-  })
+  }),
 );
 
 // Start the server

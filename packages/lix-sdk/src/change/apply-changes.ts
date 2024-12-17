@@ -74,7 +74,7 @@ export async function applyChanges(args: {
 				continue;
 			} else if (file.data.byteLength === 0) {
 				// @ts-expect-error - the plugin will handle undefined file.data
-				delete file.data
+				delete file.data;
 			}
 
 			for (const [pluginKey, changes] of Object.entries(groupByPlugin)) {

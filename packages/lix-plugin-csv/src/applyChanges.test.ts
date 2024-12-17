@@ -129,4 +129,4 @@ test("applies changes to a new csv file", async () => {
 	});
 
 	expect(applied).toEqual(initialCsv);
-}); 
+});

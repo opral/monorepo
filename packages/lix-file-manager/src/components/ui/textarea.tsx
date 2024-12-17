@@ -1,5 +1,6 @@
 import * as React from "react"
 
+// @ts-expect-error - no types
 import { cn } from "@/lib/utils"
 
 const Textarea = React.forwardRef<

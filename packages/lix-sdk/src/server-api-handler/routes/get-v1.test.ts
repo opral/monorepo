@@ -103,7 +103,6 @@ test("it should return 400 for a request without lix_id", async () => {
 	expect(responseJson.error).toBe("Missing required field 'lix_id'");
 });
 
-
 test("#lix_sync is set to true", async () => {
 	const environment = createLsaInMemoryEnvironment();
 	const lsaHandler = await createServerApiHandler({ environment });
