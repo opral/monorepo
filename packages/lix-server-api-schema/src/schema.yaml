@@ -6,7 +6,7 @@ paths:
   /lsa/new-v1:
     post:
       summary: Stores the lix on the server.
-      description: > 
+      description: >
         Use sync if you want to push or pull data from the server.
       requestBody:
         description: The lix binary.
@@ -17,7 +17,7 @@ paths:
               format: binary
 
       responses:
-        '201':
+        "201":
           description: Lix file created successfully.
           content:
             application/json:
@@ -29,7 +29,7 @@ paths:
                     description: The ID of the created lix.
                     example: "123e4567-e89b-12d3-a456-426614174000"
 
-        '400':
+        "400":
           description: Invalid Lix file.
           content:
             application/json:
@@ -40,8 +40,8 @@ paths:
                     type: string
                     description: Error message.
                     example: "Invalid Lix file."
-        
-        '409': 
+
+        "409":
           description: Lix file already exists.
           content:
             application/json:
@@ -70,13 +70,13 @@ paths:
                   description: The ID of the lix to get.
                   example: "123e4567-e89b-12d3-a456-426614174000"
       responses:
-        '200':
+        "200":
           description: Lix file fetched successfully.
           content:
             application/octet-stream:
               schema:
                 format: binary
-        '404':
+        "404":
           description: Lix file not found.
           content:
             application/json:
@@ -89,7 +89,7 @@ paths:
                     example: "Lix file not found."
 
   /lsa/push-v1:
-    post: 
+    post:
       summary: Push data to the server.
       requestBody:
         required: true
@@ -102,11 +102,11 @@ paths:
                 - vector_clock
                 - data
               properties:
-                lix_id: 
+                lix_id:
                   type: string
                   description: The ID of the lix to push to.
                   example: "123e4567-e89b-12d3-a456-426614174000"
-                vector_clock: 
+                vector_clock:
                   type: array
                   items:
                     type: object
@@ -114,8 +114,8 @@ paths:
                     required:
                       - session
                       - time
-                    properties: 
-                      session: 
+                    properties:
+                      session:
                         type: string
                         description: The session ID of the client.
                         example: "123e4567-e"
@@ -123,36 +123,36 @@ paths:
                         type: integer
                         description: The time of the client.
                         example: 123456789
-                    example: 
+                    example:
                       123e4567-e89b-12d3-a456-426614174000: 1
                 data:
                   type: object
                   description: The data to push.
-                  additionalProperties: 
+                  additionalProperties:
                     type: array
                     items:
                       type: object
                       additionalProperties: true
-                      example: > 
+                      example: >
                         {
                           "id": 1,
                           "name": "Alice"
                         }
-                  example: > 
-                            {
-                              "table_name": [
-                              {
-                                "id": 1,
-                                "name": "Alice"
-                              }
-                              ]
-                            }
-                    
+                  example: >
+                    {
+                      "table_name": [
+                      {
+                        "id": 1,
+                        "name": "Alice"
+                      }
+                      ]
+                    }
+
       responses:
-        '201':
+        "201":
           description: Rows pushed successfully.
 
-        '400':
+        "400":
           description: Invalid row data.
           content:
             application/json:
@@ -168,10 +168,10 @@ paths:
                     description: A human-readable error message.
                     example: "The provided row data is invalid."
 
-        '404':
+        "404":
           description: Lix not found.
-   
-        '500':
+
+        "500":
           description: Server error.
           content:
             application/json:
@@ -182,7 +182,7 @@ paths:
                     type: string
                     description: Error message.
                     example: "INTERNAL_SERVER_ERROR"
-                  message: 
+                  message:
                     type: string
                     description: A human-readable error message.
                     example: "An internal server error occurred."
@@ -222,7 +222,7 @@ paths:
                         description: The time of the client.
                         example: 123456789
       responses:
-        '200':
+        "200":
           description: Data fetched successfully.
           content:
             application/json:
@@ -248,36 +248,36 @@ paths:
                         time:
                           type: integer
                           description: The time of the server.
-                      example: 
+                      example:
                         session: 123e4567-e89b-12d3-a456-426614174000
                         time: 1
                   data:
                     type: object
                     description: The data to push.
-                    additionalProperties: 
+                    additionalProperties:
                       type: array
                       items:
                         type: object
                         additionalProperties: true
-                        example: > 
+                        example: >
                           {
                             "id": 1,
                             "name": "Alice"
                           }
                     required:
                       - vector_clock
-                    example: > 
-                              {
-                                "table_name": [
-                                {
-                                  "id": 1,
-                                  "name": "Alice"
-                                }
-                                ]
-                              }
-        '404':
+                    example: >
+                      {
+                        "table_name": [
+                        {
+                          "id": 1,
+                          "name": "Alice"
+                        }
+                        ]
+                      }
+        "404":
           description: Lix file not found.
-        '500':
+        "500":
           description: Failed to open the Lix file.
           content:
             application/json:

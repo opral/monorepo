@@ -6,7 +6,6 @@
     "dev": "tsx watch ./src/main.ts",
     "production": "tsx ./src/main.ts",
     "test": "tsc --noEmit",
-    "lint": "eslint ./src --fix",
     "format": "prettier ./src --write",
     "clean": "rm -rf ./dist ./node_modules"
   },
@@ -17,6 +16,8 @@
     "lix-website": "workspace:*"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.1",
     "express": "^4.21.1",
     "prettier": "^3.4.1",
     "tsx": "^4.19.2",

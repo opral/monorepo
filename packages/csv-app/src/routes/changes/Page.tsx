@@ -31,7 +31,7 @@ const changeSetsAtom = atom(async (get) => {
 		// Join with the `comment` table, filtering for first-level comments
 		.leftJoin("comment", "comment.discussion_id", "discussion.id")
 		.where("comment.parent_id", "is", null) // Filter to get only the first comment
-		.where("change.file_id", "=", activeFile.id)
+		.where("change.file_id", "=", activeFile!.id)
 		.where(changeSetHasLabel("confirmed"))
 		.groupBy("change_set.id")
 		.orderBy("change.created_at", "desc")

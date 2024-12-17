@@ -4,8 +4,8 @@
  * @param callback
  */
 export function once<T>(callback: () => T): T | void {
-	if (process.env.NEXT_PRIVATE_WORKER) {
-		return
-	}
-	return callback()
+  if (process.env.NEXT_PRIVATE_WORKER) {
+    return;
+  }
+  return callback();
 }

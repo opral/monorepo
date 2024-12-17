@@ -35,9 +35,9 @@ The init command will have generated `./messages/{lang}.json` files for each lan
 ```json
 // messages/en.json
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello World",
-	"greeting": "Hello {name}"
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "hello_world": "Hello World",
+  "greeting": "Hello {name}"
 }
 ```
 
@@ -48,21 +48,21 @@ You can add messages in two ways:
 
 ### Add messages through Sherlock (recommended)
 
-First, install the  Sherlock VS Code extension from the [vs-code marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).
+First, install the Sherlock VS Code extension from the [vs-code marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).
 
 Once you have the extension installed, select a hard-coded string with your cursor, hit `⌘ + .` and use the `Sherlock: Extract` action. Give the message an ID and hit enter.
 
-This extracts the hard-coded string and places it into the translation file of the default language. No need to even look at the file! 
+This extracts the hard-coded string and places it into the translation file of the default language. No need to even look at the file!
 
 ### Using Messages in Code
 
 Import messages from `$lib/paraglide/messages`. By convention we do a wildcard import as `m`.
 
 ```ts
-import * as m from "$lib/paraglide/messages"
+import * as m from "$lib/paraglide/messages";
 
-m.hello_world() // Hello World
-m.greeting({ name: "John" }) // Hello John
+m.hello_world(); // Hello World
+m.greeting({ name: "John" }); // Hello John
 ```
 
 Each message is a function that returns the message in the current language. If the message requires parameters, typescript will enforce that you pass them in.
@@ -74,24 +74,24 @@ Paraglide-SvelteKit uses the URL to determine which language to use. If the firs
 - `/about` → english (default language)
 - `/de/about` → german
 
-Creating a route for eacht language & updating all your links to include the language tag is tedious. For this reason Paraglide-SvelteKit comes with localised routing out of the box. 
+Creating a route for eacht language & updating all your links to include the language tag is tedious. For this reason Paraglide-SvelteKit comes with localised routing out of the box.
 
-Requests to `/de/about` will render the page at `src/routes/about/+page.svelte` by default. You don't need to add a `[locale]` parameter. Additionally, internal links like `<a href="/about">About</a>` are automatically rewritten to include the current language. 
+Requests to `/de/about` will render the page at `src/routes/about/+page.svelte` by default. You don't need to add a `[locale]` parameter. Additionally, internal links like `<a href="/about">About</a>` are automatically rewritten to include the current language.
 
 ```svelte
 <a href="/about">About</a>
 
 <!-- will render as -->
-<a href="/de/about">Über uns</a> 
+<a href="/de/about">Über uns</a>
 <!-- if current language is German -->
 ```
 
-You can specify which language a link points to by setting the `hreflang` attribute. 
+You can specify which language a link points to by setting the `hreflang` attribute.
 
 ```svelte
 <a href="/about" hreflang="de">Über uns</a>
 <!-- will render as -->
-<a href="/de/about" hreflang="de">Über uns</a> 
+<a href="/de/about" hreflang="de">Über uns</a>
 <!-- regardless of the current language -->
 ```
 
@@ -113,8 +113,8 @@ Paraglide-SvelteKit provides convenient functions for this. `i18n.route(translat
 </script>
 
 {#each availableLanguageTags as lang}
-  <a 
-  	href={currentPathWithoutLanguage} 
+  <a
+  	href={currentPathWithoutLanguage}
 	hreflang={lang}>Change language to {lang}</a>
 {/each}
 ```

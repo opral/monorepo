@@ -30,11 +30,11 @@ Use curly braces to add parameters.
 ```json
 // messages/en.json
 {
-	// The $schema key is automatically ignored
-	"$schema": "https://inlang.com/schema/inlang-message-format",
+  // The $schema key is automatically ignored
+  "$schema": "https://inlang.com/schema/inlang-message-format",
 
-	"hello_world": "Hello World!",
-	"greetings": "Greetings {name}."
+  "hello_world": "Hello World!",
+  "greetings": "Greetings {name}."
 }
 ```
 
@@ -45,15 +45,15 @@ Learn more about the format in the [Inlang Message Format Documentation](https:/
 Use messages by importing them from `@/paraglide/messages.js`. By convention, we do a wildcard import as `m`.
 
 ```tsx
-import * as m from "@/paraglide/messages.js"
+import * as m from "@/paraglide/messages.js";
 
 export function Home() {
-	return (
-		<>
-			<h1>{m.homepage_title()}</h1>
-			<p>{m.homepage_subtitle({ some: "param" })}</p>
-		</>
-	)
+  return (
+    <>
+      <h1>{m.homepage_title()}</h1>
+      <p>{m.homepage_subtitle({ some: "param" })}</p>
+    </>
+  );
 }
 ```
 
@@ -64,14 +64,14 @@ Only messages used in client components are sent to the client. Messages in Serv
 You can get the current language by calling the `languageTag()` function.
 
 ```tsx
-import { languageTag } from "@/paraglide/runtime"
+import { languageTag } from "@/paraglide/runtime";
 
 export function Home() {
-	return <h1>{languageTag()}</h1>
+  return <h1>{languageTag()}</h1>;
 }
 ```
 
-This is scoped to the current request, it's safe to use in server-components. 
+This is scoped to the current request, it's safe to use in server-components.
 
 # Examples
 

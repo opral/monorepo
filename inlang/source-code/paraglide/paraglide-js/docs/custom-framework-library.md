@@ -20,41 +20,41 @@ If there isn't one for your framework, you can write your own. This example adap
 
 ```tsx
 import {
-	setLanguageTag,
-	onSetLanguageTag,
-	type AvailableLanguageTag,
-} from "../paraglide/runtime.js"
-import { isServer, isClient, request, render } from "@example/framework"
-import { detectLanguage } from "./utils.js"
+  setLanguageTag,
+  onSetLanguageTag,
+  type AvailableLanguageTag,
+} from "../paraglide/runtime.js";
+import { isServer, isClient, request, render } from "@example/framework";
+import { detectLanguage } from "./utils.js";
 
 if (isServer) {
-	// On the server the language tag needs to be resolved on a per-request basis.
-	// Pass a getter function that resolves the language from the correct request
+  // On the server the language tag needs to be resolved on a per-request basis.
+  // Pass a getter function that resolves the language from the correct request
 
-	const detectLanguage = (request: Request): AvailableLanguageTag => {
-		//your logic ...
-	}
-	setLanguageTag(() => detectLanguage(request))
+  const detectLanguage = (request: Request): AvailableLanguageTag => {
+    //your logic ...
+  };
+  setLanguageTag(() => detectLanguage(request));
 }
 
 if (isClient) {
-	// On the client, the language tag can be resolved from
-	// the document's html lang tag.
-	setLanguageTag(() => document.documentElement.lang)
+  // On the client, the language tag can be resolved from
+  // the document's html lang tag.
+  setLanguageTag(() => document.documentElement.lang);
 
-	// When the language changes we want to re-render the page in the new language
-	// Here we just navigate to the new route
+  // When the language changes we want to re-render the page in the new language
+  // Here we just navigate to the new route
 
-	// Make sure to call `onSetLanguageTag` after `setLanguageTag` to avoid an infinite loop.
-	onSetLanguageTag((newLanguageTag) => {
-		window.location.pathname = `/${newLanguageTag}${window.location.pathname}`
-	})
+  // Make sure to call `onSetLanguageTag` after `setLanguageTag` to avoid an infinite loop.
+  onSetLanguageTag((newLanguageTag) => {
+    window.location.pathname = `/${newLanguageTag}${window.location.pathname}`;
+  });
 }
 
 // Render the app once the setup is done
 render((page) => (
-	<html lang={request.languageTag}>
-		<body>{page}</body>
-	</html>
-))
+  <html lang={request.languageTag}>
+    <body>{page}</body>
+  </html>
+));
 ```

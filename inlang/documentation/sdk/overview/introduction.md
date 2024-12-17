@@ -9,6 +9,7 @@
 If you plan to create an i18n app, this is the perfect solution. You can use the SDK (Software Development Kit), which provides reactive APIs to assist you in managing and linting translation files that are saved in the repository.
 
 ## Build i18n apps fast
+
 <doc-features>
   <doc-feature color="#EBF0F4" title="🖊️  Reactive CRUD API" image="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/sdkDocCrudNew.png"></doc-feature>
   <doc-feature color="#EBF0F4" title="📂  No Storage complexity" image="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/sdkDocStorage.png"></doc-feature>
@@ -16,8 +17,6 @@ If you plan to create an i18n app, this is the perfect solution. You can use the
 
 <br/>
 
-
 Use the handy 🖊️ **CRUD API** to easily get to content without hassle. Keep your views up-to-date effortlessly with our ⚡️ **Reactive approach**. Configure storage operations, like importing and exporting, with user-friendly 🧩 **Plugins** in a simple 📂 **Storage-agnostic** setup that supports common formats and libraries.
 
 <br/>
-

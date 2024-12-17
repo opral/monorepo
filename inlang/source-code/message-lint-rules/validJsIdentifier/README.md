@@ -10,17 +10,19 @@ Besides installing the lint rule through `manage.inlang.com` you could also conf
 ### Settings
 
 Type:
+
 ```ts
-type MessageLintRuleLevel = "error" | "warning"
+type MessageLintRuleLevel = "error" | "warning";
 ```
 
 Example in the `project.inlang/settings.json`:
+
 ```json
 {
-    // other configuration
-    "messageLintRuleLevels": {
-		"messageLintRule.inlang.validJsIdentifier": "error",
-	}
+  // other configuration
+  "messageLintRuleLevels": {
+    "messageLintRule.inlang.validJsIdentifier": "error"
+  }
 }
 ```
 

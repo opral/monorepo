@@ -1,5 +1,6 @@
 {
 	"name": "@lix-js/sdk-example-server-protocol-handler-hono",
+	"private": true,
 	"type": "module",
 	"version": "0.0.1",
 	"license": "Apache-2.0",

@@ -28,26 +28,28 @@ No plugin API. "Plugins" simply define functions.
 
 ```ts
 export async function defineConfig(env) {
-	const pluginJson = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
-	)
+  const pluginJson = await env.$import(
+    "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
+  );
 
-	const pluginConfig = {
-		pathPattern: "./languages/{language}.json",
-	}
+  const pluginConfig = {
+    pathPattern: "./languages/{language}.json",
+  };
 
-	return {
-		sourceLanguageTag: "en",
-		languageTags: await pluginJson.getLanguages({ ...env, pluginConfig }),
-		readResources: (args) => pluginJson.readResources({ ...args, ...env, pluginConfig }),
-		writeResources: (args) => pluginJson.writeResources({ ...args, ...env, pluginConfig }),
-		// bad. the SDK config shouldn't be defined as part of the core config
-		sdk: {
-			languageNegotiation: {
-				strategies: [{ type: "navigator" }, { type: "localStorage" }],
-			},
-		},
-	}
+  return {
+    sourceLanguageTag: "en",
+    languageTags: await pluginJson.getLanguages({ ...env, pluginConfig }),
+    readResources: (args) =>
+      pluginJson.readResources({ ...args, ...env, pluginConfig }),
+    writeResources: (args) =>
+      pluginJson.writeResources({ ...args, ...env, pluginConfig }),
+    // bad. the SDK config shouldn't be defined as part of the core config
+    sdk: {
+      languageNegotiation: {
+        strategies: [{ type: "navigator" }, { type: "localStorage" }],
+      },
+    },
+  };
 }
 ```
 
@@ -55,28 +57,30 @@ export async function defineConfig(env) {
 
 ```ts
 export async function defineConfig(env) {
-	const jsonPlugin = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
-	)
-	const sdk = await env.$import("https://cdn.jsdelivr.net/gh/opral/inlang1/dist/sdk-js/index.js")
-	const ideExtension = await env.$import(
-		"https://cdn.jsdelivr.net/gh/opral/inlang1/dist/sdk-js/index.js",
-	)
+  const jsonPlugin = await env.$import(
+    "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
+  );
+  const sdk = await env.$import(
+    "https://cdn.jsdelivr.net/gh/opral/inlang1/dist/sdk-js/index.js",
+  );
+  const ideExtension = await env.$import(
+    "https://cdn.jsdelivr.net/gh/opral/inlang1/dist/sdk-js/index.js",
+  );
 
-	return {
-		sourceLanguageTag: "en",
-		...jsonPlugin({
-			pathPattern: "./languages/{language}.json",
-		}),
-		...sdk({
-			languageNegotiation: {
-				strategies: [{ type: "localStorage" }, { type: "navigator" }],
-			},
-		}),
-		...ideExtension({
-			// ...
-		}),
-	}
+  return {
+    sourceLanguageTag: "en",
+    ...jsonPlugin({
+      pathPattern: "./languages/{language}.json",
+    }),
+    ...sdk({
+      languageNegotiation: {
+        strategies: [{ type: "localStorage" }, { type: "navigator" }],
+      },
+    }),
+    ...ideExtension({
+      // ...
+    }),
+  };
 }
 ```
 
@@ -130,26 +134,28 @@ export async function defineConfig(env) {
 
 ```ts
 export async function setup({ defineConfig, env }) {
-	const pluginJson = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
-	)
-	const sdk = await env.$import("https://cdn.jsdelivr.net/gh/opral/inlang@1/dist/sdk-js/index.js")
+  const pluginJson = await env.$import(
+    "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
+  );
+  const sdk = await env.$import(
+    "https://cdn.jsdelivr.net/gh/opral/inlang@1/dist/sdk-js/index.js",
+  );
 
-	return defineConfig({
-		sourceLanguageTag: "en",
-	})
-		.use(
-			pluginJson({
-				pathPattern: "./languages/{language}.json",
-			}),
-		)
-		.use(
-			sdk({
-				languageNegotiation: {
-					strategies: [{ type: "localStorage" }, { type: "navigator" }],
-				},
-			}),
-		)
+  return defineConfig({
+    sourceLanguageTag: "en",
+  })
+    .use(
+      pluginJson({
+        pathPattern: "./languages/{language}.json",
+      }),
+    )
+    .use(
+      sdk({
+        languageNegotiation: {
+          strategies: [{ type: "localStorage" }, { type: "navigator" }],
+        },
+      }),
+    );
 }
 ```
 
@@ -171,31 +177,33 @@ A major downside is two-fold increase in complexity:
 
 ```ts
 export async function defineConfig(env) {
-	const pluginJson = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
-	)
-	const sdk = await env.$import("https://cdn.jsdelivr.net/gh/opral/inlang@1/dist/sdk-js/index.js")
+  const pluginJson = await env.$import(
+    "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
+  );
+  const sdk = await env.$import(
+    "https://cdn.jsdelivr.net/gh/opral/inlang@1/dist/sdk-js/index.js",
+  );
 
-	const standardLintRules = await env.$import(
-		"https://cdn.jsdelivr.net/gh/opral/inlang@1/dist/sdk-js/index.js",
-	)
+  const standardLintRules = await env.$import(
+    "https://cdn.jsdelivr.net/gh/opral/inlang@1/dist/sdk-js/index.js",
+  );
 
-	return {
-		sourceLanguageTag: "en",
-		plugins: [
-			// @ivanhofer @jannesblobel the "collection" discussion is resolved with this approach.
-			// just use standardLintRules as plugin 🎉
-			standardLintRules(),
-			pluginJson({
-				pathPattern: "./languages/{language}.json",
-			}),
-			sdk({
-				languageNegotiation: {
-					strategies: [{ type: "localStorage" }, { type: "navigator" }],
-				},
-			}),
-		],
-	}
+  return {
+    sourceLanguageTag: "en",
+    plugins: [
+      // @ivanhofer @jannesblobel the "collection" discussion is resolved with this approach.
+      // just use standardLintRules as plugin 🎉
+      standardLintRules(),
+      pluginJson({
+        pathPattern: "./languages/{language}.json",
+      }),
+      sdk({
+        languageNegotiation: {
+          strategies: [{ type: "localStorage" }, { type: "navigator" }],
+        },
+      }),
+    ],
+  };
 }
 ```
 
@@ -217,20 +225,20 @@ This proposal is simple and flexible.
 
 ```ts
 return {
-	sourceLanguageTag: "en",
-	plugins: [
-		// pluginJson
-		pluginJson({
-			pathPattern: "./languages/{language}.json",
-		}),
-	],
-}``
+  sourceLanguageTag: "en",
+  plugins: [
+    // pluginJson
+    pluginJson({
+      pathPattern: "./languages/{language}.json",
+    }),
+  ],
+}``;
 ```
 
 3. Have a utility function `setupPlugins` that wraps `defineConfig` to merge the configs of all plugins:
 
 ```ts
-const config = await setupPlugins(defineConfig(env))
+const config = await setupPlugins(defineConfig(env));
 ```
 
 Example Input:
@@ -270,17 +278,17 @@ _`withPlugins` executes `defineConfig` (which should be executed on loading the 
 
 ```ts
 type Plugin = {
-	id: string
-	config: () => MaybePromise<Partial<Config>>
-	// anything else we need in the future like resolvedConfig for example
-	resolvedConfig: (config: Config) => Promise<void>
-}
+  id: string;
+  config: () => MaybePromise<Partial<Config>>;
+  // anything else we need in the future like resolvedConfig for example
+  resolvedConfig: (config: Config) => Promise<void>;
+};
 ```
 
 2. The consumption API of plugins is familiar and simple.
 
 ```ts
 pluginJson({
-	pathPattern: "./languages/{language}.json",
-})
+  pathPattern: "./languages/{language}.json",
+});
 ```

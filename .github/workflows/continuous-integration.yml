@@ -13,14 +13,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        version: [18]
+        version: [22]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout project
         uses: actions/checkout@v3
 
       - name: Install Doppler CLI for env (public) variables
-        uses: dopplerhq/cli-action@v2
+        uses: dopplerhq/cli-action@v3
 
       - name: Setup Pnpm
         uses: pnpm/action-setup@v4
@@ -36,14 +36,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # external contributors don't have access to doppler secrets
-      # TODO provide limited public env vars for CI for external contributors
-      - run: echo "DOPPLER_TOKEN not set, skipping CI check-all"
-        if: ${{ env.DOPPLER_TOKEN == '' }}
-        env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
-
-      - run: pnpm fetch-env:internal && pnpm check-all
-        if: ${{ env.DOPPLER_TOKEN != '' }}
+      - run: pnpm run ci
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}

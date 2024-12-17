@@ -1,4 +1,5 @@
 {
+	"private": true,
 	"name": "@lix-js/server-api-schema",
 	"type": "module",
 	"version": "0.1.0",

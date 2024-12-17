@@ -73,15 +73,14 @@ Minimum node version: `v18.0.0`
 
 If one of the commands can't be found, you probably use an outdated CLI version. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
 
-
 # Commands
 
-| Name            | Command                                               | Description                                                                                                  |
-| --------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **CLI Version** | `npx @inlang/cli@latest [command]`                   | Get the latest version of the inlang CLI.                                                                     |
-| **Validate**     | `npx @inlang/cli validate [options]`                  | Validate if the project is working correctly.                          |
-| **Machine**     | `npx @inlang/cli machine translate [options]`        | Automate translation processes. Options include `-f, --force`, `--project <path>`, `--sourceLanguageTag <source>` and `--targetLanguageTags <targets...>`                          |
-| **Plugin**      | `npx @inlang/cli plugin [command]`                   | Interact with Inlang plugins, including initialization and building. `build [options]`  build an inlang module. Options include `--type`, `--entry`, and `--outdir`. |
+| Name            | Command                                       | Description                                                                                                                                                         |
+| --------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **CLI Version** | `npx @inlang/cli@latest [command]`            | Get the latest version of the inlang CLI.                                                                                                                           |
+| **Validate**    | `npx @inlang/cli validate [options]`          | Validate if the project is working correctly.                                                                                                                       |
+| **Machine**     | `npx @inlang/cli machine translate [options]` | Automate translation processes. Options include `-f, --force`, `--project <path>`, `--sourceLanguageTag <source>` and `--targetLanguageTags <targets...>`           |
+| **Plugin**      | `npx @inlang/cli plugin [command]`            | Interact with Inlang plugins, including initialization and building. `build [options]` build an inlang module. Options include `--type`, `--entry`, and `--outdir`. |
 
 ---
 
@@ -134,7 +133,7 @@ The translate command has the following options:
 
 - `-f, --force`: If this option is set, the command will not prompt confirmation. This is useful for CI/CD build pipelines. **We advise you to only use `machine translate` in build pipelines to avoid out-of-context/wrong translations.**
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
-- `--sourceLanguageTag <source>`: Specifies the source [language tag](https://inlang.com/m/8y8sxj09/library-inlang-languageTag). 
+- `--sourceLanguageTag <source>`: Specifies the source [language tag](https://inlang.com/m/8y8sxj09/library-inlang-languageTag).
 - `--targetLanguageTags <targets...>`: Specifies the target language tags as comma seperated list (e.g. sk,zh,pt-BR).
 
 The translations are performed using machine translation services. The translated messages are added to the respective language resources. Finally, the updated resources are written back to the file system.
@@ -155,7 +154,6 @@ The validate command has the following options:
 
 This will launch an interactive prompt that will guide you through the process of migrating the inlang configuration file.
 
-
 **Options**
 
 The translate command has the following options:
@@ -167,7 +165,6 @@ The translate command has the following options:
 `lint` will read through all resources and find potential errors and warnings in the translation strings, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns/duplicates**.
 
 However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules) as a starter template.
-
 
 ## `plugin`
 
@@ -193,8 +190,7 @@ See how there is also a `--watch` flag, which enables a watch mode to monitor fo
 
 ## Troubleshoot
 
-If something isn't working as expected or you are getting errors, make sure to run on the latest version of the CLI. 
+If something isn't working as expected or you are getting errors, make sure to run on the latest version of the CLI.
 You can always get the latest version by executing `npx @inlang/cli@latest`.
 
 If the error persists, [please create an issue](https://github.com/opral/monorepo/issues/new/choose) – we're happy to help.
-

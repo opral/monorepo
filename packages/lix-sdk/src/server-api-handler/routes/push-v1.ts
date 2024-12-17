@@ -2,8 +2,8 @@ import type * as LixServerApi from "@lix-js/server-api-schema";
 import type { LixServerApiHandlerRoute } from "../create-server-api-handler.js";
 import { mergeTheirState } from "../../sync/merge-state.js";
 import type { Change } from "../../database/schema.js";
-import { detectChangeConflicts } from "../../change-conflict/detect-change-conflicts.js";
-import { createChangeConflict } from "../../change-conflict/create-change-conflict.js";
+// import { detectChangeConflicts } from "../../change-conflict/detect-change-conflicts.js";
+// import { createChangeConflict } from "../../change-conflict/create-change-conflict.js";
 import { CompiledQuery } from "kysely";
 
 type RequestBody =

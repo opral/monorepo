@@ -19,4 +19,3 @@ To work on the `@inlang/paraglide-js` package, you would run:
 1. `pnpm i`
 2. `pnpm --filter @inlang/paraglide-js... build`
 3. `pnpm --filter @inlang/paraglide-js test`
-

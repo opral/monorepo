@@ -27,13 +27,11 @@
 </a>
 </p>
 
-
-
 ## What is inlang?
 
-Inlang is an ecosystem of interoperable [lix apps](https://lix.opral.com) to globalize software. 
+Inlang is an ecosystem of interoperable [lix apps](https://lix.opral.com) to globalize software.
 
-Every app in the inlang ecosystem shares the same review, automation, and collaboration layer, making cross-team collaboration possible. No syncing, hand-offs, or automation barriers. 
+Every app in the inlang ecosystem shares the same review, automation, and collaboration layer, making cross-team collaboration possible. No syncing, hand-offs, or automation barriers.
 
 ![globalization of software is a cross team effort](./assets/inlang-problem-explainer.png)
 ![inlang pipeline](./assets/inlang-pipeline.png)
@@ -45,19 +43,16 @@ Every app in the inlang ecosystem shares the same review, automation, and collab
 - [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) to translate your app in the browser & invite collaborators to help you
 - [Parrot](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin) see translations directly in Figma
 - [inlang CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli) to lint your messsages with lint rules or machine translate them & have quality control in CI/CD
-- *build your own app / plugin / lint rule* with the [inlang SDK](https://inlang.com/documentation)
+- _build your own app / plugin / lint rule_ with the [inlang SDK](https://inlang.com/documentation)
 - ...
-
 
 ## Why inlang?
 
 Globalizing software is a cross-team effort that involves ensuring compliance, adapting the design, handling different currencies, managing translations, writing different marketing copy, etc.
 
-Existing point solutions such as apps to manage translations (Lokalise, Weglot, Smartling), apps to manage design copy (ditto, translator), or i18n libraries for developers (next-intl, i18next) don’t have interop between each other. 
+Existing point solutions such as apps to manage translations (Lokalise, Weglot, Smartling), apps to manage design copy (ditto, translator), or i18n libraries for developers (next-intl, i18next) don’t have interop between each other.
 
-The lack of interop of existing solutions leads every app and team to have its own collaboration layer, review system, and automation capabilities. Cross-team collaboration and automation, which are required to globalize software, are difficult to impossible. 
-
-
+The lack of interop of existing solutions leads every app and team to have its own collaboration layer, review system, and automation capabilities. Cross-team collaboration and automation, which are required to globalize software, are difficult to impossible.
 
 ## Contributing
 

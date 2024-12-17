@@ -1,51 +1,47 @@
 {
-	"$schema": "./node_modules/nx/schemas/nx-schema.json",
-	"namedInputs": {
-		"default": ["{projectRoot}/**/*"],
-		"publicEnv": [
-			{
-				"runtime": "env |   grep ^PUBLIC_"
-			}
-		],
-		"nodeVersion": [
-			{
-				"runtime": "node --version"
-			}
-		],
-		"platform": [
-			{
-				"runtime": " node -e 'console.log(process.platform)'"
-			}
-		]
-	},
-	"targetDefaults": {
-		"production": {
-			"dependsOn": ["^build"],
-			"inputs": ["default", "^default", "publicEnv", "nodeVersion", "platform"]
-		},
-		"build": {
-			"dependsOn": ["^build"],
-			"inputs": ["default", "^default", "publicEnv", "nodeVersion", "platform"],
-			"cache": true
-		},
-		"dev": {
-			"dependsOn": ["^build"]
-		},
-		"test": {
-			"dependsOn": ["^build", "publicEnv", "nodeVersion", "platform"],
-			"cache": true
-		},
-		"lint": {
-			"dependsOn": ["format"],
-			"cache": true
-		},
-		"format": {
-			"cache": true
-		}
-	},
-	"nxCloudAccessToken": "NmIwOWM4ZjUtZWNkMi00NTY1LThmZmEtNzMzZDEzOTZkYmVifHJlYWQ=",
-	"affected": {
-		"defaultBase": "origin/main"
-	},
-	"useDaemonProcess": false
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*"],
+    "publicEnv": [
+      {
+        "runtime": "env |   grep ^PUBLIC_"
+      }
+    ],
+    "nodeVersion": [
+      {
+        "runtime": "node --version"
+      }
+    ],
+    "platform": [
+      {
+        "runtime": " node -e 'console.log(process.platform)'"
+      }
+    ]
+  },
+  "targetDefaults": {
+    "production": {
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default", "publicEnv", "nodeVersion", "platform"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default", "publicEnv", "nodeVersion", "platform"],
+      "cache": true
+    },
+    "dev": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build", "publicEnv", "nodeVersion", "platform"],
+      "cache": true
+    },
+    "lint": {
+      "dependsOn": ["format"],
+      "cache": true
+    },
+    "format": {
+      "cache": true
+    }
+  },
+  "useDaemonProcess": false
 }

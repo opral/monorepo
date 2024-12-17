@@ -1,52 +1,52 @@
 {
-	// --- AUTO FORMAT CODE ON SAVE ---
-	"editor.formatOnSave": true,
-	"editor.formatOnSaveMode": "modificationsIfAvailable",
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
-	"eslint.format.enable": true,
-	// ---------------------------------
-	"editor.codeActionsOnSave": {
-		"source.fixAll": "never",
-		"source.fixAll.eslint": "explicit"
-	},
-	"gitlens.showWelcomeOnInstall": false,
-	"gitlens.showWhatsNewAfterUpgrades": false,
-	"gitlens.plusFeatures.enabled": false,
-	"typescript.tsdk": "node_modules/typescript/lib",
-	"files.associations": {
-		".eslintrc.json": "jsonc",
-		"tsconfig*.json": "jsonc"
-	},
-	"search.exclude": {
-		"**/node_modules": true,
-		"**/dist": true,
-		"**/.svelte-kit": true,
-		"**/build": true,
-		"**/coverage": true,
-		"**/.turbo": true
-	},
-	"files.watcherExclude": {
-		"**/dist": true
-	},
-	"[yaml]": {
-		"editor.defaultFormatter": "redhat.vscode-yaml"
-	},
-	"[jsonc]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[typescript]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"cSpell.words": ["inlang", "vinxi"],
-	"[astro]": {
-		"editor.defaultFormatter": "astro-build.astro-vscode"
-	},
-	"[svg]": {
-		"editor.defaultFormatter": "jock.svg"
-	},
-	"testing.automaticallyOpenPeekView": "never",
-	"git.mergeEditor": true,
-	"[xml]": {
-		"editor.defaultFormatter": "redhat.vscode-xml"
-	}
+  // --- AUTO FORMAT CODE ON SAVE ---
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "modificationsIfAvailable",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "eslint.format.enable": true,
+  // ---------------------------------
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "never",
+    "source.fixAll.eslint": "explicit"
+  },
+  "gitlens.showWelcomeOnInstall": false,
+  "gitlens.showWhatsNewAfterUpgrades": false,
+  "gitlens.plusFeatures.enabled": false,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "files.associations": {
+    ".eslintrc.json": "jsonc",
+    "tsconfig*.json": "jsonc"
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.svelte-kit": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/.turbo": true
+  },
+  "files.watcherExclude": {
+    "**/dist": true
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "cSpell.words": ["inlang", "vinxi"],
+  "[astro]": {
+    "editor.defaultFormatter": "astro-build.astro-vscode"
+  },
+  "[svg]": {
+    "editor.defaultFormatter": "jock.svg"
+  },
+  "testing.automaticallyOpenPeekView": "never",
+  "git.mergeEditor": true,
+  "[xml]": {
+    "editor.defaultFormatter": "redhat.vscode-xml"
+  }
 }

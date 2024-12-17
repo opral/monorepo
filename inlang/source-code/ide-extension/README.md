@@ -1,5 +1,3 @@
-
-
 # Sherlock – i18n inspector for Visual Studio Code
 
 <p>
@@ -33,12 +31,11 @@ Visualize, edit, and lint translated strings effortlessly using Inline Decoratio
 <br>
 <br>
 
-✅  Streamline the i18n translation process. 
+✅ Streamline the i18n translation process.
 
-✅  Visualize, edit, and lint translations.
+✅ Visualize, edit, and lint translations.
 
-✅  Extract new translations with a simple click.
-
+✅ Extract new translations with a simple click.
 
 <br>
 
@@ -64,9 +61,7 @@ You can use the following template when using JSON files as translation files. I
 	"baseLocale": "en",
 	// all the language tags you want to support in your project
 	"locales": ["en", "de"],
-	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js"
-	], // or use another storage module: https://inlang.com/c/plugins (i18next, json, inlang message format)
+	"modules": ["https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js"], // or use another storage module: https://inlang.com/c/plugins (i18next, json, inlang message format)
 	"settings": {}
 }
 ```
@@ -79,8 +74,8 @@ You should continue with **installing a syntax matcher**. There are multiple syn
 
 - m function matcher: https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher
 - t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher
-- *if you are using the i18next module, everything is already built-in*
-- *if you are using next-intl, you need https://inlang.com/m/193hsyds/plugin-inlang-nextIntl*
+- _if you are using the i18next module, everything is already built-in_
+- _if you are using next-intl, you need https://inlang.com/m/193hsyds/plugin-inlang-nextIntl_
 
 #### 3. ✨ Recommended
 
@@ -248,18 +243,15 @@ You can disable the automatic generation of human IDs by setting the following p
 > [!NOTE]  
 > Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.
 
-
 #### Troubleshooting
 
 If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working with Visual Studio Code to fix it. In the meantime, you can right-click the Inlang icon to hide it:
 
 <img width="25%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/hide-badge.png"/>
 
-
 ## Support: Join our Discord / Open an issue on GitHub!
 
 If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/CNPfhWpcAa) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
-
 
 <style>
 .flex-container {

@@ -10,7 +10,9 @@ import {
   useFormContext,
 } from "react-hook-form"
 
+// @ts-expect-error - no types
 import { cn } from "@/lib/utils"
+// @ts-expect-error - no types
 import { Label } from "@/components/ui/label"
 
 const Form = FormProvider

@@ -1,24 +1,24 @@
 {
-	"$schema": "https://inlang.com/schema/marketplace-manifest",
-	"id": "messageLintRule.inlang.missingTranslation",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/assets/icon.png",
-	"gallery": [
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/missing_translation-marketplace-cover.jpg"
-	],
-	"displayName": {
-		"en": "Missing translation"
-	},
-	"description": {
-		"en": "Checks for missing variants for a specific languageTag.  If a variant exists for the sourceLanguageTag but is missing for a listed languageTag, it is likely that the message has not been translated for this languageTag yet."
-	},
-	"pages": {
-		"/": "./inlang/source-code/message-lint-rules/missingTranslation/README.md",
-		"/changelog": "./inlang/source-code/message-lint-rules/missingTranslation/CHANGELOG.md"
-	},
-	"keywords": ["message", "lint rule", "missing", "website"],
-	"publisherName": "inlang",
-	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"website": "https://manage.inlang.com/install?module=messageLintRule.inlang.missingTranslation",
-	"license": "Apache-2.0",
-	"module": "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js"
+  "$schema": "https://inlang.com/schema/marketplace-manifest",
+  "id": "messageLintRule.inlang.missingTranslation",
+  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/assets/icon.png",
+  "gallery": [
+    "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/missing_translation-marketplace-cover.jpg"
+  ],
+  "displayName": {
+    "en": "Missing translation"
+  },
+  "description": {
+    "en": "Checks for missing variants for a specific languageTag.  If a variant exists for the sourceLanguageTag but is missing for a listed languageTag, it is likely that the message has not been translated for this languageTag yet."
+  },
+  "pages": {
+    "/": "./inlang/source-code/message-lint-rules/missingTranslation/README.md",
+    "/changelog": "./inlang/source-code/message-lint-rules/missingTranslation/CHANGELOG.md"
+  },
+  "keywords": ["message", "lint rule", "missing", "website"],
+  "publisherName": "inlang",
+  "publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+  "website": "https://manage.inlang.com/install?module=messageLintRule.inlang.missingTranslation",
+  "license": "Apache-2.0",
+  "module": "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js"
 }

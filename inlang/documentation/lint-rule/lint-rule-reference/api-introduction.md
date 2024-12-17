@@ -12,7 +12,12 @@ export const yourLintRule: MessageLintRule = {
   id,
   displayName,
   description,
-  message: ({ message: { id, variants }, languageTags, sourceLanguageTag, report }) => {
+  message: ({
+    message: { id, variants },
+    languageTags,
+    sourceLanguageTag,
+    report,
+  }) => {
     // Your custom lint rule logic goes here
     // You can analyze message variants and report issues if necessary
   },
@@ -20,6 +25,7 @@ export const yourLintRule: MessageLintRule = {
 ```
 
 ### Read more about these concepts:
+
 <br/>
 
 - [Messages](/documentation/concept/message)

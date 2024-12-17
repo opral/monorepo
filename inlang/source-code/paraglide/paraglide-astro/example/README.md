@@ -1,7 +1,9 @@
 # Astro + Paraglide Example
+
 This is an example project of how to use Paraglide with Astro. It properly switches between languages, demonstrates the fine-grained message splitting, and handles SEO properly.
 
 Here are some interesting files to look at:
+
 - `src/middleware` - Set's the language based on the URL
 - `src/layouts/HTML.astro` - Shows how to set the `lang` attribute on the `<html>` tag
 - `src/components/BaseHead.astro` - Shows how to set the `rel="alternate"` links for SEO

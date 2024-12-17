@@ -5,7 +5,7 @@ description: "Paraglide isn't like other i18n libraries. It uses a compiler to g
 
 # Architecture
 
-Paraglide uses a compiler to generate JS functions from your messages. We call these "message functions". 
+Paraglide uses a compiler to generate JS functions from your messages. We call these "message functions".
 
 Message Functions are fully typed using JSDoc. They are exported individually from the `messages.js` file making them tree-shakable. When called, they return a translated string. Message functions aren't reactive in any way, if you want a translation in another language you will need to re-call them.
 
@@ -17,12 +17,12 @@ In addition to the message functions, ParaglideJS also emits a runtime. The runt
 
 Paraglide consists of four main parts:
 
-| Part         | Description                                                                                                                  |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Compiler** | Compiles messages into tree-shakable message functions                                                                       |
-| **Messages** | The compiled tree-shakable message functions                                                                                 |
-| **Runtime**  | A runtime that resolves the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) of the current user |
-| **Framework Library**  | (optional) A framework library that adjusts the runtime for different frameworks                                                      |
+| Part                  | Description                                                                                                                  |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Compiler**          | Compiles messages into tree-shakable message functions                                                                       |
+| **Messages**          | The compiled tree-shakable message functions                                                                                 |
+| **Runtime**           | A runtime that resolves the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) of the current user |
+| **Framework Library** | (optional) A framework library that adjusts the runtime for different frameworks                                             |
 
 ## Compiler
 
@@ -46,5 +46,5 @@ The compiler loads an Inlang project and compiles the messages into tree-shakabl
  * @param {object} params
  * @param {string} params.name
  */
-export const hello = (params) => `Hello ${params.name}!`
+export const hello = (params) => `Hello ${params.name}!`;
 ```

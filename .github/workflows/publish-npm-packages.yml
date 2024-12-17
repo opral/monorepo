@@ -1,48 +1,47 @@
-name: Publish npm packages
+name: publish npm packages
 
 on:
-  # manually triggering the workflow if desired
+
   workflow_dispatch:
 
   # trigger this workflow when the CI workflow is completed
   workflow_run:
-    workflows: ["Continuous Integration"]
+    workflows: ["Continuous Integration", "versioning"]
     branches: [main]
-    types: 
+    types:
       - completed
 
-jobs:
-  publish-npm-packages:
-    # check that the CI workflow was actually successful
+jobs: 
+  publis:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    environment: npm
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v3
 
       - name: Setup Pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
+          cache: "pnpm"
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: pnpm install
 
       - name: Install Doppler CLI for env variables
         uses: dopplerhq/cli-action@v2
 
-      - run: doppler run -- pnpm build
+      - name: Build
+        run: doppler run -- pnpm build
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - name: Set publishing config
-        run: pnpm config set '//registry.npmjs.org/:_authToken' "${NPM_AUTH_TOKEN}" && pnpm config set 'git-checks' false
+      - name: Publish packages
+        run: pnpm ci:publish
         env:
-          NPM_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
-
-      - name: create and publish versions
-        run: pnpm --filter !vs-code-extension publish -r
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}

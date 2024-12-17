@@ -1,11 +1,11 @@
 {
-	"site_title": "Paraglide + Astro Beispiel",
-	"site_description": "Ein Beispiel für die Verwendung von Paraglide und Astro",
-	"follow_us_on": "Folge uns auf {site}",
-	"view_on": "Siehe auf {site}",
-	"all_rights_reserved": "Alle Rechte vorbehalten",
-	"count": "Der Zählerstand ist: {count}",
-	"english": "Englisch",
-	"german": "Deutsch",
-	"page_not_found": "Seite nicht gefunden"
+  "site_title": "Paraglide + Astro Beispiel",
+  "site_description": "Ein Beispiel für die Verwendung von Paraglide und Astro",
+  "follow_us_on": "Folge uns auf {site}",
+  "view_on": "Siehe auf {site}",
+  "all_rights_reserved": "Alle Rechte vorbehalten",
+  "count": "Der Zählerstand ist: {count}",
+  "english": "Englisch",
+  "german": "Deutsch",
+  "page_not_found": "Seite nicht gefunden"
 }

@@ -12,4 +12,4 @@ See [How to publish to the Marketplace](https://inlang.com/documentation/publish
 
 A node script is provided to update the CDN. You can run the script with:
 
-```node purgeRegistry.js```
+`node purgeRegistry.js`

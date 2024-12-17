@@ -335,12 +335,12 @@ type safety.
 
 ```ts
 //Pseudo code
-import { isAvailableLanguageTag } from "./paraglide/runtime"
+import { isAvailableLanguageTag } from "./paraglide/runtime";
 
 if (isAvailableLanguageTag(params.lang)) {
-	return renderSite(params.lang)
+  return renderSite(params.lang);
 } else {
-	return 404
+  return 404;
 }
 ```
 
@@ -361,8 +361,8 @@ Big thanks to [@KraXen72](https://github.com/KraXen72) for helping us find this 
 Add an optional options argument to message functions, to allow forcing a languageTag regardless of which languageTag is currently set.
 
 ```ts
-import * as m from "./paraglide/messages"
-const msg = m.hello({ name: "John" }, { languageTag: "de" })
+import * as m from "./paraglide/messages";
+const msg = m.hello({ name: "John" }, { languageTag: "de" });
 ```
 
 ## 1.0.0-prerelease.9
@@ -374,11 +374,11 @@ The `paraglide-js init` command now uses the [inlang message format](https://inl
 IMPROVE: Paraglide now splits messages into different resource files as a step towards splitting messages by language via a bundler plugin.
 
 ```ts
-import * as en from "./paraglide/messages/en"
-import * as de from "./paraglide/messages/de"
+import * as en from "./paraglide/messages/en";
+import * as de from "./paraglide/messages/de";
 
-en.hello()
-de.hello()
+en.hello();
+de.hello();
 ```
 
 ## 1.0.0-prerelease.7

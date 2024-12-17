@@ -1,11 +1,16 @@
 {
 	"name": "@lix-js/sdk",
 	"type": "module",
-	"version": "0.0.1",
+	"version": "1.0.0-preview.0",
 	"license": "Apache-2.0",
 	"exports": {
 		".": "./dist/index.js"
 	},
+	"_filesComment": "Shipping src for better debugging experience",
+	"files": [
+		"dist",
+		"src"
+	],
 	"scripts": {
 		"build": "tsc --build",
 		"test": "tsc --noEmit && vitest run --coverage",
@@ -21,7 +26,8 @@
 		"node": ">=21"
 	},
 	"bundleDependencies": [
-		"@lix-js/server-protocol"
+		"@lix-js/server-api-schema",
+		"sqlite-wasm-kysely"
 	],
 	"dependencies": {
 		"dedent": "1.5.1",

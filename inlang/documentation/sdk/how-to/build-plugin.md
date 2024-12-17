@@ -22,25 +22,29 @@ Each of the following functions in the code represents a key aspect of your plug
 - `saveMessages`: Save messages
 - `addCustomApi`: Define app-specific APIs
 
-
 ```typescript
-import type { Plugin, PluginSettings } from "@inlang/plugin"
-import { id, displayName, description } from "../marketplace-manifest.json"
+import type { Plugin, PluginSettings } from "@inlang/plugin";
+import { id, displayName, description } from "../marketplace-manifest.json";
 
 export const plugin: Plugin<PluginSettings> = {
-	meta: {
-		id: id as Plugin["id"],
-		displayName,
-		description,
-	},
-	loadMessages: async ({ languageTags, sourceLanguageTag, settings, nodeishFs }) => {
-		// Plugin's loadMessages logic
-	},
-	saveMessages: async ({ messages, settings, nodeishFs }) => {
-		// Plugin's saveMessages logic
-	},
-	addCustomApi: ({ settings }) => {},
-}
+  meta: {
+    id: id as Plugin["id"],
+    displayName,
+    description,
+  },
+  loadMessages: async ({
+    languageTags,
+    sourceLanguageTag,
+    settings,
+    nodeishFs,
+  }) => {
+    // Plugin's loadMessages logic
+  },
+  saveMessages: async ({ messages, settings, nodeishFs }) => {
+    // Plugin's saveMessages logic
+  },
+  addCustomApi: ({ settings }) => {},
+};
 ```
 
 Implement the logic for each function according to your plugin's requirements.
@@ -50,19 +54,19 @@ Implement the logic for each function according to your plugin's requirements.
 
 In your lint rule's `marketplace-manifest.json` make sure to define the following information:
 
-| Parameter        | Description                                               |
-|----------------------|---------------------------------------------------------------|
-| `id`                 | Unique identifier for your plugin.                         |
-| `icon`        | Link to the icon of your plugin (optional).              |
-| `gallery`        | Optional gallery, the first image acts as coverImage for your plugin.              |
-| `displayName`        | A user-friendly display name for your plugin.              |
-| `description`        | Briefly describe what your plugin does.              |
-| `readme`             | Link to the README documentation for your plugin.          |
-| `keywords`           | Keywords that describe your plugin.                        |
-| `publisherName`      | Your publisher name.                                          |
-| `publisherIcon`      | Link to your publisher's icon or avatar (optional).           |
-| `license`            | The license under which your plugin is distributed.        |
-| `module`             | The path to your plugin's JavaScript module (Please use [jsDelivr](https://www.jsdelivr.com/)).               |
+| Parameter       | Description                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| `id`            | Unique identifier for your plugin.                                                              |
+| `icon`          | Link to the icon of your plugin (optional).                                                     |
+| `gallery`       | Optional gallery, the first image acts as coverImage for your plugin.                           |
+| `displayName`   | A user-friendly display name for your plugin.                                                   |
+| `description`   | Briefly describe what your plugin does.                                                         |
+| `readme`        | Link to the README documentation for your plugin.                                               |
+| `keywords`      | Keywords that describe your plugin.                                                             |
+| `publisherName` | Your publisher name.                                                                            |
+| `publisherIcon` | Link to your publisher's icon or avatar (optional).                                             |
+| `license`       | The license under which your plugin is distributed.                                             |
+| `module`        | The path to your plugin's JavaScript module (Please use [jsDelivr](https://www.jsdelivr.com/)). |
 
 Make sure these settings accurately represent your plugin's purpose and functionality.
 

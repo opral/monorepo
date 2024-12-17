@@ -1,4 +1,3 @@
- 
 import type { DetectedChange, LixPlugin } from "@lix-js/sdk";
 import { CellSchemaV1 } from "./schemas/cell.js";
 import { HeaderSchemaV1 } from "./schemas/header.js";

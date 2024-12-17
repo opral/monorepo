@@ -9,7 +9,7 @@ contact_links:
   - name: Sherlock (VSCode Extension)
     url: https://github.com/opral/inlang-sherlock
     about: Issue tracker for Sherlock.
-  - name: Fink 
+  - name: Fink
     url: https://github.com/opral/inlang-fink
     about: Issue tracker for Fink.
   - name: Ninja i18n GitHub action

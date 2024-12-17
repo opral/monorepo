@@ -2,13 +2,13 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import {
 	createServerApiHandler,
-	createServerApiMemoryStorage,
+	createLsaInMemoryEnvironment,
 } from "@lix-js/sdk";
 
 const app = new Hono();
 
 const lixServerApiHandler = await createServerApiHandler({
-	storage: createServerApiMemoryStorage(),
+	environment: createLsaInMemoryEnvironment(),
 });
 
 app.get("/", (c) => c.text("Hono!"));

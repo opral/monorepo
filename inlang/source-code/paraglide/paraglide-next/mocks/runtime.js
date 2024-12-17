@@ -2,7 +2,7 @@
 
 /* eslint-disable */
 /** @type {((tag: AvailableLanguageTag) => void) | undefined} */
-let _onSetLanguageTag
+let _onSetLanguageTag;
 
 /**
  * The project's source language tag.
@@ -13,7 +13,7 @@ let _onSetLanguageTag
  *     return
  *   }
  */
-export const sourceLanguageTag = "en"
+export const sourceLanguageTag = "en";
 
 /**
  * The project's available language tags.
@@ -23,7 +23,7 @@ export const sourceLanguageTag = "en"
  *     throw new Error("Language tag not available")
  *   }
  */
-export const availableLanguageTags = /** @type {const} */ (["de", "en"])
+export const availableLanguageTags = /** @type {const} */ (["de", "en"]);
 
 /**
  * Get the current language tag.
@@ -37,7 +37,7 @@ export const availableLanguageTags = /** @type {const} */ (["de", "en"])
  *
  * @type {() => AvailableLanguageTag}
  */
-export let languageTag = () => sourceLanguageTag
+export let languageTag = () => sourceLanguageTag;
 
 /**
  * Set the language tag.
@@ -58,16 +58,16 @@ export let languageTag = () => sourceLanguageTag
  * @param {AvailableLanguageTag | (() => AvailableLanguageTag)} tag
  */
 export const setLanguageTag = (tag) => {
-	if (typeof tag === "function") {
-		languageTag = enforceLanguageTag(tag)
-	} else {
-		languageTag = enforceLanguageTag(() => tag)
-	}
-	// call the callback function if it has been defined
-	if (_onSetLanguageTag !== undefined) {
-		_onSetLanguageTag(languageTag())
-	}
-}
+  if (typeof tag === "function") {
+    languageTag = enforceLanguageTag(tag);
+  } else {
+    languageTag = enforceLanguageTag(() => tag);
+  }
+  // call the callback function if it has been defined
+  if (_onSetLanguageTag !== undefined) {
+    _onSetLanguageTag(languageTag());
+  }
+};
 
 /**
  * Wraps an untrusted function and enforces that it returns a language tag.
@@ -75,15 +75,15 @@ export const setLanguageTag = (tag) => {
  * @returns {() => AvailableLanguageTag}
  */
 function enforceLanguageTag(unsafeLanguageTag) {
-	return () => {
-		const tag = unsafeLanguageTag()
-		if (!isAvailableLanguageTag(tag)) {
-			throw new Error(
-				`languageTag() didn't return a valid language tag. Check your setLanguageTag call`
-			)
-		}
-		return tag
-	}
+  return () => {
+    const tag = unsafeLanguageTag();
+    if (!isAvailableLanguageTag(tag)) {
+      throw new Error(
+        `languageTag() didn't return a valid language tag. Check your setLanguageTag call`,
+      );
+    }
+    return tag;
+  };
 }
 
 /**
@@ -113,8 +113,8 @@ function enforceLanguageTag(unsafeLanguageTag) {
  * @param {(languageTag: AvailableLanguageTag) => void} fn
  */
 export const onSetLanguageTag = (fn) => {
-	_onSetLanguageTag = fn
-}
+  _onSetLanguageTag = fn;
+};
 
 /**
  * Check if something is an available language tag.
@@ -130,7 +130,7 @@ export const onSetLanguageTag = (fn) => {
  * @returns {thing is AvailableLanguageTag}
  */
 export function isAvailableLanguageTag(thing) {
-	return availableLanguageTags.includes(thing)
+  return availableLanguageTags.includes(thing);
 }
 
 // ------ TYPES ------
