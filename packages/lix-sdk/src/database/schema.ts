@@ -223,6 +223,9 @@ export type VersionChangeUpdate = Updateable<VersionChangeTable>;
 type VersionChangeTable = {
 	version_id: string;
 	change_id: string;
+	entity_id: string;
+	file_id: string;
+	schema_key: string;
 };
 
 export type VersionChangeConflict = Selectable<VersionChangeConflictTable>;

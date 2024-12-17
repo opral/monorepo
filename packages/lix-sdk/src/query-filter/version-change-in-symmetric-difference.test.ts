@@ -4,6 +4,7 @@ import type { VersionChange } from "../database/schema.js";
 import { mockChange } from "../change/mock-change.js";
 import { createVersion } from "../version/create-version.js";
 import { versionChangeInSymmetricDifference } from "./version-change-in-symmetric-difference.js";
+import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 
 test("should return the symmetric difference between two versions", async () => {
 	const lix = await openLixInMemory({});
@@ -11,31 +12,26 @@ test("should return the symmetric difference between two versions", async () => 
 	const versionA = await createVersion({ lix });
 	const versionB = await createVersion({ lix });
 
-	await lix.db
-		.insertInto("change")
-		.values([
-			mockChange({ id: "change1" }),
-			mockChange({ id: "change2" }),
-			mockChange({ id: "change3" }),
-			mockChange({ id: "change4" }),
-		])
-		.returningAll()
-		.execute();
+	const mockChanges = [
+		mockChange({ id: "change0", entity_id: "entity0" }),
+		mockChange({ id: "change1", entity_id: "entity1" }),
+		mockChange({ id: "change2", entity_id: "entity2" }),
+		mockChange({ id: "change3", entity_id: "entity3" }),
+	] as const;
 
-	const changesA: VersionChange[] = [
-		{ version_id: versionA.id, change_id: "change1" },
-		{ version_id: versionA.id, change_id: "change2" },
-	];
+	await lix.db.insertInto("change").values(mockChanges).execute();
 
-	const changesB: VersionChange[] = [
-		{ version_id: versionB.id, change_id: "change2" },
-		{ version_id: versionB.id, change_id: "change3" },
-	];
+	await updateChangesInVersion({
+		lix,
+		version: versionA,
+		changes: [mockChanges[0], mockChanges[1]],
+	});
 
-	await lix.db
-		.insertInto("version_change")
-		.values([...changesA, ...changesB])
-		.execute();
+	await updateChangesInVersion({
+		lix,
+		version: versionB,
+		changes: [mockChanges[1], mockChanges[2]],
+	});
 
 	const result = await lix.db
 		.selectFrom("version_change")
@@ -44,13 +40,13 @@ test("should return the symmetric difference between two versions", async () => 
 		.execute();
 
 	expect(result).toEqual([
-		// change 1 is in A but not in B
-		{ version_id: versionA.id, change_id: "change1" },
-		// change 3 is in B but not in A
-		{ version_id: versionB.id, change_id: "change3" },
-		// change 4 is in neither A nor B
+		// change 0 is in A but not in B
+		expect.objectContaining({ version_id: versionA.id, change_id: "change0" }),
+		// change 2 is in B but not in A
+		expect.objectContaining({ version_id: versionB.id, change_id: "change2" }),
+		// change 3 is in neither A nor B
 		// hence not in the symmetric difference
-	] satisfies VersionChange[]);
+	] satisfies Partial<VersionChange>[]);
 });
 
 test("should return an empty array if there are no differences", async () => {
@@ -59,25 +55,28 @@ test("should return an empty array if there are no differences", async () => {
 	const versionA = await createVersion({ lix });
 	const versionB = await createVersion({ lix });
 
+	const mockChanges = [
+		mockChange({ id: "change0", entity_id: "entity0" }),
+		mockChange({ id: "change1", entity_id: "entity1" }),
+	] as const;
+
 	await lix.db
 		.insertInto("change")
-		.values([
-			mockChange({ id: "change1" }),
-			mockChange({ id: "change2" }),
-			mockChange({ id: "change3" }),
-			mockChange({ id: "change4" }),
-		])
+		.values(mockChanges)
 		.returningAll()
 		.execute();
 
-	const changes: VersionChange[] = [
-		{ version_id: versionA.id, change_id: "change1" },
-		{ version_id: versionA.id, change_id: "change2" },
-		{ version_id: versionB.id, change_id: "change1" },
-		{ version_id: versionB.id, change_id: "change2" },
-	];
+	await updateChangesInVersion({
+		lix,
+		version: versionA,
+		changes: [mockChanges[0], mockChanges[1]],
+	});
 
-	await lix.db.insertInto("version_change").values(changes).execute();
+	await updateChangesInVersion({
+		lix,
+		version: versionB,
+		changes: [mockChanges[0], mockChanges[1]],
+	});
 
 	const result = await lix.db
 		.selectFrom("version_change")

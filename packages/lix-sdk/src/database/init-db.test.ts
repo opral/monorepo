@@ -7,6 +7,9 @@ import { jsonSha256 } from "../snapshot/json-sha-256.js";
 import { sql } from "kysely";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { updateChangesInVersion } from "../version/update-changes-in-version.js";
+import { createVersion } from "../version/create-version.js";
+import { switchVersion } from "../version/switch-version.js";
+import type { VersionChange } from "./schema.js";
 
 test("file ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
@@ -481,4 +484,45 @@ test("deleting a version cascades to version changes", async () => {
 		.execute();
 
 	expect(versionChangesAfterDelete).toHaveLength(0);
+});
+
+test("version_change must have a unique entity_id, file_id, version_id, and schema_id", async () => {
+	const lix = await openLixInMemory({});
+
+	const version0 = await createVersion({ lix, name: "version0" });
+	const version1 = await createVersion({ lix, name: "version1" });
+
+	const mockChanges = [
+		mockChange({ entity_id: "mock0", file_id: "file0", schema_key: "file" }),
+	] as const;
+
+	await lix.db.insertInto("change").values(mockChanges).execute();
+
+	const versionChange = {
+		change_id: mockChanges[0].id,
+		file_id: mockChanges[0].file_id,
+		entity_id: mockChanges[0].entity_id,
+		schema_key: mockChanges[0].schema_key,
+	};
+
+	await lix.db
+		.insertInto("version_change")
+		.values({ ...versionChange, version_id: version0.id })
+		.execute();
+
+	// inserting the same change again should throw
+	await expect(
+		lix.db
+			.insertInto("version_change")
+			.values({ ...versionChange, version_id: version0.id })
+			.execute()
+	).rejects.toThrowErrorMatchingInlineSnapshot(
+		`[SQLite3Error: SQLITE_CONSTRAINT_UNIQUE: sqlite3 result code 2067: UNIQUE constraint failed: version_change.version_id, version_change.entity_id, version_change.schema_key, version_change.file_id]`
+	);
+
+	// insert into version 1 should work
+	await lix.db
+		.insertInto("version_change")
+		.values({ ...versionChange, version_id: version1.id })
+		.execute();
 });
