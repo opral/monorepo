@@ -40,11 +40,23 @@ export async function createVersion(args: {
 		if (args.parent) {
 			await trx
 				.insertInto("version_change")
-				.columns(["version_id", "change_id"])
+				.columns([
+					"version_id",
+					"change_id",
+					"entity_id",
+					"schema_key",
+					"file_id",
+				])
 				.expression((eb) =>
 					eb
 						.selectFrom("version_change")
-						.select([eb.val(newVersion.id).as("version_id"), "change_id"])
+						.select([
+							eb.val(newVersion.id).as("version_id"),
+							"change_id",
+							"entity_id",
+							"schema_key",
+							"file_id",
+						])
 						.where("version_id", "=", args.parent!.id)
 				)
 				.execute();

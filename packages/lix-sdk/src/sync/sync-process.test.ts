@@ -16,7 +16,7 @@ test("versions should be synced", async () => {
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
 	const lix0 = await openLixInMemory({
-		keyValues: [{ key: "#lix_sync", value: "true" }],
+		keyValues: [{ key: "lix_server_url", value: "http://mock.com" }],
 	});
 
 	// @ts-expect-error - eases debugging
@@ -43,21 +43,15 @@ test("versions should be synced", async () => {
 	});
 
 	// start syncing
-	await lix0.db
-		.insertInto("key_value")
-		.values({
-			key: "lix_server_url",
-			value: "http://mock.com",
-		})
-		.execute();
-
-	await lix1.db
-		.insertInto("key_value")
-		.values({
-			key: "lix_server_url",
-			value: "http://mock.com",
-		})
-		.execute();
+	await Promise.all(
+		[lix0, lix1].map((lix) =>
+			lix.db
+				.updateTable("key_value")
+				.where("key", "=", "#lix_sync")
+				.set({ value: "true" })
+				.execute()
+		)
+	);
 
 	// @ts-expect-error - eases debugging
 	lix1.db.__name = "lix1";
@@ -113,17 +107,16 @@ test("versions should be synced", async () => {
 	expect(lix0Versions).toEqual(lix1Versions);
 
 	// expecting both lix0 and lix1 to have the same version changes
-	const lix0VersionChanges = await lix0.db
-		.selectFrom("version_change")
-		.orderBy("change_id", "desc")
-		.selectAll()
-		.execute();
-
-	const lix1VersionChanges = await lix1.db
-		.selectFrom("version_change")
-		.orderBy("change_id", "desc")
-		.selectAll()
-		.execute();
+	const [lix0VersionChanges, lix1VersionChanges] = await Promise.all(
+		[lix0, lix1].map((lix) =>
+			lix.db
+				.selectFrom("version_change")
+				.orderBy("change_id", "desc")
+				.orderBy("version_id", "desc")
+				.selectAll()
+				.execute()
+		)
+	);
 
 	expect(lix0VersionChanges).toEqual(lix1VersionChanges);
 });

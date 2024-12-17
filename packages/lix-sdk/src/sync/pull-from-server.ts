@@ -133,8 +133,6 @@ export async function pullFromServer(args: {
 		});
 
 		if (changesToApply.length > 0) {
-			// the changes already exists hence prevent own change control
-			// from creating new changes for the applied changes
 			await applyChanges({
 				lix: { ...args.lix, db: trx },
 				changes: changesToApply,
