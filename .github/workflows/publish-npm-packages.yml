@@ -12,7 +12,7 @@ on:
       - completed
 
 jobs: 
-  publis:
+  publish:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
@@ -24,11 +24,24 @@ jobs:
         with:
           version: 9
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 22
           cache: "pnpm"
+
+      # Check if any package needs to be published
+      - name: Check if publish is needed
+        id: check_publish
+        run: |
+          echo "Running pnpm publish --dry-run"
+          pnpm publish --dry-run > publish_output.txt 2>&1 || true
+          if grep -q "published" publish_output.txt; then
+            echo "needs_publish=true" >> $GITHUB_ENV
+          else
+            echo "No packages need to be published"
+            echo "needs_publish=false" >> $GITHUB_ENV
+          fi
 
       - name: Install Dependencies
         run: pnpm install
