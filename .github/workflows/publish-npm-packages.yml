@@ -6,7 +6,7 @@ on:
 
   # trigger this workflow when the CI workflow is completed
   workflow_run:
-    workflows: ["Continuous Integration", "versioning"]
+    workflows: ["Continuous Integration"]
     branches: [main]
     types:
       - completed
