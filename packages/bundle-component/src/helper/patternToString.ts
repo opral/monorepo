@@ -1,4 +1,4 @@
-import type { Pattern } from "@inlang/sdk2"
+import type { Pattern } from "@inlang/sdk2";
 
 /**
  * MVP version of the function
@@ -12,19 +12,22 @@ import type { Pattern } from "@inlang/sdk2"
  */
 
 const patternToString = (props: { pattern: Pattern }): string => {
-	if (!props.pattern) {
-		return ""
-	}
-	return props.pattern
-		.map((p) => {
-			if ("value" in p) {
-				return p.value
-			} else if (p.type === "expression" && p.arg.type === "variable-reference") {
-				return `{${p.arg.name}}`
-			}
-			return ""
-		})
-		.join("")
-}
+  if (!props.pattern) {
+    return "";
+  }
+  return props.pattern
+    .map((p) => {
+      if ("value" in p) {
+        return p.value;
+      } else if (
+        p.type === "expression" &&
+        p.arg.type === "variable-reference"
+      ) {
+        return `{${p.arg.name}}`;
+      }
+      return "";
+    })
+    .join("");
+};
 
-export default patternToString
+export default patternToString;

@@ -1,17 +1,17 @@
 {
-	"name": "@inlang/paraglide-rollup-example",
-	"private": true,
-	"version": "0.0.0",
-	"type": "module",
-	"scripts": {
-		"build": "rollup src/main.js --config rollup.config.js && tsc --noEmit",
-		"clean": "rm -rf ./dist ./node_modules ./src/paraglide"
-	},
-	"devDependencies": {
-		"@inlang/paraglide-js": "workspace:*",
-		"@inlang/paraglide-rollup": "workspace:*",
-		"rollup": "3.29.1",
-		"@rollup/plugin-alias": "^5.0.1",
-		"typescript": "^5.5.2"
-	}
+  "name": "@inlang/paraglide-rollup-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "rollup src/main.js --config rollup.config.js && tsc --noEmit",
+    "clean": "rm -rf ./dist ./node_modules ./src/paraglide"
+  },
+  "devDependencies": {
+    "@inlang/paraglide-js": "workspace:*",
+    "@inlang/paraglide-rollup": "workspace:*",
+    "rollup": "3.29.1",
+    "@rollup/plugin-alias": "^5.0.1",
+    "typescript": "^5.5.2"
+  }
 }

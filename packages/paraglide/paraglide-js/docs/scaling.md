@@ -10,14 +10,15 @@ We are working hard on getting per-language splitting to work, but in the meanti
 
 Most pages don't use many messages. Many just use one or two. Thus, one of the most important metrics for an i18n library is how well it scales _down_. What's the bundle size impact with just one message?
 
-Paraglide scales down very very well. The runtime can get as small as 300 bytes. 
+Paraglide scales down very very well. The runtime can get as small as 300 bytes.
 
 ### Scaling _Up_
 
-Paraglide currently sends messages that are _used_ on a given page in _all languages_. Thus the bundle scales up quicker than with other i18n libraries. 
+Paraglide currently sends messages that are _used_ on a given page in _all languages_. Thus the bundle scales up quicker than with other i18n libraries.
 
-However, keep in mind that: 
-- Paraglide only loads the messages you _use_ on the current page. 
+However, keep in mind that:
+
+- Paraglide only loads the messages you _use_ on the current page.
 - Paraglide starts out much smaller. The breakeven point comes after about 2500 messages variants (`messages*languages`) on a _single_ page. Of course this depends on your messages.
 
 Given that most Projects have between two and four languages you can expect Paraglide's bundle to still be smaller than other i18n libraries up to about 500 messages _on a single page_.

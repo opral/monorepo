@@ -1,9 +1,9 @@
 {
-	"extends": "./../tsconfig.base.json",
-	"include": ["src/**.ts", "src/main.ts"],
-	"compilerOptions": {
-		"outDir": "dist",
-		"types": ["node"]
-	},
-	"exclude": ["./dist", "./node_modules", "./vitest.config.ts", "*/*.test.ts"]
+  "extends": "./../tsconfig.base.json",
+  "include": ["src/**.ts", "src/main.ts"],
+  "compilerOptions": {
+    "outDir": "dist",
+    "types": ["node"]
+  },
+  "exclude": ["./dist", "./node_modules", "./vitest.config.ts", "*/*.test.ts"]
 }

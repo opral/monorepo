@@ -26,10 +26,10 @@
 
   ```ts
   const strategy = PrefixStrategy<AvailableLanguageTag>({
-  	prefixes: {
-  		"de-CH": "swiss", // use /swiss instead of /de-CH in the URL
-  	},
-  })
+    prefixes: {
+      "de-CH": "swiss", // use /swiss instead of /de-CH in the URL
+    },
+  });
   ```
 
   Prefixes must be unique and may not include slashes.
@@ -51,21 +51,24 @@
 
   ```tsx
   // src/app/layout.tsx
-  import { generateAlternateLinks } from "@inlang/paraglide-next"
-  import { strategy } from "@/lib/i18n"
-  import type { Metadata, ResolvingMetadata } from "next"
+  import { generateAlternateLinks } from "@inlang/paraglide-next";
+  import { strategy } from "@/lib/i18n";
+  import type { Metadata, ResolvingMetadata } from "next";
 
-  export const generateMetadata = (params: any, parent: ResolvingMetadata): Metadata => {
-  	return {
-  		alternates: {
-  			languages: generateAlternateLinks({
-  				origin: "https://example.com", // the origin of your site
-  				strategy: strategy,
-  				resolvingMetadata: parent,
-  			}),
-  		},
-  	}
-  }
+  export const generateMetadata = (
+    params: any,
+    parent: ResolvingMetadata,
+  ): Metadata => {
+    return {
+      alternates: {
+        languages: generateAlternateLinks({
+          origin: "https://example.com", // the origin of your site
+          strategy: strategy,
+          resolvingMetadata: parent,
+        }),
+      },
+    };
+  };
   ```
 
   > You do not need to do this on every page, just the root layout

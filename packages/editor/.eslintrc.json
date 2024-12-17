@@ -1,8 +1,8 @@
 {
-	"extends": ["plugin:solid/typescript"],
-	"plugins": ["solid"],
-	"rules": {
-		// conflicts with solidjs
-		"@typescript-eslint/no-non-null-assertion": "off"
-	}
+  "extends": ["plugin:solid/typescript"],
+  "plugins": ["solid"],
+  "rules": {
+    // conflicts with solidjs
+    "@typescript-eslint/no-non-null-assertion": "off"
+  }
 }

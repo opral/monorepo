@@ -1,8 +1,8 @@
-import { Canvas, Meta } from '@storybook/blocks';
- 
-import * as InlangAddInput from './inlang-add-variable.stories.ts';
- 
-<Meta of={InlangAddInput} />
+import { Canvas, Meta } from "@storybook/blocks";
+
+import * as InlangAddInput from "./inlang-add-variable.stories.ts";
+
+<Meta of={InlangAddInput} />;
 
 # InlangAddVariable
 
@@ -11,9 +11,11 @@ The component is currently only used inside of the bundle. That means that it ca
 <Canvas of={InlangAddInput.Example} />
 
 #### Props:
+
 - `bundle`: The bundle
 
 #### Event:
+
 - `change`: The component dispatches a change event that contains all necessary information.
 
 > The event bubbles up, so you can have a change event listener on a higher level.

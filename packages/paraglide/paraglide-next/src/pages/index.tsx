@@ -1,1 +1,1 @@
-export { default as ParaglideJS } from "./ParaglideJSProvider"
+export { default as ParaglideJS } from "./ParaglideJSProvider";

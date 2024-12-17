@@ -4,26 +4,26 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import type { ProjectConfig } from "@inlang/core/src/config/index.js"
-import { InlangEnvironment } from "@inlang/core/src/environment/types"
+import type { ProjectConfig } from "@inlang/core/src/config/index.js";
+import { InlangEnvironment } from "@inlang/core/src/environment/types";
 
 export const myPlugin = ({ pluginConfig }) => {
-	return {
-		id: "samuelstroschein.plugin-json",
-		defineConfig: (config) => {
-			if (pluginConfig.pathPattern === undefined) {
-				throw new Error("pathPattern is required")
-			}
-			config.readResources = readResources({ pluginConfig })
-			config.languages = getLanguages({ pluginConfig })
-		},
-	}
-}
+  return {
+    id: "samuelstroschein.plugin-json",
+    defineConfig: (config) => {
+      if (pluginConfig.pathPattern === undefined) {
+        throw new Error("pathPattern is required");
+      }
+      config.readResources = readResources({ pluginConfig });
+      config.languages = getLanguages({ pluginConfig });
+    },
+  };
+};
 
 type Plugin = {
-	id: string
-	defineConfig(config: ProjectConfig): ProjectConfig
-}
+  id: string;
+  defineConfig(config: ProjectConfig): ProjectConfig;
+};
 
 function readResources(args: any) {}
 

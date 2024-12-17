@@ -1,9 +1,9 @@
-name: 'Ninja i18n'
-description: 'Automatic i18n checks, issue reports and correction workflow for your pull requests'
-author: 'opral'
+name: "Ninja i18n"
+description: "Automatic i18n checks, issue reports and correction workflow for your pull requests"
+author: "opral"
 branding:
-  icon: 'globe'
-  color: 'gray-dark'
+  icon: "globe"
+  color: "gray-dark"
 
 runs:
   using: composite

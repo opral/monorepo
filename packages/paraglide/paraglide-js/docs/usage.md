@@ -31,36 +31,36 @@ You can still achieve complex formatting like so:
 For a message with multiple cases, aka a _select message_, you can define a message for each case & then use a Map to index into it.
 
 ```ts
-import * as m from "./paraglide/messages.js"
+import * as m from "./paraglide/messages.js";
 
 const season = {
-	spring: m.spring,
-	summer: m.summer,
-	autumn: m.autumn,
-	winter: m.winter,
-} as const
+  spring: m.spring,
+  summer: m.summer,
+  autumn: m.autumn,
+  winter: m.winter,
+} as const;
 
-const msg = season["spring"]() // Hello spring!
+const msg = season["spring"](); // Hello spring!
 ```
 
 For date & currency formatting use the `.toLocaleString` method on the `Date` or `Number`.
 
 ```ts
-import * as m from "./paraglide/messages.js"
-import { languageTag } from "./paraglide/runtime.js"
+import * as m from "./paraglide/messages.js";
+import { languageTag } from "./paraglide/runtime.js";
 
-const todaysDate = new Date()
+const todaysDate = new Date();
 m.today_is_the({
-	date: todaysDate.toLocaleString(languageTag()),
-})
+  date: todaysDate.toLocaleString(languageTag()),
+});
 
-const price = 100
+const price = 100;
 m.the_price_is({
-	price: price.toLocaleString(languageTag(), {
-		style: "currency",
-		currency: "EUR",
-	}),
-})
+  price: price.toLocaleString(languageTag(), {
+    style: "currency",
+    currency: "EUR",
+  }),
+});
 ```
 
 You can put HTML into the messages. This is useful for links and images.
@@ -68,7 +68,7 @@ You can put HTML into the messages. This is useful for links and images.
 ```json
 // messages/en.json
 {
-	"you_must_agree_to_the_tos": "You must agree to the <a href='/en/tos'>Terms of Service</a>."
+  "you_must_agree_to_the_tos": "You must agree to the <a href='/en/tos'>Terms of Service</a>."
 }
 ```
 
@@ -86,15 +86,15 @@ There is currently no way to interpolate framework components into messages. If 
 You can import a message in a specific language from `paraglide/messages/{lang}.js`.
 
 ```ts
-import * as m from "./paraglide/messages/de.js"
-m.hello() // Hallo Welt
+import * as m from "./paraglide/messages/de.js";
+m.hello(); // Hallo Welt
 ```
 
 If you want to force a language, but don't know _which_ language ahead of time you can pass the `languageTag` option as the second parameter to a message function. This is often handy on the server.
 
 ```js
-import * as m from "./paraglide/messages.js"
-const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
+import * as m from "./paraglide/messages.js";
+const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }); // Hallo Samuel!
 ```
 
 ### Lazy-Loading
@@ -104,8 +104,8 @@ Paraglide discourages lazy-loading translations since it causes a render-fetch w
 If you want to do it anyway, lazily import the language-specific message files.
 
 ```ts
-const lazyGerman = await import("./paraglide/messages/de.js")
-lazyGerman.hello() // Hallo Welt
+const lazyGerman = await import("./paraglide/messages/de.js");
+lazyGerman.hello(); // Hallo Welt
 ```
 
 ## Language Management
@@ -115,14 +115,14 @@ lazyGerman.hello() // Hallo Welt
 You can set the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) by calling `setLanguageTag()` with the desired language, or a getter function. Any subsequent calls to either `languageTag()` or a message function will use the new language tag.
 
 ```js
-import { setLanguageTag } from "./paraglide/runtime.js"
-import * as m from "./paraglide/messages.js"
+import { setLanguageTag } from "./paraglide/runtime.js";
+import * as m from "./paraglide/messages.js";
 
-setLanguageTag("de")
-m.hello() // Hallo Welt!
+setLanguageTag("de");
+m.hello(); // Hallo Welt!
 
-setLanguageTag(() => document.documentElement.lang /* en */)
-m.hello() // Hello world!
+setLanguageTag(() => document.documentElement.lang /* en */);
+m.hello(); // Hello world!
 ```
 
 `setLanguageTag` needs to be called both on the server and the client since they run in separate processes.
@@ -132,38 +132,38 @@ The [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag)
 **⛔️ Bad Example**:
 
 ```ts
-import { setLanguageTag, sourceLanguageTag } from "./paraglide/runtime.js"
+import { setLanguageTag, sourceLanguageTag } from "./paraglide/runtime.js";
 
 export function onRequest(request, next) {
-	const langForReq = detectLanguage(request) 
-	
-	// ⛔️ DONT DO THIS
-	// ⛔️ If multiple requests are handled concurretntly 
-	// ⛔️ later ones will override the language for earlier ones
-	setLanguageTag(langForReq)
+  const langForReq = detectLanguage(request);
 
-	return langStorage(langForReq, async () => await next())
+  // ⛔️ DONT DO THIS
+  // ⛔️ If multiple requests are handled concurretntly
+  // ⛔️ later ones will override the language for earlier ones
+  setLanguageTag(langForReq);
+
+  return langStorage(langForReq, async () => await next());
 }
 ```
 
 **✅ Good Example**:
 
 ```ts
-import { setLanguageTag, sourceLanguageTag } from "./paraglide/runtime.js"
-import { AsyncLocalStorage } from "node:async_hooks"
+import { setLanguageTag, sourceLanguageTag } from "./paraglide/runtime.js";
+import { AsyncLocalStorage } from "node:async_hooks";
 
-const langStorage = new AsyncLocalStorage()
+const langStorage = new AsyncLocalStorage();
 
 // ✅ DO THIS
-// ✅ when `languageTag` is called inside a route handler 
+// ✅ when `languageTag` is called inside a route handler
 // ✅ this function will return the language for the current request
 setLanguageTag(() => {
-	return langStorage.getValue() ?? sourceLanguageTag 
-})
+  return langStorage.getValue() ?? sourceLanguageTag;
+});
 
 export function onRequest(request, next) {
-	const langForReq = detectLanguage(request)
-	return langStorage(langForReq, async () => await next())
+  const langForReq = detectLanguage(request);
+  return langStorage(langForReq, async () => await next());
 }
 ```
 
@@ -176,15 +176,15 @@ Messages aren't reactive, so you will need to trigger a re-render when the langu
 If you are using a framework library this happens automatically.
 
 ```js
-import { setLanguageTag, onSetLanguageTag } from "./paraglide/runtime.js"
-import * as m from "./paraglide/messages.js"
+import { setLanguageTag, onSetLanguageTag } from "./paraglide/runtime.js";
+import * as m from "./paraglide/messages.js";
 
 onSetLanguageTag((newLanguageTag) => {
-	console.log(`The language changed to ${newLanguageTag}`)
-})
+  console.log(`The language changed to ${newLanguageTag}`);
+});
 
-setLanguageTag("de") // The language changed to de
-setLanguageTag("en") // The language changed to en
+setLanguageTag("de"); // The language changed to de
+setLanguageTag("en"); // The language changed to en
 ```
 
 Things to know about `onSetLanguageTag()`:

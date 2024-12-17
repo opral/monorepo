@@ -21,20 +21,19 @@ For working with inlang, you can make use of its
 
 In your app's `marketplace-manifest.json` make sure to define the following information:
 
-| Parameter        | Description                                               |
-|----------------------|---------------------------------------------------------------|
-| `id`                 | Unique identifier for your app.                         |
-| `icon`        | Link to the icon of your app (optional).              |
-| `gallery`        | Optional gallery, the first image acts as coverImage for your app.              |
-| `displayName`        | A user-friendly display name for your app.              |
-| `description`        | Briefly describe what your app does.              |
-| `readme`             | Link to the README documentation for your app.          |
-| `keywords`           | Keywords that describe your app.                        |
-| `publisherName`      | Your publisher name.                                          |
-| `publisherIcon`      | Link to your publisher's icon or avatar (optional).           |
-| `license`            | The license under which your app is distributed.       |
-| `website`             | Where your app can be found (optional).               |
-
+| Parameter       | Description                                                        |
+| --------------- | ------------------------------------------------------------------ |
+| `id`            | Unique identifier for your app.                                    |
+| `icon`          | Link to the icon of your app (optional).                           |
+| `gallery`       | Optional gallery, the first image acts as coverImage for your app. |
+| `displayName`   | A user-friendly display name for your app.                         |
+| `description`   | Briefly describe what your app does.                               |
+| `readme`        | Link to the README documentation for your app.                     |
+| `keywords`      | Keywords that describe your app.                                   |
+| `publisherName` | Your publisher name.                                               |
+| `publisherIcon` | Link to your publisher's icon or avatar (optional).                |
+| `license`       | The license under which your app is distributed.                   |
+| `website`       | Where your app can be found (optional).                            |
 
 ### 5. Publish your app
 

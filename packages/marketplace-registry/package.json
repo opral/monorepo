@@ -1,36 +1,36 @@
 {
-	"name": "@inlang/marketplace-registry",
-	"type": "module",
-	"version": "1.5.10",
-	"private": true,
-	"exports": {
-		".": "./dist/index.js",
-		"./registry.json": "./registry.json"
-	},
-	"files": [
-		"./dist",
-		"./src"
-	],
-	"scripts": {
-		"build": "node ./buildRegistry.js && npx prettier ./src --write && tsc --build",
-		"dev": "tsc --watch",
-		"purge": "node ./purgeRegistry.js",
-		"test": "node ./buildRegistry.js && npx prettier ./src --write && tsc --noEmit",
-		"lint": "eslint ./src --fix",
-		"format": "prettier ./src --write",
-		"clean": "rm -rf ./dist ./node_modules"
-	},
-	"engines": {
-		"node": ">=16.15.0"
-	},
-	"dependencies": {
-		"@inlang/marketplace-manifest": "workspace:*",
-		"@sinclair/typebox": "^0.31.8",
-		"algoliasearch": "4.20.0",
-		"node-fetch": "3.3.2"
-	},
-	"devDependencies": {
-		"typescript": "5.2.2"
-	},
-	"license": "Apache-2.0"
+  "name": "@inlang/marketplace-registry",
+  "type": "module",
+  "version": "1.5.10",
+  "private": true,
+  "exports": {
+    ".": "./dist/index.js",
+    "./registry.json": "./registry.json"
+  },
+  "files": [
+    "./dist",
+    "./src"
+  ],
+  "scripts": {
+    "build": "node ./buildRegistry.js && npx prettier ./src --write && tsc --build",
+    "dev": "tsc --watch",
+    "purge": "node ./purgeRegistry.js",
+    "test": "node ./buildRegistry.js && npx prettier ./src --write && tsc --noEmit",
+    "lint": "eslint ./src --fix",
+    "format": "prettier ./src --write",
+    "clean": "rm -rf ./dist ./node_modules"
+  },
+  "engines": {
+    "node": ">=16.15.0"
+  },
+  "dependencies": {
+    "@inlang/marketplace-manifest": "workspace:*",
+    "@sinclair/typebox": "^0.31.8",
+    "algoliasearch": "4.20.0",
+    "node-fetch": "3.3.2"
+  },
+  "devDependencies": {
+    "typescript": "5.2.2"
+  },
+  "license": "Apache-2.0"
 }

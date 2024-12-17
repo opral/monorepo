@@ -1,7 +1,7 @@
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"currentLanguageTag": "The current language tag is \"{languageTag}\".",
-	"greeting": "Welcome {name}! You have {count} messages.",
-	"about": "About",
-	"on_the_client": "I'm on the client!"
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "currentLanguageTag": "The current language tag is \"{languageTag}\".",
+  "greeting": "Welcome {name}! You have {count} messages.",
+  "about": "About",
+  "on_the_client": "I'm on the client!"
 }

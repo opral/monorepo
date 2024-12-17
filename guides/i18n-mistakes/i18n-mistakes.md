@@ -30,7 +30,6 @@ Collect user feedback and iterate on your app localization to improve the user e
 
 If you're using a product which is built on top of inlang, you can use the [Translation badge generator](https://inlang.com/m/zu942ln6/app-inlang-badge) to let users contribute to your translations, which is definitely a continuous improvement.
 
-
 ### Still asking yourself what inlang really is?
 
 inlang is an ecosystem for finding globalization products and services. Imagine inlang.com like a marketplace where you can find everything you need to make your app or website global, instead of being limited to a single service or product.

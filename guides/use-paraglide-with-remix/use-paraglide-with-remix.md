@@ -23,7 +23,6 @@ This will have done a few things:
 - Added the required devDependencies to your `package.json`
 - Installed the remix-paraglidejs
 
-
 ## Setting Up
 
 In your `vite.config.ts`, import `@inlang/paraglide-vite` and apply it to your config.
@@ -47,7 +46,7 @@ export default defineConfig({
     tsconfigPaths(),
     /* --- INCLUDE THIS --- */
     paraglide({
-      project: "./project.inlang", //Path to your inlang project 
+      project: "./project.inlang", //Path to your inlang project
       outdir: "./paraglide", //Where you want the generated files to be placed
     }),
     /* ----------------- */
@@ -65,20 +64,23 @@ import { RemixBrowser } from "@remix-run/react";
 import { startTransition, StrictMode } from "react";
 import { hydrateRoot } from "react-dom/client";
 /* --- INCLUDE THIS --- */
-import { hydrateLang } from 'remix-paraglidejs/client';
-import { availableLanguageTags, setLanguageTag } from "<YOUR_PARAGLIDE_DIR>/runtime";
+import { hydrateLang } from "remix-paraglidejs/client";
+import {
+  availableLanguageTags,
+  setLanguageTag,
+} from "<YOUR_PARAGLIDE_DIR>/runtime";
 /* ----------------- */
 
 startTransition(() => {
   /* --- INCLUDE THIS --- */
-  const lang = hydrateLang('language-tag', availableLanguageTags);
+  const lang = hydrateLang("language-tag", availableLanguageTags);
   setLanguageTag(lang);
   /* ----------------- */
   hydrateRoot(
     document,
     <StrictMode>
       <RemixBrowser />
-    </StrictMode>
+    </StrictMode>,
   );
 });
 ```
@@ -93,11 +95,14 @@ import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 import {
   createReadableStreamFromReadable,
-/* --- INCLUDE THIS --- */
+  /* --- INCLUDE THIS --- */
   createCookie,
 } from "@remix-run/node";
-import { setLangServerCookie, getContextLang } from 'remix-paraglidejs/server';
-import { setLanguageTag, availableLanguageTags } from "<YOUR_PARAGLIDE_DIR>/runtime";
+import { setLangServerCookie, getContextLang } from "remix-paraglidejs/server";
+import {
+  setLanguageTag,
+  availableLanguageTags,
+} from "<YOUR_PARAGLIDE_DIR>/runtime";
 
 // language-tag value the same as the one in the entry.client.tsx
 export const setLangCookie = createCookie("language-tag", {});
@@ -116,13 +121,13 @@ export default function handleRequest(
         request,
         responseStatusCode,
         responseHeaders,
-        remixContext
+        remixContext,
       )
     : handleBrowserRequest(
         request,
         responseStatusCode,
         responseHeaders,
-        remixContext
+        remixContext,
       );
 }
 
@@ -130,7 +135,7 @@ function handleBotRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext
+  remixContext: EntryContext,
 ) {
   return new Promise((resolve, reject) => {
     let shellRendered = false;
@@ -152,7 +157,7 @@ function handleBotRequest(
             new Response(stream, {
               headers: responseHeaders,
               status: responseStatusCode,
-            })
+            }),
           );
 
           pipe(body);
@@ -166,7 +171,7 @@ function handleBotRequest(
             console.error(error);
           }
         },
-      }
+      },
     );
 
     setTimeout(abort, ABORT_DELAY);
@@ -177,7 +182,7 @@ function handleBrowserRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext
+  remixContext: EntryContext,
 ) {
   return new Promise((resolve, reject) => {
     let shellRendered = false;
@@ -187,7 +192,7 @@ function handleBrowserRequest(
       availableLanguages: availableLanguageTags,
       // The URL parameter to look for when determining the language
       // for example ($lang)._index.tsx
-      urlParam: 'lang',
+      urlParam: "lang",
     });
     setLanguageTag(lang);
     /* ----------------- */
@@ -212,7 +217,7 @@ function handleBrowserRequest(
             new Response(stream, {
               headers: responseHeaders,
               status: responseStatusCode,
-            })
+            }),
           );
 
           pipe(body);
@@ -226,7 +231,7 @@ function handleBrowserRequest(
             console.error(error);
           }
         },
-      }
+      },
     );
 
     setTimeout(abort, ABORT_DELAY);
@@ -236,13 +241,13 @@ function handleBrowserRequest(
 
 ## Our first Message
 
-Let's create a `messages` folder in our project root. This is where we will store our messages. Then add an `en.json` file to it. 
+Let's create a `messages` folder in our project root. This is where we will store our messages. Then add an `en.json` file to it.
 
 ```json
 // messages/en.json
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"title": "Remix web example",
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "title": "Remix web example"
 }
 ```
 
@@ -251,8 +256,8 @@ If you now run start your dev server you should see a new folder appear in your 
 Let's use the `title` message on our homepage. Create a route `($lang)._index.tsx`, import all messages from `paraglide/messages.js` and use the `title` message in the `h1` tag.
 
 ```tsx
-import { Link } from '@remix-run/react';
-import * as m from '<YOUR_PARAGLIDE_DIR>/messages';
+import { Link } from "@remix-run/react";
+import * as m from "<YOUR_PARAGLIDE_DIR>/messages";
 
 export default function Index() {
   return (
@@ -274,32 +279,32 @@ You can add more languages to your project by adding them to the `languageTags` 
 ```json
 // project.inlang/settings.json
 {
-	"$schema": "https://inlang.com/schema/project-settings",
-	"sourceLanguageTag": "en",
-	"languageTags": ["en", "es"], // <-- Added Spanish
-	"...": "..."
+  "$schema": "https://inlang.com/schema/project-settings",
+  "sourceLanguageTag": "en",
+  "languageTags": ["en", "es"], // <-- Added Spanish
+  "...": "..."
 }
 ```
 
-Then add a messages file for the new language. 
+Then add a messages file for the new language.
 
 ```json
 // messages/es.json
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"title": "Remix web de ejemplo",
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "title": "Remix web de ejemplo"
 }
 ```
 
-If you now run the dev server, and visit `/en` and `/es`, you should see the Server Components switch languages. 
+If you now run the dev server, and visit `/en` and `/es`, you should see the Server Components switch languages.
 
 ## Navigating
 
 You can use Remix `<Link>` to navigate between `/en` and `/es`.
 
 ```tsx
-import { Link } from '@remix-run/react';
-import * as m from '<YOUR_PARAGLIDE_DIR>/messages';
+import { Link } from "@remix-run/react";
+import * as m from "<YOUR_PARAGLIDE_DIR>/messages";
 
 export default function Index() {
   return (
@@ -307,18 +312,12 @@ export default function Index() {
       <h1>{m.title()}</h1>
       <ul>
         <li>
-          <Link
-            to="/en"
-            reloadDocument
-          >
+          <Link to="/en" reloadDocument>
             EN
           </Link>
         </li>
         <li>
-          <Link
-            to="/es"
-            reloadDocument
-          >
+          <Link to="/es" reloadDocument>
             ES
           </Link>
         </li>
@@ -337,4 +336,3 @@ You should now have a fully functional multilingual Remix app using ParaglideJS.
 You can check out the full source code of this example [here](https://github.com/BRIKEV/remix-paraglidejs).
 
 If you want to learn more about ParaglideJS, check out the [ParaglideJS Documentation](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). If you need help or have some ideas, feel free to reach out to us on [Discord](https://discord.gg/gdMPPWy57R) or open a Discussion on [GitHub](https://github.com/opral/monorepo/discussions).
-

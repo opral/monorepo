@@ -1,4 +1,4 @@
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"greeting": "Welcome {name}!"
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "greeting": "Welcome {name}!"
 }

@@ -34,7 +34,12 @@ export const yourLintRule: MessageLintRule = {
     displayName,
     description,
   },
-  message: ({ message: { id, variants }, languageTags, sourceLanguageTag, report }) => {
+  message: ({
+    message: { id, variants },
+    languageTags,
+    sourceLanguageTag,
+    report,
+  }) => {
     // Your custom lint rule logic goes here
     // You can analyze message variants and report issues if necessary
   },
@@ -49,19 +54,19 @@ Helpful **example implementations** of lint rules can be found [here](https://gi
 
 In your lint rule's `marketplace-manifest.json` make sure to define the following information:
 
-| Parameter        | Description                                               |
-|----------------------|---------------------------------------------------------------|
-| `id`                 | Unique identifier for your lint rule.                         |
-| `icon`        | Link to the icon of your lint rule (optional).              |
-| `gallery`        | Optional gallery, the first image acts as coverImage for your lint rule.              |
-| `displayName`        | A user-friendly display name for your lint rule.              |
-| `description`        | Briefly describe what your lint rule checks for.              |
-| `readme`             | Link to the README documentation for your lint rule.          |
-| `keywords`           | Keywords that describe your lint rule.                        |
-| `publisherName`      | Your publisher name.                                          |
-| `publisherIcon`      | Link to your publisher's icon or avatar (optional).           |
-| `license`            | The license under which your lint rule is distributed.        |
-| `module`             | The path to your lint rule's JavaScript module (Please use [jsDelivr](https://www.jsdelivr.com/)).               |
+| Parameter       | Description                                                                                        |
+| --------------- | -------------------------------------------------------------------------------------------------- |
+| `id`            | Unique identifier for your lint rule.                                                              |
+| `icon`          | Link to the icon of your lint rule (optional).                                                     |
+| `gallery`       | Optional gallery, the first image acts as coverImage for your lint rule.                           |
+| `displayName`   | A user-friendly display name for your lint rule.                                                   |
+| `description`   | Briefly describe what your lint rule checks for.                                                   |
+| `readme`        | Link to the README documentation for your lint rule.                                               |
+| `keywords`      | Keywords that describe your lint rule.                                                             |
+| `publisherName` | Your publisher name.                                                                               |
+| `publisherIcon` | Link to your publisher's icon or avatar (optional).                                                |
+| `license`       | The license under which your lint rule is distributed.                                             |
+| `module`        | The path to your lint rule's JavaScript module (Please use [jsDelivr](https://www.jsdelivr.com/)). |
 
 ### 4. Test your lint rule
 
@@ -72,7 +77,6 @@ Before publishing your lint rule to the marketplace, thoroughly test it to ensur
 To make your lint rule available in the inlang.com marketplace, see [Publish on marketplace](/documentation/publish-to-marketplace).
 
 Feel free to [join our Discord](https://discord.gg/CNPfhWpcAa) if you have any questions or need assistance developing and publishing your lint rule.
-
 
 <br/>
 

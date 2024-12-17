@@ -42,10 +42,10 @@ If you are using a Bundler use one of the [Bundler Plugins](usage#usage-with-a-b
 After running the compiler import the messages with `import * as m from "./paraglide/messages"`. By convention, a wildcard import is used.
 
 ```js
-import * as m from "./paraglide/messages.js"
+import * as m from "./paraglide/messages.js";
 
-m.hello() // Hello world!
-m.loginHeader({ name: "Samuel" }) // Hello Samuel, please login to continue.
+m.hello(); // Hello world!
+m.loginHeader({ name: "Samuel" }); // Hello Samuel, please login to continue.
 ```
 
 # Playground
@@ -66,7 +66,7 @@ Of course, we're not done yet! We plan on adding the following features to Parag
 - [ ] Formatting of numbers and dates ([Join the Discussion](https://github.com/opral/monorepo/discussions/992))
 - [ ] Markup Placeholders ([Join the Discussion](https://github.com/opral/monorepo/discussions/913))
 - [ ] Component Interpolation
-- [ ] Per-Language Splitting without Lazy-Loading 
+- [ ] Per-Language Splitting without Lazy-Loading
 - [ ] Even Smaller Output
 
 # Talks
