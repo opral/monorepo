@@ -5,11 +5,97 @@ previewsEnabled: false
 previewsExpireAfterDays: 3
 
 services:
+  - name: opral-website
+    type: web
+    runtime: static
+    autoDeploy: true
+    staticPublishPath: ./opral/source-code/website
+    buildFilter:
+      paths:
+        - opral/source-code/website/**
+    domains:
+      - opral.com
+
+  - name: lix-website-server
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: starter
+    branch: main
+    pullRequestPreviewsEnabled: false
+    buildCommand: pnpm --filter lix-website-server... i && pnpm --filter lix-website-server... build
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter lix-website-server production
+    autoDeploy: true
+    envVars:
+      - fromGroup: production
+      - key: PORT
+        value: 3005
+    buildFilter:
+      paths:
+        - packages/lix-website-server/**
+        - packages/lix-website/**
+        - packages/lix-file-manager/**
+        - packages/csv-app/**
+    domains:
+      - lix.opral.com
+
+  - name: lix-host
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: starter
+    branch: main
+    pullRequestPreviewsEnabled: false
+    buildCommand: pnpm --filter @lix-js/host... i && pnpm --filter @lix-js/host... build
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @lix-js/host start
+    autoDeploy: true
+    envVars:
+      - fromGroup: production
+      - key: PORT
+        value: 3000
+    buildFilter:
+      paths:
+        - packages/lix-host/**
+        - packages/lix-sdk/**
+    domains:
+      - lix.host
+
+  - name: fink2
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: main
+    staticPublishPath: ./inlang/source-code/fink2/dist
+    routes: 
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    buildCommand: pnpm install && pnpm run --filter @inlang/fink2... build
+    buildFilter:
+      paths:
+        - inlang/source-code/fink2/**
+    envVars:
+      - fromGroup: production
+
+  - name: csv
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: main
+    staticPublishPath: ./packages/csv-app/dist
+    buildCommand: pnpm install && pnpm run --filter csv-app... build
+    buildFilter:
+      paths:
+        - packages/csv-app/**
+    envVars:
+      - fromGroup: production
+
   - name: inlang-website
     type: web
     runtime: node
     region: frankfurt
     plan: standard
+    branch: inlang-v1
     buildCommand: pnpm install && pnpm run build --projects=@inlang/website
     startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm production # configured in root package.json
     autoDeploy: true
@@ -28,31 +114,6 @@ services:
     domains:
       - inlang.com
 
-  - name: lix-website
-    type: web
-    runtime: static
-    autoDeploy: true
-    staticPublishPath: ./lix/website/dist/client
-    buildCommand: pnpm install && pnpm --filter lix-website run build
-    buildFilter:
-      paths:
-        - lix/website/**
-    domains:
-      - lix.opral.com
-
-  - name: fink2
-    type: web
-    runtime: static
-    autoDeploy: true
-    branch: lix-integration
-    staticPublishPath: ./inlang/source-code/fink2/dist
-    buildCommand: pnpm install && pnpm run --filter @inlang/fink2... build
-    buildFilter:
-      paths:
-        - inlang/source-code/fink2/**
-    envVars:
-      - fromGroup: production
-
   - name: git-proxy
     type: web
     runtime: node
@@ -60,7 +121,7 @@ services:
     plan: starter
     # PR preview deployments use the shared production git-proxy
     # This disables branch previews for the git-proxy
-    branch: main
+    branch: inlang-v1
     buildCommand: pnpm install && pnpm run build
     startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @lix-js/server production
     autoDeploy: true
@@ -74,11 +135,29 @@ services:
     domains:
       - git.inlang.com
 
+  - name: badge-service
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: standard
+    branch: inlang-v1
+    buildCommand: pnpm install && pnpm run build --projects=@inlang/badge
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/badge run production
+    autoDeploy: true
+    envVars:
+      - fromGroup: production
+    buildFilter:
+      paths:
+        - inlang/source-code/badge/CHANGELOG.md
+    domains:
+      - badge.inlang.com
+
   - name: fink-editor
     type: web
     runtime: node
     region: frankfurt
     plan: standard
+    branch: inlang-v1
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run --filter @inlang/editor... build
     startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/editor production
@@ -93,23 +172,32 @@ services:
     domains:
       - fink.inlang.com
 
-  - name: opral-website
+  - name: inlang-manage
     type: web
-    runtime: static
+    runtime: node
+    region: frankfurt
+    plan: standard
+    branch: inlang-v1
+    pullRequestPreviewsEnabled: false
+    buildCommand: pnpm install && pnpm run build
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/manage production
     autoDeploy: true
-    staticPublishPath: ./packages/opral-website
+    envVars:
+      - fromGroup: production
+      - key: PORT
+        value: 4004
     buildFilter:
       paths:
-        - packages/opral-website/**
+        - inlang/source-code/manage/CHANGELOG.md
     domains:
-      - opral.com
+      - manage.inlang.com
 
   - name: telemetry-proxy
     type: web
     runtime: node
     region: frankfurt
     plan: starter
-    branch: main
+    branch: inlang-v1
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run --filter @inlang/telemetry-proxy build
     startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm run --filter @inlang/telemetry-proxy production
@@ -128,7 +216,7 @@ services:
     runtime: node
     region: frankfurt
     plan: starter
-    branch: main
+    branch: inlang-v1
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run --filter @inlang/telemetry-proxy-parrot build
     startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm run --filter @inlang/telemetry-proxy-parrot production
@@ -141,3 +229,4 @@ services:
         - inlang/source-code/telemetry-proxy-parrot/**
     domains:
       - telemetry.inlang.com
+    
