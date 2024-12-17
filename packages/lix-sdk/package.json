@@ -21,7 +21,8 @@
 		"node": ">=21"
 	},
 	"bundleDependencies": [
-		"@lix-js/server-api-schema"
+		"@lix-js/server-api-schema",
+		"sqlite-wasm-kysely"
 	],
 	"dependencies": {
 		"dedent": "1.5.1",
