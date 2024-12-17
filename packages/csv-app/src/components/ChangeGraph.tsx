@@ -118,9 +118,9 @@ const calculateNodeDimensions = (text: string) => {
 	return { width, height };
 };
 
-function Row({ id, data }: NodeProps<Node<{ text: string }>>) {
+function Row({ id, data }: NodeProps<Node<any>>) {
 	return (
-		<div className="p-2 flex items-center justify-center border-gray-400 border justify-between rounded">
+		<div className="p-2 flex items-center border-gray-400 border justify-between rounded">
 			<div>
 				<p className="text-sm mb-2 text-gray-500">{data.schema_key}</p>
 				{JSON.stringify(data.content, undefined, 2) ?? "deleted"}

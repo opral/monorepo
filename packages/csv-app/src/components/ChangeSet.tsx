@@ -46,21 +46,21 @@ export default function Component(props: {
 	useEffect(() => {
 		if (isOpen) {
 			if (props.id !== "unconfirmed-changes") {
-				getChanges(lix, props.id, activeFile.id, currentVersion).then(
+				getChanges(lix, props.id, activeFile!.id, currentVersion).then(
 					setChanges
 				);
 			} else {
-				getUnconfirmedChanges(lix, activeFile.id, currentVersion).then(
+				getUnconfirmedChanges(lix, activeFile!.id, currentVersion).then(
 					setUnconfirmedChanges
 				);
 			}
 			const interval = setInterval(async () => {
 				if (props.id !== "unconfirmed-changes") {
-					getChanges(lix, props.id, activeFile.id, currentVersion).then(
+					getChanges(lix, props.id, activeFile!.id, currentVersion).then(
 						setChanges
 					);
 				} else {
-					getUnconfirmedChanges(lix, activeFile.id, currentVersion).then(
+					getUnconfirmedChanges(lix, activeFile!.id, currentVersion).then(
 						setUnconfirmedChanges
 					);
 				}

@@ -14,7 +14,7 @@ export default function ConflictSet(props: {
 		change_conflict_id: string;
 		change_conflict_key: string;
 		change_conflict_change_set_id: string;
-		snapshot_content: Snapshot["content"];
+		content: Snapshot["content"];
 		is_current_version_change: number;
 		is_in_current_version: number;
 	})[];
@@ -34,7 +34,7 @@ export default function ConflictSet(props: {
 				</div>
 				{props.changes.map((change) => {
 					const column = change.entity_id.split("|")[2];
-					const value = change.snapshot_content?.text;
+					const value = change.content?.text;
 
 					return (
 						<div
