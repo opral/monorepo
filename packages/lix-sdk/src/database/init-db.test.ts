@@ -8,8 +8,6 @@ import { sql } from "kysely";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 import { createVersion } from "../version/create-version.js";
-import { switchVersion } from "../version/switch-version.js";
-import type { VersionChange } from "./schema.js";
 
 test("file ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
