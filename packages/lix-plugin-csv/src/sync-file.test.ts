@@ -13,10 +13,8 @@ test("switching between versions ", async () => {
 	const lsaHandler = await createServerApiHandler({ environment });
 
 	const mockCsvFile = new TextEncoder().encode(
-		`email;First name;Last name
-rachel@demo.com;Rachel;Booker
-peter.n@moon.mail;Peter;Newman
-anna@post.de;Anna;Jakob`,
+		`email,First name,Last name
+rachel@demo.com,Rachel,Booker`,
 	) as unknown as ArrayBuffer;
 
 	// @ts-expect-error - eases debugging by querying both lixes in debug steps
@@ -82,10 +80,17 @@ anna@post.de;Anna;Jakob`,
 		.values({
 			id: "sjd9a9-2j2j-minimal",
 			path: "/email-newsletter.csv",
+			data: mockCsvFile,
+		})
+		.execute();
+
+	await lixA.db
+		.updateTable("file")
+		.where("id", "=", "sjd9a9-2j2j-minimal")
+		.set({
 			metadata: {
 				unique_column: "email",
 			},
-			data: mockCsvFile,
 		})
 		.execute();
 
