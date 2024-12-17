@@ -3,6 +3,5 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "access": "restricted",
-  "baseBranch": "main",
-  "ignore": ["@inlang/template-*"]
+  "baseBranch": "main"
 }
