@@ -10,7 +10,7 @@
     "clean": "pnpm recursive run clean && rm -rf ./.env ./node_modules",
     "----- CI ---- used to test the codebase on every commit": "",
     "ci": "pnpm format && pnpm lint && pnpm test && pnpm build",
-    "ci:publish": "pnpm --filter !vs-code-extension publish -r"
+    "ci:publish": "pnpm --filter publish -r"
   },
   "engines": {
     "node": ">=20",
