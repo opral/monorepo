@@ -43,18 +43,24 @@ jobs:
             echo "needs_publish=false" >> $GITHUB_ENV
           fi
 
+        # Conditional steps based on the check
       - name: Install Dependencies
+        if: env.needs_publish == 'true'
         run: pnpm install
 
       - name: Install Doppler CLI for env variables
+        if: env.needs_publish == 'true'
         uses: dopplerhq/cli-action@v2
 
       - name: Build
+        if: env.needs_publish == 'true'
         run: doppler run -- pnpm build
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
       - name: Publish packages
+        if: env.needs_publish == 'true'
         run: pnpm ci:publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+
