@@ -26,9 +26,9 @@ Question: should this be implemented under the `@inlang/core/lint` or `@inlang/l
 
    ```ts
    type LintInformation = {
-   	type: LintRule // which rule emitted the error
-   	message: string // a string that informs what is wrong
-   }
+     type: LintRule; // which rule emitted the error
+     message: string; // a string that informs what is wrong
+   };
    ```
 
    Question: Anything else?

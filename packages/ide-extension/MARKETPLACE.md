@@ -21,9 +21,10 @@ Find the [source code on GitHub](https://github.com/opral/monorepo/tree/main/inl
 <doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-cover-small.png" alt="Visual Studio Code extension (Sherlock) header image"></doc-image>
 
 #### Used by developers from:
+
 <doc-proof organisations="calcom, appflowy, openassistant, listmonk, jitsi"></doc-proof>
 
-## Manage Translations directly from your Code 
+## Manage Translations directly from your Code
 
 View translations within your code, extract new strings with a simple click, and effortlessly edit translated strings using Inline Decorations & Hover Support. Get notified of missing translations and other issues in real-time directly in your IDE.
 
@@ -52,6 +53,6 @@ If something isn't working as expected or you have a feature suggestion, please 
 - VS Code version 1.84.0 or higher.
 - Node.js version v18 or higher.
 
-## Pricing 
+## Pricing
 
 <doc-pricing ></doc-pricing>

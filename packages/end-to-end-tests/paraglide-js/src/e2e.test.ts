@@ -43,7 +43,7 @@ describe.concurrent("paraglide-js", () => {
         process.env.TERM_PROGRAM = "not-vscode";
         const { wait, waitForText, writeText, debug, pressKey } = await spawn(
           ParaglideLocation,
-          "init"
+          "init",
         );
 
         debug();
@@ -68,7 +68,7 @@ describe.concurrent("paraglide-js", () => {
 
         //check that the settings.json file exists
         const fileContent = await readFile(
-          path.resolve(workingDir, "project.inlang/settings.json")
+          path.resolve(workingDir, "project.inlang/settings.json"),
         );
         const settings = JSON.parse(fileContent);
         expect(settings.languageTags).toEqual(["en", "de"]);
@@ -76,50 +76,50 @@ describe.concurrent("paraglide-js", () => {
 
         //Check that the messages/en.json and messages/de.json files exist
         expect(
-          await readFile(path.resolve(workingDir, "messages/en.json"))
+          await readFile(path.resolve(workingDir, "messages/en.json")),
         ).toBeTruthy();
         expect(
-          await readFile(path.resolve(workingDir, "messages/de.json"))
+          await readFile(path.resolve(workingDir, "messages/de.json")),
         ).toBeTruthy();
 
         //Check that the compiler ran and generated the files
         expect(
-          await readFile(path.resolve(workingDir, "src/paraglide/runtime.js"))
+          await readFile(path.resolve(workingDir, "src/paraglide/runtime.js")),
         ).toBeTruthy();
         expect(
-          await readFile(path.resolve(workingDir, "src/paraglide/messages.js"))
+          await readFile(path.resolve(workingDir, "src/paraglide/messages.js")),
         ).toBeTruthy();
         expect(
           await readFile(
-            path.resolve(workingDir, "src/paraglide/messages/en.js")
-          )
+            path.resolve(workingDir, "src/paraglide/messages/en.js"),
+          ),
         ).includes("export {}");
         expect(
           await readFile(
-            path.resolve(workingDir, "src/paraglide/messages/de.js")
-          )
+            path.resolve(workingDir, "src/paraglide/messages/de.js"),
+          ),
         ).includes("export {}");
 
         const packageJson = JSON.parse(
-          await readFile(path.resolve(workingDir, "package.json"))
+          await readFile(path.resolve(workingDir, "package.json")),
         );
 
         expect(packageJson.scripts.build).includes(
-          "--project ./project.inlang"
+          "--project ./project.inlang",
         );
         expect(packageJson.scripts.postinstall).includes(
-          "--project ./project.inlang"
+          "--project ./project.inlang",
         );
 
         const expectedVersion = child_process
           .execSync(ParaglideLocation + " --version")
           .toString();
         expect(
-          packageJson.devDependencies["@inlang/paraglide-js"].trim()
+          packageJson.devDependencies["@inlang/paraglide-js"].trim(),
         ).toEqual(expectedVersion.trim());
         await cleanup();
       },
-      { timeout: 60_000 }
+      { timeout: 60_000 },
     );
 
     it(
@@ -150,18 +150,18 @@ describe.concurrent("paraglide-js", () => {
 
         writeFile(
           path.resolve(workingDir, "some/path/project.inlang/settings.json"),
-          JSON.stringify(existingProject)
+          JSON.stringify(existingProject),
         );
 
         const { wait, waitForText, writeText, debug, pressKey } = await spawn(
           ParaglideLocation,
-          "init"
+          "init",
         );
 
         debug();
 
         await waitForText(
-          "Do you want to use an existing Inlang Project or create a new one?"
+          "Do you want to use an existing Inlang Project or create a new one?",
         );
         await wait(PROMPT_TO);
         await pressKey("arrowDown"); //should select the first existing project
@@ -182,36 +182,36 @@ describe.concurrent("paraglide-js", () => {
 
         //Check that the compiler ran and generated the files
         expect(
-          await readFile(path.resolve(workingDir, "src/paraglide/runtime.js"))
+          await readFile(path.resolve(workingDir, "src/paraglide/runtime.js")),
         ).toBeTruthy();
         expect(
-          await readFile(path.resolve(workingDir, "src/paraglide/messages.js"))
+          await readFile(path.resolve(workingDir, "src/paraglide/messages.js")),
         ).toBeTruthy();
         expect(
           await readFile(
-            path.resolve(workingDir, "src/paraglide/messages/en.js")
-          )
+            path.resolve(workingDir, "src/paraglide/messages/en.js"),
+          ),
         ).includes("export {}");
         expect(
           await readFile(
-            path.resolve(workingDir, "src/paraglide/messages/de.js")
-          )
+            path.resolve(workingDir, "src/paraglide/messages/de.js"),
+          ),
         ).includes("export {}");
 
         const packageJson = JSON.parse(
-          await readFile(path.resolve(workingDir, "package.json"))
+          await readFile(path.resolve(workingDir, "package.json")),
         );
 
         expect(packageJson.scripts.build).includes(
-          "--project ./some/path/project.inlang"
+          "--project ./some/path/project.inlang",
         );
         expect(packageJson.scripts.postinstall).includes(
-          "--project ./some/path/project.inlang"
+          "--project ./some/path/project.inlang",
         );
 
         await cleanup();
       },
-      { timeout: 60_000 }
+      { timeout: 60_000 },
     );
   });
 });

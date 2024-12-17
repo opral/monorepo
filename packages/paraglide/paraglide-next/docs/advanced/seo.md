@@ -8,10 +8,10 @@ You can use messages in metadata just like everywhere else, as long as you're us
 
 ```ts
 export async function generateMetadata() {
-	return {
-		title: m.home_metadata_title(),
-		description: m.home_metadata_description(),
-	}
+  return {
+    title: m.home_metadata_title(),
+    description: m.home_metadata_description(),
+  };
 }
 ```
 
@@ -25,21 +25,24 @@ If you also want to instead have the alternate links in your page's `<head>` you
 
 ```tsx
 // src/app/layout.tsx
-import { generateAlternateLinks } from "@inlang/paraglide-next"
-import { strategy } from "@/lib/i18n"
-import type { Metadata, ResolvingMetadata } from "next"
+import { generateAlternateLinks } from "@inlang/paraglide-next";
+import { strategy } from "@/lib/i18n";
+import type { Metadata, ResolvingMetadata } from "next";
 
-export const generateMetadata = (params: any, parent: ResolvingMetadata): Metadata => {
-	return {
-		alternates: {
-			languages: generateAlternateLinks({
-				origin: "https://example.com", // the origin of your site
-				strategy: strategy,
-				resolvingMetadata: parent,
-			}),
-		},
-	}
-}
+export const generateMetadata = (
+  params: any,
+  parent: ResolvingMetadata,
+): Metadata => {
+  return {
+    alternates: {
+      languages: generateAlternateLinks({
+        origin: "https://example.com", // the origin of your site
+        strategy: strategy,
+        resolvingMetadata: parent,
+      }),
+    },
+  };
+};
 ```
 
 You **don't** need to add the translated versions of your site to your sitemap, although it doesn't hurt if you do. Adding one language is sufficient.

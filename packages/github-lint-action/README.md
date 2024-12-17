@@ -32,8 +32,8 @@ on: pull_request_target
 # explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
 permissions:
   pull-requests: write # Necessary to comment on PRs
-  issues: read         # Necessary to read issue comments
-  contents: read       # Necessary to access the repo content
+  issues: read # Necessary to read issue comments
+  contents: read # Necessary to access the repo content
 
 jobs:
   ninja-i18n:
@@ -64,23 +64,25 @@ Create a pull request with changes to your i18n files and see if the action runs
 
 ### Environmental Variables:
 
-| Name                  | Requirement | Description |
-| --------------------- | ----------- | ----------- |
-| `GITHUB_TOKEN`        | _required_ | Usage: `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`,  Ninja i18n action uses this in-built GitHub token to make the API calls for interacting with GitHub. It is built into Github Actions and does not need to be manually specified in your secrets store. [More Info](https://help.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token)|
+| Name           | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                        |
+| -------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GITHUB_TOKEN` | _required_  | Usage: `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`, Ninja i18n action uses this in-built GitHub token to make the API calls for interacting with GitHub. It is built into Github Actions and does not need to be manually specified in your secrets store. [More Info](https://help.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token) |
 
 ## Troubleshooting
 
 Please make sure that:
+
 1. you have set up an [inlang project](https://inlang.com//documentation/concept/project) with [lint rules](https://inlang.com/c/lint-rules) in your repository
 2. you have activated actions for your repository:
-    1. On GitHub.com, navigate to the main page of the repository
-    2. Click **Actions** tab
-    3. Click the button **Enable Actions on this repository**
+
+   1. On GitHub.com, navigate to the main page of the repository
+   2. Click **Actions** tab
+   3. Click the button **Enable Actions on this repository**
 
 3. actions and workflows are allowed in your repository:
-    1. On GitHub.com, navigate to the main page of the repository
-    2. Click **Settings** tab
-    3. Click **Actions** in the left sidebar, then click **General**
-    4. Select the desired option (e.g. **Allow all actions and workflows**) under **Actions permissions**
-    5. Click **Save** to apply the settings
+   1. On GitHub.com, navigate to the main page of the repository
+   2. Click **Settings** tab
+   3. Click **Actions** in the left sidebar, then click **General**
+   4. Select the desired option (e.g. **Allow all actions and workflows**) under **Actions permissions**
+   5. Click **Save** to apply the settings
 4. if the action never reports, please make sure that the pathPattern of your plugin in the project settings is a relative path (starting with "./")

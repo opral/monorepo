@@ -7,30 +7,29 @@ This Routing Strategy adds a language prefix before the pathname to distinguish 
 - `/some-page` Default Language
 
 ```ts
-import { PrefixStrategy } from "@inlang/paraglide-next"
-const strategy = PrefixStrategy()
+import { PrefixStrategy } from "@inlang/paraglide-next";
+const strategy = PrefixStrategy();
 ```
 
 ## Translated Pathnames
 
-The Prefix Strategy supports using different pathnames for each language with the `pathname` option. 
+The Prefix Strategy supports using different pathnames for each language with the `pathname` option.
 
 - `/de/ueber-uns`
 - `/fr/a-propos`
 - `/ueber-uns`
 
-
 Pathnames should not include a language prefix or the base path.
 
 ```ts
 const strategy = PrefixStrategy<AvailableLanguageTag>({
-	pathname: {
-		"/about": {
-			en: "/about",
-			de: "/ueber-uns",
-		},
-	},
-})
+  pathname: {
+    "/about": {
+      en: "/about",
+      de: "/ueber-uns",
+    },
+  },
+});
 ```
 
 You can use parameters with square brackets. You have to use an identical set of parameters in both the canonical and translated pathnames.
@@ -67,10 +66,10 @@ You can also use a message as a pathname. The translation will be used as the pa
 
 ```ts
 const strategy = PrefixStrategy<AvailableLanguageTag>({
-	pathname: {
-		"/about": m.about_pathname, //pass as reference
-	},
-})
+  pathname: {
+    "/about": m.about_pathname, //pass as reference
+  },
+});
 ```
 
 ## Excluding certain Routes from Localised Routing
@@ -79,8 +78,8 @@ You can exclude certain routes from i18n using the `exclude` option. Pass it a f
 
 ```ts
 const strategy = PrefixStrategy<AvailableLanguageTag>({
-		exclude: (pathname) => pathname == "/api" || pathname.startsWith("/api/"),
-})
+  exclude: (pathname) => pathname == "/api" || pathname.startsWith("/api/"),
+});
 ```
 
 Excluded routes won't be prefixed with the language tag & the middleware will not add `Link` headers to them.

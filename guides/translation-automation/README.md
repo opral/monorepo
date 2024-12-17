@@ -26,19 +26,22 @@ Sometimes machine translations don't match your quality standards and you want y
 Because lix is git compatible, you can use the mechanisms of GitHub to build this system.
 
 1. Create a inlang project https://manage.inlang.com
-![image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/translation-review-system/assets/lix-guide-review-step1.png)
+   ![image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/translation-review-system/assets/lix-guide-review-step1.png)
 
 2. Install the CLI
+
 ```bash
 npx @inlang/cli [command]
 ```
 
-3. Setup [Lint](https://inlang.com/m/2qj2w8pu/app-inlang-cli#lint) in CI/CD. You can add this to your test step. 
+3. Setup [Lint](https://inlang.com/m/2qj2w8pu/app-inlang-cli#lint) in CI/CD. You can add this to your test step.
+
 ```json
 "test": npx @inlang/cli lint --project <projectPath>
 ```
 
-4. Setup [Machine Translate](https://inlang.com/m/2qj2w8pu/app-inlang-cli#machine-translate) in CI/CD. You can add this to your build step. 
+4. Setup [Machine Translate](https://inlang.com/m/2qj2w8pu/app-inlang-cli#machine-translate) in CI/CD. You can add this to your build step.
+
 ```json
 "build": npx @inlang/cli machine translate --project <projectPath>
 ```

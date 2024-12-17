@@ -2,9 +2,9 @@
 
 ## Routing Strategy
 
-A "Routing Strategy" defines how the localised routing is supposed to work in your App. 
+A "Routing Strategy" defines how the localised routing is supposed to work in your App.
 
-It's an interface for providing a two-way mapping between the URL and the route that's supposed to be rendered. 
+It's an interface for providing a two-way mapping between the URL and the route that's supposed to be rendered.
 
 Eg: `https://example.com/de/ueber-uns` ↔ `/about`
 
@@ -23,27 +23,25 @@ By default this is done in `src/lib/i18n.ts`
 
 ```ts
 // src/lib/i18n.ts
-import { Navigation, Middleware, PrefixStrategy } from "@inlang/paraglide-next"
-import type { AvailableLanguageTag } from "@/paraglide/runtime"
+import { Navigation, Middleware, PrefixStrategy } from "@inlang/paraglide-next";
+import type { AvailableLanguageTag } from "@/paraglide/runtime";
 
-const strategy = PrefixStrategy<AvailableLanguageTag>()
+const strategy = PrefixStrategy<AvailableLanguageTag>();
 
-export const { Link, useRouter, usePathname, redirect, permanentRedirect } = Navigation({
+export const { Link, useRouter, usePathname, redirect, permanentRedirect } =
+  Navigation({
     strategy,
-})
+  });
 ```
 
 We can then use these localised navigation APIs throughout our App.
 
 ```tsx
-import { Link } from "@/lib/i18n"
+import { Link } from "@/lib/i18n";
 
-<Link
-    href="/"
-    className="text-blue-500 hover:text-blue-700"
->
-    {m.home_title()}
-</Link>
+<Link href="/" className="text-blue-500 hover:text-blue-700">
+  {m.home_title()}
+</Link>;
 ```
 
 ### Linking to Pages in Specific Languages
@@ -67,7 +65,6 @@ function Component() {
 }
 ```
 
-
 ## Manually Routing
 
 There are situations where you need to manually get a localized URL. You can do this by calling the `getLocalisedUrl` method on your Routing Strategy. This will return an UrlObject.
@@ -77,13 +74,13 @@ import { strategy } from "@/lib/i18n"
 
 const { pathname } = strategy.getLocalisedUrl(
     // the pathname you want to localise
-    "/about", 
+    "/about",
 
     //the language you want to localise to
     "de"
 
     // If the URL is in a different language than the current
     // Setting this is never harmful but may result in longer URLs
-    true 
+    true
 )
 ```

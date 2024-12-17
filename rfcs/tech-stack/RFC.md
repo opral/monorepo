@@ -63,33 +63,37 @@ Reasons against embeddability include runtime-dependent features like networking
 | Embeddable | -                 | o                  | +                   |
 
 {% Figure
-    src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/002-embedded-separated-legend.png"
-    
+src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/002-embedded-separated-legend.png"
+
     alt="Legend"
+
 /%}
 
 {% Figure
-    src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/002-monolith-architecture.png"
+src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/002-monolith-architecture.png"
 
     alt="Monolith architecture"
-    
+
     caption="(a) Monolith architecture. Non-editor related and editor related elements are co-developed in one application/source code."
+
 /%}
 
 {% Figure
-    src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/002-separated-architecture.png"
+src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/002-separated-architecture.png"
 
     alt="Separated architecture"
-    
+
     caption="(b) Separated architecture. A website or app links to a separate application: inlang.com -> editor.inlang.com. Similar to clicking on a document in Google Drive. The click forwards from drive.google.com to another app docs.google.com."
+
 /%}
 
 {% Figure
-    src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/002-embedded-architecture.png"
+src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/002-embedded-architecture.png"
 
     alt="Embedded architecture"
-    
+
     caption="(c) Embedded architecture. Host applications like inlang.com or VS Code embed the editor."
+
 /%}
 
 - SPA, SSR, MPA, (PWA)

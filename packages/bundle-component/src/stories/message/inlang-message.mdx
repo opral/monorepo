@@ -11,27 +11,31 @@ The InlangMessage component shows a single message of a bundle. (Example: "en" i
 ## Plain usage
 
 The compoent allows the following:
+
 - Show the variants in a listener
 - Show the locale of the message
-- Show the configured selectors 
+- Show the configured selectors
 
 <Canvas of={InlangMessage.Example} />
 
 #### Props:
+
 - `message`: The message
 - `variants`: The variants of the message
 
 #### Event:
+
 - `change`: The component dispatches a change event that contains the message information.
 
 > The event bubbles up, so you can have a change event listener on a higher level.
 
 #### Slots: (Might change in the future)
+
 - `variant`: Slot the InlangVariant component
 - `selector-button`: To slot the InlangAddSelector component
 
 ## Usage in Bundle
 
-The InlangMessage component is used in the bundle component. To achieve this you need to slot it as `message`. 
+The InlangMessage component is used in the bundle component. To achieve this you need to slot it as `message`.
 
 <Canvas of={InlangMessage.MessageInBundle} />

@@ -1,3 +1,3 @@
-import * as m from "$paraglide/messages.js"
+import * as m from "$paraglide/messages.js";
 
-console.log(m.greeting({ name: "John Doe" }))
+console.log(m.greeting({ name: "John Doe" }));

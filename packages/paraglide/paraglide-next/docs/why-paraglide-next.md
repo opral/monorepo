@@ -6,13 +6,13 @@
 <doc-feature text-color="#0F172A" color="#E1EFF7" title="No route Param needed" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/no-param.png"></doc-feature>
 </doc-features>
 
-`@inlang/paraglide-next` is the easiest way to internationalize your NextJS Project. It handles string translations, i18n routing and more! 	
+`@inlang/paraglide-next` is the easiest way to internationalize your NextJS Project. It handles string translations, i18n routing and more!
 
-Thanks to Paraglide's Treeshakeable messages only messages that are used in _Client Components_ on the _current page_ are part of the JS bundle, yielding best in class performance. 	
+Thanks to Paraglide's Treeshakeable messages only messages that are used in _Client Components_ on the _current page_ are part of the JS bundle, yielding best in class performance.
 
-Messages are fully typesafe, even with parameters, and share the same API both on the server and the client.	
+Messages are fully typesafe, even with parameters, and share the same API both on the server and the client.
 
-Paraglide-Next offers Localised routing with translated pathnames, without requiring a `[locale]` parameter in your routes.	
+Paraglide-Next offers Localised routing with translated pathnames, without requiring a `[locale]` parameter in your routes.
 
 [➡ Get started here](https://inlang.com/m/osslbuzt/paraglide-next-i18n/get-started)
 

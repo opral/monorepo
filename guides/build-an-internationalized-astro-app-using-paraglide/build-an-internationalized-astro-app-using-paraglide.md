@@ -4,9 +4,10 @@ In this guide, we will be learning how to build an multilingual Astro.
 
 Astro comes with [great internationalization out of the box](https://docs.astro.build/en/recipes/i18n/). It makes it very easy to translate the content of our pages.
 
-For stuff that's shared between pages, such as layouts or components, we still need an i18n library to inject the correct messages. We'll be using [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). 
+For stuff that's shared between pages, such as layouts or components, we still need an i18n library to inject the correct messages. We'll be using [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
 
 [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) offers some unique features that make it a great fit for Astro
+
 - Only messages that are used on 🏝️Islands are shipped to the client
 - Fully typesafe
 - Tiny runtime (<100bytes on the client)
@@ -23,17 +24,18 @@ Then set up [Astro i18n](https://docs.astro.build/en/recipes/i18n/) in `astro.co
 
 ```ts
 export default defineConfig({
-	i18n: {
-		defaultLocale: "en", // the default locale
-		locales: ["en", "de"] // the locales you want to support
-	},
-})
+  i18n: {
+    defaultLocale: "en", // the default locale
+    locales: ["en", "de"], // the locales you want to support
+  },
+});
 ```
 
 This doesn't affect the routing in any way, but it describes which paths will have which language.
+
 - `/*` will use the default language (english)
 - `/en/*` will use english
-- `/de/*` will use german 
+- `/de/*` will use german
 
 Let's set up our routes to match that:
 
@@ -49,7 +51,7 @@ Let's set up our routes to match that:
 
 It's easiest to author content directly in these files.
 
-If you are using the `content/` directory, you should set up different collections for each langauge. Follow the [Astro i18n recipie](https://docs.astro.build/en/recipes/i18n/#use-collections-for-translated-content) to do so.  
+If you are using the `content/` directory, you should set up different collections for each langauge. Follow the [Astro i18n recipie](https://docs.astro.build/en/recipes/i18n/#use-collections-for-translated-content) to do so.
 
 Inside `.astro` files, we can access the current language with `Astro.currentLocale`. We can use this to query content in the correct language.
 
@@ -67,7 +69,7 @@ This will have genrated all the files needed for Paraglid & added the necessary 
 Then register the Integration in your `astro.config.mjs`:
 
 ```js
-import paraglide from '@inlang/paraglide-astro'
+import paraglide from "@inlang/paraglide-astro";
 
 export default {
   integrations: [
@@ -79,21 +81,22 @@ export default {
   i18n: {
     defaultLocale: "en",
     locales: ["en", "de"],
-  }
-}
+  },
+};
 ```
 
 This integration will do a few things:
+
 - Run the Paraglide compiler when you run `npm run dev` or `npm run build`.
 - Run the Paraglide compiler when messages are changed.
 - Set Paraglide's language based on your astro i18n routing config.
 
-You need to tell Paraglide which languages are available, and which is the default language in `project.inlang/settings.json`. 
+You need to tell Paraglide which languages are available, and which is the default language in `project.inlang/settings.json`.
 
 ```json
 {
-    "languageTags": ["en", "de"],
-    "sourceLanguageTag": "en",
+  "languageTags": ["en", "de"],
+  "sourceLanguageTag": "en"
 }
 ```
 
@@ -107,9 +110,9 @@ The files contain a key-calue pair of the messageID and the translation.
 ```json
 // messages/en.json
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello World",
-	"greeting": "Hello {name}"
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "hello_world": "Hello World",
+  "greeting": "Hello {name}"
 }
 ```
 
@@ -120,22 +123,23 @@ If you already have a lot of hardcoded text in your app you should use the [Sher
 You can import messages from `src/paraglide/messages.js`. By convention we do a wildcard import.
 
 ```ts
-import * as m from "../paraglide/messages.js"
+import * as m from "../paraglide/messages.js";
 
-m.hello_world() // Hello World
-m.greeting({ name: "John" }) // Hello John
+m.hello_world(); // Hello World
+m.greeting({ name: "John" }); // Hello John
 ```
 
 Each message is a function that returns the message in the current language. If the message requires parameters, typescript will enforce that you pass them in.
 
 ### Passing the Language to the Client
 
-To save bundle size, Paraglide doesn't ship language detection logic to the client. Instead it just reads the `lang` attribute on the `<html>` tag. Make sure this is set correctly. 
+To save bundle size, Paraglide doesn't ship language detection logic to the client. Instead it just reads the `lang` attribute on the `<html>` tag. Make sure this is set correctly.
 
 In your global Astro layout, add the following:
+
 ```tsx
 <html lang={Astro.currentLocale}>
-    <slot/>
+  <slot />
 </html>
 ```
 
@@ -143,7 +147,7 @@ In your global Astro layout, add the following:
 
 Now it's really just a matter of going through your app and extracting any hard-coded strings into messages. This is easiest to do with the [Sherlock VSCode extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
 
-Then you just import the messages and use them in your components. 
+Then you just import the messages and use them in your components.
 
 ```html
 ---
@@ -151,12 +155,11 @@ import * as m from "../paraglide/messages.js"
 ---
 
 <aside>
-    <nav>
-        <a href="/">{m.home()}</a>
-        <a href="/about">{m.about()}</a>
-    </nav>
+  <nav>
+    <a href="/">{m.home()}</a>
+    <a href="/about">{m.about()}</a>
+  </nav>
 </aside>
-
 ```
 
 ## Translating Components
@@ -169,7 +172,7 @@ You use messages in components the same way you use messages in layouts. By impo
 <sciprt>
   import * as m from "../paraglide/messages"
 
-  let count = 0; 
+  let count = 0;
 
   function increment() {
     count += 1;

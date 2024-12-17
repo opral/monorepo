@@ -1,41 +1,41 @@
 {
-	"$schema": "https://inlang.com/schema/marketplace-manifest",
-	"id": "library.inlang.paraglideJsAdapterSolidStart",
-	"slug": "paraglide-solidstart-i18n",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-solidstart/assets/icon.png",
-	"displayName": {
-		"en": "Paraglide-SolidStart"
-	},
-	"description": {
-		"en": "A SolidStart integration for ParaglideJS, providing you with everything you need to take your solid app global."
-	},
-	"gallery": [
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-solidstart/assets/og.png"
-	],
-	"pages": {
-		"/": "./inlang/source-code/paraglide/paraglide-solidstart/README.md",
-		"/changelog": "./inlang/source-code/paraglide/paraglide-solidstart/CHANGELOG.md"
-	},
-	"keywords": [
-		"paraglide js",
-		"libraries",
-		"website",
-		"developer",
-		"paraglide",
-		"i18n",
-		"library",
-		"localization",
-		"sdk",
-		"sdk-js",
-		"solid",
-		"solid-start",
-		"javascript",
-		"typescript",
-		"inlang"
-	],
-	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
-	"pricing": "free",
-	"publisherName": "inlang",
-	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"license": "Apache-2.0"
+  "$schema": "https://inlang.com/schema/marketplace-manifest",
+  "id": "library.inlang.paraglideJsAdapterSolidStart",
+  "slug": "paraglide-solidstart-i18n",
+  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-solidstart/assets/icon.png",
+  "displayName": {
+    "en": "Paraglide-SolidStart"
+  },
+  "description": {
+    "en": "A SolidStart integration for ParaglideJS, providing you with everything you need to take your solid app global."
+  },
+  "gallery": [
+    "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-solidstart/assets/og.png"
+  ],
+  "pages": {
+    "/": "./inlang/source-code/paraglide/paraglide-solidstart/README.md",
+    "/changelog": "./inlang/source-code/paraglide/paraglide-solidstart/CHANGELOG.md"
+  },
+  "keywords": [
+    "paraglide js",
+    "libraries",
+    "website",
+    "developer",
+    "paraglide",
+    "i18n",
+    "library",
+    "localization",
+    "sdk",
+    "sdk-js",
+    "solid",
+    "solid-start",
+    "javascript",
+    "typescript",
+    "inlang"
+  ],
+  "recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
+  "pricing": "free",
+  "publisherName": "inlang",
+  "publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+  "license": "Apache-2.0"
 }

@@ -33,19 +33,19 @@ The synergy of the next-intl i18n library and an [IDE extension](/m/r7kp499g) pr
 
 ```json
 {
-	"$schema": "https://inlang.com/schema/project-settings",
-	"sourceLanguageTag": "en",
-	"languageTags": ["en", "de"],
-	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js"
-	],
-	"plugin.inlang.nextIntl": {
-		"pathPattern": "./messages/{languageTag}.json"
-	}
+  "$schema": "https://inlang.com/schema/project-settings",
+  "sourceLanguageTag": "en",
+  "languageTags": ["en", "de"],
+  "modules": [
+    "https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js"
+  ],
+  "plugin.inlang.nextIntl": {
+    "pathPattern": "./messages/{languageTag}.json"
+  }
 }
 ```
 

@@ -1,5 +1,13 @@
-import { Meta, Primary, Controls, Story, Canvas, ArgTypes, Source } from '@storybook/blocks';
-import * as InlangDocLayout from './stories/inlang-doc-layout.stories';
+import {
+  Meta,
+  Primary,
+  Controls,
+  Story,
+  Canvas,
+  ArgTypes,
+  Source,
+} from "@storybook/blocks";
+import * as InlangDocLayout from "./stories/inlang-doc-layout.stories";
 
 <Meta of={InlangDocLayout} />
 
@@ -8,6 +16,7 @@ import * as InlangDocLayout from './stories/inlang-doc-layout.stories';
 The settings component is a simple form that allows app builders add settings quickly. The component can be used as `inlang-settings`.
 
 ## Table of Contents
+
 - [Example](#example-settings)
 - [Props and Attributes](#props-and-attributes)
 - [Events](#events)
@@ -18,12 +27,12 @@ The settings component is a simple form that allows app builders add settings qu
 ## Example Settings
 
 <Canvas>
-    <Story of={InlangDocLayout.Props} />
+  <Story of={InlangDocLayout.Props} />
 </Canvas>
 
 ## Props and Attributes
 
-<ArgTypes/>
+<ArgTypes />
 
 Depending on your framework you can use pass the needed information as a prop or as an [attribute](https://lit.dev/docs/components/properties/#attributes).
 
@@ -59,6 +68,7 @@ From each property the component derives different shades and maps it on the sho
 Most styles are derrived from input css properties.
 
 Examples:
+
 - `--sl-input-color`
 - `--sl-input-background-color`
 - `--sl-input-border-color`

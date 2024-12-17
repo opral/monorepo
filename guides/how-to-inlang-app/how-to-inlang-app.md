@@ -1,6 +1,6 @@
 # Building an Inlang App: A Comprehensive Guide
 
-Inlang is a versatile globalization ecosystem that empowers developers to seamlessly integrate language translation capabilities into their applications. This comprehensive guide will walk you through the process of building a general Inlang app with the `@inlang/sdk`. 
+Inlang is a versatile globalization ecosystem that empowers developers to seamlessly integrate language translation capabilities into their applications. This comprehensive guide will walk you through the process of building a general Inlang app with the `@inlang/sdk`.
 
 We'll cover initializing a project from a repo, creating and updating messages, and working with [lint rules](https://inlang.com/c/lint-rules).
 
@@ -24,17 +24,18 @@ const repo = await openRepository(repoRoot, {
 Or, use createNodeishMemoryFs to open a GitHub repo from a browser:
 
 ```typescript
-import { createNodeishMemoryFs } from "@lix-js/fs"
-import { openRepository } from "@lix-js/client"
+import { createNodeishMemoryFs } from "@lix-js/fs";
+import { openRepository } from "@lix-js/client";
 
-const repoURL = "https://github.com/inlang/ci-test-repo"
+const repoURL = "https://github.com/inlang/ci-test-repo";
 
 const repo = await openRepository(repoURL, {
-    nodeishFs: createNodeishMemoryFs(),
-})
+  nodeishFs: createNodeishMemoryFs(),
+});
 ```
 
 ## 2. Load Project
+
 The next step is to initialize a project from the repo, using the Inlang SDK. This sets the foundation for your Inlang powered application.
 
 Since there may be multiple projects in a repo, a projectPath needs to be specified. The default projectPath is `/project.inlang`.
@@ -45,14 +46,14 @@ import { loadProject } from "@inlang/sdk";
 const projectPath = "/project.inlang";
 
 const inlang = loadProject({
-    projectPath,
-    repo,
+  projectPath,
+  repo,
 });
 ```
 
 ## 2. Create and update Messages
 
-With the project initialized, creating and updating messages is straightforward. Use the `inlang.query.messages.create` function to create a message and `inlang.query.messages.update` to update it. 
+With the project initialized, creating and updating messages is straightforward. Use the `inlang.query.messages.create` function to create a message and `inlang.query.messages.update` to update it.
 
 There are also a few other query/mutation functions you can use.
 
@@ -81,7 +82,9 @@ This lint rule checks whether your message id's are in a snake case format or no
 To fetch lint reports for a message, use the async lintReports.get() function.
 
 ```typescript
-const reports = await inlang.query.lintReports.get({ where: { messageId: message.id } })
+const reports = await inlang.query.lintReports.get({
+  where: { messageId: message.id },
+});
 /* do something with reports */
 ```
 
@@ -91,4 +94,4 @@ If you are ready and want to release what you have built, please [publish your a
 
 ## Conclusion
 
-Now it's your turn! We can't wait what you wil build with the inlang SDK. The possibilities are near endless – like a Chrome extension, a Sketch plugin, a Translation Analytics tool? Happy coding! 
+Now it's your turn! We can't wait what you wil build with the inlang SDK. The possibilities are near endless – like a Chrome extension, a Sketch plugin, a Translation Analytics tool? Happy coding!

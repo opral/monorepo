@@ -1,28 +1,28 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { ProjectConfig } from "@inlang/core/src/config"
-import { InlangEnvironment } from "@inlang/core/src/environment/types"
+import { ProjectConfig } from "@inlang/core/src/config";
+import { InlangEnvironment } from "@inlang/core/src/environment/types";
 
 function readResources(args: any): any {}
 
 function getLanguages(args: any): any {}
 
 export const myPlugin = createPlugin<{ pathPattern: string }>((settings) => {
-	return {
-		id: "samuelstroschein.plugin-json",
-		defineConfig: ({ config, env }) => {
-			if (settings.pathPattern === undefined) {
-				throw new Error("pathPattern is required")
-			}
+  return {
+    id: "samuelstroschein.plugin-json",
+    defineConfig: ({ config, env }) => {
+      if (settings.pathPattern === undefined) {
+        throw new Error("pathPattern is required");
+      }
 
-			return {
-				...config,
-				readResources: readResources({ settings, env }),
-				languages: getLanguages({ settings, env }),
-			}
-		},
-	}
-})
+      return {
+        ...config,
+        readResources: readResources({ settings, env }),
+        languages: getLanguages({ settings, env }),
+      };
+    },
+  };
+});
 
 /**
  * The function to configure a plugin.
@@ -34,18 +34,24 @@ export const myPlugin = createPlugin<{ pathPattern: string }>((settings) => {
  * 	 	})
  *   ]
  */
-type InitPluginFunction<PluginSettings> = (settings: PluginSettings) => Plugin
+type InitPluginFunction<PluginSettings> = (settings: PluginSettings) => Plugin;
 
 type Plugin = {
-	id: string
-	defineConfig(args: { config: Readonly<Partial<ProjectConfig>>; env: InlangEnvironment }): void
-}
+  id: string;
+  defineConfig(args: {
+    config: Readonly<Partial<ProjectConfig>>;
+    env: InlangEnvironment;
+  }): void;
+};
 
 function createPlugin<PluginSettings>(
-	callback: (settings: PluginSettings) => Plugin,
+  callback: (settings: PluginSettings) => Plugin,
 ): InitPluginFunction<PluginSettings> {
-	return callback
+  return callback;
 }
 
 // usage:
-myPlugin({ pathPattern: "" }).defineConfig({ config: {}, env: {} as InlangEnvironment })
+myPlugin({ pathPattern: "" }).defineConfig({
+  config: {},
+  env: {} as InlangEnvironment,
+});
