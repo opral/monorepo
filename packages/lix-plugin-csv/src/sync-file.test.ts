@@ -1,5 +1,5 @@
 import { test, expect, vi } from "vitest";
-import { openLixInMemory } from "@lix-js/sdk";
+import { changeQueueSettled, executeSync, openLixInMemory } from "@lix-js/sdk";
 import {
 	createLsaInMemoryEnvironment,
 	createServerApiHandler,
@@ -19,17 +19,17 @@ peter.n@moon.mail;Peter;Newman
 anna@post.de;Anna;Jakob`,
 	) as unknown as ArrayBuffer;
 
+	// @ts-expect-error - eases debugging by querying both lixes in debug steps
+	global.executeSync = executeSync;
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
 	const lixId = "mock_lix_id";
 
 	const lixA = await openLixInMemory({
-		keyValues: [
-			{ key: "lix_id", value: lixId },
-			{ key: "lix_server_url", value: "http://mock.com" },
-		],
+		keyValues: [{ key: "lix_id", value: lixId }],
 		providePlugins: [csvPlugin],
 	});
+
 	// @ts-expect-error - eases debugging
 	lixA.db.__name = "lixA";
 
@@ -51,6 +51,20 @@ anna@post.de;Anna;Jakob`,
 	// @ts-expect-error - eases debugging
 	lixB.db.__name = "lixB";
 
+	// ensure that both lixes are in different version
+	await switchVersion({ lix: lixA, to: version0 });
+	await switchVersion({ lix: lixB, to: version1 });
+
+	// provide the mock server url
+	await Promise.all(
+		[lixA, lixB].map((lix) =>
+			lix.db
+				.insertInto("key_value")
+				.values({ key: "lix_server_url", value: "http://mock.com" })
+				.execute(),
+		),
+	);
+
 	// turn on sync for both lixes
 	await Promise.all(
 		[lixA, lixB].map((lix) =>
@@ -62,22 +76,23 @@ anna@post.de;Anna;Jakob`,
 		),
 	);
 
-	// ensure that both lixes are in different version
-	await switchVersion({ lix: lixA, to: version0 });
-	await switchVersion({ lix: lixB, to: version1 });
-
 	// lix A inserts a csv file in version 0
 	await lixA.db
 		.insertInto("file")
 		.values({
 			id: "sjd9a9-2j2j-minimal",
 			path: "/email-newsletter.csv",
+			metadata: {
+				unique_column: "email",
+			},
 			data: mockCsvFile,
 		})
 		.execute();
 
+	await changeQueueSettled({ lix: lixA });
+
 	// awaiting the polling sync
-	await new Promise((resolve) => setTimeout(resolve, 2001));
+	await new Promise((resolve) => setTimeout(resolve, 2100));
 
 	// lix B switches to version 0
 	// expecting the files of both lixes to match
@@ -85,9 +100,13 @@ anna@post.de;Anna;Jakob`,
 
 	const [lixAFileTable, lixBFileTable] = await Promise.all(
 		[lixA, lixB].map((lix) =>
-			lix.db.selectFrom("file").orderBy("id", "desc").selectAll().execute(),
+			lix.db
+				.selectFrom("file")
+				.orderBy("id", "desc")
+				.selectAll()
+				.executeTakeFirst(),
 		),
 	);
 
-	expect(lixAFileTable).toEqual(lixBFileTable);
+	expect(lixAFileTable).toStrictEqual(lixBFileTable);
 });
