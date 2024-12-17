@@ -7,21 +7,18 @@ import {
 import { createVersion } from "@lix-js/sdk";
 import { switchVersion } from "@lix-js/sdk";
 import type { Version } from "@lix-js/sdk";
-import { executeSync } from "@lix-js/sdk";
-
 import { plugin as csvPlugin } from "./index.js";
-
-// does work in web app - how would we do this in a test?
-// import minimalCsv from "../fixtures/email-newsletter.csv?raw";
-import fs from "fs";
-
-const packFileHandle = fs.readFileSync(
-	__dirname + "/../fixtures/email-newsletter.csv",
-);
 
 test("a file without unique id should  be synced", async () => {
 	const environment = createLsaInMemoryEnvironment();
 	const lsaHandler = await createServerApiHandler({ environment });
+
+	const mockCsvFile = new TextEncoder().encode(
+		`email;First name;Last name
+rachel@demo.com;Rachel;Booker
+peter.n@moon.mail;Peter;Newman
+anna@post.de;Anna;Jakob`,
+	) as unknown as ArrayBuffer;
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
@@ -146,7 +143,7 @@ test("a file without unique id should  be synced", async () => {
 			id: "sjd9a9-2j2j-minimal",
 
 			path: "/email-newsletter.csv",
-			data: packFileHandle,
+			data: mockCsvFile,
 		})
 		.execute();
 
