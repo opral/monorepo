@@ -1,35 +1,35 @@
 {
-	"$schema": "https://inlang.com/schema/marketplace-manifest",
-	"id": "app.inlang.ninjaI18nAction",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/github-lint-action/assets/ninja-logo.png",
-	"gallery": [],
-	"displayName": {
-		"en": "Ninja i18n - GitHub Lint Action"
-	},
-	"description": {
-		"en": "This action checks for translation issues within your PRs."
-	},
-	"pages": {
-		"/": "./inlang/source-code/github-lint-action/MARKETPLACE.md",
-		"/changelog": "./inlang/source-code/github-lint-action/CHANGELOG.md"
-	},
-	"keywords": [
-		"developer",
-		"ci/cd",
-		"github",
-		"lint",
-		"action",
-		"application",
-		"website",
-		"translation",
-		"localization",
-		"i18n",
-		"inlang"
-	],
-	"recommends": ["g/ssryldhd", "g/6ddyhpoi", "m/r7kp499g", "m/tdozzpar"],
-	"publisherName": "inlang",
-	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"website": "https://github.com/marketplace/actions/ninja-i18n",
-	"license": "Apache-2.0",
-	"pricing": "Free"
+  "$schema": "https://inlang.com/schema/marketplace-manifest",
+  "id": "app.inlang.ninjaI18nAction",
+  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/github-lint-action/assets/ninja-logo.png",
+  "gallery": [],
+  "displayName": {
+    "en": "Ninja i18n - GitHub Lint Action"
+  },
+  "description": {
+    "en": "This action checks for translation issues within your PRs."
+  },
+  "pages": {
+    "/": "./inlang/source-code/github-lint-action/MARKETPLACE.md",
+    "/changelog": "./inlang/source-code/github-lint-action/CHANGELOG.md"
+  },
+  "keywords": [
+    "developer",
+    "ci/cd",
+    "github",
+    "lint",
+    "action",
+    "application",
+    "website",
+    "translation",
+    "localization",
+    "i18n",
+    "inlang"
+  ],
+  "recommends": ["g/ssryldhd", "g/6ddyhpoi", "m/r7kp499g", "m/tdozzpar"],
+  "publisherName": "inlang",
+  "publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+  "website": "https://github.com/marketplace/actions/ninja-i18n",
+  "license": "Apache-2.0",
+  "pricing": "Free"
 }

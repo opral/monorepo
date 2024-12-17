@@ -138,17 +138,17 @@ flowchart LR
 
 ```json
 {
-	"example": "Welcome {$name} to this example.",
-	"info": "Click the button to continue."
+  "example": "Welcome {$name} to this example.",
+  "info": "Click the button to continue."
 }
 ```
 
 ##### Retrieving a message
 
 ```jsx
-import translate from "i18n-library"
+import translate from "i18n-library";
 
-console.log(translate("example", { name: "Samuel" }))
+console.log(translate("example", { name: "Samuel" }));
 ```
 
 ##### Output
@@ -240,11 +240,12 @@ import Translated from 'i18n-library';
 Develop a CLI and Visual Studio Code extension (Sherlock) to extract and validate resources and messages.
 
 {% Figure
-    src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/core-architecture/assets/001-ide-extension.gif"
+src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/core-architecture/assets/001-ide-extension.gif"
 
     alt="Localization IDE extension"
-    
+
     caption="An IDE extension speeds up development by providing message extraction, linting, and more."
+
 /%}
 
 ### Editor
@@ -256,8 +257,8 @@ Develop a CLI and Visual Studio Code extension (Sherlock) to extract and validat
     alt="Proof of concept translation editor CAT"
 
     caption="Early iteration of the inlang editor from December 2021."
-/%}
 
+/%}
 
 Translators need a dedicated editor to manage translations. Those editors exist and are called CAT (Computer Assisted Translation) editors. There are two types of editors:
 
@@ -337,7 +338,7 @@ _Exemplary inlang config:_
 
 ```json
 {
-	"pathPattern": "./resources/{languageCode}.ftl"
+  "pathPattern": "./resources/{languageCode}.ftl"
 }
 ```
 
@@ -401,26 +402,26 @@ Leveraging JavaScript, or any programming language allows for tremendous flexibi
 // pseudocode that illustrates the possbility to
 // adjust how messages are machine translated.
 export async function onMachineTranslate(message) {
-	// or DeepL, Yandex, etc.
-	const googleTranslate = await import("google-translate")
-	return googleTranslate(message)
+  // or DeepL, Yandex, etc.
+  const googleTranslate = await import("google-translate");
+  return googleTranslate(message);
 }
 
 // pseudocode that illustrates the possiblity to adjust
 // the business logic of the editor.
 export const editor = {
-	// what should happen when a translator pressed "Save"
-	// (edited a message).
-	onSave: async (message) => {
-		// the message could be committed.
-		return commit(message)
-		// or a pull request can be opened.
-		return openPullRequest(message)
-		// or something else can happen
-		return somethingElse(message)
-	},
-	// and more...
-}
+  // what should happen when a translator pressed "Save"
+  // (edited a message).
+  onSave: async (message) => {
+    // the message could be committed.
+    return commit(message);
+    // or a pull request can be opened.
+    return openPullRequest(message);
+    // or something else can happen
+    return somethingElse(message);
+  },
+  // and more...
+};
 ```
 
 ### Conclusion

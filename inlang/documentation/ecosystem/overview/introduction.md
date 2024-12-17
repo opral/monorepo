@@ -33,7 +33,7 @@ inlang apps are built on lix. Lix is a git-compatible version control backend fo
 
 What you get with this approach:
 
-- **Quality management** - Define [Lint Rules](/documentation/lint-rule) for your project to ship quality cross-app. 
+- **Quality management** - Define [Lint Rules](/documentation/lint-rule) for your project to ship quality cross-app.
 - **Automations** - With lix change control you can use CI/CD to check lint, machine translate, validate and more. (Continuous Localization)
 - **Review** - PR workflows can be used to gain control over the merged content.
 

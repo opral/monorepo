@@ -82,7 +82,7 @@ The SDK will provide that function as the default export, so anyone can name it 
 This lookup function needs to be called with an `Id` e.g. like this:
 
 ```ts
-i("welcome", { name: "Inlang" })
+i("welcome", { name: "Inlang" });
 ```
 
 ### alternate links
@@ -142,25 +142,25 @@ _inlang.config.js_
 
 ```ts
 const config = {
-	sdk: {
-		adapter: {
-			SvelteKit: {
-				// ... SvelteKit specific options if there are any
-			},
-		},
-		alternateLinks: false, // turn feature off
-		languageDetection: [
-			{
-				type: "rootSlug",
-			},
-			{
-				type: "cookie",
-				// can / needs to be configured
-				name: "lang",
-			},
-		],
-	},
-}
+  sdk: {
+    adapter: {
+      SvelteKit: {
+        // ... SvelteKit specific options if there are any
+      },
+    },
+    alternateLinks: false, // turn feature off
+    languageDetection: [
+      {
+        type: "rootSlug",
+      },
+      {
+        type: "cookie",
+        // can / needs to be configured
+        name: "lang",
+      },
+    ],
+  },
+};
 ```
 
 ## Error handling
@@ -427,20 +427,20 @@ where `wrapHandle` could look like this:
 
 ```ts
 export const wrapHandle = (callback) => async (args) => {
-	const { event } = args
+  const { event } = args;
 
-	loadAllResources()
+  loadAllResources();
 
-	const language = detectLanguage(event)
-	const i18n = createLookupFunctionForLanguage(language)
+  const language = detectLanguage(event);
+  const i18n = createLookupFunctionForLanguage(language);
 
-	event.locals.inlang = {
-		language,
-		i18n,
-	}
+  event.locals.inlang = {
+    language,
+    i18n,
+  };
 
-	return callback(args)
-}
+  return callback(args);
+};
 ```
 
 ### `routes/+layout.ts`
@@ -458,12 +458,12 @@ where `wrapLayoutJs` could look like this:
 
 ```ts
 export const wrapLayoutJs = (callback) => async (args) => {
-	const { data } = await loadResourceAsync(data.inlangLanguage)
+  const { data } = await loadResourceAsync(data.inlangLanguage);
 
-	const result = await callback(args)
+  const result = await callback(args);
 
-	return { ...result, inlangLanguage: data.inlangLanguage }
-}
+  return { ...result, inlangLanguage: data.inlangLanguage };
+};
 ```
 
 ### `routes/+layout.svelte`

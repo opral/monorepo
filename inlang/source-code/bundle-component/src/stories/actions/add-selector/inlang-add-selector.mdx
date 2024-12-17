@@ -1,8 +1,8 @@
-import { Canvas, Meta } from '@storybook/blocks';
- 
-import * as InlangAddSelector from './inlang-add-selector.stories.ts';
- 
-<Meta of={InlangAddSelector} />
+import { Canvas, Meta } from "@storybook/blocks";
+
+import * as InlangAddSelector from "./inlang-add-selector.stories.ts";
+
+<Meta of={InlangAddSelector} />;
 
 # InlangAddSelector
 
@@ -11,10 +11,12 @@ The component is currently only used inside of the bundle. That means that it ca
 <Canvas of={InlangAddSelector.Example} />
 
 #### Props:
+
 - `bundle`: The bundle with with the declarations.
 - `message`: The message where the selector should be added.
 
 #### Event:
+
 - `change`: The component dispatches a change event that contains all necessary information.
 - `submit`: The component dispatches a submit event.
 

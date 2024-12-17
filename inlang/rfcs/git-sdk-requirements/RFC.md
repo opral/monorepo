@@ -56,13 +56,13 @@ Oftentimes only a subset of files in git repositories are required. Only cloning
 
 // does not clone the entire repository.
 // only metadata that enable other git commands to run
-await clone("https://github.com/opral/monorepo", fs)
+await clone("https://github.com/opral/monorepo", fs);
 
 // lazy fetches the file and git commit history of README.md
-const commitHistory = await history("/README.md", fs)
+const commitHistory = await history("/README.md", fs);
 
 // lazy fetches xyz file
-const readme = await fs.readFile("/xyz.md")
+const readme = await fs.readFile("/xyz.md");
 ```
 
 ### Must be git compatible [High Confidence]
@@ -79,30 +79,30 @@ An interesting question arises how much of the git spec is required to operate a
 // DISCUSSION: What APIs are required?
 
 // elementary
-clone()
-commit()
-push()
-pull()
+clone();
+commit();
+push();
+pull();
 
 // branch related
-currentBranch()
-createBranch()
-renameBranch()
-switchBranch()
-deleteBranch()
+currentBranch();
+createBranch();
+renameBranch();
+switchBranch();
+deleteBranch();
 
 // change related
 // (3 API different "changes" concepts...)
-unstagedChanges()
-uncommittedChanges()
-unpushedChanges()
+unstagedChanges();
+uncommittedChanges();
+unpushedChanges();
 
 // host like GitHub or GitLab dependent
-signIn()
-signOut()
-createFork()
-syncFork()
-openPullRequest()
+signIn();
+signOut();
+createFork();
+syncFork();
+openPullRequest();
 ```
 
 ### (Future) File-based auth [High Confidence | Server-related ]

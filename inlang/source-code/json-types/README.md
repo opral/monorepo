@@ -7,12 +7,12 @@ JSON types that are used across inlang's codebase (and hopefully useful to exter
 Importing any JSONObject as `type` will prune runtime validation code.
 
 ```ts
-import type { JSONObject } from "@inlang/json-types"
+import type { JSONObject } from "@inlang/json-types";
 
 type MyType = JSONObject<{
-	foo: string
-	bar: number
-}>
+  foo: string;
+  bar: number;
+}>;
 ```
 
 #### Validation
@@ -20,12 +20,12 @@ type MyType = JSONObject<{
 Every JSONObject is defined as [JSONSchema](https://json-schema.org/) with [typebox](https://github.com/sinclairzx81/typebox) and can be used for validation
 
 ```ts
-import { JSONObject } from "@inlang/json-types"
+import { JSONObject } from "@inlang/json-types";
 
 const isValid = someJsonSchemaValidator(
-	JSONObject({
-		foo: string(),
-		bar: number(),
-	}),
-)
+  JSONObject({
+    foo: string(),
+    bar: number(),
+  }),
+);
 ```

@@ -1,5 +1,5 @@
-import { setLanguageTag } from "$paraglide/runtime.js"
-import { getLanguage } from "./getLanguage.server"
+import { setLanguageTag } from "$paraglide/runtime.js";
+import { getLanguage } from "./getLanguage.server";
 
 /**
  * Set's the language on the server based on the current request.
@@ -20,6 +20,6 @@ import { getLanguage } from "./getLanguage.server"
  * ```
  */
 export function initializeLanguage() {
-	//for some reason we can't pass the function as a reference directly
-	setLanguageTag(() => getLanguage())
+  //for some reason we can't pass the function as a reference directly
+  setLanguageTag(() => getLanguage());
 }

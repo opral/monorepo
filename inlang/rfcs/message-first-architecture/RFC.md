@@ -49,7 +49,7 @@ Inlang core should be refactored to be "message-first".
 - Future optimization: Only retrieve messages that are actually used in the app by passing a filter object.
 
 ```ts
-const messages = await config.getMessages()
+const messages = await config.getMessages();
 ```
 
 #### 2. CRUD operations
@@ -59,41 +59,43 @@ const messages = await config.getMessages()
 
 ```ts
 messages = messages.create({
-	id: "hello",
-	languageTag: "en-US",
-	body: "how are you?",
-})
+  id: "hello",
+  languageTag: "en-US",
+  body: "how are you?",
+});
 
 const message = messages.get({
-	id: "hello",
-	languageTag: "en-US",
-	body: "how are you?",
-})
+  id: "hello",
+  languageTag: "en-US",
+  body: "how are you?",
+});
 
 messages = messages.update({
-	id: "hello",
-	languageTag: "en-US",
-	body: "how are you doing?",
-})
+  id: "hello",
+  languageTag: "en-US",
+  body: "how are you doing?",
+});
 
 messages = messages.delete({
-	id: "hello",
-	languageTag: "en-US",
-})
+  id: "hello",
+  languageTag: "en-US",
+});
 ```
 
 ```ts
 // For comparison, here is the current API:
 
-const refResource = resources.find((resource) => resource.languageTag.name === "en-US")
+const refResource = resources.find(
+  (resource) => resource.languageTag.name === "en-US",
+);
 const message = query(refResource).get({
-	id: "hello.login",
-})
+  id: "hello.login",
+});
 
 // -------------------
 
 // this proposal
-const message = messages.get({ id: "hello.login", languageTag: "en-US" })
+const message = messages.get({ id: "hello.login", languageTag: "en-US" });
 ```
 
 #### 3. `config.saveMessages()`
@@ -101,7 +103,7 @@ const message = messages.get({ id: "hello.login", languageTag: "en-US" })
 - A plugin can save messages anywhere (e.g. resources files, remote APIs, embedded databases).
 
 ```ts
-await config.saveMessages(messages)
+await config.saveMessages(messages);
 ```
 
 ### Plugins
@@ -120,9 +122,9 @@ await config.saveMessages(messages)
 #### Linting application flow
 
 ```ts
-const [lints, errorsDuringLinting] = await lint({ messages, config })
+const [lints, errorsDuringLinting] = await lint({ messages, config });
 
-lints.reports.filter((report) => report.level === "error")
+lints.reports.filter((report) => report.level === "error");
 ```
 
 ```
@@ -148,28 +150,28 @@ lints.reports.filter((report) => report.level === "error")
 
 ```ts
 export const missingTranslation = createLintRule({
-	id: "inlang.missingTranslation",
-	setup: ({ report }) => {
-		let targetLanguage: LanguageTag["name"] | undefined
-		return {
-			visitors: {
-				Resource: ({ target }) => {
-					// we need to derive the target language from the resource
-					// because the message is missing.
-					targetLanguage = target?.languageTag.name
-				},
-				Message: ({ target, reference }) => {
-					if (target === undefined && reference) {
-						report({
-							node: reference,
-							message: `Message with id '${reference.id.name}' is missing for '${targetLanguage}'.`,
-						})
-					}
-				},
-			},
-		}
-	},
-})
+  id: "inlang.missingTranslation",
+  setup: ({ report }) => {
+    let targetLanguage: LanguageTag["name"] | undefined;
+    return {
+      visitors: {
+        Resource: ({ target }) => {
+          // we need to derive the target language from the resource
+          // because the message is missing.
+          targetLanguage = target?.languageTag.name;
+        },
+        Message: ({ target, reference }) => {
+          if (target === undefined && reference) {
+            report({
+              node: reference,
+              message: `Message with id '${reference.id.name}' is missing for '${targetLanguage}'.`,
+            });
+          }
+        },
+      },
+    };
+  },
+});
 ```
 
 ##### Proposal
@@ -183,24 +185,24 @@ export const missingTranslation = createLintRule({
 
 ```ts
 export const missingTranslation = createLintRule({
-	id: "inlang.missingTranslation",
-	message: ({ message, messages, config }) => {
-		if (message.languageTag !== config.referenceLanguageTag) {
-			return
-		}
-		const result: LintReport[] = []
-		for (const languageTag of config.languageTags) {
-			// messages is performance optimized with an index. thus, this (should be) fast.
-			const translation = messages.get({ id: message.id, languageTag })
-			if (translation === undefined) {
-				result.push({
-					messageId: message.id,
-					languageTag,
-					message: `Missing translation for message '${message.id}' in language '${languageTag}'.`,
-				})
-			}
-		}
-		return result
-	},
-})
+  id: "inlang.missingTranslation",
+  message: ({ message, messages, config }) => {
+    if (message.languageTag !== config.referenceLanguageTag) {
+      return;
+    }
+    const result: LintReport[] = [];
+    for (const languageTag of config.languageTags) {
+      // messages is performance optimized with an index. thus, this (should be) fast.
+      const translation = messages.get({ id: message.id, languageTag });
+      if (translation === undefined) {
+        result.push({
+          messageId: message.id,
+          languageTag,
+          message: `Missing translation for message '${message.id}' in language '${languageTag}'.`,
+        });
+      }
+    }
+    return result;
+  },
+});
 ```

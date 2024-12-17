@@ -1,3 +1,5 @@
-import { NextRequest } from "next/server"
+import { NextRequest } from "next/server";
 
-export type LanguageDetector<T extends string> = (request: NextRequest) => T | undefined
+export type LanguageDetector<T extends string> = (
+  request: NextRequest,
+) => T | undefined;

@@ -1,29 +1,29 @@
 {
-	"name": "@inlang/paraglide-next-example-app",
-	"version": "0.2.27",
-	"private": true,
-	"scripts": {
-		"_dev": "next dev",
-		"build": "next build",
-		"preview": "next start",
-		"clean": "rm -rf ./dist ./node_modules ./src/paraglide ./.next"
-	},
-	"dependencies": {
-		"@inlang/paraglide-next": "workspace:*",
-		"consola": "^3.2.3",
-		"next": "14.1.3",
-		"react": "^18",
-		"react-dom": "^18"
-	},
-	"devDependencies": {
-		"@inlang/paraglide-js": "workspace:*",
-		"@types/node": "^20",
-		"@types/react": "^18",
-		"@types/react-dom": "^18",
-		"typescript": "^5.5.2"
-	},
-	"files": [
-		"*",
-		".gitignore"
-	]
+  "name": "@inlang/paraglide-next-example-app",
+  "version": "0.2.27",
+  "private": true,
+  "scripts": {
+    "_dev": "next dev",
+    "build": "next build",
+    "preview": "next start",
+    "clean": "rm -rf ./dist ./node_modules ./src/paraglide ./.next"
+  },
+  "dependencies": {
+    "@inlang/paraglide-next": "workspace:*",
+    "consola": "^3.2.3",
+    "next": "14.1.3",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@inlang/paraglide-js": "workspace:*",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5.5.2"
+  },
+  "files": [
+    "*",
+    ".gitignore"
+  ]
 }

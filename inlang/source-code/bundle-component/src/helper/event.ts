@@ -1,6 +1,6 @@
 //generalized event dispatcher
 
-import type { Bundle, Message, Variant } from "@inlang/sdk2"
+import type { Bundle, Message, Variant } from "@inlang/sdk2";
 
 /**
  * This event is dispatched when a change is made to a bundle, message or variant.
@@ -11,16 +11,16 @@ import type { Bundle, Message, Variant } from "@inlang/sdk2"
  * - `newData` is `undefined` if the entity was deleted.
  */
 export type ChangeEventDetail = {
-	entityId: string
-	entity: "bundle" | "message" | "variant"
-	newData?: Bundle | Message | Variant
-}
+  entityId: string;
+  entity: "bundle" | "message" | "variant";
+  newData?: Bundle | Message | Variant;
+};
 
 export const createChangeEvent = (detail: ChangeEventDetail) => {
-	const onChangeEvent = new CustomEvent("change", {
-		bubbles: true,
-		composed: true,
-		detail,
-	})
-	return onChangeEvent
-}
+  const onChangeEvent = new CustomEvent("change", {
+    bubbles: true,
+    composed: true,
+    detail,
+  });
+  return onChangeEvent;
+};

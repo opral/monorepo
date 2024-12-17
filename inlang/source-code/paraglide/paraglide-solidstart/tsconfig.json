@@ -1,14 +1,14 @@
 {
-	"extends": "../../tsconfig.base.json",
-	"include": ["src/**/*.ts"],
-	"compilerOptions": {
-		"module": "ESNext",
-		"moduleResolution": "Node",
-		"lib": ["ESNext", "DOM"],
-		"types": [],
-		"jsxImportSource": "solid-js",
-		"jsx": "preserve",
-		"outDir": "dist",
-		"rootDir": "src"
-	}
+  "extends": "../../tsconfig.base.json",
+  "include": ["src/**/*.ts"],
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "lib": ["ESNext", "DOM"],
+    "types": [],
+    "jsxImportSource": "solid-js",
+    "jsx": "preserve",
+    "outDir": "dist",
+    "rootDir": "src"
+  }
 }

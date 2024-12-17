@@ -8,7 +8,7 @@
 
 [![Inlang-ecosystem compatibility badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
 
-# Gettting Started 
+# Gettting Started
 
 ```bash
 npx @inlang/paraglide-js init
@@ -20,23 +20,23 @@ This will generate `messages/{lang}.json` files for each of your languages. That
 Register the Integration in `astro.config.mjs`:
 
 ```js
-import paraglide from "@inlang/paraglide-astro"
+import paraglide from "@inlang/paraglide-astro";
 
 export default {
-	// Use astro's i18n routing for deciding which language to use
-	i18n: {
-		locales: ["en", { code: "de", path: "deutsch" }],
-		defaultLocale: "en",
-	},
+  // Use astro's i18n routing for deciding which language to use
+  i18n: {
+    locales: ["en", { code: "de", path: "deutsch" }],
+    defaultLocale: "en",
+  },
 
-	integrations: [
-		paraglide({
-			// recommended settings
-			project: "./project.inlang",
-			outdir: "./src/paraglide", //where your files should be
-		}),
-	],
-}
+  integrations: [
+    paraglide({
+      // recommended settings
+      project: "./project.inlang",
+      outdir: "./src/paraglide", //where your files should be
+    }),
+  ],
+};
 ```
 
 ## Passing the Language to the Client
@@ -64,7 +64,7 @@ Messages live in `messages/{lang}.json` files. Add a message to get started
 ```json
 // messages.en.json
 {
-	"hello": "Hello {name}!"
+  "hello": "Hello {name}!"
 }
 ```
 
@@ -72,8 +72,8 @@ You can edit which languages you support in `project.inlang/settings.json`.
 
 ```json
 {
-	"languageTags": ["en", "de"],
-	"sourceLanguageTag": "en"
+  "languageTags": ["en", "de"],
+  "sourceLanguageTag": "en"
 }
 ```
 
@@ -140,28 +140,29 @@ You can also access the current language and text-direction via `Astro.locals.pa
 Because pages in different languages often have different slugs there is no way to automatically generate links in all languages. You will need to define a custom function.
 
 ```ts
-import type { AvailableLanguageTag } from "./paraglide/runtime.js"
+import type { AvailableLanguageTag } from "./paraglide/runtime.js";
 
-type AbsolutePathname = `/${string}`
+type AbsolutePathname = `/${string}`;
 
-const pathnames : Record<AbsolutePathname, 
-	Record<AvailableLanguageTag, AbsolutePathname>
+const pathnames: Record<
+  AbsolutePathname,
+  Record<AvailableLanguageTag, AbsolutePathname>
 > = {
-	"/about": {
-		en: "/about",
-		de: "/de/ueber-uns",
-	}
-}
+  "/about": {
+    en: "/about",
+    de: "/de/ueber-uns",
+  },
+};
 
 // src/linking.ts
 export function localizePathname(
-	pathname: AbsolutePathname, 
-	locale: AvailableLanguageTag
+  pathname: AbsolutePathname,
+  locale: AvailableLanguageTag,
 ) {
-	if(pathnames[pathname]) {
-		return pathnames[pathname][locale]
-	}
-	return pathname
+  if (pathnames[pathname]) {
+    return pathnames[pathname][locale];
+  }
+  return pathname;
 }
 ```
 
@@ -177,8 +178,8 @@ For SEO reasons, you should add alternate links to your page's head that point t
 
 ```html
 <head>
-	<link rel="alternate" hreflang="en" href="https://acme.com/en/about" />
-	<link rel="alternate" hreflang="de" href="https://acme.com/de/ueber-uns" />
+  <link rel="alternate" hreflang="en" href="https://acme.com/en/about" />
+  <link rel="alternate" hreflang="de" href="https://acme.com/de/ueber-uns" />
 </head>
 ```
 

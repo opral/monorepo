@@ -7,7 +7,6 @@ description: How to use Sherlock with Visual Studio Code
 
 In this video tour, you will learn how to use Sherlock with Visual Studio Code. Sherlock is an i18n inspector that helps you streamline the i18n translation process. It allows you to visualize, edit, and lint translations, as well as extract new translations with a simple click.
 
-
 ## Complete Video Tour (3min) – WIP 🚧
 
 The following video shows a complete tour of Sherlock, including the most useful features and how to use them.
@@ -32,7 +31,6 @@ The following videos show the main features of Sherlock, which are snippets of t
 
 [![Inline Annotations](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-inline.png)](https://www.youtube.com/watch?v=todo)
 
-
 ### Sherlock Settings (45sec)
 
 [![Sherlock Settings](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-settings.png)](https://www.youtube.com/watch?v=todo)
@@ -40,6 +38,3 @@ The following videos show the main features of Sherlock, which are snippets of t
 ### Error Messages (30sec)
 
 [![Error Messages](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-errors.png)](https://www.youtube.com/watch?v=todo)
-
-
-

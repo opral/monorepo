@@ -50,7 +50,7 @@ describe.concurrent("paraglide-next", () => {
       process.env.TERM_PROGRAM = "not-vscode";
       const { wait, waitForText, writeText, debug, pressKey } = await spawn(
         ParaglideLocation,
-        "init"
+        "init",
       );
 
       debug();
@@ -67,7 +67,7 @@ describe.concurrent("paraglide-next", () => {
       await pressKey("enter");
 
       await waitForText(
-        "Do you want to update your <Link>s for localised routing?"
+        "Do you want to update your <Link>s for localised routing?",
       );
       await wait(PROMPT_TO);
       await pressKey("enter"); //yes, set up i18n routing
@@ -76,24 +76,24 @@ describe.concurrent("paraglide-next", () => {
 
       // read next.config.js
       const nextConfig = await readFile(
-        path.resolve(workingDir, "next.config.mjs")
+        path.resolve(workingDir, "next.config.mjs"),
       );
       expect(nextConfig).toBeTruthy();
       expect(nextConfig).includes("paraglide(");
 
       // expect src/lib/i18n.ts to exist
       expect(
-        await readFile(path.resolve(workingDir, "src/lib/i18n.ts"))
+        await readFile(path.resolve(workingDir, "src/lib/i18n.ts")),
       ).toBeTruthy();
 
       // expect src/middleware.ts to exist
       expect(
-        await readFile(path.resolve(workingDir, "src/middleware.ts"))
+        await readFile(path.resolve(workingDir, "src/middleware.ts")),
       ).toBeTruthy();
 
       // expect the lang attribute to be set
       const layout = await readFile(
-        path.resolve(workingDir, "src/app/layout.tsx")
+        path.resolve(workingDir, "src/app/layout.tsx"),
       );
       expect(layout).toBeTruthy();
       expect(layout).includes("lang={languageTag()}");
@@ -125,7 +125,7 @@ describe.concurrent("paraglide-next", () => {
     process.env.TERM_PROGRAM = "not-vscode";
     const { wait, waitForText, writeText, debug, pressKey } = await spawn(
       ParaglideLocation,
-      "init"
+      "init",
     );
 
     debug();
@@ -146,7 +146,7 @@ describe.concurrent("paraglide-next", () => {
     console.info("Routing strategy set up");
 
     await waitForText(
-      "Do you want to update your <Link>s for localised routing?"
+      "Do you want to update your <Link>s for localised routing?",
     );
     await wait(PROMPT_TO);
     await pressKey("enter"); //yes, set up i18n routing
@@ -157,19 +157,19 @@ describe.concurrent("paraglide-next", () => {
 
     // read next.config.js
     const nextConfig = await readFile(
-      path.resolve(workingDir, "next.config.mjs")
+      path.resolve(workingDir, "next.config.mjs"),
     );
     expect(nextConfig).toBeTruthy();
     expect(nextConfig).includes("paraglide(");
 
     // expect src/lib/i18n.ts to exist
     expect(
-      await readFile(path.resolve(workingDir, "src/lib/i18n.js"))
+      await readFile(path.resolve(workingDir, "src/lib/i18n.js")),
     ).toBeTruthy();
 
     // expect src/middleware.ts to exist
     expect(
-      await readFile(path.resolve(workingDir, "src/middleware.js"))
+      await readFile(path.resolve(workingDir, "src/middleware.js")),
     ).toBeTruthy();
 
     await cleanup();

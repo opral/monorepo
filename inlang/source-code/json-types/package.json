@@ -1,33 +1,33 @@
 {
-	"name": "@inlang/json-types",
-	"type": "module",
-	"version": "1.1.0",
-	"license": "Apache-2.0",
-	"publishConfig": {
-		"access": "public"
-	},
-	"exports": {
-		".": "./dist/index.js"
-	},
-	"files": [
-		"./dist",
-		"./src"
-	],
-	"scripts": {
-		"build": "tsc --build",
-		"dev": "tsc --watch",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
-		"lint": "eslint ./src --fix",
-		"format": "prettier ./src --write",
-		"clean": "rm -rf ./dist ./node_modules"
-	},
-	"peerDependencies": {
-		"@sinclair/typebox": "^0.31.17"
-	},
-	"devDependencies": {
-		"@vitest/coverage-v8": "0.34.3",
-		"prettier": "^3.3.3",
-		"typescript": "5.2.2",
-		"vitest": "0.34.3"
-	}
+  "name": "@inlang/json-types",
+  "type": "module",
+  "version": "1.1.0",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "./dist",
+    "./src"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --watch",
+    "test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+    "lint": "eslint ./src --fix",
+    "format": "prettier ./src --write",
+    "clean": "rm -rf ./dist ./node_modules"
+  },
+  "peerDependencies": {
+    "@sinclair/typebox": "^0.31.17"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "0.34.3",
+    "prettier": "^3.3.3",
+    "typescript": "5.2.2",
+    "vitest": "0.34.3"
+  }
 }

@@ -1,8 +1,8 @@
 {
-	"$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
-	"changelog": "@changesets/cli/changelog",
-	"commit": false,
-	"access": "restricted",
-	"baseBranch": "main",
-	"ignore": ["@inlang/template-*"]
+  "$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "access": "restricted",
+  "baseBranch": "main",
+  "ignore": ["@inlang/template-*"]
 }

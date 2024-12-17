@@ -20,9 +20,7 @@ You can use the following template when using JSON files as translation files. I
 	"baseLocale": "en",
 	// all the language tags you want to support in your project
 	"locales": ["en", "de"],
-	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js"
-	], // or use another storage module: https://inlang.com/c/plugins (i18next, json, inlang message format)
+	"modules": ["https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js"], // or use another storage module: https://inlang.com/c/plugins (i18next, json, inlang message format)
 	"settings": {}
 }
 ```
@@ -33,8 +31,8 @@ You should continue with **installing a syntax matcher**. There are multiple syn
 
 - m function matcher: https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher
 - t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher
-- *if you are using the i18next module, everything is already built-in*
-- *if you are using next-intl, you need https://inlang.com/m/193hsyds/plugin-inlang-nextIntl*
+- _if you are using the i18next module, everything is already built-in_
+- _if you are using next-intl, you need https://inlang.com/m/193hsyds/plugin-inlang-nextIntl_
 
 > You might need another module if you are using a different resource file type. You can find all available modules [here](https://inlang.com/c/plugins).
 
@@ -46,7 +44,6 @@ If you want to add lint rules to your experience, you can add them from https://
 
 - VS Code version 1.84.0 or higher.
 - Node.js version v18 or higher.
-
 
 ## Usage
 

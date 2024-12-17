@@ -1,3 +1,3 @@
 Jobs at Opral (inlang & lix).
 
-Write `hello@opral.com` to apply.  
+Write `hello@opral.com` to apply.

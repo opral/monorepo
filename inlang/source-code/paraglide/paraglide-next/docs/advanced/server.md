@@ -3,7 +3,8 @@
 In general you can use messages and the `languageTag()` function on the server without issues.
 
 There are a few things to be aware of:
-- Messages are just functions. Make sure they are called somewhere that's evaluated for every request. 
+
+- Messages are just functions. Make sure they are called somewhere that's evaluated for every request.
 
 ### Using the Language in Server Actions
 
@@ -11,18 +12,18 @@ Use the `initializeLanguage` function at the top of your server-action file to m
 
 ```ts
 // src/app/actions.ts
-"use server"
-import { initializeLanguage } from "@inlang/paraglide-next"
-import { languageTag } from "@/paraglide/runtime"
+"use server";
+import { initializeLanguage } from "@inlang/paraglide-next";
+import { languageTag } from "@/paraglide/runtime";
 
-initializeLanguage() //call it at the top of the file
+initializeLanguage(); //call it at the top of the file
 
 export async function someAction() {
-	languageTag() // "de"
+  languageTag(); // "de"
 }
 
 export async function someOtherAction() {
-	languageTag() // "de"
+  languageTag(); // "de"
 }
 ```
 
@@ -34,12 +35,12 @@ Just call Paraglide-Next's middleware inside your own middleware function. Pass 
 
 ```ts
 // src/middleware.ts
-import { middleware as paraglide } from "@/lib/i18n"
+import { middleware as paraglide } from "@/lib/i18n";
 export function middleware(request: NextRequest) {
-	//do something with the request
-	const response = paraglide(request)
-	// do something with the response
-	return response
+  //do something with the request
+  const response = paraglide(request);
+  // do something with the response
+  return response;
 }
 ```
 
@@ -49,11 +50,11 @@ In some cases you may need to access the language of a request inside the middle
 
 ```ts
 // src/middleware.ts
-import { middleware as paraglideMiddleware } from "@/lib/i18n"
+import { middleware as paraglideMiddleware } from "@/lib/i18n";
 export function middleware(request: NextRequest) {
-	const lang = paraglideMiddleware.detectLanguage(request)
-	//do something with the language...
-	// still use the paraglide middleware
-	return paraglideMiddleware(request)
+  const lang = paraglideMiddleware.detectLanguage(request);
+  //do something with the language...
+  // still use the paraglide middleware
+  return paraglideMiddleware(request);
 }
 ```
