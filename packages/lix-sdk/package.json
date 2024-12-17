@@ -21,7 +21,7 @@
 		"node": ">=21"
 	},
 	"bundleDependencies": [
-		"@lix-js/server-protocol"
+		"@lix-js/server-api-schema"
 	],
 	"dependencies": {
 		"dedent": "1.5.1",
