@@ -1,0 +1,47 @@
+name: publish npm packages
+
+on:
+
+  workflow_dispatch:
+
+  # trigger this workflow when the CI workflow is completed
+  workflow_run:
+    workflows: ["Continuous Integration", "versioning"]
+    branches: [main]
+    types:
+      - completed
+
+jobs: 
+  publis:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Install Doppler CLI for env variables
+        uses: dopplerhq/cli-action@v2
+
+      - name: Build
+        run: doppler run -- pnpm build
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
+      - name: Publish packages
+        run: pnpm ci:publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
