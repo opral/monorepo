@@ -6,6 +6,11 @@
 	"exports": {
 		".": "./dist/index.js"
 	},
+	"_filesComment": "Shipping src for better debugging experience",
+	"files": [
+		"dist",
+		"src"
+	],
 	"scripts": {
 		"build": "tsc --build",
 		"test": "tsc --noEmit && vitest run --coverage",
