@@ -35,7 +35,7 @@ test("it works for inserts, updates and deletions", async () => {
 
 	for (const change of changes) {
 		expect(change.entity_id).toBe("key1");
-		expect(change.file_id).toBe("null");
+		expect(change.file_id).toBe("lix_own_change_control");
 		expect(change.plugin_key).toBe("lix_own_change_control");
 		expect(change.schema_key).toBe("lix_key_value_table");
 	}

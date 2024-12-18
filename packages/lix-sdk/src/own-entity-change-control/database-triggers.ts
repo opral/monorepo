@@ -177,7 +177,7 @@ function handleLixOwnEntityChange(
 			authors: authors,
 			version: currentVersion,
 			entityId,
-			fileId: "null",
+			fileId: "lix_own_change_control",
 			pluginKey: "lix_own_change_control",
 			schemaKey: `lix_${tableName}_table`,
 			snapshotContent,
