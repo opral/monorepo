@@ -8,6 +8,7 @@ import { createVersion } from "../version/create-version.js";
 import { switchVersion } from "../version/switch-version.js";
 import type { Version } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
+import { toBlob } from "../lix/to-blob.js";
 
 test("versions should be synced", async () => {
 	const environment = createLsaInMemoryEnvironment();
@@ -32,13 +33,13 @@ test("versions should be synced", async () => {
 	await lsaHandler(
 		new Request("http://mock.com/lsa/new-v1", {
 			method: "POST",
-			body: await lix0.toBlob(),
+			body: await toBlob({ lix: lix0 }),
 		})
 	);
 
 	// create a second client
 	const lix1 = await openLixInMemory({
-		blob: await lix0.toBlob(),
+		blob: await toBlob({ lix: lix0 }),
 		keyValues: [{ key: "#lix_sync", value: "true" }],
 	});
 
@@ -147,7 +148,7 @@ test("switching synced versions should work", async () => {
 	await lsaHandler(
 		new Request("http://mock.com/lsa/new-v1", {
 			method: "POST",
-			body: await lix0.toBlob(),
+			body: await toBlob({ lix: lix0 }),
 		})
 	);
 
@@ -162,7 +163,7 @@ test("switching synced versions should work", async () => {
 
 	// create a second client
 	const lix1 = await openLixInMemory({
-		blob: await lix0.toBlob(),
+		blob: await toBlob({ lix: lix0 }),
 		keyValues: [{ key: "#lix_sync", value: "true" }],
 	});
 
@@ -255,7 +256,7 @@ test("doesnt sync if #lix_sync is not true", async () => {
 	await lsaHandler(
 		new Request("http://mock.com/lsa/new-v1", {
 			method: "POST",
-			body: await lix.toBlob(),
+			body: await toBlob({ lix }),
 		})
 	);
 

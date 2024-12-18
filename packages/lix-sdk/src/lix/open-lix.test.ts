@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import { openLixInMemory } from "./open-lix-in-memory.js";
 import { newLixFile } from "./new-lix.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
+import { toBlob } from "./to-blob.js";
 
 test("providing plugins should be possible", async () => {
 	const mockPlugin: LixPlugin = {
@@ -24,7 +25,7 @@ test("providing key values should be possible", async () => {
 
 	// testing overwriting key values
 	const lix1 = await openLixInMemory({
-		blob: await lix.toBlob(),
+		blob: await toBlob({ lix }),
 		keyValues: [{ key: "key", value: "value2" }],
 	});
 

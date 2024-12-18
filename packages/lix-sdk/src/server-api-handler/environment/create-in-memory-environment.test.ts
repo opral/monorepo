@@ -1,6 +1,7 @@
 import { test, expect } from "vitest";
 import { createLsaInMemoryEnvironment } from "./create-in-memory-environment.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import { toBlob } from "../../lix/to-blob.js";
 
 test("opening a lix works", async () => {
 	const environment = createLsaInMemoryEnvironment();
@@ -14,7 +15,7 @@ test("opening a lix works", async () => {
 		.executeTakeFirstOrThrow();
 
 	// initialize the env with the lix file
-	environment.setLix({ id: lixId, blob: await mockLix.toBlob() });
+	environment.setLix({ id: lixId, blob: await toBlob({ lix: mockLix }) });
 
 	const open0 = await environment.openLix({ id: lixId });
 
@@ -61,7 +62,7 @@ test("it handles concurrent connections", async () => {
 		.executeTakeFirstOrThrow();
 
 	// initialize the env with the lix file
-	environment.setLix({ id: lixId, blob: await mockLix.toBlob() });
+	environment.setLix({ id: lixId, blob: await toBlob({ lix: mockLix }) });
 
 	const open0 = await environment.openLix({ id: lixId });
 	const open1 = await environment.openLix({ id: lixId });
