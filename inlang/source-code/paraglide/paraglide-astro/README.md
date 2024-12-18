@@ -39,6 +39,12 @@ export default {
 }
 ```
 
+## Switching the language 
+
+To switch the language, route to the language of interest. For example, to switch to German, route to `/de/page`.
+
+> The `setLanguageTag` function does not do anything in the Astro adapter. See https://github.com/opral/inlang-paraglide-js/issues/187
+
 ## Passing the Language to the Client
 
 To save bundle size the integration doesn't ship language detection code to the client. Instead, it will read the `lang` attribute on the `<html>` tag. Make sure it is set correctly.
