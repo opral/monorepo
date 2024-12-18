@@ -276,7 +276,7 @@ const VersionDropdown = () => {
 					onClick={async () => {
 						const newversion = await createVersion({
 							lix,
-							parent: currentVersion,
+							from: currentVersion,
 							name: humanId({
 								separator: "-",
 								capitalize: false,

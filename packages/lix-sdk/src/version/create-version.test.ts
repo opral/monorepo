@@ -42,7 +42,7 @@ test("it should copy the changes from the parent version", async () => {
 
 	const version1 = await createVersion({
 		lix,
-		parent: version0,
+		from: version0,
 	});
 
 	const changesInversion0 = await lix.db
@@ -132,7 +132,7 @@ test("it should copy change conflict pointers from the parent version", async ()
 
 	const version1 = await createVersion({
 		lix,
-		parent: version0,
+		from: version0,
 		name: "version1",
 	});
 
