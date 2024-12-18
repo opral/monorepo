@@ -4,7 +4,7 @@ import { newLixFile } from "../lix/new-lix.js";
 import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
 import { createDiscussion } from "./create-discussion.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
-import { changeQueueSettled } from "../change-queue/change-queue-settled.js";
+import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
 
 const mockPlugin: LixPlugin = {
 	key: "mock-plugin",
@@ -38,7 +38,7 @@ test("should be able to start a discussion on changes", async () => {
 		.values({ id: "test", path: "/test.txt", data: enc.encode("test") })
 		.execute();
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	const current_author = await lix.db
 		.selectFrom("active_account")

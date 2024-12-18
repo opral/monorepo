@@ -2,8 +2,8 @@ import { expect, test, vi } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { newLixFile } from "../lix/new-lix.js";
 import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
-import type { ChangeQueueEntry, LixFile } from "../database/schema.js";
-import { changeQueueSettled } from "./change-queue-settled.js";
+import type { FileQueueEntry, LixFile } from "../database/schema.js";
+import { fileQueueSettled } from "./file-queue-settled.js";
 
 test("should use queue and settled correctly", async () => {
 	const mockPlugin: LixPlugin = {
@@ -52,7 +52,7 @@ test("should use queue and settled correctly", async () => {
 		.values({ id: "test", path: "/test.txt", data: dataInitial })
 		.execute();
 
-	const queue = await lix.db.selectFrom("change_queue").selectAll().execute();
+	const queue = await lix.db.selectFrom("file_queue").selectAll().execute();
 
 	expect(queue).toEqual([
 		expect.objectContaining({
@@ -61,13 +61,13 @@ test("should use queue and settled correctly", async () => {
 			path_after: "/test.txt",
 			data_after: dataInitial,
 			data_before: null,
-		} satisfies Partial<ChangeQueueEntry>),
+		} satisfies Partial<FileQueueEntry>),
 	]);
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	expect(
-		(await lix.db.selectFrom("change_queue").selectAll().execute()).length
+		(await lix.db.selectFrom("file_queue").selectAll().execute()).length
 	).toBe(0);
 
 	// TODO QUEUE check if the replacement of file_internal was expected
@@ -118,14 +118,14 @@ test("should use queue and settled correctly", async () => {
 		.execute();
 
 	// const beforeQueueTick = await lix.db
-	// 	.selectFrom("change_queue")
+	// 	.selectFrom("file_queue")
 	// 	.selectAll()
 	// 	.execute();
 
 	// expect(beforeQueueTick.length).toBe(1);
 
 	// const afterQueueTick = await lix.db
-	// 	.selectFrom("change_queue")
+	// 	.selectFrom("file_queue")
 	// 	.selectAll()
 	// 	.execute();
 
@@ -149,11 +149,11 @@ test("should use queue and settled correctly", async () => {
 		.where("id", "=", "test")
 		.execute();
 
-	const queue2 = await lix.db.selectFrom("change_queue").selectAll().execute();
+	const queue2 = await lix.db.selectFrom("file_queue").selectAll().execute();
 
 	expect(queue2).toEqual([
 		// change update 1 is the same as change update 2
-		// hence, only 2 change queue entries are expected
+		// hence, only 2 fil queue entries are expected
 		expect.objectContaining({
 			id: 3,
 			file_id: "test",
@@ -161,7 +161,7 @@ test("should use queue and settled correctly", async () => {
 			metadata_after: null,
 			data_before: dataUpdate1,
 			data_after: dataUpdate2,
-		} satisfies Partial<ChangeQueueEntry>),
+		} satisfies Partial<FileQueueEntry>),
 		expect.objectContaining({
 			id: 4,
 			file_id: "test",
@@ -169,13 +169,13 @@ test("should use queue and settled correctly", async () => {
 			metadata_after: null,
 			data_before: dataUpdate2,
 			data_after: dataUpdate3,
-		} satisfies Partial<ChangeQueueEntry>),
+		} satisfies Partial<FileQueueEntry>),
 	]);
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	expect(
-		(await lix.db.selectFrom("change_queue").selectAll().execute()).length
+		(await lix.db.selectFrom("file_queue").selectAll().execute()).length
 	).toBe(0);
 
 	const updatedChanges = await lix.db
@@ -303,7 +303,7 @@ test.todo("changes should contain the author", async () => {
 		})
 		.execute();
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	// const changes1 = await lix.db.selectFrom("change").selectAll().execute();
 
@@ -319,7 +319,7 @@ test.todo("changes should contain the author", async () => {
 		.where("id", "=", "mock")
 		.execute();
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	// const changes2 = await lix.db.selectFrom("change").selectAll().execute();
 
@@ -333,7 +333,7 @@ test.todo("changes should contain the author", async () => {
 		.where("id", "=", "mock")
 		.execute();
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	// const changes3 = await lix.db.selectFrom("change").selectAll().execute();
 
@@ -378,7 +378,7 @@ test("should handle file deletions correctly", async () => {
 		.execute();
 
 	// Queue deletion
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	const changesAfterInsert = await lix.db
 		.selectFrom("change")
@@ -404,7 +404,7 @@ test("should handle file deletions correctly", async () => {
 	await lix.db.deleteFrom("file").where("id", "=", "file0").execute();
 
 	// Ensure the queue reflects the deletion entry
-	const queue = await lix.db.selectFrom("change_queue").selectAll().execute();
+	const queue = await lix.db.selectFrom("file_queue").selectAll().execute();
 
 	expect(queue).toEqual([
 		expect.objectContaining({
@@ -413,15 +413,15 @@ test("should handle file deletions correctly", async () => {
 			data_before: null,
 			path_after: null,
 			data_after: null,
-		} satisfies Partial<ChangeQueueEntry>),
+		} satisfies Partial<FileQueueEntry>),
 	]);
 
-	// Run the change queue settlement process
-	await changeQueueSettled({ lix });
+	// Run the fil queue settlement process
+	await fileQueueSettled({ lix });
 
-	// Verify the change queue is empty
+	// Verify the fil queue is empty
 	expect(
-		(await lix.db.selectFrom("change_queue").selectAll().execute()).length
+		(await lix.db.selectFrom("file_queue").selectAll().execute()).length
 	).toBe(0);
 
 	// Verify the changes reflect the deletion

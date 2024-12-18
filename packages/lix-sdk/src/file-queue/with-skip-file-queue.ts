@@ -1,12 +1,12 @@
 import type { Lix } from "../lix/open-lix.js";
 
-export async function withSkipChangeQueue<T>(
+export async function withSkipFileQueue<T>(
 	db: Lix["db"],
 	operation: (trx: Lix["db"]) => Promise<T>
 ): Promise<T> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const queryEntryBefore = await trx
-			.selectFrom("change_queue")
+			.selectFrom("file_queue")
 			.selectAll()
 			.orderBy("id desc")
 			.executeTakeFirst();
@@ -18,7 +18,7 @@ export async function withSkipChangeQueue<T>(
 		// the queue entry before the transaction
 
 		await trx
-			.deleteFrom("change_queue")
+			.deleteFrom("file_queue")
 			.where("id", ">", queryEntryBefore?.id ?? 0)
 			.execute();
 

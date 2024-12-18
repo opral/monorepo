@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { changeQueueSettled } from "./change-queue-settled.js";
-import { withSkipChangeQueue } from "./with-skip-change-queue.js";
+import { fileQueueSettled } from "./file-queue-settled.js";
+import { withSkipFileQueue } from "./with-skip-file-queue.js";
 
-test("skipping the change queue should be possible", async () => {
+test("skipping the file queue should be possible", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		detectChangesGlob: "*",
@@ -38,7 +38,7 @@ test("skipping the change queue should be possible", async () => {
 		})
 		.execute();
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	const changes0 = await lix.db
 		.selectFrom("change")
@@ -50,7 +50,7 @@ test("skipping the change queue should be possible", async () => {
 	expect(changes0).toHaveLength(1);
 	expect(changes0[0]?.content).toEqual({ text: "update0" });
 
-	await withSkipChangeQueue(lix.db, async (trx) => {
+	await withSkipFileQueue(lix.db, async (trx) => {
 		await trx
 			.updateTable("file")
 			.set({
@@ -60,7 +60,7 @@ test("skipping the change queue should be possible", async () => {
 			.execute();
 	});
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	const changes1 = await lix.db
 		.selectFrom("change")
@@ -74,7 +74,7 @@ test("skipping the change queue should be possible", async () => {
 	expect(changes1[0]?.content).toEqual({ text: "update0" });
 });
 
-test("skipping the change queue should be possible with multiple changes", async () => {
+test("skipping the file queue should be possible with multiple changes", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		detectChangesGlob: "*",
@@ -124,7 +124,7 @@ test("skipping the change queue should be possible with multiple changes", async
 				.execute();
 		}
 		for (const update of last50Updates) {
-			await withSkipChangeQueue(trx, async (trx) => {
+			await withSkipFileQueue(trx, async (trx) => {
 				await trx
 					.updateTable("file")
 					.set({
@@ -136,7 +136,7 @@ test("skipping the change queue should be possible with multiple changes", async
 		}
 	});
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	const file = await lix.db
 		.selectFrom("file")

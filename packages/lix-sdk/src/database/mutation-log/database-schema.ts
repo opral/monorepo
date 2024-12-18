@@ -14,7 +14,7 @@ export const tablesByDepencies: string[] = [
 	"change",
 
 	// Depends on: file
-	"change_queue",
+	"file_queue",
 	// Depends on: change
 	"change_author",
 	// Depends on: change

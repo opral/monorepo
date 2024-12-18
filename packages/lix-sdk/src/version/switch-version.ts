@@ -1,4 +1,4 @@
-import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
+import { withSkipFileQueue } from "../file-queue/with-skip-file-queue.js";
 import { applyChanges } from "../change/apply-changes.js";
 import type { Change, Version } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
@@ -29,7 +29,7 @@ export async function switchVersion(args: {
 	to: Pick<Version, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		await withSkipChangeQueue(trx, async (trx) => {
+		await withSkipFileQueue(trx, async (trx) => {
 			const sourceVersion = await trx
 				.selectFrom("current_version")
 				.selectAll()

@@ -1,6 +1,6 @@
 import type { Lix } from "./open-lix.js";
 import { getLeafChangesOnlyInSource } from "./merge.get-leaf-changes-only-in-source.js";
-import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
+import { withSkipFileQueue } from "../file-queue/with-skip-file-queue.js";
 import type { DetectedConflict } from "../plugin/lix-plugin.js";
 
 /**
@@ -83,7 +83,7 @@ export async function merge(args: {
 					metadata: file.metadata,
 				};
 
-				await withSkipChangeQueue(args.targetLix.db, async (trx) => {
+				await withSkipFileQueue(args.targetLix.db, async (trx) => {
 					await trx
 						.insertInto("file")
 						.values({ ...fileToInsert })
@@ -183,7 +183,7 @@ export async function merge(args: {
 
 		for (const [fileId, fileData] of Object.entries(changesPerFile)) {
 			// update the file data with the applied changes
-			await withSkipChangeQueue(trx, async (trx) => {
+			await withSkipFileQueue(trx, async (trx) => {
 				await trx
 					.updateTable("file")
 					.set("data", fileData)

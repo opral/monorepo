@@ -13,7 +13,7 @@ import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { createDiscussion } from "../discussion/create-discussion.js";
 import { createComment } from "../discussion/create-comment.js";
-import { changeQueueSettled } from "../change-queue/change-queue-settled.js";
+import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
 
 test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const mockSnapshots = [
@@ -441,7 +441,7 @@ test.todo("it should apply changes that are not conflicting", async () => {
 		})
 		.execute();
 
-	await changeQueueSettled({ lix: targetLix });
+	await fileQueueSettled({ lix: targetLix });
 
 	await merge({ sourceLix, targetLix });
 	const changes = await targetLix.db
@@ -687,7 +687,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 		})
 		.execute();
 
-	await changeQueueSettled({ lix: lix1 });
+	await fileQueueSettled({ lix: lix1 });
 
 	// The files have to be there before we merge
 	const lix2 = await openLixInMemory({
