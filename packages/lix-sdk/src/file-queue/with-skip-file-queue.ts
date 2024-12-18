@@ -1,6 +1,6 @@
 import type { Lix } from "../lix/open-lix.js";
 
-export async function withSkipChangeQueue<T>(
+export async function withSkipFileQueue<T>(
 	db: Lix["db"],
 	operation: (trx: Lix["db"]) => Promise<T>
 ): Promise<T> {

@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { changeQueueSettled } from "./change-queue-settled.js";
+import { fileQueueSettled } from "./file-queue-settled.js";
 
-test("should wait until the change queue is settled", async () => {
+test("should wait until the file queue is settled", async () => {
 	const lix = await openLixInMemory({});
 
 	await lix.db
@@ -31,7 +31,7 @@ test("should wait until the change queue is settled", async () => {
 		await lix.db.deleteFrom("change_queue").where("id", "=", 2).execute();
 	}, 110);
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	const remainingEntries = await lix.db
 		.selectFrom("change_queue")
@@ -41,12 +41,12 @@ test("should wait until the change queue is settled", async () => {
 	expect(remainingEntries).toEqual([]);
 });
 
-test("should return immediately if the change queue is already empty", async () => {
+test("should return immediately if the file queue is already empty", async () => {
 	const lix = await openLixInMemory({});
 
 	await lix.db.deleteFrom("change_queue").execute();
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	const remainingEntries = await lix.db
 		.selectFrom("change_queue")

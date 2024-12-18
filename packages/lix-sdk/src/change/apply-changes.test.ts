@@ -4,7 +4,7 @@ import { applyChanges } from "./apply-changes.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import type { KeyValue } from "../key-value/database-schema.js";
-import { changeQueueSettled } from "../change-queue/change-queue-settled.js";
+import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
 
 test("it applies the given changes", async () => {
 	const lix = await openLixInMemory({});
@@ -224,7 +224,7 @@ test("applies an insert change for a file if the file does not exist", async () 
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	const changes1 = await lix.db
 		.selectFrom("change")

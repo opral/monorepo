@@ -91,7 +91,7 @@ export async function initChangeQueue(args: {
 			// we either execute the queue immediately if we know there is more work or fall back to polling
 			setTimeout(() => queueWorker(true), hasMoreEntriesSince ? 0 : 1000);
 		} catch (e) {
-			console.error("change queue failed ", e);
+			console.error("file queue failed ", e);
 		}
 	}
 	// start a worker in case there are entries

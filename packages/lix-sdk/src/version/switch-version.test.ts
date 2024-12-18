@@ -4,7 +4,7 @@ import { switchVersion } from "./switch-version.js";
 import { createVersion } from "./create-version.js";
 import { createChange } from "../change/create-change.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { changeQueueSettled } from "../change-queue/change-queue-settled.js";
+import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
 
 test("switching versiones should update the current_version", async () => {
 	const lix = await openLixInMemory({});
@@ -177,7 +177,7 @@ test("a deleted file in one version does not impact a version which did not dele
 		})
 		.execute();
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	expect(mockTxtPlugin.detectChanges).toHaveBeenCalledTimes(1);
 
@@ -191,7 +191,7 @@ test("a deleted file in one version does not impact a version which did not dele
 	// deleting the file in version B
 	await lix.db.deleteFrom("file").where("id", "=", "file0").execute();
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	// lix own change control handles file deletions
 	// expecting the plugin.detectChanges to not be invoked
@@ -231,7 +231,7 @@ test("a deleted file in one version does not impact a version which did not dele
 	expect(fileAfterSwitch).toBeUndefined();
 });
 
-test("doesn't trigger the change queue when switching versions which would lead to duplicate changes", async () => {
+test("doesn't trigger the file queue when switching versions which would lead to duplicate changes", async () => {
 	const mockTxtPlugin: LixPlugin = {
 		key: "mock_txt_plugin",
 		detectChangesGlob: "*.txt",
@@ -282,7 +282,7 @@ test("doesn't trigger the change queue when switching versions which would lead 
 		})
 		.execute();
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	await switchVersion({ lix, to: versionB });
 

@@ -1,4 +1,4 @@
-import { withSkipChangeQueue } from "../change-queue/with-skip-change-queue.js";
+import { withSkipFileQueue } from "../file-queue/with-skip-file-queue.js";
 import type { Change } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { applyOwnEntityChanges } from "../own-entity-change-control/apply-own-entity-change.js";
@@ -95,7 +95,7 @@ export async function applyChanges(args: {
 					changes,
 				});
 
-				await withSkipChangeQueue(trx, async (trx) => {
+				await withSkipFileQueue(trx, async (trx) => {
 					await trx
 						.updateTable("file")
 						.set({ data: fileData })

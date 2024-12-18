@@ -1,14 +1,14 @@
 import type { Lix } from "../lix/open-lix.js";
 
 /**
- * Waits until the change queue is settled.
+ * Waits until the file queue is settled.
  *
  * @example
  *   ```ts
- *   await changeQueueSettled({ lix });
+ *   await fileQueueSettled({ lix });
  *   ```
  */
-export async function changeQueueSettled(args: {
+export async function fileQueueSettled(args: {
 	lix: Pick<Lix, "db">;
 }): Promise<void> {
 	let hasEntries = true;
