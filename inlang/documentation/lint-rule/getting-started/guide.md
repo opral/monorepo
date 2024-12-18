@@ -28,7 +28,7 @@ Now that you have a basic lint rule project, it's time to implement your custom 
 import type { MessageLintRule } from "@inlang/message-lint-rule";
 import { id, displayName, description } from "../marketplace-manifest.json";
 
-export const yourLintRule: MessageLintRule = {
+const rule: MessageLintRule = {
   meta: {
     id: id as MessageLintRule["id"],
     displayName,
@@ -39,6 +39,8 @@ export const yourLintRule: MessageLintRule = {
     // You can analyze message variants and report issues if necessary
   },
 };
+
+export default rule;
 ```
 
 Replace `yourLintRule` with a meaningful name for your lint rule.
