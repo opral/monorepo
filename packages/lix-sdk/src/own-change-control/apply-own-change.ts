@@ -16,7 +16,7 @@ import { withSkipOwnChangeControl } from "./with-skip-own-change-control.js";
 /**
  * Applies own changes to lix itself.
  */
-export async function applyOwnEntityChanges(args: {
+export async function applyOwnChanges(args: {
 	lix: Pick<Lix, "db">;
 	changes: Change[];
 }): Promise<void> {

@@ -5,7 +5,7 @@ import type {
 	ChangeSet,
 	ChangeSetElement,
 } from "../database/schema.js";
-import { applyOwnEntityChanges } from "./apply-own-entity-change.js";
+import { applyOwnChanges } from "./apply-own-change.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { type KeyValue } from "../key-value/database-schema.js";
 
@@ -32,7 +32,7 @@ test("it should apply insert changes correctly", async () => {
 		.values({ content: snapshot.content })
 		.execute();
 
-	await applyOwnEntityChanges({ lix, changes: [change] });
+	await applyOwnChanges({ lix, changes: [change] });
 
 	const result = await lix.db
 		.selectFrom("key_value")
@@ -73,7 +73,7 @@ test("it should apply update changes correctly", async () => {
 		})
 		.execute();
 
-	await applyOwnEntityChanges({ lix, changes: [change] });
+	await applyOwnChanges({ lix, changes: [change] });
 
 	const result = await lix.db
 		.selectFrom("key_value")
@@ -102,7 +102,7 @@ test("it should apply delete changes correctly", async () => {
 		snapshot_id: "no-content",
 	};
 
-	await applyOwnEntityChanges({ lix, changes: [change] });
+	await applyOwnChanges({ lix, changes: [change] });
 
 	const result = await lix.db
 		.selectFrom("key_value")
@@ -138,9 +138,7 @@ test("it should throw an error for invalid plugin key", async () => {
 		})
 		.execute();
 
-	await expect(
-		applyOwnEntityChanges({ lix, changes: [change] })
-	).rejects.toThrow(
+	await expect(applyOwnChanges({ lix, changes: [change] })).rejects.toThrow(
 		"Expected 'lix_own_change_control' as plugin key but received invalid-plugin"
 	);
 });
@@ -195,7 +193,7 @@ test("file.data is not changed by applyOwnEntityChanges", async () => {
 		created_at: "2021-01-01T00:00:00.000Z",
 	};
 
-	await applyOwnEntityChanges({ lix, changes: [mockChange] });
+	await applyOwnChanges({ lix, changes: [mockChange] });
 
 	const result = await lix.db
 		.selectFrom("file")
@@ -270,7 +268,7 @@ test("foreign key constraints are deferred to make the order of applying changes
 		.execute();
 
 	await expect(
-		applyOwnEntityChanges({ lix, changes: mockChanges })
+		applyOwnChanges({ lix, changes: mockChanges })
 	).resolves.toBeUndefined();
 });
 
@@ -321,9 +319,7 @@ test("foreign key constraints are obeyed", async () => {
 		})
 		.execute();
 
-	expect(
-		applyOwnEntityChanges({ lix, changes: mockChanges })
-	).rejects.toThrow();
+	expect(applyOwnChanges({ lix, changes: mockChanges })).rejects.toThrow();
 });
 
 // https://github.com/opral/lix-sdk/issues/185
@@ -344,7 +340,7 @@ test("applying own entity changes doesn't lead to the creation of new changes", 
 
 	const changesBefore = await lix.db.selectFrom("change").selectAll().execute();
 
-	await applyOwnEntityChanges({
+	await applyOwnChanges({
 		lix,
 		changes: [
 			{

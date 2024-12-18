@@ -9,7 +9,7 @@ import {
 import { createChange } from "../change/create-change.js";
 import { executeSync } from "../database/execute-sync.js";
 
-export function applyOwnEntityChangeControlTriggers(
+export function applyOwnChangeControlTriggers(
 	sqlite: SqliteDatabase,
 	db: Kysely<LixDatabaseSchema>
 ): void {
