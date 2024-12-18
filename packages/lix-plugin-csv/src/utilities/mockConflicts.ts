@@ -1,4 +1,4 @@
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLixInMemory, toBlob } from "@lix-js/sdk";
 import { mockChanges } from "./mockChanges.js";
 import { detectChanges } from "../detectChanges.js";
 
@@ -31,7 +31,7 @@ export async function mockConflicts(args: {
 		fileUpdates: [args.common],
 	});
 
-	const commonLixBlob = await commonLix.toBlob();
+	const commonLixBlob = await toBlob({ lix: commonLix });
 
 	const { lix: sourceLix } = await mockChanges({
 		lix: await openLixInMemory({

@@ -102,7 +102,7 @@ export const createLsaInMemoryEnvironment = (): LsaEnvironment => {
 				// TODO no concurrency guarantees
 				const lix = openLixes.get(args.id);
 				const blob = await toBlob({ lix: lix! });
-				await lix?.close();
+				lix?.sqlite.close();
 				openConnections.delete(args.id);
 				openLixes.delete(args.id);
 				store.set(args.id, blob);
