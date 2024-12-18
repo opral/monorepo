@@ -4,25 +4,25 @@ import type { Lix } from "../lix/open-lix.js";
 /**
  * Creates a new Version.
  *
- * If parent is provided, the new Version will copy the change pointers from the parent version.
+ * If `from` is provided, the new version will be identical to the from version.
  *
  * @example
- *   _Without parent_
+ *   _Without from_
  *
  *   ```ts
  *   const version = await createVersion({ lix });
  *   ```
  *
  * @example
- *   _With parent_
+ *   _With from_
  *
  *   ```ts
- *   const version = await createVersion({ lix, parent: otherVersion });
+ *   const version = await createVersion({ lix, from: otherVersion });
  *   ```
  */
 export async function createVersion(args: {
 	lix: Pick<Lix, "db">;
-	parent?: Pick<Version, "id">;
+	from?: Pick<Version, "id">;
 	name?: Version["name"];
 }): Promise<Version> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
@@ -36,8 +36,8 @@ export async function createVersion(args: {
 
 		const newVersion = await query.executeTakeFirstOrThrow();
 
-		// copy the change pointers from the parent Version
-		if (args.parent) {
+		// copy the change pointers from the from Version
+		if (args.from) {
 			await trx
 				.insertInto("version_change")
 				.columns([
@@ -57,11 +57,11 @@ export async function createVersion(args: {
 							"schema_key",
 							"file_id",
 						])
-						.where("version_id", "=", args.parent!.id)
+						.where("version_id", "=", args.from!.id)
 				)
 				.execute();
 
-			// copy the change conflicts from the parent Version
+			// copy the change conflicts from the from Version
 			await trx
 				.insertInto("version_change_conflict")
 				.columns(["version_id", "change_conflict_id"])
@@ -72,7 +72,7 @@ export async function createVersion(args: {
 							eb.val(newVersion.id).as("version_id"),
 							"change_conflict_id",
 						])
-						.where("version_id", "=", args.parent!.id)
+						.where("version_id", "=", args.from!.id)
 				)
 				.execute();
 		}

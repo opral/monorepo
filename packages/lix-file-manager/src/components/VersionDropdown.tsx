@@ -55,7 +55,7 @@ export function VersionDropdown() {
 
 		const newVersion = await createVersion({
 			lix,
-			parent: currentVersion,
+			from: currentVersion,
 			name: humanId({
 				separator: "-",
 				capitalize: false,

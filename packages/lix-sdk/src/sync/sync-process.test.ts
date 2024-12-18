@@ -68,7 +68,7 @@ test("versions should be synced", async () => {
 			.executeTakeFirstOrThrow();
 		version0 = await createVersion({
 			lix: { ...lix0, db: trx },
-			parent: currentVersion,
+			from: currentVersion,
 			name: "version0",
 		});
 		await switchVersion({ lix: { ...lix0, db: trx }, to: version0 });
@@ -180,7 +180,7 @@ test("switching synced versions should work", async () => {
 	const version0 = await createVersion({
 		lix: lix0,
 		name: "version0",
-		parent: currentVersion,
+		from: currentVersion,
 	});
 
 	await switchVersion({ lix: lix0, to: version0 });

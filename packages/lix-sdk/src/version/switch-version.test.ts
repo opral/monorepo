@@ -18,7 +18,7 @@ test("switching versiones should update the current_version", async () => {
 	const newVersion = await lix.db.transaction().execute(async (trx) => {
 		const newVersion = await createVersion({
 			lix: { db: trx },
-			parent: currentVersion,
+			from: currentVersion,
 		});
 		await switchVersion({ lix: { ...lix, db: trx }, to: newVersion });
 		return newVersion;
@@ -60,7 +60,7 @@ test("switching a version does not lead to duplicate changes", async () => {
 
 	const newVersion = await createVersion({
 		lix: lix,
-		parent: currentVersion,
+		from: currentVersion,
 	});
 
 	const changesBefore = await lix.db.selectFrom("change").selectAll().execute();
@@ -181,7 +181,7 @@ test("a deleted file in one version does not impact a version which did not dele
 
 	expect(mockTxtPlugin.detectChanges).toHaveBeenCalledTimes(1);
 
-	const versionB = await createVersion({ lix, parent: versionA });
+	const versionB = await createVersion({ lix, from: versionA });
 
 	await switchVersion({ lix, to: versionB });
 
