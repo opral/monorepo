@@ -28,7 +28,7 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
     CHECK (is_valid_file_path(path))
   ) STRICT;
 
-  CREATE TABLE IF NOT EXISTS change_queue (
+  CREATE TABLE IF NOT EXISTS file_queue (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     file_id TEXT NOT NULL,
     data_before BLOB,
@@ -41,18 +41,18 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
 
   CREATE TRIGGER IF NOT EXISTS file_insert BEFORE INSERT ON file
   BEGIN
-    INSERT INTO change_queue(
+    INSERT INTO file_queue(
       file_id, path_after, data_after, metadata_after
     )
     VALUES (
       NEW.id, NEW.path, NEW.data, NEW.metadata
     );
-    SELECT triggerChangeQueue();
+    SELECT triggerFileQueue();
   END;
 
   CREATE TRIGGER IF NOT EXISTS file_update BEFORE UPDATE ON file
   BEGIN
-    INSERT INTO change_queue(
+    INSERT INTO file_queue(
       file_id, 
       path_before, data_before, metadata_before, 
       path_after, data_after, metadata_after
@@ -64,14 +64,14 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
       NEW.path, NEW.data, NEW.metadata
     );
 
-    SELECT triggerChangeQueue();
+    SELECT triggerFileQueue();
   END;
 
   CREATE TRIGGER IF NOT EXISTS file_delete BEFORE DELETE ON file
   BEGIN
-    INSERT INTO change_queue(file_id)
+    INSERT INTO file_queue(file_id)
     VALUES (OLD.id);
-    SELECT triggerChangeQueue();
+    SELECT triggerFileQueue();
   END;
 
   CREATE TABLE IF NOT EXISTS change (

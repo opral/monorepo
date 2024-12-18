@@ -286,10 +286,7 @@ test("doesn't trigger the file queue when switching versions which would lead to
 
 	await switchVersion({ lix, to: versionB });
 
-	const changeQueue = await lix.db
-		.selectFrom("change_queue")
-		.selectAll()
-		.execute();
+	const fileQueue = await lix.db.selectFrom("file_queue").selectAll().execute();
 
-	expect(changeQueue).toHaveLength(0);
+	expect(fileQueue).toHaveLength(0);
 });

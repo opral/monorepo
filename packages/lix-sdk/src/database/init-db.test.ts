@@ -17,7 +17,7 @@ test("file ids should default to uuid", async () => {
 
 	// init the trigger function (usually defined by lix only)
 	sqlite.createFunction({
-		name: "triggerChangeQueue",
+		name: "triggerFileQueue",
 		arity: 0,
 		// @ts-expect-error - dynamic function
 		xFunc: () => {},
@@ -143,7 +143,7 @@ test("files should be able to have metadata", async () => {
 	const db = initDb({ sqlite });
 
 	sqlite.createFunction({
-		name: "triggerChangeQueue",
+		name: "triggerFileQueue",
 		arity: 0,
 		// @ts-expect-error - dynamic function
 		xFunc: () => {
@@ -338,7 +338,7 @@ test("invalid file paths should be rejected", async () => {
 
 	// init the trigger function (usually defined by lix only)
 	sqlite.createFunction({
-		name: "triggerChangeQueue",
+		name: "triggerFileQueue",
 		arity: 0,
 		// @ts-expect-error - dynamic function
 		xFunc: () => {},

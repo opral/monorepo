@@ -2,7 +2,7 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { loadPlugins } from "../plugin/load-plugin.js";
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
-import { initChangeQueue } from "../file-queue/file-queue-process.js";
+import { initFileQueueProcess } from "../file-queue/file-queue-process.js";
 import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
 import type { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
@@ -82,7 +82,7 @@ export async function openLix(args: {
 		return new Blob([contentFromDatabase(args.database)]);
 	};
 
-	initChangeQueue({
+	initFileQueueProcess({
 		lix: { db, plugin, sqlite: args.database },
 		rawDatabase: args.database,
 	});

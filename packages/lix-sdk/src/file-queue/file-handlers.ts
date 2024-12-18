@@ -1,4 +1,4 @@
-import type { ChangeQueueEntry } from "../database/schema.js";
+import type { FileQueueEntry } from "../database/schema.js";
 import type { DetectedChange } from "../plugin/lix-plugin.js";
 import type { Lix } from "../lix/open-lix.js";
 import { sql } from "kysely";
@@ -31,7 +31,7 @@ async function glob(args: {
 // creates initial changes for new files
 export async function handleFileInsert(args: {
 	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
-	changeQueueEntry: ChangeQueueEntry;
+	changeQueueEntry: FileQueueEntry;
 }): Promise<void> {
 	const detectedChanges: Array<DetectedChange & { pluginKey: string }> = [];
 
@@ -116,7 +116,7 @@ export async function handleFileInsert(args: {
 		);
 
 		await trx
-			.deleteFrom("change_queue")
+			.deleteFrom("file_queue")
 			.where("id", "=", args.changeQueueEntry.id)
 			.execute();
 	});
@@ -124,7 +124,7 @@ export async function handleFileInsert(args: {
 
 export async function handleFileUpdate(args: {
 	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
-	changeQueueEntry: ChangeQueueEntry;
+	changeQueueEntry: FileQueueEntry;
 }): Promise<void> {
 	const detectedChanges: Array<DetectedChange & { pluginKey: string }> = [];
 
@@ -210,7 +210,7 @@ export async function handleFileUpdate(args: {
 		);
 
 		await trx
-			.deleteFrom("change_queue")
+			.deleteFrom("file_queue")
 			.where("id", "=", args.changeQueueEntry.id)
 			.execute();
 	});
@@ -227,7 +227,7 @@ export async function handleFileUpdate(args: {
  */
 export async function handleFileDelete(args: {
 	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
-	changeQueueEntry: ChangeQueueEntry;
+	changeQueueEntry: FileQueueEntry;
 }): Promise<void> {
 	await args.lix.db.transaction().execute(async (trx) => {
 		const currentVersion = await trx
@@ -266,7 +266,7 @@ export async function handleFileDelete(args: {
 		);
 
 		await trx
-			.deleteFrom("change_queue")
+			.deleteFrom("file_queue")
 			.where("id", "=", args.changeQueueEntry.id)
 			.execute();
 	});

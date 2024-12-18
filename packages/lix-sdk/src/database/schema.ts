@@ -17,7 +17,7 @@ export type LixDatabaseSchema = {
 
 	// file
 	file: LixFileTable;
-	change_queue: ChangeQueueTable;
+	file_queue: FileQueueTable;
 
 	// change
 	change: ChangeTable;
@@ -50,10 +50,10 @@ export type LixDatabaseSchema = {
 	mutation_log: MutationLogTable;
 };
 
-export type ChangeQueueEntry = Selectable<ChangeQueueTable>;
-export type NewChangeQueueEntry = Insertable<ChangeQueueTable>;
-export type ChangeQueueEntryUpdate = Updateable<ChangeQueueTable>;
-type ChangeQueueTable = {
+export type FileQueueEntry = Selectable<FileQueueTable>;
+export type NewFileQueueEntry = Insertable<FileQueueTable>;
+export type FileQueueEntryUpdate = Updateable<FileQueueTable>;
+type FileQueueTable = {
 	id: Generated<number>;
 	file_id: string;
 	path_before: string | null;

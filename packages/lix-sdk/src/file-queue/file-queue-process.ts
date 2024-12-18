@@ -6,12 +6,12 @@ import {
 } from "./file-handlers.js";
 import type { Lix } from "../lix/open-lix.js";
 
-export async function initChangeQueue(args: {
+export async function initFileQueueProcess(args: {
 	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
 	rawDatabase: SqliteDatabase;
 }): Promise<void> {
 	args.rawDatabase.createFunction({
-		name: "triggerChangeQueue",
+		name: "triggerFileQueue",
 		arity: 0,
 		// @ts-expect-error - dynamic function
 		xFunc: () => {
@@ -43,7 +43,7 @@ export async function initChangeQueue(args: {
 			}
 
 			const entry = await args.lix.db
-				.selectFrom("change_queue")
+				.selectFrom("file_queue")
 				.selectAll()
 				.orderBy("id asc")
 				.limit(1)
@@ -71,7 +71,7 @@ export async function initChangeQueue(args: {
 			// console.log("getrting { numEntries }");
 
 			const { numEntries } = await args.lix.db
-				.selectFrom("change_queue")
+				.selectFrom("file_queue")
 				.select((eb) => eb.fn.count<number>("id").as("numEntries"))
 				.executeTakeFirstOrThrow();
 

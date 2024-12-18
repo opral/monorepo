@@ -15,7 +15,7 @@ export async function fileQueueSettled(args: {
 
 	while (hasEntries) {
 		const entries = await args.lix.db
-			.selectFrom("change_queue")
+			.selectFrom("file_queue")
 			.selectAll()
 			.limit(1)
 			.execute();

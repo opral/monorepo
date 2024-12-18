@@ -23,7 +23,7 @@ export function initDb(args: {
 			ParseJsonBPluginV1({
 				// jsonb columns
 				file: ["metadata"],
-				change_queue: ["metadata_before", "metadata_after"],
+				file_queue: ["metadata_before", "metadata_after"],
 				snapshot: ["content"],
 				mutation_log: ["row_id"],
 			}),

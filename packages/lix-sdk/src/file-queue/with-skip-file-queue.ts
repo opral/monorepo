@@ -6,7 +6,7 @@ export async function withSkipFileQueue<T>(
 ): Promise<T> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const queryEntryBefore = await trx
-			.selectFrom("change_queue")
+			.selectFrom("file_queue")
 			.selectAll()
 			.orderBy("id desc")
 			.executeTakeFirst();
@@ -18,7 +18,7 @@ export async function withSkipFileQueue<T>(
 		// the queue entry before the transaction
 
 		await trx
-			.deleteFrom("change_queue")
+			.deleteFrom("file_queue")
 			.where("id", ">", queryEntryBefore?.id ?? 0)
 			.execute();
 
