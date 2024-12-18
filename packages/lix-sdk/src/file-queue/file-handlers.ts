@@ -31,7 +31,7 @@ async function glob(args: {
 // creates initial changes for new files
 export async function handleFileInsert(args: {
 	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
-	changeQueueEntry: FileQueueEntry;
+	fileQueueEntry: FileQueueEntry;
 }): Promise<void> {
 	const detectedChanges: Array<DetectedChange & { pluginKey: string }> = [];
 
@@ -40,7 +40,7 @@ export async function handleFileInsert(args: {
 	// the path of the file is either the after path or the before path
 	// depending on whether the file was deleted, updated, or created
 	const path =
-		args.changeQueueEntry.path_after ?? args.changeQueueEntry.path_before;
+		args.fileQueueEntry.path_after ?? args.fileQueueEntry.path_before;
 
 	if (path === null) {
 		throw new Error("Both before and after paths are null");
@@ -67,7 +67,7 @@ export async function handleFileInsert(args: {
 			throw error;
 		}
 
-		if (args.changeQueueEntry.data_after === null) {
+		if (args.fileQueueEntry.data_after === null) {
 			throw new Error("Data after is null");
 		}
 
@@ -75,10 +75,10 @@ export async function handleFileInsert(args: {
 			lix: args.lix,
 			before: undefined,
 			after: {
-				id: args.changeQueueEntry.file_id,
+				id: args.fileQueueEntry.file_id,
 				path,
-				metadata: args.changeQueueEntry.metadata_after,
-				data: args.changeQueueEntry.data_after,
+				metadata: args.fileQueueEntry.metadata_after,
+				data: args.fileQueueEntry.data_after,
 			},
 		})) {
 			detectedChanges.push({
@@ -107,7 +107,7 @@ export async function handleFileInsert(args: {
 					authors: currentAuthors,
 					version: currentVersion,
 					entityId: detectedChange.entity_id,
-					fileId: args.changeQueueEntry.file_id,
+					fileId: args.fileQueueEntry.file_id,
 					pluginKey: detectedChange.pluginKey,
 					schemaKey: detectedChange.schema.key,
 					snapshotContent: detectedChange.snapshot,
@@ -117,14 +117,14 @@ export async function handleFileInsert(args: {
 
 		await trx
 			.deleteFrom("file_queue")
-			.where("id", "=", args.changeQueueEntry.id)
+			.where("id", "=", args.fileQueueEntry.id)
 			.execute();
 	});
 }
 
 export async function handleFileUpdate(args: {
 	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
-	changeQueueEntry: FileQueueEntry;
+	fileQueueEntry: FileQueueEntry;
 }): Promise<void> {
 	const detectedChanges: Array<DetectedChange & { pluginKey: string }> = [];
 
@@ -133,7 +133,7 @@ export async function handleFileUpdate(args: {
 	// the path of the file is either the after path or the before path
 	// depending on whether the file was deleted, updated, or created
 	const path =
-		args.changeQueueEntry.path_after ?? args.changeQueueEntry.path_before;
+		args.fileQueueEntry.path_after ?? args.fileQueueEntry.path_before;
 
 	if (path === null) {
 		throw new Error("Both before and after paths are null");
@@ -160,19 +160,19 @@ export async function handleFileUpdate(args: {
 		}
 		for (const change of await plugin.detectChanges({
 			lix: args.lix,
-			before: args.changeQueueEntry.data_before
+			before: args.fileQueueEntry.data_before
 				? {
-						id: args.changeQueueEntry.file_id,
+						id: args.fileQueueEntry.file_id,
 						path: path,
-						metadata: args.changeQueueEntry.metadata_before,
-						data: args.changeQueueEntry.data_before,
+						metadata: args.fileQueueEntry.metadata_before,
+						data: args.fileQueueEntry.data_before,
 					}
 				: undefined,
 			after: {
-				id: args.changeQueueEntry.file_id,
+				id: args.fileQueueEntry.file_id,
 				path,
-				metadata: args.changeQueueEntry.metadata_after,
-				data: args.changeQueueEntry.data_after!,
+				metadata: args.fileQueueEntry.metadata_after,
+				data: args.fileQueueEntry.data_after!,
 			},
 		})) {
 			detectedChanges.push({
@@ -201,7 +201,7 @@ export async function handleFileUpdate(args: {
 					authors: currentAuthors,
 					version: currentVersion,
 					entityId: detectedChange.entity_id,
-					fileId: args.changeQueueEntry.file_id,
+					fileId: args.fileQueueEntry.file_id,
 					pluginKey: detectedChange.pluginKey,
 					schemaKey: detectedChange.schema.key,
 					snapshotContent: detectedChange.snapshot,
@@ -211,7 +211,7 @@ export async function handleFileUpdate(args: {
 
 		await trx
 			.deleteFrom("file_queue")
-			.where("id", "=", args.changeQueueEntry.id)
+			.where("id", "=", args.fileQueueEntry.id)
 			.execute();
 	});
 }
@@ -227,7 +227,7 @@ export async function handleFileUpdate(args: {
  */
 export async function handleFileDelete(args: {
 	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
-	changeQueueEntry: FileQueueEntry;
+	fileQueueEntry: FileQueueEntry;
 }): Promise<void> {
 	await args.lix.db.transaction().execute(async (trx) => {
 		const currentVersion = await trx
@@ -238,7 +238,7 @@ export async function handleFileDelete(args: {
 
 		const toBeDeletedEntities = await trx
 			.selectFrom("change")
-			.where("file_id", "=", args.changeQueueEntry.file_id)
+			.where("file_id", "=", args.fileQueueEntry.file_id)
 			.where(changeIsLeafInVersion(currentVersion))
 			.select("entity_id")
 			.select("schema_key")
@@ -257,7 +257,7 @@ export async function handleFileDelete(args: {
 					authors: currentAuthors,
 					version: currentVersion,
 					entityId: change.entity_id,
-					fileId: args.changeQueueEntry.file_id,
+					fileId: args.fileQueueEntry.file_id,
 					pluginKey: change.plugin_key,
 					schemaKey: change.schema_key,
 					snapshotContent: null, // Snapshot is null for deletions
@@ -267,7 +267,7 @@ export async function handleFileDelete(args: {
 
 		await trx
 			.deleteFrom("file_queue")
-			.where("id", "=", args.changeQueueEntry.id)
+			.where("id", "=", args.fileQueueEntry.id)
 			.execute();
 	});
 }

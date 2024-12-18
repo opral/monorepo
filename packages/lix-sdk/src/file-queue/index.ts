@@ -1,1 +1,1 @@
-export { fileQueueSettled as changeQueueSettled } from "./file-queue-settled.js";
+export { fileQueueSettled } from "./file-queue-settled.js";

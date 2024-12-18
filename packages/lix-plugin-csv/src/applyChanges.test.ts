@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { applyChanges } from "./applyChanges.js";
 import { mockChanges } from "./utilities/mockChanges.js";
-import { changeQueueSettled, openLixInMemory } from "@lix-js/sdk";
+import { fileQueueSettled, openLixInMemory } from "@lix-js/sdk";
 import { plugin } from "./index.js";
 
 test("it applies an insert change", async () => {
@@ -114,7 +114,7 @@ test("applies changes to a new csv file", async () => {
 
 	await lix.db.insertInto("file").values(file).execute();
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	const changes = await lix.db
 		.selectFrom("change")

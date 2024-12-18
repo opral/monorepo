@@ -52,17 +52,17 @@ export async function initFileQueueProcess(args: {
 			if (entry) {
 				if (entry.data_before && entry.data_after) {
 					await handleFileUpdate({
-						changeQueueEntry: entry,
+						fileQueueEntry: entry,
 						lix: args.lix,
 					});
 				} else if (!entry.data_before && entry.data_after) {
 					await handleFileInsert({
-						changeQueueEntry: entry,
+						fileQueueEntry: entry,
 						lix: args.lix,
 					});
 				} else {
 					await handleFileDelete({
-						changeQueueEntry: entry,
+						fileQueueEntry: entry,
 						lix: args.lix,
 					});
 				}

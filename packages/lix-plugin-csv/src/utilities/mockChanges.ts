@@ -1,5 +1,5 @@
 import {
-	changeQueueSettled,
+	fileQueueSettled,
 	openLixInMemory,
 	type Lix,
 	type NewLixFile,
@@ -38,7 +38,7 @@ export async function mockChanges(args: {
 			.execute();
 	}
 
-	await changeQueueSettled({ lix });
+	await fileQueueSettled({ lix });
 
 	const changes = await lix.db
 		.selectFrom("change")
