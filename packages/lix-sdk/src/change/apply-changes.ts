@@ -52,8 +52,11 @@ export async function applyChanges(args: {
 				continue;
 			}
 			// Skip own entity changes which have a file id 'null' and
-			// plugin key 'lix_own_entity' as they are not associated with a file
-			if (fileId === "null" && changes[0]?.plugin_key === "lix_own_entity") {
+			// plugin key 'lix_own_change_control' as they are not associated with a file
+			if (
+				fileId === "null" &&
+				changes[0]?.plugin_key === "lix_own_change_control"
+			) {
 				await applyOwnEntityChanges({ lix: { ...args.lix, db: trx }, changes });
 				continue;
 			}

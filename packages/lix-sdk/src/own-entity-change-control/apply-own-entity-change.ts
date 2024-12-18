@@ -31,9 +31,9 @@ export async function applyOwnEntityChanges(args: {
 
 			await Promise.all(
 				args.changes.map(async (change) => {
-					if (change.plugin_key !== "lix_own_entity") {
+					if (change.plugin_key !== "lix_own_change_control") {
 						throw new Error(
-							"Expected 'lix_own_entity' as plugin key but received " +
+							"Expected 'lix_own_change_control' as plugin key but received " +
 								change.plugin_key
 						);
 					}

@@ -24,7 +24,7 @@ export function applyOwnEntityChangeControlTriggers(
 	}
 
 	sqlite.createFunction({
-		name: "handle_lix_own_entity_change",
+		name: "handle_lix_own_change_control",
 		arity: -1,
 		// @ts-expect-error - dynamic function
 		xFunc: (
@@ -51,7 +51,7 @@ export function applyOwnEntityChangeControlTriggers(
       CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_insert
       AFTER INSERT ON ${table}
       BEGIN
-        SELECT handle_lix_own_entity_change('${table}', 'insert', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
+        SELECT handle_lix_own_change_control('${table}', 'insert', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
       END;
       
       CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_update
@@ -69,13 +69,13 @@ export function applyOwnEntityChangeControlTriggers(
 					: ""
 			}
       BEGIN
-        SELECT handle_lix_own_entity_change('${table}', 'update', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
+        SELECT handle_lix_own_change_control('${table}', 'update', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
       END;
 
       CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_delete
       AFTER DELETE ON ${table}
       BEGIN
-        SELECT handle_lix_own_entity_change('${table}', 'delete', ${tableInfo.map((c) => "OLD." + c.name).join(", ")});
+        SELECT handle_lix_own_change_control('${table}', 'delete', ${tableInfo.map((c) => "OLD." + c.name).join(", ")});
       END;
       `;
 
@@ -120,7 +120,7 @@ function handleLixOwnEntityChange(
 			.select("plugin_key"),
 	})[0];
 
-	if (change?.plugin_key === "lix_own_entity") {
+	if (change?.plugin_key === "lix_own_change_control") {
 		return;
 	}
 
@@ -178,7 +178,7 @@ function handleLixOwnEntityChange(
 			version: currentVersion,
 			entityId,
 			fileId: "null",
-			pluginKey: "lix_own_entity",
+			pluginKey: "lix_own_change_control",
 			schemaKey: `lix_${tableName}_table`,
 			snapshotContent,
 		},
