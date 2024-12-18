@@ -36,8 +36,8 @@ export async function applyChanges(args: {
 		// Plugin changes depend on lix changes like the file
 		// data for example. Therefore, the lix changes need
 		// to be applied first.
-		const lixOwnChanges = groupByFile["null"] ?? [];
-		delete groupByFile["null"];
+		const lixOwnChanges = groupByFile["lix_own_change_control"] ?? [];
+		delete groupByFile["lix_own_change_control"];
 
 		const plugins = await args.lix.plugin.getAll();
 
@@ -45,7 +45,7 @@ export async function applyChanges(args: {
 		// https://linear.app/opral/issue/LIXDK-104/add-detectedchangeschema
 		for (const [fileId, changes] of [
 			// applying lix own changes first
-			["null", lixOwnChanges] as [string, Change[]],
+			["lix_own_change_control", lixOwnChanges] as [string, Change[]],
 			...Object.entries(groupByFile),
 		]) {
 			if (changes === undefined || changes.length === 0) {
@@ -53,10 +53,7 @@ export async function applyChanges(args: {
 			}
 			// Skip own entity changes which have a file id 'null' and
 			// plugin key 'lix_own_change_control' as they are not associated with a file
-			if (
-				fileId === "null" &&
-				changes[0]?.plugin_key === "lix_own_change_control"
-			) {
+			if (fileId === "lix_own_change_control") {
 				await applyOwnEntityChanges({ lix: { ...args.lix, db: trx }, changes });
 				continue;
 			}
