@@ -14,6 +14,7 @@ import { createChangeSet } from "../change-set/create-change-set.js";
 import { createDiscussion } from "../discussion/create-discussion.js";
 import { createComment } from "../discussion/create-comment.js";
 import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
+import { toBlob } from "./to-blob.js";
 
 test("it should copy changes from the sourceLix into the targetLix that do not exist in targetLix yet", async () => {
 	const mockSnapshots = [
@@ -691,7 +692,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 
 	// The files have to be there before we merge
 	const lix2 = await openLixInMemory({
-		blob: await lix1.toBlob(),
+		blob: await toBlob({ lix: lix1 }),
 		providePlugins: [mockPlugin],
 	});
 
@@ -816,7 +817,7 @@ test.skip("it should copy change sets and merge memberships", async () => {
 	});
 
 	const sourceLix = await openLixInMemory({
-		blob: await targetLix.toBlob(),
+		blob: await toBlob({ lix: targetLix }),
 	});
 
 	// expand the change set to contain another change

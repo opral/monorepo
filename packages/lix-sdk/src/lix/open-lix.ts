@@ -1,9 +1,8 @@
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { loadPlugins } from "../plugin/load-plugin.js";
-import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
+import { type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { initFileQueueProcess } from "../file-queue/file-queue-process.js";
-import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
 import type { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import { initSyncProcess } from "../sync/sync-process.js";
@@ -22,11 +21,9 @@ export type Lix = {
 	 */
 	sqlite: SqliteDatabase;
 	db: Kysely<LixDatabaseSchema>;
-	toBlob: () => Promise<Blob>;
 	plugin: {
 		getAll: () => Promise<LixPlugin[]>;
 	};
-	close: () => Promise<void>;
 };
 
 /**
@@ -77,27 +74,16 @@ export async function openLix(args: {
 		getAll: async () => plugins,
 	};
 
-	const toBlob = async () => {
-		await fileQueueSettled({ lix: { db } });
-		return new Blob([contentFromDatabase(args.database)]);
-	};
-
 	initFileQueueProcess({
 		lix: { db, plugin, sqlite: args.database },
 		rawDatabase: args.database,
 	});
 
-	initSyncProcess({ lix: { db, plugin, toBlob } });
+	initSyncProcess({ lix: { db, plugin, sqlite: args.database } });
 
 	return {
 		db,
 		sqlite: args.database,
-		toBlob,
 		plugin,
-		close: async () => {
-			await fileQueueSettled({ lix: { db } });
-			// args.database.close();
-			// await db.destroy();
-		},
 	};
 }

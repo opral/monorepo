@@ -34,7 +34,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
 import IconMerge from "@/components/icons/IconMerge.tsx";
-import { Lix, openLixInMemory } from "@lix-js/sdk";
+import { Lix, openLixInMemory, toBlob } from "@lix-js/sdk";
 import { posthog } from "posthog-js";
 
 const isCsvFile = (path: string) => {
@@ -432,7 +432,7 @@ const handleExportLixFile = async (lix: Lix) => {
 		.select("value")
 		.executeTakeFirstOrThrow();
 
-	const blob = await lix.toBlob();
+	const blob = await toBlob({ lix });
 	const a = document.createElement("a");
 	a.href = URL.createObjectURL(blob);
 	a.download = `${lixId.value}.lix`;

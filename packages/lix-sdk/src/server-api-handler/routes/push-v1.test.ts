@@ -9,6 +9,7 @@ import { createVersion } from "../../version/create-version.js";
 import { switchVersion } from "../../version/switch-version.js";
 import { pullFromServer } from "../../sync/pull-from-server.js";
 import { createLsaInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
+import { toBlob } from "../../lix/to-blob.js";
 
 test("it should push data successfully", async () => {
 	const lix = await openLixInMemory({});
@@ -19,7 +20,7 @@ test("it should push data successfully", async () => {
 		.executeTakeFirstOrThrow();
 
 	const environment = createLsaInMemoryEnvironment();
-	await environment.setLix({ id, blob: await lix.toBlob() });
+	await environment.setLix({ id, blob: await toBlob({ lix }) });
 
 	const lsaHandler = await createServerApiHandler({ environment });
 
@@ -130,7 +131,7 @@ test("it should return 400 for a failed insert operation", async () => {
 
 	const environment = createLsaInMemoryEnvironment();
 
-	environment.setLix({ id, blob: await lix.toBlob() });
+	environment.setLix({ id, blob: await toBlob({ lix }) });
 
 	const lsa = await createServerApiHandler({ environment });
 
@@ -169,7 +170,7 @@ test.skip("it should detect conflicts", async () => {
 
 	// initialize client
 	const lixOnClient = await openLixInMemory({
-		blob: await lixOnServer.toBlob(),
+		blob: await toBlob({ lix: lixOnServer }),
 	});
 
 	const lixId = await lixOnServer.db
@@ -192,7 +193,7 @@ test.skip("it should detect conflicts", async () => {
 
 	await environment.setLix({
 		id: lixId.value,
-		blob: await lixOnServer.toBlob(),
+		blob: await toBlob({ lix: lixOnServer }),
 	});
 
 	// client has/creates value1 for mock_key

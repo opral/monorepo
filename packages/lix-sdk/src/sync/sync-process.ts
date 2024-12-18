@@ -1,9 +1,10 @@
 import type { Lix } from "../lix/open-lix.js";
 import { pushToServer } from "./push-to-server.js";
 import { pullFromServer } from "./pull-from-server.js";
+import { toBlob } from "../lix/to-blob.js";
 
 export async function initSyncProcess(args: {
-	lix: Pick<Lix, "db" | "plugin" | "toBlob">;
+	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
 }): Promise<
 	| {
 			stop: () => void;
@@ -64,7 +65,7 @@ export async function initSyncProcess(args: {
 			const response = await fetch(
 				new Request(url.value + "/lsa/new-v1", {
 					method: "POST",
-					body: await args.lix.toBlob(),
+					body: await toBlob({ lix: args.lix }),
 				})
 			);
 			if (!response.ok && response.status !== 409) {

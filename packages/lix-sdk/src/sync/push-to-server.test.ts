@@ -9,6 +9,7 @@ import type { KeyValue } from "../key-value/database-schema.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { createLsaInMemoryEnvironment } from "../server-api-handler/environment/create-in-memory-environment.js";
+import { toBlob } from "../lix/to-blob.js";
 
 test("push rows of multiple tables to server successfully", async () => {
 	const lixBlob = await newLixFile();
@@ -30,7 +31,7 @@ test("push rows of multiple tables to server successfully", async () => {
 	await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
-			body: await lix.toBlob(),
+			body: await toBlob({ lix }),
 		})
 	);
 
@@ -111,7 +112,7 @@ test("push-pull-push with two clients", async () => {
 	await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
-			body: await client1.toBlob(),
+			body: await toBlob({ lix: client1 }),
 		})
 	);
 
@@ -291,7 +292,7 @@ test("it should handle snapshots.content json binaries", async () => {
 	await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
-			body: await lix.toBlob(),
+			body: await toBlob({ lix }),
 		})
 	);
 
@@ -345,7 +346,7 @@ test.todo("it should handle binary values", async () => {
 	await lsaHandler(
 		new Request("http://localhost:3000/lsa/new", {
 			method: "POST",
-			body: await lix.toBlob(),
+			body: await toBlob({ lix }),
 		})
 	);
 

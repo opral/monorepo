@@ -4,11 +4,14 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { createLsaInMemoryEnvironment } from "../server-api-handler/environment/create-in-memory-environment.js";
+import { toBlob } from "../lix/to-blob.js";
 
 test("pull rows of multiple tables from server successfully and applies them", async () => {
 	const lixOnServer = await openLixInMemory({});
 
-	const lix = await openLixInMemory({ blob: await lixOnServer.toBlob() });
+	const lix = await openLixInMemory({
+		blob: await toBlob({ lix: lixOnServer }),
+	});
 
 	const { value: id } = await lixOnServer.db
 		.selectFrom("key_value")
@@ -38,7 +41,7 @@ test("pull rows of multiple tables from server successfully and applies them", a
 	await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
-			body: await lixOnServer.toBlob(),
+			body: await toBlob({ lix: lixOnServer }),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -72,7 +75,9 @@ test("pull rows of multiple tables from server successfully and applies them", a
 test("it handles snapshot.content being json binary", async () => {
 	const lixOnServer = await openLixInMemory({});
 
-	const lix = await openLixInMemory({ blob: await lixOnServer.toBlob() });
+	const lix = await openLixInMemory({
+		blob: await toBlob({ lix: lixOnServer }),
+	});
 
 	const { value: id } = await lixOnServer.db
 		.selectFrom("key_value")
@@ -101,7 +106,7 @@ test("it handles snapshot.content being json binary", async () => {
 	await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
-			body: await lixOnServer.toBlob(),
+			body: await toBlob({ lix: lixOnServer }),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -141,7 +146,9 @@ test("rows changed on the client more recently should not be updated", async () 
 		})
 		.executeTakeFirstOrThrow();
 
-	const lix = await openLixInMemory({ blob: await lixOnServer.toBlob() });
+	const lix = await openLixInMemory({
+		blob: await toBlob({ lix: lixOnServer }),
+	});
 
 	const environment = createLsaInMemoryEnvironment();
 	const lsaHandler = await createServerApiHandler({ environment });
@@ -152,7 +159,7 @@ test("rows changed on the client more recently should not be updated", async () 
 	await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
-			body: await lixOnServer.toBlob(),
+			body: await toBlob({ lix: lixOnServer }),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -192,7 +199,9 @@ test.skip("rows changed on the server more recently should be updated on the cli
 
 	// create a lix and clone it for the client - so they share the same lix id
 	const remoteLix = await openLixInMemory({});
-	const localLix = await openLixInMemory({ blob: await remoteLix.toBlob() });
+	const localLix = await openLixInMemory({
+		blob: await toBlob({ lix: remoteLix }),
+	});
 
 	// insert mock data into server lix
 	await remoteLix.db
@@ -234,7 +243,7 @@ test.skip("rows changed on the server more recently should be updated on the cli
 	await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
-			body: await remoteLix.toBlob(),
+			body: await toBlob({ lix: remoteLix }),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -347,7 +356,7 @@ test("non-conflicting changes from the server should for the same version should
 
 	global.fetch = vi.fn((request) => lsaHandler(request));
 
-	const lixOnServer = await openLixInMemory({ blob: await lix.toBlob() });
+	const lixOnServer = await openLixInMemory({ blob: await toBlob({ lix }) });
 
 	// insert data on the server that the client does not have yet
 	await lixOnServer.db
@@ -377,7 +386,7 @@ test("non-conflicting changes from the server should for the same version should
 	await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
-			body: await lixOnServer.toBlob(),
+			body: await toBlob({ lix: lixOnServer }),
 			headers: {
 				"Content-Type": "application/json",
 			},

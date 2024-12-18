@@ -8,7 +8,7 @@ import {
 	SlMenu,
 	SlMenuItem,
 } from "@shoelace-style/shoelace/dist/react";
-import { Lix } from "@lix-js/sdk";
+import { Lix, toBlob } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import { openLixInMemory } from "@lix-js/sdk";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
@@ -36,13 +36,13 @@ export default function RootLayout(props: { children: JSX.Element }) {
 				autocapture: {
 					capture_copied_text: true,
 				},
-			})
-			posthog.capture("$pageview")
+			});
+			posthog.capture("$pageview");
 		} else {
-			console.info("No posthog token found")
+			console.info("No posthog token found");
 		}
-		return () => posthog.reset()
-	}, [])
+		return () => posthog.reset();
+	}, []);
 
 	useEffect(() => {
 		if (import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN) {
@@ -52,13 +52,13 @@ export default function RootLayout(props: { children: JSX.Element }) {
 				autocapture: {
 					capture_copied_text: true,
 				},
-			})
-			posthog.capture("$pageview")
+			});
+			posthog.capture("$pageview");
 		} else {
-			console.info("No posthog token found")
+			console.info("No posthog token found");
 		}
-		return () => posthog.reset()
-	}, [])
+		return () => posthog.reset();
+	}, []);
 
 	const handleOpenLixFile = async (
 		event: React.ChangeEvent<HTMLInputElement>
@@ -154,9 +154,7 @@ export default function RootLayout(props: { children: JSX.Element }) {
 							</SlMenuItem>
 						</SlMenu>
 					</SlDropdown>
-					{isSyncing && (
-						<SyncStatus lix={lix}></SyncStatus>
-					)}
+					{isSyncing && <SyncStatus lix={lix}></SyncStatus>}
 					<SyncAndShare />
 				</div>
 				<div className="flex gap-3 items-center">
@@ -187,7 +185,7 @@ const handleExportLixFile = async (lix: Lix) => {
 		.select("value")
 		.executeTakeFirstOrThrow();
 
-	const blob = await lix.toBlob();
+	const blob = await toBlob({ lix });
 	const a = document.createElement("a");
 	a.href = URL.createObjectURL(blob);
 	a.download = `${lixId.value}.lix`;

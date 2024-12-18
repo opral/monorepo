@@ -1,5 +1,6 @@
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import type { Lix } from "../../lix/open-lix.js";
+import { toBlob } from "../../lix/to-blob.js";
 import type { LsaEnvironment } from "./environment.js";
 
 /**
@@ -100,8 +101,8 @@ export const createLsaInMemoryEnvironment = (): LsaEnvironment => {
 			if (connections.size === 0) {
 				// TODO no concurrency guarantees
 				const lix = openLixes.get(args.id);
-				const blob = await lix!.toBlob();
-				await lix?.close();
+				const blob = await toBlob({ lix: lix! });
+				lix?.sqlite.close();
 				openConnections.delete(args.id);
 				openLixes.delete(args.id);
 				store.set(args.id, blob);

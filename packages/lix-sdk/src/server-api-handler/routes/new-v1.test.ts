@@ -3,6 +3,7 @@ import { createServerApiHandler } from "../create-server-api-handler.js";
 import { newLixFile } from "../../lix/new-lix.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import { createLsaInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
+import { toBlob } from "../../lix/to-blob.js";
 
 test("it should store the lix file", async () => {
 	const initLix = await openLixInMemory({
@@ -22,7 +23,7 @@ test("it should store the lix file", async () => {
 	const response = await lsaHandler(
 		new Request("http://localhost:3000/lsa/new-v1", {
 			method: "POST",
-			body: await initLix.toBlob(),
+			body: await toBlob({ lix: initLix }),
 		})
 	);
 	const json = await response.json();

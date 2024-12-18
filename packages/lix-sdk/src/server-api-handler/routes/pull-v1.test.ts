@@ -5,6 +5,7 @@ import { createServerApiHandler } from "../create-server-api-handler.js";
 import { mockJsonSnapshot } from "../../snapshot/mock-json-snapshot.js";
 import { mockChange } from "../../change/mock-change.js";
 import { createLsaInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
+import { toBlob } from "../../lix/to-blob.js";
 
 type RequestBody =
 	LixServerApi.paths["/lsa/pull-v1"]["post"]["requestBody"]["content"]["application/json"];
@@ -27,7 +28,7 @@ test("it should pull rows successfully", async () => {
 
 	const environment = createLsaInMemoryEnvironment();
 
-	await environment.setLix({ id: id.value, blob: await lix.toBlob() });
+	await environment.setLix({ id: id.value, blob: await toBlob({ lix }) });
 
 	const lsaHandler = await createServerApiHandler({ environment });
 
@@ -79,7 +80,7 @@ test("it should specifically be able to handle snapshots which use json binary a
 		.execute();
 
 	const environment = createLsaInMemoryEnvironment();
-	await environment.setLix({ id, blob: await lix.toBlob() });
+	await environment.setLix({ id, blob: await toBlob({ lix }) });
 
 	const lsa = await createServerApiHandler({ environment });
 
@@ -172,7 +173,7 @@ test("it should handle empty tables gracefully", async () => {
 		.executeTakeFirstOrThrow();
 
 	const environment = createLsaInMemoryEnvironment();
-	await environment.setLix({ id, blob: await lix.toBlob() });
+	await environment.setLix({ id, blob: await toBlob({ lix }) });
 
 	const lsa = await createServerApiHandler({ environment });
 
