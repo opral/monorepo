@@ -156,7 +156,7 @@ test("it applies own entity changes", async () => {
 				id: "change0",
 				entity_id: "mock-key",
 				file_id: "null",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_own_change_control",
 				schema_key: "lix_key_value_table",
 				snapshot_id: snapshot.id,
 				created_at: "2021-01-01T00:00:00Z",

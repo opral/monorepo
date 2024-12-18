@@ -21,7 +21,7 @@ test("it should apply insert changes correctly", async () => {
 		id: "change1",
 		entity_id: "key1",
 		schema_key: "lix_key_value_table",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_own_change_control",
 		file_id: "null",
 		snapshot_id: snapshot.id,
 		created_at: "2021-01-01T00:00:00.000Z",
@@ -62,7 +62,7 @@ test("it should apply update changes correctly", async () => {
 		entity_id: "key1",
 		file_id: "null",
 		created_at: "2021-01-01T00:00:00.000Z",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_own_change_control",
 		snapshot_id: snapshot.id,
 	};
 
@@ -98,7 +98,7 @@ test("it should apply delete changes correctly", async () => {
 		file_id: "null",
 		created_at: "2021-01-01T00:00:00.000Z",
 		entity_id: "key1",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_own_change_control",
 		snapshot_id: "no-content",
 	};
 
@@ -141,7 +141,7 @@ test("it should throw an error for invalid plugin key", async () => {
 	await expect(
 		applyOwnEntityChanges({ lix, changes: [change] })
 	).rejects.toThrow(
-		"Expected 'lix_own_entity' as plugin key but received invalid-plugin"
+		"Expected 'lix_own_change_control' as plugin key but received invalid-plugin"
 	);
 });
 
@@ -189,7 +189,7 @@ test("file.data is not changed by applyOwnEntityChanges", async () => {
 		id: "change1",
 		entity_id: file.id,
 		schema_key: "lix_file_table",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_own_change_control",
 		file_id: "null",
 		snapshot_id: snapshot.id,
 		created_at: "2021-01-01T00:00:00.000Z",
@@ -230,7 +230,7 @@ test("foreign key constraints are deferred to make the order of applying changes
 			id: "change2",
 			entity_id: "change-set-1,change0",
 			schema_key: "lix_change_set_element_table",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_own_change_control",
 			file_id: "null",
 			snapshot_id: snapshots[1].id,
 			created_at: "2021-01-01T00:00:00.000Z",
@@ -239,7 +239,7 @@ test("foreign key constraints are deferred to make the order of applying changes
 			id: "change1",
 			entity_id: "change-set-1",
 			schema_key: "lix_change_set_table",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_own_change_control",
 			file_id: "null",
 			snapshot_id: snapshots[0].id,
 			created_at: "2021-01-01T00:00:00.000Z",
@@ -291,7 +291,7 @@ test("foreign key constraints are obeyed", async () => {
 			// the change set for this change does not exist
 			entity_id: "change-set-1,change0",
 			schema_key: "lix_change_set_element_table",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_own_change_control",
 			file_id: "null",
 			snapshot_id: snapshots[0].id,
 			created_at: "2021-01-01T00:00:00.000Z",
@@ -351,7 +351,7 @@ test("applying own entity changes doesn't lead to the creation of new changes", 
 				id: "change0",
 				entity_id: "mock-key",
 				file_id: "null",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_own_change_control",
 				schema_key: "lix_key_value_table",
 				snapshot_id: snapshot.id,
 				created_at: "2021-01-01T00:00:00Z",

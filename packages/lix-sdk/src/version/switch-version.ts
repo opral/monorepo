@@ -75,7 +75,7 @@ export async function switchVersion(args: {
 				// need to remove the entity when switching the version
 				else {
 					if (
-						change.plugin_key === "lix_own_entity" &&
+						change.plugin_key === "lix_own_change_control" &&
 						(change.schema_key === "lix_account_table" ||
 							change.schema_key === "lix_version_table")
 					) {
