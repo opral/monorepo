@@ -31,8 +31,8 @@ const ConnectedChanges = () => {
 					<span className="font-medium">{filteredChanges.length}</span>
 					<span className="text-slate-500">
 						{filteredChanges.length === 1
-							? "connected change"
-							: "connected changes"}
+							? "related change"
+							: "related changes"}
 					</span>
 				</div>
 				<Button variant="ghost" size="icon">
