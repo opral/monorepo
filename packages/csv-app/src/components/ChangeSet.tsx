@@ -149,7 +149,7 @@ const ConfirmChangesBox = () => {
 			await createDiscussion({
 				lix,
 				changeSet,
-				content: description,
+				firstComment: { content: description },
 			});
 			await saveLixToOpfs({ lix });
 		}
