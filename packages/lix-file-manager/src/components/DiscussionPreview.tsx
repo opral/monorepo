@@ -17,18 +17,24 @@ const DiscussionPreview = ({ discussionId }: { discussionId: string }) => {
 
   const getFirstComment = async (discussionId: string) => {
     const comment = await lix.db
-      .selectFrom("comment")
-      .innerJoin("account", "account.id", "comment.created_by")
-      .select([
-        "comment.id",
-        "comment.content",
-        "comment.created_at",
-        "account.name as author_name"
-      ])
-      .where("comment.discussion_id", "=", discussionId)
-      .orderBy("comment.created_at", "asc")
-      .limit(1)
-      .executeTakeFirstOrThrow();
+			.selectFrom("comment")
+			.innerJoin("change", (join) =>
+				join
+					.onRef("change.entity_id", "=", "comment.id")
+					.on("change.schema_key", "=", "lix_comment_table")
+			)
+			.innerJoin("change_author", "change_author.change_id", "change.id")
+			.innerJoin("account", "account.id", "change_author.account_id")
+			.select([
+				"comment.id",
+				"comment.content",
+				"change.created_at",
+				"account.name as author_name",
+			])
+			.where("comment.discussion_id", "=", discussionId)
+			.orderBy("change.created_at", "asc")
+			.limit(1)
+			.executeTakeFirstOrThrow();
 
     setFirstComment(comment);
   };

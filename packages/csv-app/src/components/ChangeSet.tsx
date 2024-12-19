@@ -10,7 +10,7 @@ import {
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { activeAccountsAtom, currentVersionAtom, lixAtom } from "../state.ts";
+import { currentVersionAtom, lixAtom } from "../state.ts";
 import clsx from "clsx";
 import {
 	activeFileAtom,
@@ -142,7 +142,6 @@ const ConfirmChangesBox = () => {
 	const [description, setDescription] = useState("");
 	const [lix] = useAtom(lixAtom);
 	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
-	const [activeAccounts] = useAtom(activeAccountsAtom);
 
 	const handleConfirmChanges = async () => {
 		const changeSet = await confirmChanges(lix, unconfirmedChanges);
@@ -151,7 +150,6 @@ const ConfirmChangesBox = () => {
 				lix,
 				changeSet,
 				content: description,
-				createdBy: activeAccounts[0],
 			});
 			await saveLixToOpfs({ lix });
 		}

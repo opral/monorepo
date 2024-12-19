@@ -346,9 +346,10 @@ export const selectedChangeIdsAtom = atom<string[]>([]);
 
 export const activeDiscussionAtom = atom(async (get) => {
 	const lix = await get(lixAtom);
+	const currentVersion = await get(currentVersionAtom);
 	const activeFile = await get(activeFileAtom);
 	const fileIdSearchParams = await get(fileIdSearchParamsAtom);
-	if (!activeFile || !fileIdSearchParams) return null;
+	if (!activeFile || !fileIdSearchParams || !currentVersion) return null;
 	const discussionSearchParams = await get(discussionSearchParamsAtom);
 	if (!discussionSearchParams) return null;
 
@@ -361,16 +362,26 @@ export const activeDiscussionAtom = atom(async (get) => {
 			jsonArrayFrom(
 				eb
 					.selectFrom("comment")
-					.leftJoin("account", "account.id", "comment.created_by")
+					.innerJoin("change", (join) =>
+						join
+							.onRef("change.entity_id", "=", "comment.id")
+							.on("change.schema_key", "=", "lix_comment_table")
+					)
+					.where(changeInVersion(currentVersion))
+					.leftJoin("change_author", "change_author.change_id", "change.id")
+					.innerJoin("account", "account.id", "change_author.account_id")
 					.select([
 						"comment.id",
 						"comment.content",
-						"comment.created_at",
+						"change.created_at",
 						"account.id as account_id",
 						"account.name as account_name",
+						// "comment.created_at",
+						// "account.id as account_id",
+						// "account.name as account_name",
 					])
 					.whereRef("comment.discussion_id", "=", "discussion.id")
-					.orderBy("comment.created_at", "asc")
+					.orderBy("change.created_at", "asc")
 			).as("comments"),
 		])
 		.execute();

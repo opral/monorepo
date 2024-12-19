@@ -43,16 +43,12 @@ const FilterSelect = () => {
           lix: { ...lix, db: trx },
           changes: selectedChangeIds.map((id) => { return { id } }),
         })
-        const createdBy = await trx
-          .selectFrom("active_account")
-          .selectAll()
-          .executeTakeFirstOrThrow();
+
         return await createDiscussion({
-          lix: { ...lix, db: trx },
-          changeSet,
-          content: discussionValue,
-          createdBy,
-        });
+					lix: { ...lix, db: trx },
+					changeSet,
+					content: discussionValue,
+				});
       }
     );
     await saveLixToOpfs({ lix });

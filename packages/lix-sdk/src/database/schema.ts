@@ -175,8 +175,6 @@ type CommentTable = {
 	id: Generated<string>;
 	parent_id: string | null;
 	discussion_id: string;
-	created_at: Generated<string>;
-	created_by: string;
 	content: string;
 };
 
