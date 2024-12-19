@@ -3,6 +3,7 @@ import {
 	contentFromDatabase,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
+import { closeLix } from "./close-lix.js";
 
 /**
  * Creates a new lix file.
@@ -23,8 +24,6 @@ export async function newLixFile(): Promise<Blob> {
 	} catch (e) {
 		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e });
 	} finally {
-		// in any case destroy the memory db
-		sqlite.close();
-		await db.destroy();
+		closeLix({ lix: { db } });
 	}
 }

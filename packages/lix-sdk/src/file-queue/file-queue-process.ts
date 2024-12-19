@@ -1,4 +1,3 @@
-import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import {
 	handleFileUpdate,
 	handleFileInsert,
@@ -8,9 +7,8 @@ import type { Lix } from "../lix/open-lix.js";
 
 export async function initFileQueueProcess(args: {
 	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
-	rawDatabase: SqliteDatabase;
 }): Promise<void> {
-	args.rawDatabase.createFunction({
+	args.lix.sqlite.createFunction({
 		name: "triggerFileQueue",
 		arity: 0,
 		// @ts-expect-error - dynamic function
@@ -29,6 +27,12 @@ export async function initFileQueueProcess(args: {
 	let hasMoreEntriesSince: number | undefined = undefined;
 
 	async function queueWorker(trail = false) {
+
+		if (args.lix.sqlite.isOpen() === false) {
+			console.log("sqlite is closed");
+			return;
+		}
+
 		try {
 			if (pending && !trail) {
 				hasMoreEntriesSince = runNumber;
@@ -81,15 +85,14 @@ export async function initFileQueueProcess(args: {
 				!hasMoreEntriesSince ||
 				(numEntries === 0 && hasMoreEntriesSince < runNumber)
 			) {
-				resolve!(); // TODO: fix type
+				resolve!();
 				hasMoreEntriesSince = undefined;
 				pending = undefined;
 				// console.log("resolving");
+			} else {
+				// there are more entries to process
+				queueWorker(true);
 			}
-
-			// TODO: handle endless tries on failing quee entries
-			// we either execute the queue immediately if we know there is more work or fall back to polling
-			setTimeout(() => queueWorker(true), hasMoreEntriesSince ? 0 : 1000);
 		} catch (e) {
 			console.error("file queue failed ", e);
 		}

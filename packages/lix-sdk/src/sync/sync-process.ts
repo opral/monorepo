@@ -5,19 +5,12 @@ import { toBlob } from "../lix/to-blob.js";
 
 export async function initSyncProcess(args: {
 	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
-}): Promise<
-	| {
-			stop: () => void;
-	  }
-	| undefined
-> {
+}): Promise<void> {
 	const lixId = await args.lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix_id")
 		.select("value")
 		.executeTakeFirstOrThrow();
-
-	let stoped = false;
 
 	const pullAndPush = async () => {
 		const shouldSync = await args.lix.db
@@ -78,7 +71,7 @@ export async function initSyncProcess(args: {
 	// naive implementation that syncs every second
 
 	function schedulePullAndPush() {
-		if (!stoped) {
+		if (args.lix.sqlite.isOpen()) {
 			pullAndPush().catch((e) => {
 				console.error("Error in sync process", e);
 			});
@@ -89,10 +82,4 @@ export async function initSyncProcess(args: {
 	}
 
 	schedulePullAndPush();
-
-	return {
-		stop: () => {
-			stoped = true;
-		},
-	};
 }
