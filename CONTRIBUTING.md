@@ -20,5 +20,5 @@
 ## Opening a PR
 
 1. run `pnpm run ci` to run all tests and checks
-2. run `npx changeset` to write a changelog and trigger a version bumb
+2. run `npx changeset` to write a changelog and trigger a version bumb. watch this loom video to see how to use changesets: https://www.loom.com/share/1c5467ae3a5243d79040fc3eb5aa12d6
 
