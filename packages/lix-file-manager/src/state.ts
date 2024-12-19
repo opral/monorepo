@@ -164,9 +164,7 @@ export const lixAtom = atom(async (get) => {
  */
 export const withPollingAtom = atom(Date.now());
 
-export const currentVersionAtom = atom<
-	Promise<(Version & { targets: Version[] }) | null>
->(async (get) => {
+export const currentVersionAtom = atom<Promise<Version | null>>(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	if (!lix) return null;
@@ -177,7 +175,7 @@ export const currentVersionAtom = atom<
 		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
-	return { ...currentVersion, targets: [] };
+	return currentVersion;
 });
 
 export const existingVersionsAtom = atom(async (get) => {
@@ -232,7 +230,6 @@ export const switchActiveAccount = async (lix: Lix, account: Account) => {
 	});
 	localStorage.setItem(ACTIVE_ACCOUNT_STORAGE_KEY, JSON.stringify(account));
 };
-
 
 export const isSyncingAtom = atom(async (get) => {
 	get(withPollingAtom);
