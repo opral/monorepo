@@ -188,11 +188,8 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     parent_id TEXT,
     discussion_id TEXT NULL,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
     content TEXT NOT NULL,
-    created_by TEXT NOT NULL,
     
-    FOREIGN KEY(created_by) REFERENCES account(id),
     FOREIGN KEY(discussion_id) REFERENCES discussion(id),
     FOREIGN KEY(parent_id) REFERENCES comment(id)
   ) STRICT;
@@ -293,20 +290,6 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
       FROM active_account 
       WHERE id = NEW.account_id;
   END;
-    
-  CREATE TEMP TRIGGER IF NOT EXISTS insert_account_if_not_exists_on_comment
-  BEFORE INSERT ON comment
-  FOR EACH ROW
-  WHEN NEW.created_by NOT IN (SELECT id FROM account) AND NEW.created_by IN (SELECT id FROM temp.active_account)
-  BEGIN
-    INSERT OR IGNORE INTO account
-      SELECT 
-      *
-      FROM active_account 
-      WHERE id = NEW.created_by;
-  END;
-  
-
   `;
 
 	// CREATE TRIGGER IF NOT EXISTS insert_account_if_not_exists_on_change_set_label_author
