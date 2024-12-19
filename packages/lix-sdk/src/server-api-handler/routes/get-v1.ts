@@ -51,8 +51,6 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 
 	const blob2 = new Blob([contentFromDatabase(sqlite)]);
 
-	sqlite.close();
-
 	return new Response(blob2, {
 		status: 200,
 		headers: {
