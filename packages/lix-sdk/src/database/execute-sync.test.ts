@@ -100,7 +100,7 @@ test("using executeSync with a 'fake async' function should work", async () => {
 
 	const result = await fakeAyncQuery(lix);
 
-	expect(result).toEqual([{ key: "foo", value: "bar" }]);
+	expect(result).toMatchObject([{ key: "foo", value: "bar" }]);
 });
 
 test("it works with kysely transactions", async () => {

@@ -214,7 +214,7 @@ function SyncButton() {
 						.set({
 							value: "true",
 						})
-						.where("key", "=", "#lix_sync")
+						.where("key", "=", "lix_sync")
 						.execute();
 
 					await saveLixToOpfs({ lix });
@@ -235,7 +235,7 @@ function SyncStatus(props: { lix: Lix }) {
 			onClick={() => {
 				props.lix.db
 					.updateTable("key_value")
-					.where("key", "=", "#lix_sync")
+					.where("key", "=", "lix_sync")
 					.set({ value: "false" })
 					.execute();
 			}}

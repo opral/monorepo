@@ -95,7 +95,7 @@ test("switch version applies the changes of the switched to version", async () =
 		.selectAll()
 		.execute();
 
-	expect(keyValues).toEqual([{ key: "foo", value: "bar" }]);
+	expect(keyValues).toMatchObject([{ key: "foo", value: "bar" }]);
 
 	await switchVersion({ lix, to: versionB });
 
@@ -123,7 +123,7 @@ test("switch version applies the changes of the switched to version", async () =
 		.execute();
 
 	// expecting to see the value from version A again
-	expect(keyValues).toEqual([{ key: "foo", value: "bar" }]);
+	expect(keyValues).toMatchObject([{ key: "foo", value: "bar" }]);
 });
 
 // https://github.com/opral/lix-sdk/issues/209

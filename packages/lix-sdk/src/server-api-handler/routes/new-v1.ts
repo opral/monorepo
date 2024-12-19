@@ -11,7 +11,9 @@ export const route: LixServerApiHandlerRoute = async (context) => {
 		lix = await openLixInMemory({
 			blob,
 			// turn off sync for server
-			keyValues: [{ key: "#lix_sync", value: "false" }],
+			keyValues: [
+				{ key: "lix_sync", value: "false", skip_change_control: true },
+			],
 		});
 	} catch {
 		return new Response(null, {

@@ -5,7 +5,7 @@ import { pushToServer } from "./push-to-server.js";
 import type { LixFile } from "../database/schema.js";
 import type { Account } from "../account/database-schema.js";
 import { newLixFile } from "../lix/new-lix.js";
-import type { KeyValue } from "../key-value/database-schema.js";
+import type { NewKeyValue } from "../key-value/database-schema.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { createLsaInMemoryEnvironment } from "../server-api-handler/environment/create-in-memory-environment.js";
@@ -84,11 +84,11 @@ test("push rows of multiple tables to server successfully", async () => {
 		{ id: "account0", name: "some account" } satisfies Account,
 	]);
 	expect(keyValueChangesOnServer.map((c) => c.content)).toEqual([
-		{
+		expect.objectContaining({
 			key: "mock-key",
 			value: "mock-value",
-		},
-	] satisfies KeyValue[]);
+		}),
+	] satisfies NewKeyValue[]);
 });
 
 test("push-pull-push with two clients", async () => {
@@ -166,10 +166,10 @@ test("push-pull-push with two clients", async () => {
 
 	expect(client2KeyValueAfterPull).toEqual(
 		expect.arrayContaining([
-			{
+			expect.objectContaining({
 				key: "mock-key",
 				value: "mock-value from client 1",
-			} satisfies KeyValue,
+			} satisfies NewKeyValue),
 		])
 	);
 
@@ -261,15 +261,18 @@ test("push-pull-push with two clients", async () => {
 
 	expect(keyValueChangesOnServer.map((c) => c.content)).toEqual(
 		expect.arrayContaining([
-			{
+			expect.objectContaining({
 				key: "mock-key",
 				value: "mock-value from client 1",
-			},
-			{
+			}),
+			expect.objectContaining({
 				key: "mock-key",
 				value: "mock-value from client 1 - updated by client 2",
-			},
-			{ key: "mock-key-2", value: "mock-value from client 2" },
+			}),
+			expect.objectContaining({
+				key: "mock-key-2",
+				value: "mock-value from client 2",
+			}),
 		])
 	);
 });

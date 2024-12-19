@@ -40,7 +40,7 @@ test("versions should be synced", async () => {
 	// create a second client
 	const lix1 = await openLixInMemory({
 		blob: await toBlob({ lix: lix0 }),
-		keyValues: [{ key: "#lix_sync", value: "true" }],
+		keyValues: [{ key: "lix_sync", value: "true" }],
 	});
 
 	// start syncing
@@ -48,7 +48,7 @@ test("versions should be synced", async () => {
 		[lix0, lix1].map((lix) =>
 			lix.db
 				.updateTable("key_value")
-				.where("key", "=", "#lix_sync")
+				.where("key", "=", "lix_sync")
 				.set({ value: "true" })
 				.execute()
 		)
@@ -131,7 +131,7 @@ test("switching synced versions should work", async () => {
 	global.executeSync = executeSync;
 
 	const lix0 = await openLixInMemory({
-		keyValues: [{ key: "#lix_sync", value: "true" }],
+		keyValues: [{ key: "lix_sync", value: "true" }],
 	});
 	// @ts-expect-error - eases debugging
 	lix0.db.__name = "lix0";
@@ -164,7 +164,7 @@ test("switching synced versions should work", async () => {
 	// create a second client
 	const lix1 = await openLixInMemory({
 		blob: await toBlob({ lix: lix0 }),
-		keyValues: [{ key: "#lix_sync", value: "true" }],
+		keyValues: [{ key: "lix_sync", value: "true" }],
 	});
 
 	// @ts-expect-error - eases debugging
@@ -233,13 +233,13 @@ test("switching synced versions should work", async () => {
 		.selectAll()
 		.executeTakeFirst();
 
-	expect(keyValue).toEqual({
+	expect(keyValue).toMatchObject({
 		key: "mock-key",
 		value: "mock",
 	});
 });
 
-test("doesnt sync if #lix_sync is not true", async () => {
+test("doesnt sync if lix_sync is not true", async () => {
 	const environment = createLsaInMemoryEnvironment();
 	const lsaHandler = await createServerApiHandler({ environment });
 	global.fetch = vi.fn((request) => lsaHandler(request));
@@ -263,7 +263,7 @@ test("doesnt sync if #lix_sync is not true", async () => {
 	await lix.db
 		.updateTable("key_value")
 		.set({ value: "false" })
-		.where("key", "=", "#lix_sync")
+		.where("key", "=", "lix_sync")
 		.execute();
 
 	await lix.db
@@ -295,7 +295,7 @@ test("doesnt sync if #lix_sync is not true", async () => {
 	await lix.db
 		.updateTable("key_value")
 		.set({ value: "true" })
-		.where("key", "=", "#lix_sync")
+		.where("key", "=", "lix_sync")
 		.execute();
 
 	await new Promise((resolve) => setTimeout(resolve, 1010));
@@ -311,10 +311,10 @@ test("doesnt sync if #lix_sync is not true", async () => {
 	expect(keyValueChangesOnServerAfterSync).toEqual(
 		expect.arrayContaining([
 			expect.objectContaining({
-				content: {
+				content: expect.objectContaining({
 					key: "foo",
 					value: "bar",
-				},
+				}),
 			}),
 		])
 	);

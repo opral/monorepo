@@ -97,7 +97,7 @@ export function VersionDropdown() {
 				.set({
 					value: "true",
 				})
-				.where("key", "=", "#lix_sync")
+				.where("key", "=", "lix_sync")
 				.execute();
 
 			await saveLixToOpfs({ lix });
@@ -111,7 +111,7 @@ export function VersionDropdown() {
 		await lix.db
 			.updateTable("key_value")
 			.set({ value: "false" })
-			.where("key", "=", "#lix_sync")
+			.where("key", "=", "lix_sync")
 			.execute();
 		await saveLixToOpfs({ lix });
 	};
