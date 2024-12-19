@@ -81,15 +81,14 @@ export async function initFileQueueProcess(args: {
 				!hasMoreEntriesSince ||
 				(numEntries === 0 && hasMoreEntriesSince < runNumber)
 			) {
-				resolve!(); // TODO: fix type
+				resolve!();
 				hasMoreEntriesSince = undefined;
 				pending = undefined;
 				// console.log("resolving");
+			} else {
+				// there are more entries to process
+				queueWorker(true);
 			}
-
-			// TODO: handle endless tries on failing quee entries
-			// we either execute the queue immediately if we know there is more work or fall back to polling
-			setTimeout(() => queueWorker(true), hasMoreEntriesSince ? 0 : 1000);
 		} catch (e) {
 			console.error("file queue failed ", e);
 		}
