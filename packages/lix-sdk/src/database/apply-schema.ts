@@ -165,16 +165,6 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
     FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) STRICT;
 
-  CREATE TABLE IF NOT EXISTS change_set_label_author (
-    label_id TEXT NOT NULL,
-    change_set_id TEXT NOT NULL,
-    account_id TEXT NOT NULL,
-
-    PRIMARY KEY(label_id, change_set_id, account_id),
-    FOREIGN KEY(label_id, change_set_id) REFERENCES change_set_label(label_id, change_set_id),
-    FOREIGN KEY(account_id) REFERENCES account(id)
-  ) STRICT;
-
   -- discussions 
 
   CREATE TABLE IF NOT EXISTS discussion (
@@ -279,32 +269,7 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
       WHERE id = NEW.account_id;
   END;
   
-  CREATE TEMP TRIGGER IF NOT EXISTS insert_account_if_not_exists_on_change_set_label_author
-  BEFORE INSERT ON change_set_label_author
-  FOR EACH ROW
-  WHEN NEW.account_id NOT IN (SELECT id FROM account) AND NEW.account_id IN (SELECT id FROM temp.active_account)
-  BEGIN
-    INSERT OR IGNORE INTO account
-      SELECT 
-      *
-      FROM active_account 
-      WHERE id = NEW.account_id;
-  END;
   `;
-
-	// CREATE TRIGGER IF NOT EXISTS insert_account_if_not_exists_on_change_set_label_author
-	// BEFORE INSERT ON change_set_label_author
-	// FOR EACH ROW
-	// BEGIN
-	//   INSERT OR IGNORE INTO account (id, name)
-	//   VALUES (
-	//     NEW.account_id,
-	//     CASE
-	//       WHEN NEW.account_id LIKE 'anonymous_%' THEN 'anonymous'
-	//       ELSE NEW.account_id
-	//     END
-	//   );
-	// END;
 
 	applyMutationLogDatabaseSchema(args.sqlite);
 

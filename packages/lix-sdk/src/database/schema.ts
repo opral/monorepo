@@ -28,7 +28,6 @@ export type LixDatabaseSchema = {
 	change_set: ChangeSetTable;
 	change_set_element: ChangeSetElementTable;
 	change_set_label: ChangeSetLabelTable;
-	change_set_label_author: ChangeSetLabelAuthorTable;
 
 	// key value
 	key_value: KeyValueTable;
@@ -194,15 +193,6 @@ export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelTable>;
 type ChangeSetLabelTable = {
 	change_set_id: string;
 	label_id: string;
-};
-
-export type ChangeSetLabelAuthor = Selectable<ChangeSetLabelAuthorTable>;
-export type NewChangeSetLabelAuthor = Insertable<ChangeSetLabelAuthorTable>;
-export type ChangeSetLabelAuthorUpdate = Updateable<ChangeSetLabelAuthorTable>;
-type ChangeSetLabelAuthorTable = {
-	change_set_id: string;
-	label_id: string;
-	account_id: string;
 };
 
 // ------ versiones ------

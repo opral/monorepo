@@ -5,7 +5,6 @@ export const changeControlledTableIds = {
 	change_author: ["change_id", "account_id"],
 	change_set_element: ["change_set_id", "change_id"],
 	change_set_label: ["label_id", "change_set_id"],
-	change_set_label_author: ["label_id", "change_set_id", "account_id"],
 	discussion: ["id"],
 	file: ["id"],
 	key_value: ["key"],
