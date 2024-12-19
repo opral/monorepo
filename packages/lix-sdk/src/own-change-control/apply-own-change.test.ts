@@ -7,7 +7,7 @@ import type {
 } from "../database/schema.js";
 import { applyOwnChanges } from "./apply-own-change.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
-import { type KeyValue } from "../key-value/database-schema.js";
+import { type NewKeyValue } from "../key-value/database-schema.js";
 
 test("it should apply insert changes correctly", async () => {
 	const lix = await openLixInMemory({});
@@ -40,7 +40,7 @@ test("it should apply insert changes correctly", async () => {
 		.selectAll()
 		.executeTakeFirst();
 
-	expect(result).toEqual({ key: "key1", value: "value1" });
+	expect(result).toMatchObject({ key: "key1", value: "value1" });
 });
 
 test("it should apply update changes correctly", async () => {
@@ -81,7 +81,7 @@ test("it should apply update changes correctly", async () => {
 		.selectAll()
 		.executeTakeFirst();
 
-	expect(result).toEqual({ key: "key1", value: "new_value" });
+	expect(result).toMatchObject({ key: "key1", value: "new_value" });
 });
 
 test("it should apply delete changes correctly", async () => {
@@ -329,7 +329,7 @@ test("applying own entity changes doesn't lead to the creation of new changes", 
 	const snapshot = mockJsonSnapshot({
 		key: "mock-key",
 		value: "1+1=2",
-	} satisfies KeyValue);
+	} satisfies NewKeyValue);
 
 	await lix.db
 		.insertInto("snapshot")

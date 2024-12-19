@@ -3,7 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { applyChanges } from "./apply-changes.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
-import type { KeyValue } from "../key-value/database-schema.js";
+import type { NewKeyValue } from "../key-value/database-schema.js";
 import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
 
 test("it applies the given changes", async () => {
@@ -140,7 +140,7 @@ test("it applies own entity changes", async () => {
 	const snapshot = mockJsonSnapshot({
 		key: "mock-key",
 		value: "1+1=2",
-	} satisfies KeyValue);
+	} satisfies NewKeyValue);
 
 	await lix.db
 		.insertInto("snapshot")
@@ -170,7 +170,7 @@ test("it applies own entity changes", async () => {
 		.selectAll()
 		.executeTakeFirst();
 
-	expect(keyValue).toEqual({
+	expect(keyValue).toMatchObject({
 		key: "mock-key",
 		value: "1+1=2",
 	});

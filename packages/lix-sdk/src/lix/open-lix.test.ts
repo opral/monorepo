@@ -18,17 +18,28 @@ test("providing plugins should be possible", async () => {
 test("providing key values should be possible", async () => {
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
-		keyValues: [{ key: "key", value: "value" }],
+		keyValues: [{ key: "mock_key", value: "value" }],
 	});
-	const value = await lix.db.selectFrom("key_value").selectAll().execute();
-	expect(value).toContainEqual({ key: "key", value: "value" });
+
+	const value = await lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "mock_key")
+		.executeTakeFirstOrThrow();
+
+	expect(value).toMatchObject({ key: "mock_key", value: "value" });
 
 	// testing overwriting key values
 	const lix1 = await openLixInMemory({
 		blob: await toBlob({ lix }),
-		keyValues: [{ key: "key", value: "value2" }],
+		keyValues: [{ key: "mock_key", value: "value2" }],
 	});
 
-	const value1 = await lix1.db.selectFrom("key_value").selectAll().execute();
-	expect(value1).toContainEqual({ key: "key", value: "value2" });
+	const value1 = await lix1.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "mock_key")
+
+		.executeTakeFirstOrThrow();
+	expect(value1).toMatchObject({ key: "mock_key", value: "value2" });
 });

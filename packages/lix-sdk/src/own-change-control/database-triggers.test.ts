@@ -40,7 +40,7 @@ test("it works for inserts, updates and deletions", async () => {
 		expect(change.schema_key).toBe("lix_key_value_table");
 	}
 
-	expect(snapshots).toStrictEqual([
+	expect(snapshots).toMatchObject([
 		// insert
 		{ key: "key1", value: "value1" },
 		// update
@@ -125,23 +125,23 @@ test("if the trigger throws, the transaction is rolled back", async () => {
 	expect(deleteChange).toBeUndefined();
 });
 
-test("skips change control of key values if the key begins with `#`", async () => {
+test("skips change control of key values if `skip_change_control` is set to true", async () => {
 	const lix = await openLixInMemory({});
 
 	await lix.db
 		.insertInto("key_value")
-		.values({ key: "#key1", value: "value1" })
+		.values({ key: "key1", value: "value1", skip_change_control: true })
 		.execute();
 
 	const key1 = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "#key1")
+		.where("key", "=", "key1")
 		.selectAll()
 		.executeTakeFirst();
 
 	const key1Change = await lix.db
 		.selectFrom("change")
-		.where("entity_id", "=", "#key1")
+		.where("entity_id", "=", "key1")
 		.selectAll()
 		.executeTakeFirst();
 

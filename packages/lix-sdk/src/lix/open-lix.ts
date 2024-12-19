@@ -6,7 +6,7 @@ import { initFileQueueProcess } from "../file-queue/file-queue-process.js";
 import type { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import { initSyncProcess } from "../sync/sync-process.js";
-import type { KeyValue } from "../key-value/database-schema.js";
+import type { NewKeyValue } from "../key-value/database-schema.js";
 
 export type Lix = {
 	/**
@@ -49,9 +49,9 @@ export async function openLix(args: {
 	 * Set the key values when opening the lix.
 	 *
 	 * @example
-	 *   const lix = await openLix({ keyValues: [{ key: "#lix_sync", value: "false" }] })
+	 *   const lix = await openLix({ keyValues: [{ key: "lix_sync", value: "false" }] })
 	 */
-	keyValues?: KeyValue[];
+	keyValues?: NewKeyValue[];
 }): Promise<Lix> {
 	const db = initDb({ sqlite: args.database });
 

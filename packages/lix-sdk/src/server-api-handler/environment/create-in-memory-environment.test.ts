@@ -25,7 +25,7 @@ test("opening a lix works", async () => {
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	expect(mockInsert).toEqual({
+	expect(mockInsert).toMatchObject({
 		key: "foo",
 		value: "bar",
 	});
@@ -45,7 +45,7 @@ test("opening a lix works", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(mockSelect).toEqual({ key: "foo", value: "bar" });
+	expect(mockSelect).toMatchObject({ key: "foo", value: "bar" });
 
 	await environment.closeLix({ id: lixId, connectionId: open1.connectionId });
 });
@@ -73,7 +73,7 @@ test("it handles concurrent connections", async () => {
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	expect(mockInsert).toEqual({
+	expect(mockInsert).toMatchObject({
 		key: "foo",
 		value: "bar",
 	});
@@ -84,7 +84,7 @@ test("it handles concurrent connections", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(mockSelect).toEqual({ key: "foo", value: "bar" });
+	expect(mockSelect).toMatchObject({ key: "foo", value: "bar" });
 
 	// test both writing at the same time
 
@@ -125,7 +125,7 @@ test("it handles concurrent connections", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(mockSelect2).toEqual({ key: "foo", value: "bar3" });
+	expect(mockSelect2).toMatchObject({ key: "foo", value: "bar3" });
 
 	await environment.closeLix({ id: lixId, connectionId: open2.connectionId });
 });

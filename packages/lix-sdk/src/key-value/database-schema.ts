@@ -1,4 +1,4 @@
-import type { Insertable, Selectable, Updateable } from "kysely";
+import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteDatabase } from "sqlite-wasm-kysely";
 
 export function applyKeyValueDatabaseSchema(
@@ -7,7 +7,10 @@ export function applyKeyValueDatabaseSchema(
 	return sqlite.exec`
 	CREATE TABLE IF NOT EXISTS key_value (
 		key TEXT PRIMARY KEY,
-		value TEXT NOT NULL
+		value TEXT NOT NULL,
+
+		-- Options
+		skip_change_control INT DEFAULT FALSE
 	) STRICT;
 
 	INSERT OR IGNORE INTO key_value (key, value)
@@ -16,8 +19,8 @@ export function applyKeyValueDatabaseSchema(
 	-- default value for lix sync to false
 	-- if not exist to remove conditional logic
 	-- if the key exists or not
-	INSERT OR IGNORE INTO key_value (key, value)
-	VALUES ('#lix_sync', 'false');
+	INSERT OR IGNORE INTO key_value (key, value, skip_change_control)
+	VALUES ('lix_sync', 'false', 1);
 `;
 }
 
@@ -45,9 +48,18 @@ export type KeyValueTable = {
 	 *
 	 */
 	value: string;
+	/**
+	 * If `true`, the key-value pair is not tracked with own change control.
+	 *
+	 * Carefull (!) when querying the database. The return value will be `0` or `1`.
+	 * SQLite does not have a boolean select type https://www.sqlite.org/datatype3.html.
+	 *
+	 * @default false
+	 */
+	skip_change_control: Generated<boolean>;
 };
 
-type PredefinedKeys = "lix_id" | "lix_server_url" | "#lix_sync";
+type PredefinedKeys = "lix_id" | "lix_server_url" | "lix_sync";
 // The string & {} ensures TypeScript recognizes KeyValueKeys
 // as a superset of string, preventing conflicts when using other string values.
 type KeyType = string & {};

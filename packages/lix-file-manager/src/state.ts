@@ -237,7 +237,7 @@ export const isSyncingAtom = atom(async (get) => {
 
 	const sync = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "#lix_sync")
+		.where("key", "=", "lix_sync")
 		.select("value")
 		.executeTakeFirst();
 

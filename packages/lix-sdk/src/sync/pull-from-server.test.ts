@@ -69,7 +69,7 @@ test("pull rows of multiple tables from server successfully and applies them", a
 		.executeTakeFirstOrThrow();
 
 	expect(account).toEqual({ id: "account0", name: "test account" });
-	expect(mockKey).toEqual({ key: "mock-key", value: "mock-value" });
+	expect(mockKey).toMatchObject({ key: "mock-key", value: "mock-value" });
 });
 
 test("it handles snapshot.content being json binary", async () => {
@@ -186,7 +186,10 @@ test("rows changed on the client more recently should not be updated", async () 
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(mockKey).toEqual({ key: "mock-key", value: "mock-value-updated" });
+	expect(mockKey).toMatchObject({
+		key: "mock-key",
+		value: "mock-value-updated",
+	});
 });
 
 // the change table now models "change control". no more last edit wins needed
@@ -378,7 +381,10 @@ test("non-conflicting changes from the server should for the same version should
 		expect.arrayContaining([
 			expect.objectContaining({
 				version_id: currentVersion.id,
-				content: { key: "mock-key", value: "mock-value" },
+				content: expect.objectContaining({
+					key: "mock-key",
+					value: "mock-value",
+				}),
 			}),
 		])
 	);
@@ -414,6 +420,6 @@ test("non-conflicting changes from the server should for the same version should
 		.select("snapshot.content as content")
 		.execute();
 
-	expect(mockKey).toEqual({ key: "mock-key", value: "mock-value" });
+	expect(mockKey).toMatchObject({ key: "mock-key", value: "mock-value" });
 	expect(versionChanges).toEqual(expect.arrayContaining(serverVersionChanges));
 });

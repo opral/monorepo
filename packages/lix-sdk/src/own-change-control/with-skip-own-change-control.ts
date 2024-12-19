@@ -7,7 +7,11 @@ export async function withSkipOwnChangeControl<T>(
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		await trx
 			.insertInto("key_value")
-			.values({ key: "#lix_skip_own_change_control", value: "true" })
+			.values({
+				key: "lix_skip_own_change_control",
+				value: "true",
+				skip_change_control: true,
+			})
 			.onConflict((oc) => oc.doUpdateSet({ value: "true" }))
 			.execute();
 
@@ -16,7 +20,7 @@ export async function withSkipOwnChangeControl<T>(
 
 		await trx
 			.deleteFrom("key_value")
-			.where("key", "=", "#lix_skip_own_change_control")
+			.where("key", "=", "lix_skip_own_change_control")
 			.execute();
 
 		// Return the result of the operation

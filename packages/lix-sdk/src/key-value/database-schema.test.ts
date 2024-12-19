@@ -106,14 +106,35 @@ test("it should default add a uuid lix_id if not exits", async () => {
 	expect(validateUuid(result.value)).toBe(true);
 });
 
-test("default value for #lix_sync to reduce conditional logic (the key is always set)", async () => {
+test("default value for lix_sync to reduce conditional logic (the key is always set)", async () => {
 	const lix = await openLixInMemory({});
 
 	const result = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "#lix_sync")
+		.where("key", "=", "lix_sync")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(result.value).toBe("false");
+});
+
+test("skip_change_control should default to false", async () => {
+	const lix = await openLixInMemory({});
+
+	const result = await lix.db
+		.insertInto("key_value")
+		.values({ key: "mock_key", value: "mock_value" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(result.skip_change_control).toBeFalsy();
+
+	const updated = await lix.db
+		.updateTable("key_value")
+		.set({ skip_change_control: true })
+		.where("key", "=", "mock_key")
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(updated.skip_change_control).toBeTruthy();
 });

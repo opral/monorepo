@@ -104,13 +104,13 @@ test("it should return 400 for a request without lix_id", async () => {
 	expect(responseJson.error).toBe("Missing required field 'lix_id'");
 });
 
-test("#lix_sync is set to true", async () => {
+test("lix_sync is set to true", async () => {
 	const environment = createLsaInMemoryEnvironment();
 	const lsaHandler = await createServerApiHandler({ environment });
 
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
-		keyValues: [{ key: "#lix_sync", value: "false" }],
+		keyValues: [{ key: "lix_sync", value: "false" }],
 	});
 
 	// Store the lix file
@@ -139,7 +139,7 @@ test("#lix_sync is set to true", async () => {
 
 	const lixSync = await lixFromServer.db
 		.selectFrom("key_value")
-		.where("key", "=", "#lix_sync")
+		.where("key", "=", "lix_sync")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 

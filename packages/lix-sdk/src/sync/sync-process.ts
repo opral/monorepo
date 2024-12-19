@@ -22,7 +22,7 @@ export async function initSyncProcess(args: {
 	const pullAndPush = async () => {
 		const shouldSync = await args.lix.db
 			.selectFrom("key_value")
-			.where("key", "=", "#lix_sync")
+			.where("key", "=", "lix_sync")
 			.select("value")
 			.executeTakeFirst();
 

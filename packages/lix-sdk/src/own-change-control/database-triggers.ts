@@ -93,8 +93,8 @@ function handleLixOwnEntityChange(
 ): void {
 	const lix = { db, sqlite };
 
-	// keys starting with `#` are not change controlled
-	if (tableName === "key_value" && values[0].startsWith("#")) {
+	// key values that have skip_change_control set to true should not be change controlled
+	if (tableName === "key_value" && values[2]) {
 		return;
 	}
 
@@ -103,7 +103,7 @@ function handleLixOwnEntityChange(
 			lix,
 			query: db
 				.selectFrom("key_value")
-				.where("key", "=", "#lix_skip_own_change_control")
+				.where("key", "=", "lix_skip_own_change_control")
 				.select("value"),
 		})[0]?.value === "true";
 
