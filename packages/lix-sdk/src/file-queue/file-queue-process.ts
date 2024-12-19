@@ -1,4 +1,3 @@
-import type { SqliteDatabase } from "sqlite-wasm-kysely";
 import {
 	handleFileUpdate,
 	handleFileInsert,
@@ -8,9 +7,8 @@ import type { Lix } from "../lix/open-lix.js";
 
 export async function initFileQueueProcess(args: {
 	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
-	rawDatabase: SqliteDatabase;
 }): Promise<void> {
-	args.rawDatabase.createFunction({
+	args.lix.sqlite.createFunction({
 		name: "triggerFileQueue",
 		arity: 0,
 		// @ts-expect-error - dynamic function

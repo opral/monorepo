@@ -74,10 +74,7 @@ export async function openLix(args: {
 		getAll: async () => plugins,
 	};
 
-	initFileQueueProcess({
-		lix: { db, plugin, sqlite: args.database },
-		rawDatabase: args.database,
-	});
+	initFileQueueProcess({ lix: { db, plugin, sqlite: args.database } });
 
 	initSyncProcess({ lix: { db, plugin, sqlite: args.database } });
 
