@@ -27,6 +27,12 @@ export async function initFileQueueProcess(args: {
 	let hasMoreEntriesSince: number | undefined = undefined;
 
 	async function queueWorker(trail = false) {
+
+		if (args.lix.sqlite.isOpen() === false) {
+			console.log("sqlite is closed");
+			return;
+		}
+
 		try {
 			if (pending && !trail) {
 				hasMoreEntriesSince = runNumber;
