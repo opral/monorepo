@@ -724,7 +724,7 @@ test("it should copy discussion and related comments and mappings", async () => 
 	await createDiscussion({
 		lix: lix1,
 		changeSet: await createChangeSet({ lix: lix1, changes: [changes[0]!] }),
-		content: "comment on a change",
+		firstComment: { content: "comment on a change" },
 	});
 
 	await merge({ sourceLix: lix1, targetLix: lix2 });

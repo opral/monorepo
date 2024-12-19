@@ -47,7 +47,7 @@ const FilterSelect = () => {
         return await createDiscussion({
 					lix: { ...lix, db: trx },
 					changeSet,
-					content: discussionValue,
+					firstComment: { content: discussionValue },
 				});
       }
     );

@@ -7,7 +7,7 @@ import type { Lix } from "../lix/open-lix.js";
  * @example
  *   ```ts
  *   const changeSet = await createChangeSet({ lix, changes: ["change1", "change2"] });
- *   const discussion = await createDiscussion({ lix, changeSet, body: "first comment" });
+ *   const discussion = await createDiscussion({ lix, changeSet, firstComment: { content: "first comment" } });
  *   ```
  *
  * @returns the created discussion
@@ -15,8 +15,8 @@ import type { Lix } from "../lix/open-lix.js";
 export async function createDiscussion(args: {
 	lix: Pick<Lix, "db">;
 	changeSet: Pick<ChangeSet, "id">;
-	content: Comment["content"];
-}): Promise<Discussion & { comment: Comment }> {
+	firstComment: Pick<Comment, "content">;
+}): Promise<Discussion & { firstComment: Comment }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const discussion = await trx
 			.insertInto("discussion")
@@ -26,17 +26,17 @@ export async function createDiscussion(args: {
 			.returningAll()
 			.executeTakeFirstOrThrow();
 
-		const comment = await trx
+		const firstComment = await trx
 			.insertInto("comment")
 			.values({
 				parent_id: null,
 				discussion_id: discussion.id,
-				content: args.content,
+				content: args.firstComment.content,
 			})
 			.returningAll()
 			.executeTakeFirstOrThrow();
 
-		return { ...discussion, comment };
+		return { ...discussion, firstComment };
 	};
 
 	// user provided an open transaction
