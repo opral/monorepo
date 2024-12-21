@@ -8,7 +8,7 @@ import {
 import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
-import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
+import { lixCsvDemoFile } from "./helper/demo-lix-file/demo-lix-file.ts";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 
 export const fileIdSearchParamsAtom = atom((get) => {
