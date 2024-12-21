@@ -83,12 +83,27 @@ export const lixAtom = atom(async (get) => {
 		} else {
 			lixBlob = await lixCsvDemoFile();
 		}
-	}
+	}	
+	
+	let lix: Lix;
 
-	const lix = await openLixInMemory({
-		blob: lixBlob!,
-		providePlugins: [csvPlugin],
-	});
+	try {
+		lix = await openLixInMemory({
+			blob: lixBlob!,
+			providePlugins: [csvPlugin],
+		});
+	} catch {
+		// https://linear.app/opral/issue/INBOX-199/fix-loading-lix-file-if-schema-changed
+		// CLEAR OPFS. The lix file is likely corrupted.
+		for await (const entry of rootHandle.values()) {
+			if (entry.kind === "file") {
+				await rootHandle.removeEntry(entry.name);
+			}
+		}
+		window.location.reload();
+		// tricksing the TS typechecker. This will never be reached.
+		lix = {} as any;
+	}
 
 	const lixId = await lix.db
 		.selectFrom("key_value")
