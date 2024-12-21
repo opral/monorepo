@@ -524,3 +524,18 @@ test("version_change must have a unique entity_id, file_id, version_id, and sche
 		.values({ ...versionChange, version_id: version1.id })
 		.execute();
 });
+
+
+test("versions have a unique and default human readable name", async () => {
+	const lix = await openLixInMemory({});
+
+	const version0 = await createVersion({ lix });
+	const version1 = await createVersion({ lix });
+
+	expect(version0.name).not.toBe(version1.name);
+
+	await expect(
+		createVersion({ lix, name: version0.name }),
+		"version.name is unique"
+	).rejects.toThrow();
+});

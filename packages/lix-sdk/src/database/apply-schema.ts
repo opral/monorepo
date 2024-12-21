@@ -201,14 +201,7 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
   CREATE TABLE IF NOT EXISTS version (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
 
-    -- name is optional. 
-    -- 
-    -- "anonymous" versiones can ease workflows. 
-    -- For example, a user can create a version 
-    -- without a name to experiment with
-    -- changes with no mental overhead of 
-    -- naming the version.
-    name TEXT
+    name TEXT NOT NULL UNIQUE DEFAULT (human_id())
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS version_change (

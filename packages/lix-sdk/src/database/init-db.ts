@@ -9,6 +9,7 @@ import { ParseJsonBPluginV1 } from "./kysely-plugin/parse-jsonb-plugin-v1.js";
 import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js";
 import { createSession } from "./mutation-log/lix-session.js";
 import { applyOwnChangeControlTriggers } from "../own-change-control/database-triggers.js";
+import { humanId } from "human-id";
 
 export function initDb(args: {
 	sqlite: SqliteDatabase;
@@ -90,5 +91,11 @@ function initFunctions(args: { sqlite: SqliteDatabase }) {
 		name: "lix_session_clock_tick",
 		arity: 0,
 		xFunc: () => lixSession.sessionClockTick(),
+	});
+
+	args.sqlite.createFunction({
+		name: "human_id",
+		arity: 0,
+		xFunc: () => humanId({ separator: "-", capitalize: false }),
 	});
 }
