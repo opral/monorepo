@@ -1,0 +1,7 @@
+Every [package](./packages/) has their own license. 
+
+Guidelines for choosing a license:
+
+- [MIT](https://en.wikipedia.org/wiki/MIT_License) is chosen if the package is a library that developers should build upon.  
+
+- [Fair Core License](https://fcl.dev/) is chosen if the package is an "end product" (app, website, host) that developers do not build on, and might be monetized in the future. 
