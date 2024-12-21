@@ -525,7 +525,6 @@ test("version_change must have a unique entity_id, file_id, version_id, and sche
 		.execute();
 });
 
-
 test("versions have a unique and default human readable name", async () => {
 	const lix = await openLixInMemory({});
 
