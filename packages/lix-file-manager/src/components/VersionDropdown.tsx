@@ -23,7 +23,6 @@ import {
 } from "../state.js";
 import { Version, createVersion, switchVersion } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.js";
-import { humanId } from "human-id";
 import { Check, Trash2, ChevronDown, Plus } from "lucide-react";
 import { MergeDialog } from "./MergeDialog.js";
 import IconMerge from "./icons/IconMerge.js";
@@ -56,11 +55,6 @@ export function VersionDropdown() {
 		const newVersion = await createVersion({
 			lix,
 			from: currentVersion,
-			name: humanId({
-				separator: "-",
-				capitalize: false,
-				adjectiveCount: 0,
-			}),
 		});
 
 		await switchToVersion(newVersion);

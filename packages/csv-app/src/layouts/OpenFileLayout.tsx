@@ -29,7 +29,6 @@ import {
 	switchVersion,
 	mergeVersion,
 } from "@lix-js/sdk";
-import { humanId } from "human-id";
 import CustomLink from "../components/CustomLink.tsx";
 
 export default function Layout(props: { children: React.ReactNode }) {
@@ -277,11 +276,6 @@ const VersionDropdown = () => {
 						const newversion = await createVersion({
 							lix,
 							from: currentVersion,
-							name: humanId({
-								separator: "-",
-								capitalize: false,
-								adjectiveCount: 0,
-							}),
 						});
 						await switchToversion(newversion);
 					}}

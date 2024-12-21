@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
 // @ts-expect-error - no types
 import { Label } from "@/components/ui/label"
 
-const Form = FormProvider
+const Form: any = FormProvider;
 
 type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,

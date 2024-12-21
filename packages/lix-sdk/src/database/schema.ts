@@ -202,7 +202,7 @@ export type Newversion = Insertable<VersionTable>;
 export type VersionUpdate = Updateable<VersionTable>;
 type VersionTable = {
 	id: Generated<string>;
-	name: string | null;
+	name: Generated<string>;
 };
 
 export type VersionChange = Selectable<VersionChangeTable>;
