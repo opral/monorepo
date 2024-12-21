@@ -1,5 +1,13 @@
 # @inlang/paraglide-next
 
+## 0.7.5
+
+### Patch Changes
+
+- 344b499: fix: revert async headers. closes https://github.com/opral/inlang-paraglide-js/issues/255
+
+  Re-introduces https://github.com/opral/inlang-paraglide-js/issues/245
+
 ## 0.7.4
 
 ### Patch Changes
