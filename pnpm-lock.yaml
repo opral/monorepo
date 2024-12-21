@@ -180,9 +180,6 @@ importers:
       date-fns:
         specifier: ^2.29.3
         version: 2.30.0
-      human-id:
-        specifier: ^4.1.1
-        version: 4.1.1
       jotai:
         specifier: ^2.10.1
         version: 2.10.1(@types/react@18.3.11)(react@18.3.1)
