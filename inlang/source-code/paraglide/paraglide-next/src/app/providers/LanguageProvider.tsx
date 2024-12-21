@@ -12,10 +12,10 @@ import { getLanguage } from "../getLanguage.server"
 // })()
 
 //If we can reliably call setLanguageTag() from middleware.tsx, we can probably get rid of this component
-export default async function LanguageProvider(props: {
+export default function LanguageProvider(props: {
 	children: React.ReactNode
-}): Promise<React.ReactElement> {
-	setLanguageTag(await getLanguage())
+}): React.ReactElement {
+	setLanguageTag(getLanguage())
 
 	//we make the client side language provider a sibling of the children
 	//That way the entire app isn't turned into a client component

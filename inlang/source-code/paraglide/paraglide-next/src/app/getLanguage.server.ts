@@ -9,9 +9,9 @@ import { PARAGLIDE_LANGUAGE_HEADER_NAME } from "./constants"
  * THIS WILL BECOME OBSOLETE ONCE WE FIGURE OUT HOW TO SET THE LANGUAGE BEFORE ANY NEXT CODE RUNS
  * Once that's the case we will be able to just use `languageTag()` instead
  */
-export async function getLanguage<T extends string>(): Promise<T> {
+export function getLanguage<T extends string>(): T {
 	try {
-		const langHeader = (await headers()).get(PARAGLIDE_LANGUAGE_HEADER_NAME)
+		const langHeader = (headers()).get(PARAGLIDE_LANGUAGE_HEADER_NAME)
 		const lang = isAvailableLanguageTag(langHeader) ? langHeader : sourceLanguageTag
 		return lang as T
 	} catch (e) {
