@@ -14,7 +14,7 @@ export function applyKeyValueDatabaseSchema(
 	) STRICT;
 
 	INSERT OR IGNORE INTO key_value (key, value)
-	VALUES ('lix_id', uuid_v4());
+	VALUES ('lix_id', nano_id(18));
 
 	-- default value for lix sync to false
 	-- if not exist to remove conditional logic

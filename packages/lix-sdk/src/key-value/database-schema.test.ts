@@ -1,7 +1,6 @@
 import { sql } from "kysely";
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { validate as validateUuid } from "uuid";
 
 test("string values are accepted", async () => {
 	const lix = await openLixInMemory({});
@@ -94,7 +93,8 @@ test("using json as value should work", async () => {
 	});
 });
 
-test("it should default add a uuid lix_id if not exits", async () => {
+// 1919T IDs needed, in order to have a 1% probability of at least one collision.
+test("it should default add nano_id(18) for the lix_id if not exits", async () => {
 	const lix = await openLixInMemory({});
 
 	const result = await lix.db
@@ -103,7 +103,7 @@ test("it should default add a uuid lix_id if not exits", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(validateUuid(result.value)).toBe(true);
+	expect(result.value).toHaveLength(18);
 });
 
 test("default value for lix_sync to reduce conditional logic (the key is always set)", async () => {

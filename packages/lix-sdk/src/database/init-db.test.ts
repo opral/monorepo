@@ -9,30 +9,26 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 import { createVersion } from "../version/create-version.js";
 
-test("file ids should default to uuid", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
+// file ids are always in the URL of lix apps
+// to increase sharing, the ids should be as short as possible
+// 
+// 129 million file creations will lead to a 1% chance of a collision
+//
+// if someone uses lix to handle 129 million files, we can 
+// increase the length of the id :D
+test("file ids should default to nano_id(10)", async () => {
+	const lix = await openLixInMemory({});
 
-	// init the trigger function (usually defined by lix only)
-	sqlite.createFunction({
-		name: "triggerFileQueue",
-		arity: 0,
-		// @ts-expect-error - dynamic function
-		xFunc: () => {},
-	});
-
-	const file = await db
+	const file = await lix.db
 		.insertInto("file")
 		.values({
-			path: "/mock",
+			path: "/mock.txt",
 			data: new Uint8Array(),
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	expect(validate(file.id)).toBe(true);
+	expect(file.id.length).toBe(10);
 });
 
 test("change ids should default to uuid", async () => {
@@ -243,6 +239,99 @@ test("change set items must be unique", async () => {
 		`[SQLite3Error: SQLITE_CONSTRAINT_PRIMARYKEY: sqlite3 result code 1555: UNIQUE constraint failed: change_set_element.change_set_id, change_set_element.change_id]`
 	);
 });
+
+// 8B IDs needed, in order to have a 1% probability of at least one collision.
+test("discussion.id are nano_id(12)", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const changeSet = await db
+		.insertInto("change_set")
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const discussion = await db
+		.insertInto("discussion")
+		.values({
+			change_set_id: changeSet.id,
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(discussion.id.length).toBe(12);
+});
+
+// 499B IDs needed, in order to have a 1% probability of at least one collision.
+test("comment.id are nano_id(14)", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const changeSet = await db
+		.insertInto("change_set")
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const discussion = await db
+		.insertInto("discussion")
+		.values({
+			change_set_id: changeSet.id,
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const comment = await db
+		.insertInto("comment")
+		.values({
+			discussion_id: discussion.id,
+			content: "mock",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(comment.id.length).toBe(14);
+});
+
+// 30T IDs needed, in order to have a 1% probability of at least one collision
+test("change_set.id are nano_id(16)", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const changeSet = await db
+		.insertInto("change_set")
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(changeSet.id.length).toBe(16);
+});
+
+// 2M IDs needed, in order to have a 1% probability of at least one collision.
+// it is assumed that creating 2 million labels is ... unlikely
+test("label.id is nano_id(8)", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const label = await db
+		.insertInto("label")
+		.values({
+			name: "mock",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(label.id.length).toBe(8);
+});
+
 
 test("creating multiple discussions for one change set should be possible", async () => {
 	const sqlite = await createInMemoryDatabase({
