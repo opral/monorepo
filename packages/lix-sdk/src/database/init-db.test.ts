@@ -297,6 +297,22 @@ test("comment.id are nano_id(14)", async () => {
 	expect(comment.id.length).toBe(14);
 });
 
+// 30T IDs needed, in order to have a 1% probability of at least one collision
+test("change_set.id are nano_id(16)", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const changeSet = await db
+		.insertInto("change_set")
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(changeSet.id.length).toBe(16);
+});
+
 
 test("creating multiple discussions for one change set should be possible", async () => {
 	const sqlite = await createInMemoryDatabase({

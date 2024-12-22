@@ -144,7 +144,7 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
   -- change sets
 
   CREATE TABLE IF NOT EXISTS change_set (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7())
+    id TEXT PRIMARY KEY DEFAULT (nano_id(16))
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_element (
