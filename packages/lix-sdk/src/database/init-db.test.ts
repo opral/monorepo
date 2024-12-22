@@ -240,6 +240,64 @@ test("change set items must be unique", async () => {
 	);
 });
 
+// 8B IDs needed, in order to have a 1% probability of at least one collision.
+test("discussion.id are nano_id(12)", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const changeSet = await db
+		.insertInto("change_set")
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const discussion = await db
+		.insertInto("discussion")
+		.values({
+			change_set_id: changeSet.id,
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(discussion.id.length).toBe(12);
+});
+
+// 499B IDs needed, in order to have a 1% probability of at least one collision.
+test("comment.id are nano_id(14)", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const changeSet = await db
+		.insertInto("change_set")
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const discussion = await db
+		.insertInto("discussion")
+		.values({
+			change_set_id: changeSet.id,
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const comment = await db
+		.insertInto("comment")
+		.values({
+			discussion_id: discussion.id,
+			content: "mock",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(comment.id.length).toBe(14);
+});
+
+
 test("creating multiple discussions for one change set should be possible", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
