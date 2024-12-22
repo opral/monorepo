@@ -10,6 +10,7 @@ import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js"
 import { createSession } from "./mutation-log/lix-session.js";
 import { applyOwnChangeControlTriggers } from "../own-change-control/database-triggers.js";
 import { humanId } from "human-id";
+import { nanoid } from "./nano-id.js";
 
 export function initDb(args: {
 	sqlite: SqliteDatabase;
@@ -97,5 +98,14 @@ function initFunctions(args: { sqlite: SqliteDatabase }) {
 		name: "human_id",
 		arity: 0,
 		xFunc: () => humanId({ separator: "-", capitalize: false }),
+	});
+
+	args.sqlite.createFunction({
+		name: "nano_id",
+		arity: 1,
+		// @ts-expect-error - not sure why this is not working
+		xFunc: (_ctx: number, length: number) => {
+			return nanoid(length);
+		},
 	});
 }

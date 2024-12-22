@@ -9,30 +9,26 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 import { createVersion } from "../version/create-version.js";
 
-test("file ids should default to uuid", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
+// file ids are always in the URL of lix apps
+// to increase sharing, the ids should be as short as possible
+// 
+// 129 million file creations will lead to a 1% chance of a collision
+//
+// if someone uses lix to handle 129 million files, we can 
+// increase the length of the id :D
+test("file ids should default to nano_id(10)", async () => {
+	const lix = await openLixInMemory({});
 
-	// init the trigger function (usually defined by lix only)
-	sqlite.createFunction({
-		name: "triggerFileQueue",
-		arity: 0,
-		// @ts-expect-error - dynamic function
-		xFunc: () => {},
-	});
-
-	const file = await db
+	const file = await lix.db
 		.insertInto("file")
 		.values({
-			path: "/mock",
+			path: "/mock.txt",
 			data: new Uint8Array(),
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	expect(validate(file.id)).toBe(true);
+	expect(file.id.length).toBe(10);
 });
 
 test("change ids should default to uuid", async () => {

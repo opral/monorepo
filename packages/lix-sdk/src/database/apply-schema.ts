@@ -19,7 +19,7 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
   -- file
 
   CREATE TABLE IF NOT EXISTS file (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    id TEXT PRIMARY KEY DEFAULT (nano_id(10)),
     path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL,
     metadata BLOB,
