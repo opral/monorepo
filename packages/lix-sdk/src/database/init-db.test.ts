@@ -313,6 +313,25 @@ test("change_set.id are nano_id(16)", async () => {
 	expect(changeSet.id.length).toBe(16);
 });
 
+// 2M IDs needed, in order to have a 1% probability of at least one collision.
+// it is assumed that creating 2 million labels is ... unlikely
+test("label.id is nano_id(8)", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const label = await db
+		.insertInto("label")
+		.values({
+			name: "mock",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(label.id.length).toBe(8);
+});
+
 
 test("creating multiple discussions for one change set should be possible", async () => {
 	const sqlite = await createInMemoryDatabase({

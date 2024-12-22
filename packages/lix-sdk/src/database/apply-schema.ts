@@ -187,7 +187,7 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
   -- labels
   
   CREATE TABLE IF NOT EXISTS label (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    id TEXT PRIMARY KEY DEFAULT (nano_id(8)),
     
     name TEXT NOT NULL UNIQUE  -- e.g., 'confirmed', 'reviewed'
     
