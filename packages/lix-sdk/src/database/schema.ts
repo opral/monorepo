@@ -225,9 +225,9 @@ type VersionChangeConflictTable = {
 	change_conflict_id: string;
 };
 
-export type Currentversion = Selectable<CurrentVersionTable>;
-export type NewCurrentversion = Insertable<CurrentVersionTable>;
-export type CurrentversionUpdate = Updateable<CurrentVersionTable>;
+export type CurrentVersion = Selectable<CurrentVersionTable>;
+export type NewCurrentVersion = Insertable<CurrentVersionTable>;
+export type CurrentVersionUpdate = Updateable<CurrentVersionTable>;
 type CurrentVersionTable = {
 	id: string;
 };
