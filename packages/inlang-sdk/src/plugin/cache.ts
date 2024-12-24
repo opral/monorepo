@@ -47,6 +47,10 @@ async function writeModuleToCache(
 			path: filePath,
 			data: new TextEncoder().encode(moduleContent),
 		})
+		// update the cache
+		.onConflict((oc) =>
+			oc.doUpdateSet({ data: new TextEncoder().encode(moduleContent) })
+		)
 		.execute();
 }
 
