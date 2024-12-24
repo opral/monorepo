@@ -28,7 +28,7 @@ test("handles joins", async () => {
 	const mockFile0: LixFile = {
 		id: "file-0",
 		path: "/file-0",
-		data: new ArrayBuffer(0),
+		data: new Uint8Array(),
 		metadata: {},
 	};
 	const mockChange0 = mockChange({ id: "change-0", file_id: "file-0" });
@@ -56,7 +56,7 @@ test("does not transform the query or results (json parsing)", async () => {
 	const mockFile0: LixFile = {
 		id: "file-0",
 		path: "/file-0",
-		data: new ArrayBuffer(0),
+		data: new Uint8Array(),
 		metadata: {
 			foo: "bar",
 		},

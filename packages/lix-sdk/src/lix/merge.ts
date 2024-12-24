@@ -45,7 +45,7 @@ export async function merge(args: {
 
 		[];
 
-	const changesPerFile: Record<string, ArrayBuffer> = {};
+	const changesPerFile: Record<string, Uint8Array> = {};
 
 	const fileIds = new Set(sourceChangesWithSnapshot.map((c) => c.file_id));
 

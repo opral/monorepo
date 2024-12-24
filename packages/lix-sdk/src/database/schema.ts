@@ -57,8 +57,8 @@ type FileQueueTable = {
 	file_id: string;
 	path_before: string | null;
 	path_after: string | null;
-	data_before: ArrayBuffer | null;
-	data_after: ArrayBuffer | null;
+	data_before: Uint8Array | null;
+	data_after: Uint8Array | null;
 	metadata_before: Record<string, any> | null;
 	metadata_after: Record<string, any> | null;
 };
@@ -79,7 +79,7 @@ type LixFileTable = {
 	 *   - `/path/to/file.txt`
 	 */
 	path: string;
-	data: ArrayBuffer;
+	data: Uint8Array;
 	metadata: Record<string, any> | null;
 };
 
