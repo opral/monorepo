@@ -102,7 +102,7 @@ test("if a project has no id, it should be generated", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
 
 	await project.lix.db
-		.deleteFrom("file_internal")
+		.deleteFrom("file")
 		.where("path", "=", "/project_id")
 		.execute();
 
@@ -127,7 +127,7 @@ test("subscribing to errors should work", async () => {
 	});
 
 	await project.lix.db
-		.updateTable("file_internal")
+		.updateTable("file")
 		.where("path", "=", "/settings.json")
 		.set({
 			data: new TextEncoder().encode(

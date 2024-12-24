@@ -1,4 +1,4 @@
-import { type Lix } from "@lix-js/sdk";
+import { toBlob, type Lix } from "@lix-js/sdk";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import { type SqliteDatabase } from "sqlite-wasm-kysely";
@@ -117,14 +117,13 @@ export async function loadProject(args: {
 			).map((output) => ({ ...output, pluginKey }));
 		},
 		close: async () => {
-			args.sqlite.close();
 			await db.destroy();
-			await args.lix.close();
+			await args.lix.db.destroy();
 		},
 		_sqlite: args.sqlite,
 		toBlob: async () => {
 			await Promise.all(pendingSaveToLixPromises);
-			return await args.lix.toBlob();
+			return await toBlob({ lix: args.lix });
 		},
 		lix: args.lix,
 	};

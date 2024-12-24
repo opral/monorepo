@@ -191,6 +191,7 @@ test.todo(
 				await nodeishFs.writeFile(
 					"./i18n/en.json",
 					new TextEncoder().encode(JSON.stringify(messages))
+						.buffer as ArrayBuffer
 				);
 			},
 		};

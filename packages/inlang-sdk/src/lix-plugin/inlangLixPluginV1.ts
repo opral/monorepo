@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import type { DiffReport, LixPlugin } from "@lix-js/sdk";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";

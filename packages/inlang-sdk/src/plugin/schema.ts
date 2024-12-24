@@ -9,7 +9,7 @@ import type {
 	NewVariant,
 	Variant,
 } from "../database/schema.js";
-import type { ExportFile } from "../project/api.js";
+import type { ExportFile, ImportFile } from "../project/api.js";
 
 export type InlangPlugin<
 	ExternalSettings extends Record<string, any> | unknown = unknown,
@@ -52,11 +52,7 @@ export type InlangPlugin<
 		Array<{ path: string; locale: string; metadata?: Record<string, any> }>
 	>;
 	importFiles?: (args: {
-		files: Array<{
-			locale: string;
-			content: ArrayBuffer;
-			toBeImportedFilesMetadata?: Record<string, any>;
-		}>;
+		files: ImportFile[];
 		settings: ProjectSettings & ExternalSettings; // we expose the settings in case the importFunction needs to access the plugin config
 	}) => MaybePromise<{
 		bundles: BundleImport[];

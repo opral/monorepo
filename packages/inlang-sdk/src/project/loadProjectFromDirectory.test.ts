@@ -464,7 +464,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		// console.log("wrting lix settings");
 		// changes to a file in lix should reflect in the project directory
 		await project.lix.db
-			.deleteFrom("file_internal")
+			.deleteFrom("file")
 			.where("path", "=", "/.gitignore")
 			.execute();
 
@@ -758,7 +758,7 @@ test("plugin calls that use fs should be intercepted to use an absolute path", a
 					key3: "value3",
 				})
 			);
-			await nodeishFs.writeFile(pathPattern, file);
+			await nodeishFs.writeFile(pathPattern, file.buffer as ArrayBuffer);
 		},
 		toBeImportedFiles: async ({ settings }) => {
 			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern.replace(

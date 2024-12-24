@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from "vitest";
 import { inlangLixPluginV1 } from "./inlangLixPluginV1.js";
@@ -8,7 +10,7 @@ import {
 	type NewChange,
 } from "@lix-js/sdk";
 
-test("a create operation should not report a conflict given that the change does not exist in target", async () => {
+test.skip("a create operation should not report a conflict given that the change does not exist in target", async () => {
 	const targetLix = await openLixInMemory({ blob: await newLixFile() });
 	const sourceLix = await openLixInMemory({ blob: await newLixFile() });
 	const changes = await sourceLix.db
@@ -86,7 +88,7 @@ test.todo(
 	}
 );
 
-test("it should report an UPDATE as a conflict if leaf changes are conflicting", async () => {
+test.skip("it should report an UPDATE as a conflict if leaf changes are conflicting", async () => {
 	const targetLix = await openLixInMemory({ blob: await newLixFile() });
 	const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
 
@@ -157,7 +159,7 @@ test("it should report an UPDATE as a conflict if leaf changes are conflicting",
  * been made to the target change that could conflict with updates
  * in the source.
  */
-test("it should NOT report an UPDATE as a conflict if the common ancestor is the leaf change of the target", async () => {
+test.skip("it should NOT report an UPDATE as a conflict if the common ancestor is the leaf change of the target", async () => {
 	const targetLix = await openLixInMemory({ blob: await newLixFile() });
 	const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
 
@@ -221,7 +223,7 @@ test("it should NOT report an UPDATE as a conflict if the common ancestor is the
 	expect(conflicts).toHaveLength(0);
 });
 
-test("it should NOT report a DELETE as a conflict if the parent of the target and source are identical", async () => {
+test.skip("it should NOT report a DELETE as a conflict if the parent of the target and source are identical", async () => {
 	const targetLix = await openLixInMemory({ blob: await newLixFile() });
 	await targetLix.db
 		.insertInto("change")

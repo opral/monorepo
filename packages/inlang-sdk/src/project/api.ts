@@ -50,7 +50,7 @@ export type ImportFile = {
 	/** The locale of the resource file */
 	locale: string;
 	/** The binary content of the resource */
-	content: ArrayBuffer;
+	content: Uint8Array;
 };
 
 export type ExportFile = {
@@ -66,7 +66,7 @@ export type ExportFile = {
 	 */
 	name: string;
 	/** The binary content of the resource */
-	content: ArrayBuffer;
+	content: Uint8Array;
 };
 
 /**

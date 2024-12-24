@@ -13,9 +13,7 @@ export async function setSettings(args: {
 		.updateTable("file")
 		.where("path", "=", "/settings.json")
 		.set({
-			data: await new Blob([
-				JSON.stringify(cloned, undefined, 2),
-			]).arrayBuffer(),
+			data: new TextEncoder().encode(JSON.stringify(cloned, undefined, 2)),
 		})
 		.execute();
 }

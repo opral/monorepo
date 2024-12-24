@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { newLixFile, openLixInMemory, uuidv4 } from "@lix-js/sdk";
+import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import { ProjectSettings } from "../../json-schema/settings.js";
 import { createProjectState } from "./state.js";
 import { setSettings } from "./setSettings.js";
@@ -44,7 +44,6 @@ test("the settings should be persisted to lix", async () => {
 	await lix.db
 		.insertInto("file")
 		.values({
-			id: uuidv4(),
 			path: "/settings.json",
 			data: new TextEncoder().encode("{}"),
 		})

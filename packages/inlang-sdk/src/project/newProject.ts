@@ -1,4 +1,4 @@
-import { newLixFile, openLixInMemory } from "@lix-js/sdk";
+import { newLixFile, openLixInMemory, toBlob } from "@lix-js/sdk";
 import { v4 } from "uuid";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import {
@@ -47,7 +47,7 @@ export async function newProject(args?: {
 				},
 			])
 			.execute();
-		return lix.toBlob();
+		return toBlob({ lix });
 	} catch (e) {
 		const error = new Error(`Failed to create new inlang project: ${e}`, {
 			cause: e,

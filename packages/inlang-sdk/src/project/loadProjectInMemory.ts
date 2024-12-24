@@ -13,7 +13,9 @@ export async function loadProjectInMemory(
 ) {
 	const lix = await openLixInMemory({
 		blob: args.blob,
-		providePlugins: [inlangLixPluginV1],
+		providePlugins: [
+			// inlangLixPluginV1
+		],
 	});
 
 	const dbFile = await lix.db

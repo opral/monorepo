@@ -108,7 +108,7 @@ test("subscribing to plugins should work", async () => {
 	});
 
 	await project.lix.db
-		.updateTable("file_internal")
+		.updateTable("file")
 		.where("path", "=", "/settings.json")
 		.set({
 			data: new TextEncoder().encode(

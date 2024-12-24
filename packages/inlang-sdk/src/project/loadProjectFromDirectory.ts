@@ -137,7 +137,7 @@ export async function loadProjectFromDirectory(
 
 		await project.importFiles({
 			pluginKey: importer.key,
-			files,
+			files: files as any,
 		});
 	} else if (loadMessagesPlugins[0] !== undefined) {
 		// TODO create resource files from loadMessageFn call - to poll?
@@ -248,7 +248,7 @@ async function syncLixFsFiles(args: {
 				checkFsStateRecursive(fullPath, currentState);
 			} else {
 				// NOTE we could start with comparing the mdate and skip file read completely...
-				const data = args.fs.readFileSync(fullPath);
+				const data = args.fs.readFileSync(fullPath).buffer as ArrayBuffer;
 
 				const relativePath = "/" + nodePath.relative(args.path, fullPath);
 
@@ -272,7 +272,7 @@ async function syncLixFsFiles(args: {
 	async function checkLixState(currentLixState: FsFileState) {
 		// go through all files in lix and check there state
 		const filesInLix = await args.lix.db
-			.selectFrom("file_internal")
+			.selectFrom("file")
 			.where("path", "not like", "%db.sqlite")
 			.selectAll()
 			.execute();
@@ -282,17 +282,21 @@ async function syncLixFsFiles(args: {
 			// NOTE we could start with comparing the mdate and skip file read completely...
 			if (!currentStateOfFileInLix) {
 				currentLixState[fileInLix.path] = {
-					content: new Uint8Array(fileInLix.data),
+					content: new Uint8Array(fileInLix.data).buffer,
 					state: "unknown",
 				};
 			} else {
 				if (
-					arrayBuffersEqual(currentStateOfFileInLix.content, fileInLix.data)
+					arrayBuffersEqual(
+						currentStateOfFileInLix.content,
+						fileInLix.data.buffer as ArrayBuffer
+					)
 				) {
 					currentStateOfFileInLix.state = "known";
 				} else {
 					currentStateOfFileInLix.state = "updated";
-					currentStateOfFileInLix.content = fileInLix.data;
+					currentStateOfFileInLix.content = fileInLix.data
+						.buffer as ArrayBuffer;
 				}
 			}
 		}
@@ -436,7 +440,7 @@ async function syncLixFsFiles(args: {
 					} else if (lixState.state === "known") {
 						// file is in known state with lix - means we have only changes on the fs - easy
 						await args.lix.db
-							.deleteFrom("file_internal")
+							.deleteFrom("file")
 							.where("path", "=", path)
 							.execute();
 						// NOTE: states where both are gone will get removed in the lix state loop
@@ -447,7 +451,7 @@ async function syncLixFsFiles(args: {
 							"seems like we saw an update on the file in fs while some changes on lix have not been reached fs? FS -> Winns?"
 						);
 						await args.lix.db
-							.deleteFrom("file_internal")
+							.deleteFrom("file")
 							.where("path", "=", path)
 							.execute();
 						// NOTE: states where both are gone will get removed in the lix state loop
@@ -563,12 +567,14 @@ async function upsertFileInLix(
 	// NOTE we use file_internal for now see: https://linear.app/opral/issue/LIXDK-102/re-visit-simplifying-the-change-queue-implementation#comment-65eb3485
 	// This means we don't see changes for the file we update via this method!
 	await args.lix.db
-		.insertInto("file_internal") // change queue
+		.insertInto("file") // change queue
 		.values({
 			path: path,
-			data,
+			data: new Uint8Array(data),
 		})
-		.onConflict((oc) => oc.column("path").doUpdateSet({ data }))
+		.onConflict((oc) =>
+			oc.column("path").doUpdateSet({ data: new Uint8Array(data) })
+		)
 		.execute();
 }
 
