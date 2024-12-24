@@ -11,10 +11,10 @@ import { createVersion } from "../version/create-version.js";
 
 // file ids are always in the URL of lix apps
 // to increase sharing, the ids should be as short as possible
-// 
+//
 // 129 million file creations will lead to a 1% chance of a collision
 //
-// if someone uses lix to handle 129 million files, we can 
+// if someone uses lix to handle 129 million files, we can
 // increase the length of the id :D
 test("file ids should default to nano_id(10)", async () => {
 	const lix = await openLixInMemory({});
@@ -331,7 +331,6 @@ test("label.id is nano_id(8)", async () => {
 
 	expect(label.id.length).toBe(8);
 });
-
 
 test("creating multiple discussions for one change set should be possible", async () => {
 	const sqlite = await createInMemoryDatabase({
