@@ -51,7 +51,6 @@ export function validatePathTranslations<T extends string>(
 			}
 		}
 
-		//@ts-ignore
 		const translations = pathTranslations[path];
 		if (!translations) continue;
 

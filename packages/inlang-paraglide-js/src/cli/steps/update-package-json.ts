@@ -45,7 +45,7 @@ export function updatePackageJson(opt: {
 					pkg.devDependencies || {}
 				);
 			if (opt.scripts) pkg.scripts = await opt.scripts(pkg.scripts || {});
-		} catch (e) {
+		} catch {
 			return ctx;
 		}
 		await ctx.fs.writeFile("./package.json", stringify(pkg));

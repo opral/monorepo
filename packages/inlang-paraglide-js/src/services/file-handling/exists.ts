@@ -12,7 +12,7 @@ export async function pathExists(
 		await fs.stat(filePath);
 		return true;
 	} catch (error) {
-		//@ts-ignore
+		//@ts-expect-error - error is Error
 		if (error.code === "ENOENT") {
 			return false;
 		} else {

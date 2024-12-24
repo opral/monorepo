@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { colors } from "consola/utils";
 import consola from "consola";
 

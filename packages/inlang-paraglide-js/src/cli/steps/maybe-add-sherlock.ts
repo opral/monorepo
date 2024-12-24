@@ -3,7 +3,6 @@ import { prompt } from "~/cli/utils.js";
 import type { CliStep } from "../utils.js";
 import type { InlangProject } from "@inlang/sdk";
 // import * as Sherlock from "@inlang/recommend-sherlock";
-import { telemetry } from "~/services/telemetry/implementation.js";
 import type { NodeishFilesystem } from "~/services/file-handling/types.js";
 
 export const maybeAddSherlock: CliStep<

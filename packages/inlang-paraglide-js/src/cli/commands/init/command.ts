@@ -60,7 +60,7 @@ export const initCommand = new Command()
 		try {
 			await runCompiler(ctx8);
 			ctx.logger.success("Run paraglide compiler");
-		} catch (e) {
+		} catch {
 			ctx.logger.warn(
 				"Failed to compile project automatically. You will need to run the compiler manually"
 			);

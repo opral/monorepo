@@ -19,7 +19,7 @@ function canBeUsedAsVariableName(str: string): boolean {
 
 	try {
 		new Function(str, "var " + str);
-	} catch (_) {
+	} catch {
 		return false;
 	}
 

@@ -27,7 +27,7 @@ export const checkForUncommittedChanges: CliStep<
 		} else {
 			process.exit(0);
 		}
-	} catch (e) {
+	} catch {
 		// git cli is not installed
 		return ctx;
 	}

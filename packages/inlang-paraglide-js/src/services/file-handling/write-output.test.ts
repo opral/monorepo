@@ -58,7 +58,7 @@ describe("write output", () => {
 		const { writeOutput } = await import("./write-output.js");
 		const fs = mockFs({});
 
-		// @ts-ignore
+		// @ts-expect-error - spy
 		fs.writeFile = vi.spyOn(fs, "writeFile");
 
 		await writeOutput("/output", { "test.txt": "test" }, fs);
@@ -73,7 +73,7 @@ describe("write output", () => {
 		const { writeOutput } = await import("./write-output.js");
 		const fs = mockFs({});
 
-		// @ts-ignore
+		// @ts-expect-error - spy
 		fs.writeFile = vi.spyOn(fs, "writeFile");
 
 		await writeOutput("/output", { "test.txt": "test" }, fs);

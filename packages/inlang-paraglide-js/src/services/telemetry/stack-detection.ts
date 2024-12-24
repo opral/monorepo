@@ -90,7 +90,7 @@ export function getStackInfo(packageJson: unknown): StackInfo {
 		}
 
 		return { packages };
-	} catch (error) {
+	} catch {
 		return { packages };
 	}
 }
