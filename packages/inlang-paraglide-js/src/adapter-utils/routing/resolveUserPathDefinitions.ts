@@ -23,9 +23,9 @@ import type { PathDefinitionTranslations } from "./routeDefinitions.js";
  * ```
  */
 export type UserPathDefinitionTranslations<T extends string = string> = {
-  [canonicalPath: `/${string}`]:
-    | Record<T, `/${string}`>
-    | MessageIndexFunction<T>;
+	[canonicalPath: `/${string}`]:
+		| Record<T, `/${string}`>
+		| MessageIndexFunction<T>;
 };
 
 /**
@@ -41,25 +41,25 @@ export type UserPathDefinitionTranslations<T extends string = string> = {
  * @returns The resolved path translations.
  */
 export const resolveUserPathDefinitions = <T extends string>(
-  userTranslations: UserPathDefinitionTranslations<T>,
-  availableLanguageTags: readonly T[],
+	userTranslations: UserPathDefinitionTranslations<T>,
+	availableLanguageTags: readonly T[]
 ): PathDefinitionTranslations<T> =>
-  Object.fromEntries(
-    Object.entries(userTranslations).map(([path, translation]) => [
-      path,
-      typeof translation === "object"
-        ? translation
-        : fromMessage(translation, availableLanguageTags),
-    ]),
-  );
+	Object.fromEntries(
+		Object.entries(userTranslations).map(([path, translation]) => [
+			path,
+			typeof translation === "object"
+				? translation
+				: fromMessage(translation, availableLanguageTags),
+		])
+	);
 
 const fromMessage = <T extends string>(
-  message: MessageIndexFunction<T>,
-  availableLanguageTags: readonly T[],
+	message: MessageIndexFunction<T>,
+	availableLanguageTags: readonly T[]
 ) =>
-  Object.fromEntries(
-    availableLanguageTags.map((languageTag) => [
-      languageTag,
-      message({}, { languageTag }),
-    ]),
-  ) as Record<T, `/${string}`>;
+	Object.fromEntries(
+		availableLanguageTags.map((languageTag) => [
+			languageTag,
+			message({}, { languageTag }),
+		])
+	) as Record<T, `/${string}`>;

@@ -6,22 +6,22 @@ import { writeOutput } from "~/services/file-handling/write-output.js";
 import fs from "node:fs";
 
 export const runCompiler: CliStep<
-  {
-    project: InlangProject;
-    outdir: string;
-    fs: typeof fs.promises;
-  },
-  unknown
+	{
+		project: InlangProject;
+		outdir: string;
+		fs: typeof fs.promises;
+	},
+	unknown
 > = async (ctx) => {
-  const absoluteOutdir = path.resolve(process.cwd(), ctx.outdir);
-  const bundles = await selectBundleNested(ctx.project.db).execute();
-  const settings = await ctx.project.settings.get();
+	const absoluteOutdir = path.resolve(process.cwd(), ctx.outdir);
+	const bundles = await selectBundleNested(ctx.project.db).execute();
+	const settings = await ctx.project.settings.get();
 
-  const output = await compile({
-    bundles,
-    settings,
-  });
+	const output = await compile({
+		bundles,
+		settings,
+	});
 
-  await writeOutput(absoluteOutdir, output, ctx.fs);
-  return { ...ctx, bundles };
+	await writeOutput(absoluteOutdir, output, ctx.fs);
+	return { ...ctx, bundles };
 };

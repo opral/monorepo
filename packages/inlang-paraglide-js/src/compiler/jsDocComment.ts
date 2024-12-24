@@ -1,18 +1,18 @@
 import type { InputVariable } from "@inlang/sdk";
 
 export function jsDocBundleComment(args: {
-  inputs: InputVariable[];
-  locales: string[];
+	inputs: InputVariable[];
+	locales: string[];
 }): string {
-  const inputParams = args.inputs
-    .map((input) => {
-      return `${input.name}: NonNullable<unknown>`;
-    })
-    .join(", ");
+	const inputParams = args.inputs
+		.map((input) => {
+			return `${input.name}: NonNullable<unknown>`;
+		})
+		.join(", ");
 
-  const localesUnion = args.locales.map((locale) => `"${locale}"`).join(" | ");
+	const localesUnion = args.locales.map((locale) => `"${locale}"`).join(" | ");
 
-  return `/**
+	return `/**
 * This function has been compiled by [Paraglide JS](https://inlang.com/m/gerre34r).
 *
 * - Changing this function will be over-written by the next build.
@@ -26,13 +26,13 @@ export function jsDocBundleComment(args: {
 }
 
 export function jsDocMessageComment(args: { inputs: InputVariable[] }): string {
-  const inputParams = args.inputs
-    .map((input) => {
-      return `${input.name}: NonNullable<unknown>`;
-    })
-    .join(", ");
+	const inputParams = args.inputs
+		.map((input) => {
+			return `${input.name}: NonNullable<unknown>`;
+		})
+		.join(", ");
 
-  return `/**
+	return `/**
 * @param {{ ${inputParams} }} i
 */`;
 }
