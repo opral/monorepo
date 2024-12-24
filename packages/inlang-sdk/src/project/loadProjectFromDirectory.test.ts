@@ -19,7 +19,7 @@ import type {
 import { saveProjectToDirectory } from "./saveProjectToDirectory.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
 
-test("plugin.loadMessages and plugin.saveMessages must not be condigured together with import export", async () => {
+test("plugin.loadMessages and plugin.saveMessages must not be configured together with import export", async () => {
 	const mockLegacyPlugin: InlangPlugin = {
 		key: "mock-legacy-plugin",
 		loadMessages: async () => {

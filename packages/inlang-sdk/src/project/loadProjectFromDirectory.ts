@@ -248,7 +248,7 @@ async function syncLixFsFiles(args: {
 				checkFsStateRecursive(fullPath, currentState);
 			} else {
 				// NOTE we could start with comparing the mdate and skip file read completely...
-				const data = args.fs.readFileSync(fullPath).buffer as ArrayBuffer;
+				const data = args.fs.readFileSync(fullPath) as unknown as ArrayBuffer;
 
 				const relativePath = "/" + nodePath.relative(args.path, fullPath);
 
