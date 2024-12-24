@@ -51,10 +51,9 @@
     "check": "tsc --noEmit --emitDeclarationOnly false"
   },
   "bundleDependencies": [
-    "@inlang/sdk2"
+    "@inlang/sdk"
   ],
   "dependencies": {
-    "@inlang/detect-json-formatting": "workspace:*",
     "commander": "11.1.0",
     "consola": "3.2.3",
     "dedent": "1.5.1",
@@ -66,11 +65,6 @@
   },
   "devDependencies": {
     "@inlang/sdk": "workspace:*",
-    "@lix-js/client": "workspace:*",
-    "@lix-js/fs": "workspace:*",
-    "@inlang/recommend-ninja": "workspace:*",
-    "@inlang/recommend-sherlock": "workspace:*",
-    "@inlang/sdk2": "workspace:*",
     "@rollup/plugin-virtual": "3.0.1",
     "@ts-morph/bootstrap": "0.20.0",
     "@types/node": "^20.12.7",
