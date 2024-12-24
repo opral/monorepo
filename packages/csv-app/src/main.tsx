@@ -28,6 +28,9 @@ const router = createBrowserRouter(
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
 	<React.StrictMode>
-		<RouterProvider router={router} />
+		<RouterProvider
+			// @ts-expect-error - internal type mismatch of react router
+			router={router}
+		/>
 	</React.StrictMode>
 );
