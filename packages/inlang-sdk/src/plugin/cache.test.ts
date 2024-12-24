@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect, vi } from "vitest";
 import { withCache } from "./cache.js";
 import { newLixFile, openLixInMemory } from "@lix-js/sdk";
@@ -22,7 +21,7 @@ test("it should be network-first", async () => {
 	const cachedPlugins = await lix.db
 		.selectFrom("file")
 		.selectAll()
-		// @ts-expect-error
+		// @ts-expect-error - kysely doesn't know about GLOB
 		.where(sql`path GLOB '/cache/plugins/*'`)
 		.execute();
 
@@ -40,7 +39,7 @@ test("it should be network-first", async () => {
 	const cachedPlugins2 = await lix.db
 		.selectFrom("file")
 		.selectAll()
-		// @ts-expect-error
+		// @ts-expect-error - kysely doesn't know about GLOB
 		.where(sql`path GLOB '/cache/plugins/*'`)
 		.execute();
 

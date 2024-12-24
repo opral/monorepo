@@ -1,8 +1,5 @@
 import type { Kysely } from "kysely";
-import type {
-	InlangDatabaseSchema,
-	NewBundleNested,
-} from "../database/schema.js";
+import type { InlangDatabaseSchema } from "../database/schema.js";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import type { Lix } from "@lix-js/sdk";

@@ -2,7 +2,7 @@ import { expect, test, vi } from "vitest";
 import { capture } from "./capture.js";
 
 test("it should not capture if telemetry is off", async () => {
-	// @ts-expect-error
+	// @ts-expect-error - global.fetch is not defined
 	global.fetch = vi.fn(() => Promise.resolve());
 
 	vi.mock("../env-variables/index.js", async () => {
@@ -25,7 +25,7 @@ test("it should not capture if telemetry is off", async () => {
 });
 
 test("it should not capture if telemetry is NOT off", async () => {
-	// @ts-expect-error
+	// @ts-expect-error - global.fetch is not defined
 	global.fetch = vi.fn(() => Promise.resolve());
 
 	vi.mock("../env-variables/index.js", async () => {

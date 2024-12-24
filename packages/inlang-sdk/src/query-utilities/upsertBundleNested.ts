@@ -19,7 +19,7 @@ export const upsertBundleNested = async (
 			.onConflict((oc) =>
 				oc.column("id").doUpdateSet({
 					...bundle,
-					// @ts-expect-error
+					// @ts-expect-error - undefined
 					messages: undefined,
 				})
 			)
@@ -37,7 +37,7 @@ export const upsertBundleNested = async (
 				.onConflict((oc) =>
 					oc.column("id").doUpdateSet({
 						...message,
-						// @ts-expect-error
+						// @ts-expect-error - undefined
 						variants: undefined,
 					})
 				)

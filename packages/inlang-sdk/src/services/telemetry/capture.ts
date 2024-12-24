@@ -10,7 +10,7 @@ import { captureError } from "../error-reporting/index.js";
  * - prefix with `SDK` to avoid collisions with other apps
  * - use past tense to indicate that the event is completed
  */
-const events = ["SDK loaded project"] as const;
+type TelemetryEvent = "SDK loaded project";
 
 /**
  * Capture an event.
@@ -18,7 +18,7 @@ const events = ["SDK loaded project"] as const;
  * - manually calling the PostHog API because the SDKs were not platform angostic (and generally bloated)
  */
 export const capture = async (
-	event: (typeof events)[number],
+	event: TelemetryEvent,
 	args: {
 		projectId: string;
 		/**

@@ -83,7 +83,7 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 				return {
 					kind: "ColumnUpdateNode",
 					column: updateItem.column,
-					// @ts-ignore
+					// @ts-expect-error - we know that the value is a ValueNode
 					value: this.transformValue(updateItem.value),
 				};
 			}),
@@ -96,7 +96,7 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 		if (value === serializedValue) {
 			return node;
 		}
-		// @ts-ignore
+		// @ts-expect-error - we know that the node is a ValueNode
 		return sql`jsonb(${serializedValue})`.toOperationNode();
 	}
 	/**
@@ -109,7 +109,7 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 				if (listNodeItem.kind !== "ValueNode") {
 					return listNodeItem;
 				}
-				// @ts-ignore
+				// @ts-expect-error - we know that the node is a ValueNode
 				const { value } = listNodeItem;
 				const serializedValue = maybeSerializeJson(value);
 

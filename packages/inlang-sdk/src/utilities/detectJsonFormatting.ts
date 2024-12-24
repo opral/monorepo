@@ -71,7 +71,7 @@ const isJsonObjectOrArray = (character: string | undefined) =>
 	character === "{" || character === "[";
 
 // Uses imperative logic for performance
-// @ts-ignore
+// @ts-expect-error - not all code paths return a value
 const getIndent = (
 	jsonString: string | any[],
 	firstIndex: number,

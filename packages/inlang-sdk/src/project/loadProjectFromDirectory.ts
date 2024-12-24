@@ -1,9 +1,9 @@
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
 import { type Lix } from "@lix-js/sdk";
-// eslint-disable-next-line no-restricted-imports
+
 import fs from "node:fs";
-// eslint-disable-next-line no-restricted-imports
+
 import nodePath from "node:path";
 import type {
 	InlangPlugin,
@@ -185,7 +185,7 @@ async function loadLegacyMessages(args: {
 }) {
 	const loadedLegacyMessages = await args.loadMessagesFn({
 		settings: await args.project.settings.get(),
-		// @ts-ignore
+		// @ts-expect-error - type mismatch
 		nodeishFs: withAbsolutePaths(args.fs.promises, args.projectPath),
 	});
 	const upsertQueries = [];
@@ -718,7 +718,7 @@ export function withAbsolutePaths(
 	projectPath: string
 ): NodeFsPromisesSubsetLegacy {
 	return {
-		// @ts-expect-error
+		// @ts-expect-error - node type mismatch
 		readFile: (path, options) => {
 			return fs.readFile(absolutePathFromProject(projectPath, path), options);
 		},

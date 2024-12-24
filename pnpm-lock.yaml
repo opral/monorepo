@@ -151,6 +151,9 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0
     devDependencies:
+      '@eslint/js':
+        specifier: ^9.12.0
+        version: 9.15.0
       '@sentry/cli':
         specifier: ^2.35.0
         version: 2.39.1
@@ -163,15 +166,18 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^2.0.5
         version: 2.1.3(vitest@2.1.8(@types/node@22.10.1)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.7.2))(terser@5.36.0))
-      eslint-plugin-tree-shaking:
-        specifier: ^1.12.2
-        version: 1.12.2
+      eslint:
+        specifier: ^9.12.0
+        version: 9.15.0(jiti@2.3.3)
       memfs:
         specifier: 4.6.0
         version: 4.6.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.8.0)
       typescript:
         specifier: ^5.5.2
         version: 5.7.2
+      typescript-eslint:
+        specifier: ^8.9.0
+        version: 8.10.0(eslint@9.15.0(jiti@2.3.3))(typescript@5.7.2)
       vitest:
         specifier: ^2.0.5
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.7.2))(terser@5.36.0)
@@ -4057,10 +4063,6 @@ packages:
     engines: {node: '>=4'}
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7
-
-  eslint-plugin-tree-shaking@1.12.2:
-    resolution: {integrity: sha512-D3MBKjH9EaGZg1gxqezGmjCeWzHs/O0jRFajpuXLYKeOCh3ycgoXeZ1ceKaD2QnK+v18ly+XjNDUCgss4vKbWg==}
-    engines: {node: '>=6.0.0'}
 
   eslint-scope@7.2.2:
     resolution: {integrity: sha512-dOt21O7lTMhDM+X9mB4GX+DZrZtCUJPL/wlcTqxyrx5IvO0IYtILdtrQGQp+8n5S0gwSVmOf9NQrjMOgfQZlIg==}
@@ -11731,8 +11733,6 @@ snapshots:
       semver: 6.3.1
       string.prototype.matchall: 4.0.11
       string.prototype.repeat: 1.0.0
-
-  eslint-plugin-tree-shaking@1.12.2: {}
 
   eslint-scope@7.2.2:
     dependencies:

@@ -1,6 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from "vitest";
 import { inlangLixPluginV1 } from "./inlangLixPluginV1.js";
 import {

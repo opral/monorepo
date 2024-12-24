@@ -48,11 +48,13 @@
 		"readdirp": "^4.0.1"
 	},
 	"devDependencies": {
+		"@eslint/js": "^9.12.0",
 		"@sentry/cli": "^2.35.0",
 		"@types/node": "^22.5.1",
 		"@types/uuid": "^10.0.0",
 		"@vitest/coverage-v8": "^2.0.5",
-		"eslint-plugin-tree-shaking": "^1.12.2",
+		"eslint": "^9.12.0",
+		"typescript-eslint": "^8.9.0",
 		"memfs": "4.6.0",
 		"typescript": "^5.5.2",
 		"vitest": "^2.0.5"

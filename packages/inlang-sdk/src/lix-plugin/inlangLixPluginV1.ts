@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
 import type { DiffReport, LixPlugin } from "@lix-js/sdk";
@@ -27,7 +28,7 @@ export const inlangLixPluginV1: LixPlugin<{
 			const oldDb = old
 				? initDb({ sqlite: await loadDatabaseInMemory(old.data) })
 				: undefined;
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
 			const newDb = neu
 				? initDb({
 						sqlite: await loadDatabaseInMemory(neu.data),

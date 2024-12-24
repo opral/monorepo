@@ -1,6 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from "vitest";
 import { newProject } from "../project/newProject.js";
 import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
