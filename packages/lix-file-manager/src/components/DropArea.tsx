@@ -26,7 +26,7 @@ export default function DropArea() {
 						.insertInto("file")
 						.values({
 							path: "/" + file.name,
-							data: await file.arrayBuffer(),
+							data: new Uint8Array(await file.arrayBuffer()),
 							metadata:
 								// hardcoded unique column for demo purposes
 								file.name === "email-newsletter.csv"

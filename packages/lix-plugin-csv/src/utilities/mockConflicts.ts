@@ -18,9 +18,9 @@ import { detectChanges } from "../detectChanges.js";
  *   ```
  */
 export async function mockConflicts(args: {
-	common: ArrayBuffer;
-	source: ArrayBuffer;
-	target: ArrayBuffer;
+	common: Uint8Array;
+	source: Uint8Array;
+	target: Uint8Array;
 	metadata: Record<string, string>;
 }) {
 	const { lix: commonLix } = await mockChanges({

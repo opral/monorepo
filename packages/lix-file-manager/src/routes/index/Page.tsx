@@ -88,7 +88,7 @@ export default function Page() {
 					.insertInto("file")
 					.values({
 						path: "/" + file.name,
-						data: await file.arrayBuffer(),
+						data: new Uint8Array(await file.arrayBuffer()),
 					})
 					.execute();
 				posthog.capture("File Imported", {

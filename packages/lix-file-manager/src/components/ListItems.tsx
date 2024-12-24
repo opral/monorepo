@@ -75,7 +75,7 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 			if (file) {
 				await lix.db
 					.updateTable("file")
-					.set("data", await file.arrayBuffer())
+					.set("data", new Uint8Array(await file.arrayBuffer()))
 					.where("id", "=", id)
 					.returningAll()
 					.execute();
