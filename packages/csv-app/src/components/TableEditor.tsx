@@ -38,7 +38,7 @@ export default function TableEditor() {
 
 			await lix.db
 				.updateTable("file")
-				.set("data", await new Blob([csv]).arrayBuffer())
+				.set("data", new TextEncoder().encode(csv))
 				.where("id", "=", activeFile!.id)
 				.returningAll()
 				.execute();

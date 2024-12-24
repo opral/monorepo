@@ -18,7 +18,7 @@ import { detectChanges } from "../detectChanges.js";
 export async function mockChanges(args: {
 	lix?: Lix;
 	file: Omit<NewLixFile, "data">;
-	fileUpdates: ArrayBuffer[];
+	fileUpdates: Uint8Array[];
 }) {
 	const lix =
 		args.lix ??
