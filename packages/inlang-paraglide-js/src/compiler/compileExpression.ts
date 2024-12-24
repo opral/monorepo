@@ -1,4 +1,4 @@
-import type { Expression, FunctionReference } from "@inlang/sdk2";
+import type { Expression, FunctionReference } from "@inlang/sdk";
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js";
 import {
   escapeForDoubleQuoteString,
@@ -10,7 +10,7 @@ import { type Registry } from "./registry.js";
 export function compileExpression(
   lang: string,
   expression: Expression,
-  registry: Registry,
+  registry: Registry
 ): Compiled<Expression> {
   if (expression.annotation) {
     const fn = expression.annotation;
@@ -38,10 +38,10 @@ export function compileExpression(
 }
 
 function compileOptions(
-  options: FunctionReference["options"],
+  options: FunctionReference["options"]
 ): Compiled<FunctionReference["options"]> {
   const entires: string[] = options.map(
-    (option) => `${option.name}: ${compileArg(option.value)}`,
+    (option) => `${option.name}: ${compileArg(option.value)}`
   );
   const code = "{" + entires.join(", ") + "}";
 

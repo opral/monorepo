@@ -1,4 +1,4 @@
-import { loadProjectFromDirectory, type InlangProject } from "@inlang/sdk2";
+import { loadProjectFromDirectory, type InlangProject } from "@inlang/sdk";
 import type { Logger } from "~/services/logger/index.js";
 import type { CliStep } from "../utils.js";
 import { prompt } from "~/cli/utils.js";
@@ -75,7 +75,7 @@ export const existingProjectFlow = async (ctx: {
         { label: "Create a new project", value: NEW_PROJECT_VALUE },
         ...options,
       ],
-    },
+    }
   )) as unknown as string; // the prompt type is incorrect
 
   //if the user wants to create a new project - create one & use it
@@ -90,7 +90,7 @@ export const existingProjectFlow = async (ctx: {
 
   if ((await project.errors.get()).length > 0) {
     ctx.logger.error(
-      "Aborting paragilde initialization. - The selected project has errors. Either fix them, or remove the project and create a new one.",
+      "Aborting paragilde initialization. - The selected project has errors. Either fix them, or remove the project and create a new one."
     );
     for (const error of await project.errors.get()) {
       ctx.logger.error(error);
@@ -129,7 +129,7 @@ function parseLanguageTagInput(input: string): {
 }
 
 async function promptForLanguageTags(
-  initialLanguageTags: string[] = [],
+  initialLanguageTags: string[] = []
 ): Promise<string[]> {
   const languageTagsInput =
     (await prompt("Which languages do you want to support?", {
@@ -186,7 +186,7 @@ export const createNewProjectFlow = async (ctx: {
 
   //create the messages dir if it doesn't exist
   const messageDir = nodePath.dirname(
-    nodePath.resolve(process.cwd(), messagePath),
+    nodePath.resolve(process.cwd(), messagePath)
   );
   await ctx.fs.mkdir(messageDir, { recursive: true });
 
@@ -198,13 +198,13 @@ export const createNewProjectFlow = async (ctx: {
         dedent`
                     {
                         "$schema": "https://inlang.com/schema/inlang-message-format"
-                    }`,
+                    }`
       );
-    }),
+    })
   );
 
   ctx.logger.info(
-    `Creating a new inlang project in the current working directory.`,
+    `Creating a new inlang project in the current working directory.`
   );
 
   const projectPath = nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH);
@@ -215,7 +215,7 @@ export const createNewProjectFlow = async (ctx: {
   // write default settings
   await ctx.fs.writeFile(
     nodePath.resolve(projectPath, "settings.json"),
-    JSON.stringify(settings, undefined, 2),
+    JSON.stringify(settings, undefined, 2)
   );
 
   const project = await loadProjectFromDirectory({
@@ -226,7 +226,7 @@ export const createNewProjectFlow = async (ctx: {
 
   if ((await project.errors.get()).length > 0) {
     ctx.logger.warn(
-      "Failed to create a new inlang project.\n\nThis is likely an internal bug. Please file an issue at https://github.com/opral/monorepo.",
+      "Failed to create a new inlang project.\n\nThis is likely an internal bug. Please file an issue at https://github.com/opral/monorepo."
     );
     for (const error of await project.errors.get()) {
       ctx.logger.error(error);
@@ -259,7 +259,7 @@ export function getCommonPrefix(strings: string[]): string {
 
   return strs.reduce(
     (commonPrefix, str) => longestCommonPrefix(commonPrefix, str),
-    firstString,
+    firstString
   );
 }
 

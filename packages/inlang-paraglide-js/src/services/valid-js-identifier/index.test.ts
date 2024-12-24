@@ -1,4 +1,4 @@
-import { expect, it } from "vitest";
+import { it, expect } from "vitest";
 import { isValidJSIdentifier } from "./index.js";
 
 it("returns true if the string is a valid, non-reserved identifier", () => {

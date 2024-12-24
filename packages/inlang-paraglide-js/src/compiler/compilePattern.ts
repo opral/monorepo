@@ -1,4 +1,4 @@
-import type { Pattern } from "@inlang/sdk2";
+import type { Pattern } from "@inlang/sdk";
 import { escapeForTemplateLiteral } from "../services/codegen/escape.js";
 import { backtick } from "../services/codegen/quotes.js";
 import { compileExpression } from "./compileExpression.js";
@@ -15,7 +15,7 @@ import type { Registry } from "./registry.js";
 export const compilePattern = (
   lang: string,
   pattern: Pattern,
-  registry: Registry,
+  registry: Registry
 ): Compiled<Pattern> => {
   const compiledPatternElements = pattern.map(
     (element): Compiled<Pattern[number]> => {
@@ -31,10 +31,10 @@ export const compilePattern = (
           return { code, node: element };
         }
       }
-    },
+    }
   );
   const code = backtick(
-    compiledPatternElements.map((res) => res.code).join(""),
+    compiledPatternElements.map((res) => res.code).join("")
   );
 
   return { code, node: pattern };

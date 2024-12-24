@@ -1,4 +1,4 @@
-import type { Declaration, Message, Variant } from "@inlang/sdk2";
+import type { Declaration, Message, Variant } from "@inlang/sdk";
 import type { Registry } from "./registry.js";
 import { compilePattern } from "./compilePattern.js";
 import { doubleQuote } from "~/services/codegen/quotes.js";
@@ -15,7 +15,7 @@ export const compileMessage = (
   declarations: Declaration[],
   message: Message,
   variants: Variant[],
-  registry: Registry,
+  registry: Registry
 ): Compiled<Message> => {
   // return empty string instead?
   if (variants.length == 0) {
@@ -27,7 +27,7 @@ export const compileMessage = (
         declarations,
         message,
         variants,
-        registry,
+        registry
       )
     : compileMessageWithOneVariant(message, variants, registry);
 };
@@ -35,7 +35,7 @@ export const compileMessage = (
 function compileMessageWithOneVariant(
   message: Message,
   variants: Variant[],
-  registry: Registry,
+  registry: Registry
 ): Compiled<Message> {
   const variant = variants[0];
   if (!variant || variants.length !== 1) {
@@ -44,7 +44,7 @@ function compileMessageWithOneVariant(
   const compiledPattern = compilePattern(
     message.locale,
     variant.pattern,
-    registry,
+    registry
   );
   const code = `export const ${message.bundleId} = (i) => ${compiledPattern.code}`;
   return { code, node: message };
@@ -54,7 +54,7 @@ function compileMessageWithMultipleVariants(
   declarations: Declaration[],
   message: Message,
   variants: Variant[],
-  registry: Registry,
+  registry: Registry
 ): Compiled<Message> {
   if (variants.length <= 1)
     throw new Error("Message must have more than one variant");
@@ -66,12 +66,12 @@ function compileMessageWithMultipleVariants(
     const compiledPattern = compilePattern(
       message.locale,
       variant.pattern,
-      registry,
+      registry
     );
 
     // todo account for all matches in the selector (if a match is missing, it should be the catchall)
     const isCatchAll = variant.matches.every(
-      (match) => match.type === "catchall-match",
+      (match) => match.type === "catchall-match"
     );
 
     if (isCatchAll) {
@@ -86,7 +86,7 @@ function compileMessageWithMultipleVariants(
         continue;
       }
       const variableType = declarations.find(
-        (decl) => decl.name === match.key,
+        (decl) => decl.name === match.key
       )?.type;
       if (variableType === "input-variable") {
         conditions.push(`i.${match.key} == ${doubleQuote(match.value)}`);
@@ -97,7 +97,7 @@ function compileMessageWithMultipleVariants(
 
     if (conditions.length === 0) continue;
     compiledVariants.push(
-      `if (${conditions.join(" && ")}) return ${compiledPattern.code};`,
+      `if (${conditions.join(" && ")}) return ${compiledPattern.code};`
     );
   }
 

@@ -1,4 +1,4 @@
-import type { ProjectSettings } from "@inlang/sdk2";
+import type { ProjectSettings } from "@inlang/sdk";
 
 /**
  * Default project settings for createNewProject
@@ -21,11 +21,11 @@ export function getNewProjectTemplate() {
   if (!("structuredClone" in globalThis)) {
     try {
       return JSON.parse(
-        JSON.stringify(defaultProjectSettings),
+        JSON.stringify(defaultProjectSettings)
       ) as typeof defaultProjectSettings;
     } catch {
       throw new Error(
-        "structuredClone is not supported in your Node Version. Please use version 17 or higher",
+        "structuredClone is not supported in your Node Version. Please use version 17 or higher"
       );
     }
   }

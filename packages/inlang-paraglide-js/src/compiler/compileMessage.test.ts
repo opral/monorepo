@@ -1,6 +1,6 @@
 import { it, expect } from "vitest";
 import { compileMessage } from "./compileMessage.js";
-import type { Declaration, Message, Variant } from "@inlang/sdk2";
+import type { Declaration, Message, Variant } from "@inlang/sdk";
 import { DEFAULT_REGISTRY } from "./registry.js";
 
 it("compiles a message with a single variant", async () => {

@@ -1,8 +1,8 @@
 import type { Logger } from "~/services/logger/index.js";
 import { prompt } from "~/cli/utils.js";
 import type { CliStep } from "../utils.js";
-import type { InlangProject } from "@inlang/sdk2";
-import * as Sherlock from "@inlang/recommend-sherlock";
+import type { InlangProject } from "@inlang/sdk";
+// import * as Sherlock from "@inlang/recommend-sherlock";
 import { telemetry } from "~/services/telemetry/implementation.js";
 import type { NodeishFilesystem } from "~/services/file-handling/types.js";
 
@@ -34,24 +34,24 @@ export const maybeAddSherlock: CliStep<
   ) {
     // add the m function matcher plugin
     settings.modules.push(
-      "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
+      "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
     );
     await ctx.project.settings.set(settings);
   }
 
-  try {
-    if (!(await Sherlock.isAdopted({ fs: ctx.fs }))) {
-      await Sherlock.add({ fs: ctx.fs });
-      telemetry.capture({ event: "PARAGLIDE JS init added Sherlock" });
-      ctx.logger.success(
-        "Added the inlang Visual Studio Code extension (Sherlock) to the workspace recommendations.",
-      );
-    }
-  } catch (error) {
-    ctx.logger.error(
-      "Failed to add the inlang Visual Studio Code extension (Sherlock). Please open an issue",
-    );
-  }
+  // try {
+  //   if (!(await Sherlock.isAdopted({ fs: ctx.fs }))) {
+  //     await Sherlock.add({ fs: ctx.fs });
+  //     telemetry.capture({ event: "PARAGLIDE JS init added Sherlock" });
+  //     ctx.logger.success(
+  //       "Added the inlang Visual Studio Code extension (Sherlock) to the workspace recommendations.",
+  //     );
+  //   }
+  // } catch (error) {
+  //   ctx.logger.error(
+  //     "Failed to add the inlang Visual Studio Code extension (Sherlock). Please open an issue",
+  //   );
+  // }
 
   return ctx;
 };

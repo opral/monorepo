@@ -3,7 +3,7 @@ import { jsIdentifier } from "../services/codegen/identifier.js";
 import { createRuntime } from "./runtime.js";
 import { createRegistry, DEFAULT_REGISTRY } from "./registry.js";
 import { lookup } from "~/services/lookup.js";
-import { type BundleNested, type ProjectSettings } from "@inlang/sdk2";
+import { type BundleNested, type ProjectSettings } from "@inlang/sdk";
 import * as prettier from "prettier";
 import { escapeForSingleQuoteString } from "~/services/codegen/escape.js";
 

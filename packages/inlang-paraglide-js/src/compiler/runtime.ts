@@ -1,10 +1,10 @@
-import type { ProjectSettings } from "@inlang/sdk2";
+import type { ProjectSettings } from "@inlang/sdk";
 
 /**
  * Returns the code for the `runtime.js` module
  */
 export function createRuntime(
-  args: Pick<ProjectSettings, "baseLocale" | "locales">,
+  args: Pick<ProjectSettings, "baseLocale" | "locales">
 ): string {
   return `/* eslint-disable */
 /** @type {((locale: AvailableLocale) => void) | undefined} */ 

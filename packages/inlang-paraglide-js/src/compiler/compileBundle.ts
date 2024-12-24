@@ -1,4 +1,4 @@
-import type { Bundle, BundleNested, Message } from "@inlang/sdk2";
+import type { Bundle, BundleNested, Message } from "@inlang/sdk";
 import { compileMessage } from "./compileMessage.js";
 import type { Registry } from "./registry.js";
 import { jsIdentifier } from "~/services/codegen/identifier.js";
@@ -35,11 +35,11 @@ export const compileBundle = (args: {
       args.bundle.declarations,
       message,
       message.variants,
-      args.registry,
+      args.registry
     );
     // add types to the compiled message function
     const inputs = args.bundle.declarations.filter(
-      (decl) => decl.type === "input-variable",
+      (decl) => decl.type === "input-variable"
     );
     compiledMessage.code = `${jsDocMessageComment({ inputs })}\n${compiledMessage.code}`;
 
@@ -67,7 +67,7 @@ const compileBundleFunction = (args: {
   availableLanguageTags: string[];
 }): Compiled<Bundle> => {
   const inputs = args.bundle.declarations.filter(
-    (decl) => decl.type === "input-variable",
+    (decl) => decl.type === "input-variable"
   );
   const hasInputs = inputs.length > 0;
 
@@ -79,7 +79,7 @@ const ${jsIdentifier(args.bundle.id)} = (inputs ${hasInputs ? "" : "= {}"}, opti
 	${args.availableLanguageTags
     .map(
       (locale) =>
-        `if (locale === "${locale}") return ${jsIdentifier(locale)}.${args.bundle.id}(inputs)`,
+        `if (locale === "${locale}") return ${jsIdentifier(locale)}.${args.bundle.id}(inputs)`
     )
     .join("\n")}
 	return "${args.bundle.id}"

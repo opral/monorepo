@@ -1,4 +1,4 @@
-import { selectBundleNested, type InlangProject } from "@inlang/sdk2";
+import { selectBundleNested, type InlangProject } from "@inlang/sdk";
 import type { CliStep } from "../utils.js";
 import path from "node:path";
 import { compile } from "~/compiler/compile.js";

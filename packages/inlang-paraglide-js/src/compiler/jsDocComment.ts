@@ -1,4 +1,4 @@
-import type { InputVariable } from "@inlang/sdk2";
+import type { InputVariable } from "@inlang/sdk";
 
 export function jsDocBundleComment(args: {
   inputs: InputVariable[];

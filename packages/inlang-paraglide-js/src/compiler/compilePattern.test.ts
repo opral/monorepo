@@ -1,7 +1,7 @@
 import { it, expect } from "vitest";
 import { compilePattern } from "./compilePattern.js";
 import { DEFAULT_REGISTRY } from "./registry.js";
-import type { Pattern } from "@inlang/sdk2";
+import type { Pattern } from "@inlang/sdk";
 
 it("should compile a text only pattern", () => {
   const pattern: Pattern = [{ type: "text", value: "Hello" }];

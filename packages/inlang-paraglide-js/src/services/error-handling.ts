@@ -1,4 +1,4 @@
-import { PluginError } from "@inlang/sdk2";
+import { PluginError } from "@inlang/sdk";
 
 export function classifyProjectErrors(errors: readonly Error[]) {
   const isModuleError = (err: Error): err is PluginError =>
@@ -10,7 +10,7 @@ export function classifyProjectErrors(errors: readonly Error[]) {
     err.plugin.includes("plugin");
   const [fatalModuleErrors, nonFatalModuleErrors] = split(
     moduleErrors,
-    isFatalModuleError,
+    isFatalModuleError
   );
 
   const fatalErrors = [...fatalModuleErrors, ...otherErrors];
@@ -24,7 +24,7 @@ export function classifyProjectErrors(errors: readonly Error[]) {
  */
 export function split<T, U extends T>(
   array: T[],
-  predicate: (value: T) => value is U,
+  predicate: (value: T) => value is U
 ): [U[], T[]] {
   const mask = array.map(predicate);
   const result = array.filter((_, index) => mask[index]) as U[];

@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { Logger } from "~/services/logger/index.js";
 import { runCompiler } from "~/cli/steps/run-compiler.js";
 import { DEFAULT_OUTDIR } from "~/cli/defaults.js";
-import { loadProjectFromDirectory } from "@inlang/sdk2";
+import { loadProjectFromDirectory } from "@inlang/sdk";
 
 export const compileCommand = new Command()
   .name("compile")

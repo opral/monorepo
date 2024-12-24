@@ -7,7 +7,7 @@ import {
   Pattern,
   ProjectSettings,
   VariableReference,
-} from "@inlang/sdk2";
+} from "@inlang/sdk";
 import { compile } from "./compile.js";
 import { rollup as _rollup } from "rollup";
 import virtual from "@rollup/plugin-virtual";
