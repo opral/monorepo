@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { fromMessageV1 } from "./fromMessageV1.js";
-import { Value } from "@sinclair/typebox/value";
+import { Value } from "@sinclair/typebox/value/index.js";
 import { MessageV1 } from "./schemaV1.js";
 import type { BundleNested } from "../../database/schema.js";
 

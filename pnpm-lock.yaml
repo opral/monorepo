@@ -121,7 +121,7 @@ importers:
         specifier: ^2.1.3
         version: 2.1.3(@types/node@22.10.1)(@vitest/browser@2.1.3)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.6.3))(terser@5.36.0)
 
-  packages/inlang-paraglide-js:
+  packages/inlang/paraglide-js:
     dependencies:
       commander:
         specifier: 11.1.0
@@ -147,7 +147,7 @@ importers:
         version: 9.15.0
       '@inlang/sdk':
         specifier: workspace:*
-        version: link:../inlang-sdk
+        version: link:../sdk
       '@rollup/plugin-virtual':
         specifier: 3.0.1
         version: 3.0.1(rollup@3.29.1)
@@ -179,7 +179,7 @@ importers:
         specifier: 2.0.5
         version: 2.0.5(@types/node@20.16.13)(jsdom@25.0.1)(lightningcss@1.27.0)(terser@5.36.0)
 
-  packages/inlang-paraglide-js/examples/cli:
+  packages/inlang/paraglide-js/examples/cli:
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
@@ -191,11 +191,11 @@ importers:
         specifier: ^2.0.5
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.7.2))(terser@5.36.0)
 
-  packages/inlang-sdk:
+  packages/inlang/sdk:
     dependencies:
       '@lix-js/sdk':
         specifier: workspace:*
-        version: link:../lix-sdk
+        version: link:../../lix-sdk
       '@sentry/browser':
         specifier: ^7.118.0
         version: 7.120.2
@@ -216,7 +216,7 @@ importers:
         version: 7.8.1
       sqlite-wasm-kysely:
         specifier: workspace:*
-        version: link:../sqlite-wasm-kysely
+        version: link:../../sqlite-wasm-kysely
       uuid:
         specifier: ^10.0.0
         version: 10.0.0
@@ -235,7 +235,7 @@ importers:
         version: 10.0.0
       '@vitest/coverage-v8':
         specifier: ^2.0.5
-        version: 2.1.3(vitest@2.1.8(@types/node@22.10.1)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.7.2))(terser@5.36.0))
+        version: 2.0.5(vitest@2.1.8(@types/node@22.10.1)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.7.2))(terser@5.36.0))
       eslint:
         specifier: ^9.12.0
         version: 9.15.0(jiti@2.3.3)
@@ -10731,6 +10731,24 @@ snapshots:
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
       vitest: 2.1.3(@types/node@22.10.1)(@vitest/browser@2.1.3)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.7.2))(terser@5.36.0)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitest/coverage-v8@2.0.5(vitest@2.1.8(@types/node@22.10.1)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.7.2))(terser@5.36.0))':
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@bcoe/v8-coverage': 0.2.3
+      debug: 4.3.7(supports-color@9.4.0)
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 5.0.6
+      istanbul-reports: 3.1.7
+      magic-string: 0.30.12
+      magicast: 0.3.5
+      std-env: 3.8.0
+      test-exclude: 7.0.1
+      tinyrainbow: 1.2.0
+      vitest: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.7.2))(terser@5.36.0)
     transitivePeerDependencies:
       - supports-color
 
