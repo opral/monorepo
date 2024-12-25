@@ -1,8 +1,8 @@
 import type { Declaration, Message, Variant } from "@inlang/sdk";
 import type { Registry } from "./registry.js";
 import { compilePattern } from "./compilePattern.js";
-import { doubleQuote } from "~/services/codegen/quotes.js";
 import type { Compiled } from "./types.js";
+import { doubleQuote } from "../services/codegen/quotes.js";
 
 /**
  * Returns the compiled message as a string
