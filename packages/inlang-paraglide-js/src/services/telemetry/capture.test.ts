@@ -1,6 +1,5 @@
 import { expect, test, vi } from "vitest";
 import { capture } from "./capture.js";
-import type { ENV_VARIABLES } from "../env-variables/index.js";
 
 test("it should not capture if telemetry is off", async () => {
 	// @ts-expect-error - global.fetch is not defined
@@ -10,7 +9,7 @@ test("it should not capture if telemetry is off", async () => {
 		return {
 			ENV_VARIABLES: {
 				PARJS_POSTHOG_TOKEN: "mock-defined",
-			} satisfies Partial<typeof ENV_VARIABLES>,
+			},
 		};
 	});
 
@@ -33,7 +32,7 @@ test("it should not capture if telemetry is NOT off", async () => {
 		return {
 			ENV_VARIABLES: {
 				PARJS_POSTHOG_TOKEN: "mock-defined",
-			} satisfies Partial<typeof ENV_VARIABLES>,
+			},
 		};
 	});
 

@@ -1,6 +1,6 @@
-import type { Logger } from "~/services/logger/index.js";
+import type { Logger } from "../../services/logger/index.js";
 import type { CliStep } from "../utils.js";
-import { prompt } from "~/cli/utils.js";
+import { prompt } from "../utils.js";
 import childProcess from "node:child_process";
 
 export const checkForUncommittedChanges: CliStep<

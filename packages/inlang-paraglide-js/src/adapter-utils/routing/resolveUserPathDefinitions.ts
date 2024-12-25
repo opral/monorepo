@@ -1,4 +1,4 @@
-import type { MessageIndexFunction } from "~/index.js";
+import type { MessageIndexFunction } from "../../index.js";
 import type { PathDefinitionTranslations } from "./routeDefinitions.js";
 
 /**

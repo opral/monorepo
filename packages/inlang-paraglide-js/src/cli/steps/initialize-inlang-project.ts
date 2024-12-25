@@ -1,13 +1,13 @@
 import { loadProjectFromDirectory, type InlangProject } from "@inlang/sdk";
-import type { Logger } from "~/services/logger/index.js";
+import type { Logger } from "../../services/logger/index.js";
 import type { CliStep } from "../utils.js";
-import { prompt } from "~/cli/utils.js";
-import { DEFAULT_PROJECT_PATH, getNewProjectTemplate } from "~/cli/defaults.js";
+import { prompt } from "../utils.js";
+import { DEFAULT_PROJECT_PATH, getNewProjectTemplate } from "../defaults.js";
 import nodePath from "node:path";
 import consola from "consola";
 import fg from "fast-glob";
 import fs from "node:fs";
-import { ENV_VARIABLES } from "~/services/env-variables/index.js";
+import { ENV_VARIABLES } from "../../services/env-variables/index.js";
 
 export const initializeInlangProject: CliStep<
 	{

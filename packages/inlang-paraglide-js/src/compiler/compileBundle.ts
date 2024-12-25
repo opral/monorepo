@@ -1,9 +1,9 @@
 import type { Bundle, BundleNested, Message } from "@inlang/sdk";
 import { compileMessage } from "./compileMessage.js";
 import type { Registry } from "./registry.js";
-import { jsIdentifier } from "~/services/codegen/identifier.js";
-import { isValidJSIdentifier } from "~/services/valid-js-identifier/index.js";
-import { escapeForDoubleQuoteString } from "~/services/codegen/escape.js";
+import { jsIdentifier } from "../services/codegen/identifier.js";
+import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js";
+import { escapeForDoubleQuoteString } from "../services/codegen/escape.js";
 import type { Compiled } from "./types.js";
 import { jsDocBundleComment, jsDocMessageComment } from "./jsDocComment.js";
 
