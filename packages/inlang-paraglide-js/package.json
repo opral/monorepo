@@ -12,26 +12,6 @@
 		"type": "git",
 		"url": "https://github.com/opral/inlang-paraglide-js"
 	},
-	"keywords": [
-		"paraglide",
-		"javascript i18n",
-		"i18n",
-		"l10n",
-		"translation",
-		"internationalization",
-		"svelte",
-		"localization",
-		"lint",
-		"react",
-		"vue",
-		"angular",
-		"nextjs",
-		"next i18n",
-		"astro",
-		"astro i18n",
-		"solid",
-		"solidstart"
-	],
 	"bin": {
 		"paraglide-js": "./bin/run.js"
 	},
@@ -93,5 +73,25 @@
 			"import": "./dist/adapter-utils/index.js",
 			"types": "./dist/adapter-utils/index.d.ts"
 		}
-	}
+	},
+	"keywords": [
+		"paraglide",
+		"javascript i18n",
+		"i18n",
+		"l10n",
+		"translation",
+		"internationalization",
+		"svelte",
+		"localization",
+		"lint",
+		"react",
+		"vue",
+		"angular",
+		"nextjs",
+		"next i18n",
+		"astro",
+		"astro i18n",
+		"solid",
+		"solidstart"
+	]
 }
