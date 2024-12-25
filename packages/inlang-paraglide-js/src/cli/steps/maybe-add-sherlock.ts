@@ -1,9 +1,9 @@
-import type { Logger } from "~/services/logger/index.js";
-import { prompt } from "~/cli/utils.js";
+import type { Logger } from "../../services/logger/index.js";
+import { prompt } from "../utils.js";
 import type { CliStep } from "../utils.js";
 import type { InlangProject } from "@inlang/sdk";
 // import * as Sherlock from "@inlang/recommend-sherlock";
-import type { NodeishFilesystem } from "~/services/file-handling/types.js";
+import type { NodeishFilesystem } from "../../services/file-handling/types.js";
 
 export const maybeAddSherlock: CliStep<
 	{

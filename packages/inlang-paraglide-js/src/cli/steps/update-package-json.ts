@@ -1,7 +1,7 @@
-import type { Logger } from "~/services/logger/index.js";
+import type { Logger } from "../../services/logger/index.js";
 import type { CliStep } from "../utils.js";
-import type { NodeishFilesystem } from "~/services/file-handling/types.js";
-import { detectJsonFormatting } from "~/utilities/detect-json-formatting.js";
+import type { NodeishFilesystem } from "../../services/file-handling/types.js";
+import { detectJsonFormatting } from "../../utilities/detect-json-formatting.js";
 
 export function updatePackageJson(opt: {
 	dependencies?: (

@@ -1,8 +1,8 @@
 import { selectBundleNested, type InlangProject } from "@inlang/sdk";
 import type { CliStep } from "../utils.js";
 import path from "node:path";
-import { compile } from "~/compiler/compile.js";
-import { writeOutput } from "~/services/file-handling/write-output.js";
+import { compile } from "../../compiler/compile.js";
+import { writeOutput } from "../../services/file-handling/write-output.js";
 import fs from "node:fs";
 
 export const runCompiler: CliStep<

@@ -1,19 +1,19 @@
 import { Command } from "commander";
 import consola from "consola";
 import * as nodePath from "node:path";
-import { Logger } from "~/services/logger/index.js";
-import { findPackageJson } from "~/services/environment/package.js";
-import { checkForUncommittedChanges } from "~/cli/steps/check-for-uncomitted-changes.js";
-import { initializeInlangProject } from "~/cli/steps/initialize-inlang-project.js";
-import { maybeAddSherlock } from "~/cli/steps/maybe-add-sherlock.js";
-import { maybeChangeTsConfig } from "~/cli/steps/update-ts-config.js";
-import { promptForOutdir } from "~/cli/steps/prompt-for-outdir.js";
-import { updatePackageJson } from "~/cli/steps/update-package-json.js";
-import { runCompiler } from "~/cli/steps/run-compiler.js";
+import { Logger } from "../../../services/logger/index.js";
+import { findPackageJson } from "../../../services/environment/package.js";
+import { checkForUncommittedChanges } from "../../steps/check-for-uncomitted-changes.js";
+import { initializeInlangProject } from "../../steps/initialize-inlang-project.js";
+import { maybeAddSherlock } from "../../steps/maybe-add-sherlock.js";
+import { maybeChangeTsConfig } from "../../steps/update-ts-config.js";
+import { promptForOutdir } from "../../steps/prompt-for-outdir.js";
+import { updatePackageJson } from "../../steps/update-package-json.js";
+import { runCompiler } from "../../steps/run-compiler.js";
 import type { CliStep } from "../../utils.js";
 import nodeFs from "node:fs";
-import type { NodeishFilesystem } from "~/services/file-handling/types.js";
-import { ENV_VARIABLES } from "~/services/env-variables/index.js";
+import type { NodeishFilesystem } from "../../../services/file-handling/types.js";
+import { ENV_VARIABLES } from "../../../services/env-variables/index.js";
 
 export const initCommand = new Command()
 	.name("init")

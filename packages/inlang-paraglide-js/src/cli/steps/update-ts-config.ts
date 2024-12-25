@@ -1,10 +1,10 @@
 import type { CliStep } from "../utils.js";
-import type { Logger } from "~/services/logger/index.js";
-import { prompt } from "~/cli/utils.js";
+import type { Logger } from "../../services/logger/index.js";
+import { prompt } from "../utils.js";
 import JSON5 from "json5";
-import { pathExists } from "~/services/file-handling/exists.js";
+import { pathExists } from "../../services/file-handling/exists.js";
 import nodePath from "node:path";
-import type { NodeishFilesystem } from "~/services/file-handling/types.js";
+import type { NodeishFilesystem } from "../../services/file-handling/types.js";
 
 export const maybeChangeTsConfig: CliStep<
 	{ fs: NodeishFilesystem; logger: Logger },

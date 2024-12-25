@@ -1,11 +1,11 @@
 import { Command } from "commander";
 import fs from "node:fs";
 import { resolve } from "node:path";
-import { Logger } from "~/services/logger/index.js";
-import { runCompiler } from "~/cli/steps/run-compiler.js";
-import { DEFAULT_OUTDIR } from "~/cli/defaults.js";
+import { Logger } from "../../../services/logger/index.js";
+import { runCompiler } from "../../../cli/steps/run-compiler.js";
+import { DEFAULT_OUTDIR } from "../../../cli/defaults.js";
 import { loadProjectFromDirectory } from "@inlang/sdk";
-import { ENV_VARIABLES } from "~/services/env-variables/index.js";
+import { ENV_VARIABLES } from "../../../services/env-variables/index.js";
 
 export const compileCommand = new Command()
 	.name("compile")
