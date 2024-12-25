@@ -1,7 +1,6 @@
 import { Command } from "commander";
 import consola from "consola";
 import * as nodePath from "node:path";
-import { telemetry } from "~/services/telemetry/implementation.js";
 import { Logger } from "~/services/logger/index.js";
 import { findPackageJson } from "~/services/environment/package.js";
 import { checkForUncommittedChanges } from "~/cli/steps/check-for-uncomitted-changes.js";
@@ -14,6 +13,7 @@ import { runCompiler } from "~/cli/steps/run-compiler.js";
 import type { CliStep } from "../../utils.js";
 import nodeFs from "node:fs";
 import type { NodeishFilesystem } from "~/services/file-handling/types.js";
+import { ENV_VARIABLES } from "~/services/env-variables/index.js";
 
 export const initCommand = new Command()
 	.name("init")
@@ -22,37 +22,23 @@ export const initCommand = new Command()
 		const logger = new Logger({ silent: false, prefix: false });
 
 		logger.box("Welcome to inlang Paraglide-JS 🪂");
-		telemetry.capture({
-			event: "PARAGLIDE-JS init started",
-			properties: { version: PARJS_PACKAGE_VERSION },
-		});
 
 		const ctx = {
 			logger,
 			fs: nodeFs.promises,
 			syncFs: nodeFs,
 			root: process.cwd(),
-			appId: PARJS_MARKTEPLACE_ID,
 		} as const;
 
 		const ctx1 = await checkForUncommittedChanges(ctx);
 		const ctx2 = await enforcePackageJsonExists(ctx1);
 		const ctx3 = await initializeInlangProject(ctx2);
 		const ctx4 = await promptForOutdir(ctx3);
-		telemetry.capture({
-			event: "PARAGLIDE-JS init project initialized",
-			properties: { version: PARJS_PACKAGE_VERSION },
-		});
+
 		const ctx5 = await addParaglideJsToDevDependencies(ctx4);
-		telemetry.capture({
-			event: "PARAGLIDE-JS init added to devDependencies",
-			properties: { version: PARJS_PACKAGE_VERSION },
-		});
+
 		const ctx6 = await addCompileStepToPackageJSON(ctx5);
-		telemetry.capture({
-			event: "PARAGLIDE-JS init added compile commands",
-			properties: { version: PARJS_PACKAGE_VERSION },
-		});
+
 		const ctx7 = await maybeChangeTsConfig(ctx6);
 		const ctx8 = await maybeAddSherlock(ctx7);
 
@@ -64,11 +50,6 @@ export const initCommand = new Command()
 				"Failed to compile project automatically. You will need to run the compiler manually"
 			);
 		}
-
-		telemetry.capture({
-			event: "PARAGLIDE-JS init finished",
-			properties: { version: PARJS_PACKAGE_VERSION },
-		});
 
 		const absoluteSettingsPath = nodePath.resolve(
 			ctx8.projectPath,
@@ -105,7 +86,7 @@ export const addParaglideJsToDevDependencies: CliStep<
 	const ctx1 = await updatePackageJson({
 		devDependencies: async (devDeps) => ({
 			...devDeps,
-			"@inlang/paraglide-js": PARJS_PACKAGE_VERSION,
+			"@inlang/paraglide-js": ENV_VARIABLES.PARJS_PACKAGE_VERSION,
 		}),
 	})(ctx);
 	ctx.logger.success(

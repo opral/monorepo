@@ -3,7 +3,7 @@
  *
  * Exists to avoid typos/always set the correct event name and properties.
  */
-export type TelemetryEvents =
+export type TelemetryEvent =
 	| "PARAGLIDE-JS compile executed"
 	| "PARAGLIDE-JS init started"
 	| "PARAGLIDE-JS init project initialized"

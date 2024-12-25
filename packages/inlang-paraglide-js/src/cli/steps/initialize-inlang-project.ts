@@ -7,6 +7,7 @@ import nodePath from "node:path";
 import consola from "consola";
 import fg from "fast-glob";
 import fs from "node:fs";
+import { ENV_VARIABLES } from "~/services/env-variables/index.js";
 
 export const initializeInlangProject: CliStep<
 	{
@@ -14,7 +15,6 @@ export const initializeInlangProject: CliStep<
 		syncFs: typeof fs;
 		logger: Logger;
 		root: string;
-		appId: string;
 	},
 	{
 		project: InlangProject;
@@ -30,7 +30,6 @@ export const initializeInlangProject: CliStep<
 			fs: ctx.fs,
 			syncFs: fs,
 			logger: ctx.logger,
-			appId: ctx.appId,
 		});
 
 		return {
@@ -54,7 +53,6 @@ export const existingProjectFlow = async (ctx: {
 	fs: typeof fs.promises;
 	syncFs: typeof fs;
 	logger: Logger;
-	appId: string;
 }): Promise<{ project: InlangProject; projectPath: string }> => {
 	const NEW_PROJECT_VALUE = "newProject";
 
@@ -84,7 +82,7 @@ export const existingProjectFlow = async (ctx: {
 	const project = await loadProjectFromDirectory({
 		path: projectPath,
 		fs: ctx.syncFs,
-		// appId: ctx.appId,
+		appId: ENV_VARIABLES.PARJS_APP_ID,
 	});
 
 	if ((await project.errors.get()).length > 0) {
@@ -165,7 +163,6 @@ export const createNewProjectFlow = async (ctx: {
 	fs: typeof fs.promises;
 	syncFs: typeof fs;
 	logger: Logger;
-	appId: string;
 }): Promise<{
 	project: InlangProject;
 	/** An absolute path to the created project */
@@ -223,7 +220,7 @@ export const createNewProjectFlow = async (ctx: {
 	const project = await loadProjectFromDirectory({
 		path: projectPath,
 		fs: ctx.syncFs,
-		appId: ctx.appId,
+		appId: ENV_VARIABLES.PARJS_APP_ID,
 	});
 
 	if ((await project.errors.get()).length > 0) {

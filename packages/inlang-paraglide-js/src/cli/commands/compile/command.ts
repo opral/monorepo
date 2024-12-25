@@ -5,6 +5,7 @@ import { Logger } from "~/services/logger/index.js";
 import { runCompiler } from "~/cli/steps/run-compiler.js";
 import { DEFAULT_OUTDIR } from "~/cli/defaults.js";
 import { loadProjectFromDirectory } from "@inlang/sdk";
+import { ENV_VARIABLES } from "~/services/env-variables/index.js";
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -31,7 +32,11 @@ export const compileCommand = new Command()
 
 			logger.info(`Compiling inlang project at "${options.project}".`);
 
-			const project = await loadProjectFromDirectory({ path, fs });
+			const project = await loadProjectFromDirectory({
+				path,
+				fs,
+				appId: ENV_VARIABLES.PARJS_APP_ID,
+			});
 
 			await runCompiler({
 				project,
