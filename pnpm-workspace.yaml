@@ -1,4 +1,5 @@
 packages:
   - 'packages/*'
-  - 'packages/lix-sdk/examples/*'
+  - 'packages/*/example'
+  - 'packages/*/examples/*'
   
