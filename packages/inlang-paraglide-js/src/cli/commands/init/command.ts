@@ -1,6 +1,5 @@
 import { Command } from "commander";
 import consola from "consola";
-import dedent from "dedent";
 import * as nodePath from "node:path";
 import { telemetry } from "~/services/telemetry/implementation.js";
 import { Logger } from "~/services/logger/index.js";
@@ -80,15 +79,18 @@ export const initCommand = new Command()
 			"."
 		);
 
-		const successMessage = dedent`inlang Paraglide-JS has been set up sucessfully.
-			
-			1. Run your install command (npm i, yarn install, etc)
-			2. Register all your languages in ${relativeSettingsFilePath}
-			3. Run the build script (npm run build, or similar.)
-			4. Done :) Happy paragliding 🪂
-			
-			For questions and feedback, visit 
-			https://github.com/opral/monorepo/discussions`;
+		const successMessage = [
+			`inlang Paraglide-JS has been set up sucessfully.`,
+			"\n",
+			`1. Run your install command (npm i, yarn install, etc)`,
+			`2. Register all your languages in ${relativeSettingsFilePath}`,
+			`3. Run the build script (npm run build, or similar.)`,
+			`4. Done :) Happy paragliding 🪂`,
+			"\n",
+			"\n",
+			`For questions and feedback, visit`,
+			`https://github.com/opral/inlang-paraglide-js/issues`,
+		].join("\n");
 		ctx.logger.box(successMessage);
 	});
 

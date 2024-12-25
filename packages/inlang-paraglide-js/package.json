@@ -56,7 +56,6 @@
 	"dependencies": {
 		"commander": "11.1.0",
 		"consola": "3.2.3",
-		"dedent": "1.5.1",
 		"fast-glob": "^3.2.12",
 		"json5": "2.2.3",
 		"posthog-node": "^4.0.1",

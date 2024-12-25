@@ -5,7 +5,6 @@ import { prompt } from "~/cli/utils.js";
 import { DEFAULT_PROJECT_PATH, getNewProjectTemplate } from "~/cli/defaults.js";
 import nodePath from "node:path";
 import consola from "consola";
-import dedent from "dedent";
 import fg from "fast-glob";
 import fs from "node:fs";
 
@@ -195,10 +194,13 @@ export const createNewProjectFlow = async (ctx: {
 			const languageFile = nodePath.resolve(messageDir, languageTag + ".json");
 			await ctx.fs.writeFile(
 				languageFile,
-				dedent`
-                    {
-                        "$schema": "https://inlang.com/schema/inlang-message-format"
-                    }`
+				JSON.stringify(
+					{
+						$schema: "https://inlang.com/schema/inlang-message-format",
+					},
+					null,
+					2
+				)
 			);
 		})
 	);

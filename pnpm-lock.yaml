@@ -129,9 +129,6 @@ importers:
       consola:
         specifier: 3.2.3
         version: 3.2.3
-      dedent:
-        specifier: 1.5.1
-        version: 1.5.1
       fast-glob:
         specifier: ^3.2.12
         version: 3.3.2
