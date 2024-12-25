@@ -179,6 +179,18 @@ importers:
         specifier: 2.0.5
         version: 2.0.5(@types/node@20.16.13)(jsdom@25.0.1)(lightningcss@1.27.0)(terser@5.36.0)
 
+  packages/inlang-paraglide-js/examples/cli:
+    devDependencies:
+      '@inlang/paraglide-js':
+        specifier: workspace:*
+        version: link:../..
+      typescript:
+        specifier: ^5.5.2
+        version: 5.7.2
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.4.11(typescript@5.7.2))(terser@5.36.0)
+
   packages/inlang-sdk:
     dependencies:
       '@lix-js/sdk':
@@ -540,7 +552,7 @@ importers:
         version: 22.10.1
       prettier:
         specifier: ^3.3.3
-        version: 3.3.3
+        version: 3.4.2
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
