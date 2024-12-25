@@ -9,6 +9,5 @@ export type TelemetryEvents =
 	| "PARAGLIDE-JS init project initialized"
 	| "PARAGLIDE-JS init added to devDependencies"
 	| "PARAGLIDE-JS init added compile commands"
-	| "PARAGLIDE JS init added Ninja"
 	| "PARAGLIDE JS init added Sherlock"
 	| "PARAGLIDE-JS init finished";
