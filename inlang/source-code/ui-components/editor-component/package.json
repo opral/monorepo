@@ -1,0 +1,56 @@
+{
+  "name": "@inlang/editor-component",
+  "type": "module",
+  "version": "0.0.1",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "",
+  "exports": {
+    ".": "./dist/index.js",
+    "./bundled": "./dist/bundled/index.js"
+  },
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc && rollup --config rollup.config.js",
+    "test": "tsc --noEmit && vitest run --passWithNoTests",
+    "format": "prettier --write **/*.ts",
+    "storybook": "storybook dev -p 6006"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@opral/tsconfig": "workspace:*",
+    "@nx/storybook": "^18.0.4",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-replace": "^5.0.5",
+    "@storybook/addon-essentials": "^7.6.16",
+    "@storybook/addon-links": "^7.6.16",
+    "@storybook/blocks": "^7.6.16",
+    "@storybook/preview-api": "^8.2.9",
+    "@storybook/web-components": "^7.6.16",
+    "@storybook/web-components-vite": "^7.6.16",
+    "@types/chroma-js": "^2.4.4",
+    "lit": "^3.1.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rollup": "3.29.1",
+    "storybook": "^7.6.16",
+    "typescript": "^5.5.4",
+    "vitest": "2.1.8"
+  },
+  "peerDependencies": {
+    "@inlang/sdk": "workspace:*"
+  },
+  "dependencies": {
+    "@lexical/plain-text": "^0.16.1",
+    "@lexical/utils": "^0.16.1",
+    "@lit/task": "^1.0.0",
+    "@shoelace-style/shoelace": "2.14.0",
+    "@sinclair/typebox": "0.31.28",
+    "chroma-js": "^2.4.2",
+    "lexical": "^0.16.1"
+  }
+}
