@@ -5,7 +5,7 @@ import type {
   Message,
   Pattern,
   Variant,
-} from "@inlang/sdk2";
+} from "@inlang/sdk";
 import { type plugin } from "../plugin.js";
 import { unflatten } from "flat";
 

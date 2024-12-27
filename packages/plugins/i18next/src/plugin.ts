@@ -1,4 +1,4 @@
-import type { InlangPlugin } from "@inlang/sdk2";
+import type { InlangPlugin } from "@inlang/sdk";
 import type { PluginSettings } from "./settings.js";
 import { config } from "./ideExtension/config.js";
 import { pluginV4 } from "./legacy/plugin.v4.js";
@@ -13,9 +13,9 @@ export const plugin: InlangPlugin<{
 }> = {
   id: pluginV4.id,
   key: PLUGIN_KEY,
-  addCustomApi: pluginV4.addCustomApi,
-  loadMessages: pluginV4.loadMessages,
-  saveMessages: pluginV4.saveMessages,
+  // addCustomApi: pluginV4.addCustomApi,
+  // loadMessages: pluginV4.loadMessages,
+  // saveMessages: pluginV4.saveMessages,
   importFiles,
   exportFiles,
   toBeImportedFiles,

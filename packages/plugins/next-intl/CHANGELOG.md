@@ -1,5 +1,11 @@
 # @inlang/plugin-next-intl
 
+## 1.4.0
+
+### Minor Changes
+
+- default to `{}` single brackets
+
 ## 1.3.49
 
 ### Patch Changes

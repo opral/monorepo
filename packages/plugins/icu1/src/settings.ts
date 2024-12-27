@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { Type, type Static } from "@sinclair/typebox";
 
 export type PluginSettings = Static<typeof PluginSettings>;

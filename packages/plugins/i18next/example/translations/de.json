@@ -1,0 +1,16 @@
+{
+  "key": "Wert",
+  "keyNesting": "verwende $t(keyDeep.inner)",
+  "keyInterpolate": "ersetze dies {{value}}",
+  "keyInterpolateUnescaped": "ersetze dies {{- value}}",
+  "keyContext_male": "die männliche Variante",
+  "keyContext_female": "die weibliche Variante",
+  "keyPluralSimple_one": "das Singular",
+  "keyPluralSimple_other": "das Plural",
+  "keyPluralMultipleEgArabic_zero": "die Pluralform 0",
+  "keyPluralMultipleEgArabic_one": "die Pluralform 1",
+  "keyPluralMultipleEgArabic_two": "die Pluralform 2",
+  "keyPluralMultipleEgArabic_few": "die Pluralform 3",
+  "keyPluralMultipleEgArabic_many": "die Pluralform 4",
+  "keyPluralMultipleEgArabic_other": "die Pluralform 5"
+}

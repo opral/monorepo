@@ -8,7 +8,7 @@ import type {
   Declaration,
   VariableReference,
   Message,
-} from "@inlang/sdk2";
+} from "@inlang/sdk";
 import { type plugin } from "../plugin.js";
 
 export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({

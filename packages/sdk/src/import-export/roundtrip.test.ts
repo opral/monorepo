@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from "vitest";
 import type {
 	BundleImport,
@@ -8,10 +7,10 @@ import type {
 } from "../plugin/schema.js";
 import type { Message } from "../database/schema.js";
 import type { Text } from "../json-schema/pattern.js";
-import { exportFiles } from "./index.js";
 import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
 import { newProject } from "../project/newProject.js";
 import { importFiles } from "./importFiles.js";
+import { exportFiles } from "./exportFiles.js";
 
 test("the file should be identical after a roundtrip if no modifications occured", async () => {
 	const project = await loadProjectInMemory({

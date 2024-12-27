@@ -8,11 +8,11 @@ import { type PreprocessPluginBeforeImportFunction } from "../plugin/importPlugi
 import type { InlangProject } from "./api.js";
 import { createProjectState } from "./state/state.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
-import { exportFiles } from "../import-export/index.js";
 import { v4 } from "uuid";
 import { initErrorReporting } from "../services/error-reporting/index.js";
 import { maybeCaptureLoadedProject } from "./maybeCaptureTelemetry.js";
 import { importFiles } from "../import-export/importFiles.js";
+import { exportFiles } from "../import-export/exportFiles.js";
 
 /**
  * Common load project logic.

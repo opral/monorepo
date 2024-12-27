@@ -9,7 +9,7 @@ import type { PluginSettings } from "../settings.js";
 import { FileSchema } from "../fileSchema.js";
 import { Value } from "@sinclair/typebox/value";
 import { Volume } from "memfs";
-import { createMessageV1 as createMessage } from "@inlang/sdk2";
+import { createMessageV1 as createMessage } from "@inlang/sdk";
 
 beforeEach(() => {
   // clear plugin state between tests

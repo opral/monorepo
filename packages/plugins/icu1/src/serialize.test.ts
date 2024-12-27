@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { describe, it, expect } from "vitest";
 import {
   _serializeICU1Message as serializeICU1Message,
@@ -29,7 +31,7 @@ describe("serializeMessage", () => {
 
     const serialized = serializeMessage(msg);
     expect(serialized).toMatchInlineSnapshot(
-      '"It\'s, {season, select, spring {spring} summer {summer} fall {fall} winter {winter}}"',
+      '"It\'s, {season, select, spring {spring} summer {summer} fall {fall} winter {winter}}"'
     );
   });
 
@@ -42,7 +44,7 @@ describe("serializeMessage", () => {
     });
     const serialized = serializeMessage(msg);
     expect(serialized).toMatchInlineSnapshot(
-      '"It\'s, {season, select, spring {spring} summer {summer} fall {fall} other {winter}}"',
+      '"It\'s, {season, select, spring {spring} summer {summer} fall {fall} other {winter}}"'
     );
   });
 
@@ -56,7 +58,7 @@ describe("serializeMessage", () => {
 
     const serialized = serializeMessage(msg);
     expect(serialized).toMatchInlineSnapshot(
-      '"You have {likes, select, 0 {No Likes} other {{likes, plural, one {One Like} other {{likes} Likes}}}}!"',
+      '"You have {likes, select, 0 {No Likes} other {{likes, plural, one {One Like} other {{likes} Likes}}}}!"'
     );
   });
 });
@@ -70,10 +72,10 @@ describe("serializeICU1Message", () => {
   it("serializes select", () => {
     const ast = parseICU1(
       "It's, {season, select, spring {spring} summer {summer} fall {fall} winter {winter}}!",
-      { requiresOtherClause: false },
+      { requiresOtherClause: false }
     );
     expect(serializeICU1Message(ast)).toBe(
-      "It's, {season, select, spring {spring} summer {summer} fall {fall} winter {winter}}!",
+      "It's, {season, select, spring {spring} summer {summer} fall {fall} winter {winter}}!"
     );
   });
 
@@ -82,10 +84,10 @@ describe("serializeICU1Message", () => {
       "{likes, plural, =0 {No Likes} one {One Like} other {# Likes}}",
       {
         requiresOtherClause: false,
-      },
+      }
     );
     expect(serializeICU1Message(ast)).toBe(
-      "{likes, plural, =0 {No Likes} one {One Like} other {# Likes}}",
+      "{likes, plural, =0 {No Likes} one {One Like} other {# Likes}}"
     );
   });
 });

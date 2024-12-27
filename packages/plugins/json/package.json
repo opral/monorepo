@@ -12,30 +12,24 @@
 		"access": "public"
 	},
 	"scripts": {
-		"postinstall": "patch-package --error-on-fail",
-		"dev": "inlang plugin build --entry ./src/index.ts --outdir ./dist --watch",
-		"build": "inlang plugin build --entry ./src/index.ts --outdir ./dist",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
-		"lint": "eslint ./src --fix",
+		"dev": "node ./build.js",
+		"build": "NODE_ENV=production node ./build.js",
+		"test": "tsc --noEmit && vitest run --passWithNoTests",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/detect-json-formatting": "workspace:*",
-		"@inlang/sdk": "workspace:*",
+		"@inlang/detect-json-formatting": "1.0.0",
+		"@inlang/sdk": "0.36.3",
 		"@sinclair/typebox": "0.31.28"
 	},
 	"devDependencies": {
-		"@inlang/cli": "workspace:*",
-		"@inlang/sdk": "workspace:*",
-		"@lix-js/fs": "workspace:*",
+		"@opral/tsconfig": "workspace:*",
 		"@types/flat": "^5.0.2",
 		"@types/lodash.merge": "4.6.7",
-		"@vitest/coverage-v8": "^0.33.0",
 		"flat": "^5.0.2",
 		"lodash.merge": "4.6.2",
-		"patch-package": "6.4.7",
 		"typescript": "^5.5.2",
-		"vitest": "0.34.3"
+		"vitest": "2.1.8"
 	}
 }

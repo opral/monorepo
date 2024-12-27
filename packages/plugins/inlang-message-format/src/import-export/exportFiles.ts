@@ -5,7 +5,7 @@ import type {
   Match,
   Message,
   Variant,
-} from "@inlang/sdk2";
+} from "@inlang/sdk";
 import { type plugin } from "../plugin.js";
 import type { FileSchema } from "../fileSchema.js";
 
