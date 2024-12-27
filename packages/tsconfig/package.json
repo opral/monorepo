@@ -1,0 +1,10 @@
+{
+  "name": "@opral/tsconfig",
+  "version": "1.0.0",
+  "files": [
+    "tsconfig.default.json"
+  ],
+  "exports": {
+    "./default": "./tsconfig.default.json"
+  }
+}

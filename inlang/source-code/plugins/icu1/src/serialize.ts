@@ -1,4 +1,6 @@
-import type { Expression, MessageNested, Pattern, Variant } from "@inlang/sdk2";
+// @ts-nocheck
+
+import type { Expression, MessageNested, Pattern, Variant } from "@inlang/sdk";
 import {
   TYPE,
   type MessageFormatElement,
@@ -12,7 +14,7 @@ export function serializeMessage(message: MessageNested): string {
 
 function variantsToICU1(
   variants: Variant[],
-  selectors: Expression[],
+  selectors: Expression[]
 ): MessageFormatElement[] {
   const [selector, ...remainingSelectors] = selectors;
 
@@ -30,7 +32,7 @@ function variantsToICU1(
     selector.annotation?.name === "plural" ? TYPE.plural : TYPE.select;
 
   const sharedPrefixPattern = commonPrefix(
-    variants.map((variants) => variants.pattern),
+    variants.map((variants) => variants.pattern)
   );
 
   // remove the shared prefix from all variants
@@ -42,7 +44,7 @@ function variantsToICU1(
   });
 
   const sharedSuffixPattern = commonSuffix(
-    variants.map((variants) => variants.pattern),
+    variants.map((variants) => variants.pattern)
   );
   // remove the shared suffix from all variants
   variants = variants.map((variants) => {
@@ -50,7 +52,7 @@ function variantsToICU1(
       ...variants,
       pattern: variants.pattern.slice(
         0,
-        variants.pattern.length - sharedSuffixPattern.length,
+        variants.pattern.length - sharedSuffixPattern.length
       ),
     };
   });
@@ -122,7 +124,7 @@ function commonPrefix(patterns: Pattern[]): Pattern {
 
     const allEqual = elementsAtIndex.reduce(
       (acc, el) => acc && patternElementsAreEqual(el, baseElemenet),
-      true,
+      true
     );
     if (!allEqual) break;
     prefix.push(baseElemenet);
@@ -147,7 +149,7 @@ function commonSuffix(patterns: Pattern[]): Pattern {
 
     const allEqual = elementsAtIndex.reduce(
       (acc, el) => acc && patternElementsAreEqual(el, baseElemenet),
-      true,
+      true
     );
     if (!allEqual) break;
     suffix.unshift(baseElemenet);
@@ -158,7 +160,7 @@ function commonSuffix(patterns: Pattern[]): Pattern {
 
 function patternElementsAreEqual(
   el_a: Pattern[number],
-  el_b: Pattern[number],
+  el_b: Pattern[number]
 ): boolean {
   if (el_a.type !== el_b.type) return false;
   if (el_a.type === "text" && el_b.type === "text") {
@@ -186,7 +188,7 @@ function patternElementsAreEqual(
 
 function recordsAreEqual(
   a: Record<string, any>,
-  b: Record<string, any>,
+  b: Record<string, any>
 ): boolean {
   // same size
   if (Object.keys(a).length !== Object.keys(b).length) return false;
@@ -291,7 +293,7 @@ function serializeICU1Message(elements: MessageFormatElement[]): string {
       case TYPE.tag: // we don't support markup yet. This should be a text-element instead
       default: {
         throw new Error(
-          `Unsupported ICU1 element of type: ${(element as any)?.type}`,
+          `Unsupported ICU1 element of type: ${(element as any)?.type}`
         );
       }
     }

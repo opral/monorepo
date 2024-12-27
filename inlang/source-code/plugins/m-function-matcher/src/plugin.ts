@@ -1,15 +1,13 @@
-import { Plugin } from "@inlang/plugin";
-import { displayName, description } from "../marketplace-manifest.json";
 import { PluginSettings } from "./settings.js";
 import { ideExtensionConfig } from "./ideExtension/config.js";
+import type { InlangPlugin } from "@inlang/sdk";
 
-const id = "plugin.inlang.mFunctionMatcher";
+const key = "plugin.inlang.mFunctionMatcher";
 
-export const plugin: Plugin<{
-  [id]: PluginSettings;
+export const plugin: InlangPlugin<{
+	[key]: PluginSettings;
 }> = {
-  id,
-  displayName,
-  description,
-  addCustomApi: () => ideExtensionConfig(),
+	id: key,
+	key,
+	addCustomApi: () => ideExtensionConfig(),
 };

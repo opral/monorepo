@@ -1,8 +1,8 @@
 packages:
+  - 'inlang/source-code/plugins/*'
+  - 'inlang/source-code/paraglide/paraglide-js'
+  - 'inlang/source-code/sdk'
   - 'packages/*'
-  - 'packages/inlang/*'
-  - 'packages/inlang/*/example'
-  - 'packages/inlang/*/examples/*'
   - 'packages/*/example'
   - 'packages/*/examples/*'
   

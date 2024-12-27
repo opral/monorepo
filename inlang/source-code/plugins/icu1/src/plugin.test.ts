@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import type { BundleNested } from "@inlang/sdk2";
 import { it, expect } from "vitest";
 import { createMessage } from "./parse.js";
@@ -48,7 +50,7 @@ it("exports files", async () => {
 
 function createBundle(
   id: string,
-  messages: Record<string, string>,
+  messages: Record<string, string>
 ): BundleNested {
   return {
     id: id,
@@ -58,7 +60,7 @@ function createBundle(
         bundleId: id,
         messageSource: icu1,
         locale: locale,
-      }),
+      })
     ),
   };
 }

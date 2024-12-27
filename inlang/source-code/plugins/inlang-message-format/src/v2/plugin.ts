@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import type { InlangPlugin, Message } from "@inlang/sdk2";
+import type { InlangPlugin, Message } from "@inlang/sdk";
 import type { StorageSchema } from "../fileSchema.js";
 import { PluginSettings } from "../settings.js";
 import { serializeMessage } from "./parsing/serializeMessage.js";

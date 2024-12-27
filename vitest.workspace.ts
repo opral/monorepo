@@ -1,1 +1,1 @@
-export default ["packages/*", "packages/*/inlang/*"];
+export default ["inlang/source-code/plugins/*", "packages/*"];

@@ -1,69 +1,63 @@
 {
 	"name": "@inlang/sdk",
+	"version": "2.0.0-prerelease.0",
 	"type": "module",
-	"version": "0.36.3",
 	"license": "Apache-2.0",
-	"publishConfig": {
-		"access": "public"
-	},
 	"homepage": "https://inlang.com/documentation/sdk",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/opral/inlang-message-sdk"
+		"url": "https://github.com/opral/inlang-sdk"
 	},
 	"exports": {
-		".": "./dist/index.js",
-		"./test-utilities": "./dist/test-utilities/index.js",
-		"./lint": "./dist/lint/index.js",
-		"./messages": "./dist/messages/index.js",
-		"./v2": "./dist/v2/index.js",
-		"./v2-mocks": "./dist/v2/mocks/index.js"
+		".": "./dist/index.js"
 	},
 	"files": [
 		"./dist",
 		"./src"
 	],
+	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
+	"sideEffects": false,
 	"scripts": {
-		"build": "npm run prepare-env-variables && tsc --build",
-		"dev": "npm run prepare-env-variables && tsc --watch",
-		"prepare-env-variables": "node ./src/env-variables/createIndexFile.js",
-		"test": "npm run prepare-env-variables && tsc --noEmit && vitest run --passWithNoTests --coverage",
-		"lint": "eslint ./src --fix",
+		"prepublish": "npm run sentry:sourcemaps",
+		"build": "npm run env-variables && tsc --build",
+		"dev": "npm run env-variables && tsc --watch",
+		"env-variables": "node ./src/services/env-variables/createIndexFile.js",
+		"test": "tsc --noEmit && vitest run",
+		"test:watch": "vitest",
+		"lint": "eslint ./src",
 		"format": "prettier ./src --write",
-		"clean": "rm -rf ./dist ./node_modules"
+		"clean": "rm -rf ./dist ./node_modules",
+		"sentry:sourcemaps": "sentry-cli sourcemaps inject --org opral --project inlang-sdk ./dist && sentry-cli sourcemaps upload --org opral --project inlang-sdk ./dist"
 	},
 	"engines": {
 		"node": ">=18.0.0"
 	},
+	"bundleDependencies": [
+		"@lix-js/sdk",
+		"sqlite-wasm-kysely"
+	],
 	"dependencies": {
-		"@inlang/json-types": "workspace:*",
-		"@inlang/language-tag": "workspace:*",
-		"@inlang/message": "workspace:*",
-		"@inlang/message-lint-rule": "workspace:*",
-		"@inlang/module": "workspace:*",
-		"@inlang/plugin": "workspace:*",
-		"@inlang/project-settings": "workspace:*",
-		"@inlang/result": "workspace:*",
-		"@inlang/translatable": "workspace:*",
-		"@lix-js/client": "workspace:*",
-		"@lix-js/fs": "workspace:*",
+		"@lix-js/sdk": "workspace:*",
+		"@sentry/browser": "^7.118.0",
 		"@sinclair/typebox": "^0.31.17",
-		"debug": "^4.3.4",
 		"dedent": "1.5.1",
-		"deepmerge-ts": "^5.1.0",
-		"murmurhash3js": "^3.0.1",
-		"solid-js": "1.6.12",
-		"throttle-debounce": "^5.0.0"
+		"kysely": "^0.27.4",
+		"rxjs": "7.8.1",
+		"sqlite-wasm-kysely": "workspace:*",
+		"uuid": "^10.0.0",
+		"readdirp": "^4.0.1"
 	},
 	"devDependencies": {
-		"@types/debug": "^4.1.12",
-		"@types/murmurhash3js": "^3.0.7",
-		"@types/throttle-debounce": "5.0.0",
-		"@vitest/coverage-v8": "^0.33.0",
-		"jsdom": "22.1.0",
-		"patch-package": "6.5.1",
-		"tsd": "^0.25.0",
+		"@opral/tsconfig": "workspace:*",
+		"@eslint/js": "^9.12.0",
+		"@sentry/cli": "^2.35.0",
+		"@types/node": "^22.5.1",
+		"@types/uuid": "^10.0.0",
+		"@vitest/coverage-v8": "^2.0.5",
+		"eslint": "^9.12.0",
+		"typescript-eslint": "^8.9.0",
+		"memfs": "4.6.0",
 		"typescript": "^5.5.2",
-		"vitest": "^0.33.0"
+		"vitest": "^2.0.5"
 	}
 }

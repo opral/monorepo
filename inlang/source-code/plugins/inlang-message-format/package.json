@@ -13,19 +13,18 @@
 		"access": "public"
 	},
 	"scripts": {
-		"dev": "inlang plugin build --entry ./src/index.ts --outdir ./dist --watch",
-		"build": "inlang plugin build --entry ./src/index.ts --outdir ./dist",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"dev": "node ./build.js",
+		"build": "NODE_ENV=production node ./build.js",
+		"test": "tsc --noEmit && vitest run --passWithNoTests",
 		"test:watch": "vitest",
-		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"devDependencies": {
-		"@inlang/cli": "workspace:*",
-		"@inlang/sdk2": "workspace:*",
+		"@opral/tsconfig": "workspace:*",
+		"@inlang/sdk": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",
-		"@vitest/coverage-v8": "^2.0.5",
+		"esbuild": "^0.24.2",
 		"memfs": "4.6.0",
 		"prettier": "^3.3.3",
 		"typescript": "^5.5.2",

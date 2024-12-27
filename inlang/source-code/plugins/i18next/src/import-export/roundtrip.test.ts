@@ -6,7 +6,7 @@ import {
   type Message,
   type Pattern,
   type Variant,
-} from "@inlang/sdk2";
+} from "@inlang/sdk";
 import { exportFiles } from "./exportFiles.js";
 
 test("single key value", async () => {

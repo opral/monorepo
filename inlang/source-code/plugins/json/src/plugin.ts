@@ -6,11 +6,10 @@ import type {
   Plugin,
   NodeishFilesystemSubset,
 } from "@inlang/sdk";
-import { displayName, description } from "../marketplace-manifest.json";
 import { PluginSettings } from "./settings.js";
 import { replaceAll } from "./utilities.js";
 import { flatten, unflatten } from "flat";
-import { detectJsonFormatting } from "../../../detect-json-formatting/dist/index.js";
+import { detectJsonFormatting } from "@inlang/detect-json-formatting";
 
 // global variables to store the formatting of the file
 let serializeWithFormatting: ReturnType<typeof detectJsonFormatting>;
@@ -22,8 +21,8 @@ export const plugin: Plugin<{
   [id]: PluginSettings;
 }> = {
   id,
-  displayName,
-  description,
+  displayName: "JSON",
+  description: "Plugin for JSON files",
   settingsSchema: PluginSettings,
   loadMessages: async ({ settings, nodeishFs }) => {
     settings[id].variableReferencePattern = settings[id]
@@ -60,17 +59,17 @@ async function loadMessages(args: {
   const messages: Message[] = [];
   for (const languageTag of resolveOrderOfLanguageTags(
     args.languageTags,
-    args.sourceLanguageTag,
+    args.sourceLanguageTag
   )) {
     if (typeof args.pluginSettings.pathPattern !== "string") {
       for (const [prefix, path] of Object.entries(
-        args.pluginSettings.pathPattern,
+        args.pluginSettings.pathPattern
       )) {
         const messagesFromFile = await getFileToParse(
           path,
           languageTag,
           args.sourceLanguageTag,
-          args.nodeishFs,
+          args.nodeishFs
         );
         for (const [key, value] of Object.entries(messagesFromFile)) {
           if (Object.keys(value).length !== 0) {
@@ -80,7 +79,7 @@ async function loadMessages(args: {
               prefixedKey,
               languageTag,
               value,
-              args.pluginSettings,
+              args.pluginSettings
             );
           }
         }
@@ -90,7 +89,7 @@ async function loadMessages(args: {
         args.pluginSettings.pathPattern,
         languageTag,
         args.sourceLanguageTag,
-        args.nodeishFs,
+        args.nodeishFs
       );
       for (const [key, value] of Object.entries(messagesFromFile)) {
         if (Object.keys(value).length !== 0) {
@@ -99,7 +98,7 @@ async function loadMessages(args: {
             replaceAll(key, "u002E", "."),
             languageTag,
             value,
-            args.pluginSettings,
+            args.pluginSettings
           );
         }
       }
@@ -119,7 +118,7 @@ async function getFileToParse(
   path: string,
   languageTag: string,
   sourceLanguageTag: string,
-  nodeishFs: NodeishFilesystemSubset,
+  nodeishFs: NodeishFilesystemSubset
 ): Promise<Record<string, string>> {
   const pathWithLanguage = path.replace("{languageTag}", languageTag);
   // get file, make sure that is not braking when the namespace doesn't exist in every languageTag dir
@@ -163,7 +162,7 @@ async function getFileToParse(
  */
 const resolveOrderOfLanguageTags = (
   languageTags: Readonly<LanguageTag[]>,
-  sourceLanguageTag: LanguageTag,
+  sourceLanguageTag: LanguageTag
 ): LanguageTag[] => {
   const filteredTags = languageTags.filter((t) => t !== sourceLanguageTag); // Remove sourceLanguageTag
   filteredTags.unshift(sourceLanguageTag); // Add sourceLanguageTag to the beginning of the filtered array
@@ -180,7 +179,7 @@ const addVariantToMessages = (
   key: string,
   languageTag: LanguageTag,
   value: string,
-  settings: PluginSettings,
+  settings: PluginSettings
 ) => {
   const messageIndex = messages.findIndex((m) => m.id === key);
   if (messageIndex !== -1) {
@@ -218,14 +217,14 @@ const addVariantToMessages = (
  */
 function parsePattern(
   text: string,
-  variableReferencePattern: string[],
+  variableReferencePattern: string[]
 ): Variant["pattern"] {
   // dependent on the variableReferencePattern, different regex
   // expressions are used for matching
   const expression = variableReferencePattern[1]
     ? new RegExp(
         `(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
-        "g",
+        "g"
       )
     : new RegExp(`(${variableReferencePattern}\\w+)`, "g");
   const pattern: Variant["pattern"] = text
@@ -239,7 +238,7 @@ function parsePattern(
             ? element.slice(
                 variableReferencePattern[0].length,
                 // negative index, removing the trailing pattern
-                -variableReferencePattern[1].length,
+                -variableReferencePattern[1].length
               )
             : element.slice(variableReferencePattern[0].length),
         };
@@ -302,7 +301,7 @@ async function saveMessages(args: {
         ).replace("{languageTag}", languageTag);
         await args.nodeishFs.writeFile(
           pathWithLanguage,
-          serializeFile(value, args.pluginSettings.variableReferencePattern),
+          serializeFile(value, args.pluginSettings.variableReferencePattern)
         );
       }
     }
@@ -320,24 +319,24 @@ async function saveMessages(args: {
     for (const [languageTag, value] of Object.entries(storage)) {
       const pathWithLanguage = args.pluginSettings.pathPattern.replace(
         "{languageTag}",
-        languageTag,
+        languageTag
       );
       try {
         await args.nodeishFs.readdir(
-          pathWithLanguage.split("/").slice(0, -1).join("/"),
+          pathWithLanguage.split("/").slice(0, -1).join("/")
         );
       } catch {
         await args.nodeishFs.mkdir(
           pathWithLanguage.split("/").slice(0, -1).join("/"),
           {
             recursive: true,
-          },
+          }
         );
       }
 
       await args.nodeishFs.writeFile(
         pathWithLanguage,
-        serializeFile(value, args.pluginSettings.variableReferencePattern),
+        serializeFile(value, args.pluginSettings.variableReferencePattern)
       );
     }
   }
@@ -352,7 +351,7 @@ async function saveMessages(args: {
  */
 function serializeFile(
   messages: Record<Message["id"], Variant["pattern"]>,
-  variableReferencePattern: PluginSettings["variableReferencePattern"],
+  variableReferencePattern: PluginSettings["variableReferencePattern"]
 ): string {
   let result: Record<string, string> = {};
   for (const [messageId, pattern] of Object.entries(messages)) {
@@ -381,7 +380,7 @@ function serializeFile(
  */
 function serializePattern(
   pattern: Variant["pattern"],
-  variableReferencePattern: string[],
+  variableReferencePattern: string[]
 ) {
   const result: string[] = [];
   for (const element of pattern) {
@@ -393,12 +392,12 @@ function serializePattern(
         result.push(
           variableReferencePattern[1]
             ? `${variableReferencePattern[0]}${element.name}${variableReferencePattern[1]}`
-            : `${variableReferencePattern[0]}${element.name}`,
+            : `${variableReferencePattern[0]}${element.name}`
         );
         break;
       default:
         throw new Error(
-          `Unknown message pattern element of type: ${(element as any)?.type}`,
+          `Unknown message pattern element of type: ${(element as any)?.type}`
         );
     }
   }

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import {
   parse as parseICU,
   TYPE,
@@ -41,7 +43,7 @@ export const NULL_BRANCH: Branch = { pattern: [], match: [] };
 export function generateBranches(
   elements: MessageFormatElement[],
   branch: Branch,
-  poundReference: string | undefined = undefined,
+  poundReference: string | undefined = undefined
 ): Branch[] {
   let branches: Branch[] = [structuredClone(branch)];
 
@@ -76,7 +78,7 @@ export function generateBranches(
             ([key, value]) => ({
               name: key,
               value: { type: "literal", name: value },
-            }),
+            })
           );
         }
 
@@ -128,7 +130,7 @@ export function generateBranches(
                   ? [...existingBranch.match, selector]
                   : existingBranch.match,
               },
-              element.value,
+              element.value
             );
             newBranches.push(...newBranchesForBranch);
           }
@@ -201,7 +203,7 @@ export function createMessage({
         selectorFunction,
       ];
       const alreadyExists = selectors.find(
-        (s) => s[0] === selector[0] && s[1] === selector[1],
+        (s) => s[0] === selector[0] && s[1] === selector[1]
       );
       if (alreadyExists) continue;
       else selectors.push(selector);

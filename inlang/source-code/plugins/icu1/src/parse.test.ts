@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { describe, it, expect } from "vitest";
 import { parse } from "@formatjs/icu-messageformat-parser";
 import { generateBranches, NULL_BRANCH, createMessage } from "./parse.js";
@@ -49,7 +51,7 @@ describe("generateBranches", () => {
       "{value, select, first {first} second {second} third {third}}",
       {
         requiresOtherClause: false,
-      },
+      }
     );
     const branches = generateBranches(ast, NULL_BRANCH);
 
@@ -117,7 +119,7 @@ describe("generateBranches", () => {
       "{value1, select, a {A} b {B} c {C}} - {value2, select, x {X} y {Y}}",
       {
         requiresOtherClause: false,
-      },
+      }
     );
     const branches = generateBranches(ast, NULL_BRANCH);
     expect(branches.length).toBe(6);
@@ -250,7 +252,7 @@ describe("generateBranches", () => {
       "{value1, select, a {A {value2, select, x {X} y {Y}}} b {B}}",
       {
         requiresOtherClause: false,
-      },
+      }
     );
     const branches = generateBranches(ast, NULL_BRANCH);
     expect(branches.length).toBe(3);

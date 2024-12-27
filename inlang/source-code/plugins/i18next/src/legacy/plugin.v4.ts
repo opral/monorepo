@@ -10,7 +10,7 @@
 import { PluginSettings } from "../settings.js";
 import { replaceAll } from "../utilities.js";
 import { flatten, unflatten } from "flat";
-import type { InlangPlugin } from "@inlang/sdk2";
+import type { InlangPlugin } from "@inlang/sdk";
 import { parse } from "../ideExtension/messageReferenceMatchers.js";
 
 // global variable to store the formatting of the file

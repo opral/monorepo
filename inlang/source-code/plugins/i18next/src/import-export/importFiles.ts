@@ -1,12 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { Bundle, Pattern, VariableReference, Variant } from "@inlang/sdk2";
+import type { Bundle, Pattern, VariableReference, Variant } from "@inlang/sdk";
 import { type plugin } from "../plugin.js";
 import { flatten } from "flat";
-import type {
-  BundleImport,
-  MessageImport,
-  VariantImport,
-} from "../../../../sdk2/dist/plugin/schema.js";
+import type { BundleImport, MessageImport, VariantImport } from "@inlang/sdk";
 
 export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({
   files,

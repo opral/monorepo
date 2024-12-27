@@ -1,4 +1,4 @@
-import type { InlangPlugin } from "@inlang/sdk2";
+import type { InlangPlugin } from "@inlang/sdk";
 import { plugin as pluginV2 } from "./v2/plugin.js";
 import { PluginSettings } from "./settings.js";
 import { toBeImportedFiles } from "./import-export/toBeImportedFiles.js";

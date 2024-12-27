@@ -1,4 +1,4 @@
-Developer-first localization infrastructure that is built on git. Your git repository is the single source of truth for localization for collaboration and automation.
+Developer-first localization infrastructure that is built on lix. Your lix is the single source of truth for localization for collaboration and automation.
 
 <div>
     <p align="center">
