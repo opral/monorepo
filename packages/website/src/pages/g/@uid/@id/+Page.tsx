@@ -3,7 +3,6 @@ import { For, Show, onMount } from "solid-js";
 import { GetHelp } from "#src/interface/components/GetHelp.jsx";
 import { Chip } from "#src/interface/components/Chip.jsx";
 import { colorForTypeOf, convertLinkToGithub } from "../../utilities.js";
-import "@opral/markdown-wc/custom-elements";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx";
 import Link from "#src/renderer/Link.jsx";
