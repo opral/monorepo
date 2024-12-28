@@ -1,0 +1,49 @@
+{
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
+	"id": "app.inlang.finkLocalizationEditor",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/new-fink-logo.png",
+	"gallery": [
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-marketplace-cover.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-1.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-2.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-3.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-4.jpg"
+	],
+	"displayName": {
+		"en": "Fink – Localization Editor"
+	},
+	"description": {
+		"en": "Your translation workflow with no-code setup and repository-based operation — the ideal i18n solution for translators."
+	},
+	"pages": {
+		"Overview": {
+			"/": "./inlang/source-code/editor/README.md",
+			"/supported-i18n-libraries": "./inlang/source-code/editor/docs/supported-i18n-libraries.md"
+		},
+		"Guides": {
+			"Usage": "/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink",
+			"What is inlang?": "/g/7777asdy/guide-nilsjacobsen-ecosystemCompatible"
+		}
+	},
+	"keywords": [
+		"editor",
+		"web",
+		"apps",
+		"website",
+		"translator",
+		"lix",
+		"fink",
+		"inlang",
+		"astro",
+		"remix",
+		"nextjs",
+		"svelte",
+		"solid"
+	],
+	"recommends": ["m/3gk8n4n4", "m/gerre34r", "m/reootnfj", "m/4cxm3eqi"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"website": "https://fink.inlang.com/",
+	"license": "PolyForm Noncommercial License 1.0.0",
+	"pricing": "Free Beta"
+}

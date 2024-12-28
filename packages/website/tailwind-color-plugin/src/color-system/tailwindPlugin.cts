@@ -9,19 +9,19 @@ import type { Config } from "./types/config.cjs";
  * in the config is not required.
  */
 export function configure(config: Config) {
-  // merge mutates default config
-  // this line allows the user to specify a partial config
-  // and only change the primary color for example.
-  USED_COLOR_SYSTEM_CONFIG = config;
-  const tokens = generateTokens(USED_COLOR_SYSTEM_CONFIG);
-  // @ts-ignore
-  return plugin(() => undefined, {
-    theme: {
-      extend: {
-        colors: tokens,
-      },
-    },
-  });
+	// merge mutates default config
+	// this line allows the user to specify a partial config
+	// and only change the primary color for example.
+	USED_COLOR_SYSTEM_CONFIG = config;
+	const tokens = generateTokens(USED_COLOR_SYSTEM_CONFIG);
+	// @ts-ignore
+	return plugin(() => undefined, {
+		theme: {
+			extend: {
+				colors: tokens,
+			},
+		},
+	});
 }
 
 /**

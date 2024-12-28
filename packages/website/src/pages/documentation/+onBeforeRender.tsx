@@ -1,10 +1,15 @@
 import fs from "node:fs/promises";
-import ecosystemTableOfContents from "../../../../../documentation/ecosystem/tableOfContents.json";
-import sdkTableOfContents from "../../../../../documentation/sdk/tableOfContents.json";
-import pluginTableOfContents from "../../../../../documentation/plugin/tableOfContents.json";
-import lintRuleTableOfContents from "../../../../../documentation/lint-rule/tableOfContents.json";
+import ecosystemTableOfContentsRaw from "../../../../../documentation/ecosystem/tableOfContents.json?raw";
+import sdkTableOfContentsRaw from "../../../../../documentation/sdk/tableOfContents.json?raw";
+import pluginTableOfContentsRaw from "../../../../../documentation/plugin/tableOfContents.json?raw";
+import lintRuleTableOfContentsRaw from "../../../../../documentation/lint-rule/tableOfContents.json?raw";
 import { convert } from "@inlang/markdown";
 import { render, redirect } from "vike/abort";
+
+const ecosystemTableOfContents = JSON.parse(ecosystemTableOfContentsRaw);
+const sdkTableOfContents = JSON.parse(sdkTableOfContentsRaw);
+const pluginTableOfContents = JSON.parse(pluginTableOfContentsRaw);
+const lintRuleTableOfContents = JSON.parse(lintRuleTableOfContentsRaw);
 
 const renderedMarkdown = {} as Record<string, string>;
 
@@ -69,7 +74,7 @@ export default async function onBeforeRender(pageContext: any) {
 	if (renderedMarkdown[slug] === undefined) {
 		// get ecosystem documentation
 		for (const categories of Object.entries(ecosystemTableOfContents)) {
-			const [, pages] = categories;
+			const [, pages] = categories as any;
 
 			for (const page of pages) {
 				const text = await fs.readFile(
@@ -85,7 +90,7 @@ export default async function onBeforeRender(pageContext: any) {
 		}
 		//get sdk documentation
 		for (const categories of Object.entries(sdkTableOfContents)) {
-			const [, pages] = categories;
+			const [, pages] = categories as any;
 
 			for (const page of pages) {
 				const text = await fs.readFile(
@@ -98,7 +103,7 @@ export default async function onBeforeRender(pageContext: any) {
 		}
 		//get plugin documentation
 		for (const categories of Object.entries(pluginTableOfContents)) {
-			const [, pages] = categories;
+			const [, pages] = categories as any;
 
 			for (const page of pages) {
 				const text = await fs.readFile(
@@ -111,7 +116,7 @@ export default async function onBeforeRender(pageContext: any) {
 		}
 		//get lint rule documentation
 		for (const categories of Object.entries(lintRuleTableOfContents)) {
-			const [, pages] = categories;
+			const [, pages] = categories as any;
 
 			for (const page of pages) {
 				const text = await fs.readFile(

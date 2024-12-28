@@ -1,8 +1,13 @@
 import { currentPageContext } from "#src/renderer/state.js";
-import sdkTableOfContents from "../../../../../documentation/sdk/tableOfContents.json";
-import pluginTableOfContents from "../../../../../documentation/plugin/tableOfContents.json";
-import lintRuleTableOfContents from "../../../../../documentation/lint-rule/tableOfContents.json";
-import ecosystemTableOfContents from "../../../../../documentation/ecosystem/tableOfContents.json";
+import sdkTableOfContentsRaw from "../../../../../documentation/sdk/tableOfContents.json?raw";
+import pluginTableOfContentsRaw from "../../../../../documentation/plugin/tableOfContents.json?raw";
+import lintRuleTableOfContentsRaw from "../../../../../documentation/lint-rule/tableOfContents.json?raw";
+import ecosystemTableOfContentsRaw from "../../../../../documentation/ecosystem/tableOfContents.json?raw";
+
+const sdkTableOfContents = JSON.parse(sdkTableOfContentsRaw);
+const pluginTableOfContents = JSON.parse(pluginTableOfContentsRaw);
+const lintRuleTableOfContents = JSON.parse(lintRuleTableOfContentsRaw);
+const ecosystemTableOfContents = JSON.parse(ecosystemTableOfContentsRaw);
 
 export const getTableOfContents = () => {
 	switch (currentPageContext.urlParsed.pathname.split("/")[2]) {

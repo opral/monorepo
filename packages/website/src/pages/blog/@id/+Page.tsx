@@ -2,12 +2,14 @@ import { Link as MetaLink, Meta, Title } from "@solidjs/meta";
 import { Show, onMount } from "solid-js";
 import { languageTag } from "#src/paraglide/runtime.js";
 import { currentPageContext } from "#src/renderer/state.js";
-import tableOfContents from "../../../../../../blog/tableOfContents.json";
+import tableOfContentsRaw from "../../../../../../blog/tableOfContents.json?raw";
 import "@inlang/markdown/css";
 import "@inlang/markdown/custom-elements";
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx";
 import Link from "#src/renderer/Link.jsx";
 import { i18nRouting } from "#src/renderer/+onBeforeRoute.js";
+
+const tableOfContents = JSON.parse(tableOfContentsRaw);
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.

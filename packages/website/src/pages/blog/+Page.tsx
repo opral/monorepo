@@ -1,10 +1,12 @@
 import { Link as MetaLink, Title, Meta } from "@solidjs/meta";
 import { For } from "solid-js";
-import tableOfContents from "../../../../../blog/tableOfContents.json";
+import tableOfContentsRaw from "../../../../../blog/tableOfContents.json?raw";
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx";
 import Link from "#src/renderer/Link.jsx";
 import { i18nRouting } from "#src/renderer/+onBeforeRoute.js";
 import { currentPageContext } from "#src/renderer/state.js";
+
+const tableOfContents = JSON.parse(tableOfContentsRaw) as any;
 
 export default function Page() {
 	return (
@@ -24,7 +26,7 @@ export default function Page() {
 			/>
 			<MarketplaceLayout>
 				<div class="flex-row min-h-full w-full items-center justify-center mx-auto md:max-w-2xl divide-y divide-solid divide-outline">
-					<For each={Object.entries(tableOfContents)}>
+					<For each={Object.entries(tableOfContents) as any}>
 						{([, page]) => (
 							<div class="py-12">
 								<Link

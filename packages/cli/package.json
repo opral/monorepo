@@ -36,7 +36,6 @@
     "build": "cross-env NODE_ENV=production node ./build.js && tsc --noEmit",
     "test": "tsc --noEmit && vitest run --coverage --test-timeout=10000",
     "test:watch": "vitest",
-    "lint": "eslint ./src --fix",
     "format": "prettier ./src --write",
     "clean": "rm -rf ./dist ./node_modules"
   },

@@ -38,7 +38,7 @@ export function getLocalStorage(): LocalStorageSchema | undefined {
 	return undefined;
 }
 
-const allowedOrigins = publicEnv.PUBLIC_ALLOWED_AUTH_URLS.split(",");
+const allowedOrigins = import.meta.env.PUBLIC_ALLOWED_AUTH_URLS.split(",");
 
 /**
  * Store that provides access to the local storage.

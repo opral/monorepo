@@ -343,8 +343,8 @@ function findPageBySlug(slug: string) {
 	const tableOfContents = getTableOfContents();
 
 	for (const [, pageArray] of Object.entries(tableOfContents)) {
-		const foundPage = pageArray.find(
-			(page) =>
+		const foundPage = (pageArray as any).find(
+			(page: any) =>
 				page.slug === slug || page.slug === slug.replace("/documentation", "")
 		);
 
