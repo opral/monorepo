@@ -1,7 +1,5 @@
 import { css, html, LitElement } from "lit"
-import { customElement } from "lit/decorators.js"
 
-@customElement("doc-comments")
 export default class extends LitElement {
 	static override styles = css`
 		.doc-comment-grid {

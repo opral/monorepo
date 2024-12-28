@@ -1,8 +1,6 @@
 import { css, html, LitElement } from "lit"
-import { customElement } from "lit/decorators.js"
 
 // takes the inner elements and just renders them with custom styles around them
-@customElement("doc-links")
 export default class extends LitElement {
 	static override styles = css`
 		.doc-link-grid {

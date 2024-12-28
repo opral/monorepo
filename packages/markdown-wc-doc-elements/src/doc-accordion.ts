@@ -1,9 +1,7 @@
 import { LitElement, css, html } from "lit"
-import { customElement, property } from "lit/decorators.js"
-import "./doc-icon.js"
+import { property } from "lit/decorators.js"
 
-@customElement("doc-accordion")
-export class DocAccordion extends LitElement {
+export default class extends LitElement {
 	static override styles = css`
 		.accordion-wrapper {
 			margin: 0;
