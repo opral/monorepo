@@ -16,16 +16,16 @@
 	},
 	"pages": {
 		"": {
-			"/": "./inlang/packages/ide-extension/MARKETPLACE.md"
+			"/": "./inlang/packages/sherlock/MARKETPLACE.md"
 		},
 		"Getting Started": {
-			"/quick-start": "./inlang/packages/ide-extension/docs/quick-start.md",
-			"/customization": "./inlang/packages/ide-extension/docs/customization.md",
-			"/supported-i18n-libraries": "./inlang/packages/ide-extension/docs/supported-i18n-libraries.md",
-			"/video-tour": "./inlang/packages/ide-extension/docs/video-tour.md"
+			"/quick-start": "./inlang/packages/sherlock/docs/quick-start.md",
+			"/customization": "./inlang/packages/sherlock/docs/customization.md",
+			"/supported-i18n-libraries": "./inlang/packages/sherlock/docs/supported-i18n-libraries.md",
+			"/video-tour": "./inlang/packages/sherlock/docs/video-tour.md"
 		},
 		"Appendix": {
-			"/changelog": "./inlang/packages/ide-extension/CHANGELOG.md"
+			"/changelog": "./inlang/packages/sherlock/CHANGELOG.md"
 		}
 	},
 	"keywords": [
@@ -48,6 +48,6 @@
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"website": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
-	"license": "PolyForm Noncommercial License 1.0.0",
+	"license": "Fair Core License, Version 1.0, MIT Future License",
 	"pricing": "Free"
 }
