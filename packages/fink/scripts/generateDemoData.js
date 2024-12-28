@@ -1,4 +1,4 @@
-import { createBundle, createMessage, generateUUID } from "@inlang/sdk2";
+import { createBundle, createMessage, generateUUID } from "@inlang/sdk";
 import fs from "fs";
 
 const enFile = fs.readFileSync("demo/importedResources/en.json", "utf8");
@@ -192,7 +192,7 @@ fs.writeFileSync("demo/bundles.ts", "");
 // Write to demo/bundles.ts file with a defulat export. Name the export `demoBundles`
 fs.writeFileSync(
 	"demo/bundles.ts",
-	`import { BundleNested } from "@inlang/sdk2"; \n export const demoBundles: BundleNested[] = ${JSON.stringify(
+	`import { BundleNested } from "@inlang/sdk"; \n export const demoBundles: BundleNested[] = ${JSON.stringify(
 		sqliteConformAst,
 		null,
 		2

@@ -8,7 +8,7 @@ import {
 	selectBundleNested,
 	Change,
 	Bundle,
-} from "@inlang/sdk2";
+} from "@inlang/sdk";
 import SingleDiffBundle from "./SingleDiffBundle.tsx";
 import { SlButton, SlDetails, SlTooltip } from "@shoelace-style/shoelace/dist/react";
 

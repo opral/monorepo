@@ -1,4 +1,4 @@
-import { humanId, insertBundleNested } from "@inlang/sdk2";
+import { humanId, insertBundleNested } from "@inlang/sdk";
 import { useAtom } from "jotai";
 import { bundlesNestedFilteredAtom, projectAtom } from "../state.ts";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";

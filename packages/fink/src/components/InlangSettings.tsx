@@ -1,5 +1,5 @@
 import { createComponent } from "@lit/react";
-import { InlangSettings } from "@inlang/settings-component2";
+import { InlangSettings } from "@inlang/settings-component";
 import React from "react";
 
 const Settings = createComponent({

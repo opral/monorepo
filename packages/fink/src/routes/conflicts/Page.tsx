@@ -12,7 +12,7 @@ import {
 	InlangPatternEditor,
 	InlangVariant,
 } from "../../components/SingleDiffBundle.tsx";
-import { resolveConflictBySelecting, Variant } from "@inlang/sdk2";
+import { resolveConflictBySelecting, Variant } from "@inlang/sdk";
 import { useEffect } from "react";
 
 export default function Page() {

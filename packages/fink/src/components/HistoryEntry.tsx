@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Change, isInSimulatedCurrentBranch, Variant } from "@inlang/sdk2";
+import { Change, isInSimulatedCurrentBranch, Variant } from "@inlang/sdk";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { projectAtom } from "../state.ts";

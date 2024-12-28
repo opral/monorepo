@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { atom } from "jotai";
-import { Bundle, loadProjectInMemory, ProjectSettings } from "@inlang/sdk2";
+import { Bundle, loadProjectInMemory, ProjectSettings } from "@inlang/sdk";
 import { atomWithStorage } from "jotai/utils";
 import { jsonObjectFrom } from "kysely/helpers/sqlite";
-import { Change, isInSimulatedCurrentBranch } from "@inlang/sdk2";
+import { Change, isInSimulatedCurrentBranch } from "@inlang/sdk";
 import hasMissingTranslations from "./helper/hasMissingTranslations.ts";
 import getSortedBundles from "./helper/sortBundles.ts";
 // @ts-expect-error - the plugin ships with no declaration file

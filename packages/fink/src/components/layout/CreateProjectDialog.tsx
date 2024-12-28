@@ -2,7 +2,7 @@ import { useAtom } from "jotai";
 import { SetStateAction, useMemo, useState } from "react";
 import { selectedProjectPathAtom } from "../../state.ts";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
-import { newProject } from "@inlang/sdk2";
+import { newProject } from "@inlang/sdk";
 import { SlButton, SlDialog, SlInput } from "@shoelace-style/shoelace/dist/react";
 
 export const CreateProjectDialog = (props: {

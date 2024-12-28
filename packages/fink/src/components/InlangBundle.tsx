@@ -5,11 +5,11 @@ import {
 	ChangeEventDetail,
 	InlangBundleAction,
 	InlangBundle as LitInlangBundle,
-} from "@inlang/bundle-component";
-import { InlangMessage as LitInlangMessage } from "@inlang/bundle-component";
-import { InlangVariant as LitInlangVariant } from "@inlang/bundle-component";
-import { InlangPatternEditor as LitInlangPatternEditor } from "@inlang/bundle-component";
-import { InlangAddSelector as LitInlangAddSelector } from "@inlang/bundle-component";
+} from "@inlang/editor-component";
+import { InlangMessage as LitInlangMessage } from "@inlang/editor-component";
+import { InlangVariant as LitInlangVariant } from "@inlang/editor-component";
+import { InlangPatternEditor as LitInlangPatternEditor } from "@inlang/editor-component";
+import { InlangAddSelector as LitInlangAddSelector } from "@inlang/editor-component";
 
 import React, { useState } from "react";
 import { useAtom } from "jotai";
@@ -19,7 +19,7 @@ import {
 	projectAtom,
 	settingsAtom,
 } from "../state.ts";
-import { BundleNested, Message, ProjectSettings, uuidv4, Variant } from "@inlang/sdk2";
+import { BundleNested, Message, ProjectSettings, uuidv4, Variant } from "@inlang/sdk";
 import {
 	SlDialog,
 	SlDropdown,

@@ -1,5 +1,5 @@
 import { Kysely } from "kysely";
-import { InlangDatabaseSchema } from "@inlang/sdk2";
+import { InlangDatabaseSchema } from "@inlang/sdk";
 
 /**
  * Delete a bundle along with its nested messages and variants.
