@@ -20,6 +20,11 @@ type CardProps = {
 };
 
 export default function Highlight(props: BannerProps | CardProps) {
+
+	const item = registry.find(
+		(item: { id: string }) => item.id === (props as CardProps).id
+	) as any;
+
 	return (
 		<Switch>
 			<Match when={props.type === "banner"}>
@@ -62,16 +67,7 @@ export default function Highlight(props: BannerProps | CardProps) {
 					<h3 class="font-semibold absolute z-10 top-6 left-6 text-2xl px-2 bg-background/75 backdrop-blur-lg rounded-md">
 						{props.slogan}
 					</h3>
-					<Card
-						item={registry.find(
-							(item: { id: string }) => item.id === (props as CardProps).id
-						)}
-						displayName={
-							// @ts-expect-error !TODO fix later
-							registry.find((item) => item.id === (props as CardProps).id)!
-								.displayName.en
-						}
-					/>{" "}
+					<Card item={item.id} displayName={item.displayName.en} />{" "}
 				</div>
 			</Match>
 		</Switch>

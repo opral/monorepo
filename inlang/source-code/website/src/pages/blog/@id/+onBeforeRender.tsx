@@ -1,7 +1,9 @@
 import fs from "node:fs";
-import tableOfContents from "../../../../../../blog/tableOfContents.json";
+import tableOfContentsString from "../../../../../../blog/tableOfContents.json?raw";
 import { convert } from "@inlang/markdown";
 import { render } from "vike/abort";
+
+const tableOfContents = JSON.parse(tableOfContentsString);
 
 const renderedMarkdown = {} as Record<string, string>;
 
@@ -15,7 +17,7 @@ const repositoryRoot = import.meta.url.slice(
 export default async function onBeforeRender(pageContext: any) {
 	const { id } = pageContext.routeParams;
 
-	const page = tableOfContents.find((page) => page.slug === id);
+	const page = tableOfContents.find((page: any) => page.slug === id);
 	if (!page) {
 		throw render(404);
 	}

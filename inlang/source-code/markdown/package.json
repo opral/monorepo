@@ -16,7 +16,6 @@
 		"build": "npx tailwindcss -i ./src/css/style.css -o ./dist/css/style.css && npx prettier ./src --write && tsc --build",
 		"dev": "tsc --watch",
 		"test": "tsc --noEmit && vitest run",
-		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},

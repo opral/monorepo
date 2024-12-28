@@ -55,8 +55,8 @@ export default function Page(props: PageProps) {
 
 	onMount(() => {
 		if (!currentPageContext.urlParsed.hash) return;
-		// @ts-ignore
 		scrollToAnchor(
+			// @ts-ignore
 			currentPageContext.urlParsed.hash?.replace("#", "").toString(),
 			"smooth"
 		);

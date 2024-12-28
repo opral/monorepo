@@ -1,38 +1,37 @@
 {
-  "name": "@inlang/rpc",
-  "type": "module",
-  "private": true,
-  "exports": {
-    ".": "./dist/index.js",
-    "./router": "./dist/router.js"
-  },
-  "scripts": {
-    "build": "npm run env-variables && tsc --build",
-    "dev": "npm run env-variables && tsc --watch",
-    "test": "npm run env-variables && tsc --noEmit && vitest run --passWithNoTests --coverage",
-    "env-variables": "node ./src/services/env-variables/createIndexFile.js",
-    "lint": "eslint ./src --fix",
-    "format": "prettier ./src --write",
-    "clean": "rm -rf ./dist ./node_modules"
-  },
-  "dependencies": {
-    "@inlang/sdk": "workspace:*",
-    "@types/cors": "^2.8.17",
-    "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
-    "ts-dedent": "^2.2.0",
-    "typed-rpc": "3.0.0"
-  },
-  "peerDependencies": {
-    "express": "^4.18.2"
-  },
-  "license": "Apache-2.0",
-  "version": "0.3.36",
-  "devDependencies": {
-    "@types/body-parser": "1.19.2",
-    "@types/express": "4.17.17",
-    "@vitest/coverage-v8": "2.0.5",
-    "typescript": "^5.5.2",
-    "vitest": "2.0.5"
-  }
+	"name": "@inlang/rpc",
+	"type": "module",
+	"private": true,
+	"exports": {
+		".": "./dist/index.js",
+		"./router": "./dist/router.js"
+	},
+	"scripts": {
+		"build": "npm run env-variables && tsc --build",
+		"dev": "npm run env-variables && tsc --watch",
+		"test": "npm run env-variables && tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"env-variables": "node ./src/services/env-variables/createIndexFile.js",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./node_modules"
+	},
+	"dependencies": {
+		"@inlang/sdk": "workspace:*",
+		"@types/cors": "^2.8.17",
+		"body-parser": "^1.20.2",
+		"cors": "^2.8.5",
+		"ts-dedent": "^2.2.0",
+		"typed-rpc": "3.0.0"
+	},
+	"peerDependencies": {
+		"express": "^4.18.2"
+	},
+	"license": "Apache-2.0",
+	"version": "0.3.36",
+	"devDependencies": {
+		"@types/body-parser": "1.19.2",
+		"@types/express": "4.17.17",
+		"@vitest/coverage-v8": "2.0.5",
+		"typescript": "^5.5.2",
+		"vitest": "2.0.5"
+	}
 }

@@ -4,7 +4,7 @@ import { Show, createSignal } from "solid-js";
 
 const isProduction = process.env.NODE_ENV === "production";
 
-const HeroSearch = (props: { projectCount: string }) => {
+const HeroSearch = () => {
 	const [open, setOpen] = createSignal(false);
 
 	return (
