@@ -12,7 +12,7 @@ import VariantHistoryList from "../../components/VariantHistoryList.tsx";
 import { useState } from "react";
 import NoProjectView from "../../components/NoProjectView.tsx";
 import { demoBundles } from "../../../demo/bundles.ts";
-import { insertBundleNested } from "@inlang/sdk2";
+import { insertBundleNested } from "@inlang/sdk";
 import LixFloat from "../../components/LixFloat.tsx";
 import TableHeader from "../../components/TableHeader.tsx";
 import FilterSection from "../../components/FilterSection.tsx";

@@ -1,9 +1,9 @@
 import { useAtom } from "jotai";
 import { authorNameAtom, projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
-import { InlangProject } from "@inlang/sdk2";
+import { InlangProject } from "@inlang/sdk";
 import timeAgo from "../helper/timeAgo.ts";
-import { Commit } from "@inlang/sdk2";
+import { Commit } from "@inlang/sdk";
 
 const VariantHistory = (props: { variantId: string }) => {
 	const [project] = useAtom(projectAtom);

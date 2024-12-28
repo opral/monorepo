@@ -1,4 +1,4 @@
-import { ImportFile, InlangProject, loadProjectInMemory, merge } from "@inlang/sdk2";
+import { ImportFile, InlangProject, loadProjectInMemory, merge } from "@inlang/sdk";
 import JSZip from "jszip";
 import { supportedPluginKeyType } from "./types.ts";
 

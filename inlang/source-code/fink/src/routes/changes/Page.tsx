@@ -8,7 +8,7 @@ import Layout, { Grid } from "../../layout.tsx";
 import { FormEvent, useEffect, useState } from "react";
 import { SlButton, SlDialog, SlInput } from "@shoelace-style/shoelace/dist/react";
 import DiffBundleView from "../../components/DiffBundleView.tsx";
-import { BundleNested, humanId } from "@inlang/sdk2";
+import { BundleNested, humanId } from "@inlang/sdk";
 import { useNavigate } from "react-router-dom";
 
 export default function App() {

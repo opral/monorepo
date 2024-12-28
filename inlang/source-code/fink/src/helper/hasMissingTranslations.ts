@@ -1,4 +1,4 @@
-import { NewBundleNested } from "@inlang/sdk2";
+import { NewBundleNested } from "@inlang/sdk";
 
 export const hasMissingTranslations = (
 	bundle: NewBundleNested,

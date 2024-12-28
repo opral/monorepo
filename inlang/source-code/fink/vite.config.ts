@@ -14,7 +14,7 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		exclude: [
-			"@inlang/sdk2",
+			"@inlang/sdk",
 			"@sqlite.org/sqlite-wasm",
 			"@eliaspourquoi/sqlite-node-wasm",
 		],

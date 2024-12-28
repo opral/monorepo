@@ -1,4 +1,4 @@
-import { BundleNested } from "@inlang/sdk2";
+import { BundleNested } from "@inlang/sdk";
 export const demoBundles: BundleNested[] = [
 	{
 		id: "even_hour_mule_drum",

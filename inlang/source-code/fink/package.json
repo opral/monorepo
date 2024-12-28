@@ -14,11 +14,11 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/bundle-component": "workspace:*",
+		"@inlang/editor-component": "workspace:*",
 		"@inlang/plugin-i18next": "workspace:*",
 		"@inlang/plugin-message-format": "workspace:*",
-		"@inlang/sdk2": "workspace:*",
-		"@inlang/settings-component2": "workspace:*",
+		"@inlang/sdk": "workspace:*",
+		"@inlang/settings-component": "workspace:*",
 		"@lit/react": "^1.0.5",
 		"@shoelace-style/shoelace": "^2.16.0",
 		"@sqlite.org/sqlite-wasm": "^3.46.0-build2",

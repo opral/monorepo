@@ -1,4 +1,4 @@
-import { InlangProject, selectBundleNested } from "@inlang/sdk2";
+import { InlangProject, selectBundleNested } from "@inlang/sdk";
 
 export default async function getSortedBundles(project: InlangProject) {
 	// Step 1: Query all bundles from the Inlang database

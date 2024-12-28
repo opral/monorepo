@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BundleNested, ProjectSettings } from "@inlang/sdk2";
+import { BundleNested, ProjectSettings } from "@inlang/sdk";
 import { createComponent } from "@lit/react";
 import {
 	InlangBundle as LitInlangBundle,
 	InlangMessage as LitInlangMessage,
 	InlangVariant as LitInlangVariant,
 	InlangPatternEditor as LitInlangPatternEditor,
-} from "@inlang/bundle-component";
+} from "@inlang/editor-component";
 import React from "react";
 import clsx from "clsx";
 import { useAtom } from "jotai";
