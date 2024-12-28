@@ -1,7 +1,0 @@
-{
-  "$schema": "https://inlang.com/schema/inlang-message-format",
-  "currentLanguageTag": "Dä aktuell sprachtag isch \"{languageTag}\".",
-  "greeting": "Hoi {name}! Du häsch {count} Nachrichte.",
-  "about": "Über üs",
-  "on_the_client": "Ich bi uf em Client."
-}
