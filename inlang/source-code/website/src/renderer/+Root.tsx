@@ -15,7 +15,6 @@ import {
 } from "#src/paraglide/runtime.js";
 import { currentPageContext } from "./state.js";
 import type { JSXElement } from "solid-js";
-import type { LanguageTag } from "@inlang/sdk";
 import Link from "./Link.jsx";
 
 export type RootProps = Accessor<{
@@ -63,7 +62,7 @@ function ParaglideJsProvider(props: { children: JSXElement }) {
 		const pathIncludesLanguageTag = maybeLanguageTag
 			? availableLanguageTags.includes(maybeLanguageTag)
 			: false;
-		onSetLanguageTag((newLanguageTag: LanguageTag) => {
+		onSetLanguageTag((newLanguageTag: string) => {
 			if (pathIncludesLanguageTag) {
 				//replace old languageTag with new one
 				window.location.pathname = window.location.pathname

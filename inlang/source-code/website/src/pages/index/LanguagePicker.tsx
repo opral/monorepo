@@ -5,10 +5,9 @@ import {
 	availableLanguageTags,
 	languageTag,
 } from "#src/paraglide/runtime.js";
-import type { LanguageTag } from "@inlang/sdk";
 
 export function LanguagePicker() {
-	const languageNames: Record<LanguageTag, string> = {
+	const languageNames: Record<string, string> = {
 		en: "English",
 		de: "Deutsch",
 		fr: "Français",

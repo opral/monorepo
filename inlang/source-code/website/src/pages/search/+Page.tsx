@@ -9,8 +9,8 @@ import Card, {
 import { Link, Meta, Title } from "@solidjs/meta";
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx";
 import * as m from "#src/paraglide/messages.js";
-import { i18nRouting } from "#src/renderer/+onBeforeRoute.js";
 import validator from "validator";
+import { i18nRouting } from "#src/services/i18n/routing.js";
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule";
 

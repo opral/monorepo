@@ -5,10 +5,10 @@ import { currentPageContext } from "#src/renderer/state.js";
 import ParaglideHeader from "#src/interface/marketplace/categoryHeaders/cards/paraglide.jsx";
 import * as m from "#src/paraglide/messages.js";
 import { renderLocales } from "#src/renderer/renderLocales.js";
-import { i18nRouting } from "#src/renderer/+onBeforeRoute.js";
 import Personas from "./custom_section/Personas/index.jsx";
 import LixSection from "./custom_section/Lix/index.jsx";
 import Features from "./custom_section/Features.jsx";
+import { i18nRouting } from "#src/services/i18n/routing.js";
 
 export default function Page() {
 	return (

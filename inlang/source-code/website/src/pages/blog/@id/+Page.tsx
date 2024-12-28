@@ -7,7 +7,7 @@ import "@inlang/markdown/css";
 import "@inlang/markdown/custom-elements";
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx";
 import Link from "#src/renderer/Link.jsx";
-import { i18nRouting } from "#src/renderer/+onBeforeRoute.js";
+import { i18nRouting } from "#src/services/i18n/routing.js";
 
 const tableOfContents = JSON.parse(tableOfContentsRaw);
 
