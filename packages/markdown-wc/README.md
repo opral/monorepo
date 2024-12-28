@@ -1,3 +1,10 @@
+import: 
+  - "https://example.com/doc-card.js"
+  - "https://example.com/doc-button.js"
+
+
+---
+
 # Markdown with Web Components
 
 Enables writing documentation with components in markdown as backwards compatible superset.
@@ -5,16 +12,18 @@ Enables writing documentation with components in markdown as backwards compatibl
 ## Why
 
 - Enables writing documentation with components in markdown
-- Uses only HTML and Frontmatter to be backwards compatible with markdown
+- Interoperable with existing markdown parsers
 - Doesn't depend on a framework like [React MDX](https://mdxjs.com/) or [Svelte MDsveX](https://github.com/pngwn/MDsveX)
+- Doesn't introduce custom syntax like [Markdoc](https://markdoc.dev/)
 
 ## Comparison
 
 | Feature                        | Markdown | @opral/markdown-wc | React MDX | Svelte MDsveX | Markdoc |
 |--------------------------------|----------|--------------------|-----------|---------------|---------|
-| Components in markdown         | ❌       | ✅                 | ✅        | ✅            | ✅      |
-| Interoperable                  | ✅       | ✅                 | ❌        | ❌            | ✅      |
-| Doesn't depend on a framework  | ✅       | ✅                 | ❌        | ❌            | ✅      |
+| Components in markdown         | ❌       | ✅                 | ✅        | ✅             | ✅      |
+| Interoperable                  | ✅       | ✅                 | ❌        | ❌             | ✅      |
+| Portable                       | ✅       | ✅                 | ❌        | ❌             | ✅      |
+| No custom syntax               | ✅       | ✅                 | ❌        | ❌             | ❌      |
 
 
 ## Usage
@@ -33,7 +42,17 @@ const markdown = `
 </doc-card>
 `;
 
-const html = parse(markdown);
+// Parse markdown
+const parsed = parse(markdown);
 
-console.log(html);
+// Register web components
+for (const name in parsed.imports) {
+  // optionally sanitize the components here
+  const component = await import(parsed.imports[name])
+  customElements.define(name, component);
+}
+
+// render HTML
+render(parsed.html);
 ```
+

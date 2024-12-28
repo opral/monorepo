@@ -33,36 +33,27 @@ C -->|Two| E[Result two]
 	expect(html).toContain("<svg")
 })
 
-test("should be able to render custom elements", async () => {
+test("leaves imported custom elements as is", async () => {
 	const markdown = `
+---
+imports: 
+  doc-figure: "https://cdn.skypack.dev/@doc-elements/figure"
+---
 # Hello World
 
 <doc-figure label="Hello world"></doc-figure>
 	`
-	const html = (await parse(markdown)).html
-	expect(html).toContain("<doc-figure")
+	const parsed = await parse(markdown)
+	expect(parsed.html).toContain("<doc-figure")
+	expect(parsed.frontmatter.imports).toEqual({
+		"doc-figure": "https://cdn.skypack.dev/@doc-elements/figure",
+	})
 })
 
-test("should be able to provide a badge generator", async () => {
-	const markdown = `
-<inlang-badge-generator></inlang-badge-generator>
-	`
-	const html = (await parse(markdown)).html
-	expect(html).toContain("<inlang-badge-generator></inlang-badge-generator>")
-})
-
-test("should be able to display a comment", async () => {
-	const markdown = `
-<doc-comment text="Test comment." name="John Doe"></doc-comment>
-	`
-	const html = (await parse(markdown)).html
-	expect(html).toContain("<doc-comment")
-})
-
-test("should be able to use frontmatter", async () => {
+test("additional frontmatter properties", async () => {
 	const markdown = `---
-title: test
-description: test
+title: test_title
+description: test_description
 ---
 
 # Hello World
@@ -70,20 +61,15 @@ This is markdown
 	`
 	const result = await parse(markdown)
 	expect(result.html).toContain("<h1")
-	expect(result.data.frontmatter.title).toBeDefined()
+	expect(result.frontmatter.title).toEqual("test_title")
+	expect(result.frontmatter.description).toEqual("test_description")
 })
 
-test("should throw if frontmatter type is not valid", async () => {
-	const markdown = `---
-title: test
----
-
+test("no frontmatter defined", async () => {
+	const markdown = `
 # Hello World
 This is markdown
 	`
-	try {
-		await parse(markdown)
-	} catch (e: any) {
-		expect(e.message).toContain("Frontmatter is not valid")
-	}
+	const parsed = await parse(markdown)
+	expect(parsed.html).toContain("<h1")
 })
