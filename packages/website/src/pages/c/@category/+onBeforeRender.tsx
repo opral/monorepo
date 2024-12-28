@@ -13,8 +13,8 @@ export default async function onBeforeRender(pageContext: any) {
 				return "guide";
 			case "plugins":
 				return "plugin";
-			case "lint-rules":
-				return "messageLintRule";
+			// case "lint-rules":
+			// return "messageLintRule";
 			case "libraries":
 				return "library";
 			default:
