@@ -9,11 +9,10 @@
 	],
 	"exports": {
 		".": "./dist/index.js",
-		"./custom-elements": "./dist/custom-elements/index.js",
-		"./css": "./dist/css/index.js"
+		"./custom-elements": "./dist/custom-elements/index.js"
 	},
 	"scripts": {
-		"build": "npx tailwindcss -i ./src/css/style.css -o ./dist/css/style.css && npx prettier ./src --write && tsc --build",
+		"build": "tsc --build",
 		"dev": "tsc --watch",
 		"test": "tsc --noEmit && vitest run",
 		"format": "prettier ./src --write",
@@ -43,7 +42,6 @@
 	},
 	"devDependencies": {
 		"@opral/tsconfig": "workspace:*",
-		"tailwindcss": "3.3.3",
 		"typescript": "5.3.2",
 		"vitest": "2.1.8"
 	},
