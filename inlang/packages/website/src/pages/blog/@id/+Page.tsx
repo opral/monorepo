@@ -3,7 +3,6 @@ import { Show, onMount } from "solid-js";
 import { languageTag } from "#src/paraglide/runtime.js";
 import { currentPageContext } from "#src/renderer/state.js";
 import tableOfContentsRaw from "../../../../../../blog/tableOfContents.json?raw";
-import "@opral/markdown-wc/custom-elements";
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx";
 import Link from "#src/renderer/Link.jsx";
 import { i18nRouting } from "#src/services/i18n/routing.js";

@@ -1,5 +1,9 @@
 import type { PageContextRenderer } from "./types.js";
-import { generateHydrationScript, renderToString } from "solid-js/web";
+import {
+	generateHydrationScript,
+	renderToString,
+	renderToStringAsync,
+} from "solid-js/web";
 import { escapeInject, dangerouslySkipEscape } from "vike/server";
 import { setCurrentPageContext } from "./state.js";
 import Root from "./+Root.jsx";

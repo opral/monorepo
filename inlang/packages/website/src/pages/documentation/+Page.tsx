@@ -1,11 +1,17 @@
-import { For, Show, createEffect, createSignal, onMount } from "solid-js";
+import {
+	For,
+	Show,
+	createEffect,
+	createResource,
+	createSignal,
+	onMount,
+} from "solid-js";
 import { currentPageContext } from "#src/renderer/state.js";
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js";
 import { Link, Meta, Title } from "@solidjs/meta";
 import { Feedback } from "./Feedback.jsx";
 import { EditButton } from "./EditButton.jsx";
 import { languageTag } from "#src/paraglide/runtime.js";
-import "@opral/markdown-wc/custom-elements";
 import SdkDocsLayout from "#src/interface/sdkDocs/SdkDocsLayout.jsx";
 import { getTableOfContents } from "./getTableOfContents.js";
 import InPageNav from "./InPageNav.jsx";
@@ -17,7 +23,8 @@ import { i18nRouting } from "#src/services/i18n/routing.js";
 
 export type PageProps = {
 	slug: string;
-	markdown: Awaited<ReturnType<any>>;
+	markdown: string;
+	frontmatter: Record<string, string>;
 };
 
 export default function Page(props: PageProps) {
@@ -25,6 +32,24 @@ export default function Page(props: PageProps) {
 	const [editLink, setEditLink] = createSignal<string | undefined>("");
 	const [markdownHeadings, setMarkdownHeadings] = createSignal<Array<string>>(
 		[]
+	);
+
+	const [fetchCustomElements] = createResource(
+		props.frontmatter.custom_elements,
+		async () => {
+			for (const [name, src] of Object.entries(
+				props.frontmatter.custom_elements ?? {}
+			)) {
+				if (!customElements.get(name)) {
+					const module = await import(src);
+					if (!customElements.get(name)) {
+						customElements.define(name, module.default);
+					}
+				}
+			}
+			return Date.now();
+		},
+		{ initialValue: Date.now() }
 	);
 
 	const ogPath = () => {
@@ -52,18 +77,17 @@ export default function Page(props: PageProps) {
 
 	createEffect(() => {
 		setMarkdownHeadings(
+			// @ts-ignore
 			props.markdown
-				? props.markdown
-						.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
-						.map((heading: string) => {
-							// We have to use DOMParser to parse the heading string to a HTML element
-							const parser = new DOMParser();
-							const doc = parser.parseFromString(heading, "text/html");
-							const node = doc.body.firstChild as HTMLElement;
+				?.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
+				.map((heading: string) => {
+					// We have to use DOMParser to parse the heading string to a HTML element
+					const parser = new DOMParser();
+					const doc = parser.parseFromString(heading, "text/html");
+					const node = doc.body.firstChild as HTMLElement;
 
-							return node.innerText.replace(/(<([^>]+)>)/gi, "").toString();
-						})
-				: []
+					return node.innerText.replace(/(<([^>]+)>)/gi, "").toString();
+				})
 		);
 	});
 
@@ -183,11 +207,15 @@ export default function Page(props: PageProps) {
 					</nav>
 					<Show
 						when={props.markdown}
-						fallback={<p class="text-danger">{props.markdown?.error}</p>}
+						fallback={
+							<p class="text-danger">{"error while rendering the markdown"}</p>
+						}
 					>
 						<div class="flex flex-1 mb-8 md:ml-4 lg:ml-12 min-h-screen">
 							<div class="flex-1 md:max-w-[500px] lg:max-w-[724px] w-full justify-self-center md:col-span-3">
-								<Markdown markdown={props.markdown} />
+								<Show when={fetchCustomElements()}>
+									<Markdown markdown={props.markdown} />
+								</Show>
 								<EditButton href={editLink()} />
 								<Feedback />
 							</div>
@@ -214,12 +242,7 @@ export default function Page(props: PageProps) {
 }
 
 function Markdown(props: { markdown: string }) {
-	return (
-		<article
-			// eslint-disable-next-line solid/no-innerhtml
-			innerHTML={props.markdown}
-		/>
-	);
+	return <article innerHTML={props.markdown} />;
 }
 
 export const isSelected = (slug: string) => {

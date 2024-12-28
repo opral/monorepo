@@ -1,5 +1,14 @@
-<doc-header title="What is the SDK?" description="Extend the ecosystem with inlang’s SDK." button="Start building" link="/documentation/build-app">
-</doc-header>
+---
+custom_elements:
+  doc-header: "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-header.js/+esm"
+---
+
+<doc-header 
+  title="What is the SDK?" 
+  description="Extend the ecosystem with inlang’s SDK." 
+  button="Start building" 
+  link="/documentation/build-app"
+></doc-header>
 
 <br/>
 <br/>

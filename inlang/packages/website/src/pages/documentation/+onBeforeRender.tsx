@@ -5,13 +5,17 @@ import pluginTableOfContentsRaw from "../../../../../documentation/plugin/tableO
 import lintRuleTableOfContentsRaw from "../../../../../documentation/lint-rule/tableOfContents.json?raw";
 import { parse } from "@opral/markdown-wc";
 import { render, redirect } from "vike/abort";
+import type { PageContext } from "vike/types";
 
 const ecosystemTableOfContents = JSON.parse(ecosystemTableOfContentsRaw);
 const sdkTableOfContents = JSON.parse(sdkTableOfContentsRaw);
 const pluginTableOfContents = JSON.parse(pluginTableOfContentsRaw);
 const lintRuleTableOfContents = JSON.parse(lintRuleTableOfContentsRaw);
 
-const renderedMarkdown = {} as Record<string, string>;
+const renderedMarkdown = {} as Record<
+	string,
+	{ html: string; frontmatter: any }
+>;
 
 const redirectLinks = [
 	{
@@ -55,7 +59,8 @@ const repositoryRoot = import.meta.url.slice(
 	import.meta.url.lastIndexOf("inlang/packages")
 );
 
-export default async function onBeforeRender(pageContext: any) {
+export default async function onBeforeRender(pageContext: PageContext) {
+
 	const slug =
 		pageContext.urlPathname === "/documentation"
 			? ""
@@ -85,7 +90,7 @@ export default async function onBeforeRender(pageContext: any) {
 					"utf-8"
 				);
 				const markdown = await parse(text);
-				renderedMarkdown[page.slug] = markdown.html;
+				renderedMarkdown[page.slug] = markdown;
 			}
 		}
 		//get sdk documentation
@@ -98,7 +103,7 @@ export default async function onBeforeRender(pageContext: any) {
 					"utf-8"
 				);
 				const markdown = await parse(text);
-				renderedMarkdown[page.slug] = markdown.html;
+				renderedMarkdown[page.slug] = markdown;
 			}
 		}
 		//get plugin documentation
@@ -111,7 +116,7 @@ export default async function onBeforeRender(pageContext: any) {
 					"utf-8"
 				);
 				const markdown = await parse(text);
-				renderedMarkdown[page.slug] = markdown.html;
+				renderedMarkdown[page.slug] = markdown;
 			}
 		}
 		//get lint rule documentation
@@ -127,10 +132,12 @@ export default async function onBeforeRender(pageContext: any) {
 					"utf-8"
 				);
 				const markdown = await parse(text);
-				renderedMarkdown[page.slug] = markdown.html;
+				renderedMarkdown[page.slug] = markdown;
 			}
 		}
 	}
+
+	console.log("onbeforrender");
 
 	if (renderedMarkdown[slug] === undefined) {
 		throw render(404);
@@ -140,7 +147,8 @@ export default async function onBeforeRender(pageContext: any) {
 		pageContext: {
 			pageProps: {
 				slug,
-				markdown: renderedMarkdown[slug],
+				markdown: renderedMarkdown[slug].html,
+				frontmatter: renderedMarkdown[slug].frontmatter,
 			},
 		},
 	};
