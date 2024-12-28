@@ -1,5 +1,6 @@
 import { LitElement, html, css } from "lit"
 import { customElement, property } from "lit/decorators.js"
+import "./doc-icon.js"
 
 @customElement("doc-slider")
 export default class extends LitElement {
