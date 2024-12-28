@@ -12,13 +12,13 @@ const allowedOrigins = ENV_VARIABLES.PUBLIC_ALLOWED_AUTH_URLS?.split(",");
 
 // Enable CORS for all allowed origins
 router.use(
-  route,
-  cors({
-    origin: allowedOrigins,
-    methods: "GET,POST",
-    credentials: true,
-    optionsSuccessStatus: 204,
-  }),
+	route,
+	cors({
+		origin: allowedOrigins,
+		methods: "GET,POST",
+		credentials: true,
+		optionsSuccessStatus: 204,
+	})
 );
 
 // Some rpcs can be quite large

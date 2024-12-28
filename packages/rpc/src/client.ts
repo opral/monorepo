@@ -15,5 +15,5 @@ export const route = "/_rpc";
  *   const [value, exception] = await rpc.generateConfigFile({ fs, path: "./" })
  */
 export const rpc = rpcClient<AllRpcs>(
-  ENV_VARIABLES.PUBLIC_SERVER_BASE_URL + route,
+	ENV_VARIABLES.PUBLIC_SERVER_BASE_URL + route
 );

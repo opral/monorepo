@@ -16,19 +16,19 @@ import path from "node:path";
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 await fs.writeFile(
-  dirname + "/index.js",
-  `
+	dirname + "/index.js",
+	`
 export const ENV_VARIABLES = {
   GOOGLE_TRANSLATE_API_KEY: ${ifDefined(process.env.GOOGLE_TRANSLATE_API_KEY)},
 	PUBLIC_SERVER_BASE_URL: ${ifDefined(process.env.PUBLIC_SERVER_BASE_URL)},
 	PUBLIC_ALLOWED_AUTH_URLS: ${ifDefined(process.env.PUBLIC_ALLOWED_AUTH_URLS)},
 }
-`,
+`
 );
 
 // eslint-disable-next-line no-console
 // console.log("✅ Created env variable index file.");
 
 function ifDefined(value) {
-  return value ? `"${value}"` : undefined;
+	return value ? `"${value}"` : undefined;
 }
