@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
 import { router as rpcRouter } from "@inlang/rpc/router";
 import { MarketplaceManifest } from "@inlang/marketplace-manifest";
-import { ProjectSettings } from "@inlang/project-settings";
+import { ProjectSettings } from "@inlang/sdk/settings-schema";
 import { FileSchema } from "@inlang/plugin-message-format/file-schema";
 import { createProxyMiddleware } from "http-proxy-middleware";
 
@@ -42,7 +42,7 @@ if (isProduction) {
 // used by sdk load test
 app.get("/ping", (_, response) => {
   response.send(
-    `http://localhost:3000 ${process.env.MOCK_TRANSLATE ? "MOCK_TRANSLATE" : ""}\n`,
+    `http://localhost:3000 ${process.env.MOCK_TRANSLATE ? "MOCK_TRANSLATE" : ""}\n`
   );
 });
 
