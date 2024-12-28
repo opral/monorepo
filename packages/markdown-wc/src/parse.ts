@@ -32,7 +32,7 @@ export async function parse(
 		inlineStyles?: Record<string, Record<string, string>>
 	}
 ): Promise<{
-	frontmatter: Record<string, any> & { custom_elements: Record<string, string>[] }
+	frontmatter: Record<string, any> & { custom_elements: Record<string, string> }
 	html: string
 }> {
 	const withDefaults = {
