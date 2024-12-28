@@ -14,8 +14,7 @@
 	"devDependencies": {
 		"@inlang/sdk": "workspace:*",
 		"@inlang/cli": "workspace:*",
-		"@lix-js/client": "workspace:*",
 		"typescript": "^5.5.2",
-		"vitest": "^0.34.4"
+		"vitest": "^2.1.8"
 	}
 }

@@ -1,69 +1,23 @@
-import { it, expect } from "vitest"
-import { ProjectSettings, loadProject } from "@inlang/sdk"
-import { id as pluginId } from "../marketplace-manifest.json"
-import { mockRepo } from "@lix-js/client"
+import { test, expect } from "vitest";
+import { loadProjectInMemory, newProject } from "@inlang/sdk";
+import { plugin } from "./plugin.js";
 
-it("should return fake messages (without aliases) to illustrate how a plugin works", async () => {
-	// creating a virtual filesystem in a mock repo to store the project file
-	const repo = await mockRepo()
-	const fs = repo.nodeishFs
+test("example test that loads a project with the plugin", async () => {
+	const inlangFile = await newProject({
+		settings: {
+			baseLocale: "en",
+			locales: ["en", "de"],
+		},
+	});
 
-	// creating a project file
-	const settings = {
-		sourceLanguageTag: "en",
-		modules: ["./plugin.js"],
-		languageTags: ["en", "de"],
-	} satisfies ProjectSettings
+	// loading the project
+	const project = await loadProjectInMemory({
+		// providing the plugin
+		providePlugins: [plugin],
+		blob: inlangFile,
+	});
 
-	// writing the project file to the virtual filesystem
-	await fs.mkdir("/project.inlang", { recursive: true })
-	await fs.writeFile("/project.inlang/settings.json", JSON.stringify(settings))
+	expect(await project.errors.get()).toEqual([]);
 
-	// opening the project file and loading the plugin
-	const project = await loadProject({
-		repo,
-		projectPath: "/project.inlang",
-		// simulate the import function that the SDK uses
-		// to inject the plugin into the project
-		_import: async () => import("./index.js"),
-	})
-
-	expect(project.errors()).toEqual([])
-
-	expect(project.installed.plugins()[0]?.id).toBe(pluginId)
-
-	expect(project.query.messages.get({ where: { id: "this-is-a-test-message" } })).toBeDefined()
-})
-
-it("should return fake messages (with aliases) to illustrate how a plugin works", async () => {
-	// creating a virtual filesystem in a mock repo to store the project file
-	const repo = await mockRepo()
-	const fs = repo.nodeishFs
-
-	// creating a project file
-	const settings = {
-		sourceLanguageTag: "en",
-		modules: ["./plugin.js"],
-		languageTags: ["en", "de"],
-		experimental: { aliases: true },
-	} satisfies ProjectSettings
-
-	// writing the project file to the virtual filesystem
-	await fs.mkdir("/project.inlang", { recursive: true })
-	await fs.writeFile("/project.inlang/settings.json", JSON.stringify(settings))
-
-	// opening the project file and loading the plugin
-	const project = await loadProject({
-		repo,
-		projectPath: "/project.inlang",
-		// simulate the import function that the SDK uses
-		// to inject the plugin into the project
-		_import: async () => import("./index.js"),
-	})
-
-	expect(project.errors()).toEqual([])
-
-	expect(project.installed.plugins()[0]?.id).toBe(pluginId)
-
-	expect(project.query.messages.get({ where: { id: "steep_alpaca_drum_intense" } })).toBeDefined()
-})
+	expect((await project.plugins.get())[0]?.key).toBe(plugin.key);
+});
