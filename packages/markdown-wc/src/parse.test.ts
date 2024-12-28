@@ -34,9 +34,8 @@ C -->|Two| E[Result two]
 })
 
 test("leaves imported custom elements as is", async () => {
-	const markdown = `
----
-imports: 
+	const markdown = `---
+custom_elements: 
   doc-figure: "https://cdn.skypack.dev/@doc-elements/figure"
 ---
 # Hello World
@@ -45,7 +44,7 @@ imports:
 	`
 	const parsed = await parse(markdown)
 	expect(parsed.html).toContain("<doc-figure")
-	expect(parsed.frontmatter.imports).toEqual({
+	expect(parsed.frontmatter.custom_elements).toEqual({
 		"doc-figure": "https://cdn.skypack.dev/@doc-elements/figure",
 	})
 })

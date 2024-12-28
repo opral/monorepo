@@ -12,6 +12,7 @@ import { rehypeAccessibleEmojis } from "rehype-accessible-emojis"
 import { preprocess } from "./preprocess.js"
 import yaml from "yaml"
 import { defaultInlineStyles, rehypeInlineStyles } from "./inline-styles.js"
+import remarkFrontmatter from "remark-frontmatter"
 
 /* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
 export async function parse(
@@ -31,7 +32,7 @@ export async function parse(
 		inlineStyles?: Record<string, Record<string, string>>
 	}
 ): Promise<{
-	frontmatter: Record<string, any> & { imports: Record<string, string>[] }
+	frontmatter: Record<string, any> & { custom_elements: Record<string, string>[] }
 	html: string
 }> {
 	const withDefaults = {
@@ -39,41 +40,39 @@ export async function parse(
 		...options,
 	}
 
-	// Extract frontmatter manually
-	const frontmatterMatch = markdown.match(/^---\s*\n([\s\S]*?)\n---\s*\n/m)
-	let frontmatter: Record<string, any> & { imports: Record<string, string>[] } = { imports: [] }
-
-	if (frontmatterMatch) {
-		frontmatter = yaml.parse(frontmatterMatch[1]!) || { imports: [] }
-		// Remove the frontmatter from the markdown string
-		markdown = markdown.slice(frontmatterMatch[0].length).trimStart()
-	}
-
 	const content = await unified()
 		/* @ts-ignore */
 		.use(remarkParse)
 		/* @ts-ignore */
 		.use(remarkGfm)
+		.use(remarkFrontmatter, ["yaml"])
+		.use(() => (tree, file) => {
+			// Extract frontmatter and store it in `file.data`
+			// @ts-ignore
+			const yamlNode = tree.children.find((node: any) => node.type === "yaml")
+			if (yamlNode && yamlNode.value) {
+				try {
+					file.data.frontmatter = yaml.parse(yamlNode.value)
+				} catch (e) {
+					// @ts-ignore
+					throw new Error(`Failed to parse frontmatter: ${e.message}`)
+				}
+				// @ts-ignore
+				// Remove the YAML node from the tree
+				tree.children = tree.children.filter((node: any) => node.type !== "yaml")
+			} else {
+				file.data.frontmatter = {}
+			}
+		})
 		/* @ts-ignore */
 		.use(remarkRehype, { allowDangerousHtml: true })
 		/* @ts-ignore */
 		.use(rehypeRaw)
 		/* @ts-ignore */
-		.use(rehypeSanitize, {
-			...defaultSchema,
-
-			tagNames: [
-				// allow the custom elements
-				...Object.keys(frontmatter.imports ?? []),
-				...(defaultSchema.tagNames ?? []),
-			],
-			attributes: {
-				// allow any attributes on custom elements
-				...Object.keys(frontmatter.imports ?? {}).map((customElement) => ({
-					[customElement]: ["*"],
-				})),
-				...(defaultSchema.attributes ?? {}),
-			},
+		.use(() => (tree, file) => {
+			// Dynamically configure `rehypeSanitize` based on frontmatter in `file.data`
+			// @ts-ignore
+			return rehypeSanitize(createSanitizeOptions(file.data.frontmatter || {}))(tree, file)
 		})
 		.use(rehypeHighlight)
 		.use(rehypeSlug)
@@ -92,8 +91,30 @@ export async function parse(
 		.process(preprocess(markdown))
 
 	return {
-		frontmatter,
+		frontmatter: content.data.frontmatter ?? ({} as any),
 		html: String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
 	${content}`),
+	}
+}
+
+function createSanitizeOptions(frontmatter: Record<string, any>) {
+	return {
+		...defaultSchema,
+		tagNames: [
+			// Allow custom elements
+			...Object.keys(frontmatter.custom_elements ?? []),
+			...(defaultSchema.tagNames ?? []),
+		],
+		attributes: {
+			// Allow any attributes on custom elements
+			...Object.keys(frontmatter.custom_elements ?? {}).reduce(
+				(acc, customElement) => ({
+					...acc,
+					[customElement]: ["*"],
+				}),
+				{}
+			),
+			...(defaultSchema.attributes ?? {}),
+		},
 	}
 }
