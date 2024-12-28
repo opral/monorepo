@@ -4,12 +4,12 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "vite --host",
-		"build": "vite build",
-		"test": "tsc --noEmit",
-		"preview": "vite preview",
-		"generate": "node ./scripts/generateDemoData.js",
-		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+		"_dev": "vite --host",
+		"_build": "vite build",
+		"_test": "tsc --noEmit",
+		"_preview": "vite preview",
+		"_generate": "node ./scripts/generateDemoData.js",
+		"_lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
 		"format": "prettier --write .",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
