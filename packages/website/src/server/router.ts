@@ -36,7 +36,7 @@ export const router: Router = express.Router();
 
 if (process.env.NODE_ENV === "production") {
 	// import server code https://github.com/brillout/vite-plugin-ssr/issues/403
-	await import(`${rootPath}/dist/server/importBuild.cjs`);
+	await import(`${rootPath}/dist/server/entry.mjs`);
 	router.use(sirv(`${rootPath}/dist/client`));
 } else {
 	const viteServer = await createViteServer({

@@ -12,9 +12,9 @@ import { getTableOfContents } from "./getTableOfContents.js";
 import InPageNav from "./InPageNav.jsx";
 import MainActions from "./MainActions.jsx";
 import { getDocsBaseUrl } from "#src/interface/sdkDocs/SdkDocsHeader.jsx";
-import { i18nRouting } from "#src/renderer/+onBeforeRoute.js";
 import NavbarIcon from "./NavbarIcon.jsx";
 import NavbarOtherPageIndicator from "./NavBarOtherPageIndicator.jsx";
+import { i18nRouting } from "#src/services/i18n/routing.js";
 
 export type PageProps = {
 	slug: string;

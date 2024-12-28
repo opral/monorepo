@@ -3,8 +3,8 @@ import { For } from "solid-js";
 import tableOfContentsRaw from "../../../../../blog/tableOfContents.json?raw";
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx";
 import Link from "#src/renderer/Link.jsx";
-import { i18nRouting } from "#src/renderer/+onBeforeRoute.js";
 import { currentPageContext } from "#src/renderer/state.js";
+import { i18nRouting } from "#src/services/i18n/routing.js";
 
 const tableOfContents = JSON.parse(tableOfContentsRaw) as any;
 
