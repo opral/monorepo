@@ -1,7 +1,6 @@
-import type { NodeishFilesystem } from "@lix-js/fs";
 import {
-  addRecommendationToWorkspace,
-  isInWorkspaceRecommendation,
+	addRecommendationToWorkspace,
+	isInWorkspaceRecommendation,
 } from "./recommendation/recommendation.js";
 
 /**
@@ -12,10 +11,10 @@ import {
  * @returns {Promise<boolean>} - A promise that resolves to false if the project is adopted, otherwise true.
  */
 export async function shouldRecommend(args: {
-  fs: NodeishFilesystem;
-  workingDirectory?: string;
+	fs: typeof import("node:fs/promises");
+	workingDirectory?: string;
 }): Promise<boolean> {
-  return !(await isInWorkspaceRecommendation(args.fs, args.workingDirectory));
+	return !(await isInWorkspaceRecommendation(args.fs, args.workingDirectory));
 }
 
 /**
@@ -26,10 +25,10 @@ export async function shouldRecommend(args: {
  * @returns {Promise<boolean>} - A promise that resolves to false if the project is adopted, otherwise true.
  */
 export async function isAdopted(args: {
-  fs: NodeishFilesystem;
-  workingDirectory?: string;
+	fs: typeof import("node:fs/promises");
+	workingDirectory?: string;
 }): Promise<boolean> {
-  return await isInWorkspaceRecommendation(args.fs, args.workingDirectory);
+	return await isInWorkspaceRecommendation(args.fs, args.workingDirectory);
 }
 
 /**
@@ -40,8 +39,8 @@ export async function isAdopted(args: {
  * @returns {Promise<void>} - A promise that resolves when the project is successfully added.
  */
 export async function add(args: {
-  fs: NodeishFilesystem;
-  workingDirectory?: string;
+	fs: typeof import("node:fs/promises");
+	workingDirectory?: string;
 }): Promise<void> {
-  await addRecommendationToWorkspace(args.fs, args.workingDirectory);
+	await addRecommendationToWorkspace(args.fs, args.workingDirectory);
 }

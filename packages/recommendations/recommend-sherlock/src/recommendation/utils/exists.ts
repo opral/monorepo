@@ -1,5 +1,3 @@
-import type { NodeishFilesystem } from "@lix-js/fs";
-
 /**
  * Returns true if the path exists (file or directory), false otherwise.
  *
@@ -7,13 +5,13 @@ import type { NodeishFilesystem } from "@lix-js/fs";
  * @returns
  */
 export async function pathExists(
-  filePath: string,
-  nodeishFs: NodeishFilesystem,
+	filePath: string,
+	nodeishFs: typeof import("node:fs/promises")
 ) {
-  try {
-    await nodeishFs.stat(filePath);
-    return true;
-  } catch (error) {
-    return false;
-  }
+	try {
+		await nodeishFs.stat(filePath);
+		return true;
+	} catch (error) {
+		return false;
+	}
 }
