@@ -1,21 +1,17 @@
-import type { Plugin } from "@inlang/sdk"
-import { id, displayName, description } from "../marketplace-manifest.json"
-import { createMessage } from "@inlang/sdk/test-utilities"
+import type { InlangPlugin } from "@inlang/sdk";
 
-export const plugin: Plugin = {
-	id: id as Plugin["id"],
-	displayName,
-	description,
-	loadMessages: async () => {
-		console.info("loadMessages called")
-		const fakeMessages = [
-			createMessage("this-is-a-test-message", {
-				en: "Hello world!",
-			}),
-		]
-		return fakeMessages
+export const plugin: InlangPlugin = {
+	key: "my_cool_plugin",
+	importFiles: async ({ files, settings }) => {
+		// Implement me
+		return {
+			bundles: [],
+			messages: [],
+			variants: [],
+		};
 	},
-	saveMessages: (args) => {
-		console.info("saveMessages called with ", args.messages)
+	exportFiles: async ({ bundles, messages, variants, settings }) => {
+		// implement me
+		return [];
 	},
-}
+};
