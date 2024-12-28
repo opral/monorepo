@@ -1,7 +1,6 @@
 import * as m from "#src/paraglide/messages.js";
 import { Button } from "../components/Button.jsx";
 import { Show, createSignal } from "solid-js";
-import CredibilityTag from "../components/CredibilityTag.jsx";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -42,7 +41,7 @@ const HeroSearch = (props: { projectCount: string }) => {
         </sl-dialog>
       </Show>
       <div class="col-span-12 lg:col-span-6 items-center lg:items-start relative z-30 flex flex-col gap-2 pb-6 mt-4 md:mt-8">
-        <CredibilityTag projectCount={props.projectCount} />
+        {/* <CredibilityTag projectCount={props.projectCount} /> */}
 
         <h1 class="text-4xl md:text-6xl text-surface-900 text-center lg:text-start font-bold tracking-tight mt-6">
           {m.home_inlang_title()}

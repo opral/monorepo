@@ -59,7 +59,10 @@ const Footer = () => {
         name: m.footer_contact_feedback(),
         href: "https://github.com/opral/monorepo/discussions/categories/feedback",
       },
-      { name: m.footer_contact_blog(), href: "/blog" },
+      {
+        name: m.footer_contact_blog(),
+        href: "https://opral.substack.com/t/inlang",
+      },
       {
         name: m.footer_privacy_policy(),
         href: "https://www.iubenda.com/privacy-policy/63446420",
