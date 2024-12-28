@@ -9,7 +9,7 @@ import { getRedirectPath } from "./helper/getRedirectPath.js";
 
 const repositoryRoot = import.meta.url.slice(
 	0,
-	import.meta.url.lastIndexOf("inlang/source-code")
+	import.meta.url.lastIndexOf("inlang/packages")
 );
 let renderedMarkdown = {} as string | undefined;
 //let tabelOfContents = {} as Record<string, Record<string, string[]>>

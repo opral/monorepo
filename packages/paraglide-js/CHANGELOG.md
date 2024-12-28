@@ -18,7 +18,7 @@
   - NextJs: https://inlang.com/m/osslbuzt/paraglide-next-i18n
   - Astro: https://inlang.com/m/iljlwzfs/paraglide-astro-i18n
   - SolidStart: https://inlang.com/m/n860p17j/paraglide-solidstart-i18n
-  - Vite: https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-vite
+  - Vite: https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-vite
 
 ## 1.11.0
 

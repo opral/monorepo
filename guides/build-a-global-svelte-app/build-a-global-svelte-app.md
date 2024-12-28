@@ -123,6 +123,6 @@ Paraglide-SvelteKit provides convenient functions for this. `i18n.route(translat
 
 Paraglide-SvelteKit has a few more features that you might want to check out, such as localized paths. Read more about it in the [Paraglide-SvelteKit Documentation](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n).
 
-[Checkout the example GitHub](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-sveltekit/example) or on [StackBlitz](https://stackblitz.com/~/github.com/lorissigrist/paraglide-sveltekit-example)
+[Checkout the example GitHub](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-sveltekit/example) or on [StackBlitz](https://stackblitz.com/~/github.com/lorissigrist/paraglide-sveltekit-example)
 
 If you have any questions, feel free to ask them in our [Discord](https://discord.gg/CNPfhWpcAa) or open a discussion on [GitHub](https://github.com/opral/monorepo/discussions).

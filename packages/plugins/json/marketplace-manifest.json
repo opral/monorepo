@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.json",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/json/assets/icon.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/plugins/json/assets/icon.png",
 	"displayName": {
 		"en": "JSON translation files"
 	},
@@ -9,8 +9,8 @@
 		"en": "This plugin enables using JSON files for messages. It is not library specific and can be used with any framework."
 	},
 	"pages": {
-		"/": "./inlang/source-code/plugins/json/README.md",
-		"/changelog": "./inlang/source-code/plugins/json/CHANGELOG.md"
+		"/": "./inlang/packages/plugins/json/README.md",
+		"/changelog": "./inlang/packages/plugins/json/CHANGELOG.md"
 	},
 	"keywords": [
 		"json",

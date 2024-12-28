@@ -1,6 +1,5 @@
 import { Meta, Title } from "@solidjs/meta";
 import { For, Show } from "solid-js";
-import "@opral/markdown-wc/css";
 import "@opral/markdown-wc/custom-elements";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx";
@@ -68,7 +67,7 @@ export default function Page(props: PageProps) {
 			) : (
 				<Meta
 					name="og:image"
-					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-social-image.jpg"
 				/>
 			)}
 			<Meta name="twitter:card" content="summary_large_image" />
@@ -79,7 +78,7 @@ export default function Page(props: PageProps) {
 			) : (
 				<Meta
 					name="twitter:image"
-					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-social-image.jpg"
 				/>
 			)}
 			<Meta

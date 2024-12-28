@@ -24,7 +24,7 @@ Design/decide on a plugin API that:
 No plugin API. "Plugins" simply define functions.
 
 - This leads to a bloated inlang.config.js, degrading the developer experience by a wide margin. Nobody wants to merge and maintain code that looks like [that](https://github.com/inlang/internal-test/blob/be6028b0767bf2f46c1b3840cf684eea96106ee7/inlang.config.js)
-- Plugin/app-specific configuration is leaking into the core config, see https://github.com/opral/monorepo/blob/main/inlang/source-code/versioned-interfaces/project-config/src/interface.ts#L70-L122. This is bad. The result will be a massive config schema that becomes unmaintainable.
+- Plugin/app-specific configuration is leaking into the core config, see https://github.com/opral/monorepo/blob/main/inlang/packages/versioned-interfaces/project-config/src/interface.ts#L70-L122. This is bad. The result will be a massive config schema that becomes unmaintainable.
 
 ```ts
 export async function defineConfig(env) {
@@ -219,7 +219,7 @@ export async function defineConfig(env) {
 
 This proposal is simple and flexible.
 
-1. Have a utility function called `createPlugin` [similar to `createLintRule` in the lint rule system](https://github.com/opral/monorepo/blob/main/inlang/source-code/versioned-interfaces/message-lint-rule/src/interface.ts#L21-L49).
+1. Have a utility function called `createPlugin` [similar to `createLintRule` in the lint rule system](https://github.com/opral/monorepo/blob/main/inlang/packages/versioned-interfaces/message-lint-rule/src/interface.ts#L21-L49).
 
 2. Have a `plugins` property that takes an array of plugins in @inlang/core/config:
 

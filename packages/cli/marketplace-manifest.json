@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "app.inlang.cli",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/cli-icon.png",
+  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/cli/assets/cli-icon.png",
   "gallery": [
     "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/cli-marketplace-cover.jpg",
     "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-1.jpg",
@@ -15,8 +15,8 @@
     "en": "Command line interface for inlang projects. Many commands and the possibility to do translation automation."
   },
   "pages": {
-    "/": "./inlang/source-code/cli/README.md",
-    "/changelog": "./inlang/source-code/cli/CHANGELOG.md"
+    "/": "./inlang/packages/cli/README.md",
+    "/changelog": "./inlang/packages/cli/CHANGELOG.md"
   },
   "keywords": [
     "cli",

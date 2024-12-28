@@ -3,7 +3,6 @@ import { For, Show, onMount } from "solid-js";
 import { GetHelp } from "#src/interface/components/GetHelp.jsx";
 import { Chip } from "#src/interface/components/Chip.jsx";
 import { colorForTypeOf, convertLinkToGithub } from "../../utilities.js";
-import "@opral/markdown-wc/css";
 import "@opral/markdown-wc/custom-elements";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx";
@@ -76,7 +75,7 @@ export default function Page(props: PageProps) {
 			) : (
 				<Meta
 					name="og:image"
-					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-social-image.jpg"
 				/>
 			)}
 			<Meta name="twitter:card" content="summary_large_image" />
@@ -85,7 +84,7 @@ export default function Page(props: PageProps) {
 			) : (
 				<Meta
 					name="twitter:image"
-					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-social-image.jpg"
 				/>
 			)}
 			<Meta

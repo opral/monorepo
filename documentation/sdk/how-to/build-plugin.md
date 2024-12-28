@@ -48,7 +48,7 @@ export const plugin: Plugin<PluginSettings> = {
 ```
 
 Implement the logic for each function according to your plugin's requirements.
-**Example implementation** of plugins can be found [here](https://github.com/opral/monorepo/tree/main/inlang/source-code/plugins).
+**Example implementation** of plugins can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/plugins).
 
 ### 3. Configure your plugin
 

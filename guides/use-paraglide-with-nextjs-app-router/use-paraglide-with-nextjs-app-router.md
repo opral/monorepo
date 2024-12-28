@@ -175,6 +175,6 @@ You can edit which languages you support in `project.inlang/settings.json`.
 
 You now have a fully functional multilingual NextJS app using ParaglideJS. Wasn't that hard was it?
 
-You can check out the full source code of this example [here](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-next/examples/app).
+You can check out the full source code of this example [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-next/examples/app).
 
 If you want to learn more about Paraglide, check out the [Paraglide-Next Documentation](https://inlang.com/m/osslbuzt/paraglide-next-i18n). If you need help or have some ideas, feel free to reach out to us on [Discord](https://discord.gg/CNPfhWpcAa) or open a Discussion on [GitHub](https://github.com/opral/monorepo/discussions).
