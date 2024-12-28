@@ -1,7 +1,8 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
-export class DocComment extends LitElement {
+@customElement("doc-comment")
+export default class extends LitElement {
 	static override styles = css`
 		:host {
 			display: inline-flex;
@@ -63,23 +64,6 @@ export class DocComment extends LitElement {
 				${this.author}${this.icon ? html`<doc-icon icon=${this.icon}></doc-icon>` : ``}
 			</p>
 			<div class="comment-wrapper">${this.text}</div>
-		</div>`
-	}
-}
-
-@customElement("doc-comments")
-export class DocComments extends LitElement {
-	static override styles = css`
-		.doc-comment-grid {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 1rem;
-		}
-	`
-
-	override render() {
-		return html`<div class="doc-comment-grid">
-			<slot></slot>
 		</div>`
 	}
 }

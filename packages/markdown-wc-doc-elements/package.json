@@ -1,7 +1,7 @@
 {
 	"name": "@opral/markdown-wc-doc-elements",
 	"type": "module",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -10,7 +10,7 @@
 		"./dist"
 	],
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/*.js"
 	},
 	"scripts": {
 		"build": "tsc --build",

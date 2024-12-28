@@ -1,7 +1,8 @@
 import { LitElement, css, html } from "lit"
-import { property } from "lit/decorators.js"
+import { customElement, property } from "lit/decorators.js"
 
-export class DocVideo extends LitElement {
+@customElement("doc-video")
+export default class extends LitElement {
 	static override styles = css`
 		:host {
 			display: inline-flex;

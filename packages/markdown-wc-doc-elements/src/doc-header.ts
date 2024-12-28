@@ -1,7 +1,8 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
-export class DocHeader extends LitElement {
+@customElement("doc-header")
+export default class extends LitElement {
 	static override styles = css`
 		a {
 			text-decoration: none;

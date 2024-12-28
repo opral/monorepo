@@ -1,7 +1,8 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
-export class DocImportant extends LitElement {
+@customElement("doc-important")
+export default class extends LitElement {
 	static override styles = css`
 		.doc-important {
 			padding: 0.5rem 2rem;

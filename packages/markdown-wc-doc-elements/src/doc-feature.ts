@@ -1,7 +1,7 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
-
-export class DocFeature extends LitElement {
+@customElement("doc-feature")
+export default class extends LitElement {
 	static override styles = css`
 		.feature-card {
 			display: flex;

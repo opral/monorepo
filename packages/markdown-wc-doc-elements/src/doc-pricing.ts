@@ -1,7 +1,8 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
-export class DocPricing extends LitElement {
+@customElement("doc-pricing")
+export default class extends LitElement {
 	static override styles = css`
 		.doc-dev-tool {
 			background-color: #ffffff;

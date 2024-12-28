@@ -1,7 +1,8 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
-export class DocProof extends LitElement {
+@customElement("doc-proof")
+export default class extends LitElement {
 	static override styles = css`
 		.social-proof {
 			display: flex;

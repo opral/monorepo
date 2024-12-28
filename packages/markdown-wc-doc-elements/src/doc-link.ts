@@ -1,7 +1,8 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
-export class DocLink extends LitElement {
+@customElement("doc-link")
+export default class extends LitElement {
 	static override styles = css`
 		a {
 			text-decoration: none;
@@ -65,23 +66,5 @@ export class DocLink extends LitElement {
 				<p>${this.description}</p>
 			</div>
 		</a>`
-	}
-}
-
-// takes the inner elements and just renders them with custom styles around them
-@customElement("doc-links")
-export class DocLinks extends LitElement {
-	static override styles = css`
-		.doc-link-grid {
-			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-			grid-gap: 1rem;
-		}
-	`
-
-	override render() {
-		return html`<div class="doc-link-grid">
-			<slot></slot>
-		</div>`
 	}
 }

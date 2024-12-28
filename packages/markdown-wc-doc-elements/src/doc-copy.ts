@@ -1,7 +1,8 @@
 import { LitElement, css, html } from "lit"
-import { property } from "lit/decorators.js"
+import { customElement, property } from "lit/decorators.js"
 
-export class DocCopy extends LitElement {
+@customElement("doc-copy")
+export default class extends LitElement {
 	static override styles = css`
 		.copy-text {
 			color: #64748b;

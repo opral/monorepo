@@ -1,7 +1,8 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
-export class DocImage extends LitElement {
+@customElement("doc-image")
+export default class extends LitElement {
 	static override styles = css`
 		:host {
 			display: inline-flex;

@@ -1,7 +1,8 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
-export class DocFigure extends LitElement {
+@customElement("doc-figure")
+export default class extends LitElement {
 	static override styles = css`
 		figure {
 			margin: 0;
