@@ -1,7 +1,6 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
-@customElement("doc-important")
 export class DocImportant extends LitElement {
 	static override styles = css`
 		.doc-important {
