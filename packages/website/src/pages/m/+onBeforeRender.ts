@@ -120,8 +120,8 @@ export default async function onBeforeRender(pageContext: PageContext) {
 					const markdown = await parse(content);
 
 					renderedMarkdown = markdown.html;
-					if (markdown.data?.frontmatter) {
-						pageData = markdown.data?.frontmatter;
+					if (markdown?.frontmatter) {
+						pageData = markdown?.frontmatter;
 					}
 				} catch (error) {
 					// pages do not getting prerendered because they are link
@@ -139,8 +139,8 @@ export default async function onBeforeRender(pageContext: PageContext) {
 			const readmeMarkdown = await parse(await getContentString(readme()!));
 
 			renderedMarkdown = readmeMarkdown.html;
-			if (readmeMarkdown.data?.frontmatter) {
-				pageData = readmeMarkdown.data?.frontmatter;
+			if (readmeMarkdown?.frontmatter) {
+				pageData = readmeMarkdown?.frontmatter;
 			}
 		} catch (error) {
 			console.error("Error while accessing the readme file");
