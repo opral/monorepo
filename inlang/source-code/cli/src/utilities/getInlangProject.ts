@@ -2,9 +2,8 @@ import fs from "node:fs";
 import {
   loadProjectFromDirectoryInMemory,
   type InlangProject,
-} from "@inlang/sdk2";
+} from "@inlang/sdk";
 import { resolve } from "node:path";
-import { id } from "../../marketplace-manifest.json";
 
 /**
  * Used for telemetry.
@@ -24,7 +23,7 @@ export async function getInlangProject(args: {
     const project = await loadProjectFromDirectoryInMemory({
       path: projectPath,
       fs: fs,
-      appId: id,
+      appId: "app",
     });
 
     lastUsedProject = project;

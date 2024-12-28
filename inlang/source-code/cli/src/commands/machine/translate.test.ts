@@ -5,7 +5,7 @@ import {
   loadProjectInMemory,
   newProject,
   selectBundleNested,
-} from "@inlang/sdk2";
+} from "@inlang/sdk";
 
 test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
   "should tanslate the missing languages",
