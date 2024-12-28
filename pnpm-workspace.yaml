@@ -1,11 +1,5 @@
 packages:
-  - 'inlang/source-code/*'
-  - 'inlang/source-code/recommendations/*'
-  - 'inlang/source-code/templates/*'
-  - 'inlang/source-code/paraglide/paraglide-js'
-  - 'inlang/source-code/plugins/*'
-  - 'inlang/source-code/website/*'
-  - 'inlang/source-code/ui-components/*'
+  - 'inlang/source-code/**/*'
   - 'packages/*'
   - 'packages/*/example'
   - 'packages/*/examples/*'
