@@ -140,7 +140,7 @@ const NextCard = () => {
 			<div class="absolute top-1/3 md:top-1/2 -translate-y-1/2 right-1/2 translate-x-1/2 border border-surface-300 bg-[#FFF] bg-opacity-80 backdrop-blur-[16px] rounded-full w-16 lg:w-20 xl:w-28">
 				<img
 					class="w-full p-3 lg:p-4"
-					src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglideNoBg.png"
+					src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/assets/paraglideNoBg.png"
 					alt="ParaglideJS"
 				/>
 			</div>

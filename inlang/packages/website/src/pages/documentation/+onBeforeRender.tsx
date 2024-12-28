@@ -52,7 +52,7 @@ const redirectLinks = [
 This is necessary because the code is executed from the build folder. */
 const repositoryRoot = import.meta.url.slice(
 	0,
-	import.meta.url.lastIndexOf("inlang/source-code")
+	import.meta.url.lastIndexOf("inlang/packages")
 );
 
 export default async function onBeforeRender(pageContext: any) {

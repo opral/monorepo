@@ -5,7 +5,7 @@ on:
 
   push:
     paths:
-      - "inlang/source-code/ide-extension/package.json"
+      - "inlang/packages/ide-extension/package.json"
     branches:
       - main
 
@@ -52,12 +52,12 @@ jobs:
 
       - name: Publish to Visual Studio Code Marketplace
         run: pnpm --filter vs-code-extension run publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
-        working-directory: ./inlang/source-code/ide-extension
+        working-directory: ./inlang/packages/ide-extension
         env:
           VSCE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
 
       - name: Publish to Open VSX Registry
         run: pnpm --filter vs-code-extension run publish:open-vsx
-        working-directory: ./inlang/source-code/ide-extension
+        working-directory: ./inlang/packages/ide-extension
         env:
           OPEN_VSX_TOKEN: ${{ secrets.OPEN_VSX_TOKEN }}

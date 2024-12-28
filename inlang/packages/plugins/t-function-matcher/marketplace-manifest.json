@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.tFunctionMatcher",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/t-function-matcher/assets/t.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/plugins/t-function-matcher/assets/t.png",
 	"displayName": {
 		"en": "t-function-matcher"
 	},
@@ -9,8 +9,8 @@
 		"en": "Enables the inlang Visual Studio Code extension (Sherlock) to work with t-functions"
 	},
 	"pages": {
-		"/": "./inlang/source-code/plugins/t-function-matcher/README.md",
-		"/changelog": "./inlang/source-code/plugins/t-function-matcher/CHANGELOG.md"
+		"/": "./inlang/packages/plugins/t-function-matcher/README.md",
+		"/changelog": "./inlang/packages/plugins/t-function-matcher/CHANGELOG.md"
 	},
 	"keywords": [
 		"website",

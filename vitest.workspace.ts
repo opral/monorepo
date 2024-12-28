@@ -1,5 +1,5 @@
 export default [
-  "inlang/source-code/plugins/*",
-  "inlang/source-code/sherlock",
+  "inlang/packages/plugins/*",
+  "inlang/packages/sherlock",
   "packages/*",
 ];

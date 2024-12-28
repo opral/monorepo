@@ -37,7 +37,7 @@ const AstroHeader = () => {
 					<div class="px-7 pb-4 z-20">
 						<img
 							class="w-20 pt-20"
-							src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglideNoBg.png"
+							src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/assets/paraglideNoBg.png"
 							alt="ParaglideJS"
 						/>
 					</div>

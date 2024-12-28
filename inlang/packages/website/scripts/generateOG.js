@@ -3,7 +3,10 @@ import { createWriteStream, createReadStream } from "node:fs"
 import fs from "node:fs/promises"
 import path from "node:path"
 
-const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
+const repositoryRoot = import.meta.url.slice(
+	0,
+	import.meta.url.lastIndexOf("inlang/packages")
+);
 
 // The routes that need to have an OG image generated
 const routes = [{ path: "/documentation", dynamic: true }]
@@ -120,9 +123,12 @@ async function writeImage(outputDirectory, item) {
 	// Add the logo
 	const logo = await PImage.decodePNGFromStream(
 		createReadStream(
-			new URL("inlang/source-code/website/public/images/inlang-advanced.png", repositoryRoot)
+			new URL(
+				"inlang/packages/website/public/images/inlang-advanced.png",
+				repositoryRoot
+			)
 		)
-	)
+	);
 
 	ctx.drawImage(logo, 1200 - 24 - 256, 24, 256, 256)
 

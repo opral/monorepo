@@ -5,7 +5,6 @@ import { Link, Meta, Title } from "@solidjs/meta";
 import { Feedback } from "./Feedback.jsx";
 import { EditButton } from "./EditButton.jsx";
 import { languageTag } from "#src/paraglide/runtime.js";
-import "@opral/markdown-wc/css";
 import "@opral/markdown-wc/custom-elements";
 import SdkDocsLayout from "#src/interface/sdkDocs/SdkDocsLayout.jsx";
 import { getTableOfContents } from "./getTableOfContents.js";
@@ -47,7 +46,7 @@ export default function Page(props: PageProps) {
 						.replaceAll(" ", "_")
 						.replaceAll("?", "")}.jpg`;
 		} else {
-			return "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-documentation-image.jpg";
+			return "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-documentation-image.jpg";
 		}
 	};
 
@@ -109,7 +108,7 @@ export default function Page(props: PageProps) {
 			<Meta name="twitter:card" content="summary_large_image" />
 			<Meta
 				name="twitter:image"
-				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-documentation-image.jpg"
+				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-documentation-image.jpg"
 			/>
 			<Meta
 				name="twitter:image:alt"

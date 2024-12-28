@@ -7,7 +7,7 @@
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-2.jpg",
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-3.jpg"
 	],
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/ide-extension/assets/sherlock-logo.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/ide-extension/assets/sherlock-logo.png",
 	"displayName": {
 		"en": "Sherlock - VS Code extension"
 	},
@@ -16,16 +16,16 @@
 	},
 	"pages": {
 		"": {
-			"/": "./inlang/source-code/ide-extension/MARKETPLACE.md"
+			"/": "./inlang/packages/ide-extension/MARKETPLACE.md"
 		},
 		"Getting Started": {
-			"/quick-start": "./inlang/source-code/ide-extension/docs/quick-start.md",
-			"/customization": "./inlang/source-code/ide-extension/docs/customization.md",
-			"/supported-i18n-libraries": "./inlang/source-code/ide-extension/docs/supported-i18n-libraries.md",
-			"/video-tour": "./inlang/source-code/ide-extension/docs/video-tour.md"
+			"/quick-start": "./inlang/packages/ide-extension/docs/quick-start.md",
+			"/customization": "./inlang/packages/ide-extension/docs/customization.md",
+			"/supported-i18n-libraries": "./inlang/packages/ide-extension/docs/supported-i18n-libraries.md",
+			"/video-tour": "./inlang/packages/ide-extension/docs/video-tour.md"
 		},
 		"Appendix": {
-			"/changelog": "./inlang/source-code/ide-extension/CHANGELOG.md"
+			"/changelog": "./inlang/packages/ide-extension/CHANGELOG.md"
 		}
 	},
 	"keywords": [

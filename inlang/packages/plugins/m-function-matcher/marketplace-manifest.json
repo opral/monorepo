@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.mFunctionMatcher",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/m-function-matcher/assets/m.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/plugins/m-function-matcher/assets/m.png",
 	"displayName": {
 		"en": "m-function-matcher"
 	},
@@ -9,8 +9,8 @@
 		"en": "Enables the inlang Visual Studio Code extension (Sherlock) to work with paraglide"
 	},
 	"pages": {
-		"/": "./inlang/source-code/plugins/m-function-matcher/README.md",
-		"/changelog": "./inlang/source-code/plugins/m-function-matcher/CHANGELOG.md"
+		"/": "./inlang/packages/plugins/m-function-matcher/README.md",
+		"/changelog": "./inlang/packages/plugins/m-function-matcher/CHANGELOG.md"
 	},
 	"keywords": [
 		"website",

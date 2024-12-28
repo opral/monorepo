@@ -44,7 +44,7 @@ const MainActions = () => {
 							<p class="text-sm">On Marketplace</p>
 						</a>
 						<a
-							href="https://github.com/opral/monorepo/tree/main/inlang/source-code/plugins"
+							href="https://github.com/opral/monorepo/tree/main/inlang/packages/plugins"
 							target="_blanc"
 							class="flex gap-3 items-center text-surface-700 hover:opacity-80 transition-colors"
 						>
@@ -72,7 +72,7 @@ const MainActions = () => {
 							<p class="text-sm">On Marketplace</p>
 						</a>
 						<a
-							href="https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules"
+							href="https://github.com/opral/monorepo/tree/main/inlang/packages/message-lint-rules"
 							target="_blanc"
 							class="flex gap-3 items-center text-surface-700 hover:opacity-80 transition-colors"
 						>

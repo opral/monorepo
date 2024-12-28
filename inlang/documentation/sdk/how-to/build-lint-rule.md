@@ -48,7 +48,7 @@ export const yourLintRule: MessageLintRule = {
 
 Replace `yourLintRule` with a meaningful name for your lint rule.
 
-Helpful **example implementations** of lint rules can be found [here](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules).
+Helpful **example implementations** of lint rules can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/message-lint-rules).
 
 ### 3. Configure your lint rule
 

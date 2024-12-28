@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "app.inlang.finkLocalizationEditor",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/new-fink-logo.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/editor/assets/new-fink-logo.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-marketplace-cover.jpg",
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-1.jpg",
@@ -17,8 +17,8 @@
 	},
 	"pages": {
 		"Overview": {
-			"/": "./inlang/source-code/editor/README.md",
-			"/supported-i18n-libraries": "./inlang/source-code/editor/docs/supported-i18n-libraries.md"
+			"/": "./inlang/packages/editor/README.md",
+			"/supported-i18n-libraries": "./inlang/packages/editor/docs/supported-i18n-libraries.md"
 		},
 		"Guides": {
 			"Usage": "/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink",

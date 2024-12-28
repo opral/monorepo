@@ -7,8 +7,8 @@
       "request": "launch",
       "autoAttachChildProcesses": true,
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "program": "${workspaceRoot}/inlang/source-code/cli/bin/run.js",
-      "cwd": "${workspaceFolder}/inlang/source-code/sdk/multi-project-test",
+      "program": "${workspaceRoot}/inlang/packages/cli/bin/run.js",
+      "cwd": "${workspaceFolder}/inlang/packages/sdk/multi-project-test",
       "args": [
         "machine",
         "translate",
@@ -27,8 +27,8 @@
       "request": "launch",
       "autoAttachChildProcesses": true,
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "program": "${workspaceRoot}/inlang/source-code/sdk/load-test/node_modules/tsx/dist/cli.mjs",
-      "cwd": "${workspaceFolder}/inlang/source-code/sdk/load-test",
+      "program": "${workspaceRoot}/inlang/packages/sdk/load-test/node_modules/tsx/dist/cli.mjs",
+      "cwd": "${workspaceFolder}/inlang/packages/sdk/load-test",
       "args": ["./main.ts", "10", "1", "1", "1"],
       "env": { "MOCK_TRANSLATE_LOCAL": "true", "DEBUG": "sdk:*" },
       "smartStep": true,
@@ -57,7 +57,7 @@
       "args": [
         // uncomment if you have the problem that breakpoints don't bind, because the code is lazy loaded
         //"--noLazy",
-        "--extensionDevelopmentPath=${workspaceFolder}/inlang/source-code/ide-extension",
+        "--extensionDevelopmentPath=${workspaceFolder}/inlang/packages/ide-extension",
         // change this path to specify what folder should be opened upon running this configuration
         "${workspaceFolder}/inlang/development-projects/inlang-nextjs"
       ],
@@ -81,7 +81,7 @@
       "port": 3000,
       "request": "launch",
       "type": "chrome",
-      "webRoot": "${workspaceFolder}/inlang/source-code/website"
+      "webRoot": "${workspaceFolder}/inlang/packages/website"
     },
     {
       "name": "csv-app:3008",

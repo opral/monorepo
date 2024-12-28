@@ -8,8 +8,8 @@
 		"en": "The simplest storage plugin for inlang."
 	},
 	"pages": {
-		"/": "./inlang/source-code/plugins/inlang-message-format/README.md",
-		"/changelog": "./inlang/source-code/plugins/inlang-message-format/CHANGELOG.md"
+		"/": "./inlang/packages/plugins/inlang-message-format/README.md",
+		"/changelog": "./inlang/packages/plugins/inlang-message-format/CHANGELOG.md"
 	},
 	"keywords": [
 		"website",
