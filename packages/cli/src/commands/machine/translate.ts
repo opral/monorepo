@@ -8,7 +8,7 @@ import {
   selectBundleNested,
   upsertBundleNested,
   type InlangProject,
-} from "@inlang/sdk2";
+} from "@inlang/sdk";
 import { projectOption } from "../../utilities/globalFlags.js";
 import progessBar from "cli-progress";
 import fs from "node:fs/promises";
