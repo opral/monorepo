@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import tableOfContentsString from "../../../../../../blog/tableOfContents.json?raw";
-import { convert } from "@inlang/markdown";
+import { parse } from "@opral/markdown-wc";
 import { render } from "vike/abort";
 
 const tableOfContents = JSON.parse(tableOfContentsString);
@@ -28,7 +28,7 @@ export default async function onBeforeRender(pageContext: any) {
 		throw render(404);
 	}
 
-	const content = await convert(fs.readFileSync(markdownFilePath, "utf-8"));
+	const content = await parse(fs.readFileSync(markdownFilePath, "utf-8"));
 	renderedMarkdown[id] = content.html;
 
 	return {

@@ -8,8 +8,8 @@ import fetch from "node-fetch";
 const envVariables = process.env;
 
 const repositoryRoot = import.meta.url.slice(
-  0,
-  import.meta.url.lastIndexOf("inlang/source-code"),
+	0,
+	import.meta.url.lastIndexOf("inlang/packages")
 );
 const manifestLinks = JSON.parse(await fs.readFile("./registry.json", "utf-8"));
 
@@ -46,7 +46,7 @@ for (const type of Object.keys(manifestLinks)) {
         ...json,
       });
     } catch (e) {
-      throw new Error(`Manifest '${link}' is invalid.`);
+      throw new Error(`Manifest '${link}' is invalid. ${e}`);
     }
   }
 }

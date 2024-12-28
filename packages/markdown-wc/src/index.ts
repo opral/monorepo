@@ -1,2 +1,2 @@
-export { convert } from "./convert.js"
+export { parse } from "./parse.js"
 export { generateTableOfContents } from "./tableOfContents.js"

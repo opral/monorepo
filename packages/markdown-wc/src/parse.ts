@@ -44,7 +44,7 @@ const customFrontmatterValidation: Plugin<any> = () => (node, file) => {
 }
 
 /* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
-export async function convert(markdown: string): Promise<{ data: any; html: string }> {
+export async function parse(markdown: string): Promise<{ data: any; html: string }> {
 	const content = await unified()
 		/* @ts-ignore */
 		.use(remarkParse)

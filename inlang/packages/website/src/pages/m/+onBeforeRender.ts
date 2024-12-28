@@ -3,7 +3,7 @@ import { registry } from "@inlang/marketplace-registry";
 import { redirect } from "vike/abort";
 import type { PageContext } from "vike/types";
 import fs from "node:fs/promises";
-import { convert } from "@inlang/markdown";
+import { parse } from "@opral/markdown-wc";
 import type { PageProps } from "./+Page.jsx";
 import { getRedirectPath } from "./helper/getRedirectPath.js";
 
@@ -117,7 +117,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 			if (slug === pagePath) {
 				try {
 					const content = await getContentString(page);
-					const markdown = await convert(content);
+					const markdown = await parse(content);
 
 					renderedMarkdown = markdown.html;
 					if (markdown.data?.frontmatter) {
@@ -136,7 +136,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 
 		// get contant and convert it to markdown
 		try {
-			const readmeMarkdown = await convert(await getContentString(readme()!));
+			const readmeMarkdown = await parse(await getContentString(readme()!));
 
 			renderedMarkdown = readmeMarkdown.html;
 			if (readmeMarkdown.data?.frontmatter) {

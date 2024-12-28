@@ -1,5 +1,5 @@
 packages:
-  - 'inlang/source-code/**/*'
+  - 'inlang/packages/**/*'
   - 'packages/*'
   - 'packages/*/example'
   - 'packages/*/examples/*'

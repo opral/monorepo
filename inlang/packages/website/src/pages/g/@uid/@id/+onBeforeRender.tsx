@@ -1,5 +1,5 @@
 import { registry } from "@inlang/marketplace-registry";
-import { convert } from "@inlang/markdown";
+import { parse } from "@opral/markdown-wc";
 import type { PageContext } from "#src/renderer/types.js";
 import type { PageProps } from "./+Page.jsx";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
@@ -41,7 +41,7 @@ export default async function onBeforeRender(
 		? (await fetch(readme()!)).text()
 		: await fs.readFile(new URL(readme()!, repositoryRoot), "utf-8"));
 
-	const markdown = await convert(text);
+	const markdown = await parse(text);
 
 	const recommends = item.recommends
 		? registry.filter((i: any) => {

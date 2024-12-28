@@ -1,16 +1,16 @@
 {
 	"m": {
-		"2qj2w8pu": "./inlang/source-code/cli/marketplace-manifest.json",
-		"tdozzpar": "./inlang/source-code/fink/marketplace-manifest.json",
-		"r7kp499g": "./inlang/source-code/sherlock/marketplace-manifest.json",
+		"2qj2w8pu": "./inlang/packages/cli/marketplace-manifest.json",
+		"tdozzpar": "./inlang/packages/fink/marketplace-manifest.json",
+		"r7kp499g": "./inlang/packages/sherlock/marketplace-manifest.json",
 		"gkrpgoir": "https://cdn.jsdelivr.net/gh/parrot-global/parrot@latest/marketplace-manifest.json",
-		"3i8bor92": "./inlang/source-code/plugins/i18next/marketplace-manifest.json",
-		"ig84ng0o": "./inlang/source-code/plugins/json/marketplace-manifest.json",
-		"reootnfj": "./inlang/source-code/plugins/inlang-message-format/marketplace-manifest.json",
-		"gerre34r": "./inlang/source-code/paraglide-js/marketplace-manifest.json",
-		"632iow21": "./inlang/source-code/plugins/m-function-matcher/marketplace-manifest.json",
-		"698iow33": "./inlang/source-code/plugins/t-function-matcher/marketplace-manifest.json",
-		"193hsyds": "./inlang/source-code/plugins/next-intl/marketplace-manifest.json",
+		"3i8bor92": "./inlang/packages/plugins/i18next/marketplace-manifest.json",
+		"ig84ng0o": "./inlang/packages/plugins/json/marketplace-manifest.json",
+		"reootnfj": "./inlang/packages/plugins/inlang-message-format/marketplace-manifest.json",
+		"gerre34r": "./inlang/packages/paraglide-js/marketplace-manifest.json",
+		"632iow21": "./inlang/packages/plugins/m-function-matcher/marketplace-manifest.json",
+		"698iow33": "./inlang/packages/plugins/t-function-matcher/marketplace-manifest.json",
+		"193hsyds": "./inlang/packages/plugins/next-intl/marketplace-manifest.json",
 		"neh2d6w7": "https://cdn.jsdelivr.net/npm/inlang-plugin-xcstrings@latest/marketplace-manifest.json"
 	},
 	"g": {

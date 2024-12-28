@@ -1,4 +1,4 @@
-# @inlang/markdown
+# @opral/markdown-wc
 
 ## 0.1.1
 

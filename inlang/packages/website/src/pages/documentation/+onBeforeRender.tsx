@@ -3,7 +3,7 @@ import ecosystemTableOfContentsRaw from "../../../../../documentation/ecosystem/
 import sdkTableOfContentsRaw from "../../../../../documentation/sdk/tableOfContents.json?raw";
 import pluginTableOfContentsRaw from "../../../../../documentation/plugin/tableOfContents.json?raw";
 import lintRuleTableOfContentsRaw from "../../../../../documentation/lint-rule/tableOfContents.json?raw";
-import { convert } from "@inlang/markdown";
+import { parse } from "@opral/markdown-wc";
 import { render, redirect } from "vike/abort";
 
 const ecosystemTableOfContents = JSON.parse(ecosystemTableOfContentsRaw);
@@ -84,7 +84,7 @@ export default async function onBeforeRender(pageContext: any) {
 					),
 					"utf-8"
 				);
-				const markdown = await convert(text);
+				const markdown = await parse(text);
 				renderedMarkdown[page.slug] = markdown.html;
 			}
 		}
@@ -97,7 +97,7 @@ export default async function onBeforeRender(pageContext: any) {
 					new URL(`inlang/documentation/sdk/${page.path}`, repositoryRoot),
 					"utf-8"
 				);
-				const markdown = await convert(text);
+				const markdown = await parse(text);
 				renderedMarkdown[page.slug] = markdown.html;
 			}
 		}
@@ -110,7 +110,7 @@ export default async function onBeforeRender(pageContext: any) {
 					new URL(`inlang/documentation/plugin/${page.path}`, repositoryRoot),
 					"utf-8"
 				);
-				const markdown = await convert(text);
+				const markdown = await parse(text);
 				renderedMarkdown[page.slug] = markdown.html;
 			}
 		}
@@ -126,7 +126,7 @@ export default async function onBeforeRender(pageContext: any) {
 					),
 					"utf-8"
 				);
-				const markdown = await convert(text);
+				const markdown = await parse(text);
 				renderedMarkdown[page.slug] = markdown.html;
 			}
 		}
