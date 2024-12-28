@@ -3,6 +3,7 @@ packages:
   - 'inlang/source-code/paraglide/paraglide-js'
   - 'inlang/source-code/sdk'
   - 'inlang/source-code/fink'
+  - 'inlang/source-code/website'
   - 'inlang/source-code/ui-components/*'
   - 'packages/*'
   - 'packages/*/example'

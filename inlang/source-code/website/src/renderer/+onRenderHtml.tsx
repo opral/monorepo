@@ -11,49 +11,49 @@ import { languageTag } from "#src/paraglide/runtime.js";
 
 // See https://vike.dev/data-fetching
 export const passToClient = [
-  "pageProps",
-  "routeParams",
-  "languageTag",
-  "data",
+	"pageProps",
+	"routeParams",
+	"languageTag",
+	"data",
 ] as const;
 
 export default async function onRenderHtml(
-  pageContext: PageContextRenderer,
+	pageContext: PageContextRenderer
 ): Promise<unknown> {
-  //! TODO most likely cross request state pollution
-  //! Need to look into this in the future
-  setCurrentPageContext(pageContext);
-  // generating the html from the server:
-  // 1. the server sends a hydration script for the client.
-  //    the client uses the hydration script to hydrate the page.
-  //    without hydration, no interactivity.
-  // 2. the page is pre-rendered via `renderedPage`.
-  //    pre-rendering the page makes the page immediately "visible"
-  //    to the user. Afterwards, the client hydrates the page and thereby
-  //    makes the page interactive.
-  // ! important: renderToString is used instead of
-  // ! renderToStringAsync some async resources should
-  // ! not be loaded on the server (the editor for example).
-  // ! see https://github.com/opral/monorepo/issues/247
+	//! TODO most likely cross request state pollution
+	//! Need to look into this in the future
+	setCurrentPageContext(pageContext);
+	// generating the html from the server:
+	// 1. the server sends a hydration script for the client.
+	//    the client uses the hydration script to hydrate the page.
+	//    without hydration, no interactivity.
+	// 2. the page is pre-rendered via `renderedPage`.
+	//    pre-rendering the page makes the page immediately "visible"
+	//    to the user. Afterwards, the client hydrates the page and thereby
+	//    makes the page interactive.
+	// ! important: renderToString is used instead of
+	// ! renderToStringAsync some async resources should
+	// ! not be loaded on the server (the editor for example).
+	// ! see https://github.com/opral/monorepo/issues/247
 
-  // from solidjs meta
-  // mutated during render so you can include in server-rendered template later
-  const tags: any[] = [];
+	// from solidjs meta
+	// mutated during render so you can include in server-rendered template later
+	const tags: any[] = [];
 
-  const renderedPage = renderToString(() => (
-    <MetaProvider tags={tags}>
-      <Root
-        page={pageContext.Page}
-        pageProps={pageContext.pageProps}
-        data={pageContext.data}
-      />
-    </MetaProvider>
-  ));
+	const renderedPage = renderToString(() => (
+		<MetaProvider tags={tags}>
+			<Root
+				page={pageContext.Page}
+				pageProps={pageContext.pageProps}
+				data={pageContext.data}
+			/>
+		</MetaProvider>
+	));
 
-  return escapeInject`<!DOCTYPE html>
+	return escapeInject`<!DOCTYPE html>
     <html lang="${dangerouslySkipEscape(
-      languageTag(),
-    )}" class="min-h-screen min-w-screen overflow-x-hidden">
+			languageTag()
+		)}" class="min-h-screen min-w-screen overflow-x-hidden">
       <head>
 			<meta charset="UTF-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1.0" />

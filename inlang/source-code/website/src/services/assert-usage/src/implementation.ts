@@ -12,12 +12,12 @@
  *  }
  */
 export function assertUsage(
-  condition: unknown,
-  message?: string,
+	condition: unknown,
+	message?: string
 ): asserts condition {
-  // if production environment, do nothing -> vite will remove assert calls in production
-  if (import.meta.env?.PROD) return;
-  if (!condition) {
-    throw new Error(message);
-  }
+	// if production environment, do nothing -> vite will remove assert calls in production
+	if (import.meta.env?.PROD) return;
+	if (!condition) {
+		throw new Error(message);
+	}
 }

@@ -4,17 +4,17 @@ import { registry } from "@inlang/marketplace-registry";
 import { redirect } from "vike/abort";
 
 export default async function onBeforeRender(pageContext: PageContext) {
-  const item = registry.find(
-    (item: any) => item.uniqueID === pageContext.routeParams.uid,
-  ) as MarketplaceManifest & { uniqueID: string };
+	const item = registry.find(
+		(item: any) => item.uniqueID === pageContext.routeParams.uid
+	) as MarketplaceManifest & { uniqueID: string };
 
-  if (!item) {
-    console.error("Item not found");
-    throw redirect("/not-found", 301);
-  } else {
-    throw redirect(
-      `/g/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`,
-      301,
-    );
-  }
+	if (!item) {
+		console.error("Item not found");
+		throw redirect("/not-found", 301);
+	} else {
+		throw redirect(
+			`/g/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`,
+			301
+		);
+	}
 }

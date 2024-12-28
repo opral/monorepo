@@ -13,26 +13,26 @@ import IconGithub from "~icons/cib/github";
  * 	}
  */
 export function ForkPermissionDialog(props: {
-  /** forwarding the ref */
-  ref: SlDialog;
-  onClickForkPermissionButton: () => void;
+	/** forwarding the ref */
+	ref: SlDialog;
+	onClickForkPermissionButton: () => void;
 }) {
-  const [isShown, setIsShown] = createSignal(false);
+	const [isShown, setIsShown] = createSignal(false);
 
-  return (
-    <sl-dialog
-      ref={props.ref}
-      on:sl-show={() => setIsShown(true)}
-      on:sl-after-hide={() => setIsShown(false)}
-    >
-      <Show when={isShown()}>
-        <h3 slot="label">Add permissions</h3>
-        <p>
-          Creating a fork requires app permissions to "all repositories" on
-          github.
-        </p>
+	return (
+		<sl-dialog
+			ref={props.ref}
+			on:sl-show={() => setIsShown(true)}
+			on:sl-after-hide={() => setIsShown(false)}
+		>
+			<Show when={isShown()}>
+				<h3 slot="label">Add permissions</h3>
+				<p>
+					Creating a fork requires app permissions to "all repositories" on
+					github.
+				</p>
 
-        {/*<p>Alternatively you can create a manual fork on github</p>
+				{/*<p>Alternatively you can create a manual fork on github</p>
 				<a class="self-center" href="/documentation" target="_blank">
 					<sl-button prop:variant="text">
 						Manually create fork on github
@@ -40,18 +40,18 @@ export function ForkPermissionDialog(props: {
 					</sl-button>
 				</a> */}
 
-        <sl-button
-          slot="footer"
-          prop:variant="primary"
-          onClick={() => {
-            props.onClickForkPermissionButton();
-          }}
-        >
-          {/* @ts-ignore */}
-          <IconGithub slot="prefix" />
-          Enable "all repo" access on GitHub
-        </sl-button>
-      </Show>
-    </sl-dialog>
-  );
+				<sl-button
+					slot="footer"
+					prop:variant="primary"
+					onClick={() => {
+						props.onClickForkPermissionButton();
+					}}
+				>
+					{/* @ts-ignore */}
+					<IconGithub slot="prefix" />
+					Enable "all repo" access on GitHub
+				</sl-button>
+			</Show>
+		</sl-dialog>
+	);
 }

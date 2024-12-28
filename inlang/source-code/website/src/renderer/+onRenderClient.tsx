@@ -9,7 +9,7 @@ import { MetaProvider } from "@solidjs/meta";
 import { posthog } from "posthog-js";
 
 posthog.init(import.meta.env.PUBLIC_POSTHOG_TOKEN, {
-  api_host: "https://eu.posthog.com",
+	api_host: "https://eu.posthog.com",
 });
 
 // import the css
@@ -42,11 +42,11 @@ import "@shoelace-style/shoelace/dist/components/drawer/drawer.js";
 
 // enable error logging via sentry in production
 if (import.meta.env.PROD) {
-  Sentry.init({
-    dsn: import.meta.env.PUBLIC_WEBSITE_SENTRY_DSN,
-    integrations: [],
-    tracesSampleRate: 0.1,
-  });
+	Sentry.init({
+		dsn: import.meta.env.PUBLIC_WEBSITE_SENTRY_DSN,
+		integrations: [],
+		tracesSampleRate: 0.1,
+	});
 }
 
 let isFirstRender = true;
@@ -54,36 +54,36 @@ const rootElement = document.querySelector("#root") as HTMLElement;
 
 const [currentPage, setCurrentPage] = createSignal<Component>();
 const [currentPageProps, setCurrentPageProps] = createStore<
-  Record<string, unknown>
+	Record<string, unknown>
 >({});
 
 export default function onRenderClient(pageContext: PageContextRenderer) {
-  try {
-    setCurrentPageContext(pageContext);
-    setCurrentPage(() => pageContext.Page);
-    setCurrentPageProps(pageContext.pageProps);
-    if (isFirstRender) {
-      // The editor is only rendered client-side.
-      //
-      // In the future, the editor might be server-side rendered.
-      // For now, the trouble of isomorphic rendering the editor is not worth it.
-      hydrate(
-        () => (
-          <MetaProvider>
-            <Root
-              page={currentPage()!}
-              pageProps={currentPageProps}
-              data={pageContext.data}
-            />
-          </MetaProvider>
-        ),
-        rootElement,
-      );
-      isFirstRender = false;
-    }
-    // https://posthog.com/docs/integrate/client/js#one-page-apps-and-page-views
-    posthog.capture("$pageview");
-  } catch (e) {
-    console.error("ERROR in renderer", e);
-  }
+	try {
+		setCurrentPageContext(pageContext);
+		setCurrentPage(() => pageContext.Page);
+		setCurrentPageProps(pageContext.pageProps);
+		if (isFirstRender) {
+			// The editor is only rendered client-side.
+			//
+			// In the future, the editor might be server-side rendered.
+			// For now, the trouble of isomorphic rendering the editor is not worth it.
+			hydrate(
+				() => (
+					<MetaProvider>
+						<Root
+							page={currentPage()!}
+							pageProps={currentPageProps}
+							data={pageContext.data}
+						/>
+					</MetaProvider>
+				),
+				rootElement
+			);
+			isFirstRender = false;
+		}
+		// https://posthog.com/docs/integrate/client/js#one-page-apps-and-page-views
+		posthog.capture("$pageview");
+	} catch (e) {
+		console.error("ERROR in renderer", e);
+	}
 }
