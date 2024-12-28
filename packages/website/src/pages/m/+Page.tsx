@@ -1,7 +1,7 @@
 import { Meta, Title } from "@solidjs/meta";
 import { For, Show } from "solid-js";
-import "@inlang/markdown/css";
-import "@inlang/markdown/custom-elements";
+import "@opral/markdown-wc/css";
+import "@opral/markdown-wc/custom-elements";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx";
 import Card from "#src/interface/components/Card.jsx";

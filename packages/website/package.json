@@ -56,7 +56,7 @@
 		"@iconify-json/cib": "^1.1.2",
 		"@iconify-json/material-symbols": "^1.1.26",
 		"@inlang/cli": "workspace:*",
-		"@inlang/markdown": "workspace:*",
+		"@opral/markdown-wc": "workspace:*",
 		"@inlang/marketplace-manifest": "workspace:*",
 		"@inlang/marketplace-registry": "workspace:*",
 		"@inlang/paraglide-js": "1.11.3",
