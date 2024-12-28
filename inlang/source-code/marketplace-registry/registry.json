@@ -2,7 +2,7 @@
 	"m": {
 		"2qj2w8pu": "./inlang/source-code/cli/marketplace-manifest.json",
 		"tdozzpar": "./inlang/source-code/fink/marketplace-manifest.json",
-		"r7kp499g": "./inlang/source-code/ide-extension/marketplace-manifest.json",
+		"r7kp499g": "./inlang/source-code/sherlock/marketplace-manifest.json",
 		"gkrpgoir": "https://cdn.jsdelivr.net/gh/parrot-global/parrot@latest/marketplace-manifest.json",
 		"3i8bor92": "./inlang/source-code/plugins/i18next/marketplace-manifest.json",
 		"ig84ng0o": "./inlang/source-code/plugins/json/marketplace-manifest.json",

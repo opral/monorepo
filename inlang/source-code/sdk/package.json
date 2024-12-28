@@ -9,7 +9,8 @@
 		"url": "https://github.com/opral/inlang-sdk"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./settings-schema": "./src/json-schema/settings.ts"
 	},
 	"files": [
 		"./dist",
