@@ -12,10 +12,10 @@
  */
 
 import express, {
-  Router,
-  type NextFunction,
-  type Request,
-  type Response,
+	Router,
+	type NextFunction,
+	type Request,
+	type Response,
 } from "express";
 import { createServer as createViteServer } from "vite";
 import { URL } from "node:url";
@@ -35,53 +35,53 @@ const redirectMap: { [key: string]: string } = {};
 export const router: Router = express.Router();
 
 if (process.env.NODE_ENV === "production") {
-  // import server code https://github.com/brillout/vite-plugin-ssr/issues/403
-  await import(`${rootPath}/dist/server/importBuild.cjs`);
-  router.use(sirv(`${rootPath}/dist/client`));
+	// import server code https://github.com/brillout/vite-plugin-ssr/issues/403
+	await import(`${rootPath}/dist/server/importBuild.cjs`);
+	router.use(sirv(`${rootPath}/dist/client`));
 } else {
-  const viteServer = await createViteServer({
-    server: { middlewareMode: true },
-    root: rootPath,
-    appType: "custom",
-  });
-  // start vite hot module reload dev server
-  // use vite's connect instance as middleware
-  router.use(viteServer.middlewares);
+	const viteServer = await createViteServer({
+		server: { middlewareMode: true },
+		root: rootPath,
+		appType: "custom",
+	});
+	// start vite hot module reload dev server
+	// use vite's connect instance as middleware
+	router.use(viteServer.middlewares);
 }
 
 // ------------------------ START ROUTES ------------------------
 
 router.use((request: Request, response: Response, next: NextFunction) => {
-  try {
-    //redirect
-    if (Object.keys(redirectMap).includes(request.url)) {
-      const redirectUrl: string = redirectMap[request.url]
-        ? redirectMap[request.url]!
-        : request.url!;
-      response.redirect(redirectUrl);
-    }
-    next();
-  } catch (error) {
-    next(error);
-  }
+	try {
+		//redirect
+		if (Object.keys(redirectMap).includes(request.url)) {
+			const redirectUrl: string = redirectMap[request.url]
+				? redirectMap[request.url]!
+				: request.url!;
+			response.redirect(redirectUrl);
+		}
+		next();
+	} catch (error) {
+		next(error);
+	}
 });
 
 // serving #src/pages and /public
 //! it is extremely important that a request handler is not async to catch errors
 //! express does not catch async errors. hence, renderPage uses the callback pattern
 router.get("*", (request, response, next) => {
-  renderPage({
-    urlOriginal: request.originalUrl,
-  })
-    .then((pageContext) => {
-      if (pageContext.httpResponse === null) {
-        next();
-      } else {
-        const { body, headers, statusCode } = pageContext.httpResponse;
-        for (const [name, value] of headers) response.setHeader(name, value);
-        response.status(statusCode).send(body);
-      }
-    })
-    // pass the error to expresses error handling
-    .catch(next);
+	renderPage({
+		urlOriginal: request.originalUrl,
+	})
+		.then((pageContext) => {
+			if (pageContext.httpResponse === null) {
+				next();
+			} else {
+				const { body, headers, statusCode } = pageContext.httpResponse;
+				for (const [name, value] of headers) response.setHeader(name, value);
+				response.status(statusCode).send(body);
+			}
+		})
+		// pass the error to expresses error handling
+		.catch(next);
 });

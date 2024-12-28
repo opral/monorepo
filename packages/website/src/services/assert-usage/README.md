@@ -9,9 +9,9 @@ assert calls are removed and, therefore, have no performance error error implica
 
 ```ts
 function x(argument: string) {
-  assertUsage(
-    argument.startsWith("hello"),
-    "The argument must start with 'hello'. Otherwise, the function crashes.",
-  );
+	assertUsage(
+		argument.startsWith("hello"),
+		"The argument must start with 'hello'. Otherwise, the function crashes."
+	);
 }
 ```

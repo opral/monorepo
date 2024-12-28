@@ -13,38 +13,38 @@ import IconGithub from "~icons/cib/github";
  * 	}
  */
 export function PushPermissionDialog(props: {
-  /** forwarding the ref */
-  ref: SlDialog;
-  onClickPushPermissionButton: () => void;
+	/** forwarding the ref */
+	ref: SlDialog;
+	onClickPushPermissionButton: () => void;
 }) {
-  // web component slots load eagarly. applying manual conditional rendering
-  // combats flickering on initial render
-  const [isShown, setIsShown] = createSignal(false);
+	// web component slots load eagarly. applying manual conditional rendering
+	// combats flickering on initial render
+	const [isShown, setIsShown] = createSignal(false);
 
-  return (
-    <sl-dialog
-      ref={props.ref}
-      on:sl-show={() => setIsShown(true)}
-      on:sl-after-hide={() => setIsShown(false)}
-    >
-      <Show when={isShown()}>
-        <h3 slot="label">Add permissions</h3>
-        <p>
-          To push changes, you need to add the repository to your permissions of
-          the github app.
-        </p>
-        <sl-button
-          slot="footer"
-          prop:variant="primary"
-          onClick={() => {
-            props.onClickPushPermissionButton();
-          }}
-        >
-          {/* @ts-ignore */}
-          <IconGithub slot="prefix" />
-          Add permissions on GitHub
-        </sl-button>
-      </Show>
-    </sl-dialog>
-  );
+	return (
+		<sl-dialog
+			ref={props.ref}
+			on:sl-show={() => setIsShown(true)}
+			on:sl-after-hide={() => setIsShown(false)}
+		>
+			<Show when={isShown()}>
+				<h3 slot="label">Add permissions</h3>
+				<p>
+					To push changes, you need to add the repository to your permissions of
+					the github app.
+				</p>
+				<sl-button
+					slot="footer"
+					prop:variant="primary"
+					onClick={() => {
+						props.onClickPushPermissionButton();
+					}}
+				>
+					{/* @ts-ignore */}
+					<IconGithub slot="prefix" />
+					Add permissions on GitHub
+				</sl-button>
+			</Show>
+		</sl-dialog>
+	);
 }

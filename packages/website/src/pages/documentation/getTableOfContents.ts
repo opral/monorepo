@@ -5,14 +5,14 @@ import lintRuleTableOfContents from "../../../../../documentation/lint-rule/tabl
 import ecosystemTableOfContents from "../../../../../documentation/ecosystem/tableOfContents.json";
 
 export const getTableOfContents = () => {
-  switch (currentPageContext.urlParsed.pathname.split("/")[2]) {
-    case "plugin":
-      return pluginTableOfContents as typeof pluginTableOfContents;
-    case "lint-rule":
-      return lintRuleTableOfContents as typeof lintRuleTableOfContents;
-    case "sdk":
-      return sdkTableOfContents as typeof sdkTableOfContents;
-    default:
-      return ecosystemTableOfContents as typeof ecosystemTableOfContents;
-  }
+	switch (currentPageContext.urlParsed.pathname.split("/")[2]) {
+		case "plugin":
+			return pluginTableOfContents as typeof pluginTableOfContents;
+		case "lint-rule":
+			return lintRuleTableOfContents as typeof lintRuleTableOfContents;
+		case "sdk":
+			return sdkTableOfContents as typeof sdkTableOfContents;
+		default:
+			return ecosystemTableOfContents as typeof ecosystemTableOfContents;
+	}
 };
