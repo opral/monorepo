@@ -89,13 +89,13 @@ describe("Cross-sell Sherlock app", () => {
     };
     await add({ fs: fsMock });
     expect(fsMock.writeFile).toHaveBeenCalledWith(
-      "./.vscode/extensions.json",
-      JSON.stringify(
-        { recommendations: ["inlang.vs-code-extension"] },
-        undefined,
-        2,
-      ),
-    );
+			".vscode/extensions.json",
+			JSON.stringify(
+				{ recommendations: ["inlang.vs-code-extension"] },
+				undefined,
+				2
+			)
+		);
   });
 
   it("should add recommendation array if parsed content is not of the expected type", async () => {
@@ -192,9 +192,9 @@ describe("Cross-sell Sherlock app", () => {
       mkdir: vi.fn(),
     };
     expect(await shouldRecommend({ fs: fsMock })).toBe(true);
-    expect(fsMock.readFile).toHaveBeenCalledWith("./.vscode/extensions.json", {
-      encoding: "utf-8",
-    });
+    expect(fsMock.readFile).toHaveBeenCalledWith(".vscode/extensions.json", {
+			encoding: "utf-8",
+		});
   });
 
   it("should create extensions.json in the .vscode folder if it does not exist", async () => {
