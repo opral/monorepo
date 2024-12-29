@@ -3,7 +3,7 @@ imports:
   - "../dist/doc-figure.js"
 ---
 
-### `<doc-figure>`
+### doc-figure
 
 The `<doc-figure>` element is used to display an image with a caption. 
 

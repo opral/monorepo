@@ -30,10 +30,6 @@ export default class Element extends LitElement {
 			color: #0891b2;
 		}
 
-		.accordion-title.opened > doc-icon {
-			transform: rotate(-180deg);
-		}
-
 		.accordion-content {
 			max-height: 0;
 			overflow: hidden;
@@ -57,18 +53,26 @@ export default class Element extends LitElement {
 		text: { type: String },
 	}
 
-	isOpen: boolean = false
-	heading: string = ""
-	text: string = ""
+	isOpen!: boolean
+	heading!: string
+	text!: string
+
+	constructor() {
+		super()
+		this.isOpen = false
+	}
 
 	override render() {
+		console.log("re=render")
 		return html`<div class="accordion-wrapper">
 			<label
 				for="accordion"
 				class="accordion-title ${this.isOpen ? "opened" : ""}"
 				@click=${this._handleClick}
 				>${this.heading}
-				<doc-icon icon="mdi:chevron-down" size="1.2em"></doc-icon>
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+					<path fill="currentColor" d="m7 10l5 5l5-5z" />
+				</svg>
 			</label>
 			<div class="accordion-content ${this.isOpen ? "show" : ""}">
 				<p>${this.text}</p>
@@ -77,6 +81,7 @@ export default class Element extends LitElement {
 	}
 
 	_handleClick() {
+		console.log("clicked")
 		this.isOpen = !this.isOpen
 	}
 }

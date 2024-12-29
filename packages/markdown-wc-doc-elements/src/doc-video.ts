@@ -19,8 +19,13 @@ export default class Element extends LitElement {
 		type: { type: String },
 	}
 
-	src: string = ""
-	type: string = "video/mp4"
+	src!: string
+	type!: string
+
+	constructor() {
+		super()
+		this.type = "video/mp4"
+	}
 
 	override render() {
 		return html`<video class="doc-video" controls autoplay muted>
