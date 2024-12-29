@@ -20,7 +20,6 @@ import { getDocsBaseUrl } from "#src/interface/sdkDocs/SdkDocsHeader.jsx";
 import NavbarIcon from "./NavbarIcon.jsx";
 import NavbarOtherPageIndicator from "./NavBarOtherPageIndicator.jsx";
 import { i18nRouting } from "#src/services/i18n/routing.js";
-import "@opral/markdown-wc-doc-elements";
 
 export type PageProps = {
 	slug: string;
@@ -36,20 +35,13 @@ export default function Page(props: PageProps) {
 	);
 
 	const [fetchCustomElements] = createResource(
-		props.frontmatter?.custom_elements ?? {},
+		props.frontmatter?.imports ?? {},
 		async () => {
-			for (const [name, src] of Object.entries(
-				props.frontmatter?.custom_elements ?? {}
-			)) {
-				if (!customElements.get(name)) {
-					const module = await import(
-						/* @vite-ignore */
-						src
-					);
-					if (!customElements.get(name)) {
-						customElements.define(name, module.default);
-					}
-				}
+			for (const src of props.frontmatter?.imports ?? []) {
+				await import(
+					/* @vite-ignore */
+					src
+				);
 			}
 			return Date.now();
 		},
