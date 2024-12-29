@@ -1,6 +1,6 @@
 ---
 imports:
-  - "./dist/doc-figure.js"
+  - "../dist/doc-figure.js"
 ---
 
 ### `<doc-figure>`
