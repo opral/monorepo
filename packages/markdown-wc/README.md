@@ -76,3 +76,8 @@ for (const url of parsed.frontmatter.imports ?? []) {
 // render HTML
 render(parsed.html);
 ```
+
+## Limitations
+
+- sanitzation of markdown as well as custom elements is not implemented atm
+- SSR is DIY atm (use the `parse` function and SSR the markdown with [lit for example](https://lit.dev/docs/ssr/overview/)) 
