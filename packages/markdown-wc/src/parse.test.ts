@@ -35,18 +35,17 @@ C -->|Two| E[Result two]
 
 test("leaves imported custom elements as is", async () => {
 	const markdown = `---
-custom_elements: 
-  doc-figure: "https://cdn.skypack.dev/@doc-elements/figure"
+imports: 
+  - "https://cdn.skypack.dev/doc-figure.js"
 ---
 # Hello World
 
 <doc-figure label="Hello world"></doc-figure>
 	`
 	const parsed = await parse(markdown)
-	expect(parsed.html).toContain("<doc-figure")
-	expect(parsed.frontmatter.custom_elements).toEqual({
-		"doc-figure": "https://cdn.skypack.dev/@doc-elements/figure",
-	})
+	expect(parsed.html).toContain('<doc-figure label="Hello world"></doc-figure>')
+	expect(parsed.detectedCustomElements).toEqual(["doc-figure"])
+	expect(parsed.frontmatter.imports).toEqual(["https://cdn.skypack.dev/doc-figure.js"])
 })
 
 test("additional frontmatter properties", async () => {
@@ -71,5 +70,22 @@ This is markdown
 	`
 	const parsed = await parse(markdown)
 	expect(parsed.html).toContain("<h1")
-	expect(parsed.frontmatter).toEqual({ custom_elements: {} })
+	expect(parsed.frontmatter).toEqual({})
+})
+
+test("only injects css if code blocks are present", async () => {
+	const markdown = `
+# Hello World
+This is markdown
+	`
+	const parsed = await parse(markdown)
+	expect(parsed.html).not.toContain('<link rel="stylesheet"')
+
+	const markdownWithCode = `
+\`\`\`js
+const a = 1
+\`\`\`
+	`
+	const parsedWithCode = await parse(markdownWithCode)
+	expect(parsedWithCode.html).toContain('<link rel="stylesheet"')
 })

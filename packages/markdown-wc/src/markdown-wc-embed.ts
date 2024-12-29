@@ -3,6 +3,8 @@ import { Task } from "@lit/task"
 import { unsafeHTML } from "lit/directives/unsafe-html.js"
 import { parse } from "./parse.js"
 
+console.log("Hello from markdown-wc-embed.ts")
+
 /**
  * A custom element that fetches and embeds markdown wc content.
  *
@@ -11,14 +13,14 @@ import { parse } from "./parse.js"
  *   <embed-markdown-wc src="https://example.com/markdown.md"></embed-markdown-wc>
  *   ```
  */
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css``
 
 	static override properties = {
 		src: { type: String },
 	}
 
-	src: string = ""
+	src!: string
 
 	private fetchMarkdown = new Task(
 		this,
@@ -26,13 +28,11 @@ export default class extends LitElement {
 			if (src === undefined) {
 				throw new Error("src is undefined")
 			}
+			console.log("fetching src:", src)
 			const text = await (await fetch(src)).text()
 			const parsed = await parse(text)
-			for (const [name, src] of Object.entries(parsed.frontmatter.custom_elements)) {
-				if (customElements.get(name) === undefined) {
-					const module = await import(src)
-					customElements.define(name, module.default)
-				}
+			for (const src of parsed.frontmatter.imports ?? []) {
+				await import(src)
 			}
 			return parsed.html
 		},
@@ -40,6 +40,7 @@ export default class extends LitElement {
 	)
 
 	override render() {
+		console.log("rendering markdown-wc-embed.ts")
 		return html`
 			${this.fetchMarkdown.render({
 				pending: () => html`<p>Loading...</p>`,
@@ -51,4 +52,9 @@ export default class extends LitElement {
 			})}
 		`
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("markdown-wc-embed")) {
+	console.log("defining markdown-wc-embed")
+	customElements.define("markdown-wc-embed", Element)
 }

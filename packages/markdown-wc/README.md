@@ -1,10 +1,3 @@
-import: 
-  - "https://example.com/doc-card.js"
-  - "https://example.com/doc-button.js"
-
-
----
-
 # Markdown with Web Components
 
 Enables writing documentation with components in markdown as backwards compatible superset.
@@ -26,7 +19,35 @@ Enables writing documentation with components in markdown as backwards compatibl
 | No custom syntax               | ✅       | ✅                 | ❌        | ❌             | ❌      |
 
 
-## Usage
+## Usage in browser 
+
+The `<markdown-wc-embed>` element can be used to embed markdown-wc in a webpage.
+
+```html
+  <script type="module" src="../dist/markdown-wc-embed.js"></script>
+  <body>
+    <markdown-wc-embed src="https://my-markdown-url.com/markdown.md"></markdown-wc-embed>
+  </body>
+```
+
+## Usage in markdown-wc
+
+The `<markdown-wc-embed>` element can be used to embed markdown-wc in markdown-wc.
+
+```markdown
+---
+imports:
+  - https://cdn.jsdelivr.net/
+---
+
+# Hello World
+
+<markdown-wc-embed src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/packages/markdown-wc/README.md"></markdown-wc-embed>
+```
+
+## Usage as libary
+
+Enables SSR and more control over the rendering process.
 
 ```ts
 import { parse } from '@opral/markdown-wc';
@@ -46,13 +67,12 @@ const markdown = `
 const parsed = parse(markdown);
 
 // Register web components
-for (const name in parsed.imports) {
-  // optionally sanitize the components here
-  const component = await import(parsed.imports[name])
-  customElements.define(name, component);
+for (const url of parsed.frontmatter.imports ?? []) {
+  // optionally sanitize the imported imported here
+  // by, for example, only trusting a specific domain
+  await import(url)
 }
 
 // render HTML
 render(parsed.html);
 ```
-

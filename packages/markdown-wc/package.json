@@ -1,7 +1,7 @@
 {
 	"name": "@opral/markdown-wc",
 	"type": "module",
-	"version": "0.1.1",
+	"version": "0.1.0",
 	"private": true,
 	"files": [
 		"./src",
@@ -9,12 +9,13 @@
 	],
 	"exports": {
 		".": "./dist/index.js",
-		"./dist/embed-markdown-wc.js": "./dist/embed-markdown-wc.js"
+		"./dist/markdown-wc-embed.js": "./dist/markdown-wc-embed.js"
 	},
 	"scripts": {
 		"build": "tsc --build && rolldown -c",
 		"dev": "tsc --watch",
 		"test": "tsc --noEmit && vitest run",
+		"test:watch": "vitest",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},

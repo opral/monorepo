@@ -32,7 +32,8 @@ export async function parse(
 		inlineStyles?: Record<string, Record<string, string>>
 	}
 ): Promise<{
-	frontmatter: Record<string, any> & { custom_elements: Record<string, string> }
+	frontmatter: Record<string, any> & { imports?: string[] }
+	detectedCustomElements: string[]
 	html: string
 }> {
 	const withDefaults = {
@@ -41,13 +42,12 @@ export async function parse(
 	}
 
 	const content = await unified()
-		/* @ts-ignore */
+		// @ts-ignore
 		.use(remarkParse)
-		/* @ts-ignore */
+		// @ts-ignore
 		.use(remarkGfm)
 		.use(remarkFrontmatter, ["yaml"])
 		.use(() => (tree, file) => {
-			// Extract frontmatter and store it in `file.data`
 			// @ts-ignore
 			const yamlNode = tree.children.find((node: any) => node.type === "yaml")
 			if (yamlNode && yamlNode.value) {
@@ -58,59 +58,52 @@ export async function parse(
 					throw new Error(`Failed to parse frontmatter: ${e.message}`)
 				}
 				// @ts-ignore
-				// Remove the YAML node from the tree
 				tree.children = tree.children.filter((node: any) => node.type !== "yaml")
-			} else {
-				file.data.frontmatter = {}
 			}
 		})
-		/* @ts-ignore */
+		.use(customElementDetector)
+		.use(codeBlockDetector)
+		// @ts-ignore
 		.use(remarkRehype, { allowDangerousHtml: true })
-		/* @ts-ignore */
 		.use(rehypeRaw)
-		/* @ts-ignore */
-		.use(() => (tree, file) => {
-			// Dynamically configure `rehypeSanitize` based on frontmatter in `file.data`
-			// @ts-ignore
-			return rehypeSanitize(createSanitizeOptions(file.data.frontmatter || {}))(tree, file)
-		})
+		// TODO sanitization
+		// sanitization broke for attributes of custom elements
+		// took too much time to fix now
+		// .use(() => (tree, file) => {
+		// 	// @ts-ignore
+		// 	return rehypeSanitize(createSanitizeOptions(file.data.customElements || []))(tree, file)
+		// })
 		.use(rehypeHighlight)
 		.use(rehypeSlug)
 		.use(rehypeInlineStyles(withDefaults.inlineStyles))
-		/* @ts-ignore */
 		.use(rehypeAutolinkHeadings, {
 			behavior: "wrap",
 			properties: {
 				onclick: `event.preventDefault(); event.target.hash && document.getElementById(event.target.hash.substring(1)) && window.scrollTo({top: document.getElementById(event.target.hash.substring(1)).offsetTop - 200, behavior: "smooth"}); window.history.pushState(null, null, event.target.hash);`,
 			},
 		})
-		/* @ts-ignore */
 		.use(rehypeAccessibleEmojis)
-		/* @ts-ignore */
 		.use(rehypeStringify)
 		.process(preprocess(markdown))
 
 	return {
 		frontmatter: {
-			custom_elements: {},
 			...(content.data.frontmatter as Record<string, any>),
 		},
-		html: String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
-	${content}`),
+		detectedCustomElements: (content.data.customElements as []) ?? [],
+		html: content.data.containsCodeBlock
+			? String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
+			${content}`)
+			: String(content),
 	}
 }
 
-function createSanitizeOptions(frontmatter: Record<string, any>) {
+function createSanitizeOptions(customElements: string[]) {
 	return {
 		...defaultSchema,
-		tagNames: [
-			// Allow custom elements
-			...Object.keys(frontmatter.custom_elements ?? []),
-			...(defaultSchema.tagNames ?? []),
-		],
+		tagNames: [...customElements, ...(defaultSchema.tagNames ?? [])],
 		attributes: {
-			// Allow any attributes on custom elements
-			...Object.keys(frontmatter.custom_elements ?? {}).reduce(
+			...customElements.reduce(
 				(acc, customElement) => ({
 					...acc,
 					[customElement]: ["*"],
@@ -120,4 +113,32 @@ function createSanitizeOptions(frontmatter: Record<string, any>) {
 			...(defaultSchema.attributes ?? {}),
 		},
 	}
+}
+
+const codeBlockDetector: Plugin = () => (tree, file) => {
+	// Initialize the containsCodeBlock flag in file.data
+	file.data.containsCodeBlock = false
+
+	// Detect if there are code blocks in the Markdown tree
+	// @ts-ignore
+	for (const node of tree.children) {
+		if (node.type === "code") {
+			file.data.containsCodeBlock = true
+			break
+		}
+	}
+}
+
+const customElementDetector: Plugin = () => (tree, file) => {
+	const markdownText = String(file.value)
+	const regex = /<\/([a-zA-Z0-9-]+)>/g
+	const customElements = new Set<string>()
+	let match
+
+	while ((match = regex.exec(markdownText)) !== null) {
+		customElements.add(match[1]!)
+	}
+
+	// Store detected custom elements in file.data
+	file.data.customElements = Array.from(customElements)
 }

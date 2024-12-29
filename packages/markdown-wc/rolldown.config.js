@@ -7,6 +7,7 @@ export default defineConfig({
 	output: {
 		file: `dist/markdown-wc-embed.js`,
 		format: "esm",
+		minify: false,
 		// minify is still in beta at the time of writing (Dec 29, 2024)
 		// minify: true,
 	},
