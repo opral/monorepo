@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		a {
 			text-decoration: none;
@@ -69,4 +69,8 @@ export default class extends LitElement {
 			</div>
 		</a>`
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-link")) {
+	customElements.define("doc-link", Element)
 }

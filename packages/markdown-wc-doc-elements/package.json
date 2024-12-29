@@ -10,11 +10,12 @@
 		"./dist"
 	],
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/library/index.js",
+		"./dist/*": "./dist/*.js"
 	},
 	"scripts": {
 		"dev": "rolldown -c --watch",
-		"build": "rolldown -c && tsc --emitDeclarationOnly",
+		"build": "rolldown -c && tsc --build",
 		"test": "tsc --noEmit && vitest run",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"

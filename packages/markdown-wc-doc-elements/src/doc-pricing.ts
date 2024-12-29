@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		.doc-dev-tool {
 			background-color: #ffffff;
@@ -32,4 +32,8 @@ export default class extends LitElement {
 			<p class="doc-p">${this.content}</p>
 		</div> `
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-pricing")) {
+	customElements.define("doc-pricing", Element)
 }

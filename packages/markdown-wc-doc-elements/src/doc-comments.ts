@@ -1,6 +1,6 @@
 import { css, html, LitElement } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		.doc-comment-grid {
 			display: flex;
@@ -14,4 +14,8 @@ export default class extends LitElement {
 			<slot></slot>
 		</div>`
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-comments")) {
+	customElements.define("doc-comments", Element)
 }

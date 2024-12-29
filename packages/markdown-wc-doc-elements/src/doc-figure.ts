@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		figure {
 			margin: 0;
@@ -24,9 +24,9 @@ export default class extends LitElement {
 		caption: { type: String },
 	}
 
-	src: string = ""
-	alt: string = ""
-	caption: string = ""
+	src!: string
+	alt!: string
+	caption!: string
 
 	override render() {
 		return html`<figure>
@@ -34,4 +34,8 @@ export default class extends LitElement {
 			<figcaption>${this.caption}</figcaption>
 		</figure>`
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-figure")) {
+	customElements.define("doc-figure", Element)
 }

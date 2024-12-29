@@ -1,6 +1,6 @@
 import { css, html, LitElement } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		.doc-features-container {
 			display: flex;
@@ -21,4 +21,8 @@ export default class extends LitElement {
 			<slot class="doc-feature-container"></slot>
 		</div>`
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-features")) {
+	customElements.define("doc-features", Element)
 }

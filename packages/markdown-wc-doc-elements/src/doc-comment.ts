@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		:host {
 			display: inline-flex;
@@ -67,4 +67,8 @@ export default class extends LitElement {
 			<div class="comment-wrapper">${this.text}</div>
 		</div>`
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-comment")) {
+	customElements.define("doc-comment", Element)
 }

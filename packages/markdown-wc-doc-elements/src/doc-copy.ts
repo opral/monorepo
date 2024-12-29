@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		.copy-text {
 			color: #64748b;
@@ -38,4 +38,8 @@ export default class extends LitElement {
 	override render() {
 		return html` <span @click=${() => this.handleCopy()} class="copy-text"> ${this.text} </span> `
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-copy")) {
+	customElements.define("doc-copy", Element)
 }

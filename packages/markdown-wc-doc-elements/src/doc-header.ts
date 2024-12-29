@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		a {
 			text-decoration: none;
@@ -64,4 +64,8 @@ export default class extends LitElement {
 			<a class="doc-header-button" href="${this.link}">${this.button}</a>
 		</div>`
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-header")) {
+	customElements.define("doc-header", Element)
 }

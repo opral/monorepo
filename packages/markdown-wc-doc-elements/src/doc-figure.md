@@ -1,19 +1,19 @@
 ---
-custom_elements:
-  doc-figure: "./dist/doc-figure.js"
+imports:
+  - "./dist/doc-figure.js"
 ---
 
-## `<doc-figure>`
+### `<doc-figure>`
 
 The `<doc-figure>` element is used to display an image with a caption. 
 
-### Attributes
+#### Attributes
 
 - `src`: The URL of the image to display.
 - `alt`: The alternative text for the image.
 - `caption`: The caption to display below the image.
 
-### Example
+#### Example
 
 ```html
 <doc-figure 

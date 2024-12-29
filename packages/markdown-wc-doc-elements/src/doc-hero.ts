@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		.container {
 			color: #000;
@@ -133,4 +133,8 @@ export default class extends LitElement {
 			</div>
 		</div>`
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-hero")) {
+	customElements.define("doc-hero", Element)
 }

@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		.doc-important {
 			padding: 0.5rem 2rem;
@@ -34,4 +34,8 @@ export default class extends LitElement {
 			</div>
 		`
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-important")) {
+	customElements.define("doc-important", Element)
 }

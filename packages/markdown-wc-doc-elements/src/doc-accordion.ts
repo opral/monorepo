@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		.accordion-wrapper {
 			margin: 0;
@@ -79,4 +79,8 @@ export default class extends LitElement {
 	_handleClick() {
 		this.isOpen = !this.isOpen
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-accordion")) {
+	customElements.define("doc-accordion", Element)
 }

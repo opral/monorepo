@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		.feature-card {
 			display: flex;
@@ -53,4 +53,8 @@ export default class extends LitElement {
 			</p>
 		</div>`
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-feature")) {
+	customElements.define("doc-feature", Element)
 }

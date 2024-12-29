@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		:host {
 			display: inline-flex;
@@ -27,4 +27,8 @@ export default class extends LitElement {
 			<source src=${this.src} type=${this.type} />
 		</video>`
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-video")) {
+	customElements.define("doc-video", Element)
 }

@@ -1,7 +1,6 @@
 import { LitElement, css, html } from "lit"
-import { property } from "lit/decorators.js"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override styles = css`
 		:host {
 			display: inline-flex;
@@ -19,4 +18,8 @@ export default class extends LitElement {
 	override render() {
 		return html` <iconify-icon height=${this.size} icon=${this.icon}></iconify-icon> `
 	}
+}
+
+if (typeof customElements !== "undefined" && !customElements.get("doc-icon")) {
+	customElements.define("doc-icon", Element)
 }

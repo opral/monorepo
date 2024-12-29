@@ -7,7 +7,7 @@
 		"declarationMap": false,
 		"experimentalDecorators": false,
 		"useDefineForClassFields": true,
-		"outDir": "./dist",
+		"outDir": "./dist/library",
 		"rootDir": "./src"
 	}
 }

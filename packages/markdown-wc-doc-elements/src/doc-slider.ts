@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit"
 
-export default class extends LitElement {
+export default class Element extends LitElement {
 	static override properties = {
 		popupIndex: { type: Number },
 		items: { type: String },
@@ -235,4 +235,8 @@ export default class extends LitElement {
 
 		this.style.setProperty("--item-offset", `${this._offset}px`)
 	}
+}
+
+if (!customElements.get("doc-slider")) {
+	customElements.define("doc-slider", Element)
 }
