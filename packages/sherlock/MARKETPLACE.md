@@ -18,7 +18,7 @@ Find the [source code on GitHub](https://github.com/opral/monorepo/tree/main/inl
 
 [<img width="256px" height="auto" alt="Visual Studio Code install badge" src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode-install-badge.svg" />](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)
 
-<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/ide-extension/assets/sherlock-cover-small.png" alt="Visual Studio Code extension (Sherlock) header image"></doc-image>
+<img src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/ide-extension/assets/sherlock-cover-small.png" alt="Visual Studio Code extension (Sherlock) header image"></img>
 
 #### Used by developers from:
 

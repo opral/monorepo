@@ -13,7 +13,7 @@ custom_elements:
 <br/>
 <br/>
 
-<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/sdk-image.png" alt="infografic"></doc-image>
+<img src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/sdk-image.png" alt="infografic"></img>
 
 If you plan to create an i18n app, this is the perfect solution. You can use the SDK (Software Development Kit), which provides reactive APIs to assist you in managing and linting translation files that are saved in the repository.
 
