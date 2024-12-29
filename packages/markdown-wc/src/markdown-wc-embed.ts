@@ -1,8 +1,16 @@
 import { LitElement, css, html } from "lit"
 import { Task } from "@lit/task"
-import { parse } from "@opral/markdown-wc"
 import { unsafeHTML } from "lit/directives/unsafe-html.js"
+import { parse } from "./parse.js"
 
+/**
+ * A custom element that fetches and embeds markdown wc content.
+ *
+ * @example
+ *   ```html
+ *   <embed-markdown-wc src="https://example.com/markdown.md"></embed-markdown-wc>
+ *   ```
+ */
 export default class extends LitElement {
 	static override styles = css``
 
@@ -19,9 +27,7 @@ export default class extends LitElement {
 				throw new Error("src is undefined")
 			}
 			const text = await (await fetch(src)).text()
-			console.log(text)
 			const parsed = await parse(text)
-			console.log(parsed)
 			for (const [name, src] of Object.entries(parsed.frontmatter.custom_elements)) {
 				if (customElements.get(name) === undefined) {
 					const module = await import(src)

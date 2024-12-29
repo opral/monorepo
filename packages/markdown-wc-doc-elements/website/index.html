@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MWC Doc Elements</title>
   <script type="module">
-    import DocEmbed from "../dist/doc-embed.js";
-    customElements.define("doc-embed", DocEmbed);
+    import MarkdownWcEmbed from "../../markdown-wc/dist/markdown-wc-embed.js";
+    customElements.define("markdown-wc-embed", MarkdownWcEmbed);
   </script>
 
 </head>
 <body>
-  <doc-embed src="../README.md"></doc-embed>
+  <!-- crazy cool that this works. the ease of use is awesome -->
+  <markdown-wc-embed src="../README.md"></markdown-wc-embed>
 </body>
 </html>
