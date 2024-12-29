@@ -35,10 +35,10 @@ export default function Page(props: PageProps) {
 	);
 
 	const [fetchCustomElements] = createResource(
-		props.frontmatter.custom_elements,
+		props.frontmatter?.custom_elements ?? {},
 		async () => {
 			for (const [name, src] of Object.entries(
-				props.frontmatter.custom_elements ?? {}
+				props.frontmatter?.custom_elements ?? {}
 			)) {
 				if (!customElements.get(name)) {
 					const module = await import(src);
