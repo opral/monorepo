@@ -1,7 +1,7 @@
 ---
-custom_elements:
-  "doc-link": "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.1.4/dist/doc-link.js/+esm"
-  "doc-links": "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.1.4/dist/doc-links.js/+esm"
+imports:
+  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.1.4/dist/doc-link.js/+esm"
+  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.1.4/dist/doc-links.js/+esm"
 ---
 
 # What is inlang?

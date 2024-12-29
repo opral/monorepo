@@ -1,5 +1,5 @@
 ---
-custom_elements:
+imports:
   markdown-wc-embed: "../dist/markdown-wc-embed.js"
 ---
 
@@ -15,7 +15,7 @@ The `<markdown-wc-embed>` element is used to display an image with a caption.
 
 ```markdown
 ---
-custom_elements:
+imports:
   doc-embed: 'link/to/markdown-wc-embed.js'
 ---
 
