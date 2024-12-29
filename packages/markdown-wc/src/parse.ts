@@ -91,7 +91,10 @@ export async function parse(
 		.process(preprocess(markdown))
 
 	return {
-		frontmatter: content.data.frontmatter ?? ({} as any),
+		frontmatter: {
+			custom_elements: {},
+			...(content.data.frontmatter as Record<string, any>),
+		},
 		html: String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
 	${content}`),
 	}

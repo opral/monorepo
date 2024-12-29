@@ -71,4 +71,5 @@ This is markdown
 	`
 	const parsed = await parse(markdown)
 	expect(parsed.html).toContain("<h1")
+	expect(parsed.frontmatter).toEqual({ custom_elements: {} })
 })
