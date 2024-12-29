@@ -1,5 +1,4 @@
 import { LitElement, css, html } from "lit"
-import { property } from "lit/decorators.js"
 
 export default class extends LitElement {
 	static override styles = css`
@@ -19,11 +18,14 @@ export default class extends LitElement {
 			padding-right: 16px;
 		}
 	`
-	@property()
+	static override properties = {
+		src: { type: String },
+		alt: { type: String },
+		caption: { type: String },
+	}
+
 	src: string = ""
-	@property()
 	alt: string = ""
-	@property()
 	caption: string = ""
 
 	override render() {

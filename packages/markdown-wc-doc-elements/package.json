@@ -10,21 +10,24 @@
 		"./dist"
 	],
 	"exports": {
-		"./*": "./dist/*"
+		".": "./dist/index.js"
 	},
 	"scripts": {
-		"build": "tsc --build",
-		"dev": "tsc --watch",
+		"dev": "rolldown -c --watch",
+		"build": "rolldown -c && tsc --emitDeclarationOnly",
 		"test": "tsc --noEmit && vitest run",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
+		"@lit/task": "1.0.1",
+		"@opral/markdown-wc": "workspace:*",
 		"iconify-icon": "1.0.8",
 		"lit": "2.8.0"
 	},
 	"devDependencies": {
 		"@opral/tsconfig": "workspace:*",
+		"rolldown": "1.0.0-beta.1",
 		"typescript": "5.3.2",
 		"vitest": "2.1.8"
 	},

@@ -1,23 +1,18 @@
 import { LitElement, html, css } from "lit"
-import { property } from "lit/decorators.js"
 
 export default class extends LitElement {
-	private _firstIndex: number
-	private _offset: number
-
-	@property()
-	looping: boolean
-
-	@property()
-	items: string
-	constructor() {
-		super()
-
-		this.items = ""
-		this.looping = false
-		this._firstIndex = 0
-		this._offset = 0
+	static override properties = {
+		popupIndex: { type: Number },
+		items: { type: String },
+		looping: { type: Boolean },
 	}
+
+	items: string = ""
+	looping: boolean = false
+	popupIndex: number = -1
+
+	private _firstIndex: number = 0
+	private _offset: number = 0
 
 	override connectedCallback() {
 		super.connectedCallback()
@@ -30,9 +25,6 @@ export default class extends LitElement {
 
 		window.removeEventListener("resize", this._initiateContainers)
 	}
-
-	@property()
-	popupIndex: number = -1
 
 	static override get styles() {
 		return css`

@@ -4,12 +4,10 @@
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
 		"declaration": true,
-		"declarationMap": true,
-		"experimentalDecorators": true,
-		"useDefineForClassFields": false,
-		"types": [],
+		"declarationMap": false,
+		"experimentalDecorators": false,
+		"useDefineForClassFields": true,
 		"outDir": "./dist",
-		"rootDir": "./src",
-		"resolveJsonModule": true
+		"rootDir": "./src"
 	}
 }

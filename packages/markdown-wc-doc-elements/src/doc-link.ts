@@ -1,5 +1,4 @@
 import { LitElement, css, html } from "lit"
-import { property } from "lit/decorators.js"
 
 export default class extends LitElement {
 	static override styles = css`
@@ -44,14 +43,18 @@ export default class extends LitElement {
 			color: #475569;
 		}
 	`
-	@property()
+
+	static override properties = {
+		title: { type: String },
+		description: { type: String },
+		icon: { type: String },
+		href: { type: String },
+	}
+
 	override title: string = ""
-	@property()
-	icon: string = ""
-	@property()
-	href: string = ""
-	@property()
 	description: string = ""
+	icon: string = ""
+	href: string = ""
 
 	override render() {
 		return html`<a href="${this.href}" target="${this.href.includes("http") ? `_blank` : ``}">

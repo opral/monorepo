@@ -8,9 +8,12 @@ export default class extends LitElement {
 			height: auto;
 		}
 	`
-	@property()
+	static override properties = {
+		icon: { type: String },
+		size: { type: String },
+	}
+
 	icon: string = ""
-	@property()
 	size: string = ""
 
 	override render() {

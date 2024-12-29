@@ -1,5 +1,4 @@
 import { LitElement, html, css } from "lit"
-import { property } from "lit/decorators.js"
 
 export default class extends LitElement {
 	static override styles = css`
@@ -81,29 +80,25 @@ export default class extends LitElement {
 			background-color: #cbd5e1;
 		}
 	`
-	@property()
+	static override properties = {
+		title: { type: String },
+		description: { type: String },
+		"primary-text": { type: String },
+		"primary-link": { type: String },
+		"secondary-text": { type: String },
+		"secondary-link": { type: String },
+		tag: { type: String },
+		companies: { type: String },
+	}
+
 	override title: string = ""
-
-	@property()
 	description: string = ""
-
-	@property()
 	"primary-text": string = ""
-
-	@property()
 	"primary-link": string = ""
-
-	@property()
-	"secondary-text"?: string = ""
-
-	@property()
-	"secondary-link"?: string = ""
-
-	@property()
-	tag?: string = ""
-
-	@property()
-	companies?: string = ""
+	"secondary-text": string = ""
+	"secondary-link": string = ""
+	tag: string = ""
+	companies: string = ""
 
 	private get _parsedCompanies(): Array<string> | undefined {
 		if (this.companies && this.companies !== "") {

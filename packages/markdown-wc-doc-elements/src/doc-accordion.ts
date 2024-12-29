@@ -1,5 +1,4 @@
 import { LitElement, css, html } from "lit"
-import { property } from "lit/decorators.js"
 
 export default class extends LitElement {
 	static override styles = css`
@@ -52,12 +51,14 @@ export default class extends LitElement {
 		}
 	`
 
-	@property({ type: Boolean, reflect: true })
-	isOpen: boolean = false
+	static override properties = {
+		isOpen: { type: Boolean, reflect: true },
+		heading: { type: String },
+		text: { type: String },
+	}
 
-	@property()
+	isOpen: boolean = false
 	heading: string = ""
-	@property()
 	text: string = ""
 
 	override render() {

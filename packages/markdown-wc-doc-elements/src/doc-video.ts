@@ -1,5 +1,4 @@
 import { LitElement, css, html } from "lit"
-import { property } from "lit/decorators.js"
 
 export default class extends LitElement {
 	static override styles = css`
@@ -15,11 +14,13 @@ export default class extends LitElement {
 			border: 1px solid #e0e0e0;
 		}
 	`
-	@property()
-	src: string = ""
+	static override properties = {
+		src: { type: String },
+		type: { type: String },
+	}
 
-	@property()
-	type?: string = "video/mp4"
+	src: string = ""
+	type: string = "video/mp4"
 
 	override render() {
 		return html`<video class="doc-video" controls autoplay muted>

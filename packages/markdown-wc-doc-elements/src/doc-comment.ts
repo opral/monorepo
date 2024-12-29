@@ -1,5 +1,4 @@
 import { LitElement, css, html } from "lit"
-import { property } from "lit/decorators.js"
 
 export default class extends LitElement {
 	static override styles = css`
@@ -50,12 +49,15 @@ export default class extends LitElement {
 		}
 	`
 
-	@property()
+	static override properties = {
+		text: { type: String },
+		author: { type: String },
+		icon: { type: String },
+	}
+
 	text: string = ""
-	@property()
 	author: string = ""
-	@property()
-	icon?: string = ""
+	icon: string = ""
 
 	override render() {
 		return html`<div>

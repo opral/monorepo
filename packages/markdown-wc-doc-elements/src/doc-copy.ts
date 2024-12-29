@@ -1,5 +1,4 @@
 import { LitElement, css, html } from "lit"
-import { property } from "lit/decorators.js"
 
 export default class extends LitElement {
 	static override styles = css`
@@ -15,7 +14,11 @@ export default class extends LitElement {
 	`
 
 	private copied = false
-	@property()
+
+	static override properties = {
+		text: { type: String },
+	}
+
 	text: string = "Copy"
 
 	private handleCopy() {
