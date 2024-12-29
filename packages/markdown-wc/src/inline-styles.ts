@@ -29,6 +29,7 @@ export const defaultInlineStyles = {
 		cursor: "pointer",
 		"text-decoration": "none",
 		"font-size": "1.875rem",
+		color: "inherit",
 	},
 	h2: {
 		"font-weight": "600",
@@ -38,6 +39,7 @@ export const defaultInlineStyles = {
 		cursor: "pointer",
 		"text-decoration": "none",
 		"font-size": "1.5rem",
+		color: "inherit",
 	},
 	h3: {
 		"font-weight": "600",
@@ -47,6 +49,7 @@ export const defaultInlineStyles = {
 		cursor: "pointer",
 		"text-decoration": "none",
 		"font-size": "1.25rem",
+		color: "inherit",
 	},
 	h4: {
 		"font-weight": "600",
@@ -56,6 +59,7 @@ export const defaultInlineStyles = {
 		cursor: "pointer",
 		"text-decoration": "none",
 		"font-size": "1.125rem",
+		color: "inherit",
 	},
 	h5: {
 		"font-weight": "600",
@@ -65,6 +69,7 @@ export const defaultInlineStyles = {
 		cursor: "pointer",
 		"text-decoration": "none",
 		"font-size": "1.125rem",
+		color: "inherit",
 	},
 	h6: {
 		"font-weight": "600",
@@ -74,15 +79,16 @@ export const defaultInlineStyles = {
 		cursor: "pointer",
 		"text-decoration": "none",
 		"font-size": "1rem",
+		color: "inherit",
 	},
 	p: {
 		"font-size": "1rem",
-		color: "#6b7280",
+		color: "inherit",
 		margin: "1rem 0",
 		"line-height": "1.625",
 	},
 	a: {
-		color: "#3b82f6",
+		color: "inherit",
 		"font-weight": "500",
 		"text-decoration": "none",
 		display: "inline-block",
@@ -94,7 +100,7 @@ export const defaultInlineStyles = {
 		margin: "1.5rem 0",
 		"font-size": "0.875rem",
 		"font-family": "monospace",
-		color: "#1f2937",
+		color: "inherit",
 	},
 	pre: {
 		position: "relative",
@@ -104,15 +110,18 @@ export const defaultInlineStyles = {
 		"list-style-position": "inside",
 		"margin-bottom": "0.75rem",
 		"padding-left": "1.5rem",
+		color: "inherit",
 	},
 	ol: {
 		"list-style-type": "decimal",
 		"list-style-position": "inside",
 		"margin-bottom": "0.75rem",
 		"padding-left": "1.5rem",
+		color: "inherit",
 	},
 	li: {
 		"list-style-position": "outside",
+		color: "inherit",
 	},
 	table: {
 		"table-layout": "auto",
@@ -122,22 +131,25 @@ export const defaultInlineStyles = {
 		"text-align": "left",
 		"max-width": "100%",
 		overflow: "auto",
+		color: "inherit",
 	},
 	thead: {
 		"font-weight": "500",
 		"padding-bottom": "0.5rem",
-		"border-bottom": "1px solid #e5e7eb",
+		"border-bottom": "1px solid inherit",
 		"text-align": "left",
+		color: "inherit",
 	},
 	th: {
 		padding: "0.5rem 0",
 		"font-weight": "500",
-		"border-bottom": "1px solid #e5e7eb",
+		"border-bottom": "1px solid inherit",
 		"white-space": "nowrap",
+		color: "inherit",
 	},
 	tr: {
 		padding: "0.5rem 0",
-		"border-bottom": "1px solid #e5e7eb",
+		"border-bottom": "1px solid inherit",
 	},
 	td: {
 		padding: "0.5rem 0",
@@ -145,7 +157,7 @@ export const defaultInlineStyles = {
 	},
 	hr: {
 		margin: "1.5rem 0",
-		"border-bottom": "1px solid #e5e7eb",
+		"border-bottom": "1px solid inherit",
 	},
 	img: {
 		margin: "1rem auto",

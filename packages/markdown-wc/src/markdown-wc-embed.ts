@@ -3,8 +3,6 @@ import { Task } from "@lit/task"
 import { unsafeHTML } from "lit/directives/unsafe-html.js"
 import { parse } from "./parse.js"
 
-console.log("Hello from markdown-wc-embed.ts")
-
 /**
  * A custom element that fetches and embeds markdown wc content.
  *
@@ -39,6 +37,23 @@ export default class Element extends LitElement {
 		() => [this.src]
 	)
 
+	override connectedCallback() {
+		super.connectedCallback()
+		this.applyLightDomStyles()
+	}
+
+	/**
+	 * Applies styles defined in the light DOM `<style>` element to the shadow DOM.
+	 */
+	private applyLightDomStyles() {
+		const styleElement = this.querySelector("style")
+		if (styleElement) {
+			const userStyles = document.createElement("style")
+			userStyles.textContent = styleElement.textContent
+			this.shadowRoot?.appendChild(userStyles)
+		}
+	}
+
 	override render() {
 		console.log("rendering markdown-wc-embed.ts")
 		return html`
@@ -55,6 +70,5 @@ export default class Element extends LitElement {
 }
 
 if (typeof customElements !== "undefined" && !customElements.get("markdown-wc-embed")) {
-	console.log("defining markdown-wc-embed")
 	customElements.define("markdown-wc-embed", Element)
 }

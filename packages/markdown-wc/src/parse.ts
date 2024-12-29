@@ -78,9 +78,6 @@ export async function parse(
 		.use(rehypeInlineStyles(withDefaults.inlineStyles))
 		.use(rehypeAutolinkHeadings, {
 			behavior: "wrap",
-			properties: {
-				onclick: `event.preventDefault(); event.target.hash && document.getElementById(event.target.hash.substring(1)) && window.scrollTo({top: document.getElementById(event.target.hash.substring(1)).offsetTop - 200, behavior: "smooth"}); window.history.pushState(null, null, event.target.hash);`,
-			},
 		})
 		.use(rehypeAccessibleEmojis)
 		.use(rehypeStringify)
