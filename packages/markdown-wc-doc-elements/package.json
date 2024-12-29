@@ -16,7 +16,7 @@
 	"scripts": {
 		"dev": "rolldown -c --watch",
 		"build": "rolldown -c && tsc --build",
-		"test": "tsc --noEmit && vitest run",
+		"test": "tsc --noEmit && vitest run --passWithNoTests",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
