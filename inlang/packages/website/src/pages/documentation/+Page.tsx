@@ -20,6 +20,7 @@ import { getDocsBaseUrl } from "#src/interface/sdkDocs/SdkDocsHeader.jsx";
 import NavbarIcon from "./NavbarIcon.jsx";
 import NavbarOtherPageIndicator from "./NavBarOtherPageIndicator.jsx";
 import { i18nRouting } from "#src/services/i18n/routing.js";
+import "@opral/markdown-wc-doc-elements";
 
 export type PageProps = {
 	slug: string;
@@ -41,7 +42,10 @@ export default function Page(props: PageProps) {
 				props.frontmatter?.custom_elements ?? {}
 			)) {
 				if (!customElements.get(name)) {
-					const module = await import(src);
+					const module = await import(
+						/* @vite-ignore */
+						src
+					);
 					if (!customElements.get(name)) {
 						customElements.define(name, module.default);
 					}

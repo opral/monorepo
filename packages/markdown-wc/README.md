@@ -1,4 +1,4 @@
-# Markdown with Web Components
+# Markdown WC (Markdown with Web Components)
 
 Enables writing documentation with components in markdown as backwards compatible superset.
 

@@ -86,8 +86,6 @@ export const defaultInlineStyles = {
 		display: "inline-block",
 	},
 	code: {
-		padding: "0.125rem 0.25rem",
-		"background-color": "#f3f4f6",
 		"border-radius": "0.375rem",
 		margin: "1.5rem 0",
 		"font-size": "0.875rem",

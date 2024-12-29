@@ -14,14 +14,18 @@
   </style>
 </head>
 <body style="margin-left: auto; margin-right: auto; max-width: 900px;">
-  <!-- crazy cool that this works. the ease of use is awesome -->
 
   <div style="display: flex; gap: 1rem; margin-top: 1rem;">
     <a href="./">Home</a>
     <a href="./libraries.html">Libraries</a>
   </div>
 
-  <markdown-wc-embed src="../README.md">
+  <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+    <a href="#doc-elements">MWC Doc Elements</a>
+    <a href="https://github.com/opral/monorepo/issues/new" target="_blank">Submit your library</a>
+  </div>
+
+  <markdown-wc-embed id="#doc-elements" base="../../markdown-wc-doc-elements/" src="./README.md">
     <style>
       h1 a {
         color: black;
