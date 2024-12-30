@@ -149,7 +149,12 @@ export default class Element extends LitElement {
 		return html`
 			<div class="wrapper">
 				<button class="btn-prev" @click=${() => this._move("left")}>
-					<doc-icon height="40" icon="mdi:chevron-left"></doc-icon>
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+						<path
+							fill="currentColor"
+							d="m10.8 12l3.9 3.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275l-4.6-4.6q-.15-.15-.212-.325T8.425 12t.063-.375t.212-.325l4.6-4.6q.275-.275.7-.275t.7.275t.275.7t-.275.7z"
+						/>
+					</svg>
 				</button>
 				<div id="contents">
 					${itemsArray.map(
@@ -175,7 +180,12 @@ export default class Element extends LitElement {
 						</div>`
 					: undefined}
 				<button class="btn-next" @click=${() => this._move("right")}>
-					<doc-icon height="40" icon="mdi:chevron-right"></doc-icon>
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+						<path
+							fill="currentColor"
+							d="M12.6 12L8.7 8.1q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.6 4.6q.15.15.213.325t.062.375t-.062.375t-.213.325l-4.6 4.6q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7z"
+						/>
+					</svg>
 				</button>
 			</div>
 		`
@@ -234,6 +244,9 @@ export default class Element extends LitElement {
 		}
 
 		this.style.setProperty("--item-offset", `${this._offset}px`)
+
+		// TODO automatic re-rendering is not working. manual re-rendering is needed
+		this.requestUpdate()
 	}
 }
 

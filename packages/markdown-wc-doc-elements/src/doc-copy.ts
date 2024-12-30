@@ -28,9 +28,14 @@ export default class Element extends LitElement {
 			// copy to clipboard from the next parent element the innerText
 			navigator.clipboard.writeText(this.parentElement?.innerText ?? "")
 
+			// TODO automatic re-rendering is not working. manual re-rendering is needed
+			this.requestUpdate()
+
 			setTimeout(() => {
 				this.text = "Copy"
 				this.copied = false
+				// TODO automatic re-rendering is not working. manual re-rendering is needed
+				this.requestUpdate()
 			}, 3000)
 		}
 	}

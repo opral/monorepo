@@ -48,41 +48,41 @@ export default class Element extends LitElement {
 	`
 
 	static override properties = {
-		isOpen: { type: Boolean, reflect: true },
+		open: {},
 		heading: { type: String },
 		text: { type: String },
 	}
 
-	isOpen!: boolean
+	open: boolean | undefined
 	heading!: string
 	text!: string
 
 	constructor() {
 		super()
-		this.isOpen = false
+		this.open = false
 	}
 
 	override render() {
-		console.log("re=render")
 		return html`<div class="accordion-wrapper">
 			<label
 				for="accordion"
-				class="accordion-title ${this.isOpen ? "opened" : ""}"
+				class="accordion-title ${this.open ? "opened" : ""}"
 				@click=${this._handleClick}
 				>${this.heading}
 				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
 					<path fill="currentColor" d="m7 10l5 5l5-5z" />
 				</svg>
 			</label>
-			<div class="accordion-content ${this.isOpen ? "show" : ""}">
+			<div class="accordion-content ${this.open ? "show" : ""}">
 				<p>${this.text}</p>
 			</div>
 		</div>`
 	}
 
 	_handleClick() {
-		console.log("clicked")
-		this.isOpen = !this.isOpen
+		this.open = !this.open
+		// TODO automatic re-rendering is not working. manual re-rendering is needed
+		this.requestUpdate()
 	}
 }
 

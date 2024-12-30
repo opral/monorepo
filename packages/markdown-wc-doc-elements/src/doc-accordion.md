@@ -9,7 +9,7 @@ The `<doc-accordion>` element is used to display an accordion with a heading and
 
 #### Attributes
 
-- `isOpen`: Whether the accordion is open or closed.
+- `open`: Whether the accordion is open or closed.
 - `heading`: The heading of the accordion.
 - `text`: The text content of the accordion.
 

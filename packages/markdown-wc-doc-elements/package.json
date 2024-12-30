@@ -22,7 +22,7 @@
 	},
 	"dependencies": {
 		"iconify-icon": "1.0.8",
-		"lit": "2.8.0"
+		"lit": "3.2.1"
 	},
 	"devDependencies": {
 		"@opral/markdown-wc": "workspace:*",
