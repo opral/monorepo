@@ -229,4 +229,15 @@ services:
         - inlang/packages/telemetry-proxy-parrot/**
     domains:
       - telemetry.inlang.com
-    
+
+  - name: markdown-wc-website
+    type: web
+    runtime: static
+    autoDeploy: true
+    staticPublishPath: ./packages/markdown-wc/website
+    buildFilter:
+      paths:
+        - ./packages/markdown-wc/**
+        - ./packages/markdown-wc-doc-elements/**
+    domains:
+      - markdown-wc.opral.com
