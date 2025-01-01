@@ -20,6 +20,7 @@
     "@inlang/server",
     "@inlang/template-plugin",
     "@inlang/editor-component",
-    "@inlang/website"
+    "@inlang/website",
+    "@inlang/recommend-sherlock"
   ]
 }
