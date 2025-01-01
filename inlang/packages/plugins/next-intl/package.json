@@ -1,0 +1,36 @@
+{
+	"name": "@inlang/plugin-next-intl",
+	"version": "1.4.0",
+	"type": "module",
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"files": [
+		"./dist"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"dev": "node ./build.js",
+		"build": "NODE_ENV=production node ./build.js",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./node_modules"
+	},
+	"dependencies": {
+		"@inlang/detect-json-formatting": "1.0.0",
+		"@inlang/sdk": "0.36.3",
+		"@sinclair/typebox": "0.31.28"
+	},
+	"devDependencies": {
+		"@opral/tsconfig": "workspace:*",
+		"@types/flat": "^5.0.2",
+		"@types/lodash.merge": "^4.6.7",
+		"@types/parsimmon": "1.10.6",
+		"flat": "^5.0.2",
+		"parsimmon": "^1.18.1",
+		"typescript": "^5.5.2",
+		"vitest": "2.1.8"
+	}
+}

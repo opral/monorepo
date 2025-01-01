@@ -1,0 +1,141 @@
+import { unified, type Plugin } from "unified"
+import remarkParse from "remark-parse"
+import remarkGfm from "remark-gfm"
+import remarkRehype from "remark-rehype"
+import rehypeRaw from "rehype-raw"
+import rehypeStringify from "rehype-stringify"
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize"
+import rehypeSlug from "rehype-slug"
+import rehypeHighlight from "rehype-highlight"
+import rehypeAutolinkHeadings from "rehype-autolink-headings"
+import { rehypeAccessibleEmojis } from "rehype-accessible-emojis"
+import { preprocess } from "./preprocess.js"
+import yaml from "yaml"
+import { defaultInlineStyles, rehypeInlineStyles } from "./inline-styles.js"
+import remarkFrontmatter from "remark-frontmatter"
+
+/* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
+export async function parse(
+	markdown: string,
+	options?: {
+		/**
+		 * Inline styles to be applied to the HTML elements
+		 *
+		 * @example
+		 *   const inlineStyles = {
+		 *     h1: {
+		 *      font-weight: "600",
+		 *      line-height: "1.625",
+		 *     }
+		 *   }
+		 */
+		inlineStyles?: Record<string, Record<string, string>>
+	}
+): Promise<{
+	frontmatter: Record<string, any> & { imports?: string[] }
+	detectedCustomElements: string[]
+	html: string
+}> {
+	const withDefaults = {
+		inlineStyles: defaultInlineStyles,
+		...options,
+	}
+
+	const content = await unified()
+		// @ts-ignore
+		.use(remarkParse)
+		// @ts-ignore
+		.use(remarkGfm)
+		.use(remarkFrontmatter, ["yaml"])
+		.use(() => (tree, file) => {
+			// @ts-ignore
+			const yamlNode = tree.children.find((node: any) => node.type === "yaml")
+			if (yamlNode && yamlNode.value) {
+				try {
+					file.data.frontmatter = yaml.parse(yamlNode.value)
+				} catch (e) {
+					// @ts-ignore
+					throw new Error(`Failed to parse frontmatter: ${e.message}`)
+				}
+				// @ts-ignore
+				tree.children = tree.children.filter((node: any) => node.type !== "yaml")
+			}
+		})
+		.use(customElementDetector)
+		.use(codeBlockDetector)
+		// @ts-ignore
+		.use(remarkRehype, { allowDangerousHtml: true })
+		.use(rehypeRaw)
+		// TODO sanitization
+		// sanitization broke for attributes of custom elements
+		// took too much time to fix now
+		// .use(() => (tree, file) => {
+		// 	// @ts-ignore
+		// 	return rehypeSanitize(createSanitizeOptions(file.data.customElements || []))(tree, file)
+		// })
+		.use(rehypeHighlight)
+		.use(rehypeSlug)
+		.use(rehypeInlineStyles(withDefaults.inlineStyles))
+		.use(rehypeAutolinkHeadings, {
+			behavior: "wrap",
+		})
+		.use(rehypeAccessibleEmojis)
+		.use(rehypeStringify)
+		.process(preprocess(markdown))
+
+	return {
+		frontmatter: {
+			...(content.data.frontmatter as Record<string, any>),
+		},
+		detectedCustomElements: (content.data.customElements as []) ?? [],
+		html: content.data.containsCodeBlock
+			? String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+			${content}`)
+			: String(content),
+	}
+}
+
+function createSanitizeOptions(customElements: string[]) {
+	return {
+		...defaultSchema,
+		tagNames: [...customElements, ...(defaultSchema.tagNames ?? [])],
+		attributes: {
+			...customElements.reduce(
+				(acc, customElement) => ({
+					...acc,
+					[customElement]: ["*"],
+				}),
+				{}
+			),
+			...(defaultSchema.attributes ?? {}),
+		},
+	}
+}
+
+const codeBlockDetector: Plugin = () => (tree, file) => {
+	// Initialize the containsCodeBlock flag in file.data
+	file.data.containsCodeBlock = false
+
+	// Detect if there are code blocks in the Markdown tree
+	// @ts-ignore
+	for (const node of tree.children) {
+		if (node.type === "code") {
+			file.data.containsCodeBlock = true
+			break
+		}
+	}
+}
+
+const customElementDetector: Plugin = () => (tree, file) => {
+	const markdownText = String(file.value)
+	const regex = /<\/([a-zA-Z0-9-]+)>/g
+	const customElements = new Set<string>()
+	let match
+
+	while ((match = regex.exec(markdownText)) !== null) {
+		customElements.add(match[1]!)
+	}
+
+	// Store detected custom elements in file.data
+	file.data.customElements = Array.from(customElements)
+}

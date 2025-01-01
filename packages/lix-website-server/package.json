@@ -17,6 +17,7 @@
     "lix-website": "workspace:*"
   },
   "devDependencies": {
+    "@opral/tsconfig": "workspace:*",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.1",
     "express": "^4.21.1",

@@ -1,0 +1,48 @@
+{
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
+	"id": "app.inlang.finkLocalizationEditor",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/icon.jpg",
+	"gallery": [
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/cover.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-1.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-2.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-3.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-4.jpg"
+	],
+	"displayName": {
+		"en": "Fink - CAT Editor (Computer Assistet Tranlation Editor)"
+	},
+	"description": {
+		"en": "Manage translations as web app with Fink."
+	},
+	"pages": {
+		"Overview": {
+			"/": "./inlang/packages/fink/README.md",
+			"/supported-i18n-libraries": "./inlang/packages/fink/docs/supported-i18n-libraries.md"
+		},
+		"Guides": {
+			"Usage": "/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink",
+			"What is inlang?": "/g/7777asdy/guide-nilsjacobsen-ecosystemCompatible"
+		}
+	},
+	"keywords": [
+		"fink",
+		"cat",
+		"localization",
+		"editor",
+		"translation",
+		"i18n",
+		"l10n",
+		"no-code",
+		"repository",
+		"translator",
+		"workflow",
+		"inlang"
+	],
+	"recommends": ["m/3gk8n4n4", "m/gerre34r", "m/reootnfj", "m/4cxm3eqi"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"website": "https://fink.inlang.com/",
+	"license": "PolyForm Noncommercial License 1.0.0",
+	"pricing": "Free Beta"
+}

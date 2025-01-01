@@ -65,7 +65,7 @@ services:
     runtime: static
     autoDeploy: true
     branch: main
-    staticPublishPath: ./inlang/source-code/fink2/dist
+    staticPublishPath: ./inlang/packages/fink2/dist
     routes: 
       - type: rewrite
         source: /*
@@ -73,7 +73,7 @@ services:
     buildCommand: pnpm install && pnpm run --filter @inlang/fink2... build
     buildFilter:
       paths:
-        - inlang/source-code/fink2/**
+        - inlang/packages/fink2/**
     envVars:
       - fromGroup: production
 
@@ -105,9 +105,9 @@ services:
       - fromGroup: production
     buildFilter:
       paths:
-        - inlang/source-code/website/**
-        - inlang/source-code/markdown/**
-        - inlang/source-code/marketplace-registry/**
+        - inlang/packages/website/**
+        - inlang/packages/markdown/**
+        - inlang/packages/marketplace-registry/**
         - '**/*.md'
       ignoredPaths:
         - '**/CHANGELOG.md'
@@ -148,7 +148,7 @@ services:
       - fromGroup: production
     buildFilter:
       paths:
-        - inlang/source-code/badge/CHANGELOG.md
+        - inlang/packages/badge/CHANGELOG.md
     domains:
       - badge.inlang.com
 
@@ -168,7 +168,7 @@ services:
         value: 4003
     buildFilter:
       paths:
-        - inlang/source-code/editor/CHANGELOG.md
+        - inlang/packages/editor/CHANGELOG.md
     domains:
       - fink.inlang.com
 
@@ -188,7 +188,7 @@ services:
         value: 4004
     buildFilter:
       paths:
-        - inlang/source-code/manage/CHANGELOG.md
+        - inlang/packages/manage/CHANGELOG.md
     domains:
       - manage.inlang.com
 
@@ -207,7 +207,7 @@ services:
         value: 4005
     buildFilter:
       paths:
-        - inlang/source-code/telemetry-proxy/**
+        - inlang/packages/telemetry-proxy/**
     domains:
       - tm.inlang.com
 
@@ -226,7 +226,18 @@ services:
         value: 4006
     buildFilter:
       paths:
-        - inlang/source-code/telemetry-proxy-parrot/**
+        - inlang/packages/telemetry-proxy-parrot/**
     domains:
       - telemetry.inlang.com
-    
+
+  - name: markdown-wc-website
+    type: web
+    runtime: static
+    autoDeploy: true
+    staticPublishPath: ./packages/markdown-wc/website
+    buildFilter:
+      paths:
+        - ./packages/markdown-wc/**
+        - ./packages/markdown-wc-doc-elements/**
+    domains:
+      - markdown-wc.opral.com

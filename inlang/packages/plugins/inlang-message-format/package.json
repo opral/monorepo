@@ -1,0 +1,33 @@
+{
+	"name": "@inlang/plugin-message-format",
+	"version": "2.2.0",
+	"type": "module",
+	"exports": {
+		".": "./dist/index.js",
+		"./file-schema": "./src/fileSchema.ts"
+	},
+	"files": [
+		"./dist"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"dev": "node ./build.js",
+		"build": "NODE_ENV=production node ./build.js",
+		"test": "tsc --noEmit && vitest run --passWithNoTests",
+		"test:watch": "vitest",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./node_modules"
+	},
+	"devDependencies": {
+		"@opral/tsconfig": "workspace:*",
+		"@inlang/sdk": "workspace:*",
+		"@sinclair/typebox": "^0.31.17",
+		"esbuild": "^0.24.2",
+		"memfs": "4.6.0",
+		"prettier": "^3.3.3",
+		"typescript": "^5.5.2",
+		"vitest": "^2.0.5"
+	}
+}

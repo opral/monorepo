@@ -1,9 +1,12 @@
 import { type KyselyPlugin } from "kysely";
-import { createInMemoryDatabase } from "sqlite-wasm-kysely";
+import {
+	createInMemoryDatabase,
+	type SqliteDatabase,
+} from "sqlite-wasm-kysely";
 
 // workaround for v1. v2 doesn't need to transform
 // jsonb columns during runtime
-const sqlite = await createInMemoryDatabase({});
+let sqlite: SqliteDatabase;
 
 export function ParseJsonBPluginV1(
 	jsonbColumns: Record<string, string[]>
@@ -14,6 +17,10 @@ export function ParseJsonBPluginV1(
 
 	return {
 		transformResult: async (args) => {
+			if (!sqlite) {
+				sqlite = await createInMemoryDatabase({});
+			}
+
 			for (const row of args.result.rows) {
 				for (const col of jsonColumnNames) {
 					if (!row[col]) {

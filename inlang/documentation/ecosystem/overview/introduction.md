@@ -1,3 +1,9 @@
+---
+imports:
+  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.1.4/dist/doc-link.js/+esm"
+  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.1.4/dist/doc-links.js/+esm"
+---
+
 # What is inlang?
 
 **inlang** is globalization infrastructure that powers an ecosystem of inlang apps, plugins and solutions that make globalization simple.
@@ -17,8 +23,19 @@ For every use case, there is an app, a plugin, a lint rule, or a custom solution
 <br/>
 
 <doc-links>
-    <doc-link title="Project directory (file)" icon="mdi:file-outline" href="/documentation/concept/project" description="Learn about the inlang project."></doc-link>
-    <doc-link title="inlang Apps" icon="mdi:apps" href="/c/apps" description="Discover the inlang apps."></doc-link>
+    <doc-link 
+      title="Project directory (file)" 
+      icon="mdi:file-outline" 
+      href="/documentation/concept/project" 
+      description="Learn about the inlang project."
+    >
+    </doc-link>
+    <doc-link 
+      title="inlang Apps" 
+      icon="mdi:apps" 
+      href="/c/apps" 
+      description="Discover inlang apps.">
+    </doc-link>
 </doc-links>
 
 <br/>

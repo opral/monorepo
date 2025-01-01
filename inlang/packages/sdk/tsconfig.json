@@ -1,0 +1,17 @@
+{
+	"extends": "@opral/tsconfig/default",
+	"include": ["src/**/*.ts"],
+	"compilerOptions": {
+		"lib": ["ESNext", "DOM"],
+		"types": [],
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"declaration": true,
+		"sourceMap": true,
+		"inlineSources": true,
+		// Set `sourceRoot` to  "/" to strip the build path prefix
+		// from generated source code references.
+		// This improves issue grouping in Sentry.
+		"sourceRoot": "/"
+	}
+}

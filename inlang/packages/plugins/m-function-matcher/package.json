@@ -1,0 +1,37 @@
+{
+	"name": "@inlang/plugin-m-function-matcher",
+	"version": "0.9.36",
+	"type": "module",
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"files": [
+		"./dist"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"recommends": [
+		"m/tdozzpa",
+		"m/2qj2w8pu",
+		"m/r7kp499g",
+		"m/gerre34r"
+	],
+	"scripts": {
+		"dev": "node ./build.js",
+		"build": "NODE_ENV=production node ./build.js",
+		"test": "tsc --noEmit && vitest run",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./node_modules"
+	},
+	"dependencies": {
+		"@inlang/sdk": "workspace:*"
+	},
+	"devDependencies": {
+		"@opral/tsconfig": "workspace:*",
+		"@types/parsimmon": "1.10.6",
+		"parsimmon": "^1.18.1",
+		"typescript": "^5.5.2",
+		"vitest": "2.1.8"
+	}
+}

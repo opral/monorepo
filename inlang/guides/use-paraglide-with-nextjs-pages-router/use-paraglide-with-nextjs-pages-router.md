@@ -227,6 +227,6 @@ You should _always_ switch languages by doing a navigation. This will ensure tha
 
 That's it! You should now have a fully functional multilingual NextJS app using ParaglideJS. Wasn't that hard was it?
 
-You can check out the full source code of this example [here](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-next/examples/pages).
+You can check out the full source code of this example [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-next/examples/pages).
 
 If you want to learn more about ParaglideJS, check out the [ParaglideJS Documentation](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). If you need help or have some ideas, feel free to reach out to us on [Discord](https://discord.gg/CNPfhWpcAa) or open a Discussion on [GitHub](https://github.com/opral/monorepo/discussions).

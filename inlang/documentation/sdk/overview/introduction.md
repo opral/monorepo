@@ -1,10 +1,20 @@
-<doc-header title="What is the SDK?" description="Extend the ecosystem with inlang’s SDK." button="Start building" link="/documentation/build-app">
-</doc-header>
+---
+imports:
+  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-header.js/+esm"
+  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-features.js/+esm"
+  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-feature.js/+esm"
+---
+
+<doc-header 
+  title="What is the SDK?" 
+  description="Extend the ecosystem with inlang’s SDK." 
+  button="Start building" 
+  link="/documentation/build-app"></doc-header>
 
 <br/>
 <br/>
 
-<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/sdk-image.png" alt="infografic"></doc-image>
+<img src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/sdk-image.png" alt="infografic"></img>
 
 If you plan to create an i18n app, this is the perfect solution. You can use the SDK (Software Development Kit), which provides reactive APIs to assist you in managing and linting translation files that are saved in the repository.
 

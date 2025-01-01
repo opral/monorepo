@@ -1,0 +1,53 @@
+{
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
+	"id": "app.inlang.ideExtension",
+	"gallery": [
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/sherlock/assets/marketplace/cover.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/sherlock/assets/marketplace/gallery/image-1.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/sherlock/assets/marketplace/gallery/image-2.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/sherlock/assets/marketplace/gallery/image-3.jpg"
+	],
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/sherlock/assets/sherlock-logo.png",
+	"displayName": {
+		"en": "Sherlock - VS Code extension"
+	},
+	"description": {
+		"en": "Visualize, edit & lint translated strings at a glance via Inline Decorations & Hover Support, and extract new strings with a single click."
+	},
+	"pages": {
+		"": {
+			"/": "./inlang/packages/sherlock/MARKETPLACE.md"
+		},
+		"Getting Started": {
+			"/quick-start": "./inlang/packages/sherlock/docs/quick-start.md",
+			"/customization": "./inlang/packages/sherlock/docs/customization.md",
+			"/supported-i18n-libraries": "./inlang/packages/sherlock/docs/supported-i18n-libraries.md",
+			"/video-tour": "./inlang/packages/sherlock/docs/video-tour.md"
+		},
+		"Appendix": {
+			"/changelog": "./inlang/packages/sherlock/CHANGELOG.md"
+		}
+	},
+	"keywords": [
+		"apps",
+		"website",
+		"developer",
+		"vscode",
+		"ide",
+		"extension",
+		"lix",
+		"Sherlock",
+		"inspector",
+		"svelte",
+		"nextjs",
+		"remix",
+		"astro",
+		"inlang",
+		"solid"
+	],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"website": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
+	"license": "Fair Core License, Version 1.0, MIT Future License",
+	"pricing": "Free"
+}

@@ -1,0 +1,7 @@
+{
+  "extends": "@opral/tsconfig/default",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "resolveJsonModule": true
+  }
+}

@@ -1,0 +1,35 @@
+{
+	"m": {
+		"2qj2w8pu": "./inlang/packages/cli/marketplace-manifest.json",
+		"tdozzpar": "./inlang/packages/fink/marketplace-manifest.json",
+		"r7kp499g": "./inlang/packages/sherlock/marketplace-manifest.json",
+		"gkrpgoir": "https://cdn.jsdelivr.net/gh/parrot-global/parrot@latest/marketplace-manifest.json",
+		"3i8bor92": "./inlang/packages/plugins/i18next/marketplace-manifest.json",
+		"ig84ng0o": "./inlang/packages/plugins/json/marketplace-manifest.json",
+		"reootnfj": "./inlang/packages/plugins/inlang-message-format/marketplace-manifest.json",
+		"gerre34r": "./inlang/packages/paraglide-js/marketplace-manifest.json",
+		"632iow21": "./inlang/packages/plugins/m-function-matcher/marketplace-manifest.json",
+		"698iow33": "./inlang/packages/plugins/t-function-matcher/marketplace-manifest.json",
+		"193hsyds": "./inlang/packages/plugins/next-intl/marketplace-manifest.json",
+		"neh2d6w7": "https://cdn.jsdelivr.net/npm/inlang-plugin-xcstrings@latest/marketplace-manifest.json"
+	},
+	"g": {
+		"mqlyfa7l": "./inlang/guides/dont-lazy-load/marketplace-manifest.json",
+		"94ng94n4": "./inlang/guides/how-to-inlang-app/marketplace-manifest.json",
+		"2fg8ng94": "./inlang/guides/build-a-global-svelte-app/marketplace-manifest.json",
+		"3go4f04m": "./inlang/guides/what-is-inlang/marketplace-manifest.json",
+		"00162hsd": "./inlang/guides/what-are-plugins/marketplace-manifest.json",
+		"940fn8mg": "./inlang/guides/i18n-mistakes/marketplace-manifest.json",
+		"6ddyhpoi": "./inlang/guides/contribute-translations-with-fink/marketplace-manifest.json",
+		"uxohikde": "./inlang/guides/use-paraglide-with-nextjs-pages-router/marketplace-manifest.json",
+		"wxcebbig": "./inlang/guides/use-paraglide-with-nextjs-app-router/marketplace-manifest.json",
+		"38fnf03n": "./inlang/guides/localization-strategy/marketplace-manifest.json",
+		"lubhdyua": "./inlang/guides/build-a-global-solidstart-app/marketplace-manifest.json",
+		"7777asdy": "./inlang/guides/ecosystem-compatible/marketplace-manifest.json",
+		"hhfueysj": "./inlang/guides/next-intl-with-ide-extension/marketplace-manifest.json",
+		"utqgkmzp": "./inlang/guides/build-an-internationalized-astro-app-using-paraglide/marketplace-manifest.json",
+		"oostafhs": "./inlang/guides/translation-review-system/marketplace-manifest.json",
+		"ssryldhd": "./inlang/guides/translation-automation/marketplace-manifest.json",
+		"pposhsfh": "./inlang/guides/use-paraglide-with-remix/marketplace-manifest.json"
+	}
+}

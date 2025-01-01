@@ -1,0 +1,13 @@
+{
+	"extends": "@opral/tsconfig/default",
+	"include": ["src/**/*"],
+	"compilerOptions": {
+		"lib": ["ESNext", "DOM"],
+		"declaration": true,
+		"declarationMap": false,
+		"experimentalDecorators": false,
+		"useDefineForClassFields": true,
+		"outDir": "./dist/library",
+		"rootDir": "./src"
+	}
+}

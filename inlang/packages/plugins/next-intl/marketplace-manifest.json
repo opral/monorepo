@@ -1,0 +1,34 @@
+{
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
+	"id": "plugin.inlang.nextIntl",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/plugins/next-intl/assets/plugin-next-intl-logo.png",
+	"displayName": {
+		"en": "next-intl plugin"
+	},
+	"description": {
+		"en": "A plugin to make next-intl ecosystem compatible with inlang"
+	},
+	"pages": {
+		"/": "./inlang/packages/plugins/next-intl/README.md",
+		"/changelog": "./inlang/packages/plugins/next-intl/CHANGELOG.md"
+	},
+	"keywords": [
+		"next-intl",
+		"javascript",
+		"react",
+		"nextjs",
+		"website",
+		"load",
+		"save",
+		"import",
+		"export",
+		"messages",
+		"plugin"
+	],
+	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"website": "https://manage.inlang.com/install?module=plugin.inlang.nextIntl",
+	"license": "Apache-2.0",
+	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@latest/dist/index.js"
+}

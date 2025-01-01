@@ -3,5 +3,24 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "access": "restricted",
-  "baseBranch": "main"
+  "baseBranch": "main",
+  "ignore": [
+    "@inlang/sdk",
+    "@inlang/plugin-i18next",
+    "vs-code-extension",
+    "@inlang/cli",
+    "@inlang/fink",
+    "@inlang/paraglide-js",
+    "@inlang/paraglide-js-example-cli",
+    "@inlang/plugin-icu1",
+    "@inlang/plugin-message-format",
+    "@inlang/plugin-m-function-matcher",
+    "@inlang/plugin-t-function-matcher",
+    "@inlang/rpc",
+    "@inlang/server",
+    "@inlang/template-plugin",
+    "@inlang/editor-component",
+    "@inlang/website",
+    "@inlang/recommend-sherlock"
+  ]
 }
