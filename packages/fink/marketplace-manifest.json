@@ -1,19 +1,19 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "app.inlang.finkLocalizationEditor",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/new-fink-logo.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/icon.jpg",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/fink-marketplace-cover.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/fink-gallery/fink-gallery-image-1.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/fink-gallery/fink-gallery-image-2.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/fink-gallery/fink-gallery-image-3.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/fink-gallery/fink-gallery-image-4.jpg"
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/cover.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-1.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-2.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-3.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-4.jpg"
 	],
 	"displayName": {
-		"en": "Fink – Localization Editor"
+		"en": "Fink - CAT Editor (Computer Assistet Tranlation Editor)"
 	},
 	"description": {
-		"en": "Your translation workflow with no-code setup and repository-based operation — the ideal i18n solution for translators."
+		"en": "Manage translations as web app with Fink."
 	},
 	"pages": {
 		"Overview": {

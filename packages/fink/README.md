@@ -1,16 +1,26 @@
+---
+imports: 
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-hero.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-features.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-comments.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-pricing.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-feature.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-comment.js
+---
+
 <doc-hero 
-  title="Edit translations with version control in a visual editor." description="Fink enables translators to edit translations in a visual editor and submit them to your repository. It is a client-side application that pulls the translations from your repository into the browser and commits changes back to it. Contributors can easily submit translations by creating forks and pull requests within the editor." primary-text="Open Fink" primary-link="https://fink.inlang.com" secondary-text="Guide" secondary-link="https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink" tag="Best app for translators" companies='["https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/appflowy-logo.svg","https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/osmosis-logo.svg","https://www.remnote.com/assets/homepage/images/logoText.svg"]'>
+  title="CAT Editor" description="Fink enables translators to edit translations via a web app." primary-text="Open Fink" primary-link="https://fink.inlang.com" secondary-text="Guide" secondary-link="https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink" tag="Best app for translators" companies='["https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/editor/assets/appflowy-logo.svg","https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/osmosis-logo.svg","https://www.remnote.com/assets/homepage/images/logoText.svg"]'>
 
 </doc-hero>
 
-![editor banner image](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/editor/assets/fink-image.png)
+![editor banner image](https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/packages/fink/assets/fink-image.png)
 
 ## Why use Fink?
 
 <doc-features>
-  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Edit messages visually" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/editor01.png"></doc-feature>
-  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Collaborate using version control" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/editor02.png"></doc-feature>
-  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Ensure quality with lint rules" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/editor03.png"></doc-feature>
+  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Edit messages visually" image="https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/editor/assets/editor01.png"></doc-feature>
+  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Collaborate using version control" image="https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/editor/assets/editor02.png"></doc-feature>
+  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Ensure quality with lint rules" image="https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/editor/assets/editor03.png"></doc-feature>
 </doc-features>
 
 ## What users say
@@ -25,14 +35,8 @@
 <br />
 <br />
 
-## How to contribute translations
-
-[![Fink Guide Ad](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-guide-image.jpg) Read in-depth guide](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
 
 ## Pricing
 
 <doc-pricing></doc-pricing>
 
-## Login via GitHub
-
-If your repository can't be accessed anonymously, you can login via GitHub. The editor will ask you to login if it can't access your repository.
