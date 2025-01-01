@@ -2,12 +2,12 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "app.inlang.ideExtension",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-marketplace-cover.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-1.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-2.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-3.jpg"
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/sherlock/assets/marketplace/cover.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/sherlock/assets/marketplace/gallery/image-1.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/sherlock/assets/marketplace/gallery/image-2.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/sherlock/assets/marketplace/gallery/image-3.jpg"
 	],
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/ide-extension/assets/sherlock-logo.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/sherlock/assets/sherlock-logo.png",
 	"displayName": {
 		"en": "Sherlock - VS Code extension"
 	},
