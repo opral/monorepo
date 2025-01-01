@@ -3,5 +3,6 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "access": "restricted",
-  "baseBranch": "main"
+  "baseBranch": "main",
+  "ignore": ["@inlang/sdk", "@inlang/plugin-i18next", "vs-code-extension"]
 }
