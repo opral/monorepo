@@ -25,6 +25,6 @@ Given that most Projects have between two and four languages you can expect Para
 
 This chart shows Paraglide's bundle size with a different number of languages compared to `i18next` loading a single language.
 
-![Chart showing Paraglide starting out way smaller than i18next and then gradually overtaking it. With one language Paraglide never overtakes i18next. With two it overtakes it at 1250 messages. With five languages it overtakes it at about 400 messages](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/docs/benchmark.jpeg)
+![Chart showing Paraglide starting out way smaller than i18next and then gradually overtaking it. With one language Paraglide never overtakes i18next. With two it overtakes it at 1250 messages. With five languages it overtakes it at about 400 messages](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide-js/docs/benchmark.jpeg)
 
 **Per-Language Splitting is a long-term goal for Paraglide**. Once Per-Language splitting works Paraglide's bundle will scale about 30% slower than other i18n libraries thanks to minified messageIDs. Keep track of progress in [this issue](https://github.com/opral/inlang-paraglide-js/issues/88).
