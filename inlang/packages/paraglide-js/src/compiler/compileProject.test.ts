@@ -98,6 +98,48 @@ describe("tree-shaking", () => {
 	});
 });
 
+test("emitPrettierIgnore", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+	});
+
+	const output = await compileProject({ project });
+
+	// defaults to true
+	expect(output[".prettierignore"]).toBeDefined();
+
+	const output2 = await compileProject({
+		project,
+		options: {
+			emitPrettierIgnore: false,
+		},
+	});
+
+	// no prettierignore if options is set to false
+	expect(output2[".prettierignore"]).toBeUndefined();
+});
+
+test("emitGitIgnore", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+	});
+
+	const output = await compileProject({ project });
+
+	// defaults to true
+	expect(output[".gitignore"]).toBeDefined();
+
+	const output2 = await compileProject({
+		project,
+		options: {
+			emitGitIgnore: false,
+		},
+	});
+
+	// no prettierignore if options is set to false
+	expect(output2[".gitignore"]).toBeUndefined();
+});
+
 describe("e2e", async () => {
 	// The compiled output needs to be bundled into one file to be dynamically imported.
 	const code = await bundleCode(
