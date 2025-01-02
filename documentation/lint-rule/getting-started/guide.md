@@ -1,3 +1,9 @@
+---
+imports: 
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-links.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-link.js
+---
+
 # Build a Lint Rule
 
 This documentation provides step-by-step instructions on developing a lint rule for the inlang ecosystem. Lint rules are used to check for specific patterns or issues in translated messages to ensure high-quality translations. Follow the guide below to create your own custom lint rule.
