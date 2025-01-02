@@ -46,7 +46,7 @@ jobs:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
       - name: Publish packages
-        run: pnpm ci:publish
+        run: pnpm publish -r
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
 
