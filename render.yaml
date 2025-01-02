@@ -96,8 +96,8 @@ services:
     region: frankfurt
     plan: standard
     branch: main
-    buildCommand: pnpm install && pnpm run --filter @inlang/website... build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm production # configured in root package.json
+    buildCommand: pnpm install && pnpm run --filter @inlang/server... build
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/server production 
     autoDeploy: true
     envVars:
       - key: PORT
