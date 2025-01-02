@@ -1,6 +1,10 @@
 {
   "name": "@opral/tsconfig",
   "version": "1.0.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "tsconfig.default.json"
   ],
