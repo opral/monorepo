@@ -1,7 +1,10 @@
 import { loadProjectFromDirectory } from "@inlang/sdk";
 import path from "node:path";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
-import { compileProject } from "./compileProject.js";
+import {
+	compileProject,
+	type ParaglideCompilerOptions,
+} from "./compileProject.js";
 import { writeOutput } from "../services/file-handling/write-output.js";
 
 /**
@@ -21,6 +24,7 @@ export async function compile(args: {
 	path: string;
 	outdir: string;
 	fs: typeof import("node:fs");
+	options?: ParaglideCompilerOptions;
 }): Promise<void> {
 	const absoluteOutdir = path.resolve(process.cwd(), args.outdir);
 
@@ -32,6 +36,7 @@ export async function compile(args: {
 
 	const output = await compileProject({
 		project,
+		options: args.options,
 	});
 
 	await writeOutput(absoluteOutdir, output, args.fs.promises);

@@ -507,6 +507,20 @@ test("./messages.js types", async () => {
 	expect(diagnostics.length).toEqual(0);
 });
 
+test("emits ts declaration files when option is true", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+	});
+
+	for (const bundle of mockBundles) {
+		await insertBundleNested(project.db, bundle);
+	}
+
+	const output = await compileProject({ project, options: { emitDts: true } });
+
+	expect(Object.keys(output)).toContain("messages.d.ts");
+});
+
 async function bundleCode(output: Record<string, string>, file: string) {
 	const bundle = await _rollup({
 		input: "main.js",
