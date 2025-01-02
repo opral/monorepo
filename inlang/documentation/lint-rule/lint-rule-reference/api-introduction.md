@@ -1,3 +1,9 @@
+---
+imports: 
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-links.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-link.js
+---
+
 # Lint Rule API Introduction
 
 The Lint Rule API provides a straightforward way to implement linting rules for messages in your `project`. The API can be categorized into two main blocks: `meta` and `lint logic`.
