@@ -36,7 +36,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	const uid = pageContext.routeParams?.uid;
 
 	if (!uid) {
-		console.log("No uid defined.", pageContext);
+		console.log("No uid defined.", pageContext.routeParams);
 		redirect("/not-found", 301);
 	}
 
@@ -46,8 +46,10 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	) as MarketplaceManifest & {
 		uniqueID: string;
 	};
+
 	if (!item) {
-		console.log("No item found for uid in registry.", pageContext);
+		console.log("No item found for uid in registry.", pageContext.routeParams);
+		console.log("Registry:", registry);
 		throw redirect("/not-found", 301);
 	}
 
