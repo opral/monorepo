@@ -2,7 +2,10 @@
 	"name": "@inlang/sdk",
 	"version": "2.0.0-prerelease.0",
 	"type": "module",
-	"license": "Apache-2.0",
+	"license": "MIT",
+	"publishConfig": {
+		"access": "public"
+	},
 	"homepage": "https://inlang.com/documentation/sdk",
 	"repository": {
 		"type": "git",
