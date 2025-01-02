@@ -9,8 +9,7 @@
     "format": "pnpm exec nx run-many --target=format --parallel",
     "clean": "pnpm recursive run clean && rm -rf ./.env ./node_modules",
     "----- CI ---- used to test the codebase on every commit": "",
-    "ci": "pnpm lint && pnpm test && pnpm build",
-    "ci:publish": "pnpm publish -r"
+    "ci": "pnpm lint && pnpm test && pnpm build"
   },
   "engines": {
     "node": ">=20",

@@ -12,7 +12,7 @@ on:
 jobs:
   vs-code-marketplace:
     runs-on: ubuntu-latest
-    environment: vscode-marketplace
+    environment: production
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
