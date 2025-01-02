@@ -9,7 +9,7 @@ const ParaglideHeader = () => {
 					<div class="p-1 rounded-lg overflow-hidden mt-8 md:mt-0">
 						<img
 							class="w-10 h-10 object-cover"
-							src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/assets/paraglideNoBg.png"
+							src="/images/paraglideNoBg.png"
 							alt="paraglide logo"
 						/>
 					</div>
