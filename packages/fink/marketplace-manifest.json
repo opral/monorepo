@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "app.inlang.finkLocalizationEditor",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/icon.jpg",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/icon.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/cover.jpg",
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-1.jpg",
