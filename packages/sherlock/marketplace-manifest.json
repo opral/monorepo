@@ -21,8 +21,7 @@
 		"Getting Started": {
 			"/quick-start": "./inlang/packages/sherlock/docs/quick-start.md",
 			"/customization": "./inlang/packages/sherlock/docs/customization.md",
-			"/supported-i18n-libraries": "./inlang/packages/sherlock/docs/supported-i18n-libraries.md",
-			"/video-tour": "./inlang/packages/sherlock/docs/video-tour.md"
+			"/supported-i18n-libraries": "./inlang/packages/sherlock/docs/supported-i18n-libraries.md"
 		},
 		"Appendix": {
 			"/changelog": "./inlang/packages/sherlock/CHANGELOG.md"

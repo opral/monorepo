@@ -8,19 +8,14 @@ imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-comment.js
 ---
 
-<doc-hero 
-  title="CAT Editor" description="Fink enables translators to edit translations via a web app." primary-text="Open Fink" primary-link="https://fink.inlang.com" secondary-text="Guide" secondary-link="https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink" tag="Best app for translators" companies='["https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/editor/assets/appflowy-logo.svg","https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/osmosis-logo.svg","https://www.remnote.com/assets/homepage/images/logoText.svg"]'>
-
-</doc-hero>
-
-![editor banner image](https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/packages/fink/assets/fink-image.png)
+![editor banner image](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/fink/assets/fink-image.png)
 
 ## Why use Fink?
 
 <doc-features>
-  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Edit messages visually" image="https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/editor/assets/editor01.png"></doc-feature>
-  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Collaborate using version control" image="https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/editor/assets/editor02.png"></doc-feature>
-  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Ensure quality with lint rules" image="https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/editor/assets/editor03.png"></doc-feature>
+  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Edit messages visually" image="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/fink/assets/editor01.png"></doc-feature>
+  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Collaborate using version control" image="https://cdn.jsdelivr.net/gh/opral/monorepo/packages/fink/assets/editor02.png"></doc-feature>
+  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Ensure quality with lint rules" image="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/fink/assets/editor03.png"></doc-feature>
 </doc-features>
 
 ## What users say
@@ -35,8 +30,4 @@ imports:
 <br />
 <br />
 
-
-## Pricing
-
-<doc-pricing></doc-pricing>
 

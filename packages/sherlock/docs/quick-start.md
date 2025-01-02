@@ -1,6 +1,6 @@
 # Quick start
 
-<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/ide-extension/assets/sherlock-start.png"/>
+<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/sherlock-start.png"/>
 
 Install the extension and click `Getting Started` in the `Sherlock Tab`.
 
