@@ -20,6 +20,7 @@ jobs:
         os: [ubuntu-latest]
         version: [22]
     runs-on: ${{ matrix.os }}
+    environment: production
     steps:
       - name: Checkout project
         uses: actions/checkout@v3

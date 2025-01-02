@@ -15,6 +15,7 @@ jobs:
   versioning:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: versioning
+    environment: production
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
