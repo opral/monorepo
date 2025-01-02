@@ -37,14 +37,26 @@ jobs:
       - name: Check if publish is needed
         id: check_publish
         run: |
-          echo "Running pnpm publish --dry-run"
-          pnpm publish --dry-run > publish_output.txt 2>&1 || true
-          if grep -q "published" publish_output.txt; then
+            # Log the dry-run publish command
+            echo "Running pnpm publish --dry-run"
+            
+            # Perform a dry-run of pnpm publish and redirect output to a file
+            pnpm publish -r --dry-run > publish_output.txt 2>&1 || true
+            
+            # Check the output file for the presence of "=== Tarball Details ==="
+
+            if grep -q "=== Tarball Details ===" publish_output.txt; then
+
+            # If found, set the environment variable to indicate publishing is needed
             echo "needs_publish=true" >> $GITHUB_ENV
-          else
+
+            else
+            # If not found, log that no packages need to be published
             echo "No packages need to be published"
+            
+            # Set the environment variable to indicate no publishing is needed
             echo "needs_publish=false" >> $GITHUB_ENV
-          fi
+            fi
 
         # Conditional steps based on the check
       - name: Install Dependencies
