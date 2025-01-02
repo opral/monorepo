@@ -34,7 +34,11 @@ export default async function onBeforeRender(pageContext: PageContext) {
 
 	// check if uid is defined
 	const uid = pageContext.routeParams?.uid;
-	if (!uid) redirect("/not-found", 301);
+
+	if (!uid) {
+		console.log("No uid defined.", pageContext);
+		redirect("/not-found", 301);
+	}
 
 	// check if item for uid exists
 	const item = registry.find(
@@ -42,7 +46,10 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	) as MarketplaceManifest & {
 		uniqueID: string;
 	};
-	if (!item) throw redirect("/not-found", 301);
+	if (!item) {
+		console.log("No item found for uid in registry.", pageContext);
+		throw redirect("/not-found", 301);
+	}
 
 	// get corrected item slug; replace all dots with dashes; if no slug is defined, use the id
 	const itemPath = `/m/${item.uniqueID}/${
