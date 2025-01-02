@@ -95,8 +95,8 @@ services:
     runtime: node
     region: frankfurt
     plan: standard
-    branch: inlang-v1
-    buildCommand: pnpm install && pnpm run build --projects=@inlang/website
+    branch: main
+    buildCommand: pnpm install && pnpm run --filter @inlang/website... build
     startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm production # configured in root package.json
     autoDeploy: true
     envVars:
@@ -106,7 +106,6 @@ services:
     buildFilter:
       paths:
         - inlang/packages/website/**
-        - inlang/packages/markdown/**
         - inlang/packages/marketplace-registry/**
         - '**/*.md'
       ignoredPaths:

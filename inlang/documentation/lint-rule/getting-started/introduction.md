@@ -1,3 +1,11 @@
+---
+imports: 
+    - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-header.js
+    - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-links.js
+    - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-link.js
+---
+
+
 <doc-header title="What is a Lint Rule?" description="Validate content in an inlang project." button="Get started" link="/documentation/lint-rule/guide">
 </doc-header>
 

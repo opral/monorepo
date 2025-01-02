@@ -10,7 +10,7 @@
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-4.jpg"
 	],
 	"displayName": {
-		"en": "Fink - CAT Editor (Computer Assistet Tranlation Editor)"
+		"en": "Fink - CAT Editor (Computer Assisted Translation Editor)"
 	},
 	"description": {
 		"en": "Manage translations as web app with Fink."
@@ -43,6 +43,6 @@
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"website": "https://fink.inlang.com/",
-	"license": "PolyForm Noncommercial License 1.0.0",
+	"license": "Fair Core License, Version 1.0, MIT Future License",
 	"pricing": "Free Beta"
 }
