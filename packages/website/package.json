@@ -4,10 +4,10 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "node ./scripts/generateSitemap.js && paraglide-js compile --project ./website.inlang && vite build",
+		"build": "node ./scripts/generateSitemap.js && vite build",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts ",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "tsc --noEmit && vitest run --passWithNoTests",
+		"test": "vitest run --passWithNoTests && tsc --noEmit",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
