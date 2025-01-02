@@ -2,9 +2,9 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJsAdapterAstro",
 	"slug": "paraglide-astro-i18n",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-astro/assets/icon.svg",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/paraglide/paraglide-astro/assets/icon.svg",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-astro/assets/og.png"
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang-v1/source-code/paraglide/paraglide-astro/assets/og.png"
 	],
 	"displayName": {
 		"en": "Paraglide-Astro"
