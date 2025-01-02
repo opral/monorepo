@@ -60,7 +60,7 @@
 		"@opral/markdown-wc-doc-elements": "workspace:*",
 		"@inlang/marketplace-manifest": "workspace:*",
 		"@inlang/marketplace-registry": "workspace:*",
-		"@inlang/paraglide-js": "1.11.3",
+		"@inlang/paraglide-js": "2.0.0-prerelease.0",
 		"@inlang/paraglide-vite": "1.3.0",
 		"@inlang/rpc": "workspace:*",
 		"@tailwindcss/aspect-ratio": "^0.4.2",
