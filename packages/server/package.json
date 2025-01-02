@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "node --loader tsx ./src/main.ts",
-    "production": "NODE_ENV=production tsx ./src/main.ts",
+    "production": "pnpm run production:website & pnpm run production:self",
+    "production:website": "pnpm run --filter @inlang/website production",
+    "production:self": "NODE_ENV=production tsx ./src/main.ts",
     "test": "tsc --noEmit",
     "format": "prettier ./src --write",
     "clean": "rm -rf ./dist ./node_modules"
