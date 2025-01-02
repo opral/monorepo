@@ -379,5 +379,8 @@ inlang/packages/paraglide/paraglide-solidstart/example/.solid
 # Fink version.json
 inlang/packages/editor/version.json
 
+# Lix website build
+packages/lix-website/build
+
 # gitea test instance data
 lix/packages/gitea
