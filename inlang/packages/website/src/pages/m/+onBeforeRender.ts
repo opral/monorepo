@@ -152,7 +152,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 				pageData = readmeMarkdown?.frontmatter;
 			}
 		} catch (error) {
-			console.error("Error while accessing the readme file");
+			console.error("Error while accessing the readme file", error);
 			throw redirect("/not-found", 301);
 		}
 	} else {
