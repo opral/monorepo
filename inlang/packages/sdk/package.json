@@ -4,7 +4,8 @@
 	"type": "module",
 	"license": "MIT",
 	"publishConfig": {
-		"access": "public"
+		"access": "public",
+		"tag": "prerelease"
 	},
 	"homepage": "https://inlang.com/documentation/sdk",
 	"repository": {
