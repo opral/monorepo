@@ -1,13 +1,6 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  test: {
-    browser: {
-      enabled: false,
-      headless: true,
-      name: "chrome",
-    },
-  },
   optimizeDeps: {
     exclude: ["@sqlite.org/sqlite-wasm"],
   },
