@@ -2,6 +2,9 @@
 	"m": {
 		"2qj2w8pu": "./inlang/packages/cli/marketplace-manifest.json",
 		"tdozzpar": "./inlang/packages/fink/marketplace-manifest.json",
+		"dxnzrydw": "https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/paraglide/paraglide-sveltekit/marketplace-manifest.json",
+		"osslbuzt": "https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/paraglide/paraglide-next/marketplace-manifest.json",
+		"iljlwzfs": "https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/paraglide/paraglide-astro/marketplace-manifest.json",
 		"r7kp499g": "./inlang/packages/sherlock/marketplace-manifest.json",
 		"gkrpgoir": "https://cdn.jsdelivr.net/gh/parrot-global/parrot@latest/marketplace-manifest.json",
 		"3i8bor92": "./inlang/packages/plugins/i18next/marketplace-manifest.json",
