@@ -2,7 +2,9 @@ import express from "express";
 import compression from "compression";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
-import { router } from "./router.js";
+// @ts-expect-error - needs .ts extension here because of https://github.com/nodejs/loaders/issues/214
+// using the new --rewriteImportPaths flag seemed to experimental.
+import { router } from "./router.ts";
 // --------------- SETUP -----------------
 
 export const isProduction = process.env.NODE_ENV === "production";
