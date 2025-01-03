@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.i18next",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/plugins/i18next/assets/icon.png",
+	"icon": "./assets/icon.png",
 	"displayName": {
 		"en": "i18next"
 	},
@@ -9,8 +9,8 @@
 		"en": "A plugin for inlang projects that works with i18next and reads + writes resources."
 	},
 	"pages": {
-		"/": "./inlang/packages/plugins/i18next/README.md",
-		"/changelog": "./inlang/packages/plugins/i18next/CHANGELOG.md"
+		"/": "./README.md",
+		"/changelog": "./CHANGELOG.md"
 	},
 	"keywords": [
 		"i18next",
@@ -30,7 +30,6 @@
 	],
 	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
 	"publisherName": "inlang",
-	"website": "https://manage.inlang.com/install?module=plugin.inlang.i18next",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",
 	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"

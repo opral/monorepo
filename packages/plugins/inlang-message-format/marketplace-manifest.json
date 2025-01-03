@@ -8,8 +8,8 @@
 		"en": "The simplest storage plugin for inlang."
 	},
 	"pages": {
-		"/": "./inlang/packages/plugins/inlang-message-format/README.md",
-		"/changelog": "./inlang/packages/plugins/inlang-message-format/CHANGELOG.md"
+		"/": "./README.md",
+		"/changelog": "./CHANGELOG.md"
 	},
 	"keywords": [
 		"website",
@@ -30,7 +30,6 @@
 	],
 	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
 	"publisherName": "inlang",
-	"website": "https://manage.inlang.com/install?module=plugin.inlang.messageFormat",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",
 	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js"
