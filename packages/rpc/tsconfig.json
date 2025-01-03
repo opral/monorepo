@@ -1,5 +1,5 @@
 {
-	"extends": "../tsconfig.base.json",
+	"extends": "@opral/tsconfig/default",
 	"include": ["src/**/*.ts", "src/services/env-variables/index.js"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
@@ -7,6 +7,7 @@
 		// required to copy js files to dist
 		"allowJs": true,
 		"outDir": "./dist",
+		"noImplicitAny": false,
 		"rootDir": "./src"
 	}
 }

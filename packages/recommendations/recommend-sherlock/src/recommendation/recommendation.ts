@@ -1,4 +1,3 @@
-import { Value } from "@sinclair/typebox/value";
 import { parse, type CommentJSONValue, stringify } from "comment-json";
 import { type ExtensionsJson as ExtensionsJsonType } from "./utils/types.js";
 import { pathExists } from "./utils/exists.js";
