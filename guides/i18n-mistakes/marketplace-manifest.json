@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "guide.floriankiem.i18nMistakes",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/i18n-mistakes/assets/computer-icon.jpg",
+  "icon": "./assets/computer-icon.jpg",
   "displayName": {
     "en": "Localization Mistakes and How to Avoid Them when Internationalizing (i18n) your App"
   },
@@ -9,7 +9,7 @@
     "en": "This guide will help you avoid common mistakes when localizing your app. It will also help you understand the importance of localization and how to do it right."
   },
   "readme": {
-    "en": "./inlang/guides/i18n-mistakes/i18n-mistakes.md"
+    "en": "./i18n-mistakes.md"
   },
   "keywords": [
     "i18n",

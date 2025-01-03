@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "guide.lorissigrist.useParaglideJsWithNextjsAppRouter",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/use-paraglide-with-nextjs-app-router/app-router-logo.png",
+  "icon": "./app-router-logo.png",
   "displayName": {
     "en": "Use ParaglideJS with the NextJS App Router"
   },
@@ -9,7 +9,7 @@
     "en": "This guide covers how to integrate ParaglideJS into a NextJS project using the app router. It will cover server & client components, i18n routing and more!"
   },
   "readme": {
-    "en": "./inlang/guides/use-paraglide-with-nextjs-app-router/use-paraglide-with-nextjs-app-router.md"
+    "en": "./use-paraglide-with-nextjs-app-router.md"
   },
   "keywords": [
     "application",

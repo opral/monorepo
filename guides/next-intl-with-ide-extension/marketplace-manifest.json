@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "guide.nilsjacobsen.nextIntlIdeExtension",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/next-intl-with-ide-extension/assets/iconv3.png",
+  "icon": "./assets/iconv3.png",
   "displayName": {
     "en": "Setting Up next-intl with the Sherlock VS Code extension."
   },
@@ -9,7 +9,7 @@
     "en": "I'll walk you through the integration of the next-intl internationalization library with the Sherlock VS Code extension."
   },
   "readme": {
-    "en": "./inlang/guides/next-intl-with-ide-extension/README.md"
+    "en": "./README.md"
   },
   "gallery": [
     "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/next-intl-with-ide-extension/assets/next-intl-guide.png"

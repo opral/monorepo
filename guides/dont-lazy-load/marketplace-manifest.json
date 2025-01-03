@@ -1,10 +1,8 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "guide.lorissigrist.dontlazyload",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/dont-lazy-load/assets/icon.png",
-  "gallery": [
-    "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/dont-lazy-load/assets/thumbnail.png"
-  ],
+  "icon": "./assets/icon.png",
+  "gallery": ["./assets/thumbnail.png"],
   "displayName": {
     "en": "Don't Lazy-Load Translations"
   },
@@ -12,7 +10,7 @@
     "en": "Lazy-loading translations can seriously hurt your web-vitals. Here is what to do instead."
   },
   "readme": {
-    "en": "./inlang/guides/dont-lazy-load/README.md"
+    "en": "./README.md"
   },
   "keywords": [
     "i18n",
