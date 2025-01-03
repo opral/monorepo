@@ -1,5 +1,11 @@
 # @inlang/recommend-sherlock
 
+## 0.1.1
+
+### Patch Changes
+
+- 738448e: fix: move required runtime dependencies from `devDependencies` to `dependencies`
+
 ## 0.1.0
 
 ### Minor Changes

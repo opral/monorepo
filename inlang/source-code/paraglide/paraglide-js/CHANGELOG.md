@@ -1,5 +1,13 @@
 # @inlang/paraglide-js
 
+## 1.11.6
+
+### Patch Changes
+
+- 3123e85: fix: just in case bundle monorepo dependencies to mitigate https://github.com/opral/inlang-paraglide-js/issues/289
+- Updated dependencies [738448e]
+  - @inlang/recommend-sherlock@0.1.1
+
 ## 1.11.5
 
 ### Patch Changes

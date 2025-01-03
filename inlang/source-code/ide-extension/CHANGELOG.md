@@ -1,5 +1,12 @@
 # inlang-vs-code-extension
 
+## 1.48.4
+
+### Patch Changes
+
+- Updated dependencies [738448e]
+  - @inlang/recommend-sherlock@0.1.1
+
 ## 1.48.3
 
 ### Patch Changes
