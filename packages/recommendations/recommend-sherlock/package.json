@@ -20,10 +20,12 @@
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
+	"dependencies": {
+		"comment-json": "^4.2.3"
+	},
 	"devDependencies": {
 		"@types/vscode": "^1.84.2",
 		"@vitest/coverage-v8": "2.1.8",
-		"comment-json": "^4.2.3",
 		"memfs": "4.6.0",
 		"typescript": "^5.1.3",
 		"vitest": "2.1.8",
