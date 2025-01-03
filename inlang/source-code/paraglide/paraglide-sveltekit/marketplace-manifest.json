@@ -2,9 +2,9 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJsAdapterSvelteKit",
 	"slug": "paraglide-sveltekit-i18n",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/paraglide/paraglide-sveltekit/assets/icon.png",
+	"icon": "./assets/icon.png",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/paraglide/paraglide-sveltekit/assets/og.png"
+		"./assets/og.png"
 	],
 	"displayName": {
 		"en": "Paraglide-SvelteKit"
@@ -14,18 +14,17 @@
 	},
 	"pages": {
 		"": {
-			"/": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/why-paraglide.md",
-			"/getting-started": "./inlang/source-code/paraglide/paraglide-sveltekit/README.md",
-			"/localised-routing": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/localised-routing.md",
-			"/advanced-usage": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/advanced-usage.md",
-			"/deployment": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/deployment.md"
+			"/": "./docs/why-paraglide.md",
+			"/getting-started": "./README.md",
+			"/localised-routing": "./docs/localised-routing.md",
+			"/advanced-usage": "./docs/advanced-usage.md",
+			"/deployment": "./docs/deployment.md"
 		},
 
 		"Appendix": {
-			"/manual-setup": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/manual-setup.md",
-			"/roadmap-and-caveats": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/roadmap.md",
-			"/changelog": "./inlang/source-code/paraglide/paraglide-sveltekit/CHANGELOG.md",
-			"StackBlitz": "https://stackblitz.com/~/github.com/lorissigrist/paraglide-sveltekit-example"
+			"/manual-setup": "./docs/manual-setup.md",
+			"/roadmap-and-caveats": "./docs/roadmap.md",
+			"/changelog": "./CHANGELOG.md"
 		}
 	},
 	"keywords": [

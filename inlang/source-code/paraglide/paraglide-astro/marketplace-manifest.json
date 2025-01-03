@@ -2,10 +2,8 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJsAdapterAstro",
 	"slug": "paraglide-astro-i18n",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/paraglide/paraglide-astro/assets/icon.svg",
-	"gallery": [
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang-v1/source-code/paraglide/paraglide-astro/assets/og.png"
-	],
+	"icon": "./assets/icon.svg",
+	"gallery": ["./assets/og.png"],
 	"displayName": {
 		"en": "Paraglide-Astro"
 	},
@@ -13,8 +11,8 @@
 		"en": "An Astro integration for ParaglideJS, providing you with everything you need to internationalize your Astro App"
 	},
 	"pages": {
-		"/": "./inlang/source-code/paraglide/paraglide-astro/README.md",
-		"/changelog": "./inlang/source-code/paraglide/paraglide-astro/CHANGELOG.md"
+		"/": "./README.md",
+		"/changelog": "./CHANGELOG.md"
 	},
 	"keywords": [
 		"paraglide js",

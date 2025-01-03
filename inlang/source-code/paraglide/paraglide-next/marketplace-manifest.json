@@ -2,10 +2,8 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJsAdapterNextJs",
 	"slug": "paraglide-next-i18n",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/paraglide/paraglide-next/assets/next-logo.svg",
-	"gallery": [
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/paraglide/paraglide-next/assets/og.png"
-	],
+	"icon": "./assets/next-logo.svg",
+	"gallery": ["./assets/og.png"],
 	"displayName": {
 		"en": "Paraglide-Next"
 	},
@@ -14,24 +12,24 @@
 	},
 	"pages": {
 		"Setup": {
-			"/": "./inlang/source-code/paraglide/paraglide-next/docs/why-paraglide-next.md",
-			"/get-started": "./inlang/source-code/paraglide/paraglide-next/README.md"
+			"/": "./docs/why-paraglide-next.md",
+			"/get-started": "./README.md"
 		},
 		"Localised Routing": {
-			"/localized-routing/overview": "./inlang/source-code/paraglide/paraglide-next/docs/routing/overview.md",
-			"/localized-routing/prefix-strategy": "./inlang/source-code/paraglide/paraglide-next/docs/routing/prefix-strategy.md",
-			"/localized-routing/other-strategies": "./inlang/source-code/paraglide/paraglide-next/docs/routing/other-strategies.md"
+			"/localized-routing/overview": "./docs/routing/overview.md",
+			"/localized-routing/prefix-strategy": "./docs/routing/prefix-strategy.md",
+			"/localized-routing/other-strategies": "./docs/routing/other-strategies.md"
 		},
 		"Advanced Usage": {
-			"/advanced/seo": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/seo.md",
-			"/advanced/usage-on-the-server": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/server.md"
+			"/advanced/seo": "./docs/advanced/seo.md",
+			"/advanced/usage-on-the-server": "./docs/advanced/server.md"
 		},
 		"Appendix": {
-			"/pages-router": "./inlang/source-code/paraglide/paraglide-next/docs/pages-router.md",
-			"/manual-setup": "./inlang/source-code/paraglide/paraglide-next/docs/manual-setup.md",
+			"/pages-router": "./docs/pages-router.md",
+			"/manual-setup": "./docs/manual-setup.md",
 			"Vanilla ParaglideJS": "/m/gerre34r/library-inlang-paraglideJs",
-			"/roadmap": "./inlang/source-code/paraglide/paraglide-next/docs/roadmap.md",
-			"/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
+			"/roadmap": "./docs/roadmap.md",
+			"/changelog": "./CHANGELOG.md"
 		}
 	},
 	"keywords": [
