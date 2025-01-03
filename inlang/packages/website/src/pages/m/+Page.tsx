@@ -1,5 +1,5 @@
 import { Meta, Title } from "@solidjs/meta";
-import { For, Show } from "solid-js";
+import { createEffect, For, Show } from "solid-js";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx";
 import Card from "#src/interface/components/Card.jsx";
@@ -20,14 +20,16 @@ export type PageProps = {
 };
 
 export default function Page(props: PageProps) {
-	// import the custom elements of the document
-	// todo sanitize the imports
-	if (!import.meta.env.SSR) {
-		// @ts-expect-error
-		for (const url of props.pageData?.imports ?? []) {
-			import(url);
+	createEffect(() => {
+		// import the custom elements of the document
+		// todo sanitize the imports
+		if (!import.meta.env.SSR) {
+			// @ts-expect-error
+			for (const url of props.pageData?.imports ?? []) {
+				import(url).then(() => console.log("imported", url));
+			}
 		}
-	}
+	});
 
 	// mapping translatable types
 	const displayName = () =>
