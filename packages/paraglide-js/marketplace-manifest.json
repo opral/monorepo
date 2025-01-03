@@ -1,13 +1,13 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJs",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide-js/assets/paraglideNoBg.png",
+	"icon": "./assets/paraglideNoBg.png",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide-js/assets/og.png",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-1.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-2.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-3.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-4.jpg"
+		"./assets/og.png",
+		"./assets/marketplace/paraglide-gallery/paraglide-gallery-image-1.jpg",
+		"./assets/marketplace/paraglide-gallery/paraglide-gallery-image-2.jpg",
+		"./assets/marketplace/paraglide-gallery/paraglide-gallery-image-3.jpg",
+		"./assets/marketplace/paraglide-gallery/paraglide-gallery-image-4.jpg"
 	],
 	"displayName": {
 		"en": "Paraglide JS"
@@ -17,13 +17,13 @@
 	},
 	"pages": {
 		"": {
-			"/": "./inlang/packages/paraglide-js/docs/why-paraglide.md",
-			"/getting-started": "./inlang/packages/paraglide-js/README.md",
-			"/usage": "./inlang/packages/paraglide-js/docs/usage.md",
-			"/scaling": "./inlang/packages/paraglide-js/docs/scaling.md",
-			"/architecture": "./inlang/packages/paraglide-js/docs/architecture.md",
-			"/manual-setup": "./inlang/packages/paraglide-js/docs/manual-setup.md",
-			"/changelog": "./inlang/packages/paraglide-js/CHANGELOG.md"
+			"/": "./docs/why-paraglide.md",
+			"/getting-started": "./README.md",
+			"/usage": "./docs/usage.md",
+			"/scaling": "./docs/scaling.md",
+			"/architecture": "./docs/architecture.md",
+			"/manual-setup": "./docs/manual-setup.md",
+			"/changelog": "./CHANGELOG.md"
 		},
 
 		"Framework Libraries": {
@@ -31,10 +31,8 @@
 			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",
 			"Astro": "/m/iljlwzfs/paraglide-astro-i18n",
 			"SolidStart": "/m/n860p17j/paraglide-solidstart-i18n",
-			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n",
-			"/framework-libraries/build-your-own": "./inlang/packages/paraglide-js/docs/custom-framework-library.md"
+			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n"
 		},
-
 		"Tooling": {
 			"VsCode Extension": "/m/r7kp499g/app-inlang-ideExtension",
 			"Machine Translation": "/m/2qj2w8pu/app-inlang-cli",
