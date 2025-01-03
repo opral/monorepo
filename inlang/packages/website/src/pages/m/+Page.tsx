@@ -20,6 +20,15 @@ export type PageProps = {
 };
 
 export default function Page(props: PageProps) {
+	// import the custom elements of the document
+	// todo sanitize the imports
+	if (!import.meta.env.SSR) {
+		// @ts-expect-error
+		for (const url of props.pageData?.imports ?? []) {
+			import(url);
+		}
+	}
+
 	// mapping translatable types
 	const displayName = () =>
 		typeof props.manifest.displayName === "object"
