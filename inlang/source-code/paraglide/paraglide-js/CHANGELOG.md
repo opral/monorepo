@@ -1,5 +1,13 @@
 # @inlang/paraglide-js
 
+## 1.11.5
+
+### Patch Changes
+
+- fix: move monorepo dependencies from `devDependencies` to `dependencies`
+
+  Otherwise, the monorepo dependencies are not installed when the package is installed as a dependency. Unclear why the bug popped up now.
+
 ## 1.11.3
 
 ### Patch Changes

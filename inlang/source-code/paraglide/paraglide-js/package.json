@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-js",
 	"type": "module",
-	"version": "1.11.4",
+	"version": "1.11.5",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
@@ -50,6 +50,13 @@
 		"check": "tsc --noEmit --emitDeclarationOnly false"
 	},
 	"dependencies": {
+		"@inlang/recommend-sherlock": "workspace:*",
+		"@inlang/recommend-ninja": "workspace:*",
+		"@inlang/language-tag": "workspace:*",
+		"@inlang/plugin-message-format": "workspace:*",
+		"@inlang/sdk": "workspace:*",
+		"@lix-js/client": "workspace:*",
+		"@lix-js/fs": "workspace:*",
 		"@inlang/detect-json-formatting": "workspace:*",
 		"commander": "11.1.0",
 		"consola": "3.2.3",
@@ -58,13 +65,6 @@
 		"posthog-node": "^4.0.1"
 	},
 	"devDependencies": {
-		"@inlang/recommend-sherlock": "workspace:*",
-		"@inlang/recommend-ninja": "workspace:*",
-		"@inlang/language-tag": "workspace:*",
-		"@inlang/plugin-message-format": "workspace:*",
-		"@inlang/sdk": "workspace:*",
-		"@lix-js/client": "workspace:*",
-		"@lix-js/fs": "workspace:*",
 		"@rollup/plugin-terser": "0.4.3",
 		"@rollup/plugin-virtual": "3.0.1",
 		"@ts-morph/bootstrap": "0.20.0",
