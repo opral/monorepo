@@ -1,7 +1,7 @@
 ---
 imports:
-  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.1.4/dist/doc-link.js/+esm"
-  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.1.4/dist/doc-links.js/+esm"
+  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-link.js"
+  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-links.js"
 ---
 
 # What is inlang?
@@ -27,8 +27,7 @@ For every use case, there is an app, a plugin, a lint rule, or a custom solution
       title="Project directory (file)" 
       icon="mdi:file-outline" 
       href="/documentation/concept/project" 
-      description="Learn about the inlang project."
-    >
+      description="Learn about the inlang project.">
     </doc-link>
     <doc-link 
       title="inlang Apps" 

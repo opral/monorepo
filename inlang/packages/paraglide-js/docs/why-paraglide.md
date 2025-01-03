@@ -1,11 +1,11 @@
 ---
 imports: 
-  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.2/dist/doc-feature.js
-  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.2/dist/doc-features.js
-  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.2/dist/doc-link.js
-  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.2/dist/doc-links.js
-  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.2/dist/doc-comment.js
-  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements@0.2/dist/doc-comments.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-feature.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-features.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-link.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-links.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-comment.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-comments.js
 ---
 
 [<img src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide-js/assets/header.png" alt="Dead Simple i18n. Typesafe, Small Footprint, Treeshsakeable Messages, IDE Integration, Framework Agnostic" width="10000000px" />](https://www.youtube.com/watch?v=-YES3CCAG90)
@@ -27,7 +27,7 @@ Paraglide is framework agnostic, but there are framework-specific libraries avai
 
 <doc-links>
 	<doc-link title="Paraglide-Next" icon="tabler:brand-nextjs" href="/m/osslbuzt/paraglide-next-i18n" description="Go to Library"></doc-link>
-    <doc-link title="Paraglide-SvelteKit" icon="simple-icons:svelte" href="/m/dxnzrydw/paraglide-sveltekit-i18n" description="Go to Library"></doc-link>
+    <doc-link title="Paraglide-SvelteKit" icon="simple-icons:svelte" href="https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n" description="Go to Library"></doc-link>
     <doc-link title="Paraglide-Astro" icon="devicon-plain:astro" href="/m/iljlwzfs/paraglide-astro-i18n" description="Go to Library"></doc-link>
     <doc-link title="Paraglide-SolidStart" icon="tabler:brand-solidjs" href="/m/n860p17j/paraglide-solidstart-i18n" description="Go to Library"></doc-link>
 	<doc-link title="Paraglide-Remix" icon="simple-icons:remix" href="/m/fnhuwzrx/paraglide-remix-i18n" description="Go to Library"></doc-link>

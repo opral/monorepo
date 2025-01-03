@@ -1,3 +1,10 @@
+---
+imports: 
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-header.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-links.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-link.js
+---
+
 <doc-header title="What is a Plugin?" description="Change or extend app behavior with custom plugins." button="Get started" link="/documentation/plugin/guide">
 </doc-header>
 

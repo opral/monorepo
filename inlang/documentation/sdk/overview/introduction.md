@@ -1,8 +1,8 @@
 ---
 imports:
-  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-header.js/+esm"
-  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-features.js/+esm"
-  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-feature.js/+esm"
+  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-header.js"
+  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-features.js"
+  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-feature.js"
 ---
 
 <doc-header 
