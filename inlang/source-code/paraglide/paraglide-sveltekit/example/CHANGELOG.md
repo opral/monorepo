@@ -1,5 +1,11 @@
 # @inlang/paraglide-sveltekit-example
 
+## 0.1.84
+
+### Patch Changes
+
+- @inlang/paraglide-sveltekit@0.15.3
+
 ## 0.1.83
 
 ### Patch Changes

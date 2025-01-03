@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-unplugin",
-	"version": "1.9.2",
+	"version": "1.9.3",
 	"description": "Unplugin Plugin for runnning the Paraglide compiler.",
 	"license": "Apache-2.0",
 	"type": "module",

@@ -1,5 +1,13 @@
 # @inlang/paraglide-js
 
+## 1.11.7
+
+### Patch Changes
+
+- fix: remove bundle dependencies
+
+  pnpm bundles dependencies but does not resolve the versions. upon installing @inlang/paraglide-js, pnpm doesn't resolve `workspace:*` to the actual version on npm.
+
 ## 1.11.6
 
 ### Patch Changes
