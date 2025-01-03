@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "guide.nilsjacobsen.reviewSystem",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/translation-review-system/assets/logo.png",
+  "icon": "./assets/logo.png",
   "displayName": {
     "en": "Translation Review System"
   },
@@ -9,7 +9,7 @@
     "en": "The aim of this system is to meet specific standards for translations."
   },
   "readme": {
-    "en": "./inlang/guides/translation-review-system/README.md"
+    "en": "./README.md"
   },
   "keywords": [
     "i18n",

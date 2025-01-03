@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "guide.floriankiem.localizationStrategy",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/localization-strategy/assets/pin-icon.jpg",
+  "icon": "./assets/pin-icon.jpg",
   "displayName": {
     "en": "Localization Strategy: Best Practices for SEO and Global Ranking"
   },
@@ -9,7 +9,7 @@
     "en": "Learn how to avoid common pitfalls and implement best practices in app localization with this comprehensive guide. Discover practical tips to enhance your global ranking and ensure a successful localization strategy."
   },
   "readme": {
-    "en": "./inlang/guides/localization-strategy/localization-strategy.md"
+    "en": "./localization-strategy.md"
   },
   "keywords": [
     "i18n",

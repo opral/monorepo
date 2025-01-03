@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "guide.nilsjacobsen.ecosystemCompatible",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/ecosystem-compatible/assets/compatible-badge.png",
+  "icon": "./assets/compatible-badge.png",
   "displayName": {
     "en": "inlang ecosystem compatible"
   },
@@ -9,7 +9,7 @@
     "en": "What does this term mean and why is the approach important?"
   },
   "readme": {
-    "en": "./inlang/guides/ecosystem-compatible/README.md"
+    "en": "./README.md"
   },
   "keywords": [
     "i18n",

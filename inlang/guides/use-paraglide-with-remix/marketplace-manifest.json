@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "guide.kevinccbsg.useParaglideJsWithRemix",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/external-projects/remix-paraglidejs/assets/remix.svg",
+  "icon": "./remix_logo.png",
   "displayName": {
     "en": "Use ParaglideJS with Remix"
   },
@@ -9,7 +9,7 @@
     "en": "This guide covers how to integrate ParaglideJS into a Remix project."
   },
   "readme": {
-    "en": "./inlang/guides/use-paraglide-with-remix/use-paraglide-with-remix.md"
+    "en": "./use-paraglide-with-remix.md"
   },
   "keywords": [
     "application",

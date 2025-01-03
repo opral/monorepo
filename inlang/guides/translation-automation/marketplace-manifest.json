@@ -9,7 +9,7 @@
     "en": "How can you achieve continuous translation?"
   },
   "readme": {
-    "en": "./inlang/guides/translation-automation/README.md"
+    "en": "./README.md"
   },
   "keywords": [
     "i18n",

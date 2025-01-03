@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "guide.lorissigrist.useParaglideJsWithNextjsPagesRouter",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/use-paraglide-with-nextjs-pages-router/pages-router-logo.png",
+  "icon": "./pages-router-logo.png",
   "displayName": {
     "en": "Use ParaglideJS with the NextJS Pages Router"
   },
@@ -9,7 +9,7 @@
     "en": "This guide covers how to integrate ParaglideJS into a NextJS project using the pages router. It will cover i18n routing and SEO Pitfalls and more!"
   },
   "readme": {
-    "en": "./inlang/guides/use-paraglide-with-nextjs-pages-router/use-paraglide-with-nextjs-pages-router.md"
+    "en": "./use-paraglide-with-nextjs-pages-router.md"
   },
   "keywords": [
     "application",

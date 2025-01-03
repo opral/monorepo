@@ -9,7 +9,7 @@
     "en": "A complete guide on how to adopt inlang with paraglide.js and message-format-plugin"
   },
   "readme": {
-    "en": "./inlang/guides/build-a-global-svelte-app/build-a-global-svelte-app.md"
+    "en": "./build-a-global-svelte-app.md"
   },
   "keywords": [
     "libraries",

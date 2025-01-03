@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "guide.lorissigrist.buildAGlobalSolidStartApp",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/build-a-global-solidstart-app/icon.png",
+  "icon": "./icon.png",
   "displayName": {
     "en": "Build a Global SolidStart App"
   },
@@ -9,7 +9,7 @@
     "en": "A complete guide on how to adopt inlang with paraglide.js and message-format-plugin in your SolidStart project."
   },
   "readme": {
-    "en": "./inlang/guides/build-a-global-solidstart-app/build-a-global-solidstart-app.md"
+    "en": "./build-a-global-solidstart-app.md"
   },
   "keywords": [
     "libraries",

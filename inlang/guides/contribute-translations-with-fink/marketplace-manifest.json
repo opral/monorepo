@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "guide.nilsjacobsen.contributeTranslationsWithFink",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/contribute-translations-with-fink/bird-contribute.png?raw=true",
+  "icon": "./bird-contribute.png?raw=true",
   "displayName": {
     "en": "Contribute Translations with Fink"
   },
@@ -9,7 +9,7 @@
     "en": "You can create or improve community translations through the Fink i18n editor."
   },
   "readme": {
-    "en": "./inlang/guides/contribute-translations-with-fink/README.md"
+    "en": "./README.md"
   },
   "keywords": [
     "i18n",

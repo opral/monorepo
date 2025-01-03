@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "guide.lorissigrist.buildAGlobalAstroApp",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/build-an-internationalized-astro-app-using-paraglide/icon.svg",
+  "icon": "./icon.svg",
   "displayName": {
     "en": "Build an internationalized Astro App using Paraglide"
   },
@@ -9,7 +9,7 @@
     "en": "Learn how to set up Paraglide in an Astro project."
   },
   "readme": {
-    "en": "./inlang/guides/build-an-internationalized-astro-app-using-paraglide/build-an-internationalized-astro-app-using-paraglide.md"
+    "en": "./build-an-internationalized-astro-app-using-paraglide.md"
   },
   "keywords": [
     "libraries",
