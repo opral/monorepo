@@ -1,12 +1,12 @@
 {
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "app.inlang.cli",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/cli/assets/cli-icon.png",
+  "icon": "./assets/cli-icon.png",
   "gallery": [
-    "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/cli-marketplace-cover.jpg",
-    "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-1.jpg",
-    "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-2.jpg",
-    "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-3.jpg"
+    "./assets/marketplace/cli-marketplace-cover.jpg",
+    "./assets/marketplace/cli-gallery/cli-gallery-image-1.jpg",
+    "./assets/marketplace/cli-gallery/cli-gallery-image-2.jpg",
+    "./assets/marketplace/cli-gallery/cli-gallery-image-3.jpg"
   ],
   "displayName": {
     "en": "CLI - Translation Automation"
@@ -15,8 +15,8 @@
     "en": "Command line interface for inlang projects. Many commands and the possibility to do translation automation."
   },
   "pages": {
-    "/": "./inlang/packages/cli/README.md",
-    "/changelog": "./inlang/packages/cli/CHANGELOG.md"
+    "/": "./README.md",
+    "/changelog": "./CHANGELOG.md"
   },
   "keywords": [
     "cli",

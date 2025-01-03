@@ -2,12 +2,12 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "app.inlang.ideExtension",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/sherlock/assets/marketplace/cover.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/sherlock/assets/marketplace/gallery/image-1.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/sherlock/assets/marketplace/gallery/image-2.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/sherlock/assets/marketplace/gallery/image-3.jpg"
+		"./assets/marketplace/cover.jpg",
+		"./assets/marketplace/gallery/image-1.jpg",
+		"./assets/marketplace/gallery/image-2.jpg",
+		"./assets/marketplace/gallery/image-3.jpg"
 	],
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/sherlock/assets/sherlock-logo.png",
+	"icon": "./assets/sherlock-logo.png",
 	"displayName": {
 		"en": "Sherlock - VS Code extension"
 	},
@@ -16,15 +16,15 @@
 	},
 	"pages": {
 		"": {
-			"/": "./inlang/packages/sherlock/MARKETPLACE.md"
+			"/": "./MARKETPLACE.md"
 		},
 		"Getting Started": {
-			"/quick-start": "./inlang/packages/sherlock/docs/quick-start.md",
-			"/customization": "./inlang/packages/sherlock/docs/customization.md",
-			"/supported-i18n-libraries": "./inlang/packages/sherlock/docs/supported-i18n-libraries.md"
+			"/quick-start": "./docs/quick-start.md",
+			"/customization": "./docs/customization.md",
+			"/supported-i18n-libraries": "./docs/supported-i18n-libraries.md"
 		},
 		"Appendix": {
-			"/changelog": "./inlang/packages/sherlock/CHANGELOG.md"
+			"/changelog": "./sherlock/CHANGELOG.md"
 		}
 	},
 	"keywords": [
