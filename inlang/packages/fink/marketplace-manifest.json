@@ -1,24 +1,24 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "app.inlang.finkLocalizationEditor",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/icon.png",
+	"icon": "./assets/icon.png",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/cover.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-1.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-2.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-3.jpg",
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/fink/assets/gallery-image-4.jpg"
+		"./assets/cover.jpg",
+		"./assets/gallery-image-1.jpg",
+		"./assets/gallery-image-2.jpg",
+		"./assets/gallery-image-3.jpg",
+		"./assets/gallery-image-4.jpg"
 	],
 	"displayName": {
 		"en": "Fink - CAT Editor (Computer Assisted Translation Editor)"
 	},
 	"description": {
-		"en": "Manage translations as web app with Fink."
+		"en": "Manage translations in a web app with Fink."
 	},
 	"pages": {
 		"Overview": {
-			"/": "./inlang/packages/fink/README.md",
-			"/supported-i18n-libraries": "./inlang/packages/fink/docs/supported-i18n-libraries.md"
+			"/": "./README.md",
+			"/supported-i18n-libraries": "./docs/supported-i18n-libraries.md"
 		},
 		"Guides": {
 			"Usage": "/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink",
