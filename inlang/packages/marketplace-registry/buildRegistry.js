@@ -28,7 +28,6 @@ function toAbsolutePath(baseUrl, relativePath) {
 	}
 	const base = new URL(baseUrl);
 	const path = new URL(relativePath, base).href;
-	console.log({ baseUrl, relativePath, path });
 	return new URL(relativePath, base).href;
 }
 
