@@ -49,6 +49,16 @@
 		"clean": "rm -rf ./dist ./node_modules",
 		"check": "tsc --noEmit --emitDeclarationOnly false"
 	},
+	"bundleDependencies": [
+		"@inlang/detect-json-formatting",
+		"@inlang/language-tag",
+		"@inlang/plugin-message-format",
+		"@inlang/recommend-ninja",
+		"@inlang/recommend-sherlock",
+		"@inlang/sdk",
+		"@lix-js/client",
+		"@lix-js/fs"
+	],
 	"dependencies": {
 		"@inlang/recommend-sherlock": "workspace:*",
 		"@inlang/recommend-ninja": "workspace:*",

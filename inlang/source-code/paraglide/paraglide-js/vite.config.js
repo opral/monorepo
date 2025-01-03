@@ -4,7 +4,7 @@ import tsconfigPaths from "vite-tsconfig-paths"
 import pkg from "./package.json"
 import manifest from "./marketplace-manifest.json"
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
 	// eslint-disable-next-line no-undef
 	const pToken = process.env.PUBLIC_POSTHOG_TOKEN ?? "placeholder"
 
@@ -15,7 +15,6 @@ export default defineConfig(({ mode }) => {
 				entry: ["src/index.ts", "src/adapter-utils/index.ts", "src/cli/index.ts"],
 				formats: ["es"],
 			},
-
 			emptyOutDir: true,
 			rollupOptions: {
 				external: Object.keys(pkg.dependencies),
