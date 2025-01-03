@@ -1,5 +1,17 @@
 # @inlang/marketplace-registry
 
+## 2.0.0
+
+### Major Changes
+
+- d837c51: breaking: only allow https links and resolve relative links from the marketplace manifest
+
+  ```diff
+  -  "readme": "./<repo>/x.md",
+  // paths are now resolved from the marketplace manifest
+  +  "readme": "./x.md",
+  ```
+
 ## 1.5.10
 
 ### Patch Changes

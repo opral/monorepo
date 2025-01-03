@@ -1,5 +1,11 @@
 # @opral/markdown-wc-doc-elements
 
+## 0.2.1
+
+### Patch Changes
+
+- caea2f6: fix: import doc-icon for doc-link element
+
 ## 0.2.0
 
 ### Minor Changes
