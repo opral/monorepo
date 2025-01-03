@@ -1,4 +1,5 @@
 import { LitElement, css, html } from "lit"
+import "./doc-icon.js"
 
 export default class Element extends LitElement {
 	static override styles = css`
