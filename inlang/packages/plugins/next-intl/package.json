@@ -28,6 +28,7 @@
 		"@types/flat": "^5.0.2",
 		"@types/lodash.merge": "^4.6.7",
 		"@types/parsimmon": "1.10.6",
+		"esbuild": "^0.24.2",
 		"flat": "^5.0.2",
 		"parsimmon": "^1.18.1",
 		"typescript": "^5.5.2",
