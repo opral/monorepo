@@ -1,5 +1,11 @@
 # @inlang/rpc
 
+## 0.3.37
+
+### Patch Changes
+
+Vendors legacy v1 `machineTranslateMessage` function to enable legacy v1 apps to machine translate https://github.com/opral/inlang-cli/issues/29.
+
 ## 0.3.36
 
 ### Patch Changes

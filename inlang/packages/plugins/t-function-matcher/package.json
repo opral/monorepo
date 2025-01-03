@@ -24,6 +24,7 @@
 	"devDependencies": {
 		"@opral/tsconfig": "workspace:*",
 		"@types/parsimmon": "1.10.6",
+		"esbuild": "^0.24.2",
 		"parsimmon": "^1.18.1",
 		"typescript": "^5.5.2",
 		"vitest": "2.1.8"
