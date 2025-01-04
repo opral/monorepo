@@ -54,7 +54,7 @@ The `<markdown-wc-embed>` element can be used to embed markdown-wc in a webpage.
   </body>
 ```
 
-## Usage in markdown-wc
+## Usage in another markdown file
 
 The `<markdown-wc-embed>` element can be used to embed markdown-wc in markdown-wc.
 
@@ -63,6 +63,10 @@ The `<markdown-wc-embed>` element can be used to embed markdown-wc in markdown-w
 imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-embed.js
 ---
+
+# Hello World
+
+This is a markdown file that embeds another markdown file 🤯
 
 <markdown-wc-embed src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/packages/markdown-wc/README.md"></markdown-wc-embed>
 ```
