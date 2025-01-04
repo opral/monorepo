@@ -1,6 +1,7 @@
 ---
 imports: 
   - ./dist/walking-dinosaur.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-video.js
 
 ---
 
@@ -19,9 +20,11 @@ imports:
 Enables writing documentation with web components in markdown.
 
 <walking-dinosaur></walking-dinosaur>
+<doc-video src="https://youtu.be/IMjJ1jvKsZU"></doc-video>
 ```
 
 <walking-dinosaur></walking-dinosaur>
+<doc-video src="https://youtu.be/IMjJ1jvKsZU"></doc-video>
 
 ## Why
 

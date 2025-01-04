@@ -1,5 +1,11 @@
 # @opral/markdown-wc
 
+## 0.3.1
+
+### Patch Changes
+
+- include video in readme
+
 ## 0.3.0
 
 ### Minor Changes
