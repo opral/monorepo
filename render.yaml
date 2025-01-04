@@ -235,14 +235,13 @@ services:
     autoDeploy: true
     staticPublishPath: ./packages/markdown-wc
     routes: 
-      - type: redirect
-        source: /
-        destination: /website
+      - type: rewrite
+        source: /*
+        destination: /website/*
 
     buildCommand: pnpm install && pnpm run --filter @opral/markdown-wc... build
     buildFilter:
       paths:
         - ./packages/markdown-wc/**
-        - ./packages/markdown-wc-doc-elements/**
     domains:
       - markdown-wc.opral.com
