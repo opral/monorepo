@@ -2,7 +2,10 @@
 	"name": "@opral/markdown-wc",
 	"type": "module",
 	"version": "0.3.0",
-	"private": true,
+	"private": false,
+	"publishConfig": {
+		"access": "public"
+	},
 	"files": [
 		"./src",
 		"./dist"
