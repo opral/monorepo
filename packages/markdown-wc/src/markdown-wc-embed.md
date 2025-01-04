@@ -5,7 +5,7 @@ imports:
 
 ## `<markdown-wc-embed>`
 
-The `<markdown-wc-embed>` element is used to display an image with a caption. 
+The `<markdown-wc-embed>` element is used to render markdown-wc in a webpage.
 
 ### Attributes
 

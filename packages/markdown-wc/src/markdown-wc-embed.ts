@@ -37,7 +37,8 @@ export default class Element extends LitElement {
 
 			for (const importSrc of parsed.frontmatter.imports ?? []) {
 				const resolvedImportSrc = resolveUrl(importSrc, resolvedSrc)
-				await import(resolvedImportSrc)
+				// not awaited to speed up rendering. components will load in parallel
+				import(resolvedImportSrc)
 			}
 
 			return this.base
