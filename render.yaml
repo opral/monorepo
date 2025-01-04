@@ -238,6 +238,11 @@ services:
       - type: rewrite
         source: /*
         destination: /website/*
+
+      - type: rewrite
+        source: /libraries.html
+        destination: /website/libraries.html
+
     buildCommand: pnpm install && pnpm run --filter @opral/markdown-wc... build
     buildFilter:
       paths:
