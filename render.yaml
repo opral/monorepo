@@ -234,6 +234,7 @@ services:
     runtime: static
     autoDeploy: true
     staticPublishPath: ./packages/markdown-wc/website
+    buildCommand: pnpm install && pnpm run --filter markdown-wc-website... build && pnpm run --filter markdown-wc-doc-elements build
     buildFilter:
       paths:
         - ./packages/markdown-wc/**
