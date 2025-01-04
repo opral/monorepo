@@ -1,5 +1,11 @@
 # @opral/markdown-wc
 
+## 0.3.0
+
+### Minor Changes
+
+- 5b54306: adds dinosaur example to readme
+
 ## 0.2.0
 
 ### Minor Changes
