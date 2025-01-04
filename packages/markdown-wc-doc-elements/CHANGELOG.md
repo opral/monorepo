@@ -1,5 +1,11 @@
 # @opral/markdown-wc-doc-elements
 
+## 0.2.4
+
+### Patch Changes
+
+- fixes the video component and icon component
+
 ## 0.2.3
 
 ### Patch Changes

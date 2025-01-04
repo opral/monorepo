@@ -10,7 +10,6 @@ The `<doc-video>` element is used to display a video with controls.
 #### Attributes
 
 - `src`: The source URL of the video.
-- `type`: The MIME type of the video (defaults to `video/mp4`).
 
 #### Example
 
@@ -19,3 +18,9 @@ The `<doc-video>` element is used to display a video with controls.
 ```
 
 <doc-video src="https://youtu.be/vJ3jGgCrz2I"></doc-video>
+
+```html
+<doc-video src="https://www.loom.com/share/cc29f05291d2414c9f134d68bfe7b8f1"></doc-video>
+```
+
+<doc-video src="https://www.loom.com/share/cc29f05291d2414c9f134d68bfe7b8f1"></doc-video>
