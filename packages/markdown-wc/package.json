@@ -8,7 +8,8 @@
 	},
 	"files": [
 		"./src",
-		"./dist"
+		"./dist",
+		"./README.md"
 	],
 	"exports": {
 		".": "./dist/index.js",

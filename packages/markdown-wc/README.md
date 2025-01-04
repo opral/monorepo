@@ -35,8 +35,8 @@ Enables writing documentation with web components in markdown.
 | Feature                        | Markdown | @opral/markdown-wc | React MDX | Svelte MDsveX | Markdoc |
 |--------------------------------|----------|--------------------|-----------|---------------|---------|
 | Components in markdown         | ❌       | ✅                 | ✅        | ✅             | ✅      |
-| Interoperable                  | ✅       | ✅                 | ❌        | ❌             | ✅      |
-| Portable                       | ✅       | ✅                 | ❌        | ❌             | ✅      |
+| Framework agnostic             | ✅       | ✅                 | ❌        | ❌             | ✅      |
+| Portable                       | ✅       | ✅                 | ❌        | ❌             | ❌      |
 | No custom syntax               | ✅       | ✅                 | ❌        | ❌             | ❌      |
 
 
@@ -100,3 +100,13 @@ render(parsed.html);
 
 - sanitzation of markdown as well as custom elements is not implemented atm
 - SSR is DIY atm (use the `parse` function and SSR the markdown with [lit for example](https://lit.dev/docs/ssr/overview/)) 
+
+## FAQ 
+
+### Why not use React MDX or Svelte MDsveX?
+
+React MDX and Svelte MDsveX are great tools but they introduce a dependency on a specific framework which is a no-go for portability. 
+
+### Why not use a `<script>` tag to import the web components?
+
+Markdown parsers don't remove the `<script>` tag from the output. This means that the script tag would be rendered in the final HTML. To increase interoperability, frontmatter is used to define imports. 

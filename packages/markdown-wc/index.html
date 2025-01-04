@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Markdown WC</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-  <script type="module" src="../dist/markdown-wc-embed.js"></script>
+  <script type="module" src="./dist/markdown-wc-embed.js"></script>
 
   <style>
     body {
@@ -14,18 +14,13 @@
   </style>
 </head>
 <body style="margin-left: auto; margin-right: auto; max-width: 900px;">
-
+  
   <div style="display: flex; gap: 1rem; margin-top: 1rem;">
     <a href="./">Home</a>
-    <a href="./libraries.html">Libraries</a>
+    <a href="./doc-elements.html">Doc elements</a>
   </div>
-
-  <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-    <a href="#doc-elements">MWC Doc Elements</a>
-    <a href="https://github.com/opral/monorepo/issues/new" target="_blank">Submit your library</a>
-  </div>
-
-  <markdown-wc-embed id="#doc-elements" base="https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/" src="./README.md">
+  
+  <markdown-wc-embed src="./README.md">
     <style>
       h1 a {
         color: black;
