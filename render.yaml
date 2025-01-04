@@ -233,7 +233,11 @@ services:
     type: web
     runtime: static
     autoDeploy: true
-    staticPublishPath: ./packages/markdown-wc/website
+    staticPublishPath: ./packages/markdown-wc
+    routes: 
+      - type: rewrite
+        source: /*
+        destination: /website/*
     buildCommand: pnpm install && pnpm run --filter @opral/markdown-wc... build && pnpm run --filter @opral/markdown-wc-doc-elements build
     buildFilter:
       paths:
