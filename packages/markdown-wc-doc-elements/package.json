@@ -1,13 +1,14 @@
 {
 	"name": "@opral/markdown-wc-doc-elements",
 	"type": "module",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"publishConfig": {
 		"access": "public"
 	},
 	"files": [
 		"./src",
-		"./dist"
+		"./dist",
+		"README.md"
 	],
 	"exports": {
 		".": "./dist/library/index.js",

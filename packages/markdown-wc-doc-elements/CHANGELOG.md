@@ -1,5 +1,11 @@
 # @opral/markdown-wc-doc-elements
 
+## 0.2.2
+
+### Patch Changes
+
+- include readme in files to use jsdelivr to reference the readme
+
 ## 0.2.1
 
 ### Patch Changes
