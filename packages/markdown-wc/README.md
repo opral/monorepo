@@ -11,7 +11,7 @@ Enables writing documentation with web components in markdown.
 ```markdown
 ---
 imports: 
-  - ../dist/walking-dinosaur.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/walking-dinosaur.js
 ---
 
 # Opral Markdown WC 
@@ -45,7 +45,7 @@ Enables writing documentation with web components in markdown.
 The `<markdown-wc-embed>` element can be used to embed markdown-wc in a webpage.
 
 ```html
-  <script type="module" src="../dist/markdown-wc-embed.js"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-embed.js"></script>
   <body>
     <markdown-wc-embed src="https://my-markdown-url.com/markdown.md"></markdown-wc-embed>
   </body>
@@ -58,7 +58,7 @@ The `<markdown-wc-embed>` element can be used to embed markdown-wc in markdown-w
 ```markdown
 ---
 imports:
-  - https://cdn.jsdelivr.net/
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-embed.js
 ---
 
 # Hello World

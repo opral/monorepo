@@ -238,7 +238,7 @@ services:
       - type: rewrite
         source: /*
         destination: /website/*
-    buildCommand: pnpm install && pnpm run --filter @opral/markdown-wc... build && pnpm run --filter @opral/markdown-wc-doc-elements build
+    buildCommand: pnpm install && pnpm run --filter @opral/markdown-wc... build
     buildFilter:
       paths:
         - ./packages/markdown-wc/**
