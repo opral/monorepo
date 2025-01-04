@@ -235,13 +235,9 @@ services:
     autoDeploy: true
     staticPublishPath: ./packages/markdown-wc
     routes: 
-      - type: rewrite
-        source: /*
-        destination: /website/*
-
-      - type: rewrite
-        source: /libraries.html
-        destination: /website/libraries.html
+      - type: redirect
+        source: /
+        destination: /website
 
     buildCommand: pnpm install && pnpm run --filter @opral/markdown-wc... build
     buildFilter:
