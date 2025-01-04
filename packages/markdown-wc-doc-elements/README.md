@@ -7,6 +7,19 @@ imports:
 
 This package provides a set of custom elements that can be used to write documentation. 
 
+## Usage
+
+Import the custom elements from JSDelivr and use them in markdown-wc. Replace the dist/*.js with the custom element you want to use.
+
+```markdown
+---
+imports:
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-figure.js
+---
+
+<doc-figure src="https://example.com/image.png"></doc-figure>
+```
+
 ## Elements
 
 <markdown-wc-embed src="./src/doc-accordion.md"></markdown-wc-embed>
