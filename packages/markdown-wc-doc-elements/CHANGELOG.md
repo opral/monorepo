@@ -1,5 +1,11 @@
 # @opral/markdown-wc-doc-elements
 
+## 0.2.3
+
+### Patch Changes
+
+- use remote component link for portability
+
 ## 0.2.2
 
 ### Patch Changes

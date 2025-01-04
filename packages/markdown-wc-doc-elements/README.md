@@ -1,6 +1,6 @@
 ---
 imports: 
-   - "../markdown-wc/dist/markdown-wc-embed.js"
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-embed.js
 ---
 
 # Markdown WC Doc Elements (Documentation Elements)
