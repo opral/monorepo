@@ -1,6 +1,27 @@
-# Markdown WC (Markdown with Web Components)
+---
+imports: 
+  - ./dist/walking-dinosaur.js
 
-Enables writing documentation with components in markdown as backwards compatible superset.
+---
+
+# Opral Markdown WC 
+
+Enables writing documentation with web components in markdown.
+
+```markdown
+---
+imports: 
+  - ../dist/walking-dinosaur.js
+---
+
+# Opral Markdown WC 
+
+Enables writing documentation with web components in markdown.
+
+<walking-dinosaur></walking-dinosaur>
+```
+
+<walking-dinosaur></walking-dinosaur>
 
 ## Why
 
