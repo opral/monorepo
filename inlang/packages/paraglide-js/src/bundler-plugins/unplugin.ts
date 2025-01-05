@@ -4,6 +4,8 @@ import { compile } from "../compiler/compile.js";
 import fs from "node:fs";
 import chokidar from "chokidar";
 
+const PLUGIN_NAME = "unplugin-paraglide-js";
+
 export const unpluginFactory: UnpluginFactory<{
 	/**
 	 * The path to the inlang project.
@@ -19,7 +21,7 @@ export const unpluginFactory: UnpluginFactory<{
 	outdir: string;
 	options?: ParaglideCompilerOptions;
 }> = (args) => ({
-	name: "unplugin-paraglide-js",
+	name: PLUGIN_NAME,
 	enforce: "pre",
 	async buildStart() {
 		const compileArgs = {
@@ -61,6 +63,18 @@ export const unpluginFactory: UnpluginFactory<{
 		watcher.on("unlink", async (path) => {
 			console.log(`File ${path} has been removed. Recompiling...`);
 			await recompile();
+		});
+	},
+	webpack(compiler) {
+		//we need the compiler to run before the build so that the message-modules will be present
+		//In the other bundlers `buildStart` already runs before the build. In webpack it's a race condition
+		compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
+			await compile({
+				project: args.project,
+				outdir: args.outdir,
+				options: args.options,
+				fs: wrappedFs,
+			});
 		});
 	},
 });
