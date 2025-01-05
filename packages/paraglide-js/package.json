@@ -1,11 +1,11 @@
 {
 	"name": "@inlang/paraglide-js",
 	"type": "module",
-	"version": "2.0.0-prerelease.0",
+	"version": "2.0.0-beta.0",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public",
-		"tag": "prerelease"
+		"tag": "beta"
 	},
 	"author": "inlang <hello@inlang.com> (https://inlang.com/)",
 	"homepage": "https://inlang.com/m/gerre34r/library-inlang-paraglideJs",
@@ -36,35 +36,34 @@
 		"@inlang/sdk"
 	],
 	"dependencies": {
+		"chokidar": "^4.0.3",
 		"commander": "11.1.0",
 		"consola": "3.2.3",
 		"fast-glob": "^3.2.12",
 		"json5": "2.2.3",
 		"prettier": "^3.4.2",
-		"prettier-plugin-jsdoc": "^1.3.0"
+		"prettier-plugin-jsdoc": "^1.3.0",
+		"unplugin": "^2.1.2"
 	},
 	"devDependencies": {
-		"@opral/tsconfig": "workspace:*",
-		"@inlang/sdk": "workspace:*",
 		"@eslint/js": "^9.12.0",
-		"eslint": "^9.12.0",
-		"typescript-eslint": "^8.15.0",
+		"@inlang/sdk": "workspace:*",
+		"@opral/tsconfig": "workspace:*",
 		"@rollup/plugin-virtual": "3.0.1",
 		"@ts-morph/bootstrap": "0.20.0",
 		"@types/node": "^20.12.7",
 		"@vitest/coverage-v8": "2.0.5",
+		"eslint": "^9.12.0",
 		"memfs": "4.6.0",
 		"rollup": "3.29.1",
 		"typescript": "^5.5.2",
+		"typescript-eslint": "^8.15.0",
 		"vitest": "2.0.5"
 	},
 	"exports": {
+		".": "./dist/index.js",
 		"./cli": "./dist/cli/index.js",
 		"./compiler": "./dist/compiler/index.js",
-		".": {
-			"import": "./default/index.js",
-			"types": "./default/index.d.ts"
-		},
 		"./internal": {
 			"import": "./dist/index.js",
 			"types": "./dist/index.d.ts"
@@ -79,6 +78,7 @@
 		}
 	},
 	"keywords": [
+		"inlang",
 		"paraglide",
 		"javascript i18n",
 		"i18n",
@@ -87,7 +87,6 @@
 		"internationalization",
 		"svelte",
 		"localization",
-		"lint",
 		"react",
 		"vue",
 		"angular",
@@ -96,6 +95,9 @@
 		"astro",
 		"astro i18n",
 		"solid",
-		"solidstart"
+		"solidstart",
+		"vite",
+		"vite-plugin",
+		"rollup-plugin"
 	]
 }
