@@ -1,20 +1,11 @@
-import {
-	compileBundle,
-	type CompiledBundleWithMessages,
-} from "./compileBundle.js";
-import { jsIdentifier } from "../services/codegen/identifier.js";
-import { createRuntime } from "./runtime.js";
-import { createRegistry, DEFAULT_REGISTRY } from "./registry.js";
-import {
-	selectBundleNested,
-	type InlangProject,
-	type ProjectSettings,
-} from "@inlang/sdk";
+import { compileBundle } from "./compileBundle.js";
+import { DEFAULT_REGISTRY } from "./registry.js";
+import { selectBundleNested, type InlangProject } from "@inlang/sdk";
 import * as prettier from "prettier";
-import { escapeForSingleQuoteString } from "../services/codegen/escape.js";
 import { lookup } from "../services/lookup.js";
 import { emitDts } from "./emit-dts.js";
-import { generateRegularOutput } from "./output/regular.js";
+import { generateLocaleModules } from "./output-structure/locale-modules.js";
+import { generateMessageModules } from "./output-structure/message-modules.js";
 
 export type ParaglideCompilerOptions = {
 	/**
@@ -38,13 +29,13 @@ export type ParaglideCompilerOptions = {
 	/**
 	 * The file-structure of the compiled output.
 	 *
-	 * @default "regular"
+	 * @default "message-modules"
 	 */
-	outputStructure?: "regular" | "message-modules";
+	outputStructure?: "locale-modules" | "message-modules";
 };
 
 const defaultCompilerOptions: ParaglideCompilerOptions = {
-	outputStructure: "regular",
+	outputStructure: "message-modules",
 	emitDts: true,
 	emitGitIgnore: true,
 	emitPrettierIgnore: true,
@@ -85,8 +76,8 @@ export const compileProject = async (args: {
 
 	const output: Record<string, string> = {};
 
-	if (optionsWithDefaults.outputStructure === "regular") {
-		const regularOutput = generateRegularOutput(
+	if (optionsWithDefaults.outputStructure === "locale-modules") {
+		const regularOutput = generateLocaleModules(
 			compiledBundles,
 			settings,
 			fallbackMap
@@ -95,7 +86,7 @@ export const compileProject = async (args: {
 	}
 
 	if (optionsWithDefaults.outputStructure === "message-modules") {
-		const messageModuleOutput = generateModuleOutput(
+		const messageModuleOutput = generateMessageModules(
 			compiledBundles,
 			settings,
 			fallbackMap
@@ -118,81 +109,6 @@ export const compileProject = async (args: {
 
 	return await formatFiles(output);
 };
-
-function generateModuleOutput(
-	resources: CompiledBundleWithMessages[],
-	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
-	fallbackMap: Record<string, string | undefined>
-): Record<string, string> {
-	const output: Record<string, string> = {
-		"runtime.js": createRuntime(settings),
-		"registry.js": createRegistry(),
-	};
-
-	// index messages
-	output["messages.js"] = [
-		"/* eslint-disable */",
-		...resources.map(
-			({ bundle }) => `export * from './messages/index/${bundle.node.id}.js'`
-		),
-	].join("\n");
-
-	for (const resource of resources) {
-		const filename = `messages/index/${resource.bundle.node.id}.js`;
-		const code = [
-			"/* eslint-disable */",
-			"import * as registry from '../../registry.js'",
-			settings.locales
-				.map(
-					(locale) =>
-						`import * as ${jsIdentifier(locale)} from "../${locale}.js"`
-				)
-				.join("\n"),
-			"import { getLocale } from '../../runtime.js'",
-			"",
-			resource.bundle.code,
-		].join("\n");
-		output[filename] = code;
-	}
-
-	// generate locales
-	for (const locale of settings.locales) {
-		const messageIndexFile = [
-			"/* eslint-disable */",
-			...resources.map(
-				({ bundle }) => `export * from './${locale}/${bundle.node.id}.js'`
-			),
-		].join("\n");
-		output[`messages/${locale}.js`] = messageIndexFile;
-
-		// generate individual message files
-		for (const resource of resources) {
-			let file = [
-				"/* eslint-disable */",
-				"import * as registry from '../../registry.js' ",
-			].join("\n");
-
-			const compiledMessage = resource.messages[locale];
-			const id = jsIdentifier(resource.bundle.node.id);
-			if (!compiledMessage) {
-				// add fallback
-				const fallbackLocale = fallbackMap[locale];
-				if (fallbackLocale) {
-					file += `\nexport { ${id} } from "../${fallbackLocale}.js"`;
-				} else {
-					file += `\nexport const ${id} = () => '${escapeForSingleQuoteString(
-						resource.bundle.node.id
-					)}'`;
-				}
-			} else {
-				file += `\n${compiledMessage.code}`;
-			}
-
-			output[`messages/${locale}/${resource.bundle.node.id}.js`] = file;
-		}
-	}
-	return output;
-}
 
 async function formatFiles(
 	files: Record<string, string>

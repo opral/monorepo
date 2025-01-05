@@ -82,7 +82,7 @@ test("emitPrettierIgnore", async () => {
 });
 
 describe.each([
-	{ outputStructure: "regular" },
+	{ outputStructure: "locale-modules" },
 	{ outputStructure: "message-modules" },
 ] satisfies Array<ParaglideCompilerOptions>)("options", async (options) => {
 	describe("tree-shaking", () => {

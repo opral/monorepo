@@ -4,7 +4,7 @@ import { jsIdentifier } from "../../services/codegen/identifier.js";
 import { createRuntime } from "../runtime.js";
 import { createRegistry } from "../registry.js";
 
-export function generateRegularOutput(
+export function generateLocaleModules(
 	bundles: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
 	fallbackMap: Record<string, string | undefined>
