@@ -16,12 +16,12 @@ import { writeOutput } from "../services/file-handling/write-output.js";
  *
  * @example
  *   await compile({
- *     path: 'path/to/project',
+ *     project: 'path/to/project',
  *     outdir: 'path/to/output',
  *   })
  */
 export async function compile(args: {
-	path: string;
+	project: string;
 	outdir: string;
 	fs: typeof import("node:fs");
 	options?: ParaglideCompilerOptions;
@@ -29,7 +29,7 @@ export async function compile(args: {
 	const absoluteOutdir = path.resolve(process.cwd(), args.outdir);
 
 	const project = await loadProjectFromDirectory({
-		path: args.path,
+		path: args.project,
 		fs: args.fs,
 		appId: ENV_VARIABLES.PARJS_APP_ID,
 	});

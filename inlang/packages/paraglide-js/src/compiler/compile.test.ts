@@ -27,7 +27,7 @@ test("loads a project and compiles it", async () => {
 	});
 
 	await compile({
-		path: "/project.inlang",
+		project: "/project.inlang",
 		outdir: "/output",
 		fs: fs,
 	});
