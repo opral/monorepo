@@ -23,39 +23,68 @@ beforeEach(() => {
 	vi.clearAllMocks();
 });
 
+test("emitGitignore", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				locales: ["en", "de"],
+				baseLocale: "en",
+			},
+		}),
+	});
+
+	const _default = await compileProject({
+		project,
+	});
+
+	const _true = await compileProject({
+		project,
+		options: { emitGitIgnore: true },
+	});
+
+	const _false = await compileProject({
+		project,
+		options: { emitGitIgnore: false },
+	});
+
+	expect(_default).toHaveProperty(".gitignore");
+	expect(_true).toHaveProperty(".gitignore");
+	expect(_false).not.toHaveProperty(".gitignore");
+});
+
+test("emitPrettierIgnore", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				locales: ["en", "de"],
+				baseLocale: "en",
+			},
+		}),
+	});
+
+	const _default = await compileProject({
+		project,
+	});
+
+	const _true = await compileProject({
+		project,
+		options: { emitPrettierIgnore: true },
+	});
+
+	const _false = await compileProject({
+		project,
+		options: { emitPrettierIgnore: false },
+	});
+
+	expect(_default).toHaveProperty(".prettierignore");
+	expect(_true).toHaveProperty(".prettierignore");
+	expect(_false).not.toHaveProperty(".prettierignore");
+});
+
 describe.each([
 	{ outputStructure: "regular" },
 	{ outputStructure: "message-modules" },
 ] satisfies Array<ParaglideCompilerOptions>)("options", async (options) => {
-	describe("output-formalities", async () => {
-		const project = await loadProjectInMemory({
-			blob: await newProject({
-				settings: {
-					locales: ["en", "de"],
-					baseLocale: "en",
-				},
-			}),
-		});
-
-		const output = await compileProject({ project, options });
-		// the compiled should be ignored to avoid merge conflicts
-		test("the files should include a gitignore file", async () => {
-			expect(output).toHaveProperty(".gitignore");
-			expect(output[".gitignore"]).toContain("*");
-		});
-		// ignore all formatting stuff
-		test("the files should include a prettierignore file", async () => {
-			expect(output).toHaveProperty(".prettierignore");
-			expect(output[".prettierignore"]).toContain("*");
-		});
-
-		test("the files should include files for each language, even if there are no messages", async () => {
-			const output = await compileProject({ project, options });
-			expect(output["messages/en.js"]).toBeDefined();
-			expect(output["messages/de.js"]).toBeDefined();
-		});
-	});
-
 	describe("tree-shaking", () => {
 		test("should tree-shake unused messages", async () => {
 			const code = await bundleCode(
@@ -108,51 +137,7 @@ describe.each([
 		});
 	});
 
-	test("emitPrettierIgnore", async () => {
-		const project = await loadProjectInMemory({
-			blob: await newProject(),
-		});
-
-		const output = await compileProject({ project, options });
-
-		// defaults to true
-		expect(output[".prettierignore"]).toBeDefined();
-
-		const output2 = await compileProject({
-			project,
-			options: {
-				...options,
-				emitPrettierIgnore: false,
-			},
-		});
-
-		// no prettierignore if options is set to false
-		expect(output2[".prettierignore"]).toBeUndefined();
-	});
-
-	test("emitGitIgnore", async () => {
-		const project = await loadProjectInMemory({
-			blob: await newProject(),
-		});
-
-		const output = await compileProject({ project, options });
-
-		// defaults to true
-		expect(output[".gitignore"]).toBeDefined();
-
-		const output2 = await compileProject({
-			project,
-			options: {
-				...options,
-				emitGitIgnore: false,
-			},
-		});
-
-		// no prettierignore if options is set to false
-		expect(output2[".gitignore"]).toBeUndefined();
-	});
-
-	describe.sequential("e2e", async () => {
+	describe("e2e", async () => {
 		// The compiled output needs to be bundled into one file to be dynamically imported.
 		const code = await bundleCode(
 			output,

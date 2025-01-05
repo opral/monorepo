@@ -1,4 +1,7 @@
-import { compileBundle, type Resource } from "./compileBundle.js";
+import {
+	compileBundle,
+	type CompiledBundleWithMessages,
+} from "./compileBundle.js";
 import { jsIdentifier } from "../services/codegen/identifier.js";
 import { createRuntime } from "./runtime.js";
 import { createRegistry, DEFAULT_REGISTRY } from "./registry.js";
@@ -11,6 +14,7 @@ import * as prettier from "prettier";
 import { escapeForSingleQuoteString } from "../services/codegen/escape.js";
 import { lookup } from "../services/lookup.js";
 import { emitDts } from "./emit-dts.js";
+import { generateRegularOutput } from "./output/regular.js";
 
 export type ParaglideCompilerOptions = {
 	/**
@@ -71,7 +75,7 @@ export const compileProject = async (args: {
 	//Maps each language to it's fallback
 	//If there is no fallback, it will be undefined
 	const fallbackMap = getFallbackMap(settings.locales, settings.baseLocale);
-	const resources = bundles.map((bundle) =>
+	const compiledBundles = bundles.map((bundle) =>
 		compileBundle({
 			bundle,
 			fallbackMap,
@@ -79,10 +83,25 @@ export const compileProject = async (args: {
 		})
 	);
 
-	const output =
-		optionsWithDefaults.outputStructure === "regular"
-			? generateRegularOutput(resources, settings, fallbackMap)
-			: generateModuleOutput(resources, settings, fallbackMap);
+	const output: Record<string, string> = {};
+
+	if (optionsWithDefaults.outputStructure === "regular") {
+		const regularOutput = generateRegularOutput(
+			compiledBundles,
+			settings,
+			fallbackMap
+		);
+		Object.assign(output, regularOutput);
+	}
+
+	if (optionsWithDefaults.outputStructure === "message-modules") {
+		const messageModuleOutput = generateModuleOutput(
+			compiledBundles,
+			settings,
+			fallbackMap
+		);
+		Object.assign(output, messageModuleOutput);
+	}
 
 	if (optionsWithDefaults.emitDts) {
 		const dtsFiles = emitDts(output);
@@ -100,67 +119,8 @@ export const compileProject = async (args: {
 	return await formatFiles(output);
 };
 
-function generateRegularOutput(
-	resources: Resource[],
-	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
-	fallbackMap: Record<string, string | undefined>
-): Record<string, string> {
-	const indexFile = [
-		"/* eslint-disable */",
-		'import { getLocale } from "./runtime.js"',
-		settings.locales
-			.map(
-				(locale) =>
-					`import * as ${jsIdentifier(locale)} from "./messages/${locale}.js"`
-			)
-			.join("\n"),
-		resources.map(({ bundle }) => bundle.code).join("\n"),
-	].join("\n");
-
-	const output: Record<string, string> = {
-		"runtime.js": createRuntime(settings),
-		"registry.js": createRegistry(),
-		"messages.js": indexFile,
-	};
-
-	// generate message files
-	for (const locale of settings.locales) {
-		const filename = `messages/${locale}.js`;
-		let file = `
-/* eslint-disable */ 
-/** 
- * This file contains language specific functions for tree-shaking. 
- * 
- *! WARNING: Only import from this file if you want to manually
- *! optimize your bundle. Else, import from the \`messages.js\` file. 
- */
-import * as registry from '../registry.js'`;
-
-		for (const resource of resources) {
-			const compiledMessage = resource.messages[locale];
-			const id = jsIdentifier(resource.bundle.node.id);
-			if (!compiledMessage) {
-				const fallbackLocale = fallbackMap[locale];
-				if (fallbackLocale) {
-					// use the fall back locale e.g. render the message in English if the German message is missing
-					file += `\nexport { ${id} } from "./${fallbackLocale}.js"`;
-				} else {
-					// no fallback exists, render the bundleId
-					file += `\nexport const ${id} = () => '${id}'`;
-				}
-				continue;
-			}
-
-			file += `\n\n${compiledMessage.code}`;
-		}
-
-		output[filename] = file;
-	}
-	return output;
-}
-
 function generateModuleOutput(
-	resources: Resource[],
+	resources: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
 	fallbackMap: Record<string, string | undefined>
 ): Record<string, string> {
