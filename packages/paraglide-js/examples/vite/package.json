@@ -1,0 +1,16 @@
+{
+	"name": "@inlang/paraglide-js-example-vite",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"_dev": "vite dev",
+		"_build": "vite build && tsc --noEmit",
+		"_clean": "rm -rf ./dist ./node_modules ./src/paraglide"
+	},
+	"devDependencies": {
+		"@inlang/paraglide-js": "workspace:*",
+		"typescript": "^5.7.2",
+		"vite": "^6.0.7"
+	}
+}

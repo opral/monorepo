@@ -7,7 +7,7 @@ import { escapeForDoubleQuoteString } from "../services/codegen/escape.js";
 import type { Compiled } from "./types.js";
 import { jsDocBundleComment, jsDocMessageComment } from "./jsDocComment.js";
 
-export type Resource = {
+export type CompiledBundleWithMessages = {
 	/** The compilation result for the bundle index */
 	bundle: Compiled<Bundle>;
 	/** The compilation results for the languages */
@@ -23,7 +23,7 @@ export const compileBundle = (args: {
 	bundle: BundleNested;
 	fallbackMap: Record<string, string | undefined>;
 	registry: Registry;
-}): Resource => {
+}): CompiledBundleWithMessages => {
 	const compiledMessages: Record<string, Compiled<Message>> = {};
 
 	for (const message of args.bundle.messages) {
