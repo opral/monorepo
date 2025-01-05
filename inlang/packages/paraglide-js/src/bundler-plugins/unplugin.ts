@@ -34,8 +34,6 @@ export const unpluginFactory: UnpluginFactory<{
 		// initial compilation
 		await compile(compileArgs);
 
-		console.log("Watching for changes...", Array.from(readFiles));
-
 		// Watch for changes to the files that have been read by the compile function
 		const watcher = chokidar.watch(Array.from(readFiles), {
 			persistent: true,
