@@ -10,383 +10,400 @@ import {
 	Pattern,
 	VariableReference,
 } from "@inlang/sdk";
-import { compileProject } from "./compileProject.js";
+import {
+	compileProject,
+	type ParaglideCompilerOptions,
+} from "./compileProject.js";
 import { rollup as _rollup } from "rollup";
 import virtual from "@rollup/plugin-virtual";
 
 beforeEach(() => {
 	// reset the imports to make sure that the runtime is reloaded
 	vi.resetModules();
-	vi.restoreAllMocks();
-});
-describe("output-formalities", async () => {
-	const project = await loadProjectInMemory({
-		blob: await newProject({
-			settings: {
-				locales: ["en", "de"],
-				baseLocale: "en",
-			},
-		}),
-	});
-
-	const output = await compileProject({ project });
-	// the compiled should be ignored to avoid merge conflicts
-	test("the files should include a gitignore file", async () => {
-		expect(output).toHaveProperty(".gitignore");
-		expect(output[".gitignore"]).toContain("*");
-	});
-	// ignore all formatting stuff
-	test("the files should include a prettierignore file", async () => {
-		expect(output).toHaveProperty(".prettierignore");
-		expect(output[".prettierignore"]).toContain("*");
-	});
-
-	test("the files should include files for each language, even if there are no messages", async () => {
-		const output = await compileProject({ project });
-		expect(output["messages/en.js"]).toBeDefined();
-		expect(output["messages/de.js"]).toBeDefined();
-	});
+	vi.clearAllMocks();
 });
 
-describe("tree-shaking", () => {
-	test("should tree-shake unused messages", async () => {
-		const code = await bundleCode(
-			output,
-			`import * as m from "./paraglide/messages.js"
+describe.each([
+	{ outputStructure: "regular" },
+	{ outputStructure: "message-modules" },
+] satisfies Array<ParaglideCompilerOptions>)("options", async (options) => {
+	describe("output-formalities", async () => {
+		const project = await loadProjectInMemory({
+			blob: await newProject({
+				settings: {
+					locales: ["en", "de"],
+					baseLocale: "en",
+				},
+			}),
+		});
+
+		const output = await compileProject({ project, options });
+		// the compiled should be ignored to avoid merge conflicts
+		test("the files should include a gitignore file", async () => {
+			expect(output).toHaveProperty(".gitignore");
+			expect(output[".gitignore"]).toContain("*");
+		});
+		// ignore all formatting stuff
+		test("the files should include a prettierignore file", async () => {
+			expect(output).toHaveProperty(".prettierignore");
+			expect(output[".prettierignore"]).toContain("*");
+		});
+
+		test("the files should include files for each language, even if there are no messages", async () => {
+			const output = await compileProject({ project, options });
+			expect(output["messages/en.js"]).toBeDefined();
+			expect(output["messages/de.js"]).toBeDefined();
+		});
+	});
+
+	describe("tree-shaking", () => {
+		test("should tree-shake unused messages", async () => {
+			const code = await bundleCode(
+				output,
+				`import * as m from "./paraglide/messages.js"
 
 			console.log(m.sad_penguin_bundle())`
-		);
-		const log = vi.spyOn(console, "log").mockImplementation(() => {});
-		// all required code for the message to be rendered is included like sourceLanguageTag.
-		// but, all other messages except of 'sad_penguin_bundle' are tree-shaken away.
-		for (const { id } of mockBundles) {
-			if (id === "sad_penguin_bundle") {
-				expect(code).toContain(id);
-			} else {
-				expect(code).not.toContain(id);
+			);
+			const log = vi.spyOn(console, "log").mockImplementation(() => {});
+			// all required code for the message to be rendered is included like sourceLanguageTag.
+			// but, all other messages except of 'sad_penguin_bundle' are tree-shaken away.
+			for (const { id } of mockBundles) {
+				if (id === "sad_penguin_bundle") {
+					expect(code).toContain(id);
+				} else {
+					expect(code).not.toContain(id);
+				}
 			}
-		}
-		eval(code);
-		expect(log).toHaveBeenCalledWith("A simple message.");
-	});
+			eval(code);
+			expect(log).toHaveBeenCalledWith("A simple message.");
+		});
 
-	test("should not treeshake messages that are used", async () => {
-		const code = await bundleCode(
-			output,
-			`import * as m from "./paraglide/messages.js"
+		test("should not treeshake messages that are used", async () => {
+			const code = await bundleCode(
+				output,
+				`import * as m from "./paraglide/messages.js"
 		
 			console.log(
 				m.sad_penguin_bundle(),
 				m.depressed_dog({ name: "Samuel" }),
 				m.insane_cats({ name: "Samuel", count: 5 })
 			)`
-		);
-		const log = vi.spyOn(console, "log").mockImplementation(() => {});
-		for (const id of mockBundles.map((m) => m.id)) {
-			if (["sad_penguin_bundle", "depressed_dog", "insane_cats"].includes(id)) {
-				expect(code).toContain(id);
-			} else {
-				expect(code).not.toContain(id);
+			);
+			const log = vi.spyOn(console, "log").mockImplementation(() => {});
+			for (const id of mockBundles.map((m) => m.id)) {
+				if (
+					["sad_penguin_bundle", "depressed_dog", "insane_cats"].includes(id)
+				) {
+					expect(code).toContain(id);
+				} else {
+					expect(code).not.toContain(id);
+				}
 			}
-		}
-		eval(code);
-		expect(log).toHaveBeenCalledWith(
-			"A simple message.",
-			"Good morning Samuel!",
-			"Hello Samuel! You have 5 messages."
-		);
-	});
-});
-
-test("emitPrettierIgnore", async () => {
-	const project = await loadProjectInMemory({
-		blob: await newProject(),
+			eval(code);
+			expect(log).toHaveBeenCalledWith(
+				"A simple message.",
+				"Good morning Samuel!",
+				"Hello Samuel! You have 5 messages."
+			);
+		});
 	});
 
-	const output = await compileProject({ project });
+	test("emitPrettierIgnore", async () => {
+		const project = await loadProjectInMemory({
+			blob: await newProject(),
+		});
 
-	// defaults to true
-	expect(output[".prettierignore"]).toBeDefined();
+		const output = await compileProject({ project, options });
 
-	const output2 = await compileProject({
-		project,
-		options: {
-			emitPrettierIgnore: false,
-		},
+		// defaults to true
+		expect(output[".prettierignore"]).toBeDefined();
+
+		const output2 = await compileProject({
+			project,
+			options: {
+				...options,
+				emitPrettierIgnore: false,
+			},
+		});
+
+		// no prettierignore if options is set to false
+		expect(output2[".prettierignore"]).toBeUndefined();
 	});
 
-	// no prettierignore if options is set to false
-	expect(output2[".prettierignore"]).toBeUndefined();
-});
+	test("emitGitIgnore", async () => {
+		const project = await loadProjectInMemory({
+			blob: await newProject(),
+		});
 
-test("emitGitIgnore", async () => {
-	const project = await loadProjectInMemory({
-		blob: await newProject(),
+		const output = await compileProject({ project, options });
+
+		// defaults to true
+		expect(output[".gitignore"]).toBeDefined();
+
+		const output2 = await compileProject({
+			project,
+			options: {
+				...options,
+				emitGitIgnore: false,
+			},
+		});
+
+		// no prettierignore if options is set to false
+		expect(output2[".gitignore"]).toBeUndefined();
 	});
 
-	const output = await compileProject({ project });
-
-	// defaults to true
-	expect(output[".gitignore"]).toBeDefined();
-
-	const output2 = await compileProject({
-		project,
-		options: {
-			emitGitIgnore: false,
-		},
-	});
-
-	// no prettierignore if options is set to false
-	expect(output2[".gitignore"]).toBeUndefined();
-});
-
-describe("e2e", async () => {
-	// The compiled output needs to be bundled into one file to be dynamically imported.
-	const code = await bundleCode(
-		output,
-		`export * as m from "./paraglide/messages.js"
+	describe.sequential("e2e", async () => {
+		// The compiled output needs to be bundled into one file to be dynamically imported.
+		const code = await bundleCode(
+			output,
+			`export * as m from "./paraglide/messages.js"
 		export * as runtime from "./paraglide/runtime.js"
 		export * as en from "./paraglide/messages/en.js"`
-	);
-
-	// test is a direct result of a bug
-	test("locales should include locales with a hyphen", async () => {
-		const { runtime } = await importCode(code);
-
-		expect(runtime.locales).toContain("en-US");
-	});
-
-	test("it should be possible to directly import a message function via a resource file", async () => {
-		const { en } = await importCode(code);
-
-		expect(en).toBeDefined();
-		expect(en.sad_penguin_bundle()).toBe("A simple message.");
-	});
-
-	test("should set the baseLocale as default getLocale value", async () => {
-		const { runtime } = await importCode(code);
-
-		expect(runtime.getLocale()).toBe(runtime.baseLocale);
-	});
-
-	test("should return the correct message for the current locale", async () => {
-		const { m, runtime } = await importCode(code);
-
-		runtime.setLocale("en");
-
-		expect(m.sad_penguin_bundle()).toBe("A simple message.");
-
-		runtime.setLocale("de");
-
-		expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
-	});
-
-	test("setting the locale as a getter function should be possible", async () => {
-		const { m, runtime } = await importCode(code);
-
-		runtime.setLocale(() => "en");
-
-		expect(m.sad_penguin_bundle()).toBe("A simple message.");
-
-		runtime.setLocale(() => "de");
-
-		expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
-	});
-
-	test("defining onSetLocale should be possible and should be called when the locale changes", async () => {
-		const { runtime } = await importCode(code);
-
-		const mockOnSetLocale = vi.fn().mockImplementation(() => {});
-		runtime.onSetLocale((locale: any) => {
-			mockOnSetLocale(locale);
-		});
-
-		runtime.setLocale("de");
-		expect(mockOnSetLocale).toHaveBeenLastCalledWith("de");
-
-		runtime.setLocale("en");
-		expect(mockOnSetLocale).toHaveBeenLastCalledWith("en");
-
-		expect(mockOnSetLocale).toHaveBeenCalledTimes(2);
-	});
-
-	test("Calling onSetLocale() multiple times should override the previous callback", async () => {
-		const cb1 = vi.fn().mockImplementation(() => {});
-		const cb2 = vi.fn().mockImplementation(() => {});
-
-		const { runtime } = await importCode(code);
-
-		runtime.onSetLocale(cb1);
-		runtime.setLocale("en");
-
-		expect(cb1).toHaveBeenCalledTimes(1);
-
-		runtime.onSetLocale(cb2);
-		runtime.setLocale("de");
-
-		expect(cb2).toHaveBeenCalledTimes(1);
-		expect(cb1).toHaveBeenCalledTimes(1);
-	});
-
-	test("should return the correct message if a languageTag is set in the message options", async () => {
-		const { m, runtime } = await importCode(code);
-
-		// set the language tag to de to make sure that the message options override the runtime language tag
-		runtime.setLanguageTag("de");
-		expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
-		expect(m.sad_penguin_bundle(undefined, { languageTag: "en" })).toBe(
-			"A simple message."
-		);
-	});
-
-	test("runtime.isAvailableLocale should only return `true` if a locale is passed to it", async () => {
-		const { runtime } = await importCode(code);
-
-		for (const tag of runtime.availableLanguageTags) {
-			expect(runtime.isAvailableLocale(tag)).toBe(true);
-		}
-
-		expect(runtime.isAvailableLocale("")).toBe(false);
-		expect(runtime.isAvailableLocale("pl")).toBe(false);
-		expect(runtime.isAvailableLocale("--")).toBe(false);
-	});
-
-	test("falls back to base locale", async () => {
-		const project = await loadProjectInMemory({
-			blob: await newProject({
-				settings: { locales: ["en", "de", "en-US"], baseLocale: "en" },
-			}),
-		});
-
-		await insertBundleNested(
-			project.db,
-			createBundleNested({
-				id: "missingInGerman",
-				messages: [
-					{
-						locale: "en",
-						variants: [
-							{ pattern: [{ type: "text", value: "A simple message." }] },
-						],
-					},
-				],
-			})
 		);
 
-		const output = await compileProject({
-			project,
+		// test is a direct result of a bug
+		test("locales should include locales with a hyphen", async () => {
+			const { runtime } = await importCode(code);
+
+			expect(runtime.locales).toContain("en-US");
 		});
-		const code = await bundleCode(
-			output,
-			`export * as m from "./paraglide/messages.js"
+
+		test("it should be possible to directly import a message function via a resource file", async () => {
+			const { en } = await importCode(code);
+
+			expect(en).toBeDefined();
+			expect(en.sad_penguin_bundle()).toBe("A simple message.");
+		});
+
+		test("should set the baseLocale as default getLocale value", async () => {
+			const { runtime } = await importCode(code);
+
+			expect(runtime.getLocale()).toBe(runtime.baseLocale);
+		});
+
+		test("should return the correct message for the current locale", async () => {
+			const { m, runtime } = await importCode(code);
+
+			runtime.setLocale("en");
+
+			expect(m.sad_penguin_bundle()).toBe("A simple message.");
+
+			runtime.setLocale("de");
+
+			expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
+		});
+
+		test("setting the locale as a getter function should be possible", async () => {
+			const { m, runtime } = await importCode(code);
+
+			runtime.setLocale(() => "en");
+
+			expect(m.sad_penguin_bundle()).toBe("A simple message.");
+
+			runtime.setLocale(() => "de");
+
+			expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
+		});
+
+		test("defining onSetLocale should be possible and should be called when the locale changes", async () => {
+			const { runtime } = await importCode(code);
+
+			const mockOnSetLocale = vi.fn().mockImplementation(() => {});
+			runtime.onSetLocale((locale: any) => {
+				mockOnSetLocale(locale);
+			});
+
+			runtime.setLocale("de");
+			expect(mockOnSetLocale).toHaveBeenLastCalledWith("de");
+
+			runtime.setLocale("en");
+			expect(mockOnSetLocale).toHaveBeenLastCalledWith("en");
+
+			expect(mockOnSetLocale).toHaveBeenCalledTimes(2);
+		});
+
+		test("Calling onSetLocale() multiple times should override the previous callback", async () => {
+			const cb1 = vi.fn().mockImplementation(() => {});
+			const cb2 = vi.fn().mockImplementation(() => {});
+
+			const { runtime } = await importCode(code);
+
+			runtime.onSetLocale(cb1);
+			runtime.setLocale("en");
+
+			expect(cb1).toHaveBeenCalledTimes(1);
+
+			runtime.onSetLocale(cb2);
+			runtime.setLocale("de");
+
+			expect(cb2).toHaveBeenCalledTimes(1);
+			expect(cb1).toHaveBeenCalledTimes(1);
+		});
+
+		test("should return the correct message if a languageTag is set in the message options", async () => {
+			const { m, runtime } = await importCode(code);
+
+			// set the language tag to de to make sure that the message options override the runtime language tag
+			runtime.setLanguageTag("de");
+			expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
+			expect(m.sad_penguin_bundle(undefined, { languageTag: "en" })).toBe(
+				"A simple message."
+			);
+		});
+
+		test("runtime.isAvailableLocale should only return `true` if a locale is passed to it", async () => {
+			const { runtime } = await importCode(code);
+
+			for (const tag of runtime.availableLanguageTags) {
+				expect(runtime.isAvailableLocale(tag)).toBe(true);
+			}
+
+			expect(runtime.isAvailableLocale("")).toBe(false);
+			expect(runtime.isAvailableLocale("pl")).toBe(false);
+			expect(runtime.isAvailableLocale("--")).toBe(false);
+		});
+
+		test("falls back to base locale", async () => {
+			const project = await loadProjectInMemory({
+				blob: await newProject({
+					settings: { locales: ["en", "de", "en-US"], baseLocale: "en" },
+				}),
+			});
+
+			await insertBundleNested(
+				project.db,
+				createBundleNested({
+					id: "missingInGerman",
+					messages: [
+						{
+							locale: "en",
+							variants: [
+								{ pattern: [{ type: "text", value: "A simple message." }] },
+							],
+						},
+					],
+				})
+			);
+
+			const output = await compileProject({
+				project,
+				options,
+			});
+			const code = await bundleCode(
+				output,
+				`export * as m from "./paraglide/messages.js"
 			export * as runtime from "./paraglide/runtime.js"`
-		);
-		const { m, runtime } = await importCode(code);
+			);
+			const { m, runtime } = await importCode(code);
 
-		runtime.setLocale("de");
-		expect(m.missingInGerman()).toBe("A simple message.");
+			runtime.setLocale("de");
+			expect(m.missingInGerman()).toBe("A simple message.");
 
-		runtime.setLocale("en-US");
-		expect(m.missingInGerman()).toBe("A simple message.");
-	});
-
-	test("falls back to parent locale if message doesn't exist", async () => {
-		const project = await loadProjectInMemory({
-			blob: await newProject({
-				settings: { locales: ["en", "en-US"], baseLocale: "en" },
-			}),
+			runtime.setLocale("en-US");
+			expect(m.missingInGerman()).toBe("A simple message.");
 		});
 
-		await insertBundleNested(
-			project.db,
-			createBundleNested({
-				id: "exists_in_both",
-				messages: [
-					{
-						locale: "en",
-						variants: [
-							{ pattern: [{ type: "text", value: "A simple message." }] },
-						],
-					},
-					{
-						locale: "en-US",
-						variants: [
-							{
-								pattern: [
-									{ type: "text", value: "A simple message for Americans." },
-								],
-							},
-						],
-					},
-				],
-			})
-		);
+		test("falls back to parent locale if message doesn't exist", async () => {
+			const project = await loadProjectInMemory({
+				blob: await newProject({
+					settings: { locales: ["en", "en-US"], baseLocale: "en" },
+				}),
+			});
 
-		await insertBundleNested(
-			project.db,
-			createBundleNested({
-				id: "missing_in_en_US",
-				messages: [
-					{
-						locale: "en",
-						variants: [
-							{ pattern: [{ type: "text", value: "Fallback message." }] },
-						],
-					},
-				],
-			})
-		);
+			await insertBundleNested(
+				project.db,
+				createBundleNested({
+					id: "exists_in_both",
+					messages: [
+						{
+							locale: "en",
+							variants: [
+								{ pattern: [{ type: "text", value: "A simple message." }] },
+							],
+						},
+						{
+							locale: "en-US",
+							variants: [
+								{
+									pattern: [
+										{
+											type: "text",
+											value: "A simple message for Americans.",
+										},
+									],
+								},
+							],
+						},
+					],
+				})
+			);
 
-		const output = await compileProject({
-			project,
-		});
+			await insertBundleNested(
+				project.db,
+				createBundleNested({
+					id: "missing_in_en_US",
+					messages: [
+						{
+							locale: "en",
+							variants: [
+								{ pattern: [{ type: "text", value: "Fallback message." }] },
+							],
+						},
+					],
+				})
+			);
 
-		const code = await bundleCode(
-			output,
-			`export * as m from "./paraglide/messages.js"
+			const output = await compileProject({
+				project,
+				options,
+			});
+
+			const code = await bundleCode(
+				output,
+				`export * as m from "./paraglide/messages.js"
 			export * as runtime from "./paraglide/runtime.js"`
-		);
-		const { m, runtime } = await importCode(code);
+			);
+			const { m, runtime } = await importCode(code);
 
-		runtime.setLocale("en-US");
-		expect(m.exists_in_both()).toBe("A simple message for Americans.");
+			runtime.setLocale("en-US");
+			expect(m.exists_in_both()).toBe("A simple message for Americans.");
 
-		runtime.setLocale("en-US");
-		expect(m.missing_in_en_US()).toBe("Fallback message.");
+			runtime.setLocale("en-US");
+			expect(m.missing_in_en_US()).toBe("Fallback message.");
+		});
+
+		test("throws an error if getLocale() returns an unavailable locale", async () => {
+			const { runtime } = await importCode(code);
+
+			expect(() => {
+				runtime.setLocale(() => "dsklfgj");
+				runtime.getLocale();
+			}).toThrow();
+		});
 	});
 
-	test("throws an error if getLocale() returns an unavailable locale", async () => {
-		const { runtime } = await importCode(code);
+	// remove with v3 of paraglide js
+	test("./runtime.js types", async () => {
+		const project = await typescriptProject({
+			useInMemoryFileSystem: true,
+			compilerOptions: {
+				outDir: "dist",
+				declaration: true,
+				allowJs: true,
+				checkJs: true,
+				module: ts.ModuleKind.Node16,
+				strict: true,
+			},
+		});
 
-		expect(() => {
-			runtime.setLocale(() => "dsklfgj");
-			runtime.getLocale();
-		}).toThrow();
-	});
-});
-
-// remove with v3 of paraglide js
-test("./runtime.js types", async () => {
-	const project = await typescriptProject({
-		useInMemoryFileSystem: true,
-		compilerOptions: {
-			outDir: "dist",
-			declaration: true,
-			allowJs: true,
-			checkJs: true,
-			module: ts.ModuleKind.Node16,
-			strict: true,
-		},
-	});
-
-	for (const [fileName, code] of Object.entries(output)) {
-		if (fileName.endsWith(".js")) {
-			project.createSourceFile(fileName, code);
+		for (const [fileName, code] of Object.entries(output)) {
+			if (fileName.endsWith(".js")) {
+				project.createSourceFile(fileName, code);
+			}
 		}
-	}
-	project.createSourceFile(
-		"test.ts",
-		`
+		project.createSourceFile(
+			"test.ts",
+			`
     import * as runtime from "./runtime.js"
 
     // --------- RUNTIME ---------
@@ -416,38 +433,38 @@ test("./runtime.js types", async () => {
 			const a : "de" | "en" | "en-US" = thing
 		}
   `
-	);
+		);
 
-	const program = project.createProgram();
-	const diagnostics = ts.getPreEmitDiagnostics(program);
-	for (const diagnostic of diagnostics) {
-		console.error(diagnostic.messageText, diagnostic.file?.fileName);
-	}
-	expect(diagnostics.length).toEqual(0);
-});
-
-// remove with v3 of paraglide js
-test("./runtime.js (legacy) types", async () => {
-	const project = await typescriptProject({
-		useInMemoryFileSystem: true,
-		compilerOptions: {
-			outDir: "dist",
-			declaration: true,
-			allowJs: true,
-			checkJs: true,
-			module: ts.ModuleKind.Node16,
-			strict: true,
-		},
+		const program = project.createProgram();
+		const diagnostics = ts.getPreEmitDiagnostics(program);
+		for (const diagnostic of diagnostics) {
+			console.error(diagnostic.messageText, diagnostic.file?.fileName);
+		}
+		expect(diagnostics.length).toEqual(0);
 	});
 
-	for (const [fileName, code] of Object.entries(output)) {
-		if (fileName.endsWith(".js")) {
-			project.createSourceFile(fileName, code);
+	// remove with v3 of paraglide js
+	test("./runtime.js (legacy) types", async () => {
+		const project = await typescriptProject({
+			useInMemoryFileSystem: true,
+			compilerOptions: {
+				outDir: "dist",
+				declaration: true,
+				allowJs: true,
+				checkJs: true,
+				module: ts.ModuleKind.Node16,
+				strict: true,
+			},
+		});
+
+		for (const [fileName, code] of Object.entries(output)) {
+			if (fileName.endsWith(".js")) {
+				project.createSourceFile(fileName, code);
+			}
 		}
-	}
-	project.createSourceFile(
-		"test.ts",
-		`
+		project.createSourceFile(
+			"test.ts",
+			`
     import * as runtime from "./runtime.js"
 
     // --------- RUNTIME ---------
@@ -481,37 +498,37 @@ test("./runtime.js (legacy) types", async () => {
 			const a : "de" | "en" | "en-US" = thing
 		}
   `
-	);
+		);
 
-	const program = project.createProgram();
-	const diagnostics = ts.getPreEmitDiagnostics(program);
-	for (const diagnostic of diagnostics) {
-		console.error(diagnostic.messageText, diagnostic.file?.fileName);
-	}
-	expect(diagnostics.length).toEqual(0);
-});
-
-test("./messages.js types", async () => {
-	const project = await typescriptProject({
-		useInMemoryFileSystem: true,
-		compilerOptions: {
-			outDir: "dist",
-			declaration: true,
-			allowJs: true,
-			checkJs: true,
-			module: ts.ModuleKind.Node16,
-			strict: true,
-		},
+		const program = project.createProgram();
+		const diagnostics = ts.getPreEmitDiagnostics(program);
+		for (const diagnostic of diagnostics) {
+			console.error(diagnostic.messageText, diagnostic.file?.fileName);
+		}
+		expect(diagnostics.length).toEqual(0);
 	});
 
-	for (const [fileName, code] of Object.entries(output)) {
-		if (fileName.endsWith(".js")) {
-			project.createSourceFile(fileName, code);
+	test("./messages.js types", async () => {
+		const project = await typescriptProject({
+			useInMemoryFileSystem: true,
+			compilerOptions: {
+				outDir: "dist",
+				declaration: true,
+				allowJs: true,
+				checkJs: true,
+				module: ts.ModuleKind.Node16,
+				strict: true,
+			},
+		});
+
+		for (const [fileName, code] of Object.entries(output)) {
+			if (fileName.endsWith(".js")) {
+				project.createSourceFile(fileName, code);
+			}
 		}
-	}
-	project.createSourceFile(
-		"test.ts",
-		`
+		project.createSourceFile(
+			"test.ts",
+			`
     import * as m from "./messages.js"
 
     // --------- MESSAGES ---------
@@ -539,28 +556,32 @@ test("./messages.js types", async () => {
 		// @ts-expect-error - invalid language tag
 		m.sad_penguin_bundle({}, { languageTag: "---" })
   `
-	);
+		);
 
-	const program = project.createProgram();
-	const diagnostics = ts.getPreEmitDiagnostics(program);
-	for (const diagnostic of diagnostics) {
-		console.error(diagnostic.messageText, diagnostic.file?.fileName);
-	}
-	expect(diagnostics.length).toEqual(0);
-});
-
-test("emits ts declaration files when option is true", async () => {
-	const project = await loadProjectInMemory({
-		blob: await newProject(),
+		const program = project.createProgram();
+		const diagnostics = ts.getPreEmitDiagnostics(program);
+		for (const diagnostic of diagnostics) {
+			console.error(diagnostic.messageText, diagnostic.file?.fileName);
+		}
+		expect(diagnostics.length).toEqual(0);
 	});
 
-	for (const bundle of mockBundles) {
-		await insertBundleNested(project.db, bundle);
-	}
+	test("emits ts declaration files when option is true", async () => {
+		const project = await loadProjectInMemory({
+			blob: await newProject(),
+		});
 
-	const output = await compileProject({ project, options: { emitDts: true } });
+		for (const bundle of mockBundles) {
+			await insertBundleNested(project.db, bundle);
+		}
 
-	expect(Object.keys(output)).toContain("messages.d.ts");
+		const output = await compileProject({
+			project,
+			options: { ...options, emitDts: true },
+		});
+
+		expect(Object.keys(output)).toContain("messages.d.ts");
+	});
 });
 
 async function bundleCode(output: Record<string, string>, file: string) {
@@ -588,8 +609,12 @@ async function bundleCode(output: Record<string, string>, file: string) {
 }
 
 async function importCode(code: string) {
+	// The random comment ensures that each code is a unique module
+	// and state is not shared between imports
+	const randomComment = `// ${Math.random()}`;
+	const codeWithComment = `${randomComment}\n${code}`;
 	return await import(
-		`data:application/javascript;base64,${Buffer.from(code, "utf8").toString("base64")}`
+		`data:application/javascript;base64,${Buffer.from(codeWithComment, "utf8").toString("base64")}`
 	);
 }
 
