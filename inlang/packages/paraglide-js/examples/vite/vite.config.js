@@ -6,6 +6,14 @@ export default defineConfig({
 		paraglideVite({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
+			options: {
+				// declutters output for easier debugging
+				emitDts: false,
+			},
 		}),
 	],
+	build: {
+		// eases debugging
+		minify: false,
+	},
 });
