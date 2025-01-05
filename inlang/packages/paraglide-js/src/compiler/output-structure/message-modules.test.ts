@@ -35,51 +35,12 @@ test("should emit per locale message files", () => {
 		de: "en",
 	};
 
-	const output = generateMessageModules(
-		resources,
-		settings,
-		fallbackMap
-	);
+	const output = generateMessageModules(resources, settings, fallbackMap);
 
-	expect(output).toHaveProperty("messages/en.js");
-	expect(output).toHaveProperty("messages/de.js");
-	expect(output).toHaveProperty("messages/en/happy_elephant.js");
-	expect(output).toHaveProperty("messages/de/happy_elephant.js");
+	expect(output).not.toHaveProperty("messages/en.js");
+	expect(output).not.toHaveProperty("messages/de.js");
+	expect(output).toHaveProperty("messages/happy_elephant/en.js");
+	expect(output).toHaveProperty("messages/happy_elephant/de.js");
+	expect(output).toHaveProperty("messages/happy_elephant/index.js");
 });
 
-test("the files should include files for each locale, even if there are no messages", () => {
-	const resources: CompiledBundleWithMessages[] = [
-		{
-			bundle: {
-				code: 'console.log("bundle code");',
-				node: {
-					id: "happy_elephant",
-				} as unknown as Bundle,
-			},
-			messages: {},
-		},
-	];
-
-	const settings: Pick<ProjectSettings, "locales" | "baseLocale"> = {
-		locales: ["en", "de", "fr"],
-		baseLocale: "en",
-	};
-
-	const fallbackMap: Record<string, string | undefined> = {
-		en: "de",
-		de: "en",
-	};
-
-	const output = generateMessageModules(
-		resources,
-		settings,
-		fallbackMap
-	);
-
-	expect(output).toHaveProperty("messages/en.js");
-	expect(output).toHaveProperty("messages/de.js");
-	expect(output).toHaveProperty("messages/fr.js");
-	expect(output).toHaveProperty("messages/en/happy_elephant.js");
-	expect(output).toHaveProperty("messages/de/happy_elephant.js");
-	expect(output).toHaveProperty("messages/fr/happy_elephant.js");
-});

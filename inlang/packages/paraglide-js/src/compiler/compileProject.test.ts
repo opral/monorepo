@@ -142,8 +142,7 @@ describe.each([
 		const code = await bundleCode(
 			output,
 			`export * as m from "./paraglide/messages.js"
-		export * as runtime from "./paraglide/runtime.js"
-		export * as en from "./paraglide/messages/en.js"`
+		   export * as runtime from "./paraglide/runtime.js"`
 		);
 
 		// test is a direct result of a bug
@@ -151,13 +150,6 @@ describe.each([
 			const { runtime } = await importCode(code);
 
 			expect(runtime.locales).toContain("en-US");
-		});
-
-		test("it should be possible to directly import a message function via a resource file", async () => {
-			const { en } = await importCode(code);
-
-			expect(en).toBeDefined();
-			expect(en.sad_penguin_bundle()).toBe("A simple message.");
 		});
 
 		test("should set the baseLocale as default getLocale value", async () => {
@@ -400,7 +392,7 @@ describe.each([
     runtime.locales satisfies Readonly<Array<"de" | "en" | "en-US">>
 
     // setLocale() should fail if the given language tag is not included in availableLocales
-    // @ts-expect-error
+    // @ts-expect-error - invalid locale
     runtime.setLocale("fr")
 
     // setLocale() should not fail if the given language tag is included in availableLocales

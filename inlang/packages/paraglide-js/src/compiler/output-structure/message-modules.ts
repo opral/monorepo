@@ -15,23 +15,24 @@ export function generateMessageModules(
 		"registry.js": createRegistry(),
 	};
 
-	// index messages
+	// messages index file
 	output["messages.js"] = [
 		"/* eslint-disable */",
 		...resources.map(
-			({ bundle }) => `export * from './messages/index/${bundle.node.id}.js'`
+			({ bundle }) => `export * from './messages/${bundle.node.id}/index.js'`
 		),
 	].join("\n");
 
+	// Creates a per message index file
 	for (const resource of resources) {
-		const filename = `messages/index/${resource.bundle.node.id}.js`;
+		const filename = `messages/${resource.bundle.node.id}/index.js`;
 		const code = [
 			"/* eslint-disable */",
 			"import * as registry from '../../registry.js'",
 			settings.locales
 				.map(
 					(locale) =>
-						`import * as ${jsIdentifier(locale)} from "../${locale}.js"`
+						`import * as ${jsIdentifier(locale)} from "./${locale}.js"`
 				)
 				.join("\n"),
 			"import { getLocale } from '../../runtime.js'",
@@ -41,17 +42,7 @@ export function generateMessageModules(
 		output[filename] = code;
 	}
 
-	// generate locales
 	for (const locale of settings.locales) {
-		const messageIndexFile = [
-			"/* eslint-disable */",
-			...resources.map(
-				({ bundle }) => `export * from './${locale}/${bundle.node.id}.js'`
-			),
-		].join("\n");
-		output[`messages/${locale}.js`] = messageIndexFile;
-
-		// generate individual message files
 		for (const resource of resources) {
 			let file = [
 				"/* eslint-disable */",
@@ -64,8 +55,10 @@ export function generateMessageModules(
 				// add fallback
 				const fallbackLocale = fallbackMap[locale];
 				if (fallbackLocale) {
-					file += `\nexport { ${id} } from "../${fallbackLocale}.js"`;
+					// take the fallback locale
+					file += `\nexport { ${id} } from "./${fallbackLocale}.js"`;
 				} else {
+					// fallback to just the bundle id
 					file += `\nexport const ${id} = () => '${escapeForSingleQuoteString(
 						resource.bundle.node.id
 					)}'`;
@@ -74,7 +67,7 @@ export function generateMessageModules(
 				file += `\n${compiledMessage.code}`;
 			}
 
-			output[`messages/${locale}/${resource.bundle.node.id}.js`] = file;
+			output[`messages/${resource.bundle.node.id}/${locale}.js`] = file;
 		}
 	}
 	return output;
