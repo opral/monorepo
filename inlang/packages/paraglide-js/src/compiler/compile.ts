@@ -40,4 +40,7 @@ export async function compile(args: {
 	});
 
 	await writeOutput(absoluteOutdir, output, args.fs.promises);
+
+	await project.close();
+	await new Promise((resolve) => setTimeout(resolve, 1000));
 }

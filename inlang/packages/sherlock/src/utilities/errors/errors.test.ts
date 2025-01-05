@@ -77,8 +77,8 @@ describe("error handling", () => {
 
 	it("creates a single error node when there are no errors", async () => {
 		vi.mocked(state).mockReturnValue({
+			// @ts-expect-error
 			project: {
-				// @ts-expect-error
 				errors: {
 					get: vi.fn().mockResolvedValue([]),
 				},

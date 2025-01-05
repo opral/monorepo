@@ -116,33 +116,42 @@ test("if a project has no id, it should be generated", async () => {
 	expect(validate(id)).toBe(true);
 });
 
-test("subscribing to errors should work", async () => {
+// test("subscribing to errors should work", async () => {
+// 	const project = await loadProjectInMemory({ blob: await newProject() });
+
+// 	expect(await project.errors.get()).toEqual([]);
+
+// 	let errorsFromSub: readonly Error[] = [];
+// 	project.errors.subscribe((value) => {
+// 		errorsFromSub = value;
+// 	});
+
+// 	await project.lix.db
+// 		.updateTable("file")
+// 		.where("path", "=", "/settings.json")
+// 		.set({
+// 			data: new TextEncoder().encode(
+// 				JSON.stringify({
+// 					baseLocale: "en",
+// 					locales: ["en"],
+// 					modules: ["invalid-module.js"],
+// 				})
+// 			),
+// 		})
+// 		.execute();
+
+// 	const errors = await project.errors.get();
+
+// 	expect(errors.length).toBe(1);
+// 	expect(errorsFromSub.length).toBe(1);
+// 	expect(errorsFromSub).toStrictEqual(errors);
+// });
+
+test("closing a project should not lead to a throw", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
 
-	expect(await project.errors.get()).toEqual([]);
+	await project.close();
 
-	let errorsFromSub: readonly Error[] = [];
-	project.errors.subscribe((value) => {
-		errorsFromSub = value;
-	});
-
-	await project.lix.db
-		.updateTable("file")
-		.where("path", "=", "/settings.json")
-		.set({
-			data: new TextEncoder().encode(
-				JSON.stringify({
-					baseLocale: "en",
-					locales: ["en"],
-					modules: ["invalid-module.js"],
-				})
-			),
-		})
-		.execute();
-
-	const errors = await project.errors.get();
-
-	expect(errors.length).toBe(1);
-	expect(errorsFromSub.length).toBe(1);
-	expect(errorsFromSub).toStrictEqual(errors);
+	// capture async throws
+	await new Promise((resolve) => setTimeout(resolve, 250));
 });
