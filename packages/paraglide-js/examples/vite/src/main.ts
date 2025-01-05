@@ -1,6 +1,7 @@
 import * as m from "./paraglide/messages.js";
 
-//This should be removed by the compiler
+// This should be removed by the compiler
+// (can be verified by inspecting the output in dist)
 m.unused();
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
