@@ -43,4 +43,3 @@ test("should emit per locale message files", () => {
 	expect(output).toHaveProperty("messages/happy_elephant/de.js");
 	expect(output).toHaveProperty("messages/happy_elephant/index.js");
 });
-
