@@ -188,7 +188,7 @@ function generateModuleOutput(
 						`import * as ${jsIdentifier(locale)} from "../${locale}.js"`
 				)
 				.join("\n"),
-			"import { languageTag } from '../../runtime.js'",
+			"import { getLocale } from '../../runtime.js'",
 			"",
 			resource.bundle.code,
 		].join("\n");
