@@ -70,7 +70,6 @@ describe("extractMessageCommand", () => {
 		vi.mocked(state).mockReturnValue({
 			project: {
 				plugins: {
-					subscribe: vi.fn(),
 					get: async () => [
 						{
 							key: "plugin1",
@@ -116,7 +115,6 @@ describe("extractMessageCommand", () => {
 		vi.mocked(state).mockReturnValue({
 			project: {
 				plugins: {
-					subscribe: vi.fn(),
 					get: async () => [
 						{
 							key: "plugin1",
@@ -164,7 +162,6 @@ describe("extractMessageCommand", () => {
 		vi.mocked(state).mockReturnValue({
 			project: {
 				plugins: {
-					subscribe: vi.fn(),
 					get: async () => [
 						{
 							key: "plugin1",
@@ -199,7 +196,6 @@ describe("extractMessageCommand", () => {
 		vi.mocked(state).mockReturnValue({
 			project: {
 				plugins: {
-					subscribe: vi.fn(),
 					get: async () => [
 						{
 							key: "plugin1",
@@ -242,7 +238,6 @@ describe("extractMessageCommand", () => {
 		vi.mocked(state).mockReturnValue({
 			project: {
 				plugins: {
-					subscribe: vi.fn(),
 					get: async () => [
 						{
 							key: "plugin1",
@@ -298,7 +293,6 @@ describe("extractMessageCommand", () => {
 		vi.mocked(state).mockReturnValue({
 			project: {
 				plugins: {
-					subscribe: vi.fn(),
 					get: async () => [
 						{
 							key: "plugin1",
@@ -366,7 +360,6 @@ describe("extractMessageCommand", () => {
 		vi.mocked(state).mockReturnValue({
 			project: {
 				plugins: {
-					subscribe: vi.fn(),
 					get: async () => [
 						{
 							key: "plugin1",
@@ -433,7 +426,6 @@ describe("extractMessageCommand", () => {
 		vi.mocked(state).mockReturnValue({
 			project: {
 				plugins: {
-					subscribe: vi.fn(),
 					get: async () => [
 						{
 							key: "plugin1",

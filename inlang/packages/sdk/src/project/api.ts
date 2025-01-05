@@ -16,20 +16,16 @@ export type InlangProject = {
 	_sqlite: SqliteDatabase;
 	id: {
 		get: () => Promise<string>;
-		subscribe: Subscription<string>;
 	};
 	plugins: {
 		get: () => Promise<readonly InlangPlugin[]>;
-		subscribe: Subscription<readonly InlangPlugin[]>;
 	};
 	errors: {
 		get: () => Promise<readonly Error[]>;
-		subscribe: Subscription<readonly Error[]>;
 	};
 	settings: {
 		get: () => Promise<ProjectSettings>;
 		set: (settings: ProjectSettings) => Promise<void>;
-		subscribe: Subscription<ProjectSettings>;
 	};
 	lix: Lix;
 	importFiles: (args: {

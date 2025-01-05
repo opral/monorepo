@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/sdk",
-	"version": "2.0.0-prerelease.0",
+	"version": "2.0.0-beta.0",
 	"type": "module",
 	"license": "MIT",
 	"publishConfig": {
@@ -47,7 +47,6 @@
 		"@sinclair/typebox": "^0.31.17",
 		"dedent": "1.5.1",
 		"kysely": "^0.27.4",
-		"rxjs": "7.8.1",
 		"sqlite-wasm-kysely": "workspace:*",
 		"uuid": "^10.0.0",
 		"readdirp": "^4.0.1"

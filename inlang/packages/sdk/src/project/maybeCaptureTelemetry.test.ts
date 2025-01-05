@@ -2,7 +2,6 @@ import { expect, test, vi } from "vitest";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
 import { newProject } from "./newProject.js";
 import { maybeCaptureLoadedProject } from "./maybeCaptureTelemetry.js";
-import type { ProjectState } from "./state/state.js";
 import { capture } from "../services/telemetry/capture.js";
 
 test("it should capture as expected", async () => {
@@ -43,8 +42,16 @@ test("it should capture as expected", async () => {
 		.returningAll()
 		.executeTakeFirst();
 
+	const settings = await project.settings.get();
+
+	const id = await project.id.get();
+
+	const plugins = await project.plugins.get();
+
 	await maybeCaptureLoadedProject({
-		state: project as unknown as ProjectState,
+		id,
+		settings,
+		plugins,
 		appId: "test",
 		db: project.db,
 	});

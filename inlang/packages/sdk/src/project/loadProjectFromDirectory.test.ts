@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { ProjectSettings } from "../json-schema/settings.js";
 import { fs, vol, Volume } from "memfs";
@@ -7,7 +7,6 @@ import {
 	loadProjectFromDirectory,
 	ResourceFileImportError,
 	WarningDeprecatedLintRule,
-	WarningLocalPluginImport,
 } from "./loadProjectFromDirectory.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import { Text } from "../json-schema/pattern.js";
@@ -698,13 +697,8 @@ test("it should provide plugins from disk for backwards compatibility but warn t
 	expect(plugins.length).toBe(1);
 	expect(plugins[0]?.key).toBe("mock-plugin");
 
-	// old mock lint rule import is number two import
-	// it's hard to model the import of a lint rule
-	// best if they are removed
-	expect(errors.length).toBe(3);
-	expect(errors[0]).toBeInstanceOf(WarningLocalPluginImport);
-	expect(errors[1]).toBeInstanceOf(WarningLocalPluginImport);
-	expect(errors[2]).toBeInstanceOf(WarningDeprecatedLintRule);
+	expect(errors.length).toBe(1);
+	expect(errors[0]).toBeInstanceOf(WarningDeprecatedLintRule);
 
 	// it should not remove the module from the settings
 	// else roundtrips would not work
