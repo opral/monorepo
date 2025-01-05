@@ -11,7 +11,7 @@ import type { ProjectSettings } from "../json-schema/settings.js";
 import type { MessageV1 } from "../json-schema/old-v1-message/schemaV1.js";
 
 test("it should throw if the path doesn't end with .inlang", async () => {
-	expect(() =>
+	await expect(() =>
 		saveProjectToDirectory({
 			fs: {} as any,
 			project: {} as any,
