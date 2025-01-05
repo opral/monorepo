@@ -1,9 +1,9 @@
 import { defineConfig } from "vite";
-import { paraglideVite } from "@inlang/paraglide-js";
+import { paraglideVitePlugin } from "@inlang/paraglide-js";
 
 export default defineConfig({
 	plugins: [
-		paraglideVite({
+		paraglideVitePlugin({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
 			options: {
@@ -17,3 +17,4 @@ export default defineConfig({
 		minify: false,
 	},
 });
+

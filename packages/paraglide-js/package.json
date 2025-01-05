@@ -78,6 +78,7 @@
 		}
 	},
 	"keywords": [
+		"inlang",
 		"paraglide",
 		"javascript i18n",
 		"i18n",
@@ -86,7 +87,6 @@
 		"internationalization",
 		"svelte",
 		"localization",
-		"lint",
 		"react",
 		"vue",
 		"angular",
@@ -95,6 +95,9 @@
 		"astro",
 		"astro i18n",
 		"solid",
-		"solidstart"
+		"solidstart",
+		"vite",
+		"vite-plugin",
+		"rollup-plugin"
 	]
 }
