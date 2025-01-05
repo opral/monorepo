@@ -4,9 +4,11 @@ import type { ProjectSettings } from "../json-schema/settings.js";
 import { type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
 import { initHandleSaveToLixOnChange } from "./initHandleSaveToLixOnChange.js";
-import { type PreprocessPluginBeforeImportFunction } from "../plugin/importPlugins.js";
+import {
+	importPlugins,
+	type PreprocessPluginBeforeImportFunction,
+} from "../plugin/importPlugins.js";
 import type { InlangProject } from "./api.js";
-import { createProjectState } from "./state/state.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
 import { v4 } from "uuid";
 import { initErrorReporting } from "../services/error-reporting/index.js";
@@ -65,10 +67,26 @@ export async function loadProject(args: {
 		JSON.parse(new TextDecoder().decode(settingsFile.data)) as ProjectSettings
 	);
 
-	const state = createProjectState({
-		...args,
+	const importedPlugins = await importPlugins({
 		settings,
+		lix: args.lix,
+		preprocessPluginBeforeImport: args.preprocessPluginBeforeImport,
 	});
+
+	const plugins = [...(args.providePlugins ?? []), ...importedPlugins.plugins];
+
+	const idFile = await args.lix.db
+		.selectFrom("file")
+		.where("path", "=", "/project_id")
+		.select("data")
+		.executeTakeFirstOrThrow();
+
+	const id = new TextDecoder().decode(idFile.data);
+
+	// const state = createProjectState({
+	// 	...args,
+	// 	settings,
+	// });
 
 	// TODO implement garbage collection/a proper queue.
 	//      for the protoype and tests, it seems good enough
@@ -85,34 +103,98 @@ export async function loadProject(args: {
 	// not awaiting to not block the load time of a project
 	maybeCaptureLoadedProject({
 		db,
-		state,
+		id,
+		settings,
+		plugins,
 		appId: args.appId,
 	});
 
-	initErrorReporting({ projectId: await state.id.get() });
+	initErrorReporting({ projectId: id });
 
 	return {
 		db,
-		id: state.id,
-		settings: state.settings,
-		plugins: state.plugins,
-		errors: state.errors,
+		id: {
+			get: async () => {
+				const file = await args.lix.db
+					.selectFrom("file")
+					.where("path", "=", "/project_id")
+					.select("file.data")
+					.executeTakeFirstOrThrow();
+				return new TextDecoder().decode(file.data);
+			},
+		},
+		settings: {
+			get: async () => {
+				const file = await args.lix.db
+					.selectFrom("file")
+					.where("path", "=", "/settings.json")
+					.select("file.data")
+					.executeTakeFirstOrThrow();
+				return withLanguageTagToLocaleMigration(
+					JSON.parse(new TextDecoder().decode(file.data))
+				);
+			},
+			set: async (newSettings) => {
+				const cloned = JSON.parse(JSON.stringify(newSettings));
+				cloned.languageTags = cloned.locales;
+				cloned.sourceLanguageTag = cloned.baseLocale;
+
+				await args.lix.db
+					.updateTable("file")
+					.where("path", "=", "/settings.json")
+					.set({
+						data: new TextEncoder().encode(
+							JSON.stringify(cloned, undefined, 2)
+						),
+					})
+					.execute();
+			},
+		},
+		plugins: {
+			get: async () => plugins,
+		},
+		errors: {
+			get: async () => [...importedPlugins.errors],
+		},
+		// errors: state.errors,
 		importFiles: async ({ files, pluginKey }) => {
+			const settingsFile = await args.lix.db
+				.selectFrom("file")
+				.where("path", "=", "/settings.json")
+				.select("file.data")
+				.executeTakeFirstOrThrow();
+
+			const settings = JSON.parse(
+				new TextDecoder().decode(settingsFile.data)
+			) as ProjectSettings;
+
 			return await importFiles({
 				files,
 				pluginKey,
-				settings: await state.settings.get(),
-				plugins: await state.plugins.get(),
+				settings,
+				// TODO don't use global state, might be stale
+				plugins,
 				db,
 			});
 		},
 		exportFiles: async ({ pluginKey }) => {
+			const settingsFile = await args.lix.db
+				.selectFrom("file")
+				.where("path", "=", "/settings.json")
+				.select("file.data")
+				.executeTakeFirstOrThrow();
+
+			const settings = JSON.parse(
+				new TextDecoder().decode(settingsFile.data)
+			) as ProjectSettings;
+
 			return (
 				await exportFiles({
 					pluginKey,
 					db,
-					settings: await state.settings.get(),
-					plugins: await state.plugins.get(),
+					settings,
+					// TODO don't use global state, might be stale
+					plugins,
 				})
 			).map((output) => ({ ...output, pluginKey }));
 		},

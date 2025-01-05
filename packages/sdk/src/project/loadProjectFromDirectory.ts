@@ -13,7 +13,6 @@ import { fromMessageV1 } from "../json-schema/old-v1-message/fromMessageV1.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import type { PreprocessPluginBeforeImportFunction } from "../plugin/importPlugins.js";
 import { PluginImportError } from "../plugin/errors.js";
-import type { InlangProject } from "./api.js";
 import { upsertBundleNestedMatchByProperties } from "../import-export/upsertBundleNestedMatchByProperties.js";
 
 /**
@@ -154,24 +153,19 @@ export async function loadProjectFromDirectory(
 		...project,
 		errors: {
 			get: async () => {
-				const errors = await project.errors.get();
-				return [
-					...withLocallyImportedPluginWarning(errors),
-					...localImport.errors,
-					...importedResourceFileErrors,
-				];
+				return [...localImport.errors, ...importedResourceFileErrors];
 			},
-			subscribe: (
-				callback: Parameters<InlangProject["errors"]["subscribe"]>[0]
-			) => {
-				return project.errors.subscribe((value) => {
-					callback([
-						...withLocallyImportedPluginWarning(value),
-						...localImport.errors,
-						...importedResourceFileErrors,
-					]);
-				});
-			},
+			// subscribe: (
+			// 	callback: Parameters<InlangProject["errors"]["subscribe"]>[0]
+			// ) => {
+			// 	return project.errors.subscribe((value) => {
+			// 		callback([
+			// 			...withLocallyImportedPluginWarning(value),
+			// 			...localImport.errors,
+			// 			...importedResourceFileErrors,
+			// 		]);
+			// 	});
+			// },
 		},
 	};
 }
@@ -667,27 +661,6 @@ async function importLocalPlugins(args: {
 		errors,
 		locallyImportedPlugins,
 	};
-}
-
-function withLocallyImportedPluginWarning(errors: readonly Error[]) {
-	return errors.map((error) => {
-		if (
-			error instanceof PluginImportError &&
-			error.plugin.startsWith("http") === false
-		) {
-			return new WarningLocalPluginImport(error.plugin);
-		}
-		return error;
-	});
-}
-
-export class WarningLocalPluginImport extends Error {
-	constructor(module: string) {
-		super(
-			`Plugin ${module} is imported from a local path. This will work fine in dev tools like Sherlock or Paraglide JS but is not portable. Web apps like Fink or Parrot won't be able to import this plugin. It is recommended to use an http url to import plugins. The plugins are cached locally and will be available offline.`
-		);
-		this.name = "WarningLocalImport";
-	}
 }
 
 export class WarningDeprecatedLintRule extends Error {
