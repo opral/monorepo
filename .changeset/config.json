@@ -12,6 +12,7 @@
     "@inlang/fink",
     "@inlang/paraglide-js",
     "@inlang/paraglide-js-example-cli",
+    "@inlang/paraglide-js-example-vite",
     "@inlang/plugin-icu1",
     "@inlang/plugin-message-format",
     "@inlang/plugin-m-function-matcher",

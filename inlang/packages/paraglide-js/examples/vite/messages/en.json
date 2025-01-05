@@ -1,0 +1,6 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"greeting": "Welcome {name}!",
+	"unused": "This is an unused message",
+	"non_existent_in_de": "This is a new message"
+}
