@@ -82,8 +82,11 @@ test("emitPrettierIgnore", async () => {
 });
 
 describe.each([
-	{ outputStructure: "locale-modules" },
-	{ outputStructure: "message-modules" },
+	// testing both options in combination is fine. the output structure
+	// tests is tested by runtime code while emit ts declarations is
+	// tetsted by the typescript tests
+	{ outputStructure: "locale-modules", emitTsDeclarations: false },
+	{ outputStructure: "message-modules", emitTsDeclarations: true },
 ] satisfies Array<ParaglideCompilerOptions>)("options", async (options) => {
 	describe("tree-shaking", () => {
 		test("should tree-shake unused messages", async () => {
