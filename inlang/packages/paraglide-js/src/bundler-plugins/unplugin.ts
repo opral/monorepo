@@ -2,7 +2,7 @@ import type { UnpluginFactory } from "unplugin";
 import type { ParaglideCompilerOptions } from "../compiler/compileProject.js";
 import { compile } from "../compiler/compile.js";
 import fs from "node:fs";
-import chokidar from "chokidar";
+import { resolve } from "node:path";
 
 const PLUGIN_NAME = "unplugin-paraglide-js";
 
@@ -24,44 +24,29 @@ export const unpluginFactory: UnpluginFactory<{
 	name: PLUGIN_NAME,
 	enforce: "pre",
 	async buildStart() {
-		const compileArgs = {
+		console.log("Paraglide JS: Compiling inlang project...");
+		await compile({
 			project: args.project,
 			outdir: args.outdir,
 			options: args.options,
 			fs: wrappedFs,
-		};
-
-		// initial compilation
-		await compile(compileArgs);
-
-		// Watch for changes to the files that have been read by the compile function
-		const watcher = chokidar.watch(Array.from(readFiles), {
-			persistent: true,
 		});
 
-		const recompile = async () => {
-			// using try catch because an invalid json while editing
-			// can throw but shouldn't stop the compiler.
-			try {
-				// Clear the set before recompiling
-				readFiles.clear();
-				await compile(compileArgs);
-				// Update the watcher with new files
-				watcher.add(Array.from(readFiles));
-			} catch (e) {
-				console.error("Error while compiling the inlang project:", e);
-			}
-		};
-
-		watcher.on("change", async (path) => {
-			console.log(`File ${path} has been changed. Recompiling...`);
-			await recompile();
-		});
-
-		watcher.on("unlink", async (path) => {
-			console.log(`File ${path} has been removed. Recompiling...`);
-			await recompile();
-		});
+		for (const path of Array.from(readFiles)) {
+			this.addWatchFile(path);
+		}
+	},
+	async watchChange(path) {
+		if (readFiles.has(path)) {
+			console.log(`Paraglide JS: Recompiling inlang project...`);
+			readFiles.clear();
+			await compile({
+				project: args.project,
+				outdir: args.outdir,
+				options: args.options,
+				fs: wrappedFs,
+			});
+		}
 	},
 	webpack(compiler) {
 		//we need the compiler to run before the build so that the message-modules will be present
@@ -88,7 +73,7 @@ const wrappedFs: typeof import("node:fs") = {
 		options: { encoding?: null; flag?: string } | null | undefined,
 		callback: (err: NodeJS.ErrnoException | null, data: Buffer) => void
 	) => {
-		readFiles.add(path.toString());
+		readFiles.add(resolve(process.cwd(), path.toString()));
 		return fs.readFile(path, options, callback);
 	},
 	// @ts-expect-error - Node's fs has too many overloads
@@ -96,7 +81,7 @@ const wrappedFs: typeof import("node:fs") = {
 		path: fs.PathLike | number,
 		options?: { encoding?: null; flag?: string } | null | undefined
 	) => {
-		readFiles.add(path.toString());
+		readFiles.add(resolve(process.cwd(), path.toString()));
 		return fs.readFileSync(path, options);
 	},
 	promises: {
@@ -106,7 +91,7 @@ const wrappedFs: typeof import("node:fs") = {
 			path: fs.PathLike,
 			options?: { encoding?: null; flag?: string } | null
 		): Promise<Buffer> => {
-			readFiles.add(path.toString());
+			readFiles.add(resolve(process.cwd(), path.toString()));
 			return fs.promises.readFile(path, options);
 		},
 	},
