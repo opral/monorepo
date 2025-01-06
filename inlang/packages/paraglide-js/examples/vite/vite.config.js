@@ -9,7 +9,7 @@ export default defineConfig({
 			options: {
 				outputStructure: "locale-modules",
 				// declutters output for easier debugging
-				emitDts: false,
+				emitTsDeclarations: false,
 			},
 		}),
 	],

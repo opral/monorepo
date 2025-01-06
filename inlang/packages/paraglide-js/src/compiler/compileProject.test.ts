@@ -554,7 +554,7 @@ describe.each([
 
 		const output = await compileProject({
 			project,
-			options: { ...options, emitDts: true },
+			options: { ...options, emitTsDeclarations: true },
 		});
 
 		expect(Object.keys(output)).toContain("messages.d.ts");
