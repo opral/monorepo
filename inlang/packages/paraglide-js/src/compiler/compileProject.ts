@@ -100,7 +100,6 @@ export const compileProject = async (args: {
 			output["runtime.js"]!,
 			output["registry.js"]!
 		);
-		console.log("dtsFiles", dtsFiles);
 		Object.assign(output, dtsFiles);
 	}
 
