@@ -1,9 +1,9 @@
-import { createProgram, createCompilerHost, type CompilerOptions } from "typescript"
+import ts from "typescript"
 
 /**
  * Compiler options for paraglide JS
  */
-const compilerOptions: CompilerOptions = {
+const compilerOptions: ts.CompilerOptions = {
 	allowJs: true,
 	checkJs: true,
 	declaration: true,
@@ -32,7 +32,7 @@ export function generateDTSFiles(inputFiles: Record<string, string>): Record<str
 	 * ```
 	 */
 	const outputFiles: Record<string, string> = {}
-	const host = createCompilerHost(compilerOptions)
+	const host = ts.createCompilerHost(compilerOptions)
 
 	// intercept read/write methods of the compiler
 	host.writeFile = (path, contents) => (outputFiles[path] = contents)
@@ -46,7 +46,7 @@ export function generateDTSFiles(inputFiles: Record<string, string>): Record<str
 	// run the TS compiler
 	// this will cause `host.writeFile` to be called
 	// our output files are in `outputFiles` after this
-	const program = createProgram(inputs, compilerOptions, host)
+	const program = ts.createProgram(inputs, compilerOptions, host)
 	program.emit()
 
 	const output: Record<string, string> = {}
