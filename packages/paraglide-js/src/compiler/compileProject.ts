@@ -95,7 +95,12 @@ export const compileProject = async (args: {
 	}
 
 	if (optionsWithDefaults.emitTsDeclarations) {
-		const dtsFiles = emitDts(output);
+		const dtsFiles = emitDts(
+			compiledBundles,
+			output["runtime.js"]!,
+			output["registry.js"]!
+		);
+		console.log("dtsFiles", dtsFiles);
 		Object.assign(output, dtsFiles);
 	}
 
