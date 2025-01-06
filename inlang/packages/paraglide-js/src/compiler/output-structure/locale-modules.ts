@@ -5,7 +5,7 @@ import { createRuntime } from "../runtime.js";
 import { createRegistry } from "../registry.js";
 
 export function generateLocaleModules(
-	resources: CompiledBundleWithMessages[],
+	compiledBundles: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
 	fallbackMap: Record<string, string | undefined>
 ): Record<string, string> {
@@ -18,7 +18,7 @@ export function generateLocaleModules(
 					`import * as ${jsIdentifier(locale)} from "./messages/${locale}.js"`
 			)
 			.join("\n"),
-		resources.map(({ bundle }) => bundle.code).join("\n"),
+		compiledBundles.map(({ bundle }) => bundle.code).join("\n"),
 	].join("\n");
 
 	const output: Record<string, string> = {
@@ -40,9 +40,9 @@ export function generateLocaleModules(
  */
 import * as registry from '../registry.js'`;
 
-		for (const resource of resources) {
-			const compiledMessage = resource.messages[locale];
-			const id = jsIdentifier(resource.bundle.node.id);
+		for (const compiledBundle of compiledBundles) {
+			const compiledMessage = compiledBundle.messages[locale];
+			const id = jsIdentifier(compiledBundle.bundle.node.id);
 			if (!compiledMessage) {
 				const fallbackLocale = fallbackMap[locale];
 				if (fallbackLocale) {

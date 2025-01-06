@@ -22,6 +22,7 @@ export function jsDocBundleComment(args: {
 *
 * @param {{ ${inputParams} }} inputs
 * @param {{ locale?: ${localesUnion}, languageTag?: ${localesUnion} }} options
+* @returns {string}
 */`;
 }
 
