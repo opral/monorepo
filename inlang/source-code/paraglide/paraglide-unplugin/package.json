@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-unplugin",
-	"version": "1.9.3",
+	"version": "1.9.4",
 	"description": "Unplugin Plugin for runnning the Paraglide compiler.",
 	"license": "Apache-2.0",
 	"type": "module",
@@ -50,11 +50,11 @@
 		"@inlang/paraglide-js": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@inlang/sdk": "workspace:*",
-		"unplugin": "^1.14.1"
+		"unplugin": "^1.14.1",
+		"typescript": "^5.5.2"
 	},
 	"devDependencies": {
 		"@types/node": "20.9.3",
-		"typescript": "^5.5.2",
 		"vite": "^4.5.0",
 		"vitest": "0.34.3"
 	}

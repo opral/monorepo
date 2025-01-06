@@ -1,5 +1,13 @@
 # @inlang/paraglide-unplugin
 
+## 1.9.4
+
+### Patch Changes
+
+- fix: import typescript as default import
+
+  closes https://github.com/opral/inlang-paraglide-js/issues/292
+
 ## 1.9.3
 
 ### Patch Changes
