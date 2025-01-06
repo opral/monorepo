@@ -22,14 +22,19 @@ export async function initHandleSaveToLixOnChange(args: {
 			// because all previous entries are overwritten anyways
 			args.pendingPromises.push(
 				(async () => {
-					// We have to await the database operations to be finished and the database to eb in a consistent state, otherwise contentFromDatabase will crash! 100 ms is too short for current test cases, but we need a proper solution for this
-					await new Promise((resolve) => setTimeout(resolve, 400));
-					const data = contentFromDatabase(args.sqlite);
-					await args.lix.db
-						.updateTable("file")
-						.set("data", data)
-						.where("path", "=", "/db.sqlite")
-						.execute();
+					try {
+						// We have to await the database operations to be finished and the database to eb in a consistent state, otherwise contentFromDatabase will crash! 100 ms is too short for current test cases, but we need a proper solution for this
+						await new Promise((resolve) => setTimeout(resolve, 400));
+						const data = contentFromDatabase(args.sqlite);
+						await args.lix.db
+							.updateTable("file")
+							.set("data", data)
+							.where("path", "=", "/db.sqlite")
+							.execute();
+					} catch {
+						// database has likely been closed.
+						// TODO needs better handling
+					}
 				})()
 			);
 			return;

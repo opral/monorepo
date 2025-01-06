@@ -20,7 +20,7 @@ export async function newProject(args?: {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = initDb({ sqlite });
+	initDb({ sqlite });
 
 	try {
 		const inlangDbContent = contentFromDatabase(sqlite);
@@ -47,7 +47,9 @@ export async function newProject(args?: {
 				},
 			])
 			.execute();
-		return toBlob({ lix });
+		const blob = toBlob({ lix });
+		lix.sqlite.close();
+		return blob;
 	} catch (e) {
 		const error = new Error(`Failed to create new inlang project: ${e}`, {
 			cause: e,
@@ -56,7 +58,6 @@ export async function newProject(args?: {
 		throw error;
 	} finally {
 		sqlite.close();
-		await db.destroy();
 	}
 }
 
