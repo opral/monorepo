@@ -811,3 +811,44 @@ test("plugin calls that use fs should be intercepted to use an absolute path", a
 	// expect(saveMessagesSpy).toHaveBeenCalled();
 	// expect(toBeImportedFilesSpy).toHaveBeenCalled();
 });
+
+test("it can import plugins via http", async () => {
+	const mockRepo = {
+		"/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en"],
+			modules: ["https://example.com/plugin.js"],
+		} satisfies ProjectSettings),
+	};
+
+	const fs = Volume.fromJSON(mockRepo);
+
+	const mockPluginModule = `export default {
+			key: "mock-plugin"	
+		}`;
+
+	global.fetch = vi.fn(() => Promise.resolve(new Response(mockPluginModule)));
+
+	const project = await loadProjectFromDirectory({
+		fs: fs as any,
+		path: "/project.inlang",
+	});
+
+	const plugins = await project.plugins.get();
+
+	expect(global.fetch).toHaveBeenCalledWith("https://example.com/plugin.js");
+	expect(plugins.length).toBe(1);
+
+	const pluginCache = await project.lix.db
+		.selectFrom("file")
+		.selectAll()
+		.where("path", "like", "/cache/plugins/%")
+		.execute();
+
+	expect(
+		pluginCache.some(
+			(file) => new TextDecoder().decode(file.data) === mockPluginModule
+		),
+		"expecting the plugin to be cached"
+	).toBe(true);
+});

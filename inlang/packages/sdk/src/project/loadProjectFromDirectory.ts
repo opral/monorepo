@@ -27,8 +27,14 @@ export async function loadProjectFromDirectory(
 		"blob"
 	>
 ) {
+	const settingsPath = nodePath.join(args.path, "settings.json");
+	const settings = JSON.parse(
+		await args.fs.promises.readFile(settingsPath, "utf8")
+	) as ProjectSettings;
+
 	const localImport = await importLocalPlugins({
 		fs: args.fs,
+		settings,
 		path: args.path,
 	});
 
@@ -44,7 +50,9 @@ export async function loadProjectFromDirectory(
 	const project = await loadProjectInMemory({
 		...args,
 		providePlugins: providePluginsWithLocalPlugins,
-		blob: await newProject(),
+		blob: await newProject({
+			settings,
+		}),
 	});
 
 	await syncLixFsFiles({
@@ -467,9 +475,13 @@ async function syncLixFsFiles(args: {
 			if (!statesToSync.fsFileStates[path]) {
 				if (lixState.state == "unknown") {
 					// ADD TO FS (6)
+					// create directory if not exists
+					args.fs.mkdirSync(nodePath.dirname(nodePath.join(args.path, path)), {
+						recursive: true,
+					});
+					// write file
 					args.fs.writeFileSync(
-						// TODO check platform dependent folder separator
-						args.path + path,
+						nodePath.join(args.path, path),
 						Buffer.from(lixState.content)
 					);
 					statesToSync.fsFileStates[path] = {
@@ -626,16 +638,16 @@ function categorizePlugins(plugins: readonly InlangPlugin[]): {
  */
 async function importLocalPlugins(args: {
 	fs: typeof fs;
+	settings: ProjectSettings;
 	path: string;
 	preprocessPluginBeforeImport?: PreprocessPluginBeforeImportFunction;
 }) {
 	const errors: Error[] = [];
 	const locallyImportedPlugins = [];
-	const settingsPath = nodePath.join(args.path, "settings.json");
-	const settings = JSON.parse(
-		await args.fs.promises.readFile(settingsPath, "utf8")
-	) as ProjectSettings;
-	for (const module of settings.modules ?? []) {
+	for (const module of args.settings.modules ?? []) {
+		if (module.startsWith("http")) {
+			continue;
+		}
 		const modulePath = absolutePathFromProject(args.path, module);
 		try {
 			let moduleAsText = await args.fs.promises.readFile(modulePath, "utf8");
