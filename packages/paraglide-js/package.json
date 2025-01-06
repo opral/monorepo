@@ -36,7 +36,6 @@
 		"@inlang/sdk"
 	],
 	"dependencies": {
-		"chokidar": "^4.0.3",
 		"commander": "11.1.0",
 		"consola": "3.2.3",
 		"fast-glob": "^3.2.12",
