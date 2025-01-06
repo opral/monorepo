@@ -6,7 +6,7 @@ import { jsIdentifier } from "../../services/codegen/identifier.js";
 import { escapeForSingleQuoteString } from "../../services/codegen/escape.js";
 
 export function generateMessageModules(
-	resources: CompiledBundleWithMessages[],
+	compiledBundles: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
 	fallbackMap: Record<string, string | undefined>
 ): Record<string, string> {
@@ -18,14 +18,14 @@ export function generateMessageModules(
 	// messages index file
 	output["messages.js"] = [
 		"/* eslint-disable */",
-		...resources.map(
+		...compiledBundles.map(
 			({ bundle }) => `export * from './messages/${bundle.node.id}/index.js'`
 		),
 	].join("\n");
 
 	// Creates a per message index file
-	for (const resource of resources) {
-		const filename = `messages/${resource.bundle.node.id}/index.js`;
+	for (const compiledBundle of compiledBundles) {
+		const filename = `messages/${compiledBundle.bundle.node.id}/index.js`;
 		const code = [
 			"/* eslint-disable */",
 			"import * as registry from '../../registry.js'",
@@ -37,20 +37,20 @@ export function generateMessageModules(
 				.join("\n"),
 			"import { getLocale } from '../../runtime.js'",
 			"",
-			resource.bundle.code,
+			compiledBundle.bundle.code,
 		].join("\n");
 		output[filename] = code;
 	}
 
 	for (const locale of settings.locales) {
-		for (const resource of resources) {
+		for (const compiledBundle of compiledBundles) {
 			let file = [
 				"/* eslint-disable */",
 				"import * as registry from '../../registry.js' ",
 			].join("\n");
 
-			const compiledMessage = resource.messages[locale];
-			const id = jsIdentifier(resource.bundle.node.id);
+			const compiledMessage = compiledBundle.messages[locale];
+			const id = jsIdentifier(compiledBundle.bundle.node.id);
 			if (!compiledMessage) {
 				// add fallback
 				const fallbackLocale = fallbackMap[locale];
@@ -60,14 +60,14 @@ export function generateMessageModules(
 				} else {
 					// fallback to just the bundle id
 					file += `\nexport const ${id} = () => '${escapeForSingleQuoteString(
-						resource.bundle.node.id
+						compiledBundle.bundle.node.id
 					)}'`;
 				}
 			} else {
 				file += `\n${compiledMessage.code}`;
 			}
 
-			output[`messages/${resource.bundle.node.id}/${locale}.js`] = file;
+			output[`messages/${compiledBundle.bundle.node.id}/${locale}.js`] = file;
 		}
 	}
 	return output;
