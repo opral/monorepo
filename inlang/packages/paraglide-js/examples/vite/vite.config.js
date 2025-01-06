@@ -7,6 +7,7 @@ export default defineConfig({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
 			options: {
+				outputStructure: "locale-modules",
 				// declutters output for easier debugging
 				emitDts: false,
 			},

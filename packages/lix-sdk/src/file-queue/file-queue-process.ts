@@ -28,7 +28,6 @@ export async function initFileQueueProcess(args: {
 
 	async function queueWorker(trail = false) {
 		if (args.lix.sqlite.isOpen() === false) {
-			console.log("sqlite is closed");
 			return;
 		}
 
