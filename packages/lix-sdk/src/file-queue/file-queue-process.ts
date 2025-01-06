@@ -92,6 +92,10 @@ export async function initFileQueueProcess(args: {
 				queueWorker(true);
 			}
 		} catch (e) {
+			// database has been closed, ignore
+			if (e instanceof Error && e.message.includes("DB has been closed")) {
+				return;
+			}
 			console.error("file queue failed ", e);
 		}
 	}
