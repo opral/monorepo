@@ -299,6 +299,53 @@ test("roundtrip with new variants that have been created by apps", async () => {
   expect(exported2).toStrictEqual(exported1);
 });
 
+test("handles inputs of a bundle even if one message doesn't use all inputs", async () => {
+	const imported = await importFiles({
+		settings: {} as any,
+		files: [
+			{
+				locale: "en",
+				content: new TextEncoder().encode(
+					JSON.stringify({
+						blue_horse_shoe: "Hello {username}! Welcome in {placename}.",
+					})
+				),
+			},
+			{
+				locale: "de",
+				content: new TextEncoder().encode(
+					JSON.stringify({
+						blue_horse_shoe: "Willkommen {username}!.",
+					})
+				),
+			},
+		],
+	});
+
+	expect(imported.bundles).lengthOf(1);
+	expect(imported.messages).lengthOf(2);
+	expect(imported.variants).lengthOf(2);
+
+	expect(imported.bundles[0]?.declarations).toStrictEqual([
+		{ type: "input-variable", name: "username" },
+		{ type: "input-variable", name: "placename" },
+	]);
+
+	const exported = await runExportFiles(imported);
+
+	expect(
+		JSON.parse(new TextDecoder().decode(exported[0]?.content))
+	).toStrictEqual({
+		blue_horse_shoe: "Hello {username}! Welcome in {placename}.",
+	});
+
+	expect(
+		JSON.parse(new TextDecoder().decode(exported[1]?.content))
+	).toStrictEqual({
+		blue_horse_shoe: "Willkommen {username}!.",
+	});
+});
+
 // convenience wrapper for less testing code
 function runImportFiles(json: Record<string, any>) {
   return importFiles({

@@ -35,9 +35,9 @@ export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({
       } else {
         // merge declarations without duplicates
         existingBundle.declarations = unique([
-          existingBundle.declarations,
-          ...result.bundle.declarations,
-        ]);
+					...existingBundle.declarations,
+					...result.bundle.declarations,
+				]);
       }
     }
   }
