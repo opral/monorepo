@@ -34,7 +34,6 @@ export async function initSyncProcess(args: {
 		if (!url) {
 			return;
 		}
-
 		try {
 			// console.log("----------- PULL FROM SERVER -------------");
 			const serverState = await pullFromServer({
@@ -71,14 +70,20 @@ export async function initSyncProcess(args: {
 	// naive implementation that syncs every second
 
 	function schedulePullAndPush() {
-		if (args.lix.sqlite.isOpen()) {
-			pullAndPush().catch((e) => {
-				console.error("Error in sync process", e);
-			});
+		if (args.lix.sqlite.isOpen() === false) {
+			return;
 		}
+		pullAndPush().catch((e) => {
+			if (e instanceof Error && e.message.includes("DB has been closed.")) {
+				// stop the syncing process, the database has been closed.
+				return;
+			}
+			console.error("Error in sync process", e);
+		});
+		// schedule next sync
 		setTimeout(() => {
 			schedulePullAndPush();
-		}, 1000);
+		}, 750);
 	}
 
 	schedulePullAndPush();
