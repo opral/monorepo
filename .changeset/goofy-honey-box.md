@@ -2,13 +2,13 @@
 "@inlang/paraglide-js": minor
 ---
 
-adds `emitTsDeclarations` compiler option https://github.com/opral/inlang-paraglide-js/issues/288
+adds `experimentalEmitTsDeclarations` compiler option https://github.com/opral/inlang-paraglide-js/issues/288
 
 ```diff
 await compile({
   // ...
   options: {
-+   emitTsDeclarations: true
++   experimentalEmitTsDeclarations: true
   }
 })
 ```

@@ -3,11 +3,10 @@ import { prompt } from "../utils.js";
 import type { CliStep } from "../utils.js";
 import type { InlangProject } from "@inlang/sdk";
 // import * as Sherlock from "@inlang/recommend-sherlock";
-import type { NodeishFilesystem } from "../../services/file-handling/types.js";
 
 export const maybeAddSherlock: CliStep<
 	{
-		fs: NodeishFilesystem;
+		fs: typeof import("node:fs/promises");
 		logger: Logger;
 		project: InlangProject;
 	},
@@ -39,17 +38,17 @@ export const maybeAddSherlock: CliStep<
 	}
 
 	// try {
-	//   if (!(await Sherlock.isAdopted({ fs: ctx.fs }))) {
-	//     await Sherlock.add({ fs: ctx.fs });
-	//     telemetry.capture({ event: "PARAGLIDE JS init added Sherlock" });
-	//     ctx.logger.success(
-	//       "Added the inlang Visual Studio Code extension (Sherlock) to the workspace recommendations.",
-	//     );
-	//   }
+	// 	if (!(await Sherlock.isAdopted({ fs: ctx.fs }))) {
+	// 		await Sherlock.add({ fs: ctx.fs });
+	// 		telemetry.capture({ event: "PARAGLIDE JS init added Sherlock" });
+	// 		ctx.logger.success(
+	// 			"Added the inlang Visual Studio Code extension (Sherlock) to the workspace recommendations."
+	// 		);
+	// 	}
 	// } catch (error) {
-	//   ctx.logger.error(
-	//     "Failed to add the inlang Visual Studio Code extension (Sherlock). Please open an issue",
-	//   );
+	// 	ctx.logger.error(
+	// 		"Failed to add the inlang Visual Studio Code extension (Sherlock). Please open an issue"
+	// 	);
 	// }
 
 	return ctx;

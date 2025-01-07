@@ -1,6 +1,5 @@
 import type { Logger } from "../../services/logger/index.js";
 import type { CliStep } from "../utils.js";
-import type { NodeishFilesystem } from "../../services/file-handling/types.js";
 import { detectJsonFormatting } from "../../utilities/detect-json-formatting.js";
 
 export function updatePackageJson(opt: {
@@ -14,7 +13,11 @@ export function updatePackageJson(opt: {
 		scripts: Record<string, string>
 	) => Promise<Record<string, string>>;
 }): CliStep<
-	{ packageJsonPath: string; fs: NodeishFilesystem; logger: Logger },
+	{
+		packageJsonPath: string;
+		fs: typeof import("node:fs/promises");
+		logger: Logger;
+	},
 	unknown
 > {
 	return async (ctx) => {

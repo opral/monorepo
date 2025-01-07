@@ -13,7 +13,7 @@ export type ParaglideCompilerOptions = {
 	 *
 	 * @default true
 	 */
-	emitTsDeclarations?: boolean;
+	experimentalEmitTsDeclarations?: boolean;
 	/**
 	 * Whether to emit a .prettierignore file.
 	 *
@@ -36,7 +36,7 @@ export type ParaglideCompilerOptions = {
 
 const defaultCompilerOptions: ParaglideCompilerOptions = {
 	outputStructure: "message-modules",
-	emitTsDeclarations: true,
+	experimentalEmitTsDeclarations: false,
 	emitGitIgnore: true,
 	emitPrettierIgnore: true,
 };
@@ -94,7 +94,7 @@ export const compileProject = async (args: {
 		Object.assign(output, messageModuleOutput);
 	}
 
-	if (optionsWithDefaults.emitTsDeclarations) {
+	if (optionsWithDefaults.experimentalEmitTsDeclarations) {
 		const dtsFiles = emitDts(
 			compiledBundles,
 			output["runtime.js"]!,
