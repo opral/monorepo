@@ -1,4 +1,4 @@
-import { toBlob, type Lix } from "@lix-js/sdk";
+import { toBlob, type Account, type Lix } from "@lix-js/sdk";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import { type SqliteDatabase } from "sqlite-wasm-kysely";
@@ -22,6 +22,16 @@ import { exportFiles } from "../import-export/exportFiles.js";
 export async function loadProject(args: {
 	sqlite: SqliteDatabase;
 	lix: Lix;
+	/**
+	 * The account that loaded the project.
+	 *
+	 * Defaults to an anonymous/new account if undefined.
+	 *
+	 * @example
+	 *   const account = localStorage.getItem("account")
+	 *   const project = await loadProject({ account })
+	 */
+	account?: Account;
 	/**
 	 * Provide plugins to the project.
 	 *

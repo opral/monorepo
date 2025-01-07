@@ -12,6 +12,7 @@ export async function loadProjectInMemory(
 ) {
 	const lix = await openLixInMemory({
 		blob: args.blob,
+		account: args.account,
 		providePlugins: [
 			// inlangLixPluginV1
 		],
