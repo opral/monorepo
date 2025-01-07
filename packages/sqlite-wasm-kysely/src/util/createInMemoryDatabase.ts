@@ -1,4 +1,16 @@
+// @ts-ignore
+globalThis.sqlite3ApiConfig = {
+  warn: (message: string, details: any) => {
+    if (message === "Ignoring inability to install OPFS sqlite3_vfs:") {
+      // filter out
+      return;
+    }
+    console.log(message + " " + details);
+  },
+};
+
 import sqlite3InitModule from "@eliaspourquoi/sqlite-node-wasm";
+
 import { setSqliteModule, sqliteModule } from "../kysely/sqliteModule.js";
 import { wasmBinary } from "./sqliteWasmBinary.js";
 
