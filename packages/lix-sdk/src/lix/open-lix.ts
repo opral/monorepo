@@ -9,6 +9,7 @@ import { initSyncProcess } from "../sync/sync-process.js";
 import type { NewKeyValue } from "../key-value/database-schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
+import type { Account } from "../account/database-schema.js";
 
 export type Lix = {
 	/**
@@ -32,6 +33,16 @@ export type Lix = {
  * Common setup between different lix environments.
  */
 export async function openLix(args: {
+	/**
+	 * The account that is opening this lix.
+	 *
+	 * Lix will automatically set the active account to the provided account.
+	 *
+	 * @example
+	 *   const account = localStorage.getItem("account")
+	 *   const lix = await openLix({ account })
+	 */
+	account?: Account;
 	database: SqliteDatabase;
 	/**
 	 * Usecase are lix apps that define their own file format,
@@ -65,6 +76,18 @@ export async function openLix(args: {
 				oc.doUpdateSet((eb) => ({ value: eb.ref("excluded.value") }))
 			)
 			.execute();
+	}
+
+	if (args.account) {
+		await db.transaction().execute(async (trx) => {
+			// delete the default inserted active account from `initDb`
+			await trx.deleteFrom("active_account").execute();
+			await trx
+				.insertInto("active_account")
+				.values(args.account!)
+				.onConflict((oc) => oc.doUpdateSet(() => ({ ...args.account })))
+				.execute();
+		});
 	}
 
 	const plugins = await loadPlugins(db);
