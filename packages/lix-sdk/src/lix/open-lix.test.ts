@@ -45,6 +45,42 @@ test("providing key values should be possible", async () => {
 	expect(value1).toMatchObject({ key: "mock_key", value: "value2" });
 });
 
+test("providing an account should be possible", async () => {
+	const mockAccount = {
+		id: "mock-account",
+		name: "peter",
+	};
+
+	const lix = await openLixInMemory({
+		account: mockAccount,
+		blob: await newLixFile(),
+	});
+
+	const accounts = await lix.db
+		.selectFrom("active_account")
+		.selectAll()
+		.execute();
+
+	expect(accounts, "to be the provided account").toContainEqual(mockAccount);
+	expect(accounts, "no other active account is inserted").lengthOf(1);
+
+	await lix.db
+		.insertInto("key_value")
+		.values([{ key: "mock_key", value: "something" }])
+		.execute();
+
+	// lix automatically handles inserting the active account into the account table
+	const change = await lix.db
+		.selectFrom("change")
+		.innerJoin("change_author", "change_author.change_id", "change.id")
+		.where("schema_key", "=", "lix_key_value_table")
+		.where("entity_id", "=", "mock_key")
+		.select("change_author.account_id")
+		.executeTakeFirstOrThrow();
+
+	expect(change.account_id).toBe(mockAccount.id);
+});
+
 test("usedFileExtensions", async () => {
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
