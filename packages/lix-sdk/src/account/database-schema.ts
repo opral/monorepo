@@ -21,10 +21,6 @@ export function applyAccountDatabaseSchema(
     name TEXT NOT NULL
   ) STRICT;
 
-  -- default anonymous account
-  -- INSERT OR IGNORE INTO account (id, name) 
-  -- VALUES ('anonymous', 'anonymous');
-
   -- current account(s)
   -- temp table because current accounts are session
   -- specific and should not be persisted
@@ -34,8 +30,8 @@ export function applyAccountDatabaseSchema(
     -- can't use foreign keys in temp tables... :(
   ) STRICT;
 
-  -- default to the anonymous account
-  INSERT INTO active_account (id, name) values ('anonymous_' || uuid_v7(), '${anonymousAccountName}');
+  -- default to a new account
+  INSERT INTO active_account (id, name) values (uuid_v7(), '${anonymousAccountName}');
 `;
 
 	return sqlite.exec(sql);
