@@ -3,6 +3,7 @@ import { openLixInMemory } from "./open-lix-in-memory.js";
 import { newLixFile } from "./new-lix.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { toBlob } from "./to-blob.js";
+import { usedFileExtensions } from "./open-lix.js";
 
 test("providing plugins should be possible", async () => {
 	const mockPlugin: LixPlugin = {
@@ -42,4 +43,30 @@ test("providing key values should be possible", async () => {
 
 		.executeTakeFirstOrThrow();
 	expect(value1).toMatchObject({ key: "mock_key", value: "value2" });
+});
+
+test("usedFileExtensions", async () => {
+	const lix = await openLixInMemory({
+		blob: await newLixFile(),
+	});
+	await lix.db
+		.insertInto("file")
+		.values([
+			{
+				path: "/test.txt",
+				data: new Uint8Array(),
+			},
+			{
+				path: "/test2.txt",
+				data: new Uint8Array(),
+			},
+			{
+				path: "/folder/folderwithdot./doc.pdf",
+				data: new Uint8Array(),
+			},
+		])
+		.execute();
+
+	const extensions = await usedFileExtensions(lix.db);
+	expect(new Set(extensions)).toEqual(new Set(["txt", "pdf"]));
 });
