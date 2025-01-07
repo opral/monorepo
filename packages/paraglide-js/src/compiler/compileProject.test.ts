@@ -85,8 +85,8 @@ describe.each([
 	// testing both options in combination is fine. the output structure
 	// tests is tested by runtime code while emit ts declarations is
 	// tetsted by the typescript tests
-	{ outputStructure: "locale-modules", emitTsDeclarations: false },
-	{ outputStructure: "message-modules", emitTsDeclarations: true },
+	{ outputStructure: "locale-modules", experimentalEmitTsDeclarations: false },
+	{ outputStructure: "message-modules", experimentalEmitTsDeclarations: true },
 ] satisfies Array<ParaglideCompilerOptions>)("options", async (options) => {
 	describe("tree-shaking", () => {
 		test("should tree-shake unused messages", async () => {
@@ -557,7 +557,7 @@ describe.each([
 
 		const output = await compileProject({
 			project,
-			options: { ...options, emitTsDeclarations: true },
+			options: { ...options, experimentalEmitTsDeclarations: true },
 		});
 
 		expect(Object.keys(output)).toContain("messages.d.ts");
