@@ -18,7 +18,7 @@ type AccountSchema = {
 	active_account: ActiveAccountTable;
 };
 
-test("account table should have no entry in the beginning and activte account should be an anonymous account", async () => {
+test("account table should have no entry but an active account", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
@@ -38,11 +38,8 @@ test("account table should have no entry in the beginning and activte account sh
 		}),
 	});
 
-	const account = await db
-		.selectFrom("account")
-		.selectAll()
-		.where("id", "=", "anonymous")
-		.execute();
+	const account = await db.selectFrom("account").selectAll().execute();
+
 	expect(account?.length).toBe(0);
 
 	const active_account = await db
@@ -50,7 +47,7 @@ test("account table should have no entry in the beginning and activte account sh
 		.selectAll()
 		.executeTakeFirst();
 
-	expect(active_account?.id).toBe("anonymous_mock_uuid_v7");
+	expect(active_account?.id).toBe("mock_uuid_v7");
 });
 
 test("account.id should default to uuid_v7", async () => {
@@ -131,7 +128,7 @@ test('it should drop the temp "current_account" table on reboot to not persist t
 		id: "test",
 	});
 
-	const blob = contentFromDatabase(sqlite);
+	const blob = contentFromDatabase(sqlite) as unknown as ArrayBuffer;
 
 	// re-open the database
 
@@ -158,7 +155,7 @@ test('it should drop the temp "current_account" table on reboot to not persist t
 		.executeTakeFirst();
 
 	expect(account2).toMatchObject({
-		id: "anonymous_mock_uuid_v7-2",
+		id: "mock_uuid_v7-2",
 	});
 });
 
