@@ -1,59 +1,62 @@
-/* eslint-disable no-undef */
-/* eslint-disable no-console */
+import * as assert from "node:assert";
 import * as m from "./paraglide/messages.js";
 import { setLocale } from "./paraglide/runtime.js";
-import { test, expect } from "vitest";
+import { test } from "node:test";
 
 test("should log the messages in the correct locale", async () => {
-  setLocale("en");
+	setLocale("en");
 
-  expect(m.blue_horse_shoe({ username: "Samuel", placename: "Berlin" })).toBe(
-    "Hello Samuel! Welcome to Berlin.",
-  );
+	assert.strictEqual(
+		m.blue_horse_shoe({ username: "Samuel", placename: "Berlin" }),
+		"Hello Samuel! Welcome to Berlin."
+	);
 
-  setLocale("de");
-
-  expect(
-    m.blue_horse_shoe({ username: "Anna", placename: "New York City" }),
-  ).toBe("Hallo Anna! Du bist in New York City.");
+	setLocale("de");
+	assert.strictEqual(
+		m.blue_horse_shoe({ username: "Anna", placename: "New York City" }),
+		"Hallo Anna! Willkommen in New York City."
+	);
 });
 
 test("matching should work", async () => {
-  expect(
-    m.jojo_mountain_day({
-      platform: "android",
-      username: "Samuel",
-      userGender: "male",
-    }),
-  ).toBe(
-    "Samuel has to download the app on his phone from the Google Play Store.",
-  );
+	setLocale("en");
+	assert.strictEqual(
+		m.jojo_mountain_day({
+			platform: "android",
+			username: "Samuel",
+			userGender: "male",
+		}),
+		"Samuel has to download the app on his phone from the Google Play Store."
+	);
 
-  expect(
-    m.jojo_mountain_day({
-      platform: "someting",
-      userGender: "other",
-      username: "unknown",
-    }),
-  ).toBe("The person has to download the app.");
+	assert.strictEqual(
+		m.jojo_mountain_day({
+			platform: "someting",
+			userGender: "other",
+			username: "unknown",
+		}),
+		"The person has to download the app."
+	);
 });
 
 test("defining a locale as option should work ", async () => {
-  setLocale("en");
-  expect(
-    m.blue_horse_shoe(
-      { username: "Samuel", placename: "Berlin" },
-      { locale: "de" },
-    ),
-  ).toBe("Hallo Samuel! Willkommen in Berlin.");
+	setLocale("en");
+	assert.strictEqual(
+		m.blue_horse_shoe(
+			{ username: "Samuel", placename: "Berlin" },
+			{ locale: "de" }
+		),
+		"Hallo Samuel! Willkommen in Berlin."
+	);
 });
 
 test("paraglide falls back to parent locale", async () => {
-  setLocale("en-US");
+	setLocale("en-US");
 
-  expect(m.blue_horse_shoe({ username: "Samuel", placename: "Berlin" })).toBe(
-    "Hallo Samuel! Welcome to the USA.",
-  );
-  // doesn't exist in en-US but en
-  expect(m.simple()).toBe("This is a simple message.");
+	assert.strictEqual(
+		m.blue_horse_shoe({ username: "Samuel", placename: "Berlin" }),
+		"Hello Samuel! Welcome to the USA."
+	);
+	// doesn't exist in en-US but en
+	assert.strictEqual(m.simple(), "This is a simple message.");
 });
