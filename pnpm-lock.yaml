@@ -286,11 +286,8 @@ importers:
         specifier: workspace:*
         version: link:../../../plugins/inlang-message-format
       typescript:
-        specifier: ^5.5.2
+        specifier: ^5.7.2
         version: 5.7.2
-      vitest:
-        specifier: ^2.0.5
-        version: 2.1.8(@types/node@22.10.1)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.1)(typescript@5.7.2))(terser@5.36.0)
 
   inlang/packages/paraglide-js/examples/vite:
     devDependencies:
