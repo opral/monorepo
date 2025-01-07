@@ -116,6 +116,26 @@ test("if a project has no id, it should be generated", async () => {
 	expect(validate(id)).toBe(true);
 });
 
+test("providing an account should work", async () => {
+	const mockAccount = {
+		id: "mock-account-id",
+		name: "peter",
+	};
+
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+		account: mockAccount,
+	});
+
+	const activeAccount = await project.lix.db
+		.selectFrom("active_account")
+		.selectAll()
+		.execute();
+
+	expect(activeAccount).toEqual([mockAccount]);
+});
+
+
 // test("subscribing to errors should work", async () => {
 // 	const project = await loadProjectInMemory({ blob: await newProject() });
 
