@@ -12,7 +12,6 @@ import { updatePackageJson } from "../../steps/update-package-json.js";
 import { runCompiler } from "../../steps/run-compiler.js";
 import type { CliStep } from "../../utils.js";
 import nodeFs from "node:fs";
-import type { NodeishFilesystem } from "../../../services/file-handling/types.js";
 import { ENV_VARIABLES } from "../../../services/env-variables/index.js";
 
 export const initCommand = new Command()
@@ -77,7 +76,7 @@ export const initCommand = new Command()
 
 export const addParaglideJsToDevDependencies: CliStep<
 	{
-		fs: NodeishFilesystem;
+		fs: typeof import("node:fs/promises");
 		logger: Logger;
 		packageJsonPath: string;
 	},
@@ -96,7 +95,7 @@ export const addParaglideJsToDevDependencies: CliStep<
 };
 
 export const enforcePackageJsonExists: CliStep<
-	{ logger: Logger; fs: NodeishFilesystem },
+	{ logger: Logger; fs: typeof import("node:fs/promises") },
 	{ packageJsonPath: string }
 > = async (ctx) => {
 	const packageJsonPath = await findPackageJson(ctx.fs, process.cwd());
@@ -111,7 +110,7 @@ export const enforcePackageJsonExists: CliStep<
 
 export const addCompileStepToPackageJSON: CliStep<
 	{
-		fs: NodeishFilesystem;
+		fs: typeof import("node:fs/promises");
 		logger: Logger;
 		projectPath: string;
 		outdir: string;

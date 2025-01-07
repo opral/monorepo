@@ -1,15 +1,11 @@
 {
   "include": ["src/**/*"],
   "compilerOptions": {
-    "module": "ES2022",
-    "moduleResolution": "Bundler",
-    "isolatedModules": true,
-    "declaration": true,
-    "allowJs": true,
-    "checkJs": true,
-    "outDir": "dist",
-    "strict": true,
-    "lib": ["ESNext", "DOM"],
-    "skipLibCheck": true
-  }
+		"module": "ES2022",
+		"strict": true,
+		"allowJs": true,
+		"outDir": "dist",
+		"lib": ["ESNext", "DOM"],
+		"skipLibCheck": true
+	}
 }

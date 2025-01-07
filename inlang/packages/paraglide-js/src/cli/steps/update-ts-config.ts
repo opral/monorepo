@@ -4,21 +4,20 @@ import { prompt } from "../utils.js";
 import JSON5 from "json5";
 import { pathExists } from "../../services/file-handling/exists.js";
 import nodePath from "node:path";
-import type { NodeishFilesystem } from "../../services/file-handling/types.js";
 
 export const maybeChangeTsConfig: CliStep<
-	{ fs: NodeishFilesystem; logger: Logger },
+	{ fs: typeof import("node:fs/promises"); logger: Logger },
 	unknown
 > = async (ctx) => {
-	const ctx1 = await maybeChangeTsConfigModuleResolution(ctx);
-	return await maybeChangeTsConfigAllowJs(ctx1);
+	const ctx1 = await maybeChangeTsConfigAllowJs(ctx);
+	return await maybeChangeTsConfigModuleResolution(ctx1);
 };
 
 /**
  * Paraligde JS compiles to JS with JSDoc comments. TypeScript doesn't allow JS files by default.
  */
 export const maybeChangeTsConfigAllowJs: CliStep<
-	{ fs: NodeishFilesystem; logger: Logger },
+	{ fs: typeof import("node:fs/promises"); logger: Logger },
 	unknown
 > = async (ctx) => {
 	if ((await pathExists("./tsconfig.json", ctx.fs)) === false) {
@@ -87,14 +86,16 @@ export const maybeChangeTsConfigAllowJs: CliStep<
  * Otherwise, types defined in `package.exports` are not resolved by TypeScript. Leading to type
  * errors with Paraglide-JS.
  */
-export const maybeChangeTsConfigModuleResolution: CliStep<
-	{ fs: NodeishFilesystem; logger: Logger },
+const maybeChangeTsConfigModuleResolution: CliStep<
+	{ fs: typeof import("node:fs/promises"); logger: Logger },
 	unknown
 > = async (ctx) => {
 	if ((await pathExists("./tsconfig.json", ctx.fs)) === false) {
 		return ctx;
 	}
-	const file = await ctx.fs.readFile("./tsconfig.json", { encoding: "utf-8" });
+	const file = await ctx.fs.readFile("./tsconfig.json", {
+		encoding: "utf-8",
+	});
 	// tsconfig allows comments ... FML
 	let tsconfig = JSON5.parse(file);
 
