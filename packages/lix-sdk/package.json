@@ -12,9 +12,11 @@
 		"src"
 	],
 	"scripts": {
+		"prebuild": "npm run env-variables",
 		"build": "tsc --build",
 		"test": "tsc --noEmit && vitest run --coverage",
 		"test:watch": "vitest",
+		"env-variables": "node ./src/services/env-variables/create-index-file.js",
 		"bench": "vitest bench",
 		"lint": "eslint src/**/* --fix",
 		"dev": "tsc --watch",
