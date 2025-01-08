@@ -7,7 +7,7 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  * @example
  *   ```ts
  *   await lix.db.selectFrom("change_set")
- *      .where(changeSetHasLabel("confirmed"))
+ *      .where(changeSetHasLabel("checkpoint"))
  *      .selectAll()
  *      .execute();
  *   ```
@@ -17,7 +17,7 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  *
  *   ```ts
  *   await lix.db.selectFrom("change_set")
- * 		.where((eb) => eb.not(changeSetHasLabel("confirmed")))
+ * 		.where((eb) => eb.not(changeSetHasLabel("checkpoint")))
  * 		.selectAll()
  * 		.execute();
  *   ```

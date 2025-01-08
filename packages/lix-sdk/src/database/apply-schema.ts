@@ -189,11 +189,11 @@ export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
   CREATE TABLE IF NOT EXISTS label (
     id TEXT PRIMARY KEY DEFAULT (nano_id(8)),
     
-    name TEXT NOT NULL UNIQUE  -- e.g., 'confirmed', 'reviewed'
+    name TEXT NOT NULL UNIQUE  -- e.g., 'checkpoint', 'reviewed'
     
   ) STRICT;
 
-  INSERT OR IGNORE INTO label (name) VALUES ('confirmed');
+  INSERT OR IGNORE INTO label (name) VALUES ('checkpoint');
   INSERT OR IGNORE INTO label (name) VALUES ('grouped');
 
   -- versions

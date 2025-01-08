@@ -26,7 +26,7 @@ export default function App() {
 				.where("id", "=", change.id)
 				.set("meta", {
 					...change.meta,
-					tag: "confirmed",
+					tag: "checkpoint",
 					change_set: humanId(),
 				})
 				.executeTakeFirst();
@@ -74,7 +74,7 @@ export default function App() {
 									setShowDialog(true);
 								}}
 							>
-								Confirm changes
+								Create checkpoint
 							</SlButton>
 							<SlDialog
 								label="Add commit details"
@@ -100,7 +100,7 @@ export default function App() {
 									</div>
 									<div className="mt-6 flex justify-end">
 										<SlButton variant="primary" slot="footer" type="submit">
-											Confirm changes
+											Create checkpoint
 										</SlButton>
 									</div>
 								</form>

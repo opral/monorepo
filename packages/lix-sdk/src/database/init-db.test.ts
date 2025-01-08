@@ -362,7 +362,7 @@ test("creating multiple discussions for one change set should be possible", asyn
 	expect(discussions).toHaveLength(2);
 });
 
-test("the confirmed label should be created if it doesn't exist", async () => {
+test("the checkpoint label should be created if it doesn't exist", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
@@ -371,11 +371,11 @@ test("the confirmed label should be created if it doesn't exist", async () => {
 	const tag = await db
 		.selectFrom("label")
 		.selectAll()
-		.where("name", "=", "confirmed")
+		.where("name", "=", "checkpoint")
 		.executeTakeFirst();
 
 	expect(tag).toMatchObject({
-		name: "confirmed",
+		name: "checkpoint",
 	});
 });
 

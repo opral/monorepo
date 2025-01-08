@@ -4,7 +4,7 @@ import { atom, useAtom } from "jotai";
 import { lixAtom, withPollingAtom } from "../../state.ts";
 import {
 	activeFileAtom,
-	unconfirmedChangesAtom,
+	intermediateChangesAtom,
 } from "../../state-active-file.ts";
 import { changeSetHasLabel } from "@lix-js/sdk";
 
@@ -32,7 +32,7 @@ const changeSetsAtom = atom(async (get) => {
 		.leftJoin("comment", "comment.discussion_id", "discussion.id")
 		.where("comment.parent_id", "is", null) // Filter to get only the first comment
 		.where("change.file_id", "=", activeFile!.id)
-		.where(changeSetHasLabel("confirmed"))
+		.where(changeSetHasLabel("checkpoint"))
 		.groupBy("change_set.id")
 		.orderBy("change.created_at", "desc")
 		.select("change_set.id")
@@ -44,7 +44,7 @@ const changeSetsAtom = atom(async (get) => {
 
 export default function Page() {
 	const [changeSets] = useAtom(changeSetsAtom);
-	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
+	const [intermediateChanges] = useAtom(intermediateChangesAtom);
 
 	return (
 		<>
@@ -52,10 +52,10 @@ export default function Page() {
 				<div className="px-3 pb-6 pt-3 md:pt-5">
 					<div className="mx-auto max-w-7xl bg-white border border-zinc-200 rounded-lg divide-y divide-zinc-200 overflow-hidden">
 						{/* virtual change set for uncommitted changes */}
-						{unconfirmedChanges.length > 0 && (
+						{intermediateChanges.length > 0 && (
 							<ChangeSet
-								key={"unconfirmed-changes"}
-								id={"unconfirmed-changes"}
+								key={"intermediate-changes"}
+								id={"intermediate-changes"}
 								firstComment={null}
 								authorName={null}
 							/>

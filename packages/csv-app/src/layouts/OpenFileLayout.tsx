@@ -84,14 +84,14 @@ export default function Layout(props: { children: React.ReactNode }) {
 						</div>
 
 						<div className="mr-1 flex items-center gap-1.5">
-							{/* {unconfirmedChanges.length > 0 && (
+							{/* {intermediateChanges.length > 0 && (
 								<SlButton
 									size="small"
 									variant="neutral"
-									disabled={unconfirmedChanges.length === 0}
-									onClick={() => setShowConfirmChangesDialog(true)}
+									disabled={intermediateChanges.length === 0}
+									onClick={() => setShowIntermediateChangesDialog(true)}
 								>
-									Confirm Changes
+									Create Checkpoint
 								</SlButton>
 							)} */}
 						</div>
@@ -105,8 +105,8 @@ export default function Layout(props: { children: React.ReactNode }) {
 							// which assumes that nothing is auto saved
 							//
 							// counter={
-							// 	unconfirmedChanges.length !== 0
-							// 		? unconfirmedChanges.length
+							// 	intermediateChanges.length !== 0
+							// 		? intermediateChanges.length
 							// 		: undefined
 							// }
 							name="Changes"
