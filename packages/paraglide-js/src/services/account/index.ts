@@ -1,6 +1,6 @@
-import type { Account } from "@inlang/sdk";
 import path from "node:path";
 import os from "node:os";
+import type { Account } from "@inlang/sdk/lix";
 
 export function getLocalAccount(args: {
 	fs: typeof import("node:fs");

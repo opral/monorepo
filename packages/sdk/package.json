@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/sdk",
-	"version": "2.0.0-beta.2",
+	"version": "2.0.0-beta.3",
 	"type": "module",
 	"license": "MIT",
 	"publishConfig": {
@@ -14,6 +14,7 @@
 	},
 	"exports": {
 		".": "./dist/index.js",
+		"./lix": "./dist/lix/index.js",
 		"./settings-schema": "./src/json-schema/settings.ts"
 	},
 	"files": [
