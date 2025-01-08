@@ -111,6 +111,12 @@ export const compileProject = async (args: {
 		output[".prettierignore"] = ignoreDirectory;
 	}
 
+	for (const file in output) {
+		if (file.endsWith(".js")) {
+			output[file] = `// @ts-nocheck\n${output[file]}`;
+		}
+	}
+
 	return await formatFiles(output);
 };
 
