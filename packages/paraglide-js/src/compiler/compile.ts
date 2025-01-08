@@ -6,6 +6,10 @@ import {
 	type ParaglideCompilerOptions,
 } from "./compileProject.js";
 import { writeOutput } from "../services/file-handling/write-output.js";
+import {
+	getLocalAccount,
+	saveLocalAccount,
+} from "../services/account/index.js";
 
 /**
  * Loads, compiles, and writes the output to disk.
@@ -28,9 +32,12 @@ export async function compile(args: {
 }): Promise<void> {
 	const absoluteOutdir = path.resolve(process.cwd(), args.outdir);
 
+	const localAccount = getLocalAccount({ fs: args.fs });
+
 	const project = await loadProjectFromDirectory({
 		path: args.project,
 		fs: args.fs,
+		account: localAccount,
 		appId: ENV_VARIABLES.PARJS_APP_ID,
 	});
 
@@ -40,6 +47,15 @@ export async function compile(args: {
 	});
 
 	await writeOutput(absoluteOutdir, output, args.fs.promises);
+
+	if (!localAccount) {
+		const activeAccount = await project.lix.db
+			.selectFrom("active_account")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		saveLocalAccount({ fs: args.fs, account: activeAccount });
+	}
 
 	await project.close();
 	await new Promise((resolve) => setTimeout(resolve, 1000));
