@@ -7,7 +7,6 @@ import { memfs } from "memfs";
 import { test, expect, vi } from "vitest";
 import { compile } from "./compile.js";
 import { getAccountFilePath } from "../services/account/index.js";
-import { dirname } from "node:path";
 
 test("loads a project and compiles it", async () => {
 	const project = await loadProjectInMemory({
