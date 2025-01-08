@@ -2,7 +2,7 @@
 
 # Getting started
 
-To use Paraglide standalone without a framework, run the following command:
+To auto setup Paraglide JS, run the following command:
 
 ```bash
 npx @inlang/paraglide-js@latest init
@@ -10,16 +10,13 @@ npx @inlang/paraglide-js@latest init
 
 This will:
 
+- Create an [inlang project](https://inlang.com/documentation/concept/project)
 - Install necessary dependencies
 - Generate a `messages/` folder where your translation files live
-- Add the Paraglide compiler to your `build` script in `package.json`
-- Create necessary configuration files
 
-Running the Paraglide compiler will generate a `src/paraglide` folder. This folder contains all the code that you will use in your app.
+## Adding and editing Messages
 
-## Adding and Editing Messages
-
-Messages are stored in `messages/{lang}.json` as key-value pairs. You can add parameters with curly braces.
+Messages are stored in `messages/{locale}.json` as key-value pairs. You can add parameters with curly braces.
 
 ```diff
 // messages/en.json
@@ -29,49 +26,84 @@ Messages are stored in `messages/{lang}.json` as key-value pairs. You can add pa
 }
 ```
 
-Make sure to re-run the paraglide compiler after editing your messages.
+Run the compiler via the CLI to generate the message functions.
 
 ```bash
 npx @inlang/paraglide-js compile --project ./project.inlang --outdir ./src/paraglide
 ```
 
-If you are using a Bundler use one of the [Bundler Plugins](usage#usage-with-a-bundler) to recompile automatically.
+_If you are using a Bundler use one of the [Bundler Plugins](usage#usage-with-a-bundler) to recompile automatically._
 
-## Using Messages in Code
+## Using messages in code
 
 After running the compiler import the messages with `import * as m from "./paraglide/messages"`. By convention, a wildcard import is used.
 
 ```js
 import * as m from "./paraglide/messages.js";
 
-m.hello(); // Hello world!
-m.loginHeader({ name: "Samuel" }); // Hello Samuel, please login to continue.
+m.greeting({ name: "Samuel" }); // Hello Samuel!
 ```
 
-# Playground
+## Managing the locale
 
-Find examples of how to use Paraglide on CodeSandbox or in [our GitHub repository](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide).
+1. Set the locale with `setLocale` to render messages in a specific language.
+2. Trigger a re-render in your application. 
 
-<doc-links>
-    <doc-link title="NextJS + Paraglide JS" icon="lucide:codesandbox" href="https://stackblitz.com/~/LorisSigrist/paraglide-next-app-router-example" description="Play around with NextJS and Paraglide JS"></doc-link>
-    <doc-link title="Svelte + Paraglide JS" icon="lucide:codesandbox" href="https://stackblitz.com/~/github.com/LorisSigrist/paraglide-sveltekit-example" description="Play around with Svelte and Paraglide JS"></doc-link>
-    <doc-link title="Astro + Paraglide JS" icon="lucide:codesandbox" href="https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example" description="Play around with Astro and Paraglide JS"></doc-link>
-</doc-links>
+### Setting the locale
 
-# Roadmap
+Call `setLocale` to set the locale a message should be rendered in. 
 
-Of course, we're not done yet! We plan on adding the following features to Paraglide JS soon:
+```js
+import * as m from "./paraglide/messages.js";
+import { setLocale } from "./paraglide/runtime.js";
 
-- [ ] Pluralization ([Join the Discussion](https://github.com/opral/monorepo/discussions/2025))
-- [ ] Formatting of numbers and dates ([Join the Discussion](https://github.com/opral/monorepo/discussions/992))
-- [ ] Markup Placeholders ([Join the Discussion](https://github.com/opral/monorepo/discussions/913))
-- [ ] Component Interpolation
-- [ ] Per-Language Splitting without Lazy-Loading
-- [ ] Even Smaller Output
+setLocale("de");
+m.hello(); // Hallo Welt!
 
-# Talks
+setLocale("en");
+m.hello(); // Hello world!
+```
 
-- [Svelte Summit Spring 2023](https://www.youtube.com/watch?v=Y6IbPfMU1xM)
-- [Svelte Summit Fall 2023](https://www.youtube.com/watch?v=-YES3CCAG90)
-- Web Zurich December 2023
-- [Svelte London January 2024](https://www.youtube.com/watch?v=eswNQiq4T2w&t=646s)
+### Dynamically setting the locale (cookies, http headers, i18n routing, etc.)
+
+Do dynamically set the locale, pass a function that returns the locale to `setLocale`. You can use this to get the locale from the `documentElement.lang` attribute, a cookie, a HTTP header, or any other source.
+
+```js
+import * as m from "./paraglide/messages.js";
+import { setLocale } from "./paraglide/runtime.js";
+
+setLocale(() => document.documentElement.lang /** en */);
+
+m.hello(); // Hello world!
+```
+
+### Trigger a re-render 
+
+To trigger a re-render in your application, use the `onSetLocale` callback. How to trigger a re-render depends on your application but usually involves setting a render key at the top level of your application. 
+
+Below is an example for React.
+
+```js
+import { useState } from "react";
+import * as m from "./paraglide/messages.js";
+import { getLocale, onSetLocale, setLocale } from "./paraglide/runtime.js";
+
+function App() {
+	const [localeRenderKey, setLocaleRenderKey] = useState(getLocale());
+
+	onSetLocale((newLocale) => {
+		setLocaleRenderKey(newLocale);
+	});
+
+	return (
+		// The render key will trigger a re-render when the locale changes
+		<div key={localeRenderKey}>
+			<button onClick={() => setLocale("en")}>Switch locale to en</button>
+			<button onClick={() => setLocale("de")}>Switch locale to de</button>
+			<button onClick={() => setLocale("fr")}>Switch locale to fr</button>
+			<p>{m.orange_dog_wheel()}</p>
+		</div>
+	);
+}
+```
+
