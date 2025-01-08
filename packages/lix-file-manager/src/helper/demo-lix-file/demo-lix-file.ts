@@ -59,9 +59,9 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 		"Henry Clark,DevOps Engineer,Engineering,95000",
 	];
 
-	const confirmedLabel = await lix.db
+	const checkpointLabel = await lix.db
 		.selectFrom("label")
-		.where("name", "=", "confirmed")
+		.where("name", "=", "checkpoint")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -79,13 +79,13 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 		.returning("id")
 		.executeTakeFirstOrThrow();
 
-	// anna is confirming the initial salaries
-	await createAndConfimChanges({
+	// anna is creating a checkpoint for the initial salaries
+	await createChangesWithCheckpoint({
 		lix,
 		file,
 		rows,
 		timestamp: "2022-03-11 14:53:00.000",
-		confirmedLabel,
+		checkpointLabel,
 		comment: "Initial salaries",
 	});
 
@@ -94,12 +94,12 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 
 	rows[5] = "Charlie Davis,Marketing Specialist,Marketing,74000";
 
-	await createAndConfimChanges({
+	await createChangesWithCheckpoint({
 		lix,
 		file,
 		rows,
 		timestamp: "2022-04-14 19:53:00.000",
-		confirmedLabel,
+		checkpointLabel,
 		comment: "Increased Charlie Davis salary",
 	});
 
@@ -108,24 +108,24 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 
 	rows[2] = "Alice Johnson,Senior Data Scientist,Data,110000";
 
-	await createAndConfimChanges({
+	await createChangesWithCheckpoint({
 		lix,
 		file,
 		rows,
 		timestamp: "2022-05-11 14:53:00.000",
-		confirmedLabel,
+		checkpointLabel,
 		comment: "Promoted Alice Johnson to Senior Data Scientist",
 	});
 
 	// Peter hires a new employee
 	rows.push("Klaus Kleber,Intern,HR,40000");
 
-	const { discussion } = await createAndConfimChanges({
+	const { discussion } = await createChangesWithCheckpoint({
 		lix,
 		file,
 		rows,
 		timestamp: "2022-05-13 14:53:00.000",
-		confirmedLabel,
+		checkpointLabel,
 		comment: "Hired Klaus Kleber",
 	});
 
@@ -161,12 +161,12 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 
 	rows[10] = "Klaus Kleber,Intern,HR,45000";
 
-	await createAndConfimChanges({
+	await createChangesWithCheckpoint({
 		lix,
 		file,
 		rows,
 		timestamp: "2022-05-14 11:42:00.000",
-		confirmedLabel,
+		checkpointLabel,
 		comment: "Increased Klaus Kleber salary",
 	});
 
@@ -176,12 +176,12 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 
 	rows[10] = "Klaus Kleber,Junior HR Manager,HR,60000";
 
-	await createAndConfimChanges({
+	await createChangesWithCheckpoint({
 		lix,
 		file,
 		rows,
 		timestamp: "2023-01-01 10:45:00.000",
-		confirmedLabel,
+		checkpointLabel,
 		comment: "Hired Klaus Kleber after intern period",
 	});
 
@@ -197,22 +197,22 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 			`${name},${position},${department},${(salaryInt * 1.1).toFixed(0)}`;
 	}
 
-	await createAndConfimChanges({
+	await createChangesWithCheckpoint({
 		lix,
 		file,
 		rows,
 		timestamp: "2023-02-01 10:45:00.000",
-		confirmedLabel,
+		checkpointLabel,
 		comment: "Updated salary bands",
 	});
 }
 
-async function createAndConfimChanges(args: {
+async function createChangesWithCheckpoint(args: {
 	lix: Lix;
 	file: { id: string };
 	rows: string[];
 	timestamp: string;
-	confirmedLabel: Label;
+	checkpointLabel: Label;
 	comment: string;
 }) {
 	await args.lix.db
@@ -228,8 +228,8 @@ async function createAndConfimChanges(args: {
 	const changes = await args.lix.db
 		.selectFrom("change")
 		.selectAll()
-		// don't copy changes that are already confirmed
-		.where((eb) => eb.not(changeHasLabel("confirmed")))
+		// don't copy changes that are already tagged as a checkpoint
+		.where((eb) => eb.not(changeHasLabel("checkpoint")))
 		.where("file_id", "=", args.file.id)
 		.execute();
 
@@ -257,7 +257,7 @@ async function createAndConfimChanges(args: {
 		.insertInto("change_set_label")
 		.values({
 			change_set_id: changeSet.id,
-			label_id: args.confirmedLabel.id,
+			label_id: args.checkpointLabel.id,
 		})
 		.execute();
 

@@ -1,9 +1,9 @@
 import { Change, changeIsLeafOf, Lix } from "@lix-js/sdk";
 import { saveLixToOpfs } from "./saveLixToOpfs.ts";
 
-export const confirmChanges = async (
+export const createCheckpoint = async (
 	lix: Lix,
-	unconfirmedChanges: Change[]
+	intermediateChanges: Change[]
 ) => {
 	const changeSet = await lix.db.transaction().execute(async (trx) => {
 		// create a new set
@@ -13,10 +13,10 @@ export const confirmChanges = async (
 			.returning("id")
 			.executeTakeFirstOrThrow();
 
-		// get the id of the confirmed tag
-		const confirmedLabel = await trx
+		// get the id of the checkpoint tag
+		const checkpointLabel = await trx
 			.selectFrom("label")
-			.where("name", "=", "confirmed")
+			.where("name", "=", "checkpoint")
 			.select("id")
 			.executeTakeFirstOrThrow();
 
@@ -25,12 +25,12 @@ export const confirmChanges = async (
 			.insertInto("change_set_label")
 			.values({
 				change_set_id: newChangeSet.id,
-				label_id: confirmedLabel.id,
+				label_id: checkpointLabel.id,
 			})
 			.execute();
 
 		// insert the leaf changes into the set
-		for (const change of unconfirmedChanges) {
+		for (const change of intermediateChanges) {
 			const leafChange = await trx
 				.selectFrom("change")
 				.where(changeIsLeafOf(change))

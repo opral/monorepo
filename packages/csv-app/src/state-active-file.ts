@@ -140,8 +140,8 @@ export const activeCellChangesAtom = atom(async (get) => {
 	return changes;
 });
 
-// The CSV app treats changes that are not in a change set as unconfirmed changes.
-export const unconfirmedChangesAtom = atom(async (get) => {
+// The CSV app treats changes that are not in a change set as intermediate changes.
+export const intermediateChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
@@ -153,7 +153,7 @@ export const unconfirmedChangesAtom = atom(async (get) => {
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
 		.where(changeIsLeafInVersion(currentBranch))
-		.where((eb) => eb.not(changeHasLabel("confirmed")))
+		.where((eb) => eb.not(changeHasLabel("checkpoint")))
 		.selectAll("change")
 		.execute();
 });

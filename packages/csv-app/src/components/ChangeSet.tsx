@@ -14,11 +14,11 @@ import { currentVersionAtom, lixAtom } from "../state.ts";
 import clsx from "clsx";
 import {
 	activeFileAtom,
-	unconfirmedChangesAtom,
+	intermediateChangesAtom,
 } from "../state-active-file.ts";
 import { SlButton, SlInput } from "@shoelace-style/shoelace/dist/react";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
-import { confirmChanges } from "../helper/confirmChanges.ts";
+import { createCheckpoint } from "../helper/createCheckpoint.ts";
 import RowDiff from "./RowDiff.tsx";
 import { CellSchemaV1 } from "@lix-js/plugin-csv";
 
@@ -28,7 +28,7 @@ export default function Component(props: {
 	firstComment: string | null;
 }) {
 	const [isOpen, setIsOpen] = useState(
-		props.id === "unconfirmed-changes" ? true : false
+		props.id === "intermediate-changes" ? true : false
 	);
 
 	const [lix] = useAtom(lixAtom);
@@ -37,31 +37,31 @@ export default function Component(props: {
 		Awaited<ReturnType<typeof getChanges>>
 	>({});
 
-	const [unconfirmedChanges, setUnconfirmedChanges] = useState<
-		Awaited<ReturnType<typeof getUnconfirmedChanges>>
+	const [intermediateChanges, setIntermediateChanges] = useState<
+		Awaited<ReturnType<typeof getIntermediateChanges>>
 	>({});
 
 	const [currentVersion] = useAtom(currentVersionAtom);
 
 	useEffect(() => {
 		if (isOpen) {
-			if (props.id !== "unconfirmed-changes") {
+			if (props.id !== "intermediate-changes") {
 				getChanges(lix, props.id, activeFile!.id, currentVersion).then(
 					setChanges
 				);
 			} else {
-				getUnconfirmedChanges(lix, activeFile!.id, currentVersion).then(
-					setUnconfirmedChanges
+				getIntermediateChanges(lix, activeFile!.id, currentVersion).then(
+					setIntermediateChanges
 				);
 			}
 			const interval = setInterval(async () => {
-				if (props.id !== "unconfirmed-changes") {
+				if (props.id !== "intermediate-changes") {
 					getChanges(lix, props.id, activeFile!.id, currentVersion).then(
 						setChanges
 					);
 				} else {
-					getUnconfirmedChanges(lix, activeFile!.id, currentVersion).then(
-						setUnconfirmedChanges
+					getIntermediateChanges(lix, activeFile!.id, currentVersion).then(
+						setIntermediateChanges
 					);
 				}
 			}, 1000);
@@ -86,8 +86,8 @@ export default function Component(props: {
 				<div className="flex-1 flex gap-2 items-center justify-between py-3 rounded md:h-[46px]">
 					<div className="flex flex-col md:flex-row md:gap-2 md:items-center flex-1">
 						<p className="text-zinc-950 text-sm! font-semibold">
-							{props.id === "unconfirmed-changes"
-								? "Unconfirmed changes"
+							{props.id === "intermediate-changes"
+								? "Intermediate changes"
 								: props.authorName}
 						</p>
 						<p className="text-sm! text-zinc-600">{props.firstComment}</p>
@@ -115,18 +115,18 @@ export default function Component(props: {
 			</div>
 			<div className={clsx(isOpen ? "block" : "hidden")}>
 				<div className="flex flex-col gap-2 px-3 pb-3">
-					{Object.keys(unconfirmedChanges).length > 0 && <ConfirmChangesBox />}
+					{Object.keys(intermediateChanges).length > 0 && <CreateCheckpointBox />}
 
 					{Object.keys(
-						props.id === "unconfirmed-changes" ? unconfirmedChanges : changes
+						props.id === "intermediate-changes" ? intermediateChanges : changes
 					).map((rowId) => {
 						const uniqueColumnValue = rowId.split("|")[1];
 						return (
 							<RowDiff
 								uniqueColumnValue={uniqueColumnValue}
 								changes={
-									props.id === "unconfirmed-changes"
-										? unconfirmedChanges[rowId]
+									props.id === "intermediate-changes"
+										? intermediateChanges[rowId]
 										: changes[rowId]
 								}
 							></RowDiff>
@@ -138,13 +138,13 @@ export default function Component(props: {
 	);
 }
 
-const ConfirmChangesBox = () => {
+const CreateCheckpointBox = () => {
 	const [description, setDescription] = useState("");
 	const [lix] = useAtom(lixAtom);
-	const [unconfirmedChanges] = useAtom(unconfirmedChangesAtom);
+	const [intermediateChanges] = useAtom(intermediateChangesAtom);
 
-	const handleConfirmChanges = async () => {
-		const changeSet = await confirmChanges(lix, unconfirmedChanges);
+	const handleCreateCheckpoint = async () => {
+		const changeSet = await createCheckpoint(lix, intermediateChanges);
 		if (description !== "") {
 			await createDiscussion({
 				lix,
@@ -162,8 +162,8 @@ const ConfirmChangesBox = () => {
 				placeholder="Describe the changes"
 				onInput={(event: any) => setDescription(event.target?.value)}
 			></SlInput>
-			<SlButton slot="footer" variant="primary" onClick={handleConfirmChanges}>
-				{description === "" ? "Confirm without description" : "Confirm"}
+			<SlButton slot="footer" variant="primary" onClick={handleCreateCheckpoint}>
+				{description === "" ? "Create checkpoint without description" : "Create checkpoint"}
 			</SlButton>
 		</div>
 	);
@@ -194,7 +194,7 @@ const getChanges = async (
 			"change.id"
 		)
 		.where("change.schema_key", "=", CellSchemaV1.key)
-		.where(changeHasLabel("confirmed"))
+		.where(changeHasLabel("checkpoint"))
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where("change.file_id", "=", fileId)
 		.selectAll("change")
@@ -241,7 +241,7 @@ const getChanges = async (
 				.innerJoin("change_edge", "change_edge.parent_id", "change.id")
 				.where("change_edge.child_id", "=", change.id)
 				.where(changeInVersion(currentVersion))
-				.where(changeHasLabel("confirmed"))
+				.where(changeHasLabel("checkpoint"))
 				.selectAll("change")
 				.select("snapshot.content")
 				.executeTakeFirst();
@@ -253,7 +253,7 @@ const getChanges = async (
 };
 
 // duplicating because easier for now. clean up later
-const getUnconfirmedChanges = async (
+const getIntermediateChanges = async (
 	lix: Lix,
 	fileId: string,
 	currentVersion: Version
@@ -268,12 +268,12 @@ const getUnconfirmedChanges = async (
 		>
 	>
 > => {
-	const unconfirmedLeafChanges = await lix.db
+	const intermediateLeafChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where("change.file_id", "=", fileId)
 		.where(changeIsLeafInVersion(currentVersion))
-		.where((eb) => eb.not(changeHasLabel("confirmed")))
+		.where((eb) => eb.not(changeHasLabel("checkpoint")))
 		.where("change.schema_key", "=", CellSchemaV1.key)
 		.selectAll("change")
 		.select("snapshot.content")
@@ -281,7 +281,7 @@ const getUnconfirmedChanges = async (
 
 	const groupedByRow: any = {};
 
-	for (const change of unconfirmedLeafChanges) {
+	for (const change of intermediateLeafChanges) {
 		const parts = change.entity_id.split("|");
 		const rowEntityId = parts[0] + "|" + parts[1];
 
@@ -295,12 +295,12 @@ const getUnconfirmedChanges = async (
 		const row = groupedByRow[id];
 
 		for (const change of row) {
-			// defining a parent as the last confirmed change
+			// defining a parent as the last checkpoint change
 			const parent = await lix.db
 				.selectFrom("change")
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.where("change.entity_id", "=", change.entity_id)
-				.where(changeHasLabel("confirmed"))
+				.where(changeHasLabel("checkpoint"))
 				.where(changeInVersion(currentVersion))
 				// TODO fix the filter
 				// https://github.com/opral/lix-sdk/issues/151
