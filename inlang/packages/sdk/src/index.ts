@@ -27,6 +27,5 @@ export type {
 } from "./plugin/schema.js";
 export type { IdeExtensionConfig } from "./plugin/meta/ideExtension.js";
 export * from "./database/schema.js";
-export * from "@lix-js/sdk";
 export { createMessageV1 } from "./migrations/v2/createMessageV1.js";
 export { v7 as uuidV7 } from "uuid";
