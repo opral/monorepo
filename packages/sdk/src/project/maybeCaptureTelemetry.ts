@@ -4,9 +4,11 @@ import type { InlangDatabaseSchema } from "../database/schema.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import { captureError } from "../services/error-reporting/index.js";
+import type { Lix } from "@lix-js/sdk";
 
 export async function maybeCaptureLoadedProject(args: {
 	id: string;
+	lix: Lix;
 	settings: ProjectSettings;
 	plugins: Readonly<Array<{ key: string }>>;
 	appId?: string;
@@ -17,6 +19,11 @@ export async function maybeCaptureLoadedProject(args: {
 	}
 
 	try {
+		const activeAccount = await args.lix.db
+			.selectFrom("active_account")
+			.select("id")
+			.executeTakeFirstOrThrow();
+
 		const bundles = await args.db
 			.selectFrom("bundle")
 			.select((s) => s.fn.count("id").as("count"))
@@ -33,6 +40,7 @@ export async function maybeCaptureLoadedProject(args: {
 		await capture("SDK loaded project", {
 			projectId: args.id,
 			settings: args.settings,
+			accountId: activeAccount.id,
 			properties: {
 				// Insight: Which app is used by the SDK
 				appId: args.appId,

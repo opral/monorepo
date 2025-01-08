@@ -15,6 +15,7 @@ test("it should not capture if telemetry is off", async () => {
 
 	await capture("SDK loaded project", {
 		projectId: "test",
+		accountId: "test",
 		settings: {
 			telemetry: "off",
 		},
@@ -38,6 +39,7 @@ test("it should not capture if telemetry is NOT off", async () => {
 
 	await capture("SDK loaded project", {
 		projectId: "test",
+		accountId: "test",
 		settings: {
 			telemetry: undefined,
 		},

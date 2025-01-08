@@ -116,6 +116,7 @@ export async function loadProject(args: {
 		id,
 		settings,
 		plugins,
+		lix: args.lix,
 		appId: args.appId,
 	});
 
