@@ -1,5 +1,8 @@
 {
-	"private": true,
+	"private": false,
+	"publishConfig": {
+		"access": "public"
+	},
 	"name": "@lix-js/server-api-schema",
 	"type": "module",
 	"version": "0.1.1",
