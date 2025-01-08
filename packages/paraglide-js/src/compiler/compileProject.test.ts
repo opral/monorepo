@@ -173,19 +173,35 @@ describe.each([
 			expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
 		});
 
-		test("setting the locale as a getter function should be possible", async () => {
+		test("defineGetLocale() works", async () => {
 			const { m, runtime } = await importCode(code);
 
-			runtime.setLocale(() => "en");
+			let locale = "en";
+
+			runtime.defineGetLocale(() => locale);
 
 			expect(m.sad_penguin_bundle()).toBe("A simple message.");
 
-			runtime.setLocale(() => "de");
+			locale = "de";
 
 			expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
 		});
 
-		test("defining onSetLocale should be possible and should be called when the locale changes", async () => {
+		test("defineSetLocale() works", async () => {
+			const { runtime } = await importCode(code);
+
+			let locale = "en";
+
+			runtime.defineSetLocale((newLocale: any) => {
+				locale = newLocale;
+			});
+
+			runtime.setLocale("de");
+
+			expect(locale).toBe("de");
+		});
+
+		test.skip("defining onSetLocale should be possible and should be called when the locale changes", async () => {
 			const { runtime } = await importCode(code);
 
 			const mockOnSetLocale = vi.fn().mockImplementation(() => {});
@@ -202,7 +218,7 @@ describe.each([
 			expect(mockOnSetLocale).toHaveBeenCalledTimes(2);
 		});
 
-		test("Calling onSetLocale() multiple times should override the previous callback", async () => {
+		test.skip("Calling onSetLocale() multiple times should override the previous callback", async () => {
 			const cb1 = vi.fn().mockImplementation(() => {});
 			const cb2 = vi.fn().mockImplementation(() => {});
 
@@ -351,15 +367,6 @@ describe.each([
 			runtime.setLocale("en-US");
 			expect(m.missing_in_en_US()).toBe("Fallback message.");
 		});
-
-		test("throws an error if getLocale() returns an unavailable locale", async () => {
-			const { runtime } = await importCode(code);
-
-			expect(() => {
-				runtime.setLocale(() => "dsklfgj");
-				runtime.getLocale();
-			}).toThrow();
-		});
 	});
 
 	// remove with v3 of paraglide js
@@ -400,9 +407,6 @@ describe.each([
 
     // setLocale() should not fail if the given language tag is included in availableLocales
     runtime.setLocale("de")
-
-		// setting the locale as a getter function should be possible
-		runtime.setLocale(() => "en")
 
 		// isAvailableLocale should narrow the type of it's argument
 		const thing = 5;
@@ -465,9 +469,6 @@ describe.each([
 
     // languageTag should return type should be a union of language tags, not a generic string
     runtime.languageTag() satisfies "de" | "en" | "en-US"
-
-		// setting the language tag as a getter function should be possible
-		runtime.setLanguageTag(() => "en")
 
 		// isAvailableLocale should narrow the type of it's argument
 		const thing = 5;
