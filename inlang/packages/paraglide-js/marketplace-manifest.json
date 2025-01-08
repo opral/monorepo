@@ -25,7 +25,8 @@
 		"Usage": {
 			"/": "./README.md",
 			"/manual-setup": "./docs/manual-setup.md",
-			"/compiling-messages": "./docs/usage.md"
+			"/compiling-messages": "./docs/usage.md",
+			"/strategy": "./docs/strategy.md"
 		},
 		"Frameworks": {
 			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",

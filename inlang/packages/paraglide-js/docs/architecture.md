@@ -13,7 +13,39 @@ This design avoids many edge cases with reactivity, lazy-loading, and namespacin
 
 In addition to the message functions, ParaglideJS also emits a runtime. The runtime is used to set the language tag. It contains less than 50 LOC (lines of code) and is less than 300 bytes minified & gzipped.
 
-![Diagram of the Paraglide Compiler Architecture](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide-js/assets/architecture.svg)
+```mermaid
+flowchart TD
+    INLANG_PROJECT[INLANG PROJECT]
+
+    COMPILER[COMPILER]
+
+    subgraph RUNTIME
+        GET_LOCALE["getLocale()"]
+        SET_LOCALE["setLocale()"]
+    end
+
+    subgraph MESSAGES
+        M["m.hello_world()"]
+    end
+
+
+    subgraph STRATEGY
+        X["Your strategy defines how a locale is resolved. Cookie-based, i18n routing, everything is possible."]
+    end
+
+    COMPILER --> INLANG_PROJECT
+    M --> GET_LOCALE
+    MESSAGES --> COMPILER
+    RUNTIME --> COMPILER
+    APP[Your App] --> M
+    MESSAGE["'Hello World!'"] -->|renders| APP[Your App]
+    APP --> SET_LOCALE
+    GET_LOCALE -->|"defineGetLocale()"| STRATEGY
+    SET_LOCALE -->|"defineSetLocale()"| STRATEGY
+
+    classDef plainText stroke-width:0,fill-opacity:0,color:black;
+    class X plainText
+```
 
 Paraglide consists of four main parts:
 
@@ -21,30 +53,5 @@ Paraglide consists of four main parts:
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **Compiler**          | Compiles messages into tree-shakable message functions                                                                       |
 | **Messages**          | The compiled tree-shakable message functions                                                                                 |
-| **Runtime**           | A runtime that resolves the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) of the current user |
-| **Framework Library** | (optional) A framework library that adjusts the runtime for different frameworks                                             |
-
-## Compiler
-
-The compiler loads an Inlang project and compiles the messages into tree-shakable and typesafe message functions.
-
-**Input**
-
-```js
-// messages/en.json
-{
-  "hello": "Hello {name}!"
-}
-```
-
-**Output**
-
-```js
-// src/paraglide/messages/en.js
-
-/**
- * @param {object} params
- * @param {string} params.name
- */
-export const hello = (params) => `Hello ${params.name}!`;
-```
+| **Runtime**           | A runtime that resolves the locale based on the strategy                                                                     |
+| **Strategy**          | The strategy to detect the locale of a user                                                                                  |
