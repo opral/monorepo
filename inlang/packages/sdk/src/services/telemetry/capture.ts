@@ -21,6 +21,7 @@ export const capture = async (
 	event: TelemetryEvent,
 	args: {
 		projectId: string;
+		accountId: string;
 		/**
 		 * Please use snake_case for property names.
 		 */
@@ -39,8 +40,7 @@ export const capture = async (
 			body: JSON.stringify({
 				api_key: ENV_VARIABLES.PUBLIC_POSTHOG_TOKEN,
 				event,
-				// id is "unknown" because no user information is available
-				distinct_id: "unknown",
+				distinct_id: args.accountId,
 				properties: {
 					$groups: { project: args.projectId },
 					...args.properties,
@@ -49,6 +49,7 @@ export const capture = async (
 		});
 		await identifyProject({
 			projectId: args.projectId,
+			accountId: args.accountId,
 			// using the id for now as a name but can be changed in the future
 			// we need at least one property to make a project visible in the dashboar
 			properties: { name: args.projectId },
@@ -65,6 +66,7 @@ export const capture = async (
  */
 const identifyProject = async (args: {
 	projectId: string;
+	accountId: string;
 	/**
 	 * Please use snake_case for property names.
 	 */
@@ -81,8 +83,7 @@ const identifyProject = async (args: {
 			body: JSON.stringify({
 				api_key: ENV_VARIABLES.PUBLIC_POSTHOG_TOKEN,
 				event: "$groupidentify",
-				// id is "unknown" because no user information is available
-				distinct_id: "unknown",
+				distinct_id: args.accountId,
 				properties: {
 					$group_type: "project",
 					$group_key: args.projectId,

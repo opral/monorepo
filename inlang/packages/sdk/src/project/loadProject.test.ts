@@ -135,7 +135,6 @@ test("providing an account should work", async () => {
 	expect(activeAccount).toEqual([mockAccount]);
 });
 
-
 // test("subscribing to errors should work", async () => {
 // 	const project = await loadProjectInMemory({ blob: await newProject() });
 

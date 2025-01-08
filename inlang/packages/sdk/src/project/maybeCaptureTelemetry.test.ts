@@ -24,6 +24,11 @@ test("it should capture as expected", async () => {
 		blob: await newProject(),
 	});
 
+	const account = await project.lix.db
+		.selectFrom("active_account")
+		.select("id")
+		.executeTakeFirstOrThrow();
+
 	const bundle = await project.db
 		.insertInto("bundle")
 		.defaultValues()
@@ -52,6 +57,7 @@ test("it should capture as expected", async () => {
 		id,
 		settings,
 		plugins,
+		lix: project.lix,
 		appId: "test",
 		db: project.db,
 	});
@@ -59,6 +65,7 @@ test("it should capture as expected", async () => {
 	expect(capture).toHaveBeenCalledWith("SDK loaded project", {
 		projectId: await project.id.get(),
 		settings: await project.settings.get(),
+		accountId: account.id,
 		properties: {
 			appId: "test",
 			settings: await project.settings.get(),
