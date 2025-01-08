@@ -30,20 +30,7 @@ Create a folder called `project.inlang` in your root-directory. Inside it, add a
 
 Eddit the `languageTags` and `sourceLanguageTag` fields to match the languages you want to support.
 
-## 3. Add the compile script
-
-In `package.json` add a script that you will call to recompile.
-
-```diff
-// package.json
-{
-    "scripts": {
-+        "compile": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide"
-    }
-}
-```
-
-## 4. Add message files for each languages
+## 3. Add message files for each languages
 
 In your root-directory, create a `messages` folder. Then add a `en.json` file to it. This is where your messages live.
 

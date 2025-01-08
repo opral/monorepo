@@ -17,26 +17,30 @@
 	},
 	"pages": {
 		"": {
-			"/": "./docs/why-paraglide.md",
-			"/getting-started": "./README.md",
-			"/usage": "./docs/usage.md",
+			"/": "./docs/introduction.md",
+			"/limitations": "./docs/limitations.md",
 			"/scaling": "./docs/scaling.md",
-			"/architecture": "./docs/architecture.md",
-			"/manual-setup": "./docs/manual-setup.md",
 			"/changelog": "./CHANGELOG.md"
 		},
-
-		"Framework Libraries": {
-			"NextJS": "/m/osslbuzt/paraglide-next-i18n",
+		"Usage": {
+			"/": "./README.md",
+			"/manual-setup": "./docs/manual-setup.md",
+			"/compiling-messages": "./docs/usage.md"
+		},
+		"Frameworks": {
 			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",
+			"NextJS": "/m/osslbuzt/paraglide-next-i18n",
 			"Astro": "/m/iljlwzfs/paraglide-astro-i18n",
-			"SolidStart": "/m/n860p17j/paraglide-solidstart-i18n",
 			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n"
 		},
-		"Tooling": {
-			"VsCode Extension": "/m/r7kp499g/app-inlang-ideExtension",
+		"Reference": {
+			"/architecture": "./docs/architecture.md",
+			"/compiler-options": "./docs/compiler-options.md"
+		},
+		"Ecosystem": {
+			"VSCode Extension": "/m/r7kp499g/app-inlang-ideExtension",
 			"Machine Translation": "/m/2qj2w8pu/app-inlang-cli",
-			"Translation Editor": "/m/tdozzpar/app-inlang-finkLocalizationEditor"
+			"CAT Editor": "/m/tdozzpar/app-inlang-finkLocalizationEditor"
 		}
 	},
 	"keywords": [

@@ -2,29 +2,30 @@
 imports: 
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-link.js
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-links.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-important.js
 ---
 
 # Usage
 
+<doc-important>
+  Paraglide is built with the inlang SDK, and therefore, supports many different translation file formats. By default, the [Inlang Message Format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) is used.
+</doc-important>
+
 ## Working with the Inlang Message Format
 
-Paraglide is part of the highly modular Inlang Ecosystem which supports many different Message Formats. By default, the [Inlang Message Format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) is used.
-
-It expects messages to be in `messages/{lang}.json` relative to your repo root.
+It expects messages to be in `messages/{locale}.json` relative to your repo root.
 
 ```json
 //messages/en.json
 {
-	//the $schema key is automatically ignored
-	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"hello_world: "Hello World!",
 	"greeting": "Hello {name}!"
 }
 ```
 
-The `messages/{lang}.json` file contains a flat map of message IDs and their translations. You can use curly braces to insert `{parameters}` into translations
+The `messages/{locale}.json` file contains a flat map of message IDs and their translations. You can use curly braces to insert `{parameters}` into translations
 
-**Nesting purposely isn't supported and likely won't be**. Nested messages are way harder to interact with from complementary tools like the [Sherlock IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension), the [Parrot Figma Plugin](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin), or the [Fink Localization editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor). Intellisense also becomes less helpful since it only shows the messages at the current level, not all messages. Additionally enforcing an organization-style side-steps organization discussions with other contributors.
+**Nesting purposely isn't supported in the inlang message format (but other plugins do support it!)**. Nested messages are way harder to interact with from complementary tools like the [Sherlock IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension), the [Parrot Figma Plugin](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin), or the [Fink Localization editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor). Intellisense also becomes less helpful since it only shows the messages at the current level, not all messages. Additionally enforcing an organization-style side-steps organization discussions with other contributors.
 
 ## Using messages in Code
 
@@ -53,150 +54,53 @@ For date & currency formatting use the `.toLocaleString` method on the `Date` or
 
 ```ts
 import * as m from "./paraglide/messages.js";
-import { languageTag } from "./paraglide/runtime.js";
+import { locale } from "./paraglide/runtime.js";
 
 const todaysDate = new Date();
 m.today_is_the({
-  date: todaysDate.toLocaleString(languageTag()),
+  date: todaysDate.toLocaleString(getLocale()),
 });
 
 const price = 100;
 m.the_price_is({
-  price: price.toLocaleString(languageTag(), {
+  price: price.toLocaleString(getLocale(), {
     style: "currency",
     currency: "EUR",
   }),
 });
 ```
 
-You can put HTML into the messages. This is useful for links and images.
-
-```json
-// messages/en.json
-{
-  "you_must_agree_to_the_tos": "You must agree to the <a href='/en/tos'>Terms of Service</a>."
-}
-```
-
-```json
-// messages/de.json
-{
-	you_must_agree_to_the_tos": "Sie müssen den <a href='/de/agb'>Nutzungsbedingungen</a> zustimmen."
-}
-```
-
-There is currently no way to interpolate framework components into messages. If you require components mid-message you will need to create a one-off component for that bit of text.
-
 ## Getting a message in a specific language
 
-You can import a message in a specific language from `paraglide/messages/{lang}.js`.
-
-```ts
-import * as m from "./paraglide/messages/de.js";
-m.hello(); // Hallo Welt
-```
-
-If you want to force a language, but don't know _which_ language ahead of time you can pass the `languageTag` option as the second parameter to a message function. This is often handy on the server.
+If you want to force a language, but don't know _which_ language ahead of time you can pass the `locale` option as the second parameter to a message function. This is often handy on the server.
 
 ```js
 import * as m from "./paraglide/messages.js";
-const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }); // Hallo Samuel!
+const msg = m.hello({ name: "Samuel" }, { locale: "de" }); // Hallo Samuel!
 ```
-
-### Lazy-Loading
-
-Paraglide discourages lazy-loading translations since it causes a render-fetch waterfall which hurts Web Vitals. Learn more about why lazy-loading is bad & what to do instead in [our blog post on lazy-loading](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload).
-
-If you want to do it anyway, lazily import the language-specific message files.
-
-```ts
-const lazyGerman = await import("./paraglide/messages/de.js");
-lazyGerman.hello(); // Hallo Welt
-```
-
-## Language Management
-
-### Setting the language
-
-You can set the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) by calling `setLanguageTag()` with the desired language, or a getter function. Any subsequent calls to either `languageTag()` or a message function will use the new language tag.
-
-```js
-import { setLanguageTag } from "./paraglide/runtime.js";
-import * as m from "./paraglide/messages.js";
-
-setLanguageTag("de");
-m.hello(); // Hallo Welt!
-
-setLanguageTag(() => document.documentElement.lang /* en */);
-m.hello(); // Hello world!
-```
-
-`setLanguageTag` needs to be called both on the server and the client since they run in separate processes.
-
-The [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) is a global function. This means that on the server it is _shared_ accross requests. In order to avoid the langauge from one request being overwritten by another request you need to use _getter function_ that returns the language for the _current request_. A good way to implement this is using [`AsyncLocalStorage`](https://nodejs.org/api/async_context.html).
-
-**⛔️ Bad Example**:
-
-```ts
-import { setLanguageTag, sourceLanguageTag } from "./paraglide/runtime.js";
-
-export function onRequest(request, next) {
-  const langForReq = detectLanguage(request);
-
-  // ⛔️ DONT DO THIS
-  // ⛔️ If multiple requests are handled concurretntly
-  // ⛔️ later ones will override the language for earlier ones
-  setLanguageTag(langForReq);
-
-  return langStorage(langForReq, async () => await next());
-}
-```
-
-**✅ Good Example**:
-
-```ts
-import { setLanguageTag, sourceLanguageTag } from "./paraglide/runtime.js";
-import { AsyncLocalStorage } from "node:async_hooks";
-
-const langStorage = new AsyncLocalStorage();
-
-// ✅ DO THIS
-// ✅ when `languageTag` is called inside a route handler
-// ✅ this function will return the language for the current request
-setLanguageTag(() => {
-  return langStorage.getValue() ?? sourceLanguageTag;
-});
-
-export function onRequest(request, next) {
-  const langForReq = detectLanguage(request);
-  return langStorage(langForReq, async () => await next());
-}
-```
-
-If you are using a Framework library like `Paraglide-Next` or `Paraglide-SvelteKit` you do not need to call `setLanguageTag` manually.
 
 ### Reacting to language changes
 
-Messages aren't reactive, so you will need to trigger a re-render when the language changes. You can register a callback using `onSetLanguageTag()`. It is called whenever the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) changes.
+Messages aren't reactive, so you will need to trigger a re-render when the language changes. You can register a callback using `onSetLocale()`. It is called whenever the locale changes.
 
 If you are using a framework library this happens automatically.
 
 ```js
-import { setLanguageTag, onSetLanguageTag } from "./paraglide/runtime.js";
+import { setLocale, onSetLocale } from "./paraglide/runtime.js";
 import * as m from "./paraglide/messages.js";
 
-onSetLanguageTag((newLanguageTag) => {
+onSetLocale((newLanguageTag) => {
   console.log(`The language changed to ${newLanguageTag}`);
 });
 
-setLanguageTag("de"); // The language changed to de
-setLanguageTag("en"); // The language changed to en
+setLocale("de"); // The language changed to de
+setLocale("en"); // The language changed to en
 ```
 
-Things to know about `onSetLanguageTag()`:
+Things to know about `onSetLocale()`:
 
 - You can only register one listener. If you register a second listener it will throw an error.
-- `onSetLanguageTag` shouldn't be used on the server.
+- `onSetLocale` shouldn't be used on the server.
 
 ## Configuration
 
@@ -206,9 +110,8 @@ which one is the source-language.
 ```
 // project.inlang/settings.json
 {
-    "$schema": "https://inlang.com/schema/project-settings",
-    "sourceLanguageTag": "en",
-    "languageTags": ["en", "de", "ar"],
+    "baseLocale": "en",
+    "locales": ["en", "de", "ar"],
 }
 ```
 
@@ -220,32 +123,10 @@ If you want your language files to be in a different location you can change the
 // project.inlang/settings.json
 {
 	"plugin.inlang.messageFormat": {
--		"pathPattern": "./messages/{languageTag}.json"
-+		"pathPattern": "./i18n/{languageTag}.json"
+-		"pathPattern": "./messages/{locale}.json"
++		"pathPattern": "./i18n/{locale}.json"
 	}
 }
 ```
 
-## CLI Reference
 
-### `paraglide-js init`
-
-Initializes Paraglide in the current directory.
-
-No options available
-
-### `paraglide-js compile`
-
-- `--watch` - Watch for message-changes and automatically recompile.
-- `--project <path>` - The relative path to the Inlang Project with the messages that should be compiled (required)
-- `--outdir <path>` - The relative path to the output directory in which the compiled files should be placed
-
-## Usage with a Bundler
-
-If you are using a bundler you should use the corresponding plugin. The plugin will keep your Message Functions up-to-date by compiling whenever your messages change and before building your app.
-
-<doc-links>
-	<doc-link title="Vite Plugin" icon="tabler:brand-vite" href="https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-vite" description="Go to Github"></doc-link>
-    <doc-link title="Rollup Plugin" icon="file-icons:rollup" href="https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-rollup" description="Go to Github"></doc-link>
-    <doc-link title="Webpack Plugin" icon="mdi:webpack" href="https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-webpack" description="Go to Github"></doc-link>
-</doc-links>
