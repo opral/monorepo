@@ -21,7 +21,6 @@ Messages are stored in `messages/{locale}.json` as key-value pairs. You can add 
 ```diff
 // messages/en.json
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
 + 	"greeting": "Hello {name}!"
 }
 ```
@@ -44,66 +43,21 @@ import * as m from "./paraglide/messages.js";
 m.greeting({ name: "Samuel" }); // Hello Samuel!
 ```
 
-## Managing the locale
+## Changing the locale 
 
-1. Set the locale with `setLocale` to render messages in a specific language.
-2. Trigger a re-render in your application. 
-
-### Setting the locale
-
-Call `setLocale` to set the locale a message should be rendered in. 
+To change the locale, use the `setLocale` function. 
 
 ```js
-import * as m from "./paraglide/messages.js";
 import { setLocale } from "./paraglide/runtime.js";
+import * as m from "./paraglide/messages.js";
+
+m.greeting({ name: "Samuel" }); // Hello Samuel!
 
 setLocale("de");
-m.hello(); // Hallo Welt!
 
-setLocale("en");
-m.hello(); // Hello world!
+m.greeting({ name: "Samuel" }); // Guten Tag Samuel!
 ```
 
-### Dynamically setting the locale (cookies, http headers, i18n routing, etc.)
+## Define your strategy 
 
-Do dynamically set the locale, pass a function that returns the locale to `setLocale`. You can use this to get the locale from the `documentElement.lang` attribute, a cookie, a HTTP header, or any other source.
-
-```js
-import * as m from "./paraglide/messages.js";
-import { setLocale } from "./paraglide/runtime.js";
-
-setLocale(() => document.documentElement.lang /** en */);
-
-m.hello(); // Hello world!
-```
-
-### Trigger a re-render 
-
-To trigger a re-render in your application, use the `onSetLocale` callback. How to trigger a re-render depends on your application but usually involves setting a render key at the top level of your application. 
-
-Below is an example for React.
-
-```js
-import { useState } from "react";
-import * as m from "./paraglide/messages.js";
-import { getLocale, onSetLocale, setLocale } from "./paraglide/runtime.js";
-
-function App() {
-	const [localeRenderKey, setLocaleRenderKey] = useState(getLocale());
-
-	onSetLocale((newLocale) => {
-		setLocaleRenderKey(newLocale);
-	});
-
-	return (
-		// The render key will trigger a re-render when the locale changes
-		<div key={localeRenderKey}>
-			<button onClick={() => setLocale("en")}>Switch locale to en</button>
-			<button onClick={() => setLocale("de")}>Switch locale to de</button>
-			<button onClick={() => setLocale("fr")}>Switch locale to fr</button>
-			<p>{m.orange_dog_wheel()}</p>
-		</div>
-	);
-}
-```
-
+In the last step, you need to define what strategy you want to use to resolve the locale. Visit the [strategy documentation](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy) to learn more.

@@ -1,11 +1,23 @@
 import { useState } from "react";
 import * as m from "./paraglide/messages.js";
-import { getLocale, onSetLocale, setLocale } from "./paraglide/runtime.js";
+import {
+	getLocale,
+	setLocale,
+	defineGetLocale,
+	defineSetLocale,
+	baseLocale,
+	AvailableLocale,
+} from "./paraglide/runtime.js";
 
 function App() {
 	const [localeRenderKey, setLocaleRenderKey] = useState(getLocale());
 
-	onSetLocale((newLocale) => {
+	defineGetLocale(() => {
+		return (localStorage.getItem("locale") as AvailableLocale) ?? baseLocale;
+	});
+
+	defineSetLocale((newLocale) => {
+		localStorage.setItem("locale", newLocale);
 		setLocaleRenderKey(newLocale);
 	});
 
