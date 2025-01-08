@@ -4,8 +4,8 @@ import {
 	type Variant,
 	type BundleNested,
 	type NewBundleNested,
-	uuidV7,
 } from "@inlang/sdk";
+import { randomUUID } from "node:crypto";
 import type { Result } from "../types.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 
@@ -65,20 +65,20 @@ export async function machineTranslateBundle(args: {
 
 				if (targetMessage) {
 					targetMessage.variants.push({
-						id: uuidV7(),
+						id: randomUUID(),
 						messageId: targetMessage.id,
 						matches: sourceVariant.matches,
 						pattern,
 					} satisfies Variant);
 				} else {
-					const newMessageId = uuidV7();
+					const newMessageId = randomUUID();
 					copy.messages.push({
 						...sourceMessage,
 						id: newMessageId,
 						locale: targetLocale,
 						variants: [
 							{
-								id: uuidV7(),
+								id: randomUUID(),
 								messageId: newMessageId,
 								matches: sourceVariant.matches,
 								pattern,

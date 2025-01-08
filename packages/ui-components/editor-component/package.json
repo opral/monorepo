@@ -52,6 +52,7 @@
 		"@shoelace-style/shoelace": "2.14.0",
 		"@sinclair/typebox": "0.31.28",
 		"chroma-js": "^2.4.2",
-		"lexical": "^0.16.1"
+		"lexical": "^0.16.1",
+		"uuid": "^11.0.0"
 	}
 }
