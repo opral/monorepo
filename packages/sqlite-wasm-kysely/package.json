@@ -1,7 +1,10 @@
 {
-  "private": true,
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  },
   "name": "sqlite-wasm-kysely",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "exports": {
     ".": "./dist/index.js"

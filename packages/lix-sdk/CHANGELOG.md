@@ -1,5 +1,32 @@
 # @lix-js/sdk
 
+## 0.2.0
+
+### Minor Changes
+
+- 657bdc4: adds a telemetry event for opening a lix as well as the option to disable telemetry
+- 0de2866: refactor: removes the `anonymous_` prefix from "anonymous accounts".
+
+  Closes https://github.com/opral/lix-sdk/issues/233.
+
+  There is no difference between an account prefixed with `anonymous` and one that is not. This change removes the prefix to avoid confusion.
+
+- 03e746d: add the option to open a lix with an existing account
+
+  ```ts
+  const account = localStorage.getItem("account");
+  await openLix({ account });
+  ```
+
+### Patch Changes
+
+- 48fac78: fix: sync process does not create new intervals after the database has been closed
+
+  this bug hindered node processes to exit https://github.com/opral/inlang-sdk/issues/155
+
+- Updated dependencies [7046bc3]
+  - sqlite-wasm-kysely@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes

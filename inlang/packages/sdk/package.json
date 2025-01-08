@@ -37,10 +37,6 @@
 	"engines": {
 		"node": ">=18.0.0"
 	},
-	"bundleDependencies": [
-		"@lix-js/sdk",
-		"sqlite-wasm-kysely"
-	],
 	"dependencies": {
 		"@lix-js/sdk": "workspace:*",
 		"@sentry/browser": "^7.118.0",

@@ -2,7 +2,7 @@
 	"name": "@lix-js/sdk-example-server-protocol-handler-hono",
 	"private": true,
 	"type": "module",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"license": "Apache-2.0",
 	"scripts": {
 		"dev": "node --experimental-strip-types ./src/main.ts",
