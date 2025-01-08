@@ -22,7 +22,7 @@ export async function writeOutput(
 	const files = await fs.readdir(outputDirectory);
 	await Promise.allSettled(
 		files.map(async (file) => {
-			await fs.unlink(outputDirectory + "/" + file);
+			await fs.rm(path.join(outputDirectory, file));
 		})
 	);
 
