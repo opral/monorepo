@@ -3,13 +3,13 @@ import { customElement, property, state } from "lit/decorators.js";
 import { createChangeEvent } from "../../../helper/event.js";
 import { baseStyling } from "../../../styling/base.js";
 import {
-  type Message,
-  type Bundle,
-  type Variant,
-  uuidV7,
-  Declaration,
-  type Match,
+	type Message,
+	type Bundle,
+	type Variant,
+	Declaration,
+	type Match,
 } from "@inlang/sdk";
+import { v7 } from "uuid";
 
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js";
 import SlSelect from "@shoelace-style/shoelace/dist/components/select/select.component.js";
@@ -288,11 +288,11 @@ export default class InlangAddSelector extends LitElement {
     if (this.message) {
       for (const combination of newCombinations) {
         const newVariant: Variant = {
-          id: uuidV7(),
-          pattern: [],
-          messageId: this.message.id,
-          matches: combination,
-        };
+					id: v7(),
+					pattern: [],
+					messageId: this.message.id,
+					matches: combination,
+				};
 
         this.dispatchEvent(
           createChangeEvent({
