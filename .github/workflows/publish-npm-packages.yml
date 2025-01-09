@@ -36,7 +36,7 @@ jobs:
 
         # Conditional steps based on the check
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Install Doppler CLI for env variables
         uses: dopplerhq/cli-action@v2
@@ -47,7 +47,7 @@ jobs:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
       - name: Publish packages
-        run: pnpm publish -r
+        run: pnpm publish -r 
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
 
