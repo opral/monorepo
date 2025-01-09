@@ -5,7 +5,6 @@ import { prompt } from "../utils.js";
 import { DEFAULT_PROJECT_PATH, getNewProjectTemplate } from "../defaults.js";
 import nodePath from "node:path";
 import consola from "consola";
-import fg from "fast-glob";
 import fs from "node:fs";
 import { ENV_VARIABLES } from "../../services/env-variables/index.js";
 
@@ -22,7 +21,9 @@ export const initializeInlangProject: CliStep<
 		projectPath: string;
 	}
 > = async (ctx) => {
-	const existingProjectPaths = fg.sync("*.inlang");
+	const existingProjectPaths =
+		// checking for undefined if node version is lower than 22
+		typeof fs.globSync !== "undefined" ? fs.globSync("*.inlang") : [];
 
 	if (existingProjectPaths.length > 0) {
 		const { project, projectPath } = await existingProjectFlow({

@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.3
+
+### Patch Changes
+
+- remove `fast-glob` as dependency in favor of node's built-in `fs.glob` (a new API in node 22) 
+
 ## 2.0.0
 
 ### Major changes
