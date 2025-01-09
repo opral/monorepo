@@ -106,7 +106,7 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 	// Peter promotes Alice Johnson
 	await switchAccount({ lix, to: [peter] });
 
-	rows[2] = "Alice Johnson,Senior Data Scientist,Data,110000";
+	rows[3] = "Alice Johnson,Senior Data Scientist,Data,110000";
 
 	await createChangesWithCheckpoint({
 		lix,
