@@ -12,7 +12,7 @@ There are three ways to invoke the Paraglide JS compiler:
 3. Programatically
 
 <doc-callout type="info">
-	Bundler plugins are the recommend appraoch. They are more flexible and can be integrated into your build pipeline.
+	Bundler plugins are the recommend approach. They are more flexible and can be integrated into your build pipeline.
 </doc-callout>
 
 
