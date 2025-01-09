@@ -23,6 +23,7 @@
     "@inlang/template-plugin",
     "@inlang/editor-component",
     "@inlang/website",
-    "@inlang/recommend-sherlock"
+    "@inlang/recommend-sherlock",
+    "@lix-js/sdk-example-server-protocol-handler-hono"
   ]
 }
