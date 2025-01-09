@@ -31,15 +31,15 @@
 			"/variants": "./docs/variants.md",
 			"/storage-format": "./docs/storage-format.md"
 		},
+		"Reference": {
+			"/architecture": "./docs/architecture.md",
+			"/compiler-options": "./docs/compiler-options.md"
+		},
 		"Frameworks": {
 			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",
 			"NextJS": "/m/osslbuzt/paraglide-next-i18n",
 			"Astro": "/m/iljlwzfs/paraglide-astro-i18n",
 			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n"
-		},
-		"Reference": {
-			"/architecture": "./docs/architecture.md",
-			"/compiler-options": "./docs/compiler-options.md"
 		},
 		"Ecosystem": {
 			"VSCode Extension": "/m/r7kp499g/app-inlang-ideExtension",
