@@ -107,6 +107,7 @@ services:
       paths:
         - inlang/packages/website/**
         - inlang/packages/marketplace-registry/**
+        - inlang/packages/**/marketplace-manifest.json
         - '**/*.md'
       ignoredPaths:
         - '**/CHANGELOG.md'
