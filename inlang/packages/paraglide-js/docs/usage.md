@@ -2,14 +2,14 @@
 imports: 
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-link.js
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-links.js
-  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-important.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
 # Usage
 
-<doc-important>
+<doc-callout type="tip">
   Paraglide is built with the inlang SDK, and therefore, supports many different translation file formats. By default, the [Inlang Message Format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) is used.
-</doc-important>
+</doc-callout>
 
 ## Working with the Inlang Message Format
 

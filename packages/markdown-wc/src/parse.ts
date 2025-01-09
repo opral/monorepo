@@ -13,6 +13,7 @@ import { preprocess } from "./preprocess.js"
 import yaml from "yaml"
 import { defaultInlineStyles, rehypeInlineStyles } from "./inline-styles.js"
 import remarkFrontmatter from "remark-frontmatter"
+import { visit } from "unist-util-visit";
 
 /* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
 export async function parse(
@@ -61,6 +62,7 @@ export async function parse(
 				tree.children = tree.children.filter((node: any) => node.type !== "yaml")
 			}
 		})
+		.use(mermaidTransformer)
 		.use(customElementDetector)
 		.use(codeBlockDetector)
 		// @ts-ignore
@@ -83,15 +85,28 @@ export async function parse(
 		.use(rehypeStringify)
 		.process(preprocess(markdown))
 
+	
+	let html = String(content)
+
+	const hasMermaidDiagram = html.includes("<markdown-wc-mermaid>");
+
+	if (hasMermaidDiagram){
+		// load mermaid component
+		html = `<script type="module" src="https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-mermaid.js"></script>
+			${html}`
+	} 
+
+	if (content.data.containsCodeBlock) {
+		html = `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+			${html}`
+	}
+
 	return {
 		frontmatter: {
 			...(content.data.frontmatter as Record<string, any>),
 		},
 		detectedCustomElements: (content.data.customElements as []) ?? [],
-		html: content.data.containsCodeBlock
-			? String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
-			${content}`)
-			: String(content),
+		html,
 	}
 }
 
@@ -138,4 +153,15 @@ const customElementDetector: Plugin = () => (tree, file) => {
 
 	// Store detected custom elements in file.data
 	file.data.customElements = Array.from(customElements)
+}
+
+function mermaidTransformer() {
+  return (tree: any) => {
+    visit(tree, "code", (node: any) => {
+      if (node.lang === "mermaid") {
+        node.type = "html";
+        node.value = `<markdown-wc-mermaid>${node.value}</markdown-wc-mermaid>`;
+      }
+    });
+  };
 }

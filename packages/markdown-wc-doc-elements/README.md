@@ -23,6 +23,7 @@ imports:
 ## Elements
 
 <markdown-wc-embed src="./src/doc-accordion.md"></markdown-wc-embed>
+<markdown-wc-embed src="./src/doc-callout.md"></markdown-wc-embed>
 <markdown-wc-embed src="./src/doc-comment.md"></markdown-wc-embed>
 <markdown-wc-embed src="./src/doc-comments.md"></markdown-wc-embed>
 <markdown-wc-embed src="./src/doc-copy.md"></markdown-wc-embed>
@@ -31,7 +32,6 @@ imports:
 <markdown-wc-embed src="./src/doc-figure.md"></markdown-wc-embed>
 <markdown-wc-embed src="./src/doc-header.md"></markdown-wc-embed>
 <markdown-wc-embed src="./src/doc-icon.md"></markdown-wc-embed>
-<markdown-wc-embed src="./src/doc-important.md"></markdown-wc-embed>
 <markdown-wc-embed src="./src/doc-link.md"></markdown-wc-embed>
 <markdown-wc-embed src="./src/doc-links.md"></markdown-wc-embed>
 <markdown-wc-embed src="./src/doc-slider.md"></markdown-wc-embed>
