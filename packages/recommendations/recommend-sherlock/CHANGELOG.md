@@ -1,5 +1,11 @@
 # @inlang/recommend-sherlock
 
+## 0.2.1
+
+### Patch Changes
+
+- added mit license
+
 ## 0.2.0
 
 ### Minor Changes
