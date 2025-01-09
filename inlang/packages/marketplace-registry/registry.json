@@ -14,7 +14,7 @@
 		"632iow21": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/packages/plugins/m-function-matcher/marketplace-manifest.json",
 		"698iow33": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/packages/plugins/t-function-matcher/marketplace-manifest.json",
 		"193hsyds": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/packages/plugins/next-intl/marketplace-manifest.json",
-		"neh2d6w7": "https://raw.githubusercontent.com/inlang-plugin-xcstrings/refs/heads/main/marketplace-manifest.json"
+		"neh2d6w7": "https://cdn.jsdelivr.net/npm/inlang-plugin-xcstrings@latest/marketplace-manifest.json"
 	},
 	"g": {
 		"mqlyfa7l": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/dont-lazy-load/marketplace-manifest.json",
