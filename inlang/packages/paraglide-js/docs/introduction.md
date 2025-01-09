@@ -41,18 +41,6 @@ You can write your own framework specific adapter in a few lines of code, and ke
 	<doc-link title="Paraglide-Remix" icon="simple-icons:remix" href="/m/fnhuwzrx/paraglide-remix-i18n" description="Go to Library"></doc-link>
 </doc-links>
 
-## Ecosystem 
-
-Paraglide JS is build on top of the inlang ecosystem. Use the Sherlock VSCode extension, CLI to machine translate, or Fink to let translators manage translations out of the box. 
-
-<doc-links>
-  <doc-link title="Sherlock" description="VSCode extension" icon="devicon:vscode" href="https://inlang.com/m/r7kp499g/app-inlang-ideExtension"></doc-link>
-  <doc-link title="CLI" description="Machine translate" icon="garden:terminal-cli-fill-16" href="https://inlang.com/m/2qj2w8pu/app-inlang-cli"></doc-link>
-  <doc-link title="Fink" description="CAT editor for translators" icon="fxemoji:bird" href="https://inlang.com/m/2qj2w8pu/app-inlang-cli"></doc-link>
-  <doc-link title="Parrot" description="Manage translations in Figma" icon="devicon:figma" href="https://inlang.com/m/2qj2w8pu/app-inlang-cli"></doc-link>
-  <doc-link title="Explore more" href="https://inlang.com/c/apps"></doc-link>
-</doc-links>
-
 ## People Love It
 
 A few recent comments.
@@ -63,6 +51,18 @@ A few recent comments.
 <doc-comment text="I was messing with various i18n frameworks and tools in combination with Astro, and must say that Paraglide was the smoothest experience. I have migrated my website from i18next and it was a breeze. SSG and SSR worked out of the box (which was the first one for me), and overall DX is great. Thanks for your work!" author="Dalibor Hon" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1096039983116202034/1220796380772307004"></doc-comment>
 <doc-comment text="Awesome library 🙂 Thanks so much! 1) The docs were simple and straight forward 2) Everything just worked.. no headaches" author="Dimitry" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1083724234142011392/1225658097016766574"></doc-comment>
 </doc-comments>
+
+## Ecosystem 
+
+Paraglide JS is build on top of the inlang ecosystem. Use the Sherlock VSCode extension, CLI to machine translate, or Fink to let translators manage translations out of the box. 
+
+<doc-links>
+  <doc-link title="Sherlock" description="VSCode extension" icon="twemoji:detective" href="https://inlang.com/m/r7kp499g/app-inlang-ideExtension"></doc-link>
+  <doc-link title="CLI" description="Machine translate" icon="garden:terminal-cli-fill-16" href="https://inlang.com/m/2qj2w8pu/app-inlang-cli"></doc-link>
+  <doc-link title="Fink" description="CAT editor for translators" icon="fxemoji:bird" href="https://inlang.com/m/2qj2w8pu/app-inlang-cli"></doc-link>
+  <doc-link title="Parrot" description="Manage translations in Figma" icon="twemoji:parrot" href="https://inlang.com/m/2qj2w8pu/app-inlang-cli"></doc-link>
+  <doc-link icon="material-symbols-light:travel-explore-rounded" title="Explore more" href="https://inlang.com/c/apps"></doc-link>
+</doc-links>
 
 ## Talks
 
