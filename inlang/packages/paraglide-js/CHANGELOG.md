@@ -1,5 +1,82 @@
 # @inlang/paraglide-js
 
+## 2.0.0
+
+### Major changes
+
+- Upgrade to @inlang/sdk v2 
+- Support for variants (pluralization, gendering, A/B test, etc.)
+
+### Minor Changes
+
+- 1d62451: remove `dedent` dependency in CLI
+- 5d906bd: refactor: remove posthog-node dependency
+
+  Posthog node has been replaced for a fetch call. Removing 3 (posthog + 2 transitive dependencies).
+
+- 855a71c: adds `experimentalEmitTsDeclarations` compiler option https://github.com/opral/inlang-paraglide-js/issues/288
+
+  ```diff
+  await compile({
+    // ...
+    options: {
+  +   experimentalEmitTsDeclarations: true
+    }
+  })
+  ```
+
+  Projects can now select if TypeScript declaration file should be emitted. The need for the `allowJs: true` option in TypeScript configs becomes redundant at the cost of slower compilation times (https://github.com/opral/inlang-paraglide-js/issues/238).
+
+- 346c21b: maintenance: remove path prop from tsconfig
+
+  ```diff
+  -"paths": {
+  -  "~/*": ["./src/*"]
+  -}
+  ```
+
+  So not worth it "nice to have" "but it's better DX" thing. Breaks path resolving in JS. Vitest needed a vite config to resolve the paths because only TS knew how to resolve thep paths. Etc. Etc. Etc.
+
+- fb06546: adds `emitGitIgnore` and `emitPrettierIgnore` compiler options
+
+  Closes https://github.com/opral/inlang-paraglide-js/issues/189
+
+  ```diff
+  await compile({
+    // ...
+    options: {
+  +   emitPrettierIgnore: false
+  +   emitGitIgnore: false
+    }
+  })
+  ```
+
+- e2b9e24: feat: expose compiler as library
+
+  closes https://github.com/opral/inlang-paraglide-js/issues/206
+
+  The Paraglide compiler is now exposed as a library. This allows you to use and extend the compiler however you need.
+
+  ```ts
+  import { compile } from "@inlang/paraglide-js/compiler";
+
+  await compile({
+  	path: "/path/to/project.inlang",
+  	outdir: "/path/to/output",
+  });
+  ```
+
+- 44ac447: maintenance: remove vite in favor of tsc to build paraglide js lib
+
+  Closes https://github.com/opral/inlang-paraglide-js/issues/208
+
+  ```diff
+  -  "build": "vite build",
+  +  "build": "tsc",
+  ```
+
+  Paraglide JS used vite to build the library. This change removes vite in favor of tsc to build the library. This change is made to simplify the build process and to make it easier to maintain the library in the future.
+
 ## 1.11.2
 
 ### Patch Changes
@@ -338,9 +415,9 @@ type safety.
 import { isAvailableLanguageTag } from "./paraglide/runtime";
 
 if (isAvailableLanguageTag(params.lang)) {
-  return renderSite(params.lang);
+	return renderSite(params.lang);
 } else {
-  return 404;
+	return 404;
 }
 ```
 
