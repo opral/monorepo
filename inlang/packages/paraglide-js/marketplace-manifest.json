@@ -25,7 +25,7 @@
 		"Usage": {
 			"/": "./README.md",
 			"/manual-setup": "./docs/manual-setup.md",
-			"/compiling-messages": "./docs/usage.md",
+			"/compiling-messages": "./docs/compiling-messages.md",
 			"/strategy": "./docs/strategy.md"
 		},
 		"Frameworks": {
