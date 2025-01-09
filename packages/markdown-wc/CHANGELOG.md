@@ -1,5 +1,11 @@
 # @opral/markdown-wc
 
+## 0.4.1
+
+### Patch Changes
+
+- import mermaid component via the imports frontmatter
+
 ## 0.4.0
 
 ### Minor Changes

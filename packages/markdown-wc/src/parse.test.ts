@@ -100,6 +100,6 @@ A --> B
 
 	const parsed = await parse(markdown)
 
-	expect(parsed.html).toContain("mermaid")
-	expect(parsed.html).toContain("https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-mermaid.js")
+	expect(parsed.html).toContain("<markdown-wc-mermaid>")
+	expect(parsed.frontmatter.imports).toEqual(["https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-mermaid.js"])
 })

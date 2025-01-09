@@ -88,12 +88,13 @@ export async function parse(
 	
 	let html = String(content)
 
+	let frontmatter = content.data.frontmatter as Record<string, any> & { imports?: string[] } ?? {}
+
 	const hasMermaidDiagram = html.includes("<markdown-wc-mermaid>");
 
 	if (hasMermaidDiagram){
-		// load mermaid component
-		html = `<script type="module" src="https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-mermaid.js"></script>
-			${html}`
+		// import markdown-wc-mermaid component
+		frontmatter.imports = [...(frontmatter.imports ?? []), 'https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-mermaid.js'];
 	} 
 
 	if (content.data.containsCodeBlock) {
@@ -102,9 +103,7 @@ export async function parse(
 	}
 
 	return {
-		frontmatter: {
-			...(content.data.frontmatter as Record<string, any>),
-		},
+		frontmatter,
 		detectedCustomElements: (content.data.customElements as []) ?? [],
 		html,
 	}
