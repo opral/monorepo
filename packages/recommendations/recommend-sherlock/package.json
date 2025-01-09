@@ -3,6 +3,7 @@
 	"description": "A package to recommend Sherlock",
 	"version": "0.2.0",
 	"type": "module",
+	"license": "MIT",
 	"publishConfig": {
 		"access": "public"
 	},
