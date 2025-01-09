@@ -1,5 +1,11 @@
 # @lix-js/sdk
 
+## 0.3.2
+
+### Patch Changes
+
+- d71b3c7: move @lix-js/server-api-schema to regular dependencies
+
 ## 0.3.0
 
 ### Minor Changes
