@@ -1,5 +1,17 @@
 # lix-file-manager
 
+## 0.2.0
+
+### Minor Changes
+
+- c3d2d8e: Refactor: change "confirmed" to "checkpoint" and "unconfirmed" to "intermediate"
+
+### Patch Changes
+
+- Updated dependencies [c3d2d8e]
+  - @lix-js/sdk@0.3.0
+  - @lix-js/plugin-csv@0.0.5
+
 ## 0.1.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @lix-js/sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- c3d2d8e: Refactor: change "confirmed" to "checkpoint" and "unconfirmed" to "intermediate"
+
 ## 0.2.0
 
 ### Minor Changes

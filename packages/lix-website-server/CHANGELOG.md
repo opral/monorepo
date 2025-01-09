@@ -1,5 +1,13 @@
 # lix-website-server
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [c3d2d8e]
+  - lix-file-manager@0.2.0
+  - csv-app@0.2.0
+
 ## 0.0.3
 
 ### Patch Changes

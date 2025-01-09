@@ -1,5 +1,11 @@
 # @opral/markdown-wc-doc-elements
 
+## 0.3.0
+
+### Minor Changes
+
+- fd48b2d: replace doc-important with doc-callout
+
 ## 0.2.4
 
 ### Patch Changes
