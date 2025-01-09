@@ -1587,6 +1587,9 @@ importers:
 
   packages/lix-sdk:
     dependencies:
+      '@lix-js/server-api-schema':
+        specifier: workspace:*
+        version: link:../lix-server-api-schema
       dedent:
         specifier: 1.5.1
         version: 1.5.1
@@ -1609,9 +1612,6 @@ importers:
       '@eslint/js':
         specifier: ^9.12.0
         version: 9.13.0
-      '@lix-js/server-api-schema':
-        specifier: workspace:*
-        version: link:../lix-server-api-schema
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
