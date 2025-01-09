@@ -89,3 +89,17 @@ const a = 1
 	const parsedWithCode = await parse(markdownWithCode)
 	expect(parsedWithCode.html).toContain('<link rel="stylesheet"')
 })
+
+test("can render mermaid diagrams", async () => {
+	const markdown = `
+\`\`\`mermaid
+graph TD
+A --> B
+\`\`\`	
+	`
+
+	const parsed = await parse(markdown)
+
+	expect(parsed.html).toContain("mermaid")
+	expect(parsed.html).toContain("https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-mermaid.js")
+})
