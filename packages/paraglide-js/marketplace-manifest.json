@@ -28,6 +28,7 @@
 			"/manual-setup": "./docs/manual-setup.md",
 			"/compiling-messages": "./docs/compiling-messages.md",
 			"/strategy": "./docs/strategy.md",
+			"/variants": "./docs/variants.md",
 			"/storage-format": "./docs/storage-format.md"
 		},
 		"Frameworks": {
