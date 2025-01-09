@@ -1,6 +1,6 @@
 ---
 imports: 
-  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-important.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
 # Compiling messages
@@ -11,7 +11,9 @@ There are three ways to invoke the Paraglide JS compiler:
 2. Via a bundler plugin 
 3. Programatically
 
-<doc-important title="Bundler plugins are the recommended approach" description="Bundler plugins automatically take care of watching, building, and are the easiest to use."></doc-important>
+<doc-callout type="info">
+	Bundler plugins are the recommend appraoch. They are more flexible and can be integrated into your build pipeline.
+</doc-callout>
 
 
 ## Via the Paraglide CLI
