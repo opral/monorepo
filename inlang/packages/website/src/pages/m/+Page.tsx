@@ -26,7 +26,7 @@ export default function Page(props: PageProps) {
 		if (!import.meta.env.SSR) {
 			// @ts-expect-error
 			for (const url of props.pageData?.imports ?? []) {
-				import(url).then(() => console.log("imported", url));
+				import(url);
 			}
 		}
 	});
