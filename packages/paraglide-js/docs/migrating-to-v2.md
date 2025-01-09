@@ -24,3 +24,10 @@
   // do something
 })
 ```
+
+3. If you use vite or another bundler, import the plugin directly from `@inlang/paraglide-js`
+
+```diff
+-import { paraglide } from "@inlang/paraglide-vite";
++import { paraglideVitePlugin } from "@inlang/paraglide-js";
+```
