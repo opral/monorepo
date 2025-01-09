@@ -11,7 +11,7 @@
 +availableLocales
 ```
 
-2. The `onSetLanguageTag` has been removed in favor of simplifying writing strategies/adapters. 
+2. The `onSetLanguageTag` has been removed in favor of simplifying writing [strategies/adapters](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy). 
 
 
 ```diff
