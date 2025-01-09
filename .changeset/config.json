@@ -7,7 +7,6 @@
   "ignore": [
     "vs-code-extension",
     "@inlang/cli",
-    "@inlang/sdk",
     "@inlang/fink",
     "@inlang/paraglide-js",
     "@inlang/paraglide-js-example-cli",
