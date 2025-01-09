@@ -1,5 +1,21 @@
 # @opral/markdown-wc
 
+## 0.4.0
+
+### Minor Changes
+
+- 70b48a8: support for mermaid diagrams
+
+  ```markdown
+  \`\`\`mermaid
+  graph TD;
+  A-->B;
+  A-->C;
+  B-->D;
+  C-->D;
+  \`\`\`
+  ```
+
 ## 0.3.1
 
 ### Patch Changes
