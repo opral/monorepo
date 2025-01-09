@@ -20,6 +20,7 @@
 			"/": "./docs/introduction.md",
 			"/limitations": "./docs/limitations.md",
 			"/scaling": "./docs/scaling.md",
+			"/migrating-to-v2": "./docs/migrating-to-v2.md",
 			"/changelog": "./CHANGELOG.md"
 		},
 		"Usage": {
