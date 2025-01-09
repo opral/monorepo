@@ -1,5 +1,11 @@
 # @inlang/plugin-message-format
 
+## 3.0.0
+
+### Major Changes
+
+- upgrade to @inlang/sdk v2 beta
+
 ## 2.2.0
 
 ### Minor Changes

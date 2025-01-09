@@ -1,5 +1,11 @@
 # @inlang/recommend-sherlock
 
+## 0.2.0
+
+### Minor Changes
+
+- 97dbff2: refacor: remove @inlang/sdk, @lix-js/fs, tyepbox from dependencies
+
 ## 0.1.0
 
 ### Minor Changes
