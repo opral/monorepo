@@ -59,10 +59,6 @@ const SDKSettings = Type.Object({
 					description: "The module must end with `.js`.",
 					pattern: ".*\\.js$",
 				}),
-				Type.String({
-					description: "The module can only contain a major version number.",
-					pattern: "^(?!.*@\\d\\.)[^]*$",
-				}),
 			]),
 			{
 				uniqueItems: true,
