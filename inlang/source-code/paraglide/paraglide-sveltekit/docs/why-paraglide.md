@@ -1,9 +1,9 @@
-![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and, with an IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-sveltekit/assets/og.png)
+![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and, with an IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/paraglide/paraglide-sveltekit/assets/og.png)
 
 <doc-features>
-<doc-feature text-color="#0F172A" color="#E1EFF7" title="Internationalized Routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/i18n-routing.png"></doc-feature>
-<doc-feature text-color="#0F172A" color="#E1EFF7" title="Tiny Bundle Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/bundle-size.png"></doc-feature>
-<doc-feature text-color="#0F172A" color="#E1EFF7" title="No route Param needed" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-sveltekit/assets/no-param.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Internationalized Routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/paraglide/paraglide-next/assets/i18n-routing.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Tiny Bundle Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/paraglide/paraglide-next/assets/bundle-size.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="No route Param needed" image="https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/paraglide/paraglide-sveltekit/assets/no-param.png"></doc-feature>
 </doc-features>
 
 `@inlang/paraglide-sveltekit` is the easiest way to internationalize your SvelteKit Project. It handles string translations, i18n routing and more! 	
