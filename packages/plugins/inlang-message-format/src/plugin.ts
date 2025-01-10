@@ -19,6 +19,8 @@ export const plugin: InlangPlugin<{
 	displayName: pluginV2.displayName,
 	// @ts-expect-error - description is not in the v2 plugin
 	description: pluginV2.description,
+	loadMessages: pluginV2.loadMessages,
+	saveMessages: pluginV2.saveMessages,
 	settingsSchema: PluginSettings,
 	toBeImportedFiles,
 	importFiles,

@@ -1,5 +1,11 @@
 # @inlang/plugin-message-format
 
+## 3.0.3
+
+### Patch Changes
+
+- fix: re-add `loadMessages` and `saveMessages` again for backwards compatibility
+
 ## 3.0.2
 
 ### Patch Changes
