@@ -10,8 +10,7 @@
 		"./dist"
 	],
 	"publishConfig": {
-		"access": "public",
-		"tag": "beta"
+		"access": "public"
 	},
 	"scripts": {
 		"dev": "node ./build.js",
