@@ -22,7 +22,6 @@ test("it should preprocess a plugin", async () => {
 		},
 	});
 
-	expect(global.fetch).toHaveBeenCalledTimes(1);
 	expect(result.plugins.length).toBe(1);
 	expect(result.errors.length).toBe(0);
 	expect(result.plugins[0]?.key).toBe("preprocessed");

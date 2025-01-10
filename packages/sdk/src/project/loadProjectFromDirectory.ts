@@ -1,9 +1,7 @@
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
 import { type Lix } from "@lix-js/sdk";
-
 import fs from "node:fs";
-
 import nodePath from "node:path";
 import type {
 	InlangPlugin,
@@ -14,6 +12,7 @@ import type { ProjectSettings } from "../json-schema/settings.js";
 import type { PreprocessPluginBeforeImportFunction } from "../plugin/importPlugins.js";
 import { PluginImportError } from "../plugin/errors.js";
 import { upsertBundleNestedMatchByProperties } from "../import-export/upsertBundleNestedMatchByProperties.js";
+import type { ImportFile } from "./api.js";
 
 /**
  * Loads a project from a directory.
@@ -62,69 +61,39 @@ export async function loadProjectFromDirectory(
 		syncInterval: args.syncInterval,
 	});
 
-	const {
-		loadMessagesPlugins,
-		saveMessagesPlugins,
-		importPlugins,
-		exportPlugins,
-	} = categorizePlugins(await project.plugins.get());
+	const allPlugins = await project.plugins.get();
+	const { loadSavePlugins, importExportPlugins } =
+		categorizePlugins(allPlugins);
 
 	// TODO i guess we should move this validation logic into sdk2/src/project/loadProject.ts
 	// Two scenarios could arise:
 	// 1. set settings is called from an app - it should detect and reject the setting of settings -> app need to be able to validate before calling set
 	// 2. the settings file loaded from disc here is corrupted -> user has to fix the file on disc
-	if (loadMessagesPlugins.length > 1 || saveMessagesPlugins.length > 1) {
+	if (loadSavePlugins.length > 1) {
 		throw new Error(
 			"Max one loadMessages (found: " +
-				loadMessagesPlugins.length +
+				loadSavePlugins.length +
 				") and one saveMessages plugins (found: " +
-				saveMessagesPlugins.length +
+				loadSavePlugins.length +
 				") are allowed "
 		);
 	}
 	const importedResourceFileErrors: Error[] = [];
 
-	if (
-		(loadMessagesPlugins.length > 0 || saveMessagesPlugins.length > 0) &&
-		(exportPlugins.length > 0 || importPlugins.length > 0)
-	) {
-		throw new Error(
-			"Plugins for loadMessages (found: " +
-				loadMessagesPlugins.length +
-				") and saveMessages plugins (found: " +
-				saveMessagesPlugins.length +
-				") must not coexist with import (found: " +
-				importPlugins.length +
-				") or export (found: " +
-				exportPlugins.length +
-				") "
-		);
-	} else if (loadMessagesPlugins.length > 1 || saveMessagesPlugins.length > 1) {
-		throw new Error(
-			"Max one loadMessages (found: " +
-				loadMessagesPlugins.length +
-				") and one saveMessages plugins (found: " +
-				saveMessagesPlugins.length +
-				") are allowed "
-		);
-	} else if (importPlugins[0]) {
-		const importer = importPlugins[0];
-		const files = [];
-
-		if (importer.toBeImportedFiles) {
-			const toBeImportedFiles = await importer.toBeImportedFiles({
+	// import files from local fs
+	for (const plugin of importExportPlugins) {
+		const files: ImportFile[] = [];
+		if (plugin.toBeImportedFiles) {
+			const toBeImportedFiles = await plugin.toBeImportedFiles({
 				settings: await project.settings.get(),
 			});
 			for (const toBeImported of toBeImportedFiles) {
 				const absolute = absolutePathFromProject(args.path, toBeImported.path);
 				try {
 					const data = await args.fs.promises.readFile(absolute);
-					const name = nodePath.basename(toBeImported.path);
 					files.push({
-						name,
 						locale: toBeImported.locale,
 						content: data,
-						pluginKey: importer.key,
 						toBeImportedFilesMetadata: toBeImported.metadata,
 					});
 				} catch (e) {
@@ -143,17 +112,18 @@ export async function loadProjectFromDirectory(
 		}
 
 		await project.importFiles({
-			pluginKey: importer.key,
-			files: files as any,
+			pluginKey: plugin.key,
+			files,
 		});
-	} else if (loadMessagesPlugins[0] !== undefined) {
-		// TODO create resource files from loadMessageFn call - to poll?
+	}
+
+	for (const plugin of loadSavePlugins) {
 		await loadLegacyMessages({
 			project,
+			pluginKey: plugin.key ?? plugin.id,
+			loadMessagesFn: plugin.loadMessages!,
 			projectPath: args.path,
 			fs: args.fs,
-			pluginKey: loadMessagesPlugins[0].key ?? loadMessagesPlugins[0].id,
-			loadMessagesFn: loadMessagesPlugins[0].loadMessages,
 		});
 	}
 
@@ -583,52 +553,28 @@ async function upsertFileInLix(
 		)
 		.execute();
 }
+/**
+ * Filters legacy load and save messages plugins.
+ *
+ * Legacy plugins are plugins that implement loadMessages and saveMessages but not importFiles and exportFiles.
+ */
+function categorizePlugins(plugins: readonly InlangPlugin[]) {
+	const loadSavePlugins: InlangPlugin[] = [];
+	const importExportPlugins: InlangPlugin[] = [];
 
-// TODO i guess we should move this validation logic into sdk2/src/project/loadProject.ts
-function categorizePlugins(plugins: readonly InlangPlugin[]): {
-	loadMessagesPlugins: (InlangPlugin &
-		Required<Pick<InlangPlugin, "loadMessages">>)[];
-	saveMessagesPlugins: (InlangPlugin &
-		Required<Pick<InlangPlugin, "saveMessages">>)[];
-	importPlugins: (InlangPlugin &
-		Required<Pick<InlangPlugin, "importFiles" | "toBeImportedFiles">>)[];
-	exportPlugins: (InlangPlugin & Required<Pick<InlangPlugin, "exportFiles">>)[];
-} {
-	const loadMessagesPlugins = plugins.filter(
-		(
-			plugin
-		): plugin is InlangPlugin & Required<Pick<InlangPlugin, "loadMessages">> =>
-			plugin.loadMessages !== undefined
-	);
+	for (const plugin of plugins) {
+		if (
+			plugin.loadMessages &&
+			plugin.saveMessages &&
+			!(plugin.importFiles && plugin.exportFiles)
+		) {
+			loadSavePlugins.push(plugin);
+		} else if (plugin.importFiles || plugin.exportFiles) {
+			importExportPlugins.push(plugin);
+		}
+	}
 
-	const saveMessagesPlugins = plugins.filter(
-		(
-			plugin
-		): plugin is InlangPlugin & Required<Pick<InlangPlugin, "saveMessages">> =>
-			plugin.saveMessages !== undefined
-	);
-
-	const importPlugins = plugins.filter(
-		(
-			plugin
-		): plugin is InlangPlugin &
-			Required<Pick<InlangPlugin, "importFiles" | "toBeImportedFiles">> =>
-			plugin.importFiles !== undefined && plugin.toBeImportedFiles !== undefined
-	);
-
-	const exportPlugins = plugins.filter(
-		(
-			plugin
-		): plugin is InlangPlugin & Required<Pick<InlangPlugin, "exportFiles">> =>
-			plugin.exportFiles !== undefined
-	);
-
-	return {
-		loadMessagesPlugins,
-		saveMessagesPlugins,
-		importPlugins,
-		exportPlugins,
-	};
+	return { loadSavePlugins, importExportPlugins };
 }
 
 /**

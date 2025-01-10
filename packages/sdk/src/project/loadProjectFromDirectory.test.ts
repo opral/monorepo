@@ -658,7 +658,6 @@ test("it should pass toBeImportedMetadata on import", async () => {
 		expect.objectContaining({
 			files: [
 				expect.objectContaining({
-					name: "en.json",
 					toBeImportedFilesMetadata: {
 						foo: "bar",
 					},
@@ -851,4 +850,73 @@ test("it can import plugins via http", async () => {
 		),
 		"expecting the plugin to be cached"
 	).toBe(true);
+});
+
+test("plugins that provide both loadMessages and importFiles should be allowed and the importFiles should be called", async () => {
+	const mockRepo = {
+		"/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en"],
+			modules: [],
+		} satisfies ProjectSettings),
+	};
+
+	const fs = Volume.fromJSON(mockRepo);
+
+	const mockPlugin: InlangPlugin = {
+		key: "mock-plugin",
+		loadMessages: vi.fn(async () => []),
+		importFiles: vi.fn(async () => {
+			return { bundles: [], messages: [], variants: [] };
+		}),
+	};
+
+	const project = await loadProjectFromDirectory({
+		fs: fs as any,
+		path: "/project.inlang",
+		providePlugins: [mockPlugin],
+	});
+
+	expect(mockPlugin.importFiles).toHaveBeenCalled();
+	expect(mockPlugin.loadMessages).not.toHaveBeenCalled();
+});
+
+test("providing multiple plugins that have legacy loadMessages and saveMessages function should be possible if they have import/export functions", async () => {
+	const mockRepo = {
+		"/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en"],
+			modules: [],
+		} satisfies ProjectSettings),
+	};
+
+	const fs = Volume.fromJSON(mockRepo);
+
+	const mockPlugin1: InlangPlugin = {
+		key: "mock-plugin1",
+		loadMessages: vi.fn(async () => []),
+		importFiles: vi.fn(async () => {
+			return { bundles: [], messages: [], variants: [] };
+		}),
+	};
+
+	const mockPlugin2: InlangPlugin = {
+		key: "mock-plugin2",
+		loadMessages: vi.fn(async () => []),
+		importFiles: vi.fn(async () => {
+			return { bundles: [], messages: [], variants: [] };
+		}),
+	};
+
+	const project = await loadProjectFromDirectory({
+		fs: fs as any,
+		path: "/project.inlang",
+		providePlugins: [mockPlugin1, mockPlugin2],
+	});
+
+	expect(mockPlugin1.importFiles).toHaveBeenCalled();
+	expect(mockPlugin1.loadMessages).not.toHaveBeenCalled();
+
+	expect(mockPlugin2.importFiles).toHaveBeenCalled();
+	expect(mockPlugin2.loadMessages).not.toHaveBeenCalled();
 });
