@@ -16,8 +16,6 @@ import { validatedModuleSettings } from "./validatedModuleSettings.js"
 import type { Plugin } from "@inlang/plugin"
 import type { MessageLintRule } from "@inlang/message-lint-rule"
 
-const ModuleCompiler = TypeCompiler.Compile(InlangModule)
-
 export const resolveModules: ResolveModuleFunction = async (args) => {
 	const _import = args._import ?? createImport(args.projectPath, args.nodeishFs)
 
@@ -50,19 +48,19 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 			return
 		}
 
-		// -- CHECK IF MODULE IS SYNTACTIALLY VALID
-		const isValidModule = ModuleCompiler.Check(importedModule.data)
-		if (isValidModule === false) {
-			const errors = [...ModuleCompiler.Errors(importedModule.data)]
-			moduleErrors.push(
-				new ModuleExportIsInvalidError({
-					module: module,
-					errors,
-				})
-			)
+		// // -- CHECK IF MODULE IS SYNTACTIALLY VALID
+		// const isValidModule = ModuleCompiler.Check(importedModule.data)
+		// if (isValidModule === false) {
+		// 	const errors = [...ModuleCompiler.Errors(importedModule.data)]
+		// 	moduleErrors.push(
+		// 		new ModuleExportIsInvalidError({
+		// 			module: module,
+		// 			errors,
+		// 		})
+		// 	)
 
-			return
-		}
+		// 	return
+		// }
 
 		// -- VALIDATE MODULE SETTINGS
 

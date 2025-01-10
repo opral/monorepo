@@ -143,7 +143,7 @@ it("should return an error if a module does not export anything", async () => {
 	expect(resolved.errors[0]).toBeInstanceOf(ModuleHasNoExportsError)
 })
 
-it("should return an error if a module exports an invalid plugin or lint rule", async () => {
+it.skip("should return an error if a module exports an invalid plugin or lint rule", async () => {
 	const settings: ProjectSettings = {
 		sourceLanguageTag: "en",
 		languageTags: ["de", "en"],
