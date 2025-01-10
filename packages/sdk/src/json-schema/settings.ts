@@ -1,9 +1,4 @@
-import {
-	type Static,
-	Type,
-	type TTemplateLiteral,
-	type TLiteral,
-} from "@sinclair/typebox";
+import { type Static, Type } from "@sinclair/typebox";
 
 const SDKSettings = Type.Object({
 	// TODO SDK-v2 SETTINGS do we need to generate a settings v2 schema?
@@ -96,30 +91,6 @@ const SDKSettings = Type.Object({
 	 */
 });
 
-/**
- * Settings defined via apps, plugins, lint rules, etc.
- *
- * Using external settings to only allow `plugin.*` keys
- * and don't block the SDK from adding new settings.
- */
-const ExternalSettings = Type.Record(
-	Type.String({
-		pattern: `^((plugin)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)|\\$schema|${
-			// pattern must include the settings properties
-			Object.keys(SDKSettings.properties)
-				.map((key) => key.replaceAll(".", "\\."))
-				.join("|")
-		})$`,
-		description: "The key must be conform to `plugin.*`.",
-		examples: ["plugin.csv-importer", "plugin.i18next"],
-	}) as unknown as TTemplateLiteral<[TLiteral<`${"plugin"}.${string}`>]>,
-	// Using JSON (array and object) as a workaround to make the
-	// intersection between `InternalSettings`, which contains an array,
-	// and `ExternalSettings` which are objects possible
-	Type.Record(Type.String(), Type.Any()),
-	{ description: "Settings defined by apps, plugins, etc." }
-);
-
 export type ProjectSettings = Omit<
 	Static<typeof ProjectSettings>,
 	"languageTags" | "sourceLanguageTag"
@@ -130,5 +101,5 @@ export type ProjectSettings = Omit<
 	languageTags?: string[];
 	/** @deprecated This will soon be replaced by `Lix Validation Rules` */
 	messageLintRuleLevels?: Record<string, "error" | "warning">;
-};
-export const ProjectSettings = Type.Intersect([SDKSettings, ExternalSettings]);
+} & Record<string, any>;
+export const ProjectSettings = SDKSettings;
