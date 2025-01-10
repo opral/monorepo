@@ -51,7 +51,7 @@ export default defineConfig({
 
 ## Programatically
 
-In case you have a special use case, or want to extend Paraglide JS, you can also invoke the compiler programatically.
+The Paraglide compiler can be invoked programatically via the `compile` function.
 
 ```ts
 import { compile } from "@inlang/paraglide-js";
@@ -60,4 +60,21 @@ await compile({
   project: "./project.inlang",
   outdir: "./src/paraglide",
 });
+```
+
+If you need/want to extend the compiler, you can use the lower level `compileProject` function. 
+
+```ts
+import { compileProject } from "@inlang/paraglide-js";
+import { loadProjectFromDirectory } from "@inlang/sdk";
+
+const inlangProject = await loadProjectFromDirectory({
+	path: "./project.inlang",
+})
+
+const output = await compileProject({
+	project: inlangProject
+});
+
+console.log(output);
 ```
