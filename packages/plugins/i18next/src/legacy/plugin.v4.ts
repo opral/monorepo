@@ -19,33 +19,36 @@ let hasNestedKeys = false;
 const id = "plugin.inlang.i18next";
 
 export const pluginV4: InlangPlugin<{
-  [id]: PluginSettings;
+	[id]: PluginSettings;
 }> = {
-  id,
-  key: id,
-  settingsSchema: PluginSettings,
-  loadMessages: async ({ settings, nodeishFs }) => {
-    settings["plugin.inlang.i18next"].variableReferencePattern = settings[
-      "plugin.inlang.i18next"
-    ].variableReferencePattern || ["{{", "}}"];
-    return loadMessages({
-      settings,
-      pluginSettings: settings["plugin.inlang.i18next"],
-      nodeishFs,
-    });
-  },
-  saveMessages: async ({ messages, settings, nodeishFs }) => {
-    settings["plugin.inlang.i18next"].variableReferencePattern = settings[
-      "plugin.inlang.i18next"
-    ].variableReferencePattern || ["{{", "}}"];
-    return saveMessages({
-      pluginSettings: settings["plugin.inlang.i18next"],
-      nodeishFs,
-      messages,
-    });
-  },
-  addCustomApi: ({ settings }) =>
-    ideExtensionConfig(settings["plugin.inlang.i18next"]),
+	id,
+	key: id,
+	displayName: "Inlang i18next",
+	description:
+		"A plugin for the inlang SDK that uses a JSON file per language tag to store translations.",
+	settingsSchema: PluginSettings,
+	loadMessages: async ({ settings, nodeishFs }) => {
+		settings["plugin.inlang.i18next"].variableReferencePattern = settings[
+			"plugin.inlang.i18next"
+		].variableReferencePattern || ["{{", "}}"];
+		return loadMessages({
+			settings,
+			pluginSettings: settings["plugin.inlang.i18next"],
+			nodeishFs,
+		});
+	},
+	saveMessages: async ({ messages, settings, nodeishFs }) => {
+		settings["plugin.inlang.i18next"].variableReferencePattern = settings[
+			"plugin.inlang.i18next"
+		].variableReferencePattern || ["{{", "}}"];
+		return saveMessages({
+			pluginSettings: settings["plugin.inlang.i18next"],
+			nodeishFs,
+			messages,
+		});
+	},
+	addCustomApi: ({ settings }) =>
+		ideExtensionConfig(settings["plugin.inlang.i18next"]),
 };
 
 /**
