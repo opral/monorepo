@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 5.0.2
+
+### Patch Changes
+
+- add properties for backwards compatibility
+
 ## 5.0.1
 
 ### Patch Changes

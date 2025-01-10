@@ -1,5 +1,11 @@
 # @inlang/plugin-t-function-matcher
 
+## 1.0.2
+
+### Patch Changes
+
+- add properties for backwards compatibility
+
 ## 1.0.1
 
 ### Patch Changes
