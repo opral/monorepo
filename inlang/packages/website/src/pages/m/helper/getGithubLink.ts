@@ -30,7 +30,10 @@ export const getGithubLink = (
 	if (isExternal) {
 		if (link?.includes("https://github.com")) {
 			return link;
-		} else if (link?.includes("https://cdn.jsdelivr.net/gh/")) {
+		} else if (link?.includes("raw.githubusercontent.com")) {
+			return link.replace("raw.githubusercontent.com", "github.com").replace("refs/heads", "blob")
+		}
+		else if (link?.includes("https://cdn.jsdelivr.net/gh/")) {
 			const owner = link
 				.replace("https://cdn.jsdelivr.net/gh/", "")
 				.split("/")[0];
