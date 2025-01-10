@@ -99,7 +99,7 @@ export const existingProjectFlow = async (ctx: {
 	return { project, projectPath };
 };
 
-function parseLanguageTagInput(input: string): {
+function parseLocaleInput(input: string): {
 	validLanguageTags: string[];
 	invalidLanguageTags: string[];
 } {
@@ -126,36 +126,34 @@ function parseLanguageTagInput(input: string): {
 	};
 }
 
-async function promptForLanguageTags(
-	initialLanguageTags: string[] = []
+async function promptForLocales(
+	initialLocales: string[] = []
 ): Promise<string[]> {
-	const languageTagsInput =
-		(await prompt("Which languages do you want to support?", {
+	const localesInput =
+		(await prompt("Which locales do you want to support?", {
 			type: "text",
 			placeholder: "en, de-ch, ar",
-			initial: initialLanguageTags.length
-				? initialLanguageTags.join(", ")
-				: undefined,
+			initial: initialLocales.length ? initialLocales.join(", ") : undefined,
 		})) ?? "";
 
-	const { invalidLanguageTags, validLanguageTags } =
-		parseLanguageTagInput(languageTagsInput);
+	const { invalidLanguageTags: invalidLocales, validLanguageTags } =
+		parseLocaleInput(localesInput);
 
 	if (validLanguageTags.length === 0) {
-		consola.warn("You must specify at least one language tag");
-		return await promptForLanguageTags();
+		consola.warn("You must specify at least one locale");
+		return await promptForLocales();
 	}
 
-	if (invalidLanguageTags.length > 0) {
+	if (invalidLocales.length > 0) {
 		const message =
-			invalidLanguageTags.length === 1
-				? invalidLanguageTags[0] +
-					" isn't a valid language tag. Please stick to IEEE BCP-47 Language Tags"
-				: invalidLanguageTags.map((tag) => `"${tag}"`).join(", ") +
-					" aren't valid language tags. Please stick to IEEE BCP-47 Language Tags";
+			invalidLocales.length === 1
+				? invalidLocales[0] +
+					" isn't a valid locale. Please stick to IEEE BCP-47 Language Tags"
+				: invalidLocales.map((tag) => `"${tag}"`).join(", ") +
+					" aren't valid locales. Please stick to IEEE BCP-47 Language Tags";
 
 		consola.warn(message);
-		return await promptForLanguageTags(validLanguageTags);
+		return await promptForLocales(validLanguageTags);
 	}
 
 	return validLanguageTags;
@@ -169,15 +167,15 @@ export const createNewProjectFlow = async (ctx: {
 	/** An absolute path to the created project */
 	projectPath: string;
 }> => {
-	const languageTags = await promptForLanguageTags();
+	const locales = await promptForLocales();
 	const settings = getNewProjectTemplate();
 
 	//Should always be defined. This is to shut TS up
-	const sourceLanguageTag = languageTags[0];
-	if (!sourceLanguageTag) throw new Error("sourceLanguageTag is not defined");
+	const baseLocale = locales[0];
+	if (!baseLocale) throw new Error("baseLocale is not defined");
 
-	settings.locales = languageTags;
-	settings.baseLocale = sourceLanguageTag;
+	settings.locales = locales;
+	settings.baseLocale = baseLocale;
 
 	const messagePath = settings["plugin.inlang.messageFormat"].pathPattern;
 
@@ -188,7 +186,7 @@ export const createNewProjectFlow = async (ctx: {
 	await ctx.fs.mkdir(messageDir, { recursive: true });
 
 	await Promise.allSettled(
-		languageTags.map(async (languageTag) => {
+		locales.map(async (languageTag) => {
 			const languageFile = nodePath.resolve(messageDir, languageTag + ".json");
 			await ctx.fs.writeFile(
 				languageFile,
@@ -276,7 +274,7 @@ function longestCommonPrefix(strA: string, strB: string): string {
 }
 
 /**
- * Follows the IETF BCP 47 language tag schema with modifications.
+ * Follows the IETF BCP 47 locale schema with modifications.
  */
 export const pattern =
 	"^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$";
