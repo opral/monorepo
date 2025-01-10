@@ -539,9 +539,14 @@ async function upsertFileInLix(
 	path: string,
 	data: ArrayBuffer
 ) {
-	// file is in known state with lix - means we have only changes on the fs - easy
-	// NOTE we use file_internal for now see: https://linear.app/opral/issue/LIXDK-102/re-visit-simplifying-the-change-queue-implementation#comment-65eb3485
-	// This means we don't see changes for the file we update via this method!
+	// force posix path when upserting into lix
+	// https://github.com/opral/inlang-sdk/issues/229
+	let posixPath = path.split(nodePath.win32.sep).join(nodePath.posix.sep);
+
+	if (posixPath.startsWith("/") === false) {
+		posixPath = "/" + posixPath;
+	}
+
 	await args.lix.db
 		.insertInto("file") // change queue
 		.values({
