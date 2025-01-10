@@ -4,6 +4,7 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
+		"bench": "node ./build.js",
 		"build": "paraglide-js compile --project ./project.inlang && tsc",
 		"pretest": "paraglide-js compile --project ./project.inlang",
 		"test": "tsc --noEmit && node --experimental-strip-types ./src/main.ts"
