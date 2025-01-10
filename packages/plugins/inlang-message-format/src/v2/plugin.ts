@@ -9,93 +9,96 @@ import { parseMessage } from "./parsing/parseMessage.js";
 export const pluginId = "plugin.inlang.messageFormat";
 
 export const plugin: InlangPlugin<{
-  [pluginId]: PluginSettings;
+	[pluginId]: PluginSettings;
 }> = {
-  id: pluginId,
-  key: "inlang-message-format",
-  settingsSchema: PluginSettings,
-  loadMessages: async ({ settings, nodeishFs }) => {
-    await maybeMigrateToV2({ settings, nodeishFs });
-    // TODO - Call fs.readDir to automatically add the directory to the watchlist
+	id: pluginId,
+	displayName: "Inlang Message Format",
+	description:
+		"A plugin for the inlang SDK that uses a JSON file per language tag to store translations.",
+	key: "inlang-message-format",
+	settingsSchema: PluginSettings,
+	loadMessages: async ({ settings, nodeishFs }) => {
+		await maybeMigrateToV2({ settings, nodeishFs });
+		// TODO - Call fs.readDir to automatically add the directory to the watchlist
 
-    const result: Record<string, Message> = {};
+		const result: Record<string, Message> = {};
 
-    for (const tag of settings.languageTags) {
-      try {
-        const file = await nodeishFs.readFile(
-          settings["plugin.inlang.messageFormat"].pathPattern.replace(
-            "{languageTag}",
-            tag,
-          ),
-          {
-            encoding: "utf-8",
-          },
-        );
-        const json = JSON.parse(file);
-        for (const key in json) {
-          if (key === "$schema") {
-            continue;
-          }
-          // message already exists, add the variants
-          else if (result[key]) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            result[key]!.variants = [
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              ...result[key]!.variants,
-              ...parseMessage({ key, value: json[key], languageTag: tag })
-                .variants,
-            ];
-          }
-          // message does not exist yet, create it
-          else {
-            result[key] = parseMessage({
-              key,
-              value: json[key],
-              languageTag: tag,
-            });
-          }
-        }
-      } catch (error) {
-        // ignore if file does not exist => no translations exist yet.
-        if ((error as any)?.code !== "ENOENT") {
-          throw error;
-        }
-      }
-    }
-    return Object.values(result) as any;
-  },
-  saveMessages: async ({ settings, nodeishFs, messages }) => {
-    const result: Record<LanguageTag, Record<string, string>> = {};
-    for (const message of messages) {
-      const serialized = serializeMessage(message);
-      for (const [languageTag, value] of Object.entries(serialized)) {
-        if (result[languageTag] === undefined) {
-          result[languageTag] = {};
-        }
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        result[languageTag]![message.id] = value;
-      }
-    }
-    for (const [languageTag, messages] of Object.entries(result)) {
-      const path = settings["plugin.inlang.messageFormat"].pathPattern.replace(
-        "{languageTag}",
-        languageTag,
-      );
-      await createDirectoryIfNotExits({ path, nodeishFs });
-      await nodeishFs.writeFile(
-        settings["plugin.inlang.messageFormat"].pathPattern.replace(
-          "{languageTag}",
-          languageTag,
-        ),
-        // default to tab indentation
-        // PS sorry for anyone who reads this code
-        ((data: object) => JSON.stringify(data, undefined, "\t"))({
-          $schema: "https://inlang.com/schema/inlang-message-format",
-          ...messages,
-        } satisfies StorageSchema),
-      );
-    }
-  },
+		for (const tag of settings.languageTags) {
+			try {
+				const file = await nodeishFs.readFile(
+					settings["plugin.inlang.messageFormat"].pathPattern.replace(
+						"{languageTag}",
+						tag
+					),
+					{
+						encoding: "utf-8",
+					}
+				);
+				const json = JSON.parse(file);
+				for (const key in json) {
+					if (key === "$schema") {
+						continue;
+					}
+					// message already exists, add the variants
+					else if (result[key]) {
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						result[key]!.variants = [
+							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+							...result[key]!.variants,
+							...parseMessage({ key, value: json[key], languageTag: tag })
+								.variants,
+						];
+					}
+					// message does not exist yet, create it
+					else {
+						result[key] = parseMessage({
+							key,
+							value: json[key],
+							languageTag: tag,
+						});
+					}
+				}
+			} catch (error) {
+				// ignore if file does not exist => no translations exist yet.
+				if ((error as any)?.code !== "ENOENT") {
+					throw error;
+				}
+			}
+		}
+		return Object.values(result) as any;
+	},
+	saveMessages: async ({ settings, nodeishFs, messages }) => {
+		const result: Record<LanguageTag, Record<string, string>> = {};
+		for (const message of messages) {
+			const serialized = serializeMessage(message);
+			for (const [languageTag, value] of Object.entries(serialized)) {
+				if (result[languageTag] === undefined) {
+					result[languageTag] = {};
+				}
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				result[languageTag]![message.id] = value;
+			}
+		}
+		for (const [languageTag, messages] of Object.entries(result)) {
+			const path = settings["plugin.inlang.messageFormat"].pathPattern.replace(
+				"{languageTag}",
+				languageTag
+			);
+			await createDirectoryIfNotExits({ path, nodeishFs });
+			await nodeishFs.writeFile(
+				settings["plugin.inlang.messageFormat"].pathPattern.replace(
+					"{languageTag}",
+					languageTag
+				),
+				// default to tab indentation
+				// PS sorry for anyone who reads this code
+				((data: object) => JSON.stringify(data, undefined, "\t"))({
+					$schema: "https://inlang.com/schema/inlang-message-format",
+					...messages,
+				} satisfies StorageSchema)
+			);
+		}
+	},
 };
 
 const createDirectoryIfNotExits = async (args: {
