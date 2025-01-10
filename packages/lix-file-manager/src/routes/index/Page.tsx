@@ -13,12 +13,12 @@ import { Button } from "@/components/ui/button.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import {
 	activeFileAtom,
-	allChangesDynamicGroupingAtom,
 	changesCurrentVersionAtom,
+	checkpointChangeSetsAtom,
+	intermediateChangesAtom,
 } from "@/state-active-file.ts";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChangeComponent } from "@/components/ChangeComponent.tsx";
-import { DynamicChangeGroup } from "@/components/DynamicChangeGroup.tsx";
 import FilterSelect from "@/components/FilterSelect.tsx";
 import ChatInput from "@/components/ChatInput.tsx";
 import ConnectedChanges from "@/components/ConnectedChanges.tsx";
@@ -36,6 +36,8 @@ import {
 import IconMerge from "@/components/icons/IconMerge.tsx";
 import { Lix, openLixInMemory, toBlob } from "@lix-js/sdk";
 import { posthog } from "posthog-js";
+import CheckpointComponent from "@/components/CheckpointComponent.tsx";
+import IntermediateCheckpointComponent from "@/components/IntermediateCheckpointComponent.tsx";
 
 const isCsvFile = (path: string) => {
 	return path.toLowerCase().endsWith(".csv");
@@ -68,7 +70,8 @@ export default function Page() {
 	const [lix] = useAtom(lixAtom);
 	const [files] = useAtom(filesAtom);
 	const [changesCurrentVersion] = useAtom(changesCurrentVersionAtom);
-	const [allChangesDynamicGrouping] = useAtom(allChangesDynamicGroupingAtom);
+	const [intermediateChanges] = useAtom(intermediateChangesAtom);
+	const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
 	const [activeFile] = useAtom(activeFileAtom);
 	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
 	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
@@ -400,24 +403,23 @@ export default function Page() {
 					</div>
 				</div>
 			)}
-			{!fileIdSearchParams && !discussionSearchParams && (
+			{!discussionSearchParams && (
 				<div className="flex-1 h-full">
 					<SectionHeader title="Overview" />
 					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
-						{Object.entries(allChangesDynamicGrouping).map(
-							([date, changes], i) => {
-								return (
-									<DynamicChangeGroup
-										key={date}
-										changes={changes}
-										showTopLine={i !== 0}
-										showBottomLine={
-											i !== Object.keys(allChangesDynamicGrouping).length - 1
-										}
-									/>
-								);
-							}
+						{intermediateChanges.length > 0 && (
+							<IntermediateCheckpointComponent />
 						)}
+						{checkpointChangeSets.map((checkpointChangeSet, i) => {
+							return (
+								<CheckpointComponent
+									key={checkpointChangeSet.id}
+									checkpointChangeSet={checkpointChangeSet}
+									showTopLine={i !== 0 || intermediateChanges.length > 0}
+									showBottomLine={i !== checkpointChangeSets.length - 1}
+								/>
+							);
+						})}
 					</div>
 				</div>
 			)}
