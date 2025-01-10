@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.37.0
+
+### Minor Changes
+
+- 31dd8f8: improve: remove module validation logic ahead of v2 which has updated JSON schemas
+
 ## 0.36.3
 
 ### Patch Changes

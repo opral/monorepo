@@ -1,5 +1,11 @@
 # @inlang/paraglide-next
 
+## 0.7.9
+
+### Patch Changes
+
+- @inlang/paraglide-js@1.11.8
+
 ## 0.7.8
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # @inlang/paraglide-js
 
+## 1.11.8
+
+### Patch Changes
+
+- Updated dependencies [31dd8f8]
+  - @inlang/sdk@0.37.0
+  - @inlang/plugin-message-format@2.2.0
+  - @inlang/recommend-ninja@0.1.2
+  - @inlang/recommend-sherlock@0.1.2
+
 ## 1.11.7
 
 ### Patch Changes

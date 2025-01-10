@@ -1,5 +1,17 @@
 # inlang-vs-code-extension
 
+## 1.48.5
+
+### Patch Changes
+
+- Updated dependencies [31dd8f8]
+  - @inlang/sdk@0.37.0
+  - @inlang/recommend-ninja@0.1.2
+  - @inlang/recommend-sherlock@0.1.2
+  - @inlang/rpc@0.3.37
+  - @inlang/settings-component@1.0.31
+  - @inlang/telemetry@0.3.51
+
 ## 1.48.4
 
 ### Patch Changes
