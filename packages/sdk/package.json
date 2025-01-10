@@ -1,11 +1,10 @@
 {
 	"name": "@inlang/sdk",
-	"version": "2.0.0-beta.6",
+	"version": "2.0.1",
 	"type": "module",
 	"license": "MIT",
 	"publishConfig": {
-		"access": "public",
-		"tag": "beta"
+		"access": "public"
 	},
 	"homepage": "https://inlang.com/documentation/sdk",
 	"repository": {
