@@ -42,6 +42,10 @@ export const convertLinkToGithub = (link: string) => {
 
 		const githubLink = `https://github.com/${user}/${repo}/tree/${branch}/${path}`;
 		return githubLink;
+	} else if (link.includes("raw.githubusercontent.com")) {
+		return link
+			.replace("raw.githubusercontent.com", "github.com")
+			.replace("refs/heads", "blob");
 	} else {
 		return "https://github.com/opral/monorepo";
 	}

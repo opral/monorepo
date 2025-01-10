@@ -9,8 +9,6 @@ import {
 import { currentPageContext } from "#src/renderer/state.js";
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js";
 import { Link, Meta, Title } from "@solidjs/meta";
-import { Feedback } from "./Feedback.jsx";
-import { EditButton } from "./EditButton.jsx";
 import { languageTag } from "#src/paraglide/runtime.js";
 import SdkDocsLayout from "#src/interface/sdkDocs/SdkDocsLayout.jsx";
 import { getTableOfContents } from "./getTableOfContents.js";
@@ -29,10 +27,32 @@ export type PageProps = {
 
 export default function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined;
-	const [editLink, setEditLink] = createSignal<string | undefined>("");
-	const [markdownHeadings, setMarkdownHeadings] = createSignal<Array<string>>(
-		[]
-	);
+
+	const editLink = () =>
+		"https://github.com/opral/monorepo/edit/main/inlang" +
+		getDocsBaseUrl(currentPageContext.urlParsed.pathname) +
+		"/" +
+		findPageBySlug(
+			currentPageContext.urlParsed.pathname
+				.replace("/" + languageTag(), "")
+				.replace("/documentation/", "")
+		)?.path.replace("./", "");
+
+	const markdownHeadings = () => {
+		return (
+			// @ts-expect-error- posssible undefined
+			props.markdown
+				?.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
+				.map((heading: string) => {
+					// We have to use DOMParser to parse the heading string to a HTML element
+					const parser = new DOMParser();
+					const doc = parser.parseFromString(heading, "text/html");
+					const node = doc.body.firstChild as HTMLElement;
+
+					return node.innerText.replace(/(<([^>]+)>)/gi, "").toString();
+				}) ?? []
+		);
+	};
 
 	const [fetchCustomElements] = createResource(
 		props.frontmatter?.imports ?? {},
@@ -70,37 +90,6 @@ export default function Page(props: PageProps) {
 			return "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-documentation-image.jpg";
 		}
 	};
-
-	createEffect(() => {
-		setMarkdownHeadings(
-			// @ts-ignore
-			props.markdown
-				?.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
-				.map((heading: string) => {
-					// We have to use DOMParser to parse the heading string to a HTML element
-					const parser = new DOMParser();
-					const doc = parser.parseFromString(heading, "text/html");
-					const node = doc.body.firstChild as HTMLElement;
-
-					return node.innerText.replace(/(<([^>]+)>)/gi, "").toString();
-				})
-		);
-	});
-
-	createEffect(() => {
-		if (currentPageContext) {
-			setEditLink(
-				"https://github.com/opral/monorepo/edit/main/inlang" +
-					getDocsBaseUrl(currentPageContext.urlParsed.pathname) +
-					"/" +
-					findPageBySlug(
-						currentPageContext.urlParsed.pathname
-							.replace("/" + languageTag(), "")
-							.replace("/documentation/", "")
-					)?.path.replace("./", "")
-			);
-		}
-	});
 
 	return (
 		<>
@@ -212,8 +201,7 @@ export default function Page(props: PageProps) {
 								<Show when={fetchCustomElements()}>
 									<Markdown markdown={props.markdown} />
 								</Show>
-								<EditButton href={editLink()} />
-								<Feedback />
+								{/* <EditButton href={editLink()} /> */}
 							</div>
 						</div>
 					</Show>

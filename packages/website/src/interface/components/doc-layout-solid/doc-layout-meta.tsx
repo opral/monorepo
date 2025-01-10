@@ -19,9 +19,8 @@ const InlangDocMeta = (props: {
 	currentRoute: string;
 }) => {
 	const [headlines, setHeadlines] = createSignal<Headlines>([]);
-	const [githubLink, setGithubLink] = createSignal<string | undefined>(
-		undefined
-	);
+	
+	const githubLink = () => getGithubLink(props.manifest, props.currentRoute);
 
 	const replaceChars = (str: string) => {
 		return str
@@ -95,9 +94,6 @@ const InlangDocMeta = (props: {
 		}
 	});
 
-	createEffect(() => {
-		setGithubLink(getGithubLink(props.manifest, props.currentRoute));
-	});
 
 	onMount(async () => {
 		setHeadlines(findHeadlineElements(props.contentInHtml));
