@@ -99,12 +99,9 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 					messageId: "mock-message-id",
 					matches: [
 						{
-							type: "match",
-							name: "name",
-							value: {
-								type: "literal",
-								value: "John",
-							},
+							type: "literal-match",
+							key: "name",
+							value: "John",
 						},
 					],
 					pattern: [{ type: "text", value: "Hello world, John" }],
@@ -114,11 +111,8 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 					messageId: "mock-message-id",
 					matches: [
 						{
-							type: "match",
-							name: "name",
-							value: {
-								type: "catch-all",
-							},
+							type: "catchall-match",
+							key: "name",
 						},
 					],
 					pattern: [{ type: "text", value: "Hello world" }],
@@ -127,12 +121,9 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 				expect.objectContaining({
 					matches: [
 						{
-							type: "match",
-							name: "name",
-							value: {
-								type: "literal",
-								value: "John",
-							},
+							type: "literal-match",
+							key: "name",
+							value: "John",
 						},
 					],
 					pattern: [{ type: "text", value: "Hallo Welt, John" }],
@@ -140,11 +131,8 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 				expect.objectContaining({
 					matches: [
 						{
-							type: "match",
-							name: "name",
-							value: {
-								type: "catch-all",
-							},
+							type: "catchall-match",
+							key: "name",
 						},
 					],
 					pattern: [{ type: "text", value: "Hallo Welt" }],
@@ -153,12 +141,9 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 				expect.objectContaining({
 					matches: [
 						{
-							type: "match",
-							name: "name",
-							value: {
-								type: "literal",
-								value: "John",
-							},
+							type: "literal-match",
+							key: "name",
+							value: "John",
 						},
 					],
 					pattern: [{ type: "text", value: "Bonjour tout le monde, John" }],
@@ -166,11 +151,8 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 				expect.objectContaining({
 					matches: [
 						{
-							type: "match",
-							name: "name",
-							value: {
-								type: "catch-all",
-							},
+							type: "catchall-match",
+							key: "name",
 						},
 					],
 					pattern: [{ type: "text", value: "Bonjour le monde" }],
