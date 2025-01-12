@@ -550,7 +550,7 @@ async function upsertFileInLix(
 	await args.lix.db
 		.insertInto("file") // change queue
 		.values({
-			path: path,
+			path: posixPath,
 			data: new Uint8Array(data),
 		})
 		.onConflict((oc) =>
