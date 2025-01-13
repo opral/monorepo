@@ -41,9 +41,17 @@ bench("compile 1000 messages", async () => {
 		}),
 	}).fs as unknown as typeof import("node:fs");
 
+	const start = performance.now();
+
 	await compile({
 		project: "/project.inlang",
 		outdir: "/output",
 		fs: fs,
 	});
+
+	const end = performance.now();
+
+	const duration = end - start;
+
+	console.log(`Compiled ${numMessages} messages in ${duration}ms`);
 });
