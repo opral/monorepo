@@ -27,16 +27,17 @@ import {
 export async function compile(args: {
 	project: string;
 	outdir: string;
-	fs: typeof import("node:fs");
+	fs?: typeof import("node:fs");
 	options?: ParaglideCompilerOptions;
 }): Promise<void> {
+	const fs = args.fs ?? (await import("node:fs"));
 	const absoluteOutdir = path.resolve(process.cwd(), args.outdir);
 
-	const localAccount = getLocalAccount({ fs: args.fs });
+	const localAccount = getLocalAccount({ fs });
 
 	const project = await loadProjectFromDirectory({
 		path: args.project,
-		fs: args.fs,
+		fs,
 		account: localAccount,
 		appId: ENV_VARIABLES.PARJS_APP_ID,
 	});
@@ -46,7 +47,7 @@ export async function compile(args: {
 		options: args.options,
 	});
 
-	await writeOutput(absoluteOutdir, output, args.fs.promises);
+	await writeOutput(absoluteOutdir, output, fs.promises);
 
 	if (!localAccount) {
 		const activeAccount = await project.lix.db
@@ -54,7 +55,7 @@ export async function compile(args: {
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
-		saveLocalAccount({ fs: args.fs, account: activeAccount });
+		saveLocalAccount({ fs, account: activeAccount });
 	}
 
 	await project.close();

@@ -23,6 +23,7 @@
 	],
 	"scripts": {
 		"dev": "tsc --watch",
+		"bench": "vitest bench --run",
 		"build": "npm run env-variables && tsc --build",
 		"test": "npm run env-variables && tsc --noEmit && vitest run --coverage ./src/**/*",
 		"test:watch": "npm run env-variables && vitest --watch ./src/**/*",
@@ -37,18 +38,18 @@
 		"commander": "11.1.0",
 		"consola": "3.2.3",
 		"json5": "2.2.3",
-		"prettier": "^3.4.2",
-		"prettier-plugin-jsdoc": "^1.3.0",
 		"unplugin": "^2.1.2",
 		"typescript": "^5.7.3"
 	},
 	"devDependencies": {
+		"@inlang/plugin-message-format": "workspace:*",
 		"@eslint/js": "^9.12.0",
 		"@opral/tsconfig": "workspace:*",
 		"@rollup/plugin-virtual": "3.0.1",
 		"@ts-morph/bootstrap": "0.20.0",
 		"@types/node": "^22.10.5",
 		"@vitest/coverage-v8": "2.0.5",
+		"prettier": "^3.4.2",
 		"eslint": "^9.12.0",
 		"memfs": "4.6.0",
 		"rollup": "3.29.1",

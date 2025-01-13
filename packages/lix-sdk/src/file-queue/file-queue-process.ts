@@ -93,7 +93,11 @@ export async function initFileQueueProcess(args: {
 			}
 		} catch (e) {
 			// database has been closed, ignore
-			if (e instanceof Error && e.message.includes("DB has been closed")) {
+			if (
+				e instanceof Error &&
+				(e.message.includes("DB has been closed") ||
+					e.message.includes("driver has already been destroyed"))
+			) {
 				return;
 			}
 			console.error("file queue failed ", e);
