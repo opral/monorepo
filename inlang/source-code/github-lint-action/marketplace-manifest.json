@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "app.inlang.ninjaI18nAction",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/github-lint-action/assets/ninja-logo.png",
+	"icon": "./assets/ninja-logo.png",
 	"gallery": [],
 	"displayName": {
 		"en": "Ninja i18n - GitHub Lint Action"
@@ -10,8 +10,8 @@
 		"en": "This action checks for translation issues within your PRs."
 	},
 	"pages": {
-		"/": "./inlang/source-code/github-lint-action/MARKETPLACE.md",
-		"/changelog": "./inlang/source-code/github-lint-action/CHANGELOG.md"
+		"/": "./MARKETPLACE.md",
+		"/changelog": "./CHANGELOG.md"
 	},
 	"keywords": [
 		"developer",

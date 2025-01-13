@@ -1,4 +1,10 @@
-<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/github-lint-action/assets/ninja-i18n-cover.webp"></doc-image>
+---
+imports: 
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-image.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-video.js
+---
+
+<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/github-lint-action/assets/ninja-i18n-cover.webp"></doc-image>
 
 # Automate your i18n linting for pull requests
 
@@ -13,7 +19,7 @@ Ensure that your i18n files are always up to date with the latest changes in you
 
 ## Workflow
 
-<doc-video src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/github-lint-action/assets/Ninja-showcase.mp4"></doc-video>
+<doc-video src="https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/github-lint-action/assets/Ninja-showcase.mp4"></doc-video>
 
 - When a pull request is opened or updated, the action will run and check for new i18n issues.
 - If issues are found, the action creates a comment on the pull request with an issues report including links to the Fink localization editor to resolve the issues.
