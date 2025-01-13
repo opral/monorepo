@@ -106,11 +106,11 @@ test("saves the local account to app data if not exists", async () => {
 
 // the test exists to catch performance regressions
 // and avoid issues like https://github.com/opral/inlang-paraglide-js/issues/306
-test("compiling 100 messages takes less than 1000ms", async () => {
+test("compiling 100 messages takes less than 250ms", async () => {
 	const baseline = measureBaselinePerformance();
 
 	// time in ms
-	const threshold = 1000;
+	const threshold = 250;
 	// Adjust the threshold based on the baseline performance of the computer
 	const adjustedThreshold = threshold + baseline;
 
