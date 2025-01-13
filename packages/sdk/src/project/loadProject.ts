@@ -1,9 +1,8 @@
 import { toBlob, type Account, type Lix } from "@lix-js/sdk";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
-import { type SqliteDatabase } from "sqlite-wasm-kysely";
+import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
-import { initHandleSaveToLixOnChange } from "./initHandleSaveToLixOnChange.js";
 import {
 	importPlugins,
 	type PreprocessPluginBeforeImportFunction,
@@ -97,18 +96,6 @@ export async function loadProject(args: {
 	// 	...args,
 	// 	settings,
 	// });
-
-	// TODO implement garbage collection/a proper queue.
-	//      for the protoype and tests, it seems good enough
-	//      without garbage collection of old promises.
-	const pendingSaveToLixPromises: Promise<unknown>[] = [];
-
-	await initHandleSaveToLixOnChange({
-		sqlite: args.sqlite,
-		db,
-		lix: args.lix,
-		pendingPromises: pendingSaveToLixPromises,
-	});
 
 	// not awaiting to not block the load time of a project
 	maybeCaptureLoadedProject({
@@ -210,16 +197,29 @@ export async function loadProject(args: {
 			).map((output) => ({ ...output, pluginKey }));
 		},
 		close: async () => {
+			await saveDbToLix({ sqlite: args.sqlite, lix: args.lix });
 			await db.destroy();
 			await args.lix.db.destroy();
 		},
 		_sqlite: args.sqlite,
 		toBlob: async () => {
-			await Promise.all(pendingSaveToLixPromises);
+			await saveDbToLix({ sqlite: args.sqlite, lix: args.lix });
 			return await toBlob({ lix: args.lix });
 		},
 		lix: args.lix,
 	};
+}
+
+async function saveDbToLix(args: {
+	sqlite: SqliteDatabase;
+	lix: Lix;
+}): Promise<void> {
+	const data = contentFromDatabase(args.sqlite);
+	await args.lix.db
+		.updateTable("file")
+		.set("data", data)
+		.where("path", "=", "/db.sqlite")
+		.execute();
 }
 
 /**
