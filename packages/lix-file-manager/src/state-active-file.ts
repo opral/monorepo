@@ -159,10 +159,26 @@ export const intermediateChangesAtom = atom(async (get) => {
 	if (!currentBranch) return [];
 	return await lix.db
 		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.leftJoin("change_edge", "change_edge.child_id", "change.id")
+		.leftJoin(
+			"change as parent_change",
+			"parent_change.id",
+			"change_edge.parent_id"
+		)
+		.leftJoin(
+			"snapshot as parent_snapshot",
+			"parent_snapshot.id",
+			"parent_change.snapshot_id"
+		)
 		.where("change.file_id", "!=", "lix_own_change_control")
 		.where(changeIsLeafInVersion(currentBranch))
 		.where((eb) => eb.not(changeHasLabel("checkpoint")))
 		.selectAll("change")
+		.select(sql`json(snapshot.content)`.as("snapshot_content"))
+		.select(sql`json(parent_snapshot.content)`.as("parent_snapshot_content")) // This will be NULL if no parent exists
+		.groupBy("change.id")
+		.orderBy("change.created_at", "desc")
 		.execute();
 });
 
