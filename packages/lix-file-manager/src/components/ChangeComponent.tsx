@@ -18,7 +18,8 @@ export const ChangeComponent = (props: {
 	change: Change & {
 		snapshot_content: Record<string, any> | null;
 		parent_snapshot_content: Record<string, any> | null;
-		file_path: string; account_name: string
+		file_path: string;
+		account_name: string;
 		discussion_count: number;
 		discussion_ids: string; // should be an array but is a comma separated string
 	};
