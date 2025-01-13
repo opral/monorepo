@@ -2,7 +2,11 @@
 imports: 
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-image.js
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-video.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
+
+<doc-callout type="warning">Ninja has been deprecated. We strongly advise against using Ninja for new projects.</doc-callout>
+
 
 <doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo@inlang-v1/inlang/source-code/github-lint-action/assets/ninja-i18n-cover.webp"></doc-image>
 
