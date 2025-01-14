@@ -11,7 +11,7 @@ export type ParaglideCompilerOptions = {
 	 *
 	 * @default false
 	 */
-	emitTs?: boolean;
+	experimentalEmitTs?: boolean;
 	/**
 	 * Whether to import files as TypeScript in the emitted code.
 	 *
@@ -29,7 +29,7 @@ export type ParaglideCompilerOptions = {
 	 *   // true
 	 *   import { getLocale } from "./runtime.ts";
 	 */
-	useTsImports?: boolean;
+	experimentalUseTsImports?: boolean;
 	/**
 	 * Whether to emit a .prettierignore file.
 	 *
@@ -52,8 +52,8 @@ export type ParaglideCompilerOptions = {
 
 const defaultCompilerOptions = {
 	outputStructure: "message-modules",
-	emitTs: false,
-	useTsImports: false,
+	experimentalEmitTs: false,
+	experimentalUseTsImports: false,
 	emitGitIgnore: true,
 	emitPrettierIgnore: true,
 } as const satisfies ParaglideCompilerOptions;
@@ -88,7 +88,7 @@ export const compileProject = async (args: {
 			bundle,
 			fallbackMap,
 			registry: DEFAULT_REGISTRY,
-			emitTs: optionsWithDefaults.emitTs,
+			emitTs: optionsWithDefaults.experimentalEmitTs,
 		})
 	);
 
@@ -99,8 +99,8 @@ export const compileProject = async (args: {
 			compiledBundles,
 			settings,
 			fallbackMap,
-			optionsWithDefaults.emitTs,
-			optionsWithDefaults.useTsImports
+			optionsWithDefaults.experimentalEmitTs,
+			optionsWithDefaults.experimentalUseTsImports
 		);
 		Object.assign(output, regularOutput);
 	}
@@ -110,8 +110,8 @@ export const compileProject = async (args: {
 			compiledBundles,
 			settings,
 			fallbackMap,
-			optionsWithDefaults.emitTs,
-			optionsWithDefaults.useTsImports
+			optionsWithDefaults.experimentalEmitTs,
+			optionsWithDefaults.experimentalUseTsImports
 		);
 		Object.assign(output, messageModuleOutput);
 	}

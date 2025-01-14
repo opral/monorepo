@@ -83,15 +83,31 @@ test("emitPrettierIgnore", async () => {
 
 describe.each([
 	// useTsImports must be true to test emitTs. Otherwise, rolldown can't resolve the imports
-	{ outputStructure: "locale-modules", emitTs: false, useTsImports: false },
-	{ outputStructure: "locale-modules", emitTs: true, useTsImports: true },
-	{ outputStructure: "message-modules", emitTs: false, useTsImports: false },
-	{ outputStructure: "message-modules", emitTs: true, useTsImports: true },
+	{
+		outputStructure: "locale-modules",
+		experimentalEmitTs: false,
+		experimentalUseTsImports: false,
+	},
+	{
+		outputStructure: "locale-modules",
+		experimentalEmitTs: true,
+		experimentalUseTsImports: true,
+	},
+	{
+		outputStructure: "message-modules",
+		experimentalEmitTs: false,
+		experimentalUseTsImports: false,
+	},
+	{
+		outputStructure: "message-modules",
+		experimentalEmitTs: true,
+		experimentalUseTsImports: true,
+	},
 ] satisfies Array<ParaglideCompilerOptions>)(
 	"options",
 	async (compilerOptions) => {
 		const output = await compileProject({ project, compilerOptions });
-		const importExt = compilerOptions.useTsImports ? "ts" : "js";
+		const importExt = compilerOptions.experimentalEmitTs ? "ts" : "js";
 		describe("tree-shaking", () => {
 			test("should tree-shake unused messages", async () => {
 				const code = await bundleCode(

@@ -1,3 +1,8 @@
+---
+imports: 
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
+---
+
 # Compiler options
 
 ## `emitGitIgnore`
@@ -64,4 +69,38 @@ Messages are bundled in a per locale module. Bundlers sometimes struggle tree-sh
    - ...
   - messages.js
   - runtime.js 
+```
+
+## `experimentalEmitTs`
+
+Emits TypeScript files instead of JSDoc annotated JavaScript files. Defaults to `false`. 
+
+<doc-callout type="warning">
+This feature is experimental and may change or be removed in the future.
+</doc-callout>
+
+```diff
+ - outdir/
+-    - messages.js
++    - messages.ts
+-    - runtime.js
++    - runtime.ts
+     ...
+```
+
+## `experimentalUseTsImports`
+
+Imports emitted files with `.ts` extension instead of `.js`. Defaults to `false`.
+
+Only works in combination with `experimentalEmitTs`. The feature is useful in some 
+codebases which need to resolve TypeScript files with a `.ts` ending. Node's 
+strip-types flag is an example. 
+
+<doc-callout type="warning">
+This feature is experimental and may change or be removed in the future.
+</doc-callout>
+
+```diff
+-import { getLocale } from "./runtime.js";
++import { getLocale } from "./runtime.ts";
 ```
