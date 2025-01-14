@@ -52,11 +52,11 @@ const defaultCompilerOptions: ParaglideCompilerOptions = {
  */
 export const compileProject = async (args: {
 	project: InlangProject;
-	options?: ParaglideCompilerOptions;
+	compilerOptions?: ParaglideCompilerOptions;
 }): Promise<Record<string, string>> => {
 	const optionsWithDefaults = {
 		...defaultCompilerOptions,
-		...args.options,
+		...args.compilerOptions,
 	};
 
 	const settings = await args.project.settings.get();
