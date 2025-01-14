@@ -8,15 +8,18 @@ import { escapeForSingleQuoteString } from "../../services/codegen/escape.js";
 export function generateMessageModules(
 	compiledBundles: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
-	fallbackMap: Record<string, string | undefined>
+	fallbackMap: Record<string, string | undefined>,
+	emitTs: boolean
 ): Record<string, string> {
+	const ending = emitTs ? ".ts" : ".js";
+
 	const output: Record<string, string> = {
-		"runtime.js": createRuntime(settings),
-		"registry.js": createRegistry(),
+		["runtime" + ending]: createRuntime(settings, emitTs),
+		["registry" + ending]: createRegistry(emitTs),
 	};
 
 	// messages index file
-	output["messages.js"] = [
+	output["messages" + ending] = [
 		"/* eslint-disable */",
 		...compiledBundles.map(
 			({ bundle }) => `export * from './messages/${bundle.node.id}/index.js'`

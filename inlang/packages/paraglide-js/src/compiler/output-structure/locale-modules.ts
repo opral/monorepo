@@ -7,7 +7,8 @@ import { createRegistry } from "../registry.js";
 export function generateLocaleModules(
 	compiledBundles: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
-	fallbackMap: Record<string, string | undefined>
+	fallbackMap: Record<string, string | undefined>,
+	emitTs: boolean
 ): Record<string, string> {
 	const indexFile = [
 		"/* eslint-disable */",
@@ -21,15 +22,17 @@ export function generateLocaleModules(
 		compiledBundles.map(({ bundle }) => bundle.code).join("\n"),
 	].join("\n");
 
+	const ending = emitTs ? ".ts" : ".js";
+
 	const output: Record<string, string> = {
-		"runtime.js": createRuntime(settings),
-		"registry.js": createRegistry(),
-		"messages.js": indexFile,
+		["runtime" + ending]: createRuntime(settings, emitTs),
+		["registry" + ending]: createRegistry(emitTs),
+		["messages" + ending]: indexFile,
 	};
 
 	// generate message files
 	for (const locale of settings.locales) {
-		const filename = `messages/${locale}.js`;
+		const filename = emitTs ? `messages/${locale}.ts` : `messages/${locale}.js`;
 		let file = `
 /* eslint-disable */ 
 /** 

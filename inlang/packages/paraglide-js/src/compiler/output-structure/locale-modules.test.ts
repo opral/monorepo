@@ -35,7 +35,9 @@ test("should emit per locale message files", () => {
 		de: "en",
 	};
 
-	const output = generateLocaleModules(bundles, settings, fallbackMap);
+	const emitTs = false;
+
+	const output = generateLocaleModules(bundles, settings, fallbackMap, emitTs);
 
 	expect(output).toHaveProperty("messages.js");
 	expect(output).toHaveProperty("messages/en.js");
@@ -69,7 +71,9 @@ test("the files should include files for each locale, even if there are no messa
 		de: "en",
 	};
 
-	const output = generateLocaleModules(bundles, settings, fallbackMap);
+	const emitTs = false;
+
+	const output = generateLocaleModules(bundles, settings, fallbackMap, emitTs);
 
 	expect(output).toHaveProperty("messages.js");
 	expect(output).toHaveProperty("messages/en.js");

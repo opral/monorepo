@@ -82,11 +82,10 @@ test("emitPrettierIgnore", async () => {
 });
 
 describe.each([
-	// testing both options in combination is fine. the output structure
-	// tests is tested by runtime code while emit ts declarations is
-	// tetsted by the typescript tests
-	{ outputStructure: "locale-modules", experimentalEmitTsDeclarations: false },
-	{ outputStructure: "message-modules", experimentalEmitTsDeclarations: true },
+	{ outputStructure: "locale-modules", emitTs: false },
+	{ outputStructure: "locale-modules", emitTs: true },
+	{ outputStructure: "message-modules", emitTs: false },
+	// { outputStructure: "message-modules", emitTs: true },
 ] satisfies Array<ParaglideCompilerOptions>)(
 	"options",
 	async (compilerOptions) => {
@@ -94,7 +93,7 @@ describe.each([
 			test("should tree-shake unused messages", async () => {
 				const code = await bundleCode(
 					output,
-					`import * as m from "./paraglide/messages.js"
+					`import * as m from "./paraglide/messages"
 
 			console.log(m.sad_penguin_bundle())`
 				);
@@ -115,7 +114,7 @@ describe.each([
 			test("should not treeshake messages that are used", async () => {
 				const code = await bundleCode(
 					output,
-					`import * as m from "./paraglide/messages.js"
+					`import * as m from "./paraglide/messages"
 		
 			console.log(
 				m.sad_penguin_bundle(),
@@ -146,8 +145,8 @@ describe.each([
 			// The compiled output needs to be bundled into one file to be dynamically imported.
 			const code = await bundleCode(
 				output,
-				`export * as m from "./paraglide/messages.js"
-		   export * as runtime from "./paraglide/runtime.js"`
+				`export * as m from "./paraglide/messages"
+		     export * as runtime from "./paraglide/runtime"`
 			);
 
 			// test is a direct result of a bug
@@ -289,8 +288,8 @@ describe.each([
 				});
 				const code = await bundleCode(
 					output,
-					`export * as m from "./paraglide/messages.js"
-			export * as runtime from "./paraglide/runtime.js"`
+					`export * as m from "./paraglide/messages"
+			export * as runtime from "./paraglide/runtime"`
 				);
 				const { m, runtime } = await importCode(code);
 
@@ -358,8 +357,8 @@ describe.each([
 
 				const code = await bundleCode(
 					output,
-					`export * as m from "./paraglide/messages.js"
-			export * as runtime from "./paraglide/runtime.js"`
+					`export * as m from "./paraglide/messages"
+					export * as runtime from "./paraglide/runtime"`
 				);
 				const { m, runtime } = await importCode(code);
 
@@ -393,7 +392,7 @@ describe.each([
 			project.createSourceFile(
 				"test.ts",
 				`
-    import * as runtime from "./runtime.js"
+    import * as runtime from "./runtime"
 
     // --------- RUNTIME ---------
 
@@ -451,7 +450,7 @@ describe.each([
 			project.createSourceFile(
 				"test.ts",
 				`
-    import * as runtime from "./runtime.js"
+    import * as runtime from "./runtime"
 
     // --------- RUNTIME ---------
 
@@ -512,7 +511,7 @@ describe.each([
 			project.createSourceFile(
 				"test.ts",
 				`
-    import * as m from "./messages.js"
+    import * as m from "./messages"
 
     // --------- MESSAGES ---------
 
@@ -548,26 +547,6 @@ describe.each([
 			}
 			expect(diagnostics.length).toEqual(0);
 		});
-
-		test("emits ts declaration files when option is true", async () => {
-			const project = await loadProjectInMemory({
-				blob: await newProject(),
-			});
-
-			for (const bundle of mockBundles) {
-				await insertBundleNested(project.db, bundle);
-			}
-
-			const output = await compileProject({
-				project,
-				compilerOptions: {
-					...compilerOptions,
-					experimentalEmitTsDeclarations: true,
-				},
-			});
-
-			expect(Object.keys(output)).toContain("messages.d.ts");
-		});
 	}
 );
 
@@ -582,7 +561,7 @@ async function bundleCode(output: Record<string, string>, file: string) {
 			virtual({
 				...Object.fromEntries(
 					Object.entries(output).map(([fileName, code]) => [
-						"paraglide/" + fileName,
+						"paraglide/" + fileName.replace(".js", "").replace(".ts", ""),
 						code,
 					])
 				),

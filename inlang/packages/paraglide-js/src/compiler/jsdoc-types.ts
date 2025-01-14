@@ -1,6 +1,6 @@
 import type { InputVariable } from "@inlang/sdk";
 
-export function jsDocBundleComment(args: {
+export function jsDocBundleFunctionTypes(args: {
 	inputs: InputVariable[];
 	locales: string[];
 }): string {
@@ -12,21 +12,16 @@ export function jsDocBundleComment(args: {
 
 	const localesUnion = args.locales.map((locale) => `"${locale}"`).join(" | ");
 
-	return `/**
-* This function has been compiled by [Paraglide JS](https://inlang.com/m/gerre34r).
-*
-* - Changing this function will be over-written by the next build.
-*
-* - If you want to change the translations, you can either edit the source files e.g. \`en.json\`, or
-* use another inlang app like [Fink](https://inlang.com/m/tdozzpar) or the [VSCode extension Sherlock](https://inlang.com/m/r7kp499g).
-*
+	return `
 * @param {{ ${inputParams} }} inputs
 * @param {{ locale?: ${localesUnion}, languageTag?: ${localesUnion} }} options
 * @returns {string}
-*/`;
+`;
 }
 
-export function jsDocMessageComment(args: { inputs: InputVariable[] }): string {
+export function jsDocMessageFunctionTypes(args: {
+	inputs: InputVariable[];
+}): string {
 	const inputParams = args.inputs
 		.map((input) => {
 			return `${input.name}: NonNullable<unknown>`;
