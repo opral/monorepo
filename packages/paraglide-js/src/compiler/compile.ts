@@ -28,7 +28,7 @@ export async function compile(args: {
 	project: string;
 	outdir: string;
 	fs?: typeof import("node:fs");
-	options?: ParaglideCompilerOptions;
+	compilerOptions?: ParaglideCompilerOptions;
 }): Promise<void> {
 	const fs = args.fs ?? (await import("node:fs"));
 	const absoluteOutdir = path.resolve(process.cwd(), args.outdir);
@@ -44,7 +44,7 @@ export async function compile(args: {
 
 	const output = await compileProject({
 		project,
-		options: args.options,
+		compilerOptions: args.compilerOptions,
 	});
 
 	await writeOutput(absoluteOutdir, output, fs.promises);
