@@ -11,15 +11,13 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/mdx": "3.1.2",
-    "@astrojs/node": "^8.3.2",
-    "@astrojs/rss": "4.0.7",
-    "@astrojs/sitemap": "3.1.6",
-    "@astrojs/svelte": "^5.6.0",
-    "astro": "^4.11.3",
-    "@astrojs/check": "^0.7.0",
+    "@astrojs/node": "^9.0.1",
+    "@astrojs/sitemap": "3.2.1",
+    "@astrojs/svelte": "^7.0.3",
+    "astro": "^5.1.6",
+    "@astrojs/check": "^0.9.4",
     "typescript": "^5.5.2",
-    "svelte": "^4.2.18"
+    "svelte": "^5.17.5"
   },
   "files": [
     "*",
