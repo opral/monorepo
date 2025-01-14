@@ -2,24 +2,22 @@
 
 This plugin reads and writes messages for [i18next](https://inlang.com/m/kl95463j) setups. It also determines how translation functions and namespaces are parsed and handled by [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) – a helpful i18n VS Code extension.
 
-## Manual Installation
-
-> We recommend using the install button, but if you want to do it manually:
+## Installation
 
 - Add this to the modules in your `project.inlang/settings.json`
-- Change the `sourceLanguageTag` if needed 
-- Include existing languagetags in the `languageTags` array
+- Change the `baseLocale` if needed 
+- Include existing locaels in the `locales` array
 
-```json
+```diff
 {
-	"sourceLanguageTag": "en",
-	"languageTags": ["en", "de"], 
+	"baseLocale": "en",
+	"locales": ["en", "de"], 
 	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"
++		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"
   	],
-	"plugin.inlang.i18next": {
-		"pathPattern": "./resources/{languageTag}.json"
-  	}
++	"plugin.inlang.i18next": {
++		"pathPattern": "./resources/{locale}.json"
++  	}
 }
 ```
 
@@ -37,13 +35,13 @@ type PluginSettings = {
 
 ## `pathPattern`
 
-To use our plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{languageTag}` to specify the language name.
+To use our plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{locale}` to specify the language name.
 
 ### pathPattern without namespaces
 
 ```json
 "plugin.inlang.i18next": {
-	"pathPattern": "./resources/{languageTag}.json"
+	"pathPattern": "./resources/{locale}.json"
 }
 ```
 
@@ -53,8 +51,8 @@ To use our plugin, you need to provide a path to the directory where your langua
 ```json
 "plugin.inlang.i18next": {
 	"pathPattern": {
-		"common": "./resources/{languageTag}/common.json",
-		"vital": "./resources/{languageTag}/vital.json"
+		"common": "./resources/{locale}/common.json",
+		"vital": "./resources/{locale}/vital.json"
 	}
 }
 ```
@@ -76,7 +74,7 @@ default:
 
 ## `sourceLanguageFilePath`
 
-This setting is optional and should only be used if the file name of your sourceLanguageTag does not match your pathPattern structure. For example, if your sourceLanguageTag is `en` but your sourceLanguage file is called `main.json`, you can use this setting to specify the path to the sourceLanguage file. We recommend renaming the file to `en.json` and not using this setting.
+This setting is optional and should only be used if the file name of your sourcelocale does not match your pathPattern structure. For example, if your sourcelocale is `en` but your sourceLanguage file is called `main.json`, you can use this setting to specify the path to the sourceLanguage file. We recommend renaming the file to `en.json` and not using this setting.
 
 ### Without namespaces
 
