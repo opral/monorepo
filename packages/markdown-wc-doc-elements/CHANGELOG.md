@@ -1,5 +1,11 @@
 # @opral/markdown-wc-doc-elements
 
+## 0.3.1
+
+### Patch Changes
+
+- bdb333a: fix documentation for doc-links
+
 ## 0.3.0
 
 ### Minor Changes
