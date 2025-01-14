@@ -308,3 +308,23 @@ test("it should preserve the formatting of existing json resource files", async 
 	const fileAfterSave = await volume.promises.readFile("/foo/en.json", "utf-8");
 	expect(fileAfterSave).toBe(mockJson);
 });
+
+test("adds a gitignore file if it doesn't exist", async () => {
+	const fs = Volume.fromJSON({});
+
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+	});
+
+	await saveProjectToDirectory({
+		fs: fs.promises as any,
+		project,
+		path: "/foo/bar.inlang",
+	});
+
+	const gitignore = await fs.promises.readFile(
+		"/foo/bar.inlang/.gitignore",
+		"utf-8"
+	);
+	expect(gitignore).toBe("cache");
+});
