@@ -19,7 +19,7 @@ export const unpluginFactory: UnpluginFactory<{
 	 * @example "./src/paraglide"
 	 */
 	outdir: string;
-	options?: ParaglideCompilerOptions;
+	compilerOptions?: ParaglideCompilerOptions;
 }> = (args) => ({
 	name: PLUGIN_NAME,
 	enforce: "pre",
@@ -28,7 +28,7 @@ export const unpluginFactory: UnpluginFactory<{
 		await compile({
 			project: args.project,
 			outdir: args.outdir,
-			options: args.options,
+			compilerOptions: args.compilerOptions,
 			fs: wrappedFs,
 		});
 
@@ -43,7 +43,7 @@ export const unpluginFactory: UnpluginFactory<{
 			await compile({
 				project: args.project,
 				outdir: args.outdir,
-				options: args.options,
+				compilerOptions: args.compilerOptions,
 				fs: wrappedFs,
 			});
 		}
@@ -55,7 +55,7 @@ export const unpluginFactory: UnpluginFactory<{
 			await compile({
 				project: args.project,
 				outdir: args.outdir,
-				options: args.options,
+				compilerOptions: args.compilerOptions,
 				fs: wrappedFs,
 			});
 		});
