@@ -10,6 +10,9 @@ export function generateLocaleModules(
 	fallbackMap: Record<string, string | undefined>,
 	emitTs: boolean
 ): Record<string, string> {
+
+	const fileExt = emitTs ? ".ts" : ".js";
+
 	const indexFile = [
 		"/* eslint-disable */",
 		'import { getLocale } from "./runtime.js"',
@@ -22,12 +25,10 @@ export function generateLocaleModules(
 		compiledBundles.map(({ bundle }) => bundle.code).join("\n"),
 	].join("\n");
 
-	const ending = emitTs ? ".ts" : ".js";
-
 	const output: Record<string, string> = {
-		["runtime" + ending]: createRuntime(settings, emitTs),
-		["registry" + ending]: createRegistry(emitTs),
-		["messages" + ending]: indexFile,
+		["runtime" + fileExt]: createRuntime(settings, emitTs),
+		["registry" + fileExt]: createRegistry(emitTs),
+		["messages" + fileExt]: indexFile,
 	};
 
 	// generate message files
