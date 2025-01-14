@@ -2,17 +2,34 @@ import { compileBundle } from "./compileBundle.js";
 import { DEFAULT_REGISTRY } from "./registry.js";
 import { selectBundleNested, type InlangProject } from "@inlang/sdk";
 import { lookup } from "../services/lookup.js";
-import { emitDts } from "./emit-dts.js";
 import { generateLocaleModules } from "./output-structure/locale-modules.js";
 import { generateMessageModules } from "./output-structure/message-modules.js";
 
 export type ParaglideCompilerOptions = {
 	/**
-	 * Whether to emit d.ts files.
+	 * Whether to emit TypeScript files instead of JSDoc annotated JavaScript.
 	 *
-	 * @default true
+	 * @default false
 	 */
-	experimentalEmitTsDeclarations?: boolean;
+	experimentalEmitTs?: boolean;
+	/**
+	 * Whether to import files as TypeScript in the emitted code.
+	 *
+	 * The option is useful in some setups where TypeScript is run
+	 * directly on the emitted code such as node --strip-types.
+	 * [Here](https://devblogs.microsoft.com/typescript/announcing-typescript-5-7/#path-rewriting-for-relative-paths)
+	 * is more information on path rewriting for relative paths.
+	 *
+	 * ! Only works in combination with `emitTs: true`.
+	 *
+	 * @example
+	 *   // false
+	 *   import { getLocale } from "./runtime.js";
+	 *
+	 *   // true
+	 *   import { getLocale } from "./runtime.ts";
+	 */
+	experimentalUseTsImports?: boolean;
 	/**
 	 * Whether to emit a .prettierignore file.
 	 *
@@ -33,12 +50,13 @@ export type ParaglideCompilerOptions = {
 	outputStructure?: "locale-modules" | "message-modules";
 };
 
-const defaultCompilerOptions: ParaglideCompilerOptions = {
+const defaultCompilerOptions = {
 	outputStructure: "message-modules",
-	experimentalEmitTsDeclarations: false,
+	experimentalEmitTs: false,
+	experimentalUseTsImports: false,
 	emitGitIgnore: true,
 	emitPrettierIgnore: true,
-};
+} as const satisfies ParaglideCompilerOptions;
 
 /**
  * Takes an inlang project and compiles it into a set of files.
@@ -54,7 +72,7 @@ export const compileProject = async (args: {
 	project: InlangProject;
 	compilerOptions?: ParaglideCompilerOptions;
 }): Promise<Record<string, string>> => {
-	const optionsWithDefaults = {
+	const optionsWithDefaults: Required<ParaglideCompilerOptions> = {
 		...defaultCompilerOptions,
 		...args.compilerOptions,
 	};
@@ -70,6 +88,7 @@ export const compileProject = async (args: {
 			bundle,
 			fallbackMap,
 			registry: DEFAULT_REGISTRY,
+			emitTs: optionsWithDefaults.experimentalEmitTs,
 		})
 	);
 
@@ -79,7 +98,9 @@ export const compileProject = async (args: {
 		const regularOutput = generateLocaleModules(
 			compiledBundles,
 			settings,
-			fallbackMap
+			fallbackMap,
+			optionsWithDefaults.experimentalEmitTs,
+			optionsWithDefaults.experimentalUseTsImports
 		);
 		Object.assign(output, regularOutput);
 	}
@@ -88,18 +109,11 @@ export const compileProject = async (args: {
 		const messageModuleOutput = generateMessageModules(
 			compiledBundles,
 			settings,
-			fallbackMap
+			fallbackMap,
+			optionsWithDefaults.experimentalEmitTs,
+			optionsWithDefaults.experimentalUseTsImports
 		);
 		Object.assign(output, messageModuleOutput);
-	}
-
-	if (optionsWithDefaults.experimentalEmitTsDeclarations) {
-		const dtsFiles = emitDts(
-			compiledBundles,
-			output["runtime.js"]!,
-			output["registry.js"]!
-		);
-		Object.assign(output, dtsFiles);
 	}
 
 	if (optionsWithDefaults.emitGitIgnore) {
@@ -111,7 +125,7 @@ export const compileProject = async (args: {
 	}
 
 	for (const file in output) {
-		if (file.endsWith(".js")) {
+		if (file.endsWith(".js") || file.endsWith(".ts")) {
 			output[file] = `// @ts-nocheck\n${output[file]}`;
 		}
 	}

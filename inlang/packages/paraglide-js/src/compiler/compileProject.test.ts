@@ -14,8 +14,8 @@ import {
 	compileProject,
 	type ParaglideCompilerOptions,
 } from "./compileProject.js";
-import { rollup as _rollup } from "rollup";
 import virtual from "@rollup/plugin-virtual";
+import { rolldown } from "rolldown";
 
 beforeEach(() => {
 	// reset the imports to make sure that the runtime is reloaded
@@ -82,19 +82,37 @@ test("emitPrettierIgnore", async () => {
 });
 
 describe.each([
-	// testing both options in combination is fine. the output structure
-	// tests is tested by runtime code while emit ts declarations is
-	// tetsted by the typescript tests
-	{ outputStructure: "locale-modules", experimentalEmitTsDeclarations: false },
-	{ outputStructure: "message-modules", experimentalEmitTsDeclarations: true },
+	// useTsImports must be true to test emitTs. Otherwise, rolldown can't resolve the imports
+	{
+		outputStructure: "locale-modules",
+		experimentalEmitTs: false,
+		experimentalUseTsImports: false,
+	},
+	{
+		outputStructure: "locale-modules",
+		experimentalEmitTs: true,
+		experimentalUseTsImports: true,
+	},
+	{
+		outputStructure: "message-modules",
+		experimentalEmitTs: false,
+		experimentalUseTsImports: false,
+	},
+	{
+		outputStructure: "message-modules",
+		experimentalEmitTs: true,
+		experimentalUseTsImports: true,
+	},
 ] satisfies Array<ParaglideCompilerOptions>)(
 	"options",
 	async (compilerOptions) => {
+		const output = await compileProject({ project, compilerOptions });
+		const importExt = compilerOptions.experimentalEmitTs ? "ts" : "js";
 		describe("tree-shaking", () => {
 			test("should tree-shake unused messages", async () => {
 				const code = await bundleCode(
 					output,
-					`import * as m from "./paraglide/messages.js"
+					`import * as m from "./paraglide/messages.${importExt}"
 
 			console.log(m.sad_penguin_bundle())`
 				);
@@ -115,7 +133,7 @@ describe.each([
 			test("should not treeshake messages that are used", async () => {
 				const code = await bundleCode(
 					output,
-					`import * as m from "./paraglide/messages.js"
+					`import * as m from "./paraglide/messages.${importExt}"
 		
 			console.log(
 				m.sad_penguin_bundle(),
@@ -146,8 +164,8 @@ describe.each([
 			// The compiled output needs to be bundled into one file to be dynamically imported.
 			const code = await bundleCode(
 				output,
-				`export * as m from "./paraglide/messages.js"
-		   export * as runtime from "./paraglide/runtime.js"`
+				`export * as m from "./paraglide/messages.${importExt}"
+		     export * as runtime from "./paraglide/runtime.${importExt}"`
 			);
 
 			// test is a direct result of a bug
@@ -289,8 +307,8 @@ describe.each([
 				});
 				const code = await bundleCode(
 					output,
-					`export * as m from "./paraglide/messages.js"
-			export * as runtime from "./paraglide/runtime.js"`
+					`export * as m from "./paraglide/messages.${importExt}"
+					export * as runtime from "./paraglide/runtime.${importExt}"`
 				);
 				const { m, runtime } = await importCode(code);
 
@@ -358,8 +376,8 @@ describe.each([
 
 				const code = await bundleCode(
 					output,
-					`export * as m from "./paraglide/messages.js"
-			export * as runtime from "./paraglide/runtime.js"`
+					`export * as m from "./paraglide/messages.${importExt}"
+					export * as runtime from "./paraglide/runtime.${importExt}"`
 				);
 				const { m, runtime } = await importCode(code);
 
@@ -386,7 +404,7 @@ describe.each([
 			});
 
 			for (const [fileName, code] of Object.entries(output)) {
-				if (fileName.endsWith(".js")) {
+				if (fileName.endsWith(".js") || fileName.endsWith(".ts")) {
 					project.createSourceFile(fileName, code);
 				}
 			}
@@ -444,7 +462,7 @@ describe.each([
 			});
 
 			for (const [fileName, code] of Object.entries(output)) {
-				if (fileName.endsWith(".js")) {
+				if (fileName.endsWith(".js") || fileName.endsWith(".ts")) {
 					project.createSourceFile(fileName, code);
 				}
 			}
@@ -505,7 +523,7 @@ describe.each([
 			});
 
 			for (const [fileName, code] of Object.entries(output)) {
-				if (fileName.endsWith(".js")) {
+				if (fileName.endsWith(".js") || fileName.endsWith(".ts")) {
 					project.createSourceFile(fileName, code);
 				}
 			}
@@ -548,34 +566,16 @@ describe.each([
 			}
 			expect(diagnostics.length).toEqual(0);
 		});
-
-		test("emits ts declaration files when option is true", async () => {
-			const project = await loadProjectInMemory({
-				blob: await newProject(),
-			});
-
-			for (const bundle of mockBundles) {
-				await insertBundleNested(project.db, bundle);
-			}
-
-			const output = await compileProject({
-				project,
-				compilerOptions: {
-					...compilerOptions,
-					experimentalEmitTsDeclarations: true,
-				},
-			});
-
-			expect(Object.keys(output)).toContain("messages.d.ts");
-		});
 	}
 );
 
 async function bundleCode(output: Record<string, string>, file: string) {
-	const bundle = await _rollup({
-		input: "main.js",
-		output: {
-			minifyInternalExports: false,
+	const bundle = await rolldown({
+		input: ["main.js"],
+		resolve: {
+			extensionAlias: {
+				".js": [".ts", ".js"],
+			},
 		},
 		plugins: [
 			// @ts-expect-error - rollup types are not up to date
@@ -757,8 +757,6 @@ const mockBundles: BundleNested[] = [
 for (const bundle of mockBundles) {
 	await insertBundleNested(project.db, bundle);
 }
-
-const output = await compileProject({ project });
 
 function createBundleNested(args: {
 	id: string;
