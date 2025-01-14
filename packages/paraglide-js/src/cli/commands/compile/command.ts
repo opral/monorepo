@@ -53,7 +53,7 @@ export const compileCommand = new Command()
 					`But the project reported the following warnings and/or errors that might have influenced compilation:`
 				);
 				for (const error of errors) {
-					logger.log(`${error}`);
+					logger.error(`${error}`);
 				}
 			}
 
