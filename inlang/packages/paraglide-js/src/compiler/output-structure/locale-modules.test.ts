@@ -37,7 +37,15 @@ test("should emit per locale message files", () => {
 
 	const emitTs = false;
 
-	const output = generateLocaleModules(bundles, settings, fallbackMap, emitTs);
+	const useTsImports = false;
+
+	const output = generateLocaleModules(
+		bundles,
+		settings,
+		fallbackMap,
+		emitTs,
+		useTsImports
+	);
 
 	expect(output).toHaveProperty("messages.js");
 	expect(output).toHaveProperty("messages/en.js");
@@ -73,7 +81,15 @@ test("the files should include files for each locale, even if there are no messa
 
 	const emitTs = false;
 
-	const output = generateLocaleModules(bundles, settings, fallbackMap, emitTs);
+	const useTsImports = false;
+
+	const output = generateLocaleModules(
+		bundles,
+		settings,
+		fallbackMap,
+		emitTs,
+		useTsImports
+	);
 
 	expect(output).toHaveProperty("messages.js");
 	expect(output).toHaveProperty("messages/en.js");

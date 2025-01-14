@@ -37,11 +37,14 @@ test("should emit per locale message files", () => {
 
 	const emitTs = false;
 
+	const useTsImports = false;
+
 	const output = generateMessageModules(
 		resources,
 		settings,
 		fallbackMap,
-		emitTs
+		emitTs,
+		useTsImports
 	);
 
 	expect(output).not.toHaveProperty("messages/en.js");
