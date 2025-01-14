@@ -11,15 +11,15 @@ export function generateMessageModules(
 	fallbackMap: Record<string, string | undefined>,
 	emitTs: boolean
 ): Record<string, string> {
-	const ending = emitTs ? ".ts" : ".js";
+	const fileExt = emitTs ? ".ts" : ".js";
 
 	const output: Record<string, string> = {
-		["runtime" + ending]: createRuntime(settings, emitTs),
-		["registry" + ending]: createRegistry(emitTs),
+		["runtime" + fileExt]: createRuntime(settings, emitTs),
+		["registry" + fileExt]: createRegistry(emitTs),
 	};
 
 	// messages index file
-	output["messages" + ending] = [
+	output["messages" + fileExt] = [
 		"/* eslint-disable */",
 		...compiledBundles.map(
 			({ bundle }) => `export * from './messages/${bundle.node.id}/index.js'`

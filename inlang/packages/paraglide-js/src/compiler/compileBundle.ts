@@ -93,7 +93,7 @@ const compileBundleFunction = (args: {
 * ${emitTs ? "" : jsDocBundleFunctionTypes({ inputs, locales: args.availableLocales })}
 */
 /* @__NO_SIDE_EFFECTS__ */
-const ${jsIdentifier(args.bundle.id)} = (inputs${emitTs ? tsInputType(inputs) : ""} ${hasInputs ? "" : "= {}"}, options ${emitTs ? tsOptionsType(args.availableLocales) : ""} = {}) ${emitTs ? ": string" : ""} => {
+const ${jsIdentifier(args.bundle.id)} = (inputs${emitTs ? tsInputType(inputs) : ""} ${hasInputs ? "" : "= {}"}, options${emitTs ? tsOptionsType(args.availableLocales) : ""} = {}) ${emitTs ? ": string" : ""} => {
 	const locale = options.locale ?? options.languageTag ?? getLocale()
 	${args.availableLocales
 		.map(
@@ -120,7 +120,7 @@ const ${jsIdentifier(args.bundle.id)} = (inputs${emitTs ? tsInputType(inputs) : 
 
 function tsOptionsType(locales: string[]): string {
 	const localesUnion = locales.map((locale) => `"${locale}"`).join(" | ");
-	return `{ locale?: ${localesUnion},/** @deprecated use \`locale\` instead */languageTag?: ${localesUnion} }`;
+	return `: { locale?: ${localesUnion},/** @deprecated use \`locale\` instead */languageTag?: ${localesUnion} }`;
 }
 
 function tsInputType(inputs: { name: string }[]): string {

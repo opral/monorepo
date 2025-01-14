@@ -104,7 +104,7 @@ export const compileProject = async (args: {
 	}
 
 	for (const file in output) {
-		if (file.endsWith(".js")) {
+		if (file.endsWith(".js") || file.endsWith(".ts")) {
 			output[file] = `// @ts-nocheck\n${output[file]}`;
 		}
 	}
