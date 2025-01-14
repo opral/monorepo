@@ -82,19 +82,21 @@ test("emitPrettierIgnore", async () => {
 });
 
 describe.each([
-	// { outputStructure: "locale-modules", emitTs: false },
-	{ outputStructure: "locale-modules", emitTs: true },
-	// { outputStructure: "message-modules", emitTs: false },
-	// { outputStructure: "message-modules", emitTs: true },
+	// useTsImports must be true to test emitTs. Otherwise, rolldown can't resolve the imports
+	{ outputStructure: "locale-modules", emitTs: false, useTsImports: false },
+	{ outputStructure: "locale-modules", emitTs: true, useTsImports: true },
+	{ outputStructure: "message-modules", emitTs: false, useTsImports: false },
+	{ outputStructure: "message-modules", emitTs: true, useTsImports: true },
 ] satisfies Array<ParaglideCompilerOptions>)(
 	"options",
 	async (compilerOptions) => {
 		const output = await compileProject({ project, compilerOptions });
+		const importExt = compilerOptions.useTsImports ? "ts" : "js";
 		describe("tree-shaking", () => {
 			test("should tree-shake unused messages", async () => {
 				const code = await bundleCode(
 					output,
-					`import * as m from "./paraglide/messages.js"
+					`import * as m from "./paraglide/messages.${importExt}"
 
 			console.log(m.sad_penguin_bundle())`
 				);
@@ -115,7 +117,7 @@ describe.each([
 			test("should not treeshake messages that are used", async () => {
 				const code = await bundleCode(
 					output,
-					`import * as m from "./paraglide/messages.js"
+					`import * as m from "./paraglide/messages.${importExt}"
 		
 			console.log(
 				m.sad_penguin_bundle(),
@@ -146,8 +148,8 @@ describe.each([
 			// The compiled output needs to be bundled into one file to be dynamically imported.
 			const code = await bundleCode(
 				output,
-				`export * as m from "./paraglide/messages.js"
-		     export * as runtime from "./paraglide/runtime.js"`
+				`export * as m from "./paraglide/messages.${importExt}"
+		     export * as runtime from "./paraglide/runtime.${importExt}"`
 			);
 
 			// test is a direct result of a bug
@@ -289,8 +291,8 @@ describe.each([
 				});
 				const code = await bundleCode(
 					output,
-					`export * as m from "./paraglide/messages.js"
-					export * as runtime from "./paraglide/runtime.js"`
+					`export * as m from "./paraglide/messages.${importExt}"
+					export * as runtime from "./paraglide/runtime.${importExt}"`
 				);
 				const { m, runtime } = await importCode(code);
 
@@ -358,8 +360,8 @@ describe.each([
 
 				const code = await bundleCode(
 					output,
-					`export * as m from "./paraglide/messages.js"
-					export * as runtime from "./paraglide/runtime.js"`
+					`export * as m from "./paraglide/messages.${importExt}"
+					export * as runtime from "./paraglide/runtime.${importExt}"`
 				);
 				const { m, runtime } = await importCode(code);
 

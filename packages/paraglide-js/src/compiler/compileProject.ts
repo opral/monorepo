@@ -7,11 +7,29 @@ import { generateMessageModules } from "./output-structure/message-modules.js";
 
 export type ParaglideCompilerOptions = {
 	/**
-	 * Whether to emit d.ts files.
+	 * Whether to emit TypeScript files instead of JSDoc annotated JavaScript.
 	 *
 	 * @default false
 	 */
 	emitTs?: boolean;
+	/**
+	 * Whether to import files as TypeScript in the emitted code.
+	 *
+	 * The option is useful in some setups where TypeScript is run
+	 * directly on the emitted code such as node --strip-types.
+	 * [Here](https://devblogs.microsoft.com/typescript/announcing-typescript-5-7/#path-rewriting-for-relative-paths)
+	 * is more information on path rewriting for relative paths.
+	 *
+	 * ! Only works in combination with `emitTs: true`.
+	 *
+	 * @example
+	 *   // false
+	 *   import { getLocale } from "./runtime.js";
+	 *
+	 *   // true
+	 *   import { getLocale } from "./runtime.ts";
+	 */
+	useTsImports?: boolean;
 	/**
 	 * Whether to emit a .prettierignore file.
 	 *
@@ -35,6 +53,7 @@ export type ParaglideCompilerOptions = {
 const defaultCompilerOptions = {
 	outputStructure: "message-modules",
 	emitTs: false,
+	useTsImports: false,
 	emitGitIgnore: true,
 	emitPrettierIgnore: true,
 } as const satisfies ParaglideCompilerOptions;
@@ -80,7 +99,8 @@ export const compileProject = async (args: {
 			compiledBundles,
 			settings,
 			fallbackMap,
-			optionsWithDefaults.emitTs
+			optionsWithDefaults.emitTs,
+			optionsWithDefaults.useTsImports
 		);
 		Object.assign(output, regularOutput);
 	}
@@ -90,7 +110,8 @@ export const compileProject = async (args: {
 			compiledBundles,
 			settings,
 			fallbackMap,
-			optionsWithDefaults.emitTs
+			optionsWithDefaults.emitTs,
+			optionsWithDefaults.useTsImports
 		);
 		Object.assign(output, messageModuleOutput);
 	}

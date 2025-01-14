@@ -9,36 +9,39 @@ export function generateMessageModules(
 	compiledBundles: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
 	fallbackMap: Record<string, string | undefined>,
-	emitTs: boolean
+	emitTs: boolean,
+	useTsImports: boolean
 ): Record<string, string> {
-	const fileExt = emitTs ? ".ts" : ".js";
+	const fileExt = emitTs ? "ts" : "js";
+	const importExt = useTsImports ? "ts" : "js";
 
 	const output: Record<string, string> = {
-		["runtime" + fileExt]: createRuntime(settings, emitTs),
-		["registry" + fileExt]: createRegistry(emitTs),
+		["runtime." + fileExt]: createRuntime(settings, emitTs),
+		["registry." + fileExt]: createRegistry(emitTs),
 	};
 
 	// messages index file
-	output["messages" + fileExt] = [
+	output["messages." + fileExt] = [
 		"/* eslint-disable */",
 		...compiledBundles.map(
-			({ bundle }) => `export * from './messages/${bundle.node.id}/index.js'`
+			({ bundle }) =>
+				`export * from './messages/${bundle.node.id}/index.${importExt}'`
 		),
 	].join("\n");
 
 	// Creates a per message index file
 	for (const compiledBundle of compiledBundles) {
-		const filename = `messages/${compiledBundle.bundle.node.id}/index.js`;
+		const filename = `messages/${compiledBundle.bundle.node.id}/index.${fileExt}`;
 		const code = [
 			"/* eslint-disable */",
-			"import * as registry from '../../registry.js'",
+			`import * as registry from '../../registry.${importExt}'`,
 			settings.locales
 				.map(
 					(locale) =>
-						`import * as ${jsIdentifier(locale)} from "./${locale}.js"`
+						`import * as ${jsIdentifier(locale)} from "./${locale}.${importExt}"`
 				)
 				.join("\n"),
-			"import { getLocale } from '../../runtime.js'",
+			`import { getLocale } from '../../runtime.${importExt}'`,
 			"",
 			compiledBundle.bundle.code,
 		].join("\n");
@@ -49,7 +52,7 @@ export function generateMessageModules(
 		for (const compiledBundle of compiledBundles) {
 			let file = [
 				"/* eslint-disable */",
-				"import * as registry from '../../registry.js' ",
+				`import * as registry from '../../registry.${importExt}'`,
 			].join("\n");
 
 			const compiledMessage = compiledBundle.messages[locale];
@@ -59,7 +62,7 @@ export function generateMessageModules(
 				const fallbackLocale = fallbackMap[locale];
 				if (fallbackLocale) {
 					// take the fallback locale
-					file += `\nexport { ${id} } from "./${fallbackLocale}.js"`;
+					file += `\nexport { ${id} } from "./${fallbackLocale}.${importExt}"`;
 				} else {
 					// fallback to just the bundle id
 					file += `\nexport const ${id} = () => '${escapeForSingleQuoteString(
@@ -70,7 +73,8 @@ export function generateMessageModules(
 				file += `\n${compiledMessage.code}`;
 			}
 
-			output[`messages/${compiledBundle.bundle.node.id}/${locale}.js`] = file;
+			output[`messages/${compiledBundle.bundle.node.id}/${locale}.${fileExt}`] =
+				file;
 		}
 	}
 	return output;
