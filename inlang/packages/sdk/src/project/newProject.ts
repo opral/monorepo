@@ -38,7 +38,11 @@ export async function newProject(args?: {
 				{
 					path: "/settings.json",
 					data: new TextEncoder().encode(
-						JSON.stringify(args?.settings ?? defaultProjectSettings)
+						JSON.stringify(
+							args?.settings ?? defaultProjectSettings,
+							undefined,
+							2
+						)
 					),
 				},
 				{
