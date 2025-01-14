@@ -1,5 +1,12 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.7
+
+- fixed windows path problems
+- increased performance of the compiler by removing a redundant setTimeout
+- increased performance of the compiler by removing prettier
+- `experimentalEmitTs` flag
+
 ## 2.0.0-beta.3
 
 ### Patch Changes
