@@ -13,6 +13,8 @@ import { runCompiler } from "../../steps/run-compiler.js";
 import type { CliStep } from "../../utils.js";
 import nodeFs from "node:fs";
 import { ENV_VARIABLES } from "../../../services/env-variables/index.js";
+import { detectBundler } from "../../steps/detect-bundler.js";
+import { addVitePlugin } from "../../steps/add-vite-plugin.js";
 
 export const initCommand = new Command()
 	.name("init")
@@ -20,7 +22,7 @@ export const initCommand = new Command()
 	.action(async () => {
 		const logger = new Logger({ silent: false, prefix: false });
 
-		logger.box("Welcome to inlang Paraglide-JS 🪂");
+		logger.box("Welcome to inlang Paraglide JS 🪂");
 
 		const ctx = {
 			logger,
@@ -33,10 +35,14 @@ export const initCommand = new Command()
 		const ctx2 = await enforcePackageJsonExists(ctx1);
 		const ctx3 = await initializeInlangProject(ctx2);
 		const ctx4 = await promptForOutdir(ctx3);
-
 		const ctx5 = await addParaglideJsToDevDependencies(ctx4);
+		const ctx6 = await detectBundler(ctx5);
 
-		const ctx6 = await addCompileStepToPackageJSON(ctx5);
+		if (ctx6.bundler === "vite") {
+			await addVitePlugin(ctx6);
+		} else {
+			await addCompileStepToPackageJSON(ctx6);
+		}
 
 		const ctx7 = await maybeChangeTsConfig(ctx6);
 		const ctx8 = await maybeAddSherlock(ctx7);
@@ -63,15 +69,15 @@ export const initCommand = new Command()
 			`inlang Paraglide-JS has been set up sucessfully.`,
 			"\n",
 			`1. Run your install command (npm i, yarn install, etc)`,
-			`2. Register all your languages in ${relativeSettingsFilePath}`,
-			`3. Run the build script (npm run build, or similar.)`,
-			`4. Done :) Happy paragliding 🪂`,
+			`2. Run the build script (npm run build, or similar.)`,
+			`3. Define the locales in ${relativeSettingsFilePath}`,
 			"\n",
 			"\n",
 			`For questions and feedback, visit`,
 			`https://github.com/opral/inlang-paraglide-js/issues`,
 		].join("\n");
 		ctx.logger.box(successMessage);
+		process.exit(0);
 	});
 
 export const addParaglideJsToDevDependencies: CliStep<

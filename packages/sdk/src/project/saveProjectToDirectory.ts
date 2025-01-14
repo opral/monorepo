@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-imports */
 import type fs from "node:fs/promises";
 import type { InlangProject } from "./api.js";
 import path from "node:path";
@@ -23,14 +22,25 @@ export async function saveProjectToDirectory(args: {
 		.selectAll()
 		.execute();
 
+	let hasGitignore = false;
+
 	// write all files to the directory
 	for (const file of files) {
 		if (file.path.endsWith("db.sqlite")) {
 			continue;
+		} else if (file.path.endsWith(".gitignore")) {
+			hasGitignore = true;
 		}
 		const p = path.join(args.path, file.path);
 		await args.fs.mkdir(path.dirname(p), { recursive: true });
 		await args.fs.writeFile(p, new Uint8Array(file.data));
+	}
+
+	if (hasGitignore === false) {
+		await args.fs.writeFile(
+			path.join(args.path, ".gitignore"),
+			new TextEncoder().encode("cache")
+		);
 	}
 
 	// run exporters
