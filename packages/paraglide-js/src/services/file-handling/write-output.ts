@@ -13,18 +13,9 @@ export async function writeOutput(
 	const currentOutputHash = hashOutput(output, outputDirectory);
 	if (currentOutputHash === previousOutputHash) return;
 
-	// create the output directory if it doesn't exist
-	await fs.stat(outputDirectory).catch(async () => {
-		await fs.mkdir(outputDirectory, { recursive: true });
-	});
-
 	// clear the output directory
-	const files = await fs.readdir(outputDirectory);
-	await Promise.allSettled(
-		files.map(async (file) => {
-			await fs.rm(path.join(outputDirectory, file));
-		})
-	);
+	await fs.rm(outputDirectory, { recursive: true, force: true });
+	await fs.mkdir(outputDirectory, { recursive: true });
 
 	//Create missing directories inside the output directory
 	await Promise.allSettled(

@@ -6,8 +6,8 @@
 	"scripts": {
 		"bench": "node ./build.js",
 		"build": "paraglide-js compile --project ./project.inlang && tsc",
-		"pretest": "paraglide-js compile --project ./project.inlang",
-		"test": "tsc --noEmit && node --experimental-strip-types ./src/main.ts"
+		"pretest": "npm run build",
+		"test": "node ./dist/main.js"
 	},
 	"devDependencies": {
 		"@inlang/plugin-message-format": "workspace:*",
