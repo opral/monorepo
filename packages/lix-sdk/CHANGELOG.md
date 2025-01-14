@@ -1,5 +1,11 @@
 # @lix-js/sdk
 
+## 0.3.3
+
+### Patch Changes
+
+- 7fd8092: fix: account for db close via "driver has already been destroyed" in file queue
+
 ## 0.3.2
 
 ### Patch Changes
