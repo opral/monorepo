@@ -2,7 +2,7 @@
 // Import the global.css file here so that it is included on
 // all pages through the use of the <BaseHead /> component.
 import '../styles/global.css';
-import { availableLanguageTags, isAvailableLanguageTag } from '../paraglide/runtime.js';
+import { locales, isAvailableLocale } from '../paraglide/runtime.js';
 import { getAbsoluteLocaleUrl } from 'astro:i18n';
 
 interface Props {
@@ -15,7 +15,7 @@ const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
 
 function removeLanguagePrefix(path: string) {
 	const [maybeLanguage, ...rest] = path.split('/').filter(Boolean);
-	return isAvailableLanguageTag(maybeLanguage) ? rest.join('/') : path;
+	return isAvailableLocale(maybeLanguage) ? rest.join('/') : path;
 }
 
 const currentPathWithoutLanguage = removeLanguagePrefix(Astro.url.pathname);
@@ -51,6 +51,6 @@ const currentPathWithoutLanguage = removeLanguagePrefix(Astro.url.pathname);
 <meta property="twitter:image" content={new URL(image, Astro.url)} />
 
 <!-- Alternate Language Versions -->
-{availableLanguageTags.map(lang => (
+{locales.map(lang => (
 	<link rel="alternate" hreflang={lang} href={getAbsoluteLocaleUrl(lang, currentPathWithoutLanguage)} />
 ))}

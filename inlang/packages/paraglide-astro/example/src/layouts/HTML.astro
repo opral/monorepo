@@ -1,5 +1,9 @@
+---
+import { getLocale } from "../paraglide/runtime";
+---
+
 <!doctype html>
-<html lang={Astro.locals.paraglide.lang} dir={Astro.locals.paraglide.dir}>
+<html lang={getLocale()} dir={Astro.locals.paraglide.dir}>
     <slot />
 </html>
 

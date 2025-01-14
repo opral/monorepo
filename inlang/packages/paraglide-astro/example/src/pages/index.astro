@@ -7,6 +7,18 @@ import HTML from '../layouts/HTML.astro';
 import * as m from "../paraglide/messages.js"
 ---
 
+<script>
+	import { setLocale} from "../paraglide/runtime.js"
+
+	document.querySelector("#en-locale").addEventListener('click', () => {
+		setLocale("en")
+	})
+
+	document.querySelector("#de-locale").addEventListener('click', () => {
+		setLocale("en")
+	})
+</script>
+
 <HTML>
 	<head>
 		<BaseHead title={m.site_title()} description={m.site_description()} />
@@ -21,6 +33,8 @@ import * as m from "../paraglide/messages.js"
 				like forms, app-shells, or this counter:
 			</p>
 			<Counter client:load />
+			<button id="en-locale">Switch to en</button>
+			<button id="de-locale">Switch to de</button>
 			<p>
 				Because Paraglide treeshakes very well, each island only ships the message it actually 
 				uses. This means that you can use Paraglide in your app without worrying about 

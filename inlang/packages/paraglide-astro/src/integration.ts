@@ -46,14 +46,17 @@ export function integration(integrationConfig: {
         });
 
 				injectScript(
-					"before-hydration",
-					`
-                    import { isAvailableLanguageTag, setLanguageTag, sourceLanguageTag } from "virtual:paraglide-astro:runtime";
+          "before-hydration",
+          `
+                    import { isAvailableLocale, defineGetLocale, baseLocale } from "virtual:paraglide-astro:runtime";
 					const htmlLang = document.documentElement.lang;
-					const language = isAvailableLanguageTag(htmlLang) ? htmlLang : sourceLanguageTag;
-					setLanguageTag(language);
+					const language = isAvailableLocale(htmlLang) ? htmlLang : baseLocale;
+					defineGetLocale(() => language);
+					defineSetLocale((newLocale) => {
+					  
+					})
                     `
-				)
+        );
 
 				return undefined
 			},

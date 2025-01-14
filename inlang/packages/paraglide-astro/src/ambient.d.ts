@@ -3,12 +3,12 @@
  * (e.g. "paraglide/runtime.js")
  */
 declare module "virtual:paraglide-astro:runtime" {
-	export const setLanguageTag: (language_tag: string | (() => string)) => void
-	export const languageTag: () => string
-	export const onSetLanguageTag: (callback: (language_tag: string) => void) => void
-	export const isAvailableLanguageTag: (language_tag: unknown) => language_tag is string
-	export const availableLanguageTags: readonly string[]
-	export const sourceLanguageTag: string
+	export const defineGetLocale: (fn: () => string) => void;
+  export const defineSetLocale: (fn: (locale: string) => void) => void;
+  export const getLocale: () => string;
+  export const isAvailableLocale: (locale: unknown) => locale is string;
+  export const locales: readonly string[];
+  export const baseLocale: string;
 }
 
 declare module "astro:i18n" {
