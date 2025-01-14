@@ -1,5 +1,5 @@
 import type { AstroIntegration } from "astro"
-import { paraglide } from "@inlang/paraglide-vite"
+import { paraglideVitePlugin } from "@inlang/paraglide-js";
 import path from "node:path"
 import { alias } from "./alias.js"
 import { fileURLToPath } from "node:url"
@@ -28,21 +28,22 @@ export function integration(integrationConfig: {
 
 				//Register the vite plugin
 				updateConfig({
-					vite: {
-						plugins: [
-							paraglide({
-								project: integrationConfig.project,
-								outdir: integrationConfig.outdir,
-							}),
-							alias({
-								//normalizing the path is very important!
-								//otherwise you get duplicate modules on windows
-								//learned that one the hard way (parjs-47)
-								"virtual:paraglide-astro:runtime": nodeNormalizePath(runtimePath),
-							}),
-						],
-					},
-				})
+          vite: {
+            plugins: [
+              paraglideVitePlugin({
+                project: integrationConfig.project,
+                outdir: integrationConfig.outdir,
+              }),
+              alias({
+                //normalizing the path is very important!
+                //otherwise you get duplicate modules on windows
+                //learned that one the hard way (parjs-47)
+                "virtual:paraglide-astro:runtime":
+                  nodeNormalizePath(runtimePath),
+              }),
+            ],
+          },
+        });
 
 				injectScript(
 					"before-hydration",

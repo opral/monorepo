@@ -1,9 +1,16 @@
-![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and with an IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-astro/assets/og.png)
+---
+imports: 
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-features.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-feature.js
+
+---
+
+![Typesafe, Small, SEO-Friendly and with a VSCode Extension.](./assets/og.png)
 
 <doc-features>
-<doc-feature text-color="#0F172A" color="#E1EFF7" title="Uses astro:i18n for routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-astro/assets/use-astro-i18n.png"></doc-feature>
-<doc-feature text-color="#0F172A" color="#E1EFF7" title="Tiny Bundle Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-astro/assets/bundle-size.png"></doc-feature>
-<doc-feature text-color="#0F172A" color="#E1EFF7" title="Only ships messages used on islands" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-astro/assets/islands-only.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Uses astro:i18n for routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide-astro/assets/use-astro-i18n.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Tiny Bundle Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide-astro/assets/bundle-size.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Only ships messages used on islands" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide-astro/assets/islands-only.png"></doc-feature>
 </doc-features>
 
 [![Inlang-ecosystem compatibility badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
@@ -11,7 +18,7 @@
 # Gettting Started 
 
 ```bash
-npx @inlang/paraglide-js init
+npx @inlang/paraglide-js@latest init
 npm i @inlang/paraglide-astro
 ```
 
