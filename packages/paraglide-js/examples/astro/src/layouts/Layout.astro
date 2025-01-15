@@ -1,5 +1,10 @@
+---
+import { getLocale } from "../paraglide/runtime.js";
+import { getRelativeLocaleUrl } from "astro:i18n";
+---
+
 <!doctype html>
-<html lang="en">
+<html lang={getLocale()}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
@@ -8,13 +13,30 @@
 		<title>Paraglide JS Astro Example</title>
 	</head>
 	<body>
+		<script>
+			import { defineGetLocale, defineSetLocale, setLocale } from "../paraglide/runtime.js"
+			import { getRelativeLocaleUrl } from "astro:i18n";
+
+			defineGetLocale(() => {
+				return document.documentElement.lang
+			});
+			
+			defineSetLocale((newLocale) => {
+				window.location = getRelativeLocaleUrl(newLocale, window.location.pathname);
+			})
+
+			document.querySelector("#switch-locale-en")?.addEventListener('click', () => {
+				setLocale("en")
+			})
+
+			document.querySelector("#switch-locale-de")?.addEventListener('click', () => {
+				setLocale("de")
+			})
+		</script>
 		<div class="row">
-			<p>Pages: </p>
-			<a href="/">Home</a>
-			<a href="/about">About</a>
 			<p>Locale: </p>
-			<a href="/">en</a>
-			<a href="/about">de</a>
+			<button id="switch-locale-en">en</button>
+			<button id="switch-locale-de">de</button>
 		</div>
 		<slot />
 	</body>
