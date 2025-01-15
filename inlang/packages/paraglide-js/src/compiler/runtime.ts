@@ -29,14 +29,14 @@ const jsdocRuntime = (
 export const baseLocale = "${settings.baseLocale}";
 
 /**
- * The project's locales.
+ * The project's locales that have been specified in the settings.
  *
  * @example
- *   if (locales.includes(userSelectedLocale) === false) {
+ *   if (availableLocales.includes(userSelectedLocale) === false) {
  *     throw new Error('Locale is not available');
  *   }
  */
-export const locales = /** @type {const} */ (${JSON.stringify(settings.locales)});
+export const availableLocales = /** @type {const} */ (${JSON.stringify(settings.locales)});
 
 /**
  * This is a default implementation that is almost always
@@ -130,7 +130,7 @@ export let setLocale =
  * @returns {locale is AvailableLocale}
  */
 export function isAvailableLocale(locale) {
-	return locales.includes(locale);
+	return availableLocales.includes(locale);
 }
 
 // ------ TYPES ------
@@ -141,7 +141,7 @@ export function isAvailableLocale(locale) {
  * @example
  *   setLocale(request.locale as AvailableLocale)
  *
- * @typedef {(typeof locales)[number]} AvailableLocale
+ * @typedef {(typeof availableLocales)[number]} AvailableLocale
  */
 
 // ------ LEGACY RUNTIME (will be removed in the next major version) ------
@@ -149,8 +149,8 @@ export function isAvailableLocale(locale) {
 /** @deprecated Use \`baseLocale\` instead */
 export const sourceLanguageTag = baseLocale;
 
-/** @deprecated Use \`locales\` instead */
-export const availableLanguageTags = locales;
+/** @deprecated Use \`availableLocales\` instead */
+export const availableLanguageTags = availableLocales;
 
 /** @deprecated Use \`getLocale()\` instead */
 export let languageTag = getLocale;
@@ -166,7 +166,7 @@ export const isAvailableLanguageTag = isAvailableLocale;
 
 /**
  * @deprecated Use \`AvailableLocale\` instead
- * @typedef {(typeof locales)[number]} AvailableLanguageTag
+ * @typedef {(typeof availableLocales)[number]} AvailableLanguageTag
  */
 `;
 
@@ -186,14 +186,14 @@ const tsRuntime = (
 export const baseLocale = "${settings.baseLocale}";
 
 /**
- * The project's locales.
+ * The project's locales that have been specified in the settings.
  *
  * @example
- *   if (locales.includes(userSelectedLocale) === false) {
+ *   if (availableLocales.includes(userSelectedLocale) === false) {
  *     throw new Error('Locale is not available');
  *   }
  */
-export const locales = ${JSON.stringify(settings.locales)} as const;
+export const availableLocales = ${JSON.stringify(settings.locales)} as const;
 
 /**
  * This is a default implementation that is almost always
@@ -276,7 +276,7 @@ export let setLocale: (newLocale: AvailableLocale) => void = (newLocale) => {
  *   }
  */
 export function isAvailableLocale(locale: any): locale is AvailableLocale {
-	return locales.includes(locale);
+	return availableLocales.includes(locale);
 }
 
 // ------ TYPES ------
@@ -288,15 +288,15 @@ export function isAvailableLocale(locale: any): locale is AvailableLocale {
  *   setLocale(request.locale as AvailableLocale)
  *
  */
-export type AvailableLocale = (typeof locales)[number];
+export type AvailableLocale = (typeof availableLocales)[number];
 
 // ------ LEGACY RUNTIME (will be removed in the next major version) ------
 
 /** @deprecated Use \`baseLocale\` instead */
 export const sourceLanguageTag = baseLocale;
 
-/** @deprecated Use \`locales\` instead */
-export const availableLanguageTags = locales;
+/** @deprecated Use \`availableLocales\` instead */
+export const availableLanguageTags = availableLocales;
 
 /** @deprecated Use \`getLocale()\` instead */
 export let languageTag = getLocale;
