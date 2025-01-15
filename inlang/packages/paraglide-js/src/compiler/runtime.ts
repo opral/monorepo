@@ -143,31 +143,6 @@ export function isAvailableLocale(locale) {
  *
  * @typedef {(typeof availableLocales)[number]} AvailableLocale
  */
-
-// ------ LEGACY RUNTIME (will be removed in the next major version) ------
-
-/** @deprecated Use \`baseLocale\` instead */
-export const sourceLanguageTag = baseLocale;
-
-/** @deprecated Use \`availableLocales\` instead */
-export const availableLanguageTags = availableLocales;
-
-/** @deprecated Use \`getLocale()\` instead */
-export let languageTag = getLocale;
-
-/** @deprecated Use \`setLocale()\` instead */
-export const setLanguageTag = setLocale;
-
-/**
- * @deprecated Use \`isAvailableLocale()\` instead
- * @returns {thing is AvailableLanguageTag}
- */
-export const isAvailableLanguageTag = isAvailableLocale;
-
-/**
- * @deprecated Use \`AvailableLocale\` instead
- * @typedef {(typeof availableLocales)[number]} AvailableLanguageTag
- */
 `;
 
 const tsRuntime = (
@@ -289,28 +264,4 @@ export function isAvailableLocale(locale: any): locale is AvailableLocale {
  *
  */
 export type AvailableLocale = (typeof availableLocales)[number];
-
-// ------ LEGACY RUNTIME (will be removed in the next major version) ------
-
-/** @deprecated Use \`baseLocale\` instead */
-export const sourceLanguageTag = baseLocale;
-
-/** @deprecated Use \`availableLocales\` instead */
-export const availableLanguageTags = availableLocales;
-
-/** @deprecated Use \`getLocale()\` instead */
-export let languageTag = getLocale;
-
-/** @deprecated Use \`setLocale()\` instead */
-export const setLanguageTag = setLocale;
-
-/**
- * @deprecated Use \`isAvailableLocale()\` instead
- */
-export const isAvailableLanguageTag = isAvailableLocale;
-
-/**
- * @deprecated Use \`AvailableLocale\` instead
- */
-export type AvailableLanguageTag = AvailableLocale;
 `;
