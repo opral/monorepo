@@ -19,20 +19,26 @@ export const ChangeDiffComponent = (props: {
 
 	const loadDiffComponent = async () => {
 		if (lix) {
-			const schemaKey = props.change.schema_key;
-			const plugin = (await lix.plugin.getAll()).find((p) =>
-				p.diffUiComponents?.some((c) => c.schema_key === schemaKey)
-			);
-			const component = plugin?.diffUiComponents?.find(
-				(c) => c.schema_key === schemaKey
-			)?.component;
+			const pluginKey = props.change.plugin_key;
+			const component = (await lix.plugin.getAll()).find(
+				(p) => p.key === pluginKey
+			)?.diffUiComponent;
+
+			// replace _ with - in custom element name
+			const customElementName = `diff-${pluginKey.replace(/_/g, "-")}`;
+
 			if (component) {
-				// Dynamically define the custom element (if not already defined)
-				if (!customElements.get(`diff-${schemaKey}`)) {
-					customElements.define(
-						`diff-${schemaKey}`,
-						component.constructor as typeof HTMLElement
-					);
+				const isRegistered = customElements.get(customElementName);
+
+				if (!isRegistered) {
+					const ElementConstructor = component;
+					if (typeof ElementConstructor === 'function' &&
+						ElementConstructor.prototype instanceof HTMLElement) {
+						customElements.define(customElementName, ElementConstructor as CustomElementConstructor);
+					} else {
+						console.error(`The component constructor for plugin key '${pluginKey}' is invalid.`);
+						return;
+					}
 				}
 
 				setDiffComponent(() => {
@@ -40,7 +46,7 @@ export const ChangeDiffComponent = (props: {
 						snapshotBefore: Record<string, any> | null;
 						snapshotAfter: Record<string, any> | null;
 					}) => {
-						return React.createElement(`diff-${schemaKey}`, props);
+						return React.createElement(customElementName, props);
 					};
 
 					return React.createElement(WrappedComponent, {
@@ -48,8 +54,10 @@ export const ChangeDiffComponent = (props: {
 						snapshotAfter: props.change.snapshot_content,
 					});
 				});
+			} else {
+				console.warn(`No diff UI component found for plugin key '${customElementName}'`);
+				// Fallback logic
 			}
-			// Todo: add fallback component
 		}
 	};
 

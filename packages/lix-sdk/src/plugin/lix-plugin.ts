@@ -34,12 +34,7 @@ export type LixPlugin = {
 	/**
 	 * UI components that are used to render the diff view.
 	 */
-	diffUiComponents?: [
-		{
-			schema_key: string;
-			component: HTMLElement;
-		},
-	];
+	diffUiComponent?: HTMLElement;
 	/**
 	 * Detects changes from the source lix that conflict with changes in the target lix.
 	 */
