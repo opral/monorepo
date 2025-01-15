@@ -2,7 +2,7 @@ import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 @customElement(`diff-lix-plugin-csv-cell-v1`)
-export class Diff extends LitElement {
+export class CellDiff extends LitElement {
 	static override styles = css`
 		:host {
 			/* Ensure the component respects app-wide theming */
