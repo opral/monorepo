@@ -32,7 +32,7 @@ export const compileBundle = (args: {
 
 	for (const message of args.bundle.messages) {
 		if (compiledMessages[message.locale]) {
-			throw new Error(`Duplicate language tag: ${message.locale}`);
+			throw new Error(`Duplicate locale: ${message.locale}`);
 		}
 
 		const compiledMessage = compileMessage(
@@ -94,7 +94,7 @@ const compileBundleFunction = (args: {
 */
 /* @__NO_SIDE_EFFECTS__ */
 const ${jsIdentifier(args.bundle.id)} = (inputs${emitTs ? tsInputType(inputs) : ""} ${hasInputs ? "" : "= {}"}, options${emitTs ? tsOptionsType(args.availableLocales) : ""} = {}) ${emitTs ? ": string" : ""} => {
-	const locale = options.locale ?? options.languageTag ?? getLocale()
+	const locale = options.locale ?? getLocale()
 	${args.availableLocales
 		.map(
 			(locale, index) =>
@@ -120,7 +120,7 @@ const ${jsIdentifier(args.bundle.id)} = (inputs${emitTs ? tsInputType(inputs) : 
 
 function tsOptionsType(locales: string[]): string {
 	const localesUnion = locales.map((locale) => `"${locale}"`).join(" | ");
-	return `: { locale?: ${localesUnion},/** @deprecated use \`locale\` instead */languageTag?: ${localesUnion} }`;
+	return `: { locale?: ${localesUnion} }`;
 }
 
 function tsInputType(inputs: { name: string }[]): string {

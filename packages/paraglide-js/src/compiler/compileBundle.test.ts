@@ -24,8 +24,8 @@ test("compiles as ts", async () => {
 * 
 */
 /* @__NO_SIDE_EFFECTS__ */
-const blue_moon_bottle = (inputs: { age: NonNullable<unknown> } , options: { locale?: "en" | "en-US",/** @deprecated use \`locale\` instead */languageTag?: "en" | "en-US" } = {}) : string => {
-	const locale = options.locale ?? options.languageTag ?? getLocale()
+const blue_moon_bottle = (inputs: { age: NonNullable<unknown> } , options: { locale?: "en" | "en-US" } = {}) : string => {
+	const locale = options.locale ?? getLocale()
 	if (locale === "en") return en.blue_moon_bottle(inputs)
 	if (locale === "en-US") return en_US.blue_moon_bottle(inputs)
 	return "blue_moon_bottle"
