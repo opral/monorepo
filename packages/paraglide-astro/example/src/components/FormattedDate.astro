@@ -1,5 +1,5 @@
 ---
-import { languageTag } from '../paraglide/runtime';
+import { getLocale } from '../paraglide/runtime';
 
 interface Props {
 	date: Date;
@@ -10,7 +10,7 @@ const { date } = Astro.props;
 
 <time datetime={date.toISOString()}>
 	{
-		date.toLocaleDateString(languageTag(), {
+		date.toLocaleDateString(getLocale(), {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric',

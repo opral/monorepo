@@ -18,19 +18,18 @@
     "test": "vitest run --passWithNoTests --dir src",
     "build": "tsc",
     "dev": "tsc -w",
-    "lint": "eslint ./src --fix",
     "format": "prettier ./src --write",
     "clean": "rm -rf ./dist ./node_modules"
   },
-  "dependencies": {},
   "peerDependencies": {
-    "astro": "^4 || ^5",
-    "@inlang/paraglide-js": "^2"
+    "@inlang/paraglide-js": "^2",
+    "astro": "^4 || ^5"
   },
   "devDependencies": {
-    "typescript": "^5.5.4",
     "@inlang/paraglide-js": "workspace:*",
-    "@opral/tsconfig": "workspace:*"
+    "@opral/tsconfig": "workspace:*",
+    "prettier": "^3.4.2",
+    "typescript": "^5.5.4"
   },
   "keywords": [
     "paraglide",
