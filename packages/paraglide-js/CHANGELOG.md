@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.8
+
+- rename `runtime.locales` to `runtime.availableLocales` to align with v1 API and avoid ambiguity https://github.com/opral/inlang-paraglide-js/issues/314
+
 ## 2.0.0-beta.7
 
 - fixed windows path problems
