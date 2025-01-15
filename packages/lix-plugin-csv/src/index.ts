@@ -1,16 +1,17 @@
 import { type LixPlugin } from "@lix-js/sdk";
 import { applyChanges } from "./applyChanges.js";
 import { detectChanges } from "./detectChanges.js";
-import { Diff } from "./diff.js";
+import { CellDiff } from "./diff.js";
+import { CellSchemaV1 } from "./schemas/cell.js";
 
 export const plugin: LixPlugin = {
-	key: "lix-plugin-csv-v2",
+	key: "lix_plugin_csv",
 	detectChangesGlob: "*.csv",
 	detectChanges,
 	diffUiComponents: [
 		{
-			schema_key: "lix-plugin-csv-cell-v1",
-			component: Diff,
+			schema_key: CellSchemaV1.key,
+			component: CellDiff,
 		},
 	],
 	applyChanges,

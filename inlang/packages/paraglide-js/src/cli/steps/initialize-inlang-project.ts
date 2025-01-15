@@ -1,10 +1,14 @@
-import { loadProjectFromDirectory, type InlangProject } from "@inlang/sdk";
+import {
+	loadProjectFromDirectory,
+	loadProjectInMemory,
+	newProject,
+	saveProjectToDirectory,
+	type InlangProject,
+} from "@inlang/sdk";
 import type { Logger } from "../../services/logger/index.js";
 import type { CliStep } from "../utils.js";
-import { prompt } from "../utils.js";
 import { DEFAULT_PROJECT_PATH, getNewProjectTemplate } from "../defaults.js";
 import nodePath from "node:path";
-import consola from "consola";
 import fs from "node:fs";
 import { ENV_VARIABLES } from "../../services/env-variables/index.js";
 
@@ -21,145 +25,143 @@ export const initializeInlangProject: CliStep<
 		projectPath: string;
 	}
 > = async (ctx) => {
-	const existingProjectPaths =
-		// checking for undefined if node version is lower than 22
-		typeof fs.globSync !== "undefined" ? fs.globSync("*.inlang") : [];
+	// const existingProjectPaths =
+	// 	// checking for undefined if node version is lower than 22
+	// 	typeof fs.globSync !== "undefined" ? fs.globSync("*.inlang") : [];
 
-	if (existingProjectPaths.length > 0) {
-		const { project, projectPath } = await existingProjectFlow({
-			existingProjectPaths,
-			fs: ctx.fs,
-			syncFs: fs,
-			logger: ctx.logger,
-		});
+	// if (existingProjectPaths.length > 0) {
+	// 	const { project, projectPath } = await existingProjectFlow({
+	// 		existingProjectPaths,
+	// 		fs: ctx.fs,
+	// 		syncFs: fs,
+	// 		logger: ctx.logger,
+	// 	});
 
-		return {
-			...ctx,
-			project,
-			projectPath,
-		};
-	} else {
-		const { project, projectPath } = await createNewProjectFlow(ctx);
-		return {
-			...ctx,
-			project,
-			projectPath,
-		};
-	}
-};
-
-export const existingProjectFlow = async (ctx: {
-	/** An array of absolute paths to existing projects. */
-	existingProjectPaths: string[];
-	fs: typeof fs.promises;
-	syncFs: typeof fs;
-	logger: Logger;
-}): Promise<{ project: InlangProject; projectPath: string }> => {
-	const NEW_PROJECT_VALUE = "newProject";
-
-	const commonPrefix = getCommonPrefix(ctx.existingProjectPaths);
-	const options = ctx.existingProjectPaths.map((path) => {
-		return {
-			label: path.replace(commonPrefix, ""),
-			value: path,
-		};
-	});
-
-	const selection = (await prompt(
-		`Do you want to use an existing Inlang Project or create a new one?`,
-		{
-			type: "select",
-			options: [
-				{ label: "Create a new project", value: NEW_PROJECT_VALUE },
-				...options,
-			],
-		}
-	)) as unknown as string; // the prompt type is incorrect
-
-	//if the user wants to create a new project - create one & use it
-	if (selection === NEW_PROJECT_VALUE) return createNewProjectFlow(ctx);
-
-	const projectPath = selection;
-	const project = await loadProjectFromDirectory({
-		path: projectPath,
-		fs: ctx.syncFs,
-		appId: ENV_VARIABLES.PARJS_APP_ID,
-	});
-
-	if ((await project.errors.get()).length > 0) {
-		ctx.logger.error(
-			"Aborting paragilde initialization. - The selected project has errors. Either fix them, or remove the project and create a new one."
-		);
-		for (const error of await project.errors.get()) {
-			ctx.logger.error(error);
-		}
-		process.exit(1);
-	}
-
-	return { project, projectPath };
-};
-
-function parseLanguageTagInput(input: string): {
-	validLanguageTags: string[];
-	invalidLanguageTags: string[];
-} {
-	const languageTags = input
-		.replaceAll(/[,:\s]/g, " ") //replace common separators with spaces
-		.split(" ")
-		.filter(Boolean) //remove empty segments
-		.map((tag) => tag.toLowerCase());
-
-	const validLanguageTags: string[] = [];
-	const invalidLanguageTags: string[] = [];
-
-	for (const tag of languageTags) {
-		if (isValidLanguageTag(tag)) {
-			validLanguageTags.push(tag);
-		} else {
-			invalidLanguageTags.push(tag);
-		}
-	}
-
+	// 	return {
+	// 		...ctx,
+	// 		project,
+	// 		projectPath,
+	// 	};
+	// } else {
+	const { project, projectPath } = await createNewProjectFlow(ctx);
 	return {
-		validLanguageTags,
-		invalidLanguageTags,
+		...ctx,
+		project,
+		projectPath,
 	};
-}
+	// }
+};
 
-async function promptForLanguageTags(
-	initialLanguageTags: string[] = []
-): Promise<string[]> {
-	const languageTagsInput =
-		(await prompt("Which languages do you want to support?", {
-			type: "text",
-			placeholder: "en, de-ch, ar",
-			initial: initialLanguageTags.length
-				? initialLanguageTags.join(", ")
-				: undefined,
-		})) ?? "";
+// export const existingProjectFlow = async (ctx: {
+// 	/** An array of absolute paths to existing projects. */
+// 	existingProjectPaths: string[];
+// 	fs: typeof fs.promises;
+// 	syncFs: typeof fs;
+// 	logger: Logger;
+// }): Promise<{ project: InlangProject; projectPath: string }> => {
+// 	const NEW_PROJECT_VALUE = "newProject";
 
-	const { invalidLanguageTags, validLanguageTags } =
-		parseLanguageTagInput(languageTagsInput);
+// 	const commonPrefix = getCommonPrefix(ctx.existingProjectPaths);
+// 	const options = ctx.existingProjectPaths.map((path) => {
+// 		return {
+// 			label: path.replace(commonPrefix, ""),
+// 			value: path,
+// 		};
+// 	});
 
-	if (validLanguageTags.length === 0) {
-		consola.warn("You must specify at least one language tag");
-		return await promptForLanguageTags();
-	}
+// 	const selection = (await prompt(
+// 		`Do you want to use an existing Inlang Project or create a new one?`,
+// 		{
+// 			type: "select",
+// 			options: [
+// 				{ label: "Create a new project", value: NEW_PROJECT_VALUE },
+// 				...options,
+// 			],
+// 		}
+// 	)) as unknown as string; // the prompt type is incorrect
 
-	if (invalidLanguageTags.length > 0) {
-		const message =
-			invalidLanguageTags.length === 1
-				? invalidLanguageTags[0] +
-					" isn't a valid language tag. Please stick to IEEE BCP-47 Language Tags"
-				: invalidLanguageTags.map((tag) => `"${tag}"`).join(", ") +
-					" aren't valid language tags. Please stick to IEEE BCP-47 Language Tags";
+// 	//if the user wants to create a new project - create one & use it
+// 	if (selection === NEW_PROJECT_VALUE) return createNewProjectFlow(ctx);
 
-		consola.warn(message);
-		return await promptForLanguageTags(validLanguageTags);
-	}
+// 	const projectPath = selection;
+// 	const project = await loadProjectFromDirectory({
+// 		path: projectPath,
+// 		fs: ctx.syncFs,
+// 		appId: ENV_VARIABLES.PARJS_APP_ID,
+// 	});
 
-	return validLanguageTags;
-}
+// 	if ((await project.errors.get()).length > 0) {
+// 		ctx.logger.error(
+// 			"Aborting paragilde initialization. - The selected project has errors. Either fix them, or remove the project and create a new one."
+// 		);
+// 		for (const error of await project.errors.get()) {
+// 			ctx.logger.error(error);
+// 		}
+// 		process.exit(1);
+// 	}
+
+// 	return { project, projectPath };
+// };
+
+// function parseLocaleInput(input: string): {
+// 	validlocales: string[];
+// 	invalidlocales: string[];
+// } {
+// 	const locales = input
+// 		.replaceAll(/[,:\s]/g, " ") //replace common separators with spaces
+// 		.split(" ")
+// 		.filter(Boolean) //remove empty segments
+// 		.map((tag) => tag.toLowerCase());
+
+// 	const validlocales: string[] = [];
+// 	const invalidlocales: string[] = [];
+
+// 	for (const tag of locales) {
+// 		if (isValidlocale(tag)) {
+// 			validlocales.push(tag);
+// 		} else {
+// 			invalidlocales.push(tag);
+// 		}
+// 	}
+
+// 	return {
+// 		validlocales,
+// 		invalidlocales,
+// 	};
+// }
+
+// async function promptForLocales(
+// 	initialLocales: string[] = []
+// ): Promise<string[]> {
+// 	const localesInput =
+// 		(await prompt("Which locales do you want to support?", {
+// 			type: "text",
+// 			placeholder: "en, de-ch, ar",
+// 			initial: initialLocales.length ? initialLocales.join(", ") : undefined,
+// 		})) ?? "";
+
+// 	const { invalidlocales: invalidLocales, validlocales } =
+// 		parseLocaleInput(localesInput);
+
+// 	if (validlocales.length === 0) {
+// 		consola.warn("You must specify at least one locale");
+// 		return await promptForLocales();
+// 	}
+
+// 	if (invalidLocales.length > 0) {
+// 		const message =
+// 			invalidLocales.length === 1
+// 				? invalidLocales[0] +
+// 					" isn't a valid locale. Please stick to IEEE BCP-47 Language Tags"
+// 				: invalidLocales.map((tag) => `"${tag}"`).join(", ") +
+// 					" aren't valid locales. Please stick to IEEE BCP-47 Language Tags";
+
+// 		consola.warn(message);
+// 		return await promptForLocales(validlocales);
+// 	}
+
+// 	return validlocales;
+// }
 export const createNewProjectFlow = async (ctx: {
 	fs: typeof fs.promises;
 	syncFs: typeof fs;
@@ -169,15 +171,7 @@ export const createNewProjectFlow = async (ctx: {
 	/** An absolute path to the created project */
 	projectPath: string;
 }> => {
-	const languageTags = await promptForLanguageTags();
 	const settings = getNewProjectTemplate();
-
-	//Should always be defined. This is to shut TS up
-	const sourceLanguageTag = languageTags[0];
-	if (!sourceLanguageTag) throw new Error("sourceLanguageTag is not defined");
-
-	settings.locales = languageTags;
-	settings.baseLocale = sourceLanguageTag;
 
 	const messagePath = settings["plugin.inlang.messageFormat"].pathPattern;
 
@@ -188,13 +182,23 @@ export const createNewProjectFlow = async (ctx: {
 	await ctx.fs.mkdir(messageDir, { recursive: true });
 
 	await Promise.allSettled(
-		languageTags.map(async (languageTag) => {
-			const languageFile = nodePath.resolve(messageDir, languageTag + ".json");
+		settings.locales.map(async (locale) => {
+			const languageFile = nodePath.resolve(messageDir, locale + ".json");
+			const exists = await ctx.fs
+				.access(languageFile)
+				.then(() => true)
+				.catch(() => false);
+			if (exists) return;
 			await ctx.fs.writeFile(
 				languageFile,
 				JSON.stringify(
 					{
 						$schema: "https://inlang.com/schema/inlang-message-format",
+						// add an example message for instant aha moment
+						example_message:
+							locale === "en"
+								? "Hello world {username}"
+								: "Guten Tag {username}",
 					},
 					null,
 					2
@@ -207,16 +211,22 @@ export const createNewProjectFlow = async (ctx: {
 		`Creating a new inlang project in the current working directory.`
 	);
 
-	const projectPath = nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH);
+	const projectPath = DEFAULT_PROJECT_PATH;
 
 	//create default project
 	await ctx.fs.mkdir(projectPath, { recursive: true });
 
-	// write default settings
-	await ctx.fs.writeFile(
-		nodePath.resolve(projectPath, "settings.json"),
-		JSON.stringify(settings, undefined, 2)
-	);
+	const tempProject = await loadProjectInMemory({
+		blob: await newProject({
+			settings,
+		}),
+	});
+
+	await saveProjectToDirectory({
+		project: tempProject,
+		fs: ctx.fs,
+		path: projectPath,
+	});
 
 	const project = await loadProjectFromDirectory({
 		path: projectPath,
@@ -276,10 +286,10 @@ function longestCommonPrefix(strA: string, strB: string): string {
 }
 
 /**
- * Follows the IETF BCP 47 language tag schema with modifications.
+ * Follows the IETF BCP 47 locale schema with modifications.
  */
 export const pattern =
 	"^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$";
 
-const isValidLanguageTag = (languageTag: string): boolean =>
-	RegExp(`${pattern}`).test(languageTag);
+// const isValidlocale = (locale: string): boolean =>
+// 	RegExp(`${pattern}`).test(locale);

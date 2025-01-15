@@ -7,8 +7,11 @@ import type { ProjectSettings } from "@inlang/sdk";
 const defaultProjectSettings = {
 	$schema: "https://inlang.com/schema/project-settings",
 	baseLocale: "en",
-	locales: ["en"],
-	modules: [],
+	locales: ["en", "de"],
+	modules: [
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@3/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@1/dist/index.js",
+	],
 	"plugin.inlang.messageFormat": {
 		pathPattern: "./messages/{locale}.json",
 	},
@@ -18,17 +21,6 @@ const defaultProjectSettings = {
  * @returns A new copy of the default project template that is safe to mutate.
  */
 export function getNewProjectTemplate() {
-	if (!("structuredClone" in globalThis)) {
-		try {
-			return JSON.parse(
-				JSON.stringify(defaultProjectSettings)
-			) as typeof defaultProjectSettings;
-		} catch {
-			throw new Error(
-				"structuredClone is not supported in your Node Version. Please use version 17 or higher"
-			);
-		}
-	}
 	return structuredClone(defaultProjectSettings);
 }
 

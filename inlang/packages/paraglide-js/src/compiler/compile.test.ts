@@ -101,3 +101,34 @@ test("saves the local account to app data if not exists", async () => {
 	expect(account).toHaveProperty("id");
 	expect(account).toHaveProperty("name");
 });
+
+test("cleans the output directory", async () => {
+	const fs = memfs().fs as unknown as typeof import("node:fs");
+
+	const project = await loadProjectInMemory({
+		blob: await newProject({}),
+	});
+
+	// save project to directory to test loading
+	await saveProjectToDirectory({
+		project,
+		path: "/project.inlang",
+		fs: fs.promises,
+	});
+
+	await fs.promises.mkdir("/output/subdir", { recursive: true });
+	await fs.promises.writeFile("/output/subdir/x.js", "console.log('hello')");
+	await fs.promises.writeFile("/output/y.js", "console.log('hello')");
+
+	await compile({
+		project: "/project.inlang",
+		outdir: "/output",
+		fs: fs,
+	});
+
+	const outputDir = await fs.promises.readdir("/output");
+	const outputSubDir = fs.existsSync("/output/subdir");
+
+	expect(outputDir).not.toContain("y.js");
+	expect(outputSubDir).toBe(false);
+});

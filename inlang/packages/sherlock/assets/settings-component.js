@@ -3,910 +3,63 @@
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const t$2 = globalThis,
-	e$4 =
-		t$2.ShadowRoot &&
-		(void 0 === t$2.ShadyCSS || t$2.ShadyCSS.nativeShadow) &&
-		"adoptedStyleSheets" in Document.prototype &&
-		"replace" in CSSStyleSheet.prototype,
-	s = Symbol(),
-	o$2 = new WeakMap()
-let n$3 = class n {
-	constructor(t, e, o) {
-		if (((this._$cssResult$ = !0), o !== s))
-			throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.")
-		;(this.cssText = t), (this.t = e)
-	}
-	get styleSheet() {
-		let t = this.o
-		const s = this.t
-		if (e$4 && void 0 === t) {
-			const e = void 0 !== s && 1 === s.length
-			e && (t = o$2.get(s)),
-				void 0 === t &&
-					((this.o = t = new CSSStyleSheet()).replaceSync(this.cssText), e && o$2.set(s, t))
-		}
-		return t
-	}
-	toString() {
-		return this.cssText
-	}
-}
-const r$3 = (t) => new n$3("string" == typeof t ? t : t + "", void 0, s),
-	i$2 = (t, ...e) => {
-		const o =
-			1 === t.length
-				? t[0]
-				: e.reduce(
-						(e, s, o) =>
-							e +
-							((t) => {
-								if (!0 === t._$cssResult$) return t.cssText
-								if ("number" == typeof t) return t
-								throw Error(
-									"Value passed to 'css' function must be a 'css' function result: " +
-										t +
-										". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security."
-								)
-							})(s) +
-							t[o + 1],
-						t[0]
-					)
-		return new n$3(o, t, s)
-	},
-	S$1 = (s, o) => {
-		if (e$4) s.adoptedStyleSheets = o.map((t) => (t instanceof CSSStyleSheet ? t : t.styleSheet))
-		else
-			for (const e of o) {
-				const o = document.createElement("style"),
-					n = t$2.litNonce
-				void 0 !== n && o.setAttribute("nonce", n), (o.textContent = e.cssText), s.appendChild(o)
-			}
-	},
-	c$2 = e$4
-		? (t) => t
-		: (t) =>
-				t instanceof CSSStyleSheet
-					? ((t) => {
-							let e = ""
-							for (const s of t.cssRules) e += s.cssText
-							return r$3(e)
-						})(t)
-					: t
+const t$3=globalThis,e$8=t$3.ShadowRoot&&(void 0===t$3.ShadyCSS||t$3.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,s$1=Symbol(),o$6=new WeakMap;let n$4 = class n{constructor(t,e,o){if(this._$cssResult$=!0,o!==s$1)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e;}get styleSheet(){let t=this.o;const s=this.t;if(e$8&&void 0===t){const e=void 0!==s&&1===s.length;e&&(t=o$6.get(s)),void 0===t&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),e&&o$6.set(s,t));}return t}toString(){return this.cssText}};const r$5=t=>new n$4("string"==typeof t?t:t+"",void 0,s$1),i$5=(t,...e)=>{const o=1===t.length?t[0]:e.reduce(((e,s,o)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(s)+t[o+1]),t[0]);return new n$4(o,t,s$1)},S$1=(s,o)=>{if(e$8)s.adoptedStyleSheets=o.map((t=>t instanceof CSSStyleSheet?t:t.styleSheet));else for(const e of o){const o=document.createElement("style"),n=t$3.litNonce;void 0!==n&&o.setAttribute("nonce",n),o.textContent=e.cssText,s.appendChild(o);}},c$2=e$8?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const s of t.cssRules)e+=s.cssText;return r$5(e)})(t):t;
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */ const {
-		is: i$1,
-		defineProperty: e$3,
-		getOwnPropertyDescriptor: r$2,
-		getOwnPropertyNames: h$2,
-		getOwnPropertySymbols: o$1,
-		getPrototypeOf: n$2,
-	} = Object,
-	a = globalThis,
-	c$1 = a.trustedTypes,
-	l = c$1 ? c$1.emptyScript : "",
-	p = a.reactiveElementPolyfillSupport,
-	d = (t, s) => t,
-	u = {
-		toAttribute(t, s) {
-			switch (s) {
-				case Boolean:
-					t = t ? l : null
-					break
-				case Object:
-				case Array:
-					t = null == t ? t : JSON.stringify(t)
-			}
-			return t
-		},
-		fromAttribute(t, s) {
-			let i = t
-			switch (s) {
-				case Boolean:
-					i = null !== t
-					break
-				case Number:
-					i = null === t ? null : Number(t)
-					break
-				case Object:
-				case Array:
-					try {
-						i = JSON.parse(t)
-					} catch (t) {
-						i = null
-					}
-			}
-			return i
-		},
-	},
-	f$2 = (t, s) => !i$1(t, s),
-	y = { attribute: !0, type: String, converter: u, reflect: !1, hasChanged: f$2 }
-;(Symbol.metadata ??= Symbol("metadata")), (a.litPropertyMetadata ??= new WeakMap())
-class b extends HTMLElement {
-	static addInitializer(t) {
-		this._$Ei(), (this.l ??= []).push(t)
-	}
-	static get observedAttributes() {
-		return this.finalize(), this._$Eh && [...this._$Eh.keys()]
-	}
-	static createProperty(t, s = y) {
-		if (
-			(s.state && (s.attribute = !1), this._$Ei(), this.elementProperties.set(t, s), !s.noAccessor)
-		) {
-			const i = Symbol(),
-				r = this.getPropertyDescriptor(t, i, s)
-			void 0 !== r && e$3(this.prototype, t, r)
-		}
-	}
-	static getPropertyDescriptor(t, s, i) {
-		const { get: e, set: h } = r$2(this.prototype, t) ?? {
-			get() {
-				return this[s]
-			},
-			set(t) {
-				this[s] = t
-			},
-		}
-		return {
-			get() {
-				return e?.call(this)
-			},
-			set(s) {
-				const r = e?.call(this)
-				h.call(this, s), this.requestUpdate(t, r, i)
-			},
-			configurable: !0,
-			enumerable: !0,
-		}
-	}
-	static getPropertyOptions(t) {
-		return this.elementProperties.get(t) ?? y
-	}
-	static _$Ei() {
-		if (this.hasOwnProperty(d("elementProperties"))) return
-		const t = n$2(this)
-		t.finalize(),
-			void 0 !== t.l && (this.l = [...t.l]),
-			(this.elementProperties = new Map(t.elementProperties))
-	}
-	static finalize() {
-		if (this.hasOwnProperty(d("finalized"))) return
-		if (((this.finalized = !0), this._$Ei(), this.hasOwnProperty(d("properties")))) {
-			const t = this.properties,
-				s = [...h$2(t), ...o$1(t)]
-			for (const i of s) this.createProperty(i, t[i])
-		}
-		const t = this[Symbol.metadata]
-		if (null !== t) {
-			const s = litPropertyMetadata.get(t)
-			if (void 0 !== s) for (const [t, i] of s) this.elementProperties.set(t, i)
-		}
-		this._$Eh = new Map()
-		for (const [t, s] of this.elementProperties) {
-			const i = this._$Eu(t, s)
-			void 0 !== i && this._$Eh.set(i, t)
-		}
-		this.elementStyles = this.finalizeStyles(this.styles)
-	}
-	static finalizeStyles(s) {
-		const i = []
-		if (Array.isArray(s)) {
-			const e = new Set(s.flat(1 / 0).reverse())
-			for (const s of e) i.unshift(c$2(s))
-		} else void 0 !== s && i.push(c$2(s))
-		return i
-	}
-	static _$Eu(t, s) {
-		const i = s.attribute
-		return !1 === i
-			? void 0
-			: "string" == typeof i
-				? i
-				: "string" == typeof t
-					? t.toLowerCase()
-					: void 0
-	}
-	constructor() {
-		super(),
-			(this._$Ep = void 0),
-			(this.isUpdatePending = !1),
-			(this.hasUpdated = !1),
-			(this._$Em = null),
-			this._$Ev()
-	}
-	_$Ev() {
-		;(this._$ES = new Promise((t) => (this.enableUpdating = t))),
-			(this._$AL = new Map()),
-			this._$E_(),
-			this.requestUpdate(),
-			this.constructor.l?.forEach((t) => t(this))
-	}
-	addController(t) {
-		;(this._$EO ??= new Set()).add(t),
-			void 0 !== this.renderRoot && this.isConnected && t.hostConnected?.()
-	}
-	removeController(t) {
-		this._$EO?.delete(t)
-	}
-	_$E_() {
-		const t = new Map(),
-			s = this.constructor.elementProperties
-		for (const i of s.keys()) this.hasOwnProperty(i) && (t.set(i, this[i]), delete this[i])
-		t.size > 0 && (this._$Ep = t)
-	}
-	createRenderRoot() {
-		const t = this.shadowRoot ?? this.attachShadow(this.constructor.shadowRootOptions)
-		return S$1(t, this.constructor.elementStyles), t
-	}
-	connectedCallback() {
-		;(this.renderRoot ??= this.createRenderRoot()),
-			this.enableUpdating(!0),
-			this._$EO?.forEach((t) => t.hostConnected?.())
-	}
-	enableUpdating(t) {}
-	disconnectedCallback() {
-		this._$EO?.forEach((t) => t.hostDisconnected?.())
-	}
-	attributeChangedCallback(t, s, i) {
-		this._$AK(t, i)
-	}
-	_$EC(t, s) {
-		const i = this.constructor.elementProperties.get(t),
-			e = this.constructor._$Eu(t, i)
-		if (void 0 !== e && !0 === i.reflect) {
-			const r = (void 0 !== i.converter?.toAttribute ? i.converter : u).toAttribute(s, i.type)
-			;(this._$Em = t),
-				null == r ? this.removeAttribute(e) : this.setAttribute(e, r),
-				(this._$Em = null)
-		}
-	}
-	_$AK(t, s) {
-		const i = this.constructor,
-			e = i._$Eh.get(t)
-		if (void 0 !== e && this._$Em !== e) {
-			const t = i.getPropertyOptions(e),
-				r =
-					"function" == typeof t.converter
-						? { fromAttribute: t.converter }
-						: void 0 !== t.converter?.fromAttribute
-							? t.converter
-							: u
-			;(this._$Em = e), (this[e] = r.fromAttribute(s, t.type)), (this._$Em = null)
-		}
-	}
-	requestUpdate(t, s, i) {
-		if (void 0 !== t) {
-			if (((i ??= this.constructor.getPropertyOptions(t)), !(i.hasChanged ?? f$2)(this[t], s)))
-				return
-			this.P(t, s, i)
-		}
-		!1 === this.isUpdatePending && (this._$ES = this._$ET())
-	}
-	P(t, s, i) {
-		this._$AL.has(t) || this._$AL.set(t, s),
-			!0 === i.reflect && this._$Em !== t && (this._$Ej ??= new Set()).add(t)
-	}
-	async _$ET() {
-		this.isUpdatePending = !0
-		try {
-			await this._$ES
-		} catch (t) {
-			Promise.reject(t)
-		}
-		const t = this.scheduleUpdate()
-		return null != t && (await t), !this.isUpdatePending
-	}
-	scheduleUpdate() {
-		return this.performUpdate()
-	}
-	performUpdate() {
-		if (!this.isUpdatePending) return
-		if (!this.hasUpdated) {
-			if (((this.renderRoot ??= this.createRenderRoot()), this._$Ep)) {
-				for (const [t, s] of this._$Ep) this[t] = s
-				this._$Ep = void 0
-			}
-			const t = this.constructor.elementProperties
-			if (t.size > 0)
-				for (const [s, i] of t)
-					!0 !== i.wrapped || this._$AL.has(s) || void 0 === this[s] || this.P(s, this[s], i)
-		}
-		let t = !1
-		const s = this._$AL
-		try {
-			;(t = this.shouldUpdate(s)),
-				t
-					? (this.willUpdate(s), this._$EO?.forEach((t) => t.hostUpdate?.()), this.update(s))
-					: this._$EU()
-		} catch (s) {
-			throw ((t = !1), this._$EU(), s)
-		}
-		t && this._$AE(s)
-	}
-	willUpdate(t) {}
-	_$AE(t) {
-		this._$EO?.forEach((t) => t.hostUpdated?.()),
-			this.hasUpdated || ((this.hasUpdated = !0), this.firstUpdated(t)),
-			this.updated(t)
-	}
-	_$EU() {
-		;(this._$AL = new Map()), (this.isUpdatePending = !1)
-	}
-	get updateComplete() {
-		return this.getUpdateComplete()
-	}
-	getUpdateComplete() {
-		return this._$ES
-	}
-	shouldUpdate(t) {
-		return !0
-	}
-	update(t) {
-		;(this._$Ej &&= this._$Ej.forEach((t) => this._$EC(t, this[t]))), this._$EU()
-	}
-	updated(t) {}
-	firstUpdated(t) {}
-}
-;(b.elementStyles = []),
-	(b.shadowRootOptions = { mode: "open" }),
-	(b[d("elementProperties")] = new Map()),
-	(b[d("finalized")] = new Map()),
-	p?.({ ReactiveElement: b }),
-	(a.reactiveElementVersions ??= []).push("2.0.4")
+ */const{is:i$4,defineProperty:e$7,getOwnPropertyDescriptor:r$4,getOwnPropertyNames:h$1,getOwnPropertySymbols:o$5,getPrototypeOf:n$3}=Object,a$2=globalThis,c$1=a$2.trustedTypes,l$3=c$1?c$1.emptyScript:"",p$1=a$2.reactiveElementPolyfillSupport,d$1=(t,s)=>t,u$3={toAttribute(t,s){switch(s){case Boolean:t=t?l$3:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t);}return t},fromAttribute(t,s){let i=t;switch(s){case Boolean:i=null!==t;break;case Number:i=null===t?null:Number(t);break;case Object:case Array:try{i=JSON.parse(t);}catch(t){i=null;}}return i}},f$2=(t,s)=>!i$4(t,s),y$1={attribute:!0,type:String,converter:u$3,reflect:!1,hasChanged:f$2};Symbol.metadata??=Symbol("metadata"),a$2.litPropertyMetadata??=new WeakMap;class b extends HTMLElement{static addInitializer(t){this._$Ei(),(this.l??=[]).push(t);}static get observedAttributes(){return this.finalize(),this._$Eh&&[...this._$Eh.keys()]}static createProperty(t,s=y$1){if(s.state&&(s.attribute=!1),this._$Ei(),this.elementProperties.set(t,s),!s.noAccessor){const i=Symbol(),r=this.getPropertyDescriptor(t,i,s);void 0!==r&&e$7(this.prototype,t,r);}}static getPropertyDescriptor(t,s,i){const{get:e,set:h}=r$4(this.prototype,t)??{get(){return this[s]},set(t){this[s]=t;}};return {get(){return e?.call(this)},set(s){const r=e?.call(this);h.call(this,s),this.requestUpdate(t,r,i);},configurable:!0,enumerable:!0}}static getPropertyOptions(t){return this.elementProperties.get(t)??y$1}static _$Ei(){if(this.hasOwnProperty(d$1("elementProperties")))return;const t=n$3(this);t.finalize(),void 0!==t.l&&(this.l=[...t.l]),this.elementProperties=new Map(t.elementProperties);}static finalize(){if(this.hasOwnProperty(d$1("finalized")))return;if(this.finalized=!0,this._$Ei(),this.hasOwnProperty(d$1("properties"))){const t=this.properties,s=[...h$1(t),...o$5(t)];for(const i of s)this.createProperty(i,t[i]);}const t=this[Symbol.metadata];if(null!==t){const s=litPropertyMetadata.get(t);if(void 0!==s)for(const[t,i]of s)this.elementProperties.set(t,i);}this._$Eh=new Map;for(const[t,s]of this.elementProperties){const i=this._$Eu(t,s);void 0!==i&&this._$Eh.set(i,t);}this.elementStyles=this.finalizeStyles(this.styles);}static finalizeStyles(s){const i=[];if(Array.isArray(s)){const e=new Set(s.flat(1/0).reverse());for(const s of e)i.unshift(c$2(s));}else void 0!==s&&i.push(c$2(s));return i}static _$Eu(t,s){const i=s.attribute;return !1===i?void 0:"string"==typeof i?i:"string"==typeof t?t.toLowerCase():void 0}constructor(){super(),this._$Ep=void 0,this.isUpdatePending=!1,this.hasUpdated=!1,this._$Em=null,this._$Ev();}_$Ev(){this._$ES=new Promise((t=>this.enableUpdating=t)),this._$AL=new Map,this._$E_(),this.requestUpdate(),this.constructor.l?.forEach((t=>t(this)));}addController(t){(this._$EO??=new Set).add(t),void 0!==this.renderRoot&&this.isConnected&&t.hostConnected?.();}removeController(t){this._$EO?.delete(t);}_$E_(){const t=new Map,s=this.constructor.elementProperties;for(const i of s.keys())this.hasOwnProperty(i)&&(t.set(i,this[i]),delete this[i]);t.size>0&&(this._$Ep=t);}createRenderRoot(){const t=this.shadowRoot??this.attachShadow(this.constructor.shadowRootOptions);return S$1(t,this.constructor.elementStyles),t}connectedCallback(){this.renderRoot??=this.createRenderRoot(),this.enableUpdating(!0),this._$EO?.forEach((t=>t.hostConnected?.()));}enableUpdating(t){}disconnectedCallback(){this._$EO?.forEach((t=>t.hostDisconnected?.()));}attributeChangedCallback(t,s,i){this._$AK(t,i);}_$EC(t,s){const i=this.constructor.elementProperties.get(t),e=this.constructor._$Eu(t,i);if(void 0!==e&&!0===i.reflect){const r=(void 0!==i.converter?.toAttribute?i.converter:u$3).toAttribute(s,i.type);this._$Em=t,null==r?this.removeAttribute(e):this.setAttribute(e,r),this._$Em=null;}}_$AK(t,s){const i=this.constructor,e=i._$Eh.get(t);if(void 0!==e&&this._$Em!==e){const t=i.getPropertyOptions(e),r="function"==typeof t.converter?{fromAttribute:t.converter}:void 0!==t.converter?.fromAttribute?t.converter:u$3;this._$Em=e,this[e]=r.fromAttribute(s,t.type),this._$Em=null;}}requestUpdate(t,s,i){if(void 0!==t){if(i??=this.constructor.getPropertyOptions(t),!(i.hasChanged??f$2)(this[t],s))return;this.P(t,s,i);}!1===this.isUpdatePending&&(this._$ES=this._$ET());}P(t,s,i){this._$AL.has(t)||this._$AL.set(t,s),!0===i.reflect&&this._$Em!==t&&(this._$Ej??=new Set).add(t);}async _$ET(){this.isUpdatePending=!0;try{await this._$ES;}catch(t){Promise.reject(t);}const t=this.scheduleUpdate();return null!=t&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){if(!this.isUpdatePending)return;if(!this.hasUpdated){if(this.renderRoot??=this.createRenderRoot(),this._$Ep){for(const[t,s]of this._$Ep)this[t]=s;this._$Ep=void 0;}const t=this.constructor.elementProperties;if(t.size>0)for(const[s,i]of t)!0!==i.wrapped||this._$AL.has(s)||void 0===this[s]||this.P(s,this[s],i);}let t=!1;const s=this._$AL;try{t=this.shouldUpdate(s),t?(this.willUpdate(s),this._$EO?.forEach((t=>t.hostUpdate?.())),this.update(s)):this._$EU();}catch(s){throw t=!1,this._$EU(),s}t&&this._$AE(s);}willUpdate(t){}_$AE(t){this._$EO?.forEach((t=>t.hostUpdated?.())),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(t)),this.updated(t);}_$EU(){this._$AL=new Map,this.isUpdatePending=!1;}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$ES}shouldUpdate(t){return !0}update(t){this._$Ej&&=this._$Ej.forEach((t=>this._$EC(t,this[t]))),this._$EU();}updated(t){}firstUpdated(t){}}b.elementStyles=[],b.shadowRootOptions={mode:"open"},b[d$1("elementProperties")]=new Map,b[d$1("finalized")]=new Map,p$1?.({ReactiveElement:b}),(a$2.reactiveElementVersions??=[]).push("2.0.4");
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const n$1 = globalThis,
-	c = n$1.trustedTypes,
-	h$1 = c ? c.createPolicy("lit-html", { createHTML: (t) => t }) : void 0,
-	f$1 = "$lit$",
-	v = `lit$${Math.random().toFixed(9).slice(2)}$`,
-	m = "?" + v,
-	_ = `<${m}>`,
-	w = document,
-	lt = () => w.createComment(""),
-	st = (t) => null === t || ("object" != typeof t && "function" != typeof t),
-	g = Array.isArray,
-	$ = (t) => g(t) || "function" == typeof t?.[Symbol.iterator],
-	x = "[ \t\n\f\r]",
-	T = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,
-	E = /-->/g,
-	k = />/g,
-	O = RegExp(`>|${x}(?:([^\\s"'>=/]+)(${x}*=${x}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"),
-	S = /'/g,
-	j = /"/g,
-	M = /^(?:script|style|textarea|title)$/i,
-	P =
-		(t) =>
-		(i, ...s) => ({ _$litType$: t, strings: i, values: s }),
-	ke$1 = P(1),
-	R = Symbol.for("lit-noChange"),
-	D = Symbol.for("lit-nothing"),
-	V = new WeakMap(),
-	I = w.createTreeWalker(w, 129)
-function N(t, i) {
-	if (!g(t) || !t.hasOwnProperty("raw")) throw Error("invalid template strings array")
-	return void 0 !== h$1 ? h$1.createHTML(i) : i
-}
-const U = (t, i) => {
-	const s = t.length - 1,
-		e = []
-	let h,
-		o = 2 === i ? "<svg>" : 3 === i ? "<math>" : "",
-		n = T
-	for (let i = 0; i < s; i++) {
-		const s = t[i]
-		let r,
-			l,
-			c = -1,
-			a = 0
-		for (; a < s.length && ((n.lastIndex = a), (l = n.exec(s)), null !== l); )
-			(a = n.lastIndex),
-				n === T
-					? "!--" === l[1]
-						? (n = E)
-						: void 0 !== l[1]
-							? (n = k)
-							: void 0 !== l[2]
-								? (M.test(l[2]) && (h = RegExp("</" + l[2], "g")), (n = O))
-								: void 0 !== l[3] && (n = O)
-					: n === O
-						? ">" === l[0]
-							? ((n = h ?? T), (c = -1))
-							: void 0 === l[1]
-								? (c = -2)
-								: ((c = n.lastIndex - l[2].length),
-									(r = l[1]),
-									(n = void 0 === l[3] ? O : '"' === l[3] ? j : S))
-						: n === j || n === S
-							? (n = O)
-							: n === E || n === k
-								? (n = T)
-								: ((n = O), (h = void 0))
-		const u = n === O && t[i + 1].startsWith("/>") ? " " : ""
-		o +=
-			n === T
-				? s + _
-				: c >= 0
-					? (e.push(r), s.slice(0, c) + f$1 + s.slice(c) + v + u)
-					: s + v + (-2 === c ? i : u)
-	}
-	return [N(t, o + (t[s] || "<?>") + (2 === i ? "</svg>" : 3 === i ? "</math>" : "")), e]
-}
-class B {
-	constructor({ strings: t, _$litType$: i }, s) {
-		let e
-		this.parts = []
-		let h = 0,
-			o = 0
-		const n = t.length - 1,
-			r = this.parts,
-			[l, a] = U(t, i)
-		if (
-			((this.el = B.createElement(l, s)), (I.currentNode = this.el.content), 2 === i || 3 === i)
-		) {
-			const t = this.el.content.firstChild
-			t.replaceWith(...t.childNodes)
-		}
-		for (; null !== (e = I.nextNode()) && r.length < n; ) {
-			if (1 === e.nodeType) {
-				if (e.hasAttributes())
-					for (const t of e.getAttributeNames())
-						if (t.endsWith(f$1)) {
-							const i = a[o++],
-								s = e.getAttribute(t).split(v),
-								n = /([.?@])?(.*)/.exec(i)
-							r.push({
-								type: 1,
-								index: h,
-								name: n[2],
-								strings: s,
-								ctor: "." === n[1] ? Y : "?" === n[1] ? Z : "@" === n[1] ? q : G,
-							}),
-								e.removeAttribute(t)
-						} else t.startsWith(v) && (r.push({ type: 6, index: h }), e.removeAttribute(t))
-				if (M.test(e.tagName)) {
-					const t = e.textContent.split(v),
-						i = t.length - 1
-					if (i > 0) {
-						e.textContent = c ? c.emptyScript : ""
-						for (let s = 0; s < i; s++)
-							e.append(t[s], lt()), I.nextNode(), r.push({ type: 2, index: ++h })
-						e.append(t[i], lt())
-					}
-				}
-			} else if (8 === e.nodeType)
-				if (e.data === m) r.push({ type: 2, index: h })
-				else {
-					let t = -1
-					for (; -1 !== (t = e.data.indexOf(v, t + 1)); )
-						r.push({ type: 7, index: h }), (t += v.length - 1)
-				}
-			h++
-		}
-	}
-	static createElement(t, i) {
-		const s = w.createElement("template")
-		return (s.innerHTML = t), s
-	}
-}
-function z(t, i, s = t, e) {
-	if (i === R) return i
-	let h = void 0 !== e ? s.o?.[e] : s.l
-	const o = st(i) ? void 0 : i._$litDirective$
-	return (
-		h?.constructor !== o &&
-			(h?._$AO?.(!1),
-			void 0 === o ? (h = void 0) : ((h = new o(t)), h._$AT(t, s, e)),
-			void 0 !== e ? ((s.o ??= [])[e] = h) : (s.l = h)),
-		void 0 !== h && (i = z(t, h._$AS(t, i.values), h, e)),
-		i
-	)
-}
-class F {
-	constructor(t, i) {
-		;(this._$AV = []), (this._$AN = void 0), (this._$AD = t), (this._$AM = i)
-	}
-	get parentNode() {
-		return this._$AM.parentNode
-	}
-	get _$AU() {
-		return this._$AM._$AU
-	}
-	u(t) {
-		const {
-				el: { content: i },
-				parts: s,
-			} = this._$AD,
-			e = (t?.creationScope ?? w).importNode(i, !0)
-		I.currentNode = e
-		let h = I.nextNode(),
-			o = 0,
-			n = 0,
-			r = s[0]
-		for (; void 0 !== r; ) {
-			if (o === r.index) {
-				let i
-				2 === r.type
-					? (i = new et(h, h.nextSibling, this, t))
-					: 1 === r.type
-						? (i = new r.ctor(h, r.name, r.strings, this, t))
-						: 6 === r.type && (i = new K(h, this, t)),
-					this._$AV.push(i),
-					(r = s[++n])
-			}
-			o !== r?.index && ((h = I.nextNode()), o++)
-		}
-		return (I.currentNode = w), e
-	}
-	p(t) {
-		let i = 0
-		for (const s of this._$AV)
-			void 0 !== s &&
-				(void 0 !== s.strings ? (s._$AI(t, s, i), (i += s.strings.length - 2)) : s._$AI(t[i])),
-				i++
-	}
-}
-class et {
-	get _$AU() {
-		return this._$AM?._$AU ?? this.v
-	}
-	constructor(t, i, s, e) {
-		;(this.type = 2),
-			(this._$AH = D),
-			(this._$AN = void 0),
-			(this._$AA = t),
-			(this._$AB = i),
-			(this._$AM = s),
-			(this.options = e),
-			(this.v = e?.isConnected ?? !0)
-	}
-	get parentNode() {
-		let t = this._$AA.parentNode
-		const i = this._$AM
-		return void 0 !== i && 11 === t?.nodeType && (t = i.parentNode), t
-	}
-	get startNode() {
-		return this._$AA
-	}
-	get endNode() {
-		return this._$AB
-	}
-	_$AI(t, i = this) {
-		;(t = z(this, t, i)),
-			st(t)
-				? t === D || null == t || "" === t
-					? (this._$AH !== D && this._$AR(), (this._$AH = D))
-					: t !== this._$AH && t !== R && this._(t)
-				: void 0 !== t._$litType$
-					? this.$(t)
-					: void 0 !== t.nodeType
-						? this.T(t)
-						: $(t)
-							? this.k(t)
-							: this._(t)
-	}
-	O(t) {
-		return this._$AA.parentNode.insertBefore(t, this._$AB)
-	}
-	T(t) {
-		this._$AH !== t && (this._$AR(), (this._$AH = this.O(t)))
-	}
-	_(t) {
-		this._$AH !== D && st(this._$AH)
-			? (this._$AA.nextSibling.data = t)
-			: this.T(w.createTextNode(t)),
-			(this._$AH = t)
-	}
-	$(t) {
-		const { values: i, _$litType$: s } = t,
-			e =
-				"number" == typeof s
-					? this._$AC(t)
-					: (void 0 === s.el && (s.el = B.createElement(N(s.h, s.h[0]), this.options)), s)
-		if (this._$AH?._$AD === e) this._$AH.p(i)
-		else {
-			const t = new F(e, this),
-				s = t.u(this.options)
-			t.p(i), this.T(s), (this._$AH = t)
-		}
-	}
-	_$AC(t) {
-		let i = V.get(t.strings)
-		return void 0 === i && V.set(t.strings, (i = new B(t))), i
-	}
-	k(t) {
-		g(this._$AH) || ((this._$AH = []), this._$AR())
-		const i = this._$AH
-		let s,
-			e = 0
-		for (const h of t)
-			e === i.length
-				? i.push((s = new et(this.O(lt()), this.O(lt()), this, this.options)))
-				: (s = i[e]),
-				s._$AI(h),
-				e++
-		e < i.length && (this._$AR(s && s._$AB.nextSibling, e), (i.length = e))
-	}
-	_$AR(t = this._$AA.nextSibling, i) {
-		for (this._$AP?.(!1, !0, i); t && t !== this._$AB; ) {
-			const i = t.nextSibling
-			t.remove(), (t = i)
-		}
-	}
-	setConnected(t) {
-		void 0 === this._$AM && ((this.v = t), this._$AP?.(t))
-	}
-}
-class G {
-	get tagName() {
-		return this.element.tagName
-	}
-	get _$AU() {
-		return this._$AM._$AU
-	}
-	constructor(t, i, s, e, h) {
-		;(this.type = 1),
-			(this._$AH = D),
-			(this._$AN = void 0),
-			(this.element = t),
-			(this.name = i),
-			(this._$AM = e),
-			(this.options = h),
-			s.length > 2 || "" !== s[0] || "" !== s[1]
-				? ((this._$AH = Array(s.length - 1).fill(new String())), (this.strings = s))
-				: (this._$AH = D)
-	}
-	_$AI(t, i = this, s, e) {
-		const h = this.strings
-		let o = !1
-		if (void 0 === h)
-			(t = z(this, t, i, 0)), (o = !st(t) || (t !== this._$AH && t !== R)), o && (this._$AH = t)
-		else {
-			const e = t
-			let n, r
-			for (t = h[0], n = 0; n < h.length - 1; n++)
-				(r = z(this, e[s + n], i, n)),
-					r === R && (r = this._$AH[n]),
-					(o ||= !st(r) || r !== this._$AH[n]),
-					r === D ? (t = D) : t !== D && (t += (r ?? "") + h[n + 1]),
-					(this._$AH[n] = r)
-		}
-		o && !e && this.j(t)
-	}
-	j(t) {
-		t === D
-			? this.element.removeAttribute(this.name)
-			: this.element.setAttribute(this.name, t ?? "")
-	}
-}
-class Y extends G {
-	constructor() {
-		super(...arguments), (this.type = 3)
-	}
-	j(t) {
-		this.element[this.name] = t === D ? void 0 : t
-	}
-}
-class Z extends G {
-	constructor() {
-		super(...arguments), (this.type = 4)
-	}
-	j(t) {
-		this.element.toggleAttribute(this.name, !!t && t !== D)
-	}
-}
-class q extends G {
-	constructor(t, i, s, e, h) {
-		super(t, i, s, e, h), (this.type = 5)
-	}
-	_$AI(t, i = this) {
-		if ((t = z(this, t, i, 0) ?? D) === R) return
-		const s = this._$AH,
-			e =
-				(t === D && s !== D) ||
-				t.capture !== s.capture ||
-				t.once !== s.once ||
-				t.passive !== s.passive,
-			h = t !== D && (s === D || e)
-		e && this.element.removeEventListener(this.name, this, s),
-			h && this.element.addEventListener(this.name, this, t),
-			(this._$AH = t)
-	}
-	handleEvent(t) {
-		"function" == typeof this._$AH
-			? this._$AH.call(this.options?.host ?? this.element, t)
-			: this._$AH.handleEvent(t)
-	}
-}
-class K {
-	constructor(t, i, s) {
-		;(this.element = t), (this.type = 6), (this._$AN = void 0), (this._$AM = i), (this.options = s)
-	}
-	get _$AU() {
-		return this._$AM._$AU
-	}
-	_$AI(t) {
-		z(this, t)
-	}
-}
-const Re = n$1.litHtmlPolyfillSupport
-Re?.(B, et), (n$1.litHtmlVersions ??= []).push("3.2.0")
-const Q = (t, i, s) => {
-	const e = s?.renderBefore ?? i
-	let h = e._$litPart$
-	if (void 0 === h) {
-		const t = s?.renderBefore ?? null
-		e._$litPart$ = h = new et(i.insertBefore(lt(), t), t, void 0, s ?? {})
-	}
-	return h._$AI(t), h
-}
+const t$2=globalThis,i$3=t$2.trustedTypes,s=i$3?i$3.createPolicy("lit-html",{createHTML:t=>t}):void 0,e$6="$lit$",h=`lit$${Math.random().toFixed(9).slice(2)}$`,o$4="?"+h,n$2=`<${o$4}>`,r$3=document,l$2=()=>r$3.createComment(""),c=t=>null===t||"object"!=typeof t&&"function"!=typeof t,a$1=Array.isArray,u$2=t=>a$1(t)||"function"==typeof t?.[Symbol.iterator],d="[ \t\n\f\r]",f$1=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,v=/-->/g,_=/>/g,m$1=RegExp(`>|${d}(?:([^\\s"'>=/]+)(${d}*=${d}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),p=/'/g,g=/"/g,$=/^(?:script|style|textarea|title)$/i,y=t=>(i,...s)=>({_$litType$:t,strings:i,values:s}),x=y(1),T=Symbol.for("lit-noChange"),E=Symbol.for("lit-nothing"),A=new WeakMap,C=r$3.createTreeWalker(r$3,129);function P(t,i){if(!a$1(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==s?s.createHTML(i):i}const V=(t,i)=>{const s=t.length-1,o=[];let r,l=2===i?"<svg>":3===i?"<math>":"",c=f$1;for(let i=0;i<s;i++){const s=t[i];let a,u,d=-1,y=0;for(;y<s.length&&(c.lastIndex=y,u=c.exec(s),null!==u);)y=c.lastIndex,c===f$1?"!--"===u[1]?c=v:void 0!==u[1]?c=_:void 0!==u[2]?($.test(u[2])&&(r=RegExp("</"+u[2],"g")),c=m$1):void 0!==u[3]&&(c=m$1):c===m$1?">"===u[0]?(c=r??f$1,d=-1):void 0===u[1]?d=-2:(d=c.lastIndex-u[2].length,a=u[1],c=void 0===u[3]?m$1:'"'===u[3]?g:p):c===g||c===p?c=m$1:c===v||c===_?c=f$1:(c=m$1,r=void 0);const x=c===m$1&&t[i+1].startsWith("/>")?" ":"";l+=c===f$1?s+n$2:d>=0?(o.push(a),s.slice(0,d)+e$6+s.slice(d)+h+x):s+h+(-2===d?i:x);}return [P(t,l+(t[s]||"<?>")+(2===i?"</svg>":3===i?"</math>":"")),o]};class N{constructor({strings:t,_$litType$:s},n){let r;this.parts=[];let c=0,a=0;const u=t.length-1,d=this.parts,[f,v]=V(t,s);if(this.el=N.createElement(f,n),C.currentNode=this.el.content,2===s||3===s){const t=this.el.content.firstChild;t.replaceWith(...t.childNodes);}for(;null!==(r=C.nextNode())&&d.length<u;){if(1===r.nodeType){if(r.hasAttributes())for(const t of r.getAttributeNames())if(t.endsWith(e$6)){const i=v[a++],s=r.getAttribute(t).split(h),e=/([.?@])?(.*)/.exec(i);d.push({type:1,index:c,name:e[2],strings:s,ctor:"."===e[1]?H:"?"===e[1]?I:"@"===e[1]?L:k}),r.removeAttribute(t);}else t.startsWith(h)&&(d.push({type:6,index:c}),r.removeAttribute(t));if($.test(r.tagName)){const t=r.textContent.split(h),s=t.length-1;if(s>0){r.textContent=i$3?i$3.emptyScript:"";for(let i=0;i<s;i++)r.append(t[i],l$2()),C.nextNode(),d.push({type:2,index:++c});r.append(t[s],l$2());}}}else if(8===r.nodeType)if(r.data===o$4)d.push({type:2,index:c});else {let t=-1;for(;-1!==(t=r.data.indexOf(h,t+1));)d.push({type:7,index:c}),t+=h.length-1;}c++;}}static createElement(t,i){const s=r$3.createElement("template");return s.innerHTML=t,s}}function S(t,i,s=t,e){if(i===T)return i;let h=void 0!==e?s._$Co?.[e]:s._$Cl;const o=c(i)?void 0:i._$litDirective$;return h?.constructor!==o&&(h?._$AO?.(!1),void 0===o?h=void 0:(h=new o(t),h._$AT(t,s,e)),void 0!==e?(s._$Co??=[])[e]=h:s._$Cl=h),void 0!==h&&(i=S(t,h._$AS(t,i.values),h,e)),i}class M{constructor(t,i){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=i;}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){const{el:{content:i},parts:s}=this._$AD,e=(t?.creationScope??r$3).importNode(i,!0);C.currentNode=e;let h=C.nextNode(),o=0,n=0,l=s[0];for(;void 0!==l;){if(o===l.index){let i;2===l.type?i=new R(h,h.nextSibling,this,t):1===l.type?i=new l.ctor(h,l.name,l.strings,this,t):6===l.type&&(i=new z(h,this,t)),this._$AV.push(i),l=s[++n];}o!==l?.index&&(h=C.nextNode(),o++);}return C.currentNode=r$3,e}p(t){let i=0;for(const s of this._$AV)void 0!==s&&(void 0!==s.strings?(s._$AI(t,s,i),i+=s.strings.length-2):s._$AI(t[i])),i++;}}class R{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(t,i,s,e){this.type=2,this._$AH=E,this._$AN=void 0,this._$AA=t,this._$AB=i,this._$AM=s,this.options=e,this._$Cv=e?.isConnected??!0;}get parentNode(){let t=this._$AA.parentNode;const i=this._$AM;return void 0!==i&&11===t?.nodeType&&(t=i.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,i=this){t=S(this,t,i),c(t)?t===E||null==t||""===t?(this._$AH!==E&&this._$AR(),this._$AH=E):t!==this._$AH&&t!==T&&this._(t):void 0!==t._$litType$?this.$(t):void 0!==t.nodeType?this.T(t):u$2(t)?this.k(t):this._(t);}O(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}T(t){this._$AH!==t&&(this._$AR(),this._$AH=this.O(t));}_(t){this._$AH!==E&&c(this._$AH)?this._$AA.nextSibling.data=t:this.T(r$3.createTextNode(t)),this._$AH=t;}$(t){const{values:i,_$litType$:s}=t,e="number"==typeof s?this._$AC(t):(void 0===s.el&&(s.el=N.createElement(P(s.h,s.h[0]),this.options)),s);if(this._$AH?._$AD===e)this._$AH.p(i);else {const t=new M(e,this),s=t.u(this.options);t.p(i),this.T(s),this._$AH=t;}}_$AC(t){let i=A.get(t.strings);return void 0===i&&A.set(t.strings,i=new N(t)),i}k(t){a$1(this._$AH)||(this._$AH=[],this._$AR());const i=this._$AH;let s,e=0;for(const h of t)e===i.length?i.push(s=new R(this.O(l$2()),this.O(l$2()),this,this.options)):s=i[e],s._$AI(h),e++;e<i.length&&(this._$AR(s&&s._$AB.nextSibling,e),i.length=e);}_$AR(t=this._$AA.nextSibling,i){for(this._$AP?.(!1,!0,i);t&&t!==this._$AB;){const i=t.nextSibling;t.remove(),t=i;}}setConnected(t){void 0===this._$AM&&(this._$Cv=t,this._$AP?.(t));}}class k{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(t,i,s,e,h){this.type=1,this._$AH=E,this._$AN=void 0,this.element=t,this.name=i,this._$AM=e,this.options=h,s.length>2||""!==s[0]||""!==s[1]?(this._$AH=Array(s.length-1).fill(new String),this.strings=s):this._$AH=E;}_$AI(t,i=this,s,e){const h=this.strings;let o=!1;if(void 0===h)t=S(this,t,i,0),o=!c(t)||t!==this._$AH&&t!==T,o&&(this._$AH=t);else {const e=t;let n,r;for(t=h[0],n=0;n<h.length-1;n++)r=S(this,e[s+n],i,n),r===T&&(r=this._$AH[n]),o||=!c(r)||r!==this._$AH[n],r===E?t=E:t!==E&&(t+=(r??"")+h[n+1]),this._$AH[n]=r;}o&&!e&&this.j(t);}j(t){t===E?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,t??"");}}class H extends k{constructor(){super(...arguments),this.type=3;}j(t){this.element[this.name]=t===E?void 0:t;}}class I extends k{constructor(){super(...arguments),this.type=4;}j(t){this.element.toggleAttribute(this.name,!!t&&t!==E);}}class L extends k{constructor(t,i,s,e,h){super(t,i,s,e,h),this.type=5;}_$AI(t,i=this){if((t=S(this,t,i,0)??E)===T)return;const s=this._$AH,e=t===E&&s!==E||t.capture!==s.capture||t.once!==s.once||t.passive!==s.passive,h=t!==E&&(s===E||e);e&&this.element.removeEventListener(this.name,this,s),h&&this.element.addEventListener(this.name,this,t),this._$AH=t;}handleEvent(t){"function"==typeof this._$AH?this._$AH.call(this.options?.host??this.element,t):this._$AH.handleEvent(t);}}class z{constructor(t,i,s){this.element=t,this.type=6,this._$AN=void 0,this._$AM=i,this.options=s;}get _$AU(){return this._$AM._$AU}_$AI(t){S(this,t);}}const j=t$2.litHtmlPolyfillSupport;j?.(N,R),(t$2.litHtmlVersions??=[]).push("3.2.1");const B=(t,i,s)=>{const e=s?.renderBefore??i;let h=e._$litPart$;if(void 0===h){const t=s?.renderBefore??null;e._$litPart$=h=new R(i.insertBefore(l$2(),t),t,void 0,s??{});}return h._$AI(t),h};
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */ class h extends b {
-	constructor() {
-		super(...arguments), (this.renderOptions = { host: this }), (this.o = void 0)
-	}
-	createRenderRoot() {
-		const t = super.createRenderRoot()
-		return (this.renderOptions.renderBefore ??= t.firstChild), t
-	}
-	update(t) {
-		const e = this.render()
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected),
-			super.update(t),
-			(this.o = Q(e, this.renderRoot, this.renderOptions))
-	}
-	connectedCallback() {
-		super.connectedCallback(), this.o?.setConnected(!0)
-	}
-	disconnectedCallback() {
-		super.disconnectedCallback(), this.o?.setConnected(!1)
-	}
-	render() {
-		return R
-	}
-}
-;(h._$litElement$ = !0),
-	(h["finalized"] = !0),
-	globalThis.litElementHydrateSupport?.({ LitElement: h })
-const f = globalThis.litElementPolyfillSupport
-f?.({ LitElement: h })
-;(globalThis.litElementVersions ??= []).push("4.1.0")
+ */let r$2 = class r extends b{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0;}createRenderRoot(){const t=super.createRenderRoot();return this.renderOptions.renderBefore??=t.firstChild,t}update(t){const s=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=B(s,this.renderRoot,this.renderOptions);}connectedCallback(){super.connectedCallback(),this._$Do?.setConnected(!0);}disconnectedCallback(){super.disconnectedCallback(),this._$Do?.setConnected(!1);}render(){return T}};r$2._$litElement$=!0,r$2["finalized"]=!0,globalThis.litElementHydrateSupport?.({LitElement:r$2});const i$2=globalThis.litElementPolyfillSupport;i$2?.({LitElement:r$2});(globalThis.litElementVersions??=[]).push("4.1.1");
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const t$1 = (t) => (e, o) => {
-	void 0 !== o
-		? o.addInitializer(() => {
-				customElements.define(t, e)
-			})
-		: customElements.define(t, e)
-}
+const t$1=t=>(e,o)=>{void 0!==o?o.addInitializer((()=>{customElements.define(t,e);})):customElements.define(t,e);};
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */ const o = { attribute: !0, type: String, converter: u, reflect: !1, hasChanged: f$2 },
-	r$1 = (t = o, e, r) => {
-		const { kind: n, metadata: i } = r
-		let s = globalThis.litPropertyMetadata.get(i)
-		if (
-			(void 0 === s && globalThis.litPropertyMetadata.set(i, (s = new Map())),
-			s.set(r.name, t),
-			"accessor" === n)
-		) {
-			const { name: o } = r
-			return {
-				set(r) {
-					const n = e.get.call(this)
-					e.set.call(this, r), this.requestUpdate(o, n, t)
-				},
-				init(e) {
-					return void 0 !== e && this.P(o, void 0, t), e
-				},
-			}
-		}
-		if ("setter" === n) {
-			const { name: o } = r
-			return function (r) {
-				const n = this[o]
-				e.call(this, r), this.requestUpdate(o, n, t)
-			}
-		}
-		throw Error("Unsupported decorator location: " + n)
-	}
-function n(t) {
-	return (e, o) =>
-		"object" == typeof o
-			? r$1(t, e, o)
-			: ((t, e, o) => {
-					const r = e.hasOwnProperty(o)
-					return (
-						e.constructor.createProperty(o, r ? { ...t, wrapped: !0 } : t),
-						r ? Object.getOwnPropertyDescriptor(e, o) : void 0
-					)
-				})(t, e, o)
-}
+ */const o$3={attribute:!0,type:String,converter:u$3,reflect:!1,hasChanged:f$2},r$1=(t=o$3,e,r)=>{const{kind:n,metadata:i}=r;let s=globalThis.litPropertyMetadata.get(i);if(void 0===s&&globalThis.litPropertyMetadata.set(i,s=new Map),s.set(r.name,t),"accessor"===n){const{name:o}=r;return {set(r){const n=e.get.call(this);e.set.call(this,r),this.requestUpdate(o,n,t);},init(e){return void 0!==e&&this.P(o,void 0,t),e}}}if("setter"===n){const{name:o}=r;return function(r){const n=this[o];e.call(this,r),this.requestUpdate(o,n,t);}}throw Error("Unsupported decorator location: "+n)};function n$1(t){return (e,o)=>"object"==typeof o?r$1(t,e,o):((t,e,o)=>{const r=e.hasOwnProperty(o);return e.constructor.createProperty(o,r?{...t,wrapped:!0}:t),r?Object.getOwnPropertyDescriptor(e,o):void 0})(t,e,o)}
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */ function r(r) {
-	return n({ ...r, state: !0, attribute: !1 })
-}
+ */function r(r){return n$1({...r,state:!0,attribute:!1})}
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const e$2 = (e, t, c) => (
-	(c.configurable = !0),
-	(c.enumerable = !0),
-	Reflect.decorate && "object" != typeof t && Object.defineProperty(e, t, c),
-	c
-)
+const e$5=(e,t,c)=>(c.configurable=!0,c.enumerable=!0,Reflect.decorate&&"object"!=typeof t&&Object.defineProperty(e,t,c),c);
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */ function e$1(e, r) {
-	return (n, s, i) => {
-		const o = (t) => t.renderRoot?.querySelector(e) ?? null
-		if (r) {
-			const { get: e, set: r } =
-				"object" == typeof s
-					? n
-					: (i ??
-						(() => {
-							const t = Symbol()
-							return {
-								get() {
-									return this[t]
-								},
-								set(e) {
-									this[t] = e
-								},
-							}
-						})())
-			return e$2(n, s, {
-				get() {
-					let t = e.call(this)
-					return (
-						void 0 === t && ((t = o(this)), (null !== t || this.hasUpdated) && r.call(this, t)), t
-					)
-				},
-			})
-		}
-		return e$2(n, s, {
-			get() {
-				return o(this)
-			},
-		})
-	}
-}
+ */function e$4(e,r){return (n,s,i)=>{const o=t=>t.renderRoot?.querySelector(e)??null;if(r){const{get:e,set:r}="object"==typeof s?n:i??(()=>{const t=Symbol();return {get(){return this[t]},set(e){this[t]=e;}}})();return e$5(n,s,{get(){let t=e.call(this);return void 0===t&&(t=o(this),(null!==t||this.hasUpdated)&&r.call(this,t)),t}})}return e$5(n,s,{get(){return o(this)}})}}
 
 /*
- * This gets into the published component
- */
-const baseStyling = i$2`
+* This gets into the published component
+*/
+const baseStyling = i$5 `
 	:host {
 		font-family: "Inter", sans-serif;
 
@@ -1434,11 +587,11 @@ const baseStyling = i$2`
 		--sl-z-index-toast: 950;
 		--sl-z-index-tooltip: 1000;
 	}
-`
+`;
 
-var typebox = {}
+var typebox = {};
 
-;(function (exports) {
+(function (exports) {
 	/*--------------------------------------------------------------------------
 
 	@sinclair/typebox
@@ -1466,303 +619,251 @@ var typebox = {}
 	THE SOFTWARE.
 
 	---------------------------------------------------------------------------*/
-	Object.defineProperty(exports, "__esModule", { value: true })
-	exports.Type =
-		exports.JsonType =
-		exports.JavaScriptTypeBuilder =
-		exports.JsonTypeBuilder =
-		exports.TypeBuilder =
-		exports.TypeBuilderError =
-		exports.TransformEncodeBuilder =
-		exports.TransformDecodeBuilder =
-		exports.TemplateLiteralDslParser =
-		exports.TemplateLiteralGenerator =
-		exports.TemplateLiteralGeneratorError =
-		exports.TemplateLiteralFinite =
-		exports.TemplateLiteralFiniteError =
-		exports.TemplateLiteralParser =
-		exports.TemplateLiteralParserError =
-		exports.TemplateLiteralResolver =
-		exports.TemplateLiteralPattern =
-		exports.TemplateLiteralPatternError =
-		exports.UnionResolver =
-		exports.KeyArrayResolver =
-		exports.KeyArrayResolverError =
-		exports.KeyResolver =
-		exports.ObjectMap =
-		exports.Intrinsic =
-		exports.IndexedAccessor =
-		exports.TypeClone =
-		exports.TypeExtends =
-		exports.TypeExtendsResult =
-		exports.TypeExtendsError =
-		exports.ExtendsUndefined =
-		exports.TypeGuard =
-		exports.TypeGuardUnknownTypeError =
-		exports.ValueGuard =
-		exports.FormatRegistry =
-		exports.TypeBoxError =
-		exports.TypeRegistry =
-		exports.PatternStringExact =
-		exports.PatternNumberExact =
-		exports.PatternBooleanExact =
-		exports.PatternString =
-		exports.PatternNumber =
-		exports.PatternBoolean =
-		exports.Kind =
-		exports.Hint =
-		exports.Optional =
-		exports.Readonly =
-		exports.Transform =
-			void 0
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.Type = exports.JsonType = exports.JavaScriptTypeBuilder = exports.JsonTypeBuilder = exports.TypeBuilder = exports.TypeBuilderError = exports.TransformEncodeBuilder = exports.TransformDecodeBuilder = exports.TemplateLiteralDslParser = exports.TemplateLiteralGenerator = exports.TemplateLiteralGeneratorError = exports.TemplateLiteralFinite = exports.TemplateLiteralFiniteError = exports.TemplateLiteralParser = exports.TemplateLiteralParserError = exports.TemplateLiteralResolver = exports.TemplateLiteralPattern = exports.TemplateLiteralPatternError = exports.UnionResolver = exports.KeyArrayResolver = exports.KeyArrayResolverError = exports.KeyResolver = exports.ObjectMap = exports.Intrinsic = exports.IndexedAccessor = exports.TypeClone = exports.TypeExtends = exports.TypeExtendsResult = exports.TypeExtendsError = exports.ExtendsUndefined = exports.TypeGuard = exports.TypeGuardUnknownTypeError = exports.ValueGuard = exports.FormatRegistry = exports.TypeBoxError = exports.TypeRegistry = exports.PatternStringExact = exports.PatternNumberExact = exports.PatternBooleanExact = exports.PatternString = exports.PatternNumber = exports.PatternBoolean = exports.Kind = exports.Hint = exports.Optional = exports.Readonly = exports.Transform = void 0;
 	// --------------------------------------------------------------------------
 	// Symbols
 	// --------------------------------------------------------------------------
-	exports.Transform = Symbol.for("TypeBox.Transform")
-	exports.Readonly = Symbol.for("TypeBox.Readonly")
-	exports.Optional = Symbol.for("TypeBox.Optional")
-	exports.Hint = Symbol.for("TypeBox.Hint")
-	exports.Kind = Symbol.for("TypeBox.Kind")
+	exports.Transform = Symbol.for('TypeBox.Transform');
+	exports.Readonly = Symbol.for('TypeBox.Readonly');
+	exports.Optional = Symbol.for('TypeBox.Optional');
+	exports.Hint = Symbol.for('TypeBox.Hint');
+	exports.Kind = Symbol.for('TypeBox.Kind');
 	// --------------------------------------------------------------------------
 	// Patterns
 	// --------------------------------------------------------------------------
-	exports.PatternBoolean = "(true|false)"
-	exports.PatternNumber = "(0|[1-9][0-9]*)"
-	exports.PatternString = "(.*)"
-	exports.PatternBooleanExact = `^${exports.PatternBoolean}$`
-	exports.PatternNumberExact = `^${exports.PatternNumber}$`
-	exports.PatternStringExact = `^${exports.PatternString}$`
+	exports.PatternBoolean = '(true|false)';
+	exports.PatternNumber = '(0|[1-9][0-9]*)';
+	exports.PatternString = '(.*)';
+	exports.PatternBooleanExact = `^${exports.PatternBoolean}$`;
+	exports.PatternNumberExact = `^${exports.PatternNumber}$`;
+	exports.PatternStringExact = `^${exports.PatternString}$`;
 	/** A registry for user defined types */
-	var TypeRegistry
-	;(function (TypeRegistry) {
-		const map = new Map()
-		/** Returns the entries in this registry */
-		function Entries() {
-			return new Map(map)
-		}
-		TypeRegistry.Entries = Entries
-		/** Clears all user defined types */
-		function Clear() {
-			return map.clear()
-		}
-		TypeRegistry.Clear = Clear
-		/** Deletes a registered type */
-		function Delete(kind) {
-			return map.delete(kind)
-		}
-		TypeRegistry.Delete = Delete
-		/** Returns true if this registry contains this kind */
-		function Has(kind) {
-			return map.has(kind)
-		}
-		TypeRegistry.Has = Has
-		/** Sets a validation function for a user defined type */
-		function Set(kind, func) {
-			map.set(kind, func)
-		}
-		TypeRegistry.Set = Set
-		/** Gets a custom validation function for a user defined type */
-		function Get(kind) {
-			return map.get(kind)
-		}
-		TypeRegistry.Get = Get
-	})(TypeRegistry || (exports.TypeRegistry = TypeRegistry = {}))
+	var TypeRegistry;
+	(function (TypeRegistry) {
+	    const map = new Map();
+	    /** Returns the entries in this registry */
+	    function Entries() {
+	        return new Map(map);
+	    }
+	    TypeRegistry.Entries = Entries;
+	    /** Clears all user defined types */
+	    function Clear() {
+	        return map.clear();
+	    }
+	    TypeRegistry.Clear = Clear;
+	    /** Deletes a registered type */
+	    function Delete(kind) {
+	        return map.delete(kind);
+	    }
+	    TypeRegistry.Delete = Delete;
+	    /** Returns true if this registry contains this kind */
+	    function Has(kind) {
+	        return map.has(kind);
+	    }
+	    TypeRegistry.Has = Has;
+	    /** Sets a validation function for a user defined type */
+	    function Set(kind, func) {
+	        map.set(kind, func);
+	    }
+	    TypeRegistry.Set = Set;
+	    /** Gets a custom validation function for a user defined type */
+	    function Get(kind) {
+	        return map.get(kind);
+	    }
+	    TypeRegistry.Get = Get;
+	})(TypeRegistry || (exports.TypeRegistry = TypeRegistry = {}));
 	// --------------------------------------------------------------------------
 	// TypeBoxError
 	// --------------------------------------------------------------------------
 	class TypeBoxError extends Error {
-		constructor(message) {
-			super(message)
-		}
+	    constructor(message) {
+	        super(message);
+	    }
 	}
-	exports.TypeBoxError = TypeBoxError
+	exports.TypeBoxError = TypeBoxError;
 	/** A registry for user defined string formats */
-	var FormatRegistry
-	;(function (FormatRegistry) {
-		const map = new Map()
-		/** Returns the entries in this registry */
-		function Entries() {
-			return new Map(map)
-		}
-		FormatRegistry.Entries = Entries
-		/** Clears all user defined string formats */
-		function Clear() {
-			return map.clear()
-		}
-		FormatRegistry.Clear = Clear
-		/** Deletes a registered format */
-		function Delete(format) {
-			return map.delete(format)
-		}
-		FormatRegistry.Delete = Delete
-		/** Returns true if the user defined string format exists */
-		function Has(format) {
-			return map.has(format)
-		}
-		FormatRegistry.Has = Has
-		/** Sets a validation function for a user defined string format */
-		function Set(format, func) {
-			map.set(format, func)
-		}
-		FormatRegistry.Set = Set
-		/** Gets a validation function for a user defined string format */
-		function Get(format) {
-			return map.get(format)
-		}
-		FormatRegistry.Get = Get
-	})(FormatRegistry || (exports.FormatRegistry = FormatRegistry = {}))
+	var FormatRegistry;
+	(function (FormatRegistry) {
+	    const map = new Map();
+	    /** Returns the entries in this registry */
+	    function Entries() {
+	        return new Map(map);
+	    }
+	    FormatRegistry.Entries = Entries;
+	    /** Clears all user defined string formats */
+	    function Clear() {
+	        return map.clear();
+	    }
+	    FormatRegistry.Clear = Clear;
+	    /** Deletes a registered format */
+	    function Delete(format) {
+	        return map.delete(format);
+	    }
+	    FormatRegistry.Delete = Delete;
+	    /** Returns true if the user defined string format exists */
+	    function Has(format) {
+	        return map.has(format);
+	    }
+	    FormatRegistry.Has = Has;
+	    /** Sets a validation function for a user defined string format */
+	    function Set(format, func) {
+	        map.set(format, func);
+	    }
+	    FormatRegistry.Set = Set;
+	    /** Gets a validation function for a user defined string format */
+	    function Get(format) {
+	        return map.get(format);
+	    }
+	    FormatRegistry.Get = Get;
+	})(FormatRegistry || (exports.FormatRegistry = FormatRegistry = {}));
 	// --------------------------------------------------------------------------
 	// ValueGuard
 	// --------------------------------------------------------------------------
 	/** Provides functions to type guard raw JavaScript values */
-	var ValueGuard
-	;(function (ValueGuard) {
-		/** Returns true if this value is an array */
-		function IsArray(value) {
-			return Array.isArray(value)
-		}
-		ValueGuard.IsArray = IsArray
-		/** Returns true if this value is bigint */
-		function IsBigInt(value) {
-			return typeof value === "bigint"
-		}
-		ValueGuard.IsBigInt = IsBigInt
-		/** Returns true if this value is a boolean */
-		function IsBoolean(value) {
-			return typeof value === "boolean"
-		}
-		ValueGuard.IsBoolean = IsBoolean
-		/** Returns true if this value is a Date object */
-		function IsDate(value) {
-			return value instanceof globalThis.Date
-		}
-		ValueGuard.IsDate = IsDate
-		/** Returns true if this value is null */
-		function IsNull(value) {
-			return value === null
-		}
-		ValueGuard.IsNull = IsNull
-		/** Returns true if this value is number */
-		function IsNumber(value) {
-			return typeof value === "number"
-		}
-		ValueGuard.IsNumber = IsNumber
-		/** Returns true if this value is an object */
-		function IsObject(value) {
-			return typeof value === "object" && value !== null
-		}
-		ValueGuard.IsObject = IsObject
-		/** Returns true if this value is string */
-		function IsString(value) {
-			return typeof value === "string"
-		}
-		ValueGuard.IsString = IsString
-		/** Returns true if this value is a Uint8Array */
-		function IsUint8Array(value) {
-			return value instanceof globalThis.Uint8Array
-		}
-		ValueGuard.IsUint8Array = IsUint8Array
-		/** Returns true if this value is undefined */
-		function IsUndefined(value) {
-			return value === undefined
-		}
-		ValueGuard.IsUndefined = IsUndefined
-	})(ValueGuard || (exports.ValueGuard = ValueGuard = {}))
+	var ValueGuard;
+	(function (ValueGuard) {
+	    /** Returns true if this value is an array */
+	    function IsArray(value) {
+	        return Array.isArray(value);
+	    }
+	    ValueGuard.IsArray = IsArray;
+	    /** Returns true if this value is bigint */
+	    function IsBigInt(value) {
+	        return typeof value === 'bigint';
+	    }
+	    ValueGuard.IsBigInt = IsBigInt;
+	    /** Returns true if this value is a boolean */
+	    function IsBoolean(value) {
+	        return typeof value === 'boolean';
+	    }
+	    ValueGuard.IsBoolean = IsBoolean;
+	    /** Returns true if this value is a Date object */
+	    function IsDate(value) {
+	        return value instanceof globalThis.Date;
+	    }
+	    ValueGuard.IsDate = IsDate;
+	    /** Returns true if this value is null */
+	    function IsNull(value) {
+	        return value === null;
+	    }
+	    ValueGuard.IsNull = IsNull;
+	    /** Returns true if this value is number */
+	    function IsNumber(value) {
+	        return typeof value === 'number';
+	    }
+	    ValueGuard.IsNumber = IsNumber;
+	    /** Returns true if this value is an object */
+	    function IsObject(value) {
+	        return typeof value === 'object' && value !== null;
+	    }
+	    ValueGuard.IsObject = IsObject;
+	    /** Returns true if this value is string */
+	    function IsString(value) {
+	        return typeof value === 'string';
+	    }
+	    ValueGuard.IsString = IsString;
+	    /** Returns true if this value is a Uint8Array */
+	    function IsUint8Array(value) {
+	        return value instanceof globalThis.Uint8Array;
+	    }
+	    ValueGuard.IsUint8Array = IsUint8Array;
+	    /** Returns true if this value is undefined */
+	    function IsUndefined(value) {
+	        return value === undefined;
+	    }
+	    ValueGuard.IsUndefined = IsUndefined;
+	})(ValueGuard || (exports.ValueGuard = ValueGuard = {}));
 	// --------------------------------------------------------------------------
 	// TypeGuard
 	// --------------------------------------------------------------------------
-	class TypeGuardUnknownTypeError extends TypeBoxError {}
-	exports.TypeGuardUnknownTypeError = TypeGuardUnknownTypeError
+	class TypeGuardUnknownTypeError extends TypeBoxError {
+	}
+	exports.TypeGuardUnknownTypeError = TypeGuardUnknownTypeError;
 	/** Provides functions to test if JavaScript values are TypeBox types */
-	var TypeGuard
-	;(function (TypeGuard) {
-		function IsPattern(value) {
-			try {
-				new RegExp(value)
-				return true
-			} catch {
-				return false
-			}
-		}
-		function IsControlCharacterFree(value) {
-			if (!ValueGuard.IsString(value)) return false
-			for (let i = 0; i < value.length; i++) {
-				const code = value.charCodeAt(i)
-				if ((code >= 7 && code <= 13) || code === 27 || code === 127) {
-					return false
-				}
-			}
-			return true
-		}
-		function IsAdditionalProperties(value) {
-			return IsOptionalBoolean(value) || TSchema(value)
-		}
-		function IsOptionalBigInt(value) {
-			return ValueGuard.IsUndefined(value) || ValueGuard.IsBigInt(value)
-		}
-		function IsOptionalNumber(value) {
-			return ValueGuard.IsUndefined(value) || ValueGuard.IsNumber(value)
-		}
-		function IsOptionalBoolean(value) {
-			return ValueGuard.IsUndefined(value) || ValueGuard.IsBoolean(value)
-		}
-		function IsOptionalString(value) {
-			return ValueGuard.IsUndefined(value) || ValueGuard.IsString(value)
-		}
-		function IsOptionalPattern(value) {
-			return (
-				ValueGuard.IsUndefined(value) ||
-				(ValueGuard.IsString(value) && IsControlCharacterFree(value) && IsPattern(value))
-			)
-		}
-		function IsOptionalFormat(value) {
-			return (
-				ValueGuard.IsUndefined(value) ||
-				(ValueGuard.IsString(value) && IsControlCharacterFree(value))
-			)
-		}
-		function IsOptionalSchema(value) {
-			return ValueGuard.IsUndefined(value) || TSchema(value)
-		}
-		// ----------------------------------------------------------------
-		// Types
-		// ----------------------------------------------------------------
-		/** Returns true if the given value is TAny */
-		function TAny(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Any') &&
+	var TypeGuard;
+	(function (TypeGuard) {
+	    function IsPattern(value) {
+	        try {
+	            new RegExp(value);
+	            return true;
+	        }
+	        catch {
+	            return false;
+	        }
+	    }
+	    function IsControlCharacterFree(value) {
+	        if (!ValueGuard.IsString(value))
+	            return false;
+	        for (let i = 0; i < value.length; i++) {
+	            const code = value.charCodeAt(i);
+	            if ((code >= 7 && code <= 13) || code === 27 || code === 127) {
+	                return false;
+	            }
+	        }
+	        return true;
+	    }
+	    function IsAdditionalProperties(value) {
+	        return IsOptionalBoolean(value) || TSchema(value);
+	    }
+	    function IsOptionalBigInt(value) {
+	        return ValueGuard.IsUndefined(value) || ValueGuard.IsBigInt(value);
+	    }
+	    function IsOptionalNumber(value) {
+	        return ValueGuard.IsUndefined(value) || ValueGuard.IsNumber(value);
+	    }
+	    function IsOptionalBoolean(value) {
+	        return ValueGuard.IsUndefined(value) || ValueGuard.IsBoolean(value);
+	    }
+	    function IsOptionalString(value) {
+	        return ValueGuard.IsUndefined(value) || ValueGuard.IsString(value);
+	    }
+	    function IsOptionalPattern(value) {
+	        return ValueGuard.IsUndefined(value) || (ValueGuard.IsString(value) && IsControlCharacterFree(value) && IsPattern(value));
+	    }
+	    function IsOptionalFormat(value) {
+	        return ValueGuard.IsUndefined(value) || (ValueGuard.IsString(value) && IsControlCharacterFree(value));
+	    }
+	    function IsOptionalSchema(value) {
+	        return ValueGuard.IsUndefined(value) || TSchema(value);
+	    }
+	    // ----------------------------------------------------------------
+	    // Types
+	    // ----------------------------------------------------------------
+	    /** Returns true if the given value is TAny */
+	    function TAny(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Any') &&
 	            IsOptionalString(schema.$id));
-		}
-		TypeGuard.TAny = TAny
-		/** Returns true if the given value is TArray */
-		function TArray(schema) {
-			return (
-				TKindOf(schema, "Array") &&
-				schema.type === "array" &&
-				IsOptionalString(schema.$id) &&
-				TSchema(schema.items) &&
-				IsOptionalNumber(schema.minItems) &&
-				IsOptionalNumber(schema.maxItems) &&
-				IsOptionalBoolean(schema.uniqueItems) &&
-				IsOptionalSchema(schema.contains) &&
-				IsOptionalNumber(schema.minContains) &&
-				IsOptionalNumber(schema.maxContains)
-			)
-		}
-		TypeGuard.TArray = TArray
-		/** Returns true if the given value is TAsyncIterator */
-		function TAsyncIterator(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'AsyncIterator') &&
+	    }
+	    TypeGuard.TAny = TAny;
+	    /** Returns true if the given value is TArray */
+	    function TArray(schema) {
+	        return (TKindOf(schema, 'Array') &&
+	            schema.type === 'array' &&
+	            IsOptionalString(schema.$id) &&
+	            TSchema(schema.items) &&
+	            IsOptionalNumber(schema.minItems) &&
+	            IsOptionalNumber(schema.maxItems) &&
+	            IsOptionalBoolean(schema.uniqueItems) &&
+	            IsOptionalSchema(schema.contains) &&
+	            IsOptionalNumber(schema.minContains) &&
+	            IsOptionalNumber(schema.maxContains));
+	    }
+	    TypeGuard.TArray = TArray;
+	    /** Returns true if the given value is TAsyncIterator */
+	    function TAsyncIterator(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'AsyncIterator') &&
 	            schema.type === 'AsyncIterator' &&
 	            IsOptionalString(schema.$id) &&
 	            TSchema(schema.items));
-		}
-		TypeGuard.TAsyncIterator = TAsyncIterator
-		/** Returns true if the given value is TBigInt */
-		function TBigInt(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'BigInt') &&
+	    }
+	    TypeGuard.TAsyncIterator = TAsyncIterator;
+	    /** Returns true if the given value is TBigInt */
+	    function TBigInt(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'BigInt') &&
 	            schema.type === 'bigint' &&
 	            IsOptionalString(schema.$id) &&
 	            IsOptionalBigInt(schema.exclusiveMaximum) &&
@@ -1770,166 +871,156 @@ var typebox = {}
 	            IsOptionalBigInt(schema.maximum) &&
 	            IsOptionalBigInt(schema.minimum) &&
 	            IsOptionalBigInt(schema.multipleOf));
-		}
-		TypeGuard.TBigInt = TBigInt
-		/** Returns true if the given value is TBoolean */
-		function TBoolean(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Boolean') &&
+	    }
+	    TypeGuard.TBigInt = TBigInt;
+	    /** Returns true if the given value is TBoolean */
+	    function TBoolean(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Boolean') &&
 	            schema.type === 'boolean' &&
 	            IsOptionalString(schema.$id));
-		}
-		TypeGuard.TBoolean = TBoolean
-		/** Returns true if the given value is TConstructor */
-		function TConstructor(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Constructor') &&
+	    }
+	    TypeGuard.TBoolean = TBoolean;
+	    /** Returns true if the given value is TConstructor */
+	    function TConstructor(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Constructor') &&
 	            schema.type === 'Constructor' &&
 	            IsOptionalString(schema.$id) &&
 	            ValueGuard.IsArray(schema.parameters) &&
 	            schema.parameters.every(schema => TSchema(schema)) &&
 	            TSchema(schema.returns));
-		}
-		TypeGuard.TConstructor = TConstructor
-		/** Returns true if the given value is TDate */
-		function TDate(schema) {
-			return (
-				TKindOf(schema, "Date") &&
-				schema.type === "Date" &&
-				IsOptionalString(schema.$id) &&
-				IsOptionalNumber(schema.exclusiveMaximumTimestamp) &&
-				IsOptionalNumber(schema.exclusiveMinimumTimestamp) &&
-				IsOptionalNumber(schema.maximumTimestamp) &&
-				IsOptionalNumber(schema.minimumTimestamp) &&
-				IsOptionalNumber(schema.multipleOfTimestamp)
-			)
-		}
-		TypeGuard.TDate = TDate
-		/** Returns true if the given value is TFunction */
-		function TFunction(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Function') &&
+	    }
+	    TypeGuard.TConstructor = TConstructor;
+	    /** Returns true if the given value is TDate */
+	    function TDate(schema) {
+	        return (TKindOf(schema, 'Date') &&
+	            schema.type === 'Date' &&
+	            IsOptionalString(schema.$id) &&
+	            IsOptionalNumber(schema.exclusiveMaximumTimestamp) &&
+	            IsOptionalNumber(schema.exclusiveMinimumTimestamp) &&
+	            IsOptionalNumber(schema.maximumTimestamp) &&
+	            IsOptionalNumber(schema.minimumTimestamp) &&
+	            IsOptionalNumber(schema.multipleOfTimestamp));
+	    }
+	    TypeGuard.TDate = TDate;
+	    /** Returns true if the given value is TFunction */
+	    function TFunction(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Function') &&
 	            schema.type === 'Function' &&
 	            IsOptionalString(schema.$id) &&
 	            ValueGuard.IsArray(schema.parameters) &&
 	            schema.parameters.every(schema => TSchema(schema)) &&
 	            TSchema(schema.returns));
-		}
-		TypeGuard.TFunction = TFunction
-		/** Returns true if the given value is TInteger */
-		function TInteger(schema) {
-			return (
-				TKindOf(schema, "Integer") &&
-				schema.type === "integer" &&
-				IsOptionalString(schema.$id) &&
-				IsOptionalNumber(schema.exclusiveMaximum) &&
-				IsOptionalNumber(schema.exclusiveMinimum) &&
-				IsOptionalNumber(schema.maximum) &&
-				IsOptionalNumber(schema.minimum) &&
-				IsOptionalNumber(schema.multipleOf)
-			)
-		}
-		TypeGuard.TInteger = TInteger
-		/** Returns true if the given value is TIntersect */
-		function TIntersect(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Intersect') &&
+	    }
+	    TypeGuard.TFunction = TFunction;
+	    /** Returns true if the given value is TInteger */
+	    function TInteger(schema) {
+	        return (TKindOf(schema, 'Integer') &&
+	            schema.type === 'integer' &&
+	            IsOptionalString(schema.$id) &&
+	            IsOptionalNumber(schema.exclusiveMaximum) &&
+	            IsOptionalNumber(schema.exclusiveMinimum) &&
+	            IsOptionalNumber(schema.maximum) &&
+	            IsOptionalNumber(schema.minimum) &&
+	            IsOptionalNumber(schema.multipleOf));
+	    }
+	    TypeGuard.TInteger = TInteger;
+	    /** Returns true if the given value is TIntersect */
+	    function TIntersect(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Intersect') &&
 	            (ValueGuard.IsString(schema.type) && schema.type !== 'object' ? false : true) &&
 	            ValueGuard.IsArray(schema.allOf) &&
 	            schema.allOf.every(schema => TSchema(schema) && !TTransform(schema)) &&
 	            IsOptionalString(schema.type) &&
 	            (IsOptionalBoolean(schema.unevaluatedProperties) || IsOptionalSchema(schema.unevaluatedProperties)) &&
 	            IsOptionalString(schema.$id));
-		}
-		TypeGuard.TIntersect = TIntersect
-		/** Returns true if the given value is TIterator */
-		function TIterator(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Iterator') &&
+	    }
+	    TypeGuard.TIntersect = TIntersect;
+	    /** Returns true if the given value is TIterator */
+	    function TIterator(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Iterator') &&
 	            schema.type === 'Iterator' &&
 	            IsOptionalString(schema.$id) &&
 	            TSchema(schema.items));
-		}
-		TypeGuard.TIterator = TIterator
-		/** Returns true if the given value is a TKind with the given name. */
-		function TKindOf(schema, kind) {
-			return TKind(schema) && schema[exports.Kind] === kind
-		}
-		TypeGuard.TKindOf = TKindOf
-		/** Returns true if the given value is TKind */
-		function TKind(schema) {
-			return (
-				ValueGuard.IsObject(schema) &&
-				exports.Kind in schema &&
-				ValueGuard.IsString(schema[exports.Kind])
-			)
-		}
-		TypeGuard.TKind = TKind
-		/** Returns true if the given value is TLiteral<string> */
-		function TLiteralString(schema) {
-			return TLiteral(schema) && ValueGuard.IsString(schema.const)
-		}
-		TypeGuard.TLiteralString = TLiteralString
-		/** Returns true if the given value is TLiteral<number> */
-		function TLiteralNumber(schema) {
-			return TLiteral(schema) && ValueGuard.IsNumber(schema.const)
-		}
-		TypeGuard.TLiteralNumber = TLiteralNumber
-		/** Returns true if the given value is TLiteral<boolean> */
-		function TLiteralBoolean(schema) {
-			return TLiteral(schema) && ValueGuard.IsBoolean(schema.const)
-		}
-		TypeGuard.TLiteralBoolean = TLiteralBoolean
-		/** Returns true if the given value is TLiteral */
-		function TLiteral(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Literal') &&
+	    }
+	    TypeGuard.TIterator = TIterator;
+	    /** Returns true if the given value is a TKind with the given name. */
+	    function TKindOf(schema, kind) {
+	        return TKind(schema) && schema[exports.Kind] === kind;
+	    }
+	    TypeGuard.TKindOf = TKindOf;
+	    /** Returns true if the given value is TKind */
+	    function TKind(schema) {
+	        return ValueGuard.IsObject(schema) && exports.Kind in schema && ValueGuard.IsString(schema[exports.Kind]);
+	    }
+	    TypeGuard.TKind = TKind;
+	    /** Returns true if the given value is TLiteral<string> */
+	    function TLiteralString(schema) {
+	        return TLiteral(schema) && ValueGuard.IsString(schema.const);
+	    }
+	    TypeGuard.TLiteralString = TLiteralString;
+	    /** Returns true if the given value is TLiteral<number> */
+	    function TLiteralNumber(schema) {
+	        return TLiteral(schema) && ValueGuard.IsNumber(schema.const);
+	    }
+	    TypeGuard.TLiteralNumber = TLiteralNumber;
+	    /** Returns true if the given value is TLiteral<boolean> */
+	    function TLiteralBoolean(schema) {
+	        return TLiteral(schema) && ValueGuard.IsBoolean(schema.const);
+	    }
+	    TypeGuard.TLiteralBoolean = TLiteralBoolean;
+	    /** Returns true if the given value is TLiteral */
+	    function TLiteral(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Literal') &&
 	            IsOptionalString(schema.$id) && (ValueGuard.IsBoolean(schema.const) ||
 	            ValueGuard.IsNumber(schema.const) ||
 	            ValueGuard.IsString(schema.const)));
-		}
-		TypeGuard.TLiteral = TLiteral
-		/** Returns true if the given value is TNever */
-		function TNever(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Never') &&
+	    }
+	    TypeGuard.TLiteral = TLiteral;
+	    /** Returns true if the given value is TNever */
+	    function TNever(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Never') &&
 	            ValueGuard.IsObject(schema.not) &&
 	            Object.getOwnPropertyNames(schema.not).length === 0);
-		}
-		TypeGuard.TNever = TNever
-		/** Returns true if the given value is TNot */
-		function TNot(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Not') &&
+	    }
+	    TypeGuard.TNever = TNever;
+	    /** Returns true if the given value is TNot */
+	    function TNot(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Not') &&
 	            TSchema(schema.not));
-		}
-		TypeGuard.TNot = TNot
-		/** Returns true if the given value is TNull */
-		function TNull(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Null') &&
+	    }
+	    TypeGuard.TNot = TNot;
+	    /** Returns true if the given value is TNull */
+	    function TNull(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Null') &&
 	            schema.type === 'null' &&
 	            IsOptionalString(schema.$id));
-		}
-		TypeGuard.TNull = TNull
-		/** Returns true if the given value is TNumber */
-		function TNumber(schema) {
-			return (
-				TKindOf(schema, "Number") &&
-				schema.type === "number" &&
-				IsOptionalString(schema.$id) &&
-				IsOptionalNumber(schema.exclusiveMaximum) &&
-				IsOptionalNumber(schema.exclusiveMinimum) &&
-				IsOptionalNumber(schema.maximum) &&
-				IsOptionalNumber(schema.minimum) &&
-				IsOptionalNumber(schema.multipleOf)
-			)
-		}
-		TypeGuard.TNumber = TNumber
-		/** Returns true if the given value is TObject */
-		function TObject(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Object') &&
+	    }
+	    TypeGuard.TNull = TNull;
+	    /** Returns true if the given value is TNumber */
+	    function TNumber(schema) {
+	        return (TKindOf(schema, 'Number') &&
+	            schema.type === 'number' &&
+	            IsOptionalString(schema.$id) &&
+	            IsOptionalNumber(schema.exclusiveMaximum) &&
+	            IsOptionalNumber(schema.exclusiveMinimum) &&
+	            IsOptionalNumber(schema.maximum) &&
+	            IsOptionalNumber(schema.minimum) &&
+	            IsOptionalNumber(schema.multipleOf));
+	    }
+	    TypeGuard.TNumber = TNumber;
+	    /** Returns true if the given value is TObject */
+	    function TObject(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Object') &&
 	            schema.type === 'object' &&
 	            IsOptionalString(schema.$id) &&
 	            ValueGuard.IsObject(schema.properties) &&
@@ -1937,21 +1028,21 @@ var typebox = {}
 	            IsOptionalNumber(schema.minProperties) &&
 	            IsOptionalNumber(schema.maxProperties) &&
 	            Object.entries(schema.properties).every(([key, schema]) => IsControlCharacterFree(key) && TSchema(schema)));
-		}
-		TypeGuard.TObject = TObject
-		/** Returns true if the given value is TPromise */
-		function TPromise(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Promise') &&
+	    }
+	    TypeGuard.TObject = TObject;
+	    /** Returns true if the given value is TPromise */
+	    function TPromise(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Promise') &&
 	            schema.type === 'Promise' &&
 	            IsOptionalString(schema.$id) &&
 	            TSchema(schema.item));
-		}
-		TypeGuard.TPromise = TPromise
-		/** Returns true if the given value is TRecord */
-		function TRecord(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Record') &&
+	    }
+	    TypeGuard.TPromise = TPromise;
+	    /** Returns true if the given value is TRecord */
+	    function TRecord(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Record') &&
 	            schema.type === 'object' &&
 	            IsOptionalString(schema.$id) &&
 	            IsAdditionalProperties(schema.additionalProperties) &&
@@ -1963,72 +1054,68 @@ var typebox = {}
 	                    ValueGuard.IsObject(schema.patternProperties) &&
 	                    TSchema(schema.patternProperties[keys[0]]));
 	            })(schema));
-		}
-		TypeGuard.TRecord = TRecord
-		/** Returns true if this value is TRecursive */
-		function TRecursive(schema) {
-			return (
-				ValueGuard.IsObject(schema) &&
-				exports.Hint in schema &&
-				schema[exports.Hint] === "Recursive"
-			)
-		}
-		TypeGuard.TRecursive = TRecursive
-		/** Returns true if the given value is TRef */
-		function TRef(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Ref') &&
+	    }
+	    TypeGuard.TRecord = TRecord;
+	    /** Returns true if this value is TRecursive */
+	    function TRecursive(schema) {
+	        return ValueGuard.IsObject(schema) && exports.Hint in schema && schema[exports.Hint] === 'Recursive';
+	    }
+	    TypeGuard.TRecursive = TRecursive;
+	    /** Returns true if the given value is TRef */
+	    function TRef(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Ref') &&
 	            IsOptionalString(schema.$id) &&
 	            ValueGuard.IsString(schema.$ref));
-		}
-		TypeGuard.TRef = TRef
-		/** Returns true if the given value is TString */
-		function TString(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'String') &&
+	    }
+	    TypeGuard.TRef = TRef;
+	    /** Returns true if the given value is TString */
+	    function TString(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'String') &&
 	            schema.type === 'string' &&
 	            IsOptionalString(schema.$id) &&
 	            IsOptionalNumber(schema.minLength) &&
 	            IsOptionalNumber(schema.maxLength) &&
 	            IsOptionalPattern(schema.pattern) &&
 	            IsOptionalFormat(schema.format));
-		}
-		TypeGuard.TString = TString
-		/** Returns true if the given value is TSymbol */
-		function TSymbol(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Symbol') &&
+	    }
+	    TypeGuard.TString = TString;
+	    /** Returns true if the given value is TSymbol */
+	    function TSymbol(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Symbol') &&
 	            schema.type === 'symbol' &&
 	            IsOptionalString(schema.$id));
-		}
-		TypeGuard.TSymbol = TSymbol
-		/** Returns true if the given value is TTemplateLiteral */
-		function TTemplateLiteral(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'TemplateLiteral') &&
+	    }
+	    TypeGuard.TSymbol = TSymbol;
+	    /** Returns true if the given value is TTemplateLiteral */
+	    function TTemplateLiteral(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'TemplateLiteral') &&
 	            schema.type === 'string' &&
 	            ValueGuard.IsString(schema.pattern) &&
 	            schema.pattern[0] === '^' &&
 	            schema.pattern[schema.pattern.length - 1] === '$');
-		}
-		TypeGuard.TTemplateLiteral = TTemplateLiteral
-		/** Returns true if the given value is TThis */
-		function TThis(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'This') &&
+	    }
+	    TypeGuard.TTemplateLiteral = TTemplateLiteral;
+	    /** Returns true if the given value is TThis */
+	    function TThis(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'This') &&
 	            IsOptionalString(schema.$id) &&
 	            ValueGuard.IsString(schema.$ref));
-		}
-		TypeGuard.TThis = TThis
-		/** Returns true of this value is TTransform */
-		function TTransform(schema) {
-			return ValueGuard.IsObject(schema) && exports.Transform in schema
-		}
-		TypeGuard.TTransform = TTransform
-		/** Returns true if the given value is TTuple */
-		function TTuple(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Tuple') &&
+	    }
+	    TypeGuard.TThis = TThis;
+	    /** Returns true of this value is TTransform */
+	    function TTransform(schema) {
+	        return ValueGuard.IsObject(schema) && exports.Transform in schema;
+	    }
+	    TypeGuard.TTransform = TTransform;
+	    /** Returns true if the given value is TTuple */
+	    function TTuple(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Tuple') &&
 	            schema.type === 'array' &&
 	            IsOptionalString(schema.$id) &&
 	            ValueGuard.IsNumber(schema.minItems) &&
@@ -2039,78 +1126,75 @@ var typebox = {}
 	                ValueGuard.IsUndefined(schema.additionalItems) &&
 	                schema.minItems === 0) || (ValueGuard.IsArray(schema.items) &&
 	                schema.items.every(schema => TSchema(schema)))));
-		}
-		TypeGuard.TTuple = TTuple
-		/** Returns true if the given value is TUndefined */
-		function TUndefined(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Undefined') &&
+	    }
+	    TypeGuard.TTuple = TTuple;
+	    /** Returns true if the given value is TUndefined */
+	    function TUndefined(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Undefined') &&
 	            schema.type === 'undefined' &&
 	            IsOptionalString(schema.$id));
-		}
-		TypeGuard.TUndefined = TUndefined
-		/** Returns true if the given value is TUnion<Literal<string | number>[]> */
-		function TUnionLiteral(schema) {
-			return (
-				TUnion(schema) &&
-				schema.anyOf.every((schema) => TLiteralString(schema) || TLiteralNumber(schema))
-			)
-		}
-		TypeGuard.TUnionLiteral = TUnionLiteral
-		/** Returns true if the given value is TUnion */
-		function TUnion(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Union') &&
+	    }
+	    TypeGuard.TUndefined = TUndefined;
+	    /** Returns true if the given value is TUnion<Literal<string | number>[]> */
+	    function TUnionLiteral(schema) {
+	        return TUnion(schema) && schema.anyOf.every((schema) => TLiteralString(schema) || TLiteralNumber(schema));
+	    }
+	    TypeGuard.TUnionLiteral = TUnionLiteral;
+	    /** Returns true if the given value is TUnion */
+	    function TUnion(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Union') &&
 	            IsOptionalString(schema.$id) &&
 	            ValueGuard.IsObject(schema) &&
 	            ValueGuard.IsArray(schema.anyOf) &&
 	            schema.anyOf.every(schema => TSchema(schema)));
-		}
-		TypeGuard.TUnion = TUnion
-		/** Returns true if the given value is TUint8Array */
-		function TUint8Array(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Uint8Array') &&
+	    }
+	    TypeGuard.TUnion = TUnion;
+	    /** Returns true if the given value is TUint8Array */
+	    function TUint8Array(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Uint8Array') &&
 	            schema.type === 'Uint8Array' &&
 	            IsOptionalString(schema.$id) &&
 	            IsOptionalNumber(schema.minByteLength) &&
 	            IsOptionalNumber(schema.maxByteLength));
-		}
-		TypeGuard.TUint8Array = TUint8Array
-		/** Returns true if the given value is TUnknown */
-		function TUnknown(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Unknown') &&
+	    }
+	    TypeGuard.TUint8Array = TUint8Array;
+	    /** Returns true if the given value is TUnknown */
+	    function TUnknown(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Unknown') &&
 	            IsOptionalString(schema.$id));
-		}
-		TypeGuard.TUnknown = TUnknown
-		/** Returns true if the given value is a raw TUnsafe */
-		function TUnsafe(schema) {
-			return TKindOf(schema, "Unsafe")
-		}
-		TypeGuard.TUnsafe = TUnsafe
-		/** Returns true if the given value is TVoid */
-		function TVoid(schema) {
-			// prettier-ignore
-			return (TKindOf(schema, 'Void') &&
+	    }
+	    TypeGuard.TUnknown = TUnknown;
+	    /** Returns true if the given value is a raw TUnsafe */
+	    function TUnsafe(schema) {
+	        return TKindOf(schema, 'Unsafe');
+	    }
+	    TypeGuard.TUnsafe = TUnsafe;
+	    /** Returns true if the given value is TVoid */
+	    function TVoid(schema) {
+	        // prettier-ignore
+	        return (TKindOf(schema, 'Void') &&
 	            schema.type === 'void' &&
 	            IsOptionalString(schema.$id));
-		}
-		TypeGuard.TVoid = TVoid
-		/** Returns true if this value has a Readonly symbol */
-		function TReadonly(schema) {
-			return ValueGuard.IsObject(schema) && schema[exports.Readonly] === "Readonly"
-		}
-		TypeGuard.TReadonly = TReadonly
-		/** Returns true if this value has a Optional symbol */
-		function TOptional(schema) {
-			return ValueGuard.IsObject(schema) && schema[exports.Optional] === "Optional"
-		}
-		TypeGuard.TOptional = TOptional
-		/** Returns true if the given value is TSchema */
-		function TSchema(schema) {
-			// prettier-ignore
-			return (ValueGuard.IsObject(schema)) && (TAny(schema) ||
+	    }
+	    TypeGuard.TVoid = TVoid;
+	    /** Returns true if this value has a Readonly symbol */
+	    function TReadonly(schema) {
+	        return ValueGuard.IsObject(schema) && schema[exports.Readonly] === 'Readonly';
+	    }
+	    TypeGuard.TReadonly = TReadonly;
+	    /** Returns true if this value has a Optional symbol */
+	    function TOptional(schema) {
+	        return ValueGuard.IsObject(schema) && schema[exports.Optional] === 'Optional';
+	    }
+	    TypeGuard.TOptional = TOptional;
+	    /** Returns true if the given value is TSchema */
+	    function TSchema(schema) {
+	        // prettier-ignore
+	        return (ValueGuard.IsObject(schema)) && (TAny(schema) ||
 	            TArray(schema) ||
 	            TBoolean(schema) ||
 	            TBigInt(schema) ||
@@ -2142,225 +1226,222 @@ var typebox = {}
 	            TUnsafe(schema) ||
 	            TVoid(schema) ||
 	            (TKind(schema) && TypeRegistry.Has(schema[exports.Kind])));
-		}
-		TypeGuard.TSchema = TSchema
-	})(TypeGuard || (exports.TypeGuard = TypeGuard = {}))
+	    }
+	    TypeGuard.TSchema = TSchema;
+	})(TypeGuard || (exports.TypeGuard = TypeGuard = {}));
 	// --------------------------------------------------------------------------
 	// ExtendsUndefined
 	// --------------------------------------------------------------------------
 	/** Fast undefined check used for properties of type undefined */
-	var ExtendsUndefined
-	;(function (ExtendsUndefined) {
-		function Check(schema) {
-			return schema[exports.Kind] === "Intersect"
-				? schema.allOf.every((schema) => Check(schema))
-				: schema[exports.Kind] === "Union"
-					? schema.anyOf.some((schema) => Check(schema))
-					: schema[exports.Kind] === "Undefined"
-						? true
-						: schema[exports.Kind] === "Not"
-							? !Check(schema.not)
-							: false
-		}
-		ExtendsUndefined.Check = Check
-	})(ExtendsUndefined || (exports.ExtendsUndefined = ExtendsUndefined = {}))
+	var ExtendsUndefined;
+	(function (ExtendsUndefined) {
+	    function Check(schema) {
+	        return schema[exports.Kind] === 'Intersect'
+	            ? schema.allOf.every((schema) => Check(schema))
+	            : schema[exports.Kind] === 'Union'
+	                ? schema.anyOf.some((schema) => Check(schema))
+	                : schema[exports.Kind] === 'Undefined'
+	                    ? true
+	                    : schema[exports.Kind] === 'Not'
+	                        ? !Check(schema.not)
+	                        : false;
+	    }
+	    ExtendsUndefined.Check = Check;
+	})(ExtendsUndefined || (exports.ExtendsUndefined = ExtendsUndefined = {}));
 	// --------------------------------------------------------------------------
 	// TypeExtends
 	// --------------------------------------------------------------------------
-	class TypeExtendsError extends TypeBoxError {}
-	exports.TypeExtendsError = TypeExtendsError
-	var TypeExtendsResult
-	;(function (TypeExtendsResult) {
-		TypeExtendsResult[(TypeExtendsResult["Union"] = 0)] = "Union"
-		TypeExtendsResult[(TypeExtendsResult["True"] = 1)] = "True"
-		TypeExtendsResult[(TypeExtendsResult["False"] = 2)] = "False"
-	})(TypeExtendsResult || (exports.TypeExtendsResult = TypeExtendsResult = {}))
-	var TypeExtends
-	;(function (TypeExtends) {
-		// --------------------------------------------------------------------------
-		// IntoBooleanResult
-		// --------------------------------------------------------------------------
-		function IntoBooleanResult(result) {
-			return result === TypeExtendsResult.False ? result : TypeExtendsResult.True
-		}
-		// --------------------------------------------------------------------------
-		// Throw
-		// --------------------------------------------------------------------------
-		function Throw(message) {
-			throw new TypeExtendsError(message)
-		}
-		// --------------------------------------------------------------------------
-		// StructuralRight
-		// --------------------------------------------------------------------------
-		function IsStructuralRight(right) {
-			// prettier-ignore
-			return (TypeGuard.TNever(right) ||
+	class TypeExtendsError extends TypeBoxError {
+	}
+	exports.TypeExtendsError = TypeExtendsError;
+	var TypeExtendsResult;
+	(function (TypeExtendsResult) {
+	    TypeExtendsResult[TypeExtendsResult["Union"] = 0] = "Union";
+	    TypeExtendsResult[TypeExtendsResult["True"] = 1] = "True";
+	    TypeExtendsResult[TypeExtendsResult["False"] = 2] = "False";
+	})(TypeExtendsResult || (exports.TypeExtendsResult = TypeExtendsResult = {}));
+	var TypeExtends;
+	(function (TypeExtends) {
+	    // --------------------------------------------------------------------------
+	    // IntoBooleanResult
+	    // --------------------------------------------------------------------------
+	    function IntoBooleanResult(result) {
+	        return result === TypeExtendsResult.False ? result : TypeExtendsResult.True;
+	    }
+	    // --------------------------------------------------------------------------
+	    // Throw
+	    // --------------------------------------------------------------------------
+	    function Throw(message) {
+	        throw new TypeExtendsError(message);
+	    }
+	    // --------------------------------------------------------------------------
+	    // StructuralRight
+	    // --------------------------------------------------------------------------
+	    function IsStructuralRight(right) {
+	        // prettier-ignore
+	        return (TypeGuard.TNever(right) ||
 	            TypeGuard.TIntersect(right) ||
 	            TypeGuard.TUnion(right) ||
 	            TypeGuard.TUnknown(right) ||
 	            TypeGuard.TAny(right));
-		}
-		function StructuralRight(left, right) {
-			// prettier-ignore
-			return (TypeGuard.TNever(right) ? TNeverRight() :
+	    }
+	    function StructuralRight(left, right) {
+	        // prettier-ignore
+	        return (TypeGuard.TNever(right) ? TNeverRight() :
 	            TypeGuard.TIntersect(right) ? TIntersectRight(left, right) :
 	                TypeGuard.TUnion(right) ? TUnionRight(left, right) :
 	                    TypeGuard.TUnknown(right) ? TUnknownRight() :
 	                        TypeGuard.TAny(right) ? TAnyRight() :
 	                            Throw('StructuralRight'));
-		}
-		// --------------------------------------------------------------------------
-		// Any
-		// --------------------------------------------------------------------------
-		function TAnyRight(left, right) {
-			return TypeExtendsResult.True
-		}
-		function TAny(left, right) {
-			// prettier-ignore
-			return (TypeGuard.TIntersect(right) ? TIntersectRight(left, right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Any
+	    // --------------------------------------------------------------------------
+	    function TAnyRight(left, right) {
+	        return TypeExtendsResult.True;
+	    }
+	    function TAny(left, right) {
+	        // prettier-ignore
+	        return (TypeGuard.TIntersect(right) ? TIntersectRight(left, right) :
 	            (TypeGuard.TUnion(right) && right.anyOf.some((schema) => TypeGuard.TAny(schema) || TypeGuard.TUnknown(schema))) ? TypeExtendsResult.True :
 	                TypeGuard.TUnion(right) ? TypeExtendsResult.Union :
 	                    TypeGuard.TUnknown(right) ? TypeExtendsResult.True :
 	                        TypeGuard.TAny(right) ? TypeExtendsResult.True :
 	                            TypeExtendsResult.Union);
-		}
-		// --------------------------------------------------------------------------
-		// Array
-		// --------------------------------------------------------------------------
-		function TArrayRight(left, right) {
-			// prettier-ignore
-			return (TypeGuard.TUnknown(left) ? TypeExtendsResult.False :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Array
+	    // --------------------------------------------------------------------------
+	    function TArrayRight(left, right) {
+	        // prettier-ignore
+	        return (TypeGuard.TUnknown(left) ? TypeExtendsResult.False :
 	            TypeGuard.TAny(left) ? TypeExtendsResult.Union :
 	                TypeGuard.TNever(left) ? TypeExtendsResult.True :
 	                    TypeExtendsResult.False);
-		}
-		function TArray(left, right) {
-			// prettier-ignore
-			return (TypeGuard.TObject(right) && IsObjectArrayLike(right) ? TypeExtendsResult.True :
+	    }
+	    function TArray(left, right) {
+	        // prettier-ignore
+	        return (TypeGuard.TObject(right) && IsObjectArrayLike(right) ? TypeExtendsResult.True :
 	            IsStructuralRight(right) ? StructuralRight(left, right) :
 	                !TypeGuard.TArray(right) ? TypeExtendsResult.False :
 	                    IntoBooleanResult(Visit(left.items, right.items)));
-		}
-		// --------------------------------------------------------------------------
-		// AsyncIterator
-		// --------------------------------------------------------------------------
-		function TAsyncIterator(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // AsyncIterator
+	    // --------------------------------------------------------------------------
+	    function TAsyncIterator(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            !TypeGuard.TAsyncIterator(right) ? TypeExtendsResult.False :
 	                IntoBooleanResult(Visit(left.items, right.items)));
-		}
-		// --------------------------------------------------------------------------
-		// BigInt
-		// --------------------------------------------------------------------------
-		function TBigInt(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // BigInt
+	    // --------------------------------------------------------------------------
+	    function TBigInt(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                TypeGuard.TRecord(right) ? TRecordRight(left, right) :
 	                    TypeGuard.TBigInt(right) ? TypeExtendsResult.True :
 	                        TypeExtendsResult.False);
-		}
-		// --------------------------------------------------------------------------
-		// Boolean
-		// --------------------------------------------------------------------------
-		function TBooleanRight(left, right) {
-			return TypeGuard.TLiteral(left) && ValueGuard.IsBoolean(left.const)
-				? TypeExtendsResult.True
-				: TypeGuard.TBoolean(left)
-					? TypeExtendsResult.True
-					: TypeExtendsResult.False
-		}
-		function TBoolean(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Boolean
+	    // --------------------------------------------------------------------------
+	    function TBooleanRight(left, right) {
+	        return TypeGuard.TLiteral(left) && ValueGuard.IsBoolean(left.const) ? TypeExtendsResult.True : TypeGuard.TBoolean(left) ? TypeExtendsResult.True : TypeExtendsResult.False;
+	    }
+	    function TBoolean(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                TypeGuard.TRecord(right) ? TRecordRight(left, right) :
 	                    TypeGuard.TBoolean(right) ? TypeExtendsResult.True :
 	                        TypeExtendsResult.False);
-		}
-		// --------------------------------------------------------------------------
-		// Constructor
-		// --------------------------------------------------------------------------
-		function TConstructor(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Constructor
+	    // --------------------------------------------------------------------------
+	    function TConstructor(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                !TypeGuard.TConstructor(right) ? TypeExtendsResult.False :
 	                    left.parameters.length > right.parameters.length ? TypeExtendsResult.False :
 	                        (!left.parameters.every((schema, index) => IntoBooleanResult(Visit(right.parameters[index], schema)) === TypeExtendsResult.True)) ? TypeExtendsResult.False :
 	                            IntoBooleanResult(Visit(left.returns, right.returns)));
-		}
-		// --------------------------------------------------------------------------
-		// Date
-		// --------------------------------------------------------------------------
-		function TDate(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Date
+	    // --------------------------------------------------------------------------
+	    function TDate(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                TypeGuard.TRecord(right) ? TRecordRight(left, right) :
 	                    TypeGuard.TDate(right) ? TypeExtendsResult.True :
 	                        TypeExtendsResult.False);
-		}
-		// --------------------------------------------------------------------------
-		// Function
-		// --------------------------------------------------------------------------
-		function TFunction(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Function
+	    // --------------------------------------------------------------------------
+	    function TFunction(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                !TypeGuard.TFunction(right) ? TypeExtendsResult.False :
 	                    left.parameters.length > right.parameters.length ? TypeExtendsResult.False :
 	                        (!left.parameters.every((schema, index) => IntoBooleanResult(Visit(right.parameters[index], schema)) === TypeExtendsResult.True)) ? TypeExtendsResult.False :
 	                            IntoBooleanResult(Visit(left.returns, right.returns)));
-		}
-		// --------------------------------------------------------------------------
-		// Integer
-		// --------------------------------------------------------------------------
-		function TIntegerRight(left, right) {
-			// prettier-ignore
-			return (TypeGuard.TLiteral(left) && ValueGuard.IsNumber(left.const) ? TypeExtendsResult.True :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Integer
+	    // --------------------------------------------------------------------------
+	    function TIntegerRight(left, right) {
+	        // prettier-ignore
+	        return (TypeGuard.TLiteral(left) && ValueGuard.IsNumber(left.const) ? TypeExtendsResult.True :
 	            TypeGuard.TNumber(left) || TypeGuard.TInteger(left) ? TypeExtendsResult.True :
 	                TypeExtendsResult.False);
-		}
-		function TInteger(left, right) {
-			// prettier-ignore
-			return (TypeGuard.TInteger(right) || TypeGuard.TNumber(right) ? TypeExtendsResult.True :
+	    }
+	    function TInteger(left, right) {
+	        // prettier-ignore
+	        return (TypeGuard.TInteger(right) || TypeGuard.TNumber(right) ? TypeExtendsResult.True :
 	            IsStructuralRight(right) ? StructuralRight(left, right) :
 	                TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                    TypeGuard.TRecord(right) ? TRecordRight(left, right) :
 	                        TypeExtendsResult.False);
-		}
-		// --------------------------------------------------------------------------
-		// Intersect
-		// --------------------------------------------------------------------------
-		function TIntersectRight(left, right) {
-			// prettier-ignore
-			return right.allOf.every((schema) => Visit(left, schema) === TypeExtendsResult.True)
+	    }
+	    // --------------------------------------------------------------------------
+	    // Intersect
+	    // --------------------------------------------------------------------------
+	    function TIntersectRight(left, right) {
+	        // prettier-ignore
+	        return right.allOf.every((schema) => Visit(left, schema) === TypeExtendsResult.True)
 	            ? TypeExtendsResult.True
 	            : TypeExtendsResult.False;
-		}
-		function TIntersect(left, right) {
-			// prettier-ignore
-			return left.allOf.some((schema) => Visit(schema, right) === TypeExtendsResult.True)
+	    }
+	    function TIntersect(left, right) {
+	        // prettier-ignore
+	        return left.allOf.some((schema) => Visit(schema, right) === TypeExtendsResult.True)
 	            ? TypeExtendsResult.True
 	            : TypeExtendsResult.False;
-		}
-		// --------------------------------------------------------------------------
-		// Iterator
-		// --------------------------------------------------------------------------
-		function TIterator(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Iterator
+	    // --------------------------------------------------------------------------
+	    function TIterator(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            !TypeGuard.TIterator(right) ? TypeExtendsResult.False :
 	                IntoBooleanResult(Visit(left.items, right.items)));
-		}
-		// --------------------------------------------------------------------------
-		// Literal
-		// --------------------------------------------------------------------------
-		function TLiteral(left, right) {
-			// prettier-ignore
-			return (TypeGuard.TLiteral(right) && right.const === left.const ? TypeExtendsResult.True :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Literal
+	    // --------------------------------------------------------------------------
+	    function TLiteral(left, right) {
+	        // prettier-ignore
+	        return (TypeGuard.TLiteral(right) && right.const === left.const ? TypeExtendsResult.True :
 	            IsStructuralRight(right) ? StructuralRight(left, right) :
 	                TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                    TypeGuard.TRecord(right) ? TRecordRight(left, right) :
@@ -2369,137 +1450,123 @@ var typebox = {}
 	                                TypeGuard.TInteger(right) ? TIntegerRight(left) :
 	                                    TypeGuard.TBoolean(right) ? TBooleanRight(left) :
 	                                        TypeExtendsResult.False);
-		}
-		// --------------------------------------------------------------------------
-		// Never
-		// --------------------------------------------------------------------------
-		function TNeverRight(left, right) {
-			return TypeExtendsResult.False
-		}
-		function TNever(left, right) {
-			return TypeExtendsResult.True
-		}
-		// --------------------------------------------------------------------------
-		// Not
-		// --------------------------------------------------------------------------
-		function UnwrapTNot(schema) {
-			let [current, depth] = [schema, 0]
-			while (true) {
-				if (!TypeGuard.TNot(current)) break
-				current = current.not
-				depth += 1
-			}
-			return depth % 2 === 0 ? current : exports.Type.Unknown()
-		}
-		function TNot(left, right) {
-			// TypeScript has no concept of negated types, and attempts to correctly check the negated
-			// type at runtime would put TypeBox at odds with TypeScripts ability to statically infer
-			// the type. Instead we unwrap to either unknown or T and continue evaluating.
-			// prettier-ignore
-			return (TypeGuard.TNot(left) ? Visit(UnwrapTNot(left), right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Never
+	    // --------------------------------------------------------------------------
+	    function TNeverRight(left, right) {
+	        return TypeExtendsResult.False;
+	    }
+	    function TNever(left, right) {
+	        return TypeExtendsResult.True;
+	    }
+	    // --------------------------------------------------------------------------
+	    // Not
+	    // --------------------------------------------------------------------------
+	    function UnwrapTNot(schema) {
+	        let [current, depth] = [schema, 0];
+	        while (true) {
+	            if (!TypeGuard.TNot(current))
+	                break;
+	            current = current.not;
+	            depth += 1;
+	        }
+	        return depth % 2 === 0 ? current : exports.Type.Unknown();
+	    }
+	    function TNot(left, right) {
+	        // TypeScript has no concept of negated types, and attempts to correctly check the negated
+	        // type at runtime would put TypeBox at odds with TypeScripts ability to statically infer
+	        // the type. Instead we unwrap to either unknown or T and continue evaluating.
+	        // prettier-ignore
+	        return (TypeGuard.TNot(left) ? Visit(UnwrapTNot(left), right) :
 	            TypeGuard.TNot(right) ? Visit(left, UnwrapTNot(right)) :
 	                Throw('Invalid fallthrough for Not'));
-		}
-		// --------------------------------------------------------------------------
-		// Null
-		// --------------------------------------------------------------------------
-		function TNull(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Null
+	    // --------------------------------------------------------------------------
+	    function TNull(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                TypeGuard.TRecord(right) ? TRecordRight(left, right) :
 	                    TypeGuard.TNull(right) ? TypeExtendsResult.True :
 	                        TypeExtendsResult.False);
-		}
-		// --------------------------------------------------------------------------
-		// Number
-		// --------------------------------------------------------------------------
-		function TNumberRight(left, right) {
-			// prettier-ignore
-			return (TypeGuard.TLiteralNumber(left) ? TypeExtendsResult.True :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Number
+	    // --------------------------------------------------------------------------
+	    function TNumberRight(left, right) {
+	        // prettier-ignore
+	        return (TypeGuard.TLiteralNumber(left) ? TypeExtendsResult.True :
 	            TypeGuard.TNumber(left) || TypeGuard.TInteger(left) ? TypeExtendsResult.True :
 	                TypeExtendsResult.False);
-		}
-		function TNumber(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    function TNumber(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                TypeGuard.TRecord(right) ? TRecordRight(left, right) :
 	                    TypeGuard.TInteger(right) || TypeGuard.TNumber(right) ? TypeExtendsResult.True :
 	                        TypeExtendsResult.False);
-		}
-		// --------------------------------------------------------------------------
-		// Object
-		// --------------------------------------------------------------------------
-		function IsObjectPropertyCount(schema, count) {
-			return Object.getOwnPropertyNames(schema.properties).length === count
-		}
-		function IsObjectStringLike(schema) {
-			return IsObjectArrayLike(schema)
-		}
-		function IsObjectSymbolLike(schema) {
-			// prettier-ignore
-			return IsObjectPropertyCount(schema, 0) || (IsObjectPropertyCount(schema, 1) && 'description' in schema.properties && TypeGuard.TUnion(schema.properties.description) && schema.properties.description.anyOf.length === 2 && ((TypeGuard.TString(schema.properties.description.anyOf[0]) &&
+	    }
+	    // --------------------------------------------------------------------------
+	    // Object
+	    // --------------------------------------------------------------------------
+	    function IsObjectPropertyCount(schema, count) {
+	        return Object.getOwnPropertyNames(schema.properties).length === count;
+	    }
+	    function IsObjectStringLike(schema) {
+	        return IsObjectArrayLike(schema);
+	    }
+	    function IsObjectSymbolLike(schema) {
+	        // prettier-ignore
+	        return IsObjectPropertyCount(schema, 0) || (IsObjectPropertyCount(schema, 1) && 'description' in schema.properties && TypeGuard.TUnion(schema.properties.description) && schema.properties.description.anyOf.length === 2 && ((TypeGuard.TString(schema.properties.description.anyOf[0]) &&
 	            TypeGuard.TUndefined(schema.properties.description.anyOf[1])) || (TypeGuard.TString(schema.properties.description.anyOf[1]) &&
 	            TypeGuard.TUndefined(schema.properties.description.anyOf[0]))));
-		}
-		function IsObjectNumberLike(schema) {
-			return IsObjectPropertyCount(schema, 0)
-		}
-		function IsObjectBooleanLike(schema) {
-			return IsObjectPropertyCount(schema, 0)
-		}
-		function IsObjectBigIntLike(schema) {
-			return IsObjectPropertyCount(schema, 0)
-		}
-		function IsObjectDateLike(schema) {
-			return IsObjectPropertyCount(schema, 0)
-		}
-		function IsObjectUint8ArrayLike(schema) {
-			return IsObjectArrayLike(schema)
-		}
-		function IsObjectFunctionLike(schema) {
-			const length = exports.Type.Number()
-			return (
-				IsObjectPropertyCount(schema, 0) ||
-				(IsObjectPropertyCount(schema, 1) &&
-					"length" in schema.properties &&
-					IntoBooleanResult(Visit(schema.properties["length"], length)) === TypeExtendsResult.True)
-			)
-		}
-		function IsObjectConstructorLike(schema) {
-			return IsObjectPropertyCount(schema, 0)
-		}
-		function IsObjectArrayLike(schema) {
-			const length = exports.Type.Number()
-			return (
-				IsObjectPropertyCount(schema, 0) ||
-				(IsObjectPropertyCount(schema, 1) &&
-					"length" in schema.properties &&
-					IntoBooleanResult(Visit(schema.properties["length"], length)) === TypeExtendsResult.True)
-			)
-		}
-		function IsObjectPromiseLike(schema) {
-			const then = exports.Type.Function([exports.Type.Any()], exports.Type.Any())
-			return (
-				IsObjectPropertyCount(schema, 0) ||
-				(IsObjectPropertyCount(schema, 1) &&
-					"then" in schema.properties &&
-					IntoBooleanResult(Visit(schema.properties["then"], then)) === TypeExtendsResult.True)
-			)
-		}
-		// --------------------------------------------------------------------------
-		// Property
-		// --------------------------------------------------------------------------
-		function Property(left, right) {
-			// prettier-ignore
-			return (Visit(left, right) === TypeExtendsResult.False ? TypeExtendsResult.False :
+	    }
+	    function IsObjectNumberLike(schema) {
+	        return IsObjectPropertyCount(schema, 0);
+	    }
+	    function IsObjectBooleanLike(schema) {
+	        return IsObjectPropertyCount(schema, 0);
+	    }
+	    function IsObjectBigIntLike(schema) {
+	        return IsObjectPropertyCount(schema, 0);
+	    }
+	    function IsObjectDateLike(schema) {
+	        return IsObjectPropertyCount(schema, 0);
+	    }
+	    function IsObjectUint8ArrayLike(schema) {
+	        return IsObjectArrayLike(schema);
+	    }
+	    function IsObjectFunctionLike(schema) {
+	        const length = exports.Type.Number();
+	        return IsObjectPropertyCount(schema, 0) || (IsObjectPropertyCount(schema, 1) && 'length' in schema.properties && IntoBooleanResult(Visit(schema.properties['length'], length)) === TypeExtendsResult.True);
+	    }
+	    function IsObjectConstructorLike(schema) {
+	        return IsObjectPropertyCount(schema, 0);
+	    }
+	    function IsObjectArrayLike(schema) {
+	        const length = exports.Type.Number();
+	        return IsObjectPropertyCount(schema, 0) || (IsObjectPropertyCount(schema, 1) && 'length' in schema.properties && IntoBooleanResult(Visit(schema.properties['length'], length)) === TypeExtendsResult.True);
+	    }
+	    function IsObjectPromiseLike(schema) {
+	        const then = exports.Type.Function([exports.Type.Any()], exports.Type.Any());
+	        return IsObjectPropertyCount(schema, 0) || (IsObjectPropertyCount(schema, 1) && 'then' in schema.properties && IntoBooleanResult(Visit(schema.properties['then'], then)) === TypeExtendsResult.True);
+	    }
+	    // --------------------------------------------------------------------------
+	    // Property
+	    // --------------------------------------------------------------------------
+	    function Property(left, right) {
+	        // prettier-ignore
+	        return (Visit(left, right) === TypeExtendsResult.False ? TypeExtendsResult.False :
 	            TypeGuard.TOptional(left) && !TypeGuard.TOptional(right) ? TypeExtendsResult.False :
 	                TypeExtendsResult.True);
-		}
-		function TObjectRight(left, right) {
-			// prettier-ignore
-			return (TypeGuard.TUnknown(left) ? TypeExtendsResult.False :
+	    }
+	    function TObjectRight(left, right) {
+	        // prettier-ignore
+	        return (TypeGuard.TUnknown(left) ? TypeExtendsResult.False :
 	            TypeGuard.TAny(left) ? TypeExtendsResult.Union : (TypeGuard.TNever(left) ||
 	                (TypeGuard.TLiteralString(left) && IsObjectStringLike(right)) ||
 	                (TypeGuard.TLiteralNumber(left) && IsObjectNumberLike(right)) ||
@@ -2526,10 +1593,10 @@ var typebox = {}
 	                            : TypeExtendsResult.False;
 	                    })() :
 	                        TypeExtendsResult.False);
-		}
-		function TObject(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    function TObject(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TRecord(right) ? TRecordRight(left, right) :
 	                !TypeGuard.TObject(right) ? TypeExtendsResult.False :
 	                    (() => {
@@ -2546,36 +1613,36 @@ var typebox = {}
 	                        }
 	                        return TypeExtendsResult.True;
 	                    })());
-		}
-		// --------------------------------------------------------------------------
-		// Promise
-		// --------------------------------------------------------------------------
-		function TPromise(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Promise
+	    // --------------------------------------------------------------------------
+	    function TPromise(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) && IsObjectPromiseLike(right) ? TypeExtendsResult.True :
 	                !TypeGuard.TPromise(right) ? TypeExtendsResult.False :
 	                    IntoBooleanResult(Visit(left.item, right.item)));
-		}
-		// --------------------------------------------------------------------------
-		// Record
-		// --------------------------------------------------------------------------
-		function RecordKey(schema) {
-			// prettier-ignore
-			return (exports.PatternNumberExact in schema.patternProperties ? exports.Type.Number() :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Record
+	    // --------------------------------------------------------------------------
+	    function RecordKey(schema) {
+	        // prettier-ignore
+	        return (exports.PatternNumberExact in schema.patternProperties ? exports.Type.Number() :
 	            exports.PatternStringExact in schema.patternProperties ? exports.Type.String() :
 	                Throw('Unknown record key pattern'));
-		}
-		function RecordValue(schema) {
-			// prettier-ignore
-			return (exports.PatternNumberExact in schema.patternProperties ? schema.patternProperties[exports.PatternNumberExact] :
+	    }
+	    function RecordValue(schema) {
+	        // prettier-ignore
+	        return (exports.PatternNumberExact in schema.patternProperties ? schema.patternProperties[exports.PatternNumberExact] :
 	            exports.PatternStringExact in schema.patternProperties ? schema.patternProperties[exports.PatternStringExact] :
 	                Throw('Unable to get record value schema'));
-		}
-		function TRecordRight(left, right) {
-			const [Key, Value] = [RecordKey(right), RecordValue(right)]
-			// prettier-ignore
-			return ((TypeGuard.TLiteralString(left) && TypeGuard.TNumber(Key) && IntoBooleanResult(Visit(left, Value)) === TypeExtendsResult.True) ? TypeExtendsResult.True :
+	    }
+	    function TRecordRight(left, right) {
+	        const [Key, Value] = [RecordKey(right), RecordValue(right)];
+	        // prettier-ignore
+	        return ((TypeGuard.TLiteralString(left) && TypeGuard.TNumber(Key) && IntoBooleanResult(Visit(left, Value)) === TypeExtendsResult.True) ? TypeExtendsResult.True :
 	            TypeGuard.TUint8Array(left) && TypeGuard.TNumber(Key) ? Visit(left, Value) :
 	                TypeGuard.TString(left) && TypeGuard.TNumber(Key) ? Visit(left, Value) :
 	                    TypeGuard.TArray(left) && TypeGuard.TNumber(Key) ? Visit(left, Value) :
@@ -2588,73 +1655,73 @@ var typebox = {}
 	                            return TypeExtendsResult.True;
 	                        })() :
 	                            TypeExtendsResult.False);
-		}
-		function TRecord(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    function TRecord(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                !TypeGuard.TRecord(right) ? TypeExtendsResult.False :
 	                    Visit(RecordValue(left), RecordValue(right)));
-		}
-		// --------------------------------------------------------------------------
-		// String
-		// --------------------------------------------------------------------------
-		function TStringRight(left, right) {
-			// prettier-ignore
-			return (TypeGuard.TLiteral(left) && ValueGuard.IsString(left.const) ? TypeExtendsResult.True :
+	    }
+	    // --------------------------------------------------------------------------
+	    // String
+	    // --------------------------------------------------------------------------
+	    function TStringRight(left, right) {
+	        // prettier-ignore
+	        return (TypeGuard.TLiteral(left) && ValueGuard.IsString(left.const) ? TypeExtendsResult.True :
 	            TypeGuard.TString(left) ? TypeExtendsResult.True :
 	                TypeExtendsResult.False);
-		}
-		function TString(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    function TString(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                TypeGuard.TRecord(right) ? TRecordRight(left, right) :
 	                    TypeGuard.TString(right) ? TypeExtendsResult.True :
 	                        TypeExtendsResult.False);
-		}
-		// --------------------------------------------------------------------------
-		// Symbol
-		// --------------------------------------------------------------------------
-		function TSymbol(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Symbol
+	    // --------------------------------------------------------------------------
+	    function TSymbol(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                TypeGuard.TRecord(right) ? TRecordRight(left, right) :
 	                    TypeGuard.TSymbol(right) ? TypeExtendsResult.True :
 	                        TypeExtendsResult.False);
-		}
-		// --------------------------------------------------------------------------
-		// TemplateLiteral
-		// --------------------------------------------------------------------------
-		function TTemplateLiteral(left, right) {
-			// TemplateLiteral types are resolved to either unions for finite expressions or string
-			// for infinite expressions. Here we call to TemplateLiteralResolver to resolve for
-			// either type and continue evaluating.
-			// prettier-ignore
-			return (TypeGuard.TTemplateLiteral(left) ? Visit(TemplateLiteralResolver.Resolve(left), right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // TemplateLiteral
+	    // --------------------------------------------------------------------------
+	    function TTemplateLiteral(left, right) {
+	        // TemplateLiteral types are resolved to either unions for finite expressions or string
+	        // for infinite expressions. Here we call to TemplateLiteralResolver to resolve for
+	        // either type and continue evaluating.
+	        // prettier-ignore
+	        return (TypeGuard.TTemplateLiteral(left) ? Visit(TemplateLiteralResolver.Resolve(left), right) :
 	            TypeGuard.TTemplateLiteral(right) ? Visit(left, TemplateLiteralResolver.Resolve(right)) :
 	                Throw('Invalid fallthrough for TemplateLiteral'));
-		}
-		// --------------------------------------------------------------------------
-		// Tuple
-		// --------------------------------------------------------------------------
-		function IsArrayOfTuple(left, right) {
-			// prettier-ignore
-			return (TypeGuard.TArray(right) &&
+	    }
+	    // --------------------------------------------------------------------------
+	    // Tuple
+	    // --------------------------------------------------------------------------
+	    function IsArrayOfTuple(left, right) {
+	        // prettier-ignore
+	        return (TypeGuard.TArray(right) &&
 	            left.items !== undefined &&
 	            left.items.every((schema) => Visit(schema, right.items) === TypeExtendsResult.True));
-		}
-		function TTupleRight(left, right) {
-			// prettier-ignore
-			return (TypeGuard.TNever(left) ? TypeExtendsResult.True :
+	    }
+	    function TTupleRight(left, right) {
+	        // prettier-ignore
+	        return (TypeGuard.TNever(left) ? TypeExtendsResult.True :
 	            TypeGuard.TUnknown(left) ? TypeExtendsResult.False :
 	                TypeGuard.TAny(left) ? TypeExtendsResult.Union :
 	                    TypeExtendsResult.False);
-		}
-		function TTuple(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    function TTuple(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) && IsObjectArrayLike(right) ? TypeExtendsResult.True :
 	                TypeGuard.TArray(right) && IsArrayOfTuple(left, right) ? TypeExtendsResult.True :
 	                    !TypeGuard.TTuple(right) ? TypeExtendsResult.False :
@@ -2662,54 +1729,54 @@ var typebox = {}
 	                            (ValueGuard.IsUndefined(left.items) && !ValueGuard.IsUndefined(right.items)) ? TypeExtendsResult.True :
 	                                left.items.every((schema, index) => Visit(schema, right.items[index]) === TypeExtendsResult.True) ? TypeExtendsResult.True :
 	                                    TypeExtendsResult.False);
-		}
-		// --------------------------------------------------------------------------
-		// Uint8Array
-		// --------------------------------------------------------------------------
-		function TUint8Array(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Uint8Array
+	    // --------------------------------------------------------------------------
+	    function TUint8Array(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                TypeGuard.TRecord(right) ? TRecordRight(left, right) :
 	                    TypeGuard.TUint8Array(right) ? TypeExtendsResult.True :
 	                        TypeExtendsResult.False);
-		}
-		// --------------------------------------------------------------------------
-		// Undefined
-		// --------------------------------------------------------------------------
-		function TUndefined(left, right) {
-			// prettier-ignore
-			return (IsStructuralRight(right) ? StructuralRight(left, right) :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Undefined
+	    // --------------------------------------------------------------------------
+	    function TUndefined(left, right) {
+	        // prettier-ignore
+	        return (IsStructuralRight(right) ? StructuralRight(left, right) :
 	            TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                TypeGuard.TRecord(right) ? TRecordRight(left, right) :
 	                    TypeGuard.TVoid(right) ? VoidRight(left) :
 	                        TypeGuard.TUndefined(right) ? TypeExtendsResult.True :
 	                            TypeExtendsResult.False);
-		}
-		// --------------------------------------------------------------------------
-		// Union
-		// --------------------------------------------------------------------------
-		function TUnionRight(left, right) {
-			// prettier-ignore
-			return right.anyOf.some((schema) => Visit(left, schema) === TypeExtendsResult.True)
+	    }
+	    // --------------------------------------------------------------------------
+	    // Union
+	    // --------------------------------------------------------------------------
+	    function TUnionRight(left, right) {
+	        // prettier-ignore
+	        return right.anyOf.some((schema) => Visit(left, schema) === TypeExtendsResult.True)
 	            ? TypeExtendsResult.True
 	            : TypeExtendsResult.False;
-		}
-		function TUnion(left, right) {
-			// prettier-ignore
-			return left.anyOf.every((schema) => Visit(schema, right) === TypeExtendsResult.True)
+	    }
+	    function TUnion(left, right) {
+	        // prettier-ignore
+	        return left.anyOf.every((schema) => Visit(schema, right) === TypeExtendsResult.True)
 	            ? TypeExtendsResult.True
 	            : TypeExtendsResult.False;
-		}
-		// --------------------------------------------------------------------------
-		// Unknown
-		// --------------------------------------------------------------------------
-		function TUnknownRight(left, right) {
-			return TypeExtendsResult.True
-		}
-		function TUnknown(left, right) {
-			// prettier-ignore
-			return (TypeGuard.TNever(right) ? TNeverRight() :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Unknown
+	    // --------------------------------------------------------------------------
+	    function TUnknownRight(left, right) {
+	        return TypeExtendsResult.True;
+	    }
+	    function TUnknown(left, right) {
+	        // prettier-ignore
+	        return (TypeGuard.TNever(right) ? TNeverRight() :
 	            TypeGuard.TIntersect(right) ? TIntersectRight(left, right) :
 	                TypeGuard.TUnion(right) ? TUnionRight(left, right) :
 	                    TypeGuard.TAny(right) ? TAnyRight() :
@@ -2722,29 +1789,29 @@ var typebox = {}
 	                                                TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                                                    TypeGuard.TUnknown(right) ? TypeExtendsResult.True :
 	                                                        TypeExtendsResult.False);
-		}
-		// --------------------------------------------------------------------------
-		// Void
-		// --------------------------------------------------------------------------
-		function VoidRight(left, right) {
-			// prettier-ignore
-			return TypeGuard.TUndefined(left) ? TypeExtendsResult.True :
+	    }
+	    // --------------------------------------------------------------------------
+	    // Void
+	    // --------------------------------------------------------------------------
+	    function VoidRight(left, right) {
+	        // prettier-ignore
+	        return TypeGuard.TUndefined(left) ? TypeExtendsResult.True :
 	            TypeGuard.TUndefined(left) ? TypeExtendsResult.True :
 	                TypeExtendsResult.False;
-		}
-		function TVoid(left, right) {
-			// prettier-ignore
-			return TypeGuard.TIntersect(right) ? TIntersectRight(left, right) :
+	    }
+	    function TVoid(left, right) {
+	        // prettier-ignore
+	        return TypeGuard.TIntersect(right) ? TIntersectRight(left, right) :
 	            TypeGuard.TUnion(right) ? TUnionRight(left, right) :
 	                TypeGuard.TUnknown(right) ? TUnknownRight() :
 	                    TypeGuard.TAny(right) ? TAnyRight() :
 	                        TypeGuard.TObject(right) ? TObjectRight(left, right) :
 	                            TypeGuard.TVoid(right) ? TypeExtendsResult.True :
 	                                TypeExtendsResult.False;
-		}
-		function Visit(left, right) {
-			// prettier-ignore
-			return (
+	    }
+	    function Visit(left, right) {
+	        // prettier-ignore
+	        return (
 	        // resolvable
 	        (TypeGuard.TTemplateLiteral(left) || TypeGuard.TTemplateLiteral(right)) ? TTemplateLiteral(left, right) :
 	            (TypeGuard.TNot(left) || TypeGuard.TNot(right)) ? TNot(left, right) :
@@ -2776,275 +1843,260 @@ var typebox = {}
 	                                                                                                                TypeGuard.TUnknown(left) ? TUnknown(left, right) :
 	                                                                                                                    TypeGuard.TVoid(left) ? TVoid(left, right) :
 	                                                                                                                        Throw(`Unknown left type operand '${left[exports.Kind]}'`));
-		}
-		function Extends(left, right) {
-			return Visit(left, right)
-		}
-		TypeExtends.Extends = Extends
-	})(TypeExtends || (exports.TypeExtends = TypeExtends = {}))
+	    }
+	    function Extends(left, right) {
+	        return Visit(left, right);
+	    }
+	    TypeExtends.Extends = Extends;
+	})(TypeExtends || (exports.TypeExtends = TypeExtends = {}));
 	// --------------------------------------------------------------------------
 	// TypeClone
 	// --------------------------------------------------------------------------
 	/** Specialized Clone for Types */
-	var TypeClone
-	;(function (TypeClone) {
-		function ArrayType(value) {
-			return value.map((value) => Visit(value))
-		}
-		function DateType(value) {
-			return new Date(value.getTime())
-		}
-		function Uint8ArrayType(value) {
-			return new Uint8Array(value)
-		}
-		function ObjectType(value) {
-			const clonedProperties = Object.getOwnPropertyNames(value).reduce(
-				(acc, key) => ({ ...acc, [key]: Visit(value[key]) }),
-				{}
-			)
-			const clonedSymbols = Object.getOwnPropertySymbols(value).reduce(
-				(acc, key) => ({ ...acc, [key]: Visit(value[key]) }),
-				{}
-			)
-			return { ...clonedProperties, ...clonedSymbols }
-		}
-		function Visit(value) {
-			// prettier-ignore
-			return (ValueGuard.IsArray(value) ? ArrayType(value) :
+	var TypeClone;
+	(function (TypeClone) {
+	    function ArrayType(value) {
+	        return value.map((value) => Visit(value));
+	    }
+	    function DateType(value) {
+	        return new Date(value.getTime());
+	    }
+	    function Uint8ArrayType(value) {
+	        return new Uint8Array(value);
+	    }
+	    function ObjectType(value) {
+	        const clonedProperties = Object.getOwnPropertyNames(value).reduce((acc, key) => ({ ...acc, [key]: Visit(value[key]) }), {});
+	        const clonedSymbols = Object.getOwnPropertySymbols(value).reduce((acc, key) => ({ ...acc, [key]: Visit(value[key]) }), {});
+	        return { ...clonedProperties, ...clonedSymbols };
+	    }
+	    function Visit(value) {
+	        // prettier-ignore
+	        return (ValueGuard.IsArray(value) ? ArrayType(value) :
 	            ValueGuard.IsDate(value) ? DateType(value) :
 	                ValueGuard.IsUint8Array(value) ? Uint8ArrayType(value) :
 	                    ValueGuard.IsObject(value) ? ObjectType(value) :
 	                        value);
-		}
-		/** Clones a Rest */
-		function Rest(schemas) {
-			return schemas.map((schema) => Type(schema))
-		}
-		TypeClone.Rest = Rest
-		/** Clones a Type */
-		function Type(schema, options = {}) {
-			return { ...Visit(schema), ...options }
-		}
-		TypeClone.Type = Type
-	})(TypeClone || (exports.TypeClone = TypeClone = {}))
+	    }
+	    /** Clones a Rest */
+	    function Rest(schemas) {
+	        return schemas.map((schema) => Type(schema));
+	    }
+	    TypeClone.Rest = Rest;
+	    /** Clones a Type */
+	    function Type(schema, options = {}) {
+	        return { ...Visit(schema), ...options };
+	    }
+	    TypeClone.Type = Type;
+	})(TypeClone || (exports.TypeClone = TypeClone = {}));
 	// --------------------------------------------------------------------------
 	// IndexedAccessor
 	// --------------------------------------------------------------------------
-	var IndexedAccessor
-	;(function (IndexedAccessor) {
-		function OptionalUnwrap(schema) {
-			return schema.map((schema) => {
-				const { [exports.Optional]: _, ...clone } = TypeClone.Type(schema)
-				return clone
-			})
-		}
-		function IsIntersectOptional(schema) {
-			return schema.every((schema) => TypeGuard.TOptional(schema))
-		}
-		function IsUnionOptional(schema) {
-			return schema.some((schema) => TypeGuard.TOptional(schema))
-		}
-		function ResolveIntersect(schema) {
-			return IsIntersectOptional(schema.allOf)
-				? exports.Type.Optional(exports.Type.Intersect(OptionalUnwrap(schema.allOf)))
-				: schema
-		}
-		function ResolveUnion(schema) {
-			return IsUnionOptional(schema.anyOf)
-				? exports.Type.Optional(exports.Type.Union(OptionalUnwrap(schema.anyOf)))
-				: schema
-		}
-		function ResolveOptional(schema) {
-			// prettier-ignore
-			return schema[exports.Kind] === 'Intersect' ? ResolveIntersect(schema) :
+	var IndexedAccessor;
+	(function (IndexedAccessor) {
+	    function OptionalUnwrap(schema) {
+	        return schema.map((schema) => {
+	            const { [exports.Optional]: _, ...clone } = TypeClone.Type(schema);
+	            return clone;
+	        });
+	    }
+	    function IsIntersectOptional(schema) {
+	        return schema.every((schema) => TypeGuard.TOptional(schema));
+	    }
+	    function IsUnionOptional(schema) {
+	        return schema.some((schema) => TypeGuard.TOptional(schema));
+	    }
+	    function ResolveIntersect(schema) {
+	        return IsIntersectOptional(schema.allOf) ? exports.Type.Optional(exports.Type.Intersect(OptionalUnwrap(schema.allOf))) : schema;
+	    }
+	    function ResolveUnion(schema) {
+	        return IsUnionOptional(schema.anyOf) ? exports.Type.Optional(exports.Type.Union(OptionalUnwrap(schema.anyOf))) : schema;
+	    }
+	    function ResolveOptional(schema) {
+	        // prettier-ignore
+	        return schema[exports.Kind] === 'Intersect' ? ResolveIntersect(schema) :
 	            schema[exports.Kind] === 'Union' ? ResolveUnion(schema) :
 	                schema;
-		}
-		function TIntersect(schema, key) {
-			const resolved = schema.allOf.reduce((acc, schema) => {
-				const indexed = Visit(schema, key)
-				return indexed[exports.Kind] === "Never" ? acc : [...acc, indexed]
-			}, [])
-			return ResolveOptional(exports.Type.Intersect(resolved))
-		}
-		function TUnion(schema, key) {
-			const resolved = schema.anyOf.map((schema) => Visit(schema, key))
-			return ResolveOptional(exports.Type.Union(resolved))
-		}
-		function TObject(schema, key) {
-			const property = schema.properties[key]
-			return ValueGuard.IsUndefined(property)
-				? exports.Type.Never()
-				: exports.Type.Union([property])
-		}
-		function TTuple(schema, key) {
-			const items = schema.items
-			if (ValueGuard.IsUndefined(items)) return exports.Type.Never()
-			const element = items[key] //
-			if (ValueGuard.IsUndefined(element)) return exports.Type.Never()
-			return element
-		}
-		function Visit(schema, key) {
-			// prettier-ignore
-			return schema[exports.Kind] === 'Intersect' ? TIntersect(schema, key) :
+	    }
+	    function TIntersect(schema, key) {
+	        const resolved = schema.allOf.reduce((acc, schema) => {
+	            const indexed = Visit(schema, key);
+	            return indexed[exports.Kind] === 'Never' ? acc : [...acc, indexed];
+	        }, []);
+	        return ResolveOptional(exports.Type.Intersect(resolved));
+	    }
+	    function TUnion(schema, key) {
+	        const resolved = schema.anyOf.map((schema) => Visit(schema, key));
+	        return ResolveOptional(exports.Type.Union(resolved));
+	    }
+	    function TObject(schema, key) {
+	        const property = schema.properties[key];
+	        return ValueGuard.IsUndefined(property) ? exports.Type.Never() : exports.Type.Union([property]);
+	    }
+	    function TTuple(schema, key) {
+	        const items = schema.items;
+	        if (ValueGuard.IsUndefined(items))
+	            return exports.Type.Never();
+	        const element = items[key]; //
+	        if (ValueGuard.IsUndefined(element))
+	            return exports.Type.Never();
+	        return element;
+	    }
+	    function Visit(schema, key) {
+	        // prettier-ignore
+	        return schema[exports.Kind] === 'Intersect' ? TIntersect(schema, key) :
 	            schema[exports.Kind] === 'Union' ? TUnion(schema, key) :
 	                schema[exports.Kind] === 'Object' ? TObject(schema, key) :
 	                    schema[exports.Kind] === 'Tuple' ? TTuple(schema, key) :
 	                        exports.Type.Never();
-		}
-		function Resolve(schema, keys, options = {}) {
-			const resolved = keys.map((key) => Visit(schema, key.toString()))
-			return ResolveOptional(exports.Type.Union(resolved, options))
-		}
-		IndexedAccessor.Resolve = Resolve
-	})(IndexedAccessor || (exports.IndexedAccessor = IndexedAccessor = {}))
+	    }
+	    function Resolve(schema, keys, options = {}) {
+	        const resolved = keys.map((key) => Visit(schema, key.toString()));
+	        return ResolveOptional(exports.Type.Union(resolved, options));
+	    }
+	    IndexedAccessor.Resolve = Resolve;
+	})(IndexedAccessor || (exports.IndexedAccessor = IndexedAccessor = {}));
 	// --------------------------------------------------------------------------
 	// Intrinsic
 	// --------------------------------------------------------------------------
-	var Intrinsic
-	;(function (Intrinsic) {
-		function Uncapitalize(value) {
-			const [first, rest] = [value.slice(0, 1), value.slice(1)]
-			return `${first.toLowerCase()}${rest}`
-		}
-		function Capitalize(value) {
-			const [first, rest] = [value.slice(0, 1), value.slice(1)]
-			return `${first.toUpperCase()}${rest}`
-		}
-		function Uppercase(value) {
-			return value.toUpperCase()
-		}
-		function Lowercase(value) {
-			return value.toLowerCase()
-		}
-		function IntrinsicTemplateLiteral(schema, mode) {
-			// note: template literals require special runtime handling as they are encoded in string patterns.
-			// This diverges from the mapped type which would otherwise map on the template literal kind.
-			const expression = TemplateLiteralParser.ParseExact(schema.pattern)
-			const finite = TemplateLiteralFinite.Check(expression)
-			if (!finite) return { ...schema, pattern: IntrinsicLiteral(schema.pattern, mode) }
-			const strings = [...TemplateLiteralGenerator.Generate(expression)]
-			const literals = strings.map((value) => exports.Type.Literal(value))
-			const mapped = IntrinsicRest(literals, mode)
-			const union = exports.Type.Union(mapped)
-			return exports.Type.TemplateLiteral([union])
-		}
-		function IntrinsicLiteral(value, mode) {
-			// prettier-ignore
-			return typeof value === 'string' ? (mode === 'Uncapitalize' ? Uncapitalize(value) :
+	var Intrinsic;
+	(function (Intrinsic) {
+	    function Uncapitalize(value) {
+	        const [first, rest] = [value.slice(0, 1), value.slice(1)];
+	        return `${first.toLowerCase()}${rest}`;
+	    }
+	    function Capitalize(value) {
+	        const [first, rest] = [value.slice(0, 1), value.slice(1)];
+	        return `${first.toUpperCase()}${rest}`;
+	    }
+	    function Uppercase(value) {
+	        return value.toUpperCase();
+	    }
+	    function Lowercase(value) {
+	        return value.toLowerCase();
+	    }
+	    function IntrinsicTemplateLiteral(schema, mode) {
+	        // note: template literals require special runtime handling as they are encoded in string patterns.
+	        // This diverges from the mapped type which would otherwise map on the template literal kind.
+	        const expression = TemplateLiteralParser.ParseExact(schema.pattern);
+	        const finite = TemplateLiteralFinite.Check(expression);
+	        if (!finite)
+	            return { ...schema, pattern: IntrinsicLiteral(schema.pattern, mode) };
+	        const strings = [...TemplateLiteralGenerator.Generate(expression)];
+	        const literals = strings.map((value) => exports.Type.Literal(value));
+	        const mapped = IntrinsicRest(literals, mode);
+	        const union = exports.Type.Union(mapped);
+	        return exports.Type.TemplateLiteral([union]);
+	    }
+	    function IntrinsicLiteral(value, mode) {
+	        // prettier-ignore
+	        return typeof value === 'string' ? (mode === 'Uncapitalize' ? Uncapitalize(value) :
 	            mode === 'Capitalize' ? Capitalize(value) :
 	                mode === 'Uppercase' ? Uppercase(value) :
 	                    mode === 'Lowercase' ? Lowercase(value) :
 	                        value) : value.toString();
-		}
-		function IntrinsicRest(schema, mode) {
-			if (schema.length === 0) return []
-			const [L, ...R] = schema
-			return [Map(L, mode), ...IntrinsicRest(R, mode)]
-		}
-		function Visit(schema, mode) {
-			// prettier-ignore
-			return TypeGuard.TTemplateLiteral(schema) ? IntrinsicTemplateLiteral(schema, mode) :
+	    }
+	    function IntrinsicRest(schema, mode) {
+	        if (schema.length === 0)
+	            return [];
+	        const [L, ...R] = schema;
+	        return [Map(L, mode), ...IntrinsicRest(R, mode)];
+	    }
+	    function Visit(schema, mode) {
+	        // prettier-ignore
+	        return TypeGuard.TTemplateLiteral(schema) ? IntrinsicTemplateLiteral(schema, mode) :
 	            TypeGuard.TUnion(schema) ? exports.Type.Union(IntrinsicRest(schema.anyOf, mode)) :
 	                TypeGuard.TLiteral(schema) ? exports.Type.Literal(IntrinsicLiteral(schema.const, mode)) :
 	                    schema;
-		}
-		/** Applies an intrinsic string manipulation to the given type. */
-		function Map(schema, mode) {
-			return Visit(schema, mode)
-		}
-		Intrinsic.Map = Map
-	})(Intrinsic || (exports.Intrinsic = Intrinsic = {}))
+	    }
+	    /** Applies an intrinsic string manipulation to the given type. */
+	    function Map(schema, mode) {
+	        return Visit(schema, mode);
+	    }
+	    Intrinsic.Map = Map;
+	})(Intrinsic || (exports.Intrinsic = Intrinsic = {}));
 	// --------------------------------------------------------------------------
 	// ObjectMap
 	// --------------------------------------------------------------------------
-	var ObjectMap
-	;(function (ObjectMap) {
-		function TIntersect(schema, callback) {
-			// prettier-ignore
-			return exports.Type.Intersect(schema.allOf.map((inner) => Visit(inner, callback)), { ...schema });
-		}
-		function TUnion(schema, callback) {
-			// prettier-ignore
-			return exports.Type.Union(schema.anyOf.map((inner) => Visit(inner, callback)), { ...schema });
-		}
-		function TObject(schema, callback) {
-			return callback(schema)
-		}
-		function Visit(schema, callback) {
-			// There are cases where users need to map objects with unregistered kinds. Using a TypeGuard here would
-			// prevent sub schema mapping as unregistered kinds will not pass TSchema checks. This is notable in the
-			// case of TObject where unregistered property kinds cause the TObject check to fail. As mapping is only
-			// used for composition, we use explicit checks instead.
-			// prettier-ignore
-			return (schema[exports.Kind] === 'Intersect' ? TIntersect(schema, callback) :
+	var ObjectMap;
+	(function (ObjectMap) {
+	    function TIntersect(schema, callback) {
+	        // prettier-ignore
+	        return exports.Type.Intersect(schema.allOf.map((inner) => Visit(inner, callback)), { ...schema });
+	    }
+	    function TUnion(schema, callback) {
+	        // prettier-ignore
+	        return exports.Type.Union(schema.anyOf.map((inner) => Visit(inner, callback)), { ...schema });
+	    }
+	    function TObject(schema, callback) {
+	        return callback(schema);
+	    }
+	    function Visit(schema, callback) {
+	        // There are cases where users need to map objects with unregistered kinds. Using a TypeGuard here would
+	        // prevent sub schema mapping as unregistered kinds will not pass TSchema checks. This is notable in the
+	        // case of TObject where unregistered property kinds cause the TObject check to fail. As mapping is only
+	        // used for composition, we use explicit checks instead.
+	        // prettier-ignore
+	        return (schema[exports.Kind] === 'Intersect' ? TIntersect(schema, callback) :
 	            schema[exports.Kind] === 'Union' ? TUnion(schema, callback) :
 	                schema[exports.Kind] === 'Object' ? TObject(schema, callback) :
 	                    schema);
-		}
-		function Map(schema, callback, options) {
-			return { ...Visit(TypeClone.Type(schema), callback), ...options }
-		}
-		ObjectMap.Map = Map
-	})(ObjectMap || (exports.ObjectMap = ObjectMap = {}))
-	var KeyResolver
-	;(function (KeyResolver) {
-		function UnwrapPattern(key) {
-			return key[0] === "^" && key[key.length - 1] === "$" ? key.slice(1, key.length - 1) : key
-		}
-		function TIntersect(schema, options) {
-			return schema.allOf.reduce((acc, schema) => [...acc, ...Visit(schema, options)], [])
-		}
-		function TUnion(schema, options) {
-			const sets = schema.anyOf.map((inner) => Visit(inner, options))
-			return [
-				...sets.reduce(
-					(set, outer) =>
-						outer.map((key) =>
-							sets.every((inner) => inner.includes(key)) ? set.add(key) : set
-						)[0],
-					new Set()
-				),
-			]
-		}
-		function TObject(schema, options) {
-			return Object.getOwnPropertyNames(schema.properties)
-		}
-		function TRecord(schema, options) {
-			return options.includePatterns ? Object.getOwnPropertyNames(schema.patternProperties) : []
-		}
-		function Visit(schema, options) {
-			// prettier-ignore
-			return (TypeGuard.TIntersect(schema) ? TIntersect(schema, options) :
+	    }
+	    function Map(schema, callback, options) {
+	        return { ...Visit(TypeClone.Type(schema), callback), ...options };
+	    }
+	    ObjectMap.Map = Map;
+	})(ObjectMap || (exports.ObjectMap = ObjectMap = {}));
+	var KeyResolver;
+	(function (KeyResolver) {
+	    function UnwrapPattern(key) {
+	        return key[0] === '^' && key[key.length - 1] === '$' ? key.slice(1, key.length - 1) : key;
+	    }
+	    function TIntersect(schema, options) {
+	        return schema.allOf.reduce((acc, schema) => [...acc, ...Visit(schema, options)], []);
+	    }
+	    function TUnion(schema, options) {
+	        const sets = schema.anyOf.map((inner) => Visit(inner, options));
+	        return [...sets.reduce((set, outer) => outer.map((key) => (sets.every((inner) => inner.includes(key)) ? set.add(key) : set))[0], new Set())];
+	    }
+	    function TObject(schema, options) {
+	        return Object.getOwnPropertyNames(schema.properties);
+	    }
+	    function TRecord(schema, options) {
+	        return options.includePatterns ? Object.getOwnPropertyNames(schema.patternProperties) : [];
+	    }
+	    function Visit(schema, options) {
+	        // prettier-ignore
+	        return (TypeGuard.TIntersect(schema) ? TIntersect(schema, options) :
 	            TypeGuard.TUnion(schema) ? TUnion(schema, options) :
 	                TypeGuard.TObject(schema) ? TObject(schema) :
 	                    TypeGuard.TRecord(schema) ? TRecord(schema, options) :
 	                        []);
-		}
-		/** Resolves an array of keys in this schema */
-		function ResolveKeys(schema, options) {
-			return [...new Set(Visit(schema, options))]
-		}
-		KeyResolver.ResolveKeys = ResolveKeys
-		/** Resolves a regular expression pattern matching all keys in this schema */
-		function ResolvePattern(schema) {
-			const keys = ResolveKeys(schema, { includePatterns: true })
-			const pattern = keys.map((key) => `(${UnwrapPattern(key)})`)
-			return `^(${pattern.join("|")})$`
-		}
-		KeyResolver.ResolvePattern = ResolvePattern
-	})(KeyResolver || (exports.KeyResolver = KeyResolver = {}))
+	    }
+	    /** Resolves an array of keys in this schema */
+	    function ResolveKeys(schema, options) {
+	        return [...new Set(Visit(schema, options))];
+	    }
+	    KeyResolver.ResolveKeys = ResolveKeys;
+	    /** Resolves a regular expression pattern matching all keys in this schema */
+	    function ResolvePattern(schema) {
+	        const keys = ResolveKeys(schema, { includePatterns: true });
+	        const pattern = keys.map((key) => `(${UnwrapPattern(key)})`);
+	        return `^(${pattern.join('|')})$`;
+	    }
+	    KeyResolver.ResolvePattern = ResolvePattern;
+	})(KeyResolver || (exports.KeyResolver = KeyResolver = {}));
 	// --------------------------------------------------------------------------
 	// KeyArrayResolver
 	// --------------------------------------------------------------------------
-	class KeyArrayResolverError extends TypeBoxError {}
-	exports.KeyArrayResolverError = KeyArrayResolverError
-	var KeyArrayResolver
-	;(function (KeyArrayResolver) {
-		/** Resolves an array of string[] keys from the given schema or array type. */
-		function Resolve(schema) {
-			// prettier-ignore
-			return Array.isArray(schema) ? schema :
+	class KeyArrayResolverError extends TypeBoxError {
+	}
+	exports.KeyArrayResolverError = KeyArrayResolverError;
+	var KeyArrayResolver;
+	(function (KeyArrayResolver) {
+	    /** Resolves an array of string[] keys from the given schema or array type. */
+	    function Resolve(schema) {
+	        // prettier-ignore
+	        return Array.isArray(schema) ? schema :
 	            TypeGuard.TUnionLiteral(schema) ? schema.anyOf.map((schema) => schema.const.toString()) :
 	                TypeGuard.TLiteral(schema) ? [schema.const] :
 	                    TypeGuard.TTemplateLiteral(schema) ? (() => {
@@ -3053,45 +2105,47 @@ var typebox = {}
 	                            throw new KeyArrayResolverError('Cannot resolve keys from infinite template expression');
 	                        return [...TemplateLiteralGenerator.Generate(expression)];
 	                    })() : [];
-		}
-		KeyArrayResolver.Resolve = Resolve
-	})(KeyArrayResolver || (exports.KeyArrayResolver = KeyArrayResolver = {}))
+	    }
+	    KeyArrayResolver.Resolve = Resolve;
+	})(KeyArrayResolver || (exports.KeyArrayResolver = KeyArrayResolver = {}));
 	// --------------------------------------------------------------------------
 	// UnionResolver
 	// --------------------------------------------------------------------------
-	var UnionResolver
-	;(function (UnionResolver) {
-		function* TUnion(union) {
-			for (const schema of union.anyOf) {
-				if (schema[exports.Kind] === "Union") {
-					yield* TUnion(schema)
-				} else {
-					yield schema
-				}
-			}
-		}
-		/** Returns a resolved union with interior unions flattened */
-		function Resolve(union) {
-			return exports.Type.Union([...TUnion(union)], { ...union })
-		}
-		UnionResolver.Resolve = Resolve
-	})(UnionResolver || (exports.UnionResolver = UnionResolver = {}))
+	var UnionResolver;
+	(function (UnionResolver) {
+	    function* TUnion(union) {
+	        for (const schema of union.anyOf) {
+	            if (schema[exports.Kind] === 'Union') {
+	                yield* TUnion(schema);
+	            }
+	            else {
+	                yield schema;
+	            }
+	        }
+	    }
+	    /** Returns a resolved union with interior unions flattened */
+	    function Resolve(union) {
+	        return exports.Type.Union([...TUnion(union)], { ...union });
+	    }
+	    UnionResolver.Resolve = Resolve;
+	})(UnionResolver || (exports.UnionResolver = UnionResolver = {}));
 	// --------------------------------------------------------------------------
 	// TemplateLiteralPattern
 	// --------------------------------------------------------------------------
-	class TemplateLiteralPatternError extends TypeBoxError {}
-	exports.TemplateLiteralPatternError = TemplateLiteralPatternError
-	var TemplateLiteralPattern
-	;(function (TemplateLiteralPattern) {
-		function Throw(message) {
-			throw new TemplateLiteralPatternError(message)
-		}
-		function Escape(value) {
-			return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-		}
-		function Visit(schema, acc) {
-			// prettier-ignore
-			return (TypeGuard.TTemplateLiteral(schema) ? schema.pattern.slice(1, schema.pattern.length - 1) :
+	class TemplateLiteralPatternError extends TypeBoxError {
+	}
+	exports.TemplateLiteralPatternError = TemplateLiteralPatternError;
+	var TemplateLiteralPattern;
+	(function (TemplateLiteralPattern) {
+	    function Throw(message) {
+	        throw new TemplateLiteralPatternError(message);
+	    }
+	    function Escape(value) {
+	        return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	    }
+	    function Visit(schema, acc) {
+	        // prettier-ignore
+	        return (TypeGuard.TTemplateLiteral(schema) ? schema.pattern.slice(1, schema.pattern.length - 1) :
 	            TypeGuard.TUnion(schema) ? `(${schema.anyOf.map((schema) => Visit(schema, acc)).join('|')})` :
 	                TypeGuard.TNumber(schema) ? `${acc}${exports.PatternNumber}` :
 	                    TypeGuard.TInteger(schema) ? `${acc}${exports.PatternNumber}` :
@@ -3100,233 +2154,253 @@ var typebox = {}
 	                                TypeGuard.TLiteral(schema) ? `${acc}${Escape(schema.const.toString())}` :
 	                                    TypeGuard.TBoolean(schema) ? `${acc}${exports.PatternBoolean}` :
 	                                        Throw(`Unexpected Kind '${schema[exports.Kind]}'`));
-		}
-		function Create(kinds) {
-			return `^${kinds.map((schema) => Visit(schema, "")).join("")}\$`
-		}
-		TemplateLiteralPattern.Create = Create
-	})(TemplateLiteralPattern || (exports.TemplateLiteralPattern = TemplateLiteralPattern = {}))
+	    }
+	    function Create(kinds) {
+	        return `^${kinds.map((schema) => Visit(schema, '')).join('')}\$`;
+	    }
+	    TemplateLiteralPattern.Create = Create;
+	})(TemplateLiteralPattern || (exports.TemplateLiteralPattern = TemplateLiteralPattern = {}));
 	// --------------------------------------------------------------------------------------
 	// TemplateLiteralResolver
 	// --------------------------------------------------------------------------------------
-	var TemplateLiteralResolver
-	;(function (TemplateLiteralResolver) {
-		/** Resolves a template literal as a TUnion */
-		function Resolve(template) {
-			const expression = TemplateLiteralParser.ParseExact(template.pattern)
-			if (!TemplateLiteralFinite.Check(expression)) return exports.Type.String()
-			const literals = [...TemplateLiteralGenerator.Generate(expression)].map((value) =>
-				exports.Type.Literal(value)
-			)
-			return exports.Type.Union(literals)
-		}
-		TemplateLiteralResolver.Resolve = Resolve
-	})(TemplateLiteralResolver || (exports.TemplateLiteralResolver = TemplateLiteralResolver = {}))
+	var TemplateLiteralResolver;
+	(function (TemplateLiteralResolver) {
+	    /** Resolves a template literal as a TUnion */
+	    function Resolve(template) {
+	        const expression = TemplateLiteralParser.ParseExact(template.pattern);
+	        if (!TemplateLiteralFinite.Check(expression))
+	            return exports.Type.String();
+	        const literals = [...TemplateLiteralGenerator.Generate(expression)].map((value) => exports.Type.Literal(value));
+	        return exports.Type.Union(literals);
+	    }
+	    TemplateLiteralResolver.Resolve = Resolve;
+	})(TemplateLiteralResolver || (exports.TemplateLiteralResolver = TemplateLiteralResolver = {}));
 	// --------------------------------------------------------------------------------------
 	// TemplateLiteralParser
 	// --------------------------------------------------------------------------------------
-	class TemplateLiteralParserError extends TypeBoxError {}
-	exports.TemplateLiteralParserError = TemplateLiteralParserError
-	var TemplateLiteralParser
-	;(function (TemplateLiteralParser) {
-		function IsNonEscaped(pattern, index, char) {
-			return pattern[index] === char && pattern.charCodeAt(index - 1) !== 92
-		}
-		function IsOpenParen(pattern, index) {
-			return IsNonEscaped(pattern, index, "(")
-		}
-		function IsCloseParen(pattern, index) {
-			return IsNonEscaped(pattern, index, ")")
-		}
-		function IsSeparator(pattern, index) {
-			return IsNonEscaped(pattern, index, "|")
-		}
-		function IsGroup(pattern) {
-			if (!(IsOpenParen(pattern, 0) && IsCloseParen(pattern, pattern.length - 1))) return false
-			let count = 0
-			for (let index = 0; index < pattern.length; index++) {
-				if (IsOpenParen(pattern, index)) count += 1
-				if (IsCloseParen(pattern, index)) count -= 1
-				if (count === 0 && index !== pattern.length - 1) return false
-			}
-			return true
-		}
-		function InGroup(pattern) {
-			return pattern.slice(1, pattern.length - 1)
-		}
-		function IsPrecedenceOr(pattern) {
-			let count = 0
-			for (let index = 0; index < pattern.length; index++) {
-				if (IsOpenParen(pattern, index)) count += 1
-				if (IsCloseParen(pattern, index)) count -= 1
-				if (IsSeparator(pattern, index) && count === 0) return true
-			}
-			return false
-		}
-		function IsPrecedenceAnd(pattern) {
-			for (let index = 0; index < pattern.length; index++) {
-				if (IsOpenParen(pattern, index)) return true
-			}
-			return false
-		}
-		function Or(pattern) {
-			let [count, start] = [0, 0]
-			const expressions = []
-			for (let index = 0; index < pattern.length; index++) {
-				if (IsOpenParen(pattern, index)) count += 1
-				if (IsCloseParen(pattern, index)) count -= 1
-				if (IsSeparator(pattern, index) && count === 0) {
-					const range = pattern.slice(start, index)
-					if (range.length > 0) expressions.push(Parse(range))
-					start = index + 1
-				}
-			}
-			const range = pattern.slice(start)
-			if (range.length > 0) expressions.push(Parse(range))
-			if (expressions.length === 0) return { type: "const", const: "" }
-			if (expressions.length === 1) return expressions[0]
-			return { type: "or", expr: expressions }
-		}
-		function And(pattern) {
-			function Group(value, index) {
-				if (!IsOpenParen(value, index))
-					throw new TemplateLiteralParserError(
-						`TemplateLiteralParser: Index must point to open parens`
-					)
-				let count = 0
-				for (let scan = index; scan < value.length; scan++) {
-					if (IsOpenParen(value, scan)) count += 1
-					if (IsCloseParen(value, scan)) count -= 1
-					if (count === 0) return [index, scan]
-				}
-				throw new TemplateLiteralParserError(
-					`TemplateLiteralParser: Unclosed group parens in expression`
-				)
-			}
-			function Range(pattern, index) {
-				for (let scan = index; scan < pattern.length; scan++) {
-					if (IsOpenParen(pattern, scan)) return [index, scan]
-				}
-				return [index, pattern.length]
-			}
-			const expressions = []
-			for (let index = 0; index < pattern.length; index++) {
-				if (IsOpenParen(pattern, index)) {
-					const [start, end] = Group(pattern, index)
-					const range = pattern.slice(start, end + 1)
-					expressions.push(Parse(range))
-					index = end
-				} else {
-					const [start, end] = Range(pattern, index)
-					const range = pattern.slice(start, end)
-					if (range.length > 0) expressions.push(Parse(range))
-					index = end - 1
-				}
-			}
-			// prettier-ignore
-			return (expressions.length === 0) ? { type: 'const', const: '' } :
+	class TemplateLiteralParserError extends TypeBoxError {
+	}
+	exports.TemplateLiteralParserError = TemplateLiteralParserError;
+	var TemplateLiteralParser;
+	(function (TemplateLiteralParser) {
+	    function IsNonEscaped(pattern, index, char) {
+	        return pattern[index] === char && pattern.charCodeAt(index - 1) !== 92;
+	    }
+	    function IsOpenParen(pattern, index) {
+	        return IsNonEscaped(pattern, index, '(');
+	    }
+	    function IsCloseParen(pattern, index) {
+	        return IsNonEscaped(pattern, index, ')');
+	    }
+	    function IsSeparator(pattern, index) {
+	        return IsNonEscaped(pattern, index, '|');
+	    }
+	    function IsGroup(pattern) {
+	        if (!(IsOpenParen(pattern, 0) && IsCloseParen(pattern, pattern.length - 1)))
+	            return false;
+	        let count = 0;
+	        for (let index = 0; index < pattern.length; index++) {
+	            if (IsOpenParen(pattern, index))
+	                count += 1;
+	            if (IsCloseParen(pattern, index))
+	                count -= 1;
+	            if (count === 0 && index !== pattern.length - 1)
+	                return false;
+	        }
+	        return true;
+	    }
+	    function InGroup(pattern) {
+	        return pattern.slice(1, pattern.length - 1);
+	    }
+	    function IsPrecedenceOr(pattern) {
+	        let count = 0;
+	        for (let index = 0; index < pattern.length; index++) {
+	            if (IsOpenParen(pattern, index))
+	                count += 1;
+	            if (IsCloseParen(pattern, index))
+	                count -= 1;
+	            if (IsSeparator(pattern, index) && count === 0)
+	                return true;
+	        }
+	        return false;
+	    }
+	    function IsPrecedenceAnd(pattern) {
+	        for (let index = 0; index < pattern.length; index++) {
+	            if (IsOpenParen(pattern, index))
+	                return true;
+	        }
+	        return false;
+	    }
+	    function Or(pattern) {
+	        let [count, start] = [0, 0];
+	        const expressions = [];
+	        for (let index = 0; index < pattern.length; index++) {
+	            if (IsOpenParen(pattern, index))
+	                count += 1;
+	            if (IsCloseParen(pattern, index))
+	                count -= 1;
+	            if (IsSeparator(pattern, index) && count === 0) {
+	                const range = pattern.slice(start, index);
+	                if (range.length > 0)
+	                    expressions.push(Parse(range));
+	                start = index + 1;
+	            }
+	        }
+	        const range = pattern.slice(start);
+	        if (range.length > 0)
+	            expressions.push(Parse(range));
+	        if (expressions.length === 0)
+	            return { type: 'const', const: '' };
+	        if (expressions.length === 1)
+	            return expressions[0];
+	        return { type: 'or', expr: expressions };
+	    }
+	    function And(pattern) {
+	        function Group(value, index) {
+	            if (!IsOpenParen(value, index))
+	                throw new TemplateLiteralParserError(`TemplateLiteralParser: Index must point to open parens`);
+	            let count = 0;
+	            for (let scan = index; scan < value.length; scan++) {
+	                if (IsOpenParen(value, scan))
+	                    count += 1;
+	                if (IsCloseParen(value, scan))
+	                    count -= 1;
+	                if (count === 0)
+	                    return [index, scan];
+	            }
+	            throw new TemplateLiteralParserError(`TemplateLiteralParser: Unclosed group parens in expression`);
+	        }
+	        function Range(pattern, index) {
+	            for (let scan = index; scan < pattern.length; scan++) {
+	                if (IsOpenParen(pattern, scan))
+	                    return [index, scan];
+	            }
+	            return [index, pattern.length];
+	        }
+	        const expressions = [];
+	        for (let index = 0; index < pattern.length; index++) {
+	            if (IsOpenParen(pattern, index)) {
+	                const [start, end] = Group(pattern, index);
+	                const range = pattern.slice(start, end + 1);
+	                expressions.push(Parse(range));
+	                index = end;
+	            }
+	            else {
+	                const [start, end] = Range(pattern, index);
+	                const range = pattern.slice(start, end);
+	                if (range.length > 0)
+	                    expressions.push(Parse(range));
+	                index = end - 1;
+	            }
+	        }
+	        // prettier-ignore
+	        return (expressions.length === 0) ? { type: 'const', const: '' } :
 	            (expressions.length === 1) ? expressions[0] :
 	                { type: 'and', expr: expressions };
-		}
-		/** Parses a pattern and returns an expression tree */
-		function Parse(pattern) {
-			// prettier-ignore
-			return IsGroup(pattern) ? Parse(InGroup(pattern)) :
+	    }
+	    /** Parses a pattern and returns an expression tree */
+	    function Parse(pattern) {
+	        // prettier-ignore
+	        return IsGroup(pattern) ? Parse(InGroup(pattern)) :
 	            IsPrecedenceOr(pattern) ? Or(pattern) :
 	                IsPrecedenceAnd(pattern) ? And(pattern) :
 	                    { type: 'const', const: pattern };
-		}
-		TemplateLiteralParser.Parse = Parse
-		/** Parses a pattern and strips forward and trailing ^ and $ */
-		function ParseExact(pattern) {
-			return Parse(pattern.slice(1, pattern.length - 1))
-		}
-		TemplateLiteralParser.ParseExact = ParseExact
-	})(TemplateLiteralParser || (exports.TemplateLiteralParser = TemplateLiteralParser = {}))
+	    }
+	    TemplateLiteralParser.Parse = Parse;
+	    /** Parses a pattern and strips forward and trailing ^ and $ */
+	    function ParseExact(pattern) {
+	        return Parse(pattern.slice(1, pattern.length - 1));
+	    }
+	    TemplateLiteralParser.ParseExact = ParseExact;
+	})(TemplateLiteralParser || (exports.TemplateLiteralParser = TemplateLiteralParser = {}));
 	// --------------------------------------------------------------------------------------
 	// TemplateLiteralFinite
 	// --------------------------------------------------------------------------------------
-	class TemplateLiteralFiniteError extends TypeBoxError {}
-	exports.TemplateLiteralFiniteError = TemplateLiteralFiniteError
-	var TemplateLiteralFinite
-	;(function (TemplateLiteralFinite) {
-		function Throw(message) {
-			throw new TemplateLiteralFiniteError(message)
-		}
-		function IsNumber(expression) {
-			// prettier-ignore
-			return (expression.type === 'or' &&
+	class TemplateLiteralFiniteError extends TypeBoxError {
+	}
+	exports.TemplateLiteralFiniteError = TemplateLiteralFiniteError;
+	var TemplateLiteralFinite;
+	(function (TemplateLiteralFinite) {
+	    function Throw(message) {
+	        throw new TemplateLiteralFiniteError(message);
+	    }
+	    function IsNumber(expression) {
+	        // prettier-ignore
+	        return (expression.type === 'or' &&
 	            expression.expr.length === 2 &&
 	            expression.expr[0].type === 'const' &&
 	            expression.expr[0].const === '0' &&
 	            expression.expr[1].type === 'const' &&
 	            expression.expr[1].const === '[1-9][0-9]*');
-		}
-		function IsBoolean(expression) {
-			// prettier-ignore
-			return (expression.type === 'or' &&
+	    }
+	    function IsBoolean(expression) {
+	        // prettier-ignore
+	        return (expression.type === 'or' &&
 	            expression.expr.length === 2 &&
 	            expression.expr[0].type === 'const' &&
 	            expression.expr[0].const === 'true' &&
 	            expression.expr[1].type === 'const' &&
 	            expression.expr[1].const === 'false');
-		}
-		function IsString(expression) {
-			return expression.type === "const" && expression.const === ".*"
-		}
-		function Check(expression) {
-			// prettier-ignore
-			return IsBoolean(expression) ? true :
+	    }
+	    function IsString(expression) {
+	        return expression.type === 'const' && expression.const === '.*';
+	    }
+	    function Check(expression) {
+	        // prettier-ignore
+	        return IsBoolean(expression) ? true :
 	            IsNumber(expression) || IsString(expression) ? false :
 	                (expression.type === 'and') ? expression.expr.every((expr) => Check(expr)) :
 	                    (expression.type === 'or') ? expression.expr.every((expr) => Check(expr)) :
 	                        (expression.type === 'const') ? true :
 	                            Throw(`Unknown expression type`);
-		}
-		TemplateLiteralFinite.Check = Check
-	})(TemplateLiteralFinite || (exports.TemplateLiteralFinite = TemplateLiteralFinite = {}))
+	    }
+	    TemplateLiteralFinite.Check = Check;
+	})(TemplateLiteralFinite || (exports.TemplateLiteralFinite = TemplateLiteralFinite = {}));
 	// --------------------------------------------------------------------------------------
 	// TemplateLiteralGenerator
 	// --------------------------------------------------------------------------------------
-	class TemplateLiteralGeneratorError extends TypeBoxError {}
-	exports.TemplateLiteralGeneratorError = TemplateLiteralGeneratorError
-	var TemplateLiteralGenerator
-	;(function (TemplateLiteralGenerator) {
-		function* Reduce(buffer) {
-			if (buffer.length === 1) return yield* buffer[0]
-			for (const left of buffer[0]) {
-				for (const right of Reduce(buffer.slice(1))) {
-					yield `${left}${right}`
-				}
-			}
-		}
-		function* And(expression) {
-			return yield* Reduce(expression.expr.map((expr) => [...Generate(expr)]))
-		}
-		function* Or(expression) {
-			for (const expr of expression.expr) yield* Generate(expr)
-		}
-		function* Const(expression) {
-			return yield expression.const
-		}
-		function* Generate(expression) {
-			// prettier-ignore
-			return (expression.type === 'and' ? yield* And(expression) :
+	class TemplateLiteralGeneratorError extends TypeBoxError {
+	}
+	exports.TemplateLiteralGeneratorError = TemplateLiteralGeneratorError;
+	var TemplateLiteralGenerator;
+	(function (TemplateLiteralGenerator) {
+	    function* Reduce(buffer) {
+	        if (buffer.length === 1)
+	            return yield* buffer[0];
+	        for (const left of buffer[0]) {
+	            for (const right of Reduce(buffer.slice(1))) {
+	                yield `${left}${right}`;
+	            }
+	        }
+	    }
+	    function* And(expression) {
+	        return yield* Reduce(expression.expr.map((expr) => [...Generate(expr)]));
+	    }
+	    function* Or(expression) {
+	        for (const expr of expression.expr)
+	            yield* Generate(expr);
+	    }
+	    function* Const(expression) {
+	        return yield expression.const;
+	    }
+	    function* Generate(expression) {
+	        // prettier-ignore
+	        return (expression.type === 'and' ? yield* And(expression) :
 	            expression.type === 'or' ? yield* Or(expression) :
 	                expression.type === 'const' ? yield* Const(expression) :
 	                    (() => { throw new TemplateLiteralGeneratorError('Unknown expression'); })());
-		}
-		TemplateLiteralGenerator.Generate = Generate
-	})(TemplateLiteralGenerator || (exports.TemplateLiteralGenerator = TemplateLiteralGenerator = {}))
+	    }
+	    TemplateLiteralGenerator.Generate = Generate;
+	})(TemplateLiteralGenerator || (exports.TemplateLiteralGenerator = TemplateLiteralGenerator = {}));
 	// ---------------------------------------------------------------------
 	// TemplateLiteralDslParser
 	// ---------------------------------------------------------------------
-	var TemplateLiteralDslParser
-	;(function (TemplateLiteralDslParser) {
-		function* ParseUnion(template) {
-			const trim = template.trim().replace(/"|'/g, "")
-			// prettier-ignore
-			return (trim === 'boolean' ? yield exports.Type.Boolean() :
+	var TemplateLiteralDslParser;
+	(function (TemplateLiteralDslParser) {
+	    function* ParseUnion(template) {
+	        const trim = template.trim().replace(/"|'/g, '');
+	        // prettier-ignore
+	        return (trim === 'boolean' ? yield exports.Type.Boolean() :
 	            trim === 'number' ? yield exports.Type.Number() :
 	                trim === 'bigint' ? yield exports.Type.BigInt() :
 	                    trim === 'string' ? yield exports.Type.String() :
@@ -3336,58 +2410,58 @@ var typebox = {}
 	                                literals.length === 1 ? literals[0] :
 	                                    exports.Type.Union(literals));
 	                        })());
-		}
-		function* ParseTerminal(template) {
-			if (template[1] !== "{") {
-				const L = exports.Type.Literal("$")
-				const R = ParseLiteral(template.slice(1))
-				return yield* [L, ...R]
-			}
-			for (let i = 2; i < template.length; i++) {
-				if (template[i] === "}") {
-					const L = ParseUnion(template.slice(2, i))
-					const R = ParseLiteral(template.slice(i + 1))
-					return yield* [...L, ...R]
-				}
-			}
-			yield exports.Type.Literal(template)
-		}
-		function* ParseLiteral(template) {
-			for (let i = 0; i < template.length; i++) {
-				if (template[i] === "$") {
-					const L = exports.Type.Literal(template.slice(0, i))
-					const R = ParseTerminal(template.slice(i))
-					return yield* [L, ...R]
-				}
-			}
-			yield exports.Type.Literal(template)
-		}
-		function Parse(template_dsl) {
-			return [...ParseLiteral(template_dsl)]
-		}
-		TemplateLiteralDslParser.Parse = Parse
-	})(TemplateLiteralDslParser || (exports.TemplateLiteralDslParser = TemplateLiteralDslParser = {}))
+	    }
+	    function* ParseTerminal(template) {
+	        if (template[1] !== '{') {
+	            const L = exports.Type.Literal('$');
+	            const R = ParseLiteral(template.slice(1));
+	            return yield* [L, ...R];
+	        }
+	        for (let i = 2; i < template.length; i++) {
+	            if (template[i] === '}') {
+	                const L = ParseUnion(template.slice(2, i));
+	                const R = ParseLiteral(template.slice(i + 1));
+	                return yield* [...L, ...R];
+	            }
+	        }
+	        yield exports.Type.Literal(template);
+	    }
+	    function* ParseLiteral(template) {
+	        for (let i = 0; i < template.length; i++) {
+	            if (template[i] === '$') {
+	                const L = exports.Type.Literal(template.slice(0, i));
+	                const R = ParseTerminal(template.slice(i));
+	                return yield* [L, ...R];
+	            }
+	        }
+	        yield exports.Type.Literal(template);
+	    }
+	    function Parse(template_dsl) {
+	        return [...ParseLiteral(template_dsl)];
+	    }
+	    TemplateLiteralDslParser.Parse = Parse;
+	})(TemplateLiteralDslParser || (exports.TemplateLiteralDslParser = TemplateLiteralDslParser = {}));
 	// ---------------------------------------------------------------------
 	// TransformBuilder
 	// ---------------------------------------------------------------------
 	class TransformDecodeBuilder {
-		constructor(schema) {
-			this.schema = schema
-		}
-		Decode(decode) {
-			return new TransformEncodeBuilder(this.schema, decode)
-		}
+	    constructor(schema) {
+	        this.schema = schema;
+	    }
+	    Decode(decode) {
+	        return new TransformEncodeBuilder(this.schema, decode);
+	    }
 	}
-	exports.TransformDecodeBuilder = TransformDecodeBuilder
+	exports.TransformDecodeBuilder = TransformDecodeBuilder;
 	class TransformEncodeBuilder {
-		constructor(schema, decode) {
-			this.schema = schema
-			this.decode = decode
-		}
-		Encode(encode) {
-			const schema = TypeClone.Type(this.schema)
-			// prettier-ignore
-			return (TypeGuard.TTransform(schema) ? (() => {
+	    constructor(schema, decode) {
+	        this.schema = schema;
+	        this.decode = decode;
+	    }
+	    Encode(encode) {
+	        const schema = TypeClone.Type(this.schema);
+	        // prettier-ignore
+	        return (TypeGuard.TTransform(schema) ? (() => {
 	            const Encode = (value) => schema[exports.Transform].Encode(encode(value));
 	            const Decode = (value) => this.decode(schema[exports.Transform].Decode(value));
 	            const Codec = { Encode: Encode, Decode: Decode };
@@ -3396,117 +2470,111 @@ var typebox = {}
 	            const Codec = { Decode: this.decode, Encode: encode };
 	            return { ...schema, [exports.Transform]: Codec };
 	        })());
-		}
+	    }
 	}
-	exports.TransformEncodeBuilder = TransformEncodeBuilder
+	exports.TransformEncodeBuilder = TransformEncodeBuilder;
 	// --------------------------------------------------------------------------
 	// TypeOrdinal: Used for auto $id generation
 	// --------------------------------------------------------------------------
-	let TypeOrdinal = 0
+	let TypeOrdinal = 0;
 	// --------------------------------------------------------------------------
 	// TypeBuilder
 	// --------------------------------------------------------------------------
-	class TypeBuilderError extends TypeBoxError {}
-	exports.TypeBuilderError = TypeBuilderError
-	class TypeBuilder {
-		/** `[Internal]` Creates a schema without `static` and `params` types */
-		Create(schema) {
-			return schema
-		}
-		/** `[Internal]` Throws a TypeBuilder error with the given message */
-		Throw(message) {
-			throw new TypeBuilderError(message)
-		}
-		/** `[Internal]` Discards property keys from the given record type */
-		Discard(record, keys) {
-			return keys.reduce((acc, key) => {
-				const { [key]: _, ...rest } = acc
-				return rest
-			}, record)
-		}
-		/** `[Json]` Omits compositing symbols from this schema */
-		Strict(schema) {
-			return JSON.parse(JSON.stringify(schema))
-		}
+	class TypeBuilderError extends TypeBoxError {
 	}
-	exports.TypeBuilder = TypeBuilder
+	exports.TypeBuilderError = TypeBuilderError;
+	class TypeBuilder {
+	    /** `[Internal]` Creates a schema without `static` and `params` types */
+	    Create(schema) {
+	        return schema;
+	    }
+	    /** `[Internal]` Throws a TypeBuilder error with the given message */
+	    Throw(message) {
+	        throw new TypeBuilderError(message);
+	    }
+	    /** `[Internal]` Discards property keys from the given record type */
+	    Discard(record, keys) {
+	        return keys.reduce((acc, key) => {
+	            const { [key]: _, ...rest } = acc;
+	            return rest;
+	        }, record);
+	    }
+	    /** `[Json]` Omits compositing symbols from this schema */
+	    Strict(schema) {
+	        return JSON.parse(JSON.stringify(schema));
+	    }
+	}
+	exports.TypeBuilder = TypeBuilder;
 	// --------------------------------------------------------------------------
 	// JsonTypeBuilder
 	// --------------------------------------------------------------------------
 	class JsonTypeBuilder extends TypeBuilder {
-		// ------------------------------------------------------------------------
-		// Modifiers
-		// ------------------------------------------------------------------------
-		/** `[Json]` Creates a Readonly and Optional property */
-		ReadonlyOptional(schema) {
-			return this.Readonly(this.Optional(schema))
-		}
-		/** `[Json]` Creates a Readonly property */
-		Readonly(schema) {
-			return { ...TypeClone.Type(schema), [exports.Readonly]: "Readonly" }
-		}
-		/** `[Json]` Creates an Optional property */
-		Optional(schema) {
-			return { ...TypeClone.Type(schema), [exports.Optional]: "Optional" }
-		}
-		// ------------------------------------------------------------------------
-		// Types
-		// ------------------------------------------------------------------------
-		/** `[Json]` Creates an Any type */
-		Any(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: "Any" })
-		}
-		/** `[Json]` Creates an Array type */
-		Array(schema, options = {}) {
-			return this.Create({
-				...options,
-				[exports.Kind]: "Array",
-				type: "array",
-				items: TypeClone.Type(schema),
-			})
-		}
-		/** `[Json]` Creates a Boolean type */
-		Boolean(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: "Boolean", type: "boolean" })
-		}
-		/** `[Json]` Intrinsic function to Capitalize LiteralString types */
-		Capitalize(schema, options = {}) {
-			return { ...Intrinsic.Map(TypeClone.Type(schema), "Capitalize"), ...options }
-		}
-		/** `[Json]` Creates a Composite object type */
-		Composite(objects, options) {
-			const intersect = exports.Type.Intersect(objects, {})
-			const keys = KeyResolver.ResolveKeys(intersect, { includePatterns: false })
-			const properties = keys.reduce(
-				(acc, key) => ({ ...acc, [key]: exports.Type.Index(intersect, [key]) }),
-				{}
-			)
-			return exports.Type.Object(properties, options)
-		}
-		/** `[Json]` Creates a Enum type */
-		Enum(item, options = {}) {
-			if (ValueGuard.IsUndefined(item)) return this.Throw("Enum undefined or empty")
-			// prettier-ignore
-			const values1 = Object.getOwnPropertyNames(item).filter((key) => isNaN(key)).map((key) => item[key]);
-			const values2 = [...new Set(values1)]
-			const anyOf = values2.map((value) => exports.Type.Literal(value))
-			return this.Union(anyOf, { ...options, [exports.Hint]: "Enum" })
-		}
-		/** `[Json]` Creates a Conditional type */
-		Extends(left, right, trueType, falseType, options = {}) {
-			switch (TypeExtends.Extends(left, right)) {
-				case TypeExtendsResult.Union:
-					return this.Union([TypeClone.Type(trueType, options), TypeClone.Type(falseType, options)])
-				case TypeExtendsResult.True:
-					return TypeClone.Type(trueType, options)
-				case TypeExtendsResult.False:
-					return TypeClone.Type(falseType, options)
-			}
-		}
-		/** `[Json]` Constructs a type by excluding from unionType all union members that are assignable to excludedMembers */
-		Exclude(unionType, excludedMembers, options = {}) {
-			// prettier-ignore
-			return (TypeGuard.TTemplateLiteral(unionType) ? this.Exclude(TemplateLiteralResolver.Resolve(unionType), excludedMembers, options) :
+	    // ------------------------------------------------------------------------
+	    // Modifiers
+	    // ------------------------------------------------------------------------
+	    /** `[Json]` Creates a Readonly and Optional property */
+	    ReadonlyOptional(schema) {
+	        return this.Readonly(this.Optional(schema));
+	    }
+	    /** `[Json]` Creates a Readonly property */
+	    Readonly(schema) {
+	        return { ...TypeClone.Type(schema), [exports.Readonly]: 'Readonly' };
+	    }
+	    /** `[Json]` Creates an Optional property */
+	    Optional(schema) {
+	        return { ...TypeClone.Type(schema), [exports.Optional]: 'Optional' };
+	    }
+	    // ------------------------------------------------------------------------
+	    // Types
+	    // ------------------------------------------------------------------------
+	    /** `[Json]` Creates an Any type */
+	    Any(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Any' });
+	    }
+	    /** `[Json]` Creates an Array type */
+	    Array(schema, options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Array', type: 'array', items: TypeClone.Type(schema) });
+	    }
+	    /** `[Json]` Creates a Boolean type */
+	    Boolean(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Boolean', type: 'boolean' });
+	    }
+	    /** `[Json]` Intrinsic function to Capitalize LiteralString types */
+	    Capitalize(schema, options = {}) {
+	        return { ...Intrinsic.Map(TypeClone.Type(schema), 'Capitalize'), ...options };
+	    }
+	    /** `[Json]` Creates a Composite object type */
+	    Composite(objects, options) {
+	        const intersect = exports.Type.Intersect(objects, {});
+	        const keys = KeyResolver.ResolveKeys(intersect, { includePatterns: false });
+	        const properties = keys.reduce((acc, key) => ({ ...acc, [key]: exports.Type.Index(intersect, [key]) }), {});
+	        return exports.Type.Object(properties, options);
+	    }
+	    /** `[Json]` Creates a Enum type */
+	    Enum(item, options = {}) {
+	        if (ValueGuard.IsUndefined(item))
+	            return this.Throw('Enum undefined or empty');
+	        // prettier-ignore
+	        const values1 = Object.getOwnPropertyNames(item).filter((key) => isNaN(key)).map((key) => item[key]);
+	        const values2 = [...new Set(values1)];
+	        const anyOf = values2.map((value) => exports.Type.Literal(value));
+	        return this.Union(anyOf, { ...options, [exports.Hint]: 'Enum' });
+	    }
+	    /** `[Json]` Creates a Conditional type */
+	    Extends(left, right, trueType, falseType, options = {}) {
+	        switch (TypeExtends.Extends(left, right)) {
+	            case TypeExtendsResult.Union:
+	                return this.Union([TypeClone.Type(trueType, options), TypeClone.Type(falseType, options)]);
+	            case TypeExtendsResult.True:
+	                return TypeClone.Type(trueType, options);
+	            case TypeExtendsResult.False:
+	                return TypeClone.Type(falseType, options);
+	        }
+	    }
+	    /** `[Json]` Constructs a type by excluding from unionType all union members that are assignable to excludedMembers */
+	    Exclude(unionType, excludedMembers, options = {}) {
+	        // prettier-ignore
+	        return (TypeGuard.TTemplateLiteral(unionType) ? this.Exclude(TemplateLiteralResolver.Resolve(unionType), excludedMembers, options) :
 	            TypeGuard.TTemplateLiteral(excludedMembers) ? this.Exclude(unionType, TemplateLiteralResolver.Resolve(excludedMembers), options) :
 	                TypeGuard.TUnion(unionType) ? (() => {
 	                    const narrowed = unionType.anyOf.filter((inner) => TypeExtends.Extends(inner, excludedMembers) === TypeExtendsResult.False);
@@ -3514,11 +2582,11 @@ var typebox = {}
 	                })() :
 	                    TypeExtends.Extends(unionType, excludedMembers) !== TypeExtendsResult.False ? this.Never(options) :
 	                        TypeClone.Type(unionType, options));
-		}
-		/** `[Json]` Constructs a type by extracting from type all union members that are assignable to union */
-		Extract(type, union, options = {}) {
-			// prettier-ignore
-			return (TypeGuard.TTemplateLiteral(type) ? this.Extract(TemplateLiteralResolver.Resolve(type), union, options) :
+	    }
+	    /** `[Json]` Constructs a type by extracting from type all union members that are assignable to union */
+	    Extract(type, union, options = {}) {
+	        // prettier-ignore
+	        return (TypeGuard.TTemplateLiteral(type) ? this.Extract(TemplateLiteralResolver.Resolve(type), union, options) :
 	            TypeGuard.TTemplateLiteral(union) ? this.Extract(type, TemplateLiteralResolver.Resolve(union), options) :
 	                TypeGuard.TUnion(type) ? (() => {
 	                    const narrowed = type.anyOf.filter((inner) => TypeExtends.Extends(inner, union) !== TypeExtendsResult.False);
@@ -3526,11 +2594,11 @@ var typebox = {}
 	                })() :
 	                    TypeExtends.Extends(type, union) !== TypeExtendsResult.False ? TypeClone.Type(type, options) :
 	                        this.Never(options));
-		}
-		/** `[Json]` Returns an Indexed property type for the given keys */
-		Index(schema, unresolved, options = {}) {
-			// prettier-ignore
-			return (TypeGuard.TArray(schema) && TypeGuard.TNumber(unresolved) ? (() => {
+	    }
+	    /** `[Json]` Returns an Indexed property type for the given keys */
+	    Index(schema, unresolved, options = {}) {
+	        // prettier-ignore
+	        return (TypeGuard.TArray(schema) && TypeGuard.TNumber(unresolved) ? (() => {
 	            return TypeClone.Type(schema.items, options);
 	        })() :
 	            TypeGuard.TTuple(schema) && TypeGuard.TNumber(unresolved) ? (() => {
@@ -3542,44 +2610,33 @@ var typebox = {}
 	                const clone = TypeClone.Type(schema);
 	                return IndexedAccessor.Resolve(clone, keys, options);
 	            })());
-		}
-		/** `[Json]` Creates an Integer type */
-		Integer(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: "Integer", type: "integer" })
-		}
-		/** `[Json]` Creates an Intersect type */
-		Intersect(allOf, options = {}) {
-			if (allOf.length === 0) return exports.Type.Never()
-			if (allOf.length === 1) return TypeClone.Type(allOf[0], options)
-			if (allOf.some((schema) => TypeGuard.TTransform(schema)))
-				this.Throw("Cannot intersect transform types")
-			const objects = allOf.every((schema) => TypeGuard.TObject(schema))
-			const cloned = TypeClone.Rest(allOf)
-			// prettier-ignore
-			const clonedUnevaluatedProperties = TypeGuard.TSchema(options.unevaluatedProperties)
+	    }
+	    /** `[Json]` Creates an Integer type */
+	    Integer(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Integer', type: 'integer' });
+	    }
+	    /** `[Json]` Creates an Intersect type */
+	    Intersect(allOf, options = {}) {
+	        if (allOf.length === 0)
+	            return exports.Type.Never();
+	        if (allOf.length === 1)
+	            return TypeClone.Type(allOf[0], options);
+	        if (allOf.some((schema) => TypeGuard.TTransform(schema)))
+	            this.Throw('Cannot intersect transform types');
+	        const objects = allOf.every((schema) => TypeGuard.TObject(schema));
+	        const cloned = TypeClone.Rest(allOf);
+	        // prettier-ignore
+	        const clonedUnevaluatedProperties = TypeGuard.TSchema(options.unevaluatedProperties)
 	            ? { unevaluatedProperties: TypeClone.Type(options.unevaluatedProperties) }
 	            : {};
-			return options.unevaluatedProperties === false ||
-				TypeGuard.TSchema(options.unevaluatedProperties) ||
-				objects
-				? this.Create({
-						...options,
-						...clonedUnevaluatedProperties,
-						[exports.Kind]: "Intersect",
-						type: "object",
-						allOf: cloned,
-					})
-				: this.Create({
-						...options,
-						...clonedUnevaluatedProperties,
-						[exports.Kind]: "Intersect",
-						allOf: cloned,
-					})
-		}
-		/** `[Json]` Creates a KeyOf type */
-		KeyOf(schema, options = {}) {
-			// prettier-ignore
-			return (TypeGuard.TRecord(schema) ? (() => {
+	        return options.unevaluatedProperties === false || TypeGuard.TSchema(options.unevaluatedProperties) || objects
+	            ? this.Create({ ...options, ...clonedUnevaluatedProperties, [exports.Kind]: 'Intersect', type: 'object', allOf: cloned })
+	            : this.Create({ ...options, ...clonedUnevaluatedProperties, [exports.Kind]: 'Intersect', allOf: cloned });
+	    }
+	    /** `[Json]` Creates a KeyOf type */
+	    KeyOf(schema, options = {}) {
+	        // prettier-ignore
+	        return (TypeGuard.TRecord(schema) ? (() => {
 	            const pattern = Object.getOwnPropertyNames(schema.patternProperties)[0];
 	            return (pattern === exports.PatternNumberExact ? this.Number(options) :
 	                pattern === exports.PatternStringExact ? this.String(options) :
@@ -3599,70 +2656,47 @@ var typebox = {}
 	                    const literals = keys.map((key) => this.Literal(key));
 	                    return this.Union(literals, options);
 	                })());
-		}
-		/** `[Json]` Creates a Literal type */
-		Literal(value, options = {}) {
-			return this.Create({
-				...options,
-				[exports.Kind]: "Literal",
-				const: value,
-				type: typeof value,
-			})
-		}
-		/** `[Json]` Intrinsic function to Lowercase LiteralString types */
-		Lowercase(schema, options = {}) {
-			return { ...Intrinsic.Map(TypeClone.Type(schema), "Lowercase"), ...options }
-		}
-		/** `[Json]` Creates a Never type */
-		Never(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: "Never", not: {} })
-		}
-		/** `[Json]` Creates a Not type */
-		Not(schema, options) {
-			return this.Create({ ...options, [exports.Kind]: "Not", not: TypeClone.Type(schema) })
-		}
-		/** `[Json]` Creates a Null type */
-		Null(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: "Null", type: "null" })
-		}
-		/** `[Json]` Creates a Number type */
-		Number(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: "Number", type: "number" })
-		}
-		/** `[Json]` Creates an Object type */
-		Object(properties, options = {}) {
-			const propertyKeys = Object.getOwnPropertyNames(properties)
-			const optionalKeys = propertyKeys.filter((key) => TypeGuard.TOptional(properties[key]))
-			const requiredKeys = propertyKeys.filter((name) => !optionalKeys.includes(name))
-			const clonedAdditionalProperties = TypeGuard.TSchema(options.additionalProperties)
-				? { additionalProperties: TypeClone.Type(options.additionalProperties) }
-				: {}
-			const clonedProperties = propertyKeys.reduce(
-				(acc, key) => ({ ...acc, [key]: TypeClone.Type(properties[key]) }),
-				{}
-			)
-			return requiredKeys.length > 0
-				? this.Create({
-						...options,
-						...clonedAdditionalProperties,
-						[exports.Kind]: "Object",
-						type: "object",
-						properties: clonedProperties,
-						required: requiredKeys,
-					})
-				: this.Create({
-						...options,
-						...clonedAdditionalProperties,
-						[exports.Kind]: "Object",
-						type: "object",
-						properties: clonedProperties,
-					})
-		}
-		/** `[Json]` Constructs a type whose keys are omitted from the given type */
-		Omit(schema, unresolved, options = {}) {
-			const keys = KeyArrayResolver.Resolve(unresolved)
-			// prettier-ignore
-			return ObjectMap.Map(this.Discard(TypeClone.Type(schema), ['$id', exports.Transform]), (object) => {
+	    }
+	    /** `[Json]` Creates a Literal type */
+	    Literal(value, options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Literal', const: value, type: typeof value });
+	    }
+	    /** `[Json]` Intrinsic function to Lowercase LiteralString types */
+	    Lowercase(schema, options = {}) {
+	        return { ...Intrinsic.Map(TypeClone.Type(schema), 'Lowercase'), ...options };
+	    }
+	    /** `[Json]` Creates a Never type */
+	    Never(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Never', not: {} });
+	    }
+	    /** `[Json]` Creates a Not type */
+	    Not(schema, options) {
+	        return this.Create({ ...options, [exports.Kind]: 'Not', not: TypeClone.Type(schema) });
+	    }
+	    /** `[Json]` Creates a Null type */
+	    Null(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Null', type: 'null' });
+	    }
+	    /** `[Json]` Creates a Number type */
+	    Number(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Number', type: 'number' });
+	    }
+	    /** `[Json]` Creates an Object type */
+	    Object(properties, options = {}) {
+	        const propertyKeys = Object.getOwnPropertyNames(properties);
+	        const optionalKeys = propertyKeys.filter((key) => TypeGuard.TOptional(properties[key]));
+	        const requiredKeys = propertyKeys.filter((name) => !optionalKeys.includes(name));
+	        const clonedAdditionalProperties = TypeGuard.TSchema(options.additionalProperties) ? { additionalProperties: TypeClone.Type(options.additionalProperties) } : {};
+	        const clonedProperties = propertyKeys.reduce((acc, key) => ({ ...acc, [key]: TypeClone.Type(properties[key]) }), {});
+	        return requiredKeys.length > 0
+	            ? this.Create({ ...options, ...clonedAdditionalProperties, [exports.Kind]: 'Object', type: 'object', properties: clonedProperties, required: requiredKeys })
+	            : this.Create({ ...options, ...clonedAdditionalProperties, [exports.Kind]: 'Object', type: 'object', properties: clonedProperties });
+	    }
+	    /** `[Json]` Constructs a type whose keys are omitted from the given type */
+	    Omit(schema, unresolved, options = {}) {
+	        const keys = KeyArrayResolver.Resolve(unresolved);
+	        // prettier-ignore
+	        return ObjectMap.Map(this.Discard(TypeClone.Type(schema), ['$id', exports.Transform]), (object) => {
 	            if (ValueGuard.IsArray(object.required)) {
 	                object.required = object.required.filter((key) => !keys.includes(key));
 	                if (object.required.length === 0)
@@ -3674,22 +2708,22 @@ var typebox = {}
 	            }
 	            return this.Create(object);
 	        }, options);
-		}
-		/** `[Json]` Constructs a type where all properties are optional */
-		Partial(schema, options = {}) {
-			// prettier-ignore
-			return ObjectMap.Map(this.Discard(TypeClone.Type(schema), ['$id', exports.Transform]), (object) => {
+	    }
+	    /** `[Json]` Constructs a type where all properties are optional */
+	    Partial(schema, options = {}) {
+	        // prettier-ignore
+	        return ObjectMap.Map(this.Discard(TypeClone.Type(schema), ['$id', exports.Transform]), (object) => {
 	            const properties = Object.getOwnPropertyNames(object.properties).reduce((acc, key) => {
 	                return { ...acc, [key]: this.Optional(object.properties[key]) };
 	            }, {});
 	            return this.Object(properties, this.Discard(object, ['required']) /* object used as options to retain other constraints */);
 	        }, options);
-		}
-		/** `[Json]` Constructs a type whose keys are picked from the given type */
-		Pick(schema, unresolved, options = {}) {
-			const keys = KeyArrayResolver.Resolve(unresolved)
-			// prettier-ignore
-			return ObjectMap.Map(this.Discard(TypeClone.Type(schema), ['$id', exports.Transform]), (object) => {
+	    }
+	    /** `[Json]` Constructs a type whose keys are picked from the given type */
+	    Pick(schema, unresolved, options = {}) {
+	        const keys = KeyArrayResolver.Resolve(unresolved);
+	        // prettier-ignore
+	        return ObjectMap.Map(this.Discard(TypeClone.Type(schema), ['$id', exports.Transform]), (object) => {
 	            if (ValueGuard.IsArray(object.required)) {
 	                object.required = object.required.filter((key) => keys.includes(key));
 	                if (object.required.length === 0)
@@ -3701,11 +2735,11 @@ var typebox = {}
 	            }
 	            return this.Create(object);
 	        }, options);
-		}
-		/** `[Json]` Creates a Record type */
-		Record(key, schema, options = {}) {
-			// prettier-ignore
-			return (TypeGuard.TTemplateLiteral(key) ? (() => {
+	    }
+	    /** `[Json]` Creates a Record type */
+	    Record(key, schema, options = {}) {
+	        // prettier-ignore
+	        return (TypeGuard.TTemplateLiteral(key) ? (() => {
 	            const expression = TemplateLiteralParser.ParseExact(key.pattern);
 	            // prettier-ignore
 	            return TemplateLiteralFinite.Check(expression)
@@ -3735,76 +2769,71 @@ var typebox = {}
 	                            return this.Create({ ...options, [exports.Kind]: 'Record', type: 'object', patternProperties: { [pattern]: TypeClone.Type(schema) } });
 	                        })() :
 	                            this.Never());
-		}
-		/** `[Json]` Creates a Recursive type */
-		Recursive(callback, options = {}) {
-			if (ValueGuard.IsUndefined(options.$id)) options.$id = `T${TypeOrdinal++}`
-			const thisType = callback({ [exports.Kind]: "This", $ref: `${options.$id}` })
-			thisType.$id = options.$id
-			return this.Create({ ...options, [exports.Hint]: "Recursive", ...thisType })
-		}
-		/** `[Json]` Creates a Ref type. */
-		Ref(unresolved, options = {}) {
-			if (ValueGuard.IsString(unresolved))
-				return this.Create({ ...options, [exports.Kind]: "Ref", $ref: unresolved })
-			if (ValueGuard.IsUndefined(unresolved.$id))
-				this.Throw("Reference target type must specify an $id")
-			return this.Create({ ...options, [exports.Kind]: "Ref", $ref: unresolved.$id })
-		}
-		/** `[Json]` Constructs a type where all properties are required */
-		Required(schema, options = {}) {
-			// prettier-ignore
-			return ObjectMap.Map(this.Discard(TypeClone.Type(schema), ['$id', exports.Transform]), (object) => {
+	    }
+	    /** `[Json]` Creates a Recursive type */
+	    Recursive(callback, options = {}) {
+	        if (ValueGuard.IsUndefined(options.$id))
+	            options.$id = `T${TypeOrdinal++}`;
+	        const thisType = callback({ [exports.Kind]: 'This', $ref: `${options.$id}` });
+	        thisType.$id = options.$id;
+	        return this.Create({ ...options, [exports.Hint]: 'Recursive', ...thisType });
+	    }
+	    /** `[Json]` Creates a Ref type. */
+	    Ref(unresolved, options = {}) {
+	        if (ValueGuard.IsString(unresolved))
+	            return this.Create({ ...options, [exports.Kind]: 'Ref', $ref: unresolved });
+	        if (ValueGuard.IsUndefined(unresolved.$id))
+	            this.Throw('Reference target type must specify an $id');
+	        return this.Create({ ...options, [exports.Kind]: 'Ref', $ref: unresolved.$id });
+	    }
+	    /** `[Json]` Constructs a type where all properties are required */
+	    Required(schema, options = {}) {
+	        // prettier-ignore
+	        return ObjectMap.Map(this.Discard(TypeClone.Type(schema), ['$id', exports.Transform]), (object) => {
 	            const properties = Object.getOwnPropertyNames(object.properties).reduce((acc, key) => {
 	                return { ...acc, [key]: this.Discard(object.properties[key], [exports.Optional]) };
 	            }, {});
 	            return this.Object(properties, object /* object used as options to retain other constraints  */);
 	        }, options);
-		}
-		/** `[Json]` Extracts interior Rest elements from Tuple, Intersect and Union types */
-		Rest(schema) {
-			return TypeGuard.TTuple(schema) && !ValueGuard.IsUndefined(schema.items)
-				? TypeClone.Rest(schema.items)
-				: TypeGuard.TIntersect(schema)
-					? TypeClone.Rest(schema.allOf)
-					: TypeGuard.TUnion(schema)
-						? TypeClone.Rest(schema.anyOf)
-						: []
-		}
-		/** `[Json]` Creates a String type */
-		String(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: "String", type: "string" })
-		}
-		/** `[Json]` Creates a TemplateLiteral type */
-		TemplateLiteral(unresolved, options = {}) {
-			// prettier-ignore
-			const pattern = ValueGuard.IsString(unresolved)
+	    }
+	    /** `[Json]` Extracts interior Rest elements from Tuple, Intersect and Union types */
+	    Rest(schema) {
+	        return (TypeGuard.TTuple(schema) && !ValueGuard.IsUndefined(schema.items) ? TypeClone.Rest(schema.items) : TypeGuard.TIntersect(schema) ? TypeClone.Rest(schema.allOf) : TypeGuard.TUnion(schema) ? TypeClone.Rest(schema.anyOf) : []);
+	    }
+	    /** `[Json]` Creates a String type */
+	    String(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'String', type: 'string' });
+	    }
+	    /** `[Json]` Creates a TemplateLiteral type */
+	    TemplateLiteral(unresolved, options = {}) {
+	        // prettier-ignore
+	        const pattern = ValueGuard.IsString(unresolved)
 	            ? TemplateLiteralPattern.Create(TemplateLiteralDslParser.Parse(unresolved))
 	            : TemplateLiteralPattern.Create(unresolved);
-			return this.Create({ ...options, [exports.Kind]: "TemplateLiteral", type: "string", pattern })
-		}
-		/** `[Json]` Creates a Transform type */
-		Transform(schema) {
-			return new TransformDecodeBuilder(schema)
-		}
-		/** `[Json]` Creates a Tuple type */
-		Tuple(items, options = {}) {
-			const [additionalItems, minItems, maxItems] = [false, items.length, items.length]
-			const clonedItems = TypeClone.Rest(items)
-			// prettier-ignore
-			const schema = (items.length > 0 ?
+	        return this.Create({ ...options, [exports.Kind]: 'TemplateLiteral', type: 'string', pattern });
+	    }
+	    /** `[Json]` Creates a Transform type */
+	    Transform(schema) {
+	        return new TransformDecodeBuilder(schema);
+	    }
+	    /** `[Json]` Creates a Tuple type */
+	    Tuple(items, options = {}) {
+	        const [additionalItems, minItems, maxItems] = [false, items.length, items.length];
+	        const clonedItems = TypeClone.Rest(items);
+	        // prettier-ignore
+	        const schema = (items.length > 0 ?
 	            { ...options, [exports.Kind]: 'Tuple', type: 'array', items: clonedItems, additionalItems, minItems, maxItems } :
 	            { ...options, [exports.Kind]: 'Tuple', type: 'array', minItems, maxItems });
-			return this.Create(schema)
-		}
-		/** `[Json]` Intrinsic function to Uncapitalize LiteralString types */
-		Uncapitalize(schema, options = {}) {
-			return { ...Intrinsic.Map(TypeClone.Type(schema), "Uncapitalize"), ...options }
-		}
-		/** `[Json]` Creates a Union type */
-		Union(union, options = {}) {
-			// prettier-ignore
-			return TypeGuard.TTemplateLiteral(union)
+	        return this.Create(schema);
+	    }
+	    /** `[Json]` Intrinsic function to Uncapitalize LiteralString types */
+	    Uncapitalize(schema, options = {}) {
+	        return { ...Intrinsic.Map(TypeClone.Type(schema), 'Uncapitalize'), ...options };
+	    }
+	    /** `[Json]` Creates a Union type */
+	    Union(union, options = {}) {
+	        // prettier-ignore
+	        return TypeGuard.TTemplateLiteral(union)
 	            ? TemplateLiteralResolver.Resolve(union)
 	            : (() => {
 	                const anyOf = union;
@@ -3815,267 +2844,187 @@ var typebox = {}
 	                const clonedAnyOf = TypeClone.Rest(anyOf);
 	                return this.Create({ ...options, [exports.Kind]: 'Union', anyOf: clonedAnyOf });
 	            })();
-		}
-		/** `[Json]` Creates an Unknown type */
-		Unknown(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: "Unknown" })
-		}
-		/** `[Json]` Creates a Unsafe type that will infers as the generic argument T */
-		Unsafe(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: options[exports.Kind] || "Unsafe" })
-		}
-		/** `[Json]` Intrinsic function to Uppercase LiteralString types */
-		Uppercase(schema, options = {}) {
-			return { ...Intrinsic.Map(TypeClone.Type(schema), "Uppercase"), ...options }
-		}
+	    }
+	    /** `[Json]` Creates an Unknown type */
+	    Unknown(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Unknown' });
+	    }
+	    /** `[Json]` Creates a Unsafe type that will infers as the generic argument T */
+	    Unsafe(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: options[exports.Kind] || 'Unsafe' });
+	    }
+	    /** `[Json]` Intrinsic function to Uppercase LiteralString types */
+	    Uppercase(schema, options = {}) {
+	        return { ...Intrinsic.Map(TypeClone.Type(schema), 'Uppercase'), ...options };
+	    }
 	}
-	exports.JsonTypeBuilder = JsonTypeBuilder
+	exports.JsonTypeBuilder = JsonTypeBuilder;
 	// --------------------------------------------------------------------------
 	// JavaScriptTypeBuilder
 	// --------------------------------------------------------------------------
 	class JavaScriptTypeBuilder extends JsonTypeBuilder {
-		/** `[JavaScript]` Creates a AsyncIterator type */
-		AsyncIterator(items, options = {}) {
-			return this.Create({
-				...options,
-				[exports.Kind]: "AsyncIterator",
-				type: "AsyncIterator",
-				items: TypeClone.Type(items),
-			})
-		}
-		/** `[JavaScript]` Constructs a type by recursively unwrapping Promise types */
-		Awaited(schema, options = {}) {
-			// prettier-ignore
-			const Unwrap = (rest) => rest.length > 0 ? (() => {
+	    /** `[JavaScript]` Creates a AsyncIterator type */
+	    AsyncIterator(items, options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'AsyncIterator', type: 'AsyncIterator', items: TypeClone.Type(items) });
+	    }
+	    /** `[JavaScript]` Constructs a type by recursively unwrapping Promise types */
+	    Awaited(schema, options = {}) {
+	        // prettier-ignore
+	        const Unwrap = (rest) => rest.length > 0 ? (() => {
 	            const [L, ...R] = rest;
 	            return [this.Awaited(L), ...Unwrap(R)];
 	        })() : rest;
-			// prettier-ignore
-			return (TypeGuard.TIntersect(schema) ? exports.Type.Intersect(Unwrap(schema.allOf)) :
+	        // prettier-ignore
+	        return (TypeGuard.TIntersect(schema) ? exports.Type.Intersect(Unwrap(schema.allOf)) :
 	            TypeGuard.TUnion(schema) ? exports.Type.Union(Unwrap(schema.anyOf)) :
 	                TypeGuard.TPromise(schema) ? this.Awaited(schema.item) :
 	                    TypeClone.Type(schema, options));
-		}
-		/** `[JavaScript]` Creates a BigInt type */
-		BigInt(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: "BigInt", type: "bigint" })
-		}
-		/** `[JavaScript]` Extracts the ConstructorParameters from the given Constructor type */
-		ConstructorParameters(schema, options = {}) {
-			return this.Tuple([...schema.parameters], { ...options })
-		}
-		/** `[JavaScript]` Creates a Constructor type */
-		Constructor(parameters, returns, options) {
-			const [clonedParameters, clonedReturns] = [
-				TypeClone.Rest(parameters),
-				TypeClone.Type(returns),
-			]
-			return this.Create({
-				...options,
-				[exports.Kind]: "Constructor",
-				type: "Constructor",
-				parameters: clonedParameters,
-				returns: clonedReturns,
-			})
-		}
-		/** `[JavaScript]` Creates a Date type */
-		Date(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: "Date", type: "Date" })
-		}
-		/** `[JavaScript]` Creates a Function type */
-		Function(parameters, returns, options) {
-			const [clonedParameters, clonedReturns] = [
-				TypeClone.Rest(parameters),
-				TypeClone.Type(returns),
-			]
-			return this.Create({
-				...options,
-				[exports.Kind]: "Function",
-				type: "Function",
-				parameters: clonedParameters,
-				returns: clonedReturns,
-			})
-		}
-		/** `[JavaScript]` Extracts the InstanceType from the given Constructor type */
-		InstanceType(schema, options = {}) {
-			return TypeClone.Type(schema.returns, options)
-		}
-		/** `[JavaScript]` Creates an Iterator type */
-		Iterator(items, options = {}) {
-			return this.Create({
-				...options,
-				[exports.Kind]: "Iterator",
-				type: "Iterator",
-				items: TypeClone.Type(items),
-			})
-		}
-		/** `[JavaScript]` Extracts the Parameters from the given Function type */
-		Parameters(schema, options = {}) {
-			return this.Tuple(schema.parameters, { ...options })
-		}
-		/** `[JavaScript]` Creates a Promise type */
-		Promise(item, options = {}) {
-			return this.Create({
-				...options,
-				[exports.Kind]: "Promise",
-				type: "Promise",
-				item: TypeClone.Type(item),
-			})
-		}
-		/** `[Extended]` Creates a String type */
-		RegExp(unresolved, options = {}) {
-			const pattern = ValueGuard.IsString(unresolved) ? unresolved : unresolved.source
-			return this.Create({ ...options, [exports.Kind]: "String", type: "string", pattern })
-		}
-		/**
-		 * @deprecated Use `Type.RegExp`
-		 */
-		RegEx(regex, options = {}) {
-			return this.RegExp(regex, options)
-		}
-		/** `[JavaScript]` Extracts the ReturnType from the given Function type */
-		ReturnType(schema, options = {}) {
-			return TypeClone.Type(schema.returns, options)
-		}
-		/** `[JavaScript]` Creates a Symbol type */
-		Symbol(options) {
-			return this.Create({ ...options, [exports.Kind]: "Symbol", type: "symbol" })
-		}
-		/** `[JavaScript]` Creates a Undefined type */
-		Undefined(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: "Undefined", type: "undefined" })
-		}
-		/** `[JavaScript]` Creates a Uint8Array type */
-		Uint8Array(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: "Uint8Array", type: "Uint8Array" })
-		}
-		/** `[JavaScript]` Creates a Void type */
-		Void(options = {}) {
-			return this.Create({ ...options, [exports.Kind]: "Void", type: "void" })
-		}
+	    }
+	    /** `[JavaScript]` Creates a BigInt type */
+	    BigInt(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'BigInt', type: 'bigint' });
+	    }
+	    /** `[JavaScript]` Extracts the ConstructorParameters from the given Constructor type */
+	    ConstructorParameters(schema, options = {}) {
+	        return this.Tuple([...schema.parameters], { ...options });
+	    }
+	    /** `[JavaScript]` Creates a Constructor type */
+	    Constructor(parameters, returns, options) {
+	        const [clonedParameters, clonedReturns] = [TypeClone.Rest(parameters), TypeClone.Type(returns)];
+	        return this.Create({ ...options, [exports.Kind]: 'Constructor', type: 'Constructor', parameters: clonedParameters, returns: clonedReturns });
+	    }
+	    /** `[JavaScript]` Creates a Date type */
+	    Date(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Date', type: 'Date' });
+	    }
+	    /** `[JavaScript]` Creates a Function type */
+	    Function(parameters, returns, options) {
+	        const [clonedParameters, clonedReturns] = [TypeClone.Rest(parameters), TypeClone.Type(returns)];
+	        return this.Create({ ...options, [exports.Kind]: 'Function', type: 'Function', parameters: clonedParameters, returns: clonedReturns });
+	    }
+	    /** `[JavaScript]` Extracts the InstanceType from the given Constructor type */
+	    InstanceType(schema, options = {}) {
+	        return TypeClone.Type(schema.returns, options);
+	    }
+	    /** `[JavaScript]` Creates an Iterator type */
+	    Iterator(items, options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Iterator', type: 'Iterator', items: TypeClone.Type(items) });
+	    }
+	    /** `[JavaScript]` Extracts the Parameters from the given Function type */
+	    Parameters(schema, options = {}) {
+	        return this.Tuple(schema.parameters, { ...options });
+	    }
+	    /** `[JavaScript]` Creates a Promise type */
+	    Promise(item, options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Promise', type: 'Promise', item: TypeClone.Type(item) });
+	    }
+	    /** `[Extended]` Creates a String type */
+	    RegExp(unresolved, options = {}) {
+	        const pattern = ValueGuard.IsString(unresolved) ? unresolved : unresolved.source;
+	        return this.Create({ ...options, [exports.Kind]: 'String', type: 'string', pattern });
+	    }
+	    /**
+	     * @deprecated Use `Type.RegExp`
+	     */
+	    RegEx(regex, options = {}) {
+	        return this.RegExp(regex, options);
+	    }
+	    /** `[JavaScript]` Extracts the ReturnType from the given Function type */
+	    ReturnType(schema, options = {}) {
+	        return TypeClone.Type(schema.returns, options);
+	    }
+	    /** `[JavaScript]` Creates a Symbol type */
+	    Symbol(options) {
+	        return this.Create({ ...options, [exports.Kind]: 'Symbol', type: 'symbol' });
+	    }
+	    /** `[JavaScript]` Creates a Undefined type */
+	    Undefined(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Undefined', type: 'undefined' });
+	    }
+	    /** `[JavaScript]` Creates a Uint8Array type */
+	    Uint8Array(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Uint8Array', type: 'Uint8Array' });
+	    }
+	    /** `[JavaScript]` Creates a Void type */
+	    Void(options = {}) {
+	        return this.Create({ ...options, [exports.Kind]: 'Void', type: 'void' });
+	    }
 	}
-	exports.JavaScriptTypeBuilder = JavaScriptTypeBuilder
+	exports.JavaScriptTypeBuilder = JavaScriptTypeBuilder;
 	/** Json Type Builder with Static Resolution for TypeScript */
-	exports.JsonType = new JsonTypeBuilder()
+	exports.JsonType = new JsonTypeBuilder();
 	/** JavaScript Type Builder with Static Resolution for TypeScript */
-	exports.Type = new JavaScriptTypeBuilder()
-})(typebox)
+	exports.Type = new JavaScriptTypeBuilder(); 
+} (typebox));
 
 const SDKSettings = typebox.Type.Object({
-	// TODO SDK-v2 SETTINGS do we need to generate a settings v2 schema?
-	$schema: typebox.Type.Optional(
-		typebox.Type.Literal("https://inlang.com/schema/project-settings")
-	),
-	baseLocale: typebox.Type.String({
-		title: "Base locale",
-		description: "The base locale of the project. We recommend BCP-47 language tags.",
-	}),
-	locales: typebox.Type.Array(typebox.Type.String(), {
-		uniqueItems: true,
-		title: "Project Locales",
-		description:
-			"Set the locales that are available in your project. All locales needs to be a valid BCP-47 language tag. Needs to include the base locale tag.",
-	}),
-	// exits for backwards compatibility
-	// remove in SDK-v3
-	sourceLanguageTag: typebox.Type.Optional(
-		typebox.Type.String({
-			description: "Use baseLocale instead.",
-			deprecated: true,
-		})
-	),
-	// exits for backwards compatibility
-	// remove in SDK-v3
-	languageTags: typebox.Type.Optional(
-		typebox.Type.Array(typebox.Type.String(), {
-			uniqueItems: true,
-			deprecated: true,
-			description: "Use locales instead.",
-		})
-	),
-	/**
-	 * The modules to load.
-	 *
-	 * @example
-	 *  modules: [
-	 * 	  "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
-	 * 	  "https://cdn.jsdelivr.net/npm/@inlang/plugin-csv@1/dist/index.js",
-	 *  ]
-	 */
-	modules: typebox.Type.Optional(
-		typebox.Type.Array(
-			typebox.Type.Intersect([
-				typebox.Type.String({
-					description: "The module must be a valid URI according to RFC 3986.",
-					pattern:
-						"(?:[A-Za-z][A-Za-z0-9+.-]*:/{2})?(?:(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})+(?::([A-Za-z0-9-._~]?|[%][A-Fa-f0-9]{2})+)?@)?(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\\.){1,126}[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?::[0-9]+)?(?:/(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})*)*(?:\\?(?:[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)(?:&|;[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)*)?",
-				}),
-				typebox.Type.String({
-					description: "The module must end with `.js`.",
-					pattern: ".*\\.js$",
-				}),
-				typebox.Type.String({
-					description: "The module can only contain a major version number.",
-					pattern: "^(?!.*@\\d\\.)[^]*$",
-				}),
-			]),
-			{
-				uniqueItems: true,
-				description: "The modules to load. Must be a valid URI but can be relative.",
-				examples: [
-					"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
-					"https://cdn.jsdelivr.net/npm/@inlang/plugin-csv@1/dist/index.js",
-					"./local-testing-plugin.js",
-				],
-			}
-		)
-	),
-	telemetry: typebox.Type.Optional(
-		typebox.Type.Union(
-			[
-				typebox.Type.Literal("off", {
-					description: "No telemetry events ",
-				}),
-			],
-			{ description: "If not set, defaults to all" }
-		)
-	),
-	experimental: typebox.Type.Optional(
-		typebox.Type.Record(typebox.Type.String(), typebox.Type.Literal(true), {
-			title: "Experimental settings",
-			description: "Experimental settings that are used for product development.",
-		})
-	),
-	/**
-	 * plugin.*: JSONObject
-	 *
-	 * The plugin settings are validated when importing plugins
-	 */
-})
-/**
- * Settings defined via apps, plugins, lint rules, etc.
- *
- * Using external settings to only allow `plugin.*` keys
- * and don't block the SDK from adding new settings.
- */
-const ExternalSettings = typebox.Type.Record(
-	typebox.Type.String({
-		pattern: `^((plugin)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)|\\$schema|${
-			// pattern must include the settings properties
-			Object.keys(SDKSettings.properties)
-				.map((key) => key.replaceAll(".", "\\."))
-				.join("|")
-		})$`,
-		description: "The key must be conform to `plugin.*`.",
-		examples: ["plugin.csv-importer", "plugin.i18next"],
-	}),
-	// Using JSON (array and object) as a workaround to make the
-	// intersection between `InternalSettings`, which contains an array,
-	// and `ExternalSettings` which are objects possible
-	typebox.Type.Record(typebox.Type.String(), typebox.Type.Any()),
-	{ description: "Settings defined by apps, plugins, etc." }
-)
-const ProjectSettings = typebox.Type.Intersect([SDKSettings, ExternalSettings])
+    // TODO SDK-v2 SETTINGS do we need to generate a settings v2 schema?
+    $schema: typebox.Type.Optional(typebox.Type.Literal("https://inlang.com/schema/project-settings")),
+    baseLocale: typebox.Type.String({
+        title: "Base locale",
+        description: "The base locale of the project. We recommend BCP-47 language tags.",
+    }),
+    locales: typebox.Type.Array(typebox.Type.String(), {
+        uniqueItems: true,
+        title: "Project Locales",
+        description: "Set the locales that are available in your project. All locales needs to be a valid BCP-47 language tag. Needs to include the base locale tag.",
+    }),
+    // exits for backwards compatibility
+    // remove in SDK-v3
+    sourceLanguageTag: typebox.Type.Optional(typebox.Type.String({
+        description: "Use baseLocale instead.",
+        deprecated: true,
+    })),
+    // exits for backwards compatibility
+    // remove in SDK-v3
+    languageTags: typebox.Type.Optional(typebox.Type.Array(typebox.Type.String(), {
+        uniqueItems: true,
+        deprecated: true,
+        description: "Use locales instead.",
+    })),
+    /**
+     * The modules to load.
+     *
+     * @example
+     *  modules: [
+     * 	  "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
+     * 	  "https://cdn.jsdelivr.net/npm/@inlang/plugin-csv@1/dist/index.js",
+     *  ]
+     */
+    modules: typebox.Type.Optional(typebox.Type.Array(typebox.Type.Intersect([
+        typebox.Type.String({
+            description: "The module must be a valid URI according to RFC 3986.",
+            pattern: "(?:[A-Za-z][A-Za-z0-9+.-]*:/{2})?(?:(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})+(?::([A-Za-z0-9-._~]?|[%][A-Fa-f0-9]{2})+)?@)?(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\\.){1,126}[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?::[0-9]+)?(?:/(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})*)*(?:\\?(?:[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)(?:&|;[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)*)?",
+        }),
+        typebox.Type.String({
+            description: "The module must end with `.js`.",
+            pattern: ".*\\.js$",
+        }),
+    ]), {
+        uniqueItems: true,
+        description: "The modules to load. Must be a valid URI but can be relative.",
+        examples: [
+            "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
+            "https://cdn.jsdelivr.net/npm/@inlang/plugin-csv@1/dist/index.js",
+            "./local-testing-plugin.js",
+        ],
+    })),
+    telemetry: typebox.Type.Optional(typebox.Type.Union([
+        typebox.Type.Literal("off", {
+            description: "No telemetry events ",
+        }),
+    ], { description: "If not set, defaults to all" })),
+    experimental: typebox.Type.Optional(typebox.Type.Record(typebox.Type.String(), typebox.Type.Literal(true), {
+        title: "Experimental settings",
+        description: "Experimental settings that are used for product development.",
+    })),
+    /**
+     * plugin.*: JSONObject
+     *
+     * The plugin settings are validated when importing plugins
+     */
+});
+const ProjectSettings = SDKSettings;
 
 /*
  * Checks if a property is required in a schema.
@@ -4084,182 +3033,185 @@ const ProjectSettings = typebox.Type.Intersect([SDKSettings, ExternalSettings])
  * @param property: string
  */
 const checkRequired = (schema, property) => {
-	if (schema && schema.required && schema.required.includes(property)) {
-		return true
-	}
-	return false
-}
+    if (schema && schema.required && schema.required.includes(property)) {
+        return true;
+    }
+    return false;
+};
 
 var limit = (x, low = 0, high = 1) => {
-	return min$4(max$4(low, x), high)
-}
+    return min$4(max$4(low, x), high);
+};
 
 var clip_rgb = (rgb) => {
-	rgb._clipped = false
-	rgb._unclipped = rgb.slice(0)
-	for (let i = 0; i <= 3; i++) {
-		if (i < 3) {
-			if (rgb[i] < 0 || rgb[i] > 255) rgb._clipped = true
-			rgb[i] = limit(rgb[i], 0, 255)
-		} else if (i === 3) {
-			rgb[i] = limit(rgb[i], 0, 1)
-		}
-	}
-	return rgb
-}
+    rgb._clipped = false;
+    rgb._unclipped = rgb.slice(0);
+    for (let i = 0; i <= 3; i++) {
+        if (i < 3) {
+            if (rgb[i] < 0 || rgb[i] > 255) rgb._clipped = true;
+            rgb[i] = limit(rgb[i], 0, 255);
+        } else if (i === 3) {
+            rgb[i] = limit(rgb[i], 0, 1);
+        }
+    }
+    return rgb;
+};
 
 // ported from jQuery's $.type
-const classToType = {}
+const classToType = {};
 for (let name of [
-	"Boolean",
-	"Number",
-	"String",
-	"Function",
-	"Array",
-	"Date",
-	"RegExp",
-	"Undefined",
-	"Null",
+    'Boolean',
+    'Number',
+    'String',
+    'Function',
+    'Array',
+    'Date',
+    'RegExp',
+    'Undefined',
+    'Null'
 ]) {
-	classToType[`[object ${name}]`] = name.toLowerCase()
+    classToType[`[object ${name}]`] = name.toLowerCase();
 }
-function type(obj) {
-	return classToType[Object.prototype.toString.call(obj)] || "object"
+function type (obj) {
+    return classToType[Object.prototype.toString.call(obj)] || 'object';
 }
 
 var unpack = (args, keyOrder = null) => {
-	// if called with more than 3 arguments, we return the arguments
-	if (args.length >= 3) return Array.prototype.slice.call(args)
-	// with less than 3 args we check if first arg is object
-	// and use the keyOrder string to extract and sort properties
-	if (type(args[0]) == "object" && keyOrder) {
-		return keyOrder
-			.split("")
-			.filter((k) => args[0][k] !== undefined)
-			.map((k) => args[0][k])
-	}
-	// otherwise we just return the first argument
-	// (which we suppose is an array of args)
-	return args[0]
-}
+    // if called with more than 3 arguments, we return the arguments
+    if (args.length >= 3) return Array.prototype.slice.call(args);
+    // with less than 3 args we check if first arg is object
+    // and use the keyOrder string to extract and sort properties
+    if (type(args[0]) == 'object' && keyOrder) {
+        return keyOrder
+            .split('')
+            .filter((k) => args[0][k] !== undefined)
+            .map((k) => args[0][k]);
+    }
+    // otherwise we just return the first argument
+    // (which we suppose is an array of args)
+    return args[0];
+};
 
 var last = (args) => {
-	if (args.length < 2) return null
-	const l = args.length - 1
-	if (type(args[l]) == "string") return args[l].toLowerCase()
-	return null
-}
+    if (args.length < 2) return null;
+    const l = args.length - 1;
+    if (type(args[l]) == 'string') return args[l].toLowerCase();
+    return null;
+};
 
-const { PI: PI$2, min: min$4, max: max$4 } = Math
+const { PI: PI$2, min: min$4, max: max$4 } = Math;
 
-const TWOPI = PI$2 * 2
-const PITHIRD = PI$2 / 3
-const DEG2RAD = PI$2 / 180
-const RAD2DEG = 180 / PI$2
+const TWOPI = PI$2 * 2;
+const PITHIRD = PI$2 / 3;
+const DEG2RAD = PI$2 / 180;
+const RAD2DEG = 180 / PI$2;
 
 var input = {
-	format: {},
-	autodetect: [],
-}
+    format: {},
+    autodetect: []
+};
 
 class Color {
-	constructor(...args) {
-		const me = this
-		if (
-			type(args[0]) === "object" &&
-			args[0].constructor &&
-			args[0].constructor === this.constructor
-		) {
-			// the argument is already a Color instance
-			return args[0]
-		}
-		// last argument could be the mode
-		let mode = last(args)
-		let autodetect = false
-		if (!mode) {
-			autodetect = true
-			if (!input.sorted) {
-				input.autodetect = input.autodetect.sort((a, b) => b.p - a.p)
-				input.sorted = true
-			}
-			// auto-detect format
-			for (let chk of input.autodetect) {
-				mode = chk.test(...args)
-				if (mode) break
-			}
-		}
-		if (input.format[mode]) {
-			const rgb = input.format[mode].apply(null, autodetect ? args : args.slice(0, -1))
-			me._rgb = clip_rgb(rgb)
-		} else {
-			throw new Error("unknown format: " + args)
-		}
-		// add alpha channel
-		if (me._rgb.length === 3) me._rgb.push(1)
-	}
-	toString() {
-		if (type(this.hex) == "function") return this.hex()
-		return `[${this._rgb.join(",")}]`
-	}
+    constructor(...args) {
+        const me = this;
+        if (
+            type(args[0]) === 'object' &&
+            args[0].constructor &&
+            args[0].constructor === this.constructor
+        ) {
+            // the argument is already a Color instance
+            return args[0];
+        }
+        // last argument could be the mode
+        let mode = last(args);
+        let autodetect = false;
+        if (!mode) {
+            autodetect = true;
+            if (!input.sorted) {
+                input.autodetect = input.autodetect.sort((a, b) => b.p - a.p);
+                input.sorted = true;
+            }
+            // auto-detect format
+            for (let chk of input.autodetect) {
+                mode = chk.test(...args);
+                if (mode) break;
+            }
+        }
+        if (input.format[mode]) {
+            const rgb = input.format[mode].apply(
+                null,
+                autodetect ? args : args.slice(0, -1)
+            );
+            me._rgb = clip_rgb(rgb);
+        } else {
+            throw new Error('unknown format: ' + args);
+        }
+        // add alpha channel
+        if (me._rgb.length === 3) me._rgb.push(1);
+    }
+    toString() {
+        if (type(this.hex) == 'function') return this.hex();
+        return `[${this._rgb.join(',')}]`;
+    }
 }
 
 // this gets updated automatically
-const version = "2.6.0"
+const version = '2.6.0';
 
 const chroma = (...args) => {
-	return new chroma.Color(...args)
-}
+    return new chroma.Color(...args);
+};
 
-chroma.Color = Color
-chroma.version = version
+chroma.Color = Color;
+chroma.version = version;
 
 const cmyk2rgb = (...args) => {
-	args = unpack(args, "cmyk")
-	const [c, m, y, k] = args
-	const alpha = args.length > 4 ? args[4] : 1
-	if (k === 1) return [0, 0, 0, alpha]
-	return [
-		c >= 1 ? 0 : 255 * (1 - c) * (1 - k), // r
-		m >= 1 ? 0 : 255 * (1 - m) * (1 - k), // g
-		y >= 1 ? 0 : 255 * (1 - y) * (1 - k), // b
-		alpha,
-	]
-}
+    args = unpack(args, 'cmyk');
+    const [c, m, y, k] = args;
+    const alpha = args.length > 4 ? args[4] : 1;
+    if (k === 1) return [0, 0, 0, alpha];
+    return [
+        c >= 1 ? 0 : 255 * (1 - c) * (1 - k), // r
+        m >= 1 ? 0 : 255 * (1 - m) * (1 - k), // g
+        y >= 1 ? 0 : 255 * (1 - y) * (1 - k), // b
+        alpha
+    ];
+};
 
-const { max: max$3 } = Math
+const { max: max$3 } = Math;
 
 const rgb2cmyk = (...args) => {
-	let [r, g, b] = unpack(args, "rgb")
-	r = r / 255
-	g = g / 255
-	b = b / 255
-	const k = 1 - max$3(r, max$3(g, b))
-	const f = k < 1 ? 1 / (1 - k) : 0
-	const c = (1 - r - k) * f
-	const m = (1 - g - k) * f
-	const y = (1 - b - k) * f
-	return [c, m, y, k]
-}
+    let [r, g, b] = unpack(args, 'rgb');
+    r = r / 255;
+    g = g / 255;
+    b = b / 255;
+    const k = 1 - max$3(r, max$3(g, b));
+    const f = k < 1 ? 1 / (1 - k) : 0;
+    const c = (1 - r - k) * f;
+    const m = (1 - g - k) * f;
+    const y = (1 - b - k) * f;
+    return [c, m, y, k];
+};
 
 Color.prototype.cmyk = function () {
-	return rgb2cmyk(this._rgb)
-}
+    return rgb2cmyk(this._rgb);
+};
 
-chroma.cmyk = (...args) => new Color(...args, "cmyk")
+chroma.cmyk = (...args) => new Color(...args, 'cmyk');
 
-input.format.cmyk = cmyk2rgb
+input.format.cmyk = cmyk2rgb;
 
 input.autodetect.push({
-	p: 2,
-	test: (...args) => {
-		args = unpack(args, "cmyk")
-		if (type(args) === "array" && args.length === 4) {
-			return "cmyk"
-		}
-	},
-})
+    p: 2,
+    test: (...args) => {
+        args = unpack(args, 'cmyk');
+        if (type(args) === 'array' && args.length === 4) {
+            return 'cmyk';
+        }
+    }
+});
 
-const rnd = (a) => Math.round(a * 100) / 100
+const rnd = (a) => Math.round(a * 100) / 100;
 
 /*
  * supported arguments:
@@ -4270,19 +3222,19 @@ const rnd = (a) => Math.round(a * 100) / 100
  * - hsl2css({h,s,l,a}, mode)
  */
 const hsl2css = (...args) => {
-	const hsla = unpack(args, "hsla")
-	let mode = last(args) || "lsa"
-	hsla[0] = rnd(hsla[0] || 0)
-	hsla[1] = rnd(hsla[1] * 100) + "%"
-	hsla[2] = rnd(hsla[2] * 100) + "%"
-	if (mode === "hsla" || (hsla.length > 3 && hsla[3] < 1)) {
-		hsla[3] = hsla.length > 3 ? hsla[3] : 1
-		mode = "hsla"
-	} else {
-		hsla.length = 3
-	}
-	return `${mode}(${hsla.join(",")})`
-}
+    const hsla = unpack(args, 'hsla');
+    let mode = last(args) || 'lsa';
+    hsla[0] = rnd(hsla[0] || 0);
+    hsla[1] = rnd(hsla[1] * 100) + '%';
+    hsla[2] = rnd(hsla[2] * 100) + '%';
+    if (mode === 'hsla' || (hsla.length > 3 && hsla[3] < 1)) {
+        hsla[3] = hsla.length > 3 ? hsla[3] : 1;
+        mode = 'hsla';
+    } else {
+        hsla.length = 3;
+    }
+    return `${mode}(${hsla.join(',')})`;
+};
 
 /*
  * supported arguments:
@@ -4293,37 +3245,40 @@ const hsl2css = (...args) => {
  * - rgb2hsl({r,g,b,a})
  */
 const rgb2hsl$1 = (...args) => {
-	args = unpack(args, "rgba")
-	let [r, g, b] = args
+    args = unpack(args, 'rgba');
+    let [r, g, b] = args;
 
-	r /= 255
-	g /= 255
-	b /= 255
+    r /= 255;
+    g /= 255;
+    b /= 255;
 
-	const minRgb = min$4(r, g, b)
-	const maxRgb = max$4(r, g, b)
+    const minRgb = min$4(r, g, b);
+    const maxRgb = max$4(r, g, b);
 
-	const l = (maxRgb + minRgb) / 2
-	let s, h
+    const l = (maxRgb + minRgb) / 2;
+    let s, h;
 
-	if (maxRgb === minRgb) {
-		s = 0
-		h = Number.NaN
-	} else {
-		s = l < 0.5 ? (maxRgb - minRgb) / (maxRgb + minRgb) : (maxRgb - minRgb) / (2 - maxRgb - minRgb)
-	}
+    if (maxRgb === minRgb) {
+        s = 0;
+        h = Number.NaN;
+    } else {
+        s =
+            l < 0.5
+                ? (maxRgb - minRgb) / (maxRgb + minRgb)
+                : (maxRgb - minRgb) / (2 - maxRgb - minRgb);
+    }
 
-	if (r == maxRgb) h = (g - b) / (maxRgb - minRgb)
-	else if (g == maxRgb) h = 2 + (b - r) / (maxRgb - minRgb)
-	else if (b == maxRgb) h = 4 + (r - g) / (maxRgb - minRgb)
+    if (r == maxRgb) h = (g - b) / (maxRgb - minRgb);
+    else if (g == maxRgb) h = 2 + (b - r) / (maxRgb - minRgb);
+    else if (b == maxRgb) h = 4 + (r - g) / (maxRgb - minRgb);
 
-	h *= 60
-	if (h < 0) h += 360
-	if (args.length > 3 && args[3] !== undefined) return [h, s, l, args[3]]
-	return [h, s, l]
-}
+    h *= 60;
+    if (h < 0) h += 360;
+    if (args.length > 3 && args[3] !== undefined) return [h, s, l, args[3]];
+    return [h, s, l];
+};
 
-const { round: round$7 } = Math
+const { round: round$7 } = Math;
 
 /*
  * supported arguments:
@@ -4334,182 +3289,184 @@ const { round: round$7 } = Math
  * - rgb2css({r,g,b,a}, mode)
  */
 const rgb2css = (...args) => {
-	const rgba = unpack(args, "rgba")
-	let mode = last(args) || "rgb"
-	if (mode.substr(0, 3) == "hsl") {
-		return hsl2css(rgb2hsl$1(rgba), mode)
-	}
-	rgba[0] = round$7(rgba[0])
-	rgba[1] = round$7(rgba[1])
-	rgba[2] = round$7(rgba[2])
-	if (mode === "rgba" || (rgba.length > 3 && rgba[3] < 1)) {
-		rgba[3] = rgba.length > 3 ? rgba[3] : 1
-		mode = "rgba"
-	}
-	return `${mode}(${rgba.slice(0, mode === "rgb" ? 3 : 4).join(",")})`
-}
+    const rgba = unpack(args, 'rgba');
+    let mode = last(args) || 'rgb';
+    if (mode.substr(0, 3) == 'hsl') {
+        return hsl2css(rgb2hsl$1(rgba), mode);
+    }
+    rgba[0] = round$7(rgba[0]);
+    rgba[1] = round$7(rgba[1]);
+    rgba[2] = round$7(rgba[2]);
+    if (mode === 'rgba' || (rgba.length > 3 && rgba[3] < 1)) {
+        rgba[3] = rgba.length > 3 ? rgba[3] : 1;
+        mode = 'rgba';
+    }
+    return `${mode}(${rgba.slice(0, mode === 'rgb' ? 3 : 4).join(',')})`;
+};
 
-const { round: round$6 } = Math
+const { round: round$6 } = Math;
 
 const hsl2rgb = (...args) => {
-	args = unpack(args, "hsl")
-	const [h, s, l] = args
-	let r, g, b
-	if (s === 0) {
-		r = g = b = l * 255
-	} else {
-		const t3 = [0, 0, 0]
-		const c = [0, 0, 0]
-		const t2 = l < 0.5 ? l * (1 + s) : l + s - l * s
-		const t1 = 2 * l - t2
-		const h_ = h / 360
-		t3[0] = h_ + 1 / 3
-		t3[1] = h_
-		t3[2] = h_ - 1 / 3
-		for (let i = 0; i < 3; i++) {
-			if (t3[i] < 0) t3[i] += 1
-			if (t3[i] > 1) t3[i] -= 1
-			if (6 * t3[i] < 1) c[i] = t1 + (t2 - t1) * 6 * t3[i]
-			else if (2 * t3[i] < 1) c[i] = t2
-			else if (3 * t3[i] < 2) c[i] = t1 + (t2 - t1) * (2 / 3 - t3[i]) * 6
-			else c[i] = t1
-		}
-		;[r, g, b] = [round$6(c[0] * 255), round$6(c[1] * 255), round$6(c[2] * 255)]
-	}
-	if (args.length > 3) {
-		// keep alpha channel
-		return [r, g, b, args[3]]
-	}
-	return [r, g, b, 1]
-}
+    args = unpack(args, 'hsl');
+    const [h, s, l] = args;
+    let r, g, b;
+    if (s === 0) {
+        r = g = b = l * 255;
+    } else {
+        const t3 = [0, 0, 0];
+        const c = [0, 0, 0];
+        const t2 = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const t1 = 2 * l - t2;
+        const h_ = h / 360;
+        t3[0] = h_ + 1 / 3;
+        t3[1] = h_;
+        t3[2] = h_ - 1 / 3;
+        for (let i = 0; i < 3; i++) {
+            if (t3[i] < 0) t3[i] += 1;
+            if (t3[i] > 1) t3[i] -= 1;
+            if (6 * t3[i] < 1) c[i] = t1 + (t2 - t1) * 6 * t3[i];
+            else if (2 * t3[i] < 1) c[i] = t2;
+            else if (3 * t3[i] < 2) c[i] = t1 + (t2 - t1) * (2 / 3 - t3[i]) * 6;
+            else c[i] = t1;
+        }
+        [r, g, b] = [round$6(c[0] * 255), round$6(c[1] * 255), round$6(c[2] * 255)];
+    }
+    if (args.length > 3) {
+        // keep alpha channel
+        return [r, g, b, args[3]];
+    }
+    return [r, g, b, 1];
+};
 
-const RE_RGB = /^rgb\(\s*(-?\d+),\s*(-?\d+)\s*,\s*(-?\d+)\s*\)$/
-const RE_RGBA = /^rgba\(\s*(-?\d+),\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*([01]|[01]?\.\d+)\)$/
+const RE_RGB = /^rgb\(\s*(-?\d+),\s*(-?\d+)\s*,\s*(-?\d+)\s*\)$/;
+const RE_RGBA =
+    /^rgba\(\s*(-?\d+),\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*([01]|[01]?\.\d+)\)$/;
 const RE_RGB_PCT =
-	/^rgb\(\s*(-?\d+(?:\.\d+)?)%,\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*\)$/
+    /^rgb\(\s*(-?\d+(?:\.\d+)?)%,\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*\)$/;
 const RE_RGBA_PCT =
-	/^rgba\(\s*(-?\d+(?:\.\d+)?)%,\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*,\s*([01]|[01]?\.\d+)\)$/
-const RE_HSL = /^hsl\(\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*\)$/
+    /^rgba\(\s*(-?\d+(?:\.\d+)?)%,\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*,\s*([01]|[01]?\.\d+)\)$/;
+const RE_HSL =
+    /^hsl\(\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*\)$/;
 const RE_HSLA =
-	/^hsla\(\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*,\s*([01]|[01]?\.\d+)\)$/
+    /^hsla\(\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*,\s*([01]|[01]?\.\d+)\)$/;
 
-const { round: round$5 } = Math
+const { round: round$5 } = Math;
 
 const css2rgb = (css) => {
-	css = css.toLowerCase().trim()
-	let m
+    css = css.toLowerCase().trim();
+    let m;
 
-	if (input.format.named) {
-		try {
-			return input.format.named(css)
-			// eslint-disable-next-line
-		} catch (e) {}
-	}
+    if (input.format.named) {
+        try {
+            return input.format.named(css);
+            // eslint-disable-next-line
+        } catch (e) {}
+    }
 
-	// rgb(250,20,0)
-	if ((m = css.match(RE_RGB))) {
-		const rgb = m.slice(1, 4)
-		for (let i = 0; i < 3; i++) {
-			rgb[i] = +rgb[i]
-		}
-		rgb[3] = 1 // default alpha
-		return rgb
-	}
+    // rgb(250,20,0)
+    if ((m = css.match(RE_RGB))) {
+        const rgb = m.slice(1, 4);
+        for (let i = 0; i < 3; i++) {
+            rgb[i] = +rgb[i];
+        }
+        rgb[3] = 1; // default alpha
+        return rgb;
+    }
 
-	// rgba(250,20,0,0.4)
-	if ((m = css.match(RE_RGBA))) {
-		const rgb = m.slice(1, 5)
-		for (let i = 0; i < 4; i++) {
-			rgb[i] = +rgb[i]
-		}
-		return rgb
-	}
+    // rgba(250,20,0,0.4)
+    if ((m = css.match(RE_RGBA))) {
+        const rgb = m.slice(1, 5);
+        for (let i = 0; i < 4; i++) {
+            rgb[i] = +rgb[i];
+        }
+        return rgb;
+    }
 
-	// rgb(100%,0%,0%)
-	if ((m = css.match(RE_RGB_PCT))) {
-		const rgb = m.slice(1, 4)
-		for (let i = 0; i < 3; i++) {
-			rgb[i] = round$5(rgb[i] * 2.55)
-		}
-		rgb[3] = 1 // default alpha
-		return rgb
-	}
+    // rgb(100%,0%,0%)
+    if ((m = css.match(RE_RGB_PCT))) {
+        const rgb = m.slice(1, 4);
+        for (let i = 0; i < 3; i++) {
+            rgb[i] = round$5(rgb[i] * 2.55);
+        }
+        rgb[3] = 1; // default alpha
+        return rgb;
+    }
 
-	// rgba(100%,0%,0%,0.4)
-	if ((m = css.match(RE_RGBA_PCT))) {
-		const rgb = m.slice(1, 5)
-		for (let i = 0; i < 3; i++) {
-			rgb[i] = round$5(rgb[i] * 2.55)
-		}
-		rgb[3] = +rgb[3]
-		return rgb
-	}
+    // rgba(100%,0%,0%,0.4)
+    if ((m = css.match(RE_RGBA_PCT))) {
+        const rgb = m.slice(1, 5);
+        for (let i = 0; i < 3; i++) {
+            rgb[i] = round$5(rgb[i] * 2.55);
+        }
+        rgb[3] = +rgb[3];
+        return rgb;
+    }
 
-	// hsl(0,100%,50%)
-	if ((m = css.match(RE_HSL))) {
-		const hsl = m.slice(1, 4)
-		hsl[1] *= 0.01
-		hsl[2] *= 0.01
-		const rgb = hsl2rgb(hsl)
-		rgb[3] = 1
-		return rgb
-	}
+    // hsl(0,100%,50%)
+    if ((m = css.match(RE_HSL))) {
+        const hsl = m.slice(1, 4);
+        hsl[1] *= 0.01;
+        hsl[2] *= 0.01;
+        const rgb = hsl2rgb(hsl);
+        rgb[3] = 1;
+        return rgb;
+    }
 
-	// hsla(0,100%,50%,0.5)
-	if ((m = css.match(RE_HSLA))) {
-		const hsl = m.slice(1, 4)
-		hsl[1] *= 0.01
-		hsl[2] *= 0.01
-		const rgb = hsl2rgb(hsl)
-		rgb[3] = +m[4] // default alpha = 1
-		return rgb
-	}
-}
+    // hsla(0,100%,50%,0.5)
+    if ((m = css.match(RE_HSLA))) {
+        const hsl = m.slice(1, 4);
+        hsl[1] *= 0.01;
+        hsl[2] *= 0.01;
+        const rgb = hsl2rgb(hsl);
+        rgb[3] = +m[4]; // default alpha = 1
+        return rgb;
+    }
+};
 
 css2rgb.test = (s) => {
-	return (
-		RE_RGB.test(s) ||
-		RE_RGBA.test(s) ||
-		RE_RGB_PCT.test(s) ||
-		RE_RGBA_PCT.test(s) ||
-		RE_HSL.test(s) ||
-		RE_HSLA.test(s)
-	)
-}
+    return (
+        RE_RGB.test(s) ||
+        RE_RGBA.test(s) ||
+        RE_RGB_PCT.test(s) ||
+        RE_RGBA_PCT.test(s) ||
+        RE_HSL.test(s) ||
+        RE_HSLA.test(s)
+    );
+};
 
 Color.prototype.css = function (mode) {
-	return rgb2css(this._rgb, mode)
-}
+    return rgb2css(this._rgb, mode);
+};
 
-chroma.css = (...args) => new Color(...args, "css")
+chroma.css = (...args) => new Color(...args, 'css');
 
-input.format.css = css2rgb
+input.format.css = css2rgb;
 
 input.autodetect.push({
-	p: 5,
-	test: (h, ...rest) => {
-		if (!rest.length && type(h) === "string" && css2rgb.test(h)) {
-			return "css"
-		}
-	},
-})
+    p: 5,
+    test: (h, ...rest) => {
+        if (!rest.length && type(h) === 'string' && css2rgb.test(h)) {
+            return 'css';
+        }
+    }
+});
 
 input.format.gl = (...args) => {
-	const rgb = unpack(args, "rgba")
-	rgb[0] *= 255
-	rgb[1] *= 255
-	rgb[2] *= 255
-	return rgb
-}
+    const rgb = unpack(args, 'rgba');
+    rgb[0] *= 255;
+    rgb[1] *= 255;
+    rgb[2] *= 255;
+    return rgb;
+};
 
-chroma.gl = (...args) => new Color(...args, "gl")
+chroma.gl = (...args) => new Color(...args, 'gl');
 
 Color.prototype.gl = function () {
-	const rgb = this._rgb
-	return [rgb[0] / 255, rgb[1] / 255, rgb[2] / 255, rgb[3]]
-}
+    const rgb = this._rgb;
+    return [rgb[0] / 255, rgb[1] / 255, rgb[2] / 255, rgb[3]];
+};
 
-const { floor: floor$4 } = Math
+const { floor: floor$4 } = Math;
 
 /*
  * this is basically just HSV with some minor tweaks
@@ -4520,177 +3477,189 @@ const { floor: floor$4 } = Math
  */
 
 const hcg2rgb = (...args) => {
-	args = unpack(args, "hcg")
-	let [h, c, _g] = args
-	let r, g, b
-	_g = _g * 255
-	const _c = c * 255
-	if (c === 0) {
-		r = g = b = _g
-	} else {
-		if (h === 360) h = 0
-		if (h > 360) h -= 360
-		if (h < 0) h += 360
-		h /= 60
-		const i = floor$4(h)
-		const f = h - i
-		const p = _g * (1 - c)
-		const q = p + _c * (1 - f)
-		const t = p + _c * f
-		const v = p + _c
-		switch (i) {
-			case 0:
-				;[r, g, b] = [v, t, p]
-				break
-			case 1:
-				;[r, g, b] = [q, v, p]
-				break
-			case 2:
-				;[r, g, b] = [p, v, t]
-				break
-			case 3:
-				;[r, g, b] = [p, q, v]
-				break
-			case 4:
-				;[r, g, b] = [t, p, v]
-				break
-			case 5:
-				;[r, g, b] = [v, p, q]
-				break
-		}
-	}
-	return [r, g, b, args.length > 3 ? args[3] : 1]
-}
+    args = unpack(args, 'hcg');
+    let [h, c, _g] = args;
+    let r, g, b;
+    _g = _g * 255;
+    const _c = c * 255;
+    if (c === 0) {
+        r = g = b = _g;
+    } else {
+        if (h === 360) h = 0;
+        if (h > 360) h -= 360;
+        if (h < 0) h += 360;
+        h /= 60;
+        const i = floor$4(h);
+        const f = h - i;
+        const p = _g * (1 - c);
+        const q = p + _c * (1 - f);
+        const t = p + _c * f;
+        const v = p + _c;
+        switch (i) {
+            case 0:
+                [r, g, b] = [v, t, p];
+                break;
+            case 1:
+                [r, g, b] = [q, v, p];
+                break;
+            case 2:
+                [r, g, b] = [p, v, t];
+                break;
+            case 3:
+                [r, g, b] = [p, q, v];
+                break;
+            case 4:
+                [r, g, b] = [t, p, v];
+                break;
+            case 5:
+                [r, g, b] = [v, p, q];
+                break;
+        }
+    }
+    return [r, g, b, args.length > 3 ? args[3] : 1];
+};
 
 const rgb2hcg = (...args) => {
-	const [r, g, b] = unpack(args, "rgb")
-	const minRgb = min$4(r, g, b)
-	const maxRgb = max$4(r, g, b)
-	const delta = maxRgb - minRgb
-	const c = (delta * 100) / 255
-	const _g = (minRgb / (255 - delta)) * 100
-	let h
-	if (delta === 0) {
-		h = Number.NaN
-	} else {
-		if (r === maxRgb) h = (g - b) / delta
-		if (g === maxRgb) h = 2 + (b - r) / delta
-		if (b === maxRgb) h = 4 + (r - g) / delta
-		h *= 60
-		if (h < 0) h += 360
-	}
-	return [h, c, _g]
-}
+    const [r, g, b] = unpack(args, 'rgb');
+    const minRgb = min$4(r, g, b);
+    const maxRgb = max$4(r, g, b);
+    const delta = maxRgb - minRgb;
+    const c = (delta * 100) / 255;
+    const _g = (minRgb / (255 - delta)) * 100;
+    let h;
+    if (delta === 0) {
+        h = Number.NaN;
+    } else {
+        if (r === maxRgb) h = (g - b) / delta;
+        if (g === maxRgb) h = 2 + (b - r) / delta;
+        if (b === maxRgb) h = 4 + (r - g) / delta;
+        h *= 60;
+        if (h < 0) h += 360;
+    }
+    return [h, c, _g];
+};
 
 Color.prototype.hcg = function () {
-	return rgb2hcg(this._rgb)
-}
+    return rgb2hcg(this._rgb);
+};
 
-chroma.hcg = (...args) => new Color(...args, "hcg")
+chroma.hcg = (...args) => new Color(...args, 'hcg');
 
-input.format.hcg = hcg2rgb
+input.format.hcg = hcg2rgb;
 
 input.autodetect.push({
-	p: 1,
-	test: (...args) => {
-		args = unpack(args, "hcg")
-		if (type(args) === "array" && args.length === 3) {
-			return "hcg"
-		}
-	},
-})
+    p: 1,
+    test: (...args) => {
+        args = unpack(args, 'hcg');
+        if (type(args) === 'array' && args.length === 3) {
+            return 'hcg';
+        }
+    }
+});
 
-const RE_HEX = /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
-const RE_HEXA = /^#?([A-Fa-f0-9]{8}|[A-Fa-f0-9]{4})$/
+const RE_HEX = /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+const RE_HEXA = /^#?([A-Fa-f0-9]{8}|[A-Fa-f0-9]{4})$/;
 
 const hex2rgb = (hex) => {
-	if (hex.match(RE_HEX)) {
-		// remove optional leading #
-		if (hex.length === 4 || hex.length === 7) {
-			hex = hex.substr(1)
-		}
-		// expand short-notation to full six-digit
-		if (hex.length === 3) {
-			hex = hex.split("")
-			hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]
-		}
-		const u = parseInt(hex, 16)
-		const r = u >> 16
-		const g = (u >> 8) & 0xff
-		const b = u & 0xff
-		return [r, g, b, 1]
-	}
+    if (hex.match(RE_HEX)) {
+        // remove optional leading #
+        if (hex.length === 4 || hex.length === 7) {
+            hex = hex.substr(1);
+        }
+        // expand short-notation to full six-digit
+        if (hex.length === 3) {
+            hex = hex.split('');
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        }
+        const u = parseInt(hex, 16);
+        const r = u >> 16;
+        const g = (u >> 8) & 0xff;
+        const b = u & 0xff;
+        return [r, g, b, 1];
+    }
 
-	// match rgba hex format, eg #FF000077
-	if (hex.match(RE_HEXA)) {
-		if (hex.length === 5 || hex.length === 9) {
-			// remove optional leading #
-			hex = hex.substr(1)
-		}
-		// expand short-notation to full eight-digit
-		if (hex.length === 4) {
-			hex = hex.split("")
-			hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3]
-		}
-		const u = parseInt(hex, 16)
-		const r = (u >> 24) & 0xff
-		const g = (u >> 16) & 0xff
-		const b = (u >> 8) & 0xff
-		const a = Math.round(((u & 0xff) / 0xff) * 100) / 100
-		return [r, g, b, a]
-	}
+    // match rgba hex format, eg #FF000077
+    if (hex.match(RE_HEXA)) {
+        if (hex.length === 5 || hex.length === 9) {
+            // remove optional leading #
+            hex = hex.substr(1);
+        }
+        // expand short-notation to full eight-digit
+        if (hex.length === 4) {
+            hex = hex.split('');
+            hex =
+                hex[0] +
+                hex[0] +
+                hex[1] +
+                hex[1] +
+                hex[2] +
+                hex[2] +
+                hex[3] +
+                hex[3];
+        }
+        const u = parseInt(hex, 16);
+        const r = (u >> 24) & 0xff;
+        const g = (u >> 16) & 0xff;
+        const b = (u >> 8) & 0xff;
+        const a = Math.round(((u & 0xff) / 0xff) * 100) / 100;
+        return [r, g, b, a];
+    }
 
-	// we used to check for css colors here
-	// if _input.css? and rgb = _input.css hex
-	//     return rgb
+    // we used to check for css colors here
+    // if _input.css? and rgb = _input.css hex
+    //     return rgb
 
-	throw new Error(`unknown hex color: ${hex}`)
-}
+    throw new Error(`unknown hex color: ${hex}`);
+};
 
-const { round: round$4 } = Math
+const { round: round$4 } = Math;
 
 const rgb2hex = (...args) => {
-	let [r, g, b, a] = unpack(args, "rgba")
-	let mode = last(args) || "auto"
-	if (a === undefined) a = 1
-	if (mode === "auto") {
-		mode = a < 1 ? "rgba" : "rgb"
-	}
-	r = round$4(r)
-	g = round$4(g)
-	b = round$4(b)
-	const u = (r << 16) | (g << 8) | b
-	let str = "000000" + u.toString(16) //#.toUpperCase();
-	str = str.substr(str.length - 6)
-	let hxa = "0" + round$4(a * 255).toString(16)
-	hxa = hxa.substr(hxa.length - 2)
-	switch (mode.toLowerCase()) {
-		case "rgba":
-			return `#${str}${hxa}`
-		case "argb":
-			return `#${hxa}${str}`
-		default:
-			return `#${str}`
-	}
-}
+    let [r, g, b, a] = unpack(args, 'rgba');
+    let mode = last(args) || 'auto';
+    if (a === undefined) a = 1;
+    if (mode === 'auto') {
+        mode = a < 1 ? 'rgba' : 'rgb';
+    }
+    r = round$4(r);
+    g = round$4(g);
+    b = round$4(b);
+    const u = (r << 16) | (g << 8) | b;
+    let str = '000000' + u.toString(16); //#.toUpperCase();
+    str = str.substr(str.length - 6);
+    let hxa = '0' + round$4(a * 255).toString(16);
+    hxa = hxa.substr(hxa.length - 2);
+    switch (mode.toLowerCase()) {
+        case 'rgba':
+            return `#${str}${hxa}`;
+        case 'argb':
+            return `#${hxa}${str}`;
+        default:
+            return `#${str}`;
+    }
+};
 
 Color.prototype.hex = function (mode) {
-	return rgb2hex(this._rgb, mode)
-}
+    return rgb2hex(this._rgb, mode);
+};
 
-chroma.hex = (...args) => new Color(...args, "hex")
+chroma.hex = (...args) => new Color(...args, 'hex');
 
-input.format.hex = hex2rgb
+input.format.hex = hex2rgb;
 input.autodetect.push({
-	p: 4,
-	test: (h, ...rest) => {
-		if (!rest.length && type(h) === "string" && [3, 4, 5, 6, 7, 8, 9].indexOf(h.length) >= 0) {
-			return "hex"
-		}
-	},
-})
+    p: 4,
+    test: (h, ...rest) => {
+        if (
+            !rest.length &&
+            type(h) === 'string' &&
+            [3, 4, 5, 6, 7, 8, 9].indexOf(h.length) >= 0
+        ) {
+            return 'hex';
+        }
+    }
+});
 
-const { cos: cos$4 } = Math
+const { cos: cos$4 } = Math;
 
 /*
  * hue [0..360]
@@ -4698,152 +3667,152 @@ const { cos: cos$4 } = Math
  * intensity [0..1]
  */
 const hsi2rgb = (...args) => {
-	/*
+    /*
     borrowed from here:
     http://hummer.stanford.edu/museinfo/doc/examples/humdrum/keyscape2/hsi2rgb.cpp
     */
-	args = unpack(args, "hsi")
-	let [h, s, i] = args
-	let r, g, b
+    args = unpack(args, 'hsi');
+    let [h, s, i] = args;
+    let r, g, b;
 
-	if (isNaN(h)) h = 0
-	if (isNaN(s)) s = 0
-	// normalize hue
-	if (h > 360) h -= 360
-	if (h < 0) h += 360
-	h /= 360
-	if (h < 1 / 3) {
-		b = (1 - s) / 3
-		r = (1 + (s * cos$4(TWOPI * h)) / cos$4(PITHIRD - TWOPI * h)) / 3
-		g = 1 - (b + r)
-	} else if (h < 2 / 3) {
-		h -= 1 / 3
-		r = (1 - s) / 3
-		g = (1 + (s * cos$4(TWOPI * h)) / cos$4(PITHIRD - TWOPI * h)) / 3
-		b = 1 - (r + g)
-	} else {
-		h -= 2 / 3
-		g = (1 - s) / 3
-		b = (1 + (s * cos$4(TWOPI * h)) / cos$4(PITHIRD - TWOPI * h)) / 3
-		r = 1 - (g + b)
-	}
-	r = limit(i * r * 3)
-	g = limit(i * g * 3)
-	b = limit(i * b * 3)
-	return [r * 255, g * 255, b * 255, args.length > 3 ? args[3] : 1]
-}
+    if (isNaN(h)) h = 0;
+    if (isNaN(s)) s = 0;
+    // normalize hue
+    if (h > 360) h -= 360;
+    if (h < 0) h += 360;
+    h /= 360;
+    if (h < 1 / 3) {
+        b = (1 - s) / 3;
+        r = (1 + (s * cos$4(TWOPI * h)) / cos$4(PITHIRD - TWOPI * h)) / 3;
+        g = 1 - (b + r);
+    } else if (h < 2 / 3) {
+        h -= 1 / 3;
+        r = (1 - s) / 3;
+        g = (1 + (s * cos$4(TWOPI * h)) / cos$4(PITHIRD - TWOPI * h)) / 3;
+        b = 1 - (r + g);
+    } else {
+        h -= 2 / 3;
+        g = (1 - s) / 3;
+        b = (1 + (s * cos$4(TWOPI * h)) / cos$4(PITHIRD - TWOPI * h)) / 3;
+        r = 1 - (g + b);
+    }
+    r = limit(i * r * 3);
+    g = limit(i * g * 3);
+    b = limit(i * b * 3);
+    return [r * 255, g * 255, b * 255, args.length > 3 ? args[3] : 1];
+};
 
-const { min: min$3, sqrt: sqrt$4, acos } = Math
+const { min: min$3, sqrt: sqrt$4, acos } = Math;
 
 const rgb2hsi = (...args) => {
-	/*
+    /*
     borrowed from here:
     http://hummer.stanford.edu/museinfo/doc/examples/humdrum/keyscape2/rgb2hsi.cpp
     */
-	let [r, g, b] = unpack(args, "rgb")
-	r /= 255
-	g /= 255
-	b /= 255
-	let h
-	const min_ = min$3(r, g, b)
-	const i = (r + g + b) / 3
-	const s = i > 0 ? 1 - min_ / i : 0
-	if (s === 0) {
-		h = NaN
-	} else {
-		h = (r - g + (r - b)) / 2
-		h /= sqrt$4((r - g) * (r - g) + (r - b) * (g - b))
-		h = acos(h)
-		if (b > g) {
-			h = TWOPI - h
-		}
-		h /= TWOPI
-	}
-	return [h * 360, s, i]
-}
+    let [r, g, b] = unpack(args, 'rgb');
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    let h;
+    const min_ = min$3(r, g, b);
+    const i = (r + g + b) / 3;
+    const s = i > 0 ? 1 - min_ / i : 0;
+    if (s === 0) {
+        h = NaN;
+    } else {
+        h = (r - g + (r - b)) / 2;
+        h /= sqrt$4((r - g) * (r - g) + (r - b) * (g - b));
+        h = acos(h);
+        if (b > g) {
+            h = TWOPI - h;
+        }
+        h /= TWOPI;
+    }
+    return [h * 360, s, i];
+};
 
 Color.prototype.hsi = function () {
-	return rgb2hsi(this._rgb)
-}
+    return rgb2hsi(this._rgb);
+};
 
-chroma.hsi = (...args) => new Color(...args, "hsi")
+chroma.hsi = (...args) => new Color(...args, 'hsi');
 
-input.format.hsi = hsi2rgb
+input.format.hsi = hsi2rgb;
 
 input.autodetect.push({
-	p: 2,
-	test: (...args) => {
-		args = unpack(args, "hsi")
-		if (type(args) === "array" && args.length === 3) {
-			return "hsi"
-		}
-	},
-})
+    p: 2,
+    test: (...args) => {
+        args = unpack(args, 'hsi');
+        if (type(args) === 'array' && args.length === 3) {
+            return 'hsi';
+        }
+    }
+});
 
 Color.prototype.hsl = function () {
-	return rgb2hsl$1(this._rgb)
-}
+    return rgb2hsl$1(this._rgb);
+};
 
-chroma.hsl = (...args) => new Color(...args, "hsl")
+chroma.hsl = (...args) => new Color(...args, 'hsl');
 
-input.format.hsl = hsl2rgb
+input.format.hsl = hsl2rgb;
 
 input.autodetect.push({
-	p: 2,
-	test: (...args) => {
-		args = unpack(args, "hsl")
-		if (type(args) === "array" && args.length === 3) {
-			return "hsl"
-		}
-	},
-})
+    p: 2,
+    test: (...args) => {
+        args = unpack(args, 'hsl');
+        if (type(args) === 'array' && args.length === 3) {
+            return 'hsl';
+        }
+    }
+});
 
-const { floor: floor$3 } = Math
+const { floor: floor$3 } = Math;
 
 const hsv2rgb = (...args) => {
-	args = unpack(args, "hsv")
-	let [h, s, v] = args
-	let r, g, b
-	v *= 255
-	if (s === 0) {
-		r = g = b = v
-	} else {
-		if (h === 360) h = 0
-		if (h > 360) h -= 360
-		if (h < 0) h += 360
-		h /= 60
+    args = unpack(args, 'hsv');
+    let [h, s, v] = args;
+    let r, g, b;
+    v *= 255;
+    if (s === 0) {
+        r = g = b = v;
+    } else {
+        if (h === 360) h = 0;
+        if (h > 360) h -= 360;
+        if (h < 0) h += 360;
+        h /= 60;
 
-		const i = floor$3(h)
-		const f = h - i
-		const p = v * (1 - s)
-		const q = v * (1 - s * f)
-		const t = v * (1 - s * (1 - f))
+        const i = floor$3(h);
+        const f = h - i;
+        const p = v * (1 - s);
+        const q = v * (1 - s * f);
+        const t = v * (1 - s * (1 - f));
 
-		switch (i) {
-			case 0:
-				;[r, g, b] = [v, t, p]
-				break
-			case 1:
-				;[r, g, b] = [q, v, p]
-				break
-			case 2:
-				;[r, g, b] = [p, v, t]
-				break
-			case 3:
-				;[r, g, b] = [p, q, v]
-				break
-			case 4:
-				;[r, g, b] = [t, p, v]
-				break
-			case 5:
-				;[r, g, b] = [v, p, q]
-				break
-		}
-	}
-	return [r, g, b, args.length > 3 ? args[3] : 1]
-}
+        switch (i) {
+            case 0:
+                [r, g, b] = [v, t, p];
+                break;
+            case 1:
+                [r, g, b] = [q, v, p];
+                break;
+            case 2:
+                [r, g, b] = [p, v, t];
+                break;
+            case 3:
+                [r, g, b] = [p, q, v];
+                break;
+            case 4:
+                [r, g, b] = [t, p, v];
+                break;
+            case 5:
+                [r, g, b] = [v, p, q];
+                break;
+        }
+    }
+    return [r, g, b, args.length > 3 ? args[3] : 1];
+};
 
-const { min: min$2, max: max$2 } = Math
+const { min: min$2, max: max$2 } = Math;
 
 /*
  * supported arguments:
@@ -4852,61 +3821,61 @@ const { min: min$2, max: max$2 } = Math
  * - rgb2hsv({r,g,b})
  */
 const rgb2hsl = (...args) => {
-	args = unpack(args, "rgb")
-	let [r, g, b] = args
-	const min_ = min$2(r, g, b)
-	const max_ = max$2(r, g, b)
-	const delta = max_ - min_
-	let h, s, v
-	v = max_ / 255.0
-	if (max_ === 0) {
-		h = Number.NaN
-		s = 0
-	} else {
-		s = delta / max_
-		if (r === max_) h = (g - b) / delta
-		if (g === max_) h = 2 + (b - r) / delta
-		if (b === max_) h = 4 + (r - g) / delta
-		h *= 60
-		if (h < 0) h += 360
-	}
-	return [h, s, v]
-}
+    args = unpack(args, 'rgb');
+    let [r, g, b] = args;
+    const min_ = min$2(r, g, b);
+    const max_ = max$2(r, g, b);
+    const delta = max_ - min_;
+    let h, s, v;
+    v = max_ / 255.0;
+    if (max_ === 0) {
+        h = Number.NaN;
+        s = 0;
+    } else {
+        s = delta / max_;
+        if (r === max_) h = (g - b) / delta;
+        if (g === max_) h = 2 + (b - r) / delta;
+        if (b === max_) h = 4 + (r - g) / delta;
+        h *= 60;
+        if (h < 0) h += 360;
+    }
+    return [h, s, v];
+};
 
 Color.prototype.hsv = function () {
-	return rgb2hsl(this._rgb)
-}
+    return rgb2hsl(this._rgb);
+};
 
-chroma.hsv = (...args) => new Color(...args, "hsv")
+chroma.hsv = (...args) => new Color(...args, 'hsv');
 
-input.format.hsv = hsv2rgb
+input.format.hsv = hsv2rgb;
 
 input.autodetect.push({
-	p: 2,
-	test: (...args) => {
-		args = unpack(args, "hsv")
-		if (type(args) === "array" && args.length === 3) {
-			return "hsv"
-		}
-	},
-})
+    p: 2,
+    test: (...args) => {
+        args = unpack(args, 'hsv');
+        if (type(args) === 'array' && args.length === 3) {
+            return 'hsv';
+        }
+    }
+});
 
 var LAB_CONSTANTS = {
-	// Corresponds roughly to RGB brighter/darker
-	Kn: 18,
+    // Corresponds roughly to RGB brighter/darker
+    Kn: 18,
 
-	// D65 standard referent
-	Xn: 0.95047,
-	Yn: 1,
-	Zn: 1.08883,
+    // D65 standard referent
+    Xn: 0.95047,
+    Yn: 1,
+    Zn: 1.08883,
 
-	t0: 0.137931034, // 4 / 29
-	t1: 0.206896552, // 6 / 29
-	t2: 0.12841855, // 3 * t1 * t1
-	t3: 0.008856452, // t1 * t1 * t1
-}
+    t0: 0.137931034, // 4 / 29
+    t1: 0.206896552, // 6 / 29
+    t2: 0.12841855, // 3 * t1 * t1
+    t3: 0.008856452 // t1 * t1 * t1
+};
 
-const { pow: pow$a } = Math
+const { pow: pow$a } = Math;
 
 /*
  * L* [0..100]
@@ -4914,148 +3883,156 @@ const { pow: pow$a } = Math
  * b [-100..100]
  */
 const lab2rgb = (...args) => {
-	args = unpack(args, "lab")
-	const [l, a, b] = args
-	let x, y, z, r, g, b_
+    args = unpack(args, 'lab');
+    const [l, a, b] = args;
+    let x, y, z, r, g, b_;
 
-	y = (l + 16) / 116
-	x = isNaN(a) ? y : y + a / 500
-	z = isNaN(b) ? y : y - b / 200
+    y = (l + 16) / 116;
+    x = isNaN(a) ? y : y + a / 500;
+    z = isNaN(b) ? y : y - b / 200;
 
-	y = LAB_CONSTANTS.Yn * lab_xyz(y)
-	x = LAB_CONSTANTS.Xn * lab_xyz(x)
-	z = LAB_CONSTANTS.Zn * lab_xyz(z)
+    y = LAB_CONSTANTS.Yn * lab_xyz(y);
+    x = LAB_CONSTANTS.Xn * lab_xyz(x);
+    z = LAB_CONSTANTS.Zn * lab_xyz(z);
 
-	r = xyz_rgb(3.2404542 * x - 1.5371385 * y - 0.4985314 * z) // D65 -> sRGB
-	g = xyz_rgb(-0.969266 * x + 1.8760108 * y + 0.041556 * z)
-	b_ = xyz_rgb(0.0556434 * x - 0.2040259 * y + 1.0572252 * z)
+    r = xyz_rgb(3.2404542 * x - 1.5371385 * y - 0.4985314 * z); // D65 -> sRGB
+    g = xyz_rgb(-0.969266 * x + 1.8760108 * y + 0.041556 * z);
+    b_ = xyz_rgb(0.0556434 * x - 0.2040259 * y + 1.0572252 * z);
 
-	return [r, g, b_, args.length > 3 ? args[3] : 1]
-}
+    return [r, g, b_, args.length > 3 ? args[3] : 1];
+};
 
 const xyz_rgb = (r) => {
-	return 255 * (r <= 0.00304 ? 12.92 * r : 1.055 * pow$a(r, 1 / 2.4) - 0.055)
-}
+    return 255 * (r <= 0.00304 ? 12.92 * r : 1.055 * pow$a(r, 1 / 2.4) - 0.055);
+};
 
 const lab_xyz = (t) => {
-	return t > LAB_CONSTANTS.t1 ? t * t * t : LAB_CONSTANTS.t2 * (t - LAB_CONSTANTS.t0)
-}
+    return t > LAB_CONSTANTS.t1
+        ? t * t * t
+        : LAB_CONSTANTS.t2 * (t - LAB_CONSTANTS.t0);
+};
 
-const { pow: pow$9 } = Math
+const { pow: pow$9 } = Math;
 
 const rgb2lab = (...args) => {
-	const [r, g, b] = unpack(args, "rgb")
-	const [x, y, z] = rgb2xyz(r, g, b)
-	const l = 116 * y - 16
-	return [l < 0 ? 0 : l, 500 * (x - y), 200 * (y - z)]
-}
+    const [r, g, b] = unpack(args, 'rgb');
+    const [x, y, z] = rgb2xyz(r, g, b);
+    const l = 116 * y - 16;
+    return [l < 0 ? 0 : l, 500 * (x - y), 200 * (y - z)];
+};
 
 const rgb_xyz = (r) => {
-	if ((r /= 255) <= 0.04045) return r / 12.92
-	return pow$9((r + 0.055) / 1.055, 2.4)
-}
+    if ((r /= 255) <= 0.04045) return r / 12.92;
+    return pow$9((r + 0.055) / 1.055, 2.4);
+};
 
 const xyz_lab = (t) => {
-	if (t > LAB_CONSTANTS.t3) return pow$9(t, 1 / 3)
-	return t / LAB_CONSTANTS.t2 + LAB_CONSTANTS.t0
-}
+    if (t > LAB_CONSTANTS.t3) return pow$9(t, 1 / 3);
+    return t / LAB_CONSTANTS.t2 + LAB_CONSTANTS.t0;
+};
 
 const rgb2xyz = (r, g, b) => {
-	r = rgb_xyz(r)
-	g = rgb_xyz(g)
-	b = rgb_xyz(b)
-	const x = xyz_lab((0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / LAB_CONSTANTS.Xn)
-	const y = xyz_lab((0.2126729 * r + 0.7151522 * g + 0.072175 * b) / LAB_CONSTANTS.Yn)
-	const z = xyz_lab((0.0193339 * r + 0.119192 * g + 0.9503041 * b) / LAB_CONSTANTS.Zn)
-	return [x, y, z]
-}
+    r = rgb_xyz(r);
+    g = rgb_xyz(g);
+    b = rgb_xyz(b);
+    const x = xyz_lab(
+        (0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / LAB_CONSTANTS.Xn
+    );
+    const y = xyz_lab(
+        (0.2126729 * r + 0.7151522 * g + 0.072175 * b) / LAB_CONSTANTS.Yn
+    );
+    const z = xyz_lab(
+        (0.0193339 * r + 0.119192 * g + 0.9503041 * b) / LAB_CONSTANTS.Zn
+    );
+    return [x, y, z];
+};
 
 Color.prototype.lab = function () {
-	return rgb2lab(this._rgb)
-}
+    return rgb2lab(this._rgb);
+};
 
-chroma.lab = (...args) => new Color(...args, "lab")
+chroma.lab = (...args) => new Color(...args, 'lab');
 
-input.format.lab = lab2rgb
+input.format.lab = lab2rgb;
 
 input.autodetect.push({
-	p: 2,
-	test: (...args) => {
-		args = unpack(args, "lab")
-		if (type(args) === "array" && args.length === 3) {
-			return "lab"
-		}
-	},
-})
+    p: 2,
+    test: (...args) => {
+        args = unpack(args, 'lab');
+        if (type(args) === 'array' && args.length === 3) {
+            return 'lab';
+        }
+    }
+});
 
-const { sin: sin$3, cos: cos$3 } = Math
+const { sin: sin$3, cos: cos$3 } = Math;
 
 const lch2lab = (...args) => {
-	/*
+    /*
     Convert from a qualitative parameter h and a quantitative parameter l to a 24-bit pixel.
     These formulas were invented by David Dalrymple to obtain maximum contrast without going
     out of gamut if the parameters are in the range 0-1.
 
     A saturation multiplier was added by Gregor Aisch
     */
-	let [l, c, h] = unpack(args, "lch")
-	if (isNaN(h)) h = 0
-	h = h * DEG2RAD
-	return [l, cos$3(h) * c, sin$3(h) * c]
-}
+    let [l, c, h] = unpack(args, 'lch');
+    if (isNaN(h)) h = 0;
+    h = h * DEG2RAD;
+    return [l, cos$3(h) * c, sin$3(h) * c];
+};
 
 const lch2rgb = (...args) => {
-	args = unpack(args, "lch")
-	const [l, c, h] = args
-	const [L, a, b_] = lch2lab(l, c, h)
-	const [r, g, b] = lab2rgb(L, a, b_)
-	return [r, g, b, args.length > 3 ? args[3] : 1]
-}
+    args = unpack(args, 'lch');
+    const [l, c, h] = args;
+    const [L, a, b_] = lch2lab(l, c, h);
+    const [r, g, b] = lab2rgb(L, a, b_);
+    return [r, g, b, args.length > 3 ? args[3] : 1];
+};
 
 const hcl2rgb = (...args) => {
-	const hcl = unpack(args, "hcl").reverse()
-	return lch2rgb(...hcl)
-}
+    const hcl = unpack(args, 'hcl').reverse();
+    return lch2rgb(...hcl);
+};
 
-const { sqrt: sqrt$3, atan2: atan2$2, round: round$3 } = Math
+const { sqrt: sqrt$3, atan2: atan2$2, round: round$3 } = Math;
 
 const lab2lch = (...args) => {
-	const [l, a, b] = unpack(args, "lab")
-	const c = sqrt$3(a * a + b * b)
-	let h = (atan2$2(b, a) * RAD2DEG + 360) % 360
-	if (round$3(c * 10000) === 0) h = Number.NaN
-	return [l, c, h]
-}
+    const [l, a, b] = unpack(args, 'lab');
+    const c = sqrt$3(a * a + b * b);
+    let h = (atan2$2(b, a) * RAD2DEG + 360) % 360;
+    if (round$3(c * 10000) === 0) h = Number.NaN;
+    return [l, c, h];
+};
 
 const rgb2lch = (...args) => {
-	const [r, g, b] = unpack(args, "rgb")
-	const [l, a, b_] = rgb2lab(r, g, b)
-	return lab2lch(l, a, b_)
-}
+    const [r, g, b] = unpack(args, 'rgb');
+    const [l, a, b_] = rgb2lab(r, g, b);
+    return lab2lch(l, a, b_);
+};
 
 Color.prototype.lch = function () {
-	return rgb2lch(this._rgb)
-}
+    return rgb2lch(this._rgb);
+};
 Color.prototype.hcl = function () {
-	return rgb2lch(this._rgb).reverse()
-}
+    return rgb2lch(this._rgb).reverse();
+};
 
-chroma.lch = (...args) => new Color(...args, "lch")
-chroma.hcl = (...args) => new Color(...args, "hcl")
+chroma.lch = (...args) => new Color(...args, 'lch');
+chroma.hcl = (...args) => new Color(...args, 'hcl');
 
-input.format.lch = lch2rgb
-input.format.hcl = hcl2rgb
-;["lch", "hcl"].forEach((m) =>
-	input.autodetect.push({
-		p: 2,
-		test: (...args) => {
-			args = unpack(args, m)
-			if (type(args) === "array" && args.length === 3) {
-				return m
-			}
-		},
-	})
-)
+input.format.lch = lch2rgb;
+input.format.hcl = hcl2rgb;
+['lch', 'hcl'].forEach((m) =>
+    input.autodetect.push({
+        p: 2,
+        test: (...args) => {
+            args = unpack(args, m);
+            if (type(args) === 'array' && args.length === 3) {
+                return m;
+            }
+        }
+    })
+);
 
 /**
 	X11 color names
@@ -5064,319 +4041,343 @@ input.format.hcl = hcl2rgb
 */
 
 const w3cx11 = {
-	aliceblue: "#f0f8ff",
-	antiquewhite: "#faebd7",
-	aqua: "#00ffff",
-	aquamarine: "#7fffd4",
-	azure: "#f0ffff",
-	beige: "#f5f5dc",
-	bisque: "#ffe4c4",
-	black: "#000000",
-	blanchedalmond: "#ffebcd",
-	blue: "#0000ff",
-	blueviolet: "#8a2be2",
-	brown: "#a52a2a",
-	burlywood: "#deb887",
-	cadetblue: "#5f9ea0",
-	chartreuse: "#7fff00",
-	chocolate: "#d2691e",
-	coral: "#ff7f50",
-	cornflowerblue: "#6495ed",
-	cornsilk: "#fff8dc",
-	crimson: "#dc143c",
-	cyan: "#00ffff",
-	darkblue: "#00008b",
-	darkcyan: "#008b8b",
-	darkgoldenrod: "#b8860b",
-	darkgray: "#a9a9a9",
-	darkgreen: "#006400",
-	darkgrey: "#a9a9a9",
-	darkkhaki: "#bdb76b",
-	darkmagenta: "#8b008b",
-	darkolivegreen: "#556b2f",
-	darkorange: "#ff8c00",
-	darkorchid: "#9932cc",
-	darkred: "#8b0000",
-	darksalmon: "#e9967a",
-	darkseagreen: "#8fbc8f",
-	darkslateblue: "#483d8b",
-	darkslategray: "#2f4f4f",
-	darkslategrey: "#2f4f4f",
-	darkturquoise: "#00ced1",
-	darkviolet: "#9400d3",
-	deeppink: "#ff1493",
-	deepskyblue: "#00bfff",
-	dimgray: "#696969",
-	dimgrey: "#696969",
-	dodgerblue: "#1e90ff",
-	firebrick: "#b22222",
-	floralwhite: "#fffaf0",
-	forestgreen: "#228b22",
-	fuchsia: "#ff00ff",
-	gainsboro: "#dcdcdc",
-	ghostwhite: "#f8f8ff",
-	gold: "#ffd700",
-	goldenrod: "#daa520",
-	gray: "#808080",
-	green: "#008000",
-	greenyellow: "#adff2f",
-	grey: "#808080",
-	honeydew: "#f0fff0",
-	hotpink: "#ff69b4",
-	indianred: "#cd5c5c",
-	indigo: "#4b0082",
-	ivory: "#fffff0",
-	khaki: "#f0e68c",
-	laserlemon: "#ffff54",
-	lavender: "#e6e6fa",
-	lavenderblush: "#fff0f5",
-	lawngreen: "#7cfc00",
-	lemonchiffon: "#fffacd",
-	lightblue: "#add8e6",
-	lightcoral: "#f08080",
-	lightcyan: "#e0ffff",
-	lightgoldenrod: "#fafad2",
-	lightgoldenrodyellow: "#fafad2",
-	lightgray: "#d3d3d3",
-	lightgreen: "#90ee90",
-	lightgrey: "#d3d3d3",
-	lightpink: "#ffb6c1",
-	lightsalmon: "#ffa07a",
-	lightseagreen: "#20b2aa",
-	lightskyblue: "#87cefa",
-	lightslategray: "#778899",
-	lightslategrey: "#778899",
-	lightsteelblue: "#b0c4de",
-	lightyellow: "#ffffe0",
-	lime: "#00ff00",
-	limegreen: "#32cd32",
-	linen: "#faf0e6",
-	magenta: "#ff00ff",
-	maroon: "#800000",
-	maroon2: "#7f0000",
-	maroon3: "#b03060",
-	mediumaquamarine: "#66cdaa",
-	mediumblue: "#0000cd",
-	mediumorchid: "#ba55d3",
-	mediumpurple: "#9370db",
-	mediumseagreen: "#3cb371",
-	mediumslateblue: "#7b68ee",
-	mediumspringgreen: "#00fa9a",
-	mediumturquoise: "#48d1cc",
-	mediumvioletred: "#c71585",
-	midnightblue: "#191970",
-	mintcream: "#f5fffa",
-	mistyrose: "#ffe4e1",
-	moccasin: "#ffe4b5",
-	navajowhite: "#ffdead",
-	navy: "#000080",
-	oldlace: "#fdf5e6",
-	olive: "#808000",
-	olivedrab: "#6b8e23",
-	orange: "#ffa500",
-	orangered: "#ff4500",
-	orchid: "#da70d6",
-	palegoldenrod: "#eee8aa",
-	palegreen: "#98fb98",
-	paleturquoise: "#afeeee",
-	palevioletred: "#db7093",
-	papayawhip: "#ffefd5",
-	peachpuff: "#ffdab9",
-	peru: "#cd853f",
-	pink: "#ffc0cb",
-	plum: "#dda0dd",
-	powderblue: "#b0e0e6",
-	purple: "#800080",
-	purple2: "#7f007f",
-	purple3: "#a020f0",
-	rebeccapurple: "#663399",
-	red: "#ff0000",
-	rosybrown: "#bc8f8f",
-	royalblue: "#4169e1",
-	saddlebrown: "#8b4513",
-	salmon: "#fa8072",
-	sandybrown: "#f4a460",
-	seagreen: "#2e8b57",
-	seashell: "#fff5ee",
-	sienna: "#a0522d",
-	silver: "#c0c0c0",
-	skyblue: "#87ceeb",
-	slateblue: "#6a5acd",
-	slategray: "#708090",
-	slategrey: "#708090",
-	snow: "#fffafa",
-	springgreen: "#00ff7f",
-	steelblue: "#4682b4",
-	tan: "#d2b48c",
-	teal: "#008080",
-	thistle: "#d8bfd8",
-	tomato: "#ff6347",
-	turquoise: "#40e0d0",
-	violet: "#ee82ee",
-	wheat: "#f5deb3",
-	white: "#ffffff",
-	whitesmoke: "#f5f5f5",
-	yellow: "#ffff00",
-	yellowgreen: "#9acd32",
-}
+    aliceblue: '#f0f8ff',
+    antiquewhite: '#faebd7',
+    aqua: '#00ffff',
+    aquamarine: '#7fffd4',
+    azure: '#f0ffff',
+    beige: '#f5f5dc',
+    bisque: '#ffe4c4',
+    black: '#000000',
+    blanchedalmond: '#ffebcd',
+    blue: '#0000ff',
+    blueviolet: '#8a2be2',
+    brown: '#a52a2a',
+    burlywood: '#deb887',
+    cadetblue: '#5f9ea0',
+    chartreuse: '#7fff00',
+    chocolate: '#d2691e',
+    coral: '#ff7f50',
+    cornflowerblue: '#6495ed',
+    cornsilk: '#fff8dc',
+    crimson: '#dc143c',
+    cyan: '#00ffff',
+    darkblue: '#00008b',
+    darkcyan: '#008b8b',
+    darkgoldenrod: '#b8860b',
+    darkgray: '#a9a9a9',
+    darkgreen: '#006400',
+    darkgrey: '#a9a9a9',
+    darkkhaki: '#bdb76b',
+    darkmagenta: '#8b008b',
+    darkolivegreen: '#556b2f',
+    darkorange: '#ff8c00',
+    darkorchid: '#9932cc',
+    darkred: '#8b0000',
+    darksalmon: '#e9967a',
+    darkseagreen: '#8fbc8f',
+    darkslateblue: '#483d8b',
+    darkslategray: '#2f4f4f',
+    darkslategrey: '#2f4f4f',
+    darkturquoise: '#00ced1',
+    darkviolet: '#9400d3',
+    deeppink: '#ff1493',
+    deepskyblue: '#00bfff',
+    dimgray: '#696969',
+    dimgrey: '#696969',
+    dodgerblue: '#1e90ff',
+    firebrick: '#b22222',
+    floralwhite: '#fffaf0',
+    forestgreen: '#228b22',
+    fuchsia: '#ff00ff',
+    gainsboro: '#dcdcdc',
+    ghostwhite: '#f8f8ff',
+    gold: '#ffd700',
+    goldenrod: '#daa520',
+    gray: '#808080',
+    green: '#008000',
+    greenyellow: '#adff2f',
+    grey: '#808080',
+    honeydew: '#f0fff0',
+    hotpink: '#ff69b4',
+    indianred: '#cd5c5c',
+    indigo: '#4b0082',
+    ivory: '#fffff0',
+    khaki: '#f0e68c',
+    laserlemon: '#ffff54',
+    lavender: '#e6e6fa',
+    lavenderblush: '#fff0f5',
+    lawngreen: '#7cfc00',
+    lemonchiffon: '#fffacd',
+    lightblue: '#add8e6',
+    lightcoral: '#f08080',
+    lightcyan: '#e0ffff',
+    lightgoldenrod: '#fafad2',
+    lightgoldenrodyellow: '#fafad2',
+    lightgray: '#d3d3d3',
+    lightgreen: '#90ee90',
+    lightgrey: '#d3d3d3',
+    lightpink: '#ffb6c1',
+    lightsalmon: '#ffa07a',
+    lightseagreen: '#20b2aa',
+    lightskyblue: '#87cefa',
+    lightslategray: '#778899',
+    lightslategrey: '#778899',
+    lightsteelblue: '#b0c4de',
+    lightyellow: '#ffffe0',
+    lime: '#00ff00',
+    limegreen: '#32cd32',
+    linen: '#faf0e6',
+    magenta: '#ff00ff',
+    maroon: '#800000',
+    maroon2: '#7f0000',
+    maroon3: '#b03060',
+    mediumaquamarine: '#66cdaa',
+    mediumblue: '#0000cd',
+    mediumorchid: '#ba55d3',
+    mediumpurple: '#9370db',
+    mediumseagreen: '#3cb371',
+    mediumslateblue: '#7b68ee',
+    mediumspringgreen: '#00fa9a',
+    mediumturquoise: '#48d1cc',
+    mediumvioletred: '#c71585',
+    midnightblue: '#191970',
+    mintcream: '#f5fffa',
+    mistyrose: '#ffe4e1',
+    moccasin: '#ffe4b5',
+    navajowhite: '#ffdead',
+    navy: '#000080',
+    oldlace: '#fdf5e6',
+    olive: '#808000',
+    olivedrab: '#6b8e23',
+    orange: '#ffa500',
+    orangered: '#ff4500',
+    orchid: '#da70d6',
+    palegoldenrod: '#eee8aa',
+    palegreen: '#98fb98',
+    paleturquoise: '#afeeee',
+    palevioletred: '#db7093',
+    papayawhip: '#ffefd5',
+    peachpuff: '#ffdab9',
+    peru: '#cd853f',
+    pink: '#ffc0cb',
+    plum: '#dda0dd',
+    powderblue: '#b0e0e6',
+    purple: '#800080',
+    purple2: '#7f007f',
+    purple3: '#a020f0',
+    rebeccapurple: '#663399',
+    red: '#ff0000',
+    rosybrown: '#bc8f8f',
+    royalblue: '#4169e1',
+    saddlebrown: '#8b4513',
+    salmon: '#fa8072',
+    sandybrown: '#f4a460',
+    seagreen: '#2e8b57',
+    seashell: '#fff5ee',
+    sienna: '#a0522d',
+    silver: '#c0c0c0',
+    skyblue: '#87ceeb',
+    slateblue: '#6a5acd',
+    slategray: '#708090',
+    slategrey: '#708090',
+    snow: '#fffafa',
+    springgreen: '#00ff7f',
+    steelblue: '#4682b4',
+    tan: '#d2b48c',
+    teal: '#008080',
+    thistle: '#d8bfd8',
+    tomato: '#ff6347',
+    turquoise: '#40e0d0',
+    violet: '#ee82ee',
+    wheat: '#f5deb3',
+    white: '#ffffff',
+    whitesmoke: '#f5f5f5',
+    yellow: '#ffff00',
+    yellowgreen: '#9acd32'
+};
 
 Color.prototype.name = function () {
-	const hex = rgb2hex(this._rgb, "rgb")
-	for (let n of Object.keys(w3cx11)) {
-		if (w3cx11[n] === hex) return n.toLowerCase()
-	}
-	return hex
-}
+    const hex = rgb2hex(this._rgb, 'rgb');
+    for (let n of Object.keys(w3cx11)) {
+        if (w3cx11[n] === hex) return n.toLowerCase();
+    }
+    return hex;
+};
 
 input.format.named = (name) => {
-	name = name.toLowerCase()
-	if (w3cx11[name]) return hex2rgb(w3cx11[name])
-	throw new Error("unknown color name: " + name)
-}
+    name = name.toLowerCase();
+    if (w3cx11[name]) return hex2rgb(w3cx11[name]);
+    throw new Error('unknown color name: ' + name);
+};
 
 input.autodetect.push({
-	p: 5,
-	test: (h, ...rest) => {
-		if (!rest.length && type(h) === "string" && w3cx11[h.toLowerCase()]) {
-			return "named"
-		}
-	},
-})
+    p: 5,
+    test: (h, ...rest) => {
+        if (!rest.length && type(h) === 'string' && w3cx11[h.toLowerCase()]) {
+            return 'named';
+        }
+    }
+});
 
 const num2rgb = (num) => {
-	if (type(num) == "number" && num >= 0 && num <= 0xffffff) {
-		const r = num >> 16
-		const g = (num >> 8) & 0xff
-		const b = num & 0xff
-		return [r, g, b, 1]
-	}
-	throw new Error("unknown num color: " + num)
-}
+    if (type(num) == 'number' && num >= 0 && num <= 0xffffff) {
+        const r = num >> 16;
+        const g = (num >> 8) & 0xff;
+        const b = num & 0xff;
+        return [r, g, b, 1];
+    }
+    throw new Error('unknown num color: ' + num);
+};
 
 const rgb2num = (...args) => {
-	const [r, g, b] = unpack(args, "rgb")
-	return (r << 16) + (g << 8) + b
-}
+    const [r, g, b] = unpack(args, 'rgb');
+    return (r << 16) + (g << 8) + b;
+};
 
 Color.prototype.num = function () {
-	return rgb2num(this._rgb)
-}
+    return rgb2num(this._rgb);
+};
 
-chroma.num = (...args) => new Color(...args, "num")
+chroma.num = (...args) => new Color(...args, 'num');
 
-input.format.num = num2rgb
+input.format.num = num2rgb;
 
 input.autodetect.push({
-	p: 5,
-	test: (...args) => {
-		if (args.length === 1 && type(args[0]) === "number" && args[0] >= 0 && args[0] <= 0xffffff) {
-			return "num"
-		}
-	},
-})
+    p: 5,
+    test: (...args) => {
+        if (
+            args.length === 1 &&
+            type(args[0]) === 'number' &&
+            args[0] >= 0 &&
+            args[0] <= 0xffffff
+        ) {
+            return 'num';
+        }
+    }
+});
 
-const { round: round$2 } = Math
+const { round: round$2 } = Math;
 
 Color.prototype.rgb = function (rnd = true) {
-	if (rnd === false) return this._rgb.slice(0, 3)
-	return this._rgb.slice(0, 3).map(round$2)
-}
+    if (rnd === false) return this._rgb.slice(0, 3);
+    return this._rgb.slice(0, 3).map(round$2);
+};
 
 Color.prototype.rgba = function (rnd = true) {
-	return this._rgb.slice(0, 4).map((v, i) => {
-		return i < 3 ? (rnd === false ? v : round$2(v)) : v
-	})
-}
+    return this._rgb.slice(0, 4).map((v, i) => {
+        return i < 3 ? (rnd === false ? v : round$2(v)) : v;
+    });
+};
 
-chroma.rgb = (...args) => new Color(...args, "rgb")
+chroma.rgb = (...args) => new Color(...args, 'rgb');
 
 input.format.rgb = (...args) => {
-	const rgba = unpack(args, "rgba")
-	if (rgba[3] === undefined) rgba[3] = 1
-	return rgba
-}
+    const rgba = unpack(args, 'rgba');
+    if (rgba[3] === undefined) rgba[3] = 1;
+    return rgba;
+};
 
 input.autodetect.push({
-	p: 3,
-	test: (...args) => {
-		args = unpack(args, "rgba")
-		if (
-			type(args) === "array" &&
-			(args.length === 3 ||
-				(args.length === 4 && type(args[3]) == "number" && args[3] >= 0 && args[3] <= 1))
-		) {
-			return "rgb"
-		}
-	},
-})
+    p: 3,
+    test: (...args) => {
+        args = unpack(args, 'rgba');
+        if (
+            type(args) === 'array' &&
+            (args.length === 3 ||
+                (args.length === 4 &&
+                    type(args[3]) == 'number' &&
+                    args[3] >= 0 &&
+                    args[3] <= 1))
+        ) {
+            return 'rgb';
+        }
+    }
+});
 
 /*
  * Based on implementation by Neil Bartlett
  * https://github.com/neilbartlett/color-temperature
  */
 
-const { log: log$1 } = Math
+const { log: log$1 } = Math;
 
 const temperature2rgb = (kelvin) => {
-	const temp = kelvin / 100
-	let r, g, b
-	if (temp < 66) {
-		r = 255
-		g =
-			temp < 6
-				? 0
-				: -155.25485562709179 - 0.44596950469579133 * (g = temp - 2) + 104.49216199393888 * log$1(g)
-		b =
-			temp < 20
-				? 0
-				: -254.76935184120902 + 0.8274096064007395 * (b = temp - 10) + 115.67994401066147 * log$1(b)
-	} else {
-		r = 351.97690566805693 + 0.114206453784165 * (r = temp - 55) - 40.25366309332127 * log$1(r)
-		g = 325.4494125711974 + 0.07943456536662342 * (g = temp - 50) - 28.0852963507957 * log$1(g)
-		b = 255
-	}
-	return [r, g, b, 1]
-}
+    const temp = kelvin / 100;
+    let r, g, b;
+    if (temp < 66) {
+        r = 255;
+        g =
+            temp < 6
+                ? 0
+                : -155.25485562709179 -
+                  0.44596950469579133 * (g = temp - 2) +
+                  104.49216199393888 * log$1(g);
+        b =
+            temp < 20
+                ? 0
+                : -254.76935184120902 +
+                  0.8274096064007395 * (b = temp - 10) +
+                  115.67994401066147 * log$1(b);
+    } else {
+        r =
+            351.97690566805693 +
+            0.114206453784165 * (r = temp - 55) -
+            40.25366309332127 * log$1(r);
+        g =
+            325.4494125711974 +
+            0.07943456536662342 * (g = temp - 50) -
+            28.0852963507957 * log$1(g);
+        b = 255;
+    }
+    return [r, g, b, 1];
+};
 
 /*
  * Based on implementation by Neil Bartlett
  * https://github.com/neilbartlett/color-temperature
  **/
 
-const { round: round$1 } = Math
+const { round: round$1 } = Math;
 
 const rgb2temperature = (...args) => {
-	const rgb = unpack(args, "rgb")
-	const r = rgb[0],
-		b = rgb[2]
-	let minTemp = 1000
-	let maxTemp = 40000
-	const eps = 0.4
-	let temp
-	while (maxTemp - minTemp > eps) {
-		temp = (maxTemp + minTemp) * 0.5
-		const rgb = temperature2rgb(temp)
-		if (rgb[2] / rgb[0] >= b / r) {
-			maxTemp = temp
-		} else {
-			minTemp = temp
-		}
-	}
-	return round$1(temp)
-}
+    const rgb = unpack(args, 'rgb');
+    const r = rgb[0],
+        b = rgb[2];
+    let minTemp = 1000;
+    let maxTemp = 40000;
+    const eps = 0.4;
+    let temp;
+    while (maxTemp - minTemp > eps) {
+        temp = (maxTemp + minTemp) * 0.5;
+        const rgb = temperature2rgb(temp);
+        if (rgb[2] / rgb[0] >= b / r) {
+            maxTemp = temp;
+        } else {
+            minTemp = temp;
+        }
+    }
+    return round$1(temp);
+};
 
 Color.prototype.temp =
-	Color.prototype.kelvin =
-	Color.prototype.temperature =
-		function () {
-			return rgb2temperature(this._rgb)
-		}
+    Color.prototype.kelvin =
+    Color.prototype.temperature =
+        function () {
+            return rgb2temperature(this._rgb);
+        };
 
-chroma.temp = chroma.kelvin = chroma.temperature = (...args) => new Color(...args, "temp")
+chroma.temp =
+    chroma.kelvin =
+    chroma.temperature =
+        (...args) => new Color(...args, 'temp');
 
-input.format.temp = input.format.kelvin = input.format.temperature = temperature2rgb
+input.format.temp =
+    input.format.kelvin =
+    input.format.temperature =
+        temperature2rgb;
 
-const { pow: pow$8, sign: sign$1 } = Math
+const { pow: pow$8, sign: sign$1 } = Math;
 
 /*
  * L* [0..100]
@@ -5384,1433 +4385,1481 @@ const { pow: pow$8, sign: sign$1 } = Math
  * b [-100..100]
  */
 const oklab2rgb = (...args) => {
-	args = unpack(args, "lab")
-	const [L, a, b] = args
+    args = unpack(args, 'lab');
+    const [L, a, b] = args;
 
-	const l = pow$8(L + 0.3963377774 * a + 0.2158037573 * b, 3)
-	const m = pow$8(L - 0.1055613458 * a - 0.0638541728 * b, 3)
-	const s = pow$8(L - 0.0894841775 * a - 1.291485548 * b, 3)
+    const l = pow$8(L + 0.3963377774 * a + 0.2158037573 * b, 3);
+    const m = pow$8(L - 0.1055613458 * a - 0.0638541728 * b, 3);
+    const s = pow$8(L - 0.0894841775 * a - 1.291485548 * b, 3);
 
-	return [
-		255 * lrgb2rgb(+4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
-		255 * lrgb2rgb(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
-		255 * lrgb2rgb(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s),
-		args.length > 3 ? args[3] : 1,
-	]
-}
+    return [
+        255 * lrgb2rgb(+4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+        255 * lrgb2rgb(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+        255 * lrgb2rgb(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s),
+        args.length > 3 ? args[3] : 1
+    ];
+};
 
 function lrgb2rgb(c) {
-	const abs = Math.abs(c)
-	if (abs > 0.0031308) {
-		return (sign$1(c) || 1) * (1.055 * pow$8(abs, 1 / 2.4) - 0.055)
-	}
-	return c * 12.92
+    const abs = Math.abs(c);
+    if (abs > 0.0031308) {
+        return (sign$1(c) || 1) * (1.055 * pow$8(abs, 1 / 2.4) - 0.055);
+    }
+    return c * 12.92;
 }
 
-const { cbrt, pow: pow$7, sign } = Math
+const { cbrt, pow: pow$7, sign } = Math;
 
 const rgb2oklab = (...args) => {
-	// OKLab color space implementation taken from
-	// https://bottosson.github.io/posts/oklab/
-	const [r, g, b] = unpack(args, "rgb")
-	const [lr, lg, lb] = [rgb2lrgb(r / 255), rgb2lrgb(g / 255), rgb2lrgb(b / 255)]
-	const l = cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb)
-	const m = cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb)
-	const s = cbrt(0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb)
+    // OKLab color space implementation taken from
+    // https://bottosson.github.io/posts/oklab/
+    const [r, g, b] = unpack(args, 'rgb');
+    const [lr, lg, lb] = [
+        rgb2lrgb(r / 255),
+        rgb2lrgb(g / 255),
+        rgb2lrgb(b / 255)
+    ];
+    const l = cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb);
+    const m = cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb);
+    const s = cbrt(0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb);
 
-	return [
-		0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
-		1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
-		0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
-	]
-}
+    return [
+        0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+        1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+        0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s
+    ];
+};
 
 function rgb2lrgb(c) {
-	const abs = Math.abs(c)
-	if (abs < 0.04045) {
-		return c / 12.92
-	}
-	return (sign(c) || 1) * pow$7((abs + 0.055) / 1.055, 2.4)
+    const abs = Math.abs(c);
+    if (abs < 0.04045) {
+        return c / 12.92;
+    }
+    return (sign(c) || 1) * pow$7((abs + 0.055) / 1.055, 2.4);
 }
 
 Color.prototype.oklab = function () {
-	return rgb2oklab(this._rgb)
-}
+    return rgb2oklab(this._rgb);
+};
 
-chroma.oklab = (...args) => new Color(...args, "oklab")
+chroma.oklab = (...args) => new Color(...args, 'oklab');
 
-input.format.oklab = oklab2rgb
+input.format.oklab = oklab2rgb;
 
 input.autodetect.push({
-	p: 3,
-	test: (...args) => {
-		args = unpack(args, "oklab")
-		if (type(args) === "array" && args.length === 3) {
-			return "oklab"
-		}
-	},
-})
+    p: 3,
+    test: (...args) => {
+        args = unpack(args, 'oklab');
+        if (type(args) === 'array' && args.length === 3) {
+            return 'oklab';
+        }
+    }
+});
 
 const oklch2rgb = (...args) => {
-	args = unpack(args, "lch")
-	const [l, c, h] = args
-	const [L, a, b_] = lch2lab(l, c, h)
-	const [r, g, b] = oklab2rgb(L, a, b_)
-	return [r, g, b, args.length > 3 ? args[3] : 1]
-}
+    args = unpack(args, 'lch');
+    const [l, c, h] = args;
+    const [L, a, b_] = lch2lab(l, c, h);
+    const [r, g, b] = oklab2rgb(L, a, b_);
+    return [r, g, b, args.length > 3 ? args[3] : 1];
+};
 
 const rgb2oklch = (...args) => {
-	const [r, g, b] = unpack(args, "rgb")
-	const [l, a, b_] = rgb2oklab(r, g, b)
-	return lab2lch(l, a, b_)
-}
+    const [r, g, b] = unpack(args, 'rgb');
+    const [l, a, b_] = rgb2oklab(r, g, b);
+    return lab2lch(l, a, b_);
+};
 
 Color.prototype.oklch = function () {
-	return rgb2oklch(this._rgb)
-}
+    return rgb2oklch(this._rgb);
+};
 
-chroma.oklch = (...args) => new Color(...args, "oklch")
+chroma.oklch = (...args) => new Color(...args, 'oklch');
 
-input.format.oklch = oklch2rgb
+input.format.oklch = oklch2rgb;
 
 input.autodetect.push({
-	p: 3,
-	test: (...args) => {
-		args = unpack(args, "oklch")
-		if (type(args) === "array" && args.length === 3) {
-			return "oklch"
-		}
-	},
-})
+    p: 3,
+    test: (...args) => {
+        args = unpack(args, 'oklch');
+        if (type(args) === 'array' && args.length === 3) {
+            return 'oklch';
+        }
+    }
+});
 
 Color.prototype.alpha = function (a, mutate = false) {
-	if (a !== undefined && type(a) === "number") {
-		if (mutate) {
-			this._rgb[3] = a
-			return this
-		}
-		return new Color([this._rgb[0], this._rgb[1], this._rgb[2], a], "rgb")
-	}
-	return this._rgb[3]
-}
+    if (a !== undefined && type(a) === 'number') {
+        if (mutate) {
+            this._rgb[3] = a;
+            return this;
+        }
+        return new Color([this._rgb[0], this._rgb[1], this._rgb[2], a], 'rgb');
+    }
+    return this._rgb[3];
+};
 
 Color.prototype.clipped = function () {
-	return this._rgb._clipped || false
-}
+    return this._rgb._clipped || false;
+};
 
 Color.prototype.darken = function (amount = 1) {
-	const me = this
-	const lab = me.lab()
-	lab[0] -= LAB_CONSTANTS.Kn * amount
-	return new Color(lab, "lab").alpha(me.alpha(), true)
-}
+    const me = this;
+    const lab = me.lab();
+    lab[0] -= LAB_CONSTANTS.Kn * amount;
+    return new Color(lab, 'lab').alpha(me.alpha(), true);
+};
 
 Color.prototype.brighten = function (amount = 1) {
-	return this.darken(-amount)
-}
+    return this.darken(-amount);
+};
 
-Color.prototype.darker = Color.prototype.darken
-Color.prototype.brighter = Color.prototype.brighten
+Color.prototype.darker = Color.prototype.darken;
+Color.prototype.brighter = Color.prototype.brighten;
 
 Color.prototype.get = function (mc) {
-	const [mode, channel] = mc.split(".")
-	const src = this[mode]()
-	if (channel) {
-		const i = mode.indexOf(channel) - (mode.substr(0, 2) === "ok" ? 2 : 0)
-		if (i > -1) return src[i]
-		throw new Error(`unknown channel ${channel} in mode ${mode}`)
-	} else {
-		return src
-	}
-}
+    const [mode, channel] = mc.split('.');
+    const src = this[mode]();
+    if (channel) {
+        const i = mode.indexOf(channel) - (mode.substr(0, 2) === 'ok' ? 2 : 0);
+        if (i > -1) return src[i];
+        throw new Error(`unknown channel ${channel} in mode ${mode}`);
+    } else {
+        return src;
+    }
+};
 
-const { pow: pow$6 } = Math
+const { pow: pow$6 } = Math;
 
-const EPS = 1e-7
-const MAX_ITER = 20
+const EPS = 1e-7;
+const MAX_ITER = 20;
 
-Color.prototype.luminance = function (lum, mode = "rgb") {
-	if (lum !== undefined && type(lum) === "number") {
-		if (lum === 0) {
-			// return pure black
-			return new Color([0, 0, 0, this._rgb[3]], "rgb")
-		}
-		if (lum === 1) {
-			// return pure white
-			return new Color([255, 255, 255, this._rgb[3]], "rgb")
-		}
-		// compute new color using...
-		let cur_lum = this.luminance()
-		let max_iter = MAX_ITER
+Color.prototype.luminance = function (lum, mode = 'rgb') {
+    if (lum !== undefined && type(lum) === 'number') {
+        if (lum === 0) {
+            // return pure black
+            return new Color([0, 0, 0, this._rgb[3]], 'rgb');
+        }
+        if (lum === 1) {
+            // return pure white
+            return new Color([255, 255, 255, this._rgb[3]], 'rgb');
+        }
+        // compute new color using...
+        let cur_lum = this.luminance();
+        let max_iter = MAX_ITER;
 
-		const test = (low, high) => {
-			const mid = low.interpolate(high, 0.5, mode)
-			const lm = mid.luminance()
-			if (Math.abs(lum - lm) < EPS || !max_iter--) {
-				// close enough
-				return mid
-			}
-			return lm > lum ? test(low, mid) : test(mid, high)
-		}
+        const test = (low, high) => {
+            const mid = low.interpolate(high, 0.5, mode);
+            const lm = mid.luminance();
+            if (Math.abs(lum - lm) < EPS || !max_iter--) {
+                // close enough
+                return mid;
+            }
+            return lm > lum ? test(low, mid) : test(mid, high);
+        };
 
-		const rgb = (
-			cur_lum > lum ? test(new Color([0, 0, 0]), this) : test(this, new Color([255, 255, 255]))
-		).rgb()
-		return new Color([...rgb, this._rgb[3]])
-	}
-	return rgb2luminance(...this._rgb.slice(0, 3))
-}
+        const rgb = (
+            cur_lum > lum
+                ? test(new Color([0, 0, 0]), this)
+                : test(this, new Color([255, 255, 255]))
+        ).rgb();
+        return new Color([...rgb, this._rgb[3]]);
+    }
+    return rgb2luminance(...this._rgb.slice(0, 3));
+};
 
 const rgb2luminance = (r, g, b) => {
-	// relative luminance
-	// see http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
-	r = luminance_x(r)
-	g = luminance_x(g)
-	b = luminance_x(b)
-	return 0.2126 * r + 0.7152 * g + 0.0722 * b
-}
+    // relative luminance
+    // see http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+    r = luminance_x(r);
+    g = luminance_x(g);
+    b = luminance_x(b);
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
 
 const luminance_x = (x) => {
-	x /= 255
-	return x <= 0.03928 ? x / 12.92 : pow$6((x + 0.055) / 1.055, 2.4)
-}
+    x /= 255;
+    return x <= 0.03928 ? x / 12.92 : pow$6((x + 0.055) / 1.055, 2.4);
+};
 
-var index = {}
+var index = {};
 
 var mix = (col1, col2, f = 0.5, ...rest) => {
-	let mode = rest[0] || "lrgb"
-	if (!index[mode] && !rest.length) {
-		// fall back to the first supported mode
-		mode = Object.keys(index)[0]
-	}
-	if (!index[mode]) {
-		throw new Error(`interpolation mode ${mode} is not defined`)
-	}
-	if (type(col1) !== "object") col1 = new Color(col1)
-	if (type(col2) !== "object") col2 = new Color(col2)
-	return index[mode](col1, col2, f).alpha(col1.alpha() + f * (col2.alpha() - col1.alpha()))
-}
+    let mode = rest[0] || 'lrgb';
+    if (!index[mode] && !rest.length) {
+        // fall back to the first supported mode
+        mode = Object.keys(index)[0];
+    }
+    if (!index[mode]) {
+        throw new Error(`interpolation mode ${mode} is not defined`);
+    }
+    if (type(col1) !== 'object') col1 = new Color(col1);
+    if (type(col2) !== 'object') col2 = new Color(col2);
+    return index[mode](col1, col2, f).alpha(
+        col1.alpha() + f * (col2.alpha() - col1.alpha())
+    );
+};
 
-Color.prototype.mix = Color.prototype.interpolate = function (col2, f = 0.5, ...rest) {
-	return mix(this, col2, f, ...rest)
-}
+Color.prototype.mix = Color.prototype.interpolate = function (
+    col2,
+    f = 0.5,
+    ...rest
+) {
+    return mix(this, col2, f, ...rest);
+};
 
 Color.prototype.premultiply = function (mutate = false) {
-	const rgb = this._rgb
-	const a = rgb[3]
-	if (mutate) {
-		this._rgb = [rgb[0] * a, rgb[1] * a, rgb[2] * a, a]
-		return this
-	} else {
-		return new Color([rgb[0] * a, rgb[1] * a, rgb[2] * a, a], "rgb")
-	}
-}
+    const rgb = this._rgb;
+    const a = rgb[3];
+    if (mutate) {
+        this._rgb = [rgb[0] * a, rgb[1] * a, rgb[2] * a, a];
+        return this;
+    } else {
+        return new Color([rgb[0] * a, rgb[1] * a, rgb[2] * a, a], 'rgb');
+    }
+};
 
 Color.prototype.saturate = function (amount = 1) {
-	const me = this
-	const lch = me.lch()
-	lch[1] += LAB_CONSTANTS.Kn * amount
-	if (lch[1] < 0) lch[1] = 0
-	return new Color(lch, "lch").alpha(me.alpha(), true)
-}
+    const me = this;
+    const lch = me.lch();
+    lch[1] += LAB_CONSTANTS.Kn * amount;
+    if (lch[1] < 0) lch[1] = 0;
+    return new Color(lch, 'lch').alpha(me.alpha(), true);
+};
 
 Color.prototype.desaturate = function (amount = 1) {
-	return this.saturate(-amount)
-}
+    return this.saturate(-amount);
+};
 
 Color.prototype.set = function (mc, value, mutate = false) {
-	const [mode, channel] = mc.split(".")
-	const src = this[mode]()
-	if (channel) {
-		const i = mode.indexOf(channel) - (mode.substr(0, 2) === "ok" ? 2 : 0)
-		if (i > -1) {
-			if (type(value) == "string") {
-				switch (value.charAt(0)) {
-					case "+":
-						src[i] += +value
-						break
-					case "-":
-						src[i] += +value
-						break
-					case "*":
-						src[i] *= +value.substr(1)
-						break
-					case "/":
-						src[i] /= +value.substr(1)
-						break
-					default:
-						src[i] = +value
-				}
-			} else if (type(value) === "number") {
-				src[i] = value
-			} else {
-				throw new Error(`unsupported value for Color.set`)
-			}
-			const out = new Color(src, mode)
-			if (mutate) {
-				this._rgb = out._rgb
-				return this
-			}
-			return out
-		}
-		throw new Error(`unknown channel ${channel} in mode ${mode}`)
-	} else {
-		return src
-	}
-}
+    const [mode, channel] = mc.split('.');
+    const src = this[mode]();
+    if (channel) {
+        const i = mode.indexOf(channel) - (mode.substr(0, 2) === 'ok' ? 2 : 0);
+        if (i > -1) {
+            if (type(value) == 'string') {
+                switch (value.charAt(0)) {
+                    case '+':
+                        src[i] += +value;
+                        break;
+                    case '-':
+                        src[i] += +value;
+                        break;
+                    case '*':
+                        src[i] *= +value.substr(1);
+                        break;
+                    case '/':
+                        src[i] /= +value.substr(1);
+                        break;
+                    default:
+                        src[i] = +value;
+                }
+            } else if (type(value) === 'number') {
+                src[i] = value;
+            } else {
+                throw new Error(`unsupported value for Color.set`);
+            }
+            const out = new Color(src, mode);
+            if (mutate) {
+                this._rgb = out._rgb;
+                return this;
+            }
+            return out;
+        }
+        throw new Error(`unknown channel ${channel} in mode ${mode}`);
+    } else {
+        return src;
+    }
+};
 
 Color.prototype.tint = function (f = 0.5, ...rest) {
-	return mix(this, "white", f, ...rest)
-}
+    return mix(this, 'white', f, ...rest);
+};
 
 Color.prototype.shade = function (f = 0.5, ...rest) {
-	return mix(this, "black", f, ...rest)
-}
+    return mix(this, 'black', f, ...rest);
+};
 
 const rgb = (col1, col2, f) => {
-	const xyz0 = col1._rgb
-	const xyz1 = col2._rgb
-	return new Color(
-		xyz0[0] + f * (xyz1[0] - xyz0[0]),
-		xyz0[1] + f * (xyz1[1] - xyz0[1]),
-		xyz0[2] + f * (xyz1[2] - xyz0[2]),
-		"rgb"
-	)
-}
+    const xyz0 = col1._rgb;
+    const xyz1 = col2._rgb;
+    return new Color(
+        xyz0[0] + f * (xyz1[0] - xyz0[0]),
+        xyz0[1] + f * (xyz1[1] - xyz0[1]),
+        xyz0[2] + f * (xyz1[2] - xyz0[2]),
+        'rgb'
+    );
+};
 
 // register interpolator
-index.rgb = rgb
+index.rgb = rgb;
 
-const { sqrt: sqrt$2, pow: pow$5 } = Math
+const { sqrt: sqrt$2, pow: pow$5 } = Math;
 
 const lrgb = (col1, col2, f) => {
-	const [x1, y1, z1] = col1._rgb
-	const [x2, y2, z2] = col2._rgb
-	return new Color(
-		sqrt$2(pow$5(x1, 2) * (1 - f) + pow$5(x2, 2) * f),
-		sqrt$2(pow$5(y1, 2) * (1 - f) + pow$5(y2, 2) * f),
-		sqrt$2(pow$5(z1, 2) * (1 - f) + pow$5(z2, 2) * f),
-		"rgb"
-	)
-}
+    const [x1, y1, z1] = col1._rgb;
+    const [x2, y2, z2] = col2._rgb;
+    return new Color(
+        sqrt$2(pow$5(x1, 2) * (1 - f) + pow$5(x2, 2) * f),
+        sqrt$2(pow$5(y1, 2) * (1 - f) + pow$5(y2, 2) * f),
+        sqrt$2(pow$5(z1, 2) * (1 - f) + pow$5(z2, 2) * f),
+        'rgb'
+    );
+};
 
 // register interpolator
-index.lrgb = lrgb
+index.lrgb = lrgb;
 
 const lab = (col1, col2, f) => {
-	const xyz0 = col1.lab()
-	const xyz1 = col2.lab()
-	return new Color(
-		xyz0[0] + f * (xyz1[0] - xyz0[0]),
-		xyz0[1] + f * (xyz1[1] - xyz0[1]),
-		xyz0[2] + f * (xyz1[2] - xyz0[2]),
-		"lab"
-	)
-}
+    const xyz0 = col1.lab();
+    const xyz1 = col2.lab();
+    return new Color(
+        xyz0[0] + f * (xyz1[0] - xyz0[0]),
+        xyz0[1] + f * (xyz1[1] - xyz0[1]),
+        xyz0[2] + f * (xyz1[2] - xyz0[2]),
+        'lab'
+    );
+};
 
 // register interpolator
-index.lab = lab
+index.lab = lab;
 
 var interpolate_hsx = (col1, col2, f, m) => {
-	let xyz0, xyz1
-	if (m === "hsl") {
-		xyz0 = col1.hsl()
-		xyz1 = col2.hsl()
-	} else if (m === "hsv") {
-		xyz0 = col1.hsv()
-		xyz1 = col2.hsv()
-	} else if (m === "hcg") {
-		xyz0 = col1.hcg()
-		xyz1 = col2.hcg()
-	} else if (m === "hsi") {
-		xyz0 = col1.hsi()
-		xyz1 = col2.hsi()
-	} else if (m === "lch" || m === "hcl") {
-		m = "hcl"
-		xyz0 = col1.hcl()
-		xyz1 = col2.hcl()
-	} else if (m === "oklch") {
-		xyz0 = col1.oklch().reverse()
-		xyz1 = col2.oklch().reverse()
-	}
+    let xyz0, xyz1;
+    if (m === 'hsl') {
+        xyz0 = col1.hsl();
+        xyz1 = col2.hsl();
+    } else if (m === 'hsv') {
+        xyz0 = col1.hsv();
+        xyz1 = col2.hsv();
+    } else if (m === 'hcg') {
+        xyz0 = col1.hcg();
+        xyz1 = col2.hcg();
+    } else if (m === 'hsi') {
+        xyz0 = col1.hsi();
+        xyz1 = col2.hsi();
+    } else if (m === 'lch' || m === 'hcl') {
+        m = 'hcl';
+        xyz0 = col1.hcl();
+        xyz1 = col2.hcl();
+    } else if (m === 'oklch') {
+        xyz0 = col1.oklch().reverse();
+        xyz1 = col2.oklch().reverse();
+    }
 
-	let hue0, hue1, sat0, sat1, lbv0, lbv1
-	if (m.substr(0, 1) === "h" || m === "oklch") {
-		;[hue0, sat0, lbv0] = xyz0
-		;[hue1, sat1, lbv1] = xyz1
-	}
+    let hue0, hue1, sat0, sat1, lbv0, lbv1;
+    if (m.substr(0, 1) === 'h' || m === 'oklch') {
+        [hue0, sat0, lbv0] = xyz0;
+        [hue1, sat1, lbv1] = xyz1;
+    }
 
-	let sat, hue, lbv, dh
+    let sat, hue, lbv, dh;
 
-	if (!isNaN(hue0) && !isNaN(hue1)) {
-		// both colors have hue
-		if (hue1 > hue0 && hue1 - hue0 > 180) {
-			dh = hue1 - (hue0 + 360)
-		} else if (hue1 < hue0 && hue0 - hue1 > 180) {
-			dh = hue1 + 360 - hue0
-		} else {
-			dh = hue1 - hue0
-		}
-		hue = hue0 + f * dh
-	} else if (!isNaN(hue0)) {
-		hue = hue0
-		if ((lbv1 == 1 || lbv1 == 0) && m != "hsv") sat = sat0
-	} else if (!isNaN(hue1)) {
-		hue = hue1
-		if ((lbv0 == 1 || lbv0 == 0) && m != "hsv") sat = sat1
-	} else {
-		hue = Number.NaN
-	}
+    if (!isNaN(hue0) && !isNaN(hue1)) {
+        // both colors have hue
+        if (hue1 > hue0 && hue1 - hue0 > 180) {
+            dh = hue1 - (hue0 + 360);
+        } else if (hue1 < hue0 && hue0 - hue1 > 180) {
+            dh = hue1 + 360 - hue0;
+        } else {
+            dh = hue1 - hue0;
+        }
+        hue = hue0 + f * dh;
+    } else if (!isNaN(hue0)) {
+        hue = hue0;
+        if ((lbv1 == 1 || lbv1 == 0) && m != 'hsv') sat = sat0;
+    } else if (!isNaN(hue1)) {
+        hue = hue1;
+        if ((lbv0 == 1 || lbv0 == 0) && m != 'hsv') sat = sat1;
+    } else {
+        hue = Number.NaN;
+    }
 
-	if (sat === undefined) sat = sat0 + f * (sat1 - sat0)
-	lbv = lbv0 + f * (lbv1 - lbv0)
-	return m === "oklch" ? new Color([lbv, sat, hue], m) : new Color([hue, sat, lbv], m)
-}
+    if (sat === undefined) sat = sat0 + f * (sat1 - sat0);
+    lbv = lbv0 + f * (lbv1 - lbv0);
+    return m === 'oklch'
+        ? new Color([lbv, sat, hue], m)
+        : new Color([hue, sat, lbv], m);
+};
 
 const lch = (col1, col2, f) => {
-	return interpolate_hsx(col1, col2, f, "lch")
-}
+    return interpolate_hsx(col1, col2, f, 'lch');
+};
 
 // register interpolator
-index.lch = lch
-index.hcl = lch
+index.lch = lch;
+index.hcl = lch;
 
 const num = (col1, col2, f) => {
-	const c1 = col1.num()
-	const c2 = col2.num()
-	return new Color(c1 + f * (c2 - c1), "num")
-}
+    const c1 = col1.num();
+    const c2 = col2.num();
+    return new Color(c1 + f * (c2 - c1), 'num');
+};
 
 // register interpolator
-index.num = num
+index.num = num;
 
 const hcg = (col1, col2, f) => {
-	return interpolate_hsx(col1, col2, f, "hcg")
-}
+    return interpolate_hsx(col1, col2, f, 'hcg');
+};
 
 // register interpolator
-index.hcg = hcg
+index.hcg = hcg;
 
 const hsi = (col1, col2, f) => {
-	return interpolate_hsx(col1, col2, f, "hsi")
-}
+    return interpolate_hsx(col1, col2, f, 'hsi');
+};
 
 // register interpolator
-index.hsi = hsi
+index.hsi = hsi;
 
 const hsl = (col1, col2, f) => {
-	return interpolate_hsx(col1, col2, f, "hsl")
-}
+    return interpolate_hsx(col1, col2, f, 'hsl');
+};
 
 // register interpolator
-index.hsl = hsl
+index.hsl = hsl;
 
 const hsv = (col1, col2, f) => {
-	return interpolate_hsx(col1, col2, f, "hsv")
-}
+    return interpolate_hsx(col1, col2, f, 'hsv');
+};
 
 // register interpolator
-index.hsv = hsv
+index.hsv = hsv;
 
 const oklab = (col1, col2, f) => {
-	const xyz0 = col1.oklab()
-	const xyz1 = col2.oklab()
-	return new Color(
-		xyz0[0] + f * (xyz1[0] - xyz0[0]),
-		xyz0[1] + f * (xyz1[1] - xyz0[1]),
-		xyz0[2] + f * (xyz1[2] - xyz0[2]),
-		"oklab"
-	)
-}
+    const xyz0 = col1.oklab();
+    const xyz1 = col2.oklab();
+    return new Color(
+        xyz0[0] + f * (xyz1[0] - xyz0[0]),
+        xyz0[1] + f * (xyz1[1] - xyz0[1]),
+        xyz0[2] + f * (xyz1[2] - xyz0[2]),
+        'oklab'
+    );
+};
 
 // register interpolator
-index.oklab = oklab
+index.oklab = oklab;
 
 const oklch = (col1, col2, f) => {
-	return interpolate_hsx(col1, col2, f, "oklch")
-}
+    return interpolate_hsx(col1, col2, f, 'oklch');
+};
 
 // register interpolator
-index.oklch = oklch
+index.oklch = oklch;
 
-const { pow: pow$4, sqrt: sqrt$1, PI: PI$1, cos: cos$2, sin: sin$2, atan2: atan2$1 } = Math
+const { pow: pow$4, sqrt: sqrt$1, PI: PI$1, cos: cos$2, sin: sin$2, atan2: atan2$1 } = Math;
 
-var average = (colors, mode = "lrgb", weights = null) => {
-	const l = colors.length
-	if (!weights) weights = Array.from(new Array(l)).map(() => 1)
-	// normalize weights
-	const k =
-		l /
-		weights.reduce(function (a, b) {
-			return a + b
-		})
-	weights.forEach((w, i) => {
-		weights[i] *= k
-	})
-	// convert colors to Color objects
-	colors = colors.map((c) => new Color(c))
-	if (mode === "lrgb") {
-		return _average_lrgb(colors, weights)
-	}
-	const first = colors.shift()
-	const xyz = first.get(mode)
-	const cnt = []
-	let dx = 0
-	let dy = 0
-	// initial color
-	for (let i = 0; i < xyz.length; i++) {
-		xyz[i] = (xyz[i] || 0) * weights[0]
-		cnt.push(isNaN(xyz[i]) ? 0 : weights[0])
-		if (mode.charAt(i) === "h" && !isNaN(xyz[i])) {
-			const A = (xyz[i] / 180) * PI$1
-			dx += cos$2(A) * weights[0]
-			dy += sin$2(A) * weights[0]
-		}
-	}
+var average = (colors, mode = 'lrgb', weights = null) => {
+    const l = colors.length;
+    if (!weights) weights = Array.from(new Array(l)).map(() => 1);
+    // normalize weights
+    const k =
+        l /
+        weights.reduce(function (a, b) {
+            return a + b;
+        });
+    weights.forEach((w, i) => {
+        weights[i] *= k;
+    });
+    // convert colors to Color objects
+    colors = colors.map((c) => new Color(c));
+    if (mode === 'lrgb') {
+        return _average_lrgb(colors, weights);
+    }
+    const first = colors.shift();
+    const xyz = first.get(mode);
+    const cnt = [];
+    let dx = 0;
+    let dy = 0;
+    // initial color
+    for (let i = 0; i < xyz.length; i++) {
+        xyz[i] = (xyz[i] || 0) * weights[0];
+        cnt.push(isNaN(xyz[i]) ? 0 : weights[0]);
+        if (mode.charAt(i) === 'h' && !isNaN(xyz[i])) {
+            const A = (xyz[i] / 180) * PI$1;
+            dx += cos$2(A) * weights[0];
+            dy += sin$2(A) * weights[0];
+        }
+    }
 
-	let alpha = first.alpha() * weights[0]
-	colors.forEach((c, ci) => {
-		const xyz2 = c.get(mode)
-		alpha += c.alpha() * weights[ci + 1]
-		for (let i = 0; i < xyz.length; i++) {
-			if (!isNaN(xyz2[i])) {
-				cnt[i] += weights[ci + 1]
-				if (mode.charAt(i) === "h") {
-					const A = (xyz2[i] / 180) * PI$1
-					dx += cos$2(A) * weights[ci + 1]
-					dy += sin$2(A) * weights[ci + 1]
-				} else {
-					xyz[i] += xyz2[i] * weights[ci + 1]
-				}
-			}
-		}
-	})
+    let alpha = first.alpha() * weights[0];
+    colors.forEach((c, ci) => {
+        const xyz2 = c.get(mode);
+        alpha += c.alpha() * weights[ci + 1];
+        for (let i = 0; i < xyz.length; i++) {
+            if (!isNaN(xyz2[i])) {
+                cnt[i] += weights[ci + 1];
+                if (mode.charAt(i) === 'h') {
+                    const A = (xyz2[i] / 180) * PI$1;
+                    dx += cos$2(A) * weights[ci + 1];
+                    dy += sin$2(A) * weights[ci + 1];
+                } else {
+                    xyz[i] += xyz2[i] * weights[ci + 1];
+                }
+            }
+        }
+    });
 
-	for (let i = 0; i < xyz.length; i++) {
-		if (mode.charAt(i) === "h") {
-			let A = (atan2$1(dy / cnt[i], dx / cnt[i]) / PI$1) * 180
-			while (A < 0) A += 360
-			while (A >= 360) A -= 360
-			xyz[i] = A
-		} else {
-			xyz[i] = xyz[i] / cnt[i]
-		}
-	}
-	alpha /= l
-	return new Color(xyz, mode).alpha(alpha > 0.99999 ? 1 : alpha, true)
-}
+    for (let i = 0; i < xyz.length; i++) {
+        if (mode.charAt(i) === 'h') {
+            let A = (atan2$1(dy / cnt[i], dx / cnt[i]) / PI$1) * 180;
+            while (A < 0) A += 360;
+            while (A >= 360) A -= 360;
+            xyz[i] = A;
+        } else {
+            xyz[i] = xyz[i] / cnt[i];
+        }
+    }
+    alpha /= l;
+    return new Color(xyz, mode).alpha(alpha > 0.99999 ? 1 : alpha, true);
+};
 
 const _average_lrgb = (colors, weights) => {
-	const l = colors.length
-	const xyz = [0, 0, 0, 0]
-	for (let i = 0; i < colors.length; i++) {
-		const col = colors[i]
-		const f = weights[i] / l
-		const rgb = col._rgb
-		xyz[0] += pow$4(rgb[0], 2) * f
-		xyz[1] += pow$4(rgb[1], 2) * f
-		xyz[2] += pow$4(rgb[2], 2) * f
-		xyz[3] += rgb[3] * f
-	}
-	xyz[0] = sqrt$1(xyz[0])
-	xyz[1] = sqrt$1(xyz[1])
-	xyz[2] = sqrt$1(xyz[2])
-	if (xyz[3] > 0.9999999) xyz[3] = 1
-	return new Color(clip_rgb(xyz))
-}
+    const l = colors.length;
+    const xyz = [0, 0, 0, 0];
+    for (let i = 0; i < colors.length; i++) {
+        const col = colors[i];
+        const f = weights[i] / l;
+        const rgb = col._rgb;
+        xyz[0] += pow$4(rgb[0], 2) * f;
+        xyz[1] += pow$4(rgb[1], 2) * f;
+        xyz[2] += pow$4(rgb[2], 2) * f;
+        xyz[3] += rgb[3] * f;
+    }
+    xyz[0] = sqrt$1(xyz[0]);
+    xyz[1] = sqrt$1(xyz[1]);
+    xyz[2] = sqrt$1(xyz[2]);
+    if (xyz[3] > 0.9999999) xyz[3] = 1;
+    return new Color(clip_rgb(xyz));
+};
 
 // minimal multi-purpose interface
 
-const { pow: pow$3 } = Math
 
-function scale(colors) {
-	// constructor
-	let _mode = "rgb"
-	let _nacol = chroma("#ccc")
-	let _spread = 0
-	// const _fixed = false;
-	let _domain = [0, 1]
-	let _pos = []
-	let _padding = [0, 0]
-	let _classes = false
-	let _colors = []
-	let _out = false
-	let _min = 0
-	let _max = 1
-	let _correctLightness = false
-	let _colorCache = {}
-	let _useCache = true
-	let _gamma = 1
+const { pow: pow$3 } = Math;
 
-	// private methods
+function scale (colors) {
+    // constructor
+    let _mode = 'rgb';
+    let _nacol = chroma('#ccc');
+    let _spread = 0;
+    // const _fixed = false;
+    let _domain = [0, 1];
+    let _pos = [];
+    let _padding = [0, 0];
+    let _classes = false;
+    let _colors = [];
+    let _out = false;
+    let _min = 0;
+    let _max = 1;
+    let _correctLightness = false;
+    let _colorCache = {};
+    let _useCache = true;
+    let _gamma = 1;
 
-	const setColors = function (colors) {
-		colors = colors || ["#fff", "#000"]
-		if (
-			colors &&
-			type(colors) === "string" &&
-			chroma.brewer &&
-			chroma.brewer[colors.toLowerCase()]
-		) {
-			colors = chroma.brewer[colors.toLowerCase()]
-		}
-		if (type(colors) === "array") {
-			// handle single color
-			if (colors.length === 1) {
-				colors = [colors[0], colors[0]]
-			}
-			// make a copy of the colors
-			colors = colors.slice(0)
-			// convert to chroma classes
-			for (let c = 0; c < colors.length; c++) {
-				colors[c] = chroma(colors[c])
-			}
-			// auto-fill color position
-			_pos.length = 0
-			for (let c = 0; c < colors.length; c++) {
-				_pos.push(c / (colors.length - 1))
-			}
-		}
-		resetCache()
-		return (_colors = colors)
-	}
+    // private methods
 
-	const getClass = function (value) {
-		if (_classes != null) {
-			const n = _classes.length - 1
-			let i = 0
-			while (i < n && value >= _classes[i]) {
-				i++
-			}
-			return i - 1
-		}
-		return 0
-	}
+    const setColors = function (colors) {
+        colors = colors || ['#fff', '#000'];
+        if (
+            colors &&
+            type(colors) === 'string' &&
+            chroma.brewer &&
+            chroma.brewer[colors.toLowerCase()]
+        ) {
+            colors = chroma.brewer[colors.toLowerCase()];
+        }
+        if (type(colors) === 'array') {
+            // handle single color
+            if (colors.length === 1) {
+                colors = [colors[0], colors[0]];
+            }
+            // make a copy of the colors
+            colors = colors.slice(0);
+            // convert to chroma classes
+            for (let c = 0; c < colors.length; c++) {
+                colors[c] = chroma(colors[c]);
+            }
+            // auto-fill color position
+            _pos.length = 0;
+            for (let c = 0; c < colors.length; c++) {
+                _pos.push(c / (colors.length - 1));
+            }
+        }
+        resetCache();
+        return (_colors = colors);
+    };
 
-	let tMapLightness = (t) => t
-	let tMapDomain = (t) => t
+    const getClass = function (value) {
+        if (_classes != null) {
+            const n = _classes.length - 1;
+            let i = 0;
+            while (i < n && value >= _classes[i]) {
+                i++;
+            }
+            return i - 1;
+        }
+        return 0;
+    };
 
-	// const classifyValue = function(value) {
-	//     let val = value;
-	//     if (_classes.length > 2) {
-	//         const n = _classes.length-1;
-	//         const i = getClass(value);
-	//         const minc = _classes[0] + ((_classes[1]-_classes[0]) * (0 + (_spread * 0.5)));  // center of 1st class
-	//         const maxc = _classes[n-1] + ((_classes[n]-_classes[n-1]) * (1 - (_spread * 0.5)));  // center of last class
-	//         val = _min + ((((_classes[i] + ((_classes[i+1] - _classes[i]) * 0.5)) - minc) / (maxc-minc)) * (_max - _min));
-	//     }
-	//     return val;
-	// };
+    let tMapLightness = (t) => t;
+    let tMapDomain = (t) => t;
 
-	const getColor = function (val, bypassMap) {
-		let col, t
-		if (bypassMap == null) {
-			bypassMap = false
-		}
-		if (isNaN(val) || val === null) {
-			return _nacol
-		}
-		if (!bypassMap) {
-			if (_classes && _classes.length > 2) {
-				// find the class
-				const c = getClass(val)
-				t = c / (_classes.length - 2)
-			} else if (_max !== _min) {
-				// just interpolate between min/max
-				t = (val - _min) / (_max - _min)
-			} else {
-				t = 1
-			}
-		} else {
-			t = val
-		}
+    // const classifyValue = function(value) {
+    //     let val = value;
+    //     if (_classes.length > 2) {
+    //         const n = _classes.length-1;
+    //         const i = getClass(value);
+    //         const minc = _classes[0] + ((_classes[1]-_classes[0]) * (0 + (_spread * 0.5)));  // center of 1st class
+    //         const maxc = _classes[n-1] + ((_classes[n]-_classes[n-1]) * (1 - (_spread * 0.5)));  // center of last class
+    //         val = _min + ((((_classes[i] + ((_classes[i+1] - _classes[i]) * 0.5)) - minc) / (maxc-minc)) * (_max - _min));
+    //     }
+    //     return val;
+    // };
 
-		// domain map
-		t = tMapDomain(t)
+    const getColor = function (val, bypassMap) {
+        let col, t;
+        if (bypassMap == null) {
+            bypassMap = false;
+        }
+        if (isNaN(val) || val === null) {
+            return _nacol;
+        }
+        if (!bypassMap) {
+            if (_classes && _classes.length > 2) {
+                // find the class
+                const c = getClass(val);
+                t = c / (_classes.length - 2);
+            } else if (_max !== _min) {
+                // just interpolate between min/max
+                t = (val - _min) / (_max - _min);
+            } else {
+                t = 1;
+            }
+        } else {
+            t = val;
+        }
 
-		if (!bypassMap) {
-			t = tMapLightness(t) // lightness correction
-		}
+        // domain map
+        t = tMapDomain(t);
 
-		if (_gamma !== 1) {
-			t = pow$3(t, _gamma)
-		}
+        if (!bypassMap) {
+            t = tMapLightness(t); // lightness correction
+        }
 
-		t = _padding[0] + t * (1 - _padding[0] - _padding[1])
+        if (_gamma !== 1) {
+            t = pow$3(t, _gamma);
+        }
 
-		t = limit(t, 0, 1)
+        t = _padding[0] + t * (1 - _padding[0] - _padding[1]);
 
-		const k = Math.floor(t * 10000)
+        t = limit(t, 0, 1);
 
-		if (_useCache && _colorCache[k]) {
-			col = _colorCache[k]
-		} else {
-			if (type(_colors) === "array") {
-				//for i in [0.._pos.length-1]
-				for (let i = 0; i < _pos.length; i++) {
-					const p = _pos[i]
-					if (t <= p) {
-						col = _colors[i]
-						break
-					}
-					if (t >= p && i === _pos.length - 1) {
-						col = _colors[i]
-						break
-					}
-					if (t > p && t < _pos[i + 1]) {
-						t = (t - p) / (_pos[i + 1] - p)
-						col = chroma.interpolate(_colors[i], _colors[i + 1], t, _mode)
-						break
-					}
-				}
-			} else if (type(_colors) === "function") {
-				col = _colors(t)
-			}
-			if (_useCache) {
-				_colorCache[k] = col
-			}
-		}
-		return col
-	}
+        const k = Math.floor(t * 10000);
 
-	var resetCache = () => (_colorCache = {})
+        if (_useCache && _colorCache[k]) {
+            col = _colorCache[k];
+        } else {
+            if (type(_colors) === 'array') {
+                //for i in [0.._pos.length-1]
+                for (let i = 0; i < _pos.length; i++) {
+                    const p = _pos[i];
+                    if (t <= p) {
+                        col = _colors[i];
+                        break;
+                    }
+                    if (t >= p && i === _pos.length - 1) {
+                        col = _colors[i];
+                        break;
+                    }
+                    if (t > p && t < _pos[i + 1]) {
+                        t = (t - p) / (_pos[i + 1] - p);
+                        col = chroma.interpolate(
+                            _colors[i],
+                            _colors[i + 1],
+                            t,
+                            _mode
+                        );
+                        break;
+                    }
+                }
+            } else if (type(_colors) === 'function') {
+                col = _colors(t);
+            }
+            if (_useCache) {
+                _colorCache[k] = col;
+            }
+        }
+        return col;
+    };
 
-	setColors(colors)
+    var resetCache = () => (_colorCache = {});
 
-	// public interface
+    setColors(colors);
 
-	const f = function (v) {
-		const c = chroma(getColor(v))
-		if (_out && c[_out]) {
-			return c[_out]()
-		} else {
-			return c
-		}
-	}
+    // public interface
 
-	f.classes = function (classes) {
-		if (classes != null) {
-			if (type(classes) === "array") {
-				_classes = classes
-				_domain = [classes[0], classes[classes.length - 1]]
-			} else {
-				const d = chroma.analyze(_domain)
-				if (classes === 0) {
-					_classes = [d.min, d.max]
-				} else {
-					_classes = chroma.limits(d, "e", classes)
-				}
-			}
-			return f
-		}
-		return _classes
-	}
+    const f = function (v) {
+        const c = chroma(getColor(v));
+        if (_out && c[_out]) {
+            return c[_out]();
+        } else {
+            return c;
+        }
+    };
 
-	f.domain = function (domain) {
-		if (!arguments.length) {
-			return _domain
-		}
-		_min = domain[0]
-		_max = domain[domain.length - 1]
-		_pos = []
-		const k = _colors.length
-		if (domain.length === k && _min !== _max) {
-			// update positions
-			for (let d of Array.from(domain)) {
-				_pos.push((d - _min) / (_max - _min))
-			}
-		} else {
-			for (let c = 0; c < k; c++) {
-				_pos.push(c / (k - 1))
-			}
-			if (domain.length > 2) {
-				// set domain map
-				const tOut = domain.map((d, i) => i / (domain.length - 1))
-				const tBreaks = domain.map((d) => (d - _min) / (_max - _min))
-				if (!tBreaks.every((val, i) => tOut[i] === val)) {
-					tMapDomain = (t) => {
-						if (t <= 0 || t >= 1) return t
-						let i = 0
-						while (t >= tBreaks[i + 1]) i++
-						const f = (t - tBreaks[i]) / (tBreaks[i + 1] - tBreaks[i])
-						const out = tOut[i] + f * (tOut[i + 1] - tOut[i])
-						return out
-					}
-				}
-			}
-		}
-		_domain = [_min, _max]
-		return f
-	}
+    f.classes = function (classes) {
+        if (classes != null) {
+            if (type(classes) === 'array') {
+                _classes = classes;
+                _domain = [classes[0], classes[classes.length - 1]];
+            } else {
+                const d = chroma.analyze(_domain);
+                if (classes === 0) {
+                    _classes = [d.min, d.max];
+                } else {
+                    _classes = chroma.limits(d, 'e', classes);
+                }
+            }
+            return f;
+        }
+        return _classes;
+    };
 
-	f.mode = function (_m) {
-		if (!arguments.length) {
-			return _mode
-		}
-		_mode = _m
-		resetCache()
-		return f
-	}
+    f.domain = function (domain) {
+        if (!arguments.length) {
+            return _domain;
+        }
+        _min = domain[0];
+        _max = domain[domain.length - 1];
+        _pos = [];
+        const k = _colors.length;
+        if (domain.length === k && _min !== _max) {
+            // update positions
+            for (let d of Array.from(domain)) {
+                _pos.push((d - _min) / (_max - _min));
+            }
+        } else {
+            for (let c = 0; c < k; c++) {
+                _pos.push(c / (k - 1));
+            }
+            if (domain.length > 2) {
+                // set domain map
+                const tOut = domain.map((d, i) => i / (domain.length - 1));
+                const tBreaks = domain.map((d) => (d - _min) / (_max - _min));
+                if (!tBreaks.every((val, i) => tOut[i] === val)) {
+                    tMapDomain = (t) => {
+                        if (t <= 0 || t >= 1) return t;
+                        let i = 0;
+                        while (t >= tBreaks[i + 1]) i++;
+                        const f =
+                            (t - tBreaks[i]) / (tBreaks[i + 1] - tBreaks[i]);
+                        const out = tOut[i] + f * (tOut[i + 1] - tOut[i]);
+                        return out;
+                    };
+                }
+            }
+        }
+        _domain = [_min, _max];
+        return f;
+    };
 
-	f.range = function (colors, _pos) {
-		setColors(colors)
-		return f
-	}
+    f.mode = function (_m) {
+        if (!arguments.length) {
+            return _mode;
+        }
+        _mode = _m;
+        resetCache();
+        return f;
+    };
 
-	f.out = function (_o) {
-		_out = _o
-		return f
-	}
+    f.range = function (colors, _pos) {
+        setColors(colors);
+        return f;
+    };
 
-	f.spread = function (val) {
-		if (!arguments.length) {
-			return _spread
-		}
-		_spread = val
-		return f
-	}
+    f.out = function (_o) {
+        _out = _o;
+        return f;
+    };
 
-	f.correctLightness = function (v) {
-		if (v == null) {
-			v = true
-		}
-		_correctLightness = v
-		resetCache()
-		if (_correctLightness) {
-			tMapLightness = function (t) {
-				const L0 = getColor(0, true).lab()[0]
-				const L1 = getColor(1, true).lab()[0]
-				const pol = L0 > L1
-				let L_actual = getColor(t, true).lab()[0]
-				const L_ideal = L0 + (L1 - L0) * t
-				let L_diff = L_actual - L_ideal
-				let t0 = 0
-				let t1 = 1
-				let max_iter = 20
-				while (Math.abs(L_diff) > 1e-2 && max_iter-- > 0) {
-					;(function () {
-						if (pol) {
-							L_diff *= -1
-						}
-						if (L_diff < 0) {
-							t0 = t
-							t += (t1 - t) * 0.5
-						} else {
-							t1 = t
-							t += (t0 - t) * 0.5
-						}
-						L_actual = getColor(t, true).lab()[0]
-						return (L_diff = L_actual - L_ideal)
-					})()
-				}
-				return t
-			}
-		} else {
-			tMapLightness = (t) => t
-		}
-		return f
-	}
+    f.spread = function (val) {
+        if (!arguments.length) {
+            return _spread;
+        }
+        _spread = val;
+        return f;
+    };
 
-	f.padding = function (p) {
-		if (p != null) {
-			if (type(p) === "number") {
-				p = [p, p]
-			}
-			_padding = p
-			return f
-		} else {
-			return _padding
-		}
-	}
+    f.correctLightness = function (v) {
+        if (v == null) {
+            v = true;
+        }
+        _correctLightness = v;
+        resetCache();
+        if (_correctLightness) {
+            tMapLightness = function (t) {
+                const L0 = getColor(0, true).lab()[0];
+                const L1 = getColor(1, true).lab()[0];
+                const pol = L0 > L1;
+                let L_actual = getColor(t, true).lab()[0];
+                const L_ideal = L0 + (L1 - L0) * t;
+                let L_diff = L_actual - L_ideal;
+                let t0 = 0;
+                let t1 = 1;
+                let max_iter = 20;
+                while (Math.abs(L_diff) > 1e-2 && max_iter-- > 0) {
+                    (function () {
+                        if (pol) {
+                            L_diff *= -1;
+                        }
+                        if (L_diff < 0) {
+                            t0 = t;
+                            t += (t1 - t) * 0.5;
+                        } else {
+                            t1 = t;
+                            t += (t0 - t) * 0.5;
+                        }
+                        L_actual = getColor(t, true).lab()[0];
+                        return (L_diff = L_actual - L_ideal);
+                    })();
+                }
+                return t;
+            };
+        } else {
+            tMapLightness = (t) => t;
+        }
+        return f;
+    };
 
-	f.colors = function (numColors, out) {
-		// If no arguments are given, return the original colors that were provided
-		if (arguments.length < 2) {
-			out = "hex"
-		}
-		let result = []
+    f.padding = function (p) {
+        if (p != null) {
+            if (type(p) === 'number') {
+                p = [p, p];
+            }
+            _padding = p;
+            return f;
+        } else {
+            return _padding;
+        }
+    };
 
-		if (arguments.length === 0) {
-			result = _colors.slice(0)
-		} else if (numColors === 1) {
-			result = [f(0.5)]
-		} else if (numColors > 1) {
-			const dm = _domain[0]
-			const dd = _domain[1] - dm
-			result = __range__(0, numColors, false).map((i) => f(dm + (i / (numColors - 1)) * dd))
-		} else {
-			// returns all colors based on the defined classes
-			colors = []
-			let samples = []
-			if (_classes && _classes.length > 2) {
-				for (
-					let i = 1, end = _classes.length, asc = 1 <= end;
-					asc ? i < end : i > end;
-					asc ? i++ : i--
-				) {
-					samples.push((_classes[i - 1] + _classes[i]) * 0.5)
-				}
-			} else {
-				samples = _domain
-			}
-			result = samples.map((v) => f(v))
-		}
+    f.colors = function (numColors, out) {
+        // If no arguments are given, return the original colors that were provided
+        if (arguments.length < 2) {
+            out = 'hex';
+        }
+        let result = [];
 
-		if (chroma[out]) {
-			result = result.map((c) => c[out]())
-		}
-		return result
-	}
+        if (arguments.length === 0) {
+            result = _colors.slice(0);
+        } else if (numColors === 1) {
+            result = [f(0.5)];
+        } else if (numColors > 1) {
+            const dm = _domain[0];
+            const dd = _domain[1] - dm;
+            result = __range__(0, numColors, false).map((i) =>
+                f(dm + (i / (numColors - 1)) * dd)
+            );
+        } else {
+            // returns all colors based on the defined classes
+            colors = [];
+            let samples = [];
+            if (_classes && _classes.length > 2) {
+                for (
+                    let i = 1, end = _classes.length, asc = 1 <= end;
+                    asc ? i < end : i > end;
+                    asc ? i++ : i--
+                ) {
+                    samples.push((_classes[i - 1] + _classes[i]) * 0.5);
+                }
+            } else {
+                samples = _domain;
+            }
+            result = samples.map((v) => f(v));
+        }
 
-	f.cache = function (c) {
-		if (c != null) {
-			_useCache = c
-			return f
-		} else {
-			return _useCache
-		}
-	}
+        if (chroma[out]) {
+            result = result.map((c) => c[out]());
+        }
+        return result;
+    };
 
-	f.gamma = function (g) {
-		if (g != null) {
-			_gamma = g
-			return f
-		} else {
-			return _gamma
-		}
-	}
+    f.cache = function (c) {
+        if (c != null) {
+            _useCache = c;
+            return f;
+        } else {
+            return _useCache;
+        }
+    };
 
-	f.nodata = function (d) {
-		if (d != null) {
-			_nacol = chroma(d)
-			return f
-		} else {
-			return _nacol
-		}
-	}
+    f.gamma = function (g) {
+        if (g != null) {
+            _gamma = g;
+            return f;
+        } else {
+            return _gamma;
+        }
+    };
 
-	return f
+    f.nodata = function (d) {
+        if (d != null) {
+            _nacol = chroma(d);
+            return f;
+        } else {
+            return _nacol;
+        }
+    };
+
+    return f;
 }
 
 function __range__(left, right, inclusive) {
-	let range = []
-	let ascending = left < right
-	let end = !inclusive ? right : ascending ? right + 1 : right - 1
-	for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-		range.push(i)
-	}
-	return range
+    let range = [];
+    let ascending = left < right;
+    let end = !inclusive ? right : ascending ? right + 1 : right - 1;
+    for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
+        range.push(i);
+    }
+    return range;
 }
 
 //
 // interpolates between a set of colors uzing a bezier spline
 //
 
+
 // nth row of the pascal triangle
 const binom_row = function (n) {
-	let row = [1, 1]
-	for (let i = 1; i < n; i++) {
-		let newrow = [1]
-		for (let j = 1; j <= row.length; j++) {
-			newrow[j] = (row[j] || 0) + row[j - 1]
-		}
-		row = newrow
-	}
-	return row
-}
+    let row = [1, 1];
+    for (let i = 1; i < n; i++) {
+        let newrow = [1];
+        for (let j = 1; j <= row.length; j++) {
+            newrow[j] = (row[j] || 0) + row[j - 1];
+        }
+        row = newrow;
+    }
+    return row;
+};
 
 const bezier = function (colors) {
-	let I, lab0, lab1, lab2
-	colors = colors.map((c) => new Color(c))
-	if (colors.length === 2) {
-		// linear interpolation
-		;[lab0, lab1] = colors.map((c) => c.lab())
-		I = function (t) {
-			const lab = [0, 1, 2].map((i) => lab0[i] + t * (lab1[i] - lab0[i]))
-			return new Color(lab, "lab")
-		}
-	} else if (colors.length === 3) {
-		// quadratic bezier interpolation
-		;[lab0, lab1, lab2] = colors.map((c) => c.lab())
-		I = function (t) {
-			const lab = [0, 1, 2].map(
-				(i) => (1 - t) * (1 - t) * lab0[i] + 2 * (1 - t) * t * lab1[i] + t * t * lab2[i]
-			)
-			return new Color(lab, "lab")
-		}
-	} else if (colors.length === 4) {
-		// cubic bezier interpolation
-		let lab3
-		;[lab0, lab1, lab2, lab3] = colors.map((c) => c.lab())
-		I = function (t) {
-			const lab = [0, 1, 2].map(
-				(i) =>
-					(1 - t) * (1 - t) * (1 - t) * lab0[i] +
-					3 * (1 - t) * (1 - t) * t * lab1[i] +
-					3 * (1 - t) * t * t * lab2[i] +
-					t * t * t * lab3[i]
-			)
-			return new Color(lab, "lab")
-		}
-	} else if (colors.length >= 5) {
-		// general case (degree n bezier)
-		let labs, row, n
-		labs = colors.map((c) => c.lab())
-		n = colors.length - 1
-		row = binom_row(n)
-		I = function (t) {
-			const u = 1 - t
-			const lab = [0, 1, 2].map((i) =>
-				labs.reduce((sum, el, j) => sum + row[j] * u ** (n - j) * t ** j * el[i], 0)
-			)
-			return new Color(lab, "lab")
-		}
-	} else {
-		throw new RangeError("No point in running bezier with only one color.")
-	}
-	return I
-}
+    let I, lab0, lab1, lab2;
+    colors = colors.map((c) => new Color(c));
+    if (colors.length === 2) {
+        // linear interpolation
+        [lab0, lab1] = colors.map((c) => c.lab());
+        I = function (t) {
+            const lab = [0, 1, 2].map((i) => lab0[i] + t * (lab1[i] - lab0[i]));
+            return new Color(lab, 'lab');
+        };
+    } else if (colors.length === 3) {
+        // quadratic bezier interpolation
+        [lab0, lab1, lab2] = colors.map((c) => c.lab());
+        I = function (t) {
+            const lab = [0, 1, 2].map(
+                (i) =>
+                    (1 - t) * (1 - t) * lab0[i] +
+                    2 * (1 - t) * t * lab1[i] +
+                    t * t * lab2[i]
+            );
+            return new Color(lab, 'lab');
+        };
+    } else if (colors.length === 4) {
+        // cubic bezier interpolation
+        let lab3;
+        [lab0, lab1, lab2, lab3] = colors.map((c) => c.lab());
+        I = function (t) {
+            const lab = [0, 1, 2].map(
+                (i) =>
+                    (1 - t) * (1 - t) * (1 - t) * lab0[i] +
+                    3 * (1 - t) * (1 - t) * t * lab1[i] +
+                    3 * (1 - t) * t * t * lab2[i] +
+                    t * t * t * lab3[i]
+            );
+            return new Color(lab, 'lab');
+        };
+    } else if (colors.length >= 5) {
+        // general case (degree n bezier)
+        let labs, row, n;
+        labs = colors.map((c) => c.lab());
+        n = colors.length - 1;
+        row = binom_row(n);
+        I = function (t) {
+            const u = 1 - t;
+            const lab = [0, 1, 2].map((i) =>
+                labs.reduce(
+                    (sum, el, j) =>
+                        sum + row[j] * u ** (n - j) * t ** j * el[i],
+                    0
+                )
+            );
+            return new Color(lab, 'lab');
+        };
+    } else {
+        throw new RangeError('No point in running bezier with only one color.');
+    }
+    return I;
+};
 
 var bezier$1 = (colors) => {
-	const f = bezier(colors)
-	f.scale = () => scale(f)
-	return f
-}
+    const f = bezier(colors);
+    f.scale = () => scale(f);
+    return f;
+};
 
 /*
  * interpolates between a set of colors uzing a bezier spline
  * blend mode formulas taken from https://web.archive.org/web/20180110014946/http://www.venture-ware.com/kevin/coding/lets-learn-math-photoshop-blend-modes/
  */
 
+
 const blend = (bottom, top, mode) => {
-	if (!blend[mode]) {
-		throw new Error("unknown blend mode " + mode)
-	}
-	return blend[mode](bottom, top)
-}
+    if (!blend[mode]) {
+        throw new Error('unknown blend mode ' + mode);
+    }
+    return blend[mode](bottom, top);
+};
 
 const blend_f = (f) => (bottom, top) => {
-	const c0 = chroma(top).rgb()
-	const c1 = chroma(bottom).rgb()
-	return chroma.rgb(f(c0, c1))
-}
+    const c0 = chroma(top).rgb();
+    const c1 = chroma(bottom).rgb();
+    return chroma.rgb(f(c0, c1));
+};
 
 const each = (f) => (c0, c1) => {
-	const out = []
-	out[0] = f(c0[0], c1[0])
-	out[1] = f(c0[1], c1[1])
-	out[2] = f(c0[2], c1[2])
-	return out
-}
+    const out = [];
+    out[0] = f(c0[0], c1[0]);
+    out[1] = f(c0[1], c1[1]);
+    out[2] = f(c0[2], c1[2]);
+    return out;
+};
 
-const normal = (a) => a
-const multiply = (a, b) => (a * b) / 255
-const darken = (a, b) => (a > b ? b : a)
-const lighten = (a, b) => (a > b ? a : b)
-const screen = (a, b) => 255 * (1 - (1 - a / 255) * (1 - b / 255))
+const normal = (a) => a;
+const multiply = (a, b) => (a * b) / 255;
+const darken = (a, b) => (a > b ? b : a);
+const lighten = (a, b) => (a > b ? a : b);
+const screen = (a, b) => 255 * (1 - (1 - a / 255) * (1 - b / 255));
 const overlay = (a, b) =>
-	b < 128 ? (2 * a * b) / 255 : 255 * (1 - 2 * (1 - a / 255) * (1 - b / 255))
-const burn = (a, b) => 255 * (1 - (1 - b / 255) / (a / 255))
+    b < 128 ? (2 * a * b) / 255 : 255 * (1 - 2 * (1 - a / 255) * (1 - b / 255));
+const burn = (a, b) => 255 * (1 - (1 - b / 255) / (a / 255));
 const dodge = (a, b) => {
-	if (a === 255) return 255
-	a = (255 * (b / 255)) / (1 - a / 255)
-	return a > 255 ? 255 : a
-}
+    if (a === 255) return 255;
+    a = (255 * (b / 255)) / (1 - a / 255);
+    return a > 255 ? 255 : a;
+};
 
 // # add = (a,b) ->
 // #     if (a + b > 255) then 255 else a + b
 
-blend.normal = blend_f(each(normal))
-blend.multiply = blend_f(each(multiply))
-blend.screen = blend_f(each(screen))
-blend.overlay = blend_f(each(overlay))
-blend.darken = blend_f(each(darken))
-blend.lighten = blend_f(each(lighten))
-blend.dodge = blend_f(each(dodge))
-blend.burn = blend_f(each(burn))
+blend.normal = blend_f(each(normal));
+blend.multiply = blend_f(each(multiply));
+blend.screen = blend_f(each(screen));
+blend.overlay = blend_f(each(overlay));
+blend.darken = blend_f(each(darken));
+blend.lighten = blend_f(each(lighten));
+blend.dodge = blend_f(each(dodge));
+blend.burn = blend_f(each(burn));
 
 // cubehelix interpolation
 // based on D.A. Green "A colour scheme for the display of astronomical intensity images"
 // http://astron-soc.in/bulletin/11June/289392011.pdf
-const { pow: pow$2, sin: sin$1, cos: cos$1 } = Math
+const { pow: pow$2, sin: sin$1, cos: cos$1 } = Math;
 
-function cubehelix(start = 300, rotations = -1.5, hue = 1, gamma = 1, lightness = [0, 1]) {
-	let dh = 0,
-		dl
-	if (type(lightness) === "array") {
-		dl = lightness[1] - lightness[0]
-	} else {
-		dl = 0
-		lightness = [lightness, lightness]
-	}
-	const f = function (fract) {
-		const a = TWOPI * ((start + 120) / 360 + rotations * fract)
-		const l = pow$2(lightness[0] + dl * fract, gamma)
-		const h = dh !== 0 ? hue[0] + fract * dh : hue
-		const amp = (h * l * (1 - l)) / 2
-		const cos_a = cos$1(a)
-		const sin_a = sin$1(a)
-		const r = l + amp * (-0.14861 * cos_a + 1.78277 * sin_a)
-		const g = l + amp * (-0.29227 * cos_a - 0.90649 * sin_a)
-		const b = l + amp * (+1.97294 * cos_a)
-		return chroma(clip_rgb([r * 255, g * 255, b * 255, 1]))
-	}
-	f.start = function (s) {
-		if (s == null) {
-			return start
-		}
-		start = s
-		return f
-	}
-	f.rotations = function (r) {
-		if (r == null) {
-			return rotations
-		}
-		rotations = r
-		return f
-	}
-	f.gamma = function (g) {
-		if (g == null) {
-			return gamma
-		}
-		gamma = g
-		return f
-	}
-	f.hue = function (h) {
-		if (h == null) {
-			return hue
-		}
-		hue = h
-		if (type(hue) === "array") {
-			dh = hue[1] - hue[0]
-			if (dh === 0) {
-				hue = hue[1]
-			}
-		} else {
-			dh = 0
-		}
-		return f
-	}
-	f.lightness = function (h) {
-		if (h == null) {
-			return lightness
-		}
-		if (type(h) === "array") {
-			lightness = h
-			dl = h[1] - h[0]
-		} else {
-			lightness = [h, h]
-			dl = 0
-		}
-		return f
-	}
-	f.scale = () => chroma.scale(f)
-	f.hue(hue)
-	return f
+function cubehelix (
+    start = 300,
+    rotations = -1.5,
+    hue = 1,
+    gamma = 1,
+    lightness = [0, 1]
+) {
+    let dh = 0,
+        dl;
+    if (type(lightness) === 'array') {
+        dl = lightness[1] - lightness[0];
+    } else {
+        dl = 0;
+        lightness = [lightness, lightness];
+    }
+    const f = function (fract) {
+        const a = TWOPI * ((start + 120) / 360 + rotations * fract);
+        const l = pow$2(lightness[0] + dl * fract, gamma);
+        const h = dh !== 0 ? hue[0] + fract * dh : hue;
+        const amp = (h * l * (1 - l)) / 2;
+        const cos_a = cos$1(a);
+        const sin_a = sin$1(a);
+        const r = l + amp * (-0.14861 * cos_a + 1.78277 * sin_a);
+        const g = l + amp * (-0.29227 * cos_a - 0.90649 * sin_a);
+        const b = l + amp * (+1.97294 * cos_a);
+        return chroma(clip_rgb([r * 255, g * 255, b * 255, 1]));
+    };
+    f.start = function (s) {
+        if (s == null) {
+            return start;
+        }
+        start = s;
+        return f;
+    };
+    f.rotations = function (r) {
+        if (r == null) {
+            return rotations;
+        }
+        rotations = r;
+        return f;
+    };
+    f.gamma = function (g) {
+        if (g == null) {
+            return gamma;
+        }
+        gamma = g;
+        return f;
+    };
+    f.hue = function (h) {
+        if (h == null) {
+            return hue;
+        }
+        hue = h;
+        if (type(hue) === 'array') {
+            dh = hue[1] - hue[0];
+            if (dh === 0) {
+                hue = hue[1];
+            }
+        } else {
+            dh = 0;
+        }
+        return f;
+    };
+    f.lightness = function (h) {
+        if (h == null) {
+            return lightness;
+        }
+        if (type(h) === 'array') {
+            lightness = h;
+            dl = h[1] - h[0];
+        } else {
+            lightness = [h, h];
+            dl = 0;
+        }
+        return f;
+    };
+    f.scale = () => chroma.scale(f);
+    f.hue(hue);
+    return f;
 }
 
-const digits = "0123456789abcdef"
+const digits = '0123456789abcdef';
 
-const { floor: floor$2, random } = Math
+const { floor: floor$2, random } = Math;
 
 var random$1 = () => {
-	let code = "#"
-	for (let i = 0; i < 6; i++) {
-		code += digits.charAt(floor$2(random() * 16))
-	}
-	return new Color(code, "hex")
-}
+    let code = '#';
+    for (let i = 0; i < 6; i++) {
+        code += digits.charAt(floor$2(random() * 16));
+    }
+    return new Color(code, 'hex');
+};
 
-const { log, pow: pow$1, floor: floor$1, abs: abs$1 } = Math
+const { log, pow: pow$1, floor: floor$1, abs: abs$1 } = Math;
 
 function analyze(data, key = null) {
-	const r = {
-		min: Number.MAX_VALUE,
-		max: Number.MAX_VALUE * -1,
-		sum: 0,
-		values: [],
-		count: 0,
-	}
-	if (type(data) === "object") {
-		data = Object.values(data)
-	}
-	data.forEach((val) => {
-		if (key && type(val) === "object") val = val[key]
-		if (val !== undefined && val !== null && !isNaN(val)) {
-			r.values.push(val)
-			r.sum += val
-			if (val < r.min) r.min = val
-			if (val > r.max) r.max = val
-			r.count += 1
-		}
-	})
+    const r = {
+        min: Number.MAX_VALUE,
+        max: Number.MAX_VALUE * -1,
+        sum: 0,
+        values: [],
+        count: 0
+    };
+    if (type(data) === 'object') {
+        data = Object.values(data);
+    }
+    data.forEach((val) => {
+        if (key && type(val) === 'object') val = val[key];
+        if (val !== undefined && val !== null && !isNaN(val)) {
+            r.values.push(val);
+            r.sum += val;
+            if (val < r.min) r.min = val;
+            if (val > r.max) r.max = val;
+            r.count += 1;
+        }
+    });
 
-	r.domain = [r.min, r.max]
+    r.domain = [r.min, r.max];
 
-	r.limits = (mode, num) => limits(r, mode, num)
+    r.limits = (mode, num) => limits(r, mode, num);
 
-	return r
+    return r;
 }
 
-function limits(data, mode = "equal", num = 7) {
-	if (type(data) == "array") {
-		data = analyze(data)
-	}
-	const { min, max } = data
-	const values = data.values.sort((a, b) => a - b)
+function limits(data, mode = 'equal', num = 7) {
+    if (type(data) == 'array') {
+        data = analyze(data);
+    }
+    const { min, max } = data;
+    const values = data.values.sort((a, b) => a - b);
 
-	if (num === 1) {
-		return [min, max]
-	}
+    if (num === 1) {
+        return [min, max];
+    }
 
-	const limits = []
+    const limits = [];
 
-	if (mode.substr(0, 1) === "c") {
-		// continuous
-		limits.push(min)
-		limits.push(max)
-	}
+    if (mode.substr(0, 1) === 'c') {
+        // continuous
+        limits.push(min);
+        limits.push(max);
+    }
 
-	if (mode.substr(0, 1) === "e") {
-		// equal interval
-		limits.push(min)
-		for (let i = 1; i < num; i++) {
-			limits.push(min + (i / num) * (max - min))
-		}
-		limits.push(max)
-	} else if (mode.substr(0, 1) === "l") {
-		// log scale
-		if (min <= 0) {
-			throw new Error("Logarithmic scales are only possible for values > 0")
-		}
-		const min_log = Math.LOG10E * log(min)
-		const max_log = Math.LOG10E * log(max)
-		limits.push(min)
-		for (let i = 1; i < num; i++) {
-			limits.push(pow$1(10, min_log + (i / num) * (max_log - min_log)))
-		}
-		limits.push(max)
-	} else if (mode.substr(0, 1) === "q") {
-		// quantile scale
-		limits.push(min)
-		for (let i = 1; i < num; i++) {
-			const p = ((values.length - 1) * i) / num
-			const pb = floor$1(p)
-			if (pb === p) {
-				limits.push(values[pb])
-			} else {
-				// p > pb
-				const pr = p - pb
-				limits.push(values[pb] * (1 - pr) + values[pb + 1] * pr)
-			}
-		}
-		limits.push(max)
-	} else if (mode.substr(0, 1) === "k") {
-		// k-means clustering
-		/*
+    if (mode.substr(0, 1) === 'e') {
+        // equal interval
+        limits.push(min);
+        for (let i = 1; i < num; i++) {
+            limits.push(min + (i / num) * (max - min));
+        }
+        limits.push(max);
+    } else if (mode.substr(0, 1) === 'l') {
+        // log scale
+        if (min <= 0) {
+            throw new Error(
+                'Logarithmic scales are only possible for values > 0'
+            );
+        }
+        const min_log = Math.LOG10E * log(min);
+        const max_log = Math.LOG10E * log(max);
+        limits.push(min);
+        for (let i = 1; i < num; i++) {
+            limits.push(pow$1(10, min_log + (i / num) * (max_log - min_log)));
+        }
+        limits.push(max);
+    } else if (mode.substr(0, 1) === 'q') {
+        // quantile scale
+        limits.push(min);
+        for (let i = 1; i < num; i++) {
+            const p = ((values.length - 1) * i) / num;
+            const pb = floor$1(p);
+            if (pb === p) {
+                limits.push(values[pb]);
+            } else {
+                // p > pb
+                const pr = p - pb;
+                limits.push(values[pb] * (1 - pr) + values[pb + 1] * pr);
+            }
+        }
+        limits.push(max);
+    } else if (mode.substr(0, 1) === 'k') {
+        // k-means clustering
+        /*
         implementation based on
         http://code.google.com/p/figue/source/browse/trunk/figue.js#336
         simplified for 1-d input values
         */
-		let cluster
-		const n = values.length
-		const assignments = new Array(n)
-		const clusterSizes = new Array(num)
-		let repeat = true
-		let nb_iters = 0
-		let centroids = null
+        let cluster;
+        const n = values.length;
+        const assignments = new Array(n);
+        const clusterSizes = new Array(num);
+        let repeat = true;
+        let nb_iters = 0;
+        let centroids = null;
 
-		// get seed values
-		centroids = []
-		centroids.push(min)
-		for (let i = 1; i < num; i++) {
-			centroids.push(min + (i / num) * (max - min))
-		}
-		centroids.push(max)
+        // get seed values
+        centroids = [];
+        centroids.push(min);
+        for (let i = 1; i < num; i++) {
+            centroids.push(min + (i / num) * (max - min));
+        }
+        centroids.push(max);
 
-		while (repeat) {
-			// assignment step
-			for (let j = 0; j < num; j++) {
-				clusterSizes[j] = 0
-			}
-			for (let i = 0; i < n; i++) {
-				const value = values[i]
-				let mindist = Number.MAX_VALUE
-				let best
-				for (let j = 0; j < num; j++) {
-					const dist = abs$1(centroids[j] - value)
-					if (dist < mindist) {
-						mindist = dist
-						best = j
-					}
-					clusterSizes[best]++
-					assignments[i] = best
-				}
-			}
+        while (repeat) {
+            // assignment step
+            for (let j = 0; j < num; j++) {
+                clusterSizes[j] = 0;
+            }
+            for (let i = 0; i < n; i++) {
+                const value = values[i];
+                let mindist = Number.MAX_VALUE;
+                let best;
+                for (let j = 0; j < num; j++) {
+                    const dist = abs$1(centroids[j] - value);
+                    if (dist < mindist) {
+                        mindist = dist;
+                        best = j;
+                    }
+                    clusterSizes[best]++;
+                    assignments[i] = best;
+                }
+            }
 
-			// update centroids step
-			const newCentroids = new Array(num)
-			for (let j = 0; j < num; j++) {
-				newCentroids[j] = null
-			}
-			for (let i = 0; i < n; i++) {
-				cluster = assignments[i]
-				if (newCentroids[cluster] === null) {
-					newCentroids[cluster] = values[i]
-				} else {
-					newCentroids[cluster] += values[i]
-				}
-			}
-			for (let j = 0; j < num; j++) {
-				newCentroids[j] *= 1 / clusterSizes[j]
-			}
+            // update centroids step
+            const newCentroids = new Array(num);
+            for (let j = 0; j < num; j++) {
+                newCentroids[j] = null;
+            }
+            for (let i = 0; i < n; i++) {
+                cluster = assignments[i];
+                if (newCentroids[cluster] === null) {
+                    newCentroids[cluster] = values[i];
+                } else {
+                    newCentroids[cluster] += values[i];
+                }
+            }
+            for (let j = 0; j < num; j++) {
+                newCentroids[j] *= 1 / clusterSizes[j];
+            }
 
-			// check convergence
-			repeat = false
-			for (let j = 0; j < num; j++) {
-				if (newCentroids[j] !== centroids[j]) {
-					repeat = true
-					break
-				}
-			}
+            // check convergence
+            repeat = false;
+            for (let j = 0; j < num; j++) {
+                if (newCentroids[j] !== centroids[j]) {
+                    repeat = true;
+                    break;
+                }
+            }
 
-			centroids = newCentroids
-			nb_iters++
+            centroids = newCentroids;
+            nb_iters++;
 
-			if (nb_iters > 200) {
-				repeat = false
-			}
-		}
+            if (nb_iters > 200) {
+                repeat = false;
+            }
+        }
 
-		// finished k-means clustering
-		// the next part is borrowed from gabrielflor.it
-		const kClusters = {}
-		for (let j = 0; j < num; j++) {
-			kClusters[j] = []
-		}
-		for (let i = 0; i < n; i++) {
-			cluster = assignments[i]
-			kClusters[cluster].push(values[i])
-		}
-		let tmpKMeansBreaks = []
-		for (let j = 0; j < num; j++) {
-			tmpKMeansBreaks.push(kClusters[j][0])
-			tmpKMeansBreaks.push(kClusters[j][kClusters[j].length - 1])
-		}
-		tmpKMeansBreaks = tmpKMeansBreaks.sort((a, b) => a - b)
-		limits.push(tmpKMeansBreaks[0])
-		for (let i = 1; i < tmpKMeansBreaks.length; i += 2) {
-			const v = tmpKMeansBreaks[i]
-			if (!isNaN(v) && limits.indexOf(v) === -1) {
-				limits.push(v)
-			}
-		}
-	}
-	return limits
+        // finished k-means clustering
+        // the next part is borrowed from gabrielflor.it
+        const kClusters = {};
+        for (let j = 0; j < num; j++) {
+            kClusters[j] = [];
+        }
+        for (let i = 0; i < n; i++) {
+            cluster = assignments[i];
+            kClusters[cluster].push(values[i]);
+        }
+        let tmpKMeansBreaks = [];
+        for (let j = 0; j < num; j++) {
+            tmpKMeansBreaks.push(kClusters[j][0]);
+            tmpKMeansBreaks.push(kClusters[j][kClusters[j].length - 1]);
+        }
+        tmpKMeansBreaks = tmpKMeansBreaks.sort((a, b) => a - b);
+        limits.push(tmpKMeansBreaks[0]);
+        for (let i = 1; i < tmpKMeansBreaks.length; i += 2) {
+            const v = tmpKMeansBreaks[i];
+            if (!isNaN(v) && limits.indexOf(v) === -1) {
+                limits.push(v);
+            }
+        }
+    }
+    return limits;
 }
 
 var contrast = (a, b) => {
-	// WCAG contrast ratio
-	// see http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
-	a = new Color(a)
-	b = new Color(b)
-	const l1 = a.luminance()
-	const l2 = b.luminance()
-	return l1 > l2 ? (l1 + 0.05) / (l2 + 0.05) : (l2 + 0.05) / (l1 + 0.05)
-}
+    // WCAG contrast ratio
+    // see http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
+    a = new Color(a);
+    b = new Color(b);
+    const l1 = a.luminance();
+    const l2 = b.luminance();
+    return l1 > l2 ? (l1 + 0.05) / (l2 + 0.05) : (l2 + 0.05) / (l1 + 0.05);
+};
 
-const { sqrt, pow, min: min$1, max: max$1, atan2, abs, cos, sin, exp, PI } = Math
+const { sqrt, pow, min: min$1, max: max$1, atan2, abs, cos, sin, exp, PI } = Math;
 
-function deltaE(a, b, Kl = 1, Kc = 1, Kh = 1) {
-	// Delta E (CIE 2000)
-	// see http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE2000.html
-	var rad2deg = function (rad) {
-		return (360 * rad) / (2 * PI)
-	}
-	var deg2rad = function (deg) {
-		return (2 * PI * deg) / 360
-	}
-	a = new Color(a)
-	b = new Color(b)
-	const [L1, a1, b1] = Array.from(a.lab())
-	const [L2, a2, b2] = Array.from(b.lab())
-	const avgL = (L1 + L2) / 2
-	const C1 = sqrt(pow(a1, 2) + pow(b1, 2))
-	const C2 = sqrt(pow(a2, 2) + pow(b2, 2))
-	const avgC = (C1 + C2) / 2
-	const G = 0.5 * (1 - sqrt(pow(avgC, 7) / (pow(avgC, 7) + pow(25, 7))))
-	const a1p = a1 * (1 + G)
-	const a2p = a2 * (1 + G)
-	const C1p = sqrt(pow(a1p, 2) + pow(b1, 2))
-	const C2p = sqrt(pow(a2p, 2) + pow(b2, 2))
-	const avgCp = (C1p + C2p) / 2
-	const arctan1 = rad2deg(atan2(b1, a1p))
-	const arctan2 = rad2deg(atan2(b2, a2p))
-	const h1p = arctan1 >= 0 ? arctan1 : arctan1 + 360
-	const h2p = arctan2 >= 0 ? arctan2 : arctan2 + 360
-	const avgHp = abs(h1p - h2p) > 180 ? (h1p + h2p + 360) / 2 : (h1p + h2p) / 2
-	const T =
-		1 -
-		0.17 * cos(deg2rad(avgHp - 30)) +
-		0.24 * cos(deg2rad(2 * avgHp)) +
-		0.32 * cos(deg2rad(3 * avgHp + 6)) -
-		0.2 * cos(deg2rad(4 * avgHp - 63))
-	let deltaHp = h2p - h1p
-	deltaHp = abs(deltaHp) <= 180 ? deltaHp : h2p <= h1p ? deltaHp + 360 : deltaHp - 360
-	deltaHp = 2 * sqrt(C1p * C2p) * sin(deg2rad(deltaHp) / 2)
-	const deltaL = L2 - L1
-	const deltaCp = C2p - C1p
-	const sl = 1 + (0.015 * pow(avgL - 50, 2)) / sqrt(20 + pow(avgL - 50, 2))
-	const sc = 1 + 0.045 * avgCp
-	const sh = 1 + 0.015 * avgCp * T
-	const deltaTheta = 30 * exp(-pow((avgHp - 275) / 25, 2))
-	const Rc = 2 * sqrt(pow(avgCp, 7) / (pow(avgCp, 7) + pow(25, 7)))
-	const Rt = -Rc * sin(2 * deg2rad(deltaTheta))
-	const result = sqrt(
-		pow(deltaL / (Kl * sl), 2) +
-			pow(deltaCp / (Kc * sc), 2) +
-			pow(deltaHp / (Kh * sh), 2) +
-			Rt * (deltaCp / (Kc * sc)) * (deltaHp / (Kh * sh))
-	)
-	return max$1(0, min$1(100, result))
+function deltaE (a, b, Kl = 1, Kc = 1, Kh = 1) {
+    // Delta E (CIE 2000)
+    // see http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE2000.html
+    var rad2deg = function (rad) {
+        return (360 * rad) / (2 * PI);
+    };
+    var deg2rad = function (deg) {
+        return (2 * PI * deg) / 360;
+    };
+    a = new Color(a);
+    b = new Color(b);
+    const [L1, a1, b1] = Array.from(a.lab());
+    const [L2, a2, b2] = Array.from(b.lab());
+    const avgL = (L1 + L2) / 2;
+    const C1 = sqrt(pow(a1, 2) + pow(b1, 2));
+    const C2 = sqrt(pow(a2, 2) + pow(b2, 2));
+    const avgC = (C1 + C2) / 2;
+    const G = 0.5 * (1 - sqrt(pow(avgC, 7) / (pow(avgC, 7) + pow(25, 7))));
+    const a1p = a1 * (1 + G);
+    const a2p = a2 * (1 + G);
+    const C1p = sqrt(pow(a1p, 2) + pow(b1, 2));
+    const C2p = sqrt(pow(a2p, 2) + pow(b2, 2));
+    const avgCp = (C1p + C2p) / 2;
+    const arctan1 = rad2deg(atan2(b1, a1p));
+    const arctan2 = rad2deg(atan2(b2, a2p));
+    const h1p = arctan1 >= 0 ? arctan1 : arctan1 + 360;
+    const h2p = arctan2 >= 0 ? arctan2 : arctan2 + 360;
+    const avgHp =
+        abs(h1p - h2p) > 180 ? (h1p + h2p + 360) / 2 : (h1p + h2p) / 2;
+    const T =
+        1 -
+        0.17 * cos(deg2rad(avgHp - 30)) +
+        0.24 * cos(deg2rad(2 * avgHp)) +
+        0.32 * cos(deg2rad(3 * avgHp + 6)) -
+        0.2 * cos(deg2rad(4 * avgHp - 63));
+    let deltaHp = h2p - h1p;
+    deltaHp =
+        abs(deltaHp) <= 180
+            ? deltaHp
+            : h2p <= h1p
+              ? deltaHp + 360
+              : deltaHp - 360;
+    deltaHp = 2 * sqrt(C1p * C2p) * sin(deg2rad(deltaHp) / 2);
+    const deltaL = L2 - L1;
+    const deltaCp = C2p - C1p;
+    const sl = 1 + (0.015 * pow(avgL - 50, 2)) / sqrt(20 + pow(avgL - 50, 2));
+    const sc = 1 + 0.045 * avgCp;
+    const sh = 1 + 0.015 * avgCp * T;
+    const deltaTheta = 30 * exp(-pow((avgHp - 275) / 25, 2));
+    const Rc = 2 * sqrt(pow(avgCp, 7) / (pow(avgCp, 7) + pow(25, 7)));
+    const Rt = -Rc * sin(2 * deg2rad(deltaTheta));
+    const result = sqrt(
+        pow(deltaL / (Kl * sl), 2) +
+            pow(deltaCp / (Kc * sc), 2) +
+            pow(deltaHp / (Kh * sh), 2) +
+            Rt * (deltaCp / (Kc * sc)) * (deltaHp / (Kh * sh))
+    );
+    return max$1(0, min$1(100, result));
 }
 
 // simple Euclidean distance
-function distance(a, b, mode = "lab") {
-	// Delta E (CIE 1976)
-	// see http://www.brucelindbloom.com/index.html?Equations.html
-	a = new Color(a)
-	b = new Color(b)
-	const l1 = a.get(mode)
-	const l2 = b.get(mode)
-	let sum_sq = 0
-	for (let i in l1) {
-		const d = (l1[i] || 0) - (l2[i] || 0)
-		sum_sq += d * d
-	}
-	return Math.sqrt(sum_sq)
+function distance (a, b, mode = 'lab') {
+    // Delta E (CIE 1976)
+    // see http://www.brucelindbloom.com/index.html?Equations.html
+    a = new Color(a);
+    b = new Color(b);
+    const l1 = a.get(mode);
+    const l2 = b.get(mode);
+    let sum_sq = 0;
+    for (let i in l1) {
+        const d = (l1[i] || 0) - (l2[i] || 0);
+        sum_sq += d * d;
+    }
+    return Math.sqrt(sum_sq);
 }
 
 var valid = (...args) => {
-	try {
-		new Color(...args)
-		return true
-		// eslint-disable-next-line
-	} catch (e) {
-		return false
-	}
-}
+    try {
+        new Color(...args);
+        return true;
+        // eslint-disable-next-line
+    } catch (e) {
+        return false;
+    }
+};
 
 // some pre-defined color scales:
 
 var scales = {
-	cool() {
-		return scale([chroma.hsl(180, 1, 0.9), chroma.hsl(250, 0.7, 0.4)])
-	},
-	hot() {
-		return scale(["#000", "#f00", "#ff0", "#fff"]).mode("rgb")
-	},
-}
+    cool() {
+        return scale([chroma.hsl(180, 1, 0.9), chroma.hsl(250, 0.7, 0.4)]);
+    },
+    hot() {
+        return scale(['#000', '#f00', '#ff0', '#fff']).mode(
+            'rgb'
+        );
+    }
+};
 
 /**
     ColorBrewer colors for chroma.js
@@ -6830,489 +5879,132 @@ var scales = {
 */
 
 const colorbrewer = {
-	// sequential
-	OrRd: [
-		"#fff7ec",
-		"#fee8c8",
-		"#fdd49e",
-		"#fdbb84",
-		"#fc8d59",
-		"#ef6548",
-		"#d7301f",
-		"#b30000",
-		"#7f0000",
-	],
-	PuBu: [
-		"#fff7fb",
-		"#ece7f2",
-		"#d0d1e6",
-		"#a6bddb",
-		"#74a9cf",
-		"#3690c0",
-		"#0570b0",
-		"#045a8d",
-		"#023858",
-	],
-	BuPu: [
-		"#f7fcfd",
-		"#e0ecf4",
-		"#bfd3e6",
-		"#9ebcda",
-		"#8c96c6",
-		"#8c6bb1",
-		"#88419d",
-		"#810f7c",
-		"#4d004b",
-	],
-	Oranges: [
-		"#fff5eb",
-		"#fee6ce",
-		"#fdd0a2",
-		"#fdae6b",
-		"#fd8d3c",
-		"#f16913",
-		"#d94801",
-		"#a63603",
-		"#7f2704",
-	],
-	BuGn: [
-		"#f7fcfd",
-		"#e5f5f9",
-		"#ccece6",
-		"#99d8c9",
-		"#66c2a4",
-		"#41ae76",
-		"#238b45",
-		"#006d2c",
-		"#00441b",
-	],
-	YlOrBr: [
-		"#ffffe5",
-		"#fff7bc",
-		"#fee391",
-		"#fec44f",
-		"#fe9929",
-		"#ec7014",
-		"#cc4c02",
-		"#993404",
-		"#662506",
-	],
-	YlGn: [
-		"#ffffe5",
-		"#f7fcb9",
-		"#d9f0a3",
-		"#addd8e",
-		"#78c679",
-		"#41ab5d",
-		"#238443",
-		"#006837",
-		"#004529",
-	],
-	Reds: [
-		"#fff5f0",
-		"#fee0d2",
-		"#fcbba1",
-		"#fc9272",
-		"#fb6a4a",
-		"#ef3b2c",
-		"#cb181d",
-		"#a50f15",
-		"#67000d",
-	],
-	RdPu: [
-		"#fff7f3",
-		"#fde0dd",
-		"#fcc5c0",
-		"#fa9fb5",
-		"#f768a1",
-		"#dd3497",
-		"#ae017e",
-		"#7a0177",
-		"#49006a",
-	],
-	Greens: [
-		"#f7fcf5",
-		"#e5f5e0",
-		"#c7e9c0",
-		"#a1d99b",
-		"#74c476",
-		"#41ab5d",
-		"#238b45",
-		"#006d2c",
-		"#00441b",
-	],
-	YlGnBu: [
-		"#ffffd9",
-		"#edf8b1",
-		"#c7e9b4",
-		"#7fcdbb",
-		"#41b6c4",
-		"#1d91c0",
-		"#225ea8",
-		"#253494",
-		"#081d58",
-	],
-	Purples: [
-		"#fcfbfd",
-		"#efedf5",
-		"#dadaeb",
-		"#bcbddc",
-		"#9e9ac8",
-		"#807dba",
-		"#6a51a3",
-		"#54278f",
-		"#3f007d",
-	],
-	GnBu: [
-		"#f7fcf0",
-		"#e0f3db",
-		"#ccebc5",
-		"#a8ddb5",
-		"#7bccc4",
-		"#4eb3d3",
-		"#2b8cbe",
-		"#0868ac",
-		"#084081",
-	],
-	Greys: [
-		"#ffffff",
-		"#f0f0f0",
-		"#d9d9d9",
-		"#bdbdbd",
-		"#969696",
-		"#737373",
-		"#525252",
-		"#252525",
-		"#000000",
-	],
-	YlOrRd: [
-		"#ffffcc",
-		"#ffeda0",
-		"#fed976",
-		"#feb24c",
-		"#fd8d3c",
-		"#fc4e2a",
-		"#e31a1c",
-		"#bd0026",
-		"#800026",
-	],
-	PuRd: [
-		"#f7f4f9",
-		"#e7e1ef",
-		"#d4b9da",
-		"#c994c7",
-		"#df65b0",
-		"#e7298a",
-		"#ce1256",
-		"#980043",
-		"#67001f",
-	],
-	Blues: [
-		"#f7fbff",
-		"#deebf7",
-		"#c6dbef",
-		"#9ecae1",
-		"#6baed6",
-		"#4292c6",
-		"#2171b5",
-		"#08519c",
-		"#08306b",
-	],
-	PuBuGn: [
-		"#fff7fb",
-		"#ece2f0",
-		"#d0d1e6",
-		"#a6bddb",
-		"#67a9cf",
-		"#3690c0",
-		"#02818a",
-		"#016c59",
-		"#014636",
-	],
-	Viridis: [
-		"#440154",
-		"#482777",
-		"#3f4a8a",
-		"#31678e",
-		"#26838f",
-		"#1f9d8a",
-		"#6cce5a",
-		"#b6de2b",
-		"#fee825",
-	],
+    // sequential
+    OrRd: ['#fff7ec', '#fee8c8', '#fdd49e', '#fdbb84', '#fc8d59', '#ef6548', '#d7301f', '#b30000', '#7f0000'],
+    PuBu: ['#fff7fb', '#ece7f2', '#d0d1e6', '#a6bddb', '#74a9cf', '#3690c0', '#0570b0', '#045a8d', '#023858'],
+    BuPu: ['#f7fcfd', '#e0ecf4', '#bfd3e6', '#9ebcda', '#8c96c6', '#8c6bb1', '#88419d', '#810f7c', '#4d004b'],
+    Oranges: ['#fff5eb', '#fee6ce', '#fdd0a2', '#fdae6b', '#fd8d3c', '#f16913', '#d94801', '#a63603', '#7f2704'],
+    BuGn: ['#f7fcfd', '#e5f5f9', '#ccece6', '#99d8c9', '#66c2a4', '#41ae76', '#238b45', '#006d2c', '#00441b'],
+    YlOrBr: ['#ffffe5', '#fff7bc', '#fee391', '#fec44f', '#fe9929', '#ec7014', '#cc4c02', '#993404', '#662506'],
+    YlGn: ['#ffffe5', '#f7fcb9', '#d9f0a3', '#addd8e', '#78c679', '#41ab5d', '#238443', '#006837', '#004529'],
+    Reds: ['#fff5f0', '#fee0d2', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d', '#a50f15', '#67000d'],
+    RdPu: ['#fff7f3', '#fde0dd', '#fcc5c0', '#fa9fb5', '#f768a1', '#dd3497', '#ae017e', '#7a0177', '#49006a'],
+    Greens: ['#f7fcf5', '#e5f5e0', '#c7e9c0', '#a1d99b', '#74c476', '#41ab5d', '#238b45', '#006d2c', '#00441b'],
+    YlGnBu: ['#ffffd9', '#edf8b1', '#c7e9b4', '#7fcdbb', '#41b6c4', '#1d91c0', '#225ea8', '#253494', '#081d58'],
+    Purples: ['#fcfbfd', '#efedf5', '#dadaeb', '#bcbddc', '#9e9ac8', '#807dba', '#6a51a3', '#54278f', '#3f007d'],
+    GnBu: ['#f7fcf0', '#e0f3db', '#ccebc5', '#a8ddb5', '#7bccc4', '#4eb3d3', '#2b8cbe', '#0868ac', '#084081'],
+    Greys: ['#ffffff', '#f0f0f0', '#d9d9d9', '#bdbdbd', '#969696', '#737373', '#525252', '#252525', '#000000'],
+    YlOrRd: ['#ffffcc', '#ffeda0', '#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c', '#bd0026', '#800026'],
+    PuRd: ['#f7f4f9', '#e7e1ef', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#980043', '#67001f'],
+    Blues: ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#08519c', '#08306b'],
+    PuBuGn: ['#fff7fb', '#ece2f0', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016c59', '#014636'],
+    Viridis: ['#440154', '#482777', '#3f4a8a', '#31678e', '#26838f', '#1f9d8a', '#6cce5a', '#b6de2b', '#fee825'],
 
-	// diverging
-	Spectral: [
-		"#9e0142",
-		"#d53e4f",
-		"#f46d43",
-		"#fdae61",
-		"#fee08b",
-		"#ffffbf",
-		"#e6f598",
-		"#abdda4",
-		"#66c2a5",
-		"#3288bd",
-		"#5e4fa2",
-	],
-	RdYlGn: [
-		"#a50026",
-		"#d73027",
-		"#f46d43",
-		"#fdae61",
-		"#fee08b",
-		"#ffffbf",
-		"#d9ef8b",
-		"#a6d96a",
-		"#66bd63",
-		"#1a9850",
-		"#006837",
-	],
-	RdBu: [
-		"#67001f",
-		"#b2182b",
-		"#d6604d",
-		"#f4a582",
-		"#fddbc7",
-		"#f7f7f7",
-		"#d1e5f0",
-		"#92c5de",
-		"#4393c3",
-		"#2166ac",
-		"#053061",
-	],
-	PiYG: [
-		"#8e0152",
-		"#c51b7d",
-		"#de77ae",
-		"#f1b6da",
-		"#fde0ef",
-		"#f7f7f7",
-		"#e6f5d0",
-		"#b8e186",
-		"#7fbc41",
-		"#4d9221",
-		"#276419",
-	],
-	PRGn: [
-		"#40004b",
-		"#762a83",
-		"#9970ab",
-		"#c2a5cf",
-		"#e7d4e8",
-		"#f7f7f7",
-		"#d9f0d3",
-		"#a6dba0",
-		"#5aae61",
-		"#1b7837",
-		"#00441b",
-	],
-	RdYlBu: [
-		"#a50026",
-		"#d73027",
-		"#f46d43",
-		"#fdae61",
-		"#fee090",
-		"#ffffbf",
-		"#e0f3f8",
-		"#abd9e9",
-		"#74add1",
-		"#4575b4",
-		"#313695",
-	],
-	BrBG: [
-		"#543005",
-		"#8c510a",
-		"#bf812d",
-		"#dfc27d",
-		"#f6e8c3",
-		"#f5f5f5",
-		"#c7eae5",
-		"#80cdc1",
-		"#35978f",
-		"#01665e",
-		"#003c30",
-	],
-	RdGy: [
-		"#67001f",
-		"#b2182b",
-		"#d6604d",
-		"#f4a582",
-		"#fddbc7",
-		"#ffffff",
-		"#e0e0e0",
-		"#bababa",
-		"#878787",
-		"#4d4d4d",
-		"#1a1a1a",
-	],
-	PuOr: [
-		"#7f3b08",
-		"#b35806",
-		"#e08214",
-		"#fdb863",
-		"#fee0b6",
-		"#f7f7f7",
-		"#d8daeb",
-		"#b2abd2",
-		"#8073ac",
-		"#542788",
-		"#2d004b",
-	],
+    // diverging
+    Spectral: ['#9e0142', '#d53e4f', '#f46d43', '#fdae61', '#fee08b', '#ffffbf', '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2'],
+    RdYlGn: ['#a50026', '#d73027', '#f46d43', '#fdae61', '#fee08b', '#ffffbf', '#d9ef8b', '#a6d96a', '#66bd63', '#1a9850', '#006837'],
+    RdBu: ['#67001f', '#b2182b', '#d6604d', '#f4a582', '#fddbc7', '#f7f7f7', '#d1e5f0', '#92c5de', '#4393c3', '#2166ac', '#053061'],
+    PiYG: ['#8e0152', '#c51b7d', '#de77ae', '#f1b6da', '#fde0ef', '#f7f7f7', '#e6f5d0', '#b8e186', '#7fbc41', '#4d9221', '#276419'],
+    PRGn: ['#40004b', '#762a83', '#9970ab', '#c2a5cf', '#e7d4e8', '#f7f7f7', '#d9f0d3', '#a6dba0', '#5aae61', '#1b7837', '#00441b'],
+    RdYlBu: ['#a50026', '#d73027', '#f46d43', '#fdae61', '#fee090', '#ffffbf', '#e0f3f8', '#abd9e9', '#74add1', '#4575b4', '#313695'],
+    BrBG: ['#543005', '#8c510a', '#bf812d', '#dfc27d', '#f6e8c3', '#f5f5f5', '#c7eae5', '#80cdc1', '#35978f', '#01665e', '#003c30'],
+    RdGy: ['#67001f', '#b2182b', '#d6604d', '#f4a582', '#fddbc7', '#ffffff', '#e0e0e0', '#bababa', '#878787', '#4d4d4d', '#1a1a1a'],
+    PuOr: ['#7f3b08', '#b35806', '#e08214', '#fdb863', '#fee0b6', '#f7f7f7', '#d8daeb', '#b2abd2', '#8073ac', '#542788', '#2d004b'],
 
-	// qualitative
-	Set2: ["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854", "#ffd92f", "#e5c494", "#b3b3b3"],
-	Accent: ["#7fc97f", "#beaed4", "#fdc086", "#ffff99", "#386cb0", "#f0027f", "#bf5b17", "#666666"],
-	Set1: [
-		"#e41a1c",
-		"#377eb8",
-		"#4daf4a",
-		"#984ea3",
-		"#ff7f00",
-		"#ffff33",
-		"#a65628",
-		"#f781bf",
-		"#999999",
-	],
-	Set3: [
-		"#8dd3c7",
-		"#ffffb3",
-		"#bebada",
-		"#fb8072",
-		"#80b1d3",
-		"#fdb462",
-		"#b3de69",
-		"#fccde5",
-		"#d9d9d9",
-		"#bc80bd",
-		"#ccebc5",
-		"#ffed6f",
-	],
-	Dark2: ["#1b9e77", "#d95f02", "#7570b3", "#e7298a", "#66a61e", "#e6ab02", "#a6761d", "#666666"],
-	Paired: [
-		"#a6cee3",
-		"#1f78b4",
-		"#b2df8a",
-		"#33a02c",
-		"#fb9a99",
-		"#e31a1c",
-		"#fdbf6f",
-		"#ff7f00",
-		"#cab2d6",
-		"#6a3d9a",
-		"#ffff99",
-		"#b15928",
-	],
-	Pastel2: ["#b3e2cd", "#fdcdac", "#cbd5e8", "#f4cae4", "#e6f5c9", "#fff2ae", "#f1e2cc", "#cccccc"],
-	Pastel1: [
-		"#fbb4ae",
-		"#b3cde3",
-		"#ccebc5",
-		"#decbe4",
-		"#fed9a6",
-		"#ffffcc",
-		"#e5d8bd",
-		"#fddaec",
-		"#f2f2f2",
-	],
-}
+    // qualitative
+    Set2: ['#66c2a5', '#fc8d62', '#8da0cb', '#e78ac3', '#a6d854', '#ffd92f', '#e5c494', '#b3b3b3'],
+    Accent: ['#7fc97f', '#beaed4', '#fdc086', '#ffff99', '#386cb0', '#f0027f', '#bf5b17', '#666666'],
+    Set1: ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628', '#f781bf', '#999999'],
+    Set3: ['#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', '#d9d9d9', '#bc80bd', '#ccebc5', '#ffed6f'],
+    Dark2: ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666'],
+    Paired: ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928'],
+    Pastel2: ['#b3e2cd', '#fdcdac', '#cbd5e8', '#f4cae4', '#e6f5c9', '#fff2ae', '#f1e2cc', '#cccccc'],
+    Pastel1: ['#fbb4ae', '#b3cde3', '#ccebc5', '#decbe4', '#fed9a6', '#ffffcc', '#e5d8bd', '#fddaec', '#f2f2f2']
+};
 
 // add lowercase aliases for case-insensitive matches
 for (let key of Object.keys(colorbrewer)) {
-	colorbrewer[key.toLowerCase()] = colorbrewer[key]
+    colorbrewer[key.toLowerCase()] = colorbrewer[key];
 }
 
 Object.assign(chroma, {
-	average,
-	bezier: bezier$1,
-	blend,
-	cubehelix,
-	mix,
-	interpolate: mix,
-	random: random$1,
-	scale,
-	analyze,
-	contrast,
-	deltaE,
-	distance,
-	limits,
-	valid,
-	scales,
-	input,
-	colors: w3cx11,
-	brewer: colorbrewer,
-})
+    average,
+    bezier: bezier$1,
+    blend,
+    cubehelix,
+    mix,
+    interpolate: mix,
+    random: random$1,
+    scale,
+    analyze,
+    contrast,
+    deltaE,
+    distance,
+    limits,
+    valid,
+    scales,
+    input,
+    colors: w3cx11,
+    brewer: colorbrewer
+});
 
 const overridePrimitiveColors = () => {
-	const inlangSettings = document.querySelector("inlang-settings")
-	if (!inlangSettings) return undefined
-	const primitives = ["primary", "success", "warning", "danger", "neutral"]
-	for (const primitive of primitives) {
-		const unformattedColor = window
-			.getComputedStyle(inlangSettings)
-			.getPropertyValue(`--inlang-color-${primitive}`)
-			.trim()
-		if (unformattedColor !== "") {
-			const colorShades = getPalette(unformattedColor)
-			appendCSSProperties(colorShades, primitive, inlangSettings)
-		}
-	}
-}
+    const inlangSettings = document.querySelector("inlang-settings");
+    if (!inlangSettings)
+        return undefined;
+    const primitives = ["primary", "success", "warning", "danger", "neutral"];
+    for (const primitive of primitives) {
+        const unformattedColor = window
+            .getComputedStyle(inlangSettings)
+            .getPropertyValue(`--inlang-color-${primitive}`)
+            .trim();
+        if (unformattedColor !== "") {
+            const colorShades = getPalette(unformattedColor);
+            appendCSSProperties(colorShades, primitive, inlangSettings);
+        }
+    }
+};
 const appendCSSProperties = (colorShades, primitive, element) => {
-	let textContent = Object.entries(colorShades)
-		.map(([index, shade]) => `--sl-color-${primitive}-${index}: ${shade} !important;`)
-		.join("\n")
-	textContent = ":host { " + textContent + " }"
-	const shadowRoot = element.shadowRoot || element.attachShadow({ mode: "open" })
-	const style = document.createElement("style")
-	style.textContent = textContent
-	shadowRoot.appendChild(style)
-}
-const getColor = (unformattedColor) => chroma(unformattedColor)
+    let textContent = Object.entries(colorShades)
+        .map(([index, shade]) => `--sl-color-${primitive}-${index}: ${shade} !important;`)
+        .join("\n");
+    textContent = ":host { " + textContent + " }";
+    const shadowRoot = element.shadowRoot || element.attachShadow({ mode: "open" });
+    const style = document.createElement("style");
+    style.textContent = textContent;
+    shadowRoot.appendChild(style);
+};
+const getColor = (unformattedColor) => chroma(unformattedColor);
 const getPalette = (unformattedColor) => {
-	const color = getColor(unformattedColor)
-	const colors = chroma.scale(["white", color, "black"]).domain([0, 0.6, 1]).mode("lrgb")
-	const palette = {}
-	// Create 50
-	palette[50] = colors(0.05).hex()
-	// Create 100-900
-	for (let i = 0.1; i < 0.9; i += 0.1) {
-		palette[Math.round(i * 1000)] = colors(i).hex()
-	}
-	// Create 950
-	palette[950] = colors(0.95).hex()
-	return palette
-}
+    const color = getColor(unformattedColor);
+    const colors = chroma.scale(["white", color, "black"]).domain([0, 0.6, 1]).mode("lrgb");
+    const palette = {};
+    // Create 50
+    palette[50] = colors(0.05).hex();
+    // Create 100-900
+    for (let i = 0.1; i < 0.9; i += 0.1) {
+        palette[Math.round(i * 1000)] = colors(i).hex();
+    }
+    // Create 950
+    palette[950] = colors(0.95).hex();
+    return palette;
+};
 
-var __decorate$b =
-	(undefined && undefined.__decorate) ||
-	function (decorators, target, key, desc) {
-		var c = arguments.length,
-			r =
-				c < 3
-					? target
-					: desc === null
-						? (desc = Object.getOwnPropertyDescriptor(target, key))
-						: desc,
-			d
-		if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-			r = Reflect.decorate(decorators, target, key, desc)
-		else
-			for (var i = decorators.length - 1; i >= 0; i--)
-				if ((d = decorators[i]))
-					r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r
-		return c > 3 && r && Object.defineProperty(target, key, r), r
-	}
+var __decorate$b = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 //import { baseStyling } from "../../../styling/base.js"
-let FieldHeader = class FieldHeader extends h {
-	constructor() {
-		super(...arguments)
-		this.optional = false
-	}
-	static {
-		this.styles = [
-			//baseStyling,
-			i$2`
+let FieldHeader = class FieldHeader extends r$2 {
+    constructor() {
+        super(...arguments);
+        this.optional = false;
+    }
+    static { this.styles = [
+        //baseStyling,
+        i$5 `
 			.header {
 				display: flex;
 				flex-direction: column;
@@ -7355,329 +6047,329 @@ let FieldHeader = class FieldHeader extends h {
 				line-height: 1.5;
 			}
 		`,
-		]
-	}
-	render() {
-		return ke$1` <div class="header">
-			${
-				this.fieldTitle &&
-				ke$1`<h3 part="property-title">
-				${this.fieldTitle}${this.optional ? ke$1`<span class="optinal">${" " + "(optional)"}</span>` : ""}
-			</h3>`
-			}
-			${this.description && ke$1`<p part="property-paragraph" class="help-text">${this.description}</p>`}
-			${
-				this.examples
-					? ke$1`<div class="example-container">
+    ]; }
+    render() {
+        return x ` <div class="header">
+			${this.fieldTitle &&
+            x `<h3 part="property-title">
+				${this.fieldTitle}${this.optional
+                ? x `<span class="optinal">${" " + "(optional)"}</span>`
+                : ""}
+			</h3>`}
+			${this.description &&
+            x `<p part="property-paragraph" class="help-text">${this.description}</p>`}
+			${this.examples
+            ? x `<div class="example-container">
 						<p class="help-text">Examples:</p>
-						${this.examples.map((example) => ke$1`<p class="example">${example}</p>`)}
+						${this.examples.map((example) => x `<p class="example">${example}</p>`)}
 				  </div>`
-					: ``
-			}
-		</div>`
-	}
-}
-__decorate$b([n()], FieldHeader.prototype, "fieldTitle", void 0)
-__decorate$b([n()], FieldHeader.prototype, "description", void 0)
-__decorate$b([n({ type: Array })], FieldHeader.prototype, "examples", void 0)
-__decorate$b([n({ type: Boolean })], FieldHeader.prototype, "optional", void 0)
-FieldHeader = __decorate$b([t$1("field-header")], FieldHeader)
+            : ``}
+		</div>`;
+    }
+};
+__decorate$b([
+    n$1()
+], FieldHeader.prototype, "fieldTitle", void 0);
+__decorate$b([
+    n$1()
+], FieldHeader.prototype, "description", void 0);
+__decorate$b([
+    n$1({ type: Array })
+], FieldHeader.prototype, "examples", void 0);
+__decorate$b([
+    n$1({ type: Boolean })
+], FieldHeader.prototype, "optional", void 0);
+FieldHeader = __decorate$b([
+    t$1("field-header")
+], FieldHeader);
 
-var __decorate$a =
-	(undefined && undefined.__decorate) ||
-	function (decorators, target, key, desc) {
-		var c = arguments.length,
-			r =
-				c < 3
-					? target
-					: desc === null
-						? (desc = Object.getOwnPropertyDescriptor(target, key))
-						: desc,
-			d
-		if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-			r = Reflect.decorate(decorators, target, key, desc)
-		else
-			for (var i = decorators.length - 1; i >= 0; i--)
-				if ((d = decorators[i]))
-					r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r
-		return c > 3 && r && Object.defineProperty(target, key, r), r
-	}
-let StringInput = class StringInput extends h {
-	constructor() {
-		super(...arguments)
-		this.property = ""
-		this.value = ""
-		this.schema = {}
-		this.required = false
-		this.handleInlangProjectChange = () => {}
-	}
-	static {
-		this.styles = [
-			i$2`
-			.property {
-				display: flex;
-				flex-direction: column;
-				gap: 12px;
-			}
-			h3 {
-				margin: 0;
-				font-size: 14px;
-				font-weight: 800;
-			}
-			.help-text {
-				font-size: 14px;
-				color: var(--sl-input-help-text-color);
-				margin: 0;
-				line-height: 1.5;
-			}
-			.description-container {
-				display: flex;
-				flex-direction: column;
-				gap: 4px;
-			}
-		`,
-		]
-	}
-	get _description() {
-		return this.schema.description || undefined
-	}
-	get _examples() {
-		return this.schema.examples
-	}
-	get _title() {
-		return this.schema.title || undefined
-	}
-	render() {
-		return ke$1` <div part="property" class="property">
-			<field-header
-				.fieldTitle=${this._title ? this._title : this.property}
-				.description=${this._description}
-				.examples=${this._examples}
-				.optional=${this.required ? false : true}
-				exportparts="property-title, property-paragraph"
-			></field-header>
-			<sl-input
-				value=${this.value}
-				size="small"
-				@input=${(e) => {
-					this.handleInlangProjectChange(e.target.value, this.property, this.moduleId)
-				}}
-			>
-			</sl-input>
-		</div>`
-	}
-}
-__decorate$a([n()], StringInput.prototype, "property", void 0)
-__decorate$a([n()], StringInput.prototype, "moduleId", void 0)
-__decorate$a([n()], StringInput.prototype, "value", void 0)
-__decorate$a([n()], StringInput.prototype, "schema", void 0)
-__decorate$a([n()], StringInput.prototype, "required", void 0)
-__decorate$a([n()], StringInput.prototype, "handleInlangProjectChange", void 0)
-StringInput = __decorate$a([t$1("string-input")], StringInput)
+var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let StringInput = class StringInput extends r$2 {
+    constructor() {
+        super(...arguments);
+        this.property = "";
+        this.value = "";
+        this.schema = {};
+        this.required = false;
+        this.handleInlangProjectChange = () => { };
+    }
+    static { this.styles = [
+        i$5 `
+      .property {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      h3 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 800;
+      }
+      .help-text {
+        font-size: 14px;
+        color: var(--sl-input-help-text-color);
+        margin: 0;
+        line-height: 1.5;
+      }
+      .description-container {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+    `,
+    ]; }
+    get _description() {
+        return this.schema.description || undefined;
+    }
+    get _examples() {
+        return this.schema.examples;
+    }
+    get _title() {
+        return this.schema.title || undefined;
+    }
+    render() {
+        return x ` <div part="property" class="property">
+      <field-header
+        .fieldTitle=${this._title ? this._title : this.property}
+        .description=${this._description}
+        .examples=${this._examples}
+        .optional=${this.required ? false : true}
+        exportparts="property-title, property-paragraph"
+      ></field-header>
+      <sl-input
+        value=${this.value}
+        size="small"
+        @input=${(e) => {
+            this.handleInlangProjectChange(e.target.value, this.property, this.moduleId);
+        }}
+      >
+      </sl-input>
+    </div>`;
+    }
+};
+__decorate$a([
+    n$1()
+], StringInput.prototype, "property", void 0);
+__decorate$a([
+    n$1()
+], StringInput.prototype, "moduleId", void 0);
+__decorate$a([
+    n$1()
+], StringInput.prototype, "value", void 0);
+__decorate$a([
+    n$1()
+], StringInput.prototype, "schema", void 0);
+__decorate$a([
+    n$1()
+], StringInput.prototype, "required", void 0);
+__decorate$a([
+    n$1()
+], StringInput.prototype, "handleInlangProjectChange", void 0);
+StringInput = __decorate$a([
+    t$1("string-input")
+], StringInput);
 
-var __decorate$9 =
-	(undefined && undefined.__decorate) ||
-	function (decorators, target, key, desc) {
-		var c = arguments.length,
-			r =
-				c < 3
-					? target
-					: desc === null
-						? (desc = Object.getOwnPropertyDescriptor(target, key))
-						: desc,
-			d
-		if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-			r = Reflect.decorate(decorators, target, key, desc)
-		else
-			for (var i = decorators.length - 1; i >= 0; i--)
-				if ((d = decorators[i]))
-					r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r
-		return c > 3 && r && Object.defineProperty(target, key, r), r
-	}
-let DefaultArrayInput = class DefaultArrayInput extends h {
-	constructor() {
-		super(...arguments)
-		this.property = ""
-		this.value = []
-		this.schema = {}
-		this.required = false
-		this.handleInlangProjectChange = () => {}
-		this._inputValue = undefined
-	}
-	static {
-		this.styles = [
-			i$2`
-			.property {
-				display: flex;
-				flex-direction: column;
-				gap: 12px;
-			}
-			.item-container {
-				display: flex;
-				flex-direction: column;
-				gap: 4px;
-				padding-bottom: 8px;
-			}
-			.disabled-input::part(base) {
-				cursor: unset;
-				opacity: 1;
-			}
-			.disabled-input::part(suffix) {
-				cursor: pointer;
-				opacity: 0.5;
-			}
-			.disabled-input::part(suffix):hover {
-				opacity: 1;
-			}
-			.add-input {
-				flex-grow: 1;
-			}
-			.add-input::part(suffix) {
-				cursor: pointer;
-			}
-			.new-line-container {
-				display: flex;
-				gap: 4px;
-			}
-			.icon-wrapper {
-				display: flex;
-			}
-		`,
-		]
-	}
-	get _description() {
-		return this.schema.description || undefined
-	}
-	get _title() {
-		return this.schema.title || undefined
-	}
-	handleInputChange(e) {
-		const inputElement = e.target
-		this._inputValue = inputElement.value
-	}
-	handleAddItemClick() {
-		if (this._inputValue && this._inputValue.trim() !== "") {
-			this.value ? this.value.push(this._inputValue) : (this.value = [this._inputValue])
-			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
-			this._inputValue = "null"
-			this._inputValue = undefined
-		}
-	}
-	handleDeleteItemClick(index) {
-		if (this.value) {
-			this.value.splice(index, 1)
-			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
-			this._inputValue = "null"
-			this._inputValue = undefined
-		}
-	}
-	render() {
-		return ke$1`<div part="property" class="property">
-			<field-header
-				.fieldTitle=${this._title ? this._title : this.property}
-				.description=${this._description}
-				.optional=${this.required ? false : true}
-				exportparts="property-title, property-paragraph"
-			></field-header>
-			${
-				this.value && this.value.length > 0
-					? ke$1`<div class="item-container">
-						${this.value.map((arrayItem, index) => {
-							return ke$1`<sl-input
-								class="disabled-input"
-								size="small"
-								value=${arrayItem}
-								disabled
-								filled
-							>
-								<div
-									slot="suffix"
-									class="icon-wrapper"
-									@click=${() => {
-										this.handleDeleteItemClick(index)
-									}}
-								>
-									<svg class="icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-										<path
-											xmlns="http://www.w3.org/2000/svg"
-											d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"
-										/>
-									</svg>
-								</div>
-							</sl-input>`
-						})}
-				  </div>`
-					: undefined
-			}
-			<div class="new-line-container">
-				<sl-input
-					class="add-input"
-					size="small"
-					placeholder="Add new item"
-					@input=${(e) => this.handleInputChange(e)}
-					@keydown=${(e) => {
-						if (e.key === "Enter") {
-							this.handleAddItemClick()
-						}
-					}}
-					value=${this._inputValue}
-				>
-				</sl-input>
-				<sl-button
-					exportparts="base:button"
-					size="small"
-					variant="neutral"
-					@click=${() => {
-						this.handleAddItemClick()
-					}}
-				>
-					Add
-				</sl-button>
-			</div>
-		</div>`
-	}
-}
-__decorate$9([n()], DefaultArrayInput.prototype, "property", void 0)
-__decorate$9([n()], DefaultArrayInput.prototype, "moduleId", void 0)
-__decorate$9([n()], DefaultArrayInput.prototype, "value", void 0)
-__decorate$9([n()], DefaultArrayInput.prototype, "schema", void 0)
-__decorate$9([n()], DefaultArrayInput.prototype, "required", void 0)
-__decorate$9([n()], DefaultArrayInput.prototype, "handleInlangProjectChange", void 0)
-__decorate$9([r()], DefaultArrayInput.prototype, "_inputValue", void 0)
-DefaultArrayInput = __decorate$9([t$1("default-array-input")], DefaultArrayInput)
+var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let DefaultArrayInput = class DefaultArrayInput extends r$2 {
+    constructor() {
+        super(...arguments);
+        this.property = "";
+        this.value = [];
+        this.schema = {};
+        this.required = false;
+        this.handleInlangProjectChange = () => { };
+        this._inputValue = undefined;
+    }
+    static { this.styles = [
+        i$5 `
+      .property {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .item-container {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding-bottom: 8px;
+      }
+      .disabled-input::part(base) {
+        cursor: unset;
+        opacity: 1;
+      }
+      .disabled-input::part(suffix) {
+        cursor: pointer;
+        opacity: 0.5;
+      }
+      .disabled-input::part(suffix):hover {
+        opacity: 1;
+      }
+      .add-input {
+        flex-grow: 1;
+      }
+      .add-input::part(suffix) {
+        cursor: pointer;
+      }
+      .new-line-container {
+        display: flex;
+        gap: 4px;
+      }
+      .icon-wrapper {
+        display: flex;
+      }
+    `,
+    ]; }
+    get _description() {
+        return this.schema.description || undefined;
+    }
+    get _title() {
+        return this.schema.title || undefined;
+    }
+    handleInputChange(e) {
+        const inputElement = e.target;
+        this._inputValue = inputElement.value;
+    }
+    handleAddItemClick() {
+        if (this._inputValue && this._inputValue.trim() !== "") {
+            this.value
+                ? this.value.push(this._inputValue)
+                : (this.value = [this._inputValue]);
+            this.handleInlangProjectChange(this.value, this.property, this.moduleId);
+            this._inputValue = "null";
+            this._inputValue = undefined;
+        }
+    }
+    handleDeleteItemClick(index) {
+        if (this.value) {
+            this.value.splice(index, 1);
+            this.handleInlangProjectChange(this.value, this.property, this.moduleId);
+            this._inputValue = "null";
+            this._inputValue = undefined;
+        }
+    }
+    render() {
+        return x `<div part="property" class="property">
+      <field-header
+        .fieldTitle=${this._title ? this._title : this.property}
+        .description=${this._description}
+        .optional=${this.required ? false : true}
+        exportparts="property-title, property-paragraph"
+      ></field-header>
+      ${this.value && this.value.length > 0
+            ? x `<div class="item-container">
+            ${this.value.map((arrayItem, index) => {
+                return x `<sl-input
+                class="disabled-input"
+                size="small"
+                value=${arrayItem}
+                disabled
+                filled
+              >
+                <div
+                  slot="suffix"
+                  class="icon-wrapper"
+                  @click=${() => {
+                    this.handleDeleteItemClick(index);
+                }}
+                >
+                  <svg
+                    class="icon"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      xmlns="http://www.w3.org/2000/svg"
+                      d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"
+                    />
+                  </svg>
+                </div>
+              </sl-input>`;
+            })}
+          </div>`
+            : undefined}
+      <div class="new-line-container">
+        <sl-input
+          class="add-input"
+          size="small"
+          placeholder="Add new item"
+          @input=${(e) => this.handleInputChange(e)}
+          @keydown=${(e) => {
+            if (e.key === "Enter") {
+                this.handleAddItemClick();
+            }
+        }}
+          value=${this._inputValue}
+        >
+        </sl-input>
+        <sl-button
+          exportparts="base:button"
+          size="small"
+          variant="neutral"
+          @click=${() => {
+            this.handleAddItemClick();
+        }}
+        >
+          Add
+        </sl-button>
+      </div>
+    </div>`;
+    }
+};
+__decorate$9([
+    n$1()
+], DefaultArrayInput.prototype, "property", void 0);
+__decorate$9([
+    n$1()
+], DefaultArrayInput.prototype, "moduleId", void 0);
+__decorate$9([
+    n$1()
+], DefaultArrayInput.prototype, "value", void 0);
+__decorate$9([
+    n$1()
+], DefaultArrayInput.prototype, "schema", void 0);
+__decorate$9([
+    n$1()
+], DefaultArrayInput.prototype, "required", void 0);
+__decorate$9([
+    n$1()
+], DefaultArrayInput.prototype, "handleInlangProjectChange", void 0);
+__decorate$9([
+    r()
+], DefaultArrayInput.prototype, "_inputValue", void 0);
+DefaultArrayInput = __decorate$9([
+    t$1("default-array-input")
+], DefaultArrayInput);
 
-var __decorate$8 =
-	(undefined && undefined.__decorate) ||
-	function (decorators, target, key, desc) {
-		var c = arguments.length,
-			r =
-				c < 3
-					? target
-					: desc === null
-						? (desc = Object.getOwnPropertyDescriptor(target, key))
-						: desc,
-			d
-		if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-			r = Reflect.decorate(decorators, target, key, desc)
-		else
-			for (var i = decorators.length - 1; i >= 0; i--)
-				if ((d = decorators[i]))
-					r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r
-		return c > 3 && r && Object.defineProperty(target, key, r), r
-	}
-let LocaleInput = class LocaleInput extends h {
-	constructor() {
-		super(...arguments)
-		this.property = ""
-		this.value = []
-		this.schema = {}
-		this.required = false
-		this.handleInlangProjectChange = () => {}
-		this._inputValue = undefined
-	}
-	static {
-		this.styles = [
-			i$2`
+var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let LocaleInput = class LocaleInput extends r$2 {
+    constructor() {
+        super(...arguments);
+        this.property = "";
+        this.value = [];
+        this.schema = {};
+        this.required = false;
+        this.handleInlangProjectChange = () => { };
+        this._inputValue = undefined;
+    }
+    static { this.styles = [
+        i$5 `
 			.property {
 				display: flex;
 				flex-direction: column;
@@ -7722,36 +6414,35 @@ let LocaleInput = class LocaleInput extends h {
 				color: var(--sl-input-color);
 			}
 		`,
-		]
-	}
-	get _description() {
-		return this.schema.description || undefined
-	}
-	get _title() {
-		return this.schema.title || undefined
-	}
-	handleInputChange(e) {
-		const inputElement = e.target
-		this._inputValue = inputElement.value
-	}
-	handleAddItemClick() {
-		if (this._inputValue && this._inputValue.trim() !== "") {
-			this.value ? this.value.push(this._inputValue) : (this.value = [this._inputValue])
-			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
-			this._inputValue = "null"
-			this._inputValue = undefined
-		}
-	}
-	handleDeleteItemClick(index) {
-		if (this.value) {
-			this.value.splice(index, 1)
-			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
-			this._inputValue = "null"
-			this._inputValue = undefined
-		}
-	}
-	render() {
-		return ke$1`<div part="property" class="property">
+    ]; }
+    get _description() {
+        return this.schema.description || undefined;
+    }
+    get _title() {
+        return this.schema.title || undefined;
+    }
+    handleInputChange(e) {
+        const inputElement = e.target;
+        this._inputValue = inputElement.value;
+    }
+    handleAddItemClick() {
+        if (this._inputValue && this._inputValue.trim() !== "") {
+            this.value ? this.value.push(this._inputValue) : (this.value = [this._inputValue]);
+            this.handleInlangProjectChange(this.value, this.property, this.moduleId);
+            this._inputValue = "null";
+            this._inputValue = undefined;
+        }
+    }
+    handleDeleteItemClick(index) {
+        if (this.value) {
+            this.value.splice(index, 1);
+            this.handleInlangProjectChange(this.value, this.property, this.moduleId);
+            this._inputValue = "null";
+            this._inputValue = undefined;
+        }
+    }
+    render() {
+        return x `<div part="property" class="property">
 			<field-header
 				.fieldTitle=${this._title ? this._title : this.property}
 				.description=${this._description}
@@ -7759,21 +6450,19 @@ let LocaleInput = class LocaleInput extends h {
 				exportparts="property-title, property-paragraph"
 			></field-header>
 			<div class="tags-container">
-				${
-					this.value &&
-					this.value.map((arrayItem, index) => {
-						return ke$1`
+				${this.value &&
+            this.value.map((arrayItem, index) => {
+                return x `
 						<sl-tag
 							@sl-remove=${() => {
-								this.handleDeleteItemClick(index)
-							}}
+                    this.handleDeleteItemClick(index);
+                }}
 							removable
 							size="small"
 							>${arrayItem}</sl-tag
 						>
-					`
-					})
-				}
+					`;
+            })}
 			</div>
 			<div class="new-line-container">
 				<sl-input
@@ -7782,10 +6471,10 @@ let LocaleInput = class LocaleInput extends h {
 					placeholder="Enter locale ..."
 					@input=${(e) => this.handleInputChange(e)}
 					@keydown=${(e) => {
-						if (e.key === "Enter") {
-							this.handleAddItemClick()
-						}
-					}}
+            if (e.key === "Enter") {
+                this.handleAddItemClick();
+            }
+        }}
 					value=${this._inputValue}
 				>
 				</sl-input>
@@ -7794,55 +6483,57 @@ let LocaleInput = class LocaleInput extends h {
 					size="small"
 					variant="neutral"
 					@click=${() => {
-						this.handleAddItemClick()
-					}}
+            this.handleAddItemClick();
+        }}
 				>
 					Add
 				</sl-button>
 			</div>
-		</div>`
-	}
-}
-__decorate$8([n()], LocaleInput.prototype, "property", void 0)
-__decorate$8([n()], LocaleInput.prototype, "moduleId", void 0)
-__decorate$8([n()], LocaleInput.prototype, "value", void 0)
-__decorate$8([n()], LocaleInput.prototype, "schema", void 0)
-__decorate$8([n()], LocaleInput.prototype, "required", void 0)
-__decorate$8([n()], LocaleInput.prototype, "handleInlangProjectChange", void 0)
-__decorate$8([r()], LocaleInput.prototype, "_inputValue", void 0)
-LocaleInput = __decorate$8([t$1("locale-input")], LocaleInput)
+		</div>`;
+    }
+};
+__decorate$8([
+    n$1()
+], LocaleInput.prototype, "property", void 0);
+__decorate$8([
+    n$1()
+], LocaleInput.prototype, "moduleId", void 0);
+__decorate$8([
+    n$1()
+], LocaleInput.prototype, "value", void 0);
+__decorate$8([
+    n$1()
+], LocaleInput.prototype, "schema", void 0);
+__decorate$8([
+    n$1()
+], LocaleInput.prototype, "required", void 0);
+__decorate$8([
+    n$1()
+], LocaleInput.prototype, "handleInlangProjectChange", void 0);
+__decorate$8([
+    r()
+], LocaleInput.prototype, "_inputValue", void 0);
+LocaleInput = __decorate$8([
+    t$1("locale-input")
+], LocaleInput);
 
-var __decorate$7 =
-	(undefined && undefined.__decorate) ||
-	function (decorators, target, key, desc) {
-		var c = arguments.length,
-			r =
-				c < 3
-					? target
-					: desc === null
-						? (desc = Object.getOwnPropertyDescriptor(target, key))
-						: desc,
-			d
-		if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-			r = Reflect.decorate(decorators, target, key, desc)
-		else
-			for (var i = decorators.length - 1; i >= 0; i--)
-				if ((d = decorators[i]))
-					r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r
-		return c > 3 && r && Object.defineProperty(target, key, r), r
-	}
-let ReferencePatternInput = class ReferencePatternInput extends h {
-	constructor() {
-		super(...arguments)
-		this.property = ""
-		this.value = []
-		this.schema = {}
-		this.required = false
-		this.handleInlangProjectChange = () => {}
-	}
-	static {
-		this.styles = [
-			i$2`
+var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let ReferencePatternInput = class ReferencePatternInput extends r$2 {
+    constructor() {
+        super(...arguments);
+        this.property = "";
+        this.value = [];
+        this.schema = {};
+        this.required = false;
+        this.handleInlangProjectChange = () => { };
+    }
+    static { this.styles = [
+        i$5 `
 			.property {
 				display: flex;
 				flex-direction: column;
@@ -7879,19 +6570,18 @@ let ReferencePatternInput = class ReferencePatternInput extends h {
 				width: inherit;
 			}
 		`,
-		]
-	}
-	get _description() {
-		return this.schema.description || undefined
-	}
-	get _title() {
-		return this.schema.title || undefined
-	}
-	get _examples() {
-		return this.schema.examples
-	}
-	render() {
-		return ke$1`<div part="property" class="property">
+    ]; }
+    get _description() {
+        return this.schema.description || undefined;
+    }
+    get _title() {
+        return this.schema.title || undefined;
+    }
+    get _examples() {
+        return this.schema.examples;
+    }
+    render() {
+        return x `<div part="property" class="property">
 			<field-header
 				.fieldTitle=${this._title ? this._title : this.property}
 				.description=${this._description}
@@ -7907,10 +6597,11 @@ let ReferencePatternInput = class ReferencePatternInput extends h {
 					placeholder="Enter pattern ..."
 					value=${this.value ? this.value[0] : ""}
 					@input=${(e) => {
-						if (this.value === undefined) this.value = []
-						this.value[0] = e.target.value
-						this.handleInlangProjectChange(this.value, this.property, this.moduleId)
-					}}
+            if (this.value === undefined)
+                this.value = [];
+            this.value[0] = e.target.value;
+            this.handleInlangProjectChange(this.value, this.property, this.moduleId);
+        }}
 				>
 				</sl-input>
 				<sl-input
@@ -7921,61 +6612,61 @@ let ReferencePatternInput = class ReferencePatternInput extends h {
 					?disabled=${!this.value}
 					value=${this.value ? this.value[1] : ""}
 					@input=${(e) => {
-						if (this.value === undefined) this.value = []
-						this.value[1] = e.target.value
-						this.handleInlangProjectChange(this.value, this.property, this.moduleId)
-					}}
+            if (this.value === undefined)
+                this.value = [];
+            this.value[1] = e.target.value;
+            this.handleInlangProjectChange(this.value, this.property, this.moduleId);
+        }}
 				>
 				</sl-input>
 			</div>
-		</div>`
-	}
-}
-__decorate$7([n()], ReferencePatternInput.prototype, "property", void 0)
-__decorate$7([n()], ReferencePatternInput.prototype, "moduleId", void 0)
-__decorate$7([n()], ReferencePatternInput.prototype, "value", void 0)
-__decorate$7([n()], ReferencePatternInput.prototype, "schema", void 0)
-__decorate$7([n()], ReferencePatternInput.prototype, "required", void 0)
-__decorate$7([n()], ReferencePatternInput.prototype, "handleInlangProjectChange", void 0)
-ReferencePatternInput = __decorate$7([t$1("reference-pattern-input")], ReferencePatternInput)
+		</div>`;
+    }
+};
+__decorate$7([
+    n$1()
+], ReferencePatternInput.prototype, "property", void 0);
+__decorate$7([
+    n$1()
+], ReferencePatternInput.prototype, "moduleId", void 0);
+__decorate$7([
+    n$1()
+], ReferencePatternInput.prototype, "value", void 0);
+__decorate$7([
+    n$1()
+], ReferencePatternInput.prototype, "schema", void 0);
+__decorate$7([
+    n$1()
+], ReferencePatternInput.prototype, "required", void 0);
+__decorate$7([
+    n$1()
+], ReferencePatternInput.prototype, "handleInlangProjectChange", void 0);
+ReferencePatternInput = __decorate$7([
+    t$1("reference-pattern-input")
+], ReferencePatternInput);
 
-var __decorate$6 =
-	(undefined && undefined.__decorate) ||
-	function (decorators, target, key, desc) {
-		var c = arguments.length,
-			r =
-				c < 3
-					? target
-					: desc === null
-						? (desc = Object.getOwnPropertyDescriptor(target, key))
-						: desc,
-			d
-		if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-			r = Reflect.decorate(decorators, target, key, desc)
-		else
-			for (var i = decorators.length - 1; i >= 0; i--)
-				if ((d = decorators[i]))
-					r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r
-		return c > 3 && r && Object.defineProperty(target, key, r), r
-	}
-let ArrayInput = class ArrayInput extends h {
-	constructor() {
-		//static override styles = [baseStyling]
-		super(...arguments)
-		this.property = ""
-		this.value = []
-		this.schema = {}
-		this.required = false
-		this.handleInlangProjectChange = () => {}
-	}
-	render() {
-		const schemaPattern = this.schema.items.pattern
-		if (
-			schemaPattern &&
-			schemaPattern ===
-				"^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$"
-		) {
-			return ke$1`
+var __decorate$6 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let ArrayInput = class ArrayInput extends r$2 {
+    constructor() {
+        //static override styles = [baseStyling]
+        super(...arguments);
+        this.property = "";
+        this.value = [];
+        this.schema = {};
+        this.required = false;
+        this.handleInlangProjectChange = () => { };
+    }
+    render() {
+        const schemaPattern = this.schema.items.pattern;
+        if (schemaPattern &&
+            schemaPattern ===
+                "^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$") {
+            return x `
 				<locale-input
 					exportparts="property, property-title, property-paragraph, button"
 					.property=${this.property}
@@ -7985,9 +6676,10 @@ let ArrayInput = class ArrayInput extends h {
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
 					.required=${this.required}
 				></locale-input>
-			`
-		} else if (this.property === "variableReferencePattern") {
-			return ke$1`
+			`;
+        }
+        else if (this.property === "variableReferencePattern") {
+            return x `
 				<reference-pattern-input
 					exportparts="property, property-title, property-paragraph"
 					.property=${this.property}
@@ -7997,9 +6689,10 @@ let ArrayInput = class ArrayInput extends h {
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
 					.required=${this.required}
 				></reference-pattern-input>
-			`
-		} else {
-			return ke$1`
+			`;
+        }
+        else {
+            return x `
 				<default-array-input
 					exportparts="property, property-title, property-paragraph, button"
 					.property=${this.property}
@@ -8009,56 +6702,58 @@ let ArrayInput = class ArrayInput extends h {
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
 					.required=${this.required}
 				></default-array-input>
-			`
-		}
-	}
-}
-__decorate$6([n()], ArrayInput.prototype, "property", void 0)
-__decorate$6([n()], ArrayInput.prototype, "moduleId", void 0)
-__decorate$6([n()], ArrayInput.prototype, "modules", void 0)
-__decorate$6([n()], ArrayInput.prototype, "value", void 0)
-__decorate$6([n()], ArrayInput.prototype, "schema", void 0)
-__decorate$6([n()], ArrayInput.prototype, "required", void 0)
-__decorate$6([n()], ArrayInput.prototype, "handleInlangProjectChange", void 0)
-ArrayInput = __decorate$6([t$1("array-input")], ArrayInput)
+			`;
+        }
+    }
+};
+__decorate$6([
+    n$1()
+], ArrayInput.prototype, "property", void 0);
+__decorate$6([
+    n$1()
+], ArrayInput.prototype, "moduleId", void 0);
+__decorate$6([
+    n$1()
+], ArrayInput.prototype, "modules", void 0);
+__decorate$6([
+    n$1()
+], ArrayInput.prototype, "value", void 0);
+__decorate$6([
+    n$1()
+], ArrayInput.prototype, "schema", void 0);
+__decorate$6([
+    n$1()
+], ArrayInput.prototype, "required", void 0);
+__decorate$6([
+    n$1()
+], ArrayInput.prototype, "handleInlangProjectChange", void 0);
+ArrayInput = __decorate$6([
+    t$1("array-input")
+], ArrayInput);
 
-var __decorate$5 =
-	(undefined && undefined.__decorate) ||
-	function (decorators, target, key, desc) {
-		var c = arguments.length,
-			r =
-				c < 3
-					? target
-					: desc === null
-						? (desc = Object.getOwnPropertyDescriptor(target, key))
-						: desc,
-			d
-		if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-			r = Reflect.decorate(decorators, target, key, desc)
-		else
-			for (var i = decorators.length - 1; i >= 0; i--)
-				if ((d = decorators[i]))
-					r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r
-		return c > 3 && r && Object.defineProperty(target, key, r), r
-	}
-let DefaultObjectInput = class DefaultObjectInput extends h {
-	constructor() {
-		super(...arguments)
-		this.property = ""
-		this.keyPlaceholder = "Enter key"
-		this.valuePlaceholder = "Enter value"
-		this.value = {}
-		this.schema = {}
-		this.withTitle = true
-		this.withDescription = true
-		this.required = false
-		this.handleInlangProjectChange = () => {}
-		this._inputValue = undefined
-		this._inputKey = undefined
-	}
-	static {
-		this.styles = [
-			i$2`
+var __decorate$5 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let DefaultObjectInput = class DefaultObjectInput extends r$2 {
+    constructor() {
+        super(...arguments);
+        this.property = "";
+        this.keyPlaceholder = "Enter key";
+        this.valuePlaceholder = "Enter value";
+        this.value = {};
+        this.schema = {};
+        this.withTitle = true;
+        this.withDescription = true;
+        this.required = false;
+        this.handleInlangProjectChange = () => { };
+        this._inputValue = undefined;
+        this._inputKey = undefined;
+    }
+    static { this.styles = [
+        i$5 `
 			.property {
 				display: flex;
 				flex-direction: column;
@@ -8110,57 +6805,52 @@ let DefaultObjectInput = class DefaultObjectInput extends h {
 				width: inherit;
 			}
 		`,
-		]
-	}
-	get _description() {
-		return this.schema.description || undefined
-	}
-	get _title() {
-		return this.schema.title || undefined
-	}
-	handleAddItemClick() {
-		if (
-			this._inputValue &&
-			this._inputKey &&
-			this._inputValue.trim() !== "" &&
-			this._inputKey.trim() !== ""
-		) {
-			if (!this.value) {
-				this.value = {}
-			}
-			this.value[this._inputKey] = this._inputValue
-			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
-			this._inputValue = "null"
-			this._inputValue = undefined
-			this._inputKey = "null"
-			this._inputKey = undefined
-		}
-	}
-	handleDeleteItemClick(key) {
-		if (this.value) {
-			delete this.value[key]
-			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
-			this._inputValue = "null"
-			this._inputValue = undefined
-			this._inputKey = "null"
-			this._inputKey = undefined
-		}
-	}
-	render() {
-		return ke$1` <div part="property" class="property">
+    ]; }
+    get _description() {
+        return this.schema.description || undefined;
+    }
+    get _title() {
+        return this.schema.title || undefined;
+    }
+    handleAddItemClick() {
+        if (this._inputValue &&
+            this._inputKey &&
+            this._inputValue.trim() !== "" &&
+            this._inputKey.trim() !== "") {
+            if (!this.value) {
+                this.value = {};
+            }
+            this.value[this._inputKey] = this._inputValue;
+            this.handleInlangProjectChange(this.value, this.property, this.moduleId);
+            this._inputValue = "null";
+            this._inputValue = undefined;
+            this._inputKey = "null";
+            this._inputKey = undefined;
+        }
+    }
+    handleDeleteItemClick(key) {
+        if (this.value) {
+            delete this.value[key];
+            this.handleInlangProjectChange(this.value, this.property, this.moduleId);
+            this._inputValue = "null";
+            this._inputValue = undefined;
+            this._inputKey = "null";
+            this._inputKey = undefined;
+        }
+    }
+    render() {
+        return x ` <div part="property" class="property">
 			<field-header
 				.fieldTitle=${this.withTitle ? (this._title ? this._title : this.property) : undefined}
 				.description=${this.withDescription ? this._description : ``}
 				.optional=${this.required ? false : true}
 				exportparts="property-title, property-paragraph"
 			></field-header>
-			${
-				this.value
-					? ke$1`<div class="list-container">
-						${
-							this.value &&
-							Object.entries(this.value).map(([key, value]) => {
-								return ke$1`<div class="add-item-container">
+			${this.value
+            ? x `<div class="list-container">
+						${this.value &&
+                Object.entries(this.value).map(([key, value]) => {
+                    return x `<div class="add-item-container">
 								<sl-input
 									class="disabled-input add-item-side"
 									size="small"
@@ -8180,8 +6870,8 @@ let DefaultObjectInput = class DefaultObjectInput extends h {
 								<div class="remove-icon">
 									<div
 										@click=${() => {
-											this.handleDeleteItemClick(key)
-										}}
+                        this.handleDeleteItemClick(key);
+                    }}
 									>
 										<svg
 											class="icon"
@@ -8197,25 +6887,23 @@ let DefaultObjectInput = class DefaultObjectInput extends h {
 										</svg>
 									</div>
 								</div>
-							</div>`
-							})
-						}
+							</div>`;
+                })}
 				  </div>`
-					: ``
-			}
+            : ``}
 			<div class="add-item-container">
 				<sl-input
 					class="add-item-side"
 					placeholder=${this.keyPlaceholder}
 					size="small"
 					@input=${(e) => {
-						this._inputKey = e.target.value
-					}}
+            this._inputKey = e.target.value;
+        }}
 					@keydown=${(e) => {
-						if (e.key === "Enter") {
-							this.handleAddItemClick()
-						}
-					}}
+            if (e.key === "Enter") {
+                this.handleAddItemClick();
+            }
+        }}
 					value=${this._inputKey}
 				>
 				</sl-input>
@@ -8224,13 +6912,13 @@ let DefaultObjectInput = class DefaultObjectInput extends h {
 					placeholder=${this.valuePlaceholder}
 					size="small"
 					@input=${(e) => {
-						this._inputValue = e.target.value
-					}}
+            this._inputValue = e.target.value;
+        }}
 					@keydown=${(e) => {
-						if (e.key === "Enter") {
-							this.handleAddItemClick()
-						}
-					}}
+            if (e.key === "Enter") {
+                this.handleAddItemClick();
+            }
+        }}
 					value=${this._inputValue}
 				>
 				</sl-input>
@@ -8239,270 +6927,284 @@ let DefaultObjectInput = class DefaultObjectInput extends h {
 					size="small"
 					variant="neutral"
 					@click=${() => {
-						this.handleAddItemClick()
-					}}
+            this.handleAddItemClick();
+        }}
 				>
 					Add
 				</sl-button>
 			</div>
-		</div>`
-	}
-}
-__decorate$5([n()], DefaultObjectInput.prototype, "property", void 0)
-__decorate$5([n()], DefaultObjectInput.prototype, "keyPlaceholder", void 0)
-__decorate$5([n()], DefaultObjectInput.prototype, "valuePlaceholder", void 0)
-__decorate$5([n()], DefaultObjectInput.prototype, "moduleId", void 0)
-__decorate$5([n()], DefaultObjectInput.prototype, "value", void 0)
-__decorate$5([n()], DefaultObjectInput.prototype, "schema", void 0)
-__decorate$5([n()], DefaultObjectInput.prototype, "withTitle", void 0)
-__decorate$5([n()], DefaultObjectInput.prototype, "withDescription", void 0)
-__decorate$5([n()], DefaultObjectInput.prototype, "required", void 0)
-__decorate$5([n()], DefaultObjectInput.prototype, "handleInlangProjectChange", void 0)
-__decorate$5([r()], DefaultObjectInput.prototype, "_inputValue", void 0)
-__decorate$5([r()], DefaultObjectInput.prototype, "_inputKey", void 0)
-DefaultObjectInput = __decorate$5([t$1("default-object-input")], DefaultObjectInput)
+		</div>`;
+    }
+};
+__decorate$5([
+    n$1()
+], DefaultObjectInput.prototype, "property", void 0);
+__decorate$5([
+    n$1()
+], DefaultObjectInput.prototype, "keyPlaceholder", void 0);
+__decorate$5([
+    n$1()
+], DefaultObjectInput.prototype, "valuePlaceholder", void 0);
+__decorate$5([
+    n$1()
+], DefaultObjectInput.prototype, "moduleId", void 0);
+__decorate$5([
+    n$1()
+], DefaultObjectInput.prototype, "value", void 0);
+__decorate$5([
+    n$1()
+], DefaultObjectInput.prototype, "schema", void 0);
+__decorate$5([
+    n$1()
+], DefaultObjectInput.prototype, "withTitle", void 0);
+__decorate$5([
+    n$1()
+], DefaultObjectInput.prototype, "withDescription", void 0);
+__decorate$5([
+    n$1()
+], DefaultObjectInput.prototype, "required", void 0);
+__decorate$5([
+    n$1()
+], DefaultObjectInput.prototype, "handleInlangProjectChange", void 0);
+__decorate$5([
+    r()
+], DefaultObjectInput.prototype, "_inputValue", void 0);
+__decorate$5([
+    r()
+], DefaultObjectInput.prototype, "_inputKey", void 0);
+DefaultObjectInput = __decorate$5([
+    t$1("default-object-input")
+], DefaultObjectInput);
 
-var __decorate$4 =
-	(undefined && undefined.__decorate) ||
-	function (decorators, target, key, desc) {
-		var c = arguments.length,
-			r =
-				c < 3
-					? target
-					: desc === null
-						? (desc = Object.getOwnPropertyDescriptor(target, key))
-						: desc,
-			d
-		if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-			r = Reflect.decorate(decorators, target, key, desc)
-		else
-			for (var i = decorators.length - 1; i >= 0; i--)
-				if ((d = decorators[i]))
-					r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r
-		return c > 3 && r && Object.defineProperty(target, key, r), r
-	}
-let LintRuleLevelObjectInput = class LintRuleLevelObjectInput extends h {
-	constructor() {
-		super(...arguments)
-		this.property = ""
-		this.value = {}
-		this.schema = {}
-		this.required = false
-		this.handleInlangProjectChange = () => {}
-	}
-	static {
-		this.styles = [
-			i$2`
-			.property {
-				display: flex;
-				flex-direction: column;
-				gap: 12px;
-			}
-			.container {
-				display: flex;
-				flex-direction: column;
-				padding-top: 8px;
-				gap: 12px;
-			}
-			.ruleId {
-				font-size: 0.8rem;
-				margin: 0;
-				color: var(--sl-input-color);
-			}
-			.rule-container {
-				display: flex;
-				align-items: center;
-				gap: 12px;
-				flex-wrap: wrap;
-			}
-			.select {
-				max-width: 140px;
-				min-width: 100px;
-			}
-			.title-container {
-				display: flex;
-				gap: 8px;
-			}
-			sl-select::part(expand-icon) {
-				color: var(--sl-input-placeholder-color);
-			}
-			sl-select::part(expand-icon):hover {
-				color: var(--sl-input-color);
-			}
-			sl-select::part(base):hover {
-				border: var(--sl-input-placeholder-color);
-			}
-			.level-icon {
-				color: var(--sl-color-neutral-400);
-				margin-top: 1px;
-				margin-right: 6px;
-			}
-			.level-icon.danger {
-				color: var(--sl-color-danger-600);
-			}
-		`,
-		]
-	}
-	get _description() {
-		return this.schema.description || undefined
-	}
-	get _title() {
-		return this.schema.title || undefined
-	}
-	get _valueOptions() {
-		//@ts-ignore
-		const valuesOptions = Object.values(this.schema.patternProperties)[0]?.anyOf
-		return valuesOptions ? valuesOptions : undefined
-	}
-	handleUpdate(key, value) {
-		if (key && value) {
-			if (!this.value) {
-				this.value = {}
-			}
-			this.value[key] = value
-			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
-		}
-	}
-	async update(changedProperties) {
-		super.update(changedProperties)
-		// TODO find a better way to update the value
-		if (changedProperties.has("value")) {
-			await this.updateComplete
-			const newValue = changedProperties.get("value")
-			if (newValue) {
-				for (const moduleId of Object.keys(newValue)) {
-					const slSelect = this.shadowRoot?.getElementById(moduleId)
-					if (slSelect) {
-						const input = slSelect.shadowRoot?.querySelector(".select__display-input")
-						if (input && input.value) {
-							input.value = this.value[moduleId] ? this.value[moduleId] : "warning"
-						}
-					}
-				}
-			}
-		}
-	}
-	render() {
-		return this.modules && this.modules.some((module) => module.id.split(".")[0] !== "plugin")
-			? ke$1` <div part="property" class="property">
-					<div class="title-container">
-						<field-header
-							.fieldTitle=${this._title ? this._title : this.property}
-							.description=${this._description}
-							.optional=${this.required ? false : true}
-							exportparts="property-title, property-paragraph"
-						></field-header>
-					</div>
-					<div class="container">
-						${
-							this.modules &&
-							this.modules.map((module) => {
-								return module.id.split(".")[0] !== "plugin"
-									? ke$1`<div class="rule-container">
-										<sl-select
-											id=${module.id}
-											exportparts="listbox:option-wrapper"
-											value=${this.value ? this.value[module.id] : "warning"}
-											placeholder="warning"
-											class="select"
-											size="small"
-											@sl-change=${(e) => {
-												this.handleUpdate(module.id, e.target.value)
-											}}
-										>
-											${
-												this.value[module.id] === "error"
-													? ke$1`<svg
-														class="level-icon danger"
-														slot="prefix"
-														width="20"
-														height="20"
-														viewBox="0 0 24 24"
-												  >
-														<path
-															fill="currentColor"
-															d="M12 17q.425 0 .713-.288T13 16t-.288-.712T12 15t-.712.288T11 16t.288.713T12 17m0-4q.425 0 .713-.288T13 12V8q0-.425-.288-.712T12 7t-.712.288T11 8v4q0 .425.288.713T12 13m0 9q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"
-														/>
-												  </svg>`
-													: ke$1`<svg
-														class="level-icon"
-														slot="prefix"
-														width="20"
-														height="20"
-														viewBox="0 0 24 24"
-												  >
-														<path
-															fill="currentColor"
-															d="M12 17q.425 0 .713-.288T13 16t-.288-.712T12 15t-.712.288T11 16t.288.713T12 17m0-4q.425 0 .713-.288T13 12V8q0-.425-.288-.712T12 7t-.712.288T11 8v4q0 .425.288.713T12 13m0 9q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"
-														/>
-												  </svg>`
-											}
-											${this._valueOptions?.map((option) => {
-												return ke$1`<sl-option
-													exportparts="base:option"
-													value=${option.const}
-													class="add-item-side"
-												>
-													${option.const}
-												</sl-option>`
-											})}
-										</sl-select>
-										<p class="ruleId">${module.displayName.en}</p>
-								  </div>`
-									: undefined
-							})
-						}
-					</div>
-			  </div>`
-			: undefined
-	}
-}
-__decorate$4([n()], LintRuleLevelObjectInput.prototype, "property", void 0)
-__decorate$4([n()], LintRuleLevelObjectInput.prototype, "moduleId", void 0)
-__decorate$4([n()], LintRuleLevelObjectInput.prototype, "modules", void 0)
-__decorate$4([n()], LintRuleLevelObjectInput.prototype, "value", void 0)
-__decorate$4([n()], LintRuleLevelObjectInput.prototype, "schema", void 0)
-__decorate$4([n()], LintRuleLevelObjectInput.prototype, "required", void 0)
-__decorate$4([n()], LintRuleLevelObjectInput.prototype, "handleInlangProjectChange", void 0)
-LintRuleLevelObjectInput = __decorate$4(
-	[t$1("lint-rule-level-object-input")],
-	LintRuleLevelObjectInput
-)
+var __decorate$4 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let LintRuleLevelObjectInput = class LintRuleLevelObjectInput extends r$2 {
+    constructor() {
+        super(...arguments);
+        this.property = "";
+        this.value = {};
+        this.schema = {};
+        this.required = false;
+        this.handleInlangProjectChange = () => { };
+    }
+    static { this.styles = [
+        i$5 `
+      .property {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        padding-top: 8px;
+        gap: 12px;
+      }
+      .ruleId {
+        font-size: 0.8rem;
+        margin: 0;
+        color: var(--sl-input-color);
+      }
+      .rule-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .select {
+        max-width: 140px;
+        min-width: 100px;
+      }
+      .title-container {
+        display: flex;
+        gap: 8px;
+      }
+      sl-select::part(expand-icon) {
+        color: var(--sl-input-placeholder-color);
+      }
+      sl-select::part(expand-icon):hover {
+        color: var(--sl-input-color);
+      }
+      sl-select::part(base):hover {
+        border: var(--sl-input-placeholder-color);
+      }
+      .level-icon {
+        color: var(--sl-color-neutral-400);
+        margin-top: 1px;
+        margin-right: 6px;
+      }
+      .level-icon.danger {
+        color: var(--sl-color-danger-600);
+      }
+    `,
+    ]; }
+    get _description() {
+        return this.schema.description || undefined;
+    }
+    get _title() {
+        return this.schema.title || undefined;
+    }
+    get _valueOptions() {
+        const valuesOptions = //@ts-ignore
+         Object.values(this.schema.patternProperties)[0]?.anyOf;
+        return valuesOptions ? valuesOptions : undefined;
+    }
+    handleUpdate(key, value) {
+        if (key && value) {
+            if (!this.value) {
+                this.value = {};
+            }
+            this.value[key] = value;
+            this.handleInlangProjectChange(this.value, this.property, this.moduleId);
+        }
+    }
+    async update(changedProperties) {
+        super.update(changedProperties);
+        // TODO find a better way to update the value
+        if (changedProperties.has("value")) {
+            await this.updateComplete;
+            const newValue = changedProperties.get("value");
+            if (newValue) {
+                for (const moduleId of Object.keys(newValue)) {
+                    const slSelect = this.shadowRoot?.getElementById(moduleId);
+                    if (slSelect) {
+                        const input = slSelect.shadowRoot?.querySelector(".select__display-input");
+                        if (input && input.value) {
+                            input.value = this.value[moduleId]
+                                ? this.value[moduleId]
+                                : "warning";
+                        }
+                    }
+                }
+            }
+        }
+    }
+    render() {
+        return this.modules &&
+            this.modules.some((module) => module.id.split(".")[0] !== "plugin")
+            ? x ` <div part="property" class="property">
+          <div class="title-container">
+            <field-header
+              .fieldTitle=${this._title ? this._title : this.property}
+              .description=${this._description}
+              .optional=${this.required ? false : true}
+              exportparts="property-title, property-paragraph"
+            ></field-header>
+          </div>
+          <div class="container">
+            ${this.modules &&
+                this.modules.map((module) => {
+                    return module.id.split(".")[0] !== "plugin"
+                        ? x `<div class="rule-container">
+                    <sl-select
+                      id=${module.id}
+                      exportparts="listbox:option-wrapper"
+                      value=${this.value
+                            ? this.value[module.id]
+                            : "warning"}
+                      placeholder="warning"
+                      class="select"
+                      size="small"
+                      @sl-change=${(e) => {
+                            this.handleUpdate(module.id, e.target.value);
+                        }}
+                    >
+                      ${this.value[module.id] === "error"
+                            ? x `<svg
+                            class="level-icon danger"
+                            slot="prefix"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="currentColor"
+                              d="M12 17q.425 0 .713-.288T13 16t-.288-.712T12 15t-.712.288T11 16t.288.713T12 17m0-4q.425 0 .713-.288T13 12V8q0-.425-.288-.712T12 7t-.712.288T11 8v4q0 .425.288.713T12 13m0 9q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"
+                            />
+                          </svg>`
+                            : x `<svg
+                            class="level-icon"
+                            slot="prefix"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="currentColor"
+                              d="M12 17q.425 0 .713-.288T13 16t-.288-.712T12 15t-.712.288T11 16t.288.713T12 17m0-4q.425 0 .713-.288T13 12V8q0-.425-.288-.712T12 7t-.712.288T11 8v4q0 .425.288.713T12 13m0 9q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"
+                            />
+                          </svg>`}
+                      ${this._valueOptions?.map((option) => {
+                            return x `<sl-option
+                          exportparts="base:option"
+                          value=${option.const}
+                          class="add-item-side"
+                        >
+                          ${option.const}
+                        </sl-option>`;
+                        })}
+                    </sl-select>
+                    <p class="ruleId">
+                      ${module.displayName.en}
+                    </p>
+                  </div>`
+                        : undefined;
+                })}
+          </div>
+        </div>`
+            : undefined;
+    }
+};
+__decorate$4([
+    n$1()
+], LintRuleLevelObjectInput.prototype, "property", void 0);
+__decorate$4([
+    n$1()
+], LintRuleLevelObjectInput.prototype, "moduleId", void 0);
+__decorate$4([
+    n$1()
+], LintRuleLevelObjectInput.prototype, "modules", void 0);
+__decorate$4([
+    n$1()
+], LintRuleLevelObjectInput.prototype, "value", void 0);
+__decorate$4([
+    n$1()
+], LintRuleLevelObjectInput.prototype, "schema", void 0);
+__decorate$4([
+    n$1()
+], LintRuleLevelObjectInput.prototype, "required", void 0);
+__decorate$4([
+    n$1()
+], LintRuleLevelObjectInput.prototype, "handleInlangProjectChange", void 0);
+LintRuleLevelObjectInput = __decorate$4([
+    t$1("lint-rule-level-object-input")
+], LintRuleLevelObjectInput);
 
-var __decorate$3 =
-	(undefined && undefined.__decorate) ||
-	function (decorators, target, key, desc) {
-		var c = arguments.length,
-			r =
-				c < 3
-					? target
-					: desc === null
-						? (desc = Object.getOwnPropertyDescriptor(target, key))
-						: desc,
-			d
-		if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-			r = Reflect.decorate(decorators, target, key, desc)
-		else
-			for (var i = decorators.length - 1; i >= 0; i--)
-				if ((d = decorators[i]))
-					r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r
-		return c > 3 && r && Object.defineProperty(target, key, r), r
-	}
-let ObjectInput = class ObjectInput extends h {
-	constructor() {
-		//static override styles = [baseStyling]
-		super(...arguments)
-		this.property = ""
-		this.value = {}
-		this.schema = {}
-		this.withTitle = true
-		this.withDescription = true
-		this.required = false
-		this.handleInlangProjectChange = () => {}
-	}
-	render() {
-		if (this.property === "messageLintRuleLevels") {
-			return ke$1`<lint-rule-level-object-input
+var __decorate$3 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let ObjectInput = class ObjectInput extends r$2 {
+    constructor() {
+        //static override styles = [baseStyling]
+        super(...arguments);
+        this.property = "";
+        this.value = {};
+        this.schema = {};
+        this.withTitle = true;
+        this.withDescription = true;
+        this.required = false;
+        this.handleInlangProjectChange = () => { };
+    }
+    render() {
+        if (this.property === "messageLintRuleLevels") {
+            return x `<lint-rule-level-object-input
 				exportparts="property, property-title, property-paragraph, option, option-wrapper"
 				.property=${this.property}
 				.moduleId=${this.moduleId}
@@ -8511,9 +7213,10 @@ let ObjectInput = class ObjectInput extends h {
 				.schema=${this.schema}
 				.handleInlangProjectChange=${this.handleInlangProjectChange}
 				.required=${this.required}
-			></lint-rule-level-object-input>`
-		} else {
-			return ke$1`<default-object-input
+			></lint-rule-level-object-input>`;
+        }
+        else {
+            return x `<default-object-input
 				exportparts="property, property-title, property-paragraph, button"
 				.property=${this.property}
 				.moduleId=${this.moduleId}
@@ -8525,213 +7228,229 @@ let ObjectInput = class ObjectInput extends h {
 				.withTitle=${this.withTitle}
 				.withDescription=${this.withDescription}
 				.required=${this.required}
-			></default-object-input>`
-		}
-	}
-}
-__decorate$3([n()], ObjectInput.prototype, "property", void 0)
-__decorate$3([n()], ObjectInput.prototype, "moduleId", void 0)
-__decorate$3([n()], ObjectInput.prototype, "modules", void 0)
-__decorate$3([n()], ObjectInput.prototype, "keyPlaceholder", void 0)
-__decorate$3([n()], ObjectInput.prototype, "valuePlaceholder", void 0)
-__decorate$3([n()], ObjectInput.prototype, "value", void 0)
-__decorate$3([n()], ObjectInput.prototype, "schema", void 0)
-__decorate$3([n()], ObjectInput.prototype, "withTitle", void 0)
-__decorate$3([n()], ObjectInput.prototype, "withDescription", void 0)
-__decorate$3([n()], ObjectInput.prototype, "required", void 0)
-__decorate$3([n()], ObjectInput.prototype, "handleInlangProjectChange", void 0)
-ObjectInput = __decorate$3([t$1("object-input")], ObjectInput)
+			></default-object-input>`;
+        }
+    }
+};
+__decorate$3([
+    n$1()
+], ObjectInput.prototype, "property", void 0);
+__decorate$3([
+    n$1()
+], ObjectInput.prototype, "moduleId", void 0);
+__decorate$3([
+    n$1()
+], ObjectInput.prototype, "modules", void 0);
+__decorate$3([
+    n$1()
+], ObjectInput.prototype, "keyPlaceholder", void 0);
+__decorate$3([
+    n$1()
+], ObjectInput.prototype, "valuePlaceholder", void 0);
+__decorate$3([
+    n$1()
+], ObjectInput.prototype, "value", void 0);
+__decorate$3([
+    n$1()
+], ObjectInput.prototype, "schema", void 0);
+__decorate$3([
+    n$1()
+], ObjectInput.prototype, "withTitle", void 0);
+__decorate$3([
+    n$1()
+], ObjectInput.prototype, "withDescription", void 0);
+__decorate$3([
+    n$1()
+], ObjectInput.prototype, "required", void 0);
+__decorate$3([
+    n$1()
+], ObjectInput.prototype, "handleInlangProjectChange", void 0);
+ObjectInput = __decorate$3([
+    t$1("object-input")
+], ObjectInput);
 
-var __decorate$2 =
-	(undefined && undefined.__decorate) ||
-	function (decorators, target, key, desc) {
-		var c = arguments.length,
-			r =
-				c < 3
-					? target
-					: desc === null
-						? (desc = Object.getOwnPropertyDescriptor(target, key))
-						: desc,
-			d
-		if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-			r = Reflect.decorate(decorators, target, key, desc)
-		else
-			for (var i = decorators.length - 1; i >= 0; i--)
-				if ((d = decorators[i]))
-					r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r
-		return c > 3 && r && Object.defineProperty(target, key, r), r
-	}
-let PathPatternInput = class PathPatternInput extends h {
-	constructor() {
-		super(...arguments)
-		this.property = ""
-		this.value = ""
-		this.schema = {}
-		this.required = false
-		this.handleInlangProjectChange = () => {}
-		this._isObject = undefined
-		this._isInitialized = false
-	}
-	static {
-		this.styles = [
-			i$2`
-			.property {
-				display: flex;
-				flex-direction: column;
-				gap: 12px;
-			}
-			sl-checkbox::part(base) {
-				font-size: 14px;
-				color: var(--sl-input-help-text-color);
-			}
-			.description-container {
-				display: flex;
-				flex-direction: column;
-				gap: 4px;
-			}
-		`,
-		]
-	}
-	get _descriptionObject() {
-		if (this.schema.description) {
-			return this.schema.description
-		} else {
-			return "Specify the pathPattern to locate language files of specific namespaces in your repository. The namespace is a string taht shouldn't include '.', the path must include `{languageTag}` and end with `.json`."
-		}
-	}
-	get _examplesObject() {
-		return [
-			'{ common: "./locales/{languageTag}/common.json", app: "./locales/{languageTag}/app.json" }',
-		]
-	}
-	get _descriptionString() {
-		if (this.schema.description) {
-			return this.schema.description
-		} else {
-			return this.schema.anyOf[0].description || undefined
-		}
-	}
-	get _examplesString() {
-		return this.schema.anyOf[0].examples
-	}
-	get _title() {
-		return this.schema.title || undefined
-	}
-	render() {
-		if (this._isInitialized === false) {
-			if (typeof this.value === "object") {
-				this._isObject = true
-			} else {
-				this._isObject = false
-			}
-			this._isInitialized = true
-		}
-		return ke$1` <div part="property" class="property">
-			<field-header
-				.fieldTitle=${this._title ? this._title : this.property}
-				.optional=${this.required ? false : true}
-				exportparts="property-title"
-			></field-header>
-			<sl-checkbox
-				?checked=${this._isObject}
-				@input=${(e) => {
-					//log input state
-					if (e.target.checked) {
-						this._isObject = true
-					} else {
-						this._isObject = false
-					}
-				}}
-				>with namespaces</sl-checkbox
-			>
-			${
-				this._isObject
-					? ke$1`<div part="property" class="property">
-						<field-header
-							.description=${this._descriptionObject}
-							.examples=${this._examplesObject}
-							.optional=${this.required ? false : true}
-							exportparts="property-title, property-paragraph"
-						></field-header>
-						<object-input
-							exportparts="button"
-							.value=${typeof this.value === "object" ? this.value : ""}
-							.keyPlaceholder=${"Namespace"}
-							.valuePlaceholder=${"Path to resource [./**/*.json]"}
-							.handleInlangProjectChange=${this.handleInlangProjectChange}
-							.property=${this.property}
-							.moduleId=${this.moduleId}
-							.schema=${this.schema}
-							.withTitle=${false}
-							.withDescription=${false}
-							.required=${this.required}
-						>
-						</object-input>
-				  </div>`
-					: ke$1`<div part="property" class="property">
-						<field-header
-							.description=${this._descriptionString}
-							.examples=${this._examplesString}
-							.optional=${this.required ? false : true}
-							exportparts="property-title, property-paragraph"
-						></field-header>
-						<sl-input
-							value=${typeof this.value === "object" ? "" : this.value}
-							size="small"
-							placeholder="Path to resource [./**/*.json]"
-							@input=${(e) => {
-								this.handleInlangProjectChange(e.target.value, this.property, this.moduleId)
-							}}
-						>
-						</sl-input>
-				  </div>`
-			}
-		</div>`
-	}
-}
-__decorate$2([n()], PathPatternInput.prototype, "property", void 0)
-__decorate$2([n()], PathPatternInput.prototype, "moduleId", void 0)
-__decorate$2([n()], PathPatternInput.prototype, "value", void 0)
-__decorate$2([n()], PathPatternInput.prototype, "schema", void 0)
-__decorate$2([n()], PathPatternInput.prototype, "required", void 0)
-__decorate$2([n()], PathPatternInput.prototype, "handleInlangProjectChange", void 0)
-__decorate$2([r()], PathPatternInput.prototype, "_isObject", void 0)
-__decorate$2([r()], PathPatternInput.prototype, "_isInitialized", void 0)
-PathPatternInput = __decorate$2([t$1("path-pattern-input")], PathPatternInput)
+var __decorate$2 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let PathPatternInput = class PathPatternInput extends r$2 {
+    constructor() {
+        super(...arguments);
+        this.property = "";
+        this.value = "";
+        this.schema = {};
+        this.required = false;
+        this.handleInlangProjectChange = () => { };
+        this._isObject = undefined;
+        this._isInitialized = false;
+    }
+    static { this.styles = [
+        i$5 `
+      .property {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      sl-checkbox::part(base) {
+        font-size: 14px;
+        color: var(--sl-input-help-text-color);
+      }
+      .description-container {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+    `,
+    ]; }
+    get _descriptionObject() {
+        if (this.schema.description) {
+            return this.schema.description;
+        }
+        else {
+            return "Specify the pathPattern to locate language files of specific namespaces in your repository. The namespace is a string taht shouldn't include '.', the path must include `{languageTag}` and end with `.json`.";
+        }
+    }
+    get _examplesObject() {
+        return [
+            '{ common: "./locales/{languageTag}/common.json", app: "./locales/{languageTag}/app.json" }',
+        ];
+    }
+    get _descriptionString() {
+        if (this.schema.description) {
+            return this.schema.description;
+        }
+        else {
+            return this.schema.anyOf[0].description || undefined;
+        }
+    }
+    get _examplesString() {
+        return this.schema.anyOf[0].examples;
+    }
+    get _title() {
+        return this.schema.title || undefined;
+    }
+    render() {
+        if (this._isInitialized === false) {
+            if (typeof this.value === "object") {
+                this._isObject = true;
+            }
+            else {
+                this._isObject = false;
+            }
+            this._isInitialized = true;
+        }
+        return x ` <div part="property" class="property">
+      <field-header
+        .fieldTitle=${this._title ? this._title : this.property}
+        .optional=${this.required ? false : true}
+        exportparts="property-title"
+      ></field-header>
+      <sl-checkbox
+        ?checked=${this._isObject}
+        @input=${(e) => {
+            //log input state
+            if (e.target.checked) {
+                this._isObject = true;
+            }
+            else {
+                this._isObject = false;
+            }
+        }}
+        >with namespaces</sl-checkbox
+      >
+      ${this._isObject
+            ? x `<div part="property" class="property">
+            <field-header
+              .description=${this._descriptionObject}
+              .examples=${this._examplesObject}
+              .optional=${this.required ? false : true}
+              exportparts="property-title, property-paragraph"
+            ></field-header>
+            <object-input
+              exportparts="button"
+              .value=${typeof this.value === "object" ? this.value : ""}
+              .keyPlaceholder=${"Namespace"}
+              .valuePlaceholder=${"Path to resource [./**/*.json]"}
+              .handleInlangProjectChange=${this.handleInlangProjectChange}
+              .property=${this.property}
+              .moduleId=${this.moduleId}
+              .schema=${this.schema}
+              .withTitle=${false}
+              .withDescription=${false}
+              .required=${this.required}
+            >
+            </object-input>
+          </div>`
+            : x `<div part="property" class="property">
+            <field-header
+              .description=${this._descriptionString}
+              .examples=${this._examplesString}
+              .optional=${this.required ? false : true}
+              exportparts="property-title, property-paragraph"
+            ></field-header>
+            <sl-input
+              value=${typeof this.value === "object" ? "" : this.value}
+              size="small"
+              placeholder="Path to resource [./**/*.json]"
+              @input=${(e) => {
+                this.handleInlangProjectChange(e.target.value, this.property, this.moduleId);
+            }}
+            >
+            </sl-input>
+          </div>`}
+    </div>`;
+    }
+};
+__decorate$2([
+    n$1()
+], PathPatternInput.prototype, "property", void 0);
+__decorate$2([
+    n$1()
+], PathPatternInput.prototype, "moduleId", void 0);
+__decorate$2([
+    n$1()
+], PathPatternInput.prototype, "value", void 0);
+__decorate$2([
+    n$1()
+], PathPatternInput.prototype, "schema", void 0);
+__decorate$2([
+    n$1()
+], PathPatternInput.prototype, "required", void 0);
+__decorate$2([
+    n$1()
+], PathPatternInput.prototype, "handleInlangProjectChange", void 0);
+__decorate$2([
+    r()
+], PathPatternInput.prototype, "_isObject", void 0);
+__decorate$2([
+    r()
+], PathPatternInput.prototype, "_isInitialized", void 0);
+PathPatternInput = __decorate$2([
+    t$1("path-pattern-input")
+], PathPatternInput);
 
-var __decorate$1 =
-	(undefined && undefined.__decorate) ||
-	function (decorators, target, key, desc) {
-		var c = arguments.length,
-			r =
-				c < 3
-					? target
-					: desc === null
-						? (desc = Object.getOwnPropertyDescriptor(target, key))
-						: desc,
-			d
-		if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-			r = Reflect.decorate(decorators, target, key, desc)
-		else
-			for (var i = decorators.length - 1; i >= 0; i--)
-				if ((d = decorators[i]))
-					r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r
-		return c > 3 && r && Object.defineProperty(target, key, r), r
-	}
-let GeneralInput = class GeneralInput extends h {
-	constructor() {
-		//static override styles = baseStyling
-		super(...arguments)
-		this.property = ""
-		this.value = ""
-		this.schema = {}
-		this.required = {}
-		this.handleInlangProjectChange = () => {}
-	}
-	render() {
-		if (this.schema.type) {
-			if (this.schema.type === "string") {
-				return ke$1` <div>
+var __decorate$1 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let GeneralInput = class GeneralInput extends r$2 {
+    constructor() {
+        //static override styles = baseStyling
+        super(...arguments);
+        this.property = "";
+        this.value = "";
+        this.schema = {};
+        this.required = {};
+        this.handleInlangProjectChange = () => { };
+    }
+    render() {
+        if (this.schema.type) {
+            if (this.schema.type === "string") {
+                return x ` <div>
 					<string-input
 						exportparts="property, property-title, property-paragraph"
 						.property=${this.property}
@@ -8741,9 +7460,10 @@ let GeneralInput = class GeneralInput extends h {
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
 						.required=${this.required}
 					></string-input>
-				</div>`
-			} else if (this.schema.type === "array") {
-				return ke$1` <div>
+				</div>`;
+            }
+            else if (this.schema.type === "array") {
+                return x ` <div>
 					<array-input
 						exportparts="property, property-title, property-paragraph, button"
 						.property=${this.property}
@@ -8754,9 +7474,10 @@ let GeneralInput = class GeneralInput extends h {
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
 						.required=${this.required}
 					></array-input>
-				</div>`
-			} else if (this.schema.type === "object") {
-				return ke$1` <div>
+				</div>`;
+            }
+            else if (this.schema.type === "object") {
+                return x ` <div>
 					<object-input
 						exportparts="property, property-title, property-paragraph, option, option-wrapper, button"
 						.property=${this.property}
@@ -8771,9 +7492,10 @@ let GeneralInput = class GeneralInput extends h {
 						.keyPlaceholder=${"Enter key"}
 						.valuePlaceholder=${"Enter value"}
 					></object-input>
-				</div>`
-			} else {
-				return ke$1` <div>
+				</div>`;
+            }
+            else {
+                return x ` <div>
 					<string-input
 						exportparts="property, property-title, property-paragraph"
 						.property=${this.property}
@@ -8783,10 +7505,11 @@ let GeneralInput = class GeneralInput extends h {
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
 						.required=${this.required}
 					></string-input>
-				</div>`
-			}
-		} else if (this.property === "pathPattern" || this.property === "sourceLanguageFilePath") {
-			return ke$1` <div>
+				</div>`;
+            }
+        }
+        else if (this.property === "pathPattern" || this.property === "sourceLanguageFilePath") {
+            return x ` <div>
 				<path-pattern-input
 					exportparts="property, property-title, property-paragraph, button"
 					.property=${this.property}
@@ -8796,9 +7519,10 @@ let GeneralInput = class GeneralInput extends h {
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
 					.required=${this.required}
 				></path-pattern-input>
-			</div>`
-		} else {
-			return ke$1` <div>
+			</div>`;
+        }
+        else {
+            return x ` <div>
 				<string-input
 					exportparts="property, property-title, property-paragraph"
 					.property=${this.property}
@@ -8808,21 +7532,37 @@ let GeneralInput = class GeneralInput extends h {
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
 					.required=${this.required}
 				></string-input>
-			</div>`
-		}
-	}
-}
-__decorate$1([n()], GeneralInput.prototype, "property", void 0)
-__decorate$1([n()], GeneralInput.prototype, "moduleId", void 0)
-__decorate$1([n()], GeneralInput.prototype, "modules", void 0)
-__decorate$1([n()], GeneralInput.prototype, "value", void 0)
-__decorate$1([n()], GeneralInput.prototype, "schema", void 0)
-__decorate$1([n()], GeneralInput.prototype, "required", void 0)
-__decorate$1([n()], GeneralInput.prototype, "handleInlangProjectChange", void 0)
-GeneralInput = __decorate$1([t$1("general-input")], GeneralInput)
+			</div>`;
+        }
+    }
+};
+__decorate$1([
+    n$1()
+], GeneralInput.prototype, "property", void 0);
+__decorate$1([
+    n$1()
+], GeneralInput.prototype, "moduleId", void 0);
+__decorate$1([
+    n$1()
+], GeneralInput.prototype, "modules", void 0);
+__decorate$1([
+    n$1()
+], GeneralInput.prototype, "value", void 0);
+__decorate$1([
+    n$1()
+], GeneralInput.prototype, "schema", void 0);
+__decorate$1([
+    n$1()
+], GeneralInput.prototype, "required", void 0);
+__decorate$1([
+    n$1()
+], GeneralInput.prototype, "handleInlangProjectChange", void 0);
+GeneralInput = __decorate$1([
+    t$1("general-input")
+], GeneralInput);
 
 // src/components/tag/tag.styles.ts
-var tag_styles_default = i$2`
+var tag_styles_default = i$5`
   :host {
     display: inline-block;
   }
@@ -8935,10 +7675,10 @@ var tag_styles_default = i$2`
   .tag--pill {
     border-radius: var(--sl-border-radius-pill);
   }
-`
+`;
 
 // src/components/icon-button/icon-button.styles.ts
-var icon_button_styles_default = i$2`
+var icon_button_styles_default = i$5`
   :host {
     display: inline-block;
     color: var(--sl-color-neutral-600);
@@ -8985,51 +7725,48 @@ var icon_button_styles_default = i$2`
   .icon-button__icon {
     pointer-events: none;
   }
-`
+`;
 
 // src/utilities/base-path.ts
-var basePath = ""
+var basePath = "";
 function setBasePath(path) {
-	basePath = path
+  basePath = path;
 }
 function getBasePath(subpath = "") {
-	if (!basePath) {
-		const scripts = [...document.getElementsByTagName("script")]
-		const configScript = scripts.find((script) => script.hasAttribute("data-shoelace"))
-		if (configScript) {
-			setBasePath(configScript.getAttribute("data-shoelace"))
-		} else {
-			const fallbackScript = scripts.find((s) => {
-				return (
-					/shoelace(\.min)?\.js($|\?)/.test(s.src) ||
-					/shoelace-autoloader(\.min)?\.js($|\?)/.test(s.src)
-				)
-			})
-			let path = ""
-			if (fallbackScript) {
-				path = fallbackScript.getAttribute("src")
-			}
-			setBasePath(path.split("/").slice(0, -1).join("/"))
-		}
-	}
-	return basePath.replace(/\/$/, "") + (subpath ? `/${subpath.replace(/^\//, "")}` : ``)
+  if (!basePath) {
+    const scripts = [...document.getElementsByTagName("script")];
+    const configScript = scripts.find((script) => script.hasAttribute("data-shoelace"));
+    if (configScript) {
+      setBasePath(configScript.getAttribute("data-shoelace"));
+    } else {
+      const fallbackScript = scripts.find((s) => {
+        return /shoelace(\.min)?\.js($|\?)/.test(s.src) || /shoelace-autoloader(\.min)?\.js($|\?)/.test(s.src);
+      });
+      let path = "";
+      if (fallbackScript) {
+        path = fallbackScript.getAttribute("src");
+      }
+      setBasePath(path.split("/").slice(0, -1).join("/"));
+    }
+  }
+  return basePath.replace(/\/$/, "") + (subpath ? `/${subpath.replace(/^\//, "")}` : ``);
 }
 
 // src/components/icon/library.default.ts
 var library = {
-	name: "default",
-	resolver: (name) => getBasePath(`assets/icons/${name}.svg`),
-}
-var library_default_default = library
+  name: "default",
+  resolver: (name) => getBasePath(`assets/icons/${name}.svg`)
+};
+var library_default_default = library;
 
 // src/components/icon/library.system.ts
 var icons = {
-	caret: `
+  caret: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="6 9 12 15 18 9"></polyline>
     </svg>
   `,
-	check: `
+  check: `
     <svg part="checked-icon" class="checkbox__icon" viewBox="0 0 16 16">
       <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round">
         <g stroke="currentColor">
@@ -9041,50 +7778,50 @@ var icons = {
       </g>
     </svg>
   `,
-	"chevron-down": `
+  "chevron-down": `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
       <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
     </svg>
   `,
-	"chevron-left": `
+  "chevron-left": `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
       <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
     </svg>
   `,
-	"chevron-right": `
+  "chevron-right": `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
       <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
     </svg>
   `,
-	copy: `
+  copy: `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
       <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V2Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H6ZM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1H2Z"/>
     </svg>
   `,
-	eye: `
+  eye: `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
       <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
       <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
     </svg>
   `,
-	"eye-slash": `
+  "eye-slash": `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-slash" viewBox="0 0 16 16">
       <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.944 5.944 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z"/>
       <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829z"/>
       <path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12-.708.708z"/>
     </svg>
   `,
-	eyedropper: `
+  eyedropper: `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eyedropper" viewBox="0 0 16 16">
       <path d="M13.354.646a1.207 1.207 0 0 0-1.708 0L8.5 3.793l-.646-.647a.5.5 0 1 0-.708.708L8.293 5l-7.147 7.146A.5.5 0 0 0 1 12.5v1.793l-.854.853a.5.5 0 1 0 .708.707L1.707 15H3.5a.5.5 0 0 0 .354-.146L11 7.707l1.146 1.147a.5.5 0 0 0 .708-.708l-.647-.646 3.147-3.146a1.207 1.207 0 0 0 0-1.708l-2-2zM2 12.707l7-7L10.293 7l-7 7H2v-1.293z"></path>
     </svg>
   `,
-	"grip-vertical": `
+  "grip-vertical": `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grip-vertical" viewBox="0 0 16 16">
       <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"></path>
     </svg>
   `,
-	indeterminate: `
+  indeterminate: `
     <svg part="indeterminate-icon" class="checkbox__icon" viewBox="0 0 16 16">
       <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round">
         <g stroke="currentColor" stroke-width="2">
@@ -9095,22 +7832,22 @@ var icons = {
       </g>
     </svg>
   `,
-	"person-fill": `
+  "person-fill": `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
       <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
     </svg>
   `,
-	"play-fill": `
+  "play-fill": `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
       <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"></path>
     </svg>
   `,
-	"pause-fill": `
+  "pause-fill": `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pause-fill" viewBox="0 0 16 16">
       <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"></path>
     </svg>
   `,
-	radio: `
+  radio: `
     <svg part="checked-icon" class="radio__icon" viewBox="0 0 16 16">
       <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g fill="currentColor">
@@ -9119,48 +7856,48 @@ var icons = {
       </g>
     </svg>
   `,
-	"star-fill": `
+  "star-fill": `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16">
       <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
     </svg>
   `,
-	"x-lg": `
+  "x-lg": `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
       <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
     </svg>
   `,
-	"x-circle-fill": `
+  "x-circle-fill": `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
       <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"></path>
     </svg>
-  `,
-}
+  `
+};
 var systemLibrary = {
-	name: "system",
-	resolver: (name) => {
-		if (name in icons) {
-			return `data:image/svg+xml,${encodeURIComponent(icons[name])}`
-		}
-		return ""
-	},
-}
-var library_system_default = systemLibrary
+  name: "system",
+  resolver: (name) => {
+    if (name in icons) {
+      return `data:image/svg+xml,${encodeURIComponent(icons[name])}`;
+    }
+    return "";
+  }
+};
+var library_system_default = systemLibrary;
 
 // src/components/icon/library.ts
-var registry = [library_default_default, library_system_default]
-var watchedIcons = []
+var registry = [library_default_default, library_system_default];
+var watchedIcons = [];
 function watchIcon(icon) {
-	watchedIcons.push(icon)
+  watchedIcons.push(icon);
 }
 function unwatchIcon(icon) {
-	watchedIcons = watchedIcons.filter((el) => el !== icon)
+  watchedIcons = watchedIcons.filter((el) => el !== icon);
 }
 function getIconLibrary(name) {
-	return registry.find((lib) => lib.name === name)
+  return registry.find((lib) => lib.name === name);
 }
 
 // src/components/icon/icon.styles.ts
-var icon_styles_default = i$2`
+var icon_styles_default = i$5`
   :host {
     display: inline-block;
     width: 1em;
@@ -9173,68 +7910,66 @@ var icon_styles_default = i$2`
     height: 100%;
     width: 100%;
   }
-`
+`;
 
-var __defProp = Object.defineProperty
-var __defProps = Object.defineProperties
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor
-var __getOwnPropDescs = Object.getOwnPropertyDescriptors
-var __getOwnPropSymbols = Object.getOwnPropertySymbols
-var __hasOwnProp = Object.prototype.hasOwnProperty
-var __propIsEnum = Object.prototype.propertyIsEnumerable
-var __defNormalProp = (obj, key, value) =>
-	key in obj
-		? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value })
-		: (obj[key] = value)
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __spreadValues = (a, b) => {
-	for (var prop in b || (b = {})) if (__hasOwnProp.call(b, prop)) __defNormalProp(a, prop, b[prop])
-	if (__getOwnPropSymbols)
-		for (var prop of __getOwnPropSymbols(b)) {
-			if (__propIsEnum.call(b, prop)) __defNormalProp(a, prop, b[prop])
-		}
-	return a
-}
-var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b))
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 var __decorateClass = (decorators, target, key, kind) => {
-	var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc(target, key) : target
-	for (var i = decorators.length - 1, decorator; i >= 0; i--)
-		if ((decorator = decorators[i]))
-			result = (kind ? decorator(target, key, result) : decorator(result)) || result
-	if (kind && result) __defProp(target, key, result)
-	return result
-}
+  var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc(target, key) : target;
+  for (var i = decorators.length - 1, decorator; i >= 0; i--)
+    if (decorator = decorators[i])
+      result = (kind ? decorator(target, key, result) : decorator(result)) || result;
+  if (kind && result)
+    __defProp(target, key, result);
+  return result;
+};
 
 // src/internal/watch.ts
 function watch(propertyName, options) {
-	const resolvedOptions = __spreadValues(
-		{
-			waitUntilFirstUpdate: false,
-		},
-		options
-	)
-	return (proto, decoratedFnName) => {
-		const { update } = proto
-		const watchedProperties = Array.isArray(propertyName) ? propertyName : [propertyName]
-		proto.update = function (changedProps) {
-			watchedProperties.forEach((property) => {
-				const key = property
-				if (changedProps.has(key)) {
-					const oldValue = changedProps.get(key)
-					const newValue = this[key]
-					if (oldValue !== newValue) {
-						if (!resolvedOptions.waitUntilFirstUpdate || this.hasUpdated) {
-							this[decoratedFnName](oldValue, newValue)
-						}
-					}
-				}
-			})
-			update.call(this, changedProps)
-		}
-	}
+  const resolvedOptions = __spreadValues({
+    waitUntilFirstUpdate: false
+  }, options);
+  return (proto, decoratedFnName) => {
+    const { update } = proto;
+    const watchedProperties = Array.isArray(propertyName) ? propertyName : [propertyName];
+    proto.update = function(changedProps) {
+      watchedProperties.forEach((property) => {
+        const key = property;
+        if (changedProps.has(key)) {
+          const oldValue = changedProps.get(key);
+          const newValue = this[key];
+          if (oldValue !== newValue) {
+            if (!resolvedOptions.waitUntilFirstUpdate || this.hasUpdated) {
+              this[decoratedFnName](oldValue, newValue);
+            }
+          }
+        }
+      });
+      update.call(this, changedProps);
+    };
+  };
 }
 
 // src/styles/component.styles.ts
-var component_styles_default = i$2`
+var component_styles_default = i$5`
   :host {
     box-sizing: border-box;
   }
@@ -9248,380 +7983,292 @@ var component_styles_default = i$2`
   [hidden] {
     display: none !important;
   }
-`
+`;
 
-var ShoelaceElement = class extends h {
-	constructor() {
-		super()
-		Object.entries(this.constructor.dependencies).forEach(([name, component]) => {
-			this.constructor.define(name, component)
-		})
-	}
-	emit(name, options) {
-		const event = new CustomEvent(
-			name,
-			__spreadValues(
-				{
-					bubbles: true,
-					cancelable: false,
-					composed: true,
-					detail: {},
-				},
-				options
-			)
-		)
-		this.dispatchEvent(event)
-		return event
-	}
-	/* eslint-enable */
-	static define(name, elementConstructor = this, options = {}) {
-		const currentlyRegisteredConstructor = customElements.get(name)
-		if (!currentlyRegisteredConstructor) {
-			customElements.define(name, class extends elementConstructor {}, options)
-			return
-		}
-		let newVersion = " (unknown version)"
-		let existingVersion = newVersion
-		if ("version" in elementConstructor && elementConstructor.version) {
-			newVersion = " v" + elementConstructor.version
-		}
-		if ("version" in currentlyRegisteredConstructor && currentlyRegisteredConstructor.version) {
-			existingVersion = " v" + currentlyRegisteredConstructor.version
-		}
-		if (newVersion && existingVersion && newVersion === existingVersion) {
-			return
-		}
-		console.warn(
-			`Attempted to register <${name}>${newVersion}, but <${name}>${existingVersion} has already been registered.`
-		)
-	}
-}
+var ShoelaceElement = class extends r$2 {
+  constructor() {
+    super();
+    Object.entries(this.constructor.dependencies).forEach(([name, component]) => {
+      this.constructor.define(name, component);
+    });
+  }
+  emit(name, options) {
+    const event = new CustomEvent(name, __spreadValues({
+      bubbles: true,
+      cancelable: false,
+      composed: true,
+      detail: {}
+    }, options));
+    this.dispatchEvent(event);
+    return event;
+  }
+  /* eslint-enable */
+  static define(name, elementConstructor = this, options = {}) {
+    const currentlyRegisteredConstructor = customElements.get(name);
+    if (!currentlyRegisteredConstructor) {
+      customElements.define(name, class extends elementConstructor {
+      }, options);
+      return;
+    }
+    let newVersion = " (unknown version)";
+    let existingVersion = newVersion;
+    if ("version" in elementConstructor && elementConstructor.version) {
+      newVersion = " v" + elementConstructor.version;
+    }
+    if ("version" in currentlyRegisteredConstructor && currentlyRegisteredConstructor.version) {
+      existingVersion = " v" + currentlyRegisteredConstructor.version;
+    }
+    if (newVersion && existingVersion && newVersion === existingVersion) {
+      return;
+    }
+    console.warn(
+      `Attempted to register <${name}>${newVersion}, but <${name}>${existingVersion} has already been registered.`
+    );
+  }
+};
 /* eslint-disable */
 // @ts-expect-error This is auto-injected at build time.
-ShoelaceElement.version = "2.14.0"
-ShoelaceElement.dependencies = {}
-__decorateClass([n()], ShoelaceElement.prototype, "dir", 2)
-__decorateClass([n()], ShoelaceElement.prototype, "lang", 2)
+ShoelaceElement.version = "2.14.0";
+ShoelaceElement.dependencies = {};
+__decorateClass([
+  n$1()
+], ShoelaceElement.prototype, "dir", 2);
+__decorateClass([
+  n$1()
+], ShoelaceElement.prototype, "lang", 2);
 
 /**
  * @license
  * Copyright 2020 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */ const nt = (o, t) => (void 0 === t ? void 0 !== o?._$litType$ : o?._$litType$ === t),
-	rt = (o) => void 0 === o.strings,
-	ht = {},
-	dt = (o, t = ht) => (o._$AH = t)
+ */const e$3=(o,t)=>void 0===t?void 0!==o?._$litType$:o?._$litType$===t,f=o=>void 0===o.strings,u$1={},m=(o,t=u$1)=>o._$AH=t;
 
-var CACHEABLE_ERROR = Symbol()
-var RETRYABLE_ERROR = Symbol()
-var parser
-var iconCache = /* @__PURE__ */ new Map()
+var CACHEABLE_ERROR = Symbol();
+var RETRYABLE_ERROR = Symbol();
+var parser;
+var iconCache = /* @__PURE__ */ new Map();
 var SlIcon = class extends ShoelaceElement {
-	constructor() {
-		super(...arguments)
-		this.initialRender = false
-		this.svg = null
-		this.label = ""
-		this.library = "default"
-	}
-	/** Given a URL, this function returns the resulting SVG element or an appropriate error symbol. */
-	async resolveIcon(url, library) {
-		var _a
-		let fileData
-		if (library == null ? void 0 : library.spriteSheet) {
-			return ke$1`<svg part="svg">
+  constructor() {
+    super(...arguments);
+    this.initialRender = false;
+    this.svg = null;
+    this.label = "";
+    this.library = "default";
+  }
+  /** Given a URL, this function returns the resulting SVG element or an appropriate error symbol. */
+  async resolveIcon(url, library) {
+    var _a;
+    let fileData;
+    if (library == null ? void 0 : library.spriteSheet) {
+      return x`<svg part="svg">
         <use part="use" href="${url}"></use>
-      </svg>`
-		}
-		try {
-			fileData = await fetch(url, { mode: "cors" })
-			if (!fileData.ok) return fileData.status === 410 ? CACHEABLE_ERROR : RETRYABLE_ERROR
-		} catch (e) {
-			return RETRYABLE_ERROR
-		}
-		try {
-			const div = document.createElement("div")
-			div.innerHTML = await fileData.text()
-			const svg = div.firstElementChild
-			if (((_a = svg == null ? void 0 : svg.tagName) == null ? void 0 : _a.toLowerCase()) !== "svg")
-				return CACHEABLE_ERROR
-			if (!parser) parser = new DOMParser()
-			const doc = parser.parseFromString(svg.outerHTML, "text/html")
-			const svgEl = doc.body.querySelector("svg")
-			if (!svgEl) return CACHEABLE_ERROR
-			svgEl.part.add("svg")
-			return document.adoptNode(svgEl)
-		} catch (e) {
-			return CACHEABLE_ERROR
-		}
-	}
-	connectedCallback() {
-		super.connectedCallback()
-		watchIcon(this)
-	}
-	firstUpdated() {
-		this.initialRender = true
-		this.setIcon()
-	}
-	disconnectedCallback() {
-		super.disconnectedCallback()
-		unwatchIcon(this)
-	}
-	getIconSource() {
-		const library = getIconLibrary(this.library)
-		if (this.name && library) {
-			return {
-				url: library.resolver(this.name),
-				fromLibrary: true,
-			}
-		}
-		return {
-			url: this.src,
-			fromLibrary: false,
-		}
-	}
-	handleLabelChange() {
-		const hasLabel = typeof this.label === "string" && this.label.length > 0
-		if (hasLabel) {
-			this.setAttribute("role", "img")
-			this.setAttribute("aria-label", this.label)
-			this.removeAttribute("aria-hidden")
-		} else {
-			this.removeAttribute("role")
-			this.removeAttribute("aria-label")
-			this.setAttribute("aria-hidden", "true")
-		}
-	}
-	async setIcon() {
-		var _a
-		const { url, fromLibrary } = this.getIconSource()
-		const library = fromLibrary ? getIconLibrary(this.library) : void 0
-		if (!url) {
-			this.svg = null
-			return
-		}
-		let iconResolver = iconCache.get(url)
-		if (!iconResolver) {
-			iconResolver = this.resolveIcon(url, library)
-			iconCache.set(url, iconResolver)
-		}
-		if (!this.initialRender) {
-			return
-		}
-		const svg = await iconResolver
-		if (svg === RETRYABLE_ERROR) {
-			iconCache.delete(url)
-		}
-		if (url !== this.getIconSource().url) {
-			return
-		}
-		if (nt(svg)) {
-			this.svg = svg
-			return
-		}
-		switch (svg) {
-			case RETRYABLE_ERROR:
-			case CACHEABLE_ERROR:
-				this.svg = null
-				this.emit("sl-error")
-				break
-			default:
-				this.svg = svg.cloneNode(true)
-				;(_a = library == null ? void 0 : library.mutator) == null
-					? void 0
-					: _a.call(library, this.svg)
-				this.emit("sl-load")
-		}
-	}
-	render() {
-		return this.svg
-	}
-}
-SlIcon.styles = [component_styles_default, icon_styles_default]
-__decorateClass([r()], SlIcon.prototype, "svg", 2)
-__decorateClass([n({ reflect: true })], SlIcon.prototype, "name", 2)
-__decorateClass([n()], SlIcon.prototype, "src", 2)
-__decorateClass([n()], SlIcon.prototype, "label", 2)
-__decorateClass([n({ reflect: true })], SlIcon.prototype, "library", 2)
-__decorateClass([watch("label")], SlIcon.prototype, "handleLabelChange", 1)
-__decorateClass([watch(["name", "src", "library"])], SlIcon.prototype, "setIcon", 1)
+      </svg>`;
+    }
+    try {
+      fileData = await fetch(url, { mode: "cors" });
+      if (!fileData.ok)
+        return fileData.status === 410 ? CACHEABLE_ERROR : RETRYABLE_ERROR;
+    } catch (e) {
+      return RETRYABLE_ERROR;
+    }
+    try {
+      const div = document.createElement("div");
+      div.innerHTML = await fileData.text();
+      const svg = div.firstElementChild;
+      if (((_a = svg == null ? void 0 : svg.tagName) == null ? void 0 : _a.toLowerCase()) !== "svg")
+        return CACHEABLE_ERROR;
+      if (!parser)
+        parser = new DOMParser();
+      const doc = parser.parseFromString(svg.outerHTML, "text/html");
+      const svgEl = doc.body.querySelector("svg");
+      if (!svgEl)
+        return CACHEABLE_ERROR;
+      svgEl.part.add("svg");
+      return document.adoptNode(svgEl);
+    } catch (e) {
+      return CACHEABLE_ERROR;
+    }
+  }
+  connectedCallback() {
+    super.connectedCallback();
+    watchIcon(this);
+  }
+  firstUpdated() {
+    this.initialRender = true;
+    this.setIcon();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    unwatchIcon(this);
+  }
+  getIconSource() {
+    const library = getIconLibrary(this.library);
+    if (this.name && library) {
+      return {
+        url: library.resolver(this.name),
+        fromLibrary: true
+      };
+    }
+    return {
+      url: this.src,
+      fromLibrary: false
+    };
+  }
+  handleLabelChange() {
+    const hasLabel = typeof this.label === "string" && this.label.length > 0;
+    if (hasLabel) {
+      this.setAttribute("role", "img");
+      this.setAttribute("aria-label", this.label);
+      this.removeAttribute("aria-hidden");
+    } else {
+      this.removeAttribute("role");
+      this.removeAttribute("aria-label");
+      this.setAttribute("aria-hidden", "true");
+    }
+  }
+  async setIcon() {
+    var _a;
+    const { url, fromLibrary } = this.getIconSource();
+    const library = fromLibrary ? getIconLibrary(this.library) : void 0;
+    if (!url) {
+      this.svg = null;
+      return;
+    }
+    let iconResolver = iconCache.get(url);
+    if (!iconResolver) {
+      iconResolver = this.resolveIcon(url, library);
+      iconCache.set(url, iconResolver);
+    }
+    if (!this.initialRender) {
+      return;
+    }
+    const svg = await iconResolver;
+    if (svg === RETRYABLE_ERROR) {
+      iconCache.delete(url);
+    }
+    if (url !== this.getIconSource().url) {
+      return;
+    }
+    if (e$3(svg)) {
+      this.svg = svg;
+      return;
+    }
+    switch (svg) {
+      case RETRYABLE_ERROR:
+      case CACHEABLE_ERROR:
+        this.svg = null;
+        this.emit("sl-error");
+        break;
+      default:
+        this.svg = svg.cloneNode(true);
+        (_a = library == null ? void 0 : library.mutator) == null ? void 0 : _a.call(library, this.svg);
+        this.emit("sl-load");
+    }
+  }
+  render() {
+    return this.svg;
+  }
+};
+SlIcon.styles = [component_styles_default, icon_styles_default];
+__decorateClass([
+  r()
+], SlIcon.prototype, "svg", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlIcon.prototype, "name", 2);
+__decorateClass([
+  n$1()
+], SlIcon.prototype, "src", 2);
+__decorateClass([
+  n$1()
+], SlIcon.prototype, "label", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlIcon.prototype, "library", 2);
+__decorateClass([
+  watch("label")
+], SlIcon.prototype, "handleLabelChange", 1);
+__decorateClass([
+  watch(["name", "src", "library"])
+], SlIcon.prototype, "setIcon", 1);
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const t = { ATTRIBUTE: 1, CHILD: 2, PROPERTY: 3, BOOLEAN_ATTRIBUTE: 4, EVENT: 5, ELEMENT: 6 },
-	e =
-		(t) =>
-		(...e) => ({ _$litDirective$: t, values: e })
-class i {
-	constructor(t) {}
-	get _$AU() {
-		return this._$AM._$AU
-	}
-	_$AT(t, e, i) {
-		;(this.t = t), (this._$AM = e), (this.i = i)
-	}
-	_$AS(t, e) {
-		return this.update(t, e)
-	}
-	update(t, e) {
-		return this.render(...e)
-	}
-}
+const t={ATTRIBUTE:1,CHILD:2,PROPERTY:3,BOOLEAN_ATTRIBUTE:4,EVENT:5,ELEMENT:6},e$2=t=>(...e)=>({_$litDirective$:t,values:e});let i$1 = class i{constructor(t){}get _$AU(){return this._$AM._$AU}_$AT(t,e,i){this._$Ct=t,this._$AM=e,this._$Ci=i;}_$AS(t,e){return this.update(t,e)}update(t,e){return this.render(...e)}};
 
 /**
  * @license
  * Copyright 2018 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */ const Rt = e(
-	class extends i {
-		constructor(s) {
-			if ((super(s), s.type !== t.ATTRIBUTE || "class" !== s.name || s.strings?.length > 2))
-				throw Error(
-					"`classMap()` can only be used in the `class` attribute and must be the only part in the attribute."
-				)
-		}
-		render(t) {
-			return (
-				" " +
-				Object.keys(t)
-					.filter((s) => t[s])
-					.join(" ") +
-				" "
-			)
-		}
-		update(t, [s]) {
-			if (void 0 === this.st) {
-				;(this.st = new Set()),
-					void 0 !== t.strings &&
-						(this.nt = new Set(
-							t.strings
-								.join(" ")
-								.split(/\s/)
-								.filter((t) => "" !== t)
-						))
-				for (const t in s) s[t] && !this.nt?.has(t) && this.st.add(t)
-				return this.render(s)
-			}
-			const i = t.element.classList
-			for (const t of this.st) t in s || (i.remove(t), this.st.delete(t))
-			for (const t in s) {
-				const r = !!s[t]
-				r === this.st.has(t) ||
-					this.nt?.has(t) ||
-					(r ? (i.add(t), this.st.add(t)) : (i.remove(t), this.st.delete(t)))
-			}
-			return R
-		}
-	}
-)
+ */const e$1=e$2(class extends i$1{constructor(t$1){if(super(t$1),t$1.type!==t.ATTRIBUTE||"class"!==t$1.name||t$1.strings?.length>2)throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.")}render(t){return " "+Object.keys(t).filter((s=>t[s])).join(" ")+" "}update(s,[i]){if(void 0===this.st){this.st=new Set,void 0!==s.strings&&(this.nt=new Set(s.strings.join(" ").split(/\s/).filter((t=>""!==t))));for(const t in i)i[t]&&!this.nt?.has(t)&&this.st.add(t);return this.render(i)}const r=s.element.classList;for(const t of this.st)t in i||(r.remove(t),this.st.delete(t));for(const t in i){const s=!!i[t];s===this.st.has(t)||this.nt?.has(t)||(s?(r.add(t),this.st.add(t)):(r.remove(t),this.st.delete(t)));}return T}});
 
 /**
  * @license
  * Copyright 2020 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const $e = Symbol.for(""),
-	xe = (t) => {
-		if (t?.r === $e) return t?._$litStatic$
-	},
-	er = (t, ...r) => ({
-		_$litStatic$: r.reduce(
-			(r, e, a) =>
-				r +
-				((t) => {
-					if (void 0 !== t._$litStatic$) return t._$litStatic$
-					throw Error(
-						`Value passed to 'literal' function must be a 'literal' result: ${t}. Use 'unsafeStatic' to pass non-literal values, but\n            take care to ensure page security.`
-					)
-				})(e) +
-				t[a + 1],
-			t[0]
-		),
-		r: $e,
-	}),
-	Te = new Map(),
-	Ee =
-		(t) =>
-		(r, ...e) => {
-			const a = e.length
-			let o, s
-			const i = [],
-				l = []
-			let n,
-				u = 0,
-				c = !1
-			for (; u < a; ) {
-				for (n = r[u]; u < a && void 0 !== ((s = e[u]), (o = xe(s))); ) (n += o + r[++u]), (c = !0)
-				u !== a && l.push(s), i.push(n), u++
-			}
-			if ((u === a && i.push(r[a]), c)) {
-				const t = i.join("$$lit$$")
-				void 0 === (r = Te.get(t)) && ((i.raw = i), Te.set(t, (r = i))), (e = l)
-			}
-			return t(r, ...e)
-		},
-	ke = Ee(ke$1)
+const a=Symbol.for(""),o$2=t=>{if(t?.r===a)return t?._$litStatic$},i=(t,...r)=>({_$litStatic$:r.reduce(((r,e,a)=>r+(t=>{if(void 0!==t._$litStatic$)return t._$litStatic$;throw Error(`Value passed to 'literal' function must be a 'literal' result: ${t}. Use 'unsafeStatic' to pass non-literal values, but\n            take care to ensure page security.`)})(e)+t[a+1]),t[0]),r:a}),l$1=new Map,n=t=>(r,...e)=>{const a=e.length;let s,i;const n=[],u=[];let c,$=0,f=!1;for(;$<a;){for(c=r[$];$<a&&void 0!==(i=e[$],s=o$2(i));)c+=s+r[++$],f=!0;$!==a&&u.push(i),n.push(c),$++;}if($===a&&n.push(r[a]),f){const t=n.join("$$lit$$");void 0===(r=l$1.get(t))&&(n.raw=n,l$1.set(t,r=n)),e=u;}return t(r,...e)},u=n(x);
 
 /**
  * @license
  * Copyright 2018 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */ const to = (t) => t ?? D
+ */const o$1=o=>o??E;
 
 var SlIconButton = class extends ShoelaceElement {
-	constructor() {
-		super(...arguments)
-		this.hasFocus = false
-		this.label = ""
-		this.disabled = false
-	}
-	handleBlur() {
-		this.hasFocus = false
-		this.emit("sl-blur")
-	}
-	handleFocus() {
-		this.hasFocus = true
-		this.emit("sl-focus")
-	}
-	handleClick(event) {
-		if (this.disabled) {
-			event.preventDefault()
-			event.stopPropagation()
-		}
-	}
-	/** Simulates a click on the icon button. */
-	click() {
-		this.button.click()
-	}
-	/** Sets focus on the icon button. */
-	focus(options) {
-		this.button.focus(options)
-	}
-	/** Removes focus from the icon button. */
-	blur() {
-		this.button.blur()
-	}
-	render() {
-		const isLink = this.href ? true : false
-		const tag = isLink ? er`a` : er`button`
-		return ke`
+  constructor() {
+    super(...arguments);
+    this.hasFocus = false;
+    this.label = "";
+    this.disabled = false;
+  }
+  handleBlur() {
+    this.hasFocus = false;
+    this.emit("sl-blur");
+  }
+  handleFocus() {
+    this.hasFocus = true;
+    this.emit("sl-focus");
+  }
+  handleClick(event) {
+    if (this.disabled) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }
+  /** Simulates a click on the icon button. */
+  click() {
+    this.button.click();
+  }
+  /** Sets focus on the icon button. */
+  focus(options) {
+    this.button.focus(options);
+  }
+  /** Removes focus from the icon button. */
+  blur() {
+    this.button.blur();
+  }
+  render() {
+    const isLink = this.href ? true : false;
+    const tag = isLink ? i`a` : i`button`;
+    return u`
       <${tag}
         part="base"
-        class=${Rt({
-					"icon-button": true,
-					"icon-button--disabled": !isLink && this.disabled,
-					"icon-button--focused": this.hasFocus,
-				})}
-        ?disabled=${to(isLink ? void 0 : this.disabled)}
-        type=${to(isLink ? void 0 : "button")}
-        href=${to(isLink ? this.href : void 0)}
-        target=${to(isLink ? this.target : void 0)}
-        download=${to(isLink ? this.download : void 0)}
-        rel=${to(isLink && this.target ? "noreferrer noopener" : void 0)}
-        role=${to(isLink ? void 0 : "button")}
+        class=${e$1({
+      "icon-button": true,
+      "icon-button--disabled": !isLink && this.disabled,
+      "icon-button--focused": this.hasFocus
+    })}
+        ?disabled=${o$1(isLink ? void 0 : this.disabled)}
+        type=${o$1(isLink ? void 0 : "button")}
+        href=${o$1(isLink ? this.href : void 0)}
+        target=${o$1(isLink ? this.target : void 0)}
+        download=${o$1(isLink ? this.download : void 0)}
+        rel=${o$1(isLink && this.target ? "noreferrer noopener" : void 0)}
+        role=${o$1(isLink ? void 0 : "button")}
         aria-disabled=${this.disabled ? "true" : "false"}
         aria-label="${this.label}"
         tabindex=${this.disabled ? "-1" : "0"}
@@ -9631,229 +8278,238 @@ var SlIconButton = class extends ShoelaceElement {
       >
         <sl-icon
           class="icon-button__icon"
-          name=${to(this.name)}
-          library=${to(this.library)}
-          src=${to(this.src)}
+          name=${o$1(this.name)}
+          library=${o$1(this.library)}
+          src=${o$1(this.src)}
           aria-hidden="true"
         ></sl-icon>
       </${tag}>
-    `
-	}
-}
-SlIconButton.styles = [component_styles_default, icon_button_styles_default]
-SlIconButton.dependencies = { "sl-icon": SlIcon }
-__decorateClass([e$1(".icon-button")], SlIconButton.prototype, "button", 2)
-__decorateClass([r()], SlIconButton.prototype, "hasFocus", 2)
-__decorateClass([n()], SlIconButton.prototype, "name", 2)
-__decorateClass([n()], SlIconButton.prototype, "library", 2)
-__decorateClass([n()], SlIconButton.prototype, "src", 2)
-__decorateClass([n()], SlIconButton.prototype, "href", 2)
-__decorateClass([n()], SlIconButton.prototype, "target", 2)
-__decorateClass([n()], SlIconButton.prototype, "download", 2)
-__decorateClass([n()], SlIconButton.prototype, "label", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlIconButton.prototype, "disabled", 2)
+    `;
+  }
+};
+SlIconButton.styles = [component_styles_default, icon_button_styles_default];
+SlIconButton.dependencies = { "sl-icon": SlIcon };
+__decorateClass([
+  e$4(".icon-button")
+], SlIconButton.prototype, "button", 2);
+__decorateClass([
+  r()
+], SlIconButton.prototype, "hasFocus", 2);
+__decorateClass([
+  n$1()
+], SlIconButton.prototype, "name", 2);
+__decorateClass([
+  n$1()
+], SlIconButton.prototype, "library", 2);
+__decorateClass([
+  n$1()
+], SlIconButton.prototype, "src", 2);
+__decorateClass([
+  n$1()
+], SlIconButton.prototype, "href", 2);
+__decorateClass([
+  n$1()
+], SlIconButton.prototype, "target", 2);
+__decorateClass([
+  n$1()
+], SlIconButton.prototype, "download", 2);
+__decorateClass([
+  n$1()
+], SlIconButton.prototype, "label", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlIconButton.prototype, "disabled", 2);
 
-const connectedElements = new Set()
-const translations = new Map()
-let fallback
-let documentDirection = "ltr"
-let documentLanguage = "en"
-const isClient =
-	typeof MutationObserver !== "undefined" &&
-	typeof document !== "undefined" &&
-	typeof document.documentElement !== "undefined"
+const connectedElements = new Set();
+const translations = new Map();
+let fallback;
+let documentDirection = 'ltr';
+let documentLanguage = 'en';
+const isClient = (typeof MutationObserver !== "undefined" && typeof document !== "undefined" && typeof document.documentElement !== "undefined");
 if (isClient) {
-	const documentElementObserver = new MutationObserver(update)
-	documentDirection = document.documentElement.dir || "ltr"
-	documentLanguage = document.documentElement.lang || navigator.language
-	documentElementObserver.observe(document.documentElement, {
-		attributes: true,
-		attributeFilter: ["dir", "lang"],
-	})
+    const documentElementObserver = new MutationObserver(update);
+    documentDirection = document.documentElement.dir || 'ltr';
+    documentLanguage = document.documentElement.lang || navigator.language;
+    documentElementObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['dir', 'lang']
+    });
 }
 function registerTranslation(...translation) {
-	translation.map((t) => {
-		const code = t.$code.toLowerCase()
-		if (translations.has(code)) {
-			translations.set(code, Object.assign(Object.assign({}, translations.get(code)), t))
-		} else {
-			translations.set(code, t)
-		}
-		if (!fallback) {
-			fallback = t
-		}
-	})
-	update()
+    translation.map(t => {
+        const code = t.$code.toLowerCase();
+        if (translations.has(code)) {
+            translations.set(code, Object.assign(Object.assign({}, translations.get(code)), t));
+        }
+        else {
+            translations.set(code, t);
+        }
+        if (!fallback) {
+            fallback = t;
+        }
+    });
+    update();
 }
 function update() {
-	if (isClient) {
-		documentDirection = document.documentElement.dir || "ltr"
-		documentLanguage = document.documentElement.lang || navigator.language
-	}
-	;[...connectedElements.keys()].map((el) => {
-		if (typeof el.requestUpdate === "function") {
-			el.requestUpdate()
-		}
-	})
+    if (isClient) {
+        documentDirection = document.documentElement.dir || 'ltr';
+        documentLanguage = document.documentElement.lang || navigator.language;
+    }
+    [...connectedElements.keys()].map((el) => {
+        if (typeof el.requestUpdate === 'function') {
+            el.requestUpdate();
+        }
+    });
 }
 let LocalizeController$1 = class LocalizeController {
-	constructor(host) {
-		this.host = host
-		this.host.addController(this)
-	}
-	hostConnected() {
-		connectedElements.add(this.host)
-	}
-	hostDisconnected() {
-		connectedElements.delete(this.host)
-	}
-	dir() {
-		return `${this.host.dir || documentDirection}`.toLowerCase()
-	}
-	lang() {
-		return `${this.host.lang || documentLanguage}`.toLowerCase()
-	}
-	getTranslationData(lang) {
-		var _a, _b
-		const locale = new Intl.Locale(lang.replace(/_/g, "-"))
-		const language = locale === null || locale === void 0 ? void 0 : locale.language.toLowerCase()
-		const region =
-			(_b =
-				(_a = locale === null || locale === void 0 ? void 0 : locale.region) === null ||
-				_a === void 0
-					? void 0
-					: _a.toLowerCase()) !== null && _b !== void 0
-				? _b
-				: ""
-		const primary = translations.get(`${language}-${region}`)
-		const secondary = translations.get(language)
-		return { locale, language, region, primary, secondary }
-	}
-	exists(key, options) {
-		var _a
-		const { primary, secondary } = this.getTranslationData(
-			(_a = options.lang) !== null && _a !== void 0 ? _a : this.lang()
-		)
-		options = Object.assign({ includeFallback: false }, options)
-		if (
-			(primary && primary[key]) ||
-			(secondary && secondary[key]) ||
-			(options.includeFallback && fallback && fallback[key])
-		) {
-			return true
-		}
-		return false
-	}
-	term(key, ...args) {
-		const { primary, secondary } = this.getTranslationData(this.lang())
-		let term
-		if (primary && primary[key]) {
-			term = primary[key]
-		} else if (secondary && secondary[key]) {
-			term = secondary[key]
-		} else if (fallback && fallback[key]) {
-			term = fallback[key]
-		} else {
-			console.error(`No translation found for: ${String(key)}`)
-			return String(key)
-		}
-		if (typeof term === "function") {
-			return term(...args)
-		}
-		return term
-	}
-	date(dateToFormat, options) {
-		dateToFormat = new Date(dateToFormat)
-		return new Intl.DateTimeFormat(this.lang(), options).format(dateToFormat)
-	}
-	number(numberToFormat, options) {
-		numberToFormat = Number(numberToFormat)
-		return isNaN(numberToFormat)
-			? ""
-			: new Intl.NumberFormat(this.lang(), options).format(numberToFormat)
-	}
-	relativeTime(value, unit, options) {
-		return new Intl.RelativeTimeFormat(this.lang(), options).format(value, unit)
-	}
-}
+    constructor(host) {
+        this.host = host;
+        this.host.addController(this);
+    }
+    hostConnected() {
+        connectedElements.add(this.host);
+    }
+    hostDisconnected() {
+        connectedElements.delete(this.host);
+    }
+    dir() {
+        return `${this.host.dir || documentDirection}`.toLowerCase();
+    }
+    lang() {
+        return `${this.host.lang || documentLanguage}`.toLowerCase();
+    }
+    getTranslationData(lang) {
+        var _a, _b;
+        const locale = new Intl.Locale(lang.replace(/_/g, '-'));
+        const language = locale === null || locale === void 0 ? void 0 : locale.language.toLowerCase();
+        const region = (_b = (_a = locale === null || locale === void 0 ? void 0 : locale.region) === null || _a === void 0 ? void 0 : _a.toLowerCase()) !== null && _b !== void 0 ? _b : '';
+        const primary = translations.get(`${language}-${region}`);
+        const secondary = translations.get(language);
+        return { locale, language, region, primary, secondary };
+    }
+    exists(key, options) {
+        var _a;
+        const { primary, secondary } = this.getTranslationData((_a = options.lang) !== null && _a !== void 0 ? _a : this.lang());
+        options = Object.assign({ includeFallback: false }, options);
+        if ((primary && primary[key]) ||
+            (secondary && secondary[key]) ||
+            (options.includeFallback && fallback && fallback[key])) {
+            return true;
+        }
+        return false;
+    }
+    term(key, ...args) {
+        const { primary, secondary } = this.getTranslationData(this.lang());
+        let term;
+        if (primary && primary[key]) {
+            term = primary[key];
+        }
+        else if (secondary && secondary[key]) {
+            term = secondary[key];
+        }
+        else if (fallback && fallback[key]) {
+            term = fallback[key];
+        }
+        else {
+            console.error(`No translation found for: ${String(key)}`);
+            return String(key);
+        }
+        if (typeof term === 'function') {
+            return term(...args);
+        }
+        return term;
+    }
+    date(dateToFormat, options) {
+        dateToFormat = new Date(dateToFormat);
+        return new Intl.DateTimeFormat(this.lang(), options).format(dateToFormat);
+    }
+    number(numberToFormat, options) {
+        numberToFormat = Number(numberToFormat);
+        return isNaN(numberToFormat) ? '' : new Intl.NumberFormat(this.lang(), options).format(numberToFormat);
+    }
+    relativeTime(value, unit, options) {
+        return new Intl.RelativeTimeFormat(this.lang(), options).format(value, unit);
+    }
+};
 
 // src/translations/en.ts
 var translation = {
-	$code: "en",
-	$name: "English",
-	$dir: "ltr",
-	carousel: "Carousel",
-	clearEntry: "Clear entry",
-	close: "Close",
-	copied: "Copied",
-	copy: "Copy",
-	currentValue: "Current value",
-	error: "Error",
-	goToSlide: (slide, count) => `Go to slide ${slide} of ${count}`,
-	hidePassword: "Hide password",
-	loading: "Loading",
-	nextSlide: "Next slide",
-	numOptionsSelected: (num) => {
-		if (num === 0) return "No options selected"
-		if (num === 1) return "1 option selected"
-		return `${num} options selected`
-	},
-	previousSlide: "Previous slide",
-	progress: "Progress",
-	remove: "Remove",
-	resize: "Resize",
-	scrollToEnd: "Scroll to end",
-	scrollToStart: "Scroll to start",
-	selectAColorFromTheScreen: "Select a color from the screen",
-	showPassword: "Show password",
-	slideNum: (slide) => `Slide ${slide}`,
-	toggleColorFormat: "Toggle color format",
-}
-registerTranslation(translation)
-var en_default = translation
+  $code: "en",
+  $name: "English",
+  $dir: "ltr",
+  carousel: "Carousel",
+  clearEntry: "Clear entry",
+  close: "Close",
+  copied: "Copied",
+  copy: "Copy",
+  currentValue: "Current value",
+  error: "Error",
+  goToSlide: (slide, count) => `Go to slide ${slide} of ${count}`,
+  hidePassword: "Hide password",
+  loading: "Loading",
+  nextSlide: "Next slide",
+  numOptionsSelected: (num) => {
+    if (num === 0)
+      return "No options selected";
+    if (num === 1)
+      return "1 option selected";
+    return `${num} options selected`;
+  },
+  previousSlide: "Previous slide",
+  progress: "Progress",
+  remove: "Remove",
+  resize: "Resize",
+  scrollToEnd: "Scroll to end",
+  scrollToStart: "Scroll to start",
+  selectAColorFromTheScreen: "Select a color from the screen",
+  showPassword: "Show password",
+  slideNum: (slide) => `Slide ${slide}`,
+  toggleColorFormat: "Toggle color format"
+};
+registerTranslation(translation);
+var en_default = translation;
 
-var LocalizeController = class extends LocalizeController$1 {}
-registerTranslation(en_default)
+var LocalizeController = class extends LocalizeController$1 {
+};
+registerTranslation(en_default);
 
 var SlTag = class extends ShoelaceElement {
-	constructor() {
-		super(...arguments)
-		this.localize = new LocalizeController(this)
-		this.variant = "neutral"
-		this.size = "medium"
-		this.pill = false
-		this.removable = false
-	}
-	handleRemoveClick() {
-		this.emit("sl-remove")
-	}
-	render() {
-		return ke$1`
+  constructor() {
+    super(...arguments);
+    this.localize = new LocalizeController(this);
+    this.variant = "neutral";
+    this.size = "medium";
+    this.pill = false;
+    this.removable = false;
+  }
+  handleRemoveClick() {
+    this.emit("sl-remove");
+  }
+  render() {
+    return x`
       <span
         part="base"
-        class=${Rt({
-					tag: true,
-					// Types
-					"tag--primary": this.variant === "primary",
-					"tag--success": this.variant === "success",
-					"tag--neutral": this.variant === "neutral",
-					"tag--warning": this.variant === "warning",
-					"tag--danger": this.variant === "danger",
-					"tag--text": this.variant === "text",
-					// Sizes
-					"tag--small": this.size === "small",
-					"tag--medium": this.size === "medium",
-					"tag--large": this.size === "large",
-					// Modifiers
-					"tag--pill": this.pill,
-					"tag--removable": this.removable,
-				})}
+        class=${e$1({
+      tag: true,
+      // Types
+      "tag--primary": this.variant === "primary",
+      "tag--success": this.variant === "success",
+      "tag--neutral": this.variant === "neutral",
+      "tag--warning": this.variant === "warning",
+      "tag--danger": this.variant === "danger",
+      "tag--text": this.variant === "text",
+      // Sizes
+      "tag--small": this.size === "small",
+      "tag--medium": this.size === "medium",
+      "tag--large": this.size === "large",
+      // Modifiers
+      "tag--pill": this.pill,
+      "tag--removable": this.removable
+    })}
       >
         <slot part="content" class="tag__content"></slot>
 
-        ${
-					this.removable
-						? ke$1`
+        ${this.removable ? x`
               <sl-icon-button
                 part="remove-button"
                 exportparts="base:remove-button__base"
@@ -9864,22 +8520,28 @@ var SlTag = class extends ShoelaceElement {
                 @click=${this.handleRemoveClick}
                 tabindex="-1"
               ></sl-icon-button>
-            `
-						: ""
-				}
+            ` : ""}
       </span>
-    `
-	}
-}
-SlTag.styles = [component_styles_default, tag_styles_default]
-SlTag.dependencies = { "sl-icon-button": SlIconButton }
-__decorateClass([n({ reflect: true })], SlTag.prototype, "variant", 2)
-__decorateClass([n({ reflect: true })], SlTag.prototype, "size", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlTag.prototype, "pill", 2)
-__decorateClass([n({ type: Boolean })], SlTag.prototype, "removable", 2)
+    `;
+  }
+};
+SlTag.styles = [component_styles_default, tag_styles_default];
+SlTag.dependencies = { "sl-icon-button": SlIconButton };
+__decorateClass([
+  n$1({ reflect: true })
+], SlTag.prototype, "variant", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlTag.prototype, "size", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlTag.prototype, "pill", 2);
+__decorateClass([
+  n$1({ type: Boolean })
+], SlTag.prototype, "removable", 2);
 
 // src/components/select/select.styles.ts
-var select_styles_default = i$2`
+var select_styles_default = i$5`
   :host {
     display: block;
   }
@@ -10203,47 +8865,41 @@ var select_styles_default = i$2`
     padding-block: var(--sl-spacing-x-small);
     padding-inline: var(--sl-spacing-x-large);
   }
-`
+`;
 
 // src/internal/offset.ts
 function getOffset(element, parent) {
-	return {
-		top: Math.round(element.getBoundingClientRect().top - parent.getBoundingClientRect().top),
-		left: Math.round(element.getBoundingClientRect().left - parent.getBoundingClientRect().left),
-	}
+  return {
+    top: Math.round(element.getBoundingClientRect().top - parent.getBoundingClientRect().top),
+    left: Math.round(element.getBoundingClientRect().left - parent.getBoundingClientRect().left)
+  };
 }
 function scrollIntoView(element, container, direction = "vertical", behavior = "smooth") {
-	const offset = getOffset(element, container)
-	const offsetTop = offset.top + container.scrollTop
-	const offsetLeft = offset.left + container.scrollLeft
-	const minX = container.scrollLeft
-	const maxX = container.scrollLeft + container.offsetWidth
-	const minY = container.scrollTop
-	const maxY = container.scrollTop + container.offsetHeight
-	if (direction === "horizontal" || direction === "both") {
-		if (offsetLeft < minX) {
-			container.scrollTo({ left: offsetLeft, behavior })
-		} else if (offsetLeft + element.clientWidth > maxX) {
-			container.scrollTo({
-				left: offsetLeft - container.offsetWidth + element.clientWidth,
-				behavior,
-			})
-		}
-	}
-	if (direction === "vertical" || direction === "both") {
-		if (offsetTop < minY) {
-			container.scrollTo({ top: offsetTop, behavior })
-		} else if (offsetTop + element.clientHeight > maxY) {
-			container.scrollTo({
-				top: offsetTop - container.offsetHeight + element.clientHeight,
-				behavior,
-			})
-		}
-	}
+  const offset = getOffset(element, container);
+  const offsetTop = offset.top + container.scrollTop;
+  const offsetLeft = offset.left + container.scrollLeft;
+  const minX = container.scrollLeft;
+  const maxX = container.scrollLeft + container.offsetWidth;
+  const minY = container.scrollTop;
+  const maxY = container.scrollTop + container.offsetHeight;
+  if (direction === "horizontal" || direction === "both") {
+    if (offsetLeft < minX) {
+      container.scrollTo({ left: offsetLeft, behavior });
+    } else if (offsetLeft + element.clientWidth > maxX) {
+      container.scrollTo({ left: offsetLeft - container.offsetWidth + element.clientWidth, behavior });
+    }
+  }
+  if (direction === "vertical" || direction === "both") {
+    if (offsetTop < minY) {
+      container.scrollTo({ top: offsetTop, behavior });
+    } else if (offsetTop + element.clientHeight > maxY) {
+      container.scrollTo({ top: offsetTop - container.offsetHeight + element.clientHeight, behavior });
+    }
+  }
 }
 
 // src/styles/form-control.styles.ts
-var form_control_styles_default = i$2`
+var form_control_styles_default = i$5`
   .form-control .form-control__label {
     display: none;
   }
@@ -10299,37 +8955,30 @@ var form_control_styles_default = i$2`
   .form-control--has-help-text.form-control--radio-group .form-control__help-text {
     margin-top: var(--sl-spacing-2x-small);
   }
-`
+`;
 
 // src/internal/default-value.ts
-var defaultValue =
-	(propertyName = "value") =>
-	(proto, key) => {
-		const ctor = proto.constructor
-		const attributeChangedCallback = ctor.prototype.attributeChangedCallback
-		ctor.prototype.attributeChangedCallback = function (name, old, value) {
-			var _a
-			const options = ctor.getPropertyOptions(propertyName)
-			const attributeName = typeof options.attribute === "string" ? options.attribute : propertyName
-			if (name === attributeName) {
-				const converter = options.converter || u
-				const fromAttribute =
-					typeof converter === "function"
-						? converter
-						: (_a = converter == null ? void 0 : converter.fromAttribute) != null
-							? _a
-							: u.fromAttribute
-				const newValue = fromAttribute(value, options.type)
-				if (this[propertyName] !== newValue) {
-					this[key] = newValue
-				}
-			}
-			attributeChangedCallback.call(this, name, old, value)
-		}
-	}
+var defaultValue = (propertyName = "value") => (proto, key) => {
+  const ctor = proto.constructor;
+  const attributeChangedCallback = ctor.prototype.attributeChangedCallback;
+  ctor.prototype.attributeChangedCallback = function(name, old, value) {
+    var _a;
+    const options = ctor.getPropertyOptions(propertyName);
+    const attributeName = typeof options.attribute === "string" ? options.attribute : propertyName;
+    if (name === attributeName) {
+      const converter = options.converter || u$3;
+      const fromAttribute = typeof converter === "function" ? converter : (_a = converter == null ? void 0 : converter.fromAttribute) != null ? _a : u$3.fromAttribute;
+      const newValue = fromAttribute(value, options.type);
+      if (this[propertyName] !== newValue) {
+        this[key] = newValue;
+      }
+    }
+    attributeChangedCallback.call(this, name, old, value);
+  };
+};
 
 // src/components/popup/popup.styles.ts
-var popup_styles_default = i$2`
+var popup_styles_default = i$5`
   :host {
     --arrow-color: var(--sl-color-neutral-1000);
     --arrow-size: 6px;
@@ -10387,201 +9036,196 @@ var popup_styles_default = i$2`
       var(--hover-bridge-bottom-left-x, 0) var(--hover-bridge-bottom-left-y, 0)
     );
   }
-`
+`;
 
 /**
  * Custom positioning reference element.
  * @see https://floating-ui.com/docs/virtual-elements
  */
 
-const min = Math.min
-const max = Math.max
-const round = Math.round
-const floor = Math.floor
-const createCoords = (v) => ({
-	x: v,
-	y: v,
-})
+const min = Math.min;
+const max = Math.max;
+const round = Math.round;
+const floor = Math.floor;
+const createCoords = v => ({
+  x: v,
+  y: v
+});
 const oppositeSideMap = {
-	left: "right",
-	right: "left",
-	bottom: "top",
-	top: "bottom",
-}
+  left: 'right',
+  right: 'left',
+  bottom: 'top',
+  top: 'bottom'
+};
 const oppositeAlignmentMap = {
-	start: "end",
-	end: "start",
-}
+  start: 'end',
+  end: 'start'
+};
 function clamp(start, value, end) {
-	return max(start, min(value, end))
+  return max(start, min(value, end));
 }
 function evaluate(value, param) {
-	return typeof value === "function" ? value(param) : value
+  return typeof value === 'function' ? value(param) : value;
 }
 function getSide(placement) {
-	return placement.split("-")[0]
+  return placement.split('-')[0];
 }
 function getAlignment(placement) {
-	return placement.split("-")[1]
+  return placement.split('-')[1];
 }
 function getOppositeAxis(axis) {
-	return axis === "x" ? "y" : "x"
+  return axis === 'x' ? 'y' : 'x';
 }
 function getAxisLength(axis) {
-	return axis === "y" ? "height" : "width"
+  return axis === 'y' ? 'height' : 'width';
 }
 function getSideAxis(placement) {
-	return ["top", "bottom"].includes(getSide(placement)) ? "y" : "x"
+  return ['top', 'bottom'].includes(getSide(placement)) ? 'y' : 'x';
 }
 function getAlignmentAxis(placement) {
-	return getOppositeAxis(getSideAxis(placement))
+  return getOppositeAxis(getSideAxis(placement));
 }
 function getAlignmentSides(placement, rects, rtl) {
-	if (rtl === void 0) {
-		rtl = false
-	}
-	const alignment = getAlignment(placement)
-	const alignmentAxis = getAlignmentAxis(placement)
-	const length = getAxisLength(alignmentAxis)
-	let mainAlignmentSide =
-		alignmentAxis === "x"
-			? alignment === (rtl ? "end" : "start")
-				? "right"
-				: "left"
-			: alignment === "start"
-				? "bottom"
-				: "top"
-	if (rects.reference[length] > rects.floating[length]) {
-		mainAlignmentSide = getOppositePlacement(mainAlignmentSide)
-	}
-	return [mainAlignmentSide, getOppositePlacement(mainAlignmentSide)]
+  if (rtl === void 0) {
+    rtl = false;
+  }
+  const alignment = getAlignment(placement);
+  const alignmentAxis = getAlignmentAxis(placement);
+  const length = getAxisLength(alignmentAxis);
+  let mainAlignmentSide = alignmentAxis === 'x' ? alignment === (rtl ? 'end' : 'start') ? 'right' : 'left' : alignment === 'start' ? 'bottom' : 'top';
+  if (rects.reference[length] > rects.floating[length]) {
+    mainAlignmentSide = getOppositePlacement(mainAlignmentSide);
+  }
+  return [mainAlignmentSide, getOppositePlacement(mainAlignmentSide)];
 }
 function getExpandedPlacements(placement) {
-	const oppositePlacement = getOppositePlacement(placement)
-	return [
-		getOppositeAlignmentPlacement(placement),
-		oppositePlacement,
-		getOppositeAlignmentPlacement(oppositePlacement),
-	]
+  const oppositePlacement = getOppositePlacement(placement);
+  return [getOppositeAlignmentPlacement(placement), oppositePlacement, getOppositeAlignmentPlacement(oppositePlacement)];
 }
 function getOppositeAlignmentPlacement(placement) {
-	return placement.replace(/start|end/g, (alignment) => oppositeAlignmentMap[alignment])
+  return placement.replace(/start|end/g, alignment => oppositeAlignmentMap[alignment]);
 }
 function getSideList(side, isStart, rtl) {
-	const lr = ["left", "right"]
-	const rl = ["right", "left"]
-	const tb = ["top", "bottom"]
-	const bt = ["bottom", "top"]
-	switch (side) {
-		case "top":
-		case "bottom":
-			if (rtl) return isStart ? rl : lr
-			return isStart ? lr : rl
-		case "left":
-		case "right":
-			return isStart ? tb : bt
-		default:
-			return []
-	}
+  const lr = ['left', 'right'];
+  const rl = ['right', 'left'];
+  const tb = ['top', 'bottom'];
+  const bt = ['bottom', 'top'];
+  switch (side) {
+    case 'top':
+    case 'bottom':
+      if (rtl) return isStart ? rl : lr;
+      return isStart ? lr : rl;
+    case 'left':
+    case 'right':
+      return isStart ? tb : bt;
+    default:
+      return [];
+  }
 }
 function getOppositeAxisPlacements(placement, flipAlignment, direction, rtl) {
-	const alignment = getAlignment(placement)
-	let list = getSideList(getSide(placement), direction === "start", rtl)
-	if (alignment) {
-		list = list.map((side) => side + "-" + alignment)
-		if (flipAlignment) {
-			list = list.concat(list.map(getOppositeAlignmentPlacement))
-		}
-	}
-	return list
+  const alignment = getAlignment(placement);
+  let list = getSideList(getSide(placement), direction === 'start', rtl);
+  if (alignment) {
+    list = list.map(side => side + "-" + alignment);
+    if (flipAlignment) {
+      list = list.concat(list.map(getOppositeAlignmentPlacement));
+    }
+  }
+  return list;
 }
 function getOppositePlacement(placement) {
-	return placement.replace(/left|right|bottom|top/g, (side) => oppositeSideMap[side])
+  return placement.replace(/left|right|bottom|top/g, side => oppositeSideMap[side]);
 }
 function expandPaddingObject(padding) {
-	return {
-		top: 0,
-		right: 0,
-		bottom: 0,
-		left: 0,
-		...padding,
-	}
+  return {
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    ...padding
+  };
 }
 function getPaddingObject(padding) {
-	return typeof padding !== "number"
-		? expandPaddingObject(padding)
-		: {
-				top: padding,
-				right: padding,
-				bottom: padding,
-				left: padding,
-			}
+  return typeof padding !== 'number' ? expandPaddingObject(padding) : {
+    top: padding,
+    right: padding,
+    bottom: padding,
+    left: padding
+  };
 }
 function rectToClientRect(rect) {
-	const { x, y, width, height } = rect
-	return {
-		width,
-		height,
-		top: y,
-		left: x,
-		right: x + width,
-		bottom: y + height,
-		x,
-		y,
-	}
+  const {
+    x,
+    y,
+    width,
+    height
+  } = rect;
+  return {
+    width,
+    height,
+    top: y,
+    left: x,
+    right: x + width,
+    bottom: y + height,
+    x,
+    y
+  };
 }
 
 function computeCoordsFromPlacement(_ref, placement, rtl) {
-	let { reference, floating } = _ref
-	const sideAxis = getSideAxis(placement)
-	const alignmentAxis = getAlignmentAxis(placement)
-	const alignLength = getAxisLength(alignmentAxis)
-	const side = getSide(placement)
-	const isVertical = sideAxis === "y"
-	const commonX = reference.x + reference.width / 2 - floating.width / 2
-	const commonY = reference.y + reference.height / 2 - floating.height / 2
-	const commonAlign = reference[alignLength] / 2 - floating[alignLength] / 2
-	let coords
-	switch (side) {
-		case "top":
-			coords = {
-				x: commonX,
-				y: reference.y - floating.height,
-			}
-			break
-		case "bottom":
-			coords = {
-				x: commonX,
-				y: reference.y + reference.height,
-			}
-			break
-		case "right":
-			coords = {
-				x: reference.x + reference.width,
-				y: commonY,
-			}
-			break
-		case "left":
-			coords = {
-				x: reference.x - floating.width,
-				y: commonY,
-			}
-			break
-		default:
-			coords = {
-				x: reference.x,
-				y: reference.y,
-			}
-	}
-	switch (getAlignment(placement)) {
-		case "start":
-			coords[alignmentAxis] -= commonAlign * (rtl && isVertical ? -1 : 1)
-			break
-		case "end":
-			coords[alignmentAxis] += commonAlign * (rtl && isVertical ? -1 : 1)
-			break
-	}
-	return coords
+  let {
+    reference,
+    floating
+  } = _ref;
+  const sideAxis = getSideAxis(placement);
+  const alignmentAxis = getAlignmentAxis(placement);
+  const alignLength = getAxisLength(alignmentAxis);
+  const side = getSide(placement);
+  const isVertical = sideAxis === 'y';
+  const commonX = reference.x + reference.width / 2 - floating.width / 2;
+  const commonY = reference.y + reference.height / 2 - floating.height / 2;
+  const commonAlign = reference[alignLength] / 2 - floating[alignLength] / 2;
+  let coords;
+  switch (side) {
+    case 'top':
+      coords = {
+        x: commonX,
+        y: reference.y - floating.height
+      };
+      break;
+    case 'bottom':
+      coords = {
+        x: commonX,
+        y: reference.y + reference.height
+      };
+      break;
+    case 'right':
+      coords = {
+        x: reference.x + reference.width,
+        y: commonY
+      };
+      break;
+    case 'left':
+      coords = {
+        x: reference.x - floating.width,
+        y: commonY
+      };
+      break;
+    default:
+      coords = {
+        x: reference.x,
+        y: reference.y
+      };
+  }
+  switch (getAlignment(placement)) {
+    case 'start':
+      coords[alignmentAxis] -= commonAlign * (rtl && isVertical ? -1 : 1);
+      break;
+    case 'end':
+      coords[alignmentAxis] += commonAlign * (rtl && isVertical ? -1 : 1);
+      break;
+  }
+  return coords;
 }
 
 /**
@@ -10592,77 +9236,88 @@ function computeCoordsFromPlacement(_ref, placement, rtl) {
  * write one for the platform you are using Floating UI with.
  */
 const computePosition$1 = async (reference, floating, config) => {
-	const { placement = "bottom", strategy = "absolute", middleware = [], platform } = config
-	const validMiddleware = middleware.filter(Boolean)
-	const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(floating))
-	let rects = await platform.getElementRects({
-		reference,
-		floating,
-		strategy,
-	})
-	let { x, y } = computeCoordsFromPlacement(rects, placement, rtl)
-	let statefulPlacement = placement
-	let middlewareData = {}
-	let resetCount = 0
-	for (let i = 0; i < validMiddleware.length; i++) {
-		const { name, fn } = validMiddleware[i]
-		const {
-			x: nextX,
-			y: nextY,
-			data,
-			reset,
-		} = await fn({
-			x,
-			y,
-			initialPlacement: placement,
-			placement: statefulPlacement,
-			strategy,
-			middlewareData,
-			rects,
-			platform,
-			elements: {
-				reference,
-				floating,
-			},
-		})
-		x = nextX != null ? nextX : x
-		y = nextY != null ? nextY : y
-		middlewareData = {
-			...middlewareData,
-			[name]: {
-				...middlewareData[name],
-				...data,
-			},
-		}
-		if (reset && resetCount <= 50) {
-			resetCount++
-			if (typeof reset === "object") {
-				if (reset.placement) {
-					statefulPlacement = reset.placement
-				}
-				if (reset.rects) {
-					rects =
-						reset.rects === true
-							? await platform.getElementRects({
-									reference,
-									floating,
-									strategy,
-								})
-							: reset.rects
-				}
-				;({ x, y } = computeCoordsFromPlacement(rects, statefulPlacement, rtl))
-			}
-			i = -1
-		}
-	}
-	return {
-		x,
-		y,
-		placement: statefulPlacement,
-		strategy,
-		middlewareData,
-	}
-}
+  const {
+    placement = 'bottom',
+    strategy = 'absolute',
+    middleware = [],
+    platform
+  } = config;
+  const validMiddleware = middleware.filter(Boolean);
+  const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(floating));
+  let rects = await platform.getElementRects({
+    reference,
+    floating,
+    strategy
+  });
+  let {
+    x,
+    y
+  } = computeCoordsFromPlacement(rects, placement, rtl);
+  let statefulPlacement = placement;
+  let middlewareData = {};
+  let resetCount = 0;
+  for (let i = 0; i < validMiddleware.length; i++) {
+    const {
+      name,
+      fn
+    } = validMiddleware[i];
+    const {
+      x: nextX,
+      y: nextY,
+      data,
+      reset
+    } = await fn({
+      x,
+      y,
+      initialPlacement: placement,
+      placement: statefulPlacement,
+      strategy,
+      middlewareData,
+      rects,
+      platform,
+      elements: {
+        reference,
+        floating
+      }
+    });
+    x = nextX != null ? nextX : x;
+    y = nextY != null ? nextY : y;
+    middlewareData = {
+      ...middlewareData,
+      [name]: {
+        ...middlewareData[name],
+        ...data
+      }
+    };
+    if (reset && resetCount <= 50) {
+      resetCount++;
+      if (typeof reset === 'object') {
+        if (reset.placement) {
+          statefulPlacement = reset.placement;
+        }
+        if (reset.rects) {
+          rects = reset.rects === true ? await platform.getElementRects({
+            reference,
+            floating,
+            strategy
+          }) : reset.rects;
+        }
+        ({
+          x,
+          y
+        } = computeCoordsFromPlacement(rects, statefulPlacement, rtl));
+      }
+      i = -1;
+    }
+  }
+  return {
+    x,
+    y,
+    placement: statefulPlacement,
+    strategy,
+    middlewareData
+  };
+};
 
 /**
  * Resolves with an object of overflow side offsets that determine how much the
@@ -10673,81 +9328,60 @@ const computePosition$1 = async (reference, floating, config) => {
  * @see https://floating-ui.com/docs/detectOverflow
  */
 async function detectOverflow(state, options) {
-	var _await$platform$isEle
-	if (options === void 0) {
-		options = {}
-	}
-	const { x, y, platform, rects, elements, strategy } = state
-	const {
-		boundary = "clippingAncestors",
-		rootBoundary = "viewport",
-		elementContext = "floating",
-		altBoundary = false,
-		padding = 0,
-	} = evaluate(options, state)
-	const paddingObject = getPaddingObject(padding)
-	const altContext = elementContext === "floating" ? "reference" : "floating"
-	const element = elements[altBoundary ? altContext : elementContext]
-	const clippingClientRect = rectToClientRect(
-		await platform.getClippingRect({
-			element: (
-				(_await$platform$isEle = await (platform.isElement == null
-					? void 0
-					: platform.isElement(element))) != null
-					? _await$platform$isEle
-					: true
-			)
-				? element
-				: element.contextElement ||
-					(await (platform.getDocumentElement == null
-						? void 0
-						: platform.getDocumentElement(elements.floating))),
-			boundary,
-			rootBoundary,
-			strategy,
-		})
-	)
-	const rect =
-		elementContext === "floating"
-			? {
-					x,
-					y,
-					width: rects.floating.width,
-					height: rects.floating.height,
-				}
-			: rects.reference
-	const offsetParent = await (platform.getOffsetParent == null
-		? void 0
-		: platform.getOffsetParent(elements.floating))
-	const offsetScale = (await (platform.isElement == null
-		? void 0
-		: platform.isElement(offsetParent)))
-		? (await (platform.getScale == null ? void 0 : platform.getScale(offsetParent))) || {
-				x: 1,
-				y: 1,
-			}
-		: {
-				x: 1,
-				y: 1,
-			}
-	const elementClientRect = rectToClientRect(
-		platform.convertOffsetParentRelativeRectToViewportRelativeRect
-			? await platform.convertOffsetParentRelativeRectToViewportRelativeRect({
-					elements,
-					rect,
-					offsetParent,
-					strategy,
-				})
-			: rect
-	)
-	return {
-		top: (clippingClientRect.top - elementClientRect.top + paddingObject.top) / offsetScale.y,
-		bottom:
-			(elementClientRect.bottom - clippingClientRect.bottom + paddingObject.bottom) / offsetScale.y,
-		left: (clippingClientRect.left - elementClientRect.left + paddingObject.left) / offsetScale.x,
-		right:
-			(elementClientRect.right - clippingClientRect.right + paddingObject.right) / offsetScale.x,
-	}
+  var _await$platform$isEle;
+  if (options === void 0) {
+    options = {};
+  }
+  const {
+    x,
+    y,
+    platform,
+    rects,
+    elements,
+    strategy
+  } = state;
+  const {
+    boundary = 'clippingAncestors',
+    rootBoundary = 'viewport',
+    elementContext = 'floating',
+    altBoundary = false,
+    padding = 0
+  } = evaluate(options, state);
+  const paddingObject = getPaddingObject(padding);
+  const altContext = elementContext === 'floating' ? 'reference' : 'floating';
+  const element = elements[altBoundary ? altContext : elementContext];
+  const clippingClientRect = rectToClientRect(await platform.getClippingRect({
+    element: ((_await$platform$isEle = await (platform.isElement == null ? void 0 : platform.isElement(element))) != null ? _await$platform$isEle : true) ? element : element.contextElement || (await (platform.getDocumentElement == null ? void 0 : platform.getDocumentElement(elements.floating))),
+    boundary,
+    rootBoundary,
+    strategy
+  }));
+  const rect = elementContext === 'floating' ? {
+    x,
+    y,
+    width: rects.floating.width,
+    height: rects.floating.height
+  } : rects.reference;
+  const offsetParent = await (platform.getOffsetParent == null ? void 0 : platform.getOffsetParent(elements.floating));
+  const offsetScale = (await (platform.isElement == null ? void 0 : platform.isElement(offsetParent))) ? (await (platform.getScale == null ? void 0 : platform.getScale(offsetParent))) || {
+    x: 1,
+    y: 1
+  } : {
+    x: 1,
+    y: 1
+  };
+  const elementClientRect = rectToClientRect(platform.convertOffsetParentRelativeRectToViewportRelativeRect ? await platform.convertOffsetParentRelativeRectToViewportRelativeRect({
+    elements,
+    rect,
+    offsetParent,
+    strategy
+  }) : rect);
+  return {
+    top: (clippingClientRect.top - elementClientRect.top + paddingObject.top) / offsetScale.y,
+    bottom: (elementClientRect.bottom - clippingClientRect.bottom + paddingObject.bottom) / offsetScale.y,
+    left: (clippingClientRect.left - elementClientRect.left + paddingObject.left) / offsetScale.x,
+    right: (elementClientRect.right - clippingClientRect.right + paddingObject.right) / offsetScale.x
+  };
 }
 
 /**
@@ -10755,84 +9389,82 @@ async function detectOverflow(state, options) {
  * appears centered to the reference element.
  * @see https://floating-ui.com/docs/arrow
  */
-const arrow$1 = (options) => ({
-	name: "arrow",
-	options,
-	async fn(state) {
-		const { x, y, placement, rects, platform, elements, middlewareData } = state
-		// Since `element` is required, we don't Partial<> the type.
-		const { element, padding = 0 } = evaluate(options, state) || {}
-		if (element == null) {
-			return {}
-		}
-		const paddingObject = getPaddingObject(padding)
-		const coords = {
-			x,
-			y,
-		}
-		const axis = getAlignmentAxis(placement)
-		const length = getAxisLength(axis)
-		const arrowDimensions = await platform.getDimensions(element)
-		const isYAxis = axis === "y"
-		const minProp = isYAxis ? "top" : "left"
-		const maxProp = isYAxis ? "bottom" : "right"
-		const clientProp = isYAxis ? "clientHeight" : "clientWidth"
-		const endDiff =
-			rects.reference[length] + rects.reference[axis] - coords[axis] - rects.floating[length]
-		const startDiff = coords[axis] - rects.reference[axis]
-		const arrowOffsetParent = await (platform.getOffsetParent == null
-			? void 0
-			: platform.getOffsetParent(element))
-		let clientSize = arrowOffsetParent ? arrowOffsetParent[clientProp] : 0
+const arrow$1 = options => ({
+  name: 'arrow',
+  options,
+  async fn(state) {
+    const {
+      x,
+      y,
+      placement,
+      rects,
+      platform,
+      elements,
+      middlewareData
+    } = state;
+    // Since `element` is required, we don't Partial<> the type.
+    const {
+      element,
+      padding = 0
+    } = evaluate(options, state) || {};
+    if (element == null) {
+      return {};
+    }
+    const paddingObject = getPaddingObject(padding);
+    const coords = {
+      x,
+      y
+    };
+    const axis = getAlignmentAxis(placement);
+    const length = getAxisLength(axis);
+    const arrowDimensions = await platform.getDimensions(element);
+    const isYAxis = axis === 'y';
+    const minProp = isYAxis ? 'top' : 'left';
+    const maxProp = isYAxis ? 'bottom' : 'right';
+    const clientProp = isYAxis ? 'clientHeight' : 'clientWidth';
+    const endDiff = rects.reference[length] + rects.reference[axis] - coords[axis] - rects.floating[length];
+    const startDiff = coords[axis] - rects.reference[axis];
+    const arrowOffsetParent = await (platform.getOffsetParent == null ? void 0 : platform.getOffsetParent(element));
+    let clientSize = arrowOffsetParent ? arrowOffsetParent[clientProp] : 0;
 
-		// DOM platform can return `window` as the `offsetParent`.
-		if (
-			!clientSize ||
-			!(await (platform.isElement == null ? void 0 : platform.isElement(arrowOffsetParent)))
-		) {
-			clientSize = elements.floating[clientProp] || rects.floating[length]
-		}
-		const centerToReference = endDiff / 2 - startDiff / 2
+    // DOM platform can return `window` as the `offsetParent`.
+    if (!clientSize || !(await (platform.isElement == null ? void 0 : platform.isElement(arrowOffsetParent)))) {
+      clientSize = elements.floating[clientProp] || rects.floating[length];
+    }
+    const centerToReference = endDiff / 2 - startDiff / 2;
 
-		// If the padding is large enough that it causes the arrow to no longer be
-		// centered, modify the padding so that it is centered.
-		const largestPossiblePadding = clientSize / 2 - arrowDimensions[length] / 2 - 1
-		const minPadding = min(paddingObject[minProp], largestPossiblePadding)
-		const maxPadding = min(paddingObject[maxProp], largestPossiblePadding)
+    // If the padding is large enough that it causes the arrow to no longer be
+    // centered, modify the padding so that it is centered.
+    const largestPossiblePadding = clientSize / 2 - arrowDimensions[length] / 2 - 1;
+    const minPadding = min(paddingObject[minProp], largestPossiblePadding);
+    const maxPadding = min(paddingObject[maxProp], largestPossiblePadding);
 
-		// Make sure the arrow doesn't overflow the floating element if the center
-		// point is outside the floating element's bounds.
-		const min$1 = minPadding
-		const max = clientSize - arrowDimensions[length] - maxPadding
-		const center = clientSize / 2 - arrowDimensions[length] / 2 + centerToReference
-		const offset = clamp(min$1, center, max)
+    // Make sure the arrow doesn't overflow the floating element if the center
+    // point is outside the floating element's bounds.
+    const min$1 = minPadding;
+    const max = clientSize - arrowDimensions[length] - maxPadding;
+    const center = clientSize / 2 - arrowDimensions[length] / 2 + centerToReference;
+    const offset = clamp(min$1, center, max);
 
-		// If the reference is small enough that the arrow's padding causes it to
-		// to point to nothing for an aligned placement, adjust the offset of the
-		// floating element itself. To ensure `shift()` continues to take action,
-		// a single reset is performed when this is true.
-		const shouldAddOffset =
-			!middlewareData.arrow &&
-			getAlignment(placement) != null &&
-			center !== offset &&
-			rects.reference[length] / 2 -
-				(center < min$1 ? minPadding : maxPadding) -
-				arrowDimensions[length] / 2 <
-				0
-		const alignmentOffset = shouldAddOffset ? (center < min$1 ? center - min$1 : center - max) : 0
-		return {
-			[axis]: coords[axis] + alignmentOffset,
-			data: {
-				[axis]: offset,
-				centerOffset: center - offset - alignmentOffset,
-				...(shouldAddOffset && {
-					alignmentOffset,
-				}),
-			},
-			reset: shouldAddOffset,
-		}
-	},
-})
+    // If the reference is small enough that the arrow's padding causes it to
+    // to point to nothing for an aligned placement, adjust the offset of the
+    // floating element itself. To ensure `shift()` continues to take action,
+    // a single reset is performed when this is true.
+    const shouldAddOffset = !middlewareData.arrow && getAlignment(placement) != null && center !== offset && rects.reference[length] / 2 - (center < min$1 ? minPadding : maxPadding) - arrowDimensions[length] / 2 < 0;
+    const alignmentOffset = shouldAddOffset ? center < min$1 ? center - min$1 : center - max : 0;
+    return {
+      [axis]: coords[axis] + alignmentOffset,
+      data: {
+        [axis]: offset,
+        centerOffset: center - offset - alignmentOffset,
+        ...(shouldAddOffset && {
+          alignmentOffset
+        })
+      },
+      reset: shouldAddOffset
+    };
+  }
+});
 
 /**
  * Optimizes the visibility of the floating element by flipping the `placement`
@@ -10841,197 +9473,166 @@ const arrow$1 = (options) => ({
  * @see https://floating-ui.com/docs/flip
  */
 const flip$1 = function (options) {
-	if (options === void 0) {
-		options = {}
-	}
-	return {
-		name: "flip",
-		options,
-		async fn(state) {
-			var _middlewareData$arrow, _middlewareData$flip
-			const { placement, middlewareData, rects, initialPlacement, platform, elements } = state
-			const {
-				mainAxis: checkMainAxis = true,
-				crossAxis: checkCrossAxis = true,
-				fallbackPlacements: specifiedFallbackPlacements,
-				fallbackStrategy = "bestFit",
-				fallbackAxisSideDirection = "none",
-				flipAlignment = true,
-				...detectOverflowOptions
-			} = evaluate(options, state)
+  if (options === void 0) {
+    options = {};
+  }
+  return {
+    name: 'flip',
+    options,
+    async fn(state) {
+      var _middlewareData$arrow, _middlewareData$flip;
+      const {
+        placement,
+        middlewareData,
+        rects,
+        initialPlacement,
+        platform,
+        elements
+      } = state;
+      const {
+        mainAxis: checkMainAxis = true,
+        crossAxis: checkCrossAxis = true,
+        fallbackPlacements: specifiedFallbackPlacements,
+        fallbackStrategy = 'bestFit',
+        fallbackAxisSideDirection = 'none',
+        flipAlignment = true,
+        ...detectOverflowOptions
+      } = evaluate(options, state);
 
-			// If a reset by the arrow was caused due to an alignment offset being
-			// added, we should skip any logic now since `flip()` has already done its
-			// work.
-			// https://github.com/floating-ui/floating-ui/issues/2549#issuecomment-1719601643
-			if (
-				(_middlewareData$arrow = middlewareData.arrow) != null &&
-				_middlewareData$arrow.alignmentOffset
-			) {
-				return {}
-			}
-			const side = getSide(placement)
-			const initialSideAxis = getSideAxis(initialPlacement)
-			const isBasePlacement = getSide(initialPlacement) === initialPlacement
-			const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating))
-			const fallbackPlacements =
-				specifiedFallbackPlacements ||
-				(isBasePlacement || !flipAlignment
-					? [getOppositePlacement(initialPlacement)]
-					: getExpandedPlacements(initialPlacement))
-			const hasFallbackAxisSideDirection = fallbackAxisSideDirection !== "none"
-			if (!specifiedFallbackPlacements && hasFallbackAxisSideDirection) {
-				fallbackPlacements.push(
-					...getOppositeAxisPlacements(
-						initialPlacement,
-						flipAlignment,
-						fallbackAxisSideDirection,
-						rtl
-					)
-				)
-			}
-			const placements = [initialPlacement, ...fallbackPlacements]
-			const overflow = await detectOverflow(state, detectOverflowOptions)
-			const overflows = []
-			let overflowsData =
-				((_middlewareData$flip = middlewareData.flip) == null
-					? void 0
-					: _middlewareData$flip.overflows) || []
-			if (checkMainAxis) {
-				overflows.push(overflow[side])
-			}
-			if (checkCrossAxis) {
-				const sides = getAlignmentSides(placement, rects, rtl)
-				overflows.push(overflow[sides[0]], overflow[sides[1]])
-			}
-			overflowsData = [
-				...overflowsData,
-				{
-					placement,
-					overflows,
-				},
-			]
+      // If a reset by the arrow was caused due to an alignment offset being
+      // added, we should skip any logic now since `flip()` has already done its
+      // work.
+      // https://github.com/floating-ui/floating-ui/issues/2549#issuecomment-1719601643
+      if ((_middlewareData$arrow = middlewareData.arrow) != null && _middlewareData$arrow.alignmentOffset) {
+        return {};
+      }
+      const side = getSide(placement);
+      const initialSideAxis = getSideAxis(initialPlacement);
+      const isBasePlacement = getSide(initialPlacement) === initialPlacement;
+      const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating));
+      const fallbackPlacements = specifiedFallbackPlacements || (isBasePlacement || !flipAlignment ? [getOppositePlacement(initialPlacement)] : getExpandedPlacements(initialPlacement));
+      const hasFallbackAxisSideDirection = fallbackAxisSideDirection !== 'none';
+      if (!specifiedFallbackPlacements && hasFallbackAxisSideDirection) {
+        fallbackPlacements.push(...getOppositeAxisPlacements(initialPlacement, flipAlignment, fallbackAxisSideDirection, rtl));
+      }
+      const placements = [initialPlacement, ...fallbackPlacements];
+      const overflow = await detectOverflow(state, detectOverflowOptions);
+      const overflows = [];
+      let overflowsData = ((_middlewareData$flip = middlewareData.flip) == null ? void 0 : _middlewareData$flip.overflows) || [];
+      if (checkMainAxis) {
+        overflows.push(overflow[side]);
+      }
+      if (checkCrossAxis) {
+        const sides = getAlignmentSides(placement, rects, rtl);
+        overflows.push(overflow[sides[0]], overflow[sides[1]]);
+      }
+      overflowsData = [...overflowsData, {
+        placement,
+        overflows
+      }];
 
-			// One or more sides is overflowing.
-			if (!overflows.every((side) => side <= 0)) {
-				var _middlewareData$flip2, _overflowsData$filter
-				const nextIndex =
-					(((_middlewareData$flip2 = middlewareData.flip) == null
-						? void 0
-						: _middlewareData$flip2.index) || 0) + 1
-				const nextPlacement = placements[nextIndex]
-				if (nextPlacement) {
-					// Try next placement and re-run the lifecycle.
-					return {
-						data: {
-							index: nextIndex,
-							overflows: overflowsData,
-						},
-						reset: {
-							placement: nextPlacement,
-						},
-					}
-				}
+      // One or more sides is overflowing.
+      if (!overflows.every(side => side <= 0)) {
+        var _middlewareData$flip2, _overflowsData$filter;
+        const nextIndex = (((_middlewareData$flip2 = middlewareData.flip) == null ? void 0 : _middlewareData$flip2.index) || 0) + 1;
+        const nextPlacement = placements[nextIndex];
+        if (nextPlacement) {
+          // Try next placement and re-run the lifecycle.
+          return {
+            data: {
+              index: nextIndex,
+              overflows: overflowsData
+            },
+            reset: {
+              placement: nextPlacement
+            }
+          };
+        }
 
-				// First, find the candidates that fit on the mainAxis side of overflow,
-				// then find the placement that fits the best on the main crossAxis side.
-				let resetPlacement =
-					(_overflowsData$filter = overflowsData
-						.filter((d) => d.overflows[0] <= 0)
-						.sort((a, b) => a.overflows[1] - b.overflows[1])[0]) == null
-						? void 0
-						: _overflowsData$filter.placement
+        // First, find the candidates that fit on the mainAxis side of overflow,
+        // then find the placement that fits the best on the main crossAxis side.
+        let resetPlacement = (_overflowsData$filter = overflowsData.filter(d => d.overflows[0] <= 0).sort((a, b) => a.overflows[1] - b.overflows[1])[0]) == null ? void 0 : _overflowsData$filter.placement;
 
-				// Otherwise fallback.
-				if (!resetPlacement) {
-					switch (fallbackStrategy) {
-						case "bestFit": {
-							var _overflowsData$filter2
-							const placement =
-								(_overflowsData$filter2 = overflowsData
-									.filter((d) => {
-										if (hasFallbackAxisSideDirection) {
-											const currentSideAxis = getSideAxis(d.placement)
-											return (
-												currentSideAxis === initialSideAxis ||
-												// Create a bias to the `y` side axis due to horizontal
-												// reading directions favoring greater width.
-												currentSideAxis === "y"
-											)
-										}
-										return true
-									})
-									.map((d) => [
-										d.placement,
-										d.overflows
-											.filter((overflow) => overflow > 0)
-											.reduce((acc, overflow) => acc + overflow, 0),
-									])
-									.sort((a, b) => a[1] - b[1])[0]) == null
-									? void 0
-									: _overflowsData$filter2[0]
-							if (placement) {
-								resetPlacement = placement
-							}
-							break
-						}
-						case "initialPlacement":
-							resetPlacement = initialPlacement
-							break
-					}
-				}
-				if (placement !== resetPlacement) {
-					return {
-						reset: {
-							placement: resetPlacement,
-						},
-					}
-				}
-			}
-			return {}
-		},
-	}
-}
+        // Otherwise fallback.
+        if (!resetPlacement) {
+          switch (fallbackStrategy) {
+            case 'bestFit':
+              {
+                var _overflowsData$filter2;
+                const placement = (_overflowsData$filter2 = overflowsData.filter(d => {
+                  if (hasFallbackAxisSideDirection) {
+                    const currentSideAxis = getSideAxis(d.placement);
+                    return currentSideAxis === initialSideAxis ||
+                    // Create a bias to the `y` side axis due to horizontal
+                    // reading directions favoring greater width.
+                    currentSideAxis === 'y';
+                  }
+                  return true;
+                }).map(d => [d.placement, d.overflows.filter(overflow => overflow > 0).reduce((acc, overflow) => acc + overflow, 0)]).sort((a, b) => a[1] - b[1])[0]) == null ? void 0 : _overflowsData$filter2[0];
+                if (placement) {
+                  resetPlacement = placement;
+                }
+                break;
+              }
+            case 'initialPlacement':
+              resetPlacement = initialPlacement;
+              break;
+          }
+        }
+        if (placement !== resetPlacement) {
+          return {
+            reset: {
+              placement: resetPlacement
+            }
+          };
+        }
+      }
+      return {};
+    }
+  };
+};
 
 // For type backwards-compatibility, the `OffsetOptions` type was also
 // Derivable.
 
 async function convertValueToCoords(state, options) {
-	const { placement, platform, elements } = state
-	const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating))
-	const side = getSide(placement)
-	const alignment = getAlignment(placement)
-	const isVertical = getSideAxis(placement) === "y"
-	const mainAxisMulti = ["left", "top"].includes(side) ? -1 : 1
-	const crossAxisMulti = rtl && isVertical ? -1 : 1
-	const rawValue = evaluate(options, state)
+  const {
+    placement,
+    platform,
+    elements
+  } = state;
+  const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating));
+  const side = getSide(placement);
+  const alignment = getAlignment(placement);
+  const isVertical = getSideAxis(placement) === 'y';
+  const mainAxisMulti = ['left', 'top'].includes(side) ? -1 : 1;
+  const crossAxisMulti = rtl && isVertical ? -1 : 1;
+  const rawValue = evaluate(options, state);
 
-	// eslint-disable-next-line prefer-const
-	let { mainAxis, crossAxis, alignmentAxis } =
-		typeof rawValue === "number"
-			? {
-					mainAxis: rawValue,
-					crossAxis: 0,
-					alignmentAxis: null,
-				}
-			: {
-					mainAxis: 0,
-					crossAxis: 0,
-					alignmentAxis: null,
-					...rawValue,
-				}
-	if (alignment && typeof alignmentAxis === "number") {
-		crossAxis = alignment === "end" ? alignmentAxis * -1 : alignmentAxis
-	}
-	return isVertical
-		? {
-				x: crossAxis * crossAxisMulti,
-				y: mainAxis * mainAxisMulti,
-			}
-		: {
-				x: mainAxis * mainAxisMulti,
-				y: crossAxis * crossAxisMulti,
-			}
+  // eslint-disable-next-line prefer-const
+  let {
+    mainAxis,
+    crossAxis,
+    alignmentAxis
+  } = typeof rawValue === 'number' ? {
+    mainAxis: rawValue,
+    crossAxis: 0,
+    alignmentAxis: null
+  } : {
+    mainAxis: rawValue.mainAxis || 0,
+    crossAxis: rawValue.crossAxis || 0,
+    alignmentAxis: rawValue.alignmentAxis
+  };
+  if (alignment && typeof alignmentAxis === 'number') {
+    crossAxis = alignment === 'end' ? alignmentAxis * -1 : alignmentAxis;
+  }
+  return isVertical ? {
+    x: crossAxis * crossAxisMulti,
+    y: mainAxis * mainAxisMulti
+  } : {
+    x: mainAxis * mainAxisMulti,
+    y: crossAxis * crossAxisMulti
+  };
 }
 
 /**
@@ -11042,40 +9643,38 @@ async function convertValueToCoords(state, options) {
  * @see https://floating-ui.com/docs/offset
  */
 const offset$1 = function (options) {
-	if (options === void 0) {
-		options = 0
-	}
-	return {
-		name: "offset",
-		options,
-		async fn(state) {
-			var _middlewareData$offse, _middlewareData$arrow
-			const { x, y, placement, middlewareData } = state
-			const diffCoords = await convertValueToCoords(state, options)
+  if (options === void 0) {
+    options = 0;
+  }
+  return {
+    name: 'offset',
+    options,
+    async fn(state) {
+      var _middlewareData$offse, _middlewareData$arrow;
+      const {
+        x,
+        y,
+        placement,
+        middlewareData
+      } = state;
+      const diffCoords = await convertValueToCoords(state, options);
 
-			// If the placement is the same and the arrow caused an alignment offset
-			// then we don't need to change the positioning coordinates.
-			if (
-				placement ===
-					((_middlewareData$offse = middlewareData.offset) == null
-						? void 0
-						: _middlewareData$offse.placement) &&
-				(_middlewareData$arrow = middlewareData.arrow) != null &&
-				_middlewareData$arrow.alignmentOffset
-			) {
-				return {}
-			}
-			return {
-				x: x + diffCoords.x,
-				y: y + diffCoords.y,
-				data: {
-					...diffCoords,
-					placement,
-				},
-			}
-		},
-	}
-}
+      // If the placement is the same and the arrow caused an alignment offset
+      // then we don't need to change the positioning coordinates.
+      if (placement === ((_middlewareData$offse = middlewareData.offset) == null ? void 0 : _middlewareData$offse.placement) && (_middlewareData$arrow = middlewareData.arrow) != null && _middlewareData$arrow.alignmentOffset) {
+        return {};
+      }
+      return {
+        x: x + diffCoords.x,
+        y: y + diffCoords.y,
+        data: {
+          ...diffCoords,
+          placement
+        }
+      };
+    }
+  };
+};
 
 /**
  * Optimizes the visibility of the floating element by shifting it in order to
@@ -11083,66 +9682,77 @@ const offset$1 = function (options) {
  * @see https://floating-ui.com/docs/shift
  */
 const shift$1 = function (options) {
-	if (options === void 0) {
-		options = {}
-	}
-	return {
-		name: "shift",
-		options,
-		async fn(state) {
-			const { x, y, placement } = state
-			const {
-				mainAxis: checkMainAxis = true,
-				crossAxis: checkCrossAxis = false,
-				limiter = {
-					fn: (_ref) => {
-						let { x, y } = _ref
-						return {
-							x,
-							y,
-						}
-					},
-				},
-				...detectOverflowOptions
-			} = evaluate(options, state)
-			const coords = {
-				x,
-				y,
-			}
-			const overflow = await detectOverflow(state, detectOverflowOptions)
-			const crossAxis = getSideAxis(getSide(placement))
-			const mainAxis = getOppositeAxis(crossAxis)
-			let mainAxisCoord = coords[mainAxis]
-			let crossAxisCoord = coords[crossAxis]
-			if (checkMainAxis) {
-				const minSide = mainAxis === "y" ? "top" : "left"
-				const maxSide = mainAxis === "y" ? "bottom" : "right"
-				const min = mainAxisCoord + overflow[minSide]
-				const max = mainAxisCoord - overflow[maxSide]
-				mainAxisCoord = clamp(min, mainAxisCoord, max)
-			}
-			if (checkCrossAxis) {
-				const minSide = crossAxis === "y" ? "top" : "left"
-				const maxSide = crossAxis === "y" ? "bottom" : "right"
-				const min = crossAxisCoord + overflow[minSide]
-				const max = crossAxisCoord - overflow[maxSide]
-				crossAxisCoord = clamp(min, crossAxisCoord, max)
-			}
-			const limitedCoords = limiter.fn({
-				...state,
-				[mainAxis]: mainAxisCoord,
-				[crossAxis]: crossAxisCoord,
-			})
-			return {
-				...limitedCoords,
-				data: {
-					x: limitedCoords.x - x,
-					y: limitedCoords.y - y,
-				},
-			}
-		},
-	}
-}
+  if (options === void 0) {
+    options = {};
+  }
+  return {
+    name: 'shift',
+    options,
+    async fn(state) {
+      const {
+        x,
+        y,
+        placement
+      } = state;
+      const {
+        mainAxis: checkMainAxis = true,
+        crossAxis: checkCrossAxis = false,
+        limiter = {
+          fn: _ref => {
+            let {
+              x,
+              y
+            } = _ref;
+            return {
+              x,
+              y
+            };
+          }
+        },
+        ...detectOverflowOptions
+      } = evaluate(options, state);
+      const coords = {
+        x,
+        y
+      };
+      const overflow = await detectOverflow(state, detectOverflowOptions);
+      const crossAxis = getSideAxis(getSide(placement));
+      const mainAxis = getOppositeAxis(crossAxis);
+      let mainAxisCoord = coords[mainAxis];
+      let crossAxisCoord = coords[crossAxis];
+      if (checkMainAxis) {
+        const minSide = mainAxis === 'y' ? 'top' : 'left';
+        const maxSide = mainAxis === 'y' ? 'bottom' : 'right';
+        const min = mainAxisCoord + overflow[minSide];
+        const max = mainAxisCoord - overflow[maxSide];
+        mainAxisCoord = clamp(min, mainAxisCoord, max);
+      }
+      if (checkCrossAxis) {
+        const minSide = crossAxis === 'y' ? 'top' : 'left';
+        const maxSide = crossAxis === 'y' ? 'bottom' : 'right';
+        const min = crossAxisCoord + overflow[minSide];
+        const max = crossAxisCoord - overflow[maxSide];
+        crossAxisCoord = clamp(min, crossAxisCoord, max);
+      }
+      const limitedCoords = limiter.fn({
+        ...state,
+        [mainAxis]: mainAxisCoord,
+        [crossAxis]: crossAxisCoord
+      });
+      return {
+        ...limitedCoords,
+        data: {
+          x: limitedCoords.x - x,
+          y: limitedCoords.y - y,
+          enabled: {
+            [mainAxis]: checkMainAxis,
+            [crossAxis]: checkCrossAxis
+          }
+        }
+      };
+    }
+  };
+};
 
 /**
  * Provides data that allows you to change the size of the floating element —
@@ -11151,783 +9761,777 @@ const shift$1 = function (options) {
  * @see https://floating-ui.com/docs/size
  */
 const size$1 = function (options) {
-	if (options === void 0) {
-		options = {}
-	}
-	return {
-		name: "size",
-		options,
-		async fn(state) {
-			const { placement, rects, platform, elements } = state
-			const { apply = () => {}, ...detectOverflowOptions } = evaluate(options, state)
-			const overflow = await detectOverflow(state, detectOverflowOptions)
-			const side = getSide(placement)
-			const alignment = getAlignment(placement)
-			const isYAxis = getSideAxis(placement) === "y"
-			const { width, height } = rects.floating
-			let heightSide
-			let widthSide
-			if (side === "top" || side === "bottom") {
-				heightSide = side
-				widthSide =
-					alignment ===
-					((await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating)))
-						? "start"
-						: "end")
-						? "left"
-						: "right"
-			} else {
-				widthSide = side
-				heightSide = alignment === "end" ? "top" : "bottom"
-			}
-			const maximumClippingHeight = height - overflow.top - overflow.bottom
-			const maximumClippingWidth = width - overflow.left - overflow.right
-			const overflowAvailableHeight = min(height - overflow[heightSide], maximumClippingHeight)
-			const overflowAvailableWidth = min(width - overflow[widthSide], maximumClippingWidth)
-			const noShift = !state.middlewareData.shift
-			let availableHeight = overflowAvailableHeight
-			let availableWidth = overflowAvailableWidth
-			if (isYAxis) {
-				availableWidth =
-					alignment || noShift
-						? min(overflowAvailableWidth, maximumClippingWidth)
-						: maximumClippingWidth
-			} else {
-				availableHeight =
-					alignment || noShift
-						? min(overflowAvailableHeight, maximumClippingHeight)
-						: maximumClippingHeight
-			}
-			if (noShift && !alignment) {
-				const xMin = max(overflow.left, 0)
-				const xMax = max(overflow.right, 0)
-				const yMin = max(overflow.top, 0)
-				const yMax = max(overflow.bottom, 0)
-				if (isYAxis) {
-					availableWidth =
-						width -
-						2 * (xMin !== 0 || xMax !== 0 ? xMin + xMax : max(overflow.left, overflow.right))
-				} else {
-					availableHeight =
-						height -
-						2 * (yMin !== 0 || yMax !== 0 ? yMin + yMax : max(overflow.top, overflow.bottom))
-				}
-			}
-			await apply({
-				...state,
-				availableWidth,
-				availableHeight,
-			})
-			const nextDimensions = await platform.getDimensions(elements.floating)
-			if (width !== nextDimensions.width || height !== nextDimensions.height) {
-				return {
-					reset: {
-						rects: true,
-					},
-				}
-			}
-			return {}
-		},
-	}
-}
+  if (options === void 0) {
+    options = {};
+  }
+  return {
+    name: 'size',
+    options,
+    async fn(state) {
+      var _state$middlewareData, _state$middlewareData2;
+      const {
+        placement,
+        rects,
+        platform,
+        elements
+      } = state;
+      const {
+        apply = () => {},
+        ...detectOverflowOptions
+      } = evaluate(options, state);
+      const overflow = await detectOverflow(state, detectOverflowOptions);
+      const side = getSide(placement);
+      const alignment = getAlignment(placement);
+      const isYAxis = getSideAxis(placement) === 'y';
+      const {
+        width,
+        height
+      } = rects.floating;
+      let heightSide;
+      let widthSide;
+      if (side === 'top' || side === 'bottom') {
+        heightSide = side;
+        widthSide = alignment === ((await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating))) ? 'start' : 'end') ? 'left' : 'right';
+      } else {
+        widthSide = side;
+        heightSide = alignment === 'end' ? 'top' : 'bottom';
+      }
+      const maximumClippingHeight = height - overflow.top - overflow.bottom;
+      const maximumClippingWidth = width - overflow.left - overflow.right;
+      const overflowAvailableHeight = min(height - overflow[heightSide], maximumClippingHeight);
+      const overflowAvailableWidth = min(width - overflow[widthSide], maximumClippingWidth);
+      const noShift = !state.middlewareData.shift;
+      let availableHeight = overflowAvailableHeight;
+      let availableWidth = overflowAvailableWidth;
+      if ((_state$middlewareData = state.middlewareData.shift) != null && _state$middlewareData.enabled.x) {
+        availableWidth = maximumClippingWidth;
+      }
+      if ((_state$middlewareData2 = state.middlewareData.shift) != null && _state$middlewareData2.enabled.y) {
+        availableHeight = maximumClippingHeight;
+      }
+      if (noShift && !alignment) {
+        const xMin = max(overflow.left, 0);
+        const xMax = max(overflow.right, 0);
+        const yMin = max(overflow.top, 0);
+        const yMax = max(overflow.bottom, 0);
+        if (isYAxis) {
+          availableWidth = width - 2 * (xMin !== 0 || xMax !== 0 ? xMin + xMax : max(overflow.left, overflow.right));
+        } else {
+          availableHeight = height - 2 * (yMin !== 0 || yMax !== 0 ? yMin + yMax : max(overflow.top, overflow.bottom));
+        }
+      }
+      await apply({
+        ...state,
+        availableWidth,
+        availableHeight
+      });
+      const nextDimensions = await platform.getDimensions(elements.floating);
+      if (width !== nextDimensions.width || height !== nextDimensions.height) {
+        return {
+          reset: {
+            rects: true
+          }
+        };
+      }
+      return {};
+    }
+  };
+};
 
+function hasWindow() {
+  return typeof window !== 'undefined';
+}
 function getNodeName(node) {
-	if (isNode(node)) {
-		return (node.nodeName || "").toLowerCase()
-	}
-	// Mocked nodes in testing environments may not be instances of Node. By
-	// returning `#document` an infinite loop won't occur.
-	// https://github.com/floating-ui/floating-ui/issues/2317
-	return "#document"
+  if (isNode(node)) {
+    return (node.nodeName || '').toLowerCase();
+  }
+  // Mocked nodes in testing environments may not be instances of Node. By
+  // returning `#document` an infinite loop won't occur.
+  // https://github.com/floating-ui/floating-ui/issues/2317
+  return '#document';
 }
 function getWindow(node) {
-	var _node$ownerDocument
-	return (
-		(node == null || (_node$ownerDocument = node.ownerDocument) == null
-			? void 0
-			: _node$ownerDocument.defaultView) || window
-	)
+  var _node$ownerDocument;
+  return (node == null || (_node$ownerDocument = node.ownerDocument) == null ? void 0 : _node$ownerDocument.defaultView) || window;
 }
 function getDocumentElement(node) {
-	var _ref
-	return (_ref = (isNode(node) ? node.ownerDocument : node.document) || window.document) == null
-		? void 0
-		: _ref.documentElement
+  var _ref;
+  return (_ref = (isNode(node) ? node.ownerDocument : node.document) || window.document) == null ? void 0 : _ref.documentElement;
 }
 function isNode(value) {
-	return value instanceof Node || value instanceof getWindow(value).Node
+  if (!hasWindow()) {
+    return false;
+  }
+  return value instanceof Node || value instanceof getWindow(value).Node;
 }
 function isElement(value) {
-	return value instanceof Element || value instanceof getWindow(value).Element
+  if (!hasWindow()) {
+    return false;
+  }
+  return value instanceof Element || value instanceof getWindow(value).Element;
 }
 function isHTMLElement(value) {
-	return value instanceof HTMLElement || value instanceof getWindow(value).HTMLElement
+  if (!hasWindow()) {
+    return false;
+  }
+  return value instanceof HTMLElement || value instanceof getWindow(value).HTMLElement;
 }
 function isShadowRoot(value) {
-	// Browsers without `ShadowRoot` support.
-	if (typeof ShadowRoot === "undefined") {
-		return false
-	}
-	return value instanceof ShadowRoot || value instanceof getWindow(value).ShadowRoot
+  if (!hasWindow() || typeof ShadowRoot === 'undefined') {
+    return false;
+  }
+  return value instanceof ShadowRoot || value instanceof getWindow(value).ShadowRoot;
 }
 function isOverflowElement(element) {
-	const { overflow, overflowX, overflowY, display } = getComputedStyle$1(element)
-	return (
-		/auto|scroll|overlay|hidden|clip/.test(overflow + overflowY + overflowX) &&
-		!["inline", "contents"].includes(display)
-	)
+  const {
+    overflow,
+    overflowX,
+    overflowY,
+    display
+  } = getComputedStyle$1(element);
+  return /auto|scroll|overlay|hidden|clip/.test(overflow + overflowY + overflowX) && !['inline', 'contents'].includes(display);
 }
 function isTableElement(element) {
-	return ["table", "td", "th"].includes(getNodeName(element))
+  return ['table', 'td', 'th'].includes(getNodeName(element));
 }
 function isTopLayer(element) {
-	return [":popover-open", ":modal"].some((selector) => {
-		try {
-			return element.matches(selector)
-		} catch (e) {
-			return false
-		}
-	})
+  return [':popover-open', ':modal'].some(selector => {
+    try {
+      return element.matches(selector);
+    } catch (e) {
+      return false;
+    }
+  });
 }
 function isContainingBlock(elementOrCss) {
-	const webkit = isWebKit()
-	const css = isElement(elementOrCss) ? getComputedStyle$1(elementOrCss) : elementOrCss
+  const webkit = isWebKit();
+  const css = isElement(elementOrCss) ? getComputedStyle$1(elementOrCss) : elementOrCss;
 
-	// https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
-	return (
-		css.transform !== "none" ||
-		css.perspective !== "none" ||
-		(css.containerType ? css.containerType !== "normal" : false) ||
-		(!webkit && (css.backdropFilter ? css.backdropFilter !== "none" : false)) ||
-		(!webkit && (css.filter ? css.filter !== "none" : false)) ||
-		["transform", "perspective", "filter"].some((value) =>
-			(css.willChange || "").includes(value)
-		) ||
-		["paint", "layout", "strict", "content"].some((value) => (css.contain || "").includes(value))
-	)
+  // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
+  return css.transform !== 'none' || css.perspective !== 'none' || (css.containerType ? css.containerType !== 'normal' : false) || !webkit && (css.backdropFilter ? css.backdropFilter !== 'none' : false) || !webkit && (css.filter ? css.filter !== 'none' : false) || ['transform', 'perspective', 'filter'].some(value => (css.willChange || '').includes(value)) || ['paint', 'layout', 'strict', 'content'].some(value => (css.contain || '').includes(value));
 }
 function getContainingBlock(element) {
-	let currentNode = getParentNode(element)
-	while (isHTMLElement(currentNode) && !isLastTraversableNode(currentNode)) {
-		if (isContainingBlock(currentNode)) {
-			return currentNode
-		} else if (isTopLayer(currentNode)) {
-			return null
-		}
-		currentNode = getParentNode(currentNode)
-	}
-	return null
+  let currentNode = getParentNode(element);
+  while (isHTMLElement(currentNode) && !isLastTraversableNode(currentNode)) {
+    if (isContainingBlock(currentNode)) {
+      return currentNode;
+    } else if (isTopLayer(currentNode)) {
+      return null;
+    }
+    currentNode = getParentNode(currentNode);
+  }
+  return null;
 }
 function isWebKit() {
-	if (typeof CSS === "undefined" || !CSS.supports) return false
-	return CSS.supports("-webkit-backdrop-filter", "none")
+  if (typeof CSS === 'undefined' || !CSS.supports) return false;
+  return CSS.supports('-webkit-backdrop-filter', 'none');
 }
 function isLastTraversableNode(node) {
-	return ["html", "body", "#document"].includes(getNodeName(node))
+  return ['html', 'body', '#document'].includes(getNodeName(node));
 }
 function getComputedStyle$1(element) {
-	return getWindow(element).getComputedStyle(element)
+  return getWindow(element).getComputedStyle(element);
 }
 function getNodeScroll(element) {
-	if (isElement(element)) {
-		return {
-			scrollLeft: element.scrollLeft,
-			scrollTop: element.scrollTop,
-		}
-	}
-	return {
-		scrollLeft: element.scrollX,
-		scrollTop: element.scrollY,
-	}
+  if (isElement(element)) {
+    return {
+      scrollLeft: element.scrollLeft,
+      scrollTop: element.scrollTop
+    };
+  }
+  return {
+    scrollLeft: element.scrollX,
+    scrollTop: element.scrollY
+  };
 }
 function getParentNode(node) {
-	if (getNodeName(node) === "html") {
-		return node
-	}
-	const result =
-		// Step into the shadow DOM of the parent of a slotted node.
-		node.assignedSlot ||
-		// DOM Element detected.
-		node.parentNode ||
-		// ShadowRoot detected.
-		(isShadowRoot(node) && node.host) ||
-		// Fallback.
-		getDocumentElement(node)
-	return isShadowRoot(result) ? result.host : result
+  if (getNodeName(node) === 'html') {
+    return node;
+  }
+  const result =
+  // Step into the shadow DOM of the parent of a slotted node.
+  node.assignedSlot ||
+  // DOM Element detected.
+  node.parentNode ||
+  // ShadowRoot detected.
+  isShadowRoot(node) && node.host ||
+  // Fallback.
+  getDocumentElement(node);
+  return isShadowRoot(result) ? result.host : result;
 }
 function getNearestOverflowAncestor(node) {
-	const parentNode = getParentNode(node)
-	if (isLastTraversableNode(parentNode)) {
-		return node.ownerDocument ? node.ownerDocument.body : node.body
-	}
-	if (isHTMLElement(parentNode) && isOverflowElement(parentNode)) {
-		return parentNode
-	}
-	return getNearestOverflowAncestor(parentNode)
+  const parentNode = getParentNode(node);
+  if (isLastTraversableNode(parentNode)) {
+    return node.ownerDocument ? node.ownerDocument.body : node.body;
+  }
+  if (isHTMLElement(parentNode) && isOverflowElement(parentNode)) {
+    return parentNode;
+  }
+  return getNearestOverflowAncestor(parentNode);
 }
 function getOverflowAncestors(node, list, traverseIframes) {
-	var _node$ownerDocument2
-	if (list === void 0) {
-		list = []
-	}
-	if (traverseIframes === void 0) {
-		traverseIframes = true
-	}
-	const scrollableAncestor = getNearestOverflowAncestor(node)
-	const isBody =
-		scrollableAncestor ===
-		((_node$ownerDocument2 = node.ownerDocument) == null ? void 0 : _node$ownerDocument2.body)
-	const win = getWindow(scrollableAncestor)
-	if (isBody) {
-		const frameElement = getFrameElement(win)
-		return list.concat(
-			win,
-			win.visualViewport || [],
-			isOverflowElement(scrollableAncestor) ? scrollableAncestor : [],
-			frameElement && traverseIframes ? getOverflowAncestors(frameElement) : []
-		)
-	}
-	return list.concat(
-		scrollableAncestor,
-		getOverflowAncestors(scrollableAncestor, [], traverseIframes)
-	)
+  var _node$ownerDocument2;
+  if (list === void 0) {
+    list = [];
+  }
+  if (traverseIframes === void 0) {
+    traverseIframes = true;
+  }
+  const scrollableAncestor = getNearestOverflowAncestor(node);
+  const isBody = scrollableAncestor === ((_node$ownerDocument2 = node.ownerDocument) == null ? void 0 : _node$ownerDocument2.body);
+  const win = getWindow(scrollableAncestor);
+  if (isBody) {
+    const frameElement = getFrameElement(win);
+    return list.concat(win, win.visualViewport || [], isOverflowElement(scrollableAncestor) ? scrollableAncestor : [], frameElement && traverseIframes ? getOverflowAncestors(frameElement) : []);
+  }
+  return list.concat(scrollableAncestor, getOverflowAncestors(scrollableAncestor, [], traverseIframes));
 }
 function getFrameElement(win) {
-	return win.parent && Object.getPrototypeOf(win.parent) ? win.frameElement : null
+  return win.parent && Object.getPrototypeOf(win.parent) ? win.frameElement : null;
 }
 
 function getCssDimensions(element) {
-	const css = getComputedStyle$1(element)
-	// In testing environments, the `width` and `height` properties are empty
-	// strings for SVG elements, returning NaN. Fallback to `0` in this case.
-	let width = parseFloat(css.width) || 0
-	let height = parseFloat(css.height) || 0
-	const hasOffset = isHTMLElement(element)
-	const offsetWidth = hasOffset ? element.offsetWidth : width
-	const offsetHeight = hasOffset ? element.offsetHeight : height
-	const shouldFallback = round(width) !== offsetWidth || round(height) !== offsetHeight
-	if (shouldFallback) {
-		width = offsetWidth
-		height = offsetHeight
-	}
-	return {
-		width,
-		height,
-		$: shouldFallback,
-	}
+  const css = getComputedStyle$1(element);
+  // In testing environments, the `width` and `height` properties are empty
+  // strings for SVG elements, returning NaN. Fallback to `0` in this case.
+  let width = parseFloat(css.width) || 0;
+  let height = parseFloat(css.height) || 0;
+  const hasOffset = isHTMLElement(element);
+  const offsetWidth = hasOffset ? element.offsetWidth : width;
+  const offsetHeight = hasOffset ? element.offsetHeight : height;
+  const shouldFallback = round(width) !== offsetWidth || round(height) !== offsetHeight;
+  if (shouldFallback) {
+    width = offsetWidth;
+    height = offsetHeight;
+  }
+  return {
+    width,
+    height,
+    $: shouldFallback
+  };
 }
 
 function unwrapElement(element) {
-	return !isElement(element) ? element.contextElement : element
+  return !isElement(element) ? element.contextElement : element;
 }
 
 function getScale(element) {
-	const domElement = unwrapElement(element)
-	if (!isHTMLElement(domElement)) {
-		return createCoords(1)
-	}
-	const rect = domElement.getBoundingClientRect()
-	const { width, height, $ } = getCssDimensions(domElement)
-	let x = ($ ? round(rect.width) : rect.width) / width
-	let y = ($ ? round(rect.height) : rect.height) / height
+  const domElement = unwrapElement(element);
+  if (!isHTMLElement(domElement)) {
+    return createCoords(1);
+  }
+  const rect = domElement.getBoundingClientRect();
+  const {
+    width,
+    height,
+    $
+  } = getCssDimensions(domElement);
+  let x = ($ ? round(rect.width) : rect.width) / width;
+  let y = ($ ? round(rect.height) : rect.height) / height;
 
-	// 0, NaN, or Infinity should always fallback to 1.
+  // 0, NaN, or Infinity should always fallback to 1.
 
-	if (!x || !Number.isFinite(x)) {
-		x = 1
-	}
-	if (!y || !Number.isFinite(y)) {
-		y = 1
-	}
-	return {
-		x,
-		y,
-	}
+  if (!x || !Number.isFinite(x)) {
+    x = 1;
+  }
+  if (!y || !Number.isFinite(y)) {
+    y = 1;
+  }
+  return {
+    x,
+    y
+  };
 }
 
-const noOffsets = /*#__PURE__*/ createCoords(0)
+const noOffsets = /*#__PURE__*/createCoords(0);
 function getVisualOffsets(element) {
-	const win = getWindow(element)
-	if (!isWebKit() || !win.visualViewport) {
-		return noOffsets
-	}
-	return {
-		x: win.visualViewport.offsetLeft,
-		y: win.visualViewport.offsetTop,
-	}
+  const win = getWindow(element);
+  if (!isWebKit() || !win.visualViewport) {
+    return noOffsets;
+  }
+  return {
+    x: win.visualViewport.offsetLeft,
+    y: win.visualViewport.offsetTop
+  };
 }
 function shouldAddVisualOffsets(element, isFixed, floatingOffsetParent) {
-	if (isFixed === void 0) {
-		isFixed = false
-	}
-	if (!floatingOffsetParent || (isFixed && floatingOffsetParent !== getWindow(element))) {
-		return false
-	}
-	return isFixed
+  if (isFixed === void 0) {
+    isFixed = false;
+  }
+  if (!floatingOffsetParent || isFixed && floatingOffsetParent !== getWindow(element)) {
+    return false;
+  }
+  return isFixed;
 }
 
 function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetParent) {
-	if (includeScale === void 0) {
-		includeScale = false
-	}
-	if (isFixedStrategy === void 0) {
-		isFixedStrategy = false
-	}
-	const clientRect = element.getBoundingClientRect()
-	const domElement = unwrapElement(element)
-	let scale = createCoords(1)
-	if (includeScale) {
-		if (offsetParent) {
-			if (isElement(offsetParent)) {
-				scale = getScale(offsetParent)
-			}
-		} else {
-			scale = getScale(element)
-		}
-	}
-	const visualOffsets = shouldAddVisualOffsets(domElement, isFixedStrategy, offsetParent)
-		? getVisualOffsets(domElement)
-		: createCoords(0)
-	let x = (clientRect.left + visualOffsets.x) / scale.x
-	let y = (clientRect.top + visualOffsets.y) / scale.y
-	let width = clientRect.width / scale.x
-	let height = clientRect.height / scale.y
-	if (domElement) {
-		const win = getWindow(domElement)
-		const offsetWin =
-			offsetParent && isElement(offsetParent) ? getWindow(offsetParent) : offsetParent
-		let currentWin = win
-		let currentIFrame = getFrameElement(currentWin)
-		while (currentIFrame && offsetParent && offsetWin !== currentWin) {
-			const iframeScale = getScale(currentIFrame)
-			const iframeRect = currentIFrame.getBoundingClientRect()
-			const css = getComputedStyle$1(currentIFrame)
-			const left =
-				iframeRect.left + (currentIFrame.clientLeft + parseFloat(css.paddingLeft)) * iframeScale.x
-			const top =
-				iframeRect.top + (currentIFrame.clientTop + parseFloat(css.paddingTop)) * iframeScale.y
-			x *= iframeScale.x
-			y *= iframeScale.y
-			width *= iframeScale.x
-			height *= iframeScale.y
-			x += left
-			y += top
-			currentWin = getWindow(currentIFrame)
-			currentIFrame = getFrameElement(currentWin)
-		}
-	}
-	return rectToClientRect({
-		width,
-		height,
-		x,
-		y,
-	})
+  if (includeScale === void 0) {
+    includeScale = false;
+  }
+  if (isFixedStrategy === void 0) {
+    isFixedStrategy = false;
+  }
+  const clientRect = element.getBoundingClientRect();
+  const domElement = unwrapElement(element);
+  let scale = createCoords(1);
+  if (includeScale) {
+    if (offsetParent) {
+      if (isElement(offsetParent)) {
+        scale = getScale(offsetParent);
+      }
+    } else {
+      scale = getScale(element);
+    }
+  }
+  const visualOffsets = shouldAddVisualOffsets(domElement, isFixedStrategy, offsetParent) ? getVisualOffsets(domElement) : createCoords(0);
+  let x = (clientRect.left + visualOffsets.x) / scale.x;
+  let y = (clientRect.top + visualOffsets.y) / scale.y;
+  let width = clientRect.width / scale.x;
+  let height = clientRect.height / scale.y;
+  if (domElement) {
+    const win = getWindow(domElement);
+    const offsetWin = offsetParent && isElement(offsetParent) ? getWindow(offsetParent) : offsetParent;
+    let currentWin = win;
+    let currentIFrame = getFrameElement(currentWin);
+    while (currentIFrame && offsetParent && offsetWin !== currentWin) {
+      const iframeScale = getScale(currentIFrame);
+      const iframeRect = currentIFrame.getBoundingClientRect();
+      const css = getComputedStyle$1(currentIFrame);
+      const left = iframeRect.left + (currentIFrame.clientLeft + parseFloat(css.paddingLeft)) * iframeScale.x;
+      const top = iframeRect.top + (currentIFrame.clientTop + parseFloat(css.paddingTop)) * iframeScale.y;
+      x *= iframeScale.x;
+      y *= iframeScale.y;
+      width *= iframeScale.x;
+      height *= iframeScale.y;
+      x += left;
+      y += top;
+      currentWin = getWindow(currentIFrame);
+      currentIFrame = getFrameElement(currentWin);
+    }
+  }
+  return rectToClientRect({
+    width,
+    height,
+    x,
+    y
+  });
 }
 
 function convertOffsetParentRelativeRectToViewportRelativeRect(_ref) {
-	let { elements, rect, offsetParent, strategy } = _ref
-	const isFixed = strategy === "fixed"
-	const documentElement = getDocumentElement(offsetParent)
-	const topLayer = elements ? isTopLayer(elements.floating) : false
-	if (offsetParent === documentElement || (topLayer && isFixed)) {
-		return rect
-	}
-	let scroll = {
-		scrollLeft: 0,
-		scrollTop: 0,
-	}
-	let scale = createCoords(1)
-	const offsets = createCoords(0)
-	const isOffsetParentAnElement = isHTMLElement(offsetParent)
-	if (isOffsetParentAnElement || (!isOffsetParentAnElement && !isFixed)) {
-		if (getNodeName(offsetParent) !== "body" || isOverflowElement(documentElement)) {
-			scroll = getNodeScroll(offsetParent)
-		}
-		if (isHTMLElement(offsetParent)) {
-			const offsetRect = getBoundingClientRect(offsetParent)
-			scale = getScale(offsetParent)
-			offsets.x = offsetRect.x + offsetParent.clientLeft
-			offsets.y = offsetRect.y + offsetParent.clientTop
-		}
-	}
-	return {
-		width: rect.width * scale.x,
-		height: rect.height * scale.y,
-		x: rect.x * scale.x - scroll.scrollLeft * scale.x + offsets.x,
-		y: rect.y * scale.y - scroll.scrollTop * scale.y + offsets.y,
-	}
+  let {
+    elements,
+    rect,
+    offsetParent,
+    strategy
+  } = _ref;
+  const isFixed = strategy === 'fixed';
+  const documentElement = getDocumentElement(offsetParent);
+  const topLayer = elements ? isTopLayer(elements.floating) : false;
+  if (offsetParent === documentElement || topLayer && isFixed) {
+    return rect;
+  }
+  let scroll = {
+    scrollLeft: 0,
+    scrollTop: 0
+  };
+  let scale = createCoords(1);
+  const offsets = createCoords(0);
+  const isOffsetParentAnElement = isHTMLElement(offsetParent);
+  if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
+    if (getNodeName(offsetParent) !== 'body' || isOverflowElement(documentElement)) {
+      scroll = getNodeScroll(offsetParent);
+    }
+    if (isHTMLElement(offsetParent)) {
+      const offsetRect = getBoundingClientRect(offsetParent);
+      scale = getScale(offsetParent);
+      offsets.x = offsetRect.x + offsetParent.clientLeft;
+      offsets.y = offsetRect.y + offsetParent.clientTop;
+    }
+  }
+  return {
+    width: rect.width * scale.x,
+    height: rect.height * scale.y,
+    x: rect.x * scale.x - scroll.scrollLeft * scale.x + offsets.x,
+    y: rect.y * scale.y - scroll.scrollTop * scale.y + offsets.y
+  };
 }
 
 function getClientRects(element) {
-	return Array.from(element.getClientRects())
+  return Array.from(element.getClientRects());
 }
 
-function getWindowScrollBarX(element) {
-	// If <html> has a CSS width greater than the viewport, then this will be
-	// incorrect for RTL.
-	return getBoundingClientRect(getDocumentElement(element)).left + getNodeScroll(element).scrollLeft
+// If <html> has a CSS width greater than the viewport, then this will be
+// incorrect for RTL.
+function getWindowScrollBarX(element, rect) {
+  const leftScroll = getNodeScroll(element).scrollLeft;
+  if (!rect) {
+    return getBoundingClientRect(getDocumentElement(element)).left + leftScroll;
+  }
+  return rect.left + leftScroll;
 }
 
 // Gets the entire size of the scrollable document area, even extending outside
 // of the `<html>` and `<body>` rect bounds if horizontally scrollable.
 function getDocumentRect(element) {
-	const html = getDocumentElement(element)
-	const scroll = getNodeScroll(element)
-	const body = element.ownerDocument.body
-	const width = max(html.scrollWidth, html.clientWidth, body.scrollWidth, body.clientWidth)
-	const height = max(html.scrollHeight, html.clientHeight, body.scrollHeight, body.clientHeight)
-	let x = -scroll.scrollLeft + getWindowScrollBarX(element)
-	const y = -scroll.scrollTop
-	if (getComputedStyle$1(body).direction === "rtl") {
-		x += max(html.clientWidth, body.clientWidth) - width
-	}
-	return {
-		width,
-		height,
-		x,
-		y,
-	}
+  const html = getDocumentElement(element);
+  const scroll = getNodeScroll(element);
+  const body = element.ownerDocument.body;
+  const width = max(html.scrollWidth, html.clientWidth, body.scrollWidth, body.clientWidth);
+  const height = max(html.scrollHeight, html.clientHeight, body.scrollHeight, body.clientHeight);
+  let x = -scroll.scrollLeft + getWindowScrollBarX(element);
+  const y = -scroll.scrollTop;
+  if (getComputedStyle$1(body).direction === 'rtl') {
+    x += max(html.clientWidth, body.clientWidth) - width;
+  }
+  return {
+    width,
+    height,
+    x,
+    y
+  };
 }
 
 function getViewportRect(element, strategy) {
-	const win = getWindow(element)
-	const html = getDocumentElement(element)
-	const visualViewport = win.visualViewport
-	let width = html.clientWidth
-	let height = html.clientHeight
-	let x = 0
-	let y = 0
-	if (visualViewport) {
-		width = visualViewport.width
-		height = visualViewport.height
-		const visualViewportBased = isWebKit()
-		if (!visualViewportBased || (visualViewportBased && strategy === "fixed")) {
-			x = visualViewport.offsetLeft
-			y = visualViewport.offsetTop
-		}
-	}
-	return {
-		width,
-		height,
-		x,
-		y,
-	}
+  const win = getWindow(element);
+  const html = getDocumentElement(element);
+  const visualViewport = win.visualViewport;
+  let width = html.clientWidth;
+  let height = html.clientHeight;
+  let x = 0;
+  let y = 0;
+  if (visualViewport) {
+    width = visualViewport.width;
+    height = visualViewport.height;
+    const visualViewportBased = isWebKit();
+    if (!visualViewportBased || visualViewportBased && strategy === 'fixed') {
+      x = visualViewport.offsetLeft;
+      y = visualViewport.offsetTop;
+    }
+  }
+  return {
+    width,
+    height,
+    x,
+    y
+  };
 }
 
 // Returns the inner client rect, subtracting scrollbars if present.
 function getInnerBoundingClientRect(element, strategy) {
-	const clientRect = getBoundingClientRect(element, true, strategy === "fixed")
-	const top = clientRect.top + element.clientTop
-	const left = clientRect.left + element.clientLeft
-	const scale = isHTMLElement(element) ? getScale(element) : createCoords(1)
-	const width = element.clientWidth * scale.x
-	const height = element.clientHeight * scale.y
-	const x = left * scale.x
-	const y = top * scale.y
-	return {
-		width,
-		height,
-		x,
-		y,
-	}
+  const clientRect = getBoundingClientRect(element, true, strategy === 'fixed');
+  const top = clientRect.top + element.clientTop;
+  const left = clientRect.left + element.clientLeft;
+  const scale = isHTMLElement(element) ? getScale(element) : createCoords(1);
+  const width = element.clientWidth * scale.x;
+  const height = element.clientHeight * scale.y;
+  const x = left * scale.x;
+  const y = top * scale.y;
+  return {
+    width,
+    height,
+    x,
+    y
+  };
 }
 function getClientRectFromClippingAncestor(element, clippingAncestor, strategy) {
-	let rect
-	if (clippingAncestor === "viewport") {
-		rect = getViewportRect(element, strategy)
-	} else if (clippingAncestor === "document") {
-		rect = getDocumentRect(getDocumentElement(element))
-	} else if (isElement(clippingAncestor)) {
-		rect = getInnerBoundingClientRect(clippingAncestor, strategy)
-	} else {
-		const visualOffsets = getVisualOffsets(element)
-		rect = {
-			...clippingAncestor,
-			x: clippingAncestor.x - visualOffsets.x,
-			y: clippingAncestor.y - visualOffsets.y,
-		}
-	}
-	return rectToClientRect(rect)
+  let rect;
+  if (clippingAncestor === 'viewport') {
+    rect = getViewportRect(element, strategy);
+  } else if (clippingAncestor === 'document') {
+    rect = getDocumentRect(getDocumentElement(element));
+  } else if (isElement(clippingAncestor)) {
+    rect = getInnerBoundingClientRect(clippingAncestor, strategy);
+  } else {
+    const visualOffsets = getVisualOffsets(element);
+    rect = {
+      ...clippingAncestor,
+      x: clippingAncestor.x - visualOffsets.x,
+      y: clippingAncestor.y - visualOffsets.y
+    };
+  }
+  return rectToClientRect(rect);
 }
 function hasFixedPositionAncestor(element, stopNode) {
-	const parentNode = getParentNode(element)
-	if (parentNode === stopNode || !isElement(parentNode) || isLastTraversableNode(parentNode)) {
-		return false
-	}
-	return (
-		getComputedStyle$1(parentNode).position === "fixed" ||
-		hasFixedPositionAncestor(parentNode, stopNode)
-	)
+  const parentNode = getParentNode(element);
+  if (parentNode === stopNode || !isElement(parentNode) || isLastTraversableNode(parentNode)) {
+    return false;
+  }
+  return getComputedStyle$1(parentNode).position === 'fixed' || hasFixedPositionAncestor(parentNode, stopNode);
 }
 
 // A "clipping ancestor" is an `overflow` element with the characteristic of
 // clipping (or hiding) child elements. This returns all clipping ancestors
 // of the given element up the tree.
 function getClippingElementAncestors(element, cache) {
-	const cachedResult = cache.get(element)
-	if (cachedResult) {
-		return cachedResult
-	}
-	let result = getOverflowAncestors(element, [], false).filter(
-		(el) => isElement(el) && getNodeName(el) !== "body"
-	)
-	let currentContainingBlockComputedStyle = null
-	const elementIsFixed = getComputedStyle$1(element).position === "fixed"
-	let currentNode = elementIsFixed ? getParentNode(element) : element
+  const cachedResult = cache.get(element);
+  if (cachedResult) {
+    return cachedResult;
+  }
+  let result = getOverflowAncestors(element, [], false).filter(el => isElement(el) && getNodeName(el) !== 'body');
+  let currentContainingBlockComputedStyle = null;
+  const elementIsFixed = getComputedStyle$1(element).position === 'fixed';
+  let currentNode = elementIsFixed ? getParentNode(element) : element;
 
-	// https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
-	while (isElement(currentNode) && !isLastTraversableNode(currentNode)) {
-		const computedStyle = getComputedStyle$1(currentNode)
-		const currentNodeIsContaining = isContainingBlock(currentNode)
-		if (!currentNodeIsContaining && computedStyle.position === "fixed") {
-			currentContainingBlockComputedStyle = null
-		}
-		const shouldDropCurrentNode = elementIsFixed
-			? !currentNodeIsContaining && !currentContainingBlockComputedStyle
-			: (!currentNodeIsContaining &&
-					computedStyle.position === "static" &&
-					!!currentContainingBlockComputedStyle &&
-					["absolute", "fixed"].includes(currentContainingBlockComputedStyle.position)) ||
-				(isOverflowElement(currentNode) &&
-					!currentNodeIsContaining &&
-					hasFixedPositionAncestor(element, currentNode))
-		if (shouldDropCurrentNode) {
-			// Drop non-containing blocks.
-			result = result.filter((ancestor) => ancestor !== currentNode)
-		} else {
-			// Record last containing block for next iteration.
-			currentContainingBlockComputedStyle = computedStyle
-		}
-		currentNode = getParentNode(currentNode)
-	}
-	cache.set(element, result)
-	return result
+  // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
+  while (isElement(currentNode) && !isLastTraversableNode(currentNode)) {
+    const computedStyle = getComputedStyle$1(currentNode);
+    const currentNodeIsContaining = isContainingBlock(currentNode);
+    if (!currentNodeIsContaining && computedStyle.position === 'fixed') {
+      currentContainingBlockComputedStyle = null;
+    }
+    const shouldDropCurrentNode = elementIsFixed ? !currentNodeIsContaining && !currentContainingBlockComputedStyle : !currentNodeIsContaining && computedStyle.position === 'static' && !!currentContainingBlockComputedStyle && ['absolute', 'fixed'].includes(currentContainingBlockComputedStyle.position) || isOverflowElement(currentNode) && !currentNodeIsContaining && hasFixedPositionAncestor(element, currentNode);
+    if (shouldDropCurrentNode) {
+      // Drop non-containing blocks.
+      result = result.filter(ancestor => ancestor !== currentNode);
+    } else {
+      // Record last containing block for next iteration.
+      currentContainingBlockComputedStyle = computedStyle;
+    }
+    currentNode = getParentNode(currentNode);
+  }
+  cache.set(element, result);
+  return result;
 }
 
 // Gets the maximum area that the element is visible in due to any number of
 // clipping ancestors.
 function getClippingRect(_ref) {
-	let { element, boundary, rootBoundary, strategy } = _ref
-	const elementClippingAncestors =
-		boundary === "clippingAncestors"
-			? isTopLayer(element)
-				? []
-				: getClippingElementAncestors(element, this._c)
-			: [].concat(boundary)
-	const clippingAncestors = [...elementClippingAncestors, rootBoundary]
-	const firstClippingAncestor = clippingAncestors[0]
-	const clippingRect = clippingAncestors.reduce(
-		(accRect, clippingAncestor) => {
-			const rect = getClientRectFromClippingAncestor(element, clippingAncestor, strategy)
-			accRect.top = max(rect.top, accRect.top)
-			accRect.right = min(rect.right, accRect.right)
-			accRect.bottom = min(rect.bottom, accRect.bottom)
-			accRect.left = max(rect.left, accRect.left)
-			return accRect
-		},
-		getClientRectFromClippingAncestor(element, firstClippingAncestor, strategy)
-	)
-	return {
-		width: clippingRect.right - clippingRect.left,
-		height: clippingRect.bottom - clippingRect.top,
-		x: clippingRect.left,
-		y: clippingRect.top,
-	}
+  let {
+    element,
+    boundary,
+    rootBoundary,
+    strategy
+  } = _ref;
+  const elementClippingAncestors = boundary === 'clippingAncestors' ? isTopLayer(element) ? [] : getClippingElementAncestors(element, this._c) : [].concat(boundary);
+  const clippingAncestors = [...elementClippingAncestors, rootBoundary];
+  const firstClippingAncestor = clippingAncestors[0];
+  const clippingRect = clippingAncestors.reduce((accRect, clippingAncestor) => {
+    const rect = getClientRectFromClippingAncestor(element, clippingAncestor, strategy);
+    accRect.top = max(rect.top, accRect.top);
+    accRect.right = min(rect.right, accRect.right);
+    accRect.bottom = min(rect.bottom, accRect.bottom);
+    accRect.left = max(rect.left, accRect.left);
+    return accRect;
+  }, getClientRectFromClippingAncestor(element, firstClippingAncestor, strategy));
+  return {
+    width: clippingRect.right - clippingRect.left,
+    height: clippingRect.bottom - clippingRect.top,
+    x: clippingRect.left,
+    y: clippingRect.top
+  };
 }
 
 function getDimensions(element) {
-	const { width, height } = getCssDimensions(element)
-	return {
-		width,
-		height,
-	}
+  const {
+    width,
+    height
+  } = getCssDimensions(element);
+  return {
+    width,
+    height
+  };
 }
 
 function getRectRelativeToOffsetParent(element, offsetParent, strategy) {
-	const isOffsetParentAnElement = isHTMLElement(offsetParent)
-	const documentElement = getDocumentElement(offsetParent)
-	const isFixed = strategy === "fixed"
-	const rect = getBoundingClientRect(element, true, isFixed, offsetParent)
-	let scroll = {
-		scrollLeft: 0,
-		scrollTop: 0,
-	}
-	const offsets = createCoords(0)
-	if (isOffsetParentAnElement || (!isOffsetParentAnElement && !isFixed)) {
-		if (getNodeName(offsetParent) !== "body" || isOverflowElement(documentElement)) {
-			scroll = getNodeScroll(offsetParent)
-		}
-		if (isOffsetParentAnElement) {
-			const offsetRect = getBoundingClientRect(offsetParent, true, isFixed, offsetParent)
-			offsets.x = offsetRect.x + offsetParent.clientLeft
-			offsets.y = offsetRect.y + offsetParent.clientTop
-		} else if (documentElement) {
-			offsets.x = getWindowScrollBarX(documentElement)
-		}
-	}
-	const x = rect.left + scroll.scrollLeft - offsets.x
-	const y = rect.top + scroll.scrollTop - offsets.y
-	return {
-		x,
-		y,
-		width: rect.width,
-		height: rect.height,
-	}
+  const isOffsetParentAnElement = isHTMLElement(offsetParent);
+  const documentElement = getDocumentElement(offsetParent);
+  const isFixed = strategy === 'fixed';
+  const rect = getBoundingClientRect(element, true, isFixed, offsetParent);
+  let scroll = {
+    scrollLeft: 0,
+    scrollTop: 0
+  };
+  const offsets = createCoords(0);
+  if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
+    if (getNodeName(offsetParent) !== 'body' || isOverflowElement(documentElement)) {
+      scroll = getNodeScroll(offsetParent);
+    }
+    if (isOffsetParentAnElement) {
+      const offsetRect = getBoundingClientRect(offsetParent, true, isFixed, offsetParent);
+      offsets.x = offsetRect.x + offsetParent.clientLeft;
+      offsets.y = offsetRect.y + offsetParent.clientTop;
+    } else if (documentElement) {
+      // If the <body> scrollbar appears on the left (e.g. RTL systems). Use
+      // Firefox with layout.scrollbar.side = 3 in about:config to test this.
+      offsets.x = getWindowScrollBarX(documentElement);
+    }
+  }
+  let htmlX = 0;
+  let htmlY = 0;
+  if (documentElement && !isOffsetParentAnElement && !isFixed) {
+    const htmlRect = documentElement.getBoundingClientRect();
+    htmlY = htmlRect.top + scroll.scrollTop;
+    htmlX = htmlRect.left + scroll.scrollLeft -
+    // RTL <body> scrollbar.
+    getWindowScrollBarX(documentElement, htmlRect);
+  }
+  const x = rect.left + scroll.scrollLeft - offsets.x - htmlX;
+  const y = rect.top + scroll.scrollTop - offsets.y - htmlY;
+  return {
+    x,
+    y,
+    width: rect.width,
+    height: rect.height
+  };
 }
 
 function isStaticPositioned(element) {
-	return getComputedStyle$1(element).position === "static"
+  return getComputedStyle$1(element).position === 'static';
 }
 
 function getTrueOffsetParent(element, polyfill) {
-	if (!isHTMLElement(element) || getComputedStyle$1(element).position === "fixed") {
-		return null
-	}
-	if (polyfill) {
-		return polyfill(element)
-	}
-	return element.offsetParent
+  if (!isHTMLElement(element) || getComputedStyle$1(element).position === 'fixed') {
+    return null;
+  }
+  if (polyfill) {
+    return polyfill(element);
+  }
+  let rawOffsetParent = element.offsetParent;
+
+  // Firefox returns the <html> element as the offsetParent if it's non-static,
+  // while Chrome and Safari return the <body> element. The <body> element must
+  // be used to perform the correct calculations even if the <html> element is
+  // non-static.
+  if (getDocumentElement(element) === rawOffsetParent) {
+    rawOffsetParent = rawOffsetParent.ownerDocument.body;
+  }
+  return rawOffsetParent;
 }
 
 // Gets the closest ancestor positioned element. Handles some edge cases,
 // such as table ancestors and cross browser bugs.
 function getOffsetParent(element, polyfill) {
-	const win = getWindow(element)
-	if (isTopLayer(element)) {
-		return win
-	}
-	if (!isHTMLElement(element)) {
-		let svgOffsetParent = getParentNode(element)
-		while (svgOffsetParent && !isLastTraversableNode(svgOffsetParent)) {
-			if (isElement(svgOffsetParent) && !isStaticPositioned(svgOffsetParent)) {
-				return svgOffsetParent
-			}
-			svgOffsetParent = getParentNode(svgOffsetParent)
-		}
-		return win
-	}
-	let offsetParent = getTrueOffsetParent(element, polyfill)
-	while (offsetParent && isTableElement(offsetParent) && isStaticPositioned(offsetParent)) {
-		offsetParent = getTrueOffsetParent(offsetParent, polyfill)
-	}
-	if (
-		offsetParent &&
-		isLastTraversableNode(offsetParent) &&
-		isStaticPositioned(offsetParent) &&
-		!isContainingBlock(offsetParent)
-	) {
-		return win
-	}
-	return offsetParent || getContainingBlock(element) || win
+  const win = getWindow(element);
+  if (isTopLayer(element)) {
+    return win;
+  }
+  if (!isHTMLElement(element)) {
+    let svgOffsetParent = getParentNode(element);
+    while (svgOffsetParent && !isLastTraversableNode(svgOffsetParent)) {
+      if (isElement(svgOffsetParent) && !isStaticPositioned(svgOffsetParent)) {
+        return svgOffsetParent;
+      }
+      svgOffsetParent = getParentNode(svgOffsetParent);
+    }
+    return win;
+  }
+  let offsetParent = getTrueOffsetParent(element, polyfill);
+  while (offsetParent && isTableElement(offsetParent) && isStaticPositioned(offsetParent)) {
+    offsetParent = getTrueOffsetParent(offsetParent, polyfill);
+  }
+  if (offsetParent && isLastTraversableNode(offsetParent) && isStaticPositioned(offsetParent) && !isContainingBlock(offsetParent)) {
+    return win;
+  }
+  return offsetParent || getContainingBlock(element) || win;
 }
 
 const getElementRects = async function (data) {
-	const getOffsetParentFn = this.getOffsetParent || getOffsetParent
-	const getDimensionsFn = this.getDimensions
-	const floatingDimensions = await getDimensionsFn(data.floating)
-	return {
-		reference: getRectRelativeToOffsetParent(
-			data.reference,
-			await getOffsetParentFn(data.floating),
-			data.strategy
-		),
-		floating: {
-			x: 0,
-			y: 0,
-			width: floatingDimensions.width,
-			height: floatingDimensions.height,
-		},
-	}
-}
+  const getOffsetParentFn = this.getOffsetParent || getOffsetParent;
+  const getDimensionsFn = this.getDimensions;
+  const floatingDimensions = await getDimensionsFn(data.floating);
+  return {
+    reference: getRectRelativeToOffsetParent(data.reference, await getOffsetParentFn(data.floating), data.strategy),
+    floating: {
+      x: 0,
+      y: 0,
+      width: floatingDimensions.width,
+      height: floatingDimensions.height
+    }
+  };
+};
 
 function isRTL(element) {
-	return getComputedStyle$1(element).direction === "rtl"
+  return getComputedStyle$1(element).direction === 'rtl';
 }
 
 const platform = {
-	convertOffsetParentRelativeRectToViewportRelativeRect,
-	getDocumentElement,
-	getClippingRect,
-	getOffsetParent,
-	getElementRects,
-	getClientRects,
-	getDimensions,
-	getScale,
-	isElement,
-	isRTL,
-}
+  convertOffsetParentRelativeRectToViewportRelativeRect,
+  getDocumentElement,
+  getClippingRect,
+  getOffsetParent,
+  getElementRects,
+  getClientRects,
+  getDimensions,
+  getScale,
+  isElement,
+  isRTL
+};
 
 // https://samthor.au/2021/observing-dom/
 function observeMove(element, onMove) {
-	let io = null
-	let timeoutId
-	const root = getDocumentElement(element)
-	function cleanup() {
-		var _io
-		clearTimeout(timeoutId)
-		;(_io = io) == null || _io.disconnect()
-		io = null
-	}
-	function refresh(skip, threshold) {
-		if (skip === void 0) {
-			skip = false
-		}
-		if (threshold === void 0) {
-			threshold = 1
-		}
-		cleanup()
-		const { left, top, width, height } = element.getBoundingClientRect()
-		if (!skip) {
-			onMove()
-		}
-		if (!width || !height) {
-			return
-		}
-		const insetTop = floor(top)
-		const insetRight = floor(root.clientWidth - (left + width))
-		const insetBottom = floor(root.clientHeight - (top + height))
-		const insetLeft = floor(left)
-		const rootMargin =
-			-insetTop + "px " + -insetRight + "px " + -insetBottom + "px " + -insetLeft + "px"
-		const options = {
-			rootMargin,
-			threshold: max(0, min(1, threshold)) || 1,
-		}
-		let isFirstUpdate = true
-		function handleObserve(entries) {
-			const ratio = entries[0].intersectionRatio
-			if (ratio !== threshold) {
-				if (!isFirstUpdate) {
-					return refresh()
-				}
-				if (!ratio) {
-					// If the reference is clipped, the ratio is 0. Throttle the refresh
-					// to prevent an infinite loop of updates.
-					timeoutId = setTimeout(() => {
-						refresh(false, 1e-7)
-					}, 1000)
-				} else {
-					refresh(false, ratio)
-				}
-			}
-			isFirstUpdate = false
-		}
+  let io = null;
+  let timeoutId;
+  const root = getDocumentElement(element);
+  function cleanup() {
+    var _io;
+    clearTimeout(timeoutId);
+    (_io = io) == null || _io.disconnect();
+    io = null;
+  }
+  function refresh(skip, threshold) {
+    if (skip === void 0) {
+      skip = false;
+    }
+    if (threshold === void 0) {
+      threshold = 1;
+    }
+    cleanup();
+    const {
+      left,
+      top,
+      width,
+      height
+    } = element.getBoundingClientRect();
+    if (!skip) {
+      onMove();
+    }
+    if (!width || !height) {
+      return;
+    }
+    const insetTop = floor(top);
+    const insetRight = floor(root.clientWidth - (left + width));
+    const insetBottom = floor(root.clientHeight - (top + height));
+    const insetLeft = floor(left);
+    const rootMargin = -insetTop + "px " + -insetRight + "px " + -insetBottom + "px " + -insetLeft + "px";
+    const options = {
+      rootMargin,
+      threshold: max(0, min(1, threshold)) || 1
+    };
+    let isFirstUpdate = true;
+    function handleObserve(entries) {
+      const ratio = entries[0].intersectionRatio;
+      if (ratio !== threshold) {
+        if (!isFirstUpdate) {
+          return refresh();
+        }
+        if (!ratio) {
+          // If the reference is clipped, the ratio is 0. Throttle the refresh
+          // to prevent an infinite loop of updates.
+          timeoutId = setTimeout(() => {
+            refresh(false, 1e-7);
+          }, 1000);
+        } else {
+          refresh(false, ratio);
+        }
+      }
+      isFirstUpdate = false;
+    }
 
-		// Older browsers don't support a `document` as the root and will throw an
-		// error.
-		try {
-			io = new IntersectionObserver(handleObserve, {
-				...options,
-				// Handle <iframe>s
-				root: root.ownerDocument,
-			})
-		} catch (e) {
-			io = new IntersectionObserver(handleObserve, options)
-		}
-		io.observe(element)
-	}
-	refresh(true)
-	return cleanup
+    // Older browsers don't support a `document` as the root and will throw an
+    // error.
+    try {
+      io = new IntersectionObserver(handleObserve, {
+        ...options,
+        // Handle <iframe>s
+        root: root.ownerDocument
+      });
+    } catch (e) {
+      io = new IntersectionObserver(handleObserve, options);
+    }
+    io.observe(element);
+  }
+  refresh(true);
+  return cleanup;
 }
 
 /**
@@ -11939,87 +10543,74 @@ function observeMove(element, onMove) {
  * @see https://floating-ui.com/docs/autoUpdate
  */
 function autoUpdate(reference, floating, update, options) {
-	if (options === void 0) {
-		options = {}
-	}
-	const {
-		ancestorScroll = true,
-		ancestorResize = true,
-		elementResize = typeof ResizeObserver === "function",
-		layoutShift = typeof IntersectionObserver === "function",
-		animationFrame = false,
-	} = options
-	const referenceEl = unwrapElement(reference)
-	const ancestors =
-		ancestorScroll || ancestorResize
-			? [
-					...(referenceEl ? getOverflowAncestors(referenceEl) : []),
-					...getOverflowAncestors(floating),
-				]
-			: []
-	ancestors.forEach((ancestor) => {
-		ancestorScroll &&
-			ancestor.addEventListener("scroll", update, {
-				passive: true,
-			})
-		ancestorResize && ancestor.addEventListener("resize", update)
-	})
-	const cleanupIo = referenceEl && layoutShift ? observeMove(referenceEl, update) : null
-	let reobserveFrame = -1
-	let resizeObserver = null
-	if (elementResize) {
-		resizeObserver = new ResizeObserver((_ref) => {
-			let [firstEntry] = _ref
-			if (firstEntry && firstEntry.target === referenceEl && resizeObserver) {
-				// Prevent update loops when using the `size` middleware.
-				// https://github.com/floating-ui/floating-ui/issues/1740
-				resizeObserver.unobserve(floating)
-				cancelAnimationFrame(reobserveFrame)
-				reobserveFrame = requestAnimationFrame(() => {
-					var _resizeObserver
-					;(_resizeObserver = resizeObserver) == null || _resizeObserver.observe(floating)
-				})
-			}
-			update()
-		})
-		if (referenceEl && !animationFrame) {
-			resizeObserver.observe(referenceEl)
-		}
-		resizeObserver.observe(floating)
-	}
-	let frameId
-	let prevRefRect = animationFrame ? getBoundingClientRect(reference) : null
-	if (animationFrame) {
-		frameLoop()
-	}
-	function frameLoop() {
-		const nextRefRect = getBoundingClientRect(reference)
-		if (
-			prevRefRect &&
-			(nextRefRect.x !== prevRefRect.x ||
-				nextRefRect.y !== prevRefRect.y ||
-				nextRefRect.width !== prevRefRect.width ||
-				nextRefRect.height !== prevRefRect.height)
-		) {
-			update()
-		}
-		prevRefRect = nextRefRect
-		frameId = requestAnimationFrame(frameLoop)
-	}
-	update()
-	return () => {
-		var _resizeObserver2
-		ancestors.forEach((ancestor) => {
-			ancestorScroll && ancestor.removeEventListener("scroll", update)
-			ancestorResize && ancestor.removeEventListener("resize", update)
-		})
-		cleanupIo == null || cleanupIo()
-		;(_resizeObserver2 = resizeObserver) == null || _resizeObserver2.disconnect()
-		resizeObserver = null
-		if (animationFrame) {
-			cancelAnimationFrame(frameId)
-		}
-	}
+  if (options === void 0) {
+    options = {};
+  }
+  const {
+    ancestorScroll = true,
+    ancestorResize = true,
+    elementResize = typeof ResizeObserver === 'function',
+    layoutShift = typeof IntersectionObserver === 'function',
+    animationFrame = false
+  } = options;
+  const referenceEl = unwrapElement(reference);
+  const ancestors = ancestorScroll || ancestorResize ? [...(referenceEl ? getOverflowAncestors(referenceEl) : []), ...getOverflowAncestors(floating)] : [];
+  ancestors.forEach(ancestor => {
+    ancestorScroll && ancestor.addEventListener('scroll', update, {
+      passive: true
+    });
+    ancestorResize && ancestor.addEventListener('resize', update);
+  });
+  const cleanupIo = referenceEl && layoutShift ? observeMove(referenceEl, update) : null;
+  let reobserveFrame = -1;
+  let resizeObserver = null;
+  if (elementResize) {
+    resizeObserver = new ResizeObserver(_ref => {
+      let [firstEntry] = _ref;
+      if (firstEntry && firstEntry.target === referenceEl && resizeObserver) {
+        // Prevent update loops when using the `size` middleware.
+        // https://github.com/floating-ui/floating-ui/issues/1740
+        resizeObserver.unobserve(floating);
+        cancelAnimationFrame(reobserveFrame);
+        reobserveFrame = requestAnimationFrame(() => {
+          var _resizeObserver;
+          (_resizeObserver = resizeObserver) == null || _resizeObserver.observe(floating);
+        });
+      }
+      update();
+    });
+    if (referenceEl && !animationFrame) {
+      resizeObserver.observe(referenceEl);
+    }
+    resizeObserver.observe(floating);
+  }
+  let frameId;
+  let prevRefRect = animationFrame ? getBoundingClientRect(reference) : null;
+  if (animationFrame) {
+    frameLoop();
+  }
+  function frameLoop() {
+    const nextRefRect = getBoundingClientRect(reference);
+    if (prevRefRect && (nextRefRect.x !== prevRefRect.x || nextRefRect.y !== prevRefRect.y || nextRefRect.width !== prevRefRect.width || nextRefRect.height !== prevRefRect.height)) {
+      update();
+    }
+    prevRefRect = nextRefRect;
+    frameId = requestAnimationFrame(frameLoop);
+  }
+  update();
+  return () => {
+    var _resizeObserver2;
+    ancestors.forEach(ancestor => {
+      ancestorScroll && ancestor.removeEventListener('scroll', update);
+      ancestorResize && ancestor.removeEventListener('resize', update);
+    });
+    cleanupIo == null || cleanupIo();
+    (_resizeObserver2 = resizeObserver) == null || _resizeObserver2.disconnect();
+    resizeObserver = null;
+    if (animationFrame) {
+      cancelAnimationFrame(frameId);
+    }
+  };
 }
 
 /**
@@ -12029,14 +10620,14 @@ function autoUpdate(reference, floating, update, options) {
  * object may be passed.
  * @see https://floating-ui.com/docs/offset
  */
-const offset = offset$1
+const offset = offset$1;
 
 /**
  * Optimizes the visibility of the floating element by shifting it in order to
  * keep it in view when it will overflow the clipping boundary.
  * @see https://floating-ui.com/docs/shift
  */
-const shift = shift$1
+const shift = shift$1;
 
 /**
  * Optimizes the visibility of the floating element by flipping the `placement`
@@ -12044,7 +10635,7 @@ const shift = shift$1
  * clipping boundary. Alternative to `autoPlacement`.
  * @see https://floating-ui.com/docs/flip
  */
-const flip = flip$1
+const flip = flip$1;
 
 /**
  * Provides data that allows you to change the size of the floating element —
@@ -12052,971 +10643,917 @@ const flip = flip$1
  * width of the reference element.
  * @see https://floating-ui.com/docs/size
  */
-const size = size$1
+const size = size$1;
 
 /**
  * Provides data to position an inner element of the floating element so that it
  * appears centered to the reference element.
  * @see https://floating-ui.com/docs/arrow
  */
-const arrow = arrow$1
+const arrow = arrow$1;
 
 /**
  * Computes the `x` and `y` coordinates that will place the floating element
  * next to a given reference element.
  */
 const computePosition = (reference, floating, options) => {
-	// This caches the expensive `getClippingElementAncestors` function so that
-	// multiple lifecycle resets re-use the same result. It only lives for a
-	// single call. If other functions become expensive, we can add them as well.
-	const cache = new Map()
-	const mergedOptions = {
-		platform,
-		...options,
-	}
-	const platformWithCache = {
-		...mergedOptions.platform,
-		_c: cache,
-	}
-	return computePosition$1(reference, floating, {
-		...mergedOptions,
-		platform: platformWithCache,
-	})
-}
+  // This caches the expensive `getClippingElementAncestors` function so that
+  // multiple lifecycle resets re-use the same result. It only lives for a
+  // single call. If other functions become expensive, we can add them as well.
+  const cache = new Map();
+  const mergedOptions = {
+    platform,
+    ...options
+  };
+  const platformWithCache = {
+    ...mergedOptions.platform,
+    _c: cache
+  };
+  return computePosition$1(reference, floating, {
+    ...mergedOptions,
+    platform: platformWithCache
+  });
+};
 
 /* eslint-disable @typescript-eslint/ban-types */
 function offsetParent(element) {
-	return offsetParentPolyfill(element)
+    return offsetParentPolyfill(element);
 }
 function flatTreeParent(element) {
-	if (element.assignedSlot) {
-		return element.assignedSlot
-	}
-	if (element.parentNode instanceof ShadowRoot) {
-		return element.parentNode.host
-	}
-	return element.parentNode
+    if (element.assignedSlot) {
+        return element.assignedSlot;
+    }
+    if (element.parentNode instanceof ShadowRoot) {
+        return element.parentNode.host;
+    }
+    return element.parentNode;
 }
 function offsetParentPolyfill(element) {
-	// Do an initial walk to check for display:none ancestors.
-	for (let ancestor = element; ancestor; ancestor = flatTreeParent(ancestor)) {
-		if (!(ancestor instanceof Element)) {
-			continue
-		}
-		if (getComputedStyle(ancestor).display === "none") {
-			return null
-		}
-	}
-	for (let ancestor = flatTreeParent(element); ancestor; ancestor = flatTreeParent(ancestor)) {
-		if (!(ancestor instanceof Element)) {
-			continue
-		}
-		const style = getComputedStyle(ancestor)
-		// Display:contents nodes aren't in the layout tree so they should be skipped.
-		if (style.display === "contents") {
-			continue
-		}
-		if (style.position !== "static" || style.filter !== "none") {
-			return ancestor
-		}
-		if (ancestor.tagName === "BODY") {
-			return ancestor
-		}
-	}
-	return null
+    // Do an initial walk to check for display:none ancestors.
+    for (let ancestor = element; ancestor; ancestor = flatTreeParent(ancestor)) {
+        if (!(ancestor instanceof Element)) {
+            continue;
+        }
+        if (getComputedStyle(ancestor).display === 'none') {
+            return null;
+        }
+    }
+    for (let ancestor = flatTreeParent(element); ancestor; ancestor = flatTreeParent(ancestor)) {
+        if (!(ancestor instanceof Element)) {
+            continue;
+        }
+        const style = getComputedStyle(ancestor);
+        // Display:contents nodes aren't in the layout tree so they should be skipped.
+        if (style.display === 'contents') {
+            continue;
+        }
+        if (style.position !== 'static' || style.filter !== 'none') {
+            return ancestor;
+        }
+        if (ancestor.tagName === 'BODY') {
+            return ancestor;
+        }
+    }
+    return null;
 }
 
 function isVirtualElement(e) {
-	return e !== null && typeof e === "object" && "getBoundingClientRect" in e
+  return e !== null && typeof e === "object" && "getBoundingClientRect" in e;
 }
 var SlPopup = class extends ShoelaceElement {
-	constructor() {
-		super(...arguments)
-		this.active = false
-		this.placement = "top"
-		this.strategy = "absolute"
-		this.distance = 0
-		this.skidding = 0
-		this.arrow = false
-		this.arrowPlacement = "anchor"
-		this.arrowPadding = 10
-		this.flip = false
-		this.flipFallbackPlacements = ""
-		this.flipFallbackStrategy = "best-fit"
-		this.flipPadding = 0
-		this.shift = false
-		this.shiftPadding = 0
-		this.autoSizePadding = 0
-		this.hoverBridge = false
-		this.updateHoverBridge = () => {
-			if (this.hoverBridge && this.anchorEl) {
-				const anchorRect = this.anchorEl.getBoundingClientRect()
-				const popupRect = this.popup.getBoundingClientRect()
-				const isVertical = this.placement.includes("top") || this.placement.includes("bottom")
-				let topLeftX = 0
-				let topLeftY = 0
-				let topRightX = 0
-				let topRightY = 0
-				let bottomLeftX = 0
-				let bottomLeftY = 0
-				let bottomRightX = 0
-				let bottomRightY = 0
-				if (isVertical) {
-					if (anchorRect.top < popupRect.top) {
-						topLeftX = anchorRect.left
-						topLeftY = anchorRect.bottom
-						topRightX = anchorRect.right
-						topRightY = anchorRect.bottom
-						bottomLeftX = popupRect.left
-						bottomLeftY = popupRect.top
-						bottomRightX = popupRect.right
-						bottomRightY = popupRect.top
-					} else {
-						topLeftX = popupRect.left
-						topLeftY = popupRect.bottom
-						topRightX = popupRect.right
-						topRightY = popupRect.bottom
-						bottomLeftX = anchorRect.left
-						bottomLeftY = anchorRect.top
-						bottomRightX = anchorRect.right
-						bottomRightY = anchorRect.top
-					}
-				} else {
-					if (anchorRect.left < popupRect.left) {
-						topLeftX = anchorRect.right
-						topLeftY = anchorRect.top
-						topRightX = popupRect.left
-						topRightY = popupRect.top
-						bottomLeftX = anchorRect.right
-						bottomLeftY = anchorRect.bottom
-						bottomRightX = popupRect.left
-						bottomRightY = popupRect.bottom
-					} else {
-						topLeftX = popupRect.right
-						topLeftY = popupRect.top
-						topRightX = anchorRect.left
-						topRightY = anchorRect.top
-						bottomLeftX = popupRect.right
-						bottomLeftY = popupRect.bottom
-						bottomRightX = anchorRect.left
-						bottomRightY = anchorRect.bottom
-					}
-				}
-				this.style.setProperty("--hover-bridge-top-left-x", `${topLeftX}px`)
-				this.style.setProperty("--hover-bridge-top-left-y", `${topLeftY}px`)
-				this.style.setProperty("--hover-bridge-top-right-x", `${topRightX}px`)
-				this.style.setProperty("--hover-bridge-top-right-y", `${topRightY}px`)
-				this.style.setProperty("--hover-bridge-bottom-left-x", `${bottomLeftX}px`)
-				this.style.setProperty("--hover-bridge-bottom-left-y", `${bottomLeftY}px`)
-				this.style.setProperty("--hover-bridge-bottom-right-x", `${bottomRightX}px`)
-				this.style.setProperty("--hover-bridge-bottom-right-y", `${bottomRightY}px`)
-			}
-		}
-	}
-	async connectedCallback() {
-		super.connectedCallback()
-		await this.updateComplete
-		this.start()
-	}
-	disconnectedCallback() {
-		super.disconnectedCallback()
-		this.stop()
-	}
-	async updated(changedProps) {
-		super.updated(changedProps)
-		if (changedProps.has("active")) {
-			if (this.active) {
-				this.start()
-			} else {
-				this.stop()
-			}
-		}
-		if (changedProps.has("anchor")) {
-			this.handleAnchorChange()
-		}
-		if (this.active) {
-			await this.updateComplete
-			this.reposition()
-		}
-	}
-	async handleAnchorChange() {
-		await this.stop()
-		if (this.anchor && typeof this.anchor === "string") {
-			const root = this.getRootNode()
-			this.anchorEl = root.getElementById(this.anchor)
-		} else if (this.anchor instanceof Element || isVirtualElement(this.anchor)) {
-			this.anchorEl = this.anchor
-		} else {
-			this.anchorEl = this.querySelector('[slot="anchor"]')
-		}
-		if (this.anchorEl instanceof HTMLSlotElement) {
-			this.anchorEl = this.anchorEl.assignedElements({ flatten: true })[0]
-		}
-		if (this.anchorEl) {
-			this.start()
-		}
-	}
-	start() {
-		if (!this.anchorEl) {
-			return
-		}
-		this.cleanup = autoUpdate(this.anchorEl, this.popup, () => {
-			this.reposition()
-		})
-	}
-	async stop() {
-		return new Promise((resolve) => {
-			if (this.cleanup) {
-				this.cleanup()
-				this.cleanup = void 0
-				this.removeAttribute("data-current-placement")
-				this.style.removeProperty("--auto-size-available-width")
-				this.style.removeProperty("--auto-size-available-height")
-				requestAnimationFrame(() => resolve())
-			} else {
-				resolve()
-			}
-		})
-	}
-	/** Forces the popup to recalculate and reposition itself. */
-	reposition() {
-		if (!this.active || !this.anchorEl) {
-			return
-		}
-		const middleware = [
-			// The offset middleware goes first
-			offset({ mainAxis: this.distance, crossAxis: this.skidding }),
-		]
-		if (this.sync) {
-			middleware.push(
-				size({
-					apply: ({ rects }) => {
-						const syncWidth = this.sync === "width" || this.sync === "both"
-						const syncHeight = this.sync === "height" || this.sync === "both"
-						this.popup.style.width = syncWidth ? `${rects.reference.width}px` : ""
-						this.popup.style.height = syncHeight ? `${rects.reference.height}px` : ""
-					},
-				})
-			)
-		} else {
-			this.popup.style.width = ""
-			this.popup.style.height = ""
-		}
-		if (this.flip) {
-			middleware.push(
-				flip({
-					boundary: this.flipBoundary,
-					// @ts-expect-error - We're converting a string attribute to an array here
-					fallbackPlacements: this.flipFallbackPlacements,
-					fallbackStrategy:
-						this.flipFallbackStrategy === "best-fit" ? "bestFit" : "initialPlacement",
-					padding: this.flipPadding,
-				})
-			)
-		}
-		if (this.shift) {
-			middleware.push(
-				shift({
-					boundary: this.shiftBoundary,
-					padding: this.shiftPadding,
-				})
-			)
-		}
-		if (this.autoSize) {
-			middleware.push(
-				size({
-					boundary: this.autoSizeBoundary,
-					padding: this.autoSizePadding,
-					apply: ({ availableWidth, availableHeight }) => {
-						if (this.autoSize === "vertical" || this.autoSize === "both") {
-							this.style.setProperty("--auto-size-available-height", `${availableHeight}px`)
-						} else {
-							this.style.removeProperty("--auto-size-available-height")
-						}
-						if (this.autoSize === "horizontal" || this.autoSize === "both") {
-							this.style.setProperty("--auto-size-available-width", `${availableWidth}px`)
-						} else {
-							this.style.removeProperty("--auto-size-available-width")
-						}
-					},
-				})
-			)
-		} else {
-			this.style.removeProperty("--auto-size-available-width")
-			this.style.removeProperty("--auto-size-available-height")
-		}
-		if (this.arrow) {
-			middleware.push(
-				arrow({
-					element: this.arrowEl,
-					padding: this.arrowPadding,
-				})
-			)
-		}
-		const getOffsetParent =
-			this.strategy === "absolute"
-				? (element) => platform.getOffsetParent(element, offsetParent)
-				: platform.getOffsetParent
-		computePosition(this.anchorEl, this.popup, {
-			placement: this.placement,
-			middleware,
-			strategy: this.strategy,
-			platform: __spreadProps(__spreadValues({}, platform), {
-				getOffsetParent,
-			}),
-		}).then(({ x, y, middlewareData, placement }) => {
-			const isRtl = getComputedStyle(this).direction === "rtl"
-			const staticSide = { top: "bottom", right: "left", bottom: "top", left: "right" }[
-				placement.split("-")[0]
-			]
-			this.setAttribute("data-current-placement", placement)
-			Object.assign(this.popup.style, {
-				left: `${x}px`,
-				top: `${y}px`,
-			})
-			if (this.arrow) {
-				const arrowX = middlewareData.arrow.x
-				const arrowY = middlewareData.arrow.y
-				let top = ""
-				let right = ""
-				let bottom = ""
-				let left = ""
-				if (this.arrowPlacement === "start") {
-					const value =
-						typeof arrowX === "number"
-							? `calc(${this.arrowPadding}px - var(--arrow-padding-offset))`
-							: ""
-					top =
-						typeof arrowY === "number"
-							? `calc(${this.arrowPadding}px - var(--arrow-padding-offset))`
-							: ""
-					right = isRtl ? value : ""
-					left = isRtl ? "" : value
-				} else if (this.arrowPlacement === "end") {
-					const value =
-						typeof arrowX === "number"
-							? `calc(${this.arrowPadding}px - var(--arrow-padding-offset))`
-							: ""
-					right = isRtl ? "" : value
-					left = isRtl ? value : ""
-					bottom =
-						typeof arrowY === "number"
-							? `calc(${this.arrowPadding}px - var(--arrow-padding-offset))`
-							: ""
-				} else if (this.arrowPlacement === "center") {
-					left = typeof arrowX === "number" ? `calc(50% - var(--arrow-size-diagonal))` : ""
-					top = typeof arrowY === "number" ? `calc(50% - var(--arrow-size-diagonal))` : ""
-				} else {
-					left = typeof arrowX === "number" ? `${arrowX}px` : ""
-					top = typeof arrowY === "number" ? `${arrowY}px` : ""
-				}
-				Object.assign(this.arrowEl.style, {
-					top,
-					right,
-					bottom,
-					left,
-					[staticSide]: "calc(var(--arrow-size-diagonal) * -1)",
-				})
-			}
-		})
-		requestAnimationFrame(() => this.updateHoverBridge())
-		this.emit("sl-reposition")
-	}
-	render() {
-		return ke$1`
+  constructor() {
+    super(...arguments);
+    this.active = false;
+    this.placement = "top";
+    this.strategy = "absolute";
+    this.distance = 0;
+    this.skidding = 0;
+    this.arrow = false;
+    this.arrowPlacement = "anchor";
+    this.arrowPadding = 10;
+    this.flip = false;
+    this.flipFallbackPlacements = "";
+    this.flipFallbackStrategy = "best-fit";
+    this.flipPadding = 0;
+    this.shift = false;
+    this.shiftPadding = 0;
+    this.autoSizePadding = 0;
+    this.hoverBridge = false;
+    this.updateHoverBridge = () => {
+      if (this.hoverBridge && this.anchorEl) {
+        const anchorRect = this.anchorEl.getBoundingClientRect();
+        const popupRect = this.popup.getBoundingClientRect();
+        const isVertical = this.placement.includes("top") || this.placement.includes("bottom");
+        let topLeftX = 0;
+        let topLeftY = 0;
+        let topRightX = 0;
+        let topRightY = 0;
+        let bottomLeftX = 0;
+        let bottomLeftY = 0;
+        let bottomRightX = 0;
+        let bottomRightY = 0;
+        if (isVertical) {
+          if (anchorRect.top < popupRect.top) {
+            topLeftX = anchorRect.left;
+            topLeftY = anchorRect.bottom;
+            topRightX = anchorRect.right;
+            topRightY = anchorRect.bottom;
+            bottomLeftX = popupRect.left;
+            bottomLeftY = popupRect.top;
+            bottomRightX = popupRect.right;
+            bottomRightY = popupRect.top;
+          } else {
+            topLeftX = popupRect.left;
+            topLeftY = popupRect.bottom;
+            topRightX = popupRect.right;
+            topRightY = popupRect.bottom;
+            bottomLeftX = anchorRect.left;
+            bottomLeftY = anchorRect.top;
+            bottomRightX = anchorRect.right;
+            bottomRightY = anchorRect.top;
+          }
+        } else {
+          if (anchorRect.left < popupRect.left) {
+            topLeftX = anchorRect.right;
+            topLeftY = anchorRect.top;
+            topRightX = popupRect.left;
+            topRightY = popupRect.top;
+            bottomLeftX = anchorRect.right;
+            bottomLeftY = anchorRect.bottom;
+            bottomRightX = popupRect.left;
+            bottomRightY = popupRect.bottom;
+          } else {
+            topLeftX = popupRect.right;
+            topLeftY = popupRect.top;
+            topRightX = anchorRect.left;
+            topRightY = anchorRect.top;
+            bottomLeftX = popupRect.right;
+            bottomLeftY = popupRect.bottom;
+            bottomRightX = anchorRect.left;
+            bottomRightY = anchorRect.bottom;
+          }
+        }
+        this.style.setProperty("--hover-bridge-top-left-x", `${topLeftX}px`);
+        this.style.setProperty("--hover-bridge-top-left-y", `${topLeftY}px`);
+        this.style.setProperty("--hover-bridge-top-right-x", `${topRightX}px`);
+        this.style.setProperty("--hover-bridge-top-right-y", `${topRightY}px`);
+        this.style.setProperty("--hover-bridge-bottom-left-x", `${bottomLeftX}px`);
+        this.style.setProperty("--hover-bridge-bottom-left-y", `${bottomLeftY}px`);
+        this.style.setProperty("--hover-bridge-bottom-right-x", `${bottomRightX}px`);
+        this.style.setProperty("--hover-bridge-bottom-right-y", `${bottomRightY}px`);
+      }
+    };
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    await this.updateComplete;
+    this.start();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.stop();
+  }
+  async updated(changedProps) {
+    super.updated(changedProps);
+    if (changedProps.has("active")) {
+      if (this.active) {
+        this.start();
+      } else {
+        this.stop();
+      }
+    }
+    if (changedProps.has("anchor")) {
+      this.handleAnchorChange();
+    }
+    if (this.active) {
+      await this.updateComplete;
+      this.reposition();
+    }
+  }
+  async handleAnchorChange() {
+    await this.stop();
+    if (this.anchor && typeof this.anchor === "string") {
+      const root = this.getRootNode();
+      this.anchorEl = root.getElementById(this.anchor);
+    } else if (this.anchor instanceof Element || isVirtualElement(this.anchor)) {
+      this.anchorEl = this.anchor;
+    } else {
+      this.anchorEl = this.querySelector('[slot="anchor"]');
+    }
+    if (this.anchorEl instanceof HTMLSlotElement) {
+      this.anchorEl = this.anchorEl.assignedElements({ flatten: true })[0];
+    }
+    if (this.anchorEl) {
+      this.start();
+    }
+  }
+  start() {
+    if (!this.anchorEl) {
+      return;
+    }
+    this.cleanup = autoUpdate(this.anchorEl, this.popup, () => {
+      this.reposition();
+    });
+  }
+  async stop() {
+    return new Promise((resolve) => {
+      if (this.cleanup) {
+        this.cleanup();
+        this.cleanup = void 0;
+        this.removeAttribute("data-current-placement");
+        this.style.removeProperty("--auto-size-available-width");
+        this.style.removeProperty("--auto-size-available-height");
+        requestAnimationFrame(() => resolve());
+      } else {
+        resolve();
+      }
+    });
+  }
+  /** Forces the popup to recalculate and reposition itself. */
+  reposition() {
+    if (!this.active || !this.anchorEl) {
+      return;
+    }
+    const middleware = [
+      // The offset middleware goes first
+      offset({ mainAxis: this.distance, crossAxis: this.skidding })
+    ];
+    if (this.sync) {
+      middleware.push(
+        size({
+          apply: ({ rects }) => {
+            const syncWidth = this.sync === "width" || this.sync === "both";
+            const syncHeight = this.sync === "height" || this.sync === "both";
+            this.popup.style.width = syncWidth ? `${rects.reference.width}px` : "";
+            this.popup.style.height = syncHeight ? `${rects.reference.height}px` : "";
+          }
+        })
+      );
+    } else {
+      this.popup.style.width = "";
+      this.popup.style.height = "";
+    }
+    if (this.flip) {
+      middleware.push(
+        flip({
+          boundary: this.flipBoundary,
+          // @ts-expect-error - We're converting a string attribute to an array here
+          fallbackPlacements: this.flipFallbackPlacements,
+          fallbackStrategy: this.flipFallbackStrategy === "best-fit" ? "bestFit" : "initialPlacement",
+          padding: this.flipPadding
+        })
+      );
+    }
+    if (this.shift) {
+      middleware.push(
+        shift({
+          boundary: this.shiftBoundary,
+          padding: this.shiftPadding
+        })
+      );
+    }
+    if (this.autoSize) {
+      middleware.push(
+        size({
+          boundary: this.autoSizeBoundary,
+          padding: this.autoSizePadding,
+          apply: ({ availableWidth, availableHeight }) => {
+            if (this.autoSize === "vertical" || this.autoSize === "both") {
+              this.style.setProperty("--auto-size-available-height", `${availableHeight}px`);
+            } else {
+              this.style.removeProperty("--auto-size-available-height");
+            }
+            if (this.autoSize === "horizontal" || this.autoSize === "both") {
+              this.style.setProperty("--auto-size-available-width", `${availableWidth}px`);
+            } else {
+              this.style.removeProperty("--auto-size-available-width");
+            }
+          }
+        })
+      );
+    } else {
+      this.style.removeProperty("--auto-size-available-width");
+      this.style.removeProperty("--auto-size-available-height");
+    }
+    if (this.arrow) {
+      middleware.push(
+        arrow({
+          element: this.arrowEl,
+          padding: this.arrowPadding
+        })
+      );
+    }
+    const getOffsetParent = this.strategy === "absolute" ? (element) => platform.getOffsetParent(element, offsetParent) : platform.getOffsetParent;
+    computePosition(this.anchorEl, this.popup, {
+      placement: this.placement,
+      middleware,
+      strategy: this.strategy,
+      platform: __spreadProps(__spreadValues({}, platform), {
+        getOffsetParent
+      })
+    }).then(({ x, y, middlewareData, placement }) => {
+      const isRtl = getComputedStyle(this).direction === "rtl";
+      const staticSide = { top: "bottom", right: "left", bottom: "top", left: "right" }[placement.split("-")[0]];
+      this.setAttribute("data-current-placement", placement);
+      Object.assign(this.popup.style, {
+        left: `${x}px`,
+        top: `${y}px`
+      });
+      if (this.arrow) {
+        const arrowX = middlewareData.arrow.x;
+        const arrowY = middlewareData.arrow.y;
+        let top = "";
+        let right = "";
+        let bottom = "";
+        let left = "";
+        if (this.arrowPlacement === "start") {
+          const value = typeof arrowX === "number" ? `calc(${this.arrowPadding}px - var(--arrow-padding-offset))` : "";
+          top = typeof arrowY === "number" ? `calc(${this.arrowPadding}px - var(--arrow-padding-offset))` : "";
+          right = isRtl ? value : "";
+          left = isRtl ? "" : value;
+        } else if (this.arrowPlacement === "end") {
+          const value = typeof arrowX === "number" ? `calc(${this.arrowPadding}px - var(--arrow-padding-offset))` : "";
+          right = isRtl ? "" : value;
+          left = isRtl ? value : "";
+          bottom = typeof arrowY === "number" ? `calc(${this.arrowPadding}px - var(--arrow-padding-offset))` : "";
+        } else if (this.arrowPlacement === "center") {
+          left = typeof arrowX === "number" ? `calc(50% - var(--arrow-size-diagonal))` : "";
+          top = typeof arrowY === "number" ? `calc(50% - var(--arrow-size-diagonal))` : "";
+        } else {
+          left = typeof arrowX === "number" ? `${arrowX}px` : "";
+          top = typeof arrowY === "number" ? `${arrowY}px` : "";
+        }
+        Object.assign(this.arrowEl.style, {
+          top,
+          right,
+          bottom,
+          left,
+          [staticSide]: "calc(var(--arrow-size-diagonal) * -1)"
+        });
+      }
+    });
+    requestAnimationFrame(() => this.updateHoverBridge());
+    this.emit("sl-reposition");
+  }
+  render() {
+    return x`
       <slot name="anchor" @slotchange=${this.handleAnchorChange}></slot>
 
       <span
         part="hover-bridge"
-        class=${Rt({
-					"popup-hover-bridge": true,
-					"popup-hover-bridge--visible": this.hoverBridge && this.active,
-				})}
+        class=${e$1({
+      "popup-hover-bridge": true,
+      "popup-hover-bridge--visible": this.hoverBridge && this.active
+    })}
       ></span>
 
       <div
         part="popup"
-        class=${Rt({
-					popup: true,
-					"popup--active": this.active,
-					"popup--fixed": this.strategy === "fixed",
-					"popup--has-arrow": this.arrow,
-				})}
+        class=${e$1({
+      popup: true,
+      "popup--active": this.active,
+      "popup--fixed": this.strategy === "fixed",
+      "popup--has-arrow": this.arrow
+    })}
       >
         <slot></slot>
-        ${this.arrow ? ke$1`<div part="arrow" class="popup__arrow" role="presentation"></div>` : ""}
+        ${this.arrow ? x`<div part="arrow" class="popup__arrow" role="presentation"></div>` : ""}
       </div>
-    `
-	}
-}
-SlPopup.styles = [component_styles_default, popup_styles_default]
-__decorateClass([e$1(".popup")], SlPopup.prototype, "popup", 2)
-__decorateClass([e$1(".popup__arrow")], SlPopup.prototype, "arrowEl", 2)
-__decorateClass([n()], SlPopup.prototype, "anchor", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlPopup.prototype, "active", 2)
-__decorateClass([n({ reflect: true })], SlPopup.prototype, "placement", 2)
-__decorateClass([n({ reflect: true })], SlPopup.prototype, "strategy", 2)
-__decorateClass([n({ type: Number })], SlPopup.prototype, "distance", 2)
-__decorateClass([n({ type: Number })], SlPopup.prototype, "skidding", 2)
-__decorateClass([n({ type: Boolean })], SlPopup.prototype, "arrow", 2)
-__decorateClass([n({ attribute: "arrow-placement" })], SlPopup.prototype, "arrowPlacement", 2)
-__decorateClass(
-	[n({ attribute: "arrow-padding", type: Number })],
-	SlPopup.prototype,
-	"arrowPadding",
-	2
-)
-__decorateClass([n({ type: Boolean })], SlPopup.prototype, "flip", 2)
-__decorateClass(
-	[
-		n({
-			attribute: "flip-fallback-placements",
-			converter: {
-				fromAttribute: (value) => {
-					return value
-						.split(" ")
-						.map((p) => p.trim())
-						.filter((p) => p !== "")
-				},
-				toAttribute: (value) => {
-					return value.join(" ")
-				},
-			},
-		}),
-	],
-	SlPopup.prototype,
-	"flipFallbackPlacements",
-	2
-)
-__decorateClass(
-	[n({ attribute: "flip-fallback-strategy" })],
-	SlPopup.prototype,
-	"flipFallbackStrategy",
-	2
-)
-__decorateClass([n({ type: Object })], SlPopup.prototype, "flipBoundary", 2)
-__decorateClass(
-	[n({ attribute: "flip-padding", type: Number })],
-	SlPopup.prototype,
-	"flipPadding",
-	2
-)
-__decorateClass([n({ type: Boolean })], SlPopup.prototype, "shift", 2)
-__decorateClass([n({ type: Object })], SlPopup.prototype, "shiftBoundary", 2)
-__decorateClass(
-	[n({ attribute: "shift-padding", type: Number })],
-	SlPopup.prototype,
-	"shiftPadding",
-	2
-)
-__decorateClass([n({ attribute: "auto-size" })], SlPopup.prototype, "autoSize", 2)
-__decorateClass([n()], SlPopup.prototype, "sync", 2)
-__decorateClass([n({ type: Object })], SlPopup.prototype, "autoSizeBoundary", 2)
-__decorateClass(
-	[n({ attribute: "auto-size-padding", type: Number })],
-	SlPopup.prototype,
-	"autoSizePadding",
-	2
-)
-__decorateClass(
-	[n({ attribute: "hover-bridge", type: Boolean })],
-	SlPopup.prototype,
-	"hoverBridge",
-	2
-)
+    `;
+  }
+};
+SlPopup.styles = [component_styles_default, popup_styles_default];
+__decorateClass([
+  e$4(".popup")
+], SlPopup.prototype, "popup", 2);
+__decorateClass([
+  e$4(".popup__arrow")
+], SlPopup.prototype, "arrowEl", 2);
+__decorateClass([
+  n$1()
+], SlPopup.prototype, "anchor", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlPopup.prototype, "active", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlPopup.prototype, "placement", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlPopup.prototype, "strategy", 2);
+__decorateClass([
+  n$1({ type: Number })
+], SlPopup.prototype, "distance", 2);
+__decorateClass([
+  n$1({ type: Number })
+], SlPopup.prototype, "skidding", 2);
+__decorateClass([
+  n$1({ type: Boolean })
+], SlPopup.prototype, "arrow", 2);
+__decorateClass([
+  n$1({ attribute: "arrow-placement" })
+], SlPopup.prototype, "arrowPlacement", 2);
+__decorateClass([
+  n$1({ attribute: "arrow-padding", type: Number })
+], SlPopup.prototype, "arrowPadding", 2);
+__decorateClass([
+  n$1({ type: Boolean })
+], SlPopup.prototype, "flip", 2);
+__decorateClass([
+  n$1({
+    attribute: "flip-fallback-placements",
+    converter: {
+      fromAttribute: (value) => {
+        return value.split(" ").map((p) => p.trim()).filter((p) => p !== "");
+      },
+      toAttribute: (value) => {
+        return value.join(" ");
+      }
+    }
+  })
+], SlPopup.prototype, "flipFallbackPlacements", 2);
+__decorateClass([
+  n$1({ attribute: "flip-fallback-strategy" })
+], SlPopup.prototype, "flipFallbackStrategy", 2);
+__decorateClass([
+  n$1({ type: Object })
+], SlPopup.prototype, "flipBoundary", 2);
+__decorateClass([
+  n$1({ attribute: "flip-padding", type: Number })
+], SlPopup.prototype, "flipPadding", 2);
+__decorateClass([
+  n$1({ type: Boolean })
+], SlPopup.prototype, "shift", 2);
+__decorateClass([
+  n$1({ type: Object })
+], SlPopup.prototype, "shiftBoundary", 2);
+__decorateClass([
+  n$1({ attribute: "shift-padding", type: Number })
+], SlPopup.prototype, "shiftPadding", 2);
+__decorateClass([
+  n$1({ attribute: "auto-size" })
+], SlPopup.prototype, "autoSize", 2);
+__decorateClass([
+  n$1()
+], SlPopup.prototype, "sync", 2);
+__decorateClass([
+  n$1({ type: Object })
+], SlPopup.prototype, "autoSizeBoundary", 2);
+__decorateClass([
+  n$1({ attribute: "auto-size-padding", type: Number })
+], SlPopup.prototype, "autoSizePadding", 2);
+__decorateClass([
+  n$1({ attribute: "hover-bridge", type: Boolean })
+], SlPopup.prototype, "hoverBridge", 2);
 
 // src/internal/form.ts
-var formCollections = /* @__PURE__ */ new WeakMap()
-var reportValidityOverloads = /* @__PURE__ */ new WeakMap()
-var checkValidityOverloads = /* @__PURE__ */ new WeakMap()
-var userInteractedControls = /* @__PURE__ */ new WeakSet()
-var interactions = /* @__PURE__ */ new WeakMap()
+var formCollections = /* @__PURE__ */ new WeakMap();
+var reportValidityOverloads = /* @__PURE__ */ new WeakMap();
+var checkValidityOverloads = /* @__PURE__ */ new WeakMap();
+var userInteractedControls = /* @__PURE__ */ new WeakSet();
+var interactions = /* @__PURE__ */ new WeakMap();
 var FormControlController = class {
-	constructor(host, options) {
-		this.handleFormData = (event) => {
-			const disabled = this.options.disabled(this.host)
-			const name = this.options.name(this.host)
-			const value = this.options.value(this.host)
-			const isButton = this.host.tagName.toLowerCase() === "sl-button"
-			if (
-				this.host.isConnected &&
-				!disabled &&
-				!isButton &&
-				typeof name === "string" &&
-				name.length > 0 &&
-				typeof value !== "undefined"
-			) {
-				if (Array.isArray(value)) {
-					value.forEach((val) => {
-						event.formData.append(name, val.toString())
-					})
-				} else {
-					event.formData.append(name, value.toString())
-				}
-			}
-		}
-		this.handleFormSubmit = (event) => {
-			var _a
-			const disabled = this.options.disabled(this.host)
-			const reportValidity = this.options.reportValidity
-			if (this.form && !this.form.noValidate) {
-				;(_a = formCollections.get(this.form)) == null
-					? void 0
-					: _a.forEach((control) => {
-							this.setUserInteracted(control, true)
-						})
-			}
-			if (this.form && !this.form.noValidate && !disabled && !reportValidity(this.host)) {
-				event.preventDefault()
-				event.stopImmediatePropagation()
-			}
-		}
-		this.handleFormReset = () => {
-			this.options.setValue(this.host, this.options.defaultValue(this.host))
-			this.setUserInteracted(this.host, false)
-			interactions.set(this.host, [])
-		}
-		this.handleInteraction = (event) => {
-			const emittedEvents = interactions.get(this.host)
-			if (!emittedEvents.includes(event.type)) {
-				emittedEvents.push(event.type)
-			}
-			if (emittedEvents.length === this.options.assumeInteractionOn.length) {
-				this.setUserInteracted(this.host, true)
-			}
-		}
-		this.checkFormValidity = () => {
-			if (this.form && !this.form.noValidate) {
-				const elements = this.form.querySelectorAll("*")
-				for (const element of elements) {
-					if (typeof element.checkValidity === "function") {
-						if (!element.checkValidity()) {
-							return false
-						}
-					}
-				}
-			}
-			return true
-		}
-		this.reportFormValidity = () => {
-			if (this.form && !this.form.noValidate) {
-				const elements = this.form.querySelectorAll("*")
-				for (const element of elements) {
-					if (typeof element.reportValidity === "function") {
-						if (!element.reportValidity()) {
-							return false
-						}
-					}
-				}
-			}
-			return true
-		}
-		;(this.host = host).addController(this)
-		this.options = __spreadValues(
-			{
-				form: (input) => {
-					const formId = input.form
-					if (formId) {
-						const root = input.getRootNode()
-						const form = root.getElementById(formId)
-						if (form) {
-							return form
-						}
-					}
-					return input.closest("form")
-				},
-				name: (input) => input.name,
-				value: (input) => input.value,
-				defaultValue: (input) => input.defaultValue,
-				disabled: (input) => {
-					var _a
-					return (_a = input.disabled) != null ? _a : false
-				},
-				reportValidity: (input) =>
-					typeof input.reportValidity === "function" ? input.reportValidity() : true,
-				checkValidity: (input) =>
-					typeof input.checkValidity === "function" ? input.checkValidity() : true,
-				setValue: (input, value) => (input.value = value),
-				assumeInteractionOn: ["sl-input"],
-			},
-			options
-		)
-	}
-	hostConnected() {
-		const form = this.options.form(this.host)
-		if (form) {
-			this.attachForm(form)
-		}
-		interactions.set(this.host, [])
-		this.options.assumeInteractionOn.forEach((event) => {
-			this.host.addEventListener(event, this.handleInteraction)
-		})
-	}
-	hostDisconnected() {
-		this.detachForm()
-		interactions.delete(this.host)
-		this.options.assumeInteractionOn.forEach((event) => {
-			this.host.removeEventListener(event, this.handleInteraction)
-		})
-	}
-	hostUpdated() {
-		const form = this.options.form(this.host)
-		if (!form) {
-			this.detachForm()
-		}
-		if (form && this.form !== form) {
-			this.detachForm()
-			this.attachForm(form)
-		}
-		if (this.host.hasUpdated) {
-			this.setValidity(this.host.validity.valid)
-		}
-	}
-	attachForm(form) {
-		if (form) {
-			this.form = form
-			if (formCollections.has(this.form)) {
-				formCollections.get(this.form).add(this.host)
-			} else {
-				formCollections.set(this.form, /* @__PURE__ */ new Set([this.host]))
-			}
-			this.form.addEventListener("formdata", this.handleFormData)
-			this.form.addEventListener("submit", this.handleFormSubmit)
-			this.form.addEventListener("reset", this.handleFormReset)
-			if (!reportValidityOverloads.has(this.form)) {
-				reportValidityOverloads.set(this.form, this.form.reportValidity)
-				this.form.reportValidity = () => this.reportFormValidity()
-			}
-			if (!checkValidityOverloads.has(this.form)) {
-				checkValidityOverloads.set(this.form, this.form.checkValidity)
-				this.form.checkValidity = () => this.checkFormValidity()
-			}
-		} else {
-			this.form = void 0
-		}
-	}
-	detachForm() {
-		if (!this.form) return
-		const formCollection = formCollections.get(this.form)
-		if (!formCollection) {
-			return
-		}
-		formCollection.delete(this.host)
-		if (formCollection.size <= 0) {
-			this.form.removeEventListener("formdata", this.handleFormData)
-			this.form.removeEventListener("submit", this.handleFormSubmit)
-			this.form.removeEventListener("reset", this.handleFormReset)
-			if (reportValidityOverloads.has(this.form)) {
-				this.form.reportValidity = reportValidityOverloads.get(this.form)
-				reportValidityOverloads.delete(this.form)
-			}
-			if (checkValidityOverloads.has(this.form)) {
-				this.form.checkValidity = checkValidityOverloads.get(this.form)
-				checkValidityOverloads.delete(this.form)
-			}
-			this.form = void 0
-		}
-	}
-	setUserInteracted(el, hasInteracted) {
-		if (hasInteracted) {
-			userInteractedControls.add(el)
-		} else {
-			userInteractedControls.delete(el)
-		}
-		el.requestUpdate()
-	}
-	doAction(type, submitter) {
-		if (this.form) {
-			const button = document.createElement("button")
-			button.type = type
-			button.style.position = "absolute"
-			button.style.width = "0"
-			button.style.height = "0"
-			button.style.clipPath = "inset(50%)"
-			button.style.overflow = "hidden"
-			button.style.whiteSpace = "nowrap"
-			if (submitter) {
-				button.name = submitter.name
-				button.value = submitter.value
-				;["formaction", "formenctype", "formmethod", "formnovalidate", "formtarget"].forEach(
-					(attr) => {
-						if (submitter.hasAttribute(attr)) {
-							button.setAttribute(attr, submitter.getAttribute(attr))
-						}
-					}
-				)
-			}
-			this.form.append(button)
-			button.click()
-			button.remove()
-		}
-	}
-	/** Returns the associated `<form>` element, if one exists. */
-	getForm() {
-		var _a
-		return (_a = this.form) != null ? _a : null
-	}
-	/** Resets the form, restoring all the control to their default value */
-	reset(submitter) {
-		this.doAction("reset", submitter)
-	}
-	/** Submits the form, triggering validation and form data injection. */
-	submit(submitter) {
-		this.doAction("submit", submitter)
-	}
-	/**
-	 * Synchronously sets the form control's validity. Call this when you know the future validity but need to update
-	 * the host element immediately, i.e. before Lit updates the component in the next update.
-	 */
-	setValidity(isValid) {
-		const host = this.host
-		const hasInteracted = Boolean(userInteractedControls.has(host))
-		const required = Boolean(host.required)
-		host.toggleAttribute("data-required", required)
-		host.toggleAttribute("data-optional", !required)
-		host.toggleAttribute("data-invalid", !isValid)
-		host.toggleAttribute("data-valid", isValid)
-		host.toggleAttribute("data-user-invalid", !isValid && hasInteracted)
-		host.toggleAttribute("data-user-valid", isValid && hasInteracted)
-	}
-	/**
-	 * Updates the form control's validity based on the current value of `host.validity.valid`. Call this when anything
-	 * that affects constraint validation changes so the component receives the correct validity states.
-	 */
-	updateValidity() {
-		const host = this.host
-		this.setValidity(host.validity.valid)
-	}
-	/**
-	 * Dispatches a non-bubbling, cancelable custom event of type `sl-invalid`.
-	 * If the `sl-invalid` event will be cancelled then the original `invalid`
-	 * event (which may have been passed as argument) will also be cancelled.
-	 * If no original `invalid` event has been passed then the `sl-invalid`
-	 * event will be cancelled before being dispatched.
-	 */
-	emitInvalidEvent(originalInvalidEvent) {
-		const slInvalidEvent = new CustomEvent("sl-invalid", {
-			bubbles: false,
-			composed: false,
-			cancelable: true,
-			detail: {},
-		})
-		if (!originalInvalidEvent) {
-			slInvalidEvent.preventDefault()
-		}
-		if (!this.host.dispatchEvent(slInvalidEvent)) {
-			originalInvalidEvent == null ? void 0 : originalInvalidEvent.preventDefault()
-		}
-	}
-}
+  constructor(host, options) {
+    this.handleFormData = (event) => {
+      const disabled = this.options.disabled(this.host);
+      const name = this.options.name(this.host);
+      const value = this.options.value(this.host);
+      const isButton = this.host.tagName.toLowerCase() === "sl-button";
+      if (this.host.isConnected && !disabled && !isButton && typeof name === "string" && name.length > 0 && typeof value !== "undefined") {
+        if (Array.isArray(value)) {
+          value.forEach((val) => {
+            event.formData.append(name, val.toString());
+          });
+        } else {
+          event.formData.append(name, value.toString());
+        }
+      }
+    };
+    this.handleFormSubmit = (event) => {
+      var _a;
+      const disabled = this.options.disabled(this.host);
+      const reportValidity = this.options.reportValidity;
+      if (this.form && !this.form.noValidate) {
+        (_a = formCollections.get(this.form)) == null ? void 0 : _a.forEach((control) => {
+          this.setUserInteracted(control, true);
+        });
+      }
+      if (this.form && !this.form.noValidate && !disabled && !reportValidity(this.host)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    };
+    this.handleFormReset = () => {
+      this.options.setValue(this.host, this.options.defaultValue(this.host));
+      this.setUserInteracted(this.host, false);
+      interactions.set(this.host, []);
+    };
+    this.handleInteraction = (event) => {
+      const emittedEvents = interactions.get(this.host);
+      if (!emittedEvents.includes(event.type)) {
+        emittedEvents.push(event.type);
+      }
+      if (emittedEvents.length === this.options.assumeInteractionOn.length) {
+        this.setUserInteracted(this.host, true);
+      }
+    };
+    this.checkFormValidity = () => {
+      if (this.form && !this.form.noValidate) {
+        const elements = this.form.querySelectorAll("*");
+        for (const element of elements) {
+          if (typeof element.checkValidity === "function") {
+            if (!element.checkValidity()) {
+              return false;
+            }
+          }
+        }
+      }
+      return true;
+    };
+    this.reportFormValidity = () => {
+      if (this.form && !this.form.noValidate) {
+        const elements = this.form.querySelectorAll("*");
+        for (const element of elements) {
+          if (typeof element.reportValidity === "function") {
+            if (!element.reportValidity()) {
+              return false;
+            }
+          }
+        }
+      }
+      return true;
+    };
+    (this.host = host).addController(this);
+    this.options = __spreadValues({
+      form: (input) => {
+        const formId = input.form;
+        if (formId) {
+          const root = input.getRootNode();
+          const form = root.getElementById(formId);
+          if (form) {
+            return form;
+          }
+        }
+        return input.closest("form");
+      },
+      name: (input) => input.name,
+      value: (input) => input.value,
+      defaultValue: (input) => input.defaultValue,
+      disabled: (input) => {
+        var _a;
+        return (_a = input.disabled) != null ? _a : false;
+      },
+      reportValidity: (input) => typeof input.reportValidity === "function" ? input.reportValidity() : true,
+      checkValidity: (input) => typeof input.checkValidity === "function" ? input.checkValidity() : true,
+      setValue: (input, value) => input.value = value,
+      assumeInteractionOn: ["sl-input"]
+    }, options);
+  }
+  hostConnected() {
+    const form = this.options.form(this.host);
+    if (form) {
+      this.attachForm(form);
+    }
+    interactions.set(this.host, []);
+    this.options.assumeInteractionOn.forEach((event) => {
+      this.host.addEventListener(event, this.handleInteraction);
+    });
+  }
+  hostDisconnected() {
+    this.detachForm();
+    interactions.delete(this.host);
+    this.options.assumeInteractionOn.forEach((event) => {
+      this.host.removeEventListener(event, this.handleInteraction);
+    });
+  }
+  hostUpdated() {
+    const form = this.options.form(this.host);
+    if (!form) {
+      this.detachForm();
+    }
+    if (form && this.form !== form) {
+      this.detachForm();
+      this.attachForm(form);
+    }
+    if (this.host.hasUpdated) {
+      this.setValidity(this.host.validity.valid);
+    }
+  }
+  attachForm(form) {
+    if (form) {
+      this.form = form;
+      if (formCollections.has(this.form)) {
+        formCollections.get(this.form).add(this.host);
+      } else {
+        formCollections.set(this.form, /* @__PURE__ */ new Set([this.host]));
+      }
+      this.form.addEventListener("formdata", this.handleFormData);
+      this.form.addEventListener("submit", this.handleFormSubmit);
+      this.form.addEventListener("reset", this.handleFormReset);
+      if (!reportValidityOverloads.has(this.form)) {
+        reportValidityOverloads.set(this.form, this.form.reportValidity);
+        this.form.reportValidity = () => this.reportFormValidity();
+      }
+      if (!checkValidityOverloads.has(this.form)) {
+        checkValidityOverloads.set(this.form, this.form.checkValidity);
+        this.form.checkValidity = () => this.checkFormValidity();
+      }
+    } else {
+      this.form = void 0;
+    }
+  }
+  detachForm() {
+    if (!this.form)
+      return;
+    const formCollection = formCollections.get(this.form);
+    if (!formCollection) {
+      return;
+    }
+    formCollection.delete(this.host);
+    if (formCollection.size <= 0) {
+      this.form.removeEventListener("formdata", this.handleFormData);
+      this.form.removeEventListener("submit", this.handleFormSubmit);
+      this.form.removeEventListener("reset", this.handleFormReset);
+      if (reportValidityOverloads.has(this.form)) {
+        this.form.reportValidity = reportValidityOverloads.get(this.form);
+        reportValidityOverloads.delete(this.form);
+      }
+      if (checkValidityOverloads.has(this.form)) {
+        this.form.checkValidity = checkValidityOverloads.get(this.form);
+        checkValidityOverloads.delete(this.form);
+      }
+      this.form = void 0;
+    }
+  }
+  setUserInteracted(el, hasInteracted) {
+    if (hasInteracted) {
+      userInteractedControls.add(el);
+    } else {
+      userInteractedControls.delete(el);
+    }
+    el.requestUpdate();
+  }
+  doAction(type, submitter) {
+    if (this.form) {
+      const button = document.createElement("button");
+      button.type = type;
+      button.style.position = "absolute";
+      button.style.width = "0";
+      button.style.height = "0";
+      button.style.clipPath = "inset(50%)";
+      button.style.overflow = "hidden";
+      button.style.whiteSpace = "nowrap";
+      if (submitter) {
+        button.name = submitter.name;
+        button.value = submitter.value;
+        ["formaction", "formenctype", "formmethod", "formnovalidate", "formtarget"].forEach((attr) => {
+          if (submitter.hasAttribute(attr)) {
+            button.setAttribute(attr, submitter.getAttribute(attr));
+          }
+        });
+      }
+      this.form.append(button);
+      button.click();
+      button.remove();
+    }
+  }
+  /** Returns the associated `<form>` element, if one exists. */
+  getForm() {
+    var _a;
+    return (_a = this.form) != null ? _a : null;
+  }
+  /** Resets the form, restoring all the control to their default value */
+  reset(submitter) {
+    this.doAction("reset", submitter);
+  }
+  /** Submits the form, triggering validation and form data injection. */
+  submit(submitter) {
+    this.doAction("submit", submitter);
+  }
+  /**
+   * Synchronously sets the form control's validity. Call this when you know the future validity but need to update
+   * the host element immediately, i.e. before Lit updates the component in the next update.
+   */
+  setValidity(isValid) {
+    const host = this.host;
+    const hasInteracted = Boolean(userInteractedControls.has(host));
+    const required = Boolean(host.required);
+    host.toggleAttribute("data-required", required);
+    host.toggleAttribute("data-optional", !required);
+    host.toggleAttribute("data-invalid", !isValid);
+    host.toggleAttribute("data-valid", isValid);
+    host.toggleAttribute("data-user-invalid", !isValid && hasInteracted);
+    host.toggleAttribute("data-user-valid", isValid && hasInteracted);
+  }
+  /**
+   * Updates the form control's validity based on the current value of `host.validity.valid`. Call this when anything
+   * that affects constraint validation changes so the component receives the correct validity states.
+   */
+  updateValidity() {
+    const host = this.host;
+    this.setValidity(host.validity.valid);
+  }
+  /**
+   * Dispatches a non-bubbling, cancelable custom event of type `sl-invalid`.
+   * If the `sl-invalid` event will be cancelled then the original `invalid`
+   * event (which may have been passed as argument) will also be cancelled.
+   * If no original `invalid` event has been passed then the `sl-invalid`
+   * event will be cancelled before being dispatched.
+   */
+  emitInvalidEvent(originalInvalidEvent) {
+    const slInvalidEvent = new CustomEvent("sl-invalid", {
+      bubbles: false,
+      composed: false,
+      cancelable: true,
+      detail: {}
+    });
+    if (!originalInvalidEvent) {
+      slInvalidEvent.preventDefault();
+    }
+    if (!this.host.dispatchEvent(slInvalidEvent)) {
+      originalInvalidEvent == null ? void 0 : originalInvalidEvent.preventDefault();
+    }
+  }
+};
 var validValidityState = Object.freeze({
-	badInput: false,
-	customError: false,
-	patternMismatch: false,
-	rangeOverflow: false,
-	rangeUnderflow: false,
-	stepMismatch: false,
-	tooLong: false,
-	tooShort: false,
-	typeMismatch: false,
-	valid: true,
-	valueMissing: false,
-})
-Object.freeze(
-	__spreadProps(__spreadValues({}, validValidityState), {
-		valid: false,
-		valueMissing: true,
-	})
-)
-Object.freeze(
-	__spreadProps(__spreadValues({}, validValidityState), {
-		valid: false,
-		customError: true,
-	})
-)
+  badInput: false,
+  customError: false,
+  patternMismatch: false,
+  rangeOverflow: false,
+  rangeUnderflow: false,
+  stepMismatch: false,
+  tooLong: false,
+  tooShort: false,
+  typeMismatch: false,
+  valid: true,
+  valueMissing: false
+});
+Object.freeze(__spreadProps(__spreadValues({}, validValidityState), {
+  valid: false,
+  valueMissing: true
+}));
+Object.freeze(__spreadProps(__spreadValues({}, validValidityState), {
+  valid: false,
+  customError: true
+}));
 
 // src/utilities/animation-registry.ts
-var defaultAnimationRegistry = /* @__PURE__ */ new Map()
-var customAnimationRegistry = /* @__PURE__ */ new WeakMap()
+var defaultAnimationRegistry = /* @__PURE__ */ new Map();
+var customAnimationRegistry = /* @__PURE__ */ new WeakMap();
 function ensureAnimation(animation) {
-	return animation != null ? animation : { keyframes: [], options: { duration: 0 } }
+  return animation != null ? animation : { keyframes: [], options: { duration: 0 } };
 }
 function getLogicalAnimation(animation, dir) {
-	if (dir.toLowerCase() === "rtl") {
-		return {
-			keyframes: animation.rtlKeyframes || animation.keyframes,
-			options: animation.options,
-		}
-	}
-	return animation
+  if (dir.toLowerCase() === "rtl") {
+    return {
+      keyframes: animation.rtlKeyframes || animation.keyframes,
+      options: animation.options
+    };
+  }
+  return animation;
 }
 function setDefaultAnimation(animationName, animation) {
-	defaultAnimationRegistry.set(animationName, ensureAnimation(animation))
+  defaultAnimationRegistry.set(animationName, ensureAnimation(animation));
 }
 function getAnimation(el, animationName, options) {
-	const customAnimation = customAnimationRegistry.get(el)
-	if (customAnimation == null ? void 0 : customAnimation[animationName]) {
-		return getLogicalAnimation(customAnimation[animationName], options.dir)
-	}
-	const defaultAnimation = defaultAnimationRegistry.get(animationName)
-	if (defaultAnimation) {
-		return getLogicalAnimation(defaultAnimation, options.dir)
-	}
-	return {
-		keyframes: [],
-		options: { duration: 0 },
-	}
+  const customAnimation = customAnimationRegistry.get(el);
+  if (customAnimation == null ? void 0 : customAnimation[animationName]) {
+    return getLogicalAnimation(customAnimation[animationName], options.dir);
+  }
+  const defaultAnimation = defaultAnimationRegistry.get(animationName);
+  if (defaultAnimation) {
+    return getLogicalAnimation(defaultAnimation, options.dir);
+  }
+  return {
+    keyframes: [],
+    options: { duration: 0 }
+  };
 }
 
 // src/internal/event.ts
 function waitForEvent(el, eventName) {
-	return new Promise((resolve) => {
-		function done(event) {
-			if (event.target === el) {
-				el.removeEventListener(eventName, done)
-				resolve()
-			}
-		}
-		el.addEventListener(eventName, done)
-	})
+  return new Promise((resolve) => {
+    function done(event) {
+      if (event.target === el) {
+        el.removeEventListener(eventName, done);
+        resolve();
+      }
+    }
+    el.addEventListener(eventName, done);
+  });
 }
 
 // src/internal/animate.ts
 function animateTo(el, keyframes, options) {
-	return new Promise((resolve) => {
-		if ((options == null ? void 0 : options.duration) === Infinity) {
-			throw new Error("Promise-based animations must be finite.")
-		}
-		const animation = el.animate(
-			keyframes,
-			__spreadProps(__spreadValues({}, options), {
-				duration: prefersReducedMotion() ? 0 : options.duration,
-			})
-		)
-		animation.addEventListener("cancel", resolve, { once: true })
-		animation.addEventListener("finish", resolve, { once: true })
-	})
+  return new Promise((resolve) => {
+    if ((options == null ? void 0 : options.duration) === Infinity) {
+      throw new Error("Promise-based animations must be finite.");
+    }
+    const animation = el.animate(keyframes, __spreadProps(__spreadValues({}, options), {
+      duration: prefersReducedMotion() ? 0 : options.duration
+    }));
+    animation.addEventListener("cancel", resolve, { once: true });
+    animation.addEventListener("finish", resolve, { once: true });
+  });
 }
 function prefersReducedMotion() {
-	const query = window.matchMedia("(prefers-reduced-motion: reduce)")
-	return query.matches
+  const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+  return query.matches;
 }
 function stopAnimations(el) {
-	return Promise.all(
-		el.getAnimations().map((animation) => {
-			return new Promise((resolve) => {
-				animation.cancel()
-				requestAnimationFrame(resolve)
-			})
-		})
-	)
+  return Promise.all(
+    el.getAnimations().map((animation) => {
+      return new Promise((resolve) => {
+        animation.cancel();
+        requestAnimationFrame(resolve);
+      });
+    })
+  );
 }
 
 // src/internal/slot.ts
 var HasSlotController = class {
-	constructor(host, ...slotNames) {
-		this.slotNames = []
-		this.handleSlotChange = (event) => {
-			const slot = event.target
-			if (
-				(this.slotNames.includes("[default]") && !slot.name) ||
-				(slot.name && this.slotNames.includes(slot.name))
-			) {
-				this.host.requestUpdate()
-			}
-		}
-		;(this.host = host).addController(this)
-		this.slotNames = slotNames
-	}
-	hasDefaultSlot() {
-		return [...this.host.childNodes].some((node) => {
-			if (node.nodeType === node.TEXT_NODE && node.textContent.trim() !== "") {
-				return true
-			}
-			if (node.nodeType === node.ELEMENT_NODE) {
-				const el = node
-				const tagName = el.tagName.toLowerCase()
-				if (tagName === "sl-visually-hidden") {
-					return false
-				}
-				if (!el.hasAttribute("slot")) {
-					return true
-				}
-			}
-			return false
-		})
-	}
-	hasNamedSlot(name) {
-		return this.host.querySelector(`:scope > [slot="${name}"]`) !== null
-	}
-	test(slotName) {
-		return slotName === "[default]" ? this.hasDefaultSlot() : this.hasNamedSlot(slotName)
-	}
-	hostConnected() {
-		this.host.shadowRoot.addEventListener("slotchange", this.handleSlotChange)
-	}
-	hostDisconnected() {
-		this.host.shadowRoot.removeEventListener("slotchange", this.handleSlotChange)
-	}
-}
+  constructor(host, ...slotNames) {
+    this.slotNames = [];
+    this.handleSlotChange = (event) => {
+      const slot = event.target;
+      if (this.slotNames.includes("[default]") && !slot.name || slot.name && this.slotNames.includes(slot.name)) {
+        this.host.requestUpdate();
+      }
+    };
+    (this.host = host).addController(this);
+    this.slotNames = slotNames;
+  }
+  hasDefaultSlot() {
+    return [...this.host.childNodes].some((node) => {
+      if (node.nodeType === node.TEXT_NODE && node.textContent.trim() !== "") {
+        return true;
+      }
+      if (node.nodeType === node.ELEMENT_NODE) {
+        const el = node;
+        const tagName = el.tagName.toLowerCase();
+        if (tagName === "sl-visually-hidden") {
+          return false;
+        }
+        if (!el.hasAttribute("slot")) {
+          return true;
+        }
+      }
+      return false;
+    });
+  }
+  hasNamedSlot(name) {
+    return this.host.querySelector(`:scope > [slot="${name}"]`) !== null;
+  }
+  test(slotName) {
+    return slotName === "[default]" ? this.hasDefaultSlot() : this.hasNamedSlot(slotName);
+  }
+  hostConnected() {
+    this.host.shadowRoot.addEventListener("slotchange", this.handleSlotChange);
+  }
+  hostDisconnected() {
+    this.host.shadowRoot.removeEventListener("slotchange", this.handleSlotChange);
+  }
+};
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */ class le extends i {
-	constructor(i) {
-		if ((super(i), (this.it = D), i.type !== t.CHILD))
-			throw Error(this.constructor.directiveName + "() can only be used in child bindings")
-	}
-	render(t) {
-		if (t === D || null == t) return (this._t = void 0), (this.it = t)
-		if (t === R) return t
-		if ("string" != typeof t)
-			throw Error(this.constructor.directiveName + "() called with a non-string value")
-		if (t === this.it) return this._t
-		this.it = t
-		const i = [t]
-		return (
-			(i.raw = i), (this._t = { _$litType$: this.constructor.resultType, strings: i, values: [] })
-		)
-	}
-}
-;(le.directiveName = "unsafeHTML"), (le.resultType = 1)
-const ae = e(le)
+ */class e extends i$1{constructor(i){if(super(i),this.it=E,i.type!==t.CHILD)throw Error(this.constructor.directiveName+"() can only be used in child bindings")}render(r){if(r===E||null==r)return this._t=void 0,this.it=r;if(r===T)return r;if("string"!=typeof r)throw Error(this.constructor.directiveName+"() called with a non-string value");if(r===this.it)return this._t;this.it=r;const s=[r];return s.raw=s,this._t={_$litType$:this.constructor.resultType,strings:s,values:[]}}}e.directiveName="unsafeHTML",e.resultType=1;const o=e$2(e);
 
 var SlSelect = class extends ShoelaceElement {
-	constructor() {
-		super(...arguments)
-		this.formControlController = new FormControlController(this, {
-			assumeInteractionOn: ["sl-blur", "sl-input"],
-		})
-		this.hasSlotController = new HasSlotController(this, "help-text", "label")
-		this.localize = new LocalizeController(this)
-		this.typeToSelectString = ""
-		this.hasFocus = false
-		this.displayLabel = ""
-		this.selectedOptions = []
-		this.name = ""
-		this.value = ""
-		this.defaultValue = ""
-		this.size = "medium"
-		this.placeholder = ""
-		this.multiple = false
-		this.maxOptionsVisible = 3
-		this.disabled = false
-		this.clearable = false
-		this.open = false
-		this.hoist = false
-		this.filled = false
-		this.pill = false
-		this.label = ""
-		this.placement = "bottom"
-		this.helpText = ""
-		this.form = ""
-		this.required = false
-		this.getTag = (option) => {
-			return ke$1`
+  constructor() {
+    super(...arguments);
+    this.formControlController = new FormControlController(this, {
+      assumeInteractionOn: ["sl-blur", "sl-input"]
+    });
+    this.hasSlotController = new HasSlotController(this, "help-text", "label");
+    this.localize = new LocalizeController(this);
+    this.typeToSelectString = "";
+    this.hasFocus = false;
+    this.displayLabel = "";
+    this.selectedOptions = [];
+    this.name = "";
+    this.value = "";
+    this.defaultValue = "";
+    this.size = "medium";
+    this.placeholder = "";
+    this.multiple = false;
+    this.maxOptionsVisible = 3;
+    this.disabled = false;
+    this.clearable = false;
+    this.open = false;
+    this.hoist = false;
+    this.filled = false;
+    this.pill = false;
+    this.label = "";
+    this.placement = "bottom";
+    this.helpText = "";
+    this.form = "";
+    this.required = false;
+    this.getTag = (option) => {
+      return x`
       <sl-tag
         part="tag"
         exportparts="
@@ -13032,420 +11569,418 @@ var SlSelect = class extends ShoelaceElement {
       >
         ${option.getTextLabel()}
       </sl-tag>
-    `
-		}
-		this.handleDocumentFocusIn = (event) => {
-			const path = event.composedPath()
-			if (this && !path.includes(this)) {
-				this.hide()
-			}
-		}
-		this.handleDocumentKeyDown = (event) => {
-			const target = event.target
-			const isClearButton = target.closest(".select__clear") !== null
-			const isIconButton = target.closest("sl-icon-button") !== null
-			if (isClearButton || isIconButton) {
-				return
-			}
-			if (event.key === "Escape" && this.open && !this.closeWatcher) {
-				event.preventDefault()
-				event.stopPropagation()
-				this.hide()
-				this.displayInput.focus({ preventScroll: true })
-			}
-			if (event.key === "Enter" || (event.key === " " && this.typeToSelectString === "")) {
-				event.preventDefault()
-				event.stopImmediatePropagation()
-				if (!this.open) {
-					this.show()
-					return
-				}
-				if (this.currentOption && !this.currentOption.disabled) {
-					if (this.multiple) {
-						this.toggleOptionSelection(this.currentOption)
-					} else {
-						this.setSelectedOptions(this.currentOption)
-					}
-					this.updateComplete.then(() => {
-						this.emit("sl-input")
-						this.emit("sl-change")
-					})
-					if (!this.multiple) {
-						this.hide()
-						this.displayInput.focus({ preventScroll: true })
-					}
-				}
-				return
-			}
-			if (["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) {
-				const allOptions = this.getAllOptions()
-				const currentIndex = allOptions.indexOf(this.currentOption)
-				let newIndex = Math.max(0, currentIndex)
-				event.preventDefault()
-				if (!this.open) {
-					this.show()
-					if (this.currentOption) {
-						return
-					}
-				}
-				if (event.key === "ArrowDown") {
-					newIndex = currentIndex + 1
-					if (newIndex > allOptions.length - 1) newIndex = 0
-				} else if (event.key === "ArrowUp") {
-					newIndex = currentIndex - 1
-					if (newIndex < 0) newIndex = allOptions.length - 1
-				} else if (event.key === "Home") {
-					newIndex = 0
-				} else if (event.key === "End") {
-					newIndex = allOptions.length - 1
-				}
-				this.setCurrentOption(allOptions[newIndex])
-			}
-			if (event.key.length === 1 || event.key === "Backspace") {
-				const allOptions = this.getAllOptions()
-				if (event.metaKey || event.ctrlKey || event.altKey) {
-					return
-				}
-				if (!this.open) {
-					if (event.key === "Backspace") {
-						return
-					}
-					this.show()
-				}
-				event.stopPropagation()
-				event.preventDefault()
-				clearTimeout(this.typeToSelectTimeout)
-				this.typeToSelectTimeout = window.setTimeout(() => (this.typeToSelectString = ""), 1e3)
-				if (event.key === "Backspace") {
-					this.typeToSelectString = this.typeToSelectString.slice(0, -1)
-				} else {
-					this.typeToSelectString += event.key.toLowerCase()
-				}
-				for (const option of allOptions) {
-					const label = option.getTextLabel().toLowerCase()
-					if (label.startsWith(this.typeToSelectString)) {
-						this.setCurrentOption(option)
-						break
-					}
-				}
-			}
-		}
-		this.handleDocumentMouseDown = (event) => {
-			const path = event.composedPath()
-			if (this && !path.includes(this)) {
-				this.hide()
-			}
-		}
-	}
-	/** Gets the validity state object */
-	get validity() {
-		return this.valueInput.validity
-	}
-	/** Gets the validation message */
-	get validationMessage() {
-		return this.valueInput.validationMessage
-	}
-	connectedCallback() {
-		super.connectedCallback()
-		this.open = false
-	}
-	addOpenListeners() {
-		var _a
-		const root = this.getRootNode()
-		if ("CloseWatcher" in window) {
-			;(_a = this.closeWatcher) == null ? void 0 : _a.destroy()
-			this.closeWatcher = new CloseWatcher()
-			this.closeWatcher.onclose = () => {
-				if (this.open) {
-					this.hide()
-					this.displayInput.focus({ preventScroll: true })
-				}
-			}
-		}
-		root.addEventListener("focusin", this.handleDocumentFocusIn)
-		root.addEventListener("keydown", this.handleDocumentKeyDown)
-		root.addEventListener("mousedown", this.handleDocumentMouseDown)
-	}
-	removeOpenListeners() {
-		var _a
-		const root = this.getRootNode()
-		root.removeEventListener("focusin", this.handleDocumentFocusIn)
-		root.removeEventListener("keydown", this.handleDocumentKeyDown)
-		root.removeEventListener("mousedown", this.handleDocumentMouseDown)
-		;(_a = this.closeWatcher) == null ? void 0 : _a.destroy()
-	}
-	handleFocus() {
-		this.hasFocus = true
-		this.displayInput.setSelectionRange(0, 0)
-		this.emit("sl-focus")
-	}
-	handleBlur() {
-		this.hasFocus = false
-		this.emit("sl-blur")
-	}
-	handleLabelClick() {
-		this.displayInput.focus()
-	}
-	handleComboboxMouseDown(event) {
-		const path = event.composedPath()
-		const isIconButton = path.some(
-			(el) => el instanceof Element && el.tagName.toLowerCase() === "sl-icon-button"
-		)
-		if (this.disabled || isIconButton) {
-			return
-		}
-		event.preventDefault()
-		this.displayInput.focus({ preventScroll: true })
-		this.open = !this.open
-	}
-	handleComboboxKeyDown(event) {
-		if (event.key === "Tab") {
-			return
-		}
-		event.stopPropagation()
-		this.handleDocumentKeyDown(event)
-	}
-	handleClearClick(event) {
-		event.stopPropagation()
-		if (this.value !== "") {
-			this.setSelectedOptions([])
-			this.displayInput.focus({ preventScroll: true })
-			this.updateComplete.then(() => {
-				this.emit("sl-clear")
-				this.emit("sl-input")
-				this.emit("sl-change")
-			})
-		}
-	}
-	handleClearMouseDown(event) {
-		event.stopPropagation()
-		event.preventDefault()
-	}
-	handleOptionClick(event) {
-		const target = event.target
-		const option = target.closest("sl-option")
-		const oldValue = this.value
-		if (option && !option.disabled) {
-			if (this.multiple) {
-				this.toggleOptionSelection(option)
-			} else {
-				this.setSelectedOptions(option)
-			}
-			this.updateComplete.then(() => this.displayInput.focus({ preventScroll: true }))
-			if (this.value !== oldValue) {
-				this.updateComplete.then(() => {
-					this.emit("sl-input")
-					this.emit("sl-change")
-				})
-			}
-			if (!this.multiple) {
-				this.hide()
-				this.displayInput.focus({ preventScroll: true })
-			}
-		}
-	}
-	handleDefaultSlotChange() {
-		const allOptions = this.getAllOptions()
-		const value = Array.isArray(this.value) ? this.value : [this.value]
-		const values = []
-		if (customElements.get("sl-option")) {
-			allOptions.forEach((option) => values.push(option.value))
-			this.setSelectedOptions(allOptions.filter((el) => value.includes(el.value)))
-		} else {
-			customElements.whenDefined("sl-option").then(() => this.handleDefaultSlotChange())
-		}
-	}
-	handleTagRemove(event, option) {
-		event.stopPropagation()
-		if (!this.disabled) {
-			this.toggleOptionSelection(option, false)
-			this.updateComplete.then(() => {
-				this.emit("sl-input")
-				this.emit("sl-change")
-			})
-		}
-	}
-	// Gets an array of all <sl-option> elements
-	getAllOptions() {
-		return [...this.querySelectorAll("sl-option")]
-	}
-	// Gets the first <sl-option> element
-	getFirstOption() {
-		return this.querySelector("sl-option")
-	}
-	// Sets the current option, which is the option the user is currently interacting with (e.g. via keyboard). Only one
-	// option may be "current" at a time.
-	setCurrentOption(option) {
-		const allOptions = this.getAllOptions()
-		allOptions.forEach((el) => {
-			el.current = false
-			el.tabIndex = -1
-		})
-		if (option) {
-			this.currentOption = option
-			option.current = true
-			option.tabIndex = 0
-			option.focus()
-		}
-	}
-	// Sets the selected option(s)
-	setSelectedOptions(option) {
-		const allOptions = this.getAllOptions()
-		const newSelectedOptions = Array.isArray(option) ? option : [option]
-		allOptions.forEach((el) => (el.selected = false))
-		if (newSelectedOptions.length) {
-			newSelectedOptions.forEach((el) => (el.selected = true))
-		}
-		this.selectionChanged()
-	}
-	// Toggles an option's selected state
-	toggleOptionSelection(option, force) {
-		if (force === true || force === false) {
-			option.selected = force
-		} else {
-			option.selected = !option.selected
-		}
-		this.selectionChanged()
-	}
-	// This method must be called whenever the selection changes. It will update the selected options cache, the current
-	// value, and the display value
-	selectionChanged() {
-		var _a, _b, _c, _d
-		this.selectedOptions = this.getAllOptions().filter((el) => el.selected)
-		if (this.multiple) {
-			this.value = this.selectedOptions.map((el) => el.value)
-			if (this.placeholder && this.value.length === 0) {
-				this.displayLabel = ""
-			} else {
-				this.displayLabel = this.localize.term("numOptionsSelected", this.selectedOptions.length)
-			}
-		} else {
-			this.value =
-				(_b = (_a = this.selectedOptions[0]) == null ? void 0 : _a.value) != null ? _b : ""
-			this.displayLabel =
-				(_d = (_c = this.selectedOptions[0]) == null ? void 0 : _c.getTextLabel()) != null ? _d : ""
-		}
-		this.updateComplete.then(() => {
-			this.formControlController.updateValidity()
-		})
-	}
-	get tags() {
-		return this.selectedOptions.map((option, index) => {
-			if (index < this.maxOptionsVisible || this.maxOptionsVisible <= 0) {
-				const tag = this.getTag(option, index)
-				return ke$1`<div @sl-remove=${(e) => this.handleTagRemove(e, option)}>
-          ${typeof tag === "string" ? ae(tag) : tag}
-        </div>`
-			} else if (index === this.maxOptionsVisible) {
-				return ke$1`<sl-tag>+${this.selectedOptions.length - index}</sl-tag>`
-			}
-			return ke$1``
-		})
-	}
-	handleInvalid(event) {
-		this.formControlController.setValidity(false)
-		this.formControlController.emitInvalidEvent(event)
-	}
-	handleDisabledChange() {
-		if (this.disabled) {
-			this.open = false
-			this.handleOpenChange()
-		}
-	}
-	handleValueChange() {
-		const allOptions = this.getAllOptions()
-		const value = Array.isArray(this.value) ? this.value : [this.value]
-		this.setSelectedOptions(allOptions.filter((el) => value.includes(el.value)))
-	}
-	async handleOpenChange() {
-		if (this.open && !this.disabled) {
-			this.setCurrentOption(this.selectedOptions[0] || this.getFirstOption())
-			this.emit("sl-show")
-			this.addOpenListeners()
-			await stopAnimations(this)
-			this.listbox.hidden = false
-			this.popup.active = true
-			requestAnimationFrame(() => {
-				this.setCurrentOption(this.currentOption)
-			})
-			const { keyframes, options } = getAnimation(this, "select.show", { dir: this.localize.dir() })
-			await animateTo(this.popup.popup, keyframes, options)
-			if (this.currentOption) {
-				scrollIntoView(this.currentOption, this.listbox, "vertical", "auto")
-			}
-			this.emit("sl-after-show")
-		} else {
-			this.emit("sl-hide")
-			this.removeOpenListeners()
-			await stopAnimations(this)
-			const { keyframes, options } = getAnimation(this, "select.hide", { dir: this.localize.dir() })
-			await animateTo(this.popup.popup, keyframes, options)
-			this.listbox.hidden = true
-			this.popup.active = false
-			this.emit("sl-after-hide")
-		}
-	}
-	/** Shows the listbox. */
-	async show() {
-		if (this.open || this.disabled) {
-			this.open = false
-			return void 0
-		}
-		this.open = true
-		return waitForEvent(this, "sl-after-show")
-	}
-	/** Hides the listbox. */
-	async hide() {
-		if (!this.open || this.disabled) {
-			this.open = false
-			return void 0
-		}
-		this.open = false
-		return waitForEvent(this, "sl-after-hide")
-	}
-	/** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
-	checkValidity() {
-		return this.valueInput.checkValidity()
-	}
-	/** Gets the associated form, if one exists. */
-	getForm() {
-		return this.formControlController.getForm()
-	}
-	/** Checks for validity and shows the browser's validation message if the control is invalid. */
-	reportValidity() {
-		return this.valueInput.reportValidity()
-	}
-	/** Sets a custom validation message. Pass an empty string to restore validity. */
-	setCustomValidity(message) {
-		this.valueInput.setCustomValidity(message)
-		this.formControlController.updateValidity()
-	}
-	/** Sets focus on the control. */
-	focus(options) {
-		this.displayInput.focus(options)
-	}
-	/** Removes focus from the control. */
-	blur() {
-		this.displayInput.blur()
-	}
-	render() {
-		const hasLabelSlot = this.hasSlotController.test("label")
-		const hasHelpTextSlot = this.hasSlotController.test("help-text")
-		const hasLabel = this.label ? true : !!hasLabelSlot
-		const hasHelpText = this.helpText ? true : !!hasHelpTextSlot
-		const hasClearIcon = this.clearable && !this.disabled && this.value.length > 0
-		const isPlaceholderVisible = this.placeholder && this.value.length === 0
-		return ke$1`
+    `;
+    };
+    this.handleDocumentFocusIn = (event) => {
+      const path = event.composedPath();
+      if (this && !path.includes(this)) {
+        this.hide();
+      }
+    };
+    this.handleDocumentKeyDown = (event) => {
+      const target = event.target;
+      const isClearButton = target.closest(".select__clear") !== null;
+      const isIconButton = target.closest("sl-icon-button") !== null;
+      if (isClearButton || isIconButton) {
+        return;
+      }
+      if (event.key === "Escape" && this.open && !this.closeWatcher) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.hide();
+        this.displayInput.focus({ preventScroll: true });
+      }
+      if (event.key === "Enter" || event.key === " " && this.typeToSelectString === "") {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (!this.open) {
+          this.show();
+          return;
+        }
+        if (this.currentOption && !this.currentOption.disabled) {
+          if (this.multiple) {
+            this.toggleOptionSelection(this.currentOption);
+          } else {
+            this.setSelectedOptions(this.currentOption);
+          }
+          this.updateComplete.then(() => {
+            this.emit("sl-input");
+            this.emit("sl-change");
+          });
+          if (!this.multiple) {
+            this.hide();
+            this.displayInput.focus({ preventScroll: true });
+          }
+        }
+        return;
+      }
+      if (["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) {
+        const allOptions = this.getAllOptions();
+        const currentIndex = allOptions.indexOf(this.currentOption);
+        let newIndex = Math.max(0, currentIndex);
+        event.preventDefault();
+        if (!this.open) {
+          this.show();
+          if (this.currentOption) {
+            return;
+          }
+        }
+        if (event.key === "ArrowDown") {
+          newIndex = currentIndex + 1;
+          if (newIndex > allOptions.length - 1)
+            newIndex = 0;
+        } else if (event.key === "ArrowUp") {
+          newIndex = currentIndex - 1;
+          if (newIndex < 0)
+            newIndex = allOptions.length - 1;
+        } else if (event.key === "Home") {
+          newIndex = 0;
+        } else if (event.key === "End") {
+          newIndex = allOptions.length - 1;
+        }
+        this.setCurrentOption(allOptions[newIndex]);
+      }
+      if (event.key.length === 1 || event.key === "Backspace") {
+        const allOptions = this.getAllOptions();
+        if (event.metaKey || event.ctrlKey || event.altKey) {
+          return;
+        }
+        if (!this.open) {
+          if (event.key === "Backspace") {
+            return;
+          }
+          this.show();
+        }
+        event.stopPropagation();
+        event.preventDefault();
+        clearTimeout(this.typeToSelectTimeout);
+        this.typeToSelectTimeout = window.setTimeout(() => this.typeToSelectString = "", 1e3);
+        if (event.key === "Backspace") {
+          this.typeToSelectString = this.typeToSelectString.slice(0, -1);
+        } else {
+          this.typeToSelectString += event.key.toLowerCase();
+        }
+        for (const option of allOptions) {
+          const label = option.getTextLabel().toLowerCase();
+          if (label.startsWith(this.typeToSelectString)) {
+            this.setCurrentOption(option);
+            break;
+          }
+        }
+      }
+    };
+    this.handleDocumentMouseDown = (event) => {
+      const path = event.composedPath();
+      if (this && !path.includes(this)) {
+        this.hide();
+      }
+    };
+  }
+  /** Gets the validity state object */
+  get validity() {
+    return this.valueInput.validity;
+  }
+  /** Gets the validation message */
+  get validationMessage() {
+    return this.valueInput.validationMessage;
+  }
+  connectedCallback() {
+    super.connectedCallback();
+    this.open = false;
+  }
+  addOpenListeners() {
+    var _a;
+    const root = this.getRootNode();
+    if ("CloseWatcher" in window) {
+      (_a = this.closeWatcher) == null ? void 0 : _a.destroy();
+      this.closeWatcher = new CloseWatcher();
+      this.closeWatcher.onclose = () => {
+        if (this.open) {
+          this.hide();
+          this.displayInput.focus({ preventScroll: true });
+        }
+      };
+    }
+    root.addEventListener("focusin", this.handleDocumentFocusIn);
+    root.addEventListener("keydown", this.handleDocumentKeyDown);
+    root.addEventListener("mousedown", this.handleDocumentMouseDown);
+  }
+  removeOpenListeners() {
+    var _a;
+    const root = this.getRootNode();
+    root.removeEventListener("focusin", this.handleDocumentFocusIn);
+    root.removeEventListener("keydown", this.handleDocumentKeyDown);
+    root.removeEventListener("mousedown", this.handleDocumentMouseDown);
+    (_a = this.closeWatcher) == null ? void 0 : _a.destroy();
+  }
+  handleFocus() {
+    this.hasFocus = true;
+    this.displayInput.setSelectionRange(0, 0);
+    this.emit("sl-focus");
+  }
+  handleBlur() {
+    this.hasFocus = false;
+    this.emit("sl-blur");
+  }
+  handleLabelClick() {
+    this.displayInput.focus();
+  }
+  handleComboboxMouseDown(event) {
+    const path = event.composedPath();
+    const isIconButton = path.some((el) => el instanceof Element && el.tagName.toLowerCase() === "sl-icon-button");
+    if (this.disabled || isIconButton) {
+      return;
+    }
+    event.preventDefault();
+    this.displayInput.focus({ preventScroll: true });
+    this.open = !this.open;
+  }
+  handleComboboxKeyDown(event) {
+    if (event.key === "Tab") {
+      return;
+    }
+    event.stopPropagation();
+    this.handleDocumentKeyDown(event);
+  }
+  handleClearClick(event) {
+    event.stopPropagation();
+    if (this.value !== "") {
+      this.setSelectedOptions([]);
+      this.displayInput.focus({ preventScroll: true });
+      this.updateComplete.then(() => {
+        this.emit("sl-clear");
+        this.emit("sl-input");
+        this.emit("sl-change");
+      });
+    }
+  }
+  handleClearMouseDown(event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  handleOptionClick(event) {
+    const target = event.target;
+    const option = target.closest("sl-option");
+    const oldValue = this.value;
+    if (option && !option.disabled) {
+      if (this.multiple) {
+        this.toggleOptionSelection(option);
+      } else {
+        this.setSelectedOptions(option);
+      }
+      this.updateComplete.then(() => this.displayInput.focus({ preventScroll: true }));
+      if (this.value !== oldValue) {
+        this.updateComplete.then(() => {
+          this.emit("sl-input");
+          this.emit("sl-change");
+        });
+      }
+      if (!this.multiple) {
+        this.hide();
+        this.displayInput.focus({ preventScroll: true });
+      }
+    }
+  }
+  handleDefaultSlotChange() {
+    const allOptions = this.getAllOptions();
+    const value = Array.isArray(this.value) ? this.value : [this.value];
+    const values = [];
+    if (customElements.get("sl-option")) {
+      allOptions.forEach((option) => values.push(option.value));
+      this.setSelectedOptions(allOptions.filter((el) => value.includes(el.value)));
+    } else {
+      customElements.whenDefined("sl-option").then(() => this.handleDefaultSlotChange());
+    }
+  }
+  handleTagRemove(event, option) {
+    event.stopPropagation();
+    if (!this.disabled) {
+      this.toggleOptionSelection(option, false);
+      this.updateComplete.then(() => {
+        this.emit("sl-input");
+        this.emit("sl-change");
+      });
+    }
+  }
+  // Gets an array of all <sl-option> elements
+  getAllOptions() {
+    return [...this.querySelectorAll("sl-option")];
+  }
+  // Gets the first <sl-option> element
+  getFirstOption() {
+    return this.querySelector("sl-option");
+  }
+  // Sets the current option, which is the option the user is currently interacting with (e.g. via keyboard). Only one
+  // option may be "current" at a time.
+  setCurrentOption(option) {
+    const allOptions = this.getAllOptions();
+    allOptions.forEach((el) => {
+      el.current = false;
+      el.tabIndex = -1;
+    });
+    if (option) {
+      this.currentOption = option;
+      option.current = true;
+      option.tabIndex = 0;
+      option.focus();
+    }
+  }
+  // Sets the selected option(s)
+  setSelectedOptions(option) {
+    const allOptions = this.getAllOptions();
+    const newSelectedOptions = Array.isArray(option) ? option : [option];
+    allOptions.forEach((el) => el.selected = false);
+    if (newSelectedOptions.length) {
+      newSelectedOptions.forEach((el) => el.selected = true);
+    }
+    this.selectionChanged();
+  }
+  // Toggles an option's selected state
+  toggleOptionSelection(option, force) {
+    if (force === true || force === false) {
+      option.selected = force;
+    } else {
+      option.selected = !option.selected;
+    }
+    this.selectionChanged();
+  }
+  // This method must be called whenever the selection changes. It will update the selected options cache, the current
+  // value, and the display value
+  selectionChanged() {
+    var _a, _b, _c, _d;
+    this.selectedOptions = this.getAllOptions().filter((el) => el.selected);
+    if (this.multiple) {
+      this.value = this.selectedOptions.map((el) => el.value);
+      if (this.placeholder && this.value.length === 0) {
+        this.displayLabel = "";
+      } else {
+        this.displayLabel = this.localize.term("numOptionsSelected", this.selectedOptions.length);
+      }
+    } else {
+      this.value = (_b = (_a = this.selectedOptions[0]) == null ? void 0 : _a.value) != null ? _b : "";
+      this.displayLabel = (_d = (_c = this.selectedOptions[0]) == null ? void 0 : _c.getTextLabel()) != null ? _d : "";
+    }
+    this.updateComplete.then(() => {
+      this.formControlController.updateValidity();
+    });
+  }
+  get tags() {
+    return this.selectedOptions.map((option, index) => {
+      if (index < this.maxOptionsVisible || this.maxOptionsVisible <= 0) {
+        const tag = this.getTag(option, index);
+        return x`<div @sl-remove=${(e) => this.handleTagRemove(e, option)}>
+          ${typeof tag === "string" ? o(tag) : tag}
+        </div>`;
+      } else if (index === this.maxOptionsVisible) {
+        return x`<sl-tag>+${this.selectedOptions.length - index}</sl-tag>`;
+      }
+      return x``;
+    });
+  }
+  handleInvalid(event) {
+    this.formControlController.setValidity(false);
+    this.formControlController.emitInvalidEvent(event);
+  }
+  handleDisabledChange() {
+    if (this.disabled) {
+      this.open = false;
+      this.handleOpenChange();
+    }
+  }
+  handleValueChange() {
+    const allOptions = this.getAllOptions();
+    const value = Array.isArray(this.value) ? this.value : [this.value];
+    this.setSelectedOptions(allOptions.filter((el) => value.includes(el.value)));
+  }
+  async handleOpenChange() {
+    if (this.open && !this.disabled) {
+      this.setCurrentOption(this.selectedOptions[0] || this.getFirstOption());
+      this.emit("sl-show");
+      this.addOpenListeners();
+      await stopAnimations(this);
+      this.listbox.hidden = false;
+      this.popup.active = true;
+      requestAnimationFrame(() => {
+        this.setCurrentOption(this.currentOption);
+      });
+      const { keyframes, options } = getAnimation(this, "select.show", { dir: this.localize.dir() });
+      await animateTo(this.popup.popup, keyframes, options);
+      if (this.currentOption) {
+        scrollIntoView(this.currentOption, this.listbox, "vertical", "auto");
+      }
+      this.emit("sl-after-show");
+    } else {
+      this.emit("sl-hide");
+      this.removeOpenListeners();
+      await stopAnimations(this);
+      const { keyframes, options } = getAnimation(this, "select.hide", { dir: this.localize.dir() });
+      await animateTo(this.popup.popup, keyframes, options);
+      this.listbox.hidden = true;
+      this.popup.active = false;
+      this.emit("sl-after-hide");
+    }
+  }
+  /** Shows the listbox. */
+  async show() {
+    if (this.open || this.disabled) {
+      this.open = false;
+      return void 0;
+    }
+    this.open = true;
+    return waitForEvent(this, "sl-after-show");
+  }
+  /** Hides the listbox. */
+  async hide() {
+    if (!this.open || this.disabled) {
+      this.open = false;
+      return void 0;
+    }
+    this.open = false;
+    return waitForEvent(this, "sl-after-hide");
+  }
+  /** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
+  checkValidity() {
+    return this.valueInput.checkValidity();
+  }
+  /** Gets the associated form, if one exists. */
+  getForm() {
+    return this.formControlController.getForm();
+  }
+  /** Checks for validity and shows the browser's validation message if the control is invalid. */
+  reportValidity() {
+    return this.valueInput.reportValidity();
+  }
+  /** Sets a custom validation message. Pass an empty string to restore validity. */
+  setCustomValidity(message) {
+    this.valueInput.setCustomValidity(message);
+    this.formControlController.updateValidity();
+  }
+  /** Sets focus on the control. */
+  focus(options) {
+    this.displayInput.focus(options);
+  }
+  /** Removes focus from the control. */
+  blur() {
+    this.displayInput.blur();
+  }
+  render() {
+    const hasLabelSlot = this.hasSlotController.test("label");
+    const hasHelpTextSlot = this.hasSlotController.test("help-text");
+    const hasLabel = this.label ? true : !!hasLabelSlot;
+    const hasHelpText = this.helpText ? true : !!hasHelpTextSlot;
+    const hasClearIcon = this.clearable && !this.disabled && this.value.length > 0;
+    const isPlaceholderVisible = this.placeholder && this.value.length === 0;
+    return x`
       <div
         part="form-control"
-        class=${Rt({
-					"form-control": true,
-					"form-control--small": this.size === "small",
-					"form-control--medium": this.size === "medium",
-					"form-control--large": this.size === "large",
-					"form-control--has-label": hasLabel,
-					"form-control--has-help-text": hasHelpText,
-				})}
+        class=${e$1({
+      "form-control": true,
+      "form-control--small": this.size === "small",
+      "form-control--medium": this.size === "medium",
+      "form-control--large": this.size === "large",
+      "form-control--has-label": hasLabel,
+      "form-control--has-help-text": hasHelpText
+    })}
       >
         <label
           id="label"
@@ -13459,22 +11994,22 @@ var SlSelect = class extends ShoelaceElement {
 
         <div part="form-control-input" class="form-control-input">
           <sl-popup
-            class=${Rt({
-							select: true,
-							"select--standard": true,
-							"select--filled": this.filled,
-							"select--pill": this.pill,
-							"select--open": this.open,
-							"select--disabled": this.disabled,
-							"select--multiple": this.multiple,
-							"select--focused": this.hasFocus,
-							"select--placeholder-visible": isPlaceholderVisible,
-							"select--top": this.placement === "top",
-							"select--bottom": this.placement === "bottom",
-							"select--small": this.size === "small",
-							"select--medium": this.size === "medium",
-							"select--large": this.size === "large",
-						})}
+            class=${e$1({
+      select: true,
+      "select--standard": true,
+      "select--filled": this.filled,
+      "select--pill": this.pill,
+      "select--open": this.open,
+      "select--disabled": this.disabled,
+      "select--multiple": this.multiple,
+      "select--focused": this.hasFocus,
+      "select--placeholder-visible": isPlaceholderVisible,
+      "select--top": this.placement === "top",
+      "select--bottom": this.placement === "bottom",
+      "select--small": this.size === "small",
+      "select--medium": this.size === "medium",
+      "select--large": this.size === "large"
+    })}
             placement=${this.placement}
             strategy=${this.hoist ? "fixed" : "absolute"}
             flip
@@ -13515,7 +12050,7 @@ var SlSelect = class extends ShoelaceElement {
                 @blur=${this.handleBlur}
               />
 
-              ${this.multiple ? ke$1`<div part="tags" class="select__tags">${this.tags}</div>` : ""}
+              ${this.multiple ? x`<div part="tags" class="select__tags">${this.tags}</div>` : ""}
 
               <input
                 class="select__value-input"
@@ -13529,9 +12064,7 @@ var SlSelect = class extends ShoelaceElement {
                 @invalid=${this.handleInvalid}
               />
 
-              ${
-								hasClearIcon
-									? ke$1`
+              ${hasClearIcon ? x`
                     <button
                       part="clear-button"
                       class="select__clear"
@@ -13545,9 +12078,7 @@ var SlSelect = class extends ShoelaceElement {
                         <sl-icon name="x-circle-fill" library="system"></sl-icon>
                       </slot>
                     </button>
-                  `
-									: ""
-							}
+                  ` : ""}
 
               <slot name="expand-icon" part="expand-icon" class="select__expand-icon">
                 <sl-icon library="system" name="chevron-down"></sl-icon>
@@ -13580,95 +12111,130 @@ var SlSelect = class extends ShoelaceElement {
           <slot name="help-text">${this.helpText}</slot>
         </div>
       </div>
-    `
-	}
-}
-SlSelect.styles = [component_styles_default, form_control_styles_default, select_styles_default]
+    `;
+  }
+};
+SlSelect.styles = [component_styles_default, form_control_styles_default, select_styles_default];
 SlSelect.dependencies = {
-	"sl-icon": SlIcon,
-	"sl-popup": SlPopup,
-	"sl-tag": SlTag,
-}
-__decorateClass([e$1(".select")], SlSelect.prototype, "popup", 2)
-__decorateClass([e$1(".select__combobox")], SlSelect.prototype, "combobox", 2)
-__decorateClass([e$1(".select__display-input")], SlSelect.prototype, "displayInput", 2)
-__decorateClass([e$1(".select__value-input")], SlSelect.prototype, "valueInput", 2)
-__decorateClass([e$1(".select__listbox")], SlSelect.prototype, "listbox", 2)
-__decorateClass([r()], SlSelect.prototype, "hasFocus", 2)
-__decorateClass([r()], SlSelect.prototype, "displayLabel", 2)
-__decorateClass([r()], SlSelect.prototype, "currentOption", 2)
-__decorateClass([r()], SlSelect.prototype, "selectedOptions", 2)
-__decorateClass([n()], SlSelect.prototype, "name", 2)
-__decorateClass(
-	[
-		n({
-			converter: {
-				fromAttribute: (value) => value.split(" "),
-				toAttribute: (value) => value.join(" "),
-			},
-		}),
-	],
-	SlSelect.prototype,
-	"value",
-	2
-)
-__decorateClass([defaultValue()], SlSelect.prototype, "defaultValue", 2)
-__decorateClass([n({ reflect: true })], SlSelect.prototype, "size", 2)
-__decorateClass([n()], SlSelect.prototype, "placeholder", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlSelect.prototype, "multiple", 2)
-__decorateClass(
-	[n({ attribute: "max-options-visible", type: Number })],
-	SlSelect.prototype,
-	"maxOptionsVisible",
-	2
-)
-__decorateClass([n({ type: Boolean, reflect: true })], SlSelect.prototype, "disabled", 2)
-__decorateClass([n({ type: Boolean })], SlSelect.prototype, "clearable", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlSelect.prototype, "open", 2)
-__decorateClass([n({ type: Boolean })], SlSelect.prototype, "hoist", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlSelect.prototype, "filled", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlSelect.prototype, "pill", 2)
-__decorateClass([n()], SlSelect.prototype, "label", 2)
-__decorateClass([n({ reflect: true })], SlSelect.prototype, "placement", 2)
-__decorateClass([n({ attribute: "help-text" })], SlSelect.prototype, "helpText", 2)
-__decorateClass([n({ reflect: true })], SlSelect.prototype, "form", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlSelect.prototype, "required", 2)
-__decorateClass([n()], SlSelect.prototype, "getTag", 2)
-__decorateClass(
-	[watch("disabled", { waitUntilFirstUpdate: true })],
-	SlSelect.prototype,
-	"handleDisabledChange",
-	1
-)
-__decorateClass(
-	[watch("value", { waitUntilFirstUpdate: true })],
-	SlSelect.prototype,
-	"handleValueChange",
-	1
-)
-__decorateClass(
-	[watch("open", { waitUntilFirstUpdate: true })],
-	SlSelect.prototype,
-	"handleOpenChange",
-	1
-)
+  "sl-icon": SlIcon,
+  "sl-popup": SlPopup,
+  "sl-tag": SlTag
+};
+__decorateClass([
+  e$4(".select")
+], SlSelect.prototype, "popup", 2);
+__decorateClass([
+  e$4(".select__combobox")
+], SlSelect.prototype, "combobox", 2);
+__decorateClass([
+  e$4(".select__display-input")
+], SlSelect.prototype, "displayInput", 2);
+__decorateClass([
+  e$4(".select__value-input")
+], SlSelect.prototype, "valueInput", 2);
+__decorateClass([
+  e$4(".select__listbox")
+], SlSelect.prototype, "listbox", 2);
+__decorateClass([
+  r()
+], SlSelect.prototype, "hasFocus", 2);
+__decorateClass([
+  r()
+], SlSelect.prototype, "displayLabel", 2);
+__decorateClass([
+  r()
+], SlSelect.prototype, "currentOption", 2);
+__decorateClass([
+  r()
+], SlSelect.prototype, "selectedOptions", 2);
+__decorateClass([
+  n$1()
+], SlSelect.prototype, "name", 2);
+__decorateClass([
+  n$1({
+    converter: {
+      fromAttribute: (value) => value.split(" "),
+      toAttribute: (value) => value.join(" ")
+    }
+  })
+], SlSelect.prototype, "value", 2);
+__decorateClass([
+  defaultValue()
+], SlSelect.prototype, "defaultValue", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlSelect.prototype, "size", 2);
+__decorateClass([
+  n$1()
+], SlSelect.prototype, "placeholder", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlSelect.prototype, "multiple", 2);
+__decorateClass([
+  n$1({ attribute: "max-options-visible", type: Number })
+], SlSelect.prototype, "maxOptionsVisible", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlSelect.prototype, "disabled", 2);
+__decorateClass([
+  n$1({ type: Boolean })
+], SlSelect.prototype, "clearable", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlSelect.prototype, "open", 2);
+__decorateClass([
+  n$1({ type: Boolean })
+], SlSelect.prototype, "hoist", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlSelect.prototype, "filled", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlSelect.prototype, "pill", 2);
+__decorateClass([
+  n$1()
+], SlSelect.prototype, "label", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlSelect.prototype, "placement", 2);
+__decorateClass([
+  n$1({ attribute: "help-text" })
+], SlSelect.prototype, "helpText", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlSelect.prototype, "form", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlSelect.prototype, "required", 2);
+__decorateClass([
+  n$1()
+], SlSelect.prototype, "getTag", 2);
+__decorateClass([
+  watch("disabled", { waitUntilFirstUpdate: true })
+], SlSelect.prototype, "handleDisabledChange", 1);
+__decorateClass([
+  watch("value", { waitUntilFirstUpdate: true })
+], SlSelect.prototype, "handleValueChange", 1);
+__decorateClass([
+  watch("open", { waitUntilFirstUpdate: true })
+], SlSelect.prototype, "handleOpenChange", 1);
 setDefaultAnimation("select.show", {
-	keyframes: [
-		{ opacity: 0, scale: 0.9 },
-		{ opacity: 1, scale: 1 },
-	],
-	options: { duration: 100, easing: "ease" },
-})
+  keyframes: [
+    { opacity: 0, scale: 0.9 },
+    { opacity: 1, scale: 1 }
+  ],
+  options: { duration: 100, easing: "ease" }
+});
 setDefaultAnimation("select.hide", {
-	keyframes: [
-		{ opacity: 1, scale: 1 },
-		{ opacity: 0, scale: 0.9 },
-	],
-	options: { duration: 100, easing: "ease" },
-})
+  keyframes: [
+    { opacity: 1, scale: 1 },
+    { opacity: 0, scale: 0.9 }
+  ],
+  options: { duration: 100, easing: "ease" }
+});
 
 // src/components/option/option.styles.ts
-var option_styles_default = i$2`
+var option_styles_default = i$5`
   :host {
     display: block;
     user-select: none;
@@ -13752,86 +12318,83 @@ var option_styles_default = i$2`
       outline-offset: -1px;
     }
   }
-`
+`;
 
 var SlOption = class extends ShoelaceElement {
-	constructor() {
-		super(...arguments)
-		// @ts-expect-error - Controller is currently unused
-		this.localize = new LocalizeController(this)
-		this.current = false
-		this.selected = false
-		this.hasHover = false
-		this.value = ""
-		this.disabled = false
-	}
-	connectedCallback() {
-		super.connectedCallback()
-		this.setAttribute("role", "option")
-		this.setAttribute("aria-selected", "false")
-	}
-	handleDefaultSlotChange() {
-		const textLabel = this.getTextLabel()
-		if (typeof this.cachedTextLabel === "undefined") {
-			this.cachedTextLabel = textLabel
-			return
-		}
-		if (textLabel !== this.cachedTextLabel) {
-			this.cachedTextLabel = textLabel
-			this.emit("slotchange", { bubbles: true, composed: false, cancelable: false })
-		}
-	}
-	handleMouseEnter() {
-		this.hasHover = true
-	}
-	handleMouseLeave() {
-		this.hasHover = false
-	}
-	handleDisabledChange() {
-		this.setAttribute("aria-disabled", this.disabled ? "true" : "false")
-	}
-	handleSelectedChange() {
-		this.setAttribute("aria-selected", this.selected ? "true" : "false")
-	}
-	handleValueChange() {
-		if (typeof this.value !== "string") {
-			this.value = String(this.value)
-		}
-		if (this.value.includes(" ")) {
-			console.error(
-				`Option values cannot include a space. All spaces have been replaced with underscores.`,
-				this
-			)
-			this.value = this.value.replace(/ /g, "_")
-		}
-	}
-	/** Returns a plain text label based on the option's content. */
-	getTextLabel() {
-		const nodes = this.childNodes
-		let label = ""
-		;[...nodes].forEach((node) => {
-			if (node.nodeType === Node.ELEMENT_NODE) {
-				if (!node.hasAttribute("slot")) {
-					label += node.textContent
-				}
-			}
-			if (node.nodeType === Node.TEXT_NODE) {
-				label += node.textContent
-			}
-		})
-		return label.trim()
-	}
-	render() {
-		return ke$1`
+  constructor() {
+    super(...arguments);
+    // @ts-expect-error - Controller is currently unused
+    this.localize = new LocalizeController(this);
+    this.current = false;
+    this.selected = false;
+    this.hasHover = false;
+    this.value = "";
+    this.disabled = false;
+  }
+  connectedCallback() {
+    super.connectedCallback();
+    this.setAttribute("role", "option");
+    this.setAttribute("aria-selected", "false");
+  }
+  handleDefaultSlotChange() {
+    const textLabel = this.getTextLabel();
+    if (typeof this.cachedTextLabel === "undefined") {
+      this.cachedTextLabel = textLabel;
+      return;
+    }
+    if (textLabel !== this.cachedTextLabel) {
+      this.cachedTextLabel = textLabel;
+      this.emit("slotchange", { bubbles: true, composed: false, cancelable: false });
+    }
+  }
+  handleMouseEnter() {
+    this.hasHover = true;
+  }
+  handleMouseLeave() {
+    this.hasHover = false;
+  }
+  handleDisabledChange() {
+    this.setAttribute("aria-disabled", this.disabled ? "true" : "false");
+  }
+  handleSelectedChange() {
+    this.setAttribute("aria-selected", this.selected ? "true" : "false");
+  }
+  handleValueChange() {
+    if (typeof this.value !== "string") {
+      this.value = String(this.value);
+    }
+    if (this.value.includes(" ")) {
+      console.error(`Option values cannot include a space. All spaces have been replaced with underscores.`, this);
+      this.value = this.value.replace(/ /g, "_");
+    }
+  }
+  /** Returns a plain text label based on the option's content. */
+  getTextLabel() {
+    const nodes = this.childNodes;
+    let label = "";
+    [...nodes].forEach((node) => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        if (!node.hasAttribute("slot")) {
+          label += node.textContent;
+        }
+      }
+      if (node.nodeType === Node.TEXT_NODE) {
+        label += node.textContent;
+      }
+    });
+    return label.trim();
+  }
+  render() {
+    return x`
       <div
         part="base"
-        class=${Rt({
-					option: true,
-					"option--current": this.current,
-					"option--disabled": this.disabled,
-					"option--selected": this.selected,
-					"option--hover": this.hasHover,
-				})}
+        class=${e$1({
+      option: true,
+      "option--current": this.current,
+      "option--disabled": this.disabled,
+      "option--selected": this.selected,
+      "option--hover": this.hasHover
+    })}
         @mouseenter=${this.handleMouseEnter}
         @mouseleave=${this.handleMouseLeave}
       >
@@ -13840,23 +12403,41 @@ var SlOption = class extends ShoelaceElement {
         <slot part="label" class="option__label" @slotchange=${this.handleDefaultSlotChange}></slot>
         <slot part="suffix" name="suffix" class="option__suffix"></slot>
       </div>
-    `
-	}
-}
-SlOption.styles = [component_styles_default, option_styles_default]
-SlOption.dependencies = { "sl-icon": SlIcon }
-__decorateClass([e$1(".option__label")], SlOption.prototype, "defaultSlot", 2)
-__decorateClass([r()], SlOption.prototype, "current", 2)
-__decorateClass([r()], SlOption.prototype, "selected", 2)
-__decorateClass([r()], SlOption.prototype, "hasHover", 2)
-__decorateClass([n({ reflect: true })], SlOption.prototype, "value", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlOption.prototype, "disabled", 2)
-__decorateClass([watch("disabled")], SlOption.prototype, "handleDisabledChange", 1)
-__decorateClass([watch("selected")], SlOption.prototype, "handleSelectedChange", 1)
-__decorateClass([watch("value")], SlOption.prototype, "handleValueChange", 1)
+    `;
+  }
+};
+SlOption.styles = [component_styles_default, option_styles_default];
+SlOption.dependencies = { "sl-icon": SlIcon };
+__decorateClass([
+  e$4(".option__label")
+], SlOption.prototype, "defaultSlot", 2);
+__decorateClass([
+  r()
+], SlOption.prototype, "current", 2);
+__decorateClass([
+  r()
+], SlOption.prototype, "selected", 2);
+__decorateClass([
+  r()
+], SlOption.prototype, "hasHover", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlOption.prototype, "value", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlOption.prototype, "disabled", 2);
+__decorateClass([
+  watch("disabled")
+], SlOption.prototype, "handleDisabledChange", 1);
+__decorateClass([
+  watch("selected")
+], SlOption.prototype, "handleSelectedChange", 1);
+__decorateClass([
+  watch("value")
+], SlOption.prototype, "handleValueChange", 1);
 
 // src/components/input/input.styles.ts
-var input_styles_default = i$2`
+var input_styles_default = i$5`
   :host {
     display: block;
   }
@@ -14150,247 +12731,219 @@ var input_styles_default = i$2`
   .input--no-spin-buttons input[type='number'] {
     -moz-appearance: textfield;
   }
-`
+`;
 
 /**
  * @license
  * Copyright 2020 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */ const Ft = e(
-	class extends i {
-		constructor(r) {
-			if (
-				(super(r),
-				r.type !== t.PROPERTY && r.type !== t.ATTRIBUTE && r.type !== t.BOOLEAN_ATTRIBUTE)
-			)
-				throw Error("The `live` directive is not allowed on child or event bindings")
-			if (!rt(r)) throw Error("`live` bindings can only contain a single expression")
-		}
-		render(r) {
-			return r
-		}
-		update(r, [e]) {
-			if (e === R || e === D) return e
-			const i = r.element,
-				n = r.name
-			if (r.type === t.PROPERTY) {
-				if (e === i[n]) return R
-			} else if (r.type === t.BOOLEAN_ATTRIBUTE) {
-				if (!!e === i.hasAttribute(n)) return R
-			} else if (r.type === t.ATTRIBUTE && i.getAttribute(n) === e + "") return R
-			return dt(r), e
-		}
-	}
-)
+ */const l=e$2(class extends i$1{constructor(r){if(super(r),r.type!==t.PROPERTY&&r.type!==t.ATTRIBUTE&&r.type!==t.BOOLEAN_ATTRIBUTE)throw Error("The `live` directive is not allowed on child or event bindings");if(!f(r))throw Error("`live` bindings can only contain a single expression")}render(r){return r}update(i,[t$1]){if(t$1===T||t$1===E)return t$1;const o=i.element,l=i.name;if(i.type===t.PROPERTY){if(t$1===o[l])return T}else if(i.type===t.BOOLEAN_ATTRIBUTE){if(!!t$1===o.hasAttribute(l))return T}else if(i.type===t.ATTRIBUTE&&o.getAttribute(l)===t$1+"")return T;return m(i),t$1}});
 
 var SlInput = class extends ShoelaceElement {
-	constructor() {
-		super(...arguments)
-		this.formControlController = new FormControlController(this, {
-			assumeInteractionOn: ["sl-blur", "sl-input"],
-		})
-		this.hasSlotController = new HasSlotController(this, "help-text", "label")
-		this.localize = new LocalizeController(this)
-		this.hasFocus = false
-		this.title = ""
-		// make reactive to pass through
-		this.__numberInput = Object.assign(document.createElement("input"), { type: "number" })
-		this.__dateInput = Object.assign(document.createElement("input"), { type: "date" })
-		this.type = "text"
-		this.name = ""
-		this.value = ""
-		this.defaultValue = ""
-		this.size = "medium"
-		this.filled = false
-		this.pill = false
-		this.label = ""
-		this.helpText = ""
-		this.clearable = false
-		this.disabled = false
-		this.placeholder = ""
-		this.readonly = false
-		this.passwordToggle = false
-		this.passwordVisible = false
-		this.noSpinButtons = false
-		this.form = ""
-		this.required = false
-		this.spellcheck = true
-	}
-	//
-	// NOTE: We use an in-memory input for these getters/setters instead of the one in the template because the properties
-	// can be set before the component is rendered.
-	//
-	/**
-	 * Gets or sets the current value as a `Date` object. Returns `null` if the value can't be converted. This will use the native `<input type="{{type}}">` implementation and may result in an error.
-	 */
-	get valueAsDate() {
-		var _a
-		this.__dateInput.type = this.type
-		this.__dateInput.value = this.value
-		return ((_a = this.input) == null ? void 0 : _a.valueAsDate) || this.__dateInput.valueAsDate
-	}
-	set valueAsDate(newValue) {
-		this.__dateInput.type = this.type
-		this.__dateInput.valueAsDate = newValue
-		this.value = this.__dateInput.value
-	}
-	/** Gets or sets the current value as a number. Returns `NaN` if the value can't be converted. */
-	get valueAsNumber() {
-		var _a
-		this.__numberInput.value = this.value
-		return (
-			((_a = this.input) == null ? void 0 : _a.valueAsNumber) || this.__numberInput.valueAsNumber
-		)
-	}
-	set valueAsNumber(newValue) {
-		this.__numberInput.valueAsNumber = newValue
-		this.value = this.__numberInput.value
-	}
-	/** Gets the validity state object */
-	get validity() {
-		return this.input.validity
-	}
-	/** Gets the validation message */
-	get validationMessage() {
-		return this.input.validationMessage
-	}
-	firstUpdated() {
-		this.formControlController.updateValidity()
-	}
-	handleBlur() {
-		this.hasFocus = false
-		this.emit("sl-blur")
-	}
-	handleChange() {
-		this.value = this.input.value
-		this.emit("sl-change")
-	}
-	handleClearClick(event) {
-		this.value = ""
-		this.emit("sl-clear")
-		this.emit("sl-input")
-		this.emit("sl-change")
-		this.input.focus()
-		event.stopPropagation()
-	}
-	handleFocus() {
-		this.hasFocus = true
-		this.emit("sl-focus")
-	}
-	handleInput() {
-		this.value = this.input.value
-		this.formControlController.updateValidity()
-		this.emit("sl-input")
-	}
-	handleInvalid(event) {
-		this.formControlController.setValidity(false)
-		this.formControlController.emitInvalidEvent(event)
-	}
-	handleKeyDown(event) {
-		const hasModifier = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey
-		if (event.key === "Enter" && !hasModifier) {
-			setTimeout(() => {
-				if (!event.defaultPrevented && !event.isComposing) {
-					this.formControlController.submit()
-				}
-			})
-		}
-	}
-	handlePasswordToggle() {
-		this.passwordVisible = !this.passwordVisible
-	}
-	handleDisabledChange() {
-		this.formControlController.setValidity(this.disabled)
-	}
-	handleStepChange() {
-		this.input.step = String(this.step)
-		this.formControlController.updateValidity()
-	}
-	async handleValueChange() {
-		await this.updateComplete
-		this.formControlController.updateValidity()
-	}
-	/** Sets focus on the input. */
-	focus(options) {
-		this.input.focus(options)
-	}
-	/** Removes focus from the input. */
-	blur() {
-		this.input.blur()
-	}
-	/** Selects all the text in the input. */
-	select() {
-		this.input.select()
-	}
-	/** Sets the start and end positions of the text selection (0-based). */
-	setSelectionRange(selectionStart, selectionEnd, selectionDirection = "none") {
-		this.input.setSelectionRange(selectionStart, selectionEnd, selectionDirection)
-	}
-	/** Replaces a range of text with a new string. */
-	setRangeText(replacement, start, end, selectMode = "preserve") {
-		const selectionStart = start != null ? start : this.input.selectionStart
-		const selectionEnd = end != null ? end : this.input.selectionEnd
-		this.input.setRangeText(replacement, selectionStart, selectionEnd, selectMode)
-		if (this.value !== this.input.value) {
-			this.value = this.input.value
-		}
-	}
-	/** Displays the browser picker for an input element (only works if the browser supports it for the input type). */
-	showPicker() {
-		if ("showPicker" in HTMLInputElement.prototype) {
-			this.input.showPicker()
-		}
-	}
-	/** Increments the value of a numeric input type by the value of the step attribute. */
-	stepUp() {
-		this.input.stepUp()
-		if (this.value !== this.input.value) {
-			this.value = this.input.value
-		}
-	}
-	/** Decrements the value of a numeric input type by the value of the step attribute. */
-	stepDown() {
-		this.input.stepDown()
-		if (this.value !== this.input.value) {
-			this.value = this.input.value
-		}
-	}
-	/** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
-	checkValidity() {
-		return this.input.checkValidity()
-	}
-	/** Gets the associated form, if one exists. */
-	getForm() {
-		return this.formControlController.getForm()
-	}
-	/** Checks for validity and shows the browser's validation message if the control is invalid. */
-	reportValidity() {
-		return this.input.reportValidity()
-	}
-	/** Sets a custom validation message. Pass an empty string to restore validity. */
-	setCustomValidity(message) {
-		this.input.setCustomValidity(message)
-		this.formControlController.updateValidity()
-	}
-	render() {
-		const hasLabelSlot = this.hasSlotController.test("label")
-		const hasHelpTextSlot = this.hasSlotController.test("help-text")
-		const hasLabel = this.label ? true : !!hasLabelSlot
-		const hasHelpText = this.helpText ? true : !!hasHelpTextSlot
-		const hasClearIcon = this.clearable && !this.disabled && !this.readonly
-		const isClearIconVisible =
-			hasClearIcon && (typeof this.value === "number" || this.value.length > 0)
-		return ke$1`
+  constructor() {
+    super(...arguments);
+    this.formControlController = new FormControlController(this, {
+      assumeInteractionOn: ["sl-blur", "sl-input"]
+    });
+    this.hasSlotController = new HasSlotController(this, "help-text", "label");
+    this.localize = new LocalizeController(this);
+    this.hasFocus = false;
+    this.title = "";
+    // make reactive to pass through
+    this.__numberInput = Object.assign(document.createElement("input"), { type: "number" });
+    this.__dateInput = Object.assign(document.createElement("input"), { type: "date" });
+    this.type = "text";
+    this.name = "";
+    this.value = "";
+    this.defaultValue = "";
+    this.size = "medium";
+    this.filled = false;
+    this.pill = false;
+    this.label = "";
+    this.helpText = "";
+    this.clearable = false;
+    this.disabled = false;
+    this.placeholder = "";
+    this.readonly = false;
+    this.passwordToggle = false;
+    this.passwordVisible = false;
+    this.noSpinButtons = false;
+    this.form = "";
+    this.required = false;
+    this.spellcheck = true;
+  }
+  //
+  // NOTE: We use an in-memory input for these getters/setters instead of the one in the template because the properties
+  // can be set before the component is rendered.
+  //
+  /**
+   * Gets or sets the current value as a `Date` object. Returns `null` if the value can't be converted. This will use the native `<input type="{{type}}">` implementation and may result in an error.
+   */
+  get valueAsDate() {
+    var _a;
+    this.__dateInput.type = this.type;
+    this.__dateInput.value = this.value;
+    return ((_a = this.input) == null ? void 0 : _a.valueAsDate) || this.__dateInput.valueAsDate;
+  }
+  set valueAsDate(newValue) {
+    this.__dateInput.type = this.type;
+    this.__dateInput.valueAsDate = newValue;
+    this.value = this.__dateInput.value;
+  }
+  /** Gets or sets the current value as a number. Returns `NaN` if the value can't be converted. */
+  get valueAsNumber() {
+    var _a;
+    this.__numberInput.value = this.value;
+    return ((_a = this.input) == null ? void 0 : _a.valueAsNumber) || this.__numberInput.valueAsNumber;
+  }
+  set valueAsNumber(newValue) {
+    this.__numberInput.valueAsNumber = newValue;
+    this.value = this.__numberInput.value;
+  }
+  /** Gets the validity state object */
+  get validity() {
+    return this.input.validity;
+  }
+  /** Gets the validation message */
+  get validationMessage() {
+    return this.input.validationMessage;
+  }
+  firstUpdated() {
+    this.formControlController.updateValidity();
+  }
+  handleBlur() {
+    this.hasFocus = false;
+    this.emit("sl-blur");
+  }
+  handleChange() {
+    this.value = this.input.value;
+    this.emit("sl-change");
+  }
+  handleClearClick(event) {
+    this.value = "";
+    this.emit("sl-clear");
+    this.emit("sl-input");
+    this.emit("sl-change");
+    this.input.focus();
+    event.stopPropagation();
+  }
+  handleFocus() {
+    this.hasFocus = true;
+    this.emit("sl-focus");
+  }
+  handleInput() {
+    this.value = this.input.value;
+    this.formControlController.updateValidity();
+    this.emit("sl-input");
+  }
+  handleInvalid(event) {
+    this.formControlController.setValidity(false);
+    this.formControlController.emitInvalidEvent(event);
+  }
+  handleKeyDown(event) {
+    const hasModifier = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+    if (event.key === "Enter" && !hasModifier) {
+      setTimeout(() => {
+        if (!event.defaultPrevented && !event.isComposing) {
+          this.formControlController.submit();
+        }
+      });
+    }
+  }
+  handlePasswordToggle() {
+    this.passwordVisible = !this.passwordVisible;
+  }
+  handleDisabledChange() {
+    this.formControlController.setValidity(this.disabled);
+  }
+  handleStepChange() {
+    this.input.step = String(this.step);
+    this.formControlController.updateValidity();
+  }
+  async handleValueChange() {
+    await this.updateComplete;
+    this.formControlController.updateValidity();
+  }
+  /** Sets focus on the input. */
+  focus(options) {
+    this.input.focus(options);
+  }
+  /** Removes focus from the input. */
+  blur() {
+    this.input.blur();
+  }
+  /** Selects all the text in the input. */
+  select() {
+    this.input.select();
+  }
+  /** Sets the start and end positions of the text selection (0-based). */
+  setSelectionRange(selectionStart, selectionEnd, selectionDirection = "none") {
+    this.input.setSelectionRange(selectionStart, selectionEnd, selectionDirection);
+  }
+  /** Replaces a range of text with a new string. */
+  setRangeText(replacement, start, end, selectMode = "preserve") {
+    const selectionStart = start != null ? start : this.input.selectionStart;
+    const selectionEnd = end != null ? end : this.input.selectionEnd;
+    this.input.setRangeText(replacement, selectionStart, selectionEnd, selectMode);
+    if (this.value !== this.input.value) {
+      this.value = this.input.value;
+    }
+  }
+  /** Displays the browser picker for an input element (only works if the browser supports it for the input type). */
+  showPicker() {
+    if ("showPicker" in HTMLInputElement.prototype) {
+      this.input.showPicker();
+    }
+  }
+  /** Increments the value of a numeric input type by the value of the step attribute. */
+  stepUp() {
+    this.input.stepUp();
+    if (this.value !== this.input.value) {
+      this.value = this.input.value;
+    }
+  }
+  /** Decrements the value of a numeric input type by the value of the step attribute. */
+  stepDown() {
+    this.input.stepDown();
+    if (this.value !== this.input.value) {
+      this.value = this.input.value;
+    }
+  }
+  /** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
+  checkValidity() {
+    return this.input.checkValidity();
+  }
+  /** Gets the associated form, if one exists. */
+  getForm() {
+    return this.formControlController.getForm();
+  }
+  /** Checks for validity and shows the browser's validation message if the control is invalid. */
+  reportValidity() {
+    return this.input.reportValidity();
+  }
+  /** Sets a custom validation message. Pass an empty string to restore validity. */
+  setCustomValidity(message) {
+    this.input.setCustomValidity(message);
+    this.formControlController.updateValidity();
+  }
+  render() {
+    const hasLabelSlot = this.hasSlotController.test("label");
+    const hasHelpTextSlot = this.hasSlotController.test("help-text");
+    const hasLabel = this.label ? true : !!hasLabelSlot;
+    const hasHelpText = this.helpText ? true : !!hasHelpTextSlot;
+    const hasClearIcon = this.clearable && !this.disabled && !this.readonly;
+    const isClearIconVisible = hasClearIcon && (typeof this.value === "number" || this.value.length > 0);
+    return x`
       <div
         part="form-control"
-        class=${Rt({
-					"form-control": true,
-					"form-control--small": this.size === "small",
-					"form-control--medium": this.size === "medium",
-					"form-control--large": this.size === "large",
-					"form-control--has-label": hasLabel,
-					"form-control--has-help-text": hasHelpText,
-				})}
+        class=${e$1({
+      "form-control": true,
+      "form-control--small": this.size === "small",
+      "form-control--medium": this.size === "medium",
+      "form-control--large": this.size === "large",
+      "form-control--has-label": hasLabel,
+      "form-control--has-help-text": hasHelpText
+    })}
       >
         <label
           part="form-control-label"
@@ -14404,21 +12957,21 @@ var SlInput = class extends ShoelaceElement {
         <div part="form-control-input" class="form-control-input">
           <div
             part="base"
-            class=${Rt({
-							input: true,
-							// Sizes
-							"input--small": this.size === "small",
-							"input--medium": this.size === "medium",
-							"input--large": this.size === "large",
-							// States
-							"input--pill": this.pill,
-							"input--standard": !this.filled,
-							"input--filled": this.filled,
-							"input--disabled": this.disabled,
-							"input--focused": this.hasFocus,
-							"input--empty": !this.value,
-							"input--no-spin-buttons": this.noSpinButtons,
-						})}
+            class=${e$1({
+      input: true,
+      // Sizes
+      "input--small": this.size === "small",
+      "input--medium": this.size === "medium",
+      "input--large": this.size === "large",
+      // States
+      "input--pill": this.pill,
+      "input--standard": !this.filled,
+      "input--filled": this.filled,
+      "input--disabled": this.disabled,
+      "input--focused": this.hasFocus,
+      "input--empty": !this.value,
+      "input--no-spin-buttons": this.noSpinButtons
+    })}
           >
             <span part="prefix" class="input__prefix">
               <slot name="prefix"></slot>
@@ -14430,25 +12983,25 @@ var SlInput = class extends ShoelaceElement {
               class="input__control"
               type=${this.type === "password" && this.passwordVisible ? "text" : this.type}
               title=${this.title}
-              name=${to(this.name)}
+              name=${o$1(this.name)}
               ?disabled=${this.disabled}
               ?readonly=${this.readonly}
               ?required=${this.required}
-              placeholder=${to(this.placeholder)}
-              minlength=${to(this.minlength)}
-              maxlength=${to(this.maxlength)}
-              min=${to(this.min)}
-              max=${to(this.max)}
-              step=${to(this.step)}
-              .value=${Ft(this.value)}
-              autocapitalize=${to(this.autocapitalize)}
-              autocomplete=${to(this.autocomplete)}
-              autocorrect=${to(this.autocorrect)}
+              placeholder=${o$1(this.placeholder)}
+              minlength=${o$1(this.minlength)}
+              maxlength=${o$1(this.maxlength)}
+              min=${o$1(this.min)}
+              max=${o$1(this.max)}
+              step=${o$1(this.step)}
+              .value=${l(this.value)}
+              autocapitalize=${o$1(this.autocapitalize)}
+              autocomplete=${o$1(this.autocomplete)}
+              autocorrect=${o$1(this.autocorrect)}
               ?autofocus=${this.autofocus}
               spellcheck=${this.spellcheck}
-              pattern=${to(this.pattern)}
-              enterkeyhint=${to(this.enterkeyhint)}
-              inputmode=${to(this.inputmode)}
+              pattern=${o$1(this.pattern)}
+              enterkeyhint=${o$1(this.enterkeyhint)}
+              inputmode=${o$1(this.inputmode)}
               aria-describedby="help-text"
               @change=${this.handleChange}
               @input=${this.handleInput}
@@ -14458,15 +13011,13 @@ var SlInput = class extends ShoelaceElement {
               @blur=${this.handleBlur}
             />
 
-            ${
-							hasClearIcon
-								? ke$1`
+            ${hasClearIcon ? x`
                   <button
                     part="clear-button"
-                    class=${Rt({
-											input__clear: true,
-											"input__clear--visible": isClearIconVisible,
-										})}
+                    class=${e$1({
+      input__clear: true,
+      "input__clear--visible": isClearIconVisible
+    })}
                     type="button"
                     aria-label=${this.localize.term("clearEntry")}
                     @click=${this.handleClearClick}
@@ -14476,12 +13027,8 @@ var SlInput = class extends ShoelaceElement {
                       <sl-icon name="x-circle-fill" library="system"></sl-icon>
                     </slot>
                   </button>
-                `
-								: ""
-						}
-            ${
-							this.passwordToggle && !this.disabled
-								? ke$1`
+                ` : ""}
+            ${this.passwordToggle && !this.disabled ? x`
                   <button
                     part="password-toggle-button"
                     class="input__password-toggle"
@@ -14490,23 +13037,17 @@ var SlInput = class extends ShoelaceElement {
                     @click=${this.handlePasswordToggle}
                     tabindex="-1"
                   >
-                    ${
-											this.passwordVisible
-												? ke$1`
+                    ${this.passwordVisible ? x`
                           <slot name="show-password-icon">
                             <sl-icon name="eye-slash" library="system"></sl-icon>
                           </slot>
-                        `
-												: ke$1`
+                        ` : x`
                           <slot name="hide-password-icon">
                             <sl-icon name="eye" library="system"></sl-icon>
                           </slot>
-                        `
-										}
+                        `}
                   </button>
-                `
-								: ""
-						}
+                ` : ""}
 
             <span part="suffix" class="input__suffix">
               <slot name="suffix"></slot>
@@ -14523,95 +13064,132 @@ var SlInput = class extends ShoelaceElement {
           <slot name="help-text">${this.helpText}</slot>
         </div>
       </div>
-    `
-	}
-}
-SlInput.styles = [component_styles_default, form_control_styles_default, input_styles_default]
-SlInput.dependencies = { "sl-icon": SlIcon }
-__decorateClass([e$1(".input__control")], SlInput.prototype, "input", 2)
-__decorateClass([r()], SlInput.prototype, "hasFocus", 2)
-__decorateClass([n()], SlInput.prototype, "title", 2)
-__decorateClass([n({ reflect: true })], SlInput.prototype, "type", 2)
-__decorateClass([n()], SlInput.prototype, "name", 2)
-__decorateClass([n()], SlInput.prototype, "value", 2)
-__decorateClass([defaultValue()], SlInput.prototype, "defaultValue", 2)
-__decorateClass([n({ reflect: true })], SlInput.prototype, "size", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlInput.prototype, "filled", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlInput.prototype, "pill", 2)
-__decorateClass([n()], SlInput.prototype, "label", 2)
-__decorateClass([n({ attribute: "help-text" })], SlInput.prototype, "helpText", 2)
-__decorateClass([n({ type: Boolean })], SlInput.prototype, "clearable", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlInput.prototype, "disabled", 2)
-__decorateClass([n()], SlInput.prototype, "placeholder", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlInput.prototype, "readonly", 2)
-__decorateClass(
-	[n({ attribute: "password-toggle", type: Boolean })],
-	SlInput.prototype,
-	"passwordToggle",
-	2
-)
-__decorateClass(
-	[n({ attribute: "password-visible", type: Boolean })],
-	SlInput.prototype,
-	"passwordVisible",
-	2
-)
-__decorateClass(
-	[n({ attribute: "no-spin-buttons", type: Boolean })],
-	SlInput.prototype,
-	"noSpinButtons",
-	2
-)
-__decorateClass([n({ reflect: true })], SlInput.prototype, "form", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlInput.prototype, "required", 2)
-__decorateClass([n()], SlInput.prototype, "pattern", 2)
-__decorateClass([n({ type: Number })], SlInput.prototype, "minlength", 2)
-__decorateClass([n({ type: Number })], SlInput.prototype, "maxlength", 2)
-__decorateClass([n()], SlInput.prototype, "min", 2)
-__decorateClass([n()], SlInput.prototype, "max", 2)
-__decorateClass([n()], SlInput.prototype, "step", 2)
-__decorateClass([n()], SlInput.prototype, "autocapitalize", 2)
-__decorateClass([n()], SlInput.prototype, "autocorrect", 2)
-__decorateClass([n()], SlInput.prototype, "autocomplete", 2)
-__decorateClass([n({ type: Boolean })], SlInput.prototype, "autofocus", 2)
-__decorateClass([n()], SlInput.prototype, "enterkeyhint", 2)
-__decorateClass(
-	[
-		n({
-			type: Boolean,
-			converter: {
-				// Allow "true|false" attribute values but keep the property boolean
-				fromAttribute: (value) => (!value || value === "false" ? false : true),
-				toAttribute: (value) => (value ? "true" : "false"),
-			},
-		}),
-	],
-	SlInput.prototype,
-	"spellcheck",
-	2
-)
-__decorateClass([n()], SlInput.prototype, "inputmode", 2)
-__decorateClass(
-	[watch("disabled", { waitUntilFirstUpdate: true })],
-	SlInput.prototype,
-	"handleDisabledChange",
-	1
-)
-__decorateClass(
-	[watch("step", { waitUntilFirstUpdate: true })],
-	SlInput.prototype,
-	"handleStepChange",
-	1
-)
-__decorateClass(
-	[watch("value", { waitUntilFirstUpdate: true })],
-	SlInput.prototype,
-	"handleValueChange",
-	1
-)
+    `;
+  }
+};
+SlInput.styles = [component_styles_default, form_control_styles_default, input_styles_default];
+SlInput.dependencies = { "sl-icon": SlIcon };
+__decorateClass([
+  e$4(".input__control")
+], SlInput.prototype, "input", 2);
+__decorateClass([
+  r()
+], SlInput.prototype, "hasFocus", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "title", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlInput.prototype, "type", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "name", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "value", 2);
+__decorateClass([
+  defaultValue()
+], SlInput.prototype, "defaultValue", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlInput.prototype, "size", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlInput.prototype, "filled", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlInput.prototype, "pill", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "label", 2);
+__decorateClass([
+  n$1({ attribute: "help-text" })
+], SlInput.prototype, "helpText", 2);
+__decorateClass([
+  n$1({ type: Boolean })
+], SlInput.prototype, "clearable", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlInput.prototype, "disabled", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "placeholder", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlInput.prototype, "readonly", 2);
+__decorateClass([
+  n$1({ attribute: "password-toggle", type: Boolean })
+], SlInput.prototype, "passwordToggle", 2);
+__decorateClass([
+  n$1({ attribute: "password-visible", type: Boolean })
+], SlInput.prototype, "passwordVisible", 2);
+__decorateClass([
+  n$1({ attribute: "no-spin-buttons", type: Boolean })
+], SlInput.prototype, "noSpinButtons", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlInput.prototype, "form", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlInput.prototype, "required", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "pattern", 2);
+__decorateClass([
+  n$1({ type: Number })
+], SlInput.prototype, "minlength", 2);
+__decorateClass([
+  n$1({ type: Number })
+], SlInput.prototype, "maxlength", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "min", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "max", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "step", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "autocapitalize", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "autocorrect", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "autocomplete", 2);
+__decorateClass([
+  n$1({ type: Boolean })
+], SlInput.prototype, "autofocus", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "enterkeyhint", 2);
+__decorateClass([
+  n$1({
+    type: Boolean,
+    converter: {
+      // Allow "true|false" attribute values but keep the property boolean
+      fromAttribute: (value) => !value || value === "false" ? false : true,
+      toAttribute: (value) => value ? "true" : "false"
+    }
+  })
+], SlInput.prototype, "spellcheck", 2);
+__decorateClass([
+  n$1()
+], SlInput.prototype, "inputmode", 2);
+__decorateClass([
+  watch("disabled", { waitUntilFirstUpdate: true })
+], SlInput.prototype, "handleDisabledChange", 1);
+__decorateClass([
+  watch("step", { waitUntilFirstUpdate: true })
+], SlInput.prototype, "handleStepChange", 1);
+__decorateClass([
+  watch("value", { waitUntilFirstUpdate: true })
+], SlInput.prototype, "handleValueChange", 1);
 
 // src/components/spinner/spinner.styles.ts
-var spinner_styles_default = i$2`
+var spinner_styles_default = i$5`
   :host {
     --track-width: 2px;
     --track-color: rgb(128 128 128 / 25%);
@@ -14668,26 +13246,26 @@ var spinner_styles_default = i$2`
       stroke-dasharray: 0.05em, 3em;
     }
   }
-`
+`;
 
 var SlSpinner = class extends ShoelaceElement {
-	constructor() {
-		super(...arguments)
-		this.localize = new LocalizeController(this)
-	}
-	render() {
-		return ke$1`
+  constructor() {
+    super(...arguments);
+    this.localize = new LocalizeController(this);
+  }
+  render() {
+    return x`
       <svg part="base" class="spinner" role="progressbar" aria-label=${this.localize.term("loading")}>
         <circle class="spinner__track"></circle>
         <circle class="spinner__indicator"></circle>
       </svg>
-    `
-	}
-}
-SlSpinner.styles = [component_styles_default, spinner_styles_default]
+    `;
+  }
+};
+SlSpinner.styles = [component_styles_default, spinner_styles_default];
 
 // src/components/button/button.styles.ts
-var button_styles_default = i$2`
+var button_styles_default = i$5`
   :host {
     display: inline-block;
     position: relative;
@@ -15280,161 +13858,161 @@ var button_styles_default = i$2`
   :host(.sl-button-group__button[checked]) {
     z-index: 2;
   }
-`
+`;
 
 var SlButton = class extends ShoelaceElement {
-	constructor() {
-		super(...arguments)
-		this.formControlController = new FormControlController(this, {
-			assumeInteractionOn: ["click"],
-		})
-		this.hasSlotController = new HasSlotController(this, "[default]", "prefix", "suffix")
-		this.localize = new LocalizeController(this)
-		this.hasFocus = false
-		this.invalid = false
-		this.title = ""
-		this.variant = "default"
-		this.size = "medium"
-		this.caret = false
-		this.disabled = false
-		this.loading = false
-		this.outline = false
-		this.pill = false
-		this.circle = false
-		this.type = "button"
-		this.name = ""
-		this.value = ""
-		this.href = ""
-		this.rel = "noreferrer noopener"
-	}
-	/** Gets the validity state object */
-	get validity() {
-		if (this.isButton()) {
-			return this.button.validity
-		}
-		return validValidityState
-	}
-	/** Gets the validation message */
-	get validationMessage() {
-		if (this.isButton()) {
-			return this.button.validationMessage
-		}
-		return ""
-	}
-	firstUpdated() {
-		if (this.isButton()) {
-			this.formControlController.updateValidity()
-		}
-	}
-	handleBlur() {
-		this.hasFocus = false
-		this.emit("sl-blur")
-	}
-	handleFocus() {
-		this.hasFocus = true
-		this.emit("sl-focus")
-	}
-	handleClick() {
-		if (this.type === "submit") {
-			this.formControlController.submit(this)
-		}
-		if (this.type === "reset") {
-			this.formControlController.reset(this)
-		}
-	}
-	handleInvalid(event) {
-		this.formControlController.setValidity(false)
-		this.formControlController.emitInvalidEvent(event)
-	}
-	isButton() {
-		return this.href ? false : true
-	}
-	isLink() {
-		return this.href ? true : false
-	}
-	handleDisabledChange() {
-		if (this.isButton()) {
-			this.formControlController.setValidity(this.disabled)
-		}
-	}
-	/** Simulates a click on the button. */
-	click() {
-		this.button.click()
-	}
-	/** Sets focus on the button. */
-	focus(options) {
-		this.button.focus(options)
-	}
-	/** Removes focus from the button. */
-	blur() {
-		this.button.blur()
-	}
-	/** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
-	checkValidity() {
-		if (this.isButton()) {
-			return this.button.checkValidity()
-		}
-		return true
-	}
-	/** Gets the associated form, if one exists. */
-	getForm() {
-		return this.formControlController.getForm()
-	}
-	/** Checks for validity and shows the browser's validation message if the control is invalid. */
-	reportValidity() {
-		if (this.isButton()) {
-			return this.button.reportValidity()
-		}
-		return true
-	}
-	/** Sets a custom validation message. Pass an empty string to restore validity. */
-	setCustomValidity(message) {
-		if (this.isButton()) {
-			this.button.setCustomValidity(message)
-			this.formControlController.updateValidity()
-		}
-	}
-	render() {
-		const isLink = this.isLink()
-		const tag = isLink ? er`a` : er`button`
-		return ke`
+  constructor() {
+    super(...arguments);
+    this.formControlController = new FormControlController(this, {
+      assumeInteractionOn: ["click"]
+    });
+    this.hasSlotController = new HasSlotController(this, "[default]", "prefix", "suffix");
+    this.localize = new LocalizeController(this);
+    this.hasFocus = false;
+    this.invalid = false;
+    this.title = "";
+    this.variant = "default";
+    this.size = "medium";
+    this.caret = false;
+    this.disabled = false;
+    this.loading = false;
+    this.outline = false;
+    this.pill = false;
+    this.circle = false;
+    this.type = "button";
+    this.name = "";
+    this.value = "";
+    this.href = "";
+    this.rel = "noreferrer noopener";
+  }
+  /** Gets the validity state object */
+  get validity() {
+    if (this.isButton()) {
+      return this.button.validity;
+    }
+    return validValidityState;
+  }
+  /** Gets the validation message */
+  get validationMessage() {
+    if (this.isButton()) {
+      return this.button.validationMessage;
+    }
+    return "";
+  }
+  firstUpdated() {
+    if (this.isButton()) {
+      this.formControlController.updateValidity();
+    }
+  }
+  handleBlur() {
+    this.hasFocus = false;
+    this.emit("sl-blur");
+  }
+  handleFocus() {
+    this.hasFocus = true;
+    this.emit("sl-focus");
+  }
+  handleClick() {
+    if (this.type === "submit") {
+      this.formControlController.submit(this);
+    }
+    if (this.type === "reset") {
+      this.formControlController.reset(this);
+    }
+  }
+  handleInvalid(event) {
+    this.formControlController.setValidity(false);
+    this.formControlController.emitInvalidEvent(event);
+  }
+  isButton() {
+    return this.href ? false : true;
+  }
+  isLink() {
+    return this.href ? true : false;
+  }
+  handleDisabledChange() {
+    if (this.isButton()) {
+      this.formControlController.setValidity(this.disabled);
+    }
+  }
+  /** Simulates a click on the button. */
+  click() {
+    this.button.click();
+  }
+  /** Sets focus on the button. */
+  focus(options) {
+    this.button.focus(options);
+  }
+  /** Removes focus from the button. */
+  blur() {
+    this.button.blur();
+  }
+  /** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
+  checkValidity() {
+    if (this.isButton()) {
+      return this.button.checkValidity();
+    }
+    return true;
+  }
+  /** Gets the associated form, if one exists. */
+  getForm() {
+    return this.formControlController.getForm();
+  }
+  /** Checks for validity and shows the browser's validation message if the control is invalid. */
+  reportValidity() {
+    if (this.isButton()) {
+      return this.button.reportValidity();
+    }
+    return true;
+  }
+  /** Sets a custom validation message. Pass an empty string to restore validity. */
+  setCustomValidity(message) {
+    if (this.isButton()) {
+      this.button.setCustomValidity(message);
+      this.formControlController.updateValidity();
+    }
+  }
+  render() {
+    const isLink = this.isLink();
+    const tag = isLink ? i`a` : i`button`;
+    return u`
       <${tag}
         part="base"
-        class=${Rt({
-					button: true,
-					"button--default": this.variant === "default",
-					"button--primary": this.variant === "primary",
-					"button--success": this.variant === "success",
-					"button--neutral": this.variant === "neutral",
-					"button--warning": this.variant === "warning",
-					"button--danger": this.variant === "danger",
-					"button--text": this.variant === "text",
-					"button--small": this.size === "small",
-					"button--medium": this.size === "medium",
-					"button--large": this.size === "large",
-					"button--caret": this.caret,
-					"button--circle": this.circle,
-					"button--disabled": this.disabled,
-					"button--focused": this.hasFocus,
-					"button--loading": this.loading,
-					"button--standard": !this.outline,
-					"button--outline": this.outline,
-					"button--pill": this.pill,
-					"button--rtl": this.localize.dir() === "rtl",
-					"button--has-label": this.hasSlotController.test("[default]"),
-					"button--has-prefix": this.hasSlotController.test("prefix"),
-					"button--has-suffix": this.hasSlotController.test("suffix"),
-				})}
-        ?disabled=${to(isLink ? void 0 : this.disabled)}
-        type=${to(isLink ? void 0 : this.type)}
+        class=${e$1({
+      button: true,
+      "button--default": this.variant === "default",
+      "button--primary": this.variant === "primary",
+      "button--success": this.variant === "success",
+      "button--neutral": this.variant === "neutral",
+      "button--warning": this.variant === "warning",
+      "button--danger": this.variant === "danger",
+      "button--text": this.variant === "text",
+      "button--small": this.size === "small",
+      "button--medium": this.size === "medium",
+      "button--large": this.size === "large",
+      "button--caret": this.caret,
+      "button--circle": this.circle,
+      "button--disabled": this.disabled,
+      "button--focused": this.hasFocus,
+      "button--loading": this.loading,
+      "button--standard": !this.outline,
+      "button--outline": this.outline,
+      "button--pill": this.pill,
+      "button--rtl": this.localize.dir() === "rtl",
+      "button--has-label": this.hasSlotController.test("[default]"),
+      "button--has-prefix": this.hasSlotController.test("prefix"),
+      "button--has-suffix": this.hasSlotController.test("suffix")
+    })}
+        ?disabled=${o$1(isLink ? void 0 : this.disabled)}
+        type=${o$1(isLink ? void 0 : this.type)}
         title=${this.title}
-        name=${to(isLink ? void 0 : this.name)}
-        value=${to(isLink ? void 0 : this.value)}
-        href=${to(isLink ? this.href : void 0)}
-        target=${to(isLink ? this.target : void 0)}
-        download=${to(isLink ? this.download : void 0)}
-        rel=${to(isLink ? this.rel : void 0)}
-        role=${to(isLink ? void 0 : "button")}
+        name=${o$1(isLink ? void 0 : this.name)}
+        value=${o$1(isLink ? void 0 : this.value)}
+        href=${o$1(isLink ? this.href : void 0)}
+        target=${o$1(isLink ? this.target : void 0)}
+        download=${o$1(isLink ? this.download : void 0)}
+        rel=${o$1(isLink ? this.rel : void 0)}
+        role=${o$1(isLink ? void 0 : "button")}
         aria-disabled=${this.disabled ? "true" : "false"}
         tabindex=${this.disabled ? "-1" : "0"}
         @blur=${this.handleBlur}
@@ -15445,56 +14023,98 @@ var SlButton = class extends ShoelaceElement {
         <slot name="prefix" part="prefix" class="button__prefix"></slot>
         <slot part="label" class="button__label"></slot>
         <slot name="suffix" part="suffix" class="button__suffix"></slot>
-        ${this.caret ? ke` <sl-icon part="caret" class="button__caret" library="system" name="caret"></sl-icon> ` : ""}
-        ${this.loading ? ke`<sl-spinner part="spinner"></sl-spinner>` : ""}
+        ${this.caret ? u` <sl-icon part="caret" class="button__caret" library="system" name="caret"></sl-icon> ` : ""}
+        ${this.loading ? u`<sl-spinner part="spinner"></sl-spinner>` : ""}
       </${tag}>
-    `
-	}
-}
-SlButton.styles = [component_styles_default, button_styles_default]
+    `;
+  }
+};
+SlButton.styles = [component_styles_default, button_styles_default];
 SlButton.dependencies = {
-	"sl-icon": SlIcon,
-	"sl-spinner": SlSpinner,
-}
-__decorateClass([e$1(".button")], SlButton.prototype, "button", 2)
-__decorateClass([r()], SlButton.prototype, "hasFocus", 2)
-__decorateClass([r()], SlButton.prototype, "invalid", 2)
-__decorateClass([n()], SlButton.prototype, "title", 2)
-__decorateClass([n({ reflect: true })], SlButton.prototype, "variant", 2)
-__decorateClass([n({ reflect: true })], SlButton.prototype, "size", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlButton.prototype, "caret", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlButton.prototype, "disabled", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlButton.prototype, "loading", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlButton.prototype, "outline", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlButton.prototype, "pill", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlButton.prototype, "circle", 2)
-__decorateClass([n()], SlButton.prototype, "type", 2)
-__decorateClass([n()], SlButton.prototype, "name", 2)
-__decorateClass([n()], SlButton.prototype, "value", 2)
-__decorateClass([n()], SlButton.prototype, "href", 2)
-__decorateClass([n()], SlButton.prototype, "target", 2)
-__decorateClass([n()], SlButton.prototype, "rel", 2)
-__decorateClass([n()], SlButton.prototype, "download", 2)
-__decorateClass([n()], SlButton.prototype, "form", 2)
-__decorateClass([n({ attribute: "formaction" })], SlButton.prototype, "formAction", 2)
-__decorateClass([n({ attribute: "formenctype" })], SlButton.prototype, "formEnctype", 2)
-__decorateClass([n({ attribute: "formmethod" })], SlButton.prototype, "formMethod", 2)
-__decorateClass(
-	[n({ attribute: "formnovalidate", type: Boolean })],
-	SlButton.prototype,
-	"formNoValidate",
-	2
-)
-__decorateClass([n({ attribute: "formtarget" })], SlButton.prototype, "formTarget", 2)
-__decorateClass(
-	[watch("disabled", { waitUntilFirstUpdate: true })],
-	SlButton.prototype,
-	"handleDisabledChange",
-	1
-)
+  "sl-icon": SlIcon,
+  "sl-spinner": SlSpinner
+};
+__decorateClass([
+  e$4(".button")
+], SlButton.prototype, "button", 2);
+__decorateClass([
+  r()
+], SlButton.prototype, "hasFocus", 2);
+__decorateClass([
+  r()
+], SlButton.prototype, "invalid", 2);
+__decorateClass([
+  n$1()
+], SlButton.prototype, "title", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlButton.prototype, "variant", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlButton.prototype, "size", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlButton.prototype, "caret", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlButton.prototype, "disabled", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlButton.prototype, "loading", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlButton.prototype, "outline", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlButton.prototype, "pill", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlButton.prototype, "circle", 2);
+__decorateClass([
+  n$1()
+], SlButton.prototype, "type", 2);
+__decorateClass([
+  n$1()
+], SlButton.prototype, "name", 2);
+__decorateClass([
+  n$1()
+], SlButton.prototype, "value", 2);
+__decorateClass([
+  n$1()
+], SlButton.prototype, "href", 2);
+__decorateClass([
+  n$1()
+], SlButton.prototype, "target", 2);
+__decorateClass([
+  n$1()
+], SlButton.prototype, "rel", 2);
+__decorateClass([
+  n$1()
+], SlButton.prototype, "download", 2);
+__decorateClass([
+  n$1()
+], SlButton.prototype, "form", 2);
+__decorateClass([
+  n$1({ attribute: "formaction" })
+], SlButton.prototype, "formAction", 2);
+__decorateClass([
+  n$1({ attribute: "formenctype" })
+], SlButton.prototype, "formEnctype", 2);
+__decorateClass([
+  n$1({ attribute: "formmethod" })
+], SlButton.prototype, "formMethod", 2);
+__decorateClass([
+  n$1({ attribute: "formnovalidate", type: Boolean })
+], SlButton.prototype, "formNoValidate", 2);
+__decorateClass([
+  n$1({ attribute: "formtarget" })
+], SlButton.prototype, "formTarget", 2);
+__decorateClass([
+  watch("disabled", { waitUntilFirstUpdate: true })
+], SlButton.prototype, "handleDisabledChange", 1);
 
 // src/components/checkbox/checkbox.styles.ts
-var checkbox_styles_default = i$2`
+var checkbox_styles_default = i$5`
   :host {
     display: inline-block;
   }
@@ -15611,134 +14231,134 @@ var checkbox_styles_default = i$2`
     content: var(--sl-input-required-content);
     margin-inline-start: var(--sl-input-required-content-offset);
   }
-`
+`;
 
 var SlCheckbox = class extends ShoelaceElement {
-	constructor() {
-		super(...arguments)
-		this.formControlController = new FormControlController(this, {
-			value: (control) => (control.checked ? control.value || "on" : void 0),
-			defaultValue: (control) => control.defaultChecked,
-			setValue: (control, checked) => (control.checked = checked),
-		})
-		this.hasSlotController = new HasSlotController(this, "help-text")
-		this.hasFocus = false
-		this.title = ""
-		this.name = ""
-		this.size = "medium"
-		this.disabled = false
-		this.checked = false
-		this.indeterminate = false
-		this.defaultChecked = false
-		this.form = ""
-		this.required = false
-		this.helpText = ""
-	}
-	/** Gets the validity state object */
-	get validity() {
-		return this.input.validity
-	}
-	/** Gets the validation message */
-	get validationMessage() {
-		return this.input.validationMessage
-	}
-	firstUpdated() {
-		this.formControlController.updateValidity()
-	}
-	handleClick() {
-		this.checked = !this.checked
-		this.indeterminate = false
-		this.emit("sl-change")
-	}
-	handleBlur() {
-		this.hasFocus = false
-		this.emit("sl-blur")
-	}
-	handleInput() {
-		this.emit("sl-input")
-	}
-	handleInvalid(event) {
-		this.formControlController.setValidity(false)
-		this.formControlController.emitInvalidEvent(event)
-	}
-	handleFocus() {
-		this.hasFocus = true
-		this.emit("sl-focus")
-	}
-	handleDisabledChange() {
-		this.formControlController.setValidity(this.disabled)
-	}
-	handleStateChange() {
-		this.input.checked = this.checked
-		this.input.indeterminate = this.indeterminate
-		this.formControlController.updateValidity()
-	}
-	/** Simulates a click on the checkbox. */
-	click() {
-		this.input.click()
-	}
-	/** Sets focus on the checkbox. */
-	focus(options) {
-		this.input.focus(options)
-	}
-	/** Removes focus from the checkbox. */
-	blur() {
-		this.input.blur()
-	}
-	/** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
-	checkValidity() {
-		return this.input.checkValidity()
-	}
-	/** Gets the associated form, if one exists. */
-	getForm() {
-		return this.formControlController.getForm()
-	}
-	/** Checks for validity and shows the browser's validation message if the control is invalid. */
-	reportValidity() {
-		return this.input.reportValidity()
-	}
-	/**
-	 * Sets a custom validation message. The value provided will be shown to the user when the form is submitted. To clear
-	 * the custom validation message, call this method with an empty string.
-	 */
-	setCustomValidity(message) {
-		this.input.setCustomValidity(message)
-		this.formControlController.updateValidity()
-	}
-	render() {
-		const hasHelpTextSlot = this.hasSlotController.test("help-text")
-		const hasHelpText = this.helpText ? true : !!hasHelpTextSlot
-		return ke$1`
+  constructor() {
+    super(...arguments);
+    this.formControlController = new FormControlController(this, {
+      value: (control) => control.checked ? control.value || "on" : void 0,
+      defaultValue: (control) => control.defaultChecked,
+      setValue: (control, checked) => control.checked = checked
+    });
+    this.hasSlotController = new HasSlotController(this, "help-text");
+    this.hasFocus = false;
+    this.title = "";
+    this.name = "";
+    this.size = "medium";
+    this.disabled = false;
+    this.checked = false;
+    this.indeterminate = false;
+    this.defaultChecked = false;
+    this.form = "";
+    this.required = false;
+    this.helpText = "";
+  }
+  /** Gets the validity state object */
+  get validity() {
+    return this.input.validity;
+  }
+  /** Gets the validation message */
+  get validationMessage() {
+    return this.input.validationMessage;
+  }
+  firstUpdated() {
+    this.formControlController.updateValidity();
+  }
+  handleClick() {
+    this.checked = !this.checked;
+    this.indeterminate = false;
+    this.emit("sl-change");
+  }
+  handleBlur() {
+    this.hasFocus = false;
+    this.emit("sl-blur");
+  }
+  handleInput() {
+    this.emit("sl-input");
+  }
+  handleInvalid(event) {
+    this.formControlController.setValidity(false);
+    this.formControlController.emitInvalidEvent(event);
+  }
+  handleFocus() {
+    this.hasFocus = true;
+    this.emit("sl-focus");
+  }
+  handleDisabledChange() {
+    this.formControlController.setValidity(this.disabled);
+  }
+  handleStateChange() {
+    this.input.checked = this.checked;
+    this.input.indeterminate = this.indeterminate;
+    this.formControlController.updateValidity();
+  }
+  /** Simulates a click on the checkbox. */
+  click() {
+    this.input.click();
+  }
+  /** Sets focus on the checkbox. */
+  focus(options) {
+    this.input.focus(options);
+  }
+  /** Removes focus from the checkbox. */
+  blur() {
+    this.input.blur();
+  }
+  /** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
+  checkValidity() {
+    return this.input.checkValidity();
+  }
+  /** Gets the associated form, if one exists. */
+  getForm() {
+    return this.formControlController.getForm();
+  }
+  /** Checks for validity and shows the browser's validation message if the control is invalid. */
+  reportValidity() {
+    return this.input.reportValidity();
+  }
+  /**
+   * Sets a custom validation message. The value provided will be shown to the user when the form is submitted. To clear
+   * the custom validation message, call this method with an empty string.
+   */
+  setCustomValidity(message) {
+    this.input.setCustomValidity(message);
+    this.formControlController.updateValidity();
+  }
+  render() {
+    const hasHelpTextSlot = this.hasSlotController.test("help-text");
+    const hasHelpText = this.helpText ? true : !!hasHelpTextSlot;
+    return x`
       <div
-        class=${Rt({
-					"form-control": true,
-					"form-control--small": this.size === "small",
-					"form-control--medium": this.size === "medium",
-					"form-control--large": this.size === "large",
-					"form-control--has-help-text": hasHelpText,
-				})}
+        class=${e$1({
+      "form-control": true,
+      "form-control--small": this.size === "small",
+      "form-control--medium": this.size === "medium",
+      "form-control--large": this.size === "large",
+      "form-control--has-help-text": hasHelpText
+    })}
       >
         <label
           part="base"
-          class=${Rt({
-						checkbox: true,
-						"checkbox--checked": this.checked,
-						"checkbox--disabled": this.disabled,
-						"checkbox--focused": this.hasFocus,
-						"checkbox--indeterminate": this.indeterminate,
-						"checkbox--small": this.size === "small",
-						"checkbox--medium": this.size === "medium",
-						"checkbox--large": this.size === "large",
-					})}
+          class=${e$1({
+      checkbox: true,
+      "checkbox--checked": this.checked,
+      "checkbox--disabled": this.disabled,
+      "checkbox--focused": this.hasFocus,
+      "checkbox--indeterminate": this.indeterminate,
+      "checkbox--small": this.size === "small",
+      "checkbox--medium": this.size === "medium",
+      "checkbox--large": this.size === "large"
+    })}
         >
           <input
             class="checkbox__input"
             type="checkbox"
             title=${this.title}
             name=${this.name}
-            value=${to(this.value)}
-            .indeterminate=${Ft(this.indeterminate)}
-            .checked=${Ft(this.checked)}
+            value=${o$1(this.value)}
+            .indeterminate=${l(this.indeterminate)}
+            .checked=${l(this.checked)}
             .disabled=${this.disabled}
             .required=${this.required}
             aria-checked=${this.checked ? "true" : "false"}
@@ -15754,25 +14374,17 @@ var SlCheckbox = class extends ShoelaceElement {
             part="control${this.checked ? " control--checked" : ""}${this.indeterminate ? " control--indeterminate" : ""}"
             class="checkbox__control"
           >
-            ${
-							this.checked
-								? ke$1`
+            ${this.checked ? x`
                   <sl-icon part="checked-icon" class="checkbox__checked-icon" library="system" name="check"></sl-icon>
-                `
-								: ""
-						}
-            ${
-							!this.checked && this.indeterminate
-								? ke$1`
+                ` : ""}
+            ${!this.checked && this.indeterminate ? x`
                   <sl-icon
                     part="indeterminate-icon"
                     class="checkbox__indeterminate-icon"
                     library="system"
                     name="indeterminate"
                   ></sl-icon>
-                `
-								: ""
-						}
+                ` : ""}
           </span>
 
           <div part="label" class="checkbox__label">
@@ -15789,335 +14401,354 @@ var SlCheckbox = class extends ShoelaceElement {
           <slot name="help-text">${this.helpText}</slot>
         </div>
       </div>
-    `
-	}
-}
-SlCheckbox.styles = [component_styles_default, checkbox_styles_default]
-SlCheckbox.dependencies = { "sl-icon": SlIcon }
-__decorateClass([e$1('input[type="checkbox"]')], SlCheckbox.prototype, "input", 2)
-__decorateClass([r()], SlCheckbox.prototype, "hasFocus", 2)
-__decorateClass([n()], SlCheckbox.prototype, "title", 2)
-__decorateClass([n()], SlCheckbox.prototype, "name", 2)
-__decorateClass([n()], SlCheckbox.prototype, "value", 2)
-__decorateClass([n({ reflect: true })], SlCheckbox.prototype, "size", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlCheckbox.prototype, "disabled", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlCheckbox.prototype, "checked", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlCheckbox.prototype, "indeterminate", 2)
-__decorateClass([defaultValue("checked")], SlCheckbox.prototype, "defaultChecked", 2)
-__decorateClass([n({ reflect: true })], SlCheckbox.prototype, "form", 2)
-__decorateClass([n({ type: Boolean, reflect: true })], SlCheckbox.prototype, "required", 2)
-__decorateClass([n({ attribute: "help-text" })], SlCheckbox.prototype, "helpText", 2)
-__decorateClass(
-	[watch("disabled", { waitUntilFirstUpdate: true })],
-	SlCheckbox.prototype,
-	"handleDisabledChange",
-	1
-)
-__decorateClass(
-	[watch(["checked", "indeterminate"], { waitUntilFirstUpdate: true })],
-	SlCheckbox.prototype,
-	"handleStateChange",
-	1
-)
+    `;
+  }
+};
+SlCheckbox.styles = [component_styles_default, checkbox_styles_default];
+SlCheckbox.dependencies = { "sl-icon": SlIcon };
+__decorateClass([
+  e$4('input[type="checkbox"]')
+], SlCheckbox.prototype, "input", 2);
+__decorateClass([
+  r()
+], SlCheckbox.prototype, "hasFocus", 2);
+__decorateClass([
+  n$1()
+], SlCheckbox.prototype, "title", 2);
+__decorateClass([
+  n$1()
+], SlCheckbox.prototype, "name", 2);
+__decorateClass([
+  n$1()
+], SlCheckbox.prototype, "value", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlCheckbox.prototype, "size", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlCheckbox.prototype, "disabled", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlCheckbox.prototype, "checked", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlCheckbox.prototype, "indeterminate", 2);
+__decorateClass([
+  defaultValue("checked")
+], SlCheckbox.prototype, "defaultChecked", 2);
+__decorateClass([
+  n$1({ reflect: true })
+], SlCheckbox.prototype, "form", 2);
+__decorateClass([
+  n$1({ type: Boolean, reflect: true })
+], SlCheckbox.prototype, "required", 2);
+__decorateClass([
+  n$1({ attribute: "help-text" })
+], SlCheckbox.prototype, "helpText", 2);
+__decorateClass([
+  watch("disabled", { waitUntilFirstUpdate: true })
+], SlCheckbox.prototype, "handleDisabledChange", 1);
+__decorateClass([
+  watch(["checked", "indeterminate"], { waitUntilFirstUpdate: true })
+], SlCheckbox.prototype, "handleStateChange", 1);
 
-var __decorate =
-	(undefined && undefined.__decorate) ||
-	function (decorators, target, key, desc) {
-		var c = arguments.length,
-			r =
-				c < 3
-					? target
-					: desc === null
-						? (desc = Object.getOwnPropertyDescriptor(target, key))
-						: desc,
-			d
-		if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-			r = Reflect.decorate(decorators, target, key, desc)
-		else
-			for (var i = decorators.length - 1; i >= 0; i--)
-				if ((d = decorators[i]))
-					r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r
-		return c > 3 && r && Object.defineProperty(target, key, r), r
-	}
+var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 // in case an app defines it's own set of shoelace components, prevent double registering
-if (!customElements.get("sl-select")) customElements.define("sl-select", SlSelect)
-if (!customElements.get("sl-option")) customElements.define("sl-option", SlOption)
-if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
-if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
-if (!customElements.get("sl-checkbox")) customElements.define("sl-checkbox", SlCheckbox)
-let InlangSettings = class InlangSettings extends h {
-	constructor() {
-		super(...arguments)
-		this.settings = {}
-		this.installedPlugins = []
-		this._newSettings = undefined
-		this._unsavedChanges = false
-		this.handleInlangProjectChange = (
-			//value needs to be exactly how it goes in the project settings json
-			value,
-			property,
-			moduleId
-		) => {
-			//update state object
-			if (this._newSettings && moduleId) {
-				this._newSettings = {
-					...this._newSettings,
-					// plugin: {
-					// 	...this._newSettings.plugin
-					// 	[moduleId]: {
-					// 		...this._newSettings[moduleId],
-					// 		[property]: value,
-					// 	},
-					// }
-				}
-			} else if (this._newSettings) {
-				this._newSettings = {
-					...this._newSettings,
-					[property]: value,
-				}
-			}
-			if (JSON.stringify(this.settings) !== JSON.stringify(this._newSettings)) {
-				this._unsavedChanges = true
-			} else {
-				this._unsavedChanges = false
-			}
-		}
-		this._revertChanges = () => {
-			if (this.settings) {
-				this._newSettings = JSON.parse(JSON.stringify(this.settings))
-			}
-			this._unsavedChanges = false
-		}
-		this._saveChanges = () => {
-			if (this._newSettings) {
-				this.dispatchOnSetSettings(this._newSettings)
-				this.settings = JSON.parse(JSON.stringify(this._newSettings))
-			}
-			this._unsavedChanges = false
-		}
-	}
-	static {
-		this.styles = [
-			baseStyling,
-			i$2`
-			h2 {
-				margin: 0;
-				padding-top: 1rem;
-			}
-			.container {
-				position: relative;
-				display: flex;
-				flex-direction: column;
-				gap: 48px;
-			}
-			.module-container {
-				display: flex;
-				flex-direction: column;
-				gap: 40px;
-			}
-			.hover-bar-container {
-				width: 100%;
-				box-sizing: border-box;
-				position: sticky;
-				bottom: 1rem;
-			}
-			.hover-bar {
-				box-sizing: border-box;
-				width: 100%;
-				max-width: 500px;
-				padding-top: 0.5rem;
-				padding-bottom: 0.5rem;
-				margin: 0 auto;
-				display: flex;
-				flex-wrap: wrap;
-				justify-content: space-between;
-				align-items: center;
-				gap: 8px;
-				background-color: var(--sl-panel-background-color);
-				padding-left: 1rem;
-				padding-right: 0.8rem;
-				border-radius: 0.5rem;
-				border: 1px solid var(--sl-panel-border-color);
-				filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));
-				font-weight: 600;
-				line-height: 1.5;
-				font-size: 14px;
-			}
-			.hover-bar-text {
-				margin: 0;
-			}
-			.module-link-container {
-				display: flex;
-				color: var(--sl-input-help-text-color);
-				gap: 6px;
-				padding-top: 0.5rem;
-			}
-			.module-link {
-				margin: 0;
-				font-size: 14px;
-				line-height: 1.5;
-				flex-grow: 1;
-				text-decoration: none;
-				color: var(--sl-input-help-text-color);
-			}
-			.module-link:hover {
-				color: var(--sl-color-primary-600);
-			}
-			.module-type {
-				background-color: var(--sl-input-background-color-disabled);
-				width: fit-content;
-				padding: 0px 6px;
-				border-radius: 2px;
-				font-size: 14px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				color: var(--sl-input-color-disabled);
-				margin: 0;
-				line-height: 1.5;
-				flex-grow: 0;
-			}
-		`,
-		]
-	}
-	dispatchOnSetSettings(settings) {
-		const onSetSettings = new CustomEvent("set-settings", {
-			detail: {
-				argument: settings,
-			},
-		})
-		this.dispatchEvent(onSetSettings)
-	}
-	async firstUpdated() {
-		await this.updateComplete
-		if (this.settings) {
-			this._newSettings = JSON.parse(JSON.stringify(this.settings))
-		}
-		//override primitive colors to match the design system
-		overridePrimitiveColors()
-	}
-	get _settingProperties() {
-		const _settings = this.settings
-		if (!_settings) throw new Error("No inlang settings")
-		const generalSchema = { internal: { schema: ProjectSettings.allOf[0] } }
-		// for (const plugin of _installedPlugins) {
-		// 	if (plugin.settingsSchema) {
-		// 		generalSchema[plugin.id] = {
-		// 			schema: plugin.settingsSchema,
-		// 			meta: plugin,
-		// 		}
-		// 	}
-		// }
-		// for (const lintRule of _installedMessageLintRules) {
-		// 	if (lintRule.settingsSchema) {
-		// 		generalSchema[lintRule.id] = {
-		// 			schema: lintRule.settingsSchema,
-		// 			meta: lintRule,
-		// 		}
-		// 	}
-		// }
-		return generalSchema
-	}
-	render() {
-		return ke$1` <div class="container" part="base">
-			${Object.entries(this._settingProperties).map(([key, value]) => {
-				// TODO remove marketplace registry (bundling is too expensive)
-				//const item = registry.find((item) => item.id === value.meta?.id)
-				return value.schema?.properties && this._newSettings
-					? ke$1`<div class="module-container" part="module">
-							${
-								value.meta &&
-								(value.meta?.displayName).en &&
-								ke$1`<div>
-								<h2 part="module-title">
-									${value.meta && (value.meta?.displayName).en}
-								</h2>
-								<div class="module-link-container">
-									<svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-										<path
-											fill="currentColor"
-											d="M11 17H7c-1.383 0-2.562-.488-3.537-1.463C2.488 14.562 2.001 13.383 2 12c0-1.383.487-2.562 1.463-3.537C4.439 7.488 5.618 7 7 7h4v2H7c-.833 0-1.542.292-2.125.875A2.893 2.893 0 004 12c0 .833.292 1.542.875 2.125A2.893 2.893 0 007 15h4v2zm-3-4v-2h8v2H8zm5 4v-2h4c.833 0 1.542-.292 2.125-.875A2.893 2.893 0 0020 12c0-.833-.292-1.542-.875-2.125A2.893 2.893 0 0017 9h-4V7h4c1.383 0 2.563.488 3.538 1.463.975.975 1.463 2.154 1.462 3.537 0 1.383-.488 2.562-1.463 3.538-.975.976-2.154 1.463-3.537 1.462h-4z"
-										></path>
-									</svg>
-									<div class="module-type">
-										${value.meta.id.startsWith("plugin") ? "Plugin" : "Lint Rule"}
-									</div>
-								</div>
-							</div>`
-							}
-							${Object.entries(value.schema.properties).map(([property, schema]) => {
-								if (
-									property === "$schema" ||
-									property === "modules" ||
-									property === "languageTags" ||
-									property === "sourceLanguageTag"
-								)
-									return undefined
-								return key === "internal"
-									? ke$1`
-											<general-input
-												exportparts="property, property-title, property-paragraph, option, option-wrapper, button"
-												.property=${property}
-												.modules=${[]}
-												.value=${structuredClone(this._newSettings?.[property])}
-												.schema=${schema}
-												.handleInlangProjectChange=${this.handleInlangProjectChange}
-												.required=${checkRequired(value.schema, property)}
-											></general-input>
-									  `
-									: ke$1`
-											<general-input
-												exportparts="property, property-title, property-paragraph, option, option-wrapper, button"
-												.property=${property}
-												.value=${
-													// @ts-ignore
-													structuredClone(this._newSettings?.[key]?.[property])
-												}
-												.schema=${schema}
-												.moduleId=${key}
-												.handleInlangProjectChange=${this.handleInlangProjectChange}
-												.required=${checkRequired(value.schema, property)}
-											></general-input>
-									  `
-							})}
-					  </div>`
-					: undefined
-			})}
-			${
-				this._unsavedChanges
-					? ke$1`<div class="hover-bar-container">
-						<div class="hover-bar" part="float">
-							<p class="hover-bar-text">Attention, you have unsaved changes.</p>
-							<div>
-								<sl-button
-									exportparts="base:button"
-									size="small"
-									@click=${() => {
-										this._revertChanges()
-									}}
-									varaint="default"
-								>
-									Cancel
-								</sl-button>
-								<sl-button
-									size="small"
-									@click=${() => {
-										this._saveChanges()
-									}}
-									variant="primary"
-								>
-									Save Changes
-								</sl-button>
-							</div>
-						</div>
-				  </div>`
-					: ke$1``
-			}
-		</div>`
-	}
-}
-__decorate([n({ type: Object })], InlangSettings.prototype, "settings", void 0)
-__decorate([n({ type: Array })], InlangSettings.prototype, "installedPlugins", void 0)
-__decorate([r()], InlangSettings.prototype, "_newSettings", void 0)
-__decorate([r()], InlangSettings.prototype, "_unsavedChanges", void 0)
-InlangSettings = __decorate([t$1("inlang-settings")], InlangSettings)
+if (!customElements.get("sl-select"))
+    customElements.define("sl-select", SlSelect);
+if (!customElements.get("sl-option"))
+    customElements.define("sl-option", SlOption);
+if (!customElements.get("sl-input"))
+    customElements.define("sl-input", SlInput);
+if (!customElements.get("sl-button"))
+    customElements.define("sl-button", SlButton);
+if (!customElements.get("sl-checkbox"))
+    customElements.define("sl-checkbox", SlCheckbox);
+let InlangSettings = class InlangSettings extends r$2 {
+    constructor() {
+        super(...arguments);
+        this.settings = {};
+        this.installedPlugins = [];
+        this._newSettings = undefined;
+        this._unsavedChanges = false;
+        this.handleInlangProjectChange = (
+        //value needs to be exactly how it goes in the project settings json
+        value, property, moduleId) => {
+            //update state object
+            if (this._newSettings && moduleId) {
+                this._newSettings = {
+                    ...this._newSettings,
+                    // plugin: {
+                    // 	...this._newSettings.plugin
+                    // 	[moduleId]: {
+                    // 		...this._newSettings[moduleId],
+                    // 		[property]: value,
+                    // 	},
+                    // }
+                };
+            }
+            else if (this._newSettings) {
+                this._newSettings = {
+                    ...this._newSettings,
+                    [property]: value,
+                };
+            }
+            if (JSON.stringify(this.settings) !== JSON.stringify(this._newSettings)) {
+                this._unsavedChanges = true;
+            }
+            else {
+                this._unsavedChanges = false;
+            }
+        };
+        this._revertChanges = () => {
+            if (this.settings) {
+                this._newSettings = JSON.parse(JSON.stringify(this.settings));
+            }
+            this._unsavedChanges = false;
+        };
+        this._saveChanges = () => {
+            if (this._newSettings) {
+                this.dispatchOnSetSettings(this._newSettings);
+                this.settings = JSON.parse(JSON.stringify(this._newSettings));
+            }
+            this._unsavedChanges = false;
+        };
+    }
+    static { this.styles = [
+        baseStyling,
+        i$5 `
+      h2 {
+        margin: 0;
+        padding-top: 1rem;
+      }
+      .container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 48px;
+      }
+      .module-container {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+      }
+      .hover-bar-container {
+        width: 100%;
+        box-sizing: border-box;
+        position: sticky;
+        bottom: 1rem;
+      }
+      .hover-bar {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 500px;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        background-color: var(--sl-panel-background-color);
+        padding-left: 1rem;
+        padding-right: 0.8rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--sl-panel-border-color);
+        filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07))
+          drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));
+        font-weight: 600;
+        line-height: 1.5;
+        font-size: 14px;
+      }
+      .hover-bar-text {
+        margin: 0;
+      }
+      .module-link-container {
+        display: flex;
+        color: var(--sl-input-help-text-color);
+        gap: 6px;
+        padding-top: 0.5rem;
+      }
+      .module-link {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+        flex-grow: 1;
+        text-decoration: none;
+        color: var(--sl-input-help-text-color);
+      }
+      .module-link:hover {
+        color: var(--sl-color-primary-600);
+      }
+      .module-type {
+        background-color: var(--sl-input-background-color-disabled);
+        width: fit-content;
+        padding: 0px 6px;
+        border-radius: 2px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sl-input-color-disabled);
+        margin: 0;
+        line-height: 1.5;
+        flex-grow: 0;
+      }
+    `,
+    ]; }
+    dispatchOnSetSettings(settings) {
+        const onSetSettings = new CustomEvent("set-settings", {
+            detail: {
+                argument: settings,
+            },
+        });
+        this.dispatchEvent(onSetSettings);
+    }
+    async firstUpdated() {
+        await this.updateComplete;
+        if (this.settings) {
+            this._newSettings = JSON.parse(JSON.stringify(this.settings));
+        }
+        //override primitive colors to match the design system
+        overridePrimitiveColors();
+    }
+    get _settingProperties() {
+        const _settings = this.settings;
+        if (!_settings)
+            throw new Error("No inlang settings");
+        const generalSchema = { internal: { schema: ProjectSettings.allOf[0] } };
+        // for (const plugin of _installedPlugins) {
+        // 	if (plugin.settingsSchema) {
+        // 		generalSchema[plugin.id] = {
+        // 			schema: plugin.settingsSchema,
+        // 			meta: plugin,
+        // 		}
+        // 	}
+        // }
+        // for (const lintRule of _installedMessageLintRules) {
+        // 	if (lintRule.settingsSchema) {
+        // 		generalSchema[lintRule.id] = {
+        // 			schema: lintRule.settingsSchema,
+        // 			meta: lintRule,
+        // 		}
+        // 	}
+        // }
+        return generalSchema;
+    }
+    render() {
+        return x ` <div class="container" part="base">
+      ${Object.entries(this._settingProperties).map(([key, value]) => {
+            // TODO remove marketplace registry (bundling is too expensive)
+            //const item = registry.find((item) => item.id === value.meta?.id)
+            return value.schema?.properties && this._newSettings
+                ? x `<div class="module-container" part="module">
+              ${value.meta &&
+                    (value.meta?.displayName).en &&
+                    x `<div>
+                <h2 part="module-title">
+                  ${value.meta &&
+                        (value.meta?.displayName).en}
+                </h2>
+                <div class="module-link-container">
+                  <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path
+                      fill="currentColor"
+                      d="M11 17H7c-1.383 0-2.562-.488-3.537-1.463C2.488 14.562 2.001 13.383 2 12c0-1.383.487-2.562 1.463-3.537C4.439 7.488 5.618 7 7 7h4v2H7c-.833 0-1.542.292-2.125.875A2.893 2.893 0 004 12c0 .833.292 1.542.875 2.125A2.893 2.893 0 007 15h4v2zm-3-4v-2h8v2H8zm5 4v-2h4c.833 0 1.542-.292 2.125-.875A2.893 2.893 0 0020 12c0-.833-.292-1.542-.875-2.125A2.893 2.893 0 0017 9h-4V7h4c1.383 0 2.563.488 3.538 1.463.975.975 1.463 2.154 1.462 3.537 0 1.383-.488 2.562-1.463 3.538-.975.976-2.154 1.463-3.537 1.462h-4z"
+                    ></path>
+                  </svg>
+                  <div class="module-type">
+                    ${value.meta.id.startsWith("plugin")
+                        ? "Plugin"
+                        : "Lint Rule"}
+                  </div>
+                </div>
+              </div>`}
+              ${Object.entries(value.schema.properties).map(([property, schema]) => {
+                    if (property === "$schema" ||
+                        property === "modules" ||
+                        property === "languageTags" ||
+                        property === "sourceLanguageTag")
+                        return undefined;
+                    return key === "internal"
+                        ? x `
+                        <general-input
+                          exportparts="property, property-title, property-paragraph, option, option-wrapper, button"
+                          .property=${property}
+                          .modules=${[]}
+                          .value=${structuredClone(this._newSettings?.[property])}
+                          .schema=${schema}
+                          .handleInlangProjectChange=${this
+                            .handleInlangProjectChange}
+                          .required=${checkRequired(value.schema, property)}
+                        ></general-input>
+                      `
+                        : x `
+                        <general-input
+                          exportparts="property, property-title, property-paragraph, option, option-wrapper, button"
+                          .property=${property}
+                          .value=${structuredClone(
+                        // @ts-ignore
+                        this._newSettings?.[key]?.[property])}
+                          .schema=${schema}
+                          .moduleId=${key}
+                          .handleInlangProjectChange=${this
+                            .handleInlangProjectChange}
+                          .required=${checkRequired(value.schema, property)}
+                        ></general-input>
+                      `;
+                })}
+            </div>`
+                : undefined;
+        })}
+      ${this._unsavedChanges
+            ? x `<div class="hover-bar-container">
+            <div class="hover-bar" part="float">
+              <p class="hover-bar-text">Attention, you have unsaved changes.</p>
+              <div>
+                <sl-button
+                  exportparts="base:button"
+                  size="small"
+                  @click=${() => {
+                this._revertChanges();
+            }}
+                  varaint="default"
+                >
+                  Cancel
+                </sl-button>
+                <sl-button
+                  size="small"
+                  @click=${() => {
+                this._saveChanges();
+            }}
+                  variant="primary"
+                >
+                  Save Changes
+                </sl-button>
+              </div>
+            </div>
+          </div>`
+            : x ``}
+    </div>`;
+    }
+};
+__decorate([
+    n$1({ type: Object })
+], InlangSettings.prototype, "settings", void 0);
+__decorate([
+    n$1({ type: Array })
+], InlangSettings.prototype, "installedPlugins", void 0);
+__decorate([
+    r()
+], InlangSettings.prototype, "_newSettings", void 0);
+__decorate([
+    r()
+], InlangSettings.prototype, "_unsavedChanges", void 0);
+InlangSettings = __decorate([
+    t$1("inlang-settings")
+], InlangSettings);

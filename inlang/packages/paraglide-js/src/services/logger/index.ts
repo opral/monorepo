@@ -20,15 +20,6 @@ export class Logger {
 		private options: LoggerOptions = { silent: false, prefix: true }
 	) {}
 
-	/**
-	 * Prints an empty line to the console.
-	 */
-	public ln(): Logger {
-		if (this.options.silent) return this;
-		console.log("");
-		return this;
-	}
-
 	public log(message: string): Logger {
 		if (this.options.silent) return this;
 		const prefix = this.options.prefix ? colors.bold("[paraglide] ") : "";

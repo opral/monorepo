@@ -6,9 +6,6 @@ export default defineConfig({
 		paraglideVitePlugin({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
-			options: {
-				outputStructure: "locale-modules",
-			},
 		}),
 	],
 	build: {
@@ -16,4 +13,3 @@ export default defineConfig({
 		minify: false,
 	},
 });
-

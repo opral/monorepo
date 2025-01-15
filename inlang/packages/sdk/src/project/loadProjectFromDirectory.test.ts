@@ -2,7 +2,8 @@
 
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { ProjectSettings } from "../json-schema/settings.js";
-import { fs, vol, Volume } from "memfs";
+import { Volume } from "memfs";
+import nodePath from "node:path";
 import {
 	loadProjectFromDirectory,
 	ResourceFileImportError,
@@ -272,6 +273,51 @@ describe("it should keep files between the inlang directory and lix in sync", as
 			fs: fs as any,
 			path: "/project.inlang",
 			syncInterval: syncInterval,
+		});
+
+		const files = await project.lix.db.selectFrom("file").selectAll().execute();
+
+		expect(files.length).toBe(
+			5 + 1 /* the db.sqlite file */ + 1 /* project_id */
+		);
+
+		const filesByPath = files.reduce((acc, file) => {
+			acc[file.path] = new TextDecoder().decode(file.data);
+			return acc;
+		}, {} as any);
+
+		expect(filesByPath["/cache/plugin/29j49j2"]).toBe("cache value");
+		expect(filesByPath["/.gitignore"]).toBe("git value");
+		expect(filesByPath["/prettierrc.json"]).toBe("prettier value");
+		expect(filesByPath["/README.md"]).toBe("readme value");
+		expect(filesByPath["/settings.json"]).toBe(JSON.stringify(mockSettings));
+	});
+
+	// the test doesn't work on non-windows systems
+	// mocking the node:path to use backlashes has no effect
+	test.skip("files from directory should be available via lix if the OS uses backlashes as folder separators", async () => {
+		const mockWindowsDirectory = {
+			"\\project.inlang\\cache\\plugin\\29j49j2": "cache value",
+			"\\project.inlang\\.gitignore": "git value",
+			"\\project.inlang\\prettierrc.json": "prettier value",
+			"\\project.inlang\\README.md": "readme value",
+			"\\project.inlang\\settings.json": JSON.stringify(mockSettings),
+		};
+
+		// Temporarily set the platform to win32
+		Object.defineProperty(process, "platform", {
+			value: "win32",
+		});
+
+		Object.defineProperty(nodePath, "sep", {
+			value: "\\",
+		});
+
+		const fs = Volume.fromJSON(mockWindowsDirectory);
+
+		const project = await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "\\project.inlang",
 		});
 
 		const files = await project.lix.db.selectFrom("file").selectAll().execute();

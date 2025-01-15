@@ -5,6 +5,9 @@
 - [Node.js](https://nodejs.org/en/) (v20 or higher)
 - [pnpm](https://pnpm.io/) (v8 or higher)
 
+> [!IMPORTANT]  
+> If you are developing on Windows, you need to use [WSL](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux). 
+
 ## Development
 
 1. Clone the repository
