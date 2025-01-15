@@ -14,7 +14,7 @@ export function jsDocBundleFunctionTypes(args: {
 
 	return `
 * @param {{ ${inputParams} }} inputs
-* @param {{ locale?: ${localesUnion}, languageTag?: ${localesUnion} }} options
+* @param {{ locale?: ${localesUnion} }} options
 * @returns {string}
 `;
 }

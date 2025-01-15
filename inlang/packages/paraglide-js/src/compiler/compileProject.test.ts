@@ -256,13 +256,13 @@ describe.each([
 				expect(cb1).toHaveBeenCalledTimes(1);
 			});
 
-			test("should return the correct message if a languageTag is set in the message options", async () => {
+			test("should return the correct message if a locale is set in the message options", async () => {
 				const { m, runtime } = await importCode(code);
 
 				// set the language tag to de to make sure that the message options override the runtime language tag
-				runtime.setLanguageTag("de");
+				runtime.setLocale("de");
 				expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
-				expect(m.sad_penguin_bundle(undefined, { languageTag: "en" })).toBe(
+				expect(m.sad_penguin_bundle(undefined, { locale: "en" })).toBe(
 					"A simple message."
 				);
 			});
@@ -270,7 +270,7 @@ describe.each([
 			test("runtime.isAvailableLocale should only return `true` if a locale is passed to it", async () => {
 				const { runtime } = await importCode(code);
 
-				for (const tag of runtime.availableLanguageTags) {
+				for (const tag of runtime.availableLocales) {
 					expect(runtime.isAvailableLocale(tag)).toBe(true);
 				}
 
@@ -447,68 +447,6 @@ describe.each([
 			expect(diagnostics.length).toEqual(0);
 		});
 
-		// remove with v3 of paraglide js
-		test("./runtime.js (legacy) types", async () => {
-			const project = await typescriptProject({
-				useInMemoryFileSystem: true,
-				compilerOptions: {
-					outDir: "dist",
-					declaration: true,
-					allowJs: true,
-					checkJs: true,
-					module: ts.ModuleKind.Node16,
-					strict: true,
-				},
-			});
-
-			for (const [fileName, code] of Object.entries(output)) {
-				if (fileName.endsWith(".js") || fileName.endsWith(".ts")) {
-					project.createSourceFile(fileName, code);
-				}
-			}
-			project.createSourceFile(
-				"test.ts",
-				`
-    import * as runtime from "./runtime.js"
-
-    // --------- RUNTIME ---------
-
-    // sourceLanguageTag should have a narrow type, not a generic string
-
-    runtime.sourceLanguageTag satisfies "en"
-
-    // availableLanguageTags should have a narrow type, not a generic string
-    runtime.availableLanguageTags satisfies Readonly<Array<"de" | "en" | "en-US">>
-
-    // setLanguageTag() should fail if the given language tag is not included in availableLanguageTags
-    // @ts-expect-error
-    runtime.setLanguageTag("fr")
-
-    // setLanguageTag() should not fail if the given language tag is included in availableLanguageTags
-    runtime.setLanguageTag("de")
-
-    // languageTag should return type should be a union of language tags, not a generic string
-    runtime.languageTag() satisfies "de" | "en" | "en-US"
-
-		// isAvailableLocale should narrow the type of it's argument
-		const thing = 5;
-		if(runtime.isAvailableLocale(thing)) {
-			const a : "de" | "en" | "en-US" = thing
-		} else {
-			// @ts-expect-error - thing is not a language tag
-			const a : "de" | "en" | "en-US" = thing
-		}
-  `
-			);
-
-			const program = project.createProgram();
-			const diagnostics = ts.getPreEmitDiagnostics(program);
-			for (const diagnostic of diagnostics) {
-				console.error(diagnostic.messageText, diagnostic.file?.fileName);
-			}
-			expect(diagnostics.length).toEqual(0);
-		});
-
 		test("./messages.js types", async () => {
 			const project = await typescriptProject({
 				useInMemoryFileSystem: true,
@@ -547,15 +485,15 @@ describe.each([
     m.sad_penguin_bundle() satisfies string
 
 		// --------- MESSAGE OPTIONS ---------
-		// the languageTag option should be optional
+		// the locale option should be optional
 		m.sad_penguin_bundle({}, {}) satisfies string
 
-		// the languageTag option should be allowed
-		m.sad_penguin_bundle({}, { languageTag: "en" }) satisfies string
+		// the locale option should be allowed
+		m.sad_penguin_bundle({}, { locale: "en" }) satisfies string
 
-		// the languageTag option must be a valid language tag
+		// the locale option must be a valid language tag
 		// @ts-expect-error - invalid language tag
-		m.sad_penguin_bundle({}, { languageTag: "---" })
+		m.sad_penguin_bundle({}, { locale: "---" })
   `
 			);
 
