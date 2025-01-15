@@ -18,13 +18,13 @@ const packagesToCopy = [
 		transpile: false,
 	},
 	{
-		src: "node_modules/@inlang/settings-component2/dist/bundled/index.js",
+		src: "node_modules/@inlang/settings-component/dist/bundled/index.js",
 		dest: "./assets/settings-component.js",
 		transpile: false,
 	},
 	{
-		src: "node_modules/@inlang/bundle-component/dist/bundled/index.js",
-		dest: "./assets/bundle-component.js",
+		src: "node_modules/@inlang/editor-component/dist/bundled/index.js",
+		dest: "./assets/editor-component.js",
 		transpile: false,
 	},
 ]
