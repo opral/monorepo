@@ -172,7 +172,7 @@ describe.each([
 			test("locales should include locales with a hyphen", async () => {
 				const { runtime } = await importCode(code);
 
-				expect(runtime.locales).toContain("en-US");
+				expect(runtime.availableLocales).toContain("en-US");
 			});
 
 			test("should set the baseLocale as default getLocale value", async () => {
@@ -419,7 +419,7 @@ describe.each([
     runtime.getLocale() satisfies "de" | "en" | "en-US"
 
     // availableLocales should have a narrow type, not a generic string
-    runtime.locales satisfies Readonly<Array<"de" | "en" | "en-US">>
+    runtime.availableLocales satisfies Readonly<Array<"de" | "en" | "en-US">>
 
     // setLocale() should fail if the given language tag is not included in availableLocales
     // @ts-expect-error - invalid locale
