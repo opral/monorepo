@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/project-settings",
-  "sourceLanguageTag": "en",
-  "languageTags": ["en", "de"],
+  "baseLocale": "en",
+  "locales": ["en", "de"],
   "modules": [
     "./../../../source-code/plugins/i18next/dist/index.js",
     "./../../../source-code/message-lint-rules/emptyPattern/dist/index.js",
