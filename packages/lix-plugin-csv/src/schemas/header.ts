@@ -1,7 +1,7 @@
 import type { ExperimentalChangeSchema } from "@lix-js/sdk";
 
 export const HeaderSchemaV1 = {
-	key: "lix-plugin-csv" + "-header-v1",
+	key: "lix_plugin_csv_header",
 	type: "json",
 	schema: {
 		type: "object",
