@@ -153,33 +153,40 @@ export const activeCellChangesAtom = atom(async (get) => {
 export const intermediateChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
-	// const activeFile = await get(activeFileAtom);
-	// if (!activeFile) return [];
-	const currentBranch = await get(currentVersionAtom);
-	if (!currentBranch) return [];
-	return await lix.db
+	const activeFile = await get(activeFileAtom);
+	const currentVersion = await get(currentVersionAtom);
+	if (!currentVersion) return [];
+
+	const queryIntermediateLeafChanges = lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.leftJoin("change_edge", "change_edge.child_id", "change.id")
-		.leftJoin(
-			"change as parent_change",
-			"parent_change.id",
-			"change_edge.parent_id"
-		)
-		.leftJoin(
-			"snapshot as parent_snapshot",
-			"parent_snapshot.id",
-			"parent_change.snapshot_id"
-		)
-		.where("change.file_id", "!=", "lix_own_change_control")
-		.where(changeIsLeafInVersion(currentBranch))
+		.where(changeIsLeafInVersion(currentVersion))
 		.where((eb) => eb.not(changeHasLabel("checkpoint")))
+		.where("change.schema_key", "=", CellSchemaV1.key)
 		.selectAll("change")
-		.select(sql`json(snapshot.content)`.as("snapshot_content"))
-		.select(sql`json(parent_snapshot.content)`.as("parent_snapshot_content")) // This will be NULL if no parent exists
-		.groupBy("change.id")
-		.orderBy("change.created_at", "desc")
-		.execute();
+		.select(sql`json(snapshot.content)`.as("snapshot_content"));
+
+	if (activeFile) {
+		queryIntermediateLeafChanges.where("change.file_id", "=", activeFile.id);
+	}
+
+	const intermediateLeafChanges = await queryIntermediateLeafChanges.execute();
+
+	for (const change of intermediateLeafChanges) {
+		const snapshot_before = await lix.db
+			.selectFrom("change")
+			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+			.where(changeInVersion(currentVersion))
+			.where(changeHasLabel("checkpoint"))
+			.where("change.entity_id", "=", change.entity_id)
+			.where("change.schema_key", "=", change.schema_key)
+			.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
+			.executeTakeFirst();
+
+		change.parent_snapshot_content = snapshot_before?.snapshot_content_before;
+	}
+
+	return intermediateLeafChanges;
 });
 
 export const allChangesAtom = atom(async (get) => {

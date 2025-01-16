@@ -13,13 +13,10 @@ import { Button } from "@/components/ui/button.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import {
 	activeFileAtom,
-	changesCurrentVersionAtom,
 	checkpointChangeSetsAtom,
 	intermediateChangesAtom,
 } from "@/state-active-file.ts";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChangeComponent } from "@/components/ChangeComponent.tsx";
-import FilterSelect from "@/components/FilterSelect.tsx";
 import ChatInput from "@/components/ChatInput.tsx";
 import ConnectedChanges from "@/components/ConnectedChanges.tsx";
 import DiscussionThread from "@/components/DiscussionThread.tsx";
@@ -69,7 +66,6 @@ export default function Page() {
 	// state atoms
 	const [lix] = useAtom(lixAtom);
 	const [files] = useAtom(filesAtom);
-	const [changesCurrentVersion] = useAtom(changesCurrentVersionAtom);
 	const [intermediateChanges] = useAtom(intermediateChangesAtom);
 	const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
 	const [activeFile] = useAtom(activeFileAtom);
@@ -338,75 +334,46 @@ export default function Page() {
 					</div>
 				</div>
 			)}
-			{fileIdSearchParams && !discussionSearchParams && (
+			{!discussionSearchParams && (
 				<div className="flex-1 h-full">
 					<SectionHeader
-						backaction={() => navigate("/")}
+						backaction={activeFile ? () => navigate("/") : undefined}
 						title={
 							activeFile?.path.replace("/", "")
 								? `/ ${activeFile?.path.replace("/", "")}`
 								: "Graph"
-						}
+							}
 					>
-						<Button
-							variant="default"
-							size="default"
-							className={activeFile?.path ? "relative" : "hidden"}
-						>
-							<CustomLink
-								to={
-									activeFile?.path && isCsvFile(activeFile.path)
-										? `/app/csv/editor?f=${fileIdSearchParams}`
-										: "https://github.com/opral/monorepo/tree/main/lix"
-								}
-								target={isCsvFile(activeFile?.path || "") ? "_self" : "_blank"}
+						{fileIdSearchParams && (
+							<Button
+								variant="default"
+								size="default"
+								className={activeFile?.path ? "relative" : "hidden"}
 							>
-								{activeFile?.path && isCsvFile(activeFile.path)
-									? "Open in CSV app"
-									: "Build a Lix App"}
-							</CustomLink>
-							{/* indicator for user to click on the button */}
-							{activeFile?.path && (
-								<span className="absolute top-0 right-0 w-2.5 h-2.5 bg-blue-900 rounded-full animate-ping" />
-							)}
-						</Button>
+								<CustomLink
+									to={
+										activeFile?.path && isCsvFile(activeFile.path)
+											? `/app/csv/editor?f=${fileIdSearchParams}`
+											: "https://github.com/opral/monorepo/tree/main/lix"
+									}
+									target={isCsvFile(activeFile?.path || "") ? "_self" : "_blank"}
+								>
+									{activeFile?.path && isCsvFile(activeFile.path)
+										? "Open in CSV app"
+										: "Build a Lix App"}
+								</CustomLink>
+								{/* indicator for user to click on the button */}
+								{activeFile?.path && (
+									<span className="absolute top-0 right-0 w-2.5 h-2.5 bg-blue-900 rounded-full animate-ping" />
+								)}
+							</Button>
+						)}
 					</SectionHeader>
-					<div className="px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
+					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
 						{activeFile?.path && !isCsvFile(activeFile.path) ? (
 							<NoPluginMessage extension={getFileExtension(activeFile.path)} />
 						) : (
-							<>
-								<FilterSelect />
-								{changesCurrentVersion.map((change, i) => (
-									<ChangeComponent
-										key={change.id}
-										change={{
-											...change,
-											snapshot_content: change.snapshot_content as Record<
-												string,
-												any
-											> | null,
-											parent_snapshot_content:
-												change.parent_snapshot_content as Record<
-													string,
-													any
-												> | null,
-											discussion_count: Number(change.discussion_count),
-											discussion_ids: String(change.discussion_ids),
-										}}
-										showTopLine={i !== 0}
-										showBottomLine={i !== changesCurrentVersion.length - 1}
-									/>
-								))}
-							</>
-						)}
-					</div>
-				</div>
-			)}
-			{!discussionSearchParams && (
-				<div className="flex-1 h-full">
-					<SectionHeader title="Overview" />
-					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
+								<>
 						{intermediateChanges.length > 0 && (
 							<IntermediateCheckpointComponent />
 						)}
@@ -420,6 +387,8 @@ export default function Page() {
 								/>
 							);
 						})}
+							</>
+						)}
 					</div>
 				</div>
 			)}
