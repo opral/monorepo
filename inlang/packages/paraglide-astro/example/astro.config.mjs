@@ -1,8 +1,8 @@
-import paraglide from "@inlang/paraglide-astro"
+import paraglideAstro from "@inlang/paraglide-astro";
 import { defineConfig } from "astro/config";
-import sitemap from "@astrojs/sitemap"
-import svelte, { vitePreprocess } from "@astrojs/svelte"
-import node from "@astrojs/node"
+import sitemap from "@astrojs/sitemap";
+import svelte, { vitePreprocess } from "@astrojs/svelte";
+import node from "@astrojs/node";
 
 // https://astro.build/config
 export default defineConfig({
@@ -26,7 +26,7 @@ export default defineConfig({
 		svelte({
 			preprocess: [vitePreprocess()],
 		}),
-		paraglide({
+		paraglideAstro({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
 		}),
