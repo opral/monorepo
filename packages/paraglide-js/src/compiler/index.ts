@@ -1,3 +1,5 @@
+export type { CompilerArgs } from "./compile.js";
+export type { CompilerOptions } from "./compileProject.js";
 export { compile } from "./compile.js";
 export { compileProject } from "./compileProject.js";
 export { compileBundle } from "./compileBundle.js";

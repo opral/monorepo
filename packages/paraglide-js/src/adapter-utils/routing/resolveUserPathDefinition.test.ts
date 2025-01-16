@@ -12,18 +12,18 @@ describe("resolvePathTranslations", () => {
 				de: "/ueber-uns",
 			},
 		};
-		const availableLanguageTags = ["en", "de"] as const;
+		const availableLocales = ["en", "de"] as const;
 		const result = resolveUserPathDefinitions(
 			userTranslations,
-			availableLanguageTags
+			availableLocales
 		);
 		expect(result).toEqual(userTranslations);
 	});
 
 	it("resolves message translations", () => {
 		const userTranslations: UserPathDefinitionTranslations<"en" | "de"> = {
-			"/about": (_: any, { languageTag }: { languageTag: "en" | "de" }) => {
-				switch (languageTag) {
+			"/about": (_: any, { locale }: { locale: "en" | "de" }) => {
+				switch (locale) {
 					case "en":
 						return "/about";
 					case "de":
@@ -32,10 +32,10 @@ describe("resolvePathTranslations", () => {
 			},
 		};
 
-		const availableLanguageTags = ["en", "de"] as const;
+		const availableLocales = ["en", "de"] as const;
 		const result = resolveUserPathDefinitions(
 			userTranslations,
-			availableLanguageTags
+			availableLocales
 		);
 		expect(result).toEqual({
 			"/about": {
