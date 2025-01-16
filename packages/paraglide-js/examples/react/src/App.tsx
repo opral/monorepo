@@ -6,14 +6,14 @@ import {
 	defineGetLocale,
 	defineSetLocale,
 	baseLocale,
-	AvailableLocale,
+	type Locale,
 } from "./paraglide/runtime.js";
 
 function App() {
 	const [localeRenderKey, setLocaleRenderKey] = useState(getLocale());
 
 	defineGetLocale(() => {
-		return (localStorage.getItem("locale") as AvailableLocale) ?? baseLocale;
+		return (localStorage.getItem("locale") as Locale) ?? baseLocale;
 	});
 
 	defineSetLocale((newLocale) => {
