@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { compileBundle } from "./compileBundle.js";
+import { compileBundle } from "./compile-bundle.js";
 import type { BundleNested } from "@inlang/sdk";
 
 test("compiles as ts", async () => {

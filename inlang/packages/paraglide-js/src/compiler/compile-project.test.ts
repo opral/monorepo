@@ -10,7 +10,7 @@ import {
 	Pattern,
 	VariableReference,
 } from "@inlang/sdk";
-import { compileProject, type CompilerOptions } from "./compileProject.js";
+import { compileProject, type CompilerOptions } from "./compile-project.js";
 import virtual from "@rollup/plugin-virtual";
 import { rolldown } from "rolldown";
 

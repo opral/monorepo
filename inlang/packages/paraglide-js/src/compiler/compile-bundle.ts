@@ -1,5 +1,5 @@
 import type { Bundle, BundleNested, Message } from "@inlang/sdk";
-import { compileMessage } from "./compileMessage.js";
+import { compileMessage } from "./compile-message.js";
 import type { Registry } from "./registry.js";
 import { jsIdentifier } from "../services/codegen/identifier.js";
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js";

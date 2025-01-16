@@ -1,5 +1,5 @@
 import { it, expect } from "vitest";
-import { compilePattern } from "./compilePattern.js";
+import { compilePattern } from "./compile-pattern.js";
 import { DEFAULT_REGISTRY } from "./registry.js";
 import type { Pattern } from "@inlang/sdk";
 
