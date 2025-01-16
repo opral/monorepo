@@ -167,7 +167,7 @@ describe.each([
 		test("locales should include locales with a hyphen", async () => {
 			const { runtime } = await importCode(code);
 
-			expect(runtime.availableLocales).toContain("en-US");
+			expect(runtime.locales).toContain("en-US");
 		});
 
 		test("should set the baseLocale as default getLocale value", async () => {
@@ -262,16 +262,16 @@ describe.each([
 			);
 		});
 
-		test("runtime.isAvailableLocale should only return `true` if a locale is passed to it", async () => {
+		test("runtime.isLocale should only return `true` if a locale is passed to it", async () => {
 			const { runtime } = await importCode(code);
 
-			for (const tag of runtime.availableLocales) {
-				expect(runtime.isAvailableLocale(tag)).toBe(true);
+			for (const tag of runtime.locales) {
+				expect(runtime.isLocale(tag)).toBe(true);
 			}
 
-			expect(runtime.isAvailableLocale("")).toBe(false);
-			expect(runtime.isAvailableLocale("pl")).toBe(false);
-			expect(runtime.isAvailableLocale("--")).toBe(false);
+			expect(runtime.isLocale("")).toBe(false);
+			expect(runtime.isLocale("pl")).toBe(false);
+			expect(runtime.isLocale("--")).toBe(false);
 		});
 
 		test("falls back to base locale", async () => {
@@ -413,19 +413,19 @@ describe.each([
     // getLocale() should return type should be a union of language tags, not a generic string
     runtime.getLocale() satisfies "de" | "en" | "en-US"
 
-    // availableLocales should have a narrow type, not a generic string
-    runtime.availableLocales satisfies Readonly<Array<"de" | "en" | "en-US">>
+    // locales should have a narrow type, not a generic string
+    runtime.locales satisfies Readonly<Array<"de" | "en" | "en-US">>
 
-    // setLocale() should fail if the given language tag is not included in availableLocales
+    // setLocale() should fail if the given language tag is not included in locales
     // @ts-expect-error - invalid locale
     runtime.setLocale("fr")
 
-    // setLocale() should not fail if the given language tag is included in availableLocales
+    // setLocale() should not fail if the given language tag is included in locales
     runtime.setLocale("de")
 
-		// isAvailableLocale should narrow the type of it's argument
+		// isLocale should narrow the type of it's argument
 		const thing = 5;
-		if(runtime.isAvailableLocale(thing)) {
+		if(runtime.isLocale(thing)) {
 			const a : "de" | "en" | "en-US" = thing
 		} else {
 			// @ts-expect-error - thing is not a language tag
