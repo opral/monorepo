@@ -1,5 +1,20 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.9
+
+- Expose compiler on the index 
+
+```diff
+-import { compile } from "@inlang/paraglide-js/compiler";
++import { compile } from "@inlang/paraglide-js";
+```
+
+- expose paraglide compile args
+
+```diff
++ import { type CompileArgs } from "@inlang/paraglide-js";
+```
+
 ## 2.0.0-beta.8
 
 - rename `runtime.locales` to `runtime.availableLocales` to align with v1 API and avoid ambiguity https://github.com/opral/inlang-paraglide-js/issues/314
