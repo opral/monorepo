@@ -1,7 +1,7 @@
 import type { ProjectSettings } from "@inlang/sdk";
 import type { CompiledBundleWithMessages } from "../compileBundle.js";
 import { jsIdentifier } from "../../services/codegen/identifier.js";
-import { createRuntime } from "../runtime.js";
+import { createRuntime } from "../runtime/create-runtime.js";
 import { createRegistry } from "../registry.js";
 
 export function generateLocaleModules(
