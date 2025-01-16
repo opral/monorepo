@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { availableLocales, isAvailableLocale } from '../paraglide/runtime.js';
+import { locales, isLocale } from '../paraglide/runtime.js';
 import { getAbsoluteLocaleUrl } from 'astro:i18n';
 
 interface Props {
@@ -13,7 +13,7 @@ const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
 
 function removeLocaleFromPath(path: string) {
 	const [maybeLanguage, ...rest] = path.split('/').filter(Boolean);
-	return isAvailableLocale(maybeLanguage) ? rest.join('/') : path;
+	return isLocale(maybeLanguage) ? rest.join('/') : path;
 }
 
 const pathWithoutLocale = removeLocaleFromPath(Astro.url.pathname);
@@ -35,6 +35,6 @@ const pathWithoutLocale = removeLocaleFromPath(Astro.url.pathname);
 <meta name="description" content={description} />
 
 <!-- Alternate Locale Versions -->
-{availableLocales.map(lang => (
+{locales.map(lang => (
 	<link rel="alternate" hreflang={lang} href={getAbsoluteLocaleUrl(lang, pathWithoutLocale)} />
 ))}
