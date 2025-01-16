@@ -327,16 +327,6 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0)
 
-  inlang/packages/paraglide-js/examples/astro:
-    dependencies:
-      astro:
-        specifier: ^5.1.7
-        version: 5.1.7(@azure/identity@4.5.0)(@types/node@22.10.6)(jiti@2.3.3)(lightningcss@1.27.0)(rollup@4.24.0)(terser@5.36.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.6.0)
-    devDependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../..
-
   inlang/packages/paraglide-js/examples/cli:
     devDependencies:
       '@inlang/paraglide-js':

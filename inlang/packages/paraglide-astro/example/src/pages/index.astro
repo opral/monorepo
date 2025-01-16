@@ -1,6 +1,5 @@
 ---
 import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
 import Counter from '../components/Counter.svelte';
 import Header from '../components/Header.astro';
 import HTML from '../layouts/HTML.astro';
@@ -33,14 +32,11 @@ import * as m from "../paraglide/messages.js"
 				like forms, app-shells, or this counter:
 			</p>
 			<Counter client:load />
-			<button id="en-locale">Switch to en</button>
-			<button id="de-locale">Switch to de</button>
 			<p>
 				Because Paraglide treeshakes very well, each island only ships the message it actually 
 				uses. This means that you can use Paraglide in your app without worrying about 
 				the size of your JS bundle. It can get as small as 100 bytes!
 			</p>
 		</main>
-		<Footer />
 	</body>
 </HTML>
