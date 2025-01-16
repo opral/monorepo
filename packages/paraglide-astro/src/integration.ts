@@ -57,7 +57,7 @@ export function integration(integrationConfig: {
 					"before-hydration",
 					`
           import { isAvailableLocale, defineGetLocale, defineSetLocale, baseLocale } from "virtual:paraglide-astro:runtime";
-					import { getRelativeLocaleUrl } from "astro:i18n";
+					import { getPathByLocale } from "astro:i18n";
 					
 					defineGetLocale(() => {
 						const htmlLang = document.documentElement.lang;
@@ -66,7 +66,7 @@ export function integration(integrationConfig: {
 
 					defineSetLocale((newLocale) => {
 					  const currentPath = window.location.pathname;
-						const redirectTo = getRelativeLocaleUrl(newLocale, currentPath);
+						const redirectTo = getPathByLocale(newLocale, currentPath);
 						window.location = redirectTo;
 					})
                     `,
