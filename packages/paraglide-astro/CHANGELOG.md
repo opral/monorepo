@@ -1,5 +1,10 @@
 # @inlang/paraglide-astro
 
+## 1.0.0-beta.1
+
+- use Paraglide JS 2.0 beta
+- make `setLocale` work
+
 ## 0.3.5
 
 ### Patch Changes
