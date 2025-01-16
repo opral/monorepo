@@ -1,0 +1,12 @@
+{
+	"site_title": "Paraglide + Astro Example",
+	"site_description": "A simple example of using Paraglide with Astro",
+	"follow_us_on": "Follow us on {site}",
+	"view_on": "View on {site}",
+	"all_rights_reserved": "All rights reserved",
+	"count": "The current count is {count}",
+	"english": "English",
+	"german": "German",
+	"page_not_found": "Page not found",
+	"switch_locale": "Programmatically switch locale to {locale}"
+}

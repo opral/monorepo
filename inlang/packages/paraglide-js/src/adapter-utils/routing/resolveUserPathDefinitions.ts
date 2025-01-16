@@ -1,4 +1,4 @@
-import type { MessageIndexFunction } from "../../index.js";
+import type { MessageBundleFunction } from "../../compiler/types.js";
 import type { PathDefinitionTranslations } from "./routeDefinitions.js";
 
 /**
@@ -25,7 +25,7 @@ import type { PathDefinitionTranslations } from "./routeDefinitions.js";
 export type UserPathDefinitionTranslations<T extends string = string> = {
 	[canonicalPath: `/${string}`]:
 		| Record<T, `/${string}`>
-		| MessageIndexFunction<T>;
+		| MessageBundleFunction<T>;
 };
 
 /**
@@ -37,29 +37,26 @@ export type UserPathDefinitionTranslations<T extends string = string> = {
  * Does NOT perform any validation on if the user-provided path translation configuration is valid.
  *
  * @param userTranslations The user-provided path translation configuration.
- * @param availableLanguageTags The available language tags.
+ * @param availableLocales The available language tags.
  * @returns The resolved path translations.
  */
 export const resolveUserPathDefinitions = <T extends string>(
 	userTranslations: UserPathDefinitionTranslations<T>,
-	availableLanguageTags: readonly T[]
+	availableLocales: readonly T[]
 ): PathDefinitionTranslations<T> =>
 	Object.fromEntries(
 		Object.entries(userTranslations).map(([path, translation]) => [
 			path,
 			typeof translation === "object"
 				? translation
-				: fromMessage(translation, availableLanguageTags),
+				: fromMessage(translation, availableLocales),
 		])
 	);
 
 const fromMessage = <T extends string>(
-	message: MessageIndexFunction<T>,
-	availableLanguageTags: readonly T[]
+	message: MessageBundleFunction<T>,
+	availableLocales: readonly T[]
 ) =>
 	Object.fromEntries(
-		availableLanguageTags.map((languageTag) => [
-			languageTag,
-			message({}, { languageTag }),
-		])
+		availableLocales.map((locale) => [locale, message({}, { locale })])
 	) as Record<T, `/${string}`>;

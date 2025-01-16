@@ -5,7 +5,7 @@ import { lookup } from "../services/lookup.js";
 import { generateLocaleModules } from "./output-structure/locale-modules.js";
 import { generateMessageModules } from "./output-structure/message-modules.js";
 
-export type ParaglideCompilerOptions = {
+export type CompilerOptions = {
 	/**
 	 * Whether to emit TypeScript files instead of JSDoc annotated JavaScript.
 	 *
@@ -56,7 +56,7 @@ const defaultCompilerOptions = {
 	experimentalUseTsImports: false,
 	emitGitIgnore: true,
 	emitPrettierIgnore: true,
-} as const satisfies ParaglideCompilerOptions;
+} as const satisfies CompilerOptions;
 
 /**
  * Takes an inlang project and compiles it into a set of files.
@@ -70,9 +70,9 @@ const defaultCompilerOptions = {
  */
 export const compileProject = async (args: {
 	project: InlangProject;
-	compilerOptions?: ParaglideCompilerOptions;
+	compilerOptions?: CompilerOptions;
 }): Promise<Record<string, string>> => {
-	const optionsWithDefaults: Required<ParaglideCompilerOptions> = {
+	const optionsWithDefaults: Required<CompilerOptions> = {
 		...defaultCompilerOptions,
 		...args.compilerOptions,
 	};
