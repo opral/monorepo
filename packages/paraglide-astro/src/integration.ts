@@ -50,12 +50,12 @@ export function integration(args: CompilerArgs): AstroIntegration {
 				injectScript(
 					"before-hydration",
 					`
-          import { isAvailableLocale, defineGetLocale, defineSetLocale, baseLocale } from "virtual:paraglide-astro:runtime";
+          import { isLocale, defineGetLocale, defineSetLocale, baseLocale } from "virtual:paraglide-astro:runtime";
 					import { getPathByLocale, getLocaleByPath } from "astro:i18n";
 
 					function splitPathByLocale(path) {
 						const [maybeLocale, ...rest] = path.split('/').filter(Boolean);
-						const locale = isAvailableLocale(maybeLocale) ? maybeLocale : baseLocale;
+						const locale = isLocale(maybeLocale) ? maybeLocale : baseLocale;
 						return [locale, rest.join('/')];
 				  }
 					

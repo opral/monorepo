@@ -2,7 +2,6 @@ import {
 	baseLocale,
 	defineGetLocale,
 	defineSetLocale,
-	isAvailableLocale,
 } from "virtual:paraglide-astro:runtime";
 import { type MiddlewareHandler } from "astro";
 import { AsyncLocalStorage } from "node:async_hooks";
