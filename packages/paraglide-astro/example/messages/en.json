@@ -7,5 +7,6 @@
 	"count": "The current count is {count}",
 	"english": "English",
 	"german": "German",
-	"page_not_found": "Page not found"
+	"page_not_found": "Page not found",
+	"switch_locale": "Programmatically switch locale to {locale}"
 }

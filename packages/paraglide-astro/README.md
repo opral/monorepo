@@ -22,7 +22,7 @@ npx @inlang/paraglide-js@latest init
 npm i @inlang/paraglide-astro
 ```
 
-This will generate `messages/{locale}.json` files for each of your languages. That's where your translations live.
+This will generate `messages/{locale}.json` files for each of your languages. 
 
 Register the Integration in `astro.config.mjs`:
 
@@ -32,10 +32,9 @@ import paraglide from "@inlang/paraglide-astro"
 export default {
 	// Use astro's i18n routing for deciding which language to use
 	i18n: {
-		locales: ["en", { code: "de", path: "deutsch" }],
 		defaultLocale: "en",
+		locales: ["en", "de"],
 	},
-
 	integrations: [
 		paraglide({
 			project: "./project.inlang",
@@ -49,28 +48,17 @@ export default {
 
 To switch the language, route to the language of interest. For example, to switch to German, route to `/de/page`.
 
+```tsx
+<a href="/page">Switch to en</a>
+<a href="/de/page">Switch to de</a>
+```
+
 You can also use `setLocale` which will redirect the user to page in the given locale. Keep in mind that programmatically setting the locale will ship JS to the client and increase the bundle size.
 
 ```ts
 import { setLocale } from "../paraglide/runtime.js"
 
 setLocale("de")
-```
-
-## Passing the locale to the client
-
-To save bundle size the integration doesn't ship language detection code to the client. Instead, it will read the `lang` attribute on the `<html>` tag. Make sure it is set correctly.
-
-```astro
-//src/layouts/default.astro
----
-import { getLocale } from "../paraglide/runtime.js";
----
-
-<!doctype html>
-<html lang={getLocale()}>
-    <slot />
-</html>
 ```
 
 # Usage
@@ -115,13 +103,11 @@ import { getLocale } from "$paraglide/runtime";
 ---
 
 <!doctype html>
-<html lang={getLocale()} dir={Astro.locals.paraglide.dir}>
+<html lang={getLocale()}>
     <slot />
 </html>
 ---
 ```
-
-You can also access the current language and text-direction via `Astro.locals.paraglide.lang` and `Astro.locals.paraglide.dir` respectively.
 
 ## Linking between pages
 

@@ -6,18 +6,6 @@ import HTML from '../layouts/HTML.astro';
 import * as m from "../paraglide/messages.js"
 ---
 
-<script>
-	import { setLocale} from "../paraglide/runtime.js"
-
-	document.querySelector("#en-locale")?.addEventListener('click', () => {
-		setLocale("en")
-	})
-
-	document.querySelector("#de-locale")?.addEventListener('click', () => {
-		setLocale("de")
-	})
-</script>
-
 <HTML>
 	<head>
 		<BaseHead title={m.site_title()} description={m.site_description()} />

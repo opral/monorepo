@@ -7,5 +7,6 @@
 	"count": "Der Zählerstand ist: {count}",
 	"english": "Englisch",
 	"german": "Deutsch",
-	"page_not_found": "Seite nicht gefunden"
+	"page_not_found": "Seite nicht gefunden",
+	"switch_locale": "Programmatisch locale ändern zu {locale}"
 }
