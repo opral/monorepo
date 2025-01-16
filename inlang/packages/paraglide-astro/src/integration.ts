@@ -57,17 +57,30 @@ export function integration(integrationConfig: {
 					"before-hydration",
 					`
           import { isAvailableLocale, defineGetLocale, defineSetLocale, baseLocale } from "virtual:paraglide-astro:runtime";
-					import { getPathByLocale } from "astro:i18n";
+					import { getPathByLocale, getLocaleByPath } from "astro:i18n";
+
+					function splitPathByLocale(path) {
+						const [maybeLocale, ...rest] = path.split('/').filter(Boolean);
+						const locale = isAvailableLocale(maybeLocale) ? maybeLocale : baseLocale;
+						return [locale, rest.join('/')];
+				  }
 					
 					defineGetLocale(() => {
-						const htmlLang = document.documentElement.lang;
-					  return isAvailableLocale(htmlLang) ? htmlLang : baseLocale;
+						const [locale] = splitPathByLocale(window.location.pathname);
+						console.log("getting locale", locale);
+						return locale;
 					});
 
 					defineSetLocale((newLocale) => {
-					  const currentPath = window.location.pathname;
-						const redirectTo = getPathByLocale(newLocale, currentPath);
-						window.location = redirectTo;
+						const [locale, path] = splitPathByLocale(window.location.pathname);
+						const redirectTo = getPathByLocale(newLocale, path);
+
+						// the astro getPathByLocale function is buggy and returns the baseLocale as path
+						if (redirectTo.replaceAll("/", "") === baseLocale){
+							window.location = '/';
+						} else {
+							window.location = redirectTo;
+						}
 					})
                     `,
 				);

@@ -11,12 +11,12 @@ interface Props {
 
 const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
 
-function removeLanguagePrefix(path: string) {
+function removeLocaleFromPath(path: string) {
 	const [maybeLanguage, ...rest] = path.split('/').filter(Boolean);
 	return isAvailableLocale(maybeLanguage) ? rest.join('/') : path;
 }
 
-const currentPathWithoutLanguage = removeLanguagePrefix(Astro.url.pathname);
+const pathWithoutLocale = removeLocaleFromPath(Astro.url.pathname);
 ---
 
 <!-- Global Metadata -->
@@ -36,5 +36,5 @@ const currentPathWithoutLanguage = removeLanguagePrefix(Astro.url.pathname);
 
 <!-- Alternate Locale Versions -->
 {availableLocales.map(lang => (
-	<link rel="alternate" hreflang={lang} href={getAbsoluteLocaleUrl(lang, currentPathWithoutLanguage)} />
+	<link rel="alternate" hreflang={lang} href={getAbsoluteLocaleUrl(lang, pathWithoutLocale)} />
 ))}

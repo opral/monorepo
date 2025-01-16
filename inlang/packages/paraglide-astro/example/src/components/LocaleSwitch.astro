@@ -1,3 +1,7 @@
+---
+import * as m from "../paraglide/messages.js"
+---
+
 <script>
 	import { setLocale} from "../paraglide/runtime.js"
 
@@ -11,6 +15,6 @@
 </script>
 
 <div>
-  <button id="en-locale">Programmatically switch to en</button>
-  <button id="de-locale">Programmatically switch to de</button>
+  <button id="en-locale">{m.switch_locale({ locale: "en" })}</button>
+  <button id="de-locale">{m.switch_locale({ locale: "de" })}</button>
 </div>
