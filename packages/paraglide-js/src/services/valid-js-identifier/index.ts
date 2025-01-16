@@ -1,4 +1,4 @@
-import { KEYWORDS } from "./reservedWords.js";
+import { KEYWORDS } from "./reserved-words.js";
 
 /**
  * Checks if a string is a valid JS identifier.

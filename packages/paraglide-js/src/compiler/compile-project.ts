@@ -1,4 +1,4 @@
-import { compileBundle } from "./compileBundle.js";
+import { compileBundle } from "./compile-bundle.js";
 import { DEFAULT_REGISTRY } from "./registry.js";
 import { selectBundleNested, type InlangProject } from "@inlang/sdk";
 import { lookup } from "../services/lookup.js";

@@ -1,5 +1,5 @@
 import { it, expect } from "vitest";
-import { compileMessage } from "./compileMessage.js";
+import { compileMessage } from "./compile-message.js";
 import type { Declaration, Message, Variant } from "@inlang/sdk";
 import { DEFAULT_REGISTRY } from "./registry.js";
 

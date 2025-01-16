@@ -1,7 +1,7 @@
 import type { Pattern } from "@inlang/sdk";
 import { escapeForTemplateLiteral } from "../services/codegen/escape.js";
 import { backtick } from "../services/codegen/quotes.js";
-import { compileExpression } from "./compileExpression.js";
+import { compileExpression } from "./compile-expression.js";
 import type { Compiled } from "./types.js";
 import type { Registry } from "./registry.js";
 

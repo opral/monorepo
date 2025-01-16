@@ -3,7 +3,7 @@ import type { CliStep } from "../utils.js";
 import path from "node:path";
 import { writeOutput } from "../../services/file-handling/write-output.js";
 import fs from "node:fs";
-import { compileProject } from "../../compiler/compileProject.js";
+import { compileProject } from "../../compiler/compile-project.js";
 
 export const runCompiler: CliStep<
 	{

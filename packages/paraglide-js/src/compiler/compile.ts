@@ -1,7 +1,7 @@
 import { loadProjectFromDirectory } from "@inlang/sdk";
 import path from "node:path";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
-import { compileProject, type CompilerOptions } from "./compileProject.js";
+import { compileProject, type CompilerOptions } from "./compile-project.js";
 import { writeOutput } from "../services/file-handling/write-output.js";
 import {
 	getLocalAccount,
