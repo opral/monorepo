@@ -1,3 +1,8 @@
+// to modify the runtime, outcomment the export const jsdocRuntime line
+
+export const jsdocRuntime = `
+// @eslint-disable
+
 /**
  * The project's base locale.
  *
@@ -123,3 +128,5 @@ export function isLocale(locale) {
  *
  * @typedef {(typeof locales)[number]} Locale
  */
+
+`;
