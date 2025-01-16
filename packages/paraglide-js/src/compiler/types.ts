@@ -7,15 +7,15 @@ export type Compiled<Node> = {
 
 /**
  * A message function that takes inputs and returns a message.
- * 
+ *
  * @example
  *   import
  */
 export type MessageFunction = (inputs?: Record<string, never>) => string;
 
 /**
- * A message bundle function. 
- * 
+ * A message bundle function.
+ *
  * @example
  *   import * as m from './messages.js'
  *   m.hello({ name: 'world', { locale: "en" } })
