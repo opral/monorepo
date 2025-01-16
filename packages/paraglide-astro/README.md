@@ -27,7 +27,7 @@ This will generate `messages/{locale}.json` files for each of your languages.
 Register the Integration in `astro.config.mjs`:
 
 ```js
-import paraglide from "@inlang/paraglide-astro"
+import paraglideAstro from "@inlang/paraglide-astro"
 
 export default {
 	// Use astro's i18n routing for deciding which language to use
@@ -36,7 +36,7 @@ export default {
 		locales: ["en", "de"],
 	},
 	integrations: [
-		paraglide({
+		paraglideAstro({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
 		}),
