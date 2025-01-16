@@ -1,26 +1,11 @@
 import type { UnpluginFactory } from "unplugin";
-import type { ParaglideCompilerOptions } from "../compiler/compileProject.js";
-import { compile } from "../compiler/compile.js";
+import { compile, type CompilerArgs } from "../compiler/compile.js";
 import fs from "node:fs";
 import { resolve } from "node:path";
 
 const PLUGIN_NAME = "unplugin-paraglide-js";
 
-export const unpluginFactory: UnpluginFactory<{
-	/**
-	 * The path to the inlang project.
-	 *
-	 * @example "./project.inlang"
-	 */
-	project: string;
-	/**
-	 * The path to the output directory.
-	 *
-	 * @example "./src/paraglide"
-	 */
-	outdir: string;
-	compilerOptions?: ParaglideCompilerOptions;
-}> = (args) => ({
+export const unpluginFactory: UnpluginFactory<CompilerArgs> = (args) => ({
 	name: PLUGIN_NAME,
 	enforce: "pre",
 	async buildStart() {
