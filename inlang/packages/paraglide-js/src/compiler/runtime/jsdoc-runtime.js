@@ -12,17 +12,17 @@ export const baseLocale = "<replace>";
  * The project's locales that have been specified in the settings.
  *
  * @example
- *   if (availableLocales.includes(userSelectedLocale) === false) {
+ *   if (locales.includes(userSelectedLocale) === false) {
  *     throw new Error('Locale is not available');
  *   }
  */
-export const availableLocales = /** @type {const} */ (["<replace>"]);
+export const locales = /** @type {const} */ (["<replace>"]);
 
 /**
  * This is a default implementation that is almost always
  * overwritten by \`defineGetLocale()\` and \`defineSetLocale()\`.
  *
- * @type {AvailableLocale}
+ * @type {Locale}
  */
 let _locale = baseLocale;
 
@@ -39,8 +39,8 @@ let _locale = baseLocale;
  *     return Cookies.get('locale') ?? baseLocale
  *   }
  *
- * @param {() => AvailableLocale} fn
- * @type {(fn: () => AvailableLocale) => void}
+ * @param {() => Locale} fn
+ * @type {(fn: () => Locale) => void}
  */
 export const defineGetLocale = (fn) => {
 	getLocale = fn;
@@ -58,7 +58,7 @@ export const defineGetLocale = (fn) => {
  *     return Cookies.set('locale', newLocale)
  *   });
  *
- * @param {(newLocale: AvailableLocale) => void} fn
+ * @param {(newLocale: Locale) => void} fn
  */
 export const defineSetLocale = (fn) => {
 	setLocale = fn;
@@ -74,7 +74,7 @@ export const defineSetLocale = (fn) => {
  *     console.log('Netherlands 🇳🇱');
  *   }
  *
- * @type {() => AvailableLocale}
+ * @type {() => Locale}
  */
 export let getLocale =
 	/** default implementation likely overwritten by \`defineGetLocale()\` */ () =>
@@ -86,8 +86,8 @@ export let getLocale =
  * @example
  *   setLocale('en');
  *
- * @param {AvailableLocale} newLocale
- * @type {(newLocale: AvailableLocale) => void}
+ * @param {Locale} newLocale
+ * @type {(newLocale: Locale) => void}
  */
 export let setLocale =
 	/** default implementation likely overwritten by \`defineSetLocale()\` */ (
@@ -107,10 +107,10 @@ export let setLocale =
  *   }
  *
  * @param {any} locale
- * @returns {locale is AvailableLocale}
+ * @returns {locale is Locale}
  */
-export function isAvailableLocale(locale) {
-	return availableLocales.includes(locale);
+export function isLocale(locale) {
+	return locales.includes(locale);
 }
 
 // ------ TYPES ------
@@ -119,7 +119,7 @@ export function isAvailableLocale(locale) {
  * A locale that is available in the project.
  *
  * @example
- *   setLocale(request.locale as AvailableLocale)
+ *   setLocale(request.locale as Locale)
  *
- * @typedef {(typeof availableLocales)[number]} AvailableLocale
+ * @typedef {(typeof locales)[number]} Locale
  */

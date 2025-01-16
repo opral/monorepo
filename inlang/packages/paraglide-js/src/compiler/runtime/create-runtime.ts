@@ -8,11 +8,10 @@ const __dirname = path.dirname(__filename);
 const tsRuntime = fs.readFileSync(path.resolve(__dirname, "ts-runtime.ts"), {
 	encoding: "utf-8",
 });
+
 const jsdocRuntime = fs.readFileSync(
 	path.resolve(__dirname, "jsdoc-runtime.js"),
-	{
-		encoding: "utf-8",
-	}
+	{ encoding: "utf-8" }
 );
 
 /**
