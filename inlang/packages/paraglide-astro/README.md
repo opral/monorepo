@@ -15,7 +15,7 @@ imports:
 
 [![Inlang-ecosystem compatibility badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
 
-# Gettting Started 
+# Getting Started 
 
 ```bash
 npx @inlang/paraglide-js@latest init
@@ -158,6 +158,19 @@ For SEO reasons, you should add alternate links to your page's head that point t
 
 Since only you know which pages correspond to each other this can't reliably be done automatically. Add these links manually.
 
-# Playground
+# Migrating to v1 (beta)
 
-Check out an example Astro project with Paraglide integration on [StackBlitz](https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example)
+1. Remove references of `Astro.locals.paraglide` from your code in favor of `getLocale()`. If you want to include the dir in the HTML, write your own function. 
+
+```diff
+---
++imports { getLocale } from "$paraglide/runtime.js"
+---
+
+
+<!doctype html>
+-<html lang={Astro.locals.paraglide.locale} dir={Astro.locals.paraglide.dir}>
++<html lang={getLocale()}>
+    <slot />
+</html>
+```

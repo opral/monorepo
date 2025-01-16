@@ -1,8 +1,5 @@
 <script>
     import * as m from "$paraglide/messages.js";
-    import { getLocale } from "$paraglide/runtime.js";
-
-    console.log("locale", getLocale())
 
     let count = 0;
 </script>
