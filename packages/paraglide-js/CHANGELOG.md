@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.10
+
+- remove `available` prefix from locale APIs alltogether https://github.com/opral/inlang-paraglide-js/issues/201#issuecomment-2596202820
+
 ## 2.0.0-beta.9
 
 - Expose compiler on the index 
