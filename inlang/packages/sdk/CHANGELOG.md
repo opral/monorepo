@@ -1,5 +1,13 @@
 # @inlang/sdk
 
+## 2.1.1
+
+### Patch Changes
+
+- Updated dependencies [31e8fb8]
+  - sqlite-wasm-kysely@0.2.0
+  - @lix-js/sdk@0.3.4
+
 ## 2.1.0
 
 ### Minor Changes
