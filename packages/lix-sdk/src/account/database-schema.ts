@@ -1,10 +1,10 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
-import type { SqliteDatabase } from "sqlite-wasm-kysely";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { humanId } from "human-id";
 
 export function applyAccountDatabaseSchema(
-	sqlite: SqliteDatabase
-): SqliteDatabase {
+	sqlite: SqliteWasmDatabase
+): SqliteWasmDatabase {
 	const anonymousAccountName = `Anonymous ${humanId({
 		capitalize: true,
 		adjectiveCount: 0,
