@@ -1,5 +1,17 @@
 # @lix-js/plugin-csv
 
+## 0.1.0
+
+### Minor Changes
+
+- 494ab14: refactor: remove version numbers from plugin_key and schema_key
+
+  closes https://github.com/opral/lix-sdk/issues/234
+
+### Patch Changes
+
+- @lix-js/sdk@0.3.4
+
 ## 0.0.7
 
 ### Patch Changes
