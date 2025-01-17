@@ -9,7 +9,6 @@ export const unpluginFactory: UnpluginFactory<CompilerArgs> = (args) => ({
 	name: PLUGIN_NAME,
 	enforce: "pre",
 	async buildStart() {
-		console.log("Paraglide JS: Compiling inlang project...");
 		await compile({
 			project: args.project,
 			outdir: args.outdir,
@@ -23,7 +22,6 @@ export const unpluginFactory: UnpluginFactory<CompilerArgs> = (args) => ({
 	},
 	async watchChange(path) {
 		if (readFiles.has(path)) {
-			console.log(`Paraglide JS: Recompiling inlang project...`);
 			readFiles.clear();
 			await compile({
 				project: args.project,
