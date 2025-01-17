@@ -1,9 +1,9 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
-import type { SqliteDatabase } from "sqlite-wasm-kysely";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 export function applyKeyValueDatabaseSchema(
-	sqlite: SqliteDatabase
-): SqliteDatabase {
+	sqlite: SqliteWasmDatabase
+): SqliteWasmDatabase {
 	return sqlite.exec`
 	CREATE TABLE IF NOT EXISTS key_value (
 		key TEXT PRIMARY KEY,

@@ -1,7 +1,10 @@
 import { toBlob, type Account, type Lix } from "@lix-js/sdk";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
-import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
+import {
+	contentFromDatabase,
+	type SqliteWasmDatabase,
+} from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
 import {
 	importPlugins,
@@ -19,7 +22,7 @@ import { exportFiles } from "../import-export/exportFiles.js";
  * Common load project logic.
  */
 export async function loadProject(args: {
-	sqlite: SqliteDatabase;
+	sqlite: SqliteWasmDatabase;
 	lix: Lix;
 	/**
 	 * The account that loaded the project.
@@ -211,7 +214,7 @@ export async function loadProject(args: {
 }
 
 async function saveDbToLix(args: {
-	sqlite: SqliteDatabase;
+	sqlite: SqliteWasmDatabase;
 	lix: Lix;
 }): Promise<void> {
 	const data = contentFromDatabase(args.sqlite);

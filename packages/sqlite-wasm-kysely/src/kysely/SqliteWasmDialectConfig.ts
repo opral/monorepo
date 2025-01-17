@@ -1,5 +1,5 @@
 import { DatabaseConnection } from "kysely";
-import { Database } from "@eliaspourquoi/sqlite-node-wasm";
+import { SqliteWasmDatabase } from "../util/createInMemoryDatabase.js";
 
 export interface SqliteWasmDialectConfig {
   /**
@@ -9,7 +9,7 @@ export interface SqliteWasmDialectConfig {
    *
    * https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#new-databasepath-options
    */
-  database: Database | (() => Promise<Database>);
+  database: SqliteWasmDatabase | (() => Promise<SqliteWasmDatabase>);
   /**
    * Called once when the first query is executed.
    *
