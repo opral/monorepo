@@ -1,5 +1,10 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.11
+
+- improve: compiler awaits ongoing compilations before starting a new one 
+- update dependency that fixes https://github.com/opral/inlang-paraglide-js/issues/320
+
 ## 2.0.0-beta.10
 
 - remove `available` prefix from locale APIs alltogether https://github.com/opral/inlang-paraglide-js/issues/201#issuecomment-2596202820

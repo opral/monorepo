@@ -132,3 +132,36 @@ test("cleans the output directory", async () => {
 	expect(outputDir).not.toContain("y.js");
 	expect(outputSubDir).toBe(false);
 });
+
+test("multiple compile calls do not interfere with each other", async () => {
+	const fs = memfs().fs as unknown as typeof import("node:fs");
+
+	const project = await loadProjectInMemory({
+		blob: await newProject({}),
+	});
+
+	await saveProjectToDirectory({
+		project,
+		path: "/project.inlang",
+		fs: fs.promises,
+	});
+
+	const compilations = [
+		compile({
+			project: "/project.inlang",
+			outdir: "/output/subdir",
+			fs: fs,
+		}),
+		compile({
+			project: "/project.inlang",
+			outdir: "/output",
+			fs: fs,
+		}),
+	];
+
+	await Promise.all(compilations);
+
+	const outputDir = await fs.promises.readdir("/output");
+
+	expect(outputDir).not.toContain("subdir");
+});

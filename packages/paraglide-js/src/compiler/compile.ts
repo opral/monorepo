@@ -35,6 +35,10 @@ export type CompilerArgs = {
 	fs?: typeof import("node:fs");
 };
 
+// This is a workaround to prevent multiple compilations from running at the same time.
+// https://github.com/opral/inlang-paraglide-js/issues/320#issuecomment-2596951222
+let compilationInProgress: Promise<void> | null = null;
+
 /**
  * Loads, compiles, and writes the output to disk.
  *
@@ -49,33 +53,42 @@ export type CompilerArgs = {
  *   })
  */
 export async function compile(args: CompilerArgs): Promise<void> {
-	const fs = args.fs ?? (await import("node:fs"));
-	const absoluteOutdir = path.resolve(process.cwd(), args.outdir);
-
-	const localAccount = getLocalAccount({ fs });
-
-	const project = await loadProjectFromDirectory({
-		path: args.project,
-		fs,
-		account: localAccount,
-		appId: ENV_VARIABLES.PARJS_APP_ID,
-	});
-
-	const output = await compileProject({
-		project,
-		compilerOptions: args.compilerOptions,
-	});
-
-	await writeOutput(absoluteOutdir, output, fs.promises);
-
-	if (!localAccount) {
-		const activeAccount = await project.lix.db
-			.selectFrom("active_account")
-			.selectAll()
-			.executeTakeFirstOrThrow();
-
-		saveLocalAccount({ fs, account: activeAccount });
+	if (compilationInProgress) {
+		await compilationInProgress;
 	}
 
-	await project.close();
+	compilationInProgress = (async () => {
+		const fs = args.fs ?? (await import("node:fs"));
+		const absoluteOutdir = path.resolve(process.cwd(), args.outdir);
+
+		const localAccount = getLocalAccount({ fs });
+
+		const project = await loadProjectFromDirectory({
+			path: args.project,
+			fs,
+			account: localAccount,
+			appId: ENV_VARIABLES.PARJS_APP_ID,
+		});
+
+		const output = await compileProject({
+			project,
+			compilerOptions: args.compilerOptions,
+		});
+
+		await writeOutput(absoluteOutdir, output, fs.promises);
+
+		if (!localAccount) {
+			const activeAccount = await project.lix.db
+				.selectFrom("active_account")
+				.selectAll()
+				.executeTakeFirstOrThrow();
+
+			saveLocalAccount({ fs, account: activeAccount });
+		}
+
+		await project.close();
+	})();
+
+	await compilationInProgress;
+	compilationInProgress = null;
 }
