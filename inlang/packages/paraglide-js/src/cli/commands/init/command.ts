@@ -6,7 +6,7 @@ import { findPackageJson } from "../../../services/environment/package.js";
 import { checkForUncommittedChanges } from "../../steps/check-for-uncomitted-changes.js";
 import { initializeInlangProject } from "../../steps/initialize-inlang-project.js";
 import { maybeAddSherlock } from "../../steps/maybe-add-sherlock.js";
-import { maybeChangeTsConfig } from "../../steps/update-ts-config.js";
+import { maybeUpdateTsConfig } from "../../steps/update-ts-config.js";
 import { promptForOutdir } from "../../steps/prompt-for-outdir.js";
 import { updatePackageJson } from "../../steps/update-package-json.js";
 import { runCompiler } from "../../steps/run-compiler.js";
@@ -44,7 +44,7 @@ export const initCommand = new Command()
 			await addCompileStepToPackageJSON(ctx6);
 		}
 
-		const ctx7 = await maybeChangeTsConfig(ctx6);
+		const ctx7 = await maybeUpdateTsConfig(ctx6);
 		const ctx8 = await maybeAddSherlock(ctx7);
 
 		try {

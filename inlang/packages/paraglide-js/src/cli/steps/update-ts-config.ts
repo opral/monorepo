@@ -5,18 +5,18 @@ import JSON5 from "json5";
 import { pathExists } from "../../services/file-handling/exists.js";
 import nodePath from "node:path";
 
-export const maybeChangeTsConfig: CliStep<
+export const maybeUpdateTsConfig: CliStep<
 	{ fs: typeof import("node:fs/promises"); logger: Logger },
 	unknown
 > = async (ctx) => {
-	const ctx1 = await maybeChangeTsConfigAllowJs(ctx);
-	return await maybeChangeTsConfigModuleResolution(ctx1);
+	const ctx1 = await maybeUpdateTsConfigAllowJs(ctx);
+	return await maybeUpdateTsConfigModuleResolution(ctx1);
 };
 
 /**
  * Paraligde JS compiles to JS with JSDoc comments. TypeScript doesn't allow JS files by default.
  */
-export const maybeChangeTsConfigAllowJs: CliStep<
+export const maybeUpdateTsConfigAllowJs: CliStep<
 	{ fs: typeof import("node:fs/promises"); logger: Logger },
 	unknown
 > = async (ctx) => {
@@ -86,7 +86,7 @@ export const maybeChangeTsConfigAllowJs: CliStep<
  * Otherwise, types defined in `package.exports` are not resolved by TypeScript. Leading to type
  * errors with Paraglide-JS.
  */
-const maybeChangeTsConfigModuleResolution: CliStep<
+const maybeUpdateTsConfigModuleResolution: CliStep<
 	{ fs: typeof import("node:fs/promises"); logger: Logger },
 	unknown
 > = async (ctx) => {
