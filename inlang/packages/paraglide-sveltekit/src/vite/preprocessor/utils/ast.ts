@@ -1,10 +1,6 @@
-import type { LegacyRoot } from "svelte/compiler"
 import type { Attribute, ElementNode, TemplateNode } from "../types.js"
 
-export function getElementsFromAst<Name extends string>(
-	ast: LegacyRoot,
-	elementName: Name
-): ElementNode<Name>[] {
+export function getElementsFromAst<Name extends string>(ast: any, elementName: Name): ElementNode<Name>[] {
 	const links: ElementNode<Name>[] = []
 
 	function walk(templateNode: TemplateNode) {
