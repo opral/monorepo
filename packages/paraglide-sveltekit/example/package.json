@@ -3,10 +3,10 @@
 	"version": "0.1.86",
 	"private": true,
 	"scripts": {
-		"_dev": "vite dev",
+		"dev": "vite dev",
 		"start": "vite dev",
-		"build": "vite build && tsc --noEmit",
-		"test": "vite build",
+		"build": "vite build",
+		"test": "tsc --noEmit && vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
