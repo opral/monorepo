@@ -60,19 +60,7 @@
 	"exports": {
 		".": "./dist/index.js",
 		"./cli": "./dist/cli/index.js",
-		"./compiler": "./dist/compiler/index.js",
-		"./internal": {
-			"import": "./dist/index.js",
-			"types": "./dist/index.d.ts"
-		},
-		"./internal/cli": {
-			"import": "./dist/cli/index.js",
-			"types": "./dist/cli/index.d.ts"
-		},
-		"./internal/adapter-utils": {
-			"import": "./dist/adapter-utils/index.js",
-			"types": "./dist/adapter-utils/index.d.ts"
-		}
+		"./compiler": "./dist/compiler/index.js"
 	},
 	"keywords": [
 		"inlang",
