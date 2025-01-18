@@ -1,5 +1,7 @@
 export type { CompilerArgs } from "./compile.js";
 export type { CompilerOptions } from "./compile-project.js";
+export type { MessageBundleFunction, MessageFunction } from "./types.js";
+export type { Runtime } from "./runtime/type.js";
 export { compile } from "./compile.js";
 export { compileProject } from "./compile-project.js";
 export { compileBundle } from "./compile-bundle.js";
