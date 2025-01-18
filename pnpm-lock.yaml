@@ -397,11 +397,8 @@ importers:
   inlang/packages/paraglide-sveltekit:
     dependencies:
       '@inlang/paraglide-js':
-        specifier: 1.11.8
-        version: 1.11.8
-      '@inlang/paraglide-vite':
-        specifier: 1.3.5
-        version: 1.3.5
+        specifier: workspace:*
+        version: link:../paraglide-js
       '@lix-js/client':
         specifier: 2.2.1
         version: 2.2.1
@@ -469,16 +466,16 @@ importers:
 
   inlang/packages/paraglide-sveltekit/example:
     dependencies:
-      '@inlang/paraglide-sveltekit':
-        specifier: workspace:*
-        version: link:..
       typescript:
-        specifier: ^4||^5
+        specifier: ^5
         version: 5.7.3
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
+      '@inlang/paraglide-sveltekit':
+        specifier: workspace:*
+        version: link:..
       '@sveltejs/adapter-node':
         specifier: ^5.2.10
         version: 5.2.12(@sveltejs/kit@2.16.0(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.18.0)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.27.0)(terser@5.36.0)))(svelte@5.18.0)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.27.0)(terser@5.36.0)))
@@ -4180,21 +4177,11 @@ packages:
     resolution: {integrity: sha512-KEZQvED+eLidJ/U7VSE60ux7M+ctfvvxlqQ3pkaSNbRPeEYRSt/9e8aWMv9cHgEtqS62x2s0n7Ej+BF7uNSJyA==}
     hasBin: true
 
-  '@inlang/paraglide-js@1.11.8':
-    resolution: {integrity: sha512-PxzrmDP63fbMNF4/AtiLFTnUodFxVbOkLpIrOzPZvNuLg0wCWnsaBfNT87/rNjL/A7ZPzEBmuDi0P2pn8iB0Fw==}
-    hasBin: true
-
   '@inlang/paraglide-unplugin@1.9.4':
     resolution: {integrity: sha512-8UPXNJSdJx8c5p2R85ITqEv9crPgcIJ3W7CsJRWhLHOU3g6FibXbwz98+25jTJJnadmhiQ+P+nZKNYJOFjcEDw==}
 
-  '@inlang/paraglide-unplugin@1.9.5':
-    resolution: {integrity: sha512-5KklLBvl/y+R4SccWH74USTGQNFW5IwEyMLQ3WIHX9cHX2pnnA5wGqQxYg3EcgCyErHLc3+sm7EMNB5Z0dSeTg==}
-
   '@inlang/paraglide-vite@1.3.4':
     resolution: {integrity: sha512-6LqDU7ed7QzV5qBGcOfFhuvGZZ3s5RFBSHyItyh9G8+8XrpGGYIQ5LZfvgd2DAFs2Bzjlk5gRGXcfwc5W+wfYQ==}
-
-  '@inlang/paraglide-vite@1.3.5':
-    resolution: {integrity: sha512-yLa+gxA8el6RXXneeiqTnV9Od4Yh389lA+wSfiS+jDXY5vV/2j7Lpk2yuATLmxwI9i2nMP6c6yu8L0X77PA9dg==}
 
   '@inlang/plugin-message-format@2.2.0':
     resolution: {integrity: sha512-6MJLExr3OLqbR8gCP4UEgNMgdaJFFCug2GLmFwid7Ana4kObnbCA33YN3m3eN8p+lmnv7zpfW7oeyTZXZLoptg==}
@@ -4224,10 +4211,6 @@ packages:
 
   '@inlang/sdk@0.36.4':
     resolution: {integrity: sha512-fTr0mkDx2ViZt/8lxaF9Mxj3m8LaqIhcjMJy+CdHREMc9UvpUhGLB7elMp061YysxnN1CFccAgLRug5VWK3yWw==}
-    engines: {node: '>=18.0.0'}
-
-  '@inlang/sdk@0.37.0':
-    resolution: {integrity: sha512-/uG/9HrJU+v5jY/nWKZAlI3diD8WdT5bAYuIZ3rVsnphvqV4iWvQwAp3H/K8F5QDJ+GEY79mhKfFhHcKMSiWng==}
     engines: {node: '>=18.0.0'}
 
   '@inlang/translatable@1.3.1':
@@ -17721,26 +17704,6 @@ snapshots:
       - debug
       - supports-color
 
-  '@inlang/paraglide-js@1.11.8':
-    dependencies:
-      '@inlang/detect-json-formatting': 1.0.0
-      '@inlang/language-tag': 1.5.1
-      '@inlang/plugin-message-format': 2.2.0
-      '@inlang/recommend-ninja': 0.1.1
-      '@inlang/recommend-sherlock': 0.1.1
-      '@inlang/sdk': 0.37.0
-      '@lix-js/client': 2.2.1
-      '@lix-js/fs': 2.2.0
-      commander: 11.1.0
-      consola: 3.2.3
-      dedent: 1.5.1
-      json5: 2.2.3
-      posthog-node: 4.3.2
-    transitivePeerDependencies:
-      - babel-plugin-macros
-      - debug
-      - supports-color
-
   '@inlang/paraglide-unplugin@1.9.4':
     dependencies:
       '@inlang/paraglide-js': 1.11.7
@@ -17753,29 +17716,9 @@ snapshots:
       - debug
       - supports-color
 
-  '@inlang/paraglide-unplugin@1.9.5':
-    dependencies:
-      '@inlang/paraglide-js': 1.11.8
-      '@inlang/sdk': 0.37.0
-      '@lix-js/client': 2.2.1
-      typescript: 5.7.3
-      unplugin: 1.16.0
-    transitivePeerDependencies:
-      - babel-plugin-macros
-      - debug
-      - supports-color
-
   '@inlang/paraglide-vite@1.3.4':
     dependencies:
       '@inlang/paraglide-unplugin': 1.9.4
-    transitivePeerDependencies:
-      - babel-plugin-macros
-      - debug
-      - supports-color
-
-  '@inlang/paraglide-vite@1.3.5':
-    dependencies:
-      '@inlang/paraglide-unplugin': 1.9.5
     transitivePeerDependencies:
       - babel-plugin-macros
       - debug
@@ -17847,30 +17790,6 @@ snapshots:
       - supports-color
 
   '@inlang/sdk@0.36.4':
-    dependencies:
-      '@inlang/json-types': 1.1.0(@sinclair/typebox@0.31.28)
-      '@inlang/language-tag': 1.5.1
-      '@inlang/message': 2.1.0(@sinclair/typebox@0.31.28)
-      '@inlang/message-lint-rule': 1.4.7(@sinclair/typebox@0.31.28)
-      '@inlang/module': 1.2.14(@sinclair/typebox@0.31.28)
-      '@inlang/plugin': 2.4.14(@sinclair/typebox@0.31.28)
-      '@inlang/project-settings': 2.4.2(@sinclair/typebox@0.31.28)
-      '@inlang/result': 1.1.0
-      '@inlang/translatable': 1.3.1
-      '@lix-js/client': 2.2.1
-      '@lix-js/fs': 2.2.0
-      '@sinclair/typebox': 0.31.28
-      debug: 4.4.0(supports-color@9.4.0)
-      dedent: 1.5.1
-      deepmerge-ts: 5.1.0
-      murmurhash3js: 3.0.1
-      solid-js: 1.6.12
-      throttle-debounce: 5.0.2
-    transitivePeerDependencies:
-      - babel-plugin-macros
-      - supports-color
-
-  '@inlang/sdk@0.37.0':
     dependencies:
       '@inlang/json-types': 1.1.0(@sinclair/typebox@0.31.28)
       '@inlang/language-tag': 1.5.1
