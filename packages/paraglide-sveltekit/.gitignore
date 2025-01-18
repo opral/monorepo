@@ -1,0 +1,6 @@
+node_modules
+.svelte-kit
+dist
+.vercel
+src/meta.js
+paraglide.d.ts

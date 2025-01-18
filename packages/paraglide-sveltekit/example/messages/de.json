@@ -1,0 +1,18 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"about": "Über uns",
+	"home": "Startseite",
+	"users": "Benutzer",
+	"next_user": "Nächster Benutzer",
+	"previous_user": "Vorheriger Benutzer",
+	"about_path": "/ueber-uns",
+
+	"edit_user": "Benutzer {userId} bearbeiten",
+
+	"paraglide_and_next_app_router": "ParaglideJS + SvelteKit",
+	"this_app_was_localised_with_paraglide": "Dies ist eine SvelteKit App die mit Paraglide-Next lokalisiert wurde.",
+	"switch_languages_in_top_right": "Sie können die Sprache oben rechts ändern",
+	"learn_more_at_following_links": "Erfahren sie mehr über Paraglide und SvelteKit mit den folgenden Links:",
+	"paraglide_documentation": "Paraglide Dokumentation",
+	"source_code": "Quell-Code"
+}

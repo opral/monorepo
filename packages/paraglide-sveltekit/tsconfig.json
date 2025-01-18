@@ -1,0 +1,14 @@
+{
+	"extends": "@opral/tsconfig/default",
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules", "**/*.test.ts", "examples"],
+	"compilerOptions": {
+		"target": "ESNext",
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"declaration": true,
+		"esModuleInterop": true,
+		"sourceMap": true,
+		"checkJs": true
+	}
+}
