@@ -1,4 +1,4 @@
-import { parse, type PreprocessorGroup, type LegacyRoot } from "svelte/compiler"
+import { parse, type PreprocessorGroup } from "svelte/compiler"
 import MagicString from "magic-string"
 import { shouldApply } from "./precheck.js"
 import { rewrite } from "./rewrite.js"
@@ -58,7 +58,7 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 			if (!shouldApply(content, TRANSLATIONS)) return NOOP
 
 			//Parse the file
-			let root: LegacyRoot
+			let root: any
 			try {
 				root = parse(content)
 			} catch (error) {
@@ -93,7 +93,7 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 }
 
 function modifyScriptTag(
-	root: LegacyRoot,
+	root: any,
 	code: MagicString,
 	additions: { before?: Iterable<string>; after?: Iterable<string> }
 ) {
