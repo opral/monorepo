@@ -1,7 +1,7 @@
 import type { Repository } from "@lix-js/client"
 import type { CliStep } from "../utils.js"
 import path from "node:path"
-import type { Logger } from "@inlang/paraglide-js/internal"
+import type { Logger } from "@inlang/paraglide-js/cli"
 
 export const addI18nFile: CliStep<
 	{

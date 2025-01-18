@@ -1,7 +1,7 @@
 import type { Repository } from "@lix-js/client"
 import { findFile, type CliStep } from "../utils.js"
 import path from "node:path"
-import type { Logger } from "@inlang/paraglide-js/internal"
+import type { Logger } from "@inlang/paraglide-js/cli"
 
 const BOILERPLATE = `// file initialized by the Paraglide-SvelteKit CLI - Feel free to edit it
 import { sequence } from "@sveltejs/kit/hooks"

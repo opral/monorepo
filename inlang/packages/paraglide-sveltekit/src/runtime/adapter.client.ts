@@ -17,15 +17,15 @@ import {
 	type PathDefinitionTranslations,
 } from "@inlang/paraglide-js/internal/adapter-utils"
 import type { ParamMatcher } from "@sveltejs/kit"
-import type { Paraglide } from "./runtime.js"
 import { PrefixStrategy } from "./strategy.js"
 import type { I18nUserConfig } from "./adapter.server.js"
+import type { Runtime } from "@inlang/paraglide-js"
 
 /**
  * The _resolved_ configuration for the i18n instance.
  */
 export type I18nConfig<T extends string> = {
-	runtime: Paraglide<T>
+	runtime: Runtime
 	translations: PathDefinitionTranslations<T>
 	exclude: (path: string) => boolean
 	defaultLanguageTag: T
@@ -53,7 +53,7 @@ export type I18nConfig<T extends string> = {
  * export const i18n = createI18n(runtime, { ...options })
  * ```
  */
-export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I18nUserConfig<T>) {
+export function createI18n<T extends string>(runtime: Runtime, options?: I18nUserConfig<T>) {
 	const translations = options?.pathnames
 		? resolveUserPathDefinitions(options.pathnames, runtime.availableLanguageTags)
 		: {}

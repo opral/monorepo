@@ -1,12 +1,12 @@
 <script>
-    import { availableLanguageTags, languageTag } from "$lib/paraglide/runtime";
+    import { locales, getLocale } from "$lib/paraglide/runtime";
     import { i18n } from "$lib/i18n";
 	import { goto } from "$app/navigation"
     import { page } from "$app/stores";
 	import { get } from "svelte/store"
 
     /**
-     * @param { import("$lib/paraglide/runtime").AvailableLanguageTag } newLanguage
+     * @param { import("$lib/paraglide/runtime").Locale } newLanguage
      */
     function switchToLanguage(newLanguage) {
         const canonicalPath = i18n.route(get(page).url.pathname)
@@ -15,7 +15,7 @@
     }
 
     /**
-     * @type {Record<import("$lib/paraglide/runtime").AvailableLanguageTag, string>}
+     * @type {Record<import("$lib/paraglide/runtime").Locale, string>}
      */
     const labels = {
         en: "🇬🇧 English",
@@ -24,10 +24,10 @@
 </script>
 
 <select on:change={e => switchToLanguage(/** @type {any} */ (e).target.value)}>
-    {#each availableLanguageTags as langTag}
+    {#each locales as locale}
         <option 
-            value={langTag}
-            selected={languageTag() === langTag}
-            >{labels[langTag]}</option>
+            value={locale}
+            selected={getLocale() === locale}
+            >{labels[locale]}</option>
     {/each}
 </select>

@@ -1,12 +1,12 @@
-import { paraglide as vitePluginParaglide } from "@inlang/paraglide-vite"
 import { preprocessor, type PreprocessorConfig } from "./preprocessor/index.js"
 import { type UserConfig, type Config, resolveConfig } from "./config.js"
 import type { Plugin } from "vite"
+import { paraglideVitePlugin } from "@inlang/paraglide-js"
 
 // Vite's Plugin type is often incompatible between vite versions, so we use any here
 export function paraglide(userConfig: UserConfig): any {
 	const config = resolveConfig(userConfig)
-	const plugins: Plugin[] = [vitePluginParaglide(config)]
+	const plugins: Plugin[] = [paraglideVitePlugin(config)]
 
 	if (!config.disablePreprocessor) {
 		plugins.push(registerPreprocessor(config))

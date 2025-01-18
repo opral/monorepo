@@ -1,5 +1,5 @@
 import type { Repository } from "@lix-js/client"
-import type { Logger } from "@inlang/paraglide-js/internal"
+import type { Logger } from "@inlang/paraglide-js/cli"
 import { findFile, type CliStep } from "../utils.js"
 
 export const addTypesForLocals: CliStep<
