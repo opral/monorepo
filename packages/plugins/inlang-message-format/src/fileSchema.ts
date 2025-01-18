@@ -10,15 +10,25 @@ const InternalProperties = Type.Object(
 );
 
 const Messages = Type.Record(
-  Type.String({
-    pattern: "^[^\\.-]+$",
-    description:
-      "The message key. Hypens (-) and dots (.) are not allowed to increase compatibility with libraries.",
-    examples: ["helloWorld", "hello_world", "helloWorld123", "hello_world_123"],
-  }),
-  Type.Union([Type.String(), Type.Record(Type.String(), Type.String())]),
-
-  { additionalProperties: false },
+	Type.String({
+		pattern: "^[^\\.-]+$",
+		description:
+			"The message key. Hypens (-) and dots (.) are not allowed to increase compatibility with libraries.",
+		examples: ["helloWorld", "hello_world", "helloWorld123", "hello_world_123"],
+	}),
+	Type.Union([
+		// a simple message
+		// "hello world"
+		Type.String(),
+		// a message with variants
+		//
+		Type.Object({
+			match: Type.Record(Type.String(), Type.String()),
+			declarations: Type.Optional(Type.Array(Type.String())),
+			selectors: Type.Optional(Type.Array(Type.String())),
+		}),
+	]),
+	{ additionalProperties: false }
 );
 
 /**

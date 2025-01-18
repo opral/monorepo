@@ -31,13 +31,21 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 
   for (const locale in files) {
     result.push({
-      locale,
-      // beautify the json
-      content: new TextEncoder().encode(
-        JSON.stringify(files[locale], undefined, "\t"),
-      ),
-      name: locale + ".json",
-    });
+			locale,
+			// beautify the json
+			content: new TextEncoder().encode(
+				JSON.stringify(
+					{
+						// increase DX by providing auto complete in IDEs
+						$schema: "https://inlang.com/schema/inlang-message-format",
+						...files[locale],
+					},
+					undefined,
+					"\t"
+				)
+			),
+			name: locale + ".json",
+		});
   }
 
   return result;
