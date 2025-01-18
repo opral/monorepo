@@ -1,0 +1,37 @@
+* {
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+:root {
+    font-size: 16px;
+} 
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.5;
+    font-size: 1rem;
+    color: #111;
+    background-color: #fefefe;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.container {
+    max-width: 800px;
+    margin-inline: auto;
+    margin-block-start: 5rem;
+    padding: 0 20px;
+}
+
+.code-block {
+    display: block;
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-radius: 5px;
+}
