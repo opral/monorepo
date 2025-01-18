@@ -1,8 +1,7 @@
 import { findRepoRoot, openRepository } from "@lix-js/client"
 import nodeishFs from "node:fs/promises"
 import { Command } from "commander"
-import { Logger } from "@inlang/paraglide-js/internal"
-import { Steps, cli as ParaglideCli } from "@inlang/paraglide-js/internal/cli"
+import { Steps, cli as ParaglideCli, Logger } from "@inlang/paraglide-js/cli"
 import { scanSvelteKitProject } from "../steps/scanSvelteKitProject.js"
 import { addParaglideSvelteKitVitePlugin } from "../steps/addVitePlugin.js"
 import { addI18nFile } from "../steps/addI18nFile.js"
@@ -35,20 +34,17 @@ export const initCommand = new Command()
 			appId: PARAGLIDE_SVELTEKIT_MARKETPLACE_ID,
 		}
 
-		const ctx1 = await scanSvelteKitProject(ctx0)
+		const ctx1 = (await scanSvelteKitProject(ctx0)) as any
 		const ctx2 = await Steps.initializeInlangProject(ctx1)
 		const ctx3 = await Steps.updatePackageJson({
 			dependencies: async (deps) => ({
 				...deps,
-				"@inlang/paraglide-sveltekit": PARAGLIDE_SVELTEKIT_VERSION,
-			}),
-			devDependencies: async (deps) => ({
-				...deps,
 				"@inlang/paraglide-js": ParaglideCli.version() as string,
+				"@inlang/paraglide-sveltekit": PARAGLIDE_SVELTEKIT_VERSION,
 			}),
 		})(ctx2)
 
-		const ctx4 = await Steps.maybeChangeTsConfig(ctx3)
+		const ctx4 = await Steps.maybeUpdateTsConfig(ctx3)
 		const ctx5 = await addParaglideSvelteKitVitePlugin(ctx4)
 		const ctx6 = await addI18nFile(ctx5)
 		const ctx7 = await addParaglideJSComponent(ctx6)
@@ -57,10 +53,9 @@ export const initCommand = new Command()
 		const ctx10 = await addHandleHook(ctx9)
 		const ctx11 = await addTypesForLocals(ctx10)
 		const crx12 = await Steps.maybeAddSherlock(ctx11)
-		const crx13 = await Steps.maybeAddNinja(crx12)
 
 		try {
-			await Steps.runCompiler({ ...crx13, outdir: "./src/lib/paraglide" })
+			await Steps.runCompiler({ ...crx12, outdir: "./src/lib/paraglide" })
 		} catch (e) {
 			//silently ignore
 		}

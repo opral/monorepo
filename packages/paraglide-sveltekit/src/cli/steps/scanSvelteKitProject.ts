@@ -1,6 +1,6 @@
 import type { Repository } from "@lix-js/client"
 import { findFile, type CliStep } from "../utils.js"
-import type { Logger } from "@inlang/paraglide-js/internal"
+import type { Logger } from "@inlang/paraglide-js/cli"
 
 export const scanSvelteKitProject: CliStep<
 	{ repo: Repository; logger: Logger },

@@ -11,14 +11,13 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},
-	"dependencies": {
-		"@inlang/paraglide-sveltekit": "workspace:*"
-	},
+	"dependencies": {},
 	"peerDependencies": {
-		"typescript": "^4||^5"
+		"typescript": "^5"
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
+		"@inlang/paraglide-sveltekit": "workspace:*",
 		"@sveltejs/adapter-node": "^5.2.10",
 		"@sveltejs/adapter-static": "^3.0.0",
 		"@sveltejs/kit": "^2.12.1",

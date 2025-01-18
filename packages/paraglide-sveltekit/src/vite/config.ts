@@ -1,8 +1,8 @@
-import type { paraglide as vitePluginParaglide } from "@inlang/paraglide-vite"
+import type { paraglideVitePlugin } from "@inlang/paraglide-js"
 
-type VitePluginUserConfig = Parameters<typeof vitePluginParaglide>[0]
+type VitePluginUserConfig = Parameters<typeof paraglideVitePlugin>[0]
 
-export interface UserConfig extends VitePluginUserConfig {
+export type UserConfig = VitePluginUserConfig & {
 	/**
 	 * The preprocessor rewrites any links in your markup
 	 * and translates them according to the routing strategy.
@@ -18,7 +18,7 @@ export interface UserConfig extends VitePluginUserConfig {
  * The full config for @inlang/paraglide-sveltekit.
  * Any values not provided by the user are filled in with defaults.
  */
-export interface Config extends VitePluginUserConfig {
+export type Config = VitePluginUserConfig & {
 	disablePreprocessor: boolean
 }
 
