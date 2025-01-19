@@ -48,7 +48,7 @@ export function createRegistry(emitTs: boolean): string {
 const jsdocRegistry = `
 
 /**
- * @param {import("./runtime.js").AvailableLocale} locale
+ * @param {import("./runtime.js").Locale} locale
  * @param {number} input
  * @param {Intl.PluralRulesOptions} [options]
  * @returns {string}
@@ -58,7 +58,7 @@ export function plural(locale, input, options) {
 }
 
 /**
- * @param {import("./runtime.js").AvailableLocale} locale
+ * @param {import("./runtime.js").Locale} locale
  * @param {number} input
  * @param {Intl.NumberFormatOptions} [options]
  * @returns {string}
@@ -68,7 +68,7 @@ export function number(locale, input, options) {
 }
 
 /**
- * @param {import("./runtime.js").AvailableLocale} locale
+ * @param {import("./runtime.js").Locale} locale
  * @param {Date} input
  * @param {Intl.DateTimeFormatOptions} [options]
  * @returns {string}
@@ -80,7 +80,7 @@ export function datetime(locale, input, options) {
 
 const tsRegistry = `
 export function plural(
-	locale: import("./runtime.js").AvailableLocale,
+	locale: import("./runtime.js").Locale,
 	input: number,
 	options: Intl.PluralRulesOptions
 ): string {
@@ -88,7 +88,7 @@ export function plural(
 }
 
 export function number(
-	locale: import("./runtime.js").AvailableLocale,
+	locale: import("./runtime.js").Locale,
 	input: number,
 	options: Intl.NumberFormatOptions
 ): string {
@@ -96,7 +96,7 @@ export function number(
 }
 
 export function datetime(
-	locale: import("./runtime.js").AvailableLocale,
+	locale: import("./runtime.js").Locale,
 	input: Date,
 	options: Intl.DateTimeFormatOptions
 ): string {
