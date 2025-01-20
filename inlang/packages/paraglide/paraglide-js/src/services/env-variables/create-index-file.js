@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 /**
  * This script writes public environment variables
  * to an importable env file.
@@ -31,6 +30,11 @@ export const ENV_VARIABLES = {
 
 // console.log("✅ Created env variable index file.");
 
+/**
+ *
+ * @param {string | undefined} value
+ * @returns {string | undefined}
+ */
 function ifDefined(value) {
 	return value ? `"${value}"` : undefined;
 }
