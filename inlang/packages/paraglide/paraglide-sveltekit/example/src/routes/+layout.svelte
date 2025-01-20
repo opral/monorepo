@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { ParaglideSveltekit } from '@inlang/paraglide-sveltekit';
-	import * as runtime from '$lib/paraglide/runtime';
+	import { ParaglideSveltekitProvider } from '$lib/paraglide/adapter';
 </script>
 
-<ParaglideSveltekit {runtime}>
+<ParaglideSveltekitProvider>
 	<slot></slot>
-</ParaglideSveltekit>
+</ParaglideSveltekitProvider>

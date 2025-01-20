@@ -1,13 +1,3 @@
-import type { Reroute } from '@sveltejs/kit';
+import { i18nRouting } from '$lib/paraglide/adapter';
 
-export const reroute: Reroute = (request) => {
-	if (request.url.pathname === '/de') {
-		return '/';
-	}
-
-	return stripLocaleFromPath(request.url.pathname);
-};
-
-function stripLocaleFromPath(path: string) {
-	return path.replace(/^\/[a-z]{2}\//, '/');
-}
+export const reroute = i18nRouting;
