@@ -31,17 +31,28 @@ test("runtime type", async () => {
 		"utf-8"
 	);
 
-	project.createSourceFile("./runtime.js", jsdocRuntime);
+	const getLocaleFromPath = await fs.readFile(
+		resolve(__dirname, "./get-locale-from-path.js"),
+		"utf-8"
+	);
 
-	project.createSourceFile("./runtime-type.ts", runtimeType);
+	const ambientDts = await fs.readFile(
+		resolve(__dirname, "./ambient.d.ts"),
+		"utf-8"
+	);
+
+	project.createSourceFile("./runtime.js", jsdocRuntime);
+	project.createSourceFile("./type.ts", runtimeType);
+	project.createSourceFile("./ambient.d.ts", ambientDts);
+	project.createSourceFile("./get-locale-from-path.js", getLocaleFromPath);
 
 	project.createSourceFile(
 		"./test.ts",
 		`
     import * as runtime from "./runtime.js"
-    import type { Runtime as RuntimeType } from "./runtime-type.js"
+    import type { Runtime } from "./type.js"
 
-    const runtimeType: RuntimeType = runtime
+    runtime satisfies Runtime
     `
 	);
 

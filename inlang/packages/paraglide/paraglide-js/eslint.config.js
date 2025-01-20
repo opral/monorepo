@@ -8,18 +8,11 @@ export default [
 		rules: {
 			// any makes testing sometimes easier
 			"@typescript-eslint/no-explicit-any": "off",
+			// Disable no-undef for runtime files
+			// which make use of global variables.
+			// overwrites for the runtime files didn't work
+			// in eslint 9
+			"no-undef": "off",
 		},
-	},
-	{
-		overrides: [
-			{
-				// Disable no-undef for runtime files
-				// which make use of global variables
-				files: ["./src/compiler/runtime/*"],
-				rules: {
-					"no-undef": "off",
-				},
-			},
-		],
 	},
 ];
