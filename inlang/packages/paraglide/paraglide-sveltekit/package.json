@@ -21,9 +21,15 @@
 		"./bin",
 		"./default"
 	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js"
+		}
+	},
 	"scripts": {
-		"dev": "tsc --watch",
-		"build": "tsc --build",
+		"dev": "svelte-package -i src -o dist --watch",
+		"build": "svelte-package -i src -o dist",
 		"test": "tsc --noEmit && vitest run --coverage ./src/**/*",
 		"test:watch": "npm run env-variables && vitest --watch ./src/**/*",
 		"lint": "eslint ./src --fix",
@@ -32,10 +38,13 @@
 	},
 	"dependencies": {},
 	"peerDependencies": {
-		"@inlang/paraglide-js": "^2.0.0"
+		"@inlang/paraglide-js": "^2.0.0",
+		"svelte": "^5.0.0",
+		"@sveltejs/kit": "^2.4.3"
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
+		"@sveltejs/package": "^2.2.3",
 		"@eslint/js": "^9.18.0",
 		"@opral/tsconfig": "workspace:*",
 		"@types/node": "^22.10.6",
@@ -45,9 +54,6 @@
 		"typescript-eslint": "^8.20.0",
 		"typescript": "^5.7.3",
 		"vitest": "2.1.8"
-	},
-	"exports": {
-		".": "./dist/index.js"
 	},
 	"keywords": [
 		"inlang",
