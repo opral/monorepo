@@ -8,7 +8,7 @@
    */
 	const { runtime, children }: {
 		runtime: Runtime,
-		children: any
+		children?: any
 	} = $props()
 
 	let locale = $state(runtime.getLocale())
