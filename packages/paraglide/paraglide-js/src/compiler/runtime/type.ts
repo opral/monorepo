@@ -2,16 +2,17 @@
  * The Paraglide runtime API.
  */
 export type Runtime = {
-	baseLocale: UnknownLocale;
-	locales: Readonly<UnknownLocale[]>;
+	baseLocale: Locale;
+	locales: Readonly<Locale[]>;
 	getLocale: () => string;
-	setLocale: (newLocale: UnknownLocale) => void;
-	defineGetLocale: (fn: () => UnknownLocale) => void;
-	defineSetLocale: (fn: (newLocale: UnknownLocale) => void) => void;
-	isLocale: (locale: UnknownLocale) => locale is UnknownLocale;
+	setLocale: (newLocale: Locale) => void;
+	defineGetLocale: (fn: () => Locale) => void;
+	defineSetLocale: (fn: (newLocale: Locale) => void) => void;
+	isLocale: (locale: Locale) => locale is Locale;
+	getLocaleFromPath: typeof import("./get-locale-from-path.js").getLocaleFromPath;
 };
 
 /**
- * A locale that is unknown before compilation.
+ * Locale is any here because the locale is unknown before compilation.
  */
-export type UnknownLocale = any;
+type Locale = any;

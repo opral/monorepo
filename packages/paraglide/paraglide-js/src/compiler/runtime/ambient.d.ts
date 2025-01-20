@@ -5,5 +5,5 @@ import type { Runtime } from "./type.ts";
  */
 declare global {
 	export const isLocale: Runtime["isLocale"];
-	export type Locale = Runtime["Locale"];
+	export type Locale = any;
 }
