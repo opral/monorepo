@@ -13,6 +13,7 @@
     "@inlang/paraglide-js-example-vite",
     "@inlang/paraglide-js-example-react",
     "@inlang/paraglide-astro-example",
+    "@inlang/paraglide-sveltekit-example",
     "@inlang/plugin-icu1",
     "@inlang/rpc",
     "@inlang/server",
