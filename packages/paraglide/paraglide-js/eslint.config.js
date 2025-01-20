@@ -10,4 +10,16 @@ export default [
 			"@typescript-eslint/no-explicit-any": "off",
 		},
 	},
+	{
+		overrides: [
+			{
+				// Disable no-undef for runtime files
+				// which make use of global variables
+				files: ["./src/compiler/runtime/*"],
+				rules: {
+					"no-undef": "off",
+				},
+			},
+		],
+	},
 ];

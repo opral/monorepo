@@ -1,3 +1,10 @@
+import fs from "node:fs";
+
+const getLocaleFromPath = fs.readFileSync(
+	new URL("./get-locale-from-path.js", import.meta.url),
+	"utf-8"
+);
+
 // to modify the runtime, outcomment the export const jsdocRuntime line
 
 export const jsdocRuntime = `
@@ -117,6 +124,8 @@ export let setLocale =
 export function isLocale(locale) {
 	return locales.includes(locale);
 }
+
+${getLocaleFromPath}
 
 // ------ TYPES ------
 
