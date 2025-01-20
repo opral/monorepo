@@ -1,6 +1,6 @@
 {
 	"extends": "@opral/tsconfig/default",
-	"include": ["src/**/*.ts", "src/compiler/runtime/get-locale-from-path.js"],
+	"include": ["src/**/*.js", "src/**/*.ts"],
 	"compilerOptions": {
 		"outDir": "./dist",
 		"rootDir": "./src",
