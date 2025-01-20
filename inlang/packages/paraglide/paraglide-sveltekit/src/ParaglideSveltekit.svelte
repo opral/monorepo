@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { Runtime } from "@inlang/paraglide-js";
-	// @ts-expect-error - sveltekit runtime variable
 	import { browser } from "$app/environment"
+	import { page } from '$app/state';
+	import { goto} from "$app/navigation";
 
 	/**
 	 * Component props interface using Svelte 5's $props
@@ -11,7 +12,19 @@
 		children?: any
 	} = $props()
 
-	let locale = $state(runtime.getLocale())
+	let locale = $derived(runtime.getLocaleFromPath(page.url.pathname) ?? runtime.baseLocale)
+
+	const localizedPath = (path: string, options?: {
+		locale?: string
+	}) => {
+		const locale = options?.locale ?? runtime.getLocale()
+	
+		if (locale === "en"){
+			return `/`
+		} else {
+			return `/${locale}`
+		}
+	}
 
 	// the effect needs to run before the DOM updates
 	// otherwise, the message function will render a
@@ -19,12 +32,9 @@
 	// has not been called yet.
 	$effect.pre(() => {
 		if (browser) {
-      runtime.defineGetLocale(() => {
-        return locale
-      })
+      runtime.defineGetLocale(() => locale)
 			runtime.defineSetLocale((newLocale) => {
-				locale = newLocale
-				document.documentElement.lang = newLocale;
+				return goto(localizedPath(page.url.pathname, { locale: newLocale }))
 			})
 		}
 	});
