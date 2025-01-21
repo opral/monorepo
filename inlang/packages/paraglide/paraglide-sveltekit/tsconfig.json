@@ -1,6 +1,6 @@
 {
 	"extends": "@opral/tsconfig/default",
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.js"],
 	"compilerOptions": {
 		"outDir": "./dist",
 		"rootDir": "./src",

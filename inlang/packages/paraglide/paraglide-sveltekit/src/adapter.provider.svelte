@@ -13,24 +13,6 @@
 
 	let locale = $derived(runtime.getLocaleFromPath(page.url.pathname) ?? runtime.baseLocale)
 
-	  /**
-   * Generates a localized path.
-   *
-   * @param {string} path - The path to localize.
-   * @param {Object} [options] - Optional parameters.
-   * @param {string} [options.locale] - The locale to use for the path.
-   * @returns {string} The localized path.
-   */
-	const localizedPath = (path, options) => {
-		const locale = options?.locale ?? runtime.getLocale()
-	
-		if (locale === "en"){
-			return `/`
-		} else {
-			return `/${locale}`
-		}
-	}
-
 	// the effect needs to run before the DOM updates
 	// otherwise, the message function will render a
 	// stale language (because runtime.setLocale)
@@ -39,7 +21,7 @@
 		if (browser) {
       runtime.defineGetLocale(() => locale)
 			runtime.defineSetLocale((newLocale) => {
-				return goto(localizedPath(page.url.pathname, { locale: newLocale }))
+				return goto(runtime.localizedPath(page.url.pathname, { locale: newLocale }))
 			})
 		}
 	});
