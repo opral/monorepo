@@ -2,11 +2,12 @@ import fs from "node:fs";
 
 /**
  * Load a file from the current directory.
- * 
- * @param {string} path 
+ *
+ * @param {string} path
  * @returns {string}
  */
-const injectCode = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf-8");  
+const injectCode = (path) =>
+	fs.readFileSync(new URL(path, import.meta.url), "utf-8");
 
 // to modify the runtime, outcomment the export const jsdocRuntime line
 

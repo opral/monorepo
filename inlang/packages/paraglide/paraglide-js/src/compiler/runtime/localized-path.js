@@ -5,7 +5,7 @@
  * in your application.
  *
  * Defaults to `getLocale()` if no locale is provided.
- * 
+ *
  * @tip
  *   Use `deLocalizedPath()` for the inverse operation.
  *
