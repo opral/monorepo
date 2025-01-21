@@ -7,7 +7,7 @@
  * Defaults to `getLocale()` if no locale is provided.
  * 
  * @tip
- *   Use `delocalizedPath()` for the inverse operation.
+ *   Use `deLocalizedPath()` for the inverse operation.
  *
  * @example
  *  // getLocale() = 'en'

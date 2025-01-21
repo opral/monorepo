@@ -117,7 +117,7 @@ ${injectCode("./get-locale-from-path.js")}
 
 ${injectCode("./localized-path.js")}
 
-${injectCode("./delocalized-path.js")}
+${injectCode("./de-localized-path.js")}
 
 // ------ TYPES ------
 

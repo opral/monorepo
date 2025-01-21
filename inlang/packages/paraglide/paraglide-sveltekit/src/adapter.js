@@ -1,9 +1,7 @@
-export { default as ParaglideSveltekitProvider } from "./adapter.provider.svelte";
-import { localizedPath } from "./runtime.js";
-
 /**
- * @type {import('@sveltejs/kit').Reroute}
+ * Exports stuff that is specific to SvelteKit.
+ *
+ * The APIs here are not universal across Paraglide JS adapters.
  */
-export const localizedRouting = (request) => {
-	return localizedPath(request.url.pathname);
-};
+
+export { default as ParaglideSveltekitProvider } from "./adapter.provider.svelte";

@@ -1,5 +1,5 @@
 import { test, vi, beforeEach, expect, describe } from "vitest";
-import { delocalizedPath } from "./delocalized-path.js";
+import { deLocalizedPath } from "./de-localized-path.js";
 import { mockRuntime } from "./mock-runtime.js";
 
 // sequential to avoid global variable conflicts
@@ -18,7 +18,7 @@ describe.sequential("delocalizedPath", () => {
 		globalThis.getLocaleFromPath = vi.fn().mockReturnValue("de");
 
 		const path = "/de/home";
-		const result = delocalizedPath(path);
+		const result = deLocalizedPath(path);
 
 		expect(result).toBe("/home");
 	});
@@ -28,7 +28,7 @@ describe.sequential("delocalizedPath", () => {
 		globalThis.getLocaleFromPath = vi.fn().mockReturnValue(undefined);
 
 		const path = "/home";
-		const result = delocalizedPath(path);
+		const result = deLocalizedPath(path);
 
 		expect(result).toBe("/home");
 	});
@@ -38,7 +38,7 @@ describe.sequential("delocalizedPath", () => {
 		globalThis.getLocaleFromPath = vi.fn().mockReturnValue("fr");
 
 		const path = "/fr/contact";
-		const result = delocalizedPath(path);
+		const result = deLocalizedPath(path);
 
 		expect(result).toBe("/contact");
 	});
@@ -48,7 +48,7 @@ describe.sequential("delocalizedPath", () => {
 		globalThis.getLocaleFromPath = vi.fn().mockReturnValue("en");
 
 		const path = "/en/";
-		const result = delocalizedPath(path);
+		const result = deLocalizedPath(path);
 
 		expect(result).toBe("/");
 	});
@@ -58,7 +58,7 @@ describe.sequential("delocalizedPath", () => {
 		globalThis.getLocaleFromPath = vi.fn().mockReturnValue(undefined);
 
 		const path = "/";
-		const result = delocalizedPath(path);
+		const result = deLocalizedPath(path);
 
 		expect(result).toBe("/");
 	});
