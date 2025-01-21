@@ -10,10 +10,8 @@ export const unpluginFactory: UnpluginFactory<CompilerArgs> = (args) => ({
 	enforce: "pre",
 	async buildStart() {
 		await compile({
-			project: args.project,
-			outdir: args.outdir,
-			compilerOptions: args.compilerOptions,
 			fs: wrappedFs,
+			...args,
 		});
 
 		for (const path of Array.from(readFiles)) {
@@ -24,10 +22,8 @@ export const unpluginFactory: UnpluginFactory<CompilerArgs> = (args) => ({
 		if (readFiles.has(path)) {
 			readFiles.clear();
 			await compile({
-				project: args.project,
-				outdir: args.outdir,
-				compilerOptions: args.compilerOptions,
 				fs: wrappedFs,
+				...args,
 			});
 		}
 	},
@@ -36,10 +32,8 @@ export const unpluginFactory: UnpluginFactory<CompilerArgs> = (args) => ({
 		//In the other bundlers `buildStart` already runs before the build. In webpack it's a race condition
 		compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
 			await compile({
-				project: args.project,
-				outdir: args.outdir,
-				compilerOptions: args.compilerOptions,
 				fs: wrappedFs,
+				...args,
 			});
 		});
 	},
