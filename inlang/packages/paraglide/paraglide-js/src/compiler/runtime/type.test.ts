@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { createProject as typescriptProject, ts } from "@ts-morph/bootstrap";
 import { createRuntime } from "./create-runtime.js";
-import fs from "node:fs/promises";
+import fs from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "url";
 
@@ -26,25 +26,16 @@ test("runtime type", async () => {
 		false
 	);
 
-	const runtimeType = await fs.readFile(
-		resolve(__dirname, "./type.ts"),
-		"utf-8"
-	);
-
-	const getLocaleFromPath = await fs.readFile(
-		resolve(__dirname, "./get-locale-from-path.js"),
-		"utf-8"
-	);
-
-	const ambientDts = await fs.readFile(
-		resolve(__dirname, "./ambient.d.ts"),
-		"utf-8"
-	);
+	const file = (path: string) => {
+		return [path, fs.readFileSync(resolve(__dirname, path), "utf-8")!] as const;
+	};
 
 	project.createSourceFile("./runtime.js", jsdocRuntime);
-	project.createSourceFile("./type.ts", runtimeType);
-	project.createSourceFile("./ambient.d.ts", ambientDts);
-	project.createSourceFile("./get-locale-from-path.js", getLocaleFromPath);
+	project.createSourceFile(...file("./type.ts"));
+	project.createSourceFile(...file("./ambient.d.ts"));
+	project.createSourceFile(...file("./get-locale-from-path.js"));
+	project.createSourceFile(...file("./localized-path.js"));
+	project.createSourceFile(...file("./is-locale.js"));
 
 	project.createSourceFile(
 		"./test.ts",
