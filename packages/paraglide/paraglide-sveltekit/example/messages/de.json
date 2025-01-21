@@ -1,0 +1,4 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"welcome": "Willkommen zum SvelteKit Paraglide Adapter Beispiel."
+}

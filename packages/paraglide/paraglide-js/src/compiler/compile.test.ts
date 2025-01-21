@@ -5,7 +5,7 @@ import {
 } from "@inlang/sdk";
 import { memfs } from "memfs";
 import { test, expect, vi } from "vitest";
-import { compile } from "./compile.js";
+import { compile, type Adapter } from "./compile.js";
 import { getAccountFilePath } from "../services/account/index.js";
 
 test("loads a project and compiles it", async () => {
@@ -164,4 +164,47 @@ test("multiple compile calls do not interfere with each other", async () => {
 	const outputDir = await fs.promises.readdir("/output");
 
 	expect(outputDir).not.toContain("subdir");
+});
+
+test("emits files of an adapter", async () => {
+	const adapter: Adapter = {
+		files: {
+			"adapter/component.svelte": "<script>console.log('hello')</script>",
+			"adapter.js": "console.log('hello')",
+		},
+	};
+
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
+	});
+
+	const fs = memfs().fs as unknown as typeof import("node:fs");
+
+	// save project to directory to test loading
+	await saveProjectToDirectory({
+		project,
+		path: "/project.inlang",
+		fs: fs.promises,
+	});
+
+	await compile({
+		project: "/project.inlang",
+		outdir: "/output",
+		fs: fs,
+		adapter,
+	});
+
+	const outputDir = await fs.promises.readdir("/output");
+	const adapterDir = await fs.promises.readdir("/output/adapter");
+
+	expect(outputDir).toEqual(
+		expect.arrayContaining(["runtime.js", "messages.js", "adapter.js"])
+	);
+
+	expect(adapterDir).toEqual(["component.svelte"]);
 });
