@@ -7,10 +7,11 @@ import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import ChangeDot from "./ChangeDot.tsx";
 import DiscussionPreview from "./DiscussionPreview.tsx";
-import { Change, changeInVersion, Lix, Snapshot, sql, Version } from "@lix-js/sdk";
+import { changeHasLabel, changeInVersion, Lix, sql, UiDiffComponentProps, Version } from "@lix-js/sdk";
 import { useAtom } from "jotai/react";
 import { currentVersionAtom, lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "./ChangeDiffComponent.tsx";
+import { activeFileAtom } from "@/state-active-file.ts";
 
 export const CheckpointComponent = (props: {
   checkpointChangeSet: {
@@ -25,8 +26,9 @@ export const CheckpointComponent = (props: {
 }) => {
   const [lix] = useAtom(lixAtom);
   const [currentVersion] = useAtom(currentVersionAtom);
+  const [activeFile] = useAtom(activeFileAtom);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const [changes, setChanges] = useState<Change[]>([]);
+  const [diffs, setDiffs] = useState<UiDiffComponentProps["diffs"]>([]);
 
   // Don't render anything if there's no change data
   if (!props.checkpointChangeSet || !props.checkpointChangeSet.id) {
@@ -34,10 +36,10 @@ export const CheckpointComponent = (props: {
   }
 
   const toggleExpanded = async () => {
-    if (changes && changes.length > 0) setIsExpanded(!isExpanded);
+    if (diffs && diffs.length > 0) setIsExpanded(!isExpanded);
     else {
-      const changes = await getChanges(lix, props.checkpointChangeSet.id, currentVersion!);
-      setChanges(changes);
+      const changes = await getChanges(lix, props.checkpointChangeSet.id, currentVersion!, activeFile);
+      setDiffs(changes);
       setIsExpanded(!isExpanded);
     }
   }
@@ -95,11 +97,11 @@ export const CheckpointComponent = (props: {
             {/* Option to introduce tabs - Discussion | Changes */}
             <div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 pt-2 pb-4 sm:pb-6 overflow-hidden">
               {/* list change diffs */}
-              {changes.map((change) => (
-                <div key={change.id} className="flex flex-col gap-2">
+              {diffs.map((diff: UiDiffComponentProps["diffs"][number]) => (
+                <div key={`${diff.plugin_key}_${diff.schema_key}_${diff.entity_id}`} className="flex flex-col gap-2">
                   <ChangeDiffComponent
-                    key={change.id}
-                    change={change}
+                    key={`${diff.plugin_key}_${diff.schema_key}_${diff.entity_id}`}
+                    diffs={[diff]}
                   />
                 </div>
               ))}
@@ -122,17 +124,10 @@ export default CheckpointComponent;
 const getChanges = async (
   lix: Lix,
   changeSetId: string,
-  // fileId: string,
-  currentVersion: Version
-): Promise<
-  Array<
-    Change & {
-      snapshot_content: Snapshot["content"];
-      parent_snapshot_content: Snapshot["content"] | null;
-    }
-  >
-> => {
-  const changes = await lix.db
+  currentVersion: Version,
+  activeFile: { id: string } | null
+): Promise<UiDiffComponentProps["diffs"]> => {
+  const queryCheckpointChanges = lix.db
     .selectFrom("change")
     .innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
     .innerJoin(
@@ -153,17 +148,37 @@ const getChanges = async (
     )
     .where("change_set_element.change_set_id", "=", changeSetId)
     .where(changeInVersion(currentVersion))
-    // .where("change.file_id", "=", fileId)
-    .selectAll("change")
-    .select(sql`json(snapshot.content)`.as("snapshot_content"))
-    .select(sql`json(parent_snapshot.content)`.as("parent_snapshot_content")) // This will be NULL if no parent exists
-    .groupBy("change.id")
-    .orderBy("change.created_at", "desc")
-    .execute();
+    .where(changeHasLabel("checkpoint"))
+    .select("change.plugin_key")
+    .select("change.schema_key")
+    .select("change.entity_id")
+    .select(sql`json(snapshot.content)`.as("snapshot_content_after"))
 
-  return changes.map(change => ({
-    ...change,
-    snapshot_content: change.snapshot_content as Record<string, any> | null,
-    parent_snapshot_content: change.parent_snapshot_content as Record<string, any> | null,
-  }));
+  if (activeFile) {
+    queryCheckpointChanges.where("change.file_id", "=", activeFile.id);
+  }
+
+  const checkpointChanges = await queryCheckpointChanges.execute();
+
+  const changesWithBeforeSnapshot: UiDiffComponentProps["diffs"] = await Promise.all(
+    checkpointChanges.map(async (change) => {
+      const snapshotBefore = await lix.db
+        .selectFrom("change")
+        .innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+        .where(changeInVersion(currentVersion))
+        .where(changeHasLabel("checkpoint"))
+        .where("change.entity_id", "=", change.entity_id)
+        .where("change.schema_key", "=", change.schema_key)
+        .select(sql`json(snapshot.content)`.as("snapshot_content_before"))
+        .executeTakeFirst();
+
+      return {
+        ...change,
+        snapshot_content_after: change.snapshot_content_after ? JSON.parse(change.snapshot_content_after) : null,
+        snapshot_content_before: snapshotBefore?.snapshot_content_before ? JSON.parse(snapshotBefore.snapshot_content_before) : null,
+      }
+    })
+  );
+
+  return changesWithBeforeSnapshot;
 };

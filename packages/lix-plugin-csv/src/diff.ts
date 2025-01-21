@@ -1,5 +1,7 @@
 import { css, html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
+import type { UiDiffComponentProps } from "@lix-js/sdk";
+
 export class DiffComponent extends LitElement {
 	static override styles = css`
 		:host {
@@ -17,6 +19,7 @@ export class DiffComponent extends LitElement {
 			align-items: center;
 			flex-direction: column;
 			width: auto;
+			gap: 0.5rem;
 		}
 
 		.box {
@@ -46,29 +49,32 @@ export class DiffComponent extends LitElement {
 		}
 	`;
 
-	@property({ type: Object })
-	snapshotBefore: Record<string, any> | null = null;
-
-	@property({ type: Object })
-	snapshotAfter: Record<string, any> | null = null;
+	@property({ type: Array })
+	diffs: UiDiffComponentProps["diffs"] = [];
 
 	override render() {
 		return html`
 			<div class="container">
-				<p class="box after">${this.snapshotAfter?.text || ""}</p>
-				<svg
-					class="icon"
-					xmlns="http://www.w3.org/2000/svg"
-					viewBox="0 0 24 24"
-				>
-					<path
-						fill="var(--color-icon)"
-						d="M11 20h2V8l5.5 5.5l1.42-1.42L12 4.16l-7.92 7.92L5.5 13.5L11 8z"
-					></path>
-				</svg>
-				${this.snapshotBefore?.text
-					? html`<p class="box before">${this.snapshotBefore.text}</p>`
-					: html`<p class="dotted box before"></p>`}
+				${this.diffs.map(
+					(diff) => html`
+						<p class="box after">${diff.snapshot_content_after?.text || ""}</p>
+						<svg
+							class="icon"
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 24 24"
+						>
+							<path
+								fill="var(--color-icon)"
+								d="M11 20h2V8l5.5 5.5l1.42-1.42L12 4.16l-7.92 7.92L5.5 13.5L11 8z"
+							></path>
+						</svg>
+						${diff.snapshot_content_before?.text
+							? html`<p class="box before">
+									${diff.snapshot_content_before?.text || ""}
+								</p>`
+							: html`<p class="dotted box before"></p>`}
+					`,
+				)}
 			</div>
 		`;
 	}

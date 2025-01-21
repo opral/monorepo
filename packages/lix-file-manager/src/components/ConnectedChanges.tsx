@@ -51,12 +51,10 @@ const ConnectedChanges = () => {
 							key={change.id}
 							change={{
 								...change,
-								snapshot_content: change.snapshot_content as Record<
-									string,
-									any
-								> | null,
-								parent_snapshot_content:
-									change.parent_snapshot_content as Record<string, any> | null,
+								snapshot_content_after:
+									change.snapshot_content_after as Record<string, any> | null,
+								snapshot_content_before:
+									change.snapshot_content_before as Record<string, any> | null,
 								discussion_count: Number(change.discussion_count),
 								discussion_ids: String(change.discussion_ids || ""),
 							}}

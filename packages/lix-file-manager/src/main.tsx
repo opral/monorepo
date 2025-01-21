@@ -10,9 +10,7 @@ const router = createBrowserRouter(
 		...route,
 		// Wrap each route's element with the App layout and Suspense
 		element: (
-			<Suspense fallback={null}>
-				<App>{route.element} </App>
-			</Suspense>
+			<App>{route.element} </App>
 		),
 	})),
 	{

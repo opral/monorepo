@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button.tsx";
 import ChangeDot from "./ChangeDot.tsx";
 import IconChevron from "@/components/icons/IconChevron.tsx";
 import clsx from "clsx";
-import { checkpointChangeSetsAtom, intermediateChangesAtom } from "@/state-active-file.ts";
+import { checkpointChangeSetsAtom, intermediateChangeIdsAtom, intermediateChangesAtom } from "@/state-active-file.ts";
 import { useAtom } from "jotai/react";
 import { Input } from "./ui/input.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
@@ -16,6 +16,8 @@ export const IntermediateCheckpointComponent = () => {
   const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
   const [intermediateChanges] = useAtom(intermediateChangesAtom);
   const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
+
+  console.log(intermediateChanges.length);
 
   // Don't render anything if there's no change data
   if (intermediateChanges.length === 0) {
@@ -39,8 +41,6 @@ export const IntermediateCheckpointComponent = () => {
             Intermediate changes{" "}
           </p>
           <div className="flex gap-3 items-center">
-            {/* show time of changes oldest - newest */}
-            {/* list authors with avatars */}
             <Button variant="ghost" size="icon">
               <IconChevron
                 className={clsx(
@@ -56,11 +56,10 @@ export const IntermediateCheckpointComponent = () => {
             <div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 pt-2 pb-4 sm:pb-6 overflow-hidden">
               <CreateCheckpointInput />
               {intermediateChanges.map((change) => (
-                <div key={change.id} className="flex flex-col gap-2">
-                  {/* show change diff */}
+                <div key={`${change.plugin_key}_${change.schema_key}_${change.entity_id}`} className="flex flex-col gap-2">
                   <ChangeDiffComponent
-                    key={change.id}
-                    change={change}
+                    key={`${change.plugin_key}_${change.schema_key}_${change.entity_id}`}
+                    diffs={[change]}
                   />
                 </div>
               ))}
@@ -77,10 +76,10 @@ export default IntermediateCheckpointComponent;
 const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
   const [lix] = useAtom(lixAtom);
-  const [intermediateChanges] = useAtom(intermediateChangesAtom);
+  const [intermediateChangeIds] = useAtom(intermediateChangeIdsAtom);
 
   const handleCreateCheckpoint = async () => {
-    const changeSet = await createCheckpoint(lix, intermediateChanges);
+    const changeSet = await createCheckpoint(lix, intermediateChangeIds);
     if (description !== "") {
       await createDiscussion({
         lix,

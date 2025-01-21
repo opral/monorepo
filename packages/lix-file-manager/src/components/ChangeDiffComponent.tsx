@@ -1,69 +1,50 @@
-import React, { useEffect, useState, JSX } from "react";
-import { Change } from "@lix-js/sdk";
+import { useEffect, useState } from "react";
+import { UiDiffComponentProps } from "@lix-js/sdk";
 import { lixAtom } from "@/state.ts";
 import { useAtom } from "jotai/react";
 
 export const ChangeDiffComponent = (props: {
-	change: Change & {
-		snapshot_content: Record<string, any> | null;
-		parent_snapshot_content: Record<string, any> | null;
-	};
+	diffs: UiDiffComponentProps["diffs"];
 	className?: string;
 }) => {
 	const [lix] = useAtom(lixAtom);
-	const [DiffComponent, setDiffComponent] = useState<JSX.Element | null>(null);
+	const [isComponentLoaded, setIsComponentLoaded] = useState(false);
+
+	const pluginKey = props.diffs[0]?.plugin_key;
+	const CustomElementName = `diff-${pluginKey.replace(/_/g, "-")}`;
 
 	useEffect(() => {
-		loadDiffComponent();
-	}, [lix]);
-
-	const loadDiffComponent = async () => {
-		if (lix) {
-			const pluginKey = props.change.plugin_key;
+		const loadDiffComponent = async () => {
 			const component = (await lix.plugin.getAll()).find(
 				(p) => p.key === pluginKey
 			)?.diffUiComponent;
 
-			// replace _ with - in custom element name
-			const customElementName = `diff-${pluginKey.replace(/_/g, "-")}`;
-
-			if (component) {
-				const isRegistered = customElements.get(customElementName);
-
-				if (!isRegistered) {
-					const ElementConstructor = component;
-					if (typeof ElementConstructor === 'function' &&
-						ElementConstructor.prototype instanceof HTMLElement) {
-						customElements.define(customElementName, ElementConstructor as CustomElementConstructor);
+			if (!customElements.get(CustomElementName)) {
+				if (component) {
+					customElements.define(CustomElementName, component);
+					setIsComponentLoaded(true);
 					} else {
-						console.error(`The component constructor for plugin key '${pluginKey}' is invalid.`);
-						return;
+					console.warn(`No diff UI component found for plugin key '${pluginKey}'`);
+					// Fallback logic
 					}
-				}
-
-				setDiffComponent(() => {
-					const WrappedComponent = (props: {
-						snapshotBefore: Record<string, any> | null;
-						snapshotAfter: Record<string, any> | null;
-					}) => {
-						return React.createElement(customElementName, props);
-					};
-
-					return React.createElement(WrappedComponent, {
-						snapshotBefore: props.change.parent_snapshot_content,
-						snapshotAfter: props.change.snapshot_content,
-					});
-				});
 			} else {
-				console.warn(`No diff UI component found for plugin key '${customElementName}'`);
-				// Fallback logic
+				setIsComponentLoaded(true);
 			}
-		}
-	};
+		};
+
+		loadDiffComponent();
+	}, [lix, pluginKey]);
+
+	if (!isComponentLoaded) {
+		return null;
+	}
 
 	return (
 		<div className={props.className}>
-			{DiffComponent && <>{DiffComponent}</>}
+			<CustomElementName
+				// @ts-expect-error - Custom element props
+				diffs={props.diffs}
+			/>
 		</div>
 	);
 };
