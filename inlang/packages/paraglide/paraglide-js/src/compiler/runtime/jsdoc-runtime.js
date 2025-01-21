@@ -113,7 +113,7 @@ export let setLocale =
 
 ${injectCode("./is-locale.js")}
 
-${injectCode("./assert-locale.js")}
+${injectCode("./assert-is-locale.js")}
 
 ${injectCode("./get-locale-from-path.js")}
 

@@ -1,4 +1,4 @@
-import { assertLocale } from "./assert-locale.js";
+import { assertIsLocale } from "./assert-is-locale.js";
 import { test, expect } from "vitest";
 import { mockRuntime } from "./mock-runtime.js";
 
@@ -8,15 +8,15 @@ mockRuntime({
 });
 
 test("throws if the locale is not available", () => {
-	expect(() => assertLocale("es")).toThrow();
+	expect(() => assertIsLocale("es")).toThrow();
 });
 
 test("passes if the locale is available", () => {
-	expect(() => assertLocale("en")).not.toThrow();
+	expect(() => assertIsLocale("en")).not.toThrow();
 });
 
 test("the return value is a Locale", () => {
-	const locale = assertLocale("en");
+	const locale = assertIsLocale("en");
 
 	// a bit of a wacky test given that locale is `any`
 	// in the ambient type definition
