@@ -1,8 +1,12 @@
-import { test, expect, vi, describe } from "vitest";
+import { test, expect, vi, describe, afterEach } from "vitest";
 import { getLocaleFromPath } from "./get-locale-from-path.js";
 
 // sequential to avoid global variable conflicts
 describe.sequential("", () => {
+	afterEach(() => {
+		vi.resetAllMocks();
+	});
+
 	test("returns the locale from the path", () => {
 		// @ts-expect-error - global variable definition
 		globalThis.isLocale = vi.fn().mockReturnValue(true);

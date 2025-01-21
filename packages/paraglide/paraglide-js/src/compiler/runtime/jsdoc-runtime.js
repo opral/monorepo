@@ -1,9 +1,12 @@
 import fs from "node:fs";
 
-const getLocaleFromPath = fs.readFileSync(
-	new URL("./get-locale-from-path.js", import.meta.url),
-	"utf-8"
-);
+/**
+ * Load a file from the current directory.
+ * 
+ * @param {string} path 
+ * @returns {string}
+ */
+const injectCode = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf-8");  
 
 // to modify the runtime, outcomment the export const jsdocRuntime line
 
@@ -108,24 +111,11 @@ export let setLocale =
 		_locale = newLocale;
 	};
 
-/**
- * Check if something is an available locale.
- *
- * @example
- *   if (isLocale(params.locale)) {
- *     setLocale(params.locale);
- *   } else {
- *     setLocale('en');
- *   }
- *
- * @param {any} locale
- * @returns {locale is Locale}
- */
-export function isLocale(locale) {
-	return locales.includes(locale);
-}
+${injectCode("./localized-path.js")}
 
-${getLocaleFromPath}
+${injectCode("./get-locale-from-path.js")}
+
+${injectCode("./is-locale.js")}
 
 // ------ TYPES ------
 
