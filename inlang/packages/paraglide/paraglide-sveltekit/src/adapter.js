@@ -1,12 +1,9 @@
 export { default as ParaglideSveltekitProvider } from "./adapter.provider.svelte";
+import { localizedPath } from "./runtime.js";
 
 /**
  * @type {import('@sveltejs/kit').Reroute}
  */
-export const i18nRouting = (request) => {
-	if (request.url.pathname === "/de") {
-		return "/";
-	}
-
-	return request.url.pathname;
+export const localizedRouting = (request) => {
+	return localizedPath(request.url.pathname);
 };

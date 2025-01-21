@@ -1,3 +1,3 @@
-import { i18nRouting } from '$lib/paraglide/adapter';
+import { localizedRouting } from '$lib/paraglide/adapter';
 
-export const reroute = i18nRouting;
+export const reroute = localizedRouting;

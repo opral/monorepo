@@ -8,3 +8,4 @@ export const defineGetLocale: Runtime["defineGetLocale"];
 export const defineSetLocale: Runtime["defineSetLocale"];
 export const isLocale: Runtime["isLocale"];
 export const getLocaleFromPath: Runtime["getLocaleFromPath"];
+export const localizedPath: Runtime["localizedPath"];

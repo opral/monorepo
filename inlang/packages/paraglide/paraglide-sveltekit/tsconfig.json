@@ -4,6 +4,7 @@
 	"compilerOptions": {
 		"outDir": "./dist",
 		"rootDir": "./src",
+		"module": "Node16",
 		"declaration": true,
 		"sourceMap": false,
 		"checkJs": true,
