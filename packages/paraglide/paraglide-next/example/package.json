@@ -1,13 +1,13 @@
 {
 	"name": "@inlang/paraglide-next-example",
 	"version": "0.1.0",
+	"type": "module",
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
-		"build": "paraglide-js compile --project ./project.inlang --outdir ./src/app/paraglide && next build",
+		"build": "next build",
 		"start": "next start",
-		"lint": "next lint",
-		"postinstall": "paraglide-js compile --project ./project.inlang --outdir ./src/app/paraglide"
+		"lint": "next lint"
 	},
 	"dependencies": {
 		"react": "^19.0.0",
