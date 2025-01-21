@@ -174,8 +174,14 @@ const getChanges = async (
 
       return {
         ...change,
-        snapshot_content_after: change.snapshot_content_after ? JSON.parse(change.snapshot_content_after) : null,
-        snapshot_content_before: snapshotBefore?.snapshot_content_before ? JSON.parse(snapshotBefore.snapshot_content_before) : null,
+        snapshot_content_after:
+          change.snapshot_content_after
+            ? JSON.parse(change.snapshot_content_after as string)
+            : null,
+        snapshot_content_before:
+          snapshotBefore?.snapshot_content_before
+            ? JSON.parse(snapshotBefore.snapshot_content_before as string)
+            : null,
       }
     })
   );
