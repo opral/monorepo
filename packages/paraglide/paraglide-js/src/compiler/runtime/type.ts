@@ -8,7 +8,7 @@ export type Runtime = {
 	setLocale: (newLocale: Locale) => void;
 	defineGetLocale: (fn: () => Locale) => void;
 	defineSetLocale: (fn: (newLocale: Locale) => void) => void;
-	assertLocale: typeof import("./assert-locale.js").assertLocale;
+	assertIsLocale: typeof import("./assert-is-locale.js").assertIsLocale;
 	isLocale: (locale: Locale) => locale is Locale;
 	deLocalizedPath: typeof import("./de-localized-path.js").deLocalizedPath;
 	localizedPath: typeof import("./localized-path.js").localizedPath;

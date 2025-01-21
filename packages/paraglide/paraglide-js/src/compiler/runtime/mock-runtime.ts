@@ -3,7 +3,7 @@ import { getLocaleFromPath } from "./get-locale-from-path.js";
 import { localizedPath } from "./localized-path.js";
 import { isLocale } from "./is-locale.js";
 import { deLocalizedPath } from "./de-localized-path.js";
-import { assertLocale } from "./assert-locale.js";
+import { assertIsLocale } from "./assert-is-locale.js";
 
 export function mockRuntime({ baseLocale = "en", locales = ["en", "de"] }) {
 	let locale = baseLocale;
@@ -12,7 +12,7 @@ export function mockRuntime({ baseLocale = "en", locales = ["en", "de"] }) {
 		baseLocale,
 		locales,
 		isLocale,
-		assertLocale,
+		assertIsLocale,
 		getLocaleFromPath,
 		localizedPath,
 		deLocalizedPath,
