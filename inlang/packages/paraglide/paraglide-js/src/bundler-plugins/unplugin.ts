@@ -27,6 +27,16 @@ export const unpluginFactory: UnpluginFactory<CompilerArgs> = (args) => ({
 			});
 		}
 	},
+	webpack(compiler) {
+		//we need the compiler to run before the build so that the message-modules will be present
+		//In the other bundlers `buildStart` already runs before the build. In webpack it's a race condition
+		compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
+			await compile({
+				fs: wrappedFs,
+				...args,
+			});
+		});
+	},
 });
 
 const readFiles = new Set<string>();
