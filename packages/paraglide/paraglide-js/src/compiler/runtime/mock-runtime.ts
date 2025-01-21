@@ -1,6 +1,7 @@
 import { getLocaleFromPath } from "./get-locale-from-path.js";
 import { localizedPath } from "./localized-path.js";
 import { isLocale } from "./is-locale.js";
+import { delocalizedPath } from "./delocalized-path.js";
 import type { Runtime } from "./type.js";
 
 export function mockRuntime({ baseLocale = "en", locales = ["en", "de"] }) {
@@ -12,6 +13,7 @@ export function mockRuntime({ baseLocale = "en", locales = ["en", "de"] }) {
 		isLocale,
 		getLocaleFromPath,
 		localizedPath,
+		delocalizedPath,
 		defineGetLocale: (fn) => (runtime.getLocale = fn),
 		defineSetLocale: (fn) => (runtime.setLocale = fn),
 		setLocale: (newLocale) => (locale = newLocale),

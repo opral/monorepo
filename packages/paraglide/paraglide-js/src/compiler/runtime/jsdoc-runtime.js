@@ -111,11 +111,13 @@ export let setLocale =
 		_locale = newLocale;
 	};
 
-${injectCode("./localized-path.js")}
+${injectCode("./is-locale.js")}
 
 ${injectCode("./get-locale-from-path.js")}
 
-${injectCode("./is-locale.js")}
+${injectCode("./localized-path.js")}
+
+${injectCode("./delocalized-path.js")}
 
 // ------ TYPES ------
 
