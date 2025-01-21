@@ -1,14 +1,14 @@
-import { useState } from "react";
-import IconChevron from "./icons/IconChevron.tsx";
+// import { useState } from "react";
+// import IconChevron from "./icons/IconChevron.tsx";
 import { useAtom } from "jotai/react";
 import { changesCurrentVersionAtom } from "@/state-active-file.ts";
-import { ChangeComponent } from "./ChangeComponent.tsx";
-import { Button } from "./ui/button.tsx";
-import { clsx } from "clsx";
+// import { ChangeComponent } from "./ChangeComponent.tsx";
+// import { Button } from "./ui/button.tsx";
+// import { clsx } from "clsx";
 import { discussionSearchParamsAtom } from "@/state.ts";
 
 const ConnectedChanges = () => {
-	const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
+	// const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
 	const [changesCurrentVersion] = useAtom(changesCurrentVersionAtom);
 	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
 	const filteredChanges = changesCurrentVersion.filter((change) => {
@@ -24,7 +24,7 @@ const ConnectedChanges = () => {
 	return (
 		<div
 			className="flex-shrink -mx-2.5 px-2.5 border-y-[1px] border-slate-200 hover:bg-slate-50"
-			onClick={() => setIsExpandedState(!isExpandedState)}
+			// onClick={() => setIsExpandedState(!isExpandedState)}
 		>
 			<div className="group/connected flex items-center flex-1 py-1.5 pl-2.5 pr-2 rounded-md cursor-pointer">
 				<div className="flex flex-1 gap-3">
@@ -35,16 +35,16 @@ const ConnectedChanges = () => {
 							: "related changes"}
 					</span>
 				</div>
-				<Button variant="ghost" size="icon">
+				{/* <Button variant="ghost" size="icon">
 					<IconChevron
 						className={clsx(
 							isExpandedState ? "rotate-180" : "rotate-0",
 							"transition"
 						)}
 					/>
-				</Button>
+				</Button> */}
 			</div>
-			{isExpandedState && (
+			{/* {isExpandedState && (
 				<div className="flex flex-col pb-2">
 					{filteredChanges.map((change, i) => (
 						<ChangeComponent
@@ -64,7 +64,7 @@ const ConnectedChanges = () => {
 						/>
 					))}
 				</div>
-			)}
+			)} */}
 		</div>
 	);
 }

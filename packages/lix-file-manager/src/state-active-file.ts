@@ -276,12 +276,11 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	if (!activeFile) return [];
 	const currentBranch = await get(currentVersionAtom);
 	if (!currentBranch) return [];
-	return await lix.db
+
+	const changesCurrentVersionQuery = lix.db
 		.selectFrom("change")
-		.where("change.file_id", "=", activeFile.id)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin("file", "file.id", "change.file_id")
 		.innerJoin("change_author", "change_author.change_id", "change.id")
@@ -312,8 +311,13 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 		.select((eb) => eb.fn.count("discussion.id").as("discussion_count"))
 		.select(sql`group_concat(discussion.id)`.as("discussion_ids"))
 		.groupBy("change.id")
-		.orderBy("change.created_at", "desc")
-		.execute();
+		.orderBy("change.created_at", "desc");
+
+	if (activeFile) {
+		changesCurrentVersionQuery.where("change.file_id", "=", activeFile.id);
+	}
+
+	return await changesCurrentVersionQuery.execute();
 });
 
 export const allEdgesAtom = atom(async (get) => {
