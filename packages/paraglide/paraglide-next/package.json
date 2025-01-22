@@ -26,8 +26,8 @@
 		}
 	},
 	"scripts": {
-		"dev": "svelte-package -i src -o dist --watch",
-		"build": "svelte-package -i src -o dist",
+		"dev": "tsc --watch",
+		"build": "tsc",
 		"test": "tsc --noEmit && vitest run --coverage ./src/**/* --passWithNoTests",
 		"test:watch": "npm run env-variables && vitest --watch ./src/**/*",
 		"lint": "eslint ./src --fix",

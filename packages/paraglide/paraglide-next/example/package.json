@@ -1,13 +1,11 @@
 {
 	"name": "@inlang/paraglide-next-example",
 	"version": "0.1.0",
-	"type": "module",
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
-		"start": "next start",
-		"lint": "next lint"
+		"start": "next start"
 	},
 	"dependencies": {
 		"react": "^19.0.0",
@@ -15,7 +13,7 @@
 		"next": "15.1.5"
 	},
 	"devDependencies": {
-		"@inlang/paraglide-js": "2.0.0-beta.12",
+		"@inlang/paraglide-js": "workspace:*",
 		"typescript": "^5",
 		"@types/node": "^20",
 		"@types/react": "^19",
