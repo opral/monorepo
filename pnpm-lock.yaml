@@ -56,7 +56,7 @@ importers:
         version: 2.4.9
       '@vitest/coverage-v8':
         specifier: 2.1.8
-        version: 2.1.8(@vitest/browser@2.1.8(@types/node@20.5.9)(playwright@1.48.1)(typescript@5.2.2)(vite@5.4.11(@types/node@20.5.9)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1))(vitest@2.1.8(@types/node@20.5.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@20.5.9)(typescript@5.2.2))(terser@5.36.0))
+        version: 2.1.8(@vitest/browser@2.1.8)(vitest@2.1.8)
       cli-progress:
         specifier: ^3.12.0
         version: 3.12.0
@@ -304,7 +304,7 @@ importers:
         version: 22.10.6
       '@vitest/coverage-v8':
         specifier: 2.1.8
-        version: 2.1.8(@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.3)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1))(vitest@2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0))
+        version: 2.1.8(@vitest/browser@2.1.8)(vitest@2.1.8)
       eslint:
         specifier: ^9.18.0
         version: 9.18.0(jiti@2.3.3)
@@ -420,7 +420,7 @@ importers:
         version: 22.10.6
       '@vitest/coverage-v8':
         specifier: 2.1.8
-        version: 2.1.8(@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.3)(vite@6.0.7(@types/node@22.10.6)(jiti@2.3.3)(lightningcss@1.27.0)(terser@5.36.0)(tsx@4.19.2)(yaml@2.6.0))(vitest@2.1.8)(webdriverio@9.2.1))(vitest@2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0))
+        version: 2.1.8(@vitest/browser@2.1.8)(vitest@2.1.8)
       eslint:
         specifier: ^9.18.0
         version: 9.18.0(jiti@2.3.3)
@@ -721,7 +721,7 @@ importers:
         version: 1.96.0
       '@vitest/coverage-v8':
         specifier: 2.1.8
-        version: 2.1.8(@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1))(vitest@2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.2))(terser@5.36.0))
+        version: 2.1.8(@vitest/browser@2.1.8)(vitest@2.1.8)
       memfs:
         specifier: 4.6.0
         version: 4.6.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.8.0)
@@ -816,7 +816,7 @@ importers:
         version: 10.0.0
       '@vitest/coverage-v8':
         specifier: ^2.0.5
-        version: 2.1.8(@vitest/browser@2.1.8(@types/node@22.10.1)(playwright@1.48.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1))(vitest@2.1.8(@types/node@22.10.1)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.1)(typescript@5.7.2))(terser@5.36.0))
+        version: 2.1.8(@vitest/browser@2.1.8)(vitest@2.1.8)
       eslint:
         specifier: ^9.12.0
         version: 9.15.0(jiti@2.3.3)
@@ -898,7 +898,7 @@ importers:
         version: link:../ui-components/settings-component
       '@vitest/coverage-v8':
         specifier: 2.1.8
-        version: 2.1.8(@vitest/browser@2.1.8(@types/node@20.16.13)(playwright@1.48.1)(typescript@5.3.2)(vite@5.4.11(@types/node@20.16.13)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@8.41.0))(vitest@2.1.8(@types/node@20.16.13)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@20.16.13)(typescript@5.3.2))(terser@5.36.0))
+        version: 2.1.8(@vitest/browser@2.1.8)(vitest@2.1.8)
       comlink:
         specifier: ^4.4.1
         version: 4.4.2
@@ -1362,8 +1362,6 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@20.5.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@20.5.9)(typescript@5.7.2))(terser@5.36.0)
 
-  inlang/packages/website/dist/server: {}
-
   inlang/packages/website/tailwind-color-plugin:
     dependencies:
       '@ctrl/tinycolor':
@@ -1378,7 +1376,7 @@ importers:
         version: link:../../../../packages/tsconfig
       '@vitest/coverage-v8':
         specifier: 0.34.3
-        version: 0.34.3(vitest@0.34.3(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(playwright@1.48.1)(safaridriver@0.1.2)(terser@5.36.0)(webdriverio@9.2.1))
+        version: 0.34.3(vitest@0.34.3)
       tailwindcss:
         specifier: ^3.3.3
         version: 3.4.15(ts-node@10.9.2(@types/node@22.10.6)(typescript@5.2.2))
@@ -8319,7 +8317,7 @@ packages:
     engines: {node: '>= 0.8.0'}
 
   concat-map@0.0.1:
-    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
+    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
 
   concat-stream@1.6.2:
     resolution: {integrity: sha512-27HBghJxjiZtIk3Ycvn/4kbJk/1uZuJFfuPEns6LaEvpvG1f0hTea8lilrouyo9mVc2GWdcEZ8OLoGmSADlrCw==}
@@ -22156,30 +22154,7 @@ snapshots:
       - vite
     optional: true
 
-  '@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.3)(vite@6.0.7(@types/node@22.10.6)(jiti@2.3.3)(lightningcss@1.27.0)(terser@5.36.0)(tsx@4.19.2)(yaml@2.6.0))(vitest@2.1.8)(webdriverio@9.2.1)':
-    dependencies:
-      '@testing-library/dom': 10.4.0
-      '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
-      '@vitest/mocker': 2.1.8(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(vite@6.0.7(@types/node@22.10.6)(jiti@2.3.3)(lightningcss@1.27.0)(terser@5.36.0)(tsx@4.19.2)(yaml@2.6.0))
-      '@vitest/utils': 2.1.8
-      magic-string: 0.30.17
-      msw: 2.7.0(@types/node@22.10.6)(typescript@5.7.3)
-      sirv: 3.0.0
-      tinyrainbow: 1.2.0
-      vitest: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0)
-      ws: 8.18.0
-    optionalDependencies:
-      playwright: 1.48.1
-      webdriverio: 9.2.1
-    transitivePeerDependencies:
-      - '@types/node'
-      - bufferutil
-      - typescript
-      - utf-8-validate
-      - vite
-    optional: true
-
-  '@vitest/coverage-v8@0.34.3(vitest@0.34.3(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(playwright@1.48.1)(safaridriver@0.1.2)(terser@5.36.0)(webdriverio@9.2.1))':
+  '@vitest/coverage-v8@0.34.3(vitest@0.34.3)':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -22232,87 +22207,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-v8@2.1.8(@vitest/browser@2.1.8(@types/node@20.16.13)(playwright@1.48.1)(typescript@5.3.2)(vite@5.4.11(@types/node@20.16.13)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@8.41.0))(vitest@2.1.8(@types/node@20.16.13)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@20.16.13)(typescript@5.3.2))(terser@5.36.0))':
-    dependencies:
-      '@ampproject/remapping': 2.3.0
-      '@bcoe/v8-coverage': 0.2.3
-      debug: 4.4.0
-      istanbul-lib-coverage: 3.2.2
-      istanbul-lib-report: 3.0.1
-      istanbul-lib-source-maps: 5.0.6
-      istanbul-reports: 3.1.7
-      magic-string: 0.30.17
-      magicast: 0.3.5
-      std-env: 3.8.0
-      test-exclude: 7.0.1
-      tinyrainbow: 1.2.0
-      vitest: 2.1.8(@types/node@20.16.13)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@20.16.13)(typescript@5.3.2))(terser@5.36.0)
-    optionalDependencies:
-      '@vitest/browser': 2.1.8(@types/node@20.16.13)(playwright@1.48.1)(typescript@5.3.2)(vite@5.4.11(@types/node@20.16.13)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@8.41.0)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@vitest/coverage-v8@2.1.8(@vitest/browser@2.1.8(@types/node@20.5.9)(playwright@1.48.1)(typescript@5.2.2)(vite@5.4.11(@types/node@20.5.9)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1))(vitest@2.1.8(@types/node@20.5.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@20.5.9)(typescript@5.2.2))(terser@5.36.0))':
-    dependencies:
-      '@ampproject/remapping': 2.3.0
-      '@bcoe/v8-coverage': 0.2.3
-      debug: 4.4.0
-      istanbul-lib-coverage: 3.2.2
-      istanbul-lib-report: 3.0.1
-      istanbul-lib-source-maps: 5.0.6
-      istanbul-reports: 3.1.7
-      magic-string: 0.30.17
-      magicast: 0.3.5
-      std-env: 3.8.0
-      test-exclude: 7.0.1
-      tinyrainbow: 1.2.0
-      vitest: 2.1.8(@types/node@20.5.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@20.5.9)(typescript@5.2.2))(terser@5.36.0)
-    optionalDependencies:
-      '@vitest/browser': 2.1.8(@types/node@20.5.9)(playwright@1.48.1)(typescript@5.2.2)(vite@5.4.11(@types/node@20.5.9)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@vitest/coverage-v8@2.1.8(@vitest/browser@2.1.8(@types/node@22.10.1)(playwright@1.48.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1))(vitest@2.1.8(@types/node@22.10.1)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.1)(typescript@5.7.2))(terser@5.36.0))':
-    dependencies:
-      '@ampproject/remapping': 2.3.0
-      '@bcoe/v8-coverage': 0.2.3
-      debug: 4.4.0
-      istanbul-lib-coverage: 3.2.2
-      istanbul-lib-report: 3.0.1
-      istanbul-lib-source-maps: 5.0.6
-      istanbul-reports: 3.1.7
-      magic-string: 0.30.17
-      magicast: 0.3.5
-      std-env: 3.8.0
-      test-exclude: 7.0.1
-      tinyrainbow: 1.2.0
-      vitest: 2.1.8(@types/node@22.10.1)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.1)(typescript@5.7.2))(terser@5.36.0)
-    optionalDependencies:
-      '@vitest/browser': 2.1.8(@types/node@22.10.1)(playwright@1.48.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@vitest/coverage-v8@2.1.8(@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1))(vitest@2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.2))(terser@5.36.0))':
-    dependencies:
-      '@ampproject/remapping': 2.3.0
-      '@bcoe/v8-coverage': 0.2.3
-      debug: 4.4.0
-      istanbul-lib-coverage: 3.2.2
-      istanbul-lib-report: 3.0.1
-      istanbul-lib-source-maps: 5.0.6
-      istanbul-reports: 3.1.7
-      magic-string: 0.30.17
-      magicast: 0.3.5
-      std-env: 3.8.0
-      test-exclude: 7.0.1
-      tinyrainbow: 1.2.0
-      vitest: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.2))(terser@5.36.0)
-    optionalDependencies:
-      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@vitest/coverage-v8@2.1.8(@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.3)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1))(vitest@2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0))':
+  '@vitest/coverage-v8@2.1.8(@vitest/browser@2.1.8)(vitest@2.1.8)':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -22329,26 +22224,6 @@ snapshots:
       vitest: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0)
     optionalDependencies:
       '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.3)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.27.0)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@vitest/coverage-v8@2.1.8(@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.3)(vite@6.0.7(@types/node@22.10.6)(jiti@2.3.3)(lightningcss@1.27.0)(terser@5.36.0)(tsx@4.19.2)(yaml@2.6.0))(vitest@2.1.8)(webdriverio@9.2.1))(vitest@2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0))':
-    dependencies:
-      '@ampproject/remapping': 2.3.0
-      '@bcoe/v8-coverage': 0.2.3
-      debug: 4.4.0
-      istanbul-lib-coverage: 3.2.2
-      istanbul-lib-report: 3.0.1
-      istanbul-lib-source-maps: 5.0.6
-      istanbul-reports: 3.1.7
-      magic-string: 0.30.17
-      magicast: 0.3.5
-      std-env: 3.8.0
-      test-exclude: 7.0.1
-      tinyrainbow: 1.2.0
-      vitest: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0)
-    optionalDependencies:
-      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.3)(vite@6.0.7(@types/node@22.10.6)(jiti@2.3.3)(lightningcss@1.27.0)(terser@5.36.0)(tsx@4.19.2)(yaml@2.6.0))(vitest@2.1.8)(webdriverio@9.2.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -22553,16 +22428,6 @@ snapshots:
     optionalDependencies:
       msw: 2.7.0(@types/node@22.10.6)(typescript@5.7.3)
       vite: 5.4.11(@types/node@22.10.6)(lightningcss@1.27.0)(terser@5.36.0)
-
-  '@vitest/mocker@2.1.8(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(vite@6.0.7(@types/node@22.10.6)(jiti@2.3.3)(lightningcss@1.27.0)(terser@5.36.0)(tsx@4.19.2)(yaml@2.6.0))':
-    dependencies:
-      '@vitest/spy': 2.1.8
-      estree-walker: 3.0.3
-      magic-string: 0.30.17
-    optionalDependencies:
-      msw: 2.7.0(@types/node@22.10.6)(typescript@5.7.3)
-      vite: 6.0.7(@types/node@22.10.6)(jiti@2.3.3)(lightningcss@1.27.0)(terser@5.36.0)(tsx@4.19.2)(yaml@2.6.0)
-    optional: true
 
   '@vitest/pretty-format@2.0.5':
     dependencies:
@@ -25213,7 +25078,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.7.0(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.7.0)(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -25235,7 +25100,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.7.0(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.7.0)(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.15.1
       is-glob: 4.0.3
