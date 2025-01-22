@@ -35,6 +35,8 @@ export function localizedPath(path, options) {
 
 	if (locale === baseLocale) {
 		return pathWithoutLocale;
+	} else if (path === "/") {
+		return `/${locale}`;
 	} else {
 		return `/${locale}${pathWithoutLocale}`;
 	}
