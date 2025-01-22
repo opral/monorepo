@@ -46,4 +46,11 @@ describe.sequential("", () => {
 
 		expect(l10nPath).toBe("/about");
 	});
+
+	test("does not add a slash suffix if it's the root path that is already localized", () => {
+		const path = "/de";
+		const l10nPath = localizedPath(path, { locale: "de" });
+
+		expect(l10nPath).toBe("/de");
+	});
 });
