@@ -20,7 +20,7 @@ const SDKSettings = Type.Object({
 	// remove in SDK-v3
 	sourceLanguageTag: Type.Optional(
 		Type.String({
-			description: "Use baseLocale instead.",
+			description: "Use baseLocale instead if all your inlang apps that you are using are on the inlang SDK V2. Otherwise, leave this property in.",
 			deprecated: true,
 		})
 	),
@@ -30,7 +30,7 @@ const SDKSettings = Type.Object({
 		Type.Array(Type.String(), {
 			uniqueItems: true,
 			deprecated: true,
-			description: "Use locales instead.",
+			description: "Use baseLocale instead if all your inlang apps that you are using are on the inlang SDK V2. Otherwise, leave this property in.",
 		})
 	),
 	/**
