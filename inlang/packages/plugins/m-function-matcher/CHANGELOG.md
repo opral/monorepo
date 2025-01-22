@@ -1,5 +1,11 @@
 # @inlang/plugin-m-function-matcher
 
+## 1.0.5
+
+### Patch Changes
+
+- e8c02a5: Support import { m } from '...' on vscode extension
+
 ## 1.0.4
 
 ### Patch Changes
