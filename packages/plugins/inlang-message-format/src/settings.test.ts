@@ -68,3 +68,22 @@ test("it should be possible to use parent directories in the storage path", () =
   } satisfies PluginSettings;
   expect(Value.Check(PluginSettings, settings)).toBe(true);
 });
+
+test("it should be possible to use multiple storage paths given as array", () => {
+  const valid = [
+    "./messages/{locale}.json",
+    "./src/i18n/{locale}.json",
+    "./translations/{locale}.json",
+  ];
+  const invalid = ["./messages/{locale}.json.txt", "./messages/{locale}.js"];
+  expect(
+    Value.Check(PluginSettings, {
+      pathPattern: valid,
+    } satisfies PluginSettings)
+  ).toBe(true);
+  expect(
+    Value.Check(PluginSettings, {
+      pathPattern: invalid,
+    } satisfies PluginSettings)
+  ).toBe(false);
+});
