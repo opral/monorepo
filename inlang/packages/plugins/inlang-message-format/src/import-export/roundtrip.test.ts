@@ -346,6 +346,67 @@ test("handles inputs of a bundle even if one message doesn't use all inputs", as
 	});
 });
 
+test("it handles multiple files for the same locale", async () => {
+  const imported = await importFiles({
+    settings: {} as any,
+    files: [
+      {
+        locale: "en",
+        content: new TextEncoder().encode(
+          JSON.stringify({
+            some_happy_cat: "Read more about Lix",
+            one_happy_dog: "This explains itself",
+          })
+        ),
+      },
+      {
+        locale: "en",
+        content: new TextEncoder().encode(
+          JSON.stringify({
+            some_happy_cat: "Read more about Lix",
+            one_happy_dog: "Read more about Inlang",
+          })
+        ),
+      },
+    ],
+  });
+  expect(await runExportFilesParsed(imported)).toMatchObject({
+    some_happy_cat: "Read more about Lix",
+    one_happy_dog: "Read more about Inlang",
+  });
+
+  expect(imported.bundles).lengthOf(2);
+  expect(imported.messages).lengthOf(4);
+  expect(imported.variants).lengthOf(4);
+
+  expect(imported.bundles[0]?.id).toStrictEqual("some_happy_cat");
+  expect(imported.bundles[0]?.declarations).toStrictEqual([]);
+  expect(imported.bundles[1]?.id).toStrictEqual("one_happy_dog");
+  expect(imported.bundles[1]?.declarations).toStrictEqual([]);
+
+  expect(imported.messages[0]?.selectors).toStrictEqual([]);
+  expect(imported.messages[1]?.selectors).toStrictEqual([]);
+  expect(imported.messages[2]?.selectors).toStrictEqual([]);
+  expect(imported.messages[3]?.selectors).toStrictEqual([]);
+
+  expect(imported.variants[0]?.matches).toStrictEqual([]);
+  expect(imported.variants[0]?.pattern).toStrictEqual([
+    { type: "text", value: "Read more about Lix" },
+  ]);
+  expect(imported.variants[1]?.matches).toStrictEqual([]);
+  expect(imported.variants[1]?.pattern).toStrictEqual([
+    { type: "text", value: "This explains itself" },
+  ]);
+  expect(imported.variants[2]?.matches).toStrictEqual([]);
+  expect(imported.variants[2]?.pattern).toStrictEqual([
+    { type: "text", value: "Read more about Lix" },
+  ]);
+  expect(imported.variants[3]?.matches).toStrictEqual([]);
+  expect(imported.variants[3]?.pattern).toStrictEqual([
+    { type: "text", value: "Read more about Inlang" },
+  ]);
+});
+
 // convenience wrapper for less testing code
 function runImportFiles(json: Record<string, any>) {
   return importFiles({
@@ -361,12 +422,15 @@ function runImportFiles(json: Record<string, any>) {
 
 // convenience wrapper for less testing code
 async function runExportFiles(
-  imported: Awaited<ReturnType<typeof importFiles>>,
+  imported: Awaited<ReturnType<typeof importFiles>>
 ) {
   // add ids which are undefined from the import
   for (const message of imported.messages) {
     if (message.id === undefined) {
-      message.id = `${Math.random() * 1000}`;
+      message.id =
+        imported.messages.find(
+          (m) => m.bundleId === message.bundleId && m.locale === message.locale
+        )?.id ?? `${Math.random() * 1000}`;
     }
   }
   for (const variant of imported.variants) {
@@ -379,7 +443,7 @@ async function runExportFiles(
       variant.messageId = imported.messages.find(
         (m: any) =>
           m.bundleId === variant.messageBundleId &&
-          m.locale === variant.messageLocale,
+          m.locale === variant.messageLocale
       )?.id;
     }
   }

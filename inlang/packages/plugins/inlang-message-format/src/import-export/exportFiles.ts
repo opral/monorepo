@@ -18,9 +18,14 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 
   for (const message of messages) {
     const bundle = bundles.find((b) => b.id === message.bundleId);
-    const variantsOfMessage = variants.filter(
-      (v) => v.messageId === message.id,
-    );
+    const variantsOfMessage = [
+      ...variants
+        .reduce((r, v) => {
+          if (v.messageId === message.id) r.set(JSON.stringify(v.matches), v);
+          return r;
+        }, new Map<string, (typeof variants)[number]>())
+        .values(),
+    ];
     files[message.locale] = {
       ...files[message.locale],
       ...serializeMessage(bundle!, message, variantsOfMessage),
