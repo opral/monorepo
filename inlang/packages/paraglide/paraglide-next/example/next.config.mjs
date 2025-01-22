@@ -1,8 +1,6 @@
 import { paraglideWebpackPlugin } from "@inlang/paraglide-js";
 
-/**
- * @type {import('next').NextConfig}
- */
+/** @type {import("next").NextConfig} */
 const nextConfig = {
 	eslint: {
 		// Warning: This allows production builds to successfully complete even if
