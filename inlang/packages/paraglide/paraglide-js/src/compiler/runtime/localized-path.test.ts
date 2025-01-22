@@ -30,6 +30,13 @@ describe.sequential("", () => {
 		expect(l10nPath).toBe("/de/about/");
 	});
 
+	test("adds no trailing slash for the root path", () => {
+		const path = "/";
+		const l10nPath = localizedPath(path, { locale: "de" });
+
+		expect(l10nPath).toBe("/de");
+	});
+
 	test("removes the base locale from the path", () => {
 		// @ts-expect-error - global variable definition
 		globalThis.baseLocale = "en";
