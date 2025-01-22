@@ -9,7 +9,7 @@ const nextConfig = {
 		// your project has ESLint errors.
 		ignoreDuringBuilds: true,
 	},
-	webpack: (config, { isServer }) => {
+	webpack: (config) => {
 		config.plugins.push(
 			paraglideWebpackPlugin({
 				project: "./project.inlang",
