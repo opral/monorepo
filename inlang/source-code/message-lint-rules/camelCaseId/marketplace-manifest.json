@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "messageLintRule.inlang.camelCaseId",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/camelCaseId/assets/icon.png",
+	"icon": "./assets/icon.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/camel_case_id-cover.jpg"
 	],
@@ -12,8 +12,8 @@
 		"en": "Checks for messages to have a camel case formatted message id (e.g. 'myMessage')."
 	},
 	"pages": {
-		"/": "./inlang/source-code/message-lint-rules/camelCaseId/README.md",
-		"/changelog": "./inlang/source-code/message-lint-rules/camelCaseId/CHANGELOG.md"
+		"/": "./README.md",
+		"/changelog": "./CHANGELOG.md"
 	},
 	"keywords": ["message", "lint rule", "id", "format", "camel", "case", "website"],
 	"publisherName": "inlang",

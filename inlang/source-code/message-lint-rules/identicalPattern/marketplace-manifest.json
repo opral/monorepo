@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "messageLintRule.inlang.identicalPattern",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/identicalPattern/assets/icon.png",
+	"icon": "./assets/icon.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/identical_pattern-marketplace-cover.jpg"
 	],
@@ -12,8 +12,8 @@
 		"en": "Checks for identical patterns in different languages.  A message with identical wording in multiple languages can indicate that the translations are redundant or can be combined into a single message to reduce translation effort."
 	},
 	"pages": {
-		"/": "./inlang/source-code/message-lint-rules/identicalPattern/README.md",
-		"/changelog": "./inlang/source-code/message-lint-rules/identicalPattern/CHANGELOG.md"
+		"/": "./README.md",
+		"/changelog": "./CHANGELOG.md"
 	},
 	"keywords": ["message", "lint rule", "itentical pattern", "website"],
 	"publisherName": "inlang",

@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "messageLintRule.inlang.validJsIdentifier",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/validJsIdentifier/assets/icon.png",
+	"icon": "./icon.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/valid_js_identifier_id.jpg"
 	],
@@ -12,8 +12,8 @@
 		"en": "Make sure that all message IDs are valid JavaScript identifiers."
 	},
 	"pages": {
-		"/": "./inlang/source-code/message-lint-rules/validJsIdentifier/README.md",
-		"/changelog": "./inlang/source-code/message-lint-rules/validJsIdentifier/CHANGELOG.md"
+		"/": "./README.md",
+		"/changelog": "./CHANGELOG.md"
 	},
 	"keywords": ["message", "lint rule", "javascript", "paraglide", "website"],
 	"publisherName": "inlang",

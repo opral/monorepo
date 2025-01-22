@@ -12,8 +12,8 @@
 		"en": "Checks for missing variants for a specific languageTag.  If a variant exists for the sourceLanguageTag but is missing for a listed languageTag, it is likely that the message has not been translated for this languageTag yet."
 	},
 	"pages": {
-		"/": "./inlang/source-code/message-lint-rules/missingTranslation/README.md",
-		"/changelog": "./inlang/source-code/message-lint-rules/missingTranslation/CHANGELOG.md"
+		"/": "./README.md",
+		"/changelog": "./CHANGELOG.md"
 	},
 	"keywords": ["message", "lint rule", "missing", "website"],
 	"publisherName": "inlang",

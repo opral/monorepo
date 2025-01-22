@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "messageLintRule.inlang.emptyPattern",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/assets/icon.png",
+	"icon": "./assets/icon.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/empty_pattern-marketplace-cover.jpg"
 	],
@@ -12,8 +12,8 @@
 		"en": "Checks for empty pattern in a language tag. If a message exists in the reference resource but the pattern in a target resource is empty, it is likely that the message has not been translated yet."
 	},
 	"pages": {
-		"/": "./inlang/source-code/message-lint-rules/emptyPattern/README.md",
-		"/changelog": "./inlang/source-code/message-lint-rules/emptyPattern/CHANGELOG.md"
+		"/": "./README.md",
+		"/changelog": "./CHANGELOG.md"
 	},
 	"keywords": ["message", "lint rule", "empty pattern", "website"],
 	"publisherName": "inlang",
