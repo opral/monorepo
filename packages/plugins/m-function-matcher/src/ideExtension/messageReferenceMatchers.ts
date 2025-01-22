@@ -23,7 +23,7 @@ const createParser = () => {
     findReference: function (r) {
       return Parsimmon.seq(
         Parsimmon.regex(/(import \* as m)|(import { m })/),
-        r.findMessage!.many()
+        r.findMessage!.many(),
       );
     },
 
