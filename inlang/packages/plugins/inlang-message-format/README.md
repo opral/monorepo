@@ -59,6 +59,18 @@ The path pattern defines _where_ the plugin will be looking for your message fil
 }
 ```
 
+You can also define an array of paths. The last path in the array will take precedence over the previous ones. This is useful if you want to have a default message file that is overridden by a customer-specific file.
+
+```json
+// project.inlang/settings.json
+{
+  "modules": [ ... ],
+  "plugin.inlang.messageFormat": {
+    "pathPattern": ["./defaults/{locale}.json", "./customer1/{locale}.json"]
+  }
+}
+```
+
 
 ## Variants (pluralization, gendering, A/B testing)
 
