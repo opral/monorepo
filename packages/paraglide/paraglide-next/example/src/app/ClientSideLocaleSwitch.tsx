@@ -1,6 +1,6 @@
 "use client";
 
-import { setLocale } from "./paraglide/runtime";
+import { setLocale } from "../paraglide/runtime";
 
 export default function ClientSideLocaleSwitch() {
 	return (

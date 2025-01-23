@@ -6,13 +6,15 @@ import {
 	localizedPath,
 	baseLocale,
 	getLocaleFromPath,
-} from "./paraglide/runtime.js";
+} from "./runtime.js";
 
 /**
  * Defines `getLocale()` and `setLocale()` for client side components.
  *
  * NextJS >13 defaults to RSC which requires an extra provider that
  * executes JS to define get locale and set locale.
+ *
+ * @returns {JSX.Element}
  */
 export default function ParaglideProviderClientSide() {
 	defineGetLocale(() => {
