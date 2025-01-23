@@ -1,5 +1,22 @@
 # @inlang/plugin-message-format
 
+## 3.1.1
+
+### Patch Changes
+
+- 8132942: feat: support array of paths for pathPattern in inlang-message-format plugin
+
+  ```diff
+  // settings.json
+
+  {
+    "plugin.inlang.messageFormat": {
+  +    pathPattern: ["/defaults/{locale}.json", "/translations/{locale}.json"],
+    }
+  }
+
+  ```
+
 ## 3.1.0
 
 ### Minor Changes
