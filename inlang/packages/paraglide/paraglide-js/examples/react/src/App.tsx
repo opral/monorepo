@@ -27,7 +27,13 @@ function App() {
 			<button onClick={() => setLocale("en")}>Switch locale to en</button>
 			<button onClick={() => setLocale("de")}>Switch locale to de</button>
 			<button onClick={() => setLocale("fr")}>Switch locale to fr</button>
-			<p>{m.orange_dog_wheel()}</p>
+			<p>
+				{m.jojo_mountain_day({
+					username: "John Doe",
+					platform: "ios",
+					userGender: "male",
+				})}
+			</p>
 		</div>
 	);
 }
