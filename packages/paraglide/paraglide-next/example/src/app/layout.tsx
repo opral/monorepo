@@ -23,13 +23,11 @@ export default function RootLayout({
 						<p>{m.static_anchor_tags_info()}</p>
 					</b>
 					<div>
-						{/* @ts-expect-error no idea why */}
 						<Link href={localizedPath("/", { locale: "en" })}>
 							{m.navigate_to_en()}
 						</Link>
 					</div>
 					<div>
-						{/* @ts-expect-error no idea why */}
 						<Link href={localizedPath("/", { locale: "de" })}>
 							{m.navigate_to_de()}
 						</Link>
