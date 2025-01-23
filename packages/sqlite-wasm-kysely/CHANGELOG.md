@@ -1,5 +1,11 @@
 # sqlite-wasm-kysely
 
+## 0.3.0
+
+### Minor Changes
+
+- b87f8a8: update sqlite dependency to 3.48.0-build2
+
 ## 0.2.0
 
 ### Minor Changes

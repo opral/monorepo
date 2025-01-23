@@ -1,5 +1,11 @@
 # @lix-js/plugin-csv
 
+## 0.1.1
+
+### Patch Changes
+
+- @lix-js/sdk@0.3.5
+
 ## 0.1.0
 
 ### Minor Changes
