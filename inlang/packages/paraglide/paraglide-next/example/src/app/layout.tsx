@@ -1,4 +1,9 @@
 import type { Metadata } from "next";
+import { getLocale, localizedPath, setLocale } from "./paraglide/runtime";
+import ClientSideLocaleSwitch from "./ClientSideLocaleSwitch";
+import ParaglideNextProvider from "./adapter.provider";
+import Link from "next/link";
+import * as m from "./paraglide/messages.js";
 
 export const metadata: Metadata = {
 	title: "Create Next App",
@@ -11,8 +16,30 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
-			<body>{children}</body>
-		</html>
+		<ParaglideNextProvider>
+			<html lang={getLocale()}>
+				<body>
+					<b>
+						<p>{m.static_anchor_tags_info()}</p>
+					</b>
+					<div>
+						<Link href={localizedPath("/", { locale: "en" })}>
+							{m.navigate_to_en()}
+						</Link>
+					</div>
+					<div>
+						<Link href={localizedPath("/", { locale: "de" })}>
+							{m.navigate_to_de()}
+						</Link>
+					</div>
+					<b>
+						<p>{m.programmatic_locale_switching_info()}</p>
+					</b>
+					<ClientSideLocaleSwitch />
+					<hr />
+					{children}
+				</body>
+			</html>
+		</ParaglideNextProvider>
 	);
 }
