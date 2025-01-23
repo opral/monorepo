@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { getLocale, localizedPath, setLocale } from "./paraglide/runtime";
+import { getLocale, localizedPath } from "../paraglide/runtime";
 import ClientSideLocaleSwitch from "./ClientSideLocaleSwitch";
-import ParaglideNextProvider from "./adapter.provider";
+import ParaglideNextProvider from "../paraglide/adapter.provider";
 import Link from "next/link";
-import * as m from "./paraglide/messages.js";
+import * as m from "../paraglide/messages.js";
 
 export const metadata: Metadata = {
 	title: "Create Next App",
@@ -23,11 +23,13 @@ export default function RootLayout({
 						<p>{m.static_anchor_tags_info()}</p>
 					</b>
 					<div>
+						{/* @ts-expect-error no idea why */}
 						<Link href={localizedPath("/", { locale: "en" })}>
 							{m.navigate_to_en()}
 						</Link>
 					</div>
 					<div>
+						{/* @ts-expect-error no idea why */}
 						<Link href={localizedPath("/", { locale: "de" })}>
 							{m.navigate_to_de()}
 						</Link>

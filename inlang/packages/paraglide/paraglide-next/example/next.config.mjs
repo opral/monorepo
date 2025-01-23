@@ -1,4 +1,5 @@
 import { paraglideWebpackPlugin } from "@inlang/paraglide-js";
+import { ParaglideNext } from "@inlang/paraglide-next";
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
@@ -11,7 +12,8 @@ const nextConfig = {
 		config.plugins.push(
 			paraglideWebpackPlugin({
 				project: "./project.inlang",
-				outdir: "./src/app/paraglide",
+				outdir: "./src/paraglide",
+				adapter: ParaglideNext(),
 			})
 		);
 		return config;

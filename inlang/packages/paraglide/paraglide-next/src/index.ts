@@ -8,10 +8,11 @@ const file = (path: string) => ({
 	[path]: fs.readFileSync(new URL(path, import.meta.url), "utf-8"),
 });
 
-export const ParaglideSveltekitAdapter: () => Adapter = () => {
+export const ParaglideNext: () => Adapter = () => {
 	const files = {
-		...file("adapter.provider.svelte"),
 		...file("adapter.js"),
+		...file("adapter.provider.jsx"),
+		...file("adapter.provider.client.jsx"),
 	};
 	return { files };
 };

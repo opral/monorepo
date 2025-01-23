@@ -414,6 +414,9 @@ importers:
       eslint:
         specifier: ^9.18.0
         version: 9.18.0(jiti@2.3.3)
+      next:
+        specifier: ^15
+        version: 15.1.5(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       prettier:
         specifier: ^3.4.2
         version: 3.4.2
@@ -442,6 +445,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
+      '@inlang/paraglide-next':
+        specifier: workspace:*
+        version: link:..
       '@types/node':
         specifier: ^20
         version: 20.16.13
@@ -1422,8 +1428,6 @@ importers:
       vitest:
         specifier: 2.1.8
         version: 2.1.8(@types/node@20.5.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.27.0)(msw@2.7.0(@types/node@20.5.9)(typescript@5.7.2))(terser@5.36.0)
-
-  inlang/packages/website/dist/server: {}
 
   inlang/packages/website/tailwind-color-plugin:
     dependencies:
