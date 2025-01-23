@@ -13,12 +13,12 @@ const file = (path: string) => ({
  * additional files for SvelteKit.
  *
  * @example
- *   paraglideSvelteKit({
+ *   paraglideSveltekit({
  *      project: './project.inlang',
  *      outdir: './src/lib/paraglide',
  *   })
  */
-export const paraglideSvelteKit = (args: CompilerArgs) =>
+export const paraglideSveltekit = (args: CompilerArgs) =>
 	paraglideVitePlugin({
 		...args,
 		additionalFiles: {
