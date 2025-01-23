@@ -8,13 +8,6 @@ import {
 	saveLocalAccount,
 } from "../services/account/index.js";
 
-export type Adapter = {
-	/**
-	 * Files to emit to the output directory.
-	 */
-	files: Record<string, string>;
-};
-
 export type CompilerArgs = {
 	/**
 	 * The path to the project to compile.
@@ -31,12 +24,14 @@ export type CompilerArgs = {
 	 */
 	outdir: string;
 	/**
-	 * The adapter to use.
+	 * Additional files that should be emmited in the outdir.
 	 *
 	 * @example
-	 *   adapter: ParaglideSveltekit
+	 *   additionalFiles: {
+	 *     "custom-file.js": "console.log('Hello, world!')"
+	 *   }
 	 */
-	adapter?: Adapter;
+	additionalFiles?: Record<string, string>;
 	/**
 	 * Additional compiler options.
 	 */
@@ -90,7 +85,7 @@ export async function compile(args: CompilerArgs): Promise<void> {
 		});
 
 		for (const [filename, content] of Object.entries(
-			args.adapter?.files ?? {}
+			args.additionalFiles ?? {}
 		)) {
 			output[filename] = content;
 		}
