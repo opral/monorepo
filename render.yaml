@@ -9,10 +9,10 @@ services:
     type: web
     runtime: static
     autoDeploy: true
-    staticPublishPath: ./packages/opral-website/**
+    staticPublishPath: packages/opral-website/**
     buildFilter:
       paths:
-        - ./packages/opral-website/**
+        - packages/opral-website/**
     domains:
       - opral.com
 
