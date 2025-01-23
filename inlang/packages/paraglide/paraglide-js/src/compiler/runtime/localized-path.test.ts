@@ -30,6 +30,13 @@ describe.sequential("", () => {
 		expect(l10nPath).toBe("/de/about/");
 	});
 
+	test("adds no trailing slash for the root path", () => {
+		const path = "/";
+		const l10nPath = localizedPath(path, { locale: "de" });
+
+		expect(l10nPath).toBe("/de");
+	});
+
 	test("removes the base locale from the path", () => {
 		// @ts-expect-error - global variable definition
 		globalThis.baseLocale = "en";
@@ -38,5 +45,12 @@ describe.sequential("", () => {
 		const l10nPath = localizedPath(path, { locale: "en" });
 
 		expect(l10nPath).toBe("/about");
+	});
+
+	test("does not add a slash suffix if it's the root path that is already localized", () => {
+		const path = "/de";
+		const l10nPath = localizedPath(path, { locale: "de" });
+
+		expect(l10nPath).toBe("/de");
 	});
 });

@@ -1,7 +1,7 @@
 import sqlite3InitModule, {
   Database,
   Sqlite3Static,
-} from "@eliaspourquoi/sqlite-node-wasm";
+} from "@sqlite.org/sqlite-wasm";
 import { wasmBinary } from "./sqliteWasmBinary.js";
 
 // https://github.com/opral/lix-sdk/issues/231
