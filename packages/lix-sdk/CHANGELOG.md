@@ -1,5 +1,12 @@
 # @lix-js/sdk
 
+## 0.3.5
+
+### Patch Changes
+
+- Updated dependencies [b87f8a8]
+  - sqlite-wasm-kysely@0.3.0
+
 ## 0.3.4
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # @inlang/sdk
 
+## 2.1.2
+
+### Patch Changes
+
+- 61b9782: update the description of depreacted settings props `sourceLanguageTag` and `languageTags` to clarify that the properties should be kept in place as long as inlang apps are used that have the inlang SDK v1 as a dependency
+- Updated dependencies [b87f8a8]
+  - sqlite-wasm-kysely@0.3.0
+  - @lix-js/sdk@0.3.5
+
 ## 2.1.1
 
 ### Patch Changes
