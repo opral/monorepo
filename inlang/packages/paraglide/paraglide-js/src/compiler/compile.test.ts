@@ -5,7 +5,7 @@ import {
 } from "@inlang/sdk";
 import { memfs } from "memfs";
 import { test, expect, vi } from "vitest";
-import { compile, type Adapter } from "./compile.js";
+import { compile } from "./compile.js";
 import { getAccountFilePath } from "../services/account/index.js";
 
 test("loads a project and compiles it", async () => {
@@ -166,12 +166,10 @@ test("multiple compile calls do not interfere with each other", async () => {
 	expect(outputDir).not.toContain("subdir");
 });
 
-test("emits files of an adapter", async () => {
-	const adapter: Adapter = {
-		files: {
-			"adapter/component.svelte": "<script>console.log('hello')</script>",
-			"adapter.js": "console.log('hello')",
-		},
+test("emits additional files", async () => {
+	const additionalFiles = {
+		"adapter/component.svelte": "<script>console.log('hello')</script>",
+		"adapter.js": "console.log('hello')",
 	};
 
 	const project = await loadProjectInMemory({
@@ -196,7 +194,7 @@ test("emits files of an adapter", async () => {
 		project: "/project.inlang",
 		outdir: "/output",
 		fs: fs,
-		adapter,
+		additionalFiles,
 	});
 
 	const outputDir = await fs.promises.readdir("/output");
