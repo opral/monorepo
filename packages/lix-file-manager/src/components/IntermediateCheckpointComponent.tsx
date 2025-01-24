@@ -7,7 +7,7 @@ import { checkpointChangeSetsAtom, intermediateChangeIdsAtom, intermediateChange
 import { useAtom } from "jotai/react";
 import { Input } from "./ui/input.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
-import { createDiscussion } from "@lix-js/sdk";
+import { createDiscussion, UiDiffComponentProps } from "@lix-js/sdk";
 import { createCheckpoint } from "@/helper/createCheckpoint.ts";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "./ChangeDiffComponent.tsx";
@@ -17,12 +17,20 @@ export const IntermediateCheckpointComponent = () => {
   const [intermediateChanges] = useAtom(intermediateChangesAtom);
   const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
 
-  console.log(intermediateChanges.length);
-
   // Don't render anything if there's no change data
   if (intermediateChanges.length === 0) {
     return null;
   }
+
+  // Group changes by plugin_key
+  const groupedChanges = intermediateChanges.reduce((acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
+    const key = change.plugin_key;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(change);
+    return acc;
+  }, {});
 
   return (
     <div
@@ -55,13 +63,11 @@ export const IntermediateCheckpointComponent = () => {
           <div className="flex flex-col gap-2 pb-2">
             <div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 pt-2 pb-4 sm:pb-6 overflow-hidden">
               <CreateCheckpointInput />
-              {intermediateChanges.map((change) => (
-                <div key={`${change.plugin_key}_${change.schema_key}_${change.entity_id}`} className="flex flex-col gap-2">
-                  <ChangeDiffComponent
-                    key={`${change.plugin_key}_${change.schema_key}_${change.entity_id}`}
-                    diffs={[change]}
-                  />
-                </div>
+              {Object.keys(groupedChanges).map((pluginKey) => (
+                <ChangeDiffComponent
+                  key={pluginKey}
+                  diffs={groupedChanges[pluginKey]}
+                />
               ))}
             </div>
           </div>

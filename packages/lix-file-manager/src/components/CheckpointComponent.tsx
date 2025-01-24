@@ -44,6 +44,18 @@ export const CheckpointComponent = (props: {
     }
   }
 
+  // Group changes by plugin_key
+  const groupedChanges = diffs.reduce((acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
+    const key = change.plugin_key;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(change);
+    return acc;
+  }, {});
+
+  console.log(groupedChanges);
+
   return (
     <div
       className="flex group hover:bg-slate-50 rounded-md cursor-pointer flex-shrink-0 pr-2"
@@ -96,14 +108,11 @@ export const CheckpointComponent = (props: {
           <div className="flex flex-col gap-2 pb-2">
             {/* Option to introduce tabs - Discussion | Changes */}
             <div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 pt-2 pb-4 sm:pb-6 overflow-hidden">
-              {/* list change diffs */}
-              {diffs.map((diff: UiDiffComponentProps["diffs"][number]) => (
-                <div key={`${diff.plugin_key}_${diff.schema_key}_${diff.entity_id}`} className="flex flex-col gap-2">
-                  <ChangeDiffComponent
-                    key={`${diff.plugin_key}_${diff.schema_key}_${diff.entity_id}`}
-                    diffs={[diff]}
-                  />
-                </div>
+              {Object.keys(groupedChanges).map((pluginKey) => (
+                <ChangeDiffComponent
+                  key={pluginKey}
+                  diffs={groupedChanges[pluginKey]}
+                />
               ))}
             </div>
             {props.checkpointChangeSet.discussion_id && (
