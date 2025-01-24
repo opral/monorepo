@@ -37,12 +37,8 @@ export const DEFAULT_REGISTRY: Registry = {
 /**
  * Creates the Registry implementation file
  */
-export function createRegistry(emitTs: boolean): string {
-	if (emitTs) {
-		return tsRegistry;
-	} else {
-		return jsdocRegistry;
-	}
+export function createRegistry(): string {
+	return jsdocRegistry;
 }
 
 const jsdocRegistry = `
@@ -75,31 +71,5 @@ export function number(locale, input, options) {
  */
 export function datetime(locale, input, options) {
 	return new Intl.DateTimeFormat(locale, options).format(input)
-}
-`;
-
-const tsRegistry = `
-export function plural(
-	locale: import("./runtime.js").Locale,
-	input: number,
-	options: Intl.PluralRulesOptions
-): string {
-	return new Intl.PluralRules(locale, options).select(input);
-}
-
-export function number(
-	locale: import("./runtime.js").Locale,
-	input: number,
-	options: Intl.NumberFormatOptions
-): string {
-	return new Intl.NumberFormat(locale, options).format(input);
-}
-
-export function datetime(
-	locale: import("./runtime.js").Locale,
-	input: Date,
-	options: Intl.DateTimeFormatOptions
-): string {
-	return new Intl.DateTimeFormat(locale, options).format(input);
 }
 `;

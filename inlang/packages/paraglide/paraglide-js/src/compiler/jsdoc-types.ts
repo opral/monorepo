@@ -15,8 +15,7 @@ export function jsDocBundleFunctionTypes(args: {
 	return `
 * @param {{ ${inputParams} }} inputs
 * @param {{ locale?: ${localesUnion} }} options
-* @returns {string}
-`;
+* @returns {string}`;
 }
 
 export function jsDocMessageFunctionTypes(args: {
