@@ -5,6 +5,22 @@ imports:
 
 # Compiler options
 
+## `project`
+
+The `project` option is the path to the inlang project. 
+
+```json
+"./project.inlang"
+```
+
+## `outdir`
+
+The `outdir` option is the path to the output directory. 
+
+```json
+"./src/paraglide"
+```
+
 ## `emitGitIgnore`
 
 If `emitGitIgnore` is set to `true` a `.gitignore` file will be emitted in the output directory. Defaults to `true`. 
@@ -25,6 +41,30 @@ If `emitPrettierIgnore` is set to `true` a `.prettierignore` file will be emitte
  - outdir/
   - messages/
 +  - .prettierignore
+  - messages.js
+  - runtime.js 
+```
+
+## `additionalFiles` 
+
+The `additionalFiles` option is an array of paths to additional files that should be copied to the output directory. 
+
+The option is often used by adapters to include additional files that are specific for a framework. 
+
+```diff
+await compile({
+  project: "./project.inlang",
+  outdir: "./src/paraglide",
+  additionalFiles: [
++    "my-file.js": "console.log('hello')"
+  ]
+})
+```
+
+```diff
+ - outdir/
+  - messages/
++ - my-file.js
   - messages.js
   - runtime.js 
 ```
@@ -69,38 +109,4 @@ Messages are bundled in a per locale module. Bundlers sometimes struggle tree-sh
    - ...
   - messages.js
   - runtime.js 
-```
-
-## `experimentalEmitTs`
-
-Emits TypeScript files instead of JSDoc annotated JavaScript files. Defaults to `false`. 
-
-<doc-callout type="warning">
-This feature is experimental and may change or be removed in the future.
-</doc-callout>
-
-```diff
- - outdir/
--    - messages.js
-+    - messages.ts
--    - runtime.js
-+    - runtime.ts
-     ...
-```
-
-## `experimentalUseTsImports`
-
-Imports emitted files with `.ts` extension instead of `.js`. Defaults to `false`.
-
-Only works in combination with `experimentalEmitTs`. The feature is useful in some 
-codebases which need to resolve TypeScript files with a `.ts` ending. Node's 
-strip-types flag is an example. 
-
-<doc-callout type="warning">
-This feature is experimental and may change or be removed in the future.
-</doc-callout>
-
-```diff
--import { getLocale } from "./runtime.js";
-+import { getLocale } from "./runtime.ts";
 ```

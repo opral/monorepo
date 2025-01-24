@@ -12,7 +12,6 @@ const injectCode = (path) =>
 // to modify the runtime, outcomment the export const jsdocRuntime line
 
 export const jsdocRuntime = `
-// @eslint-disable
 
 /**
  * The project's base locale.
@@ -116,11 +115,11 @@ ${injectCode("./is-locale.js")}
 
 ${injectCode("./assert-is-locale.js")}
 
-${injectCode("./get-locale-from-path.js")}
+${injectCode("./locale-in-path.js")}
 
-${injectCode("./localized-path.js")}
+${injectCode("./localize-path.js")}
 
-${injectCode("./de-localized-path.js")}
+${injectCode("./de-localize-path.js")}
 
 // ------ TYPES ------
 

@@ -7,8 +7,8 @@ import {
 	assertIsLocale,
 	baseLocale,
 	defineGetLocale,
-	deLocalizedPath,
-	getLocaleFromPath,
+	deLocalizePath,
+	localeInPath,
 } from "./runtime.js";
 
 export { default as ParaglideSveltekitProvider } from "./adapter.provider.svelte";
@@ -45,7 +45,7 @@ export const handle = async ({ event, resolve }) => {
 		asyncStorage = new AsyncLocalStorage();
 	}
 
-	const locale = getLocaleFromPath(event.url.pathname) ?? baseLocale;
+	const locale = localeInPath(event.url.pathname) ?? baseLocale;
 
 	return asyncStorage.run(locale, () => resolve(event));
 };
@@ -67,5 +67,5 @@ export const handle = async ({ event, resolve }) => {
  * @type {import('@sveltejs/kit').Reroute}
  */
 export const reroute = (request) => {
-	return deLocalizedPath(request.url.pathname);
+	return deLocalizePath(request.url.pathname);
 };

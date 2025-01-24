@@ -206,3 +206,48 @@ test("emits additional files", async () => {
 
 	expect(adapterDir).toEqual(["component.svelte"]);
 });
+
+test("includes eslint-disable comment", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
+	});
+
+	const fs = memfs().fs as unknown as typeof import("node:fs");
+
+	// save project to directory to test loading
+	await saveProjectToDirectory({
+		project,
+		path: "/project.inlang",
+		fs: fs.promises,
+	});
+
+	await compile({
+		project: "/project.inlang",
+		outdir: "/output",
+		includeEslintDisableComment: true,
+		fs: fs,
+	});
+
+	const messages = await fs.promises.readFile("/output/messages.js", "utf8");
+
+	expect(messages).toContain("// eslint-disable-next-line");
+
+	await compile({
+		project: "/project.inlang",
+		outdir: "/output",
+		includeEslintDisableComment: false,
+		fs: fs,
+	});
+
+	const messagesWithoutComment = await fs.promises.readFile(
+		"/output/messages.js",
+		"utf8"
+	);
+
+	expect(messagesWithoutComment).not.toContain("// eslint-disable-next-line");
+});

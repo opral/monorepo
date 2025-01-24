@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-js",
 	"type": "module",
-	"version": "2.0.0-beta.12",
+	"version": "2.0.0-beta.13",
 	"license": "MIT",
 	"publishConfig": {
 		"access": "public",
@@ -18,8 +18,7 @@
 	},
 	"files": [
 		"./dist",
-		"./bin",
-		"./default"
+		"./bin"
 	],
 	"scripts": {
 		"dev": "tsc --watch",
@@ -30,8 +29,7 @@
 		"env-variables": "node ./src/services/env-variables/create-index-file.js",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
-		"clean": "rm -rf ./dist ./node_modules",
-		"check": "tsc --noEmit --emitDeclarationOnly false"
+		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
 		"@inlang/recommend-sherlock": "workspace:*",
@@ -58,9 +56,7 @@
 		"vitest": "2.1.8"
 	},
 	"exports": {
-		".": "./dist/index.js",
-		"./cli": "./dist/cli/index.js",
-		"./compiler": "./dist/compiler/index.js"
+		".": "./dist/index.js"
 	},
 	"keywords": [
 		"inlang",

@@ -11,7 +11,7 @@
    */
 	const { children } = $props()
 
-	let locale = $derived(runtime.getLocaleFromPath(page.url.pathname) ?? runtime.baseLocale)
+	let locale = $derived(runtime.localeInPath(page.url.pathname) ?? runtime.baseLocale)
 
 	// the effect needs to run before the DOM updates
 	// otherwise, the message function will render a
@@ -21,7 +21,7 @@
 		if (browser) {
       runtime.defineGetLocale(() => locale)
 			runtime.defineSetLocale((newLocale) => {
-				return goto(runtime.localizedPath(page.url.pathname, { locale: newLocale }))
+				return goto(runtime.localizePath(page.url.pathname, { locale: newLocale }))
 			})
 		}
 	});

@@ -7,28 +7,28 @@
  * Defaults to `getLocale()` if no locale is provided.
  *
  * @tip
- *   Use `deLocalizedPath()` for the inverse operation.
+ *   Use `deLocalizePath()` for the inverse operation.
  *
  * @example
  *  // getLocale() = 'en'
- *  localizedPath('/home'));
+ *  localizePath('/home'));
  *  // '/de/home'
  *
  *  // enforcing a specific locale
- *  localizedPath('/home', { locale: 'fr' });
+ *  localizePath('/home', { locale: 'fr' });
  *  // '/fr/home'
  *
  * @example
- *   <a href={localizedPath('/home')}>Home</a>
+ *   <a href={localizePath('/home')}>Home</a>
  *
  * @param {string} path
  * @param {Object} [options] - Optional parameters.
  * @param {Locale} [options.locale] - The locale to use for the path.
  * @returns {string}
  */
-export function localizedPath(path, options) {
+export function localizePath(path, options) {
 	const locale = options?.locale ?? getLocale();
-	const hasLocale = getLocaleFromPath(path);
+	const hasLocale = localeInPath(path);
 	const pathWithoutLocale = hasLocale
 		? "/" + path.split("/").slice(2).join("/")
 		: path;

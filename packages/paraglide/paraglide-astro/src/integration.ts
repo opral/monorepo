@@ -1,8 +1,11 @@
 import type { AstroIntegration } from "astro";
-import { paraglideVitePlugin, type CompilerArgs } from "@inlang/paraglide-js";
+import {
+	paraglideVitePlugin,
+	type CompilerOptions,
+} from "@inlang/paraglide-js";
 import path from "node:path";
-import { alias } from "./alias.js";
 import { fileURLToPath } from "node:url";
+import { alias } from "./alias.js";
 import { nodeNormalizePath } from "./utilts.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -10,7 +13,7 @@ const __dirname = path.dirname(__filename);
 
 const middlewarePath = path.join(__dirname, "middleware.js");
 
-export function integration(args: CompilerArgs): AstroIntegration {
+export function integration(options: CompilerOptions): AstroIntegration {
 	return {
 		name: "paraglide",
 		hooks: {
@@ -27,7 +30,7 @@ export function integration(args: CompilerArgs): AstroIntegration {
 
 				const runtimePath = path.resolve(
 					process.cwd(),
-					args.outdir,
+					options.outdir,
 					"runtime.js",
 				);
 
@@ -35,7 +38,7 @@ export function integration(args: CompilerArgs): AstroIntegration {
 				updateConfig({
 					vite: {
 						plugins: [
-							paraglideVitePlugin(args),
+							paraglideVitePlugin(options),
 							alias({
 								//normalizing the path is very important!
 								//otherwise you get duplicate modules on windows
