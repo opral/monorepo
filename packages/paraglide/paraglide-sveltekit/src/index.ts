@@ -1,5 +1,8 @@
 import fs from "node:fs";
-import { paraglideVitePlugin, type CompilerArgs } from "@inlang/paraglide-js";
+import {
+	paraglideVitePlugin,
+	type CompilerOptions,
+} from "@inlang/paraglide-js";
 
 /**
  * Reads a file from the file system and returns it as a string.
@@ -18,12 +21,12 @@ const file = (path: string) => ({
  *      outdir: './src/lib/paraglide',
  *   })
  */
-export const paraglideSveltekit = (args: CompilerArgs) =>
+export const paraglideSveltekit = (options: CompilerOptions) =>
 	paraglideVitePlugin({
-		...args,
+		...options,
 		additionalFiles: {
 			...file("adapter.js"),
 			...file("adapter.provider.svelte"),
-			...args.additionalFiles,
+			...options.additionalFiles,
 		},
 	});
