@@ -36,6 +36,7 @@
 		"vike-solid": "^0.4.2"
 	},
 	"devDependencies": {
+		"@opral/tsconfig": "workspace:*",
 		"legacy-tailwind-color-plugin": "./tailwind-color-plugin",
 		"@iconify-json/cib": "^1.1.2",
 		"@iconify-json/material-symbols": "^1.1.26",
