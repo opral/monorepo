@@ -42,7 +42,6 @@ export function createRegistry(): string {
 }
 
 const jsdocRegistry = `
-
 /**
  * @param {import("./runtime.js").Locale} locale
  * @param {number} input

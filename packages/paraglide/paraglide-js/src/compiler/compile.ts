@@ -11,6 +11,7 @@ import {
 export const defaultCompilerOptions = {
 	outputStructure: "message-modules",
 	emitGitIgnore: true,
+	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
 } as const satisfies Partial<CompilerOptions>;
 
@@ -44,6 +45,12 @@ export type CompilerOptions = {
 	 * @default true
 	 */
 	emitPrettierIgnore?: boolean;
+	/**
+	 * Whether to include an eslint-disable comment at the top of each .js file.
+	 *
+	 * @default true
+	 */
+	includeEslintDisableComment?: boolean;
 	/**
 	 * Whether to emit a .gitignore file.
 	 *
@@ -116,6 +123,14 @@ export async function compile(options: CompilerOptions): Promise<void> {
 			withDefaultOptions.additionalFiles ?? {}
 		)) {
 			output[filename] = content;
+		}
+
+		if (withDefaultOptions.includeEslintDisableComment) {
+			for (const [filename, content] of Object.entries(output)) {
+				if (filename.endsWith(".js")) {
+					output[filename] = `// eslint-disable-next-line\n${content}`;
+				}
+			}
 		}
 
 		await writeOutput(absoluteOutdir, output, fs.promises);

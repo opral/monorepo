@@ -17,7 +17,6 @@ export function generateMessageModules(
 
 	// messages index file
 	output["messages.js"] = [
-		"/* eslint-disable */",
 		...compiledBundles.map(
 			({ bundle }) => `export * from './messages/${bundle.node.id}/index.js'`
 		),
@@ -27,7 +26,6 @@ export function generateMessageModules(
 	for (const compiledBundle of compiledBundles) {
 		const filename = `messages/${compiledBundle.bundle.node.id}/index.js`;
 		const code = [
-			"/* eslint-disable */",
 			`import * as registry from '../../registry.js'`,
 			settings.locales
 				.map(
@@ -44,10 +42,7 @@ export function generateMessageModules(
 
 	for (const locale of settings.locales) {
 		for (const compiledBundle of compiledBundles) {
-			let file = [
-				"/* eslint-disable */",
-				`import * as registry from '../../registry.js'`,
-			].join("\n");
+			let file = [`import * as registry from '../../registry.js'`].join("\n");
 
 			const compiledMessage = compiledBundle.messages[locale];
 			const id = jsIdentifier(compiledBundle.bundle.node.id);

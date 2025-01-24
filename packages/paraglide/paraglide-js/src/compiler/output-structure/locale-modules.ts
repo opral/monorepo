@@ -13,7 +13,6 @@ export function generateLocaleModules(
 	const importExt = "js";
 
 	const indexFile = [
-		"/* eslint-disable */",
 		`import { getLocale } from "./runtime.${importExt}"`,
 		settings.locales
 			.map(
@@ -34,7 +33,6 @@ export function generateLocaleModules(
 	for (const locale of settings.locales) {
 		const filename = `messages/${locale}.${fileExt}`;
 		let file = `
-/* eslint-disable */ 
 /** 
  * This file contains language specific functions for tree-shaking. 
  * 
