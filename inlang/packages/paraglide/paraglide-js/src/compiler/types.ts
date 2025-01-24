@@ -14,8 +14,8 @@ export type Compiled<Node> = {
 export type MessageFunction = (inputs?: Record<string, never>) => string;
 
 /**
- * A message bundle function that selects the message to be returned. 
- * 
+ * A message bundle function that selects the message to be returned.
+ *
  * Uses `getLocale()` under the hood to determine the locale with an option.
  *
  * @example
