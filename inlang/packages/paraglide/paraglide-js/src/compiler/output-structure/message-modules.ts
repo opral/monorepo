@@ -8,40 +8,32 @@ import { escapeForSingleQuoteString } from "../../services/codegen/escape.js";
 export function generateMessageModules(
 	compiledBundles: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
-	fallbackMap: Record<string, string | undefined>,
-	emitTs: boolean,
-	useTsImports: boolean
+	fallbackMap: Record<string, string | undefined>
 ): Record<string, string> {
-	const fileExt = emitTs ? "ts" : "js";
-	const importExt = useTsImports ? "ts" : "js";
-
 	const output: Record<string, string> = {
-		["runtime." + fileExt]: createRuntime(settings, emitTs),
-		["registry." + fileExt]: createRegistry(emitTs),
+		["runtime.js"]: createRuntime(settings),
+		["registry.js"]: createRegistry(),
 	};
 
 	// messages index file
-	output["messages." + fileExt] = [
-		"/* eslint-disable */",
+	output["messages.js"] = [
 		...compiledBundles.map(
-			({ bundle }) =>
-				`export * from './messages/${bundle.node.id}/index.${importExt}'`
+			({ bundle }) => `export * from './messages/${bundle.node.id}/index.js'`
 		),
 	].join("\n");
 
 	// Creates a per message index file
 	for (const compiledBundle of compiledBundles) {
-		const filename = `messages/${compiledBundle.bundle.node.id}/index.${fileExt}`;
+		const filename = `messages/${compiledBundle.bundle.node.id}/index.js`;
 		const code = [
-			"/* eslint-disable */",
-			`import * as registry from '../../registry.${importExt}'`,
+			`import * as registry from '../../registry.js'`,
 			settings.locales
 				.map(
 					(locale) =>
-						`import * as ${jsIdentifier(locale)} from "./${locale}.${importExt}"`
+						`import * as ${jsIdentifier(locale)} from "./${locale}.js"`
 				)
 				.join("\n"),
-			`import { getLocale } from '../../runtime.${importExt}'`,
+			`import { getLocale } from '../../runtime.js'`,
 			"",
 			compiledBundle.bundle.code,
 		].join("\n");
@@ -50,10 +42,7 @@ export function generateMessageModules(
 
 	for (const locale of settings.locales) {
 		for (const compiledBundle of compiledBundles) {
-			let file = [
-				"/* eslint-disable */",
-				`import * as registry from '../../registry.${importExt}'`,
-			].join("\n");
+			let file = [`import * as registry from '../../registry.js'`].join("\n");
 
 			const compiledMessage = compiledBundle.messages[locale];
 			const id = jsIdentifier(compiledBundle.bundle.node.id);
@@ -62,7 +51,7 @@ export function generateMessageModules(
 				const fallbackLocale = fallbackMap[locale];
 				if (fallbackLocale) {
 					// take the fallback locale
-					file += `\nexport { ${id} } from "./${fallbackLocale}.${importExt}"`;
+					file += `\nexport { ${id} } from "./${fallbackLocale}.js"`;
 				} else {
 					// fallback to just the bundle id
 					file += `\nexport const ${id} = () => '${escapeForSingleQuoteString(
@@ -73,8 +62,7 @@ export function generateMessageModules(
 				file += `\n${compiledMessage.code}`;
 			}
 
-			output[`messages/${compiledBundle.bundle.node.id}/${locale}.${fileExt}`] =
-				file;
+			output[`messages/${compiledBundle.bundle.node.id}/${locale}.js`] = file;
 		}
 	}
 	return output;

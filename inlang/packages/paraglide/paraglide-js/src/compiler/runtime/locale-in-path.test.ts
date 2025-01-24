@@ -1,5 +1,5 @@
 import { test, expect, vi, describe, afterEach } from "vitest";
-import { getLocaleFromPath } from "./get-locale-from-path.js";
+import { localeInPath } from "./locale-in-path.js";
 
 // sequential to avoid global variable conflicts
 describe.sequential("", () => {
@@ -12,7 +12,7 @@ describe.sequential("", () => {
 		globalThis.isLocale = vi.fn().mockReturnValue(true);
 
 		const path = "/en-US/about";
-		const locale = getLocaleFromPath(path);
+		const locale = localeInPath(path);
 		expect(locale).toBe("en-US");
 	});
 
@@ -21,7 +21,7 @@ describe.sequential("", () => {
 		globalThis.isLocale = vi.fn().mockReturnValue(false);
 
 		const path = "/en-US/about";
-		const locale = getLocaleFromPath(path);
+		const locale = localeInPath(path);
 		expect(locale).toBe(undefined);
 	});
 });

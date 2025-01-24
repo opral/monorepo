@@ -8,6 +8,6 @@ declare global {
 	export const locales: Runtime["locales"];
 	export const isLocale: Runtime["isLocale"];
 	export const getLocale: Runtime["getLocale"];
-	export const getLocaleFromPath: Runtime["getLocaleFromPath"];
+	export const localeInPath: Runtime["localeInPath"];
 	export type Locale = any;
 }

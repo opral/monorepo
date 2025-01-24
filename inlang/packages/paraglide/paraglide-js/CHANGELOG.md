@@ -1,5 +1,26 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.13
+
+- flat compiler options 
+
+```diff
+await compile({
+- compilerOptions: {
+-  emitPrettierIgnore: false,
+- },
++ emitPrettierIgnore: false,
+})
+```
+
+- removed `experimentalEmitTs`. the overhead of maintaing two syntaxes is too large https://github.com/opral/inlang-paraglide-js/issues/329
+
+```diff
+await compile({
+- experimentalEmitTs: true,
+})
+```
+
 ## 2.0.0-beta.11
 
 - improve: compiler awaits ongoing compilations before starting a new one 

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import type { NextConfig } from "next";
 import {
 	paraglideWebpackPlugin,
-	type CompilerArgs,
+	type CompilerOptions,
 } from "@inlang/paraglide-js";
 
 /**
@@ -28,7 +28,7 @@ const file = (path: string) => ({
  */
 export function withParaglideNext(
 	config: NextConfig & {
-		paraglide: CompilerArgs;
+		paraglide: CompilerOptions;
 	}
 ): NextConfig {
 	const extendedConfig: NextConfig = {

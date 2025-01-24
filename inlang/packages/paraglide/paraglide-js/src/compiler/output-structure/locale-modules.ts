@@ -7,15 +7,12 @@ import { createRegistry } from "../registry.js";
 export function generateLocaleModules(
 	compiledBundles: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
-	fallbackMap: Record<string, string | undefined>,
-	emitTs: boolean,
-	useTsImports: boolean
+	fallbackMap: Record<string, string | undefined>
 ): Record<string, string> {
-	const fileExt = emitTs ? "ts" : "js";
-	const importExt = useTsImports ? "ts" : "js";
+	const fileExt = "js";
+	const importExt = "js";
 
 	const indexFile = [
-		"/* eslint-disable */",
 		`import { getLocale } from "./runtime.${importExt}"`,
 		settings.locales
 			.map(
@@ -27,8 +24,8 @@ export function generateLocaleModules(
 	].join("\n");
 
 	const output: Record<string, string> = {
-		["runtime." + fileExt]: createRuntime(settings, emitTs),
-		["registry." + fileExt]: createRegistry(emitTs),
+		["runtime." + fileExt]: createRuntime(settings),
+		["registry." + fileExt]: createRegistry(),
 		["messages." + fileExt]: indexFile,
 	};
 
@@ -36,7 +33,6 @@ export function generateLocaleModules(
 	for (const locale of settings.locales) {
 		const filename = `messages/${locale}.${fileExt}`;
 		let file = `
-/* eslint-disable */ 
 /** 
  * This file contains language specific functions for tree-shaking. 
  * 
