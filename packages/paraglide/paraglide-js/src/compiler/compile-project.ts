@@ -4,59 +4,7 @@ import { selectBundleNested, type InlangProject } from "@inlang/sdk";
 import { lookup } from "../services/lookup.js";
 import { generateLocaleModules } from "./output-structure/locale-modules.js";
 import { generateMessageModules } from "./output-structure/message-modules.js";
-
-export type CompilerOptions = {
-	/**
-	 * Whether to emit TypeScript files instead of JSDoc annotated JavaScript.
-	 *
-	 * @default false
-	 */
-	experimentalEmitTs?: boolean;
-	/**
-	 * Whether to import files as TypeScript in the emitted code.
-	 *
-	 * The option is useful in some setups where TypeScript is run
-	 * directly on the emitted code such as node --strip-types.
-	 * [Here](https://devblogs.microsoft.com/typescript/announcing-typescript-5-7/#path-rewriting-for-relative-paths)
-	 * is more information on path rewriting for relative paths.
-	 *
-	 * ! Only works in combination with `emitTs: true`.
-	 *
-	 * @example
-	 *   // false
-	 *   import { getLocale } from "./runtime.js";
-	 *
-	 *   // true
-	 *   import { getLocale } from "./runtime.ts";
-	 */
-	experimentalUseTsImports?: boolean;
-	/**
-	 * Whether to emit a .prettierignore file.
-	 *
-	 * @default true
-	 */
-	emitPrettierIgnore?: boolean;
-	/**
-	 * Whether to emit a .gitignore file.
-	 *
-	 * @default true
-	 */
-	emitGitIgnore?: boolean;
-	/**
-	 * The file-structure of the compiled output.
-	 *
-	 * @default "message-modules"
-	 */
-	outputStructure?: "locale-modules" | "message-modules";
-};
-
-const defaultCompilerOptions = {
-	outputStructure: "message-modules",
-	experimentalEmitTs: false,
-	experimentalUseTsImports: false,
-	emitGitIgnore: true,
-	emitPrettierIgnore: true,
-} as const satisfies CompilerOptions;
+import { defaultCompilerOptions, type CompilerOptions } from "./compile.js";
 
 /**
  * Takes an inlang project and compiles it into a set of files.
@@ -70,9 +18,12 @@ const defaultCompilerOptions = {
  */
 export const compileProject = async (args: {
 	project: InlangProject;
-	compilerOptions?: CompilerOptions;
+	compilerOptions?: Pick<
+		CompilerOptions,
+		"emitGitIgnore" | "emitPrettierIgnore" | "outputStructure"
+	>;
 }): Promise<Record<string, string>> => {
-	const optionsWithDefaults: Required<CompilerOptions> = {
+	const optionsWithDefaults = {
 		...defaultCompilerOptions,
 		...args.compilerOptions,
 	};
@@ -88,7 +39,6 @@ export const compileProject = async (args: {
 			bundle,
 			fallbackMap,
 			registry: DEFAULT_REGISTRY,
-			emitTs: optionsWithDefaults.experimentalEmitTs,
 		})
 	);
 
@@ -98,9 +48,7 @@ export const compileProject = async (args: {
 		const regularOutput = generateLocaleModules(
 			compiledBundles,
 			settings,
-			fallbackMap,
-			optionsWithDefaults.experimentalEmitTs,
-			optionsWithDefaults.experimentalUseTsImports
+			fallbackMap
 		);
 		Object.assign(output, regularOutput);
 	}
@@ -109,9 +57,7 @@ export const compileProject = async (args: {
 		const messageModuleOutput = generateMessageModules(
 			compiledBundles,
 			settings,
-			fallbackMap,
-			optionsWithDefaults.experimentalEmitTs,
-			optionsWithDefaults.experimentalUseTsImports
+			fallbackMap
 		);
 		Object.assign(output, messageModuleOutput);
 	}

@@ -21,10 +21,7 @@ test("runtime type", async () => {
 		},
 	});
 
-	const jsdocRuntime = createRuntime(
-		{ baseLocale: "en", locales: ["en"] },
-		false
-	);
+	const jsdocRuntime = createRuntime({ baseLocale: "en", locales: ["en"] });
 
 	const file = (path: string) => {
 		return [path, fs.readFileSync(resolve(__dirname, path), "utf-8")!] as const;

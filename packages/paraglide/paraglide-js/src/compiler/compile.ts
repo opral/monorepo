@@ -1,14 +1,20 @@
 import { loadProjectFromDirectory } from "@inlang/sdk";
 import path from "node:path";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
-import { compileProject, type CompilerOptions } from "./compile-project.js";
+import { compileProject } from "./compile-project.js";
 import { writeOutput } from "../services/file-handling/write-output.js";
 import {
 	getLocalAccount,
 	saveLocalAccount,
 } from "../services/account/index.js";
 
-export type CompilerArgs = {
+export const defaultCompilerOptions = {
+	outputStructure: "message-modules",
+	emitGitIgnore: true,
+	emitPrettierIgnore: true,
+} as const satisfies Partial<CompilerOptions>;
+
+export type CompilerOptions = {
 	/**
 	 * The path to the project to compile.
 	 *
@@ -33,9 +39,23 @@ export type CompilerArgs = {
 	 */
 	additionalFiles?: Record<string, string>;
 	/**
-	 * Additional compiler options.
+	 * Whether to emit a .prettierignore file.
+	 *
+	 * @default true
 	 */
-	compilerOptions?: CompilerOptions;
+	emitPrettierIgnore?: boolean;
+	/**
+	 * Whether to emit a .gitignore file.
+	 *
+	 * @default true
+	 */
+	emitGitIgnore?: boolean;
+	/**
+	 * The file-structure of the compiled output.
+	 *
+	 * @default "message-modules"
+	 */
+	outputStructure?: "locale-modules" | "message-modules";
 	/**
 	 * The file system to use. Defaults to `await import('node:fs')`.
 	 *
@@ -61,31 +81,39 @@ let compilationInProgress: Promise<void> | null = null;
  *     outdir: 'path/to/output',
  *   })
  */
-export async function compile(args: CompilerArgs): Promise<void> {
+export async function compile(options: CompilerOptions): Promise<void> {
+	const withDefaultOptions = {
+		...defaultCompilerOptions,
+		...options,
+	};
+
 	if (compilationInProgress) {
 		await compilationInProgress;
 	}
 
 	compilationInProgress = (async () => {
-		const fs = args.fs ?? (await import("node:fs"));
-		const absoluteOutdir = path.resolve(process.cwd(), args.outdir);
+		const fs = withDefaultOptions.fs ?? (await import("node:fs"));
+		const absoluteOutdir = path.resolve(
+			process.cwd(),
+			withDefaultOptions.outdir
+		);
 
 		const localAccount = getLocalAccount({ fs });
 
 		const project = await loadProjectFromDirectory({
-			path: args.project,
+			path: withDefaultOptions.project,
 			fs,
 			account: localAccount,
 			appId: ENV_VARIABLES.PARJS_APP_ID,
 		});
 
 		const output = await compileProject({
+			...withDefaultOptions,
 			project,
-			compilerOptions: args.compilerOptions,
 		});
 
 		for (const [filename, content] of Object.entries(
-			args.additionalFiles ?? {}
+			withDefaultOptions.additionalFiles ?? {}
 		)) {
 			output[filename] = content;
 		}

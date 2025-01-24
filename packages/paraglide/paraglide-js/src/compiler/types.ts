@@ -6,15 +6,17 @@ export type Compiled<Node> = {
 };
 
 /**
- * A message function that takes inputs and returns a message.
+ * A message function is a message for a specific locale.
  *
  * @example
- *   import
+ *   m.hello({ name: 'world' })
  */
 export type MessageFunction = (inputs?: Record<string, never>) => string;
 
 /**
- * A message bundle function.
+ * A message bundle function that selects the message to be returned. 
+ * 
+ * Uses `getLocale()` under the hood to determine the locale with an option.
  *
  * @example
  *   import * as m from './messages.js'
@@ -24,35 +26,3 @@ export type MessageBundleFunction<T extends string> = (
 	params: Record<string, never>,
 	options: { locale: T }
 ) => string;
-
-/**
- * Attempts to merge type restrictions from two variants.
- */
-export function mergeTypeRestrictions(
-	a: Record<string, string>,
-	b: Record<string, string>
-): Record<string, string> {
-	const result = structuredClone(a);
-	for (const [key, value] of Object.entries(b)) {
-		const existingValue = result[key];
-		// if we don't yet have a type, use it
-		if (!existingValue) {
-			result[key] = value;
-			continue;
-		}
-
-		// if the type is the same contiune
-		if (existingValue === value) continue;
-
-		// if both have a type, use the more specific one
-		if (typeSpecificity(existingValue) < typeSpecificity(value)) {
-			result[key] = value;
-		}
-	}
-	return result;
-}
-
-function typeSpecificity(type: string): number {
-	if (type === "NonNullable<unknown>") return 0;
-	else return 1;
-}

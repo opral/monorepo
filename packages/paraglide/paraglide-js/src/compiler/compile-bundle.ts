@@ -26,7 +26,6 @@ export const compileBundle = (args: {
 	bundle: BundleNested;
 	fallbackMap: Record<string, string | undefined>;
 	registry: Registry;
-	emitTs: boolean;
 }): CompiledBundleWithMessages => {
 	const compiledMessages: Record<string, Compiled<Message>> = {};
 
@@ -45,11 +44,8 @@ export const compileBundle = (args: {
 		const inputs = args.bundle.declarations.filter(
 			(decl) => decl.type === "input-variable"
 		);
-		if (args.emitTs) {
-			//
-		} else {
-			compiledMessage.code = `${jsDocMessageFunctionTypes({ inputs })}\n${compiledMessage.code}`;
-		}
+
+		compiledMessage.code = `${jsDocMessageFunctionTypes({ inputs })}\n${compiledMessage.code}`;
 
 		// set the pattern for the language tag
 		compiledMessages[message.locale] = compiledMessage;
@@ -59,7 +55,6 @@ export const compileBundle = (args: {
 		bundle: compileBundleFunction({
 			bundle: args.bundle,
 			availableLocales: Object.keys(args.fallbackMap),
-			emitTs: args.emitTs,
 		}),
 		messages: compiledMessages,
 	};
@@ -74,14 +69,11 @@ const compileBundleFunction = (args: {
 	 * The language tags which are available
 	 */
 	availableLocales: string[];
-	emitTs: boolean;
 }): Compiled<Bundle> => {
 	const inputs = args.bundle.declarations.filter(
 		(decl) => decl.type === "input-variable"
 	);
 	const hasInputs = inputs.length > 0;
-
-	const emitTs = args.emitTs;
 
 	let code = `/**
 * This function has been compiled by [Paraglide JS](https://inlang.com/m/gerre34r).
@@ -90,10 +82,10 @@ const compileBundleFunction = (args: {
 *
 * - If you want to change the translations, you can either edit the source files e.g. \`en.json\`, or
 * use another inlang app like [Fink](https://inlang.com/m/tdozzpar) or the [VSCode extension Sherlock](https://inlang.com/m/r7kp499g).
-* ${emitTs ? "" : jsDocBundleFunctionTypes({ inputs, locales: args.availableLocales })}
+* ${jsDocBundleFunctionTypes({ inputs, locales: args.availableLocales })}
 */
 /* @__NO_SIDE_EFFECTS__ */
-const ${jsIdentifier(args.bundle.id)} = (inputs${emitTs ? tsInputType(inputs) : ""} ${hasInputs ? "" : "= {}"}, options${emitTs ? tsOptionsType(args.availableLocales) : ""} = {}) ${emitTs ? ": string" : ""} => {
+const ${jsIdentifier(args.bundle.id)} = (inputs${hasInputs ? "" : "= {}"}, options = {}) => {
 	const locale = options.locale ?? getLocale()
 	${args.availableLocales
 		.map(
@@ -117,17 +109,3 @@ const ${jsIdentifier(args.bundle.id)} = (inputs${emitTs ? tsInputType(inputs) : 
 		node: args.bundle,
 	};
 };
-
-function tsOptionsType(locales: string[]): string {
-	const localesUnion = locales.map((locale) => `"${locale}"`).join(" | ");
-	return `: { locale?: ${localesUnion} }`;
-}
-
-function tsInputType(inputs: { name: string }[]): string {
-	const inputParams = inputs
-		.map((input) => {
-			return `${input.name}: NonNullable<unknown>`;
-		})
-		.join(", ");
-	return `: { ${inputParams} }`;
-}
