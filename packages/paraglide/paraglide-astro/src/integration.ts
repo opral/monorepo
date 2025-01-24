@@ -4,8 +4,8 @@ import {
 	type CompilerOptions,
 } from "@inlang/paraglide-js";
 import path from "node:path";
-import { alias } from "./alias.js";
 import { fileURLToPath } from "node:url";
+import { alias } from "./alias.js";
 import { nodeNormalizePath } from "./utilts.js";
 
 const __filename = fileURLToPath(import.meta.url);

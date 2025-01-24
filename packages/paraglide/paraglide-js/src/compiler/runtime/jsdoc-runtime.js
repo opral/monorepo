@@ -115,11 +115,11 @@ ${injectCode("./is-locale.js")}
 
 ${injectCode("./assert-is-locale.js")}
 
-${injectCode("./get-locale-from-path.js")}
+${injectCode("./locale-in-path.js")}
 
-${injectCode("./localized-path.js")}
+${injectCode("./localize-path.js")}
 
-${injectCode("./de-localized-path.js")}
+${injectCode("./de-localize-path.js")}
 
 // ------ TYPES ------
 

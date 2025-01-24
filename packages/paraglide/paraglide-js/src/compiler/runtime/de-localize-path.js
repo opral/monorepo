@@ -11,20 +11,20 @@
  *
  * @example
  *  // Assuming baseLocale = 'en'
- *  deLocalizedPath('/fr/home');
+ *  deLocalizePath('/fr/home');
  *  // '/home'
  *
- *  deLocalizedPath('/en/home');
+ *  deLocalizePath('/en/home');
  *  // '/home'
  *
- *  deLocalizedPath('/home');
+ *  deLocalizePath('/home');
  *  // '/home' (no change)
  *
  * @param {string} path - The localized path to de-localize.
  * @returns {string} The de-localized path without the locale prefix.
  */
-export function deLocalizedPath(path) {
-	const hasLocale = getLocaleFromPath(path);
+export function deLocalizePath(path) {
+	const hasLocale = localeInPath(path);
 	if (!hasLocale) {
 		return path; // Path is already de-localized
 	}

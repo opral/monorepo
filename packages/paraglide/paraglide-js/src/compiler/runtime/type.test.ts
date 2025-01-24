@@ -30,10 +30,10 @@ test("runtime type", async () => {
 	project.createSourceFile("./runtime.js", jsdocRuntime);
 	project.createSourceFile(...file("./type.ts"));
 	project.createSourceFile(...file("./ambient.d.ts"));
-	project.createSourceFile(...file("./get-locale-from-path.js"));
+	project.createSourceFile(...file("./locale-in-path.js"));
 	project.createSourceFile(...file("./is-locale.js"));
-	project.createSourceFile(...file("./localized-path.js"));
-	project.createSourceFile(...file("./de-localized-path.js"));
+	project.createSourceFile(...file("./localize-path.js"));
+	project.createSourceFile(...file("./de-localize-path.js"));
 	project.createSourceFile(...file("./assert-is-locale.js"));
 
 	project.createSourceFile(

@@ -3,9 +3,9 @@
 import {
 	defineGetLocale,
 	defineSetLocale,
-	localizedPath,
+	localizePath,
 	baseLocale,
-	getLocaleFromPath,
+	localeInPath,
 } from "./runtime.js";
 
 /**
@@ -18,11 +18,11 @@ import {
  */
 export default function ParaglideProviderClientSide() {
 	defineGetLocale(() => {
-		return getLocaleFromPath(window.location.pathname) ?? baseLocale;
+		return localeInPath(window.location.pathname) ?? baseLocale;
 	});
 
 	defineSetLocale((newLocale) => {
-		const l10nPath = localizedPath(window.location.pathname, {
+		const l10nPath = localizePath(window.location.pathname, {
 			locale: newLocale,
 		});
 		// trigger a page reload to avoid making the main provider a client component

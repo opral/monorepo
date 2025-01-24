@@ -1,5 +1,5 @@
 import { test, vi, beforeEach, expect, describe } from "vitest";
-import { localizedPath } from "./localized-path.js";
+import { localizePath } from "./localize-path.js";
 import { mockRuntime } from "./mock-runtime.js";
 
 // sequential to avoid global variable conflicts
@@ -18,21 +18,21 @@ describe.sequential("", () => {
 		globalThis.getLocale = vi.fn().mockReturnValue("de");
 
 		const path = "/about";
-		const l10nPath = localizedPath(path);
+		const l10nPath = localizePath(path);
 
 		expect(l10nPath).toBe("/de/about");
 	});
 
 	test("keeps trailing slashes if provided", () => {
 		const path = "/about/";
-		const l10nPath = localizedPath(path, { locale: "de" });
+		const l10nPath = localizePath(path, { locale: "de" });
 
 		expect(l10nPath).toBe("/de/about/");
 	});
 
 	test("adds no trailing slash for the root path", () => {
 		const path = "/";
-		const l10nPath = localizedPath(path, { locale: "de" });
+		const l10nPath = localizePath(path, { locale: "de" });
 
 		expect(l10nPath).toBe("/de");
 	});
@@ -42,14 +42,14 @@ describe.sequential("", () => {
 		globalThis.baseLocale = "en";
 
 		const path = "/de/about";
-		const l10nPath = localizedPath(path, { locale: "en" });
+		const l10nPath = localizePath(path, { locale: "en" });
 
 		expect(l10nPath).toBe("/about");
 	});
 
 	test("does not add a slash suffix if it's the root path that is already localized", () => {
 		const path = "/de";
-		const l10nPath = localizedPath(path, { locale: "de" });
+		const l10nPath = localizePath(path, { locale: "de" });
 
 		expect(l10nPath).toBe("/de");
 	});

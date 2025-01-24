@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getLocale, localizedPath } from "../paraglide/runtime";
+import { getLocale, localizePath } from "../paraglide/runtime";
 import ClientSideLocaleSwitch from "./ClientSideLocaleSwitch";
 import ParaglideNextProvider from "../paraglide/adapter.provider";
 import Link from "next/link";
@@ -23,12 +23,12 @@ export default function RootLayout({
 						<p>{m.static_anchor_tags_info()}</p>
 					</b>
 					<div>
-						<Link href={localizedPath("/", { locale: "en" })}>
+						<Link href={localizePath("/", { locale: "en" })}>
 							{m.navigate_to_en()}
 						</Link>
 					</div>
 					<div>
-						<Link href={localizedPath("/", { locale: "de" })}>
+						<Link href={localizePath("/", { locale: "de" })}>
 							{m.navigate_to_de()}
 						</Link>
 					</div>
