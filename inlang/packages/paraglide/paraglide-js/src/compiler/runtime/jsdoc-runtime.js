@@ -12,7 +12,6 @@ const injectCode = (path) =>
 // to modify the runtime, outcomment the export const jsdocRuntime line
 
 export const jsdocRuntime = `
-// @eslint-disable
 
 /**
  * The project's base locale.
