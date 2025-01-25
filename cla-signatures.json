@@ -591,6 +591,14 @@
       "created_at": "2025-01-22T20:27:11Z",
       "repoId": 394757291,
       "pullRequestNo": 3365
+    },
+    {
+      "name": "oskar-gmerek",
+      "id": 53402105,
+      "comment_id": 2614005746,
+      "created_at": "2025-01-25T15:38:28Z",
+      "repoId": 394757291,
+      "pullRequestNo": 3373
     }
   ]
 }
