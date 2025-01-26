@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.14
+
+Fixes windows path normalization https://github.com/opral/monorepo/pull/3374
+
 ## 2.0.0-beta.13
 
 - flat compiler options 
