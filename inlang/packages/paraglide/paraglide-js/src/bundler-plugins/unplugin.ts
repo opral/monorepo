@@ -2,6 +2,7 @@ import type { UnpluginFactory } from "unplugin";
 import { compile, type CompilerOptions } from "../compiler/compile.js";
 import fs from "node:fs";
 import { resolve } from "node:path";
+import { nodeNormalizePath } from "../utilities/node-normalize-path.js";
 
 const PLUGIN_NAME = "unplugin-paraglide-js";
 
@@ -19,7 +20,8 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 		}
 	},
 	async watchChange(path) {
-		if (readFiles.has(path)) {
+		const shouldCompile = readFiles.has(path) && !path.includes("cache");
+		if (shouldCompile) {
 			readFiles.clear();
 			await compile({
 				fs: wrappedFs,
@@ -50,7 +52,7 @@ const wrappedFs: typeof import("node:fs") = {
 		options: { encoding?: null; flag?: string } | null | undefined,
 		callback: (err: NodeJS.ErrnoException | null, data: Buffer) => void
 	) => {
-		readFiles.add(resolve(process.cwd(), path.toString()));
+		readFiles.add(nodeNormalizePath(resolve(process.cwd(), path.toString())));
 		return fs.readFile(path, options, callback);
 	},
 	// @ts-expect-error - Node's fs has too many overloads
@@ -58,7 +60,7 @@ const wrappedFs: typeof import("node:fs") = {
 		path: fs.PathLike | number,
 		options?: { encoding?: null; flag?: string } | null | undefined
 	) => {
-		readFiles.add(resolve(process.cwd(), path.toString()));
+		readFiles.add(nodeNormalizePath(resolve(process.cwd(), path.toString())));
 		return fs.readFileSync(path, options);
 	},
 	promises: {
@@ -68,7 +70,7 @@ const wrappedFs: typeof import("node:fs") = {
 			path: fs.PathLike,
 			options?: { encoding?: null; flag?: string } | null
 		): Promise<Buffer> => {
-			readFiles.add(resolve(process.cwd(), path.toString()));
+			readFiles.add(nodeNormalizePath(resolve(process.cwd(), path.toString())));
 			return fs.promises.readFile(path, options);
 		},
 	},
