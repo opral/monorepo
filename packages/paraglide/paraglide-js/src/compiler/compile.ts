@@ -7,12 +7,14 @@ import {
 	getLocalAccount,
 	saveLocalAccount,
 } from "../services/account/index.js";
+import type { Strategy } from "./strategy.js";
 
 export const defaultCompilerOptions = {
 	outputStructure: "message-modules",
 	emitGitIgnore: true,
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
+	strategy: { type: "custom" },
 } as const satisfies Partial<CompilerOptions>;
 
 export type CompilerOptions = {
@@ -30,6 +32,12 @@ export type CompilerOptions = {
 	 *   './src/paraglide'
 	 */
 	outdir: string;
+	/**
+	 * The strategy to use for getting the locale.
+	 *
+	 * @default CustomStrategy
+	 */
+	strategy?: Strategy;
 	/**
 	 * Additional files that should be emmited in the outdir.
 	 *
@@ -115,23 +123,9 @@ export async function compile(options: CompilerOptions): Promise<void> {
 		});
 
 		const output = await compileProject({
-			...withDefaultOptions,
+			compilerOptions: withDefaultOptions,
 			project,
 		});
-
-		for (const [filename, content] of Object.entries(
-			withDefaultOptions.additionalFiles ?? {}
-		)) {
-			output[filename] = content;
-		}
-
-		if (withDefaultOptions.includeEslintDisableComment) {
-			for (const [filename, content] of Object.entries(output)) {
-				if (filename.endsWith(".js")) {
-					output[filename] = `// eslint-disable-next-line\n${content}`;
-				}
-			}
-		}
 
 		await writeOutput(absoluteOutdir, output, fs.promises);
 
