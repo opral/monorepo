@@ -4,6 +4,7 @@ import { createRuntime } from "./create-runtime.js";
 import fs from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "url";
+import { createStrategyFile } from "../strategy.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,7 +28,13 @@ test("runtime type", async () => {
 		return [path, fs.readFileSync(resolve(__dirname, path), "utf-8")!] as const;
 	};
 
+	console.log(jsdocRuntime);
+
 	project.createSourceFile("./runtime.js", jsdocRuntime);
+	project.createSourceFile(
+		"./strategy.js",
+		createStrategyFile({ type: "custom" })
+	);
 	project.createSourceFile(...file("./type.ts"));
 	project.createSourceFile(...file("./ambient.d.ts"));
 	project.createSourceFile(...file("./locale-in-path.js"));

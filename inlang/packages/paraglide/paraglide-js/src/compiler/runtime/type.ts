@@ -18,4 +18,4 @@ export type Runtime = {
 /**
  * Locale is any here because the locale is unknown before compilation.
  */
-type Locale = any;
+type Locale = string;

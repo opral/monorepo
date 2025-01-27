@@ -9,15 +9,16 @@ export type CustomStrategy = {
 
 export type Strategy = CookieStrategy | CustomStrategy;
 
+const variableNames = ["type", "cookieName"] as const;
+
 export function createStrategyFile(strategy: Strategy): string {
 	let result = ``;
 
-	for (const key in strategy) {
-		result += `export const ${key} = ${JSON.stringify(
-			// @ts-expect-error - typescript is not smart enough to know that the key is a valid key of the strategy object
-			strategy[key],
+	for (const name of variableNames) {
+		result += `export const ${name} = ${JSON.stringify(
+			// @ts-expect-error - typescript is not smart enough to know that the name is a valid key of the strategy object
+			strategy[name],
 			null,
-			// beautify the output
 			`\t`
 		)}\n`;
 	}
