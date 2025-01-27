@@ -78,6 +78,28 @@ test("emitPrettierIgnore", async () => {
 	expect(_false).not.toHaveProperty(".prettierignore");
 });
 
+test("emits a strategy.js file", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				locales: ["en", "de"],
+				baseLocale: "en",
+			},
+		}),
+	});
+
+	const output = await compileProject({
+		project,
+		compilerOptions: {
+			strategy: { type: "cookie", cookieName: "locale" },
+		},
+	});
+
+	expect(output).toHaveProperty("strategy.js");
+	expect(output["strategy.js"]).toContain('export const type = "cookie"');
+	expect(output["strategy.js"]).toContain('export const cookieName = "locale"');
+});
+
 describe.each([
 	// useTsImports must be true to test emitTs. Otherwise, rolldown can't resolve the imports
 	{
