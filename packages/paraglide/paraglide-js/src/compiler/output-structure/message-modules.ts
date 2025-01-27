@@ -41,7 +41,7 @@ export function generateMessageModules(
 
 	for (const locale of settings.locales) {
 		for (const compiledBundle of compiledBundles) {
-			let file = [`import * as registry from '../../registry.js'`].join("\n");
+			let file = "";
 
 			const compiledMessage = compiledBundle.messages[locale];
 			const id = jsIdentifier(compiledBundle.bundle.node.id);
@@ -59,6 +59,12 @@ export function generateMessageModules(
 				}
 			} else {
 				file += `\n${compiledMessage.code}`;
+			}
+
+			// Add the registry import to the message file
+			// if registry is used
+			if (file.includes("registry.")) {
+				file = `import { registry } from '../../registry.js'\n` + file;
 			}
 
 			output[`messages/${compiledBundle.bundle.node.id}/${locale}.js`] = file;
