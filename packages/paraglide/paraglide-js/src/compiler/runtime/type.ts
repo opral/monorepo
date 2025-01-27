@@ -13,6 +13,7 @@ export type Runtime = {
 	deLocalizePath: typeof import("./de-localize-path.js").deLocalizePath;
 	localizePath: typeof import("./localize-path.js").localizePath;
 	localeInPath: typeof import("./locale-in-path.js").localeInPath;
+	detectLocaleFromRequest: typeof import("./detect-locale-from-request.js").detectLocaleFromRequest;
 };
 
 /**

@@ -42,6 +42,7 @@ test("runtime type", async () => {
 	project.createSourceFile(...file("./localize-path.js"));
 	project.createSourceFile(...file("./de-localize-path.js"));
 	project.createSourceFile(...file("./assert-is-locale.js"));
+	project.createSourceFile(...file("./detect-locale-from-request.js"));
 
 	project.createSourceFile(
 		"./test.ts",

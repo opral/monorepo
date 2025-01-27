@@ -31,6 +31,10 @@ export let setLocale = (newLocale) => {
 		window.location.pathname = localizePath(window.location.pathname, {
 			locale: newLocale,
 		});
+		return;
 	}
-	return;
+	// if condition to avoid server related errors with "window is not defined"
+	if (typeof window !== "undefined") {
+		return window.location.reload();
+	}
 };

@@ -4,6 +4,7 @@ import { localizePath } from "./localize-path.js";
 import { isLocale } from "./is-locale.js";
 import { deLocalizePath } from "./de-localize-path.js";
 import { assertIsLocale } from "./assert-is-locale.js";
+import { detectLocaleFromRequest } from "./detect-locale-from-request.js";
 
 export function mockRuntime({ baseLocale = "en", locales = ["en", "de"] }) {
 	let locale = baseLocale;
@@ -14,8 +15,9 @@ export function mockRuntime({ baseLocale = "en", locales = ["en", "de"] }) {
 		isLocale,
 		assertIsLocale,
 		localeInPath,
-		localizePath: localizePath,
-		deLocalizePath: deLocalizePath,
+		localizePath,
+		deLocalizePath,
+		detectLocaleFromRequest,
 		defineGetLocale: (fn) => (runtime.getLocale = fn),
 		defineSetLocale: (fn) => (runtime.setLocale = fn),
 		setLocale: (newLocale) => (locale = newLocale),

@@ -11,7 +11,7 @@ export type CustomStrategy = {
 	type: "custom";
 };
 
-export type Strategy = CookieStrategy | CustomStrategy;
+export type Strategy = CookieStrategy | CustomStrategy | I18nRoutingStrategy;
 
 const variableNames = ["cookieName"] as const;
 
