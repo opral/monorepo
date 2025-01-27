@@ -235,7 +235,7 @@ test("includes eslint-disable comment", async () => {
 
 	const messages = await fs.promises.readFile("/output/messages.js", "utf8");
 
-	expect(messages).toContain("// eslint-disable-next-line");
+	expect(messages).toContain("// eslint-disable");
 
 	await compile({
 		project: "/project.inlang",
@@ -249,5 +249,5 @@ test("includes eslint-disable comment", async () => {
 		"utf8"
 	);
 
-	expect(messagesWithoutComment).not.toContain("// eslint-disable-next-line");
+	expect(messagesWithoutComment).not.toContain("// eslint-disable");
 });
