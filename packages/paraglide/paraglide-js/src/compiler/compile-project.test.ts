@@ -20,6 +20,8 @@ beforeEach(() => {
 	vi.clearAllMocks();
 });
 
+
+
 test("emitGitignore", async () => {
 	const project = await loadProjectInMemory({
 		blob: await newProject({
@@ -515,11 +517,6 @@ describe.each([
 async function bundleCode(output: Record<string, string>, file: string) {
 	const bundle = await rolldown({
 		input: ["main.js"],
-		resolve: {
-			extensionAlias: {
-				".js": [".ts", ".js"],
-			},
-		},
 		plugins: [
 			// @ts-expect-error - rollup types are not up to date
 			virtual({

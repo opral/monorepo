@@ -28,8 +28,6 @@ test("runtime type", async () => {
 		return [path, fs.readFileSync(resolve(__dirname, path), "utf-8")!] as const;
 	};
 
-	console.log(jsdocRuntime);
-
 	project.createSourceFile("./runtime.js", jsdocRuntime);
 	project.createSourceFile(
 		"./strategy.js",
@@ -37,6 +35,8 @@ test("runtime type", async () => {
 	);
 	project.createSourceFile(...file("./type.ts"));
 	project.createSourceFile(...file("./ambient.d.ts"));
+	// define runtime functions which are used in the `Runtime` type
+	project.createSourceFile(...file("./set-locale.js"));
 	project.createSourceFile(...file("./locale-in-path.js"));
 	project.createSourceFile(...file("./is-locale.js"));
 	project.createSourceFile(...file("./localize-path.js"));

@@ -9,10 +9,12 @@ export type CustomStrategy = {
 
 export type Strategy = CookieStrategy | CustomStrategy;
 
-const variableNames = ["type", "cookieName"] as const;
+const variableNames = ["cookieName"] as const;
 
 export function createStrategyFile(strategy: Strategy): string {
-	let result = ``;
+	let result = `/** @type {"cookie" | "custom"} */
+export const type = ${JSON.stringify(strategy.type, null, `\t`)}
+`;
 
 	for (const name of variableNames) {
 		result += `export const ${name} = ${JSON.stringify(
