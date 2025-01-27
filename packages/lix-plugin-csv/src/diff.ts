@@ -32,14 +32,12 @@ export class DiffComponent extends LitElement {
 		@media (min-width: 768px) {
 			.container {
 				flex-wrap: nowrap;
-				gap: 0.5rem;
 			}
 		}
 
 		.group {
 			display: flex;
 			flex-direction: row;
-			align-items: center;
 			width: auto;
 		}
 
@@ -115,7 +113,7 @@ export class DiffComponent extends LitElement {
 			background-color: var(--color-background);
 			color: var(--color-text);
 			min-height: 1.5rem;
-			width: fit-content;
+			width: content-fit;
 			min-width: 140px;
 		}
 
@@ -130,6 +128,7 @@ export class DiffComponent extends LitElement {
 			height: 18px;
 			color: var(--color-icon);
 			transform: rotate(-90deg);
+			align-self: center;
 
 			@media (min-width: 768px) {
 				transform: rotate(0);
@@ -177,8 +176,8 @@ export class DiffComponent extends LitElement {
 								<div class="group">
 									<p class="label">${column}</p>
 									${value
-										? html`<p class="box after">${value}</p>`
-										: html`<p class="dotted box before"></p>`}
+										? html`<p class="box">${value}</p>`
+										: html`<p class="dotted box"></p>`}
 									<svg
 										class="icon"
 										xmlns="http://www.w3.org/2000/svg"
@@ -190,8 +189,8 @@ export class DiffComponent extends LitElement {
 										></path>
 									</svg>
 									${parentValue
-										? html`<p class="box after">${parentValue}</p>`
-										: html`<p class="dotted box before"></p>`}
+										? html`<p class="box">${parentValue}</p>`
+										: html`<p class="dotted box"></p>`}
 								</div>
 							`;
 						})}
