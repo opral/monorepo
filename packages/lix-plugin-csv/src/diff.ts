@@ -160,12 +160,12 @@ export class DiffComponent extends LitElement {
 		return html` <div class="list-container">
 			${Object.keys(groupedChanges).map((rowId) => {
 				const changes = groupedChanges[rowId];
-				const relationValue = rowId.split("|")[1];
+				const rowValue = rowId.split("|")[1];
 				return html`
 					<div class="container">
 						<div class="group">
 							<p class="label">UNIQUE VALUE</p>
-							<p class="value">${relationValue}</p>
+							<p class="value">${rowValue}</p>
 						</div>
 						${changes?.map((change) => {
 							const column = change.entity_id.split("|")[2];
