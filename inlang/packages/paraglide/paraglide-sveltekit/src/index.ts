@@ -26,7 +26,6 @@ export const paraglideSveltekit = (options: CompilerOptions) =>
 		...options,
 		additionalFiles: {
 			...file("adapter.js"),
-			...file("adapter.provider.svelte"),
 			...options.additionalFiles,
 		},
 	});
