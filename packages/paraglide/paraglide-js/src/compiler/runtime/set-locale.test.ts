@@ -4,6 +4,11 @@ import { setLocale } from "./set-locale.js";
 
 // @ts-expect-error - global variable definition
 globalThis.document = {};
+// @ts-expect-error - global variable definition
+globalThis.window = {};
+// @ts-expect-error - global variable definition
+globalThis.window.location = {};
+globalThis.window.location.reload = () => {};
 
 // sequential to avoid global variable conflicts
 describe.sequential("", () => {

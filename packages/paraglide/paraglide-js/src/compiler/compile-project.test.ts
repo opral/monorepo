@@ -18,6 +18,13 @@ beforeEach(() => {
 	// reset the imports to make sure that the runtime is reloaded
 	vi.resetModules();
 	vi.clearAllMocks();
+
+	// mocking DOM globals
+	// @ts-expect-error - global variable definition
+	globalThis.window = {};
+	// @ts-expect-error - global variable definition
+	globalThis.window.location = {};
+	globalThis.window.location.reload = () => {};
 });
 
 
