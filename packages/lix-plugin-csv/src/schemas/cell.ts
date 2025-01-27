@@ -7,7 +7,7 @@ export const CellSchemaV1 = {
 		type: "object",
 		properties: {
 			text: { type: "string" },
-			relationId: { type: "string" },
+			rowId: { type: "string" },
 		},
 		required: ["text"],
 		additionalProperties: false,

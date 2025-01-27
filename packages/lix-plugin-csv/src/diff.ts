@@ -141,12 +141,12 @@ export class DiffComponent extends LitElement {
 	diffs: UiDiffComponentProps["diffs"] = [];
 
 	override render() {
-		// group changes based on relationId
+		// group changes based on rowId
 		const groupedChanges = this.diffs.reduce(
 			(acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
 				const key =
-					change.snapshot_content_after?.relationId ||
-					change.snapshot_content_before?.relationId;
+					change.snapshot_content_after?.rowId ||
+					change.snapshot_content_before?.rowId;
 				if (key) {
 					if (!acc[key]) {
 						acc[key] = [];
@@ -159,9 +159,9 @@ export class DiffComponent extends LitElement {
 		);
 
 		return html` <div class="list-container">
-			${Object.keys(groupedChanges).map((relationId) => {
-				const changes = groupedChanges[relationId];
-				const relationValue = relationId.split("|")[1];
+			${Object.keys(groupedChanges).map((rowId) => {
+				const changes = groupedChanges[rowId];
+				const relationValue = rowId.split("|")[1];
 				return html`
 					<div class="container">
 						<div class="group">
