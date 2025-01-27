@@ -82,7 +82,7 @@ export const compileProject = async (args: {
 		}
 		if (optionsWithDefaults.includeEslintDisableComment) {
 			if (filename.endsWith(".js")) {
-				output[filename] = `// eslint-disable-next-line\n${content}`;
+				output[filename] = `// eslint-disable\n${content}`;
 			}
 		}
 	}
