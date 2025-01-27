@@ -5,6 +5,7 @@ import { lookup } from "../services/lookup.js";
 import { generateLocaleModules } from "./output-structure/locale-modules.js";
 import { generateMessageModules } from "./output-structure/message-modules.js";
 import { defaultCompilerOptions, type CompilerOptions } from "./compile.js";
+import { createStrategyFile } from "./strategy.js";
 
 /**
  * Takes an inlang project and compiles it into a set of files.
@@ -18,10 +19,7 @@ import { defaultCompilerOptions, type CompilerOptions } from "./compile.js";
  */
 export const compileProject = async (args: {
 	project: InlangProject;
-	compilerOptions?: Pick<
-		CompilerOptions,
-		"emitGitIgnore" | "emitPrettierIgnore" | "outputStructure"
-	>;
+	compilerOptions?: Omit<CompilerOptions, "fs" | "project" | "outdir">;
 }): Promise<Record<string, string>> => {
 	const optionsWithDefaults = {
 		...defaultCompilerOptions,
@@ -70,9 +68,22 @@ export const compileProject = async (args: {
 		output[".prettierignore"] = ignoreDirectory;
 	}
 
-	for (const file in output) {
-		if (file.endsWith(".js") || file.endsWith(".ts")) {
-			output[file] = `// @ts-nocheck\n${output[file]}`;
+	for (const [filename, content] of Object.entries(
+		optionsWithDefaults.additionalFiles ?? {}
+	)) {
+		output[filename] = content;
+	}
+
+	output["strategy.js"] = createStrategyFile(optionsWithDefaults.strategy);
+
+	for (const [filename, content] of Object.entries(output)) {
+		if (filename.endsWith(".js") || filename.endsWith(".ts")) {
+			output[filename] = `// @ts-nocheck\n${output[filename]}`;
+		}
+		if (optionsWithDefaults.includeEslintDisableComment) {
+			if (filename.endsWith(".js")) {
+				output[filename] = `// eslint-disable-next-line\n${content}`;
+			}
 		}
 	}
 
