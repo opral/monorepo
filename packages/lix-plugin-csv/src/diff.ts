@@ -146,8 +146,7 @@ export class DiffComponent extends LitElement {
 			(acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
 				const key =
 					change.snapshot_content_after?.relationId ||
-					change.snapshot_content_before?.relationId ||
-					"";
+					change.snapshot_content_before?.relationId;
 				if (key) {
 					if (!acc[key]) {
 						acc[key] = [];

@@ -17,8 +17,10 @@ import {
 	changeInVersion,
 	changeIsLeafInVersion,
 	jsonArrayFrom,
+	Lix,
 	sql,
 	UiDiffComponentProps,
+	Version,
 } from "@lix-js/sdk";
 import { CellSchemaV1 } from "@lix-js/plugin-csv";
 import { redirect } from "react-router-dom";
@@ -272,19 +274,20 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 	return await query.execute();
 });
 
-export const changesCurrentVersionAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const lix = await get(lixAtom);
-	const activeFile = await get(activeFileAtom);
-	const currentBranch = await get(currentVersionAtom);
-	if (!currentBranch) return [];
-
-	const changesCurrentVersionQuery = lix.db
+export const getChanges = async (
+	lix: Lix,
+	changeSetId: string,
+	currentVersion: Version,
+	activeFile: { id: string } | null
+): Promise<UiDiffComponentProps["diffs"]> => {
+	const queryCheckpointChanges = lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.innerJoin("file", "file.id", "change.file_id")
-		.innerJoin("change_author", "change_author.change_id", "change.id")
-		.innerJoin("account", "account.id", "change_author.account_id")
+		.innerJoin(
+			"change_set_element",
+			"change_set_element.change_id",
+			"change.id"
+		)
 		.leftJoin("change_edge", "change_edge.child_id", "change.id")
 		.leftJoin(
 			"change as parent_change",
@@ -296,29 +299,53 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 			"parent_snapshot.id",
 			"parent_change.snapshot_id"
 		)
-		.leftJoin("change_set_element", "change_set_element.change_id", "change.id")
-		.leftJoin(
-			"discussion",
-			"discussion.change_set_id",
-			"change_set_element.change_set_id"
-		)
-		.where(changeInVersion(currentBranch))
-		.selectAll("change")
-		.select(sql`json(snapshot.content)`.as("snapshot_content_after"))
-		.select("file.path as file_path")
-		.select("account.name as account_name")
-		.select(sql`json(parent_snapshot.content)`.as("snapshot_content_before")) // This will be NULL if no parent exists
-		.select((eb) => eb.fn.count("discussion.id").as("discussion_count"))
-		.select(sql`group_concat(discussion.id)`.as("discussion_ids"))
-		.groupBy("change.id")
-		.orderBy("change.created_at", "desc");
+		.where("change_set_element.change_set_id", "=", changeSetId)
+		.where(changeInVersion(currentVersion))
+		.where(changeHasLabel("checkpoint"))
+		.select("change.id")
+		.select("change.plugin_key")
+		.select("change.schema_key")
+		.select("change.entity_id")
+		.select(sql`json(snapshot.content)`.as("snapshot_content_after"));
 
 	if (activeFile) {
-		changesCurrentVersionQuery.where("change.file_id", "=", activeFile.id);
+		queryCheckpointChanges.where("change.file_id", "=", activeFile.id);
 	}
 
-	return await changesCurrentVersionQuery.execute();
-});
+	const checkpointChanges = await queryCheckpointChanges.execute();
+
+	const changesWithBeforeSnapshot: UiDiffComponentProps["diffs"] =
+		await Promise.all(
+			checkpointChanges.map(async (change) => {
+				const snapshotBefore = await lix.db
+					.selectFrom("change")
+					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+					.innerJoin("change_edge", "change_edge.parent_id", "change.id")
+					.where("change_edge.child_id", "=", change.id)
+					.where(changeHasLabel("checkpoint"))
+					.where(changeInVersion(currentVersion))
+					.where("change.entity_id", "=", change.entity_id)
+					.where("change.schema_key", "=", change.schema_key)
+					.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
+					.executeTakeFirst();
+
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const { id, ...rest } = change;
+
+				return {
+					...rest,
+					snapshot_content_after: change.snapshot_content_after
+						? JSON.parse(change.snapshot_content_after as string)
+						: null,
+					snapshot_content_before: snapshotBefore?.snapshot_content_before
+						? JSON.parse(snapshotBefore.snapshot_content_before as string)
+						: null,
+				};
+			})
+		);
+
+	return changesWithBeforeSnapshot;
+};
 
 export const allEdgesAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -405,9 +432,8 @@ export const selectedChangeIdsAtom = atom<string[]>([]);
 export const activeDiscussionAtom = atom(async (get) => {
 	const lix = await get(lixAtom);
 	const currentVersion = await get(currentVersionAtom);
-	const activeFile = await get(activeFileAtom);
 	const fileIdSearchParams = await get(fileIdSearchParamsAtom);
-	if (!activeFile || !fileIdSearchParams || !currentVersion) return null;
+	if (!fileIdSearchParams || !currentVersion) return null;
 	const discussionSearchParams = await get(discussionSearchParamsAtom);
 	if (!discussionSearchParams) return null;
 
