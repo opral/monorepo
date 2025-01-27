@@ -11,3 +11,4 @@ export const isLocale: Runtime["isLocale"];
 export const localeInPath: Runtime["localeInPath"];
 export const localizePath: Runtime["localizePath"];
 export const deLocalizePath: Runtime["deLocalizePath"];
+export const detectLocaleFromRequest: Runtime["detectLocaleFromRequest"];

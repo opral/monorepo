@@ -3,11 +3,18 @@ import { defineConfig } from 'vite';
 import { paraglideSveltekit } from '@inlang/paraglide-sveltekit';
 
 export default defineConfig({
+	build: {
+		minify: false
+	},
 	plugins: [
 		sveltekit(),
 		paraglideSveltekit({
 			project: './project.inlang',
-			outdir: './src/lib/paraglide'
+			outdir: './src/lib/paraglide',
+			strategy: {
+				type: 'cookie',
+				cookieName: 'PARAGLIDE_LOCALE'
+			}
 		})
 	]
 });
