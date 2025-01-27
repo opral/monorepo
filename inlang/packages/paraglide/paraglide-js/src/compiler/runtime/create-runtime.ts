@@ -91,6 +91,8 @@ ${injectCode("./localize-path.js")}
 
 ${injectCode("./de-localize-path.js")}
 
+${injectCode("./detect-locale-from-request.js")}
+
 // ------ TYPES ------
 
 /**
