@@ -32,7 +32,7 @@ export let getLocale = (() => {
 			const match = document.cookie.match(
 				new RegExp(`(^| )${cookieName}=([^;]+)`)
 			);
-			return assertIsLocale(match?.[2]);
+			return assertIsLocale(match?.[2] ?? baseLocale);
 		};
 	}
 
