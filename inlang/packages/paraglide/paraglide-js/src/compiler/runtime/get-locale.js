@@ -21,18 +21,21 @@ let _locale = "<replace>";
  *
  * @type {() => Locale}
  */
-export let getLocale = () => {
+export let getLocale = (() => {
 	if (strategy.type === "custom") {
-		return _locale;
+		return () => _locale;
 	}
 
-	// the bundler will tree-shake unused strategies
 	if (strategy.type === "cookie") {
-		return assertIsLocale(
-			document.cookie.match(
-				new RegExp(`(^| )${strategy?.cookieName}=([^;]+)`)
-			)?.[2]
-		);
+		const cookieName = strategy.cookieName;
+		return () => {
+			const match = document.cookie.match(
+				new RegExp(`(^| )${cookieName}=([^;]+)`)
+			);
+			return assertIsLocale(match?.[2]);
+		};
 	}
-	return assertIsLocale("");
-};
+
+	// Default fallback for unsupported strategies
+	return () => assertIsLocale("");
+})();

@@ -1,4 +1,3 @@
-import type { Strategy } from "../strategy.ts";
 import type { Runtime } from "./type.ts";
 
 /**
@@ -9,7 +8,7 @@ declare global {
 	 * Locale used by custom strategy.
 	 */
 	export let _locale: string;
-	export const strategy: Strategy;
+	export const strategy: any;
 	export const baseLocale: Runtime["baseLocale"];
 	export const locales: Runtime["locales"];
 	export const assertIsLocale: Runtime["assertIsLocale"];
@@ -18,5 +17,5 @@ declare global {
 	export let setLocale: Runtime["setLocale"];
 	export const localeInPath: Runtime["localeInPath"];
 	// string because precise locale is unknown before compilation
-	export type Locale = string;
+	export type Locale = any;
 }

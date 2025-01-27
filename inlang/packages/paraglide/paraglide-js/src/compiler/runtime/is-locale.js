@@ -12,5 +12,5 @@
  * @returns {locale is Locale}
  */
 export function isLocale(locale) {
-	return locales.includes(locale);
+	return !locale ? false : locales.includes(locale);
 }

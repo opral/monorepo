@@ -13,4 +13,5 @@ export let setLocale = (newLocale) => {
 	if (strategy.type === "cookie") {
 		document.cookie = `${strategy.cookieName}=${newLocale}`;
 	}
+	return;
 };

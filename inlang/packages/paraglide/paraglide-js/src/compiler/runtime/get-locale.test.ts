@@ -1,4 +1,3 @@
-import { getLocale } from "./get-locale.js";
 import { test, expect, describe } from "vitest";
 import { mockRuntime } from "./mock-runtime.js";
 import type { CookieStrategy } from "../strategy.js";
@@ -22,6 +21,9 @@ describe.sequential("", () => {
 			type: "cookie",
 			cookieName: "PARAGLIDE_LOCALE",
 		} satisfies CookieStrategy;
+
+		const { getLocale } = await import("./get-locale.js");
+
 		const locale = getLocale();
 		expect(locale).toBe("de");
 	});

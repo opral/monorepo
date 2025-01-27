@@ -1,6 +1,7 @@
 export { defaultCompilerOptions, type CompilerOptions } from "./compile.js";
 export type { MessageBundleFunction, MessageFunction } from "./types.js";
 export type { Runtime } from "./runtime/type.js";
+export type { Strategy, CookieStrategy, CustomStrategy } from "./strategy.js";
 export { compile } from "./compile.js";
 export { compileProject } from "./compile-project.js";
 export { compileBundle } from "./compile-bundle.js";
