@@ -26,7 +26,6 @@ export function generateMessageModules(
 	for (const compiledBundle of compiledBundles) {
 		const filename = `messages/${compiledBundle.bundle.node.id}/index.js`;
 		const code = [
-			`import * as registry from '../../registry.js'`,
 			settings.locales
 				.map(
 					(locale) =>
