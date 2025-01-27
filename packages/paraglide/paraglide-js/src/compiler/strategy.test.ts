@@ -5,7 +5,7 @@ test("creates the exports for a strategy", () => {
 	const result = createStrategyFile({ type: "cookie", cookieName: "locale" });
 
 	expect(result).toBe(
-		`/** @type {"cookie" | "custom"} */
+		`/** @type {"cookie" | "custom" | "i18n-routing"} */
 export const type = "cookie"
 export const cookieName = "locale"
 `

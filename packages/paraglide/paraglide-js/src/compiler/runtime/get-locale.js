@@ -36,6 +36,12 @@ export let getLocale = (() => {
 		};
 	}
 
+	if (strategy.type === "i18n-routing") {
+		return () => {
+			return localeInPath(window.location.pathname) ?? baseLocale;
+		};
+	}
+
 	// Default fallback for unsupported strategies
 	return () => assertIsLocale("");
 })();
