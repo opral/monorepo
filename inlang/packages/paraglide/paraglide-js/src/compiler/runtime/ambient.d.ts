@@ -16,6 +16,7 @@ declare global {
 	export let getLocale: Runtime["getLocale"];
 	export let setLocale: Runtime["setLocale"];
 	export const localeInPath: Runtime["localeInPath"];
+	export const localizePath: Runtime["localizePath"];
 	// string because precise locale is unknown before compilation
 	export type Locale = any;
 }

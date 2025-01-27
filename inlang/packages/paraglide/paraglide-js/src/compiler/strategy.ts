@@ -3,6 +3,10 @@ export type CookieStrategy = {
 	cookieName: string;
 };
 
+export type I18nRoutingStrategy = {
+	type: "i18n-routing";
+};
+
 export type CustomStrategy = {
 	type: "custom";
 };
@@ -12,7 +16,7 @@ export type Strategy = CookieStrategy | CustomStrategy;
 const variableNames = ["cookieName"] as const;
 
 export function createStrategyFile(strategy: Strategy): string {
-	let result = `/** @type {"cookie" | "custom"} */
+	let result = `/** @type {"cookie" | "custom" | "i18n-routing"} */
 export const type = ${JSON.stringify(strategy.type, null, `\t`)}
 `;
 
