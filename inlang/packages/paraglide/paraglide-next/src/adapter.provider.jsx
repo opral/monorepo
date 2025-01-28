@@ -1,9 +1,8 @@
 import { defineGetLocale, assertIsLocale } from "./runtime.js";
 import { headers } from "next/headers";
-import ClientSideProvider from "./adapter.provider.client.jsx";
 
 /**
- * Defines `getLocale()` on the server and client side.
+ * Defines `getLocale()` on the server.
  *
  * @param {Object} props - The properties object.
  * @param {React.ReactNode} props.children - The child components to be rendered within the provider.
@@ -15,10 +14,5 @@ export default function ParaglideProvider({ children }) {
 		return assertIsLocale(headers().get("x-paraglide-locale"));
 	});
 
-	return (
-		<>
-			<ClientSideProvider />
-			{children}
-		</>
-	);
+	return <>{children}</>;
 }
