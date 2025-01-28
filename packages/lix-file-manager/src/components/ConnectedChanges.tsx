@@ -68,7 +68,7 @@ const ConnectedChanges = () => {
 				</Button>
 			</div>
 			{isExpanded && (
-				<div className="flex flex-col pl-2 pb-4 w-fit">
+				<div className="flex flex-col pl-2 pb-4 w-full">
 					{Object.keys(groupedChanges).map((pluginKey) => (
 						<ChangeDiffComponent
 							key={pluginKey}

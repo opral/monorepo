@@ -25,7 +25,7 @@ export function App({ children }: { children: React.ReactNode }) {
 		<SidebarProvider>
 			<div className="w-full h-screen flex flex-col">
 				<Banner />
-				<div className="flex flex-1">
+				<div className="flex flex-1 overflow-hidden">
 					<AppSidebar />
 					<main className="flex-1 overflow-hidden">
 						{children}

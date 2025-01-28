@@ -320,7 +320,7 @@ export default function Page() {
 			<Separator orientation="vertical" className="h-full" />
 
 			{fileIdSearchParams && discussionSearchParams && (
-				<div className="flex-1 h-full">
+				<div className="flex-1 h-full pb-2">
 					<SectionHeader
 						backaction={() => navigate(`/?f=${fileIdSearchParams}`)}
 						title={`Discussion`}
@@ -335,7 +335,7 @@ export default function Page() {
 				</div>
 			)}
 			{!discussionSearchParams && (
-				<div className="flex-1 h-full">
+				<div className="flex-1 h-full pb-2">
 					<SectionHeader
 						backaction={activeFile ? () => navigate("/") : undefined}
 						title={
