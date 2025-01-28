@@ -369,26 +369,30 @@ export default function Page() {
 							</Button>
 						)}
 					</SectionHeader>
-					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
-						{activeFile?.path && !isCsvFile(activeFile.path) ? (
-							<NoPluginMessage extension={getFileExtension(activeFile.path)} />
-						) : (
+					<div className="relative h-full">
+						{/* Fade effect at the top */}
+						<div className="absolute top-0 left-0 w-full h-[20px] bg-gradient-to-b from-white to-transparent pointer-events-none z-10" />
+						<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
+							{activeFile?.path && !isCsvFile(activeFile.path) ? (
+								<NoPluginMessage extension={getFileExtension(activeFile.path)} />
+							) : (
 								<>
-						{intermediateChanges.length > 0 && (
-							<IntermediateCheckpointComponent />
-						)}
-						{checkpointChangeSets.map((checkpointChangeSet, i) => {
-							return (
-								<CheckpointComponent
-									key={checkpointChangeSet.id}
-									checkpointChangeSet={checkpointChangeSet}
-									showTopLine={i !== 0 || intermediateChanges.length > 0}
-									showBottomLine={i !== checkpointChangeSets.length - 1}
-								/>
-							);
-						})}
-							</>
-						)}
+									{intermediateChanges.length > 0 && (
+										<IntermediateCheckpointComponent />
+									)}
+									{checkpointChangeSets.map((checkpointChangeSet, i) => {
+										return (
+											<CheckpointComponent
+												key={checkpointChangeSet.id}
+												checkpointChangeSet={checkpointChangeSet}
+												showTopLine={i !== 0 || intermediateChanges.length > 0}
+												showBottomLine={i !== checkpointChangeSets.length - 1}
+											/>
+										);
+									})}
+								</>
+							)}
+						</div>
 					</div>
 				</div>
 			)}

@@ -41,7 +41,7 @@ export const ChangeDiffComponent = (props: {
 	}
 
 	return (
-		<div className={clsx("w-full overflow-x-auto", props.className)}>
+		<div className={clsx("w-full overflow-x-auto pb-4", props.className)}>
 			<CustomElementName
 				// @ts-expect-error - Custom element props
 				diffs={props.diffs}
