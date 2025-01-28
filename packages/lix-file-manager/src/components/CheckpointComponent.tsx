@@ -7,11 +7,13 @@ import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import ChangeDot from "./ChangeDot.tsx";
 import DiscussionPreview from "./DiscussionPreview.tsx";
-import { UiDiffComponentProps } from "@lix-js/sdk";
+import { ChangeSet, createDiscussion, UiDiffComponentProps } from "@lix-js/sdk";
 import { useAtom } from "jotai/react";
 import { currentVersionAtom, lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "./ChangeDiffComponent.tsx";
 import { activeFileAtom, getChanges } from "@/state-active-file.ts";
+import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
+import { Input } from "./ui/input.tsx";
 
 export const CheckpointComponent = (props: {
   checkpointChangeSet: {
@@ -58,8 +60,10 @@ export const CheckpointComponent = (props: {
     <div
       className="flex group hover:bg-slate-50 rounded-md cursor-pointer flex-shrink-0 pr-2"
       onClick={(e) => {
-        e.stopPropagation();
-        toggleExpanded();
+        if ((e.target as HTMLElement).tagName !== "INPUT") {
+          e.stopPropagation();
+          toggleExpanded();
+        }   
       }}
     >
       <ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />
@@ -113,12 +117,16 @@ export const CheckpointComponent = (props: {
                 />
               ))}
             </div>
-            {props.checkpointChangeSet.discussion_id && (
+            {props.checkpointChangeSet.discussion_id ? (
               <DiscussionPreview
                 key={props.checkpointChangeSet.discussion_id}
                 discussionId={props.checkpointChangeSet.discussion_id}
               />
-            )}
+            ) :
+              <CreateCheckpointDiscussion
+                changeSetId={props.checkpointChangeSet}
+              />
+            }
           </div>
         )}
       </div>
@@ -127,3 +135,40 @@ export const CheckpointComponent = (props: {
 };
 
 export default CheckpointComponent;
+
+const CreateCheckpointDiscussion = (props: {
+  changeSetId: Pick<ChangeSet, "id">,
+}) => {
+  const [description, setDescription] = useState("");
+  const [lix] = useAtom(lixAtom);
+
+  const handleCreateCheckpoint = async () => {
+    if (description !== "") {
+      await createDiscussion({
+        lix,
+        changeSet: props.changeSetId,
+        firstComment: { content: description },
+      });
+      await saveLixToOpfs({ lix });
+    }
+  };
+
+  return (
+    <div className="flex w-full gap-2 px-1 items-center">
+      <Input
+        className="flex-grow pl-2"
+        placeholder="Write a comment"
+        onInput={(event: any) => {
+          event.preventDefault();
+          setDescription(event.target?.value)
+        }}
+      ></Input>
+      <Button
+        onClick={handleCreateCheckpoint}
+        variant="default"
+      >
+        Start discussion
+      </Button>
+    </div>
+  );
+};
