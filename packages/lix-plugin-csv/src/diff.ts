@@ -16,10 +16,12 @@ export class DiffComponent extends LitElement {
 			font-family: Arial, sans-serif;
 			display: flex;
 			flex-wrap: wrap;
-			align-items: center;
+			align-items: left;
 			flex-direction: column;
-			width: auto;
 			gap: 1rem;
+
+			width: 100%;
+			container: list-container / inline-size;
 		}
 
 		.container {
@@ -27,10 +29,8 @@ export class DiffComponent extends LitElement {
 			display: flex;
 			flex-wrap: wrap;
 			gap: 0.25rem;
-		}
 
-		@media (min-width: 768px) {
-			.container {
+			@container list-container (min-width: 600px) {
 				flex-wrap: nowrap;
 			}
 		}
@@ -38,54 +38,31 @@ export class DiffComponent extends LitElement {
 		.group {
 			display: flex;
 			flex-direction: row;
-			width: auto;
-		}
+			width: content-fit;
 
-		@media (min-width: 768px) {
-			.group {
+			@container list-container (min-width: 600px) {
 				flex-direction: column;
-				width: 100%;
-			}
-		}
-
-		.unique-value {
-			display: none;
-			color: #6b7280;
-			padding-top: 0;
-			padding-bottom: 0;
-			width: 140px;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-			font-size: 14px;
-		}
-
-		@media (min-width: 768px) {
-			.unique-value {
-				display: block;
-				padding: 0.375rem 0;
 			}
 		}
 
 		.value {
-			padding: 0;
-			color: black;
-			background: none;
-			border: none;
-			border-radius: 0;
-
+			// padding: 0;
+			// color: black;
+			// background: none;
+			// border: none;
+			// border-radius: 0;
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
-		}
+			margin: 0;
+			padding: 0.375rem 1rem;
+			background-color: white;
+			border: 1px solid #e5e7eb;
+			border-radius: 9999px;
+			width: fit-content;
+			min-width: 132px;
 
-		@media (min-width: 768px) {
-			.value {
-				padding: 0.375rem 1rem;
-				background-color: white;
-				border: 1px solid #e5e7eb;
-				width: 140px;
-				border-radius: 9999px;
+			@container list-container (min-width: 600px) {
 				margin: 0rem 1rem 0rem 0rem;
 			}
 		}
@@ -99,7 +76,11 @@ export class DiffComponent extends LitElement {
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
-			width: 100%;
+			width: 140px;
+
+			@container list-container (min-width: 600px) {
+				width: 100%;
+			}
 		}
 
 		.box {
@@ -113,8 +94,12 @@ export class DiffComponent extends LitElement {
 			background-color: var(--color-background);
 			color: var(--color-text);
 			min-height: 1.5rem;
-			width: content-fit;
-			min-width: 140px;
+			width: 140px;
+
+			@container list-container (min-width: 600px) {
+				width: content-fit;
+				min-width: 140px;
+			}
 		}
 
 		.box.dotted {
@@ -130,8 +115,8 @@ export class DiffComponent extends LitElement {
 			transform: rotate(-90deg);
 			align-self: center;
 
-			@media (min-width: 768px) {
-				transform: rotate(0);
+			@container list-container (min-width: 600px) {
+				transform: rotate(0deg);
 			}
 		}
 	`;

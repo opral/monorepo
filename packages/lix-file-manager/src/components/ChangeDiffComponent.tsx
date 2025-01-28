@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { UiDiffComponentProps } from "@lix-js/sdk";
 import { lixAtom } from "@/state.ts";
 import { useAtom } from "jotai/react";
+import clsx from "clsx";
 
 export const ChangeDiffComponent = (props: {
 	diffs: UiDiffComponentProps["diffs"];
@@ -40,7 +41,7 @@ export const ChangeDiffComponent = (props: {
 	}
 
 	return (
-		<div className={props.className}>
+		<div className={clsx("w-full overflow-x-auto", props.className)}>
 			<CustomElementName
 				// @ts-expect-error - Custom element props
 				diffs={props.diffs}
