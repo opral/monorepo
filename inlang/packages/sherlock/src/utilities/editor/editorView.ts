@@ -21,7 +21,13 @@ type Pattern =
 			}
 	  }
 
-export async function editorView(args: { bundleId: string; context: vscode.ExtensionContext }) {
+export async function editorView(args: { bundleId: string }) {
+	const context = vscode.extensions.getExtension("inlang.vs-code-extension")?.exports.context
+	if (!context) {
+		console.error("Extension context is not available.")
+		return
+	}
+
 	const bundle = await getSelectedBundleByBundleIdOrAlias(args.bundleId)
 
 	if (!bundle) {
@@ -34,13 +40,13 @@ export async function editorView(args: { bundleId: string; context: vscode.Exten
 		vscode.ViewColumn.One,
 		{
 			enableScripts: true,
-			localResourceRoots: [vscode.Uri.file(args.context.extensionPath)],
+			localResourceRoots: [vscode.Uri.file(context.extensionPath)],
 		}
 	)
 
 	panel.webview.html = await getWebviewContent({
 		bundle,
-		context: args.context,
+		context: context,
 		webview: panel.webview,
 	})
 

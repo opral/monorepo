@@ -7,8 +7,8 @@ export const openEditorViewCommand = {
 	command: "sherlock.openEditorView",
 	title: "Sherlock: Open Editor View",
 	register: commands.registerCommand,
-	callback: async function (args: { bundleId: string; context: vscode.ExtensionContext }) {
-		await editorView({ bundleId: args.bundleId, context: args.context })
+	callback: async function (args: { bundleId: string }) {
+		await editorView({ bundleId: args.bundleId })
 
 		telemetry.capture({
 			event: "IDE-EXTENSION Editor View opened",
