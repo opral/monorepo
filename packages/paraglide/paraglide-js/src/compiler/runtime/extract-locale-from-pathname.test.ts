@@ -8,7 +8,7 @@ test("returns the locale from the path", async () => {
 	});
 
 	const path = "/en-US/about";
-	const locale = runtime.localeInPath(path);
+	const locale = runtime.extractLocaleFromPathname(path);
 	expect(locale).toBe("en-US");
 });
 
@@ -19,6 +19,6 @@ test("returns undefined if isLocale is false", async () => {
 	});
 
 	const path = "/en-US/about";
-	const locale = runtime.localeInPath(path);
+	const locale = runtime.extractLocaleFromPathname(path);
 	expect(locale).toBe(undefined);
 });
