@@ -13,14 +13,14 @@ import {
 	type UnknownRow,
 	OnConflictNode,
 } from "kysely";
-import type { SqliteDatabase } from "sqlite-wasm-kysely";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 export class JsonbPlugin implements KyselyPlugin {
 	#serializeJsonTransformer = new SerializeJsonbTransformer();
 	#parseJsonPlugin = new ParseJSONResultsPlugin();
-	#database: SqliteDatabase;
+	#database: SqliteWasmDatabase;
 
-	constructor(args: { database: SqliteDatabase }) {
+	constructor(args: { database: SqliteWasmDatabase }) {
 		this.#database = args.database;
 	}
 

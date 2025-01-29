@@ -3,14 +3,14 @@ import { state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
 import { getStringFromPattern } from "./query.js"
 import { escapeHtml } from "../utils.js"
-// TODO: Uncomment when bundle subscribe is implemented
-// import { throttle } from "throttle-debounce"
+import { throttle } from "throttle-debounce"
 import {
 	selectBundleNested,
 	type BundleNested,
 	type IdeExtensionConfig,
 	type InlangProject,
 } from "@inlang/sdk"
+import { pollQuery } from "../polling/pollQuery.js"
 
 export function createMessageWebviewProvider(args: {
 	context: vscode.ExtensionContext
@@ -23,7 +23,8 @@ export function createMessageWebviewProvider(args: {
 	let debounceTimer: NodeJS.Timeout | undefined
 
 	const updateMessages = async () => {
-		// Check if project is loaded
+		console.log("updateMessages")
+
 		const project = state().project as InlangProject | undefined
 		if (!project) {
 			isLoading = true
@@ -34,21 +35,18 @@ export function createMessageWebviewProvider(args: {
 		// Subscribe to messages just once for a project
 		if (subscribedToProjectPath !== state().selectedProjectPath) {
 			subscribedToProjectPath = state().selectedProjectPath
-			// TODO: Uncomment when bundle subscribe is implemented
-			// TODO unsubscribe
-			// TODO: implement polling mechanism
-			// pollQuery(() => selectBundleNested(project.db).execute()).subscribe((newBundles) => {
-			// 	bundles = newBundles
-			// 	isLoading = false
-			// 	updateWebviewContent()
-			// 	// throttledUpdateWebviewContent()
-			// })
-			// project.query.messages.getAll.subscribe((fetchedMessages: BundleNested[]) => {
-			// 	bundles = fetchedMessages ? [...fetchedMessages] : []
-			// 	isLoading = false
-			// 	throttledUpdateWebviewContent()
-			// })
+
+			updateWebviewContent() // Initial render
 		}
+
+		pollQuery(() => selectBundleNested(project.db).execute(), 2000).subscribe((newBundles) => {
+			// Only update if bundles have actually changed
+			if (JSON.stringify(bundles) !== JSON.stringify(newBundles)) {
+				bundles = newBundles
+				isLoading = false
+				updateWebviewContent() // Direct update instead of throttled
+			}
+		})
 	}
 
 	const debounceUpdate = () => {
@@ -66,6 +64,8 @@ export function createMessageWebviewProvider(args: {
 	}
 
 	const updateWebviewContent = async () => {
+		console.log("updateWebviewContent")
+
 		const activeEditor = vscode.window.activeTextEditor
 		const fileContent = activeEditor ? activeEditor.document.getText() : ""
 		const ideExtension = (await state().project.plugins.get()).find(
@@ -141,8 +141,7 @@ export function createMessageWebviewProvider(args: {
 		}
 	}
 
-	// TODO: Uncomment when bundle subscribe is implemented
-	// const throttledUpdateWebviewContent = throttle(500, updateWebviewContent)
+	const throttledUpdateWebviewContent = throttle(500, updateWebviewContent)
 
 	let webviewView: vscode.WebviewView | undefined
 
@@ -480,9 +479,25 @@ export async function getTranslationsTableHtml(args: {
 
 			const editCommand = `openEditorView('${args.bundle.id}')`
 
+			// Create a readable string from variant matches
+			const variantLabel = variant.matches
+				? variant.matches
+						.map((match) => {
+							if (match.type === "literal-match") {
+								return match.value
+							}
+							if (match.type === "catchall-match") {
+								return "*"
+							}
+							return ""
+						})
+						.filter(Boolean)
+						.join(", ")
+				: undefined
+
 			return `
 				<div class="section">
-					<span class="languageTag"><strong>${escapeHtml(locale)} - Variant ${index + 1}</strong></span>
+					<span class="languageTag"><strong>${escapeHtml(locale)}${escapeHtml(variantLabel ? ` - ${variantLabel}` : "")}</strong></span>
 					<span class="message"><button onclick="${editCommand}">${escapeHtml(pattern)}</button></span>
 					<span class="actionButtons">
 						<button title="Edit" onclick="${editCommand}"><span class="codicon codicon-edit"></span></button>

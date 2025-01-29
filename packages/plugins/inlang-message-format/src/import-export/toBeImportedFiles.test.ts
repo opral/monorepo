@@ -63,3 +63,34 @@ test("toBeImportedFiles should work with languageTag as setting for backward com
     },
   ]);
 });
+
+test("toBeImportedFiles should work with both locale and languageTag and multiple pathPatterns", async () => {
+  const result = await toBeImportedFiles({
+    settings: {
+      baseLocale: "en",
+      locales: ["en", "de"],
+      "plugin.inlang.messageFormat": {
+        pathPattern: ["/defaults/{locale}.json", "/translations/{locale}.json"],
+      },
+    },
+  });
+
+  expect(result).toEqual([
+    {
+      locale: "en",
+      path: "/defaults/en.json",
+    },
+    {
+      locale: "de",
+      path: "/defaults/de.json",
+    },
+    {
+      locale: "en",
+      path: "/translations/en.json",
+    },
+    {
+      locale: "de",
+      path: "/translations/de.json",
+    },
+  ]);
+});

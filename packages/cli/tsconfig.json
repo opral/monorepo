@@ -1,5 +1,5 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "@opral/tsconfig/default",
   "include": ["src/**/**.ts"],
   "compilerOptions": {
     "target": "ES2021",

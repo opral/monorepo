@@ -18,9 +18,14 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 
   for (const message of messages) {
     const bundle = bundles.find((b) => b.id === message.bundleId);
-    const variantsOfMessage = variants.filter(
-      (v) => v.messageId === message.id,
-    );
+    const variantsOfMessage = [
+      ...variants
+        .reduce((r, v) => {
+          if (v.messageId === message.id) r.set(JSON.stringify(v.matches), v);
+          return r;
+        }, new Map<string, (typeof variants)[number]>())
+        .values(),
+    ];
     files[message.locale] = {
       ...files[message.locale],
       ...serializeMessage(bundle!, message, variantsOfMessage),
@@ -31,13 +36,21 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 
   for (const locale in files) {
     result.push({
-      locale,
-      // beautify the json
-      content: new TextEncoder().encode(
-        JSON.stringify(files[locale], undefined, "\t"),
-      ),
-      name: locale + ".json",
-    });
+			locale,
+			// beautify the json
+			content: new TextEncoder().encode(
+				JSON.stringify(
+					{
+						// increase DX by providing auto complete in IDEs
+						$schema: "https://inlang.com/schema/inlang-message-format",
+						...files[locale],
+					},
+					undefined,
+					"\t"
+				)
+			),
+			name: locale + ".json",
+		});
   }
 
   return result;
