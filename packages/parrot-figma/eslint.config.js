@@ -1,28 +1,45 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
+import pluginJs from "@eslint/js";
+import tseslint from "typescript-eslint";
+import globals from "globals";
 
-export default tseslint.config(
-  { ignores: ['dist'] },
-  {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ['**/*.{ts,tsx}'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+export default [
+	pluginJs.configs.recommended,
+	...tseslint.configs.recommended,
+	{
+        languageOptions: {
+            ecmaVersion: 2022,
+            sourceType: "module",
+            globals: {
+                ...globals.browser,
+                ...globals.node,
+                myCustomGlobal: "readonly"
+            }
+        }
+        // ...other config
     },
-    plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
+	{
+		files: ["**/*.{js,ts,tsx}"],
+		rules: {
+			"@typescript-eslint/no-explicit-any": "off",
+			"@typescript-eslint/no-unused-vars": "off",
+			"no-restricted-imports": [
+				"error",
+				{
+					name: "@lix-js/sdk",
+					message:
+						"Importing from the compiled dist is not allowed (and you likely did this by accident). Import from source directly instead e.g. `./file.js`",
+				},
+			],
+		},
+	},
+	{
+		files: ["**/*.test.ts"],
+		rules: {
+			// any makes testing sometimes easier
+			"@typescript-eslint/no-explicit-any": "off",
+		},
+	},
+	{
+        ignores: ["dist/*", "dist/**", "snippets"]
     },
-    rules: {
-      ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
-    },
-  },
-)
+];

@@ -1,23 +1,22 @@
 {
   "compilerOptions": {
+    "sourceMap": true,
     "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "Node",
-    "useDefineForClassFields": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
+		// strict ES module
+		"module": "ES2022",
+		// strict ES module
+		"moduleResolution": "Bundler",
+
     "resolveJsonModule": true,
-    "isolatedModules": false,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "typeRoots": ["./node_modules/@figma"],
-    "paths": {
-      "@common/*": ["./src/common/*"],
-      "@ui/*": ["./src/ui/*"],
-      "@plugin/*": ["./src/plugin/*"]
-    }
+    "jsx": "react",
+    "noImplicitThis": false,
+    "allowSyntheticDefaultImports": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules/@figma"
+    ],
   },
-  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "manifest.figma.ts"],
+  "exclude": ["snipets/**"]
 }
