@@ -160,6 +160,7 @@ describe("Message Webview Provider Tests", () => {
 							},
 						],
 					},
+					// German translation is missing (to test the "missing" message)
 				],
 			},
 			workspaceFolder: {
@@ -237,7 +238,6 @@ describe("Message Webview Provider Tests", () => {
 		// Creating the complete webview HTML
 		const html = getHtml({
 			mainContent: "<div>Main Content</div>",
-			context,
 			webview,
 		})
 

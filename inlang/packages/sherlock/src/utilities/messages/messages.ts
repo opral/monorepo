@@ -13,8 +13,8 @@ import {
 import { pollQuery } from "../polling/pollQuery.js"
 
 export function createMessageWebviewProvider(args: {
-	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
+	context: vscode.ExtensionContext
 }) {
 	let bundles: BundleNested[] | undefined
 	let isLoading = true
@@ -135,7 +135,6 @@ export function createMessageWebviewProvider(args: {
 		if (webviewView) {
 			webviewView.webview.html = getHtml({
 				mainContent: mainContentHtml,
-				context: args.context,
 				webview: webviewView.webview,
 			})
 		}
@@ -158,11 +157,6 @@ export function createMessageWebviewProvider(args: {
 					if (message.command === "executeCommand") {
 						const commandName = message.commandName
 						const commandArgs = message.commandArgs
-
-						// Add context to openEditorView command
-						if (commandName === "sherlock.openEditorView") {
-							commandArgs.context = args.context
-						}
 
 						vscode.commands.executeCommand(commandName, commandArgs)
 					}
@@ -285,19 +279,21 @@ export function createMessagesLoadingHtml(): string {
 			</div>`
 }
 
-export function getHtml(args: {
-	mainContent: string
-	context: vscode.ExtensionContext
-	webview: vscode.Webview
-}): string {
+export function getHtml(args: { mainContent: string; webview: vscode.Webview }): string {
+	const context = vscode.extensions.getExtension("inlang.vs-code-extension")?.exports.context
+	if (!context) {
+		console.error("Extension context is not available.")
+		return ""
+	}
+
 	const styleUri = args.webview.asWebviewUri(
-		vscode.Uri.joinPath(args.context.extensionUri, "assets", "styles.css")
+		vscode.Uri.joinPath(context.extensionUri, "assets", "styles.css")
 	)
 	const codiconsUri = args.webview.asWebviewUri(
-		vscode.Uri.joinPath(args.context.extensionUri, "assets", "codicon.css")
+		vscode.Uri.joinPath(context.extensionUri, "assets", "codicon.css")
 	)
 	const codiconsTtfUri = args.webview.asWebviewUri(
-		vscode.Uri.joinPath(args.context.extensionUri, "assets", "codicon.ttf")
+		vscode.Uri.joinPath(context.extensionUri, "assets", "codicon.ttf")
 	)
 
 	return `
@@ -511,11 +507,13 @@ export async function getTranslationsTableHtml(args: {
 }
 
 export async function messageView(args: {
-	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
+	context: vscode.ExtensionContext
 }) {
-	const provider = createMessageWebviewProvider({ ...args })
-
+	const provider = createMessageWebviewProvider({
+		workspaceFolder: args.workspaceFolder,
+		context: args.context,
+	})
 	args.context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider("messageView", provider)
 	)
