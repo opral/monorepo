@@ -15,31 +15,30 @@
  * @type {(args: { pathname: string, headers: Record<string, string>, cookies: Record<string, string> }) => Locale}
  */
 export const detectLocaleFromRequest = (args) => {
-	const strat = strategy[0];
+	/** @type {string|undefined} */
+	let locale;
 
-	if (strat === "cookie") {
-		return assertIsLocale(
-			args.cookies[/** @type {any} */ (strategy).cookieName] ?? baseLocale
-		);
+	for (const strat of strategy) {
+		if (strat === "cookie") {
+			locale = args.cookies[cookieName];
+		} else if (strat === "pathname") {
+			locale = localeInPath(args.pathname);
+		} else if (strat === "custom") {
+			throw new Error(
+				"Custom strategy is not supported for detectLocaleFromRequest"
+			);
+		} else if (strat === "variable") {
+			locale = _localeVariable;
+		} else if (strat === "baseLocale") {
+			return baseLocale;
+		} else {
+			throw new Error(`Unsupported strategy: ${strat}`);
+		}
+		if (locale !== undefined) {
+			return assertIsLocale(locale);
+		}
 	}
-
-	if (strat === "pathname") {
-		return assertIsLocale(localeInPath(args.pathname) ?? baseLocale);
-	}
-
-	if (strat === "custom") {
-		throw new Error(
-			"Custom strategy is not supported for detectLocaleFromRequest"
-		);
-	}
-
-	if (strat === "variable") {
-		return _localeVariable;
-	}
-
-	if (strat === "baseLocale") {
-		return baseLocale;
-	}
-
-	throw new Error(`Unsupported strategy: ${strat}`);
+	throw new Error(
+		"No locale found. There is an error in your strategy. Try adding 'baseLocale' as the very last strategy."
+	);
 };
