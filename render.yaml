@@ -247,7 +247,7 @@ services:
    runtime: static
    autoDeploy: true
    # TODO replace with main when we deploy parrot-figma in prod
-   branch: figma-prod
+   branch: add-parrot-figma
    staticPublishPath: ./inlang/packages/parrot-figma/dist
    # buildCommand: pnpm install && pnpm run --filter csv-app... build
    buildCommand: pnpm install && pnpm run --filter @inlang/parrot-figma... build 
