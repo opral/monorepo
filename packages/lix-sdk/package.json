@@ -1,7 +1,7 @@
 {
 	"name": "@lix-js/sdk",
 	"type": "module",
-	"version": "0.3.3",
+	"version": "0.3.5",
 	"license": "Apache-2.0",
 	"exports": {
 		".": "./dist/index.js"
@@ -37,6 +37,7 @@
 		"uuid": "^10.0.0"
 	},
 	"devDependencies": {
+		"@opral/tsconfig": "workspace:*",
 		"@eslint/js": "^9.12.0",
 		"@types/uuid": "^10.0.0",
 		"@vitest/coverage-v8": "2.0.5",

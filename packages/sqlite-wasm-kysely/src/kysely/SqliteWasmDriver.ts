@@ -1,14 +1,14 @@
 import { CompiledQuery, DatabaseConnection, Driver } from "kysely";
-import { Database } from "@eliaspourquoi/sqlite-node-wasm";
 import { SqliteWasmDialectConfig } from "./SqliteWasmDialectConfig.js";
 import { ConnectionMutex } from "./ConnectionMutex.js";
 import { SqliteWasmConnection } from "./SqliteWasmConnection.js";
+import { SqliteWasmDatabase } from "../util/createInMemoryDatabase.js";
 
 export class SqliteWasmDriver implements Driver {
   readonly #config: SqliteWasmDialectConfig;
   readonly #connectionMutex = new ConnectionMutex();
 
-  #db?: Database;
+  #db?: SqliteWasmDatabase;
   #connection?: DatabaseConnection;
 
   constructor(config: SqliteWasmDialectConfig) {

@@ -1,11 +1,10 @@
 import { CompiledQuery, DatabaseConnection, QueryResult } from "kysely";
-import { Database } from "@eliaspourquoi/sqlite-node-wasm";
-import { sqliteModule } from "./sqliteModule.js";
+import { SqliteWasmDatabase } from "../util/createInMemoryDatabase.js";
 
 export class SqliteWasmConnection implements DatabaseConnection {
-  readonly #db: Database;
+  readonly #db: SqliteWasmDatabase;
 
-  constructor(db: Database) {
+  constructor(db: SqliteWasmDatabase) {
     this.#db = db;
   }
 
@@ -31,7 +30,9 @@ export class SqliteWasmConnection implements DatabaseConnection {
       columnNames: statementData.columns,
     });
 
-    const lastInsertId = sqliteModule?.capi.sqlite3_last_insert_rowid(this.#db);
+    const lastInsertId = this.#db.sqlite3.capi.sqlite3_last_insert_rowid(
+      this.#db,
+    );
 
     // check if we had changes in the db at all - if so - collect the number of changes
     const changes =

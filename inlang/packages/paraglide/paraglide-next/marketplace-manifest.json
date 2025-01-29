@@ -1,0 +1,60 @@
+{
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
+	"id": "library.inlang.paraglideJsAdapterNextJs",
+	"slug": "paraglide-next-i18n",
+	"icon": "./assets/next-logo.svg",
+	"gallery": ["./assets/og.png"],
+	"displayName": {
+		"en": "Paraglide-Next"
+	},
+	"description": {
+		"en": "A NextJS integration for ParaglideJS, providing you with everything you need for i18n routing"
+	},
+	"pages": {
+		"Setup": {
+			"/": "./docs/why-paraglide-next.md",
+			"/get-started": "./README.md"
+		},
+		"Localised Routing": {
+			"/localized-routing/overview": "./docs/routing/overview.md",
+			"/localized-routing/prefix-strategy": "./docs/routing/prefix-strategy.md",
+			"/localized-routing/other-strategies": "./docs/routing/other-strategies.md"
+		},
+		"Advanced Usage": {
+			"/advanced/seo": "./docs/advanced/seo.md",
+			"/advanced/usage-on-the-server": "./docs/advanced/server.md"
+		},
+		"Appendix": {
+			"/pages-router": "./docs/pages-router.md",
+			"/manual-setup": "./docs/manual-setup.md",
+			"Vanilla ParaglideJS": "/m/gerre34r/library-inlang-paraglideJs",
+			"/roadmap": "./docs/roadmap.md",
+			"/changelog": "./CHANGELOG.md"
+		}
+	},
+	"keywords": [
+		"paraglide js",
+		"libraries",
+		"website",
+		"developer",
+		"paraglide",
+		"i18n",
+		"library",
+		"localization",
+		"sdk",
+		"sdk-js",
+		"next",
+		"next-js",
+		"react",
+		"vercel",
+		"vite",
+		"javascript",
+		"typescript",
+		"inlang"
+	],
+	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0",
+	"pricing": "Free"
+}

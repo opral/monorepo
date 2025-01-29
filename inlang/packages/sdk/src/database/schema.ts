@@ -1,12 +1,12 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
-import type { SqliteDatabase } from "sqlite-wasm-kysely";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import {
 	Declaration,
 	Pattern,
 	VariableReference,
 } from "../json-schema/pattern.js";
 
-export function applySchema(args: { sqlite: SqliteDatabase }) {
+export function applySchema(args: { sqlite: SqliteWasmDatabase }) {
 	const foreignKeyActivated: any = args.sqlite.exec("PRAGMA foreign_keys", {
 		returnValue: "resultRows",
 	});

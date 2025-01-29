@@ -1,0 +1,13 @@
+{
+	"extends": "@opral/tsconfig/default",
+	"include": ["src/**/*.js", "src/**/*.ts"],
+	"compilerOptions": {
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"declaration": true,
+		"sourceMap": false,
+		"checkJs": true,
+		"allowJs": true,
+		"skipLibCheck": true
+	}
+}

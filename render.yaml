@@ -9,10 +9,10 @@ services:
     type: web
     runtime: static
     autoDeploy: true
-    staticPublishPath: ./opral/source-code/website
+    staticPublishPath: packages/opral-website
     buildFilter:
       paths:
-        - opral/source-code/website/**
+        - packages/opral-website/**
     domains:
       - opral.com
 
@@ -241,3 +241,29 @@ services:
         - ./packages/markdown-wc/**
     domains:
       - markdown-wc.opral.com
+
+  - name: parrot-figma
+    type: web
+    runtime: static
+    autoDeploy: true
+    # TODO replace with main when we deploy parrot-figma in prod
+    branch: add-parrot-figma
+    staticPublishPath: ./inlang/packages/parrot-figma/dist
+    # buildCommand: pnpm install && pnpm run --filter csv-app... build
+    buildCommand: pnpm install && pnpm run --filter @inlang/parrot-figma... build 
+    buildFilter:
+      paths:
+        - ./inlang/packages/parrot-figma/**
+    envVars:
+      - fromGroup: production
+    headers:
+      # add headers for cors
+      - path: "/*"
+        name: Access-Control-Allow-Origin
+        value: "*"
+      - path: "/*"
+        name: Access-Control-Allow-Methods
+        value: GET, OPTIONS
+      - path: "/*"
+        name: Access-Control-Allow-Headers
+        value: Content-Type

@@ -1,4 +1,4 @@
-import type { SqliteDatabase } from "sqlite-wasm-kysely";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { LixDatabaseSchema, Snapshot } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import {
@@ -10,7 +10,7 @@ import { createChange } from "../change/create-change.js";
 import { executeSync } from "../database/execute-sync.js";
 
 export function applyOwnChangeControlTriggers(
-	sqlite: SqliteDatabase,
+	sqlite: SqliteWasmDatabase,
 	db: Kysely<LixDatabaseSchema>
 ): void {
 	const tableInfos: Record<string, PragmaTableInfo> = {};
@@ -85,7 +85,7 @@ export function applyOwnChangeControlTriggers(
 
 function handleLixOwnEntityChange(
 	db: Kysely<LixDatabaseSchema>,
-	sqlite: SqliteDatabase,
+	sqlite: SqliteWasmDatabase,
 	tableName: keyof typeof changeControlledTableIds,
 	tableInfos: Record<keyof typeof changeControlledTableIds, PragmaTableInfo>,
 	operation: "insert" | "update" | "delete",

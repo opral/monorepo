@@ -4,7 +4,7 @@
     "tag": "latest"
   },
   "name": "sqlite-wasm-kysely",
-  "version": "0.1.1",
+  "version": "0.3.0",
   "type": "module",
   "exports": {
     ".": "./dist/index.js"
@@ -20,7 +20,7 @@
     "format": "prettier . --write"
   },
   "dependencies": {
-    "@eliaspourquoi/sqlite-node-wasm": "^3.46.0-build2"
+    "@sqlite.org/sqlite-wasm": "^3.48.0-build2"
   },
   "devDependencies": {
     "kysely": "^0.27.4",

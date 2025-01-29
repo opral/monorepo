@@ -1,6 +1,6 @@
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { loadPlugins } from "../plugin/load-plugin.js";
-import { type SqliteDatabase } from "sqlite-wasm-kysely";
+import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { initFileQueueProcess } from "../file-queue/file-queue-process.js";
 import { sql, type Kysely } from "kysely";
@@ -22,7 +22,7 @@ export type Lix = {
 	 * results like parsing json (similar to the db API)
 	 * is not guaranteed.
 	 */
-	sqlite: SqliteDatabase;
+	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixDatabaseSchema>;
 	plugin: {
 		getAll: () => Promise<LixPlugin[]>;
@@ -43,7 +43,7 @@ export async function openLix(args: {
 	 *   const lix = await openLix({ account })
 	 */
 	account?: Account;
-	database: SqliteDatabase;
+	database: SqliteWasmDatabase;
 	/**
 	 * Usecase are lix apps that define their own file format,
 	 * like inlang (unlike a markdown, csv, or json plugin).

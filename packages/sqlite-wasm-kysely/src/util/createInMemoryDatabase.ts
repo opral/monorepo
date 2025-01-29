@@ -1,4 +1,11 @@
-// @ts-ignore
+import sqlite3InitModule, {
+  Database,
+  Sqlite3Static,
+} from "@sqlite.org/sqlite-wasm";
+import { wasmBinary } from "./sqliteWasmBinary.js";
+
+// https://github.com/opral/lix-sdk/issues/231
+// @ts-expect-error -  globalThis
 globalThis.sqlite3ApiConfig = {
   warn: (message: string, details: any) => {
     if (message === "Ignoring inability to install OPFS sqlite3_vfs:") {
@@ -9,34 +16,38 @@ globalThis.sqlite3ApiConfig = {
   },
 };
 
-import sqlite3InitModule from "@eliaspourquoi/sqlite-node-wasm";
+export type SqliteWasmDatabase = Database & {
+  /**
+   * The sqlite3 module used to create the database.
+   *
+   * Use this API to access the sqlite3 module directly.
+   */
+  sqlite3: Sqlite3Static;
+};
 
-import { setSqliteModule, sqliteModule } from "../kysely/sqliteModule.js";
-import { wasmBinary } from "./sqliteWasmBinary.js";
+let sqlite3: Sqlite3Static;
 
 export const createInMemoryDatabase = async ({
   readOnly = false,
 }: {
   readOnly?: boolean;
-}) => {
-  if (!sqliteModule) {
-    await initSqlite();
+}): Promise<SqliteWasmDatabase> => {
+  if (sqlite3 === undefined) {
+    // avoiding a top level await by initializing the module here
+    sqlite3 = await sqlite3InitModule({
+      // @ts-expect-error
+      wasmBinary: wasmBinary,
+      // https://github.com/opral/inlang-sdk/issues/170#issuecomment-2334768193
+      locateFile: () => "sqlite3.wasm",
+    });
   }
   const flags = [
     readOnly ? "r" : "cw", // read and write
     "", // non verbose
   ].join("");
 
-  return new sqliteModule.oo1.DB(":memory:", flags);
+  const db = new sqlite3.oo1.DB(":memory:", flags);
+  // @ts-expect-error - assigning new type
+  db.sqlite3 = sqlite3;
+  return db as SqliteWasmDatabase;
 };
-
-async function initSqlite() {
-  setSqliteModule(
-    await sqlite3InitModule({
-      // @ts-expect-error
-      wasmBinary: wasmBinary,
-      // https://github.com/opral/inlang-sdk/issues/170#issuecomment-2334768193
-      locateFile: () => "sqlite3.wasm",
-    }),
-  );
-}

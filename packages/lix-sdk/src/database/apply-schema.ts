@@ -1,4 +1,4 @@
-import type { SqliteDatabase } from "sqlite-wasm-kysely";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { applyAccountDatabaseSchema } from "../account/database-schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value/database-schema.js";
 import { applyMutationLogDatabaseSchema } from "./mutation-log/database-schema.js";
@@ -6,7 +6,9 @@ import { applyMutationLogDatabaseSchema } from "./mutation-log/database-schema.j
 /**
  * Applies the database schema to the given sqlite database.
  */
-export function applySchema(args: { sqlite: SqliteDatabase }): SqliteDatabase {
+export function applySchema(args: {
+	sqlite: SqliteWasmDatabase;
+}): SqliteWasmDatabase {
 	applyAccountDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
 

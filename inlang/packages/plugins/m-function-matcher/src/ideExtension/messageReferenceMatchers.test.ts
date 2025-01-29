@@ -19,6 +19,23 @@ describe("Paraglide Message Parser", () => {
     ]);
   });
 
+  it("should match simple named import m function call", () => {
+    const sourceCode = `
+		import { m } from "../../i18n-generated/messages";
+		m.helloWorld();
+		`;
+    const result = parse(sourceCode);
+    expect(result).toEqual([
+      {
+        messageId: "helloWorld",
+        position: {
+          start: { line: 3, character: 5 },
+          end: { line: 3, character: 17 },
+        },
+      },
+    ]);
+  });
+
   // it should match minified m function call
   it("should match minified m function call", () => {
     const sourceCode = `

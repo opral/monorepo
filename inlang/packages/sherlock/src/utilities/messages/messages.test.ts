@@ -160,7 +160,6 @@ describe("Message Webview Provider Tests", () => {
 							},
 						],
 					},
-					// German translation is missing (to test the "missing" message)
 				],
 			},
 			workspaceFolder: {
@@ -168,11 +167,12 @@ describe("Message Webview Provider Tests", () => {
 			} as vscode.WorkspaceFolder,
 		})
 
-		// Validate that the translations table contains the expected structure
-		expect(html).toContain("en - Variant 1") // English variant
-		expect(html).toContain("Hello") // English message content
-		expect(html).toContain("de") // German translation section
-		expect(html).toContain("[missing]") // Missing German translation
+		// Update assertions to match new HTML structure
+		expect(html).toContain('<span class="languageTag"><strong>en</strong></span>')
+		expect(html).toContain("<button onclick=\"openEditorView('message-id')\">Hello</button>")
+		expect(html).toContain('<span class="languageTag"><strong>de</strong></span>')
+		expect(html).toContain("[missing]")
+		expect(html).toContain("codicon-sparkle") // Machine translation button
 	})
 
 	it("should handle cases where there are no translations", async () => {
