@@ -79,7 +79,9 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 					// Get the message from the bundle
 					const message = _bundle?.messages.find((m) => m.locale === baseLocale)
 
-					const variant = message?.variants.find((v) => v.matches.length === 0)
+					const variant =
+						message?.variants.find((v) => v.matches.some((m) => m.type === "catchall-match")) ||
+						message?.variants[0]
 
 					const previewLocale = await getPreviewLocale()
 					const translationLocale = previewLocale.length ? previewLocale : baseLocale
@@ -166,7 +168,12 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 	)
 
 	// update decorations, when message was edited / extracted
-	CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => updateDecorations())
+	CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => {
+		console.log("ON_DID_EDIT_MESSAGE")
+
+		updateDecorations()
+	})
+
 	CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => updateDecorations())
 	CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.event(() => updateDecorations())
 	CONFIGURATION.EVENTS.ON_DID_PREVIEW_LOCALE_CHANGE.event(() => updateDecorations())
