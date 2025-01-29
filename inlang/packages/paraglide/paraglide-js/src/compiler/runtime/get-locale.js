@@ -1,7 +1,7 @@
 import { assertIsLocale } from "./assert-is-locale.js";
 import { baseLocale } from "./base-locale.js";
 import { cookieName } from "./cookie-name.js";
-import { localeInPath } from "./locale-in-path.js";
+import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
 import { strategy } from "./strategy.js";
 
 /**
@@ -33,13 +33,13 @@ export let getLocale = () => {
 
 	for (const strat of strategy) {
 		if (strat === "cookie") {
-			locale = getLocaleFromCookie();
+			locale = extractLocaleFromCookie();
 		}
 		if (strat === "baseLocale") {
 			locale = baseLocale;
 		}
 		if (strat === "pathname") {
-			locale = localeInPath(window.location.pathname) ?? baseLocale;
+			locale = extractLocaleFromPathname(window.location.pathname);
 		}
 		if (strat === "variable") {
 			locale = _locale;
@@ -56,7 +56,7 @@ export let getLocale = () => {
 	throw new Error("No locale found. There is an error in your strategy.");
 };
 
-function getLocaleFromCookie() {
+function extractLocaleFromCookie() {
 	const match = document.cookie.match(new RegExp(`(^| )${cookieName}=([^;]+)`));
 	return match?.[2];
 }

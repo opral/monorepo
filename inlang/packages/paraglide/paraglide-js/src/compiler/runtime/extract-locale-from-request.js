@@ -1,14 +1,14 @@
 import { assertIsLocale } from "./assert-is-locale.js";
 import { baseLocale } from "./base-locale.js";
 import { cookieName } from "./cookie-name.js";
-import { localeInPath } from "./locale-in-path.js";
+import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
 import { strategy } from "./strategy.js";
 
 /**
  * Detect a locale from a request.
  *
  * @example
- *   const locale = detectLocaleFromRequest({
+ *   const locale = extractLocaleFromRequest({
  *      pathname: '/en/home',
  *      headers: {
  *        'accept-language': 'en'
@@ -20,7 +20,7 @@ import { strategy } from "./strategy.js";
  *
  * @type {(args: { pathname: string, headers: Record<string, string>, cookies: Record<string, string> }) => Locale}
  */
-export const detectLocaleFromRequest = (args) => {
+export const extractLocaleFromRequest = (args) => {
 	/** @type {string|undefined} */
 	let locale;
 
@@ -28,7 +28,7 @@ export const detectLocaleFromRequest = (args) => {
 		if (strat === "cookie") {
 			locale = args.cookies[cookieName];
 		} else if (strat === "pathname") {
-			locale = localeInPath(args.pathname);
+			locale = extractLocaleFromPathname(args.pathname);
 		} else if (strat === "custom") {
 			throw new Error(
 				"Custom strategy is not supported for detectLocaleFromRequest"

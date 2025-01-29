@@ -1,6 +1,6 @@
 import { baseLocale } from "./base-locale.js";
 import { getLocale } from "./get-locale.js";
-import { localeInPath } from "./locale-in-path.js";
+import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
 
 /**
  * Localizes the given path.
@@ -32,7 +32,7 @@ import { localeInPath } from "./locale-in-path.js";
  */
 export function localizePath(path, options) {
 	const locale = options?.locale ?? getLocale();
-	const hasLocale = localeInPath(path);
+	const hasLocale = extractLocaleFromPathname(path);
 	const pathWithoutLocale = hasLocale
 		? "/" + path.split("/").slice(2).join("/")
 		: path;
