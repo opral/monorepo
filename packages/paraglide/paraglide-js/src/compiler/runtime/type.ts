@@ -1,10 +1,12 @@
+import type { CompilerOptions } from "../compile.js";
+
 /**
  * The Paraglide runtime API.
  */
 export type Runtime = {
 	baseLocale: Locale;
 	locales: Readonly<Locale[]>;
-	strategy: Readonly<string[]>;
+	strategy: NonNullable<CompilerOptions["strategy"]>;
 	cookieName: string;
 	getLocale: () => string;
 	setLocale: (newLocale: Locale) => void;
