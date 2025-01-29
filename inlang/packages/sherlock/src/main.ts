@@ -15,7 +15,7 @@ import { gettingStartedView } from "./utilities/getting-started/gettingStarted.j
 import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
 import { recommendationBannerView } from "./utilities/recommendation/recommendation.js"
 import { telemetry } from "./services/telemetry/index.js"
-import { version } from "../package.json"
+import packageJson from "../package.json"
 import { statusBar } from "./utilities/settings/statusBar.js"
 import fg from "fast-glob"
 import type { IdeExtensionConfig } from "@inlang/sdk"
@@ -24,7 +24,9 @@ import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
-export async function activate(context: vscode.ExtensionContext): Promise<void> {
+export async function activate(
+	context: vscode.ExtensionContext
+): Promise<{ context: vscode.ExtensionContext } | undefined> {
 	// Sentry Error Handling
 	//initErrorMonitoring()
 
@@ -42,7 +44,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			event: "IDE-EXTENSION activated",
 			properties: {
 				vscode_version: vscode.version,
-				version,
+				version: packageJson.version,
 				platform: process.platform,
 			},
 		})
@@ -52,9 +54,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		await setProjects({ workspaceFolder })
 		await main({ context, workspaceFolder, fs: mappedFs })
 
-		msg("Sherlock activated", "info")
+		return { context }
 	} catch (error) {
 		handleError(error)
+		return
 	}
 }
 
