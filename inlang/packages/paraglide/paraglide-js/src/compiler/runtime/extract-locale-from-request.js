@@ -8,27 +8,23 @@ import { strategy } from "./strategy.js";
  * Detect a locale from a request.
  *
  * @example
- *   const locale = extractLocaleFromRequest({
- *      pathname: '/en/home',
- *      headers: {
- *        'accept-language': 'en'
- *      },
- *      cookies: {
- *        'PARAGLIDE_LOCALE': 'fr'
- *      }
- *   });
+ *   const locale = extractLocaleFromRequest(request);
  *
- * @type {(args: { pathname: string, headers: Record<string, string>, cookies: Record<string, string> }) => Locale}
+ * @type {(request: Request) => Locale}
  */
-export const extractLocaleFromRequest = (args) => {
+export const extractLocaleFromRequest = (request) => {
 	/** @type {string|undefined} */
 	let locale;
 
 	for (const strat of strategy) {
 		if (strat === "cookie") {
-			locale = args.cookies[cookieName];
+			locale = request.headers
+				.get("cookie")
+				?.split("; ")
+				.find((c) => c.startsWith(cookieName + "="))
+				?.split("=")[1];
 		} else if (strat === "pathname") {
-			locale = extractLocaleFromPathname(args.pathname);
+			locale = extractLocaleFromPathname(new URL(request.url).pathname);
 		} else if (strat === "custom") {
 			throw new Error(
 				"Custom strategy is not supported for detectLocaleFromRequest"
