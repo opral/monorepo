@@ -15,7 +15,7 @@ export const defaultCompilerOptions = {
 	includeEslintDisableComment: true,
 	isServer: "false",
 	emitPrettierIgnore: true,
-	strategy: ["variable"],
+	strategy: ["cookie", "baseLocale"],
 	cookieName: "PARAGLIDE_LOCALE",
 } as const satisfies Partial<CompilerOptions>;
 
@@ -46,7 +46,7 @@ export type CompilerOptions = {
 	 *
 	 * @example ['pathname', 'cookie', 'baseLocale']
 	 *
-	 * @default ['variable']
+	 * @default ["cookie", "baseLocale"]
 	 */
 	strategy?: Runtime["strategy"];
 	/**

@@ -50,7 +50,7 @@ export let setLocale = (newLocale) => {
 	} else {
 		throw new Error("Unknown strategy");
 	}
-	if (isServer === false) {
+	if (!isServer) {
 		// Reload the page to render the new locale
 		//
 		// If the behavior is not desired, the implementation
