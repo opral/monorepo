@@ -1,3 +1,7 @@
+import { baseLocale } from "./base-locale.js";
+import { getLocale } from "./get-locale.js";
+import { localeInPath } from "./locale-in-path.js";
+
 /**
  * Localizes the given path.
  *

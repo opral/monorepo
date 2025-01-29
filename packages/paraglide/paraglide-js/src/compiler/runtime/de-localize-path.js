@@ -1,3 +1,5 @@
+import { localeInPath } from "./locale-in-path.js";
+
 /**
  * De-localizes the given localized path.
  *

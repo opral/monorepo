@@ -1,3 +1,5 @@
+import { locales } from "./locales.js";
+
 /**
  * Check if something is an available locale.
  *

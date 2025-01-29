@@ -1,15 +1,13 @@
-import type { CompilerOptions } from "../compile.js";
-
 /**
  * The Paraglide runtime API.
  */
 export type Runtime = {
 	baseLocale: Locale;
 	locales: Readonly<Locale[]>;
-	strategy: NonNullable<CompilerOptions["strategy"]>;
-	cookieName: string;
-	getLocale: () => string;
-	setLocale: (newLocale: Locale) => void;
+	strategy: typeof import("./strategy.js").strategy;
+	cookieName: typeof import("./cookie-name.js").cookieName;
+	getLocale: typeof import("./get-locale.js").getLocale;
+	setLocale: typeof import("./set-locale.js").setLocale;
 	defineGetLocale: (fn: () => Locale) => void;
 	defineSetLocale: (fn: (newLocale: Locale) => void) => void;
 	assertIsLocale: typeof import("./assert-is-locale.js").assertIsLocale;

@@ -7,11 +7,13 @@ import {
 	getLocalAccount,
 	saveLocalAccount,
 } from "../services/account/index.js";
+import type { Runtime } from "./runtime/type.js";
 
 export const defaultCompilerOptions = {
 	outputStructure: "message-modules",
 	emitGitIgnore: true,
 	includeEslintDisableComment: true,
+	isServer: "false",
 	emitPrettierIgnore: true,
 	strategy: ["variable"],
 	cookieName: "PARAGLIDE_LOCALE",
@@ -46,9 +48,7 @@ export type CompilerOptions = {
 	 *
 	 * @default ['variable']
 	 */
-	strategy?: Array<
-		"pathname" | "cookie" | "baseLocale" | "custom" | "variable"
-	>;
+	strategy?: Runtime["strategy"];
 	/**
 	 * The name of the cookie to use for the cookie strategy.
 	 *
@@ -82,6 +82,21 @@ export type CompilerOptions = {
 	 * @default true
 	 */
 	emitGitIgnore?: boolean;
+	/**
+	 * Boolean expression that determines if the code is running in a server environment.
+	 *
+	 * The isServer condition is used to avoid calling browser based APIs. Make sure
+	 * that your bundler can tree-shake the expression.
+	 *
+	 * @example
+	 *   isServer: 'process.env.NODE_ENV === "production"'
+	 *
+	 * @example
+	 *   isServer: 'import.meta.env.SSR'
+	 *
+	 * @default 'false'
+	 */
+	isServer?: string;
 	/**
 	 * The file-structure of the compiled output.
 	 *

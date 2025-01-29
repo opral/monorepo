@@ -1,3 +1,5 @@
+import { isLocale } from "./is-locale.js";
+
 /**
  * Extracts the locale from a given path.
  *
@@ -14,4 +16,5 @@ export function localeInPath(path) {
 	if (isLocale(maybeLocale)) {
 		return maybeLocale;
 	}
+	return undefined;
 }
