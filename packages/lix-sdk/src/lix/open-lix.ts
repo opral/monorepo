@@ -136,16 +136,17 @@ async function captureOpened(args: { db: Kysely<LixDatabaseSchema> }) {
 			.executeTakeFirstOrThrow();
 
 		const fileExtensions = await usedFileExtensions(args.db);
-
-		await capture("LIX-SDK lix opened", {
-			accountId: activeAccount.id,
-			lixId: lixId.value,
-			telemetryKeyValue: telemetry?.value ?? "on",
-			properties: {
-				lix_sdk_version: ENV_VARIABLES.LIX_SDK_VERSION,
-				stored_file_extensions: fileExtensions,
-			},
-		});
+		if (Math.random() > 0.5) {
+			await capture("LIX-SDK lix opened", {
+				accountId: activeAccount.id,
+				lixId: lixId.value,
+				telemetryKeyValue: telemetry?.value ?? "on",
+				properties: {
+					lix_sdk_version: ENV_VARIABLES.LIX_SDK_VERSION,
+					stored_file_extensions: fileExtensions,
+				},
+			});
+		}
 	} catch {
 		// ignore
 	}

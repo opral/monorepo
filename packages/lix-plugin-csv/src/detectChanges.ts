@@ -97,7 +97,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 					detectedChanges.push({
 						schema: CellSchemaV1,
 						entity_id,
-						snapshot: { text: afterCell },
+						snapshot: { text: afterCell, rowId: rowId },
 					});
 				}
 			}
@@ -114,7 +114,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 				detectedChanges.push({
 					schema: CellSchemaV1,
 					entity_id,
-					snapshot: { text: afterCell },
+					snapshot: { text: afterCell, rowId: rowId },
 				});
 			}
 		}

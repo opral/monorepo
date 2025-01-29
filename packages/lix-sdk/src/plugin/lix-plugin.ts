@@ -34,12 +34,7 @@ export type LixPlugin = {
 	/**
 	 * UI components that are used to render the diff view.
 	 */
-	diffUiComponents?: [
-		{
-			schema_key: string;
-			component: HTMLElement;
-		},
-	];
+	diffUiComponent?: CustomElementConstructor;
 	/**
 	 * Detects changes from the source lix that conflict with changes in the target lix.
 	 */
@@ -125,4 +120,13 @@ export type LixReadonly = Pick<Lix, "plugin"> & {
 		selectFrom: Lix["db"]["selectFrom"];
 		withRecursive: Lix["db"]["withRecursive"];
 	};
+};
+
+export type UiDiffComponentProps = {
+	diffs: Array<
+		Pick<Change, "entity_id" | "plugin_key" | "schema_key"> & {
+			snapshot_content_before: Record<string, any> | null;
+			snapshot_content_after: Record<string, any> | null;
+		}
+	>;
 };

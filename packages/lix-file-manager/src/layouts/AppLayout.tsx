@@ -1,18 +1,9 @@
 import { useEffect } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar.tsx";
 import { AppSidebar } from "./Sidebar.tsx";
-import { useAtom } from "jotai";
-import { withPollingAtom } from "@/state.ts";
 import { posthog } from "posthog-js";
+import PollingComponent from "@/components/PollingComponent.tsx";
 export function App({ children }: { children: React.ReactNode }) {
-	const [, setPolling] = useAtom(withPollingAtom);
-
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setPolling(Date.now());
-		}, 100);
-		return () => clearInterval(interval);
-	}, []);
 
 	useEffect(() => {
 		if (import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN) {
@@ -34,9 +25,12 @@ export function App({ children }: { children: React.ReactNode }) {
 		<SidebarProvider>
 			<div className="w-full h-screen flex flex-col">
 				<Banner />
-				<div className="flex flex-1">
+				<div className="flex flex-1 overflow-hidden">
 					<AppSidebar />
-					<main className="flex-1 overflow-hidden">{children}</main>
+					<main className="flex-1 overflow-hidden">
+						{children}
+						<PollingComponent />
+					</main>
 				</div>
 			</div>
 		</SidebarProvider>

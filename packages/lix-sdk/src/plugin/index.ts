@@ -3,4 +3,5 @@ export type {
 	DetectedChange,
 	DetectedConflict,
 	LixReadonly,
+	UiDiffComponentProps,
 } from "./lix-plugin.js";

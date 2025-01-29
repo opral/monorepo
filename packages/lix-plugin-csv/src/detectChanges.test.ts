@@ -54,12 +54,12 @@ test("it should detect a new row with its cells", async () => {
 		{
 			entity_id: "Name|John|Name",
 			schema: CellSchemaV1,
-			snapshot: { text: "John" },
+			snapshot: { text: "John", rowId: "Name|John" },
 		},
 		{
 			entity_id: "Name|John|Age",
 			schema: CellSchemaV1,
-			snapshot: { text: "30" },
+			snapshot: { text: "30", rowId: "Name|John" },
 		},
 	] satisfies DetectedChange<typeof CellSchemaV1 | typeof RowSchemaV1>[]);
 });
@@ -82,7 +82,7 @@ test("it should detect updates", async () => {
 		{
 			schema: CellSchemaV1,
 			entity_id: "Name|Anna|Age",
-			snapshot: { text: "21" },
+			snapshot: { text: "21", rowId: "Name|Anna" },
 		},
 	] satisfies DetectedChange<typeof CellSchemaV1>[]);
 });
@@ -169,23 +169,23 @@ test("changing the unique column should lead to a new cell entity_ids to avoid b
 			{
 				entity_id: "Age|50|Name",
 				schema: CellSchemaV1,
-				snapshot: { text: "Peter" },
+				snapshot: { text: "Peter", rowId: "Age|50" },
 			},
 			{
 				entity_id: "Age|50|Age",
 				schema: CellSchemaV1,
-				snapshot: { text: "50" },
+				snapshot: { text: "50", rowId: "Age|50" },
 			},
 
 			{
 				entity_id: "Age|20|Name",
 				schema: CellSchemaV1,
-				snapshot: { text: "Anna" },
+				snapshot: { text: "Anna", rowId: "Age|20" },
 			},
 			{
 				entity_id: "Age|20|Age",
 				schema: CellSchemaV1,
-				snapshot: { text: "20" },
+				snapshot: { text: "20", rowId: "Age|20" },
 			},
 		] satisfies DetectedChange<typeof CellSchemaV1>[]),
 	);
