@@ -91,9 +91,13 @@ describe.each([
 	// useTsImports must be true to test emitTs. Otherwise, rolldown can't resolve the imports
 	{
 		outputStructure: "locale-modules",
+		strategy: ["variable"],
+		isServer: "true",
 	},
 	{
 		outputStructure: "message-modules",
+		strategy: ["variable"],
+		isServer: "true",
 	},
 ] satisfies Array<Parameters<typeof compileProject>["0"]["compilerOptions"]>)(
 	"options",
@@ -394,6 +398,8 @@ describe.each([
 					strict: true,
 				},
 			});
+
+			console.log(output["runtime.js"]);
 
 			for (const [fileName, code] of Object.entries(output)) {
 				if (fileName.endsWith(".js") || fileName.endsWith(".ts")) {
