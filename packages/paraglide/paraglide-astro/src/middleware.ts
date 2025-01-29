@@ -1,28 +1,23 @@
-import {
-	baseLocale,
-	defineGetLocale,
-	defineSetLocale,
-} from "virtual:paraglide-astro:runtime";
+// @ts-expect-error - virtuao module
+import * as r from "virtual:paraglide-astro:runtime";
 import { type MiddlewareHandler } from "astro";
 import { AsyncLocalStorage } from "node:async_hooks";
+import type { Runtime } from "@inlang/paraglide-js";
 
+// type casting
+const runtime = r as Runtime;
+
+// cross request safe storage
 const asyncStorage = new AsyncLocalStorage<string>();
 
-defineGetLocale(() => {
-	const maybeLocale = asyncStorage.getStore();
-	return maybeLocale ?? baseLocale;
-});
+// retrieve the locale from the request
+runtime.defineGetLocale(() => asyncStorage.getStore());
 
-defineSetLocale(() => {
-	// do nothing on the server
-});
+// do nothing on the server
+runtime.defineSetLocale(() => {});
 
 export const onRequest: MiddlewareHandler = async (context, next) => {
-	// const normalizedBase = normalizeBase(import.meta.env!.BASE_URL);
-
-	// using astro's i18n routing locale
-	const locale = context.currentLocale ?? baseLocale;
+	const locale = runtime.extractLocaleFromRequest(context.request);
 
 	return await asyncStorage.run(locale, next);
 };
-

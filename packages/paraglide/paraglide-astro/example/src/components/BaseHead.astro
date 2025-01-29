@@ -1,7 +1,6 @@
 ---
-import '../styles/global.css';
-import { locales, isLocale } from '../paraglide/runtime.js';
-import { getAbsoluteLocaleUrl } from 'astro:i18n';
+import "../styles/global.css";
+import { locales, deLocalizePath, localizePath } from "../paraglide/runtime.js";
 
 interface Props {
 	title: string;
@@ -9,14 +8,9 @@ interface Props {
 	image?: string;
 }
 
-const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
+const { title, description, image = "/blog-placeholder-1.jpg" } = Astro.props;
 
-function removeLocaleFromPath(path: string) {
-	const [maybeLanguage, ...rest] = path.split('/').filter(Boolean);
-	return isLocale(maybeLanguage) ? rest.join('/') : path;
-}
-
-const pathWithoutLocale = removeLocaleFromPath(Astro.url.pathname);
+const pathWithoutLocale = deLocalizePath(Astro.url.pathname);
 ---
 
 <!-- Global Metadata -->
@@ -26,8 +20,20 @@ const pathWithoutLocale = removeLocaleFromPath(Astro.url.pathname);
 <meta name="generator" content={Astro.generator} />
 
 <!-- Font preloads -->
-<link rel="preload" href="/fonts/atkinson-regular.woff" as="font" type="font/woff" crossorigin />
-<link rel="preload" href="/fonts/atkinson-bold.woff" as="font" type="font/woff" crossorigin />
+<link
+	rel="preload"
+	href="/fonts/atkinson-regular.woff"
+	as="font"
+	type="font/woff"
+	crossorigin
+/>
+<link
+	rel="preload"
+	href="/fonts/atkinson-bold.woff"
+	as="font"
+	type="font/woff"
+	crossorigin
+/>
 
 <!-- Primary Meta Tags -->
 <title>{title}</title>
@@ -35,6 +41,14 @@ const pathWithoutLocale = removeLocaleFromPath(Astro.url.pathname);
 <meta name="description" content={description} />
 
 <!-- Alternate Locale Versions -->
-{locales.map(lang => (
-	<link rel="alternate" hreflang={lang} href={getAbsoluteLocaleUrl(lang, pathWithoutLocale)} />
-))}
+{
+	locales.map((locale) => (
+		<link
+			rel="alternate"
+			hreflang={locale}
+			href={localizePath(pathWithoutLocale, {
+				locale: locale,
+			})}
+		/>
+	))
+}
