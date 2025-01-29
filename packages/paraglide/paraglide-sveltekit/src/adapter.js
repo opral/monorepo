@@ -42,13 +42,7 @@ export const handle = async ({ event, resolve }) => {
 		asyncStorage = new AsyncLocalStorage();
 	}
 
-	const locale = extractLocaleFromRequest({
-		pathname: event.url.pathname,
-		cookies: Object.fromEntries(
-			event.cookies.getAll().map((cookie) => [cookie.name, cookie.value])
-		),
-		headers: {},
-	});
+	const locale = extractLocaleFromRequest(event.request);
 
 	return asyncStorage.run(locale, () => resolve(event));
 };
