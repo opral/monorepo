@@ -80,6 +80,8 @@ ${injectCode("./extract-locale-from-pathname.js")}
 
 ${injectCode("./extract-locale-from-request.js")}
 
+${injectCode("./extract-locale-from-cookie.js")}
+
 // ------ TYPES ------
 
 /**
