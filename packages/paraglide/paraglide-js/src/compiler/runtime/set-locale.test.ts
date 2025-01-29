@@ -1,5 +1,4 @@
 import { test, expect, describe } from "vitest";
-import type { CookieStrategy } from "../strategy.js";
 import { setLocale } from "./set-locale.js";
 
 // @ts-expect-error - global variable definition
@@ -12,14 +11,13 @@ globalThis.window.location.reload = () => {};
 
 // sequential to avoid global variable conflicts
 describe.sequential("", () => {
-	test("cookie", async () => {
+	test("sets the cookie to a different locale", async () => {
 		globalThis.document.cookie = "PARAGLIDE_LOCALE=en";
 
 		// @ts-expect-error - global variable definition
-		globalThis.strategy = {
-			type: "cookie",
-			cookieName: "PARAGLIDE_LOCALE",
-		} satisfies CookieStrategy;
+		globalThis.strategy = ["cookie"];
+		// @ts-expect-error - global variable definition
+		globalThis.cookieName = "PARAGLIDE_LOCALE";
 
 		setLocale("de");
 

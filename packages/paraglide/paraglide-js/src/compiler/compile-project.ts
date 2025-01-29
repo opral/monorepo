@@ -5,7 +5,6 @@ import { lookup } from "../services/lookup.js";
 import { generateLocaleModules } from "./output-structure/locale-modules.js";
 import { generateMessageModules } from "./output-structure/message-modules.js";
 import { defaultCompilerOptions, type CompilerOptions } from "./compile.js";
-import { createStrategyFile } from "./strategy.js";
 
 /**
  * Takes an inlang project and compiles it into a set of files.
@@ -46,7 +45,8 @@ export const compileProject = async (args: {
 		const regularOutput = generateLocaleModules(
 			compiledBundles,
 			settings,
-			fallbackMap
+			fallbackMap,
+			optionsWithDefaults
 		);
 		Object.assign(output, regularOutput);
 	}
@@ -55,7 +55,8 @@ export const compileProject = async (args: {
 		const messageModuleOutput = generateMessageModules(
 			compiledBundles,
 			settings,
-			fallbackMap
+			fallbackMap,
+			optionsWithDefaults
 		);
 		Object.assign(output, messageModuleOutput);
 	}
@@ -73,8 +74,6 @@ export const compileProject = async (args: {
 	)) {
 		output[filename] = content;
 	}
-
-	output["strategy.js"] = createStrategyFile(optionsWithDefaults.strategy);
 
 	for (const [filename, content] of Object.entries(output)) {
 		if (filename.endsWith(".js") || filename.endsWith(".ts")) {

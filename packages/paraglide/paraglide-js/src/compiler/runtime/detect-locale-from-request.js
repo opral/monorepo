@@ -15,21 +15,23 @@
  * @type {(args: { pathname: string, headers: Record<string, string>, cookies: Record<string, string> }) => Locale}
  */
 export const detectLocaleFromRequest = (args) => {
-	if (strategy.type === "cookie") {
+	const strat = strategy[0];
+
+	if (strat === "cookie") {
 		return assertIsLocale(
 			args.cookies[/** @type {any} */ (strategy).cookieName] ?? baseLocale
 		);
 	}
 
-	if (strategy.type === "i18n-routing") {
+	if (strat === "pathname") {
 		return assertIsLocale(localeInPath(args.pathname) ?? baseLocale);
 	}
 
-	if (strategy.type === "custom") {
+	if (strat === "custom") {
 		throw new Error(
 			"Custom strategy is not supported for detectLocaleFromRequest"
 		);
 	}
 
-	throw new Error(`Unsupported strategy: ${strategy.type}`);
+	throw new Error(`Unsupported strategy: ${strat}`);
 };

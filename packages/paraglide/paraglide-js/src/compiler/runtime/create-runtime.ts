@@ -1,23 +1,23 @@
-import type { ProjectSettings } from "@inlang/sdk";
 import fs from "node:fs";
+import type { CompilerOptions } from "../compile.js";
 
 /**
  * Returns the code for the `runtime.js` module
  */
-export function createRuntime(
-	settings: Pick<ProjectSettings, "baseLocale" | "locales">
-): string {
-	return (
-		jsdocRuntime
-			// replace the locales first
-			.replace('["<replace>"]', JSON.stringify(settings.locales))
-			// then the base locale
-			.replaceAll('"<replace>"', JSON.stringify(settings.baseLocale))
-	);
-}
+export function createRuntime(args: {
+	baseLocale: string;
+	locales: string[];
+	compilerOptions: {
+		strategy: NonNullable<CompilerOptions["strategy"]>;
+		cookieName: NonNullable<CompilerOptions["cookieName"]>;
+	};
+}): string {
+	return `
 
-const jsdocRuntime = `
-import * as strategy from "./strategy.js";
+export const strategy = ["${args.compilerOptions.strategy.join('", "')}"];
+
+export const cookieName = ${JSON.stringify(args.compilerOptions.cookieName)};
+
 
 /**
  * The project's base locale.
@@ -27,7 +27,7 @@ import * as strategy from "./strategy.js";
  *     // do something
  *   }
  */
-export const baseLocale = "<replace>";
+export const baseLocale = "${args.baseLocale}";
 
 /**
  * The project's locales that have been specified in the settings.
@@ -37,7 +37,7 @@ export const baseLocale = "<replace>";
  *     throw new Error('Locale is not available');
  *   }
  */
-export const locales = /** @type {const} */ (["<replace>"]);
+export const locales = /** @type {const} */ (["${args.locales.join('", "')}"]);
 
 /**
  * Define the \`getLocale()\` function.
@@ -105,6 +105,7 @@ ${injectCode("./detect-locale-from-request.js")}
  */
 
 `;
+}
 
 /**
  * Load a file from the current directory.

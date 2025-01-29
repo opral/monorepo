@@ -4,14 +4,23 @@ import { createRuntime } from "../runtime/create-runtime.js";
 import { createRegistry } from "../registry.js";
 import { jsIdentifier } from "../../services/codegen/identifier.js";
 import { escapeForSingleQuoteString } from "../../services/codegen/escape.js";
+import type { CompilerOptions } from "../compile.js";
 
 export function generateMessageModules(
 	compiledBundles: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
-	fallbackMap: Record<string, string | undefined>
+	fallbackMap: Record<string, string | undefined>,
+	compilerOptions: {
+		strategy: NonNullable<CompilerOptions["strategy"]>;
+		cookieName: NonNullable<CompilerOptions["cookieName"]>;
+	}
 ): Record<string, string> {
 	const output: Record<string, string> = {
-		["runtime.js"]: createRuntime(settings),
+		["runtime.js"]: createRuntime({
+			baseLocale: settings.baseLocale,
+			locales: settings.locales,
+			compilerOptions,
+		}),
 		["registry.js"]: createRegistry(),
 	};
 
