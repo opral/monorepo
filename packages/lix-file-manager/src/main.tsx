@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -8,7 +8,6 @@ import { App } from "./layouts/AppLayout.tsx";
 const router = createBrowserRouter(
 	routes.map((route) => ({
 		...route,
-		// Wrap each route's element with the App layout and Suspense
 		element: (
 			<App>{route.element} </App>
 		),

@@ -2,7 +2,7 @@ import { useAtom } from "jotai/react";
 import IconAdd from "./icons/IconAdd.tsx";
 // import IconFilter from "./icons/IconFilter.tsx";
 import { Button } from "./ui/button.tsx";
-import { changesCurrentVersionAtom, selectedChangeIdsAtom } from "@/state-active-file.ts";
+import { selectedChangeIdsAtom } from "@/state-active-file.ts";
 import { Checkbox } from "./ui/checkbox.tsx";
 import { lixAtom } from "@/state.ts";
 import { createChangeSet, createDiscussion } from "@lix-js/sdk";
@@ -16,8 +16,9 @@ import IconArrow from "./icons/IconArrow.tsx";
 
 const FilterSelect = () => {
   const [selectedChangeIds, setSelectedChangeIds] = useAtom(selectedChangeIdsAtom);
-  const [changesCurrentVersion] = useAtom(changesCurrentVersionAtom);
   const [lix] = useAtom(lixAtom);
+  // TODO: replace with actual changes if this component is used again
+  const [changesCurrentVersion] = useState<{ id: string }[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const form = useForm({
     defaultValues: {
@@ -29,7 +30,7 @@ const FilterSelect = () => {
 
   const handleSelectAll = () => {
     // select or unset all changes
-    if (selectedChangeIds.length === 0) {
+    if (selectedChangeIds.length === 0 && changesCurrentVersion.length > 0) {
       setSelectedChangeIds(changesCurrentVersion.map((change) => change.id));
     } else {
       setSelectedChangeIds([]);
