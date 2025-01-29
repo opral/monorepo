@@ -4,6 +4,8 @@
 export type Runtime = {
 	baseLocale: Locale;
 	locales: Readonly<Locale[]>;
+	strategy: Readonly<string[]>;
+	cookieName?: string;
 	getLocale: () => string;
 	setLocale: (newLocale: Locale) => void;
 	defineGetLocale: (fn: () => Locale) => void;

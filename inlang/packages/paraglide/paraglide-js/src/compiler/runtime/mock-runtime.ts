@@ -5,6 +5,7 @@ import { isLocale } from "./is-locale.js";
 import { deLocalizePath } from "./de-localize-path.js";
 import { assertIsLocale } from "./assert-is-locale.js";
 import { detectLocaleFromRequest } from "./detect-locale-from-request.js";
+import { defaultCompilerOptions } from "../compile.js";
 
 export function mockRuntime({ baseLocale = "en", locales = ["en", "de"] }) {
 	let locale = baseLocale;
@@ -12,6 +13,8 @@ export function mockRuntime({ baseLocale = "en", locales = ["en", "de"] }) {
 	const runtime: Runtime = {
 		baseLocale,
 		locales,
+		cookieName: defaultCompilerOptions.cookieName,
+		strategy: defaultCompilerOptions.strategy,
 		isLocale,
 		assertIsLocale,
 		localeInPath,

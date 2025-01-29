@@ -7,8 +7,11 @@ declare global {
 	/**
 	 * Locale used by custom strategy.
 	 */
-	export let _locale: string;
-	export const strategy: any;
+	export let _localeVariable: string;
+	export const strategy: Array<
+		"cookie" | "pathname" | "variable" | "baseLocale" | "custom"
+	>;
+	export const cookieName: Runtime["cookieName"];
 	export const baseLocale: Runtime["baseLocale"];
 	export const locales: Runtime["locales"];
 	export const assertIsLocale: Runtime["assertIsLocale"];

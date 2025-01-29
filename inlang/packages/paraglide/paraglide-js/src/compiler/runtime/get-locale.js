@@ -7,7 +7,7 @@
  *
  * @type {Locale}
  */
-let _locale = "<replace>";
+let _localeVariable = baseLocale;
 
 /**
  * Get the current locale.
@@ -21,27 +21,36 @@ let _locale = "<replace>";
  *
  * @type {() => Locale}
  */
-export let getLocale = (() => {
-	if (strategy.type === "custom") {
-		return () => _locale;
+export let getLocale = () => {
+	/** @type {string | undefined} */
+	let locale;
+
+	for (const strat of strategy) {
+		if (strat === "cookie") {
+			locale = getLocaleFromCookie();
+		}
+		if (strat === "baseLocale") {
+			locale = baseLocale;
+		}
+		if (strat === "pathname") {
+			locale = localeInPath(window.location.pathname) ?? baseLocale;
+		}
+		if (strat === "variable") {
+			locale = _localeVariable;
+		}
+		if (strat === "custom") {
+			throw new Error("Custom strategy not implemented");
+		}
+		// check if match, else continue loop
+		if (locale !== undefined) {
+			return assertIsLocale(locale);
+		}
 	}
 
-	if (strategy.type === "cookie") {
-		const cookieName = strategy.cookieName;
-		return () => {
-			const match = document.cookie.match(
-				new RegExp(`(^| )${cookieName}=([^;]+)`)
-			);
-			return assertIsLocale(match?.[2] ?? baseLocale);
-		};
-	}
+	throw new Error("No locale found. There is an error in your strategy.");
+};
 
-	if (strategy.type === "i18n-routing") {
-		return () => {
-			return localeInPath(window.location.pathname) ?? baseLocale;
-		};
-	}
-
-	// Default fallback for unsupported strategies
-	return () => assertIsLocale("");
-})();
+function getLocaleFromCookie() {
+	const match = document.cookie.match(new RegExp(`(^| )${cookieName}=([^;]+)`));
+	return match?.[2];
+}

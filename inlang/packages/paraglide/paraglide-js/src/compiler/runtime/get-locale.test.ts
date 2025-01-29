@@ -1,6 +1,5 @@
 import { test, expect, describe } from "vitest";
 import { mockRuntime } from "./mock-runtime.js";
-import type { CookieStrategy } from "../strategy.js";
 
 const baseLocale = "en";
 
@@ -8,6 +7,9 @@ mockRuntime({
 	baseLocale,
 	locales: ["en", "de", "fr"],
 });
+
+// dynamic import to make `baseLocale` defined after the mock runtime call
+const { getLocale } = await import("./get-locale.js");
 
 // @ts-expect-error - global variable definition
 globalThis.document = {};
@@ -19,12 +21,9 @@ describe.sequential("", () => {
 			"OTHER_COOKIE=fr; PARAGLIDE_LOCALE=de; ANOTHER_COOKIE=en; EXPIRES_COOKIE=es; Max-Age=3600";
 
 		// @ts-expect-error - global variable definition
-		globalThis.strategy = {
-			type: "cookie",
-			cookieName: "PARAGLIDE_LOCALE",
-		} satisfies CookieStrategy;
-
-		const { getLocale } = await import("./get-locale.js");
+		globalThis.strategy = ["cookie"];
+		// @ts-expect-error - global variable definition
+		globalThis.cookieName = "PARAGLIDE_LOCALE";
 
 		const locale = getLocale();
 		expect(locale).toBe("de");
@@ -34,12 +33,9 @@ describe.sequential("", () => {
 		globalThis.document.cookie = "OTHER_COOKIE=blaba;";
 
 		// @ts-expect-error - global variable definition
-		globalThis.strategy = {
-			type: "cookie",
-			cookieName: "PARAGLIDE_LOCALE",
-		} satisfies CookieStrategy;
-
-		const { getLocale } = await import("./get-locale.js");
+		globalThis.strategy = ["cookie", "baseLocale"];
+		// @ts-expect-error - global variable definition
+		globalThis.cookieName = "PARAGLIDE_LOCALE";
 
 		const locale = getLocale();
 		expect(locale).toBe(baseLocale);

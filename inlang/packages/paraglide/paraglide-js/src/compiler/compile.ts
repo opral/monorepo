@@ -7,14 +7,14 @@ import {
 	getLocalAccount,
 	saveLocalAccount,
 } from "../services/account/index.js";
-import type { Strategy } from "./strategy.js";
 
 export const defaultCompilerOptions = {
 	outputStructure: "message-modules",
 	emitGitIgnore: true,
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
-	strategy: { type: "custom" },
+	strategy: ["variable"],
+	cookieName: "PARAGLIDE_LOCALE",
 } as const satisfies Partial<CompilerOptions>;
 
 export type CompilerOptions = {
@@ -35,9 +35,26 @@ export type CompilerOptions = {
 	/**
 	 * The strategy to use for getting the locale.
 	 *
-	 * @default CustomStrategy
+	 * The order of the strategy defines the precendence of matches.
+	 * For example, in `['pathname', 'cookie', 'baseLocale']`, the locale will be
+	 * first tried to be detected in the pathname, then in a cookie, and finally
+	 * fallback to the base locale.
+	 *
+	 * You can define a custom strategy by using `custom`.
+	 *
+	 * @example ['pathname', 'cookie', 'baseLocale']
+	 *
+	 * @default ['variable']
 	 */
-	strategy?: Strategy;
+	strategy?: Array<
+		"pathname" | "cookie" | "baseLocale" | "custom" | "variable"
+	>;
+	/**
+	 * The name of the cookie to use for the cookie strategy.
+	 *
+	 * @default 'PARAGLIDE_LOCALE'
+	 */
+	cookieName?: string;
 	/**
 	 * Additional files that should be emmited in the outdir.
 	 *
