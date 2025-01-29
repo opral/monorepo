@@ -7,7 +7,7 @@ import {
 	assertIsLocale,
 	defineGetLocale,
 	deLocalizePath,
-	detectLocaleFromRequest,
+	extractLocaleFromRequest,
 } from "./runtime.js";
 
 /**
@@ -42,7 +42,7 @@ export const handle = async ({ event, resolve }) => {
 		asyncStorage = new AsyncLocalStorage();
 	}
 
-	const locale = detectLocaleFromRequest({
+	const locale = extractLocaleFromRequest({
 		pathname: event.url.pathname,
 		cookies: Object.fromEntries(
 			event.cookies.getAll().map((cookie) => [cookie.name, cookie.value])
