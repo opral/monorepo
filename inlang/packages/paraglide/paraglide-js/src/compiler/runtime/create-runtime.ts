@@ -1,43 +1,29 @@
 import fs from "node:fs";
-import type { CompilerOptions } from "../compile.js";
+import { defaultCompilerOptions, type CompilerOptions } from "../compile.js";
 
 /**
  * Returns the code for the `runtime.js` module
  */
-export function createRuntime(args: {
+export function createRuntimeFile(args: {
 	baseLocale: string;
 	locales: string[];
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
+		isServer: string;
 	};
 }): string {
 	return `
 
-export const strategy = ["${args.compilerOptions.strategy.join('", "')}"];
+${injectCode("./base-locale.js").replace(`<base-locale>`, `${args.baseLocale}`)}
 
-export const cookieName = ${JSON.stringify(args.compilerOptions.cookieName)};
+${injectCode("./locales.js").replace(`["<base-locale>"]`, `["${args.locales.join('", "')}"]`)}
 
+${injectCode("./strategy.js").replace(`["variable"]`, `["${args.compilerOptions.strategy.join('", "')}"]`)}
 
-/**
- * The project's base locale.
- *
- * @example
- *   if (locale === baseLocale) {
- *     // do something
- *   }
- */
-export const baseLocale = "${args.baseLocale}";
+${injectCode("./cookie-name.js").replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)}
 
-/**
- * The project's locales that have been specified in the settings.
- *
- * @example
- *   if (locales.includes(userSelectedLocale) === false) {
- *     throw new Error('Locale is not available');
- *   }
- */
-export const locales = /** @type {const} */ (["${args.locales.join('", "')}"]);
+const isServer = ${args.compilerOptions.isServer}
 
 /**
  * Define the \`getLocale()\` function.
@@ -110,9 +96,75 @@ ${injectCode("./detect-locale-from-request.js")}
 /**
  * Load a file from the current directory.
  *
+ * Prunes the imports on top of the file as the runtime is
+ * self-contained.
+ *
  * @param {string} path
  * @returns {string}
  */
 function injectCode(path: string): string {
-	return fs.readFileSync(new URL(path, import.meta.url), "utf-8");
+	const code = fs.readFileSync(new URL(path, import.meta.url), "utf-8");
+	return code.replace(/import\s+.*?;?\n/g, "");
 }
+
+/**
+ * Returns the runtime module as an object for testing purposes.
+ *
+ * Defaults to `isServer: "true"` and `strategy: ["variable"]`
+ * to avoid server-side testing issues.
+ *
+ * @example
+ *   const runtime = await createRuntime({
+ *      baseLocale: "en",
+ *      locales: ["en", "de"],
+ *   })
+ */
+export async function createRuntimeForTesting(args: {
+	baseLocale: string;
+	locales: string[];
+	compilerOptions?: {
+		strategy?: CompilerOptions["strategy"];
+		cookieName?: CompilerOptions["cookieName"];
+		isServer?: string;
+	};
+}): Promise<Runtime> {
+	const file = createRuntimeFile({
+		baseLocale: args.baseLocale,
+		locales: args.locales,
+		compilerOptions: {
+			...defaultCompilerOptions,
+			strategy: ["variable"],
+			isServer: "true",
+			...args.compilerOptions,
+		},
+	});
+	return await import(
+		"data:text/javascript;base64," +
+			Buffer.from(file, "utf-8").toString("base64")
+	);
+}
+
+/**
+ * The Paraglide runtime API.
+ */
+export type Runtime = {
+	baseLocale: Locale;
+	locales: Readonly<Locale[]>;
+	strategy: NonNullable<CompilerOptions["strategy"]>;
+	cookieName: string;
+	getLocale: () => string;
+	setLocale: (newLocale: Locale) => void;
+	defineGetLocale: (fn: () => Locale) => void;
+	defineSetLocale: (fn: (newLocale: Locale) => void) => void;
+	assertIsLocale: typeof import("./assert-is-locale.js").assertIsLocale;
+	isLocale: typeof import("./is-locale.js").isLocale;
+	deLocalizePath: typeof import("./de-localize-path.js").deLocalizePath;
+	localizePath: typeof import("./localize-path.js").localizePath;
+	localeInPath: typeof import("./locale-in-path.js").localeInPath;
+	detectLocaleFromRequest: typeof import("./detect-locale-from-request.js").detectLocaleFromRequest;
+};
+
+/**
+ * Locale is any here because the locale is unknown before compilation.
+ */
+type Locale = any;

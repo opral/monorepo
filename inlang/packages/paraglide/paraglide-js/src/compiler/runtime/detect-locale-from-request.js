@@ -1,3 +1,9 @@
+import { assertIsLocale } from "./assert-is-locale.js";
+import { baseLocale } from "./base-locale.js";
+import { cookieName } from "./cookie-name.js";
+import { localeInPath } from "./locale-in-path.js";
+import { strategy } from "./strategy.js";
+
 /**
  * Detect a locale from a request.
  *
@@ -28,7 +34,7 @@ export const detectLocaleFromRequest = (args) => {
 				"Custom strategy is not supported for detectLocaleFromRequest"
 			);
 		} else if (strat === "variable") {
-			locale = _localeVariable;
+			locale = _locale;
 		} else if (strat === "baseLocale") {
 			return baseLocale;
 		} else {

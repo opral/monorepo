@@ -1,3 +1,9 @@
+import { assertIsLocale } from "./assert-is-locale.js";
+import { baseLocale } from "./base-locale.js";
+import { cookieName } from "./cookie-name.js";
+import { localeInPath } from "./locale-in-path.js";
+import { strategy } from "./strategy.js";
+
 /**
  * This is a fallback to get started with a custom
  * strategy and avoid type errors.
@@ -7,7 +13,7 @@
  *
  * @type {Locale}
  */
-let _localeVariable = baseLocale;
+let _locale = baseLocale;
 
 /**
  * Get the current locale.
@@ -36,7 +42,7 @@ export let getLocale = () => {
 			locale = localeInPath(window.location.pathname) ?? baseLocale;
 		}
 		if (strat === "variable") {
-			locale = _localeVariable;
+			locale = _locale;
 		}
 		if (strat === "custom") {
 			throw new Error("Custom strategy not implemented");

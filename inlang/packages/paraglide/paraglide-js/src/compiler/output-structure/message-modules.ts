@@ -1,6 +1,6 @@
 import type { ProjectSettings } from "@inlang/sdk";
 import type { CompiledBundleWithMessages } from "../compile-bundle.js";
-import { createRuntime } from "../runtime/create-runtime.js";
+import { createRuntimeFile } from "../runtime/create-runtime.js";
 import { createRegistry } from "../registry.js";
 import { jsIdentifier } from "../../services/codegen/identifier.js";
 import { escapeForSingleQuoteString } from "../../services/codegen/escape.js";
@@ -13,10 +13,11 @@ export function generateMessageModules(
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
+		isServer: NonNullable<CompilerOptions["isServer"]>;
 	}
 ): Record<string, string> {
 	const output: Record<string, string> = {
-		["runtime.js"]: createRuntime({
+		["runtime.js"]: createRuntimeFile({
 			baseLocale: settings.baseLocale,
 			locales: settings.locales,
 			compilerOptions,
