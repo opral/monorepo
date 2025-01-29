@@ -1,8 +1,8 @@
 import { SqliteAdapter, SqliteIntrospector, SqliteQueryCompiler } from "kysely";
 import { SqliteWasmDriver } from "./kysely/SqliteWasmDriver.js";
-import { Database } from "@eliaspourquoi/sqlite-node-wasm";
+import { SqliteWasmDatabase } from "./util/createInMemoryDatabase.js";
 
-export const createDialect = (args: { database: Database }) => {
+export const createDialect = (args: { database: SqliteWasmDatabase }) => {
   return {
     createAdapter: () => new SqliteAdapter(),
     createDriver: () =>

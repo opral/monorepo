@@ -1,5 +1,5 @@
 import { Kysely } from "kysely";
-import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely";
+import { createDialect, type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { v7 as uuid_v7, v4 as uuid_v4 } from "uuid";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
@@ -13,7 +13,7 @@ import { humanId } from "human-id";
 import { nanoid } from "./nano-id.js";
 
 export function initDb(args: {
-	sqlite: SqliteDatabase;
+	sqlite: SqliteWasmDatabase;
 }): Kysely<LixDatabaseSchema> {
 	initFunctions({ sqlite: args.sqlite });
 	applySchema({ sqlite: args.sqlite });
@@ -38,7 +38,7 @@ export function initDb(args: {
 	return db;
 }
 
-function initFunctions(args: { sqlite: SqliteDatabase }) {
+function initFunctions(args: { sqlite: SqliteWasmDatabase }) {
 	args.sqlite.createFunction({
 		name: "uuid_v7",
 		arity: 0,

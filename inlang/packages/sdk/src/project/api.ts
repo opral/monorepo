@@ -3,7 +3,7 @@ import type { InlangDatabaseSchema } from "../database/schema.js";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import type { Lix } from "@lix-js/sdk";
-import type { SqliteDatabase } from "sqlite-wasm-kysely";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 export type InlangProject = {
 	db: Kysely<InlangDatabaseSchema>;
@@ -13,7 +13,7 @@ export type InlangProject = {
 	 *
 	 * TODO remove this
 	 */
-	_sqlite: SqliteDatabase;
+	_sqlite: SqliteWasmDatabase;
 	id: {
 		get: () => Promise<string>;
 	};

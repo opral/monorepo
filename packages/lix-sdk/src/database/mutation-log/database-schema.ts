@@ -1,5 +1,5 @@
 import type { Insertable, Selectable } from "kysely";
-import type { SqliteDatabase } from "sqlite-wasm-kysely";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 export const tablesByDepencies: string[] = [
 	// no dependencies
@@ -50,7 +50,9 @@ export const tableIdColumns: Record<string, Array<string>> = {
 	// version_change: ["version_id", "change_id"],
 };
 
-export function applyMutationLogDatabaseSchema(sqlite: SqliteDatabase): void {
+export function applyMutationLogDatabaseSchema(
+	sqlite: SqliteWasmDatabase
+): void {
 	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	sqlite.exec`
   -- vector clock

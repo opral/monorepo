@@ -1,12 +1,12 @@
 import { type KyselyPlugin } from "kysely";
 import {
 	createInMemoryDatabase,
-	type SqliteDatabase,
+	type SqliteWasmDatabase,
 } from "sqlite-wasm-kysely";
 
 // workaround for v1. v2 doesn't need to transform
 // jsonb columns during runtime
-let sqlite: SqliteDatabase;
+let sqlite: SqliteWasmDatabase;
 
 export function ParseJsonBPluginV1(
 	jsonbColumns: Record<string, string[]>

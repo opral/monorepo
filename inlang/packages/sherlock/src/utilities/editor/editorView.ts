@@ -3,7 +3,23 @@ import { state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
 import { getSelectedBundleByBundleIdOrAlias } from "../helper.js"
 import { msg } from "../messages/msg.js"
-import type { BundleNested } from "@inlang/sdk"
+import type { BundleNested, Match } from "@inlang/sdk"
+import { updateBundleNested } from "@inlang/sdk"
+
+type Pattern =
+	| { type: "text"; value: string }
+	| {
+			type: "expression"
+			arg: { type: "variable-reference"; name: string } | { type: "literal"; value: string }
+			annotation?: {
+				type: "function-reference"
+				name: string
+				options: Array<{
+					value: { type: "variable-reference"; name: string } | { type: "literal"; value: string }
+					name: string
+				}>
+			}
+	  }
 
 export async function editorView(args: { bundleId: string; context: vscode.ExtensionContext }) {
 	const bundle = await getSelectedBundleByBundleIdOrAlias(args.bundleId)
@@ -28,45 +44,66 @@ export async function editorView(args: { bundleId: string; context: vscode.Exten
 		webview: panel.webview,
 	})
 
-	panel.webview.onDidReceiveMessage(async (message) => {
-		console.log("message", message)
-		switch (message.command) {
-			case "updateBundle":
-				// TODO: Update the bundle in the database
-				// try {
-				// 	await state()
-				// 		.project.db.transaction()
-				// 		.execute(async (trx) => {
-				// 			await trx
-				// 				.updateTable("message")
-				// 				.set({
-				// 					declarations: messageObj.declarations,
-				// 					selectors: messageObj.selectors,
-				// 				})
-				// 				.where("message.id", "=", messageObj.id)
-				// 				.execute()
+	panel.webview.onDidReceiveMessage(
+		async (message: {
+			command: string
+			bundle: {
+				entityId: string
+				entity: "variant"
+				newData: {
+					id: string
+					messageId: string
+					matches: Array<{ type: string; key: string }>
+					pattern: Array<{ type: string; value?: string }>
+				}
+			}
+		}) => {
+			console.log("message", message)
+			switch (message.command) {
+				case "updateBundle":
+					try {
+						const originalBundle = await getSelectedBundleByBundleIdOrAlias(args.bundleId)
+						if (!originalBundle) {
+							throw new Error(`Bundle with id ${args.bundleId} not found`)
+						}
 
-				// 			await trx
-				// 				.updateTable("variant")
-				// 				.set({
-				// 					pattern: variant.pattern,
-				// 				})
-				// 				.where("variant.id", "=", variant.id)
-				// 				.execute()
-				// 		})
+						if (message.bundle.newData) {
+							state()
+								.project?.db.insertInto(message.bundle.entity)
+								.values({
+									...message.bundle.newData,
+									// @ts-expect-error - we need to remove the nesting
+									messages: undefined,
+									variants: undefined,
+								})
+								.onConflict((oc) =>
+									oc.column("id").doUpdateSet({
+										...message.bundle.newData,
+										// @ts-expect-error - we need to remove the nesting
+										messages: undefined,
+										variants: undefined,
+									})
+								)
+								.execute()
+						} else {
+							state()
+								.project?.db.deleteFrom(message.bundle.entity)
+								.where("id", "=", message.bundle.entityId)
+								.execute()
+						}
 
-				// 	CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
+						CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
+						msg("Bundle updated successfully.")
+					} catch (e) {
+						console.log(`Couldn't update bundle. ${e}`, "error")
+						console.error(e)
+					}
 
-				// 	msg("Message updated.")
-				// } catch (e) {
-				// 	msg(`Couldn't update bundle with id ${bundleId}. ${e}`)
-				// }
-
-				CONFIGURATION.EVENTS.ON_DID_EDITOR_VIEW_CHANGE.fire()
-
-				break
+					CONFIGURATION.EVENTS.ON_DID_EDITOR_VIEW_CHANGE.fire()
+					break
+			}
 		}
-	})
+	)
 }
 
 export async function getWebviewContent(args: {
@@ -78,11 +115,11 @@ export async function getWebviewContent(args: {
 
 	// Paths to local scripts and styles
 	const styleUri = webview.asWebviewUri(
-		vscode.Uri.joinPath(context.extensionUri, "assets", "bundle-view.css")
+		vscode.Uri.joinPath(context.extensionUri, "assets", "editor-view.css")
 	)
 
 	const scriptUri = webview.asWebviewUri(
-		vscode.Uri.joinPath(context.extensionUri, "assets", "bundle-component.js")
+		vscode.Uri.joinPath(context.extensionUri, "assets", "editor-component.js")
 	)
 
 	const litHtmlUri = webview.asWebviewUri(
@@ -167,24 +204,24 @@ export async function getWebviewContent(args: {
 						messageElement.appendChild(variantElement);
 					});
 	
-					// Add selector button and dialog to message
-					const selectorButtonDiv = document.createElement('div');
-					selectorButtonDiv.setAttribute('slot', 'selector-button');
-					selectorButtonDiv.classList.add('add-selector');
-					selectorButtonDiv.textContent = 'Add selector';
-					selectorButtonDiv.addEventListener('click', handleSelectorModal);
-					messageElement.appendChild(selectorButtonDiv);
+					// // Add selector button and dialog to message
+					// const selectorButtonDiv = document.createElement('div');
+					// selectorButtonDiv.setAttribute('slot', 'selector-button');
+					// selectorButtonDiv.classList.add('add-selector');
+					// selectorButtonDiv.textContent = 'Add selector';
+					// selectorButtonDiv.addEventListener('click', handleSelectorModal);
+					// messageElement.appendChild(selectorButtonDiv);
 	
-					const selectorButtonDialog = document.createElement('sl-dialog');
-					selectorButtonDialog.setAttribute('slot', 'selector-button');
-					selectorButtonDialog.setAttribute('label', 'Add Selector');
+					// const selectorButtonDialog = document.createElement('sl-dialog');
+					// selectorButtonDialog.setAttribute('slot', 'selector-button');
+					// selectorButtonDialog.setAttribute('label', 'Add Selector');
 	
-					const addSelectorDialog = document.createElement('inlang-add-selector');
-					addSelectorDialog.message = message;
-					addSelectorDialog.messages = messages;
-					selectorButtonDialog.appendChild(addSelectorDialog);
+					// const addSelectorDialog = document.createElement('inlang-add-selector');
+					// addSelectorDialog.message = message;
+					// addSelectorDialog.messages = messages;
+					// selectorButtonDialog.appendChild(addSelectorDialog);
 	
-					messageElement.appendChild(selectorButtonDialog);
+					// messageElement.appendChild(selectorButtonDialog);
 	
 					// Append message to bundle
 					bundleElement.appendChild(messageElement);

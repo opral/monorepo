@@ -1,0 +1,14 @@
+{
+	"extends": "@opral/tsconfig/default",
+	"include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.js"],
+	"compilerOptions": {
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"module": "Node16",
+		"declaration": true,
+		"sourceMap": false,
+		"checkJs": true,
+		"allowJs": true,
+		"skipLibCheck": true
+	}
+}

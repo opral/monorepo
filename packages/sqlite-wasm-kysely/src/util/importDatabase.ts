@@ -1,5 +1,4 @@
-import { sqliteModule } from "../kysely/sqliteModule.js";
-import { Database } from "@eliaspourquoi/sqlite-node-wasm";
+import { SqliteWasmDatabase } from "./createInMemoryDatabase.js";
 
 export const importDatabase = ({
   db,
@@ -7,18 +6,18 @@ export const importDatabase = ({
   schema = "main",
   readOnly = false,
 }: {
-  db: Database;
+  db: SqliteWasmDatabase;
   content: Uint8Array;
   schema?: string;
   readOnly?: boolean;
 }) => {
   const deserializeFlag = readOnly
-    ? sqliteModule.capi.SQLITE_DESERIALIZE_READONLY
-    : sqliteModule.capi.SQLITE_DESERIALIZE_FREEONCLOSE |
-      sqliteModule.capi.SQLITE_DESERIALIZE_RESIZEABLE;
+    ? db.sqlite3.capi.SQLITE_DESERIALIZE_READONLY
+    : db.sqlite3.capi.SQLITE_DESERIALIZE_FREEONCLOSE |
+      db.sqlite3.capi.SQLITE_DESERIALIZE_RESIZEABLE;
 
-  const contentPointer = sqliteModule.wasm.allocFromTypedArray(content);
-  const deserializeReturnCode = sqliteModule.capi.sqlite3_deserialize(
+  const contentPointer = db.sqlite3.wasm.allocFromTypedArray(content);
+  const deserializeReturnCode = db.sqlite3.capi.sqlite3_deserialize(
     db.pointer!,
     schema,
     contentPointer,
