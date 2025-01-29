@@ -33,5 +33,13 @@ export const detectLocaleFromRequest = (args) => {
 		);
 	}
 
+	if (strat === "variable") {
+		return _localeVariable;
+	}
+
+	if (strat === "baseLocale") {
+		return baseLocale;
+	}
+
 	throw new Error(`Unsupported strategy: ${strat}`);
 };
