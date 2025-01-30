@@ -4,10 +4,7 @@ export default withParaglideNext({
 	paraglide: {
 		outdir: "./src/paraglide",
 		project: "./project.inlang",
-		strategy: {
-			type: "cookie",
-			cookieName: "PARAGLIDE_LOCALE",
-		},
+		strategy: ["pathname", "baseLocale"],
 	},
 	eslint: {
 		// Warning: This allows production builds to successfully complete even if
