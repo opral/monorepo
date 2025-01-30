@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-astro",
-	"version": "1.0.0-beta.3",
+	"version": "1.0.0-beta.4",
 	"author": "inlang <hello@inlang.com> (https://inlang.com/)",
 	"description": "A fully type-safe i18n library specifically designed for partial hydration patterns like Astro's islands.",
 	"homepage": "https://inlang.com/m/iljlwzfs/paraglide-astro-i18n",
@@ -22,8 +22,10 @@
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
+	"dependencies": {
+		"@inlang/paraglide-js": "workspace:*"
+	},
 	"peerDependencies": {
-		"@inlang/paraglide-js": "^2",
 		"astro": "^4 || ^5"
 	},
 	"devDependencies": {

@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-next",
 	"type": "module",
-	"version": "1.0.0-beta.3",
+	"version": "1.0.0-beta.4",
 	"license": "MIT",
 	"publishConfig": {
 		"access": "public",
@@ -27,9 +27,10 @@
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
-	"dependencies": {},
+	"dependencies": {
+		"@inlang/paraglide-js": "workspace:*"
+	},
 	"peerDependencies": {
-		"@inlang/paraglide-js": "^2",
 		"next": "^15"
 	},
 	"devDependencies": {
