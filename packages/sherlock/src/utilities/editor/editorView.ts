@@ -1,263 +1,261 @@
 import * as vscode from "vscode"
+import type {
+	CancellationToken,
+	Disposable,
+	Webview,
+	WebviewView,
+	WebviewViewProvider,
+	WebviewViewResolveContext,
+} from "vscode"
+
+import { Extension } from "./helper/Extension.js"
+import { getUri } from "./helper/getUri.js"
+import { getNonce } from "./helper/getNonce.js"
+
+// ---- These imports come from your old code snippet. Update paths to match your project.
 import { state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
 import { getSelectedBundleByBundleIdOrAlias } from "../helper.js"
 import { msg } from "../messages/msg.js"
-import type { BundleNested, Match } from "@inlang/sdk"
-import { updateBundleNested } from "@inlang/sdk"
 
-type Pattern =
-	| { type: "text"; value: string }
-	| {
-			type: "expression"
-			arg: { type: "variable-reference"; name: string } | { type: "literal"; value: string }
-			annotation?: {
-				type: "function-reference"
-				name: string
-				options: Array<{
-					value: { type: "variable-reference"; name: string } | { type: "literal"; value: string }
-					name: string
-				}>
-			}
-	  }
-
-export async function editorView(args: { bundleId: string }) {
-	const context = vscode.extensions.getExtension("inlang.vs-code-extension")?.exports.context
-	if (!context) {
-		console.error("Extension context is not available.")
-		return
-	}
-
-	const bundle = await getSelectedBundleByBundleIdOrAlias(args.bundleId)
-
-	if (!bundle) {
-		return msg("Bundle with id " + args.bundleId + " not found.", "error")
-	}
-
-	const panel = vscode.window.createWebviewPanel(
-		"bundlePanel",
-		state().selectedProjectPath.split("/").pop() ?? "Bundle",
-		vscode.ViewColumn.One,
-		{
-			enableScripts: true,
-			localResourceRoots: [vscode.Uri.file(context.extensionPath)],
+// Example interface (from old snippet) for "updateBundle" messages
+interface UpdateBundleMessage {
+	command: string
+	bundle: {
+		entityId: string
+		entity: "variant" | "message" // etc.
+		newData?: {
+			id: string
+			messageId: string
+			matches: Array<{ type: string; key: string }>
+			pattern: Array<{ type: string; value?: string }>
 		}
-	)
-
-	panel.webview.html = await getWebviewContent({
-		bundle,
-		context: context,
-		webview: panel.webview,
-	})
-
-	panel.webview.onDidReceiveMessage(
-		async (message: {
-			command: string
-			bundle: {
-				entityId: string
-				entity: "variant"
-				newData: {
-					id: string
-					messageId: string
-					matches: Array<{ type: string; key: string }>
-					pattern: Array<{ type: string; value?: string }>
-				}
-			}
-		}) => {
-			console.log("message", message)
-			switch (message.command) {
-				case "updateBundle":
-					try {
-						const originalBundle = await getSelectedBundleByBundleIdOrAlias(args.bundleId)
-						if (!originalBundle) {
-							throw new Error(`Bundle with id ${args.bundleId} not found`)
-						}
-
-						if (message.bundle.newData) {
-							state()
-								.project?.db.insertInto(message.bundle.entity)
-								.values({
-									...message.bundle.newData,
-									// @ts-expect-error - we need to remove the nesting
-									messages: undefined,
-									variants: undefined,
-								})
-								.onConflict((oc) =>
-									oc.column("id").doUpdateSet({
-										...message.bundle.newData,
-										// @ts-expect-error - we need to remove the nesting
-										messages: undefined,
-										variants: undefined,
-									})
-								)
-								.execute()
-						} else {
-							state()
-								.project?.db.deleteFrom(message.bundle.entity)
-								.where("id", "=", message.bundle.entityId)
-								.execute()
-						}
-
-						CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
-						msg("Bundle updated successfully.")
-					} catch (e) {
-						console.log(`Couldn't update bundle. ${e}`, "error")
-						console.error(e)
-					}
-
-					CONFIGURATION.EVENTS.ON_DID_EDITOR_VIEW_CHANGE.fire()
-					break
-			}
-		}
-	)
+	}
 }
 
-export async function getWebviewContent(args: {
-	bundle: BundleNested
-	context: vscode.ExtensionContext
-	webview: vscode.Webview
-}): Promise<string> {
-	const { context, webview, bundle } = args
+/**
+ * The viewType property from the class version:
+ */
+export const EDITOR_VIEW_TYPE = "editorView"
 
-	// Paths to local scripts and styles
-	const styleUri = webview.asWebviewUri(
-		vscode.Uri.joinPath(context.extensionUri, "assets", "editor-view.css")
-	)
+export function createEditorView(
+	extensionUri: vscode.Uri,
+	// optionally pass a bundleId if needed, like the old `editorView(args: { bundleId: string })`
+	initialBundleId?: string
+): WebviewViewProvider & {
+	setBundleId: (newBundleId: string) => void
+	getBundleId: () => string | undefined
+	dispose: () => void
+} {
+	// Private, internal variables ("fields") that used to be on the class
+	let view: WebviewView | undefined
+	let disposables: Disposable[] = []
+	let bundleId = initialBundleId
 
-	const scriptUri = webview.asWebviewUri(
-		vscode.Uri.joinPath(context.extensionUri, "assets", "editor-component.js")
-	)
+	/**
+	 * The method that gets called when the WebviewView becomes visible.
+	 * You must implement this to satisfy `WebviewViewProvider`.
+	 */
+	async function resolveWebviewView(
+		webviewView: WebviewView,
+		_context: WebviewViewResolveContext,
+		_token: CancellationToken
+	) {
+		view = webviewView
 
-	const litHtmlUri = webview.asWebviewUri(
-		vscode.Uri.joinPath(context.extensionUri, "assets", "lit-html.js")
-	)
+		view.webview.options = {
+			enableScripts: true,
+			localResourceRoots: [extensionUri],
+		}
 
-	return `<!DOCTYPE html>
-	<html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<title>Inlang Bundle</title>
-		<link href="${styleUri}" rel="stylesheet">
-		<script type="module" src="${litHtmlUri}"></script>
-		<script type="module" src="${scriptUri}"></script>
-		<!-- Include other component scripts -->
-	</head>
-	<body>
-		<div id="bundle-container"></div>
-		<script type="module">
-			// Initialize VSCode API
-			const vscode = acquireVsCodeApi();
-	
-			// Function to create and append elements with slots
-			function createInlangComponents(bundle, messages) {
-				const bundleContainer = document.getElementById('bundle-container');
-				const bundleElement = document.createElement('inlang-bundle');
-				bundleElement.bundle = bundle;
-				bundleElement.messages = messages;
-	
-				// Listen for change events
-				bundleElement.addEventListener('change', (event) => {
-					vscode.postMessage({
-						command: 'updateBundle',
-						bundle: event.detail // Contains the updated bundle information
-					});
-				});
-	
-				// Append bundleElement to container
-				bundleContainer.appendChild(bundleElement);
-	
-				// Dynamically create and append messages
-				messages.forEach(message => {
-					const messageElement = document.createElement('inlang-message');
-					messageElement.setAttribute('slot', 'message');
-					messageElement.message = message;
-					messageElement.settings = {}; // Replace with actual settings if needed
-	
-					// Dynamically create and append variants
-					message.variants.forEach(variant => {
-						const variantElement = document.createElement('inlang-variant');
-						variantElement.setAttribute('slot', 'variant');
-						variantElement.variant = variant;
-	
-						// Create and append pattern-editor
-						const patternEditor = document.createElement('inlang-pattern-editor');
-						patternEditor.setAttribute('slot', 'pattern-editor');
-						patternEditor.variant = variant;
-						variantElement.appendChild(patternEditor);
-	
-						// Conditional rendering based on selectors and variants
-						if ((message.selectors.length === 0 && message.variants.length <= 1) || !message.selectors) {	
-							// Add selector button and dialog
-							const variantActionDiv = document.createElement('div');
-							variantActionDiv.setAttribute('slot', 'variant-action');
-							variantActionDiv.textContent = 'Add selector';
-							variantActionDiv.addEventListener('click', handleSelectorModal);
-							variantElement.appendChild(variantActionDiv);
-	
-							const variantActionDialog = document.createElement('sl-dialog');
-							variantActionDialog.setAttribute('slot', 'variant-action');
-							variantActionDialog.setAttribute('label', 'Add Selector');
-	
-							const addSelector = document.createElement('inlang-add-selector');
-							addSelector.message = message;
-							addSelector.messages = messages;
-							variantActionDialog.appendChild(addSelector);
-	
-							variantElement.appendChild(variantActionDialog);
-						}
-	
-						// Append variant to message
-						messageElement.appendChild(variantElement);
-					});
-	
-					// // Add selector button and dialog to message
-					// const selectorButtonDiv = document.createElement('div');
-					// selectorButtonDiv.setAttribute('slot', 'selector-button');
-					// selectorButtonDiv.classList.add('add-selector');
-					// selectorButtonDiv.textContent = 'Add selector';
-					// selectorButtonDiv.addEventListener('click', handleSelectorModal);
-					// messageElement.appendChild(selectorButtonDiv);
-	
-					// const selectorButtonDialog = document.createElement('sl-dialog');
-					// selectorButtonDialog.setAttribute('slot', 'selector-button');
-					// selectorButtonDialog.setAttribute('label', 'Add Selector');
-	
-					// const addSelectorDialog = document.createElement('inlang-add-selector');
-					// addSelectorDialog.message = message;
-					// addSelectorDialog.messages = messages;
-					// selectorButtonDialog.appendChild(addSelectorDialog);
-	
-					// messageElement.appendChild(selectorButtonDialog);
-	
-					// Append message to bundle
-					bundleElement.appendChild(messageElement);
-				});
+		// Provide initial React-based HTML for the webview
+		view.webview.html = getHtmlForWebview(view.webview)
+
+		// Listen for messages from the React webview
+		setWebviewMessageListener(view.webview)
+	}
+
+	/**
+	 * Cleans up and disposes of webview resources when the view is closed/unmounted.
+	 */
+	function dispose() {
+		while (disposables.length) {
+			const disposable = disposables.pop()
+			if (disposable) {
+				disposable.dispose()
 			}
-	
-			// Handle messages from VSCode
-			window.addEventListener('message', event => {
-				const message = event.data; // The JSON data our extension sent
-	
-				switch (message.command) {
-					case 'updateBundle':
-						// Handle bundle update
-						console.log('Bundle updated:', message.bundle);
-						break;
-					// Handle other commands
+		}
+	}
+
+	/**
+	 * If you want to inject a bundle directly, you could fetch it here and
+	 * embed it. For now, we keep the same style as your React-starter approach.
+	 */
+	function getHtmlForWebview(webview: Webview) {
+		const file = "src/index.tsx"
+		const localPort = "5173"
+		const localServerUrl = `localhost:${localPort}`
+
+		const stylesUri = getUri(webview, extensionUri, ["webview-ui", "build", "assets", "index.css"])
+
+		let scriptUri: string | vscode.Uri
+		const isProd = Extension.getInstance().isProductionMode
+		if (isProd) {
+			scriptUri = getUri(webview, extensionUri, ["webview-ui", "build", "assets", "index.js"])
+		} else {
+			scriptUri = `http://${localServerUrl}/${file}`
+		}
+
+		const nonce = getNonce()
+
+		const reactRefresh = /*html*/ `
+      <script type="module">
+        import RefreshRuntime from "http://localhost:5173/@react-refresh"
+        RefreshRuntime.injectIntoGlobalHook(window)
+        window.$RefreshReg$ = () => {}
+        window.$RefreshSig$ = () => (type) => type
+        window.__vite_plugin_react_preamble_installed__ = true
+      </script>`
+
+		const reactRefreshHash = "sha256-YmMpkm5ow6h+lfI3ZRp0uys+EUCt6FOyLkJERkfVnTY="
+
+		const csp = [
+			`default-src 'none';`,
+			`script-src 'unsafe-eval' https://* ${
+				isProd
+					? `'nonce-${nonce}'`
+					: `http://${localServerUrl} http://0.0.0.0:${localPort} '${reactRefreshHash}'`
+			}`,
+			`style-src ${webview.cspSource} 'self' 'unsafe-inline' https://*`,
+			`font-src ${webview.cspSource}`,
+			`connect-src https://* ${
+				isProd
+					? ``
+					: `ws://${localServerUrl} ws://0.0.0.0:${localPort} http://${localServerUrl} http://0.0.0.0:${localPort}`
+			}`,
+		]
+
+		return /*html*/ `<!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="Content-Security-Policy" content="${csp.join("; ")}">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" type="text/css" href="${stylesUri}">
+        <title>VSCode React Starter</title>
+      </head>
+      <body>
+        <div id="root"></div>
+        ${isProd ? "" : reactRefresh}
+        <script type="module" src="${scriptUri}"></script>
+      </body>
+    </html>`
+	}
+
+	/**
+	 * This listens for messages sent from the React app (webview)
+	 * via vscode.postMessage({ command: '...', ... }).
+	 */
+	function setWebviewMessageListener(webview: Webview) {
+		webview.onDidReceiveMessage(
+			async (message: any) => {
+				console.log("Received message from webview:", message)
+				const command = message.command
+
+				switch (command) {
+					case "hello":
+						// Example from your existing code
+						vscode.window.showInformationMessage(message.text)
+						return
+
+					case "updateBundle":
+						// The shape of the message is presumably something like:
+						// {
+						//   command: 'updateBundle',
+						//   bundle: {
+						//     entityId: string,
+						//     entity: 'variant' | 'message',
+						//     newData?: {...}
+						//   }
+						// }
+						await handleUpdateBundle(message)
+						return
+
+					default:
+						console.log("Unknown command from webview:", command)
 				}
-			});
-	
-			// Function to handle selector modal (placeholder)
-			function handleSelectorModal(event) {
-				// Implement modal handling logic here
-				console.log('Selector modal triggered');
+			},
+			undefined,
+			disposables
+		)
+	}
+
+	/**
+	 * Replicates the logic from your old snippet's onDidReceiveMessage => updateBundle.
+	 */
+	async function handleUpdateBundle(message: UpdateBundleMessage) {
+		try {
+			if (!bundleId) {
+				throw new Error("No bundleId set for this view.")
 			}
-	
-			// Render the components with initial data
-			const initialBundle = ${JSON.stringify(bundle)};
-			const initialMessages = ${JSON.stringify(bundle.messages)};
-			createInlangComponents(initialBundle, initialMessages);
-		</script>
-	</body>
-	</html>`
+
+			// 1. Re-fetch the "original" bundle
+			const originalBundle = await getSelectedBundleByBundleIdOrAlias(bundleId)
+			if (!originalBundle) {
+				throw new Error(`Bundle with id ${bundleId} not found`)
+			}
+
+			// 2. Insert or delete data
+			if (message.bundle.newData) {
+				state()
+					.project?.db.insertInto(message.bundle.entity)
+					.values({
+						...message.bundle.newData,
+					})
+					.onConflict((oc) =>
+						oc.column("id").doUpdateSet({
+							...message.bundle.newData,
+						})
+					)
+					.execute()
+			} else {
+				// If no newData, remove it
+				state()
+					.project?.db.deleteFrom(message.bundle.entity)
+					.where("id", "=", message.bundle.entityId)
+					.execute()
+			}
+
+			// 3. Trigger your extension's events
+			CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
+			msg("Bundle updated successfully.")
+
+			// Possibly re-render or do something else
+			CONFIGURATION.EVENTS.ON_DID_EDITOR_VIEW_CHANGE.fire()
+		} catch (e) {
+			console.error(`Couldn't update bundle: ${e}`)
+			msg(`Couldn't update bundle. ${String(e)}`, "error")
+		}
+	}
+
+	/**
+	 * Set or get the current bundleId from outside.
+	 */
+	function setBundleId(newBundleId: string) {
+		bundleId = newBundleId
+	}
+	function getBundleId() {
+		return bundleId
+	}
+
+	/**
+	 * Return an object matching the `WebviewViewProvider` interface.
+	 * We also expose setBundleId/getBundleId and dispose explicitly.
+	 */
+	return {
+		resolveWebviewView,
+		dispose,
+		setBundleId,
+		getBundleId,
+	}
 }
