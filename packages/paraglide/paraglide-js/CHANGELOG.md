@@ -1,5 +1,17 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.15
+
+New `strategy` API. See https://github.com/opral/inlang-paraglide-js/issues/346.
+
+You can now define your own stragegy for getting and setting a locale.
+
+```diff
+await compile({
++  strategy: ["pathname", "cookie", "baseLocale"]
+})
+```
+
 ## 2.0.0-beta.14
 
 Fixes windows path normalization https://github.com/opral/monorepo/pull/3374
