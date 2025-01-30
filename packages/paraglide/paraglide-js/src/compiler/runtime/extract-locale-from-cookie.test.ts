@@ -1,16 +1,16 @@
 import { test, expect } from "vitest";
 import { createRuntimeForTesting } from "./create-runtime.js";
 
-test("throws if executed on the server", async () => {
+test("returns undefined if document is not available", async () => {
+	// @ts-expect-error - global variable definition
+	globalThis.document = undefined;
+
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de"],
-		compilerOptions: {
-			isServer: "true",
-		},
 	});
 
-	expect(() => runtime.extractLocaleFromCookie()).toThrowError();
+	expect(runtime.extractLocaleFromCookie()).toBeUndefined();
 });
 
 test("matches the locale of a cookie", async () => {
@@ -18,7 +18,6 @@ test("matches the locale of a cookie", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			isServer: "false",
 			strategy: ["cookie"],
 			cookieName: "PARAGLIDE_LOCALE",
 		},

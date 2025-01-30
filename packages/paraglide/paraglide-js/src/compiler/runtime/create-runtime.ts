@@ -11,7 +11,6 @@ export function createRuntimeFile(args: {
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
-		isServer: string;
 	};
 }): string {
 	return `
@@ -23,8 +22,6 @@ ${injectCode("./locales.js").replace(`["<base-locale>"]`, `["${args.locales.join
 ${injectCode("./strategy.js").replace(`["variable"]`, `["${args.compilerOptions.strategy.join('", "')}"]`)}
 
 ${injectCode("./cookie-name.js").replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)}
-
-const isServer = ${args.compilerOptions.isServer}
 
 /**
  * Define the \`getLocale()\` function.
@@ -113,9 +110,6 @@ function injectCode(path: string): string {
 /**
  * Returns the runtime module as an object for testing purposes.
  *
- * Defaults to `isServer: "true"` and `strategy: ["variable"]`
- * to avoid server-side testing issues.
- *
  * @example
  *   const runtime = await createRuntime({
  *      baseLocale: "en",
@@ -128,7 +122,6 @@ export async function createRuntimeForTesting(args: {
 	compilerOptions?: {
 		strategy?: CompilerOptions["strategy"];
 		cookieName?: CompilerOptions["cookieName"];
-		isServer?: string;
 	};
 }): Promise<Runtime> {
 	const file = createRuntimeFile({
@@ -137,7 +130,6 @@ export async function createRuntimeForTesting(args: {
 		compilerOptions: {
 			...defaultCompilerOptions,
 			strategy: ["variable"],
-			isServer: "true",
 			...args.compilerOptions,
 		},
 	});

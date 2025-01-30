@@ -11,9 +11,9 @@ import { strategy } from "./strategy.js";
  * The implementation is overwritten
  * by \`defineGetLocale()\` and \`defineSetLocale()\`.
  *
- * @type {Locale}
+ * @type {Locale|undefined}
  */
-let _locale = baseLocale;
+let _locale;
 
 /**
  * Get the current locale.
@@ -38,10 +38,14 @@ export let getLocale = () => {
 		if (strat === "baseLocale") {
 			locale = baseLocale;
 		}
-		if (strat === "pathname") {
+		if (
+			strat === "pathname" &&
+			typeof window !== "undefined" &&
+			window.location?.pathname
+		) {
 			locale = extractLocaleFromPathname(window.location.pathname);
 		}
-		if (strat === "variable") {
+		if (strat === "variable" && _locale !== undefined) {
 			locale = _locale;
 		}
 		// check if match, else continue loop

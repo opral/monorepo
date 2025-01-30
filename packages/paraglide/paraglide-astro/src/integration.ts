@@ -33,10 +33,7 @@ export function integration(options: CompilerOptions): AstroIntegration {
 				updateConfig({
 					vite: {
 						plugins: [
-							paraglideVitePlugin({
-								...options,
-								isServer: "import.meta.env.SSR",
-							}),
+							paraglideVitePlugin(options),
 							alias({
 								//normalizing the path is very important!
 								//otherwise you get duplicate modules on windows

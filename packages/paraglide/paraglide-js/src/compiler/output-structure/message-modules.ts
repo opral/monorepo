@@ -13,7 +13,6 @@ export function generateMessageModules(
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
-		isServer: NonNullable<CompilerOptions["isServer"]>;
 	}
 ): Record<string, string> {
 	const output: Record<string, string> = {

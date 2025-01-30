@@ -14,10 +14,6 @@ export default defineConfig({
 		paraglideVitePlugin({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
-			strategy: {
-				type: "cookie",
-				cookieName: "PARAGLIDE_LOCALE",
-			},
 		}),
 	],
 });
