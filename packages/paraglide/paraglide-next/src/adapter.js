@@ -1,20 +1,15 @@
 import { NextResponse } from "next/server";
-import { deLocalizePath, detectLocaleFromRequest } from "./runtime.js";
+import { deLocalizePath, extractLocaleFromRequest } from "./runtime.js";
 
 /**
  *
  * @param {import("next/server").NextRequest} request
  */
 export async function middleware(request) {
-	const locale = detectLocaleFromRequest({
-		pathname: request.nextUrl.pathname,
-		headers: {},
-		cookies: Object.fromEntries(
-			request.cookies.getAll().map((cookie) => [cookie.name, cookie.value])
-		),
-	});
+	const locale = extractLocaleFromRequest(request);
 
-	// in case of i18n routing strategy, we need the delocalized path
+	// in case of pathname strategy, we need the delocalized
+	// path for nextjs to match the page
 	const path = deLocalizePath(request.nextUrl.pathname);
 
 	if (request.nextUrl.pathname.startsWith("/_next")) {
