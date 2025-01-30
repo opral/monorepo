@@ -4,30 +4,30 @@ export function jsDocBundleFunctionTypes(args: {
 	inputs: InputVariable[];
 	locales: string[];
 }): string {
-	const inputParams = args.inputs
-		.map((input) => {
-			return `${input.name}: NonNullable<unknown>`;
-		})
-		.join(", ");
-
 	const localesUnion = args.locales.map((locale) => `"${locale}"`).join(" | ");
 
 	return `
-* @param {{ ${inputParams} }} inputs
+* @param {${inputsType(args.inputs)}} inputs
 * @param {{ locale?: ${localesUnion} }} options
 * @returns {string}`;
 }
 
-export function jsDocMessageFunctionTypes(args: {
-	inputs: InputVariable[];
-}): string {
-	const inputParams = args.inputs
+/**
+ * Returns the types for the input variables.
+ *
+ * @example
+ *   const inputs = [{ name: "age" }]
+ *   inputsType(inputs)
+ *   >> "{ age: NonNullable<unknown> }"
+ */
+export function inputsType(inputs: InputVariable[]): string {
+	if (inputs.length === 0) {
+		return "{}";
+	}
+	const inputParams = inputs
 		.map((input) => {
 			return `${input.name}: NonNullable<unknown>`;
 		})
 		.join(", ");
-
-	return `/**
-* @param {{ ${inputParams} }} i
-*/`;
+	return `{ ${inputParams} }`;
 }

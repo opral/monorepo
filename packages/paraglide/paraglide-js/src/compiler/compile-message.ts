@@ -3,13 +3,11 @@ import type { Registry } from "./registry.js";
 import { compilePattern } from "./compile-pattern.js";
 import type { Compiled } from "./types.js";
 import { doubleQuote } from "../services/codegen/quotes.js";
+import { inputsType } from "./jsdoc-types.js";
 
 /**
  * Returns the compiled message as a string
  *
- * @example
- * @param message The message to compile
- * @returns (inputs) => string
  */
 export const compileMessage = (
 	declarations: Declaration[],
@@ -21,6 +19,7 @@ export const compileMessage = (
 	if (variants.length == 0) {
 		throw new Error("Message must have at least one variant");
 	}
+
 	const hasMultipleVariants = variants.length > 1;
 	return hasMultipleVariants
 		? compileMessageWithMultipleVariants(
@@ -29,10 +28,11 @@ export const compileMessage = (
 				variants,
 				registry
 			)
-		: compileMessageWithOneVariant(message, variants, registry);
+		: compileMessageWithOneVariant(declarations, message, variants, registry);
 };
 
 function compileMessageWithOneVariant(
+	declarations: Declaration[],
 	message: Message,
 	variants: Variant[],
 	registry: Registry
@@ -41,12 +41,15 @@ function compileMessageWithOneVariant(
 	if (!variant || variants.length !== 1) {
 		throw new Error("Message must have exactly one variant");
 	}
+	const inputs = declarations.filter((decl) => decl.type === "input-variable");
+	const hasInputs = inputs.length > 0;
 	const compiledPattern = compilePattern(
 		message.locale,
 		variant.pattern,
 		registry
 	);
-	const code = `export const ${message.bundleId} = (i) => ${compiledPattern.code}`;
+	const code = `/** @type {(inputs: ${inputsType(inputs)}) => string} */
+export const ${message.bundleId} = (${hasInputs ? "i" : ""}) => ${compiledPattern.code};`;
 	return { code, node: message };
 }
 
@@ -56,8 +59,12 @@ function compileMessageWithMultipleVariants(
 	variants: Variant[],
 	registry: Registry
 ): Compiled<Message> {
-	if (variants.length <= 1)
+	if (variants.length <= 1) {
 		throw new Error("Message must have more than one variant");
+	}
+
+	const inputs = declarations.filter((decl) => decl.type === "input-variable");
+	const hasInputs = inputs.length > 0;
 
 	// TODO make sure that matchers use keys instead of indexes
 	const compiledVariants = [];
@@ -101,9 +108,10 @@ function compileMessageWithMultipleVariants(
 		);
 	}
 
-	const code = `export const ${message.bundleId} = (i) => {
+	const code = `/** @type {(inputs: ${inputsType(inputs)}) => string} */
+export const ${message.bundleId} = (${hasInputs ? "i" : ""}) => {
 	${compiledVariants.join("\n\t")}
-}`;
+};`;
 
 	return { code, node: message };
 }

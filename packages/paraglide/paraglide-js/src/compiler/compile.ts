@@ -98,7 +98,9 @@ export type CompilerOptions = {
 
 // This is a workaround to prevent multiple compilations from running at the same time.
 // https://github.com/opral/inlang-paraglide-js/issues/320#issuecomment-2596951222
-let compilationInProgress: Promise<void> | null = null;
+let compilationInProgress: Promise<{
+	outputHashes: Record<string, string> | undefined;
+}> | null = null;
 
 /**
  * Loads, compiles, and writes the output to disk.
@@ -113,7 +115,10 @@ let compilationInProgress: Promise<void> | null = null;
  *     outdir: 'path/to/output',
  *   })
  */
-export async function compile(options: CompilerOptions): Promise<void> {
+export async function compile(
+	options: CompilerOptions,
+	previousOutputHashes?: Record<string, string>
+): Promise<{ outputHashes: Record<string, string> | undefined }> {
 	const withDefaultOptions = {
 		...defaultCompilerOptions,
 		...options,
@@ -144,7 +149,12 @@ export async function compile(options: CompilerOptions): Promise<void> {
 			project,
 		});
 
-		await writeOutput(absoluteOutdir, output, fs.promises);
+		const outputHashes = await writeOutput({
+			directory: absoluteOutdir,
+			output,
+			fs: fs.promises,
+			previousOutputHashes,
+		});
 
 		if (!localAccount) {
 			const activeAccount = await project.lix.db
@@ -156,8 +166,12 @@ export async function compile(options: CompilerOptions): Promise<void> {
 		}
 
 		await project.close();
+
+		return { outputHashes };
 	})();
 
-	await compilationInProgress;
+	const result = structuredClone(await compilationInProgress);
 	compilationInProgress = null;
+
+	return result;
 }

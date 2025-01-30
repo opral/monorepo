@@ -76,9 +76,6 @@ export const compileProject = async (args: {
 	}
 
 	for (const [filename, content] of Object.entries(output)) {
-		if (filename.endsWith(".js") || filename.endsWith(".ts")) {
-			output[filename] = `// @ts-nocheck\n${output[filename]}`;
-		}
 		if (optionsWithDefaults.includeEslintDisableComment) {
 			if (filename.endsWith(".js")) {
 				output[filename] = `// eslint-disable\n${content}`;

@@ -5,10 +5,8 @@ import { jsIdentifier } from "../services/codegen/identifier.js";
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js";
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js";
 import type { Compiled } from "./types.js";
-import {
-	jsDocBundleFunctionTypes,
-	jsDocMessageFunctionTypes,
-} from "./jsdoc-types.js";
+import { jsDocBundleFunctionTypes } from "./jsdoc-types.js";
+import { KEYWORDS } from "../services/valid-js-identifier/reserved-words.js";
 
 export type CompiledBundleWithMessages = {
 	/** The compilation result for the bundle index */
@@ -29,6 +27,16 @@ export const compileBundle = (args: {
 }): CompiledBundleWithMessages => {
 	const compiledMessages: Record<string, Compiled<Message>> = {};
 
+	if (KEYWORDS.includes(args.bundle.id) || args.bundle.id === "then") {
+		throw new Error(
+			[
+				`You are using a reserved JS keyword as id "${args.bundle.id}".`,
+				"Rename the message bundle id to something else.",
+				"See https://github.com/opral/inlang-paraglide-js/issues/331",
+			].join("\n")
+		);
+	}
+
 	for (const message of args.bundle.messages) {
 		if (compiledMessages[message.locale]) {
 			throw new Error(`Duplicate locale: ${message.locale}`);
@@ -40,12 +48,6 @@ export const compileBundle = (args: {
 			message.variants,
 			args.registry
 		);
-		// add types to the compiled message function
-		const inputs = args.bundle.declarations.filter(
-			(decl) => decl.type === "input-variable"
-		);
-
-		compiledMessage.code = `${jsDocMessageFunctionTypes({ inputs })}\n${compiledMessage.code}`;
 
 		// set the pattern for the language tag
 		compiledMessages[message.locale] = compiledMessage;

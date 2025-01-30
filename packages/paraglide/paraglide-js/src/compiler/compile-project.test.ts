@@ -1,5 +1,9 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
-import { createProject as typescriptProject, ts } from "@ts-morph/bootstrap";
+import {
+	createProject as typescriptProject,
+	ts,
+	type ProjectOptions,
+} from "@ts-morph/bootstrap";
 import {
 	type BundleNested,
 	Declaration,
@@ -381,21 +385,31 @@ describe.each([
 			});
 		});
 
+		// whatever the strictest users use, this is the ultimate nothing gets stricter than this
+		// (to avoid developers opening issues "i get a ts warning in my code")
+		const superStrictRuleOutAnyErrorTsSettings: ProjectOptions["compilerOptions"] =
+			{
+				outDir: "dist",
+				declaration: true,
+				allowJs: true,
+				checkJs: true,
+				noImplicitAny: true,
+				noUnusedLocals: true,
+				noUnusedParameters: true,
+				noImplicitReturns: true,
+				noImplicitThis: true,
+				noUncheckedIndexedAccess: true,
+				noPropertyAccessFromIndexSignature: true,
+				module: ts.ModuleKind.Node16,
+				strict: true,
+			};
+
 		// remove with v3 of paraglide js
 		test("./runtime.js types", async () => {
 			const project = await typescriptProject({
 				useInMemoryFileSystem: true,
-				compilerOptions: {
-					outDir: "dist",
-					declaration: true,
-					allowJs: true,
-					checkJs: true,
-					module: ts.ModuleKind.Node16,
-					strict: true,
-				},
+				compilerOptions: superStrictRuleOutAnyErrorTsSettings,
 			});
-
-			console.log(output["runtime.js"]);
 
 			for (const [fileName, code] of Object.entries(output)) {
 				if (fileName.endsWith(".js") || fileName.endsWith(".ts")) {
@@ -424,12 +438,18 @@ describe.each([
 
 		// isLocale should narrow the type of it's argument
 		const thing = 5;
+
+		let a: "de" | "en" | "en-US";
+
 		if(runtime.isLocale(thing)) {
-			const a : "de" | "en" | "en-US" = thing
+			a = thing
 		} else {
 			// @ts-expect-error - thing is not a language tag
-			const a : "de" | "en" | "en-US" = thing
+			a = thing
 		}
+
+		// to make ts not complain about unused variables
+		console.log(a)
   `
 			);
 
@@ -444,14 +464,7 @@ describe.each([
 		test("./messages.js types", async () => {
 			const project = await typescriptProject({
 				useInMemoryFileSystem: true,
-				compilerOptions: {
-					outDir: "dist",
-					declaration: true,
-					allowJs: true,
-					checkJs: true,
-					module: ts.ModuleKind.Node16,
-					strict: true,
-				},
+				compilerOptions: superStrictRuleOutAnyErrorTsSettings,
 			});
 
 			for (const [fileName, code] of Object.entries(output)) {

@@ -19,6 +19,6 @@ export const runCompiler: CliStep<
 		project: ctx.project,
 	});
 
-	await writeOutput(absoluteOutdir, output, ctx.fs);
+	await writeOutput({ directory: absoluteOutdir, output, fs: ctx.fs });
 	return { ...ctx };
 };

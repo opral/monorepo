@@ -63,3 +63,17 @@ const mockBundle: BundleNested = {
 		},
 	],
 };
+
+test("throws if a JS keyword is used as an identifier", async () => {
+	expect(() =>
+		compileBundle({
+			fallbackMap: {},
+			registry: {},
+			bundle: {
+				id: "then",
+				declarations: [],
+				messages: [],
+			},
+		})
+	).toThrow();
+});
