@@ -1,6 +1,6 @@
 # @inlang/paraglide-js
 
-## 2.0.0-beta.15
+## 2.0.0-beta.16
 
 New `strategy` API. See https://github.com/opral/inlang-paraglide-js/issues/346.
 
