@@ -87,3 +87,4 @@ test("the files should include files for each locale, even if there are no messa
 	expect(output).toHaveProperty("messages/de.js");
 	expect(output).toHaveProperty("messages/fr.js");
 });
+

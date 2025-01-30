@@ -5,10 +5,7 @@ import { jsIdentifier } from "../services/codegen/identifier.js";
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js";
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js";
 import type { Compiled } from "./types.js";
-import {
-	jsDocBundleFunctionTypes,
-	jsDocMessageFunctionTypes,
-} from "./jsdoc-types.js";
+import { jsDocBundleFunctionTypes } from "./jsdoc-types.js";
 
 export type CompiledBundleWithMessages = {
 	/** The compilation result for the bundle index */
@@ -40,12 +37,6 @@ export const compileBundle = (args: {
 			message.variants,
 			args.registry
 		);
-		// add types to the compiled message function
-		const inputs = args.bundle.declarations.filter(
-			(decl) => decl.type === "input-variable"
-		);
-
-		compiledMessage.code = `${jsDocMessageFunctionTypes({ inputs })}\n${compiledMessage.code}`;
 
 		// set the pattern for the language tag
 		compiledMessages[message.locale] = compiledMessage;

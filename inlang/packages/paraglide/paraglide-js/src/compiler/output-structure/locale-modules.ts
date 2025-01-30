@@ -41,14 +41,7 @@ export function generateLocaleModules(
 	// generate message files
 	for (const locale of settings.locales) {
 		const filename = `messages/${locale}.${fileExt}`;
-		let file = `
-/** 
- * This file contains language specific functions for tree-shaking. 
- * 
- *! WARNING: Only import from this file if you want to manually
- *! optimize your bundle. Else, import from the \`messages.js\` file. 
- */
-import * as registry from '../registry.${importExt}'`;
+		let file = "";
 
 		for (const compiledBundle of compiledBundles) {
 			const compiledMessage = compiledBundle.messages[locale];
@@ -66,6 +59,11 @@ import * as registry from '../registry.${importExt}'`;
 			}
 
 			file += `\n\n${compiledMessage.code}`;
+		}
+
+		// add import if used
+		if (file.includes("registry.")) {
+			file = `import * as registry from "./registry.js"\n` + file;
 		}
 
 		output[filename] = file;
