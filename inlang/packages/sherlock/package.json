@@ -237,15 +237,16 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/sdk": "workspace:*",
-		"@inlang/settings-component": "workspace:*",
 		"@inlang/editor-component": "workspace:*",
 		"@inlang/recommend-sherlock": "workspace:*",
 		"@inlang/rpc": "workspace:*",
+		"@inlang/sdk": "workspace:*",
+		"@inlang/settings-component": "workspace:*",
 		"@vitest/coverage-v8": "2.1.8",
 		"comlink": "^4.4.1",
 		"fast-glob": "^3.2.12",
 		"https-proxy-agent": "7.0.2",
+		"kysely": "^0.27.4",
 		"lit-html": "^3.1.2",
 		"prettier": "^3.3.3",
 		"require-from-string": "^2.0.2",
