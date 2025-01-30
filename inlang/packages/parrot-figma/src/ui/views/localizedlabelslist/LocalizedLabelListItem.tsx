@@ -22,7 +22,7 @@ import { MessageParameterValues } from "../../../lib/message/MessageParameterVal
 import TranslatorMachine, {
 	NoMoreTranslationsLeftError,
 } from "../../../lib/translationprovider/TranslatorMachine";
-import FeatureFlags from "../../../lib/featureflags/FeatureFlags";
+
 
 type LocalizedLabelListItemProps = {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- TODO specify type
@@ -461,8 +461,7 @@ export default function LocalizedLabelListItem({
 									{localizedLabel.language !==
 										localizedLabelManager.messageStore.getRefLanugage() &&
 										(localizedLabel.currentPatternHTML === undefined ||
-											localizedLabel.currentPatternHTML === "") &&
-										FeatureFlags.features.payment && (
+											localizedLabel.currentPatternHTML === "") && (
 											<button
 												type="button"
 												disabled={!localizedLabel.isTranslatable()}

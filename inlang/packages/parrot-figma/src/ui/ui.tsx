@@ -42,7 +42,7 @@ import { OverlayScrollbarsComponent } from "./compontents/overlayscrollbar";
 import TranslatorMachine from "../lib/translationprovider/TranslatorMachine";
 import MessageUpsellOverlay from "./compontents/upselloverlay/MessageUpsellOverlay";
 import Monitoring from "../lib/monitoring/MonitoringProxy";
-import FeatureFlags from "../lib/featureflags/FeatureFlags";
+
 
 console.log(`Starting Figma UI - Version ${pjs.version}`);
 
