@@ -9,6 +9,8 @@
     "@inlang/cli",
     "@inlang/fink",
     "@inlang/paraglide-js",
+    "@inlang/paraglide-next",
+    "@inlang/paraglide-astro",
     "@inlang/paraglide-sveltekit",
     "@inlang/paraglide-js-example-cli",
     "@inlang/paraglide-js-example-vite",
