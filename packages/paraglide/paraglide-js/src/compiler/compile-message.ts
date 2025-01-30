@@ -114,4 +114,3 @@ export const ${message.bundleId} = (${hasInputs ? "i" : ""}) => {
 
 	return { code, node: message };
 }
-

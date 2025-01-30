@@ -136,5 +136,3 @@ const mockFs = (files: memfs.DirectoryJSON) => {
 	const _memfs = memfs.createFsFromVolume(memfs.Volume.fromJSON(files));
 	return _memfs.promises as unknown as typeof fs;
 };
-
-
