@@ -17,10 +17,6 @@ export let setLocale = (newLocale) => {
 		// a default for a custom strategy to get started quickly
 		// is likely overwritten by `defineSetLocale()`
 		_locale = newLocale;
-	} else if (strat === "custom") {
-		// a default for a custom strategy to get started quickly
-		// is likely overwritten by `defineSetLocale()`
-		throw new Error("Custom strategy not implemented");
 	} else if (strat === "cookie") {
 		if (isServer) {
 			throw new Error(

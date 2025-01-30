@@ -25,10 +25,6 @@ export const extractLocaleFromRequest = (request) => {
 				?.split("=")[1];
 		} else if (strat === "pathname") {
 			locale = extractLocaleFromPathname(new URL(request.url).pathname);
-		} else if (strat === "custom") {
-			throw new Error(
-				"Custom strategy is not supported for detectLocaleFromRequest"
-			);
 		} else if (strat === "variable") {
 			locale = _locale;
 		} else if (strat === "baseLocale") {
