@@ -1,11 +1,10 @@
-interface Features {
-	payment: boolean;
-}
+// interface Features {
+// 	payment: boolean;
+// }
+type Features = object;
 
 export default class FeatureFlags {
-	static features: Features = {
-		payment: false,
-	};
+	static features: Features = {};
 
 	static setFeatureflags(fileFeatureFlags: any) {
 		for (const key of Object.keys(FeatureFlags.features)) {
