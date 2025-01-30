@@ -1,17 +1,26 @@
 import type { ProjectSettings } from "@inlang/sdk";
 import type { CompiledBundleWithMessages } from "../compile-bundle.js";
-import { createRuntime } from "../runtime/create-runtime.js";
+import { createRuntimeFile } from "../runtime/create-runtime.js";
 import { createRegistry } from "../registry.js";
 import { jsIdentifier } from "../../services/codegen/identifier.js";
 import { escapeForSingleQuoteString } from "../../services/codegen/escape.js";
+import type { CompilerOptions } from "../compile.js";
 
 export function generateMessageModules(
 	compiledBundles: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
-	fallbackMap: Record<string, string | undefined>
+	fallbackMap: Record<string, string | undefined>,
+	compilerOptions: {
+		strategy: NonNullable<CompilerOptions["strategy"]>;
+		cookieName: NonNullable<CompilerOptions["cookieName"]>;
+	}
 ): Record<string, string> {
 	const output: Record<string, string> = {
-		["runtime.js"]: createRuntime(settings),
+		["runtime.js"]: createRuntimeFile({
+			baseLocale: settings.baseLocale,
+			locales: settings.locales,
+			compilerOptions,
+		}),
 		["registry.js"]: createRegistry(),
 	};
 
@@ -26,7 +35,6 @@ export function generateMessageModules(
 	for (const compiledBundle of compiledBundles) {
 		const filename = `messages/${compiledBundle.bundle.node.id}/index.js`;
 		const code = [
-			`import * as registry from '../../registry.js'`,
 			settings.locales
 				.map(
 					(locale) =>
@@ -42,7 +50,7 @@ export function generateMessageModules(
 
 	for (const locale of settings.locales) {
 		for (const compiledBundle of compiledBundles) {
-			let file = [`import * as registry from '../../registry.js'`].join("\n");
+			let file = "";
 
 			const compiledMessage = compiledBundle.messages[locale];
 			const id = jsIdentifier(compiledBundle.bundle.node.id);
@@ -60,6 +68,12 @@ export function generateMessageModules(
 				}
 			} else {
 				file += `\n${compiledMessage.code}`;
+			}
+
+			// Add the registry import to the message file
+			// if registry is used
+			if (file.includes("registry.")) {
+				file = `import { registry } from '../../registry.js'\n` + file;
 			}
 
 			output[`messages/${compiledBundle.bundle.node.id}/${locale}.js`] = file;

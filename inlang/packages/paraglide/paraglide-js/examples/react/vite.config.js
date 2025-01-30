@@ -4,6 +4,11 @@ import { paraglideVitePlugin } from "@inlang/paraglide-js";
 
 // https://vite.dev/config/
 export default defineConfig({
+	build: {
+		// eases debugging
+		minify: false,
+		target: "es2022",
+	},
 	plugins: [
 		react(),
 		paraglideVitePlugin({

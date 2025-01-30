@@ -5,5 +5,5 @@
 
 <h1>{m.welcome()}</h1>
 
-<button on:click={() => setLocale('en')}>Set locale to "en"</button>
-<button on:click={() => setLocale('de')}>Set locale to "de"</button>
+<button onclick={() => setLocale('en')}>Set locale to "en"</button>
+<button onclick={() => setLocale('de')}>Set locale to "de"</button>

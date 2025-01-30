@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { generateLocaleModules } from "./locale-modules.js";
 import type { Bundle, Message, ProjectSettings } from "@inlang/sdk";
 import type { CompiledBundleWithMessages } from "../compile-bundle.js";
+import { defaultCompilerOptions } from "../compile.js";
 
 test("should emit per locale message files", () => {
 	const bundles: CompiledBundleWithMessages[] = [
@@ -35,7 +36,12 @@ test("should emit per locale message files", () => {
 		de: "en",
 	};
 
-	const output = generateLocaleModules(bundles, settings, fallbackMap);
+	const output = generateLocaleModules(
+		bundles,
+		settings,
+		fallbackMap,
+		defaultCompilerOptions
+	);
 
 	expect(output).toHaveProperty("messages.js");
 	expect(output).toHaveProperty("messages/en.js");
@@ -69,7 +75,12 @@ test("the files should include files for each locale, even if there are no messa
 		de: "en",
 	};
 
-	const output = generateLocaleModules(bundles, settings, fallbackMap);
+	const output = generateLocaleModules(
+		bundles,
+		settings,
+		fallbackMap,
+		defaultCompilerOptions
+	);
 
 	expect(output).toHaveProperty("messages.js");
 	expect(output).toHaveProperty("messages/en.js");

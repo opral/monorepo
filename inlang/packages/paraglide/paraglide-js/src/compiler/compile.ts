@@ -7,12 +7,15 @@ import {
 	getLocalAccount,
 	saveLocalAccount,
 } from "../services/account/index.js";
+import type { Runtime } from "./runtime/type.js";
 
 export const defaultCompilerOptions = {
 	outputStructure: "message-modules",
 	emitGitIgnore: true,
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
+	strategy: ["cookie", "variable", "baseLocale"],
+	cookieName: "PARAGLIDE_LOCALE",
 } as const satisfies Partial<CompilerOptions>;
 
 export type CompilerOptions = {
@@ -30,6 +33,28 @@ export type CompilerOptions = {
 	 *   './src/paraglide'
 	 */
 	outdir: string;
+	/**
+	 * The strategy to use for getting the locale.
+	 *
+	 * The order of the strategy defines the precendence of matches.
+	 *
+	 * For example, in `['pathname', 'cookie', 'baseLocale']`, the locale will be
+	 * first tried to be detected in the pathname, then in a cookie, and finally
+	 * fallback to the base locale.
+	 *
+	 * The default ensures that the browser takes a cookie approach,
+	 * server-side takes the variable (because cookie is unvailable),
+	 * whereas both fallback to the base locale if not available.
+	 *
+	 * @default ["cookie", "variable", "baseLocale"]
+	 */
+	strategy?: Runtime["strategy"];
+	/**
+	 * The name of the cookie to use for the cookie strategy.
+	 *
+	 * @default 'PARAGLIDE_LOCALE'
+	 */
+	cookieName?: string;
 	/**
 	 * Additional files that should be emmited in the outdir.
 	 *
@@ -115,23 +140,9 @@ export async function compile(options: CompilerOptions): Promise<void> {
 		});
 
 		const output = await compileProject({
-			...withDefaultOptions,
+			compilerOptions: withDefaultOptions,
 			project,
 		});
-
-		for (const [filename, content] of Object.entries(
-			withDefaultOptions.additionalFiles ?? {}
-		)) {
-			output[filename] = content;
-		}
-
-		if (withDefaultOptions.includeEslintDisableComment) {
-			for (const [filename, content] of Object.entries(output)) {
-				if (filename.endsWith(".js")) {
-					output[filename] = `// eslint-disable-next-line\n${content}`;
-				}
-			}
-		}
 
 		await writeOutput(absoluteOutdir, output, fs.promises);
 

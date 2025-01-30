@@ -1,13 +1,18 @@
 import type { ProjectSettings } from "@inlang/sdk";
 import type { CompiledBundleWithMessages } from "../compile-bundle.js";
 import { jsIdentifier } from "../../services/codegen/identifier.js";
-import { createRuntime } from "../runtime/create-runtime.js";
+import { createRuntimeFile } from "../runtime/create-runtime.js";
 import { createRegistry } from "../registry.js";
+import { type CompilerOptions } from "../compile.js";
 
 export function generateLocaleModules(
 	compiledBundles: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
-	fallbackMap: Record<string, string | undefined>
+	fallbackMap: Record<string, string | undefined>,
+	compilerOptions: {
+		strategy: NonNullable<CompilerOptions["strategy"]>;
+		cookieName: NonNullable<CompilerOptions["cookieName"]>;
+	}
 ): Record<string, string> {
 	const fileExt = "js";
 	const importExt = "js";
@@ -24,7 +29,11 @@ export function generateLocaleModules(
 	].join("\n");
 
 	const output: Record<string, string> = {
-		["runtime." + fileExt]: createRuntime(settings),
+		["runtime." + fileExt]: createRuntimeFile({
+			baseLocale: settings.baseLocale,
+			locales: settings.locales,
+			compilerOptions,
+		}),
 		["registry." + fileExt]: createRegistry(),
 		["messages." + fileExt]: indexFile,
 	};

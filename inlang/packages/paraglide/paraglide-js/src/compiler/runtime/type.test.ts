@@ -1,9 +1,10 @@
 import { expect, test } from "vitest";
 import { createProject as typescriptProject, ts } from "@ts-morph/bootstrap";
-import { createRuntime } from "./create-runtime.js";
+import { createRuntimeFile } from "./create-runtime.js";
 import fs from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "url";
+import { defaultCompilerOptions } from "../compile.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -21,7 +22,11 @@ test("runtime type", async () => {
 		},
 	});
 
-	const jsdocRuntime = createRuntime({ baseLocale: "en", locales: ["en"] });
+	const jsdocRuntime = createRuntimeFile({
+		baseLocale: "en",
+		locales: ["en"],
+		compilerOptions: defaultCompilerOptions,
+	});
 
 	const file = (path: string) => {
 		return [path, fs.readFileSync(resolve(__dirname, path), "utf-8")!] as const;
@@ -30,11 +35,13 @@ test("runtime type", async () => {
 	project.createSourceFile("./runtime.js", jsdocRuntime);
 	project.createSourceFile(...file("./type.ts"));
 	project.createSourceFile(...file("./ambient.d.ts"));
-	project.createSourceFile(...file("./locale-in-path.js"));
-	project.createSourceFile(...file("./is-locale.js"));
-	project.createSourceFile(...file("./localize-path.js"));
-	project.createSourceFile(...file("./de-localize-path.js"));
-	project.createSourceFile(...file("./assert-is-locale.js"));
+
+	// add the imports for the types in the runtime type
+	for (const name of fs.readdirSync(__dirname)) {
+		if (name.endsWith(".js")) {
+			project.createSourceFile(...file(name));
+		}
+	}
 
 	project.createSourceFile(
 		"./test.ts",
@@ -47,7 +54,10 @@ test("runtime type", async () => {
 	);
 
 	const program = project.createProgram();
-	const diagnostics = ts.getPreEmitDiagnostics(program);
+	const diagnostics = ts
+		.getPreEmitDiagnostics(program)
+		// ignore 'export' modifier cannot be applied to ambient modules and module augmentations since they are always visible. /ambient.d.ts
+		.filter((d) => d.code !== 2668);
 	for (const diagnostic of diagnostics) {
 		console.error(diagnostic.messageText, diagnostic.file?.fileName);
 	}

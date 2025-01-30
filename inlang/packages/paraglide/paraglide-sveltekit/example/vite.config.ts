@@ -3,6 +3,9 @@ import { defineConfig } from 'vite';
 import { paraglideSveltekit } from '@inlang/paraglide-sveltekit';
 
 export default defineConfig({
+	build: {
+		minify: false
+	},
 	plugins: [
 		sveltekit(),
 		paraglideSveltekit({

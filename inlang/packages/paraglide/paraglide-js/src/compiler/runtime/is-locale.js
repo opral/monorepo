@@ -1,3 +1,5 @@
+import { locales } from "./locales.js";
+
 /**
  * Check if something is an available locale.
  *
@@ -12,5 +14,5 @@
  * @returns {locale is Locale}
  */
 export function isLocale(locale) {
-	return locales.includes(locale);
+	return !locale ? false : locales.includes(locale);
 }

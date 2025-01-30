@@ -101,10 +101,9 @@ function compileMessageWithMultipleVariants(
 		);
 	}
 
-	const code = `
-		export const ${message.bundleId} = (i) => {
-				${compiledVariants.join("\n\n")}
-		}`;
+	const code = `export const ${message.bundleId} = (i) => {
+	${compiledVariants.join("\n\t")}
+}`;
 
 	return { code, node: message };
 }
