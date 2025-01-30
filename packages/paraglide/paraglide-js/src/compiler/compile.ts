@@ -13,7 +13,7 @@ export const defaultCompilerOptions = {
 	outputStructure: "message-modules",
 	emitGitIgnore: true,
 	includeEslintDisableComment: true,
-	isServer: "false",
+	isServer: 'typeof window === "undefined"',
 	emitPrettierIgnore: true,
 	strategy: ["cookie", "baseLocale"],
 	cookieName: "PARAGLIDE_LOCALE",
@@ -89,12 +89,9 @@ export type CompilerOptions = {
 	 * that your bundler can tree-shake the expression.
 	 *
 	 * @example
-	 *   isServer: 'process.env.NODE_ENV === "production"'
-	 *
-	 * @example
 	 *   isServer: 'import.meta.env.SSR'
 	 *
-	 * @default 'false'
+	 * @default 'typeof window === "undefined"'
 	 */
 	isServer?: string;
 	/**
