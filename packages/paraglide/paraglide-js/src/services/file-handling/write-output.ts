@@ -13,9 +13,10 @@ export async function writeOutput(
 	const currentOutputHash = hashOutput(output, outputDirectory);
 	if (currentOutputHash === previousOutputHash) return;
 
-	// clear the output directory
-	await fs.rm(outputDirectory, { recursive: true, force: true });
-	await fs.mkdir(outputDirectory, { recursive: true });
+	// disabled because of https://github.com/opral/inlang-paraglide-js/issues/350
+	// // clear the output directory
+	// await fs.rm(outputDirectory, { recursive: true, force: true });
+	// await fs.mkdir(outputDirectory, { recursive: true });
 
 	//Create missing directories inside the output directory
 	await Promise.allSettled(
