@@ -9,16 +9,17 @@ const PLUGIN_NAME = "unplugin-paraglide-js";
 
 const logger = new Logger();
 
+let compilationResult: Awaited<ReturnType<typeof compile>> | undefined;
+
 export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 	name: PLUGIN_NAME,
 	enforce: "pre",
 	async buildStart() {
 		logger.info("Compiling inlang project...");
-		await compile({
+		compilationResult = await compile({
 			fs: wrappedFs,
 			...args,
 		});
-		logger.success("Compilation complete");
 
 		for (const path of Array.from(readFiles)) {
 			this.addWatchFile(path);
@@ -29,11 +30,13 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 		if (shouldCompile) {
 			readFiles.clear();
 			logger.info("Re-compiling inlang project...");
-			await compile({
-				fs: wrappedFs,
-				...args,
-			});
-			logger.success("Re-compilation complete");
+			compilationResult = await compile(
+				{
+					fs: wrappedFs,
+					...args,
+				},
+				compilationResult?.outputHashes
+			);
 		}
 	},
 	webpack(compiler) {
