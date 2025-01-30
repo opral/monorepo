@@ -3,17 +3,22 @@ import { compile, type CompilerOptions } from "../compiler/compile.js";
 import fs from "node:fs";
 import { resolve } from "node:path";
 import { nodeNormalizePath } from "../utilities/node-normalize-path.js";
+import { Logger } from "../cli/index.js";
 
 const PLUGIN_NAME = "unplugin-paraglide-js";
+
+const logger = new Logger();
 
 export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 	name: PLUGIN_NAME,
 	enforce: "pre",
 	async buildStart() {
+		logger.info("Compiling inlang project...");
 		await compile({
 			fs: wrappedFs,
 			...args,
 		});
+		logger.success("Compilation complete");
 
 		for (const path of Array.from(readFiles)) {
 			this.addWatchFile(path);
@@ -23,10 +28,12 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 		const shouldCompile = readFiles.has(path) && !path.includes("cache");
 		if (shouldCompile) {
 			readFiles.clear();
+			logger.info("Re-compiling inlang project...");
 			await compile({
 				fs: wrappedFs,
 				...args,
 			});
+			logger.success("Re-compilation complete");
 		}
 	},
 	webpack(compiler) {
