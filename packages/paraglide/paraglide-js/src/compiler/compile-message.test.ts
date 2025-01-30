@@ -1,9 +1,9 @@
-import { it, expect } from "vitest";
+import { test, expect } from "vitest";
 import { compileMessage } from "./compile-message.js";
 import type { Declaration, Message, Variant } from "@inlang/sdk";
 import { DEFAULT_REGISTRY } from "./registry.js";
 
-it("compiles a message with a single variant", async () => {
+test("compiles a message with a single variant", async () => {
 	const declarations: Declaration[] = [];
 	const message: Message = {
 		locale: "en",
@@ -34,7 +34,7 @@ it("compiles a message with a single variant", async () => {
 	expect(some_message()).toBe("Hello");
 });
 
-it("compiles a message with variants", async () => {
+test("compiles a message with variants", async () => {
 	const declarations: Declaration[] = [
 		{ type: "input-variable", name: "fistInput" },
 		{ type: "input-variable", name: "secondInput" },
@@ -98,4 +98,36 @@ it("compiles a message with variants", async () => {
 	);
 	expect(some_message({ fistInput: 3, secondInput: 4 })).toBe("Catch all");
 	expect(some_message({ fistInput: 1, secondInput: 5 })).toBe("Catch all");
+});
+
+test("only emits input arguments when inputs exist", async () => {
+	const declarations: Declaration[] = [];
+	const message: Message = {
+		locale: "en",
+		bundleId: "some_message",
+		id: "message-id",
+		selectors: [],
+	};
+	const variants: Variant[] = [
+		{
+			id: "1",
+			messageId: "message-id",
+			matches: [],
+			pattern: [{ type: "text", value: "Hello" }],
+		},
+	];
+
+	const compiled = compileMessage(
+		declarations,
+		message,
+		variants,
+		DEFAULT_REGISTRY
+	);
+
+	expect(compiled.code, "single variant").toBe(
+		[
+			"/** @type {(inputs: {}) => string} */",
+			"export const some_message = () => `Hello`;",
+		].join("\n")
+	);
 });
