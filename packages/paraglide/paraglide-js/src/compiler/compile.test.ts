@@ -5,7 +5,7 @@ import {
 } from "@inlang/sdk";
 import { memfs } from "memfs";
 import { test, expect, vi } from "vitest";
-import { compile } from "./compile.js";
+import { compile, defaultCompilerOptions } from "./compile.js";
 import { getAccountFilePath } from "../services/account/index.js";
 
 test("loads a project and compiles it", async () => {
@@ -235,7 +235,7 @@ test("includes eslint-disable comment", async () => {
 
 	const messages = await fs.promises.readFile("/output/messages.js", "utf8");
 
-	expect(messages).toContain("// eslint-disable-next-line");
+	expect(messages).toContain("// eslint-disable");
 
 	await compile({
 		project: "/project.inlang",
@@ -249,5 +249,17 @@ test("includes eslint-disable comment", async () => {
 		"utf8"
 	);
 
-	expect(messagesWithoutComment).not.toContain("// eslint-disable-next-line");
+	expect(messagesWithoutComment).not.toContain("// eslint-disable");
+});
+
+test("default compiler options should include variable and baseLocale to ensure easy try out of paraglide js, working both in server and browser environemnts", () => {
+	// someone trying out paraglide js should be able to call `getLocale()` and `setLocale()`
+	// without getting an error slammed in their face saying "define your strategy".
+	//
+	// instead, make the apis work out of the box and once the developer is convinced that
+	// paraglide js is the right tool for them, they can then define their own strategy.
+
+	expect(defaultCompilerOptions.strategy).toEqual(
+		expect.arrayContaining(["variable", "baseLocale"])
+	);
 });

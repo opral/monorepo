@@ -30,15 +30,12 @@ Register the Integration in `astro.config.mjs`:
 import paraglideAstro from "@inlang/paraglide-astro"
 
 export default {
-	// Use astro's i18n routing for deciding which language to use
-	i18n: {
-		defaultLocale: "en",
-		locales: ["en", "de"],
-	},
 	integrations: [
 		paraglideAstro({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
+			// define your strategy
+			strategy: ["pathname", "baseLocale"]
 		}),
 	],
 }
@@ -65,99 +62,6 @@ setLocale("de")
 
 Refer to the Paraglide JS docs https://inlang.com/m/gerre34r/library-inlang-paraglideJs/getting-started.
 
-## Understanding Locale Detection
-
-Paraglide-Astro relies on [`astro:i18n`](https://docs.astro.build/en/guides/internationalization/)'s language detection. Place your page in a folder named for the language (or the `path` of the language) & all messages will be in that language.
-
-```filesystem
-src
-├── pages
-│   ├── en
-│   │   ├── index.astro
-│   │   └── about.astro
-│   └── de
-│       ├── index.astro
-│       └── about.astro
-```
-
-If a page isn't in a language folder, it will use the default language.
-
-```filesystem
-src
-├── pages
-│   ├── index.astro // default language
-│   ├── about.astro // default language
-│   └── de
-│       ├── index.astro // de
-│       └── about.astro // de
-```
-
-You can configure which languages are available, and which is the default language in `project.inlang/settings.json`.
-
-To save bundle size the integration doesn't ship language detection code to the client. Instead, it will read the `lang` attribute on the `<html>` tag. Make sure it is set correctly.
-
-```astro
-//src/layouts/default.astro
----
-import { getLocale } from "$paraglide/runtime";
----
-
-<!doctype html>
-<html lang={getLocale()}>
-    <slot />
-</html>
----
-```
-
-## Linking between pages
-
-Because pages in different languages often have different slugs there is no way to automatically generate links in all languages. You will need to define a custom function.
-
-```ts
-import type { AvailableLanguageTag } from "./paraglide/runtime.js"
-
-type AbsolutePathname = `/${string}`
-
-const pathnames : Record<AbsolutePathname, 
-	Record<AvailableLanguageTag, AbsolutePathname>
-> = {
-	"/about": {
-		en: "/about",
-		de: "/de/ueber-uns",
-	}
-}
-
-// src/linking.ts
-export function localizePathname(
-	pathname: AbsolutePathname, 
-	locale: AvailableLanguageTag
-) {
-	if(pathnames[pathname]) {
-		return pathnames[pathname][locale]
-	}
-	return pathname
-}
-```
-
-Then use this function on your links
-
-```tsx
-<a href={localizePathname("/about", languageTag())}>{m.about()}</a>
-```
-
-## Adding Alternate Links
-
-For SEO reasons, you should add alternate links to your page's head that point to all translations of the current page. Include the _current_ page. Make sure these are full HREFs, including the protocol and origin, not just the path.
-
-```html
-<head>
-	<link rel="alternate" hreflang="en" href="https://acme.com/en/about" />
-	<link rel="alternate" hreflang="de" href="https://acme.com/de/ueber-uns" />
-</head>
-```
-
-Since only you know which pages correspond to each other this can't reliably be done automatically. Add these links manually.
-
 # Migrating to v1 (beta)
 
 1. Remove references of `Astro.locals.paraglide` from your code in favor of `getLocale()`. If you want to include the dir in the HTML, write your own function. 
@@ -173,4 +77,19 @@ Since only you know which pages correspond to each other this can't reliably be 
 +<html lang={getLocale()}>
     <slot />
 </html>
+```
+
+2. Remove the `astro:i18n` package. Paraglide JS 2.0 has native support for routing.
+
+```diff
+// astro.config.mjs
+
+-	i18n: {
+-		defaultLocale: "en",
+-		locales: ["en", "de"],
+-	},
+  paraglideAstro({
+		// ...
+	})
+
 ```

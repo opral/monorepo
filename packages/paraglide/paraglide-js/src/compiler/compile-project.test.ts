@@ -18,6 +18,13 @@ beforeEach(() => {
 	// reset the imports to make sure that the runtime is reloaded
 	vi.resetModules();
 	vi.clearAllMocks();
+
+	// mocking DOM globals
+	// @ts-expect-error - global variable definition
+	globalThis.window = {};
+	// @ts-expect-error - global variable definition
+	globalThis.window.location = {};
+	globalThis.window.location.reload = () => {};
 });
 
 test("emitGitignore", async () => {
@@ -82,9 +89,11 @@ describe.each([
 	// useTsImports must be true to test emitTs. Otherwise, rolldown can't resolve the imports
 	{
 		outputStructure: "locale-modules",
+		strategy: ["variable", "baseLocale"],
 	},
 	{
 		outputStructure: "message-modules",
+		strategy: ["variable", "baseLocale"],
 	},
 ] satisfies Array<Parameters<typeof compileProject>["0"]["compilerOptions"]>)(
 	"options",
@@ -386,6 +395,8 @@ describe.each([
 				},
 			});
 
+			console.log(output["runtime.js"]);
+
 			for (const [fileName, code] of Object.entries(output)) {
 				if (fileName.endsWith(".js") || fileName.endsWith(".ts")) {
 					project.createSourceFile(fileName, code);
@@ -493,11 +504,6 @@ describe.each([
 async function bundleCode(output: Record<string, string>, file: string) {
 	const bundle = await rolldown({
 		input: ["main.js"],
-		resolve: {
-			extensionAlias: {
-				".js": [".ts", ".js"],
-			},
-		},
 		plugins: [
 			// @ts-expect-error - rollup types are not up to date
 			virtual({

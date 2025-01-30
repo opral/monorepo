@@ -5,8 +5,7 @@ import {
 } from "@inlang/paraglide-js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { alias } from "./alias.js";
-import { nodeNormalizePath } from "./utilts.js";
+import { nodeNormalizePath } from "./normalize-path.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,11 +16,7 @@ export function integration(options: CompilerOptions): AstroIntegration {
 	return {
 		name: "paraglide",
 		hooks: {
-			"astro:config:setup": async ({
-				addMiddleware,
-				updateConfig,
-				injectScript,
-			}) => {
+			"astro:config:setup": async ({ addMiddleware, updateConfig }) => {
 				//Register the middleware
 				addMiddleware({
 					order: "pre", //Run before user-defined middleware (why not?)
@@ -50,39 +45,17 @@ export function integration(options: CompilerOptions): AstroIntegration {
 					},
 				});
 
-				injectScript(
-					"before-hydration",
-					`
-          import { isLocale, defineGetLocale, defineSetLocale, baseLocale } from "virtual:paraglide-astro:runtime";
-					import { getPathByLocale, getLocaleByPath } from "astro:i18n";
-
-					function splitPathByLocale(path) {
-						const [maybeLocale, ...rest] = path.split('/').filter(Boolean);
-						const locale = isLocale(maybeLocale) ? maybeLocale : baseLocale;
-						return [locale, rest.join('/')];
-				  }
-					
-					defineGetLocale(() => {
-						const [locale] = splitPathByLocale(window.location.pathname);
-						return locale;
-					});
-
-					defineSetLocale((newLocale) => {
-						const [locale, path] = splitPathByLocale(window.location.pathname);
-						const redirectTo = getPathByLocale(newLocale, path);
-
-						// the astro getPathByLocale function is buggy and returns the baseLocale as path
-						if (redirectTo.replaceAll("/", "") === baseLocale){
-							window.location = '/';
-						} else {
-							window.location = redirectTo;
-						}
-					})
-                    `,
-				);
-
 				return undefined;
 			},
+		},
+	};
+}
+
+function alias(map: Record<string, string>) {
+	return {
+		name: "astro-plugin-paraglide-alias",
+		resolveId(id: string) {
+			return map[id];
 		},
 	};
 }

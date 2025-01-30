@@ -1,65 +1,62 @@
-import { test, vi, beforeEach, expect, describe } from "vitest";
-import { deLocalizePath } from "./de-localize-path.js";
-import { mockRuntime } from "./mock-runtime.js";
+import { test, expect } from "vitest";
+import { createRuntimeForTesting } from "./create-runtime.js";
 
-// sequential to avoid global variable conflicts
-describe.sequential("delocalizedPath", () => {
-	beforeEach(() => {
-		vi.resetAllMocks();
+test("removes the locale from a localized path", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
 	});
 
-	mockRuntime({
+	const path = "/de/home";
+	const result = runtime.deLocalizePath(path);
+
+	expect(result).toBe("/home");
+});
+
+test("returns the same path if there is no locale", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+	});
+
+	const path = "/home";
+	const result = runtime.deLocalizePath(path);
+
+	expect(result).toBe("/home");
+});
+
+test("handles paths with different locales", async () => {
+	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de", "fr"],
 	});
 
-	test("removes the locale from a localized path", () => {
-		// @ts-expect-error - global variable definition
-		globalThis.localeInPath = vi.fn().mockReturnValue("de");
+	const path = "/fr/contact";
+	const result = runtime.deLocalizePath(path);
 
-		const path = "/de/home";
-		const result = deLocalizePath(path);
+	expect(result).toBe("/contact");
+});
 
-		expect(result).toBe("/home");
+test("handles paths with no segments after locale", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
 	});
 
-	test("returns the same path if there is no locale", () => {
-		// @ts-expect-error - global variable definition
-		globalThis.localeInPath = vi.fn().mockReturnValue(undefined);
+	const path = "/en/";
+	const result = runtime.deLocalizePath(path);
 
-		const path = "/home";
-		const result = deLocalizePath(path);
+	expect(result).toBe("/");
+});
 
-		expect(result).toBe("/home");
+test("handles paths that are already the root", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
 	});
 
-	test("handles paths with different locales", () => {
-		// @ts-expect-error - global variable definition
-		globalThis.localeInPath = vi.fn().mockReturnValue("fr");
+	const path = "/";
+	const result = runtime.deLocalizePath(path);
 
-		const path = "/fr/contact";
-		const result = deLocalizePath(path);
-
-		expect(result).toBe("/contact");
-	});
-
-	test("handles paths with no segments after locale", () => {
-		// @ts-expect-error - global variable definition
-		globalThis.localeInPath = vi.fn().mockReturnValue("en");
-
-		const path = "/en/";
-		const result = deLocalizePath(path);
-
-		expect(result).toBe("/");
-	});
-
-	test("handles paths that are already the root", () => {
-		// @ts-expect-error - global variable definition
-		globalThis.localeInPath = vi.fn().mockReturnValue(undefined);
-
-		const path = "/";
-		const result = deLocalizePath(path);
-
-		expect(result).toBe("/");
-	});
+	expect(result).toBe("/");
 });

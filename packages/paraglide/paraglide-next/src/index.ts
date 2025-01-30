@@ -40,7 +40,6 @@ export function withParaglideNext(
 					additionalFiles: {
 						...file("adapter.js"),
 						...file("adapter.provider.jsx"),
-						...file("adapter.provider.client.jsx"),
 					},
 				})
 			);

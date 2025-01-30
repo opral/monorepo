@@ -5,13 +5,10 @@
  */
 import {
 	assertIsLocale,
-	baseLocale,
 	defineGetLocale,
 	deLocalizePath,
-	localeInPath,
+	extractLocaleFromRequest,
 } from "./runtime.js";
-
-export { default as ParaglideSveltekitProvider } from "./adapter.provider.svelte";
 
 /**
  * @type {import("node:async_hooks").AsyncLocalStorage<string> | undefined}
@@ -45,7 +42,7 @@ export const handle = async ({ event, resolve }) => {
 		asyncStorage = new AsyncLocalStorage();
 	}
 
-	const locale = localeInPath(event.url.pathname) ?? baseLocale;
+	const locale = extractLocaleFromRequest(event.request);
 
 	return asyncStorage.run(locale, () => resolve(event));
 };

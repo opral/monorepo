@@ -1,3 +1,6 @@
+import { isLocale } from "./is-locale.js";
+import { locales } from "./locales.js";
+
 /**
  * Asserts that the input is a locale.
  *
