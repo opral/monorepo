@@ -27,8 +27,6 @@ beforeEach(() => {
 	globalThis.window.location.reload = () => {};
 });
 
-
-
 test("emitGitignore", async () => {
 	const project = await loadProjectInMemory({
 		blob: await newProject({

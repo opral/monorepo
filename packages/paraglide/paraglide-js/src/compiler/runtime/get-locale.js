@@ -44,9 +44,6 @@ export let getLocale = () => {
 		if (strat === "variable") {
 			locale = _locale;
 		}
-		if (strat === "custom") {
-			throw new Error("Custom strategy not implemented");
-		}
 		// check if match, else continue loop
 		if (locale !== undefined) {
 			return assertIsLocale(locale);
@@ -55,4 +52,3 @@ export let getLocale = () => {
 
 	throw new Error("No locale found. There is an error in your strategy.");
 };
-
