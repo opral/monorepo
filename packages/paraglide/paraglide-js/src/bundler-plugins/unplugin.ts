@@ -20,6 +20,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			fs: wrappedFs,
 			...args,
 		});
+		logger.success("Compilation complete");
 
 		for (const path of Array.from(readFiles)) {
 			this.addWatchFile(path);
@@ -37,6 +38,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 				},
 				compilationResult?.outputHashes
 			);
+			logger.success("Compilation complete");
 		}
 	},
 	webpack(compiler) {
