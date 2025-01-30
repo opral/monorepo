@@ -7,7 +7,7 @@ import { MessageParameterValues } from "../../../lib/message/MessageParameterVal
 import MessageStoreMemory from "../../../lib/message/store/MessageStoreMemory";
 import LocalizedLabelManagerUI from "../../../lib/localizedlabels/LocalizedLabelManagerUI";
 import TranslatorMachine from "../../../lib/translationprovider/TranslatorMachine";
-import FeatureFlags from "../../../lib/featureflags/FeatureFlags";
+
 
 type MessageVariantItemProps = {
 	language: Locale;
@@ -107,7 +107,7 @@ export default function MessageVariantItem({
 						variantHTML={variantHTML}
 						messageStore={messageStore}
 					>
-						{language !== refLanguage && isEmpty && FeatureFlags.features.payment && (
+						{language !== refLanguage && isEmpty && (
 							<button
 								type="button"
 								disabled={refVariantHtml === undefined}

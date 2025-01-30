@@ -4,8 +4,6 @@ import { Locale } from "../message/variants/Locale";
 import getKey from "./TranslationCredit";
 
 import GoogleTranslator from "./google";
-import FeatureFlags from "../featureflags/FeatureFlags";
-import Monitoring from "../monitoring/MonitoringProxy";
 
 const translationsCreditUsageLocalStorageKey = "prrt_utc";
 const translationCreditsLocalStorageKey = "prrt_tc";
@@ -127,34 +125,6 @@ export default class TranslatorMachine {
 				translationCreditsLocalStorageKey,
 			);
 
-			if (FeatureFlags.features.payment) {
-				this.state = {
-					translationCredits:
-						typeof translationCredits === "object"
-							? (translationCredits as TranslationCredit[])
-							: [
-									{
-										cid: "included-batteries-1",
-										ct: "voucher",
-										co: figma.currentUser!.id!,
-										msgc: 100,
-										msgu: 0,
-										jwt: includedBatteries,
-									},
-								],
-					translationsCreditUsage:
-						typeof usedTranslationsCredits === "object"
-							? (usedTranslationsCredits as TranslationCreditUsage[])
-							: [],
-				};
-
-				// remove sent flags - since this is a new run...
-				for (const usage of this.state!.translationsCreditUsage) {
-					usage.send = false;
-				}
-
-				await this.syncTranslations(true);
-			}
 		};
 		this.ensureStateLoaded = ensureStateLoadedPromise();
 	}
@@ -290,36 +260,11 @@ export default class TranslatorMachine {
 		// For now don't use the owner of the file
 		const userId = figma.currentUser!.id!;
 
-		if (FeatureFlags.features.payment) {
-			const availableTranslations = calculateAvailableMessages(
-				this.state!,
-				userId,
-				new Date().getTime(),
-			);
-
-			if (availableTranslations <= 0 && FeatureFlags.features.payment) {
-				if (triggersCTA) {
-					await this.fireCreditsUpdateEvent(true);
-				}
-				// TODO #29 activate again
-				throw new NoMoreTranslationsLeftError("No Machine Translations left");
-			}
-		}
-
 		let translation: string | null = null;
 
 		// call google translate
 		translation = await GoogleTranslator.translate(text, sourceLange, targetLanguage);
 
-		// lets not wait for the results here ;-)
-		if (figma.currentUser && FeatureFlags.features.payment) {
-			try {
-				await this.addTranslationCreditUse(userId, text.length, triggersCTA);
-			} catch (e: any) {
-				// we won't fail if the backend is down...
-				await Monitoring.instance?.sentryCaptureException(e, {});
-			}
-		}
 		return translation;
 	}
 
