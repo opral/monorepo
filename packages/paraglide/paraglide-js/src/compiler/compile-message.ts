@@ -19,6 +19,7 @@ export const compileMessage = (
 	if (variants.length == 0) {
 		throw new Error("Message must have at least one variant");
 	}
+
 	const hasMultipleVariants = variants.length > 1;
 	return hasMultipleVariants
 		? compileMessageWithMultipleVariants(
