@@ -8,7 +8,7 @@ interface Props {
 	image?: string;
 }
 
-const { title, description, image = "/blog-placeholder-1.jpg" } = Astro.props;
+const { title, description } = Astro.props;
 
 const pathWithoutLocale = deLocalizePath(Astro.url.pathname);
 ---
