@@ -56,7 +56,7 @@
   },
   "dependencies": {
     "@figma-plugin/helpers": "^0.15.2",
-    "@inlang/message": "2.0.0",
+    "@inlang/message": "2.1.0",
     "@inlang/plugin": "2.0.0",
     "@inlang/sdk": "^0.9.0",
     "@rollup/plugin-replace": "^6.0.2",
