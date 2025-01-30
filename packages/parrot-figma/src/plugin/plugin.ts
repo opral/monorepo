@@ -7,8 +7,6 @@
 
 // This shows the HTML page in "ui.html". d
 
-eval('console.log("I am comming from an eval...")')
-
 import { AsyncFunctionProxy } from "../lib/rpc/AsyncFunctionProxy";
 import MigrationManager from "../lib/migrations/MigrationManager";
 
