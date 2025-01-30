@@ -23,7 +23,6 @@ const file = (path: string) => ({
  */
 export const paraglideSveltekit = (options: CompilerOptions) =>
 	paraglideVitePlugin({
-		isServer: "import.meta.env.SSR",
 		...options,
 		additionalFiles: {
 			...file("adapter.js"),

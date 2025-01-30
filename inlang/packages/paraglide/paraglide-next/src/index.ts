@@ -37,7 +37,6 @@ export function withParaglideNext(
 			webpackConfig.plugins.push(
 				paraglideWebpackPlugin({
 					...config.paraglide,
-					isServer: `typeof window === "undefined"`,
 					additionalFiles: {
 						...file("adapter.js"),
 						...file("adapter.provider.jsx"),

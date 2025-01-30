@@ -13,9 +13,8 @@ export const defaultCompilerOptions = {
 	outputStructure: "message-modules",
 	emitGitIgnore: true,
 	includeEslintDisableComment: true,
-	isServer: 'typeof window === "undefined"',
 	emitPrettierIgnore: true,
-	strategy: ["cookie", "baseLocale"],
+	strategy: ["cookie", "variable", "baseLocale"],
 	cookieName: "PARAGLIDE_LOCALE",
 } as const satisfies Partial<CompilerOptions>;
 
@@ -38,15 +37,16 @@ export type CompilerOptions = {
 	 * The strategy to use for getting the locale.
 	 *
 	 * The order of the strategy defines the precendence of matches.
+	 *
 	 * For example, in `['pathname', 'cookie', 'baseLocale']`, the locale will be
 	 * first tried to be detected in the pathname, then in a cookie, and finally
 	 * fallback to the base locale.
 	 *
-	 * You can define a custom strategy by using `custom`.
+	 * The default ensures that the browser takes a cookie approach,
+	 * server-side takes the variable (because cookie is unvailable),
+	 * whereas both fallback to the base locale if not available.
 	 *
-	 * @example ['pathname', 'cookie', 'baseLocale']
-	 *
-	 * @default ["cookie", "baseLocale"]
+	 * @default ["cookie", "variable", "baseLocale"]
 	 */
 	strategy?: Runtime["strategy"];
 	/**
@@ -82,18 +82,6 @@ export type CompilerOptions = {
 	 * @default true
 	 */
 	emitGitIgnore?: boolean;
-	/**
-	 * Boolean expression that determines if the code is running in a server environment.
-	 *
-	 * The isServer condition is used to avoid calling browser based APIs. Make sure
-	 * that your bundler can tree-shake the expression.
-	 *
-	 * @example
-	 *   isServer: 'import.meta.env.SSR'
-	 *
-	 * @default 'typeof window === "undefined"'
-	 */
-	isServer?: string;
 	/**
 	 * The file-structure of the compiled output.
 	 *

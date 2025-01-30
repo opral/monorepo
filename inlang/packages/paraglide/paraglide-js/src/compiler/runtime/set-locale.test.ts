@@ -14,7 +14,6 @@ test("sets the cookie to a different locale", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			isServer: "false",
 			strategy: ["cookie"],
 			cookieName: "PARAGLIDE_LOCALE",
 		},
@@ -24,6 +23,26 @@ test("sets the cookie to a different locale", async () => {
 
 	runtime.setLocale("de");
 
+	// set the locale
 	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=de");
+	// reloads the site if window is available
 	expect(globalThis.window.location.reload).toBeCalled();
+});
+
+test("doesn't throw for server unavailable APIs", async () => {
+	// @ts-expect-error - reset document in case it's defined
+	globalThis.document = undefined;
+	// @ts-expect-error - reset window in case it's defined
+	globalThis.window = undefined;
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			// using browser based strategies first, then variable which is available on the server
+			strategy: ["pathname", "cookie", "variable", "baseLocale"],
+		},
+	});
+
+	expect(() => runtime.setLocale("de")).not.toThrow();
+	expect(runtime.getLocale()).toBe("de");
 });
