@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-sveltekit",
 	"type": "module",
-	"version": "1.0.0-beta.4",
+	"version": "1.0.0-beta.5",
 	"license": "MIT",
 	"publishConfig": {
 		"access": "public",
@@ -34,14 +34,14 @@
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
-	"dependencies": {},
+	"dependencies": {
+		"@inlang/paraglide-js": "workspace:*"
+	},
 	"peerDependencies": {
-		"@inlang/paraglide-js": "^2",
 		"svelte": "^5.0.0",
 		"@sveltejs/kit": "^2.4.3"
 	},
 	"devDependencies": {
-		"@inlang/paraglide-js": "workspace:*",
 		"@sveltejs/package": "^2.2.3",
 		"@eslint/js": "^9.18.0",
 		"@opral/tsconfig": "workspace:*",
