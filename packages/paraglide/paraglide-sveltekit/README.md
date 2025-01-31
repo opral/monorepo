@@ -45,15 +45,3 @@ import * as paraglideAdapter from '$lib/paraglide/adapter';
 
 export const reroute: Reroute = paraglideAdapter.reroute;
 ```
-
-Create or add the the Paraglide provider to the root layout file in `/src/routes/+layout.svelte`:
-
-```diff
-<script lang="ts">
-+	import { ParaglideSveltekitProvider } from '$lib/paraglide/adapter';
-</script>
-
-+<ParaglideSveltekitProvider>
-	<slot></slot>
-+</ParaglideSveltekitProvider>
-```
