@@ -25,3 +25,6 @@ export const cookieName = "<cookie-name>";
  * @type {Array<"cookie" | "baseLocale" | "pathname" | "variable">}
  */
 export const strategy = ["variable"];
+
+/** @type {boolean} */
+export const pathnamePrefixDefaultLocale = false;
