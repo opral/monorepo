@@ -41,6 +41,9 @@ test("handles paths with no segments after locale", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de"],
+		compilerOptions: {
+			pathnamePrefixDefaultLocale: true,
+		},
 	});
 
 	const path = "/en/";
