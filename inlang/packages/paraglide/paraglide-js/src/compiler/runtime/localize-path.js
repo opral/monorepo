@@ -1,4 +1,4 @@
-import { baseLocale } from "./variables.js";
+import { baseLocale, pathnamePrefixDefaultLocale } from "./variables.js";
 import { getLocale } from "./get-locale.js";
 import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
 
@@ -25,21 +25,21 @@ import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
  * @example
  *   <a href={localizePath('/home')}>Home</a>
  *
- * @param {string} path
+ * @param {string} pathname
  * @param {Object} [options] - Optional parameters.
  * @param {Locale} [options.locale] - The locale to use for the path.
  * @returns {string}
  */
-export function localizePath(path, options) {
+export function localizePath(pathname, options) {
 	const locale = options?.locale ?? getLocale();
-	const hasLocale = extractLocaleFromPathname(path);
+	const hasLocale = extractLocaleFromPathname(pathname);
 	const pathWithoutLocale = hasLocale
-		? "/" + path.split("/").slice(2).join("/")
-		: path;
+		? "/" + pathname.split("/").slice(2).join("/")
+		: pathname;
 
-	if (locale === baseLocale) {
+	if (locale === baseLocale && pathnamePrefixDefaultLocale === false) {
 		return pathWithoutLocale;
-	} else if (path === "/" || pathWithoutLocale === "/") {
+	} else if (pathname === "/" || pathWithoutLocale === "/") {
 		return `/${locale}`;
 	} else {
 		return `/${locale}${pathWithoutLocale}`;
