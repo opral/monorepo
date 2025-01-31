@@ -13,6 +13,9 @@ export function generateMessageModules(
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
+		pathnamePrefixDefaultLocale: NonNullable<
+			CompilerOptions["pathnamePrefixDefaultLocale"]
+		>;
 	}
 ): Record<string, string> {
 	const output: Record<string, string> = {

@@ -1,4 +1,4 @@
-import { locales } from "./locales.js";
+import { locales } from "./variables.js";
 
 /**
  * Check if something is an available locale.

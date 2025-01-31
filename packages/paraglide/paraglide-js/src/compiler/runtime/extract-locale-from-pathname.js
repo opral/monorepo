@@ -1,4 +1,5 @@
 import { isLocale } from "./is-locale.js";
+import { baseLocale, pathnamePrefixDefaultLocale } from "./variables.js";
 
 /**
  * Extracts the locale from a given pathname.
@@ -13,9 +14,21 @@ import { isLocale } from "./is-locale.js";
  */
 export function extractLocaleFromPathname(pathname) {
 	const [, maybeLocale] = pathname.split("/");
-	if (isLocale(maybeLocale)) {
-		return maybeLocale;
-	}
 
-	return undefined;
+	if (pathnamePrefixDefaultLocale && maybeLocale === baseLocale) {
+		return baseLocale;
+	} else if (
+		pathnamePrefixDefaultLocale === false &&
+		maybeLocale === baseLocale
+	) {
+		return undefined;
+	} else if (isLocale(maybeLocale)) {
+		return maybeLocale;
+	} else {
+		// it's not possible to match deterministically
+		// if the path is the baseLocale at this point
+		// or not. users should use the strategy api
+		// to set the base locale as fallback
+		return undefined;
+	}
 }

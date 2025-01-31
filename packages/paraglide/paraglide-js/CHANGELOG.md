@@ -1,5 +1,17 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.17
+
+Add support for `pathnamePrefixBaseLocale` https://github.com/opral/inlang-paraglide-js/issues/358.
+
+```diff
+await compile({
+  strategy: ["pathname", "cookie", "baseLocale"],
++ pathnamePrefixBaseLocale: true
+})
+
+```
+
 ## 2.0.0-beta.16
 
 New `strategy` API. See https://github.com/opral/inlang-paraglide-js/issues/346.

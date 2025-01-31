@@ -1,8 +1,6 @@
 import { assertIsLocale } from "./assert-is-locale.js";
-import { baseLocale } from "./base-locale.js";
-import { cookieName } from "./cookie-name.js";
+import { baseLocale, cookieName, strategy } from "./variables.js";
 import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
-import { strategy } from "./strategy.js";
 
 /**
  * Detect a locale from a request.

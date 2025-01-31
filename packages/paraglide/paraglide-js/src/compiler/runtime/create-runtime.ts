@@ -11,17 +11,22 @@ export function createRuntimeFile(args: {
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
+		pathnamePrefixDefaultLocale: NonNullable<
+			CompilerOptions["pathnamePrefixDefaultLocale"]
+		>;
 	};
 }): string {
 	return `
 
-${injectCode("./base-locale.js").replace(`<base-locale>`, `${args.baseLocale}`)}
-
-${injectCode("./locales.js").replace(`["<base-locale>"]`, `["${args.locales.join('", "')}"]`)}
-
-${injectCode("./strategy.js").replace(`["variable"]`, `["${args.compilerOptions.strategy.join('", "')}"]`)}
-
-${injectCode("./cookie-name.js").replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)}
+${injectCode("./variables.js")
+	.replace(`<base-locale>`, `${args.baseLocale}`)
+	.replace(`["<base-locale>"]`, `["${args.locales.join('", "')}"]`)
+	.replace(`["variable"]`, `["${args.compilerOptions.strategy.join('", "')}"]`)
+	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
+	.replace(
+		`pathnamePrefixDefaultLocale = false`,
+		`pathnamePrefixDefaultLocale = ${args.compilerOptions.pathnamePrefixDefaultLocale}`
+	)}
 
 /**
  * Define the \`getLocale()\` function.
@@ -122,6 +127,7 @@ export async function createRuntimeForTesting(args: {
 	compilerOptions?: {
 		strategy?: CompilerOptions["strategy"];
 		cookieName?: CompilerOptions["cookieName"];
+		pathnamePrefixDefaultLocale?: CompilerOptions["pathnamePrefixDefaultLocale"];
 	};
 }): Promise<Runtime> {
 	const file = createRuntimeFile({
