@@ -1,4 +1,4 @@
-import { baseLocale } from "./base-locale.js";
+import { baseLocale } from "./variables.js";
 import { getLocale } from "./get-locale.js";
 import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
 

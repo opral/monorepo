@@ -15,13 +15,11 @@ export function createRuntimeFile(args: {
 }): string {
 	return `
 
-${injectCode("./base-locale.js").replace(`<base-locale>`, `${args.baseLocale}`)}
-
-${injectCode("./locales.js").replace(`["<base-locale>"]`, `["${args.locales.join('", "')}"]`)}
-
-${injectCode("./strategy.js").replace(`["variable"]`, `["${args.compilerOptions.strategy.join('", "')}"]`)}
-
-${injectCode("./cookie-name.js").replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)}
+${injectCode("./variables.js")
+	.replace(`<base-locale>`, `${args.baseLocale}`)
+	.replace(`["<base-locale>"]`, `["${args.locales.join('", "')}"]`)
+	.replace(`["variable"]`, `["${args.compilerOptions.strategy.join('", "')}"]`)
+	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)}
 
 /**
  * Define the \`getLocale()\` function.
