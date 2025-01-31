@@ -10,7 +10,9 @@ export default defineConfig({
 		sveltekit(),
 		paraglideSveltekit({
 			project: './project.inlang',
-			outdir: './src/lib/paraglide'
+			outdir: './src/lib/paraglide',
+			strategy: ['pathname', 'baseLocale'],
+			pathnamePrefixDefaultLocale: false
 		})
 	]
 });

@@ -1,6 +1,5 @@
-import { cookieName } from "./cookie-name.js";
+import { cookieName, strategy } from "./variables.js";
 import { localizePath } from "./localize-path.js";
-import { strategy } from "./strategy.js";
 
 /**
  * Set the locale.

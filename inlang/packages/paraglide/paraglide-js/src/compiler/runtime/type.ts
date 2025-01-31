@@ -4,8 +4,8 @@
 export type Runtime = {
 	baseLocale: Locale;
 	locales: Readonly<Locale[]>;
-	strategy: typeof import("./strategy.js").strategy;
-	cookieName: typeof import("./cookie-name.js").cookieName;
+	strategy: typeof import("./variables.js").strategy;
+	cookieName: typeof import("./variables.js").cookieName;
 	getLocale: typeof import("./get-locale.js").getLocale;
 	setLocale: typeof import("./set-locale.js").setLocale;
 	defineGetLocale: (fn: () => Locale) => void;

@@ -39,16 +39,34 @@ test("adds no trailing slash for the root path", async () => {
 	expect(l10nPath).toBe("/de");
 });
 
-test("removes the base locale from the path", async () => {
+test("removes the base locale from the path if pathnamePrefixDefaultLocale = false", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de"],
+		compilerOptions: {
+			pathnamePrefixDefaultLocale: false,
+		},
 	});
 
 	const path = "/de/about";
 	const l10nPath = runtime.localizePath(path, { locale: "en" });
 
 	expect(l10nPath).toBe("/about");
+});
+
+test("adds the base locale to the path if pathnamePrefixDefaultLocale = true", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			pathnamePrefixDefaultLocale: true,
+		},
+	});
+
+	const path = "/de/about";
+	const l10nPath = runtime.localizePath(path, { locale: "en" });
+
+	expect(l10nPath).toBe("/en/about");
 });
 
 test("does not add a slash suffix if it's the root path that is already localized", async () => {
