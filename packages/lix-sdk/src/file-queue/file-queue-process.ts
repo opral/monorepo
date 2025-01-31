@@ -27,11 +27,10 @@ export async function initFileQueueProcess(args: {
 	let hasMoreEntriesSince: number | undefined = undefined;
 
 	async function queueWorker(trail = false) {
-		if (args.lix.sqlite.isOpen() === false) {
-			return;
-		}
-
 		try {
+			if (args.lix.sqlite.isOpen() === false) {
+				return;
+			}
 			if (pending && !trail) {
 				hasMoreEntriesSince = runNumber;
 				return;
@@ -104,5 +103,6 @@ export async function initFileQueueProcess(args: {
 		}
 	}
 	// start a worker in case there are entries
-	return queueWorker();
+	queueWorker();
+	return;
 }

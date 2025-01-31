@@ -5,6 +5,13 @@ import { Kysely, sql } from "kysely";
 export async function loadPlugins(
 	db: Kysely<LixDatabaseSchema>
 ): Promise<LixPlugin[]> {
+	// https://github.com/opral/inlang-paraglide-js/issues/350
+
+	// this function need an overhaul. text @samuelstroschein before you implement stuff.
+	// - needs manifest file, not match by "plugin/*" to avoid accidental loading of non-plugins
+
+	throw new Error("not implemented");
+	// @ts-expect-error - currently disabled
 	const pluginFiles = (
 		await sql`
     SELECT * FROM file
@@ -15,10 +22,12 @@ export async function loadPlugins(
 	const decoder = new TextDecoder("utf8");
 	const plugins: LixPlugin[] = [];
 	for (const plugin of pluginFiles) {
-		const text = btoa(decoder.decode(plugin.data));
-		const pluginModule = await import(
-			/* @vite-ignore */ "data:text/javascript;base64," + text
-		);
+		const blob = new Blob([decoder.decode(plugin.data)], {
+			type: "text/javascript",
+		});
+		const blobUrl = URL.createObjectURL(blob);
+		const pluginModule = await import(/* @vite-ignore */ blobUrl);
+
 		plugins.push(pluginModule.default);
 		if (pluginModule.default.setup) {
 			await pluginModule.default.setup();
