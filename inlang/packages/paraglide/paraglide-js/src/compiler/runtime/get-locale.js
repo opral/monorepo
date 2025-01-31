@@ -1,8 +1,7 @@
 import { assertIsLocale } from "./assert-is-locale.js";
-import { baseLocale } from "./base-locale.js";
+import { baseLocale, strategy } from "./variables.js";
 import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
 import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
-import { strategy } from "./strategy.js";
 
 /**
  * This is a fallback to get started with a custom

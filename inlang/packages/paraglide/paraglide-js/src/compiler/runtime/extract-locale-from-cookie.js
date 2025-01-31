@@ -1,4 +1,4 @@
-import { cookieName } from "./cookie-name.js";
+import { cookieName } from "./variables.js";
 
 /**
  * Extracts a cookie from the document.
