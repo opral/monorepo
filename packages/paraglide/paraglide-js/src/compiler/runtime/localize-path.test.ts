@@ -80,3 +80,33 @@ test("does not add a slash suffix if it's the root path that is already localize
 
 	expect(l10nPath).toBe("/de");
 });
+
+
+test("localizes with the provided pathnames", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["pathname"],
+			pathnames: {
+				"/about": {
+					en: "/about",
+					de: "/uber-uns",
+				},
+				"/about/team": {
+					en: "/about/team",
+					de: "/uber-uns/team",
+				},
+			},
+		},
+	});
+
+	expect(runtime.localizePath("/about", { locale: "en" })).toBe("/about");
+	expect(runtime.localizePath("/about", { locale: "de" })).toBe("/de/uber-uns");
+	expect(runtime.localizePath("/about/team", { locale: "en" })).toBe(
+		"/about/team"
+	);
+	expect(runtime.localizePath("/about/team", { locale: "de" })).toBe(
+		"/de/uber-uns/team"
+	);
+});

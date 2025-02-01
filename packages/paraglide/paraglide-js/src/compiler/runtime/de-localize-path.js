@@ -1,4 +1,5 @@
 import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
+import { pathnames } from "./variables.js";
 
 /**
  * De-localizes the given localized path.
@@ -26,6 +27,14 @@ import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
  * @returns {string} The de-localized path without the locale prefix.
  */
 export function deLocalizePath(path) {
+	for (const delocalizedPath in pathnames) {
+		const maybePath =
+			pathnames[delocalizedPath]?.[extractLocaleFromPathname(path)];
+		if (maybePath === path) {
+			return delocalizedPath;
+		}
+	}
+
 	const hasLocale = extractLocaleFromPathname(path);
 	if (!hasLocale) {
 		return path; // Path is already de-localized

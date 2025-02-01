@@ -14,8 +14,22 @@ export function createRuntimeFile(args: {
 		pathnamePrefixDefaultLocale: NonNullable<
 			CompilerOptions["pathnamePrefixDefaultLocale"]
 		>;
+		pathnames?: CompilerOptions["pathnames"];
 	};
 }): string {
+	const mappedPathnames: Record<string, Locale> = {};
+
+	// turns pathnames into a mapping of pathnames to locales for
+	// faster lookups that avoids nested loops in the runtime.
+	//
+	// input: { "/about": { "en": "/about", "de": "/ueber-uns" } }
+	// output: { "/about": "en", "/ueber-uns": "de" }
+	for (const mapping of Object.values(args.compilerOptions.pathnames ?? {})) {
+		for (const [locale, path] of Object.entries(mapping)) {
+			mappedPathnames[path] = locale;
+		}
+	}
+
 	return `
 
 ${injectCode("./variables.js")
@@ -26,6 +40,14 @@ ${injectCode("./variables.js")
 	.replace(
 		`pathnamePrefixDefaultLocale = false`,
 		`pathnamePrefixDefaultLocale = ${args.compilerOptions.pathnamePrefixDefaultLocale}`
+	)
+	.replace(
+		"mappedPathnames = {}",
+		`mappedPathnames = ${JSON.stringify(mappedPathnames ?? {}, null, 2)}`
+	)
+	.replace(
+		`pathnames = {}`,
+		`pathnames = ${JSON.stringify(args.compilerOptions.pathnames ?? {}, null, 2)}`
 	)}
 
 /**
@@ -109,7 +131,9 @@ ${injectCode("./extract-locale-from-cookie.js")}
  */
 function injectCode(path: string): string {
 	const code = fs.readFileSync(new URL(path, import.meta.url), "utf-8");
-	return code.replace(/import\s+.*?;?\n/g, "");
+	// Regex to match single-line and multi-line imports
+	const importRegex = /import\s+[\s\S]*?from\s+['"][^'"]+['"]\s*;?/g;
+	return code.replace(importRegex, "").trim();
 }
 
 /**
@@ -128,6 +152,7 @@ export async function createRuntimeForTesting(args: {
 		strategy?: CompilerOptions["strategy"];
 		cookieName?: CompilerOptions["cookieName"];
 		pathnamePrefixDefaultLocale?: CompilerOptions["pathnamePrefixDefaultLocale"];
+		pathnames?: CompilerOptions["pathnames"];
 	};
 }): Promise<Runtime> {
 	const file = createRuntimeFile({
