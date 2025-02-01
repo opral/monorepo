@@ -72,6 +72,21 @@ export type CompilerOptions = {
 	 */
 	emitPrettierIgnore?: boolean;
 	/**
+	 * The localized pathnames to use.
+	 *
+	 * Use this API if you want to localize the pathnames beyond
+	 * locale prefixing.
+	 *
+	 * @example
+	 *   pathnames: {
+	 *     "/about": {
+	 *        "en": "/about",
+	 *        "de": "/ueber-uns",
+	 *     }
+	 *   }
+	 */
+	pathnames?: Record<string, Record<string, string>>;
+	/**
 	 * Whether to include an eslint-disable comment at the top of each .js file.
 	 *
 	 * @default true

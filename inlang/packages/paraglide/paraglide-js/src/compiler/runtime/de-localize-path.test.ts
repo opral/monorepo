@@ -63,3 +63,27 @@ test("handles paths that are already the root", async () => {
 
 	expect(result).toBe("/");
 });
+
+test("delocalized a localized path", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			pathnames: {
+				"/about": {
+					en: "/UK/about",
+					de: "/ueber-uns",
+				},
+				"/about/team": {
+					en: "/UK/about/team",
+					de: "/ueber-uns/team",
+				},
+			},
+		},
+	});
+
+	expect(runtime.deLocalizePath("/ueber-uns")).toBe("/about");
+	expect(runtime.deLocalizePath("/UK/about")).toBe("/about");
+	expect(runtime.deLocalizePath("/ueber-uns/team")).toBe("/about/team");
+	expect(runtime.deLocalizePath("/UK/about/team")).toBe("/about/team");
+});

@@ -1,4 +1,8 @@
-import { baseLocale, pathnamePrefixDefaultLocale } from "./variables.js";
+import {
+	baseLocale,
+	pathnamePrefixDefaultLocale,
+	pathnames,
+} from "./variables.js";
 import { getLocale } from "./get-locale.js";
 import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
 
@@ -33,9 +37,18 @@ import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
 export function localizePath(pathname, options) {
 	const locale = options?.locale ?? getLocale();
 	const hasLocale = extractLocaleFromPathname(pathname);
-	const pathWithoutLocale = hasLocale
+	let pathWithoutLocale = hasLocale
 		? "/" + pathname.split("/").slice(2).join("/")
 		: pathname;
+
+	for (const unlocalizedPath in pathnames) {
+		for (const loc in pathnames[unlocalizedPath]) {
+			const maybePath = pathnames[unlocalizedPath][loc];
+			if (maybePath === pathname) {
+				pathWithoutLocale = maybePath;
+			}
+		}
+	}
 
 	if (locale === baseLocale && pathnamePrefixDefaultLocale === false) {
 		return pathWithoutLocale;

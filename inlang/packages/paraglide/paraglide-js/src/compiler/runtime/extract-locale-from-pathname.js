@@ -1,5 +1,10 @@
+import { assertIsLocale } from "./assert-is-locale.js";
 import { isLocale } from "./is-locale.js";
-import { baseLocale, pathnamePrefixDefaultLocale } from "./variables.js";
+import {
+	baseLocale,
+	mappedPathnames,
+	pathnamePrefixDefaultLocale,
+} from "./variables.js";
 
 /**
  * Extracts the locale from a given pathname.
@@ -13,7 +18,16 @@ import { baseLocale, pathnamePrefixDefaultLocale } from "./variables.js";
  * @returns {Locale|undefined} The extracted locale, or undefined if no locale is found.
  */
 export function extractLocaleFromPathname(pathname) {
-	const [, maybeLocale] = pathname.split("/");
+	// if a mapping for the pathname exists, choose the mapping
+	// else, use the pathname as is to extract the locale
+
+	if (mappedPathnames[pathname]) {
+		return assertIsLocale(mappedPathnames[pathname]);
+	}
+
+	const selectedPath = mappedPathnames[pathname] ?? pathname;
+
+	const [, maybeLocale] = selectedPath.split("/");
 
 	if (pathnamePrefixDefaultLocale && maybeLocale === baseLocale) {
 		return baseLocale;
