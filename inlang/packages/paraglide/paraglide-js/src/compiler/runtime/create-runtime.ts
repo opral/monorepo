@@ -2,6 +2,12 @@ import fs from "node:fs";
 import { defaultCompilerOptions, type CompilerOptions } from "../compile.js";
 import type { Runtime } from "./type.js";
 
+// Conditional ESM module loading (Node.js and browser)
+// @ts-expect-error: Property 'UrlPattern' does not exist 
+if (!globalThis.URLPattern) { 
+  await import("urlpattern-polyfill");
+}
+
 /**
  * Returns the code for the `runtime.js` module
  */

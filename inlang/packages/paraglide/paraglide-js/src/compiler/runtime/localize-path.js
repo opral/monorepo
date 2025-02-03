@@ -36,25 +36,55 @@ import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
  */
 export function localizePath(pathname, options) {
 	const locale = options?.locale ?? getLocale();
-	const hasLocale = extractLocaleFromPathname(pathname);
-	let pathWithoutLocale = hasLocale
-		? "/" + pathname.split("/").slice(2).join("/")
-		: pathname;
 
-	for (const unlocalizedPath in pathnames) {
-		for (const loc in pathnames[unlocalizedPath]) {
-			const maybePath = pathnames[unlocalizedPath][loc];
-			if (maybePath === pathname) {
-				pathWithoutLocale = maybePath;
+	for (const [pattern, locales] of Object.entries(pathnames)) {
+		const urlPattern = new URLPattern({ pathname: pattern });
+
+		const match = urlPattern.exec({ pathname });
+		if (match) {
+			let localizedPath = locales[locale];
+
+			if (!localizedPath) {
+				return pathname;
 			}
+
+			// Replace dynamic segments
+			for (const [key, value] of Object.entries(match.pathname.groups || {})) {
+				localizedPath = localizedPath.replace(`:${key}`, value);
+			}
+
+			return localizedPath;
 		}
 	}
 
-	if (locale === baseLocale && pathnamePrefixDefaultLocale === false) {
-		return pathWithoutLocale;
-	} else if (pathname === "/" || pathWithoutLocale === "/") {
-		return `/${locale}`;
-	} else {
-		return `/${locale}${pathWithoutLocale}`;
-	}
+	// Default to original if no match
+	return pathname;
 }
+
+
+
+
+// export function localizePath(pathname, options) {
+// 	const locale = options?.locale ?? getLocale();
+// 	const hasLocale = extractLocaleFromPathname(pathname);
+// 	let pathWithoutLocale = hasLocale
+// 		? "/" + pathname.split("/").slice(2).join("/")
+// 		: pathname;
+
+// 	for (const unlocalizedPath in pathnames) {
+// 		for (const loc in pathnames[unlocalizedPath]) {
+// 			const maybePath = pathnames[unlocalizedPath][loc];
+// 			if (maybePath === pathname) {
+// 				pathWithoutLocale = maybePath;
+// 			}
+// 		}
+// 	}
+
+// 	if (locale === baseLocale && pathnamePrefixDefaultLocale === false) {
+// 		return pathWithoutLocale;
+// 	} else if (pathname === "/" || pathWithoutLocale === "/") {
+// 		return `/${locale}`;
+// 	} else {
+// 		return `/${locale}${pathWithoutLocale}`;
+// 	}
+// }
