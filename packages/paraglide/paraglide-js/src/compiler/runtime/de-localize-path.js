@@ -1,4 +1,3 @@
-import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
 import { pathnames } from "./variables.js";
 
 /**
@@ -23,21 +22,56 @@ import { pathnames } from "./variables.js";
  *  deLocalizePath('/home');
  *  // '/home' (no change)
  *
- * @param {string} path - The localized path to de-localize.
+ * @param {string} pathname - The localized path to de-localize.
  * @returns {string} The de-localized path without the locale prefix.
  */
-export function deLocalizePath(path) {
-	for (const delocalizedPath in pathnames) {
-		const maybePath =
-			pathnames[delocalizedPath]?.[extractLocaleFromPathname(path)];
-		if (maybePath === path) {
-			return delocalizedPath;
+export function deLocalizePath(pathname) {
+	const base = "https://example.com";
+
+	const url = new URL(pathname, base);
+
+	for (const [unLocalizedPattern, locales] of Object.entries(pathnames)) {
+		for (const [, localizedPattern] of Object.entries(locales)) {
+			const urlPattern = new URLPattern({
+				pathname: localizedPattern,
+				baseURL: base,
+			});
+
+			const match = urlPattern.exec(url);
+
+			if (match) {
+				let deLocalizedPath = unLocalizedPattern;
+
+				// Replace dynamic segments
+				for (const [key, value] of Object.entries(
+					match.pathname.groups ?? {}
+				)) {
+					if (value === undefined) {
+						continue;
+					}
+					// check if group name is a number in which case it is an unnamed group
+					// https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API#unnamed_and_named_groups
+					if (/^\d+$/.test(key)) {
+						deLocalizedPath = deLocalizedPath.replace(/\(.*?\)/, value);
+					} else {
+						deLocalizedPath = deLocalizedPath.replace(`:${key}`, value);
+					}
+				}
+
+				deLocalizedPath = deLocalizedPath.replace("*", "");
+
+				return deLocalizedPath + url.search;
+			}
 		}
 	}
 
-	const hasLocale = extractLocaleFromPathname(path);
-	if (!hasLocale) {
-		return path; // Path is already de-localized
-	}
-	return "/" + path.split("/").slice(2).join("/");
+	throw new Error(
+		"No match found for localized path. Refer to the documentation on how to define pathnames."
+	);
+
+	// const hasLocale = extractLocaleFromPathname(pathname);
+	// if (!hasLocale) {
+	// 	return pathname; // Path is already de-localized
+	// }
+	// return "/" + pathname.split("/").slice(2).join("/");
 }
