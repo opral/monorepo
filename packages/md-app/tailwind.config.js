@@ -11,7 +11,7 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				neutral: slate, // Use Tailwind's slate color palette for neutral
+				neutral: "slate",
 				border: "hsl(var(--border))",
 				input: "hsl(var(--input))",
 				ring: "hsl(var(--ring))",
@@ -62,6 +62,14 @@ export default {
 					border: "hsl(var(--sidebar-border))",
 					ring: "hsl(var(--sidebar-ring))",
 				},
+				brand: {
+					DEFAULT: "hsl(var(--brand))",
+					foreground: "hsl(var(--brand-foreground))",
+				},
+				highlight: {
+					DEFAULT: "hsl(var(--highlight))",
+					foreground: "hsl(var(--highlight-foreground))",
+				},
 			},
 			borderRadius: {
 				sm: "calc(var(--radius) - 4px)",
@@ -71,6 +79,40 @@ export default {
 			fontFamily: {
 				poppins: "var(--font-poppins)",
 				inter: "var(--font-inter)",
+				heading: [
+					"var(--font-heading)",
+					"ui-sans-serif",
+					"-apple-system",
+					"BlinkMacSystemFont",
+					"Segoe UI Variable Display",
+					"Segoe UI",
+					"Helvetica",
+					"Apple Color Emoji",
+					"Arial",
+					"sans-serif",
+					"Segoe UI Emoji",
+					"Segoe UI Symbol",
+					"Noto Color Emoji",
+				],
+				mono: [
+					"var(--font-mono)",
+					...require("tailwindcss/defaultTheme").fontFamily.mono,
+				],
+				sans: [
+					"var(--font-sans)",
+					"ui-sans-serif",
+					"-apple-system",
+					"BlinkMacSystemFont",
+					"Segoe UI Variable Display",
+					"Segoe UI",
+					"Helvetica",
+					"Apple Color Emoji",
+					"Arial",
+					"sans-serif",
+					"Segoe UI Emoji",
+					"Segoe UI Symbol",
+					"Noto Color Emoji",
+				],
 			},
 			keyframes: {
 				"accordion-down": {
@@ -94,7 +136,12 @@ export default {
 				"accordion-down": "accordion-down 0.2s ease-out",
 				"accordion-up": "accordion-up 0.2s ease-out",
 			},
+			screens: {
+				"main-hover": {
+					raw: "(hover: hover)",
+				},
+			},
 		},
 	},
-	plugins: [import("tailwindcss-animate")],
+	plugins: [import("tailwindcss-animate"), import("tailwind-scrollbar-hide")],
 };
