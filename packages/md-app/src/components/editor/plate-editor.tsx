@@ -15,11 +15,15 @@ export function PlateEditor() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <Plate editor={editor}>
+      <Plate
+        editor={editor}
+        onChange={(newValue) => {
+          console.log('onChange', newValue.editor.api.markdown.serialize());
+        }}
+      >
         <EditorContainer>
-          <Editor variant="demo" />
+          <Editor />
         </EditorContainer>
-
         <SettingsDialog />
       </Plate>
     </DndProvider>
