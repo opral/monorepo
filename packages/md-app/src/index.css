@@ -4,6 +4,9 @@
 
 @layer base {
   :root {
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'Fira Code', monospace;
+    --font-heading: 'Poppins', sans-serif;
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --muted: 210, 40%, 96%;
@@ -40,6 +43,9 @@
   }
 
   .dark {
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'Fira Code', monospace;
+    --font-heading: 'Poppins', sans-serif;
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
     --muted: 210, 40%, 96%;
