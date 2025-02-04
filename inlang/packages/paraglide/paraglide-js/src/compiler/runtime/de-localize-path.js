@@ -58,8 +58,10 @@ export function deLocalizePath(pathname) {
 					}
 				}
 
-				deLocalizedPath = deLocalizedPath.replace("*", "");
-
+				deLocalizedPath = deLocalizedPath
+					// replace wildcards like `/home/*` to `/home`
+					.replace("*", "");
+				
 				return deLocalizedPath + url.search;
 			}
 		}
