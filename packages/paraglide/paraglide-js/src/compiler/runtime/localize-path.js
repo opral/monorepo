@@ -54,35 +54,3 @@ export function localizePath(pathname, options) {
 	// Default to original if no match
 	return pathname;
 }
-
-/**
- * Matches a pathname against a wildcard pattern.
- * Supports path-to-regexp v8 syntax (`/*path`).
- *
- * @param {string} pattern - The wildcard pattern to match.
- * @param {string} pathname - The actual pathname to check.
- * @returns {object | undefined} - Matched parameters or `undefined` if no match.
- */
-export function matchPathname(pattern, pathname) {
-	// Convert `*` into a regex group that captures everything
-	const regexPattern = pattern.replace(/\*([^/]+)/g, "(.*)");
-
-	// Create a RegExp object from the modified pattern
-	const regex = new RegExp(`^${regexPattern}$`);
-
-	// Attempt to match the pathname
-	const match = pathname.match(regex);
-	if (!match) return undefined;
-
-	// Extract wildcard values
-	const params = {};
-	const keys = (pattern.match(/\*([^/]+)/g) || []).map((key) =>
-		key.substring(1)
-	);
-
-	keys.forEach((key, index) => {
-		params[key] = match[index + 1]; // Captured value in regex
-	});
-
-	return params;
-}
