@@ -4,7 +4,7 @@
  *
  * @param {string} pattern - The pattern to match.
  * @param {string} pathname - The pathname.
- * @returns {object | undefined} - Matched parameters or `undefined` if no match.
+ * @returns {{ params: Record<string, string>} | undefined} - Matched parameters or `undefined` if no match.
  */
 export function matchPathnamePattern(pattern, pathname) {
 	// Ensure pathname doesn't have trailing slashes (unless root `/`)
