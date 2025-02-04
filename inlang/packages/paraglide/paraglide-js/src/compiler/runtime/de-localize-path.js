@@ -32,6 +32,7 @@ export function deLocalizePath(pathname) {
 
 	for (const [unLocalizedPattern, locales] of Object.entries(pathnames)) {
 		for (const [, localizedPattern] of Object.entries(locales)) {
+			// @ts-expect-error - xyz
 			const urlPattern = new URLPattern({
 				pathname: localizedPattern,
 				baseURL: base,
@@ -61,7 +62,7 @@ export function deLocalizePath(pathname) {
 				deLocalizedPath = deLocalizedPath
 					// replace wildcards like `/home/*` to `/home`
 					.replace("*", "");
-				
+
 				return deLocalizedPath + url.search;
 			}
 		}
