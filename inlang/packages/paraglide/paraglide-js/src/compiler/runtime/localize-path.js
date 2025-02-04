@@ -1,10 +1,5 @@
-import {
-	baseLocale,
-	pathnamePrefixDefaultLocale,
-	pathnames,
-} from "./variables.js";
+import { pathnames } from "./variables.js";
 import { getLocale } from "./get-locale.js";
-import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
 
 /**
  * Localizes the given path.
@@ -38,9 +33,7 @@ export function localizePath(pathname, options) {
 	const locale = options?.locale ?? getLocale();
 
 	for (const [pattern, locales] of Object.entries(pathnames)) {
-		const urlPattern = new URLPattern({ pathname: pattern });
-
-		const match = urlPattern.exec({ pathname });
+		const match = createMatcher(pattern)(pathname);
 		if (match) {
 			let localizedPath = locales[locale];
 
@@ -49,6 +42,7 @@ export function localizePath(pathname, options) {
 			}
 
 			// Replace dynamic segments
+			// @ts-expect-error - xyz
 			for (const [key, value] of Object.entries(match.pathname.groups || {})) {
 				localizedPath = localizedPath.replace(`:${key}`, value);
 			}
@@ -61,30 +55,34 @@ export function localizePath(pathname, options) {
 	return pathname;
 }
 
+/**
+ * Matches a pathname against a wildcard pattern.
+ * Supports path-to-regexp v8 syntax (`/*path`).
+ *
+ * @param {string} pattern - The wildcard pattern to match.
+ * @param {string} pathname - The actual pathname to check.
+ * @returns {object | undefined} - Matched parameters or `undefined` if no match.
+ */
+export function matchPathname(pattern, pathname) {
+	// Convert `*` into a regex group that captures everything
+	const regexPattern = pattern.replace(/\*([^/]+)/g, "(.*)");
 
+	// Create a RegExp object from the modified pattern
+	const regex = new RegExp(`^${regexPattern}$`);
 
+	// Attempt to match the pathname
+	const match = pathname.match(regex);
+	if (!match) return undefined;
 
-// export function localizePath(pathname, options) {
-// 	const locale = options?.locale ?? getLocale();
-// 	const hasLocale = extractLocaleFromPathname(pathname);
-// 	let pathWithoutLocale = hasLocale
-// 		? "/" + pathname.split("/").slice(2).join("/")
-// 		: pathname;
+	// Extract wildcard values
+	const params = {};
+	const keys = (pattern.match(/\*([^/]+)/g) || []).map((key) =>
+		key.substring(1)
+	);
 
-// 	for (const unlocalizedPath in pathnames) {
-// 		for (const loc in pathnames[unlocalizedPath]) {
-// 			const maybePath = pathnames[unlocalizedPath][loc];
-// 			if (maybePath === pathname) {
-// 				pathWithoutLocale = maybePath;
-// 			}
-// 		}
-// 	}
+	keys.forEach((key, index) => {
+		params[key] = match[index + 1]; // Captured value in regex
+	});
 
-// 	if (locale === baseLocale && pathnamePrefixDefaultLocale === false) {
-// 		return pathWithoutLocale;
-// 	} else if (pathname === "/" || pathWithoutLocale === "/") {
-// 		return `/${locale}`;
-// 	} else {
-// 		return `/${locale}${pathWithoutLocale}`;
-// 	}
-// }
+	return params;
+}
