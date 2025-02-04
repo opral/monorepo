@@ -90,6 +90,19 @@ services:
     envVars:
       - fromGroup: production
 
+  - name: lix-md
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: md-app
+    staticPublishPath: ./packages/md-app/dist
+    buildCommand: pnpm install && pnpm run --filter md-app... build
+    buildFilter:
+      paths:
+        - packages/md-app/**
+    envVars:
+      - fromGroup: production
+
   - name: inlang-website
     type: web
     runtime: node
