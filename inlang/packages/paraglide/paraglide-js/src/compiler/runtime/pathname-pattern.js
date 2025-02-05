@@ -12,12 +12,13 @@ export function matchPathnamePattern(pattern, pathname) {
 		pathname = pathname.slice(0, -1);
 	}
 
-	// Convert `{/*param}` to an optional named capture group `(?:/(?<param>.*))?`
+	// Convert `{*param}` to a named capture group `(?<param>.+)`
 	let regexPattern = pattern
-		.replace(/\{\/\*([^}]+)\}/g, (_, param) => `(?:/(?<${param}>[^/]+))?`) // Optional wildcards `{/*param}`
-		.replace(/\{\/:([^}]+)\}/g, (_, param) => `(?:/(?<${param}>[^/]+))?`) //  Optional parameters `{/:param}`
-		.replace(/\/:([^/]+)/g, (_, param) => `/(?<${param}>[^/]+)`) //  Named parameters
-		.replace(/\*([^/]+)/g, (_, param) => `(?<${param}>.+)`); //  Normal wildcards `*param`
+		.replace(/\{\*([^}]+)\}/g, (_, param) => `(?<${param}>.+)`) // ✅ Wildcards `{*param}`
+		.replace(/\{\/\*([^}]+)\}/g, (_, param) => `(?:/(?<${param}>.*?))?`) // ✅ Optional wildcards `{/*param}`
+		.replace(/\{\/:([^}]+)\}/g, (_, param) => `(?:/(?<${param}>[^/]+))?`) // ✅ Optional parameters `{/:param}`
+		.replace(/\/:([^/]+)/g, (_, param) => `/(?<${param}>[^/]+)`) // ✅ Named parameters
+		.replace(/\*([^/]+)/g, (_, param) => `(?<${param}>.+)`); // ✅ Normal wildcards `*param`
 
 	// Create a RegExp object from the modified pattern
 	const regex = new RegExp(`^${regexPattern}$`);

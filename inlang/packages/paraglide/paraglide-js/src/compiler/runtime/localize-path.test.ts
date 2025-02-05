@@ -64,9 +64,9 @@ test("root path stays root path", async () => {
 		locales: ["en", "de"],
 		compilerOptions: {
 			pathnames: {
-				"*path": {
-					en: "*path",
-					de: "/de*path",
+				"/{*path}": {
+					en: "/{*path}",
+					de: "/de{/*path}",
 				},
 			},
 		},
