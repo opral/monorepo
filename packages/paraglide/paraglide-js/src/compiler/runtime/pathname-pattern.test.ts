@@ -135,8 +135,6 @@ test("generating paths from patterns", async () => {
 		locales: ["en"],
 	});
 
-	// expect(compilePathnamePattern("/*path", { path: ["/"] })).toBe("/");
-
 	expect(compilePathnamePattern("/:post", { post: "123" })).toBe("/123");
 
 	expect(
