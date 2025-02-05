@@ -120,6 +120,10 @@ test("optional wildcard", async () => {
 		locales: ["en", "de"],
 	});
 
+	expect(pathToRegexp("/{*path}")("/")).toMatchObject(
+		matchPathnamePattern("/{*path}", "/") as any
+	);
+
 	expect(pathToRegexp("/de{/*path}")("/de")).toMatchObject(
 		matchPathnamePattern("/de{/*path}", "/de") as any
 	);
