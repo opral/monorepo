@@ -10,7 +10,6 @@ import {
 	currentVersionAtom,
 	discussionSearchParamsAtom,
 } from "./state.ts";
-import Papa from "papaparse";
 import {
 	changeConflictInVersion,
 	changeHasLabel,
@@ -48,107 +47,11 @@ export const activeFileAtom = atom(async (get) => {
 	return fileAtom;
 });
 
-export const parsedCsvAtom = atom(async (get) => {
+export const parsedMdAtom = atom(async (get) => {
 	const file = await get(activeFileAtom);
 	if (!file) throw new Error("No file selected");
 	const data = await new Blob([file.data]).text();
-	const parsed = Papa.parse(data, { header: true });
-	return parsed as Papa.ParseResult<Record<string, string>>;
-});
-
-export const uniqueColumnAtom = atom<Promise<string | undefined>>(
-	async (get) => {
-		const file = await get(activeFileAtom);
-		if (!file) return undefined;
-		return file.metadata?.unique_column as string | undefined;
-	}
-);
-
-/**
- * The entity id that is selected in the editor.
- */
-export const activeCellAtom = atom<{
-	colId?: string;
-	col: number;
-	row: number;
-} | null>(null);
-
-/**
- * The entity (row) id that is selected in the editor.
- */
-export const activeRowEntityIdAtom = atom(async (get) => {
-	const activeCell = get(activeCellAtom);
-	const parsedCsv = await get(parsedCsvAtom);
-	const uniqueColumn = await get(uniqueColumnAtom);
-	if (!activeCell || !uniqueColumn) return null;
-	const uniqueColumnValue = parsedCsv.data[activeCell.row]?.[uniqueColumn];
-	return `${uniqueColumn}|${uniqueColumnValue}`;
-});
-
-/**
- * The cell entity_id that is selected in the editor.
- */
-export const activeCellEntityIdAtom = atom(async (get) => {
-	const activeCell = get(activeCellAtom);
-	const parsedCsv = await get(parsedCsvAtom);
-	const activeRowEntityId = await get(activeRowEntityIdAtom);
-	if (!activeCell || !activeRowEntityId) return null;
-	const columName = parsedCsv.meta.fields![activeCell.col];
-	return `${activeRowEntityId}|${columName}`;
-});
-
-/**
- * All changes for a given row.
- */
-export const activeCellChangesAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const activeFile = await get(activeFileAtom);
-	if (!activeFile) return [];
-	const cellEntityId = await get(activeCellEntityIdAtom);
-	const currentBranch = await get(currentVersionAtom);
-	if (!currentBranch) return [];
-	const lix = await get(lixAtom);
-	if (!cellEntityId) return [];
-	const changes = await lix.db
-		.selectFrom("change")
-		// .where("change.schema_key", "=", CellSchemaV1.key)
-		.where("change.entity_id", "=", cellEntityId)
-		.where("change.file_id", "=", activeFile.id)
-		.where(changeInVersion(currentBranch))
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		// .innerJoin("change_set_item", "change_set_item.change_id", "change.id")
-		// .innerJoin("change_set", "change_set.id", "change_set_item.change_set_id")
-		// .innerJoin("discussion", "discussion.change_set_id", "change_set.id")
-		// .innerJoin("comment", "comment.discussion_id", "discussion.id")
-		// .selectAll("change")
-		// .select((eb) => eb.fn.count("comment.id").as("comment_count"))
-		.select("snapshot.content")
-		.selectAll("change")
-		.orderBy("change.created_at", "desc")
-		.execute();
-
-	for (const change of changes) {
-		const labels = await lix.db
-			.selectFrom("label")
-			.innerJoin("change_set_label", "change_set_label.label_id", "label.id")
-			.innerJoin(
-				"change_set",
-				"change_set.id",
-				"change_set_label.change_set_id"
-			)
-			.innerJoin(
-				"change_set_element",
-				"change_set_element.change_set_id",
-				"change_set.id"
-			)
-			.where("change_set_element.change_id", "=", change.id)
-			.select("label.name")
-			.execute();
-
-		// @ts-expect-error - labels is not in the type
-		change.labels = labels.map((label) => label.name);
-	}
-	return changes;
+	return data;
 });
 
 // The file manager app treats changes that are not in a change set as intermediate changes.
