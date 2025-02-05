@@ -45,6 +45,7 @@ export function localizePath(pathname, options) {
 				return pathname;
 			}
 
+			// @ts-expect-error - blabla
 			return compilePathnamePattern(localizedPath, match.params);
 		}
 	}
