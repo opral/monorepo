@@ -1,23 +1,22 @@
-import { lixAtom } from "@/state.ts";
-import { useAtom } from "jotai";
-import { useNavigate } from "react-router-dom";
 import { Toaster } from 'sonner';
 import { PlateEditor } from '@/components/editor/plate-editor';
 import { SettingsProvider } from '@/components/editor/settings';
+import LixMenuDropdown from "@/components/LixMenuDropdown";
 
 export default function Page() {
-	// state atoms
-	const [lix] = useAtom(lixAtom);
-
-	//hooks
-	const navigate = useNavigate();
-
 	return (
-		<div className="h-screen w-full" data-registry="plate">
-			<SettingsProvider>
-				<PlateEditor />
-			</SettingsProvider>
-			<Toaster />
-		</div>
+		<>
+			<div className="w-full p-2 flex justify-between items-center">
+				<div className="flex-1" />
+				<LixMenuDropdown />
+			</div>
+			<div className="w-full border-t-[1px] border-[hsl(var(--border))]"></div>
+			<div className="h-screen w-full" data-registry="plate">
+				<SettingsProvider>
+					<PlateEditor />
+				</SettingsProvider>
+				<Toaster />
+			</div>
+		</>
 	);
 }

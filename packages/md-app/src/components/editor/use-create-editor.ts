@@ -159,21 +159,21 @@ export const useCreateEditor = () => {
 			FloatingToolbarPlugin,
 			MarkdownPlugin,
 		],
-		value: [
-			{
-				children: [{ text: "Playground" }],
-				type: "h1",
-			},
-			{
-				children: [
-					{ text: "A rich-text editor with AI capabilities. Try the " },
-					{ bold: true, text: "AI commands" },
-					{ text: " or use " },
-					{ kbd: true, text: "Cmd+J" },
-					{ text: " to open the AI menu." },
-				],
-				type: ParagraphPlugin.key,
-			},
-		],
+		// value: [
+		// 	{
+		// 		children: [{ text: "Playground" }],
+		// 		type: "h1",
+		// 	},
+		// 	{
+		// 		children: [
+		// 			{ text: "A rich-text editor with AI capabilities. Try the " },
+		// 			{ bold: true, text: "AI commands" },
+		// 			{ text: " or use " },
+		// 			{ kbd: true, text: "Cmd+J" },
+		// 			{ text: " to open the AI menu." },
+		// 		],
+		// 		type: ParagraphPlugin.key,
+		// 	},
+		// ],
 	});
 };
