@@ -90,3 +90,78 @@ test("optional parameter pattern", async () => {
 		matchPathnamePattern("/users{/:id}/delete", "/users/123/delete") as any
 	);
 });
+
+test("wildcard on root with prefixed slash", async () => {
+	const { matchPathnamePattern } = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en"],
+	});
+
+	expect([
+		matchPathnamePattern("/*path", "/"),
+		pathToRegexp("/*path")("/"),
+	]).toStrictEqual([undefined, false]);
+});
+
+test("wildcard on root with no slash", async () => {
+	const { matchPathnamePattern } = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en"],
+	});
+
+	expect(pathToRegexp("*path")("/")).toMatchObject(
+		matchPathnamePattern("*path", "/") as any
+	);
+});
+
+test("optional wildcard", async () => {
+	const { matchPathnamePattern } = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+	});
+
+	expect(pathToRegexp("/de{/*path}")("/de")).toMatchObject(
+		matchPathnamePattern("/de{/*path}", "/de") as any
+	);
+
+	expect(pathToRegexp("/de{/*path}")("/de/etwas")).toMatchObject(
+		matchPathnamePattern("/de{/*path}", "/de/etwas") as any
+	);
+});
+
+test("generating paths from patterns", async () => {
+	const { compilePathnamePattern } = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en"],
+	});
+
+	// expect(compilePathnamePattern("/*path", { path: ["/"] })).toBe("/");
+
+	expect(compilePathnamePattern("/:post", { post: "123" })).toBe("/123");
+
+	expect(
+		compilePathnamePattern("/:category/:id", { category: "books", id: "42" })
+	).toBe("/books/42");
+
+	expect(compilePathnamePattern("/users{/:id}/delete", { id: "123" })).toBe(
+		"/users/123/delete"
+	);
+
+	expect(compilePathnamePattern("/users{/:id}/delete", {})).toBe(
+		"/users/delete"
+	);
+
+	expect(
+		compilePathnamePattern("/*path/suffix", { path: ["about", "xyz"] })
+	).toBe("/about/xyz/suffix");
+
+	expect(compilePathnamePattern("/*path", { path: ["home"] })).toBe("/home");
+
+	expect(() => compilePathnamePattern("/:post", {})).toThrow(
+		'Missing value for parameter ":post"'
+	);
+
+	expect(() => compilePathnamePattern("/*path", { path: "home" })).toThrow(
+		'Wildcard parameter "*path" must be an array'
+	);
+});

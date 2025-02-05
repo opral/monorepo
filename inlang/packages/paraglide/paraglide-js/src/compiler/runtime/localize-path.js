@@ -1,5 +1,9 @@
 import { pathnames } from "./variables.js";
 import { getLocale } from "./get-locale.js";
+import {
+	compilePathnamePattern,
+	matchPathnamePattern,
+} from "./pathname-pattern.js";
 
 /**
  * Localizes the given path.
@@ -33,7 +37,7 @@ export function localizePath(pathname, options) {
 	const locale = options?.locale ?? getLocale();
 
 	for (const [pattern, locales] of Object.entries(pathnames)) {
-		const match = createMatcher(pattern)(pathname);
+		const match = matchPathnamePattern(pattern, pathname);
 		if (match) {
 			let localizedPath = locales[locale];
 
@@ -41,13 +45,7 @@ export function localizePath(pathname, options) {
 				return pathname;
 			}
 
-			// Replace dynamic segments
-			// @ts-expect-error - xyz
-			for (const [key, value] of Object.entries(match.pathname.groups || {})) {
-				localizedPath = localizedPath.replace(`:${key}`, value);
-			}
-
-			return localizedPath;
+			return compilePathnamePattern(localizedPath, match.params);
 		}
 	}
 
