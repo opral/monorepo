@@ -165,6 +165,22 @@ export default function Page() {
 		}
 	};
 
+	const handleExportLixFile = async (lix: Lix) => {
+		const lixId = await lix.db
+			.selectFrom("key_value")
+			.where("key", "=", "lix_id")
+			.select("value")
+			.executeTakeFirstOrThrow();
+
+		const blob = await toBlob({ lix });
+		const a = document.createElement("a");
+		a.href = URL.createObjectURL(blob);
+		a.download = `${lixId.value}.lix`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	};
+
 	const handleBackgroundClick = async (e: React.MouseEvent) => {
 		// Only trigger if clicking the background container itself
 		if (e.target === e.currentTarget) {
@@ -399,19 +415,3 @@ export default function Page() {
 		</div>
 	);
 }
-
-const handleExportLixFile = async (lix: Lix) => {
-	const lixId = await lix.db
-		.selectFrom("key_value")
-		.where("key", "=", "lix_id")
-		.select("value")
-		.executeTakeFirstOrThrow();
-
-	const blob = await toBlob({ lix });
-	const a = document.createElement("a");
-	a.href = URL.createObjectURL(blob);
-	a.download = `${lixId.value}.lix`;
-	document.body.appendChild(a);
-	a.click();
-	document.body.removeChild(a);
-};
