@@ -4,7 +4,7 @@
  *
  * @param {string} pattern - The pattern to match.
  * @param {string} pathname - The pathname.
- * @returns {{ params: Record<string, string>} | undefined} - Matched parameters or `undefined` if no match.
+ * @returns {{ params: Record<string, string | string[]>} | undefined} - Matched parameters or `undefined` if no match.
  */
 export function matchPathnamePattern(pattern, pathname) {
 	// Ensure pathname doesn't have trailing slashes (unless root `/`)
@@ -26,11 +26,16 @@ export function matchPathnamePattern(pattern, pathname) {
 	if (!match) return undefined;
 
 	// Extract named parameters
+	/** @type {Record<string, string | string[]>} */
 	const params = match.groups ? { ...match.groups } : {};
 
-	// Remove undefined params (optional parameters)
 	for (const key in params) {
-		if (params[key] === undefined) {
+		// Convert wildcard (`*param`) values to arrays to match regexp behavior
+		if (pattern.includes(`*${key}`) && typeof params[key] === "string") {
+			params[key] = params[key].split("/");
+		}
+		// Remove undefined params (optional parameters)
+		else if (params[key] === undefined) {
 			delete params[key];
 		}
 	}
