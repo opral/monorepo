@@ -47,7 +47,7 @@ export const activeFileAtom = atom(async (get) => {
 	return fileAtom;
 });
 
-export const parsedMdAtom = atom(async (get) => {
+export const loadedMdAtom = atom(async (get) => {
 	const file = await get(activeFileAtom);
 	if (!file) throw new Error("No file selected");
 	const data = await new Blob([file.data]).text();

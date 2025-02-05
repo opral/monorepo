@@ -12,20 +12,20 @@ import { Editor, EditorContainer } from '@/components/plate-ui/editor';
 import { debounce } from 'lodash-es';
 import { useAtom } from 'jotai/react';
 import { lixAtom } from '@/state';
-import { activeFileAtom, parsedMdAtom } from '@/state-active-file';
+import { activeFileAtom, loadedMdAtom } from '@/state-active-file';
 import { saveLixToOpfs } from '@/helper/saveLixToOpfs';
 
 export function PlateEditor() {
   const [lix] = useAtom(lixAtom);
   const [activeFile] = useAtom(activeFileAtom);
-  const [parsedMd] = useAtom(parsedMdAtom);
+  const [loadedMd] = useAtom(loadedMdAtom);
 
   const editor = useCreateEditor();
 
   // Set the initial value of the editor
   useEffect(() => {
-    if (parsedMd !== editor.api.markdown.serialize()) {
-      editor.tf.setValue(editor.api.markdown.deserialize(parsedMd))
+    if (loadedMd !== editor.api.markdown.serialize()) {
+      editor.tf.setValue(editor.api.markdown.deserialize(loadedMd))
     }
   }, []);
 
@@ -56,7 +56,7 @@ export function PlateEditor() {
       <Plate
         editor={editor}
         onValueChange={(newValue) => {
-          if (parsedMd !== newValue.editor.api.markdown.serialize()) {
+          if (loadedMd !== newValue.editor.api.markdown.serialize()) {
             handleUpdateMdData(newValue)
           } else {
             console.log('no change');
