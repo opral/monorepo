@@ -4,6 +4,7 @@ import {
 	Account,
 	switchAccount,
 	Lix,
+	newLixFile,
 } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
@@ -101,12 +102,10 @@ export const lixAtom = atom(async (get) => {
 			);
 			const file = await fileHandle.getFile();
 			lixBlob = new Blob([await file.arrayBuffer()]);
+		} else {
+			loadDemoFile(await openLixInMemory({ blob: await newLixFile() }));
+			return;
 		}
-		// create a demo lix
-		// else {
-		// 	const demoFile = await lixCsvDemoFile();
-		// 	lixBlob = demoFile.blob;
-		// }
 	}
 
 	let lix: Lix;
@@ -171,6 +170,20 @@ export const lixAtom = atom(async (get) => {
 		.execute();
 
 	await saveLixToOpfs({ lix });
+
+	// Check if there is a file in lix
+	const firstFile = await lix.db
+		.selectFrom("file")
+		.selectAll()
+		.executeTakeFirst();
+	if (firstFile) {
+		// Set the file ID as searchParams
+		const url = new URL(window.location.href);
+		url.searchParams.set("f", firstFile.id);
+		window.history.replaceState({}, "", url.toString());
+	} else {
+		await loadDemoFile(lix);
+	}
 
 	// mismatch in id, load correct url
 	if (lixId.value !== lixIdSearchParam) {
@@ -273,3 +286,23 @@ export const isSyncingAtom = atom(async (get) => {
 		return false;
 	}
 });
+
+const loadDemoFile = async (lix: Lix) => {
+	// Load a demo md file and save it to OPFS
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			path: "/demo.md",
+			data: new TextEncoder().encode(`# Playground
+A rich-text editor with AI capabilities. Try the **AI commands** or use Cmd+J to open the AI menu.
+<br>`),
+		})
+		.returning("id")
+		.executeTakeFirstOrThrow();
+	await saveLixToOpfs({ lix });
+
+	// Set the file ID as searchParams
+	const url = new URL(window.location.href);
+	url.searchParams.set("f", file.id);
+	window.history.replaceState({}, "", url.toString());
+};
