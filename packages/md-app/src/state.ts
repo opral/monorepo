@@ -104,7 +104,6 @@ export const lixAtom = atom(async (get) => {
 			lixBlob = new Blob([await file.arrayBuffer()]);
 		} else {
 			loadDemoFile(await openLixInMemory({ blob: await newLixFile() }));
-			return;
 		}
 	}
 
