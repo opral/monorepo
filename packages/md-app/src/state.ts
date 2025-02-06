@@ -4,11 +4,14 @@ import {
 	Account,
 	switchAccount,
 	Lix,
-	newLixFile,
 } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
+import {
+	lixMdDemoFile,
+	setupMdDemo,
+} from "./helper/demo-lix-file/demo-lix-file.ts";
 
 export const fileIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
@@ -103,7 +106,8 @@ export const lixAtom = atom(async (get) => {
 			const file = await fileHandle.getFile();
 			lixBlob = new Blob([await file.arrayBuffer()]);
 		} else {
-			loadDemoFile(await openLixInMemory({ blob: await newLixFile() }));
+			const demoLix = await lixMdDemoFile();
+			lixBlob = demoLix.blob;
 		}
 	}
 
@@ -168,21 +172,17 @@ export const lixAtom = atom(async (get) => {
 		.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
 		.execute();
 
-	await saveLixToOpfs({ lix });
-
 	// Check if there is a file in lix
-	const firstFile = await lix.db
-		.selectFrom("file")
-		.selectAll()
-		.executeTakeFirst();
-	if (firstFile) {
+	let file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
+	if (!file) file = await setupMdDemo(lix);
+	if (!get(fileIdSearchParamsAtom)) {
 		// Set the file ID as searchParams
 		const url = new URL(window.location.href);
-		url.searchParams.set("f", firstFile.id);
+		url.searchParams.set("f", file.id);
 		window.history.replaceState({}, "", url.toString());
-	} else {
-		await loadDemoFile(lix);
 	}
+
+	await saveLixToOpfs({ lix });
 
 	// mismatch in id, load correct url
 	if (lixId.value !== lixIdSearchParam) {
@@ -285,23 +285,3 @@ export const isSyncingAtom = atom(async (get) => {
 		return false;
 	}
 });
-
-const loadDemoFile = async (lix: Lix) => {
-	// Load a demo md file and save it to OPFS
-	const file = await lix.db
-		.insertInto("file")
-		.values({
-			path: "/demo.md",
-			data: new TextEncoder().encode(`# Playground
-A rich-text editor with AI capabilities. Try the **AI commands** or use Cmd+J to open the AI menu.
-<br>`),
-		})
-		.returning("id")
-		.executeTakeFirstOrThrow();
-	await saveLixToOpfs({ lix });
-
-	// Set the file ID as searchParams
-	const url = new URL(window.location.href);
-	url.searchParams.set("f", file.id);
-	window.history.replaceState({}, "", url.toString());
-};

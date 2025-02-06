@@ -25,7 +25,7 @@ import { redirect } from "react-router-dom";
 
 export const activeFileAtom = atom(async (get) => {
 	get(withPollingAtom);
-	const fileId = await get(fileIdSearchParamsAtom);
+	const fileId = get(fileIdSearchParamsAtom);
 
 	if (!fileId) {
 		redirect("/");
