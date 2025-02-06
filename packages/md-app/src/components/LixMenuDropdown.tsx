@@ -1,7 +1,7 @@
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { lixAtom } from "@/state";
 import { Lix, openLixInMemory, toBlob } from "@lix-js/sdk";
-import { useAtom } from "jotai/react";
+import { useAtom } from "jotai";
 import posthog from "posthog-js";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./plate-ui/dropdown-menu";

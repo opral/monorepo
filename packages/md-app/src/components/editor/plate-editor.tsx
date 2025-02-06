@@ -10,7 +10,7 @@ import { useCreateEditor } from '@/components/editor/use-create-editor';
 import { SettingsDialog } from '@/components/editor/settings';
 import { Editor, EditorContainer } from '@/components/plate-ui/editor';
 import { debounce } from 'lodash-es';
-import { useAtom } from 'jotai/react';
+import { useAtom } from 'jotai';
 import { lixAtom } from '@/state';
 import { activeFileAtom, loadedMdAtom } from '@/state-active-file';
 import { saveLixToOpfs } from '@/helper/saveLixToOpfs';
