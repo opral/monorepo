@@ -1,9 +1,5 @@
 import { pathnames } from "./variables.js";
 import { getLocale } from "./get-locale.js";
-import {
-	compilePathnamePattern,
-	matchPathnamePattern,
-} from "./pathname-pattern.js";
 
 /**
  * Localizes the given path.
@@ -37,16 +33,11 @@ export function localizePath(pathname, options) {
 	const locale = options?.locale ?? getLocale();
 
 	for (const [pattern, locales] of Object.entries(pathnames)) {
-		const match = matchPathnamePattern(pattern, pathname);
-		if (match) {
-			let localizedPath = locales[locale];
-
-			if (!localizedPath) {
-				return pathname;
-			}
-
-			// @ts-expect-error - blabla
-			return compilePathnamePattern(localizedPath, match.params);
+		const hasMatch = pathToRegexp.match(pattern)(pathname);
+		if (hasMatch) {
+			let localizedPattern = locales[locale];
+			if (!localizedPattern) return pathname;
+			return pathToRegexp.compile(localizedPattern)(hasMatch.params);
 		}
 	}
 
