@@ -19,16 +19,16 @@ test("handles path that is the root", async () => {
 		locales: ["en", "de"],
 		compilerOptions: {
 			pathnames: {
-				"{*path}": {
-					de: "/de{*path}",
-					en: "{*path}",
+				"/{*path}": {
+					de: "/de{/*path}",
+					en: "/{*path}",
 				},
 			},
 		},
 	});
 
 	expect(runtime.deLocalizePath("/")).toBe("/");
-	expect(runtime.deLocalizePath("/de/")).toBe("/");
+	expect(runtime.deLocalizePath("/de")).toBe("/");
 });
 
 test("delocalizes a localized paths", async () => {
@@ -46,9 +46,9 @@ test("delocalizes a localized paths", async () => {
 					en: "/en/blog/:post/suffix",
 					de: "/de/artikel/:post/anhang",
 				},
-				"{*path}": {
-					en: "/en{*path}",
-					de: "/de{*path}",
+				"/{*path}": {
+					en: "/en{/*path}",
+					de: "/de{/*path}",
 				},
 			},
 		},
@@ -78,9 +78,9 @@ test("handles query parameters", async () => {
 		compilerOptions: {
 			strategy: ["pathname"],
 			pathnames: {
-				"{*path}": {
-					en: "/en{*path}",
-					de: "/de{*path}",
+				"/{*path}": {
+					en: "/en{/*path}",
+					de: "/de{/*path}",
 				},
 			},
 		},
