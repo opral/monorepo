@@ -26,42 +26,16 @@ import { pathnames } from "./variables.js";
  * @returns {string} The de-localized path without the locale prefix.
  */
 export function deLocalizePath(pathname) {
-	const base = "https://example.com";
-
-	const url = new URL(pathname, base);
+	const url = new URL(pathname, "http://y.com");
 
 	for (const [unLocalizedPattern, locales] of Object.entries(pathnames)) {
 		for (const [, localizedPattern] of Object.entries(locales)) {
-			// @ts-expect-error - xyz
-			const urlPattern = new URLPattern({
-				pathname: localizedPattern,
-				baseURL: base,
-			});
+			const hasMatch = pathToRegexp.match(localizedPattern)(url.pathname);
 
-			const match = urlPattern.exec(url);
-
-			if (match) {
-				let deLocalizedPath = unLocalizedPattern;
-
-				// Replace dynamic segments
-				for (const [key, value] of Object.entries(
-					match.pathname.groups ?? {}
-				)) {
-					if (value === undefined) {
-						continue;
-					}
-					// check if group name is a number in which case it is an unnamed group
-					// https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API#unnamed_and_named_groups
-					if (/^\d+$/.test(key)) {
-						deLocalizedPath = deLocalizedPath.replace(/\(.*?\)/, value);
-					} else {
-						deLocalizedPath = deLocalizedPath.replace(`:${key}`, value);
-					}
-				}
-
-				deLocalizedPath = deLocalizedPath
-					// replace wildcards like `/home/*` to `/home`
-					.replace("*", "");
+			if (hasMatch) {
+				let deLocalizedPath = pathToRegexp.compile(unLocalizedPattern)(
+					hasMatch.params
+				);
 
 				return deLocalizedPath + url.search;
 			}
@@ -71,10 +45,4 @@ export function deLocalizePath(pathname) {
 	throw new Error(
 		"No match found for localized path. Refer to the documentation on how to define pathnames."
 	);
-
-	// const hasLocale = extractLocaleFromPathname(pathname);
-	// if (!hasLocale) {
-	// 	return pathname; // Path is already de-localized
-	// }
-	// return "/" + pathname.split("/").slice(2).join("/");
 }

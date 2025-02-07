@@ -149,3 +149,22 @@ test("order of defining pathnames matters", async () => {
 
 	expect(runtime.localizePath("/about", { locale: "en" })).toBe("/en/about");
 });
+
+test("handles query parameters", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			pathnames: {
+				"*path": {
+					en: "/en*path",
+					de: "/de*path",
+				},
+			},
+		},
+	});
+
+	expect(runtime.localizePath("/about?query=1", { locale: "en" })).toBe(
+		"/en/about?query=1"
+	);
+});
