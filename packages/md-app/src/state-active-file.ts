@@ -22,6 +22,7 @@ import {
 	Version,
 } from "@lix-js/sdk";
 import { redirect } from "react-router-dom";
+import { parseMdBlocks } from "@lix-js/plugin-md";
 
 export const activeFileAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -51,6 +52,7 @@ export const loadedMdAtom = atom(async (get) => {
 	const file = await get(activeFileAtom);
 	if (!file) throw new Error("No file selected");
 	const data = await new Blob([file.data]).text();
+	console.log(parseMdBlocks(new TextEncoder().encode(data)));
 	return data;
 });
 
