@@ -7,15 +7,15 @@ test("matches root path and paths", async () => {
 		locales: ["en", "de"],
 		compilerOptions: {
 			pathnames: {
-				"*path": {
-					de: "/de*path",
-					en: "/en*path",
+				"/{*path}": {
+					de: "/de{/*path}",
+					en: "/en{/*path}",
 				},
 			},
 		},
 	});
 
-	expect(runtime.localizePath("/", { locale: "en" })).toBe("/en/");
+	expect(runtime.localizePath("/", { locale: "en" })).toBe("/en");
 	expect(runtime.localizePath("/something", { locale: "en" })).toBe(
 		"/en/something"
 	);
@@ -27,9 +27,9 @@ test("localizes the path based on the return value of getLocale()", async () => 
 		locales: ["en", "de"],
 		compilerOptions: {
 			pathnames: {
-				"*path": {
-					en: "/en*path",
-					de: "/de*path",
+				"/{*path}": {
+					en: "/en{/*path}",
+					de: "/de{/*path}",
 				},
 			},
 		},
@@ -67,16 +67,16 @@ test("root path stays root path", async () => {
 		locales: ["en", "de"],
 		compilerOptions: {
 			pathnames: {
-				"*path": {
-					en: "*path",
-					de: "/de*path",
+				"/{*path}": {
+					en: "/{*path}",
+					de: "/de{/*path}",
 				},
 			},
 		},
 	});
 
 	expect(runtime.localizePath("/", { locale: "en" })).toBe("/");
-	expect(runtime.localizePath("/", { locale: "de" })).toBe("/de/");
+	expect(runtime.localizePath("/", { locale: "de" })).toBe("/de");
 });
 
 test("catchall pathname pattern", async () => {
@@ -85,9 +85,9 @@ test("catchall pathname pattern", async () => {
 		locales: ["en", "de"],
 		compilerOptions: {
 			pathnames: {
-				"*path": {
-					en: "/en*path",
-					de: "/de*path",
+				"/{*path}": {
+					en: "/en{/*path}",
+					de: "/de{/*path}",
 				},
 			},
 		},
@@ -135,9 +135,9 @@ test("order of defining pathnames matters", async () => {
 			pathnames: {
 				// the catch all has precedence over the parameter pattern
 				// because it is defined first
-				"/*path": {
-					en: "/en/*path",
-					de: "/de/*path",
+				"/{*path}": {
+					en: "/en{/*path}",
+					de: "/de{/*path}",
 				},
 				"/about": {
 					en: "/about",
@@ -156,9 +156,9 @@ test("handles query parameters", async () => {
 		locales: ["en", "de"],
 		compilerOptions: {
 			pathnames: {
-				"*path": {
-					en: "/en*path",
-					de: "/de*path",
+				"/{*path}": {
+					en: "/en{/*path}",
+					de: "/de{/*path}",
 				},
 			},
 		},
