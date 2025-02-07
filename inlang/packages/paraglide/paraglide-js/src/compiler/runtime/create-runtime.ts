@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { defaultCompilerOptions, type CompilerOptions } from "../compile.js";
 import type { Runtime } from "./type.js";
+import * as pathToRegexp from "path-to-regexp";
 
 /**
  * Returns the code for the `runtime.js` module
@@ -31,6 +32,7 @@ export function createRuntimeFile(args: {
 	}
 
 	return `
+import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";
 
 ${injectCode("./variables.js")
 	.replace(`<base-locale>`, `${args.baseLocale}`)
@@ -106,8 +108,6 @@ ${injectCode("./extract-locale-from-request.js")}
 
 ${injectCode("./extract-locale-from-cookie.js")}
 
-${injectCode("./pathname-pattern.js")}
-
 // ------ TYPES ------
 
 /**
@@ -165,7 +165,16 @@ export async function createRuntimeForTesting(args: {
 			strategy: ["variable"],
 			...args.compilerOptions,
 		},
-	});
+	})
+		// remove the import statement for path-to-regexp
+		.replace(
+			`import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";`,
+			""
+		);
+
+	// @ts-expect-error - defining a depdency globally to avoid importing it in the runtime
+	globalThis.pathToRegexp = pathToRegexp;
+
 	return await import(
 		"data:text/javascript;base64," +
 			Buffer.from(file, "utf-8").toString("base64")
