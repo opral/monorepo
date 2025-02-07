@@ -40,7 +40,6 @@ export function localizePath(pathname, options) {
 			return pathToRegexp.compile(localizedPattern)(hasMatch.params);
 		}
 	}
-
 	// Default to original if no match
 	return pathname;
 }
