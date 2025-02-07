@@ -10,5 +10,5 @@ export declare global {
 	let _locale: string;
 	// string because precise locale is unknown before compilation
 	type Locale = any;
-	const pathToRegexp = ptr;
+	const pathToRegexp = { match: ptr.match, compile: ptr.compile };
 }

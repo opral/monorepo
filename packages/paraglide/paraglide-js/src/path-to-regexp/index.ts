@@ -3,4 +3,4 @@
  *
  * See https://github.com/pillarjs/path-to-regexp for more information.
  */
-export * from "path-to-regexp";
+export { match, compile } from "path-to-regexp";

@@ -184,7 +184,14 @@ test("multiple compile calls do not interfere with each other", async () => {
 
 	const runtime = (await import(
 		"data:text/javascript;base64," +
-			Buffer.from(runtimeFile, "utf-8").toString("base64")
+			Buffer.from(
+				// replace the
+				runtimeFile.replace(
+					`import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";`,
+					""
+				),
+				"utf-8"
+			).toString("base64")
 	)) as Runtime;
 
 	// expecting the second compile step to overwrite the first
