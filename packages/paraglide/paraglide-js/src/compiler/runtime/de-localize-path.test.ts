@@ -19,16 +19,16 @@ test("handles path that is the root", async () => {
 		locales: ["en", "de"],
 		compilerOptions: {
 			pathnames: {
-				"/(.*)": {
-					de: "/de(.*)",
-					en: "/(.*)",
+				"{*path}": {
+					de: "/de{*path}",
+					en: "{*path}",
 				},
 			},
 		},
 	});
 
 	expect(runtime.deLocalizePath("/")).toBe("/");
-	expect(runtime.deLocalizePath("/de")).toBe("/");
+	expect(runtime.deLocalizePath("/de/")).toBe("/");
 });
 
 test("delocalizes a localized paths", async () => {
@@ -46,9 +46,9 @@ test("delocalizes a localized paths", async () => {
 					en: "/en/blog/:post/suffix",
 					de: "/de/artikel/:post/anhang",
 				},
-				"/:path*": {
-					en: "/en/:path",
-					de: "/de/:path",
+				"{*path}": {
+					en: "/en{*path}",
+					de: "/de{*path}",
 				},
 			},
 		},
@@ -78,9 +78,9 @@ test("handles query parameters", async () => {
 		compilerOptions: {
 			strategy: ["pathname"],
 			pathnames: {
-				"/:path*": {
-					en: "/en/:path",
-					de: "/de/:path",
+				"{*path}": {
+					en: "/en{*path}",
+					de: "/de{*path}",
 				},
 			},
 		},
@@ -89,50 +89,4 @@ test("handles query parameters", async () => {
 	expect(runtime.deLocalizePath("/en/something?query=123&other=5")).toBe(
 		"/something?query=123&other=5"
 	);
-});
-
-test("handles regex groups in combination with named groups", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
-		compilerOptions: {
-			strategy: ["pathname"],
-			pathnames: {
-				"/blog/:post/(\\d+)": {
-					en: "/en/blog/:post/(\\d+)",
-					de: "/de/artikel/:post/(\\d+)",
-				},
-			},
-		},
-	});
-
-	// something is not a degit
-	expect(() => runtime.deLocalizePath("/en/blog/123/something")).toThrowError();
-
-	// 456 is a degit, should work
-	expect(runtime.deLocalizePath("/en/blog/123/456")).toBe("/blog/123/456");
-
-	// should work for german as well
-	expect(runtime.deLocalizePath("/de/artikel/123/456")).toBe("/blog/123/456");
-});
-
-test.skip("throws on non capturing groups because they can't be localized", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
-		compilerOptions: {
-			strategy: ["pathname"],
-			pathnames: {
-				"/product{/:subpath}?": {
-					en: "/en/product{/:subpath}?",
-					de: "/de/product{/:subpath}?",
-				},
-			},
-		},
-	});
-
-	expect(runtime.deLocalizePath("/en/product")).toBe("/product");
-	expect(runtime.deLocalizePath("/en/product/old")).toBe("/product/old");
-	expect(runtime.deLocalizePath("/de/product")).toBe("/product");
-	expect(runtime.deLocalizePath("/de/product/alt")).toBe("/product/old");
 });

@@ -30,14 +30,17 @@ import { getLocale } from "./get-locale.js";
  * @returns {string}
  */
 export function localizePath(pathname, options) {
+	const url = new URL(pathname, "http://y.com");
 	const locale = options?.locale ?? getLocale();
 
 	for (const [pattern, locales] of Object.entries(pathnames)) {
-		const hasMatch = pathToRegexp.match(pattern)(pathname);
+		const hasMatch = pathToRegexp.match(pattern)(url.pathname);
 		if (hasMatch) {
 			let localizedPattern = locales[locale];
 			if (!localizedPattern) return pathname;
-			return pathToRegexp.compile(localizedPattern)(hasMatch.params);
+			return (
+				pathToRegexp.compile(localizedPattern)(hasMatch.params) + url.search
+			);
 		}
 	}
 	// Default to original if no match
