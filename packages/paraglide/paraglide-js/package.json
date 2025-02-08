@@ -39,11 +39,11 @@
 	},
 	"dependencies": {
 		"@inlang/recommend-sherlock": "workspace:*",
-		"path-to-regexp": "^8.2.0",
 		"@inlang/sdk": "workspace:*",
 		"commander": "11.1.0",
 		"consola": "3.4.0",
 		"json5": "2.2.3",
+		"path-to-regexp": "^8.2.0",
 		"unplugin": "^2.1.2"
 	},
 	"devDependencies": {
