@@ -289,6 +289,9 @@ importers:
       json5:
         specifier: 2.2.3
         version: 2.2.3
+      path-to-regexp:
+        specifier: ^8.2.0
+        version: 8.2.0
       unplugin:
         specifier: ^2.1.2
         version: 2.1.2
@@ -320,9 +323,6 @@ importers:
       memfs:
         specifier: 4.17.0
         version: 4.17.0
-      path-to-regexp:
-        specifier: ^8.2.0
-        version: 8.2.0
       prettier:
         specifier: ^3.4.2
         version: 3.4.2
