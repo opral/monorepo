@@ -1,5 +1,11 @@
 import { assertIsLocale } from "./assert-is-locale.js";
-import { baseLocale, strategy } from "./variables.js";
+import {
+	baseLocale,
+	strategy,
+	TREE_SHAKE_COOKIE_STRATEGY_USED,
+	TREE_SHAKE_PATHNAME_STRATEGY_USED,
+	TREE_SHAKE_VARIABLE_STRATEGY_USED,
+} from "./variables.js";
 import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
 import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
 
@@ -31,20 +37,25 @@ export let getLocale = () => {
 	let locale;
 
 	for (const strat of strategy) {
-		if (strat === "cookie") {
+		if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
 			locale = extractLocaleFromCookie();
 		}
 		if (strat === "baseLocale") {
 			locale = baseLocale;
 		}
 		if (
+			TREE_SHAKE_PATHNAME_STRATEGY_USED &&
 			strat === "pathname" &&
 			typeof window !== "undefined" &&
 			window.location?.pathname
 		) {
 			locale = extractLocaleFromPathname(window.location.pathname);
 		}
-		if (strat === "variable" && _locale !== undefined) {
+		if (
+			TREE_SHAKE_VARIABLE_STRATEGY_USED &&
+			strat === "variable" &&
+			_locale !== undefined
+		) {
 			locale = _locale;
 		}
 		// check if match, else continue loop

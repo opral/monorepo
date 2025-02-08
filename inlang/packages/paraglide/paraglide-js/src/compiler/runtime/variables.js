@@ -27,19 +27,25 @@ export const cookieName = "<cookie-name>";
 export const strategy = ["variable"];
 
 /**
- * The localized pathnames. 
- * 
- * @type {Record<string, Record<Locale, string>>} 
+ * The localized pathnames.
+ *
+ * @type {Record<string, Record<Locale, string>>}
  */
-export const pathnames = {}
+export const pathnames = {};
 
 /**
  * Whether the pathnames are the default pathnames.
- * 
- * If the default pathnames are used, the matching is done 
+ *
+ * If the default pathnames are used, the matching is done
  * statically with no runtime matching logic which reduces
- * the bundlesize. 
- * 
+ * the bundlesize.
+ *
  * @type {boolean}
  */
 export const TREE_SHAKE_IS_DEFAULT_PATHNAMES = false;
+
+export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;
+
+export const TREE_SHAKE_PATHNAME_STRATEGY_USED = false;
+
+export const TREE_SHAKE_VARIABLE_STRATEGY_USED = false;
