@@ -68,8 +68,8 @@ test("root path stays root path", async () => {
 		compilerOptions: {
 			pathnames: {
 				"/{*path}": {
-					en: "/{*path}",
 					de: "/de{/*path}",
+					en: "/{*path}",
 				},
 			},
 		},
@@ -140,14 +140,39 @@ test("order of defining pathnames matters", async () => {
 					de: "/de{/*path}",
 				},
 				"/about": {
-					en: "/about",
-					de: "/uber-uns",
+					en: "/en/about",
+					de: "/de/uber-uns",
+				},
+			},
+		},
+	});
+
+	const runtime2 = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["pathname"],
+			pathnames: {
+				// the catch all has precedence over the parameter pattern
+				// because it is defined first
+				"/about": {
+					en: "/en/about",
+					de: "/de/uber-uns",
+				},
+				"/{*path}": {
+					en: "/en{/*path}",
+					de: "/de{/*path}",
 				},
 			},
 		},
 	});
 
 	expect(runtime.localizePath("/about", { locale: "en" })).toBe("/en/about");
+	expect(runtime.localizePath("/about", { locale: "de" })).toBe("/de/about");
+	expect(runtime2.localizePath("/about", { locale: "en" })).toBe("/en/about");
+	expect(runtime2.localizePath("/about", { locale: "de" })).toBe(
+		"/de/uber-uns"
+	);
 });
 
 test("handles query parameters", async () => {
@@ -167,4 +192,22 @@ test("handles query parameters", async () => {
 	expect(runtime.localizePath("/about?query=1", { locale: "en" })).toBe(
 		"/en/about?query=1"
 	);
+});
+
+test("does not double localize already localized paths", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			pathnames: {
+				"/{*path}": {
+					en: "/en{/*path}",
+					de: "/de{/*path}",
+				},
+			},
+		},
+	});
+
+	// path is already localized
+	expect(runtime.localizePath("/en/about", { locale: "en" })).toBe("/en/about");
 });
