@@ -1,8 +1,132 @@
 # Locale strategy
 
+Paraglide JS comes with various strategies to determine the locale out of the box. 
+
+The strategy is defined with the `strategy` option. The order of the strategies in the array defines the priority. The first strategy that returns a locale will be used.
+
+In the example below, the locale is first determined by the `cookie` strategy. If no cookie is found, the `baseLocale` is used.
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["cookie", "baseLocale"]
+})
+```
+
+## Built-in strategies
+
+### cookie 
+
+The cookie strategy determines the locale from a cookie. 
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["cookie"]
+})
+```
+
+### baseLocale
+
+Returns the `baseLocale` defined in the settings. 
+
+Useful as fallback if no other strategy returned a locale. If a cookie has not been set yet, for example. 
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["cookie", "baseLocale"]
+})
+```
+
+### globalVariable
+
+Uses a global variable to determine the locale. 
+
+This strategy is only useful in testing environments, or to get started quickly. Setting a global variable can lead to cross request issues in server-side environments and the locale is not persisted between page reloads in client-side environments.
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["globalVariable"]
+})
+```
+
+### pathname
+
+The pathname strategy determines the locale from the pathname. 
+
+For example, if the pathname is `/en-US/about`, the locale will be `en-US`. You can adjust the pathnames with the `pathnames` option. The syntax uses [path-to-regexp](https://github.com/pillarjs/path-to-regexp).
+
+<doc-callout type="info">If you use wildcards (*), be aware of the matching order. Use wildcards after static and parameterized paths.</doc-callout>
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["pathname"]
++	pathnames: {
+		 // define static paths
+		 "/about": {
+			 en: "/about",
+			 de: "/ueber-uns",
+		 },
+		 // parameterized paths
+		 "/shop/:id": {
+			 en: "/shop/:id",
+			 de: "/einkaufen/:id",
+		 }
+		 // wildcard paths
+	   "/{*path}": {
+			  de: "/de{/*path}",
+			  en: "/{*path}",
+		 },
+})
+```
+
+Pathnames default to prefixing every locale other than the base locale in the path. If you want another behaviour, you can define it with the `pathnames` option. 
+
+#### Prefix every locale
+
+```
+/en/about
+/de/about
+```
+
+```json
+{
+	"/{*path}": {
+		"de": "/de{/*path}",
+		"en": "/en{/*path}"
+	}
+}
+```
+
+#### Aliases for locales
+
+```
+/deutsch/about
+/english/about
+```
+
+```json
+{
+	"/{*path}": {
+		"de": "/deutsch{/*path}",
+		"en": "/english{/*path}"
+	}
+}
+```
+
+## Write your own strategy
+
 Write your own cookie, http header, or i18n routing based locale strategy to integrate Paraglide into any framework or app.
 
-## Basics
+### Basics
 
 Every time a message is rendered, Paraglide calls the `getLocale()` function under the hood to determine which locale to apply. By default, this will be the `baseLocale` defined in your settings. Calling `setLocale(locale)` anywhere in your code will update the locale stored by the runtime. Any calls to `getLocale()` after that (eg: when a new message is rendered) will return the newly set locale.
 
@@ -159,9 +283,9 @@ defineSetLocale((newLocale) => {
 {/key}
 ```
 
-## Examples
+### Examples
 
-### Cookie based strategy
+#### Cookie based strategy
 
 The example uses React for demonstration purposes. You can replicate the same pattern in any other framework or vanilla JS.
 
@@ -199,7 +323,7 @@ function App() {
 }
 ```
 
-### Server-side rendering
+#### Server-side rendering
 
 1. Detect the locale from the request. 
 2. Make sure that `defineGetLocale()` is cross-request safe on the server. 
