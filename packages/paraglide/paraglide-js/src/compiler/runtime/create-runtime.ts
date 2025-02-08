@@ -12,25 +12,9 @@ export function createRuntimeFile(args: {
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
-		pathnamePrefixDefaultLocale: NonNullable<
-			CompilerOptions["pathnamePrefixDefaultLocale"]
-		>;
 		pathnames?: CompilerOptions["pathnames"];
 	};
 }): string {
-	const mappedPathnames: Record<string, Locale> = {};
-
-	// turns pathnames into a mapping of pathnames to locales for
-	// faster lookups that avoids nested loops in the runtime.
-	//
-	// input: { "/about": { "en": "/about", "de": "/ueber-uns" } }
-	// output: { "/about": "en", "/ueber-uns": "de" }
-	for (const mapping of Object.values(args.compilerOptions.pathnames ?? {})) {
-		for (const [locale, path] of Object.entries(mapping)) {
-			mappedPathnames[path] = locale;
-		}
-	}
-
 	return `
 import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";
 
@@ -39,14 +23,6 @@ ${injectCode("./variables.js")
 	.replace(`["<base-locale>"]`, `["${args.locales.join('", "')}"]`)
 	.replace(`["variable"]`, `["${args.compilerOptions.strategy.join('", "')}"]`)
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
-	.replace(
-		`pathnamePrefixDefaultLocale = false`,
-		`pathnamePrefixDefaultLocale = ${args.compilerOptions.pathnamePrefixDefaultLocale}`
-	)
-	.replace(
-		"mappedPathnames = {}",
-		`mappedPathnames = ${JSON.stringify(mappedPathnames ?? {}, null, 2)}`
-	)
 	.replace(
 		`pathnames = {}`,
 		`pathnames = ${JSON.stringify(args.compilerOptions.pathnames ?? {}, null, 2)}`
@@ -153,7 +129,6 @@ export async function createRuntimeForTesting(args: {
 	compilerOptions?: {
 		strategy?: CompilerOptions["strategy"];
 		cookieName?: CompilerOptions["cookieName"];
-		pathnamePrefixDefaultLocale?: CompilerOptions["pathnamePrefixDefaultLocale"];
 		pathnames?: CompilerOptions["pathnames"];
 	};
 }): Promise<Runtime> {
