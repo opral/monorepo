@@ -293,6 +293,6 @@ test("default compiler options should include variable and baseLocale to ensure 
 	// paraglide js is the right tool for them, they can then define their own strategy.
 
 	expect(defaultCompilerOptions.strategy).toEqual(
-		expect.arrayContaining(["variable", "baseLocale"])
+		expect.arrayContaining(["globalVariable", "baseLocale"])
 	);
 });

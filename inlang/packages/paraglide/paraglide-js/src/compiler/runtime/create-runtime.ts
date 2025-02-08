@@ -28,7 +28,10 @@ import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";
 ${injectCode("./variables.js")
 	.replace(`<base-locale>`, `${args.baseLocale}`)
 	.replace(`["<base-locale>"]`, `["${args.locales.join('", "')}"]`)
-	.replace(`["variable"]`, `["${args.compilerOptions.strategy.join('", "')}"]`)
+	.replace(
+		`["globalVariable"]`,
+		`["${args.compilerOptions.strategy.join('", "')}"]`
+	)
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
 	.replace(
 		`pathnames = {}`,
@@ -47,8 +50,8 @@ ${injectCode("./variables.js")
 		`const TREE_SHAKE_PATHNAME_STRATEGY_USED = ${args.compilerOptions.strategy.includes("pathname")};`
 	)
 	.replace(
-		`export const TREE_SHAKE_VARIABLE_STRATEGY_USED = false;`,
-		`const TREE_SHAKE_VARIABLE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("variable")};`
+		`export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("globalVariable")};`
 	)}
 
 /**
@@ -160,7 +163,6 @@ export async function createRuntimeForTesting(args: {
 		locales: args.locales,
 		compilerOptions: {
 			...defaultCompilerOptions,
-			strategy: ["variable"],
 			...args.compilerOptions,
 		},
 	})

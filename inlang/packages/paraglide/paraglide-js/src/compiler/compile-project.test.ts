@@ -93,11 +93,11 @@ describe.each([
 	// useTsImports must be true to test emitTs. Otherwise, rolldown can't resolve the imports
 	{
 		outputStructure: "locale-modules",
-		strategy: ["variable", "baseLocale"],
+		strategy: ["globalVariable", "baseLocale"],
 	},
 	{
 		outputStructure: "message-modules",
-		strategy: ["variable", "baseLocale"],
+		strategy: ["globalVariable", "baseLocale"],
 	},
 ] satisfies Array<Parameters<typeof compileProject>["0"]["compilerOptions"]>)(
 	"options",
