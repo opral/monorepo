@@ -15,7 +15,6 @@ export function createRuntimeFile(args: {
 		pathnames?: CompilerOptions["pathnames"];
 	};
 }): string {
-
 	const pathnames = args.compilerOptions.pathnames ?? {
 		"/{*path}": Object.fromEntries([
 			...args.locales.map((locale) => [locale, `/${locale}{/*path}`]),
