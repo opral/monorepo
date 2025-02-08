@@ -57,11 +57,11 @@ export const i18n = createI18n(runtime, {
 })
 ```
 
-This does make it ambigous which language should be used on `/` so language negotiation will kick in.
+Since the language can no longer be determined on `/` (i.e. on the URL alone), language negotiation will kick in.
 
 ### Language Negotiation
 
-Whenever the language cannot be determined from the URL alone the language negotiation is triggered. This happens in the following steps:
+Whenever the language cannot be determined from the URL alone (for example, where the default language prefix is always displayed on the URL - `prefixDefaultLanguage: "always"`), the language negotiation is triggered. This happens in the following steps:
 
 1. Check if the `paraglide_lang` cookie is set from previous visits, if so, use it
 2. Negotiate the language from the `Accept-Language` header
