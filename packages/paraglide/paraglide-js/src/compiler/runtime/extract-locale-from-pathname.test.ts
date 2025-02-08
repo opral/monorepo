@@ -55,3 +55,23 @@ test("works for static paths", async () => {
 	expect(runtime.extractLocaleFromPathname("/about")).toBe("en");
 	expect(runtime.extractLocaleFromPathname("/ueber-uns")).toBe("de");
 });
+
+test("works for default pathnames", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			// undefined auto creates default pathnames
+			pathnames: undefined,
+		},
+	});
+
+	expect(runtime.extractLocaleFromPathname("/")).toBe("en");
+	expect(runtime.extractLocaleFromPathname("/de/")).toBe("de");
+	expect(runtime.extractLocaleFromPathname("/about")).toBe("en");
+	expect(runtime.extractLocaleFromPathname("/de/about")).toBe("de");
+	expect(runtime.extractLocaleFromPathname("/de/about/")).toBe("de");
+	// limitation of the implementation that ambigously matches other locales
+	// as base locale
+	expect(runtime.extractLocaleFromPathname("/fr/ueber-uns")).toBe("en");
+});

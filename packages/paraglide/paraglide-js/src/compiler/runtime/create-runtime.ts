@@ -15,6 +15,14 @@ export function createRuntimeFile(args: {
 		pathnames?: CompilerOptions["pathnames"];
 	};
 }): string {
+
+	const pathnames = args.compilerOptions.pathnames ?? {
+		"/{*path}": Object.fromEntries([
+			...args.locales.map((locale) => [locale, `/${locale}{/*path}`]),
+			[args.baseLocale, `/{*path}`],
+		]),
+	};
+
 	return `
 import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";
 
@@ -25,7 +33,11 @@ ${injectCode("./variables.js")
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
 	.replace(
 		`pathnames = {}`,
-		`pathnames = ${JSON.stringify(args.compilerOptions.pathnames ?? {}, null, 2)}`
+		`pathnames = ${JSON.stringify(pathnames ?? {}, null, 2)}`
+	)
+	.replace(
+		`export const TREE_SHAKE_IS_DEFAULT_PATHNAMES = false;`,
+		`const TREE_SHAKE_IS_DEFAULT_PATHNAMES = ${args.compilerOptions.pathnames ? false : true};`
 	)}
 
 /**

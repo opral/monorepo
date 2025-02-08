@@ -32,3 +32,14 @@ export const strategy = ["variable"];
  * @type {Record<string, Record<Locale, string>>} 
  */
 export const pathnames = {}
+
+/**
+ * Whether the pathnames are the default pathnames.
+ * 
+ * If the default pathnames are used, the matching is done 
+ * statically with no runtime matching logic which reduces
+ * the bundlesize. 
+ * 
+ * @type {boolean}
+ */
+export const TREE_SHAKE_IS_DEFAULT_PATHNAMES = false;
