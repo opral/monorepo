@@ -1,65 +1,98 @@
 import { test, expect } from "vitest";
 import { createRuntimeForTesting } from "./create-runtime.js";
 
-test("removes the locale from a localized path", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
-	});
-
-	const path = "/de/home";
-	const result = runtime.deLocalizePath(path);
-
-	expect(result).toBe("/home");
-});
-
-test("returns the same path if there is no locale", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
-	});
-
-	const path = "/home";
-	const result = runtime.deLocalizePath(path);
-
-	expect(result).toBe("/home");
-});
-
-test("handles paths with different locales", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de", "fr"],
-	});
-
-	const path = "/fr/contact";
-	const result = runtime.deLocalizePath(path);
-
-	expect(result).toBe("/contact");
-});
-
-test("handles paths with no segments after locale", async () => {
+test("handles path that is the root", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			pathnamePrefixDefaultLocale: true,
+			pathnames: {
+				"/{*path}": {
+					de: "/de{/*path}",
+					en: "/{*path}",
+				},
+			},
 		},
 	});
 
-	const path = "/en/";
-	const result = runtime.deLocalizePath(path);
-
-	expect(result).toBe("/");
+	expect(runtime.deLocalizePath("/")).toBe("/");
+	expect(runtime.deLocalizePath("/de")).toBe("/");
 });
 
-test("handles paths that are already the root", async () => {
+test("delocalizes a localized paths", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["pathname"],
+			pathnames: {
+				"/about": {
+					en: "/UK/about",
+					de: "/uber-uns",
+				},
+				"/blog/:post/suffix": {
+					en: "/en/blog/:post/suffix",
+					de: "/de/artikel/:post/anhang",
+				},
+				"/{*path}": {
+					en: "/en{/*path}",
+					de: "/de{/*path}",
+				},
+			},
+		},
 	});
 
-	const path = "/";
-	const result = runtime.deLocalizePath(path);
+	// check simple cases
+	expect(runtime.deLocalizePath("/uber-uns")).toBe("/about");
+	expect(runtime.deLocalizePath("/UK/about")).toBe("/about");
 
-	expect(result).toBe("/");
+	// check parameters
+	expect(runtime.deLocalizePath("/de/artikel/123/anhang")).toBe(
+		"/blog/123/suffix"
+	);
+	expect(runtime.deLocalizePath("/en/blog/123/suffix")).toBe(
+		"/blog/123/suffix"
+	);
+
+	// check wild cards
+	expect(runtime.deLocalizePath("/de/something")).toBe("/something");
+	expect(runtime.deLocalizePath("/en/something")).toBe("/something");
+});
+
+test("handles query parameters", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["pathname"],
+			pathnames: {
+				"/{*path}": {
+					en: "/en{/*path}",
+					de: "/de{/*path}",
+				},
+			},
+		},
+	});
+
+	expect(runtime.deLocalizePath("/en/something?query=123&other=5")).toBe(
+		"/something?query=123&other=5"
+	);
+});
+
+test("handles TREE_SHAKE_DEFAULT_PATHNAMES", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["pathname"],
+			// will create default pathnames
+			pathnames: undefined,
+		},
+	});
+
+	expect(runtime.deLocalizePath("/")).toBe("/");
+	expect(runtime.deLocalizePath("/de")).toBe("/");
+	expect(runtime.deLocalizePath("/de/something")).toBe("/something");
+	// base locale is not prefixed
+	expect(runtime.deLocalizePath("/en/blaba")).toBe("/en/blaba");
 });

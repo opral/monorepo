@@ -1,5 +1,10 @@
+import { assertIsLocale } from "./assert-is-locale.js";
 import { isLocale } from "./is-locale.js";
-import { baseLocale, pathnamePrefixDefaultLocale } from "./variables.js";
+import {
+	baseLocale,
+	pathnames,
+	TREE_SHAKE_IS_DEFAULT_PATHNAMES,
+} from "./variables.js";
 
 /**
  * Extracts the locale from a given pathname.
@@ -13,22 +18,23 @@ import { baseLocale, pathnamePrefixDefaultLocale } from "./variables.js";
  * @returns {Locale|undefined} The extracted locale, or undefined if no locale is found.
  */
 export function extractLocaleFromPathname(pathname) {
-	const [, maybeLocale] = pathname.split("/");
-
-	if (pathnamePrefixDefaultLocale && maybeLocale === baseLocale) {
-		return baseLocale;
-	} else if (
-		pathnamePrefixDefaultLocale === false &&
-		maybeLocale === baseLocale
-	) {
-		return undefined;
-	} else if (isLocale(maybeLocale)) {
-		return maybeLocale;
-	} else {
-		// it's not possible to match deterministically
-		// if the path is the baseLocale at this point
-		// or not. users should use the strategy api
-		// to set the base locale as fallback
-		return undefined;
+	// optimization for default pathnames that doesn't require dynamic matching
+	if (TREE_SHAKE_IS_DEFAULT_PATHNAMES) {
+		const [, maybeLocale] = pathname.split("/");
+		if (isLocale(maybeLocale)) {
+			return maybeLocale;
+		} else {
+			return baseLocale;
+		}
+	}
+	// custom pathnames are defined, needs dynamic matching
+	else {
+		for (const patterns of Object.values(pathnames)) {
+			for (const [locale, localizedPattern] of Object.entries(patterns)) {
+				if (pathToRegexp.match(localizedPattern)(pathname)) {
+					return assertIsLocale(locale);
+				}
+			}
+		}
 	}
 }

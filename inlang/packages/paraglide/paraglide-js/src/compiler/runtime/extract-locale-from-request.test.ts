@@ -25,7 +25,11 @@ test("returns the locale from the pathname", async () => {
 		locales: ["en"],
 		compilerOptions: {
 			strategy: ["pathname"],
-			pathnamePrefixDefaultLocale: true,
+			pathnames: {
+				"/{*path}": {
+					en: "/en{/*path}",
+				},
+			},
 		},
 	});
 	const request = new Request("http://example.com/en/home");

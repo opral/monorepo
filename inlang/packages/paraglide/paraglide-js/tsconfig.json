@@ -12,6 +12,11 @@
 		"sourceMap": false,
 		"checkJs": true,
 		"allowJs": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"noImplicitAny": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"noUncheckedIndexedAccess": true
 	}
 }

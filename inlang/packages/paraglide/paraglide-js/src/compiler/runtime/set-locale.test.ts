@@ -39,7 +39,7 @@ test("doesn't throw for server unavailable APIs", async () => {
 		locales: ["en", "de"],
 		compilerOptions: {
 			// using browser based strategies first, then variable which is available on the server
-			strategy: ["pathname", "cookie", "variable", "baseLocale"],
+			strategy: ["pathname", "cookie", "globalVariable", "baseLocale"],
 		},
 	});
 

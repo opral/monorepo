@@ -1,4 +1,8 @@
-import { baseLocale, pathnamePrefixDefaultLocale } from "./variables.js";
+import {
+	baseLocale,
+	pathnames,
+	TREE_SHAKE_IS_DEFAULT_PATHNAMES,
+} from "./variables.js";
 import { getLocale } from "./get-locale.js";
 import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
 
@@ -31,17 +35,35 @@ import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
  * @returns {string}
  */
 export function localizePath(pathname, options) {
+	const url = new URL(pathname, "http://y.com");
 	const locale = options?.locale ?? getLocale();
-	const hasLocale = extractLocaleFromPathname(pathname);
-	const pathWithoutLocale = hasLocale
-		? "/" + pathname.split("/").slice(2).join("/")
-		: pathname;
 
-	if (locale === baseLocale && pathnamePrefixDefaultLocale === false) {
-		return pathWithoutLocale;
-	} else if (pathname === "/" || pathWithoutLocale === "/") {
-		return `/${locale}`;
-	} else {
-		return `/${locale}${pathWithoutLocale}`;
+	// If the path is already localized, return it as is
+	if (extractLocaleFromPathname(url.pathname) === locale) {
+		return pathname;
+	}
+
+	// no dynamic matching is needed if the default pathnames are used
+	if (TREE_SHAKE_IS_DEFAULT_PATHNAMES) {
+		if (locale === baseLocale) {
+			return "/" + url.pathname.split("/").slice(2).join("/") + url.search;
+		} else {
+			return `/${locale}${url.pathname}` + url.search;
+		}
+	}
+	// dynamic matching is needed
+	else {
+		for (const [pattern, locales] of Object.entries(pathnames)) {
+			const hasMatch = pathToRegexp.match(pattern)(url.pathname);
+			if (hasMatch) {
+				let localizedPattern = locales[locale];
+				if (!localizedPattern) return pathname;
+				return (
+					pathToRegexp.compile(localizedPattern)(hasMatch.params) + url.search
+				);
+			}
+		}
+		// Default to original if no match
+		return pathname;
 	}
 }

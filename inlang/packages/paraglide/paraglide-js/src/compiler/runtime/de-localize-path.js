@@ -1,4 +1,8 @@
-import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
+import {
+	baseLocale,
+	pathnames,
+	TREE_SHAKE_IS_DEFAULT_PATHNAMES,
+} from "./variables.js";
 
 /**
  * De-localizes the given localized path.
@@ -22,13 +26,36 @@ import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
  *  deLocalizePath('/home');
  *  // '/home' (no change)
  *
- * @param {string} path - The localized path to de-localize.
+ * @param {string} pathname - The localized path to de-localize.
  * @returns {string} The de-localized path without the locale prefix.
  */
-export function deLocalizePath(path) {
-	const hasLocale = extractLocaleFromPathname(path);
-	if (!hasLocale) {
-		return path; // Path is already de-localized
+export function deLocalizePath(pathname) {
+	const url = new URL(pathname, "http://y.com");
+
+	if (TREE_SHAKE_IS_DEFAULT_PATHNAMES) {
+		const [, locale, ...rest] = url.pathname.split("/");
+		if (locale === baseLocale) {
+			return url.pathname + url.search;
+		} else {
+			return `/${rest.join("/")}` + url.search;
+		}
+	} else {
+		for (const [unLocalizedPattern, locales] of Object.entries(pathnames)) {
+			for (const [, localizedPattern] of Object.entries(locales)) {
+				const hasMatch = pathToRegexp.match(localizedPattern)(url.pathname);
+
+				if (hasMatch) {
+					let deLocalizedPath = pathToRegexp.compile(unLocalizedPattern)(
+						hasMatch.params
+					);
+
+					return deLocalizedPath + url.search;
+				}
+			}
+		}
+
+		throw new Error(
+			"No match found for localized path. Refer to the documentation on how to define pathnames."
+		);
 	}
-	return "/" + path.split("/").slice(2).join("/");
 }

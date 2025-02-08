@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { defaultCompilerOptions, type CompilerOptions } from "../compile.js";
 import type { Runtime } from "./type.js";
+import * as pathToRegexp from "path-to-regexp";
 
 /**
  * Returns the code for the `runtime.js` module
@@ -11,21 +12,46 @@ export function createRuntimeFile(args: {
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
-		pathnamePrefixDefaultLocale: NonNullable<
-			CompilerOptions["pathnamePrefixDefaultLocale"]
-		>;
+		pathnames?: CompilerOptions["pathnames"];
 	};
 }): string {
+	const pathnames = args.compilerOptions.pathnames ?? {
+		"/{*path}": Object.fromEntries([
+			...args.locales.map((locale) => [locale, `/${locale}{/*path}`]),
+			[args.baseLocale, `/{*path}`],
+		]),
+	};
+
 	return `
+import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";
 
 ${injectCode("./variables.js")
 	.replace(`<base-locale>`, `${args.baseLocale}`)
 	.replace(`["<base-locale>"]`, `["${args.locales.join('", "')}"]`)
-	.replace(`["variable"]`, `["${args.compilerOptions.strategy.join('", "')}"]`)
+	.replace(
+		`["globalVariable"]`,
+		`["${args.compilerOptions.strategy.join('", "')}"]`
+	)
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
 	.replace(
-		`pathnamePrefixDefaultLocale = false`,
-		`pathnamePrefixDefaultLocale = ${args.compilerOptions.pathnamePrefixDefaultLocale}`
+		`pathnames = {}`,
+		`pathnames = ${JSON.stringify(pathnames ?? {}, null, 2)}`
+	)
+	.replace(
+		`export const TREE_SHAKE_IS_DEFAULT_PATHNAMES = false;`,
+		`const TREE_SHAKE_IS_DEFAULT_PATHNAMES = ${args.compilerOptions.pathnames ? false : true};`
+	)
+	.replace(
+		`export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_COOKIE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("cookie")};`
+	)
+	.replace(
+		`export const TREE_SHAKE_PATHNAME_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_PATHNAME_STRATEGY_USED = ${args.compilerOptions.strategy.includes("pathname")};`
+	)
+	.replace(
+		`export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("globalVariable")};`
 	)}
 
 /**
@@ -109,7 +135,9 @@ ${injectCode("./extract-locale-from-cookie.js")}
  */
 function injectCode(path: string): string {
 	const code = fs.readFileSync(new URL(path, import.meta.url), "utf-8");
-	return code.replace(/import\s+.*?;?\n/g, "");
+	// Regex to match single-line and multi-line imports
+	const importRegex = /import\s+[\s\S]*?from\s+['"][^'"]+['"]\s*;?/g;
+	return code.replace(importRegex, "").trim();
 }
 
 /**
@@ -127,7 +155,7 @@ export async function createRuntimeForTesting(args: {
 	compilerOptions?: {
 		strategy?: CompilerOptions["strategy"];
 		cookieName?: CompilerOptions["cookieName"];
-		pathnamePrefixDefaultLocale?: CompilerOptions["pathnamePrefixDefaultLocale"];
+		pathnames?: CompilerOptions["pathnames"];
 	};
 }): Promise<Runtime> {
 	const file = createRuntimeFile({
@@ -135,10 +163,18 @@ export async function createRuntimeForTesting(args: {
 		locales: args.locales,
 		compilerOptions: {
 			...defaultCompilerOptions,
-			strategy: ["variable"],
 			...args.compilerOptions,
 		},
-	});
+	})
+		// remove the import statement for path-to-regexp
+		.replace(
+			`import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";`,
+			""
+		);
+
+	// @ts-expect-error - defining a depdency globally to avoid importing it in the runtime
+	globalThis.pathToRegexp = pathToRegexp;
+
 	return await import(
 		"data:text/javascript;base64," +
 			Buffer.from(file, "utf-8").toString("base64")

@@ -14,9 +14,8 @@ export const defaultCompilerOptions = {
 	emitGitIgnore: true,
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
-	strategy: ["cookie", "variable", "baseLocale"],
+	strategy: ["cookie", "globalVariable", "baseLocale"],
 	cookieName: "PARAGLIDE_LOCALE",
-	pathnamePrefixDefaultLocale: false,
 } as const satisfies Partial<CompilerOptions>;
 
 export type CompilerOptions = {
@@ -72,6 +71,26 @@ export type CompilerOptions = {
 	 */
 	emitPrettierIgnore?: boolean;
 	/**
+	 * The localized pathname patterns.
+	 *
+	 * The syntax is based on path-to-regexp v8
+	 * https://github.com/pillarjs/path-to-regexp.
+	 *
+	 * @example
+	 *   pathnames: {
+	 *     "/about": {
+	 *        "en": "/about",
+	 *        "de": "/ueber-uns",
+	 *     },
+	 *     // catch all
+	 *     "/{*path}": {
+	 *       "de": "/de/{*path}",
+	 *       "en": "/{*path}",
+	 *     }
+	 *   }
+	 */
+	pathnames?: Record<string, Record<string, string>>;
+	/**
 	 * Whether to include an eslint-disable comment at the top of each .js file.
 	 *
 	 * @default true
@@ -83,19 +102,6 @@ export type CompilerOptions = {
 	 * @default true
 	 */
 	emitGitIgnore?: boolean;
-	/**
-	 * Whether to prefix the default locale to the pathname.
-	 *
-	 * For incremental adoption reasons, the base locale is not
-	 * prefixed by default. A path like `/page` will be served by
-	 * is matched as base locale.
-	 *
-	 * Setting the option to `true` will prefix the default locale to the
-	 * pathname. `/page` will become `/en/page` (if the base locale is en).
-	 *
-	 * @default false
-	 */
-	pathnamePrefixDefaultLocale?: boolean;
 	/**
 	 * The file-structure of the compiled output.
 	 *
