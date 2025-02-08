@@ -211,3 +211,19 @@ test("does not double localize already localized paths", async () => {
 	// path is already localized
 	expect(runtime.localizePath("/en/about", { locale: "en" })).toBe("/en/about");
 });
+
+test("handles TREE_SHAKE_DEFAULT_PATHNAMES", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			// auto creates default pathnames for all locales
+			pathnames: undefined,
+		},
+	});
+
+	expect(runtime.localizePath("/about", { locale: "en" })).toBe("/about");
+	expect(runtime.localizePath("/about", { locale: "de" })).toBe("/de/about");
+	expect(runtime.localizePath("/about/", { locale: "de" })).toBe("/de/about/");
+	expect(runtime.localizePath("/de/about", { locale: "de" })).toBe("/de/about");
+});

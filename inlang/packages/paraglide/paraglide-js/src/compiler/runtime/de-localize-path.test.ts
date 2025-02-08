@@ -1,18 +1,6 @@
 import { test, expect } from "vitest";
 import { createRuntimeForTesting } from "./create-runtime.js";
 
-test("returns the path as if if no pathnames are defined", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
-		compilerOptions: {
-			pathnames: undefined,
-		},
-	});
-
-	expect(() => runtime.deLocalizePath("/home")).toThrowError();
-});
-
 test("handles path that is the root", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
@@ -89,4 +77,22 @@ test("handles query parameters", async () => {
 	expect(runtime.deLocalizePath("/en/something?query=123&other=5")).toBe(
 		"/something?query=123&other=5"
 	);
+});
+
+test("handles TREE_SHAKE_DEFAULT_PATHNAMES", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["pathname"],
+			// will create default pathnames
+			pathnames: undefined,
+		},
+	});
+
+	expect(runtime.deLocalizePath("/")).toBe("/");
+	expect(runtime.deLocalizePath("/de")).toBe("/");
+	expect(runtime.deLocalizePath("/de/something")).toBe("/something");
+	// base locale is not prefixed
+	expect(runtime.deLocalizePath("/en/blaba")).toBe("/en/blaba");
 });
