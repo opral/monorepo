@@ -46,7 +46,7 @@ export function localizePath(pathname, options) {
 	// no dynamic matching is needed if the default pathnames are used
 	if (TREE_SHAKE_IS_DEFAULT_PATHNAMES) {
 		if (locale === baseLocale) {
-			return url.pathname + url.search;
+			return "/" + url.pathname.split("/").slice(2).join("/") + url.search;
 		} else {
 			return `/${locale}${url.pathname}` + url.search;
 		}

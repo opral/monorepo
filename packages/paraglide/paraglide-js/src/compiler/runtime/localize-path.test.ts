@@ -226,4 +226,7 @@ test("handles TREE_SHAKE_DEFAULT_PATHNAMES", async () => {
 	expect(runtime.localizePath("/about", { locale: "de" })).toBe("/de/about");
 	expect(runtime.localizePath("/about/", { locale: "de" })).toBe("/de/about/");
 	expect(runtime.localizePath("/de/about", { locale: "de" })).toBe("/de/about");
+
+	// switching locale
+	expect(runtime.localizePath("/de/about", { locale: "en" })).toBe("/about");
 });
