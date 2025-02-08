@@ -38,6 +38,18 @@ ${injectCode("./variables.js")
 	.replace(
 		`export const TREE_SHAKE_IS_DEFAULT_PATHNAMES = false;`,
 		`const TREE_SHAKE_IS_DEFAULT_PATHNAMES = ${args.compilerOptions.pathnames ? false : true};`
+	)
+	.replace(
+		`export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_COOKIE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("cookie")};`
+	)
+	.replace(
+		`export const TREE_SHAKE_PATHNAME_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_PATHNAME_STRATEGY_USED = ${args.compilerOptions.strategy.includes("pathname")};`
+	)
+	.replace(
+		`export const TREE_SHAKE_VARIABLE_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_VARIABLE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("variable")};`
 	)}
 
 /**

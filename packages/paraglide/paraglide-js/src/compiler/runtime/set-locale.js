@@ -1,4 +1,10 @@
-import { cookieName, strategy } from "./variables.js";
+import {
+	cookieName,
+	strategy,
+	TREE_SHAKE_COOKIE_STRATEGY_USED,
+	TREE_SHAKE_PATHNAME_STRATEGY_USED,
+	TREE_SHAKE_VARIABLE_STRATEGY_USED,
+} from "./variables.js";
 import { localizePath } from "./localize-path.js";
 
 /**
@@ -12,19 +18,19 @@ import { localizePath } from "./localize-path.js";
 export let setLocale = (newLocale) => {
 	let localeHasBeenSet = false;
 	for (const strat of strategy) {
-		if (strat === "variable") {
+		if (TREE_SHAKE_VARIABLE_STRATEGY_USED && strat === "variable") {
 			// a default for a custom strategy to get started quickly
 			// is likely overwritten by `defineSetLocale()`
 			_locale = newLocale;
 			localeHasBeenSet = true;
-		} else if (strat === "cookie") {
+		} else if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
 			if (typeof document === "undefined" || !document.cookie) {
 				continue;
 			}
 			// set the cookie
 			document.cookie = `${cookieName}=${newLocale}`;
 			localeHasBeenSet = true;
-		} else if (strat === "pathname") {
+		} else if (TREE_SHAKE_PATHNAME_STRATEGY_USED && strat === "pathname") {
 			if (typeof window === "undefined" || !window.location) {
 				continue;
 			}
