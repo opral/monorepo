@@ -1,5 +1,3 @@
-import * as ptr from "path-to-regexp";
-
 /**
  * Declared globablly to write the runtime functions.
  */
@@ -10,5 +8,8 @@ export declare global {
 	let _locale: string;
 	// string because precise locale is unknown before compilation
 	type Locale = any;
-	let pathToRegexp: { match: ptr.match; compile: ptr.compile };
+	let pathToRegexp: {
+		match: (path: string) => (pathname: string) => any;
+		compile: (path: string) => (params: any) => string;
+	};
 }
