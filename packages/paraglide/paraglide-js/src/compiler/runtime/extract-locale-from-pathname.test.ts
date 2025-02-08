@@ -5,6 +5,14 @@ test("returns the locale from the path", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "en-US"],
+		compilerOptions: {
+			pathnames: {
+				"/{*path}": {
+					en: "/en{/*path}",
+					"en-US": "/en-US{/*path}",
+				},
+			},
+		},
 	});
 
 	const path = "/en-US/about";
@@ -16,6 +24,13 @@ test("returns undefined if isLocale is false", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en"],
+		compilerOptions: {
+			pathnames: {
+				"/{*path}": {
+					en: "/en{/*path}",
+				},
+			},
+		},
 	});
 
 	const path = "/en-US/about";
@@ -23,49 +38,7 @@ test("returns undefined if isLocale is false", async () => {
 	expect(locale).toBe(undefined);
 });
 
-test("returns undefined if pathnamePrefixDefaultLocale = false and base locale is contained path", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
-		compilerOptions: {
-			pathnamePrefixDefaultLocale: false,
-		},
-	});
-
-	const path = "/en/about";
-	const locale = runtime.extractLocaleFromPathname(path);
-	expect(locale).toBe(undefined);
-});
-
-test("returns the locale if pathnamePrefixDefaultLocale = true and base locale is contained path", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
-		compilerOptions: {
-			pathnamePrefixDefaultLocale: true,
-		},
-	});
-
-	const path = "/en/about";
-	const locale = runtime.extractLocaleFromPathname(path);
-	expect(locale).toBe("en");
-});
-
-test("returns undefined if pathnamePrefixDefaultLocale = false and path doesn't contain a locale", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
-		compilerOptions: {
-			pathnamePrefixDefaultLocale: false,
-		},
-	});
-
-	const path = "/about";
-	const locale = runtime.extractLocaleFromPathname(path);
-	expect(locale).toBe(undefined);
-});
-
-test("returns undefined if pathnamePrefixDefaultLocale = false and path doesn't contain a locale", async () => {
+test("works for static paths", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de"],
@@ -80,5 +53,5 @@ test("returns undefined if pathnamePrefixDefaultLocale = false and path doesn't 
 	});
 
 	expect(runtime.extractLocaleFromPathname("/about")).toBe("en");
-	expect(runtime.extractLocaleFromPathname("/de/ueber-uns")).toBe("de");
+	expect(runtime.extractLocaleFromPathname("/ueber-uns")).toBe("de");
 });

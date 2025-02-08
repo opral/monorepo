@@ -1,5 +1,6 @@
 import { pathnames } from "./variables.js";
 import { getLocale } from "./get-locale.js";
+import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
 
 /**
  * Localizes the given path.
@@ -32,6 +33,11 @@ import { getLocale } from "./get-locale.js";
 export function localizePath(pathname, options) {
 	const url = new URL(pathname, "http://y.com");
 	const locale = options?.locale ?? getLocale();
+
+	// If the path is already localized, return it as is
+	if (extractLocaleFromPathname(url.pathname) === locale) {
+		return pathname;
+	}
 
 	for (const [pattern, locales] of Object.entries(pathnames)) {
 		const hasMatch = pathToRegexp.match(pattern)(url.pathname);
