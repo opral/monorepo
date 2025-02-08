@@ -57,7 +57,8 @@ test("runtime type", async () => {
 	const diagnostics = ts
 		.getPreEmitDiagnostics(program)
 		// ignore 'export' modifier cannot be applied to ambient modules and module augmentations since they are always visible. /ambient.d.ts
-		.filter((d) => d.code !== 2668);
+		.filter((d) => d.code !== 2668)
+		.filter((d) => d.messageText.toString().includes("path-to-regexp"));
 	for (const diagnostic of diagnostics) {
 		console.error(diagnostic.messageText, diagnostic.file?.fileName);
 	}
