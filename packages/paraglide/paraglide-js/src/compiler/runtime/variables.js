@@ -22,9 +22,9 @@ export const locales = /** @type {const} */ (["<base-locale>"]);
 export const cookieName = "<cookie-name>";
 
 /**
- * @type {Array<"cookie" | "baseLocale" | "pathname" | "variable">}
+ * @type {Array<"cookie" | "baseLocale" | "pathname" | "globalVariable">}
  */
-export const strategy = ["variable"];
+export const strategy = ["globalVariable"];
 
 /**
  * The localized pathnames.
@@ -48,4 +48,4 @@ export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;
 
 export const TREE_SHAKE_PATHNAME_STRATEGY_USED = false;
 
-export const TREE_SHAKE_VARIABLE_STRATEGY_USED = false;
+export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;

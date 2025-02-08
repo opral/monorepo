@@ -3,7 +3,7 @@ import {
 	strategy,
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
 	TREE_SHAKE_PATHNAME_STRATEGY_USED,
-	TREE_SHAKE_VARIABLE_STRATEGY_USED,
+	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
 } from "./variables.js";
 import { localizePath } from "./localize-path.js";
 
@@ -18,7 +18,10 @@ import { localizePath } from "./localize-path.js";
 export let setLocale = (newLocale) => {
 	let localeHasBeenSet = false;
 	for (const strat of strategy) {
-		if (TREE_SHAKE_VARIABLE_STRATEGY_USED && strat === "variable") {
+		if (
+			TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED &&
+			strat === "globalVariable"
+		) {
 			// a default for a custom strategy to get started quickly
 			// is likely overwritten by `defineSetLocale()`
 			_locale = newLocale;

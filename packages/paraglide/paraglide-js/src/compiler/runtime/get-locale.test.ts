@@ -28,7 +28,7 @@ test("doesn't throw when using pathname strategy on the server", async () => {
 		baseLocale,
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["pathname", "variable", "baseLocale"],
+			strategy: ["pathname", "globalVariable", "baseLocale"],
 		},
 	});
 
@@ -41,7 +41,7 @@ test("throws if variable is used without baseLocale as fallback strategy", async
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["variable"],
+			strategy: ["globalVariable"],
 		},
 	});
 

@@ -23,7 +23,7 @@ export const extractLocaleFromRequest = (request) => {
 				?.split("=")[1];
 		} else if (strat === "pathname") {
 			locale = extractLocaleFromPathname(new URL(request.url).pathname);
-		} else if (strat === "variable") {
+		} else if (strat === "globalVariable") {
 			locale = _locale;
 		} else if (strat === "baseLocale") {
 			return baseLocale;
