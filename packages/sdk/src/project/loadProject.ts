@@ -13,7 +13,6 @@ import {
 import type { InlangProject } from "./api.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
 import { v4 } from "uuid";
-import { initErrorReporting } from "../services/error-reporting/index.js";
 import { maybeCaptureLoadedProject } from "./maybeCaptureTelemetry.js";
 import { importFiles } from "../import-export/importFiles.js";
 import { exportFiles } from "../import-export/exportFiles.js";
@@ -109,8 +108,6 @@ export async function loadProject(args: {
 		lix: args.lix,
 		appId: args.appId,
 	});
-
-	initErrorReporting({ projectId: id });
 
 	return {
 		db,
