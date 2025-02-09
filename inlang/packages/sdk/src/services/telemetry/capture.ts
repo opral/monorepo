@@ -2,7 +2,6 @@
 
 import type { ProjectSettings } from "../../json-schema/settings.js";
 import { ENV_VARIABLES } from "../env-variables/index.js";
-import { captureError } from "../error-reporting/index.js";
 
 /**
  * List of telemetry events for typesafety.
@@ -54,8 +53,8 @@ export const capture = async (
 			// we need at least one property to make a project visible in the dashboar
 			properties: { name: args.projectId },
 		});
-	} catch (e) {
-		captureError(e);
+	} catch {
+		// do nothing
 	}
 };
 
@@ -93,7 +92,7 @@ const identifyProject = async (args: {
 				},
 			}),
 		});
-	} catch (e) {
-		captureError(e);
+	} catch {
+		// do nothing
 	}
 };
