@@ -1,5 +1,13 @@
 # @inlang/sdk
 
+## 2.2.0
+
+### Minor Changes
+
+- fc41e71: remove sentry
+
+  the overhead of sentry is too high for the inlang sdk. errors that occur are eventually reported by apps.
+
 ## 2.1.3
 
 ### Patch Changes
