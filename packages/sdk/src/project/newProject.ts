@@ -6,7 +6,6 @@ import {
 	createInMemoryDatabase,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
-import { captureError } from "../services/error-reporting/index.js";
 
 /**
  * Creates a new inlang project.
@@ -58,7 +57,6 @@ export async function newProject(args?: {
 		const error = new Error(`Failed to create new inlang project: ${e}`, {
 			cause: e,
 		});
-		captureError(error);
 		throw error;
 	} finally {
 		sqlite.close();
