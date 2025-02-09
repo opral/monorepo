@@ -3,7 +3,6 @@ import { capture } from "../services/telemetry/capture.js";
 import type { InlangDatabaseSchema } from "../database/schema.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
-import { captureError } from "../services/error-reporting/index.js";
 import type { Lix } from "@lix-js/sdk";
 
 export async function maybeCaptureLoadedProject(args: {
@@ -64,6 +63,5 @@ export async function maybeCaptureLoadedProject(args: {
 			// The project has been closed, nothing to capture
 			return;
 		}
-		captureError(e);
 	}
 }
