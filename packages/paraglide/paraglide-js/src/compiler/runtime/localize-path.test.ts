@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { test, expect, describe } from "vitest";
 import { createRuntimeForTesting } from "./create-runtime.js";
 
 test("matches root path and paths", async () => {
@@ -229,4 +229,43 @@ test("handles TREE_SHAKE_DEFAULT_PATHNAMES", async () => {
 
 	// switching locale
 	expect(runtime.localizePath("/de/about", { locale: "en" })).toBe("/about");
+});
+
+// https://github.com/opral/inlang-paraglide-js/issues/362
+describe.each([
+	{ pathnameBase: "/base" },
+	{
+		pathnameBase: "/base",
+		pathnames: {
+			"/{*path}": {
+				de: "/de{/*path}",
+				en: "/{*path}",
+			},
+		},
+	},
+])("handles pathnameBase", (compilerOptions) => {
+	test(`pathnames: ${compilerOptions.pathnames}`, async () => {
+		const runtime = await createRuntimeForTesting({
+			baseLocale: "en",
+			locales: ["en", "de"],
+			compilerOptions,
+		});
+
+		expect(runtime.localizePath("/about", { locale: "en" })).toBe(
+			"/base/about"
+		);
+		expect(runtime.localizePath("/base", { locale: "de" })).toBe("/base/de");
+
+		expect(runtime.localizePath("/base/de", { locale: "en" })).toBe("/base");
+
+		expect(runtime.localizePath("/base/about", { locale: "en" })).toBe(
+			"/base/about"
+		);
+		expect(runtime.localizePath("/about", { locale: "de" })).toBe(
+			"/base/de/about"
+		);
+		expect(runtime.localizePath("/base/de/about", { locale: "de" })).toBe(
+			"/base/de/about"
+		);
+	});
 });

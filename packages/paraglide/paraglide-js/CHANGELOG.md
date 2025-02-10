@@ -2,12 +2,28 @@
 
 ## 2.0.0-beta.17
 
-Add support for `pathnamePrefixBaseLocale` https://github.com/opral/inlang-paraglide-js/issues/358.
+Add support for `pathnames` API https://github.com/opral/inlang-paraglide-js/issues/359
+
+You can now create whatever pathname pattern you want. The syntax is provided by https://github.com/pillarjs/path-to-regexp.
 
 ```diff
 await compile({
   strategy: ["pathname", "cookie", "baseLocale"],
-+ pathnamePrefixBaseLocale: true
++ pathnames: {
++   "{*path}": {
++     "de": "/de{/*path}",
++     "en": "/en{/*path}",
+}
+}
+})
+```
+
+Add support for `pathnameBase` https://github.com/opral/inlang-paraglide-js/issues/362
+
+```diff
+await compile({
+  strategy: ["pathname", "cookie", "baseLocale"],
++ pathnameBase: "/base"
 })
 
 ```
@@ -30,7 +46,7 @@ Fixes windows path normalization https://github.com/opral/monorepo/pull/3374
 
 ## 2.0.0-beta.13
 
-- flat compiler options 
+- flat compiler options
 
 ```diff
 await compile({
@@ -51,7 +67,7 @@ await compile({
 
 ## 2.0.0-beta.11
 
-- improve: compiler awaits ongoing compilations before starting a new one 
+- improve: compiler awaits ongoing compilations before starting a new one
 - update dependency that fixes https://github.com/opral/inlang-paraglide-js/issues/320
 
 ## 2.0.0-beta.10
@@ -60,7 +76,7 @@ await compile({
 
 ## 2.0.0-beta.9
 
-- Expose compiler on the index 
+- Expose compiler on the index
 
 ```diff
 -import { compile } from "@inlang/paraglide-js/compiler";
@@ -89,13 +105,13 @@ await compile({
 
 ### Patch Changes
 
-- remove `fast-glob` as dependency in favor of node's built-in `fs.glob` (a new API in node 22) 
+- remove `fast-glob` as dependency in favor of node's built-in `fs.glob` (a new API in node 22)
 
 ## 2.0.0
 
 ### Major changes
 
-- Upgrade to @inlang/sdk v2 
+- Upgrade to @inlang/sdk v2
 - Support for variants (pluralization, gendering, A/B test, etc.)
 
 ### Minor Changes
