@@ -16,9 +16,12 @@ export async function middleware(request) {
 		return NextResponse.next();
 	}
 
-	return NextResponse.rewrite(new URL(path, request.url), {
-		headers: {
-			"x-paraglide-locale": locale,
-		},
-	});
+	return NextResponse.rewrite(
+		new URL(path, request.url).toString() + request.nextUrl.search,
+		{
+			headers: {
+				"x-paraglide-locale": locale,
+			},
+		}
+	);
 }
