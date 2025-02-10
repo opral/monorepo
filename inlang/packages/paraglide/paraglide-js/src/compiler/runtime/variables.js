@@ -6,7 +6,7 @@
  *     // do something
  *   }
  */
-export const baseLocale = "<base-locale>";
+export const baseLocale = "en";
 
 /**
  * The project's locales that have been specified in the settings.
@@ -16,7 +16,7 @@ export const baseLocale = "<base-locale>";
  *     throw new Error('Locale is not available');
  *   }
  */
-export const locales = /** @type {const} */ (["<base-locale>"]);
+export const locales = /** @type {const} */ (["en", "de"]);
 
 /** @type {string} */
 export const cookieName = "<cookie-name>";
@@ -32,6 +32,9 @@ export const strategy = ["globalVariable"];
  * @type {Record<string, Record<Locale, string>>}
  */
 export const pathnames = {};
+
+/** @type {string | undefined} */
+export const pathnameBase = undefined;
 
 /**
  * Whether the pathnames are the default pathnames.
