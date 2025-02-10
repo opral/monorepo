@@ -1,5 +1,9 @@
 import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
-import { pathnames, TREE_SHAKE_IS_DEFAULT_PATHNAMES } from "./variables.js";
+import {
+	pathnameBase,
+	pathnames,
+	TREE_SHAKE_IS_DEFAULT_PATHNAMES,
+} from "./variables.js";
 
 /**
  * De-localizes the given localized path.
@@ -41,14 +45,20 @@ export function deLocalizePath(pathname) {
 	} else {
 		for (const [unLocalizedPattern, locales] of Object.entries(pathnames)) {
 			for (const [, localizedPattern] of Object.entries(locales)) {
-				const hasMatch = pathToRegexp.match(localizedPattern)(url.pathname);
+				let path = url.pathname;
+				if (pathnameBase && path.startsWith(pathnameBase)) {
+					path = path.replace(pathnameBase, "");
+				}
+				const hasMatch = pathToRegexp.match(localizedPattern)(path);
 
 				if (hasMatch) {
 					let deLocalizedPath = pathToRegexp.compile(unLocalizedPattern)(
 						hasMatch.params
 					);
 
-					return deLocalizedPath + url.search;
+					return (
+						(pathnameBase ? pathnameBase : "") + deLocalizedPath + url.search
+					);
 				}
 			}
 		}
