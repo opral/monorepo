@@ -19,35 +19,26 @@ import {
  * @returns {Locale|undefined} The extracted locale, or undefined if no locale is found.
  */
 export function extractLocaleFromPathname(pathname) {
-	let normalizedPathname = pathname;
+	let path = pathnameBase
+		? pathname.replace(pathnameBase, "") || "/"
+		: pathname;
 
-	// remove pathnameBase from the beginning of the pathname
-	if (pathnameBase) {
-		normalizedPathname = pathname.replace(pathnameBase, "");
-	}
-
-	// in case removing the pathnameBase results in an empty string, set it to "/"
-	if (normalizedPathname === "") {
-		normalizedPathname = "/";
-	}
-
-	// optimization for default pathnames that doesn't require dynamic matching
+	// optimization to avoid loading the path-to-regexp library
+	// which saves around 2kb gzipped
 	if (TREE_SHAKE_IS_DEFAULT_PATHNAMES) {
-		const [, maybeLocale] = normalizedPathname.split("/");
-		if (isLocale(maybeLocale) && maybeLocale !== baseLocale) {
-			return maybeLocale;
-		} else {
-			return baseLocale;
-		}
+		const [, maybeLocale] = path.split("/");
+		return isLocale(maybeLocale) && maybeLocale !== baseLocale
+			? maybeLocale
+			: baseLocale;
 	}
-	// custom pathnames are defined, needs dynamic matching
-	else {
-		for (const patterns of Object.values(pathnames)) {
-			for (const [locale, localizedPattern] of Object.entries(patterns)) {
-				if (pathToRegexp.match(localizedPattern)(normalizedPathname)) {
-					return assertIsLocale(locale);
-				}
+
+	for (const patterns of Object.values(pathnames)) {
+		for (const [locale, localizedPattern] of Object.entries(patterns)) {
+			if (pathToRegexp.match(localizedPattern)(path)) {
+				return assertIsLocale(locale);
 			}
 		}
 	}
+
+	return undefined;
 }
