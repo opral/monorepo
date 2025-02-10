@@ -94,8 +94,15 @@ export type CompilerOptions = {
 	/**
 	 * The base path for the pathname strategy.
 	 *
+	 * If the pathnameBase is set, `localizePath()` and `deLocalizePath()` will
+	 * automatically add or remove the base path from the pathname.
+	 *
+	 * Don't forget to set your server's or frameworks "base path" to the same value.
+	 *
 	 * @example
 	 *   pathnameBase: "/base"
+	 *
+	 *   localizePath("/about") // -> "/base/about"
 	 *
 	 * @default undefined
 	 */
