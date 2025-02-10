@@ -1,5 +1,6 @@
 import {
 	baseLocale,
+	pathnameBase,
 	pathnames,
 	TREE_SHAKE_IS_DEFAULT_PATHNAMES,
 } from "./variables.js";
@@ -38,16 +39,32 @@ export function localizePath(pathname, options) {
 	const url = new URL(pathname, "http://y.com");
 	const locale = options?.locale ?? getLocale();
 
+	const pathnameLocale = extractLocaleFromPathname(url.pathname);
+
 	// If the path is already localized, return it as is
-	if (extractLocaleFromPathname(url.pathname) === locale) {
+	if (pathnameLocale === locale) {
 		return pathname;
 	}
 
 	// no dynamic matching is needed if the default pathnames are used
 	if (TREE_SHAKE_IS_DEFAULT_PATHNAMES) {
 		if (locale === baseLocale) {
-			return "/" + url.pathname.split("/").slice(2).join("/") + url.search;
+			let path = url.pathname;
+			if (pathnameBase && !path.startsWith(pathnameBase)) {
+				path = pathnameBase + path;
+			}
+			// remove the locale from the path
+			if (pathnameLocale) {
+				path = path.replace(`/${pathnameLocale}`, "");
+			}
+			return path + url.search;
 		} else {
+			if (pathnameBase) {
+				return (
+					`${pathnameBase}/${locale}${url.pathname.replace(pathnameBase, "")}` +
+					url.search
+				);
+			}
 			return `/${locale}${url.pathname}` + url.search;
 		}
 	}

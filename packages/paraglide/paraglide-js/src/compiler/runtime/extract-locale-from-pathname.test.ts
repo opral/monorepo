@@ -66,12 +66,30 @@ test("works for default pathnames", async () => {
 		},
 	});
 
-	expect(runtime.extractLocaleFromPathname("/")).toBe("en");
+	expect(runtime.extractLocaleFromPathname("/")).toBe(undefined);
 	expect(runtime.extractLocaleFromPathname("/de/")).toBe("de");
-	expect(runtime.extractLocaleFromPathname("/about")).toBe("en");
+	// the base path is not prefixed
+	expect(runtime.extractLocaleFromPathname("/en")).toBe(undefined);
+	expect(runtime.extractLocaleFromPathname("/about")).toBe(undefined);
 	expect(runtime.extractLocaleFromPathname("/de/about")).toBe("de");
 	expect(runtime.extractLocaleFromPathname("/de/about/")).toBe("de");
-	// limitation of the implementation that ambigously matches other locales
-	// as base locale
-	expect(runtime.extractLocaleFromPathname("/fr/ueber-uns")).toBe("en");
+	expect(runtime.extractLocaleFromPathname("/fr/ueber-uns")).toBe(undefined);
+});
+
+test("works with pathnameBase", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			pathnameBase: "/base",
+		},
+	});
+
+	expect(runtime.extractLocaleFromPathname("/base")).toBe(undefined);
+	expect(runtime.extractLocaleFromPathname("/base/de/")).toBe("de");
+	expect(runtime.extractLocaleFromPathname("/base/de/about")).toBe("de");
+	expect(runtime.extractLocaleFromPathname("/base/de/about/")).toBe("de");
+	expect(runtime.extractLocaleFromPathname("/base/fr/ueber-uns")).toBe(
+		undefined
+	);
 });
