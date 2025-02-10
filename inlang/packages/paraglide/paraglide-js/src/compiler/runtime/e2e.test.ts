@@ -39,3 +39,25 @@ describe.each([
 		expect(runtime.localizePath("/base/de", { locale: "en" })).toBe("/base");
 	});
 });
+
+test("handles domain based strategy", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["domain"],
+			domains: {
+				de: "example.de",
+				en: "example.com",
+			},
+		},
+	});
+
+	globalThis.window = { location: { hostname: "example.com" } } as any;
+
+	expect(runtime.getLocale()).toBe("en");
+
+	runtime.setLocale("de");
+
+	expect(window.location.hostname).toBe("example.de");
+});

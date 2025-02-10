@@ -46,3 +46,31 @@ test("doesn't throw for server unavailable APIs", async () => {
 	expect(() => runtime.setLocale("de")).not.toThrow();
 	expect(runtime.getLocale()).toBe("de");
 });
+
+
+test("domain strategy sets the hostname", async () => {
+	// @ts-expect-error - global variable definition
+	globalThis.window = {};
+	// @ts-expect-error - global variable definition
+	globalThis.window.location = {};
+	globalThis.window.location.hostname = "example.com";
+	globalThis.window.location.reload = vi.fn();
+
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["domain"],
+			domains: {
+				de: "example.de",
+				en: "example.com",
+			},
+		},
+	});
+
+	runtime.setLocale("de");
+
+	expect(globalThis.window.location.hostname).toBe("example.de");
+	// setting window.location.hostname automatically reloads the page
+	expect(globalThis.window.location.reload).not.toBeCalled();
+});
