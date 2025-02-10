@@ -51,6 +51,7 @@ export function localizePath(pathname, options) {
 	}
 
 	// no dynamic matching is needed if the default pathnames are used
+	// this is a tree-shaking optimization to avoid loading the path-to-regexp library
 	if (TREE_SHAKE_IS_DEFAULT_PATHNAMES) {
 		if (locale === baseLocale) {
 			let path = url.pathname;
@@ -73,34 +74,32 @@ export function localizePath(pathname, options) {
 		}
 	}
 	// dynamic matching is needed
-	else {
-		for (const [pattern, locales] of Object.entries(pathnames)) {
-			let path = url.pathname;
-			if (pathnameBase && path.startsWith(pathnameBase)) {
-				path = path.replace(pathnameBase, "");
-			}
-			if (pathnameLocale) {
-				path = path.replace(`/${pathnameLocale}`, "");
-			}
-			if (path === "") {
-				path = "/";
-			}
-			const hasMatch = pathToRegexp.match(pattern)(path);
-			if (hasMatch) {
-				const localizedPattern = /** @type {string} */ (locales[locale]);
-				const localizedPath =
-					pathToRegexp.compile(localizedPattern)(hasMatch.params) + url.search;
-				if (pathnameBase && localizedPath !== "/") {
-					return pathnameBase + localizedPath;
-				} else if (pathnameBase) {
-					return pathnameBase;
-				} else {
-					return localizedPath;
-				}
+	for (const [pattern, locales] of Object.entries(pathnames)) {
+		let path = url.pathname;
+		if (pathnameBase && path.startsWith(pathnameBase)) {
+			path = path.replace(pathnameBase, "");
+		}
+		if (pathnameLocale) {
+			path = path.replace(`/${pathnameLocale}`, "");
+		}
+		if (path === "") {
+			path = "/";
+		}
+		const hasMatch = pathToRegexp.match(pattern)(path);
+		if (hasMatch) {
+			const localizedPattern = /** @type {string} */ (locales[locale]);
+			const localizedPath =
+				pathToRegexp.compile(localizedPattern)(hasMatch.params) + url.search;
+			if (pathnameBase && localizedPath !== "/") {
+				return pathnameBase + localizedPath;
+			} else if (pathnameBase) {
+				return pathnameBase;
+			} else {
+				return localizedPath;
 			}
 		}
-		throw new Error(
-			"No match found for localized path. Refer to the documentation on how to define pathnames."
-		);
 	}
+	throw new Error(
+		"No match found for localized path. Refer to the documentation on how to define pathnames."
+	);
 }
