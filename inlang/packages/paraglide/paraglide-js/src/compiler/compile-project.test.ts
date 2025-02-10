@@ -89,6 +89,50 @@ test("emitPrettierIgnore", async () => {
 	expect(_false).not.toHaveProperty(".prettierignore");
 });
 
+// https://github.com/opral/inlang-paraglide-js/issues/347
+test("can emit message bundles with more than 255 characters", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
+	});
+
+	await insertBundleNested(
+		project.db,
+		createBundleNested({
+			// 300 characters long id
+			id: "a".repeat(300),
+			messages: [
+				{
+					locale: "en",
+					variants: [
+						{
+							pattern: [{ type: "text", value: "Hello" }],
+						},
+					],
+				},
+			],
+		})
+	);
+
+	const output = await compileProject({
+		project,
+	});
+
+	const code = await bundleCode(
+		output,
+		`export * as m from "./paraglide/messages.js"
+		 export * as runtime from "./paraglide/runtime.js"`
+	);
+
+	const { m } = await importCode(code);
+
+	expect(m["a".repeat(300)]()).toBe("Hello");
+})
+
 describe.each([
 	// useTsImports must be true to test emitTs. Otherwise, rolldown can't resolve the imports
 	{
