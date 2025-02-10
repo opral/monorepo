@@ -1097,12 +1097,6 @@ importers:
       '@lit/react':
         specifier: ^1.0.5
         version: 1.0.6(@types/react@19.0.8)
-      '@shoelace-style/shoelace':
-        specifier: ^2.19.1
-        version: 2.19.1(@floating-ui/utils@0.2.9)(@types/react@19.0.8)
-      '@types/vscode-webview':
-        specifier: ^1.57.5
-        version: 1.57.5
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1125,12 +1119,18 @@ importers:
       '@eslint/js':
         specifier: ^9.19.0
         version: 9.19.0
+      '@shoelace-style/shoelace':
+        specifier: ^2.19.1
+        version: 2.19.1(@floating-ui/utils@0.2.9)(@types/react@19.0.8)
       '@types/react':
         specifier: ^19.0.8
         version: 19.0.8
       '@types/react-dom':
         specifier: ^19.0.3
         version: 19.0.3(@types/react@19.0.8)
+      '@types/vscode-webview':
+        specifier: ^1.57.5
+        version: 1.57.5
       '@vitejs/plugin-react':
         specifier: ^4.3.4
         version: 4.3.4(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.27.0)(terser@5.36.0))
