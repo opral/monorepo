@@ -5,7 +5,6 @@ import {
 	TREE_SHAKE_IS_DEFAULT_PATHNAMES,
 } from "./variables.js";
 
-
 /**
  * De-localizes the given localized path.
  *
