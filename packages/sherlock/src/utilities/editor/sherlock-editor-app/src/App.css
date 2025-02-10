@@ -1,0 +1,47 @@
+.inlang-pattern-editor-contenteditable {
+    background-color: var(--vscode-editor-background) !important;
+    color: var(--vscode-editor-foreground) !important;
+}
+.inlang-pattern-editor-contenteditable:hover {
+    background-color: var(--vscode-editor-hoverBackground) !important;
+}
+.inlang-pattern-editor-placeholder {
+    color: var(--vscode-editor-placeholderForeground) !important;
+}
+inlang-variant {
+    --sl-input-border-color: var(--vscode-input-border);
+    --sl-input-background-color: var(--vscode-input-background);
+    --sl-input-background-color-focus: var(--vscode-input-background);
+    --sl-input-background-color-hover: var(--vscode-input-hoverBackground);
+    --sl-input-border-color-hover: var(--vscode-input-hoverBorder);
+    --sl-input-color: var(--vscode-input-foreground);
+    --sl-input-color-focus: var(--vscode-input-foreground);
+    --sl-input-color-hover: var(--vscode-input-foreground);
+}
+inlang-message {
+    --sl-input-border-color: var(--vscode-input-border);
+    --sl-input-background-color: var(--vscode-input-background);
+    --sl-input-background-color-focus: var(--vscode-input-background);
+    --sl-input-background-color-hover: var(--vscode-input-hoverBackground);
+    --sl-input-border-color-hover: var(--vscode-input-hoverBorder);
+    --sl-input-color: var(--vscode-input-foreground);
+    --sl-input-color-focus: var(--vscode-input-foreground);
+    --sl-input-color-hover: var(--vscode-input-foreground);
+    --sl-input-background-color-disabled: var(--vscode-input-disabledBackground);
+    --sl-input-placeholder-color: var(--vscode-input-placeholderForeground);
+}
+inlang-bundle {
+    --sl-input-border-color: var(--vscode-input-border);
+    --sl-input-background-color: var(--vscode-input-background);
+    --sl-input-background-color-focus: var(--vscode-input-background);
+    --sl-input-background-color-hover: var(--vscode-input-hoverBackground);
+    --sl-input-border-color-hover: var(--vscode-input-hoverBorder);
+    --sl-input-color: var(--vscode-input-foreground);
+    --sl-input-color-focus: var(--vscode-input-foreground);
+    --sl-input-color-hover: var(--vscode-input-foreground);
+    --sl-input-background-color-disabled: var(--vscode-input-disabledBackground);
+    --sl-input-placeholder-color: var(--vscode-input-placeholderForeground);
+}
+inlang-bundle::part(base) {
+    background-color: var(--vscode-editor-background);
+}
