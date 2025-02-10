@@ -2,6 +2,7 @@ import { assertIsLocale } from "./assert-is-locale.js";
 import { isLocale } from "./is-locale.js";
 import {
 	baseLocale,
+	pathnameBase,
 	pathnames,
 	TREE_SHAKE_IS_DEFAULT_PATHNAMES,
 } from "./variables.js";
@@ -20,11 +21,16 @@ import {
 export function extractLocaleFromPathname(pathname) {
 	// optimization for default pathnames that doesn't require dynamic matching
 	if (TREE_SHAKE_IS_DEFAULT_PATHNAMES) {
-		const [, maybeLocale] = pathname.split("/");
-		if (isLocale(maybeLocale)) {
+		const [, maybeLocale] = pathnameBase
+			? pathname.replace(pathnameBase, "").split("/")
+			: pathname.split("/");
+		if (isLocale(maybeLocale) && maybeLocale !== baseLocale) {
 			return maybeLocale;
-		} else {
-			return baseLocale;
+		}
+		// it's ambiguous if the base locale is matched. hence, return undefined.
+		// use the strategy `baseLocale` to fallback to the base locale.
+		else {
+			return undefined;
 		}
 	}
 	// custom pathnames are defined, needs dynamic matching

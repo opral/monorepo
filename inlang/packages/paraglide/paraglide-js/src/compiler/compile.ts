@@ -14,6 +14,7 @@ export const defaultCompilerOptions = {
 	emitGitIgnore: true,
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
+	pathnameBase: undefined,
 	strategy: ["cookie", "globalVariable", "baseLocale"],
 	cookieName: "PARAGLIDE_LOCALE",
 } as const satisfies Partial<CompilerOptions>;
@@ -90,6 +91,15 @@ export type CompilerOptions = {
 	 *   }
 	 */
 	pathnames?: Record<string, Record<string, string>>;
+	/**
+	 * The base path for the pathname strategy.
+	 *
+	 * @example
+	 *   pathnameBase: "/base"
+	 *
+	 * @default undefined
+	 */
+	pathnameBase?: string;
 	/**
 	 * Whether to include an eslint-disable comment at the top of each .js file.
 	 *

@@ -13,6 +13,7 @@ export function createRuntimeFile(args: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
 		pathnames?: CompilerOptions["pathnames"];
+		pathnameBase?: CompilerOptions["pathnameBase"];
 	};
 }): string {
 	const pathnames = args.compilerOptions.pathnames ?? {
@@ -26,11 +27,17 @@ export function createRuntimeFile(args: {
 import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";
 
 ${injectCode("./variables.js")
-	.replace(`<base-locale>`, `${args.baseLocale}`)
-	.replace(`["<base-locale>"]`, `["${args.locales.join('", "')}"]`)
 	.replace(
-		`["globalVariable"]`,
-		`["${args.compilerOptions.strategy.join('", "')}"]`
+		`export const baseLocale = "en";`,
+		`export const baseLocale = "${args.baseLocale}";`
+	)
+	.replace(
+		`export const locales = /** @type {const} */ (["en", "de"]);`,
+		`export const locales = /** @type {const} */ (["${args.locales.join('", "')}"]);`
+	)
+	.replace(
+		`export const strategy = ["globalVariable"];`,
+		`export const strategy = ["${args.compilerOptions.strategy.join('", "')}"]`
 	)
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
 	.replace(
@@ -52,6 +59,10 @@ ${injectCode("./variables.js")
 	.replace(
 		`export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;`,
 		`const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("globalVariable")};`
+	)
+	.replace(
+		`export const pathnameBase = undefined;`,
+		`export const pathnameBase = ${args.compilerOptions.pathnameBase ? `"${args.compilerOptions.pathnameBase}"` : "undefined"};`
 	)}
 
 /**
@@ -152,11 +163,7 @@ function injectCode(path: string): string {
 export async function createRuntimeForTesting(args: {
 	baseLocale: string;
 	locales: string[];
-	compilerOptions?: {
-		strategy?: CompilerOptions["strategy"];
-		cookieName?: CompilerOptions["cookieName"];
-		pathnames?: CompilerOptions["pathnames"];
-	};
+	compilerOptions?: Omit<CompilerOptions, "outdir" | "project" | "fs">;
 }): Promise<Runtime> {
 	const file = createRuntimeFile({
 		baseLocale: args.baseLocale,
