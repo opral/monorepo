@@ -51,3 +51,25 @@ test("throws if variable is used without baseLocale as fallback strategy", async
 
 	expect(runtime.getLocale()).toBe("de");
 });
+
+test("retrieves the locale for domain", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["domain"],
+			domains: {
+				de: "example.de",
+				en: "example.com",
+			},
+		},
+	});
+
+	globalThis.window = { location: { hostname: "example.com" } } as any;
+
+	expect(runtime.getLocale()).toBe("en");
+
+	globalThis.window = { location: { hostname: "example.de" } } as any;
+
+	expect(runtime.getLocale()).toBe("de");
+});

@@ -5,6 +5,7 @@ import {
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
 	TREE_SHAKE_PATHNAME_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
+	domains,
 } from "./variables.js";
 import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
 import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
@@ -39,19 +40,22 @@ export let getLocale = () => {
 	for (const strat of strategy) {
 		if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
 			locale = extractLocaleFromCookie();
-		}
-		if (strat === "baseLocale") {
+		} else if (strat === "baseLocale") {
 			locale = baseLocale;
-		}
-		if (
+		} else if (domains && strat === "domain") {
+			for (const [_locale, hostname] of Object.entries(domains)) {
+				if (window.location.hostname === hostname) {
+					locale = _locale;
+				}
+			}
+		} else if (
 			TREE_SHAKE_PATHNAME_STRATEGY_USED &&
 			strat === "pathname" &&
 			typeof window !== "undefined" &&
 			window.location?.pathname
 		) {
 			locale = extractLocaleFromPathname(window.location.pathname);
-		}
-		if (
+		} else if (
 			TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED &&
 			strat === "globalVariable" &&
 			_locale !== undefined

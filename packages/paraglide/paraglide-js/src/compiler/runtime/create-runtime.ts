@@ -14,6 +14,7 @@ export function createRuntimeFile(args: {
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
 		pathnames?: CompilerOptions["pathnames"];
 		pathnameBase?: CompilerOptions["pathnameBase"];
+		domains?: CompilerOptions["domains"];
 	};
 }): string {
 	const pathnames = args.compilerOptions.pathnames ?? {
@@ -63,6 +64,10 @@ ${injectCode("./variables.js")
 	.replace(
 		`export const pathnameBase = undefined;`,
 		`export const pathnameBase = ${args.compilerOptions.pathnameBase ? `"${args.compilerOptions.pathnameBase}"` : "undefined"};`
+	)
+	.replace(
+		`export const domains = undefined;`,
+		`export const domains = ${args.compilerOptions.domains ? JSON.stringify(args.compilerOptions.domains, null, 2) : "undefined"};`
 	)}
 
 /**

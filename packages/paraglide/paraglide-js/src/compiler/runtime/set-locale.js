@@ -4,6 +4,7 @@ import {
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
 	TREE_SHAKE_PATHNAME_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
+	domains,
 } from "./variables.js";
 import { localizePath } from "./localize-path.js";
 
@@ -54,6 +55,20 @@ export let setLocale = (newLocale) => {
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
+		} else if (domains && strat === "domain") {
+			if (typeof window === "undefined" || !window.location) {
+				continue;
+			}
+			const hostname = domains[newLocale];
+			if (!hostname) {
+				throw new Error(
+					`No domain found for locale ${newLocale}. Check your domain settings.`
+				);
+			}
+			window.location.hostname = hostname;
+			// not needed, as the page reloads
+			// localeHasBeenSet = true;
+			return;
 		} else {
 			throw new Error("Unknown strategy");
 		}

@@ -92,6 +92,22 @@ export type CompilerOptions = {
 	 */
 	pathnames?: Record<string, Record<string, string>>;
 	/**
+	 * Define custom domains for locales.
+	 *
+	 * You can assign mutliple locales the same domain in combination with the
+	 * pathname strategy e.g. `strategy: ["pathname", "domain"]` where
+	 * `https://example.com/fr/about` would resolve to `fr` and
+	 * `https://example.com/about` would resolve to `en`.
+	 *
+	 * @example
+	 *   domains: {
+	 *    "de": "example.de",
+	 *    "en": "example.com",
+	 *    "fr": "example.com",
+	 *   }
+	 */
+	domains?: Record<string, string>;
+	/**
 	 * The base path for the pathname strategy.
 	 *
 	 * If the pathnameBase is set, `localizePath()` and `deLocalizePath()` will
