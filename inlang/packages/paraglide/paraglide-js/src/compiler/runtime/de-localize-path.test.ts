@@ -93,17 +93,34 @@ test("handles TREE_SHAKE_DEFAULT_PATHNAMES", async () => {
 	expect(runtime.deLocalizePath("/")).toBe("/");
 	expect(runtime.deLocalizePath("/de")).toBe("/");
 	expect(runtime.deLocalizePath("/de/something")).toBe("/something");
-	// base locale is not prefixed
-	expect(runtime.deLocalizePath("/en/blaba")).toBe("/en/blaba");
 });
 
 // https://github.com/opral/inlang-paraglide-js/issues/362
-test("handles 'base paths'", async () => {
+test("handles pathnameBase for default pathnames option", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			pathnameBase: "/base"
+			pathnameBase: "/base",
+		},
+	});
+
+	expect(runtime.deLocalizePath("/base/something")).toBe("/base/something");
+	expect(runtime.deLocalizePath("/base/de/something")).toBe("/base/something");
+});
+
+test("handles pathnameBase for matcher pathnames option", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			pathnameBase: "/base",
+			pathnames: {
+				"/{*path}": {
+					de: "/de{/*path}",
+					en: "/{*path}",
+				},
+			},
 		},
 	});
 
