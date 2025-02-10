@@ -5,6 +5,7 @@ import {
 	TREE_SHAKE_IS_DEFAULT_PATHNAMES,
 } from "./variables.js";
 
+
 /**
  * De-localizes the given localized path.
  *
@@ -32,39 +33,31 @@ import {
  */
 export function deLocalizePath(pathname) {
 	const url = new URL(pathname, "http://y.com");
+	let path = url.pathname;
 
+	// no dynamic matching is needed if the default pathnames are used
 	if (TREE_SHAKE_IS_DEFAULT_PATHNAMES) {
-		const locale = extractLocaleFromPathname(url.pathname);
-		if (locale) {
-			const path = url.pathname.replace(`/${locale}`, "") + url.search;
-			if (path === "") return "/";
-			return path;
-		} else {
-			return url.pathname + url.search;
-		}
-	} else {
-		for (const [unLocalizedPattern, locales] of Object.entries(pathnames)) {
-			for (const [, localizedPattern] of Object.entries(locales)) {
-				let path = url.pathname;
-				if (pathnameBase && path.startsWith(pathnameBase)) {
-					path = path.replace(pathnameBase, "");
-				}
-				const hasMatch = pathToRegexp.match(localizedPattern)(path);
+		const locale = extractLocaleFromPathname(path);
+		if (locale) path = path.replace(`/${locale}`, "") || "/";
+		return path + url.search;
+	}
 
-				if (hasMatch) {
-					let deLocalizedPath = pathToRegexp.compile(unLocalizedPattern)(
-						hasMatch.params
-					);
+	if (pathnameBase && path.startsWith(pathnameBase)) {
+		path = path.replace(pathnameBase, "");
+	}
 
-					return (
-						(pathnameBase ? pathnameBase : "") + deLocalizedPath + url.search
-					);
-				}
+	for (const [unLocalizedPattern, locales] of Object.entries(pathnames)) {
+		for (const [, localizedPattern] of Object.entries(locales)) {
+			const match = pathToRegexp.match(localizedPattern)(path);
+			if (match) {
+				return (
+					(pathnameBase || "") +
+					pathToRegexp.compile(unLocalizedPattern)(match.params) +
+					url.search
+				);
 			}
 		}
-
-		throw new Error(
-			"No match found for localized path. Refer to the documentation on how to define pathnames."
-		);
 	}
+
+	throw new Error("No match found for localized path. Check pathnames option.");
 }
