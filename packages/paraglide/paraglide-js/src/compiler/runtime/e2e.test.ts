@@ -62,7 +62,7 @@ test("domain based strategy works", async () => {
 	expect(window.location.hostname).toBe("example.de");
 });
 
-test("pathname strategy with locale prefixes e.g. /fr/page works", async () => {
+test("url pattern strategy with locale prefixes e.g. /fr/page works", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de"],
@@ -87,7 +87,58 @@ test("pathname strategy with locale prefixes e.g. /fr/page works", async () => {
 
 	expect(runtime.getLocale()).toBe("en");
 
+	expect(runtime.localizeUrl("/page")).toBe("https://example.com/page");
+
+	expect(runtime.deLocalizeUrl("/page")).toBe("https://example.com/page");
+
 	runtime.setLocale("de");
 
-	expect(window.location.href).toBe("https://example.com/de/");
+	expect(runtime.getLocale()).toBe("de");
+
+	expect(runtime.localizeUrl("/page")).toBe("https://example.com/de/page");
+
+	expect(runtime.deLocalizeUrl("/page")).toBe("https://example.com/page");
+});
+
+test("url pattern strategy with base paths e.g. /fr/page works", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["urlPattern"],
+			urlPatterns: [
+				{
+					pattern: "/{*path}",
+					deLocalizedPattern: "/{*path}",
+					locale: "en",
+				},
+				{
+					pattern: "http{s}\\://*domain/base/de/{*path}",
+					locale: "de",
+					deLocalizedPattern: "http{s}\\://*domain/base{/*path}",
+				},
+				{
+					pattern: "http{s}\\://*domain/base{/*path}",
+					locale: "en",
+					deLocalizedPattern: "http{s}\\://*domain/base{/*path}",
+				},
+			],
+		},
+	});
+
+	globalThis.window = { location: new URL("https://example.com/base") } as any;
+
+	expect(runtime.getLocale()).toBe("en");
+
+	expect(runtime.localizeUrl("/page")).toBe("https://example.com/page");
+
+	expect(runtime.deLocalizeUrl("/page")).toBe("https://example.com/page");
+
+	runtime.setLocale("de");
+
+	expect(runtime.getLocale()).toBe("de");
+
+	expect(runtime.localizeUrl("/page")).toBe("https://example.com/de/page");
+
+	expect(runtime.deLocalizeUrl("/page")).toBe("https://example.com/page");
 });
