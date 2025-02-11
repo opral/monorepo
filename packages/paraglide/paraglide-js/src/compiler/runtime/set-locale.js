@@ -7,6 +7,7 @@ import {
 	domains,
 } from "./variables.js";
 import { localizePath } from "./localize-path.js";
+import { localizeUrl } from "./localize-url.js";
 
 /**
  * Set the locale.
@@ -55,6 +56,13 @@ export let setLocale = (newLocale) => {
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
+		} else if (strat === "url") {
+			const x = localizeUrl(window.location.href, {
+				locale: newLocale,
+			});
+			window.location.href = x;
+			// just in case return. the browser reloads the page by setting href
+			return;
 		} else if (domains && strat === "domain") {
 			if (typeof window === "undefined" || !window.location) {
 				continue;

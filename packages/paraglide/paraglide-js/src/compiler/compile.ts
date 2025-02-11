@@ -15,6 +15,7 @@ export const defaultCompilerOptions = {
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
 	pathnameBase: undefined,
+	urlPatterns: [],
 	strategy: ["cookie", "globalVariable", "baseLocale"],
 	cookieName: "PARAGLIDE_LOCALE",
 } as const satisfies Partial<CompilerOptions>;
@@ -107,6 +108,11 @@ export type CompilerOptions = {
 	 *   }
 	 */
 	domains?: Record<string, string>;
+
+	/**
+	 * TODO documentation
+	 */
+	urlPatterns?: Runtime["urlPatterns"];
 	/**
 	 * The base path for the pathname strategy.
 	 *

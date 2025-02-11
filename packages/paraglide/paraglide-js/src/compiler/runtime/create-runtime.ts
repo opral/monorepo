@@ -15,6 +15,7 @@ export function createRuntimeFile(args: {
 		pathnames?: CompilerOptions["pathnames"];
 		pathnameBase?: CompilerOptions["pathnameBase"];
 		domains?: CompilerOptions["domains"];
+		urlPatterns?: CompilerOptions["urlPatterns"];
 	};
 }): string {
 	const pathnames = args.compilerOptions.pathnames ?? {
@@ -68,6 +69,10 @@ ${injectCode("./variables.js")
 	.replace(
 		`export const domains = undefined;`,
 		`export const domains = ${args.compilerOptions.domains ? JSON.stringify(args.compilerOptions.domains, null, 2) : "undefined"};`
+	)
+	.replace(
+		`export const urlPatterns = [];`,
+		`export const urlPatterns = ${JSON.stringify(args.compilerOptions.urlPatterns, null, 2)};`
 	)}
 
 /**
@@ -125,6 +130,12 @@ ${injectCode("./extract-locale-from-pathname.js")}
 ${injectCode("./extract-locale-from-request.js")}
 
 ${injectCode("./extract-locale-from-cookie.js")}
+
+${injectCode("./extract-locale-from-url.js")}
+
+${injectCode("./localize-url.js")}
+
+${injectCode("./de-localize-url.js")}
 
 // ------ TYPES ------
 

@@ -6,6 +6,7 @@ export type Runtime = {
 	locales: Readonly<Locale[]>;
 	strategy: typeof import("./variables.js").strategy;
 	cookieName: typeof import("./variables.js").cookieName;
+	urlPatterns: typeof import("./variables.js").urlPatterns;
 	getLocale: typeof import("./get-locale.js").getLocale;
 	setLocale: typeof import("./set-locale.js").setLocale;
 	defineGetLocale: (fn: () => Locale) => void;
@@ -14,6 +15,9 @@ export type Runtime = {
 	isLocale: typeof import("./is-locale.js").isLocale;
 	deLocalizePath: typeof import("./de-localize-path.js").deLocalizePath;
 	localizePath: typeof import("./localize-path.js").localizePath;
+	localizeUrl: typeof import("./localize-url.js").localizeUrl;
+	deLocalizeUrl: typeof import("./de-localize-url.js").deLocalizeUrl;
+	extractLocaleFromUrl: typeof import("./extract-locale-from-url.js").extractLocaleFromUrl;
 	extractLocaleFromPathname: typeof import("./extract-locale-from-pathname.js").extractLocaleFromPathname;
 	extractLocaleFromRequest: typeof import("./extract-locale-from-request.js").extractLocaleFromRequest;
 	extractLocaleFromCookie: typeof import("./extract-locale-from-cookie.js").extractLocaleFromCookie;
