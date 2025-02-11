@@ -15,10 +15,10 @@ import { gettingStartedView } from "./utilities/getting-started/gettingStarted.j
 import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
 import { recommendationBannerView } from "./utilities/recommendation/recommendation.js"
 import { telemetry } from "./services/telemetry/index.js"
-import packageJson from "../package.json"
+import packageJson from "../package.json" assert { type: "json" }
 import { statusBar } from "./utilities/settings/statusBar.js"
 import fg from "fast-glob"
-import type { IdeExtensionConfig } from "@inlang/sdk"
+import { saveProjectToDirectory, type IdeExtensionConfig } from "@inlang/sdk"
 import path from "node:path"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
@@ -96,6 +96,9 @@ async function main(args: {
 		// Register Extension Components & Handle Inlang Errors
 		await registerExtensionComponents(args)
 		await handleInlangErrors()
+
+		// Save Project
+		await saveProject(args)
 
 		// TODO: Replace by reactive settings API?
 		setupFileSystemWatcher(args)
@@ -182,4 +185,20 @@ async function setProjects(args: { workspaceFolder: vscode.WorkspaceFolder }) {
 	} catch (error) {
 		handleError(error)
 	}
+}
+
+async function saveProject(args: { workspaceFolder: vscode.WorkspaceFolder; fs: FileSystem }) {
+	setInterval(async () => {
+		try {
+			if (state().selectedProjectPath && state().project) {
+				await saveProjectToDirectory({
+					fs: args.fs,
+					project: state().project,
+					path: state().selectedProjectPath,
+				})
+			}
+		} catch (error) {
+			handleError(error)
+		}
+	}, 2000)
 }

@@ -219,12 +219,15 @@
 		}
 	},
 	"scripts": {
-		"_build": "tsc --noEmit && node ./build.js",
+		"_build": "tsc --noEmit && pnpm run editor:build && node ./build.js",
 		"dev": "DEV=true node ./build.js",
 		"package": "pnpm vsce package --no-dependencies",
 		"publish": "pnpm vsce publish --no-dependencies",
 		"publish:open-vsx": "node publish-openvsx.js",
 		"vscode:prepublish": "npm run build",
+		"---- EDITOR ----------------------------------------------------------": "",
+		"editor:build": "cd src/utilities/editor/sherlock-editor-app && pnpm run build",
+		"editor:dev": "cd src/utilities/editor/sherlock-editor-app && pnpm run dev",
 		"---- TEST ----------------------------------------------------------": "",
 		"_pretest": "node ./build.js",
 		"_test": "tsc --noEmit && vitest run",
@@ -236,6 +239,7 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
+		"@eliaspourquoi/sqlite-node-wasm": "3.46.0-build2",
 		"@inlang/editor-component": "workspace:*",
 		"@inlang/recommend-sherlock": "workspace:*",
 		"@inlang/rpc": "workspace:*",
