@@ -1,5 +1,4 @@
 import { getLocale } from "./get-locale.js";
-import * as pathToRegexp from "path-to-regexp";
 import { urlPatterns } from "./variables.js";
 
 /**
