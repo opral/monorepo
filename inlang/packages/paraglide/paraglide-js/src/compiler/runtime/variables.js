@@ -22,7 +22,7 @@ export const locales = /** @type {const} */ (["en", "de"]);
 export const cookieName = "<cookie-name>";
 
 /**
- * @type {Array<"domain" | "cookie" | "baseLocale" | "pathname" | "globalVariable">}
+ * @type {Array<"domain" | "cookie" | "baseLocale" | "pathname" | "globalVariable" | "url">}
  */
 export const strategy = ["globalVariable"];
 
@@ -38,6 +38,9 @@ export const pathnameBase = undefined;
 
 /** @type {Record<Locale, string> | undefined} */
 export const domains = undefined;
+
+/** @type {Array<{ pattern: string, locale: Locale, deLocalizedPattern: string }>} */
+export const urlPatterns = [];
 
 /**
  * Whether the pathnames are the default pathnames.

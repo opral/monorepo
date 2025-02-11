@@ -9,6 +9,7 @@ import {
 } from "./variables.js";
 import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
 import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
+import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
 
 /**
  * This is a fallback to get started with a custom
@@ -48,6 +49,8 @@ export let getLocale = () => {
 					locale = _locale;
 				}
 			}
+		} else if (strat === "url") {
+			locale = extractLocaleFromUrl(window.location.pathname);
 		} else if (
 			TREE_SHAKE_PATHNAME_STRATEGY_USED &&
 			strat === "pathname" &&

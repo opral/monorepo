@@ -40,7 +40,7 @@ describe.each([
 	});
 });
 
-test("handles domain based strategy", async () => {
+test("domain based strategy works", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de"],
@@ -60,4 +60,34 @@ test("handles domain based strategy", async () => {
 	runtime.setLocale("de");
 
 	expect(window.location.hostname).toBe("example.de");
+});
+
+test("pathname strategy with locale prefixes e.g. /fr/page works", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "http{s}\\://*domain/de/{*path}",
+					locale: "de",
+					deLocalizedPattern: "http{s}\\://*domain/{*path}",
+				},
+				{
+					pattern: "http{s}\\://*domain/{*path}",
+					locale: "en",
+					deLocalizedPattern: "http{s}\\://*domain/{*path}",
+				},
+			],
+		},
+	});
+
+	globalThis.window = { location: new URL("https://example.com/") } as any;
+
+	expect(runtime.getLocale()).toBe("en");
+
+	runtime.setLocale("de");
+
+	expect(window.location.href).toBe("https://example.com/de/");
 });
