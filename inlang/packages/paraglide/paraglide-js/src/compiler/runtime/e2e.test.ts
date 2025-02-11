@@ -67,7 +67,7 @@ test("pathname strategy with locale prefixes e.g. /fr/page works", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["url"],
+			strategy: ["urlPattern"],
 			urlPatterns: [
 				{
 					pattern: "http{s}\\://*domain/de/{*path}",
