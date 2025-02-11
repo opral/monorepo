@@ -49,7 +49,7 @@ export let getLocale = () => {
 					locale = _locale;
 				}
 			}
-		} else if (strat === "url") {
+		} else if (strat === "urlPattern") {
 			locale = extractLocaleFromUrl(window.location.pathname);
 		} else if (
 			TREE_SHAKE_PATHNAME_STRATEGY_USED &&

@@ -56,7 +56,7 @@ export let setLocale = (newLocale) => {
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
-		} else if (strat === "url") {
+		} else if (strat === "urlPattern") {
 			const x = localizeUrl(window.location.href, {
 				locale: newLocale,
 			});
