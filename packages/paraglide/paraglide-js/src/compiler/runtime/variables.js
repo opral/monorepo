@@ -22,7 +22,7 @@ export const locales = /** @type {const} */ (["en", "de"]);
 export const cookieName = "<cookie-name>";
 
 /**
- * @type {Array<"domain" | "cookie" | "baseLocale" | "pathname" | "globalVariable" | "url">}
+ * @type {Array<"domain" | "cookie" | "baseLocale" | "pathname" | "globalVariable" | "urlPattern">}
  */
 export const strategy = ["globalVariable"];
 
