@@ -125,7 +125,7 @@ const LixHandlingDropdown = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="secondary">
+        <Button variant="outline">
           <Ellipsis />
         </Button>
       </DropdownMenuTrigger>
