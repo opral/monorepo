@@ -10,11 +10,12 @@ export function LanguagePicker() {
 	const languageNames: Record<string, string> = {
 		en: "English",
 		de: "Deutsch",
+		es: "Español",
 		fr: "Français",
 		it: "Italiano",
-		zh: "中文",
-		sk: "Slovak",
 		"pt-BR": "Portuguese Brazil",
+		sk: "Slovak",
+		zh: "中文",
 		name: "English",
 	};
 
