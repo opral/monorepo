@@ -9,7 +9,7 @@ test("handles translated path segments", async () => {
 			urlPatterns: [
 				{
 					pattern: "http{s}\\://:domain/:bookstore{/*path}",
-					paramOverrides: {
+					localizedParams: {
 						en: { bookstore: "bookstore" },
 						de: { bookstore: "buchladen" },
 					},
@@ -32,6 +32,11 @@ test("handles translated path segments", async () => {
 	expect(
 		runtime.localizeUrlV3("https://example.com/bookstore/45", { locale: "de" })
 	).toBe("https://example.com/buchladen/45");
+
+	// delocalizing de to en
+	expect(runtime.deLocalizeUrlV3("https://example.com/buchladen/45")).toBe(
+		"https://example.com/bookstore/45"
+	);
 });
 
 test("cross domain urls", async () => {
@@ -42,7 +47,7 @@ test("cross domain urls", async () => {
 			urlPatterns: [
 				{
 					pattern: "http{s}\\://:domain/*path",
-					paramOverrides: {
+					localizedParams: {
 						en: { domain: "example.com" },
 						de: { domain: "de.example.com" },
 					},
@@ -60,6 +65,11 @@ test("cross domain urls", async () => {
 		runtime.localizeUrlV3("https://de.example.com/about", { locale: "en" })
 	).toBe("https://example.com/about");
 
+	// delocalizing from de to en
+	expect(runtime.deLocalizeUrlV3("https://de.example.com/about")).toBe(
+		"https://example.com/about"
+	);
+
 	// EN routing
 	expect(
 		runtime.localizeUrlV3("https://example.com/about", { locale: "de" })
@@ -68,6 +78,11 @@ test("cross domain urls", async () => {
 	expect(
 		runtime.localizeUrlV3("https://example.com/about", { locale: "en" })
 	).toBe("https://example.com/about");
+
+	// delocalizing from en to en
+	expect(runtime.deLocalizeUrlV3("https://example.com/about")).toBe(
+		"https://example.com/about"
+	);
 });
 
 test("pathname based localization", async () => {
@@ -78,7 +93,7 @@ test("pathname based localization", async () => {
 			urlPatterns: [
 				{
 					pattern: "http{s}\\://*domain{/:locale}/*path",
-					paramOverrides: {
+					localizedParams: {
 						de: {
 							locale: "de",
 						},
@@ -106,23 +121,25 @@ test("multi tenancy", async () => {
 				// 1) customer1.fr => root locale is fr, sub-locale is /en/
 				{
 					pattern: "http{s}\\://customer1.fr{/:locale}/*path",
-					paramOverrides: {
-						fr: { locale: undefined }, // remove /locale => root is FR
+					localizedParams: {
+						fr: { locale: null }, // remove /locale => root is FR
 						en: { locale: "en" }, // subpath => /en/about
 					},
+					deLocalizedParams: { locale: null },
 				},
 				// 2) customer2.com => root locale is en, sub-locale is /fr/
 				{
 					pattern: "http{s}\\://customer2.com{/:locale}/*path",
-					paramOverrides: {
-						en: { locale: undefined }, // remove /locale => root is EN
+					localizedParams: {
+						en: { locale: null }, // remove /locale => root is EN
 						fr: { locale: "fr" }, // subpath => /fr/about
 					},
+					deLocalizedParams: { locale: "fr" },
 				},
 				// 3) Any other domain => path-based for en/fr
 				{
 					pattern: "http{s}\\://:domain{/:locale}/*path",
-					paramOverrides: {
+					localizedParams: {
 						en: { locale: "en" },
 						fr: { locale: "fr" },
 					},
@@ -130,23 +147,33 @@ test("multi tenancy", async () => {
 			],
 		},
 	});
-	// customer 1 - french locale is root
+	// customer 1 - localizing french to french
 	expect(
 		runtime.localizeUrlV3("https://customer1.fr/about", { locale: "fr" })
 	).toBe("https://customer1.fr/about");
 
-	// customer 1 - english locale is subpath
+	// customer 1 - localizing from french to english
 	expect(
 		runtime.localizeUrlV3("https://customer1.fr/about", { locale: "en" })
 	).toBe("https://customer1.fr/en/about");
 
-	// customer 2 - english locale is root
+	// customer 1 - de-localizing from english to french
+	expect(runtime.deLocalizeUrlV3("https://customer1.fr/en/about")).toBe(
+		"https://customer1.fr/about"
+	);
+
+	// customer 2 - english to english
 	expect(
 		runtime.localizeUrlV3("https://customer2.com/about", { locale: "en" })
 	).toBe("https://customer2.com/about");
 
-	// customer 2 - french locale is subpath
+	// customer 2 - english to french
 	expect(
 		runtime.localizeUrlV3("https://customer2.com/about", { locale: "fr" })
 	).toBe("https://customer2.com/fr/about");
+
+	// customer 2 - de-localize french to english
+	expect(runtime.deLocalizeUrlV3("https://customer2.com/about")).toBe(
+		"https://customer2.com/fr/about"
+	);
 });
