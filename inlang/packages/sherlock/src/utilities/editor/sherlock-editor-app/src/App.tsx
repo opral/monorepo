@@ -27,13 +27,13 @@ function App() {
 	}, [])
 
 	return (
-		<div>
+		<>
 			{bundle && settings ? (
 				<Editor bundle={bundle} settings={settings} />
 			) : (
 				<p className="flex justify-center items-center h-screen text-gray-500">Loading...</p>
 			)}
-		</div>
+		</>
 	)
 }
 
