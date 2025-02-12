@@ -49,21 +49,15 @@ export function deLocalizeUrlV3(url) {
 
 		// 2) Attempt to match this pattern to the current URL
 		const matchResult = matcher(urlObj.href);
+
 		if (matchResult) {
-			// We found a matching pattern
-			// e.g. matchResult.params might be { domain: "customer1.fr", locale: "de", path: "about" }
-
-			// 3) Merge matched params with baseLocale overrides
-			// If baseLocale is not in paramOverrides, default to an empty object
-			const baseOverrides =
+			const overrides =
 				element.deLocalizedParams ?? element.localizedParams[baseLocale] ?? {};
-			const finalParams = { ...matchResult.params, ...baseOverrides };
+			const params = { ...matchResult.params, ...overrides };
 
-			// 4) Compile the pattern into a new URL
 			const toPath = pathToRegexp.compile(element.pattern);
-			const newUrl = toPath(finalParams);
+			const newUrl = toPath(params);
 
-			// 5) Preserve query & hash
 			const finalUrl = new URL(newUrl);
 			finalUrl.search = urlObj.search;
 			finalUrl.hash = urlObj.hash;
