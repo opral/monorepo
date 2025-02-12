@@ -8,7 +8,6 @@ import { CONFIGURATION } from "../../configuration.js"
 import { getSelectedBundleByBundleIdOrAlias } from "../helper.js"
 import { msg } from "../messages/msg.js"
 import type { ChangeEventDetail } from "@inlang/editor-component"
-import { saveProjectToDirectory } from "@inlang/sdk"
 
 // Same interface as before
 interface UpdateBundleMessage {
