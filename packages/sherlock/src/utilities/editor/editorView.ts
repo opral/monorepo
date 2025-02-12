@@ -8,7 +8,6 @@ import { CONFIGURATION } from "../../configuration.js"
 import { getSelectedBundleByBundleIdOrAlias } from "../helper.js"
 import { msg } from "../messages/msg.js"
 import type { ChangeEventDetail } from "@inlang/editor-component"
-import { saveProjectToDirectory } from "@inlang/sdk"
 
 // Same interface as before
 interface UpdateBundleMessage {
@@ -62,6 +61,23 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 			() => {
 				dispose()
 				panel = undefined
+			},
+			null,
+			disposables
+		)
+
+		// Listen to panel and load state when it's visible
+		panel.onDidChangeViewState(
+			async (e) => {
+				if (e.webviewPanel.visible) {
+					panel?.webview.postMessage({
+						command: "change",
+						data: {
+							bundle: await getSelectedBundleByBundleIdOrAlias(bundleId),
+							settings: await state().project?.settings.get(),
+						},
+					})
+				}
 			},
 			null,
 			disposables
