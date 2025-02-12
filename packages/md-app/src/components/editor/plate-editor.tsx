@@ -35,7 +35,9 @@ export function PlateEditor() {
   // delete changes/disregard keystroke changes on merge
   const handleUpdateMdData = useCallback(
     debounce(async (newData) => {
+      // console.log(newData);
       const serializedMd = newData.editor.api.markdown.serialize();
+      // console.log(serializedMd);
 
       await lix.db
         .updateTable("file")

@@ -12,6 +12,7 @@ import {
 	lixMdDemoFile,
 	setupMdDemo,
 } from "./helper/demo-lix-file/demo-lix-file.ts";
+import { plugin as mdPlugin } from "@lix-js/plugin-md";
 
 export const fileIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
@@ -80,9 +81,7 @@ export const lixAtom = atom(async (get) => {
 					const blob = await response.blob();
 					const lix = await openLixInMemory({
 						blob,
-						providePlugins: [
-							// mdPlugin
-						],
+						providePlugins: [mdPlugin],
 					});
 					await saveLixToOpfs({ lix });
 					return lix;
@@ -118,17 +117,13 @@ export const lixAtom = atom(async (get) => {
 		if (storedActiveAccount) {
 			lix = await openLixInMemory({
 				blob: lixBlob!,
-				providePlugins: [
-					// mdPlugin
-				],
+				providePlugins: [mdPlugin],
 				account: JSON.parse(storedActiveAccount),
 			});
 		} else {
 			lix = await openLixInMemory({
 				blob: lixBlob!,
-				providePlugins: [
-					// mdPlugin
-				],
+				providePlugins: [mdPlugin],
 			});
 		}
 	} catch {

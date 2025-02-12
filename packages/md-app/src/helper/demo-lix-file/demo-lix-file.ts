@@ -5,13 +5,12 @@ import {
 	openLixInMemory,
 	toBlob,
 } from "@lix-js/sdk";
+import { plugin as mdPlugin } from "@lix-js/plugin-md";
 
 export async function lixMdDemoFile(): Promise<{ blob: Blob; id: string }> {
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
-		providePlugins: [
-			// mdPlugin
-		],
+		providePlugins: [mdPlugin],
 	});
 
 	const id = await lix.db
