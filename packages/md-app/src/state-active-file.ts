@@ -52,7 +52,7 @@ export const loadedMdAtom = atom(async (get) => {
 	const file = await get(activeFileAtom);
 	if (!file) throw new Error("No file selected");
 	const data = await new Blob([file.data]).text();
-	console.log(parseMdBlocks(new TextEncoder().encode(data)));
+	// console.log(parseMdBlocks(new TextEncoder().encode(data)));
 	return data;
 });
 
