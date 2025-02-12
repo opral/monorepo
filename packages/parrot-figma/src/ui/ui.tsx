@@ -189,7 +189,7 @@ asyncFunctionProxy.proxyAsyncMethods(figmaRemote);
 })();
 
 figmaRemote.getFeatureFlags().then((featureFlags) => {
-	FeatureFlags.setFeatureflags(featureFlags);
+	// FeatureFlags.setFeatureflags(featureFlags);
 });
 
 figmaRemote.getUserId().then((userId) => {
@@ -258,7 +258,7 @@ function App() {
 		};
 
 		const onPlanUpgradeNeeded = (event: any) => {
-			setCunsumptionPayWallFeature(event.detail as string);
+			// setCunsumptionPayWallFeature(event.detail as string);
 		};
 
 		userStateManagerUi.addEventListener("planUpgradeNeeded", onPlanUpgradeNeeded);
