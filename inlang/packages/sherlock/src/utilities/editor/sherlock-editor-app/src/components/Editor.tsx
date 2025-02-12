@@ -1,6 +1,6 @@
 import { BundleNested, ProjectSettings } from "@inlang/sdk"
 import { vscode } from "../utils/vscode.js"
-import React from "react"
+import React, { useState } from "react"
 import {
 	InlangMessage,
 	InlangPatternEditor,
@@ -8,9 +8,10 @@ import {
 	InlangBundle,
 	ChangeEventDetail,
 	InlangBundleAction,
+	InlangAddSelector,
 } from "@inlang/editor-component"
 import { createComponent } from "@lit/react"
-import { SlDropdown, SlMenu, SlMenuItem } from "@shoelace-style/shoelace/dist/react"
+import { SlDialog, SlDropdown, SlMenu, SlMenuItem } from "@shoelace-style/shoelace/dist/react"
 
 const ReactInlangBundle = createComponent({
 	tagName: "inlang-bundle",
@@ -49,25 +50,37 @@ const ReactInlangPatternEditor = createComponent({
 	},
 })
 
-// const ReactInlangAddSelector = createComponent({
-//   tagName: "inlang-add-selector",
-//   elementClass: InlangAddSelector,
-//   react: React,
-//   events: {
-//     change: "change",
-//     onSubmit: "submit",
-//   },
-// });
+const ReactInlangAddSelector = createComponent({
+	tagName: "inlang-add-selector",
+	elementClass: InlangAddSelector,
+	react: React,
+	events: {
+		change: "change",
+		onSubmit: "submit",
+	},
+})
 
 const Editor: React.FC<{
 	bundle: BundleNested
 	settings: ProjectSettings
 }> = ({ bundle, settings }) => {
-	// const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [isDialogOpen, setIsDialogOpen] = useState(false)
 
 	const handleChangeEvent = (e: Event) => {
 		const change = (e as CustomEvent).detail as ChangeEventDetail
 		vscode.postMessage({ command: "change", change })
+	}
+
+	const handleDelete = ({
+		command,
+		message,
+	}: {
+		command: "delete-bundle" | "delete-variant"
+		message: {
+			id: string
+		}
+	}) => {
+		vscode.postMessage({ command, id: message.id })
 	}
 
 	return (
@@ -75,7 +88,7 @@ const Editor: React.FC<{
 			<ReactInlangBundleAction
 				slot="bundle-action"
 				actionTitle="Delete"
-				onClick={() => vscode.postMessage({ command: "delete", bundleId: bundle.id })}
+				onClick={() => handleDelete({ command: "delete-bundle", message: { id: bundle.id } })}
 			/>
 			{bundle.messages.map((message) => (
 				<ReactInlangMessage
@@ -93,34 +106,31 @@ const Editor: React.FC<{
 									...
 								</div>
 								<SlMenu>
+									<SlMenuItem onClick={() => setIsDialogOpen(true)}>Add Selector</SlMenuItem>
 									{message.variants.length > 1 && (
 										<SlMenuItem
 											onClick={() =>
-												vscode.postMessage({ command: "delete-variant", variantId: variant.id })
+												handleDelete({ command: "delete-variant", message: { id: variant.id } })
 											}
 										>
 											Delete
 										</SlMenuItem>
 									)}
-									{/* <SlMenuItem onClick={() => setIsDialogOpen(true)}>Add Selector</SlMenuItem> */}
 								</SlMenu>
 							</SlDropdown>
 						</ReactInlangVariant>
 					))}
-					{/* <div slot="selector-button" className="add-selector" onClick={() => setIsDialogOpen(true)}>
-            Add selector
-          </div>
-          <SlDialog slot="selector-button" label="Add Selector" open={isDialogOpen}>
-            <ReactInlangAddSelector
-              bundle={bundle}
-              message={message}
-              variants={message.variants}
-              change={(e) => {
-                handleChangeEvent(e);
-                setIsDialogOpen(false);
-              }}
-            />
-          </SlDialog> */}
+					<SlDialog slot="selector-button" label="Add Selector" open={isDialogOpen}>
+						<ReactInlangAddSelector
+							bundle={bundle}
+							message={message}
+							variants={message.variants}
+							change={(e) => {
+								handleChangeEvent(e)
+								setIsDialogOpen(false)
+							}}
+						/>
+					</SlDialog>
 				</ReactInlangMessage>
 			))}
 		</ReactInlangBundle>

@@ -8,9 +8,12 @@ import { CONFIGURATION } from "../../configuration.js"
 import { getSelectedBundleByBundleIdOrAlias } from "../helper.js"
 import { msg } from "../messages/msg.js"
 import type { ChangeEventDetail } from "@inlang/editor-component"
+import { deleteVariant } from "./helper/deleteVariant.js"
+import { deleteBundleNested } from "./helper/deleteBundleNested.js"
+import { handleUpdateBundle } from "./helper/handleBundleUpdate.js"
 
 // Same interface as before
-interface UpdateBundleMessage {
+export interface UpdateBundleMessage {
 	command: string
 	change: ChangeEventDetail
 }
@@ -107,9 +110,36 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 		const disposable = webview.onDidReceiveMessage(async (message: any) => {
 			const command = message.command
 
+			console.log("Received command from webview:", command, message)
+
 			switch (command) {
+				case "delete-variant":
+					console.log("delete-variant", message)
+
+					await deleteVariant({
+						db: state().project?.db,
+						variantId: message.id,
+					})
+
+					updateView()
+					return
+				case "delete-bundle":
+					await deleteBundleNested({
+						db: state().project?.db,
+						bundleId: message.id,
+					})
+
+					updateView()
+					return
 				case "change":
-					await handleUpdateBundle(message)
+					console.log("change", message)
+
+					await handleUpdateBundle({
+						db: state().project?.db,
+						message,
+					})
+
+					updateView()
 					return
 
 				default:
@@ -120,61 +150,19 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 	}
 
 	/**
-	 * The same update logic from your original snippet.
+	 * Update view
 	 */
-	async function handleUpdateBundle(message: UpdateBundleMessage) {
-		console.log("handleUpdateBundle", message)
-		try {
-			if (!bundleId) {
-				throw new Error("No bundleId set for this view.")
-			}
+	async function updateView() {
+		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
+		CONFIGURATION.EVENTS.ON_DID_EDITOR_VIEW_CHANGE.fire()
 
-			const originalBundle = await getSelectedBundleByBundleIdOrAlias(bundleId)
-			if (!originalBundle) {
-				throw new Error(`Bundle with id ${bundleId} not found`)
-			}
-
-			const { change } = message
-
-			if (change.newData) {
-				state()
-					.project?.db.insertInto(change.entity)
-					.values({
-						...change.newData,
-						// @ts-expect-error - we need to remove the nesting
-						messages: undefined,
-						variants: undefined,
-					})
-					.onConflict((oc) =>
-						oc.column("id").doUpdateSet({
-							...change.newData,
-							// @ts-expect-error - we need to remove the nesting
-							messages: undefined,
-							variants: undefined,
-						})
-					)
-					.execute()
-
-				// Check if the change involves adding a new variant or selector
-				if (change.entity === "variant") {
-					panel?.webview.postMessage({
-						command: "change",
-						data: {
-							bundle: await getSelectedBundleByBundleIdOrAlias(bundleId),
-							settings: await state().project?.settings.get(),
-						},
-					})
-				}
-			} else {
-				state().project?.db.deleteFrom(change.entity).where("id", "=", change.entityId).execute()
-			}
-
-			CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
-			CONFIGURATION.EVENTS.ON_DID_EDITOR_VIEW_CHANGE.fire()
-		} catch (e) {
-			console.error(`Couldn't update bundle: ${e}`)
-			msg(`Couldn't update bundle. ${String(e)}`, "error")
-		}
+		panel?.webview.postMessage({
+			command: "change",
+			data: {
+				bundle: await getSelectedBundleByBundleIdOrAlias(bundleId),
+				settings: await state().project?.settings.get(),
+			},
+		})
 	}
 
 	/**
