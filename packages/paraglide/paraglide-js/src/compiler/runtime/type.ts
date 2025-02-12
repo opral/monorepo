@@ -17,6 +17,7 @@ export type Runtime = {
 	localizePath: typeof import("./localize-path.js").localizePath;
 	localizeUrl: typeof import("./localize-url.js").localizeUrl;
 	localizeUrlV2: typeof import("./localize-url-v2.js").localizeUrlV2;
+	localizeUrlV3: typeof import("./localize-url-v3.js").localizeUrlV3;
 	deLocalizeUrl: typeof import("./de-localize-url.js").deLocalizeUrl;
 	extractLocaleFromUrl: typeof import("./extract-locale-from-url.js").extractLocaleFromUrl;
 	extractLocaleFromPathname: typeof import("./extract-locale-from-pathname.js").extractLocaleFromPathname;

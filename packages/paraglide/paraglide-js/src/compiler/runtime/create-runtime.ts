@@ -137,6 +137,8 @@ ${injectCode("./localize-url.js")}
 
 ${injectCode("./localize-url-v2.js")}
 
+${injectCode("./localize-url-v3.js")}
+
 ${injectCode("./de-localize-url.js")}
 
 // ------ TYPES ------
