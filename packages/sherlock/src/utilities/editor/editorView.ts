@@ -67,6 +67,23 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 			disposables
 		)
 
+		// Listen to panel and load state when it's visible
+		panel.onDidChangeViewState(
+			async (e) => {
+				if (e.webviewPanel.visible) {
+					panel?.webview.postMessage({
+						command: "change",
+						data: {
+							bundle: await getSelectedBundleByBundleIdOrAlias(bundleId),
+							settings: await state().project?.settings.get(),
+						},
+					})
+				}
+			},
+			null,
+			disposables
+		)
+
 		// Provide the same HTML you had before
 		panel.webview.html = getHtmlForWebview(panel.webview)
 
