@@ -135,6 +135,8 @@ ${injectCode("./extract-locale-from-url.js")}
 
 ${injectCode("./localize-url.js")}
 
+${injectCode("./localize-url-v2.js")}
+
 ${injectCode("./de-localize-url.js")}
 
 // ------ TYPES ------

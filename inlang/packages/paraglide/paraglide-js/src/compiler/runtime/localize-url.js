@@ -9,25 +9,24 @@ import { urlPatterns } from "./variables.js";
  * @returns {string}
  */
 export function localizeUrl(url, options) {
-	const currentOrigin =
-		typeof window === "undefined" ? undefined : window.location.origin;
-	const urlObj = new URL(url, currentOrigin);
+	// const currentOrigin =
+	// 	typeof window === "undefined" ? undefined : window.location.origin;
+	// const urlObj = new URL(url, currentOrigin);
 	const locale = options?.locale ?? getLocale();
 
 	for (const { pattern, locale: patternLocale } of urlPatterns) {
-		const match = pathToRegexp.match(pattern)(urlObj.href);
+		const match = pathToRegexp.match(pattern)(url);
 		if (match) {
 			if (locale === patternLocale) {
-				return urlObj.href;
+				return url;
 			} else {
 				for (const { pattern, locale: toBeMatchedLocale } of urlPatterns) {
 					if (locale === toBeMatchedLocale) {
-						return new URL(
+						return decodeURIComponent(
 							pathToRegexp.compile(pattern)({
 								...match.params,
-								locale,
 							})
-						).href;
+						);
 					}
 				}
 			}

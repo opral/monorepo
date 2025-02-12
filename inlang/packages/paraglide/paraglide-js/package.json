@@ -44,7 +44,8 @@
 		"consola": "3.4.0",
 		"json5": "2.2.3",
 		"path-to-regexp": "^8.2.0",
-		"unplugin": "^2.1.2"
+		"unplugin": "^2.1.2",
+		"urlpattern-polyfill": "^10.0.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.18.0",
