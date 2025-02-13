@@ -13,7 +13,7 @@ imports:
 
 ## Working with the Inlang Message Format
 
-It expects messages to be in `messages/{locale}.json` relative to your repo root.
+It expects messages to be in `messages/{languageTag}.json` relative to your repo root.
 
 ```json
 //messages/en.json
@@ -23,7 +23,7 @@ It expects messages to be in `messages/{locale}.json` relative to your repo root
 }
 ```
 
-The `messages/{locale}.json` file contains a flat map of message IDs and their translations. You can use curly braces to insert `{parameters}` into translations
+The `messages/{languageTag}.json` file contains a flat map of message IDs and their translations. You can use curly braces to insert `{parameters}` into translations
 
 **Nesting purposely isn't supported in the inlang message format (but other plugins do support it!)**. Nested messages are way harder to interact with from complementary tools like the [Sherlock IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension), the [Parrot Figma Plugin](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin), or the [Fink Localization editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor). Intellisense also becomes less helpful since it only shows the messages at the current level, not all messages. Additionally enforcing an organization-style side-steps organization discussions with other contributors.
 
@@ -123,8 +123,8 @@ If you want your language files to be in a different location you can change the
 // project.inlang/settings.json
 {
 	"plugin.inlang.messageFormat": {
--		"pathPattern": "./messages/{locale}.json"
-+		"pathPattern": "./i18n/{locale}.json"
+-		"pathPattern": "./messages/{languageTag}.json"
++		"pathPattern": "./i18n/{languageTag}.json"
 	}
 }
 ```

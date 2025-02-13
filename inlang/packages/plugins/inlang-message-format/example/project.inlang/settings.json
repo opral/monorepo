@@ -3,6 +3,6 @@
 	"locales": ["en", "de"],
 	"modules": ["../dist/index.js"],
 	"plugin.inlang.messageFormat": {
-		"pathPattern": "./translations/{locale}.json"
+		"pathPattern": "./translations/{languageTag}.json"
 	}
 }

@@ -7,6 +7,6 @@
 		"../../../../plugins/m-function-matcher/dist/index.js"
 	],
 	"plugin.inlang.messageFormat": {
-		"pathPattern": "./messages/{locale}.json"
+		"pathPattern": "./messages/{languageTag}.json"
 	}
 }

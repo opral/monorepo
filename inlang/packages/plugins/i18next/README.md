@@ -6,7 +6,7 @@ This plugin reads and writes messages for [i18next](https://inlang.com/m/kl95463
 
 - Add this to the modules in your `project.inlang/settings.json`
 - Change the `baseLocale` if needed 
-- Include existing locaels in the `locales` array
+- Include existing locales in the `locales` array
 
 ```diff
 {
@@ -16,7 +16,7 @@ This plugin reads and writes messages for [i18next](https://inlang.com/m/kl95463
 +		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"
   	],
 +	"plugin.inlang.i18next": {
-+		"pathPattern": "./resources/{locale}.json"
++		"pathPattern": "./resources/{languageTag}.json"
 +  	}
 }
 ```
@@ -35,13 +35,13 @@ type PluginSettings = {
 
 ## `pathPattern`
 
-To use our plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{locale}` to specify the language name.
+To use our plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{languageTag}` to specify the language name.
 
 ### pathPattern without namespaces
 
 ```json
 "plugin.inlang.i18next": {
-	"pathPattern": "./resources/{locale}.json"
+	"pathPattern": "./resources/{languageTag}.json"
 }
 ```
 
@@ -51,8 +51,8 @@ To use our plugin, you need to provide a path to the directory where your langua
 ```json
 "plugin.inlang.i18next": {
 	"pathPattern": {
-		"common": "./resources/{locale}/common.json",
-		"vital": "./resources/{locale}/vital.json"
+		"common": "./resources/{languageTag}/common.json",
+		"vital": "./resources/{languageTag}/vital.json"
 	}
 }
 ```

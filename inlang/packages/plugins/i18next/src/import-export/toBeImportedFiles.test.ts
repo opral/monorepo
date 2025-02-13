@@ -8,7 +8,7 @@ test("it should work for a single namespace", async () => {
       baseLocale: "en",
       locales: ["en", "de"],
       "plugin.inlang.i18next": {
-        pathPattern: "/translations/{locale}.json",
+        pathPattern: "/translations/{languageTag}.json",
       },
     },
   });
@@ -32,8 +32,8 @@ test("it should work for multiple namespaces", async () => {
       locales: ["en", "de"],
       "plugin.inlang.i18next": {
         pathPattern: {
-          common: "/resources/{locale}/common.json",
-          vital: "/resources/{locale}/vital.json",
+          common: "/resources/{languageTag}/common.json",
+          vital: "/resources/{languageTag}/vital.json",
         },
       } satisfies PluginSettings,
     },
@@ -82,7 +82,7 @@ test("returns [] if the pathPattern is not provided", async () => {
       "plugin.inlang.i18next": {
         // @ts-expect-error - testing defined plugin settings without pathPattern
         "some-other-prop": "value",
-        // pathPattern: "/translations/{locale}.json",
+        // pathPattern: "/translations/{languageTag}.json",
       },
     },
   });

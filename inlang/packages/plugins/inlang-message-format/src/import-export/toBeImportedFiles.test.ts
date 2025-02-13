@@ -7,7 +7,7 @@ test("toBeImportedFiles should work with locale as setting", async () => {
       baseLocale: "en",
       locales: ["en", "de"],
       "plugin.inlang.messageFormat": {
-        pathPattern: "/translations/{locale}.json",
+        pathPattern: "/translations/{languageTag}.json",
       },
     },
   });
@@ -33,7 +33,7 @@ test("toBeImportedFiles returns [] if the pathPattern is not provided", async ()
       "plugin.inlang.messageFormat": {
         // @ts-expect-error - testing defined plugin settings without pathPattern
         "some-other-prop": "value",
-        // pathPattern: "/translations/{locale}.json",
+        // pathPattern: "/translations/{languageTag}.json",
       },
     },
   });
@@ -70,7 +70,7 @@ test("toBeImportedFiles should work with both locale and languageTag and multipl
       baseLocale: "en",
       locales: ["en", "de"],
       "plugin.inlang.messageFormat": {
-        pathPattern: ["/defaults/{locale}.json", "/translations/{locale}.json"],
+        pathPattern: ["/defaults/{languageTag}.json", "/translations/{languageTag}.json"],
       },
     },
   });

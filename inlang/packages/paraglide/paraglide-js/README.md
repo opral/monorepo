@@ -16,7 +16,7 @@ This will:
 
 ## Adding and editing Messages
 
-Messages are stored in `messages/{locale}.json` as key-value pairs. You can add parameters with curly braces.
+Messages are stored in `messages/{languageTag}.json` as key-value pairs. You can add parameters with curly braces.
 
 ```diff
 // messages/en.json

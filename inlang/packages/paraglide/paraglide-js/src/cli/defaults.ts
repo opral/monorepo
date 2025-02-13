@@ -13,7 +13,7 @@ const defaultProjectSettings = {
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@1/dist/index.js",
 	],
 	"plugin.inlang.messageFormat": {
-		pathPattern: "./messages/{locale}.json",
+		pathPattern: "./messages/{languageTag}.json",
 	},
 } satisfies ProjectSettings;
 

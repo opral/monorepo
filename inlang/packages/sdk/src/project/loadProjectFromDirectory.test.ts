@@ -763,7 +763,7 @@ test("plugin calls that use fs should be intercepted to use an absolute path", a
 			baseLocale: "en",
 			locales: ["en", "de"],
 			"plugin.mock-plugin": {
-				pathPattern: "./messages/{locale}.json",
+				pathPattern: "./messages/{languageTag}.json",
 			},
 		} satisfies ProjectSettings),
 	};
@@ -772,7 +772,7 @@ test("plugin calls that use fs should be intercepted to use an absolute path", a
 		key: "mock-plugin",
 		loadMessages: async ({ nodeishFs, settings }) => {
 			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern.replace(
-				"{locale}",
+				"{languageTag}",
 				"en"
 			) as string;
 			const file = await nodeishFs.readFile(pathPattern);
@@ -787,7 +787,7 @@ test("plugin calls that use fs should be intercepted to use an absolute path", a
 		},
 		saveMessages: async ({ nodeishFs, settings }) => {
 			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern.replace(
-				"{locale}",
+				"{languageTag}",
 				"en"
 			) as string;
 			const file = new TextEncoder().encode(
@@ -801,7 +801,7 @@ test("plugin calls that use fs should be intercepted to use an absolute path", a
 		},
 		toBeImportedFiles: async ({ settings }) => {
 			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern.replace(
-				"{locale}",
+				"{languageTag}",
 				"en"
 			) as string;
 			return [

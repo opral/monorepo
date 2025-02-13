@@ -36,7 +36,7 @@ Install the plugin in your Inlang Project by adding it to your `"modules"` in `p
 +    "https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js"
   ],
 + "plugin.inlang.messageFormat": {
-+   "pathPattern": "./messages/{locale}.json" 
++   "pathPattern": "./messages/{languageTag}.json" 
 + }
 }
 ```
@@ -47,14 +47,14 @@ Configuration happens in `project.inlang/settings.json` under the `"plugin.inlan
 
 ### `pathPattern`
 
-The path pattern defines _where_ the plugin will be looking for your message files. The default is `./messages/{locale}.json`. The `{locale}` placeholder will be replaced with the language tag for each of your languages. 
+The path pattern defines _where_ the plugin will be looking for your message files. The default is `./messages/{languageTag}.json`. The `{languageTag}` placeholder will be replaced with the language tag for each of your languages. 
 
 ```json
 // project.inlang/settings.json
 {
   "modules": [ ... ],
   "plugin.inlang.messageFormat": {
-		"pathPattern": "./messages/{locale}.json"
+		"pathPattern": "./messages/{languageTag}.json"
 	}
 }
 ```
@@ -66,7 +66,7 @@ You can also define an array of paths. The last path in the array will take prec
 {
   "modules": [ ... ],
   "plugin.inlang.messageFormat": {
-    "pathPattern": ["./defaults/{locale}.json", "./customer1/{locale}.json"]
+    "pathPattern": ["./defaults/{languageTag}.json", "./customer1/{languageTag}.json"]
   }
 }
 ```

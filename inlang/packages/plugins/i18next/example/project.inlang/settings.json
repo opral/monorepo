@@ -3,6 +3,6 @@
   "locales": ["en", "de"],
   "modules": ["../dist/index.js"],
   "plugin.inlang.i18next": {
-    "pathPattern": "./translations/{locale}.json"
+    "pathPattern": "./translations/{languageTag}.json"
   }
 }

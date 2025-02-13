@@ -36,7 +36,7 @@ bench("compile 1000 messages", async () => {
 			locales: ["en"],
 			modules: ["/plugin.js"],
 			"plugin.inlang.messageFormat": {
-				pathPattern: "/{locale}.json",
+				pathPattern: "/{languageTag}.json",
 			},
 		}),
 	}).fs as unknown as typeof import("node:fs");

@@ -22,7 +22,7 @@ npx @inlang/paraglide-js@latest init
 npm i @inlang/paraglide-astro
 ```
 
-This will generate `messages/{locale}.json` files for each of your languages. 
+This will generate `messages/{languageTag}.json` files for each of your languages. 
 
 Register the Integration in `astro.config.mjs`:
 
