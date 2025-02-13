@@ -83,3 +83,26 @@ test("optional parameters", async () => {
 		runtime.extractLocaleFromUrl(`https://example.com/en/optional-subpage`)
 	).toBe("en");
 });
+
+test("ambigious match returns undefined", async () => {
+	const { extractLocaleFromUrl } = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			urlPatterns: [
+				{
+					pattern: "http{s}\\://example.com/:locale{/*path}",
+					localizedParams: {
+						de: { locale: "de" },
+					},
+				},
+			],
+		},
+	});
+
+	expect(extractLocaleFromUrl(`https://example.com/de`)).toBe("de");
+	expect(extractLocaleFromUrl(`https://example.com/`)).toBe(undefined);
+
+	expect(extractLocaleFromUrl(`https://example.com/de/subpage`)).toBe("de");
+	expect(extractLocaleFromUrl(`https://example.com/subpage`)).toBe(undefined);
+});
