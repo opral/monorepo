@@ -48,7 +48,7 @@ export const ChangeDiffComponent = (props: {
 				diffs={props.diffs}
 			/>
 			{props.debug && (
-				<pre className="text-xs text-gray-500 w-full">
+				<pre className="text-xs text-gray-500 whitespace-pre-wrap">
 					{JSON.stringify(props.diffs, null, 2)}
 				</pre>
 			)}
