@@ -2,6 +2,7 @@ import fs from "node:fs";
 import { defaultCompilerOptions, type CompilerOptions } from "../compile.js";
 import type { Runtime } from "./type.js";
 import * as pathToRegexp from "path-to-regexp";
+import "urlpattern-polyfill";
 
 /**
  * Returns the code for the `runtime.js` module
@@ -132,6 +133,8 @@ ${injectCode("./extract-locale-from-request.js")}
 ${injectCode("./extract-locale-from-cookie.js")}
 
 ${injectCode("./extract-locale-from-url.js")}
+
+${injectCode("./extract-locale-from-url-v2.js")}
 
 ${injectCode("./localize-url.js")}
 

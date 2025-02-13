@@ -94,9 +94,8 @@ test("pathname based localization", async () => {
 				{
 					pattern: "http{s}\\://*domain{/:locale}/*path",
 					localizedParams: {
-						de: {
-							locale: "de",
-						},
+						de: { locale: "de" },
+						en: { locale: null },
 					},
 				},
 			],
@@ -106,6 +105,10 @@ test("pathname based localization", async () => {
 	expect(
 		runtime.localizeUrlV3("https://example.com/about", { locale: "de" })
 	).toBe("https://example.com/de/about");
+
+	expect(
+		runtime.localizeUrlV3("https://example.com/de/about", { locale: "en" })
+	).toBe("https://example.com/about");
 
 	expect(
 		runtime.localizeUrlV3("https://example.com/about", { locale: "en" })
