@@ -31,8 +31,10 @@ export const setupMdDemo = async (lix: Lix) => {
 		.insertInto("file")
 		.values({
 			path: "/demo.md",
-			data: new TextEncoder().encode(`# Playground
-A rich-text editor with AI capabilities. Try the **AI commands** or use  \`Cmd+J\` to open the AI menu.
+			data: new TextEncoder().encode(`<!-- id: zXaw5bKGtU -->
+# Playground
+<!-- id: MF25p8ND7g -->
+A rich-text editor with AI capabilities. Try the **AI commands** or use \`Cmd+J\` to open the AI menu.
 <br>`),
 		})
 		.returningAll()
