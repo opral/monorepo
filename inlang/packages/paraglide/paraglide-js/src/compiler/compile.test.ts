@@ -187,7 +187,7 @@ test("multiple compile calls do not interfere with each other", async () => {
 			Buffer.from(
 				// replace the
 				runtimeFile.replace(
-					`import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";`,
+					`import "@inlang/paraglide-js/urlpattern-polyfill";`,
 					""
 				),
 				"utf-8"

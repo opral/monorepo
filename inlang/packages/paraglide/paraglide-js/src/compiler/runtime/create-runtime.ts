@@ -1,8 +1,6 @@
 import fs from "node:fs";
 import { defaultCompilerOptions, type CompilerOptions } from "../compile.js";
 import type { Runtime } from "./type.js";
-import * as pathToRegexp from "path-to-regexp";
-import "urlpattern-polyfill";
 
 /**
  * Returns the code for the `runtime.js` module
@@ -25,7 +23,7 @@ export function createRuntimeFile(args: {
 	// };
 
 	return `
-import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";
+import "@inlang/paraglide-js/urlpattern-polyfill";
 
 ${injectCode("./variables.js")
 	.replace(
@@ -164,14 +162,10 @@ export async function createRuntimeForTesting(args: {
 			...args.compilerOptions,
 		},
 	})
-		// remove the import statement for path-to-regexp
-		.replace(
-			`import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";`,
-			""
-		);
+		// remove the polyfill import statement to avoid module resolution logic in testing
+		.replace(`import "@inlang/paraglide-js/urlpattern-polyfill";`, "");
 
-	// @ts-expect-error - defining a depdency globally to avoid importing it in the runtime
-	globalThis.pathToRegexp = pathToRegexp;
+	await import("urlpattern-polyfill");
 
 	return await import(
 		"data:text/javascript;base64," +
