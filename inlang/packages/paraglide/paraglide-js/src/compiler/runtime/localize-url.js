@@ -1,25 +1,32 @@
-import { baseLocale, urlPatterns } from "./variables.js";
+import { urlPatterns } from "./variables.js";
 
 /**
- * Localizes a URL to a specific locale using URLPattern.
+ * Localizes a URL to a specific locale using the new namedGroups API.
  * @param {string} url - The URL to localize.
- * @param {Object} [options] - Optional parameters.
- * @param {Locale} [options.locale] - The locale to use.
+ * @param {Object} options - Options containing the target locale.
+ * @param {string} options.locale - The target locale.
  * @returns {string} - The localized URL.
  */
-export function localizeUrl(url, options) {
+export function localizeUrl(url, { locale }) {
 	const urlObj = new URL(url);
 
 	for (const element of urlPatterns) {
 		const pattern = new URLPattern(element.pattern);
-
 		const match = pattern.exec(urlObj.href);
 
 		if (match) {
-			const overrides = element.localizedParams[options?.locale] || {};
+			/** @type {Record<string, string | null >} */
+			const overrides = {};
+
+			for (const [groupName, locales] of Object.entries(
+				element.localizedNamedGroups ?? {}
+			)) {
+				if (locales[locale] !== undefined) {
+					overrides[groupName] = locales[locale];
+				}
+			}
 
 			const groups = {
-				...match.hostname.groups,
 				...match.protocol.groups,
 				...match.hostname.groups,
 				...match.pathname.groups,
@@ -32,8 +39,9 @@ export function localizeUrl(url, options) {
 
 	throw new Error(`No match found for ${url}`);
 }
+
 /**
- * De-localizes a URL back to the base locale using URLPattern and localizedParams.
+ * De-localizes a URL back to the base locale using the new namedGroups API.
  * @param {string} url - The localized URL.
  * @returns {string} - The de-localized URL.
  */
@@ -45,12 +53,16 @@ export function deLocalizeUrl(url) {
 		const match = pattern.exec(urlObj.href);
 
 		if (match) {
-			// Find the inverse mappings from localizedParams (locale -> baseLocale)
-			const overrides =
-				element.deLocalizedParams ?? element.localizedParams[baseLocale] ?? {};
+			/** @type {Record<string, string | null>} */
+			const overrides = {};
+
+			for (const [groupName, value] of Object.entries(
+				element.deLocalizedNamedGroups ?? {}
+			)) {
+				overrides[groupName] = value;
+			}
 
 			const groups = {
-				...match.hostname.groups,
 				...match.protocol.groups,
 				...match.hostname.groups,
 				...match.pathname.groups,

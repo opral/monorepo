@@ -39,7 +39,7 @@ export const pathnameBase = undefined;
 /** @type {Record<Locale, string> | undefined} */
 export const domains = undefined;
 
-/** @type {Array<{ pattern: string, deLocalizedParams?: Record<string, string | null>, localizedParams: Record<Locale, Record<string, string | undefined>> }>} */
+/** @type {Array<{ pattern: string, deLocalizedNamedGroups?: Record<string, string | null>, localizedNamedGroups?: Record<string, Record<string, string | null>> }>} */
 export const urlPatterns = [];
 
 /**
