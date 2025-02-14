@@ -1,70 +1,113 @@
 import { expect, test } from "vitest";
 import { detectChanges } from "./detectChanges.js";
 import { MarkdownBlockSchemaV1 } from "./schemas/blocks.js";
+import { openLixInMemory } from "@lix-js/sdk";
 
 const encode = (text: string) => new TextEncoder().encode(text);
 
 test("it should not detect changes if the markdown file did not update", async () => {
-	const before = encode("# Heading\n\nSome text.");
+	const lix = await openLixInMemory({});
+	const before = encode(`<!-- id: abc123 -->
+# Heading
+
+<!-- id: def456 -->
+Some text.`);
 	const after = before;
 
 	const detectedChanges = await detectChanges({
-		before: { id: "random", path: "x.md", data: before },
-		after: { id: "random", path: "x.md", data: after },
+		lix,
+		before: { id: "random", path: "x.md", data: before, metadata: {} },
+		after: { id: "random", path: "x.md", data: after, metadata: {} },
 	});
 
 	expect(detectedChanges).toEqual([]);
 });
 
 test("it should detect a new block", async () => {
-	const before = encode("# Heading\n\nSome text.");
-	const after = encode("# Heading\n\nSome text.\n\nNew paragraph.");
+	const lix = await openLixInMemory({});
+	const before = encode(`<!-- id: abc123 -->
+# Heading
+
+<!-- id: def456 -->
+Some text.`);
+	const after = encode(`<!-- id: abc123 -->
+# Heading
+
+<!-- id: def456 -->
+Some text.
+
+<!-- id: xyz789 -->
+New paragraph.`);
 
 	const detectedChanges = await detectChanges({
-		before: { id: "random", path: "x.md", data: before },
-		after: { id: "random", path: "x.md", data: after },
+		lix,
+		before: { id: "random", path: "x.md", data: before, metadata: {} },
+		after: { id: "random", path: "x.md", data: after, metadata: {} },
 	});
 
 	expect(detectedChanges).toStrictEqual([
 		{
 			schema: MarkdownBlockSchemaV1,
-			entity_id: expect.any(String),
+			entity_id: "xyz789",
 			snapshot: { text: "New paragraph.", type: "paragraph" },
 		},
 	]);
 });
 
 test("it should detect an updated block", async () => {
-	const before = encode("# Heading\n\nSome text.");
-	const after = encode("# Heading\n\nUpdated text.");
+	const lix = await openLixInMemory({});
+	const before = encode(`<!-- id: abc123 -->
+# Heading
+
+<!-- id: def456 -->
+Some text.`);
+	const after = encode(`<!-- id: abc123 -->
+# Heading
+
+<!-- id: def456 -->
+Updated text.`);
 
 	const detectedChanges = await detectChanges({
-		before: { id: "random", path: "x.md", data: before },
-		after: { id: "random", path: "x.md", data: after },
+		lix,
+		before: { id: "random", path: "x.md", data: before, metadata: {} },
+		after: { id: "random", path: "x.md", data: after, metadata: {} },
 	});
 
 	expect(detectedChanges).toStrictEqual([
 		{
 			schema: MarkdownBlockSchemaV1,
-			entity_id: expect.any(String),
+			entity_id: "def456",
 			snapshot: { text: "Updated text.", type: "paragraph" },
 		},
 	]);
 });
 
 test("it should detect a deleted block", async () => {
-	const before = encode("# Heading\n\nSome text.\n\nAnother paragraph.");
-	const after = encode("# Heading\n\nSome text.");
+	const lix = await openLixInMemory({});
+	const before = encode(`<!-- id: abc123 -->
+# Heading
+
+<!-- id: def456 -->
+Some text.
+
+<!-- id: xyz789 -->
+Another paragraph.`);
+	const after = encode(`<!-- id: abc123 -->
+# Heading
+
+<!-- id: def456 -->
+Some text.`);
 
 	const detectedChanges = await detectChanges({
-		before: { id: "random", path: "x.md", data: before },
-		after: { id: "random", path: "x.md", data: after },
+		lix,
+		before: { id: "random", path: "x.md", data: before, metadata: {} },
+		after: { id: "random", path: "x.md", data: after, metadata: {} },
 	});
 
 	expect(detectedChanges).toStrictEqual([
 		{
 			schema: MarkdownBlockSchemaV1,
-			entity_id: expect.any(String),
+			entity_id: "xyz789",
 			snapshot: undefined,
 		},
 	]);

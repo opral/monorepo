@@ -104,11 +104,11 @@ export function PlateEditor() {
 						})
 					) {
 						handleUpdateMdData(newValue);
-						console.log(
-							newValue.editor.api.markdown.serialize({
-								nodes: idEnrichedSerializeMdNodesOptions,
-							})
-						);
+						// console.log(
+						// 	newValue.editor.api.markdown.serialize({
+						// 		nodes: idEnrichedSerializeMdNodesOptions,
+						// 	})
+						// );
 					} else {
 						console.log("no change");
 					}

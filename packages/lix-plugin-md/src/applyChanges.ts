@@ -1,6 +1,6 @@
 import { type LixPlugin } from "@lix-js/sdk";
-import { MarkdownBlockSchemaV1 } from "./schemas/blocks.js";
 import { parseMdBlocks } from "./utilities/parseMdBlocks.js";
+import { MarkdownBlockSchemaV1 } from "./schemas/blocks.js";
 
 export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	lix,

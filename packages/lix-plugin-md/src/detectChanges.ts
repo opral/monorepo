@@ -10,28 +10,38 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	const afterBlocks = parseMdBlocks(after?.data ?? new Uint8Array());
 	const detectedChanges = [];
 
+	// Create maps for fast lookup
 	const beforeMap = new Map(beforeBlocks.map((block) => [block.id, block]));
 	const afterMap = new Map(afterBlocks.map((block) => [block.id, block]));
 
+	// Detect deleted or modified blocks
 	for (const [id, beforeBlock] of beforeMap) {
-		if (!afterMap.has(id)) {
+		const afterBlock = afterMap.get(id);
+
+		if (!afterBlock) {
+			// Block was removed
 			detectedChanges.push({
 				schema: MarkdownBlockSchemaV1,
 				entity_id: id,
 				snapshot: undefined,
 			});
-		} else if (beforeBlock.content !== afterMap.get(id)?.content) {
+		} else if (
+			beforeBlock.content !== afterBlock.content ||
+			beforeBlock.type !== afterBlock.type
+		) {
+			// Block was modified
 			detectedChanges.push({
 				schema: MarkdownBlockSchemaV1,
 				entity_id: id,
 				snapshot: {
-					text: afterMap.get(id)?.content,
-					type: afterMap.get(id)?.type,
+					text: afterBlock.content,
+					type: afterBlock.type,
 				},
 			});
 		}
 	}
 
+	// Detect newly added blocks
 	for (const [id, afterBlock] of afterMap) {
 		if (!beforeMap.has(id)) {
 			detectedChanges.push({

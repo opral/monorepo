@@ -27,9 +27,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 
 	for (const change of changes) {
 		// save row order changes for later
-		if (rowOrderChanges) {
-			rowOrderChanges.push(change);
-		}
+		rowOrderChanges.push(change);
 
 		if (change.schema_key === CellSchemaV1.key) {
 			const snapshot = await lix.db
