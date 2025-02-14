@@ -8,10 +8,12 @@ test("handles translated path segments", async () => {
 		compilerOptions: {
 			urlPatterns: [
 				{
-					pattern: "https://:domain.:tld/:bookstore/:path*",
-					localizedParams: {
-						en: { bookstore: "bookstore" },
-						de: { bookstore: "buchladen" },
+					pattern: "https://:domain(.*)/:bookstore/:path*",
+					deLocalizedNamedGroups: {
+						bookstore: "bookstore",
+					},
+					localizedNamedGroups: {
+						bookstore: { en: "bookstore", de: "buchladen" },
 					},
 				},
 			],
@@ -47,9 +49,9 @@ test("cross domain urls", async () => {
 			urlPatterns: [
 				{
 					pattern: "https://:domain(.*)/:path*",
-					localizedParams: {
-						en: { domain: "example.com" },
-						de: { domain: "de.example.com" },
+					deLocalizedNamedGroups: { domain: "example.com" },
+					localizedNamedGroups: {
+						domain: { en: "example.com", de: "de.example.com" },
 					},
 				},
 			],
@@ -93,9 +95,9 @@ test("pathname based localization", async () => {
 			urlPatterns: [
 				{
 					pattern: "https://:domain(.*)/:locale(de)?/:path*",
-					localizedParams: {
-						de: { locale: "de" },
-						en: { locale: null },
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
+						locale: { en: null, de: "de" },
 					},
 				},
 			],
@@ -132,25 +134,23 @@ test("multi tenancy", async () => {
 				// 1) customer1.fr => root locale is fr, sub-locale is /en/
 				{
 					pattern: "https://customer1.fr/:locale(en)?/:path*",
-					localizedParams: {
-						fr: { locale: null }, // remove /locale => root is FR
-						en: { locale: "en" }, // subpath => /en/about
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
+						locale: { fr: null, en: "en" },
 					},
-					deLocalizedParams: { locale: null },
 				},
 				// 2) customer2.com => root locale is en, sub-locale is /fr/
 				{
 					pattern: "https://customer2.com/:locale(fr)?/:path*",
-					localizedParams: {
-						en: { locale: null }, // remove /locale => root is EN
-						fr: { locale: "fr" }, // subpath => /fr/about
+					localizedNamedGroups: {
+						locale: { en: null, fr: "fr" },
 					},
-					deLocalizedParams: { locale: "fr" },
+					deLocalizedNamedGroups: { locale: "fr" },
 				},
 				// 3) Any other domain => path-based for en/fr
 				{
 					pattern: "https://:domain(.*)/:locale/:path*",
-					localizedParams: {
+					localizedNamedGroups: {
 						en: { locale: "en" },
 						fr: { locale: "fr" },
 					},
