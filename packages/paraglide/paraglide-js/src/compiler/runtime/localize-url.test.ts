@@ -188,3 +188,28 @@ test("multi tenancy", async () => {
 		"https://customer2.com/fr/about"
 	);
 });
+
+test("providing a URL object as input", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			urlPatterns: [
+				{
+					pattern: "https://:domain(.*)/:path*",
+					localizedNamedGroups: {
+						domain: { en: "example.com", de: "de.example.com" },
+					},
+				},
+			],
+		},
+	});
+
+	const url = new URL("https://example.com/about");
+
+	expect(runtime.localizeUrl(url, { locale: "de" })).toBe(
+		"https://de.example.com/about"
+	);
+
+	expect(runtime.deLocalizeUrl(url)).toBe("https://example.com/about");
+});
