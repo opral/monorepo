@@ -37,24 +37,34 @@ export const compileCommand = new Command()
 				fs,
 				appId: ENV_VARIABLES.PARJS_APP_ID,
 			});
-
-			await runCompiler({
-				project,
-				fs: fs.promises,
-				outdir: options.outdir,
-			});
-
-			logger.success("Successfully compiled the project.");
+			try {
+				await runCompiler({
+					project,
+					fs: fs.promises,
+					outdir: options.outdir,
+				});
+			} catch (e) {
+				const previousErrors = await project.errors.get();
+				project.errors.get = async () => [
+					...previousErrors,
+					new Error("Error occurred while running compiler.", {
+						cause: e as Error,
+					}),
+				];
+			}
 
 			const errors = await project.errors.get();
 
-			if (errors.length > 0) {
+			if (errors.length == 0) {
+				logger.success("Successfully compiled the project.");
+			} else {
 				logger.warn(
-					`But the project reported the following warnings and/or errors that might have influenced compilation:`
+					`The project reported the following warnings and/or errors that might have influenced compilation:`
 				);
 				for (const error of errors) {
 					logger.error(`${error}`);
 				}
+				logger.warn("Errors while compiling the project.");
 			}
 
 			process.exit(0);
