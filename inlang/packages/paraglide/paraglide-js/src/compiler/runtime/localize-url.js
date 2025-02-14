@@ -2,7 +2,7 @@ import { urlPatterns } from "./variables.js";
 
 /**
  * Localizes a URL to a specific locale using the new namedGroups API.
- * @param {string} url - The URL to localize.
+ * @param {string | URL} url - The URL to localize.
  * @param {Object} options - Options containing the target locale.
  * @param {string} options.locale - The target locale.
  * @returns {string} - The localized URL.
@@ -41,9 +41,9 @@ export function localizeUrl(url, { locale }) {
 }
 
 /**
- * De-localizes a URL back to the base locale using the new namedGroups API.
- * @param {string} url - The localized URL.
- * @returns {string} - The de-localized URL.
+ * De-localizes a URL.
+ *
+ * @type {(url: string | URL) => string}
  */
 export function deLocalizeUrl(url) {
 	const urlObj = new URL(url);
@@ -56,10 +56,12 @@ export function deLocalizeUrl(url) {
 			/** @type {Record<string, string | null>} */
 			const overrides = {};
 
-			for (const [groupName, value] of Object.entries(
-				element.deLocalizedNamedGroups ?? {}
-			)) {
-				overrides[groupName] = value;
+			if (element.deLocalizedNamedGroups) {
+				for (const [groupName, value] of Object.entries(
+					element.deLocalizedNamedGroups
+				)) {
+					overrides[groupName] = value;
+				}
 			}
 
 			const groups = {
@@ -73,7 +75,7 @@ export function deLocalizeUrl(url) {
 		}
 	}
 
-	return url; // Return original if no match
+	throw new Error(`No match found for ${url}`);
 }
 
 /**
