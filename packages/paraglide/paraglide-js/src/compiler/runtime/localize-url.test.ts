@@ -150,6 +150,7 @@ test("multi tenancy", async () => {
 				// 3) Any other domain => path-based for en/fr
 				{
 					pattern: "https://:domain(.*)/:locale/:path*",
+					deLocalizedNamedGroups: {},
 					localizedNamedGroups: {
 						en: { locale: "en" },
 						fr: { locale: "fr" },
@@ -197,6 +198,7 @@ test("providing a URL object as input", async () => {
 			urlPatterns: [
 				{
 					pattern: "https://:domain(.*)/:path*",
+					deLocalizedNamedGroups: { domain: "example.com" },
 					localizedNamedGroups: {
 						domain: { en: "example.com", de: "de.example.com" },
 					},
