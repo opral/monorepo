@@ -33,10 +33,10 @@ test("handles translated path segments", async () => {
 		runtime.localizeUrlV4("https://example.com/bookstore/45", { locale: "de" })
 	).toBe("https://example.com/buchladen/45");
 
-	// delocalizing de to en
-	// expect(runtime.deLocalizeUrlV4("https://example.com/buchladen/45")).toBe(
-	// 	"https://example.com/bookstore/45"
-	// );
+	// delocalizing
+	expect(runtime.deLocalizeUrlV4("https://example.com/buchladen/45")).toBe(
+		"https://example.com/bookstore/45"
+	);
 });
 
 test("cross domain urls", async () => {
@@ -65,10 +65,10 @@ test("cross domain urls", async () => {
 		runtime.localizeUrlV4("https://de.example.com/about", { locale: "en" })
 	).toBe("https://example.com/about");
 
-	// // delocalizing from de to en
-	// expect(runtime.localizeUrlV4("https://de.example.com/about")).toBe(
-	// 	"https://example.com/about"
-	// );
+	// delocalizing
+	expect(runtime.deLocalizeUrlV4("https://de.example.com/about")).toBe(
+		"https://example.com/about"
+	);
 
 	// EN routing
 	expect(
@@ -79,10 +79,10 @@ test("cross domain urls", async () => {
 		runtime.localizeUrlV4("https://example.com/about", { locale: "en" })
 	).toBe("https://example.com/about");
 
-	// // delocalizing from en to en
-	// expect(runtime.localizeUrlV4("https://example.com/about")).toBe(
-	// 	"https://example.com/about"
-	// );
+	// delocalizing
+	expect(runtime.deLocalizeUrlV4("https://example.com/about")).toBe(
+		"https://example.com/about"
+	);
 });
 
 test("pathname based localization", async () => {
@@ -102,17 +102,25 @@ test("pathname based localization", async () => {
 		},
 	});
 
+	// en to de
 	expect(
 		runtime.localizeUrlV4("https://example.com/about", { locale: "de" })
 	).toBe("https://example.com/de/about");
 
+	// de to en
 	expect(
 		runtime.localizeUrlV4("https://example.com/de/about", { locale: "en" })
 	).toBe("https://example.com/about");
 
+	// en == delocalized
 	expect(
 		runtime.localizeUrlV4("https://example.com/about", { locale: "en" })
 	).toBe("https://example.com/about");
+
+	// delocalizing
+	expect(runtime.deLocalizeUrlV4("https://example.com/de/about")).toBe(
+		"https://example.com/about"
+	);
 });
 
 test("multi tenancy", async () => {
@@ -160,10 +168,10 @@ test("multi tenancy", async () => {
 		runtime.localizeUrlV4("https://customer1.fr/about", { locale: "en" })
 	).toBe("https://customer1.fr/en/about");
 
-	// customer 1 - de-localizing from english to french
-	// expect(runtime.deLocalizeUrlV3("https://customer1.fr/en/about")).toBe(
-	// 	"https://customer1.fr/about"
-	// );
+	// customer 1 - de-localizing french
+	expect(runtime.deLocalizeUrlV4("https://customer1.fr/en/about")).toBe(
+		"https://customer1.fr/about"
+	);
 
 	// customer 2 - english to english
 	expect(
@@ -175,8 +183,8 @@ test("multi tenancy", async () => {
 		runtime.localizeUrlV4("https://customer2.com/about", { locale: "fr" })
 	).toBe("https://customer2.com/fr/about");
 
-	// customer 2 - de-localize french to english
-	// expect(runtime.deLocalizeUrlV3("https://customer2.com/about")).toBe(
-	// 	"https://customer2.com/fr/about"
-	// );
+	// customer 2 - de-localize french
+	expect(runtime.deLocalizeUrlV4("https://customer2.com/about")).toBe(
+		"https://customer2.com/fr/about"
+	);
 });
