@@ -1,15 +1,16 @@
 import { test, expect } from "vitest";
 import { createRuntimeForTesting } from "./create-runtime.js";
 
-test("parameters", async () => {
+test("normal named groups", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
 			urlPatterns: [
 				{
-					pattern: "http{s}\\://:domain/:bookstore/:item/:id",
-					localizedParams: {
+					pattern: "https://example.com/:bookstore/:item/:id",
+					deLocalizedNamedGroups: { bookstore: "buchladen", item: "artikel" },
+					localizedNamedGroups: {
 						de: { bookstore: "buchladen", item: "artikel" },
 						en: { bookstore: "bookstore", item: "item" },
 					},
@@ -38,10 +39,11 @@ test("wildcards", async () => {
 		compilerOptions: {
 			urlPatterns: [
 				{
-					pattern: "http{s}\\://:domain/*path",
-					localizedParams: {
-						de: { domain: "de.example.com", path: ["startseite", "ueber-uns"] },
-						en: { domain: "example.com", path: ["home", "about-us"] },
+					pattern: "https://{:subdomain.}?:domain.:tld/:path*",
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
+						de: { subdomain: "de", path: "startseite/ueber-uns" },
+						en: { subdomain: null, path: "home/about-us" },
 					},
 				},
 			],
@@ -64,8 +66,9 @@ test("optional parameters", async () => {
 		compilerOptions: {
 			urlPatterns: [
 				{
-					pattern: "https\\://example.com/:locale{/optional-subpage}",
-					localizedParams: {
+					pattern: "https://example.com/:locale{/optional-subpage}?",
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
 						de: { locale: "de" },
 						en: { locale: "en" },
 					},
@@ -84,25 +87,29 @@ test("optional parameters", async () => {
 	).toBe("en");
 });
 
-test("ambigious match returns undefined", async () => {
+test("regex works", async () => {
 	const { extractLocaleFromUrl } = await createRuntimeForTesting({
 		baseLocale: "en",
-		locales: ["en", "de"],
+		locales: ["en", "de", "fr"],
 		compilerOptions: {
 			urlPatterns: [
 				{
-					pattern: "http{s}\\://example.com/:locale{/*path}",
-					localizedParams: {
+					pattern: "https://example.com/:locale(de|fr)?/**",
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
 						de: { locale: "de" },
+						fr: { locale: "fr" },
+						en: { locale: null },
 					},
 				},
 			],
 		},
 	});
 
+	expect(extractLocaleFromUrl(`https://example.com/fr`)).toBe("fr");
 	expect(extractLocaleFromUrl(`https://example.com/de`)).toBe("de");
-	expect(extractLocaleFromUrl(`https://example.com/`)).toBe(undefined);
+	expect(extractLocaleFromUrl(`https://example.com/`)).toBe("en");
 
 	expect(extractLocaleFromUrl(`https://example.com/de/subpage`)).toBe("de");
-	expect(extractLocaleFromUrl(`https://example.com/subpage`)).toBe(undefined);
+	expect(extractLocaleFromUrl(`https://example.com/subpage`)).toBe("en");
 });

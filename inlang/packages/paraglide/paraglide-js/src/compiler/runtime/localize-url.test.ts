@@ -4,7 +4,7 @@ import { createRuntimeForTesting } from "./create-runtime.js";
 test("handles translated path segments", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
-		locales: ["en", "de", "fr", "en-UK"],
+		locales: ["en", "de"],
 		compilerOptions: {
 			urlPatterns: [
 				{
@@ -13,7 +13,8 @@ test("handles translated path segments", async () => {
 						bookstore: "bookstore",
 					},
 					localizedNamedGroups: {
-						bookstore: { en: "bookstore", de: "buchladen" },
+						de: { bookstore: "buchladen" },
+						en: { bookstore: "bookstore" },
 					},
 				},
 			],
@@ -51,7 +52,8 @@ test("cross domain urls", async () => {
 					pattern: "https://:domain(.*)/:path*",
 					deLocalizedNamedGroups: { domain: "example.com" },
 					localizedNamedGroups: {
-						domain: { en: "example.com", de: "de.example.com" },
+						en: { domain: "example.com" },
+						de: { domain: "de.example.com" },
 					},
 				},
 			],
@@ -97,7 +99,8 @@ test("pathname based localization", async () => {
 					pattern: "https://:domain(.*)/:locale(de)?/:path*",
 					deLocalizedNamedGroups: { locale: null },
 					localizedNamedGroups: {
-						locale: { en: null, de: "de" },
+						en: { locale: null },
+						de: { locale: "de" },
 					},
 				},
 			],
@@ -136,14 +139,16 @@ test("multi tenancy", async () => {
 					pattern: "https://customer1.fr/:locale(en)?/:path*",
 					deLocalizedNamedGroups: { locale: null },
 					localizedNamedGroups: {
-						locale: { fr: null, en: "en" },
+						en: { locale: "en" },
+						fr: { locale: null },
 					},
 				},
 				// 2) customer2.com => root locale is en, sub-locale is /fr/
 				{
 					pattern: "https://customer2.com/:locale(fr)?/:path*",
 					localizedNamedGroups: {
-						locale: { en: null, fr: "fr" },
+						en: { locale: null },
+						fr: { locale: "fr" },
 					},
 					deLocalizedNamedGroups: { locale: "fr" },
 				},
@@ -200,7 +205,8 @@ test("providing a URL object as input", async () => {
 					pattern: "https://:domain(.*)/:path*",
 					deLocalizedNamedGroups: { domain: "example.com" },
 					localizedNamedGroups: {
-						domain: { en: "example.com", de: "de.example.com" },
+						en: { domain: "example.com" },
+						de: { domain: "de.example.com" },
 					},
 				},
 			],

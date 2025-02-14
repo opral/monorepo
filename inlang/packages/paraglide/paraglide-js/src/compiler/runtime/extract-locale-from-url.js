@@ -1,50 +1,51 @@
 import { assertIsLocale } from "./assert-is-locale.js";
+import { aggregateGroups } from "./localize-url.js";
 import { urlPatterns } from "./variables.js";
 
 /**
- * Extracts the locale from a given url.
+ * Extracts the locale from a given URL using native URLPattern.
  *
  * @param {string} url - The full URL from which to extract the locale.
  * @returns {Locale|undefined} The extracted locale, or undefined if no locale is found.
  */
 export function extractLocaleFromUrl(url) {
-	const urlObj = new URL(url);
-
 	for (const element of urlPatterns) {
-		const match = pathToRegexp.match(element.pattern)(urlObj.href);
-
+		const pattern = new URLPattern(element.pattern);
+		const match = pattern.exec(url);
 		if (match) {
+			const groups = aggregateGroups(match);
+
 			for (const [locale, overrideParams] of Object.entries(
-				element.localizedParams
+				element.localizedNamedGroups
 			)) {
 				let allMatch = true;
 
 				for (const [key, val] of Object.entries(overrideParams)) {
-					// overwritten parameter like { locale: null }
+					const matchedValue = groups[key];
+
+					// Handle nullable parameters
 					if (val === null) {
-						if (match.params[key] != null) {
+						if (matchedValue != null) {
 							allMatch = false;
 							break;
 						}
 					}
-					// wildcard match like `/*domain` where the parameter is an array
-					else if (Array.isArray(val) && Array.isArray(match.params[key])) {
-						for (let i = 0; i < match.params[key].length; i++) {
-							if (match.params[key][i] !== val[i]) {
-								allMatch = false;
-								break;
-							}
+					// Handle wildcard arrays
+					else if (Array.isArray(val)) {
+						const matchedArray = matchedValue?.split("/") ?? [];
+						if (JSON.stringify(matchedArray) !== JSON.stringify(val)) {
+							allMatch = false;
+							break;
 						}
 					}
-					// regular parameter match like `/:domain`
-					else if (match.params[key] !== val) {
+					// Handle regular parameters
+					else if (matchedValue !== val) {
 						allMatch = false;
 						break;
 					}
 				}
 
 				if (allMatch) {
-					// e.g. if overrideParams = { locale: 'fr' }, we found locale 'fr'
 					return assertIsLocale(locale);
 				}
 			}

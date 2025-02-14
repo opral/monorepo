@@ -134,8 +134,6 @@ ${injectCode("./extract-locale-from-cookie.js")}
 
 ${injectCode("./extract-locale-from-url.js")}
 
-${injectCode("./extract-locale-from-url-v2.js")}
-
 ${injectCode("./localize-url.js")}
 
 // ------ TYPES ------
