@@ -1,13 +1,9 @@
 @import "tailwindcss";
 @import "tailwindcss/utilities";
 
-/* custom css */
-
-:root {
-    --sl-menu-item-background-color: var(--vscode-dropdown-background);
-    --sl-menu-item-color: var(--vscode-dropdown-foreground);
-    --sl-menu-item-hover-background-color: var(--vscode-dropdown-hoverBackground);
-    --sl-menu-item-hover-color: var(--vscode-dropdown-hoverForeground);
+* {
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
 }
 
 
@@ -131,4 +127,36 @@ sl-menu-item::part(label) {
 
 sl-menu-item:hover::part(label) {
     color: var(--sl-menu-item-hover-color);
+}
+
+.add-selector-dialog::part(panel) {
+    padding: 2rem;
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.add-selector-dialog::part(title) {
+    font-size: 1rem;
+}
+
+inlang-add-selector {
+    --sl-input-border-color: var(--vscode-input-border);
+    --sl-input-background-color: var(--vscode-input-background);
+    --sl-input-background-color-focus: var(--vscode-input-background);
+    --sl-input-background-color-hover: var(--vscode-input-hoverBackground);
+    --sl-input-border-color-hover: var(--vscode-input-hoverBorder);
+    --sl-input-color: var(--vscode-input-foreground);
+    --sl-input-color-focus: var(--vscode-input-foreground);
+    --sl-input-color-hover: var(--vscode-input-foreground);
+}
+
+inlang-add-selector sl-option::part(base) {
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+}
+
+inlang-message::part(selector) {
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
 }
