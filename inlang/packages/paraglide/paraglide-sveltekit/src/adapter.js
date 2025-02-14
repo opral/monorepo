@@ -6,7 +6,7 @@
 import {
 	assertIsLocale,
 	defineGetLocale,
-	deLocalizePath,
+	deLocalizeUrl,
 	extractLocaleFromRequest,
 } from "./runtime.js";
 
@@ -64,5 +64,5 @@ export const handle = async ({ event, resolve }) => {
  * @type {import('@sveltejs/kit').Reroute}
  */
 export const reroute = (request) => {
-	return deLocalizePath(request.url.pathname);
+	return deLocalizeUrl(request.url).pathname;
 };

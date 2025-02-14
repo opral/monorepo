@@ -11,7 +11,17 @@ export default defineConfig({
 		paraglideSveltekit({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide',
-			strategy: ['pathname', 'cookie', 'baseLocale']
+			strategy: ['urlPattern', 'cookie', 'baseLocale'],
+			urlPatterns: [
+				{
+					pattern: ':protocol://:domain(.*)::port?/:locale(de)?/:path(.*)?',
+					localizedNamedGroups: {
+						en: { locale: null },
+						de: { locale: 'de' }
+					},
+					deLocalizedNamedGroups: { locale: null }
+				}
+			]
 		})
 	]
 });
