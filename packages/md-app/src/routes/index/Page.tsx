@@ -21,7 +21,7 @@ export default function Page() {
 			</div>
 			<div className='flex h-full'>
 				{activeFile &&
-					<div className="h-screen w-full" data-registry="plate">
+					<div className="h-screen max-w-[calc(100%-600px)]" data-registry="plate">
 						<SettingsProvider>
 							<PlateEditor />
 						</SettingsProvider>
