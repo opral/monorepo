@@ -41,7 +41,7 @@ export let getLocale = () => {
 			locale = extractLocaleFromCookie();
 		} else if (strat === "baseLocale") {
 			locale = baseLocale;
-		} else if (TREE_SHAKE_URL_PATTERN_STRATEGY_USED && strat === "urlPattern") {
+		} else if (TREE_SHAKE_URL_PATTERN_STRATEGY_USED && strat === "urlPattern" && typeof window !== "undefined") {
 			locale = extractLocaleFromUrl(window.location.href);
 		} else if (
 			TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED &&

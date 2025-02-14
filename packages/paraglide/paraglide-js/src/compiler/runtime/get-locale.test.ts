@@ -64,3 +64,25 @@ test("retrieves the locale for a url pattern", async () => {
 
 	expect(runtime.getLocale()).toBe("de");
 });
+
+test("url pattern strategy doesn't throw during SSR", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["urlPattern", "baseLocale"],
+			urlPatterns: [
+				{
+					pattern: "https://example.:tld/:path*",
+					deLocalizedNamedGroups: { tld: "com" },
+					localizedNamedGroups: {
+						en: { tld: "com" },
+						de: { tld: "de" },
+					},
+				},
+			],
+		},
+	});
+
+	expect(() => runtime.getLocale()).not.toThrow();
+});
