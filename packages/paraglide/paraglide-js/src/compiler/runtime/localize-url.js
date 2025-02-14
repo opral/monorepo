@@ -27,9 +27,7 @@ export function localizeUrl(url, { locale }) {
 			}
 
 			const groups = {
-				...match.protocol.groups,
-				...match.hostname.groups,
-				...match.pathname.groups,
+				...aggregateGroups(match),
 				...overrides,
 			};
 
@@ -63,9 +61,7 @@ export function deLocalizeUrl(url) {
 			}
 
 			const groups = {
-				...match.protocol.groups,
-				...match.hostname.groups,
-				...match.pathname.groups,
+				...aggregateGroups(match),
 				...overrides,
 			};
 
@@ -127,4 +123,23 @@ function fillPattern(pattern, values) {
 
 	// Final cleanup: collapse consecutive slashes (excluding protocol slashes)
 	return filled.replace(/([^:]\/)\/+/g, "$1");
+}
+
+/**
+ * Aggregates named groups from various parts of the URLPattern match result.
+ *
+ *
+ * @type {(match: URLPatternResult) => Record<string, string | null | undefined>}
+ */
+function aggregateGroups(match) {
+	return {
+		...match.hash.groups,
+		...match.hostname.groups,
+		...match.password.groups,
+		...match.pathname.groups,
+		...match.port.groups,
+		...match.protocol.groups,
+		...match.search.groups,
+		...match.username.groups,
+	};
 }
