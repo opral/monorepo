@@ -113,3 +113,4 @@ test("regex works", async () => {
 	expect(extractLocaleFromUrl(`https://example.com/de/subpage`)).toBe("de");
 	expect(extractLocaleFromUrl(`https://example.com/subpage`)).toBe("en");
 });
+

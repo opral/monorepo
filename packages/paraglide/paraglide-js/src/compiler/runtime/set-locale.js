@@ -47,7 +47,7 @@ export let setLocale = (newLocale) => {
 			// a full page reload.
 			window.location.href = localizeUrl(window.location.href, {
 				locale: newLocale,
-			});
+			}).href;
 			// just in case return. the browser reloads the page by setting href
 			return;
 		} else {

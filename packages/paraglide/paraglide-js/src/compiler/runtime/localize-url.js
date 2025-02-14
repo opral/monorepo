@@ -5,7 +5,7 @@ import { urlPatterns } from "./variables.js";
  * @param {string | URL} url - The URL to localize.
  * @param {Object} options - Options containing the target locale.
  * @param {string} options.locale - The target locale.
- * @returns {string} - The localized URL.
+ * @returns {URL} - The localized URL.
  */
 export function localizeUrl(url, { locale }) {
 	const urlObj = new URL(url);
@@ -39,7 +39,7 @@ export function localizeUrl(url, { locale }) {
 /**
  * De-localizes a URL.
  *
- * @type {(url: string | URL) => string}
+ * @type {(url: string | URL) => URL}
  */
 export function deLocalizeUrl(url) {
 	const urlObj = new URL(url);
@@ -72,6 +72,8 @@ export function deLocalizeUrl(url) {
 
 /**
  * Fills a URL pattern with values for named groups, supporting all URLPattern-style modifiers:
+ * 
+ * This function will eventually be replaced by 
  *
  * Matches:
  * - :name        -> Simple
@@ -84,7 +86,7 @@ export function deLocalizeUrl(url) {
  *
  * @param {string} pattern - The URL pattern containing named groups.
  * @param {Record<string, string | null | undefined>} values - Object of values for named groups.
- * @returns {string} - The constructed URL with named groups filled.
+ * @returns {URL} - The constructed URL with named groups filled.
  */
 function fillPattern(pattern, values) {
 	const filled = pattern.replace(
@@ -119,8 +121,7 @@ function fillPattern(pattern, values) {
 		}
 	);
 
-	// Final cleanup: collapse consecutive slashes (excluding protocol slashes)
-	return filled.replace(/([^:]\/)\/+/g, "$1");
+	return new URL(filled);
 }
 
 /**
