@@ -18,12 +18,10 @@ export function localizeUrl(url, { locale }) {
 			/** @type {Record<string, string | null >} */
 			const overrides = {};
 
-			for (const [groupName, locales] of Object.entries(
-				element.localizedNamedGroups
+			for (const [groupName, value] of Object.entries(
+				element.localizedNamedGroups?.[locale] ?? {}
 			)) {
-				if (locales[locale] !== undefined) {
-					overrides[groupName] = locales[locale];
-				}
+				overrides[groupName] = value;
 			}
 
 			const groups = {
@@ -131,7 +129,7 @@ function fillPattern(pattern, values) {
  *
  * @type {(match: URLPatternResult) => Record<string, string | null | undefined>}
  */
-function aggregateGroups(match) {
+export function aggregateGroups(match) {
 	return {
 		...match.hash.groups,
 		...match.hostname.groups,
