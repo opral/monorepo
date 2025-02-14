@@ -29,26 +29,7 @@ test("sets the cookie to a different locale", async () => {
 	expect(globalThis.window.location.reload).toBeCalled();
 });
 
-test("doesn't throw for server unavailable APIs", async () => {
-	// @ts-expect-error - reset document in case it's defined
-	globalThis.document = undefined;
-	// @ts-expect-error - reset window in case it's defined
-	globalThis.window = undefined;
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
-		compilerOptions: {
-			// using browser based strategies first, then variable which is available on the server
-			strategy: ["pathname", "cookie", "globalVariable", "baseLocale"],
-		},
-	});
-
-	expect(() => runtime.setLocale("de")).not.toThrow();
-	expect(runtime.getLocale()).toBe("de");
-});
-
-
-test("domain strategy sets the hostname", async () => {
+test("url pattern strategy sets the window location", async () => {
 	// @ts-expect-error - global variable definition
 	globalThis.window = {};
 	// @ts-expect-error - global variable definition
@@ -60,17 +41,25 @@ test("domain strategy sets the hostname", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["domain"],
-			domains: {
-				de: "example.de",
-				en: "example.com",
-			},
+			strategy: ["urlPattern"],
+			urlPatterns: [
+				{
+					pattern: "https://example.:tld/:path*",
+					deLocalizedNamedGroups: { tld: "com" },
+					localizedNamedGroups: {
+						en: { tld: "com" },
+						de: { tld: "de" },
+					},
+				},
+			],
 		},
 	});
 
+	globalThis.window.location.href = "https://example.com/page";
+
 	runtime.setLocale("de");
 
-	expect(globalThis.window.location.hostname).toBe("example.de");
+	expect(globalThis.window.location.href).toBe("https://example.de/page");
 	// setting window.location.hostname automatically reloads the page
 	expect(globalThis.window.location.reload).not.toBeCalled();
 });

@@ -1,6 +1,11 @@
 import { assertIsLocale } from "./assert-is-locale.js";
-import { baseLocale, cookieName, strategy } from "./variables.js";
-import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
+import {
+	baseLocale,
+	cookieName,
+	strategy,
+	TREE_SHAKE_URL_PATTERN_STRATEGY_USED,
+} from "./variables.js";
+import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
 
 /**
  * Detect a locale from a request.
@@ -21,8 +26,8 @@ export const extractLocaleFromRequest = (request) => {
 				?.split("; ")
 				.find((c) => c.startsWith(cookieName + "="))
 				?.split("=")[1];
-		} else if (strat === "pathname") {
-			locale = extractLocaleFromPathname(new URL(request.url).pathname);
+		} else if (TREE_SHAKE_URL_PATTERN_STRATEGY_USED && strat === "urlPattern") {
+			locale = extractLocaleFromUrl(request.url);
 		} else if (strat === "globalVariable") {
 			locale = _locale;
 		} else if (strat === "baseLocale") {

@@ -2,11 +2,9 @@ import {
 	cookieName,
 	strategy,
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
-	TREE_SHAKE_PATHNAME_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
-	domains,
+	TREE_SHAKE_URL_PATTERN_STRATEGY_USED,
 } from "./variables.js";
-import { localizePath } from "./localize-path.js";
 import { localizeUrl } from "./localize-url.js";
 
 /**
@@ -35,11 +33,11 @@ export let setLocale = (newLocale) => {
 			// set the cookie
 			document.cookie = `${cookieName}=${newLocale}`;
 			localeHasBeenSet = true;
-		} else if (TREE_SHAKE_PATHNAME_STRATEGY_USED && strat === "pathname") {
-			if (typeof window === "undefined" || !window.location) {
-				continue;
-			}
-			// route to the new locale
+		} else if (strat === "baseLocale") {
+			// nothing to be set here. baseLocale is only a fallback
+			continue;
+		} else if (TREE_SHAKE_URL_PATTERN_STRATEGY_USED && strat === "urlPattern") {
+			// route to the new url
 			//
 			// this triggers a page reload but a user rarely
 			// switches locales, so this should be fine.
@@ -47,35 +45,10 @@ export let setLocale = (newLocale) => {
 			// if the behavior is not desired, the implementation
 			// can be overwritten by `defineSetLocale()` to avoid
 			// a full page reload.
-			window.location.pathname = localizePath(window.location.pathname, {
+			window.location.href = localizeUrl(window.location.href, {
 				locale: newLocale,
 			});
-			// not needed, as the page reloads
-			// localeHasBeenSet = true;
-			return;
-		} else if (strat === "baseLocale") {
-			// nothing to be set here. baseLocale is only a fallback
-			continue;
-		} else if (strat === "urlPattern") {
-			const x = localizeUrl(window.location.href, {
-				locale: newLocale,
-			});
-			window.location.href = x;
 			// just in case return. the browser reloads the page by setting href
-			return;
-		} else if (domains && strat === "domain") {
-			if (typeof window === "undefined" || !window.location) {
-				continue;
-			}
-			const hostname = domains[newLocale];
-			if (!hostname) {
-				throw new Error(
-					`No domain found for locale ${newLocale}. Check your domain settings.`
-				);
-			}
-			window.location.hostname = hostname;
-			// not needed, as the page reloads
-			// localeHasBeenSet = true;
 			return;
 		} else {
 			throw new Error("Unknown strategy");

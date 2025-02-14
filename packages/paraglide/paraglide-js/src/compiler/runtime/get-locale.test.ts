@@ -21,21 +21,6 @@ test("matching by strategy works", async () => {
 	expect(locale).toBe(baseLocale);
 });
 
-test("doesn't throw when using pathname strategy on the server", async () => {
-	const baseLocale = "en";
-
-	const runtime = await createRuntimeForTesting({
-		baseLocale,
-		locales: ["en", "de"],
-		compilerOptions: {
-			strategy: ["pathname", "globalVariable", "baseLocale"],
-		},
-	});
-
-	expect(() => runtime.getLocale()).not.toThrow();
-	expect(runtime.getLocale()).toBe(baseLocale);
-});
-
 test("throws if variable is used without baseLocale as fallback strategy", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
@@ -52,24 +37,30 @@ test("throws if variable is used without baseLocale as fallback strategy", async
 	expect(runtime.getLocale()).toBe("de");
 });
 
-test("retrieves the locale for domain", async () => {
+test("retrieves the locale for a url pattern", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["domain"],
-			domains: {
-				de: "example.de",
-				en: "example.com",
-			},
+			strategy: ["urlPattern"],
+			urlPatterns: [
+				{
+					pattern: "https://example.:tld/:path*",
+					deLocalizedNamedGroups: { tld: "com" },
+					localizedNamedGroups: {
+						en: { tld: "com" },
+						de: { tld: "de" },
+					},
+				},
+			],
 		},
 	});
 
-	globalThis.window = { location: { hostname: "example.com" } } as any;
+	globalThis.window = { location: { href: "https://example.com/page" } } as any;
 
 	expect(runtime.getLocale()).toBe("en");
 
-	globalThis.window = { location: { hostname: "example.de" } } as any;
+	globalThis.window = { location: { href: "https://example.de/page" } } as any;
 
 	expect(runtime.getLocale()).toBe("de");
 });
