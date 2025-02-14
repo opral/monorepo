@@ -13,18 +13,16 @@ export function createRuntimeFile(args: {
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
-		pathnames?: CompilerOptions["pathnames"];
 		pathnameBase?: CompilerOptions["pathnameBase"];
-		domains?: CompilerOptions["domains"];
 		urlPatterns?: CompilerOptions["urlPatterns"];
 	};
 }): string {
-	const pathnames = args.compilerOptions.pathnames ?? {
-		"/{*path}": Object.fromEntries([
-			...args.locales.map((locale) => [locale, `/${locale}{/*path}`]),
-			[args.baseLocale, `/{*path}`],
-		]),
-	};
+	// const pathnames = args.compilerOptions.pathnames ?? {
+	// 	"/{*path}": Object.fromEntries([
+	// 		...args.locales.map((locale) => [locale, `/${locale}{/*path}`]),
+	// 		[args.baseLocale, `/{*path}`],
+	// 	]),
+	// };
 
 	return `
 import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";
@@ -44,32 +42,16 @@ ${injectCode("./variables.js")
 	)
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
 	.replace(
-		`pathnames = {}`,
-		`pathnames = ${JSON.stringify(pathnames ?? {}, null, 2)}`
-	)
-	.replace(
-		`export const TREE_SHAKE_IS_DEFAULT_PATHNAMES = false;`,
-		`const TREE_SHAKE_IS_DEFAULT_PATHNAMES = ${args.compilerOptions.pathnames ? false : true};`
-	)
-	.replace(
 		`export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;`,
 		`const TREE_SHAKE_COOKIE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("cookie")};`
 	)
 	.replace(
-		`export const TREE_SHAKE_PATHNAME_STRATEGY_USED = false;`,
-		`const TREE_SHAKE_PATHNAME_STRATEGY_USED = ${args.compilerOptions.strategy.includes("pathname")};`
+		`export const TREE_SHAKE_URL_PATTERN_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_URL_PATTERN_STRATEGY_USED = ${args.compilerOptions.strategy.includes("urlPattern")};`
 	)
 	.replace(
 		`export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;`,
 		`const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("globalVariable")};`
-	)
-	.replace(
-		`export const pathnameBase = undefined;`,
-		`export const pathnameBase = ${args.compilerOptions.pathnameBase ? `"${args.compilerOptions.pathnameBase}"` : "undefined"};`
-	)
-	.replace(
-		`export const domains = undefined;`,
-		`export const domains = ${args.compilerOptions.domains ? JSON.stringify(args.compilerOptions.domains, null, 2) : "undefined"};`
 	)
 	.replace(
 		`export const urlPatterns = [];`,
@@ -121,12 +103,6 @@ ${injectCode("./set-locale.js")}
 ${injectCode("./is-locale.js")}
 
 ${injectCode("./assert-is-locale.js")}
-
-${injectCode("./localize-path.js")}
-
-${injectCode("./de-localize-path.js")}
-
-${injectCode("./extract-locale-from-pathname.js")}
 
 ${injectCode("./extract-locale-from-request.js")}
 

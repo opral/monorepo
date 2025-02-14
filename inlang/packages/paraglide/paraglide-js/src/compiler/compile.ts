@@ -48,7 +48,7 @@ export type CompilerOptions = {
 	 * server-side takes the variable (because cookie is unvailable),
 	 * whereas both fallback to the base locale if not available.
 	 *
-	 * @default ["cookie", "variable", "baseLocale"]
+	 * @default ["cookie", "variable", "baseLocale"
 	 */
 	strategy?: Runtime["strategy"];
 	/**
@@ -72,42 +72,6 @@ export type CompilerOptions = {
 	 * @default true
 	 */
 	emitPrettierIgnore?: boolean;
-	/**
-	 * The localized pathname patterns.
-	 *
-	 * The syntax is based on path-to-regexp v8
-	 * https://github.com/pillarjs/path-to-regexp.
-	 *
-	 * @example
-	 *   pathnames: {
-	 *     "/about": {
-	 *        "en": "/about",
-	 *        "de": "/ueber-uns",
-	 *     },
-	 *     // catch all
-	 *     "/{*path}": {
-	 *       "de": "/de/{*path}",
-	 *       "en": "/{*path}",
-	 *     }
-	 *   }
-	 */
-	pathnames?: Record<string, Record<string, string>>;
-	/**
-	 * Define custom domains for locales.
-	 *
-	 * You can assign mutliple locales the same domain in combination with the
-	 * pathname strategy e.g. `strategy: ["pathname", "domain"]` where
-	 * `https://example.com/fr/about` would resolve to `fr` and
-	 * `https://example.com/about` would resolve to `en`.
-	 *
-	 * @example
-	 *   domains: {
-	 *    "de": "example.de",
-	 *    "en": "example.com",
-	 *    "fr": "example.com",
-	 *   }
-	 */
-	domains?: Record<string, string>;
 
 	/**
 	 * TODO documentation

@@ -24,15 +24,19 @@ test("returns the locale from the pathname", async () => {
 		baseLocale: "en",
 		locales: ["en"],
 		compilerOptions: {
-			strategy: ["pathname"],
-			pathnames: {
-				"/{*path}": {
-					en: "/en{/*path}",
+			strategy: ["urlPattern"],
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:locale/:path*",
+					deLocalizedNamedGroups: { locale: "en" },
+					localizedNamedGroups: {
+						en: { locale: "en" },
+					},
 				},
-			},
+			],
 		},
 	});
-	const request = new Request("http://example.com/en/home");
+	const request = new Request("https://example.com/en/home");
 	const locale = runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("en");
 });

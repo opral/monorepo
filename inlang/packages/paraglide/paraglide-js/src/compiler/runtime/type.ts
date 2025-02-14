@@ -13,12 +13,9 @@ export type Runtime = {
 	defineSetLocale: (fn: (newLocale: Locale) => void) => void;
 	assertIsLocale: typeof import("./assert-is-locale.js").assertIsLocale;
 	isLocale: typeof import("./is-locale.js").isLocale;
-	deLocalizePath: typeof import("./de-localize-path.js").deLocalizePath;
-	localizePath: typeof import("./localize-path.js").localizePath;
 	localizeUrl: typeof import("./localize-url.js").localizeUrl;
 	deLocalizeUrl: typeof import("./localize-url.js").deLocalizeUrl;
 	extractLocaleFromUrl: typeof import("./extract-locale-from-url.js").extractLocaleFromUrl;
-	extractLocaleFromPathname: typeof import("./extract-locale-from-pathname.js").extractLocaleFromPathname;
 	extractLocaleFromRequest: typeof import("./extract-locale-from-request.js").extractLocaleFromRequest;
 	extractLocaleFromCookie: typeof import("./extract-locale-from-cookie.js").extractLocaleFromCookie;
 };

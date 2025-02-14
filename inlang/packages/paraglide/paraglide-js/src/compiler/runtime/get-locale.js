@@ -3,12 +3,10 @@ import {
 	baseLocale,
 	strategy,
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
-	TREE_SHAKE_PATHNAME_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
-	domains,
+	TREE_SHAKE_URL_PATTERN_STRATEGY_USED,
 } from "./variables.js";
 import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
-import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
 import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
 
 /**
@@ -43,21 +41,8 @@ export let getLocale = () => {
 			locale = extractLocaleFromCookie();
 		} else if (strat === "baseLocale") {
 			locale = baseLocale;
-		} else if (domains && strat === "domain") {
-			for (const [_locale, hostname] of Object.entries(domains)) {
-				if (window.location.hostname === hostname) {
-					locale = _locale;
-				}
-			}
-		} else if (strat === "urlPattern") {
-			locale = extractLocaleFromUrl(window.location.pathname);
-		} else if (
-			TREE_SHAKE_PATHNAME_STRATEGY_USED &&
-			strat === "pathname" &&
-			typeof window !== "undefined" &&
-			window.location?.pathname
-		) {
-			locale = extractLocaleFromPathname(window.location.pathname);
+		} else if (TREE_SHAKE_URL_PATTERN_STRATEGY_USED && strat === "urlPattern") {
+			locale = extractLocaleFromUrl(window.location.href);
 		} else if (
 			TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED &&
 			strat === "globalVariable" &&
