@@ -19,7 +19,7 @@ export function localizeUrl(url, { locale }) {
 			const overrides = {};
 
 			for (const [groupName, locales] of Object.entries(
-				element.localizedNamedGroups ?? {}
+				element.localizedNamedGroups
 			)) {
 				if (locales[locale] !== undefined) {
 					overrides[groupName] = locales[locale];
@@ -56,12 +56,10 @@ export function deLocalizeUrl(url) {
 			/** @type {Record<string, string | null>} */
 			const overrides = {};
 
-			if (element.deLocalizedNamedGroups) {
-				for (const [groupName, value] of Object.entries(
-					element.deLocalizedNamedGroups
-				)) {
-					overrides[groupName] = value;
-				}
+			for (const [groupName, value] of Object.entries(
+				element.deLocalizedNamedGroups
+			)) {
+				overrides[groupName] = value;
 			}
 
 			const groups = {
