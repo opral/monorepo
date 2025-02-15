@@ -7,7 +7,7 @@ import { urlPatterns } from "./variables.js";
  * @param {string} options.locale - The target locale.
  * @returns {URL} - The localized URL.
  */
-export function localizeUrl(url, { locale }) {
+export function localizeUrl(url, options) {
 	const urlObj = new URL(url);
 
 	for (const element of urlPatterns) {
@@ -19,7 +19,7 @@ export function localizeUrl(url, { locale }) {
 			const overrides = {};
 
 			for (const [groupName, value] of Object.entries(
-				element.localizedNamedGroups?.[locale] ?? {}
+				element.localizedNamedGroups?.[options.locale] ?? {}
 			)) {
 				overrides[groupName] = value;
 			}
@@ -72,8 +72,8 @@ export function deLocalizeUrl(url) {
 
 /**
  * Fills a URL pattern with values for named groups, supporting all URLPattern-style modifiers:
- * 
- * This function will eventually be replaced by 
+ *
+ * This function will eventually be replaced by https://github.com/whatwg/urlpattern/issues/73
  *
  * Matches:
  * - :name        -> Simple
