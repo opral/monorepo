@@ -110,6 +110,8 @@ ${injectCode("./extract-locale-from-url.js")}
 
 ${injectCode("./localize-url.js")}
 
+${injectCode("./localize-href.js")}
+
 // ------ TYPES ------
 
 /**
