@@ -65,3 +65,21 @@ export let setLocale = (newLocale) => {
 
 	return;
 };
+
+/**
+ * Define the \`setLocale()\` function.
+ *
+ * Use this function to define how the locale is set. For example,
+ * modify a cookie, env variable, or a user's preference.
+ *
+ * @example
+ *   defineSetLocale((newLocale) => {
+ *     // set the locale in a cookie
+ *     return Cookies.set('locale', newLocale)
+ *   });
+ *
+ * @param {(newLocale: Locale) => void} fn
+ */
+export const defineSetLocale = (fn) => {
+	setLocale = fn;
+};

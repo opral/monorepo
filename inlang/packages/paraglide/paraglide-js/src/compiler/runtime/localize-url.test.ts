@@ -56,6 +56,14 @@ test("cross domain urls", async () => {
 		compilerOptions: {
 			urlPatterns: [
 				{
+					pattern: "https://localhost::port/:locale(de|en)?/:path(.*)?",
+					localizedNamedGroups: {
+						en: { locale: "en" },
+						de: { locale: "de" },
+					},
+					deLocalizedNamedGroups: { locale: null },
+				},
+				{
 					pattern: "https://:domain(.*)/:path*",
 					deLocalizedNamedGroups: { domain: "example.com" },
 					localizedNamedGroups: {
@@ -66,6 +74,19 @@ test("cross domain urls", async () => {
 			],
 		},
 	});
+
+	// in development use localhost with different mapping
+	expect(
+		runtime.localizeUrl("https://localhost:5173/about", { locale: "de" }).href
+	).toBe("https://localhost:5173/de/about");
+
+	expect(
+		runtime.localizeUrl("https://localhost:5173/about", { locale: "en" }).href
+	).toBe("https://localhost:5173/en/about");
+
+	expect(runtime.deLocalizeUrl("https://localhost:5173/de/about").href).toBe(
+		"https://localhost:5173/about"
+	);
 
 	// DE routing
 	expect(

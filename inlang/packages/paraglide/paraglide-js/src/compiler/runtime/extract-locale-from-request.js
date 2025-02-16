@@ -8,7 +8,13 @@ import {
 import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
 
 /**
- * Detect a locale from a request.
+ * Extracts a locale from a request.
+ * 
+ * Use the function on the server to extract the locale 
+ * from a request. 
+ * 
+ * The function goes through the strategies in the order 
+ * they are defined.
  *
  * @example
  *   const locale = extractLocaleFromRequest(request);

@@ -14,3 +14,4 @@ export const localizeUrl: Runtime["localizeUrl"];
 export const deLocalizeUrl: Runtime["deLocalizeUrl"];
 export const extractLocaleFromRequest: Runtime["extractLocaleFromRequest"];
 export const extractLocaleFromUrl: Runtime["extractLocaleFromUrl"];
+export const overwriteGetUrlOrigin: Runtime["overwriteGetUrlOrigin"];
