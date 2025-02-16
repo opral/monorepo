@@ -1,4 +1,5 @@
 import { getLocale } from "./get-locale.js";
+import { getUrlOrigin } from "./get-url-origin.js";
 import { deLocalizeUrl, localizeUrl } from "./localize-url.js";
 
 /**
@@ -22,7 +23,7 @@ import { deLocalizeUrl, localizeUrl } from "./localize-url.js";
  */
 export function localizeHref(href, options) {
 	const locale = options?.locale ?? getLocale();
-	const url = new URL(href, "http://example.com");
+	const url = new URL(href, getUrlOrigin());
 
 	const localized = localizeUrl(url, { locale });
 
@@ -61,7 +62,7 @@ export function localizeHref(href, options) {
  * @returns {string} - The de-localized href.
  */
 export function deLocalizeHref(href) {
-	const url = new URL(href, "http://example.com");
+	const url = new URL(href, getUrlOrigin());
 
 	const deLocalized = deLocalizeUrl(url);
 

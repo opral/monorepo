@@ -14,6 +14,7 @@ export function createRuntimeFile(args: {
 		pathnameBase?: CompilerOptions["pathnameBase"];
 		urlPatterns?: CompilerOptions["urlPatterns"];
 	};
+	testing?: boolean;
 }): string {
 	// const pathnames = args.compilerOptions.pathnames ?? {
 	// 	"/{*path}": Object.fromEntries([
@@ -56,47 +57,11 @@ ${injectCode("./variables.js")
 		`export const urlPatterns = ${JSON.stringify(args.compilerOptions.urlPatterns, null, 2)};`
 	)}
 
-/**
- * Define the \`getLocale()\` function.
- *
- * Use this function to define how the locale is resolved. For example,
- * you can resolve the locale from the browser's preferred language,
- * a cookie, env variable, or a user's preference.
- *
- * @example
- *   defineGetLocale(() => {
- *     // resolve the locale from a cookie. fallback to the base locale.
- *     return Cookies.get('locale') ?? baseLocale
- *   }
- *
- * @param {() => Locale} fn
- * @type {(fn: () => Locale) => void}
- */
-export const defineGetLocale = (fn) => {
-	getLocale = fn;
-};
-
-/**
- * Define the \`setLocale()\` function.
- *
- * Use this function to define how the locale is set. For example,
- * modify a cookie, env variable, or a user's preference.
- *
- * @example
- *   defineSetLocale((newLocale) => {
- *     // set the locale in a cookie
- *     return Cookies.set('locale', newLocale)
- *   });
- *
- * @param {(newLocale: Locale) => void} fn
- */
-export const defineSetLocale = (fn) => {
-	setLocale = fn;
-};
-
 ${injectCode("./get-locale.js")} 
 
 ${injectCode("./set-locale.js")}
+
+${injectCode("./get-url-origin.js").replace(/** non public api */ "export let getUrlOrigin", args.testing ? "export let getUrlOrigin" : "let getUrlOrigin")}
 
 ${injectCode("./is-locale.js")}
 
@@ -159,6 +124,7 @@ export async function createRuntimeForTesting(args: {
 	const file = createRuntimeFile({
 		baseLocale: args.baseLocale,
 		locales: args.locales,
+		testing: true,
 		compilerOptions: {
 			...defaultCompilerOptions,
 			...args.compilerOptions,

@@ -58,3 +58,22 @@ export let getLocale = () => {
 
 	throw new Error("No locale found. There is an error in your strategy.");
 };
+
+/**
+ * Define the \`getLocale()\` function.
+ *
+ * Use this function to define how the locale is resolved. For example,
+ * you can resolve the locale from the browser's preferred language,
+ * a cookie, env variable, or a user's preference.
+ *
+ * @example
+ *   defineGetLocale(() => {
+ *     // resolve the locale from a cookie. fallback to the base locale.
+ *     return Cookies.get('locale') ?? baseLocale
+ *   }
+ *
+ * @type {(fn: () => Locale) => void}
+ */
+export const defineGetLocale = (fn) => {
+	getLocale = fn;
+};

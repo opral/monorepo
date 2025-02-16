@@ -9,6 +9,7 @@ export type Runtime = {
 	urlPatterns: typeof import("./variables.js").urlPatterns;
 	getLocale: typeof import("./get-locale.js").getLocale;
 	setLocale: typeof import("./set-locale.js").setLocale;
+	getUrlOrigin: typeof import("./get-url-origin.js").getUrlOrigin;
 	defineGetLocale: (fn: () => Locale) => void;
 	defineSetLocale: (fn: (newLocale: Locale) => void) => void;
 	assertIsLocale: typeof import("./assert-is-locale.js").assertIsLocale;
@@ -20,6 +21,7 @@ export type Runtime = {
 	extractLocaleFromUrl: typeof import("./extract-locale-from-url.js").extractLocaleFromUrl;
 	extractLocaleFromRequest: typeof import("./extract-locale-from-request.js").extractLocaleFromRequest;
 	extractLocaleFromCookie: typeof import("./extract-locale-from-cookie.js").extractLocaleFromCookie;
+	overwriteGetUrlOrigin: typeof import("./get-url-origin.js").overwriteGetUrlOrigin;
 };
 
 /**
