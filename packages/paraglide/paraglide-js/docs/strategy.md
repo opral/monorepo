@@ -1,3 +1,8 @@
+---
+imports:
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
+---
+
 # Locale strategy
 
 Paraglide JS comes with various strategies to determine the locale out of the box. 
@@ -56,70 +61,93 @@ compile({
 })
 ```
 
-### pathname
+### url
 
-The pathname strategy determines the locale from the pathname. 
-
-For example, if the pathname is `/en-US/about`, the locale will be `en-US`. You can adjust the pathnames with the `pathnames` option. The syntax uses [path-to-regexp](https://github.com/pillarjs/path-to-regexp).
-
-<doc-callout type="info">If you use wildcards (*), be aware of the matching order. Use wildcards after static and parameterized paths.</doc-callout>
+Determine the locale from the URL (pathname, domain, etc).
 
 ```diff
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
-+	strategy: ["pathname"]
-+	pathnames: {
-		 // define static paths
-		 "/about": {
-			 en: "/about",
-			 de: "/ueber-uns",
-		 },
-		 // parameterized paths
-		 "/shop/:id": {
-			 en: "/shop/:id",
-			 de: "/einkaufen/:id",
-		 }
-		 // wildcard paths
-	   "/{*path}": {
-			  de: "/de{/*path}",
-			  en: "/{*path}",
-		 },
++	strategy: ["url"]
 })
 ```
 
-Pathnames default to prefixing every locale other than the base locale in the path. If you want another behaviour, you can define it with the `pathnames` option. 
+The URL-based strategy uses the web standard [URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API) to match and localize URLs. 
 
-#### Prefix every locale
+For example, the pattern `https://:domain(.*)/:locale(de|en)?/:path*` matches URLs like `https://example.com/de/about` and `https://example.com/about`. The named groups `domain`, `locale`, and `path` are used to extract and replace parts of the URL.
 
-```
-/en/about
-/de/about
-```
+<doc-callout type="tip">Use https://urlpattern.com/ to test your URL patterns.</doc-callout>
 
-```json
-{
-	"/{*path}": {
-		"de": "/de{/*path}",
-		"en": "/en{/*path}"
-	}
-}
-```
 
-#### Aliases for locales
+#### Pathname-based url localization example
 
 ```
-/deutsch/about
-/english/about
+https://example.com/about 
+https://example.com/de/about
 ```
 
-```json
-{
-	"/{*path}": {
-		"de": "/deutsch{/*path}",
-		"en": "/english{/*path}"
-	}
-}
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url"],
+	compilerOptions: {
+		urlPatterns: [
+			{
+				pattern: ":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)",
+				// the original URL is https://example.com/about. 
+				// hence, the locale is null
+				deLocalizedNamedGroups: { locale: null },
+				localizedNamedGroups: {
+					// the en locale should have no locale in the URL
+					// hence, the locale is null
+					en: { locale: null },
+					// the de locale should have the locale in the URL
+					de: { locale: "de" },
+				},
+			},
+		],
+	},
+});
+```
+
+#### Domain-based url localization example
+
+```
+https://example.com/about
+https://de.example.com/about
+```
+
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url"],
+	compilerOptions: {
+		urlPatterns: [
+			// defining the pattern during development which 
+			// uses path suffixes like /en
+			{
+				pattern: ':protocol://localhost::port?/:locale(de|en)?/:path(.*)',
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
+						en: { locale: 'en' },
+						de: { locale: 'de' }
+					},
+			},
+			// production pattern which uses subdomains like de.example.com
+			{
+				pattern: ":protocol://:domain(.*)::port?/:path(.*)",
+				deLocalizedNamedGroups: { domain: "example.com" },
+				localizedNamedGroups: {
+					en: { domain: "example.com" },
+					de: { domain: "de.example.com" },
+				},
+			},
+		],
+	},
+});
 ```
 
 ## Write your own strategy
