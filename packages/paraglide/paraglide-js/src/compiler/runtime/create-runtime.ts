@@ -25,7 +25,7 @@ export function createRuntimeFile(args: {
 		},
 	};
 
-	return `
+	const code = `
 import "@inlang/paraglide-js/urlpattern-polyfill";
 
 ${injectCode("./variables.js")
@@ -63,7 +63,7 @@ ${injectCode("./get-locale.js")}
 
 ${injectCode("./set-locale.js")}
 
-${injectCode("./get-url-origin.js").replace(/** non public api */ "export let getUrlOrigin", args.testing ? "export let getUrlOrigin" : "let getUrlOrigin")}
+${injectCode("./get-url-origin.js")}
 
 ${injectCode("./is-locale.js")}
 
@@ -91,6 +91,16 @@ ${injectCode("./localize-href.js")}
  */
 
 `;
+
+	if (args.testing) {
+		return code;
+	}
+	// make non-public APIs private
+	return code
+		.replace("export let getUrlOrigin", "let getUrlOrigin")
+		.replace("export function localizeUrl", "function localizeUrl")
+		.replace("export function deLocalizeUrl", "function deLocalizeUrl");
+
 }
 
 /**
