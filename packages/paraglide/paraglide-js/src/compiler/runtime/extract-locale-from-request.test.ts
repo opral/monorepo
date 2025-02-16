@@ -24,7 +24,7 @@ test("returns the locale from the pathname", async () => {
 		baseLocale: "en",
 		locales: ["en"],
 		compilerOptions: {
-			strategy: ["urlPattern"],
+			strategy: ["url"],
 			urlPatterns: [
 				{
 					pattern: "https://example.com/:locale/:path*",

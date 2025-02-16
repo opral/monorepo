@@ -3,17 +3,17 @@ import {
 	baseLocale,
 	cookieName,
 	strategy,
-	TREE_SHAKE_URL_PATTERN_STRATEGY_USED,
+	TREE_SHAKE_URL_STRATEGY_USED,
 } from "./variables.js";
 import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
 
 /**
  * Extracts a locale from a request.
- * 
- * Use the function on the server to extract the locale 
- * from a request. 
- * 
- * The function goes through the strategies in the order 
+ *
+ * Use the function on the server to extract the locale
+ * from a request.
+ *
+ * The function goes through the strategies in the order
  * they are defined.
  *
  * @example
@@ -32,7 +32,7 @@ export const extractLocaleFromRequest = (request) => {
 				?.split("; ")
 				.find((c) => c.startsWith(cookieName + "="))
 				?.split("=")[1];
-		} else if (TREE_SHAKE_URL_PATTERN_STRATEGY_USED && strat === "urlPattern") {
+		} else if (TREE_SHAKE_URL_STRATEGY_USED && strat === "url") {
 			locale = extractLocaleFromUrl(request.url);
 		} else if (strat === "globalVariable") {
 			locale = _locale;

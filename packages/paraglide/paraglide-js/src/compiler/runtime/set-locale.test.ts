@@ -41,7 +41,7 @@ test("url pattern strategy sets the window location", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["urlPattern"],
+			strategy: ["url"],
 			urlPatterns: [
 				{
 					pattern: "https://example.:tld/:path*",

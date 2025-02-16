@@ -42,7 +42,7 @@ test("retrieves the locale for a url pattern", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["urlPattern"],
+			strategy: ["url"],
 			urlPatterns: [
 				{
 					pattern: "https://example.:tld/:path*",
@@ -70,7 +70,7 @@ test("url pattern strategy doesn't throw during SSR", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["urlPattern", "baseLocale"],
+			strategy: ["url", "baseLocale"],
 			urlPatterns: [
 				{
 					pattern: "https://example.:tld/:path*",
