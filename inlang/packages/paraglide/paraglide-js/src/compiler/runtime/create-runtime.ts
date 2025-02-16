@@ -45,8 +45,8 @@ ${injectCode("./variables.js")
 		`const TREE_SHAKE_COOKIE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("cookie")};`
 	)
 	.replace(
-		`export const TREE_SHAKE_URL_PATTERN_STRATEGY_USED = false;`,
-		`const TREE_SHAKE_URL_PATTERN_STRATEGY_USED = ${args.compilerOptions.strategy.includes("urlPattern")};`
+		`export const TREE_SHAKE_URL_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_URL_STRATEGY_USED = ${args.compilerOptions.strategy.includes("url")};`
 	)
 	.replace(
 		`export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;`,

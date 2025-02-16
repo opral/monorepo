@@ -3,7 +3,7 @@ import {
 	strategy,
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
-	TREE_SHAKE_URL_PATTERN_STRATEGY_USED,
+	TREE_SHAKE_URL_STRATEGY_USED,
 } from "./variables.js";
 import { localizeUrl } from "./localize-url.js";
 
@@ -36,7 +36,7 @@ export let setLocale = (newLocale) => {
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
-		} else if (TREE_SHAKE_URL_PATTERN_STRATEGY_USED && strat === "urlPattern") {
+		} else if (TREE_SHAKE_URL_STRATEGY_USED && strat === "url") {
 			// route to the new url
 			//
 			// this triggers a page reload but a user rarely
