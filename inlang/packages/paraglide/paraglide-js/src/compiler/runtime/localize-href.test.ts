@@ -87,3 +87,28 @@ test("returns an absolute href if the provided href is relative but the origin o
 		"http://example.com/hello"
 	);
 });
+
+// https://github.com/opral/inlang-paraglide-js/issues/362
+test("adding a base path", async () => {
+	const base = "shop";
+
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			urlPatterns: [
+				{
+					pattern: ":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)",
+					deLocalizedNamedGroups: { base },
+					localizedNamedGroups: {
+						en: { base, locale: "en" },
+						de: { base, locale: "de" },
+					},
+				},
+			],
+		},
+	});
+
+	expect(runtime.localizeHref("/about")).toBe("/shop/en/about");
+	expect(runtime.deLocalizeHref("/about")).toBe("/shop/about");
+});
