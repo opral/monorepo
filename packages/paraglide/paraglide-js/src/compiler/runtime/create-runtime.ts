@@ -16,12 +16,14 @@ export function createRuntimeFile(args: {
 	};
 	testing?: boolean;
 }): string {
-	// const pathnames = args.compilerOptions.pathnames ?? {
-	// 	"/{*path}": Object.fromEntries([
-	// 		...args.locales.map((locale) => [locale, `/${locale}{/*path}`]),
-	// 		[args.baseLocale, `/{*path}`],
-	// 	]),
-	// };
+	const defaultUrlPattern = {
+		pattern: `:protocol://:domain(.*)::port?/:locale(${args.locales.filter((l) => l !== args.baseLocale).join("|")})?/:path(.*)`,
+		deLocalizedNamedGroups: { locale: null },
+		localizedNamedGroups: {
+			...Object.fromEntries(args.locales.map((locale) => [locale, { locale }])),
+			en: { locale: null },
+		},
+	};
 
 	return `
 import "@inlang/paraglide-js/urlpattern-polyfill";
@@ -54,7 +56,7 @@ ${injectCode("./variables.js")
 	)
 	.replace(
 		`export const urlPatterns = [];`,
-		`export const urlPatterns = ${JSON.stringify(args.compilerOptions.urlPatterns, null, 2)};`
+		`export const urlPatterns = ${JSON.stringify(args.compilerOptions.urlPatterns ?? [defaultUrlPattern], null, 2)};`
 	)}
 
 ${injectCode("./get-locale.js")} 

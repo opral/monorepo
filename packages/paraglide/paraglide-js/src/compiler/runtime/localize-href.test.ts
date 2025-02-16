@@ -112,3 +112,38 @@ test("adding a base path", async () => {
 	expect(runtime.localizeHref("/about")).toBe("/shop/en/about");
 	expect(runtime.deLocalizeHref("/about")).toBe("/shop/about");
 });
+
+test("default url patterns to improve out of the box experience", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de", "fr"],
+		compilerOptions: {
+			urlPatterns: undefined,
+		},
+	});
+
+	expect(runtime.urlPatterns).toStrictEqual([
+		{
+			pattern: ":protocol://:domain(.*)::port?/:locale(de|fr)?/:path(.*)",
+			deLocalizedNamedGroups: { locale: null },
+			localizedNamedGroups: {
+				en: { locale: null },
+				de: { locale: "de" },
+				fr: { locale: "fr" },
+			},
+		},
+	]);
+
+	// expecting the baseLocale to not be included in the url
+	expect(runtime.localizeHref("/about", { locale: "en" })).toBe("/about");
+	expect(runtime.localizeHref("/about", { locale: "de" })).toBe("/de/about");
+
+	// expecting root path to work
+	expect(runtime.localizeHref("/", { locale: "en" })).toBe("/");
+	expect(runtime.localizeHref("/", { locale: "de" })).toBe("/de/");
+
+	// expecting localhost to work (for development)
+	expect(
+		runtime.localizeHref("http://localhost:5173/about", { locale: "de" })
+	).toBe("http://localhost:5173/de/about");
+});
