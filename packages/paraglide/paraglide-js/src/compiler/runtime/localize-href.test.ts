@@ -98,7 +98,8 @@ test("adding a base path", async () => {
 		compilerOptions: {
 			urlPatterns: [
 				{
-					pattern: ":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)",
+					pattern:
+						":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)",
 					deLocalizedNamedGroups: { base },
 					localizedNamedGroups: {
 						en: { base, locale: "en" },

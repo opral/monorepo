@@ -77,9 +77,9 @@ export function deLocalizeHref(href) {
 
 /**
  * @deprecated use `localizeHref` instead and give feedback on here https://github.com/opral/inlang-paraglide-js/issues/380
- * @type {(href: string, options?: { locale?: string }) => string} 
+ * @type {(href: string, options?: { locale?: string }) => string}
  */
-export function localizePath(href, options){
+export function localizePath(href, options) {
 	return localizeHref(href, options);
 }
 
@@ -87,6 +87,6 @@ export function localizePath(href, options){
  * @deprecated use `deLocalizeHref` instead and give feedback on here https://github.com/opral/inlang-paraglide-js/issues/380
  * @type {(href: string) => string}
  */
-export function deLocalizePath(href){
+export function deLocalizePath(href) {
 	return deLocalizeHref(href);
 }
