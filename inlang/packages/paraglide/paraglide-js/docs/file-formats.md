@@ -58,6 +58,8 @@ You can use multiple plugins in your project.
 
 ## Good-to-know: `.inlang` files
 
-The long-term vision is to use `.inlang` files directly without unpacking the file into a directory.
+The long-term vision is to use `.inlang` files directly without depending on external message files and plugins. 
 
-We [learned the hard way](https://opral.substack.com/p/focus-shift-from-inlang-to-lix) that a binary `.inlang` file is needed to make localization simple. Unfortunately, git can't store binary files without loosing the benefits of version control. Hence, for now (and the near future), plugins and the reliance on external message files is required.
+We [learned the hard way](https://opral.substack.com/p/focus-shift-from-inlang-to-lix) that a binary `.inlang` file is needed to make localization simple. Unfortunately, git can't store binary files without losing the benefits of version control. 
+
+Hence, for now, unpacking `.inlang` files into directories and creating an in-memory sqlite on each load is the way to go. 
