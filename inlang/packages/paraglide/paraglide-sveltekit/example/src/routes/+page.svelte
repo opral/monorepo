@@ -10,5 +10,5 @@
 
 <br />
 <br />
-<a href={localizeHref("/about", { locale: "en"})}>go to about in en</a>
-<a href={localizeHref("/about", { locale: "de"})}>go to about in de</a>
+<a href={localizeHref('/about', { locale: 'en' })}>go to about in en</a>
+<a href={localizeHref('/about', { locale: 'de' })}>go to about in de</a>

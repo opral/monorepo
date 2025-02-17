@@ -12,7 +12,7 @@ export default defineConfig({
 		paraglideAstro({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
-			strategy: ["pathname", "baseLocale"],
+			strategy: ["url", "baseLocale"],
 		}),
 	],
 	output: "server",
