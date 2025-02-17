@@ -231,6 +231,7 @@ describe.each([
 					messages: [
 						{
 							locale: "en",
+							selectors: [{ type: "variable-reference", name: "countPlural" }],
 							variants: [
 								{
 									matches: [
@@ -254,7 +255,7 @@ describe.each([
 				})
 			);
 
-			const m = await importCode(
+			const { m } = await importCode(
 				await bundleCode(
 					await compileProject({
 						project,
