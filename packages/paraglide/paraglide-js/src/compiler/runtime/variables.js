@@ -26,10 +26,11 @@ export const cookieName = "<cookie-name>";
  */
 export const strategy = ["globalVariable"];
 
-/** @type {string | undefined} */
-export const pathnameBase = undefined;
-
-/** @type {Array<{ pattern: string, deLocalizedNamedGroups: Record<string, string | null>, localizedNamedGroups: Record<string, Record<string, string | null>> }>} */
+/** 
+ * The used URL patterns. 
+ *
+ * @type {Array<{ pattern: string, deLocalizedNamedGroups: Record<string, string | null>, localizedNamedGroups: Record<string, Record<string, string | null>> }>} 
+ */
 export const urlPatterns = [];
 
 /**
