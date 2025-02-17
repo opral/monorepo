@@ -1,5 +1,11 @@
-import { cookieName, strategy } from "./variables.js";
-import { localizePath } from "./localize-path.js";
+import {
+	cookieName,
+	strategy,
+	TREE_SHAKE_COOKIE_STRATEGY_USED,
+	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
+	TREE_SHAKE_URL_STRATEGY_USED,
+} from "./variables.js";
+import { localizeUrl } from "./localize-url.js";
 
 /**
  * Set the locale.
@@ -12,23 +18,26 @@ import { localizePath } from "./localize-path.js";
 export let setLocale = (newLocale) => {
 	let localeHasBeenSet = false;
 	for (const strat of strategy) {
-		if (strat === "variable") {
+		if (
+			TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED &&
+			strat === "globalVariable"
+		) {
 			// a default for a custom strategy to get started quickly
 			// is likely overwritten by `defineSetLocale()`
 			_locale = newLocale;
 			localeHasBeenSet = true;
-		} else if (strat === "cookie") {
+		} else if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
 			if (typeof document === "undefined" || !document.cookie) {
 				continue;
 			}
 			// set the cookie
 			document.cookie = `${cookieName}=${newLocale}`;
 			localeHasBeenSet = true;
-		} else if (strat === "pathname") {
-			if (typeof window === "undefined" || !window.location) {
-				continue;
-			}
-			// route to the new locale
+		} else if (strat === "baseLocale") {
+			// nothing to be set here. baseLocale is only a fallback
+			continue;
+		} else if (TREE_SHAKE_URL_STRATEGY_USED && strat === "url") {
+			// route to the new url
 			//
 			// this triggers a page reload but a user rarely
 			// switches locales, so this should be fine.
@@ -36,15 +45,11 @@ export let setLocale = (newLocale) => {
 			// if the behavior is not desired, the implementation
 			// can be overwritten by `defineSetLocale()` to avoid
 			// a full page reload.
-			window.location.pathname = localizePath(window.location.pathname, {
+			window.location.href = localizeUrl(window.location.href, {
 				locale: newLocale,
-			});
-			// not needed, as the page reloads
-			// localeHasBeenSet = true;
+			}).href;
+			// just in case return. the browser reloads the page by setting href
 			return;
-		} else if (strat === "baseLocale") {
-			// nothing to be set here. baseLocale is only a fallback
-			continue;
 		} else {
 			throw new Error("Unknown strategy");
 		}
@@ -59,4 +64,22 @@ export let setLocale = (newLocale) => {
 	}
 
 	return;
+};
+
+/**
+ * Define the \`setLocale()\` function.
+ *
+ * Use this function to define how the locale is set. For example,
+ * modify a cookie, env variable, or a user's preference.
+ *
+ * @example
+ *   defineSetLocale((newLocale) => {
+ *     // set the locale in a cookie
+ *     return Cookies.set('locale', newLocale)
+ *   });
+ *
+ * @param {(newLocale: Locale) => void} fn
+ */
+export const defineSetLocale = (fn) => {
+	setLocale = fn;
 };

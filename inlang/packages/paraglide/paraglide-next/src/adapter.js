@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { deLocalizePath, extractLocaleFromRequest } from "./runtime.js";
+import {
+	deLocalizeUrl,
+	extractLocaleFromRequest,
+	strategy,
+} from "./runtime.js";
 
 /**
  *
@@ -10,13 +14,15 @@ export async function middleware(request) {
 
 	// in case of pathname strategy, we need the delocalized
 	// path for nextjs to match the page
-	const path = deLocalizePath(request.nextUrl.pathname);
+	const deLocalizedUrl = strategy.includes("url")
+		? deLocalizeUrl(request.nextUrl)
+		: request.nextUrl;
 
 	if (request.nextUrl.pathname.startsWith("/_next")) {
 		return NextResponse.next();
 	}
 
-	return NextResponse.rewrite(new URL(path, request.url), {
+	return NextResponse.rewrite(deLocalizedUrl, {
 		headers: {
 			"x-paraglide-locale": locale,
 		},

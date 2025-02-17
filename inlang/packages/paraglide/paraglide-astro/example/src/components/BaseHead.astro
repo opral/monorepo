@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-import { locales, deLocalizePath, localizePath } from "../paraglide/runtime.js";
+import { locales, localizeHref } from "../paraglide/runtime.js";
 
 interface Props {
 	title: string;
@@ -9,8 +9,6 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
-
-const pathWithoutLocale = deLocalizePath(Astro.url.pathname);
 ---
 
 <!-- Global Metadata -->
@@ -46,7 +44,7 @@ const pathWithoutLocale = deLocalizePath(Astro.url.pathname);
 		<link
 			rel="alternate"
 			hreflang={locale}
-			href={localizePath(pathWithoutLocale, {
+			href={localizeHref(Astro.url.href, {
 				locale: locale,
 			})}
 		/>

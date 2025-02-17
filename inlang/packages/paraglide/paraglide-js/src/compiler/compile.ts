@@ -14,9 +14,9 @@ export const defaultCompilerOptions = {
 	emitGitIgnore: true,
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
-	strategy: ["cookie", "variable", "baseLocale"],
+	pathnameBase: undefined,
+	strategy: ["cookie", "globalVariable", "baseLocale"],
 	cookieName: "PARAGLIDE_LOCALE",
-	pathnamePrefixDefaultLocale: false,
 } as const satisfies Partial<CompilerOptions>;
 
 export type CompilerOptions = {
@@ -47,7 +47,7 @@ export type CompilerOptions = {
 	 * server-side takes the variable (because cookie is unvailable),
 	 * whereas both fallback to the base locale if not available.
 	 *
-	 * @default ["cookie", "variable", "baseLocale"]
+	 * @default ["cookie", "variable", "baseLocale"
 	 */
 	strategy?: Runtime["strategy"];
 	/**
@@ -71,6 +71,27 @@ export type CompilerOptions = {
 	 * @default true
 	 */
 	emitPrettierIgnore?: boolean;
+
+	/**
+	 * TODO documentation
+	 */
+	urlPatterns?: Runtime["urlPatterns"];
+	/**
+	 * The base path for the pathname strategy.
+	 *
+	 * If the pathnameBase is set, `localizePath()` and `deLocalizePath()` will
+	 * automatically add or remove the base path from the pathname.
+	 *
+	 * Don't forget to set your server's or frameworks "base path" to the same value.
+	 *
+	 * @example
+	 *   pathnameBase: "/base"
+	 *
+	 *   localizePath("/about") // -> "/base/about"
+	 *
+	 * @default undefined
+	 */
+	pathnameBase?: string;
 	/**
 	 * Whether to include an eslint-disable comment at the top of each .js file.
 	 *
@@ -83,19 +104,6 @@ export type CompilerOptions = {
 	 * @default true
 	 */
 	emitGitIgnore?: boolean;
-	/**
-	 * Whether to prefix the default locale to the pathname.
-	 *
-	 * For incremental adoption reasons, the base locale is not
-	 * prefixed by default. A path like `/page` will be served by
-	 * is matched as base locale.
-	 *
-	 * Setting the option to `true` will prefix the default locale to the
-	 * pathname. `/page` will become `/en/page` (if the base locale is en).
-	 *
-	 * @default false
-	 */
-	pathnamePrefixDefaultLocale?: boolean;
 	/**
 	 * The file-structure of the compiled output.
 	 *

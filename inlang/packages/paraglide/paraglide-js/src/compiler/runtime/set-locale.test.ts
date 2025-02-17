@@ -29,20 +29,37 @@ test("sets the cookie to a different locale", async () => {
 	expect(globalThis.window.location.reload).toBeCalled();
 });
 
-test("doesn't throw for server unavailable APIs", async () => {
-	// @ts-expect-error - reset document in case it's defined
-	globalThis.document = undefined;
-	// @ts-expect-error - reset window in case it's defined
-	globalThis.window = undefined;
+test("url pattern strategy sets the window location", async () => {
+	// @ts-expect-error - global variable definition
+	globalThis.window = {};
+	// @ts-expect-error - global variable definition
+	globalThis.window.location = {};
+	globalThis.window.location.hostname = "example.com";
+	globalThis.window.location.reload = vi.fn();
+
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			// using browser based strategies first, then variable which is available on the server
-			strategy: ["pathname", "cookie", "variable", "baseLocale"],
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "https://example.:tld/:path*",
+					deLocalizedNamedGroups: { tld: "com" },
+					localizedNamedGroups: {
+						en: { tld: "com" },
+						de: { tld: "de" },
+					},
+				},
+			],
 		},
 	});
 
-	expect(() => runtime.setLocale("de")).not.toThrow();
-	expect(runtime.getLocale()).toBe("de");
+	globalThis.window.location.href = "https://example.com/page";
+
+	runtime.setLocale("de");
+
+	expect(globalThis.window.location.href).toBe("https://example.de/page");
+	// setting window.location.hostname automatically reloads the page
+	expect(globalThis.window.location.reload).not.toBeCalled();
 });

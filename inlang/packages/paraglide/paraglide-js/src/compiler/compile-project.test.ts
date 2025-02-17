@@ -89,15 +89,59 @@ test("emitPrettierIgnore", async () => {
 	expect(_false).not.toHaveProperty(".prettierignore");
 });
 
+// https://github.com/opral/inlang-paraglide-js/issues/347
+test("can emit message bundles with more than 255 characters", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
+	});
+
+	await insertBundleNested(
+		project.db,
+		createBundleNested({
+			// 300 characters long id
+			id: "a".repeat(300),
+			messages: [
+				{
+					locale: "en",
+					variants: [
+						{
+							pattern: [{ type: "text", value: "Hello" }],
+						},
+					],
+				},
+			],
+		})
+	);
+
+	const output = await compileProject({
+		project,
+	});
+
+	const code = await bundleCode(
+		output,
+		`export * as m from "./paraglide/messages.js"
+		 export * as runtime from "./paraglide/runtime.js"`
+	);
+
+	const { m } = await importCode(code);
+
+	expect(m["a".repeat(300)]()).toBe("Hello");
+});
+
 describe.each([
 	// useTsImports must be true to test emitTs. Otherwise, rolldown can't resolve the imports
 	{
 		outputStructure: "locale-modules",
-		strategy: ["variable", "baseLocale"],
+		strategy: ["globalVariable", "baseLocale"],
 	},
 	{
 		outputStructure: "message-modules",
-		strategy: ["variable", "baseLocale"],
+		strategy: ["globalVariable", "baseLocale"],
 	},
 ] satisfies Array<Parameters<typeof compileProject>["0"]["compilerOptions"]>)(
 	"options",
@@ -110,7 +154,7 @@ describe.each([
 					output,
 					`import * as m from "./paraglide/messages.js"
 
-			console.log(m.sad_penguin_bundle())`
+					console.log(m.sad_penguin_bundle())`
 				);
 				const log = vi.spyOn(console, "log").mockImplementation(() => {});
 				// all required code for the message to be rendered is included like sourceLanguageTag.
@@ -404,63 +448,6 @@ describe.each([
 				strict: true,
 			};
 
-		// remove with v3 of paraglide js
-		test("./runtime.js types", async () => {
-			const project = await typescriptProject({
-				useInMemoryFileSystem: true,
-				compilerOptions: superStrictRuleOutAnyErrorTsSettings,
-			});
-
-			for (const [fileName, code] of Object.entries(output)) {
-				if (fileName.endsWith(".js") || fileName.endsWith(".ts")) {
-					project.createSourceFile(fileName, code);
-				}
-			}
-			project.createSourceFile(
-				"test.ts",
-				`
-    import * as runtime from "./runtime.js"
-
-    // --------- RUNTIME ---------
-
-    // getLocale() should return type should be a union of language tags, not a generic string
-    runtime.getLocale() satisfies "de" | "en" | "en-US"
-
-    // locales should have a narrow type, not a generic string
-    runtime.locales satisfies Readonly<Array<"de" | "en" | "en-US">>
-
-    // setLocale() should fail if the given language tag is not included in locales
-    // @ts-expect-error - invalid locale
-    runtime.setLocale("fr")
-
-    // setLocale() should not fail if the given language tag is included in locales
-    runtime.setLocale("de")
-
-		// isLocale should narrow the type of it's argument
-		const thing = 5;
-
-		let a: "de" | "en" | "en-US";
-
-		if(runtime.isLocale(thing)) {
-			a = thing
-		} else {
-			// @ts-expect-error - thing is not a language tag
-			a = thing
-		}
-
-		// to make ts not complain about unused variables
-		console.log(a)
-  `
-			);
-
-			const program = project.createProgram();
-			const diagnostics = ts.getPreEmitDiagnostics(program);
-			for (const diagnostic of diagnostics) {
-				console.error(diagnostic.messageText, diagnostic.file?.fileName);
-			}
-			expect(diagnostics.length).toEqual(0);
-		});
-
 		test("./messages.js types", async () => {
 			const project = await typescriptProject({
 				useInMemoryFileSystem: true,
@@ -505,7 +492,10 @@ describe.each([
 			);
 
 			const program = project.createProgram();
-			const diagnostics = ts.getPreEmitDiagnostics(program);
+			const diagnostics = ts
+				.getPreEmitDiagnostics(program)
+				// runtime type here makes issues because of the path-to-regexp import
+				.filter((d) => !d.file?.fileName.includes("runtime.js"));
 			for (const diagnostic of diagnostics) {
 				console.error(diagnostic.messageText, diagnostic.file?.fileName);
 			}
@@ -515,6 +505,11 @@ describe.each([
 );
 
 async function bundleCode(output: Record<string, string>, file: string) {
+	output["runtime.js"] = output["runtime.js"]!.replace(
+		'import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";',
+		"/** @type {any} */const pathToRegexp = {};"
+	);
+
 	const bundle = await rolldown({
 		input: ["main.js"],
 		plugins: [

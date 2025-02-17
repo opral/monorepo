@@ -1,8 +1,193 @@
+---
+imports:
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
+---
+
 # Locale strategy
+
+Paraglide JS comes with various strategies to determine the locale out of the box. 
+
+The strategy is defined with the `strategy` option. The order of the strategies in the array defines the priority. The first strategy that returns a locale will be used.
+
+In the example below, the locale is first determined by the `cookie` strategy. If no cookie is found, the `baseLocale` is used.
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["cookie", "baseLocale"]
+})
+```
+
+## Built-in strategies
+
+### cookie 
+
+The cookie strategy determines the locale from a cookie. 
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["cookie"]
+})
+```
+
+### baseLocale
+
+Returns the `baseLocale` defined in the settings. 
+
+Useful as fallback if no other strategy returned a locale. If a cookie has not been set yet, for example. 
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["cookie", "baseLocale"]
+})
+```
+
+### globalVariable
+
+Uses a global variable to determine the locale. 
+
+This strategy is only useful in testing environments, or to get started quickly. Setting a global variable can lead to cross request issues in server-side environments and the locale is not persisted between page reloads in client-side environments.
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["globalVariable"]
+})
+```
+
+### url
+
+Determine the locale from the URL (pathname, domain, etc).
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["url"]
+})
+```
+
+The URL-based strategy uses the web standard [URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API) to match and localize URLs. 
+
+For example, the pattern `https://:domain(.*)/:locale(de|en)?/:path*` matches URLs like `https://example.com/de/about` and `https://example.com/about`. The named groups `domain`, `locale`, and `path` are used to extract and replace parts of the URL.
+
+<doc-callout type="tip">Use https://urlpattern.com/ to test your URL patterns.</doc-callout>
+
+
+#### Pathname-based url localization example
+
+```
+https://example.com/about 
+https://example.com/de/about
+```
+
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url"],
+	compilerOptions: {
+		urlPatterns: [
+			{
+				pattern: ":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)",
+				// the original URL is https://example.com/about. 
+				// hence, the locale is null
+				deLocalizedNamedGroups: { locale: null },
+				localizedNamedGroups: {
+					// the en locale should have no locale in the URL
+					// hence, the locale is null
+					en: { locale: null },
+					// the de locale should have the locale in the URL
+					de: { locale: "de" },
+				},
+			},
+		],
+	},
+});
+```
+
+#### Domain-based url localization example
+
+```
+https://example.com/about
+https://de.example.com/about
+```
+
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url"],
+	compilerOptions: {
+		urlPatterns: [
+			// defining the pattern during development which 
+			// uses path suffixes like /en
+			{
+				pattern: ':protocol://localhost::port?/:locale(de|en)?/:path(.*)',
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
+						en: { locale: 'en' },
+						de: { locale: 'de' }
+					},
+			},
+			// production pattern which uses subdomains like de.example.com
+			{
+				pattern: ":protocol://:domain(.*)::port?/:path(.*)",
+				deLocalizedNamedGroups: { domain: "example.com" },
+				localizedNamedGroups: {
+					en: { domain: "example.com" },
+					de: { domain: "de.example.com" },
+				},
+			},
+		],
+	},
+});
+```
+
+#### Adding a base path
+
+You can add a base path to your URL patterns to support localized URLs with a common base path. 
+
+For example, with the base path set to "shop":
+
+- `runtime.localizeHref("/about")` will return `/shop/en/about`
+- `runtime.deLocalizeHref("/about")` will return `/shop/about`
+
+
+```js
+const base = "shop";
+
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url"],
+	compilerOptions: {
+		urlPatterns: [
+			{
+				pattern: ":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)",
+				deLocalizedNamedGroups: { base },
+				localizedNamedGroups: {
+					en: { base, locale: "en" },
+					de: { base, locale: "de" },
+				},
+			},
+		],
+	},
+});
+```
+
+
+## Write your own strategy
 
 Write your own cookie, http header, or i18n routing based locale strategy to integrate Paraglide into any framework or app.
 
-## Basics
+### Basics
 
 Every time a message is rendered, Paraglide calls the `getLocale()` function under the hood to determine which locale to apply. By default, this will be the `baseLocale` defined in your settings. Calling `setLocale(locale)` anywhere in your code will update the locale stored by the runtime. Any calls to `getLocale()` after that (eg: when a new message is rendered) will return the newly set locale.
 
@@ -159,9 +344,9 @@ defineSetLocale((newLocale) => {
 {/key}
 ```
 
-## Examples
+### Examples
 
-### Cookie based strategy
+#### Cookie based strategy
 
 The example uses React for demonstration purposes. You can replicate the same pattern in any other framework or vanilla JS.
 
@@ -199,7 +384,7 @@ function App() {
 }
 ```
 
-### Server-side rendering
+#### Server-side rendering
 
 1. Detect the locale from the request. 
 2. Make sure that `defineGetLocale()` is cross-request safe on the server. 

@@ -1,5 +1,11 @@
 # editor-app
 
+## 0.0.2
+
+### Patch Changes
+
+- @inlang/editor-component@2.0.0
+
 ## 0.0.1
 
 ### Patch Changes

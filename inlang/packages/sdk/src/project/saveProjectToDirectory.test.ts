@@ -328,3 +328,44 @@ test("adds a gitignore file if it doesn't exist", async () => {
 	);
 	expect(gitignore).toBe("cache");
 });
+
+ test("uses exportFiles when both exportFiles and saveMessages are defined", async () => {
+		const exportFilesSpy = vi.fn().mockResolvedValue([]);
+		const saveMessagesSpy = vi.fn();
+		const mockPlugin: InlangPlugin = {
+			key: "mock",
+			exportFiles: exportFilesSpy,
+			saveMessages: saveMessagesSpy,
+		};
+		const volume = Volume.fromJSON({});
+		const project = await loadProjectInMemory({
+			blob: await newProject(),
+			providePlugins: [mockPlugin],
+		});
+		await saveProjectToDirectory({
+			path: "/foo/project.inlang",
+			fs: volume.promises as any,
+			project,
+		});
+		expect(exportFilesSpy).toHaveBeenCalled();
+		expect(saveMessagesSpy).not.toHaveBeenCalled();
+ });
+
+ test("uses saveMessages when exportFiles is not defined", async () => {
+		const saveMessagesSpy = vi.fn().mockResolvedValue([]);
+		const mockPlugin: InlangPlugin = {
+			key: "mock",
+			saveMessages: saveMessagesSpy,
+		};
+		const volume = Volume.fromJSON({});
+		const project = await loadProjectInMemory({
+			blob: await newProject(),
+			providePlugins: [mockPlugin],
+		});
+		await saveProjectToDirectory({
+			path: "/foo/project.inlang",
+			fs: volume.promises as any,
+			project,
+		});
+		expect(saveMessagesSpy).toHaveBeenCalled();
+ });

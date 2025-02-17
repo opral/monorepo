@@ -11,78 +11,72 @@ export function createRuntimeFile(args: {
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
-		pathnamePrefixDefaultLocale: NonNullable<
-			CompilerOptions["pathnamePrefixDefaultLocale"]
-		>;
+		pathnameBase?: CompilerOptions["pathnameBase"];
+		urlPatterns?: CompilerOptions["urlPatterns"];
 	};
 }): string {
-	return `
+	const defaultUrlPattern = {
+		pattern: `:protocol://:domain(.*)::port?/:locale(${args.locales.filter((l) => l !== args.baseLocale).join("|")})?/:path(.*)?`,
+		deLocalizedNamedGroups: { locale: null },
+		localizedNamedGroups: {
+			...Object.fromEntries(args.locales.map((locale) => [locale, { locale }])),
+			en: { locale: null },
+		},
+	};
+
+	const code = `
+import "@inlang/paraglide-js/urlpattern-polyfill";
 
 ${injectCode("./variables.js")
-	.replace(`<base-locale>`, `${args.baseLocale}`)
-	.replace(`["<base-locale>"]`, `["${args.locales.join('", "')}"]`)
-	.replace(`["variable"]`, `["${args.compilerOptions.strategy.join('", "')}"]`)
+	.replace(
+		`export const baseLocale = "en";`,
+		`export const baseLocale = "${args.baseLocale}";`
+	)
+	.replace(
+		`export const locales = /** @type {const} */ (["en", "de"]);`,
+		`export const locales = /** @type {const} */ (["${args.locales.join('", "')}"]);`
+	)
+	.replace(
+		`export const strategy = ["globalVariable"];`,
+		`export const strategy = ["${args.compilerOptions.strategy.join('", "')}"]`
+	)
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
 	.replace(
-		`pathnamePrefixDefaultLocale = false`,
-		`pathnamePrefixDefaultLocale = ${args.compilerOptions.pathnamePrefixDefaultLocale}`
+		`export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_COOKIE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("cookie")};`
+	)
+	.replace(
+		`export const TREE_SHAKE_URL_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_URL_STRATEGY_USED = ${args.compilerOptions.strategy.includes("url")};`
+	)
+	.replace(
+		`export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("globalVariable")};`
+	)
+	.replace(
+		`export const urlPatterns = [];`,
+		`export const urlPatterns = ${JSON.stringify(args.compilerOptions?.urlPatterns ?? [defaultUrlPattern], null, 2)};`
 	)}
-
-/**
- * Define the \`getLocale()\` function.
- *
- * Use this function to define how the locale is resolved. For example,
- * you can resolve the locale from the browser's preferred language,
- * a cookie, env variable, or a user's preference.
- *
- * @example
- *   defineGetLocale(() => {
- *     // resolve the locale from a cookie. fallback to the base locale.
- *     return Cookies.get('locale') ?? baseLocale
- *   }
- *
- * @param {() => Locale} fn
- * @type {(fn: () => Locale) => void}
- */
-export const defineGetLocale = (fn) => {
-	getLocale = fn;
-};
-
-/**
- * Define the \`setLocale()\` function.
- *
- * Use this function to define how the locale is set. For example,
- * modify a cookie, env variable, or a user's preference.
- *
- * @example
- *   defineSetLocale((newLocale) => {
- *     // set the locale in a cookie
- *     return Cookies.set('locale', newLocale)
- *   });
- *
- * @param {(newLocale: Locale) => void} fn
- */
-export const defineSetLocale = (fn) => {
-	setLocale = fn;
-};
 
 ${injectCode("./get-locale.js")} 
 
 ${injectCode("./set-locale.js")}
 
+${injectCode("./get-url-origin.js")}
+
 ${injectCode("./is-locale.js")}
 
 ${injectCode("./assert-is-locale.js")}
 
-${injectCode("./localize-path.js")}
-
-${injectCode("./de-localize-path.js")}
-
-${injectCode("./extract-locale-from-pathname.js")}
-
 ${injectCode("./extract-locale-from-request.js")}
 
 ${injectCode("./extract-locale-from-cookie.js")}
+
+${injectCode("./extract-locale-from-url.js")}
+
+${injectCode("./localize-url.js")}
+
+${injectCode("./localize-href.js")}
 
 // ------ TYPES ------
 
@@ -96,6 +90,8 @@ ${injectCode("./extract-locale-from-cookie.js")}
  */
 
 `;
+
+	return code;
 }
 
 /**
@@ -109,7 +105,9 @@ ${injectCode("./extract-locale-from-cookie.js")}
  */
 function injectCode(path: string): string {
 	const code = fs.readFileSync(new URL(path, import.meta.url), "utf-8");
-	return code.replace(/import\s+.*?;?\n/g, "");
+	// Regex to match single-line and multi-line imports
+	const importRegex = /import\s+[\s\S]*?from\s+['"][^'"]+['"]\s*;?/g;
+	return code.replace(importRegex, "").trim();
 }
 
 /**
@@ -124,21 +122,21 @@ function injectCode(path: string): string {
 export async function createRuntimeForTesting(args: {
 	baseLocale: string;
 	locales: string[];
-	compilerOptions?: {
-		strategy?: CompilerOptions["strategy"];
-		cookieName?: CompilerOptions["cookieName"];
-		pathnamePrefixDefaultLocale?: CompilerOptions["pathnamePrefixDefaultLocale"];
-	};
+	compilerOptions?: Omit<CompilerOptions, "outdir" | "project" | "fs">;
 }): Promise<Runtime> {
 	const file = createRuntimeFile({
 		baseLocale: args.baseLocale,
 		locales: args.locales,
 		compilerOptions: {
 			...defaultCompilerOptions,
-			strategy: ["variable"],
 			...args.compilerOptions,
 		},
-	});
+	})
+		// remove the polyfill import statement to avoid module resolution logic in testing
+		.replace(`import "@inlang/paraglide-js/urlpattern-polyfill";`, "");
+
+	await import("urlpattern-polyfill");
+
 	return await import(
 		"data:text/javascript;base64," +
 			Buffer.from(file, "utf-8").toString("base64")

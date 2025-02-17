@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-js",
 	"type": "module",
-	"version": "2.0.0-beta.16",
+	"version": "2.0.0-beta.18",
 	"license": "MIT",
 	"publishConfig": {
 		"access": "public",
@@ -20,6 +20,12 @@
 		"./dist",
 		"./bin"
 	],
+	"exports": {
+		".": "./dist/index.js",
+		"./urlpattern-polyfill": "./dist/urlpattern-polyfill/index.js"
+	},
+	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
+	"sideEffects": false,
 	"scripts": {
 		"dev": "tsc --watch",
 		"bench": "vitest bench --run",
@@ -37,7 +43,8 @@
 		"commander": "11.1.0",
 		"consola": "3.4.0",
 		"json5": "2.2.3",
-		"unplugin": "^2.1.2"
+		"unplugin": "^2.1.2",
+		"urlpattern-polyfill": "^10.0.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.18.0",
@@ -51,12 +58,9 @@
 		"memfs": "4.17.0",
 		"prettier": "^3.4.2",
 		"rolldown": "1.0.0-beta.1",
-		"typescript-eslint": "^8.20.0",
 		"typescript": "^5.7.3",
+		"typescript-eslint": "^8.20.0",
 		"vitest": "2.1.8"
-	},
-	"exports": {
-		".": "./dist/index.js"
 	},
 	"keywords": [
 		"inlang",

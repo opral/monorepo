@@ -30,7 +30,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 		const shouldCompile = readFiles.has(path) && !path.includes("cache");
 		if (shouldCompile) {
 			readFiles.clear();
-			logger.info("Re-compiling inlang project...");
+			logger.info(`Re-compiling inlang project... File "${path}" has changed.`);
 			compilationResult = await compile(
 				{
 					fs: wrappedFs,
