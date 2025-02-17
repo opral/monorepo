@@ -16,7 +16,7 @@ export function createRuntimeFile(args: {
 	};
 }): string {
 	const defaultUrlPattern = {
-		pattern: `:protocol://:domain(.*)::port?/:locale(${args.locales.filter((l) => l !== args.baseLocale).join("|")})?/:path(.*)`,
+		pattern: `:protocol://:domain(.*)::port?/:locale(${args.locales.filter((l) => l !== args.baseLocale).join("|")})?/:path(.*)?`,
 		deLocalizedNamedGroups: { locale: null },
 		localizedNamedGroups: {
 			...Object.fromEntries(args.locales.map((locale) => [locale, { locale }])),
