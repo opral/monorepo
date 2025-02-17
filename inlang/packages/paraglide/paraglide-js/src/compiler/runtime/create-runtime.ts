@@ -14,7 +14,6 @@ export function createRuntimeFile(args: {
 		pathnameBase?: CompilerOptions["pathnameBase"];
 		urlPatterns?: CompilerOptions["urlPatterns"];
 	};
-	testing?: boolean;
 }): string {
 	const defaultUrlPattern = {
 		pattern: `:protocol://:domain(.*)::port?/:locale(${args.locales.filter((l) => l !== args.baseLocale).join("|")})?/:path(.*)`,
@@ -56,7 +55,7 @@ ${injectCode("./variables.js")
 	)
 	.replace(
 		`export const urlPatterns = [];`,
-		`export const urlPatterns = ${JSON.stringify(args.compilerOptions.urlPatterns ?? [defaultUrlPattern], null, 2)};`
+		`export const urlPatterns = ${JSON.stringify(args.compilerOptions?.urlPatterns ?? [defaultUrlPattern], null, 2)};`
 	)}
 
 ${injectCode("./get-locale.js")} 
@@ -92,15 +91,7 @@ ${injectCode("./localize-href.js")}
 
 `;
 
-	if (args.testing) {
-		return code;
-	}
-	// make non-public APIs private
-	return code
-		.replace("export let getUrlOrigin", "let getUrlOrigin")
-		.replace("export function localizeUrl", "function localizeUrl")
-		.replace("export function deLocalizeUrl", "function deLocalizeUrl");
-
+	return code;
 }
 
 /**
@@ -136,7 +127,6 @@ export async function createRuntimeForTesting(args: {
 	const file = createRuntimeFile({
 		baseLocale: args.baseLocale,
 		locales: args.locales,
-		testing: true,
 		compilerOptions: {
 			...defaultCompilerOptions,
 			...args.compilerOptions,
