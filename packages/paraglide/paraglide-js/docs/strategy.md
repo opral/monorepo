@@ -150,6 +150,39 @@ compile({
 });
 ```
 
+#### Adding a base path
+
+You can add a base path to your URL patterns to support localized URLs with a common base path. 
+
+For example, with the base path set to "shop":
+
+- `runtime.localizeHref("/about")` will return `/shop/en/about`
+- `runtime.deLocalizeHref("/about")` will return `/shop/about`
+
+
+```js
+const base = "shop";
+
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url"],
+	compilerOptions: {
+		urlPatterns: [
+			{
+				pattern: ":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)",
+				deLocalizedNamedGroups: { base },
+				localizedNamedGroups: {
+					en: { base, locale: "en" },
+					de: { base, locale: "de" },
+				},
+			},
+		],
+	},
+});
+```
+
+
 ## Write your own strategy
 
 Write your own cookie, http header, or i18n routing based locale strategy to integrate Paraglide into any framework or app.
