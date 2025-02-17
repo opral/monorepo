@@ -289,12 +289,12 @@ importers:
       json5:
         specifier: 2.2.3
         version: 2.2.3
-      path-to-regexp:
-        specifier: ^8.2.0
-        version: 8.2.0
       unplugin:
         specifier: ^2.1.2
         version: 2.1.2
+      urlpattern-polyfill:
+        specifier: ^10.0.0
+        version: 10.0.0
     devDependencies:
       '@eslint/js':
         specifier: ^9.18.0
@@ -12679,10 +12679,6 @@ packages:
 
   path-to-regexp@6.3.0:
     resolution: {integrity: sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ==}
-
-  path-to-regexp@8.2.0:
-    resolution: {integrity: sha512-TdrF7fW9Rphjq4RjrW0Kp2AW0Ahwu9sRGTkS6bvDi0SCwZlEZYmcfDbEsTz8RVk0EHIS/Vd1bv3JhG+1xZuAyQ==}
-    engines: {node: '>=16'}
 
   path-type@4.0.0:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
@@ -30612,8 +30608,6 @@ snapshots:
 
   path-to-regexp@6.3.0:
     optional: true
-
-  path-to-regexp@8.2.0: {}
 
   path-type@4.0.0: {}
 

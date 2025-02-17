@@ -22,7 +22,7 @@
 	],
 	"exports": {
 		".": "./dist/index.js",
-		"./path-to-regexp": "./dist/path-to-regexp/index.js"
+		"./urlpattern-polyfill": "./dist/urlpattern-polyfill/index.js"
 	},
 	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
 	"sideEffects": false,
@@ -43,8 +43,8 @@
 		"commander": "11.1.0",
 		"consola": "3.4.0",
 		"json5": "2.2.3",
-		"path-to-regexp": "^8.2.0",
-		"unplugin": "^2.1.2"
+		"unplugin": "^2.1.2",
+		"urlpattern-polyfill": "^10.0.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.18.0",

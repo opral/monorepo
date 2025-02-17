@@ -47,7 +47,7 @@ export type CompilerOptions = {
 	 * server-side takes the variable (because cookie is unvailable),
 	 * whereas both fallback to the base locale if not available.
 	 *
-	 * @default ["cookie", "variable", "baseLocale"]
+	 * @default ["cookie", "variable", "baseLocale"
 	 */
 	strategy?: Runtime["strategy"];
 	/**
@@ -71,26 +71,11 @@ export type CompilerOptions = {
 	 * @default true
 	 */
 	emitPrettierIgnore?: boolean;
+
 	/**
-	 * The localized pathname patterns.
-	 *
-	 * The syntax is based on path-to-regexp v8
-	 * https://github.com/pillarjs/path-to-regexp.
-	 *
-	 * @example
-	 *   pathnames: {
-	 *     "/about": {
-	 *        "en": "/about",
-	 *        "de": "/ueber-uns",
-	 *     },
-	 *     // catch all
-	 *     "/{*path}": {
-	 *       "de": "/de/{*path}",
-	 *       "en": "/{*path}",
-	 *     }
-	 *   }
+	 * TODO documentation
 	 */
-	pathnames?: Record<string, Record<string, string>>;
+	urlPatterns?: Runtime["urlPatterns"];
 	/**
 	 * The base path for the pathname strategy.
 	 *

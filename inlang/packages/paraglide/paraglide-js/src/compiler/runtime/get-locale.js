@@ -3,11 +3,11 @@ import {
 	baseLocale,
 	strategy,
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
-	TREE_SHAKE_PATHNAME_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
+	TREE_SHAKE_URL_STRATEGY_USED,
 } from "./variables.js";
 import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
-import { extractLocaleFromPathname } from "./extract-locale-from-pathname.js";
+import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
 
 /**
  * This is a fallback to get started with a custom
@@ -39,19 +39,15 @@ export let getLocale = () => {
 	for (const strat of strategy) {
 		if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
 			locale = extractLocaleFromCookie();
-		}
-		if (strat === "baseLocale") {
+		} else if (strat === "baseLocale") {
 			locale = baseLocale;
-		}
-		if (
-			TREE_SHAKE_PATHNAME_STRATEGY_USED &&
-			strat === "pathname" &&
-			typeof window !== "undefined" &&
-			window.location?.pathname
+		} else if (
+			TREE_SHAKE_URL_STRATEGY_USED &&
+			strat === "url" &&
+			typeof window !== "undefined"
 		) {
-			locale = extractLocaleFromPathname(window.location.pathname);
-		}
-		if (
+			locale = extractLocaleFromUrl(window.location.href);
+		} else if (
 			TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED &&
 			strat === "globalVariable" &&
 			_locale !== undefined
@@ -65,4 +61,23 @@ export let getLocale = () => {
 	}
 
 	throw new Error("No locale found. There is an error in your strategy.");
+};
+
+/**
+ * Define the \`getLocale()\` function.
+ *
+ * Use this function to define how the locale is resolved. For example,
+ * you can resolve the locale from the browser's preferred language,
+ * a cookie, env variable, or a user's preference.
+ *
+ * @example
+ *   defineGetLocale(() => {
+ *     // resolve the locale from a cookie. fallback to the base locale.
+ *     return Cookies.get('locale') ?? baseLocale
+ *   }
+ *
+ * @type {(fn: () => Locale) => void}
+ */
+export const defineGetLocale = (fn) => {
+	getLocale = fn;
 };

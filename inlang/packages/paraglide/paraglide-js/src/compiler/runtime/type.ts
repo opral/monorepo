@@ -6,17 +6,22 @@ export type Runtime = {
 	locales: Readonly<Locale[]>;
 	strategy: typeof import("./variables.js").strategy;
 	cookieName: typeof import("./variables.js").cookieName;
+	urlPatterns: typeof import("./variables.js").urlPatterns;
 	getLocale: typeof import("./get-locale.js").getLocale;
 	setLocale: typeof import("./set-locale.js").setLocale;
+	getUrlOrigin: typeof import("./get-url-origin.js").getUrlOrigin;
 	defineGetLocale: (fn: () => Locale) => void;
 	defineSetLocale: (fn: (newLocale: Locale) => void) => void;
 	assertIsLocale: typeof import("./assert-is-locale.js").assertIsLocale;
 	isLocale: typeof import("./is-locale.js").isLocale;
-	deLocalizePath: typeof import("./de-localize-path.js").deLocalizePath;
-	localizePath: typeof import("./localize-path.js").localizePath;
-	extractLocaleFromPathname: typeof import("./extract-locale-from-pathname.js").extractLocaleFromPathname;
+	localizeHref: typeof import("./localize-href.js").localizeHref;
+	deLocalizeHref: typeof import("./localize-href.js").deLocalizeHref;
+	localizeUrl: typeof import("./localize-url.js").localizeUrl;
+	deLocalizeUrl: typeof import("./localize-url.js").deLocalizeUrl;
+	extractLocaleFromUrl: typeof import("./extract-locale-from-url.js").extractLocaleFromUrl;
 	extractLocaleFromRequest: typeof import("./extract-locale-from-request.js").extractLocaleFromRequest;
 	extractLocaleFromCookie: typeof import("./extract-locale-from-cookie.js").extractLocaleFromCookie;
+	overwriteGetUrlOrigin: typeof import("./get-url-origin.js").overwriteGetUrlOrigin;
 };
 
 /**
