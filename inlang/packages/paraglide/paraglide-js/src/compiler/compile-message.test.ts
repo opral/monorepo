@@ -241,3 +241,71 @@ test("compiles messages that use datetime()", async () => {
 		"Today is 31.3.2022."
 	);
 });
+
+test("compiles messages that use datetime a function with options", async () => {
+	const createMessage = async (locale: string) => {
+		const declarations: Declaration[] = [
+			{ type: "input-variable", name: "count" },
+			{
+				type: "local-variable",
+				name: "formattedDate",
+				value: {
+					arg: { type: "variable-reference", name: "date" },
+					annotation: {
+						type: "function-reference",
+						name: "datetime",
+						options: [
+							{ name: "month", value: { type: "literal", value: "long" } },
+							{ name: "day", value: { type: "literal", value: "numeric" } },
+						],
+					},
+					type: "expression",
+				},
+			},
+		];
+
+		const message: Message = {
+			locale,
+			bundleId: "datetime_test",
+			id: "message_id",
+			selectors: [],
+		};
+
+		const variants: Variant[] = [
+			{
+				id: "1",
+				messageId: "message_id",
+				matches: [],
+				pattern: [
+					{ type: "text", value: "Today is " },
+					{
+						type: "expression",
+						arg: { type: "variable-reference", name: "formattedDate" },
+					},
+					{ type: "text", value: "." },
+				],
+			},
+		];
+
+		const compiled = compileMessage(declarations, message, variants);
+
+		const { datetime_test } = await import(
+			"data:text/javascript;base64," +
+				// bundling the registry inline to avoid managing module imports here
+				btoa(createRegistry()) +
+				btoa(compiled.code.replace("registry.", ""))
+		);
+		return datetime_test;
+	};
+
+	const enMessage = await createMessage("en");
+	const deMessage = await createMessage("de");
+
+	expect(enMessage({ date: "2022-04-01T00:00:00.000Z" })).toBe(
+		"Today is March 31."
+	);
+
+	expect(deMessage({ date: "2022-04-01T00:00:00.000Z" })).toBe(
+		"Today is 31. März."
+	);
+});
