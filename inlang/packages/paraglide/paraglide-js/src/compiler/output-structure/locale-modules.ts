@@ -63,7 +63,7 @@ export function generateLocaleModules(
 
 		// add import if used
 		if (file.includes("registry.")) {
-			file = `import * as registry from "./registry.js"\n` + file;
+			file = `import * as registry from "../registry.js"\n` + file;
 		}
 
 		output[filename] = file;

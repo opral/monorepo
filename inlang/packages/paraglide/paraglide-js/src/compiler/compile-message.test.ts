@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { compileMessage } from "./compile-message.js";
 import type { Declaration, Message, Variant } from "@inlang/sdk";
-import { DEFAULT_REGISTRY } from "./registry.js";
+import { createRegistry } from "./registry.js";
 
 test("compiles a message with a single variant", async () => {
 	const declarations: Declaration[] = [];
@@ -20,12 +20,7 @@ test("compiles a message with a single variant", async () => {
 		},
 	];
 
-	const compiled = compileMessage(
-		declarations,
-		message,
-		variants,
-		DEFAULT_REGISTRY
-	);
+	const compiled = compileMessage(declarations, message, variants);
 
 	const { some_message } = await import(
 		"data:text/javascript;base64," + btoa(compiled.code)
@@ -82,12 +77,7 @@ test("compiles a message with variants", async () => {
 		},
 	];
 
-	const compiled = compileMessage(
-		declarations,
-		message,
-		variants,
-		DEFAULT_REGISTRY
-	);
+	const compiled = compileMessage(declarations, message, variants);
 
 	const { some_message } = await import(
 		"data:text/javascript;base64," + btoa(compiled.code)
@@ -117,17 +107,137 @@ test("only emits input arguments when inputs exist", async () => {
 		},
 	];
 
-	const compiled = compileMessage(
-		declarations,
-		message,
-		variants,
-		DEFAULT_REGISTRY
-	);
+	const compiled = compileMessage(declarations, message, variants);
 
-	expect(compiled.code, "single variant").toBe(
+	expect(compiled.code).toBe(
 		[
 			"/** @type {(inputs: {}) => string} */",
-			"export const some_message = () => `Hello`;",
+			"export const some_message = () => {\n\treturn `Hello`\n};",
 		].join("\n")
+	);
+});
+
+// https://github.com/opral/inlang-paraglide-js/issues/379
+test("compiles messages that use plural()", async () => {
+	const declarations: Declaration[] = [
+		{ type: "input-variable", name: "count" },
+		{
+			type: "local-variable",
+			name: "countPlural",
+			value: {
+				arg: { type: "variable-reference", name: "count" },
+				annotation: {
+					type: "function-reference",
+					name: "plural",
+					options: [],
+				},
+				type: "expression",
+			},
+		},
+	];
+	const message: Message = {
+		locale: "en",
+		bundleId: "plural_test",
+		id: "message_id",
+		selectors: [{ type: "variable-reference", name: "countPlural" }],
+	};
+	const variants: Variant[] = [
+		{
+			id: "1",
+			messageId: "message_id",
+			matches: [{ type: "literal-match", value: "one", key: "countPlural" }],
+			pattern: [{ type: "text", value: "There is one cat." }],
+		},
+		{
+			id: "2",
+			messageId: "message_id",
+			matches: [
+				{
+					type: "literal-match",
+					value: "other",
+					key: "countPlural",
+				},
+			],
+			pattern: [{ type: "text", value: "There are many cats." }],
+		},
+	];
+
+	const compiled = compileMessage(declarations, message, variants);
+
+	const { plural_test } = await import(
+		"data:text/javascript;base64," +
+			// bundling the registry inline to avoid managing module imports here
+			btoa(createRegistry()) +
+			btoa(compiled.code.replace("registry.", ""))
+	);
+
+	expect(plural_test({ count: 1 })).toBe("There is one cat.");
+	expect(plural_test({ count: 2 })).toBe("There are many cats.");
+	// INTL.plural will match "other" for undefined
+	expect(plural_test({ count: undefined })).toBe("There are many cats.");
+});
+
+test("compiles messages that use datetime()", async () => {
+	const createMessage = async (locale: string) => {
+		const declarations: Declaration[] = [
+			{ type: "input-variable", name: "count" },
+			{
+				type: "local-variable",
+				name: "formattedDate",
+				value: {
+					arg: { type: "variable-reference", name: "date" },
+					annotation: {
+						type: "function-reference",
+						name: "datetime",
+						options: [],
+					},
+					type: "expression",
+				},
+			},
+		];
+
+		const message: Message = {
+			locale,
+			bundleId: "datetime_test",
+			id: "message_id",
+			selectors: [],
+		};
+
+		const variants: Variant[] = [
+			{
+				id: "1",
+				messageId: "message_id",
+				matches: [],
+				pattern: [
+					{ type: "text", value: "Today is " },
+					{
+						type: "expression",
+						arg: { type: "variable-reference", name: "formattedDate" },
+					},
+					{ type: "text", value: "." },
+				],
+			},
+		];
+
+		const compiled = compileMessage(declarations, message, variants);
+
+		const { datetime_test } = await import(
+			"data:text/javascript;base64," +
+				// bundling the registry inline to avoid managing module imports here
+				btoa(createRegistry()) +
+				btoa(compiled.code.replace("registry.", ""))
+		);
+		return datetime_test;
+	};
+
+	const enMessage = await createMessage("en");
+	const deMessage = await createMessage("de");
+
+	expect(enMessage({ date: "2022-04-01T00:00:00.000Z" })).toBe(
+		"Today is 3/31/2022."
+	);
+
+	expect(deMessage({ date: "2022-04-01T00:00:00.000Z" })).toBe(
+		"Today is 31.3.2022."
 	);
 });

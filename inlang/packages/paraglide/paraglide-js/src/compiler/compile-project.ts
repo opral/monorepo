@@ -1,5 +1,4 @@
 import { compileBundle } from "./compile-bundle.js";
-import { DEFAULT_REGISTRY } from "./registry.js";
 import { selectBundleNested, type InlangProject } from "@inlang/sdk";
 import { lookup } from "../services/lookup.js";
 import { generateLocaleModules } from "./output-structure/locale-modules.js";
@@ -35,7 +34,6 @@ export const compileProject = async (args: {
 		compileBundle({
 			bundle,
 			fallbackMap,
-			registry: DEFAULT_REGISTRY,
 		})
 	);
 
