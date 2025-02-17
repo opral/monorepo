@@ -124,7 +124,7 @@ test("default url patterns to improve out of the box experience", async () => {
 
 	expect(runtime.urlPatterns).toStrictEqual([
 		{
-			pattern: ":protocol://:domain(.*)::port?/:locale(de|fr)?/:path(.*)",
+			pattern: ":protocol://:domain(.*)::port?/:locale(de|fr)?/:path(.*)?",
 			deLocalizedNamedGroups: { locale: null },
 			localizedNamedGroups: {
 				en: { locale: null },
@@ -142,8 +142,27 @@ test("default url patterns to improve out of the box experience", async () => {
 	expect(runtime.localizeHref("/", { locale: "en" })).toBe("/");
 	expect(runtime.localizeHref("/", { locale: "de" })).toBe("/de/");
 
+	// expecting de-localization to work
+	expect(runtime.deLocalizeHref("/de/")).toBe("/");
+	expect(runtime.deLocalizeHref("/de/about")).toBe("/about");
+	expect(runtime.deLocalizeHref("/about")).toBe("/about");
+
 	// expecting localhost to work (for development)
+	expect(runtime.localizeHref("http://localhost:5173/", { locale: "de" })).toBe(
+		"http://localhost:5173/de/"
+	);
+
+	// de-localizing localhost
+	expect(runtime.deLocalizeHref("http://localhost:5173/de")).toBe(
+		"http://localhost:5173/"
+	);
+
+	// pathnames
 	expect(
 		runtime.localizeHref("http://localhost:5173/about", { locale: "de" })
 	).toBe("http://localhost:5173/de/about");
+
+	expect(runtime.deLocalizeHref("http://localhost:5173/de/about")).toBe(
+		"http://localhost:5173/about"
+	);
 });
