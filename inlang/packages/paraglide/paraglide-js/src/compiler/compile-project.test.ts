@@ -200,6 +200,74 @@ describe.each([
 			});
 		});
 
+		// https://github.com/opral/inlang-paraglide-js/issues/379
+		test("plurals work", async () => {
+			const project = await loadProjectInMemory({
+				blob: await newProject({
+					settings: { locales: ["en", "de"], baseLocale: "en" },
+				}),
+			});
+
+			await insertBundleNested(
+				project.db,
+				createBundleNested({
+					id: "plural_test",
+					declarations: [
+						{ type: "input-variable", name: "count" },
+						{
+							type: "local-variable",
+							name: "countPlural",
+							value: {
+								arg: { type: "variable-reference", name: "count" },
+								annotation: {
+									type: "function-reference",
+									name: "plural",
+									options: [],
+								},
+								type: "expression",
+							},
+						},
+					],
+					messages: [
+						{
+							locale: "en",
+							variants: [
+								{
+									matches: [
+										{ type: "literal-match", value: "one", key: "countPlural" },
+									],
+									pattern: [{ type: "text", value: "There is one cat." }],
+								},
+								{
+									matches: [
+										{
+											type: "literal-match",
+											value: "other",
+											key: "countPlural",
+										},
+									],
+									pattern: [{ type: "text", value: "There are many cats." }],
+								},
+							],
+						},
+					],
+				})
+			);
+
+			const m = await importCode(
+				await bundleCode(
+					await compileProject({
+						project,
+						compilerOptions,
+					}),
+					`export * as m from "./paraglide/messages.js"`
+				)
+			);
+
+			expect(m.plural_test({ count: 1 })).toBe("There is one cat.");
+			expect(m.plural_test({ count: 2 })).toBe("There are many cats.");
+		});
+
 		describe("e2e", async () => {
 			// The compiled output needs to be bundled into one file to be dynamically imported.
 			const code = await bundleCode(
@@ -506,8 +574,8 @@ describe.each([
 
 async function bundleCode(output: Record<string, string>, file: string) {
 	output["runtime.js"] = output["runtime.js"]!.replace(
-		'import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";',
-		"/** @type {any} */const pathToRegexp = {};"
+		'import "@inlang/paraglide-js/urlpattern-polyfill";',
+		"/** @type {any} */const URLPattern = {};"
 	);
 
 	const bundle = await rolldown({
@@ -719,7 +787,7 @@ function createBundleNested(args: {
 					"_" +
 					message.locale +
 					"_" +
-					variant.pattern.map((p) => p.type).join(""),
+					Math.random().toString(36).slice(2),
 				messageId: args.id,
 				matches: variant.matches ?? [],
 				pattern: variant.pattern,
