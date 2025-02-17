@@ -20,6 +20,7 @@
 	"dependencies": {
 		"@lix-js/sdk": "workspace:*",
 		"crypto": "^1.0.1",
+		"diff": "^7.0.0",
 		"lit": "^3.2.1",
 		"papaparse": "^5.4.1",
 		"remark-parse": "10.0.2",

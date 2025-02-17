@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/plate-ui/avatar.tsx";
 import { Button } from "@/components/plate-ui/button.tsx";
@@ -114,7 +116,7 @@ export const CheckpointComponent = (props: {
                 <ChangeDiffComponent
                   key={pluginKey}
                   diffs={groupedChanges[pluginKey]}
-                  debug={true}
+                  // debug={true}
                 />
               ))}
             </div>

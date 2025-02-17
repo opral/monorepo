@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Button } from "@/components/plate-ui/button";
 import clsx from "clsx";
@@ -67,7 +69,7 @@ export const IntermediateCheckpointComponent = () => {
                 <ChangeDiffComponent
                   key={pluginKey}
                   diffs={groupedChanges[pluginKey]}
-                  debug={true}
+                // debug={true}
                 />
               ))}
             </div>

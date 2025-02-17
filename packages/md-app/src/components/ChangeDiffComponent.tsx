@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { UiDiffComponentProps } from "@lix-js/sdk";
 import { lixAtom } from "@/state.ts";

@@ -1,123 +1,69 @@
 import { css, html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 import type { UiDiffComponentProps } from "@lix-js/sdk";
+import { diffLines } from "diff";
 
 export class DiffComponent extends LitElement {
 	static override styles = css`
 		:host {
-			/* Ensure the component respects app-wide theming */
-			--color-border: #e2e8f0;
-			--color-background: #ffffff;
-			--color-icon: #9ca3af; /* Default gray */
-			--color-text: #000000; /* Default text color */
+			--color-added-bg: #e6ffed;
+			--color-added-text: #22863a;
+			--color-removed-bg: #ffeef0;
+			--color-removed-text: #b31d28;
+			--color-border: #e1e4e8;
+			--color-line-bg: #f6f8fa;
+			--color-text: #24292e;
 		}
 
-		.list-container {
-			font-family: Arial, sans-serif;
+		.diff-container {
 			display: flex;
-			flex-wrap: wrap;
-			align-items: left;
 			flex-direction: column;
-			gap: 1rem;
-
-			width: 100%;
-			container: list-container / inline-size;
-		}
-
-		.container {
-			font-family: Arial, sans-serif;
-			display: flex;
-			flex-wrap: wrap;
-			gap: 0.25rem;
-
-			@container list-container (min-width: 600px) {
-				flex-wrap: nowrap;
-			}
-		}
-
-		.group {
-			display: flex;
-			flex-direction: row;
-			width: content-fit;
-
-			@container list-container (min-width: 600px) {
-				flex-direction: column;
-			}
-		}
-
-		.value {
-			// padding: 0;
-			// color: black;
-			// background: none;
-			// border: none;
-			// border-radius: 0;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-			margin: 0;
-			padding: 0.375rem 1rem;
-			background-color: white;
-			border: 1px solid #e5e7eb;
-			border-radius: 9999px;
-			width: fit-content;
-			min-width: 132px;
-
-			@container list-container (min-width: 600px) {
-				margin: 0rem 1rem 0rem 0rem;
-			}
-		}
-
-		.label {
-			color: #6b7280;
-			padding: 0.25rem 0;
-			margin: 0;
-			font-size: 14px;
-			text-transform: uppercase;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-			width: 140px;
-
-			@container list-container (min-width: 600px) {
-				width: 100%;
-			}
-		}
-
-		.box {
-			overflow: hidden;
-			padding: 0.375rem 0.75rem;
-			margin: 0;
-			flex: 1 1 0%;
 			border: 1px solid var(--color-border);
-			text-overflow: ellipsis;
-			white-space: nowrap;
-			background-color: var(--color-background);
+			border-radius: 6px;
+			overflow: hidden;
+			font-family: "Courier New", monospace;
+		}
+
+		.diff-row {
+			display: flex;
+			width: 100%;
+		}
+
+		.column {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			border-right: 1px solid var(--color-border);
+		}
+
+		.line {
+			display: flex;
+			align-items: center;
+			padding: 4px 8px;
+			white-space: pre-wrap;
+		}
+
+		.line-number {
+			width: 40px;
+			text-align: right;
+			padding: 4px 8px;
+			background-color: var(--color-line-bg);
 			color: var(--color-text);
-			min-height: 1.5rem;
-			width: 140px;
-
-			@container list-container (min-width: 600px) {
-				width: content-fit;
-				min-width: 140px;
-			}
+			border-right: 1px solid var(--color-border);
 		}
 
-		.box.dotted {
-			border-style: dashed;
-			background-color: transparent;
+		.added {
+			background-color: var(--color-added-bg);
+			color: var(--color-added-text);
 		}
 
-		.icon {
-			margin: 0.25rem;
-			width: 18px;
-			height: 18px;
-			color: var(--color-icon);
-			transform: rotate(-90deg);
-			align-self: center;
+		.removed {
+			background-color: var(--color-removed-bg);
+			color: var(--color-removed-text);
+		}
 
-			@container list-container (min-width: 600px) {
-				transform: rotate(0deg);
-			}
+		.empty {
+			visibility: hidden;
 		}
 	`;
 
@@ -125,63 +71,66 @@ export class DiffComponent extends LitElement {
 	diffs: UiDiffComponentProps["diffs"] = [];
 
 	override render() {
-		// group changes based on rowId
-		const groupedChanges = this.diffs.reduce(
-			(acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
-				const key =
-					change.snapshot_content_after?.rowId ||
-					change.snapshot_content_before?.rowId;
-				if (key) {
-					if (!acc[key]) {
-						acc[key] = [];
-					}
-					acc[key].push(change);
-				}
-				return acc;
-			},
-			{},
-		);
+		return html`
+			<div class="diff-container">
+				${this.diffs.map((diff) => this.renderDiff(diff))}
+			</div>
+		`;
+	}
 
-		return html` <div class="list-container">
-			${Object.keys(groupedChanges).map((rowId) => {
-				const changes = groupedChanges[rowId];
-				const rowValue = rowId.split("|")[1];
-				return html`
-					<div class="container">
-						<div class="group">
-							<p class="label">UNIQUE VALUE</p>
-							<p class="value">${rowValue}</p>
-						</div>
-						${changes?.map((change) => {
-							const column = change.entity_id.split("|")[2];
-							const value = change.snapshot_content_after?.text;
-							const parentValue = change.snapshot_content_before?.text;
+	renderDiff(diff: UiDiffComponentProps["diffs"][0]) {
+		const before = diff.snapshot_content_before?.text || "";
+		const after = diff.snapshot_content_after?.text || "";
+		const lineDiffs = diffLines(before, after);
 
-							return html`
-								<div class="group">
-									<p class="label">${column}</p>
-									${value
-										? html`<p class="box">${value}</p>`
-										: html`<p class="dotted box"></p>`}
-									<svg
-										class="icon"
-										xmlns="http://www.w3.org/2000/svg"
-										viewBox="0 0 24 24"
-									>
-										<path
-											fill="currentColor"
-											d="M11 20h2V8l5.5 5.5l1.42-1.42L12 4.16l-7.92 7.92L5.5 13.5L11 8z"
-										></path>
-									</svg>
-									${parentValue
-										? html`<p class="box">${parentValue}</p>`
-										: html`<p class="dotted box"></p>`}
-								</div>
-							`;
-						})}
+		const oldLine = 1;
+		const newLine = 1;
+
+		// Track left and right columns
+		const leftColumn: unknown[] = [];
+		const rightColumn: unknown[] = [];
+
+		lineDiffs.forEach((part) => {
+			const isAdded = part.added;
+			const isRemoved = part.removed;
+			const className = isAdded ? "added" : isRemoved ? "removed" : "";
+
+			if (isRemoved) {
+				// Removed lines go only in the left column
+				leftColumn.push(html`
+					<div class="diff-row ${className}">
+						<span class="line">${part.value}</span>
 					</div>
-				`;
-			})}
-		</div>`;
+				`);
+				rightColumn.push(html`<div class="diff-row empty"></div>`);
+			} else if (isAdded) {
+				// Added lines go only in the right column
+				rightColumn.push(html`
+					<div class="diff-row ${className}">
+						<span class="line">${part.value}</span>
+					</div>
+				`);
+				leftColumn.push(html`<div class="diff-row empty"></div>`);
+			} else {
+				// Unchanged lines go in both columns
+				leftColumn.push(html`
+					<div class="diff-row">
+						<span class="line">${part.value}</span>
+					</div>
+				`);
+				rightColumn.push(html`
+					<div class="diff-row">
+						<span class="line">${part.value}</span>
+					</div>
+				`);
+			}
+		});
+
+		return html`
+			<div class="diff-row">
+				<div class="column">${leftColumn}</div>
+				<div class="column">${rightColumn}</div>
+			</div>
+		`;
 	}
 }
