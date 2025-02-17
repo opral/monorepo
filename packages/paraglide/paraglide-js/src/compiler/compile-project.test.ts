@@ -131,7 +131,7 @@ test("can emit message bundles with more than 255 characters", async () => {
 	const { m } = await importCode(code);
 
 	expect(m["a".repeat(300)]()).toBe("Hello");
-})
+});
 
 describe.each([
 	// useTsImports must be true to test emitTs. Otherwise, rolldown can't resolve the imports

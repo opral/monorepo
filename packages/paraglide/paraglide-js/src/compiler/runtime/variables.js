@@ -22,19 +22,16 @@ export const locales = /** @type {const} */ (["en", "de"]);
 export const cookieName = "<cookie-name>";
 
 /**
- * @type {Array<"cookie" | "baseLocale" | "pathname" | "globalVariable">}
+ * @type {Array<"cookie" | "baseLocale" | "globalVariable" | "url">}
  */
 export const strategy = ["globalVariable"];
 
 /**
- * The localized pathnames.
+ * The used URL patterns.
  *
- * @type {Record<string, Record<Locale, string>>}
+ * @type {Array<{ pattern: string, deLocalizedNamedGroups: Record<string, string | null>, localizedNamedGroups: Record<string, Record<string, string | null>> }>}
  */
-export const pathnames = {};
-
-/** @type {string | undefined} */
-export const pathnameBase = undefined;
+export const urlPatterns = [];
 
 /**
  * Whether the pathnames are the default pathnames.
@@ -49,6 +46,6 @@ export const TREE_SHAKE_IS_DEFAULT_PATHNAMES = false;
 
 export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;
 
-export const TREE_SHAKE_PATHNAME_STRATEGY_USED = false;
+export const TREE_SHAKE_URL_STRATEGY_USED = false;
 
 export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;
