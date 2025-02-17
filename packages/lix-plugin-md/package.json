@@ -31,6 +31,7 @@
 	"devDependencies": {
 		"@eslint/js": "^9.12.0",
 		"@opral/tsconfig": "workspace:*",
+		"@types/diff": "^7.0.1",
 		"@types/mdast": "^4.0.4",
 		"@types/papaparse": "^5.3.14",
 		"@vitest/coverage-v8": "^2.0.5",
