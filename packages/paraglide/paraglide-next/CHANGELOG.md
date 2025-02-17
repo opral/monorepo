@@ -1,5 +1,9 @@
 # @inlang/paraglide-next
 
+## 1.0.0-beta.8
+
+Update to Paraglide JS 2.0-beta.18
+
 ## 0.7.9
 
 ### Patch Changes
