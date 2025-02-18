@@ -104,8 +104,11 @@ function serializeVariants(
 	return {
 		// naively adding all declarations, even if unused in the variants
 		// can be optimized later.
-		declarations: bundle.declarations.map(serializeDeclaration),
-		selectors: message.selectors.map((s) => s.name),
+		declarations: bundle.declarations
+			.sort((a, b) => a.name.localeCompare(b.name))
+			.map(serializeDeclaration)
+			.sort(),
+		selectors: message.selectors.map((s) => s.name).sort(),
 		match: Object.fromEntries(entries),
 	};
 }
@@ -128,14 +131,14 @@ function serializePattern(pattern: Variant["pattern"]): string {
 // input: { platform: "android", userGender: "male" }
 // output: `platform=android,userGender=male`
 function serializeMatcher(matches: Match[]): string {
-	const parts = [];
-	for (const match of matches) {
-		if (match.type === "literal-match") {
-			parts.push(`${match.key}=${match.value}`);
-		} else {
-			parts.push(`${match.key}=*`);
-		}
-	}
+	const parts = matches
+		.sort((a, b) => a.key.localeCompare(b.key))
+		.map((match) =>
+			match.type === "literal-match"
+				? `${match.key}=${match.value}`
+				: `${match.key}=*`
+		);
+
 	return parts.join(", ");
 }
 
