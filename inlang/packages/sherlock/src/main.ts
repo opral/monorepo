@@ -97,9 +97,6 @@ async function main(args: {
 		await registerExtensionComponents(args)
 		await handleInlangErrors()
 
-		// Save Project
-		await saveProject(args)
-
 		// TODO: Replace by reactive settings API?
 		setupFileSystemWatcher(args)
 
@@ -187,18 +184,19 @@ async function setProjects(args: { workspaceFolder: vscode.WorkspaceFolder }) {
 	}
 }
 
-async function saveProject(args: { workspaceFolder: vscode.WorkspaceFolder; fs: FileSystem }) {
-	setInterval(async () => {
-		try {
-			if (state().selectedProjectPath && state().project) {
-				await saveProjectToDirectory({
-					fs: args.fs,
-					project: state().project,
-					path: state().selectedProjectPath,
-				})
-			}
-		} catch (error) {
-			handleError(error)
+export async function saveProject(args: {
+	workspaceFolder: vscode.WorkspaceFolder
+	fs: FileSystem
+}) {
+	try {
+		if (state().selectedProjectPath && state().project) {
+			await saveProjectToDirectory({
+				fs: args.fs,
+				project: state().project,
+				path: state().selectedProjectPath,
+			})
 		}
-	}, 2000)
+	} catch (error) {
+		handleError(error)
+	}
 }
