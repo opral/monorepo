@@ -302,12 +302,12 @@ describe.each([
 				expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
 			});
 
-			test("defineGetLocale() works", async () => {
+			test("overwriteGetLocale() works", async () => {
 				const { m, runtime } = await importCode(code);
 
 				let locale = "en";
 
-				runtime.defineGetLocale(() => locale);
+				runtime.overwriteGetLocale(() => locale);
 
 				expect(m.sad_penguin_bundle()).toBe("A simple message.");
 
@@ -316,12 +316,12 @@ describe.each([
 				expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
 			});
 
-			test("defineSetLocale() works", async () => {
+			test("overwriteSetLocale() works", async () => {
 				const { runtime } = await importCode(code);
 
 				let locale = "en";
 
-				runtime.defineSetLocale((newLocale: any) => {
+				runtime.overwriteSetLocale((newLocale: any) => {
 					locale = newLocale;
 				});
 

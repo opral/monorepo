@@ -3,8 +3,8 @@ import * as m from "./paraglide/messages.js";
 import {
 	getLocale,
 	setLocale,
-	defineGetLocale,
-	defineSetLocale,
+	overwriteGetLocale,
+	overwriteSetLocale,
 	baseLocale,
 	type Locale,
 } from "./paraglide/runtime.js";
@@ -12,11 +12,11 @@ import {
 function App() {
 	const [localeRenderKey, setLocaleRenderKey] = useState(getLocale());
 
-	defineGetLocale(() => {
+	overwriteGetLocale(() => {
 		return (localStorage.getItem("locale") as Locale) ?? baseLocale;
 	});
 
-	defineSetLocale((newLocale) => {
+	overwriteSetLocale((newLocale) => {
 		localStorage.setItem("locale", newLocale);
 		setLocaleRenderKey(newLocale);
 	});

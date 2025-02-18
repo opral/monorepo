@@ -5,7 +5,7 @@
  */
 import {
 	assertIsLocale,
-	defineGetLocale,
+	overwriteGetLocale,
 	deLocalizeUrl,
 	extractLocaleFromRequest,
 	overwriteGetUrlOrigin,
@@ -23,7 +23,7 @@ let asyncStorage;
  * Each request has a scoped locale during the rendering process.
  */
 if (import.meta.env.SSR) {
-	defineGetLocale(() => assertIsLocale(asyncStorage.getStore()?.locale));
+	overwriteGetLocale(() => assertIsLocale(asyncStorage.getStore()?.locale));
 	overwriteGetUrlOrigin(
 		() => asyncStorage.getStore()?.origin ?? "http://fallback.com"
 	);

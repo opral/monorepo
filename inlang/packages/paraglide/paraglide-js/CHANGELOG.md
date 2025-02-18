@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.19
+
+- rename `defineGetLocale()` and `defineSetLocale()` to `overwriteGetLocale()` and `overwriteSetLocale()` https://github.com/opral/inlang-paraglide-js/issues/382
+
 ## 2.0.0-beta.18
 
 Added URLPatterns as a replacement for the beta 17 pathnames API. 
