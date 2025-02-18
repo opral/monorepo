@@ -86,3 +86,23 @@ test("url pattern strategy doesn't throw during SSR", async () => {
 
 	expect(() => runtime.getLocale()).not.toThrow();
 });
+
+test("doesn't throw for an old cookie locale", async () => {
+	const baseLocale = "en";
+
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["cookie", "baseLocale"],
+			cookieName: "PARAGLIDE_LOCALE",
+		},
+	});
+
+	// @ts-expect-error - global variable definition
+	globalThis.document = {};
+	globalThis.document.cookie = "PARAGLIDE_LOCALE=fr;";
+
+	const locale = runtime.getLocale();
+	expect(locale).toBe(baseLocale);
+});
