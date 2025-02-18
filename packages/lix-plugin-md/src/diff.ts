@@ -41,6 +41,7 @@ export class DiffComponent extends LitElement {
 			align-items: center;
 			padding: 4px 8px;
 			white-space: pre-wrap;
+			word-break: break-all;
 		}
 
 		.line-number {
@@ -82,9 +83,6 @@ export class DiffComponent extends LitElement {
 		const before = diff.snapshot_content_before?.text || "";
 		const after = diff.snapshot_content_after?.text || "";
 		const lineDiffs = diffLines(before, after);
-
-		const oldLine = 1;
-		const newLine = 1;
 
 		// Track left and right columns
 		const leftColumn: unknown[] = [];
