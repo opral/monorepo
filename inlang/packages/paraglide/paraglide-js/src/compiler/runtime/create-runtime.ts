@@ -1,6 +1,9 @@
 import fs from "node:fs";
-import { defaultCompilerOptions, type CompilerOptions } from "../compile.js";
 import type { Runtime } from "./type.js";
+import {
+	defaultCompilerOptions,
+	type CompilerOptions,
+} from "../compiler-options.js";
 
 /**
  * Returns the code for the `runtime.js` module

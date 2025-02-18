@@ -1,9 +1,10 @@
 import type { UnpluginFactory } from "unplugin";
-import { compile, type CompilerOptions } from "../compiler/compile.js";
+import { compile } from "../compiler/compile.js";
 import fs from "node:fs";
 import { resolve } from "node:path";
 import { nodeNormalizePath } from "../utilities/node-normalize-path.js";
 import { Logger } from "../services/logger/index.js";
+import type { CompilerOptions } from "../compiler/compiler-options.js";
 
 const PLUGIN_NAME = "unplugin-paraglide-js";
 

@@ -8,7 +8,7 @@ import { createRuntimeFile } from "./create-runtime.js";
 import fs from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "url";
-import { defaultCompilerOptions } from "../compile.js";
+import { defaultCompilerOptions } from "../compiler-options.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
