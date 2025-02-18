@@ -2,8 +2,8 @@
  * The Paraglide runtime API.
  */
 export type Runtime = {
-	baseLocale: Locale;
-	locales: Readonly<Locale[]>;
+	baseLocale: typeof import("./variables.js").baseLocale;
+	locales: typeof import("./variables.js").locales;
 	strategy: typeof import("./variables.js").strategy;
 	cookieName: typeof import("./variables.js").cookieName;
 	urlPatterns: typeof import("./variables.js").urlPatterns;
@@ -23,8 +23,3 @@ export type Runtime = {
 	extractLocaleFromCookie: typeof import("./extract-locale-from-cookie.js").extractLocaleFromCookie;
 	overwriteGetUrlOrigin: typeof import("./get-url-origin.js").overwriteGetUrlOrigin;
 };
-
-/**
- * Locale is any here because the locale is unknown before compilation.
- */
-type Locale = any;

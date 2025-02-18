@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { generateMessageModules } from "./message-modules.js";
 import type { Bundle, Message, ProjectSettings } from "@inlang/sdk";
 import type { CompiledBundleWithMessages } from "../compile-bundle.js";
-import { defaultCompilerOptions } from "../compile.js";
+import { defaultCompilerOptions } from "../compiler-options.js";
 
 test("should emit per locale message files", () => {
 	const resources: CompiledBundleWithMessages[] = [
