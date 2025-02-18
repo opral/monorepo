@@ -233,9 +233,13 @@ test("compiles messages that use datetime()", async () => {
 	const enMessage = await createMessage("en");
 	const deMessage = await createMessage("de");
 
-	expect(enMessage({ date: "2022-04-01" })).toMatch(/Today is \d{1,2}\/\d{1,2}\/2022\./);
+	expect(enMessage({ date: "2022-04-01" })).toMatch(
+		/Today is \d{1,2}\/\d{1,2}\/2022\./
+	);
 
-	expect(deMessage({ date: "2022-04-01" })).toMatch(/Today is \d{1,2}\.\d{1,2}\.2022\./);
+	expect(deMessage({ date: "2022-04-01" })).toMatch(
+		/Today is \d{1,2}\.\d{1,2}\.2022\./
+	);
 });
 
 test("compiles messages that use datetime a function with options", async () => {

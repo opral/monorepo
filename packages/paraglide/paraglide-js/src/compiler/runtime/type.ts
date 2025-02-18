@@ -10,8 +10,8 @@ export type Runtime = {
 	getLocale: typeof import("./get-locale.js").getLocale;
 	setLocale: typeof import("./set-locale.js").setLocale;
 	getUrlOrigin: typeof import("./get-url-origin.js").getUrlOrigin;
-	defineGetLocale: (fn: () => Locale) => void;
-	defineSetLocale: (fn: (newLocale: Locale) => void) => void;
+	overwriteGetLocale: typeof import("./get-locale.js").overwriteGetLocale;
+	overwriteSetLocale: typeof import("./set-locale.js").overwriteSetLocale;
 	assertIsLocale: typeof import("./assert-is-locale.js").assertIsLocale;
 	isLocale: typeof import("./is-locale.js").isLocale;
 	localizeHref: typeof import("./localize-href.js").localizeHref;

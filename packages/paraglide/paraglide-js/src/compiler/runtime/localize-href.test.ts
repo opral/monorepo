@@ -17,7 +17,7 @@ test("uses the locale from getLocale() if no locale is provided", async () => {
 		},
 	});
 
-	runtime.defineGetLocale(() => "de");
+	runtime.overwriteGetLocale(() => "de");
 
 	expect(runtime.localizeHref("/hello")).toBe("/de/hello");
 	expect(runtime.deLocalizeHref("/de/hello")).toBe("/hello");
@@ -68,7 +68,7 @@ test("returns an absolute href if the provided href is relative but the origin o
 	});
 
 	// simulating routing from current en page to de page
-	runtime.defineGetLocale(() => "en");
+	runtime.overwriteGetLocale(() => "en");
 
 	expect(runtime.localizeHref("/hello", { locale: "de" })).toBe(
 		"http://de.example.com/hello"
@@ -78,7 +78,7 @@ test("returns an absolute href if the provided href is relative but the origin o
 	);
 
 	// simulating routing from current de page to en page
-	runtime.defineGetLocale(() => "de");
+	runtime.overwriteGetLocale(() => "de");
 
 	expect(runtime.localizeHref("/hello", { locale: "en" })).toBe(
 		"http://example.com/hello"
