@@ -3,7 +3,7 @@ import { compile, type CompilerOptions } from "../compiler/compile.js";
 import fs from "node:fs";
 import { resolve } from "node:path";
 import { nodeNormalizePath } from "../utilities/node-normalize-path.js";
-import { Logger } from "../cli/index.js";
+import { Logger } from "../services/logger/index.js";
 
 const PLUGIN_NAME = "unplugin-paraglide-js";
 
