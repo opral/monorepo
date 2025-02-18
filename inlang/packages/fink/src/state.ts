@@ -58,7 +58,7 @@ export const projectAtom = atom(async (get) => {
 			await writable.close();
 		}, 2000);
 
-		//@ts-ignore
+		// @ts-expect-error - expose the project to the window for debugging
 		window.lix = project.lix;
 
 		return project;
@@ -150,7 +150,8 @@ export const committedChangesAtom = atom(async (get) => {
 		.where("commit_id", "is not", null)
 		// TODO remove after sequence concept on lix
 		// https://linear.app/opral/issue/LIX-126/branching
-		.where(isInSimulatedCurrentBranch)
+		// TODO Fink update
+		// .where(isInSimulatedCurrentBranch)
 		.innerJoin("commit", "commit.id", "change.commit_id")
 		.orderBy("commit.created_at desc")
 		.execute();
@@ -168,7 +169,8 @@ export const pendingChangesAtom = atom(async (get) => {
 		.where("commit_id", "is", null)
 		// TODO remove after sequence concept on lix
 		// https://linear.app/opral/issue/LIX-126/branching
-		.where(isInSimulatedCurrentBranch)
+		// TODO Fink update
+		// .where(isInSimulatedCurrentBranch)
 		.execute();
 	return result;
 });
@@ -184,7 +186,8 @@ export const groupedPendingChangesAtom = atom(async (get) => {
 		.where("commit_id", "is", null)
 		// TODO remove after sequence concept on lix
 		// https://linear.app/opral/issue/LIX-126/branching
-		.where(isInSimulatedCurrentBranch)
+		// TODO Fink update
+		// .where(isInSimulatedCurrentBranch)
 		.execute();
 
 	const latestChangesPerEntity: Change[] = [];
@@ -286,8 +289,7 @@ export const commitsAtom = atom(async (get) => {
 		.execute();
 });
 
-//@ts-ignore
-const humanFileSize = (bytes, si = false, dp = 1) => {
+const humanFileSize = (bytes: number, si = false, dp = 1) => {
 	const thresh = si ? 1000 : 1024;
 
 	if (Math.abs(bytes) < thresh) {
@@ -308,24 +310,22 @@ const humanFileSize = (bytes, si = false, dp = 1) => {
 	return bytes.toFixed(dp) + " " + units[u];
 };
 
-//@ts-ignore
+// @ts-expect-error - any is ok for now as return type
 const getDirectoryEntriesRecursive = async (relativePath = ".") => {
-	// @ts-ignore
 	const directoryHandle = await navigator.storage.getDirectory();
 	const fileHandles = [];
 	const directoryHandles = [];
 
 	// Get an iterator of the files and folders in the directory.
-	// @ts-ignore
+	// @ts-expect-error - TODO Update Fink - types
 	const directoryIterator = directoryHandle.values();
 	const directoryEntryPromises = [];
 	for await (const handle of directoryIterator) {
 		const nestedPath = `${relativePath}/${handle.name}`;
 		if (handle.kind === "file") {
-			// @ts-ignore
 			fileHandles.push({ handle, nestedPath });
 			directoryEntryPromises.push(
-				// @ts-ignore
+				// @ts-expect-error - TODO Update Fink - types
 				handle.getFile().then((file) => {
 					return {
 						name: handle.name,
@@ -337,19 +337,18 @@ const getDirectoryEntriesRecursive = async (relativePath = ".") => {
 				})
 			);
 		} else if (handle.kind === "directory") {
-			// @ts-ignore
 			directoryHandles.push({ handle, nestedPath });
 			directoryEntryPromises.push(
-				// @ts-ignore
+				// @ts-expect-error - TODO Update Fink - types
 				(async () => {
 					return {
 						name: handle.name,
-						// @ts-ignore
+						// @ts-expect-error - TODO Update Fink - types
 						file,
-						// @ts-ignore
+						// @ts-expect-error - TODO Update Fink - types
 						size: humanFileSize(file.size),
 						relativePath: nestedPath,
-						// @ts-ignore
+						// @ts-expect-error - TODO Update Fink - types
 						entries: await getDirectoryEntriesRecursive(handle, nestedPath),
 						handle,
 					};
@@ -360,10 +359,10 @@ const getDirectoryEntriesRecursive = async (relativePath = ".") => {
 	return await Promise.all(directoryEntryPromises);
 };
 
-//@ts-ignore
+// @ts-expect-error - we expoese the db for debugging
 window.databases = await getDirectoryEntriesRecursive();
 
-//@ts-ignore
+// @ts-expect-error - we expoese a delete all helper function for debugging
 window.deleteAll = async () => {
 	clearInterval(safeProjectToOpfsInterval);
 	const databases = await getDirectoryEntriesRecursive();
