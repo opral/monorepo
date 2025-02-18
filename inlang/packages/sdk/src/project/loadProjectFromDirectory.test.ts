@@ -966,3 +966,69 @@ test("providing multiple plugins that have legacy loadMessages and saveMessages 
 	expect(mockPlugin2.importFiles).toHaveBeenCalled();
 	expect(mockPlugin2.loadMessages).not.toHaveBeenCalled();
 });
+
+// https://github.com/opral/inlang-sdk/issues/228
+test("the lix id should be stable between loadings of the same project", async () => {
+	const mockRepo = {
+		"/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en"],
+			modules: [],
+		} satisfies ProjectSettings),
+	};
+
+	const fs = Volume.fromJSON(mockRepo);
+
+	const project1 = await loadProjectFromDirectory({
+		fs: fs as any,
+		path: "/project.inlang",
+	});
+
+	const inlangId = await project1.id.get();
+
+	const { value: lixId } = await project1.lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// the project_id file does not exist on the first load
+	await saveProjectToDirectory({
+		fs: fs.promises as any,
+		path: "/project.inlang",
+		project: project1,
+	});
+
+	const project2 = await loadProjectFromDirectory({
+		fs: fs as any,
+		path: "/project.inlang",
+	});
+
+	const inlangId2 = await project2.id.get();
+
+	const { value: lixId2 } = await project2.lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const project3 = await loadProjectFromDirectory({
+		fs: fs as any,
+		path: "/project.inlang",
+	});
+
+	const inlangId3 = await project3.id.get();
+	const { value: lixId3 } = await project3.lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(inlangId).not.toBeUndefined();
+	expect(inlangId).toBe(inlangId2);
+	expect(inlangId).toBe(inlangId3);
+
+	expect(lixId).not.toBeUndefined();
+	expect(lixId).toBe(lixId2);
+	expect(lixId).toBe(lixId3);
+});
