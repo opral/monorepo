@@ -2,4 +2,4 @@
 "@inlang/plugin-message-format": patch
 ---
 
-:qa
+- update `exportFiles` to emit sorted output to have less diff noise 
