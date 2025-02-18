@@ -466,9 +466,20 @@ async function syncLixFsFiles(args: {
 				if (lixState.state == "unknown") {
 					// ADD TO FS (6)
 					// create directory if not exists
-					args.fs.mkdirSync(nodePath.dirname(nodePath.join(args.path, path)), {
-						recursive: true,
-					});
+					try {
+						args.fs.mkdirSync(
+							nodePath.dirname(nodePath.join(args.path, path)),
+							{
+								recursive: true,
+							}
+						);
+					} catch (e) {
+						// ignore if directory already exists
+						// https://github.com/opral/inlang-paraglide-js/issues/377
+						if ((e as any)?.code !== "EEXIST") {
+							throw e;
+						}
+					}
 					// write file
 					args.fs.writeFileSync(
 						nodePath.join(args.path, path),
