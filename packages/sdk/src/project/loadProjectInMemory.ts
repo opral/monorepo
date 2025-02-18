@@ -1,4 +1,4 @@
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLixInMemory, type NewKeyValue } from "@lix-js/sdk";
 import { createInMemoryDatabase, importDatabase } from "sqlite-wasm-kysely";
 import { loadProject } from "./loadProject.js";
 
@@ -8,11 +8,13 @@ import { loadProject } from "./loadProject.js";
 export async function loadProjectInMemory(
 	args: {
 		blob: Blob;
+		lixKeyValues?: NewKeyValue[];
 	} & Omit<Parameters<typeof loadProject>[0], "sqlite" | "lix">
 ) {
 	const lix = await openLixInMemory({
 		blob: args.blob,
 		account: args.account,
+		keyValues: args.lixKeyValues,
 		providePlugins: [
 			// inlangLixPluginV1
 		],
