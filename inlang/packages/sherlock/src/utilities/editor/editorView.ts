@@ -11,6 +11,11 @@ import type { ChangeEventDetail } from "@inlang/editor-component"
 import { deleteVariant } from "./helper/deleteVariant.js"
 import { deleteBundleNested } from "./helper/deleteBundleNested.js"
 import { handleUpdateBundle } from "./helper/handleBundleUpdate.js"
+import { createMessage } from "./helper/createMessage.js"
+import { saveProject } from "../../main.js"
+import { createFileSystemMapper } from "../fs/createFileSystemMapper.js"
+import path from "path"
+import fs from "node:fs/promises"
 
 // Same interface as before
 export interface UpdateBundleMessage {
@@ -51,7 +56,7 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 		// Otherwise, create a brand-new panel
 		panel = vscode.window.createWebviewPanel(
 			EDITOR_PANEL_ID,
-			"Editor Panel",
+			`# ${bundleId}`,
 			vscode.ViewColumn.One,
 			{
 				enableScripts: true,
@@ -113,9 +118,15 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 			console.log("Received command from webview:", command, message)
 
 			switch (command) {
-				case "delete-variant":
-					console.log("delete-variant", message)
+				case "create-message":
+					await createMessage({
+						db: state().project?.db,
+						message: message.message,
+					})
 
+					updateView()
+					return
+				case "delete-variant":
 					await deleteVariant({
 						db: state().project?.db,
 						variantId: message.id,
@@ -132,8 +143,6 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 					updateView()
 					return
 				case "change":
-					console.log("change", message)
-
 					await handleUpdateBundle({
 						db: state().project?.db,
 						message,
@@ -163,6 +172,19 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 				settings: await state().project?.settings.get(),
 			},
 		})
+
+		const workspaceFolder = vscode.workspace.workspaceFolders![0]
+		if (workspaceFolder) {
+			try {
+				await saveProject({
+					workspaceFolder,
+					fs: createFileSystemMapper(path.normalize(workspaceFolder.uri.fsPath), fs),
+				})
+			} catch (error) {
+				console.error("Failed to save project", error)
+				msg(`Failed to save project. ${String(error)}`, "error")
+			}
+		}
 	}
 
 	/**
@@ -238,7 +260,7 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
         <meta http-equiv="Content-Security-Policy" content="${csp.join("; ")}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" type="text/css" href="${stylesUri}">
-        <title>VSCode React Starter</title>
+        <title>${bundleId}</title>
       </head>
       <body>
         <div id="root"></div>
