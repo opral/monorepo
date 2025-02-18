@@ -1,4 +1,4 @@
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 import { setLocale } from "./paraglide/runtime.js";
 
 function App() {

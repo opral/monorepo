@@ -1,5 +1,5 @@
 import * as assert from "node:assert";
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 import { setLocale } from "./paraglide/runtime.js";
 import { test } from "node:test";
 
