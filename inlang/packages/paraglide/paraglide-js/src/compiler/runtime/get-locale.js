@@ -14,7 +14,7 @@ import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
  * strategy and avoid type errors.
  *
  * The implementation is overwritten
- * by \`defineGetLocale()\` and \`defineSetLocale()\`.
+ * by \`overwriteGetLocale()\` and \`defineSetLocale()\`.
  *
  * @type {Locale|undefined}
  */
@@ -64,20 +64,20 @@ export let getLocale = () => {
 };
 
 /**
- * Define the \`getLocale()\` function.
+ * Overwrite the \`getLocale()\` function.
  *
- * Use this function to define how the locale is resolved. For example,
+ * Use this function to overwrite how the locale is resolved. For example,
  * you can resolve the locale from the browser's preferred language,
  * a cookie, env variable, or a user's preference.
  *
  * @example
- *   defineGetLocale(() => {
+ *   overwriteGetLocale(() => {
  *     // resolve the locale from a cookie. fallback to the base locale.
  *     return Cookies.get('locale') ?? baseLocale
  *   }
  *
  * @type {(fn: () => Locale) => void}
  */
-export const defineGetLocale = (fn) => {
+export const overwriteGetLocale = (fn) => {
 	getLocale = fn;
 };

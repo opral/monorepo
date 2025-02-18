@@ -11,10 +11,10 @@ const runtime = r as Runtime;
 const asyncStorage = new AsyncLocalStorage<string>();
 
 // retrieve the locale from the request
-runtime.defineGetLocale(() => asyncStorage.getStore());
+runtime.overwriteGetLocale(() => asyncStorage.getStore());
 
 // do nothing on the server
-runtime.defineSetLocale(() => {});
+runtime.overwriteSetLocale(() => {});
 
 export const onRequest: MiddlewareHandler = async (context, next) => {
 	const locale = runtime.extractLocaleFromRequest(context.request);
