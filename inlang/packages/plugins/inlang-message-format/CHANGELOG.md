@@ -1,5 +1,11 @@
 # @inlang/plugin-message-format
 
+## 3.2.0
+
+### Minor Changes
+
+- ff871c4: add support for local variable options and persists selectors
+
 ## 3.1.1
 
 ### Patch Changes
