@@ -170,6 +170,28 @@ describe.each([
 				expect(log).toHaveBeenCalledWith("A simple message.");
 			});
 
+			// https://github.com/opral/inlang-paraglide-js/issues/345
+			test("importing { m } works and tree-shakes unused messages", async () => {
+				const code = await bundleCode(
+					output,
+					`import { m } from "./paraglide/messages.js"
+					console.log(m.sad_penguin_bundle())`
+				);
+				const log = vi.spyOn(console, "log").mockImplementation(() => {});
+
+				// all required code for the message to be rendered is included like sourceLanguageTag.
+				// but, all other messages except of 'sad_penguin_bundle' are tree-shaken away.
+				for (const { id } of mockBundles) {
+					if (id === "sad_penguin_bundle") {
+						expect(code).toContain(id);
+					} else {
+						expect(code).not.toContain(id);
+					}
+				}
+				eval(code);
+				expect(log).toHaveBeenCalledWith("A simple message.");
+			});
+
 			test("should not treeshake messages that are used", async () => {
 				const code = await bundleCode(
 					output,
