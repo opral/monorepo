@@ -95,19 +95,19 @@ const InlangBundle = (props: {
 	);
 
 	const handleChangeEvent = (e: Event) => {
-		const change = (e as CustomEvent).detail as ChangeEventDetail;
-		if (change.newData) {
+		const changeEvent = (e as CustomEvent).detail as ChangeEventDetail;
+		if (changeEvent.newData) {
 			project?.db
-				.insertInto(change.entity)
+				.insertInto(changeEvent.entity)
 				.values({
-					...change.newData,
+					...changeEvent.newData,
 					// @ts-expect-error - we need to remove the nesting
 					messages: undefined,
 					variants: undefined,
 				})
 				.onConflict((oc) =>
 					oc.column("id").doUpdateSet({
-						...change.newData,
+						...changeEvent.newData,
 						// @ts-expect-error - we need to remove the nesting
 						messages: undefined,
 						variants: undefined,
@@ -115,7 +115,7 @@ const InlangBundle = (props: {
 				)
 				.execute();
 		} else {
-			project?.db.deleteFrom(change.entity).where("id", "=", change.entityId).execute();
+			project?.db.deleteFrom(changeEvent.entity).where("id", "=", changeEvent.entityId).execute();
 		}
 	};
 

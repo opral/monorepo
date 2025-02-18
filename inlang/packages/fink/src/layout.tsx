@@ -27,17 +27,18 @@ export default function Layout(props: { children: React.ReactNode }) {
 	const [selectedProjectPath] = useAtom(selectedProjectPathAtom);
 	const [showAuthorDialog, setShowAuthorDialog] = useState(false);
 
-	useEffect(() => {
-		if (selectedProjectPath && !authorName) {
-			setShowAuthorDialog(true);
-		}
-	}, [authorName, project?.lix.currentAuthor, selectedProjectPath]);
+	// TODO UPDATE FINK
+	// useEffect(() => {
+	// 	if (selectedProjectPath && !authorName) {
+	// 		setShowAuthorDialog(true);
+	// 	}
+	// }, [authorName, project?.lix.currentAuthor, selectedProjectPath]);
 
-	useEffect(() => {
-		if (authorName && project?.lix.currentAuthor.get() !== authorName) {
-			project?.lix.currentAuthor.set(authorName);
-		}
-	}, [authorName, project?.lix.currentAuthor]);
+	// useEffect(() => {
+	// 	if (authorName && project?.lix.currentAuthor.get() !== authorName) {
+	// 		project?.lix.currentAuthor.set(authorName);
+	// 	}
+	// }, [authorName, project?.lix.currentAuthor]);
 
 	return (
 		<>

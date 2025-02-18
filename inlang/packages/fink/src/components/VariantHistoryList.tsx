@@ -26,7 +26,8 @@ const VariantHistoryList = (props: {
 			.innerJoin("commit", "commit.id", "change.commit_id")
 			// TODO remove after branching concept on lix
 			// https://linear.app/opral/issue/LIX-126/branching
-			.where(isInSimulatedCurrentBranch)
+			// TODO Fink update
+			// .where(isInSimulatedCurrentBranch)
 			.orderBy("commit.author desc")
 			.orderBy("commit.created_at desc")
 			.execute();

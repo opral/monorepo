@@ -126,53 +126,58 @@ export const committedChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];
-	const result = await project.lix.db
-		.selectFrom("change")
-		.select((eb) => [
-			"change.id",
-			"change.commit_id",
-			"change.file_id",
-			"change.operation",
-			"change.type",
-			"change.value",
-			jsonObjectFrom(
-				eb
-					.selectFrom("commit")
-					.select([
-						"commit.id",
-						"commit.author",
-						"commit.description",
-						"commit.created_at",
-					])
-					.whereRef("change.commit_id", "=", "commit.id")
-			).as("commit"),
-		])
-		.where("commit_id", "is not", null)
-		// TODO remove after sequence concept on lix
-		// https://linear.app/opral/issue/LIX-126/branching
-		// TODO Fink update
-		// .where(isInSimulatedCurrentBranch)
-		.innerJoin("commit", "commit.id", "change.commit_id")
-		.orderBy("commit.created_at desc")
-		.execute();
+	return [];
+	// TODO UPDATE FINK
+	// const result = await project.lix.db
+	// 	.selectFrom("change")
+	// 	.select((eb) => [
+	// 		"change.id",
+	// 		"change.commit_id",
+	// 		"change.file_id",
+	// 		"change.operation",
+	// 		"change.type",
+	// 		"change.value",
+	// 		jsonObjectFrom(
+	// 			eb
+	// 				.selectFrom("commit")
+	// 				.select([
+	// 					"commit.id",
+	// 					"commit.author",
+	// 					"commit.description",
+	// 					"commit.created_at",
+	// 				])
+	// 				.whereRef("change.commit_id", "=", "commit.id")
+	// 		).as("commit"),
+	// 	])
+	// 	.where("commit_id", "is not", null)
+	// 	// TODO remove after sequence concept on lix
+	// 	// https://linear.app/opral/issue/LIX-126/branching
+	// 	// TODO Fink update
+	// 	// .where(isInSimulatedCurrentBranch)
+	// 	.innerJoin("commit", "commit.id", "change.commit_id")
+	// 	.orderBy("commit.created_at desc")
+	// 	.execute();
 
-	return result;
+	// return result;
 });
 
 export const pendingChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];
-	const result = await project.lix.db
-		.selectFrom("change")
-		.selectAll()
-		.where("commit_id", "is", null)
-		// TODO remove after sequence concept on lix
-		// https://linear.app/opral/issue/LIX-126/branching
-		// TODO Fink update
-		// .where(isInSimulatedCurrentBranch)
-		.execute();
-	return result;
+	return [];
+
+	// TODO UPDATE FINK
+	// const result = await project.lix.db
+	// 	.selectFrom("change")
+	// 	.selectAll()
+	// 	.where("commit_id", "is", null)
+	// 	// TODO remove after sequence concept on lix
+	// 	// https://linear.app/opral/issue/LIX-126/branching
+	// 	// TODO Fink update
+	// 	// .where(isInSimulatedCurrentBranch)
+	// 	.execute();
+	// return result;
 });
 
 export const groupedPendingChangesAtom = atom(async (get) => {
@@ -180,37 +185,40 @@ export const groupedPendingChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];
-	const result = await project.lix.db
-		.selectFrom("change")
-		.selectAll()
-		.where("commit_id", "is", null)
-		// TODO remove after sequence concept on lix
-		// https://linear.app/opral/issue/LIX-126/branching
-		// TODO Fink update
-		// .where(isInSimulatedCurrentBranch)
-		.execute();
+
+	// TODO UPDATE FINK
+	// const result = await project.lix.db
+	// 	.selectFrom("change")
+	// 	.selectAll()
+	// 	.where("commit_id", "is", null)
+	// 	// TODO remove after sequence concept on lix
+	// 	// https://linear.app/opral/issue/LIX-126/branching
+	// 	// TODO Fink update
+	// 	// .where(isInSimulatedCurrentBranch)
+	// 	.execute();
 
 	const latestChangesPerEntity: Change[] = [];
 
-	for (const change of result) {
-		const entityId = change.value?.id;
-		if (!entityId) continue;
+	// TODO UPDATE FINK
+	// for (const change of result) {
+	// 	const entityId = change.value?.id;
+	// 	if (!entityId) continue;
 
-		const latestChange = await project.lix.db
-			.selectFrom("change")
-			.selectAll()
-			.where("commit_id", "is", null)
-			.where((eb) => eb.ref("value", "->>").key("id"), "=", entityId)
-			.orderBy("created_at desc")
-			.executeTakeFirst();
+	// 	const latestChange = await project.lix.db
+	// 		.selectFrom("change")
+	// 		.selectAll()
+	// 		.where("commit_id", "is", null)
+	// 		.where((eb) => eb.ref("value", "->>").key("id"), "=", entityId)
+	// 		.orderBy("created_at desc")
+	// 		.executeTakeFirst();
 
-		if (
-			latestChange &&
-			!latestChangesPerEntity.some((change) => change.value?.id === entityId)
-		) {
-			latestChangesPerEntity.push(latestChange);
-		}
-	}
+	// 	if (
+	// 		latestChange &&
+	// 		!latestChangesPerEntity.some((change) => change.value?.id === entityId)
+	// 	) {
+	// 		latestChangesPerEntity.push(latestChange);
+	// 	}
+	// }
 
 	return latestChangesPerEntity;
 });
@@ -237,14 +245,16 @@ export const unresolvedConflictsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];
-	const result = await project.lix.db
-		.selectFrom("conflict")
-		.where("resolved_with_change_id", "is", null)
-		.selectAll()
-		.execute();
+	return [];
+	// TODO UPDATE FINK
+	// const result = await project.lix.db
+	// 	.selectFrom("conflict")
+	// 	.where("resolved_with_change_id", "is", null)
+	// 	.selectAll()
+	// 	.execute();
 
 	//console.log(result);
-	return result;
+	// return result;
 });
 
 /**
@@ -261,20 +271,21 @@ export const conflictingChangesAtom = atom(async (get) => {
 	if (!project) return [];
 	const result: Set<Change> = new Set();
 
-	for (const conflict of unresolvedConflicts) {
-		const change = await project.lix.db
-			.selectFrom("change")
-			.selectAll()
-			.where("id", "=", conflict.change_id)
-			.executeTakeFirstOrThrow();
-		const conflicting = await project.lix.db
-			.selectFrom("change")
-			.selectAll()
-			.where("id", "=", conflict.conflicting_change_id)
-			.executeTakeFirstOrThrow();
-		result.add(change);
-		result.add(conflicting);
-	}
+	// TODO UPDATE FINK
+	// for (const conflict of unresolvedConflicts) {
+	// 	const change = await project.lix.db
+	// 		.selectFrom("change")
+	// 		.selectAll()
+	// 		.where("id", "=", conflict.change_id)
+	// 		.executeTakeFirstOrThrow();
+	// 	const conflicting = await project.lix.db
+	// 		.selectFrom("change")
+	// 		.selectAll()
+	// 		.where("id", "=", conflict.conflicting_change_id)
+	// 		.executeTakeFirstOrThrow();
+	// 	result.add(change);
+	// 	result.add(conflicting);
+	// }
 	return [...result];
 });
 
@@ -282,11 +293,13 @@ export const commitsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];
-	return await project.lix.db
-		.selectFrom("commit")
-		.selectAll()
-		.orderBy("commit.created_at desc")
-		.execute();
+	return [];
+	// TODO UPDATE FINK
+	// return await project.lix.db
+	// 	.selectFrom("commit")
+	// 	.selectAll()
+	// 	.orderBy("commit.created_at desc")
+	// 	.execute();
 });
 
 const humanFileSize = (bytes: number, si = false, dp = 1) => {

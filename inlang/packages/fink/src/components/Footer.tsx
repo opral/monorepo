@@ -1,5 +1,6 @@
-import { version } from "../../package.json";
-
+// TODO FINK UPDATE fix version import under node 16
+// import { version } from "../../package.json";
+const version = "0.0.1";
 const Footer = () => {
 	const socialMediaLinks = [
 		{
