@@ -101,7 +101,7 @@ test("it handles detecting and adding selectors and declarations for multi varia
 	expect(await runExportFilesParsed(imported)).toStrictEqual(
 		expect.objectContaining({
 			some_happy_cat: {
-				declarations: ["input username", "input platform", "input userGender"],
+				declarations: ["input platform", "input userGender", "input username"],
 				selectors: ["platform", "userGender"],
 				match: {
 					"platform=android, userGender=male":
