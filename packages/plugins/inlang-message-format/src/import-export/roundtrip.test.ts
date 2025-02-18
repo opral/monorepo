@@ -253,6 +253,75 @@ test("variants with a plural function are parsed correctly", async () => {
 	);
 });
 
+test("doesn't use string as value if declarations, selectors, or multiple matches exist ", async () => {
+	const imported = await runImportFiles({
+		some_happy_cat: "Today is {date}.",
+	});
+
+	imported.messages[0]!.selectors!.push({
+		name: "date",
+		type: "variable-reference",
+	});
+
+	expect(await runExportFilesParsed(imported)).toMatchObject({
+		some_happy_cat: {
+			declarations: ["input date"],
+			selectors: ["date"],
+			match: {
+				"date=*": "Today is {date}.",
+			},
+		},
+	});
+});
+
+test("local variables with function declarations and options", async () => {
+	const imported = await runImportFiles({
+		some_happy_cat: {
+			declarations: [
+				"input date",
+				"local formattedDate = date: datetime month=long day=numeric",
+			],
+			selectors: [],
+			match: {
+				"formattedDate=*": "Today is {formattedDate}.",
+			},
+		},
+	});
+	expect(await runExportFilesParsed(imported)).toMatchObject({
+		some_happy_cat: {
+			declarations: [
+				"input date",
+				"local formattedDate = date: datetime month=long day=numeric",
+			],
+			selectors: ["formattedDate"],
+			match: {
+				"formattedDate=*": "Today is {formattedDate}.",
+			},
+		},
+	});
+});
+
+test("turns string syntax into ", async () => {
+	const imported = await runImportFiles({
+		some_happy_cat: {
+			declarations: ["input date", "local formattedDate = date: datetime"],
+			selectors: [],
+			match: {
+				"formattedDate=*": "Today is {formattedDate}.",
+			},
+		},
+	});
+	expect(await runExportFilesParsed(imported)).toMatchObject({
+		some_happy_cat: {
+			declarations: ["input date", "local formattedDate = date: datetime"],
+			selectors: ["formattedDate"],
+			match: {
+				"formattedDate=*": "Today is {formattedDate}.",
+			},
+		},
+	});
+});
+
 test("roundtrip with new variants that have been created by apps", async () => {
 	const imported1 = await runImportFiles({
 		some_happy_cat: "Read more about Lix",
