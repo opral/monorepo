@@ -15,7 +15,7 @@ import ChangeDot from "@/components/ChangeDot.tsx";
 import { ChevronDown } from "lucide-react";
 
 export const IntermediateCheckpointComponent = () => {
-  const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
+  const [isExpandedState, setIsExpandedState] = useState<boolean>(true);
   const [intermediateChanges] = useAtom(intermediateChangesAtom);
   const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
 
