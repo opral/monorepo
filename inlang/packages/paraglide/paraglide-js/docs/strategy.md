@@ -3,7 +3,7 @@ imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
-# Locale strategy
+# Strategy
 
 Paraglide JS comes with various strategies to determine the locale out of the box. 
 
