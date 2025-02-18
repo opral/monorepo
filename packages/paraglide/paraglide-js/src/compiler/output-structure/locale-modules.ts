@@ -3,7 +3,7 @@ import type { CompiledBundleWithMessages } from "../compile-bundle.js";
 import { jsIdentifier } from "../../services/codegen/identifier.js";
 import { createRuntimeFile } from "../runtime/create-runtime.js";
 import { createRegistry } from "../registry.js";
-import { type CompilerOptions } from "../compile.js";
+import type { CompilerOptions } from "../compiler-options.js";
 
 export function generateLocaleModules(
 	compiledBundles: CompiledBundleWithMessages[],

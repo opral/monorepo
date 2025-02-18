@@ -5,9 +5,10 @@ import {
 } from "@inlang/sdk";
 import { memfs } from "memfs";
 import { test, expect, vi } from "vitest";
-import { compile, defaultCompilerOptions } from "./compile.js";
+import { compile } from "./compile.js";
 import { getAccountFilePath } from "../services/account/index.js";
 import type { Runtime } from "./runtime/type.js";
+import { defaultCompilerOptions } from "./compiler-options.js";
 
 test("loads a project and compiles it", async () => {
 	const project = await loadProjectInMemory({
