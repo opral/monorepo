@@ -25,10 +25,16 @@ export function generateMessageModules(
 	};
 
 	// messages index file
-	output["messages.js"] = [
+	output["messages/_index.js"] = [
 		...compiledBundles.map(
-			({ bundle }) => `export * from './messages/${bundle.node.id}/index.js'`
+			({ bundle }) => `export * from './${bundle.node.id}/index.js'`
 		),
+	].join("\n");
+
+	output["messages.js"] = [
+		"export * from './messages/_index.js'",
+		"// enabling auto-import by exposing all messages as m",
+		"export * as m from './messages/_index.js'",
 	].join("\n");
 
 	// Creates a per message index file

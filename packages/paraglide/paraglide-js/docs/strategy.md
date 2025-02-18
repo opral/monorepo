@@ -212,7 +212,7 @@ _Read the [architecture documentation](https://inlang.com/m/gerre34r/library-inl
 To dynamically resolve the locale, pass a function that returns the locale to `getLocale()`. You can use this to get the locale from the `documentElement.lang` attribute, a cookie, a locale route, or any other source.
 
 ```js
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 import { overwriteGetLocale } from "./paraglide/runtime.js";
 
 overwriteGetLocale(() => document.documentElement.lang /** en */);
@@ -225,7 +225,7 @@ On the server, you might determine the locale from a cookie, a locale route, a h
 To avoid this, use `AsyncLocaleStorage` in Node, or its equivalent for other server-side JS runtimes. 
 
 ```js
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 import {overwriteGetLocale, baseLocale } from "./paraglide/runtime.js";
 import { AsyncLocalStorage } from "node:async_hooks";
 const localeStorage = new AsyncLocalStorage();
@@ -285,7 +285,7 @@ Below is an example for React.
 
 ```js
 import { useState } from "react";
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 import { getLocale, overwriteSetLocale, setLocale } from "./paraglide/runtime.js";
 
 function App() {
@@ -314,7 +314,7 @@ function App() {
 For SvelteKit you can wrap your base `+layout.svelte` in a `{#key getLocale()}{/key}` block to automatically trigger a rerender whenever `setLocale()` is called: 
 ```svelte
 <script lang="ts">
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 import { getLocale, overwriteGetLocale, overwriteSetLocale, setLocale } from "./paraglide/runtime.js";
 
 //first set the locale
@@ -354,7 +354,7 @@ The example uses React for demonstration purposes. You can replicate the same pa
 2. Define the `setLocale()` function that writes the locale to a cookie and triggers a re-render.
 
 ```tsx
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 import { overwriteSetLocale, overwriteGetLocale, setLocale, baseLocale } from "./paraglide/runtime.js";
 import { useState } from "react";
 
