@@ -111,3 +111,26 @@ export function toTextElement(text: string): Text {
 		value: text,
 	};
 }
+
+export function isInSimulatedCurrentBranch() {
+	// TODO Fink update
+	// NOOP
+}
+
+export function merge() {
+	// TODO Fink update
+	// NOOP
+}
+
+export function uuidv4() {
+	// TODO Fink update
+	// TODO not sure about id strategy here - use a pseudo random id for now
+	return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) =>
+		((c === "x" ? Math.random() * 16 : Math.random() * 4 + 8) | 0).toString(16)
+	);
+}
+
+export function resolveConflictBySelecting() {
+	// TODO Fink update
+	// NOOP
+}

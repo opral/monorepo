@@ -4,9 +4,9 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"_dev": "vite --host",
-		"_build": "vite build",
 		"_test": "tsc --noEmit",
+		"dev": "vite --host",
+		"build": "vite build",
 		"_preview": "vite preview",
 		"_generate": "node ./scripts/generateDemoData.js",
 		"_lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
