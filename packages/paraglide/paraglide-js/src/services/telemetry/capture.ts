@@ -1,6 +1,5 @@
 import type { ProjectSettings } from "@inlang/sdk";
 import { ENV_VARIABLES } from "../env-variables/index.js";
-import type { TelemetryEvent } from "./events.js";
 
 /**
  * Capture an event.
@@ -8,7 +7,7 @@ import type { TelemetryEvent } from "./events.js";
  * - manually calling the PostHog API because the SDKs were not platform angostic (and generally bloated)
  */
 export const capture = async (
-	event: TelemetryEvent,
+	event: "PARAGLIDE-JS compile executed",
 	args: {
 		projectId: string;
 		/**
