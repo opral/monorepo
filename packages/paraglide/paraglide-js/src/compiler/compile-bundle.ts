@@ -1,6 +1,5 @@
 import type { Bundle, BundleNested, Message } from "@inlang/sdk";
 import { compileMessage } from "./compile-message.js";
-import type { Registry } from "./registry.js";
 import { jsIdentifier } from "../services/codegen/identifier.js";
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js";
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js";
@@ -23,7 +22,6 @@ export type CompiledBundleWithMessages = {
 export const compileBundle = (args: {
 	bundle: BundleNested;
 	fallbackMap: Record<string, string | undefined>;
-	registry: Registry;
 }): CompiledBundleWithMessages => {
 	const compiledMessages: Record<string, Compiled<Message>> = {};
 
@@ -45,8 +43,7 @@ export const compileBundle = (args: {
 		const compiledMessage = compileMessage(
 			args.bundle.declarations,
 			message,
-			message.variants,
-			args.registry
+			message.variants
 		);
 
 		// set the pattern for the language tag

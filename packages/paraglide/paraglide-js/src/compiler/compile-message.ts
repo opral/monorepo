@@ -1,9 +1,9 @@
 import type { Declaration, Message, Variant } from "@inlang/sdk";
-import type { Registry } from "./registry.js";
 import { compilePattern } from "./compile-pattern.js";
 import type { Compiled } from "./types.js";
 import { doubleQuote } from "../services/codegen/quotes.js";
 import { inputsType } from "./jsdoc-types.js";
+import { compileLocalVariable } from "./compile-local-variable.js";
 
 /**
  * Returns the compiled message as a string
@@ -12,8 +12,7 @@ import { inputsType } from "./jsdoc-types.js";
 export const compileMessage = (
 	declarations: Declaration[],
 	message: Message,
-	variants: Variant[],
-	registry: Registry
+	variants: Variant[]
 ): Compiled<Message> => {
 	// return empty string instead?
 	if (variants.length == 0) {
@@ -22,20 +21,14 @@ export const compileMessage = (
 
 	const hasMultipleVariants = variants.length > 1;
 	return hasMultipleVariants
-		? compileMessageWithMultipleVariants(
-				declarations,
-				message,
-				variants,
-				registry
-			)
-		: compileMessageWithOneVariant(declarations, message, variants, registry);
+		? compileMessageWithMultipleVariants(declarations, message, variants)
+		: compileMessageWithOneVariant(declarations, message, variants);
 };
 
 function compileMessageWithOneVariant(
 	declarations: Declaration[],
 	message: Message,
-	variants: Variant[],
-	registry: Registry
+	variants: Variant[]
 ): Compiled<Message> {
 	const variant = variants[0];
 	if (!variant || variants.length !== 1) {
@@ -43,21 +36,33 @@ function compileMessageWithOneVariant(
 	}
 	const inputs = declarations.filter((decl) => decl.type === "input-variable");
 	const hasInputs = inputs.length > 0;
-	const compiledPattern = compilePattern(
-		message.locale,
-		variant.pattern,
-		registry
-	);
+	const compiledPattern = compilePattern({
+		pattern: variant.pattern,
+		declarations,
+	});
+
+	const compiledLocalVariables = [];
+
+	for (const declaration of declarations) {
+		if (declaration.type === "local-variable") {
+			compiledLocalVariables.push(
+				compileLocalVariable({ declaration, locale: message.locale })
+			);
+		}
+	}
+
 	const code = `/** @type {(inputs: ${inputsType(inputs)}) => string} */
-export const ${message.bundleId} = (${hasInputs ? "i" : ""}) => ${compiledPattern.code};`;
+export const ${message.bundleId} = (${hasInputs ? "i" : ""}) => {
+	${compiledLocalVariables.join("\n\t")}return ${compiledPattern.code}
+};`;
+
 	return { code, node: message };
 }
 
 function compileMessageWithMultipleVariants(
 	declarations: Declaration[],
 	message: Message,
-	variants: Variant[],
-	registry: Registry
+	variants: Variant[]
 ): Compiled<Message> {
 	if (variants.length <= 1) {
 		throw new Error("Message must have more than one variant");
@@ -70,11 +75,10 @@ function compileMessageWithMultipleVariants(
 	const compiledVariants = [];
 
 	for (const variant of variants) {
-		const compiledPattern = compilePattern(
-			message.locale,
-			variant.pattern,
-			registry
-		);
+		const compiledPattern = compilePattern({
+			pattern: variant.pattern,
+			declarations,
+		});
 
 		// todo account for all matches in the selector (if a match is missing, it should be the catchall)
 		const isCatchAll = variant.matches.every(
@@ -108,9 +112,21 @@ function compileMessageWithMultipleVariants(
 		);
 	}
 
+	const compiledLocalVariables = [];
+
+	for (const declaration of declarations) {
+		if (declaration.type === "local-variable") {
+			compiledLocalVariables.push(
+				compileLocalVariable({ declaration, locale: message.locale })
+			);
+		}
+	}
+
 	const code = `/** @type {(inputs: ${inputsType(inputs)}) => string} */
 export const ${message.bundleId} = (${hasInputs ? "i" : ""}) => {
+	${compiledLocalVariables.join("\n\t")}
 	${compiledVariants.join("\n\t")}
+	return \`${message.id}\`;
 };`;
 
 	return { code, node: message };

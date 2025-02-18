@@ -38,7 +38,7 @@ export const Text = Type.Object({
 	value: Type.String(),
 });
 
-export type LocalVariable = Static<typeof VariableReference>;
+export type LocalVariable = Static<typeof LocalVariable>;
 export const LocalVariable = Type.Object({
 	type: Type.Literal("local-variable"),
 	name: Type.String(),

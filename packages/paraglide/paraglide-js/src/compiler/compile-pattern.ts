@@ -1,41 +1,49 @@
-import type { Pattern } from "@inlang/sdk";
-import { escapeForTemplateLiteral } from "../services/codegen/escape.js";
-import { backtick } from "../services/codegen/quotes.js";
-import { compileExpression } from "./compile-expression.js";
+import type { Declaration, Pattern, VariableReference } from "@inlang/sdk";
 import type { Compiled } from "./types.js";
-import type { Registry } from "./registry.js";
+import { escapeForTemplateLiteral } from "../services/codegen/escape.js";
 
 /**
  * Compiles a pattern into a template literal string.
  *
  * @example
- *  const { compiled, params } = compilePattern([{ type: "Text", value: "Hello " }, { type: "VariableReference", name: "name" }])
- *  >> compiled === "`Hello ${i.name}`"
+ *   const pattern: Pattern = [
+ * 	 { type: "text", value: "Your age is " },
+ * 	 { type: "expression", arg: { type: "variable-reference", name: "age" } },
+ *   ]
+ *
+ *   const { code } = compilePattern({ pattern, declarations: [{ type: "input-variable", name: "age" }] });
+ *
+ *   // code will be: `Your age is ${i.age}`
  */
-export const compilePattern = (
-	lang: string,
-	pattern: Pattern,
-	registry: Registry
-): Compiled<Pattern> => {
-	const compiledPatternElements = pattern.map(
-		(element): Compiled<Pattern[number]> => {
-			switch (element.type) {
-				case "text":
-					return {
-						code: escapeForTemplateLiteral(element.value),
-						node: element,
-					};
-				case "expression": {
-					const compiledExpression = compileExpression(lang, element, registry);
-					const code = "${" + compiledExpression.code + "}";
-					return { code, node: element };
+export const compilePattern = (args: {
+	pattern: Pattern;
+	declarations: Declaration[];
+}): Compiled<Pattern> => {
+	let result = "";
+
+	for (const part of args.pattern) {
+		if (part.type === "text") {
+			result += escapeForTemplateLiteral(part.value);
+		} else {
+			if (part.arg.type === "variable-reference") {
+				const declaration = args.declarations.find(
+					(decl) => decl.name === (part.arg as VariableReference).name
+				);
+				if (declaration?.type === "input-variable") {
+					result += `\${i.${part.arg.name}}`;
+				} else if (declaration?.type === "local-variable") {
+					result += `\${${part.arg.name}}`;
+				} else {
+					throw new Error(
+						`Variable reference "${part.arg.name}" not found in declarations`
+					);
 				}
 			}
 		}
-	);
-	const code = backtick(
-		compiledPatternElements.map((res) => res.code).join("")
-	);
+	}
 
-	return { code, node: pattern };
+	return {
+		code: `\`${result}\``,
+		node: args.pattern,
+	};
 };
