@@ -2,11 +2,11 @@ import { Command } from "commander";
 import { resolve } from "node:path";
 import { Logger } from "../../../services/logger/index.js";
 import { DEFAULT_OUTDIR } from "../../defaults.js";
+import { compile } from "../../../compiler/compile.js";
 import {
-	compile,
 	defaultCompilerOptions,
 	type CompilerOptions,
-} from "../../../compiler/compile.js";
+} from "../../../compiler/compiler-options.js";
 
 export const compileCommand = new Command()
 	.name("compile")
