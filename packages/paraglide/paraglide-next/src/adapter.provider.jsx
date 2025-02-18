@@ -1,4 +1,4 @@
-import { defineGetLocale, assertIsLocale } from "./runtime.js";
+import { overwriteGetLocale, assertIsLocale } from "./runtime.js";
 import { headers } from "next/headers";
 
 /**
@@ -9,7 +9,7 @@ import { headers } from "next/headers";
  * @returns {JSX.Element}
  */
 export default function ParaglideProvider({ children }) {
-	defineGetLocale(() => {
+	overwriteGetLocale(() => {
 		// @ts-ignore
 		return assertIsLocale(headers().get("x-paraglide-locale"));
 	});
