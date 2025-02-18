@@ -11,7 +11,6 @@ export function createRuntimeFile(args: {
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
-		pathnameBase?: CompilerOptions["pathnameBase"];
 		urlPatterns?: CompilerOptions["urlPatterns"];
 	};
 }): string {

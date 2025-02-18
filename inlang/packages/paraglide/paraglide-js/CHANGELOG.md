@@ -6,6 +6,8 @@
 
 - enables `import { m } from "./paraglide/messages.js"` for auto imports https://github.com/opral/inlang-paraglide-js/issues/345
 
+- adds the `strategy` compiler option to the cli https://github.com/opral/inlang-paraglide-js/issues/316
+
 ## 2.0.0-beta.18
 
 Added URLPatterns as a replacement for the beta 17 pathnames API. 
