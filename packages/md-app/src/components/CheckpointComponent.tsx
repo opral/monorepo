@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/plate-ui/avatar.tsx";
 import { Button } from "@/components/plate-ui/button.tsx";
@@ -39,14 +37,17 @@ export const CheckpointComponent = (props: {
     return null;
   }
 
-  const toggleExpanded = async () => {
-    if (diffs && diffs.length > 0) setIsExpanded(!isExpanded);
-    else {
-      const changes = await getChanges(lix, props.checkpointChangeSet.id, currentVersion!, activeFile);
-      setDiffs(changes);
+  const toggleExpanded = () => {
+    if (diffs.length > 0) {
       setIsExpanded(!isExpanded);
+      return;
     }
-  }
+
+    getChanges(lix, props.checkpointChangeSet.id, currentVersion!, activeFile).then((changes) => {
+      setDiffs(changes);
+      setIsExpanded(true);
+    });
+  };
 
   // Group changes by plugin_key
   const groupedChanges = diffs.reduce((acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
@@ -116,7 +117,7 @@ export const CheckpointComponent = (props: {
                 <ChangeDiffComponent
                   key={pluginKey}
                   diffs={groupedChanges[pluginKey]}
-                  // debug={true}
+                // debug={true}
                 />
               ))}
             </div>

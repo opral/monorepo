@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { Button } from "@/components/plate-ui/button";
 import clsx from "clsx";
