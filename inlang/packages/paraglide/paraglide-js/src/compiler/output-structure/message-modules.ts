@@ -73,7 +73,7 @@ export function generateMessageModules(
 			// Add the registry import to the message file
 			// if registry is used
 			if (file.includes("registry.")) {
-				file = `import { registry } from '../../registry.js'\n` + file;
+				file = `import * as registry from '../../registry.js'\n` + file;
 			}
 
 			output[`messages/${compiledBundle.bundle.node.id}/${locale}.js`] = file;

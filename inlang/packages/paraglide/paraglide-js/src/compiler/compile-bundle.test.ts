@@ -8,7 +8,6 @@ test("compiles to jsdoc", async () => {
 			en: "en",
 			"en-US": "en",
 		},
-		registry: {},
 		bundle: mockBundle,
 	});
 
@@ -68,7 +67,6 @@ test("throws if a JS keyword is used as an identifier", async () => {
 	expect(() =>
 		compileBundle({
 			fallbackMap: {},
-			registry: {},
 			bundle: {
 				id: "then",
 				declarations: [],
