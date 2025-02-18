@@ -60,7 +60,9 @@ export let getLocale = () => {
 		}
 	}
 
-	throw new Error("No locale found. There is an error in your strategy.");
+	throw new Error(
+		"No locale found. Read the docs https://inlang.com/m/gerre34r/library-inlang-paraglideJs/errors#no-locale-found"
+	);
 };
 
 /**
