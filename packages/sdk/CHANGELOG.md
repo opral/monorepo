@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 2.2.2
+
+### Patch Changes
+
+- c53b1a9: fix: type of LocalVariable
+
 ## 2.2.1
 
 ### Patch Changes
