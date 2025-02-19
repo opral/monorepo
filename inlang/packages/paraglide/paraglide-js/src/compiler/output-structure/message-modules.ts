@@ -4,7 +4,7 @@ import { createRuntimeFile } from "../runtime/create-runtime.js";
 import { createRegistry } from "../registry.js";
 import { jsIdentifier } from "../../services/codegen/identifier.js";
 import { escapeForSingleQuoteString } from "../../services/codegen/escape.js";
-import type { CompilerOptions } from "../compile.js";
+import type { CompilerOptions } from "../compiler-options.js";
 
 export function generateMessageModules(
 	compiledBundles: CompiledBundleWithMessages[],
@@ -25,10 +25,16 @@ export function generateMessageModules(
 	};
 
 	// messages index file
-	output["messages.js"] = [
+	output["messages/_index.js"] = [
 		...compiledBundles.map(
-			({ bundle }) => `export * from './messages/${bundle.node.id}/index.js'`
+			({ bundle }) => `export * from './${bundle.node.id}/index.js'`
 		),
+	].join("\n");
+
+	output["messages.js"] = [
+		"export * from './messages/_index.js'",
+		"// enabling auto-import by exposing all messages as m",
+		"export * as m from './messages/_index.js'",
 	].join("\n");
 
 	// Creates a per message index file
@@ -73,7 +79,7 @@ export function generateMessageModules(
 			// Add the registry import to the message file
 			// if registry is used
 			if (file.includes("registry.")) {
-				file = `import { registry } from '../../registry.js'\n` + file;
+				file = `import * as registry from '../../registry.js'\n` + file;
 			}
 
 			output[`messages/${compiledBundle.bundle.node.id}/${locale}.js`] = file;

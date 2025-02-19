@@ -1,5 +1,4 @@
 import { newLixFile, openLixInMemory, toBlob } from "@lix-js/sdk";
-import { v4 } from "uuid";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import {
 	contentFromDatabase,
@@ -26,6 +25,12 @@ export async function newProject(args?: {
 
 		const lix = await openLixInMemory({ blob: await newLixFile() });
 
+		const { value: lixId } = await lix.db
+			.selectFrom("key_value")
+			.select("value")
+			.where("key", "=", "lix_id")
+			.executeTakeFirstOrThrow();
+
 		// write files to lix
 		await lix.db
 			.insertInto("file")
@@ -46,7 +51,7 @@ export async function newProject(args?: {
 				},
 				{
 					path: "/project_id",
-					data: new TextEncoder().encode(v4()),
+					data: new TextEncoder().encode(lixId),
 				},
 			])
 			.execute();

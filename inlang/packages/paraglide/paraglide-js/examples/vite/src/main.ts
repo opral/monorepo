@@ -1,4 +1,4 @@
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 
 // This should be removed by the compiler
 // (can be verified by inspecting the output in dist)

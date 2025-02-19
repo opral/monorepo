@@ -1,4 +1,9 @@
-# Locale strategy
+---
+imports:
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
+---
+
+# Strategy
 
 Paraglide JS comes with various strategies to determine the locale out of the box. 
 
@@ -56,71 +61,127 @@ compile({
 })
 ```
 
-### pathname
+### url
 
-The pathname strategy determines the locale from the pathname. 
-
-For example, if the pathname is `/en-US/about`, the locale will be `en-US`. You can adjust the pathnames with the `pathnames` option. The syntax uses [path-to-regexp](https://github.com/pillarjs/path-to-regexp).
-
-<doc-callout type="info">If you use wildcards (*), be aware of the matching order. Use wildcards after static and parameterized paths.</doc-callout>
+Determine the locale from the URL (pathname, domain, etc).
 
 ```diff
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
-+	strategy: ["pathname"]
-+	pathnames: {
-		 // define static paths
-		 "/about": {
-			 en: "/about",
-			 de: "/ueber-uns",
-		 },
-		 // parameterized paths
-		 "/shop/:id": {
-			 en: "/shop/:id",
-			 de: "/einkaufen/:id",
-		 }
-		 // wildcard paths
-	   "/{*path}": {
-			  de: "/de{/*path}",
-			  en: "/{*path}",
-		 },
++	strategy: ["url"]
 })
 ```
 
-Pathnames default to prefixing every locale other than the base locale in the path. If you want another behaviour, you can define it with the `pathnames` option. 
+The URL-based strategy uses the web standard [URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API) to match and localize URLs. 
 
-#### Prefix every locale
+For example, the pattern `https://:domain(.*)/:locale(de|en)?/:path*` matches URLs like `https://example.com/de/about` and `https://example.com/about`. The named groups `domain`, `locale`, and `path` are used to extract and replace parts of the URL.
 
-```
-/en/about
-/de/about
-```
+<doc-callout type="tip">Use https://urlpattern.com/ to test your URL patterns.</doc-callout>
 
-```json
-{
-	"/{*path}": {
-		"de": "/de{/*path}",
-		"en": "/en{/*path}"
-	}
-}
-```
 
-#### Aliases for locales
+#### Pathname-based url localization example
 
 ```
-/deutsch/about
-/english/about
+https://example.com/about 
+https://example.com/de/about
 ```
 
-```json
-{
-	"/{*path}": {
-		"de": "/deutsch{/*path}",
-		"en": "/english{/*path}"
-	}
-}
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url"],
+	compilerOptions: {
+		urlPatterns: [
+			{
+				pattern: ":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)",
+				// the original URL is https://example.com/about. 
+				// hence, the locale is null
+				deLocalizedNamedGroups: { locale: null },
+				localizedNamedGroups: {
+					// the en locale should have no locale in the URL
+					// hence, the locale is null
+					en: { locale: null },
+					// the de locale should have the locale in the URL
+					de: { locale: "de" },
+				},
+			},
+		],
+	},
+});
 ```
+
+#### Domain-based url localization example
+
+```
+https://example.com/about
+https://de.example.com/about
+```
+
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url"],
+	compilerOptions: {
+		urlPatterns: [
+			// defining the pattern during development which 
+			// uses path suffixes like /en
+			{
+				pattern: ':protocol://localhost::port?/:locale(de|en)?/:path(.*)',
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
+						en: { locale: 'en' },
+						de: { locale: 'de' }
+					},
+			},
+			// production pattern which uses subdomains like de.example.com
+			{
+				pattern: ":protocol://:domain(.*)::port?/:path(.*)",
+				deLocalizedNamedGroups: { domain: "example.com" },
+				localizedNamedGroups: {
+					en: { domain: "example.com" },
+					de: { domain: "de.example.com" },
+				},
+			},
+		],
+	},
+});
+```
+
+#### Adding a base path
+
+You can add a base path to your URL patterns to support localized URLs with a common base path. 
+
+For example, with the base path set to "shop":
+
+- `runtime.localizeHref("/about")` will return `/shop/en/about`
+- `runtime.deLocalizeHref("/about")` will return `/shop/about`
+
+
+```js
+const base = "shop";
+
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url"],
+	compilerOptions: {
+		urlPatterns: [
+			{
+				pattern: ":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)",
+				deLocalizedNamedGroups: { base },
+				localizedNamedGroups: {
+					en: { base, locale: "en" },
+					de: { base, locale: "de" },
+				},
+			},
+		],
+	},
+});
+```
+
 
 ## Write your own strategy
 
@@ -134,15 +195,15 @@ This behaviour is far too simple for most apps. Instead of starting with the def
 
 Only two APIs are needed to define this behaviour and adapt Paraglide JS to your requirements: 
 
-- `defineGetLocale` defines the `getLocale()` function that messages use to determine the locale
-- `defineSetLocale` defines the `setLocale()` function that apps call to change the locale
+- `overwriteGetLocale` defines the `getLocale()` function that messages use to determine the locale
+- `overwriteSetLocale` defines the `setLocale()` function that apps call to change the locale
 
 Because the client and server have separate Paraglide runtimes, you will need to define these behaviours separately on the client and server. 
 
 The steps are usually the same, irrespective of the strategy and framework you use:
 
-1. Use `defineGetLocale()` function that reads the locale from a cookie, HTTP header, or i18n routing.
-2. Handle any side effects of changing the locale and trigger a re-render in your application via `defineSetLocale()` (for many apps, this may only be required on the client side). 
+1. Use `overwriteGetLocale()` function that reads the locale from a cookie, HTTP header, or i18n routing.
+2. Handle any side effects of changing the locale and trigger a re-render in your application via `overwriteSetLocale()` (for many apps, this may only be required on the client side). 
 
 _Read the [architecture documentation](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/architecture) to learn more about's Paraglide's inner workings._
 
@@ -151,25 +212,25 @@ _Read the [architecture documentation](https://inlang.com/m/gerre34r/library-inl
 To dynamically resolve the locale, pass a function that returns the locale to `getLocale()`. You can use this to get the locale from the `documentElement.lang` attribute, a cookie, a locale route, or any other source.
 
 ```js
-import * as m from "./paraglide/messages.js";
-import { defineGetLocale } from "./paraglide/runtime.js";
+import { m } from "./paraglide/messages.js";
+import { overwriteGetLocale } from "./paraglide/runtime.js";
 
-defineGetLocale(() => document.documentElement.lang /** en */);
+overwriteGetLocale(() => document.documentElement.lang /** en */);
 
 m.orange_dog_wheel(); // Hello world!
 ```
 
-On the server, you might determine the locale from a cookie, a locale route, a http header, or anything else. When calling `defineGetLocale()` on the server, you need to be mindful of race conditions caused when multiple requests come in at the same time with different locales. 
+On the server, you might determine the locale from a cookie, a locale route, a http header, or anything else. When calling `overwriteGetLocale()` on the server, you need to be mindful of race conditions caused when multiple requests come in at the same time with different locales. 
 
 To avoid this, use `AsyncLocaleStorage` in Node, or its equivalent for other server-side JS runtimes. 
 
 ```js
-import * as m from "./paraglide/messages.js";
-import {defineGetLocale, baseLocale } from "./paraglide/runtime.js";
+import { m } from "./paraglide/messages.js";
+import {overwriteGetLocale, baseLocale } from "./paraglide/runtime.js";
 import { AsyncLocalStorage } from "node:async_hooks";
 const localeStorage = new AsyncLocalStorage();
 
-defineGetLocale(() => {
+overwriteGetLocale(() => {
   //any calls to getLocale() in the async local storage context will return the stored locale
   return localeStorage.getStore() ?? baseLocale;
 });
@@ -188,9 +249,9 @@ Or, for a SvelteKit specific example, in your `hooks.server.ts`:
 ```js
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { sequence } from '@sveltejs/kit/hooks';
-import { defineGetLocale, baseLocale } from './paraglide/runtime.js';
+import { overwriteGetLocale, baseLocale } from './paraglide/runtime.js';
 
-defineGetLocale(() => {
+overwriteGetLocale(() => {
   //any calls to getLocale() in the async local storage context will return the stored locale
   return localeStorage.getStore() ?? baseLocale;
 });
@@ -218,23 +279,23 @@ export const handle = sequence(
 
 ### Trigger a re-render 
 
-When the user changes the locale (eg: using a language switcher) you will likely want to trigger a re-render of your application. To do so, use the `defineSetLocale` callback. How to trigger a re-render depends on your application but usually involves setting a render key at the top level of your application. 
+When the user changes the locale (eg: using a language switcher) you will likely want to trigger a re-render of your application. To do so, use the `overwriteSetLocale` callback. How to trigger a re-render depends on your application but usually involves setting a render key at the top level of your application. 
 
 Below is an example for React.
 
 ```js
 import { useState } from "react";
-import * as m from "./paraglide/messages.js";
-import { getLocale, defineSetLocale, setLocale } from "./paraglide/runtime.js";
+import { m } from "./paraglide/messages.js";
+import { getLocale, overwriteSetLocale, setLocale } from "./paraglide/runtime.js";
 
 function App() {
 	const [localeRenderKey, setLocaleRenderKey] = useState(getLocale());
 
-	defineGetLocale(() => {
+	overwriteGetLocale(() => {
 		return document.documentElement.lang; //or any other source
 	})
 
-	defineSetLocale((newLocale) => {
+	overwriteSetLocale((newLocale) => {
 		setLocaleRenderKey(newLocale);
 	});
 
@@ -253,18 +314,18 @@ function App() {
 For SvelteKit you can wrap your base `+layout.svelte` in a `{#key getLocale()}{/key}` block to automatically trigger a rerender whenever `setLocale()` is called: 
 ```svelte
 <script lang="ts">
-import * as m from "./paraglide/messages.js";
-import { getLocale, defineGetLocale, defineSetLocale, setLocale } from "./paraglide/runtime.js";
+import { m } from "./paraglide/messages.js";
+import { getLocale, overwriteGetLocale, overwriteSetLocale, setLocale } from "./paraglide/runtime.js";
 
 //first set the locale
 setLocale(document.documentElement.lang); //or any other source
 let locale = $state(getLocale()); //stores the current locale
 
-defineGetLocale(() => {
+overwriteGetLocale(() => {
 	return locale;
 });
 
-defineSetLocale((newLocale) => {
+overwriteSetLocale((newLocale) => {
 	locale = newLocale;
 	//update any cookies, localStorage, etc
 });
@@ -293,18 +354,18 @@ The example uses React for demonstration purposes. You can replicate the same pa
 2. Define the `setLocale()` function that writes the locale to a cookie and triggers a re-render.
 
 ```tsx
-import * as m from "./paraglide/messages.js";
-import { defineSetLocale, defineGetLocale, setLocale, baseLocale } from "./paraglide/runtime.js";
+import { m } from "./paraglide/messages.js";
+import { overwriteSetLocale, overwriteGetLocale, setLocale, baseLocale } from "./paraglide/runtime.js";
 import { useState } from "react";
 
 function App() {
 	const [localeRenderKey, setLocaleRenderKey] = useState(null);
 
-	defineGetLocale(() => {
+	overwriteGetLocale(() => {
 		return Cookies.get("locale") ?? baseLocale;
 	});
 
-	defineSetLocale((newLocale) => {
+	overwriteSetLocale((newLocale) => {
 		// set the locale in the cookie
 		Cookies.set("locale", newLocale);
 		// trigger a re-render
@@ -326,12 +387,12 @@ function App() {
 #### Server-side rendering
 
 1. Detect the locale from the request. 
-2. Make sure that `defineGetLocale()` is cross-request safe on the server. 
+2. Make sure that `overwriteGetLocale()` is cross-request safe on the server. 
 
 Pseudocode logic on the server: 
 
 ```ts
-import { defineGetLocale, defineSetLocale, setLocale, baseLocale } from "./paraglide/runtime.js";
+import { overwriteGetLocale, overwriteSetLocale, setLocale, baseLocale } from "./paraglide/runtime.js";
 import { AsyncLocalStorage } from "node:async_hooks";
 
 const localeStorage = new AsyncLocalStorage();
@@ -339,7 +400,7 @@ const localeStorage = new AsyncLocalStorage();
 // ✅ DO THIS
 // ✅ when `getLocale()` is called inside a route handler
 // ✅ this function will return the language for the current request
-defineGetLocale(() => {
+overwriteGetLocale(() => {
   return localeStorage.getValue() ?? baseLocale;
 });
 
@@ -357,10 +418,10 @@ Pseudocode on the client:
 ```ts
 function App() {
   if (!import.meta.env.SSR){
-		defineGetLocale(() => {
+		overwriteGetLocale(() => {
 			// your strategy to detect the locale on the client
 	  });
-		defineSetLocale((newLocale) => {
+		overwriteSetLocale((newLocale) => {
 			// your strategy
 		});
 	} 

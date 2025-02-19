@@ -101,7 +101,7 @@ test("it handles detecting and adding selectors and declarations for multi varia
 	expect(await runExportFilesParsed(imported)).toStrictEqual(
 		expect.objectContaining({
 			some_happy_cat: {
-				declarations: ["input username", "input platform", "input userGender"],
+				declarations: ["input platform", "input userGender", "input username"],
 				selectors: ["platform", "userGender"],
 				match: {
 					"platform=android, userGender=male":
@@ -251,6 +251,75 @@ test("variants with a plural function are parsed correctly", async () => {
 			pattern: [{ type: "text", value: "There are many cats." }],
 		} satisfies Partial<Variant>)
 	);
+});
+
+test("doesn't use string as value if declarations, selectors, or multiple matches exist ", async () => {
+	const imported = await runImportFiles({
+		some_happy_cat: "Today is {date}.",
+	});
+
+	imported.messages[0]!.selectors!.push({
+		name: "date",
+		type: "variable-reference",
+	});
+
+	expect(await runExportFilesParsed(imported)).toMatchObject({
+		some_happy_cat: {
+			declarations: ["input date"],
+			selectors: ["date"],
+			match: {
+				"date=*": "Today is {date}.",
+			},
+		},
+	});
+});
+
+test("local variables with function declarations and options", async () => {
+	const imported = await runImportFiles({
+		some_happy_cat: {
+			declarations: [
+				"input date",
+				"local formattedDate = date: datetime month=long day=numeric",
+			],
+			selectors: [],
+			match: {
+				"formattedDate=*": "Today is {formattedDate}.",
+			},
+		},
+	});
+	expect(await runExportFilesParsed(imported)).toMatchObject({
+		some_happy_cat: {
+			declarations: [
+				"input date",
+				"local formattedDate = date: datetime month=long day=numeric",
+			],
+			selectors: ["formattedDate"],
+			match: {
+				"formattedDate=*": "Today is {formattedDate}.",
+			},
+		},
+	});
+});
+
+test("turns string syntax into ", async () => {
+	const imported = await runImportFiles({
+		some_happy_cat: {
+			declarations: ["input date", "local formattedDate = date: datetime"],
+			selectors: [],
+			match: {
+				"formattedDate=*": "Today is {formattedDate}.",
+			},
+		},
+	});
+	expect(await runExportFilesParsed(imported)).toMatchObject({
+		some_happy_cat: {
+			declarations: ["input date", "local formattedDate = date: datetime"],
+			selectors: ["formattedDate"],
+			match: {
+				"formattedDate=*": "Today is {formattedDate}.",
+			},
+		},
+	});
 });
 
 test("roundtrip with new variants that have been created by apps", async () => {

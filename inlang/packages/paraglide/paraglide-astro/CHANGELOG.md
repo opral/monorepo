@@ -1,5 +1,9 @@
 # @inlang/paraglide-astro
 
+## 1.0.0-beta.6
+
+Update to Paraglide JS 2.0-beta.18
+
 ## 1.0.0-beta.2
 
 - remove `available` prefix from locales API https://github.com/opral/inlang-paraglide-js/issues/323

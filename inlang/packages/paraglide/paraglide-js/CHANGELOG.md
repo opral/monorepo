@@ -1,5 +1,35 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.19
+
+- rename `defineGetLocale()` and `defineSetLocale()` to `overwriteGetLocale()` and `overwriteSetLocale()` https://github.com/opral/inlang-paraglide-js/issues/382
+
+- enables `import { m } from "./paraglide/messages.js"` for auto imports https://github.com/opral/inlang-paraglide-js/issues/345
+
+- adds the `strategy` compiler option to the cli https://github.com/opral/inlang-paraglide-js/issues/316
+
+## 2.0.0-beta.18
+
+Added URLPatterns as a replacement for the beta 17 pathnames API. 
+
+The URLPattern API is extremly powerful. You can express base paths, translated pathnames, domain based localization, and even multi-tenancy. 
+
+Read the docs [here](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy#url) and make PRs to improve the documentation.
+
+```diff
+await compile({
+-  strategy: ["pathname"],
++  strategy: ["url"],
+})
+```
+
+The `localizePath()` API had to be replaced by a new `localizeHref()` API. Please give feedback on the new API in [#380](https://github.com/opral/inlang-paraglide-js/issues/380)
+
+```diff
+- <a href={localizePath("/about")}>About</a>
++ <a href={localizeHref("/about")}>About</a>
+```
+
 ## 2.0.0-beta.17
 
 Add support for `pathnames` API https://github.com/opral/inlang-paraglide-js/issues/359

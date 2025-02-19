@@ -1,5 +1,9 @@
 # @inlang/paraglide-sveltekit
 
+## 1.0.0-beta.7
+
+Update to Paraglide JS 2.0-beta.18
+
 ## 0.15.5
 
 ### Patch Changes

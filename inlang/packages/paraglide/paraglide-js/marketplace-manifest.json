@@ -29,11 +29,14 @@
 			"/compiling-messages": "./docs/compiling-messages.md",
 			"/strategy": "./docs/strategy.md",
 			"/variants": "./docs/variants.md",
-			"/storage-format": "./docs/storage-format.md"
+			"/file-formats": "./docs/file-formats.md",
+			"/multi-tenancy": "./docs/multi-tenancy.md"
 		},
 		"Reference": {
 			"/architecture": "./docs/architecture.md",
-			"/compiler-options": "./docs/compiler-options.md"
+			"/compiler-options": "./docs-api/compiler-options.md",
+			"/runtime": "./docs-api/runtime/-internal-.md",
+			"/errors": "./docs/errors.md"
 		},
 		"Frameworks": {
 			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",

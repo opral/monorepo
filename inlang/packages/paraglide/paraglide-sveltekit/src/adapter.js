@@ -5,13 +5,14 @@
  */
 import {
 	assertIsLocale,
-	defineGetLocale,
-	deLocalizePath,
+	overwriteGetLocale,
+	deLocalizeUrl,
 	extractLocaleFromRequest,
+	overwriteGetUrlOrigin,
 } from "./runtime.js";
 
 /**
- * @type {import("node:async_hooks").AsyncLocalStorage<string> | undefined}
+ * @type {import("node:async_hooks").AsyncLocalStorage<{ locale: string, origin: string }>}
  */
 let asyncStorage;
 
@@ -22,7 +23,10 @@ let asyncStorage;
  * Each request has a scoped locale during the rendering process.
  */
 if (import.meta.env.SSR) {
-	defineGetLocale(() => assertIsLocale(asyncStorage?.getStore()));
+	overwriteGetLocale(() => assertIsLocale(asyncStorage.getStore()?.locale));
+	overwriteGetUrlOrigin(
+		() => asyncStorage.getStore()?.origin ?? "http://fallback.com"
+	);
 }
 
 /**
@@ -43,8 +47,9 @@ export const handle = async ({ event, resolve }) => {
 	}
 
 	const locale = extractLocaleFromRequest(event.request);
+	const origin = event.url.origin;
 
-	return asyncStorage.run(locale, () => resolve(event));
+	return asyncStorage.run({ locale, origin }, () => resolve(event));
 };
 
 /**
@@ -64,5 +69,5 @@ export const handle = async ({ event, resolve }) => {
  * @type {import('@sveltejs/kit').Reroute}
  */
 export const reroute = (request) => {
-	return deLocalizePath(request.url.pathname);
+	return deLocalizeUrl(request.url).pathname;
 };

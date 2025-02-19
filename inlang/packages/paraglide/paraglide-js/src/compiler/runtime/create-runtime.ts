@@ -1,7 +1,9 @@
 import fs from "node:fs";
-import { defaultCompilerOptions, type CompilerOptions } from "../compile.js";
 import type { Runtime } from "./type.js";
-import * as pathToRegexp from "path-to-regexp";
+import {
+	defaultCompilerOptions,
+	type CompilerOptions,
+} from "../compiler-options.js";
 
 /**
  * Returns the code for the `runtime.js` module
@@ -12,19 +14,20 @@ export function createRuntimeFile(args: {
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
-		pathnames?: CompilerOptions["pathnames"];
-		pathnameBase?: CompilerOptions["pathnameBase"];
+		urlPatterns?: CompilerOptions["urlPatterns"];
 	};
 }): string {
-	const pathnames = args.compilerOptions.pathnames ?? {
-		"/{*path}": Object.fromEntries([
-			...args.locales.map((locale) => [locale, `/${locale}{/*path}`]),
-			[args.baseLocale, `/{*path}`],
-		]),
+	const defaultUrlPattern = {
+		pattern: `:protocol://:domain(.*)::port?/:locale(${args.locales.filter((l) => l !== args.baseLocale).join("|")})?/:path(.*)?`,
+		deLocalizedNamedGroups: { locale: null },
+		localizedNamedGroups: {
+			...Object.fromEntries(args.locales.map((locale) => [locale, { locale }])),
+			en: { locale: null },
+		},
 	};
 
-	return `
-import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";
+	const code = `
+import "@inlang/paraglide-js/urlpattern-polyfill";
 
 ${injectCode("./variables.js")
 	.replace(
@@ -41,85 +44,41 @@ ${injectCode("./variables.js")
 	)
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
 	.replace(
-		`pathnames = {}`,
-		`pathnames = ${JSON.stringify(pathnames ?? {}, null, 2)}`
-	)
-	.replace(
-		`export const TREE_SHAKE_IS_DEFAULT_PATHNAMES = false;`,
-		`const TREE_SHAKE_IS_DEFAULT_PATHNAMES = ${args.compilerOptions.pathnames ? false : true};`
-	)
-	.replace(
 		`export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;`,
 		`const TREE_SHAKE_COOKIE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("cookie")};`
 	)
 	.replace(
-		`export const TREE_SHAKE_PATHNAME_STRATEGY_USED = false;`,
-		`const TREE_SHAKE_PATHNAME_STRATEGY_USED = ${args.compilerOptions.strategy.includes("pathname")};`
+		`export const TREE_SHAKE_URL_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_URL_STRATEGY_USED = ${args.compilerOptions.strategy.includes("url")};`
 	)
 	.replace(
 		`export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;`,
 		`const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("globalVariable")};`
 	)
 	.replace(
-		`export const pathnameBase = undefined;`,
-		`export const pathnameBase = ${args.compilerOptions.pathnameBase ? `"${args.compilerOptions.pathnameBase}"` : "undefined"};`
+		`export const urlPatterns = [];`,
+		`export const urlPatterns = ${JSON.stringify(args.compilerOptions?.urlPatterns ?? [defaultUrlPattern], null, 2)};`
 	)}
-
-/**
- * Define the \`getLocale()\` function.
- *
- * Use this function to define how the locale is resolved. For example,
- * you can resolve the locale from the browser's preferred language,
- * a cookie, env variable, or a user's preference.
- *
- * @example
- *   defineGetLocale(() => {
- *     // resolve the locale from a cookie. fallback to the base locale.
- *     return Cookies.get('locale') ?? baseLocale
- *   }
- *
- * @param {() => Locale} fn
- * @type {(fn: () => Locale) => void}
- */
-export const defineGetLocale = (fn) => {
-	getLocale = fn;
-};
-
-/**
- * Define the \`setLocale()\` function.
- *
- * Use this function to define how the locale is set. For example,
- * modify a cookie, env variable, or a user's preference.
- *
- * @example
- *   defineSetLocale((newLocale) => {
- *     // set the locale in a cookie
- *     return Cookies.set('locale', newLocale)
- *   });
- *
- * @param {(newLocale: Locale) => void} fn
- */
-export const defineSetLocale = (fn) => {
-	setLocale = fn;
-};
 
 ${injectCode("./get-locale.js")} 
 
 ${injectCode("./set-locale.js")}
 
+${injectCode("./get-url-origin.js")}
+
 ${injectCode("./is-locale.js")}
 
 ${injectCode("./assert-is-locale.js")}
 
-${injectCode("./localize-path.js")}
-
-${injectCode("./de-localize-path.js")}
-
-${injectCode("./extract-locale-from-pathname.js")}
-
 ${injectCode("./extract-locale-from-request.js")}
 
 ${injectCode("./extract-locale-from-cookie.js")}
+
+${injectCode("./extract-locale-from-url.js")}
+
+${injectCode("./localize-url.js")}
+
+${injectCode("./localize-href.js")}
 
 // ------ TYPES ------
 
@@ -133,6 +92,8 @@ ${injectCode("./extract-locale-from-cookie.js")}
  */
 
 `;
+
+	return code;
 }
 
 /**
@@ -173,14 +134,10 @@ export async function createRuntimeForTesting(args: {
 			...args.compilerOptions,
 		},
 	})
-		// remove the import statement for path-to-regexp
-		.replace(
-			`import * as pathToRegexp from "@inlang/paraglide-js/path-to-regexp";`,
-			""
-		);
+		// remove the polyfill import statement to avoid module resolution logic in testing
+		.replace(`import "@inlang/paraglide-js/urlpattern-polyfill";`, "");
 
-	// @ts-expect-error - defining a depdency globally to avoid importing it in the runtime
-	globalThis.pathToRegexp = pathToRegexp;
+	await import("urlpattern-polyfill");
 
 	return await import(
 		"data:text/javascript;base64," +

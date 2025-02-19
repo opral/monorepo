@@ -40,8 +40,8 @@ flowchart TD
     APP[Your App] --> M
     MESSAGE["'Hello World!'"] -->|renders| APP[Your App]
     APP --> SET_LOCALE
-    GET_LOCALE -->|"defineGetLocale()"| STRATEGY
-    SET_LOCALE -->|"defineSetLocale()"| STRATEGY
+    GET_LOCALE -->|"overwriteGetLocale()"| STRATEGY
+    SET_LOCALE -->|"overwriteSetLocale()"| STRATEGY
 
     classDef plainText stroke-width:0,fill-opacity:0,color:black;
     class X plainText
