@@ -314,3 +314,8 @@ sl-dialog.video-dialog::part(title) {
 sl-dialog.video-dialog::part(body) {
 	padding-top: 0;
 }
+
+/* ugly quickfix for https://github.com/opral/inlang.com/issues/117. likely breaks other parts of the UI :/ */
+html {
+  scroll-padding-top: 28rem; 
+}
