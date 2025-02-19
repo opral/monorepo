@@ -12,15 +12,25 @@ const logger = new Logger();
 
 let compilationResult: Awaited<ReturnType<typeof compile>> | undefined;
 
+// https://github.com/opral/inlang-paraglide-js/issues/371
+//
+// has the second benefit that paraglide js only compiles once
+// per enviornment build (browser, server, etc.)
+let hasInitiallyCompiled = false;
+
 export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 	name: PLUGIN_NAME,
 	enforce: "pre",
 	async buildStart() {
+		if (hasInitiallyCompiled === true) {
+			return;
+		}
 		logger.info("Compiling inlang project...");
 		compilationResult = await compile({
 			fs: wrappedFs,
 			...args,
 		});
+		hasInitiallyCompiled = true;
 		logger.success("Compilation complete");
 
 		for (const path of Array.from(readFiles)) {
@@ -29,18 +39,19 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 	},
 	async watchChange(path) {
 		const shouldCompile = readFiles.has(path) && !path.includes("cache");
-		if (shouldCompile) {
-			readFiles.clear();
-			logger.info(`Re-compiling inlang project... File "${path}" has changed.`);
-			compilationResult = await compile(
-				{
-					fs: wrappedFs,
-					...args,
-				},
-				compilationResult?.outputHashes
-			);
-			logger.success("Compilation complete");
+		if (shouldCompile === false) {
+			return;
 		}
+		readFiles.clear();
+		logger.info(`Re-compiling inlang project... File "${path}" has changed.`);
+		compilationResult = await compile(
+			{
+				fs: wrappedFs,
+				...args,
+			},
+			compilationResult?.outputHashes
+		);
+		logger.success("Compilation complete");
 	},
 	webpack(compiler) {
 		//we need the compiler to run before the build so that the message-modules will be present
