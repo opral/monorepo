@@ -24,8 +24,6 @@
 		".": "./dist/index.js",
 		"./urlpattern-polyfill": "./dist/urlpattern-polyfill/index.js"
 	},
-	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
-	"sideEffects": false,
 	"scripts": {
 		"dev": "tsc --watch",
 		"bench": "vitest bench --run",
