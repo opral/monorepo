@@ -92,7 +92,7 @@ export function FixedToolbarButtons() {
           <ToolbarGroup>
             <InsertDropdownMenu />
             <TurnIntoDropdownMenu />
-            <FontSizeToolbarButton />
+            {/* <FontSizeToolbarButton /> */}
           </ToolbarGroup>
 
           <ToolbarGroup>
@@ -125,12 +125,12 @@ export function FixedToolbarButtons() {
               <Code2Icon />
             </MarkToolbarButton>
 
-            <ColorDropdownMenu
+            {/* <ColorDropdownMenu
               nodeType={FontColorPlugin.key}
               tooltip="Text color"
             >
               <BaselineIcon />
-            </ColorDropdownMenu>
+            </ColorDropdownMenu> */}
 
             <ColorDropdownMenu
               nodeType={FontBackgroundColorPlugin.key}
@@ -151,19 +151,19 @@ export function FixedToolbarButtons() {
 
           <ToolbarGroup>
             <LinkToolbarButton />
-            <TableDropdownMenu />
+            {/* <TableDropdownMenu /> */}
             <EmojiDropdownMenu />
           </ToolbarGroup>
 
-          <ToolbarGroup>
+          {/* <ToolbarGroup>
             <MediaToolbarButton nodeType={ImagePlugin.key} />
             <MediaToolbarButton nodeType={VideoPlugin.key} />
             <MediaToolbarButton nodeType={AudioPlugin.key} />
             <MediaToolbarButton nodeType={FilePlugin.key} />
-          </ToolbarGroup>
+          </ToolbarGroup> */}
 
           <ToolbarGroup>
-            <LineHeightDropdownMenu />
+            {/* <LineHeightDropdownMenu /> */}
             <OutdentToolbarButton />
             <IndentToolbarButton />
           </ToolbarGroup>
