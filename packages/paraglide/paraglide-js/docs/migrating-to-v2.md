@@ -31,3 +31,11 @@
 -import { paraglide } from "@inlang/paraglide-vite";
 +import { paraglideVitePlugin } from "@inlang/paraglide-js";
 ```
+
+4. Use `localizeHref()` in HTML 
+
+```diff
+-<a href="/about">
++<a href={localizeHref("/about")}>
+  Something
+</a>

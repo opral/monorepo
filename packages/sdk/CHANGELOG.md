@@ -1,5 +1,18 @@
 # @inlang/sdk
 
+## 2.2.2
+
+### Patch Changes
+
+- c53b1a9: fix: type of LocalVariable
+
+## 2.2.1
+
+### Patch Changes
+
+- f51736f: fix: plugin imports on Bun
+- adf7d6c: fix `saveProjectToDirectory` to have proper backwards compatibility and respect `pathPattern` file location`
+
 ## 2.2.0
 
 ### Minor Changes

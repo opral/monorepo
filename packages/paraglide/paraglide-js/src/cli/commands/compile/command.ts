@@ -1,11 +1,12 @@
 import { Command } from "commander";
-import fs from "node:fs";
 import { resolve } from "node:path";
 import { Logger } from "../../../services/logger/index.js";
-import { runCompiler } from "../../steps/run-compiler.js";
 import { DEFAULT_OUTDIR } from "../../defaults.js";
-import { loadProjectFromDirectory } from "@inlang/sdk";
-import { ENV_VARIABLES } from "../../../services/env-variables/index.js";
+import { compile } from "../../../compiler/compile.js";
+import {
+	defaultCompilerOptions,
+	type CompilerOptions,
+} from "../../../compiler/compiler-options.js";
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -19,43 +20,41 @@ export const compileCommand = new Command()
 		'The path to the output directory. Example: "./src/paraglide"',
 		DEFAULT_OUTDIR
 	)
+	.option(
+		"--strategy <items...>",
+		[
+			"The strategy to be used.",
+			"",
+			"Example: --strategy cookie globalVariable baseLocale",
+			"Read more on https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy",
+		].join("\n")
+	)
 	.requiredOption("--silent", "Only log errors to the console", false)
 	.action(
 		async (options: {
 			silent: boolean;
 			project: string;
 			outdir: string;
-			watch: boolean;
+			strategy?: CompilerOptions["strategy"];
 		}) => {
 			const logger = new Logger({ silent: options.silent, prefix: true });
 			const path = resolve(process.cwd(), options.project);
 
-			logger.info(`Compiling inlang project at "${options.project}".`);
+			logger.info(`Compiling inlang project ...`);
 
-			const project = await loadProjectFromDirectory({
-				path,
-				fs,
-				appId: ENV_VARIABLES.PARJS_APP_ID,
-			});
-
-			await runCompiler({
-				project,
-				fs: fs.promises,
-				outdir: options.outdir,
-			});
-
-			logger.success("Successfully compiled the project.");
-
-			const errors = await project.errors.get();
-
-			if (errors.length > 0) {
-				logger.warn(
-					`But the project reported the following warnings and/or errors that might have influenced compilation:`
-				);
-				for (const error of errors) {
-					logger.error(`${error}`);
-				}
+			try {
+				await compile({
+					project: path,
+					outdir: options.outdir,
+					strategy: options.strategy ?? defaultCompilerOptions.strategy,
+				});
+			} catch (e) {
+				logger.error("Error while compiling inlang project.");
+				logger.error(e);
+				process.exit(1);
 			}
+
+			logger.success(`Successfully compiled inlang project.`);
 
 			process.exit(0);
 		}

@@ -1,0 +1,8 @@
+<script>
+	import { localizeHref } from '$lib/paraglide/runtime';
+	import * as m from '$lib/paraglide/messages';
+</script>
+
+<p>{m.about()}</p>
+
+<a href={localizeHref('/')}>go back to home</a>
