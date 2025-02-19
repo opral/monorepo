@@ -1,1 +1,1 @@
-import "urlpattern-polyfill";
+export * as x from "urlpattern-polyfill";
