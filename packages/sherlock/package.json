@@ -219,7 +219,7 @@
 		}
 	},
 	"scripts": {
-		"_build": "tsc --noEmit && pnpm run editor:build && node ./build.js",
+		"build": "pnpm run editor:build && node ./build.js",
 		"dev": "DEV=true node ./build.js",
 		"package": "pnpm vsce package --no-dependencies",
 		"publish": "pnpm vsce publish --no-dependencies",
@@ -229,10 +229,10 @@
 		"editor:build": "cd src/utilities/editor/sherlock-editor-app && pnpm run build",
 		"editor:dev": "cd src/utilities/editor/sherlock-editor-app && pnpm run dev",
 		"---- TEST ----------------------------------------------------------": "",
-		"_pretest": "node ./build.js",
-		"_test": "tsc --noEmit && vitest run",
-		"_test:watch": "vitest",
-		"_test:e2e": "npm run pretest && wdio run ./test/wdio.conf.ts",
+		"pretest": "node ./build.js",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:e2e": "npm run pretest && wdio run ./test/wdio.conf.ts",
 		"---- LINT ----------------------------------------------------------": "",
 		"format": "prettier ./src --write",
 		"---- OTHER ----------------------------------------------------------": "",
