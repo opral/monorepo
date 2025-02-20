@@ -205,7 +205,7 @@ whereas both fallback to the base locale if not available.
 ##### Default
 
 ```ts
-["cookie", "variable", "baseLocale"]
+["url", "cookie", "variable", "baseLocale"]
 ```
 
 #### urlPatterns?
@@ -246,4 +246,4 @@ Defined in: [compiler-options.ts:3](https://github.com/opral/monorepo/tree/main/
 
 #### strategy
 
-> `readonly` **strategy**: \[`"cookie"`, `"globalVariable"`, `"baseLocale"`\]
+> `readonly` **strategy**: \[`"url"`, `"cookie"`, `"globalVariable"`, `"baseLocale"`\]
