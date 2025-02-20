@@ -2,7 +2,7 @@
 
 > **CompilerOptions**: `object`
 
-Defined in: compiler-options.ts:12
+Defined in: [compiler-options.ts:12](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 ### Type declaration
 
@@ -220,7 +220,7 @@ TODO documentation
 
 > `const` **defaultCompilerOptions**: `object`
 
-Defined in: compiler-options.ts:3
+Defined in: [compiler-options.ts:3](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 ### Type declaration
 

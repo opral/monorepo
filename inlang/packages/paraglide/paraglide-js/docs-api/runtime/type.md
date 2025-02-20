@@ -6,7 +6,7 @@
 
 > **Runtime**: `object`
 
-Defined in: [runtime/type.ts:4](https://github.com/opral/monorepo/blob/bf86cc52a6bbec968003fe3503bd3c3392eb3b48/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts#L4)
+Defined in: [runtime/type.ts:4](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
 
 The Paraglide runtime API.
 
