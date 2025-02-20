@@ -15,16 +15,17 @@ let serverMiddlewareAsyncStorage = undefined;
 /**
  * The handle function defines the locale for the incoming request.
  *
- * @type {(request: Request, resolve: () => void) => Promise<void>}
- *
+ * @template T
+ * @param {Request} request - The incoming request object.
+ * @param {() => Promise<T> | T} resolve - A function that resolves the request.
+ * @returns {Promise<T>} The result of `resolve()` within the async storage context.
  */
 export async function serverMiddleware(request, resolve) {
 	if (!serverMiddlewareAsyncStorage) {
 		const { AsyncLocalStorage } = await import("node:async_hooks");
 		serverMiddlewareAsyncStorage = new AsyncLocalStorage();
 	}
-
 	const locale = extractLocaleFromRequest(request);
 	const origin = new URL(request.url).origin;
-	return serverMiddlewareAsyncStorage?.run({ locale, origin }, () => resolve());
+	return serverMiddlewareAsyncStorage.run({ locale, origin }, () => resolve());
 }

@@ -471,9 +471,15 @@ overwriteSetLocale((newLocale) => {
 
 ## serverMiddleware()
 
-> **serverMiddleware**(`request`, `resolve`): `Promise`\<`void`\>
+> **serverMiddleware**\<`T`\>(`request`, `resolve`): `Promise`\<`T`\>
 
-Defined in: [runtime/server-middleware.js:18](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/server-middleware.js)
+Defined in: [runtime/server-middleware.js:23](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/server-middleware.js)
+
+The handle function defines the locale for the incoming request.
+
+### Type Parameters
+
+• **T**
 
 ### Parameters
 
@@ -481,13 +487,19 @@ Defined in: [runtime/server-middleware.js:18](https://github.com/opral/monorepo/
 
 `Request`
 
+The incoming request object.
+
 #### resolve
 
-() => `void`
+() => `T` \| `Promise`\<`T`\>
+
+A function that resolves the request.
 
 ### Returns
 
-`Promise`\<`void`\>
+`Promise`\<`T`\>
+
+The result of `resolve()` within the async storage context.
 
 ***
 
