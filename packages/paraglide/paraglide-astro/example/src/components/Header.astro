@@ -1,17 +1,28 @@
 ---
-import HeaderLink from './HeaderLink.astro';
+import HeaderLink from "./HeaderLink.astro";
 import LocaleSwitch from "./LocaleSwitch.astro";
-import * as m from '../paraglide/messages';
+import { m } from "../paraglide/messages";
+import { getLocale, localizeHref } from "$paraglide/runtime";
 ---
 
 <header>
 	<nav>
 		<h2><a href="/">{m.site_title()}</a></h2>
 		<div class="internal-links">
-			<HeaderLink href={"/"}>{m.english()}</HeaderLink>
-			<HeaderLink href={"/de"}>{m.german()}</HeaderLink>
+			<HeaderLink
+				href={localizeHref("/", { locale: "en" })}
+				isActive={getLocale() === "en"}
+			>
+				{m.english()}
+			</HeaderLink>
+			<HeaderLink
+				href={localizeHref("/", { locale: "de" })}
+				isActive={getLocale() === "de"}
+			>
+				{m.german()}
+			</HeaderLink>
 		</div>
-	<LocaleSwitch />
+		<LocaleSwitch />
 	</nav>
 </header>
 <style>

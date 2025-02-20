@@ -471,7 +471,7 @@ overwriteSetLocale((newLocale) => {
 
 ## serverMiddleware()
 
-> **serverMiddleware**\<`T`\>(`request`, `resolve`): `Promise`\<`T`\>
+> **serverMiddleware**\<`T`\>(`request`, `resolve`): `Promise`\<`any`\>
 
 Defined in: [runtime/server-middleware.js:25](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/server-middleware.js)
 
@@ -497,7 +497,7 @@ A function that resolves the request.
 
 ### Returns
 
-`Promise`\<`T`\>
+`Promise`\<`any`\>
 
 The result of `resolve()` within the async storage context.
 

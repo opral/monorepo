@@ -1,4 +1,4 @@
-# Astro Example
+# Astro SSR Example
 
 ## Setup
 
@@ -8,7 +8,7 @@
 npx @inlang/paraglide-js@beta init
 ```
 
-### 2. Add the vite plugin to the `astro.config.mjs` file:
+### 2. Add the vite plugin to the `astro.config.mjs` file and set `output` to `server`:
 
 ```diff
 import { defineConfig } from "astro/config";
@@ -24,6 +24,7 @@ export default defineConfig({
 +			}),
 +		],
 	},
++  output: "server",
 });
 ```
 ### 3. Create or add the paraglide js server middleware to the `src/middleware.ts` file:

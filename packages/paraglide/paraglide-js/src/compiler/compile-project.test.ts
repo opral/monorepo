@@ -120,6 +120,9 @@ test("can emit message bundles with more than 255 characters", async () => {
 
 	const output = await compileProject({
 		project,
+		compilerOptions: {
+			urlPatterns: [],
+		},
 	});
 
 	const code = await bundleCode(
