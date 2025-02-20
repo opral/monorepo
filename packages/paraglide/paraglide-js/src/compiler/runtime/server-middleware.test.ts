@@ -65,7 +65,7 @@ test("does not delocalize the url if the url strategy is not used", async () => 
 
 	const request = new Request(new URL("https://example.com/de/page"));
 
-	const result: any = await runtime.serverMiddleware(request, (args) => args);
+	const result = await runtime.serverMiddleware(request, (args) => args);
 
 	expect(result.request.url).toBe("https://example.com/de/page");
 	// falling back to baseLocale
