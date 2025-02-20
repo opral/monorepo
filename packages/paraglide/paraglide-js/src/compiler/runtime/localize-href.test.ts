@@ -6,7 +6,7 @@ test("uses the locale from getLocale() if no locale is provided", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["globalVariable", "baseLocale"],
+			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
 				{
 					pattern: "http://:domain(.*)/:locale?/:path(.*)",
@@ -28,7 +28,7 @@ test("returns an absolute href if the provided href is absolute", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["globalVariable", "baseLocale"],
+			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
 				{
 					pattern: "http://:domain(.*)/:locale?/:path(.*)",
@@ -53,7 +53,7 @@ test("returns an absolute href if the provided href is relative but the origin o
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["globalVariable", "baseLocale"],
+			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
 				{
 					pattern: "http://:domain(.*)/:path(.*)",
@@ -96,11 +96,11 @@ test("adding a base path", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				{
-					pattern:
-						":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)",
-					deLocalizedNamedGroups: { base },
+					pattern: `:protocol://:domain(.*)::port?/:base(${base})?/:locale(en|de)?/:path(.*)?`,
+					deLocalizedNamedGroups: { base, locale: null },
 					localizedNamedGroups: {
 						en: { base, locale: "en" },
 						de: { base, locale: "de" },
@@ -110,8 +110,16 @@ test("adding a base path", async () => {
 		},
 	});
 
+	// simulating the current locale to be en
+	runtime.overwriteGetLocale(() => "en");
+
 	expect(runtime.localizeHref("/about")).toBe("/shop/en/about");
 	expect(runtime.deLocalizeHref("/about")).toBe("/shop/about");
+
+	// simulating current locale to be fde
+	runtime.overwriteGetLocale(() => "de");
+	expect(runtime.localizeHref("/about")).toBe("/shop/de/about");
+	expect(runtime.deLocalizeHref("/de/about")).toBe("/shop/about");
 });
 
 test("default url patterns to improve out of the box experience", async () => {
@@ -119,9 +127,13 @@ test("default url patterns to improve out of the box experience", async () => {
 		baseLocale: "en",
 		locales: ["en", "de", "fr"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: undefined,
 		},
 	});
+
+	// polyfilling window
+	globalThis.window = { location: new URL("http://example.com") } as any;
 
 	expect(runtime.urlPatterns).toStrictEqual([
 		{
@@ -166,4 +178,16 @@ test("default url patterns to improve out of the box experience", async () => {
 	expect(runtime.deLocalizeHref("http://localhost:5173/de/about")).toBe(
 		"http://localhost:5173/about"
 	);
+});
+
+test("does not create default url pattern if the url strategy is not used to avoid unexpected localizeUrl() behavior", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de", "fr"],
+		compilerOptions: {
+			strategy: ["cookie"],
+		},
+	});
+
+	expect(runtime.urlPatterns).toStrictEqual([]);
 });

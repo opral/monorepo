@@ -6,6 +6,7 @@ test("handles translated path segments", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				{
 					pattern: "https://:domain(.*)/:bookstore/:path*",
@@ -54,6 +55,7 @@ test("cross domain urls", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				{
 					pattern: "https://localhost::port/:locale(de|en)?/:path(.*)?",
@@ -122,6 +124,7 @@ test("pathname based localization", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				{
 					pattern: "https://:domain(.*)/:locale(de)?/:path*",
@@ -161,6 +164,7 @@ test("multi tenancy", async () => {
 		baseLocale: "en",
 		locales: ["en", "de", "fr"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				// 1) customer1.fr => root locale is fr, sub-locale is /en/
 				{
@@ -228,6 +232,7 @@ test("providing a URL object as input", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				{
 					pattern: "https://:domain(.*)/:path*",
@@ -255,6 +260,7 @@ test("localhost with portname", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				{
 					pattern: ":protocol://:domain(.*)::port?/:locale(de)?/:path(.*)?",

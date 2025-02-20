@@ -600,7 +600,7 @@ async function bundleCode(output: Record<string, string>, file: string) {
 		'import "@inlang/paraglide-js/urlpattern-polyfill";',
 		"/** @type {any} */const URLPattern = {};"
 	).replace(
-		'const { AsyncLocalStorage } = await import("node:async_hooks");',
+		'const { AsyncLocalStorage } = await import("async_hooks");',
 		"const AsyncLocalStorage = class {};"
 	);
 

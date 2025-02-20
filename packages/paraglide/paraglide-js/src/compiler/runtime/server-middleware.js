@@ -19,22 +19,23 @@ let serverMiddlewareAsyncStorage = undefined;
  *
  * @template T
  * @param {Request} request - The incoming request object.
- * @param {(localizedRequest: Request) => Promise<T> | T} resolve - A function that resolves the request.
+ * @param {(args: { request: Request, locale: Locale }) => T | Promise<T>} resolve - A function that resolves the request.
  * @returns {Promise<T>} The result of `resolve()` within the async storage context.
  */
 export async function serverMiddleware(request, resolve) {
 	if (!serverMiddlewareAsyncStorage) {
-		const { AsyncLocalStorage } = await import(
-			/** not using `node:async_hooks` because webpack can't handle `node:` prefixes */ "async_hooks"
-		);
+		const { AsyncLocalStorage } = await import("async_hooks");
 		serverMiddlewareAsyncStorage = new AsyncLocalStorage();
 	}
+
 	const locale = extractLocaleFromRequest(request);
 	const origin = new URL(request.url).origin;
+
 	const newRequest = strategy.includes("url")
 		? new Request(deLocalizeUrl(request.url), request)
 		: request;
+
 	return serverMiddlewareAsyncStorage.run({ locale, origin }, () =>
-		resolve(newRequest)
+		resolve({ locale, request: newRequest })
 	);
 }
