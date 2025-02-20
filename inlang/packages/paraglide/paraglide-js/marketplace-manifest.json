@@ -37,11 +37,13 @@
 			"/runtime": "./docs-api/runtime/-internal-.md",
 			"/errors": "./docs/errors.md"
 		},
+		"Examples": {
+			"/react-router": "./examples/react-router/README.md"
+		},
 		"Frameworks": {
 			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",
 			"NextJS": "/m/osslbuzt/paraglide-next-i18n",
 			"Astro": "/m/iljlwzfs/paraglide-astro-i18n",
-			"React Router": "./examples/react-router/README.md",
 			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n"
 		},
 		"Ecosystem": {
