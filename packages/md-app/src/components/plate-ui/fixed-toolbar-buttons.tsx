@@ -132,16 +132,16 @@ export function FixedToolbarButtons() {
               <BaselineIcon />
             </ColorDropdownMenu> */}
 
-            <ColorDropdownMenu
+            {/* <ColorDropdownMenu
               nodeType={FontBackgroundColorPlugin.key}
               tooltip="Background color"
             >
               <PaintBucketIcon />
-            </ColorDropdownMenu>
+            </ColorDropdownMenu> */}
           </ToolbarGroup>
 
           <ToolbarGroup>
-            <AlignDropdownMenu />
+            {/* <AlignDropdownMenu /> */}
 
             <NumberedIndentListToolbarButton />
             <BulletedIndentListToolbarButton />
@@ -168,9 +168,9 @@ export function FixedToolbarButtons() {
             <IndentToolbarButton />
           </ToolbarGroup>
 
-          <ToolbarGroup>
+          {/* <ToolbarGroup>
             <MoreDropdownMenu />
-          </ToolbarGroup>
+          </ToolbarGroup> */}
         </>
       )}
 
