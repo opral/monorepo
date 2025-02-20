@@ -1,7 +1,7 @@
-import paraglideAstro from "@inlang/paraglide-astro";
 import { defineConfig } from "astro/config";
 import svelte, { vitePreprocess } from "@astrojs/svelte";
 import node from "@astrojs/node";
+import { paraglideVitePlugin } from "@inlang/paraglide-js";
 
 // https://astro.build/config
 export default defineConfig({
@@ -9,12 +9,16 @@ export default defineConfig({
 		svelte({
 			preprocess: [vitePreprocess()],
 		}),
-		paraglideAstro({
-			project: "./project.inlang",
-			outdir: "./src/paraglide",
-			strategy: ["url", "baseLocale"],
-		}),
 	],
+	vite: {
+		plugins: [
+			paraglideVitePlugin({
+				project: "./project.inlang",
+				outdir: "./src/paraglide",
+				strategy: ["url", "baseLocale"],
+			}),
+		],
+	},
 	output: "server",
 	adapter: node({
 		mode: "standalone",
