@@ -15,8 +15,6 @@ export const openEditorViewCommand = {
 			return
 		}
 
-		console.log("editor view triggered", context)
-
 		const editor = editorView({ context, initialBundleId: args.bundleId })
 		await editor.createOrShowPanel()
 

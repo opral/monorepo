@@ -115,8 +115,6 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 		const disposable = webview.onDidReceiveMessage(async (message: any) => {
 			const command = message.command
 
-			console.log("Received command from webview:", command, message)
-
 			switch (command) {
 				case "create-message":
 					await createMessage({
@@ -152,7 +150,7 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 					return
 
 				default:
-					console.log("Unknown command from webview:", command)
+					console.error("Unknown command from webview:", command)
 			}
 		})
 		disposables.push(disposable)

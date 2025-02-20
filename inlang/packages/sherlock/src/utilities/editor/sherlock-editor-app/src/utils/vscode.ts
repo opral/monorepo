@@ -32,9 +32,6 @@ class VSCodeAPIWrapper {
 		if (this.vsCodeApi) {
 			// In VS Code, use the official API
 			this.vsCodeApi.postMessage(message)
-		} else {
-			// In a regular browser, just log to console (fallback)
-			console.log("postMessage (browser fallback):", message)
 		}
 	}
 
@@ -48,7 +45,6 @@ class VSCodeAPIWrapper {
 		// We do not call `this.vsCodeApi.onMessage` because it doesn't exist.
 		// All messages posted by the extension come through the global 'message' event:
 		window.addEventListener("message", (event) => {
-			console.log("message", event.data)
 			callback(event.data)
 		})
 	}
