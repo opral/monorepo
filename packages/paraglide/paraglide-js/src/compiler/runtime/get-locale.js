@@ -1,7 +1,6 @@
 import { assertIsLocale } from "./assert-is-locale.js";
 import {
 	baseLocale,
-	serverAsyncStorage,
 	strategy,
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
@@ -39,8 +38,8 @@ export let getLocale = () => {
 
 	// if running in a server-side rendering context
 	// retrieve the locale from the async local storage
-	if (serverAsyncStorage) {
-		const locale = serverAsyncStorage?.getStore()?.locale;
+	if (serverMiddlewareAsyncStorage) {
+		const locale = serverMiddlewareAsyncStorage?.getStore()?.locale;
 		if (locale) {
 			return locale;
 		}

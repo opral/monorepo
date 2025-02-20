@@ -2,7 +2,7 @@
 
 > `const` **baseLocale**: `"en"` = `"en"`
 
-Defined in: [runtime/variables.js:11](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:9](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 The project's base locale.
 
@@ -20,7 +20,7 @@ if (locale === baseLocale) {
 
 > `const` **cookieName**: `string` = `"<cookie-name>"`
 
-Defined in: [runtime/variables.js:24](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:22](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [runtime/variables.js:24](https://github.com/opral/monorepo/tree/mai
 
 > `const` **locales**: readonly \[`"en"`, `"de"`\]
 
-Defined in: [runtime/variables.js:21](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:19](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 The project's locales that have been specified in the settings.
 
@@ -46,7 +46,7 @@ if (locales.includes(userSelectedLocale) === false) {
 
 > `const` **strategy**: (`"cookie"` \| `"baseLocale"` \| `"globalVariable"` \| `"url"`)[]
 
-Defined in: [runtime/variables.js:29](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:27](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [runtime/variables.js:29](https://github.com/opral/monorepo/tree/mai
 
 > `const` **urlPatterns**: `object`[] = `[]`
 
-Defined in: [runtime/variables.js:49](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:34](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 The used URL patterns.
 
@@ -234,7 +234,7 @@ The extracted locale, or undefined if no locale is found.
 
 > **getLocale**(): `any`
 
-Defined in: [runtime/get-locale.js:36](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:35](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Get the current locale.
 
@@ -258,7 +258,7 @@ if (getLocale() === 'de') {
 
 > **getUrlOrigin**(): `string`
 
-Defined in: [runtime/get-url-origin.js:12](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-url-origin.js)
+Defined in: [runtime/get-url-origin.js:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-url-origin.js)
 
 The origin of the current URL.
 
@@ -385,7 +385,7 @@ The target locale.
 
 > **overwriteGetLocale**(`fn`): `void`
 
-Defined in: [runtime/get-locale.js:93](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:92](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Overwrite the `getLocale()` function.
 
@@ -473,7 +473,7 @@ overwriteSetLocale((newLocale) => {
 
 > **serverMiddleware**(`request`, `resolve`): `Promise`\<`void`\>
 
-Defined in: runtime/server-middleware.js:7
+Defined in: [runtime/server-middleware.js:18](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/server-middleware.js)
 
 ### Parameters
 

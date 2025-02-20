@@ -1,6 +1,6 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import { paraglideSveltekit } from '@inlang/paraglide-sveltekit';
+import { paraglideVitePlugin } from '@inlang/paraglide-js';
 
 export default defineConfig({
 	build: {
@@ -8,7 +8,7 @@ export default defineConfig({
 	},
 	plugins: [
 		sveltekit(),
-		paraglideSveltekit({
+		paraglideVitePlugin({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide',
 			strategy: ['url']
