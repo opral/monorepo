@@ -491,7 +491,7 @@ The incoming request object.
 
 #### resolve
 
-(`newRequest`) => `T` \| `Promise`\<`T`\>
+(`args`) => `T` \| `Promise`\<`T`\>
 
 A function that resolves the request.
 
