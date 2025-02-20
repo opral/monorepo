@@ -54,6 +54,14 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 		logger.success("Compilation complete");
 	},
 	webpack(compiler) {
+		compiler.options.resolve = {
+			...compiler.options.resolve,
+			fallback: {
+				...compiler.options.resolve?.fallback,
+				// https://stackoverflow.com/a/72989932
+				async_hooks: false,
+			},
+		};
 		//we need the compiler to run before the build so that the message-modules will be present
 		//In the other bundlers `buildStart` already runs before the build. In webpack it's a race condition
 		compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
