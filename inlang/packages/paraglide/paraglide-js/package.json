@@ -46,6 +46,7 @@
 		"urlpattern-polyfill": "^10.0.0"
 	},
 	"devDependencies": {
+		"@inlang/paraglide-js": "workspace:*",
 		"@eslint/js": "^9.18.0",
 		"@inlang/plugin-message-format": "workspace:*",
 		"@opral/tsconfig": "workspace:*",
@@ -78,6 +79,7 @@
 		"vue",
 		"angular",
 		"nextjs",
+		"react router",
 		"next i18n",
 		"astro",
 		"astro i18n",

@@ -9,8 +9,7 @@
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"format": "prettier --write .",
-		"lint": "prettier --check ./src && eslint ./src"
+		"format": "prettier --write ."
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
@@ -18,8 +17,6 @@
 		"@sveltejs/adapter-auto": "^4.0.0",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^4.0.0",
-		"eslint-config-prettier": "^10.0.1",
-		"eslint-plugin-svelte": "^2.46.1",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",
 		"svelte": "^5.0.0",
