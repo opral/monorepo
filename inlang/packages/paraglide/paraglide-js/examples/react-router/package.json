@@ -17,6 +17,7 @@
 		"react-router": "^7.2.0"
 	},
 	"devDependencies": {
+		"@inlang/paraglide-js": "workspace:*",
 		"@react-router/dev": "^7.2.0",
 		"@tailwindcss/vite": "^4.0.0",
 		"@types/node": "^20",
@@ -24,7 +25,6 @@
 		"@types/react-dom": "^19.0.1",
 		"react-router-devtools": "^1.1.0",
 		"typescript": "^5.7.2",
-		"vite": "^5.4.11",
-		"@inlang/paraglide-js": "1.11.8"
+		"vite": "^5.4.11"
 	}
 }
