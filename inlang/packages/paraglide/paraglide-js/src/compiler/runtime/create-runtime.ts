@@ -19,11 +19,8 @@ export function createRuntimeFile(args: {
 }): string {
 	const urlPatterns = args.compilerOptions.urlPatterns ?? [];
 
-	// add default urlPatterns if the url strategy is used for a good out of the box experience
-	if (
-		args.compilerOptions.urlPatterns === undefined &&
-		args.compilerOptions.strategy.includes("url")
-	) {
+	// add default urlPatterns for a good out of the box experience
+	if (args.compilerOptions.urlPatterns === undefined) {
 		urlPatterns.push({
 			pattern: `:protocol://:domain(.*)::port?/:locale(${args.locales.filter((l) => l !== args.baseLocale).join("|")})?/:path(.*)?`,
 			deLocalizedNamedGroups: { locale: null },

@@ -179,15 +179,3 @@ test("default url patterns to improve out of the box experience", async () => {
 		"http://localhost:5173/about"
 	);
 });
-
-test("does not create default url pattern if the url strategy is not used to avoid unexpected localizeUrl() behavior", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de", "fr"],
-		compilerOptions: {
-			strategy: ["cookie"],
-		},
-	});
-
-	expect(runtime.urlPatterns).toStrictEqual([]);
-});
