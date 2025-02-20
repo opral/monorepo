@@ -599,6 +599,9 @@ async function bundleCode(output: Record<string, string>, file: string) {
 	output["runtime.js"] = output["runtime.js"]!.replace(
 		'import "@inlang/paraglide-js/urlpattern-polyfill";',
 		"/** @type {any} */const URLPattern = {};"
+	).replace(
+		'import { AsyncLocalStorage } from "node:async_hooks";',
+		"const AsyncLocalStorage = class {};"
 	);
 
 	const bundle = await rolldown({

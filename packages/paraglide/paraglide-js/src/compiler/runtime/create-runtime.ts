@@ -28,6 +28,8 @@ export function createRuntimeFile(args: {
 
 	const code = `
 import "@inlang/paraglide-js/urlpattern-polyfill";
+import { AsyncLocalStorage } from "node:async_hooks";
+
 
 ${injectCode("./variables.js")
 	.replace(
@@ -79,6 +81,8 @@ ${injectCode("./extract-locale-from-url.js")}
 ${injectCode("./localize-url.js")}
 
 ${injectCode("./localize-href.js")}
+
+${injectCode("./server-middleware.js")}
 
 // ------ TYPES ------
 
