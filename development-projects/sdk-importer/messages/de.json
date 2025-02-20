@@ -1,3 +1,0 @@
-{
-  "likes": "Du hast {count, plural, one {einen Like} other {{count} Likes}}"
-}
