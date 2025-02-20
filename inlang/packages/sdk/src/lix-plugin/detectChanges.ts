@@ -82,8 +82,8 @@ const diffTable = async ({
 	tableName: "bundle" | "message" | "variant";
 	//  idColumn: string; NOTE all tables use the id column - no need to pass it
 }) => {
-	const rowsBefore = await after?.selectFrom(tableName).selectAll().execute();
-	const rowsAfter = await before?.selectFrom(tableName).selectAll().execute();
+	const rowsBefore = await before?.selectFrom(tableName).selectAll().execute();
+	const rowsAfter = await after?.selectFrom(tableName).selectAll().execute();
 
 	const changes: DetectedChange[] = [];
 
