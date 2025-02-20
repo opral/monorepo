@@ -1,9 +1,44 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
-import { setLocale } from "./paraglide/runtime";
+import type { Route } from "./+types/root";
+import type React from "react";
+import { createContext, useContext } from "react";
+import {
+	assertIsLocale,
+	baseLocale,
+	getLocale,
+	isLocale,
+	overwriteGetLocale,
+} from "./paraglide/runtime";
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function loader(args: Route.LoaderArgs) {
+	return {
+		// detect the locale from the path. if no locale is found, the baseLocale is used.
+		// e.g. /de will set the locale to "de"
+		locale: isLocale(args.params.locale) ? args.params.locale : baseLocale,
+	};
+}
+
+// server-side rendering needs to be scoped to each request
+// react context is used to scope the locale to each request
+// and getLocale() is overwritten to read from the react context
+const LocaleContextSSR = createContext(baseLocale);
+if (import.meta.env.SSR) {
+	overwriteGetLocale(() => assertIsLocale(useContext(LocaleContextSSR)));
+}
+
+export default function App(props: Route.ComponentProps) {
 	return (
-		<html lang="en">
+		// use the locale
+		<LocaleContextSSR.Provider value={props.loaderData.locale}>
+			{/* @ts-ignore */}
+			<Outlet />
+		</LocaleContextSSR.Provider>
+	);
+}
+
+export function Layout(props: { children: React.ReactNode }) {
+	return (
+		<html lang={getLocale()}>
 			<head>
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -11,20 +46,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<Links />
 			</head>
 			<body>
-				{children}
-				<div style={{ display: "flex", gap: 10 }}>
-					<p>Change locale to </p>
-					<button onClick={() => setLocale("en")}>en</button>
-					<button onClick={() => setLocale("de")}>de</button>
-				</div>
+				{props.children}
 				<ScrollRestoration />
 				<Scripts />
 			</body>
 		</html>
 	);
-}
-
-export default function App() {
-	// @ts-ignore
-	return <Outlet />;
 }

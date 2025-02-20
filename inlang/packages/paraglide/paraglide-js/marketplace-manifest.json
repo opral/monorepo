@@ -25,7 +25,6 @@
 		},
 		"Usage": {
 			"/getting-started": "./README.md",
-			"/manual-setup": "./docs/manual-setup.md",
 			"/compiling-messages": "./docs/compiling-messages.md",
 			"/strategy": "./docs/strategy.md",
 			"/variants": "./docs/variants.md",
@@ -42,6 +41,7 @@
 			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",
 			"NextJS": "/m/osslbuzt/paraglide-next-i18n",
 			"Astro": "/m/iljlwzfs/paraglide-astro-i18n",
+			"React Router": "./examples/react-router/README.md",
 			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n"
 		},
 		"Ecosystem": {
@@ -71,6 +71,7 @@
 		"javascript",
 		"solid",
 		"typescript",
+		"react router",
 		"inlang"
 	],
 	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
