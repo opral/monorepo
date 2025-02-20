@@ -35,3 +35,22 @@ test("sets the locale and origin", async () => {
 	// global variable is not impacted by middleware
 	expect(runtime.getLocale()).toBe("fr");
 });
+
+
+test("delocalizes a url if url strategy is used", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+		},
+	});
+
+	const request = new Request(new URL("https://example.com/de/page"));
+
+	const result = await runtime.serverMiddleware(request, (newRequest) => {
+		return newRequest;
+	});
+
+	expect(result.url).toBe("https://example.com/page");
+});
