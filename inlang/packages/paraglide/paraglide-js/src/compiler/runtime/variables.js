@@ -1,5 +1,3 @@
-import { AsyncLocalStorage } from "node:async_hooks";
-
 /**
  * The project's base locale.
  *
@@ -27,19 +25,6 @@ export const cookieName = "<cookie-name>";
  * @type {Array<"cookie" | "baseLocale" | "globalVariable" | "url">}
  */
 export const strategy = ["globalVariable"];
-
-/**
- * Server side async local storage that is set by `serverMiddleware()`.
- *
- * The variable is used to retrieve the locale and origin in a server-side
- * rendering context without effecting other requests.
- *
- * - is `undefined` on the client.
- *
- * @type {import("node:async_hooks").AsyncLocalStorage<{ locale: Locale, origin: string }> | undefined}
- */
-export const serverAsyncStorage =
-	typeof window === "undefined" ? new AsyncLocalStorage() : undefined;
 
 /**
  * The used URL patterns.

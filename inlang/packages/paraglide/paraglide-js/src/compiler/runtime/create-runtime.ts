@@ -28,8 +28,6 @@ export function createRuntimeFile(args: {
 
 	const code = `
 import "@inlang/paraglide-js/urlpattern-polyfill";
-import { AsyncLocalStorage } from "node:async_hooks";
-
 
 ${injectCode("./variables.js")
 	.replace(

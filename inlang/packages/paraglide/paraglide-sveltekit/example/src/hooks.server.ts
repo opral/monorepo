@@ -1,4 +1,6 @@
 import type { Handle } from '@sveltejs/kit';
-import * as paraglideAdapter from '$lib/paraglide/adapter';
+import * as paraglide from '$lib/paraglide/runtime';
 
-export const handle: Handle = paraglideAdapter.handle;
+export const handle: Handle = ({ event, resolve }) => {
+	return paraglide.serverMiddleware(event.request, () => resolve(event));
+};

@@ -1,5 +1,3 @@
-import { serverAsyncStorage } from "./variables.js";
-
 /**
  * The origin of the current URL.
  *
@@ -10,8 +8,10 @@ import { serverAsyncStorage } from "./variables.js";
  * @type {() => string}
  */
 export let getUrlOrigin = () => {
-	if (serverAsyncStorage) {
-		return serverAsyncStorage.getStore()?.origin ?? "http://fallback.com";
+	if (serverMiddlewareAsyncStorage) {
+		return (
+			serverMiddlewareAsyncStorage.getStore()?.origin ?? "http://fallback.com"
+		);
 	} else if (typeof window !== "undefined") {
 		return window.location.origin;
 	}
