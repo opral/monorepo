@@ -1,6 +1,7 @@
 import { assertIsLocale } from "./assert-is-locale.js";
 import {
 	baseLocale,
+	serverAsyncStorage,
 	strategy,
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
@@ -35,6 +36,15 @@ let _locale;
 export let getLocale = () => {
 	/** @type {string | undefined} */
 	let locale;
+
+	// if running in a server-side rendering context
+	// retrieve the locale from the async local storage
+	if (serverAsyncStorage) {
+		const locale = serverAsyncStorage?.getStore()?.locale;
+		if (locale) {
+			return locale;
+		}
+	}
 
 	for (const strat of strategy) {
 		if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {

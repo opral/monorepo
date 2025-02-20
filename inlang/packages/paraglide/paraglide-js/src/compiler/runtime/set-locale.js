@@ -36,7 +36,7 @@ export let setLocale = (newLocale) => {
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
-		} else if (TREE_SHAKE_URL_STRATEGY_USED && strat === "url") {
+		} else if (TREE_SHAKE_URL_STRATEGY_USED && strat === "url" && typeof window !== "undefined") {
 			// route to the new url
 			//
 			// this triggers a page reload but a user rarely
@@ -50,9 +50,7 @@ export let setLocale = (newLocale) => {
 			}).href;
 			// just in case return. the browser reloads the page by setting href
 			return;
-		} else {
-			throw new Error("Unknown strategy");
-		}
+		} 
 	}
 	if (localeHasBeenSet === false) {
 		throw new Error(
