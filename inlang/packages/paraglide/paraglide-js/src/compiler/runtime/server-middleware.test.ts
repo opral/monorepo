@@ -37,7 +37,7 @@ test("sets the locale and origin", async () => {
 });
 
 
-test("delocalizes a url if url strategy is used", async () => {
+test("delocalizes the url if the url strategy is used and returns the locale", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "de"],
@@ -48,9 +48,26 @@ test("delocalizes a url if url strategy is used", async () => {
 
 	const request = new Request(new URL("https://example.com/de/page"));
 
-	const result = await runtime.serverMiddleware(request, (newRequest) => {
-		return newRequest;
+	const result: any = await runtime.serverMiddleware(request, (args) => args);
+
+	expect(result.request.url).toBe("https://example.com/page");
+	expect(result.locale).toBe("de");
+});
+
+test("does not delocalize the url if the url strategy is not used", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["globalVariable", "baseLocale"],
+		},
 	});
 
-	expect(result.url).toBe("https://example.com/page");
+	const request = new Request(new URL("https://example.com/de/page"));
+
+	const result: any = await runtime.serverMiddleware(request, (args) => args);
+
+	expect(result.request.url).toBe("https://example.com/de/page");
+	// falling back to baseLocale
+	expect(result.locale).toBe("en");
 });
