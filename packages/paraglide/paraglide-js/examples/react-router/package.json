@@ -3,11 +3,10 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "paraglide-js compile --project ./project.inlang --outdir ./app/paraglide && react-router build",
+		"build": "react-router build",
 		"dev": "react-router dev",
 		"test": "react-router typegen && tsc",
-		"start": "react-router-serve ./build/server/index.js",
-		"postinstall": "paraglide-js compile --project ./project.inlang --outdir ./app/paraglide"
+		"start": "react-router-serve ./build/server/index.js"
 	},
 	"dependencies": {
 		"@react-router/node": "^7.2.0",
