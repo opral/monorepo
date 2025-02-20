@@ -110,7 +110,7 @@ services:
     plan: standard
     branch: main
     # corepack has some key matching issues. disable the checks for now. 
-    buildCommand: COREPACK_INTEGRITY_KEYS=0 corepack enable && pnpm install && pnpm run --filter @inlang/server... build
+    buildCommand: npm i pnpm@10 -g && pnpm install && pnpm run --filter @inlang/server... build
     startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/server production 
     autoDeploy: true
     envVars:
