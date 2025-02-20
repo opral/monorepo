@@ -1,5 +1,5 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
-import "./app.css";
+import { setLocale } from "./paraglide/runtime";
 
 export function Layout({ children }: { children: React.ReactNode }) {
 	return (
@@ -12,6 +12,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 				{children}
+				<div style={{ display: "flex", gap: 10 }}>
+					<p>Change locale to </p>
+					<button onClick={() => setLocale("en")}>en</button>
+					<button onClick={() => setLocale("de")}>de</button>
+				</div>
 				<ScrollRestoration />
 				<Scripts />
 			</body>
@@ -20,5 +25,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+	// @ts-ignore
 	return <Outlet />;
 }

@@ -1,7 +1,13 @@
 import { reactRouter } from "@react-router/dev/vite";
-import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
+import { paraglideVitePlugin } from "@inlang/paraglide-js";
 
 export default defineConfig({
-	plugins: [tailwindcss(), reactRouter()],
+	plugins: [
+		reactRouter(),
+		paraglideVitePlugin({
+			project: "./project.inlang",
+			outdir: "./app/paraglide",
+		}),
+	],
 });

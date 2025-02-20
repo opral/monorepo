@@ -3,10 +3,11 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "react-router build",
+		"build": "paraglide-js compile --project ./project.inlang --outdir ./app/paraglide && react-router build",
 		"dev": "react-router dev",
 		"test": "react-router typegen && tsc",
-		"start": "react-router-serve ./build/server/index.js"
+		"start": "react-router-serve ./build/server/index.js",
+		"postinstall": "paraglide-js compile --project ./project.inlang --outdir ./app/paraglide"
 	},
 	"dependencies": {
 		"@react-router/node": "^7.2.0",
@@ -23,8 +24,8 @@
 		"@types/react": "^19.0.1",
 		"@types/react-dom": "^19.0.1",
 		"react-router-devtools": "^1.1.0",
-		"tailwindcss": "^4.0.0",
 		"typescript": "^5.7.2",
-		"vite": "^5.4.11"
+		"vite": "^5.4.11",
+		"@inlang/paraglide-js": "1.11.8"
 	}
 }
