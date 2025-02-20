@@ -46,7 +46,7 @@ services:
     plan: starter
     branch: main
     pullRequestPreviewsEnabled: false
-    buildCommand: pnpm --filter @lix-js/host... i && pnpm --filter @lix-js/host... build
+    buildCommand: corepack enable && pnpm --filter @lix-js/host... i && pnpm --filter @lix-js/host... build
     startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @lix-js/host start
     autoDeploy: true
     envVars:
@@ -109,7 +109,7 @@ services:
     region: frankfurt
     plan: standard
     branch: main
-    buildCommand: pnpm install && pnpm run --filter @inlang/server... build
+    buildCommand: corepack enable && pnpm install && pnpm run --filter @inlang/server... build
     startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/server production 
     autoDeploy: true
     envVars:
