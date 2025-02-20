@@ -20,7 +20,7 @@ let serverMiddlewareAsyncStorage = undefined;
  * @template T
  * @param {Request} request - The incoming request object.
  * @param {(args: { request: Request, locale: Locale }) => T | Promise<T>} resolve - A function that resolves the request.
- * @returns {Promise<T>} The result of `resolve()` within the async storage context.
+ * @returns {Promise<any>} The result of `resolve()` within the async storage context.
  */
 export async function serverMiddleware(request, resolve) {
 	if (!serverMiddlewareAsyncStorage) {
