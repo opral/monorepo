@@ -46,12 +46,18 @@ export class Logger {
 	}
 
 	public warn(message: any, ...args: any[]): Logger {
-		consola.warn(message, ...args);
+		const prefix = this.options.prefix
+			? colors.bold(colors.yellow("[paraglide-js] "))
+			: "";
+		consola.warn(prefix + message, ...args);
 		return this;
 	}
 
 	public error(message: any, ...args: any[]): Logger {
-		consola.error(message, ...args);
+		const prefix = this.options.prefix
+			? colors.bold(colors.red("[paraglide-js] "))
+			: "";
+		consola.error(prefix + message, ...args);
 		return this;
 	}
 
