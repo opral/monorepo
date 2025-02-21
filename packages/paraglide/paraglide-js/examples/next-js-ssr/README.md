@@ -5,7 +5,7 @@ imports:
 
 # Paraglide Next JS SSR example
 
-This is an example of how to use Paraglide with Next JS with SSR.
+This is an example of how to use Paraglide with Next JS with SSR. The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/next-js-ssr).
 
 ## Features
 
