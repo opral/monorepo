@@ -42,6 +42,7 @@ export async function writeOutput(args: {
 	await Promise.allSettled(
 		Object.entries(args.output).map(async ([filePath, fileContent]) => {
 			if (!changedFiles.has(filePath)) {
+				console.log("not writing", filePath);
 				return;
 			}
 			const fullPath = path.resolve(args.directory, filePath);
