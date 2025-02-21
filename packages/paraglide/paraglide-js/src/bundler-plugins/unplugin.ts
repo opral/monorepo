@@ -72,13 +72,11 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			for (const filePath of Array.from(readFiles)) {
 				this.addWatchFile(filePath);
 			}
-		} catch {
+		} catch (e) {
 			readFiles = previouslyReadFiles;
 			// Reset compilation result on error
 			compilationResult = undefined;
-			logger.info(
-				"Failed to re-compile project. Please check your translation files for syntax errors."
-			);
+			logger.error("Failed to re-compile project:", (e as Error).message);
 		}
 	},
 	webpack(compiler) {
