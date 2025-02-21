@@ -9,7 +9,7 @@ test("uses the locale from getLocale() if no locale is provided", async () => {
 			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
 				{
-					pattern: "http://:domain(.*)/:locale?/:path(.*)",
+					pattern: "http://:domain(.*)/:locale(de|en)?/:path(.*)?",
 					deLocalizedNamedGroups: { locale: null },
 					localizedNamedGroups: { de: { locale: "de" }, en: { locale: "en" } },
 				},
@@ -31,7 +31,7 @@ test("returns an absolute href if the provided href is absolute", async () => {
 			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
 				{
-					pattern: "http://:domain(.*)/:locale?/:path(.*)",
+					pattern: "http://:domain(.*)/:locale(de|en)?/:path(.*)?",
 					deLocalizedNamedGroups: { locale: null },
 					localizedNamedGroups: { de: { locale: "de" }, en: { locale: "en" } },
 				},
@@ -56,7 +56,7 @@ test("returns an absolute href if the provided href is relative but the origin o
 			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
 				{
-					pattern: "http://:domain(.*)/:path(.*)",
+					pattern: "http://:domain(.*)/:path(.*)?",
 					deLocalizedNamedGroups: { domain: "example.com" },
 					localizedNamedGroups: {
 						de: { domain: "de.example.com" },

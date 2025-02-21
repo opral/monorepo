@@ -95,7 +95,7 @@ compile({
 	compilerOptions: {
 		urlPatterns: [
 			{
-				pattern: ":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)",
+				pattern: ":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)?",
 				// the original URL is https://example.com/about. 
 				// hence, the locale is null
 				deLocalizedNamedGroups: { locale: null },
@@ -129,7 +129,7 @@ compile({
 			// defining the pattern during development which 
 			// uses path suffixes like /en
 			{
-				pattern: ':protocol://localhost::port?/:locale(de|en)?/:path(.*)',
+				pattern: ':protocol://localhost::port?/:locale(de|en)?/:path(.*)?',
 					deLocalizedNamedGroups: { locale: null },
 					localizedNamedGroups: {
 						en: { locale: 'en' },
@@ -138,7 +138,7 @@ compile({
 			},
 			// production pattern which uses subdomains like de.example.com
 			{
-				pattern: ":protocol://:domain(.*)::port?/:path(.*)",
+				pattern: ":protocol://:domain(.*)::port?/:path(.*)?",
 				deLocalizedNamedGroups: { domain: "example.com" },
 				localizedNamedGroups: {
 					en: { domain: "example.com" },
@@ -170,7 +170,7 @@ compile({
 	compilerOptions: {
 		urlPatterns: [
 			{
-				pattern: ":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)",
+				pattern: ":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)?",
 				deLocalizedNamedGroups: { base },
 				localizedNamedGroups: {
 					en: { base, locale: "en" },
