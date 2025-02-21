@@ -2,6 +2,18 @@
 
 ## 2.0.0-beta.19
 
+NO MORE ADAPTERS NEEDED.
+
+If you have code from an adapter, remove it and follow the examples in the documentation. https://inlang.com/m/gerre34r/library-inlang-paraglideJs/sveltekit
+
+```diff
+-@inlang/paraglide-sveltekit
+-@inlang/paraglide-next
+-@inlang/paraglide-astro
+```
+
+- introduced `serverMiddleware()` https://github.com/opral/inlang-paraglide-js/issues/201#issuecomment-2673375348
+
 - rename `defineGetLocale()` and `defineSetLocale()` to `overwriteGetLocale()` and `overwriteSetLocale()` https://github.com/opral/inlang-paraglide-js/issues/382
 
 - enables `import { m } from "./paraglide/messages.js"` for auto imports https://github.com/opral/inlang-paraglide-js/issues/345
