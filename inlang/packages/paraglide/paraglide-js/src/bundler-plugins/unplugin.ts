@@ -76,7 +76,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			readFiles = previouslyReadFiles;
 			// Reset compilation result on error
 			compilationResult = undefined;
-			logger.error("Failed to re-compile project:", (e as Error).message);
+			logger.warn("Failed to re-compile project:", (e as Error).message);
 		}
 	},
 	webpack(compiler) {
