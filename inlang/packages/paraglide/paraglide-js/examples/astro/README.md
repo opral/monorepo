@@ -62,3 +62,22 @@ You can read more about about Astro's middleware [here](https://docs.astro.build
 | SSG          | ❌        |
 | URLPattern   | ✅        |
 | Any Strategy | ✅        |
+
+## Disabling AsyncLocalStorage in serverless environments
+
+You can disable async local storage in serverless environments by using the [globalVariable strategy](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy#globalvariable) instead of the `serverMiddleware()` function. 
+
+In the `src/middleware.ts` file, replace the `serverMiddleware()` function with the following code:
+
+```diff
+import { serverMiddleware } from "./paralide/runtime.js";
+
++let locale = "en";
++overwriteGetLocale(() => locale);
+
+export const onRequest = defineMiddleware((context, next) => {
++	locale = extractLocaleFromRequest(context.request);
+  // sets the global variable on the server
+  return next();
+});
+```
