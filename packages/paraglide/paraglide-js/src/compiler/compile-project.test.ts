@@ -25,10 +25,7 @@ beforeEach(() => {
 
 	// mocking DOM globals
 	// @ts-expect-error - global variable definition
-	globalThis.window = {};
-	// @ts-expect-error - global variable definition
-	globalThis.window.location = {};
-	globalThis.window.location.reload = () => {};
+	globalThis.window = undefined;
 });
 
 test("emitGitignore", async () => {
