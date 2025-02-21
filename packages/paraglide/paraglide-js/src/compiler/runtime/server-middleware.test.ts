@@ -70,3 +70,77 @@ test("does not delocalize the url if the url strategy is not used", async () => 
 	// falling back to baseLocale
 	expect(result.locale).toBe("en");
 });
+
+test("redirects to localized URL when non-URL strategy determines locale", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr"],
+		compilerOptions: {
+			strategy: ["cookie", "url"],
+			cookieName: "PARAGLIDE_LOCALE",
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:locale/:path(.*)?",
+					deLocalizedNamedGroups: { locale: "en" },
+					localizedNamedGroups: {
+						en: { locale: "en" },
+						fr: { locale: "fr" },
+					},
+				},
+			],
+		},
+	});
+
+	// Request to URL in en with cookie specifying French
+	const request = new Request("https://example.com/en/some-path", {
+		headers: {
+			cookie: `PARAGLIDE_LOCALE=fr`,
+		},
+	});
+
+	const response = await runtime.serverMiddleware(request, () => {
+		// This shouldn't be called since we should redirect
+		throw new Error("Should not reach here");
+	});
+
+	expect(response instanceof Response).toBe(true);
+	expect(response.status).toBe(302); // Redirect status code
+	expect(response.headers.get("Location")).toBe(
+		"https://example.com/fr/some-path"
+	);
+});
+
+test("does not redirect if URL already matches determined locale", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr"],
+		compilerOptions: {
+			strategy: ["cookie", "url"],
+			cookieName: "PARAGLIDE_LOCALE",
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:locale/:path(.*)?",
+					deLocalizedNamedGroups: { locale: "en" },
+					localizedNamedGroups: {
+						en: { locale: "en" },
+						fr: { locale: "fr" },
+					},
+				},
+			],
+		},
+	});
+
+	// Request to already localized URL matching cookie locale
+	const request = new Request("https://example.com/fr/some-path", {
+		headers: {
+			cookie: `PARAGLIDE_LOCALE=fr`,
+		},
+	});
+
+	let middlewareResolveWasCalled = false;
+	await runtime.serverMiddleware(request, () => {
+		middlewareResolveWasCalled = true;
+	});
+
+	expect(middlewareResolveWasCalled).toBe(true); // Middleware should be called since no redirect needed
+});
