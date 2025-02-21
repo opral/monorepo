@@ -1,25 +1,17 @@
-import { type LixPlugin } from "@lix-js/sdk";
+import { changeIsLeafOf, type LixPlugin } from "@lix-js/sdk";
 import {
 	contentFromDatabase,
 	createInMemoryDatabase,
 	loadDatabaseInMemory,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
+import { CompiledQuery } from "kysely";
 
 export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	lix,
 	file,
 	changes,
 }) => {
-	// NOTE @samuelstroschein commented out - not needed - handled by the glob in index.ts
-	// if (file.path?.endsWith("db.sqlite") === false) {
-	// 	throw new Error(
-	// 		"Unimplemented. Only the db.sqlite file can be handled for now."
-	// 	);
-	// }
-
-	// todo make transactional
-
 	const sqlite = file.data
 		? // @ts-expect-error -- what is the expected type?
 			await loadDatabaseInMemory(file.data)
@@ -30,93 +22,91 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	// init and apply the schema
 	const db = initDb({ sqlite });
 
-	// NOTE @samuelstroschein - why do we get the leaf changes here?
-	// the award for the most inefficient deduplication goes to...
-	// const leafChanges = [
-	// 	...new Set(
-	// 		await Promise.all(
-	// 			changes.map(async (change) => {
-	// 				const leafChange = await getLeafChange({ change, lix });
-	// 				// enable string comparison to avoid duplicates
-	// 				return JSON.stringify(leafChange);
-	// 			})
-	// 		)
-	// 	),
-	// ].map((v) => JSON.parse(v));
+	// await the transaction to finish
+	await db.transaction().execute(async (trx) => {
+		// defer foreign keys in the current transaction
+		await trx.executeQuery(
+			CompiledQuery.raw("PRAGMA defer_foreign_keys = ON;")
+		);
 
-	// NOTE @samuelstroschein this is because we extract the changes from the file and don't know the order between two saves?
-	// changes need to be applied in order of foreign keys to avoid constraint violations
-	// 1. bundles
-	// 2. messages
-	// 3. variants
-	const applyOrder: Record<string, number> = {
-		bundle: 1,
-		message: 2,
-		variant: 3,
-	};
+		// We only apply the leafchanges
+		// - since lix doesn't provide the changes in order
+		// - fetching all snapshots for all changes will become costy
+		// the award for the most inefficient deduplication goes to... (comment by @samuelstroschein)
+		const leafChanges = [
+			...new Set(
+				await Promise.all(
+					changes.map(async (change) => {
+						const leafChange = await lix.db
+							.selectFrom("change")
+							.where(changeIsLeafOf({ id: change.id }))
+							.selectAll()
+							.execute();
+						// enable string comparison to avoid duplicates
+						return JSON.stringify(leafChange);
+					})
+				)
+			),
+		].map((v) => JSON.parse(v));
 
-	// NOTE @samuelstroschein just iterating over changes instead of leaf changes!?
-	// future optimization potential here but sorting in one go
-	const orderedChanges = [...changes].sort((a, b) => {
-		const orderA = applyOrder[a.schema_key];
-		const orderB = applyOrder[b.schema_key];
+		// changes need to be applied in order of foreign keys to avoid constraint violations
+		// 1. bundles
+		// 2. messages
+		// 3. variants
+		const applyOrder: Record<string, number> = {
+			bundle: 1,
+			message: 2,
+			variant: 3,
+		};
 
-		if (orderA === undefined || orderB === undefined) {
-			throw new Error(
-				`Received an unknown entity type: ${a.schema_key} && ${
-					b.schema_key
-				}. Expected one of: ${Object.keys(applyOrder)}`
-			);
-		}
+		// future optimization potential here but sorting in one go
+		const orderedLeafChanges = [...leafChanges].sort((a, b) => {
+			const orderA = applyOrder[a.schema_key];
+			const orderB = applyOrder[b.schema_key];
 
-		return orderA - orderB;
-	});
-	for (const change of orderedChanges) {
-		const snapshot = await lix.db
-			.selectFrom("snapshot")
-			.where("id", "=", change.snapshot_id)
-			.selectAll()
-			.executeTakeFirstOrThrow();
+			if (orderA === undefined || orderB === undefined) {
+				throw new Error(
+					`Received an unknown entity type: ${a.schema_key} && ${
+						b.schema_key
+					}. Expected one of: ${Object.keys(applyOrder)}`
+				);
+			}
 
-		// if (change.schema_key === 'bundle') {
-		// } else if (change.schema_key === 'message') {
-		// } else if (change.schema_key === 'variant') {
-		// } else {
-		// 	throw new Error("unknonw schema key " +change.schema_key);
-		// }
+			return orderA - orderB;
+		});
+		for (const change of orderedLeafChanges) {
+			const snapshot = await lix.db
+				.selectFrom("snapshot")
+				.where("id", "=", change.snapshot_id)
+				.selectAll()
+				.executeTakeFirstOrThrow();
 
-		// deletion
-		if (snapshot.content === null) {
-			await db
-				.deleteFrom(change.schema_key as "bundle" | "message" | "variant")
-				.where("id", "=", change.entity_id)
-				.execute();
-			continue;
-		}
+			// deletion
+			if (snapshot.content === null) {
+				await trx
+					.deleteFrom(change.schema_key as "bundle" | "message" | "variant")
+					.where("id", "=", change.entity_id)
+					.execute();
+				continue;
+			}
 
-		// upsert the value
-		const value = snapshot.content as any;
+			// upsert the value
+			const value = snapshot.content as any;
 
-		// eslint-disable-next-line no-useless-catch -- not clear why this is disabled
-		try {
-			await db
+			await trx
 				.insertInto(change.schema_key as "bundle" | "message" | "variant")
 				.values(value)
 				.onConflict((c: any) => c.column("id").doUpdateSet(value))
 				.execute();
-		} catch (e) {
-			// TODO @samuelstroschein - why do we need to handle foreign key violations?
-			// 787 = SQLITE_CONSTRAINT_FOREIGNKEY
-			// if (e instanceof Error && (e as any)?.resultCode === 787) {
-			// 	await handleForeignKeyViolation({ change: change, lix, db });
-			// } else {
-			throw e;
-			// }
 		}
-	}
+	});
+
 	return { fileData: contentFromDatabase(sqlite) };
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// NOTE: this code was commented out - it solved foreign key violations - reason unclear ///
+////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Handles foreign key violations e.g. a change
  * doesn't exist in the target database but is referenced
@@ -127,6 +117,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 // 	lix: LixReadonly;
 // 	db: Kysely<InlangDatabaseSchema>;
 // }) {
+// 	throw new Error("Not implemented - check out the comment below if you run into this");
 // 	const lastKnown = async (
 // 		type: "bundle" | "message" | "variant",
 // 		id: string
