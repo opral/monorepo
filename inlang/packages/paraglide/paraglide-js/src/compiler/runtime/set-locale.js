@@ -27,7 +27,7 @@ export let setLocale = (newLocale) => {
 			_locale = newLocale;
 			localeHasBeenSet = true;
 		} else if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
-			if (typeof document === "undefined" || !document.cookie) {
+			if (typeof document === "undefined") {
 				continue;
 			}
 			// set the cookie

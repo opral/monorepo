@@ -63,3 +63,59 @@ test("url pattern strategy sets the window location", async () => {
 	// setting window.location.hostname automatically reloads the page
 	expect(globalThis.window.location.reload).not.toBeCalled();
 });
+
+// `!document.cookie` was used which returned false for an empty string
+test("sets the cookie when it's an empty string", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr"],
+		compilerOptions: {
+			strategy: ["cookie"],
+			cookieName: "PARAGLIDE_LOCALE",
+		},
+	});
+
+	/** @ts-expect-error - client side api */
+	globalThis.document = { cookie: "" };
+
+	runtime.setLocale("en");
+
+	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=en");
+});
+
+test("when strategy precedes URL, it should set the locale and re-direct to the URL", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr"],
+		compilerOptions: {
+			strategy: ["cookie", "url", "baseLocale"],
+			cookieName: "PARAGLIDE_LOCALE",
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:locale/:path(.*)?",
+					deLocalizedNamedGroups: { locale: "en" },
+					localizedNamedGroups: {
+						en: { locale: "en" },
+						fr: { locale: "fr" },
+					},
+				},
+			],
+		},
+	});
+
+	/** @ts-expect-error - client side api */
+	globalThis.document = { cookie: "PARAGLIDE_LOCALE=fr" };
+	globalThis.window = {
+		location: new URL("https://example.com/fr/some-path"),
+	} as any;
+
+	// Cookie strategy should determine locale as French
+	expect(runtime.getLocale()).toBe("fr");
+
+	runtime.setLocale("en");
+
+	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=en");
+	expect(globalThis.window.location.href).toBe(
+		"https://example.com/en/some-path"
+	);
+});
