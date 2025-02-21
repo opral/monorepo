@@ -1,36 +1,113 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+---
+imports: 
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
+---
 
-## Getting Started
+# Paraglide Next JS SSG example
 
-First, run the development server:
+This is an example of how to use Paraglide with Next JS with SSG. 
+
+<doc-callout type="warning">The SSG example is relies on having the locale prefixed in the path like `/en/page`.</doc-callout>
+
+<doc-callout type="tip">Pull requests that improve this example are welcome.</doc-callout>
+
+## Getting started
+
+### Install paraglide js
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npx @inlang/paraglide-js@beta init
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Add the webpack plugin to the `next.config.js` file:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+<doc-callout type="info">The URL Pattern ensures that `localizeHref()` includes the locale in the path.</doc-callout>
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+```diff
+import { paraglideWebpackPlugin } from "@inlang/paraglide-js";
 
-To learn more about Next.js, take a look at the following resources:
+/**
+ * @type {import('next').NextConfig}
+ */
+export default {
++	webpack: (config) => {
++		config.plugins.push(
++			paraglideWebpackPlugin({
++				outdir: "./src/paraglide",
++				project: "./project.inlang",
++				urlPatterns: [
++					{
++						pattern:
++							":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)?",
++						deLocalizedNamedGroups: {
++							locale: "en",
++						},
++						localizedNamedGroups: {
++							de: { locale: "de" },
++							en: { locale: "en" },
++						},
++					},
++				],
++			})
++		);
++		return config;
+	},
+};
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Create a `[locale]` folder and move all of your pages in there
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+app/
+  - [locale]/
+    - index.tsx
+    - about.tsx
+    - ...
+```
 
-## Deploy on Vercel
+### Add the locale handling to your root layout
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```diff
+app/
+  - [locale]/
+    - index.tsx
++   - layout.tsx
+    - about.tsx
+    - ...
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```diff
+
+// needed for SSG
++export function generateStaticParams() {
++	return [{ locale: "en" }, { locale: "de" }];
++}
+
+// scopes the locale per request
++let ssrLocale = cache(() => ({
++	locale: baseLocale,
++}));
+
+// overwrite the getLocale function to use the locale from the request
++overwriteGetLocale(() => assertIsLocale(ssrLocale().locale));
+
+export default async function RootLayout({
+	children,
+	params,
+}: {
+	children: React.ReactNode;
+	params: { locale: string };
+}) {
+	// can't use async params because the execution order get's screwed up.
+	// this is something nextjs has to fix
++	ssrLocale().locale = params.locale;
+	return (
+		<html lang={getLocale()}>
+			<body>
+				{children}
+			</body>
+		</html>
+	);
+}
+```
