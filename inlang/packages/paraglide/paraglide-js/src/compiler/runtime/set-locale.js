@@ -31,7 +31,7 @@ export let setLocale = (newLocale) => {
 				continue;
 			}
 			// set the cookie
-			document.cookie = `${cookieName}=${newLocale}`;
+			document.cookie = `${cookieName}=${newLocale}; path=/`;
 			localeHasBeenSet = true;
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
