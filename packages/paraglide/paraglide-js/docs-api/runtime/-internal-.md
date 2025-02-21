@@ -44,7 +44,7 @@ if (locales.includes(userSelectedLocale) === false) {
 
 ## strategy
 
-> `const` **strategy**: (`"cookie"` \| `"baseLocale"` \| `"globalVariable"` \| `"url"`)[]
+> `const` **strategy**: (`"cookie"` \| `"baseLocale"` \| `"globalVariable"` \| `"url"` \| `"preferredLanguage"`)[]
 
 Defined in: [runtime/variables.js:27](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
@@ -178,7 +178,7 @@ The `document` object is not available in server-side rendering, so this functio
 
 > **extractLocaleFromRequest**(`request`): `any`
 
-Defined in: [runtime/extract-locale-from-request.js:24](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
+Defined in: [runtime/extract-locale-from-request.js:27](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
 
 Extracts a locale from a request.
 
@@ -234,7 +234,7 @@ The extracted locale, or undefined if no locale is found.
 
 > **getLocale**(): `any`
 
-Defined in: [runtime/get-locale.js:35](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:37](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Get the current locale.
 
@@ -385,7 +385,7 @@ The target locale.
 
 > **overwriteGetLocale**(`fn`): `void`
 
-Defined in: [runtime/get-locale.js:92](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:126](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Overwrite the `getLocale()` function.
 

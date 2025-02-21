@@ -62,6 +62,10 @@ ${injectCode("./variables.js")
 		`const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("globalVariable")};`
 	)
 	.replace(
+		`export const TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("preferredLanguage")};`
+	)
+	.replace(
 		`export const urlPatterns = [];`,
 		`export const urlPatterns = ${JSON.stringify(urlPatterns, null, 2)};`
 	)}
