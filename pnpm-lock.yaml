@@ -228,50 +228,6 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
 
-  inlang/packages/paraglide/paraglide-astro:
-    dependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../paraglide-js
-      astro:
-        specifier: ^4 || ^5
-        version: 5.1.10(@azure/identity@4.5.0)(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.24.0)(terser@5.36.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
-    devDependencies:
-      '@opral/tsconfig':
-        specifier: workspace:*
-        version: link:../../../../packages/tsconfig
-      prettier:
-        specifier: ^3.4.2
-        version: 3.4.2
-      typescript:
-        specifier: ^5.5.4
-        version: 5.7.3
-
-  inlang/packages/paraglide/paraglide-astro/example:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.4
-        version: 0.9.4(prettier@3.5.1)(typescript@5.7.3)
-      '@astrojs/node':
-        specifier: ^9.0.1
-        version: 9.0.2(astro@5.1.10(@azure/identity@4.5.0)(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.24.0)(terser@5.36.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0))
-      '@astrojs/svelte':
-        specifier: ^7.0.3
-        version: 7.0.4(@types/node@22.10.6)(astro@5.1.10(@azure/identity@4.5.0)(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.24.0)(terser@5.36.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0))(jiti@2.4.2)(lightningcss@1.29.1)(svelte@5.19.5)(terser@5.36.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
-      astro:
-        specifier: ^5.1.6
-        version: 5.1.10(@azure/identity@4.5.0)(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.24.0)(terser@5.36.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
-      svelte:
-        specifier: ^5.17.5
-        version: 5.19.5
-      typescript:
-        specifier: ^5.5.2
-        version: 5.7.3
-    devDependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../../paraglide-js
-
   inlang/packages/paraglide/paraglide-js:
     dependencies:
       '@inlang/recommend-sherlock':
@@ -351,6 +307,31 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0)
 
+  inlang/packages/paraglide/paraglide-js/examples/astro:
+    dependencies:
+      '@astrojs/check':
+        specifier: ^0.9.4
+        version: 0.9.4(prettier@3.5.1)(typescript@5.7.3)
+      '@astrojs/node':
+        specifier: ^9.0.1
+        version: 9.0.2(astro@5.1.10(@azure/identity@4.5.0)(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.24.0)(terser@5.36.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0))
+      '@astrojs/svelte':
+        specifier: ^7.0.3
+        version: 7.0.4(@types/node@22.10.6)(astro@5.1.10(@azure/identity@4.5.0)(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.24.0)(terser@5.36.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0))(jiti@2.4.2)(lightningcss@1.29.1)(svelte@5.19.5)(terser@5.36.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
+      astro:
+        specifier: ^5.1.6
+        version: 5.1.10(@azure/identity@4.5.0)(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.24.0)(terser@5.36.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
+      svelte:
+        specifier: ^5.17.5
+        version: 5.19.5
+      typescript:
+        specifier: ^5.5.2
+        version: 5.7.3
+    devDependencies:
+      '@inlang/paraglide-js':
+        specifier: workspace:*
+        version: link:../..
+
   inlang/packages/paraglide/paraglide-js/examples/cli:
     devDependencies:
       '@inlang/paraglide-js':
@@ -364,6 +345,34 @@ importers:
         version: 5.7.3
 
   inlang/packages/paraglide/paraglide-js/examples/next-js-ssg:
+    dependencies:
+      next:
+        specifier: 15.1.5
+        version: 15.1.5(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react:
+        specifier: ^19.0.0
+        version: 19.0.0
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.0.0(react@19.0.0)
+    devDependencies:
+      '@inlang/paraglide-js':
+        specifier: workspace:*
+        version: link:../..
+      '@types/node':
+        specifier: ^20
+        version: 20.16.13
+      '@types/react':
+        specifier: ^19
+        version: 19.0.8
+      '@types/react-dom':
+        specifier: ^19
+        version: 19.0.3(@types/react@19.0.8)
+      typescript:
+        specifier: ^5
+        version: 5.7.3
+
+  inlang/packages/paraglide/paraglide-js/examples/next-js-ssr:
     dependencies:
       next:
         specifier: 15.1.5
@@ -483,94 +492,11 @@ importers:
         specifier: ^5.4.11
         version: 5.4.11(@types/node@20.16.13)(lightningcss@1.29.1)(terser@5.36.0)
 
-  inlang/packages/paraglide/paraglide-js/examples/vite:
+  inlang/packages/paraglide/paraglide-js/examples/sveltekit:
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../..
-      typescript:
-        specifier: ^5.7.2
-        version: 5.7.3
-      vite:
-        specifier: ^6.0.7
-        version: 6.0.7(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0)
-
-  inlang/packages/paraglide/paraglide-next:
-    dependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../paraglide-js
-    devDependencies:
-      '@opral/tsconfig':
-        specifier: workspace:*
-        version: link:../../../../packages/tsconfig
-      '@types/node':
-        specifier: ^22.10.6
-        version: 22.10.6
-      '@vitest/coverage-v8':
-        specifier: 2.1.8
-        version: 2.1.8(@vitest/browser@2.1.8)(vitest@2.1.8)
-      next:
-        specifier: ^15
-        version: 15.1.5(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      prettier:
-        specifier: ^3.4.2
-        version: 3.4.2
-      typescript:
-        specifier: ^5.7.3
-        version: 5.7.3
-      vitest:
-        specifier: 2.1.8
-        version: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0)
-
-  inlang/packages/paraglide/paraglide-sveltekit:
-    dependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../paraglide-js
-      '@sveltejs/kit':
-        specifier: ^2.4.3
-        version: 2.16.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.19.5)(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0)))(svelte@5.19.5)(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0))
-      svelte:
-        specifier: ^5.0.0
-        version: 5.19.5
-    devDependencies:
-      '@eslint/js':
-        specifier: ^9.18.0
-        version: 9.18.0
-      '@opral/tsconfig':
-        specifier: workspace:*
-        version: link:../../../../packages/tsconfig
-      '@sveltejs/package':
-        specifier: ^2.2.3
-        version: 2.3.9(svelte@5.19.5)(typescript@5.7.3)
-      '@types/node':
-        specifier: ^22.10.6
-        version: 22.10.6
-      '@vitest/coverage-v8':
-        specifier: 2.1.8
-        version: 2.1.8(@vitest/browser@2.1.8)(vitest@2.1.8)
-      eslint:
-        specifier: ^9.18.0
-        version: 9.18.0(jiti@2.4.2)
-      prettier:
-        specifier: ^3.4.2
-        version: 3.4.2
-      typescript:
-        specifier: ^5.7.3
-        version: 5.7.3
-      typescript-eslint:
-        specifier: ^8.20.0
-        version: 8.20.0(eslint@9.18.0(jiti@2.4.2))(typescript@5.7.3)
-      vitest:
-        specifier: 2.1.8
-        version: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0)
-
-  inlang/packages/paraglide/paraglide-sveltekit/example:
-    devDependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../../paraglide-js
       '@sveltejs/adapter-auto':
         specifier: ^4.0.0
         version: 4.0.0(@sveltejs/kit@2.16.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))
@@ -582,10 +508,10 @@ importers:
         version: 4.0.4(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))
       prettier:
         specifier: ^3.4.2
-        version: 3.4.2
+        version: 3.5.1
       prettier-plugin-svelte:
         specifier: ^3.3.3
-        version: 3.3.3(prettier@3.4.2)(svelte@5.19.5)
+        version: 3.3.3(prettier@3.5.1)(svelte@5.19.5)
       svelte:
         specifier: ^5.0.0
         version: 5.19.5
@@ -598,6 +524,18 @@ importers:
       vite:
         specifier: ^5.4.11
         version: 5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)
+
+  inlang/packages/paraglide/paraglide-js/examples/vite:
+    devDependencies:
+      '@inlang/paraglide-js':
+        specifier: workspace:*
+        version: link:../..
+      typescript:
+        specifier: ^5.7.2
+        version: 5.7.3
+      vite:
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0)
 
   inlang/packages/plugins/i18next:
     dependencies:
@@ -6747,13 +6685,6 @@ packages:
       '@sveltejs/vite-plugin-svelte': ^3.0.0 || ^4.0.0-next.1 || ^5.0.0
       svelte: ^4.0.0 || ^5.0.0-next.0
       vite: ^5.0.3 || ^6.0.0
-
-  '@sveltejs/package@2.3.9':
-    resolution: {integrity: sha512-POIiQknGmcGCcM7ZbFG7cjsJ51GndFOY3PTXa8XFzZ+C/GJfx/JufvVXiWcXVsteP74FeXSSgcC+b5sIayXXKw==}
-    engines: {node: ^16.14 || >=18}
-    hasBin: true
-    peerDependencies:
-      svelte: ^3.44.0 || ^4.0.0 || ^5.0.0-next.1
 
   '@sveltejs/vite-plugin-svelte-inspector@3.0.1':
     resolution: {integrity: sha512-2CKypmj1sM4GE7HjllT7UKmo4Q6L5xFRd7VMGEWhYnZ+wc6AUVU01IBd7yUi6WnFndEwWoMNOd6e8UjoN0nbvQ==}
@@ -15987,14 +15918,6 @@ packages:
       vite:
         optional: true
 
-  vitefu@1.0.4:
-    resolution: {integrity: sha512-y6zEE3PQf6uu/Mt6DTJ9ih+kyJLr4XcSgHR2zUkM8SWDhuixEJxfJ6CZGMHh1Ec3vPLoEA0IHU5oWzVqw8ulow==}
-    peerDependencies:
-      vite: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
-    peerDependenciesMeta:
-      vite:
-        optional: true
-
   vitefu@1.0.5:
     resolution: {integrity: sha512-h4Vflt9gxODPFNGPwp4zAMZRpZR7eslzwH2c5hn5kNZ5rhnKyRJ50U+yGCdc2IRaBs8O4haIgLNGrV5CrpMsCA==}
     peerDependencies:
@@ -16725,7 +16648,7 @@ snapshots:
       '@volar/language-core': 2.4.11
       '@volar/language-server': 2.4.11
       '@volar/language-service': 2.4.11
-      fast-glob: 3.3.2
+      fast-glob: 3.3.3
       muggle-string: 0.4.1
       volar-service-css: 0.0.62(@volar/language-service@2.4.11)
       volar-service-emmet: 0.0.62(@volar/language-service@2.4.11)
@@ -16813,7 +16736,7 @@ snapshots:
 
   '@astrojs/yaml2ts@0.2.2':
     dependencies:
-      yaml: 2.6.0
+      yaml: 2.7.0
 
   '@aw-web-design/x-default-browser@1.4.126':
     dependencies:
@@ -22567,34 +22490,6 @@ snapshots:
       svelte: 5.19.5
       vite: 5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)
 
-  '@sveltejs/kit@2.16.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.19.5)(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0)))(svelte@5.19.5)(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0))':
-    dependencies:
-      '@sveltejs/vite-plugin-svelte': 5.0.3(svelte@5.19.5)(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0))
-      '@types/cookie': 0.6.0
-      cookie: 0.6.0
-      devalue: 5.1.1
-      esm-env: 1.2.2
-      import-meta-resolve: 4.1.0
-      kleur: 4.1.5
-      magic-string: 0.30.17
-      mrmime: 2.0.0
-      sade: 1.8.1
-      set-cookie-parser: 2.7.1
-      sirv: 3.0.0
-      svelte: 5.19.5
-      vite: 6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0)
-
-  '@sveltejs/package@2.3.9(svelte@5.19.5)(typescript@5.7.3)':
-    dependencies:
-      chokidar: 4.0.3
-      kleur: 4.1.5
-      sade: 1.8.1
-      semver: 7.6.3
-      svelte: 5.19.5
-      svelte2tsx: 0.7.34(svelte@5.19.5)(typescript@5.7.3)
-    transitivePeerDependencies:
-      - typescript
-
   '@sveltejs/vite-plugin-svelte-inspector@3.0.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))':
     dependencies:
       '@sveltejs/vite-plugin-svelte': 4.0.4(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))
@@ -22622,7 +22517,7 @@ snapshots:
       magic-string: 0.30.17
       svelte: 5.19.5
       vite: 5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)
-      vitefu: 1.0.4(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))
+      vitefu: 1.0.5(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -22635,7 +22530,7 @@ snapshots:
       magic-string: 0.30.17
       svelte: 5.19.5
       vite: 6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0)
-      vitefu: 1.0.4(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0))
+      vitefu: 1.0.5(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -23751,7 +23646,7 @@ snapshots:
       '@typescript-eslint/types': 8.10.0
       '@typescript-eslint/visitor-keys': 8.10.0
       debug: 4.4.0(supports-color@9.4.0)
-      fast-glob: 3.3.2
+      fast-glob: 3.3.3
       is-glob: 4.0.3
       minimatch: 9.0.5
       semver: 7.6.3
@@ -23766,7 +23661,7 @@ snapshots:
       '@typescript-eslint/types': 8.10.0
       '@typescript-eslint/visitor-keys': 8.10.0
       debug: 4.4.0(supports-color@9.4.0)
-      fast-glob: 3.3.2
+      fast-glob: 3.3.3
       is-glob: 4.0.3
       minimatch: 9.0.5
       semver: 7.6.3
@@ -23781,7 +23676,7 @@ snapshots:
       '@typescript-eslint/types': 8.18.2
       '@typescript-eslint/visitor-keys': 8.18.2
       debug: 4.4.0(supports-color@9.4.0)
-      fast-glob: 3.3.2
+      fast-glob: 3.3.3
       is-glob: 4.0.3
       minimatch: 9.0.5
       semver: 7.6.3
@@ -23795,7 +23690,7 @@ snapshots:
       '@typescript-eslint/types': 8.20.0
       '@typescript-eslint/visitor-keys': 8.20.0
       debug: 4.4.0(supports-color@9.4.0)
-      fast-glob: 3.3.2
+      fast-glob: 3.3.3
       is-glob: 4.0.3
       minimatch: 9.0.5
       semver: 7.6.3
@@ -32194,9 +32089,9 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-plugin-svelte@3.3.3(prettier@3.4.2)(svelte@5.19.5):
+  prettier-plugin-svelte@3.3.3(prettier@3.5.1)(svelte@5.19.5):
     dependencies:
-      prettier: 3.4.2
+      prettier: 3.5.1
       svelte: 5.19.5
 
   prettier@2.8.7: {}
@@ -35183,7 +35078,7 @@ snapshots:
       solid-js: 1.7.11
       solid-refresh: 0.6.3(solid-js@1.7.11)
       vite: 4.5.5(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0)
-      vitefu: 1.0.4(vite@4.5.5(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0))
+      vitefu: 1.0.5(vite@4.5.5(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -35321,17 +35216,13 @@ snapshots:
     optionalDependencies:
       vite: 4.5.5(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0)
 
-  vitefu@1.0.4(vite@4.5.5(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0)):
+  vitefu@1.0.5(vite@4.5.5(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0)):
     optionalDependencies:
       vite: 4.5.5(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0)
 
-  vitefu@1.0.4(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)):
+  vitefu@1.0.5(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)):
     optionalDependencies:
       vite: 5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)
-
-  vitefu@1.0.4(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0)):
-    optionalDependencies:
-      vite: 6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0)
 
   vitefu@1.0.5(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0)):
     optionalDependencies:

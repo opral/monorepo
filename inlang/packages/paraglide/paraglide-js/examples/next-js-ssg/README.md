@@ -105,8 +105,8 @@ export default async function RootLayout({
 	children,
 	params,
 }: {
-	children: React.ReactNode;
-	params: { locale: string };
+	children: any;
+	params: any;
 }) {
 	// can't use async params because the execution order get's screwed up.
 	// this is something nextjs has to fix

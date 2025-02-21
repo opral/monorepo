@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/paraglide-sveltekit-example",
+	"name": "@inlang/paraglide-js-example-sveltekit",
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",

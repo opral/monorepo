@@ -36,7 +36,6 @@ test("sets the locale and origin", async () => {
 	expect(runtime.getLocale()).toBe("fr");
 });
 
-
 test("delocalizes the url if the url strategy is used and returns the locale", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
