@@ -38,7 +38,9 @@
 			"/errors": "./docs/errors.md"
 		},
 		"Examples": {
-			"/react-router": "./examples/react-router/README.md"
+			"/next-js": "./docs/examples/next-js.md",
+			"/react-router": "./examples/react-router/README.md",
+			"/vite": "./examples/vite/README.md"
 		},
 		"Frameworks": {
 			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",
