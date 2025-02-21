@@ -82,3 +82,31 @@ test("throws an error if no locale is found", async () => {
 		"No locale found. There is an error in your strategy. Try adding 'baseLocale' as the very last strategy."
 	);
 });
+
+test("returns the preferred locale from Accept-Language header", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr", "de"],
+		compilerOptions: {
+			strategy: ["preferredLanguage"],
+		},
+	});
+
+	// simple direct match
+	const request = new Request("http://example.com", {
+		headers: {
+			"Accept-Language": "en-US;q=0.8,fr;q=0.9,de;q=0.6",
+		},
+	});
+	const locale = runtime.extractLocaleFromRequest(request);
+	expect(locale).toBe("fr");
+
+	// testing fallback
+	const request2 = new Request("http://example.com", {
+		headers: {
+			"Accept-Language": "en-US;q=0.8",
+		},
+	});
+	const locale2 = runtime.extractLocaleFromRequest(request2);
+	expect(locale2).toBe("en");
+});
