@@ -92,23 +92,21 @@ compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
 	strategy: ["url"],
-	compilerOptions: {
-		urlPatterns: [
-			{
-				pattern: ":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)?",
-				// the original URL is https://example.com/about. 
+	urlPatterns: [
+		{
+			pattern: ":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)?",
+			// the original URL is https://example.com/about. 
+			// hence, the locale is null
+			deLocalizedNamedGroups: { locale: null },
+			localizedNamedGroups: {
+				// the en locale should have no locale in the URL
 				// hence, the locale is null
-				deLocalizedNamedGroups: { locale: null },
-				localizedNamedGroups: {
-					// the en locale should have no locale in the URL
-					// hence, the locale is null
-					en: { locale: null },
-					// the de locale should have the locale in the URL
-					de: { locale: "de" },
-				},
+				en: { locale: null },
+				// the de locale should have the locale in the URL
+				de: { locale: "de" },
 			},
-		],
-	},
+		},
+	],
 });
 ```
 
@@ -124,29 +122,27 @@ compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
 	strategy: ["url"],
-	compilerOptions: {
-		urlPatterns: [
-			// defining the pattern during development which 
-			// uses path suffixes like /en
-			{
-				pattern: ':protocol://localhost::port?/:locale(de|en)?/:path(.*)?',
-					deLocalizedNamedGroups: { locale: null },
-					localizedNamedGroups: {
-						en: { locale: 'en' },
-						de: { locale: 'de' }
-					},
-			},
-			// production pattern which uses subdomains like de.example.com
-			{
-				pattern: ":protocol://:domain(.*)::port?/:path(.*)?",
-				deLocalizedNamedGroups: { domain: "example.com" },
+	urlPatterns: [
+		// defining the pattern during development which 
+		// uses path suffixes like /en
+		{
+			pattern: ':protocol://localhost::port?/:locale(de|en)?/:path(.*)?',
+				deLocalizedNamedGroups: { locale: null },
 				localizedNamedGroups: {
-					en: { domain: "example.com" },
-					de: { domain: "de.example.com" },
+					en: { locale: 'en' },
+					de: { locale: 'de' }
 				},
+		},
+		// production pattern which uses subdomains like de.example.com
+		{
+			pattern: ":protocol://:domain(.*)::port?/:path(.*)?",
+			deLocalizedNamedGroups: { domain: "example.com" },
+			localizedNamedGroups: {
+				en: { domain: "example.com" },
+				de: { domain: "de.example.com" },
 			},
-		],
-	},
+		},
+	],
 });
 ```
 
@@ -167,18 +163,16 @@ compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
 	strategy: ["url"],
-	compilerOptions: {
-		urlPatterns: [
-			{
-				pattern: ":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)?",
-				deLocalizedNamedGroups: { base },
-				localizedNamedGroups: {
-					en: { base, locale: "en" },
-					de: { base, locale: "de" },
-				},
+	urlPatterns: [
+		{
+			pattern: ":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)?",
+			deLocalizedNamedGroups: { base },
+			localizedNamedGroups: {
+				en: { base, locale: "en" },
+				de: { base, locale: "de" },
 			},
-		],
-	},
+		},
+	],
 });
 ```
 
