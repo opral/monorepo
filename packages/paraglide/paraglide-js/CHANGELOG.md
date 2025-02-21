@@ -1,5 +1,10 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.20
+
+- automatic re-directs in `serverMiddleware()` https://github.com/opral/inlang-paraglide-js/issues/201#issuecomment-2675823651
+- various bug fixes and improvements
+
 ## 2.0.0-beta.19
 
 NO MORE ADAPTERS NEEDED.
