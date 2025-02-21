@@ -1,5 +1,5 @@
 ---
-imports: 
+imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
@@ -22,7 +22,7 @@ import type { Handle } from '@sveltejs/kit';
 import { serverMiddleware } from '$lib/paraglide/runtime';
 
 export const handle: Handle = ({ event, resolve }) => {
-	return serverMiddleware(event.request, () => resolve(event));
+	return serverMiddleware(event.request, ({ request }) => resolve({ ...event, request }));
 };
 ```
 
@@ -39,7 +39,7 @@ export const reroute: Reroute = (request) => {
 
 ### Done :)
 
-Check out https://inlang.com/m/gerre34r/library-inlang-paraglideJs/getting-started on how to use Paraglide Js. 
+Check out https://inlang.com/m/gerre34r/library-inlang-paraglideJs/getting-started on how to use Paraglide Js.
 
 ## Features of the example
 
