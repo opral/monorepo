@@ -16,57 +16,49 @@ let serverMiddlewareAsyncStorage = undefined;
 
 /**
  * Server middleware that handles locale-based routing and request processing.
- * 
+ *
  * This middleware performs several key functions:
- * 
+ *
  * 1. Determines the locale for the incoming request using configured strategies
  * 2. Handles URL localization and redirects
  * 3. Maintains locale state using AsyncLocalStorage to prevent request interference
- * 
+ *
  * When URL strategy is used:
- * 
+ *
  * - If URL doesn't match the determined locale, redirects to localized URL
  * - De-localizes URLs before passing to server (e.g., `/fr/about` → `/about`)
- * 
+ *
  * @template T - The return type of the resolve function
- * 
+ *
  * @param {Request} request - The incoming request object
  * @param {(args: { request: Request, locale: Locale }) => T | Promise<T>} resolve - Function to handle the request
- * 
- * @returns {Promise<Response | T>} Returns either:
+ *
+ * @returns {Promise<Response | any>} Returns either:
  * - A {@link Response} object (302 redirect) if URL localization is needed
  * - The result of the resolve function if no redirect is required
- * 
+ *
  * @example
  * ```typescript
- * // Basic usage
- * const result = await serverMiddleware(
- *   new Request("https://example.com/about"),
- *   ({ request, locale }) => {
- *     console.log(locale); // "fr" (if French is determined from cookie/headers)
- *     console.log(request.url); // "https://example.com/about" (de-localized)
- *     return new Response("OK");
- *   }
- * );
- * // Result may be a redirect to https://example.com/fr/about
+ * // Basic usage in metaframeworks like NextJS, SvelteKit, Astro, Nuxt, etc.
+ * export const handle = async ({ event, resolve }) => {
+ *   return serverMiddleware(event.request, ({ request, locale }) => {
+ *     // let the framework further resolve the request
+ *     return resolve(request);
+ *   });
+ * };
  * ```
- * 
+ *
  * @example
  * ```typescript
  * // Usage in a framework like Express JS or Hono
- * app.use(async (req, res) => {
+ * app.use(async (req, res, next) => {
  *   const result = await serverMiddleware(req, ({ request, locale }) => {
  *     // If a redirect happens this won't be called
- *     return handleRequest(request);
+ *     return next(request);
  *   });
- *   
- *   if (result instanceof Response) {
- *     // Handle redirect
- *     res.redirect(result.headers.get("Location"));
- *   }
  * });
  * ```
- * 
+ *
  * @see {@link https://inlang.com/documentation/paraglide-js/server-middleware|Server Middleware Documentation}
  */
 export async function serverMiddleware(request, resolve) {
