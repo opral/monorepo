@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import svelte, { vitePreprocess } from "@astrojs/svelte";
 import { paraglideVitePlugin } from "@inlang/paraglide-js";
+import node from "@astrojs/node";
 
 // https://astro.build/config
 export default defineConfig({
@@ -18,4 +19,5 @@ export default defineConfig({
 		],
 	},
 	output: "server",
+	adapter: node,
 });

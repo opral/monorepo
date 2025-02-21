@@ -5,10 +5,7 @@
 		"allowJs": true,
 		"checkJs": true,
 		"moduleResolution": "Bundler",
-		"baseUrl": ".",
-		"paths": {
-			"$paraglide/*": ["./src/paraglide/*"]
-		}
+		"baseUrl": "."
 	},
 	"include": ["src", ".astro"]
 }

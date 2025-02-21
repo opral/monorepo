@@ -2,7 +2,6 @@ import {
 	assertIsLocale,
 	baseLocale,
 	getLocale,
-	Locale,
 	overwriteGetLocale,
 } from "../../paraglide/runtime";
 import ClientSideLocaleSwitch from "./ClientSideLocaleSwitch";
@@ -15,7 +14,7 @@ export function generateStaticParams() {
 }
 
 // scopes the locale per request
-let ssrLocale = cache(() => ({
+const ssrLocale = cache(() => ({
 	locale: baseLocale,
 }));
 
@@ -26,8 +25,8 @@ export default async function RootLayout({
 	children,
 	params,
 }: {
-	children: React.ReactNode;
-	params: { locale: string };
+	children: any;
+	params: any;
 }) {
 	// can't use async params because the execution order get's screwed up.
 	// this is something nextjs has to fix
