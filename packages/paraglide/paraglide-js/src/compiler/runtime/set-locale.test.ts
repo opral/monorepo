@@ -24,7 +24,7 @@ test("sets the cookie to a different locale", async () => {
 	runtime.setLocale("de");
 
 	// set the locale
-	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=de");
+	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=de; path=/");
 	// reloads the site if window is available
 	expect(globalThis.window.location.reload).toBeCalled();
 });
@@ -80,7 +80,7 @@ test("sets the cookie when it's an empty string", async () => {
 
 	runtime.setLocale("en");
 
-	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=en");
+	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=en; path=/");
 });
 
 test("when strategy precedes URL, it should set the locale and re-direct to the URL", async () => {
@@ -114,7 +114,7 @@ test("when strategy precedes URL, it should set the locale and re-direct to the 
 
 	runtime.setLocale("en");
 
-	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=en");
+	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=en; path=/");
 	expect(globalThis.window.location.href).toBe(
 		"https://example.com/en/some-path"
 	);
