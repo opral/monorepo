@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/paraglide-next-example",
+	"name": "@inlang/paraglide-js-example-next-js-ssg",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
