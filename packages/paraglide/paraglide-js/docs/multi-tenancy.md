@@ -81,7 +81,7 @@ await compile({
 
 - De-localizing French:
   ```javascript
-  runtime.deLocalizeUrl("https://customer2.com/about").href;
+  deLocalizeHref("https://customer2.com/about");
   // Output: "https://customer2.com/fr/about"
   ```
 
