@@ -80,6 +80,10 @@ The Paraglide runtime API.
 
 > **overwriteSetLocale**: [`overwriteSetLocale`](-internal-.md#overwritesetlocale)
 
+#### serverMiddleware
+
+> **serverMiddleware**: [`serverMiddleware`](-internal-.md#servermiddleware)
+
 #### setLocale
 
 > **setLocale**: [`setLocale`](-internal-.md#setlocale)

@@ -8,9 +8,14 @@
  * @type {() => string}
  */
 export let getUrlOrigin = () => {
-	return typeof window === "undefined"
-		? "http://fallback.com"
-		: window.location.origin;
+	if (serverMiddlewareAsyncStorage) {
+		return (
+			serverMiddlewareAsyncStorage.getStore()?.origin ?? "http://fallback.com"
+		);
+	} else if (typeof window !== "undefined") {
+		return window.location.origin;
+	}
+	return "http://fallback.com";
 };
 
 /**

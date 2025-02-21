@@ -17,15 +17,21 @@ export function createRuntimeFile(args: {
 		urlPatterns?: CompilerOptions["urlPatterns"];
 	};
 }): string {
-	const defaultUrlPattern = {
-		pattern: `:protocol://:domain(.*)::port?/:locale(${args.locales.filter((l) => l !== args.baseLocale).join("|")})?/:path(.*)?`,
-		deLocalizedNamedGroups: { locale: null },
-		localizedNamedGroups: {
-			...Object.fromEntries(args.locales.map((locale) => [locale, { locale }])),
-			en: { locale: null },
-		},
-	};
+	const urlPatterns = args.compilerOptions.urlPatterns ?? [];
 
+	// add default urlPatterns for a good out of the box experience
+	if (args.compilerOptions.urlPatterns === undefined) {
+		urlPatterns.push({
+			pattern: `:protocol://:domain(.*)::port?/:locale(${args.locales.filter((l) => l !== args.baseLocale).join("|")})?/:path(.*)?`,
+			deLocalizedNamedGroups: { locale: null },
+			localizedNamedGroups: {
+				...Object.fromEntries(
+					args.locales.map((locale) => [locale, { locale }])
+				),
+				en: { locale: null },
+			},
+		});
+	}
 	const code = `
 import "@inlang/paraglide-js/urlpattern-polyfill";
 
@@ -57,7 +63,7 @@ ${injectCode("./variables.js")
 	)
 	.replace(
 		`export const urlPatterns = [];`,
-		`export const urlPatterns = ${JSON.stringify(args.compilerOptions?.urlPatterns ?? [defaultUrlPattern], null, 2)};`
+		`export const urlPatterns = ${JSON.stringify(urlPatterns, null, 2)};`
 	)}
 
 ${injectCode("./get-locale.js")} 
@@ -79,6 +85,8 @@ ${injectCode("./extract-locale-from-url.js")}
 ${injectCode("./localize-url.js")}
 
 ${injectCode("./localize-href.js")}
+
+${injectCode("./server-middleware.js")}
 
 // ------ TYPES ------
 

@@ -385,7 +385,7 @@ The target locale.
 
 > **overwriteGetLocale**(`fn`): `void`
 
-Defined in: [runtime/get-locale.js:83](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:92](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Overwrite the `getLocale()` function.
 
@@ -418,7 +418,7 @@ overwriteGetLocale(() => {
 
 > **overwriteGetUrlOrigin**(`fn`): `void`
 
-Defined in: [runtime/get-url-origin.js:24](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-url-origin.js)
+Defined in: [runtime/get-url-origin.js:29](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-url-origin.js)
 
 Overwrite the getUrlOrigin function.
 
@@ -441,7 +441,7 @@ define how the URL origin is resolved.
 
 > **overwriteSetLocale**(`fn`): `void`
 
-Defined in: [runtime/set-locale.js:83](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:85](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Overwrite the `setLocale()` function.
 
@@ -466,6 +466,40 @@ overwriteSetLocale((newLocale) => {
     return Cookies.set('locale', newLocale)
   });
 ```
+
+***
+
+## serverMiddleware()
+
+> **serverMiddleware**\<`T`\>(`request`, `resolve`): `Promise`\<`any`\>
+
+Defined in: [runtime/server-middleware.js:25](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/server-middleware.js)
+
+The handle function defines the locale for the incoming request.
+
+### Type Parameters
+
+• **T**
+
+### Parameters
+
+#### request
+
+`Request`
+
+The incoming request object.
+
+#### resolve
+
+(`args`) => `T` \| `Promise`\<`T`\>
+
+A function that resolves the request.
+
+### Returns
+
+`Promise`\<`any`\>
+
+The result of `resolve()` within the async storage context.
 
 ***
 

@@ -120,6 +120,9 @@ test("can emit message bundles with more than 255 characters", async () => {
 
 	const output = await compileProject({
 		project,
+		compilerOptions: {
+			urlPatterns: [],
+		},
 	});
 
 	const code = await bundleCode(
@@ -599,6 +602,9 @@ async function bundleCode(output: Record<string, string>, file: string) {
 	output["runtime.js"] = output["runtime.js"]!.replace(
 		'import "@inlang/paraglide-js/urlpattern-polyfill";',
 		"/** @type {any} */const URLPattern = {};"
+	).replace(
+		'const { AsyncLocalStorage } = await import("async_hooks");',
+		"const AsyncLocalStorage = class {};"
 	);
 
 	const bundle = await rolldown({
