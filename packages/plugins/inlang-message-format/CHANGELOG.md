@@ -1,5 +1,11 @@
 # @inlang/plugin-message-format
 
+## 3.2.1
+
+### Patch Changes
+
+- b9442e3: - update `exportFiles` to emit sorted output to have less diff noise
+
 ## 3.2.0
 
 ### Minor Changes
