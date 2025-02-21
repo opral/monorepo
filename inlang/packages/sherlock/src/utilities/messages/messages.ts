@@ -1,4 +1,5 @@
 import * as vscode from "vscode"
+import { isEqual } from "lodash-es"
 import { state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
 import { getStringFromPattern } from "./query.js"
@@ -12,6 +13,10 @@ import {
 } from "@inlang/sdk"
 import { pollQuery } from "../polling/pollQuery.js"
 
+// Store previous subscription state
+let subscription: { unsubscribe: () => void } | undefined
+let previousBundles: BundleNested[] | undefined
+
 export function createMessageWebviewProvider(args: {
 	workspaceFolder: vscode.WorkspaceFolder
 	context: vscode.ExtensionContext
@@ -21,30 +26,62 @@ export function createMessageWebviewProvider(args: {
 	let subscribedToProjectPath = ""
 	let activeFileContent: string | undefined
 	let debounceTimer: NodeJS.Timeout | undefined
+	// Add a flag to track subscription status
+	let isSubscribing = false
 
 	const updateMessages = async () => {
 		const project = state().project as InlangProject | undefined
 		if (!project) {
 			isLoading = true
+			bundles = undefined
 			updateWebviewContent()
 			return
 		}
 
-		// Subscribe to messages just once for a project
-		if (subscribedToProjectPath !== state().selectedProjectPath) {
-			subscribedToProjectPath = state().selectedProjectPath
-
-			updateWebviewContent() // Initial render
+		// Prevent multiple subscriptions from running simultaneously
+		if (isSubscribing) {
+			return
 		}
 
-		pollQuery(() => selectBundleNested(project.db).execute(), 2000).subscribe((newBundles) => {
-			// Only update if bundles have actually changed
-			if (JSON.stringify(bundles) !== JSON.stringify(newBundles)) {
-				bundles = newBundles
-				isLoading = false
-				updateWebviewContent() // Direct update instead of throttled
+		// Ensure we are only subscribing when the project actually changes
+		if (subscribedToProjectPath !== state().selectedProjectPath) {
+			isSubscribing = true
+
+			// Clear existing subscription safely
+			if (subscription) {
+				subscription.unsubscribe()
+				subscription = undefined
 			}
-		})
+
+			// Reset state
+			bundles = undefined
+			previousBundles = undefined
+			isLoading = true
+			updateWebviewContent()
+
+			subscribedToProjectPath = state().selectedProjectPath
+
+			subscription = pollQuery(() => selectBundleNested(project.db).execute(), 2000).subscribe(
+				(result) => {
+					if (result instanceof Error) {
+						console.error("Error in subscription:", result)
+						isSubscribing = false
+						return
+					}
+
+					const newBundles = result as BundleNested[] // Ensure the correct type
+
+					// Only update if bundles actually changed
+					if (!isEqual(previousBundles, newBundles)) {
+						previousBundles = [...newBundles]
+						bundles = newBundles
+						isLoading = false
+						throttledUpdateWebviewContent()
+					}
+					isSubscribing = false // Ensure flag resets after fetch
+				}
+			)
+		}
 	}
 
 	const debounceUpdate = () => {
@@ -143,6 +180,18 @@ export function createMessageWebviewProvider(args: {
 	return {
 		resolveWebviewView(view: vscode.WebviewView) {
 			webviewView = view
+
+			// Add disposal logic
+			view.onDidDispose(() => {
+				if (subscription) {
+					subscription.unsubscribe()
+					subscription = undefined
+				}
+				bundles = undefined
+				previousBundles = undefined
+				subscribedToProjectPath = ""
+				isSubscribing = false
+			})
 
 			view.webview.options = {
 				enableScripts: true,
