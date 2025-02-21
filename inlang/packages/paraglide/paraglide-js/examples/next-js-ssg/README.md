@@ -3,7 +3,7 @@ imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
-# Paraglide Next JS SSG example
+# Next JS SSG example
 
 This is an example of how to use Paraglide with Next JS with SSG. The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/next-js-ssg).
 
