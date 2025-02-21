@@ -36,6 +36,15 @@ export let getLocale = () => {
 	/** @type {string | undefined} */
 	let locale;
 
+	// if running in a server-side rendering context
+	// retrieve the locale from the async local storage
+	if (serverMiddlewareAsyncStorage) {
+		const locale = serverMiddlewareAsyncStorage?.getStore()?.locale;
+		if (locale) {
+			return locale;
+		}
+	}
+
 	for (const strat of strategy) {
 		if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
 			locale = extractLocaleFromCookie();

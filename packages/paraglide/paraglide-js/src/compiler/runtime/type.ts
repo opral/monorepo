@@ -18,6 +18,7 @@ export type Runtime = {
 	deLocalizeHref: typeof import("./localize-href.js").deLocalizeHref;
 	localizeUrl: typeof import("./localize-url.js").localizeUrl;
 	deLocalizeUrl: typeof import("./localize-url.js").deLocalizeUrl;
+	serverMiddleware: typeof import("./server-middleware.js").serverMiddleware;
 	extractLocaleFromUrl: typeof import("./extract-locale-from-url.js").extractLocaleFromUrl;
 	extractLocaleFromRequest: typeof import("./extract-locale-from-request.js").extractLocaleFromRequest;
 	extractLocaleFromCookie: typeof import("./extract-locale-from-cookie.js").extractLocaleFromCookie;

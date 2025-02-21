@@ -194,8 +194,8 @@ The strategy to use for getting the locale.
 
 The order of the strategy defines the precedence of matches.
 
-For example, in `['pathname', 'cookie', 'baseLocale']`, the locale will be
-first tried to be detected in the pathname, then in a cookie, and finally
+For example, in `['url', 'cookie', 'baseLocale']`, the locale will be
+first tried to be detected in the url, then in a cookie, and finally
 fallback to the base locale.
 
 The default ensures that the browser takes a cookie approach,
@@ -205,7 +205,7 @@ whereas both fallback to the base locale if not available.
 ##### Default
 
 ```ts
-["cookie", "variable", "baseLocale"]
+["url", "cookie", "variable", "baseLocale"]
 ```
 
 #### urlPatterns?
@@ -246,4 +246,4 @@ Defined in: [compiler-options.ts:3](https://github.com/opral/monorepo/tree/main/
 
 #### strategy
 
-> `readonly` **strategy**: \[`"cookie"`, `"globalVariable"`, `"baseLocale"`\]
+> `readonly` **strategy**: \[`"url"`, `"cookie"`, `"globalVariable"`, `"baseLocale"`\]

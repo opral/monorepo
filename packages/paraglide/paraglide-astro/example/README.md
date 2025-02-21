@@ -1,2 +1,0 @@
-# Astro + Paraglide Example
-

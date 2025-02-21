@@ -5,7 +5,7 @@ imports:
 
 # React Router v7 (framework) example
 
-This example shows how to use Paraglide with React Router v7.
+This example shows how to use Paraglide with React Router v7. The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/react-router).
 
 ## Getting started
 
