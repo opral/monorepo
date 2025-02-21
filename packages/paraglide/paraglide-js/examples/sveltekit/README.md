@@ -7,16 +7,6 @@ imports:
 
 This example shows how to use Paraglide with SvelteKit. The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/sveltekit).
 
-## Features
-
-| Feature      | Supported |
-| ------------ | --------- |
-| CSR          | ✅        |
-| SSR          | ✅        |
-| SSG          | ❌        |
-| URLPattern   | ✅        |
-| Any Strategy | ✅        |
-
 ## Getting started
 
 ### Install paraglide js
@@ -50,3 +40,13 @@ export const reroute: Reroute = (request) => {
 ### Done :)
 
 Check out https://inlang.com/m/gerre34r/library-inlang-paraglideJs/getting-started on how to use Paraglide Js. 
+
+## Features of the example
+
+| Feature      | Supported |
+| ------------ | --------- |
+| CSR          | ✅        |
+| SSR          | ✅        |
+| SSG          | ❌        |
+| URLPattern   | ✅        |
+| Any Strategy | ✅        |
