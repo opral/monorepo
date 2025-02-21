@@ -1,11 +1,21 @@
 ---
-imports: 
+imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
 # Paraglide Next JS SSG example
 
-This is an example of how to use Paraglide with Next JS with SSG. 
+This is an example of how to use Paraglide with Next JS with SSG.
+
+## Features
+
+| Feature      | Supported |
+| ------------ | --------- |
+| CSR          | ✅        |
+| SSR          | ✅        |
+| SSG          | ✅        |
+| URLPattern   | ❌        |
+| Any Strategy | ❌        |
 
 <doc-callout type="warning">The SSG example is relies on having the locale prefixed in the path like `/en/page`.</doc-callout>
 
@@ -22,7 +32,6 @@ npx @inlang/paraglide-js@beta init
 ### Add the webpack plugin to the `next.config.js` file:
 
 <doc-callout type="info">The URL Pattern ensures that `localizeHref()` includes the locale in the path.</doc-callout>
-
 
 ```diff
 import { paraglideWebpackPlugin } from "@inlang/paraglide-js";
