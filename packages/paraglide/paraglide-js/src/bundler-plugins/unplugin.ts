@@ -1,7 +1,7 @@
 import type { UnpluginFactory } from "unplugin";
 import { compile } from "../compiler/compile.js";
 import fs from "node:fs";
-import { resolve } from "node:path";
+import { resolve, relative } from "node:path";
 import { nodeNormalizePath } from "../utilities/node-normalize-path.js";
 import { Logger } from "../services/logger/index.js";
 import type { CompilerOptions } from "../compiler/compiler-options.js";
@@ -26,32 +26,60 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			return;
 		}
 		logger.info("Compiling inlang project...");
-		compilationResult = await compile({
-			fs: wrappedFs,
-			...args,
-		});
-		hasInitiallyCompiled = true;
-		logger.success("Compilation complete");
-
-		for (const path of Array.from(readFiles)) {
-			this.addWatchFile(path);
+		try {
+			compilationResult = await compile({
+				fs: wrappedFs,
+				...args,
+			});
+			logger.success("Compilation complete");
+		} catch (error) {
+			logger.error("Failed to compile project:", (error as Error).message);
+			logger.info("Please check your translation files for syntax errors.");
+		} finally {
+			// in any case add the files to watch
+			for (const path of Array.from(readFiles)) {
+				this.addWatchFile(path);
+			}
+			hasInitiallyCompiled = true;
 		}
 	},
 	async watchChange(path) {
 		const shouldCompile = readFiles.has(path) && !path.includes("cache");
 		if (shouldCompile === false) {
+			console.log("should not compile", path);
 			return;
 		}
-		readFiles.clear();
-		logger.info(`Re-compiling inlang project... File "${path}" has changed.`);
-		compilationResult = await compile(
-			{
-				fs: wrappedFs,
-				...args,
-			},
-			compilationResult?.outputHashes
-		);
-		logger.success("Compilation complete");
+
+		try {
+			logger.info(
+				`Re-compiling inlang project... File "${relative(process.cwd(), path)}" has changed.`
+			);
+			// Clear readFiles to track fresh file reads
+			readFiles.clear();
+
+			compilationResult = await compile(
+				{
+					fs: wrappedFs,
+					...args,
+				},
+				compilationResult?.outputHashes
+			);
+			logger.success("Compilation complete");
+
+			// Add any new files to watch
+			for (const filePath of Array.from(readFiles)) {
+				this.addWatchFile(filePath);
+			}
+		} catch (error) {
+			// Reset compilation result on error
+			compilationResult = undefined;
+			logger.info(
+				"Failed to re-compile project. Please check your translation files for syntax errors."
+			);
+			if (error instanceof Error) {
+				console.error(error);
+			}
+		}
 	},
 	webpack(compiler) {
 		compiler.options.resolve = {
@@ -65,10 +93,15 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 		//we need the compiler to run before the build so that the message-modules will be present
 		//In the other bundlers `buildStart` already runs before the build. In webpack it's a race condition
 		compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
-			await compile({
-				fs: wrappedFs,
-				...args,
-			});
+			try {
+				await compile({
+					fs: wrappedFs,
+					...args,
+				});
+			} catch (error) {
+				logger.warn("Failed to compile project:", (error as Error).message);
+				logger.warn("Please check your translation files for syntax errors.");
+			}
 		});
 	},
 });
@@ -103,6 +136,8 @@ const wrappedFs: typeof import("node:fs") = {
 			options?: { encoding?: null; flag?: string } | null
 		): Promise<Buffer> => {
 			readFiles.add(nodeNormalizePath(resolve(process.cwd(), path.toString())));
+			const file = await fs.promises.readFile(path, { encoding: "utf-8" });
+			console.log("reading file", path, file);
 			return fs.promises.readFile(path, options);
 		},
 	},
