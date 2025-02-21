@@ -1,9 +1,30 @@
-import { withParaglideNext } from "@inlang/paraglide-next";
+import { paraglideWebpackPlugin } from "@inlang/paraglide-js";
 
-export default withParaglideNext({
-	paraglide: {
-		outdir: "./src/paraglide",
-		project: "./project.inlang",
-		strategy: ["url", "baseLocale"],
+/**
+ * @type {import('next').NextConfig}
+ */
+export default {
+	webpack: (config) => {
+		config.plugins.push(
+			paraglideWebpackPlugin({
+				outdir: "./src/paraglide",
+				project: "./project.inlang",
+				urlPatterns: [
+					{
+						pattern:
+							":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)?",
+						deLocalizedNamedGroups: {
+							locale: "en",
+						},
+						localizedNamedGroups: {
+							de: { locale: "de" },
+							en: { locale: "en" },
+						},
+					},
+				],
+			})
+		);
+
+		return config;
 	},
-});
+};
