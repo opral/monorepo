@@ -9,18 +9,6 @@ This example demonstrates how to use Paraglide JS with Astro in SSR mode. The so
 
 <doc-callout type="tip">Pull requests that improve this example are welcome.</doc-callout>
 
-## Features
-
-<doc-callout type="info">You can integrate Paraglide JS yourself to achieve SSG. PR with an example is welcome.</doc-callout>
-
-| Feature      | Supported |
-| ------------ | --------- |
-| CSR          | ✅        |
-| SSR          | ✅        |
-| SSG          | ❌        |
-| URLPattern   | ✅        |
-| Any Strategy | ✅        |
-
 ## Setup
 
 ### 1. If you have not initialized Paraglide JS yet, run:
@@ -62,3 +50,15 @@ export const onRequest = defineMiddleware((context, next) => {
 ```
 
 You can read more about about Astro's middleware [here](https://docs.astro.build/en/guides/middleware).
+
+## Features of the example
+
+<doc-callout type="info">You can integrate Paraglide JS yourself to achieve SSG. PR with an example is welcome.</doc-callout>
+
+| Feature      | Supported |
+| ------------ | --------- |
+| CSR          | ✅        |
+| SSR          | ✅        |
+| SSG          | ❌        |
+| URLPattern   | ✅        |
+| Any Strategy | ✅        |
