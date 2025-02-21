@@ -44,12 +44,6 @@
 			"/next-js": "./docs/examples/next-js.md",
 			"/vite": "./examples/vite/README.md"
 		},
-		"Frameworks": {
-			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",
-			"NextJS": "/m/osslbuzt/paraglide-next-i18n",
-			"Astro": "/m/iljlwzfs/paraglide-astro-i18n",
-			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n"
-		},
 		"Ecosystem": {
 			"VSCode Extension": "/m/r7kp499g/app-inlang-ideExtension",
 			"Machine Translation": "/m/2qj2w8pu/app-inlang-cli",
