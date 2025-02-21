@@ -46,14 +46,16 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 	async watchChange(path) {
 		const shouldCompile = readFiles.has(path) && !path.includes("cache");
 		if (shouldCompile === false) {
-			console.log("should not compile", path);
 			return;
 		}
+
+		const previouslyReadFiles = new Set(readFiles);
 
 		try {
 			logger.info(
 				`Re-compiling inlang project... File "${relative(process.cwd(), path)}" has changed.`
 			);
+
 			// Clear readFiles to track fresh file reads
 			readFiles.clear();
 
@@ -70,15 +72,13 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			for (const filePath of Array.from(readFiles)) {
 				this.addWatchFile(filePath);
 			}
-		} catch (error) {
+		} catch {
+			readFiles = previouslyReadFiles;
 			// Reset compilation result on error
 			compilationResult = undefined;
 			logger.info(
 				"Failed to re-compile project. Please check your translation files for syntax errors."
 			);
-			if (error instanceof Error) {
-				console.error(error);
-			}
 		}
 	},
 	webpack(compiler) {
@@ -106,7 +106,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 	},
 });
 
-const readFiles = new Set<string>();
+let readFiles = new Set<string>();
 
 // Create a wrapper around the fs object to intercept and store read files
 const wrappedFs: typeof import("node:fs") = {
@@ -136,8 +136,6 @@ const wrappedFs: typeof import("node:fs") = {
 			options?: { encoding?: null; flag?: string } | null
 		): Promise<Buffer> => {
 			readFiles.add(nodeNormalizePath(resolve(process.cwd(), path.toString())));
-			const file = await fs.promises.readFile(path, { encoding: "utf-8" });
-			console.log("reading file", path, file);
 			return fs.promises.readFile(path, options);
 		},
 	},
