@@ -1,6 +1,6 @@
 import { extractLocaleFromRequest } from "./extract-locale-from-request.js";
-import { deLocalizeUrl } from "./localize-url.js";
-import { strategy } from "./variables.js";
+import { deLocalizeUrl, localizeUrl } from "./localize-url.js";
+import { strategy, TREE_SHAKE_URL_STRATEGY_USED } from "./variables.js";
 
 /**
  * Server side async local storage that is set by `serverMiddleware()`.
@@ -31,6 +31,21 @@ export async function serverMiddleware(request, resolve) {
 	const locale = extractLocaleFromRequest(request);
 	const origin = new URL(request.url).origin;
 
+	if (TREE_SHAKE_URL_STRATEGY_USED) {
+		// if the client makes a request to a URL that doesn't match
+		// the localizedUrl, redirect the client to the localized URL
+		const localizedUrl = localizeUrl(request.url, { locale });
+		if (localizedUrl.href !== request.url) {
+			return Response.redirect(localizedUrl, 302);
+		}
+	}
+
+	// If the strategy includes "url", we need to de-localize the URL
+	// before passing it to the server middleware.
+	//
+	// The middleware is responsible for mapping a localized URL to the
+	// de-localized URL e.g. `/en/about` to `/about`. Otherwise,
+	// the server can't render the correct page.
 	const newRequest = strategy.includes("url")
 		? new Request(deLocalizeUrl(request.url), request)
 		: request;
