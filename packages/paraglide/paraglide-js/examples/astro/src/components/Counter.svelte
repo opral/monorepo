@@ -1,5 +1,5 @@
 <script>
-    import * as m from "$paraglide/messages.js";
+    import * as m from "../paraglide/messages.js";
 
     let count = 0;
 </script>

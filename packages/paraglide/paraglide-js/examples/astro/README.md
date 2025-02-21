@@ -35,7 +35,7 @@ export default defineConfig({
 +		],
 	},
 +  output: "server",
-+  adapter: node,
++  adapter: node({ mode: "standalone" }),
 });
 ```
 
