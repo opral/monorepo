@@ -12,7 +12,7 @@ await compile({
 	urlPatterns: [
 		// 1) customer1.fr => root locale is fr, sub-locale is /en/
 		{
-			pattern: ":protocol://customer1.fr/:locale(en)?/:path(.*)",
+			pattern: ":protocol://customer1.fr/:locale(en)?/:path(.*)?",
 			deLocalizedNamedGroups: { locale: null },
 			localizedNamedGroups: {
 				en: { locale: "en" },
@@ -21,7 +21,7 @@ await compile({
 		},
 		// 2) customer2.com => root locale is en, sub-locale is /fr/
 		{
-			pattern: ":protocol://customer2.com/:locale(fr)?/:path(.*)",
+			pattern: ":protocol://customer2.com/:locale(fr)?/:path(.*)?",
 			localizedNamedGroups: {
 				en: { locale: null },
 				fr: { locale: "fr" },
@@ -30,7 +30,7 @@ await compile({
 		},
 		// 3) Any other domain => path-based for en/fr
 		{
-			pattern: ":protocol://:domain(.*)/:locale/:path(.*)",
+			pattern: ":protocol://:domain(.*)/:locale/:path(.*)?",
 			deLocalizedNamedGroups: {},
 			localizedNamedGroups: {
 				en: { locale: "en" },
