@@ -332,3 +332,38 @@ test("it keeps the query parameters", async () => {
 		runtime.deLocalizeUrl("https://example.com/de/about?foo=bar&baz=qux").href
 	).toBe("https://example.com/about?foo=bar&baz=qux");
 });
+
+test("uses getLocale when no locale is provided", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "https://:domain(.*)/:locale(de|en)?/:path(.*)?",
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
+						en: { locale: "en" },
+						de: { locale: "de" },
+					},
+				},
+			],
+		},
+	});
+
+	// Override getLocale to return German
+	runtime.overwriteGetLocale(() => "de");
+
+	expect(runtime.getLocale()).toBe("de");
+
+	// Should use "de" from getLocale since no locale provided
+	expect(runtime.localizeUrl("https://example.com/about").href).toBe(
+		"https://example.com/de/about"
+	);
+
+	// Should still use explicit locale when provided
+	expect(
+		runtime.localizeUrl("https://example.com/about", { locale: "en" }).href
+	).toBe("https://example.com/en/about");
+});

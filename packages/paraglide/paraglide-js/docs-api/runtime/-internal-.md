@@ -143,7 +143,7 @@ deLocalizeHref("/de/about")
 
 > **deLocalizeUrl**(`url`): `URL`
 
-Defined in: [runtime/localize-url.js:42](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
+Defined in: [runtime/localize-url.js:48](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
 
 ### Parameters
 
@@ -349,9 +349,9 @@ localizeHref("/about")
 
 ## localizeUrl()
 
-> **localizeUrl**(`url`, `options`): `URL`
+> **localizeUrl**(`url`, `options`?): `URL`
 
-Defined in: [runtime/localize-url.js:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
+Defined in: [runtime/localize-url.js:13](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
 
 Localizes a URL to a specific locale using the new namedGroups API.
 
@@ -363,11 +363,11 @@ The URL to localize.
 
 `string` | `URL`
 
-#### options
+#### options?
 
-Options containing the target locale.
+Options
 
-##### locale
+##### locale?
 
 `string`
 

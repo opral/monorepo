@@ -1,14 +1,19 @@
+import { getLocale } from "./get-locale.js";
+import { getUrlOrigin } from "./get-url-origin.js";
 import { urlPatterns } from "./variables.js";
 
 /**
  * Localizes a URL to a specific locale using the new namedGroups API.
+ *
  * @param {string | URL} url - The URL to localize.
- * @param {Object} options - Options containing the target locale.
- * @param {string} options.locale - The target locale.
+ * @param {Object} [options] - Options
+ * @param {string} [options.locale] - The target locale.
  * @returns {URL} - The localized URL.
  */
 export function localizeUrl(url, options) {
-	const urlObj = new URL(url);
+	const locale = options?.locale ?? getLocale();
+	const urlObj = typeof url === "string" ? new URL(url) : url;
+
 	const search = urlObj.search;
 
 	for (const element of urlPatterns) {
@@ -20,7 +25,7 @@ export function localizeUrl(url, options) {
 			const overrides = {};
 
 			for (const [groupName, value] of Object.entries(
-				element.localizedNamedGroups?.[options.locale] ?? {}
+				element.localizedNamedGroups?.[locale] ?? {}
 			)) {
 				overrides[groupName] = value;
 			}
@@ -43,7 +48,7 @@ export function localizeUrl(url, options) {
  * @type {(url: string | URL) => URL}
  */
 export function deLocalizeUrl(url) {
-	const urlObj = new URL(url);
+	const urlObj = new URL(url, getUrlOrigin());
 	const search = urlObj.search;
 
 	for (const element of urlPatterns) {

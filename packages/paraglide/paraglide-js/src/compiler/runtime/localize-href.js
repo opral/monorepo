@@ -25,7 +25,7 @@ export function localizeHref(href, options) {
 	const locale = options?.locale ?? getLocale();
 	const url = new URL(href, getUrlOrigin());
 
-	const localized = localizeUrl(url, { locale });
+	const localized = localizeUrl(url, options);
 
 	// if the origin is identical and the href is relative,
 	// return the relative path
