@@ -302,3 +302,33 @@ test("localhost with portname", async () => {
 		"https://localhost:5173/"
 	);
 });
+
+test("it keeps the query parameters", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "https://:domain(.*)/:locale(de)?/:path*",
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
+						en: { locale: null },
+						de: { locale: "de" },
+					},
+				},
+			],
+		},
+	});
+
+	expect(
+		runtime.localizeUrl("https://example.com/about?foo=bar&baz=qux", {
+			locale: "de",
+		}).href
+	).toBe("https://example.com/de/about?foo=bar&baz=qux");
+
+	expect(
+		runtime.deLocalizeUrl("https://example.com/de/about?foo=bar&baz=qux").href
+	).toBe("https://example.com/about?foo=bar&baz=qux");
+});
