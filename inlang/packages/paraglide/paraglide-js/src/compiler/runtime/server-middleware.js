@@ -34,7 +34,7 @@ let serverMiddlewareAsyncStorage = undefined;
  * @param {(args: { request: Request, locale: Locale }) => T | Promise<T>} resolve - Function to handle the request
  *
  * @returns {Promise<Response | any>} Returns either:
- * - A {@link Response} object (302 redirect) if URL localization is needed
+ * - A `Response` object (302 redirect) if URL localization is needed
  * - The result of the resolve function if no redirect is required
  *
  * @example
@@ -58,8 +58,6 @@ let serverMiddlewareAsyncStorage = undefined;
  *   });
  * });
  * ```
- *
- * @see {@link https://inlang.com/documentation/paraglide-js/server-middleware|Server Middleware Documentation}
  */
 export async function serverMiddleware(request, resolve) {
 	if (!serverMiddlewareAsyncStorage) {
