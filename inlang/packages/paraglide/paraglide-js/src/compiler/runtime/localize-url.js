@@ -9,6 +9,7 @@ import { urlPatterns } from "./variables.js";
  */
 export function localizeUrl(url, options) {
 	const urlObj = new URL(url);
+	const search = urlObj.search;
 
 	for (const element of urlPatterns) {
 		const pattern = new URLPattern(element.pattern);
@@ -29,7 +30,7 @@ export function localizeUrl(url, options) {
 				...overrides,
 			};
 
-			return fillPattern(element.pattern, groups);
+			return fillPattern(element.pattern, groups, search);
 		}
 	}
 
@@ -43,6 +44,7 @@ export function localizeUrl(url, options) {
  */
 export function deLocalizeUrl(url) {
 	const urlObj = new URL(url);
+	const search = urlObj.search;
 
 	for (const element of urlPatterns) {
 		const pattern = new URLPattern(element.pattern);
@@ -63,7 +65,7 @@ export function deLocalizeUrl(url) {
 				...overrides,
 			};
 
-			return fillPattern(element.pattern, groups);
+			return fillPattern(element.pattern, groups, search);
 		}
 	}
 
@@ -86,9 +88,10 @@ export function deLocalizeUrl(url) {
  *
  * @param {string} pattern - The URL pattern containing named groups.
  * @param {Record<string, string | null | undefined>} values - Object of values for named groups.
+ * @param {string} [search] - Optional search (query) parameters to preserve
  * @returns {URL} - The constructed URL with named groups filled.
  */
-function fillPattern(pattern, values) {
+function fillPattern(pattern, values, search) {
 	const filled = pattern.replace(
 		/(\/?):([a-zA-Z0-9_]+)(\([^)]*\))?([?+*]?)/g,
 		(_, slash, name, __, modifier) => {
@@ -121,7 +124,11 @@ function fillPattern(pattern, values) {
 		}
 	);
 
-	return new URL(filled);
+	const url = new URL(filled);
+	if (search) {
+		url.search = search;
+	}
+	return url;
 }
 
 /**
