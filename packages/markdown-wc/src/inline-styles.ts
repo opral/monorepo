@@ -2,6 +2,32 @@ import { visit } from "unist-util-visit"
 
 export const rehypeInlineStyles = (styleMap: any) => {
 	return () => (tree: any) => {
+		// Create a style element for pseudo-selectors
+		const styleNode = {
+			type: "element",
+			tagName: "style",
+			properties: {},
+			children: [
+				{
+					type: "text",
+					value: Object.entries(styleMap)
+						.filter(([key]) => key.includes(":"))
+						.map(
+							([key, styles]) =>
+								`${key} { ${Object.entries(styles as any)
+									.map(([k, v]) => `${k}: ${v};`)
+									.join(" ")} }`
+						)
+						.join("\n"),
+				},
+			],
+		}
+
+		// Add the style node to the head of the document
+		if (tree.children.length > 0) {
+			tree.children.unshift(styleNode)
+		}
+
 		visit(tree, "element", (node) => {
 			// Special handling for code elements
 			if (node.tagName === "code") {
@@ -24,9 +50,10 @@ export const rehypeInlineStyles = (styleMap: any) => {
 				return
 			}
 
-			// Regular style handling for other elements
-			if (node.tagName in styleMap) {
-				const styles = styleMap[node.tagName]
+			// Regular style handling for other elements (excluding pseudo-selectors)
+			const tagName = node.tagName
+			if (tagName in styleMap && !tagName.includes(":")) {
+				const styles = styleMap[tagName]
 				const existingStyles = node.properties.style || ""
 				const newStyles = Object.entries(styles)
 					.map(([key, value]) => `${key}: ${value};`)
@@ -145,27 +172,49 @@ export const defaultInlineStyles = {
 		"border-radius": "0.75rem",
 		"text-align": "left",
 		"max-width": "100%",
-		overflow: "auto",
+		overflow: "hidden",
+		"border-collapse": "separate",
+		"border-spacing": "0",
+		border: "1px solid #e2e8f0",
 	},
 	thead: {
 		"font-weight": "500",
 		"padding-bottom": "0.5rem",
-		"border-bottom": "1px solid inherit",
 		"text-align": "left",
+		"background-color": "#f8fafc",
+	},
+	"thead tr:first-child th:first-child": {
+		"border-top-left-radius": "0.75rem",
+	},
+	"thead tr:first-child th:last-child": {
+		"border-top-right-radius": "0.75rem",
+		"border-right": "none",
+	},
+	"tbody tr:last-child td:first-child": {
+		"border-bottom-left-radius": "0.75rem",
+	},
+	"tbody tr:last-child td:last-child": {
+		"border-bottom-right-radius": "0.75rem",
+		"border-right": "none",
 	},
 	th: {
-		padding: "0.5rem 0",
-		"font-weight": "500",
-		"border-bottom": "1px solid inherit",
+		padding: "0.75rem 1rem",
+		"font-weight": "600",
+		"border-bottom": "1px solid #e2e8f0",
 		"white-space": "nowrap",
+		"border-right": "1px solid #e2e8f0",
 	},
 	tr: {
-		padding: "0.5rem 0",
-		"border-bottom": "1px solid inherit",
+		"border-bottom": "1px solid #e2e8f0",
+	},
+	"tr:last-child": {
+		"border-bottom": "none",
 	},
 	td: {
-		padding: "0.5rem 0",
+		padding: "0.75rem 1rem",
 		"line-height": "1.75",
+		"border-right": "1px solid #e2e8f0",
+		"vertical-align": "middle",
 	},
 	hr: {
 		margin: "1.5rem 0",
