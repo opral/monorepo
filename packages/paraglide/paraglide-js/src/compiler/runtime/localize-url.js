@@ -1,14 +1,54 @@
+import { getLocale } from "./get-locale.js";
+import { getUrlOrigin } from "./get-url-origin.js";
 import { urlPatterns } from "./variables.js";
 
 /**
- * Localizes a URL to a specific locale using the new namedGroups API.
- * @param {string | URL} url - The URL to localize.
- * @param {Object} options - Options containing the target locale.
- * @param {string} options.locale - The target locale.
- * @returns {URL} - The localized URL.
+ * Lower-level URL localization function, primarily used in server contexts.
+ *
+ * This function is designed for server-side usage where you need precise control
+ * over URL localization, such as in middleware or request handlers. It works with
+ * URL objects and always returns absolute URLs.
+ *
+ * For client-side UI components, use `localizeHref()` instead, which provides
+ * a more convenient API with relative paths and automatic locale detection.
+ *
+ * @example
+ * ```typescript
+ * // Server middleware example
+ * app.use((req, res, next) => {
+ *   const url = new URL(req.url, `${req.protocol}://${req.headers.host}`);
+ *   const localized = localizeUrl(url, { locale: "de" });
+ *
+ *   if (localized.href !== url.href) {
+ *     return res.redirect(localized.href);
+ *   }
+ *   next();
+ * });
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Using with URL patterns
+ * const url = new URL("https://example.com/about");
+ * localizeUrl(url, { locale: "de" });
+ * // => URL("https://example.com/de/about")
+ *
+ * // Using with domain-based localization
+ * const url = new URL("https://example.com/store");
+ * localizeUrl(url, { locale: "de" });
+ * // => URL("https://de.example.com/store")
+ * ```
+ *
+ * @param {string | URL} url - The URL to localize. If string, must be absolute.
+ * @param {Object} [options] - Options for localization
+ * @param {string} [options.locale] - Target locale. If not provided, uses getLocale()
+ * @returns {URL} The localized URL, always absolute
  */
 export function localizeUrl(url, options) {
-	const urlObj = new URL(url);
+	const locale = options?.locale ?? getLocale();
+	const urlObj = typeof url === "string" ? new URL(url) : url;
+
+	const search = urlObj.search;
 
 	for (const element of urlPatterns) {
 		const pattern = new URLPattern(element.pattern);
@@ -19,7 +59,7 @@ export function localizeUrl(url, options) {
 			const overrides = {};
 
 			for (const [groupName, value] of Object.entries(
-				element.localizedNamedGroups?.[options.locale] ?? {}
+				element.localizedNamedGroups?.[locale] ?? {}
 			)) {
 				overrides[groupName] = value;
 			}
@@ -29,7 +69,7 @@ export function localizeUrl(url, options) {
 				...overrides,
 			};
 
-			return fillPattern(element.pattern, groups);
+			return fillPattern(element.pattern, groups, search);
 		}
 	}
 
@@ -37,12 +77,45 @@ export function localizeUrl(url, options) {
 }
 
 /**
- * De-localizes a URL.
+ * Low-level URL de-localization function, primarily used in server contexts.
  *
- * @type {(url: string | URL) => URL}
+ * This function is designed for server-side usage where you need precise control
+ * over URL de-localization, such as in middleware or request handlers. It works with
+ * URL objects and always returns absolute URLs.
+ *
+ * For client-side UI components, use `deLocalizeHref()` instead, which provides
+ * a more convenient API with relative paths.
+ *
+ * @example
+ * ```typescript
+ * // Server middleware example
+ * app.use((req, res, next) => {
+ *   const url = new URL(req.url, `${req.protocol}://${req.headers.host}`);
+ *   const baseUrl = deLocalizeUrl(url);
+ *
+ *   // Store the base URL for later use
+ *   req.baseUrl = baseUrl;
+ *   next();
+ * });
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Using with URL patterns
+ * const url = new URL("https://example.com/de/about");
+ * deLocalizeUrl(url); // => URL("https://example.com/about")
+ *
+ * // Using with domain-based localization
+ * const url = new URL("https://de.example.com/store");
+ * deLocalizeUrl(url); // => URL("https://example.com/store")
+ * ```
+ *
+ * @param {string | URL} url - The URL to de-localize. If string, must be absolute.
+ * @returns {URL} The de-localized URL, always absolute
  */
 export function deLocalizeUrl(url) {
-	const urlObj = new URL(url);
+	const urlObj = new URL(url, getUrlOrigin());
+	const search = urlObj.search;
 
 	for (const element of urlPatterns) {
 		const pattern = new URLPattern(element.pattern);
@@ -63,7 +136,7 @@ export function deLocalizeUrl(url) {
 				...overrides,
 			};
 
-			return fillPattern(element.pattern, groups);
+			return fillPattern(element.pattern, groups, search);
 		}
 	}
 
@@ -86,9 +159,10 @@ export function deLocalizeUrl(url) {
  *
  * @param {string} pattern - The URL pattern containing named groups.
  * @param {Record<string, string | null | undefined>} values - Object of values for named groups.
+ * @param {string} [search] - Optional search (query) parameters to preserve
  * @returns {URL} - The constructed URL with named groups filled.
  */
-function fillPattern(pattern, values) {
+function fillPattern(pattern, values, search) {
 	const filled = pattern.replace(
 		/(\/?):([a-zA-Z0-9_]+)(\([^)]*\))?([?+*]?)/g,
 		(_, slash, name, __, modifier) => {
@@ -121,7 +195,11 @@ function fillPattern(pattern, values) {
 		}
 	);
 
-	return new URL(filled);
+	const url = new URL(filled);
+	if (search) {
+		url.search = search;
+	}
+	return url;
 }
 
 /**
