@@ -46,7 +46,7 @@ ${injectCode("./variables.js")
 	)
 	.replace(
 		`export const strategy = ["globalVariable"];`,
-		`export const strategy = ["${args.compilerOptions.strategy.join('", "')}"]`
+		`export const strategy = ${JSON.stringify(args.compilerOptions.strategy, null, 2)};`
 	)
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
 	.replace(
