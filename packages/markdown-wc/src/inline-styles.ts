@@ -3,17 +3,34 @@ import { visit } from "unist-util-visit"
 export const rehypeInlineStyles = (styleMap: any) => {
 	return () => (tree: any) => {
 		visit(tree, "element", (node) => {
-			// Check if the tagName matches the styleMap keys
-			if (node.tagName in styleMap) {
-				// Retrieve the styles for this tag
-				const styles = styleMap[node.tagName]
+			// Special handling for code elements
+			if (node.tagName === "code") {
+				// Skip styling if:
+				// 1. Inside a pre tag OR
+				// 2. Has a syntax highlighting class (starts with 'hljs' or 'language-')
+				const isInPre = node.parent?.tagName === "pre"
+				const hasHighlightClass = node.properties.className?.some(
+					(cls: string) => cls.startsWith("hljs") || cls.startsWith("language-")
+				)
 
-				// Merge existing styles if any
+				if (!isInPre && !hasHighlightClass) {
+					const inlineCodeStyles = styleMap["inlineCode"] || {}
+					const existingStyles = node.properties.style || ""
+					const newStyles = Object.entries(inlineCodeStyles)
+						.map(([key, value]) => `${key}: ${value};`)
+						.join(" ")
+					node.properties.style = `${existingStyles} ${newStyles}`.trim()
+				}
+				return
+			}
+
+			// Regular style handling for other elements
+			if (node.tagName in styleMap) {
+				const styles = styleMap[node.tagName]
 				const existingStyles = node.properties.style || ""
 				const newStyles = Object.entries(styles)
 					.map(([key, value]) => `${key}: ${value};`)
 					.join(" ")
-
 				node.properties.style = `${existingStyles} ${newStyles}`.trim()
 			}
 		})
@@ -86,13 +103,25 @@ export const defaultInlineStyles = {
 		display: "inline-block",
 	},
 	code: {
-		"border-radius": "0.375rem",
-		margin: "1.5rem 0",
-		"font-size": "0.875rem",
 		"font-family": "monospace",
+		"font-size": "0.875rem",
+		"border-radius": "0.375rem",
+		padding: "1rem",
+		margin: "1.5rem 0",
+	},
+	inlineCode: {
+		"background-color": "rgba(175, 184, 193, 0.2)",
+		"border-radius": "0.375rem",
+		padding: "0.2em 0.4em",
+		margin: "0",
+		"font-family": "monospace",
+		"font-size": "0.875rem",
 	},
 	pre: {
 		position: "relative",
+		"font-size": "0.875rem",
+		"border-radius": "0.375rem",
+		overflow: "hidden",
 	},
 	ul: {
 		"list-style-type": "disc",
