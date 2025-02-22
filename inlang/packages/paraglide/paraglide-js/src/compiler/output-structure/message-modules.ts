@@ -68,7 +68,7 @@ export function generateMessageModules(
 					file += `\nexport { ${id} } from "./${fallbackLocale}.js"`;
 				} else {
 					// fallback to just the bundle id
-					file += `\nexport const ${id} = () => '${escapeForSingleQuoteString(
+					file += `\n/** @type {(inputs?: Record<string, never>) => string} */\nexport const ${id} = () => '${escapeForSingleQuoteString(
 						compiledBundle.bundle.node.id
 					)}'`;
 				}

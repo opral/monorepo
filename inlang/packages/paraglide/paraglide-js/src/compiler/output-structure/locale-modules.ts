@@ -54,7 +54,7 @@ export function generateLocaleModules(
 					file += `\nexport { ${id} } from "./${fallbackLocale}.js"`;
 				} else {
 					// no fallback exists, render the bundleId
-					file += `\nexport const ${id} = () => '${id}'`;
+					file += `\n/** @type {(inputs?: Record<string, never>) => string} */\nexport const ${id} = () => '${id}'`;
 				}
 				continue;
 			}
