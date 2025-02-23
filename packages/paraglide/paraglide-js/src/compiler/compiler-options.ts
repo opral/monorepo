@@ -5,7 +5,7 @@ export const defaultCompilerOptions = {
 	emitGitIgnore: true,
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
-	strategy: ["url", "cookie", "globalVariable", "baseLocale"],
+	strategy: ["cookie", "globalVariable", "baseLocale"],
 	cookieName: "PARAGLIDE_LOCALE",
 } as const satisfies Partial<CompilerOptions>;
 
