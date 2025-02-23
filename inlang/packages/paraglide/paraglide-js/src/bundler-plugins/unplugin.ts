@@ -1,5 +1,5 @@
 import type { UnpluginFactory } from "unplugin";
-import { compile } from "../compiler/compile.js";
+import { compile, type CompilationResult } from "../compiler/compile.js";
 import fs from "node:fs";
 import { resolve, relative } from "node:path";
 import { nodeNormalizePath } from "../utilities/node-normalize-path.js";
@@ -10,25 +10,17 @@ const PLUGIN_NAME = "unplugin-paraglide-js";
 
 const logger = new Logger();
 
-let compilationResult: Awaited<ReturnType<typeof compile>> | undefined;
-
-// https://github.com/opral/inlang-paraglide-js/issues/371
-//
-// has the second benefit that paraglide js only compiles once
-// per enviornment build (browser, server, etc.)
-let hasInitiallyCompiled = false;
+let previousCompilation: CompilationResult | undefined;
 
 export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 	name: PLUGIN_NAME,
 	enforce: "pre",
 	async buildStart() {
-		if (hasInitiallyCompiled === true) {
-			return;
-		}
 		logger.info("Compiling inlang project...");
 		try {
-			compilationResult = await compile({
+			previousCompilation = await compile({
 				fs: wrappedFs,
+				previousCompilation,
 				...args,
 			});
 			logger.success("Compilation complete");
@@ -40,7 +32,6 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			for (const path of Array.from(readFiles)) {
 				this.addWatchFile(path);
 			}
-			hasInitiallyCompiled = true;
 		}
 	},
 	async watchChange(path) {
@@ -59,13 +50,12 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			// Clear readFiles to track fresh file reads
 			readFiles.clear();
 
-			compilationResult = await compile(
-				{
-					fs: wrappedFs,
-					...args,
-				},
-				compilationResult?.outputHashes
-			);
+			previousCompilation = await compile({
+				fs: wrappedFs,
+				previousCompilation,
+				...args,
+			});
+
 			logger.success("Compilation complete");
 
 			// Add any new files to watch
@@ -75,7 +65,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 		} catch (e) {
 			readFiles = previouslyReadFiles;
 			// Reset compilation result on error
-			compilationResult = undefined;
+			previousCompilation = undefined;
 			logger.warn("Failed to re-compile project:", (e as Error).message);
 		}
 	},
@@ -88,14 +78,15 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 				async_hooks: false,
 			},
 		};
-		//we need the compiler to run before the build so that the message-modules will be present
-		//In the other bundlers `buildStart` already runs before the build. In webpack it's a race condition
+
 		compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
 			try {
-				await compile({
+				previousCompilation = await compile({
 					fs: wrappedFs,
+					previousCompilation,
 					...args,
 				});
+				logger.success("Compilation complete");
 			} catch (error) {
 				logger.warn("Failed to compile project:", (error as Error).message);
 				logger.warn("Please check your translation files for syntax errors.");
