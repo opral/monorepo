@@ -18,6 +18,10 @@ let compilationInProgress: Promise<{
 	outputHashes: Record<string, string> | undefined;
 }> | null = null;
 
+export type CompilationResult = {
+	outputHashes: Record<string, string> | undefined;
+};
+
 /**
  * Loads, compiles, and writes the output to disk.
  *
@@ -32,9 +36,10 @@ let compilationInProgress: Promise<{
  *   })
  */
 export async function compile(
-	options: CompilerOptions,
-	previousOutputHashes?: Record<string, string>
-): Promise<{ outputHashes: Record<string, string> | undefined }> {
+	options: CompilerOptions & {
+		previousCompilation?: CompilationResult;
+	}
+): Promise<CompilationResult> {
 	const withDefaultOptions = {
 		...defaultCompilerOptions,
 		...options,
@@ -70,7 +75,7 @@ export async function compile(
 				directory: absoluteOutdir,
 				output,
 				fs: fs.promises,
-				previousOutputHashes,
+				previousOutputHashes: options.previousCompilation?.outputHashes,
 			});
 
 			if (!localAccount) {
@@ -85,6 +90,9 @@ export async function compile(
 			await project.close();
 
 			return { outputHashes };
+		} catch (e) {
+			console.error(e);
+			return { outputHashes: undefined };
 		} finally {
 			// release the lock
 			compilationInProgress = null;
