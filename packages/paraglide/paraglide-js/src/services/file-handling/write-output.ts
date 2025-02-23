@@ -20,7 +20,7 @@ export async function writeOutput(args: {
 	}
 
 	if (changedFiles.size === 0) {
-		return;
+		return currentOutputHashes;
 	}
 
 	// disabled because of https://github.com/opral/inlang-paraglide-js/issues/350

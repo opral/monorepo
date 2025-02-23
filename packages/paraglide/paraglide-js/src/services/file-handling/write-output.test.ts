@@ -73,12 +73,13 @@ it("should only write once if the output hasn't changed", async () => {
 		output: { "test.txt": "test" },
 		fs,
 	});
-	await writeOutput({
+	const hashes2 = await writeOutput({
 		directory: "/output",
 		output: { "test.txt": "test" },
 		fs,
 		previousOutputHashes: hashes,
 	});
+	expect(hashes).toEqual(hashes2);
 	expect(await fs.readFile("/output/test.txt", { encoding: "utf-8" })).toBe(
 		"test"
 	);

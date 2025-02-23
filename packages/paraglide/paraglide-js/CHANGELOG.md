@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.21
+
+- fixes webpack watch mode https://github.com/opral/inlang-paraglide-js/issues/406
+
 ## 2.0.0-beta.20
 
 - automatic re-directs in `serverMiddleware()` https://github.com/opral/inlang-paraglide-js/issues/201#issuecomment-2675823651
