@@ -195,24 +195,20 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 		const localServerUrl = `localhost:${localPort}`
 
 		const stylesUri = getUri(webview, extensionUri, [
-			"src",
-			"utilities",
-			"editor",
+			"assets",
 			"sherlock-editor-app",
-			"build",
 			"assets",
 			"index.css",
 		])
 
 		let scriptUri: string | vscode.Uri
-		const isProd = context.extensionMode === vscode.ExtensionMode.Production
+		const isDev = process.env.DEV === "true"
+		const isProd = !isDev && context.extensionMode === vscode.ExtensionMode.Production
+
 		if (isProd) {
 			scriptUri = getUri(webview, extensionUri, [
-				"src",
-				"utilities",
-				"editor",
+				"assets",
 				"sherlock-editor-app",
-				"build",
 				"assets",
 				"index.js",
 			])
