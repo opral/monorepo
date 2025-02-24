@@ -22,22 +22,6 @@ test("it should be possible to define $schema for typesafety", () => {
 	expect(Value.Check(FileSchema, messages)).toBe(true);
 });
 
-// #2325 - types have been loosened to allow for new/unknown properties
-test("using a hyphen (-) should not be possible to increase compatibility with libraries", () => {
-	const messages: FileSchema = {
-		"hello-world": "property",
-	};
-	expect(Value.Check(FileSchema, messages)).toBe(false);
-});
-
-// #2325 - types have been loosened to allow for new/unknown properties
-test("using a dot (.) should not be possible to increase compatibility with libraries", () => {
-	const messages: FileSchema = {
-		"hello.world": "property",
-	};
-	expect(Value.Check(FileSchema, messages)).toBe(false);
-});
-
 test("variant declarations and selectors are optional ", async () => {
 	const messages: FileSchema = {
 		jojo_mountain_day: {
