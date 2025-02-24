@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { telemetry } from "../../services/telemetry/index.js"
+import { capture } from "../../services/telemetry/index.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
 import { CONFIGURATION } from "../../configuration.js"
 import type { FileSystem } from "../fs/createFileSystemMapper.js"
@@ -24,7 +24,7 @@ export function createRecommendationView(args: {
 								workingDirectory: args.workspaceFolder.uri.fsPath,
 							})
 
-							telemetry.capture({
+							capture({
 								event: "IDE-EXTENSION recommendation: add Sherlock to workspace",
 								properties: { outcome: "Accepted" },
 							})

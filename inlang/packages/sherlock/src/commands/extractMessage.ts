@@ -1,7 +1,7 @@
 import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { commands, type TextEditor, window } from "vscode"
-import { telemetry } from "../services/telemetry/index.js"
+import { capture } from "../services/telemetry/index.js"
 import { CONFIGURATION } from "../configuration.js"
 import { isQuoted, stripQuotes } from "../utilities/messages/isQuoted.js"
 import { getSetting } from "../utilities/settings/index.js"
@@ -144,7 +144,7 @@ export const extractMessageCommand = {
 
 			CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
 
-			telemetry.capture({
+			capture({
 				event: "IDE-EXTENSION command executed: Extract Message",
 			})
 

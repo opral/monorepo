@@ -1,6 +1,4 @@
 import * as vscode from "vscode"
-import { msg } from "./utilities/messages/msg.js"
-// import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { handleError } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
 import { projectView } from "./utilities/project/project.js"
@@ -14,7 +12,7 @@ import fs from "node:fs/promises"
 import { gettingStartedView } from "./utilities/getting-started/gettingStarted.js"
 import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
 import { recommendationBannerView } from "./utilities/recommendation/recommendation.js"
-import { telemetry } from "./services/telemetry/index.js"
+import { capture } from "./services/telemetry/index.js"
 import packageJson from "../package.json" assert { type: "json" }
 import { statusBar } from "./utilities/settings/statusBar.js"
 import fg from "fast-glob"
@@ -40,7 +38,12 @@ export async function activate(
 			return
 		}
 
-		telemetry.capture({
+		const mappedFs = createFileSystemMapper(path.normalize(workspaceFolder.uri.fsPath), fs)
+
+		await setProjects({ workspaceFolder })
+		await main({ context, workspaceFolder, fs: mappedFs })
+
+		capture({
 			event: "IDE-EXTENSION activated",
 			properties: {
 				vscode_version: vscode.version,
@@ -48,11 +51,6 @@ export async function activate(
 				platform: process.platform,
 			},
 		})
-
-		const mappedFs = createFileSystemMapper(path.normalize(workspaceFolder.uri.fsPath), fs)
-
-		await setProjects({ workspaceFolder })
-		await main({ context, workspaceFolder, fs: mappedFs })
 
 		return { context }
 	} catch (error) {

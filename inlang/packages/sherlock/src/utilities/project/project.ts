@@ -1,7 +1,7 @@
 import * as vscode from "vscode"
 import { loadProjectFromDirectoryInMemory } from "@inlang/sdk"
 import { CONFIGURATION } from "../../configuration.js"
-import { telemetry } from "../../services/telemetry/index.js"
+import { capture } from "../../services/telemetry/index.js"
 import { setState, state } from "../state.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
 import { transpileToCjs } from "../import/transpileToCjs.js"
@@ -122,7 +122,7 @@ export async function handleTreeSelection(args: {
 			workingDirectory: path.normalize(args.workspaceFolder.uri.fsPath),
 		})
 
-		telemetry.capture({
+		capture({
 			event: "IDE-EXTENSION loaded project",
 			properties: {
 				errors: await inlangProject.errors.get(),
