@@ -148,6 +148,7 @@ describe("createMessageCommand", () => {
 		// @ts-expect-error
 		window.showInputBox.mockResolvedValueOnce("messageId123")
 
+		// @ts-expect-error
 		vi.mocked(upsertBundleNested).mockResolvedValueOnce(true)
 
 		await createMessageCommand.callback()
