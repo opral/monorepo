@@ -10,12 +10,7 @@ const InternalProperties = Type.Object(
 );
 
 const Messages = Type.Record(
-	Type.String({
-		pattern: "^[^\\.-]+$",
-		description:
-			"The message key. Hypens (-) and dots (.) are not allowed to increase compatibility with libraries.",
-		examples: ["helloWorld", "hello_world", "helloWorld123", "hello_world_123"],
-	}),
+	Type.String(),
 	Type.Union([
 		// a simple message
 		// "hello world"
