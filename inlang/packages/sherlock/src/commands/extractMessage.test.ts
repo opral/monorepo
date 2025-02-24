@@ -6,6 +6,7 @@ import { CONFIGURATION } from "../configuration.js"
 import { getSetting } from "../utilities/settings/index.js"
 import { state } from "../utilities/state.js"
 import { upsertBundleNested } from "@inlang/sdk"
+import { capture } from "../services/telemetry/index.js"
 
 // Mocking the necessary modules
 vi.mock("../utilities/state", () => ({
@@ -28,9 +29,7 @@ vi.mock("../utilities/messages/msg", () => ({
 }))
 
 vi.mock("../services/telemetry/index.js", () => ({
-	telemetry: {
-		capture: vi.fn(),
-	},
+	capture: vi.fn(),
 }))
 
 vi.mock("../configuration", () => ({

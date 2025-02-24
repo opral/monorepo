@@ -88,9 +88,7 @@ vi.mock("../../configuration.js", () => ({
 }))
 
 vi.mock("../../services/telemetry/index.js", () => ({
-	telemetry: {
-		capture: vi.fn(),
-	},
+	capture: vi.fn(),
 }))
 
 vi.mock("@lix-js/client", () => ({

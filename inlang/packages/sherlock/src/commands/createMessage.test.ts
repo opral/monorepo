@@ -25,9 +25,7 @@ vi.mock("../utilities/messages/msg", () => ({
 }))
 
 vi.mock("../services/telemetry/index.js", () => ({
-	telemetry: {
-		capture: vi.fn(),
-	},
+	capture: vi.fn(),
 }))
 
 vi.mock("../configuration", () => ({
