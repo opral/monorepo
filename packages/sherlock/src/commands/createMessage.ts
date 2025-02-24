@@ -1,7 +1,7 @@
 import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
-import { telemetry } from "../services/telemetry/index.js"
+import { capture } from "../services/telemetry/index.js"
 import { humanId, upsertBundleNested, type NewBundleNested } from "@inlang/sdk"
 import { CONFIGURATION } from "../configuration.js"
 import { getSetting } from "../utilities/settings/index.js"
@@ -72,7 +72,7 @@ export const createMessageCommand = {
 			// Emit event to notify that a message was created
 			CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire()
 
-			telemetry.capture({
+			capture({
 				event: "IDE-EXTENSION command executed: Create Message",
 			})
 

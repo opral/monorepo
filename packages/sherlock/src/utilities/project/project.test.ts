@@ -3,7 +3,7 @@ import * as vscode from "vscode"
 import * as fs from "node:fs/promises"
 import { setState, state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
-import { telemetry } from "../../services/telemetry/index.js"
+import { capture } from "../../services/telemetry/index.js"
 import {
 	createProjectViewNodes,
 	getTreeItem,
@@ -226,7 +226,7 @@ describe("handleTreeSelection", () => {
 		await handleTreeSelection({ selectedNode, fs, workspaceFolder })
 
 		expect(setState).toBeCalled()
-		expect(telemetry.capture).toBeCalledWith(
+		expect(capture).toBeCalledWith(
 			expect.objectContaining({
 				event: "IDE-EXTENSION loaded project",
 				properties: expect.objectContaining({

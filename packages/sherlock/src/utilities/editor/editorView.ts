@@ -230,28 +230,40 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 
 		const reactRefreshHash = "sha256-YmMpkm5ow6h+lfI3ZRp0uys+EUCt6FOyLkJERkfVnTY="
 
-		// CSP
 		const csp = [
 			`default-src 'none';`,
-			`script-src 'unsafe-eval' https://* ${
-				isProd
-					? `'nonce-${nonce}'`
-					: `http://${localServerUrl} http://0.0.0.0:${localPort} '${reactRefreshHash}'`
-			}`,
-			`style-src ${webview.cspSource} 'self' 'unsafe-inline' https://*`,
-			`font-src ${webview.cspSource}`,
-			`connect-src https://* ${
+
+			// Allow scripts from safe sources
+			`script-src 'self' https://* ${isProd ? `'nonce-${nonce}'` : `http://${localServerUrl} http://0.0.0.0:${localPort} '${reactRefreshHash}' 'unsafe-eval'`};`,
+
+			// Allow inline styles for better compatibility
+			`style-src ${webview.cspSource} 'self' 'unsafe-inline' https://*;`,
+
+			// Allow fonts from safe sources
+			`font-src ${webview.cspSource} https://*;`,
+
+			// Allow images from trusted sources and `data:` URLs
+			`img-src ${webview.cspSource} https://* data:;`,
+
+			// Allow media from safe sources (if needed)
+			`media-src ${webview.cspSource} https://* data:;`,
+
+			// Allow connections to APIs, WebSockets, and data URIs
+			`connect-src https://* data: ${
 				isProd
 					? ``
 					: `ws://${localServerUrl} ws://0.0.0.0:${localPort} http://${localServerUrl} http://0.0.0.0:${localPort}`
-			}`,
-		]
+			};`,
+
+			// Allow iframes only from trusted sources
+			`frame-src 'self' https://*;`,
+		].join(" ")
 
 		return /*html*/ `<!DOCTYPE html>
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
-        <meta http-equiv="Content-Security-Policy" content="${csp.join("; ")}">
+        <meta http-equiv="Content-Security-Policy" content="${csp}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" type="text/css" href="${stylesUri}">
         <title>${bundleId}</title>

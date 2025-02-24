@@ -4,7 +4,7 @@ import { msg } from "../utilities/messages/msg.js"
 import { window, commands } from "vscode"
 import { CONFIGURATION } from "../configuration.js"
 import { getSetting } from "../utilities/settings/index.js"
-import { telemetry } from "../services/telemetry/index.js"
+import { capture } from "../services/telemetry/index.js"
 import { humanId, upsertBundleNested } from "@inlang/sdk"
 import { state } from "../utilities/state.js"
 import { v4 as uuidv4 } from "uuid"
@@ -156,7 +156,7 @@ describe("createMessageCommand", () => {
 
 		expect(upsertBundleNested).toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire).toHaveBeenCalled()
-		expect(telemetry.capture).toHaveBeenCalled()
+		expect(capture).toHaveBeenCalled()
 		expect(msg).toHaveBeenCalledWith("Message created.")
 	})
 
