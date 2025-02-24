@@ -488,7 +488,6 @@ describe.each([
 				expect(m["$502.23-hello_world"]()).toBe("A simple message.");
 			});
 
-
 			test("falls back to parent locale if message doesn't exist", async () => {
 				const project = await loadProjectInMemory({
 					blob: await newProject({
