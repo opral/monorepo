@@ -186,6 +186,7 @@ const getLatestCommitedChange = async (project: InlangProject, change: Change) =
 	const latestCommitedChange = await project.lix.db
 		.selectFrom("change")
 		.selectAll()
+		// CHANGE has lable checkpoint
 		.where("commit_id", "is not", null)
 		.where("type", "=", "variant")
 		.where((eb) => eb.ref("value", "->>").key("id"), "=", change.value?.id)

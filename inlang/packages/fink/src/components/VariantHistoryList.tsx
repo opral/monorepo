@@ -28,6 +28,7 @@ const VariantHistoryList = (props: {
 			// https://linear.app/opral/issue/LIX-126/branching
 			// TODO Fink update
 			// .where(isInSimulatedCurrentBranch)
+			// isInCurrentVersion
 			.orderBy("commit.author desc")
 			.orderBy("commit.created_at desc")
 			.execute();

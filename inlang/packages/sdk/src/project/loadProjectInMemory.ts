@@ -1,6 +1,7 @@
 import { openLixInMemory } from "@lix-js/sdk";
 import { createInMemoryDatabase, importDatabase } from "sqlite-wasm-kysely";
 import { loadProject } from "./loadProject.js";
+// import { inlangLixPluginV1 } from "../lix-plugin/inlangLixPluginV1.js";
 
 /**
  * Load a project from a blob in memory.

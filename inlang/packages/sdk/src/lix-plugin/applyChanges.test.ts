@@ -1,16 +1,13 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-
 import { test, expect } from "vitest";
 import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
 import { newProject } from "../project/newProject.js";
 import type { Change, NewChange } from "@lix-js/sdk";
-import { applyChanges } from "./applyChanges.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
 import type { Bundle } from "../database/schema.js";
+import { applyChanges } from "./applyChanges.js";
 
-test.skip("it should be able to delete", async () => {
+test("it should be able to delete", async () => {
 	const project = await loadProjectInMemory({
 		blob: await newProject(),
 	});
@@ -18,11 +15,10 @@ test.skip("it should be able to delete", async () => {
 	const changes: NewChange[] = [
 		{
 			id: "1",
-			operation: "create",
 			file_id: "mock",
 			plugin_key: "mock",
-			type: "bundle",
-			meta: { id: "mock" },
+			schema_key: "bundle",
+			entity_id: "mock",
 			value: {
 				id: "mock",
 				declarations: [],
