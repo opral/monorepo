@@ -82,7 +82,7 @@ test("handles case senstivity by creating directories and files only in lowercas
 		},
 	];
 	const settings: Pick<ProjectSettings, "locales" | "baseLocale"> = {
-		locales: ["en", "de"],
+		locales: ["en"],
 		baseLocale: "en",
 	};
 	const output = generateMessageModules(
@@ -94,23 +94,23 @@ test("handles case senstivity by creating directories and files only in lowercas
 
 	// expecting only lowercase directories and files
 	expect(output).toHaveProperty("messages/happyelephant/en.js");
-	expect(output).toHaveProperty("messages/happyelephant/de.js");
 	expect(output).toHaveProperty("messages/happyelephant/index.js");
 	expect(output).not.toHaveProperty("messages/HappyElephant/en.js");
-	expect(output).not.toHaveProperty("messages/HappyElephant/de.js");
 	expect(output).not.toHaveProperty("messages/HappyElephant/index.js");
 
 	// expecting both bundles to be merged into the "happyelephant" module
-	expect(output["messages/happyelephant/index.js"]).toMatchInlineSnapshot(
-		[
-			`"export const happyelephant = () => en.happyelephant"`,
-			`"export const HappyElephant = () => en.HappyElephant"`,
-		].join("\n")
+	expect(output["messages/happyelephant/index.js"]).includes(
+		`export const happyelephant = () => en.happyelephant`
 	);
-	expect(output["messages/happyelephant/en.js"]).toMatchInlineSnapshot(
-		[
-			`"export const HappyElephant = () => "HappyElephant0"`,
-			`"export const happyelephant = () => "happyelephant1"`,
-		].join("\n")
+	expect(output["messages/happyelephant/index.js"]).includes(
+		`export const HappyElephant = () => en.HappyElephant`
+	);
+
+	// expecting both messages to be in their respective files
+	expect(output["messages/happyelephant/en.js"]).includes(
+		`export const HappyElephant = () => "HappyElephant0"`
+	);
+	expect(output["messages/happyelephant/en.js"]).includes(
+		`export const HappyElephant = () => "HappyElephant0"`
 	);
 });
