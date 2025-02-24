@@ -2,9 +2,9 @@ import type { ProjectSettings } from "@inlang/sdk";
 import type { CompiledBundleWithMessages } from "../compile-bundle.js";
 import { createRuntimeFile } from "../runtime/create-runtime.js";
 import { createRegistry } from "../registry.js";
-import { jsIdentifier } from "../../services/codegen/identifier.js";
 import { escapeForSingleQuoteString } from "../../services/codegen/escape.js";
 import type { CompilerOptions } from "../compiler-options.js";
+import { toSafeModuleId } from "../safe-module-id.js";
 
 export function generateMessageModules(
 	compiledBundles: CompiledBundleWithMessages[],
@@ -28,7 +28,7 @@ export function generateMessageModules(
 	output["messages/_index.js"] = [
 		...compiledBundles.map(
 			({ bundle }) =>
-				`export * from './${bundle.node.id.toLowerCase()}/index.js'`
+				`export * from './${toSafeModuleId(bundle.node.id)}/index.js'`
 		),
 	].join("\n");
 
@@ -39,7 +39,7 @@ export function generateMessageModules(
 	].join("\n");
 
 	for (const compiledBundle of compiledBundles) {
-		const bundleFileId = compiledBundle.bundle.node.id.toLowerCase();
+		const bundleFileId = toSafeModuleId(compiledBundle.bundle.node.id);
 		// bundle file
 		const indexFilename = `messages/${bundleFileId}/index.js`;
 		if (output[indexFilename]) {
@@ -51,7 +51,7 @@ export function generateMessageModules(
 				settings.locales
 					.map(
 						(locale) =>
-							`import * as ${jsIdentifier(locale)} from "./${locale}.js"`
+							`import * as ${toSafeModuleId(locale)} from "./${locale}.js"`
 					)
 					.join("\n"),
 				`import { getLocale } from '../../runtime.js'`,
@@ -66,7 +66,7 @@ export function generateMessageModules(
 			let file = "";
 
 			const compiledMessage = compiledBundle.messages[locale];
-			const id = jsIdentifier(compiledBundle.bundle.node.id);
+			const id = toSafeModuleId(compiledBundle.bundle.node.id);
 			if (!compiledMessage) {
 				// add fallback
 				const fallbackLocale = fallbackMap[locale];
