@@ -441,6 +441,7 @@ describe.each([
 					`export * as m from "./paraglide/messages.js"
 					export * as runtime from "./paraglide/runtime.js"`
 				);
+
 				const { m, runtime } = await importCode(code);
 
 				runtime.setLocale("de");
@@ -449,6 +450,44 @@ describe.each([
 				runtime.setLocale("en-US");
 				expect(m.missingInGerman()).toBe("A simple message.");
 			});
+
+			test("arbitrary module identifiers work", async () => {
+				const project = await loadProjectInMemory({
+					blob: await newProject({
+						settings: { locales: ["en", "de"], baseLocale: "en" },
+					}),
+				});
+
+				await insertBundleNested(
+					project.db,
+					createBundleNested({
+						id: "$502.23-hello_world",
+						messages: [
+							{
+								locale: "en",
+								variants: [
+									{ pattern: [{ type: "text", value: "A simple message." }] },
+								],
+							},
+						],
+					})
+				);
+
+				const output = await compileProject({
+					project,
+					compilerOptions,
+				});
+
+				const code = await bundleCode(
+					output,
+					`export * as m from "./paraglide/messages.js"
+					export * as runtime from "./paraglide/runtime.js"`
+				);
+				const { m } = await importCode(code);
+
+				expect(m["$502.23-hello_world"]()).toBe("A simple message.");
+			});
+
 
 			test("falls back to parent locale if message doesn't exist", async () => {
 				const project = await loadProjectInMemory({
