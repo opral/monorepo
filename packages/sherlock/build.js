@@ -119,8 +119,6 @@ async function copyDirectories() {
 
 			await fs.mkdir(dest, { recursive: true })
 			await copyDir(src, dest)
-
-			console.info(`Copied directory: ${src} -> ${dest}`)
 		} catch (err) {
 			console.error(`Error copying directory ${src} -> ${dest}:`, err)
 		}
