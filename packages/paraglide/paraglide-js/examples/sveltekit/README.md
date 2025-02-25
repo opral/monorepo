@@ -50,3 +50,23 @@ Check out https://inlang.com/m/gerre34r/library-inlang-paraglideJs/getting-start
 | SSG          | ❌        |
 | URLPattern   | ✅        |
 | Any Strategy | ✅        |
+
+## Additional guidance
+
+### Disabling AsyncLocalStorage in serverless environments	
+
+<doc-callout type="info">
+If you're deploying to SvelteKit's Edge adapter like Vercel Edge or Cloudflare Pages, you can disable AsyncLocalStorage to avoid issues with Node.js dependencies not available in those environments:
+
+```typescript
+export const handle: Handle = ({ event, resolve }) => {
+	return serverMiddleware(
+		event.request, 
+		({ request }) => resolve({ ...event, request }),
+		{ disableAsyncLocalStorage: true }
+	);
+};
+```
+
+⚠️ Only use this option in serverless environments where each request gets its own isolated runtime context. Using it in multi-request server environments could lead to data leakage between concurrent requests.
+</doc-callout>
