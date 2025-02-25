@@ -10,7 +10,7 @@ import { strategy, TREE_SHAKE_URL_STRATEGY_USED } from "./variables.js";
  *
  * Is `undefined` on the client.
  *
- * @type {import("async_hooks").AsyncLocalStorage<{ locale: Locale, origin: string }> | undefined}
+ * @type {{ getStore(): { locale: Locale, origin: string } | undefined, run: (store: any, cb: any) => any } | undefined}
  */
 let serverMiddlewareAsyncStorage = undefined;
 
@@ -32,6 +32,12 @@ let serverMiddlewareAsyncStorage = undefined;
  *
  * @param {Request} request - The incoming request object
  * @param {(args: { request: Request, locale: Locale }) => T | Promise<T>} resolve - Function to handle the request
+ * @param {Object} [options] - Optional configuration for the middleware
+ * @param {boolean} [options.disableAsyncLocalStorage=false] - If true, disables AsyncLocalStorage usage.
+ *                                                           ⚠️ WARNING: This should ONLY be used in serverless environments
+ *                                                           like Cloudflare Workers. Disabling AsyncLocalStorage in traditional
+ *                                                           server environments risks cross-request pollution where state from
+ *                                                           one request could leak into another concurrent request.
  *
  * @returns {Promise<Response | any>} Returns either:
  * - A `Response` object (302 redirect) if URL localization is needed
@@ -58,12 +64,35 @@ let serverMiddlewareAsyncStorage = undefined;
  *   });
  * });
  * ```
+ * 
+ * @example
+ * ```typescript
+ * // Usage in serverless environments like Cloudflare Workers
+ * // ⚠️ WARNING: This should ONLY be used in serverless environments like Cloudflare Workers.
+ * // Disabling AsyncLocalStorage in traditional server environments risks cross-request pollution where state from
+ * // one request could leak into another concurrent request.
+ * export default {
+ *   fetch: async (request) => {
+ *     return serverMiddleware(
+ *       request, 
+ *       ({ request, locale }) => handleRequest(request, locale),
+ *       { disableAsyncLocalStorage: true }
+ *     );
+ *   }
+ * };
+ * ```
  */
-export async function serverMiddleware(request, resolve) {
+export async function serverMiddleware(request, resolve, options = {}) {
+	const { disableAsyncLocalStorage = false } = options;
+
 	// the typeof window conditions needs to exist for non-sophisticated
 	// bundlers to detect the import statement as "should be tree-shaken"
 	// (webpack). otherwise, the bundler might throw.
-	if (typeof window === "undefined" && !serverMiddlewareAsyncStorage) {
+	if (
+		typeof window === "undefined" &&
+		!serverMiddlewareAsyncStorage &&
+		!disableAsyncLocalStorage
+	) {
 		const { AsyncLocalStorage } = await import("async_hooks");
 		serverMiddlewareAsyncStorage = new AsyncLocalStorage();
 	}
@@ -90,6 +119,24 @@ export async function serverMiddleware(request, resolve) {
 		? new Request(deLocalizeUrl(request.url), request)
 		: request;
 
+	// If AsyncLocalStorage is disabled, create a mock implementation
+	if (disableAsyncLocalStorage) {
+		// Create a mock serverMiddlewareAsyncStorage if it doesn't exist
+		if (!serverMiddlewareAsyncStorage) {
+			serverMiddlewareAsyncStorage = {
+				getStore: () => ({ locale, origin }),
+				run: async () => {
+					try {
+						return await resolve({ locale, request: newRequest });
+					} finally {
+						serverMiddlewareAsyncStorage = undefined;
+					}
+				},
+			};
+		}
+	}
+
+	// Otherwise use AsyncLocalStorage to isolate request context
 	return serverMiddlewareAsyncStorage?.run({ locale, origin }, () =>
 		resolve({ locale, request: newRequest })
 	);
