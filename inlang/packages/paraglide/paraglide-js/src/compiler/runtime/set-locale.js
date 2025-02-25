@@ -27,16 +27,20 @@ export let setLocale = (newLocale) => {
 			_locale = newLocale;
 			localeHasBeenSet = true;
 		} else if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
-			if (typeof document === "undefined" || !document.cookie) {
+			if (typeof document === "undefined") {
 				continue;
 			}
 			// set the cookie
-			document.cookie = `${cookieName}=${newLocale}`;
+			document.cookie = `${cookieName}=${newLocale}; path=/`;
 			localeHasBeenSet = true;
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
-		} else if (TREE_SHAKE_URL_STRATEGY_USED && strat === "url") {
+		} else if (
+			TREE_SHAKE_URL_STRATEGY_USED &&
+			strat === "url" &&
+			typeof window !== "undefined"
+		) {
 			// route to the new url
 			//
 			// this triggers a page reload but a user rarely
@@ -50,8 +54,6 @@ export let setLocale = (newLocale) => {
 			}).href;
 			// just in case return. the browser reloads the page by setting href
 			return;
-		} else {
-			throw new Error("Unknown strategy");
 		}
 	}
 	if (localeHasBeenSet === false) {

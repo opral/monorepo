@@ -25,7 +25,9 @@ export default class Element extends LitElement {
 				>
 					${unsafeHTML(icons[this.type])}
 				</div>
-				<slot></slot>
+				<div>
+					<slot></slot>
+				</div>
 			</div>
 		`
 	}

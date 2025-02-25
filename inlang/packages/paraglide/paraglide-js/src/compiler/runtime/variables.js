@@ -22,7 +22,7 @@ export const locales = /** @type {const} */ (["en", "de"]);
 export const cookieName = "<cookie-name>";
 
 /**
- * @type {Array<"cookie" | "baseLocale" | "globalVariable" | "url">}
+ * @type {Array<"cookie" | "baseLocale" | "globalVariable" | "url" | "preferredLanguage">}
  */
 export const strategy = ["globalVariable"];
 
@@ -38,3 +38,7 @@ export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;
 export const TREE_SHAKE_URL_STRATEGY_USED = false;
 
 export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;
+
+export const TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED = false;
+
+export const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = false;

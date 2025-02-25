@@ -1,9 +1,11 @@
 import { assertIsLocale } from "./assert-is-locale.js";
+import { isLocale } from "./is-locale.js";
 import {
 	baseLocale,
 	strategy,
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
+	TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED,
 	TREE_SHAKE_URL_STRATEGY_USED,
 } from "./variables.js";
 import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
@@ -36,6 +38,15 @@ export let getLocale = () => {
 	/** @type {string | undefined} */
 	let locale;
 
+	// if running in a server-side rendering context
+	// retrieve the locale from the async local storage
+	if (serverMiddlewareAsyncStorage) {
+		const locale = serverMiddlewareAsyncStorage?.getStore()?.locale;
+		if (locale) {
+			return locale;
+		}
+	}
+
 	for (const strat of strategy) {
 		if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
 			locale = extractLocaleFromCookie();
@@ -53,6 +64,12 @@ export let getLocale = () => {
 			_locale !== undefined
 		) {
 			locale = _locale;
+		} else if (
+			TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED &&
+			strat === "preferredLanguage" &&
+			typeof window !== "undefined"
+		) {
+			locale = negotiatePreferredLanguageFromNavigator();
 		}
 		// check if match, else continue loop
 		if (locale !== undefined) {
@@ -64,6 +81,32 @@ export let getLocale = () => {
 		"No locale found. Read the docs https://inlang.com/m/gerre34r/library-inlang-paraglideJs/errors#no-locale-found"
 	);
 };
+
+/**
+ * Negotiates a preferred language from navigator.languages.
+ *
+ * @returns {string|undefined} The negotiated preferred language.
+ */
+function negotiatePreferredLanguageFromNavigator() {
+	if (!navigator?.languages?.length) {
+		return undefined;
+	}
+
+	const languages = navigator.languages.map((lang) => ({
+		fullTag: lang.toLowerCase(),
+		baseTag: lang.split("-")[0]?.toLowerCase(),
+	}));
+
+	for (const lang of languages) {
+		if (isLocale(lang.fullTag)) {
+			return lang.fullTag;
+		} else if (isLocale(lang.baseTag)) {
+			return lang.baseTag;
+		}
+	}
+
+	return undefined;
+}
 
 /**
  * Overwrite the \`getLocale()\` function.

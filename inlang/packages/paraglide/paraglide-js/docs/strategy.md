@@ -92,23 +92,21 @@ compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
 	strategy: ["url"],
-	compilerOptions: {
-		urlPatterns: [
-			{
-				pattern: ":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)",
-				// the original URL is https://example.com/about. 
+	urlPatterns: [
+		{
+			pattern: ":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)?",
+			// the original URL is https://example.com/about. 
+			// hence, the locale is null
+			deLocalizedNamedGroups: { locale: null },
+			localizedNamedGroups: {
+				// the en locale should have no locale in the URL
 				// hence, the locale is null
-				deLocalizedNamedGroups: { locale: null },
-				localizedNamedGroups: {
-					// the en locale should have no locale in the URL
-					// hence, the locale is null
-					en: { locale: null },
-					// the de locale should have the locale in the URL
-					de: { locale: "de" },
-				},
+				en: { locale: null },
+				// the de locale should have the locale in the URL
+				de: { locale: "de" },
 			},
-		],
-	},
+		},
+	],
 });
 ```
 
@@ -124,29 +122,27 @@ compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
 	strategy: ["url"],
-	compilerOptions: {
-		urlPatterns: [
-			// defining the pattern during development which 
-			// uses path suffixes like /en
-			{
-				pattern: ':protocol://localhost::port?/:locale(de|en)?/:path(.*)',
-					deLocalizedNamedGroups: { locale: null },
-					localizedNamedGroups: {
-						en: { locale: 'en' },
-						de: { locale: 'de' }
-					},
-			},
-			// production pattern which uses subdomains like de.example.com
-			{
-				pattern: ":protocol://:domain(.*)::port?/:path(.*)",
-				deLocalizedNamedGroups: { domain: "example.com" },
+	urlPatterns: [
+		// defining the pattern during development which 
+		// uses path suffixes like /en
+		{
+			pattern: ':protocol://localhost::port?/:locale(de|en)?/:path(.*)?',
+				deLocalizedNamedGroups: { locale: null },
 				localizedNamedGroups: {
-					en: { domain: "example.com" },
-					de: { domain: "de.example.com" },
+					en: { locale: 'en' },
+					de: { locale: 'de' }
 				},
+		},
+		// production pattern which uses subdomains like de.example.com
+		{
+			pattern: ":protocol://:domain(.*)::port?/:path(.*)?",
+			deLocalizedNamedGroups: { domain: "example.com" },
+			localizedNamedGroups: {
+				en: { domain: "example.com" },
+				de: { domain: "de.example.com" },
 			},
-		],
-	},
+		},
+	],
 });
 ```
 
@@ -167,21 +163,43 @@ compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
 	strategy: ["url"],
-	compilerOptions: {
-		urlPatterns: [
-			{
-				pattern: ":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)",
-				deLocalizedNamedGroups: { base },
-				localizedNamedGroups: {
-					en: { base, locale: "en" },
-					de: { base, locale: "de" },
-				},
+	urlPatterns: [
+		{
+			pattern: ":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)?",
+			deLocalizedNamedGroups: { base },
+			localizedNamedGroups: {
+				en: { base, locale: "en" },
+				de: { base, locale: "de" },
 			},
-		],
-	},
+		},
+	],
 });
 ```
 
+
+### preferredLanguage
+
+Automatically detects the user's preferred language from browser settings or HTTP headers.
+
+- On the client: Uses [navigator.languages](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/languages)
+- On the server: Uses the [Accept-Language header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language)
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["preferredLanguage", "baseLocale"]
+})
+```
+
+The strategy attempts to match locale in order of user preference:
+
+1. First tries exact matches (e.g., "en-US" if supported)
+2. Falls back to base language codes (e.g., "en")
+
+For example:
+- If user prefers `fr-FR,fr;q=0.9,en;q=0.7` and your app supports `["en", "fr"]`, it will use `fr`
+- If user prefers `en-US` and your app only supports `["en", "de"]`, it will use `en`
 
 ## Write your own strategy
 
@@ -276,114 +294,6 @@ export const handle = sequence(
 
 ```
 
-
-### Trigger a re-render 
-
-When the user changes the locale (eg: using a language switcher) you will likely want to trigger a re-render of your application. To do so, use the `overwriteSetLocale` callback. How to trigger a re-render depends on your application but usually involves setting a render key at the top level of your application. 
-
-Below is an example for React.
-
-```js
-import { useState } from "react";
-import { m } from "./paraglide/messages.js";
-import { getLocale, overwriteSetLocale, setLocale } from "./paraglide/runtime.js";
-
-function App() {
-	const [localeRenderKey, setLocaleRenderKey] = useState(getLocale());
-
-	overwriteGetLocale(() => {
-		return document.documentElement.lang; //or any other source
-	})
-
-	overwriteSetLocale((newLocale) => {
-		setLocaleRenderKey(newLocale);
-	});
-
-	return (
-		// The render key will trigger a re-render when the locale changes
-		<div key={localeRenderKey}>
-			<button onClick={() => setLocale("en")}>Switch locale to en</button>
-			<button onClick={() => setLocale("de")}>Switch locale to de</button>
-			<button onClick={() => setLocale("fr")}>Switch locale to fr</button>
-			<p>{m.orange_dog_wheel()}</p>
-		</div>
-	);
-}
-```
-
-For SvelteKit you can wrap your base `+layout.svelte` in a `{#key getLocale()}{/key}` block to automatically trigger a rerender whenever `setLocale()` is called: 
-```svelte
-<script lang="ts">
-import { m } from "./paraglide/messages.js";
-import { getLocale, overwriteGetLocale, overwriteSetLocale, setLocale } from "./paraglide/runtime.js";
-
-//first set the locale
-setLocale(document.documentElement.lang); //or any other source
-let locale = $state(getLocale()); //stores the current locale
-
-overwriteGetLocale(() => {
-	return locale;
-});
-
-overwriteSetLocale((newLocale) => {
-	locale = newLocale;
-	//update any cookies, localStorage, etc
-});
-</script>
-{#key getLocale()}
-	<div>
-		<button onClick={() => setLocale("en")}>Switch locale to en</button>
-		<button onClick={() => setLocale("de")}>Switch locale to de</button>
-		<button onClick={() => setLocale("fr")}>Switch locale to fr</button>
-		<p>{m.orange_dog_wheel()}</p>
-	</div>
-	<div>
-		<!--The rest of your application-->
-		{@render children()}
-	</div>
-{/key}
-```
-
-### Examples
-
-#### Cookie based strategy
-
-The example uses React for demonstration purposes. You can replicate the same pattern in any other framework or vanilla JS.
-
-1. Define the `getLocale()` function that reads the locale from a cookie.
-2. Define the `setLocale()` function that writes the locale to a cookie and triggers a re-render.
-
-```tsx
-import { m } from "./paraglide/messages.js";
-import { overwriteSetLocale, overwriteGetLocale, setLocale, baseLocale } from "./paraglide/runtime.js";
-import { useState } from "react";
-
-function App() {
-	const [localeRenderKey, setLocaleRenderKey] = useState(null);
-
-	overwriteGetLocale(() => {
-		return Cookies.get("locale") ?? baseLocale;
-	});
-
-	overwriteSetLocale((newLocale) => {
-		// set the locale in the cookie
-		Cookies.set("locale", newLocale);
-		// trigger a re-render
-		setLocaleRenderKey(newLocale);
-	});
-
-	return (
-		// The render key will trigger a re-render when the locale changes
-		<div key={localeRenderKey}>
-			<button onClick={() => setLocale("en")}>Switch locale to en</button>
-			<button onClick={() => setLocale("de")}>Switch locale to de</button>
-			<button onClick={() => setLocale("fr")}>Switch locale to fr</button>
-			<p>{m.orange_dog_wheel()}</p>
-		</div>
-	);
-}
-```
-
 #### Server-side rendering
 
 1. Detect the locale from the request. 
@@ -410,26 +320,5 @@ export function onRequest(request, next) {
 	// to the detected locale and let the request continue
 	// in the async context 
   return localeStorage(locale, async () => await next());
-}
-```
-
-Pseudocode on the client:
-
-```ts
-function App() {
-  if (!import.meta.env.SSR){
-		overwriteGetLocale(() => {
-			// your strategy to detect the locale on the client
-	  });
-		overwriteSetLocale((newLocale) => {
-			// your strategy
-		});
-	} 
-
-	return (
-		<div>
-			<p>{m.orange_dog_wheel()}</p>
-		</div>
-	);
 }
 ```

@@ -1,5 +1,53 @@
 # @inlang/plugin-message-format
 
+## 4.0.0
+
+### Major Changes
+
+- 0b829f8: Support for nesting of message keys
+
+  ```json
+  //messages/en.json
+  {
+  	"hello_world": "Hello World!",
+  	"greeting": "Good morning {name}!",
+  	"nested": {
+  		"key": "Nested key"
+  	}
+  }
+  ```
+
+  **BREAKING**
+
+  Complex messages that have variants need to be wrapped in an array to be distinguished from nested keys.
+
+  ```diff
+  //messages/en.json
+  {
+    "hello_world": "Hello World!",
+  +  "complex_message": [
+      {
+        "declarations": ["input count", "local countPlural = count: plural"],
+        "selectors": ["countPlural"],
+        "match": {
+          "countPlural=one": "There is one item",
+          "countPlural=other": "There are {count} items"
+        }
+      }
+  +  ]
+  }
+  ```
+
+### Minor Changes
+
+- 2d823c8: allow arbitrary message bundle keys https://github.com/opral/inlang-paraglide-js/issues/285
+
+## 3.2.1
+
+### Patch Changes
+
+- b9442e3: - update `exportFiles` to emit sorted output to have less diff noise
+
 ## 3.2.0
 
 ### Minor Changes
