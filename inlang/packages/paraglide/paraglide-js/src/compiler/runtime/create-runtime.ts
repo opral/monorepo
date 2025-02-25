@@ -19,8 +19,11 @@ export function createRuntimeFile(args: {
 }): string {
 	const urlPatterns = args.compilerOptions.urlPatterns ?? [];
 
+	let defaultUrlPatternUsed = false;
+
 	// add default urlPatterns for a good out of the box experience
 	if (args.compilerOptions.urlPatterns === undefined) {
+		defaultUrlPatternUsed = true;
 		urlPatterns.push({
 			pattern: `:protocol://:domain(.*)::port?/:locale(${args.locales.filter((l) => l !== args.baseLocale).join("|")})?/:path(.*)?`,
 			deLocalizedNamedGroups: { locale: null },
@@ -33,7 +36,7 @@ export function createRuntimeFile(args: {
 		});
 	}
 	const code = `
-import "@inlang/paraglide-js/urlpattern-polyfill";
+${defaultUrlPatternUsed ? "/** @type {any} */\nconst URLPattern = {}" : `import "@inlang/paraglide-js/urlpattern-polyfill";`}
 
 ${injectCode("./variables.js")
 	.replace(
@@ -68,6 +71,10 @@ ${injectCode("./variables.js")
 	.replace(
 		`export const urlPatterns = [];`,
 		`export const urlPatterns = ${JSON.stringify(urlPatterns, null, 2)};`
+	)
+	.replace(
+		`export const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = false;`,
+		`const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = ${defaultUrlPatternUsed};`
 	)}
 
 ${injectCode("./get-locale.js")} 

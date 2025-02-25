@@ -167,7 +167,7 @@ deLocalizeUrl - For low-level URL de-localization in server contexts
 
 > **deLocalizeUrl**(`url`): `URL`
 
-Defined in: [runtime/localize-url.js:116](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
+Defined in: [runtime/localize-url.js:163](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
 
 Low-level URL de-localization function, primarily used in server contexts.
 
@@ -271,7 +271,7 @@ const locale = extractLocaleFromRequest(request);
 
 > **extractLocaleFromUrl**(`url`): `any`
 
-Defined in: [runtime/extract-locale-from-url.js:11](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-url.js)
+Defined in: [runtime/extract-locale-from-url.js:16](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-url.js)
 
 Extracts the locale from a given URL using native URLPattern.
 
@@ -279,9 +279,9 @@ Extracts the locale from a given URL using native URLPattern.
 
 #### url
 
-`string`
-
 The full URL from which to extract the locale.
+
+`string` | `URL`
 
 ### Returns
 
@@ -432,7 +432,7 @@ which provides more precise control over URL handling.
 
 > **localizeUrl**(`url`, `options`?): `URL`
 
-Defined in: [runtime/localize-url.js:47](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
+Defined in: [runtime/localize-url.js:53](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
 
 Lower-level URL localization function, primarily used in server contexts.
 

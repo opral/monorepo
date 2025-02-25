@@ -603,6 +603,10 @@ importers:
         version: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.2))(terser@5.36.0)
 
   inlang/packages/plugins/inlang-message-format:
+    dependencies:
+      flat:
+        specifier: ^6.0.1
+        version: 6.0.1
     devDependencies:
       '@inlang/sdk':
         specifier: workspace:*
@@ -1504,8 +1508,6 @@ importers:
       vitest:
         specifier: 2.1.8
         version: 2.1.8(@types/node@20.5.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@20.5.9)(typescript@5.7.2))(terser@5.36.0)
-
-  inlang/packages/website/dist/server: {}
 
   inlang/packages/website/tailwind-color-plugin:
     dependencies:

@@ -2,6 +2,9 @@
 
 ## 2.0.0-beta.21
 
+- compile arbitrary message keys https://github.com/opral/inlang-paraglide-js/issues/201#issuecomment-2680006131
+- only polyfills `URLPattern` if needed https://github.com/opral/inlang-paraglide-js/issues/381
+- don't include `url` strategy by default https://github.com/opral/inlang-paraglide-js/issues/405
 - fixes webpack watch mode https://github.com/opral/inlang-paraglide-js/issues/406
 
 ## 2.0.0-beta.20
