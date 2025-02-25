@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 2.4.0
+
+### Minor Changes
+
+- f01927c: bugfixing
+
 ## 2.3.0
 
 ### Minor Changes

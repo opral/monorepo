@@ -1,5 +1,16 @@
 # @inlang/message-bundle-component
 
+## 4.0.0
+
+### Minor Changes
+
+- f01927c: bugfixing
+
+### Patch Changes
+
+- Updated dependencies [f01927c]
+  - @inlang/sdk@2.4.0
+
 ## 3.0.0
 
 ### Patch Changes
