@@ -32,7 +32,7 @@ export const CreateProjectDialog = (props: {
 
 	return (
 		<SlDialog
-			label="Create new project"
+			label="Create project"
 			open={props.showNewProjectDialog}
 			onSlRequestClose={() => props.setShowNewProjectDialog(false)}
 		>
