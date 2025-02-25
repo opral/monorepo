@@ -29,7 +29,8 @@
 			"/strategy": "./docs/strategy.md",
 			"/variants": "./docs/variants.md",
 			"/file-formats": "./docs/file-formats.md",
-			"/multi-tenancy": "./docs/multi-tenancy.md"
+			"/multi-tenancy": "./docs/multi-tenancy.md",
+			"/server-side-rendering": "./docs/server-side-rendering.md"
 		},
 		"Reference": {
 			"/architecture": "./docs/architecture.md",
