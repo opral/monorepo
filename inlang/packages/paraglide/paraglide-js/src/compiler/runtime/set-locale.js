@@ -27,16 +27,20 @@ export let setLocale = (newLocale) => {
 			_locale = newLocale;
 			localeHasBeenSet = true;
 		} else if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
-			if (typeof document === "undefined" || !document.cookie) {
+			if (typeof document === "undefined") {
 				continue;
 			}
 			// set the cookie
-			document.cookie = `${cookieName}=${newLocale}`;
+			document.cookie = `${cookieName}=${newLocale}; path=/`;
 			localeHasBeenSet = true;
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
-		} else if (TREE_SHAKE_URL_STRATEGY_USED && strat === "url") {
+		} else if (
+			TREE_SHAKE_URL_STRATEGY_USED &&
+			strat === "url" &&
+			typeof window !== "undefined"
+		) {
 			// route to the new url
 			//
 			// this triggers a page reload but a user rarely
@@ -50,8 +54,6 @@ export let setLocale = (newLocale) => {
 			}).href;
 			// just in case return. the browser reloads the page by setting href
 			return;
-		} else {
-			throw new Error("Unknown strategy");
 		}
 	}
 	if (localeHasBeenSet === false) {
@@ -67,19 +69,19 @@ export let setLocale = (newLocale) => {
 };
 
 /**
- * Define the \`setLocale()\` function.
+ * Overwrite the \`setLocale()\` function.
  *
- * Use this function to define how the locale is set. For example,
+ * Use this function to overwrite how the locale is set. For example,
  * modify a cookie, env variable, or a user's preference.
  *
  * @example
- *   defineSetLocale((newLocale) => {
+ *   overwriteSetLocale((newLocale) => {
  *     // set the locale in a cookie
  *     return Cookies.set('locale', newLocale)
  *   });
  *
  * @param {(newLocale: Locale) => void} fn
  */
-export const defineSetLocale = (fn) => {
+export const overwriteSetLocale = (fn) => {
 	setLocale = fn;
 };

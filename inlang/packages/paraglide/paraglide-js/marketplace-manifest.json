@@ -25,22 +25,25 @@
 		},
 		"Usage": {
 			"/getting-started": "./README.md",
-			"/manual-setup": "./docs/manual-setup.md",
 			"/compiling-messages": "./docs/compiling-messages.md",
 			"/strategy": "./docs/strategy.md",
 			"/variants": "./docs/variants.md",
 			"/file-formats": "./docs/file-formats.md",
-			"/multi-tenancy": "./docs/multi-tenancy.md"
+			"/multi-tenancy": "./docs/multi-tenancy.md",
+			"/server-side-rendering": "./docs/server-side-rendering.md"
 		},
 		"Reference": {
 			"/architecture": "./docs/architecture.md",
-			"/compiler-options": "./docs/compiler-options.md"
+			"/compiler-options": "./docs-api/compiler-options.md",
+			"/runtime": "./docs-api/runtime/-internal-.md",
+			"/errors": "./docs/errors.md"
 		},
-		"Frameworks": {
-			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",
-			"NextJS": "/m/osslbuzt/paraglide-next-i18n",
-			"Astro": "/m/iljlwzfs/paraglide-astro-i18n",
-			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n"
+		"Examples": {
+			"/sveltekit": "./examples/sveltekit/README.md",
+			"/astro": "./examples/astro/README.md",
+			"/react-router": "./examples/react-router/README.md",
+			"/next-js": "./docs/examples/next-js.md",
+			"/vite": "./examples/vite/README.md"
 		},
 		"Ecosystem": {
 			"VSCode Extension": "/m/r7kp499g/app-inlang-ideExtension",
@@ -69,6 +72,7 @@
 		"javascript",
 		"solid",
 		"typescript",
+		"react router",
 		"inlang"
 	],
 	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],

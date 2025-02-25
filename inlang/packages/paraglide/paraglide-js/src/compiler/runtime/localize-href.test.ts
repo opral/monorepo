@@ -6,10 +6,10 @@ test("uses the locale from getLocale() if no locale is provided", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["globalVariable", "baseLocale"],
+			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
 				{
-					pattern: "http://:domain(.*)/:locale?/:path(.*)",
+					pattern: "http://:domain(.*)/:locale(de|en)?/:path(.*)?",
 					deLocalizedNamedGroups: { locale: null },
 					localizedNamedGroups: { de: { locale: "de" }, en: { locale: "en" } },
 				},
@@ -17,7 +17,7 @@ test("uses the locale from getLocale() if no locale is provided", async () => {
 		},
 	});
 
-	runtime.defineGetLocale(() => "de");
+	runtime.overwriteGetLocale(() => "de");
 
 	expect(runtime.localizeHref("/hello")).toBe("/de/hello");
 	expect(runtime.deLocalizeHref("/de/hello")).toBe("/hello");
@@ -28,10 +28,10 @@ test("returns an absolute href if the provided href is absolute", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["globalVariable", "baseLocale"],
+			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
 				{
-					pattern: "http://:domain(.*)/:locale?/:path(.*)",
+					pattern: "http://:domain(.*)/:locale(de|en)?/:path(.*)?",
 					deLocalizedNamedGroups: { locale: null },
 					localizedNamedGroups: { de: { locale: "de" }, en: { locale: "en" } },
 				},
@@ -53,10 +53,10 @@ test("returns an absolute href if the provided href is relative but the origin o
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
-			strategy: ["globalVariable", "baseLocale"],
+			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
 				{
-					pattern: "http://:domain(.*)/:path(.*)",
+					pattern: "http://:domain(.*)/:path(.*)?",
 					deLocalizedNamedGroups: { domain: "example.com" },
 					localizedNamedGroups: {
 						de: { domain: "de.example.com" },
@@ -68,7 +68,7 @@ test("returns an absolute href if the provided href is relative but the origin o
 	});
 
 	// simulating routing from current en page to de page
-	runtime.defineGetLocale(() => "en");
+	runtime.overwriteGetLocale(() => "en");
 
 	expect(runtime.localizeHref("/hello", { locale: "de" })).toBe(
 		"http://de.example.com/hello"
@@ -78,7 +78,7 @@ test("returns an absolute href if the provided href is relative but the origin o
 	);
 
 	// simulating routing from current de page to en page
-	runtime.defineGetLocale(() => "de");
+	runtime.overwriteGetLocale(() => "de");
 
 	expect(runtime.localizeHref("/hello", { locale: "en" })).toBe(
 		"http://example.com/hello"
@@ -96,11 +96,11 @@ test("adding a base path", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				{
-					pattern:
-						":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)",
-					deLocalizedNamedGroups: { base },
+					pattern: `:protocol://:domain(.*)::port?/:base(${base})?/:locale(en|de)?/:path(.*)?`,
+					deLocalizedNamedGroups: { base, locale: null },
 					localizedNamedGroups: {
 						en: { base, locale: "en" },
 						de: { base, locale: "de" },
@@ -110,8 +110,16 @@ test("adding a base path", async () => {
 		},
 	});
 
+	// simulating the current locale to be en
+	runtime.overwriteGetLocale(() => "en");
+
 	expect(runtime.localizeHref("/about")).toBe("/shop/en/about");
 	expect(runtime.deLocalizeHref("/about")).toBe("/shop/about");
+
+	// simulating current locale to be fde
+	runtime.overwriteGetLocale(() => "de");
+	expect(runtime.localizeHref("/about")).toBe("/shop/de/about");
+	expect(runtime.deLocalizeHref("/de/about")).toBe("/shop/about");
 });
 
 test("default url patterns to improve out of the box experience", async () => {
@@ -119,9 +127,13 @@ test("default url patterns to improve out of the box experience", async () => {
 		baseLocale: "en",
 		locales: ["en", "de", "fr"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: undefined,
 		},
 	});
+
+	// polyfilling window
+	globalThis.window = { location: new URL("http://example.com") } as any;
 
 	expect(runtime.urlPatterns).toStrictEqual([
 		{

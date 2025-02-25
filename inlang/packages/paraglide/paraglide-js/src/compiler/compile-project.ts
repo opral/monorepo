@@ -1,10 +1,12 @@
 import { compileBundle } from "./compile-bundle.js";
-import { DEFAULT_REGISTRY } from "./registry.js";
 import { selectBundleNested, type InlangProject } from "@inlang/sdk";
 import { lookup } from "../services/lookup.js";
 import { generateLocaleModules } from "./output-structure/locale-modules.js";
 import { generateMessageModules } from "./output-structure/message-modules.js";
-import { defaultCompilerOptions, type CompilerOptions } from "./compile.js";
+import {
+	defaultCompilerOptions,
+	type CompilerOptions,
+} from "./compiler-options.js";
 
 /**
  * Takes an inlang project and compiles it into a set of files.
@@ -35,7 +37,6 @@ export const compileProject = async (args: {
 		compileBundle({
 			bundle,
 			fallbackMap,
-			registry: DEFAULT_REGISTRY,
 		})
 	);
 

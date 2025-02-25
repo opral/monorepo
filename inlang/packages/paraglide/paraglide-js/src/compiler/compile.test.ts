@@ -5,9 +5,10 @@ import {
 } from "@inlang/sdk";
 import { memfs } from "memfs";
 import { test, expect, vi } from "vitest";
-import { compile, defaultCompilerOptions } from "./compile.js";
+import { compile } from "./compile.js";
 import { getAccountFilePath } from "../services/account/index.js";
 import type { Runtime } from "./runtime/type.js";
+import { defaultCompilerOptions } from "./compiler-options.js";
 
 test("loads a project and compiles it", async () => {
 	const project = await loadProjectInMemory({
@@ -285,14 +286,16 @@ test("includes eslint-disable comment", async () => {
 	expect(messagesWithoutComment).not.toContain("// eslint-disable");
 });
 
-test("default compiler options should include variable and baseLocale to ensure easy try out of paraglide js, working both in server and browser environemnts", () => {
+test("default compiler options should include cookied, variable and baseLocale to ensure easy try out of paraglide js, working both in server and browser environemnts", () => {
 	// someone trying out paraglide js should be able to call `getLocale()` and `setLocale()`
 	// without getting an error slammed in their face saying "define your strategy".
 	//
 	// instead, make the apis work out of the box and once the developer is convinced that
 	// paraglide js is the right tool for them, they can then define their own strategy.
 
-	expect(defaultCompilerOptions.strategy).toEqual(
-		expect.arrayContaining(["globalVariable", "baseLocale"])
-	);
+	expect(defaultCompilerOptions.strategy).toEqual([
+		"cookie",
+		"globalVariable",
+		"baseLocale",
+	]);
 });

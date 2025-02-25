@@ -1,12 +1,9 @@
 import type { Bundle, BundleNested, Message } from "@inlang/sdk";
 import { compileMessage } from "./compile-message.js";
-import type { Registry } from "./registry.js";
-import { jsIdentifier } from "../services/codegen/identifier.js";
-import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js";
-import { escapeForDoubleQuoteString } from "../services/codegen/escape.js";
 import type { Compiled } from "./types.js";
 import { jsDocBundleFunctionTypes } from "./jsdoc-types.js";
-import { KEYWORDS } from "../services/valid-js-identifier/reserved-words.js";
+import { toSafeModuleId } from "./safe-module-id.js";
+import { escapeForDoubleQuoteString } from "../services/codegen/escape.js";
 
 export type CompiledBundleWithMessages = {
 	/** The compilation result for the bundle index */
@@ -23,19 +20,8 @@ export type CompiledBundleWithMessages = {
 export const compileBundle = (args: {
 	bundle: BundleNested;
 	fallbackMap: Record<string, string | undefined>;
-	registry: Registry;
 }): CompiledBundleWithMessages => {
 	const compiledMessages: Record<string, Compiled<Message>> = {};
-
-	if (KEYWORDS.includes(args.bundle.id) || args.bundle.id === "then") {
-		throw new Error(
-			[
-				`You are using a reserved JS keyword as id "${args.bundle.id}".`,
-				"Rename the message bundle id to something else.",
-				"See https://github.com/opral/inlang-paraglide-js/issues/331",
-			].join("\n")
-		);
-	}
 
 	for (const message of args.bundle.messages) {
 		if (compiledMessages[message.locale]) {
@@ -45,8 +31,7 @@ export const compileBundle = (args: {
 		const compiledMessage = compileMessage(
 			args.bundle.declarations,
 			message,
-			message.variants,
-			args.registry
+			message.variants
 		);
 
 		// set the pattern for the language tag
@@ -77,6 +62,10 @@ const compileBundleFunction = (args: {
 	);
 	const hasInputs = inputs.length > 0;
 
+	const safeBundleId = toSafeModuleId(args.bundle.id);
+
+	const isSafeBundleId = safeBundleId === args.bundle.id;
+
 	let code = `/**
 * This function has been compiled by [Paraglide JS](https://inlang.com/m/gerre34r).
 *
@@ -87,23 +76,19 @@ const compileBundleFunction = (args: {
 * ${jsDocBundleFunctionTypes({ inputs, locales: args.availableLocales })}
 */
 /* @__NO_SIDE_EFFECTS__ */
-const ${jsIdentifier(args.bundle.id)} = (inputs${hasInputs ? "" : "= {}"}, options = {}) => {
+${isSafeBundleId ? "export" : ""} const ${safeBundleId} = (inputs${hasInputs ? "" : "= {}"}, options = {}) => {
 	const locale = options.locale ?? getLocale()
 	${args.availableLocales
 		.map(
 			(locale, index) =>
-				`${index > 0 ? "	" : ""}if (locale === "${locale}") return ${jsIdentifier(locale)}.${args.bundle.id}(inputs)`
+				`${index > 0 ? "	" : ""}if (locale === "${locale}") return ${toSafeModuleId(locale)}.${safeBundleId}(inputs)`
 		)
 		.join("\n")}
 	return "${args.bundle.id}"
-}
-	`;
+};`;
 
-	// export the function
-	if (isValidJSIdentifier(args.bundle.id)) {
-		code += `\nexport { ${args.bundle.id} }`;
-	} else {
-		code += `\nexport { ${jsIdentifier(args.bundle.id)} as "${escapeForDoubleQuoteString(args.bundle.id)}" }`;
+	if (isSafeBundleId === false) {
+		code += `\nexport { ${safeBundleId} as "${escapeForDoubleQuoteString(args.bundle.id)}" }`;
 	}
 
 	return {

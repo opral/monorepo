@@ -22,7 +22,7 @@ export const locales = /** @type {const} */ (["en", "de"]);
 export const cookieName = "<cookie-name>";
 
 /**
- * @type {Array<"cookie" | "baseLocale" | "globalVariable" | "url">}
+ * @type {Array<"cookie" | "baseLocale" | "globalVariable" | "url" | "preferredLanguage">}
  */
 export const strategy = ["globalVariable"];
 
@@ -33,19 +33,12 @@ export const strategy = ["globalVariable"];
  */
 export const urlPatterns = [];
 
-/**
- * Whether the pathnames are the default pathnames.
- *
- * If the default pathnames are used, the matching is done
- * statically with no runtime matching logic which reduces
- * the bundlesize.
- *
- * @type {boolean}
- */
-export const TREE_SHAKE_IS_DEFAULT_PATHNAMES = false;
-
 export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;
 
 export const TREE_SHAKE_URL_STRATEGY_USED = false;
 
 export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;
+
+export const TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED = false;
+
+export const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = false;

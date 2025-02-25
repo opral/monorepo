@@ -1,5 +1,11 @@
 # @lix-js/sdk
 
+## 0.4.1
+
+### Patch Changes
+
+- c0b857a: expose `KeyValue` types
+
 ## 0.4.0
 
 ### Minor Changes

@@ -23,13 +23,14 @@
 		"node": ">=16.15.0"
 	},
 	"dependencies": {
-		"@opral/tsconfig": "workspace:*",
 		"@inlang/marketplace-manifest": "workspace:*",
 		"@sinclair/typebox": "^0.31.8",
 		"algoliasearch": "4.20.0",
 		"node-fetch": "3.3.2"
 	},
 	"devDependencies": {
+		"@opral/tsconfig": "workspace:*",
+		"prettier": "^3.5.1",
 		"typescript": "5.2.2"
 	},
 	"license": "Apache-2.0"

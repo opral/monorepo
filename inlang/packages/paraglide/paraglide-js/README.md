@@ -35,10 +35,10 @@ _If you are using a Bundler use one of the [Bundler Plugins](usage#usage-with-a-
 
 ## Using messages in code
 
-After running the compiler import the messages with `import * as m from "./paraglide/messages"`. By convention, a wildcard import is used.
+After running the compiler import the messages with `import { m } from "./paraglide/messages"`. By convention, a wildcard import is used.
 
 ```js
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 
 m.greeting({ name: "Samuel" }); // Hello Samuel!
 ```
@@ -49,7 +49,7 @@ To change the locale, use the `setLocale` function.
 
 ```js
 import { setLocale } from "./paraglide/runtime.js";
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 
 m.greeting({ name: "Samuel" }); // Hello Samuel!
 
