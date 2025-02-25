@@ -5,7 +5,6 @@
   "access": "restricted",
   "baseBranch": "main",
   "ignore": [
-    "vs-code-extension",
     "@inlang/cli",
     "@inlang/fink",
     "@inlang/paraglide-js",
@@ -18,7 +17,6 @@
     "@inlang/paraglide-js-example-astro",
     "@inlang/paraglide-js-example-sveltekit",
     "@inlang/plugin-icu1",
-    "@inlang/rpc",
     "@inlang/server",
     "@inlang/template-plugin",
     "@inlang/website",

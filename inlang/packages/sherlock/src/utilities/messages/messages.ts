@@ -1,4 +1,5 @@
 import * as vscode from "vscode"
+import { isEqual } from "lodash-es"
 import { state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
 import { getStringFromPattern } from "./query.js"
@@ -11,6 +12,12 @@ import {
 	type InlangProject,
 } from "@inlang/sdk"
 import { pollQuery } from "../polling/pollQuery.js"
+import { saveProject } from "../../main.js"
+import { msg } from "./msg.js"
+
+// Store previous subscription state
+let subscription: { unsubscribe: () => void } | undefined
+let previousBundles: BundleNested[] | undefined
 
 export function createMessageWebviewProvider(args: {
 	workspaceFolder: vscode.WorkspaceFolder
@@ -21,32 +28,74 @@ export function createMessageWebviewProvider(args: {
 	let subscribedToProjectPath = ""
 	let activeFileContent: string | undefined
 	let debounceTimer: NodeJS.Timeout | undefined
+	// Add a flag to track subscription status
+	let isSubscribing = false
 
 	const updateMessages = async () => {
-		console.log("updateMessages")
-
 		const project = state().project as InlangProject | undefined
 		if (!project) {
 			isLoading = true
+			bundles = undefined
 			updateWebviewContent()
 			return
 		}
 
-		// Subscribe to messages just once for a project
-		if (subscribedToProjectPath !== state().selectedProjectPath) {
-			subscribedToProjectPath = state().selectedProjectPath
-
-			updateWebviewContent() // Initial render
+		// Prevent multiple subscriptions from running simultaneously
+		if (isSubscribing) {
+			return
 		}
 
-		pollQuery(() => selectBundleNested(project.db).execute(), 2000).subscribe((newBundles) => {
-			// Only update if bundles have actually changed
-			if (JSON.stringify(bundles) !== JSON.stringify(newBundles)) {
-				bundles = newBundles
-				isLoading = false
-				updateWebviewContent() // Direct update instead of throttled
+		// Ensure we are only subscribing when the project actually changes
+		if (subscribedToProjectPath !== state().selectedProjectPath) {
+			isSubscribing = true
+
+			// Clear existing subscription safely
+			if (subscription) {
+				subscription.unsubscribe()
+				subscription = undefined
 			}
-		})
+
+			// Reset state
+			bundles = undefined
+			previousBundles = undefined
+			isLoading = true
+			updateWebviewContent()
+
+			subscribedToProjectPath = state().selectedProjectPath
+
+			subscription = pollQuery(() => selectBundleNested(project.db).execute(), 2000).subscribe(
+				(result) => {
+					if (result instanceof Error) {
+						console.error("Error in subscription:", result)
+						isSubscribing = false
+						return
+					}
+
+					const newBundles = result as BundleNested[] // Ensure the correct type
+
+					// Only update if bundles actually changed
+					if (!isEqual(previousBundles, newBundles)) {
+						previousBundles = [...newBundles]
+						bundles = newBundles
+						isLoading = false
+						throttledUpdateWebviewContent()
+					}
+					isSubscribing = false // Ensure flag resets after fetch
+				}
+			)
+		}
+	}
+
+	const persistMessages = async () => {
+		const workspaceFolder = vscode.workspace.workspaceFolders![0]
+		if (workspaceFolder) {
+			try {
+				await saveProject()
+			} catch (error) {
+				console.error("Failed to save project", error)
+				msg(`Failed to save project. ${String(error)}`, "error")
+			}
+		}
 	}
 
 	const debounceUpdate = () => {
@@ -64,8 +113,6 @@ export function createMessageWebviewProvider(args: {
 	}
 
 	const updateWebviewContent = async () => {
-		console.log("updateWebviewContent")
-
 		const activeEditor = vscode.window.activeTextEditor
 		const fileContent = activeEditor ? activeEditor.document.getText() : ""
 		const ideExtension = (await state().project.plugins.get()).find(
@@ -148,6 +195,18 @@ export function createMessageWebviewProvider(args: {
 		resolveWebviewView(view: vscode.WebviewView) {
 			webviewView = view
 
+			// Add disposal logic
+			view.onDidDispose(() => {
+				if (subscription) {
+					subscription.unsubscribe()
+					subscription = undefined
+				}
+				bundles = undefined
+				previousBundles = undefined
+				subscribedToProjectPath = ""
+				isSubscribing = false
+			})
+
 			view.webview.options = {
 				enableScripts: true,
 			}
@@ -181,18 +240,21 @@ export function createMessageWebviewProvider(args: {
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.event(() => {
 					updateMessages()
+					persistMessages()
 				})
 			)
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => {
 					updateMessages()
+					persistMessages()
 				})
 			)
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => {
 					updateMessages()
+					persistMessages()
 				})
 			)
 
@@ -316,8 +378,6 @@ export function getHtml(args: { mainContent: string; webview: vscode.Webview }):
 				let collapsibles = [];
 				let copyButtons = [];
 				const vscode = acquireVsCodeApi();
-
-				console.log('vscode', vscode);
 			
 				document.addEventListener('DOMContentLoaded', () => {
 					collapsibles = document.querySelectorAll('.collapsible');
@@ -459,7 +519,8 @@ export async function getTranslationsTableHtml(args: {
 					<span class="languageTag"><strong>${escapeHtml(locale)}</strong></span>
 					<span class="message"><button onclick="${editCommand}">${escapeHtml(missingTranslationMessage)}</button></span>
 					<span class="actionButtons">
-						<button title="Translate message with Inlang AI" onclick="${machineTranslateCommand}"><span class="codicon codicon-sparkle"></span></button>
+						<!--<button title="Translate message with Inlang AI" onclick="${machineTranslateCommand}"><span class="codicon codicon-sparkle"></span></button>-->
+						<button title="Edit" onclick="${editCommand}"><span class="codicon codicon-edit"></span></button>
 					</span>
 				</div>
 			`
