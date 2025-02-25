@@ -36,6 +36,9 @@ Paraglide JS exports bundler plugins via the `paraglide<Bundler>Plugin()` functi
 - `paraglideRollupPlugin`
 - `paraglideWebpackPlugin`
 - `paraglideVitePlugin`
+- `paraglideRspackPlugin`
+- `paraglideRolldownPlugin`
+- `paraglideEsbuildPlugin`
 - ... and more plugins supported by [unplugin](https://unplugin.unjs.io/)
 
 ### Vite example
