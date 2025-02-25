@@ -8,6 +8,11 @@ import {
 	serializeMdNode,
 } from "@udecode/plate-markdown";
 
+
+
+// NOTE - this file is closely related to the parseMdBlocks.ts file in the lix markdown plugin
+// XXX - if you change the parsing here make sure you also update the plugin
+
 const isLeafNode = (node: MdElementType | MdLeafType): node is MdLeafType => {
 	return typeof (node as MdLeafType).text === "string";
 };

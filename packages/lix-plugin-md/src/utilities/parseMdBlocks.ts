@@ -9,6 +9,8 @@ export type MdBlock = {
 	type: string;
 };
 
+// NOTE - this file is closely related to the id-enriched-serializer.ts file in the md-app
+// XXX - if you change the parsing here make sure you also update the serializer
 export function parseMdBlocks(data: Uint8Array) {
 	const markdown = new TextDecoder().decode(data);
 	const idPrefix = btoa(markdown);
