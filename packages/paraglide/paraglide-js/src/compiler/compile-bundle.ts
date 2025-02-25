@@ -88,7 +88,7 @@ ${isSafeBundleId ? "export " : ""}const ${safeBundleId} = (inputs${hasInputs ? "
 };`;
 
 	if (isSafeBundleId === false) {
-		code += `\nexport { ${safeBundleId} as ${escapeForDoubleQuoteString(args.bundle.id)} }`;
+		code += `\nexport { ${safeBundleId} as "${escapeForDoubleQuoteString(args.bundle.id)}" }`;
 	}
 
 	return {
