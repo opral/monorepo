@@ -28,11 +28,22 @@ test("it applies an insert change", async () => {
 	  const changes = await lix.db
 		.selectFrom("change")
 		.where("change.file_id", "=", file.id)
-		.where("entity_id", "=", "tasks")
+		.where("entity_id", "=", "nested.name")
 		.selectAll("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.select("snapshot.content")
+		.selectAll()
 		.execute();
 
-		console.log(changes)
+
+		expect(changes).toMatchObject([
+			{
+			entity_id: "nested.name",
+			schema_key: "lix_plugin_json_property",
+			plugin_key: "lix_plugin_json",
+			content: {
+				property: "nested.name",
+				value: "John",
+			},
+			},
+		]);
 });
