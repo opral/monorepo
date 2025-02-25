@@ -4,8 +4,6 @@ import type { HTMLAttributes } from "astro/types";
 type Props = HTMLAttributes<"a"> & { isActive: boolean };
 
 const { href, class: className, isActive, ...props } = Astro.props;
-
-const { pathname } = Astro.url;
 ---
 
 <a href={href} class:list={[className, { active: isActive }]} {...props}>
