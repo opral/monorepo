@@ -367,3 +367,62 @@ test("uses getLocale when no locale is provided", async () => {
 		runtime.localizeUrl("https://example.com/about", { locale: "en" }).href
 	).toBe("https://example.com/en/about");
 });
+
+// https://github.com/opral/inlang-paraglide-js/issues/381
+test.each([
+	// empty url pattern will set TREE_SHAKE_DEFAULT_ULR_PATTERN_USED to true
+	{},
+	// real default url pattern to align behaviour
+	{
+		urlPatterns: [
+			{
+				pattern: ":protocol://:domain(.*)::port?/:locale(de|fr)?/:path(.*)?",
+				deLocalizedNamedGroups: { locale: null },
+				localizedNamedGroups: {
+					en: { locale: null },
+					de: { locale: "de" },
+					fr: { locale: "fr" },
+				},
+			},
+		],
+	},
+])("default url pattern", async (compilerOptions) => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions,
+	});
+
+	runtime.overwriteGetLocale(() => "en");
+
+	expect(runtime.localizeUrl("https://example.com/about").href).toBe(
+		"https://example.com/about"
+	);
+
+	runtime.overwriteGetLocale(() => "de");
+
+	expect(runtime.localizeUrl("https://example.com/").href).toBe(
+		"https://example.com/de/"
+	);
+
+	expect(runtime.localizeUrl("https://example.com/about").href).toBe(
+		"https://example.com/de/about"
+	);
+
+	// Should still use explicit locale when provided
+	expect(
+		runtime.localizeUrl("https://example.com/about", { locale: "de" }).href
+	).toBe("https://example.com/de/about");
+
+	expect(
+		runtime.localizeUrl("https://example.com/about", { locale: "en" }).href
+	).toBe("https://example.com/about");
+
+	expect(runtime.deLocalizeUrl("https://example.com/de/about").href).toBe(
+		"https://example.com/about"
+	);
+
+	expect(runtime.deLocalizeUrl("https://example.com/about").href).toBe(
+		"https://example.com/about"
+	);
+});

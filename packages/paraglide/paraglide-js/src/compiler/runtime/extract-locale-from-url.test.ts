@@ -113,3 +113,22 @@ test("regex works", async () => {
 	expect(extractLocaleFromUrl(`https://example.com/de/subpage`)).toBe("de");
 	expect(extractLocaleFromUrl(`https://example.com/subpage`)).toBe("en");
 });
+
+test("default url pattern", async () => {
+	const r = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+	});
+
+	expect(r.extractLocaleFromUrl("https://example.com/")).toBe("en");
+	expect(r.extractLocaleFromUrl("https://example.com/de")).toBe("de");
+	// anyhing other than a valid locale must be the base locale
+	expect(r.extractLocaleFromUrl("https://example.com/fr")).toBe("en");
+
+	expect(r.extractLocaleFromUrl("https://example.com/optional-subpage")).toBe(
+		"en"
+	);
+	expect(
+		r.extractLocaleFromUrl("https://example.com/de/optional-subpage")
+	).toBe("de");
+});
