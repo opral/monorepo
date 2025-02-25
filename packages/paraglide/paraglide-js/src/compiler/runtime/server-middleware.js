@@ -60,7 +60,10 @@ let serverMiddlewareAsyncStorage = undefined;
  * ```
  */
 export async function serverMiddleware(request, resolve) {
-	if (!serverMiddlewareAsyncStorage) {
+	// the typeof window conditions needs to exist for non-sophisticated
+	// bundlers to detect the import statement as "should be tree-shaken"
+	// (webpack). otherwise, the bundler might throw.
+	if (typeof window === "undefined" && !serverMiddlewareAsyncStorage) {
 		const { AsyncLocalStorage } = await import("async_hooks");
 		serverMiddlewareAsyncStorage = new AsyncLocalStorage();
 	}
@@ -87,7 +90,7 @@ export async function serverMiddleware(request, resolve) {
 		? new Request(deLocalizeUrl(request.url), request)
 		: request;
 
-	return serverMiddlewareAsyncStorage.run({ locale, origin }, () =>
+	return serverMiddlewareAsyncStorage?.run({ locale, origin }, () =>
 		resolve({ locale, request: newRequest })
 	);
 }
