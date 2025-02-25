@@ -21,6 +21,21 @@ export function parseMdBlocks(data: Uint8Array) {
 
 	let nodePosition = 0;
 	visit(tree, (node) => {
+		// handle empty paragraphs:
+		if (
+			node.type === "html" &&
+			(node as any).value.startsWith("<!-- id: ") &&
+			(node as any).value.endsWith("--><br>")
+		) {
+			const match = (node as any).value.match(/id:\s*([\w-]+)/);
+			if (match) {
+				nextId = match[1];
+				blocks.push({ id: nextId!, content: "<br>", type: "paragraph" });
+				nextId = undefined;
+			}
+			return;
+		}
+
 		if (node.type === "html" && (node as any).value.startsWith("<!-- id: ")) {
 			const match = (node as any).value.match(/id:\s*([\w-]+)/);
 			if (match) nextId = match[1];

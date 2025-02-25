@@ -12,8 +12,12 @@ const isLeafNode = (node: MdElementType | MdLeafType): node is MdLeafType => {
 	return typeof (node as MdLeafType).text === "string";
 };
 
-const withIdComment = (node: MdNodeType, content: string) =>
-	node.id ? `<!-- id: ${node.id} -->${content}` : content;
+const withIdComment = (node: MdNodeType, content: string) => {
+	if (node.id && content === "\n<br>\n") {
+		return `<!-- id: ${node.id} --><br>\n`;
+	}
+	return node.id ? `<!-- id: ${node.id} -->${content}` : content;
+};
 
 /**
  * takes the default serialize implementation and adds id comments to the serialized markdown
