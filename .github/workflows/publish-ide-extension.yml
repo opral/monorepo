@@ -52,12 +52,12 @@ jobs:
 
       - name: Publish to Visual Studio Code Marketplace
         run: pnpm --filter vs-code-extension run publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
-        working-directory: ./inlang/packages/ide-extension
+        working-directory: ./inlang/packages/sherlock
         env:
           VSCE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
 
       - name: Publish to Open VSX Registry
         run: pnpm --filter vs-code-extension run publish:open-vsx
-        working-directory: ./inlang/packages/ide-extension
+        working-directory: ./inlang/packages/sherlock
         env:
           OPEN_VSX_TOKEN: ${{ secrets.OPEN_VSX_TOKEN }}
