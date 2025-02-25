@@ -106,3 +106,34 @@ test("doesn't throw for an old cookie locale", async () => {
 	const locale = runtime.getLocale();
 	expect(locale).toBe(baseLocale);
 });
+
+test("returns the preferred locale from navigator.languages", async () => {
+	const originalNavigator = globalThis.navigator;
+
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr", "de"],
+		compilerOptions: {
+			strategy: ["preferredLanguage"],
+		},
+	});
+
+	// @ts-expect-error - simulating browser based api
+	globalThis.window = {};
+
+	// Mock navigator.languages
+	Object.defineProperty(globalThis, "navigator", {
+		value: {
+			languages: ["fr-FR", "en-US", "de"],
+		},
+		configurable: true,
+	});
+
+	expect(runtime.getLocale()).toBe("fr");
+
+	// Restore original navigator
+	Object.defineProperty(globalThis, "navigator", {
+		value: originalNavigator,
+		configurable: true,
+	});
+});

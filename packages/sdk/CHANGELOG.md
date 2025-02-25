@@ -1,5 +1,20 @@
 # @inlang/sdk
 
+## 2.3.0
+
+### Minor Changes
+
+- c0b857a: stable lix ids when opening a project with `loadProjectFromDirectory()` https://github.com/opral/inlang-sdk/issues/228
+
+### Patch Changes
+
+- 91ba4eb: fix: Cannot mkdir project.inlang/cache/puligns in window OSS using git bash terminal
+
+  https://github.com/opral/inlang-paraglide-js/issues/377
+
+- Updated dependencies [c0b857a]
+  - @lix-js/sdk@0.4.1
+
 ## 2.2.2
 
 ### Patch Changes

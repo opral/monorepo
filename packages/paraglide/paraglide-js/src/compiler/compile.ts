@@ -18,6 +18,10 @@ let compilationInProgress: Promise<{
 	outputHashes: Record<string, string> | undefined;
 }> | null = null;
 
+export type CompilationResult = {
+	outputHashes: Record<string, string> | undefined;
+};
+
 /**
  * Loads, compiles, and writes the output to disk.
  *
@@ -32,9 +36,10 @@ let compilationInProgress: Promise<{
  *   })
  */
 export async function compile(
-	options: CompilerOptions,
-	previousOutputHashes?: Record<string, string>
-): Promise<{ outputHashes: Record<string, string> | undefined }> {
+	options: CompilerOptions & {
+		previousCompilation?: CompilationResult;
+	}
+): Promise<CompilationResult> {
 	const withDefaultOptions = {
 		...defaultCompilerOptions,
 		...options,
@@ -45,45 +50,53 @@ export async function compile(
 	}
 
 	compilationInProgress = (async () => {
-		const fs = withDefaultOptions.fs ?? (await import("node:fs"));
-		const absoluteOutdir = path.resolve(
-			process.cwd(),
-			withDefaultOptions.outdir
-		);
+		try {
+			const fs = withDefaultOptions.fs ?? (await import("node:fs"));
+			const absoluteOutdir = path.resolve(
+				process.cwd(),
+				withDefaultOptions.outdir
+			);
 
-		const localAccount = getLocalAccount({ fs });
+			const localAccount = getLocalAccount({ fs });
 
-		const project = await loadProjectFromDirectory({
-			path: withDefaultOptions.project,
-			fs,
-			account: localAccount,
-			appId: ENV_VARIABLES.PARJS_APP_ID,
-		});
+			const project = await loadProjectFromDirectory({
+				path: withDefaultOptions.project,
+				fs,
+				account: localAccount,
+				appId: ENV_VARIABLES.PARJS_APP_ID,
+			});
 
-		const output = await compileProject({
-			compilerOptions: withDefaultOptions,
-			project,
-		});
+			const output = await compileProject({
+				compilerOptions: withDefaultOptions,
+				project,
+			});
 
-		const outputHashes = await writeOutput({
-			directory: absoluteOutdir,
-			output,
-			fs: fs.promises,
-			previousOutputHashes,
-		});
+			const outputHashes = await writeOutput({
+				directory: absoluteOutdir,
+				output,
+				fs: fs.promises,
+				previousOutputHashes: options.previousCompilation?.outputHashes,
+			});
 
-		if (!localAccount) {
-			const activeAccount = await project.lix.db
-				.selectFrom("active_account")
-				.selectAll()
-				.executeTakeFirstOrThrow();
+			if (!localAccount) {
+				const activeAccount = await project.lix.db
+					.selectFrom("active_account")
+					.selectAll()
+					.executeTakeFirstOrThrow();
 
-			saveLocalAccount({ fs, account: activeAccount });
+				saveLocalAccount({ fs, account: activeAccount });
+			}
+
+			await project.close();
+
+			return { outputHashes };
+		} catch (e) {
+			console.error(e);
+			return { outputHashes: undefined };
+		} finally {
+			// release the lock
+			compilationInProgress = null;
 		}
-
-		await project.close();
-
-		return { outputHashes };
 	})();
 
 	const result = structuredClone(await compilationInProgress);

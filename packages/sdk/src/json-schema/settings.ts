@@ -32,7 +32,7 @@ const SDKSettings = Type.Object({
 			uniqueItems: true,
 			deprecated: true,
 			description:
-				"Use baseLocale instead if all your inlang apps that you are using are on the inlang SDK V2. Otherwise, leave this property in.",
+				"Use locales instead if all your inlang apps that you are using are on the inlang SDK V2. Otherwise, leave this property in.",
 		})
 	),
 	/**

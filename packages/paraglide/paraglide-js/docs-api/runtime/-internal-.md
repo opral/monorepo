@@ -44,7 +44,7 @@ if (locales.includes(userSelectedLocale) === false) {
 
 ## strategy
 
-> `const` **strategy**: (`"cookie"` \| `"baseLocale"` \| `"globalVariable"` \| `"url"`)[]
+> `const` **strategy**: (`"cookie"` \| `"baseLocale"` \| `"globalVariable"` \| `"url"` \| `"preferredLanguage"`)[]
 
 Defined in: [runtime/variables.js:27](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
@@ -106,13 +106,16 @@ If the input is not a locale.
 
 > **deLocalizeHref**(`href`): `string`
 
-Defined in: [runtime/localize-href.js:64](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-href.js)
+Defined in: [runtime/localize-href.js:104](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-href.js)
 
-De-localizes an href.
+High-level URL de-localization function optimized for client-side UI usage.
 
-In contrast to `deLocalizeUrl()`, this function automatically
-calls `getLocale()` to determine the base locale and
-returns a relative path if appropriate.
+This is a convenience wrapper around `deLocalizeUrl()` that provides features
+needed in the UI:
+
+- Accepts relative paths (e.g., "/de/about")
+- Returns relative paths when possible
+- Handles string input/output instead of URL objects
 
 ### Parameters
 
@@ -120,22 +123,43 @@ returns a relative path if appropriate.
 
 `string`
 
+The href to de-localize (can be relative or absolute)
+
 ### Returns
 
 `string`
 
-- The de-localized href.
+The de-localized href, relative if input was relative
 
 ### Example
 
-```ts
-deLocalizeHref("/de/about")
-  // => "/about"
+```typescript
+// In a React/Vue/Svelte component
+const LocaleSwitcher = ({ href }) => {
+  // Remove locale prefix before switching
+  const baseHref = deLocalizeHref(href);
+  return locales.map(locale =>
+    <a href={localizeHref(baseHref, { locale })}>
+      Switch to {locale}
+    </a>
+  );
+};
 
-  // requires full URL and locale
-  deLocalizeUrl("http://example.com/de/about")
-  // => "http://example.com/about"
+// Examples:
+deLocalizeHref("/de/about")  // => "/about"
+deLocalizeHref("/fr/store")  // => "/store"
+
+// Cross-origin links remain absolute
+deLocalizeHref("https://example.com/de/about")
+// => "https://example.com/about"
 ```
+
+For server-side URL de-localization (e.g., in middleware), use `deLocalizeUrl()`
+which provides more precise control over URL handling.
+
+### See
+
+deLocalizeUrl - For low-level URL de-localization in server contexts
 
 ***
 
@@ -143,17 +167,54 @@ deLocalizeHref("/de/about")
 
 > **deLocalizeUrl**(`url`): `URL`
 
-Defined in: [runtime/localize-url.js:42](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
+Defined in: [runtime/localize-url.js:163](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
+
+Low-level URL de-localization function, primarily used in server contexts.
+
+This function is designed for server-side usage where you need precise control
+over URL de-localization, such as in middleware or request handlers. It works with
+URL objects and always returns absolute URLs.
+
+For client-side UI components, use `deLocalizeHref()` instead, which provides
+a more convenient API with relative paths.
 
 ### Parameters
 
 #### url
+
+The URL to de-localize. If string, must be absolute.
 
 `string` | `URL`
 
 ### Returns
 
 `URL`
+
+The de-localized URL, always absolute
+
+### Examples
+
+```typescript
+// Server middleware example
+app.use((req, res, next) => {
+  const url = new URL(req.url, `${req.protocol}://${req.headers.host}`);
+  const baseUrl = deLocalizeUrl(url);
+
+  // Store the base URL for later use
+  req.baseUrl = baseUrl;
+  next();
+});
+```
+
+```typescript
+// Using with URL patterns
+const url = new URL("https://example.com/de/about");
+deLocalizeUrl(url); // => URL("https://example.com/about")
+
+// Using with domain-based localization
+const url = new URL("https://de.example.com/store");
+deLocalizeUrl(url); // => URL("https://example.com/store")
+```
 
 ***
 
@@ -178,7 +239,7 @@ The `document` object is not available in server-side rendering, so this functio
 
 > **extractLocaleFromRequest**(`request`): `any`
 
-Defined in: [runtime/extract-locale-from-request.js:24](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
+Defined in: [runtime/extract-locale-from-request.js:27](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
 
 Extracts a locale from a request.
 
@@ -210,7 +271,7 @@ const locale = extractLocaleFromRequest(request);
 
 > **extractLocaleFromUrl**(`url`): `any`
 
-Defined in: [runtime/extract-locale-from-url.js:11](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-url.js)
+Defined in: [runtime/extract-locale-from-url.js:16](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-url.js)
 
 Extracts the locale from a given URL using native URLPattern.
 
@@ -218,9 +279,9 @@ Extracts the locale from a given URL using native URLPattern.
 
 #### url
 
-`string`
-
 The full URL from which to extract the locale.
+
+`string` | `URL`
 
 ### Returns
 
@@ -234,7 +295,7 @@ The extracted locale, or undefined if no locale is found.
 
 > **getLocale**(): `any`
 
-Defined in: [runtime/get-locale.js:35](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:37](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Get the current locale.
 
@@ -306,13 +367,17 @@ if (isLocale(params.locale)) {
 
 > **localizeHref**(`href`, `options`?): `string`
 
-Defined in: [runtime/localize-href.js:24](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-href.js)
+Defined in: [runtime/localize-href.js:43](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-href.js)
 
-Localizes an href.
+High-level URL localization function optimized for client-side UI usage.
 
-In contrast to `localizeUrl()`, this function automatically
-calls `getLocale()` to determine the target locale and
-returns a relative path if appropriate.
+This is a convenience wrapper around `localizeUrl()` that provides features
+needed in UI:
+
+- Accepts relative paths (e.g., "/about")
+- Returns relative paths when possible
+- Automatically detects current locale if not specified
+- Handles string input/output instead of URL objects
 
 ### Parameters
 
@@ -320,64 +385,114 @@ returns a relative path if appropriate.
 
 `string`
 
+The href to localize (can be relative or absolute)
+
 #### options?
 
-Options
+Options for localization
 
 ##### locale?
 
 `string`
 
-The target locale.
+Target locale. If not provided, uses `getLocale()`
 
 ### Returns
 
 `string`
 
+The localized href, relative if input was relative
+
 ### Example
 
-```ts
-localizeHref("/about")
-  // => "/de/about"
+```typescript
+// In a React/Vue/Svelte component
+const NavLink = ({ href }) => {
+  // Automatically uses current locale, keeps path relative
+  return <a href={localizeHref(href)}>...</a>;
+};
 
-  // requires full URL and locale
-  localizeUrl("http://example.com/about", { locale: "de" })
-  // => "http://example.com/de/about"
+// Examples:
+localizeHref("/about")
+// => "/de/about" (if current locale is "de")
+localizeHref("/store", { locale: "fr" })
+// => "/fr/store" (explicit locale)
+
+// Cross-origin links remain absolute
+localizeHref("https://other-site.com/about")
+// => "https://other-site.com/de/about"
 ```
+
+For server-side URL localization (e.g., in middleware), use `localizeUrl()`
+which provides more precise control over URL handling.
 
 ***
 
 ## localizeUrl()
 
-> **localizeUrl**(`url`, `options`): `URL`
+> **localizeUrl**(`url`, `options`?): `URL`
 
-Defined in: [runtime/localize-url.js:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
+Defined in: [runtime/localize-url.js:53](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
 
-Localizes a URL to a specific locale using the new namedGroups API.
+Lower-level URL localization function, primarily used in server contexts.
+
+This function is designed for server-side usage where you need precise control
+over URL localization, such as in middleware or request handlers. It works with
+URL objects and always returns absolute URLs.
+
+For client-side UI components, use `localizeHref()` instead, which provides
+a more convenient API with relative paths and automatic locale detection.
 
 ### Parameters
 
 #### url
 
-The URL to localize.
+The URL to localize. If string, must be absolute.
 
 `string` | `URL`
 
-#### options
+#### options?
 
-Options containing the target locale.
+Options for localization
 
-##### locale
+##### locale?
 
 `string`
 
-The target locale.
+Target locale. If not provided, uses getLocale()
 
 ### Returns
 
 `URL`
 
-- The localized URL.
+The localized URL, always absolute
+
+### Examples
+
+```typescript
+// Server middleware example
+app.use((req, res, next) => {
+  const url = new URL(req.url, `${req.protocol}://${req.headers.host}`);
+  const localized = localizeUrl(url, { locale: "de" });
+
+  if (localized.href !== url.href) {
+    return res.redirect(localized.href);
+  }
+  next();
+});
+```
+
+```typescript
+// Using with URL patterns
+const url = new URL("https://example.com/about");
+localizeUrl(url, { locale: "de" });
+// => URL("https://example.com/de/about")
+
+// Using with domain-based localization
+const url = new URL("https://example.com/store");
+localizeUrl(url, { locale: "de" });
+// => URL("https://de.example.com/store")
+```
 
 ***
 
@@ -385,7 +500,7 @@ The target locale.
 
 > **overwriteGetLocale**(`fn`): `void`
 
-Defined in: [runtime/get-locale.js:83](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:126](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Overwrite the `getLocale()` function.
 
@@ -418,7 +533,7 @@ overwriteGetLocale(() => {
 
 > **overwriteGetUrlOrigin**(`fn`): `void`
 
-Defined in: [runtime/get-url-origin.js:24](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-url-origin.js)
+Defined in: [runtime/get-url-origin.js:29](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-url-origin.js)
 
 Overwrite the getUrlOrigin function.
 
@@ -441,7 +556,7 @@ define how the URL origin is resolved.
 
 > **overwriteSetLocale**(`fn`): `void`
 
-Defined in: [runtime/set-locale.js:83](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:85](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Overwrite the `setLocale()` function.
 
@@ -465,6 +580,77 @@ overwriteSetLocale((newLocale) => {
     // set the locale in a cookie
     return Cookies.set('locale', newLocale)
   });
+```
+
+***
+
+## serverMiddleware()
+
+> **serverMiddleware**\<`T`\>(`request`, `resolve`): `Promise`\<`any`\>
+
+Defined in: [runtime/server-middleware.js:62](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/server-middleware.js)
+
+Server middleware that handles locale-based routing and request processing.
+
+This middleware performs several key functions:
+
+1. Determines the locale for the incoming request using configured strategies
+2. Handles URL localization and redirects
+3. Maintains locale state using AsyncLocalStorage to prevent request interference
+
+When URL strategy is used:
+
+- If URL doesn't match the determined locale, redirects to localized URL
+- De-localizes URLs before passing to server (e.g., `/fr/about` → `/about`)
+
+### Type Parameters
+
+• **T**
+
+The return type of the resolve function
+
+### Parameters
+
+#### request
+
+`Request`
+
+The incoming request object
+
+#### resolve
+
+(`args`) => `T` \| `Promise`\<`T`\>
+
+Function to handle the request
+
+### Returns
+
+`Promise`\<`any`\>
+
+Returns either:
+- A `Response` object (302 redirect) if URL localization is needed
+- The result of the resolve function if no redirect is required
+
+### Examples
+
+```typescript
+// Basic usage in metaframeworks like NextJS, SvelteKit, Astro, Nuxt, etc.
+export const handle = async ({ event, resolve }) => {
+  return serverMiddleware(event.request, ({ request, locale }) => {
+    // let the framework further resolve the request
+    return resolve(request);
+  });
+};
+```
+
+```typescript
+// Usage in a framework like Express JS or Hono
+app.use(async (req, res, next) => {
+  const result = await serverMiddleware(req, ({ request, locale }) => {
+    // If a redirect happens this won't be called
+    return next(request);
+  });
+});
 ```
 
 ***

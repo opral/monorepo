@@ -6,6 +6,7 @@ test("handles translated path segments", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				{
 					pattern: "https://:domain(.*)/:bookstore/:path*",
@@ -54,6 +55,7 @@ test("cross domain urls", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				{
 					pattern: "https://localhost::port/:locale(de|en)?/:path(.*)?",
@@ -122,6 +124,7 @@ test("pathname based localization", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				{
 					pattern: "https://:domain(.*)/:locale(de)?/:path*",
@@ -161,6 +164,7 @@ test("multi tenancy", async () => {
 		baseLocale: "en",
 		locales: ["en", "de", "fr"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				// 1) customer1.fr => root locale is fr, sub-locale is /en/
 				{
@@ -228,6 +232,7 @@ test("providing a URL object as input", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				{
 					pattern: "https://:domain(.*)/:path*",
@@ -255,6 +260,7 @@ test("localhost with portname", async () => {
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
+			strategy: ["url"],
 			urlPatterns: [
 				{
 					pattern: ":protocol://:domain(.*)::port?/:locale(de)?/:path(.*)?",
@@ -294,5 +300,129 @@ test("localhost with portname", async () => {
 
 	expect(runtime.deLocalizeUrl(new URL("https://localhost:5173/de")).href).toBe(
 		"https://localhost:5173/"
+	);
+});
+
+test("it keeps the query parameters", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "https://:domain(.*)/:locale(de)?/:path*",
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
+						en: { locale: null },
+						de: { locale: "de" },
+					},
+				},
+			],
+		},
+	});
+
+	expect(
+		runtime.localizeUrl("https://example.com/about?foo=bar&baz=qux", {
+			locale: "de",
+		}).href
+	).toBe("https://example.com/de/about?foo=bar&baz=qux");
+
+	expect(
+		runtime.deLocalizeUrl("https://example.com/de/about?foo=bar&baz=qux").href
+	).toBe("https://example.com/about?foo=bar&baz=qux");
+});
+
+test("uses getLocale when no locale is provided", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "https://:domain(.*)/:locale(de|en)?/:path(.*)?",
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
+						en: { locale: "en" },
+						de: { locale: "de" },
+					},
+				},
+			],
+		},
+	});
+
+	// Override getLocale to return German
+	runtime.overwriteGetLocale(() => "de");
+
+	expect(runtime.getLocale()).toBe("de");
+
+	// Should use "de" from getLocale since no locale provided
+	expect(runtime.localizeUrl("https://example.com/about").href).toBe(
+		"https://example.com/de/about"
+	);
+
+	// Should still use explicit locale when provided
+	expect(
+		runtime.localizeUrl("https://example.com/about", { locale: "en" }).href
+	).toBe("https://example.com/en/about");
+});
+
+// https://github.com/opral/inlang-paraglide-js/issues/381
+test.each([
+	// empty url pattern will set TREE_SHAKE_DEFAULT_ULR_PATTERN_USED to true
+	{},
+	// real default url pattern to align behaviour
+	{
+		urlPatterns: [
+			{
+				pattern: ":protocol://:domain(.*)::port?/:locale(de|fr)?/:path(.*)?",
+				deLocalizedNamedGroups: { locale: null },
+				localizedNamedGroups: {
+					en: { locale: null },
+					de: { locale: "de" },
+					fr: { locale: "fr" },
+				},
+			},
+		],
+	},
+])("default url pattern", async (compilerOptions) => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions,
+	});
+
+	runtime.overwriteGetLocale(() => "en");
+
+	expect(runtime.localizeUrl("https://example.com/about").href).toBe(
+		"https://example.com/about"
+	);
+
+	runtime.overwriteGetLocale(() => "de");
+
+	expect(runtime.localizeUrl("https://example.com/").href).toBe(
+		"https://example.com/de/"
+	);
+
+	expect(runtime.localizeUrl("https://example.com/about").href).toBe(
+		"https://example.com/de/about"
+	);
+
+	// Should still use explicit locale when provided
+	expect(
+		runtime.localizeUrl("https://example.com/about", { locale: "de" }).href
+	).toBe("https://example.com/de/about");
+
+	expect(
+		runtime.localizeUrl("https://example.com/about", { locale: "en" }).href
+	).toBe("https://example.com/about");
+
+	expect(runtime.deLocalizeUrl("https://example.com/de/about").href).toBe(
+		"https://example.com/about"
+	);
+
+	expect(runtime.deLocalizeUrl("https://example.com/about").href).toBe(
+		"https://example.com/about"
 	);
 });
