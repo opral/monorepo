@@ -112,3 +112,47 @@ Some text.`);
 		},
 	]);
 });
+
+
+test("it should detect an empty block", async () => {
+	const lix = await openLixInMemory({});
+	const before = encode(`<!-- id: abc123 -->
+# Heading
+
+<!-- id: def456 -->
+Some text.`);
+	const after = encode(`<!-- id: abc123 -->
+# Heading
+
+<!-- id: def456 -->
+Some text.
+<!-- id: bcd --><br>
+<!-- id: cde -->
+test
+`);
+
+	const detectedChanges = await detectChanges({
+		lix,
+		before: { id: "random", path: "x.md", data: before, metadata: {} },
+		after: { id: "random", path: "x.md", data: after, metadata: {} },
+	});
+
+	expect(detectedChanges).toMatchObject([
+		{
+			schema: MarkdownBlockSchemaV1,
+			entity_id: "bcd",
+			snapshot: {
+				text: "<br>",
+				type: "paragraph",
+			},
+		},
+		{
+			schema: MarkdownBlockSchemaV1,
+			entity_id: "cde",
+			snapshot: {
+				text: "test",
+				type: "paragraph",
+			},
+		},
+	]);
+});
