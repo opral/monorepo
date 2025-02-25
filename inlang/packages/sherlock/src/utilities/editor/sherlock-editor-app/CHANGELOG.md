@@ -1,4 +1,11 @@
-# editor-app
+# sherlock-editor-app
+
+## 0.0.6
+
+### Patch Changes
+
+- Updated dependencies [f01927c]
+  - @inlang/editor-component@4.0.0
 
 ## 0.0.5
 
