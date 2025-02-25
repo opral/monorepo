@@ -1,11 +1,13 @@
 {
-	"jojo_mountain_day": {
-		"match": {
-			"platform=android, userGender=male": "{username} muss die App auf seinem Telefon aus dem Google Play Store herunterladen.",
-			"platform=android, userGender=female": "{username} muss die App auf ihrem Telefon aus dem Google Play Store herunterladen.",
-			"platform=ios, userGender=female": "{username} muss die App auf ihrem iPhone aus dem App Store herunterladen.",
-			"platform=ios, userGender=male": "{username} muss die App auf seinem iPhone aus dem App Store herunterladen.",
-			"platform=*, userGender=*": "Die Person muss die App herunterladen."
+	"jojo_mountain_day": [
+		{
+			"match": {
+				"platform=android, userGender=male": "{username} muss die App auf seinem Telefon aus dem Google Play Store herunterladen.",
+				"platform=android, userGender=female": "{username} muss die App auf ihrem Telefon aus dem Google Play Store herunterladen.",
+				"platform=ios, userGender=female": "{username} muss die App auf ihrem iPhone aus dem App Store herunterladen.",
+				"platform=ios, userGender=male": "{username} muss die App auf seinem iPhone aus dem App Store herunterladen.",
+				"platform=*, userGender=*": "Die Person muss die App herunterladen."
+			}
 		}
-	}
+	]
 }
