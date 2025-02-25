@@ -1,9 +1,9 @@
 import type { ProjectSettings } from "@inlang/sdk";
 import type { CompiledBundleWithMessages } from "../compile-bundle.js";
-import { jsIdentifier } from "../../services/codegen/identifier.js";
 import { createRuntimeFile } from "../runtime/create-runtime.js";
 import { createRegistry } from "../registry.js";
 import type { CompilerOptions } from "../compiler-options.js";
+import { toSafeModuleId } from "../safe-module-id.js";
 
 export function generateLocaleModules(
 	compiledBundles: CompiledBundleWithMessages[],
@@ -18,7 +18,8 @@ export function generateLocaleModules(
 		`import { getLocale } from "../runtime.js"`,
 		settings.locales
 			.map(
-				(locale) => `import * as ${jsIdentifier(locale)} from "./${locale}.js"`
+				(locale) =>
+					`import * as ${toSafeModuleId(locale)} from "./${locale}.js"`
 			)
 			.join("\n"),
 		compiledBundles.map(({ bundle }) => bundle.code).join("\n"),
@@ -46,15 +47,16 @@ export function generateLocaleModules(
 
 		for (const compiledBundle of compiledBundles) {
 			const compiledMessage = compiledBundle.messages[locale];
-			const id = jsIdentifier(compiledBundle.bundle.node.id);
+			const bundleModuleId = toSafeModuleId(compiledBundle.bundle.node.id);
+			const bundleId = compiledBundle.bundle.node.id;
 			if (!compiledMessage) {
 				const fallbackLocale = fallbackMap[locale];
 				if (fallbackLocale) {
 					// use the fall back locale e.g. render the message in English if the German message is missing
-					file += `\nexport { ${id} } from "./${fallbackLocale}.js"`;
+					file += `\nexport { ${bundleModuleId} } from "./${fallbackLocale}.js"`;
 				} else {
 					// no fallback exists, render the bundleId
-					file += `\n/** @type {(inputs?: Record<string, never>) => string} */\nexport const ${id} = () => '${id}'`;
+					file += `\n/** @type {(inputs?: Record<string, never>) => string} */\nexport const ${bundleModuleId} = () => '${bundleId}'`;
 				}
 				continue;
 			}
