@@ -1,6 +1,12 @@
+import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
 import { getLocale } from "./get-locale.js";
 import { getUrlOrigin } from "./get-url-origin.js";
-import { urlPatterns } from "./variables.js";
+import { isLocale } from "./is-locale.js";
+import {
+	baseLocale,
+	TREE_SHAKE_DEFAULT_URL_PATTERN_USED,
+	urlPatterns,
+} from "./variables.js";
 
 /**
  * Lower-level URL localization function, primarily used in server contexts.
@@ -45,6 +51,10 @@ import { urlPatterns } from "./variables.js";
  * @returns {URL} The localized URL, always absolute
  */
 export function localizeUrl(url, options) {
+	if (TREE_SHAKE_DEFAULT_URL_PATTERN_USED) {
+		return localizeUrlDefaultPattern(url, options);
+	}
+
 	const locale = options?.locale ?? getLocale();
 	const urlObj = typeof url === "string" ? new URL(url) : url;
 
@@ -74,6 +84,43 @@ export function localizeUrl(url, options) {
 	}
 
 	throw new Error(`No match found for ${url}`);
+}
+
+/**
+ * https://github.com/opral/inlang-paraglide-js/issues/381
+ *
+ * @param {string | URL} url
+ * @param {Object} [options]
+ * @param {string} [options.locale]
+ * @returns {URL}
+ */
+function localizeUrlDefaultPattern(url, options) {
+	const urlObj =
+		typeof url === "string" ? new URL(url, getUrlOrigin()) : new URL(url);
+	const locale = options?.locale ?? getLocale();
+	const currentLocale = extractLocaleFromUrl(urlObj);
+
+	// If current locale matches target locale, no change needed
+	if (currentLocale === locale) {
+		return urlObj;
+	}
+
+	const pathSegments = urlObj.pathname.split("/").filter(Boolean);
+
+	// If current path starts with a locale, remove it
+	if (pathSegments.length > 0 && isLocale(pathSegments[0])) {
+		pathSegments.shift();
+	}
+
+	// For base locale, don't add prefix
+	if (locale === baseLocale) {
+		urlObj.pathname = "/" + pathSegments.join("/");
+	} else {
+		// For other locales, add prefix
+		urlObj.pathname = "/" + locale + "/" + pathSegments.join("/");
+	}
+
+	return urlObj;
 }
 
 /**
@@ -114,6 +161,10 @@ export function localizeUrl(url, options) {
  * @returns {URL} The de-localized URL, always absolute
  */
 export function deLocalizeUrl(url) {
+	if (TREE_SHAKE_DEFAULT_URL_PATTERN_USED) {
+		return deLocalizeUrlDefaultPattern(url);
+	}
+
 	const urlObj = new URL(url, getUrlOrigin());
 	const search = urlObj.search;
 
@@ -141,6 +192,24 @@ export function deLocalizeUrl(url) {
 	}
 
 	throw new Error(`No match found for ${url}`);
+}
+
+/**
+ * De-localizes a URL using the default pattern (/:locale/*)
+ * @param {string|URL} url
+ * @returns {URL}
+ */
+function deLocalizeUrlDefaultPattern(url) {
+	const urlObj =
+		typeof url === "string" ? new URL(url, getUrlOrigin()) : new URL(url);
+	const pathSegments = urlObj.pathname.split("/").filter(Boolean);
+
+	// If first segment is a locale, remove it
+	if (pathSegments.length > 0 && isLocale(pathSegments[0])) {
+		urlObj.pathname = "/" + pathSegments.slice(1).join("/");
+	}
+
+	return urlObj;
 }
 
 /**
@@ -206,7 +275,7 @@ function fillPattern(pattern, values, search) {
  * Aggregates named groups from various parts of the URLPattern match result.
  *
  *
- * @type {(match: URLPatternResult) => Record<string, string | null | undefined>}
+ * @type {(match: any) => Record<string, string | null | undefined>}
  */
 export function aggregateGroups(match) {
 	return {
