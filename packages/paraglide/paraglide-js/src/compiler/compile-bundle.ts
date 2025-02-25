@@ -76,7 +76,7 @@ const compileBundleFunction = (args: {
 * ${jsDocBundleFunctionTypes({ inputs, locales: args.availableLocales })}
 */
 /* @__NO_SIDE_EFFECTS__ */
-${isSafeBundleId ? "export" : ""} const ${safeBundleId} = (inputs${hasInputs ? "" : "= {}"}, options = {}) => {
+${isSafeBundleId ? "export " : ""}const ${safeBundleId} = (inputs${hasInputs ? "" : " = {}"}, options = {}) => {
 	const locale = options.locale ?? getLocale()
 	${args.availableLocales
 		.map(
