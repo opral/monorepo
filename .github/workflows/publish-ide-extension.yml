@@ -36,7 +36,7 @@ jobs:
         uses: dopplerhq/cli-action@v2
 
       - name: Build
-        run: doppler run -- pnpm build
+        run: doppler run -- pnpm --filter vs-code-extension... build
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
