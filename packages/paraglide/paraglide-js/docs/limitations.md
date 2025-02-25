@@ -21,7 +21,3 @@ The workaround is to write HTML directly in the message and render the message a
 ```html
 <div innerHTML={m.my_cool_message({name: "John"})}></div>
 ```
-
-## Messages with `.` in the key can't be compiled yet 
-
-TypeScript recently shipped arbitrary module exports which will make this possible in the future. Follow issue [#285](https://github.com/opral/inlang-paraglide-js/issues/285). 
