@@ -70,7 +70,10 @@ export async function saveProjectToDirectory(args: {
 			for (const file of files) {
 				const pathPattern = settings[plugin.key]?.pathPattern;
 				const p = pathPattern
-					? pathPattern.replace(/\{(languageTag|locale)\}/g, file.locale)
+					? absolutePathFromProject(
+							args.path,
+							pathPattern.replace(/\{(languageTag|locale)\}/g, file.locale)
+						)
 					: absolutePathFromProject(args.path, file.name);
 				const dirname = path.dirname(p);
 				if ((await args.fs.stat(dirname)).isDirectory() === false) {
