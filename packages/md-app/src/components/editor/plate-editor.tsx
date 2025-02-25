@@ -117,7 +117,7 @@ export function PlateEditor() {
 				<EditorContainer>
 					<Editor />
 				</EditorContainer>
-				<SettingsDialog />
+				{/* <SettingsDialog /> */}
 			</Plate>
 		</DndProvider>
 	);

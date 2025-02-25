@@ -12,7 +12,9 @@ export const copilotPlugins = [
   CopilotPlugin.configure(({ api }) => ({
     options: {
       completeOptions: {
-        api: '/api/ai/copilot',
+        api: import.meta.env.PROD
+          ? "https://lix.opral.com/api/ai/copilot"
+          : "http://localhost:3005/api/ai/copilot",
         body: {
           system: `You are an advanced AI writing assistant, similar to VSCode Copilot but for general text. Your task is to predict and generate the next part of the text based on the given context.
   
