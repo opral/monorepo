@@ -45,6 +45,7 @@ export default {
 +			paraglideWebpackPlugin({
 +				outdir: "./src/paraglide",
 +				project: "./project.inlang",
++       strategy: ["url"],
 +				urlPatterns: [
 +					{
 +						pattern:
