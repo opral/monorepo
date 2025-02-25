@@ -222,7 +222,7 @@
 		"build": "pnpm run editor:build && node ./build.js",
 		"dev": "DEV=true node ./build.js",
 		"package": "pnpm vsce package --no-dependencies",
-		"publish": "pnpm vsce publish --no-dependencies",
+		"publish": "pnpm vsce publish --no-dependencies -p $VSCE_TOKEN",
 		"publish:open-vsx": "node publish-openvsx.js",
 		"vscode:prepublish": "npm run build",
 		"---- EDITOR ----------------------------------------------------------": "",
