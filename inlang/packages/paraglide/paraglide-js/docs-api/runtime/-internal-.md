@@ -586,9 +586,9 @@ overwriteSetLocale((newLocale) => {
 
 ## serverMiddleware()
 
-> **serverMiddleware**\<`T`\>(`request`, `resolve`): `Promise`\<`any`\>
+> **serverMiddleware**\<`T`\>(`request`, `resolve`, `options`?): `Promise`\<`any`\>
 
-Defined in: [runtime/server-middleware.js:62](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/server-middleware.js)
+Defined in: [runtime/server-middleware.js:85](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/server-middleware.js)
 
 Server middleware that handles locale-based routing and request processing.
 
@@ -623,6 +623,20 @@ The incoming request object
 
 Function to handle the request
 
+#### options?
+
+Optional configuration for the middleware
+
+##### disableAsyncLocalStorage?
+
+`boolean`
+
+If true, disables AsyncLocalStorage usage.
+                                                          ⚠️ WARNING: This should ONLY be used in serverless environments
+                                                          like Cloudflare Workers. Disabling AsyncLocalStorage in traditional
+                                                          server environments risks cross-request pollution where state from
+                                                          one request could leak into another concurrent request.
+
 ### Returns
 
 `Promise`\<`any`\>
@@ -651,6 +665,22 @@ app.use(async (req, res, next) => {
     return next(request);
   });
 });
+```
+
+```typescript
+// Usage in serverless environments like Cloudflare Workers
+// ⚠️ WARNING: This should ONLY be used in serverless environments like Cloudflare Workers.
+// Disabling AsyncLocalStorage in traditional server environments risks cross-request pollution where state from
+// one request could leak into another concurrent request.
+export default {
+  fetch: async (request) => {
+    return serverMiddleware(
+      request,
+      ({ request, locale }) => handleRequest(request, locale),
+      { disableAsyncLocalStorage: true }
+    );
+  }
+};
 ```
 
 ***

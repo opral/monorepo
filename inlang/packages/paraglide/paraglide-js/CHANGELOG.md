@@ -1,5 +1,10 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.22
+
+- fix `serverMiddleware()` only imports async_hooks on the server
+- add `serverMiddleware(req, resolve, { disableAsyncLocalStorage: true })` to disable async local storage
+
 ## 2.0.0-beta.21
 
 - compile arbitrary message keys https://github.com/opral/inlang-paraglide-js/issues/201#issuecomment-2680006131
