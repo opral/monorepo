@@ -182,14 +182,11 @@ async function setProjects(args: { workspaceFolder: vscode.WorkspaceFolder }) {
 	}
 }
 
-export async function saveProject(args: {
-	workspaceFolder: vscode.WorkspaceFolder
-	fs: FileSystem
-}) {
+export async function saveProject() {
 	try {
 		if (state().selectedProjectPath && state().project) {
 			await saveProjectToDirectory({
-				fs: args.fs,
+				fs: createFileSystemMapper(state().selectedProjectPath, fs),
 				project: state().project,
 				path: state().selectedProjectPath,
 			})

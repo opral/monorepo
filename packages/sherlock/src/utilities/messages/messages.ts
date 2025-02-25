@@ -12,6 +12,8 @@ import {
 	type InlangProject,
 } from "@inlang/sdk"
 import { pollQuery } from "../polling/pollQuery.js"
+import { saveProject } from "../../main.js"
+import { msg } from "./msg.js"
 
 // Store previous subscription state
 let subscription: { unsubscribe: () => void } | undefined
@@ -81,6 +83,18 @@ export function createMessageWebviewProvider(args: {
 					isSubscribing = false // Ensure flag resets after fetch
 				}
 			)
+		}
+	}
+
+	const persistMessages = async () => {
+		const workspaceFolder = vscode.workspace.workspaceFolders![0]
+		if (workspaceFolder) {
+			try {
+				await saveProject()
+			} catch (error) {
+				console.error("Failed to save project", error)
+				msg(`Failed to save project. ${String(error)}`, "error")
+			}
 		}
 	}
 
@@ -226,18 +240,21 @@ export function createMessageWebviewProvider(args: {
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.event(() => {
 					updateMessages()
+					persistMessages()
 				})
 			)
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => {
 					updateMessages()
+					persistMessages()
 				})
 			)
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => {
 					updateMessages()
+					persistMessages()
 				})
 			)
 
@@ -502,7 +519,8 @@ export async function getTranslationsTableHtml(args: {
 					<span class="languageTag"><strong>${escapeHtml(locale)}</strong></span>
 					<span class="message"><button onclick="${editCommand}">${escapeHtml(missingTranslationMessage)}</button></span>
 					<span class="actionButtons">
-						<button title="Translate message with Inlang AI" onclick="${machineTranslateCommand}"><span class="codicon codicon-sparkle"></span></button>
+						<!--<button title="Translate message with Inlang AI" onclick="${machineTranslateCommand}"><span class="codicon codicon-sparkle"></span></button>-->
+						<button title="Edit" onclick="${editCommand}"><span class="codicon codicon-edit"></span></button>
 					</span>
 				</div>
 			`
