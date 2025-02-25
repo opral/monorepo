@@ -1,6 +1,9 @@
 import fs from "node:fs";
-import { defaultCompilerOptions, type CompilerOptions } from "../compile.js";
 import type { Runtime } from "./type.js";
+import {
+	defaultCompilerOptions,
+	type CompilerOptions,
+} from "../compiler-options.js";
 
 /**
  * Returns the code for the `runtime.js` module
@@ -11,21 +14,29 @@ export function createRuntimeFile(args: {
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
-		pathnameBase?: CompilerOptions["pathnameBase"];
 		urlPatterns?: CompilerOptions["urlPatterns"];
 	};
 }): string {
-	const defaultUrlPattern = {
-		pattern: `:protocol://:domain(.*)::port?/:locale(${args.locales.filter((l) => l !== args.baseLocale).join("|")})?/:path(.*)?`,
-		deLocalizedNamedGroups: { locale: null },
-		localizedNamedGroups: {
-			...Object.fromEntries(args.locales.map((locale) => [locale, { locale }])),
-			en: { locale: null },
-		},
-	};
+	const urlPatterns = args.compilerOptions.urlPatterns ?? [];
 
+	let defaultUrlPatternUsed = false;
+
+	// add default urlPatterns for a good out of the box experience
+	if (args.compilerOptions.urlPatterns === undefined) {
+		defaultUrlPatternUsed = true;
+		urlPatterns.push({
+			pattern: `:protocol://:domain(.*)::port?/:locale(${args.locales.filter((l) => l !== args.baseLocale).join("|")})?/:path(.*)?`,
+			deLocalizedNamedGroups: { locale: null },
+			localizedNamedGroups: {
+				...Object.fromEntries(
+					args.locales.map((locale) => [locale, { locale }])
+				),
+				en: { locale: null },
+			},
+		});
+	}
 	const code = `
-import "@inlang/paraglide-js/urlpattern-polyfill";
+${defaultUrlPatternUsed ? "/** @type {any} */\nconst URLPattern = {}" : `import "@inlang/paraglide-js/urlpattern-polyfill";`}
 
 ${injectCode("./variables.js")
 	.replace(
@@ -38,7 +49,7 @@ ${injectCode("./variables.js")
 	)
 	.replace(
 		`export const strategy = ["globalVariable"];`,
-		`export const strategy = ["${args.compilerOptions.strategy.join('", "')}"]`
+		`export const strategy = ${JSON.stringify(args.compilerOptions.strategy, null, 2)};`
 	)
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
 	.replace(
@@ -54,8 +65,16 @@ ${injectCode("./variables.js")
 		`const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("globalVariable")};`
 	)
 	.replace(
+		`export const TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("preferredLanguage")};`
+	)
+	.replace(
 		`export const urlPatterns = [];`,
-		`export const urlPatterns = ${JSON.stringify(args.compilerOptions?.urlPatterns ?? [defaultUrlPattern], null, 2)};`
+		`export const urlPatterns = ${JSON.stringify(urlPatterns, null, 2)};`
+	)
+	.replace(
+		`export const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = false;`,
+		`const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = ${defaultUrlPatternUsed};`
 	)}
 
 ${injectCode("./get-locale.js")} 
@@ -77,6 +96,8 @@ ${injectCode("./extract-locale-from-url.js")}
 ${injectCode("./localize-url.js")}
 
 ${injectCode("./localize-href.js")}
+
+${injectCode("./server-middleware.js")}
 
 // ------ TYPES ------
 

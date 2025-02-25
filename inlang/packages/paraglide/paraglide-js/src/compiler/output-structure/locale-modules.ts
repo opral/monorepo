@@ -1,9 +1,9 @@
 import type { ProjectSettings } from "@inlang/sdk";
 import type { CompiledBundleWithMessages } from "../compile-bundle.js";
-import { jsIdentifier } from "../../services/codegen/identifier.js";
 import { createRuntimeFile } from "../runtime/create-runtime.js";
 import { createRegistry } from "../registry.js";
-import { type CompilerOptions } from "../compile.js";
+import type { CompilerOptions } from "../compiler-options.js";
+import { toSafeModuleId } from "../safe-module-id.js";
 
 export function generateLocaleModules(
 	compiledBundles: CompiledBundleWithMessages[],
@@ -14,46 +14,49 @@ export function generateLocaleModules(
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
 	}
 ): Record<string, string> {
-	const fileExt = "js";
-	const importExt = "js";
-
 	const indexFile = [
-		`import { getLocale } from "./runtime.${importExt}"`,
+		`import { getLocale } from "../runtime.js"`,
 		settings.locales
 			.map(
 				(locale) =>
-					`import * as ${jsIdentifier(locale)} from "./messages/${locale}.${importExt}"`
+					`import * as ${toSafeModuleId(locale)} from "./${locale}.js"`
 			)
 			.join("\n"),
 		compiledBundles.map(({ bundle }) => bundle.code).join("\n"),
 	].join("\n");
 
 	const output: Record<string, string> = {
-		["runtime." + fileExt]: createRuntimeFile({
+		["runtime.js"]: createRuntimeFile({
 			baseLocale: settings.baseLocale,
 			locales: settings.locales,
 			compilerOptions,
 		}),
-		["registry." + fileExt]: createRegistry(),
-		["messages." + fileExt]: indexFile,
+		["registry.js"]: createRegistry(),
+		["messages/_index.js"]: indexFile,
+		["messages.js"]: [
+			"export * from './messages/_index.js'",
+			"// enabling auto-import by exposing all messages as m",
+			"export * as m from './messages/_index.js'",
+		].join("\n"),
 	};
 
 	// generate message files
 	for (const locale of settings.locales) {
-		const filename = `messages/${locale}.${fileExt}`;
+		const filename = `messages/${locale}.js`;
 		let file = "";
 
 		for (const compiledBundle of compiledBundles) {
 			const compiledMessage = compiledBundle.messages[locale];
-			const id = jsIdentifier(compiledBundle.bundle.node.id);
+			const bundleModuleId = toSafeModuleId(compiledBundle.bundle.node.id);
+			const bundleId = compiledBundle.bundle.node.id;
 			if (!compiledMessage) {
 				const fallbackLocale = fallbackMap[locale];
 				if (fallbackLocale) {
 					// use the fall back locale e.g. render the message in English if the German message is missing
-					file += `\nexport { ${id} } from "./${fallbackLocale}.${importExt}"`;
+					file += `\nexport { ${bundleModuleId} } from "./${fallbackLocale}.js"`;
 				} else {
 					// no fallback exists, render the bundleId
-					file += `\nexport const ${id} = () => '${id}'`;
+					file += `\n/** @type {(inputs?: Record<string, never>) => string} */\nexport const ${bundleModuleId} = () => '${bundleId}'`;
 				}
 				continue;
 			}

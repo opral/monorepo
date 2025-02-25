@@ -10,84 +10,91 @@ import type {
   Message,
 } from "@inlang/sdk";
 import { type plugin } from "../plugin.js";
+import { flatten } from "flat";
+import type {
+	ComplexMessage,
+	ComplexMessageObject,
+	SimpleMessage,
+} from "../fileSchema.js";
 
 export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({
-  files,
+	files,
 }) => {
-  const bundles: Bundle[] = [];
-  const messages: MessageImport[] = [];
-  const variants: VariantImport[] = [];
+	const bundles: Bundle[] = [];
+	const messages: MessageImport[] = [];
+	const variants: VariantImport[] = [];
 
-  for (const file of files) {
-    const json = JSON.parse(new TextDecoder().decode(file.content));
+	for (const file of files) {
+		const json = JSON.parse(new TextDecoder().decode(file.content));
+		const flattened = flatten(json, { safe: true }) as Record<string, string>;
 
-    for (const key in json) {
-      if (key === "$schema") {
-        continue;
-      }
-      const result = parseBundle(key, file.locale, json[key]);
-      messages.push(result.message);
-      variants.push(...result.variants);
+		for (const key in flattened) {
+			if (key === "$schema") {
+				continue;
+			}
+			const result = parseBundle(key, file.locale, flattened[key]!);
+			messages.push(result.message);
+			variants.push(...result.variants);
 
-      const existingBundle = bundles.find((b) => b.id === result.bundle.id);
-      if (existingBundle === undefined) {
-        bundles.push(result.bundle);
-      } else {
-        // merge declarations without duplicates
-        existingBundle.declarations = unique([
+			const existingBundle = bundles.find((b) => b.id === result.bundle.id);
+			if (existingBundle === undefined) {
+				bundles.push(result.bundle);
+			} else {
+				// merge declarations without duplicates
+				existingBundle.declarations = unique([
 					...existingBundle.declarations,
 					...result.bundle.declarations,
 				]);
-      }
-    }
-  }
+			}
+		}
+	}
 
-  return { bundles, messages, variants };
+	return { bundles, messages, variants };
 };
 
 function parseBundle(
-  key: string,
-  locale: string,
-  value: string | Record<string, string>,
+	key: string,
+	locale: string,
+	value: SimpleMessage | ComplexMessage
 ): {
-  bundle: Bundle;
-  message: MessageImport;
-  variants: VariantImport[];
+	bundle: Bundle;
+	message: MessageImport;
+	variants: VariantImport[];
 } {
-  const parsed = parseVariants(key, locale, value);
-  const declarations = unique(parsed.declarations);
-  const selectors = unique(parsed.selectors);
+	const parsed = parseVariants(key, locale, value);
+	const declarations = unique(parsed.declarations);
+	const selectors = unique(parsed.selectors);
 
-  const undeclaredSelectors = selectors.filter(
-    (selector) =>
-      declarations.find((d) => d.name === selector.name) === undefined,
-  );
+	const undeclaredSelectors = selectors.filter(
+		(selector) =>
+			declarations.find((d) => d.name === selector.name) === undefined
+	);
 
-  for (const undeclaredSelector of undeclaredSelectors) {
-    declarations.push({
-      type: "input-variable",
-      name: undeclaredSelector.name,
-    });
-  }
+	for (const undeclaredSelector of undeclaredSelectors) {
+		declarations.push({
+			type: "input-variable",
+			name: undeclaredSelector.name,
+		});
+	}
 
-  return {
-    bundle: {
-      id: key,
-      declarations,
-    },
-    message: {
-      bundleId: key,
-      selectors,
-      locale: locale,
-    },
-    variants: parsed.variants,
-  };
+	return {
+		bundle: {
+			id: key,
+			declarations,
+		},
+		message: {
+			bundleId: key,
+			selectors,
+			locale: locale,
+		},
+		variants: parsed.variants,
+	};
 }
 
 function parseVariants(
 	bundleId: string,
 	locale: string,
-	value: string | Record<string, string | string[]>
+	value: SimpleMessage | ComplexMessage
 ): {
 	variants: VariantImport[];
 	declarations: Declaration[];
@@ -110,10 +117,11 @@ function parseVariants(
 			selectors: [],
 		};
 	}
+	const complexMessage = value[0]!;
 	// multi variant
 	const variants: VariantImport[] = [];
 	const selectors: VariableReference[] = (
-		(value["selectors"] as string[]) ?? []
+		(complexMessage["selectors"] as string[]) ?? []
 	).map((name) => ({
 		type: "variable-reference",
 		name,
@@ -121,13 +129,14 @@ function parseVariants(
 
 	const declarations = new Set<Declaration>();
 
-	for (const declaration of value["declarations"] ?? ([] as string[])) {
+	for (const declaration of complexMessage["declarations"] ??
+		([] as string[])) {
 		declarations.add(parseDeclaration(declaration));
 	}
 
 	const detectedSelectors = new Set<VariableReference>();
 
-	for (const [match, pattern] of Object.entries(value["match"] as string)) {
+	for (const [match, pattern] of Object.entries(complexMessage["match"])) {
 		const parsed = parsePattern(pattern);
 		const parsedMatches = parseMatches(match);
 		for (const declaration of parsed.declarations) {

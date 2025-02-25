@@ -8,7 +8,12 @@ import type {
 	Variant,
 } from "@inlang/sdk";
 import { type plugin } from "../plugin.js";
-import type { FileSchema } from "../fileSchema.js";
+import type {
+	ComplexMessage,
+	FileSchema,
+	SimpleMessage,
+} from "../fileSchema.js";
+import { unflatten } from "flat";
 
 export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 	bundles,
@@ -41,11 +46,11 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 			// beautify the json
 			content: new TextEncoder().encode(
 				JSON.stringify(
-					{
+					unflatten({
 						// increase DX by providing auto complete in IDEs
 						$schema: "https://inlang.com/schema/inlang-message-format",
 						...files[locale],
-					},
+					}),
 					undefined,
 					"\t"
 				)
@@ -61,7 +66,7 @@ function serializeMessage(
 	bundle: Bundle,
 	message: Message,
 	variants: Variant[]
-): Record<string, string | Record<string, string>> {
+): Record<string, SimpleMessage | ComplexMessage> {
 	const key = message.bundleId;
 	const value = serializeVariants(bundle, message, variants);
 	return { [key]: value };
@@ -71,7 +76,7 @@ function serializeVariants(
 	bundle: Bundle,
 	message: Message,
 	variants: Variant[]
-): string | Record<string, any> {
+): SimpleMessage | ComplexMessage {
 	// single variant
 	if (variants.length === 1) {
 		if (
@@ -101,13 +106,18 @@ function serializeVariants(
 		entries.push([match, pattern]);
 	}
 
-	return {
-		// naively adding all declarations, even if unused in the variants
-		// can be optimized later.
-		declarations: bundle.declarations.map(serializeDeclaration),
-		selectors: message.selectors.map((s) => s.name),
-		match: Object.fromEntries(entries),
-	};
+	return [
+		{
+			// naively adding all declarations, even if unused in the variants
+			// can be optimized later.
+			declarations: bundle.declarations
+				.sort((a, b) => a.name.localeCompare(b.name))
+				.map(serializeDeclaration)
+				.sort(),
+			selectors: message.selectors.map((s) => s.name).sort(),
+			match: Object.fromEntries(entries),
+		},
+	];
 }
 
 function serializePattern(pattern: Variant["pattern"]): string {
@@ -128,14 +138,14 @@ function serializePattern(pattern: Variant["pattern"]): string {
 // input: { platform: "android", userGender: "male" }
 // output: `platform=android,userGender=male`
 function serializeMatcher(matches: Match[]): string {
-	const parts = [];
-	for (const match of matches) {
-		if (match.type === "literal-match") {
-			parts.push(`${match.key}=${match.value}`);
-		} else {
-			parts.push(`${match.key}=*`);
-		}
-	}
+	const parts = matches
+		.sort((a, b) => a.key.localeCompare(b.key))
+		.map((match) =>
+			match.type === "literal-match"
+				? `${match.key}=${match.value}`
+				: `${match.key}=*`
+		);
+
 	return parts.join(", ");
 }
 

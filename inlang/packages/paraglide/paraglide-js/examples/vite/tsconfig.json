@@ -13,10 +13,7 @@
 		"noUnusedParameters": true,
 		"noImplicitReturns": true,
 		"skipLibCheck": true,
-		"allowJs": true,
-		"paths": {
-			"$paraglide/*": ["./src/paraglide/*"]
-		}
+		"allowJs": true
 	},
 	"include": ["src"]
 }

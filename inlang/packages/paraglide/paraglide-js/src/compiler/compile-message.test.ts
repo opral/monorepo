@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { compileMessage } from "./compile-message.js";
 import type { Declaration, Message, Variant } from "@inlang/sdk";
 import { createRegistry } from "./registry.js";
+import { toSafeModuleId } from "./safe-module-id.js";
 
 test("compiles a message with a single variant", async () => {
 	const declarations: Declaration[] = [];
@@ -233,9 +234,13 @@ test("compiles messages that use datetime()", async () => {
 	const enMessage = await createMessage("en");
 	const deMessage = await createMessage("de");
 
-	expect(enMessage({ date: "2022-04-01" })).toMatch(/Today is \d{1,2}\/\d{1,2}\/2022\./);
+	expect(enMessage({ date: "2022-04-01" })).toMatch(
+		/Today is \d{1,2}\/\d{1,2}\/2022\./
+	);
 
-	expect(deMessage({ date: "2022-04-01" })).toMatch(/Today is \d{1,2}\.\d{1,2}\.2022\./);
+	expect(deMessage({ date: "2022-04-01" })).toMatch(
+		/Today is \d{1,2}\.\d{1,2}\.2022\./
+	);
 });
 
 test("compiles messages that use datetime a function with options", async () => {
@@ -302,4 +307,32 @@ test("compiles messages that use datetime a function with options", async () => 
 	expect(deMessage({ date: "2022-03-31" })).toMatch(
 		/Today is \d{1,2}\. März\./
 	);
+});
+
+// https://github.com/opral/inlang-paraglide-js/issues/285
+test("compiles messages with arbitrary module identifiers", async () => {
+	const declarations: Declaration[] = [];
+	const message: Message = {
+		locale: "en",
+		bundleId: "$p@44🍌",
+		id: "message-id",
+		selectors: [],
+	};
+	const variants: Variant[] = [
+		{
+			id: "1",
+			messageId: "message-id",
+			matches: [],
+			pattern: [{ type: "text", value: "Hello" }],
+		},
+	];
+
+	const compiled = compileMessage(declarations, message, variants);
+
+	const m = await import(
+		"data:text/javascript;base64," +
+			Buffer.from(compiled.code).toString("base64")
+	);
+
+	expect(m[toSafeModuleId("$p@44🍌")]()).toBe("Hello");
 });

@@ -19,7 +19,7 @@ export type MessageFunction = (inputs?: Record<string, never>) => string;
  * Uses `getLocale()` under the hood to determine the locale with an option.
  *
  * @example
- *   import * as m from './messages.js'
+ *   import { m } from './messages.js'
  *   m.hello({ name: 'world', { locale: "en" } })
  */
 export type MessageBundleFunction<T extends string> = (

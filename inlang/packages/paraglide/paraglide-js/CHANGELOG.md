@@ -1,5 +1,37 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.21
+
+- compile arbitrary message keys https://github.com/opral/inlang-paraglide-js/issues/201#issuecomment-2680006131
+- only polyfills `URLPattern` if needed https://github.com/opral/inlang-paraglide-js/issues/381
+- don't include `url` strategy by default https://github.com/opral/inlang-paraglide-js/issues/405
+- fixes webpack watch mode https://github.com/opral/inlang-paraglide-js/issues/406
+
+## 2.0.0-beta.20
+
+- automatic re-directs in `serverMiddleware()` https://github.com/opral/inlang-paraglide-js/issues/201#issuecomment-2675823651
+- various bug fixes and improvements
+
+## 2.0.0-beta.19
+
+NO MORE ADAPTERS NEEDED.
+
+If you have code from an adapter, remove it and follow the examples in the documentation. https://inlang.com/m/gerre34r/library-inlang-paraglideJs/sveltekit
+
+```diff
+-@inlang/paraglide-sveltekit
+-@inlang/paraglide-next
+-@inlang/paraglide-astro
+```
+
+- introduced `serverMiddleware()` https://github.com/opral/inlang-paraglide-js/issues/201#issuecomment-2673375348
+
+- rename `defineGetLocale()` and `defineSetLocale()` to `overwriteGetLocale()` and `overwriteSetLocale()` https://github.com/opral/inlang-paraglide-js/issues/382
+
+- enables `import { m } from "./paraglide/messages.js"` for auto imports https://github.com/opral/inlang-paraglide-js/issues/345
+
+- adds the `strategy` compiler option to the cli https://github.com/opral/inlang-paraglide-js/issues/316
+
 ## 2.0.0-beta.18
 
 Added URLPatterns as a replacement for the beta 17 pathnames API. 

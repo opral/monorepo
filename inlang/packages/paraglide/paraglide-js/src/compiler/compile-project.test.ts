@@ -25,10 +25,7 @@ beforeEach(() => {
 
 	// mocking DOM globals
 	// @ts-expect-error - global variable definition
-	globalThis.window = {};
-	// @ts-expect-error - global variable definition
-	globalThis.window.location = {};
-	globalThis.window.location.reload = () => {};
+	globalThis.window = undefined;
 });
 
 test("emitGitignore", async () => {
@@ -120,6 +117,9 @@ test("can emit message bundles with more than 255 characters", async () => {
 
 	const output = await compileProject({
 		project,
+		compilerOptions: {
+			urlPatterns: [],
+		},
 	});
 
 	const code = await bundleCode(
@@ -157,6 +157,28 @@ describe.each([
 					console.log(m.sad_penguin_bundle())`
 				);
 				const log = vi.spyOn(console, "log").mockImplementation(() => {});
+				// all required code for the message to be rendered is included like sourceLanguageTag.
+				// but, all other messages except of 'sad_penguin_bundle' are tree-shaken away.
+				for (const { id } of mockBundles) {
+					if (id === "sad_penguin_bundle") {
+						expect(code).toContain(id);
+					} else {
+						expect(code).not.toContain(id);
+					}
+				}
+				eval(code);
+				expect(log).toHaveBeenCalledWith("A simple message.");
+			});
+
+			// https://github.com/opral/inlang-paraglide-js/issues/345
+			test("importing { m } works and tree-shakes unused messages", async () => {
+				const code = await bundleCode(
+					output,
+					`import { m } from "./paraglide/messages.js"
+					console.log(m.sad_penguin_bundle())`
+				);
+				const log = vi.spyOn(console, "log").mockImplementation(() => {});
+
 				// all required code for the message to be rendered is included like sourceLanguageTag.
 				// but, all other messages except of 'sad_penguin_bundle' are tree-shaken away.
 				for (const { id } of mockBundles) {
@@ -302,12 +324,12 @@ describe.each([
 				expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
 			});
 
-			test("defineGetLocale() works", async () => {
+			test("overwriteGetLocale() works", async () => {
 				const { m, runtime } = await importCode(code);
 
 				let locale = "en";
 
-				runtime.defineGetLocale(() => locale);
+				runtime.overwriteGetLocale(() => locale);
 
 				expect(m.sad_penguin_bundle()).toBe("A simple message.");
 
@@ -316,12 +338,12 @@ describe.each([
 				expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
 			});
 
-			test("defineSetLocale() works", async () => {
+			test("overwriteSetLocale() works", async () => {
 				const { runtime } = await importCode(code);
 
 				let locale = "en";
 
-				runtime.defineSetLocale((newLocale: any) => {
+				runtime.overwriteSetLocale((newLocale: any) => {
 					locale = newLocale;
 				});
 
@@ -419,6 +441,7 @@ describe.each([
 					`export * as m from "./paraglide/messages.js"
 					export * as runtime from "./paraglide/runtime.js"`
 				);
+
 				const { m, runtime } = await importCode(code);
 
 				runtime.setLocale("de");
@@ -426,6 +449,43 @@ describe.each([
 
 				runtime.setLocale("en-US");
 				expect(m.missingInGerman()).toBe("A simple message.");
+			});
+
+			test("arbitrary module identifiers work", async () => {
+				const project = await loadProjectInMemory({
+					blob: await newProject({
+						settings: { locales: ["en", "de"], baseLocale: "en" },
+					}),
+				});
+
+				await insertBundleNested(
+					project.db,
+					createBundleNested({
+						id: "$502.23-hello_world",
+						messages: [
+							{
+								locale: "en",
+								variants: [
+									{ pattern: [{ type: "text", value: "A simple message." }] },
+								],
+							},
+						],
+					})
+				);
+
+				const output = await compileProject({
+					project,
+					compilerOptions,
+				});
+
+				const code = await bundleCode(
+					output,
+					`export * as m from "./paraglide/messages.js"
+					export * as runtime from "./paraglide/runtime.js"`
+				);
+				const { m } = await importCode(code);
+
+				expect(m["$502.23-hello_world"]()).toBe("A simple message.");
 			});
 
 			test("falls back to parent locale if message doesn't exist", async () => {
@@ -577,6 +637,9 @@ async function bundleCode(output: Record<string, string>, file: string) {
 	output["runtime.js"] = output["runtime.js"]!.replace(
 		'import "@inlang/paraglide-js/urlpattern-polyfill";',
 		"/** @type {any} */const URLPattern = {};"
+	).replace(
+		'const { AsyncLocalStorage } = await import("async_hooks");',
+		"const AsyncLocalStorage = class {};"
 	);
 
 	const bundle = await rolldown({
