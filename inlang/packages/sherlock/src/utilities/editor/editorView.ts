@@ -174,10 +174,7 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 		const workspaceFolder = vscode.workspace.workspaceFolders![0]
 		if (workspaceFolder) {
 			try {
-				await saveProject({
-					workspaceFolder,
-					fs: createFileSystemMapper(path.normalize(workspaceFolder.uri.fsPath), fs),
-				})
+				await saveProject()
 			} catch (error) {
 				console.error("Failed to save project", error)
 				msg(`Failed to save project. ${String(error)}`, "error")
