@@ -15,6 +15,37 @@ This example shows how to use Paraglide with SvelteKit. The source code can be f
 npx @inlang/paraglide-js@beta init
 ```
 
+### Add the `paraglideVitePlugin()` to `vite.config.js`.
+
+```diff
+import { sveltekit } from '@sveltejs/kit/vite';
+import { defineConfig } from 'vite';
++import { paraglideVitePlugin } from '@inlang/paraglide-js';
+
+export default defineConfig({
+	plugins: [
+		sveltekit(),
++		paraglideVitePlugin({
++			project: './project.inlang',
++			outdir: './src/lib/paraglide',
++			strategy: ['url']
++		})
+	]
+});
+```
+
+### Add `%lang%` to `src/app.html`.
+
+See https://svelte.dev/docs/kit/accessibility#The-lang-attribute for more information.
+
+```diff
+<!doctype html>
+-<html lang="en">
++<html lang="%lang%">
+	...
+</html>
+```
+
 ### Add the serverMiddleware to `src/hooks.server.ts`
 
 ```typescript
@@ -22,7 +53,12 @@ import type { Handle } from '@sveltejs/kit';
 import { serverMiddleware } from '$lib/paraglide/runtime';
 
 export const handle: Handle = ({ event, resolve }) => {
-	return serverMiddleware(event.request, ({ request }) => resolve({ ...event, request }));
+	return serverMiddleware(event.request, ({ request, locale }) =>
+		resolve(
+			{ ...event, request },
+			{ transformPageChunk: ({ html }) => html.replace('%lang%', locale)}
+		)
+	);
 };
 ```
 
