@@ -55,6 +55,51 @@ await compile({
 <doc-video src="https://youtu.be/RO_pMjSHgpI"></doc-video>
 
 
+### Disabling Async Local Storage
+
+You can use `disableAsyncLocalStorage: true` to disable the use of Node.js' AsyncLocalStorage. Paraglide JS uses Node.js' AsyncLocalStorage to maintain request context isolation. This is crucial for:
+
+- Preventing locale information from leaking between concurrent requests
+- Ensuring consistent URL origin resolution
+- Maintaining a clean separation of request-specific state
+
+<doc-callout type="warning">
+Disabling AsyncLocalStorage is **only safe** in these environments:
+
+- Cloudflare Workers  
+- Vercel Edge Functions
+- AWS Lambda (single-request mode)
+- Other isolated runtime contexts
+</doc-callout>
+
+```ts
+// Only disable in serverless environments
+serverMiddleware(request, handler, { 
+  disableAsyncLocalStorage: true // ⚠️ Use with caution
+})
+```
+
+#### Best Practices
+
+1. **Always enable AsyncLocalStorage** for:
+   - Traditional Node.js servers
+   - Docker containers handling multiple requests
+   - Any environment with request pooling
+
+2. **Test isolation** by making parallel requests:
+```ts
+// Test that locale doesn't leak between requests
+await Promise.all([
+  fetch('/fr/about'),
+  fetch('/de/contact')
+])
+```
+
+3. Monitor for these warning signs:
+   - Random locale switches during load testing
+   - Incorrect URL origins in logs
+   - Session data appearing in wrong requests
+
 ## Manual Middleware Setup 
 
 For frameworks without middleware support, use AsyncLocalStorage directly:
