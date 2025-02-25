@@ -64,7 +64,7 @@ let serverMiddlewareAsyncStorage = undefined;
  *   });
  * });
  * ```
- * 
+ *
  * @example
  * ```typescript
  * // Usage in serverless environments like Cloudflare Workers
@@ -74,7 +74,7 @@ let serverMiddlewareAsyncStorage = undefined;
  * export default {
  *   fetch: async (request) => {
  *     return serverMiddleware(
- *       request, 
+ *       request,
  *       ({ request, locale }) => handleRequest(request, locale),
  *       { disableAsyncLocalStorage: true }
  *     );
