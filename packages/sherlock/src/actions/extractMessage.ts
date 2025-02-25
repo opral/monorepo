@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { telemetry } from "../services/telemetry/index.js"
+import { capture } from "../services/telemetry/index.js"
 import { CONFIGURATION } from "../configuration.js"
 
 /**
@@ -22,7 +22,7 @@ export class ExtractMessage implements vscode.CodeActionProvider {
 	}
 
 	public async resolveCodeAction(): Promise<vscode.CodeAction> {
-		telemetry.capture({
+		capture({
 			event: "IDE-EXTENSION code action resolved",
 			properties: { name: "extract message" },
 		})

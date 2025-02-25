@@ -5,6 +5,8 @@ import { window } from "vscode"
 import { CONFIGURATION } from "../configuration.js"
 import { getSetting } from "../utilities/settings/index.js"
 import { state } from "../utilities/state.js"
+import { upsertBundleNested } from "@inlang/sdk"
+import { capture } from "../services/telemetry/index.js"
 
 // Mocking the necessary modules
 vi.mock("../utilities/state", () => ({
@@ -27,9 +29,7 @@ vi.mock("../utilities/messages/msg", () => ({
 }))
 
 vi.mock("../services/telemetry/index.js", () => ({
-	telemetry: {
-		capture: vi.fn(),
-	},
+	capture: vi.fn(),
 }))
 
 vi.mock("../configuration", () => ({
@@ -50,6 +50,7 @@ vi.mock("@inlang/sdk", () => ({
 	humanId: vi.fn().mockReturnValue("generatedId123"),
 	createBundle: vi.fn().mockReturnValue({ id: "generatedId123", alias: "alias123" }),
 	createMessage: vi.fn().mockReturnValue({ id: "messageId123", bundleId: "generatedId123" }),
+	upsertBundleNested: vi.fn(),
 }))
 
 vi.mock("../utilities/messages/isQuoted", () => ({
@@ -87,19 +88,19 @@ describe("extractMessageCommand", () => {
 		const mockTextEditor = {
 			selection: {
 				isEmpty: false,
-				start: {
-					line: 0,
-					character: 0,
-				},
-				end: {
-					line: 0,
-					character: 0,
-				},
+				start: { line: 0, character: 0 },
+				end: { line: 0, character: 10 },
 			},
 			document: {
-				getText: () => "Some text",
+				getText: vi.fn().mockReturnValue("Some text"),
 			},
-			edit: vi.fn(),
+			edit: vi.fn((callback) => {
+				const mockBuilder = {
+					replace: vi.fn(),
+				}
+				callback(mockBuilder) // Simulate text replacement
+				return Promise.resolve(true)
+			}),
 		}
 
 		// @ts-expect-error
@@ -413,6 +414,8 @@ describe("extractMessageCommand", () => {
 		vi.mocked(window.showInputBox).mockResolvedValueOnce("generatedId123")
 		// @ts-expect-error
 		vi.mocked(window.showQuickPick).mockResolvedValueOnce("Replacement Text")
+
+		vi.mocked(upsertBundleNested).mockRejectedValueOnce(new Error("Some error"))
 
 		// @ts-expect-error
 		await extractMessageCommand.callback(mockTextEditor)
