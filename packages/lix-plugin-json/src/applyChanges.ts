@@ -1,4 +1,9 @@
-import { changeIsLeafOf, type Change, type LixPlugin, type LixReadonly } from "@lix-js/sdk";
+import {
+	changeIsLeafOf,
+	type Change,
+	type LixPlugin,
+	type LixReadonly,
+} from "@lix-js/sdk";
 import { JSONPropertySchema } from "./schemas/JSONPropertySchema.js";
 import { unflatten } from "flat";
 
@@ -7,7 +12,6 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 	// _file, - we don't need to apply changes since the leaf changes should be complete
 	changes,
 }) => {
-
 	// We only apply the leafchanges
 	// - since lix doesn't provide the changes in order
 	// - fetching all snapshots for all changes will become costy
@@ -23,15 +27,14 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 						.executeTakeFirst();
 					// enable string comparison to avoid duplicates
 					return JSON.stringify(leafChange);
-				})
-			)
+				}),
+			),
 		),
 	].map((v) => JSON.parse(v));
 
-	const flattened: Record<string, any> = {} 
+	const flattened: Record<string, any> = {};
 
 	for (const change of leafChanges) {
-		
 		if (change.schema_key === JSONPropertySchema.key) {
 			const snapshot = await lix.db
 				.selectFrom("snapshot")
@@ -39,9 +42,9 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 				.selectAll()
 				.executeTakeFirstOrThrow();
 
-			const propertyPath = change.entity_id
+			const propertyPath = change.entity_id;
 
-			flattened[propertyPath] = snapshot.content?.value
+			flattened[propertyPath] = snapshot.content?.value;
 		}
 	}
 

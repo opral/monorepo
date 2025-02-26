@@ -13,7 +13,7 @@ test("it applies an insert change", async () => {
 		JSON.stringify({
 			Name: "Anna",
 			Age: 20,
-			City: "Berlin"
+			City: "Berlin",
 		}),
 	);
 
@@ -28,7 +28,9 @@ test("it applies an insert change", async () => {
 		lix,
 	});
 
-	expect(new TextDecoder().decode(applied)).toEqual(new TextDecoder().decode(after));
+	expect(new TextDecoder().decode(applied)).toEqual(
+		new TextDecoder().decode(after),
+	);
 });
 
 test("it applies an update change", async () => {
@@ -56,7 +58,9 @@ test("it applies an update change", async () => {
 		lix,
 	});
 
-	expect(new TextDecoder().decode(applied)).toEqual(new TextDecoder().decode(after));
+	expect(new TextDecoder().decode(applied)).toEqual(
+		new TextDecoder().decode(after),
+	);
 });
 
 test("it applies a delete change", async () => {
@@ -83,6 +87,7 @@ test("it applies a delete change", async () => {
 		lix,
 	});
 
-	expect(new TextDecoder().decode(applied)).toEqual(new TextDecoder().decode(after));
-
+	expect(new TextDecoder().decode(applied)).toEqual(
+		new TextDecoder().decode(after),
+	);
 });

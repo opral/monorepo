@@ -17,10 +17,10 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		: {};
 
 	const flattenedBefore = flatten(beforeParsed, {
-		safe: true
+		safe: true,
 	}) as Record<string, unknown>;
 	const flattenedAfter = flatten(afterParsed, {
-		safe: true
+		safe: true,
 	}) as Record<string, unknown>;
 
 	for (const key in flattenedBefore) {
