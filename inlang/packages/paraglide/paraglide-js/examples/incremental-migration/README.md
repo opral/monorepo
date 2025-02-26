@@ -15,7 +15,7 @@ Paraglide JS can load any [translation file formats](https://inlang.com/m/gerre3
   This example uses i18next translation files but is applicable to any format.
 </doc-callout>
 
-## Load translations with a plugin
+## Add the i18next plugin
 
 Find a list of available plugins [here](https://inlang.com/c/plugins). For this example, the i18next plugin is used. Update the `project.inlang` settings to include the i18next plugin:
 
