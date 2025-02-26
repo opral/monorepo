@@ -34,11 +34,12 @@
 		"Usage": {
 			"/basics": "./docs/basics.md",
 			"/strategy": "./docs/strategy.md",
-			"/compiling-messages": "./docs/compiling-messages.md",
 			"/variants": "./docs/variants.md",
 			"/file-formats": "./docs/file-formats.md",
 			"/multi-tenancy": "./docs/multi-tenancy.md",
-			"/server-side-rendering": "./docs/server-side-rendering.md"
+			"/server-side-rendering": "./docs/server-side-rendering.md",
+			"/compiling-messages": "./docs/compiling-messages.md",
+			"/incremental-migration": "./docs/incremental-migration.md"
 		},
 		"Ecosystem": {
 			"Sherlock VSCode extension": "/m/r7kp499g/app-inlang-ideExtension",
