@@ -1,5 +1,14 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.23
+
+Renames and splits the `serverMiddleware()` into a dedicated `server.js` file to avoid bundler issues. 
+
+```diff
+- import { serverMiddleware } from "./paraglide/runtime.js";
++ import { paraglideMiddleware } from "./paraglide/server.js";
+```
+
 ## 2.0.0-beta.22
 
 - fix `serverMiddleware()` only imports async_hooks on the server

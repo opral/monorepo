@@ -1,8 +1,8 @@
-## middleware()
+## paraglideMiddleware()
 
-> **middleware**\<`T`\>(`request`, `resolve`, `options`?): `Promise`\<`any`\>
+> **paraglideMiddleware**\<`T`\>(`request`, `resolve`, `options`?): `Promise`\<`any`\>
 
-Defined in: server/middleware.js:71
+Defined in: [server/middleware.js:71](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/server/middleware.js)
 
 Server middleware that handles locale-based routing and request processing.
 

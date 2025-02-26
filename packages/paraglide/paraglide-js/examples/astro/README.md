@@ -51,10 +51,10 @@ export default defineConfig({
 ### 3. Create or add the paraglide js server middleware to the `src/middleware.ts` file:
 
 ```diff
-import { serverMiddleware } from "./paralide/runtime.js";
+import { paraglideMiddleware } from "./paralide/server.js";
 
 export const onRequest = defineMiddleware((context, next) => {
-+	return serverMiddleware(context.request, () => next());
++	return paraglideMiddleware(context.request, () => next());
 });
 ```
 
@@ -72,9 +72,9 @@ You can disable async local storage in serverless environments by using the `dis
 
 
 ```diff
-import { serverMiddleware } from "./paralide/runtime.js";
+import { paraglideMiddleware } from "./paralide/server.js";
 
 export const onRequest = defineMiddleware((context, next) => {
-+	return serverMiddleware(context.request, () => next(), { disableAsyncLocalStorage: true });
++	return paraglideMiddleware(context.request, () => next(), { disableAsyncLocalStorage: true });
 });
 ```

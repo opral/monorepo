@@ -12,6 +12,6 @@ The Paraglide runtime API.
 
 ### Type declaration
 
-#### middleware
+#### paraglideMiddleware
 
-> **middleware**: [`middleware`](-internal-.md#middleware)
+> **paraglideMiddleware**: [`paraglideMiddleware`](-internal-.md#paraglidemiddleware)
