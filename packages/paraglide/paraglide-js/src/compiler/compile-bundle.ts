@@ -1,14 +1,9 @@
 import type { Bundle, BundleNested, Message } from "@inlang/sdk";
 import { compileMessage } from "./compile-message.js";
-import type { Registry } from "./registry.js";
-import { jsIdentifier } from "../services/codegen/identifier.js";
-import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js";
-import { escapeForDoubleQuoteString } from "../services/codegen/escape.js";
 import type { Compiled } from "./types.js";
-import {
-	jsDocBundleFunctionTypes,
-	jsDocMessageFunctionTypes,
-} from "./jsdoc-types.js";
+import { jsDocBundleFunctionTypes } from "./jsdoc-types.js";
+import { toSafeModuleId } from "./safe-module-id.js";
+import { escapeForDoubleQuoteString } from "../services/codegen/escape.js";
 
 export type CompiledBundleWithMessages = {
 	/** The compilation result for the bundle index */
@@ -25,7 +20,6 @@ export type CompiledBundleWithMessages = {
 export const compileBundle = (args: {
 	bundle: BundleNested;
 	fallbackMap: Record<string, string | undefined>;
-	registry: Registry;
 }): CompiledBundleWithMessages => {
 	const compiledMessages: Record<string, Compiled<Message>> = {};
 
@@ -37,15 +31,8 @@ export const compileBundle = (args: {
 		const compiledMessage = compileMessage(
 			args.bundle.declarations,
 			message,
-			message.variants,
-			args.registry
+			message.variants
 		);
-		// add types to the compiled message function
-		const inputs = args.bundle.declarations.filter(
-			(decl) => decl.type === "input-variable"
-		);
-
-		compiledMessage.code = `${jsDocMessageFunctionTypes({ inputs })}\n${compiledMessage.code}`;
 
 		// set the pattern for the language tag
 		compiledMessages[message.locale] = compiledMessage;
@@ -75,6 +62,10 @@ const compileBundleFunction = (args: {
 	);
 	const hasInputs = inputs.length > 0;
 
+	const safeBundleId = toSafeModuleId(args.bundle.id);
+
+	const isSafeBundleId = safeBundleId === args.bundle.id;
+
 	let code = `/**
 * This function has been compiled by [Paraglide JS](https://inlang.com/m/gerre34r).
 *
@@ -85,23 +76,19 @@ const compileBundleFunction = (args: {
 * ${jsDocBundleFunctionTypes({ inputs, locales: args.availableLocales })}
 */
 /* @__NO_SIDE_EFFECTS__ */
-const ${jsIdentifier(args.bundle.id)} = (inputs${hasInputs ? "" : "= {}"}, options = {}) => {
+${isSafeBundleId ? "export " : ""}const ${safeBundleId} = (inputs${hasInputs ? "" : " = {}"}, options = {}) => {
 	const locale = options.locale ?? getLocale()
 	${args.availableLocales
 		.map(
 			(locale, index) =>
-				`${index > 0 ? "	" : ""}if (locale === "${locale}") return ${jsIdentifier(locale)}.${args.bundle.id}(inputs)`
+				`${index > 0 ? "	" : ""}if (locale === "${locale}") return ${toSafeModuleId(locale)}.${safeBundleId}(inputs)`
 		)
 		.join("\n")}
 	return "${args.bundle.id}"
-}
-	`;
+};`;
 
-	// export the function
-	if (isValidJSIdentifier(args.bundle.id)) {
-		code += `\nexport { ${args.bundle.id} }`;
-	} else {
-		code += `\nexport { ${jsIdentifier(args.bundle.id)} as "${escapeForDoubleQuoteString(args.bundle.id)}" }`;
+	if (isSafeBundleId === false) {
+		code += `\nexport { ${safeBundleId} as "${escapeForDoubleQuoteString(args.bundle.id)}" }`;
 	}
 
 	return {

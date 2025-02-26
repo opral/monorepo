@@ -43,7 +43,6 @@ import TranslatorMachine from "../lib/translationprovider/TranslatorMachine";
 import MessageUpsellOverlay from "./compontents/upselloverlay/MessageUpsellOverlay";
 import Monitoring from "../lib/monitoring/MonitoringProxy";
 
-
 console.log(`Starting Figma UI - Version ${pjs.version}`);
 
 TimeAgo.addDefaultLocale(en);

@@ -4,8 +4,7 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"bench": "node ./build.js",
-		"build": "paraglide-js compile --project ./project.inlang && tsc",
+		"build": "paraglide-js compile --project ./project.inlang --strategy globalVariable baseLocale && tsc",
 		"pretest": "npm run build",
 		"test": "node ./dist/main.js"
 	},

@@ -3,6 +3,8 @@ import { getUserId } from "../../utilities/settings/getUserId.js"
 import { PostHog } from "posthog-node"
 import { ENV_VARIABLES } from "../env-variables/index.js"
 import { state } from "../../utilities/state.js"
+import { getLocalAccount } from "../account/index.js"
+import fs from "node:fs"
 
 const posthog = ENV_VARIABLES.PUBLIC_POSTHOG_TOKEN
 	? new PostHog(ENV_VARIABLES.PUBLIC_POSTHOG_TOKEN, {
@@ -47,7 +49,7 @@ type CaptureEventArguments = Omit<
  * Capture a telemetry event in a typesafe way.
  */
 export async function capture(args: CaptureEventArguments) {
-	const userID = await getUserId()
+	const userID = getLocalAccount({ fs })?.id || (await getUserId())
 	const projectId = (await state().project?.id.get()) as undefined | string
 
 	// enable contributors to develop and run the app without

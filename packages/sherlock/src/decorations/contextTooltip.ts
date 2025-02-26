@@ -1,3 +1,4 @@
+import * as vscode from "vscode"
 import { MarkdownString, Uri } from "vscode"
 import { state } from "../utilities/state.js"
 import { getStringFromPattern } from "../utilities/messages/query.js"
@@ -11,6 +12,7 @@ const MISSING_TRANSLATION_MESSAGE = "[missing]"
 type ContextTableRow = {
 	locale: string
 	message: string
+	bundleId: string
 	editCommand?: Uri
 	openInFinkCommand?: Uri
 	machineTranslateCommand?: Uri
@@ -45,6 +47,12 @@ export async function contextTooltip(
 		ReturnType<IdeExtensionConfig["messageReferenceMatchers"][number]>
 	>[number]
 ) {
+	const context = vscode.extensions.getExtension("inlang.vs-code-extension")?.exports.context
+	if (!context) {
+		console.error("Extension context is not available.")
+		return
+	}
+
 	// @ts-ignore TODO: Introduce deprecation message for messageId
 	referenceMessage.bundleId = referenceMessage.bundleId || referenceMessage.messageId
 	// resolve message from id or alias
@@ -62,12 +70,10 @@ export async function contextTooltip(
 		configuredLanguageTags.map(async (locale) => {
 			const message = bundle.messages.find((m) => m.locale === locale)
 
-			// Get the variant from the message
-			const variant = message?.variants.find((v) =>
-				v.matches.find(
-					(m) => m.type === "literal-match" && m.key === "locale" && m.value === locale
-				)
-			)
+			// Get the catchall variant or first variant as fallback
+			const variant =
+				message?.variants.find((v) => v.matches.some((m) => m.type === "catchall-match")) ||
+				message?.variants[0]
 
 			let m = MISSING_TRANSLATION_MESSAGE
 
@@ -79,11 +85,12 @@ export async function contextTooltip(
 				})
 			}
 
-			const args = encodeURIComponent(
-				JSON.stringify([{ bundleId: referenceMessage.bundleId, languageTag: locale }])
+			const editCommand = Uri.parse(
+				INTERPOLATE.COMMAND_URI(
+					"OPEN_EDITOR_VIEW",
+					encodeURIComponent(JSON.stringify({ bundleId: referenceMessage.bundleId }))
+				)
 			)
-
-			const editCommand = Uri.parse(INTERPOLATE.COMMAND_URI("EDIT_MESSAGE", args))
 			const machineTranslateCommand = Uri.parse(
 				INTERPOLATE.COMMAND_URI(
 					"MACHINE_TRANSLATE_MESSAGE",
@@ -94,13 +101,19 @@ export async function contextTooltip(
 					})
 				)
 			)
-			const openInFinkCommand = Uri.parse(INTERPOLATE.COMMAND_URI("OPEN_IN_FINK", args))
+			// const openInFinkCommand = Uri.parse(
+			// 	INTERPOLATE.COMMAND_URI(
+			// 		"OPEN_IN_FINK",
+			// 		encodeURIComponent(JSON.stringify([{ bundleId: referenceMessage.bundleId, context }]))
+			// 	)
+			// )
 
 			return {
 				locale,
 				message: m,
+				bundleId: referenceMessage.bundleId,
 				editCommand,
-				openInFinkCommand,
+				// openInFinkCommand,
 				machineTranslateCommand,
 			}
 		})

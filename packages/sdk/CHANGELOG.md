@@ -1,5 +1,55 @@
 # @inlang/sdk
 
+## 2.4.0
+
+### Minor Changes
+
+- f01927c: bugfixing
+
+## 2.3.0
+
+### Minor Changes
+
+- c0b857a: stable lix ids when opening a project with `loadProjectFromDirectory()` https://github.com/opral/inlang-sdk/issues/228
+
+### Patch Changes
+
+- 91ba4eb: fix: Cannot mkdir project.inlang/cache/puligns in window OSS using git bash terminal
+
+  https://github.com/opral/inlang-paraglide-js/issues/377
+
+- Updated dependencies [c0b857a]
+  - @lix-js/sdk@0.4.1
+
+## 2.2.2
+
+### Patch Changes
+
+- c53b1a9: fix: type of LocalVariable
+
+## 2.2.1
+
+### Patch Changes
+
+- f51736f: fix: plugin imports on Bun
+- adf7d6c: fix `saveProjectToDirectory` to have proper backwards compatibility and respect `pathPattern` file location`
+
+## 2.2.0
+
+### Minor Changes
+
+- fc41e71: remove sentry
+
+  the overhead of sentry is too high for the inlang sdk. errors that occur are eventually reported by apps.
+
+## 2.1.3
+
+### Patch Changes
+
+- Updated dependencies [1c84afb]
+- Updated dependencies [175f7f9]
+  - @lix-js/sdk@0.4.0
+
 ## 2.1.2
 
 ### Patch Changes

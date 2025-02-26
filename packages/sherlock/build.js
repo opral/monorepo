@@ -29,6 +29,14 @@ const packagesToCopy = [
 	},
 ]
 
+// Copy complete directory to assets
+const packagesToCopyDir = [
+	{
+		src: "src/utilities/editor/sherlock-editor-app/build",
+		dest: "./assets/sherlock-editor-app",
+	},
+]
+
 // Production configuration
 /** @type {import("esbuild").BuildOptions} */
 let buildOptions = {
@@ -62,12 +70,12 @@ const ctx = await context(buildOptions)
 
 if (isDev) {
 	await copyDependencies()
+	await copyDirectories()
 	await ctx.watch()
-	// eslint-disable-next-line no-undef
 	console.info("👀 watching for changes...")
 } else {
+	await copyDirectories()
 	await ctx.rebuild()
-	// eslint-disable-next-line no-undef
 	console.info("✅ build complete")
 	await ctx.dispose()
 }
@@ -90,8 +98,6 @@ async function copyDependencies() {
 					platform: "browser",
 					sourcemap: false,
 					external: [],
-					// treeShaking: true,
-					// conditions: ["browser"],
 				})
 			} else {
 				// Copy the file, resolving the symlink if necessary
@@ -99,7 +105,41 @@ async function copyDependencies() {
 				await fs.copyFile(resolvedPath, dest)
 			}
 		} catch (err) {
-			console.error(`Error processing ${src} to ${dest}:`, err) // eslint-disable-line no-undef
+			console.error(`Error processing ${src} to ${dest}:`, err)
+		}
+	}
+}
+
+// Function to copy required directories to assets folder
+async function copyDirectories() {
+	for (const { src, dest } of packagesToCopyDir) {
+		try {
+			// Check if the source directory exists
+			await fs.access(src)
+
+			await fs.mkdir(dest, { recursive: true })
+			await copyDir(src, dest)
+		} catch (err) {
+			console.error(`Error copying directory ${src} -> ${dest}:`, err)
+		}
+	}
+}
+
+// Recursive function to copy directories
+/**
+ * @param {string} src
+ * @param {string} dest
+ */
+async function copyDir(src, dest) {
+	await fs.mkdir(dest, { recursive: true })
+	const entries = await fs.readdir(src, { withFileTypes: true })
+	for (const entry of entries) {
+		const srcPath = path.join(src, entry.name)
+		const destPath = path.join(dest, entry.name)
+		if (entry.isDirectory()) {
+			await copyDir(srcPath, destPath)
+		} else {
+			await fs.copyFile(srcPath, destPath)
 		}
 	}
 }

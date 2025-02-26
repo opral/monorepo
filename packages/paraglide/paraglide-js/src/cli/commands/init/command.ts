@@ -9,12 +9,12 @@ import { maybeAddSherlock } from "../../steps/maybe-add-sherlock.js";
 import { maybeUpdateTsConfig } from "../../steps/update-ts-config.js";
 import { promptForOutdir } from "../../steps/prompt-for-outdir.js";
 import { updatePackageJson } from "../../steps/update-package-json.js";
-import { runCompiler } from "../../steps/run-compiler.js";
 import type { CliStep } from "../../utils.js";
 import nodeFs from "node:fs";
 import { ENV_VARIABLES } from "../../../services/env-variables/index.js";
 import { detectBundler } from "../../steps/detect-bundler.js";
 import { addVitePlugin } from "../../steps/add-vite-plugin.js";
+import { compile } from "../../../compiler/compile.js";
 
 export const initCommand = new Command()
 	.name("init")
@@ -48,7 +48,10 @@ export const initCommand = new Command()
 		const ctx8 = await maybeAddSherlock(ctx7);
 
 		try {
-			await runCompiler(ctx8);
+			await compile({
+				project: ctx8.projectPath,
+				outdir: ctx8.outdir,
+			});
 			ctx.logger.success("Run paraglide compiler");
 		} catch {
 			ctx.logger.warn(

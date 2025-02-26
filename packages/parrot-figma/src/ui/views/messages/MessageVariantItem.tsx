@@ -8,7 +8,6 @@ import MessageStoreMemory from "../../../lib/message/store/MessageStoreMemory";
 import LocalizedLabelManagerUI from "../../../lib/localizedlabels/LocalizedLabelManagerUI";
 import TranslatorMachine from "../../../lib/translationprovider/TranslatorMachine";
 
-
 type MessageVariantItemProps = {
 	language: Locale;
 	refLanguage: Locale;

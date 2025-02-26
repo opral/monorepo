@@ -4,9 +4,9 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"_dev": "vite dev",
-		"_build": "vite build && tsc --noEmit",
-		"_clean": "rm -rf ./dist ./node_modules ./src/paraglide"
+		"dev": "vite dev",
+		"build": "vite build && tsc --noEmit",
+		"clean": "rm -rf ./dist ./node_modules ./src/paraglide"
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",

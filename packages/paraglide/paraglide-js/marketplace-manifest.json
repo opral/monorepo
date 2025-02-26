@@ -23,28 +23,34 @@
 			"/migrating-to-v2": "./docs/migrating-to-v2.md",
 			"/changelog": "./CHANGELOG.md"
 		},
+		"Getting Started": {
+			"/vanilla-js-ts": "./docs/getting-started/vanilla-js-ts.md",
+			"/sveltekit": "./examples/sveltekit/README.md",
+			"/astro": "./examples/astro/README.md",
+			"/react-router": "./examples/react-router/README.md",
+			"/next-js": "./docs/getting-started/next-js.md",
+			"/vite": "./examples/vite/README.md"
+		},
 		"Usage": {
-			"/getting-started": "./README.md",
-			"/manual-setup": "./docs/manual-setup.md",
-			"/compiling-messages": "./docs/compiling-messages.md",
+			"/basics": "./docs/basics.md",
 			"/strategy": "./docs/strategy.md",
 			"/variants": "./docs/variants.md",
-			"/storage-format": "./docs/storage-format.md"
+			"/file-formats": "./docs/file-formats.md",
+			"/multi-tenancy": "./docs/multi-tenancy.md",
+			"/server-side-rendering": "./docs/server-side-rendering.md",
+			"/compiling-messages": "./docs/compiling-messages.md",
+			"/incremental-migration": "./examples/incremental-migration/README.md"
+		},
+		"Ecosystem": {
+			"Sherlock VSCode extension": "/m/r7kp499g/app-inlang-ideExtension",
+			"CLI for automation": "/m/2qj2w8pu/app-inlang-cli",
+			"Fink web editor": "/m/tdozzpar/app-inlang-finkLocalizationEditor"
 		},
 		"Reference": {
 			"/architecture": "./docs/architecture.md",
-			"/compiler-options": "./docs/compiler-options.md"
-		},
-		"Frameworks": {
-			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",
-			"NextJS": "/m/osslbuzt/paraglide-next-i18n",
-			"Astro": "/m/iljlwzfs/paraglide-astro-i18n",
-			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n"
-		},
-		"Ecosystem": {
-			"VSCode Extension": "/m/r7kp499g/app-inlang-ideExtension",
-			"Machine Translation": "/m/2qj2w8pu/app-inlang-cli",
-			"CAT Editor": "/m/tdozzpar/app-inlang-finkLocalizationEditor"
+			"/compiler-options": "./docs-api/compiler-options.md",
+			"/runtime": "./docs-api/runtime/-internal-.md",
+			"/errors": "./docs/errors.md"
 		}
 	},
 	"keywords": [
@@ -68,6 +74,7 @@
 		"javascript",
 		"solid",
 		"typescript",
+		"react router",
 		"inlang"
 	],
 	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],

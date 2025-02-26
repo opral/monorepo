@@ -1,10 +1,12 @@
 import { compileBundle } from "./compile-bundle.js";
-import { DEFAULT_REGISTRY } from "./registry.js";
 import { selectBundleNested, type InlangProject } from "@inlang/sdk";
 import { lookup } from "../services/lookup.js";
 import { generateLocaleModules } from "./output-structure/locale-modules.js";
 import { generateMessageModules } from "./output-structure/message-modules.js";
-import { defaultCompilerOptions, type CompilerOptions } from "./compile.js";
+import {
+	defaultCompilerOptions,
+	type CompilerOptions,
+} from "./compiler-options.js";
 
 /**
  * Takes an inlang project and compiles it into a set of files.
@@ -18,10 +20,7 @@ import { defaultCompilerOptions, type CompilerOptions } from "./compile.js";
  */
 export const compileProject = async (args: {
 	project: InlangProject;
-	compilerOptions?: Pick<
-		CompilerOptions,
-		"emitGitIgnore" | "emitPrettierIgnore" | "outputStructure"
-	>;
+	compilerOptions?: Omit<CompilerOptions, "fs" | "project" | "outdir">;
 }): Promise<Record<string, string>> => {
 	const optionsWithDefaults = {
 		...defaultCompilerOptions,
@@ -38,7 +37,6 @@ export const compileProject = async (args: {
 		compileBundle({
 			bundle,
 			fallbackMap,
-			registry: DEFAULT_REGISTRY,
 		})
 	);
 
@@ -48,7 +46,8 @@ export const compileProject = async (args: {
 		const regularOutput = generateLocaleModules(
 			compiledBundles,
 			settings,
-			fallbackMap
+			fallbackMap,
+			optionsWithDefaults
 		);
 		Object.assign(output, regularOutput);
 	}
@@ -57,7 +56,8 @@ export const compileProject = async (args: {
 		const messageModuleOutput = generateMessageModules(
 			compiledBundles,
 			settings,
-			fallbackMap
+			fallbackMap,
+			optionsWithDefaults
 		);
 		Object.assign(output, messageModuleOutput);
 	}
@@ -70,9 +70,17 @@ export const compileProject = async (args: {
 		output[".prettierignore"] = ignoreDirectory;
 	}
 
-	for (const file in output) {
-		if (file.endsWith(".js") || file.endsWith(".ts")) {
-			output[file] = `// @ts-nocheck\n${output[file]}`;
+	for (const [filename, content] of Object.entries(
+		optionsWithDefaults.additionalFiles ?? {}
+	)) {
+		output[filename] = content;
+	}
+
+	for (const [filename, content] of Object.entries(output)) {
+		if (optionsWithDefaults.includeEslintDisableComment) {
+			if (filename.endsWith(".js")) {
+				output[filename] = `// eslint-disable\n${content}`;
+			}
 		}
 	}
 

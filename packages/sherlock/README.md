@@ -26,7 +26,7 @@ Visualize, edit, and lint translated strings effortlessly using Inline Decoratio
 	<br />
 </div>
 
-<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/ide-extension/assets/sherlock-cover-small.png"/>
+<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/sherlock-cover-small.png"/>
 
 <br>
 <br>
@@ -41,7 +41,7 @@ Visualize, edit, and lint translated strings effortlessly using Inline Decoratio
 
 # Quick start
 
-<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/ide-extension/assets/sherlock-start.png"/>
+<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/sherlock-start.png"/>
 
 Install the extension and click `Getting Started` in the `Sherlock Tab`.
 
@@ -99,7 +99,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/ide-extension/assets/ide-inline.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/ide-inline.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">🔎 Inline Annotations</p>
@@ -113,7 +113,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/ide-extension/assets/ide-extract.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/ide-extract.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">✂️ Extract Messages (translations)</p>
@@ -127,7 +127,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/ide-extension/assets/ide-lint.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/ide-lint.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">❌ Message Linting</p>
@@ -143,7 +143,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/ide-extension/assets/sherlock-monorepo.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/sherlock-monorepo.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">📦 Monorepo support</p>
@@ -157,7 +157,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/ide-extension/assets/sherlock-update.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/sherlock-update.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">🔁 Update Translations</p>
@@ -171,7 +171,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/ide-extension/assets/sherlock-errors.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/sherlock-errors.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">⚠ Transparent Errors</p>
@@ -247,7 +247,7 @@ You can disable the automatic generation of human IDs by setting the following p
 
 If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working with Visual Studio Code to fix it. In the meantime, you can right-click the Inlang icon to hide it:
 
-<img width="25%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/ide-extension/assets/hide-badge.png"/>
+<img width="25%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/hide-badge.png"/>
 
 ## Support: Join our Discord / Open an issue on GitHub!
 

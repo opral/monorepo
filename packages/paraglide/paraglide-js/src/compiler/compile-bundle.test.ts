@@ -1,14 +1,41 @@
 import { test, expect } from "vitest";
 import { compileBundle } from "./compile-bundle.js";
 import type { BundleNested } from "@inlang/sdk";
+import { toSafeModuleId } from "./safe-module-id.js";
 
 test("compiles to jsdoc", async () => {
+	const mockBundle: BundleNested = {
+		id: "blue_moon_bottle",
+		declarations: [{ type: "input-variable", name: "age" }],
+		messages: [
+			{
+				id: "message-id",
+				bundleId: "blue_moon_bottle",
+				locale: "en",
+				selectors: [],
+				variants: [
+					{
+						id: "1",
+						messageId: "message-id",
+						matches: [],
+						pattern: [
+							{ type: "text", value: "Hello" },
+							{
+								type: "expression",
+								arg: { type: "variable-reference", name: "age" },
+							},
+						],
+					},
+				],
+			},
+		],
+	};
+
 	const result = compileBundle({
 		fallbackMap: {
 			en: "en",
 			"en-US": "en",
 		},
-		registry: {},
 		bundle: mockBundle,
 	});
 
@@ -26,40 +53,50 @@ test("compiles to jsdoc", async () => {
 * @returns {string}
 */
 /* @__NO_SIDE_EFFECTS__ */
-const blue_moon_bottle = (inputs, options = {}) => {
+export const blue_moon_bottle = (inputs, options = {}) => {
 	const locale = options.locale ?? getLocale()
 	if (locale === "en") return en.blue_moon_bottle(inputs)
-	if (locale === "en-US") return en_US.blue_moon_bottle(inputs)
+	if (locale === "en-US") return en_us.blue_moon_bottle(inputs)
 	return "blue_moon_bottle"
-}
-	
-export { blue_moon_bottle }"`
+};"`
 	);
 });
 
-const mockBundle: BundleNested = {
-	id: "blue_moon_bottle",
-	declarations: [{ type: "input-variable", name: "age" }],
-	messages: [
-		{
-			id: "message-id",
-			bundleId: "blue_moon_bottle",
-			locale: "en",
-			selectors: [],
-			variants: [
-				{
-					id: "1",
-					messageId: "message-id",
-					matches: [],
-					pattern: [
-						{ type: "text", value: "Hello" },
-						{
-							type: "expression",
-							arg: { type: "variable-reference", name: "age" },
-						},
-					],
-				},
-			],
-		},
-	],
-};
+// https://github.com/opral/inlang-paraglide-js/issues/285
+test("compiles bundles with arbitrary module identifiers", async () => {
+	const mockBundle: BundleNested = {
+		id: "$p@44🍌",
+		declarations: [{ type: "input-variable", name: "age" }],
+		messages: [
+			{
+				id: "message-id",
+				bundleId: "$p@44🍌",
+				locale: "en",
+				selectors: [],
+				variants: [
+					{
+						id: "1",
+						messageId: "message-id",
+						matches: [],
+						pattern: [
+							{ type: "text", value: "Hello" },
+							{
+								type: "expression",
+								arg: { type: "variable-reference", name: "age" },
+							},
+						],
+					},
+				],
+			},
+		],
+	};
+
+	const result = compileBundle({
+		fallbackMap: {},
+		bundle: mockBundle,
+	});
+
+	expect(result.bundle.code).includes(
+		`export { ${toSafeModuleId("$p@44🍌")} as "$p@44🍌" }`
+	);
+});

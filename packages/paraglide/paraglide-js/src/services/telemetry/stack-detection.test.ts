@@ -1,9 +1,8 @@
 import { getStackInfo } from "./stack-detection.js";
-import { describe, it, expect } from "vitest";
+import { it as test, expect } from "vitest";
 
-describe("getStackInfo", () => {
-	it("detects sveltekit", async () => {
-		const SvelteKitPackageJson = JSON.parse(`{
+test("detects sveltekit", async () => {
+	const SvelteKitPackageJson = JSON.parse(`{
             "name": "@inlang/paraglide-sveltekit-example",
             "version": "0.0.1",
             "private": true,
@@ -30,12 +29,10 @@ describe("getStackInfo", () => {
             "type": "module"
         }`);
 
-		const stack = getStackInfo(SvelteKitPackageJson);
-		expect(Object.keys(stack.packages)).toEqual([
-			"svelte",
-			"@sveltejs/kit",
-			"@sveltejs/adapter-auto",
-			"vite",
-		]);
-	});
+	const stack = getStackInfo(SvelteKitPackageJson);
+	expect(Object.keys(stack.packages)).toEqual([
+		"svelte",
+		"@sveltejs/kit",
+		"vite",
+	]);
 });

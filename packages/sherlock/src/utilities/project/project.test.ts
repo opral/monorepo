@@ -3,7 +3,7 @@ import * as vscode from "vscode"
 import * as fs from "node:fs/promises"
 import { setState, state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
-import { telemetry } from "../../services/telemetry/index.js"
+import { capture } from "../../services/telemetry/index.js"
 import {
 	createProjectViewNodes,
 	getTreeItem,
@@ -12,7 +12,7 @@ import {
 	type ProjectViewNode,
 	projectView,
 } from "./project.js"
-import { loadProjectFromDirectoryInMemory } from "@inlang/sdk"
+import { loadProjectFromDirectory } from "@inlang/sdk"
 import type { FileSystem } from "../fs/createFileSystemMapper.js"
 
 vi.mock("vscode", () => ({
@@ -37,7 +37,7 @@ vi.mock("vscode", () => ({
 }))
 
 vi.mock("@inlang/sdk", () => ({
-	loadProjectFromDirectoryInMemory: vi.fn(),
+	loadProjectFromDirectory: vi.fn(),
 }))
 
 vi.mock("../state.js", () => ({
@@ -88,9 +88,7 @@ vi.mock("../../configuration.js", () => ({
 }))
 
 vi.mock("../../services/telemetry/index.js", () => ({
-	telemetry: {
-		capture: vi.fn(),
-	},
+	capture: vi.fn(),
 }))
 
 vi.mock("@lix-js/client", () => ({
@@ -219,14 +217,14 @@ describe("handleTreeSelection", () => {
 			},
 		}
 
-		// Mock the resolved value of loadProjectFromDirectoryInMemory to return the mockProject
+		// Mock the resolved value of loadProjectFromDirectory to return the mockProject
 		// @ts-expect-error
-		vi.mocked(loadProjectFromDirectoryInMemory).mockResolvedValue(mockProject)
+		vi.mocked(loadProjectFromDirectory).mockResolvedValue(mockProject)
 
 		await handleTreeSelection({ selectedNode, fs, workspaceFolder })
 
 		expect(setState).toBeCalled()
-		expect(telemetry.capture).toBeCalledWith(
+		expect(capture).toBeCalledWith(
 			expect.objectContaining({
 				event: "IDE-EXTENSION loaded project",
 				properties: expect.objectContaining({
@@ -253,7 +251,7 @@ describe("handleTreeSelection", () => {
 		} as vscode.WorkspaceFolder
 
 		// @ts-expect-error
-		loadProjectFromDirectoryInMemory.mockRejectedValue(new Error("Loading failed"))
+		loadProjectFromDirectory.mockRejectedValue(new Error("Loading failed"))
 
 		await handleTreeSelection({ selectedNode, fs, workspaceFolder })
 
@@ -274,7 +272,7 @@ describe("handleTreeSelection", () => {
 
 		const error = new Error("Loading failed")
 
-		vi.mocked(loadProjectFromDirectoryInMemory).mockRejectedValue(error)
+		vi.mocked(loadProjectFromDirectory).mockRejectedValue(error)
 
 		const mockWorkspaceFolder = {
 			uri: { fsPath: "/path/to/workspace" },

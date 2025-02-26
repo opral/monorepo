@@ -175,8 +175,6 @@ export class WindowManagerSandbox {
 			// const patchedHtml = __html__.split('__%%InitialWindowMode%%__').join(this.currentWindowMode);
 
 			// const patchedHtml = "<sc"+"ript>window.location.href = 'http://127.0.0.1:8080/dist/ui.html?nocache="+ (new Date()).getTime() +"';</scr"+"ipt>";
-			
-			
 
 			figma.showUI(
 				`

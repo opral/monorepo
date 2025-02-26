@@ -38,7 +38,7 @@ You can still achieve complex formatting like so:
 For a message with multiple cases, aka a _select message_, you can define a message for each case & then use a Map to index into it.
 
 ```ts
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 
 const season = {
   spring: m.spring,
@@ -53,7 +53,7 @@ const msg = season["spring"](); // Hello spring!
 For date & currency formatting use the `.toLocaleString` method on the `Date` or `Number`.
 
 ```ts
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 import { locale } from "./paraglide/runtime.js";
 
 const todaysDate = new Date();
@@ -75,7 +75,7 @@ m.the_price_is({
 If you want to force a language, but don't know _which_ language ahead of time you can pass the `locale` option as the second parameter to a message function. This is often handy on the server.
 
 ```js
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 const msg = m.hello({ name: "Samuel" }, { locale: "de" }); // Hallo Samuel!
 ```
 
@@ -87,7 +87,7 @@ If you are using a framework library this happens automatically.
 
 ```js
 import { setLocale, onSetLocale } from "./paraglide/runtime.js";
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 
 onSetLocale((newLanguageTag) => {
   console.log(`The language changed to ${newLanguageTag}`);

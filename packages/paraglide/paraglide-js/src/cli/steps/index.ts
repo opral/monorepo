@@ -1,9 +1,0 @@
-export { addVitePlugin } from "./add-vite-plugin.js";
-export { checkForUncommittedChanges } from "./check-for-uncomitted-changes.js";
-export { detectBundler } from "./detect-bundler.js";
-export { initializeInlangProject } from "./initialize-inlang-project.js";
-export { maybeAddSherlock } from "./maybe-add-sherlock.js";
-export { promptForOutdir } from "./prompt-for-outdir.js";
-export { runCompiler } from "./run-compiler.js";
-export { updatePackageJson } from "./update-package-json.js";
-export { maybeUpdateTsConfig } from "./update-ts-config.js";
