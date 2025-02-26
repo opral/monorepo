@@ -33,7 +33,7 @@ export function PlateEditor() {
 			})
 		) {
 			const nodes = editor.api.markdown.deserialize(loadedMd);
-			const idEnrichedNodes = [];
+			const idEnrichedNodes: any[] = [];
 
 			let nextId: string | undefined = undefined;
 
@@ -48,15 +48,29 @@ export function PlateEditor() {
 				if (
 					!node.type &&
 					node.text?.length > 0 &&
-					node.text.startsWith("<!-- id: ") &&
-					node.text.endsWith(" -->")
+					node.text.startsWith("<!-- id: ")
 				) {
-					const regex = /id:\s*([\w-]+)/;
-					const match = node.text.match(regex);
+					if (node.text.endsWith(" -->")) {
+						const regex = /id:\s*([\w-]+)/;
+						const match = node.text.match(regex);
 
-					if (match) {
-						nextId = match[1];
-						continue;
+						if (match) {
+							nextId = match[1];
+							continue;
+						}
+					} else if (node.text.endsWith(" -->\n")) {
+						// Plates markdown parser converts a <br> into \n here -> we need to handle empty paragraphs differently
+						const regex = /id:\s*([\w-]+)/;
+						const match = node.text.match(regex);
+
+						if (match) {
+							idEnrichedNodes.push({
+								id: match[1],
+								type: "p",
+								children: [{ text: "" }],
+							});
+							continue;
+						}
 					}
 				}
 
