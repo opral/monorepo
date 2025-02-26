@@ -7,7 +7,16 @@ imports:
 
 This example demonstrates how to use Paraglide JS with Astro in SSR mode. The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/astro).
 
-<doc-callout type="tip">Pull requests that improve this example are welcome.</doc-callout>
+
+<doc-callout type="info">You can integrate Paraglide JS yourself to achieve SSG. PR with an example is welcome.</doc-callout>
+
+| Feature      | Supported |
+| ------------ | --------- |
+| CSR          | ✅        |
+| SSR          | ✅        |
+| SSG          | ❌        |
+| URLPattern   | ✅        |
+| Any Strategy | ✅        |
 
 ## Setup
 
@@ -51,33 +60,21 @@ export const onRequest = defineMiddleware((context, next) => {
 
 You can read more about about Astro's middleware [here](https://docs.astro.build/en/guides/middleware).
 
-## Features of the example
+## Usage
 
-<doc-callout type="info">You can integrate Paraglide JS yourself to achieve SSG. PR with an example is welcome.</doc-callout>
-
-| Feature      | Supported |
-| ------------ | --------- |
-| CSR          | ✅        |
-| SSR          | ✅        |
-| SSG          | ❌        |
-| URLPattern   | ✅        |
-| Any Strategy | ✅        |
+See the [basics documentation](/m/gerre34r/library-inlang-paraglideJs/basics) for more information on how to use Paraglide's messages, parameters, and locale management.
 
 ## Disabling AsyncLocalStorage in serverless environments
 
-You can disable async local storage in serverless environments by using the [globalVariable strategy](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy#globalvariable) instead of the `serverMiddleware()` function. 
+You can disable async local storage in serverless environments by using the `disableAsyncLocalStorage` option.
 
-In the `src/middleware.ts` file, replace the `serverMiddleware()` function with the following code:
+<doc-callout type="warning">This is only safe in serverless environments where each request gets its own isolated runtime context. Using it in multi-request server environments could lead to data leakage between concurrent requests.</doc-callout>
+
 
 ```diff
 import { serverMiddleware } from "./paralide/runtime.js";
 
-+let locale = "en";
-+overwriteGetLocale(() => locale);
-
 export const onRequest = defineMiddleware((context, next) => {
-+	locale = extractLocaleFromRequest(context.request);
-  // sets the global variable on the server
-  return next();
++	return serverMiddleware(context.request, () => next(), { disableAsyncLocalStorage: true });
 });
 ```

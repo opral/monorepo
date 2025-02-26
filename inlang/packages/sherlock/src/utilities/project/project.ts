@@ -1,13 +1,14 @@
 import * as vscode from "vscode"
-import { loadProjectFromDirectoryInMemory } from "@inlang/sdk"
+import { loadProjectFromDirectory } from "@inlang/sdk"
 import { CONFIGURATION } from "../../configuration.js"
-import { telemetry } from "../../services/telemetry/index.js"
+import { capture } from "../../services/telemetry/index.js"
 import { setState, state } from "../state.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
 import { transpileToCjs } from "../import/transpileToCjs.js"
 import * as fs from "node:fs"
 import type { FileSystem } from "../fs/createFileSystemMapper.js"
 import path from "node:path"
+import { getLocalAccount, saveLocalAccount } from "../../services/account/index.js"
 
 let projectViewNodes: ProjectViewNode[] = []
 
@@ -97,19 +98,30 @@ export async function handleTreeSelection(args: {
 	const newSelectedProject = projectViewNodes.find((node) => node.isSelected)?.path as string
 
 	try {
-		const inlangProject = await loadProjectFromDirectoryInMemory({
+		const localAccount = getLocalAccount({ fs })
+
+		const inlangProject = await loadProjectFromDirectory({
 			path: newSelectedProject,
 			fs,
+			account: localAccount,
+			appId: CONFIGURATION.STRINGS.APP_ID,
 			preprocessPluginBeforeImport: transpileToCjs,
 		})
-
-		console.log(inlangProject)
 
 		setState({
 			...state(),
 			project: inlangProject,
 			selectedProjectPath: newSelectedProject,
 		})
+
+		if (!localAccount) {
+			const activeAccount = await state()
+				.project.lix.db.selectFrom("active_account")
+				.selectAll()
+				.executeTakeFirstOrThrow()
+
+			saveLocalAccount({ fs, account: activeAccount })
+		}
 
 		// Update decorations
 		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire(undefined)
@@ -124,7 +136,7 @@ export async function handleTreeSelection(args: {
 			workingDirectory: path.normalize(args.workspaceFolder.uri.fsPath),
 		})
 
-		telemetry.capture({
+		capture({
 			event: "IDE-EXTENSION loaded project",
 			properties: {
 				errors: await inlangProject.errors.get(),

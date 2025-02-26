@@ -42,7 +42,7 @@ const NoProjectView = () => {
 				onClick={() => setShowNewProjectDialog(true)}
 				className="w-[340px]"
 			>
-				Create new project
+				Create project
 			</SlButton>
 			<CreateProjectDialog
 				showNewProjectDialog={showNewProjectDialog}
