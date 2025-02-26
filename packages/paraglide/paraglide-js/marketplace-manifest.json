@@ -50,6 +50,7 @@
 			"/architecture": "./docs/architecture.md",
 			"/compiler-options": "./docs-api/compiler-options.md",
 			"/runtime": "./docs-api/runtime/-internal-.md",
+			"/server": "./docs-api/server/-internal-.md",
 			"/errors": "./docs/errors.md"
 		}
 	},

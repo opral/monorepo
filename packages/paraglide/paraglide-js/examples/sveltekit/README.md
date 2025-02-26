@@ -61,14 +61,14 @@ See https://svelte.dev/docs/kit/accessibility#The-lang-attribute for more inform
 </html>
 ```
 
-### Add the serverMiddleware to `src/hooks.server.ts`
+### Add the `paraglideMiddleware()` to `src/hooks.server.ts`
 
 ```typescript
 import type { Handle } from '@sveltejs/kit';
-import { serverMiddleware } from '$lib/paraglide/runtime';
+import { paraglideMiddleware } from '$lib/paraglide/server';
 
 export const handle: Handle = ({ event, resolve }) => {
-	return serverMiddleware(event.request, ({ request, locale }) =>
+	return paraglideMiddleware(event.request, ({ request, locale }) =>
 		resolve(
 			{ ...event, request },
 			{ transformPageChunk: ({ html }) => html.replace('%lang%', locale)}
@@ -103,7 +103,7 @@ If you're deploying to SvelteKit's Edge adapter like Vercel Edge or Cloudflare P
 
 ```typescript
 export const handle: Handle = ({ event, resolve }) => {
-	return serverMiddleware(
+	return paraglideMiddleware(
 		event.request, 
 		({ request }) => resolve({ ...event, request }),
 		{ disableAsyncLocalStorage: true }

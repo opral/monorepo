@@ -76,13 +76,17 @@ The Paraglide runtime API.
 
 > **overwriteGetUrlOrigin**: [`overwriteGetUrlOrigin`](-internal-.md#overwritegeturlorigin)
 
+#### overwriteServerAsyncLocalStorage
+
+> **overwriteServerAsyncLocalStorage**: [`overwriteServerAsyncLocalStorage`](-internal-.md#overwriteserverasynclocalstorage)
+
 #### overwriteSetLocale
 
 > **overwriteSetLocale**: [`overwriteSetLocale`](-internal-.md#overwritesetlocale)
 
-#### serverMiddleware
+#### serverAsyncLocalStorage
 
-> **serverMiddleware**: [`serverMiddleware`](-internal-.md#servermiddleware)
+> **serverAsyncLocalStorage**: [`serverAsyncLocalStorage`](-internal-.md#serverasynclocalstorage)
 
 #### setLocale
 
