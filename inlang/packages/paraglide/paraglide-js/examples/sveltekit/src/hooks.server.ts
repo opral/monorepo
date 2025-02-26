@@ -1,8 +1,8 @@
 import type { Handle } from '@sveltejs/kit';
-import { serverMiddleware } from '$lib/paraglide/runtime';
+import { paraglideMiddleware } from '$lib/paraglide/server';
 
 export const handle: Handle = ({ event, resolve }) => {
-	return serverMiddleware(event.request, ({ request, locale }) =>
+	return paraglideMiddleware(event.request, ({ request, locale }) =>
 		resolve(
 			{ ...event, request },
 			{

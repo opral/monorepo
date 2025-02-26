@@ -15,12 +15,15 @@ test("sets the locale and origin", async () => {
 
 	// simulating multiple requests that could interfere with each other
 	await Promise.all([
-		runtime.middleware(new Request(new URL("https://example.com/page")), () => {
-			expect(runtime.getLocale()).toBe("en");
-			expect(runtime.getUrlOrigin()).toBe("https://example.com");
-		}),
+		runtime.paraglideMiddleware(
+			new Request(new URL("https://example.com/page")),
+			() => {
+				expect(runtime.getLocale()).toBe("en");
+				expect(runtime.getUrlOrigin()).toBe("https://example.com");
+			}
+		),
 
-		runtime.middleware(
+		runtime.paraglideMiddleware(
 			new Request(new URL("https://peter.com/de/page")),
 			() => {
 				expect(runtime.getLocale()).toBe("de");
@@ -44,7 +47,10 @@ test("delocalizes the url if the url strategy is used and returns the locale", a
 
 	const request = new Request(new URL("https://example.com/de/page"));
 
-	const result: any = await runtime.middleware(request, (args) => args);
+	const result: any = await runtime.paraglideMiddleware(
+		request,
+		(args) => args
+	);
 
 	expect(result.request.url).toBe("https://example.com/page");
 	expect(result.locale).toBe("de");
@@ -61,7 +67,7 @@ test("does not delocalize the url if the url strategy is not used", async () => 
 
 	const request = new Request(new URL("https://example.com/de/page"));
 
-	const result = await runtime.middleware(request, (args) => args);
+	const result = await runtime.paraglideMiddleware(request, (args) => args);
 
 	expect(result.request.url).toBe("https://example.com/de/page");
 	// falling back to baseLocale
@@ -95,7 +101,7 @@ test("redirects to localized URL when non-URL strategy determines locale", async
 		},
 	});
 
-	const response = await runtime.middleware(request, () => {
+	const response = await runtime.paraglideMiddleware(request, () => {
 		// This shouldn't be called since we should redirect
 		throw new Error("Should not reach here");
 	});
@@ -135,7 +141,7 @@ test("does not redirect if URL already matches determined locale", async () => {
 	});
 
 	let middlewareResolveWasCalled = false;
-	await runtime.middleware(request, () => {
+	await runtime.paraglideMiddleware(request, () => {
 		middlewareResolveWasCalled = true;
 	});
 
@@ -158,7 +164,7 @@ test("works with disableAsyncLocalStorage option", async () => {
 	const request = new Request(new URL("https://example.com/de/page"));
 
 	// Process the request with AsyncLocalStorage disabled
-	const result = await runtime.middleware(
+	const result = await runtime.paraglideMiddleware(
 		request,
 		(args) => {
 			// Verify we still get the correct locale
@@ -194,7 +200,7 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 
 	// simulating multiple requests that could interference with each other
 	await Promise.all([
-		runtime.middleware(
+		runtime.paraglideMiddleware(
 			new Request(new URL("https://example.com/page")),
 			() => {
 				expect(runtime.getLocale()).toBe("en");
@@ -203,7 +209,7 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 			{ disableAsyncLocalStorage: true }
 		),
 
-		runtime.middleware(
+		runtime.paraglideMiddleware(
 			new Request(new URL("https://peter.com/de/page")),
 			() => {
 				expect(runtime.getLocale()).toBe("de");
