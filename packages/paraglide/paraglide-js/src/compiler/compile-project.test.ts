@@ -86,6 +86,45 @@ test("emitPrettierIgnore", async () => {
 	expect(_false).not.toHaveProperty(".prettierignore");
 });
 
+test("handles message bundles with a : in the id", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				locales: ["en", "de"],
+				baseLocale: "en",
+			},
+		}),
+	});
+
+	await insertBundleNested(
+		project.db,
+		createBundleNested({
+			id: "hello:world",
+			messages: [
+				{
+					locale: "en",
+					variants: [{ pattern: [{ type: "text", value: "Hello world!" }] }],
+				},
+			],
+		})
+	);
+
+	const output = await compileProject({
+		project,
+	});
+
+	const code = await bundleCode(
+		output,
+		`export * as m from "./paraglide/messages.js"
+		 export * as runtime from "./paraglide/runtime.js"`
+	);
+
+	const { m } = await importCode(code);
+
+	expect(m["hello:world"]()).toBe("Hello world!");
+
+})
+
 // https://github.com/opral/inlang-paraglide-js/issues/347
 test("can emit message bundles with more than 255 characters", async () => {
 	const project = await loadProjectInMemory({
