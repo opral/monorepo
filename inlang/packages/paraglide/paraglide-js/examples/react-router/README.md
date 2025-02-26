@@ -35,7 +35,7 @@ export default defineConfig({
 
 3. Done :) 
 
-Run the app and start translating. See https://inlang.com/m/gerre34r/library-inlang-paraglideJs/getting-started for usage instructions.
+Run the app and start translating. See the [basics documentation](/m/gerre34r/library-inlang-paraglideJs/basics) for information on how to use Paraglide's messages, parameters, and locale management.
 
 ## Server side rendering
 

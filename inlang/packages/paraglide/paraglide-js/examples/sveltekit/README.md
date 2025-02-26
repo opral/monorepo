@@ -5,7 +5,22 @@ imports:
 
 # SvelteKit example
 
-This example shows how to use Paraglide with SvelteKit. The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/sveltekit).
+<img src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/examples/sveltekit/sveltekit-banner.png" alt="i18n library for SvelteKit" width="10000000px" />
+
+This example shows how to use Paraglide with SvelteKit. 
+The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/sveltekit).
+
+<doc-callout type="info">
+  You can build your own Paraglide JS implementation to achieve SSG. A PR with docs is welcome.
+</doc-callout>
+
+| Feature      | Supported |
+| ------------ | --------- |
+| CSR          | ✅        |
+| SSR          | ✅        |
+| SSG          | ❌        |
+| URLPattern   | ✅        |
+| Any Strategy | ✅        |
 
 ## Getting started
 
@@ -75,17 +90,9 @@ export const reroute: Reroute = (request) => {
 
 ### Done :)
 
-Check out https://inlang.com/m/gerre34r/library-inlang-paraglideJs/getting-started on how to use Paraglide Js.
+## Usage
 
-## Features of the example
-
-| Feature      | Supported |
-| ------------ | --------- |
-| CSR          | ✅        |
-| SSR          | ✅        |
-| SSG          | ❌        |
-| URLPattern   | ✅        |
-| Any Strategy | ✅        |
+See the [basics documentation](/m/gerre34r/library-inlang-paraglideJs/basics) for more information on how to use Paraglide's messages, parameters, and locale management.
 
 ## Additional guidance
 
@@ -106,3 +113,4 @@ export const handle: Handle = ({ event, resolve }) => {
 
 ⚠️ Only use this option in serverless environments where each request gets its own isolated runtime context. Using it in multi-request server environments could lead to data leakage between concurrent requests.
 </doc-callout>
+
