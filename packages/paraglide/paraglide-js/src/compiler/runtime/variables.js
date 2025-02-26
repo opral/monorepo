@@ -33,6 +33,34 @@ export const strategy = ["globalVariable"];
  */
 export const urlPatterns = [];
 
+/**
+ * @typedef {{ getStore(): { locale: Locale, origin: string } | undefined, run: (store: any, cb: any) => any }} AsyncLocalStorageSubset
+ */
+
+/**
+ * Server side async local storage that is set by `serverMiddleware()`.
+ *
+ * The variable is used to retrieve the locale and origin in a server-side
+ * rendering context without effecting other requests.
+ *
+ * @type {AsyncLocalStorageSubset | undefined}
+ */
+export let serverAsyncLocalStorage = undefined;
+
+/**
+ * Sets the server side async local storage.
+ *
+ * The function is needed because the `runtime.js` file
+ * must define the `serverAsyncLocalStorage` variable to
+ * avoid a circular import between `runtime.js` and
+ * `server.js` files.
+ *
+ * @param {AsyncLocalStorageSubset | undefined} value
+ */
+export function overwriteServerAsyncLocalStorage(value) {
+	serverAsyncLocalStorage = value;
+}
+
 export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;
 
 export const TREE_SHAKE_URL_STRATEGY_USED = false;

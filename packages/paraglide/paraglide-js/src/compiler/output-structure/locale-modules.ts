@@ -4,6 +4,7 @@ import { createRuntimeFile } from "../runtime/create-runtime.js";
 import { createRegistry } from "../registry.js";
 import type { CompilerOptions } from "../compiler-options.js";
 import { toSafeModuleId } from "../safe-module-id.js";
+import { createServerFile } from "../server/create-server-file.js";
 
 export function generateLocaleModules(
 	compiledBundles: CompiledBundleWithMessages[],
@@ -31,6 +32,7 @@ export function generateLocaleModules(
 			locales: settings.locales,
 			compilerOptions,
 		}),
+		["server.js"]: createServerFile(),
 		["registry.js"]: createRegistry(),
 		["messages/_index.js"]: indexFile,
 		["messages.js"]: [

@@ -5,6 +5,7 @@ import { createRegistry } from "../registry.js";
 import { escapeForSingleQuoteString } from "../../services/codegen/escape.js";
 import type { CompilerOptions } from "../compiler-options.js";
 import { toSafeModuleId } from "../safe-module-id.js";
+import { createServerFile } from "../server/create-server-file.js";
 
 export function generateMessageModules(
 	compiledBundles: CompiledBundleWithMessages[],
@@ -21,6 +22,7 @@ export function generateMessageModules(
 			locales: settings.locales,
 			compilerOptions,
 		}),
+		["server.js"]: createServerFile(),
 		["registry.js"]: createRegistry(),
 	};
 
