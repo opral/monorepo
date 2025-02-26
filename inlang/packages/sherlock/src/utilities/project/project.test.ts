@@ -3,6 +3,7 @@ import * as vscode from "vscode"
 import * as fs from "node:fs/promises"
 import { setState, state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
+import { capture } from "../../services/telemetry/index.js"
 import {
 	createProjectViewNodes,
 	getTreeItem,
@@ -84,6 +85,10 @@ vi.mock("../../configuration.js", () => ({
 			},
 		},
 	},
+}))
+
+vi.mock("../../services/telemetry/index.js", () => ({
+	capture: vi.fn(),
 }))
 
 vi.mock("@lix-js/client", () => ({
@@ -219,6 +224,14 @@ describe("handleTreeSelection", () => {
 		await handleTreeSelection({ selectedNode, fs, workspaceFolder })
 
 		expect(setState).toBeCalled()
+		expect(capture).toBeCalledWith(
+			expect.objectContaining({
+				event: "IDE-EXTENSION loaded project",
+				properties: expect.objectContaining({
+					errors: errors,
+				}),
+			})
+		)
 		expect(CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.fire).toBeCalled()
 	})
 
