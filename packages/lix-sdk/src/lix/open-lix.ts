@@ -1,5 +1,4 @@
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { loadPlugins } from "../plugin/load-plugin.js";
 import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { initFileQueueProcess } from "../file-queue/file-queue-process.js";
@@ -90,7 +89,7 @@ export async function openLix(args: {
 		});
 	}
 
-	const plugins = await loadPlugins(db);
+	const plugins: LixPlugin[] = [];
 	if (args.providePlugins && args.providePlugins.length > 0) {
 		plugins.push(...args.providePlugins);
 	}
@@ -99,9 +98,9 @@ export async function openLix(args: {
 		getAll: async () => plugins,
 	};
 
-	initFileQueueProcess({ lix: { db, plugin, sqlite: args.database } });
+	await initFileQueueProcess({ lix: { db, plugin, sqlite: args.database } });
 
-	initSyncProcess({ lix: { db, plugin, sqlite: args.database } });
+	await initSyncProcess({ lix: { db, plugin, sqlite: args.database } });
 
 	captureOpened({ db });
 
@@ -136,16 +135,17 @@ async function captureOpened(args: { db: Kysely<LixDatabaseSchema> }) {
 			.executeTakeFirstOrThrow();
 
 		const fileExtensions = await usedFileExtensions(args.db);
-
-		await capture("LIX-SDK lix opened", {
-			accountId: activeAccount.id,
-			lixId: lixId.value,
-			telemetryKeyValue: telemetry?.value ?? "on",
-			properties: {
-				lix_sdk_version: ENV_VARIABLES.LIX_SDK_VERSION,
-				stored_file_extensions: fileExtensions,
-			},
-		});
+		if (Math.random() > 0.5) {
+			await capture("LIX-SDK lix opened", {
+				accountId: activeAccount.id,
+				lixId: lixId.value,
+				telemetryKeyValue: telemetry?.value ?? "on",
+				properties: {
+					lix_sdk_version: ENV_VARIABLES.LIX_SDK_VERSION,
+					stored_file_extensions: fileExtensions,
+				},
+			});
+		}
 	} catch {
 		// ignore
 	}

@@ -1,5 +1,42 @@
 # @lix-js/sdk
 
+## 0.4.1
+
+### Patch Changes
+
+- c0b857a: expose `KeyValue` types
+
+## 0.4.0
+
+### Minor Changes
+
+- 1c84afb: disabled plugin loading from the file table because unused and led to https://github.com/opral/inlang-paraglide-js/issues/350
+
+### Patch Changes
+
+- 175f7f9: @lix-js/sdk:
+
+  - define UiDiffComponent type
+  - diff components can now consume multiple diffs
+
+  @lix-js/plugin-csv:
+
+  - update to use new diff component type
+  - display multiple diffs in a single component
+  - add rowId to snapshot content
+  - group diffs by rowId
+
+  lix-file-manager:
+
+  - add checkpoint timeline instead of change list
+  - refactor API diff component rendering
+  - refactor queries to use new UiDiffComponent type
+
+  PR URL:
+  https://github.com/opral/monorepo/pull/3377
+
+  - @lix-js/server-api-schema@0.1.1
+
 ## 0.3.5
 
 ### Patch Changes

@@ -32,6 +32,18 @@ vi.mock("vscode", () => ({
 		cspSource: "cspSource",
 	})),
 	EventEmitter: vi.fn(),
+	CodeActionKind: {
+		QuickFix: vi.fn(),
+	},
+	extensions: {
+		getExtension: vi.fn(() => ({
+			exports: {
+				context: {
+					extensionUri: { fsPath: "/mocked/extension/path" },
+				},
+			},
+		})),
+	},
 }))
 
 vi.mock("../state.js", () => ({
@@ -160,6 +172,7 @@ describe("Message Webview Provider Tests", () => {
 							},
 						],
 					},
+					// German translation is missing (to test the "missing" message)
 				],
 			},
 			workspaceFolder: {
@@ -237,7 +250,6 @@ describe("Message Webview Provider Tests", () => {
 		// Creating the complete webview HTML
 		const html = getHtml({
 			mainContent: "<div>Main Content</div>",
-			context,
 			webview,
 		})
 

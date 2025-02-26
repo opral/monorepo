@@ -124,7 +124,6 @@ export default class TranslatorMachine {
 			const translationCredits = await figma.clientStorage.getAsync(
 				translationCreditsLocalStorageKey,
 			);
-
 		};
 		this.ensureStateLoaded = ensureStateLoadedPromise();
 	}

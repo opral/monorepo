@@ -13,13 +13,10 @@ import { Button } from "@/components/ui/button.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import {
 	activeFileAtom,
-	allChangesDynamicGroupingAtom,
-	changesCurrentVersionAtom,
+	checkpointChangeSetsAtom,
+	intermediateChangesAtom,
 } from "@/state-active-file.ts";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChangeComponent } from "@/components/ChangeComponent.tsx";
-import { DynamicChangeGroup } from "@/components/DynamicChangeGroup.tsx";
-import FilterSelect from "@/components/FilterSelect.tsx";
 import ChatInput from "@/components/ChatInput.tsx";
 import ConnectedChanges from "@/components/ConnectedChanges.tsx";
 import DiscussionThread from "@/components/DiscussionThread.tsx";
@@ -36,6 +33,8 @@ import {
 import IconMerge from "@/components/icons/IconMerge.tsx";
 import { Lix, openLixInMemory, toBlob } from "@lix-js/sdk";
 import { posthog } from "posthog-js";
+import CheckpointComponent from "@/components/CheckpointComponent.tsx";
+import IntermediateCheckpointComponent from "@/components/IntermediateCheckpointComponent.tsx";
 
 const isCsvFile = (path: string) => {
 	return path.toLowerCase().endsWith(".csv");
@@ -67,8 +66,8 @@ export default function Page() {
 	// state atoms
 	const [lix] = useAtom(lixAtom);
 	const [files] = useAtom(filesAtom);
-	const [changesCurrentVersion] = useAtom(changesCurrentVersionAtom);
-	const [allChangesDynamicGrouping] = useAtom(allChangesDynamicGroupingAtom);
+	const [intermediateChanges] = useAtom(intermediateChangesAtom);
+	const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
 	const [activeFile] = useAtom(activeFileAtom);
 	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
 	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
@@ -321,7 +320,7 @@ export default function Page() {
 			<Separator orientation="vertical" className="h-full" />
 
 			{fileIdSearchParams && discussionSearchParams && (
-				<div className="flex-1 h-full">
+				<div className="flex-1 h-full pb-2">
 					<SectionHeader
 						backaction={() => navigate(`/?f=${fileIdSearchParams}`)}
 						title={`Discussion`}
@@ -335,89 +334,65 @@ export default function Page() {
 					</div>
 				</div>
 			)}
-			{fileIdSearchParams && !discussionSearchParams && (
-				<div className="flex-1 h-full">
+			{!discussionSearchParams && (
+				<div className="flex-1 h-full pb-2">
 					<SectionHeader
-						backaction={() => navigate("/")}
+						backaction={activeFile ? () => navigate("/") : undefined}
 						title={
 							activeFile?.path.replace("/", "")
 								? `/ ${activeFile?.path.replace("/", "")}`
 								: "Graph"
-						}
-					>
-						<Button
-							variant="default"
-							size="default"
-							className={activeFile?.path ? "relative" : "hidden"}
-						>
-							<CustomLink
-								to={
-									activeFile?.path && isCsvFile(activeFile.path)
-										? `/app/csv/editor?f=${fileIdSearchParams}`
-										: "https://github.com/opral/monorepo/tree/main/lix"
-								}
-								target={isCsvFile(activeFile?.path || "") ? "_self" : "_blank"}
-							>
-								{activeFile?.path && isCsvFile(activeFile.path)
-									? "Open in CSV app"
-									: "Build a Lix App"}
-							</CustomLink>
-							{/* indicator for user to click on the button */}
-							{activeFile?.path && (
-								<span className="absolute top-0 right-0 w-2.5 h-2.5 bg-blue-900 rounded-full animate-ping" />
-							)}
-						</Button>
-					</SectionHeader>
-					<div className="px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
-						{activeFile?.path && !isCsvFile(activeFile.path) ? (
-							<NoPluginMessage extension={getFileExtension(activeFile.path)} />
-						) : (
-							<>
-								<FilterSelect />
-								{changesCurrentVersion.map((change, i) => (
-									<ChangeComponent
-										key={change.id}
-										change={{
-											...change,
-											snapshot_content: change.snapshot_content as Record<
-												string,
-												any
-											> | null,
-											parent_snapshot_content:
-												change.parent_snapshot_content as Record<
-													string,
-													any
-												> | null,
-											discussion_count: Number(change.discussion_count),
-											discussion_ids: String(change.discussion_ids),
-										}}
-										showTopLine={i !== 0}
-										showBottomLine={i !== changesCurrentVersion.length - 1}
-									/>
-								))}
-							</>
-						)}
-					</div>
-				</div>
-			)}
-			{!fileIdSearchParams && !discussionSearchParams && (
-				<div className="flex-1 h-full">
-					<SectionHeader title="Overview" />
-					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
-						{Object.entries(allChangesDynamicGrouping).map(
-							([date, changes], i) => {
-								return (
-									<DynamicChangeGroup
-										key={date}
-										changes={changes}
-										showTopLine={i !== 0}
-										showBottomLine={
-											i !== Object.keys(allChangesDynamicGrouping).length - 1
-										}
-									/>
-								);
 							}
+					>
+						{fileIdSearchParams && (
+							<Button
+								variant="default"
+								size="default"
+								className={activeFile?.path ? "relative" : "hidden"}
+							>
+								<CustomLink
+									to={
+										activeFile?.path && isCsvFile(activeFile.path)
+											? `/app/csv/editor?f=${fileIdSearchParams}`
+											: "https://github.com/opral/monorepo/tree/main/lix"
+									}
+									target={isCsvFile(activeFile?.path || "") ? "_self" : "_blank"}
+								>
+									{activeFile?.path && isCsvFile(activeFile.path)
+										? "Open in CSV app"
+										: "Build a Lix App"}
+								</CustomLink>
+								{/* indicator for user to click on the button */}
+								{activeFile?.path && (
+									<span className="absolute top-0 right-0 w-2.5 h-2.5 bg-blue-900 rounded-full animate-ping" />
+								)}
+							</Button>
 						)}
+					</SectionHeader>
+					<div className="relative h-full">
+						{/* Fade effect at the top */}
+						<div className="absolute top-0 left-0 w-full h-[20px] bg-gradient-to-b from-white to-transparent pointer-events-none z-10" />
+						<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
+							{activeFile?.path && !isCsvFile(activeFile.path) ? (
+								<NoPluginMessage extension={getFileExtension(activeFile.path)} />
+							) : (
+								<>
+									{intermediateChanges.length > 0 && (
+										<IntermediateCheckpointComponent />
+									)}
+									{checkpointChangeSets.map((checkpointChangeSet, i) => {
+										return (
+											<CheckpointComponent
+												key={checkpointChangeSet.id}
+												checkpointChangeSet={checkpointChangeSet}
+												showTopLine={i !== 0 || intermediateChanges.length > 0}
+												showBottomLine={i !== checkpointChangeSets.length - 1}
+											/>
+										);
+									})}
+								</>
+							)}
+						</div>
 					</div>
 				</div>
 			)}

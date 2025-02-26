@@ -1,5 +1,64 @@
 # @inlang/plugin-t-function-matcher
 
+## 2.0.0
+
+### Major Changes
+
+- 75de822: # Update plugins to support Sherlock v2 & SDK v2 compatibility
+
+  The plugin now uses the new API for message extraction (`bundleId` instead of `messageId`).
+
+  ## Upgrading to Sherlock v2
+
+  **There is no action needed** to upgrade to Sherlock v2. The plugin is now compatible with the new version and if you linked the plugin with `@latest`as we advise in the documentation.
+
+  You should be able to use the plugin with Sherlock v2 without any issues. If there are any issues, please let us know via Discord/GitHub.
+
+  ### Want to keep Sherlock v1 and the old plugin version?
+
+  If you still want to use Sherlock v1, please use the previous major version of the plugin. For Sherlock itself, [please pin the version to `1.x.x`](https://github.com/microsoft/vscode-docs/blob/vnext/release-notes/v1_91.md#extension-install-options) in the VS Code extension settings.
+
+  ### Breaking changes
+
+  - Lint rules are now polyfilled (and therefore may work different), as we are currently reworking how lint rules are working with [Lix Validation Rules](https://lix.opral.com).
+  - The `messageId` parameter in the `extractMessages` function has been renamed to `bundleId`. This change is due to the new API in Sherlock v2. If you are using the `extractMessages` function, please update the parameter name to `bundleId`.
+
+## 1.0.10
+
+### Patch Changes
+
+- Updated dependencies [c0b857a]
+- Updated dependencies [91ba4eb]
+  - @inlang/sdk@2.3.0
+
+## 1.0.9
+
+### Patch Changes
+
+- Updated dependencies [c53b1a9]
+  - @inlang/sdk@2.2.2
+
+## 1.0.8
+
+### Patch Changes
+
+- Updated dependencies [f51736f]
+- Updated dependencies [adf7d6c]
+  - @inlang/sdk@2.2.1
+
+## 1.0.7
+
+### Patch Changes
+
+- Updated dependencies [fc41e71]
+  - @inlang/sdk@2.2.0
+
+## 1.0.6
+
+### Patch Changes
+
+- @inlang/sdk@2.1.3
+
 ## 1.0.5
 
 ### Patch Changes

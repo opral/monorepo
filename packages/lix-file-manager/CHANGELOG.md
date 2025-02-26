@@ -1,5 +1,43 @@
 # lix-file-manager
 
+## 0.2.6
+
+### Patch Changes
+
+- Updated dependencies [c0b857a]
+  - @lix-js/sdk@0.4.1
+  - @lix-js/plugin-csv@0.1.3
+
+## 0.2.5
+
+### Patch Changes
+
+- 175f7f9: @lix-js/sdk:
+
+  - define UiDiffComponent type
+  - diff components can now consume multiple diffs
+
+  @lix-js/plugin-csv:
+
+  - update to use new diff component type
+  - display multiple diffs in a single component
+  - add rowId to snapshot content
+  - group diffs by rowId
+
+  lix-file-manager:
+
+  - add checkpoint timeline instead of change list
+  - refactor API diff component rendering
+  - refactor queries to use new UiDiffComponent type
+
+  PR URL:
+  https://github.com/opral/monorepo/pull/3377
+
+- Updated dependencies [1c84afb]
+- Updated dependencies [175f7f9]
+  - @lix-js/sdk@0.4.0
+  - @lix-js/plugin-csv@0.1.2
+
 ## 0.2.4
 
 ### Patch Changes

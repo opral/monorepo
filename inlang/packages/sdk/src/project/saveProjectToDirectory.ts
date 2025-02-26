@@ -48,19 +48,6 @@ export async function saveProjectToDirectory(args: {
 	const settings = await args.project.settings.get();
 
 	for (const plugin of plugins) {
-		// old legacy remove with v3
-		if (plugin.saveMessages) {
-			// in-efficient re-qeuery but it's a legacy function that will be removed.
-			// the effort of adjusting the code to not re-query is not worth it.
-			const bundlesNested = await selectBundleNested(args.project.db).execute();
-			await plugin.saveMessages({
-				messages: bundlesNested.map((b) => toMessageV1(b)),
-				// @ts-expect-error - legacy
-				nodeishFs: withAbsolutePaths(args.fs, args.path),
-				settings,
-			});
-		}
-
 		if (plugin.exportFiles) {
 			const bundles = await args.project.db
 				.selectFrom("bundle")
@@ -81,7 +68,13 @@ export async function saveProjectToDirectory(args: {
 				settings,
 			});
 			for (const file of files) {
-				const p = absolutePathFromProject(args.path, file.name);
+				const pathPattern = settings[plugin.key]?.pathPattern;
+				const p = pathPattern
+					? absolutePathFromProject(
+							args.path,
+							pathPattern.replace(/\{(languageTag|locale)\}/g, file.locale)
+						)
+					: absolutePathFromProject(args.path, file.name);
 				const dirname = path.dirname(p);
 				if ((await args.fs.stat(dirname)).isDirectory() === false) {
 					await args.fs.mkdir(dirname, { recursive: true });
@@ -105,6 +98,18 @@ export async function saveProjectToDirectory(args: {
 					await args.fs.writeFile(p, new Uint8Array(file.content));
 				}
 			}
+		}
+		// old legacy remove with v3
+		else if (plugin.saveMessages) {
+			// in-efficient re-qeuery but it's a legacy function that will be removed.
+			// the effort of adjusting the code to not re-query is not worth it.
+			const bundlesNested = await selectBundleNested(args.project.db).execute();
+			await plugin.saveMessages({
+				messages: bundlesNested.map((b) => toMessageV1(b)),
+				// @ts-expect-error - legacy
+				nodeishFs: withAbsolutePaths(args.fs, args.path),
+				settings,
+			});
 		}
 	}
 }

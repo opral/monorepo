@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-js",
 	"type": "module",
-	"version": "2.0.0-beta.14",
+	"version": "2.0.0-beta.22",
 	"license": "MIT",
 	"publishConfig": {
 		"access": "public",
@@ -20,10 +20,15 @@
 		"./dist",
 		"./bin"
 	],
+	"exports": {
+		".": "./dist/index.js",
+		"./urlpattern-polyfill": "./dist/urlpattern-polyfill/index.js"
+	},
 	"scripts": {
 		"dev": "tsc --watch",
 		"bench": "vitest bench --run",
-		"build": "npm run env-variables && tsc --build",
+		"build": "npm run env-variables && tsc --build && npm run generate-api-docs",
+		"generate-api-docs": "typedoc",
 		"test": "npm run env-variables && tsc --noEmit && vitest run --coverage ./src/**/*",
 		"test:watch": "npm run env-variables && vitest --watch ./src/**/*",
 		"env-variables": "node ./src/services/env-variables/create-index-file.js",
@@ -37,9 +42,11 @@
 		"commander": "11.1.0",
 		"consola": "3.4.0",
 		"json5": "2.2.3",
-		"unplugin": "^2.1.2"
+		"unplugin": "^2.1.2",
+		"urlpattern-polyfill": "^10.0.0"
 	},
 	"devDependencies": {
+		"@inlang/paraglide-js": "workspace:*",
 		"@eslint/js": "^9.18.0",
 		"@inlang/plugin-message-format": "workspace:*",
 		"@opral/tsconfig": "workspace:*",
@@ -51,12 +58,12 @@
 		"memfs": "4.17.0",
 		"prettier": "^3.4.2",
 		"rolldown": "1.0.0-beta.1",
-		"typescript-eslint": "^8.20.0",
+		"typedoc": "^0.27.7",
+		"typedoc-plugin-markdown": "^4.4.2",
+		"typedoc-plugin-missing-exports": "^3.1.0",
 		"typescript": "^5.7.3",
+		"typescript-eslint": "^8.20.0",
 		"vitest": "2.1.8"
-	},
-	"exports": {
-		".": "./dist/index.js"
 	},
 	"keywords": [
 		"inlang",
@@ -72,6 +79,7 @@
 		"vue",
 		"angular",
 		"nextjs",
+		"react router",
 		"next i18n",
 		"astro",
 		"astro i18n",

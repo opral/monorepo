@@ -110,12 +110,21 @@ export const lixAtom = atom(async (get) => {
 	}
 
 	let lix: Lix;
+	const storedActiveAccount = localStorage.getItem(ACTIVE_ACCOUNT_STORAGE_KEY);
 
 	try {
-		lix = await openLixInMemory({
-			blob: lixBlob!,
-			providePlugins: [csvPlugin],
-		});
+		if (storedActiveAccount) {
+			lix = await openLixInMemory({
+				blob: lixBlob!,
+				providePlugins: [csvPlugin],
+				account: JSON.parse(storedActiveAccount),
+			});
+		} else {
+			lix = await openLixInMemory({
+				blob: lixBlob!,
+				providePlugins: [csvPlugin],
+			});
+		}
 	} catch {
 		// https://linear.app/opral/issue/INBOX-199/fix-loading-lix-file-if-schema-changed
 		// CLEAR OPFS. The lix file is likely corrupted.
@@ -135,7 +144,6 @@ export const lixAtom = atom(async (get) => {
 		.select("value")
 		.executeTakeFirstOrThrow();
 
-	const storedActiveAccount = localStorage.getItem(ACTIVE_ACCOUNT_STORAGE_KEY);
 
 	if (storedActiveAccount) {
 		const activeAccount = JSON.parse(storedActiveAccount);

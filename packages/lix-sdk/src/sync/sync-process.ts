@@ -87,4 +87,5 @@ export async function initSyncProcess(args: {
 	}
 
 	schedulePullAndPush();
+	return;
 }

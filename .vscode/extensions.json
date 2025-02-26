@@ -7,6 +7,7 @@
     "vitest.explorer",
     "aaron-bond.better-comments",
     "yoavbls.pretty-ts-errors",
-    "42crunch.vscode-openapi"
+    "42crunch.vscode-openapi",
+    "bierner.lit-html"
   ]
 }

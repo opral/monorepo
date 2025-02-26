@@ -1,5 +1,5 @@
 import * as assert from "node:assert";
-import * as m from "./paraglide/messages.js";
+import { m } from "./paraglide/messages.js";
 import { setLocale } from "./paraglide/runtime.js";
 import { test } from "node:test";
 
@@ -59,4 +59,15 @@ test("paraglide falls back to parent locale", async () => {
 	);
 	// doesn't exist in en-US but en
 	assert.strictEqual(m.simple(), "This is a simple message.");
+});
+
+test("nesting works", async () => {
+	setLocale("en");
+	assert.strictEqual(
+		m["nesting.level1.level2.level3"]({
+			username: "Samuel",
+			placename: "Berlin",
+		}),
+		"This is a nested message."
+	);
 });

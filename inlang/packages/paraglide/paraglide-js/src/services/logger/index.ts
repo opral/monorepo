@@ -22,7 +22,7 @@ export class Logger {
 
 	public log(message: string): Logger {
 		if (this.options.silent) return this;
-		const prefix = this.options.prefix ? colors.bold("[paraglide] ") : "";
+		const prefix = this.options.prefix ? colors.bold("[paraglide-js] ") : "";
 		consola.log(prefix + message);
 		return this;
 	}
@@ -30,7 +30,7 @@ export class Logger {
 	public info(message: string): Logger {
 		if (this.options.silent) return this;
 		const prefix = this.options.prefix
-			? colors.bold(colors.blue("[paraglide] "))
+			? colors.bold(colors.blue("[paraglide-js] "))
 			: "";
 		consola.info(prefix + message);
 		return this;
@@ -39,19 +39,25 @@ export class Logger {
 	public success(message: string): Logger {
 		if (this.options.silent) return this;
 		const prefix = this.options.prefix
-			? colors.bold(colors.green("[paraglide] "))
+			? colors.bold(colors.green("[paraglide-js] "))
 			: "";
 		consola.success(prefix + message);
 		return this;
 	}
 
 	public warn(message: any, ...args: any[]): Logger {
-		consola.warn(message, ...args);
+		const prefix = this.options.prefix
+			? colors.bold(colors.yellow("[paraglide-js] "))
+			: "";
+		consola.warn(prefix + message, ...args);
 		return this;
 	}
 
 	public error(message: any, ...args: any[]): Logger {
-		consola.error(message, ...args);
+		const prefix = this.options.prefix
+			? colors.bold(colors.red("[paraglide-js] "))
+			: "";
+		consola.error(prefix + message, ...args);
 		return this;
 	}
 

@@ -34,9 +34,9 @@ figma.root.setRelaunchData({ open: "Let Your Design Speak all Languages" });
 const migrationManager = new MigrationManager(figmaRemote);
 migrationManager.migrate();
 
-console.log('I AM STILL RUNNING - I AM STILL RUNNING -I AM STILL RUNNING -I AM STILL RUNNING2')
+console.log("I AM STILL RUNNING - I AM STILL RUNNING -I AM STILL RUNNING -I AM STILL RUNNING2");
 // @ts-expect-error -- url is global
-console.log('url:' + url)
+console.log("url:" + url);
 
 WindowManagerSandbox.init(
 	{

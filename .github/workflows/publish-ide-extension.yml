@@ -5,14 +5,14 @@ on:
 
   push:
     paths:
-      - "inlang/packages/ide-extension/package.json"
+      - "inlang/packages/sherlock/package.json"
     branches:
       - main
 
 jobs:
   vs-code-marketplace:
     runs-on: ubuntu-latest
-    environment: production
+    environment: vscode-marketplace
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
@@ -22,12 +22,12 @@ jobs:
       - name: Setup Pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
 
       - name: Install dependencies
         run: pnpm install
@@ -36,7 +36,7 @@ jobs:
         uses: dopplerhq/cli-action@v2
 
       - name: Build
-        run: doppler run -- pnpm build
+        run: doppler run -- pnpm --filter vs-code-extension... build
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
@@ -52,12 +52,12 @@ jobs:
 
       - name: Publish to Visual Studio Code Marketplace
         run: pnpm --filter vs-code-extension run publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
-        working-directory: ./inlang/packages/ide-extension
+        working-directory: ./inlang/packages/sherlock
         env:
           VSCE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
 
       - name: Publish to Open VSX Registry
         run: pnpm --filter vs-code-extension run publish:open-vsx
-        working-directory: ./inlang/packages/ide-extension
+        working-directory: ./inlang/packages/sherlock
         env:
           OPEN_VSX_TOKEN: ${{ secrets.OPEN_VSX_TOKEN }}

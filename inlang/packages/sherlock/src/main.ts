@@ -1,6 +1,4 @@
 import * as vscode from "vscode"
-import { msg } from "./utilities/messages/msg.js"
-// import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { handleError } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
 import { projectView } from "./utilities/project/project.js"
@@ -14,17 +12,19 @@ import fs from "node:fs/promises"
 import { gettingStartedView } from "./utilities/getting-started/gettingStarted.js"
 import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
 import { recommendationBannerView } from "./utilities/recommendation/recommendation.js"
-import { telemetry } from "./services/telemetry/index.js"
-import { version } from "../package.json"
+import { capture } from "./services/telemetry/index.js"
+import packageJson from "../package.json" assert { type: "json" }
 import { statusBar } from "./utilities/settings/statusBar.js"
 import fg from "fast-glob"
-import type { IdeExtensionConfig } from "@inlang/sdk"
+import { saveProjectToDirectory, type IdeExtensionConfig } from "@inlang/sdk"
 import path from "node:path"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
-export async function activate(context: vscode.ExtensionContext): Promise<void> {
+export async function activate(
+	context: vscode.ExtensionContext
+): Promise<{ context: vscode.ExtensionContext } | undefined> {
 	// Sentry Error Handling
 	//initErrorMonitoring()
 
@@ -38,23 +38,24 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			return
 		}
 
-		telemetry.capture({
-			event: "IDE-EXTENSION activated",
-			properties: {
-				vscode_version: vscode.version,
-				version,
-				platform: process.platform,
-			},
-		})
-
 		const mappedFs = createFileSystemMapper(path.normalize(workspaceFolder.uri.fsPath), fs)
 
 		await setProjects({ workspaceFolder })
 		await main({ context, workspaceFolder, fs: mappedFs })
 
-		msg("Sherlock activated", "info")
+		capture({
+			event: "IDE-EXTENSION activated",
+			properties: {
+				vscode_version: vscode.version,
+				version: packageJson.version,
+				platform: process.platform,
+			},
+		})
+
+		return { context }
 	} catch (error) {
 		handleError(error)
+		return
 	}
 }
 
@@ -176,6 +177,20 @@ async function setProjects(args: { workspaceFolder: vscode.WorkspaceFolder }) {
 			...state(),
 			projectsInWorkspace: projectsList,
 		})
+	} catch (error) {
+		handleError(error)
+	}
+}
+
+export async function saveProject() {
+	try {
+		if (state().selectedProjectPath && state().project) {
+			await saveProjectToDirectory({
+				fs: createFileSystemMapper(state().selectedProjectPath, fs),
+				project: state().project,
+				path: state().selectedProjectPath,
+			})
+		}
 	} catch (error) {
 		handleError(error)
 	}

@@ -6,17 +6,17 @@ export default [
 	pluginJs.configs.recommended,
 	...tseslint.configs.recommended,
 	{
-        languageOptions: {
-            ecmaVersion: 2022,
-            sourceType: "module",
-            globals: {
-                ...globals.browser,
-                ...globals.node,
-                myCustomGlobal: "readonly"
-            }
-        }
-        // ...other config
-    },
+		languageOptions: {
+			ecmaVersion: 2022,
+			sourceType: "module",
+			globals: {
+				...globals.browser,
+				...globals.node,
+				myCustomGlobal: "readonly",
+			},
+		},
+		// ...other config
+	},
 	{
 		files: ["**/*.{js,ts,tsx}"],
 		rules: {
@@ -40,6 +40,6 @@ export default [
 		},
 	},
 	{
-        ignores: ["dist/*", "dist/**", "snippets"]
-    },
+		ignores: ["dist/*", "dist/**", "dist_plugin/*", "dist_plugin/**", "snippets"],
+	},
 ];

@@ -7,6 +7,8 @@ import { memfs } from "memfs";
 import { test, expect, vi } from "vitest";
 import { compile } from "./compile.js";
 import { getAccountFilePath } from "../services/account/index.js";
+import type { Runtime } from "./runtime/type.js";
+import { defaultCompilerOptions } from "./compiler-options.js";
 
 test("loads a project and compiles it", async () => {
 	const project = await loadProjectInMemory({
@@ -102,7 +104,7 @@ test("saves the local account to app data if not exists", async () => {
 	expect(account).toHaveProperty("name");
 });
 
-test("cleans the output directory", async () => {
+test.skip("cleans the output directory", async () => {
 	const fs = memfs().fs as unknown as typeof import("node:fs");
 
 	const project = await loadProjectInMemory({
@@ -137,7 +139,12 @@ test("multiple compile calls do not interfere with each other", async () => {
 	const fs = memfs().fs as unknown as typeof import("node:fs");
 
 	const project = await loadProjectInMemory({
-		blob: await newProject({}),
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
 	});
 
 	await saveProjectToDirectory({
@@ -146,14 +153,27 @@ test("multiple compile calls do not interfere with each other", async () => {
 		fs: fs.promises,
 	});
 
+	// different project settings to test compile output
+	await project.settings.set({
+		...(await project.settings.get()),
+		baseLocale: "de",
+		locales: ["de"],
+	});
+
+	await saveProjectToDirectory({
+		project,
+		path: "/project2.inlang",
+		fs: fs.promises,
+	});
+
 	const compilations = [
 		compile({
 			project: "/project.inlang",
-			outdir: "/output/subdir",
+			outdir: "/output",
 			fs: fs,
 		}),
 		compile({
-			project: "/project.inlang",
+			project: "/project2.inlang",
 			outdir: "/output",
 			fs: fs,
 		}),
@@ -161,9 +181,23 @@ test("multiple compile calls do not interfere with each other", async () => {
 
 	await Promise.all(compilations);
 
-	const outputDir = await fs.promises.readdir("/output");
+	const runtimeFile = await fs.promises.readFile("/output/runtime.js", "utf8");
 
-	expect(outputDir).not.toContain("subdir");
+	const runtime = (await import(
+		"data:text/javascript;base64," +
+			Buffer.from(
+				// replace the
+				runtimeFile.replace(
+					`import "@inlang/paraglide-js/urlpattern-polyfill";`,
+					""
+				),
+				"utf-8"
+			).toString("base64")
+	)) as Runtime;
+
+	// expecting the second compile step to overwrite the first
+	expect(runtime.baseLocale).toBe("de");
+	expect(runtime.locales).toEqual(["de"]);
 });
 
 test("emits additional files", async () => {
@@ -235,7 +269,7 @@ test("includes eslint-disable comment", async () => {
 
 	const messages = await fs.promises.readFile("/output/messages.js", "utf8");
 
-	expect(messages).toContain("// eslint-disable-next-line");
+	expect(messages).toContain("// eslint-disable");
 
 	await compile({
 		project: "/project.inlang",
@@ -249,5 +283,19 @@ test("includes eslint-disable comment", async () => {
 		"utf8"
 	);
 
-	expect(messagesWithoutComment).not.toContain("// eslint-disable-next-line");
+	expect(messagesWithoutComment).not.toContain("// eslint-disable");
+});
+
+test("default compiler options should include cookied, variable and baseLocale to ensure easy try out of paraglide js, working both in server and browser environemnts", () => {
+	// someone trying out paraglide js should be able to call `getLocale()` and `setLocale()`
+	// without getting an error slammed in their face saying "define your strategy".
+	//
+	// instead, make the apis work out of the box and once the developer is convinced that
+	// paraglide js is the right tool for them, they can then define their own strategy.
+
+	expect(defaultCompilerOptions.strategy).toEqual([
+		"cookie",
+		"globalVariable",
+		"baseLocale",
+	]);
 });

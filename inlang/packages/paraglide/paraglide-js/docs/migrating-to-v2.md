@@ -8,7 +8,7 @@
 -setLanguageTag()
 +setLocale()
 -availableLanguageTags
-+availableLocales
++locales
 ```
 
 2. The `onSetLanguageTag` has been removed in favor of simplifying writing [strategies/adapters](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy). 
@@ -20,7 +20,7 @@
   // do seomthing
 })
 
-+defineSetLocale(() => {
++overwriteSetLocale(() => {
   // do something
 })
 ```
@@ -31,3 +31,11 @@
 -import { paraglide } from "@inlang/paraglide-vite";
 +import { paraglideVitePlugin } from "@inlang/paraglide-js";
 ```
+
+4. Use `localizeHref()` in HTML 
+
+```diff
+-<a href="/about">
++<a href={localizeHref("/about")}>
+  Something
+</a>

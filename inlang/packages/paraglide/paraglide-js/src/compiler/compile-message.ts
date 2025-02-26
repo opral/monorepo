@@ -1,73 +1,87 @@
 import type { Declaration, Message, Variant } from "@inlang/sdk";
-import type { Registry } from "./registry.js";
 import { compilePattern } from "./compile-pattern.js";
 import type { Compiled } from "./types.js";
 import { doubleQuote } from "../services/codegen/quotes.js";
+import { inputsType } from "./jsdoc-types.js";
+import { compileLocalVariable } from "./compile-local-variable.js";
+import { toSafeModuleId } from "./safe-module-id.js";
 
 /**
  * Returns the compiled message as a string
  *
- * @example
- * @param message The message to compile
- * @returns (inputs) => string
  */
 export const compileMessage = (
 	declarations: Declaration[],
 	message: Message,
-	variants: Variant[],
-	registry: Registry
+	variants: Variant[]
 ): Compiled<Message> => {
 	// return empty string instead?
 	if (variants.length == 0) {
 		throw new Error("Message must have at least one variant");
 	}
+
 	const hasMultipleVariants = variants.length > 1;
 	return hasMultipleVariants
-		? compileMessageWithMultipleVariants(
-				declarations,
-				message,
-				variants,
-				registry
-			)
-		: compileMessageWithOneVariant(message, variants, registry);
+		? compileMessageWithMultipleVariants(declarations, message, variants)
+		: compileMessageWithOneVariant(declarations, message, variants);
 };
 
 function compileMessageWithOneVariant(
+	declarations: Declaration[],
 	message: Message,
-	variants: Variant[],
-	registry: Registry
+	variants: Variant[]
 ): Compiled<Message> {
 	const variant = variants[0];
 	if (!variant || variants.length !== 1) {
 		throw new Error("Message must have exactly one variant");
 	}
-	const compiledPattern = compilePattern(
-		message.locale,
-		variant.pattern,
-		registry
-	);
-	const code = `export const ${message.bundleId} = (i) => ${compiledPattern.code}`;
+	const inputs = declarations.filter((decl) => decl.type === "input-variable");
+	const hasInputs = inputs.length > 0;
+	const compiledPattern = compilePattern({
+		pattern: variant.pattern,
+		declarations,
+	});
+
+	const compiledLocalVariables = [];
+
+	for (const declaration of declarations) {
+		if (declaration.type === "local-variable") {
+			compiledLocalVariables.push(
+				compileLocalVariable({ declaration, locale: message.locale })
+			);
+		}
+	}
+
+	const safeModuleId = toSafeModuleId(message.bundleId);
+
+	const code = `/** @type {(inputs: ${inputsType(inputs)}) => string} */
+export const ${safeModuleId} = (${hasInputs ? "i" : ""}) => {
+	${compiledLocalVariables.join("\n\t")}return ${compiledPattern.code}
+};`;
+
 	return { code, node: message };
 }
 
 function compileMessageWithMultipleVariants(
 	declarations: Declaration[],
 	message: Message,
-	variants: Variant[],
-	registry: Registry
+	variants: Variant[]
 ): Compiled<Message> {
-	if (variants.length <= 1)
+	if (variants.length <= 1) {
 		throw new Error("Message must have more than one variant");
+	}
+
+	const inputs = declarations.filter((decl) => decl.type === "input-variable");
+	const hasInputs = inputs.length > 0;
 
 	// TODO make sure that matchers use keys instead of indexes
 	const compiledVariants = [];
 
 	for (const variant of variants) {
-		const compiledPattern = compilePattern(
-			message.locale,
-			variant.pattern,
-			registry
-		);
+		const compiledPattern = compilePattern({
+			pattern: variant.pattern,
+			declarations,
+		});
 
 		// todo account for all matches in the selector (if a match is missing, it should be the catchall)
 		const isCatchAll = variant.matches.every(
@@ -101,10 +115,24 @@ function compileMessageWithMultipleVariants(
 		);
 	}
 
-	const code = `
-		export const ${message.bundleId} = (i) => {
-				${compiledVariants.join("\n\n")}
-		}`;
+	const compiledLocalVariables = [];
+
+	for (const declaration of declarations) {
+		if (declaration.type === "local-variable") {
+			compiledLocalVariables.push(
+				compileLocalVariable({ declaration, locale: message.locale })
+			);
+		}
+	}
+
+	const safeModuleId = toSafeModuleId(message.bundleId);
+
+	const code = `/** @type {(inputs: ${inputsType(inputs)}) => string} */
+export const ${safeModuleId} = (${hasInputs ? "i" : ""}) => {
+	${compiledLocalVariables.join("\n\t")}
+	${compiledVariants.join("\n\t")}
+	return \`${message.id}\`;
+};`;
 
 	return { code, node: message };
 }

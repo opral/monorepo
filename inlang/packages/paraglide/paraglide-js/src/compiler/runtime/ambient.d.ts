@@ -1,13 +1,16 @@
-import type { Runtime } from "./type.ts";
-
 /**
- * Declared globablly for testing purposes.
+ * Declared globablly to write the runtime functions.
  */
-declare global {
-	export const baseLocale: Runtime["baseLocale"];
-	export const locales: Runtime["locales"];
-	export const isLocale: Runtime["isLocale"];
-	export const getLocale: Runtime["getLocale"];
-	export const localeInPath: Runtime["localeInPath"];
-	export type Locale = any;
+export declare global {
+	/**
+	 * Locale used by the variable strategy.
+	 */
+	let _locale: string;
+	let serverMiddlewareAsyncStorage: any;
+	// string because precise locale is unknown before compilation
+	type Locale = any;
+	let pathToRegexp: {
+		match: (path: string) => (pathname: string) => any;
+		compile: (path: string) => (params: any) => string;
+	};
 }

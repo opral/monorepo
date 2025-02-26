@@ -14,6 +14,39 @@ test("adding messages to the root level should be possible", () => {
 	expect(Value.Check(FileSchema, messages)).toBe(true);
 });
 
+test("complex messages must have the match property", () => {
+	const messages: FileSchema = {
+		// @ts-expect-error - invalid type
+		hello_world: [{}],
+	};
+	expect(Value.Check(FileSchema, messages)).toBe(false);
+
+	const messages2: FileSchema = {
+		hello_world: [
+			{
+				match: { "*": "Hello world" },
+			},
+		],
+	};
+	expect(Value.Check(FileSchema, messages2)).toBe(true);
+});
+
+test("complex messages can be defined", async () => {
+	const messages: FileSchema = {
+		some_happy_cat: [
+			{
+				declarations: ["input count", "local countPlural = count: plural"],
+				selectors: ["countPlural"],
+				match: {
+					"countPlural=one": "There is one cat.",
+					"countPlural=other": "There are many cats.",
+				},
+			},
+		],
+	};
+	expect(Value.Check(FileSchema, messages)).toBe(true);
+});
+
 test("it should be possible to define $schema for typesafety", () => {
 	const messages: FileSchema = {
 		$schema: "https://inlang.com/schema/inlang-message-format",
@@ -22,47 +55,20 @@ test("it should be possible to define $schema for typesafety", () => {
 	expect(Value.Check(FileSchema, messages)).toBe(true);
 });
 
-// #2325 - types have been loosened to allow for new/unknown properties
-test("using a hyphen (-) should not be possible to increase compatibility with libraries", () => {
+test("complex messages declarations and selectors are optional ", async () => {
 	const messages: FileSchema = {
-		"hello-world": "property",
-	};
-	expect(Value.Check(FileSchema, messages)).toBe(false);
-});
-
-// #2325 - types have been loosened to allow for new/unknown properties
-test("using a dot (.) should not be possible to increase compatibility with libraries", () => {
-	const messages: FileSchema = {
-		"hello.world": "property",
-	};
-	expect(Value.Check(FileSchema, messages)).toBe(false);
-});
-
-test("variant declarations and selectors are optional ", async () => {
-	const messages: FileSchema = {
-		jojo_mountain_day: {
-			match: {
-				"platform=android, userGender=male":
-					"{username} has to download the app on his phone from the Google Play Store.",
-				"platform=ios, userGender=female":
-					"{username} has to download the app on her iPhone from the App Store.",
-				"platform=*, userGender=*": "The person has to download the app.",
+		jojo_mountain_day: [
+			{
+				match: {
+					"platform=android, userGender=male":
+						"{username} has to download the app on his phone from the Google Play Store.",
+					"platform=ios, userGender=female":
+						"{username} has to download the app on her iPhone from the App Store.",
+					"platform=*, userGender=*": "The person has to download the app.",
+				},
 			},
-		},
+		],
 	};
 	expect(Value.Check(FileSchema, messages)).toBe(true);
 });
 
-test("variant declarations and selectors can be defined ", async () => {
-	const messages: FileSchema = {
-		some_happy_cat: {
-			declarations: ["input count", "local countPlural = count: plural"],
-			selectors: ["countPlural"],
-			match: {
-				"countPlural=one": "There is one cat.",
-				"countPlural=other": "There are many cats.",
-			},
-		},
-	};
-	expect(Value.Check(FileSchema, messages)).toBe(true);
-});

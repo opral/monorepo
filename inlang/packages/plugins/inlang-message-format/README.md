@@ -1,5 +1,5 @@
 ---
-imports: 
+imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/doc-callout.js
 ---
 
@@ -18,14 +18,14 @@ The message files contain key-value pairs of the message ID and the translation.
 }
 
 //messages/de.json
-{	
+{
   //the $schema key is automatically ignored
   "hello_world": "Hallo Welt!",
   "greeting": "Guten Tag {name}!"
 }
 ```
 
-## Installation
+## Installation
 
 Install the plugin in your Inlang Project by adding it to your `"modules"` in `project.inlang/settings.json`. You will also need to provide a `pathPattern` for the plugin.
 
@@ -36,7 +36,7 @@ Install the plugin in your Inlang Project by adding it to your `"modules"` in `p
 +    "https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js"
   ],
 + "plugin.inlang.messageFormat": {
-+   "pathPattern": "./messages/{locale}.json" 
++   "pathPattern": "./messages/{locale}.json"
 + }
 }
 ```
@@ -47,7 +47,7 @@ Configuration happens in `project.inlang/settings.json` under the `"plugin.inlan
 
 ### `pathPattern`
 
-The path pattern defines _where_ the plugin will be looking for your message files. The default is `./messages/{locale}.json`. The `{locale}` placeholder will be replaced with the language tag for each of your languages. 
+The path pattern defines _where_ the plugin will be looking for your message files. The default is `./messages/{locale}.json`. The `{locale}` placeholder will be replaced with the language tag for each of your languages.
 
 ```json
 // project.inlang/settings.json
@@ -71,53 +71,100 @@ You can also define an array of paths. The last path in the array will take prec
 }
 ```
 
+## Messages
 
-## Variants (pluralization, gendering, A/B testing)
+You can organize your messages in a nested structure for better organization of your translations. There are two types of messages:
 
-The message below will match the following conditions:
+### Simple Messages
 
-| Platform | User Gender | Message                                                                 |
-|----------|-------------|-------------------------------------------------------------------------|
-| android  | male        | {username} has to download the app on his phone from the Google Play Store. |
-| ios      | female      | {username} has to download the app on her iPhone from the App Store.    |
-| *        | *           | The person has to download the app.                                     |
+Simple messages are string values, either directly at the root level or nested within objects:
 
 ```json
 {
-	"jojo_mountain_day": {
-		"match": {
-			"platform=android, userGender=male": "{username} has to download the app on his phone from the Google Play Store.",
-			"platform=ios, userGender=female": "{username} has to download the app on her iPhone from the App Store.",
-			"platform=*, userGender=*": "The person has to download the app."
+	"hello": "world",
+	"navigation": {
+		"home": "Home",
+		"about": "About",
+		"contact": {
+			"email": "Email",
+			"phone": "Phone"
 		}
 	}
 }
 ```
 
+### Complex Messages (with variants, pluralization, etc.)
+
+For complex messages with variants, wrap the message object in an array to differentiate it from nested simple messages:
+
+```json
+{
+	"simple": "This is a simple message",
+  "count": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "There is one item",
+        "countPlural=other": "There are {count} items"
+      }
+    }
+  ]
+}
+```
+
+When accessing this complex message, use dot notation: `navigation.items.count`
+
+<doc-callout type="info">
+The array wrapper is how we distinguish between a nested object containing more messages vs. a complex message object with variants.
+</doc-callout>
+
+## Variants (pluralization, gendering, A/B testing)
+
+The message below will match the following conditions:
+
+| Platform | User Gender | Message                                                                     |
+| -------- | ----------- | --------------------------------------------------------------------------- |
+| android  | male        | {username} has to download the app on his phone from the Google Play Store. |
+| ios      | female      | {username} has to download the app on her iPhone from the App Store.        |
+| \*       | \*          | The person has to download the app.                                         |
+
+```json
+{
+	"jojo_mountain_day": [
+		{
+			"match": {
+				"platform=android, userGender=male": "{username} has to download the app on his phone from the Google Play Store.",
+				"platform=ios, userGender=female": "{username} has to download the app on her iPhone from the App Store.",
+				"platform=*, userGender=*": "The person has to download the app."
+			}
+		}
+	]
+}
+```
+
 Pluralization is also supported. You can define a variable in your message and then use it in the selector.
 
-| Inputs  | Condition         | Message                |
-|---------|-------------------|------------------------|
-| count=1 | countPlural=one   | There is one cat.      |
-| count>1 | countPlural=other | There are many cats.   |
+| Inputs  | Condition         | Message              |
+| ------- | ----------------- | -------------------- |
+| count=1 | countPlural=one   | There is one cat.    |
+| count>1 | countPlural=other | There are many cats. |
 
 <doc-callout type="tip">
-  Read the `local countPlural = count: plural` syntax as "create a local variable `countPlural` that equals `plural(count)`".
+Read the `local countPlural = count: plural` syntax as "create a local variable `countPlural` that equals `plural(count)`".
 </doc-callout>
 
 ```json
 {
-"some_happy_cat": {
-    "declarations": ["input count", "local countPlural = count: plural"],
-    "selectors": ["countPlural"],
-    "match": {
-      "countPlural=one": "There is one cat.",
-      "countPlural=other": "There are many cats.",
-    },
-  }
+	"some_happy_cat": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "There is one cat.",
+				"countPlural=other": "There are many cats."
+			}
+		}
+	]
 }
 ```
-
-
-Nesting is not supported and likely won't be.
-

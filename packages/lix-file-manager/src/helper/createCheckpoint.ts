@@ -1,9 +1,9 @@
-import { Change, changeIsLeafOf, Lix } from "@lix-js/sdk";
+import { Lix, Change, changeIsLeafOf } from "@lix-js/sdk";
 import { saveLixToOpfs } from "./saveLixToOpfs.ts";
 
 export const createCheckpoint = async (
 	lix: Lix,
-	intermediateChanges: Change[]
+	changeIds: Pick<Change, "id">[]
 ) => {
 	const changeSet = await lix.db.transaction().execute(async (trx) => {
 		// create a new set
@@ -30,10 +30,10 @@ export const createCheckpoint = async (
 			.execute();
 
 		// insert the leaf changes into the set
-		for (const change of intermediateChanges) {
+		for (const changeId of changeIds) {
 			const leafChange = await trx
 				.selectFrom("change")
-				.where(changeIsLeafOf(change))
+				.where(changeIsLeafOf(changeId))
 				.selectAll()
 				.executeTakeFirstOrThrow();
 			await trx

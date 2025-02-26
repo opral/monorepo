@@ -1,15 +1,14 @@
-import { it, expect } from "vitest";
+import { test, expect } from "vitest";
 import { compilePattern } from "./compile-pattern.js";
-import { DEFAULT_REGISTRY } from "./registry.js";
 import type { Pattern } from "@inlang/sdk";
 
-it("should compile a text only pattern", () => {
+test("should compile a text only pattern", () => {
 	const pattern: Pattern = [{ type: "text", value: "Hello" }];
-	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY);
+	const { code } = compilePattern({ pattern, declarations: [] });
 	expect(code).toBe("`Hello`");
 });
 
-it("should compile a pattern with multiple VariableReference's", () => {
+test("should compile a pattern with multiple VariableReference's", () => {
 	const pattern: Pattern = [
 		{ type: "text", value: "Hello " },
 		{
@@ -23,54 +22,68 @@ it("should compile a pattern with multiple VariableReference's", () => {
 		{ type: "expression", arg: { type: "variable-reference", name: "count" } },
 		{ type: "text", value: " messages." },
 	];
-	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY);
+
+	const { code } = compilePattern({
+		pattern,
+		declarations: [
+			{ type: "input-variable", name: "name" },
+			{ type: "input-variable", name: "count" },
+		],
+	});
+
 	expect(code).toBe("`Hello ${i.name}! You have ${i.count} messages.`");
 });
 
-it("should escape backticks", () => {
+test("should escape backticks", () => {
 	const pattern: Pattern = [{ type: "text", value: "`Hello world`" }];
-	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY);
+	const { code } = compilePattern({ pattern, declarations: [] });
 	expect(code).toBe("`\\`Hello world\\``");
 });
 
-it("should escape backslashes", () => {
+test("should escape backslashes", () => {
 	const pattern: Pattern = [{ type: "text", value: "\\Hello world\\" }];
-	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY);
+	const { code } = compilePattern({ pattern, declarations: [] });
+
 	expect(code).toBe("`\\\\Hello world\\\\`");
 });
 
-it("should escape escaped backticks", () => {
+test("should escape escaped backticks", () => {
 	const pattern: Pattern = [{ type: "text", value: "\\`Hello world\\`" }];
-	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY);
+	const { code } = compilePattern({ pattern, declarations: [] });
+
 	expect(code).toBe("`\\\\\\`Hello world\\\\\\``");
 });
 
-it("should escape variable interpolation ( ${} )", () => {
+test("should escape variable interpolation ( ${} )", () => {
 	const pattern: Pattern = [{ type: "text", value: "${name" }];
-	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY);
+	const { code } = compilePattern({ pattern, declarations: [] });
+
 	expect(code).toBe("`\\${name`");
 });
 
-it("should compile a pattern with multiple VariableReference's", () => {
-	const pattern: Pattern = [
-		{ type: "text", value: "Hello " },
-		{ type: "expression", arg: { type: "variable-reference", name: "name" } },
-		{ type: "text", value: "! You have " },
-		{ type: "expression", arg: { type: "variable-reference", name: "count" } },
-		{ type: "text", value: " messages." },
-	];
-	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY);
-	expect(code).toBe("`Hello ${i.name}! You have ${i.count} messages.`");
-});
+test("it can reference local variables", () => {
+	const { code } = compilePattern({
+		pattern: [
+			{ type: "text", value: "Hello " },
+			{
+				type: "expression",
+				arg: {
+					type: "variable-reference",
+					name: "name",
+				},
+			},
+		],
+		declarations: [
+			{
+				type: "local-variable",
+				name: "name",
+				value: {
+					type: "expression",
+					arg: { type: "literal", value: "Peter" },
+				},
+			},
+		],
+	});
 
-it("should compile a pattern with a variableReference that isn't a valid JS identifier", () => {
-	const pattern: Pattern = [
-		{ type: "text", value: "Hello " },
-		{
-			type: "expression",
-			arg: { type: "variable-reference", name: "000" },
-		},
-	];
-	const { code } = compilePattern("en", pattern, DEFAULT_REGISTRY);
-	expect(code).toBe("`Hello ${i['000']}`");
+	expect(code).toBe("`Hello ${name}`");
 });

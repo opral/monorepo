@@ -1,12 +1,112 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.22
+
+- fix `serverMiddleware()` only imports async_hooks on the server
+- add `serverMiddleware(req, resolve, { disableAsyncLocalStorage: true })` to disable async local storage
+- fix `serverMiddleware()` throws in next js when `url` strategy is not used https://github.com/opral/inlang-paraglide-js/issues/411#issuecomment-2683530533
+
+## 2.0.0-beta.21
+
+- compile arbitrary message keys https://github.com/opral/inlang-paraglide-js/issues/201#issuecomment-2680006131
+- only polyfills `URLPattern` if needed https://github.com/opral/inlang-paraglide-js/issues/381
+- don't include `url` strategy by default https://github.com/opral/inlang-paraglide-js/issues/405
+- fixes webpack watch mode https://github.com/opral/inlang-paraglide-js/issues/406
+
+## 2.0.0-beta.20
+
+- automatic re-directs in `serverMiddleware()` https://github.com/opral/inlang-paraglide-js/issues/201#issuecomment-2675823651
+- various bug fixes and improvements
+
+## 2.0.0-beta.19
+
+NO MORE ADAPTERS NEEDED.
+
+If you have code from an adapter, remove it and follow the examples in the documentation. https://inlang.com/m/gerre34r/library-inlang-paraglideJs/sveltekit
+
+```diff
+-@inlang/paraglide-sveltekit
+-@inlang/paraglide-next
+-@inlang/paraglide-astro
+```
+
+- introduced `serverMiddleware()` https://github.com/opral/inlang-paraglide-js/issues/201#issuecomment-2673375348
+
+- rename `defineGetLocale()` and `defineSetLocale()` to `overwriteGetLocale()` and `overwriteSetLocale()` https://github.com/opral/inlang-paraglide-js/issues/382
+
+- enables `import { m } from "./paraglide/messages.js"` for auto imports https://github.com/opral/inlang-paraglide-js/issues/345
+
+- adds the `strategy` compiler option to the cli https://github.com/opral/inlang-paraglide-js/issues/316
+
+## 2.0.0-beta.18
+
+Added URLPatterns as a replacement for the beta 17 pathnames API. 
+
+The URLPattern API is extremly powerful. You can express base paths, translated pathnames, domain based localization, and even multi-tenancy. 
+
+Read the docs [here](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy#url) and make PRs to improve the documentation.
+
+```diff
+await compile({
+-  strategy: ["pathname"],
++  strategy: ["url"],
+})
+```
+
+The `localizePath()` API had to be replaced by a new `localizeHref()` API. Please give feedback on the new API in [#380](https://github.com/opral/inlang-paraglide-js/issues/380)
+
+```diff
+- <a href={localizePath("/about")}>About</a>
++ <a href={localizeHref("/about")}>About</a>
+```
+
+## 2.0.0-beta.17
+
+Add support for `pathnames` API https://github.com/opral/inlang-paraglide-js/issues/359
+
+You can now create whatever pathname pattern you want. The syntax is provided by https://github.com/pillarjs/path-to-regexp.
+
+```diff
+await compile({
+  strategy: ["pathname", "cookie", "baseLocale"],
++ pathnames: {
++   "{*path}": {
++     "de": "/de{/*path}",
++     "en": "/en{/*path}",
+}
+}
+})
+```
+
+Add support for `pathnameBase` https://github.com/opral/inlang-paraglide-js/issues/362
+
+```diff
+await compile({
+  strategy: ["pathname", "cookie", "baseLocale"],
++ pathnameBase: "/base"
+})
+
+```
+
+## 2.0.0-beta.16
+
+New `strategy` API. See https://github.com/opral/inlang-paraglide-js/issues/346.
+
+You can now define your own stragegy for getting and setting a locale.
+
+```diff
+await compile({
++  strategy: ["pathname", "cookie", "baseLocale"]
+})
+```
+
 ## 2.0.0-beta.14
 
 Fixes windows path normalization https://github.com/opral/monorepo/pull/3374
 
 ## 2.0.0-beta.13
 
-- flat compiler options 
+- flat compiler options
 
 ```diff
 await compile({
@@ -27,7 +127,7 @@ await compile({
 
 ## 2.0.0-beta.11
 
-- improve: compiler awaits ongoing compilations before starting a new one 
+- improve: compiler awaits ongoing compilations before starting a new one
 - update dependency that fixes https://github.com/opral/inlang-paraglide-js/issues/320
 
 ## 2.0.0-beta.10
@@ -36,7 +136,7 @@ await compile({
 
 ## 2.0.0-beta.9
 
-- Expose compiler on the index 
+- Expose compiler on the index
 
 ```diff
 -import { compile } from "@inlang/paraglide-js/compiler";
@@ -65,13 +165,13 @@ await compile({
 
 ### Patch Changes
 
-- remove `fast-glob` as dependency in favor of node's built-in `fs.glob` (a new API in node 22) 
+- remove `fast-glob` as dependency in favor of node's built-in `fs.glob` (a new API in node 22)
 
 ## 2.0.0
 
 ### Major changes
 
-- Upgrade to @inlang/sdk v2 
+- Upgrade to @inlang/sdk v2
 - Support for variants (pluralization, gendering, A/B test, etc.)
 
 ### Minor Changes

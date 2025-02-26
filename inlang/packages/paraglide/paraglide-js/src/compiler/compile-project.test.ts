@@ -1,5 +1,9 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
-import { createProject as typescriptProject, ts } from "@ts-morph/bootstrap";
+import {
+	createProject as typescriptProject,
+	ts,
+	type ProjectOptions,
+} from "@ts-morph/bootstrap";
 import {
 	type BundleNested,
 	Declaration,
@@ -18,6 +22,10 @@ beforeEach(() => {
 	// reset the imports to make sure that the runtime is reloaded
 	vi.resetModules();
 	vi.clearAllMocks();
+
+	// mocking DOM globals
+	// @ts-expect-error - global variable definition
+	globalThis.window = undefined;
 });
 
 test("emitGitignore", async () => {
@@ -78,13 +86,62 @@ test("emitPrettierIgnore", async () => {
 	expect(_false).not.toHaveProperty(".prettierignore");
 });
 
+// https://github.com/opral/inlang-paraglide-js/issues/347
+test("can emit message bundles with more than 255 characters", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
+	});
+
+	await insertBundleNested(
+		project.db,
+		createBundleNested({
+			// 300 characters long id
+			id: "a".repeat(300),
+			messages: [
+				{
+					locale: "en",
+					variants: [
+						{
+							pattern: [{ type: "text", value: "Hello" }],
+						},
+					],
+				},
+			],
+		})
+	);
+
+	const output = await compileProject({
+		project,
+		compilerOptions: {
+			urlPatterns: [],
+		},
+	});
+
+	const code = await bundleCode(
+		output,
+		`export * as m from "./paraglide/messages.js"
+		 export * as runtime from "./paraglide/runtime.js"`
+	);
+
+	const { m } = await importCode(code);
+
+	expect(m["a".repeat(300)]()).toBe("Hello");
+});
+
 describe.each([
 	// useTsImports must be true to test emitTs. Otherwise, rolldown can't resolve the imports
 	{
 		outputStructure: "locale-modules",
+		strategy: ["globalVariable", "baseLocale"],
 	},
 	{
 		outputStructure: "message-modules",
+		strategy: ["globalVariable", "baseLocale"],
 	},
 ] satisfies Array<Parameters<typeof compileProject>["0"]["compilerOptions"]>)(
 	"options",
@@ -97,9 +154,31 @@ describe.each([
 					output,
 					`import * as m from "./paraglide/messages.js"
 
-			console.log(m.sad_penguin_bundle())`
+					console.log(m.sad_penguin_bundle())`
 				);
 				const log = vi.spyOn(console, "log").mockImplementation(() => {});
+				// all required code for the message to be rendered is included like sourceLanguageTag.
+				// but, all other messages except of 'sad_penguin_bundle' are tree-shaken away.
+				for (const { id } of mockBundles) {
+					if (id === "sad_penguin_bundle") {
+						expect(code).toContain(id);
+					} else {
+						expect(code).not.toContain(id);
+					}
+				}
+				eval(code);
+				expect(log).toHaveBeenCalledWith("A simple message.");
+			});
+
+			// https://github.com/opral/inlang-paraglide-js/issues/345
+			test("importing { m } works and tree-shakes unused messages", async () => {
+				const code = await bundleCode(
+					output,
+					`import { m } from "./paraglide/messages.js"
+					console.log(m.sad_penguin_bundle())`
+				);
+				const log = vi.spyOn(console, "log").mockImplementation(() => {});
+
 				// all required code for the message to be rendered is included like sourceLanguageTag.
 				// but, all other messages except of 'sad_penguin_bundle' are tree-shaken away.
 				for (const { id } of mockBundles) {
@@ -143,6 +222,75 @@ describe.each([
 			});
 		});
 
+		// https://github.com/opral/inlang-paraglide-js/issues/379
+		test("plurals work", async () => {
+			const project = await loadProjectInMemory({
+				blob: await newProject({
+					settings: { locales: ["en", "de"], baseLocale: "en" },
+				}),
+			});
+
+			await insertBundleNested(
+				project.db,
+				createBundleNested({
+					id: "plural_test",
+					declarations: [
+						{ type: "input-variable", name: "count" },
+						{
+							type: "local-variable",
+							name: "countPlural",
+							value: {
+								arg: { type: "variable-reference", name: "count" },
+								annotation: {
+									type: "function-reference",
+									name: "plural",
+									options: [],
+								},
+								type: "expression",
+							},
+						},
+					],
+					messages: [
+						{
+							locale: "en",
+							selectors: [{ type: "variable-reference", name: "countPlural" }],
+							variants: [
+								{
+									matches: [
+										{ type: "literal-match", value: "one", key: "countPlural" },
+									],
+									pattern: [{ type: "text", value: "There is one cat." }],
+								},
+								{
+									matches: [
+										{
+											type: "literal-match",
+											value: "other",
+											key: "countPlural",
+										},
+									],
+									pattern: [{ type: "text", value: "There are many cats." }],
+								},
+							],
+						},
+					],
+				})
+			);
+
+			const { m } = await importCode(
+				await bundleCode(
+					await compileProject({
+						project,
+						compilerOptions,
+					}),
+					`export * as m from "./paraglide/messages.js"`
+				)
+			);
+
+			expect(m.plural_test({ count: 1 })).toBe("There is one cat.");
+			expect(m.plural_test({ count: 2 })).toBe("There are many cats.");
+		});
+
 		describe("e2e", async () => {
 			// The compiled output needs to be bundled into one file to be dynamically imported.
 			const code = await bundleCode(
@@ -176,12 +324,12 @@ describe.each([
 				expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
 			});
 
-			test("defineGetLocale() works", async () => {
+			test("overwriteGetLocale() works", async () => {
 				const { m, runtime } = await importCode(code);
 
 				let locale = "en";
 
-				runtime.defineGetLocale(() => locale);
+				runtime.overwriteGetLocale(() => locale);
 
 				expect(m.sad_penguin_bundle()).toBe("A simple message.");
 
@@ -190,12 +338,12 @@ describe.each([
 				expect(m.sad_penguin_bundle()).toBe("Eine einfache Nachricht.");
 			});
 
-			test("defineSetLocale() works", async () => {
+			test("overwriteSetLocale() works", async () => {
 				const { runtime } = await importCode(code);
 
 				let locale = "en";
 
-				runtime.defineSetLocale((newLocale: any) => {
+				runtime.overwriteSetLocale((newLocale: any) => {
 					locale = newLocale;
 				});
 
@@ -293,6 +441,7 @@ describe.each([
 					`export * as m from "./paraglide/messages.js"
 					export * as runtime from "./paraglide/runtime.js"`
 				);
+
 				const { m, runtime } = await importCode(code);
 
 				runtime.setLocale("de");
@@ -300,6 +449,43 @@ describe.each([
 
 				runtime.setLocale("en-US");
 				expect(m.missingInGerman()).toBe("A simple message.");
+			});
+
+			test("arbitrary module identifiers work", async () => {
+				const project = await loadProjectInMemory({
+					blob: await newProject({
+						settings: { locales: ["en", "de"], baseLocale: "en" },
+					}),
+				});
+
+				await insertBundleNested(
+					project.db,
+					createBundleNested({
+						id: "$502.23-hello_world",
+						messages: [
+							{
+								locale: "en",
+								variants: [
+									{ pattern: [{ type: "text", value: "A simple message." }] },
+								],
+							},
+						],
+					})
+				);
+
+				const output = await compileProject({
+					project,
+					compilerOptions,
+				});
+
+				const code = await bundleCode(
+					output,
+					`export * as m from "./paraglide/messages.js"
+					export * as runtime from "./paraglide/runtime.js"`
+				);
+				const { m } = await importCode(code);
+
+				expect(m["$502.23-hello_world"]()).toBe("A simple message.");
 			});
 
 			test("falls back to parent locale if message doesn't exist", async () => {
@@ -372,75 +558,29 @@ describe.each([
 			});
 		});
 
-		// remove with v3 of paraglide js
-		test("./runtime.js types", async () => {
-			const project = await typescriptProject({
-				useInMemoryFileSystem: true,
-				compilerOptions: {
-					outDir: "dist",
-					declaration: true,
-					allowJs: true,
-					checkJs: true,
-					module: ts.ModuleKind.Node16,
-					strict: true,
-				},
-			});
-
-			for (const [fileName, code] of Object.entries(output)) {
-				if (fileName.endsWith(".js") || fileName.endsWith(".ts")) {
-					project.createSourceFile(fileName, code);
-				}
-			}
-			project.createSourceFile(
-				"test.ts",
-				`
-    import * as runtime from "./runtime.js"
-
-    // --------- RUNTIME ---------
-
-    // getLocale() should return type should be a union of language tags, not a generic string
-    runtime.getLocale() satisfies "de" | "en" | "en-US"
-
-    // locales should have a narrow type, not a generic string
-    runtime.locales satisfies Readonly<Array<"de" | "en" | "en-US">>
-
-    // setLocale() should fail if the given language tag is not included in locales
-    // @ts-expect-error - invalid locale
-    runtime.setLocale("fr")
-
-    // setLocale() should not fail if the given language tag is included in locales
-    runtime.setLocale("de")
-
-		// isLocale should narrow the type of it's argument
-		const thing = 5;
-		if(runtime.isLocale(thing)) {
-			const a : "de" | "en" | "en-US" = thing
-		} else {
-			// @ts-expect-error - thing is not a language tag
-			const a : "de" | "en" | "en-US" = thing
-		}
-  `
-			);
-
-			const program = project.createProgram();
-			const diagnostics = ts.getPreEmitDiagnostics(program);
-			for (const diagnostic of diagnostics) {
-				console.error(diagnostic.messageText, diagnostic.file?.fileName);
-			}
-			expect(diagnostics.length).toEqual(0);
-		});
+		// whatever the strictest users use, this is the ultimate nothing gets stricter than this
+		// (to avoid developers opening issues "i get a ts warning in my code")
+		const superStrictRuleOutAnyErrorTsSettings: ProjectOptions["compilerOptions"] =
+			{
+				outDir: "dist",
+				declaration: true,
+				allowJs: true,
+				checkJs: true,
+				noImplicitAny: true,
+				noUnusedLocals: true,
+				noUnusedParameters: true,
+				noImplicitReturns: true,
+				noImplicitThis: true,
+				noUncheckedIndexedAccess: true,
+				noPropertyAccessFromIndexSignature: true,
+				module: ts.ModuleKind.Node16,
+				strict: true,
+			};
 
 		test("./messages.js types", async () => {
 			const project = await typescriptProject({
 				useInMemoryFileSystem: true,
-				compilerOptions: {
-					outDir: "dist",
-					declaration: true,
-					allowJs: true,
-					checkJs: true,
-					module: ts.ModuleKind.Node16,
-					strict: true,
-				},
+				compilerOptions: superStrictRuleOutAnyErrorTsSettings,
 			});
 
 			for (const [fileName, code] of Object.entries(output)) {
@@ -481,7 +621,10 @@ describe.each([
 			);
 
 			const program = project.createProgram();
-			const diagnostics = ts.getPreEmitDiagnostics(program);
+			const diagnostics = ts
+				.getPreEmitDiagnostics(program)
+				// runtime type here makes issues because of the path-to-regexp import
+				.filter((d) => !d.file?.fileName.includes("runtime.js"));
 			for (const diagnostic of diagnostics) {
 				console.error(diagnostic.messageText, diagnostic.file?.fileName);
 			}
@@ -491,13 +634,16 @@ describe.each([
 );
 
 async function bundleCode(output: Record<string, string>, file: string) {
+	output["runtime.js"] = output["runtime.js"]!.replace(
+		'import "@inlang/paraglide-js/urlpattern-polyfill";',
+		"/** @type {any} */const URLPattern = {};"
+	).replace(
+		'const { AsyncLocalStorage } = await import("async_hooks");',
+		"const AsyncLocalStorage = class {};"
+	);
+
 	const bundle = await rolldown({
 		input: ["main.js"],
-		resolve: {
-			extensionAlias: {
-				".js": [".ts", ".js"],
-			},
-		},
 		plugins: [
 			// @ts-expect-error - rollup types are not up to date
 			virtual({
@@ -705,7 +851,7 @@ function createBundleNested(args: {
 					"_" +
 					message.locale +
 					"_" +
-					variant.pattern.map((p) => p.type).join(""),
+					Math.random().toString(36).slice(2),
 				messageId: args.id,
 				matches: variant.matches ?? [],
 				pattern: variant.pattern,

@@ -1,5 +1,52 @@
 # @inlang/message-bundle-component
 
+## 4.0.0
+
+### Minor Changes
+
+- f01927c: bugfixing
+
+### Patch Changes
+
+- Updated dependencies [f01927c]
+  - @inlang/sdk@2.4.0
+
+## 3.0.0
+
+### Patch Changes
+
+- Updated dependencies [c0b857a]
+- Updated dependencies [91ba4eb]
+  - @inlang/sdk@2.3.0
+
+## 2.0.2
+
+### Patch Changes
+
+- Updated dependencies [c53b1a9]
+  - @inlang/sdk@2.2.2
+
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies [f51736f]
+- Updated dependencies [adf7d6c]
+  - @inlang/sdk@2.2.1
+
+## 2.0.0
+
+### Patch Changes
+
+- Updated dependencies [fc41e71]
+  - @inlang/sdk@2.2.0
+
+## 1.0.3
+
+### Patch Changes
+
+- @inlang/sdk@2.1.3
+
 ## 1.0.2
 
 ### Patch Changes

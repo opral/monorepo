@@ -23,7 +23,6 @@ import TranslatorMachine, {
 	NoMoreTranslationsLeftError,
 } from "../../../lib/translationprovider/TranslatorMachine";
 
-
 type LocalizedLabelListItemProps = {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- TODO specify type
 	showMessage: Function;
