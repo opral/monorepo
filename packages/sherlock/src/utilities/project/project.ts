@@ -4,7 +4,6 @@ import { CONFIGURATION } from "../../configuration.js"
 import { capture } from "../../services/telemetry/index.js"
 import { setState, state } from "../state.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
-import { transpileToCjs } from "../import/transpileToCjs.js"
 import * as fs from "node:fs"
 import type { FileSystem } from "../fs/createFileSystemMapper.js"
 import path from "node:path"
@@ -105,7 +104,6 @@ export async function handleTreeSelection(args: {
 			fs,
 			account: localAccount,
 			appId: CONFIGURATION.STRINGS.APP_ID,
-			preprocessPluginBeforeImport: transpileToCjs,
 		})
 
 		setState({
