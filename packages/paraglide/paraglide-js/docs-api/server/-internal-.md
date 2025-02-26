@@ -1,8 +1,8 @@
-## serverMiddleware()
+## middleware()
 
-> **serverMiddleware**\<`T`\>(`request`, `resolve`, `options`?): `Promise`\<`any`\>
+> **middleware**\<`T`\>(`request`, `resolve`, `options`?): `Promise`\<`any`\>
 
-Defined in: server/server-middleware.js:71
+Defined in: server/middleware.js:71
 
 Server middleware that handles locale-based routing and request processing.
 

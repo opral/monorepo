@@ -7,7 +7,7 @@ export function createServerFile(): string {
 	const code = `
 import * as runtime from "./runtime.js";
 
-${injectCode("./server-middleware.js")}
+${injectCode("./middleware.js")}
 `;
 
 	return code;
