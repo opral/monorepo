@@ -15,3 +15,7 @@ NextJS is tech-debt plagued. If you start your website or app from scratch, we h
 <markdown-wc-embed src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/examples/next-js-ssr/README.md"></markdown-wc-embed>
 
 <markdown-wc-embed src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/examples/next-js-ssg/README.md"></markdown-wc-embed>
+
+## Usage
+
+Once you've set up Paraglide with Next.js using either the SSR or SSG approach, see the [basics documentation](/m/gerre34r/library-inlang-paraglideJs/basics) for more information on how to use Paraglide's messages, parameters, and locale management.
