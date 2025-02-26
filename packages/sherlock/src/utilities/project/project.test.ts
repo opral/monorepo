@@ -312,7 +312,6 @@ describe("createTreeDataProvider", () => {
 
 describe("projectView", () => {
 	it("should set up the project view", async () => {
-		// @ts-expect-error
 		const context = {
 			subscriptions: [],
 		} as vscode.ExtensionContext
