@@ -25,10 +25,21 @@ This command generates TypeScript or JavaScript files in your `src/paraglide` di
 
 ## Using messages
 
-```tsx
+```js
+// Import your message functions
 import { m } from "./src/paraglide/messages.js";
+import { getLocale, setLocale } from "./src/paraglide/runtime.js";
 
-m.greeting({ name: "World" }); // "Hello World!"
+// Use a message (with parameters if needed)
+console.log(m.greeting({ name: "World" })); // "Hello World!"
+
+// Change the locale
+setLocale("de");
+
+console.log(m.greeting({ name: "Welt" })); // "Hallo Welt!"
+
+// Get the current locale
+console.log(getLocale()); // "de"
 ```
 
 ## Next steps
