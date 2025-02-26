@@ -3,7 +3,9 @@
 import { execSync } from "node:child_process"
 import path, { dirname } from "node:path"
 import { fileURLToPath, URL } from "node:url"
-import packageJson from "./package.json" assert { type: "json" }
+import { createRequire } from "module"
+const require = createRequire(import.meta.url)
+const packageJson = require("./package.json")
 
 // Ensure environment variables are checked properly
 if (!process.env.OPEN_VSX_TOKEN) {

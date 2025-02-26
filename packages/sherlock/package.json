@@ -223,7 +223,7 @@
 		"dev": "DEV=true node ./build.js",
 		"package": "pnpm vsce package --no-dependencies",
 		"publish": "pnpm vsce publish --no-dependencies",
-		"publish:open-vsx": "node publish-openvsx.js",
+		"publish:open-vsx": "node --experimental-json-modules publish-openvsx.js",
 		"vscode:prepublish": "npm run build",
 		"---- EDITOR ----------------------------------------------------------": "",
 		"editor:build": "cd src/utilities/editor/sherlock-editor-app && pnpm run build",
