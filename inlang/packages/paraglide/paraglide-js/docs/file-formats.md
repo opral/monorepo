@@ -13,7 +13,7 @@ You can use any inlang plugin to import messages from various file formats.
 
 By default, Paraglide JS uses the [inlang-message-format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) plugin. But, you can use any other plugin that suits your needs. Mixing & matching is also possible.
 
-## Explore import/export plugins
+## Available plugins
 
 All plugins can be found on https://inlang.com/c/plugins. Here are some popular plugins:
 

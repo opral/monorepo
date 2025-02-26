@@ -8,13 +8,6 @@ imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-comments.js
 ---
 
-<script type="module" src="https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-feature.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-features.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-link.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-links.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-comment.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-comments.js"></script>
-
 [<img src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/assets/header.png" alt="Dead Simple i18n. Typesafe, Small Footprint, Treeshsakeable Messages, IDE Integration, Framework Agnostic" width="10000000px" />](https://www.youtube.com/watch?v=-YES3CCAG90)
 
 # Why Paraglide?

@@ -23,10 +23,17 @@
 			"/migrating-to-v2": "./docs/migrating-to-v2.md",
 			"/changelog": "./CHANGELOG.md"
 		},
+		"Getting Started": {
+			"/sveltekit": "./examples/sveltekit/README.md",
+			"/astro": "./examples/astro/README.md",
+			"/react-router": "./examples/react-router/README.md",
+			"/next-js": "./docs/examples/next-js.md",
+			"/vite": "./examples/vite/README.md"
+		},
 		"Usage": {
-			"/getting-started": "./README.md",
-			"/compiling-messages": "./docs/compiling-messages.md",
+			"/basics": "./docs/basics.md",
 			"/strategy": "./docs/strategy.md",
+			"/compiling-messages": "./docs/compiling-messages.md",
 			"/variants": "./docs/variants.md",
 			"/file-formats": "./docs/file-formats.md",
 			"/multi-tenancy": "./docs/multi-tenancy.md",
@@ -37,13 +44,6 @@
 			"/compiler-options": "./docs-api/compiler-options.md",
 			"/runtime": "./docs-api/runtime/-internal-.md",
 			"/errors": "./docs/errors.md"
-		},
-		"Examples": {
-			"/sveltekit": "./examples/sveltekit/README.md",
-			"/astro": "./examples/astro/README.md",
-			"/react-router": "./examples/react-router/README.md",
-			"/next-js": "./docs/examples/next-js.md",
-			"/vite": "./examples/vite/README.md"
 		},
 		"Ecosystem": {
 			"VSCode Extension": "/m/r7kp499g/app-inlang-ideExtension",
