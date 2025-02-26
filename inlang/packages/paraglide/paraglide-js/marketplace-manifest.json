@@ -39,7 +39,7 @@
 			"/multi-tenancy": "./docs/multi-tenancy.md",
 			"/server-side-rendering": "./docs/server-side-rendering.md",
 			"/compiling-messages": "./docs/compiling-messages.md",
-			"/incremental-migration": "./docs/incremental-migration.md"
+			"/incremental-migration": "./examples/incremental-migration/README.md"
 		},
 		"Ecosystem": {
 			"Sherlock VSCode extension": "/m/r7kp499g/app-inlang-ideExtension",
