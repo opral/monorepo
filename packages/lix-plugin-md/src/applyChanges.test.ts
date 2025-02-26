@@ -148,3 +148,61 @@ Some text.`);
 		new TextDecoder().decode(initialMd),
 	);
 });
+
+test("applies changes to a new markdown file in correct order", async () => {
+	const lix = await openLixInMemory({ providePlugins: [plugin] });
+
+	const initialMd = new TextEncoder().encode(`<!-- id: abc123-1 -->
+# Heading
+
+<!-- id: abc123-2 -->
+Some text.`);
+
+	const file = {
+		id: "file0",
+		path: "/mock.md",
+		data: initialMd,
+	};
+
+	await lix.db.insertInto("file").values(file).execute();
+
+	const updatedMd = new TextEncoder().encode(`<!-- id: abc123-1 -->
+# Heading
+
+<!-- id: abc123-3 -->
+Some text - added later in the middel.
+<!-- id: abc123-2 -->
+Some text.`);
+
+	const fileUpdated = {
+		id: "file0",
+		path: "/mock.md",
+		data: updatedMd,
+	};
+
+	await lix.db
+		.updateTable("file")
+		.set("data", updatedMd)
+		.where("id", "=", fileUpdated!.id)
+		.returningAll()
+		.execute();
+
+	await fileQueueSettled({ lix });
+
+	const changes = await lix.db
+		.selectFrom("change")
+		.where("file_id", "=", "file0")
+		.selectAll()
+		.execute();
+
+	const { fileData: applied } = await applyChanges({
+		file: { ...file, data: undefined, metadata: {} },
+		changes,
+		lix,
+	});
+
+	expect(new TextDecoder().decode(applied)).toEqual(
+		new TextDecoder().decode(updatedMd),
+	);
+	console.log("test");
+});
