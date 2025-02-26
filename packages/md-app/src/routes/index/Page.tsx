@@ -20,14 +20,16 @@ export default function Page() {
 				<LixMenuDropdown />
 			</div>
 			<div className='flex h-full'>
-				{activeFile &&
+				{activeFile ?
 					<div className="h-screen flex-1 max-w-[calc(100%-600px)]" data-registry="plate">
 						<SettingsProvider>
 							<PlateEditor />
 						</SettingsProvider>
 						<Toaster />
 					</div>
-				}
+					: <div className="h-screen flex-1 max-w-[calc(100%-600px)] flex justify-center items-center">
+						No file selected
+					</div>}
 				<Separator orientation="vertical" className="h-full" />
 				<div className="w-[600px] flex flex-col h-full relative mt-[10px]">
 					{/* Fade effect at the top */}
