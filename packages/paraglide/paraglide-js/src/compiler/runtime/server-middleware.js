@@ -117,7 +117,9 @@ export async function serverMiddleware(request, resolve, options = {}) {
 	// the server can't render the correct page.
 	const newRequest = strategy.includes("url")
 		? new Request(deLocalizeUrl(request.url), request)
-		: request;
+		: // need to create a new request object because some metaframeworks (nextjs!) throw otherwise
+			// https://github.com/opral/inlang-paraglide-js/issues/411
+			new Request(request);
 
 	// If AsyncLocalStorage is disabled, create a mock implementation
 	if (disableAsyncLocalStorage) {
