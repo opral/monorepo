@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 2.0.1
+
+### Patch Changes
+
+- 5dc768a: remove `transpileCjs`
+
 ## 2.0.0
 
 ### Major Changes
