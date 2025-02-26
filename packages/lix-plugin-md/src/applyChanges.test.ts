@@ -15,13 +15,21 @@ test("it applies an insert change in markdown", async () => {
 		fileUpdates: [before, after],
 	});
 
+	const { fileData: afterWithIds } = await applyChanges({
+		file: { id: "mock", path: "/mock.md", data: after, metadata: {} },
+		changes: [],
+		lix,
+	});
+
 	const { fileData: applied } = await applyChanges({
 		file: { id: "mock", path: "/mock.md", data: before, metadata: {} },
 		changes,
 		lix,
 	});
 
-	expect(applied).toEqual(after);
+	expect(new TextDecoder().decode(applied)).toEqual(
+		new TextDecoder().decode(afterWithIds),
+	);
 });
 
 test("it applies a text update in markdown", async () => {
@@ -33,13 +41,20 @@ test("it applies a text update in markdown", async () => {
 		fileUpdates: [before, after],
 	});
 
+	const { fileData: afterWithIds } = await applyChanges({
+		file: { id: "mock", path: "/mock.md", data: after, metadata: {} },
+		changes: [],
+		lix,
+	});
 	const { fileData: applied } = await applyChanges({
 		file: { id: "mock", path: "/mock.md", data: before, metadata: {} },
 		changes,
 		lix,
 	});
 
-	expect(applied).toEqual(after);
+	expect(new TextDecoder().decode(applied)).toEqual(
+		new TextDecoder().decode(afterWithIds),
+	);
 });
 
 test("it applies a delete change in markdown", async () => {
@@ -52,6 +67,11 @@ test("it applies a delete change in markdown", async () => {
 		file: { id: "mock", path: "/mock.md" },
 		fileUpdates: [before, after],
 	});
+	const { fileData: afterWithIds } = await applyChanges({
+		file: { id: "mock", path: "/mock.md", data: after, metadata: {} },
+		changes: [],
+		lix,
+	});
 
 	const { fileData: applied } = await applyChanges({
 		file: { id: "mock", path: "/mock.md", data: before, metadata: {} },
@@ -59,7 +79,9 @@ test("it applies a delete change in markdown", async () => {
 		lix,
 	});
 
-	expect(applied).toEqual(after);
+	expect(new TextDecoder().decode(applied)).toEqual(
+		new TextDecoder().decode(afterWithIds),
+	);
 });
 
 test("it applies a reordering change in markdown", async () => {
@@ -74,6 +96,11 @@ test("it applies a reordering change in markdown", async () => {
 		file: { id: "mock", path: "/mock.md" },
 		fileUpdates: [before, after],
 	});
+	const { fileData: afterWithIds } = await applyChanges({
+		file: { id: "mock", path: "/mock.md", data: after, metadata: {} },
+		changes: [],
+		lix,
+	});
 
 	const { fileData: applied } = await applyChanges({
 		file: { id: "mock", path: "/mock.md", data: before, metadata: {} },
@@ -81,13 +108,19 @@ test("it applies a reordering change in markdown", async () => {
 		lix,
 	});
 
-	expect(applied).toEqual(after);
+	expect(new TextDecoder().decode(applied)).toEqual(
+		new TextDecoder().decode(afterWithIds),
+	);
 });
 
 test("applies changes to a new markdown file", async () => {
 	const lix = await openLixInMemory({ providePlugins: [plugin] });
 
-	const initialMd = new TextEncoder().encode("# Title\n\nHello world.");
+	const initialMd = new TextEncoder().encode(`<!-- id: abc123-1 -->
+# Heading
+
+<!-- id: abc123-2 -->
+Some text.`);
 
 	const file = {
 		id: "file0",
@@ -111,5 +144,7 @@ test("applies changes to a new markdown file", async () => {
 		lix,
 	});
 
-	expect(applied).toEqual(initialMd);
+	expect(new TextDecoder().decode(applied)).toEqual(
+		new TextDecoder().decode(initialMd),
+	);
 });

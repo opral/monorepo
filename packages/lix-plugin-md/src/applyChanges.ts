@@ -17,17 +17,17 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 				.selectAll()
 				.executeTakeFirstOrThrow();
 
-			const blockHash = change.entity_id;
+			const blockId = change.entity_id;
 
 			if (snapshot.content === null) {
-				parsedBlocks = parsedBlocks.filter((block) => block.id !== blockHash);
+				parsedBlocks = parsedBlocks.filter((block) => block.id !== blockId);
 			} else {
 				const updatedBlock = {
-					id: blockHash,
+					id: blockId,
 					content: snapshot.content.text,
 					type: snapshot.content.type,
 				};
-				const index = parsedBlocks.findIndex((block) => block.id === blockHash);
+				const index = parsedBlocks.findIndex((block) => block.id === blockId);
 				if (index !== -1) {
 					parsedBlocks[index] = updatedBlock;
 				} else {
@@ -39,7 +39,9 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 
 	return {
 		fileData: new TextEncoder().encode(
-			parsedBlocks.map((block) => block.content).join("\n\n"),
+			parsedBlocks.map((block) => {
+				return block.content === '<br>' ? "<!-- id: " + block.id + " -->" + block.content
+			: "<!-- id: " + block.id + " -->\n" + block.content} ).join("\n\n"),
 		),
 	};
 };
