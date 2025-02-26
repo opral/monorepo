@@ -110,6 +110,41 @@ compile({
 });
 ```
 
+#### Translated pathname-based url localization example
+
+For translated pathnames where you want to localize both the structure and the path segments of the URL, you can use named pattern groups to match and replace specific segments of the URL. This is useful for implementing language-specific routes like `/about` in English and `/ueber-uns` in German.
+
+```
+https://example.com/about
+https://example.com/ueber-uns
+```
+
+Basic example with translated path segment:
+
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url"],
+	urlPatterns: [
+		{
+			pattern: ":protocol://:domain(.*)::port?/:about/:path*",
+			deLocalizedNamedGroups: { 
+				about: "about" 
+			},
+			localizedNamedGroups: {
+				en: { 
+					about: "about" 
+				},
+				de: { 
+					about: "ueber-uns" 
+				},
+			},
+		},
+	],
+});
+```
+
 #### Domain-based url localization example
 
 ```
