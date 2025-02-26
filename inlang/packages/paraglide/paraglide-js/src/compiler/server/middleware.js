@@ -68,7 +68,7 @@ import * as runtime from "./runtime.js";
  * };
  * ```
  */
-export async function serverMiddleware(request, resolve, options = {}) {
+export async function middleware(request, resolve, options = {}) {
 	const { disableAsyncLocalStorage = false } = options;
 
 	if (!runtime.serverAsyncLocalStorage && !disableAsyncLocalStorage) {
