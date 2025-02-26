@@ -26,6 +26,10 @@ test("handles . dots", () => {
 	expect(toSafeModuleId("hello.world.nested")).toBe("hello_world_nested");
 });
 
+test("handles : colons", () => {
+	expect(toSafeModuleId("hello:world:nested")).toBe("hello_world_nested");
+});
+
 test("transforms js reserved keywords", async () => {
 	expect(toSafeModuleId("import")).toBe("_import");
 	expect(toSafeModuleId("let")).toBe("_let");
