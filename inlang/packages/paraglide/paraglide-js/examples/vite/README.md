@@ -24,4 +24,6 @@ export default defineConfig({
 });
 ```
 
-Done :)
+## Usage
+
+See the [basics documentation](/m/gerre34r/library-inlang-paraglideJs/basics) for more information on how to use Paraglide's messages, parameters, and locale management.
