@@ -105,7 +105,6 @@ export async function handleTreeSelection(args: {
 			fs,
 			account: localAccount,
 			appId: CONFIGURATION.STRINGS.APP_ID,
-			preprocessPluginBeforeImport: transpileToCjs,
 		})
 
 		setState({
