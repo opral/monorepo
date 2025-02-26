@@ -621,10 +621,12 @@ describe.each([
 			);
 
 			const program = project.createProgram();
-			const diagnostics = ts
-				.getPreEmitDiagnostics(program)
-				// runtime type here makes issues because of the path-to-regexp import
-				.filter((d) => !d.file?.fileName.includes("runtime.js"));
+			const diagnostics = ts.getPreEmitDiagnostics(program).filter((d) => {
+				// async_hooks is a node module that is not available in the browser
+				return !d.messageText
+					.toString()
+					.includes("Cannot find module 'async_hooks'");
+			});
 			for (const diagnostic of diagnostics) {
 				console.error(diagnostic.messageText, diagnostic.file?.fileName);
 			}

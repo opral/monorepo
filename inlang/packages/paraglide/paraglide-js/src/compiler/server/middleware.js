@@ -1,18 +1,4 @@
-import { extractLocaleFromRequest } from "./extract-locale-from-request.js";
-import { deLocalizeUrl, localizeUrl } from "./localize-url.js";
-import { strategy, TREE_SHAKE_URL_STRATEGY_USED } from "./variables.js";
-
-/**
- * Server side async local storage that is set by `serverMiddleware()`.
- *
- * The variable is used to retrieve the locale and origin in a server-side
- * rendering context without effecting other requests.
- *
- * Is `undefined` on the client.
- *
- * @type {{ getStore(): { locale: Locale, origin: string } | undefined, run: (store: any, cb: any) => any } | undefined}
- */
-let serverMiddlewareAsyncStorage = undefined;
+import * as runtime from "./runtime.js";
 
 /**
  * Server middleware that handles locale-based routing and request processing.
@@ -31,7 +17,7 @@ let serverMiddlewareAsyncStorage = undefined;
  * @template T - The return type of the resolve function
  *
  * @param {Request} request - The incoming request object
- * @param {(args: { request: Request, locale: Locale }) => T | Promise<T>} resolve - Function to handle the request
+ * @param {(args: { request: Request, locale: import("./runtime.js").Locale }) => T | Promise<T>} resolve - Function to handle the request
  * @param {Object} [options] - Optional configuration for the middleware
  * @param {boolean} [options.disableAsyncLocalStorage=false] - If true, disables AsyncLocalStorage usage.
  *                                                           ⚠️ WARNING: This should ONLY be used in serverless environments
@@ -82,28 +68,21 @@ let serverMiddlewareAsyncStorage = undefined;
  * };
  * ```
  */
-export async function serverMiddleware(request, resolve, options = {}) {
+export async function paraglideMiddleware(request, resolve, options = {}) {
 	const { disableAsyncLocalStorage = false } = options;
 
-	// the typeof window conditions needs to exist for non-sophisticated
-	// bundlers to detect the import statement as "should be tree-shaken"
-	// (webpack). otherwise, the bundler might throw.
-	if (
-		typeof window === "undefined" &&
-		!serverMiddlewareAsyncStorage &&
-		!disableAsyncLocalStorage
-	) {
+	if (!runtime.serverAsyncLocalStorage && !disableAsyncLocalStorage) {
 		const { AsyncLocalStorage } = await import("async_hooks");
-		serverMiddlewareAsyncStorage = new AsyncLocalStorage();
+		runtime.overwriteServerAsyncLocalStorage(new AsyncLocalStorage());
 	}
 
-	const locale = extractLocaleFromRequest(request);
+	const locale = runtime.extractLocaleFromRequest(request);
 	const origin = new URL(request.url).origin;
 
-	if (TREE_SHAKE_URL_STRATEGY_USED) {
+	if (runtime.strategy.includes("url")) {
 		// if the client makes a request to a URL that doesn't match
 		// the localizedUrl, redirect the client to the localized URL
-		const localizedUrl = localizeUrl(request.url, { locale });
+		const localizedUrl = runtime.localizeUrl(request.url, { locale });
 		if (localizedUrl.href !== request.url) {
 			return Response.redirect(localizedUrl, 302);
 		}
@@ -115,31 +94,31 @@ export async function serverMiddleware(request, resolve, options = {}) {
 	// The middleware is responsible for mapping a localized URL to the
 	// de-localized URL e.g. `/en/about` to `/about`. Otherwise,
 	// the server can't render the correct page.
-	const newRequest = strategy.includes("url")
-		? new Request(deLocalizeUrl(request.url), request)
+	const newRequest = runtime.strategy.includes("url")
+		? new Request(runtime.deLocalizeUrl(request.url), request)
 		: // need to create a new request object because some metaframeworks (nextjs!) throw otherwise
 			// https://github.com/opral/inlang-paraglide-js/issues/411
 			new Request(request);
 
 	// If AsyncLocalStorage is disabled, create a mock implementation
 	if (disableAsyncLocalStorage) {
-		// Create a mock serverMiddlewareAsyncStorage if it doesn't exist
-		if (!serverMiddlewareAsyncStorage) {
-			serverMiddlewareAsyncStorage = {
+		// Create a mock serverAsyncLocalStorage if it doesn't exist
+		if (!runtime.serverAsyncLocalStorage) {
+			runtime.overwriteServerAsyncLocalStorage({
 				getStore: () => ({ locale, origin }),
 				run: async () => {
 					try {
 						return await resolve({ locale, request: newRequest });
 					} finally {
-						serverMiddlewareAsyncStorage = undefined;
+						runtime.overwriteServerAsyncLocalStorage(undefined);
 					}
 				},
-			};
+			});
 		}
 	}
 
 	// Otherwise use AsyncLocalStorage to isolate request context
-	return serverMiddlewareAsyncStorage?.run({ locale, origin }, () =>
+	return runtime.serverAsyncLocalStorage?.run({ locale, origin }, () =>
 		resolve({ locale, request: newRequest })
 	);
 }

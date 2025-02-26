@@ -1,3 +1,47 @@
+## AsyncLocalStorageSubset
+
+> **AsyncLocalStorageSubset**\<\>: `object`
+
+Defined in: [runtime/variables.js:37](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+### Type Parameters
+
+### Type declaration
+
+#### run()
+
+> **run**: (`store`, `cb`) => `any`
+
+##### Parameters
+
+###### store
+
+`any`
+
+###### cb
+
+`any`
+
+##### Returns
+
+`any`
+
+#### getStore()
+
+##### Returns
+
+`undefined` \| \{ `locale`: [`Locale`](-internal-.md#locale); `origin`: `string`; \}
+
+***
+
+## Locale
+
+> **Locale**: `any`
+
+Defined in: [runtime/ambient.d.ts:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/ambient.d.ts)
+
+***
+
 ## baseLocale
 
 > `const` **baseLocale**: `"en"` = `"en"`
@@ -39,6 +83,19 @@ if (locales.includes(userSelectedLocale) === false) {
     throw new Error('Locale is not available');
   }
 ```
+
+***
+
+## serverAsyncLocalStorage
+
+> **serverAsyncLocalStorage**: `undefined` \| [`AsyncLocalStorageSubset`](-internal-.md#asynclocalstoragesubset) = `undefined`
+
+Defined in: [runtime/variables.js:48](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+Server side async local storage that is set by `serverMiddleware()`.
+
+The variable is used to retrieve the locale and origin in a server-side
+rendering context without effecting other requests.
 
 ***
 
@@ -295,7 +352,7 @@ The extracted locale, or undefined if no locale is found.
 
 > **getLocale**(): `any`
 
-Defined in: [runtime/get-locale.js:37](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:38](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Get the current locale.
 
@@ -319,7 +376,7 @@ if (getLocale() === 'de') {
 
 > **getUrlOrigin**(): `string`
 
-Defined in: [runtime/get-url-origin.js:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-url-origin.js)
+Defined in: [runtime/get-url-origin.js:12](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-url-origin.js)
 
 The origin of the current URL.
 
@@ -500,7 +557,7 @@ localizeUrl(url, { locale: "de" });
 
 > **overwriteGetLocale**(`fn`): `void`
 
-Defined in: [runtime/get-locale.js:126](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:127](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Overwrite the `getLocale()` function.
 
@@ -552,6 +609,31 @@ define how the URL origin is resolved.
 
 ***
 
+## overwriteServerAsyncLocalStorage()
+
+> **overwriteServerAsyncLocalStorage**(`value`): `void`
+
+Defined in: [runtime/variables.js:60](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+Sets the server side async local storage.
+
+The function is needed because the `runtime.js` file
+must define the `serverAsyncLocalStorage` variable to
+avoid a circular import between `runtime.js` and
+`server.js` files.
+
+### Parameters
+
+#### value
+
+`undefined` | [`AsyncLocalStorageSubset`](-internal-.md#asynclocalstoragesubset)
+
+### Returns
+
+`void`
+
+***
+
 ## overwriteSetLocale()
 
 > **overwriteSetLocale**(`fn`): `void`
@@ -580,107 +662,6 @@ overwriteSetLocale((newLocale) => {
     // set the locale in a cookie
     return Cookies.set('locale', newLocale)
   });
-```
-
-***
-
-## serverMiddleware()
-
-> **serverMiddleware**\<`T`\>(`request`, `resolve`, `options`?): `Promise`\<`any`\>
-
-Defined in: [runtime/server-middleware.js:85](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/server-middleware.js)
-
-Server middleware that handles locale-based routing and request processing.
-
-This middleware performs several key functions:
-
-1. Determines the locale for the incoming request using configured strategies
-2. Handles URL localization and redirects
-3. Maintains locale state using AsyncLocalStorage to prevent request interference
-
-When URL strategy is used:
-
-- If URL doesn't match the determined locale, redirects to localized URL
-- De-localizes URLs before passing to server (e.g., `/fr/about` → `/about`)
-
-### Type Parameters
-
-• **T**
-
-The return type of the resolve function
-
-### Parameters
-
-#### request
-
-`Request`
-
-The incoming request object
-
-#### resolve
-
-(`args`) => `T` \| `Promise`\<`T`\>
-
-Function to handle the request
-
-#### options?
-
-Optional configuration for the middleware
-
-##### disableAsyncLocalStorage?
-
-`boolean`
-
-If true, disables AsyncLocalStorage usage.
-                                                          ⚠️ WARNING: This should ONLY be used in serverless environments
-                                                          like Cloudflare Workers. Disabling AsyncLocalStorage in traditional
-                                                          server environments risks cross-request pollution where state from
-                                                          one request could leak into another concurrent request.
-
-### Returns
-
-`Promise`\<`any`\>
-
-Returns either:
-- A `Response` object (302 redirect) if URL localization is needed
-- The result of the resolve function if no redirect is required
-
-### Examples
-
-```typescript
-// Basic usage in metaframeworks like NextJS, SvelteKit, Astro, Nuxt, etc.
-export const handle = async ({ event, resolve }) => {
-  return serverMiddleware(event.request, ({ request, locale }) => {
-    // let the framework further resolve the request
-    return resolve(request);
-  });
-};
-```
-
-```typescript
-// Usage in a framework like Express JS or Hono
-app.use(async (req, res, next) => {
-  const result = await serverMiddleware(req, ({ request, locale }) => {
-    // If a redirect happens this won't be called
-    return next(request);
-  });
-});
-```
-
-```typescript
-// Usage in serverless environments like Cloudflare Workers
-// ⚠️ WARNING: This should ONLY be used in serverless environments like Cloudflare Workers.
-// Disabling AsyncLocalStorage in traditional server environments risks cross-request pollution where state from
-// one request could leak into another concurrent request.
-export default {
-  fetch: async (request) => {
-    return serverMiddleware(
-      request,
-      ({ request, locale }) => handleRequest(request, locale),
-      { disableAsyncLocalStorage: true }
-    );
-  }
-};
 ```
 
 ***

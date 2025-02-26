@@ -6,7 +6,6 @@ export declare global {
 	 * Locale used by the variable strategy.
 	 */
 	let _locale: string;
-	let serverMiddlewareAsyncStorage: any;
 	// string because precise locale is unknown before compilation
 	type Locale = any;
 	let pathToRegexp: {

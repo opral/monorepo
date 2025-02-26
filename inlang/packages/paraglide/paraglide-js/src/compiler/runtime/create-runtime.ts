@@ -4,6 +4,8 @@ import {
 	defaultCompilerOptions,
 	type CompilerOptions,
 } from "../compiler-options.js";
+import { createServerFile } from "../server/create-server-file.js";
+import type { ServerRuntime } from "../server/type.js";
 
 /**
  * Returns the code for the `runtime.js` module
@@ -97,8 +99,6 @@ ${injectCode("./localize-url.js")}
 
 ${injectCode("./localize-href.js")}
 
-${injectCode("./server-middleware.js")}
-
 // ------ TYPES ------
 
 /**
@@ -144,8 +144,8 @@ export async function createRuntimeForTesting(args: {
 	baseLocale: string;
 	locales: string[];
 	compilerOptions?: Omit<CompilerOptions, "outdir" | "project" | "fs">;
-}): Promise<Runtime> {
-	const file = createRuntimeFile({
+}): Promise<Runtime & ServerRuntime> {
+	const clientSideRuntime = createRuntimeFile({
 		baseLocale: args.baseLocale,
 		locales: args.locales,
 		compilerOptions: {
@@ -156,10 +156,18 @@ export async function createRuntimeForTesting(args: {
 		// remove the polyfill import statement to avoid module resolution logic in testing
 		.replace(`import "@inlang/paraglide-js/urlpattern-polyfill";`, "");
 
+	// remove the server-side runtime import statement to avoid module resolution logic in testing
+	const serverSideRuntime = createServerFile()
+		.replace(`import * as runtime from "./runtime.js";`, "")
+		// the runtime functions are bundles, hence remove the runtime namespace
+		.replaceAll("runtime.", "");
+
 	await import("urlpattern-polyfill");
 
 	return await import(
 		"data:text/javascript;base64," +
-			Buffer.from(file, "utf-8").toString("base64")
+			Buffer.from(clientSideRuntime + serverSideRuntime, "utf-8").toString(
+				"base64"
+			)
 	);
 }
