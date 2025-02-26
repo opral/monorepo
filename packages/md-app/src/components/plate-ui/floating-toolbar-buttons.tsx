@@ -74,18 +74,18 @@ export function FloatingToolbarButtons() {
               <Code2Icon />
             </MarkToolbarButton>
 
-            <InlineEquationToolbarButton />
+            {/* <InlineEquationToolbarButton /> */}
 
             <LinkToolbarButton />
           </ToolbarGroup>
         </>
       )}
 
-      <ToolbarGroup>
+      {/* <ToolbarGroup>
         <CommentToolbarButton />
 
         {!readOnly && <MoreDropdownMenu />}
-      </ToolbarGroup>
+      </ToolbarGroup> */}
     </>
   );
 }

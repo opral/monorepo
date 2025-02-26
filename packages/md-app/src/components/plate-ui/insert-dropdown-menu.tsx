@@ -101,11 +101,11 @@ const groups: Group[] = [
         label: 'Heading 3',
         value: HEADING_KEYS.h3,
       },
-      {
-        icon: <TableIcon />,
-        label: 'Table',
-        value: TablePlugin.key,
-      },
+      // {
+      //   icon: <TableIcon />,
+      //   label: 'Table',
+      //   value: TablePlugin.key,
+      // },
       {
         icon: <FileCodeIcon />,
         label: 'Code',
@@ -121,121 +121,126 @@ const groups: Group[] = [
         label: 'Divider',
         value: HorizontalRulePlugin.key,
       },
-    ].map((item) => ({
-      ...item,
-      onSelect: (editor, value) => {
-        insertBlock(editor, value);
-      },
-    })),
-  },
-  {
-    group: 'Lists',
-    items: [
-      {
-        icon: <ListIcon />,
-        label: 'Bulleted list',
-        value: ListStyleType.Disc,
-      },
-      {
-        icon: <ListOrderedIcon />,
-        label: 'Numbered list',
-        value: ListStyleType.Decimal,
-      },
-      {
-        icon: <SquareIcon />,
-        label: 'To-do list',
-        value: INDENT_LIST_KEYS.todo,
-      },
-      {
-        icon: <ChevronRightIcon />,
-        label: 'Toggle list',
-        value: TogglePlugin.key,
-      },
-    ].map((item) => ({
-      ...item,
-      onSelect: (editor, value) => {
-        insertBlock(editor, value);
-      },
-    })),
-  },
-  {
-    group: 'Media',
-    items: [
-      {
-        icon: <ImageIcon />,
-        label: 'Image',
-        value: ImagePlugin.key,
-      },
-      {
-        icon: <FilmIcon />,
-        label: 'Embed',
-        value: MediaEmbedPlugin.key,
-      },
-      {
-        icon: <PenToolIcon />,
-        label: 'Excalidraw',
-        value: ExcalidrawPlugin.key,
-      },
-    ].map((item) => ({
-      ...item,
-      onSelect: (editor, value) => {
-        insertBlock(editor, value);
-      },
-    })),
-  },
-  {
-    group: 'Advanced blocks',
-    items: [
-      {
-        icon: <TableOfContentsIcon />,
-        label: 'Table of contents',
-        value: TocPlugin.key,
-      },
-      {
-        icon: <Columns3Icon />,
-        label: '3 columns',
-        value: 'action_three_columns',
-      },
-      {
-        focusEditor: false,
-        icon: <RadicalIcon />,
-        label: 'Equation',
-        value: EquationPlugin.key,
-      },
-    ].map((item) => ({
-      ...item,
-      onSelect: (editor, value) => {
-        insertBlock(editor, value);
-      },
-    })),
-  },
-  {
-    group: 'Inline',
-    items: [
       {
         icon: <Link2Icon />,
         label: 'Link',
         value: LinkPlugin.key,
       },
-      {
-        focusEditor: true,
-        icon: <CalendarIcon />,
-        label: 'Date',
-        value: DatePlugin.key,
-      },
-      {
-        focusEditor: false,
-        icon: <RadicalIcon />,
-        label: 'Inline Equation',
-        value: InlineEquationPlugin.key,
-      },
     ].map((item) => ({
       ...item,
       onSelect: (editor, value) => {
-        insertInlineElement(editor, value);
+        insertBlock(editor, value);
       },
     })),
   },
+  // {
+  //   group: 'Lists',
+  //   items: [
+  //     {
+  //       icon: <ListIcon />,
+  //       label: 'Bulleted list',
+  //       value: ListStyleType.Disc,
+  //     },
+  //     {
+  //       icon: <ListOrderedIcon />,
+  //       label: 'Numbered list',
+  //       value: ListStyleType.Decimal,
+  //     },
+  //     {
+  //       icon: <SquareIcon />,
+  //       label: 'To-do list',
+  //       value: INDENT_LIST_KEYS.todo,
+  //     },
+  //     {
+  //       icon: <ChevronRightIcon />,
+  //       label: 'Toggle list',
+  //       value: TogglePlugin.key,
+  //     },
+  //   ].map((item) => ({
+  //     ...item,
+  //     onSelect: (editor, value) => {
+  //       insertBlock(editor, value);
+  //     },
+  //   })),
+  // },
+  // {
+  //   group: 'Media',
+  //   items: [
+  //     {
+  //       icon: <ImageIcon />,
+  //       label: 'Image',
+  //       value: ImagePlugin.key,
+  //     },
+  //     {
+  //       icon: <FilmIcon />,
+  //       label: 'Embed',
+  //       value: MediaEmbedPlugin.key,
+  //     },
+  //     {
+  //       icon: <PenToolIcon />,
+  //       label: 'Excalidraw',
+  //       value: ExcalidrawPlugin.key,
+  //     },
+  //   ].map((item) => ({
+  //     ...item,
+  //     onSelect: (editor, value) => {
+  //       insertBlock(editor, value);
+  //     },
+  //   })),
+  // },
+  // {
+  //   group: 'Advanced blocks',
+  //   items: [
+  //     {
+  //       icon: <TableOfContentsIcon />,
+  //       label: 'Table of contents',
+  //       value: TocPlugin.key,
+  //     },
+  //     {
+  //       icon: <Columns3Icon />,
+  //       label: '3 columns',
+  //       value: 'action_three_columns',
+  //     },
+  //     {
+  //       focusEditor: false,
+  //       icon: <RadicalIcon />,
+  //       label: 'Equation',
+  //       value: EquationPlugin.key,
+  //     },
+  //   ].map((item) => ({
+  //     ...item,
+  //     onSelect: (editor, value) => {
+  //       insertBlock(editor, value);
+  //     },
+  //   })),
+  // },
+  // {
+  //   group: 'Inline',
+  //   items: [
+  //     {
+  //       icon: <Link2Icon />,
+  //       label: 'Link',
+  //       value: LinkPlugin.key,
+  //     },
+  //     {
+  //       focusEditor: true,
+  //       icon: <CalendarIcon />,
+  //       label: 'Date',
+  //       value: DatePlugin.key,
+  //     },
+  //     {
+  //       focusEditor: false,
+  //       icon: <RadicalIcon />,
+  //       label: 'Inline Equation',
+  //       value: InlineEquationPlugin.key,
+  //     },
+  //   ].map((item) => ({
+  //     ...item,
+  //     onSelect: (editor, value) => {
+  //       insertInlineElement(editor, value);
+  //     },
+  //   })),
+  // },
 ];
 
 export function InsertDropdownMenu(props: DropdownMenuProps) {

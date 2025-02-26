@@ -69,30 +69,30 @@ const turnIntoItems = [
     label: 'Heading 3',
     value: HEADING_KEYS.h3,
   },
-  {
-    icon: <ListIcon />,
-    keywords: ['unordered', 'ul', '-'],
-    label: 'Bulleted list',
-    value: ListStyleType.Disc,
-  },
-  {
-    icon: <ListOrderedIcon />,
-    keywords: ['ordered', 'ol', '1'],
-    label: 'Numbered list',
-    value: ListStyleType.Decimal,
-  },
-  {
-    icon: <SquareIcon />,
-    keywords: ['checklist', 'task', 'checkbox', '[]'],
-    label: 'To-do list',
-    value: INDENT_LIST_KEYS.todo,
-  },
-  {
-    icon: <ChevronRightIcon />,
-    keywords: ['collapsible', 'expandable'],
-    label: 'Toggle list',
-    value: TogglePlugin.key,
-  },
+  // {
+  //   icon: <ListIcon />,
+  //   keywords: ['unordered', 'ul', '-'],
+  //   label: 'Bulleted list',
+  //   value: ListStyleType.Disc,
+  // },
+  // {
+  //   icon: <ListOrderedIcon />,
+  //   keywords: ['ordered', 'ol', '1'],
+  //   label: 'Numbered list',
+  //   value: ListStyleType.Decimal,
+  // },
+  // {
+  //   icon: <SquareIcon />,
+  //   keywords: ['checklist', 'task', 'checkbox', '[]'],
+  //   label: 'To-do list',
+  //   value: INDENT_LIST_KEYS.todo,
+  // },
+  // {
+  //   icon: <ChevronRightIcon />,
+  //   keywords: ['collapsible', 'expandable'],
+  //   label: 'Toggle list',
+  //   value: TogglePlugin.key,
+  // },
   {
     icon: <FileCodeIcon />,
     keywords: ['```'],
@@ -105,11 +105,11 @@ const turnIntoItems = [
     label: 'Quote',
     value: BlockquotePlugin.key,
   },
-  {
-    icon: <Columns3Icon />,
-    label: '3 columns',
-    value: 'action_three_columns',
-  },
+  // {
+  //   icon: <Columns3Icon />,
+  //   label: '3 columns',
+  //   value: 'action_three_columns',
+  // },
 ];
 
 export function TurnIntoDropdownMenu(props: DropdownMenuProps) {
