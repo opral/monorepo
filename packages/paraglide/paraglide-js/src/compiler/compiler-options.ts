@@ -148,7 +148,10 @@ export type CompilerOptions = {
 	 *
 	 * **`locale-modules`**
 	 *
-	 * Messages are bundled in a per locale module. Bundlers sometimes struggle tree-shaking this structure.
+	 * Messages are bundled in a per locale module. Bundlers often struggle with tree-shaking this structure,
+	 * which can lead to more inefficient tree-shaking and larger bundle sizes compared to `message-modules`.
+	 *
+	 * The benefit are substantially fewer files which is needed in large projects.
 	 *
 	 * ```diff
 	 *   - outdir/
