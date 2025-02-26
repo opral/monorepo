@@ -7,6 +7,10 @@ imports:
 
 This is an example of how to use Paraglide with Next JS with SSR. The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/next-js-ssr).
 
+<doc-callout type="tip">NextJS is tech-debt plagued. If you start your app or website from scratch, we highly recommend using a vite-based framework. [Read](https://github.com/opral/inlang-paraglide-js/issues/245#issuecomment-2608727658) this comment. </doc-callout>
+
+<doc-callout type="warning">The setup has been reported as fragile for advances use-cases [#407](https://github.com/opral/inlang-paraglide-js/issues/407). Official NodeJS middleware support of NextJS could solve these problems.</doc-callout>
+
 ## Features
 
 | Feature      | Supported |
@@ -91,7 +95,7 @@ NextJS does not support AsyncLocalStorage. Hence, we need to use a workaround to
 import React, { cache } from "react";
 import { headers } from "next/headers";
 
-+const ssrLocale = cache(() => ({ locale: baseLocale, origin: "http://fallback.com" }));
++const ssrLocale = cache(() => ({ locale: baseLocale, origin: "http://localhost" }));
 
 // overwrite the getLocale function to use the locale from the request
 +overwriteGetLocale(() => assertIsLocale(ssrLocale().locale));
