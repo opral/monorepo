@@ -38,7 +38,9 @@ test("loads a project and compiles it", async () => {
 	const files = await fs.promises.readdir("/output");
 
 	//runtime.js and messages.js are always compiled with the default options
-	expect(files).toEqual(expect.arrayContaining(["runtime.js", "messages.js"]));
+	expect(files).toEqual(
+		expect.arrayContaining(["runtime.js", "server.js", "messages.js"])
+	);
 });
 
 test("loads a local account from app data if exists", async () => {
@@ -235,7 +237,12 @@ test("emits additional files", async () => {
 	const adapterDir = await fs.promises.readdir("/output/adapter");
 
 	expect(outputDir).toEqual(
-		expect.arrayContaining(["runtime.js", "messages.js", "adapter.js"])
+		expect.arrayContaining([
+			"runtime.js",
+			"server.js",
+			"messages.js",
+			"adapter.js",
+		])
 	);
 
 	expect(adapterDir).toEqual(["component.svelte"]);

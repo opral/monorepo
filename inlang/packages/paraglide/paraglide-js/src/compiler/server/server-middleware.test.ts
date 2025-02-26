@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { createRuntimeForTesting } from "../runtime/create-runtime.js";
 
 test("sets the locale and origin", async () => {
 	const runtime = await createRuntimeForTesting({
