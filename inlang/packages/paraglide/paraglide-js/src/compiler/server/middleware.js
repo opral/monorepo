@@ -79,12 +79,14 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 	const locale = runtime.extractLocaleFromRequest(request);
 	const origin = new URL(request.url).origin;
 
+	// only redirect GET requests
+	// https://github.com/opral/inlang-paraglide-js/issues/416
 	if (runtime.strategy.includes("url")) {
 		// if the client makes a request to a URL that doesn't match
 		// the localizedUrl, redirect the client to the localized URL
 		const localizedUrl = runtime.localizeUrl(request.url, { locale });
 		if (localizedUrl.href !== request.url) {
-			return Response.redirect(localizedUrl, 302);
+			return Response.redirect(localizedUrl, 307);
 		}
 	}
 
