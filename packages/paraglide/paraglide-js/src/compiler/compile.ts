@@ -95,7 +95,7 @@ export async function compile(
 			// release the lock in case of an error
 			compilationInProgress = null;
 			throw e;
-		} 
+		}
 	})();
 
 	const result = structuredClone(await compilationInProgress);
