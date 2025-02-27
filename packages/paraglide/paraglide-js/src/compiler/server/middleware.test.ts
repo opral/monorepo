@@ -107,7 +107,8 @@ test("redirects to localized URL when non-URL strategy determines locale", async
 	});
 
 	expect(response instanceof Response).toBe(true);
-	expect(response.status).toBe(302); // Redirect status code
+	// needs to be 307 status code https://github.com/opral/inlang-paraglide-js/issues/416
+	expect(response.status).toBe(307); // Redirect status code
 	expect(response.headers.get("Location")).toBe(
 		"https://example.com/fr/some-path"
 	);

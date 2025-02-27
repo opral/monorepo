@@ -122,8 +122,7 @@ test("handles message bundles with a : in the id", async () => {
 	const { m } = await importCode(code);
 
 	expect(m["hello:world"]()).toBe("Hello world!");
-
-})
+});
 
 // https://github.com/opral/inlang-paraglide-js/issues/347
 test("can emit message bundles with more than 255 characters", async () => {
