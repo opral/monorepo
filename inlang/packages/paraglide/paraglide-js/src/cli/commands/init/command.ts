@@ -64,7 +64,6 @@ export const initCommand = new Command()
 			`2. Run the build script (npm run build, or similar.)`,
 			`3. Visit https://inlang.com/m/gerre34r/library-inlang-paraglideJs/basics to get started.`,
 			"\n",
-			"\n",
 			`For questions and feedback, visit`,
 			`https://github.com/opral/inlang-paraglide-js/issues`,
 		].join("\n");
