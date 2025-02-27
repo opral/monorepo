@@ -111,6 +111,26 @@ console.log(i18next.t("greeting", { name: "World" }));
 console.log(m.greeting({ name: "World" }));
 ```
 
+## 🏘️ Multi-tenancy support
+
+Paraglide JS 2.0 supports multi-tenant applications. Read more about it [here](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/multi-tenancy).
+
+```
+# Domain-based with sub-locale
+customer1.fr/about         → French (default)
+customer1.fr/en/about      → English version
+
+# Domain-based with root locale
+customer2.com/about        → English (default)
+customer2.com/fr/about     → French version
+
+# Path-based for any domain
+example.com/en/about       → English
+example.com/fr/about       → French
+app.example.com/en/about   → English
+app.example.com/fr/about   → French
+```
+
 ## Migrating breaking changes
 
 If problems arise, please refer to the framework-specific getting started guide:
