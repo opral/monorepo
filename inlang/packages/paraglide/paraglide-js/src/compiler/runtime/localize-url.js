@@ -78,29 +78,7 @@ export function localizeUrl(url, options) {
 			}
 
 			const url = fillPattern(element.pattern, groups);
-
-			// At least protocol and hostname are required to create a valid URL
-			// inside fillPattern.
-			if (match.username.groups["0"]) {
-				url.username = match.username.groups["0"] ?? "";
-			}
-			if (match.password.groups["0"]) {
-				url.password = match.password.groups["0"] ?? "";
-			}
-			if (match.port.groups["0"]) {
-				url.port = match.port.groups["0"] ?? "";
-			}
-			if (match.pathname.groups["0"]) {
-				url.pathname = match.pathname.groups["0"] ?? "";
-			}
-			if (match.search.groups["0"]) {
-				url.search = match.search.groups["0"] ?? "";
-			}
-			if (match.hash.groups["0"]) {
-				url.hash = match.hash.groups["0"] ?? "";
-			}
-
-			return url;
+			return fillMissingUrlParts(url, match);
 		}
 	}
 
@@ -208,29 +186,7 @@ export function deLocalizeUrl(url) {
 			}
 
 			const url = fillPattern(element.pattern, groups);
-
-			// At least protocol and hostname are required to create a valid URL
-			// inside fillPattern.
-			if (match.username.groups["0"]) {
-				url.username = match.username.groups["0"] ?? "";
-			}
-			if (match.password.groups["0"]) {
-				url.password = match.password.groups["0"] ?? "";
-			}
-			if (match.port.groups["0"]) {
-				url.port = match.port.groups["0"] ?? "";
-			}
-			if (match.pathname.groups["0"]) {
-				url.pathname = match.pathname.groups["0"] ?? "";
-			}
-			if (match.search.groups["0"]) {
-				url.search = match.search.groups["0"] ?? "";
-			}
-			if (match.hash.groups["0"]) {
-				url.hash = match.hash.groups["0"] ?? "";
-			}
-
-			return url;
+			return fillMissingUrlParts(url, match);
 		}
 	}
 
@@ -253,6 +209,39 @@ function deLocalizeUrlDefaultPattern(url) {
 	}
 
 	return urlObj;
+}
+
+/**
+ * Takes matches of implicit wildcards in the UrlPattern (when a part is missing
+ * it is equal to '*') and adds them back to the result of fillPattern.
+ *
+ * At least protocol and hostname are required to create a valid URL inside fillPattern.
+ *
+ * @param {URL} url
+ * @param {URLPatternResult} match
+ * @returns {URL}
+ */
+function fillMissingUrlParts(url, match) {
+	if (match.username.groups["0"]) {
+		url.username = match.username.groups["0"] ?? "";
+	}
+	if (match.password.groups["0"]) {
+		url.password = match.password.groups["0"] ?? "";
+	}
+	if (match.port.groups["0"]) {
+		url.port = match.port.groups["0"] ?? "";
+	}
+	if (match.pathname.groups["0"]) {
+		url.pathname = match.pathname.groups["0"] ?? "";
+	}
+	if (match.search.groups["0"]) {
+		url.search = match.search.groups["0"] ?? "";
+	}
+	if (match.hash.groups["0"]) {
+		url.hash = match.hash.groups["0"] ?? "";
+	}
+
+	return url;
 }
 
 /**
