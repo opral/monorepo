@@ -5,10 +5,23 @@ imports:
 
 # Basics
 
-## Adding and editing Messages
+## Adding and removing locales 
+
+To add a new locale, add it to the `locales` array in `<project0name>.inlang/settings.json` file.
+
+```diff
+// project.inlang/settings.json
+
+{
+  "baseLocale": "en",
++ "locales": ["en", "de"]
+}
+```
+
+## Adding and editing messages
 
 <doc-callout type="info">
-  This section assumes you use the inlang message format plugin that is setup by default in Paraglide JS. [Other file formats can be used as well.](./file-formats.md)
+  This section assumes you use the inlang message format plugin that is setup by default in Paraglide JS. 
 </doc-callout>
 
 Messages are stored in `messages/{locale}.json` as key-value pairs. You can add parameters with curly braces.
