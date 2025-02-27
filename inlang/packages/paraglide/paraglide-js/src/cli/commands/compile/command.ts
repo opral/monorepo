@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { resolve } from "node:path";
 import { Logger } from "../../../services/logger/index.js";
-import { DEFAULT_OUTDIR } from "../../defaults.js";
+import { DEFAULT_OUTDIR, DEFAULT_PROJECT_PATH } from "../../defaults.js";
 import { compile } from "../../../compiler/compile.js";
 import {
 	defaultCompilerOptions,
@@ -13,7 +13,8 @@ export const compileCommand = new Command()
 	.summary("Compiles inlang Paraglide-JS")
 	.requiredOption(
 		"--project <path>",
-		'The path to the inlang project. Example: "./project.inlang"'
+		'The path to the inlang project. Example: "./project.inlang"',
+		DEFAULT_PROJECT_PATH
 	)
 	.requiredOption(
 		"--outdir <path>",
