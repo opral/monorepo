@@ -6,6 +6,7 @@
   "baseBranch": "main",
   "ignore": [
     "@inlang/cli",
+    "@inlang/cli-example",
     "@inlang/fink",
     "@inlang/paraglide-js",
     "@inlang/paraglide-js-example-cli",
