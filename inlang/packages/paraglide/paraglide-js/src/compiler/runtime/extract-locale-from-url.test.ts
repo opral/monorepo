@@ -97,9 +97,9 @@ test("regex works", async () => {
 					pattern: "https://example.com/:locale(de|fr)?/**",
 					deLocalizedNamedGroups: { locale: null },
 					localizedNamedGroups: {
-						de: { locale: "de" },
-						fr: { locale: "fr" },
 						en: { locale: null },
+						fr: { locale: "fr" },
+						de: { locale: "de" },
 					},
 				},
 			],
@@ -131,4 +131,39 @@ test("default url pattern", async () => {
 	expect(
 		r.extractLocaleFromUrl("https://example.com/de/optional-subpage")
 	).toBe("de");
+});
+
+test("multi pathname localization with optional groups", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:bookstore?/:item?",
+					deLocalizedNamedGroups: { bookstore: "bookstore", item: "item" },
+					localizedNamedGroups: {
+						de: { bookstore: "buchladen", "item?": "artikel" },
+						en: { bookstore: "bookstore", "item?": "item" },
+					},
+				},
+			],
+		},
+	});
+
+	expect(runtime.extractLocaleFromUrl(`https://example.com/bookstore`)).toBe(
+		"en"
+	);
+
+	expect(
+		runtime.extractLocaleFromUrl(`https://example.com/bookstore/blaba`)
+	).toBe(undefined);
+
+	expect(runtime.extractLocaleFromUrl(`https://example.com/buchladen`)).toBe(
+		"de"
+	);
+
+	expect(
+		runtime.extractLocaleFromUrl(`https://example.com/something/else`)
+	).toBe(undefined);
 });
