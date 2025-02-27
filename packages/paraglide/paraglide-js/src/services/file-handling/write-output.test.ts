@@ -134,6 +134,79 @@ test("should write files if output has partially changed", async () => {
 	expect(fs.writeFile).toHaveBeenCalledTimes(3);
 });
 
+test("should delete files that have been removed from the output", async () => {
+	const { writeOutput } = await import("./write-output.js");
+	const fs = mockFs({});
+
+	// First write with three files
+	const hashes = await writeOutput({
+		directory: "/output",
+		output: {
+			"file1.txt": "content1",
+			"file2.txt": "content2",
+			"subdir/file3.txt": "content3"
+		},
+		fs,
+	});
+
+	// Verify all files were written
+	expect(await fs.readFile("/output/file1.txt", { encoding: "utf-8" })).toBe("content1");
+	expect(await fs.readFile("/output/file2.txt", { encoding: "utf-8" })).toBe("content2");
+	expect(await fs.readFile("/output/subdir/file3.txt", { encoding: "utf-8" })).toBe("content3");
+
+	// Second write with file2.txt removed
+	await writeOutput({
+		directory: "/output",
+		output: {
+			"file1.txt": "content1",
+			"subdir/file3.txt": "content3updated"
+		},
+		fs,
+		previousOutputHashes: hashes,
+	});
+
+	// Verify file1.txt still exists
+	expect(await fs.readFile("/output/file1.txt", { encoding: "utf-8" })).toBe("content1");
+	// Verify file2.txt has been deleted
+	await expect(
+		async () => await fs.readFile("/output/file2.txt", { encoding: "utf-8" })
+	).rejects.toBeDefined();
+	// Verify file3.txt was updated
+	expect(await fs.readFile("/output/subdir/file3.txt", { encoding: "utf-8" })).toBe("content3updated");
+
+	// Get the new hashes
+	const newHashes = await writeOutput({
+		directory: "/output",
+		output: {
+			"file1.txt": "content1",
+			"subdir/file3.txt": "content3updated"
+		},
+		fs,
+		previousOutputHashes: hashes,
+	});
+
+	// Third write with subdir/file3.txt removed
+	await writeOutput({
+		directory: "/output",
+		output: {
+			"file1.txt": "content1"
+		},
+		fs,
+		previousOutputHashes: newHashes,
+	});
+
+	// Verify file1.txt still exists
+	expect(await fs.readFile("/output/file1.txt", { encoding: "utf-8" })).toBe("content1");
+	// Verify subdir/file3.txt has been deleted
+	await expect(
+		async () => await fs.readFile("/output/subdir/file3.txt", { encoding: "utf-8" })
+	).rejects.toBeDefined();
+	// Verify the subdir directory has also been removed
+	await expect(
+		async () => await fs.readdir("/output/subdir")
+	).rejects.toBeDefined();
+});
+
 const mockFs = (files: memfs.DirectoryJSON) => {
 	const _memfs = memfs.createFsFromVolume(memfs.Volume.fromJSON(files));
 	return _memfs.promises as unknown as typeof fs;
