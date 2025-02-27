@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.24
+
+- changes the redirect status from `302` to `307` https://github.com/opral/inlang-paraglide-js/issues/416
+
 ## 2.0.0-beta.23
 
 Renames and splits the `serverMiddleware()` into a dedicated `server.js` file to avoid bundler issues. 
