@@ -1,10 +1,34 @@
 # Multi-Tenancy
 
-URLPatterns can be used to configure multi-tenancy in your application.
+```
+https://customer1.com/about -> de
+https://customer2.de/en/about -> en
+https://customer3.com/fr/about -> fr
+```
+
+Multi-tenancy in i18n refers to serving different localization configurations. This is particularly useful when:
+
+- You have multiple customer domains that need different default languages
+- You're running a SaaS platform where each customer has their own subdomain
+- Different sections of your app need different localization strategies
+
+For example, you might want:
+
+- `customer1.fr` to default to French with English as an option
+- `customer2.com` to default to English with French as an option
+- All other domains to use path-based localization (`/en/`, `/fr/`)
+
+Multi-tenancy allows you to handle all these cases with a single configuration.
+
+## Use Cases
+
+- **Regional Businesses**: Different domains for different markets (e.g., `.fr` for France, `.de` for Germany)
+- **White-Label Solutions**: Each client gets their own domain with specific language preferences
+- **Enterprise Applications**: Different departments or subsidiaries need different language defaults
 
 ## Configuration
 
-To set up multi-tenancy, define URL patterns. Here is an example configuration:
+URLPatterns can be used to configure multi-tenancy in your application. Here is an example configuration:
 
 ```javascript
 await compile({
