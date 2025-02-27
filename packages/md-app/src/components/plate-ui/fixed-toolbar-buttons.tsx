@@ -76,7 +76,7 @@ export function FixedToolbarButtons() {
           </ToolbarGroup> */}
 
           <ToolbarGroup>
-            <AIToolbarButton tooltip="AI commands">
+            <AIToolbarButton tooltip="AI commands (⌘+J)">
               <WandSparklesIcon />
             </AIToolbarButton>
           </ToolbarGroup>
