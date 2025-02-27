@@ -5,17 +5,17 @@ imports:
 
 # Server Side Rendering
 
-Paraglide JS provides first-class support for server-side rendering (SSR) through its `serverMiddleware()` and async context management.
+Paraglide JS provides first-class support for server-side rendering (SSR) through its `paraglideMiddleware()` and async context management.
 
-## Using `serverMiddleware()`
+## Using `paraglideMiddleware()`
 
-The `serverMiddleware()` handles request-scoped locale management automatically:
+The `paraglideMiddleware()` handles request-scoped locale management automatically:
 
 ```ts
-import { serverMiddleware } from './paraglide/runtime.js';
+import { paraglideMiddleware } from './paraglide/server.js';
 
 // In your request handler:
-const response = await serverMiddleware(request, async ({ request, locale }) => {
+const response = await paraglideMiddleware(request, async ({ request, locale }) => {
   // Your request handling logic here
   return new Response(`Current locale: ${locale}`);
 });
@@ -29,9 +29,9 @@ Key features:
 
 ### Automatic re-directs
 
-The `serverMiddleware()` automatically re-directs requests to the appropriate localized URL.
+The `paraglideMiddleware()` automatically re-directs requests to the appropriate localized URL.
 
-For example, assume that the cookie strategy preceeds the url strategy. If a request from a client is made where the client's locale cookie is set to `de`, the `serverMiddleware()` will re-direct the request from `https://example.com/page` to `https://example.com/de/seite`. 
+For example, assume that the cookie strategy preceeds the url strategy. If a request from a client is made where the client's locale cookie is set to `de`, the `paraglideMiddleware()` will re-direct the request from `https://example.com/page` to `https://example.com/de/seite`. 
 
 ```diff
 await compile({
@@ -74,7 +74,7 @@ Disabling AsyncLocalStorage is **only safe** in these environments:
 
 ```ts
 // Only disable in serverless environments
-serverMiddleware(request, handler, { 
+paraglideMiddleware(request, handler, { 
   disableAsyncLocalStorage: true // ⚠️ Use with caution
 })
 ```
@@ -176,7 +176,7 @@ Key advantages:
 
 ## Best Practices
 
-- Use `serverMiddleware` for full-stack frameworks with SSR support
+- Use `paraglideMiddleware` for full-stack frameworks with SSR support
 - Manual overrides work best for API routes/edge functions
 - Combine with [Routing Strategies](/docs/strategy) for complete i18n solution
 - Always test locale propagation in production-like environments
