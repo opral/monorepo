@@ -1,0 +1,13 @@
+{
+  "name": "@inlang/cli-example",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "machine-translate": "inlang machine translate --project ./project.inlang"
+  },
+  "devDependencies": {
+    "@inlang/cli": "workspace:*",
+    "@inlang/plugin-message-format": "workspace:*"
+  }
+}

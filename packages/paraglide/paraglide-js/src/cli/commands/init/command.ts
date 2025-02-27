@@ -14,6 +14,7 @@ import { ENV_VARIABLES } from "../../../services/env-variables/index.js";
 import { detectBundler } from "../../steps/detect-bundler.js";
 import { addVitePlugin } from "../../steps/add-vite-plugin.js";
 import { compile } from "../../../compiler/compile.js";
+import { maybeAddMachineTranslation } from "../../steps/maybe-add-machine-translation.js";
 
 export const initCommand = new Command()
 	.name("init")
@@ -45,11 +46,12 @@ export const initCommand = new Command()
 
 		const ctx7 = await maybeUpdateTsConfig(ctx6);
 		const ctx8 = await maybeAddSherlock(ctx7);
+		const ctx9 = await maybeAddMachineTranslation(ctx8);
 
 		try {
 			await compile({
-				project: ctx8.projectPath,
-				outdir: ctx8.outdir,
+				project: ctx9.projectPath,
+				outdir: ctx9.outdir,
 			});
 			ctx.logger.success("Ran the paraglide compiler");
 		} catch {
