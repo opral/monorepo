@@ -3,6 +3,7 @@
 ## 2.0.0-beta.25
 
 - added optional localized groups 
+- keeps hashes, etc. in the URL when localizing https://github.com/opral/monorepo/pull/3452
 
 ## 2.0.0-beta.24
 
