@@ -110,16 +110,18 @@ compile({
 });
 ```
 
-#### Translated pathname-based url localization example
+#### Translated pathname-based URL localization
 
-For translated pathnames where you want to localize both the structure and the path segments of the URL, you can use named pattern groups to match and replace specific segments of the URL. This is useful for implementing language-specific routes like `/about` in English and `/ueber-uns` in German.
+For pathnames where you want to localize the structure and path segments of the URL, you can use named pattern groups to match and replace specific segments. This approach enables language-specific routes like `/about` in English and `/ueber-uns` in German.
 
 ```
 https://example.com/about
 https://example.com/ueber-uns
 ```
 
-Basic example with translated path segment:
+##### Basic pathname localization
+
+Here's a simple example with translated path segments:
 
 ```js
 compile({
@@ -128,22 +130,68 @@ compile({
 	strategy: ["url"],
 	urlPatterns: [
 		{
-			pattern: ":protocol://:domain(.*)::port?/:about/:path*",
+			pattern: ":protocol://:domain(.*)::port?/:about?/:path(.*)",
 			deLocalizedNamedGroups: { 
-				about: "about" 
+				"about?": "about" 
 			},
 			localizedNamedGroups: {
 				en: { 
-					about: "about" 
+					"about?": "about" 
 				},
 				de: { 
-					about: "ueber-uns" 
+					"about?": "ueber-uns" 
 				},
 			},
 		},
 	],
 });
 ```
+
+##### Working with optional parameters
+
+URL patterns often contain segments that may or may not be present. For example, an e-commerce site might have URLs like:
+
+- `http://example.com` (homepage)
+- `http://example.com/bookstore` (category page)
+- `http://example.com/bookstore/item` (product page)
+
+To localize such patterns, use the **optional parameter syntax** with the `?` modifier:
+
+```ts
+urlPatterns: [
+  {
+    // Define the pattern with optional segments using the ? modifier
+    pattern: 'http://example.com/:bookstore?/:item?',
+    
+    // Map optional segments back to base locale names
+    deLocalizedNamedGroups: {
+      'bookstore?': 'bookstore',  // Note: include the ? in the key
+      'item?': 'item'
+    },
+    
+    // Provide translations for each locale
+    localizedNamedGroups: {
+      de: {
+        'bookstore?': 'buchladen',
+        'item?': 'artikel'
+      },
+      en: {
+        'bookstore?': 'bookstore', 
+        'item?': 'item'
+      }
+    }
+  }
+]
+```
+
+This configuration enables:
+
+| Original URL (EN) | Localized URL (DE) | Notes |
+|-------------------|-------------------|-------|
+| `http://example.com/bookstore` | `http://example.com/buchladen` | Single optional segment |
+| `http://example.com/bookstore/item` | `http://example.com/buchladen/artikel` | Multiple optional segments |
+| `http://example.com` | `http://example.com` | Base URL remains unchanged |
+
 
 #### Domain-based url localization example
 
@@ -210,7 +258,6 @@ compile({
 	],
 });
 ```
-
 
 ### preferredLanguage
 
@@ -356,4 +403,3 @@ export function onRequest(request, next) {
 	// in the async context 
   return localeStorage(locale, async () => await next());
 }
-```
