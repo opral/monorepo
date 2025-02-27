@@ -5,6 +5,7 @@ export const defaultCompilerOptions = {
 	emitGitIgnore: true,
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
+	cleanOutdir: true,
 	strategy: ["cookie", "globalVariable", "baseLocale"],
 	cookieName: "PARAGLIDE_LOCALE",
 } as const satisfies Partial<CompilerOptions>;
@@ -167,6 +168,13 @@ export type CompilerOptions = {
 	 * @default "message-modules"
 	 */
 	outputStructure?: "locale-modules" | "message-modules";
+	/**
+	 * Whether to clean the output directory before writing the new files.
+	 *
+	 * @default true
+	 */
+	cleanOutdir?: boolean;
+
 	/**
 	 * The file system to use. Defaults to `await import('node:fs')`.
 	 *
