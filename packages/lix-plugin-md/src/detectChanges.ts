@@ -1,6 +1,7 @@
 import type { LixPlugin } from "@lix-js/sdk";
 import { MarkdownBlockSchemaV1 } from "./schemas/blocks.js";
 import { parseMdBlocks } from "./utilities/parseMdBlocks.js";
+import { MarkdownBlockPositionSchemaV1 } from "./schemas/blockPositions.js";
 
 export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	before,
@@ -50,6 +51,25 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 				snapshot: { text: afterBlock.content, type: afterBlock.type },
 			});
 		}
+	}
+
+	const idPositionsBefore = Object.fromEntries(
+		beforeBlocks.map((block, index) => [block.id, index]),
+	);
+	const idPositionsAfter = Object.fromEntries(
+		afterBlocks.map((block, index) => [block.id, index]),
+	);
+
+	if (JSON.stringify(idPositionsBefore) !== JSON.stringify(idPositionsAfter)) {
+		detectedChanges.push({
+			schema: MarkdownBlockPositionSchemaV1,
+			entity_id: "block_positions",
+			snapshot: {
+				idPositions: Object.fromEntries(
+					afterBlocks.map((block, index) => [block.id, index]),
+				),
+			},
+		});
 	}
 
 	return detectedChanges;

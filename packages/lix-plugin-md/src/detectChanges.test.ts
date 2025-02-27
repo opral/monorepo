@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import { detectChanges } from "./detectChanges.js";
 import { MarkdownBlockSchemaV1 } from "./schemas/blocks.js";
 import { openLixInMemory } from "@lix-js/sdk";
+import { MarkdownBlockPositionSchemaV1 } from "./schemas/blockPositions.js";
 
 const encode = (text: string) => new TextEncoder().encode(text);
 
@@ -45,13 +46,30 @@ New paragraph.`);
 		after: { id: "random", path: "x.md", data: after, metadata: {} },
 	});
 
-	expect(detectedChanges).toStrictEqual([
-		{
+	expect(detectedChanges).toStrictEqual(
+		[
+			{
 			schema: MarkdownBlockSchemaV1,
-			entity_id: "xyz789",
-			snapshot: { text: "New paragraph.", type: "paragraph" },
-		},
-	]);
+			  entity_id: "xyz789",
+			  snapshot: {
+				text: "New paragraph.",
+				type: "paragraph",
+			  },
+			},
+			{
+			  schema: MarkdownBlockPositionSchemaV1,
+			  entity_id: "block_positions",
+			  snapshot: {
+				idPositions: {
+				  abc123: 0,
+				  def456: 1,
+				  xyz789: 2,
+				},
+			  },
+			},
+		  ]
+		
+	);
 });
 
 test("it should detect an updated block", async () => {
@@ -110,6 +128,16 @@ Some text.`);
 			entity_id: "xyz789",
 			snapshot: undefined,
 		},
+		{
+		  schema: MarkdownBlockPositionSchemaV1,
+		  entity_id: "block_positions",
+		  snapshot: {
+			idPositions: {
+			  abc123: 0,
+			  def456: 1,
+			},
+		  },
+		},
 	]);
 });
 
@@ -137,7 +165,7 @@ test
 		after: { id: "random", path: "x.md", data: after, metadata: {} },
 	});
 
-	expect(detectedChanges).toMatchObject([
+	expect(detectedChanges).toStrictEqual([
 		{
 			schema: MarkdownBlockSchemaV1,
 			entity_id: "bcd",
@@ -153,6 +181,17 @@ test
 				text: "test",
 				type: "paragraph",
 			},
+		},
+		{
+		  schema: MarkdownBlockPositionSchemaV1,
+		  entity_id: "block_positions",
+		  snapshot: {
+			idPositions: {
+			  abc123: 0,
+			  def456: 1,
+			  bcd: 2, cde: 3
+			},
+		  },
 		},
 	]);
 });
