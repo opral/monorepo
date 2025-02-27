@@ -2,6 +2,8 @@ import { css, html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 import type { UiDiffComponentProps } from "@lix-js/sdk";
 import { diffLines } from "diff";
+import { MarkdownBlockPositionSchemaV1 } from "./schemas/blockPositions.js";
+import { MarkdownBlockSchemaV1 } from "./schemas/blocks.js";
 
 export class DiffComponent extends LitElement {
 	static override styles = css`
@@ -72,16 +74,39 @@ export class DiffComponent extends LitElement {
 	diffs: UiDiffComponentProps["diffs"] = [];
 
 	override render() {
+		const orderDiff = this.diffs.find(
+			(diff) => diff.schema_key === MarkdownBlockPositionSchemaV1.key,
+		);
+		if (orderDiff === undefined) return html`<div>No order diff found</div>`;
+
+		const contentDiffs = this.diffs
+			.filter((diff) => diff.schema_key === MarkdownBlockSchemaV1.key)
+			.sort((a, b) => {
+				const posA = orderDiff.snapshot_content_after?.idPositions[a.entity_id]
+					? orderDiff.snapshot_content_after?.idPositions[a.entity_id]
+					: orderDiff.snapshot_content_before?.idPositions[a.entity_id];
+				const posB = orderDiff.snapshot_content_after?.idPositions[b.entity_id]
+					? orderDiff.snapshot_content_after?.idPositions[b.entity_id]
+					: orderDiff.snapshot_content_before?.idPositions[b.entity_id];
+				return posA - posB;
+			});
+
 		return html`
 			<div class="diff-container">
-				${this.diffs.map((diff) => this.renderDiff(diff))}
+				${contentDiffs.map((diff) => this.renderDiff(diff))}
 			</div>
 		`;
 	}
 
 	renderDiff(diff: UiDiffComponentProps["diffs"][0]) {
-		const before = diff.snapshot_content_before?.text || "";
-		const after = diff.snapshot_content_after?.text || "";
+		const before =
+			diff.snapshot_content_before?.text ||
+			JSON.stringify(diff.snapshot_content_before?.idPositions) ||
+			"";
+		const after =
+			diff.snapshot_content_after?.text ||
+			JSON.stringify(diff.snapshot_content_after?.idPositions) ||
+			"";
 		const lineDiffs = diffLines(before, after);
 
 		// Track left and right columns
