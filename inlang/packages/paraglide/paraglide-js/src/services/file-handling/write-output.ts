@@ -20,7 +20,17 @@ export async function writeOutput(args: {
 		}
 	}
 
-	if (changedFiles.size === 0) {
+	// Find files that have been removed in the current output
+	const filesToDelete = new Set<string>();
+	if (args.previousOutputHashes) {
+		for (const filePath of Object.keys(args.previousOutputHashes)) {
+			if (!currentOutputHashes[filePath]) {
+				filesToDelete.add(filePath);
+			}
+		}
+	}
+
+	if (changedFiles.size === 0 && filesToDelete.size === 0) {
 		return currentOutputHashes;
 	}
 
@@ -30,8 +40,14 @@ export async function writeOutput(args: {
 	// and re-enabled because of https://github.com/opral/inlang-paraglide-js/issues/420
 	if (args.cleanDirectory) {
 		await args.fs.rm(args.directory, { recursive: true, force: true });
+	} else {
+		await args.fs.mkdir(args.directory, { recursive: true });
 	}
-	await args.fs.mkdir(args.directory, { recursive: true });
+	// Delete files that have been removed
+	// ignore if cleanDirectory is true because the directory will be cleaned anyway
+	if (filesToDelete.size > 0 && !args.cleanDirectory) {
+		await deleteRemovedFiles(args.fs, args.directory, filesToDelete);
+	}
 
 	//Create missing directories inside the output directory
 	await Promise.allSettled(
@@ -55,6 +71,63 @@ export async function writeOutput(args: {
 
 	//Only update the previousOutputHashes if the write was successful
 	return currentOutputHashes;
+}
+
+/**
+ * Delete files that have been removed and clean up empty directories
+ */
+async function deleteRemovedFiles(
+	fs: typeof nodeFs,
+	baseDirectory: string,
+	filesToDelete: Set<string>
+) {
+	// Collect directories that might need cleanup
+	const potentialEmptyDirs = new Set<string>();
+
+	// First pass: delete all files and collect parent directories
+	await Promise.allSettled(
+		Array.from(filesToDelete).map(async (filePath) => {
+			const fullPath = path.resolve(baseDirectory, filePath);
+			try {
+				await fs.unlink(fullPath);
+
+				// Add parent directory for potential cleanup
+				const dirPath = path.dirname(fullPath);
+				if (dirPath !== baseDirectory) {
+					potentialEmptyDirs.add(dirPath);
+				}
+			} catch {
+				// Ignore errors if the file doesn't exist
+			}
+		})
+	);
+
+	// Second pass: clean up empty directories, starting from deepest paths
+	const sortedDirs = Array.from(potentialEmptyDirs).sort(
+		(a, b) => b.length - a.length
+	);
+
+	for (const dirPath of sortedDirs) {
+		// Only process directories within the base directory
+		if (!dirPath.startsWith(baseDirectory) || dirPath === baseDirectory) {
+			continue;
+		}
+
+		try {
+			const dirContents = await fs.readdir(dirPath);
+			if (dirContents.length === 0) {
+				await fs.rmdir(dirPath);
+
+				// Add parent directory for potential cleanup
+				const parentDir = path.dirname(dirPath);
+				if (parentDir !== baseDirectory) {
+					sortedDirs.push(parentDir);
+				}
+			}
+		} catch {
+			// Ignore errors during directory cleanup
+		}
+	}
 }
 
 function hashOutput(
