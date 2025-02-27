@@ -207,10 +207,6 @@ export const createNewProjectFlow = async (ctx: {
 		})
 	);
 
-	ctx.logger.info(
-		`Creating a new inlang project in the current working directory.`
-	);
-
 	const projectPath = DEFAULT_PROJECT_PATH;
 
 	//create default project
@@ -235,15 +231,15 @@ export const createNewProjectFlow = async (ctx: {
 	});
 
 	if ((await project.errors.get()).length > 0) {
-		ctx.logger.warn(
-			"Failed to create a new inlang project.\n\nThis is likely an internal bug. Please file an issue at https://github.com/opral/monorepo."
+		ctx.logger.error(
+			"Failed to create a new inlang project.\n\nThis is likely an internal bug. Please file an issue at https://github.com/opral/inlang-paraglide-js."
 		);
 		for (const error of await project.errors.get()) {
 			ctx.logger.error(error);
 		}
 		return process.exit(1);
 	} else {
-		ctx.logger.success("Successfully created a new inlang project.");
+		ctx.logger.success("Created a new inlang project.");
 	}
 	return { project, projectPath };
 };
