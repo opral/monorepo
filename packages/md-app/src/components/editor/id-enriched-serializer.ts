@@ -42,11 +42,12 @@ export const idEnrichedSerializeMdNodesOptions: SerializeMdOptions["nodes"] = {
 	code: { isLeaf: true, type: "code" },
 	code_block: {
 		type: "code_block",
-		serialize: (children, node) =>
-			withIdComment(
+		serialize: (children, node) => {
+			return withIdComment(
 				node,
-				`\n\`\`\`${node.language || ""}\n${children}\n\`\`\`\n`
-			),
+				`\n\`\`\`${node.lang || ""}\n${node.children.map((codeLine) => codeLine.children[0].text).join("\n")}\n\`\`\`\n`
+			);
+		},
 	},
 	h1: {
 		type: "h1",
