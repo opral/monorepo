@@ -61,6 +61,30 @@ compile({
 })
 ```
 
+### preferredLanguage
+
+Automatically detects the user's preferred language from browser settings or HTTP headers.
+
+- On the client: Uses [navigator.languages](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/languages)
+- On the server: Uses the [Accept-Language header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language)
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["preferredLanguage", "baseLocale"]
+})
+```
+
+The strategy attempts to match locale in order of user preference:
+
+1. First tries exact matches (e.g., "en-US" if supported)
+2. Falls back to base language codes (e.g., "en")
+
+For example:
+- If user prefers `fr-FR,fr;q=0.9,en;q=0.7` and your app supports `["en", "fr"]`, it will use `fr`
+- If user prefers `en-US` and your app only supports `["en", "de"]`, it will use `en`
+
 ### url
 
 Determine the locale from the URL (pathname, domain, etc).
@@ -258,30 +282,6 @@ compile({
 	],
 });
 ```
-
-### preferredLanguage
-
-Automatically detects the user's preferred language from browser settings or HTTP headers.
-
-- On the client: Uses [navigator.languages](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/languages)
-- On the server: Uses the [Accept-Language header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language)
-
-```diff
-compile({
-	project: "./project.inlang",
-	outdir: "./src/paraglide",
-+	strategy: ["preferredLanguage", "baseLocale"]
-})
-```
-
-The strategy attempts to match locale in order of user preference:
-
-1. First tries exact matches (e.g., "en-US" if supported)
-2. Falls back to base language codes (e.g., "en")
-
-For example:
-- If user prefers `fr-FR,fr;q=0.9,en;q=0.7` and your app supports `["en", "fr"]`, it will use `fr`
-- If user prefers `en-US` and your app only supports `["en", "de"]`, it will use `en`
 
 ## Write your own strategy
 
