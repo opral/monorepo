@@ -96,45 +96,10 @@ await Promise.all([
 ```
 
 3. Monitor for these warning signs:
+
    - Random locale switches during load testing
    - Incorrect URL origins in logs
    - Session data appearing in wrong requests
-
-## Manual Middleware Setup 
-
-For frameworks without middleware support, use AsyncLocalStorage directly:
-
-```ts
-import { AsyncLocalStorage } from 'async_hooks';
-import { 
-  overwriteGetLocale,
-  overwriteGetUrlOrigin
-} from './paraglide/runtime.js';
-
-const asyncStorage = new AsyncLocalStorage<{
-  locale: string;
-  origin: string;
-}>();
-
-// Set up once:
-overwriteGetLocale(() => {
-  return asyncStorage.getStore()?.locale ?? 'en';
-});
-
-overwriteGetUrlOrigin(() => {
-  return asyncStorage.getStore()?.origin ?? 'https://default.com';
-});
-
-// Pseudo middleware example:
-app.use((req, res, next) => {
-  const locale = extractLocaleFromRequest(req);
-  const origin = req.headers.host || 'https://default.com';
-  
-  asyncStorage.run({ locale, origin }, () => {
-    next();
-  });
-});
-```
 
 ## Serverless Environments
 
@@ -167,16 +132,3 @@ export function middleware(request) {
   return NextResponse.next();
 }
 ```
-
-Key advantages:
-
-- No async storage needed (requests are isolated)
-- Minimal overhead per request
-- Works with cold-start environments
-
-## Best Practices
-
-- Use `paraglideMiddleware` for full-stack frameworks with SSR support
-- Manual overrides work best for API routes/edge functions
-- Combine with [Routing Strategies](/docs/strategy) for complete i18n solution
-- Always test locale propagation in production-like environments
