@@ -4,9 +4,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "machine-translate": "inlang machine translate --project ./project.inlang",
-    "validate": "inlang validate --project ./project.inlang",
-    "lint": "inlang lint --project ./project.inlang"
+    "machine-translate": "inlang machine translate --project ./project.inlang"
   },
   "devDependencies": {
     "@inlang/cli": "workspace:*",
