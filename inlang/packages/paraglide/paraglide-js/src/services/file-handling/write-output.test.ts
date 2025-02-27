@@ -1,12 +1,12 @@
 import memfs from "memfs";
 import type fs from "node:fs/promises";
-import { it, expect, vi, beforeEach } from "vitest";
+import { test, expect, vi, beforeEach } from "vitest";
 
 beforeEach(() => {
 	vi.resetModules();
 });
 
-it("should write the output to a non-existing directory", async () => {
+test("should write the output to a non-existing directory", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({});
 
@@ -20,7 +20,7 @@ it("should write the output to a non-existing directory", async () => {
 	);
 });
 
-it.skip("should clear & overwrite output that's already there", async () => {
+test("should clear & overwrite output that's already there", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({
 		"/output/test.txt": "old",
@@ -30,6 +30,7 @@ it.skip("should clear & overwrite output that's already there", async () => {
 	await writeOutput({
 		directory: "/output",
 		output: { "test.txt": "new" },
+		cleanDirectory: true,
 		fs,
 	});
 
@@ -41,7 +42,7 @@ it.skip("should clear & overwrite output that's already there", async () => {
 	).rejects.toBeDefined();
 });
 
-it("should create any missing directories", async () => {
+test("should create any missing directories", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({});
 
@@ -61,7 +62,7 @@ it("should create any missing directories", async () => {
 	).toBe("en");
 });
 
-it("should only write once if the output hasn't changed", async () => {
+test("should only write once if the output hasn't changed", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({});
 
@@ -86,7 +87,7 @@ it("should only write once if the output hasn't changed", async () => {
 	expect(fs.writeFile).toHaveBeenCalledTimes(1);
 });
 
-it("should write again if the output has changed", async () => {
+test("should write again if the output has changed", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({});
 
@@ -110,7 +111,7 @@ it("should write again if the output has changed", async () => {
 	expect(fs.writeFile).toHaveBeenCalledTimes(2);
 });
 
-it("should write files if output has partially changed", async () => {
+test("should write files if output has partially changed", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({});
 

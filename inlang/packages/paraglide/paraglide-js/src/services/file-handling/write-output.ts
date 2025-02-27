@@ -5,6 +5,7 @@ import type nodeFs from "node:fs/promises";
 export async function writeOutput(args: {
 	directory: string;
 	output: Record<string, string>;
+	cleanDirectory?: boolean;
 	fs: typeof nodeFs;
 	previousOutputHashes?: Record<string, string>;
 }) {
@@ -23,10 +24,13 @@ export async function writeOutput(args: {
 		return currentOutputHashes;
 	}
 
+	// clear the output directory
+	//
 	// disabled because of https://github.com/opral/inlang-paraglide-js/issues/350
-	// // clear the output directory
-	// await args.fs.rm(args.outputDirectory, { recursive: true, force: true });
-
+	// and re-enabled because of https://github.com/opral/inlang-paraglide-js/issues/420
+	if (args.cleanDirectory) {
+		await args.fs.rm(args.directory, { recursive: true, force: true });
+	}
 	await args.fs.mkdir(args.directory, { recursive: true });
 
 	//Create missing directories inside the output directory

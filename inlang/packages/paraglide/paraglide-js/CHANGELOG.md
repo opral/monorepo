@@ -3,6 +3,7 @@
 ## 2.0.0-beta.24
 
 - changes the redirect status from `302` to `307` https://github.com/opral/inlang-paraglide-js/issues/416
+- adds a `cleanOutdir` option which defaults to true https://github.com/opral/inlang-paraglide-js/issues/420
 
 ## 2.0.0-beta.23
 
