@@ -70,10 +70,10 @@ export function FixedToolbarButtons() {
     <div className="flex w-full">
       {!readOnly && (
         <>
-          <ToolbarGroup>
+          {/* <ToolbarGroup>
             <UndoToolbarButton />
             <RedoToolbarButton />
-          </ToolbarGroup>
+          </ToolbarGroup> */}
 
           <ToolbarGroup>
             <AIToolbarButton tooltip="AI commands">
@@ -140,14 +140,13 @@ export function FixedToolbarButtons() {
             </ColorDropdownMenu> */}
           </ToolbarGroup>
 
-          <ToolbarGroup>
-            {/* <AlignDropdownMenu /> */}
-
+          {/* <ToolbarGroup>
+            <AlignDropdownMenu />
             <NumberedIndentListToolbarButton />
             <BulletedIndentListToolbarButton />
             <IndentTodoToolbarButton />
             <ToggleToolbarButton />
-          </ToolbarGroup>
+          </ToolbarGroup> */}
 
           <ToolbarGroup>
             <LinkToolbarButton />
@@ -162,11 +161,11 @@ export function FixedToolbarButtons() {
             <MediaToolbarButton nodeType={FilePlugin.key} />
           </ToolbarGroup> */}
 
-          <ToolbarGroup>
-            {/* <LineHeightDropdownMenu /> */}
+          {/* <ToolbarGroup>
+            <LineHeightDropdownMenu />
             <OutdentToolbarButton />
             <IndentToolbarButton />
-          </ToolbarGroup>
+          </ToolbarGroup> */}
 
           {/* <ToolbarGroup>
             <MoreDropdownMenu />
@@ -176,12 +175,12 @@ export function FixedToolbarButtons() {
 
       <div className="grow" />
 
-      <ToolbarGroup>
+      {/* <ToolbarGroup>
         <MarkToolbarButton nodeType={HighlightPlugin.key} tooltip="Highlight">
           <HighlighterIcon />
         </MarkToolbarButton>
         <CommentToolbarButton />
-      </ToolbarGroup>
+      </ToolbarGroup> */}
 
       <ToolbarGroup>
         <ModeDropdownMenu />
