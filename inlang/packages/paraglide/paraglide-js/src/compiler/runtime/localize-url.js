@@ -58,8 +58,6 @@ export function localizeUrl(url, options) {
 	const locale = options?.locale ?? getLocale();
 	const urlObj = typeof url === "string" ? new URL(url) : url;
 
-	const search = urlObj.search;
-
 	for (const element of urlPatterns) {
 		const pattern = new URLPattern(element.pattern);
 		const match = pattern.exec(urlObj.href);
@@ -79,7 +77,30 @@ export function localizeUrl(url, options) {
 				...overrides,
 			};
 
-			return fillPattern(element.pattern, groups, search);
+			const url = fillPattern(element.pattern, groups);
+
+			// At least protocol and hostname are required to create a valid URL
+			// inside fillPattern.
+			if (match.username.groups["0"]) {
+				url.username = match.username.groups["0"] ?? "";
+			}
+			if (match.password.groups["0"]) {
+				url.password = match.password.groups["0"] ?? "";
+			}
+			if (match.port.groups["0"]) {
+				url.port = match.port.groups["0"] ?? "";
+			}
+			if (match.pathname.groups["0"]) {
+				url.pathname = match.pathname.groups["0"] ?? "";
+			}
+			if (match.search.groups["0"]) {
+				url.search = match.search.groups["0"] ?? "";
+			}
+			if (match.hash.groups["0"]) {
+				url.hash = match.hash.groups["0"] ?? "";
+			}
+
+			return url;
 		}
 	}
 
@@ -166,7 +187,6 @@ export function deLocalizeUrl(url) {
 	}
 
 	const urlObj = new URL(url, getUrlOrigin());
-	const search = urlObj.search;
 
 	for (const element of urlPatterns) {
 		const pattern = new URLPattern(element.pattern);
@@ -187,7 +207,30 @@ export function deLocalizeUrl(url) {
 				...overrides,
 			};
 
-			return fillPattern(element.pattern, groups, search);
+			const url = fillPattern(element.pattern, groups);
+
+			// At least protocol and hostname are required to create a valid URL
+			// inside fillPattern.
+			if (match.username.groups["0"]) {
+				url.username = match.username.groups["0"] ?? "";
+			}
+			if (match.password.groups["0"]) {
+				url.password = match.password.groups["0"] ?? "";
+			}
+			if (match.port.groups["0"]) {
+				url.port = match.port.groups["0"] ?? "";
+			}
+			if (match.pathname.groups["0"]) {
+				url.pathname = match.pathname.groups["0"] ?? "";
+			}
+			if (match.search.groups["0"]) {
+				url.search = match.search.groups["0"] ?? "";
+			}
+			if (match.hash.groups["0"]) {
+				url.hash = match.hash.groups["0"] ?? "";
+			}
+
+			return url;
 		}
 	}
 
@@ -228,10 +271,9 @@ function deLocalizeUrlDefaultPattern(url) {
  *
  * @param {string} pattern - The URL pattern containing named groups.
  * @param {Record<string, string | null | undefined>} values - Object of values for named groups.
- * @param {string} [search] - Optional search (query) parameters to preserve
  * @returns {URL} - The constructed URL with named groups filled.
  */
-function fillPattern(pattern, values, search) {
+function fillPattern(pattern, values) {
 	const filled = pattern.replace(
 		/(\/?):([a-zA-Z0-9_]+)(\([^)]*\))?([?+*]?)/g,
 		(_, slash, name, __, modifier) => {
@@ -264,11 +306,7 @@ function fillPattern(pattern, values, search) {
 		}
 	);
 
-	const url = new URL(filled);
-	if (search) {
-		url.search = search;
-	}
-	return url;
+	return new URL(filled);
 }
 
 /**
