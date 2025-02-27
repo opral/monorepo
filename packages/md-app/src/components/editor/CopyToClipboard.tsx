@@ -4,12 +4,13 @@ import { cn } from "@udecode/cn";
 import { Copy } from "lucide-react";
 import { Button } from "../plate-ui/button";
 import { toast } from 'sonner';
+import { useEditorRef } from "@udecode/plate/react";
 
-export const CopyToClipboard = (
-  editor: any,
-) => {
+export const CopyToClipboard = () => {
+  const editor = useEditorRef()
   const handleCopyToClipboard = () => {
-    const serializedMd = editor.editor.api.markdown.serialize();
+    // @ts-expect-error - api markdown is not in the types
+    const serializedMd = editor.api.markdown.serialize();
     navigator.clipboard.writeText(serializedMd);
     toast.success('Markdown copied to clipboard');
   };
@@ -18,10 +19,7 @@ export const CopyToClipboard = (
     <Button
       size="icon"
       variant="ghost"
-      className={cn(
-        'group absolute top-14 lg:top-12 right-1 lg:right-3 z-50 size-10 overflow-hidden',
-        'rounded-md hover:shadow-lg hover:bg-slate-50 transition-shadow transition-bg',
-      )}
+      className="hover:bg-muted hover:text-muted-foreground"
       onClick={handleCopyToClipboard}
     >
       <Copy className="size-4" />
