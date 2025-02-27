@@ -61,6 +61,30 @@ compile({
 })
 ```
 
+### preferredLanguage
+
+Automatically detects the user's preferred language from browser settings or HTTP headers.
+
+- On the client: Uses [navigator.languages](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/languages)
+- On the server: Uses the [Accept-Language header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language)
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["preferredLanguage", "baseLocale"]
+})
+```
+
+The strategy attempts to match locale in order of user preference:
+
+1. First tries exact matches (e.g., "en-US" if supported)
+2. Falls back to base language codes (e.g., "en")
+
+For example:
+- If user prefers `fr-FR,fr;q=0.9,en;q=0.7` and your app supports `["en", "fr"]`, it will use `fr`
+- If user prefers `en-US` and your app only supports `["en", "de"]`, it will use `en`
+
 ### url
 
 Determine the locale from the URL (pathname, domain, etc).
@@ -259,39 +283,9 @@ compile({
 });
 ```
 
-### preferredLanguage
-
-Automatically detects the user's preferred language from browser settings or HTTP headers.
-
-- On the client: Uses [navigator.languages](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/languages)
-- On the server: Uses the [Accept-Language header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language)
-
-```diff
-compile({
-	project: "./project.inlang",
-	outdir: "./src/paraglide",
-+	strategy: ["preferredLanguage", "baseLocale"]
-})
-```
-
-The strategy attempts to match locale in order of user preference:
-
-1. First tries exact matches (e.g., "en-US" if supported)
-2. Falls back to base language codes (e.g., "en")
-
-For example:
-- If user prefers `fr-FR,fr;q=0.9,en;q=0.7` and your app supports `["en", "fr"]`, it will use `fr`
-- If user prefers `en-US` and your app only supports `["en", "de"]`, it will use `en`
-
 ## Write your own strategy
 
 Write your own cookie, http header, or i18n routing based locale strategy to integrate Paraglide into any framework or app.
-
-### Basics
-
-Every time a message is rendered, Paraglide calls the `getLocale()` function under the hood to determine which locale to apply. By default, this will be the `baseLocale` defined in your settings. Calling `setLocale(locale)` anywhere in your code will update the locale stored by the runtime. Any calls to `getLocale()` after that (eg: when a new message is rendered) will return the newly set locale.
-
-This behaviour is far too simple for most apps. Instead of starting with the default `baseLocale`, you will probably want to determine the locale based on cookies, a http header or a routing strategy. Likewise, if the locale is changed by the user, you might want to update some cookies, change the route, or trigger a rerender of the app.
 
 Only two APIs are needed to define this behaviour and adapt Paraglide JS to your requirements: 
 
@@ -343,63 +337,3 @@ export function onRequest(request, next) {
   return localeStorage.run(locale, async () => await next());
 }
 ```
-
-Or, for a SvelteKit specific example, in your `hooks.server.ts`:
-
-```js
-import { AsyncLocalStorage } from 'node:async_hooks';
-import { sequence } from '@sveltejs/kit/hooks';
-import { overwriteGetLocale, baseLocale } from './paraglide/runtime.js';
-
-overwriteGetLocale(() => {
-  //any calls to getLocale() in the async local storage context will return the stored locale
-  return localeStorage.getStore() ?? baseLocale;
-});
-
-async function localeHandler({event, resolve}) {
-  const locale = detectLocale(request);
-  // set the async locale storage for the current request
-  // to the detected locale and let the request continue
-  // in that context
-  return locale.run(locale, async() => await resolve(event));
-}
-
-async function mainHandler({event, resolve}) {
-  //...your main server side request handler logic
-  return await resolve(event);
-}
-
-export const handle = sequence(
-  localeHandler, //goes first to set the locale context for the rest of the request
-  mainHandler
-);
-
-```
-
-#### Server-side rendering
-
-1. Detect the locale from the request. 
-2. Make sure that `overwriteGetLocale()` is cross-request safe on the server. 
-
-Pseudocode logic on the server: 
-
-```ts
-import { overwriteGetLocale, overwriteSetLocale, setLocale, baseLocale } from "./paraglide/runtime.js";
-import { AsyncLocalStorage } from "node:async_hooks";
-
-const localeStorage = new AsyncLocalStorage();
-
-// ✅ DO THIS
-// ✅ when `getLocale()` is called inside a route handler
-// ✅ this function will return the language for the current request
-overwriteGetLocale(() => {
-  return localeStorage.getValue() ?? baseLocale;
-});
-
-export function onRequest(request, next) {
-  const locale = detectLocale(request);
-	// set the async locale storage for the current request
-	// to the detected locale and let the request continue
-	// in the async context 
-  return localeStorage(locale, async () => await next());
-}
