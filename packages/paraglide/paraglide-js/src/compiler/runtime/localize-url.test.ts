@@ -333,6 +333,62 @@ test("it keeps the query parameters", async () => {
 	).toBe("https://example.com/about?foo=bar&baz=qux");
 });
 
+test("it keeps the url hash", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "https://:domain(.*)/:locale(de)?/:path*",
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
+						en: { locale: null },
+						de: { locale: "de" },
+					},
+				},
+			],
+		},
+	});
+
+	expect(
+		runtime.localizeUrl("https://example.com/about#test", { locale: "de" }).href
+	).toBe("https://example.com/de/about#test");
+
+	expect(runtime.deLocalizeUrl("https://example.com/de/about#test").href).toBe(
+		"https://example.com/about#test"
+	);
+});
+
+test("it keeps the url path", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "https://:subdomain?.example.com",
+					deLocalizedNamedGroups: { subdomain: "en" },
+					localizedNamedGroups: {
+						en: { subdomain: "en" },
+						de: { subdomain: "de" },
+					},
+				},
+			],
+		},
+	});
+
+	expect(
+		runtime.localizeUrl("https://en.example.com/about", { locale: "de" }).href
+	).toBe("https://de.example.com/about");
+
+	expect(runtime.deLocalizeUrl("https://de.example.com/about").href).toBe(
+		"https://en.example.com/about"
+	);
+});
+
 test("uses getLocale when no locale is provided", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
