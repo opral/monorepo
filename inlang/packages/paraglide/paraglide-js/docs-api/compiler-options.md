@@ -2,7 +2,7 @@
 
 > **CompilerOptions**: `object`
 
-Defined in: [compiler-options.ts:12](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:13](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 ### Type declaration
 
@@ -32,6 +32,18 @@ The output will look like this:
 +   - my-file.js
     - messages.js
     - runtime.js
+```
+
+#### cleanOutdir?
+
+> `optional` **cleanOutdir**: `boolean`
+
+Whether to clean the output directory before writing the new files.
+
+##### Default
+
+```ts
+true
 ```
 
 #### cookieName?
@@ -226,6 +238,10 @@ TODO documentation
 Defined in: [compiler-options.ts:3](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 ### Type declaration
+
+#### cleanOutdir
+
+> `readonly` **cleanOutdir**: `true` = `true`
 
 #### cookieName
 

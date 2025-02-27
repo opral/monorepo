@@ -21,6 +21,10 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			previousCompilation = await compile({
 				fs: wrappedFs,
 				previousCompilation,
+				// webpack invokes the `buildStart` api in watch mode,
+				// to avoid cleaning the output directory in watch mode,
+				// we only clean the output directory if there was no previous compilation
+				cleanOutdir: previousCompilation === undefined,
 				...args,
 			});
 			logger.success("Compilation complete");
@@ -53,10 +57,11 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			previousCompilation = await compile({
 				fs: wrappedFs,
 				previousCompilation,
+				cleanOutdir: false,
 				...args,
 			});
 
-			logger.success("Compilation complete");
+			logger.success("Re-compilation complete");
 
 			// Add any new files to watch
 			for (const filePath of Array.from(readFiles)) {
@@ -84,6 +89,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 				previousCompilation = await compile({
 					fs: wrappedFs,
 					previousCompilation,
+					cleanOutdir: true,
 					...args,
 				});
 				logger.success("Compilation complete");

@@ -74,6 +74,7 @@ export async function compile(
 			const outputHashes = await writeOutput({
 				directory: absoluteOutdir,
 				output,
+				cleanDirectory: withDefaultOptions.cleanOutdir,
 				fs: fs.promises,
 				previousOutputHashes: options.previousCompilation?.outputHashes,
 			});
@@ -91,12 +92,10 @@ export async function compile(
 
 			return { outputHashes };
 		} catch (e) {
-			console.error(e);
-			return { outputHashes: undefined };
-		} finally {
-			// release the lock
+			// release the lock in case of an error
 			compilationInProgress = null;
-		}
+			throw e;
+		} 
 	})();
 
 	const result = structuredClone(await compilationInProgress);
