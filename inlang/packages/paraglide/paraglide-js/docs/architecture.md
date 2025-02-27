@@ -1,9 +1,13 @@
 ---
 title: Architecture
 description: "Paraglide isn't like other i18n libraries. It uses a compiler to generate translations. Learn more about it here."
+imports:
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-video.js
 ---
 
 # Architecture
+
+<doc-video src="https://youtu.be/PBhdb5AS0mk"></doc-video>
 
 Paraglide uses a compiler to generate JS functions from your messages. We call these "message functions".
 
@@ -49,3 +53,4 @@ Paraglide consists of four main parts:
 | **Messages** | The compiled tree-shakable message functions             |
 | **Runtime**  | A runtime that resolves the locale based on the strategy |
 | **Strategy** | The strategy to detect the locale of a user              |
+
