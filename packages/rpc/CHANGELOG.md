@@ -1,5 +1,9 @@
 # @inlang/rpc
 
+## 0.3.40 
+
+Re-deploy because NPM deleted the package
+
 ## 0.3.39
 
 ### Patch Changes
