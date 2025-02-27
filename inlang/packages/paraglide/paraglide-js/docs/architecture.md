@@ -17,29 +17,25 @@ flowchart TD
 
     COMPILER[COMPILER]
 
-    subgraph RUNTIME
+    subgraph RUNTIME[runtime.js]
         GET_LOCALE["getLocale()"]
         SET_LOCALE["setLocale()"]
+        STRATEGY
     end
 
-    subgraph MESSAGES
+    subgraph MESSAGES[messages.js]
         M["m.hello_world()"]
     end
 
-
-    subgraph STRATEGY
-        X["Your strategy defines how a locale is resolved. Cookie-based, i18n routing, everything is possible."]
-    end
-
-    COMPILER --> INLANG_PROJECT
+    COMPILER -->|Opens| INLANG_PROJECT
     M --> GET_LOCALE
     MESSAGES --> COMPILER
     RUNTIME --> COMPILER
     APP[Your App] --> M
     MESSAGE["'Hello World!'"] -->|renders| APP[Your App]
     APP --> SET_LOCALE
-    GET_LOCALE -->|"overwriteGetLocale()"| STRATEGY
-    SET_LOCALE -->|"overwriteSetLocale()"| STRATEGY
+    GET_LOCALE --> STRATEGY
+    SET_LOCALE --> STRATEGY
 
     classDef plainText stroke-width:0,fill-opacity:0,color:black;
     class X plainText
@@ -47,9 +43,9 @@ flowchart TD
 
 Paraglide consists of four main parts:
 
-| Part                  | Description                                                                                                                  |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Compiler**          | Compiles messages into tree-shakable message functions                                                                       |
-| **Messages**          | The compiled tree-shakable message functions                                                                                 |
-| **Runtime**           | A runtime that resolves the locale based on the strategy                                                                     |
-| **Strategy**          | The strategy to detect the locale of a user                                                                                  |
+| Part         | Description                                              |
+| ------------ | -------------------------------------------------------- |
+| **Compiler** | Compiles messages into tree-shakable message functions   |
+| **Messages** | The compiled tree-shakable message functions             |
+| **Runtime**  | A runtime that resolves the locale based on the strategy |
+| **Strategy** | The strategy to detect the locale of a user              |
