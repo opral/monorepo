@@ -59,7 +59,7 @@
         //"--noLazy",
         "--extensionDevelopmentPath=${workspaceFolder}/inlang/packages/sherlock",
         // change this path to specify what folder should be opened upon running this configuration
-        "${workspaceFolder}/inlang/packages/paraglide/paraglide-js/examples/react"
+        "${workspaceFolder}/inlang/packages/"
       ],
       "outFiles": [
         "${workspaceFolder}/**/*.js",
