@@ -63,19 +63,19 @@ export function localizeUrl(url, options) {
 		const match = pattern.exec(urlObj.href);
 
 		if (match) {
-			/** @type {Record<string, string | null >} */
-			const overrides = {};
+			const groups = aggregateGroups(match);
 
 			for (const [groupName, value] of Object.entries(
 				element.localizedNamedGroups?.[locale] ?? {}
 			)) {
-				overrides[groupName] = value;
+				if (
+					groupName.endsWith("?") &&
+					groups[groupName.replace("?", "")] === undefined
+				) {
+					continue;
+				}
+				groups[groupName.replace("?", "")] = value;
 			}
-
-			const groups = {
-				...aggregateGroups(match),
-				...overrides,
-			};
 
 			const url = fillPattern(element.pattern, groups);
 
@@ -193,19 +193,19 @@ export function deLocalizeUrl(url) {
 		const match = pattern.exec(urlObj.href);
 
 		if (match) {
-			/** @type {Record<string, string | null>} */
-			const overrides = {};
+			const groups = aggregateGroups(match);
 
 			for (const [groupName, value] of Object.entries(
 				element.deLocalizedNamedGroups
 			)) {
-				overrides[groupName] = value;
+				if (
+					groupName.endsWith("?") &&
+					groups[groupName.replace("?", "")] === undefined
+				) {
+					continue;
+				}
+				groups[groupName.replace("?", "")] = value;
 			}
-
-			const groups = {
-				...aggregateGroups(match),
-				...overrides,
-			};
 
 			const url = fillPattern(element.pattern, groups);
 

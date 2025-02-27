@@ -29,7 +29,7 @@ export function extractLocaleFromUrl(url) {
 				let allMatch = true;
 
 				for (const [key, val] of Object.entries(overrideParams)) {
-					const matchedValue = groups[key];
+					const matchedValue = groups[key.replace("?", "")];
 
 					// Handle nullable parameters
 					if (val === null) {
@@ -47,7 +47,7 @@ export function extractLocaleFromUrl(url) {
 						}
 					}
 					// Handle regular parameters
-					else if (matchedValue !== val) {
+					else if (matchedValue && matchedValue !== val) {
 						allMatch = false;
 						break;
 					}

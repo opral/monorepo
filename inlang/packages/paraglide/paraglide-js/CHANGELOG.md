@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.25
+
+- added optional localized groups 
+
 ## 2.0.0-beta.24
 
 - changes the redirect status from `302` to `307` https://github.com/opral/inlang-paraglide-js/issues/416
