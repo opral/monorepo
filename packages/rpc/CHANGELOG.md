@@ -1,5 +1,11 @@
 # @inlang/rpc
 
+## 0.3.39
+
+### Patch Changes
+
+- fix: don't bundle env variable
+
 ## 0.3.38
 
 ### Patch Changes

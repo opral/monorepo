@@ -7,7 +7,6 @@ import {
 } from "@inlang/sdk";
 import { randomUUID } from "node:crypto";
 import type { Result } from "../types.js";
-import { ENV_VARIABLES } from "../services/env-variables/index.js";
 
 export async function machineTranslateBundle(args: {
 	bundle: BundleNested;
@@ -15,7 +14,7 @@ export async function machineTranslateBundle(args: {
 	targetLocales: string[];
 }): Promise<Result<NewBundleNested, string>> {
 	try {
-		if (!ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY) {
+		if (!process.env.GOOGLE_TRANSLATE_API_KEY) {
 			return { error: "GOOGLE_TRANSLATE_API_KEY is not set" };
 		}
 
@@ -45,7 +44,7 @@ export async function machineTranslateBundle(args: {
 							target: targetLocale,
 							source: args.sourceLocale,
 							format: "html",
-							key: ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY,
+							key: process.env.GOOGLE_TRANSLATE_API_KEY,
 						}),
 					{ method: "POST" }
 				);

@@ -19,7 +19,6 @@ await fs.writeFile(
 	dirname + "/index.js",
 	`
 export const ENV_VARIABLES = {
-  GOOGLE_TRANSLATE_API_KEY: ${ifDefined(process.env.GOOGLE_TRANSLATE_API_KEY)},
 	PUBLIC_SERVER_BASE_URL: ${ifDefined(process.env.PUBLIC_SERVER_BASE_URL)},
 	PUBLIC_ALLOWED_AUTH_URLS: ${ifDefined(process.env.PUBLIC_ALLOWED_AUTH_URLS)},
 }
