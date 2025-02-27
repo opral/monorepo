@@ -179,3 +179,57 @@ test("default url patterns to improve out of the box experience", async () => {
 		"http://localhost:5173/about"
 	);
 });
+
+test("multi pathname localization with optional groups", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			urlPatterns: [
+				{
+					pattern: "http://example.com/:bookstore?/:item?",
+					deLocalizedNamedGroups: {
+						"bookstore?": "bookstore",
+						"item?": "item",
+					},
+					localizedNamedGroups: {
+						de: { "bookstore?": "buchladen", "item?": "artikel" },
+						en: { "bookstore?": "bookstore", "item?": "item" },
+					},
+				},
+			],
+		},
+	});
+
+	expect(
+		runtime.localizeHref("http://example.com/bookstore", { locale: "de" })
+	).toBe("http://example.com/buchladen");
+
+	expect(
+		runtime.localizeHref("http://example.com/bookstore/item", { locale: "de" })
+	).toBe("http://example.com/buchladen/artikel");
+
+	expect(
+		runtime.localizeHref("http://example.com/bookstore/item", { locale: "en" })
+	).toBe("http://example.com/bookstore/item");
+
+	expect(runtime.deLocalizeHref("http://example.com/buchladen/artikel")).toBe(
+		"http://example.com/bookstore/item"
+	);
+
+	expect(runtime.deLocalizeHref("http://example.com/buchladen")).toBe(
+		"http://example.com/bookstore"
+	);
+
+	expect(
+		runtime.extractLocaleFromUrl(`http://example.com/bookstore/blaba`)
+	).toBe(undefined);
+
+	expect(runtime.extractLocaleFromUrl(`http://example.com/buchladen`)).toBe(
+		"de"
+	);
+
+	expect(
+		runtime.extractLocaleFromUrl(`http://example.com/something/else`)
+	).toBe(undefined);
+});
