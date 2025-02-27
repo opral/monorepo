@@ -223,3 +223,55 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 	// global variable is not impacted by middleware
 	expect(runtime.getLocale()).toBe("fr");
 });
+
+test("multi pathname localization with optional groups", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "http://example.com/:bookstore?/:item?",
+					deLocalizedNamedGroups: {
+						"bookstore?": "bookstore",
+						"item?": "item",
+					},
+					localizedNamedGroups: {
+						de: { "bookstore?": "buchladen", "item?": "artikel" },
+						en: { "bookstore?": "bookstore", "item?": "item" },
+					},
+				},
+			],
+		},
+	});
+
+	// Process the request
+	expect(
+		await runtime.paraglideMiddleware(
+			new Request(new URL("http://example.com/bookstore")),
+			({ locale }) => locale
+		)
+	).toBe("en");
+
+	expect(
+		await runtime.paraglideMiddleware(
+			new Request(new URL("http://example.com/bookstore/item")),
+			({ locale }) => locale
+		)
+	).toBe("en");
+
+	expect(
+		await runtime.paraglideMiddleware(
+			new Request(new URL("http://example.com/buchladen")),
+			({ locale }) => locale
+		)
+	).toBe("de");
+
+	expect(
+		await runtime.paraglideMiddleware(
+			new Request(new URL("http://example.com/buchladen/artikel")),
+			({ locale }) => locale
+		)
+	).toBe("de");
+});
