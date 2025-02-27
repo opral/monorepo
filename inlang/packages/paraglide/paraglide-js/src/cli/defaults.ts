@@ -9,8 +9,8 @@ const defaultProjectSettings = {
 	baseLocale: "en",
 	locales: ["en", "de"],
 	modules: [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@3/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@1/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@4/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@2/dist/index.js",
 	],
 	"plugin.inlang.messageFormat": {
 		pathPattern: "./messages/{locale}.json",

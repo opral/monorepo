@@ -40,8 +40,6 @@ export const initCommand = new Command()
 
 		if (ctx6.bundler === "vite") {
 			await addVitePlugin(ctx6);
-		} else {
-			await addCompileStepToPackageJSON(ctx6);
 		}
 
 		const ctx7 = await maybeUpdateTsConfig(ctx6);
@@ -59,21 +57,12 @@ export const initCommand = new Command()
 			);
 		}
 
-		const absoluteSettingsPath = nodePath.resolve(
-			ctx8.projectPath,
-			"settings.json"
-		);
-		const relativeSettingsFilePath = absoluteSettingsPath.replace(
-			process.cwd(),
-			"."
-		);
-
 		const successMessage = [
 			`inlang Paraglide-JS has been set up sucessfully.`,
 			"\n",
 			`1. Run your install command (npm i, yarn install, etc)`,
 			`2. Run the build script (npm run build, or similar.)`,
-			`3. Define the locales in ${relativeSettingsFilePath}`,
+			`3. Visit https://inlang.com/m/gerre34r/library-inlang-paraglideJs/basics to get started.`,
 			"\n",
 			"\n",
 			`For questions and feedback, visit`,
@@ -134,14 +123,6 @@ export const addCompileStepToPackageJSON: CliStep<
 
 	ctx = await updatePackageJson({
 		scripts: async (scripts) => {
-			// add the compile command to the postinstall script
-			// this isn't super important, so we won't interrupt the user if it fails
-			if (!scripts.postinstall?.includes("paraglide-js compile")) {
-				scripts.postinstall =
-					`paraglide-js compile --project ${projectPath} --outdir ${outdir}` +
-					(scripts.postinstall ? " && " + scripts.postinstall : "");
-			}
-
 			if (scripts.build === undefined) {
 				scripts.build = `paraglide-js compile --project ${projectPath} --outdir ${outdir}`;
 			} else if (scripts.build.includes("paraglide-js compile") === false) {
