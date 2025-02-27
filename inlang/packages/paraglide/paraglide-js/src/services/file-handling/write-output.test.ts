@@ -144,42 +144,52 @@ test("should delete files that have been removed from the output", async () => {
 		output: {
 			"file1.txt": "content1",
 			"file2.txt": "content2",
-			"subdir/file3.txt": "content3"
+			"subdir/file3.txt": "content3",
 		},
 		fs,
 	});
 
 	// Verify all files were written
-	expect(await fs.readFile("/output/file1.txt", { encoding: "utf-8" })).toBe("content1");
-	expect(await fs.readFile("/output/file2.txt", { encoding: "utf-8" })).toBe("content2");
-	expect(await fs.readFile("/output/subdir/file3.txt", { encoding: "utf-8" })).toBe("content3");
+	expect(await fs.readFile("/output/file1.txt", { encoding: "utf-8" })).toBe(
+		"content1"
+	);
+	expect(await fs.readFile("/output/file2.txt", { encoding: "utf-8" })).toBe(
+		"content2"
+	);
+	expect(
+		await fs.readFile("/output/subdir/file3.txt", { encoding: "utf-8" })
+	).toBe("content3");
 
 	// Second write with file2.txt removed
 	await writeOutput({
 		directory: "/output",
 		output: {
 			"file1.txt": "content1",
-			"subdir/file3.txt": "content3updated"
+			"subdir/file3.txt": "content3updated",
 		},
 		fs,
 		previousOutputHashes: hashes,
 	});
 
 	// Verify file1.txt still exists
-	expect(await fs.readFile("/output/file1.txt", { encoding: "utf-8" })).toBe("content1");
+	expect(await fs.readFile("/output/file1.txt", { encoding: "utf-8" })).toBe(
+		"content1"
+	);
 	// Verify file2.txt has been deleted
 	await expect(
 		async () => await fs.readFile("/output/file2.txt", { encoding: "utf-8" })
 	).rejects.toBeDefined();
 	// Verify file3.txt was updated
-	expect(await fs.readFile("/output/subdir/file3.txt", { encoding: "utf-8" })).toBe("content3updated");
+	expect(
+		await fs.readFile("/output/subdir/file3.txt", { encoding: "utf-8" })
+	).toBe("content3updated");
 
 	// Get the new hashes
 	const newHashes = await writeOutput({
 		directory: "/output",
 		output: {
 			"file1.txt": "content1",
-			"subdir/file3.txt": "content3updated"
+			"subdir/file3.txt": "content3updated",
 		},
 		fs,
 		previousOutputHashes: hashes,
@@ -189,17 +199,20 @@ test("should delete files that have been removed from the output", async () => {
 	await writeOutput({
 		directory: "/output",
 		output: {
-			"file1.txt": "content1"
+			"file1.txt": "content1",
 		},
 		fs,
 		previousOutputHashes: newHashes,
 	});
 
 	// Verify file1.txt still exists
-	expect(await fs.readFile("/output/file1.txt", { encoding: "utf-8" })).toBe("content1");
+	expect(await fs.readFile("/output/file1.txt", { encoding: "utf-8" })).toBe(
+		"content1"
+	);
 	// Verify subdir/file3.txt has been deleted
 	await expect(
-		async () => await fs.readFile("/output/subdir/file3.txt", { encoding: "utf-8" })
+		async () =>
+			await fs.readFile("/output/subdir/file3.txt", { encoding: "utf-8" })
 	).rejects.toBeDefined();
 	// Verify the subdir directory has also been removed
 	await expect(
