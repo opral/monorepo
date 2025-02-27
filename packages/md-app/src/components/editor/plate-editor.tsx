@@ -8,7 +8,6 @@ import { Plate } from "@udecode/plate/react";
 
 import { useCreateEditor } from "@/components/editor/use-create-editor";
 import { SettingsDialog } from "@/components/editor/settings";
-import { CopyToClipboard } from "./CopyToClipboard";
 import { Editor, EditorContainer } from "@/components/plate-ui/editor";
 import { debounce } from "lodash-es";
 import { useAtom } from "jotai";
@@ -109,34 +108,31 @@ export function PlateEditor() {
 
 	return (
 		<DndProvider backend={HTML5Backend}>
-			<div className="relative">
-				<Plate
-					editor={editor}
-					onValueChange={(newValue) => {
-						if (
-							loadedMd !==
-							newValue.editor.api.markdown.serialize({
-								nodes: idEnrichedSerializeMdNodesOptions,
-							})
-						) {
-							handleUpdateMdData(newValue);
-							// console.log(
-							// 	newValue.editor.api.markdown.serialize({
-							// 		nodes: idEnrichedSerializeMdNodesOptions,
-							// 	})
-							// );
-						} else {
-							console.log("no change");
-						}
-					}}
-				>
-					<EditorContainer>
-						<Editor />
-					</EditorContainer>
-					{/* <SettingsDialog /> */}
-				</Plate>
-				<CopyToClipboard editor={editor} />
-			</div>
+			<Plate
+				editor={editor}
+				onValueChange={(newValue) => {
+					if (
+						loadedMd !==
+						newValue.editor.api.markdown.serialize({
+							nodes: idEnrichedSerializeMdNodesOptions,
+						})
+					) {
+						handleUpdateMdData(newValue);
+						// console.log(
+						// 	newValue.editor.api.markdown.serialize({
+						// 		nodes: idEnrichedSerializeMdNodesOptions,
+						// 	})
+						// );
+					} else {
+						console.log("no change");
+					}
+				}}
+			>
+				<EditorContainer>
+					<Editor />
+				</EditorContainer>
+				{/* <SettingsDialog /> */}
+			</Plate>
 		</DndProvider>
 	);
 }

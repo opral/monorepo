@@ -3,16 +3,13 @@
 import { cn } from "@udecode/cn";
 import { Copy } from "lucide-react";
 import { Button } from "../plate-ui/button";
-import { idEnrichedSerializeMdNodesOptions } from "./id-enriched-serializer";
 import { toast } from 'sonner';
 
 export const CopyToClipboard = (
   editor: any,
 ) => {
   const handleCopyToClipboard = () => {
-    const serializedMd = editor.editor.api.markdown.serialize({
-      nodes: idEnrichedSerializeMdNodesOptions,
-    });
+    const serializedMd = editor.editor.api.markdown.serialize();
     navigator.clipboard.writeText(serializedMd);
     toast.success('Markdown copied to clipboard');
   };
