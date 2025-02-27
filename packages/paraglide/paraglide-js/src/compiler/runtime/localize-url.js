@@ -218,7 +218,7 @@ function deLocalizeUrlDefaultPattern(url) {
  * At least protocol and hostname are required to create a valid URL inside fillPattern.
  *
  * @param {URL} url
- * @param {URLPatternResult} match
+ * @param {any} match
  * @returns {URL}
  */
 function fillMissingUrlParts(url, match) {
