@@ -45,7 +45,7 @@ export function extractLocaleFromUrl(url) {
 							allMatch = false;
 							break;
 						}
-					}						
+					}
 					// Handle regular parameters
 					else if (matchedValue && matchedValue !== val) {
 						allMatch = false;
