@@ -1,6 +1,6 @@
 {
   "name": "@inlang/cli",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -39,9 +39,12 @@
     "format": "prettier ./src --write",
     "clean": "rm -rf ./dist ./node_modules"
   },
-  "devDependencies": {
+  "dependencies": {
+    "esbuild-wasm": "^0.19.2",
     "@inlang/rpc": "workspace:*",
-    "@inlang/sdk": "workspace:*",
+    "@inlang/sdk": "workspace:*"
+  },
+  "devDependencies": {
     "@sentry/node": "^7.64.0",
     "@sinclair/typebox": "^0.31.17",
     "@types/cli-progress": "^3.11.5",
@@ -59,9 +62,5 @@
     "typescript": "5.2.2",
     "vitest": "2.1.8"
   },
-  "license": "Apache-2.0",
-  "__comment__": "the esbuild-wasm dependency must be a regular dependency to be resolved by the host system. otherwise, esbuild throws errors",
-  "dependencies": {
-    "esbuild-wasm": "^0.19.2"
-  }
+  "license": "Apache-2.0"
 }
