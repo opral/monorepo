@@ -1,6 +1,5 @@
 'use client';
 
-import { cn } from "@udecode/cn";
 import { Copy } from "lucide-react";
 import { Button } from "../plate-ui/button";
 import { toast } from 'sonner';
