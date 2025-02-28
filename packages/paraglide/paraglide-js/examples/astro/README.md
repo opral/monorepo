@@ -5,6 +5,8 @@ imports:
 
 # Astro SSR Example
 
+<img src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/examples/astro/assets/banner.png" alt="i18n library for astro" width="10000000px" />
+
 This example demonstrates how to use Paraglide JS with Astro in SSR mode. The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/astro).
 
 
