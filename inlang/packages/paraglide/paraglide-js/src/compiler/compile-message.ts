@@ -77,19 +77,21 @@ function compileMessageWithMultipleVariants(
 	// TODO make sure that matchers use keys instead of indexes
 	const compiledVariants = [];
 
+	let hasCatchAll = false;
+
 	for (const variant of variants) {
 		const compiledPattern = compilePattern({
 			pattern: variant.pattern,
 			declarations,
 		});
 
-		// todo account for all matches in the selector (if a match is missing, it should be the catchall)
 		const isCatchAll = variant.matches.every(
 			(match) => match.type === "catchall-match"
 		);
 
 		if (isCatchAll) {
 			compiledVariants.push(`return ${compiledPattern.code}`);
+			hasCatchAll = true;
 		}
 
 		const conditions: string[] = [];
@@ -128,10 +130,9 @@ function compileMessageWithMultipleVariants(
 	const safeModuleId = toSafeModuleId(message.bundleId);
 
 	const code = `/** @type {(inputs: ${inputsType(inputs)}) => string} */
-export const ${safeModuleId} = (${hasInputs ? "i" : ""}) => {
-	${compiledLocalVariables.join("\n\t")}
+export const ${safeModuleId} = (${hasInputs ? "i" : ""}) => {${compiledLocalVariables.join("\n\t")}
 	${compiledVariants.join("\n\t")}
-	return \`${message.id}\`;
+	${hasCatchAll ? "" : `return "${message.bundleId}";`}
 };`;
 
 	return { code, node: message };

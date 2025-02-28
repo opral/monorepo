@@ -4,6 +4,7 @@
 
 - added optional localized groups 
 - keeps hashes, etc. in the URL when localizing https://github.com/opral/monorepo/pull/3452
+- fixes the multi-variant return 
 
 ## 2.0.0-beta.24
 
