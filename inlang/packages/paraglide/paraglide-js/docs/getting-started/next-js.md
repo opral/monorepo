@@ -4,8 +4,6 @@ imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
-# Paraglide Next JS example
-
 <img src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/docs/getting-started/next-js-banner.png" alt="i18n library for next js" width="10000000px" />
 
 Paraglide JS can be used with NextJS for both SSR and SSG modes. Below are examples for both modes.
