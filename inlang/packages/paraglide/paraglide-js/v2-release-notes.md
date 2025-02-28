@@ -205,3 +205,14 @@ function App() {
   )
 }
 ```
+
+### Shorten key names longer than 255 characters
+
+Paraglide JS 2.0 build output now defaults to [message-modules](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/compiler-options#outputstructure) to improve tree-shaking. Some filesystem's limitations require key names to be shorter than 255 characters.
+
+Upvote [#423](https://github.com/opral/inlang-paraglide-js/issues/423) to remove this limitation. 
+
+```diff
+- m.this_is_a_very_long_key_name_that_should_be_shortened()
++ m.shortened_key_name()
+```
