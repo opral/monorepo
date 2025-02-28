@@ -164,10 +164,13 @@ async function handleInlangErrors() {
 
 async function setProjects(args: { workspaceFolder: vscode.WorkspaceFolder }) {
 	try {
+		const workspacePath = fg.convertPathToPattern(args.workspaceFolder.uri.fsPath) // Normalize path
 		const projectsList = (
-			await fg.async(`${args.workspaceFolder.uri.fsPath}/**/*.inlang`, {
+			await fg.async(`${workspacePath}/**/*.inlang`, {
 				onlyDirectories: true,
 				ignore: ["**/node_modules/**"],
+				absolute: true, // Ensures paths are absolute and properly formatted
+				cwd: workspacePath, // Makes it platform-agnostic
 			})
 		).map((project) => ({
 			projectPath: project,
