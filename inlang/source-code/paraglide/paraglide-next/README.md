@@ -1,4 +1,13 @@
-[![Inlang-ecosystem compatibility badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
+---
+imports: 
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
+---
+
+<doc-callout type="warning">
+  Paraglide JS 2.0 does not need the NextJS adapter anymore. Please use the [Paraglide JS 2.0 NextJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/next-js) documentation instead.
+</doc-callout>
+
+Paraglide JS 2.0 does not need the NextJS adapter anymore. Please use the [Paraglide JS 2.0 NextJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/next-js) documentation instead.
 
 # Getting Started
 

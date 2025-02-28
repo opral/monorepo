@@ -1,4 +1,14 @@
-# Paraglide-Vite
+---
+imports: 
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
+---
+
+
+<doc-callout type="warning">
+  Paraglide JS 2.0 bundles the vite plugin. Please use the [Paraglide JS 2.0](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/vite) instead.
+</doc-callout>
+
+Paraglide JS 2.0 bundles the vite plugin. Please use the [Paraglide JS 2.0](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/vite) instead.
 
 This package provides a vite plugin to make it easier to use paraglide-js in any project that uses vite.
 

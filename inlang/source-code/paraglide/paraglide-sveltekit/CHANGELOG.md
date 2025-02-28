@@ -1,5 +1,9 @@
 # @inlang/paraglide-sveltekit
 
+## 0.16.0
+
+Added deprecation notice. Paraglide JS 2.0 doesn't need the SvelteKit adapter anymore. You can use [Paraglide JS 2.0](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/sveltekit) directly.
+
 ## 0.15.5
 
 ### Patch Changes

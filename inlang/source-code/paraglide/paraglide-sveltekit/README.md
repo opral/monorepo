@@ -1,4 +1,14 @@
-[![Inlang-ecosystem compatibility badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
+---
+imports: 
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
+---
+
+<doc-callout type="warning">
+  Paraglide JS 2.0 doesn't need the SvelteKit adapter anymore. Please use the [Paraglide JS 2.0](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/sveltekit) directly.
+</doc-callout>
+
+Paraglide JS 2.0 doesn't need the SvelteKit adapter anymore. Please use the [Paraglide JS 2.0](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/sveltekit) directly.
+
 
 ## Getting Started
 

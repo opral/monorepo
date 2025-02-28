@@ -1,3 +1,14 @@
+---
+imports: 
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
+---
+
+<doc-callout type="warning">
+  Paraglide JS 2.0 does not need the Astro adapter anymore. Please use the [Paraglide JS 2.0 Astro](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/astro) documentation instead.
+</doc-callout>
+
+Paraglide JS 2.0 does not need the Astro adapter anymore. Please use the [Paraglide JS 2.0 Astro](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/astro) documentation instead.
+
 ![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and with an IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-astro/assets/og.png)
 
 <doc-features>

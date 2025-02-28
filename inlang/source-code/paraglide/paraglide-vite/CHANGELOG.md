@@ -1,5 +1,9 @@
 # @inlang/paraglide-vite
 
+## 1.4.0
+
+Added a deprecation notice. Paraglide JS 2.0 bundles the vite plugin. Please use Paraglide JS 2.0 directly https://inlang.com/m/gerre34r/library-inlang-paraglideJs/vite.
+
 ## 1.3.5
 
 ### Patch Changes
