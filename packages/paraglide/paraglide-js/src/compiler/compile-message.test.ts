@@ -91,6 +91,64 @@ test("compiles a message with variants", async () => {
 	expect(some_message({ fistInput: 1, secondInput: 5 })).toBe("Catch all");
 });
 
+test("compiles multi-variant message with a fallback in case the variants are not matched", async () => {
+	const declarations: Declaration[] = [
+		{ type: "input-variable", name: "fistInput" },
+		{ type: "input-variable", name: "secondInput" },
+	];
+
+	const message: Message = {
+		locale: "en",
+		id: "some_message",
+		bundleId: "some_message",
+		selectors: [
+			{ type: "variable-reference", name: "fistInput" },
+			{ type: "variable-reference", name: "secondInput" },
+		],
+	};
+
+	const variants: Variant[] = [
+		{
+			id: "1",
+			messageId: "some_message",
+			matches: [
+				{ type: "literal-match", key: "fistInput", value: "1" },
+				{ type: "literal-match", key: "secondInput", value: "2" },
+			],
+			pattern: [
+				{ type: "text", value: "The inputs are " },
+				{
+					type: "expression",
+					arg: { type: "variable-reference", name: "fistInput" },
+				},
+				{ type: "text", value: " and " },
+				{
+					type: "expression",
+					arg: { type: "variable-reference", name: "secondInput" },
+				},
+			],
+		},
+		{
+			id: "2",
+			messageId: "some_message",
+			matches: [
+				{ type: "catchall-match", key: "fistInput" },
+				{ type: "literal-match", key: "secondInput", value: "2" },
+			],
+			pattern: [{ type: "text", value: "Catch all" }],
+		},
+	];
+
+	const compiled = compileMessage(declarations, message, variants);
+
+	const { some_message } = await import(
+		"data:text/javascript;base64," + btoa(compiled.code)
+	);
+
+	expect(some_message({ secondInput: 2 })).toBe("Catch all");
+	expect(some_message({})).toBe("some_message");
+});
+
 test("only emits input arguments when inputs exist", async () => {
 	const declarations: Declaration[] = [];
 	const message: Message = {
