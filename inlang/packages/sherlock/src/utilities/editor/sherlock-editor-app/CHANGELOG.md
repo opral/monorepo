@@ -1,5 +1,11 @@
 # sherlock-editor-app
 
+## 0.0.7
+
+### Patch Changes
+
+- @inlang/editor-component@4.0.1
+
 ## 0.0.6
 
 ### Patch Changes
