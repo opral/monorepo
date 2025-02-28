@@ -43,6 +43,7 @@ import { resetBlockTypePlugin } from './reset-block-type-plugin';
 import { softBreakPlugin } from './soft-break-plugin';
 import { tablePlugin } from './table-plugin';
 import { tocPlugin } from './toc-plugin';
+import { CreateCopyMarkdownPlugin } from '@/components/copy-markdown-plugin';
 
 export const viewPlugins = [
   ...basicNodesPlugins,
@@ -98,6 +99,9 @@ export const editorPlugins = [
   DocxPlugin,
   MarkdownPlugin.configure({ options: { indentList: true } }),
   JuicePlugin,
+
+  // Copy & paste
+  CreateCopyMarkdownPlugin,
 
   // UI
   FixedToolbarPlugin,
