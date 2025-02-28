@@ -3,8 +3,6 @@ imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
-# SvelteKit example
-
 <img src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/examples/sveltekit/sveltekit-banner.png" alt="i18n library for SvelteKit" width="10000000px" />
 
 This example shows how to use Paraglide with SvelteKit. 
