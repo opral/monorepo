@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 2.0.4
+
+### Patch Changes
+
+- e6bcc47: fix `fg` impl
+
 ## 2.0.3
 
 ### Patch Changes
