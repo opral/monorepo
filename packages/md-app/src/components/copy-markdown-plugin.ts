@@ -12,6 +12,7 @@ export const CreateCopyMarkdownPlugin = createPlatePlugin({
 
 			// @ts-expect-error - markdown is not in the types
 			const markdown = editor.api.markdown.serialize();
+			console.log(markdown);
 
 			window.navigator.clipboard.writeText(markdown);
 			event.preventDefault();
