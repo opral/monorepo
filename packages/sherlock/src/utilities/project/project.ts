@@ -118,8 +118,6 @@ export async function handleTreeSelection(args: {
 			appId: CONFIGURATION.STRINGS.APP_ID,
 		})
 
-		console.log("inlangProject", await inlangProject.plugins.get())
-
 		setState({
 			...state(),
 			project: inlangProject,
