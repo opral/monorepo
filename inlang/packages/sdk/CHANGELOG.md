@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 2.4.1
+
+### Patch Changes
+
+- 5a991cd: fix sdk&sherlock on win
+
 ## 2.4.0
 
 ### Minor Changes

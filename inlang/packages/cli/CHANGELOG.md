@@ -1,5 +1,12 @@
 # @inlang/cli
 
+## 3.0.3
+
+### Patch Changes
+
+- Updated dependencies [5a991cd]
+  - @inlang/sdk@2.4.1
+
 ## 3.0.2
 
 Fix @inlang/rpc is a bundled dependency that is not published on npm
