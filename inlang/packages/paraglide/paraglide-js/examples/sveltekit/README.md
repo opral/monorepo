@@ -8,10 +8,6 @@ imports:
 This example shows how to use Paraglide with SvelteKit. 
 The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/sveltekit).
 
-<doc-callout type="info">
-  You can build your own Paraglide JS implementation to achieve SSG. A PR with docs is welcome.
-</doc-callout>
-
 | Feature      | Supported |
 | ------------ | --------- |
 | CSR          | ✅        |
@@ -19,6 +15,10 @@ The source code can be found [here](https://github.com/opral/monorepo/tree/main/
 | SSG          | ❌        |
 | URLPattern   | ✅        |
 | Any Strategy | ✅        |
+
+<doc-callout type="info">
+  You can build your own Paraglide JS implementation to achieve SSG. A PR with docs is welcome.
+</doc-callout>
 
 ## Getting started
 

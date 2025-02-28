@@ -8,8 +8,6 @@ imports:
 This example demonstrates how to use Paraglide JS with Astro in SSR mode. The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/astro).
 
 
-<doc-callout type="info">You can integrate Paraglide JS yourself to achieve SSG. PR with an example is welcome.</doc-callout>
-
 | Feature      | Supported |
 | ------------ | --------- |
 | CSR          | ✅        |
@@ -17,6 +15,8 @@ This example demonstrates how to use Paraglide JS with Astro in SSR mode. The so
 | SSG          | ❌        |
 | URLPattern   | ✅        |
 | Any Strategy | ✅        |
+
+<doc-callout type="info">You can integrate Paraglide JS yourself to achieve SSG. PR with an example is welcome.</doc-callout>
 
 ## Setup
 
