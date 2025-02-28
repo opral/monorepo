@@ -1,6 +1,13 @@
 # @inlang/rpc
 
-## 0.3.40 
+## 0.3.41
+
+### Patch Changes
+
+- Updated dependencies [5a991cd]
+  - @inlang/sdk@2.4.1
+
+## 0.3.40
 
 Re-deploy because NPM deleted the package
 
