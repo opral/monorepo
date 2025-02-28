@@ -1,5 +1,16 @@
 # inlang-vs-code-extension
 
+## 2.0.3
+
+### Patch Changes
+
+- 5a991cd: fix sdk&sherlock on win
+- Updated dependencies [5a991cd]
+  - @inlang/sdk@2.4.1
+  - @inlang/rpc@0.3.41
+  - @inlang/editor-component@4.0.1
+  - @inlang/settings-component@5.0.0
+
 ## 2.0.2
 
 ### Patch Changes
