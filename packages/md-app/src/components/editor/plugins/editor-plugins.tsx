@@ -22,6 +22,7 @@ import { TrailingBlockPlugin } from '@udecode/plate-trailing-block';
 
 import { FixedToolbarPlugin } from '@/components/editor/plugins/fixed-toolbar-plugin';
 import { FloatingToolbarPlugin } from '@/components/editor/plugins/floating-toolbar-plugin';
+import { CreateCopyMarkdownPlugin } from '@/components/copy-markdown-plugin';
 
 import { aiPlugins } from './ai-plugins';
 import { alignPlugin } from './align-plugin';
@@ -43,7 +44,6 @@ import { resetBlockTypePlugin } from './reset-block-type-plugin';
 import { softBreakPlugin } from './soft-break-plugin';
 import { tablePlugin } from './table-plugin';
 import { tocPlugin } from './toc-plugin';
-import { CreateCopyMarkdownPlugin } from '@/components/copy-markdown-plugin';
 
 export const viewPlugins = [
   ...basicNodesPlugins,

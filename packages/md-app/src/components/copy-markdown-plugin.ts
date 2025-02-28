@@ -1,5 +1,5 @@
 import { createPlatePlugin } from "@udecode/plate-core/react";
-import { ClipboardEvent } from "react";
+import { ClipboardEvent, KeyboardEvent } from "react";
 
 export const CreateCopyMarkdownPlugin = createPlatePlugin({
 	key: "copy-to-markdown",
@@ -7,7 +7,6 @@ export const CreateCopyMarkdownPlugin = createPlatePlugin({
 		onCopy: (ctx) => {
 			console.log("onCopy");
 			const event = ctx.event as ClipboardEvent;
-			console.log(event);
 
 			const editor = ctx.editor;
 			if (!editor || !editor.selection) return;
@@ -16,11 +15,12 @@ export const CreateCopyMarkdownPlugin = createPlatePlugin({
 			const markdown = editor.api.markdown.serialize();
 			console.log({ markdown });
 
-			if (markdown) {
-				event.preventDefault();
-				event.clipboardData?.setData("text/plain", markdown);
-				event.clipboardData?.setData("text/markdown", markdown);
-			}
+			window.navigator.clipboard.writeText(markdown);
+			event.preventDefault();
+		},
+		onPaste: (ctx) => {
+			console.log("onPaste");
+			// debugger;
 		},
 	},
 });
