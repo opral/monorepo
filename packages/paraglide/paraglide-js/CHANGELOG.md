@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 2.0.0-beta.26
+
+- replace `node:crypto` with the Web Crypto API https://github.com/opral/inlang-paraglide-js/issues/424
+
 ## 2.0.0-beta.25
 
 - added optional localized groups 

@@ -1,5 +1,4 @@
 import path from "node:path";
-import crypto from "node:crypto";
 import type nodeFs from "node:fs/promises";
 
 export async function writeOutput(args: {
@@ -9,7 +8,7 @@ export async function writeOutput(args: {
 	fs: typeof nodeFs;
 	previousOutputHashes?: Record<string, string>;
 }) {
-	const currentOutputHashes = hashOutput(args.output, args.directory);
+	const currentOutputHashes = await hashOutput(args.output, args.directory);
 
 	// if the output hasn't changed, don't write it
 	const changedFiles = new Set();
@@ -130,16 +129,23 @@ async function deleteRemovedFiles(
 	}
 }
 
-function hashOutput(
+async function hashString(input: string): Promise<string> {
+	const encoder = new TextEncoder();
+	const data = encoder.encode(input);
+	const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+	const hashArray = Array.from(new Uint8Array(hashBuffer));
+	return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function hashOutput(
 	output: Record<string, string>,
 	outputDirectory: string
-): Record<string, string> {
+): Promise<Record<string, string>> {
 	const hashes: Record<string, string> = {};
 	for (const [filePath, fileContent] of Object.entries(output)) {
-		const hash = crypto.createHash("sha256");
-		hash.update(fileContent);
-		hash.update(path.resolve(outputDirectory, filePath));
-		hashes[filePath] = hash.digest("hex");
+		const combinedContent =
+			fileContent + path.resolve(outputDirectory, filePath);
+		hashes[filePath] = await hashString(combinedContent);
 	}
 	return hashes;
 }
