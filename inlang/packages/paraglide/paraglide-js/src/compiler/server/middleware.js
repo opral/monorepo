@@ -102,10 +102,15 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 			// https://github.com/opral/inlang-paraglide-js/issues/411
 			new Request(request);
 
-	// Otherwise use AsyncLocalStorage to isolate request context
-	return runtime.serverAsyncLocalStorage?.run({ locale, origin }, () =>
-		resolve({ locale, request: newRequest })
+	// the message functions that have been called in this request
+	const messageCalls = new Set();
+
+	const response = await runtime.serverAsyncLocalStorage?.run(
+		{ locale, origin, messageCalls },
+		() => resolve({ locale, request: newRequest })
 	);
+
+	return response;
 }
 
 /**
