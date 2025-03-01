@@ -1,6 +1,14 @@
-## AsyncLocalStorageSubset
+## Locale
 
-> **AsyncLocalStorageSubset**\<\>: `object`
+> **Locale**: `any`
+
+Defined in: [runtime/ambient.d.ts:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/ambient.d.ts)
+
+***
+
+## ParaglideAsyncLocalStorage
+
+> **ParaglideAsyncLocalStorage**\<\>: `object`
 
 Defined in: [runtime/variables.js:45](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
@@ -41,14 +49,6 @@ Defined in: [runtime/variables.js:45](https://github.com/opral/monorepo/tree/mai
 ##### Returns
 
 `undefined` \| \{ `locale`: [`Locale`](-internal-.md#locale); `messageCalls`: `Set`\<`string`\>; `origin`: `string`; \}
-
-***
-
-## Locale
-
-> **Locale**: `any`
-
-Defined in: [runtime/ambient.d.ts:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/ambient.d.ts)
 
 ***
 
@@ -98,7 +98,7 @@ if (locales.includes(userSelectedLocale) === false) {
 
 ## serverAsyncLocalStorage
 
-> **serverAsyncLocalStorage**: `undefined` \| [`AsyncLocalStorageSubset`](-internal-.md#asynclocalstoragesubset) = `undefined`
+> **serverAsyncLocalStorage**: `undefined` \| [`ParaglideAsyncLocalStorage`](-internal-.md#paraglideasynclocalstorage) = `undefined`
 
 Defined in: [runtime/variables.js:56](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
@@ -636,7 +636,7 @@ avoid a circular import between `runtime.js` and
 
 #### value
 
-`undefined` | [`AsyncLocalStorageSubset`](-internal-.md#asynclocalstoragesubset)
+`undefined` | [`ParaglideAsyncLocalStorage`](-internal-.md#paraglideasynclocalstorage)
 
 ### Returns
 
@@ -706,7 +706,7 @@ setLocale('en');
 
 > **trackMessageCall**(`safeModuleId`, `locale`): `void`
 
-Defined in: runtime/message-call-tracking.js:16
+Defined in: [runtime/track-message-call.js:7](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/track-message-call.js)
 
 ### Parameters
 
@@ -721,21 +721,3 @@ Defined in: runtime/message-call-tracking.js:16
 ### Returns
 
 `void`
-
-***
-
-## withMessageCallTracking()
-
-> **withMessageCallTracking**(`fn`): `any`[]
-
-Defined in: runtime/message-call-tracking.js:6
-
-### Parameters
-
-#### fn
-
-(...`args`) => `any`
-
-### Returns
-
-`any`[]

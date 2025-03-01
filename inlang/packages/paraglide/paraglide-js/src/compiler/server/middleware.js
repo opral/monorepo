@@ -110,6 +110,27 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 		() => resolve({ locale, request: newRequest })
 	);
 
+	// Only modify HTML responses
+	if (response.headers.get("Content-Type")?.includes("html")) {
+		const body = await response.text();
+
+		const script = `<script>globalThis.__paraglide_ssr = { welcome: () => "Server side message" }</script>`;
+
+		// Insert the script before the closing head tag
+		const newBody = body.replace("</head>", `${script}</head>`);
+
+		// Create a new response with the modified body
+		// Clone all headers except Content-Length which will be set automatically
+		const newHeaders = new Headers(response.headers);
+		newHeaders.delete("Content-Length"); // Let the browser calculate the correct length
+
+		return new Response(newBody, {
+			status: response.status,
+			statusText: response.statusText,
+			headers: newHeaders,
+		});
+	}
+
 	return response;
 }
 
