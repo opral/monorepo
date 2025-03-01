@@ -74,16 +74,16 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 	if (!runtime.serverAsyncLocalStorage && !disableAsyncLocalStorage) {
 		const { AsyncLocalStorage } = await import("async_hooks");
 		runtime.overwriteServerAsyncLocalStorage(new AsyncLocalStorage());
+	} else if (!runtime.serverAsyncLocalStorage) {
+		runtime.overwriteServerAsyncLocalStorage(createMockAsyncLocalStorage());
 	}
 
 	const locale = runtime.extractLocaleFromRequest(request);
 	const origin = new URL(request.url).origin;
 
-	// only redirect GET requests
-	// https://github.com/opral/inlang-paraglide-js/issues/416
+	// if the client makes a request to a URL that doesn't match
+	// the localizedUrl, redirect the client to the localized URL
 	if (runtime.strategy.includes("url")) {
-		// if the client makes a request to a URL that doesn't match
-		// the localizedUrl, redirect the client to the localized URL
 		const localizedUrl = runtime.localizeUrl(request.url, { locale });
 		if (localizedUrl.href !== request.url) {
 			return Response.redirect(localizedUrl, 307);
@@ -102,25 +102,37 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 			// https://github.com/opral/inlang-paraglide-js/issues/411
 			new Request(request);
 
-	// If AsyncLocalStorage is disabled, create a mock implementation
-	if (disableAsyncLocalStorage) {
-		// Create a mock serverAsyncLocalStorage if it doesn't exist
-		if (!runtime.serverAsyncLocalStorage) {
-			runtime.overwriteServerAsyncLocalStorage({
-				getStore: () => ({ locale, origin }),
-				run: async () => {
-					try {
-						return await resolve({ locale, request: newRequest });
-					} finally {
-						runtime.overwriteServerAsyncLocalStorage(undefined);
-					}
-				},
-			});
-		}
-	}
-
 	// Otherwise use AsyncLocalStorage to isolate request context
 	return runtime.serverAsyncLocalStorage?.run({ locale, origin }, () =>
 		resolve({ locale, request: newRequest })
 	);
+}
+
+/**
+ * Creates a mock AsyncLocalStorage implementation for environments where
+ * native AsyncLocalStorage is not available or disabled.
+ *
+ * This mock implementation mimics the behavior of the native AsyncLocalStorage
+ * but doesn't require the async_hooks module. It's designed to be used in
+ * environments like Cloudflare Workers where AsyncLocalStorage is not available.
+ *
+ * @returns {import("./runtime.js").ParaglideAsyncLocalStorage}
+ */
+function createMockAsyncLocalStorage() {
+	/** @type {any} */
+	let currentStore = undefined;
+	return {
+		getStore() {
+			return currentStore;
+		},
+		run(store, callback) {
+			const previousStore = currentStore;
+			currentStore = store;
+			try {
+				return callback();
+			} finally {
+				currentStore = previousStore;
+			}
+		},
+	};
 }
