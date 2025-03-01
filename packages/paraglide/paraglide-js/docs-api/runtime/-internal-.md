@@ -2,7 +2,7 @@
 
 > **AsyncLocalStorageSubset**\<\>: `object`
 
-Defined in: [runtime/variables.js:37](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:45](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ### Type Parameters
 
@@ -16,7 +16,17 @@ Defined in: [runtime/variables.js:37](https://github.com/opral/monorepo/tree/mai
 
 ###### store
 
-`any`
+###### locale?
+
+[`Locale`](-internal-.md#locale)
+
+###### messageCalls?
+
+`Set`\<`string`\>
+
+###### origin?
+
+`string`
 
 ###### cb
 
@@ -30,7 +40,7 @@ Defined in: [runtime/variables.js:37](https://github.com/opral/monorepo/tree/mai
 
 ##### Returns
 
-`undefined` \| \{ `locale`: [`Locale`](-internal-.md#locale); `origin`: `string`; \}
+`undefined` \| \{ `locale`: [`Locale`](-internal-.md#locale); `messageCalls`: `Set`\<`string`\>; `origin`: `string`; \}
 
 ***
 
@@ -90,7 +100,7 @@ if (locales.includes(userSelectedLocale) === false) {
 
 > **serverAsyncLocalStorage**: `undefined` \| [`AsyncLocalStorageSubset`](-internal-.md#asynclocalstoragesubset) = `undefined`
 
-Defined in: [runtime/variables.js:48](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:56](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 Server side async local storage that is set by `serverMiddleware()`.
 
@@ -613,7 +623,7 @@ define how the URL origin is resolved.
 
 > **overwriteServerAsyncLocalStorage**(`value`): `void`
 
-Defined in: [runtime/variables.js:60](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:68](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 Sets the server side async local storage.
 
@@ -689,3 +699,43 @@ Set the locale.
 ```ts
 setLocale('en');
 ```
+
+***
+
+## trackMessageCall()
+
+> **trackMessageCall**(`safeModuleId`, `locale`): `void`
+
+Defined in: runtime/message-call-tracking.js:16
+
+### Parameters
+
+#### safeModuleId
+
+`string`
+
+#### locale
+
+`any`
+
+### Returns
+
+`void`
+
+***
+
+## withMessageCallTracking()
+
+> **withMessageCallTracking**(`fn`): `any`[]
+
+Defined in: runtime/message-call-tracking.js:6
+
+### Parameters
+
+#### fn
+
+(...`args`) => `any`
+
+### Returns
+
+`any`[]

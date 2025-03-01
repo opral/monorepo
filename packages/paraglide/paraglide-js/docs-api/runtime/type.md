@@ -96,6 +96,14 @@ The Paraglide runtime API.
 
 > **strategy**: [`strategy`](-internal-.md#strategy)
 
+#### trackMessageCall
+
+> **trackMessageCall**: [`trackMessageCall`](-internal-.md#trackmessagecall)
+
 #### urlPatterns
 
 > **urlPatterns**: [`urlPatterns`](-internal-.md#urlpatterns)
+
+#### withMessageCallTracking
+
+> **withMessageCallTracking**: [`withMessageCallTracking`](-internal-.md#withmessagecalltracking)

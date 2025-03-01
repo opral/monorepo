@@ -1,4 +1,5 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
+import { AsyncLocalStorage } from "async_hooks";
 import {
 	createProject as typescriptProject,
 	ts,
@@ -487,6 +488,147 @@ describe.each([
 
 				runtime.setLocale("en-US");
 				expect(m.missingInGerman()).toBe("A simple message.");
+			});
+
+			test("message tracking works", async () => {
+				const project = await loadProjectInMemory({
+					blob: await newProject({
+						settings: { locales: ["en", "de", "fr"], baseLocale: "en" },
+					}),
+				});
+
+				// Add test messages
+				await insertBundleNested(
+					project.db,
+					createBundleNested({
+						id: "greeting",
+						messages: [
+							{
+								locale: "en",
+								variants: [{ pattern: [{ type: "text", value: "Hello" }] }],
+							},
+							{
+								locale: "de",
+								variants: [{ pattern: [{ type: "text", value: "Hallo" }] }],
+							},
+							{
+								locale: "fr",
+								variants: [{ pattern: [{ type: "text", value: "Bonjour" }] }],
+							},
+						],
+					})
+				);
+
+				await insertBundleNested(
+					project.db,
+					createBundleNested({
+						id: "farewell",
+						messages: [
+							{
+								locale: "en",
+								variants: [{ pattern: [{ type: "text", value: "Goodbye" }] }],
+							},
+							{
+								locale: "de",
+								variants: [
+									{ pattern: [{ type: "text", value: "Auf Wiedersehen" }] },
+								],
+							},
+							{
+								locale: "fr",
+								variants: [{ pattern: [{ type: "text", value: "Au revoir" }] }],
+							},
+						],
+					})
+				);
+
+				// Compile the project
+				const output = await compileProject({
+					project,
+					compilerOptions,
+				});
+
+				const code = await bundleCode(
+					output,
+					`export * as m from "./paraglide/messages.js"
+					export * as runtime from "./paraglide/runtime.js"`
+				);
+
+				const { m, runtime } = await importCode(code);
+
+				// Setup AsyncLocalStorage for tracking
+				runtime.overwriteServerAsyncLocalStorage(new AsyncLocalStorage());
+
+				// Test tracking in English
+				runtime.setLocale("en");
+				const [result1, calls1] = runtime.withMessageCallTracking(() => {
+					const greeting = m.greeting();
+					const farewell = m.farewell();
+
+					expect(greeting).toBe("Hello");
+					expect(farewell).toBe("Goodbye");
+
+					return "english";
+				});
+
+				expect(result1).toBe("english");
+				expect(calls1).toEqual(new Set(["greeting:en", "farewell:en"]));
+
+				// Test tracking in German
+				runtime.setLocale("de");
+				const [result2, calls2] = runtime.withMessageCallTracking(() => {
+					const greeting = m.greeting();
+
+					expect(greeting).toBe("Hallo");
+
+					return "german";
+				});
+
+				expect(result2).toBe("german");
+				expect(calls2).toEqual(new Set(["greeting:de"]));
+				expect(calls2.has("farewell:de")).toBe(false);
+
+				// Test tracking with explicit locale
+				const [result3, calls3] = runtime.withMessageCallTracking(() => {
+					const greeting = m.greeting(undefined, { locale: "fr" });
+
+					expect(greeting).toBe("Bonjour");
+
+					return "explicit";
+				});
+
+				expect(result3).toBe("explicit");
+				expect(calls3).toEqual(new Set(["greeting:fr"]));
+
+				// Test nested tracking contexts
+				const [result4, calls4] = runtime.withMessageCallTracking(() => {
+					// Access a message in the outer context
+					const outerGreeting = m.greeting();
+					expect(outerGreeting).toBe("Hallo"); // Still in German locale
+
+					// Create a nested tracking context
+					const [nestedResult, nestedCalls] = runtime.withMessageCallTracking(
+						() => {
+							// Access different messages in the nested context
+							const nestedFarewell = m.farewell();
+							expect(nestedFarewell).toBe("Auf Wiedersehen");
+
+							return "nested";
+						}
+					);
+
+					// Verify nested tracking
+					expect(nestedResult).toBe("nested");
+					expect(nestedCalls).toEqual(new Set(["farewell:de"]));
+					expect(nestedCalls.has("greeting:de")).toBe(false); // Not accessed in nested context
+
+					return "outer";
+				});
+
+				// Verify outer context only contains its own calls
+				expect(result4).toBe("outer");
+				expect(calls4).toEqual(new Set(["greeting:de"]));
+				expect(calls4.has("farewell:${locale}:undefined")).toBe(false); // Only in nested context
 			});
 
 			test("arbitrary module identifiers work", async () => {

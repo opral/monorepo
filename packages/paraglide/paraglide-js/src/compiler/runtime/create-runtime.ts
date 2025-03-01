@@ -99,6 +99,8 @@ ${injectCode("./localize-url.js")}
 
 ${injectCode("./localize-href.js")}
 
+${injectCode("./message-call-tracking.js")}
+
 // ------ TYPES ------
 
 /**

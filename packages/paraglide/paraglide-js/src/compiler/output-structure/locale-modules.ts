@@ -16,7 +16,7 @@ export function generateLocaleModules(
 	}
 ): Record<string, string> {
 	const indexFile = [
-		`import { getLocale } from "../runtime.js"`,
+		`import { getLocale, trackMessageCall } from "../runtime.js"`,
 		settings.locales
 			.map(
 				(locale) =>

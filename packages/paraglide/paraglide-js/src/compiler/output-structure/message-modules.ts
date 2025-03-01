@@ -56,7 +56,7 @@ export function generateMessageModules(
 							`import * as ${toSafeModuleId(locale)} from "./${locale}.js"`
 					)
 					.join("\n"),
-				`import { getLocale } from '../../runtime.js'`,
+				`import { getLocale, trackMessageCall } from '../../runtime.js'`,
 				"",
 				compiledBundle.bundle.code,
 			].join("\n");
