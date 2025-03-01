@@ -42,7 +42,7 @@ export const urlPatterns = [];
  *   	} | undefined,
  * 		run: (store: { locale?: Locale, origin?: string, messageCalls?: Set<string>},
  *    cb: any) => any
- * }} AsyncLocalStorageSubset
+ * }} ParaglideAsyncLocalStorage
  */
 
 /**
@@ -51,7 +51,7 @@ export const urlPatterns = [];
  * The variable is used to retrieve the locale and origin in a server-side
  * rendering context without effecting other requests.
  *
- * @type {AsyncLocalStorageSubset | undefined}
+ * @type {ParaglideAsyncLocalStorage | undefined}
  */
 export let serverAsyncLocalStorage = undefined;
 
@@ -63,7 +63,7 @@ export let serverAsyncLocalStorage = undefined;
  * avoid a circular import between `runtime.js` and
  * `server.js` files.
  *
- * @param {AsyncLocalStorageSubset | undefined} value
+ * @param {ParaglideAsyncLocalStorage | undefined} value
  */
 export function overwriteServerAsyncLocalStorage(value) {
 	serverAsyncLocalStorage = value;
