@@ -5,20 +5,15 @@ imports:
 
 <img src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/examples/sveltekit/sveltekit-banner.png" alt="i18n library for SvelteKit" width="10000000px" />
 
-This example shows how to use Paraglide with SvelteKit.
-The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/sveltekit).
+This example shows how to use Paraglide with SvelteKit.The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/sveltekit).
 
 | Feature      | Supported |
 | ------------ | --------- |
 | CSR          | ✅        |
 | SSR          | ✅        |
-| SSG          | ❌        |
+| SSG          | ✅        |
 | URLPattern   | ✅        |
 | Any Strategy | ✅        |
-
-<doc-callout type="info">
-  You can build your own Paraglide JS implementation to achieve SSG. A PR with docs is welcome.
-</doc-callout>
 
 ## Getting started
 
@@ -87,18 +82,45 @@ export const reroute: Reroute = (request) => {
 };
 ```
 
-### Done :)
-
 ## Usage
 
 See the [basics documentation](/m/gerre34r/library-inlang-paraglideJs/basics) for more information on how to use Paraglide's messages, parameters, and locale management.
 
-## Additional guidance
+## Static site generation (SSG)
+
+Enable [pre-renderering](https://svelte.dev/docs/kit/page-options#prerender) by adding the following line to `routes/+layout.ts`:
+
+```diff
+// routes/+layout.ts
++export const prerender = true;
+```
+
+Then add "invisble" anchor tags in `routes/+layout.svelte` to generate all pages during build time. SvelteKit crawls the anchor tags during the build and is, thereby, able to generate all pages statically.
+
+```diff
+<script>
+	import { page } from '$app/state';
++	import { locales, localizeHref } from '$lib/paraglide/runtime';
+</script>
+
+<slot></slot>
+
++<div style="display:none">
++	{#each locales as locale}
++		<a href={localizeHref(page.url.pathname, { locale })}>{locale}</a>
++	{/each}
++</div>
+```
+
+## Troubleshooting
 
 ### Disabling AsyncLocalStorage in serverless environments
 
-<doc-callout type="info">
 If you're deploying to SvelteKit's Edge adapter like Vercel Edge or Cloudflare Pages, you can disable AsyncLocalStorage to avoid issues with Node.js dependencies not available in those environments:
+
+<doc-callout type="warning">
+	⚠️ Only use this option in serverless environments where each request gets its own isolated runtime context. Using it in multi-request server environments could lead to data leakage between concurrent requests.
+</doc-callout>
 
 ```typescript
 export const handle: Handle = ({ event, resolve }) => {
@@ -108,5 +130,4 @@ export const handle: Handle = ({ event, resolve }) => {
 };
 ```
 
-⚠️ Only use this option in serverless environments where each request gets its own isolated runtime context. Using it in multi-request server environments could lead to data leakage between concurrent requests.
-</doc-callout>
+
