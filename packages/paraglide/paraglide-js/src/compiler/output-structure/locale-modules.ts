@@ -14,7 +14,9 @@ export function generateLocaleModules(
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
 		isServer: NonNullable<CompilerOptions["isServer"]>;
-		enableMiddlewareOptimizations: CompilerOptions["enableMiddlewareOptimizations"];
+		enableMiddlewareOptimizations: NonNullable<
+			CompilerOptions["enableMiddlewareOptimizations"]
+		>;
 	}
 ): Record<string, string> {
 	const indexFile = [
@@ -34,7 +36,7 @@ export function generateLocaleModules(
 			locales: settings.locales,
 			compilerOptions,
 		}),
-		["server.js"]: createServerFile(),
+		["server.js"]: createServerFile({ compiledBundles, compilerOptions }),
 		["registry.js"]: createRegistry(),
 		["messages/_index.js"]: indexFile,
 		["messages.js"]: [
