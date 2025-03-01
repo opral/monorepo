@@ -1,5 +1,11 @@
 # @inlang/plugin-t-function-matcher
 
+## 2.0.2
+
+### Patch Changes
+
+- 856f1ef: fix export of meta config for sherlock
+
 ## 2.0.1
 
 ### Patch Changes
