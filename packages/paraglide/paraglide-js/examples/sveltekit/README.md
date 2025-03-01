@@ -71,7 +71,7 @@ const paraglideHandle: Handle = ({ event, resolve }) =>
 export const handle: Handle = paraglideHandle;
 ```
 
-### Add a reroute hook in `src/hook.ts`
+### Add a reroute hook in `src/hooks.ts`
 
 ```typescript
 import type { Reroute } from '@sveltejs/kit';
