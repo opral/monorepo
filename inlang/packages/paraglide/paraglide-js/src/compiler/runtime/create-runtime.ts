@@ -171,7 +171,12 @@ export async function createRuntimeForTesting(args: {
 		.replace(`import "@inlang/paraglide-js/urlpattern-polyfill";`, "");
 
 	// remove the server-side runtime import statement to avoid module resolution logic in testing
-	const serverSideRuntime = createServerFile()
+	const serverSideRuntime = createServerFile({
+		compiledBundles: [],
+		compilerOptions: {
+			enableMiddlewareOptimizations: false,
+		},
+	})
 		.replace(`import * as runtime from "./runtime.js";`, "")
 		// the runtime functions are bundles, hence remove the runtime namespace
 		.replaceAll("runtime.", "");

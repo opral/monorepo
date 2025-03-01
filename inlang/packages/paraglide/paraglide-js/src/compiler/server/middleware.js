@@ -101,6 +101,7 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 			new Request(request);
 
 	// the message functions that have been called in this request
+	/** @type {Set<string>} */
 	const messageCalls = new Set();
 
 	const response = await runtime.serverAsyncLocalStorage?.run(
@@ -115,7 +116,17 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 	) {
 		const body = await response.text();
 
-		const script = `<script>globalThis.__paraglide_ssr = { welcome: () => "Server side message" }</script>`;
+		const messages = [];
+
+		for (const messageCall of messageCalls) {
+			const [id, locale] =
+				/** @type {[string, import("./runtime.js").Locale]} */ (
+					messageCall.split(":")
+				);
+			messages.push(`${id}: ${compiledBundles[id]?.[locale]}`);
+		}
+
+		const script = `<script>globalThis.__paraglide_ssr = { ${messages.join(",")} }</script>`;
 
 		// Insert the script before the closing head tag
 		const newBody = body.replace("</head>", `${script}</head>`);
@@ -163,3 +174,12 @@ function createMockAsyncLocalStorage() {
 		},
 	};
 }
+
+/**
+ * The compiled messages for the server middleware.
+ *
+ * Only populated if `enableMiddlewareOptimizations` is set to `true`.
+ *
+ * @type {Record<string, Record<import("./runtime.js").Locale, string>>}
+ */
+const compiledBundles = {};
