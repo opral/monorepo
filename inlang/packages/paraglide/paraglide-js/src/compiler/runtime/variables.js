@@ -34,7 +34,15 @@ export const strategy = ["globalVariable"];
 export const urlPatterns = [];
 
 /**
- * @typedef {{ getStore(): { locale: Locale, origin: string } | undefined, run: (store: any, cb: any) => any }} AsyncLocalStorageSubset
+ * @typedef {{
+ * 		getStore(): {
+ *   		locale?: Locale,
+ * 			origin?: string,
+ * 			messageCalls?: Set<string>
+ *   	} | undefined,
+ * 		run: (store: { locale?: Locale, origin?: string, messageCalls?: Set<string>},
+ *    cb: any) => any
+ * }} AsyncLocalStorageSubset
  */
 
 /**
@@ -70,3 +78,5 @@ export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;
 export const TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED = false;
 
 export const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = false;
+
+export const TREE_SHAKE_IS_SERVER = typeof window === "undefined";

@@ -78,6 +78,7 @@ const compileBundleFunction = (args: {
 /* @__NO_SIDE_EFFECTS__ */
 ${isSafeBundleId ? "export " : ""}const ${safeBundleId} = (inputs${hasInputs ? "" : " = {}"}, options = {}) => {
 	const locale = options.locale ?? getLocale()
+	trackMessageCall("${safeBundleId}", locale)
 	${args.availableLocales
 		.map(
 			(locale, index) =>

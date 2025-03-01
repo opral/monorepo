@@ -24,4 +24,6 @@ export type Runtime = {
 	extractLocaleFromUrl: typeof import("./extract-locale-from-url.js").extractLocaleFromUrl;
 	extractLocaleFromRequest: typeof import("./extract-locale-from-request.js").extractLocaleFromRequest;
 	extractLocaleFromCookie: typeof import("./extract-locale-from-cookie.js").extractLocaleFromCookie;
+	withMessageCallTracking: typeof import("./message-call-tracking.js").withMessageCallTracking;
+	trackMessageCall: typeof import("./message-call-tracking.js").trackMessageCall;
 };
