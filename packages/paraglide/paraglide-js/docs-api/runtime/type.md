@@ -103,7 +103,3 @@ The Paraglide runtime API.
 #### urlPatterns
 
 > **urlPatterns**: [`urlPatterns`](-internal-.md#urlpatterns)
-
-#### withMessageCallTracking
-
-> **withMessageCallTracking**: [`withMessageCallTracking`](-internal-.md#withmessagecalltracking)

@@ -79,6 +79,8 @@ ${injectCode("./variables.js")
 		`const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = ${defaultUrlPatternUsed};`
 	)}
 
+globalThis.__paraglide = {}
+
 ${injectCode("./get-locale.js")} 
 
 ${injectCode("./set-locale.js")}
