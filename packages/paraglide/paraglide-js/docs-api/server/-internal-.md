@@ -1,8 +1,8 @@
 ## paraglideMiddleware()
 
-> **paraglideMiddleware**\<`T`\>(`request`, `resolve`, `options`?): `Promise`\<`any`\>
+> **paraglideMiddleware**\<`T`\>(`request`, `resolve`, `options`?): `Promise`\<`Response`\>
 
-Defined in: [server/middleware.js:71](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/server/middleware.js)
+Defined in: [server/middleware.js:69](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/server/middleware.js)
 
 Server middleware that handles locale-based routing and request processing.
 
@@ -53,11 +53,7 @@ If true, disables AsyncLocalStorage usage.
 
 ### Returns
 
-`Promise`\<`any`\>
-
-Returns either:
-- A `Response` object (302 redirect) if URL localization is needed
-- The result of the resolve function if no redirect is required
+`Promise`\<`Response`\>
 
 ### Examples
 

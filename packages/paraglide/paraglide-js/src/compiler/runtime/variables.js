@@ -55,6 +55,10 @@ export const urlPatterns = [];
  */
 export let serverAsyncLocalStorage = undefined;
 
+export const enableMiddlewareOptimizations = false;
+
+export const isServer = typeof window === "undefined";
+
 /**
  * Sets the server side async local storage.
  *
@@ -78,5 +82,3 @@ export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;
 export const TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED = false;
 
 export const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = false;
-
-export const TREE_SHAKE_IS_SERVER = typeof window === "undefined";

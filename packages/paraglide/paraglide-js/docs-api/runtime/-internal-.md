@@ -78,6 +78,22 @@ Defined in: [runtime/variables.js:22](https://github.com/opral/monorepo/tree/mai
 
 ***
 
+## enableMiddlewareOptimizations
+
+> `const` **enableMiddlewareOptimizations**: `false` = `false`
+
+Defined in: [runtime/variables.js:58](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+***
+
+## isServer
+
+> `const` **isServer**: `boolean`
+
+Defined in: [runtime/variables.js:60](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+***
+
 ## locales
 
 > `const` **locales**: readonly \[`"en"`, `"de"`\]
@@ -623,7 +639,7 @@ define how the URL origin is resolved.
 
 > **overwriteServerAsyncLocalStorage**(`value`): `void`
 
-Defined in: [runtime/variables.js:68](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:72](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 Sets the server side async local storage.
 

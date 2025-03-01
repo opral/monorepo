@@ -32,6 +32,10 @@ The Paraglide runtime API.
 
 > **deLocalizeUrl**: [`deLocalizeUrl`](-internal-.md#delocalizeurl)
 
+#### enableMiddlewareOptimizations
+
+> **enableMiddlewareOptimizations**: [`enableMiddlewareOptimizations`](-internal-.md#enablemiddlewareoptimizations)
+
 #### extractLocaleFromCookie
 
 > **extractLocaleFromCookie**: [`extractLocaleFromCookie`](-internal-.md#extractlocalefromcookie)
@@ -55,6 +59,10 @@ The Paraglide runtime API.
 #### isLocale
 
 > **isLocale**: [`isLocale`](-internal-.md#islocale)
+
+#### isServer
+
+> **isServer**: [`isServer`](-internal-.md#isserver)
 
 #### locales
 
