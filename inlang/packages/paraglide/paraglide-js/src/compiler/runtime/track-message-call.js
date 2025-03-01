@@ -1,11 +1,11 @@
-import { serverAsyncLocalStorage, TREE_SHAKE_IS_SERVER } from "./variables.js";
+import { serverAsyncLocalStorage, isServer } from "./variables.js";
 
 /**
  * @param {string} safeModuleId
  * @param {Locale} locale
  */
 export function trackMessageCall(safeModuleId, locale) {
-	if (TREE_SHAKE_IS_SERVER === false) return;
+	if (isServer === false) return;
 
 	const store = serverAsyncLocalStorage?.getStore();
 

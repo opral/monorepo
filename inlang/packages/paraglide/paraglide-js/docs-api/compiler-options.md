@@ -2,7 +2,7 @@
 
 > **CompilerOptions**: `object`
 
-Defined in: [compiler-options.ts:13](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:15](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 ### Type declaration
 
@@ -98,6 +98,22 @@ If `emitPrettierIgnore` is set to `true` a `.prettierignore` file will be emitte
 true
 ```
 
+#### enableMiddlewareOptimizations?
+
+> `optional` **enableMiddlewareOptimizations**: `boolean`
+
+Whether or not to use server-side middleware optimizations.
+
+- The client bundle will tree-shake all messages (have close to 0kb JS).
+- The server middleware will inject the used messages into the HTML.
+- The client will re-trieve the messages from the injected HTML.
+
+##### Default
+
+```ts
+false
+```
+
 #### fs?
 
 > `optional` **fs**: `any`
@@ -116,6 +132,28 @@ Whether to include an eslint-disable comment at the top of each .js file.
 
 ```ts
 true
+```
+
+#### isServer?
+
+> `optional` **isServer**: `string`
+
+Tree-shaking flag if the code is running on the server.
+
+Dependent on the bundler, this flag must be adapted to
+enable tree-shaking.
+
+##### Example
+
+```ts
+// vite
+  isServer: "import.meta.env.SSR"
+```
+
+##### Default
+
+```ts
+typeof window === "undefined"
 ```
 
 #### outdir
@@ -255,9 +293,17 @@ Defined in: [compiler-options.ts:3](https://github.com/opral/monorepo/tree/main/
 
 > `readonly` **emitPrettierIgnore**: `true` = `true`
 
+#### enableMiddlewareOptimizations
+
+> `readonly` **enableMiddlewareOptimizations**: `false` = `false`
+
 #### includeEslintDisableComment
 
 > `readonly` **includeEslintDisableComment**: `true` = `true`
+
+#### isServer
+
+> `readonly` **isServer**: `"typeof window === 'undefined'"` = `"typeof window === 'undefined'"`
 
 #### outputStructure
 

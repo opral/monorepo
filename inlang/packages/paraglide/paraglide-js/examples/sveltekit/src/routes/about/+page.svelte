@@ -1,6 +1,6 @@
 <script>
 	import { localizeHref } from '$lib/paraglide/runtime';
-	import * as m from '$lib/paraglide/messages';
+	import { m } from '$lib/paraglide/messages';
 </script>
 
 <p>{m.about()}</p>

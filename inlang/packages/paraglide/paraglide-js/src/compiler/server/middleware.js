@@ -25,9 +25,7 @@ import * as runtime from "./runtime.js";
  *                                                           server environments risks cross-request pollution where state from
  *                                                           one request could leak into another concurrent request.
  *
- * @returns {Promise<Response | any>} Returns either:
- * - A `Response` object (302 redirect) if URL localization is needed
- * - The result of the resolve function if no redirect is required
+ * @returns {Promise<Response>}
  *
  * @example
  * ```typescript
@@ -111,7 +109,10 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 	);
 
 	// Only modify HTML responses
-	if (response.headers.get("Content-Type")?.includes("html")) {
+	if (
+		runtime.enableMiddlewareOptimizations &&
+		response.headers.get("Content-Type")?.includes("html")
+	) {
 		const body = await response.text();
 
 		const script = `<script>globalThis.__paraglide_ssr = { welcome: () => "Server side message" }</script>`;

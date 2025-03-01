@@ -17,6 +17,8 @@ export function createRuntimeFile(args: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
 		urlPatterns?: CompilerOptions["urlPatterns"];
+		enableMiddlewareOptimizations: CompilerOptions["enableMiddlewareOptimizations"];
+		isServer: CompilerOptions["isServer"];
 	};
 }): string {
 	const urlPatterns = args.compilerOptions.urlPatterns ?? [];
@@ -77,6 +79,14 @@ ${injectCode("./variables.js")
 	.replace(
 		`export const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = false;`,
 		`const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = ${defaultUrlPatternUsed};`
+	)
+	.replace(
+		`export const enableMiddlewareOptimizations = false;`,
+		`export const enableMiddlewareOptimizations = ${args.compilerOptions.enableMiddlewareOptimizations};`
+	)
+	.replace(
+		`export const isServer = typeof window === "undefined";`,
+		`export const isServer = ${args.compilerOptions.isServer};`
 	)}
 
 globalThis.__paraglide = {}

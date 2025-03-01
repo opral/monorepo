@@ -10,6 +10,11 @@ const PLUGIN_NAME = "unplugin-paraglide-js";
 
 const logger = new Logger();
 
+/**
+ * Default isServer which differs per bundler.
+ */
+let isServer: string | undefined;
+
 let previousCompilation: CompilationResult | undefined;
 
 export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
@@ -25,6 +30,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 				// to avoid cleaning the output directory in watch mode,
 				// we only clean the output directory if there was no previous compilation
 				cleanOutdir: previousCompilation === undefined,
+				isServer,
 				...args,
 			});
 			logger.success("Compilation complete");
@@ -58,6 +64,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 				fs: wrappedFs,
 				previousCompilation,
 				cleanOutdir: false,
+				isServer,
 				...args,
 			});
 
@@ -73,6 +80,13 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			previousCompilation = undefined;
 			logger.warn("Failed to re-compile project:", (e as Error).message);
 		}
+	},
+	vite: {
+		config: {
+			handler: () => {
+				isServer = "import.meta.env.SSR";
+			},
+		},
 	},
 	webpack(compiler) {
 		compiler.options.resolve = {

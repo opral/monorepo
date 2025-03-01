@@ -7,11 +7,12 @@ export default defineConfig({
 		minify: false
 	},
 	plugins: [
-		sveltekit()
-		// paraglideVitePlugin({
-		// 	project: './project.inlang',
-		// 	outdir: './src/lib/paraglide',
-		// 	strategy: ['url']
-		// })
+		sveltekit(),
+		paraglideVitePlugin({
+			project: './project.inlang',
+			outdir: './src/lib/paraglide',
+			strategy: ['url'],
+			enableMiddlewareOptimizations: true
+		})
 	]
 });
