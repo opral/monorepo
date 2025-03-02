@@ -16,7 +16,7 @@ for (const dir of directories) {
 
 app.get("/", (c) =>
 	c.html(`
-	<h1>Paraglide Benchmark</h1>
+	<h1>Paraglide JS Benchmark</h1>
 	<h2>Available Builds:</h2>
 	${directories.map((dir) => `<a href="${dir}">${dir}</a>`).join("<br>")}
 `)
