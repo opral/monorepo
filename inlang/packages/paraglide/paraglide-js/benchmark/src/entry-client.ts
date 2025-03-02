@@ -1,3 +1,5 @@
+import { App } from "./app.ts";
+
 // render the initial page
 render(window.location.pathname);
 
@@ -17,19 +19,22 @@ document.addEventListener("click", (event) => {
 });
 
 async function render(pathname: string) {
-	let page: () => string;
+	let children: string;
 
 	const path = pathname.replace(process.env.BASE!, "").replaceAll("//", "/");
 
 	// rootpath
 	if (path === "/") {
 		const { Page } = await import("./pages/index.js");
-		page = Page;
+		children = Page();
 	} else if (path === "/about") {
 		const { Page } = await import("./pages/about/index.js");
-		page = Page;
+		children = Page();
 	} else {
 		throw new Error("Unknown page");
 	}
-	document.getElementById("root")!.innerHTML = page();
+
+	const html = App({ children });
+
+	document.getElementById("root")!.innerHTML = html;
 }

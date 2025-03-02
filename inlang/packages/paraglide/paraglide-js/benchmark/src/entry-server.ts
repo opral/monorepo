@@ -1,16 +1,19 @@
 import { Page as Home } from "./pages/index.ts";
 import { Page as About } from "./pages/about/index.ts";
+import { App } from "./app.ts";
 
 export function render(url: string) {
-	let html: string;
+	let children: string;
 
 	if (url === "/") {
-		html = Home();
+		children = Home();
 	} else if (url === "/about") {
-		html = About();
+		children = About();
 	} else {
 		throw new Error("Unknown page");
 	}
+
+	const html = App({ children });
 
 	return { html };
 }
