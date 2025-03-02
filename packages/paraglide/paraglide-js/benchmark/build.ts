@@ -8,11 +8,13 @@ const staticPaths = ["/", "/about"];
 
 const builds = [
 	{
+		library: "paraglide",
 		locales: 5,
 		messages: 100,
 		mode: "ssg",
 	},
 	{
+		library: "paraglide",
 		locales: 5,
 		messages: 100,
 		mode: "spa",
@@ -29,12 +31,32 @@ for (const [i, b] of builds.entries()) {
 	const base = `${b.locales}-${b.messages}-${b.mode}`;
 	const outdir = `./dist/${base}`;
 
+	// generate pages
+
+	await generatePage({
+		path: "/",
+		messageKeyStart: 0,
+		messageKeyEnd: b.messages,
+		library: b.library,
+	});
+
+	await generatePage({
+		path: "/about",
+		messageKeyStart: b.messages,
+		messageKeyEnd: b.messages * 2,
+		library: b.library,
+	});
+
 	// client side build
-	await build(createViteConfig({ outdir, base }));
+	await build(
+		createViteConfig({ outdir, base, mode: b.mode, library: b.library })
+	);
 
 	// server side build
 	if (b.mode === "ssg") {
 		process.env.BASE = base;
+		process.env.MODE = b.mode;
+		process.env.LIBRARY = b.library;
 		const rootHtml = await fs.readFile(`./${outdir}/index.html`, "utf-8");
 
 		for (const path of staticPaths) {
@@ -48,4 +70,33 @@ for (const [i, b] of builds.entries()) {
 			);
 		}
 	}
+}
+
+async function generatePage(args: {
+	path: string;
+	messageKeyStart: number;
+	messageKeyEnd: number;
+	library: string;
+}) {
+	// import library specific expressions
+	const { refMessage, importExpression } = await import(
+		`./src/i18n/${args.library}.ts`
+	);
+
+	let paragraphs: string[] = [];
+
+	for (let i = args.messageKeyStart; i < args.messageKeyEnd; i++) {
+		paragraphs.push(`<p>${refMessage(`message${i}`)}</p>`);
+	}
+
+	const basePath = args.path === "/" ? "../" : "../../";
+	const page = `${importExpression.replace("<src>", basePath)}
+
+	export function Page(): string {
+	  return \`
+			${paragraphs.join("\n")}
+	  \`;
+ };
+`;
+	await fs.writeFile(`./src/pages${args.path}.ts`, page);
 }

@@ -1,7 +1,8 @@
-import { message0 } from "../paraglide/messages.js";
+import { m } from "../paraglide/messages.js";
+import { t } from "../i18n/i18next.ts";
 
 export function Page() {
 	return `
-    <p>${message0()}</p>
+    <p>${m.message0()}</p>
   `;
 }
