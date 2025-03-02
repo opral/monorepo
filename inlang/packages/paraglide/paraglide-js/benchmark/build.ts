@@ -1,5 +1,6 @@
 import { build } from "vite";
 import fs from "node:fs/promises";
+import fsSync from "node:fs";
 import { normalize } from "node:path";
 import { createViteConfig } from "./build.config.ts";
 
@@ -96,5 +97,6 @@ async function generatePage(args: {
 	  return \`${paragraphs.join("\n")}\`;
  };
 `;
+	await fs.mkdir(`src/pages/about`, { recursive: true });
 	await fs.writeFile(`./src/pages${args.path}`, page);
 }
