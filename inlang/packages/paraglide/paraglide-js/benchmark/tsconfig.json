@@ -1,5 +1,6 @@
 {
 	"include": ["./src", "./build.ts", "preview.ts"],
+	"exclude": ["./src/pages/**/*"],
 	"compilerOptions": {
 		"target": "ESNext",
 		"useDefineForClassFields": true,
