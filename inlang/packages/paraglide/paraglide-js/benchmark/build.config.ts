@@ -3,6 +3,8 @@ import { paraglideVitePlugin } from "@inlang/paraglide-js";
 
 export function createViteConfig(args: {
 	outdir: string;
+	mode: string;
+	library: string;
 	base: string;
 }): UserConfig {
 	return {
@@ -19,6 +21,8 @@ export function createViteConfig(args: {
 		define: {
 			// using process.env to make ssg build work
 			"process.env.BASE": JSON.stringify(args.base),
+			"process.env.MODE": JSON.stringify(args.mode),
+			"process.env.LIBRARY": JSON.stringify(args.library),
 		},
 		plugins: [
 			paraglideVitePlugin({
