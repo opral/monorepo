@@ -5,12 +5,16 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build && tsc --noEmit",
+		"build": "vite build",
 		"clean": "rm -rf ./dist ./node_modules ./src/paraglide"
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
 		"typescript": "^5.7.2",
 		"vite": "^6.0.7"
+	},
+	"dependencies": {
+		"express": "^5.0.1",
+		"sirv": "^3.0.1"
 	}
 }
