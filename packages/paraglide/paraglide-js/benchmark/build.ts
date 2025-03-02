@@ -3,17 +3,6 @@ import { paraglideVitePlugin } from "@inlang/paraglide-js";
 
 const configs: UserConfig[] = [
 	{
-		plugins: [
-			paraglideVitePlugin({
-				project: "./project.inlang",
-				outdir: "./src/paraglide",
-			}),
-		],
-		build: {
-			minify: false,
-		},
-	},
-	{
 		build: {
 			minify: false,
 			target: "es2024",

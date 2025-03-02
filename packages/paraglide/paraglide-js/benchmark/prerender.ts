@@ -1,40 +1,54 @@
-// Pre-render the app into static HTML.
-// run `npm run generate` and then `dist/static` can be served as a static site.
-
 import fs from "node:fs";
 import path from "node:path";
 import url from "node:url";
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-const toAbsolute = (p) => path.resolve(__dirname, p);
+const toAbsolute = (p: string): string => path.resolve(__dirname, p);
 
-const manifest = JSON.parse(
-	fs.readFileSync(toAbsolute("dist/static/.vite/ssr-manifest.json"), "utf-8")
-);
-const template = fs.readFileSync(toAbsolute("dist/static/index.html"), "utf-8");
-const { render } = await import("./dist/server/entry-server.js");
+// Create the output directory if it doesn't exist
+const outputDir = toAbsolute("dist/static");
+if (!fs.existsSync(outputDir)) {
+	fs.mkdirSync(outputDir, { recursive: true });
+}
 
-// determine routes to pre-render from src/pages
-const routesToPrerender = fs
-	.readdirSync(toAbsolute("src/pages"))
-	.map((file) => {
-		const name = file.replace(/\.vue$/, "").toLowerCase();
-		return name === "home" ? `/` : `/${name}`;
-	});
+// Read the template HTML file
+let template: string;
+try {
+	template = fs.readFileSync(toAbsolute("dist/static/index.html"), "utf-8");
+} catch (e) {
+	// If the file doesn't exist in dist/static, use the source index.html
+	template = fs.readFileSync(toAbsolute("index.html"), "utf-8");
+}
 
-// pre-render each route...
+// Import the server-side rendering function
+const { render } = await import("./src/entry-server.js");
+
+// Define routes to pre-render
+// Since we're not using Vue, we'll manually define our routes
+const routesToPrerender = ["/", "/about"];
+
+// Pre-render each route
 for (const url of routesToPrerender) {
-	const [appHtml, preloadLinks] = await render(url, manifest);
+	console.log(`Pre-rendering ${url}...`);
+
+	// No manifest needed
+	const [appHtml, preloadLinks] = await render(url);
 
 	const html = template
-		.replace(`<!--preload-links-->`, preloadLinks)
+		.replace(`<!--preload-links-->`, preloadLinks || "")
 		.replace(`<!--app-html-->`, appHtml);
 
 	const filePath = `dist/static${url === "/" ? "/index" : url}.html`;
+
+	// Ensure the directory exists
+	const dirname = path.dirname(toAbsolute(filePath));
+	if (!fs.existsSync(dirname)) {
+		fs.mkdirSync(dirname, { recursive: true });
+	}
+
 	fs.writeFileSync(toAbsolute(filePath), html);
-	console.log("pre-rendered:", filePath);
+	console.log("Pre-rendered:", filePath);
 }
 
-// done, delete .vite directory including ssr manifest
-fs.rmSync(toAbsolute("dist/static/.vite"), { recursive: true });
+console.log("Pre-rendering complete!");
