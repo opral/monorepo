@@ -16,6 +16,10 @@
 4. run `pnpm --filter <package-name> dev|test|...` to run the commands of the package you work on
    
 ### Example
+
+> [!IMPORTANT]  
+> You need to run the build for the dependencies of the package via the three dots `...` at least once. [Here](https://pnpm.io/filtering#--filter-package_name-1) is the pnpm documentation for filtering.
+
 1. `pnpm i`
 2. `pnpm --filter @inlang/paraglide-js... build`
 3. `pnpm --filter @inlang/paraglide-js dev`
