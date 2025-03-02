@@ -5,9 +5,9 @@
  *   createReference("message", { id: "123" })
  *   -> m.message({ id: "123" })
  */
-export const refMessage = (key: string, params: Record<string, string>) => {
-	return `m.${key}(${Object.keys(params)
-		.map((key) => `"${params[key]}"`)
+export const refMessage = (key: string, params?: Record<string, string>) => {
+	return `m.${key}(${Object.keys(params ?? {})
+		.map((key) => `"${params?.[key]}"`)
 		.join(", ")})`;
 };
 

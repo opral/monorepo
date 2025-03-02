@@ -2,7 +2,6 @@ import { build } from "vite";
 import fs from "node:fs/promises";
 import { normalize } from "node:path";
 import { createViteConfig } from "./build.config.ts";
-import { render as ssrRender } from "./src/entry-server.ts";
 
 const staticPaths = ["/", "/about"];
 
@@ -34,14 +33,14 @@ for (const [i, b] of builds.entries()) {
 	// generate pages
 
 	await generatePage({
-		path: "/",
+		path: "/index.ts",
 		messageKeyStart: 0,
 		messageKeyEnd: b.messages,
 		library: b.library,
 	});
 
 	await generatePage({
-		path: "/about",
+		path: "/about/index.ts",
 		messageKeyStart: b.messages,
 		messageKeyEnd: b.messages * 2,
 		library: b.library,
@@ -58,6 +57,7 @@ for (const [i, b] of builds.entries()) {
 		process.env.MODE = b.mode;
 		process.env.LIBRARY = b.library;
 		const rootHtml = await fs.readFile(`./${outdir}/index.html`, "utf-8");
+		const { render: ssrRender } = await import(`./src/entry-server.ts`);
 
 		for (const path of staticPaths) {
 			const { html } = ssrRender(path);
@@ -86,17 +86,15 @@ async function generatePage(args: {
 	let paragraphs: string[] = [];
 
 	for (let i = args.messageKeyStart; i < args.messageKeyEnd; i++) {
-		paragraphs.push(`<p>${refMessage(`message${i}`)}</p>`);
+		paragraphs.push(`<p>\${${refMessage(`message${i}`)}}</p>`);
 	}
 
-	const basePath = args.path === "/" ? "../" : "../../";
-	const page = `${importExpression.replace("<src>", basePath)}
+	const basePath = args.path === "/index.ts" ? ".." : "../..";
+	const page = `${importExpression().replace("<src>", basePath)}
 
 	export function Page(): string {
-	  return \`
-			${paragraphs.join("\n")}
-	  \`;
+	  return \`${paragraphs.join("\n")}\`;
  };
 `;
-	await fs.writeFile(`./src/pages${args.path}.ts`, page);
+	await fs.writeFile(`./src/pages${args.path}`, page);
 }
