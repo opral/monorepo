@@ -1,4 +1,6 @@
-import { init, t } from "i18next";
+import { init, t, changeLanguage } from "i18next";
+
+export { t, changeLanguage };
 
 /**
  * Creates a reference to the message using i18next.
@@ -16,7 +18,6 @@ export const importExpression = () =>
 
 init({
 	lng: "en",
-	debug: true,
 	resources: {
 		en: {
 			translation: {
@@ -26,5 +27,3 @@ init({
 		},
 	},
 });
-
-export { t };

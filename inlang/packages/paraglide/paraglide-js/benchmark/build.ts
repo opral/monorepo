@@ -1,6 +1,5 @@
 import { build } from "vite";
 import fs from "node:fs/promises";
-import fsSync from "node:fs";
 import { normalize } from "node:path";
 import { createViteConfig } from "./build.config.ts";
 
@@ -19,6 +18,12 @@ const builds = [
 		messages: 100,
 		mode: "spa",
 	},
+	{
+		library: "i18next",
+		locales: 5,
+		messages: 100,
+		mode: "spa",
+	},
 ];
 
 // Clean the dist directory
@@ -26,9 +31,16 @@ await fs.rm("./dist", { recursive: true, force: true });
 
 for (const [i, b] of builds.entries()) {
 	console.log(`Build ${i + 1} of ${builds.length}:`);
-	console.table([{ Locales: b.locales, Messages: b.messages, Mode: b.mode }]);
+	console.table([
+		{
+			Locales: b.locales,
+			Messages: b.messages,
+			Mode: b.mode,
+			Library: b.library,
+		},
+	]);
 
-	const base = `${b.locales}-${b.messages}-${b.mode}`;
+	const base = `${b.locales}-${b.messages}-${b.mode}-${b.library}`;
 	const outdir = `./dist/${base}`;
 
 	// generate pages
