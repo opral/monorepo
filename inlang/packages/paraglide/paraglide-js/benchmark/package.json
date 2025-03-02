@@ -5,16 +5,19 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "node --experimental-strip-types ./build.ts",
+		"preview": "node --experimental-strip-types --watch ./preview.ts",
 		"clean": "rm -rf ./dist ./node_modules ./src/paraglide"
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
-		"typescript": "^5.7.2",
+		"@types/express": "^5.0.0",
+		"express": "^5.0.1",
+		"typescript": "^5.8.0",
 		"vite": "^6.0.7"
 	},
 	"dependencies": {
-		"express": "^5.0.1",
-		"sirv": "^3.0.1"
+		"@hono/node-server": "^1.13.7",
+		"hono": "^4.6.11"
 	}
 }

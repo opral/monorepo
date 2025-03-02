@@ -19,10 +19,13 @@ document.addEventListener("click", (event) => {
 async function render(pathname: string) {
 	let page: () => string;
 
-	if (pathname === "/") {
+	const path = pathname.replace(process.env.BASE!, "").replaceAll("//", "/");
+
+	// rootpath
+	if (path === "/") {
 		const { Page } = await import("./pages/index.js");
 		page = Page;
-	} else if (pathname === "/about") {
+	} else if (path === "/about") {
 		const { Page } = await import("./pages/about/index.js");
 		page = Page;
 	} else {
