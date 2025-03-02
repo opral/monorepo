@@ -1,10 +1,12 @@
 {
+	"include": ["./src", "./build.ts", "preview.ts"],
 	"compilerOptions": {
 		"target": "ESNext",
 		"useDefineForClassFields": true,
-		"module": "NodeNext",
+		"module": "Node16",
+		"allowImportingTsExtensions": true,
 		"lib": ["ESNext", "DOM"],
-		"moduleResolution": "NodeNext",
+		"moduleResolution": "node16",
 		"strict": true,
 		"isolatedModules": true,
 		"esModuleInterop": true,
@@ -15,6 +17,5 @@
 		"skipLibCheck": true,
 		"allowJs": true,
 		"checkJs": true
-	},
-	"include": ["src"]
+	}
 }

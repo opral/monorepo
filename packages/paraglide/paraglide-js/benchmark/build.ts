@@ -1,30 +1,51 @@
-import { build, UserConfig } from "vite";
-import { paraglideVitePlugin } from "@inlang/paraglide-js";
+import { build } from "vite";
+import fs from "node:fs/promises";
+import { normalize } from "node:path";
+import { createViteConfig } from "./build.config.ts";
+import { render as ssrRender } from "./src/entry-server.ts";
 
-const configs: UserConfig[] = [
+const staticPaths = ["/", "/about"];
+
+const builds = [
 	{
-		build: {
-			minify: false,
-			target: "es2024",
-			// don't load the module preload to keep the bundle free
-			// from side effects that could affect the benchmark
-			modulePreload: false,
-		},
-		plugins: [
-			paraglideVitePlugin({
-				project: "./project.inlang",
-				outdir: "./src/paraglide",
-			}),
-		],
+		locales: 5,
+		messages: 100,
+		mode: "ssg",
+	},
+	{
+		locales: 5,
+		messages: 100,
+		mode: "spa",
 	},
 ];
 
-export async function runBuilds() {
-	for (const { name, config } of configs) {
-		console.log(`Building ${name}...`);
-		await build(config);
-		console.log(`${name} build complete.`);
+// Clean the dist directory
+await fs.rm("./dist", { recursive: true, force: true });
+
+for (const [i, b] of builds.entries()) {
+	console.log(`Build ${i + 1} of ${builds.length}:`);
+	console.table([{ Locales: b.locales, Messages: b.messages, Mode: b.mode }]);
+
+	const base = `${b.locales}-${b.messages}-${b.mode}`;
+	const outdir = `./dist/${base}`;
+
+	// client side build
+	await build(createViteConfig({ outdir, base }));
+
+	// server side build
+	if (b.mode === "ssg") {
+		process.env.BASE = base;
+		const rootHtml = await fs.readFile(`./${outdir}/index.html`, "utf-8");
+
+		for (const path of staticPaths) {
+			const { html } = ssrRender(path);
+			const outputPath = normalize(`./${outdir}/${path}/index.html`);
+			await fs.mkdir(normalize(`./${outdir}/${path}`), { recursive: true });
+			await fs.writeFile(
+				outputPath,
+				rootHtml.replace("<!--app-html-->", html),
+				"utf-8"
+			);
+		}
 	}
 }
-
-await runBuilds();
