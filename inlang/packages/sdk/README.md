@@ -16,23 +16,22 @@
 
 The inlang SDK is the official specification and parser for `.inlang` files. 
 
-The inlang SDK can be used to open `.inlang` files and build i18n apps, convert translation files from one format to another via plugins, and more. 
-
-> [!Note]
-> Inlang files can be unpacked and [stored as directories](#unpacked-inlang-files-directories). The long-term goal is to have portable `.inlang` files. Hence, the documentation refers to files instead of directories.   
+`.inlang` files are designed to become the open standard for i18n and enable interoperability between i18n solutions. Such solutions involve apps like [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor), libraries like [Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), or plugins that extend inlang [plugins](https://inlang.com/c/plugins) that extend inlang projects.
 
 ### Core Features
 
+- 📁 **File-based**: Interoperability without cloud integrations or lock-in.
 - 🖊️ **CRUD API**: Query messages with SQL.
 - 🧩 **Plugin System**: Extend the capabilities with plugins.
 - 📦 **Import/Export**: Import and export messages in different file formats.
+- <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon">**Change control**: Collaboration, change proposals, reviews, and automation. 
 
-### Goals
 
-- Define the standard open file format for i18n to enable interoperability.
-- Enable developers to build i18n apps and tools with the SDK. 
 
 ## Getting Started
+
+> [!Note]
+> Inlang files can be unpacked and [stored as directories](#unpacked-inlang-files-directories). The long-term goal is to have portable `.inlang` files. Hence, the documentation refers to files instead of directories.
 
 ### Installation
 
