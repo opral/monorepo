@@ -23,6 +23,7 @@ export function createViteConfig(args: {
 			"process.env.BASE": JSON.stringify(args.base),
 			"process.env.MODE": JSON.stringify(args.mode),
 			"process.env.LIBRARY": JSON.stringify(args.library),
+			"process.env.IS_CLIENT": JSON.stringify("true"),
 		},
 		plugins: [
 			paraglideVitePlugin({

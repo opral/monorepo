@@ -1,5 +1,8 @@
 import "./i18n/api.ts";
 
+// some libraries require async initialization (e.g. i18next)
+await initI18n();
+
 export function App(args: { children: string }): string {
 	return `
     <div style="display: flex; gap: 1rem;">
