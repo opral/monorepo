@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 6.0.2
+
+### Patch Changes
+
+- 73cc245: fix: key name of sherlock extension
+
 ## 6.0.1
 
 ### Patch Changes
