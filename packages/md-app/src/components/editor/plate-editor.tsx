@@ -15,8 +15,6 @@ import { lixAtom } from "@/state";
 import { activeFileAtom, loadedMdAtom } from "@/state-active-file";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 
-import { idEnrichedSerializeMdNodesOptions } from "./id-enriched-serializer";
-
 export function PlateEditor() {
 	const [lix] = useAtom(lixAtom);
 	const [activeFile] = useAtom(activeFileAtom);
@@ -28,57 +26,10 @@ export function PlateEditor() {
 	useEffect(() => {
 		if (
 			loadedMd !==
-			editor.api.markdown.serialize({
-				nodes: idEnrichedSerializeMdNodesOptions,
-			})
+			editor.api.markdown.serialize()
 		) {
 			const nodes = editor.api.markdown.deserialize(loadedMd);
-			const idEnrichedNodes: any[] = [];
-
-			let nextId: string | undefined = undefined;
-
-			for (const node of nodes) {
-				if (nextId) {
-					node.id = nextId;
-					nextId = undefined;
-					idEnrichedNodes.push(node);
-					continue;
-				}
-
-				if (
-					!node.type &&
-					node.text?.length > 0 &&
-					node.text.startsWith("<!-- id: ")
-				) {
-					if (node.text.endsWith(" -->")) {
-						const regex = /id:\s*([\w-]+)/;
-						const match = node.text.match(regex);
-
-						if (match) {
-							nextId = match[1];
-							continue;
-						}
-					} else if (node.text.endsWith(" -->\n")) {
-						// Plates markdown parser converts a <br> into \n here -> we need to handle empty paragraphs differently
-						const regex = /id:\s*([\w-]+)/;
-						const match = node.text.match(regex);
-
-						if (match) {
-							idEnrichedNodes.push({
-								id: match[1],
-								type: "p",
-								children: [{ text: "" }],
-							});
-							continue;
-						}
-					}
-				}
-
-				// add the node without an id if we have no annotation
-				idEnrichedNodes.push(node);
-			}
-
-			editor.tf.setValue(idEnrichedNodes);
+			editor.tf.setValue(nodes);
 		}
 	}, []);
 
@@ -88,9 +39,7 @@ export function PlateEditor() {
 	// delete changes/disregard keystroke changes on merge
 	const handleUpdateMdData = useCallback(
 		debounce(async (newData) => {
-			const serializedMd = newData.editor.api.markdown.serialize({
-				nodes: idEnrichedSerializeMdNodesOptions,
-			});
+			const serializedMd = newData.editor.api.markdown.serialize();
 
 			await lix.db
 				.updateTable("file")
@@ -113,15 +62,11 @@ export function PlateEditor() {
 				onValueChange={(newValue) => {
 					if (
 						loadedMd !==
-						newValue.editor.api.markdown.serialize({
-							nodes: idEnrichedSerializeMdNodesOptions,
-						})
+						newValue.editor.api.markdown.serialize()
 					) {
 						handleUpdateMdData(newValue);
 						// console.log(
-						// 	newValue.editor.api.markdown.serialize({
-						// 		nodes: idEnrichedSerializeMdNodesOptions,
-						// 	})
+						// 	newValue.editor.api.markdown.serialize()
 						// );
 					} else {
 						console.log("no change");
