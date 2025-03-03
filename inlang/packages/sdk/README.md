@@ -16,7 +16,10 @@
 
 The inlang SDK is the official specification and parser for `.inlang` files. 
 
-The inlang SDK can be used to open `.inlang` files and build i18n apps, convert translation files from one format to another via plugins, and more.
+The inlang SDK can be used to open `.inlang` files and build i18n apps, convert translation files from one format to another via plugins, and more. 
+
+> [!Note]
+> Inlang files can be unpacked and [stored as directories](#unpacked-inlang-files-directories). The long-term goal is to have portable `.inlang` files. Hence, the documentation refers to files instead of directories.   
 
 ### Core Features
 
