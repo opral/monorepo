@@ -1,5 +1,6 @@
 import { NodeApi } from "@udecode/plate";
 import { createPlatePlugin } from "@udecode/plate-core/react";
+import { serializeMdNodes } from "@udecode/plate-markdown";
 import { ClipboardEvent } from "react";
 
 export const CreateCopyMarkdownPlugin = createPlatePlugin({
@@ -12,13 +13,9 @@ export const CreateCopyMarkdownPlugin = createPlatePlugin({
 			if (!editor || !editor.selection) return;
 
 			const selectedNodes = NodeApi.fragment(editor, editor.selection);
+			const serializedMdNodes = serializeMdNodes(selectedNodes);
 
-			// @ts-expect-error - markdown is not in the types
-			const markdown = editor.api.markdown.serialize({
-				nodes: selectedNodes,
-			});
-
-			window.navigator.clipboard.writeText(markdown);
+			window.navigator.clipboard.writeText(serializedMdNodes);
 			event.preventDefault();
 		},
 	},
