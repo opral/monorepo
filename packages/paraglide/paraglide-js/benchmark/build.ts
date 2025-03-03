@@ -24,10 +24,20 @@ const builds = [
 		messages: 100,
 		mode: "spa",
 	},
+	{
+		library: "i18next",
+		locales: 5,
+		messages: 100,
+		mode: "ssg",
+	},
 ];
 
 // Clean the dist directory
 await fs.rm("./dist", { recursive: true, force: true });
+
+// copy the messages into the dist folder
+await fs.mkdir("./dist");
+await fs.cp("./messages", "./dist/messages", { recursive: true });
 
 for (const [i, b] of builds.entries()) {
 	console.log(`Build ${i + 1} of ${builds.length}:`);
@@ -69,6 +79,7 @@ for (const [i, b] of builds.entries()) {
 		process.env.BASE = base;
 		process.env.MODE = b.mode;
 		process.env.LIBRARY = b.library;
+		process.env.IS_CLIENT = "false";
 		const rootHtml = await fs.readFile(`./${outdir}/index.html`, "utf-8");
 		const { render: ssrRender } = await import(`./src/entry-server.ts`);
 
@@ -106,6 +117,7 @@ async function generatePage(args: {
 	const page = `${importExpression().replace("<src>", basePath)}
 
 	export function Page(): string {
+		console.log("rendering page");
 	  return \`${paragraphs.join("\n")}\`;
  };
 `;
