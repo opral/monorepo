@@ -1,7 +1,7 @@
 # Inlang SDK
 
 <p align="center">
-  <img src="./assets/open-file.svg" alt="Inlang SDK opens .inlang files">
+  <img src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sdk/assets/open-file.svg" alt="Inlang SDK opens .inlang files">
 </p>
 
 ## Outline
