@@ -98,7 +98,10 @@ import { TableElement } from "@/components/plate-ui/table-element";
 import { TableRowElement } from "@/components/plate-ui/table-row-element";
 import { TocElement } from "@/components/plate-ui/toc-element";
 import { ToggleElement } from "@/components/plate-ui/toggle-element";
-
+import {
+	FrontMatterPlugin,
+	FrontMatterElement,
+} from "./plugins/frontmatter-plugin";
 
 export const useCreateEditor = () => {
 	return usePlateEditor({
@@ -150,6 +153,7 @@ export const useCreateEditor = () => {
 				[TogglePlugin.key]: ToggleElement,
 				[UnderlinePlugin.key]: withProps(PlateLeaf, { as: "u" }),
 				[VideoPlugin.key]: MediaVideoElement,
+				[FrontMatterPlugin.key]: FrontMatterElement,
 			}),
 		},
 		plugins: [

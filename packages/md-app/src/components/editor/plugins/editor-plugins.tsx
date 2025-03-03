@@ -44,35 +44,36 @@ import { softBreakPlugin } from './soft-break-plugin';
 import { tablePlugin } from './table-plugin';
 import { tocPlugin } from './toc-plugin';
 import { lixMarkdownPlugin } from "./markdown-plugin";
+import { FrontMatterPlugin } from "./frontmatter-plugin";
 
 export const viewPlugins = [
-  ...basicNodesPlugins,
-  HorizontalRulePlugin,
-  linkPlugin,
-  DatePlugin,
-  mentionPlugin,
-  tablePlugin,
-  TogglePlugin,
-  tocPlugin,
-  ...mediaPlugins,
-  ...equationPlugins,
-  CalloutPlugin,
-  ColumnPlugin,
+	...basicNodesPlugins,
+	HorizontalRulePlugin,
+	linkPlugin,
+	DatePlugin,
+	mentionPlugin,
+	tablePlugin,
+	TogglePlugin,
+	tocPlugin,
+	...mediaPlugins,
+	...equationPlugins,
+	CalloutPlugin,
+	ColumnPlugin,
 
-  // Marks
-  FontColorPlugin,
-  FontBackgroundColorPlugin,
-  FontSizePlugin,
-  HighlightPlugin,
-  KbdPlugin,
+	// Marks
+	FontColorPlugin,
+	FontBackgroundColorPlugin,
+	FontSizePlugin,
+	HighlightPlugin,
+	KbdPlugin,
 
-  // Block Style
-  alignPlugin,
-  ...indentListPlugins,
-  lineHeightPlugin,
+	// Block Style
+	alignPlugin,
+	...indentListPlugins,
+	lineHeightPlugin,
 
-  // Collaboration
-  commentsPlugin,
+	// Collaboration
+	commentsPlugin,
 ] as const;
 
 export const editorPlugins = [
@@ -99,6 +100,7 @@ export const editorPlugins = [
 	DocxPlugin,
 	lixMarkdownPlugin,
 	JuicePlugin,
+	FrontMatterPlugin,
 
 	// Copy & paste
 	CreateCopyMarkdownPlugin,

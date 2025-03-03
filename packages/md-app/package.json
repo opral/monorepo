@@ -103,6 +103,7 @@
 		"react-router-dom": "^6.27.0",
 		"react-textarea-autosize": "^8.5.7",
 		"react-tweet": "^3.2.1",
+		"remark-frontmatter": "^5.0.0",
 		"sonner": "^1.7.4",
 		"tailwind-merge": "^2.5.4",
 		"tailwind-scrollbar-hide": "^2.0.0",
