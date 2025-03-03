@@ -14,8 +14,7 @@ import { HighlightPlugin } from '@udecode/plate-highlight/react';
 import { HorizontalRulePlugin } from '@udecode/plate-horizontal-rule/react';
 import { JuicePlugin } from '@udecode/plate-juice';
 import { KbdPlugin } from '@udecode/plate-kbd/react';
-import { ColumnPlugin } from '@udecode/plate-layout/react';
-import { MarkdownPlugin } from '@udecode/plate-markdown';
+import { ColumnPlugin } from "@udecode/plate-layout/react";
 import { SlashPlugin } from '@udecode/plate-slash-command/react';
 import { TogglePlugin } from '@udecode/plate-toggle/react';
 import { TrailingBlockPlugin } from '@udecode/plate-trailing-block';
@@ -44,6 +43,7 @@ import { resetBlockTypePlugin } from './reset-block-type-plugin';
 import { softBreakPlugin } from './soft-break-plugin';
 import { tablePlugin } from './table-plugin';
 import { tocPlugin } from './toc-plugin';
+import { lixMarkdownPlugin } from "./markdown-plugin";
 
 export const viewPlugins = [
   ...basicNodesPlugins,
@@ -76,34 +76,34 @@ export const viewPlugins = [
 ] as const;
 
 export const editorPlugins = [
-  // AI
-  ...aiPlugins,
+	// AI
+	...aiPlugins,
 
-  // Nodes
-  ...viewPlugins,
+	// Nodes
+	...viewPlugins,
 
-  // Functionality
-  SlashPlugin,
-  autoformatPlugin,
-  cursorOverlayPlugin,
-  ...blockMenuPlugins,
-  ...dndPlugins,
-  EmojiPlugin.configure({ options: { data: emojiMartData as any } }),
-  exitBreakPlugin,
-  resetBlockTypePlugin,
-  ...deletePlugins,
-  softBreakPlugin,
-  TrailingBlockPlugin,
+	// Functionality
+	SlashPlugin,
+	autoformatPlugin,
+	cursorOverlayPlugin,
+	...blockMenuPlugins,
+	...dndPlugins,
+	EmojiPlugin.configure({ options: { data: emojiMartData as any } }),
+	exitBreakPlugin,
+	resetBlockTypePlugin,
+	...deletePlugins,
+	softBreakPlugin,
+	TrailingBlockPlugin,
 
-  // Deserialization
-  DocxPlugin,
-  MarkdownPlugin.configure({ options: { indentList: true } }),
-  JuicePlugin,
+	// Deserialization
+	DocxPlugin,
+	lixMarkdownPlugin,
+	JuicePlugin,
 
-  // Copy & paste
-  CreateCopyMarkdownPlugin,
+	// Copy & paste
+	CreateCopyMarkdownPlugin,
 
-  // UI
-  FixedToolbarPlugin,
-  FloatingToolbarPlugin,
+	// UI
+	FixedToolbarPlugin,
+	FloatingToolbarPlugin,
 ];

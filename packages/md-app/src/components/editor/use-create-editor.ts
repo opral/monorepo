@@ -98,7 +98,7 @@ import { TableElement } from "@/components/plate-ui/table-element";
 import { TableRowElement } from "@/components/plate-ui/table-row-element";
 import { TocElement } from "@/components/plate-ui/toc-element";
 import { ToggleElement } from "@/components/plate-ui/toggle-element";
-import { MarkdownPlugin } from "@udecode/plate-markdown";
+
 
 export const useCreateEditor = () => {
 	return usePlateEditor({
@@ -157,7 +157,6 @@ export const useCreateEditor = () => {
 			...editorPlugins,
 			FixedToolbarPlugin,
 			FloatingToolbarPlugin,
-			MarkdownPlugin,
 		],
 		// value: [
 		// 	{
