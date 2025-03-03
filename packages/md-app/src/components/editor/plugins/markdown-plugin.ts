@@ -1,6 +1,5 @@
 import { TText } from "@udecode/plate";
 import {
-	deserializeMd,
 	MarkdownPlugin,
 	MdastNode,
 	remarkDefaultElementRules,
@@ -9,8 +8,6 @@ import {
 	remarkTransformElementChildren,
 } from "@udecode/plate-markdown";
 import remarkFrontmatter from "remark-frontmatter";
-import { text } from "stream/consumers";
-import { serialize } from "v8";
 
 const lixElementRules: RemarkElementRules = {
 	...remarkDefaultElementRules,

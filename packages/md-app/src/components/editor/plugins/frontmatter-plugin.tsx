@@ -1,6 +1,4 @@
 import { createPlatePlugin } from "@udecode/plate-core/react";
-import { PlateElement, withRef } from "@udecode/plate/react";
-
 import { PlateLeaf, PlateLeafProps } from "@udecode/plate/react";
 
 export const FrontMatterElement = ({
