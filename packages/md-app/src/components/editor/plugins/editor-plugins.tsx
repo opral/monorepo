@@ -21,7 +21,7 @@ import { TrailingBlockPlugin } from '@udecode/plate-trailing-block';
 
 import { FixedToolbarPlugin } from '@/components/editor/plugins/fixed-toolbar-plugin';
 import { FloatingToolbarPlugin } from '@/components/editor/plugins/floating-toolbar-plugin';
-import { CreateCopyMarkdownPlugin } from '@/components/copy-markdown-plugin';
+import { CreateCopyMarkdownPlugin } from '@/components/editor/plugins/copy-markdown-plugin';
 
 import { aiPlugins } from './ai-plugins';
 import { alignPlugin } from './align-plugin';
