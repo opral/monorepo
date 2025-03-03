@@ -6,12 +6,12 @@ imports:
 # Message file formats
 
 <doc-callout type="info">
-  Paraglide JS utilizes the inlang SDK, which is responsible for handling importing and exporting of messages. 
+  Paraglide JS is solely responsible for handling importing and exporting of messages, which it does through the inlang SDK. 
 </doc-callout>
 
-You can use any inlang plugin to import messages from various file formats.
+If you wish to use different file formats for your message files, you can use an inlang plugin that parses a specific format.
 
-By default, Paraglide JS uses the [inlang-message-format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) plugin. But, you can use any other plugin that suits your needs. Mixing & matching is also possible.
+By default, Paraglide JS uses the [inlang-message-format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) plugin, but you can use any other plugin that suits your needs. Mixing & matching is also possible.
 
 ## Available plugins
 
