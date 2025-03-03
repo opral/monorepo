@@ -14,6 +14,6 @@ export const plugin: InlangPlugin<{
 		"A plugin for the inlang SDK that uses a JSON file per language tag to store translations.",
 	key,
 	meta: {
-		"app.inlang.ide-extension": config,
+		"app.inlang.ideExtension": config,
 	},
 };
