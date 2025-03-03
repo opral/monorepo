@@ -12,6 +12,7 @@ import {
 	type NewBundleNested,
 } from "@inlang/sdk"
 import { v4 as uuidv4 } from "uuid"
+import { saveProject } from "../main.js"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -143,6 +144,8 @@ export const extractMessageCommand = {
 			})
 
 			CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
+
+			await saveProject()
 
 			capture({
 				event: "IDE-EXTENSION command executed: Extract Message",

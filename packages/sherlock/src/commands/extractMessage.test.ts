@@ -13,16 +13,29 @@ vi.mock("../utilities/state", () => ({
 	state: vi.fn(),
 }))
 
-vi.mock("vscode", () => ({
-	window: {
-		showInputBox: vi.fn(),
-		showQuickPick: vi.fn(),
-		showErrorMessage: vi.fn(),
-	},
-	commands: {
-		registerTextEditorCommand: vi.fn(),
-	},
-}))
+vi.mock("vscode", async () => {
+	return {
+		window: {
+			showInputBox: vi.fn(),
+			showQuickPick: vi.fn(),
+			showErrorMessage: vi.fn(),
+		},
+		commands: {
+			registerTextEditorCommand: vi.fn(),
+		},
+		CodeActionKind: {
+			QuickFix: "quickfix",
+			Refactor: "refactor",
+		},
+		CodeAction: vi.fn().mockImplementation(function (title, kind) {
+			return {
+				title,
+				kind,
+				command: undefined,
+			}
+		}),
+	}
+})
 
 vi.mock("../utilities/messages/msg", () => ({
 	msg: vi.fn(),
