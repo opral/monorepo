@@ -52,9 +52,6 @@ export default function Page() {
 				<HeroSearch />
 				<Features />
 				<Personas />
-				{/* <ExtendSection /> */}
-				{/* <EcosystemComponents /> */}
-				{/* <Guides /> */}
 				<LixSection />
 				<ParaglideHeader />
 			</MarketplaceLayout>
