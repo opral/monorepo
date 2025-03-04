@@ -5,7 +5,6 @@
  * See https://github.com/opral/inlang-cli/issues/29
  */
 
-import { ENV_VARIABLES } from "../services/env-variables/index.js";
 
 type Text = {
 	type: "Text";
