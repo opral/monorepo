@@ -1,9 +1,8 @@
 import { expect, test } from "vitest";
 import { machineTranslateBundle } from "./machineTranslateBundle.js";
 import type { BundleNested } from "@inlang/sdk";
-import { ENV_VARIABLES } from "../services/env-variables/index.js";
 
-test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
+test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 	"it should machine translate to all provided target locales and variants",
 	async () => {
 		const result = await machineTranslateBundle({
@@ -162,7 +161,7 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 	}
 );
 
-test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
+test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 	"should escape expressions in patterns",
 	async () => {
 		const result = await machineTranslateBundle({
@@ -310,7 +309,7 @@ test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
 // 	})
 // })
 
-test.runIf(ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY)(
+test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 	"should keep line breaks in multiline translations",
 	async () => {
 		const result = await machineTranslateBundle({

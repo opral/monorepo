@@ -36,7 +36,7 @@ export async function machineTranslateMessage(args: {
 }): // must return a string as en error because needs to be serializable
 Promise<Result<Message, string>> {
 	try {
-		if (!ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY) {
+		if (!process.env.GOOGLE_TRANSLATE_API_KEY) {
 			throw new Error("GOOGLE_TRANSLATE_API_KEY is not set");
 		}
 		const copy = structuredClone(args.message);
@@ -74,7 +74,7 @@ Promise<Result<Message, string>> {
 								source: args.sourceLanguageTag,
 								// html to escape placeholders
 								format: "html",
-								key: ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY,
+								key: process.env.GOOGLE_TRANSLATE_API_KEY,
 							}),
 						{ method: "POST" }
 					);
