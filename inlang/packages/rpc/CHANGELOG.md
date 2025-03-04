@@ -1,5 +1,12 @@
 # @inlang/rpc
 
+## 0.3.42
+
+### Patch Changes
+
+- 8b20480: fix: env variable for google translate was not referenced correctly
+- f173871: fix: only machine translate variants that don't exist
+
 ## 0.3.41
 
 ### Patch Changes
