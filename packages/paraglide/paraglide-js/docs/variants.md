@@ -24,13 +24,13 @@ The message below will match the following conditions:
 
 ```json
 {
-	"jojo_mountain_day": {
+	"jojo_mountain_day": [{
 		"match": {
 			"platform=android, userGender=male": "{username} has to download the app on his phone from the Google Play Store.",
 			"platform=ios, userGender=female": "{username} has to download the app on her iPhone from the App Store.",
 			"platform=*, userGender=*": "The person has to download the app."
 		}
-	}
+	}]
 }
 ```
 
@@ -49,13 +49,13 @@ You can define a variable in your message and then use it in the selector. Parag
 
 ```json
 {
-"some_happy_cat": {
+"some_happy_cat": [{
     "declarations": ["input count", "local countPlural = count: plural"],
     "selectors": ["countPlural"],
     "match": {
       "countPlural=one": "There is one cat.",
       "countPlural=other": "There are many cats.",
     },
-  }
+  }]
 }
 ```
