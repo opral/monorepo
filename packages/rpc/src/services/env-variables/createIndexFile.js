@@ -15,6 +15,7 @@ import path from "node:path";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
+//! only write public api keys into the file
 await fs.writeFile(
 	dirname + "/index.js",
 	`
