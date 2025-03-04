@@ -23,7 +23,7 @@ export function App({ children }: { children: React.ReactNode }) {
 		<div className="w-full h-screen flex flex-col">
 			<Banner />
 			<div className="flex flex-1 overflow-hidden">
-				<main className="flex-1 overflow-hidden">
+				<main className="flex-1 overflow-hidden bg-white">
 					{children}
 					<PollingComponent />
 				</main>

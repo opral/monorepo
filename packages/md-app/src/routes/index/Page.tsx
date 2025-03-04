@@ -1,3 +1,5 @@
+"use client";
+
 import { Toaster } from 'sonner';
 import { PlateEditor } from '@/components/editor/plate-editor';
 import { SettingsProvider } from '@/components/editor/settings';
@@ -15,7 +17,7 @@ export default function Page() {
 
 	return (
 		<>
-			<div className="w-full bg-slate-50 border-b-[1px] border-[hsl(var(--border))] p-2 flex justify-between items-center">
+			<div className="w-full bg-slate-50 border-b-[1px] border-border p-2 flex justify-between items-center">
 				<div className="flex-1" />
 				<LixMenuDropdown />
 			</div>
