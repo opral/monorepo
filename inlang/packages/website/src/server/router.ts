@@ -66,6 +66,10 @@ router.use((request: Request, response: Response, next: NextFunction) => {
 	}
 });
 
+router.get("/documentation/*", (request, response) => {
+	return response.redirect("https://github.com/opral/inlang-sdk", 301);
+});
+
 // serving #src/pages and /public
 //! it is extremely important that a request handler is not async to catch errors
 //! express does not catch async errors. hence, renderPage uses the callback pattern
