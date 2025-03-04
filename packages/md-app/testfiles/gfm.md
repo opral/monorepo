@@ -69,6 +69,8 @@ Use `console.log("Hello, world!")` to print to the console.
 
 ### Fenced Code Blocks
 
+no language
+
 ```
 function greet() {
     console.log("Hello, world!");
@@ -79,6 +81,36 @@ function greet() {
 const message = "Hello, world!";
 console.log(message);
 ```
+
+no line:
+```javascript
+```
+
+```javascript
+const message = "one line"
+```
+
+```javascript
+const message = "Hello, world!";
+console.log(message);```
+
+masked chars
+```
+
+inline with multiple(3) backticks
+
+```javascript this.fn()```
+
+inline with multiple(2) backticks
+
+``javascript this.fn()``
+
+
+inline with multiple(2) backticks
+
+`javascript this.fn()`
+
+test
 
 ## Tables
 

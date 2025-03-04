@@ -14,6 +14,7 @@ import { useAtom } from "jotai";
 import { lixAtom } from "@/state";
 import { activeFileAtom, loadedMdAtom } from "@/state-active-file";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
+import { MarkdownPlugin } from "@udecode/plate-markdown";
 
 export function PlateEditor() {
 	const [lix] = useAtom(lixAtom);
@@ -24,10 +25,7 @@ export function PlateEditor() {
 
 	// Set the initial value of the editor-
 	useEffect(() => {
-		if (
-			loadedMd !==
-			editor.api.markdown.serialize()
-		) {
+		if (loadedMd !== editor.getApi(MarkdownPlugin).markdown.serialize()) {
 			const nodes = editor.api.markdown.deserialize(loadedMd);
 			editor.tf.setValue(nodes);
 		}
@@ -60,10 +58,7 @@ export function PlateEditor() {
 			<Plate
 				editor={editor}
 				onValueChange={(newValue) => {
-					if (
-						loadedMd !==
-						newValue.editor.api.markdown.serialize()
-					) {
+					if (loadedMd !== newValue.editor.api.markdown.serialize()) {
 						handleUpdateMdData(newValue);
 						// console.log(
 						// 	newValue.editor.api.markdown.serialize()

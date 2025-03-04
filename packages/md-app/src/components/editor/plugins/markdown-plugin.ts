@@ -60,13 +60,13 @@ const lixElementRules: RemarkElementRules = {
 };
 
 export const lixMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
-	// @ts-expect-error -- type not defined here
-	const orginalDeserializeMd = editor.api.markdown.deserialize;
-	// @ts-expect-error -- type not defined here
-	const originalSerializeMd = editor.api.markdown.serialize;
+	
+	const orginalDeserializeMd =
+		editor.getApi(MarkdownPlugin).markdown.deserialize;
+
+	const originalSerializeMd = editor.getApi(MarkdownPlugin).markdown.serialize;
 	return {
 		deserialize: (data: any) => {
-			// editor.api.markdown.deserialize(data);
 			return orginalDeserializeMd(data, {
 				processor: (tree: any) => {
 					return tree.use(remarkFrontmatter, ["yaml", "toml"]);
@@ -78,9 +78,22 @@ export const lixMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 				nodes: {
 					...nodes,
 					frontmatter: {
+						// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
 						serialize: (children, node) => {
 							return "---\n" + node.value + "\n---\n";
 						},
+					},
+					// NOTE: Empty blocks get not serialized correctly - to fix this we mark the code_block as void
+					// - this is still an issue in 46.0.0
+					code_block: {
+						serialize: (children, node) => {
+							return `\n\`\`\`${node.lang || ""}\n${children}\`\`\`\n`;
+						},
+						isVoid: true,
+					},
+					code_line: {
+						// @ts-expect-error -- TODO remove this after we have update to the last version (> 43.x.x of plate) - which includes this logic
+						serialize: (children) => `${children}\n`,
 					},
 				},
 			});
