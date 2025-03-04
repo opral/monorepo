@@ -67,7 +67,7 @@ router.use((request: Request, response: Response, next: NextFunction) => {
 });
 
 router.get("/documentation/*", (request, response) => {
-	return response.redirect("https://github.com/opral/inlang-sdk", 301);
+	return response.redirect(301, "https://github.com/opral/inlang-sdk");
 });
 
 // serving #src/pages and /public
