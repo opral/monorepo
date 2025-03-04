@@ -1,6 +1,6 @@
 # Lix SDK
 
-![Lix SDK](./assets/banner.png)
+![Lix SDK](https://cdn.jsdelivr.net/gh/opral/monorepo/packages/lix-sdk/assets/banner.png)
 
 > [!NOTE]
 > Try the [demo](https://lix.opral.com/app/fm). 
