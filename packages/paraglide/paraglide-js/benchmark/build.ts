@@ -34,6 +34,14 @@ for (const [i, b] of builds.entries()) {
 
 	const numDynamic = Math.floor((b.percentDynamic / 100) * b.messages);
 
+	// created generated i18n file
+
+	const libFile = await fs.readFile(`./src/i18n/${b.library}.ts`, "utf-8");
+	await fs.writeFile(
+		`./src/i18n/generated.ts`,
+		libFile + "\nexport const locales = " + JSON.stringify(locales) + ";"
+	);
+
 	// generate messages
 	const keys = await generateMessages({
 		locales,
@@ -88,7 +96,7 @@ for (const [i, b] of builds.entries()) {
 		const { render: ssrRender } = await import(`./src/entry-server.ts`);
 
 		for (const path of staticPaths) {
-			const { html } = ssrRender(path);
+			const { html } = await ssrRender(path);
 			const outputPath = normalize(`./${outdir}/${path}/index.html`);
 			await fs.mkdir(normalize(`./${outdir}/${path}`), { recursive: true });
 			await fs.writeFile(
