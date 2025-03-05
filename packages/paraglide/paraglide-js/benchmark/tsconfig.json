@@ -1,5 +1,5 @@
 {
-	"include": ["./src", "./build.ts", "preview.ts"],
+	"include": ["./src", "./build.ts", "server.ts"],
 	"exclude": ["./src/pages/**/*"],
 	"compilerOptions": {
 		"resolveJsonModule": true,

@@ -8,7 +8,7 @@
 		"prebench": "pnpm exec playwright install --only-shell chromium",
 		"bench": "node --experimental-strip-types ./benchmark.ts",
 		"build": "node --experimental-strip-types ./build.ts",
-		"preview": "node --experimental-strip-types --watch ./preview.ts",
+		"preview": "node --experimental-strip-types --watch ./server.ts",
 		"clean": "rm -rf ./dist ./node_modules ./src/paraglide"
 	},
 	"devDependencies": {
