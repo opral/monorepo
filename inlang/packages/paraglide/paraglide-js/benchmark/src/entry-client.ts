@@ -27,7 +27,8 @@ async function render(pathname: string) {
 	if (path === "/") {
 		const { Page } = await import("./pages/index.js");
 		children = Page();
-	} else if (path === "/about") {
+	} else if (process.env.GENERATE_ABOUT_PAGE && path === "/about") {
+		// @ts-ignore - might not be generated
 		const { Page } = await import("./pages/about/index.js");
 		children = Page();
 	} else {

@@ -1,9 +1,15 @@
-import "./i18n/api.ts";
+import { init, getLocale, locales, setLocale } from "./i18n/generated.js";
 
 // some libraries require async initialization (e.g. i18next)
-await initI18n();
+if (init) {
+	// @ts-ignore can be undefined
+	await init();
+}
 
 export function App(args: { children: string }): string {
+	// @ts-expect-error - glboal variable
+	globalThis.setLocale = setLocale;
+
 	return `
     <div style="display: flex; gap: 1rem;">
       <a href="/" onclick="window.location.href='/'">All builds</a>

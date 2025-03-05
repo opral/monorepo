@@ -1,3 +1,5 @@
+import * as runtime from "../paraglide/runtime.js";
+
 /**
  * Creates a reference to the message.
  *
@@ -11,3 +13,9 @@ export const refMessage = (key: string, params?: Record<string, string>) => {
 
 export const importExpression = () =>
 	`import { m } from "<src>/paraglide/messages.js";`;
+
+export const setLocale = runtime.setLocale;
+
+export const getLocale = runtime.getLocale;
+
+export const init = undefined;
