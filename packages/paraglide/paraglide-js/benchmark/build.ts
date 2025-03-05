@@ -12,6 +12,10 @@ import {
 // Clean the dist directory
 await fs.rm("./dist", { recursive: true, force: true });
 
+// copy the message translation files in case a libary needs them
+await fs.mkdir("./dist");
+await fs.cp("./messages", "./dist/messages", { recursive: true });
+
 for (const [i, b] of builds.entries()) {
 	console.log(`Build ${i + 1} of ${builds.length}:`);
 	console.table([

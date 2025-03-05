@@ -1,6 +1,7 @@
 import * as i18next from "i18next";
 import FsBackend from "i18next-fs-backend";
 import LanguageDetector from "i18next-browser-languagedetector";
+import HttpApi from "i18next-http-backend";
 
 // need to re-export to make the init call work
 export * as i18next from "i18next";
@@ -23,17 +24,16 @@ export const init = async () => {
 	if (process.env.IS_CLIENT) {
 		// don't try to load the messages during ssg
 		if (typeof window !== "undefined") {
-			// @ts-ignore - dynamically generated
-			const messages = await import("../../messages/en.json");
-			await i18next.use(LanguageDetector).init({
-				debug: true,
-				lng: "en",
-				resources: {
-					en: {
-						translation: messages,
+			await i18next
+				.use(LanguageDetector)
+				.use(HttpApi)
+				.init({
+					backend: {
+						loadPath: "/messages/{{lng}}.json",
+						load: "languageOnly",
 					},
-				},
-			});
+					lng: "en",
+				});
 		}
 	} else {
 		await i18next.use(FsBackend).init({
@@ -42,6 +42,5 @@ export const init = async () => {
 				loadPath: "../../messages/{{lng}}.json",
 			},
 		});
-		console.log("loaded");
 	}
 };
