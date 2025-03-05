@@ -11,7 +11,7 @@ Lix is a change control system that runs in the browser and an SDK to build web 
 
 A change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g., `.xlsx`, `.sqlite`, or `.inlang`. Compared to a version control system, a change control system understands “what” changed in a file, e.g., cell C43 in the financials spreadsheet changed.
 
-![Diff examples](./assets/diff-examples.svg)
+![Diff examples](https://cdn.jsdelivr.net/gh/opral/monorepo/packages/lix-sdk/assets/diff-examples.svg)
 
 > [!TIP]
 > Lix is not a git replaced, nor designed for software engineering. 
@@ -299,11 +299,11 @@ Apps that revolve around changes are prime use cases to be built on lix. Having 
 
 Developing a web app with lix is reduced to providing a user interface that opens and saves a file.
 
-![Open a file, provide a UI, done](./assets/open_file.png)
+![Open a file, provide a UI, done](https://cdn.jsdelivr.net/gh/opral/monorepo/packages/lix-sdk/assets/open_file.png)
 
 Backend features like auth, permissions, change control, and automations are solved on a file rather than an application-specific level. Lix knows who the actors are (auth), allows actors to conduct changes (permissions), is aware of how data changes over time (change history), can merge changes (collaboration), and uses the knowledge of changes to trigger automations (automation pipelines).
 
-![Backend features for files](./assets/backend_features_to_files.png)
+![Backend features for files](https://cdn.jsdelivr.net/gh/opral/monorepo/packages/lix-sdk/assets/backend_features_to_files.png)
 
 In contrast, cloud-based apps are substantially more difficult to build because they require:
 
