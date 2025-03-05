@@ -1,5 +1,6 @@
 import * as i18next from "i18next";
 import FsBackend from "i18next-fs-backend";
+import LanguageDetector from "i18next-browser-languagedetector";
 
 // need to re-export to make the init call work
 export * as i18next from "i18next";
@@ -12,7 +13,7 @@ export * as i18next from "i18next";
  *   -> t("message", { id: "123" })
  */
 export const refMessage = (key: string, params: Record<string, string>) => {
-	return `i18next.t("${key}", ${JSON.stringify(params)})`;
+	return `i18next.t("${key}", ${params ? JSON.stringify(params) : ""})`;
 };
 
 export const importExpression = () =>
@@ -24,7 +25,7 @@ export const init = async () => {
 		if (typeof window !== "undefined") {
 			// @ts-ignore - dynamically generated
 			const messages = await import("../../messages/en.json");
-			await i18next.init({
+			await i18next.use(LanguageDetector).init({
 				debug: true,
 				lng: "en",
 				resources: {

@@ -14,7 +14,10 @@ globalThis.setLocale = (locale: string) => {
 	if (process.env.LIBRARY === "paraglide") {
 		return paraglide.setLocale(locale as any);
 	} else if (process.env.LIBRARY === "i18next") {
-		return i18next.changeLanguage(locale);
+		i18next.changeLanguage(locale);
+		const url = new URL(window.location.href);
+		url.searchParams.set("locale", locale);
+		window.location.href = url.toString();
 	}
 	throw new Error("Unsupported library");
 };
@@ -23,7 +26,7 @@ globalThis.getLocale = () => {
 	if (process.env.LIBRARY === "paraglide") {
 		return paraglide.getLocale();
 	} else if (process.env.LIBRARY === "i18next") {
-		return "i18next has no API for getting the current locale";
+		return new URL(window.location.href).searchParams.get("locale") || "en";
 	}
 	throw new Error("Unsupported library");
 };
