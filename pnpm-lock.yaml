@@ -210,7 +210,7 @@ importers:
         version: 5.7.2
       vitest:
         specifier: 0.34.3
-        version: 0.34.3(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(playwright@1.48.1)(safaridriver@0.1.2)(terser@5.36.0)(webdriverio@9.2.1)
+        version: 0.34.3(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(playwright@1.50.1)(safaridriver@0.1.2)(terser@5.36.0)(webdriverio@9.2.1)
 
   inlang/packages/marketplace-registry:
     dependencies:
@@ -340,6 +340,9 @@ importers:
       hono:
         specifier: ^4.6.11
         version: 4.6.11
+      playwright:
+        specifier: ^1.50.1
+        version: 1.50.1
       typescript:
         specifier: ^5.8.0
         version: 5.8.2
@@ -1879,7 +1882,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.3
-        version: 0.34.3(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(playwright@1.48.1)(safaridriver@0.1.2)(terser@5.36.0)(webdriverio@9.2.1)
+        version: 0.34.3(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(playwright@1.50.1)(safaridriver@0.1.2)(terser@5.36.0)(webdriverio@9.2.1)
 
   packages/csv-app:
     dependencies:
@@ -14706,13 +14709,13 @@ packages:
     resolution: {integrity: sha512-nDywThFk1i4BQK4twPQ6TA4RT8bDY96yeuCVBWL3ePARCiEKDRSrNGbFIgUJpLp+XeIR65v8ra7WuJOFUBtkMA==}
     engines: {node: '>=8'}
 
-  playwright-core@1.48.1:
-    resolution: {integrity: sha512-Yw/t4VAFX/bBr1OzwCuOMZkY1Cnb4z/doAFSwf4huqAGWmf9eMNjmK7NiOljCdLmxeRYcGPPmcDgU0zOlzP0YA==}
+  playwright-core@1.50.1:
+    resolution: {integrity: sha512-ra9fsNWayuYumt+NiM069M6OkcRb1FZSK8bgi66AtpFoWkg2+y0bJSNmkFrWhMbEBbVKC/EruAHH3g0zmtwGmQ==}
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright@1.48.1:
-    resolution: {integrity: sha512-j8CiHW/V6HxmbntOfyB4+T/uk08tBy6ph0MpBXwuoofkSnLmlfdYNNkFTYD6ofzzlSqLA1fwH4vwvVFvJgLN0w==}
+  playwright@1.50.1:
+    resolution: {integrity: sha512-G8rwsOQJ63XG6BbKj2w5rHeavFjy5zynBA9zsJMMtBoe/Uf757oG12NXz6e6OirF7RCrTVAKFXbLmn1RbL7Qaw==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -26057,7 +26060,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/browser@2.1.3(@types/node@22.10.6)(@vitest/spy@2.1.3)(playwright@1.48.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.3)(webdriverio@9.2.1)':
+  '@vitest/browser@2.1.3(@types/node@22.10.6)(@vitest/spy@2.1.3)(playwright@1.50.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.3)(webdriverio@9.2.1)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -26070,7 +26073,7 @@ snapshots:
       vitest: 2.1.3(@types/node@22.10.6)(@vitest/browser@2.1.3)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.2))(terser@5.36.0)
       ws: 8.18.0
     optionalDependencies:
-      playwright: 1.48.1
+      playwright: 1.50.1
       webdriverio: 9.2.1
     transitivePeerDependencies:
       - '@types/node'
@@ -26081,7 +26084,7 @@ snapshots:
       - vite
     optional: true
 
-  '@vitest/browser@2.1.3(@types/node@22.10.6)(@vitest/spy@2.1.8)(playwright@1.48.1)(typescript@5.6.3)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.3)(webdriverio@9.2.1)':
+  '@vitest/browser@2.1.3(@types/node@22.10.6)(@vitest/spy@2.1.8)(playwright@1.50.1)(typescript@5.6.3)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.3)(webdriverio@9.2.1)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -26094,7 +26097,7 @@ snapshots:
       vitest: 2.1.3(@types/node@22.10.6)(@vitest/browser@2.1.3)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.10.6)(typescript@5.6.3))(terser@5.36.0)
       ws: 8.18.0
     optionalDependencies:
-      playwright: 1.48.1
+      playwright: 1.50.1
       webdriverio: 9.2.1
     transitivePeerDependencies:
       - '@types/node'
@@ -26105,7 +26108,7 @@ snapshots:
       - vite
     optional: true
 
-  '@vitest/browser@2.1.8(@types/node@20.16.13)(playwright@1.48.1)(typescript@5.3.2)(vite@5.4.11(@types/node@20.16.13)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@8.41.0)':
+  '@vitest/browser@2.1.8(@types/node@20.16.13)(playwright@1.50.1)(typescript@5.3.2)(vite@5.4.11(@types/node@20.16.13)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@8.41.0)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -26118,7 +26121,7 @@ snapshots:
       vitest: 2.1.8(@types/node@20.16.13)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@20.16.13)(typescript@5.3.2))(terser@5.36.0)
       ws: 8.18.0
     optionalDependencies:
-      playwright: 1.48.1
+      playwright: 1.50.1
       webdriverio: 8.41.0
     transitivePeerDependencies:
       - '@types/node'
@@ -26128,7 +26131,7 @@ snapshots:
       - vite
     optional: true
 
-  '@vitest/browser@2.1.8(@types/node@20.5.9)(playwright@1.48.1)(typescript@5.2.2)(vite@5.4.11(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
+  '@vitest/browser@2.1.8(@types/node@20.5.9)(playwright@1.50.1)(typescript@5.2.2)(vite@5.4.11(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -26141,7 +26144,7 @@ snapshots:
       vitest: 2.1.8(@types/node@20.5.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@20.5.9)(typescript@5.2.2))(terser@5.36.0)
       ws: 8.18.0
     optionalDependencies:
-      playwright: 1.48.1
+      playwright: 1.50.1
       webdriverio: 9.2.1
     transitivePeerDependencies:
       - '@types/node'
@@ -26151,7 +26154,7 @@ snapshots:
       - vite
     optional: true
 
-  '@vitest/browser@2.1.8(@types/node@20.5.9)(playwright@1.48.1)(typescript@5.7.2)(vite@4.5.5(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
+  '@vitest/browser@2.1.8(@types/node@20.5.9)(playwright@1.50.1)(typescript@5.7.2)(vite@4.5.5(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -26164,7 +26167,7 @@ snapshots:
       vitest: 2.1.8(@types/node@20.5.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@20.5.9)(typescript@5.7.2))(terser@5.36.0)
       ws: 8.18.0
     optionalDependencies:
-      playwright: 1.48.1
+      playwright: 1.50.1
       webdriverio: 9.2.1
     transitivePeerDependencies:
       - '@types/node'
@@ -26174,7 +26177,7 @@ snapshots:
       - vite
     optional: true
 
-  '@vitest/browser@2.1.8(@types/node@22.10.1)(playwright@1.48.1)(safaridriver@0.1.2)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1)(lightningcss@1.29.1)(terser@5.36.0))(vitest@0.34.3)(webdriverio@9.2.1)':
+  '@vitest/browser@2.1.8(@types/node@22.10.1)(playwright@1.50.1)(safaridriver@0.1.2)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1)(lightningcss@1.29.1)(terser@5.36.0))(vitest@0.34.3)(webdriverio@9.2.1)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -26184,10 +26187,10 @@ snapshots:
       msw: 2.7.0(@types/node@22.10.1)(typescript@5.7.2)
       sirv: 3.0.1
       tinyrainbow: 1.2.0
-      vitest: 0.34.3(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(playwright@1.48.1)(safaridriver@0.1.2)(terser@5.36.0)(webdriverio@9.2.1)
+      vitest: 0.34.3(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(playwright@1.50.1)(safaridriver@0.1.2)(terser@5.36.0)(webdriverio@9.2.1)
       ws: 8.18.0
     optionalDependencies:
-      playwright: 1.48.1
+      playwright: 1.50.1
       safaridriver: 0.1.2
       webdriverio: 9.2.1
     transitivePeerDependencies:
@@ -26198,7 +26201,7 @@ snapshots:
       - vite
     optional: true
 
-  '@vitest/browser@2.1.8(@types/node@22.10.1)(playwright@1.48.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
+  '@vitest/browser@2.1.8(@types/node@22.10.1)(playwright@1.50.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -26211,7 +26214,7 @@ snapshots:
       vitest: 2.1.8(@types/node@22.10.1)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.10.1)(typescript@5.7.2))(terser@5.36.0)
       ws: 8.18.0
     optionalDependencies:
-      playwright: 1.48.1
+      playwright: 1.50.1
       webdriverio: 9.2.1
     transitivePeerDependencies:
       - '@types/node'
@@ -26221,7 +26224,7 @@ snapshots:
       - vite
     optional: true
 
-  '@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.3.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
+  '@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.50.1)(typescript@5.3.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -26234,7 +26237,7 @@ snapshots:
       vitest: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.10.6)(typescript@5.3.2))(terser@5.36.0)
       ws: 8.18.0
     optionalDependencies:
-      playwright: 1.48.1
+      playwright: 1.50.1
       webdriverio: 9.2.1
     transitivePeerDependencies:
       - '@types/node'
@@ -26244,7 +26247,7 @@ snapshots:
       - vite
     optional: true
 
-  '@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.4.5)(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0))(vitest@2.1.8)(webdriverio@9.2.1)':
+  '@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.50.1)(typescript@5.4.5)(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0))(vitest@2.1.8)(webdriverio@9.2.1)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -26257,7 +26260,7 @@ snapshots:
       vitest: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.10.6)(typescript@5.4.5))(terser@5.36.0)
       ws: 8.18.0
     optionalDependencies:
-      playwright: 1.48.1
+      playwright: 1.50.1
       webdriverio: 9.2.1
     transitivePeerDependencies:
       - '@types/node'
@@ -26267,7 +26270,7 @@ snapshots:
       - vite
     optional: true
 
-  '@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.6.3)(vite@5.4.9(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
+  '@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.50.1)(typescript@5.6.3)(vite@5.4.9(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -26280,7 +26283,7 @@ snapshots:
       vitest: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.10.6)(typescript@5.6.3))(terser@5.36.0)
       ws: 8.18.0
     optionalDependencies:
-      playwright: 1.48.1
+      playwright: 1.50.1
       webdriverio: 9.2.1
     transitivePeerDependencies:
       - '@types/node'
@@ -26290,7 +26293,7 @@ snapshots:
       - vite
     optional: true
 
-  '@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
+  '@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.50.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -26303,7 +26306,7 @@ snapshots:
       vitest: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.2))(terser@5.36.0)
       ws: 8.18.0
     optionalDependencies:
-      playwright: 1.48.1
+      playwright: 1.50.1
       webdriverio: 9.2.1
     transitivePeerDependencies:
       - '@types/node'
@@ -26313,7 +26316,7 @@ snapshots:
       - vite
     optional: true
 
-  '@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.3)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
+  '@vitest/browser@2.1.8(@types/node@22.10.6)(playwright@1.50.1)(typescript@5.7.3)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -26326,7 +26329,7 @@ snapshots:
       vitest: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0)
       ws: 8.18.0
     optionalDependencies:
-      playwright: 1.48.1
+      playwright: 1.50.1
       webdriverio: 9.2.1
     transitivePeerDependencies:
       - '@types/node'
@@ -26349,7 +26352,7 @@ snapshots:
       std-env: 3.8.0
       test-exclude: 6.0.0
       v8-to-istanbul: 9.3.0
-      vitest: 0.34.3(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(playwright@1.48.1)(safaridriver@0.1.2)(terser@5.36.0)(webdriverio@9.2.1)
+      vitest: 0.34.3(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(playwright@1.50.1)(safaridriver@0.1.2)(terser@5.36.0)(webdriverio@9.2.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -26423,7 +26426,7 @@ snapshots:
       tinyrainbow: 1.2.0
       vitest: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.2))(terser@5.36.0)
     optionalDependencies:
-      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
+      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.50.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -35019,15 +35022,13 @@ snapshots:
     dependencies:
       find-up: 3.0.0
 
-  playwright-core@1.48.1:
-    optional: true
+  playwright-core@1.50.1: {}
 
-  playwright@1.48.1:
+  playwright@1.50.1:
     dependencies:
-      playwright-core: 1.48.1
+      playwright-core: 1.50.1
     optionalDependencies:
       fsevents: 2.3.2
-    optional: true
 
   pluralize@8.0.0: {}
 
@@ -38759,7 +38760,7 @@ snapshots:
     optionalDependencies:
       vite: 6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0)
 
-  vitest@0.34.3(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(playwright@1.48.1)(safaridriver@0.1.2)(terser@5.36.0)(webdriverio@9.2.1):
+  vitest@0.34.3(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(playwright@1.50.1)(safaridriver@0.1.2)(terser@5.36.0)(webdriverio@9.2.1):
     dependencies:
       '@types/chai': 4.3.20
       '@types/chai-subset': 1.3.5
@@ -38786,9 +38787,9 @@ snapshots:
       vite-node: 0.34.3(@types/node@22.10.1)(lightningcss@1.29.1)(terser@5.36.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@vitest/browser': 2.1.8(@types/node@22.10.1)(playwright@1.48.1)(safaridriver@0.1.2)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1)(lightningcss@1.29.1)(terser@5.36.0))(vitest@0.34.3)(webdriverio@9.2.1)
+      '@vitest/browser': 2.1.8(@types/node@22.10.1)(playwright@1.50.1)(safaridriver@0.1.2)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1)(lightningcss@1.29.1)(terser@5.36.0))(vitest@0.34.3)(webdriverio@9.2.1)
       jsdom: 25.0.1
-      playwright: 1.48.1
+      playwright: 1.50.1
       safaridriver: 0.1.2
       webdriverio: 9.2.1
     transitivePeerDependencies:
@@ -38857,7 +38858,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.10.6
-      '@vitest/browser': 2.1.3(@types/node@22.10.6)(@vitest/spy@2.1.8)(playwright@1.48.1)(typescript@5.6.3)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.3)(webdriverio@9.2.1)
+      '@vitest/browser': 2.1.3(@types/node@22.10.6)(@vitest/spy@2.1.8)(playwright@1.50.1)(typescript@5.6.3)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.3)(webdriverio@9.2.1)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
@@ -38893,7 +38894,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.10.6
-      '@vitest/browser': 2.1.3(@types/node@22.10.6)(@vitest/spy@2.1.3)(playwright@1.48.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.3)(webdriverio@9.2.1)
+      '@vitest/browser': 2.1.3(@types/node@22.10.6)(@vitest/spy@2.1.3)(playwright@1.50.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.3)(webdriverio@9.2.1)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
@@ -38930,7 +38931,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.16.13
-      '@vitest/browser': 2.1.8(@types/node@20.16.13)(playwright@1.48.1)(typescript@5.3.2)(vite@5.4.11(@types/node@20.16.13)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@8.41.0)
+      '@vitest/browser': 2.1.8(@types/node@20.16.13)(playwright@1.50.1)(typescript@5.3.2)(vite@5.4.11(@types/node@20.16.13)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@8.41.0)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
@@ -38967,7 +38968,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.5.9
-      '@vitest/browser': 2.1.8(@types/node@20.5.9)(playwright@1.48.1)(typescript@5.2.2)(vite@5.4.11(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
+      '@vitest/browser': 2.1.8(@types/node@20.5.9)(playwright@1.50.1)(typescript@5.2.2)(vite@5.4.11(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
@@ -39004,7 +39005,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.5.9
-      '@vitest/browser': 2.1.8(@types/node@20.5.9)(playwright@1.48.1)(typescript@5.7.2)(vite@4.5.5(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
+      '@vitest/browser': 2.1.8(@types/node@20.5.9)(playwright@1.50.1)(typescript@5.7.2)(vite@4.5.5(@types/node@20.5.9)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
@@ -39041,7 +39042,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.10.1
-      '@vitest/browser': 2.1.8(@types/node@22.10.1)(playwright@1.48.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
+      '@vitest/browser': 2.1.8(@types/node@22.10.1)(playwright@1.50.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
@@ -39078,7 +39079,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.10.6
-      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.3.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
+      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.50.1)(typescript@5.3.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
@@ -39115,7 +39116,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.10.6
-      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.4.5)(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0))(vitest@2.1.8)(webdriverio@9.2.1)
+      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.50.1)(typescript@5.4.5)(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0))(vitest@2.1.8)(webdriverio@9.2.1)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
@@ -39152,7 +39153,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.10.6
-      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.6.3)(vite@5.4.9(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
+      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.50.1)(typescript@5.6.3)(vite@5.4.9(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
@@ -39189,7 +39190,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.10.6
-      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
+      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.50.1)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
@@ -39226,7 +39227,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.10.6
-      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.48.1)(typescript@5.7.3)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
+      '@vitest/browser': 2.1.8(@types/node@22.10.6)(playwright@1.50.1)(typescript@5.7.3)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
