@@ -27,3 +27,5 @@ npm install
 3. Update the ui components and plugins by running `npx shadcx@latest add plate/editor-ai` to reinstall the latest version of the editor template.
 4. Check the changes in source control to exclude any unwanted changes (e.g. files you modified before).
 5. Test the editor in the app to ensure that it works as expected.
+
+Taking a look at the [Plates Breaking Changes](https://github.com/udecode/plate/blob/main/BREAKING_CHANGES.md) and recent [Releases](https://github.com/udecode/plate/releases) might be helpful.
