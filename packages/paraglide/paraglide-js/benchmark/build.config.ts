@@ -1,11 +1,21 @@
 import { type UserConfig } from "vite";
-import { paraglideVitePlugin } from "@inlang/paraglide-js";
+
+export const builds: BuildConfig[] = createBuildConfigs([
+	{
+		libraries: ["paraglide", "i18next"],
+		locales: 2,
+		messages: 200,
+		modes: ["spa"],
+		percentDynamic: 20,
+	},
+]);
 
 export function createViteConfig(args: {
 	outdir: string;
 	mode: string;
 	library: string;
 	base: string;
+	generateAboutPage: boolean;
 }): UserConfig {
 	return {
 		logLevel: "error",
@@ -23,14 +33,48 @@ export function createViteConfig(args: {
 			"process.env.BASE": JSON.stringify(args.base),
 			"process.env.MODE": JSON.stringify(args.mode),
 			"process.env.LIBRARY": JSON.stringify(args.library),
+			"process.env.GENERATE_ABOUT_PAGE": JSON.stringify(args.generateAboutPage),
 			"process.env.IS_CLIENT": JSON.stringify("true"),
 		},
-		plugins: [
-			paraglideVitePlugin({
-				project: "./project.inlang",
-				outdir: "./src/paraglide",
-				isServer: "false",
-			}),
-		],
 	};
 }
+
+export function createBuildConfigs(
+	configs: Array<{
+		libraries: Array<BuildConfig["library"]>;
+		locales: number;
+		messages: number;
+		modes: Array<BuildConfig["mode"]>;
+		percentDynamic: number;
+		generateAboutPage?: boolean;
+	}>
+): BuildConfig[] {
+	const builds = [];
+	for (const config of configs) {
+		for (const library of config.libraries) {
+			for (const mode of config.modes) {
+				builds.push({
+					library,
+					locales: config.locales,
+					messages: config.messages,
+					percentDynamic: config.percentDynamic,
+					mode,
+					generateAboutPage: config.generateAboutPage ?? false,
+				});
+			}
+		}
+	}
+	return builds;
+}
+
+type BuildConfig = {
+	locales: number;
+	messages: number;
+	percentDynamic: number;
+	mode: "spa" | "ssg";
+	library: "paraglide" | "i18next";
+	/**
+	 * Mainly useful for testing routing.
+	 */
+	generateAboutPage: boolean;
+};

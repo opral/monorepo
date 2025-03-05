@@ -23,5 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-# dynamically generated pages
+# dynamically generated 
 src/pages
+messages
+project.inlang
