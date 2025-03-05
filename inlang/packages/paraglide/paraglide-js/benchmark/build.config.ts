@@ -8,41 +8,41 @@ export const builds: BuildConfig[] = createBuildConfigs([
 		modes: ["spa"],
 		percentDynamic: 20,
 	},
-	{
-		libraries: ["paraglide", "i18next"],
-		locales: 1,
-		messages: 200,
-		modes: ["spa"],
-		percentDynamic: 20,
-	},
-	{
-		libraries: ["paraglide", "i18next"],
-		locales: 2,
-		messages: 200,
-		modes: ["spa"],
-		percentDynamic: 20,
-	},
-	{
-		libraries: ["paraglide", "i18next"],
-		locales: 5,
-		messages: 200,
-		modes: ["spa"],
-		percentDynamic: 20,
-	},
-	{
-		libraries: ["paraglide", "i18next"],
-		locales: 10,
-		messages: 200,
-		modes: ["spa"],
-		percentDynamic: 20,
-	},
-	{
-		libraries: ["paraglide", "i18next"],
-		locales: 20,
-		messages: 200,
-		modes: ["spa"],
-		percentDynamic: 20,
-	},
+	// {
+	// 	libraries: ["paraglide", "i18next"],
+	// 	locales: 1,
+	// 	messages: 200,
+	// 	modes: ["spa"],
+	// 	percentDynamic: 20,
+	// },
+	// {
+	// 	libraries: ["paraglide", "i18next"],
+	// 	locales: 2,
+	// 	messages: 200,
+	// 	modes: ["spa"],
+	// 	percentDynamic: 20,
+	// },
+	// {
+	// 	libraries: ["paraglide", "i18next"],
+	// 	locales: 5,
+	// 	messages: 200,
+	// 	modes: ["spa"],
+	// 	percentDynamic: 20,
+	// },
+	// {
+	// 	libraries: ["paraglide", "i18next"],
+	// 	locales: 10,
+	// 	messages: 200,
+	// 	modes: ["spa"],
+	// 	percentDynamic: 20,
+	// },
+	// {
+	// 	libraries: ["paraglide", "i18next"],
+	// 	locales: 20,
+	// 	messages: 200,
+	// 	modes: ["spa"],
+	// 	percentDynamic: 20,
+	// },
 ]);
 
 export function createViteConfig(args: {
@@ -57,10 +57,12 @@ export function createViteConfig(args: {
 		base: args.base,
 		build: {
 			outDir: args.outdir,
-			minify: true,
+			minify: false,
 			target: "es2024",
 			// don't load the module preload to keep the bundle free
 			// from side effects that could affect the benchmark
+			//
+			// doesn't work because of https://github.com/vitejs/vite/issues/18551
 			modulePreload: false,
 		},
 		define: {
