@@ -21,8 +21,7 @@
 			"/limitations": "./docs/limitations.md",
 			"/scaling": "./docs/scaling.md",
 			"/migrating-to-v2": "./docs/migrating-to-v2.md",
-			"/changelog": "./CHANGELOG.md",
-			"/contributing": "./CONTRIBUTING.md"
+			"/changelog": "./CHANGELOG.md"
 		},
 		"Getting Started": {
 			"/vanilla-js-ts": "./docs/getting-started/vanilla-js-ts.md",
