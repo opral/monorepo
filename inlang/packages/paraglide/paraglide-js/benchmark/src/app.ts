@@ -14,7 +14,7 @@ export function App(args: { children: string }): string {
     <div style="display: flex; gap: 1rem;">
       <a href="/" onclick="window.location.href='/'">All builds</a>
       <a href="/${process.env.BASE}">Home</a>
-      ${process.env.GENERATE_ABOUT_PAGE ? `<a href="/${process.env.BASE}/about">About</a>` : ""}
+      <a href="/${process.env.BASE}/about">About</a>
     </div>
 
     <hr />

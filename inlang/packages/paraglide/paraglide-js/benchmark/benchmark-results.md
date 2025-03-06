@@ -1,32 +1,24 @@
 # Benchmark Results
 
 `Locales: 2`  
-`Messages: 200`   
+`Messages: 100`   
 `Namespace Size: 300` 
 
-| Library                | Total Transfer Size | 
-|------------------------|---------------------| 
-| paraglide (default)    | 55.0 KB             | 
-| i18next (http-backend) | 180.3 KB            | 
+| Library                                           | Total Transfer Size | 
+|---------------------------------------------------|---------------------| 
+| paraglide (experimental-middleware-optimizations) | 17.8 KB             | 
+| paraglide (default)                               | 29.6 KB             | 
+| i18next (http-backend)                            | 172.5 KB            | 
 
 
-`Locales: 5`  
-`Messages: 200`   
-`Namespace Size: 300` 
+`Locales: 2`  
+`Messages: 100`   
+`Namespace Size: 600` 
 
-| Library                | Total Transfer Size | 
-|------------------------|---------------------| 
-| paraglide (default)    | 89.9 KB             | 
-| i18next (http-backend) | 180.3 KB            | 
-
-
-`Locales: 10`  
-`Messages: 200`   
-`Namespace Size: 300` 
-
-| Library                | Total Transfer Size | 
-|------------------------|---------------------| 
-| paraglide (default)    | 148.1 KB            | 
-| i18next (http-backend) | 180.4 KB            | 
+| Library                                           | Total Transfer Size | 
+|---------------------------------------------------|---------------------| 
+| paraglide (experimental-middleware-optimizations) | 17.8 KB             | 
+| paraglide (default)                               | 29.6 KB             | 
+| i18next (http-backend)                            | 188.2 KB            | 
 
 

@@ -3,7 +3,6 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { serve } from "@hono/node-server";
 import path from "node:path";
 import fs from "node:fs";
-import { runBuilds } from "./build.ts";
 
 export function startServer(port: number) {
 	const app = new Hono();
@@ -40,6 +39,5 @@ export function startServer(port: number) {
 }
 
 if (process.env.PREVIEW) {
-	await runBuilds();
 	startServer(3005);
 }
