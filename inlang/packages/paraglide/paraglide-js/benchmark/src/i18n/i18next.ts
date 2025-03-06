@@ -32,10 +32,7 @@ export const init = async () => {
 		// don't try to load the messages during ssg
 		if (typeof window !== "undefined") {
 			// Check for specific library modes
-			if (
-				process.env.LIBRARY === "i18next" &&
-				process.env.LIBRARY_MODE === "http-backend"
-			) {
+			if (process.env.LIBRARY_MODE === "http-backend") {
 				// HTTP Backend mode
 				await i18next
 					.use(LanguageDetector)
@@ -47,8 +44,9 @@ export const init = async () => {
 						},
 						lng: "en",
 					});
-			} else {
-				// Default bundled mode
+			} else if (process.env.LIBRARY_MODE === "default") {
+				// default to bundled mode as described in
+				// https://www.i18next.com/overview/getting-started#basic-sample
 				const jsonFiles: Record<string, { default: string }> = import.meta.glob(
 					"../../messages/*.json",
 					{
@@ -76,6 +74,8 @@ export const init = async () => {
 					lng: "en",
 					resources,
 				});
+			} else {
+				throw new Error(`Unknown library mode: ${process.env.LIBRARY_MODE}`);
 			}
 		}
 	} else {
