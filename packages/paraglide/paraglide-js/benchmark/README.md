@@ -63,7 +63,10 @@ To the point of the problem: Avoiding manual chunking of messages into namespace
 
 ## Results
 
-TL;DR Paraglide JS is 
+TL;DR: 
+
+- Paraglide JS is always more efficient than i18next for projects with <15 locales. 
+- Dependent on the namespace size, i18next can be more efficient than Paraglide JS for projects with >15 locales.
 
 
 `Locales: 5`  
