@@ -1,11 +1,13 @@
 import { type UserConfig } from "vite";
 
+
 export const builds: BuildConfig[] = [
 	...createBuildMatrix({
-		libraries: ["paraglide"],
-		locales: [2],
-		messages: [50],
-		modes: ["spa-bundled"],
+		libraries: ["paraglide", "i18next"],
+		locales: [2, 5, 10, 20],
+		messages: [50, 100, 200],
+		modes: ["spa-bundled", "spa-on-demand"],
+		percentDynamic: 20,
 	}),
 ];
 
@@ -45,6 +47,7 @@ export function createBuildMatrix(config: {
 	locales: Array<number>;
 	messages: Array<number>;
 	modes: Array<BuildConfig["mode"]>;
+	percentDynamic: number;
 	generateAboutPage?: boolean;
 }): BuildConfig[] {
 	const builds = [];
@@ -56,6 +59,7 @@ export function createBuildMatrix(config: {
 						library,
 						locales: locale,
 						messages: message,
+						percentDynamic: config.percentDynamic,
 						mode,
 						generateAboutPage: config.generateAboutPage ?? false,
 					});
@@ -69,6 +73,7 @@ export function createBuildMatrix(config: {
 export type BuildConfig = {
 	locales: number;
 	messages: number;
+	percentDynamic: number;
 	mode: "spa-bundled" | "spa-on-demand" | "ssg";
 	library: "paraglide" | "i18next";
 	/**
@@ -78,14 +83,15 @@ export type BuildConfig = {
 };
 
 export function buildConfigToString(config: BuildConfig): string {
-	return `l${config.locales}-m${config.messages}-${config.mode}-${config.library}`;
+	return `l${config.locales}-m${config.messages}-d${config.percentDynamic}-${config.mode}-${config.library}`;
 }
 
 export function buildConfigFromString(str: string): BuildConfig {
-	const [locales, messages, mode, library] = str.split("-");
+	const [locales, messages, percentDynamic, mode, library] = str.split("-");
 	return {
 		locales: Number(locales),
 		messages: Number(messages),
+		percentDynamic: Number(percentDynamic),
 		mode: mode! as BuildConfig["mode"],
 		library: library as BuildConfig["library"],
 		generateAboutPage: false,
