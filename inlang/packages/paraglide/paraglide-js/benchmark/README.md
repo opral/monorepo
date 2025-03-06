@@ -1,24 +1,51 @@
-# Benchmark
+# Paraglide-JS vs i18next Benchmark
 
-| Locales | Messages | Paraglide | i18next |
-| ------- | -------- | --------- | ------- |
-| **2**   |          |           |         |
-|         | 100      | 600 B     | 5.5 KB  |
-|         | 200      | 600 B     | 12.5 KB |
-|         | 300      | 600 B     | 24.5 KB |
-| **5**   |          |           |         |
-|         | 100      | 1.2 KB    | 10 KB   |
-|         | 200      | 2.4 KB    | 20 KB   |
-|         | 300      | 3.6 KB    | 30 KB   |
-| **10**  |          |           |         |
-|         | 100      | 2.4 KB    | 20 KB   |
-|         | 200      | 4.8 KB    | 40 KB   |
-|         | 300      | 7.2 KB    | 60 KB   |
-| **20**  |          |           |         |
-|         | 100      | 4.8 KB    | 40 KB   |
-|         | 200      | 9.6 KB    | 80 KB   |
-|         | 300      | 14.4 KB   | 120 KB  |
+## Introduction
 
-## Decisions
+The internationalization (i18n) library you choose can significantly impact your application's bundle size and overall performance. 
 
-- The initially rendered messages are bundled to ensure comparability.
+This benchmark provides data-driven insights comparing Paraglide-JS with i18next, one of the most popular i18n solutions.
+
+### What is Being Tested
+
+This benchmark evaluates the bundle size implications of both libraries across various scenarios:
+
+- **Number of Locales**: How does an i18n library scale with the number of locales?
+- **Number of Message per page**: How does an i18n library scale with the number of messages thar ?
+- **Type of application**: Comparing multiple strategies:
+  - `spa-bundled`: All translations are bundled upfront.
+  - `spa-on-demand`: Translations loaded as needed
+- **Namespace Size**: Testing how the total available messages in a namespace affects bundle size
+
+### Key Considerations
+
+#### The Paraglide Approach
+
+Paraglide takes a different approach to i18n by compiling messages into tree-shakable functions. Bundlers are able to tree-shake and include only the used messages for any given page. This has important implications.
+
+#### Work in Progress
+
+We are actively working on per-locale splitting to further optimize bundle size for applications with many languages and messages. Find more information in issue [#88](https://github.com/opral/inlang-paraglide-js/issues/88).
+
+## Setup
+
+- Each library uses the recommend approach for given build. 
+- Playwright is used to request the site and measure the network traffic.
+
+## Results
+
+
+
+## Interpretation
+
+
+
+### Limitations
+
+**Namespacing is dependent on each project.**
+ 
+Coming up with a heuristic of how to benchmark namespaces is difficult. 
+
+Some teams use per component namespacing while other teams have one namespace for their entire project. In cal.com's case, every component that uses i18n [loads at least 3000 messages per locale](https://github.com/calcom/cal.com/blob/b5e08ea80ffecff04363a18789491065dd6ccc0b/apps/web/public/static/locales/en/common.json).
+
+To the point of the problem: Avoiding manual chunking of messages into namespaces is the benefit of Paraglide JS. The bundler tree-shakes all unused messages, making namespaces redundant. 
