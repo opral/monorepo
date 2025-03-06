@@ -19,7 +19,7 @@
 		"": {
 			"/": "./docs/introduction.md",
 			"/limitations": "./docs/limitations.md",
-			"/scaling": "./docs/scaling.md",
+			"/benchmark": "./benchmark/README.md",
 			"/migrating-to-v2": "./docs/migrating-to-v2.md",
 			"/changelog": "./CHANGELOG.md"
 		},
