@@ -7,6 +7,7 @@ import { useAtom } from 'jotai/react';
 import { Separator } from '@/components/plate-ui/separator';
 import IntermediateCheckpointComponent from '@/components/IntermediateCheckpointComponent';
 import CheckpointComponent from '@/components/CheckpointComponent';
+import Banner from '@/components/Banner';
 
 export default function Page() {
 	const [activeFile] = useAtom(activeFileAtom)
@@ -15,26 +16,25 @@ export default function Page() {
 
 	return (
 		<>
+			<Banner />
 			<div className="w-full bg-slate-50 border-b-[1px] border-border p-2 flex justify-between items-center">
 				<div className="flex-1" />
 				<LixMenuDropdown />
 			</div>
-			<div className='flex h-full'>
+			<div className='flex-1 flex overflow-hidden'>
 				{activeFile ?
-					<div className="h-screen flex-1 max-w-[calc(100%-600px)]" data-registry="plate">
-						<SettingsProvider>
-							<PlateEditor />
-						</SettingsProvider>
+					<div className="h-full flex-1 max-w-[calc(100%-600px)]" data-registry="plate">
+						{/* <SettingsProvider> */}
+						<PlateEditor />
+						{/* </SettingsProvider> */}
 						<Toaster />
 					</div>
-					: <div className="h-screen flex-1 max-w-[calc(100%-600px)] flex justify-center items-center">
+					: <div className="h-full flex-1 max-w-[calc(100%-600px)] flex justify-center items-center">
 						No file selected
 					</div>}
-				<Separator orientation="vertical" className="h-full" />
-				<div className="w-[600px] flex flex-col h-full relative mt-[10px]">
-					{/* Fade effect at the top */}
-					<div className="absolute top-0 left-0 w-full h-[20px] bg-gradient-to-b from-white to-transparent pointer-events-none z-10" />
-					<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
+				<Separator orientation="vertical" />
+				<div className="h-full w-[600px] flex flex-col relative">
+					<div className="px-[10px] pt-[10px] overflow-y-auto">
 						{intermediateChanges.length > 0 && (
 							<IntermediateCheckpointComponent />
 						)}
