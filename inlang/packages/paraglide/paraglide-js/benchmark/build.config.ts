@@ -7,12 +7,12 @@ import { type UserConfig } from "vite";
  */
 export const builds: BuildConfig[] = [
 	...createBuildMatrix({
-		libraries: ["i18next", "paraglide"],
-		locales: [2, 5, 10, 20],
+		libraries: ["paraglide", "i18next"],
+		locales: [5, 10, 20],
 		messages: [100, 200, 300],
-		modes: ["spa-on-demand", "spa-bundled"],
+		modes: ["spa-bundled"],
 		percentDynamic: 20,
-		namespaceFactor: [2, 5, 10],
+		namespaceSizes: [500],
 	}),
 ];
 
@@ -56,17 +56,23 @@ export function createBuildMatrix(config: {
 	modes: Array<BuildConfig["mode"]>;
 	percentDynamic: number;
 	generateAboutPage?: boolean;
-	namespaceFactor?: Array<number>; // New parameter replacing namespaceSizes
+	namespaceSizes?: Array<number>;
 }): BuildConfig[] {
 	const builds = [];
 	for (const library of config.libraries) {
 		for (const mode of config.modes) {
 			for (const locale of config.locales) {
 				for (const message of config.messages) {
-					if (config.namespaceFactor && config.namespaceFactor.length > 0) {
-						// Create builds with different namespace sizes based on factors
-						for (const factor of config.namespaceFactor) {
-							const namespaceSize = message * factor;
+					if (config.namespaceSizes && config.namespaceSizes.length > 0) {
+						// Create builds with different namespace sizes
+						for (const namespaceSize of config.namespaceSizes) {
+							// Throw error if namespace size is lower than message count
+							if (namespaceSize < message) {
+								throw new Error(
+									`Namespace size (${namespaceSize}) cannot be lower than message count (${message})`
+								);
+							}
+
 							builds.push({
 								library,
 								locales: locale,

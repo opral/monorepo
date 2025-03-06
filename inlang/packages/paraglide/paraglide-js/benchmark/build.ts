@@ -175,6 +175,11 @@ async function generateMessages(args: {
 }) {
 	// Use namespaceSize if provided, otherwise default to numMessages
 	const totalMessages = args.namespaceSize || args.numMessages;
+	
+	// Validate that namespace size is not lower than the number of messages
+	if (args.namespaceSize && args.namespaceSize < args.numMessages) {
+		throw new Error(`Namespace size (${args.namespaceSize}) cannot be lower than message count (${args.numMessages})`);
+	}
 
 	let messages: Record<string, string> = {};
 	let msgI = 0;

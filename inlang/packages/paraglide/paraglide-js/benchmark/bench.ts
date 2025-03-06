@@ -153,14 +153,15 @@ async function runBenchmarks() {
 				// Group by namespace size
 				for (const namespaceSize of [...namespaceSizes, undefined]) {
 					const nsKey = namespaceSize?.toString() || 'default';
-					const nsValue = namespaceSize || message; // If namespaceSize is undefined, it equals message count
+					// For undefined namespace size, use the message count as the namespace size
+					const nsDisplayValue = namespaceSize !== undefined ? namespaceSize : message;
 					const libraryResults = sortedLibraries.map((library) =>
 						formatBytes(results[mode][locale][message][nsKey][library])
 					);
 					
 					// Only add row if there are results for this configuration
 					if (libraryResults.some(result => result !== "0 B")) {
-						csvData.push(["", message.toString(), nsValue.toString(), ...libraryResults]);
+						csvData.push(["", message.toString(), nsDisplayValue.toString(), ...libraryResults]);
 					}
 				}
 			}
