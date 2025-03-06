@@ -49,13 +49,19 @@ function formatBytes(bytes: number): string {
 async function runBenchmarks() {
 	await runBuilds();
 
-	// Get unique libraries, locales, and messages
-	const libraries = [...new Set(builds.map((build) => build.library))];
+	// Get unique libraries, locales, messages, and modes
+	const libraries = [...new Set(builds.map((build) => build.library))].sort(
+		(a, b) =>
+			a === "paraglide" ? -1 : b === "paraglide" ? 1 : a.localeCompare(b)
+	);
 	const locales = [...new Set(builds.map((build) => build.locales))].sort(
 		(a, b) => a - b
 	);
 	const messages = [...new Set(builds.map((build) => build.messages))].sort(
 		(a, b) => a - b
+	);
+	const modes = [...new Set(builds.map((build) => build.mode))].sort((a, b) =>
+		a.localeCompare(b)
 	);
 
 	const port = 8110;
@@ -63,15 +69,22 @@ async function runBenchmarks() {
 	const server = startServer(port); // Start server
 
 	// Create results object to store benchmark data
-	const results: Record<number, Record<number, Record<string, number>>> = {};
+	// Structure: mode -> locale -> message -> library -> size
+	const results: Record<
+		string,
+		Record<number, Record<number, Record<string, number>>>
+	> = {};
 
 	// Initialize results structure
-	for (const locale of locales) {
-		results[locale] = {};
-		for (const message of messages) {
-			results[locale][message] = {};
-			for (const library of libraries) {
-				results[locale][message][library] = 0;
+	for (const mode of modes) {
+		results[mode] = {};
+		for (const locale of locales) {
+			results[mode][locale] = {};
+			for (const message of messages) {
+				results[mode][locale][message] = {};
+				for (const library of libraries) {
+					results[mode][locale][message][library] = 0;
+				}
 			}
 		}
 	}
@@ -82,7 +95,8 @@ async function runBenchmarks() {
 		const name = buildConfigToString(build);
 		const promise = benchmarkBuild(`http://localhost:${port}/${name}`).then(
 			(size) => {
-				results[build.locales][build.messages][build.library] = size;
+				results[build.mode][build.locales][build.messages][build.library] =
+					size;
 			}
 		);
 		benchmarkPromises.push(promise);
@@ -93,38 +107,62 @@ async function runBenchmarks() {
 
 	server.close();
 
-	// Generate CSV data for the table
-	let csvData: string[][] = [];
+	// Generate markdown with tables for each mode
+	let markdownOutput = "";
 
-	// Add header row
-	csvData.push(["Locales", "Messages", ...libraries]);
+	// Sort libraries to ensure consistent order (paraglide first, then i18next)
+	const sortedLibraries = [...libraries].sort((a, b) => {
+		if (a === "paraglide") return 1; // paraglide comes second
+		if (b === "paraglide") return -1;
+		return a.localeCompare(b);
+	});
 
-	// Add data rows
-	for (const locale of locales) {
-		// Add locale header row (with empty cells for libraries)
-		csvData.push([`**${locale}**`, "", ...libraries.map(() => "")]);
+	// Format library names correctly
+	const formattedLibraryNames = sortedLibraries.map((lib) =>
+		lib === "paraglide" ? "paraglide" : lib === "i18next" ? "i18next" : lib
+	);
 
-		// Add message rows for this locale
-		for (const message of messages) {
-			if (message === 0) continue; // Skip 0 messages
-			const libraryResults = libraries.map((library) =>
-				formatBytes(results[locale][message][library])
-			);
-			csvData.push(["", message.toString(), ...libraryResults]);
+	// Generate a table for each mode
+	for (const mode of modes) {
+		// Add mode header
+		markdownOutput += `## ${mode}\n\n`;
+
+		// Generate CSV data for this mode
+		let csvData: string[][] = [];
+
+		// Add header row
+		csvData.push(["Locales", "Messages", ...formattedLibraryNames]);
+
+		// Add data rows for this mode
+		for (const locale of locales) {
+			// Add locale header row (with empty cells for libraries)
+			csvData.push([`**${locale}**`, "", ...sortedLibraries.map(() => "")]);
+
+			// Add message rows for this locale
+			for (const message of messages) {
+				if (message === 0) continue; // Skip 0 messages
+				const libraryResults = sortedLibraries.map((library) =>
+					formatBytes(results[mode][locale][message][library])
+				);
+				csvData.push(["", message.toString(), ...libraryResults]);
+			}
 		}
+
+		// Convert CSV data to CSV string
+		const csvString = csvData.map((row) => row.join(",")).join("\n");
+
+		// Convert CSV to markdown table
+		const markdownTable = csvToMarkdown(csvString, ",", true);
+
+		// Add table to output
+		markdownOutput += markdownTable + "\n\n";
 	}
 
-	// Convert CSV data to CSV string
-	const csvString = csvData.map((row) => row.join(",")).join("\n");
-
-	// Convert CSV to markdown table
-	const markdownTable = csvToMarkdown(csvString, ",", true);
-
-	// Write the markdown table to a file for easy copying
-	fs.writeFileSync("benchmark-results.md", markdownTable);
+	// Write the markdown tables to a file for easy copying
+	fs.writeFileSync("benchmark-results.md", markdownOutput);
 	console.log("\nResults saved to benchmark-results.md");
 
-	return markdownTable;
+	return markdownOutput;
 }
 
 runBenchmarks();
