@@ -1,7 +1,11 @@
 import { build } from "vite";
 import fs from "node:fs/promises";
 import { normalize } from "node:path";
-import { builds, createViteConfig } from "./build.config.ts";
+import {
+	buildConfigToString,
+	builds,
+	createViteConfig,
+} from "./build.config.ts";
 import { compile } from "@inlang/paraglide-js";
 import {
 	sampleMessages,
@@ -9,104 +13,106 @@ import {
 	sampleInlangSettings,
 } from "./build.samples.ts";
 
-// Clean the dist directory
-await fs.rm("./dist", { recursive: true, force: true });
+export const runBuilds = async () => {
+	// Clean the dist directory
+	await fs.rm("./dist", { recursive: true, force: true });
 
-// copy the message translation files in case a libary needs them
-await fs.mkdir("./dist");
-await fs.cp("./messages", "./dist/messages", { recursive: true });
+	// copy the message translation files in case a libary needs them
+	await fs.mkdir("./dist");
+	await fs.cp("./messages", "./dist/messages", { recursive: true });
 
-for (const [i, b] of builds.entries()) {
-	console.log(`Build ${i + 1} of ${builds.length}:`);
-	console.table([
-		{
-			Locales: b.locales,
-			Messages: b.messages,
-			"% Dynamic": b.percentDynamic,
-			Mode: b.mode,
-			Library: b.library,
-		},
-	]);
-	const locales = sampleLocales.slice(0, b.locales);
+	for (const [i, b] of builds.entries()) {
+		console.log(`Build ${i + 1} of ${builds.length}:`);
+		console.table([
+			{
+				Locales: b.locales,
+				Messages: b.messages,
+				"% Dynamic": b.percentDynamic,
+				Mode: b.mode,
+				Library: b.library,
+			},
+		]);
+		const locales = sampleLocales.slice(0, b.locales);
 
-	const base = `${b.locales}-${b.messages}-${b.percentDynamic}-${b.mode}-${b.library}`;
-	const outdir = `./dist/${base}`;
+		const base = buildConfigToString(b);
+		const outdir = `./dist/${base}`;
 
-	const numDynamic = Math.floor((b.percentDynamic / 100) * b.messages);
+		const numDynamic = Math.floor((b.percentDynamic / 100) * b.messages);
 
-	// created generated i18n file
+		// created generated i18n file
 
-	const libFile = await fs.readFile(`./src/i18n/${b.library}.ts`, "utf-8");
-	await fs.writeFile(
-		`./src/i18n/generated.ts`,
-		libFile + "\nexport const locales = " + JSON.stringify(locales) + ";"
-	);
+		const libFile = await fs.readFile(`./src/i18n/${b.library}.ts`, "utf-8");
+		await fs.writeFile(
+			`./src/i18n/generated.ts`,
+			libFile + "\nexport const locales = " + JSON.stringify(locales) + ";"
+		);
 
-	// generate messages
-	const keys = await generateMessages({
-		locales,
-		numMessages: b.messages,
-		numDynamic,
-	});
+		// generate messages
+		const keys = await generateMessages({
+			locales,
+			numMessages: b.messages,
+			numDynamic,
+		});
 
-	if (b.library === "paraglide") {
-		await prepareParaglide({ locales });
-	}
+		if (b.library === "paraglide") {
+			await prepareParaglide({ locales });
+		}
 
-	// generate pages
+		// generate pages
 
-	const staticPaths = ["/"];
+		const staticPaths = ["/"];
 
-	if (b.generateAboutPage) {
-		staticPaths.push("/about");
-	}
+		if (b.generateAboutPage) {
+			staticPaths.push("/about");
+		}
 
-	await generatePage({
-		path: "/index.ts",
-		keys,
-		library: b.library,
-	});
-
-	if (b.generateAboutPage) {
 		await generatePage({
-			path: "/about/index.ts",
+			path: "/index.ts",
 			keys,
 			library: b.library,
 		});
-	}
 
-	// client side build
-	await build(
-		createViteConfig({
-			outdir,
-			base,
-			mode: b.mode,
-			library: b.library,
-			generateAboutPage: b.generateAboutPage,
-		})
-	);
+		if (b.generateAboutPage) {
+			await generatePage({
+				path: "/about/index.ts",
+				keys,
+				library: b.library,
+			});
+		}
 
-	// server side build
-	if (b.mode === "ssg") {
-		process.env.BASE = base;
-		process.env.MODE = b.mode;
-		process.env.LIBRARY = b.library;
-		process.env.IS_CLIENT = "false";
-		const rootHtml = await fs.readFile(`./${outdir}/index.html`, "utf-8");
-		const { render: ssrRender } = await import(`./src/entry-server.ts`);
+		// client side build
+		await build(
+			createViteConfig({
+				outdir,
+				base,
+				mode: b.mode,
+				library: b.library,
+				generateAboutPage: b.generateAboutPage,
+			})
+		);
 
-		for (const path of staticPaths) {
-			const { html } = await ssrRender(path);
-			const outputPath = normalize(`./${outdir}/${path}/index.html`);
-			await fs.mkdir(normalize(`./${outdir}/${path}`), { recursive: true });
-			await fs.writeFile(
-				outputPath,
-				rootHtml.replace("<!--app-html-->", html),
-				"utf-8"
-			);
+		// server side build
+		if (b.mode === "ssg") {
+			process.env.BASE = base;
+			process.env.MODE = b.mode;
+			process.env.LIBRARY = b.library;
+			process.env.IS_CLIENT = "false";
+			const rootHtml = await fs.readFile(`./${outdir}/index.html`, "utf-8");
+			const { render: ssrRender } = await import(`./src/entry-server.ts`);
+
+			for (const path of staticPaths) {
+				const { html } = await ssrRender(path);
+				const outputPath = normalize(`./${outdir}/${path}/index.html`);
+				await fs.mkdir(normalize(`./${outdir}/${path}`), { recursive: true });
+				await fs.writeFile(
+					outputPath,
+					rootHtml.replace("<!--app-html-->", html),
+					"utf-8"
+				);
+			}
 		}
 	}
-}
+};
 
 async function generatePage(args: {
 	path: string;
