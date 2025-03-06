@@ -227,6 +227,27 @@ export default function Index() {
         </div>
 
         <div className="flex flex-col items-center">
+          <h2 className="text-center">Built apps with the lix SDK</h2>
+          <p className="max-w-2xl text-center mt-4 mb-8">
+            The lix SDK can be intergated into exsiting apps, or used as backend
+            for new apps.{" "}
+            <a
+              href="https://github.com/opral/lix-sdk"
+              className="text-cyan-600"
+            >
+              Visit the documentation for more information.
+            </a>
+          </p>
+          <a href="https://github.com/opral/lix-sdk">
+            <img
+              src="/images/code-example.png"
+              alt="Simlified sketch of the lix file manager"
+              className="mb-2 sm:-mb-10 w-[724x] md:h-[300px] mt-4 mx-auto"
+            />
+          </a>
+        </div>
+
+        <div className="flex flex-col items-center">
           <h2 className="text-center">Try the demo</h2>
           <p className="max-w-lg text-center mt-4 mb-8">
             The file manager app is a demo of the lix change control system.
@@ -252,27 +273,6 @@ export default function Index() {
               </div>
             </a>
           </div>
-        </div>
-
-        <div className="flex flex-col items-center">
-          <h2 className="text-center">Built apps with the lix SDK</h2>
-          <p className="max-w-2xl text-center mt-4 mb-8">
-            The lix SDK can be intergated into exsiting apps, or used as backend
-            for new apps.{" "}
-            <a
-              href="https://github.com/opral/lix-sdk"
-              className="text-cyan-600"
-            >
-              Visit the documentation for more information.
-            </a>
-          </p>
-          <a href="https://github.com/opral/lix-sdk">
-            <img
-              src="/images/code-example.png"
-              alt="Simlified sketch of the lix file manager"
-              className="mb-2 sm:-mb-10 w-[724x] md:h-[300px] mt-4 mx-auto"
-            />
-          </a>
         </div>
 
         <hr />
