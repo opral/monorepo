@@ -82,8 +82,16 @@ async function runBenchmarks() {
 
 	const server = startServer(port); // Start server
 
+	// Create a map of unique library+mode combinations
+	const libraryModeMap = new Map<string, string>();
+	for (const build of builds) {
+		const key = `${build.library}-${build.libraryMode}`;
+		const displayName = `${build.library} (${build.libraryMode})`;
+		libraryModeMap.set(key, displayName);
+	}
+
 	// Create results object to store benchmark data
-	// Structure: locale -> message -> namespaceSize (as string) -> library+mode -> size
+	// Structure: locale -> message -> namespaceSize (as string) -> libraryModeKey -> size
 	const results: Record<
 		number, 
 		Record<number, 
@@ -102,10 +110,8 @@ async function runBenchmarks() {
 			for (const namespaceSize of [...namespaceSizes, undefined]) {
 				const nsKey = namespaceSize?.toString() || "default";
 				results[locale][message][nsKey] = {};
-				for (const library of libraries) {
-					for (const mode of libraryModes[library]) {
-						results[locale][message][nsKey][`${library}-${mode}`] = 0;
-					}
+				for (const [libraryModeKey] of libraryModeMap) {
+					results[locale][message][nsKey][libraryModeKey] = 0;
 				}
 			}
 		}
@@ -134,49 +140,34 @@ async function runBenchmarks() {
 	// Generate markdown with tables
 	let markdownOutput = "# Benchmark Results\n\n";
 
-	// Format library names for display
-	const formatLibraryMode = (key: string): string => {
-		const [library, mode] = key.split('-');
-		if (library === "paraglide") {
-			if (mode === "default") return "paraglide";
-			if (mode === "experimental-middleware-optimizations") return "paraglide (experimental)";
-			return `paraglide (${mode})`;
-		}
-		if (library === "i18next") {
-			if (mode === "http-backend") return "i18next (http)";
-			return `i18next (${mode})`;
-		}
-		return key;
-	};
-
 	// Generate CSV data
 	let csvData: string[][] = [];
 
 	// Get all library-mode combinations
-	const allLibraryModes: string[] = [];
-	for (const library of libraries) {
-		for (const mode of libraryModes[library]) {
-			allLibraryModes.push(`${library}-${mode}`);
-		}
-	}
+	const allLibraryModeKeys = Array.from(libraryModeMap.keys());
+	const allLibraryModeNames = Array.from(libraryModeMap.values());
 
 	// Sort library modes (i18next first, then paraglide)
-	const sortedLibraryModes = [...allLibraryModes].sort((a, b) => {
-		if (a.startsWith("paraglide")) return 1; // paraglide comes second
-		if (b.startsWith("paraglide")) return -1;
-		return a.localeCompare(b);
-	});
+	const sortedIndices = allLibraryModeKeys
+		.map((key, index) => ({ key, index }))
+		.sort((a, b) => {
+			if (a.key.startsWith("paraglide")) return 1; // paraglide comes second
+			if (b.key.startsWith("paraglide")) return -1;
+			return a.key.localeCompare(b.key);
+		})
+		.map(item => item.index);
 
-	// Format for display
-	const formattedLibraryModes = sortedLibraryModes.map(formatLibraryMode);
+	// Get sorted display names
+	const sortedLibraryModeNames = sortedIndices.map(index => allLibraryModeNames[index]);
+	const sortedLibraryModeKeys = sortedIndices.map(index => allLibraryModeKeys[index]);
 
 	// Add header row
-	csvData.push(["Locales", "Messages", "Namespace Size", ...formattedLibraryModes]);
+	csvData.push(["Locales", "Messages", "Namespace Size", ...sortedLibraryModeNames]);
 
 	// Add data rows
 	for (const locale of locales) {
 		// Add locale header row (with empty cells for libraries)
-		csvData.push([`**${locale}**`, "", "", ...sortedLibraryModes.map(() => "")]);
+		csvData.push([`**${locale}**`, "", "", ...sortedLibraryModeKeys.map(() => "")]);
 
 		// Add message rows for this locale
 		for (const message of messages) {
@@ -187,8 +178,8 @@ async function runBenchmarks() {
 				const nsKey = namespaceSize?.toString() || "default";
 				// For undefined namespace size, use the message count as the namespace size
 				const nsDisplayValue = namespaceSize !== undefined ? namespaceSize : message;
-				const libraryResults = sortedLibraryModes.map((libraryMode) =>
-					formatBytes(results[locale][message][nsKey][libraryMode])
+				const libraryResults = sortedLibraryModeKeys.map((libraryModeKey) =>
+					formatBytes(results[locale][message][nsKey][libraryModeKey])
 				);
 				
 				// Only add row if there are results for this configuration

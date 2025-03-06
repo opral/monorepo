@@ -21,6 +21,9 @@ export const runBuilds = async () => {
 	await fs.mkdir("./dist");
 
 	for (const [i, b] of builds.entries()) {
+		// Format library name with mode for display
+		const libraryDisplay = `${b.library} (${b.libraryMode})`;
+
 		console.log(`Build ${i + 1} of ${builds.length}:`);
 		console.table([
 			{
@@ -28,8 +31,7 @@ export const runBuilds = async () => {
 				Messages: b.messages,
 				"Namespace Size": b.namespaceSize || b.messages,
 				"% Dynamic": b.percentDynamic,
-				Library: b.library,
-				"Library Mode": b.libraryMode,
+				Library: libraryDisplay,
 			},
 		]);
 		const locales = sampleLocales.slice(0, b.locales);
@@ -115,8 +117,7 @@ export const runBuilds = async () => {
 		}
 		await fs.cp("./messages", `./dist/${base}/messages`, { recursive: true });
 	}
-}
-
+};
 
 async function generatePage(args: {
 	path: string;
