@@ -7,11 +7,7 @@ import {
 	createViteConfig,
 } from "./build.config.ts";
 import { compile } from "@inlang/paraglide-js";
-import {
-	sampleMessages,
-	sampleLocales,
-	sampleInlangSettings,
-} from "./build.samples.ts";
+
 
 export const runBuilds = async () => {
 	// Clean the dist directory
@@ -27,17 +23,28 @@ export const runBuilds = async () => {
 			{
 				Locales: b.locales,
 				Messages: b.messages,
-				"% Dynamic": b.percentDynamic,
 				Mode: b.mode,
 				Library: b.library,
 			},
 		]);
-		const locales = sampleLocales.slice(0, b.locales);
+		const localeDirs = await fs.readdir("./messages", { withFileTypes: true });
+
+		const mostUpToDateLocales = ["en", "de", "fr", "es", "it", "zh-CN"];
+		const locales = localeDirs
+			.filter((dirent) => dirent.isDirectory())
+			.map((dirent) => dirent.name)
+			.sort((a, b) => {
+				const indexA = mostUpToDateLocales.indexOf(a);
+				const indexB = mostUpToDateLocales.indexOf(b);
+				if (indexA === -1 && indexB === -1) return 0;
+				if (indexA === -1) return 1;
+				if (indexB === -1) return -1;
+				return indexA - indexB;
+			})
+			.slice(0, b.locales);
 
 		const base = buildConfigToString(b);
 		const outdir = `./dist/${base}`;
-
-		const numDynamic = Math.floor((b.percentDynamic / 100) * b.messages);
 
 		// created generated i18n file
 
@@ -46,13 +53,6 @@ export const runBuilds = async () => {
 			`./src/i18n/generated.ts`,
 			libFile + "\nexport const locales = " + JSON.stringify(locales) + ";"
 		);
-
-		// generate messages
-		const keys = await generateMessages({
-			locales,
-			numMessages: b.messages,
-			numDynamic,
-		});
 
 		if (b.library === "paraglide") {
 			await prepareParaglide({ locales });
@@ -65,6 +65,12 @@ export const runBuilds = async () => {
 		if (b.generateAboutPage) {
 			staticPaths.push("/about");
 		}
+
+		// take en as source of truth because cal.com uses en as base locale
+		const enMessages = JSON.parse(
+			await fs.readFile("./messages/en/common.json", "utf-8")
+		);
+		const keys = Object.keys(enMessages).slice(0, b.messages);
 
 		await generatePage({
 			path: "/index.ts",
@@ -158,50 +164,20 @@ function shuffleArray (array: any[])  {
 	await fs.writeFile(`./src/pages${args.path}`, page);
 }
 
-/**
- * Generates messages for the given locales.
- *
- * @example
- *   ./
- */
-async function generateMessages(args: {
-	locales: string[];
-	numMessages: number;
-	numDynamic: number;
-}) {
-	let messages: Record<string, string> = {};
-	let msgI = 0;
-	for (let i = 0; i < args.numMessages; i++) {
-		if (i < args.numDynamic) {
-			messages[`message${i}dynamic`] = sampleMessages[msgI] + " {{name}}";
-		} else {
-			messages[`message${i}`] = sampleMessages[msgI];
-		}
-		msgI++;
-		// reset the message index to 0 to
-		// loop over the samples again
-		if (msgI === 99) {
-			msgI = 0;
-		}
-	}
-	for (const locale of args.locales) {
-		await fs.mkdir(`./messages`, { recursive: true });
-		await fs.writeFile(
-			`./messages/${locale}.json`,
-			JSON.stringify(messages, null, 2)
-		);
-	}
-	return Object.keys(messages);
-}
-
 async function prepareParaglide(args: { locales: string[] }) {
 	await fs.mkdir(`./project.inlang`, { recursive: true });
 	await fs.writeFile(
 		`./project.inlang/settings.json`,
 		JSON.stringify(
 			{
-				...sampleInlangSettings,
+				baseLocale: "en",
 				locales: args.locales,
+				modules: [
+					"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@6/dist/index.js",
+				],
+				"plugin.inlang.i18next": {
+					pathPattern: "./messages/{locale}/common.json",
+				},
 			},
 			null,
 			2
@@ -210,5 +186,6 @@ async function prepareParaglide(args: { locales: string[] }) {
 	await compile({
 		project: "./project.inlang",
 		outdir: "./src/paraglide",
+		outputStructure: "locale-modules",
 	});
 }
