@@ -1,4 +1,4 @@
-'use client';
+
 
 import * as SeparatorPrimitive from '@radix-ui/react-separator';
 import { withProps, withVariants } from '@udecode/cn';

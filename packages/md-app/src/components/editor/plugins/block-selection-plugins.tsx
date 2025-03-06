@@ -1,4 +1,4 @@
-'use client';
+
 
 import { BlockSelectionPlugin } from '@udecode/plate-selection/react';
 

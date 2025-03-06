@@ -1,4 +1,4 @@
-'use client';
+
 
 import { CursorOverlayPlugin } from '@udecode/plate-selection/react';
 

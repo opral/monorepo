@@ -1,4 +1,4 @@
-'use client';
+
 
 import type { ExtendConfig, Path } from '@udecode/plate';
 

@@ -1,4 +1,4 @@
-'use client';
+
 
 import emojiMartData from '@emoji-mart/data';
 import { CalloutPlugin } from '@udecode/plate-callout/react';

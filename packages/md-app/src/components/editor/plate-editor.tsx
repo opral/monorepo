@@ -1,4 +1,4 @@
-"use client";
+
 
 import { useCallback, useEffect } from "react";
 import { DndProvider } from "react-dnd";

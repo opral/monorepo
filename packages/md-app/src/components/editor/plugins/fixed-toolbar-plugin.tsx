@@ -1,4 +1,4 @@
-'use client';
+
 
 import { createPlatePlugin } from '@udecode/plate/react';
 

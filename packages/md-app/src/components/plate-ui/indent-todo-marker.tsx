@@ -1,4 +1,4 @@
-'use client';
+
 
 import type { SlateRenderElementProps } from '@udecode/plate';
 

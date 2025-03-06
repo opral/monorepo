@@ -1,4 +1,4 @@
-'use client';
+
 
 import { withCn } from '@udecode/cn';
 

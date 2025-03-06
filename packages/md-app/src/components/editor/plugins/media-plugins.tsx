@@ -1,4 +1,4 @@
-'use client';
+
 
 import { CaptionPlugin } from '@udecode/plate-caption/react';
 import {

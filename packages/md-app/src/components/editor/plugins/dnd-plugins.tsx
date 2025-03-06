@@ -1,4 +1,4 @@
-'use client';
+
 
 import { DndPlugin } from '@udecode/plate-dnd';
 import { PlaceholderPlugin } from '@udecode/plate-media/react';

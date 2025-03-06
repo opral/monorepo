@@ -1,4 +1,4 @@
-'use client';
+
 
 import { insertInlineEquation } from '@udecode/plate-math';
 import { useEditorRef, withRef } from '@udecode/plate/react';

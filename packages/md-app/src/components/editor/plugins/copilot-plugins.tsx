@@ -1,4 +1,4 @@
-'use client';
+
 
 import type { TElement } from '@udecode/plate';
 
