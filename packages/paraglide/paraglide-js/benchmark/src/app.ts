@@ -1,4 +1,4 @@
-import { init, getLocale, locales, setLocale } from "./i18n/generated.js";
+import { init, getLocale, locales, setLocale } from "./i18n/generated.ts";
 
 // some libraries require async initialization (e.g. i18next)
 if (init) {

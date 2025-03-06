@@ -1,49 +1,14 @@
 import { type UserConfig } from "vite";
 
-export const builds: BuildConfig[] = createBuildConfigs([
-	{
+export const builds: BuildConfig[] = [
+	...createBuildMatrix({
 		libraries: ["paraglide", "i18next"],
-		locales: 1,
-		messages: 0,
+		locales: [1],
+		messages: [100],
 		modes: ["spa"],
 		percentDynamic: 20,
-	},
-	// {
-	// 	libraries: ["paraglide", "i18next"],
-	// 	locales: 1,
-	// 	messages: 200,
-	// 	modes: ["spa"],
-	// 	percentDynamic: 20,
-	// },
-	// {
-	// 	libraries: ["paraglide", "i18next"],
-	// 	locales: 2,
-	// 	messages: 200,
-	// 	modes: ["spa"],
-	// 	percentDynamic: 20,
-	// },
-	// {
-	// 	libraries: ["paraglide", "i18next"],
-	// 	locales: 5,
-	// 	messages: 200,
-	// 	modes: ["spa"],
-	// 	percentDynamic: 20,
-	// },
-	// {
-	// 	libraries: ["paraglide", "i18next"],
-	// 	locales: 10,
-	// 	messages: 200,
-	// 	modes: ["spa"],
-	// 	percentDynamic: 20,
-	// },
-	// {
-	// 	libraries: ["paraglide", "i18next"],
-	// 	locales: 20,
-	// 	messages: 200,
-	// 	modes: ["spa"],
-	// 	percentDynamic: 20,
-	// },
-]);
+	}),
+];
 
 export function createViteConfig(args: {
 	outdir: string;
@@ -76,28 +41,28 @@ export function createViteConfig(args: {
 	};
 }
 
-export function createBuildConfigs(
-	configs: Array<{
-		libraries: Array<BuildConfig["library"]>;
-		locales: number;
-		messages: number;
-		modes: Array<BuildConfig["mode"]>;
-		percentDynamic: number;
-		generateAboutPage?: boolean;
-	}>
-): BuildConfig[] {
+export function createBuildMatrix(config: {
+	libraries: Array<BuildConfig["library"]>;
+	locales: Array<number>;
+	messages: Array<number>;
+	modes: Array<BuildConfig["mode"]>;
+	percentDynamic: number;
+	generateAboutPage?: boolean;
+}): BuildConfig[] {
 	const builds = [];
-	for (const config of configs) {
-		for (const library of config.libraries) {
-			for (const mode of config.modes) {
-				builds.push({
-					library,
-					locales: config.locales,
-					messages: config.messages,
-					percentDynamic: config.percentDynamic,
-					mode,
-					generateAboutPage: config.generateAboutPage ?? false,
-				});
+	for (const library of config.libraries) {
+		for (const mode of config.modes) {
+			for (const locale of config.locales) {
+				for (const message of config.messages) {
+					builds.push({
+						library,
+						locales: locale,
+						messages: message,
+						percentDynamic: config.percentDynamic,
+						mode,
+						generateAboutPage: config.generateAboutPage ?? false,
+					});
+				}
 			}
 		}
 	}
@@ -115,3 +80,19 @@ type BuildConfig = {
 	 */
 	generateAboutPage: boolean;
 };
+
+export function buildConfigToString(config: BuildConfig): string {
+	return `l${config.locales}-m${config.messages}-d${config.percentDynamic}-${config.mode}-${config.library}`;
+}
+
+export function buildConfigFromString(str: string): BuildConfig {
+	const [locales, messages, percentDynamic, mode, library] = str.split("-");
+	return {
+		locales: Number(locales),
+		messages: Number(messages),
+		percentDynamic: Number(percentDynamic),
+		mode: mode! as BuildConfig["mode"],
+		library: library as BuildConfig["library"],
+		generateAboutPage: false,
+	};
+}
