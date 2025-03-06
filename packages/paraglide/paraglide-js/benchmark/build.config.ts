@@ -10,9 +10,9 @@ export const builds: BuildConfig[] = [
 		libraries: ["paraglide", "i18next"],
 		locales: [5, 10, 20],
 		messages: [100, 200, 300],
-		modes: ["spa-bundled"],
+		modes: ["spa-on-demand", "spa-bundled", "ssg"],
 		percentDynamic: 20,
-		namespaceSizes: [500],
+		namespaceSizes: [300, 1000],
 	}),
 ];
 
@@ -29,7 +29,7 @@ export function createViteConfig(args: {
 		base: args.base,
 		build: {
 			outDir: args.outdir,
-			minify: false,
+			minify: true,
 			target: "es2024",
 			// don't load the module preload to keep the bundle free
 			// from side effects that could affect the benchmark
@@ -153,6 +153,6 @@ export function buildConfigFromString(str: string): BuildConfig {
 		percentDynamic: percentDynamic!,
 		mode: mode! as BuildConfig["mode"],
 		library: library as BuildConfig["library"],
-		generateAboutPage: false,
+		generateAboutPage: true,
 	};
 }
