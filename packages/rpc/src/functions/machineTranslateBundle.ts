@@ -37,6 +37,25 @@ export async function machineTranslateBundle(args: {
 					continue;
 				}
 
+				// Find target message for this locale if it exists
+				const targetMessage = copy.messages.find(
+					(m) => m.locale === targetLocale
+				);
+
+				// If target message exists, check if this variant already exists
+				if (targetMessage) {
+					// Check if a matching variant already exists
+					const existingVariant = findMatchingVariant(
+						targetMessage.variants,
+						sourceVariant.matches
+					);
+
+					// Skip translation if matching variant already exists
+					if (existingVariant) {
+						continue;
+					}
+				}
+
 				const response = await fetch(
 					"https://translation.googleapis.com/language/translate/v2?" +
 						new URLSearchParams({
@@ -57,9 +76,6 @@ export async function machineTranslateBundle(args: {
 				const json = await response.json();
 				const pattern = deserializePattern(
 					json.data.translations[0].translatedText
-				);
-				const targetMessage = copy.messages.find(
-					(m) => m.locale === targetLocale
 				);
 
 				if (targetMessage) {
@@ -91,6 +107,54 @@ export async function machineTranslateBundle(args: {
 	} catch (error) {
 		return { error: error?.toString() ?? "unknown error" };
 	}
+}
+
+/**
+ * Determines if a variant with matching "matches" property already exists
+ * @param variants Array of variants to search through
+ * @param matches The matches to look for
+ * @returns The matching variant or undefined if no match found
+ */
+function findMatchingVariant(
+	variants: Variant[],
+	matches: Variant["matches"]
+): Variant | undefined {
+	// If matches is empty, look for variants with empty matches
+	if (matches.length === 0) {
+		return variants.find((v) => v.matches.length === 0);
+	}
+
+	// Otherwise, look for variants where all matches are equivalent
+	return variants.find((variant) => {
+		// If lengths don't match, it's not the same
+		if (variant.matches.length !== matches.length) {
+			return false;
+		}
+
+		// Check if all matches are equivalent
+		return matches.every((sourceMatch) => {
+			return variant.matches.some((targetMatch) => {
+				// Both matches must have the same key and type
+				if (
+					targetMatch.key !== sourceMatch.key ||
+					targetMatch.type !== sourceMatch.type
+				) {
+					return false;
+				}
+
+				// For literal matches, also check the value
+				if (
+					sourceMatch.type === "literal-match" &&
+					targetMatch.type === "literal-match"
+				) {
+					return sourceMatch.value === targetMatch.value;
+				}
+
+				// For catchall matches, just matching key and type is sufficient
+				return true;
+			});
+		});
+	});
 }
 
 // MOCK_TRANSLATE: Mock the google translate api

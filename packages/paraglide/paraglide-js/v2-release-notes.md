@@ -216,3 +216,16 @@ Upvote [#423](https://github.com/opral/inlang-paraglide-js/issues/423) to remove
 - m.this_is_a_very_long_key_name_that_should_be_shortened()
 + m.shortened_key_name()
 ```
+
+### Changing the locale requires a reload
+
+Changing the locale works via `setLocale()` in any framework now. 
+
+If you used an adapter in v1 like the SvelteKit one, this behavior is new. The new behaviour leads to a page reload. The reload is a deliberate design decision. Reloading the site eliminates the need for providers, adapters, and API differences between frameworks. Furthermore, optimizations like per-locale splitting is expected to be easier to implement. 
+
+Read https://github.com/opral/inlang-paraglide-js/issues/438#issuecomment-2703733096 for more information.
+
+```diff
+-<a href="/de">Deutsch</a>
++<button onclick="setLocale('de')">Deutsch</button>
+```

@@ -1,5 +1,7 @@
 # @inlang/paraglide-js
 
+**Paraglide JS 2.0 GA release notes are [here](https://github.com/opral/monorepo/blob/main/inlang/packages/paraglide/paraglide-js/v2-release-notes.md)**
+
 ## 2.0.0-beta.26
 
 - replace `node:crypto` with the Web Crypto API https://github.com/opral/inlang-paraglide-js/issues/424

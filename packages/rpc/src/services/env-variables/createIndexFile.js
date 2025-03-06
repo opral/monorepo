@@ -15,10 +15,11 @@ import path from "node:path";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
+//! only write public api keys into the file
 await fs.writeFile(
 	dirname + "/index.js",
 	`
-export const ENV_VARIABLES = {
+export const PUBLIC_ENV_VARIABLES = {
 	PUBLIC_SERVER_BASE_URL: ${ifDefined(process.env.PUBLIC_SERVER_BASE_URL)},
 	PUBLIC_ALLOWED_AUTH_URLS: ${ifDefined(process.env.PUBLIC_ALLOWED_AUTH_URLS)},
 }

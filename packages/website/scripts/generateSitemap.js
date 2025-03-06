@@ -8,17 +8,14 @@ const locales = ["", "/de", "/fr", "/it", "/pt-BR", "/sk", "/zh"]
 // Add all routes that should be included in the sitemap here, dynamic routes should be marked with dynamic: true
 const routes = [
 	{ path: "/", dynamic: false },
-	{ path: "/blog", dynamic: true },
 	{ path: "/c", dynamic: true },
-	{ path: "/documentation", dynamic: true },
 	{ path: "/g", dynamic: true },
 	{ path: "/m", dynamic: true },
-	{ path: "/newsletter", dynamic: false },
 	{ path: "/search", dynamic: false },
-]
+];
 
 // Hardcoded categories for the marketplace
-const categories = ["apps", "plugins", "lint-rules", "guides"]
+const categories = ["apps", "plugins", "lint-rules", "guides"];
 
 const repositoryRoot = import.meta.url.slice(
 	0,
@@ -27,12 +24,12 @@ const repositoryRoot = import.meta.url.slice(
 
 // Formats a page for the sitemap
 function formatPage(name, published) {
-	return `\n  <url>\n    <loc>${name}</loc>\n    <lastmod>${published}</lastmod>\n  </url>`
+	return `\n  <url>\n    <loc>${name}</loc>\n    <lastmod>${published}</lastmod>\n  </url>`;
 }
 
 async function generateSitemap() {
-	const publishDate = new Date().toISOString()
-	let content = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="https://www.nsb.com/wp-content/plugins/wordpress-seo-premium/css/main-sitemap.xsl"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
+	const publishDate = new Date().toISOString();
+	let content = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="https://www.nsb.com/wp-content/plugins/wordpress-seo-premium/css/main-sitemap.xsl"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 	for (const route of routes) {
 		if (route.path !== "/c" && route.path !== "/g" && route.path !== "/m")
 			if (route.path !== "/editor")
@@ -40,9 +37,10 @@ async function generateSitemap() {
 					content = `${content}${formatPage(
 						siteURL + locale + (route.path !== "/" ? route.path : ""),
 						publishDate
-					)}`
+					)}`;
 				}
-			else content = `${content}${formatPage(siteURL + route.path, publishDate)}`
+			else
+				content = `${content}${formatPage(siteURL + route.path, publishDate)}`;
 
 		if (route.dynamic && route.path === "/m") {
 			for (const item of registry) {
@@ -50,7 +48,7 @@ async function generateSitemap() {
 					if (item.pages) {
 						for (const [key, value] of Object.entries(item.pages)) {
 							if (typeof value === "string") {
-								const restSlug = key
+								const restSlug = key;
 								content = `${content}${formatPage(
 									siteURL +
 										// locale +
@@ -58,10 +56,12 @@ async function generateSitemap() {
 										"/" +
 										item.uniqueID +
 										"/" +
-										(item.slug ? item.slug.replaceAll(".", "-") : item.id.replaceAll(".", "-")) +
+										(item.slug
+											? item.slug.replaceAll(".", "-")
+											: item.id.replaceAll(".", "-")) +
 										(restSlug !== "/" ? restSlug : ""),
 									publishDate
-								)}`
+								)}`;
 							} else {
 								for (const [restSlug, path] of Object.entries(value)) {
 									if (
@@ -81,7 +81,7 @@ async function generateSitemap() {
 													: item.id.replaceAll(".", "-")) +
 												(restSlug !== "/" ? restSlug : ""),
 											publishDate
-										)}`
+										)}`;
 									}
 								}
 							}
@@ -94,9 +94,11 @@ async function generateSitemap() {
 								"/" +
 								item.uniqueID +
 								"/" +
-								(item.slug ? item.slug.replaceAll(".", "-") : item.id.replaceAll(".", "-")),
+								(item.slug
+									? item.slug.replaceAll(".", "-")
+									: item.id.replaceAll(".", "-")),
 							publishDate
-						)}`
+						)}`;
 					}
 				}
 			}
@@ -112,9 +114,11 @@ async function generateSitemap() {
 							"/" +
 							item.uniqueID +
 							"/" +
-							(item.slug ? item.slug.replaceAll(".", "-") : item.id.replaceAll(".", "-")),
+							(item.slug
+								? item.slug.replaceAll(".", "-")
+								: item.id.replaceAll(".", "-")),
 						publishDate
-					)}`
+					)}`;
 					// }
 				}
 			}
@@ -124,110 +128,19 @@ async function generateSitemap() {
 					content = `${content}${formatPage(
 						siteURL + locale + route.path + "/" + category,
 						publishDate
-					)}`
+					)}`;
 				}
-			}
-		} else if (route.dynamic && route.path === "/documentation") {
-			const sdkTableOfContents = await fs.readFile(
-				new URL("./inlang" + route.path + "/sdk/tableOfContents.json", repositoryRoot),
-				"utf-8"
-			)
-			const pluginTableOfContents = await fs.readFile(
-				new URL("./inlang" + route.path + "/plugin/tableOfContents.json", repositoryRoot),
-				"utf-8"
-			)
-			const lintRuleTableOfContents = await fs.readFile(
-				new URL("./inlang" + route.path + "/lint-rule/tableOfContents.json", repositoryRoot),
-				"utf-8"
-			)
-
-			if (
-				Array.isArray(JSON.parse(sdkTableOfContents)) &&
-				Array.isArray(JSON.parse(pluginTableOfContents)) &&
-				Array.isArray(JSON.parse(lintRuleTableOfContents))
-			) {
-				const tableOfContents = [
-					...JSON.parse(sdkTableOfContents),
-					...JSON.parse(pluginTableOfContents),
-					...JSON.parse(lintRuleTableOfContents),
-				]
-				for (const item of tableOfContents) {
-					// for (const locale of locales) {
-					// 	content = `${content}${formatPage(
-					// 		siteURL + locale + route.path + "/" + item.slug,
-					// 		publishDate
-					// 	)}`
-					// }
-					content = `${content}${formatPage(siteURL + route.path + "/" + item.slug, publishDate)}`
-				}
-			} else {
-				const tableOfContents = [
-					...Object.values(JSON.parse(sdkTableOfContents)),
-					...Object.values(JSON.parse(pluginTableOfContents)),
-				]
-				for (const items of tableOfContents) {
-					for (const item of items) {
-						if (item.slug !== "")
-							// for (const locale of locales) {
-							// 	content = `${content}${formatPage(
-							// 		siteURL + locale + route.path + "/" + item.slug,
-							// 		publishDate
-							// 	)}`
-							// }
-							content = `${content}${formatPage(
-								siteURL + route.path + "/" + item.slug,
-								publishDate
-							)}`
-					}
-				}
-			}
-		} else if (route.dynamic && route.path === "/blog") {
-			const tableOfContents = await fs.readFile(
-				new URL("./inlang" + route.path + "/tableOfContents.json", repositoryRoot),
-				"utf-8"
-			)
-
-			if (Array.isArray(JSON.parse(tableOfContents))) {
-				for (const item of JSON.parse(tableOfContents)) {
-					// for (const locale of locales) {
-					// 	content = `${content}${formatPage(
-					// 		siteURL + locale + route.path + "/" + item.slug,
-					// 		publishDate
-					// 	)}`
-					// }
-					content = `${content}${formatPage(siteURL + route.path + "/" + item.slug, publishDate)}`
-				}
-			} else {
-				for (const items of Object.values(JSON.parse(tableOfContents))) {
-					for (const item of items) {
-						if (item.slug !== "")
-							// for (const locale of locales) {
-							// 	content = `${content}${formatPage(
-							// 		siteURL + locale + route.path + "/" + item.slug,
-							// 		publishDate
-							// 	)}`
-							// }
-							content = `${content}${formatPage(
-								siteURL + route.path + "/" + item.slug,
-								publishDate
-							)}`
-					}
-				}
-			}
-		} else if (route.path === "/newsletter") {
-			for (const locale of locales) {
-				content = `${content}${formatPage(siteURL + locale + route.path, publishDate)}`
 			}
 		}
 	}
 
-	content = `${content}\n</urlset>`
+	content = `${content}\n</urlset>`;
 	await fs.writeFile(
 		new URL("./inlang/packages/website/public/sitemap.xml", repositoryRoot),
 		content
 	);
 
-	console.info("Sitemap successfully generated")
+	console.info("Sitemap successfully generated");
 }
 
 generateSitemap()

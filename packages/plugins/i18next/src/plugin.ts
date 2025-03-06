@@ -24,6 +24,6 @@ export const plugin: InlangPlugin<{
 	exportFiles,
 	toBeImportedFiles,
 	meta: {
-		"app.inlang.ide-extension": config,
+		"app.inlang.ideExtension": config,
 	},
 };

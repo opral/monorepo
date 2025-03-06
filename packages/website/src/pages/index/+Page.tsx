@@ -9,6 +9,8 @@ import Personas from "./custom_section/Personas/index.jsx";
 import LixSection from "./custom_section/Lix/index.jsx";
 import Features from "./custom_section/Features.jsx";
 import { i18nRouting } from "#src/services/i18n/routing.js";
+import { SolidMarkdown } from "solid-markdown";
+import landingMarkdown from "./assets/landingpage.md?raw";
 
 export default function Page() {
 	return (
@@ -51,12 +53,13 @@ export default function Page() {
 			<MarketplaceLayout>
 				<HeroSearch />
 				<Features />
+				<div class=" max-w-fit prose">
+					<SolidMarkdown children={landingMarkdown} />
+				</div>
+				{/* Note if we  want the old landingpage back
 				<Personas />
-				{/* <ExtendSection /> */}
-				{/* <EcosystemComponents /> */}
-				{/* <Guides /> */}
 				<LixSection />
-				<ParaglideHeader />
+				<ParaglideHeader /> */}
 			</MarketplaceLayout>
 		</>
 	);
