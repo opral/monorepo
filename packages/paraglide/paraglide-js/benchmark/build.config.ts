@@ -127,11 +127,7 @@ export type BuildConfig = {
 };
 
 export function buildConfigToString(config: BuildConfig): string {
-	const namespaceStr =
-		config.namespaceSize && config.namespaceSize !== config.messages
-			? `-ns${config.namespaceSize}`
-			: "";
-	return `l${config.locales}-m${config.messages}${namespaceStr}-d${config.percentDynamic}-${config.library}-${config.libraryMode}`;
+	return `l${config.locales}-m${config.messages}-ns${config.namespaceSize}-d${config.percentDynamic}-${config.library}-${config.libraryMode}`;
 }
 
 export function buildConfigFromString(str: string): BuildConfig {
@@ -145,12 +141,7 @@ export function buildConfigFromString(str: string): BuildConfig {
 		else if (part.startsWith("ns")) namespaceSize = Number(part.substring(2));
 		else if (part.startsWith("d")) percentDynamic = Number(part.substring(1));
 		else if (part === "paraglide" || part === "i18next") library = part;
-		else if (
-			part === "default" ||
-			part === "experimental-middleware-optimizations" ||
-			part === "http-backend"
-		)
-			libraryMode = part;
+		else libraryMode = part;
 	}
 
 	return {
