@@ -1,4 +1,5 @@
 import * as runtime from "../paraglide/runtime.js";
+import * as server from "../paraglide/server.js";
 
 /**
  * Creates a reference to the message.
@@ -19,3 +20,5 @@ export const setLocale = runtime.setLocale;
 export const getLocale = runtime.getLocale;
 
 export const init = undefined;
+
+export const middleware = server.paraglideMiddleware;

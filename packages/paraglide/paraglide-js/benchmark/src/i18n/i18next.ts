@@ -32,7 +32,10 @@ export const init = async () => {
 		// don't try to load the messages during ssg
 		if (typeof window !== "undefined") {
 			// Check for specific library modes
-			if (process.env.LIBRARY === "i18next" && process.env.LIBRARY_MODE === "http-backend") {
+			if (
+				process.env.LIBRARY === "i18next" &&
+				process.env.LIBRARY_MODE === "http-backend"
+			) {
 				// HTTP Backend mode
 				await i18next
 					.use(LanguageDetector)
@@ -84,3 +87,5 @@ export const init = async () => {
 		});
 	}
 };
+
+export const middleware = undefined;

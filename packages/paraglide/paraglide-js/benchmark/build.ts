@@ -58,7 +58,7 @@ export const runBuilds = async () => {
 		});
 
 		if (b.library === "paraglide") {
-			await prepareParaglide({ locales });
+			await compileParaglide({ locales, mode: b.libraryMode });
 		}
 
 		// generate pages
@@ -101,19 +101,18 @@ export const runBuilds = async () => {
 		process.env.LIBRARY = b.library;
 		process.env.LIBRARY_MODE = b.libraryMode; // Set libraryMode in environment
 		process.env.IS_CLIENT = "false";
-		const rootHtml = await fs.readFile(`./${outdir}/index.html`, "utf-8");
-		const { render: ssrRender } = await import(`./src/entry-server.ts`);
+		// const rootHtml = await fs.readFile(`./${outdir}/index.html`, "utf-8");
+		const { handle } = await import(`./src/entry-server.ts`);
 
 		// render each route
 		for (const path of staticPaths) {
-			const { html } = await ssrRender(path);
+			const response = await handle(
+				new Request(new URL(path, "http://example.com"))
+			);
+			const html = await response.text();
 			const outputPath = normalize(`./${outdir}/${path}/index.html`);
 			await fs.mkdir(normalize(`./${outdir}/${path}`), { recursive: true });
-			await fs.writeFile(
-				outputPath,
-				rootHtml.replace("<!--app-html-->", html),
-				"utf-8"
-			);
+			await fs.writeFile(outputPath, html, "utf-8");
 		}
 		await fs.cp("./messages", `./dist/${base}/messages`, { recursive: true });
 	}
@@ -177,10 +176,12 @@ async function generateMessages(args: {
 }) {
 	// Use namespaceSize if provided, otherwise default to numMessages
 	const totalMessages = args.namespaceSize || args.numMessages;
-	
+
 	// Validate that namespace size is not lower than the number of messages
 	if (args.namespaceSize && args.namespaceSize < args.numMessages) {
-		throw new Error(`Namespace size (${args.namespaceSize}) cannot be lower than message count (${args.numMessages})`);
+		throw new Error(
+			`Namespace size (${args.namespaceSize}) cannot be lower than message count (${args.numMessages})`
+		);
 	}
 
 	let messages: Record<string, string> = {};
@@ -214,7 +215,7 @@ async function generateMessages(args: {
 	return Object.keys(messages).slice(0, args.numMessages);
 }
 
-async function prepareParaglide(args: { locales: string[] }) {
+async function compileParaglide(args: { locales: string[]; mode: string }) {
 	await fs.mkdir(`./project.inlang`, { recursive: true });
 	await fs.writeFile(
 		`./project.inlang/settings.json`,
@@ -230,5 +231,12 @@ async function prepareParaglide(args: { locales: string[] }) {
 	await compile({
 		project: "./project.inlang",
 		outdir: "./src/paraglide",
+		isServer: "!process.env.IS_CLIENT",
+		enableMiddlewareOptimizations:
+			args.mode === "experimental-middleware-optimizations",
 	});
+}
+
+if (process.env.RUN_BUILD) {
+	await runBuilds();
 }
