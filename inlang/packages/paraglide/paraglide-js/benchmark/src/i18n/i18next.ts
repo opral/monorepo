@@ -52,7 +52,7 @@ export const init = async () => {
 				const locales = Object.keys(messages).map((key) =>
 					key.replace("../../messages/", "").replace(".json", "")
 				);
-				console.log({ locales });
+				// @ts-ignore - i18next type errors
 				await i18next.init({
 					lng: "en",
 					resources: {
