@@ -1,13 +1,18 @@
 import { type UserConfig } from "vite";
 
-
+/**
+ * The total number of messages in the namespace.
+ * This can be larger than the number of messages rendered on the page.
+ * If not specified, it defaults to the same value as messages.
+ */
 export const builds: BuildConfig[] = [
 	...createBuildMatrix({
-		libraries: ["paraglide", "i18next"],
+		libraries: ["i18next", "paraglide"],
 		locales: [2, 5, 10, 20],
-		messages: [50, 100, 200],
-		modes: ["spa-bundled", "spa-on-demand"],
+		messages: [100, 200, 300],
+		modes: ["spa-on-demand", "spa-bundled"],
 		percentDynamic: 20,
+		namespaceFactor: [2, 5, 10],
 	}),
 ];
 
@@ -51,20 +56,38 @@ export function createBuildMatrix(config: {
 	modes: Array<BuildConfig["mode"]>;
 	percentDynamic: number;
 	generateAboutPage?: boolean;
+	namespaceFactor?: Array<number>; // New parameter replacing namespaceSizes
 }): BuildConfig[] {
 	const builds = [];
 	for (const library of config.libraries) {
 		for (const mode of config.modes) {
 			for (const locale of config.locales) {
 				for (const message of config.messages) {
-					builds.push({
-						library,
-						locales: locale,
-						messages: message,
-						percentDynamic: config.percentDynamic,
-						mode,
-						generateAboutPage: config.generateAboutPage ?? false,
-					});
+					if (config.namespaceFactor && config.namespaceFactor.length > 0) {
+						// Create builds with different namespace sizes based on factors
+						for (const factor of config.namespaceFactor) {
+							const namespaceSize = message * factor;
+							builds.push({
+								library,
+								locales: locale,
+								messages: message,
+								namespaceSize,
+								percentDynamic: config.percentDynamic,
+								mode,
+								generateAboutPage: config.generateAboutPage ?? false,
+							});
+						}
+					} else {
+						// Default behavior - namespace size equals message count
+						builds.push({
+							library,
+							locales: locale,
+							messages: message,
+							percentDynamic: config.percentDynamic,
+							mode,
+							generateAboutPage: config.generateAboutPage ?? false,
+						});
+					}
 				}
 			}
 		}
@@ -82,18 +105,46 @@ export type BuildConfig = {
 	 * Mainly useful for testing routing.
 	 */
 	generateAboutPage: boolean;
+	/**
+	 * The total number of messages in the namespace.
+	 * This can be larger than the number of messages rendered on the page.
+	 * If not specified, it defaults to the same value as messages.
+	 */
+	namespaceSize?: number;
 };
 
 export function buildConfigToString(config: BuildConfig): string {
-	return `l${config.locales}-m${config.messages}-d${config.percentDynamic}-${config.mode}-${config.library}`;
+	const namespaceStr =
+		config.namespaceSize && config.namespaceSize !== config.messages
+			? `-ns${config.namespaceSize}`
+			: "";
+	return `l${config.locales}-m${config.messages}${namespaceStr}-d${config.percentDynamic}-${config.mode}-${config.library}`;
 }
 
 export function buildConfigFromString(str: string): BuildConfig {
-	const [locales, messages, percentDynamic, mode, library] = str.split("-");
+	const parts = str.split("-");
+	let locales, messages, namespaceSize, percentDynamic, mode, library;
+
+	// Extract parts based on prefix
+	for (const part of parts) {
+		if (part.startsWith("l")) locales = Number(part.substring(1));
+		else if (part.startsWith("m")) messages = Number(part.substring(1));
+		else if (part.startsWith("ns")) namespaceSize = Number(part.substring(2));
+		else if (part.startsWith("d")) percentDynamic = Number(part.substring(1));
+		else if (
+			part === "spa-bundled" ||
+			part === "spa-on-demand" ||
+			part === "ssg"
+		)
+			mode = part;
+		else if (part === "paraglide" || part === "i18next") library = part;
+	}
+
 	return {
-		locales: Number(locales),
-		messages: Number(messages),
-		percentDynamic: Number(percentDynamic),
+		locales: locales!,
+		messages: messages!,
+		namespaceSize,
+		percentDynamic: percentDynamic!,
 		mode: mode! as BuildConfig["mode"],
 		library: library as BuildConfig["library"],
 		generateAboutPage: false,
