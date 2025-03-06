@@ -3,9 +3,9 @@ import { type UserConfig } from "vite";
 
 export const builds: BuildConfig[] = [
 	...createBuildMatrix({
-		libraries: ["i18next"],
-		locales: [2, 5],
-		messages: [50],
+		libraries: ["paraglide", "i18next"],
+		locales: [2, 5, 10, 20],
+		messages: [50, 100, 200],
 		modes: ["spa-bundled", "spa-on-demand"],
 		percentDynamic: 20,
 	}),
