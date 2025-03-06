@@ -43,23 +43,32 @@ export const init = async () => {
 						lng: "en",
 					});
 			} else if (process.env.MODE === "spa-bundled") {
-				const messages: Record<string, string> = import.meta.glob(
+				const jsonFiles: Record<string, { default: string }> = import.meta.glob(
 					"../../messages/*.json",
 					{
 						eager: true,
+						query: "?raw",
 					}
 				);
-				const locales = Object.keys(messages).map((key) =>
+
+				const locales = Object.keys(jsonFiles).map((key) =>
 					key.replace("../../messages/", "").replace(".json", "")
+				);
+
+				const resources = Object.fromEntries(
+					locales.map((locale) => [
+						locale,
+						{
+							translation: JSON.parse(
+								jsonFiles[`../../messages/${locale}.json`].default
+							),
+						},
+					])
 				);
 				// @ts-ignore - i18next type errors
 				await i18next.init({
 					lng: "en",
-					resources: {
-						...locales.map((locale) => ({
-							[locale]: messages[`../../messages/${locale}.json`],
-						})),
-					},
+					resources,
 				});
 			}
 		}
