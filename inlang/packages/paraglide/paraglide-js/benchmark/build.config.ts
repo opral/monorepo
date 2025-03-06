@@ -1,11 +1,12 @@
 import { type UserConfig } from "vite";
 
+
 export const builds: BuildConfig[] = [
 	...createBuildMatrix({
-		libraries: ["paraglide", "i18next"],
-		locales: [1],
-		messages: [100],
-		modes: ["spa"],
+		libraries: ["i18next"],
+		locales: [2, 5],
+		messages: [50],
+		modes: ["spa-bundled", "spa-on-demand"],
 		percentDynamic: 20,
 	}),
 ];
@@ -69,11 +70,11 @@ export function createBuildMatrix(config: {
 	return builds;
 }
 
-type BuildConfig = {
+export type BuildConfig = {
 	locales: number;
 	messages: number;
 	percentDynamic: number;
-	mode: "spa" | "ssg";
+	mode: "spa-bundled" | "spa-on-demand" | "ssg";
 	library: "paraglide" | "i18next";
 	/**
 	 * Mainly useful for testing routing.
