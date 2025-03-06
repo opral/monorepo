@@ -8,7 +8,7 @@ import * as runtime from "../paraglide/runtime.js";
  *   -> m.message({ id: "123" })
  */
 export const refMessage = (key: string, params?: Record<string, string>) => {
-	return `m.${key}(${params ? JSON.stringify(params) : ""})`;
+	return `m["${key}"](${params ? JSON.stringify(params) : ""})`;
 };
 
 export const importExpression = () =>
