@@ -1,8 +1,9 @@
 import { chromium } from "playwright";
-import { buildConfigToString, builds } from "./build.config.ts";
+import { builds, buildConfigToString } from "./build.config.ts";
 import { startServer } from "./server.ts";
 import fs from "node:fs";
 import { runBuilds } from "./build.ts";
+import csvToMarkdown from "csv-to-markdown-table";
 
 // Function to benchmark network transfer
 async function benchmarkBuild(url: string): Promise<number> {
@@ -92,14 +93,16 @@ async function runBenchmarks() {
 
 	server.close();
 
-	// Generate markdown table
-	let table = `| Locales | Messages | ${libraries.map((l) => l.charAt(0).toUpperCase() + l.slice(1)).join(" | ")} |\n`;
-	table += `| ------- | -------- | ${libraries.map(() => "--------").join(" | ")} |\n`;
+	// Generate CSV data for the table
+	let csvData: string[][] = [];
+
+	// Add header row
+	csvData.push(["Locales", "Messages", ...libraries]);
 
 	// Add data rows
 	for (const locale of locales) {
-		// Add locale header row
-		table += `| **${locale}** | | ${libraries.map(() => "").join(" | ")} |\n`;
+		// Add locale header row (with empty cells for libraries)
+		csvData.push([`**${locale}**`, "", ...libraries.map(() => "")]);
 
 		// Add message rows for this locale
 		for (const message of messages) {
@@ -107,13 +110,21 @@ async function runBenchmarks() {
 			const libraryResults = libraries.map((library) =>
 				formatBytes(results[locale][message][library])
 			);
-			table += `| | ${message} | ${libraryResults.join(" | ")} |\n`;
+			csvData.push(["", message.toString(), ...libraryResults]);
 		}
 	}
 
-	console.log("\nResults:");
-	console.log(table);
-	return table;
+	// Convert CSV data to CSV string
+	const csvString = csvData.map((row) => row.join(",")).join("\n");
+
+	// Convert CSV to markdown table
+	const markdownTable = csvToMarkdown(csvString, ",", true);
+
+	// Write the markdown table to a file for easy copying
+	fs.writeFileSync("benchmark-results.md", markdownTable);
+	console.log("\nResults saved to benchmark-results.md");
+
+	return markdownTable;
 }
 
 runBenchmarks();

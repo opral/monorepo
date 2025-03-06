@@ -14,6 +14,7 @@
 	"devDependencies": {
 		"@hono/node-server": "^1.13.7",
 		"@inlang/paraglide-js": "workspace:*",
+		"csv-to-markdown-table": "^1.4.1",
 		"hono": "^4.6.11",
 		"playwright": "^1.50.1",
 		"typescript": "^5.8.0",

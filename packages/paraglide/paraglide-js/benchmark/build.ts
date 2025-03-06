@@ -2,8 +2,8 @@ import { build } from "vite";
 import fs from "node:fs/promises";
 import { normalize } from "node:path";
 import {
-	buildConfigToString,
 	builds,
+	buildConfigToString,
 	createViteConfig,
 } from "./build.config.ts";
 import { compile } from "@inlang/paraglide-js";

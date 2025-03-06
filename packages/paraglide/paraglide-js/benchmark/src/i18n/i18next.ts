@@ -31,16 +31,37 @@ export const init = async () => {
 	if (process.env.IS_CLIENT) {
 		// don't try to load the messages during ssg
 		if (typeof window !== "undefined") {
-			await i18next
-				.use(LanguageDetector)
-				.use(HttpApi)
-				.init({
-					backend: {
-						loadPath: "/messages/{{lng}}.json",
-						load: "languageOnly",
-					},
+			if (process.env.MODE === "spa-on-demand") {
+				await i18next
+					.use(LanguageDetector)
+					.use(HttpApi)
+					.init({
+						backend: {
+							loadPath: "/messages/{{lng}}.json",
+							load: "languageOnly",
+						},
+						lng: "en",
+					});
+			} else if (process.env.MODE === "spa-bundled") {
+				const messages: Record<string, string> = import.meta.glob(
+					"../../messages/*.json",
+					{
+						eager: true,
+					}
+				);
+				const locales = Object.keys(messages).map((key) =>
+					key.replace("../../messages/", "").replace(".json", "")
+				);
+				console.log({ locales });
+				await i18next.init({
 					lng: "en",
+					resources: {
+						...locales.map((locale) => ({
+							[locale]: messages[`../../messages/${locale}.json`],
+						})),
+					},
 				});
+			}
 		}
 	} else {
 		await i18next.use(FsBackend).init({
