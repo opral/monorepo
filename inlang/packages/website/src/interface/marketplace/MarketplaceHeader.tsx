@@ -84,7 +84,8 @@ const MarketplaceHeader = (props: { withBorder: boolean }) => {
 						</a>
 						<a
 							class="hidden text-surface-700 hover:text-primary pointer-events-auto md:flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200"
-							href="/documentation"
+							target="_blank"
+							href="https://github.com/opral/inlang-sdk"
 						>
 							{m.marketplace_header_build_on_inlang_button()}
 						</a>

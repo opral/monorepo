@@ -1,151 +1,153 @@
-import { MetaFunction } from "@remix-run/node"
-import Footer from "~/components/footer"
-import Header, { socialLinks } from "~/components/header"
-import IconArrowExternal from "~/components/icons/arrow-external"
-import IconBranch from "~/components/icons/branch"
-import IconConversation from "~/components/icons/conversation"
-import IconLix from "~/components/icons/lix"
-import IconSync from "~/components/icons/sync"
-import Banner from "~/components/ui/banner"
-import Check from "~/components/ui/check"
-import Details from "~/components/ui/details"
+import { MetaFunction } from "@remix-run/node";
+import Footer from "app/components/footer";
+import Header, { socialLinks } from "app/components/header";
+import IconArrowExternal from "app/components/icons/arrow-external";
+import IconBranch from "app/components/icons/branch";
+import IconConversation from "app/components/icons/conversation";
+import IconLix from "app/components/icons/lix";
+import IconSync from "app/components/icons/sync";
+import Check from "app/components/ui/check";
+import Details from "app/components/ui/details";
 
 export const meta: MetaFunction = () => {
-	const ogImage = [
-		{
-			property: "og:url",
-			content: "https://lix.opral.com/file-manager",
-		},
-		{
-			property: "og:type",
-			content: "website",
-		},
-		{
-			property: "og:title",
-			content: "Lix file manager",
-		},
-		{
-			property: "og:description",
-			content:
-				"Lix file manager understands changes in your files, making it easy to see detailed updates, collaborate, comment, and automate tasks directly within your documents.",
-		},
-		{
-			property: "og:image",
-			content: "https://lix.opral.com/images/og-image-lix.png",
-		},
-		{
-			property: "og:image:type",
-			content: "image/png",
-		},
-		{
-			property: "og:image:width",
-			content: "1200",
-		},
-		{
-			property: "og:image:height",
-			content: "630",
-		},
-		{
-			name: "twitter:card",
-			content: "Lix file manager with build-in change control",
-		},
-		{
-			property: "twitter:url",
-			content: "https://lix.opral.com/",
-		},
-		{
-			name: "twitter:title",
-			content: "Lix file manager",
-		},
-		{
-			name: "twitter:description",
-			content:
-				"Lix file manager understands changes in your files, making it easy to see detailed updates, collaborate, comment, and automate tasks directly within your documents.",
-		},
-		{
-			name: "twitter:image:src",
-			content: "https://lix.opral.com/images/og-image-lix.png",
-		},
-	]
+  const ogImage = [
+    {
+      property: "og:url",
+      content: "https://lix.opral.com/file-manager",
+    },
+    {
+      property: "og:type",
+      content: "website",
+    },
+    {
+      property: "og:title",
+      content: "Lix file manager",
+    },
+    {
+      property: "og:description",
+      content:
+        "Lix file manager understands changes in your files, making it easy to see detailed updates, collaborate, comment, and automate tasks directly within your documents.",
+    },
+    {
+      property: "og:image",
+      content: "https://lix.opral.com/images/og-image-lix.png",
+    },
+    {
+      property: "og:image:type",
+      content: "image/png",
+    },
+    {
+      property: "og:image:width",
+      content: "1200",
+    },
+    {
+      property: "og:image:height",
+      content: "630",
+    },
+    {
+      name: "twitter:card",
+      content: "Lix file manager with build-in change control",
+    },
+    {
+      property: "twitter:url",
+      content: "https://lix.opral.com/",
+    },
+    {
+      name: "twitter:title",
+      content: "Lix file manager",
+    },
+    {
+      name: "twitter:description",
+      content:
+        "Lix file manager understands changes in your files, making it easy to see detailed updates, collaborate, comment, and automate tasks directly within your documents.",
+    },
+    {
+      name: "twitter:image:src",
+      content: "https://lix.opral.com/images/og-image-lix.png",
+    },
+  ];
 
-	return [
-		{ title: "Lix file manager" },
-		{
-			name: "description",
-			content:
-				"The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
-		},
-		{
-			name: "keywords",
-			content: "change control, file-based apps, collaboration, automation, change graph",
-		},
-		...ogImage,
-	]
-}
+  return [
+    { title: "Lix file manager" },
+    {
+      name: "description",
+      content:
+        "The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
+    },
+    {
+      name: "keywords",
+      content:
+        "change control, file-based apps, collaboration, automation, change graph",
+    },
+    ...ogImage,
+  ];
+};
 
 const faq = [
-	{
-		question: "When will this be available for general use?",
-		answer:
-			"Lix is currently in the closed beta phase, where we're actively refining features based on user feedback. We’re excited to announce a launch event on December 16th. Sign up to join and be among the first to experience the release!",
-	},
-	{
-		question: "How does this integrate with my already existing software?",
-		answer:
-			"Lix is file-based, meaning you can seamlessly use your preferred applications alongside Lix’s internal tools. For instance, you can edit a CSV file in Numbers or Excel, and once you're done, simply upload it back to the Lix file manager. Lix will automatically understand the changes you made.",
-	},
-	{
-		question: "Where does my data get stored?",
-		answer:
-			"By default, your data is stored locally on your device, allowing for full offline support out of the box. Your files are only synced with other users or cloud storage when you choose to do so, ensuring complete control over your data.",
-	},
-	{
-		question: "How Lix compare to Git / version control?",
-		answer:
-			"Lix focuses on simplifying file management and collaboration, especially for non-developers. Read more about that in on lix.opral.com",
-	},
-	{
-		question: "Is Lix free or do I need to buy it?",
-		answer:
-			"The private beta will be completely free to use. As we approach the official launch, we’re still finalizing future pricing plans.",
-	},
-	{
-		question: "Does Lix also work with AI?",
-		answer:
-			"Yes! Lix offers a flexible automation surface where you can connect any AI API of your choice. Additionally, native AI features are on our roadmap.",
-	},
-]
+  {
+    question: "When will this be available for general use?",
+    answer:
+      "Lix is currently in the closed beta phase, where we're actively refining features based on user feedback. We’re excited to announce a launch event on December 16th. Sign up to join and be among the first to experience the release!",
+  },
+  {
+    question: "How does this integrate with my already existing software?",
+    answer:
+      "Lix is file-based, meaning you can seamlessly use your preferred applications alongside Lix’s internal tools. For instance, you can edit a CSV file in Numbers or Excel, and once you're done, simply upload it back to the Lix file manager. Lix will automatically understand the changes you made.",
+  },
+  {
+    question: "Where does my data get stored?",
+    answer:
+      "By default, your data is stored locally on your device, allowing for full offline support out of the box. Your files are only synced with other users or cloud storage when you choose to do so, ensuring complete control over your data.",
+  },
+  {
+    question: "How Lix compare to Git / version control?",
+    answer:
+      "Lix focuses on simplifying file management and collaboration, especially for non-developers. Read more about that in on lix.opral.com",
+  },
+  {
+    question: "Is Lix free or do I need to buy it?",
+    answer:
+      "The private beta will be completely free to use. As we approach the official launch, we’re still finalizing future pricing plans.",
+  },
+  {
+    question: "Does Lix also work with AI?",
+    answer:
+      "Yes! Lix offers a flexible automation surface where you can connect any AI API of your choice. Additionally, native AI features are on our roadmap.",
+  },
+];
 
 const automatedTasks = [
-	{
-		title: "Build pipelines",
-	},
-	{
-		title: "Quality checks",
-	},
-	{
-		title: "Connect external APIs",
-	},
-]
+  {
+    title: "Build pipelines",
+  },
+  {
+    title: "Quality checks",
+  },
+  {
+    title: "Connect external APIs",
+  },
+];
 
 const collaborationFeatures = [
-	{
-		title: "Sync your lix with others",
-		description: "Easily share your Lix with others to keep everyone on the same page.",
-		icon: <IconSync />,
-	},
-	{
-		title: "Create and share proposals",
-		description: "Draft proposals, gather feedback, and refine your ideas—all in one platform.",
-		icon: <IconBranch />,
-	},
-	{
-		title: "Achieve quality through review",
-		description:
-			"Collaborate with your team to review files, make edits, and ensure top-notch quality.",
-		icon: <IconConversation />,
-	},
-]
+  {
+    title: "Sync your lix with others",
+    description:
+      "Easily share your Lix with others to keep everyone on the same page.",
+    icon: <IconSync />,
+  },
+  {
+    title: "Create and share proposals",
+    description:
+      "Draft proposals, gather feedback, and refine your ideas—all in one platform.",
+    icon: <IconBranch />,
+  },
+  {
+    title: "Achieve quality through review",
+    description:
+      "Collaborate with your team to review files, make edits, and ensure top-notch quality.",
+    icon: <IconConversation />,
+  },
+];
 
 const createFeatures = [
   {
@@ -162,7 +164,6 @@ const createFeatures = [
 export default function FileManager() {
   return (
     <>
-      <Banner />
       <div className="w-full bg-slate-50">
         <Header />
       </div>

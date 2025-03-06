@@ -113,7 +113,26 @@ console.log(localizeHref("/blog", { locale: "de" })); // "/de/blog"
 
 ## Choosing your strategy
 
-You likely want to use one of the strategies provided by Inlang. Visit the [strategy documentation](./strategy.md) to learn more.
+You likely want to use one of the built-in strategies. Visit the [strategy documentation](./strategy.md) to learn more.
+
+## Dynamically calling messages
+
+You can dynamically call messages by specifying what messages you expect beforehand. Specifying the messages beforehand preserves tree-shaking. 
+
+```ts
+import { m } from "./paraglide/messages.js";
+
+const messages = {
+  greeting: m.greeting,
+  goodbye: m.goodbye
+}
+
+let messageKey = "greeting";
+
+console.log(messages[messageKey]()); 
+// "Hello World!"
+```
+
 
 ## Advanced usage 
 

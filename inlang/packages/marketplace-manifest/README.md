@@ -1,9 +1,27 @@
-# inlang Marketplace
+# Marketplace manifest
 
-inlang's Marketplace provides you with apps, plugins and lint rules for your next project. You can use the filter options to find the right item for your project.
+## Example
 
-## How to publish to the Marketplace
-
-If you have created a plugin or lint rule, you can publish it to the Marketplace in three easy steps:
-
-See [How to publish to the Marketplace](https://inlang.com/documentation/publish-to-marketplace) for more information.
+```json
+{
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
+	"id": "plugin.inlang.mFunctionMatcher",
+	"icon": "./assets/m.png",
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0",
+	"displayName": {
+		"en": "m-function-matcher"
+	},
+	"description": {
+		"en": "Enables the inlang Visual Studio Code extension (Sherlock) to work with paraglide"
+	},
+	"pages": {
+		"/": "./README.md",
+		"/changelog": "./CHANGELOG.md"
+	},
+	"keywords": [
+    "example"
+	],
+}
+```

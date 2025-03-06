@@ -1,5 +1,11 @@
 # @inlang/plugin-t-function-matcher
 
+## 2.0.3
+
+### Patch Changes
+
+- 73cc245: fix: key name of sherlock extension
+
 ## 2.0.2
 
 ### Patch Changes

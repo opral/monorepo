@@ -1,7 +1,9 @@
 {
 	"name": "@lix-js/plugin-csv",
 	"type": "module",
-	"private": true,
+	"publishConfig": {
+		"access": "public"
+	},
 	"version": "0.1.3",
 	"license": "Apache-2.0",
 	"exports": {

@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 2.0.5
+
+### Patch Changes
+
+- aeae571: fix: save the inlang project after message extraction
+
 ## 2.0.4
 
 ### Patch Changes

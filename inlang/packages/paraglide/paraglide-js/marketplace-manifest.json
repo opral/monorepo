@@ -19,7 +19,7 @@
 		"": {
 			"/": "./docs/introduction.md",
 			"/limitations": "./docs/limitations.md",
-			"/scaling": "./docs/scaling.md",
+			"/benchmark": "./benchmark/README.md",
 			"/migrating-to-v2": "./docs/migrating-to-v2.md",
 			"/changelog": "./CHANGELOG.md"
 		},
@@ -41,17 +41,17 @@
 			"/compiling-messages": "./docs/compiling-messages.md",
 			"/incremental-migration": "./examples/incremental-migration/README.md"
 		},
-		"Ecosystem": {
-			"Sherlock VSCode extension": "/m/r7kp499g/app-inlang-ideExtension",
-			"CLI for automation": "/m/2qj2w8pu/app-inlang-cli",
-			"Fink web editor": "/m/tdozzpar/app-inlang-finkLocalizationEditor"
-		},
 		"Reference": {
 			"/architecture": "./docs/architecture.md",
 			"/compiler-options": "./docs-api/compiler-options.md",
 			"/runtime": "./docs-api/runtime/-internal-.md",
 			"/server": "./docs-api/server/-internal-.md",
 			"/errors": "./docs/errors.md"
+		},
+		"Ecosystem": {
+			"Sherlock VSCode extension": "/m/r7kp499g/app-inlang-ideExtension",
+			"CLI for automation": "/m/2qj2w8pu/app-inlang-cli",
+			"Fink web editor": "/m/tdozzpar/app-inlang-finkLocalizationEditor"
 		}
 	},
 	"keywords": [
