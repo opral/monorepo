@@ -26,6 +26,7 @@ export const runBuilds = async () => {
 			{
 				Locales: b.locales,
 				Messages: b.messages,
+				"Namespace Size": b.namespaceSize || b.messages,
 				"% Dynamic": b.percentDynamic,
 				Mode: b.mode,
 				Library: b.library,
@@ -51,9 +52,8 @@ export const runBuilds = async () => {
 			locales,
 			numMessages: b.messages,
 			numDynamic,
+			namespaceSize: b.namespaceSize,
 		});
-
-		await fs.cp("./messages", `./dist/${base}/messages`, { recursive: true });
 
 		if (b.library === "paraglide") {
 			await prepareParaglide({ locales });
@@ -113,6 +113,7 @@ export const runBuilds = async () => {
 				);
 			}
 		}
+		await fs.cp("./messages", `./dist/${base}/messages`, { recursive: true });
 	}
 };
 
@@ -170,10 +171,16 @@ async function generateMessages(args: {
 	locales: string[];
 	numMessages: number;
 	numDynamic: number;
+	namespaceSize?: number;
 }) {
+	// Use namespaceSize if provided, otherwise default to numMessages
+	const totalMessages = args.namespaceSize || args.numMessages;
+
 	let messages: Record<string, string> = {};
 	let msgI = 0;
-	for (let i = 0; i < args.numMessages; i++) {
+
+	// Generate all messages for the namespace
+	for (let i = 0; i < totalMessages; i++) {
 		if (i < args.numDynamic) {
 			messages[`message${i}dynamic`] = sampleMessages[msgI] + " {{name}}";
 		} else {
@@ -182,10 +189,11 @@ async function generateMessages(args: {
 		msgI++;
 		// reset the message index to 0 to
 		// loop over the samples again
-		if (msgI === 99) {
+		if (msgI === sampleMessages.length) {
 			msgI = 0;
 		}
 	}
+
 	for (const locale of args.locales) {
 		await fs.mkdir(`./messages`, { recursive: true });
 		await fs.writeFile(
@@ -193,7 +201,10 @@ async function generateMessages(args: {
 			JSON.stringify(messages, null, 2)
 		);
 	}
-	return Object.keys(messages);
+
+	// Return only the keys that should be rendered on the page
+	// This is limited to numMessages, even if namespaceSize is larger
+	return Object.keys(messages).slice(0, args.numMessages);
 }
 
 async function prepareParaglide(args: { locales: string[] }) {
