@@ -330,9 +330,6 @@ importers:
       i18next-http-backend:
         specifier: ^3.0.2
         version: 3.0.2
-      lorem-ipsum:
-        specifier: ^2.0.8
-        version: 2.0.8
     devDependencies:
       '@hono/node-server':
         specifier: ^1.13.7
@@ -13289,11 +13286,6 @@ packages:
 
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
-    hasBin: true
-
-  lorem-ipsum@2.0.8:
-    resolution: {integrity: sha512-5RIwHuCb979RASgCJH0VKERn9cQo/+NcAi2BMe9ddj+gp7hujl6BI+qdOG4nVsLDpwWEJwTVYXNKP6BGgbcoGA==}
-    engines: {node: '>= 8.x', npm: '>= 5.x'}
     hasBin: true
 
   loupe@2.3.7:
@@ -32793,10 +32785,6 @@ snapshots:
   loose-envify@1.4.0:
     dependencies:
       js-tokens: 4.0.0
-
-  lorem-ipsum@2.0.8:
-    dependencies:
-      commander: 9.5.0
 
   loupe@2.3.7:
     dependencies:

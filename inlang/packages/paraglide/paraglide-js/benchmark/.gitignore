@@ -26,4 +26,5 @@ dist-ssr
 # dynamically generated 
 src/pages
 src/i18n/generated.ts
+messages
 project.inlang
