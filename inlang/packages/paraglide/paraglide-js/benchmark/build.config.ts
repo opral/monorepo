@@ -11,10 +11,10 @@ export const builds: BuildConfig[] = [
 			paraglide: ["default"],
 			i18next: ["http-backend"],
 		},
-		locales: [5],
-		messages: [200],
+		locales: [2, 5, 10, 20],
+		messages: [100, 200, 300],
 		percentDynamic: 20,
-		namespaceSizes: [300],
+		namespaceSizes: [300, 600, 900],
 	}),
 ];
 
