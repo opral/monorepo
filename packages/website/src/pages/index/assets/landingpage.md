@@ -6,7 +6,8 @@ Inlang is an *open file format* for internationalization *i18n* that provides an
 
 By defining a standardized file format for i18n, inlang enables interoperability between i18n solutions (translation management apps, developer tools, etc.).
 
-![interop](interop.png)![collaboration](collaboration.png)
+![interop](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/src/pages/index/assets/interop.png)
+![collaboration](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/src/pages/index/assets/collaboration.png)
 
 ### SDK for building i18n solutions
 
