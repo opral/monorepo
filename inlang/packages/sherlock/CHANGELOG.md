@@ -1,5 +1,13 @@
 # inlang-vs-code-extension
 
+## 2.0.6
+
+### Patch Changes
+
+- Updated dependencies [8b20480]
+- Updated dependencies [f173871]
+  - @inlang/rpc@0.3.42
+
 ## 2.0.5
 
 ### Patch Changes
