@@ -1,14 +1,13 @@
----
-imports:
-  - "https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-video.js"
----
-
 # Contributing
+
+<a href="https://youtu.be/A5x4FALiOUg" target="_blank">
+  <img src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/paraglide/paraglide-js/assets/contributing-youtube.png"
+  alt="video tutorial on how to contribute" />
+</a>
+
 
 > [!NOTE]
 > This is based on the [monorepo's CONTRIBUTING.md](https://github.com/opral/monorepo/blob/main/CONTRIBUTING.md). If something is unclear, please refer to the monorepo's CONTRIBUTING.md and then open a PR to update this file.
-
-<doc-video src="https://youtu.be/A5x4FALiOUg"></doc-video>
 
 ## Prerequisites
 
