@@ -140,69 +140,102 @@ async function runBenchmarks() {
 	// Generate markdown with tables
 	let markdownOutput = "# Benchmark Results\n\n";
 
-	// Generate CSV data
-	let csvData: string[][] = [];
-
-	// Get all library-mode combinations
-	const allLibraryModeKeys = Array.from(libraryModeMap.keys());
-	const allLibraryModeNames = Array.from(libraryModeMap.values());
-
-	// Sort library modes (i18next first, then paraglide)
-	const sortedIndices = allLibraryModeKeys
-		.map((key, index) => ({ key, index }))
-		.sort((a, b) => {
-			if (a.key.startsWith("paraglide")) return 1; // paraglide comes second
-			if (b.key.startsWith("paraglide")) return -1;
-			return a.key.localeCompare(b.key);
-		})
-		.map(item => item.index);
-
-	// Get sorted display names
-	const sortedLibraryModeNames = sortedIndices.map(index => allLibraryModeNames[index]);
-	const sortedLibraryModeKeys = sortedIndices.map(index => allLibraryModeKeys[index]);
-
-	// Add header row
-	csvData.push(["Locales", "Messages", "Namespace Size", ...sortedLibraryModeNames]);
-
-	// Add data rows
+	// Create a unique set of configurations
+	type ConfigKey = string;
+	type LibraryResults = Record<string, number>; // library-mode key -> size
+	
+	// Group results by configuration
+	const configResults = new Map<ConfigKey, { 
+		locale: number, 
+		message: number, 
+		namespaceSize: number | undefined,
+		results: LibraryResults 
+	}>();
+	
+	// Collect all configurations and their results
 	for (const locale of locales) {
-		// Add locale header row (with empty cells for libraries)
-		csvData.push([`**${locale}**`, "", "", ...sortedLibraryModeKeys.map(() => "")]);
-
-		// Add message rows for this locale
 		for (const message of messages) {
-			if (message === 0) continue; // Skip 0 messages
-			
-			// Group by namespace size
 			for (const namespaceSize of [...namespaceSizes, undefined]) {
 				const nsKey = namespaceSize?.toString() || "default";
-				// For undefined namespace size, use the message count as the namespace size
-				const nsDisplayValue = namespaceSize !== undefined ? namespaceSize : message;
-				const libraryResults = sortedLibraryModeKeys.map((libraryModeKey) =>
-					formatBytes(results[locale][message][nsKey][libraryModeKey])
-				);
+				const nsValue = namespaceSize !== undefined ? namespaceSize : message;
 				
-				// Only add row if there are results for this configuration
-				if (libraryResults.some(result => result !== "0 B")) {
-					csvData.push([
-						"",
-						message.toString(),
-						nsDisplayValue.toString(),
-						...libraryResults,
-					]);
+				// Create a unique key for this configuration
+				const configKey = `l${locale}-m${message}-ns${nsValue}`;
+				
+				if (!configResults.has(configKey)) {
+					configResults.set(configKey, {
+						locale,
+						message,
+						namespaceSize: nsValue,
+						results: {}
+					});
+				}
+				
+				// Add library results for this configuration
+				const libraryResults = configResults.get(configKey)!.results;
+				for (const [key, _] of libraryModeMap) {
+					libraryResults[key] = results[locale][message][nsKey][key];
 				}
 			}
 		}
 	}
-
-	// Convert CSV data to CSV string
-	const csvString = csvData.map((row) => row.join(",")).join("\n");
-
-	// Convert CSV to markdown table
-	const markdownTable = csvToMarkdown(csvString, ",", true);
-
-	// Add table to output
-	markdownOutput += markdownTable + "\n\n";
+	
+	// Sort configurations
+	const sortedConfigs = Array.from(configResults.entries())
+		.sort((a, b) => {
+			// First sort by locale
+			if (a[1].locale !== b[1].locale) {
+				return a[1].locale - b[1].locale;
+			}
+			// Then by message count
+			if (a[1].message !== b[1].message) {
+				return a[1].message - b[1].message;
+			}
+			// Finally by namespace size
+			return (a[1].namespaceSize || 0) - (b[1].namespaceSize || 0);
+		});
+	
+	// Generate a section for each configuration
+	let runNumber = 1;
+	for (const [configKey, config] of sortedConfigs) {
+		// Skip configurations with no results
+		const hasResults = Object.values(config.results).some(size => size > 0);
+		if (!hasResults) continue;
+		
+		// Add configuration details as code blocks
+		markdownOutput += `\`Locales: ${config.locale}\`  \n`;
+		markdownOutput += `\`Messages: ${config.message}\`   \n`;
+		markdownOutput += `\`Namespace Size: ${config.namespaceSize}\` \n\n`;
+		
+		// Create table for this configuration
+		let tableData: string[][] = [];
+		tableData.push(["Library", "Total Transfer Size"]);
+		
+		// Sort libraries (paraglide first, then i18next)
+		const sortedLibraryEntries = Object.entries(config.results)
+			.sort((a, b) => {
+				if (a[0].startsWith("paraglide")) return -1; // paraglide comes first
+				if (b[0].startsWith("paraglide")) return 1;
+				return a[0].localeCompare(b[0]);
+			});
+		
+		// Add library results
+		for (const [key, size] of sortedLibraryEntries) {
+			if (size === 0) continue; // Skip libraries with no results
+			
+			const displayName = libraryModeMap.get(key) || key;
+			tableData.push([displayName, formatBytes(size)]);
+		}
+		
+		// Convert to CSV format for csvToMarkdown
+		const csvData = tableData.map(row => row.join(',')).join('\n');
+		
+		// Convert to markdown table using csvToMarkdown
+		const markdownTable = csvToMarkdown(csvData, ',', true);
+		
+		markdownOutput += markdownTable + '\n\n';
+		runNumber++;
+	}
 
 	// Write the markdown tables to a file for easy copying
 	fs.writeFileSync("benchmark-results.md", markdownOutput);
