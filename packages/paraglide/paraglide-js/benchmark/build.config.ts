@@ -7,12 +7,14 @@ import { type UserConfig } from "vite";
  */
 export const builds: BuildConfig[] = [
 	...createBuildMatrix({
-		libraries: ["paraglide", "i18next"],
-		locales: [5, 10, 20],
-		messages: [100, 200, 300],
-		modes: ["spa-on-demand", "spa-bundled", "ssg"],
+		libraries: {
+			paraglide: ["default"],
+			i18next: ["http-backend"],
+		},
+		locales: [5],
+		messages: [200],
 		percentDynamic: 20,
-		namespaceSizes: [300, 1000],
+		namespaceSizes: [300],
 	}),
 ];
 
@@ -20,6 +22,7 @@ export function createViteConfig(args: {
 	outdir: string;
 	mode: string;
 	library: string;
+	libraryMode: string;
 	base: string;
 	buildName: string;
 	generateAboutPage: boolean;
@@ -43,6 +46,7 @@ export function createViteConfig(args: {
 			"process.env.MODE": JSON.stringify(args.mode),
 			"process.env.BUILD_NAME": JSON.stringify(args.buildName),
 			"process.env.LIBRARY": JSON.stringify(args.library),
+			"process.env.LIBRARY_MODE": JSON.stringify(args.libraryMode),
 			"process.env.GENERATE_ABOUT_PAGE": JSON.stringify(args.generateAboutPage),
 			"process.env.IS_CLIENT": JSON.stringify("true"),
 		},
@@ -50,17 +54,17 @@ export function createViteConfig(args: {
 }
 
 export function createBuildMatrix(config: {
-	libraries: Array<BuildConfig["library"]>;
+	libraries: Record<string, string[]>;
 	locales: Array<number>;
 	messages: Array<number>;
-	modes: Array<BuildConfig["mode"]>;
 	percentDynamic: number;
 	generateAboutPage?: boolean;
 	namespaceSizes?: Array<number>;
 }): BuildConfig[] {
 	const builds = [];
-	for (const library of config.libraries) {
-		for (const mode of config.modes) {
+
+	for (const [library, modes] of Object.entries(config.libraries)) {
+		for (const mode of modes) {
 			for (const locale of config.locales) {
 				for (const message of config.messages) {
 					if (config.namespaceSizes && config.namespaceSizes.length > 0) {
@@ -74,24 +78,24 @@ export function createBuildMatrix(config: {
 							}
 
 							builds.push({
-								library,
+								library: library as BuildConfig["library"],
+								libraryMode: mode,
 								locales: locale,
 								messages: message,
 								namespaceSize,
 								percentDynamic: config.percentDynamic,
-								mode,
-								generateAboutPage: config.generateAboutPage ?? false,
+								generateAboutPage: config.generateAboutPage ?? true,
 							});
 						}
 					} else {
 						// Default behavior - namespace size equals message count
 						builds.push({
-							library,
+							library: library as BuildConfig["library"],
+							libraryMode: mode,
 							locales: locale,
 							messages: message,
 							percentDynamic: config.percentDynamic,
-							mode,
-							generateAboutPage: config.generateAboutPage ?? false,
+							generateAboutPage: config.generateAboutPage ?? true,
 						});
 					}
 				}
@@ -105,8 +109,11 @@ export type BuildConfig = {
 	locales: number;
 	messages: number;
 	percentDynamic: number;
-	mode: "spa-bundled" | "spa-on-demand" | "ssg";
 	library: "paraglide" | "i18next";
+	/**
+	 * The mode for the specific library (e.g., "default", "experimental-", "http-backend")
+	 */
+	libraryMode: string;
 	/**
 	 * Mainly useful for testing routing.
 	 */
@@ -124,12 +131,12 @@ export function buildConfigToString(config: BuildConfig): string {
 		config.namespaceSize && config.namespaceSize !== config.messages
 			? `-ns${config.namespaceSize}`
 			: "";
-	return `l${config.locales}-m${config.messages}${namespaceStr}-d${config.percentDynamic}-${config.mode}-${config.library}`;
+	return `l${config.locales}-m${config.messages}${namespaceStr}-d${config.percentDynamic}-${config.library}-${config.libraryMode}`;
 }
 
 export function buildConfigFromString(str: string): BuildConfig {
 	const parts = str.split("-");
-	let locales, messages, namespaceSize, percentDynamic, mode, library;
+	let locales, messages, namespaceSize, percentDynamic, library, libraryMode;
 
 	// Extract parts based on prefix
 	for (const part of parts) {
@@ -137,13 +144,13 @@ export function buildConfigFromString(str: string): BuildConfig {
 		else if (part.startsWith("m")) messages = Number(part.substring(1));
 		else if (part.startsWith("ns")) namespaceSize = Number(part.substring(2));
 		else if (part.startsWith("d")) percentDynamic = Number(part.substring(1));
-		else if (
-			part === "spa-bundled" ||
-			part === "spa-on-demand" ||
-			part === "ssg"
-		)
-			mode = part;
 		else if (part === "paraglide" || part === "i18next") library = part;
+		else if (
+			part === "default" ||
+			part === "experimental-middleware-optimizations" ||
+			part === "http-backend"
+		)
+			libraryMode = part;
 	}
 
 	return {
@@ -151,8 +158,8 @@ export function buildConfigFromString(str: string): BuildConfig {
 		messages: messages!,
 		namespaceSize,
 		percentDynamic: percentDynamic!,
-		mode: mode! as BuildConfig["mode"],
 		library: library as BuildConfig["library"],
+		libraryMode: libraryMode!,
 		generateAboutPage: true,
 	};
 }

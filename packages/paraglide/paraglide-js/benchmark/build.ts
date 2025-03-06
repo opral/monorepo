@@ -28,8 +28,8 @@ export const runBuilds = async () => {
 				Messages: b.messages,
 				"Namespace Size": b.namespaceSize || b.messages,
 				"% Dynamic": b.percentDynamic,
-				Mode: b.mode,
 				Library: b.library,
+				"Library Mode": b.libraryMode,
 			},
 		]);
 		const locales = sampleLocales.slice(0, b.locales);
@@ -87,35 +87,36 @@ export const runBuilds = async () => {
 				buildName: base,
 				outdir,
 				base,
-				mode: b.mode,
+				mode: "ssg", // Always use SSG mode
 				library: b.library,
+				libraryMode: b.libraryMode, // Pass libraryMode to Vite config
 				generateAboutPage: b.generateAboutPage,
 			})
 		);
 
 		// server side build
-		if (b.mode === "ssg") {
-			process.env.BASE = base;
-			process.env.MODE = b.mode;
-			process.env.LIBRARY = b.library;
-			process.env.IS_CLIENT = "false";
-			const rootHtml = await fs.readFile(`./${outdir}/index.html`, "utf-8");
-			const { render: ssrRender } = await import(`./src/entry-server.ts`);
+		process.env.BASE = base;
+		process.env.LIBRARY = b.library;
+		process.env.LIBRARY_MODE = b.libraryMode; // Set libraryMode in environment
+		process.env.IS_CLIENT = "false";
+		const rootHtml = await fs.readFile(`./${outdir}/index.html`, "utf-8");
+		const { render: ssrRender } = await import(`./src/entry-server.ts`);
 
-			for (const path of staticPaths) {
-				const { html } = await ssrRender(path);
-				const outputPath = normalize(`./${outdir}/${path}/index.html`);
-				await fs.mkdir(normalize(`./${outdir}/${path}`), { recursive: true });
-				await fs.writeFile(
-					outputPath,
-					rootHtml.replace("<!--app-html-->", html),
-					"utf-8"
-				);
-			}
+		// render each route
+		for (const path of staticPaths) {
+			const { html } = await ssrRender(path);
+			const outputPath = normalize(`./${outdir}/${path}/index.html`);
+			await fs.mkdir(normalize(`./${outdir}/${path}`), { recursive: true });
+			await fs.writeFile(
+				outputPath,
+				rootHtml.replace("<!--app-html-->", html),
+				"utf-8"
+			);
 		}
 		await fs.cp("./messages", `./dist/${base}/messages`, { recursive: true });
 	}
-};
+}
+
 
 async function generatePage(args: {
 	path: string;

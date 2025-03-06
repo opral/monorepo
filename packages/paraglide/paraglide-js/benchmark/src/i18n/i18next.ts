@@ -31,7 +31,9 @@ export const init = async () => {
 	if (process.env.IS_CLIENT) {
 		// don't try to load the messages during ssg
 		if (typeof window !== "undefined") {
-			if (process.env.MODE === "spa-on-demand") {
+			// Check for specific library modes
+			if (process.env.LIBRARY === "i18next" && process.env.LIBRARY_MODE === "http-backend") {
+				// HTTP Backend mode
 				await i18next
 					.use(LanguageDetector)
 					.use(HttpApi)
@@ -42,7 +44,8 @@ export const init = async () => {
 						},
 						lng: "en",
 					});
-			} else if (process.env.MODE === "spa-bundled") {
+			} else {
+				// Default bundled mode
 				const jsonFiles: Record<string, { default: string }> = import.meta.glob(
 					"../../messages/*.json",
 					{
