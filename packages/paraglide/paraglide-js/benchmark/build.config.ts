@@ -16,6 +16,7 @@ export function createViteConfig(args: {
 	mode: string;
 	library: string;
 	base: string;
+	buildName: string;
 	generateAboutPage: boolean;
 }): UserConfig {
 	return {
@@ -35,6 +36,7 @@ export function createViteConfig(args: {
 			// using process.env to make ssg build work
 			"process.env.BASE": JSON.stringify(args.base),
 			"process.env.MODE": JSON.stringify(args.mode),
+			"process.env.BUILD_NAME": JSON.stringify(args.buildName),
 			"process.env.LIBRARY": JSON.stringify(args.library),
 			"process.env.GENERATE_ABOUT_PAGE": JSON.stringify(args.generateAboutPage),
 			"process.env.IS_CLIENT": JSON.stringify("true"),

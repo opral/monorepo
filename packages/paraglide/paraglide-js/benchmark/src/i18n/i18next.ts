@@ -37,7 +37,7 @@ export const init = async () => {
 					.use(HttpApi)
 					.init({
 						backend: {
-							loadPath: "/messages/{{lng}}.json",
+							loadPath: `/${process.env.BUILD_NAME}/messages/{{lng}}.json`,
 							load: "languageOnly",
 						},
 						lng: "en",

@@ -19,7 +19,6 @@ export const runBuilds = async () => {
 
 	// copy the message translation files in case a libary needs them
 	await fs.mkdir("./dist");
-	await fs.cp("./messages", "./dist/messages", { recursive: true });
 
 	for (const [i, b] of builds.entries()) {
 		console.log(`Build ${i + 1} of ${builds.length}:`);
@@ -54,6 +53,8 @@ export const runBuilds = async () => {
 			numDynamic,
 		});
 
+		await fs.cp("./messages", `./dist/${base}/messages`, { recursive: true });
+
 		if (b.library === "paraglide") {
 			await prepareParaglide({ locales });
 		}
@@ -83,6 +84,7 @@ export const runBuilds = async () => {
 		// client side build
 		await build(
 			createViteConfig({
+				buildName: base,
 				outdir,
 				base,
 				mode: b.mode,
