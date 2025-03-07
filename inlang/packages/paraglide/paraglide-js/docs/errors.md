@@ -11,9 +11,9 @@ Paraglide JS was not able to resolve a locale. This can happen if:
 +strategy: ["cookie", "baseLocale"]
 ```
 
+  
 2. You are using `overwriteGetLocale()` and `overwriteSetLocale()` but forgot to call them at the root/entrypoint of your app.
 
-If you use an empty strategy array `[]`, and overwrite the locale getter and setter, make sure to call `overwriteGetLocale()` and `overwriteSetLocale()` at the root/entrypoint of your app.
 
 ```tsx
 import { overwriteGetLocale, overwriteSetLocale } from "./paraglide/runtime.js";
@@ -32,6 +32,7 @@ export default function App() {
 }
 ```
 
+  
 3. You are using the `url` strategy but call messages outside of a request context. 
 
 ```
@@ -63,4 +64,16 @@ app.use(paraglideMiddleware)
 app.get("/", (req, res) => {
 	console.log(m.hello());
 });
+```
+
+   
+4. You make API requests and only have `strategy: ["url"]` set. 
+
+Paraglide JS will only extract the locale from a URL if the request is a document request, indicated by [Sec-Fetch-Dest: document](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Dest) to distinguish it from API requests. 
+
+Add `cookie` or `baseLocale` to your strategy array to ensure that the locale is always resolved in API requests as well.
+
+```diff
+-strategy: ["url"]
++strategy: ["url", "cookie", "baseLocale"]
 ```
