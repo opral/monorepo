@@ -9,7 +9,7 @@ export default {
 			paraglideWebpackPlugin({
 				outdir: "./src/paraglide",
 				project: "./project.inlang",
-				strategy: ["url", "baseLocale"],
+				strategy: ["url", "cookie", "baseLocale"],
 			})
 		);
 

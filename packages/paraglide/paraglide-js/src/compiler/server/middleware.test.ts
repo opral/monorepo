@@ -16,7 +16,9 @@ test("sets the locale and origin", async () => {
 	// simulating multiple requests that could interfere with each other
 	await Promise.all([
 		runtime.paraglideMiddleware(
-			new Request(new URL("https://example.com/page")),
+			new Request(new URL("https://example.com/page"), {
+				headers: { "Sec-Fetch-Dest": "document" },
+			}),
 			() => {
 				expect(runtime.getLocale()).toBe("en");
 				expect(runtime.getUrlOrigin()).toBe("https://example.com");
@@ -24,7 +26,9 @@ test("sets the locale and origin", async () => {
 			}
 		),
 		runtime.paraglideMiddleware(
-			new Request(new URL("https://peter.com/de/page")),
+			new Request(new URL("https://peter.com/de/page"), {
+				headers: { "Sec-Fetch-Dest": "document" },
+			}),
 			() => {
 				expect(runtime.getLocale()).toBe("de");
 				expect(runtime.getUrlOrigin()).toBe("https://peter.com");
@@ -46,7 +50,9 @@ test("delocalizes the url if the url strategy is used and returns the locale", a
 		},
 	});
 
-	const request = new Request(new URL("https://example.com/de/page"));
+	const request = new Request(new URL("https://example.com/de/page"), {
+		headers: { "Sec-Fetch-Dest": "document" },
+	});
 
 	const result = await runtime.paraglideMiddleware(request, (args) => {
 		expect(args.locale).toBe("de");
@@ -66,7 +72,9 @@ test("does not delocalize the url if the url strategy is not used", async () => 
 		},
 	});
 
-	const request = new Request(new URL("https://example.com/de/page"));
+	const request = new Request(new URL("https://example.com/de/page"), {
+		headers: { "Sec-Fetch-Dest": "document" },
+	});
 
 	const result = await runtime.paraglideMiddleware(request, (args) => {
 		expect(args.locale).toBe("en");
@@ -101,6 +109,7 @@ test("redirects to localized URL when non-URL strategy determines locale", async
 	const request = new Request("https://example.com/en/some-path", {
 		headers: {
 			cookie: `PARAGLIDE_LOCALE=fr`,
+			"Sec-Fetch-Dest": "document",
 		},
 	});
 
@@ -140,6 +149,7 @@ test("does not redirect if URL already matches determined locale", async () => {
 	// Request to already localized URL matching cookie locale
 	const request = new Request("https://example.com/fr/some-path", {
 		headers: {
+			"Sec-Fetch-Dest": "document",
 			cookie: `PARAGLIDE_LOCALE=fr`,
 		},
 	});
@@ -166,7 +176,9 @@ test("works with disableAsyncLocalStorage option", async () => {
 	runtime.setLocale("fr");
 
 	// Create a request with a "de" locale in the URL
-	const request = new Request(new URL("https://example.com/de/page"));
+	const request = new Request(new URL("https://example.com/de/page"), {
+		headers: { "Sec-Fetch-Dest": "document" },
+	});
 
 	// Process the request with AsyncLocalStorage disabled
 	const response = await runtime.paraglideMiddleware(
@@ -205,7 +217,9 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 	// simulating multiple requests that could interference with each other
 	await Promise.all([
 		runtime.paraglideMiddleware(
-			new Request(new URL("https://example.com/page")),
+			new Request(new URL("https://example.com/page"), {
+				headers: { "Sec-Fetch-Dest": "document" },
+			}),
 			() => {
 				expect(runtime.getLocale()).toBe("en");
 				expect(runtime.getUrlOrigin()).toBe("https://example.com");
@@ -215,7 +229,9 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 		),
 
 		runtime.paraglideMiddleware(
-			new Request(new URL("https://peter.com/de/page")),
+			new Request(new URL("https://peter.com/de/page"), {
+				headers: { "Sec-Fetch-Dest": "document" },
+			}),
 			() => {
 				expect(runtime.getLocale()).toBe("de");
 				expect(runtime.getUrlOrigin()).toBe("https://peter.com");
@@ -255,7 +271,11 @@ test("multi pathname localization with optional groups", async () => {
 	expect(
 		await (
 			await runtime.paraglideMiddleware(
-				new Request(new URL("http://example.com/bookstore")),
+				new Request(new URL("http://example.com/bookstore"), {
+					headers: {
+						"Sec-Fetch-Dest": "document",
+					},
+				}),
 				({ locale }) => new Response(locale)
 			)
 		).text()
@@ -264,7 +284,11 @@ test("multi pathname localization with optional groups", async () => {
 	expect(
 		await (
 			await runtime.paraglideMiddleware(
-				new Request(new URL("http://example.com/bookstore/item")),
+				new Request(new URL("http://example.com/bookstore/item"), {
+					headers: {
+						"Sec-Fetch-Dest": "document",
+					},
+				}),
 				({ locale }) => new Response(locale)
 			)
 		).text()
@@ -273,7 +297,11 @@ test("multi pathname localization with optional groups", async () => {
 	expect(
 		await (
 			await runtime.paraglideMiddleware(
-				new Request(new URL("http://example.com/buchladen")),
+				new Request(new URL("http://example.com/buchladen"), {
+					headers: {
+						"Sec-Fetch-Dest": "document",
+					},
+				}),
 				({ locale }) => new Response(locale)
 			)
 		).text()
@@ -282,7 +310,11 @@ test("multi pathname localization with optional groups", async () => {
 	expect(
 		await (
 			await runtime.paraglideMiddleware(
-				new Request(new URL("http://example.com/buchladen/artikel")),
+				new Request(new URL("http://example.com/buchladen/artikel"), {
+					headers: {
+						"Sec-Fetch-Dest": "document",
+					},
+				}),
 				({ locale }) => new Response(locale)
 			)
 		).text()
@@ -313,6 +345,7 @@ test("falls back to next strategy when cookie contains invalid locale", async ()
 	// Request with an invalid locale in cookie
 	const request = new Request("https://example.com/fr/some-path", {
 		headers: {
+			"Sec-Fetch-Dest": "document",
 			cookie: `PARAGLIDE_LOCALE=invalid_locale`,
 		},
 	});
@@ -339,4 +372,113 @@ test("falls back to next strategy when cookie contains invalid locale", async ()
 		expect(args.locale).toBe("en");
 		return new Response();
 	});
+});
+
+// not implemented because users should disable redirects by
+// making another strategy preceed the url strategy
+//
+// strategy: ["cookie", "url"]
+test.skip("doesn't redirect if disableUrlRedirect is true", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr"],
+		compilerOptions: {
+			cookieName: "PARAGLIDE_LOCALE",
+			strategy: ["cookie", "url"],
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:locale/:path(.*)?",
+					deLocalizedNamedGroups: { locale: "en" },
+					localizedNamedGroups: {
+						en: { locale: "en" },
+						fr: { locale: "fr" },
+					},
+				},
+			],
+		},
+	});
+
+	// Create a request that would normally be redirected
+	const request = new Request("https://example.com/en/some-path", {
+		headers: {
+			cookie: `PARAGLIDE_LOCALE=fr`,
+			"Sec-Fetch-Dest": "document",
+		},
+	});
+
+	// Test with disableUrlRedirect = true
+	let middlewareResolveWasCalled = false;
+	await runtime.paraglideMiddleware(
+		request,
+		() => {
+			middlewareResolveWasCalled = true;
+			return new Response("No redirect");
+		}
+		// { disableUrlRedirect: true }
+	);
+
+	// Middleware should be called since redirect is disabled
+	expect(middlewareResolveWasCalled).toBe(true);
+});
+
+test("only redirects if the request.headers.get('Sec-Fetch-Dest') === 'document'", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr"],
+		compilerOptions: {
+			strategy: ["cookie", "url"],
+			cookieName: "PARAGLIDE_LOCALE",
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:locale/:path(.*)?",
+					deLocalizedNamedGroups: { locale: "en" },
+					localizedNamedGroups: {
+						en: { locale: "en" },
+						fr: { locale: "fr" },
+					},
+				},
+			],
+		},
+	});
+
+	// Test with Sec-Fetch-Dest = document (should redirect)
+	const documentRequest = new Request("https://example.com/en/some-path", {
+		headers: {
+			cookie: `PARAGLIDE_LOCALE=fr`,
+			"Sec-Fetch-Dest": "document",
+		},
+	});
+
+	const documentResponse = await runtime.paraglideMiddleware(
+		documentRequest,
+		() => {
+			// This shouldn't be called since we should redirect
+			throw new Error("Should not reach here");
+		}
+	);
+
+	// Should redirect to fr version
+	expect(documentResponse instanceof Response).toBe(true);
+	expect(documentResponse.status).toBe(307);
+	expect(documentResponse.headers.get("Location")).toBe(
+		"https://example.com/fr/some-path"
+	);
+
+	// Test with Sec-Fetch-Dest = empty (should not redirect)
+	const apiRequest = new Request("https://example.com/en/some-path", {
+		headers: {
+			cookie: `PARAGLIDE_LOCALE=fr`,
+			// No Sec-Fetch-Dest header or set to something other than "document"
+			"Sec-Fetch-Dest": "empty",
+		},
+	});
+
+	let apiMiddlewareResolveWasCalled = false;
+	await runtime.paraglideMiddleware(apiRequest, () => {
+		apiMiddlewareResolveWasCalled = true;
+		return new Response("API response");
+	});
+
+	// Middleware should be called since no redirect for API requests
+	expect(apiMiddlewareResolveWasCalled).toBe(true);
 });

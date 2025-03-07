@@ -81,7 +81,10 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 
 	// if the client makes a request to a URL that doesn't match
 	// the localizedUrl, redirect the client to the localized URL
-	if (runtime.strategy.includes("url")) {
+	if (
+		request.headers.get("Sec-Fetch-Dest") === "document" &&
+		runtime.strategy.includes("url")
+	) {
 		const localizedUrl = runtime.localizeUrl(request.url, { locale });
 		if (localizedUrl.href !== request.url) {
 			return Response.redirect(localizedUrl, 307);

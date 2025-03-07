@@ -19,12 +19,12 @@ test("returns the locale from the cookie", async () => {
 	expect(locale).toBe("fr");
 });
 
-test("returns the locale from the pathname", async () => {
+test("returns the locale from the pathname for document requests", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en"],
 		compilerOptions: {
-			strategy: ["url"],
+			strategy: ["url", "baseLocale"],
 			urlPatterns: [
 				{
 					pattern: "https://example.com/:locale/:path*",
@@ -36,7 +36,11 @@ test("returns the locale from the pathname", async () => {
 			],
 		},
 	});
-	const request = new Request("https://example.com/en/home");
+	const request = new Request("https://example.com/en/home", {
+		headers: {
+			"Sec-Fetch-Dest": "document",
+		},
+	});
 	const locale = runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("en");
 });
@@ -52,21 +56,6 @@ test("returns the baseLocale if no other strategy matches", async () => {
 	const request = new Request("http://example.com");
 	const locale = runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("en");
-});
-
-test("throws an error for unsupported strategy", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en"],
-		compilerOptions: {
-			// @ts-expect-error - unsupported strategy
-			strategy: ["unsupported"],
-		},
-	});
-	const request = new Request("http://example.com");
-	expect(() => runtime.extractLocaleFromRequest(request)).toThrow(
-		"Unsupported strategy: unsupported"
-	);
 });
 
 test("throws an error if no locale is found", async () => {
@@ -88,7 +77,7 @@ test("returns the preferred locale from Accept-Language header", async () => {
 		baseLocale: "en",
 		locales: ["en", "fr", "de"],
 		compilerOptions: {
-			strategy: ["preferredLanguage"],
+			strategy: ["preferredLanguage", "baseLocale"],
 		},
 	});
 
@@ -101,48 +90,51 @@ test("returns the preferred locale from Accept-Language header", async () => {
 	const locale = runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("fr");
 
-	// testing fallback
+	// language tag match
 	const request2 = new Request("http://example.com", {
 		headers: {
-			"Accept-Language": "en-US;q=0.8",
+			"Accept-Language": "en-US;q=0.8,nl;q=0.9,de;q=0.7",
 		},
 	});
 	const locale2 = runtime.extractLocaleFromRequest(request2);
+	// Since "nl" isn't in our locales, and "de" has the highest q-value after "nl"
 	expect(locale2).toBe("en");
+
+	// no match
+	const request3 = new Request("http://example.com", {
+		headers: {
+			"Accept-Language": "nl;q=0.9,es;q=0.6",
+		},
+	});
+	const locale3 = runtime.extractLocaleFromRequest(request3);
+	expect(locale3).toBe("en");
 });
 
-// https://github.com/opral/inlang-paraglide-js/issues/442
 test("should fall back to next strategy when cookie contains invalid locale", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "fr"],
 		compilerOptions: {
-			strategy: ["cookie", "url", "baseLocale"],
+			strategy: ["cookie", "baseLocale"],
 			cookieName: "PARAGLIDE_LOCALE",
 		},
 	});
 
-	// Test falling back to URL strategy
-	const request1 = new Request("https://example.com/fr/page", {
+	// Request with an invalid locale in cookie
+	const request = new Request("http://example.com", {
 		headers: {
-			cookie: "PARAGLIDE_LOCALE=invalid_locale",
+			cookie: `PARAGLIDE_LOCALE=invalid_locale`,
 		},
 	});
-	expect(runtime.extractLocaleFromRequest(request1)).toBe("fr");
 
-	// Test falling back to baseLocale when both cookie and URL are invalid
-	const request2 = new Request("https://example.com/page", {
-		headers: {
-			cookie: "PARAGLIDE_LOCALE=invalid_locale",
-		},
-	});
-	expect(runtime.extractLocaleFromRequest(request2)).toBe("en");
+	// Should fall back to baseLocale
+	expect(runtime.extractLocaleFromRequest(request)).toBe("en");
 });
 
 test("skips over localStorage strategy as it is not supported on the server", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
-		locales: ["en"],
+		locales: ["en", "fr"],
 		compilerOptions: {
 			strategy: ["localStorage", "baseLocale"],
 		},
@@ -152,4 +144,33 @@ test("skips over localStorage strategy as it is not supported on the server", as
 
 	// expecting baseLocale
 	expect(runtime.extractLocaleFromRequest(request)).toBe("en");
+});
+
+test("does not resolve the locale from the url if request is not a document request", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr"],
+		compilerOptions: {
+			strategy: ["url", "baseLocale"],
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:locale/:path*",
+					deLocalizedNamedGroups: { locale: "en" },
+					localizedNamedGroups: {
+						en: { locale: "en" },
+						fr: { locale: "fr" },
+					},
+				},
+			],
+		},
+	});
+
+	// Document request - should use URL strategy
+	const request = new Request("https://example.com/fr/home", {
+		headers: {
+			"Sec-Fetch-Dest": "something",
+		},
+	});
+	const locale = runtime.extractLocaleFromRequest(request);
+	expect(locale).toBe("en");
 });

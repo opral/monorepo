@@ -36,7 +36,13 @@ export const extractLocaleFromRequest = (request) => {
 				?.split("; ")
 				.find((c) => c.startsWith(cookieName + "="))
 				?.split("=")[1];
-		} else if (TREE_SHAKE_URL_STRATEGY_USED && strat === "url") {
+		} else if (
+			TREE_SHAKE_URL_STRATEGY_USED &&
+			strat === "url" &&
+			// only process url strategy if request is a document
+			// else it's api requests, etc.
+			request.headers.get("Sec-Fetch-Dest") === "document"
+		) {
 			locale = extractLocaleFromUrl(request.url);
 		} else if (
 			TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED &&
@@ -52,8 +58,6 @@ export const extractLocaleFromRequest = (request) => {
 			return baseLocale;
 		} else if (strat === "localStorage") {
 			continue;
-		} else {
-			throw new Error(`Unsupported strategy: ${strat}`);
 		}
 		if (locale !== undefined) {
 			if (!isLocale(locale)) {
@@ -64,7 +68,7 @@ export const extractLocaleFromRequest = (request) => {
 		}
 	}
 	throw new Error(
-		"No locale found. There is an error in your strategy. Try adding 'baseLocale' as the very last strategy."
+		"No locale found. There is an error in your strategy. Try adding 'baseLocale' as the very last strategy. Read more here https://inlang.com/m/gerre34r/library-inlang-paraglideJs/errors#no-locale-found"
 	);
 };
 
