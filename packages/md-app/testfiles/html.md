@@ -1,3 +1,12 @@
+# Markdown with inline html
+
+Inline html node <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works _perfectly fine_
+
+Inline html node <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works _perfectly fine_
+
+
+# markdown with block html element
+
 <p align="center">
   <img src="https://avatars.githubusercontent.com/u/91317568?s=64&v=4" alt="opral icon">
   <p align="center">
@@ -7,7 +16,4 @@
   </p>
 </p>
 
-Welcome to Opral's repository. 
-
-[./inlang](./inlang) - globalization ecosystem for software companies   
-[./lix](./packages/lix-sdk) - change control backend for apps
+test

@@ -6,7 +6,7 @@ export const FrontMatterElement = ({
 	element,
 	...props
 }: PlateLeafProps) => {
-	return (
+  return (
 		<PlateLeaf asChild className={className} {...props}>
 			<code>{element.value}</code>
 		</PlateLeaf>
