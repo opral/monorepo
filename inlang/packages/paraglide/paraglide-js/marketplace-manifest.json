@@ -29,7 +29,8 @@
 			"/astro": "./examples/astro/README.md",
 			"/react-router": "./examples/react-router/README.md",
 			"/next-js": "./docs/getting-started/next-js.md",
-			"/vite": "./examples/vite/README.md"
+			"/vite": "./examples/vite/README.md",
+			"/other-frameworks": "./docs/getting-started/other-frameworks.md"
 		},
 		"Usage": {
 			"/basics": "./docs/basics.md",
