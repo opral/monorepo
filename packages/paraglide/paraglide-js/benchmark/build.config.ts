@@ -8,7 +8,7 @@ import { type UserConfig } from "vite";
 export const builds: BuildConfig[] = [
 	...createBuildMatrix({
 		libraries: {
-			paraglide: ["default", "experimental-middleware-optimizations"],
+			paraglide: ["default", "experimental-middleware-locale-splitting"],
 			i18next: ["default", "http-backend"],
 		},
 		locales: [5, 10, 20],
