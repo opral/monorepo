@@ -154,3 +154,29 @@ test("should not reload when setting locale to current locale", async () => {
 	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=de; path=/");
 	expect(globalThis.window.location.reload).toBeCalled();
 });
+
+test("sets the locale to localStorage", async () => {
+	// @ts-expect-error - global variable definition
+	globalThis.localStorage = {
+		setItem: vi.fn(),
+		getItem: () => "en",
+	};
+
+	// @ts-expect-error - global variable definition
+	globalThis.window = {};
+
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["localStorage"],
+		},
+	});
+
+	runtime.setLocale("de");
+
+	expect(globalThis.localStorage.setItem).toHaveBeenCalledWith(
+		"PARAGLIDE_LOCALE",
+		"de"
+	);
+});

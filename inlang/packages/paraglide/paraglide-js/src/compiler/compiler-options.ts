@@ -7,6 +7,7 @@ export const defaultCompilerOptions = {
 	emitPrettierIgnore: true,
 	cleanOutdir: true,
 	experimentalMiddlewareLocaleSplitting: false,
+	localStorageKey: "PARAGLIDE_LOCALE",
 	isServer: "typeof window === 'undefined'",
 	strategy: ["cookie", "globalVariable", "baseLocale"],
 	cookieName: "PARAGLIDE_LOCALE",
@@ -69,6 +70,12 @@ export type CompilerOptions = {
 	 * @default false
 	 */
 	experimentalMiddlewareLocaleSplitting?: boolean;
+	/**
+	 * The name of the localStorage key to use for the localStorage strategy.
+	 *
+	 * @default 'PARAGLIDE_LOCALE'
+	 */
+	localStorageKey?: string;
 	/**
 	 * Tree-shaking flag if the code is running on the server.
 	 *

@@ -2,7 +2,7 @@
 
 > **CompilerOptions**: `object`
 
-Defined in: [compiler-options.ts:15](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:16](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 ### Type declaration
 
@@ -162,6 +162,18 @@ enable tree-shaking.
 typeof window === "undefined"
 ```
 
+#### localStorageKey?
+
+> `optional` **localStorageKey**: `string`
+
+The name of the localStorage key to use for the localStorage strategy.
+
+##### Default
+
+```ts
+'PARAGLIDE_LOCALE'
+```
+
 #### outdir
 
 > **outdir**: `string`
@@ -310,6 +322,10 @@ Defined in: [compiler-options.ts:3](https://github.com/opral/monorepo/tree/main/
 #### isServer
 
 > `readonly` **isServer**: `"typeof window === 'undefined'"` = `"typeof window === 'undefined'"`
+
+#### localStorageKey
+
+> `readonly` **localStorageKey**: `"PARAGLIDE_LOCALE"` = `"PARAGLIDE_LOCALE"`
 
 #### outputStructure
 
