@@ -8,6 +8,8 @@ export type Runtime = {
 	cookieName: typeof import("./variables.js").cookieName;
 	urlPatterns: typeof import("./variables.js").urlPatterns;
 	serverAsyncLocalStorage: typeof import("./variables.js").serverAsyncLocalStorage;
+	experimentalMiddlewareLocaleSplitting: typeof import("./variables.js").experimentalMiddlewareLocaleSplitting;
+	isServer: typeof import("./variables.js").isServer;
 	getLocale: typeof import("./get-locale.js").getLocale;
 	setLocale: typeof import("./set-locale.js").setLocale;
 	getUrlOrigin: typeof import("./get-url-origin.js").getUrlOrigin;
@@ -24,4 +26,5 @@ export type Runtime = {
 	extractLocaleFromUrl: typeof import("./extract-locale-from-url.js").extractLocaleFromUrl;
 	extractLocaleFromRequest: typeof import("./extract-locale-from-request.js").extractLocaleFromRequest;
 	extractLocaleFromCookie: typeof import("./extract-locale-from-cookie.js").extractLocaleFromCookie;
+	trackMessageCall: typeof import("./track-message-call.js").trackMessageCall;
 };

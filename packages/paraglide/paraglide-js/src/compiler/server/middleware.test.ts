@@ -20,14 +20,15 @@ test("sets the locale and origin", async () => {
 			() => {
 				expect(runtime.getLocale()).toBe("en");
 				expect(runtime.getUrlOrigin()).toBe("https://example.com");
+				return new Response();
 			}
 		),
-
 		runtime.paraglideMiddleware(
 			new Request(new URL("https://peter.com/de/page")),
 			() => {
 				expect(runtime.getLocale()).toBe("de");
 				expect(runtime.getUrlOrigin()).toBe("https://peter.com");
+				return new Response();
 			}
 		),
 	]);
@@ -47,13 +48,13 @@ test("delocalizes the url if the url strategy is used and returns the locale", a
 
 	const request = new Request(new URL("https://example.com/de/page"));
 
-	const result: any = await runtime.paraglideMiddleware(
-		request,
-		(args) => args
-	);
+	const result = await runtime.paraglideMiddleware(request, (args) => {
+		expect(args.locale).toBe("de");
+		expect(args.request.url).toBe("https://example.com/page");
+		return new Response("Hello World");
+	});
 
-	expect(result.request.url).toBe("https://example.com/page");
-	expect(result.locale).toBe("de");
+	expect(await result.text()).toBe("Hello World");
 });
 
 test("does not delocalize the url if the url strategy is not used", async () => {
@@ -67,11 +68,13 @@ test("does not delocalize the url if the url strategy is not used", async () => 
 
 	const request = new Request(new URL("https://example.com/de/page"));
 
-	const result = await runtime.paraglideMiddleware(request, (args) => args);
+	const result = await runtime.paraglideMiddleware(request, (args) => {
+		expect(args.locale).toBe("en");
+		expect(args.request.url).toBe("https://example.com/de/page");
+		return new Response("Hello World");
+	});
 
-	expect(result.request.url).toBe("https://example.com/de/page");
-	// falling back to baseLocale
-	expect(result.locale).toBe("en");
+	expect(await result.text()).toBe("Hello World");
 });
 
 test("redirects to localized URL when non-URL strategy determines locale", async () => {
@@ -144,6 +147,7 @@ test("does not redirect if URL already matches determined locale", async () => {
 	let middlewareResolveWasCalled = false;
 	await runtime.paraglideMiddleware(request, () => {
 		middlewareResolveWasCalled = true;
+		return new Response();
 	});
 
 	expect(middlewareResolveWasCalled).toBe(true); // Middleware should be called since no redirect needed
@@ -165,7 +169,7 @@ test("works with disableAsyncLocalStorage option", async () => {
 	const request = new Request(new URL("https://example.com/de/page"));
 
 	// Process the request with AsyncLocalStorage disabled
-	const result = await runtime.paraglideMiddleware(
+	const response = await runtime.paraglideMiddleware(
 		request,
 		(args) => {
 			// Verify we still get the correct locale
@@ -174,14 +178,13 @@ test("works with disableAsyncLocalStorage option", async () => {
 			// Verify URL is still properly delocalized
 			expect(args.request.url).toBe("https://example.com/page");
 			expect(runtime.getUrlOrigin()).toBe("https://example.com");
-			return args;
+			return new Response("hello");
 		},
 		{ disableAsyncLocalStorage: true }
 	);
 
 	// Verify the result contains the correct data
-	expect(result.locale).toBe("de");
-	expect(result.request.url).toBe("https://example.com/page");
+	expect(await response.text()).toBe("hello");
 
 	// Verify that global variable wasn't affected by this request
 	expect(runtime.getLocale()).toBe("fr");
@@ -206,6 +209,7 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 			() => {
 				expect(runtime.getLocale()).toBe("en");
 				expect(runtime.getUrlOrigin()).toBe("https://example.com");
+				return new Response();
 			},
 			{ disableAsyncLocalStorage: true }
 		),
@@ -215,6 +219,7 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 			() => {
 				expect(runtime.getLocale()).toBe("de");
 				expect(runtime.getUrlOrigin()).toBe("https://peter.com");
+				return new Response();
 			},
 			{ disableAsyncLocalStorage: true }
 		),
@@ -248,30 +253,38 @@ test("multi pathname localization with optional groups", async () => {
 
 	// Process the request
 	expect(
-		await runtime.paraglideMiddleware(
-			new Request(new URL("http://example.com/bookstore")),
-			({ locale }) => locale
-		)
+		await (
+			await runtime.paraglideMiddleware(
+				new Request(new URL("http://example.com/bookstore")),
+				({ locale }) => new Response(locale)
+			)
+		).text()
 	).toBe("en");
 
 	expect(
-		await runtime.paraglideMiddleware(
-			new Request(new URL("http://example.com/bookstore/item")),
-			({ locale }) => locale
-		)
+		await (
+			await runtime.paraglideMiddleware(
+				new Request(new URL("http://example.com/bookstore/item")),
+				({ locale }) => new Response(locale)
+			)
+		).text()
 	).toBe("en");
 
 	expect(
-		await runtime.paraglideMiddleware(
-			new Request(new URL("http://example.com/buchladen")),
-			({ locale }) => locale
-		)
+		await (
+			await runtime.paraglideMiddleware(
+				new Request(new URL("http://example.com/buchladen")),
+				({ locale }) => new Response(locale)
+			)
+		).text()
 	).toBe("de");
 
 	expect(
-		await runtime.paraglideMiddleware(
-			new Request(new URL("http://example.com/buchladen/artikel")),
-			({ locale }) => locale
-		)
+		await (
+			await runtime.paraglideMiddleware(
+				new Request(new URL("http://example.com/buchladen/artikel")),
+				({ locale }) => new Response(locale)
+			)
+		).text()
 	).toBe("de");
 });

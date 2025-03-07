@@ -4,7 +4,7 @@ import { paraglideVitePlugin } from '@inlang/paraglide-js';
 
 export default defineConfig({
 	build: {
-		minify: true
+		minify: false
 	},
 	plugins: [
 		sveltekit(),

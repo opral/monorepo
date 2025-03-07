@@ -77,7 +77,9 @@ const compileBundleFunction = (args: {
 */
 /* @__NO_SIDE_EFFECTS__ */
 ${isSafeBundleId ? "export " : ""}const ${safeBundleId} = (inputs${hasInputs ? "" : " = {}"}, options = {}) => {
+	if (experimentalMiddlewareLocaleSplitting && isServer === false) return /** @type {any} */ (globalThis).__paraglide_ssr.${safeBundleId}(inputs) 
 	const locale = options.locale ?? getLocale()
+	trackMessageCall("${safeBundleId}", locale)
 	${args.availableLocales
 		.map(
 			(locale, index) =>

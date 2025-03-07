@@ -17,6 +17,8 @@ export function createRuntimeFile(args: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
 		urlPatterns?: CompilerOptions["urlPatterns"];
+		experimentalMiddlewareLocaleSplitting: CompilerOptions["experimentalMiddlewareLocaleSplitting"];
+		isServer: CompilerOptions["isServer"];
 	};
 }): string {
 	const urlPatterns = args.compilerOptions.urlPatterns ?? [];
@@ -77,7 +79,17 @@ ${injectCode("./variables.js")
 	.replace(
 		`export const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = false;`,
 		`const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = ${defaultUrlPatternUsed};`
+	)
+	.replace(
+		`export const experimentalMiddlewareLocaleSplitting = false;`,
+		`export const experimentalMiddlewareLocaleSplitting = ${args.compilerOptions.experimentalMiddlewareLocaleSplitting};`
+	)
+	.replace(
+		`export const isServer = typeof window === "undefined";`,
+		`export const isServer = ${args.compilerOptions.isServer};`
 	)}
+
+globalThis.__paraglide = {}
 
 ${injectCode("./get-locale.js")} 
 
@@ -98,6 +110,8 @@ ${injectCode("./extract-locale-from-url.js")}
 ${injectCode("./localize-url.js")}
 
 ${injectCode("./localize-href.js")}
+
+${injectCode("./track-message-call.js")}
 
 // ------ TYPES ------
 
@@ -157,7 +171,12 @@ export async function createRuntimeForTesting(args: {
 		.replace(`import "@inlang/paraglide-js/urlpattern-polyfill";`, "");
 
 	// remove the server-side runtime import statement to avoid module resolution logic in testing
-	const serverSideRuntime = createServerFile()
+	const serverSideRuntime = createServerFile({
+		compiledBundles: [],
+		compilerOptions: {
+			experimentalMiddlewareLocaleSplitting: false,
+		},
+	})
 		.replace(`import * as runtime from "./runtime.js";`, "")
 		// the runtime functions are bundles, hence remove the runtime namespace
 		.replaceAll("runtime.", "");

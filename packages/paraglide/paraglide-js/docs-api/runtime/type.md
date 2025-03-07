@@ -32,6 +32,10 @@ The Paraglide runtime API.
 
 > **deLocalizeUrl**: [`deLocalizeUrl`](-internal-.md#delocalizeurl)
 
+#### experimentalMiddlewareLocaleSplitting
+
+> **experimentalMiddlewareLocaleSplitting**: [`experimentalMiddlewareLocaleSplitting`](-internal-.md#experimentalmiddlewarelocalesplitting)
+
 #### extractLocaleFromCookie
 
 > **extractLocaleFromCookie**: [`extractLocaleFromCookie`](-internal-.md#extractlocalefromcookie)
@@ -55,6 +59,10 @@ The Paraglide runtime API.
 #### isLocale
 
 > **isLocale**: [`isLocale`](-internal-.md#islocale)
+
+#### isServer
+
+> **isServer**: [`isServer`](-internal-.md#isserver)
 
 #### locales
 
@@ -95,6 +103,10 @@ The Paraglide runtime API.
 #### strategy
 
 > **strategy**: [`strategy`](-internal-.md#strategy)
+
+#### trackMessageCall
+
+> **trackMessageCall**: [`trackMessageCall`](-internal-.md#trackmessagecall)
 
 #### urlPatterns
 

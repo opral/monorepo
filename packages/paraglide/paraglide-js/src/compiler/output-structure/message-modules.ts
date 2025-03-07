@@ -14,6 +14,10 @@ export function generateMessageModules(
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
+		isServer: NonNullable<CompilerOptions["isServer"]>;
+		experimentalMiddlewareLocaleSplitting: NonNullable<
+			CompilerOptions["experimentalMiddlewareLocaleSplitting"]
+		>;
 	}
 ): Record<string, string> {
 	const output: Record<string, string> = {
@@ -22,7 +26,7 @@ export function generateMessageModules(
 			locales: settings.locales,
 			compilerOptions,
 		}),
-		["server.js"]: createServerFile(),
+		["server.js"]: createServerFile({ compiledBundles, compilerOptions }),
 		["registry.js"]: createRegistry(),
 	};
 
@@ -56,7 +60,7 @@ export function generateMessageModules(
 							`import * as ${toSafeModuleId(locale)} from "./${locale}.js"`
 					)
 					.join("\n"),
-				`import { getLocale } from '../../runtime.js'`,
+				`import { getLocale, trackMessageCall, experimentalMiddlewareLocaleSplitting, isServer } from '../../runtime.js'`,
 				"",
 				compiledBundle.bundle.code,
 			].join("\n");

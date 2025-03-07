@@ -34,7 +34,15 @@ export const strategy = ["globalVariable"];
 export const urlPatterns = [];
 
 /**
- * @typedef {{ getStore(): { locale: Locale, origin: string } | undefined, run: (store: any, cb: any) => any }} AsyncLocalStorageSubset
+ * @typedef {{
+ * 		getStore(): {
+ *   		locale?: Locale,
+ * 			origin?: string,
+ * 			messageCalls?: Set<string>
+ *   	} | undefined,
+ * 		run: (store: { locale?: Locale, origin?: string, messageCalls?: Set<string>},
+ *    cb: any) => any
+ * }} ParaglideAsyncLocalStorage
  */
 
 /**
@@ -43,9 +51,13 @@ export const urlPatterns = [];
  * The variable is used to retrieve the locale and origin in a server-side
  * rendering context without effecting other requests.
  *
- * @type {AsyncLocalStorageSubset | undefined}
+ * @type {ParaglideAsyncLocalStorage | undefined}
  */
 export let serverAsyncLocalStorage = undefined;
+
+export const experimentalMiddlewareLocaleSplitting = false;
+
+export const isServer = typeof window === "undefined";
 
 /**
  * Sets the server side async local storage.
@@ -55,7 +67,7 @@ export let serverAsyncLocalStorage = undefined;
  * avoid a circular import between `runtime.js` and
  * `server.js` files.
  *
- * @param {AsyncLocalStorageSubset | undefined} value
+ * @param {ParaglideAsyncLocalStorage | undefined} value
  */
 export function overwriteServerAsyncLocalStorage(value) {
 	serverAsyncLocalStorage = value;
