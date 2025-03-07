@@ -117,6 +117,7 @@ For example, the pattern `https://:domain(.*)/:locale(de|en)?/:path*` matches UR
 
 <doc-callout type="tip">Use https://urlpattern.com/ to test your URL patterns.</doc-callout>
 
+<doc-callout type="info">On the server, the URL strategy will only trigger for requests with the `Sec-Fetch-Dest: "document"` header. This helps distinguish between document requests (browser page loads) and API requests, preventing unnecessary redirects for API calls.</doc-callout>
 
 #### Pathname-based url localization example
 
