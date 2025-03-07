@@ -53,7 +53,7 @@ export default function Page() {
 			<MarketplaceLayout>
 				<HeroSearch />
 				<Features />
-				<div class=" max-w-fit pros prose-lg">
+				<div class=" max-w-fit prose prose-lg">
 					<SolidMarkdown children={landingMarkdown} />
 				</div>
 				{/* Note if we  want the old landingpage back
