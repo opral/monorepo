@@ -14,7 +14,7 @@ export declare const {
 	cookieName,
 	urlPatterns,
 	serverAsyncLocalStorage,
-	enableMiddlewareOptimizations,
+	experimentalMiddlewareLocaleSplitting,
 	isServer,
 	getLocale,
 	setLocale,

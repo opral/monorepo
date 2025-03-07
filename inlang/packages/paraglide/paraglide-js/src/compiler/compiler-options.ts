@@ -6,7 +6,7 @@ export const defaultCompilerOptions = {
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
 	cleanOutdir: true,
-	enableMiddlewareOptimizations: false,
+	experimentalMiddlewareLocaleSplitting: false,
 	isServer: "typeof window === 'undefined'",
 	strategy: ["cookie", "globalVariable", "baseLocale"],
 	cookieName: "PARAGLIDE_LOCALE",
@@ -54,7 +54,13 @@ export type CompilerOptions = {
 	 */
 	strategy?: Runtime["strategy"];
 	/**
-	 * Whether or not to use server-side middleware optimizations.
+	 * Whether or not to use experimental middleware locale splitting.
+	 *
+	 * ⚠️ This feature is experimental and only works in SSR/SSG environment
+	 *   without client-side routing. Do not rely on this feature for production.
+	 *
+	 * This feature is part of the exploration of per locale splitting. The
+	 * issue is ongoing and can be followed here [#88](https://github.com/opral/inlang-paraglide-js/issues/88).
 	 *
 	 * - The client bundle will tree-shake all messages (have close to 0kb JS).
 	 * - The server middleware will inject the used messages into the HTML.
@@ -62,7 +68,7 @@ export type CompilerOptions = {
 	 *
 	 * @default false
 	 */
-	enableMiddlewareOptimizations?: boolean;
+	experimentalMiddlewareLocaleSplitting?: boolean;
 	/**
 	 * Tree-shaking flag if the code is running on the server.
 	 *

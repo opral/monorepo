@@ -562,15 +562,18 @@ describe.each([
 				// Test tracking in English
 				runtime.setLocale("en");
 				const messageCalls1 = new Set();
-				const result1 = await runtime.serverAsyncLocalStorage.run({ messageCalls: messageCalls1 }, () => {
-					const greeting = m.greeting();
-					const farewell = m.farewell();
+				const result1 = await runtime.serverAsyncLocalStorage.run(
+					{ messageCalls: messageCalls1 },
+					() => {
+						const greeting = m.greeting();
+						const farewell = m.farewell();
 
-					expect(greeting).toBe("Hello");
-					expect(farewell).toBe("Goodbye");
+						expect(greeting).toBe("Hello");
+						expect(farewell).toBe("Goodbye");
 
-					return "english";
-				});
+						return "english";
+					}
+				);
 
 				expect(result1).toBe("english");
 				expect(messageCalls1).toEqual(new Set(["greeting:en", "farewell:en"]));
@@ -578,13 +581,16 @@ describe.each([
 				// Test tracking in German
 				runtime.setLocale("de");
 				const messageCalls2 = new Set();
-				const result2 = await runtime.serverAsyncLocalStorage.run({ messageCalls: messageCalls2 }, () => {
-					const greeting = m.greeting();
+				const result2 = await runtime.serverAsyncLocalStorage.run(
+					{ messageCalls: messageCalls2 },
+					() => {
+						const greeting = m.greeting();
 
-					expect(greeting).toBe("Hallo");
+						expect(greeting).toBe("Hallo");
 
-					return "german";
-				});
+						return "german";
+					}
+				);
 
 				expect(result2).toBe("german");
 				expect(messageCalls2).toEqual(new Set(["greeting:de"]));
@@ -592,41 +598,50 @@ describe.each([
 
 				// Test tracking with explicit locale
 				const messageCalls3 = new Set();
-				const result3 = await runtime.serverAsyncLocalStorage.run({ messageCalls: messageCalls3 }, () => {
-					const greeting = m.greeting(undefined, { locale: "fr" });
+				const result3 = await runtime.serverAsyncLocalStorage.run(
+					{ messageCalls: messageCalls3 },
+					() => {
+						const greeting = m.greeting(undefined, { locale: "fr" });
 
-					expect(greeting).toBe("Bonjour");
+						expect(greeting).toBe("Bonjour");
 
-					return "explicit";
-				});
+						return "explicit";
+					}
+				);
 
 				expect(result3).toBe("explicit");
 				expect(messageCalls3).toEqual(new Set(["greeting:fr"]));
 
 				// Test nested tracking contexts
 				const messageCalls4 = new Set();
-				const result4 = await runtime.serverAsyncLocalStorage.run({ messageCalls: messageCalls4 }, () => {
-					// Access a message in the outer context
-					const outerGreeting = m.greeting();
-					expect(outerGreeting).toBe("Hallo"); // Still in German locale
+				const result4 = await runtime.serverAsyncLocalStorage.run(
+					{ messageCalls: messageCalls4 },
+					() => {
+						// Access a message in the outer context
+						const outerGreeting = m.greeting();
+						expect(outerGreeting).toBe("Hallo"); // Still in German locale
 
-					// Create a nested tracking context
-					const nestedMessageCalls = new Set();
-					const nestedResult = runtime.serverAsyncLocalStorage.run({ messageCalls: nestedMessageCalls }, () => {
-						// Access different messages in the nested context
-						const nestedFarewell = m.farewell();
-						expect(nestedFarewell).toBe("Auf Wiedersehen");
+						// Create a nested tracking context
+						const nestedMessageCalls = new Set();
+						const nestedResult = runtime.serverAsyncLocalStorage.run(
+							{ messageCalls: nestedMessageCalls },
+							() => {
+								// Access different messages in the nested context
+								const nestedFarewell = m.farewell();
+								expect(nestedFarewell).toBe("Auf Wiedersehen");
 
-						return "nested";
-					});
+								return "nested";
+							}
+						);
 
-					// Verify nested tracking
-					expect(nestedResult).toBe("nested");
-					expect(nestedMessageCalls).toEqual(new Set(["farewell:de"]));
-					expect(nestedMessageCalls.has("greeting:de")).toBe(false); // Not accessed in nested context
+						// Verify nested tracking
+						expect(nestedResult).toBe("nested");
+						expect(nestedMessageCalls).toEqual(new Set(["farewell:de"]));
+						expect(nestedMessageCalls.has("greeting:de")).toBe(false); // Not accessed in nested context
 
-					return "outer";
-				});
+						return "outer";
+					}
+				);
 
 				// Verify outer context only contains its own calls
 				expect(result4).toBe("outer");

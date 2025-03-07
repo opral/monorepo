@@ -232,8 +232,8 @@ async function compileParaglide(args: { locales: string[]; mode: string }) {
 		project: "./project.inlang",
 		outdir: "./src/paraglide",
 		isServer: "!process.env.IS_CLIENT",
-		enableMiddlewareOptimizations:
-			args.mode === "experimental-middleware-optimizations",
+		experimentalMiddlewareLocaleSplitting:
+			args.mode === "experimentalMiddlewareLocaleSplitting",
 	});
 }
 

@@ -14,13 +14,13 @@ export function generateLocaleModules(
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
 		isServer: NonNullable<CompilerOptions["isServer"]>;
-		enableMiddlewareOptimizations: NonNullable<
-			CompilerOptions["enableMiddlewareOptimizations"]
+		experimentalMiddlewareLocaleSplitting: NonNullable<
+			CompilerOptions["experimentalMiddlewareLocaleSplitting"]
 		>;
 	}
 ): Record<string, string> {
 	const indexFile = [
-		`import { getLocale, trackMessageCall, enableMiddlewareOptimizations, isServer } from "../runtime.js"`,
+		`import { getLocale, trackMessageCall, experimentalMiddlewareLocaleSplitting, isServer } from "../runtime.js"`,
 		settings.locales
 			.map(
 				(locale) =>

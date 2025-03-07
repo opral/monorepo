@@ -8,7 +8,7 @@ export type Runtime = {
 	cookieName: typeof import("./variables.js").cookieName;
 	urlPatterns: typeof import("./variables.js").urlPatterns;
 	serverAsyncLocalStorage: typeof import("./variables.js").serverAsyncLocalStorage;
-	enableMiddlewareOptimizations: typeof import("./variables.js").enableMiddlewareOptimizations;
+	experimentalMiddlewareLocaleSplitting: typeof import("./variables.js").experimentalMiddlewareLocaleSplitting;
 	isServer: typeof import("./variables.js").isServer;
 	getLocale: typeof import("./get-locale.js").getLocale;
 	setLocale: typeof import("./set-locale.js").setLocale;

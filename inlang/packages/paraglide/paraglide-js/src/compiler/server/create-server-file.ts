@@ -9,8 +9,8 @@ import { toSafeModuleId } from "../safe-module-id.js";
 export function createServerFile(args: {
 	compiledBundles: CompiledBundleWithMessages[];
 	compilerOptions: {
-		enableMiddlewareOptimizations: NonNullable<
-			CompilerOptions["enableMiddlewareOptimizations"]
+		experimentalMiddlewareLocaleSplitting: NonNullable<
+			CompilerOptions["experimentalMiddlewareLocaleSplitting"]
 		>;
 	};
 }): string {
@@ -20,7 +20,7 @@ import * as runtime from "./runtime.js";
 ${injectCode("./middleware.js")}
 `;
 
-	if (args.compilerOptions.enableMiddlewareOptimizations) {
+	if (args.compilerOptions.experimentalMiddlewareLocaleSplitting) {
 		code = code.replace(
 			"const compiledBundles = {};",
 			`const compiledBundles = ${JSON.stringify(createCompiledMessagesObject(args.compiledBundles))};`

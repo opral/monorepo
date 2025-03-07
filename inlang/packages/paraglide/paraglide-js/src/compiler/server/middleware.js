@@ -111,7 +111,7 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 
 	// Only modify HTML responses
 	if (
-		runtime.enableMiddlewareOptimizations &&
+		runtime.experimentalMiddlewareLocaleSplitting &&
 		response.headers.get("Content-Type")?.includes("html")
 	) {
 		const body = await response.text();

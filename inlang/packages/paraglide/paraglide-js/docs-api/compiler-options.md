@@ -98,11 +98,17 @@ If `emitPrettierIgnore` is set to `true` a `.prettierignore` file will be emitte
 true
 ```
 
-#### enableMiddlewareOptimizations?
+#### experimentalMiddlewareLocaleSplitting?
 
-> `optional` **enableMiddlewareOptimizations**: `boolean`
+> `optional` **experimentalMiddlewareLocaleSplitting**: `boolean`
 
-Whether or not to use server-side middleware optimizations.
+Whether or not to use experimental middleware locale splitting.
+
+⚠️ This feature is experimental and only works in SSR/SSG environment
+  without client-side routing. Do not rely on this feature for production.
+
+This feature is part of the exploration of per locale splitting. The
+issue is ongoing and can be followed here [#88](https://github.com/opral/inlang-paraglide-js/issues/88).
 
 - The client bundle will tree-shake all messages (have close to 0kb JS).
 - The server middleware will inject the used messages into the HTML.
@@ -293,9 +299,9 @@ Defined in: [compiler-options.ts:3](https://github.com/opral/monorepo/tree/main/
 
 > `readonly` **emitPrettierIgnore**: `true` = `true`
 
-#### enableMiddlewareOptimizations
+#### experimentalMiddlewareLocaleSplitting
 
-> `readonly` **enableMiddlewareOptimizations**: `false` = `false`
+> `readonly` **experimentalMiddlewareLocaleSplitting**: `false` = `false`
 
 #### includeEslintDisableComment
 
