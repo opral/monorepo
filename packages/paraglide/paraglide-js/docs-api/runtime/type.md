@@ -32,9 +32,9 @@ The Paraglide runtime API.
 
 > **deLocalizeUrl**: [`deLocalizeUrl`](-internal-.md#delocalizeurl)
 
-#### enableMiddlewareOptimizations
+#### experimentalMiddlewareLocaleSplitting
 
-> **enableMiddlewareOptimizations**: [`enableMiddlewareOptimizations`](-internal-.md#enablemiddlewareoptimizations)
+> **experimentalMiddlewareLocaleSplitting**: [`experimentalMiddlewareLocaleSplitting`](-internal-.md#experimentalmiddlewarelocalesplitting)
 
 #### extractLocaleFromCookie
 

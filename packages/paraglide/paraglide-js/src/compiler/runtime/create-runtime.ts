@@ -17,7 +17,7 @@ export function createRuntimeFile(args: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
 		urlPatterns?: CompilerOptions["urlPatterns"];
-		enableMiddlewareOptimizations: CompilerOptions["enableMiddlewareOptimizations"];
+		experimentalMiddlewareLocaleSplitting: CompilerOptions["experimentalMiddlewareLocaleSplitting"];
 		isServer: CompilerOptions["isServer"];
 	};
 }): string {
@@ -81,8 +81,8 @@ ${injectCode("./variables.js")
 		`const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = ${defaultUrlPatternUsed};`
 	)
 	.replace(
-		`export const enableMiddlewareOptimizations = false;`,
-		`export const enableMiddlewareOptimizations = ${args.compilerOptions.enableMiddlewareOptimizations};`
+		`export const experimentalMiddlewareLocaleSplitting = false;`,
+		`export const experimentalMiddlewareLocaleSplitting = ${args.compilerOptions.experimentalMiddlewareLocaleSplitting};`
 	)
 	.replace(
 		`export const isServer = typeof window === "undefined";`,
@@ -174,7 +174,7 @@ export async function createRuntimeForTesting(args: {
 	const serverSideRuntime = createServerFile({
 		compiledBundles: [],
 		compilerOptions: {
-			enableMiddlewareOptimizations: false,
+			experimentalMiddlewareLocaleSplitting: false,
 		},
 	})
 		.replace(`import * as runtime from "./runtime.js";`, "")

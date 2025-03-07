@@ -15,8 +15,8 @@ export function generateMessageModules(
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
 		isServer: NonNullable<CompilerOptions["isServer"]>;
-		enableMiddlewareOptimizations: NonNullable<
-			CompilerOptions["enableMiddlewareOptimizations"]
+		experimentalMiddlewareLocaleSplitting: NonNullable<
+			CompilerOptions["experimentalMiddlewareLocaleSplitting"]
 		>;
 	}
 ): Record<string, string> {
@@ -60,7 +60,7 @@ export function generateMessageModules(
 							`import * as ${toSafeModuleId(locale)} from "./${locale}.js"`
 					)
 					.join("\n"),
-				`import { getLocale, trackMessageCall, enableMiddlewareOptimizations, isServer } from '../../runtime.js'`,
+				`import { getLocale, trackMessageCall, experimentalMiddlewareLocaleSplitting, isServer } from '../../runtime.js'`,
 				"",
 				compiledBundle.bundle.code,
 			].join("\n");

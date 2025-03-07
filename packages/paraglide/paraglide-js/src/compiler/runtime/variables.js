@@ -55,7 +55,7 @@ export const urlPatterns = [];
  */
 export let serverAsyncLocalStorage = undefined;
 
-export const enableMiddlewareOptimizations = false;
+export const experimentalMiddlewareLocaleSplitting = false;
 
 export const isServer = typeof window === "undefined";
 

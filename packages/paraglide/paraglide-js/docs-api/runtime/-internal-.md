@@ -78,9 +78,9 @@ Defined in: [runtime/variables.js:22](https://github.com/opral/monorepo/tree/mai
 
 ***
 
-## enableMiddlewareOptimizations
+## experimentalMiddlewareLocaleSplitting
 
-> `const` **enableMiddlewareOptimizations**: `false` = `false`
+> `const` **experimentalMiddlewareLocaleSplitting**: `false` = `false`
 
 Defined in: [runtime/variables.js:58](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
