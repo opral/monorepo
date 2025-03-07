@@ -288,3 +288,55 @@ test("multi pathname localization with optional groups", async () => {
 		).text()
 	).toBe("de");
 });
+
+// https://github.com/opral/inlang-paraglide-js/issues/442
+test("falls back to next strategy when cookie contains invalid locale", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr"],
+		compilerOptions: {
+			strategy: ["cookie", "url", "baseLocale"],
+			cookieName: "PARAGLIDE_LOCALE",
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:locale/:path(.*)?",
+					deLocalizedNamedGroups: { locale: "en" },
+					localizedNamedGroups: {
+						en: { locale: "en" },
+						fr: { locale: "fr" },
+					},
+				},
+			],
+		},
+	});
+
+	// Request with an invalid locale in cookie
+	const request = new Request("https://example.com/fr/some-path", {
+		headers: {
+			cookie: `PARAGLIDE_LOCALE=invalid_locale`,
+		},
+	});
+
+	let middlewareResolveWasCalled = false;
+	await runtime.paraglideMiddleware(request, (args) => {
+		middlewareResolveWasCalled = true;
+		// Should fall back to URL strategy, which will detect 'fr' from the URL
+		expect(args.locale).toBe("fr");
+		return new Response();
+	});
+
+	expect(middlewareResolveWasCalled).toBe(true);
+
+	// Try with a request that would fall back to baseLocale
+	const baseRequest = new Request("https://example.com/some-path", {
+		headers: {
+			cookie: `PARAGLIDE_LOCALE=invalid_locale`,
+		},
+	});
+
+	await runtime.paraglideMiddleware(baseRequest, (args) => {
+		// Should fall back all the way to baseLocale since URL has no locale
+		expect(args.locale).toBe("en");
+		return new Response();
+	});
+});
