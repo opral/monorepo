@@ -110,3 +110,32 @@ test("returns the preferred locale from Accept-Language header", async () => {
 	const locale2 = runtime.extractLocaleFromRequest(request2);
 	expect(locale2).toBe("en");
 });
+
+// https://github.com/opral/inlang-paraglide-js/issues/442
+test("should fall back to next strategy when cookie contains invalid locale", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr"],
+		compilerOptions: {
+			strategy: ["cookie", "url", "baseLocale"],
+			cookieName: "PARAGLIDE_LOCALE",
+		},
+	});
+
+	// Test falling back to URL strategy
+	const request1 = new Request("https://example.com/fr/page", {
+		headers: {
+			cookie: "PARAGLIDE_LOCALE=invalid_locale",
+		},
+	});
+	expect(runtime.extractLocaleFromRequest(request1)).toBe("fr");
+
+	// Test falling back to baseLocale when both cookie and URL are invalid
+	const request2 = new Request("https://example.com/page", {
+		headers: {
+			cookie: "PARAGLIDE_LOCALE=invalid_locale",
+		},
+	});
+	expect(runtime.extractLocaleFromRequest(request2)).toBe("en");
+
+});
