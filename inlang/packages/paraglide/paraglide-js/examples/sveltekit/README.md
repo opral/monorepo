@@ -130,4 +130,16 @@ export const handle: Handle = ({ event, resolve }) => {
 };
 ```
 
+### No locale OR different locale when calling messages outside of .server.ts files
+
+If you call messages on the server outside of load functions or hooks, you might run into issues with the locale not being set correctly. This can happen if you call messages outside of a request context. 
+
+```typescript
+// hello.ts
+import { m } from "./paraglide/messages.js";
+
+// 💥 there is no url in this context to retrieve
+//    the locale from.
+console.log(m.hello());
+```
 
