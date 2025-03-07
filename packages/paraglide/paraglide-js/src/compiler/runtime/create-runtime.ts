@@ -19,6 +19,7 @@ export function createRuntimeFile(args: {
 		urlPatterns?: CompilerOptions["urlPatterns"];
 		experimentalMiddlewareLocaleSplitting: CompilerOptions["experimentalMiddlewareLocaleSplitting"];
 		isServer: CompilerOptions["isServer"];
+		localStorageKey: CompilerOptions["localStorageKey"];
 	};
 }): string {
 	const urlPatterns = args.compilerOptions.urlPatterns ?? [];
@@ -87,6 +88,14 @@ ${injectCode("./variables.js")
 	.replace(
 		`export const isServer = typeof window === "undefined";`,
 		`export const isServer = ${args.compilerOptions.isServer};`
+	)
+	.replace(
+		`export const localStorageKey = "PARAGLIDE_LOCALE";`,
+		`export const localStorageKey = "${args.compilerOptions.localStorageKey}";`
+	)
+	.replace(
+		`export const TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("localStorage")};`
 	)}
 
 globalThis.__paraglide = {}

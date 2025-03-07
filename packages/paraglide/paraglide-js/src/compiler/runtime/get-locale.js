@@ -8,6 +8,9 @@ import {
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
 	TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED,
 	TREE_SHAKE_URL_STRATEGY_USED,
+	TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED,
+	localStorageKey,
+	isServer,
 } from "./variables.js";
 import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
 import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
@@ -71,6 +74,12 @@ export let getLocale = () => {
 			typeof window !== "undefined"
 		) {
 			locale = negotiatePreferredLanguageFromNavigator();
+		} else if (
+			TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED &&
+			strat === "localStorage" &&
+			!isServer
+		) {
+			locale = localStorage.getItem(localStorageKey) ?? undefined;
 		}
 		// check if match, else continue loop
 		if (locale !== undefined) {

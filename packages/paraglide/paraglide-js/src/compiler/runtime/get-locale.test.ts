@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { test, expect, vi } from "vitest";
 import { createRuntimeForTesting } from "./create-runtime.js";
 
 test("matching by strategy works", async () => {
@@ -136,4 +136,24 @@ test("returns the preferred locale from navigator.languages", async () => {
 		value: originalNavigator,
 		configurable: true,
 	});
+});
+
+test("returns the locale from local storage", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["localStorage"],
+			localStorageKey: "PARAGLIDE_LOCALE",
+			isServer: "false",
+		},
+	});
+
+	// @ts-expect-error - global variable definition
+	globalThis.localStorage = {
+		setItem: vi.fn(),
+		getItem: vi.fn(() => "de"),
+	};
+
+	expect(runtime.getLocale()).toBe("de");
 });

@@ -21,8 +21,11 @@ export const locales = /** @type {const} */ (["en", "de"]);
 /** @type {string} */
 export const cookieName = "<cookie-name>";
 
+/** @type {string} */
+export const localStorageKey = "PARAGLIDE_LOCALE";
+
 /**
- * @type {Array<"cookie" | "baseLocale" | "globalVariable" | "url" | "preferredLanguage">}
+ * @type {Array<"cookie" | "baseLocale" | "globalVariable" | "url" | "preferredLanguage" | "localStorage">}
  */
 export const strategy = ["globalVariable"];
 
@@ -82,3 +85,5 @@ export const TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED = false;
 export const TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED = false;
 
 export const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = false;
+
+export const TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED = false;
