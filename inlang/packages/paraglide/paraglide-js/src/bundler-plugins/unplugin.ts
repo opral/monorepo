@@ -10,6 +10,11 @@ const PLUGIN_NAME = "unplugin-paraglide-js";
 
 const logger = new Logger();
 
+/**
+ * Default isServer which differs per bundler.
+ */
+let isServer: string | undefined;
+
 let previousCompilation: CompilationResult | undefined;
 
 export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
@@ -25,6 +30,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 				// to avoid cleaning the output directory in watch mode,
 				// we only clean the output directory if there was no previous compilation
 				cleanOutdir: previousCompilation === undefined,
+				isServer,
 				...args,
 			});
 			logger.success("Compilation complete");
@@ -58,6 +64,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 				fs: wrappedFs,
 				previousCompilation,
 				cleanOutdir: false,
+				isServer,
 				...args,
 			});
 
@@ -74,6 +81,13 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			logger.warn("Failed to re-compile project:", (e as Error).message);
 		}
 	},
+	vite: {
+		config: {
+			handler: () => {
+				isServer = "import.meta.env.SSR";
+			},
+		},
+	},
 	webpack(compiler) {
 		compiler.options.resolve = {
 			...compiler.options.resolve,
@@ -89,7 +103,10 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 				previousCompilation = await compile({
 					fs: wrappedFs,
 					previousCompilation,
-					cleanOutdir: true,
+					// clean dir needs to be false. otherwise webpack get's into a race condition
+					// of deleting the output directory and writing files at the same time for
+					// multi environment builds
+					cleanOutdir: false,
 					...args,
 				});
 				logger.success("Compilation complete");

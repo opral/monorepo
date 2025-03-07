@@ -1,8 +1,16 @@
-## AsyncLocalStorageSubset
+## Locale
 
-> **AsyncLocalStorageSubset**\<\>: `object`
+> **Locale**: `any`
 
-Defined in: [runtime/variables.js:37](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/ambient.d.ts:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/ambient.d.ts)
+
+***
+
+## ParaglideAsyncLocalStorage
+
+> **ParaglideAsyncLocalStorage**\<\>: `object`
+
+Defined in: [runtime/variables.js:45](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ### Type Parameters
 
@@ -16,7 +24,17 @@ Defined in: [runtime/variables.js:37](https://github.com/opral/monorepo/tree/mai
 
 ###### store
 
-`any`
+###### locale?
+
+[`Locale`](-internal-.md#locale)
+
+###### messageCalls?
+
+`Set`\<`string`\>
+
+###### origin?
+
+`string`
 
 ###### cb
 
@@ -30,15 +48,7 @@ Defined in: [runtime/variables.js:37](https://github.com/opral/monorepo/tree/mai
 
 ##### Returns
 
-`undefined` \| \{ `locale`: [`Locale`](-internal-.md#locale); `origin`: `string`; \}
-
-***
-
-## Locale
-
-> **Locale**: `any`
-
-Defined in: [runtime/ambient.d.ts:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/ambient.d.ts)
+`undefined` \| \{ `locale`: [`Locale`](-internal-.md#locale); `messageCalls`: `Set`\<`string`\>; `origin`: `string`; \}
 
 ***
 
@@ -68,6 +78,22 @@ Defined in: [runtime/variables.js:22](https://github.com/opral/monorepo/tree/mai
 
 ***
 
+## experimentalMiddlewareLocaleSplitting
+
+> `const` **experimentalMiddlewareLocaleSplitting**: `false` = `false`
+
+Defined in: [runtime/variables.js:58](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+***
+
+## isServer
+
+> `const` **isServer**: `boolean`
+
+Defined in: [runtime/variables.js:60](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+***
+
 ## locales
 
 > `const` **locales**: readonly \[`"en"`, `"de"`\]
@@ -88,9 +114,9 @@ if (locales.includes(userSelectedLocale) === false) {
 
 ## serverAsyncLocalStorage
 
-> **serverAsyncLocalStorage**: `undefined` \| [`AsyncLocalStorageSubset`](-internal-.md#asynclocalstoragesubset) = `undefined`
+> **serverAsyncLocalStorage**: `undefined` \| [`ParaglideAsyncLocalStorage`](-internal-.md#paraglideasynclocalstorage) = `undefined`
 
-Defined in: [runtime/variables.js:48](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:56](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 Server side async local storage that is set by `serverMiddleware()`.
 
@@ -613,7 +639,7 @@ define how the URL origin is resolved.
 
 > **overwriteServerAsyncLocalStorage**(`value`): `void`
 
-Defined in: [runtime/variables.js:60](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:72](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 Sets the server side async local storage.
 
@@ -626,7 +652,7 @@ avoid a circular import between `runtime.js` and
 
 #### value
 
-`undefined` | [`AsyncLocalStorageSubset`](-internal-.md#asynclocalstoragesubset)
+`undefined` | [`ParaglideAsyncLocalStorage`](-internal-.md#paraglideasynclocalstorage)
 
 ### Returns
 
@@ -689,3 +715,25 @@ Set the locale.
 ```ts
 setLocale('en');
 ```
+
+***
+
+## trackMessageCall()
+
+> **trackMessageCall**(`safeModuleId`, `locale`): `void`
+
+Defined in: [runtime/track-message-call.js:7](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/track-message-call.js)
+
+### Parameters
+
+#### safeModuleId
+
+`string`
+
+#### locale
+
+`any`
+
+### Returns
+
+`void`

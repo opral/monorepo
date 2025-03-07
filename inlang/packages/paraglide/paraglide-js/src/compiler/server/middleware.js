@@ -25,9 +25,7 @@ import * as runtime from "./runtime.js";
  *                                                           server environments risks cross-request pollution where state from
  *                                                           one request could leak into another concurrent request.
  *
- * @returns {Promise<Response | any>} Returns either:
- * - A `Response` object (302 redirect) if URL localization is needed
- * - The result of the resolve function if no redirect is required
+ * @returns {Promise<Response>}
  *
  * @example
  * ```typescript
@@ -74,16 +72,16 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 	if (!runtime.serverAsyncLocalStorage && !disableAsyncLocalStorage) {
 		const { AsyncLocalStorage } = await import("async_hooks");
 		runtime.overwriteServerAsyncLocalStorage(new AsyncLocalStorage());
+	} else if (!runtime.serverAsyncLocalStorage) {
+		runtime.overwriteServerAsyncLocalStorage(createMockAsyncLocalStorage());
 	}
 
 	const locale = runtime.extractLocaleFromRequest(request);
 	const origin = new URL(request.url).origin;
 
-	// only redirect GET requests
-	// https://github.com/opral/inlang-paraglide-js/issues/416
+	// if the client makes a request to a URL that doesn't match
+	// the localizedUrl, redirect the client to the localized URL
 	if (runtime.strategy.includes("url")) {
-		// if the client makes a request to a URL that doesn't match
-		// the localizedUrl, redirect the client to the localized URL
 		const localizedUrl = runtime.localizeUrl(request.url, { locale });
 		if (localizedUrl.href !== request.url) {
 			return Response.redirect(localizedUrl, 307);
@@ -102,25 +100,88 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 			// https://github.com/opral/inlang-paraglide-js/issues/411
 			new Request(request);
 
-	// If AsyncLocalStorage is disabled, create a mock implementation
-	if (disableAsyncLocalStorage) {
-		// Create a mock serverAsyncLocalStorage if it doesn't exist
-		if (!runtime.serverAsyncLocalStorage) {
-			runtime.overwriteServerAsyncLocalStorage({
-				getStore: () => ({ locale, origin }),
-				run: async () => {
-					try {
-						return await resolve({ locale, request: newRequest });
-					} finally {
-						runtime.overwriteServerAsyncLocalStorage(undefined);
-					}
-				},
-			});
+	// the message functions that have been called in this request
+	/** @type {Set<string>} */
+	const messageCalls = new Set();
+
+	const response = await runtime.serverAsyncLocalStorage?.run(
+		{ locale, origin, messageCalls },
+		() => resolve({ locale, request: newRequest })
+	);
+
+	// Only modify HTML responses
+	if (
+		runtime.experimentalMiddlewareLocaleSplitting &&
+		response.headers.get("Content-Type")?.includes("html")
+	) {
+		const body = await response.text();
+
+		const messages = [];
+
+		// using .values() to avoid polyfilling in older projects. else the following error is thrown
+		// Type 'Set<string>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+		for (const messageCall of Array.from(messageCalls)) {
+			const [id, locale] =
+				/** @type {[string, import("./runtime.js").Locale]} */ (
+					messageCall.split(":")
+				);
+			messages.push(`${id}: ${compiledBundles[id]?.[locale]}`);
 		}
+
+		const script = `<script>globalThis.__paraglide_ssr = { ${messages.join(",")} }</script>`;
+
+		// Insert the script before the closing head tag
+		const newBody = body.replace("</head>", `${script}</head>`);
+
+		// Create a new response with the modified body
+		// Clone all headers except Content-Length which will be set automatically
+		const newHeaders = new Headers(response.headers);
+		newHeaders.delete("Content-Length"); // Let the browser calculate the correct length
+
+		return new Response(newBody, {
+			status: response.status,
+			statusText: response.statusText,
+			headers: newHeaders,
+		});
 	}
 
-	// Otherwise use AsyncLocalStorage to isolate request context
-	return runtime.serverAsyncLocalStorage?.run({ locale, origin }, () =>
-		resolve({ locale, request: newRequest })
-	);
+	return response;
 }
+
+/**
+ * Creates a mock AsyncLocalStorage implementation for environments where
+ * native AsyncLocalStorage is not available or disabled.
+ *
+ * This mock implementation mimics the behavior of the native AsyncLocalStorage
+ * but doesn't require the async_hooks module. It's designed to be used in
+ * environments like Cloudflare Workers where AsyncLocalStorage is not available.
+ *
+ * @returns {import("./runtime.js").ParaglideAsyncLocalStorage}
+ */
+function createMockAsyncLocalStorage() {
+	/** @type {any} */
+	let currentStore = undefined;
+	return {
+		getStore() {
+			return currentStore;
+		},
+		run(store, callback) {
+			const previousStore = currentStore;
+			currentStore = store;
+			try {
+				return callback();
+			} finally {
+				currentStore = previousStore;
+			}
+		},
+	};
+}
+
+/**
+ * The compiled messages for the server middleware.
+ *
+ * Only populated if `enableMiddlewareOptimizations` is set to `true`.
+ *
+ * @type {Record<string, Record<import("./runtime.js").Locale, string>>}
+ */
+const compiledBundles = {};

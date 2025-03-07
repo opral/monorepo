@@ -138,7 +138,7 @@ async function runBenchmarks() {
 	server.close();
 
 	// Generate markdown with tables
-	let markdownOutput = "# Benchmark Results\n\n";
+	let markdownOutput = "";
 
 	// Create a unique set of configurations
 	type ConfigKey = string;

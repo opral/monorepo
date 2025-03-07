@@ -2,6 +2,11 @@ import type { Runtime } from "../runtime/type.ts";
 
 export type Locale = any;
 
+export type ParaglideAsyncLocalStorage = {
+	run(store: any, callback: () => any): any;
+	getStore(): any;
+};
+
 export declare const {
 	baseLocale,
 	locales,
@@ -9,6 +14,8 @@ export declare const {
 	cookieName,
 	urlPatterns,
 	serverAsyncLocalStorage,
+	experimentalMiddlewareLocaleSplitting,
+	isServer,
 	getLocale,
 	setLocale,
 	getUrlOrigin,
@@ -25,4 +32,6 @@ export declare const {
 	extractLocaleFromUrl,
 	extractLocaleFromRequest,
 	extractLocaleFromCookie,
+	withMessageCallTracking,
+	trackMessageCall,
 }: Runtime;
