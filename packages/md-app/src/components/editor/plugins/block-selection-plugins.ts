@@ -1,5 +1,3 @@
-"use client";
-
 import { BlockSelectionPlugin } from "@udecode/plate-selection/react";
 
 export const blockSelectionPlugins = [

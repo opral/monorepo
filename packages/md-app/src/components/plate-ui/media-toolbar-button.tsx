@@ -1,17 +1,17 @@
-'use client';
+
 
 import React, { useCallback, useState } from 'react';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
 import { isUrl } from '@udecode/plate';
-import { useEditorRef } from '@udecode/plate/react';
 import {
   AudioPlugin,
   FilePlugin,
   ImagePlugin,
   VideoPlugin,
 } from '@udecode/plate-media/react';
+import { useEditorRef } from '@udecode/plate/react';
 import {
   AudioLinesIcon,
   FileUpIcon,

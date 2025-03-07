@@ -1,4 +1,4 @@
-'use client';
+
 
 import React, { useEffect } from 'react';
 import TextareaAutosize, {
@@ -8,14 +8,14 @@ import TextareaAutosize, {
 import type { TEquationElement } from '@udecode/plate-math';
 
 import { cn } from '@udecode/cn';
+import { useEquationInput } from '@udecode/plate-math/react';
+import { BlockSelectionPlugin } from '@udecode/plate-selection/react';
 import {
   createPrimitiveComponent,
   useEditorRef,
   useElement,
   useReadOnly,
 } from '@udecode/plate/react';
-import { useEquationInput } from '@udecode/plate-math/react';
-import { BlockSelectionPlugin } from '@udecode/plate-selection/react';
 import { CornerDownLeftIcon } from 'lucide-react';
 
 import { Button } from './button';

@@ -1,4 +1,4 @@
-'use client';
+
 
 import React, { type ReactNode } from 'react';
 
@@ -22,7 +22,7 @@ export function EmojiToolbarDropdown({
       <Popover.Trigger asChild>{control}</Popover.Trigger>
 
       <Popover.Portal>
-        <Popover.Content className="z-[100]">{children}</Popover.Content>
+        <Popover.Content className="z-100">{children}</Popover.Content>
       </Popover.Portal>
     </Popover.Root>
   );

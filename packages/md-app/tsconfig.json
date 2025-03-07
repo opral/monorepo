@@ -1,5 +1,4 @@
 {
-	"include": ["src/**/*", "components/**/*", "src/lib/**/*", "hooks/**/*", "types/**/*"],
 	"compilerOptions": {
 		"composite": true,
 		"target": "ES2023",
@@ -29,5 +28,22 @@
 			"@/*": ["./src/*"],
 			"react": ["./node_modules/@types/react"]
 		}
-	}
+	},
+	"include": [
+		"next-env.d.ts",
+		".next/types/**/*.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		"**/*.cts",
+		"**/*.ctsx",
+		"**/*.mts",
+		"**/*.mtsx",
+		"**/*.js",
+		"**/*.jsx",
+		"**/*.cjs",
+		"**/*.cjsx",
+		"**/*.mjs",
+		"**/*.mjsx"
+	],
+	"exclude": ["node_modules", "dist"]
 }

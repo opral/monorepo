@@ -1,4 +1,4 @@
-'use client';
+
 
 import type { LucideProps } from 'lucide-react';
 

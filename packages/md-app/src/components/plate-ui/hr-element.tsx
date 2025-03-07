@@ -1,11 +1,14 @@
-'use client';
+
 
 import React from 'react';
 
 import { cn, withRef } from '@udecode/cn';
-import { useFocused, useReadOnly, useSelected } from '@udecode/plate/react';
-
-import { PlateElement } from './plate-element';
+import {
+  PlateElement,
+  useFocused,
+  useReadOnly,
+  useSelected,
+} from '@udecode/plate/react';
 
 export const HrElement = withRef<typeof PlateElement>(
   ({ className, nodeProps, ...props }, ref) => {

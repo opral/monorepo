@@ -1,4 +1,4 @@
-'use client';
+
 
 import { LinkPlugin } from '@udecode/plate-link/react';
 

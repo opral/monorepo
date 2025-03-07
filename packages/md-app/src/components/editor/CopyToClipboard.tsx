@@ -1,4 +1,4 @@
-'use client';
+
 
 import { Copy } from "lucide-react";
 import { Button } from "../plate-ui/button";

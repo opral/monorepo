@@ -1,4 +1,4 @@
-"use client";
+
 
 import { useCallback, useEffect } from "react";
 import { DndProvider } from "react-dnd";
@@ -7,7 +7,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { Plate } from "@udecode/plate/react";
 
 import { useCreateEditor } from "@/components/editor/use-create-editor";
-import { SettingsDialog } from "@/components/editor/settings";
+// import { SettingsDialog } from "@/components/editor/settings";
 import { Editor, EditorContainer } from "@/components/plate-ui/editor";
 import { debounce } from "lodash-es";
 import { useAtom } from "jotai";
@@ -26,7 +26,7 @@ export function PlateEditor() {
 	// Set the initial value of the editor-
 	useEffect(() => {
 		if (loadedMd !== editor.getApi(MarkdownPlugin).markdown.serialize()) {
-			const nodes = editor.api.markdown.deserialize(loadedMd);
+			const nodes = editor.getApi(MarkdownPlugin).markdown.deserialize(loadedMd);
 			editor.tf.setValue(nodes);
 		}
 	}, []);
@@ -58,7 +58,7 @@ export function PlateEditor() {
 			<Plate
 				editor={editor}
 				onValueChange={(newValue) => {
-					if (loadedMd !== newValue.editor.api.markdown.serialize()) {
+					if (loadedMd !== newValue.editor.getApi(MarkdownPlugin).markdown.serialize()) {
 						handleUpdateMdData(newValue);
 						// console.log(
 						// 	newValue.editor.api.markdown.serialize()

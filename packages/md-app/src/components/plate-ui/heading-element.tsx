@@ -1,11 +1,10 @@
-'use client';
+
 
 import React from 'react';
 
 import { withRef, withVariants } from '@udecode/cn';
+import { PlateElement } from '@udecode/plate/react';
 import { cva } from 'class-variance-authority';
-
-import { PlateElement } from './plate-element';
 
 const headingVariants = cva('relative mb-1', {
   variants: {

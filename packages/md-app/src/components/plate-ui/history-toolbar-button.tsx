@@ -1,4 +1,4 @@
-'use client';
+
 
 import { useEditorRef, useEditorSelector, withRef } from '@udecode/plate/react';
 import { Redo2Icon, Undo2Icon } from 'lucide-react';

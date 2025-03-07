@@ -1,7 +1,5 @@
-'use client';
-
-import { TablePlugin } from '@udecode/plate-table/react';
+import { TablePlugin } from "@udecode/plate-table/react";
 
 export const tablePlugin = TablePlugin.configure({
-  options: {},
+	options: {},
 });

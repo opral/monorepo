@@ -1,4 +1,4 @@
-'use client';
+
 
 import type { TElement } from '@udecode/plate';
 
@@ -43,6 +43,7 @@ export const copilotPlugins = [
         },
       },
       debounceDelay: 500,
+      renderGhostText: GhostText,
       getPrompt: ({ editor }) => {
         const contextEntry = editor.api.block({ highest: true });
 
@@ -55,7 +56,6 @@ export const copilotPlugins = [
   ${prompt}
   """`;
       },
-      renderGhostText: GhostText,
     },
   })),
 ] as const;

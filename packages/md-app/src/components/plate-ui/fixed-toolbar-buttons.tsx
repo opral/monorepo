@@ -1,4 +1,4 @@
-'use client';
+
 
 import React from 'react';
 
@@ -62,7 +62,7 @@ import { TableDropdownMenu } from './table-dropdown-menu';
 import { ToggleToolbarButton } from './toggle-toolbar-button';
 import { ToolbarGroup } from './toolbar';
 import { TurnIntoDropdownMenu } from './turn-into-dropdown-menu';
-import { CopyToClipboard } from '../editor/copytoclipboard';
+import { CopyToClipboard } from '../editor/CopyToClipboard';
 
 export function FixedToolbarButtons() {
   const readOnly = useEditorReadOnly();
