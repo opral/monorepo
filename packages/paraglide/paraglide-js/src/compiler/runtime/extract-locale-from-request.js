@@ -17,7 +17,8 @@ import { isLocale } from "./is-locale.js";
  * from a request.
  *
  * The function goes through the strategies in the order
- * they are defined.
+ * they are defined. If a strategy returns an invalid locale,
+ * it will fall back to the next strategy.
  *
  * @example
  *   const locale = extractLocaleFromRequest(request);
@@ -53,7 +54,11 @@ export const extractLocaleFromRequest = (request) => {
 			throw new Error(`Unsupported strategy: ${strat}`);
 		}
 		if (locale !== undefined) {
-			return assertIsLocale(locale);
+			if (!isLocale(locale)) {
+				locale = undefined;
+			} else {
+				return assertIsLocale(locale);
+			}
 		}
 	}
 	throw new Error(
