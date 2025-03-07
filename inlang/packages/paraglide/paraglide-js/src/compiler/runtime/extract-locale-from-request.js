@@ -50,6 +50,8 @@ export const extractLocaleFromRequest = (request) => {
 			locale = _locale;
 		} else if (strat === "baseLocale") {
 			return baseLocale;
+		} else if (strat === "localStorage") {
+			continue;
 		} else {
 			throw new Error(`Unsupported strategy: ${strat}`);
 		}

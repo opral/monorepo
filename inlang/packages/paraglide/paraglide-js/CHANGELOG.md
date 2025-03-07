@@ -10,6 +10,8 @@
 
 - fix [serverMiddleware() throws when cookie contains invalid locale](https://github.com/opral/inlang-paraglide-js/issues/442)
 
+- add `localStorage` strategy [#431](https://github.com/opral/inlang-paraglide-js/issues/431)
+
 ## 2.0.0-beta.26
 
 - replace `node:crypto` with the Web Crypto API https://github.com/opral/inlang-paraglide-js/issues/424

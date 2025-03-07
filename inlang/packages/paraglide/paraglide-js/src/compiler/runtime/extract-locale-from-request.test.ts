@@ -137,5 +137,19 @@ test("should fall back to next strategy when cookie contains invalid locale", as
 		},
 	});
 	expect(runtime.extractLocaleFromRequest(request2)).toBe("en");
+});
 
+test("skips over localStorage strategy as it is not supported on the server", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en"],
+		compilerOptions: {
+			strategy: ["localStorage", "baseLocale"],
+		},
+	});
+
+	const request = new Request("http://example.com");
+
+	// expecting baseLocale
+	expect(runtime.extractLocaleFromRequest(request)).toBe("en");
 });
