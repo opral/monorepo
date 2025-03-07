@@ -119,3 +119,38 @@ test("when strategy precedes URL, it should set the locale and re-direct to the 
 		"https://example.com/en/some-path"
 	);
 });
+
+// https://github.com/opral/inlang-paraglide-js/issues/430
+test("should not reload when setting locale to current locale", async () => {
+	// @ts-expect-error - global variable definition
+	globalThis.document = {};
+	// @ts-expect-error - global variable definition
+	globalThis.window = {};
+	// @ts-expect-error - global variable definition
+	globalThis.window.location = {};
+	globalThis.window.location.reload = vi.fn();
+
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["cookie"],
+			cookieName: "PARAGLIDE_LOCALE",
+		},
+	});
+
+	globalThis.document.cookie = "PARAGLIDE_LOCALE=en; path=/";
+
+	// Setting to the current locale (en)
+	runtime.setLocale("en");
+
+	// Cookie should remain unchanged
+	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=en; path=/");
+	// Should not trigger a reload
+	expect(globalThis.window.location.reload).not.toBeCalled();
+
+	// Setting to a different locale should still work
+	runtime.setLocale("de");
+	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=de; path=/");
+	expect(globalThis.window.location.reload).toBeCalled();
+});
