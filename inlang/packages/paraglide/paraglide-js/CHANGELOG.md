@@ -5,7 +5,8 @@
 ## 2.0.0-beta.27
 
 - `experimentalMiddlewareLocaleSplitting` option https://github.com/opral/inlang-paraglide-js/issues/425#issuecomment-2692351073
-- 
+
+- fix [setLocale() triggers re-loads if the same locale is set](https://github.com/opral/inlang-paraglide-js/issues/430) 
 
 ## 2.0.0-beta.26
 

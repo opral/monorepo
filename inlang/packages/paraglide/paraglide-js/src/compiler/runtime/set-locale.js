@@ -1,11 +1,13 @@
 import {
 	cookieName,
+	isServer,
 	strategy,
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
 	TREE_SHAKE_URL_STRATEGY_USED,
 } from "./variables.js";
 import { localizeUrl } from "./localize-url.js";
+import { getLocale } from "./get-locale.js";
 
 /**
  * Set the locale.
@@ -16,6 +18,17 @@ import { localizeUrl } from "./localize-url.js";
  * @type {(newLocale: Locale) => void}
  */
 export let setLocale = (newLocale) => {
+	// locale is already set
+	// https://github.com/opral/inlang-paraglide-js/issues/430
+	let currentLocale;
+	try {
+		currentLocale = getLocale();
+	} catch {
+		// do nothing, no locale has been set yet.
+	}
+	if (newLocale === currentLocale) {
+		return;
+	}
 	let localeHasBeenSet = false;
 	for (const strat of strategy) {
 		if (
@@ -27,7 +40,7 @@ export let setLocale = (newLocale) => {
 			_locale = newLocale;
 			localeHasBeenSet = true;
 		} else if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
-			if (typeof document === "undefined") {
+			if (isServer) {
 				continue;
 			}
 			// set the cookie
@@ -36,11 +49,7 @@ export let setLocale = (newLocale) => {
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
-		} else if (
-			TREE_SHAKE_URL_STRATEGY_USED &&
-			strat === "url" &&
-			typeof window !== "undefined"
-		) {
+		} else if (TREE_SHAKE_URL_STRATEGY_USED && strat === "url" && !isServer) {
 			// route to the new url
 			//
 			// this triggers a page reload but a user rarely
@@ -60,7 +69,7 @@ export let setLocale = (newLocale) => {
 		throw new Error(
 			"No strategy was able to set the locale. This can happen if you use browser-based strategies like `cookie` in a server-side rendering environment. Overwrite setLocale() on the server to avoid this error."
 		);
-	} else if (typeof window !== "undefined" && window.location) {
+	} else if (!isServer && window.location) {
 		// reload the page to reflect the new locale
 		window.location.reload();
 	}
