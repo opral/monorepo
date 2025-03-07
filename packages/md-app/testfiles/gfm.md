@@ -54,6 +54,8 @@ __Bold text__ using double underscores.
 
 ![GitHub Logo](https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png)
 
+<img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="Github Logo"/>
+
 ## Blockquotes
 
 > This is a blockquote. It can span multiple lines.
