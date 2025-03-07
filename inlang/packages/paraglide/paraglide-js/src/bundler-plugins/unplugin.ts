@@ -103,7 +103,10 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 				previousCompilation = await compile({
 					fs: wrappedFs,
 					previousCompilation,
-					cleanOutdir: true,
+					// clean dir needs to be false. otherwise webpack get's into a race condition
+					// of deleting the output directory and writing files at the same time for
+					// multi environment builds
+					cleanOutdir: false,
 					...args,
 				});
 				logger.success("Compilation complete");

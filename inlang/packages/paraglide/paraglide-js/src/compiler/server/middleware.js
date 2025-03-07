@@ -118,7 +118,9 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 
 		const messages = [];
 
-		for (const messageCall of messageCalls) {
+		// using .values() to avoid polyfilling in older projects. else the following error is thrown
+		// Type 'Set<string>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+		for (const messageCall of Array.from(messageCalls)) {
 			const [id, locale] =
 				/** @type {[string, import("./runtime.js").Locale]} */ (
 					messageCall.split(":")
