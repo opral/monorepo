@@ -14,6 +14,7 @@ export function generateLocaleModules(
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
 		isServer: NonNullable<CompilerOptions["isServer"]>;
+		localStorageKey: NonNullable<CompilerOptions["localStorageKey"]>;
 		experimentalMiddlewareLocaleSplitting: NonNullable<
 			CompilerOptions["experimentalMiddlewareLocaleSplitting"]
 		>;

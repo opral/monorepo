@@ -1,9 +1,11 @@
 import {
 	cookieName,
 	isServer,
+	localStorageKey,
 	strategy,
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
+	TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED,
 	TREE_SHAKE_URL_STRATEGY_USED,
 } from "./variables.js";
 import { localizeUrl } from "./localize-url.js";
@@ -63,6 +65,14 @@ export let setLocale = (newLocale) => {
 			}).href;
 			// just in case return. the browser reloads the page by setting href
 			return;
+		} else if (
+			TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED &&
+			strat === "localStorage" &&
+			!isServer
+		) {
+			// set the localStorage
+			localStorage.setItem(localStorageKey, newLocale);
+			localeHasBeenSet = true;
 		}
 	}
 	if (localeHasBeenSet === false) {

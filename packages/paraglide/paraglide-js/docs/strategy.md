@@ -85,6 +85,20 @@ For example:
 - If user prefers `fr-FR,fr;q=0.9,en;q=0.7` and your app supports `["en", "fr"]`, it will use `fr`
 - If user prefers `en-US` and your app only supports `["en", "de"]`, it will use `en`
 
+### localStorage
+
+Determine the locale from the user's local storage.
+
+<doc-callout type="warning">If you use this stragety in combination with url, make sure that a strategy like `cookie` is used as well to resolve the locale in a request. The server has no access to localStorage.</doc-callout> 
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["localStorage"]
+})
+```
+
 ### url
 
 Determine the locale from the URL (pathname, domain, etc).
