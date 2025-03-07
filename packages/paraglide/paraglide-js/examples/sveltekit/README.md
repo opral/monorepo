@@ -25,6 +25,10 @@ npx @inlang/paraglide-js@beta init
 
 ### Add the `paraglideVitePlugin()` to `vite.config.js`.
 
+<doc-callout type="info">
+	You can define strategy however you need. 
+</doc-callout>
+
 ```diff
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
@@ -36,7 +40,7 @@ export default defineConfig({
 +		paraglideVitePlugin({
 +			project: './project.inlang',
 +			outdir: './src/lib/paraglide',
-+			strategy: ['url']
++			strategy: ['url', 'cookie', 'baseLocale'],
 +		})
 	]
 });
