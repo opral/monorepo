@@ -13,6 +13,10 @@ Paraglide JS is no longer extracting the locale from API requests for the `url` 
 +strategy: ["url", "cookie", "baseLocale"]
 ```
 
+- consolidated `message-modules` output into a single file [#434](https://github.com/opral/inlang-paraglide-js/issues/434) to severaly improve scalability
+
+
+
 - `experimentalMiddlewareLocaleSplitting` option https://github.com/opral/inlang-paraglide-js/issues/425#issuecomment-2692351073
 
 - fix [setLocale() triggers re-loads if the same locale is set](https://github.com/opral/inlang-paraglide-js/issues/430) 
