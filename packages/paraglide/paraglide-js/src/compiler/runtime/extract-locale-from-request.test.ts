@@ -174,3 +174,35 @@ test("does not resolve the locale from the url if request is not a document requ
 	const locale = runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("en");
 });
+
+// https://github.com/opral/inlang-paraglide-js/issues/436
+test("preferredLanguage precedence over url", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url", "preferredLanguage"],
+			urlPatterns: [
+				{
+					pattern: ":protocol://:domain(.*)::port?/:locale(en|de)?/:path(.*)?",
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
+						en: { locale: "en" },
+						de: { locale: "de" },
+					},
+				},
+			],
+		},
+	});
+
+	// no locale in url, should use preferredLanguage
+	const request = new Request("https://example.com/home", {
+		headers: {
+			"Sec-Fetch-Dest": "document",
+			"Accept-Language": "de;q=0.9,en;q=0.8",
+		},
+	});
+
+	const locale = runtime.extractLocaleFromRequest(request);
+	expect(locale).toBe("de");
+});
