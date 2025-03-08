@@ -15,12 +15,7 @@ export function generateOutput(
 ): Record<string, string> {
 	const output: Record<string, string> = {};
 
-	// all messages index file
-	output["messages/_index.js"] = [
-		...compiledBundles.map(
-			({ bundle }) => `export * from './${toSafeModuleId(bundle.node.id)}.js'`
-		),
-	].join("\n");
+	const moduleFilenames = new Set<string>();
 
 	for (const compiledBundle of compiledBundles) {
 		const bundleId = compiledBundle.bundle.node.id;
@@ -31,14 +26,19 @@ export function generateOutput(
 			) ?? [];
 
 		// bundle file
-		const filename = `messages/${safeBundleId}.js`;
-		if (output[filename]) {
+		let filename = `messages/${safeBundleId}.js`;
+
+		let counter = 0;
+		while (output[filename]) {
 			// bundle file already exists, need to append to it
-			output[filename] += `\n${compiledBundle.bundle.code}`;
-		} else {
-			// create fresh bundle file
-			output[filename] = compiledBundle.bundle.code;
+			counter += 1;
+			filename = `messages/${safeBundleId}${counter}.js`;
 		}
+
+		moduleFilenames.add(`${safeBundleId}${counter ? counter : ""}.js`);
+
+		// create fresh bundle file
+		output[filename] = compiledBundle.bundle.code;
 
 		const needsFallback: string[] = [];
 
@@ -89,10 +89,16 @@ export function generateOutput(
 
 		// Add the registry import to the message file
 		// if registry is used
-		if (output[filename].includes("registry.")) {
+		if (output[filename]?.includes("registry.")) {
 			output[filename] =
 				`import * as registry from '../registry.js'\n` + output[filename];
 		}
 	}
+
+	// all messages index file
+	output["messages/_index.js"] = Array.from(moduleFilenames)
+		.map((filename) => `export * from './${filename}'`)
+		.join("\n");
+
 	return output;
 }
