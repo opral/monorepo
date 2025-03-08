@@ -16,15 +16,13 @@
 	},
 	"pages": {
 		"": {
-			"/": "./MARKETPLACE.md"
+			"/": "./MARKETPLACE.md",
+			"/changelog": "./CHANGELOG.md"
 		},
 		"Getting Started": {
 			"/quick-start": "./docs/quick-start.md",
 			"/customization": "./docs/customization.md",
 			"/supported-i18n-libraries": "./docs/supported-i18n-libraries.md"
-		},
-		"Appendix": {
-			"/changelog": "./sherlock/CHANGELOG.md"
 		}
 	},
 	"keywords": [
