@@ -46,8 +46,12 @@ export function extractLocaleFromUrl(url) {
 							break;
 						}
 					}
+					// optional parameters
+					else if (key.endsWith("?") && matchedValue === undefined) {
+						continue;
+					}
 					// Handle regular parameters
-					else if (matchedValue && matchedValue !== val) {
+					else if (matchedValue !== val) {
 						allMatch = false;
 						break;
 					}
