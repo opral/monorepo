@@ -1,24 +1,16 @@
 import type { ProjectSettings } from "@inlang/sdk";
 import type { CompiledBundleWithMessages } from "../compile-bundle.js";
-import { createRuntimeFile } from "../runtime/create-runtime.js";
-import { createRegistry } from "../registry.js";
-import type { CompilerOptions } from "../compiler-options.js";
 import { toSafeModuleId } from "../safe-module-id.js";
-import { createServerFile } from "../server/create-server-file.js";
+import { inputsType } from "../jsdoc-types.js";
 
-export function generateLocaleModules(
+export function messageReferenceExpression(locale: string, bundleId: string) {
+	return `${toSafeModuleId(locale)}.${toSafeModuleId(bundleId)}`;
+}
+
+export function generateOutput(
 	compiledBundles: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
-	fallbackMap: Record<string, string | undefined>,
-	compilerOptions: {
-		strategy: NonNullable<CompilerOptions["strategy"]>;
-		cookieName: NonNullable<CompilerOptions["cookieName"]>;
-		isServer: NonNullable<CompilerOptions["isServer"]>;
-		localStorageKey: NonNullable<CompilerOptions["localStorageKey"]>;
-		experimentalMiddlewareLocaleSplitting: NonNullable<
-			CompilerOptions["experimentalMiddlewareLocaleSplitting"]
-		>;
-	}
+	fallbackMap: Record<string, string | undefined>
 ): Record<string, string> {
 	const indexFile = [
 		`import { getLocale, trackMessageCall, experimentalMiddlewareLocaleSplitting, isServer } from "../runtime.js"`,
@@ -32,19 +24,7 @@ export function generateLocaleModules(
 	].join("\n");
 
 	const output: Record<string, string> = {
-		["runtime.js"]: createRuntimeFile({
-			baseLocale: settings.baseLocale,
-			locales: settings.locales,
-			compilerOptions,
-		}),
-		["server.js"]: createServerFile({ compiledBundles, compilerOptions }),
-		["registry.js"]: createRegistry(),
 		["messages/_index.js"]: indexFile,
-		["messages.js"]: [
-			"export * from './messages/_index.js'",
-			"// enabling auto-import by exposing all messages as m",
-			"export * as m from './messages/_index.js'",
-		].join("\n"),
 	};
 
 	// generate message files
@@ -56,6 +36,10 @@ export function generateLocaleModules(
 			const compiledMessage = compiledBundle.messages[locale];
 			const bundleModuleId = toSafeModuleId(compiledBundle.bundle.node.id);
 			const bundleId = compiledBundle.bundle.node.id;
+			const inputs =
+				compiledBundle.bundle.node.declarations?.filter(
+					(decl) => decl.type === "input-variable"
+				) ?? [];
 			if (!compiledMessage) {
 				const fallbackLocale = fallbackMap[locale];
 				if (fallbackLocale) {
@@ -63,12 +47,12 @@ export function generateLocaleModules(
 					file += `\nexport { ${bundleModuleId} } from "./${fallbackLocale}.js"`;
 				} else {
 					// no fallback exists, render the bundleId
-					file += `\n/** @type {(inputs?: Record<string, never>) => string} */\nexport const ${bundleModuleId} = () => '${bundleId}'`;
+					file += `\n/** @type {(inputs: ${inputsType(inputs)}) => string} */ */\nexport const ${bundleModuleId} = () => '${bundleId}'`;
 				}
 				continue;
 			}
 
-			file += `\n\n${compiledMessage.code}`;
+			file += `\n\nexport const ${bundleModuleId} = ${compiledMessage.code}`;
 		}
 
 		// add import if used

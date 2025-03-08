@@ -757,6 +757,78 @@ describe.each([
 			});
 		});
 
+		test("case sensitivity handling for bundle IDs", async () => {
+			// skip local modules for now because the option might get removed in the future
+			if (compilerOptions.outputStructure === "locale-modules") {
+				return;
+			}
+			const project = await loadProjectInMemory({
+				blob: await newProject({
+					settings: { locales: ["en"], baseLocale: "en" },
+				}),
+			});
+
+			// Create two bundles with the same name but different case
+			await insertBundleNested(
+				project.db,
+				createBundleNested({
+					id: "Helloworld",
+					messages: [
+						{
+							locale: "en",
+							variants: [
+								{
+									pattern: [
+										{ type: "text", value: "Hello from uppercase bundle" },
+									],
+								},
+							],
+						},
+					],
+				})
+			);
+
+			await insertBundleNested(
+				project.db,
+				createBundleNested({
+					id: "helloworld",
+					messages: [
+						{
+							locale: "en",
+							variants: [
+								{
+									pattern: [
+										{ type: "text", value: "Hello from lowercase bundle" },
+									],
+								},
+							],
+						},
+					],
+				})
+			);
+
+			const output = await compileProject({
+				project,
+				compilerOptions,
+			});
+
+			const code = await bundleCode(
+				output,
+				`export * as m from "./paraglide/messages.js"
+				export { helloworld, Helloworld } from "./paraglide/messages.js"`
+			);
+
+			const imported = await importCode(code);
+
+			// Both message functions should be available
+			expect(imported.helloworld()).toBe("Hello from lowercase bundle");
+			expect(imported.Helloworld()).toBe("Hello from uppercase bundle");
+
+			// They should also be available through the m namespace
+			expect(imported.m.helloworld()).toBe("Hello from lowercase bundle");
+			expect(imported.m.Helloworld()).toBe("Hello from uppercase bundle");
+		});
+
 		// whatever the strictest users use, this is the ultimate nothing gets stricter than this
 		// (to avoid developers opening issues "i get a ts warning in my code")
 		const superStrictRuleOutAnyErrorTsSettings: ProjectOptions["compilerOptions"] =

@@ -37,6 +37,8 @@ test("compiles to jsdoc", async () => {
 			"en-US": "en",
 		},
 		bundle: mockBundle,
+		messageReferenceExpression: (locale) =>
+			`${toSafeModuleId(locale)}.blue_moon_bottle`,
 	});
 
 	expect(result.bundle.code).toMatchInlineSnapshot(
@@ -54,7 +56,9 @@ test("compiles to jsdoc", async () => {
 */
 /* @__NO_SIDE_EFFECTS__ */
 export const blue_moon_bottle = (inputs, options = {}) => {
-	if (experimentalMiddlewareLocaleSplitting && isServer === false) return /** @type {any} */ (globalThis).__paraglide_ssr.blue_moon_bottle(inputs) 
+	if (experimentalMiddlewareLocaleSplitting && isServer === false) {
+		return /** @type {any} */ (globalThis).__paraglide_ssr.blue_moon_bottle(inputs) 
+	}
 	const locale = options.locale ?? getLocale()
 	trackMessageCall("blue_moon_bottle", locale)
 	if (locale === "en") return en.blue_moon_bottle(inputs)
@@ -96,6 +100,8 @@ test("compiles bundles with arbitrary module identifiers", async () => {
 	const result = compileBundle({
 		fallbackMap: {},
 		bundle: mockBundle,
+		messageReferenceExpression: (locale) =>
+			`${toSafeModuleId(locale)}.blue_moon_bottle`,
 	});
 
 	expect(result.bundle.code).includes(
