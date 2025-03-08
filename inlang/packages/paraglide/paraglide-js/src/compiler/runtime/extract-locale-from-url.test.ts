@@ -167,3 +167,40 @@ test("multi pathname localization with optional groups", async () => {
 		runtime.extractLocaleFromUrl(`https://example.com/something/else`)
 	).toBe(undefined);
 });
+
+// https://github.com/opral/inlang-paraglide-js/issues/436
+test("shouldn't match a pattern with explicit desire to not match locale", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			urlPatterns: [
+				{
+					pattern: ":protocol://:domain(.*)::port?/:locale(en|de)?/:path(.*)?",
+					deLocalizedNamedGroups: { locale: null },
+					localizedNamedGroups: {
+						en: { locale: "en" },
+						de: { locale: "de" },
+					},
+				},
+			],
+		},
+	});
+
+	// no locale in url, should use preferredLanguage
+	expect(
+		runtime.extractLocaleFromUrl(new URL("https://example.com/home"))
+	).toBe(undefined);
+
+	expect(
+		runtime.extractLocaleFromUrl(new URL("http://localhost:5173/"))
+	).toBe(undefined);
+
+	expect(
+		runtime.extractLocaleFromUrl(new URL("https://example.com/en/home"))
+	).toBe("en");
+
+	expect(
+		runtime.extractLocaleFromUrl(new URL("https://example.com/de/home"))
+	).toBe("de");
+});

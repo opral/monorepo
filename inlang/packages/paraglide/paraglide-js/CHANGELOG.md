@@ -21,6 +21,8 @@ Paraglide JS is no longer extracting the locale from API requests for the `url` 
 
 - add `localStorage` strategy [#431](https://github.com/opral/inlang-paraglide-js/issues/431)
 
+- fix url strategy with optional locale always resoles base locale  [#436](https://github.com/opral/inlang-paraglide-js/issues/436)
+
 ## 2.0.0-beta.26
 
 - replace `node:crypto` with the Web Crypto API https://github.com/opral/inlang-paraglide-js/issues/424
