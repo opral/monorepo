@@ -1,12 +1,20 @@
 import { compileBundle } from "./compile-bundle.js";
 import { selectBundleNested, type InlangProject } from "@inlang/sdk";
 import { lookup } from "../services/lookup.js";
-import { generateLocaleModules } from "./output-structure/locale-modules.js";
-import { generateMessageModules } from "./output-structure/message-modules.js";
+import * as localeModules from "./output-structure/locale-modules.js";
+import * as messageModules from "./output-structure/message-modules.js";
 import {
 	defaultCompilerOptions,
 	type CompilerOptions,
 } from "./compiler-options.js";
+import { createRuntimeFile } from "./runtime/create-runtime.js";
+import { createServerFile } from "./server/create-server-file.js";
+import { createRegistry } from "./registry.js";
+
+const outputStructures = {
+	"locale-modules": localeModules,
+	"message-modules": messageModules,
+};
 
 /**
  * Takes an inlang project and compiles it into a set of files.
@@ -33,34 +41,40 @@ export const compileProject = async (args: {
 	//Maps each language to it's fallback
 	//If there is no fallback, it will be undefined
 	const fallbackMap = getFallbackMap(settings.locales, settings.baseLocale);
+
+	const outputStructure = outputStructures[optionsWithDefaults.outputStructure];
+
 	const compiledBundles = bundles.map((bundle) =>
 		compileBundle({
 			bundle,
 			fallbackMap,
+			messageReferenceExpression: outputStructure.messageReferenceExpression,
 		})
 	);
 
-	const output: Record<string, string> = {};
-
-	if (optionsWithDefaults.outputStructure === "locale-modules") {
-		const regularOutput = generateLocaleModules(
+	const output: Record<string, string> = {
+		["runtime.js"]: createRuntimeFile({
+			baseLocale: settings.baseLocale,
+			locales: settings.locales,
+			compilerOptions: optionsWithDefaults,
+		}),
+		["server.js"]: createServerFile({
 			compiledBundles,
-			settings,
-			fallbackMap,
-			optionsWithDefaults
-		);
-		Object.assign(output, regularOutput);
-	}
+			compilerOptions: optionsWithDefaults,
+		}),
+		["registry.js"]: createRegistry(),
+		["messages.js"]: [
+			"export * from './messages/_index.js'",
+			"// enabling auto-import by exposing all messages as m",
+			"export * as m from './messages/_index.js'",
+		].join("\n"),
+	};
 
-	if (optionsWithDefaults.outputStructure === "message-modules") {
-		const messageModuleOutput = generateMessageModules(
-			compiledBundles,
-			settings,
-			fallbackMap,
-			optionsWithDefaults
-		);
-		Object.assign(output, messageModuleOutput);
-	}
+	// generate the output modules
+	Object.assign(
+		output,
+		outputStructure.generateOutput(compiledBundles, settings, fallbackMap)
+	);
 
 	if (optionsWithDefaults.emitGitIgnore) {
 		output[".gitignore"] = ignoreDirectory;
