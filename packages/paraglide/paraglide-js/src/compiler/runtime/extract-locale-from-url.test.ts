@@ -192,9 +192,9 @@ test("shouldn't match a pattern with explicit desire to not match locale", async
 		runtime.extractLocaleFromUrl(new URL("https://example.com/home"))
 	).toBe(undefined);
 
-	expect(
-		runtime.extractLocaleFromUrl(new URL("http://localhost:5173/"))
-	).toBe(undefined);
+	expect(runtime.extractLocaleFromUrl(new URL("http://localhost:5173/"))).toBe(
+		undefined
+	);
 
 	expect(
 		runtime.extractLocaleFromUrl(new URL("https://example.com/en/home"))
