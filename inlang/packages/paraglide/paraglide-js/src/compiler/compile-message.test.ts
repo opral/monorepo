@@ -2,7 +2,6 @@ import { test, expect } from "vitest";
 import { compileMessage } from "./compile-message.js";
 import type { Declaration, Message, Variant } from "@inlang/sdk";
 import { createRegistry } from "./registry.js";
-import { toSafeModuleId } from "./safe-module-id.js";
 
 test("compiles a message with a single variant", async () => {
 	const declarations: Declaration[] = [];
@@ -24,7 +23,8 @@ test("compiles a message with a single variant", async () => {
 	const compiled = compileMessage(declarations, message, variants);
 
 	const { some_message } = await import(
-		"data:text/javascript;base64," + btoa(compiled.code)
+		"data:text/javascript;base64," +
+			btoa("export const some_message =" + compiled.code)
 	);
 
 	expect(some_message()).toBe("Hello");
@@ -81,7 +81,8 @@ test("compiles a message with variants", async () => {
 	const compiled = compileMessage(declarations, message, variants);
 
 	const { some_message } = await import(
-		"data:text/javascript;base64," + btoa(compiled.code)
+		"data:text/javascript;base64," +
+			btoa("export const some_message =" + compiled.code)
 	);
 
 	expect(some_message({ fistInput: 1, secondInput: 2 })).toBe(
@@ -142,7 +143,8 @@ test("compiles multi-variant message with a fallback in case the variants are no
 	const compiled = compileMessage(declarations, message, variants);
 
 	const { some_message } = await import(
-		"data:text/javascript;base64," + btoa(compiled.code)
+		"data:text/javascript;base64," +
+			btoa("export const some_message = " + compiled.code)
 	);
 
 	expect(some_message({ secondInput: 2 })).toBe("Catch all");
@@ -169,10 +171,7 @@ test("only emits input arguments when inputs exist", async () => {
 	const compiled = compileMessage(declarations, message, variants);
 
 	expect(compiled.code).toBe(
-		[
-			"/** @type {(inputs: {}) => string} */",
-			"export const some_message = () => {\n\treturn `Hello`\n};",
-		].join("\n")
+		"/** @type {(inputs: {}) => string} */ () => {\n\treturn `Hello`\n};"
 	);
 });
 
@@ -227,7 +226,9 @@ test("compiles messages that use plural()", async () => {
 		"data:text/javascript;base64," +
 			// bundling the registry inline to avoid managing module imports here
 			btoa(createRegistry()) +
-			btoa(compiled.code.replace("registry.", ""))
+			btoa(
+				"export const plural_test = " + compiled.code.replace("registry.", "")
+			)
 	);
 
 	expect(plural_test({ count: 1 })).toBe("There is one cat.");
@@ -284,7 +285,10 @@ test("compiles messages that use datetime()", async () => {
 			"data:text/javascript;base64," +
 				// bundling the registry inline to avoid managing module imports here
 				btoa(createRegistry()) +
-				btoa(compiled.code.replace("registry.", ""))
+				btoa(
+					"export const datetime_test =" +
+						compiled.code.replace("registry.", "")
+				)
 		);
 		return datetime_test;
 	};
@@ -352,7 +356,10 @@ test("compiles messages that use datetime a function with options", async () => 
 			"data:text/javascript;base64," +
 				// bundling the registry inline to avoid managing module imports here
 				btoa(createRegistry()) +
-				btoa(compiled.code.replace("registry.", ""))
+				btoa(
+					"export const datetime_test = " +
+						compiled.code.replace("registry.", "")
+				)
 		);
 		return datetime_test;
 	};
@@ -365,32 +372,4 @@ test("compiles messages that use datetime a function with options", async () => 
 	expect(deMessage({ date: "2022-03-31" })).toMatch(
 		/Today is \d{1,2}\. März\./
 	);
-});
-
-// https://github.com/opral/inlang-paraglide-js/issues/285
-test("compiles messages with arbitrary module identifiers", async () => {
-	const declarations: Declaration[] = [];
-	const message: Message = {
-		locale: "en",
-		bundleId: "$p@44🍌",
-		id: "message-id",
-		selectors: [],
-	};
-	const variants: Variant[] = [
-		{
-			id: "1",
-			messageId: "message-id",
-			matches: [],
-			pattern: [{ type: "text", value: "Hello" }],
-		},
-	];
-
-	const compiled = compileMessage(declarations, message, variants);
-
-	const m = await import(
-		"data:text/javascript;base64," +
-			Buffer.from(compiled.code).toString("base64")
-	);
-
-	expect(m[toSafeModuleId("$p@44🍌")]()).toBe("Hello");
 });

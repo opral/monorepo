@@ -37,6 +37,8 @@ test("compiles to jsdoc", async () => {
 			"en-US": "en",
 		},
 		bundle: mockBundle,
+		messageReferenceExpression: (locale) =>
+			`${toSafeModuleId(locale)}.blue_moon_bottle`,
 	});
 
 	expect(result.bundle.code).toMatchInlineSnapshot(
@@ -96,6 +98,8 @@ test("compiles bundles with arbitrary module identifiers", async () => {
 	const result = compileBundle({
 		fallbackMap: {},
 		bundle: mockBundle,
+		messageReferenceExpression: (locale) =>
+			`${toSafeModuleId(locale)}.blue_moon_bottle`,
 	});
 
 	expect(result.bundle.code).includes(
