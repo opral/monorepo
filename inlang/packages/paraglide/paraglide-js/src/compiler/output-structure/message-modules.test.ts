@@ -81,13 +81,6 @@ test("handles case senstivity by creating directories and files only in lowercas
 
 	// expecting only lowercase directories and files
 	expect(output).toHaveProperty("messages/happyelephant.js");
+	expect(output).toHaveProperty("messages/happyelephant1.js");
 	expect(output).not.toHaveProperty("messages/HappyElephant.js");
-
-	// expecting both bundles to be merged into the "happyelephant" module
-	expect(output["messages/happyelephant.js"]).includes(
-		`export const happyelephant = () => en.happyelephant`
-	);
-	expect(output["messages/happyelephant.js"]).includes(
-		`export const HappyElephant = () => en.HappyElephant`
-	);
 });
