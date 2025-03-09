@@ -2,6 +2,48 @@
 
 **Paraglide JS 2.0 GA release notes are [here](https://github.com/opral/monorepo/blob/main/inlang/packages/paraglide/paraglide-js/v2-release-notes.md)**
 
+## 2.0.0-beta.28
+
+### BREAKING update to the URLPattern API  
+
+[#450](https://github.com/opral/inlang-paraglide-js/issues/450)  
+
+The `localizedNamedGroups` and `deLocalizedNamedGroups` API has been replaced with a tuple-based `localized` array to: 
+
+- enable translated pathnames in any combination
+- make the API more intuitive
+
+#### Migration Guide:
+
+**Refer to the updated documentation [here](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy#url).**
+
+Before
+
+```json
+{
+  "pattern": "https://:domain(.*)/:locale(de|fr)?/:path*",
+  "deLocalizedNamedGroups": { "locale": null },
+  "localizedNamedGroups": {
+    "en": { "locale": null },
+    "fr": { "locale": "fr" },
+    "de": { "locale": "de" }
+  }
+}
+```
+
+After
+
+```json
+{
+  "pattern": "https://:domain(.*)/:path*",
+  "localized": [
+    ["fr", "https://:domain(.*)/fr/:path*"],
+    ["de", "https://:domain(.*)/de/:path*"]
+    ["en", "https://:domain(.*)/:path*"],
+  ]
+}
+```
+
 ## 2.0.0-beta.27
 
 - fix wrong matching in API requests [#427](https://github.com/opral/inlang-paraglide-js/issues/427)

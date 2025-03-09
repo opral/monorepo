@@ -10,26 +10,26 @@ test("pathname based localization", async () => {
 			urlPatterns: [
 				// literal match
 				{
-					pattern: ":protocol://:domain(.*)/blog/about",
+					pattern: "/blog/about",
 					localized: [
-						["en", ":protocol://:domain(.*)/blog/about"],
-						["de", ":protocol://:domain(.*)/de/artikel/ueber-uns"],
+						["en", "/blog/about"],
+						["de", "/de/artikel/ueber-uns"],
 					],
 				},
 				// parameter
 				{
-					pattern: ":protocol://:domain(.*)/blog/:id",
+					pattern: "/blog/:id",
 					localized: [
-						["en", ":protocol://:domain(.*)/blog/:id"],
-						["de", ":protocol://:domain(.*)/de/artikel/:id"],
+						["en", "/blog/:id"],
+						["de", "/de/artikel/:id"],
 					],
 				},
 				// wildcard
 				{
-					pattern: ":protocol://:domain(.*)/:path(.*)",
+					pattern: "/:path(.*)",
 					localized: [
-						["de", ":protocol://:domain(.*)/de/:path(.*)"],
-						["en", ":protocol://:domain(.*)/:path(.*)"],
+						["de", "/de/:path(.*)"],
+						["en", "/:path(.*)"],
 					],
 				},
 			],
@@ -458,6 +458,37 @@ test.each([
 	);
 
 	expect(runtime.deLocalizeUrl("https://example.com/about").href).toBe(
+		"https://example.com/about"
+	);
+});
+
+test("auto fills the url base path", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "/:path(.*)?",
+					localized: [
+						["de", "/de/:path(.*)?"],
+						["en", "/:path(.*)?"],
+					],
+				},
+			],
+		},
+	});
+
+	expect(
+		runtime.localizeUrl("https://example.com/about", { locale: "en" }).href
+	).toBe("https://example.com/about");
+
+	expect(
+		runtime.localizeUrl("https://example.com/about", { locale: "de" }).href
+	).toBe("https://example.com/de/about");
+
+	expect(runtime.deLocalizeUrl("https://example.com/de/about").href).toBe(
 		"https://example.com/about"
 	);
 });
