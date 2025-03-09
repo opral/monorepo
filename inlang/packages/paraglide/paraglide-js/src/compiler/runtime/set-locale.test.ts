@@ -45,11 +45,10 @@ test("url pattern strategy sets the window location", async () => {
 			urlPatterns: [
 				{
 					pattern: "https://example.:tld/:path*",
-					deLocalizedNamedGroups: { tld: "com" },
-					localizedNamedGroups: {
-						en: { tld: "com" },
-						de: { tld: "de" },
-					},
+					localized: [
+						["en", "https://example.com/:path*"],
+						["de", "https://example.de/:path*"],
+					],
 				},
 			],
 		},
@@ -90,14 +89,14 @@ test("when strategy precedes URL, it should set the locale and re-direct to the 
 		compilerOptions: {
 			strategy: ["cookie", "url", "baseLocale"],
 			cookieName: "PARAGLIDE_LOCALE",
+			isServer: "false",
 			urlPatterns: [
 				{
-					pattern: "https://example.com/:locale/:path(.*)?",
-					deLocalizedNamedGroups: { locale: "en" },
-					localizedNamedGroups: {
-						en: { locale: "en" },
-						fr: { locale: "fr" },
-					},
+					pattern: "https://example.com/en/:path(.*)?",
+					localized: [
+						["en", "https://example.com/en/:path(.*)?"],
+						["fr", "https://example.com/fr/:path(.*)?"],
+					],
 				},
 			],
 		},

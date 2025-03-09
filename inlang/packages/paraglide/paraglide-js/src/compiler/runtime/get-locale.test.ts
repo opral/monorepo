@@ -46,11 +46,10 @@ test("retrieves the locale for a url pattern", async () => {
 			urlPatterns: [
 				{
 					pattern: "https://example.:tld/:path*",
-					deLocalizedNamedGroups: { tld: "com" },
-					localizedNamedGroups: {
-						en: { tld: "com" },
-						de: { tld: "de" },
-					},
+					localized: [
+						["en", "https://example.com/:path*"],
+						["de", "https://example.de/:path*"],
+					],
 				},
 			],
 		},
@@ -74,11 +73,10 @@ test("url pattern strategy doesn't throw during SSR", async () => {
 			urlPatterns: [
 				{
 					pattern: "https://example.:tld/:path*",
-					deLocalizedNamedGroups: { tld: "com" },
-					localizedNamedGroups: {
-						en: { tld: "com" },
-						de: { tld: "de" },
-					},
+					localized: [
+						["en", "https://example.com/:path*"],
+						["de", "https://example.de/:path*"],
+					],
 				},
 			],
 		},

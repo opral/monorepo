@@ -27,11 +27,8 @@ test("returns the locale from the pathname for document requests", async () => {
 			strategy: ["url", "baseLocale"],
 			urlPatterns: [
 				{
-					pattern: "https://example.com/:locale/:path*",
-					deLocalizedNamedGroups: { locale: "en" },
-					localizedNamedGroups: {
-						en: { locale: "en" },
-					},
+					pattern: "https://example.com/:path(.*)",
+					localized: [["en", "https://example.com/en/:path(.*)"]],
 				},
 			],
 		},
@@ -154,12 +151,11 @@ test("does not resolve the locale from the url if request is not a document requ
 			strategy: ["url", "baseLocale"],
 			urlPatterns: [
 				{
-					pattern: "https://example.com/:locale/:path*",
-					deLocalizedNamedGroups: { locale: "en" },
-					localizedNamedGroups: {
-						en: { locale: "en" },
-						fr: { locale: "fr" },
-					},
+					pattern: "https://example.com/:path(.*)",
+					localized: [
+						["en", "https://example.com/en/:path(.*)"],
+						["fr", "https://example.com/fr/:path(.*)"],
+					],
 				},
 			],
 		},
@@ -184,12 +180,11 @@ test("preferredLanguage precedence over url", async () => {
 			strategy: ["url", "preferredLanguage"],
 			urlPatterns: [
 				{
-					pattern: ":protocol://:domain(.*)::port?/:locale(en|de)?/:path(.*)?",
-					deLocalizedNamedGroups: { locale: null },
-					localizedNamedGroups: {
-						en: { locale: "en" },
-						de: { locale: "de" },
-					},
+					pattern: ":protocol://:domain(.*)::port??/:path(.*)?",
+					localized: [
+						["de", ":protocol://:domain(.*)::port?/de/:path(.*)?"],
+						["en", ":protocol://:domain(.*)::port?/en/:path(.*)?"],
+					],
 				},
 			],
 		},
