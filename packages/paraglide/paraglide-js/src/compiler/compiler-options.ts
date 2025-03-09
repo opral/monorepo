@@ -136,7 +136,7 @@ export type CompilerOptions = {
 	 */
 	emitPrettierIgnore?: boolean;
 	/**
-	 * TODO documentation
+	 * https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy#url
 	 */
 	urlPatterns?: Runtime["urlPatterns"];
 	/**

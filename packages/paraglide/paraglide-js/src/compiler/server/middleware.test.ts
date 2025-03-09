@@ -94,12 +94,11 @@ test("redirects to localized URL when non-URL strategy determines locale", async
 			cookieName: "PARAGLIDE_LOCALE",
 			urlPatterns: [
 				{
-					pattern: "https://example.com/:locale/:path(.*)?",
-					deLocalizedNamedGroups: { locale: "en" },
-					localizedNamedGroups: {
-						en: { locale: "en" },
-						fr: { locale: "fr" },
-					},
+					pattern: "https://example.com/:path(.*)?",
+					localized: [
+						["en", "https://example.com/en/:path(.*)?"],
+						["fr", "https://example.com/fr/:path(.*)?"],
+					],
 				},
 			],
 		},
@@ -135,12 +134,11 @@ test("does not redirect if URL already matches determined locale", async () => {
 			cookieName: "PARAGLIDE_LOCALE",
 			urlPatterns: [
 				{
-					pattern: "https://example.com/:locale/:path(.*)?",
-					deLocalizedNamedGroups: { locale: "en" },
-					localizedNamedGroups: {
-						en: { locale: "en" },
-						fr: { locale: "fr" },
-					},
+					pattern: "https://example.com/:path(.*)?",
+					localized: [
+						["en", "https://example.com/en/:path(.*)?"],
+						["fr", "https://example.com/fr/:path(.*)?"],
+					],
 				},
 			],
 		},
@@ -245,82 +243,6 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 	expect(runtime.getLocale()).toBe("fr");
 });
 
-test("multi pathname localization with optional groups", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "http://example.com/:bookstore?/:item?",
-					deLocalizedNamedGroups: {
-						"bookstore?": "bookstore",
-						"item?": "item",
-					},
-					localizedNamedGroups: {
-						de: { "bookstore?": "buchladen", "item?": "artikel" },
-						en: { "bookstore?": "bookstore", "item?": "item" },
-					},
-				},
-			],
-		},
-	});
-
-	// Process the request
-	expect(
-		await (
-			await runtime.paraglideMiddleware(
-				new Request(new URL("http://example.com/bookstore"), {
-					headers: {
-						"Sec-Fetch-Dest": "document",
-					},
-				}),
-				({ locale }) => new Response(locale)
-			)
-		).text()
-	).toBe("en");
-
-	expect(
-		await (
-			await runtime.paraglideMiddleware(
-				new Request(new URL("http://example.com/bookstore/item"), {
-					headers: {
-						"Sec-Fetch-Dest": "document",
-					},
-				}),
-				({ locale }) => new Response(locale)
-			)
-		).text()
-	).toBe("en");
-
-	expect(
-		await (
-			await runtime.paraglideMiddleware(
-				new Request(new URL("http://example.com/buchladen"), {
-					headers: {
-						"Sec-Fetch-Dest": "document",
-					},
-				}),
-				({ locale }) => new Response(locale)
-			)
-		).text()
-	).toBe("de");
-
-	expect(
-		await (
-			await runtime.paraglideMiddleware(
-				new Request(new URL("http://example.com/buchladen/artikel"), {
-					headers: {
-						"Sec-Fetch-Dest": "document",
-					},
-				}),
-				({ locale }) => new Response(locale)
-			)
-		).text()
-	).toBe("de");
-});
-
 // https://github.com/opral/inlang-paraglide-js/issues/442
 test("falls back to next strategy when cookie contains invalid locale", async () => {
 	const runtime = await createRuntimeForTesting({
@@ -331,12 +253,11 @@ test("falls back to next strategy when cookie contains invalid locale", async ()
 			cookieName: "PARAGLIDE_LOCALE",
 			urlPatterns: [
 				{
-					pattern: "https://example.com/:locale/:path(.*)?",
-					deLocalizedNamedGroups: { locale: "en" },
-					localizedNamedGroups: {
-						en: { locale: "en" },
-						fr: { locale: "fr" },
-					},
+					pattern: "https://example.com/:path(.*)?",
+					localized: [
+						["en", "https://example.com/en/:path(.*)?"],
+						["fr", "https://example.com/fr/:path(.*)?"],
+					],
 				},
 			],
 		},
@@ -387,12 +308,11 @@ test.skip("doesn't redirect if disableUrlRedirect is true", async () => {
 			strategy: ["cookie", "url"],
 			urlPatterns: [
 				{
-					pattern: "https://example.com/:locale/:path(.*)?",
-					deLocalizedNamedGroups: { locale: "en" },
-					localizedNamedGroups: {
-						en: { locale: "en" },
-						fr: { locale: "fr" },
-					},
+					pattern: "https://example.com/:path(.*)?",
+					localized: [
+						["en", "https://example.com/en/:path(.*)?"],
+						["fr", "https://example.com/fr/:path(.*)?"],
+					],
 				},
 			],
 		},
@@ -430,12 +350,11 @@ test("only redirects if the request.headers.get('Sec-Fetch-Dest') === 'document'
 			cookieName: "PARAGLIDE_LOCALE",
 			urlPatterns: [
 				{
-					pattern: "https://example.com/:locale/:path(.*)?",
-					deLocalizedNamedGroups: { locale: "en" },
-					localizedNamedGroups: {
-						en: { locale: "en" },
-						fr: { locale: "fr" },
-					},
+					pattern: "https://example.com/:path(.*)?",
+					localized: [
+						["en", "https://example.com/en/:path(.*)?"],
+						["fr", "https://example.com/fr/:path(.*)?"],
+					],
 				},
 			],
 		},

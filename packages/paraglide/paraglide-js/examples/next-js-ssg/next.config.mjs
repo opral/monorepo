@@ -12,15 +12,11 @@ export default {
 				strategy: ["url", "cookie", "baseLocale"],
 				urlPatterns: [
 					{
-						pattern:
-							":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)?",
-						deLocalizedNamedGroups: {
-							locale: "en",
-						},
-						localizedNamedGroups: {
-							de: { locale: "de" },
-							en: { locale: "en" },
-						},
+						pattern: "/:path(.*)?",
+						localized: [
+							["en", "/en/:path(.*)?"],
+							["de", "/de/:path(.*)?"],
+						],
 					},
 				],
 			})
