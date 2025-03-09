@@ -266,7 +266,7 @@ function fillMissingUrlParts(url, match) {
 }
 
 /**
- * Fills a URL pattern with values for named groups, supporting all URLPattern-style modifiers:
+ * Fills a URL pattern with values for named groups, supporting all URLPattern-style modifiers.
  *
  * This function will eventually be replaced by https://github.com/whatwg/urlpattern/issues/73
  *
@@ -276,6 +276,8 @@ function fillMissingUrlParts(url, match) {
  * - :name+       -> One or more
  * - :name*       -> Zero or more
  * - :name(...)   -> Regex group
+ * - {text}       -> Group delimiter
+ * - {text}?      -> Optional group delimiter
  *
  * If the value is `null`, the segment is removed.
  *
@@ -284,7 +286,22 @@ function fillMissingUrlParts(url, match) {
  * @returns {URL} - The constructed URL with named groups filled.
  */
 function fillPattern(pattern, values) {
-	const filled = pattern.replace(
+	// First, handle group delimiters with curly braces
+	let processedGroupDelimiters = pattern.replace(
+		/\{([^{}]*)\}([?+*]?)/g,
+		(_, content, modifier) => {
+			// For optional group delimiters
+			if (modifier === "?") {
+				// For optional groups, we'll include the content
+				return content;
+			}
+			// For non-optional group delimiters, always include the content
+			return content;
+		}
+	);
+
+	// Then handle named groups
+	const filled = processedGroupDelimiters.replace(
 		/(\/?):([a-zA-Z0-9_]+)(\([^)]*\))?([?+*]?)/g,
 		(_, slash, name, __, modifier) => {
 			const value = values[name];
