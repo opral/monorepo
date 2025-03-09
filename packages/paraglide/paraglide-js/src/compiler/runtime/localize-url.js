@@ -55,30 +55,44 @@ export function localizeUrl(url, options) {
 		return localizeUrlDefaultPattern(url, options);
 	}
 
-	const locale = options?.locale ?? getLocale();
+	const targetLocale = options?.locale ?? getLocale();
 	const urlObj = typeof url === "string" ? new URL(url) : url;
 
+	// Iterate over URL patterns
 	for (const element of urlPatterns) {
-		const pattern = new URLPattern(element.pattern);
-		const match = pattern.exec(urlObj.href);
+		// match localized patterns
+		for (const [, localizedPattern] of element.localized) {
+			const match = new URLPattern(localizedPattern).exec(urlObj.href);
 
-		if (match) {
-			const groups = aggregateGroups(match);
-
-			for (const [groupName, value] of Object.entries(
-				element.localizedNamedGroups?.[locale] ?? {}
-			)) {
-				if (
-					groupName.endsWith("?") &&
-					groups[groupName.replace("?", "")] === undefined
-				) {
-					continue;
-				}
-				groups[groupName.replace("?", "")] = value;
+			if (!match) {
+				continue;
 			}
 
-			const url = fillPattern(element.pattern, groups);
-			return fillMissingUrlParts(url, match);
+			const targetPattern = element.localized.find(
+				([locale]) => locale === targetLocale
+			)?.[1];
+
+			if (!targetPattern) {
+				throw new Error(
+					`No localized pattern found for ${targetLocale} in ${url}`
+				);
+			}
+
+			const localizedUrl = fillPattern(targetPattern, aggregateGroups(match));
+			return fillMissingUrlParts(localizedUrl, match);
+		}
+		const unlocalizedMatch = new URLPattern(element.pattern).exec(urlObj.href);
+		if (unlocalizedMatch) {
+			const targetPattern = element.localized.find(
+				([locale]) => locale === targetLocale
+			)?.[1];
+			if (targetPattern) {
+				const localizedUrl = fillPattern(
+					targetPattern,
+					aggregateGroups(unlocalizedMatch)
+				);
+				return fillMissingUrlParts(localizedUrl, unlocalizedMatch);
+			}
 		}
 	}
 
@@ -96,6 +110,7 @@ export function localizeUrl(url, options) {
 function localizeUrlDefaultPattern(url, options) {
 	const urlObj =
 		typeof url === "string" ? new URL(url, getUrlOrigin()) : new URL(url);
+
 	const locale = options?.locale ?? getLocale();
 	const currentLocale = extractLocaleFromUrl(urlObj);
 
@@ -164,32 +179,32 @@ export function deLocalizeUrl(url) {
 		return deLocalizeUrlDefaultPattern(url);
 	}
 
-	const urlObj = new URL(url, getUrlOrigin());
+	const urlObj = typeof url === "string" ? new URL(url) : url;
 
+	// Iterate over URL patterns
 	for (const element of urlPatterns) {
-		const pattern = new URLPattern(element.pattern);
-		const match = pattern.exec(urlObj.href);
+		// Iterate over localized versions
+		for (const [, localizedPattern] of element.localized) {
+			const match = new URLPattern(localizedPattern).exec(urlObj.href);
 
-		if (match) {
-			const groups = aggregateGroups(match);
+			if (match) {
+				// Convert localized URL back to the base pattern
+				const groups = aggregateGroups(match);
 
-			for (const [groupName, value] of Object.entries(
-				element.deLocalizedNamedGroups
-			)) {
-				if (
-					groupName.endsWith("?") &&
-					groups[groupName.replace("?", "")] === undefined
-				) {
-					continue;
-				}
-				groups[groupName.replace("?", "")] = value;
+				const baseUrl = fillPattern(element.pattern, groups);
+				return fillMissingUrlParts(baseUrl, match);
 			}
-
-			const url = fillPattern(element.pattern, groups);
-			return fillMissingUrlParts(url, match);
+		}
+		// match unlocalized pattern
+		const unlocalizedMatch = new URLPattern(element.pattern).exec(urlObj.href);
+		if (unlocalizedMatch) {
+			const baseUrl = fillPattern(
+				element.pattern,
+				aggregateGroups(unlocalizedMatch)
+			);
+			return fillMissingUrlParts(baseUrl, unlocalizedMatch);
 		}
 	}
-
 	throw new Error(`No match found for ${url}`);
 }
 
@@ -222,6 +237,12 @@ function deLocalizeUrlDefaultPattern(url) {
  * @returns {URL}
  */
 function fillMissingUrlParts(url, match) {
+	if (match.protocol.groups["0"]) {
+		url.protocol = match.protocol.groups["0"] ?? "";
+	}
+	if (match.hostname.groups["0"]) {
+		url.hostname = match.hostname.groups["0"] ?? "";
+	}
 	if (match.username.groups["0"]) {
 		url.username = match.username.groups["0"] ?? "";
 	}

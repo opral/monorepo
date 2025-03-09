@@ -32,7 +32,7 @@ export const strategy = ["globalVariable"];
 /**
  * The used URL patterns.
  *
- * @type {Array<{ pattern: string, namedGroups: Record<string, Array<string | null | Record<string, string | null>>>}>}
+ * @type {Array<{ pattern: string, localized: Array<[string, string]> }> }
  */
 export const urlPatterns = [];
 
