@@ -6,7 +6,7 @@
 
 ### BREAKING update to the URLPattern API  
 
-[#450](https://github.com/opral/inlang-paraglide-js/issues/450)  
+https://github.com/opral/monorepo/pull/3485
 
 The `localizedNamedGroups` and `deLocalizedNamedGroups` API has been replaced with a tuple-based `localized` array to: 
 
