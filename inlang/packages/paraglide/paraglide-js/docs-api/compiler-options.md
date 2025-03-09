@@ -283,7 +283,7 @@ whereas both fallback to the base locale if not available.
 
 > `optional` **urlPatterns**: [`Runtime`](runtime/type.md#runtime)\[`"urlPatterns"`\]
 
-TODO documentation
+https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy#url
 
 ***
 

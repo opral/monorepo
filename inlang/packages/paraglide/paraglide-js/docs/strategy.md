@@ -113,13 +113,11 @@ compile({
 
 The URL-based strategy uses the web standard [URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API) to match and localize URLs. 
 
-For example, the pattern `https://:domain(.*)/:locale(de|en)?/:path*` matches URLs like `https://example.com/de/about` and `https://example.com/about`. The named groups `domain`, `locale`, and `path` are used to extract and replace parts of the URL.
-
 <doc-callout type="tip">Use https://urlpattern.com/ to test your URL patterns.</doc-callout>
 
 <doc-callout type="info">On the server, the URL strategy will only trigger for requests with the `Sec-Fetch-Dest: "document"` header. This helps distinguish between document requests (browser page loads) and API requests, preventing unnecessary redirects for API calls.</doc-callout>
 
-#### Pathname-based url localization example
+#### Locale prefixing
 
 ```
 https://example.com/about 
@@ -133,32 +131,24 @@ compile({
 	strategy: ["url"],
 	urlPatterns: [
 		{
-			pattern: ":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)?",
-			// the original URL is https://example.com/about. 
-			// hence, the locale is null
-			deLocalizedNamedGroups: { locale: null },
-			localizedNamedGroups: {
-				// the en locale should have no locale in the URL
-				// hence, the locale is null
-				en: { locale: null },
-				// the de locale should have the locale in the URL
-				de: { locale: "de" },
-			},
+			pattern: "https://example.com/:path(.*)?",
+			localized: [
+				["en", "https://example.com/:path(.*)?"],
+				["de", "https://example.com/de/:path(.*)?"],
+			],
 		},
 	],
 });
 ```
 
-#### Translated pathname-based URL localization
+#### Translated pathnames
 
-For pathnames where you want to localize the structure and path segments of the URL, you can use named pattern groups to match and replace specific segments. This approach enables language-specific routes like `/about` in English and `/ueber-uns` in German.
+For pathnames where you want to localize the structure and path segments of the URL, you can use different patterns for each locale. This approach enables language-specific routes like `/about` in English and `/ueber-uns` in German.
 
 ```
 https://example.com/about
 https://example.com/ueber-uns
 ```
-
-##### Basic pathname localization
 
 Here's a simple example with translated path segments:
 
@@ -168,71 +158,36 @@ compile({
 	outdir: "./src/paraglide",
 	strategy: ["url"],
 	urlPatterns: [
+		// Specific translated routes
 		{
-			pattern: ":protocol://:domain(.*)::port?/:about?/:path(.*)",
-			deLocalizedNamedGroups: { 
-				"about?": "about" 
-			},
-			localizedNamedGroups: {
-				en: { 
-					"about?": "about" 
-				},
-				de: { 
-					"about?": "ueber-uns" 
-				},
-			},
+			pattern: "/about",
+			localized: [
+				["en", "/about"],
+				["de", "/ueber-uns"],
+			],
+		},
+		{
+			pattern: "/products/:id",
+			localized: [
+				["en", "/products/:id"],
+				["de", "/produkte/:id"],
+			],
+		},
+		// Wildcard pattern for untranslated routes
+		// This allows you to incrementally translate routes as needed
+		{
+			pattern: "/:path(.*)?",
+			localized: [
+				["en", "/:path(.*)?"],
+				["de", "/:path(.*)?"],
+			],
 		},
 	],
 });
 ```
 
-##### Working with optional parameters
 
-URL patterns often contain segments that may or may not be present. For example, an e-commerce site might have URLs like:
-
-- `http://example.com` (homepage)
-- `http://example.com/bookstore` (category page)
-- `http://example.com/bookstore/item` (product page)
-
-To localize such patterns, use the **optional parameter syntax** with the `?` modifier:
-
-```ts
-urlPatterns: [
-  {
-    // Define the pattern with optional segments using the ? modifier
-    pattern: 'http://example.com/:bookstore?/:item?',
-    
-    // Map optional segments back to base locale names
-    deLocalizedNamedGroups: {
-      'bookstore?': 'bookstore',  // Note: include the ? in the key
-      'item?': 'item'
-    },
-    
-    // Provide translations for each locale
-    localizedNamedGroups: {
-      de: {
-        'bookstore?': 'buchladen',
-        'item?': 'artikel'
-      },
-      en: {
-        'bookstore?': 'bookstore', 
-        'item?': 'item'
-      }
-    }
-  }
-]
-```
-
-This configuration enables:
-
-| Original URL (EN) | Localized URL (DE) | Notes |
-|-------------------|-------------------|-------|
-| `http://example.com/bookstore` | `http://example.com/buchladen` | Single optional segment |
-| `http://example.com/bookstore/item` | `http://example.com/buchladen/artikel` | Multiple optional segments |
-| `http://example.com` | `http://example.com` | Base URL remains unchanged |
-
-
-#### Domain-based url localization example
+#### Domain-based localization
 
 ```
 https://example.com/about
@@ -245,24 +200,22 @@ compile({
 	outdir: "./src/paraglide",
 	strategy: ["url"],
 	urlPatterns: [
-		// defining the pattern during development which 
-		// uses path suffixes like /en
+		// Include the localhost domain as otherwise the pattern will
+		// always match and the path won't be localized
 		{
-			pattern: ':protocol://localhost::port?/:locale(de|en)?/:path(.*)?',
-				deLocalizedNamedGroups: { locale: null },
-				localizedNamedGroups: {
-					en: { locale: 'en' },
-					de: { locale: 'de' }
-				},
+			pattern: 'https://localhost:port?/:path(.*)?',
+			localized: [
+				["en", 'https://localhost:port?/en/:path(.*)?'],
+				["de", 'https://localhost:port?/de/:path(.*)?']
+			],
 		},
 		// production pattern which uses subdomains like de.example.com
 		{
-			pattern: ":protocol://:domain(.*)::port?/:path(.*)?",
-			deLocalizedNamedGroups: { domain: "example.com" },
-			localizedNamedGroups: {
-				en: { domain: "example.com" },
-				de: { domain: "de.example.com" },
-			},
+			pattern: "https://example.com/:path(.*)?",
+			localized: [
+				["en", "https://example.com/:path(.*)?"],
+				["de", "https://de.example.com/:path(.*)?"],
+			],
 		},
 	],
 });
@@ -277,26 +230,150 @@ For example, with the base path set to "shop":
 - `runtime.localizeHref("/about")` will return `/shop/en/about`
 - `runtime.deLocalizeHref("/about")` will return `/shop/about`
 
+When using a base path, it's important to make it optional using the `{basepath/}?` syntax with curly braces and the `?` modifier. This ensures that paths without the base path will still be properly matched and have the base path added during localization.
 
 ```js
-const base = "shop";
-
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
 	strategy: ["url"],
 	urlPatterns: [
 		{
-			pattern: ":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)?",
-			deLocalizedNamedGroups: { base },
-			localizedNamedGroups: {
-				en: { base, locale: "en" },
-				de: { base, locale: "de" },
-			},
+			pattern: "/{shop/}?:path(.*)?",
+			localized: [
+				["en", "/{shop/}?en/:path(.*)?"],
+				["de", "/{shop/}?de/:path(.*)?"],
+			],
 		},
 	],
 });
 ```
+
+This configuration enables:
+
+| Original URL | Localized URL (EN) | Localized URL (DE) | Notes |
+|-------------------|-------------------|-------------------|-------|
+| `/about` | `/shop/en/about` | `/shop/de/about` | Path without base path gets base path added |
+| `/shop/about` | `/shop/en/about` | `/shop/de/about` | Path with base path gets properly localized |
+
+The curly braces `{}` with the `?` modifier ensure that the group is treated as optional, allowing both URLs with and without the base path to be matched and properly localized.
+
+#### Troubleshooting URL patterns
+
+When working with URL patterns, there are a few important considerations to keep in mind:
+
+##### Pattern order matters
+
+URL patterns are evaluated in the order they appear in the `urlPatterns` array. The first pattern that matches a URL will be used. This means that more specific patterns should come before more general patterns.
+
+```js
+urlPatterns: [
+  // ❌ INCORRECT ORDER: The wildcard pattern will match everything, 
+  // so the specific pattern will never be reached
+  {
+    pattern: "https://example.com/:path(.*)?", // This will match ANY path
+    localized: [
+      ["en", "https://example.com/:path(.*)?"],
+      ["de", "https://example.com/de/:path(.*)?"],
+    ],
+  },
+  {
+    pattern: "https://example.com/blog/:id", // This will never be reached
+    localized: [
+      ["en", "https://example.com/blog/:id"],
+      ["de", "https://example.com/de/blog/:id"],
+    ],
+  },
+]
+
+// ✅ CORRECT ORDER: Specific patterns first, then more general patterns
+urlPatterns: [
+  {
+    pattern: "https://example.com/blog/:id", // Specific pattern first
+    localized: [
+      ["en", "https://example.com/blog/:id"],
+      ["de", "https://example.com/de/blog/:id"],
+    ],
+  },
+  {
+    pattern: "https://example.com/:path(.*)?", // General pattern last
+    localized: [
+      ["en", "https://example.com/:path(.*)?"],
+      ["de", "https://example.com/de/:path(.*)?"],
+    ],
+  },
+]
+```
+
+##### Localized pattern order matters too
+
+Within each pattern's `localized` array, the order of locale patterns also matters. When localizing a URL, the first matching pattern for the target locale will be used. Similarly, when delocalizing a URL, patterns are checked in order.
+
+```js
+// ❌ INCORRECT ORDER: The first pattern is too general
+{
+  pattern: "https://example.com/:path(.*)?",
+  localized: [
+    ["en", "https://example.com/:path(.*)?"], // This will match ANY path
+    ["en", "https://example.com/en/blog/:id"], // This specific pattern will never be reached
+  ],
+}
+
+// ✅ CORRECT ORDER: Specific patterns first, then more general patterns
+{
+  pattern: "https://example.com/:path(.*)?",
+  localized: [
+    ["en", "https://example.com/en/blog/:id"], // Specific pattern first
+    ["en", "https://example.com/:path(.*)?"], // General pattern last
+  ],
+}
+```
+
+##### Example: Multi-tenant application with specific routes
+
+For a multi-tenant application with specific routes, proper pattern ordering is crucial:
+
+```js
+compile({
+  project: "./project.inlang",
+  outdir: "./src/paraglide",
+  strategy: ["url"],
+  urlPatterns: [
+    // Specific product routes first
+    {
+      pattern: "https://:tenant.example.com/products/:id",
+      localized: [
+        ["en", "https://:tenant.example.com/products/:id"],
+        ["de", "https://:tenant.example.com/produkte/:id"],
+        ["fr", "https://:tenant.example.com/produits/:id"],
+      ],
+    },
+    // Specific category routes next
+    {
+      pattern: "https://:tenant.example.com/categories/:name",
+      localized: [
+        ["en", "https://:tenant.example.com/categories/:name"],
+        ["de", "https://:tenant.example.com/kategorien/:name"],
+        ["fr", "https://:tenant.example.com/categories/:name"],
+      ],
+    },
+    // General wildcard pattern last
+    {
+      pattern: "https://:tenant.example.com/:path(.*)?",
+      localized: [
+        ["en", "https://:tenant.example.com/:path(.*)?"],
+        ["de", "https://:tenant.example.com/de/:path(.*)?"],
+        ["fr", "https://:tenant.example.com/fr/:path(.*)?"],
+      ],
+    },
+  ],
+});
+```
+
+With this configuration:
+1. Product URLs like `https://acme.example.com/products/123` will use the specific product pattern
+2. Category URLs like `https://acme.example.com/categories/electronics` will use the specific category pattern
+3. All other URLs will fall back to the general pattern
 
 ## Write your own strategy
 
@@ -351,4 +428,3 @@ export function onRequest(request, next) {
   // in that context 
   return localeStorage.run(locale, async () => await next());
 }
-```

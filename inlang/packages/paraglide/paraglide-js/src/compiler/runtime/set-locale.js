@@ -51,7 +51,11 @@ export let setLocale = (newLocale) => {
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
-		} else if (TREE_SHAKE_URL_STRATEGY_USED && strat === "url" && !isServer) {
+		} else if (
+			TREE_SHAKE_URL_STRATEGY_USED &&
+			strat === "url" &&
+			typeof window !== "undefined"
+		) {
 			// route to the new url
 			//
 			// this triggers a page reload but a user rarely
@@ -68,7 +72,7 @@ export let setLocale = (newLocale) => {
 		} else if (
 			TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED &&
 			strat === "localStorage" &&
-			!isServer
+			typeof window !== "undefined"
 		) {
 			// set the localStorage
 			localStorage.setItem(localStorageKey, newLocale);

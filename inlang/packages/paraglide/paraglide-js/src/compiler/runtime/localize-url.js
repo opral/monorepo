@@ -55,30 +55,53 @@ export function localizeUrl(url, options) {
 		return localizeUrlDefaultPattern(url, options);
 	}
 
-	const locale = options?.locale ?? getLocale();
+	const targetLocale = options?.locale ?? getLocale();
 	const urlObj = typeof url === "string" ? new URL(url) : url;
 
+	// Iterate over URL patterns
 	for (const element of urlPatterns) {
-		const pattern = new URLPattern(element.pattern);
-		const match = pattern.exec(urlObj.href);
+		// match localized patterns
+		for (const [, localizedPattern] of element.localized) {
+			const match = new URLPattern(localizedPattern, urlObj.href).exec(
+				urlObj.href
+			);
 
-		if (match) {
-			const groups = aggregateGroups(match);
-
-			for (const [groupName, value] of Object.entries(
-				element.localizedNamedGroups?.[locale] ?? {}
-			)) {
-				if (
-					groupName.endsWith("?") &&
-					groups[groupName.replace("?", "")] === undefined
-				) {
-					continue;
-				}
-				groups[groupName.replace("?", "")] = value;
+			if (!match) {
+				continue;
 			}
 
-			const url = fillPattern(element.pattern, groups);
-			return fillMissingUrlParts(url, match);
+			const targetPattern = element.localized.find(
+				([locale]) => locale === targetLocale
+			)?.[1];
+
+			if (!targetPattern) {
+				throw new Error(
+					`No localized pattern found for ${targetLocale} in ${url}`
+				);
+			}
+
+			const localizedUrl = fillPattern(
+				targetPattern,
+				aggregateGroups(match),
+				urlObj
+			);
+			return fillMissingUrlParts(localizedUrl, match);
+		}
+		const unlocalizedMatch = new URLPattern(element.pattern, urlObj.href).exec(
+			urlObj.href
+		);
+		if (unlocalizedMatch) {
+			const targetPattern = element.localized.find(
+				([locale]) => locale === targetLocale
+			)?.[1];
+			if (targetPattern) {
+				const localizedUrl = fillPattern(
+					targetPattern,
+					aggregateGroups(unlocalizedMatch),
+					urlObj
+				);
+				return fillMissingUrlParts(localizedUrl, unlocalizedMatch);
+			}
 		}
 	}
 
@@ -96,6 +119,7 @@ export function localizeUrl(url, options) {
 function localizeUrlDefaultPattern(url, options) {
 	const urlObj =
 		typeof url === "string" ? new URL(url, getUrlOrigin()) : new URL(url);
+
 	const locale = options?.locale ?? getLocale();
 	const currentLocale = extractLocaleFromUrl(urlObj);
 
@@ -164,32 +188,37 @@ export function deLocalizeUrl(url) {
 		return deLocalizeUrlDefaultPattern(url);
 	}
 
-	const urlObj = new URL(url, getUrlOrigin());
+	const urlObj = typeof url === "string" ? new URL(url) : url;
 
+	// Iterate over URL patterns
 	for (const element of urlPatterns) {
-		const pattern = new URLPattern(element.pattern);
-		const match = pattern.exec(urlObj.href);
+		// Iterate over localized versions
+		for (const [, localizedPattern] of element.localized) {
+			const match = new URLPattern(localizedPattern, urlObj.href).exec(
+				urlObj.href
+			);
 
-		if (match) {
-			const groups = aggregateGroups(match);
+			if (match) {
+				// Convert localized URL back to the base pattern
+				const groups = aggregateGroups(match);
 
-			for (const [groupName, value] of Object.entries(
-				element.deLocalizedNamedGroups
-			)) {
-				if (
-					groupName.endsWith("?") &&
-					groups[groupName.replace("?", "")] === undefined
-				) {
-					continue;
-				}
-				groups[groupName.replace("?", "")] = value;
+				const baseUrl = fillPattern(element.pattern, groups, urlObj);
+				return fillMissingUrlParts(baseUrl, match);
 			}
-
-			const url = fillPattern(element.pattern, groups);
-			return fillMissingUrlParts(url, match);
+		}
+		// match unlocalized pattern
+		const unlocalizedMatch = new URLPattern(element.pattern, urlObj.href).exec(
+			urlObj.href
+		);
+		if (unlocalizedMatch) {
+			const baseUrl = fillPattern(
+				element.pattern,
+				aggregateGroups(unlocalizedMatch),
+				urlObj
+			);
+			return fillMissingUrlParts(baseUrl, unlocalizedMatch);
 		}
 	}
-
 	throw new Error(`No match found for ${url}`);
 }
 
@@ -222,6 +251,12 @@ function deLocalizeUrlDefaultPattern(url) {
  * @returns {URL}
  */
 function fillMissingUrlParts(url, match) {
+	if (match.protocol.groups["0"]) {
+		url.protocol = match.protocol.groups["0"] ?? "";
+	}
+	if (match.hostname.groups["0"]) {
+		url.hostname = match.hostname.groups["0"] ?? "";
+	}
 	if (match.username.groups["0"]) {
 		url.username = match.username.groups["0"] ?? "";
 	}
@@ -245,7 +280,7 @@ function fillMissingUrlParts(url, match) {
 }
 
 /**
- * Fills a URL pattern with values for named groups, supporting all URLPattern-style modifiers:
+ * Fills a URL pattern with values for named groups, supporting all URLPattern-style modifiers.
  *
  * This function will eventually be replaced by https://github.com/whatwg/urlpattern/issues/73
  *
@@ -255,15 +290,33 @@ function fillMissingUrlParts(url, match) {
  * - :name+       -> One or more
  * - :name*       -> Zero or more
  * - :name(...)   -> Regex group
+ * - {text}       -> Group delimiter
+ * - {text}?      -> Optional group delimiter
  *
  * If the value is `null`, the segment is removed.
  *
  * @param {string} pattern - The URL pattern containing named groups.
  * @param {Record<string, string | null | undefined>} values - Object of values for named groups.
+ * @param {URL} base - Base URL to use for URL construction.
  * @returns {URL} - The constructed URL with named groups filled.
  */
-function fillPattern(pattern, values) {
-	const filled = pattern.replace(
+function fillPattern(pattern, values, base) {
+	// First, handle group delimiters with curly braces
+	let processedGroupDelimiters = pattern.replace(
+		/\{([^{}]*)\}([?+*]?)/g,
+		(_, content, modifier) => {
+			// For optional group delimiters
+			if (modifier === "?") {
+				// For optional groups, we'll include the content
+				return content;
+			}
+			// For non-optional group delimiters, always include the content
+			return content;
+		}
+	);
+
+	// Then handle named groups
+	const filled = processedGroupDelimiters.replace(
 		/(\/?):([a-zA-Z0-9_]+)(\([^)]*\))?([?+*]?)/g,
 		(_, slash, name, __, modifier) => {
 			const value = values[name];
@@ -295,7 +348,7 @@ function fillPattern(pattern, values) {
 		}
 	);
 
-	return new URL(filled);
+	return new URL(filled, base);
 }
 
 /**

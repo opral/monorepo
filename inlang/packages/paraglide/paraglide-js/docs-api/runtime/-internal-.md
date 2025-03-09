@@ -143,13 +143,9 @@ The used URL patterns.
 
 ### Type declaration
 
-#### deLocalizedNamedGroups
+#### localized
 
-> **deLocalizedNamedGroups**: `Record`\<`string`, `null` \| `string`\>
-
-#### localizedNamedGroups
-
-> **localizedNamedGroups**: `Record`\<`string`, `Record`\<`string`, `null` \| `string`\>\>
+> **localized**: \[`any`, `string`\][]
 
 #### pattern
 
@@ -250,7 +246,7 @@ deLocalizeUrl - For low-level URL de-localization in server contexts
 
 > **deLocalizeUrl**(`url`): `URL`
 
-Defined in: [runtime/localize-url.js:162](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
+Defined in: [runtime/localize-url.js:186](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
 
 Low-level URL de-localization function, primarily used in server contexts.
 
@@ -355,7 +351,7 @@ const locale = extractLocaleFromRequest(request);
 
 > **extractLocaleFromUrl**(`url`): `any`
 
-Defined in: [runtime/extract-locale-from-url.js:16](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-url.js)
+Defined in: [runtime/extract-locale-from-url.js:15](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-url.js)
 
 Extracts the locale from a given URL using native URLPattern.
 
@@ -665,7 +661,7 @@ avoid a circular import between `runtime.js` and
 
 > **overwriteSetLocale**(`fn`): `void`
 
-Defined in: [runtime/set-locale.js:104](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:108](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Overwrite the `setLocale()` function.
 
