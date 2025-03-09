@@ -62,7 +62,9 @@ export function localizeUrl(url, options) {
 	for (const element of urlPatterns) {
 		// match localized patterns
 		for (const [, localizedPattern] of element.localized) {
-			const match = new URLPattern(localizedPattern).exec(urlObj.href);
+			const match = new URLPattern(localizedPattern, urlObj.href).exec(
+				urlObj.href
+			);
 
 			if (!match) {
 				continue;
@@ -78,10 +80,16 @@ export function localizeUrl(url, options) {
 				);
 			}
 
-			const localizedUrl = fillPattern(targetPattern, aggregateGroups(match));
+			const localizedUrl = fillPattern(
+				targetPattern,
+				aggregateGroups(match),
+				urlObj
+			);
 			return fillMissingUrlParts(localizedUrl, match);
 		}
-		const unlocalizedMatch = new URLPattern(element.pattern).exec(urlObj.href);
+		const unlocalizedMatch = new URLPattern(element.pattern, urlObj.href).exec(
+			urlObj.href
+		);
 		if (unlocalizedMatch) {
 			const targetPattern = element.localized.find(
 				([locale]) => locale === targetLocale
@@ -89,7 +97,8 @@ export function localizeUrl(url, options) {
 			if (targetPattern) {
 				const localizedUrl = fillPattern(
 					targetPattern,
-					aggregateGroups(unlocalizedMatch)
+					aggregateGroups(unlocalizedMatch),
+					urlObj
 				);
 				return fillMissingUrlParts(localizedUrl, unlocalizedMatch);
 			}
@@ -185,22 +194,27 @@ export function deLocalizeUrl(url) {
 	for (const element of urlPatterns) {
 		// Iterate over localized versions
 		for (const [, localizedPattern] of element.localized) {
-			const match = new URLPattern(localizedPattern).exec(urlObj.href);
+			const match = new URLPattern(localizedPattern, urlObj.href).exec(
+				urlObj.href
+			);
 
 			if (match) {
 				// Convert localized URL back to the base pattern
 				const groups = aggregateGroups(match);
 
-				const baseUrl = fillPattern(element.pattern, groups);
+				const baseUrl = fillPattern(element.pattern, groups, urlObj);
 				return fillMissingUrlParts(baseUrl, match);
 			}
 		}
 		// match unlocalized pattern
-		const unlocalizedMatch = new URLPattern(element.pattern).exec(urlObj.href);
+		const unlocalizedMatch = new URLPattern(element.pattern, urlObj.href).exec(
+			urlObj.href
+		);
 		if (unlocalizedMatch) {
 			const baseUrl = fillPattern(
 				element.pattern,
-				aggregateGroups(unlocalizedMatch)
+				aggregateGroups(unlocalizedMatch),
+				urlObj
 			);
 			return fillMissingUrlParts(baseUrl, unlocalizedMatch);
 		}
@@ -283,9 +297,10 @@ function fillMissingUrlParts(url, match) {
  *
  * @param {string} pattern - The URL pattern containing named groups.
  * @param {Record<string, string | null | undefined>} values - Object of values for named groups.
+ * @param {URL} base - Base URL to use for URL construction.
  * @returns {URL} - The constructed URL with named groups filled.
  */
-function fillPattern(pattern, values) {
+function fillPattern(pattern, values, base) {
 	// First, handle group delimiters with curly braces
 	let processedGroupDelimiters = pattern.replace(
 		/\{([^{}]*)\}([?+*]?)/g,
@@ -333,7 +348,7 @@ function fillPattern(pattern, values) {
 		}
 	);
 
-	return new URL(filled);
+	return new URL(filled, base);
 }
 
 /**

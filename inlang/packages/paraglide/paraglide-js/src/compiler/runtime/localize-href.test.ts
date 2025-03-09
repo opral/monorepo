@@ -103,10 +103,10 @@ test("adding a base path", async () => {
 			strategy: ["url"],
 			urlPatterns: [
 				{
-					pattern: `:protocol://:domain(.*)::port?/{${base}/}?:path(.*)?`,
+					pattern: `/{${base}/}?:path(.*)?`,
 					localized: [
-						["de", `:protocol://:domain(.*)::port?/{${base}/}?de/:path(.*)?`],
-						["en", `:protocol://:domain(.*)::port?/{${base}/}?:path(.*)?`],
+						["de", `/{${base}/}?de/:path(.*)?`],
+						["en", `/{${base}/}?:path(.*)?`],
 					],
 				},
 			],
