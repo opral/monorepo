@@ -179,3 +179,53 @@ test("sets the locale to localStorage", async () => {
 		"de"
 	);
 });
+
+// Test that all strategies set their respective storage mechanisms
+test("should set locale in all configured storage mechanisms regardless of which strategy resolved the locale", async () => {
+	// Setup global objects
+	// @ts-expect-error - global variable definition
+	globalThis.document = { cookie: "" };
+	// @ts-expect-error - global variable definition
+	globalThis.localStorage = {
+		setItem: vi.fn(),
+		getItem: () => null,
+	};
+	// @ts-expect-error - global variable definition
+	globalThis.window = {};
+	// @ts-expect-error - global variable definition
+	globalThis.window.location = {};
+	globalThis.window.location.hostname = "example.com";
+	globalThis.window.location.href = "https://example.com/en/page";
+	globalThis.window.location.reload = vi.fn();
+
+	// Create runtime with multiple strategies
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de", "fr"],
+		compilerOptions: {
+			strategy: ["url", "localStorage", "cookie", "baseLocale"],
+			cookieName: "PARAGLIDE_LOCALE",
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:locale/:path*",
+					localized: [
+						["en", "https://example.com/en/:path*"],
+						["de", "https://example.com/de/:path*"],
+						["fr", "https://example.com/fr/:path*"],
+					],
+				},
+			],
+		},
+	});
+
+	// Call setLocale
+	runtime.setLocale("fr");
+
+	// Verify that all storage mechanisms are updated
+	expect(globalThis.window.location.href).toBe("https://example.com/fr/page");
+	expect(globalThis.localStorage.setItem).toHaveBeenCalledWith(
+		"PARAGLIDE_LOCALE",
+		"fr"
+	);
+	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=fr; path=/");
+});
