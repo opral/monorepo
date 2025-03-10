@@ -130,6 +130,7 @@ test("default url patterns to improve out of the box experience", async () => {
 		baseLocale: "en",
 		locales: ["en", "de", "fr"],
 		compilerOptions: {
+			isServer: "false",
 			strategy: ["url"],
 			urlPatterns: undefined,
 		},
