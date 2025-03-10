@@ -74,6 +74,34 @@ router.get("/documentation/*", (request, response) => {
 	return response.redirect(301, "https://github.com/opral/inlang-sdk");
 });
 
+router.get("/c/astro", (request, response) => {
+	return response.redirect(
+		301,
+		"https://inlang.com/m/gerre34r/library-inlang-paraglideJs/astro"
+	);
+});
+
+router.get("/c/svelte", (request, response) => {
+	return response.redirect(
+		301,
+		"https://inlang.com/m/gerre34r/library-inlang-paraglideJs/sveltekit"
+	);
+});
+
+router.get("m/osslbuzt*", (request, response) => {
+	return response.redirect(
+		301,
+		"https://inlang.com/m/gerre34r/library-inlang-paraglideJs/next-js"
+	);
+});
+
+router.get("/c/(next|nextjs)", (request, response) => {
+	return response.redirect(
+		301,
+		"https://inlang.com/m/gerre34r/library-inlang-paraglideJs/next-js"
+	);
+});
+
 // serving #src/pages and /public
 //! it is extremely important that a request handler is not async to catch errors
 //! express does not catch async errors. hence, renderPage uses the callback pattern
