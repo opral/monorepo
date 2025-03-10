@@ -44,6 +44,8 @@ export const serializeMdNodes = (
 		nodes.length === 0 ||
 		(nodes.length === 1 &&
 			nodes[0].type === optionsNodes.p.type &&
+			// @ts-expect-error - this should work
+			nodes[0].children.length === 1 &&
 			(nodes[0].children as Descendant[])[0].text === "")
 	) {
 		return "";
