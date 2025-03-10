@@ -83,7 +83,7 @@ export function localizeUrl(url, options) {
 			const localizedUrl = fillPattern(
 				targetPattern,
 				aggregateGroups(match),
-				urlObj
+				urlObj.origin
 			);
 			return fillMissingUrlParts(localizedUrl, match);
 		}
@@ -98,7 +98,7 @@ export function localizeUrl(url, options) {
 				const localizedUrl = fillPattern(
 					targetPattern,
 					aggregateGroups(unlocalizedMatch),
-					urlObj
+					urlObj.origin
 				);
 				return fillMissingUrlParts(localizedUrl, unlocalizedMatch);
 			}
@@ -202,7 +202,7 @@ export function deLocalizeUrl(url) {
 				// Convert localized URL back to the base pattern
 				const groups = aggregateGroups(match);
 
-				const baseUrl = fillPattern(element.pattern, groups, urlObj);
+				const baseUrl = fillPattern(element.pattern, groups, urlObj.origin);
 				return fillMissingUrlParts(baseUrl, match);
 			}
 		}
@@ -214,7 +214,7 @@ export function deLocalizeUrl(url) {
 			const baseUrl = fillPattern(
 				element.pattern,
 				aggregateGroups(unlocalizedMatch),
-				urlObj
+				urlObj.origin
 			);
 			return fillMissingUrlParts(baseUrl, unlocalizedMatch);
 		}
@@ -297,10 +297,10 @@ function fillMissingUrlParts(url, match) {
  *
  * @param {string} pattern - The URL pattern containing named groups.
  * @param {Record<string, string | null | undefined>} values - Object of values for named groups.
- * @param {URL} base - Base URL to use for URL construction.
+ * @param {string} origin - Base URL to use for URL construction.
  * @returns {URL} - The constructed URL with named groups filled.
  */
-function fillPattern(pattern, values, base) {
+function fillPattern(pattern, values, origin) {
 	// First, handle group delimiters with curly braces
 	let processedGroupDelimiters = pattern.replace(
 		/\{([^{}]*)\}([?+*]?)/g,
@@ -348,7 +348,7 @@ function fillPattern(pattern, values, base) {
 		}
 	);
 
-	return new URL(filled, base);
+	return new URL(filled, origin);
 }
 
 /**
