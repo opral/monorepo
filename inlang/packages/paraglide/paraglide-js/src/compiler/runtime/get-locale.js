@@ -85,8 +85,9 @@ export let getLocale = () => {
 			const asserted = assertIsLocale(locale);
 			if (!localeInitiallySet) {
 				_locale = asserted;
-				setLocale(asserted, { reload: false });
+				// https://github.com/opral/inlang-paraglide-js/issues/455
 				localeInitiallySet = true;
+				setLocale(asserted, { reload: false });
 			}
 			return asserted;
 		}
