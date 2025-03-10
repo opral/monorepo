@@ -129,6 +129,8 @@ ${injectCode("./localize-href.js")}
 
 ${injectCode("./track-message-call.js")}
 
+${injectCode("./generate-static-localized-urls.js")}
+
 // ------ TYPES ------
 
 /**

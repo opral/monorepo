@@ -371,6 +371,47 @@ The extracted locale, or undefined if no locale is found.
 
 ***
 
+## generateStaticLocalizedUrls()
+
+> **generateStaticLocalizedUrls**(`urls`): `URL`[]
+
+Defined in: [runtime/generate-static-localized-urls.js:31](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/generate-static-localized-urls.js)
+
+Generates a list of localized URLs for all provided URLs.
+
+This is useful for SSG (Static Site Generation) and sitemap generation.
+NextJS and other frameworks use this function for SSG.
+
+### Parameters
+
+#### urls
+
+(`string` \| `URL`)[]
+
+List of URLs to generate localized versions for. Can be absolute URLs or paths.
+
+### Returns
+
+`URL`[]
+
+List of localized URLs as URL objects
+
+### Example
+
+```typescript
+const urls = generateStaticLocalizedUrls([
+  "https://example.com/about",
+  "https://example.com/blog",
+]);
+urls[0].href // => "https://example.com/about"
+urls[1].href // => "https://example.com/blog"
+urls[2].href // => "https://example.com/de/about"
+urls[3].href // => "https://example.com/de/blog"
+...
+```
+
+***
+
 ## getLocale()
 
 > **getLocale**(): `any`
