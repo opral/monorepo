@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { posthog } from "posthog-js";
-import PollingComponent from "@/components/PollingComponent.tsx";
 export function App({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
@@ -22,7 +21,6 @@ export function App({ children }: { children: React.ReactNode }) {
 	return (
 		<main className="w-full h-screen overflow-hidden bg-white flex flex-col">
 			{children}
-			<PollingComponent />
 		</main>
 	);
 }
