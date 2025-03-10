@@ -14,6 +14,7 @@ import {
 } from "./variables.js";
 import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
 import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
+import { setLocale } from "./set-locale.js";
 
 /**
  * This is a fallback to get started with a custom
@@ -25,6 +26,8 @@ import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
  * @type {Locale|undefined}
  */
 let _locale;
+
+let localeInitiallySet = false;
 
 /**
  * Get the current locale.
@@ -56,11 +59,7 @@ export let getLocale = () => {
 			locale = extractLocaleFromCookie();
 		} else if (strat === "baseLocale") {
 			locale = baseLocale;
-		} else if (
-			TREE_SHAKE_URL_STRATEGY_USED &&
-			strat === "url" &&
-			typeof window !== "undefined"
-		) {
+		} else if (TREE_SHAKE_URL_STRATEGY_USED && strat === "url" && !isServer) {
 			locale = extractLocaleFromUrl(window.location.href);
 		} else if (
 			TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED &&
@@ -71,7 +70,7 @@ export let getLocale = () => {
 		} else if (
 			TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED &&
 			strat === "preferredLanguage" &&
-			typeof window !== "undefined"
+			!isServer
 		) {
 			locale = negotiatePreferredLanguageFromNavigator();
 		} else if (
@@ -83,7 +82,13 @@ export let getLocale = () => {
 		}
 		// check if match, else continue loop
 		if (locale !== undefined) {
-			return assertIsLocale(locale);
+			const asserted = assertIsLocale(locale);
+			if (!localeInitiallySet) {
+				_locale = asserted;
+				setLocale(asserted, { reload: false });
+				localeInitiallySet = true;
+			}
+			return asserted;
 		}
 	}
 

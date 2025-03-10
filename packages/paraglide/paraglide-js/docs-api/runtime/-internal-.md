@@ -375,7 +375,7 @@ The extracted locale, or undefined if no locale is found.
 
 > **getLocale**(): `any`
 
-Defined in: [runtime/get-locale.js:41](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:44](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Get the current locale.
 
@@ -580,7 +580,7 @@ localizeUrl(url, { locale: "de" });
 
 > **overwriteGetLocale**(`fn`): `void`
 
-Defined in: [runtime/get-locale.js:136](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:141](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Overwrite the `getLocale()` function.
 
@@ -661,7 +661,7 @@ avoid a circular import between `runtime.js` and
 
 > **overwriteSetLocale**(`fn`): `void`
 
-Defined in: [runtime/set-locale.js:108](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:119](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Overwrite the `setLocale()` function.
 
@@ -691,11 +691,16 @@ overwriteSetLocale((newLocale) => {
 
 ## setLocale()
 
-> **setLocale**(`newLocale`): `void`
+> **setLocale**(`newLocale`, `options`?): `void`
 
-Defined in: [runtime/set-locale.js:22](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:30](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Set the locale.
+
+Set locale reloads the site by default on the client. Reloading
+can be disabled by passing `reload: false` as an option. If
+reloading is disbaled, you need to ensure that the UI is updated
+to reflect the new locale.
 
 ### Parameters
 
@@ -703,14 +708,24 @@ Set the locale.
 
 `any`
 
+#### options?
+
+##### reload?
+
+`boolean`
+
 ### Returns
 
 `void`
 
-### Example
+### Examples
 
 ```ts
 setLocale('en');
+```
+
+```ts
+setLocale('en', { reload: false });
 ```
 
 ***
