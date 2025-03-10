@@ -9,7 +9,7 @@ import {
 	RemarkPluginOptions,
 	RemarkTextRules,
 	remarkTransformElementChildren,
-} from "@udecode/plate-markdown";
+} from "./markdown";
 import remarkFrontmatter from "remark-frontmatter";
 
 import remarkGfm from "remark-gfm";
