@@ -48,6 +48,10 @@ The Paraglide runtime API.
 
 > **extractLocaleFromUrl**: [`extractLocaleFromUrl`](-internal-.md#extractlocalefromurl)
 
+#### generateStaticLocalizedUrls
+
+> **generateStaticLocalizedUrls**: [`generateStaticLocalizedUrls`](-internal-.md#generatestaticlocalizedurls)
+
 #### getLocale
 
 > **getLocale**: [`getLocale`](-internal-.md#getlocale)
