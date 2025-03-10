@@ -1,3 +1,9 @@
+> [!NOTE]
+> The readme is mirrored from [opral/lix-sdk](https://github.com/opral/lix-sdk). The source code is in the [opral/monorepo](https://github.com/opral/monorepo/tree/main/packages/lix-sdk).
+
+> [!NOTE]
+> This repository serves as an issue tracker and documentation storage. The source code is in [opral/monorepo](https://github.com/opral/monorepo/tree/main/packages/lix-sdk). 
+
 # Lix SDK
 
 ![Lix SDK](https://cdn.jsdelivr.net/gh/opral/monorepo/packages/lix-sdk/assets/banner.png)
