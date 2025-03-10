@@ -6,6 +6,8 @@
 
 - fix [#455 setLocale and getLocale call each other in a loop](https://github.com/opral/inlang-paraglide-js/issues/455)
 
+- fix [#454 Adapt config to the new localized param of beta.28](https://github.com/opral/inlang-paraglide-js/issues/454)
+
 ## 2.0.0-beta.28
 
 ### BREAKING update to the URLPattern API  

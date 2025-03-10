@@ -492,3 +492,31 @@ test("auto fills the url base path", async () => {
 		"https://example.com/about"
 	);
 });
+
+// https://github.com/opral/inlang-paraglide-js/issues/454
+test("works with no trailing slash at the end", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "/:path(.*)?",
+					localized: [
+						["en", "/en/:path(.*)?"],
+						["de", "/de/:path(.*)?"],
+					],
+				},
+			],
+		},
+	});
+
+	expect(runtime.deLocalizeUrl("https://example.com/en/").href).toBe(
+		"https://example.com/"
+	);
+
+	expect(runtime.deLocalizeUrl("https://example.com/en").href).toBe(
+		"https://example.com/"
+	);
+});
