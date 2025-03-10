@@ -84,7 +84,7 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 	vite: {
 		config: {
 			handler: () => {
-				isServer = "import.meta.env.SSR";
+				isServer = "import.meta.env?.SSR ?? typeof window === 'undefined'";
 			},
 		},
 	},
