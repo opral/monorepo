@@ -1,11 +1,16 @@
 ---
 imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-video.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
 # Server Side Rendering (SSR) / Static Site Generation (SSG)
 
 Paraglide JS provides first-class support for server-side rendering (SSR) and static site generation (SSG) through the `paraglideMiddleware()`.  
+
+<doc-callout type="tip">
+  If you just want to use Paraglide JS on the server, in CLI apps, etc, without SSR/SSG, refer to the vanilla JS/TS docs.
+</doc-callout>
 
 ## Using `paraglideMiddleware()`
 
@@ -14,10 +19,11 @@ The `paraglideMiddleware()` handles request-scoped locale management automatical
 ```ts
 import { paraglideMiddleware } from './paraglide/server.js';
 
-// In your request handler:
-const response = await paraglideMiddleware(request, async ({ request, locale }) => {
-  // Your request handling logic here
-  return new Response(`Current locale: ${locale}`);
+app.get("*", async (request) => {
+  return paraglideMiddleware(request, async ({ request, locale }) => {
+    // Your request handling logic here
+    return Response(html(request));
+  });
 });
 ```
 
@@ -57,20 +63,14 @@ await compile({
 
 ### Disabling Async Local Storage
 
-You can use `disableAsyncLocalStorage: true` to disable the use of Node.js' AsyncLocalStorage. Paraglide JS uses Node.js' AsyncLocalStorage to maintain request context isolation. This is crucial for:
+You can use `disableAsyncLocalStorage: true` to disable the use of Node.js' AsyncLocalStorage. **This is only safe** in environments that do not share request context between concurrent requests. 
 
-- Preventing locale information from leaking between concurrent requests
-- Ensuring consistent URL origin resolution
-- Maintaining a clean separation of request-specific state
-
-<doc-callout type="warning">
-Disabling AsyncLocalStorage is **only safe** in these environments:
+**Examples of safe environments:**
 
 - Cloudflare Workers  
 - Vercel Edge Functions
 - AWS Lambda (single-request mode)
 - Other isolated runtime contexts
-</doc-callout>
 
 ```ts
 // Only disable in serverless environments
@@ -194,3 +194,24 @@ If invisible anchor tags are not an option, some frameworks provide APIs to disc
 - **Next.js** has [generateStaticParams()](https://nextjs.org/docs/app/api-reference/functions/generate-static-params) API to discover all localized URLs.
 - **Astro** has [getStaticPaths()](https://docs.astro.build/en/reference/routing-reference/#getstaticpaths)
 
+## Troubleshooting
+
+### `getLocale()` returns a different locale than expected
+
+This can happen if `getLocale()` is called outside of the scope of `paraglideMiddleware()`. 
+
+The `paraglideMiddleware()` ensures that the locale is set correctly for each request. If you call `getLocale()` outside of the scope of `paraglideMiddleware()`, you will get the locale of the server which is not the expected locale.
+
+```ts
+app.get("*", async (request) => {
+  // ❌ don't call `getLocale()` outside of `paraglideMiddleware`
+  const locale = getLocale()
+  
+  return paraglideMiddleware(request, async ({ request, locale }) => {
+    // ✅ call `getLocale()` inside of `paraglideMiddleware`
+    const locale = getLocale()
+    
+    // Your request handling logic here
+    return Response(html(request));
+  });
+});
