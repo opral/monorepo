@@ -107,7 +107,6 @@
 		"react-router-dom": "^7.2.0",
 		"react-textarea-autosize": "^8.5.7",
 		"react-tweet": "^3.2.2",
-		"remark-frontmatter": "^5.0.0",
 		"sonner": "^2.0.1",
 		"tailwind-merge": "^3.0.2",
 		"rehype-raw": "7.0.0",
