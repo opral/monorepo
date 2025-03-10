@@ -156,3 +156,38 @@ test("handles URL objects as input", async () => {
 	// All URLs should be URL objects
 	expect(urls.every((url) => url instanceof URL)).toBe(true);
 });
+
+test("generates localized URLs from paths", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de", "fr"],
+		compilerOptions: {
+			strategy: ["url"],
+			// undefined creates the default pattern
+			urlPatterns: undefined,
+		},
+	});
+
+	const urls = runtime.generateStaticLocalizedUrls([
+		"/about",
+		"/blog/post-1",
+		"/contact",
+	]);
+
+	const pathnames = urls.map((url) => url.pathname).sort();
+
+	expect(pathnames).toEqual([
+		"/about",
+		"/blog/post-1",
+		"/contact",
+		"/de/about",
+		"/de/blog/post-1",
+		"/de/contact",
+		"/fr/about",
+		"/fr/blog/post-1",
+		"/fr/contact",
+	]);
+
+	// All URLs should be URL objects
+	expect(urls.every((url) => url instanceof URL)).toBe(true);
+});
