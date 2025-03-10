@@ -8,10 +8,40 @@ test("normal named groups", async () => {
 		compilerOptions: {
 			urlPatterns: [
 				{
-					pattern: "https://example.com/:bookstore/item/:id",
+					pattern: "https://example.com/bookstore/item/:id",
 					localized: [
 						["de", "https://example.com/buchladen/artikel/:id"],
 						["en", "https://example.com/bookstore/item/:id"],
+					],
+				},
+			],
+		},
+	});
+
+	expect(
+		runtime.extractLocaleFromUrl(`https://example.com/bookstore/item/123`)
+	).toBe("en");
+
+	expect(
+		runtime.extractLocaleFromUrl(`https://example.com/buchladen/artikel/123`)
+	).toBe("de");
+
+	expect(
+		runtime.extractLocaleFromUrl(`https://example.com/something/else`)
+	).toBe(undefined);
+});
+
+test("handles relative named groups", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			urlPatterns: [
+				{
+					pattern: "/bookstore/item/:id",
+					localized: [
+						["de", "/buchladen/artikel/:id"],
+						["en", "/bookstore/item/:id"],
 					],
 				},
 			],
