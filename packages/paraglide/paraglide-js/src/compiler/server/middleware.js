@@ -168,13 +168,12 @@ function createMockAsyncLocalStorage() {
 		getStore() {
 			return currentStore;
 		},
-		run(store, callback) {
-			const previousStore = currentStore;
+		async run(store, callback) {
 			currentStore = store;
 			try {
-				return callback();
+				return await callback();
 			} finally {
-				currentStore = previousStore;
+				currentStore = undefined;
 			}
 		},
 	};
