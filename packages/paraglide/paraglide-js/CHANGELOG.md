@@ -2,6 +2,10 @@
 
 **Paraglide JS 2.0 GA release notes are [here](https://github.com/opral/monorepo/blob/main/inlang/packages/paraglide/paraglide-js/v2-release-notes.md)**
 
+## 2.0.0-beta.29
+
+- fix [#455 setLocale and getLocale call each other in a loop](https://github.com/opral/inlang-paraglide-js/issues/455)
+
 ## 2.0.0-beta.28
 
 ### BREAKING update to the URLPattern API  
