@@ -48,6 +48,8 @@ After
 
 - improve: fallback to `typeof window` in vite [#445](https://github.com/opral/inlang-paraglide-js/issues/445)
 
+- make `setLocale()` set all strategies. Setting all strategies aligns with user expectations and ensures that server APIs can receive the cookie of the client, for example. [#439](https://github.com/opral/inlang-paraglide-js/issues/439)
+
 ## 2.0.0-beta.27
 
 - fix wrong matching in API requests [#427](https://github.com/opral/inlang-paraglide-js/issues/427)
