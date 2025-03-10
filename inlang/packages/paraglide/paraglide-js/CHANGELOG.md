@@ -44,6 +44,10 @@ After
 }
 ```
 
+### other changes
+
+- improve: fallback to `typeof window` in vite [#445](https://github.com/opral/inlang-paraglide-js/issues/445)
+
 ## 2.0.0-beta.27
 
 - fix wrong matching in API requests [#427](https://github.com/opral/inlang-paraglide-js/issues/427)
