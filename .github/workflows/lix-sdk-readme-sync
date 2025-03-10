@@ -1,0 +1,42 @@
+
+name: Lix SDK readme Sync
+
+on:
+  schedule:
+    # Run once a day at midnight
+    - cron: "0 0 * * *"
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  sync-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Fetch README from Monorepo
+        run: |
+          curl -o README.tmp https://raw.githubusercontent.com/opral/lix-sdk/main/README.md
+          echo -e "> [!NOTE]\n> The readme is mirrored from [opral/lix-sdk](https://github.com/opral/lix-sdk). The source code is in the [opral/monorepo](https://github.com/opral/monorepo/tree/main/packages/lix-sdk).\n\n$(cat README.tmp)" > packages/lix-sdk/README.md
+          rm README.tmp
+
+      - name: Check for Changes
+        id: check_changes
+        run: |
+          if git diff --quiet packages/lix-sdk/README.md; then
+            echo "No changes detected."
+            echo "changed=false" >> $GITHUB_ENV
+          else
+            echo "Changes detected."
+            echo "changed=true" >> $GITHUB_ENV
+          fi
+
+      - name: Commit and Push Changes
+        if: env.changed == 'true'  # Only run if changes exist
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add packages/lix-sdk/README.md
+          git commit -m "chore: sync lix sdk README"
+          git push
