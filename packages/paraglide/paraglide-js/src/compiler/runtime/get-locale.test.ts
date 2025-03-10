@@ -43,6 +43,7 @@ test("retrieves the locale for a url pattern", async () => {
 		locales: ["en", "de"],
 		compilerOptions: {
 			strategy: ["url"],
+			isServer: "false",
 			urlPatterns: [
 				{
 					pattern: "https://example.:tld/:path*",
@@ -112,12 +113,10 @@ test("returns the preferred locale from navigator.languages", async () => {
 		baseLocale: "en",
 		locales: ["en", "fr", "de"],
 		compilerOptions: {
+			isServer: "false",
 			strategy: ["preferredLanguage"],
 		},
 	});
-
-	// @ts-expect-error - simulating browser based api
-	globalThis.window = {};
 
 	// Mock navigator.languages
 	Object.defineProperty(globalThis, "navigator", {
@@ -154,4 +153,46 @@ test("returns the locale from local storage", async () => {
 	};
 
 	expect(runtime.getLocale()).toBe("de");
+});
+
+test("initially sets the locale after resolving it for the first time", async () => {
+	// Create runtime with multiple strategies
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de", "fr"],
+		compilerOptions: {
+			strategy: ["url", "cookie"],
+			isServer: "false",
+			cookieName: "PARAGLIDE_LOCALE",
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:path*",
+					localized: [
+						["en", "https://example.com/en/:path*"],
+						["de", "https://example.com/de/:path*"],
+						["fr", "https://example.com/fr/:path*"],
+					],
+				},
+			],
+		},
+	});
+
+	// Setup global objects for URL strategy
+	globalThis.window = {
+		// @ts-expect-error - global variable definition
+		location: {
+			href: "https://example.com/de/page",
+		},
+	};
+
+	// Create a spy on the internal _locale variable to verify it was set
+	// We can do this by checking if setLocale works without explicitly setting it first
+	// @ts-expect-error - global variable definition
+	globalThis.document = { cookie: "" };
+
+	// First call to getLocale should resolve and set the locale
+	expect(runtime.getLocale()).toBe("de");
+	// Cookie should be set, proving that the locale was initially set
+	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=de; path=/");
+	expect(globalThis.window.location.href).toBe("https://example.com/de/page");
 });
