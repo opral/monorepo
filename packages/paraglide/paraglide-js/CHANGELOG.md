@@ -50,6 +50,22 @@ After
 
 - make `setLocale()` set all strategies. Setting all strategies aligns with user expectations and ensures that server APIs can receive the cookie of the client, for example. [#439](https://github.com/opral/inlang-paraglide-js/issues/439)
 
+- new `generateStaticLocalizedUrls()` API [#443](https://github.com/opral/inlang-paraglide-js/issues/433)
+
+```diff
+const localizedUrls = generateStaticLocalizedUrls([
+  "/example",
+  "/page/blog",
+  "/123/hello"
+])
+
+console.log(localizedUrls.map(url => url.pathnames))
+>> /de/example
+>> /fr/example
+>> ...
+```
+
+
 ## 2.0.0-beta.27
 
 - fix wrong matching in API requests [#427](https://github.com/opral/inlang-paraglide-js/issues/427)
