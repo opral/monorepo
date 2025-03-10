@@ -22,7 +22,9 @@ export function extractLocaleFromUrl(url) {
 	// Iterate over URL patterns
 	for (const element of urlPatterns) {
 		for (const [locale, localizedPattern] of element.localized) {
-			const match = new URLPattern(localizedPattern).exec(urlObj.href);
+			const match = new URLPattern(localizedPattern, urlObj.href).exec(
+				urlObj.href
+			);
 
 			if (!match) {
 				continue;
