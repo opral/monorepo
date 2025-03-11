@@ -104,8 +104,8 @@ export function localizeUrl(url, options) {
 			}
 		}
 	}
-
-	throw new Error(`No match found for ${url}`);
+	// If no match found, return the original URL
+	return urlObj;
 }
 
 /**
@@ -219,7 +219,8 @@ export function deLocalizeUrl(url) {
 			return fillMissingUrlParts(baseUrl, unlocalizedMatch);
 		}
 	}
-	throw new Error(`No match found for ${url}`);
+	// no match found return the original url
+	return urlObj;
 }
 
 /**
