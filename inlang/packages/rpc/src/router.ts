@@ -15,7 +15,7 @@ const allowedOrigins =
 router.use(
 	route,
 	cors({
-		origin: undefined,
+		origin: allowedOrigins,
 		methods: "GET,POST",
 		credentials: true,
 		optionsSuccessStatus: 204,
