@@ -17,7 +17,7 @@ body {
 	background-color: var(--vscode-sideBar-background);
 	font-size: 13px;
 	cursor: pointer;
-	padding: 5px 10px;
+	padding: 5px 8px;
 	border: none;
 	text-align: left;
 	outline: none;
@@ -37,6 +37,14 @@ body {
 	display: inline-flex;
 	gap: 5px;
 	width: 100%;
+}
+
+.collapsible .chevron {
+	transition: transform 0.2s ease;
+}
+
+.collapsible.active .chevron {
+	transform: rotate(90deg);
 }
 
 .collapsible .messageId span {
@@ -64,7 +72,7 @@ body {
 	gap: 5px;
 	width: 100%;
 	height: 18px;
-	padding: 5px 10px 4px 10px;
+	padding: 5px 8px 4px 8px;
 	border-bottom: 1px solid var(--vscode-sideBar-border);
 	font-size: 13px;
 	cursor: pointer;

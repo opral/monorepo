@@ -106,11 +106,13 @@
 			},
 			{
 				"command": "sherlock.extractMessage",
-				"title": "Sherlock: Extract Message"
+				"title": "Sherlock: Extract Message",
+				"icon": "$(arrow-down)"
 			},
 			{
 				"command": "sherlock.createMessage",
-				"title": "Sherlock: Create Message"
+				"title": "Sherlock: Create Message",
+				"icon": "$(add)"
 			}
 		],
 		"menus": {
@@ -129,6 +131,18 @@
 					"when": "view == errorView && viewItem == errorNode",
 					"command": "sherlock.copyError",
 					"group": "inline"
+				}
+			],
+			"view/title": [
+				{
+					"command": "sherlock.createMessage",
+					"when": "view == messageView",
+					"group": "navigation"
+				},
+				{
+					"command": "sherlock.extractMessage",
+					"when": "view == messageView",
+					"group": "navigation"
 				}
 			]
 		},
