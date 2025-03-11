@@ -27,6 +27,7 @@ export const remarkToPlateElementRules: RemarkElementRules = {
 				type: options.editor.getType({ key: "sanitized_block_html" }),
 				value: node.value,
 			};
+            console.log("sanitized_block_html.transform");
 			return transformed;
 		},
 	},
@@ -38,6 +39,7 @@ export const remarkToPlateElementRules: RemarkElementRules = {
 				type: options.editor.getType({ key: "sanitized_inline_html" }),
 				value: node.value,
 			};
+            console.log("sanitized_inline_html.transform");
 			return transformed;
 		},
 	},

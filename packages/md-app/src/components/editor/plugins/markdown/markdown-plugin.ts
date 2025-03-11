@@ -30,7 +30,7 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 			// 	},
 			// });
 
-			return deserializeMd(editor, data);
+			const deserializedResult = deserializeMd(editor, data);
 			// const deserializedResult = orginalDeserializeMd(data, {
 			// 	processor: (tree: any) => {
 			// 		return (
@@ -46,10 +46,11 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 			// 		);
 			// 	},
 			// });
-			// return deserializedResult;
+			console.log({ deserializedResult });
+			return deserializedResult;
 		},
 		serialize: (nodes: any) => {
-			const serializationResult = originalSerializeMd({
+			let serializenResult = originalSerializeMd({
 				nodes: {
 					...nodes,
 					sanitized_block_html: {
@@ -84,9 +85,14 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 					},
 				},
 			});
-			return serializationResult.endsWith("<br>")
-				? serializationResult.slice(0, -4) + "\n"
-				: serializationResult;
+			// XXX removes the extra <br> added by plate at the end of a paragraph
+			serializenResult = serializenResult.endsWith("<br>")
+				? serializenResult.slice(0, -4) + "\n"
+				: serializenResult;
+
+			console.log({ serializenResult });
+
+			return serializenResult;
 		},
 	};
 }).configure({
