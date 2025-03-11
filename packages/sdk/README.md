@@ -1,5 +1,8 @@
 # Inlang file format SDK
 
+[![NPM Downloads](https://img.shields.io/npm/dw/%40inlang%2Fsdk?logo=npm&logoColor=red&label=npm%20downloads)](https://www.npmjs.com/package/@inlang/sdk)
+
+
 <p align="center">
   <img src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sdk/assets/open-file.svg" alt="Inlang SDK opens .inlang files">
 </p>
