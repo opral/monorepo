@@ -2,7 +2,7 @@
 
 > **CompilerOptions**: `object`
 
-Defined in: [compiler-options.ts:16](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:17](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 ### Type declaration
 
@@ -57,6 +57,19 @@ The name of the cookie to use for the cookie strategy.
 ```ts
 'PARAGLIDE_LOCALE'
 ```
+
+#### disableAsyncLocalStorage?
+
+> `optional` **disableAsyncLocalStorage**: `boolean`
+
+Replaces AsyncLocalStorage with a synchronous implementation.
+
+⚠️ WARNING: This should ONLY be used in serverless environments
+like Cloudflare Workers.
+
+Disabling AsyncLocalStorage in traditional server environments
+risks cross-request pollution where state from one request could
+leak into another concurrent request.
 
 #### emitGitIgnore?
 
@@ -302,6 +315,10 @@ Defined in: [compiler-options.ts:3](https://github.com/opral/monorepo/tree/main/
 #### cookieName
 
 > `readonly` **cookieName**: `"PARAGLIDE_LOCALE"` = `"PARAGLIDE_LOCALE"`
+
+#### disableAsyncLocalStorage
+
+> `readonly` **disableAsyncLocalStorage**: `false` = `false`
 
 #### emitGitIgnore
 

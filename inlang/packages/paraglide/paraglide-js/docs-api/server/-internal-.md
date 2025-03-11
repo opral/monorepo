@@ -1,8 +1,8 @@
 ## paraglideMiddleware()
 
-> **paraglideMiddleware**\<`T`\>(`request`, `resolve`, `options`?): `Promise`\<`Response`\>
+> **paraglideMiddleware**\<`T`\>(`request`, `resolve`): `Promise`\<`Response`\>
 
-Defined in: [server/middleware.js:69](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/server/middleware.js)
+Defined in: [server/middleware.js:63](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/server/middleware.js)
 
 Server middleware that handles locale-based routing and request processing.
 
@@ -36,20 +36,6 @@ The incoming request object
 (`args`) => `T` \| `Promise`\<`T`\>
 
 Function to handle the request
-
-#### options?
-
-Optional configuration for the middleware
-
-##### disableAsyncLocalStorage?
-
-`boolean`
-
-If true, disables AsyncLocalStorage usage.
-                                                          ⚠️ WARNING: This should ONLY be used in serverless environments
-                                                          like Cloudflare Workers. Disabling AsyncLocalStorage in traditional
-                                                          server environments risks cross-request pollution where state from
-                                                          one request could leak into another concurrent request.
 
 ### Returns
 

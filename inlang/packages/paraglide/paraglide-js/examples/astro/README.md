@@ -72,9 +72,13 @@ You can disable async local storage in serverless environments by using the `dis
 
 
 ```diff
-import { paraglideMiddleware } from "./paralide/server.js";
-
-export const onRequest = defineMiddleware((context, next) => {
-+	return paraglideMiddleware(context.request, () => next(), { disableAsyncLocalStorage: true });
-});
+	vite: {
+		plugins: [
+			paraglideVitePlugin({
+				project: "./project.inlang",
+				outdir: "./src/paraglide",
++				disableAsyncLocalStorage: true,
+			}),
+		],
+	},
 ```

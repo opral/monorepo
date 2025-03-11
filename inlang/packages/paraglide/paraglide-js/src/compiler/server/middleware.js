@@ -18,12 +18,6 @@ import * as runtime from "./runtime.js";
  *
  * @param {Request} request - The incoming request object
  * @param {(args: { request: Request, locale: import("./runtime.js").Locale }) => T | Promise<T>} resolve - Function to handle the request
- * @param {Object} [options] - Optional configuration for the middleware
- * @param {boolean} [options.disableAsyncLocalStorage=false] - If true, disables AsyncLocalStorage usage.
- *                                                           ⚠️ WARNING: This should ONLY be used in serverless environments
- *                                                           like Cloudflare Workers. Disabling AsyncLocalStorage in traditional
- *                                                           server environments risks cross-request pollution where state from
- *                                                           one request could leak into another concurrent request.
  *
  * @returns {Promise<Response>}
  *
@@ -66,10 +60,8 @@ import * as runtime from "./runtime.js";
  * };
  * ```
  */
-export async function paraglideMiddleware(request, resolve, options = {}) {
-	const { disableAsyncLocalStorage = false } = options;
-
-	if (!runtime.serverAsyncLocalStorage && !disableAsyncLocalStorage) {
+export async function paraglideMiddleware(request, resolve) {
+	if (!runtime.disableAsyncLocalStorage && !runtime.serverAsyncLocalStorage) {
 		const { AsyncLocalStorage } = await import("async_hooks");
 		runtime.overwriteServerAsyncLocalStorage(new AsyncLocalStorage());
 	} else if (!runtime.serverAsyncLocalStorage) {

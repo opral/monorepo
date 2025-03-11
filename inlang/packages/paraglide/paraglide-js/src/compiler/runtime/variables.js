@@ -58,6 +58,8 @@ export const urlPatterns = [];
  */
 export let serverAsyncLocalStorage = undefined;
 
+export const disableAsyncLocalStorage = false;
+
 export const experimentalMiddlewareLocaleSplitting = false;
 
 export const isServer = typeof window === "undefined";

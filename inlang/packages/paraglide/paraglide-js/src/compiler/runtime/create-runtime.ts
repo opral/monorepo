@@ -20,6 +20,9 @@ export function createRuntimeFile(args: {
 		experimentalMiddlewareLocaleSplitting: CompilerOptions["experimentalMiddlewareLocaleSplitting"];
 		isServer: CompilerOptions["isServer"];
 		localStorageKey: CompilerOptions["localStorageKey"];
+		disableAsyncLocalStorage: NonNullable<
+			CompilerOptions["disableAsyncLocalStorage"]
+		>;
 	};
 }): string {
 	const urlPatterns = args.compilerOptions.urlPatterns ?? [];
@@ -83,6 +86,10 @@ ${injectCode("./variables.js")
 	.replace(
 		`export const urlPatterns = [];`,
 		`export const urlPatterns = ${JSON.stringify(urlPatterns, null, 2)};`
+	)
+	.replace(
+		`export const disableAsyncLocalStorage = false;`,
+		`export const disableAsyncLocalStorage = ${args.compilerOptions.disableAsyncLocalStorage};`
 	)
 	.replace(
 		`export const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = false;`,
