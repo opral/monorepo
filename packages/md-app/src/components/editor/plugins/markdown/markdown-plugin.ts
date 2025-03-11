@@ -56,7 +56,7 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 					sanitized_block_html: {
 						// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
 						serialize: (children, node) => {
-							return node.value;
+							return node.value + "\n\n";
 						},
 					},
 					sanitized_inline_html: {
