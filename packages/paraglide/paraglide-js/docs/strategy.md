@@ -262,6 +262,12 @@ The curly braces `{}` with the `?` modifier ensure that the group is treated as 
 
 When working with URL patterns, there are a few important considerations to keep in mind:
 
+##### Excluding paths is not supported
+
+[URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API#regex_matchers_limitations) does not support negative lookahead regex patterns. 
+
+The decision to not support negative lookaheads is likely related to ReDoS (Regular Expression Denial of Service) attacks. Read [this blog post](https://blakeembrey.com/posts/2024-09-web-redos/) or the [CVE on GitHub](https://github.com/pillarjs/path-to-regexp/security/advisories/GHSA-9wv6-86v2-598j).
+
 ##### Pattern order matters
 
 URL patterns are evaluated in the order they appear in the `urlPatterns` array. The first pattern that matches a URL will be used. This means that more specific patterns should come before more general patterns.
