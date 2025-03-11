@@ -568,9 +568,6 @@ importers:
       '@sveltejs/adapter-auto':
         specifier: ^4.0.0
         version: 4.0.0(@sveltejs/kit@2.16.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))
-      '@sveltejs/adapter-cloudflare':
-        specifier: ^5.0.3
-        version: 5.0.3(@sveltejs/kit@2.16.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))(wrangler@3.114.1(@cloudflare/workers-types@4.20250311.0))
       '@sveltejs/adapter-static':
         specifier: ^3.0.8
         version: 3.0.8(@sveltejs/kit@2.16.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))
@@ -7468,12 +7465,6 @@ packages:
     resolution: {integrity: sha512-kmuYSQdD2AwThymQF0haQhM8rE5rhutQXG4LNbnbShwhMO4qQGnKaaTy+88DuNSuoQDi58+thpq8XpHc1+oEKQ==}
     peerDependencies:
       '@sveltejs/kit': ^2.0.0
-
-  '@sveltejs/adapter-cloudflare@5.0.3':
-    resolution: {integrity: sha512-jRJmt3JtGp5ockFxoDLKPisK0RPGnitNfHS9+xhRTpRaBV7jS/fQfAmpaey7rwKWaDUnkoHx0DV0WvISHNfUEA==}
-    peerDependencies:
-      '@sveltejs/kit': ^2.0.0
-      wrangler: ^3.87.0
 
   '@sveltejs/adapter-static@3.0.8':
     resolution: {integrity: sha512-YaDrquRpZwfcXbnlDsSrBQNCChVOT9MGuSg+dMAyfsAa1SmiAhrA5jUYUiIMC59G92kIbY/AaQOWcBdq+lh+zg==}
@@ -15732,10 +15723,6 @@ packages:
     resolution: {integrity: sha512-vqlC04+RQoFalODCbCumG2xIOvapzVMHwsyIGM/SIE8fRhFFsXeH8/QQ+s0T0kDAhKc4k30s73/0ydkHQz6HlQ==}
     engines: {node: '>= 0.4'}
 
-  regexparam@3.0.0:
-    resolution: {integrity: sha512-RSYAtP31mvYLkAHrOlh25pCNQ5hWnT106VukGaaFfuJrZFkGRX5GhUAdPqpSDXxOhA2c4akmRuplv1mRqnBn6Q==}
-    engines: {node: '>=8'}
-
   regexpu-core@6.2.0:
     resolution: {integrity: sha512-H66BPQMrv+V16t8xtmq+UC0CBpiTBA60V8ibS1QVReIp8T1z8hwFxqcGzm9K6lgsN7sB5edVH8a+ze6Fqm4weA==}
     engines: {node: '>=4'}
@@ -18353,10 +18340,6 @@ packages:
   workerpool@6.5.1:
     resolution: {integrity: sha512-Fs4dNYcsdpYSAfVxhnl1L5zTksjvOJxtC5hzMNl+1t9B8hTJTdKDyZ5ju7ztgPy+ft9tBFXoOlDNiOT9WUXZlA==}
 
-  worktop@0.8.0-next.18:
-    resolution: {integrity: sha512-+TvsA6VAVoMC3XDKR5MoC/qlLqDixEfOBysDEKnPIPou/NvoPWCAuXHXMsswwlvmEuvX56lQjvELLyLuzTKvRw==}
-    engines: {node: '>=12'}
-
   wrangler@3.114.1:
     resolution: {integrity: sha512-GuS6SrnAZZDiNb20Vf2Ww0KCfnctHUEzi5GyML1i2brfQPI6BikgI/W/u6XDtYtah0OkbIWIiNJ+SdhWT7KEcw==}
     engines: {node: '>=16.17.0'}
@@ -20064,12 +20047,14 @@ snapshots:
   '@cloudflare/kv-asset-handler@0.3.4':
     dependencies:
       mime: 3.0.0
+    optional: true
 
   '@cloudflare/unenv-preset@2.0.2(unenv@2.0.0-rc.14)(workerd@1.20250310.0)':
     dependencies:
       unenv: 2.0.0-rc.14
     optionalDependencies:
       workerd: 1.20250310.0
+    optional: true
 
   '@cloudflare/workerd-darwin-64@1.20250310.0':
     optional: true
@@ -20086,7 +20071,8 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20250310.0':
     optional: true
 
-  '@cloudflare/workers-types@4.20250311.0': {}
+  '@cloudflare/workers-types@4.20250311.0':
+    optional: true
 
   '@colors/colors@1.5.0':
     optional: true
@@ -20264,12 +20250,14 @@ snapshots:
   '@esbuild-plugins/node-globals-polyfill@0.2.3(esbuild@0.17.19)':
     dependencies:
       esbuild: 0.17.19
+    optional: true
 
   '@esbuild-plugins/node-modules-polyfill@0.2.2(esbuild@0.17.19)':
     dependencies:
       esbuild: 0.17.19
       escape-string-regexp: 4.0.0
       rollup-plugin-node-polyfills: 0.2.1
+    optional: true
 
   '@esbuild/aix-ppc64@0.19.12':
     optional: true
@@ -24873,14 +24861,6 @@ snapshots:
       '@sveltejs/kit': 2.16.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))
       import-meta-resolve: 4.1.0
 
-  '@sveltejs/adapter-cloudflare@5.0.3(@sveltejs/kit@2.16.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))(wrangler@3.114.1(@cloudflare/workers-types@4.20250311.0))':
-    dependencies:
-      '@cloudflare/workers-types': 4.20250311.0
-      '@sveltejs/kit': 2.16.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))
-      esbuild: 0.24.2
-      worktop: 0.8.0-next.18
-      wrangler: 3.114.1(@cloudflare/workers-types@4.20250311.0)
-
   '@sveltejs/adapter-static@3.0.8(@sveltejs/kit@2.16.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))':
     dependencies:
       '@sveltejs/kit': 2.16.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0)))(svelte@5.19.5)(vite@5.4.11(@types/node@22.10.6)(lightningcss@1.29.1)(terser@5.36.0))
@@ -27787,7 +27767,8 @@ snapshots:
     dependencies:
       acorn: 8.14.0
 
-  acorn-walk@8.3.2: {}
+  acorn-walk@8.3.2:
+    optional: true
 
   acorn-walk@8.3.4:
     dependencies:
@@ -28057,6 +28038,7 @@ snapshots:
   as-table@1.0.55:
     dependencies:
       printable-characters: 1.0.42
+    optional: true
 
   asn1.js@4.10.1:
     dependencies:
@@ -28450,7 +28432,8 @@ snapshots:
       inherits: 2.0.4
       readable-stream: 3.6.2
 
-  blake3-wasm@2.1.5: {}
+  blake3-wasm@2.1.5:
+    optional: true
 
   blakejs@1.2.1: {}
 
@@ -29081,7 +29064,8 @@ snapshots:
 
   cookie-signature@1.2.2: {}
 
-  cookie@0.5.0: {}
+  cookie@0.5.0:
+    optional: true
 
   cookie@0.6.0: {}
 
@@ -29484,7 +29468,8 @@ snapshots:
 
   damerau-levenshtein@1.0.8: {}
 
-  data-uri-to-buffer@2.0.2: {}
+  data-uri-to-buffer@2.0.2:
+    optional: true
 
   data-uri-to-buffer@3.0.1: {}
 
@@ -30112,6 +30097,7 @@ snapshots:
       '@esbuild/win32-arm64': 0.17.19
       '@esbuild/win32-ia32': 0.17.19
       '@esbuild/win32-x64': 0.17.19
+    optional: true
 
   esbuild@0.17.6:
     optionalDependencies:
@@ -30856,7 +30842,8 @@ snapshots:
       '@types/estree-jsx': 1.0.5
       '@types/unist': 2.0.11
 
-  estree-walker@0.6.1: {}
+  estree-walker@0.6.1:
+    optional: true
 
   estree-walker@2.0.2: {}
 
@@ -30980,7 +30967,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  exsolve@1.0.4: {}
+  exsolve@1.0.4:
+    optional: true
 
   ext-list@2.2.2:
     dependencies:
@@ -31498,6 +31486,7 @@ snapshots:
     dependencies:
       data-uri-to-buffer: 2.0.2
       source-map: 0.6.1
+    optional: true
 
   get-stream@5.2.0:
     dependencies:
@@ -33291,6 +33280,7 @@ snapshots:
   magic-string@0.25.9:
     dependencies:
       sourcemap-codec: 1.4.8
+    optional: true
 
   magic-string@0.30.12:
     dependencies:
@@ -34259,6 +34249,7 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+    optional: true
 
   minimalistic-assert@1.0.1: {}
 
@@ -34696,7 +34687,8 @@ snapshots:
 
   murmurhash3js@3.0.1: {}
 
-  mustache@4.2.0: {}
+  mustache@4.2.0:
+    optional: true
 
   mute-stream@0.0.8: {}
 
@@ -35078,7 +35070,8 @@ snapshots:
 
   ohash@1.1.4: {}
 
-  ohash@2.0.11: {}
+  ohash@2.0.11:
+    optional: true
 
   on-exit-leak-free@2.1.2: {}
 
@@ -35420,13 +35413,15 @@ snapshots:
 
   path-to-regexp@0.1.10: {}
 
-  path-to-regexp@6.3.0: {}
+  path-to-regexp@6.3.0:
+    optional: true
 
   path-type@4.0.0: {}
 
   pathe@1.1.2: {}
 
-  pathe@2.0.3: {}
+  pathe@2.0.3:
+    optional: true
 
   pathval@1.1.1: {}
 
@@ -35735,7 +35730,8 @@ snapshots:
     dependencies:
       parse-ms: 2.1.0
 
-  printable-characters@1.0.42: {}
+  printable-characters@1.0.42:
+    optional: true
 
   prismjs@1.29.0: {}
 
@@ -36557,8 +36553,6 @@ snapshots:
       es-errors: 1.3.0
       set-function-name: 2.0.2
 
-  regexparam@3.0.0: {}
-
   regexpu-core@6.2.0:
     dependencies:
       regenerate: 1.4.2
@@ -36925,14 +36919,17 @@ snapshots:
       estree-walker: 0.6.1
       magic-string: 0.25.9
       rollup-pluginutils: 2.8.2
+    optional: true
 
   rollup-plugin-node-polyfills@0.2.1:
     dependencies:
       rollup-plugin-inject: 3.0.2
+    optional: true
 
   rollup-pluginutils@2.8.2:
     dependencies:
       estree-walker: 0.6.1
+    optional: true
 
   rollup@3.29.1:
     optionalDependencies:
@@ -37367,7 +37364,8 @@ snapshots:
 
   source-map@0.7.4: {}
 
-  sourcemap-codec@1.4.8: {}
+  sourcemap-codec@1.4.8:
+    optional: true
 
   space-separated-tokens@1.1.5: {}
 
@@ -37416,6 +37414,7 @@ snapshots:
     dependencies:
       as-table: 1.0.55
       get-source: 2.0.12
+    optional: true
 
   statuses@2.0.1: {}
 
@@ -38473,6 +38472,7 @@ snapshots:
   undici@5.28.5:
     dependencies:
       '@fastify/busboy': 2.1.1
+    optional: true
 
   undici@6.21.0: {}
 
@@ -38491,6 +38491,7 @@ snapshots:
       ohash: 2.0.11
       pathe: 2.0.3
       ufo: 1.5.4
+    optional: true
 
   unicode-canonical-property-names-ecmascript@2.0.1: {}
 
@@ -40350,13 +40351,9 @@ snapshots:
       '@cloudflare/workerd-linux-64': 1.20250310.0
       '@cloudflare/workerd-linux-arm64': 1.20250310.0
       '@cloudflare/workerd-windows-64': 1.20250310.0
+    optional: true
 
   workerpool@6.5.1: {}
-
-  worktop@0.8.0-next.18:
-    dependencies:
-      mrmime: 2.0.0
-      regexparam: 3.0.0
 
   wrangler@3.114.1(@cloudflare/workers-types@4.20250311.0):
     dependencies:
@@ -40377,6 +40374,7 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+    optional: true
 
   wrap-ansi@6.2.0:
     dependencies:
@@ -40538,6 +40536,7 @@ snapshots:
       cookie: 0.5.0
       mustache: 4.2.0
       stacktracey: 2.1.8
+    optional: true
 
   zimmerframe@1.1.2: {}
 
@@ -40556,7 +40555,8 @@ snapshots:
       typescript: 5.7.3
       zod: 3.24.1
 
-  zod@3.22.3: {}
+  zod@3.22.3:
+    optional: true
 
   zod@3.23.8: {}
 
