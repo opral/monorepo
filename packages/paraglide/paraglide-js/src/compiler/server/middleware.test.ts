@@ -167,6 +167,7 @@ test("works with disableAsyncLocalStorage option", async () => {
 		locales: ["en", "de", "fr"],
 		compilerOptions: {
 			strategy: ["url", "globalVariable"],
+			disableAsyncLocalStorage: true,
 		},
 	});
 
@@ -179,19 +180,15 @@ test("works with disableAsyncLocalStorage option", async () => {
 	});
 
 	// Process the request with AsyncLocalStorage disabled
-	const response = await runtime.paraglideMiddleware(
-		request,
-		(args) => {
-			// Verify we still get the correct locale
-			expect(args.locale).toBe("de");
-			expect(runtime.getLocale()).toBe("de");
-			// Verify URL is still properly delocalized
-			expect(args.request.url).toBe("https://example.com/page");
-			expect(runtime.getUrlOrigin()).toBe("https://example.com");
-			return new Response("hello");
-		},
-		{ disableAsyncLocalStorage: true }
-	);
+	const response = await runtime.paraglideMiddleware(request, (args) => {
+		// Verify we still get the correct locale
+		expect(args.locale).toBe("de");
+		expect(runtime.getLocale()).toBe("de");
+		// Verify URL is still properly delocalized
+		expect(args.request.url).toBe("https://example.com/page");
+		expect(runtime.getUrlOrigin()).toBe("https://example.com");
+		return new Response("hello");
+	});
 
 	// Verify the result contains the correct data
 	expect(await response.text()).toBe("hello");
@@ -222,8 +219,7 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 				expect(runtime.getLocale()).toBe("en");
 				expect(runtime.getUrlOrigin()).toBe("https://example.com");
 				return new Response();
-			},
-			{ disableAsyncLocalStorage: true }
+			}
 		),
 
 		runtime.paraglideMiddleware(
@@ -234,8 +230,7 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 				expect(runtime.getLocale()).toBe("de");
 				expect(runtime.getUrlOrigin()).toBe("https://peter.com");
 				return new Response();
-			},
-			{ disableAsyncLocalStorage: true }
+			}
 		),
 	]);
 
