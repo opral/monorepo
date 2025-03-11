@@ -16,6 +16,7 @@ export declare const {
 	serverAsyncLocalStorage,
 	experimentalMiddlewareLocaleSplitting,
 	isServer,
+	disableAsyncLocalStorage,
 	getLocale,
 	setLocale,
 	getUrlOrigin,
