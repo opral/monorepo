@@ -45,7 +45,7 @@ import { suggestionPlugin } from "./suggestion-plugin";
 import { tablePlugin } from "./table-plugin";
 import { tocPlugin } from "./toc-plugin";
 
-import { lixMarkdownPlugin } from "./markdown-plugin";
+import { ExtendedMarkdownPlugin } from "./markdown/markdown-plugin";
 import { FrontMatterPlugin } from "./frontmatter-plugin";
 import { CreateCopyMarkdownPlugin } from "./copy-markdown-plugin";
 import {
@@ -111,7 +111,7 @@ export const editorPlugins = [
 
 	// Deserialization
 	DocxPlugin,
-	lixMarkdownPlugin,
+	ExtendedMarkdownPlugin,
 	JuicePlugin,
 	FrontMatterPlugin,
 	SanitizedInlineHtmlPlugin,

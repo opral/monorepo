@@ -3,7 +3,7 @@
 import { BlockSelectionPlugin } from '@udecode/plate-selection/react';
 
 import { BlockSelection } from '@/components/plate-ui/block-selection';
-import { MarkdownPlugin } from './markdown';
+import { ExtendedMarkdownPlugin } from "./markdown/markdown-plugin";
 
 export const blockSelectionPlugins = [
   BlockSelectionPlugin.configure(({ editor }) => ({
@@ -28,7 +28,7 @@ export const blockSelectionPlugins = [
       if (!selectedNodes || selectedNodes.length === 0) return;
 
       // Serialize only the selected block nodes to Markdown
-      const markdown = editor.getApi(MarkdownPlugin).markdown.serialize({
+      const markdown = editor.getApi(ExtendedMarkdownPlugin).markdown.serialize({
         nodes: selectedNodes,
       });
 
