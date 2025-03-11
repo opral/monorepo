@@ -2,6 +2,10 @@
 
 **Paraglide JS 2.0 GA release notes are [here](https://github.com/opral/monorepo/blob/main/inlang/packages/paraglide/paraglide-js/v2-release-notes.md)**
 
+## 2.0.0-beta.30
+
+- improve: if no url pattern matches, `localizeUrl()` and `deLocalizeUrl()` will return the input url unchanged instead of throwing an error [#452](https://github.com/opral/inlang-paraglide-js/issues/452#issuecomment-2715761308)
+
 ## 2.0.0-beta.29
 
 - fix [#455 setLocale and getLocale call each other in a loop](https://github.com/opral/inlang-paraglide-js/issues/455)

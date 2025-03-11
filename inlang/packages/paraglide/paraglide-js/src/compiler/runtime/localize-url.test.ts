@@ -520,3 +520,31 @@ test("works with no trailing slash at the end", async () => {
 		"https://example.com/"
 	);
 });
+
+// https://github.com/opral/inlang-paraglide-js/issues/452#issuecomment-2715761308
+test("falls through if no match is found", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "/about",
+					localized: [
+						["de", "/ueber"],
+						["en", "/about"],
+					],
+				},
+			],
+		},
+	});
+
+	expect(
+		runtime.localizeUrl("https://example.com/", { locale: "en" }).href
+	).toBe("https://example.com/");
+
+	expect(runtime.deLocalizeUrl("https://example.com/").href).toBe(
+		"https://example.com/"
+	);
+});
