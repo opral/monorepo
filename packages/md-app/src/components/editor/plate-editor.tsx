@@ -15,6 +15,7 @@ import { lixAtom } from "@/state";
 import { activeFileAtom, loadedMdAtom } from "@/state-active-file";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { MarkdownPlugin } from "@udecode/plate-markdown";
+import { BlockSelectionPlugin } from "@udecode/plate-selection/react";
 
 export function PlateEditor() {
 	const [lix] = useAtom(lixAtom);
@@ -30,6 +31,20 @@ export function PlateEditor() {
 			editor.tf.setValue(nodes);
 		}
 	}, []);
+
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "a") {
+				editor.getApi(BlockSelectionPlugin).blockSelection.selectAll();
+				event.preventDefault();
+			}
+		}
+
+		document.addEventListener("keydown", handleKeyDown);
+		return () => {
+			document.removeEventListener("keydown", handleKeyDown);
+		}
+	}, [editor]);
 
 	// useCallback because react shouldn't recreate the function on every render
 	// debounce because keystroke changes are not important for the lix 1.0 preview
