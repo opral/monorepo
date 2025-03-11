@@ -6,6 +6,7 @@ export const defaultCompilerOptions = {
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
 	cleanOutdir: true,
+	disableAsyncLocalStorage: false,
 	experimentalMiddlewareLocaleSplitting: false,
 	localStorageKey: "PARAGLIDE_LOCALE",
 	isServer: "typeof window === 'undefined'",
@@ -145,6 +146,17 @@ export type CompilerOptions = {
 	 * @default true
 	 */
 	includeEslintDisableComment?: boolean;
+	/**
+	 * Replaces AsyncLocalStorage with a synchronous implementation.
+	 *
+	 * ⚠️ WARNING: This should ONLY be used in serverless environments
+	 * like Cloudflare Workers.
+	 *
+	 * Disabling AsyncLocalStorage in traditional server environments
+	 * risks cross-request pollution where state from one request could
+	 * leak into another concurrent request.
+	 */
+	disableAsyncLocalStorage?: boolean;
 	/**
 	 * If `emitGitIgnore` is set to `true` a `.gitignore` file will be emitted in the output directory. Defaults to `true`.
 	 *

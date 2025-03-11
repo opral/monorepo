@@ -6,6 +6,19 @@
 
 - improve: if no url pattern matches, `localizeUrl()` and `deLocalizeUrl()` will return the input url unchanged instead of throwing an error [#452](https://github.com/opral/inlang-paraglide-js/issues/452#issuecomment-2715761308)
 
+- improve: make AsyncLocalStorage tree-shakable by moving `disableAsyncLocalStorage` into the compiler options [#424](https://github.com/opral/inlang-paraglide-js/issues/424#issuecomment-2711453627)
+
+```diff
+-  serverMiddleware(req, resolve, { disableAsyncLocalStorage: true })
++  serverMiddleware(req, resolve)
+
+paraglideVitePlugin({
+   // ...
++  disableAsyncLocalStorage: true
+})
+
+```
+
 ## 2.0.0-beta.29
 
 - fix [#455 setLocale and getLocale call each other in a loop](https://github.com/opral/inlang-paraglide-js/issues/455)

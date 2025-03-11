@@ -32,6 +32,10 @@ The Paraglide runtime API.
 
 > **deLocalizeUrl**: [`deLocalizeUrl`](-internal-.md#delocalizeurl)
 
+#### disableAsyncLocalStorage
+
+> **disableAsyncLocalStorage**: [`disableAsyncLocalStorage`](-internal-.md#disableasynclocalstorage)
+
 #### experimentalMiddlewareLocaleSplitting
 
 > **experimentalMiddlewareLocaleSplitting**: [`experimentalMiddlewareLocaleSplitting`](-internal-.md#experimentalmiddlewarelocalesplitting)

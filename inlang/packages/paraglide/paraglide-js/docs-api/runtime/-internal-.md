@@ -78,11 +78,19 @@ Defined in: [runtime/variables.js:22](https://github.com/opral/monorepo/tree/mai
 
 ***
 
+## disableAsyncLocalStorage
+
+> `const` **disableAsyncLocalStorage**: `false` = `false`
+
+Defined in: [runtime/variables.js:61](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+***
+
 ## experimentalMiddlewareLocaleSplitting
 
 > `const` **experimentalMiddlewareLocaleSplitting**: `false` = `false`
 
-Defined in: [runtime/variables.js:61](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:63](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ***
 
@@ -90,7 +98,7 @@ Defined in: [runtime/variables.js:61](https://github.com/opral/monorepo/tree/mai
 
 > `const` **isServer**: `boolean`
 
-Defined in: [runtime/variables.js:63](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:65](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ***
 
@@ -677,7 +685,7 @@ define how the URL origin is resolved.
 
 > **overwriteServerAsyncLocalStorage**(`value`): `void`
 
-Defined in: [runtime/variables.js:75](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:77](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 Sets the server side async local storage.
 
