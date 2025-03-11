@@ -8,6 +8,7 @@ export const ChangeDiffComponent = (props: {
 	diffs: UiDiffComponentProps["diffs"];
 	className?: string;
 }) => {
+	console.log("ChangeDiffComponent", props);
 	const [lix] = useAtom(lixAtom);
 	const [isComponentLoaded, setIsComponentLoaded] = useState(false);
 

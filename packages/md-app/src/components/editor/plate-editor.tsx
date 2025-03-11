@@ -24,7 +24,7 @@ export function PlateEditor() {
 
 	const editor = useCreateEditor();
 
-	// Set the initial value of the editor-
+	// Set the initial value of the editor
 	useEffect(() => {
 		if (loadedMd !== editor.getApi(MarkdownPlugin).markdown.serialize()) {
 			const nodes = editor.getApi(MarkdownPlugin).markdown.deserialize(loadedMd);
