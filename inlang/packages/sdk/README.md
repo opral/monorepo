@@ -1,4 +1,4 @@
-# Inlang SDK
+# Inlang file format SDK
 
 <p align="center">
   <img src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sdk/assets/open-file.svg" alt="Inlang SDK opens .inlang files">
