@@ -1,5 +1,5 @@
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
-import { lixAtom } from "@/state";
+import { lixAtom, withPollingAtom } from "@/state";
 import { Lix, openLixInMemory, toBlob } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import posthog from "posthog-js";
@@ -11,6 +11,7 @@ import { Download, Ellipsis, File, Merge, TrashIcon, Upload } from "lucide-react
 const LixHandlingDropdown = () => {
   // atoms
   const [lix] = useAtom(lixAtom);
+  const [, setPolling] = useAtom(withPollingAtom);
 
   //hooks
   const navigate = useNavigate();
@@ -157,6 +158,8 @@ const LixHandlingDropdown = () => {
                 }
               }
               navigate("/");
+              // trigger "polling" reset all atoms
+              setPolling(Date.now());
               console.log("All files deleted from OPFS.");
             } catch (error) {
               console.error("Error deleting files from OPFS:", error);
