@@ -56,7 +56,11 @@ export const extractMessageCommand = {
 		}
 
 		if (textEditor.selection.isEmpty) {
-			return msg("Please select a text to extract in your text editor.", "warn", "notification")
+			return msg(
+				"Please select a text in your text editor to extract a message.",
+				"warn",
+				"notification"
+			)
 		}
 
 		const autoHumanId = await getSetting("extract.autoHumanId.enabled").catch(() => true)
