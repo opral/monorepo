@@ -13,12 +13,13 @@ import { gettingStartedView } from "./utilities/getting-started/gettingStarted.j
 import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
 import { recommendationBannerView } from "./utilities/recommendation/recommendation.js"
 import { capture } from "./services/telemetry/index.js"
-import packageJson from "../package.json" assert { type: "json" }
+import packageJson from "../package.json" with { type: "json" }
 import { statusBar } from "./utilities/settings/statusBar.js"
 import fg from "fast-glob"
 import { saveProjectToDirectory, type IdeExtensionConfig } from "@inlang/sdk"
 import path from "node:path"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
+import { setupFileSystemWatcher } from "./utilities/fs/setupFileSystemWatcher.js"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
@@ -60,7 +61,7 @@ export async function activate(
 }
 
 // Main Function
-async function main(args: {
+export async function main(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
 	fs: FileSystem
@@ -102,28 +103,6 @@ async function main(args: {
 	} else {
 		await gettingStartedView(args)
 	}
-}
-
-function setupFileSystemWatcher(args: {
-	context: vscode.ExtensionContext
-	workspaceFolder: vscode.WorkspaceFolder
-	fs: FileSystem
-}) {
-	const watcher = vscode.workspace.createFileSystemWatcher(
-		new vscode.RelativePattern(
-			args.workspaceFolder,
-			state().selectedProjectPath || CONFIGURATION.FILES.PROJECT
-		)
-	)
-
-	watcher.onDidChange(async () => {
-		// reload project
-		await main({
-			context: args.context,
-			workspaceFolder: args.workspaceFolder,
-			fs: args.fs,
-		})
-	})
 }
 
 async function registerExtensionComponents(args: {
