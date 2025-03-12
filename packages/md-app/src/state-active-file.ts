@@ -209,6 +209,7 @@ export const getChangeDiffs = async (
 		.where(changeInVersion(currentVersion))
 		.where(changeHasLabel("checkpoint"))
 		.select("change.id")
+		.select("change.created_at")
 		.select("change.plugin_key")
 		.select("change.schema_key")
 		.select("change.entity_id")
@@ -227,12 +228,17 @@ export const getChangeDiffs = async (
 					.selectFrom("change")
 					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 					.innerJoin("change_edge", "change_edge.parent_id", "change.id")
-					.where("change_edge.child_id", "=", change.id)
+					.innerJoin(
+						"change as ancestors",
+						"ancestors.id",
+						"change_edge.parent_id"
+					) // Ensure we traverse the hierarchy
+					.where("ancestors.created_at", "<", change.created_at) // Ensure the ancestor is before the change
+					.where("ancestors.entity_id", "=", change.entity_id)
+					.where("ancestors.schema_key", "=", change.schema_key)
 					.where(changeHasLabel("checkpoint"))
 					.where(changeInVersion(currentVersion))
-					.where("change.entity_id", "=", change.entity_id)
-					.where("change.schema_key", "=", change.schema_key)
-					.orderBy("change.created_at", "desc")
+					.orderBy("ancestors.created_at", "desc")
 					.limit(1)
 					.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
 					.executeTakeFirst();
