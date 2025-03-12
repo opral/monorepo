@@ -75,9 +75,7 @@ export function localizeUrl(url, options) {
 			)?.[1];
 
 			if (!targetPattern) {
-				throw new Error(
-					`No localized pattern found for ${targetLocale} in ${url}`
-				);
+				continue;
 			}
 
 			const localizedUrl = fillPattern(

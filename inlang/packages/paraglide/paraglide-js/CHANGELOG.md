@@ -19,6 +19,8 @@ paraglideVitePlugin({
 
 ```
 
+- improve: allow fall through. enables partially localized patterns and thereby eases adoption. 
+
 ## 2.0.0-beta.29
 
 - fix [#455 setLocale and getLocale call each other in a loop](https://github.com/opral/inlang-paraglide-js/issues/455)
