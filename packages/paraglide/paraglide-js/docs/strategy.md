@@ -89,8 +89,6 @@ For example:
 
 Determine the locale from the user's local storage.
 
-<doc-callout type="warning">If you use this stragety in combination with url, make sure that a strategy like `cookie` is used as well to resolve the locale in a request. The server has no access to localStorage.</doc-callout> 
-
 ```diff
 compile({
 	project: "./project.inlang",
@@ -107,7 +105,7 @@ Determine the locale from the URL (pathname, domain, etc).
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
-+	strategy: ["url"]
++	strategy: ["url", "cookie"]
 })
 ```
 
@@ -116,6 +114,8 @@ The URL-based strategy uses the web standard [URLPattern](https://developer.mozi
 <doc-callout type="tip">Use https://urlpattern.com/ to test your URL patterns.</doc-callout>
 
 <doc-callout type="info">On the server, the URL strategy will only trigger for requests with the `Sec-Fetch-Dest: "document"` header. This helps distinguish between document requests (browser page loads) and API requests, preventing unnecessary redirects for API calls.</doc-callout>
+
+<doc-callout type="warning">Make sure that a strategy like `cookie` is used as well to resolve a locale in server-side API requests that are not a `Sec-Fetch-Dest: "document"` request.</doc-callout> 
 
 #### Locale prefixing
 
@@ -128,7 +128,7 @@ https://example.com/de/about
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
-	strategy: ["url"],
+	strategy: ["url", "cookie"],
 	urlPatterns: [
 		{
 			pattern: "https://example.com/:path(.*)?",
@@ -156,7 +156,7 @@ Here's a simple example with translated path segments:
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
-	strategy: ["url"],
+	strategy: ["url", "cookie"],
 	urlPatterns: [
 		// Specific translated routes
 		{
@@ -198,7 +198,7 @@ https://de.example.com/about
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
-	strategy: ["url"],
+	strategy: ["url", "cookie"],
 	urlPatterns: [
 		// Include the localhost domain as otherwise the pattern will
 		// always match and the path won't be localized
@@ -236,7 +236,7 @@ When using a base path, it's important to make it optional using the `{basepath/
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
-	strategy: ["url"],
+	strategy: ["url", "cookie"],
 	urlPatterns: [
 		{
 			pattern: "/{shop/}?:path(.*)?",
@@ -275,7 +275,7 @@ To implement this, map the pattern to your 404 page URL for the locales where th
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
-	strategy: ["url"],
+	strategy: ["url", "cookie"],
 	urlPatterns: [
 		// 404 page definition.
 		// 
@@ -409,7 +409,7 @@ For a multi-tenant application with specific routes, proper pattern ordering is 
 compile({
   project: "./project.inlang",
   outdir: "./src/paraglide",
-  strategy: ["url"],
+  strategy: ["url", "cookie"],
   urlPatterns: [
     // Specific product routes first
     {
