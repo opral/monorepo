@@ -258,6 +258,65 @@ This configuration enables:
 
 The curly braces `{}` with the `?` modifier ensure that the group is treated as optional, allowing both URLs with and without the base path to be matched and properly localized.
 
+#### Making URL patterns unavailable in specific locales
+
+You can configure certain URL patterns to be unavailable in specific locales by redirecting them to a 404 page or any other designated error page. 
+
+This is useful when some content or features should only be accessible in certain languages.
+
+```
+https://example.com/specific-path       // Available in English
+https://example.com/de/404              // Redirected to 404 in German
+```
+
+To implement this, map the pattern to your 404 page URL for the locales where the content should be unavailable:
+
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url"],
+	urlPatterns: [
+		// 404 page definition.
+		// 
+		// 💡 make sure to define the 404 pattern
+		// before a catch all pattern
+		{
+			pattern: "/404",
+			localized: [
+				["en", "/404"],
+				["de", "/de/404"],
+			],
+		},
+		// Path that's only available in English
+		{
+			pattern: "/specific-path",
+			localized: [
+				["en", "/specific-path"],     // Normal path in English
+				["de", "/de/404"],            // Redirects to 404 in German
+			],
+		},
+		// Catch-all pattern for other routes
+		{
+			pattern: "/:path(.*)?",
+			localized: [
+				["en", "/:path(.*)?"],
+				["de", "/de/:path(.*)?"],
+			],
+		},
+	],
+});
+```
+
+When a user tries to access `/specific-path` in German, they will be redirected to `/de/404` instead. This approach allows you to:
+
+- Make certain content available only in specific languages
+- Create locale-specific restrictions for particular routes
+- Implement gradual rollouts of features by language
+- Handle legacy URLs that might only exist in certain locales
+
+Note that other paths will still work normally through the catch-all pattern, so only the specifically configured paths will be unavailable.
+
 #### Troubleshooting URL patterns
 
 When working with URL patterns, there are a few important considerations to keep in mind:
