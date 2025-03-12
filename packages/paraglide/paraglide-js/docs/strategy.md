@@ -203,10 +203,10 @@ compile({
 		// Include the localhost domain as otherwise the pattern will
 		// always match and the path won't be localized
 		{
-			pattern: 'https://localhost:port?/:path(.*)?',
+			pattern: 'http://localhost::port?/:path(.*)?',
 			localized: [
-				["en", 'https://localhost:port?/en/:path(.*)?'],
-				["de", 'https://localhost:port?/de/:path(.*)?']
+				["en", 'http://localhost::port?/en/:path(.*)?'],
+				["de", 'http://localhost::port?/de/:path(.*)?']
 			],
 		},
 		// production pattern which uses subdomains like de.example.com
@@ -286,6 +286,13 @@ compile({
 			localized: [
 				["en", "/404"],
 				["de", "/de/404"],
+				// defining paths for locales that should not
+				// be caught by the catch all pattern 
+				// 
+				// this will be matched first and the catch all
+				// pattern will not be triggered and a redirect
+				// from /de/unavailable to /de/404 will be triggered
+				["de", "/de/unavailable"]
 			],
 		},
 		// Path that's only available in English
