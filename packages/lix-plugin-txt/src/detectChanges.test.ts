@@ -5,13 +5,11 @@ import { openLixInMemory } from "@lix-js/sdk";
 
 const encode = (text: string) => new TextEncoder().encode(text);
 
-test("it should not detect changes if the markdown file did not update", async () => {
+test("it should not detect changes if the text file did not update", async () => {
 	const lix = await openLixInMemory({});
-	const before = encode(`<!-- id: abc123 -->
-# Heading
-
-<!-- id: def456 -->
-Some text.`);
+	const before = encode(`LINE 1
+LINE 2
+LINE 3`);
 	const after = before;
 
 	const detectedChanges = await detectChanges({
@@ -23,21 +21,15 @@ Some text.`);
 	expect(detectedChanges).toEqual([]);
 });
 
-test("it should detect a new block", async () => {
+test("it should detect an update if a line was added", async () => {
 	const lix = await openLixInMemory({});
-	const before = encode(`<!-- id: abc123 -->
-# Heading
-
-<!-- id: def456 -->
-Some text.`);
-	const after = encode(`<!-- id: abc123 -->
-# Heading
-
-<!-- id: def456 -->
-Some text.
-
-<!-- id: xyz789 -->
-New paragraph.`);
+	const before = encode(`LINE 1
+LINE 2
+LINE 3`);
+	const after = encode(`LINE 1
+LINE 2
+LINE 4
+LINE 3`);
 
 	const detectedChanges = await detectChanges({
 		lix,
@@ -64,25 +56,22 @@ New paragraph.`);
 					additionalProperties: false,
 				},
 			},
-			entity_id: "x.mdcontent",
-			snapshot:
-				"<!-- id: abc123 -->\n# Heading\n\n<!-- id: def456 -->\nSome text.\n\n<!-- id: xyz789 -->\nNew paragraph.",
+			entity_id: "x.md|content-snapshot",
+			snapshot: `LINE 1
+LINE 2
+LINE 4
+LINE 3`,
 		},
 	]);
 });
 
-test("it should detect an updated block", async () => {
+test("it should detect an update if a line was removed", async () => {
 	const lix = await openLixInMemory({});
-	const before = encode(`<!-- id: abc123 -->
-# Heading
-
-<!-- id: def456 -->
-Some text.`);
-	const after = encode(`<!-- id: abc123 -->
-# Heading
-
-<!-- id: def456 -->
-Updated text.`);
+	const before = encode(`LINE 1
+LINE 2
+LINE 3`);
+	const after = encode(`LINE 1
+LINE 2`);
 
 	const detectedChanges = await detectChanges({
 		lix,
@@ -109,28 +98,20 @@ Updated text.`);
 					additionalProperties: false,
 				},
 			},
-			entity_id: "x.mdcontent",
-			snapshot:
-				"<!-- id: abc123 -->\n# Heading\n\n<!-- id: def456 -->\nUpdated text.",
+			entity_id: "x.md|content-snapshot",
+			snapshot: `LINE 1
+LINE 2`,
 		},
 	]);
 });
-
-test("it should detect a deleted block", async () => {
+test("it should detect an update if a line was changed", async () => {
 	const lix = await openLixInMemory({});
-	const before = encode(`<!-- id: abc123 -->
-# Heading
-
-<!-- id: def456 -->
-Some text.
-
-<!-- id: xyz789 -->
-Another paragraph.`);
-	const after = encode(`<!-- id: abc123 -->
-# Heading
-
-<!-- id: def456 -->
-Some text.`);
+	const before = encode(`LINE 1
+LINE 2
+LINE 3`);
+	const after = encode(`LINE 1
+LINE 2
+LINE 3 - updated`);
 
 	const detectedChanges = await detectChanges({
 		lix,
@@ -157,9 +138,10 @@ Some text.`);
 					additionalProperties: false,
 				},
 			},
-			entity_id: "x.mdcontent",
-			snapshot:
-				"<!-- id: abc123 -->\n# Heading\n\n<!-- id: def456 -->\nSome text.",
+			entity_id: "x.md|content-snapshot",
+			snapshot: `LINE 1
+LINE 2
+LINE 3 - updated`,
 		},
 	]);
 });

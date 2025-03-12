@@ -11,7 +11,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	if (beforeText !== afterText) {
 		detectedChanges.push({
 			schema: TextSchemaV1,
-			entity_id: (after?.path ?? before?.path) + "content",
+			entity_id: (after?.path ?? before?.path) + "|content-snapshot",
 			snapshot: afterText,
 		});
 	}
