@@ -8,11 +8,19 @@ By defining a standardized file format for i18n, inlang enables interoperability
 
 ![fileformat benefits](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/src/pages/index/assets/fileformatbenefits.png)
 
-### SDK for building i18n solutions
+### Stack agnostic
 
-The inlang file format has an official **[SDK](https://github.com/opral/inlang-sdk)** that allows you to create, read, and query inlang files programmatically.
+Inlang is a file format with no depedency on a tech stack. Hence, it can be used with any tech stack. 
 
-Go to the [SDK docs](https://github.com/opral/inlang-sdk) for more information.
+The only thing that is needed are import/export plugins for the translation file format that is used by the tech stack. For iOS for example, the [XCode strings catalog](https://inlang.com/m/neh2d6w7/plugin-hechenbros-xcstrings) can be used. For Flutter a `.arb` plugin would be the right choice.
+
+[Explore available plugins](https://inlang.com/c/plugins)
+
+![stack agnostic](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/src/pages/index/assets/tech-stack-icon.svg)
+
+### SDK to build i18n apps & solutions
+
+The inlang file format has an SDK that allows you to create, read, and query inlang files programmatically. Go to the [SDK docs](https://github.com/opral/inlang-sdk) for more information.
 
 ![Inlang SDK](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sdk/assets/open-file.svg)
 
