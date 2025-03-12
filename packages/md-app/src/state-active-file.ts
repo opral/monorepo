@@ -180,7 +180,7 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 	return await query.execute();
 });
 
-export const getChanges = async (
+export const getChangeDiffs = async (
 	lix: Lix,
 	changeSetId: string,
 	currentVersion: Version,
@@ -232,6 +232,8 @@ export const getChanges = async (
 					.where(changeInVersion(currentVersion))
 					.where("change.entity_id", "=", change.entity_id)
 					.where("change.schema_key", "=", change.schema_key)
+					.orderBy("change.created_at", "desc")
+					.limit(1)
 					.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
 					.executeTakeFirst();
 
