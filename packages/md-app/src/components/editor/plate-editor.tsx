@@ -35,7 +35,17 @@ export function PlateEditor() {
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "a") {
-				editor.getApi(BlockSelectionPlugin).blockSelection.selectAll();
+				if (editor.getApi(BlockSelectionPlugin).blockSelection.getNodes().length > 0) {
+					editor.getApi(BlockSelectionPlugin).blockSelection.selectAll();
+				} else {
+					editor.tf.select(
+						{
+							anchor: { path: [0, 0], offset: 0 },
+							focus: { path: [editor.children.length - 1, editor.children[editor.children.length - 1].children.length - 1], offset: editor.children[editor.children.length - 1].children.length - 1 }
+						},
+						{ focus: true }
+					);
+				}
 				event.preventDefault();
 			}
 		}
