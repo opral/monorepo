@@ -48,9 +48,9 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 			console.log({ deserializedResult });
 			return deserializedResult;
 		},
-		serialize: (values: Descendant[]) => {
+		serialize: (value: Descendant[]) => {
 			let serializenResult = originalSerializeMd({
-				values,
+				value,
 				nodes: {
 					// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
 					sanitized_block_html: {

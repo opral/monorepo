@@ -12,7 +12,6 @@ export const CreateCopyMarkdownPlugin = createPlatePlugin({
 
 			const editor = ctx.editor;
 			if (!editor || !editor.selection) return;
-debugger;
 
 			const selectedNodes = NodeApi.fragment(editor, editor.selection);
 			
