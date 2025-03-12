@@ -59,12 +59,14 @@ export default function Page() {
 						Inlang is used by multiple large enterprises as well as many small
 						to medium scale projects. The NPM downloads of the{" "}
 						<code>@inlang/sdk</code>
-						provide a numerical indicator of adoption.
+						provide a an indicator of developers adopting the inlang SDK to
+						build i18n solutions on top of the inlang file format.
 					</p>
 					<iframe
 						src="https://www.npmcharts.com/compare/@inlang/sdk?minimal=true"
 						width="100%"
 						height="500"
+						// @ts-ignore
 						frameBorder="0"
 					></iframe>
 				</div>
