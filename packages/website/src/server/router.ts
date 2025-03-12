@@ -74,6 +74,14 @@ router.get("/documentation/*", (request, response) => {
 	return response.redirect(301, "https://github.com/opral/inlang-sdk");
 });
 
+router.get("/g/*", (request, response) => {
+	return response.redirect(301, "/");
+});
+
+router.get("/c/guides", (request, response) => {
+	return response.redirect(301, "/");
+});
+
 router.get("/c/astro", (request, response) => {
 	return response.redirect(
 		301,
