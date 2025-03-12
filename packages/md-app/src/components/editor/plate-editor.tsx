@@ -1,5 +1,3 @@
-
-
 import { useCallback, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -14,7 +12,7 @@ import { useAtom } from "jotai";
 import { lixAtom } from "@/state";
 import { activeFileAtom, loadedMdAtom } from "@/state-active-file";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
-import { MarkdownPlugin } from "@udecode/plate-markdown";
+import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { BlockSelectionPlugin } from "@udecode/plate-selection/react";
 
 export function PlateEditor() {
@@ -26,8 +24,12 @@ export function PlateEditor() {
 
 	// Set the initial value of the editor
 	useEffect(() => {
-		if (loadedMd !== editor.getApi(MarkdownPlugin).markdown.serialize()) {
-			const nodes = editor.getApi(MarkdownPlugin).markdown.deserialize(loadedMd);
+		if (
+			loadedMd !== editor.getApi(ExtendedMarkdownPlugin).markdown.serialize()
+		) {
+			const nodes = editor
+				.getApi(ExtendedMarkdownPlugin)
+				.markdown.deserialize(loadedMd);
 			editor.tf.setValue(nodes);
 		}
 	}, []);
@@ -38,12 +40,12 @@ export function PlateEditor() {
 				editor.getApi(BlockSelectionPlugin).blockSelection.selectAll();
 				event.preventDefault();
 			}
-		}
+		};
 
 		document.addEventListener("keydown", handleKeyDown);
 		return () => {
 			document.removeEventListener("keydown", handleKeyDown);
-		}
+		};
 	}, [editor]);
 
 	// useCallback because react shouldn't recreate the function on every render
@@ -64,6 +66,7 @@ export function PlateEditor() {
 			// needed because lix is not writing to OPFS yet
 			await saveLixToOpfs({ lix });
 			console.log("saved to lix db");
+			console.log(serializedMd);
 		}, 500),
 		[]
 	);
@@ -73,7 +76,10 @@ export function PlateEditor() {
 			<Plate
 				editor={editor}
 				onValueChange={(newValue) => {
-					if (loadedMd !== newValue.editor.getApi(MarkdownPlugin).markdown.serialize()) {
+					if (
+						loadedMd !==
+						newValue.editor.getApi(ExtendedMarkdownPlugin).markdown.serialize()
+					) {
 						handleUpdateMdData(newValue);
 						// console.log(
 						// 	newValue.editor.api.markdown.serialize()

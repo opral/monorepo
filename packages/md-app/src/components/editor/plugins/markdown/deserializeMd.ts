@@ -77,7 +77,7 @@ export const deserializeMd = (
 	//   });
 	// }
 
-	// const parsedTree = mdProcessor.parse(data);
+	const parsedTree = mdProcessor.parse(data);
 
 	// console.log(parsedTree);
 	const result = mdProcessor.processSync(data).result;

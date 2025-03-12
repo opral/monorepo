@@ -48,7 +48,7 @@ import { BaseKbdPlugin } from '@udecode/plate-kbd';
 import { BaseColumnItemPlugin, BaseColumnPlugin } from '@udecode/plate-layout';
 import { BaseLineHeightPlugin } from '@udecode/plate-line-height';
 import { BaseLinkPlugin } from '@udecode/plate-link';
-import { MarkdownPlugin } from '@udecode/plate-markdown';
+
 import {
   BaseEquationPlugin,
   BaseInlineEquationPlugin,
@@ -121,6 +121,7 @@ import { EditorStatic } from './editor-static';
 import { EquationElementStatic } from './equation-element-static';
 import { InlineEquationElementStatic } from './inline-equation-element-static';
 import { ToolbarButton } from './toolbar';
+import { ExtendedMarkdownPlugin } from '../editor/plugins/markdown/markdown-plugin';
 
 const siteUrl = 'https://platejs.org';
 const lowlight = createLowlight(all);
@@ -360,7 +361,7 @@ export function ExportToolbarButton({ children, ...props }: DropdownMenuProps) {
   };
 
   const exportToMarkdown = async () => {
-    const md = editor.getApi(MarkdownPlugin).markdown.serialize();
+    const md = editor.getApi(ExtendedMarkdownPlugin).markdown.serialize();
     const url = `data:text/markdown;charset=utf-8,${encodeURIComponent(md)}`;
     await downloadFile(url, 'plate.md');
   };

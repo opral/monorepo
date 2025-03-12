@@ -23,7 +23,7 @@ import { BaseHorizontalRulePlugin } from '@udecode/plate-horizontal-rule';
 import { BaseIndentPlugin } from '@udecode/plate-indent';
 import { BaseIndentListPlugin } from '@udecode/plate-indent-list';
 import { BaseLinkPlugin } from '@udecode/plate-link';
-import { MarkdownPlugin } from '@udecode/plate-markdown';
+
 import { usePlateEditor } from '@udecode/plate/react';
 
 import {
@@ -41,6 +41,7 @@ import { HeadingElementStatic } from './heading-element-static';
 import { HrElementStatic } from './hr-element-static';
 import { LinkElementStatic } from './link-element-static';
 import { ParagraphElementStatic } from './paragraph-element-static';
+import { ExtendedMarkdownPlugin } from '../editor/plugins/markdown/markdown-plugin';
 
 const components = {
   [BaseBlockquotePlugin.key]: BlockquoteElementStatic,
@@ -93,7 +94,7 @@ const plugins = [
       },
     },
   }),
-  MarkdownPlugin.configure({ options: { indentList: true } }),
+  ExtendedMarkdownPlugin.configure({ options: { indentList: true } }),
 ];
 
 export const AIChatEditor = memo(({ content }: { content: string }) => {

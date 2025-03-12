@@ -1,7 +1,6 @@
 
-import {
-	MarkdownPlugin,
-} from "../markdown-plate-fork";
+import { Descendant } from "@udecode/plate";
+import { MarkdownPlugin } from "../markdown-plate-fork";
 
 import { deserializeMd } from "./deserializeMd";
 import { remarkToPlateElementRules } from "./RemarkToPlateElementRules";
@@ -49,10 +48,11 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 			console.log({ deserializedResult });
 			return deserializedResult;
 		},
-		serialize: (nodes: any) => {
+		serialize: (values: Descendant[]) => {
 			let serializenResult = originalSerializeMd({
+				values,
 				nodes: {
-					...nodes,
+					// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
 					sanitized_block_html: {
 						// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
 						serialize: (children, node) => {
@@ -90,7 +90,7 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 				? serializenResult.slice(0, -4) + "\n"
 				: serializenResult;
 
-			console.log({ serializenResult });
+			console.log("serializenResult", serializenResult);
 
 			return serializenResult;
 		},
