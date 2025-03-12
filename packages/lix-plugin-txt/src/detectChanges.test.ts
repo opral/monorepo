@@ -57,10 +57,12 @@ LINE 3`);
 				},
 			},
 			entity_id: "x.md|content-snapshot",
-			snapshot: `LINE 1
+			snapshot: {
+				text: `LINE 1
 LINE 2
 LINE 4
 LINE 3`,
+			},
 		},
 	]);
 });
@@ -99,8 +101,10 @@ LINE 2`);
 				},
 			},
 			entity_id: "x.md|content-snapshot",
-			snapshot: `LINE 1
+			snapshot: {
+				text: `LINE 1
 LINE 2`,
+			},
 		},
 	]);
 });
@@ -139,9 +143,11 @@ LINE 3 - updated`);
 				},
 			},
 			entity_id: "x.md|content-snapshot",
-			snapshot: `LINE 1
+			snapshot: {
+				text: `LINE 1
 LINE 2
 LINE 3 - updated`,
+			},
 		},
 	]);
 });

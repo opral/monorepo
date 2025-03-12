@@ -5,12 +5,12 @@ import {
 	openLixInMemory,
 	toBlob,
 } from "@lix-js/sdk";
-import { plugin as mdPlugin } from "@lix-js/plugin-md";
+import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 
 export async function lixMdDemoFile(): Promise<{ blob: Blob; id: string }> {
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
-		providePlugins: [mdPlugin],
+		providePlugins: [txtPlugin],
 	});
 
 	const id = await lix.db
@@ -31,11 +31,8 @@ export const setupMdDemo = async (lix: Lix) => {
 		.insertInto("file")
 		.values({
 			path: "/demo.md",
-			data: new TextEncoder().encode(`<!-- id: zXaw5bKGtU -->
-# Playground
-<!-- id: MF25p8ND7g -->
-A rich-text editor with AI capabilities. Try the **AI commands** or use \`Cmd+J\` to open the AI menu.
-<br>`),
+			data: new TextEncoder().encode(`# Playground
+A rich-text editor with AI capabilities. Try the **AI commands** or use \`Cmd+J\` to open the AI menu.`),
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

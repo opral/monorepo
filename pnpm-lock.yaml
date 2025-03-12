@@ -22,7 +22,7 @@ importers:
         version: 16.5.2
       vitest:
         specifier: ^2.1.8
-        version: 2.1.8(@types/node@22.13.9)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.13.9)(typescript@5.8.2))(terser@5.36.0)
+        version: 2.1.8(@types/node@22.13.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.13.9)(typescript@5.8.2))(terser@5.36.0)
 
   inlang/packages/cli:
     dependencies:
@@ -2279,6 +2279,73 @@ importers:
         specifier: ^2.0.5
         version: 2.1.8(@types/node@22.13.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.13.9)(typescript@5.7.3))(terser@5.36.0)
 
+  packages/lix-plugin-txt:
+    dependencies:
+      '@lix-js/sdk':
+        specifier: workspace:*
+        version: link:../lix-sdk
+      crypto:
+        specifier: ^1.0.1
+        version: 1.0.1
+      diff:
+        specifier: ^7.0.0
+        version: 7.0.0
+      lit:
+        specifier: ^3.2.1
+        version: 3.2.1
+      papaparse:
+        specifier: ^5.4.1
+        version: 5.4.1
+      remark-parse:
+        specifier: 10.0.2
+        version: 10.0.2
+      remark-stringify:
+        specifier: ^11.0.0
+        version: 11.0.0
+      unified:
+        specifier: 11.0.3
+        version: 11.0.3
+      unist-util-visit:
+        specifier: 5.0.0
+        version: 5.0.0
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.12.0
+        version: 9.21.0
+      '@opral/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@types/diff':
+        specifier: ^7.0.1
+        version: 7.0.1
+      '@types/mdast':
+        specifier: ^4.0.4
+        version: 4.0.4
+      '@types/papaparse':
+        specifier: ^5.3.14
+        version: 5.3.15
+      '@vitest/coverage-v8':
+        specifier: ^2.0.5
+        version: 2.1.8(@vitest/browser@2.1.8)(vitest@2.1.8)
+      eslint:
+        specifier: ^9.12.0
+        version: 9.21.0(jiti@2.4.2)
+      prettier:
+        specifier: ^3.3.3
+        version: 3.5.3
+      typescript:
+        specifier: ^5.5.4
+        version: 5.8.2
+      typescript-eslint:
+        specifier: ^8.9.0
+        version: 8.26.0(eslint@9.21.0(jiti@2.4.2))(typescript@5.8.2)
+      unist:
+        specifier: ^0.0.1
+        version: 0.0.1
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.8(@types/node@22.13.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.13.9)(typescript@5.8.2))(terser@5.36.0)
+
   packages/lix-sdk:
     dependencies:
       '@lix-js/server-api-schema':
@@ -2626,6 +2693,9 @@ importers:
       '@lix-js/plugin-md':
         specifier: workspace:*
         version: link:../lix-plugin-md
+      '@lix-js/plugin-txt':
+        specifier: workspace:*
+        version: link:../lix-plugin-txt
       '@lix-js/sdk':
         specifier: workspace:*
         version: link:../lix-sdk
@@ -23018,7 +23088,7 @@ snapshots:
       '@inlang/paraglide-js': 1.11.7(babel-plugin-macros@3.1.0)
       '@inlang/sdk': 0.36.4(babel-plugin-macros@3.1.0)
       '@lix-js/client': 2.2.1
-      typescript: 5.7.3
+      typescript: 5.8.2
       unplugin: 1.16.0
     transitivePeerDependencies:
       - babel-plugin-macros
@@ -29788,6 +29858,29 @@ snapshots:
       - vite
     optional: true
 
+  '@vitest/browser@2.1.8(@types/node@22.13.9)(playwright@1.48.1)(typescript@5.8.2)(vite@5.4.11(@types/node@22.13.9)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)':
+    dependencies:
+      '@testing-library/dom': 10.4.0
+      '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
+      '@vitest/mocker': 2.1.8(msw@2.7.0(@types/node@22.13.9)(typescript@5.8.2))(vite@5.4.11(@types/node@22.13.9)(lightningcss@1.29.1)(terser@5.36.0))
+      '@vitest/utils': 2.1.8
+      magic-string: 0.30.17
+      msw: 2.7.0(@types/node@22.13.9)(typescript@5.8.2)
+      sirv: 3.0.0
+      tinyrainbow: 1.2.0
+      vitest: 2.1.8(@types/node@22.13.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.13.9)(typescript@5.8.2))(terser@5.36.0)
+      ws: 8.18.0
+    optionalDependencies:
+      playwright: 1.48.1
+      webdriverio: 9.2.1
+    transitivePeerDependencies:
+      - '@types/node'
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - vite
+    optional: true
+
   '@vitest/coverage-v8@0.34.3(vitest@0.34.3)':
     dependencies:
       '@ampproject/remapping': 2.3.0
@@ -29855,7 +29948,7 @@ snapshots:
       std-env: 3.8.0
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 2.1.8(@types/node@22.13.9)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.13.9)(typescript@5.8.2))(terser@5.36.0)
+      vitest: 2.1.8(@types/node@22.13.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.13.9)(typescript@5.8.2))(terser@5.36.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -43478,7 +43571,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@2.1.8(@types/node@22.13.9)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.13.9)(typescript@5.8.2))(terser@5.36.0):
+  vitest@2.1.8(@types/node@22.13.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.13.9)(typescript@5.8.2))(terser@5.36.0):
     dependencies:
       '@vitest/expect': 2.1.8
       '@vitest/mocker': 2.1.8(msw@2.7.0(@types/node@22.13.9)(typescript@5.8.2))(vite@5.4.11(@types/node@22.13.9)(lightningcss@1.29.1)(terser@5.36.0))
@@ -43502,6 +43595,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.13.9
+      '@vitest/browser': 2.1.8(@types/node@22.13.9)(playwright@1.48.1)(typescript@5.8.2)(vite@5.4.11(@types/node@22.13.9)(lightningcss@1.29.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
