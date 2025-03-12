@@ -11,7 +11,7 @@ import { ChangeSet, createDiscussion, UiDiffComponentProps } from "@lix-js/sdk";
 import { useAtom } from "jotai/react";
 import { currentVersionAtom, lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
-import { activeFileAtom, getChanges } from "@/state-active-file.ts";
+import { activeFileAtom, getChangeDiffs } from "@/state-active-file.ts";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
 import { ChevronDown } from "lucide-react";
 
@@ -43,8 +43,8 @@ export const CheckpointComponent = (props: {
       return;
     }
 
-    getChanges(lix, props.checkpointChangeSet.id, currentVersion!, activeFile).then((changes) => {
-      setDiffs(changes);
+    getChangeDiffs(lix, props.checkpointChangeSet.id, currentVersion!, activeFile).then((diffs) => {
+      setDiffs(diffs);
       setIsExpanded(true);
     });
   };
