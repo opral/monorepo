@@ -9,7 +9,7 @@ const HeroSearch = () => {
 
 	return (
 		<div class="relative grid grid-cols-12">
-			<Show when={open()}>
+			{/* <Show when={open()}>
 				<sl-dialog
 					prop:label="What is inlang?"
 					class="video-dialog"
@@ -39,7 +39,7 @@ const HeroSearch = () => {
 						/>
 					</div>
 				</sl-dialog>
-			</Show>
+			</Show> */}
 			<div class="col-span-12 lg:col-span-6 items-center lg:items-start relative z-30 flex flex-col gap-2 pb-6 mt-4 md:mt-8">
 				{/* <CredibilityTag projectCount={props.projectCount} /> */}
 
@@ -54,14 +54,14 @@ const HeroSearch = () => {
 					<Button class="w-fit rounded-lg" type="primary" href="/c/apps">
 						{m.home_inlang_cta()}
 					</Button>
-					<div
-						onClick={() => setOpen(true)}
+					<Button
+						href="https://github.com/opral/inlang-sdk"
+						type="secondary"
+						target="_blank"
 						class="pointer-events-auto flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 text-surface-800 bg-surface-200 hover:text-surface-900 hover:bg-surface-300 px-4"
 					>
-						<Play />
 						{m.home_inlang_button()}
-						<p class="opacity-50">90s</p>
-					</div>
+					</Button>
 				</div>
 			</div>
 			<div class="col-span-12 lg:col-span-6 mb-10 lg:mb-0 mt-6 lg:mt-16 overflow-hidden flex items-center justify-center w-full">
@@ -76,23 +76,6 @@ const HeroSearch = () => {
 };
 
 export default HeroSearch;
-
-function Play() {
-	return (
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			width="24"
-			height="24"
-			fill="none"
-			viewBox="0 0 24 24"
-		>
-			<path
-				fill="currentColor"
-				d="M12 2a10 10 0 100 20 10 10 0 000-20zm-2 14.5v-9l6 4.5-6 4.5z"
-			/>
-		</svg>
-	);
-}
 
 function addLinksToText(text: string) {
 	const replacements: { [key: string]: string } = {
