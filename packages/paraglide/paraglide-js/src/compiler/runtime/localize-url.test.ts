@@ -548,3 +548,80 @@ test("falls through if no match is found", async () => {
 		"https://example.com/"
 	);
 });
+
+test("defining no localized pattern leads to a fallthrough", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "/specific-path",
+					localized: [["en", "/specific-path"]],
+				},
+			],
+		},
+	});
+
+	// doesn't localize because no localized pattern is defined
+	expect(
+		runtime.localizeUrl("https://example.com/specific-path", { locale: "de" })
+			.href
+	).toBe("https://example.com/specific-path");
+
+	// doesn't delocalize because no localized pattern is defined
+	expect(
+		runtime.deLocalizeUrl("https://example.com/de/specific-path").href
+	).toBe("https://example.com/de/specific-path");
+});
+
+// https://github.com/opral/inlang-paraglide-js/issues/456
+test("routing to a 404 page", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "/404",
+					localized: [
+						["en", "/404"],
+						["de", "/de/404"],
+					],
+				},
+				{
+					pattern: "specific-path",
+					localized: [
+						["en", "/specific-path"],
+						["de", "/de/404"],
+					],
+				},
+				{
+					pattern: "/:path(.*)?",
+					localized: [
+						["en", "/:path(.*)?"],
+						["de", "/de/:path(.*)?"],
+					],
+				},
+			],
+		},
+	});
+
+	expect(
+		runtime.localizeUrl("https://example.com/specific-path", { locale: "en" })
+			.href
+	).toBe("https://example.com/specific-path");
+
+	// localizing to a 404 page
+	expect(
+		runtime.localizeUrl("https://example.com/specific-path", { locale: "de" })
+			.href
+	).toBe("https://example.com/de/404");
+
+	// other paths work because of the catch all
+	expect(
+		runtime.localizeUrl("https://example.com/other-path", { locale: "de" }).href
+	).toBe("https://example.com/de/other-path");
+});
