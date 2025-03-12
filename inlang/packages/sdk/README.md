@@ -19,7 +19,7 @@
 
 The inlang SDK is the official specification and parser for `.inlang` files. 
 
-`.inlang` files are designed to become the open standard for i18n and enable interoperability between i18n solutions. Such solutions involve apps like [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor), libraries like [Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), or plugins that extend inlang [plugins](https://inlang.com/c/plugins) that extend inlang projects.
+`.inlang` files are designed to become the open standard for i18n and enable interoperability between i18n solutions. Such solutions involve apps like [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor), libraries like [Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), or plugins that extend inlang.
 
 ### Core Features
 
