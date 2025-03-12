@@ -23,24 +23,5 @@
 		"teldgniy": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/inlang-v1/inlang/source-code/message-lint-rules/validJsIdentifier/marketplace-manifest.json",
 		"gkerinvo": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/inlang-v1/inlang/source-code/message-lint-rules/snakeCaseId/marketplace-manifest.json",
 		"ewkole66": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/inlang-v1/inlang/source-code/message-lint-rules/camelCaseId/marketplace-manifest.json"
-	},
-	"g": {
-		"mqlyfa7l": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/dont-lazy-load/marketplace-manifest.json",
-		"94ng94n4": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/how-to-inlang-app/marketplace-manifest.json",
-		"2fg8ng94": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/build-a-global-svelte-app/marketplace-manifest.json",
-		"3go4f04m": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/what-is-inlang/marketplace-manifest.json",
-		"00162hsd": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/what-are-plugins/marketplace-manifest.json",
-		"940fn8mg": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/i18n-mistakes/marketplace-manifest.json",
-		"6ddyhpoi": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/contribute-translations-with-fink/marketplace-manifest.json",
-		"uxohikde": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/use-paraglide-with-nextjs-pages-router/marketplace-manifest.json",
-		"wxcebbig": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/use-paraglide-with-nextjs-app-router/marketplace-manifest.json",
-		"38fnf03n": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/localization-strategy/marketplace-manifest.json",
-		"lubhdyua": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/build-a-global-solidstart-app/marketplace-manifest.json",
-		"7777asdy": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/ecosystem-compatible/marketplace-manifest.json",
-		"hhfueysj": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/next-intl-with-ide-extension/marketplace-manifest.json",
-		"utqgkmzp": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/build-an-internationalized-astro-app-using-paraglide/marketplace-manifest.json",
-		"oostafhs": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/translation-review-system/marketplace-manifest.json",
-		"ssryldhd": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/translation-automation/marketplace-manifest.json",
-		"pposhsfh": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/inlang/guides/use-paraglide-with-remix/marketplace-manifest.json"
 	}
 }
