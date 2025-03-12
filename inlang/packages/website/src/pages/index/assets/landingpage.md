@@ -2,7 +2,7 @@
 
 ### Standard open file format for i18n
 
-Inlang is an *open file format* for internationalization *i18n* that provides an [SDK](https://inlang.com/c/sdk) for building and integrating localization tools on top of that open file format.
+Inlang is an *open file format* for internationalization *i18n* that provides an [SDK](https://github.com/opral/inlang-sdk) for building and integrating localization tools on top of that open file format.
 
 By defining a standardized file format for i18n, inlang enables interoperability between i18n solutions (translation management apps, developer tools, etc.).
 
@@ -10,7 +10,7 @@ By defining a standardized file format for i18n, inlang enables interoperability
 
 ### SDK for building i18n solutions
 
-The inlang file format has an official **[SDK](https://inlang.com/c/sdk)** that allows you to create, read, and query inlang files programmatically.
+The inlang file format has an official **[SDK](https://github.com/opral/inlang-sdk)** that allows you to create, read, and query inlang files programmatically.
 
 Go to the [SDK docs](https://github.com/opral/inlang-sdk) for more information.
 
