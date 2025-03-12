@@ -18,7 +18,8 @@ const PluginHeader = () => {
 				</div>
 				<Button
 					type="secondaryOnGray"
-					href="/g/00162hsd/guide-nilsjacobsen-whatArePlugins"
+					target="_blank"
+					href="https://github.com/opral/inlang-sdk#plugins"
 				>
 					{m.marketplace_header_plugin_toast_button_text()}
 				</Button>
