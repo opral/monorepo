@@ -40,10 +40,16 @@ const HeroSearch = () => {
 					</div>
 				</sl-dialog>
 			</Show> */}
-			<div class="col-span-12 lg:col-span-6 items-center lg:items-start relative z-30 flex flex-col gap-2 pb-6 mt-4 md:mt-8">
-				{/* <CredibilityTag projectCount={props.projectCount} /> */}
-
-				<h1 class="text-4xl md:text-6xl text-surface-900 text-center lg:text-start font-bold tracking-tight mt-6">
+			<div class="col-span-12 lg:col-span-6 items-center justify-center lg:items-start relative z-30 flex flex-col gap-2 pb-6 mt-4 md:mt-8">
+				<div class="flex gap-1">
+					<a href="https://www.npmjs.com/package/@inlang/sdk" target="_blank">
+						<img src="https://img.shields.io/npm/dw/%40inlang%2Fsdk?logo=npm&logoColor=red&labelColor=white&color=gray&label=npm%20downloads"></img>
+					</a>
+					<a href="https://discord.gg/ecsc6bFtZw" target="_blank">
+						<img src="https://img.shields.io/discord/897438559458430986?style=flat&logo=discord&color=gray&labelColor=white"></img>
+					</a>
+				</div>
+				<h1 class="text-4xl md:text-5xl text-surface-900 text-center lg:text-start font-bold tracking-tight mt-6">
 					{m.home_inlang_title()}
 				</h1>
 				<p class="text-center lg:text-start text-xl max-w-[600px] text-surface-500 pt-5">
