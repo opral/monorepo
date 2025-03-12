@@ -96,6 +96,8 @@ export const intermediateChangesAtom = atom<
 					.where(changeHasLabel("checkpoint"))
 					.where("change.entity_id", "=", change.entity_id)
 					.where("change.schema_key", "=", change.schema_key)
+					.orderBy("change.created_at", "desc")
+					.limit(1)
 					.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
 					.executeTakeFirst();
 
