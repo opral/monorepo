@@ -13,7 +13,7 @@ By default, Paraglide JS uses the [inlang-message-format](https://inlang.com/m/r
 graph LR;
     
     subgraph "Pipeline"
-        A[Inlang Project] -->|Used by| B[Paraglide Compiler]
+        A[Inlang Project] -->|Opened by| B[Paraglide Compiler]
         B -->|Compiles| C[Code]
     end
 
