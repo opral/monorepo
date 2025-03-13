@@ -1,7 +1,8 @@
 [![Inlang-ecosystem compatibility badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
 
-[![NPM Downloads](https://img.shields.io/npm/dw/%40inlang%2Fparaglide-js?logo=npm&logoColor=red&label=npm%20downloads)](https://www.npmjs.com/package/@inlang/paraglide-js) [![Discord](https://img.shields.io/discord/897438559458430986?style=flat&logo=discord&labelColor=white)](https://discord.gg/MZ48XgXKkk)
-
+[![NPM Downloads](https://img.shields.io/npm/dw/%40inlang%2Fparaglide-js?logo=npm&logoColor=red&label=npm%20downloads)](https://www.npmjs.com/package/@inlang/paraglide-js)
+[![Closed github issues](https://img.shields.io/github/issues-closed/opral/paraglide-js?logo=github&color=purple)](https://github.com/opral/inlang-paraglide-js/issues) 
+[![Monorepo contributors](https://img.shields.io/github/contributors/opral/monorepo?logo=github)](https://github.com/opral/monorepo/graphs/contributors)
 
 
 A compiler-based i18n library that emits tree-shakable message functions. This means that only the messages you actually use are loaded without asynchronous waterfalls.
