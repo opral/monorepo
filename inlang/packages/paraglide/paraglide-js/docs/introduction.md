@@ -6,6 +6,7 @@ imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-links.js
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-comment.js
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-comments.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
 [<img src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/assets/header.png" alt="Dead Simple i18n. Typesafe, Small Footprint, Treeshsakeable Messages, IDE Integration, Framework Agnostic" width="10000000px" />](https://www.youtube.com/watch?v=-YES3CCAG90)
@@ -23,8 +24,6 @@ Paraglide is designed as a compiler which emits tree-shakable message functions.
 
 ## People Love It
 
-A few recent comments.
-
 <doc-comments>
 <doc-comment text="Paraglide js is by far the best option when it comes to internatinalization. Nothing better on the market." author="Ancient-Background17" icon="mdi:reddit" data-source="https://www.reddit.com/r/sveltejs/comments/1h7z5gv/comment/m0suyvf"></doc-comment>
 <doc-comment text="Just tried Paraglide JS from @inlangHQ. This is how i18n should be done! Totally new level of DX for both implementation and managing translations! Superb support for SvelteKit as well ⭐" author="Patrik Engborg" icon="mdi:twitter" data-source="https://twitter.com/patrikengborg/status/1747260930873053674"></doc-comment>
@@ -35,13 +34,13 @@ A few recent comments.
 ## Works in any framework
 
 <doc-links>
-  <doc-link title="Vanilla JS/TS" icon="devicon:javascript" href="/m/gerre34r/library-inlang-paraglideJs/vanilla-js-ts" description="Go to Library"></doc-link>
-  <doc-link title="React" icon="devicon:react" href="/m/gerre34r/library-inlang-paraglideJs/vite" description="Go to Library"></doc-link>
-  <doc-link title="Vue" icon="devicon:vuejs" href="/m/gerre34r/library-inlang-paraglideJs/vite" description="Go to Library"></doc-link>
-  <doc-link title="SvelteKit" icon="devicon:svelte" href="/m/gerre34r/library-inlang-paraglideJs/sveltekit" description="Go to Library"></doc-link>
-  <doc-link title="NextJS" icon="devicon:nextjs" href="/m/gerre34r/library-inlang-paraglideJs/next-js" description="Go to Library"></doc-link>
-  <doc-link title="Astro" icon="devicon-plain:astro" href="/m/gerre34r/library-inlang-paraglideJs/astro" description="Go to Library"></doc-link>
-  <doc-link title="Other frameworks" icon="basil:other-1-outline" href="/m/gerre34r/library-inlang-paraglideJs/other-frameworks" description="Go to Library"></doc-link>
+  <doc-link title="Vanilla JS/TS" icon="devicon:javascript" href="/m/gerre34r/library-inlang-paraglideJs/vanilla-js-ts" description="Open example"></doc-link>
+  <doc-link title="React" icon="devicon:react" href="/m/gerre34r/library-inlang-paraglideJs/vite" description="Open example"></doc-link>
+  <doc-link title="Vue" icon="devicon:vuejs" href="/m/gerre34r/library-inlang-paraglideJs/vite" description="Open example"></doc-link>
+  <doc-link title="SvelteKit" icon="devicon:svelte" href="/m/gerre34r/library-inlang-paraglideJs/sveltekit" description="Open example"></doc-link>
+  <doc-link title="NextJS" icon="devicon:nextjs" href="/m/gerre34r/library-inlang-paraglideJs/next-js" description="Open example"></doc-link>
+  <doc-link title="Astro" icon="devicon:astro" href="/m/gerre34r/library-inlang-paraglideJs/astro" description="Open example"></doc-link>
+  <doc-link title="Other frameworks" icon="basil:other-1-outline" href="/m/gerre34r/library-inlang-paraglideJs/other-frameworks"></doc-link>
 </doc-links>
 
 ## Comparison

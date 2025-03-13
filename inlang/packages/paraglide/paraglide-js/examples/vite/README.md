@@ -10,6 +10,8 @@ This example shows how to use Paraglide with Vite.
 
 Any frontend framework that works with Vite is automatically supported. Paraglide JS does not require framework specific code. If you are looking for metaframework features, check out [Paraglide JS on the server](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/server-side-rendering).
 
+The source code for the vite example is [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/vite).
+
 <doc-features>
   <doc-feature title="JavaScript" icon="devicon:javascript" color="#f0f0f0" text-color="#000"></doc-feature>
   <doc-feature title="TypeScript" icon="devicon:typescript" color="#f0f0f0" text-color="#000"></doc-feature>
@@ -17,11 +19,9 @@ Any frontend framework that works with Vite is automatically supported. Paraglid
   <doc-feature title="Vue" icon="devicon:vuejs" color="#e0e0e0" text-color="#111"></doc-feature>
   <doc-feature title="Svelte" icon="devicon:svelte" color="#f0f0f0" text-color="#000"></doc-feature>
   <doc-feature title="Solid" icon="devicon:solidjs" color="#f0f0f0" text-color="#000"></doc-feature>
-  <doc-feature title="Preact" icon="devicon:preact" color="#f0f0f0" text-color="#000"></doc-feature>
+  <doc-feature title="Preact" icon="logos:preact" color="#f0f0f0" text-color="#000"></doc-feature>
   <doc-feature title="Lit" icon="logos:lit" color="#f0f0f0" text-color="#000"></doc-feature>
 </doc-features>
-
-The source code is [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/vite).
 
 ## Getting started
 
