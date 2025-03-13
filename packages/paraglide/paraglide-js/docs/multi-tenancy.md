@@ -1,8 +1,10 @@
 # Multi-Tenancy
-
+```
 https://customer1.com/about -> de
 https://customer2.de/en/about -> en
 https://customer3.com/fr/about -> fr
+```
+
 
 Multi-tenancy in i18n refers to serving different localization configurations. This is particularly useful when:
 
