@@ -9,10 +9,6 @@ You can use any message syntax and file formats with Paraglide JS via [inlang pl
 
 By default, Paraglide JS uses the [inlang-message-format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) plugin, but you can use any other plugin that suits your needs. Mixing & matching is also possible.
 
-<doc-callout type="info">
-  Paraglide JS is not responsible for loading messages. It only compiles the messages into tree-shakable functions. 
-</doc-callout>
-
 ```mermaid
 graph LR;
     
