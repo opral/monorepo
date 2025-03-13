@@ -1,5 +1,9 @@
 # @inlang/paraglide-next
 
+## 0.8.1
+
+Fix: dist folder not uploaded to NPM.
+
 ## 0.8.0
 
 Added depreaction notice. Paraglide JS 2.0 doesn't need adapters anymore. Please use the [Paraglide JS 2.0 NextJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/next-js) documentation instead.

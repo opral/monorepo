@@ -1,5 +1,10 @@
 # @inlang/paraglide-astro
 
+## 0.4.1 
+
+Fix: dist folder not uploaded to NPM.
+
+
 ## 0.4.0
 
 Added a deprecation notice. Paraglide JS 2.0 doesn't need adapters anymore. Please use [Paraglide JS 2.0](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/astro) directly. 

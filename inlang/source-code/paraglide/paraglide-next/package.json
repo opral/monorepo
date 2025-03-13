@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-next",
 	"description": "The easiest way to do i18n in NextJS",
-	"version": "0.8.0",
+	"version": "0.8.1",
 	"publishConfig": {
 		"access": "public"
 	},
