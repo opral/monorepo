@@ -59,6 +59,7 @@ const languages: { label: string; value: string }[] = [
   { label: 'Idris', value: 'idris' },
   { label: 'Java', value: 'java' },
   { label: 'JavaScript', value: 'javascript' },
+  { label: 'JavaScript (js)', value: 'js' },
   { label: 'JSON', value: 'json' },
   { label: 'Julia', value: 'julia' },
   { label: 'Kotlin', value: 'kotlin' },

@@ -2,3 +2,6 @@
 packages/md-app/src/components/editor/plugins/markdown-plate-fork/**
 packages/md-app/src/components/editor/plugins/*.tsx
 packages/md-app/src/components/editor/plugins/*.ts
+# also exclude ui
+packages/md-app/src/components/plate-ui/*.tsx
+packages/md-app/src/components/plate-ui/*.ts
