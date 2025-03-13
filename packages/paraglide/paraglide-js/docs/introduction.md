@@ -1,5 +1,5 @@
 ---
-imports: 
+imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-feature.js
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-features.js
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-link.js
@@ -12,7 +12,7 @@ imports:
 
 # Why Paraglide?
 
-Paraglide is designed as a compiler which emits tree-shakable message functions. This means that only the messages you actually use are loaded without asynchronous waterfalls. 
+Paraglide is designed as a compiler which emits tree-shakable message functions. This means that only the messages you actually use are loaded without asynchronous waterfalls.
 
 <doc-features>
   <doc-feature title="Tiny Runtime" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/assets/bundlesize-feature.png"></doc-feature>
@@ -20,19 +20,6 @@ Paraglide is designed as a compiler which emits tree-shakable message functions.
   <doc-feature title="Only Ship Used Messages" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/assets/unused-translations.png"></doc-feature>
    <doc-feature title="Sherlock VS Code Extension" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/assets/sherlock-preview.png"></doc-feature>
 </doc-features>
-
-## Framework agnostic 
-
-Paraglide's architecture is framework agnostic as the result of years of R&D in the i18n space. 
-
-You can write your own framework specific adapter in a few lines of code, and keep full control, or start with an opinionated adapter in a few minutes. 
-
-<doc-links>
-  <doc-link title="Paraglide-SvelteKit" icon="simple-icons:svelte" href="https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n" description="Go to Library"></doc-link>
-	<doc-link title="Paraglide-Next" icon="tabler:brand-nextjs" href="/m/osslbuzt/paraglide-next-i18n" description="Go to Library"></doc-link>
-  <doc-link title="Paraglide-Astro" icon="devicon-plain:astro" href="/m/iljlwzfs/paraglide-astro-i18n" description="Go to Library"></doc-link>
-	<doc-link title="Paraglide-Remix" icon="simple-icons:remix" href="/m/fnhuwzrx/paraglide-remix-i18n" description="Go to Library"></doc-link>
-</doc-links>
 
 ## People Love It
 
@@ -45,9 +32,44 @@ A few recent comments.
 <doc-comment text="Awesome library 🙂 Thanks so much! 1) The docs were simple and straight forward 2) Everything just worked.. no headaches" author="Dimitry" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1083724234142011392/1225658097016766574"></doc-comment>
 </doc-comments>
 
-## Ecosystem 
+## Works in any framework
 
-Paraglide JS is build on top of the inlang ecosystem. Use the Sherlock VSCode extension, CLI to machine translate, or Fink to let translators manage translations out of the box. 
+<doc-links>
+  <doc-link title="Vanilla JS/TS" icon="devicon:javascript" href="/m/gerre34r/library-inlang-paraglideJs/vanilla-js-ts" description="Go to Library"></doc-link>
+  <doc-link title="React" icon="devicon:react" href="/m/gerre34r/library-inlang-paraglideJs/vite" description="Go to Library"></doc-link>
+  <doc-link title="Vue" icon="devicon:vuejs" href="/m/gerre34r/library-inlang-paraglideJs/vite" description="Go to Library"></doc-link>
+  <doc-link title="SvelteKit" icon="devicon:svelte" href="/m/gerre34r/library-inlang-paraglideJs/sveltekit" description="Go to Library"></doc-link>
+  <doc-link title="NextJS" icon="devicon:nextjs" href="/m/gerre34r/library-inlang-paraglideJs/next-js" description="Go to Library"></doc-link>
+  <doc-link title="Astro" icon="devicon-plain:astro" href="/m/gerre34r/library-inlang-paraglideJs/astro" description="Go to Library"></doc-link>
+  <doc-link title="Other frameworks" icon="basil:other-1-outline" href="/m/gerre34r/library-inlang-paraglideJs/other-frameworks" description="Go to Library"></doc-link>
+</doc-links>
+
+## Comparison
+
+<doc-callout type="info">Please open a pull request if the comparison is outdated, incorrect, or can be improved.</doc-callout>
+
+| Feature                                                      | Paraglide JS                                                                                              | i18next                                                                                                          | React-Intl/FormatJS                                                                                               |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Architecture**                                             | 🏗️ Compiler                                                                                               | 🏃 Runtime                                                                                                       | 🏃 Runtime                                                                                                        |
+| **Requires build step**                                      | ❌ Yes                                                                                                    | ✅ No                                                                                                            | ✅ No                                                                                                             |
+| **Runtime Size**                                             | ✅ Tiny (as small as 300B)                                                                                | ⚠️ Larger (10kB+)                                                                                                | ⚠️ Medium (8kB+)                                                                                                  |
+| **Tree-shaking**                                             | ✅ Built-in                                                                                               | ❌ No support                                                                                                    | ❌ No support                                                                                                     |
+| **Type Safety**                                              | ✅ Built-in                                                                                               | [🟠 Via workarounds](https://www.i18next.com/overview/typescript)                                                | ❌ No support                                                                                                     |
+| **Framework agnostic**                                       | ✅ No wrappers needed                                                                                     | [🟠 Wrappers needed](https://github.com/i18next/react-i18next)                                                   | [🟠 Wrappers needed](https://formatjs.github.io/docs/react-intl/#the-react-intl-package)                          |
+| **Message syntax agnostic**                                  | [✅ Via inlang plugins](https://inlang.com/c/plugins)                                                     | [✅ Via different backends](https://www.i18next.com/how-to/add-or-load-translations#load-using-a-backend-plugin) | [❌ Only ICU1](https://formatjs.github.io/docs/core-concepts/icu-syntax/)                                         |
+| **Pluralization**                                            | [✅ Built-in](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/variants#pluralization)            | [✅ Built-in](https://www.i18next.com/translation-function/plurals)                                              | [✅ Built-in](https://formatjs.github.io/docs/core-concepts/icu-syntax#plural-format)                             |
+| **Variants**                                                 | [✅ Built-in](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/variants)                          | ❌ No support                                                                                                    | ❌ No support                                                                                                     |
+| **Component interpolation**                                  | [❌ Open issue #240](https://github.com/opral/inlang-sdk/issues/240)                                      | [🟠 Only for React](https://react.i18next.com/legacy-v9/trans-component)                                         | [🟠 Only for React](https://formatjs.github.io/docs/react-intl/components/#rich-text-formatting)                  |
+| **Multi-tenancy**                                            | [✅ Built-in](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/multi-tenancy)                     | ❌ Custom solution needed                                                                                        | ❌ Custom solution needed                                                                                         |
+| **Strategy agnostic**                                        | [✅ Built-in](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy)                          | [🟠 Via plugins](https://github.com/i18next/i18next-browser-languageDetector)                                    | ❌ Custom solution needed                                                                                         |
+| **Scales well over 15 locales**                              | [🟠 Experimental split locale option](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/benchmark) | [✅ Via HTTP backend](https://github.com/i18next/i18next-http-backend)                                           | ❌ Custom solution needed                                                                                         |
+| **Metaframework (NextJS, SvelteKit, Astro, ...) compatible** | ✅ Out of the box                                                                                         | [🟠 Wrappers needed](https://github.com/i18next/next-i18next)                                                    | ❌ Only supports plain JS or React ([source](https://formatjs.github.io/docs/react-intl/#the-react-intl-package)) |
+| **Ecosystem**                                                | [🌱 Growing based on open inlang file format](https://github.com/opral/inlang-sdk)                        | [🟠 Cloud TMS service](https://www.i18next.com/#localization-as-a-service)                                       | ❌ Only an i18n library                                                                                           |
+| **Maturity**                                                 | 🆕 Newer                                                                                                  | 🧓 Very mature                                                                                                   | 👨 Mature                                                                                                         |
+
+## Ecosystem
+
+Paraglide JS is build on top of the [open inlang file format](https://github.com/opral/inlang-sdk). Any other inlang app like the Sherlock VSCode extension, the CLI to machine translate, or Fink to let translators manage translations works out of the box.
 
 <doc-links>
   <doc-link title="Sherlock" description="VSCode extension" icon="twemoji:detective" href="https://inlang.com/m/r7kp499g/app-inlang-ideExtension"></doc-link>
@@ -61,4 +83,3 @@ Paraglide JS is build on top of the inlang ecosystem. Use the Sherlock VSCode ex
 
 - [Paraglide JS 1.0 announcement](https://www.youtube.com/watch?v=-YES3CCAG90)
 - [Svelte London January 2024 Meetup](https://www.youtube.com/watch?v=eswNQiq4T2w&t=646s)
-
