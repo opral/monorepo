@@ -198,6 +198,9 @@ export function serializeMdNode(
       })
       .join('');
   }
+
+  let breakParagraph = false
+
   // This is pretty fragile code, check the long comment where we iterate over children
   if (
     !opts.ignoreParagraphNewline &&
@@ -206,7 +209,12 @@ export function serializeMdNode(
     !node.parent?.isList
   ) {
     type = nodes.p.type!;
-    children = opts.breakTag;
+    if (text === '') {
+      breakParagraph = true;
+      children = ''
+    } else {
+      children = opts.breakTag;
+    }
   }
 
   // Skip nodes that are empty, not a list not in a table cell and not void .
@@ -217,7 +225,8 @@ export function serializeMdNode(
     children === '' &&
     !node.parent?.isList &&
     !elOptions?.isVoid &&
-    !isInTableCell
+    !isInTableCell && 
+    !breakParagraph
   ) {
     return;
   }
