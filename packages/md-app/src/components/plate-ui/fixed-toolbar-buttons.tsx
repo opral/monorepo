@@ -141,17 +141,17 @@ export function FixedToolbarButtons() {
             </ColorDropdownMenu> */}
           </ToolbarGroup>
 
-          {/* <ToolbarGroup>
-            <AlignDropdownMenu />
+          <ToolbarGroup>
+            {/* <AlignDropdownMenu /> */}
             <NumberedIndentListToolbarButton />
             <BulletedIndentListToolbarButton />
-            <IndentTodoToolbarButton />
-            <ToggleToolbarButton />
-          </ToolbarGroup> */}
+            {/* <IndentTodoToolbarButton /> */}
+            {/* <ToggleToolbarButton /> */}
+          </ToolbarGroup>
 
           <ToolbarGroup>
             <LinkToolbarButton />
-            {/* <TableDropdownMenu /> */}
+            <TableDropdownMenu />
             <EmojiDropdownMenu />
           </ToolbarGroup>
 

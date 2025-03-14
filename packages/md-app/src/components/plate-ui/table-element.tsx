@@ -139,10 +139,10 @@ export const TableFloatingToolbar = withRef<typeof PopoverContent>(
             contentEditable={false}
           >
             <ToolbarGroup>
-              <ColorDropdownMenu tooltip="Background color">
+              {/* <ColorDropdownMenu tooltip="Background color">
                 <PaintBucketIcon />
-              </ColorDropdownMenu>
-              {canMerge && (
+              </ColorDropdownMenu> */}
+              {/* {canMerge && (
                 <ToolbarButton
                   onClick={() => tf.table.merge()}
                   onMouseDown={(e) => e.preventDefault()}
@@ -159,9 +159,9 @@ export const TableFloatingToolbar = withRef<typeof PopoverContent>(
                 >
                   <SquareSplitHorizontalIcon />
                 </ToolbarButton>
-              )}
+              )} */}
 
-              <DropdownMenu modal={false}>
+              {/* <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <ToolbarButton tooltip="Cell borders">
                     <Grid2X2Icon />
@@ -171,7 +171,7 @@ export const TableFloatingToolbar = withRef<typeof PopoverContent>(
                 <DropdownMenuPortal>
                   <TableBordersDropdownMenuContent />
                 </DropdownMenuPortal>
-              </DropdownMenu>
+              </DropdownMenu> */}
 
               {collapsed && (
                 <ToolbarGroup>

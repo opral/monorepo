@@ -122,18 +122,18 @@ const groups: Group[] = [
         label: 'Numbered list',
         value: ListStyleType.Decimal,
       },
-      {
-        icon: <Square />,
-        keywords: ['checklist', 'task', 'checkbox', '[]'],
-        label: 'To-do list',
-        value: INDENT_LIST_KEYS.todo,
-      },
-      {
-        icon: <ChevronRightIcon />,
-        keywords: ['collapsible', 'expandable'],
-        label: 'Toggle',
-        value: TogglePlugin.key,
-      },
+      // {
+      //   icon: <Square />,
+      //   keywords: ['checklist', 'task', 'checkbox', '[]'],
+      //   label: 'To-do list',
+      //   value: INDENT_LIST_KEYS.todo,
+      // },
+      // {
+      //   icon: <ChevronRightIcon />,
+      //   keywords: ['collapsible', 'expandable'],
+      //   label: 'Toggle',
+      //   value: TogglePlugin.key,
+      // },
       {
         icon: <Code2 />,
         keywords: ['```'],
@@ -158,56 +158,56 @@ const groups: Group[] = [
       },
     })),
   },
-  {
-    group: 'Advanced blocks',
-    items: [
-      {
-        icon: <TableOfContentsIcon />,
-        keywords: ['toc'],
-        label: 'Table of contents',
-        value: TocPlugin.key,
-      },
-      {
-        icon: <Columns3Icon />,
-        label: '3 columns',
-        value: 'action_three_columns',
-      },
-      {
-        focusEditor: false,
-        icon: <RadicalIcon />,
-        label: 'Equation',
-        value: EquationPlugin.key,
-      },
-    ].map((item) => ({
-      ...item,
-      onSelect: (editor, value) => {
-        insertBlock(editor, value);
-      },
-    })),
-  },
-  {
-    group: 'Inline',
-    items: [
-      {
-        focusEditor: true,
-        icon: <CalendarIcon />,
-        keywords: ['time'],
-        label: 'Date',
-        value: DatePlugin.key,
-      },
-      {
-        focusEditor: false,
-        icon: <RadicalIcon />,
-        label: 'Inline Equation',
-        value: InlineEquationPlugin.key,
-      },
-    ].map((item) => ({
-      ...item,
-      onSelect: (editor, value) => {
-        insertInlineElement(editor, value);
-      },
-    })),
-  },
+  // {
+  //   group: 'Advanced blocks',
+  //   items: [
+  //     {
+  //       icon: <TableOfContentsIcon />,
+  //       keywords: ['toc'],
+  //       label: 'Table of contents',
+  //       value: TocPlugin.key,
+  //     },
+  //     {
+  //       icon: <Columns3Icon />,
+  //       label: '3 columns',
+  //       value: 'action_three_columns',
+  //     },
+  //     {
+  //       focusEditor: false,
+  //       icon: <RadicalIcon />,
+  //       label: 'Equation',
+  //       value: EquationPlugin.key,
+  //     },
+  //   ].map((item) => ({
+  //     ...item,
+  //     onSelect: (editor, value) => {
+  //       insertBlock(editor, value);
+  //     },
+  //   })),
+  // },
+  // {
+  //   group: 'Inline',
+  //   items: [
+  //     {
+  //       focusEditor: true,
+  //       icon: <CalendarIcon />,
+  //       keywords: ['time'],
+  //       label: 'Date',
+  //       value: DatePlugin.key,
+  //     },
+  //     {
+  //       focusEditor: false,
+  //       icon: <RadicalIcon />,
+  //       label: 'Inline Equation',
+  //       value: InlineEquationPlugin.key,
+  //     },
+  //   ].map((item) => ({
+  //     ...item,
+  //     onSelect: (editor, value) => {
+  //       insertInlineElement(editor, value);
+  //     },
+  //   })),
+  // },
 ];
 
 export const SlashInputElement = withRef<typeof PlateElement>(
