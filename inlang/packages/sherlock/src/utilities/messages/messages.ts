@@ -309,6 +309,7 @@ export async function createMessageHtml(args: {
     <div class="tree-item">
         <div class="collapsible" data-message-id="${args.bundle.id}">
             <div class="messageId">
+			 	<span class="chevron codicon codicon-chevron-right"></span>
                 <span><strong>#</strong></span>
                 <span>${args.bundle.id}</span>
             </div>
