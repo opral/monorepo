@@ -48,12 +48,12 @@ export function ModeDropdownMenu(props: DropdownMenuProps) {
         <span className="hidden lg:inline">Suggestion</span>
       </>
     ),
-    viewing: (
-      <>
-        <Eye />
-        <span className="hidden lg:inline">Viewing</span>
-      </>
-    ),
+    // viewing: (
+    //   <>
+    //     <Eye />
+    //     <span className="hidden lg:inline">Viewing</span>
+    //   </>
+    // ),
   };
 
   return (
@@ -72,13 +72,13 @@ export function ModeDropdownMenu(props: DropdownMenuProps) {
         <DropdownMenuRadioGroup
           value={value}
           onValueChange={(newValue) => {
-            if (newValue === 'viewing') {
-              setReadOnly(true);
+            // if (newValue === 'viewing') {
+            //   setReadOnly(true);
 
-              return;
-            } else {
-              setReadOnly(false);
-            }
+            //   return;
+            // } else {
+            //   setReadOnly(false);
+            // }
 
             if (newValue === 'suggestion') {
               editor.setOption(SuggestionPlugin, 'isSuggesting', true);
@@ -99,9 +99,9 @@ export function ModeDropdownMenu(props: DropdownMenuProps) {
             {item.editing}
           </DropdownMenuRadioItem>
 
-          <DropdownMenuRadioItem value="viewing">
+          {/* <DropdownMenuRadioItem value="viewing">
             {item.viewing}
-          </DropdownMenuRadioItem>
+          </DropdownMenuRadioItem> */}
 
           <DropdownMenuRadioItem value="suggestion">
             {item.suggestion}
