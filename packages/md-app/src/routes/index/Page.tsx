@@ -1,6 +1,6 @@
 import { Toaster } from 'sonner';
 import { PlateEditor } from '@/components/editor/plate-editor';
-import { SettingsProvider } from '@/components/editor/settings';
+// import { SettingsProvider } from '@/components/editor/settings';
 import LixMenuDropdown from "@/components/LixMenuDropdown";
 import { activeFileAtom, checkpointChangeSetsAtom, intermediateChangesAtom } from '@/state-active-file';
 import { useAtom } from 'jotai/react';
@@ -18,6 +18,10 @@ export default function Page() {
 		<>
 			<Banner />
 			<div className="w-full bg-slate-50 border-b-[1px] border-border p-2 flex justify-between items-center">
+				<div className="flex items-center">
+					<img src="/lix.svg" alt="lix logo" className="h-6 w-6" />
+					<div className="text-slate-600 text-xl font-medium ml-0.5 mt-[1px]">md</div>
+				</div>
 				<div className="flex-1" />
 				<LixMenuDropdown />
 			</div>
