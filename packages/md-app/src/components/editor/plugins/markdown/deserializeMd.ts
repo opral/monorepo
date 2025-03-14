@@ -16,7 +16,8 @@ import { visit } from "unist-util-visit";
 const sanitizeHtml = function () {
 	return (tree: any) => {
 		visit(tree, (node, index, parent) => {
-			if (node.type === "html") {
+			// don't sanitize <br> tags: remark never concats them and conversion to \n happens on ui layer
+			if (node.type === "html" && node.value !== "<br>") {
 				if (parent.type === "root") {
 					node.type = "sanitized_block_html";
 				} else {
