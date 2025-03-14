@@ -140,7 +140,7 @@ export const defaultSerializeMdNodesOptions: SerializeMdOptions['nodes'] = {
         post = '\n';
       }  
 
-      return `${pre}${children}${post}`;
+      return `${pre}${children.split('\n').join('<br>')}${post}`;
     },
   },
   strikethrough: { isLeaf: true, type: 'strikethrough' },
