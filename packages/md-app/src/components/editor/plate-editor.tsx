@@ -15,6 +15,7 @@ import { activeFileAtom, loadedMdAtom } from "@/state-active-file";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { BlockSelectionPlugin } from "@udecode/plate-selection/react";
+import { TElement } from "@udecode/plate";
 
 export function PlateEditor() {
 	const [lix] = useAtom(lixAtom);
@@ -37,11 +38,24 @@ export function PlateEditor() {
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			console.log(JSON.stringify(editor.selection));
 			if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "a") {
 				// if (!editor.api.isFocused()) {
 				// 	editor.getApi(BlockSelectionPlugin).blockSelection.selectAll();
 				// } else {
+
+				// recursive function to get the length of the last text node
+				function getLastTextOffset(node: TElement): number {
+					if (!node.children || node.children.length === 0) {
+						// @ts-expect-error - length is not defined on TElement
+						return node.text ? node.text.length : 0;
+					}
+					const lastChild = node.children[node.children.length - 1];
+					if ('children' in lastChild) {
+						return getLastTextOffset(lastChild as TElement);
+					}
+					return lastChild.text ? lastChild.text.length : 0;
+				}
+
 				editor.tf.select(
 					{
 						anchor: { path: [0, 0], offset: 0 },
@@ -51,7 +65,7 @@ export function PlateEditor() {
 								editor.children[editor.children.length - 1].children.length - 1,
 							],
 							offset:
-								editor.children[editor.children.length - 1].children.length - 1,
+								getLastTextOffset(editor.children[editor.children.length - 1]),
 						},
 					},
 					{ focus: true }
