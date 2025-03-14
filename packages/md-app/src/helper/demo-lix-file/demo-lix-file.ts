@@ -31,8 +31,14 @@ export const setupMdDemo = async (lix: Lix) => {
 		.insertInto("file")
 		.values({
 			path: "/demo.md",
-			data: new TextEncoder().encode(`# Playground
-A rich-text editor with AI capabilities. Try the **AI commands** or use \`Cmd+J\` to open the AI menu.`),
+			data: new TextEncoder().encode(`# The AI Markdown Editor
+_AI-powered Markdown editor with change tracking._
+
+[Sign up](https://opral.substack.com/) for to get notified about the beta.
+
+---
+
+Try the **AI commands** or use \`Cmd+J\` to open the AI menu.`),
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
