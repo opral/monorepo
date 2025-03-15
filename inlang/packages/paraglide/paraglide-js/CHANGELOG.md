@@ -2,6 +2,14 @@
 
 **Paraglide JS 2.0 GA release notes are [here](https://github.com/opral/monorepo/blob/main/inlang/packages/paraglide/paraglide-js/v2-release-notes.md)**
 
+## 2.0.0-beta.31
+
+- fix: `getLocale` returns correct value on SvelteKit server [#463](https://github.com/opral/inlang-paraglide-js/issues/463)
+  - Removes the `Sec-Fetch-Dest` check from URL locale extraction
+  - URL locale extraction now works for all request types, not just document requests
+  - Maintains the `Sec-Fetch-Dest` check for redirects only
+  - Eliminates inconsistencies between client-side and server-side locale detection
+
 ## 2.0.0-beta.30
 
 - improve: if no url pattern matches, `localizeUrl()` and `deLocalizeUrl()` will return the input url unchanged instead of throwing an error [#452](https://github.com/opral/inlang-paraglide-js/issues/452#issuecomment-2715761308)
