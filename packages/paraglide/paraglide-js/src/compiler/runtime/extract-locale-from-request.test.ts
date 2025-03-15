@@ -143,7 +143,7 @@ test("skips over localStorage strategy as it is not supported on the server", as
 	expect(runtime.extractLocaleFromRequest(request)).toBe("en");
 });
 
-test("does not resolve the locale from the url if request is not a document request", async () => {
+test("resolves the locale from the url for all request types", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "fr"],
@@ -161,14 +161,14 @@ test("does not resolve the locale from the url if request is not a document requ
 		},
 	});
 
-	// Document request - should use URL strategy
+	// Non-document request should still use URL strategy
 	const request = new Request("https://example.com/fr/home", {
 		headers: {
 			"Sec-Fetch-Dest": "something",
 		},
 	});
 	const locale = runtime.extractLocaleFromRequest(request);
-	expect(locale).toBe("en");
+	expect(locale).toBe("fr");
 });
 
 // https://github.com/opral/inlang-paraglide-js/issues/436

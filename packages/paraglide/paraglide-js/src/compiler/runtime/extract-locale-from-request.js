@@ -38,10 +38,7 @@ export const extractLocaleFromRequest = (request) => {
 				?.split("=")[1];
 		} else if (
 			TREE_SHAKE_URL_STRATEGY_USED &&
-			strat === "url" &&
-			// only process url strategy if request is a document
-			// else it's api requests, etc.
-			request.headers.get("Sec-Fetch-Dest") === "document"
+			strat === "url"
 		) {
 			locale = extractLocaleFromUrl(request.url);
 		} else if (
