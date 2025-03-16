@@ -1,27 +1,40 @@
 import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
+import { newProject } from "@inlang/sdk";
 
 test("throws if the locale is not available", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 	});
 
 	expect(() => runtime.assertIsLocale("es")).toThrow();
 });
 
 test("passes if the locale is available", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 	});
 	expect(() => runtime.assertIsLocale("en")).not.toThrow();
 });
 
 test("the return value is a Locale", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 	});
 
 	const locale = runtime.assertIsLocale("en");
