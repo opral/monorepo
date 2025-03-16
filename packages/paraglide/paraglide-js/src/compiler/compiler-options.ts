@@ -49,10 +49,10 @@ export type CompilerOptions = {
 	 * fallback to the base locale.
 	 *
 	 * The default ensures that the browser takes a cookie approach,
-	 * server-side takes the variable (because cookie is unavailable),
+	 * server-side takes the globalVariable (because cookie is unavailable),
 	 * whereas both fallback to the base locale if not available.
 	 *
-	 * @default ["url", "cookie", "variable", "baseLocale"]
+	 * @default ["cookie", "globalVariable", "baseLocale"]
 	 */
 	strategy?: Runtime["strategy"];
 	/**
