@@ -626,6 +626,79 @@ test("routing to a 404 page", async () => {
 	).toBe("https://example.com/de/other-path");
 });
 
+// Test showing the importance of pattern order in the localized array
+test("pattern order in localized array - correct order (specific first)", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "/:path(.*)?",
+					localized: [
+						// CORRECT ORDER: more specific pattern first
+						["de", "/de/:path(.*)?"],  // More specific pattern with prefix
+						["en", "/:path(.*)?"],     // Less specific pattern without prefix
+					],
+				},
+			],
+		},
+	});
+
+	// These should work correctly with the specific (de) pattern first
+	expect(
+		runtime.localizeUrl("https://example.com/about", { locale: "en" }).href
+	).toBe("https://example.com/about");
+
+	expect(
+		runtime.localizeUrl("https://example.com/about", { locale: "de" }).href
+	).toBe("https://example.com/de/about");
+
+	// Delocalization should work correctly too
+	expect(
+		runtime.deLocalizeUrl("https://example.com/de/about").href
+	).toBe("https://example.com/about");
+});
+
+// Test showing the importance of pattern order in the localized array
+test("pattern order in localized array - incorrect order (generic first)", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "/:path(.*)?",
+					localized: [
+						// INCORRECT ORDER: less specific pattern first
+						["en", "/:path(.*)?"],     // Less specific pattern without prefix
+						["de", "/de/:path(.*)?"],  // More specific pattern with prefix that may never match
+					],
+				},
+			],
+		},
+	});
+
+	// English localization works as expected
+	expect(
+		runtime.localizeUrl("https://example.com/about", { locale: "en" }).href
+	).toBe("https://example.com/about");
+
+	// German localization still works when explicitly requested
+	expect(
+		runtime.localizeUrl("https://example.com/about", { locale: "de" }).href
+	).toBe("https://example.com/de/about");
+
+	// The problem happens with delocalization:
+	// With incorrect pattern order, the generic /:path(.*)?
+	// pattern matches first and swallows the /de/ prefix
+	expect(
+		runtime.deLocalizeUrl("https://example.com/de/about").href
+	).toBe("https://example.com/de/about"); // Should be "https://example.com/about"
+});
+
 // Test for port number issue with specific port numbers in the URL pattern
 test("handles explicit port numbers in URL patterns correctly", async () => {
 	const runtime = await createRuntimeForTesting({
