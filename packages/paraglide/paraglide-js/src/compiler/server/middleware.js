@@ -80,7 +80,7 @@ export async function paraglideMiddleware(request, resolve) {
 			runtime.strategy.includes("url")
 		) {
 			const localizedUrl = runtime.localizeUrl(request.url, { locale });
-			if (localizedUrl.href !== request.url) {
+			if (normalizeURL(localizedUrl.href) !== normalizeURL(request.url)) {
 				return Response.redirect(localizedUrl, 307);
 			}
 		}
@@ -159,6 +159,19 @@ export async function paraglideMiddleware(request, resolve) {
 			}
 		);
 	}
+}
+
+/**
+ * Normalize url for comparison.
+ * Strips trailing slash
+ * @param {string} url
+ * @returns {string} normalized url string
+ */
+function normalizeURL(url) {
+	const urlObj = new URL(url);
+	// strip trailing slash from pathname
+	urlObj.pathname = urlObj.pathname.replace(/\/$/, "");
+	return urlObj.href;
 }
 
 /**
