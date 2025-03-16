@@ -6,12 +6,13 @@ import * as runtime from "./runtime.js";
  * This middleware performs several key functions:
  *
  * 1. Determines the locale for the incoming request using configured strategies
- * 2. Handles URL localization and redirects
+ * 2. Handles URL localization and redirects (only for document requests)
  * 3. Maintains locale state using AsyncLocalStorage to prevent request interference
  *
  * When URL strategy is used:
  *
- * - If URL doesn't match the determined locale, redirects to localized URL
+ * - The locale is extracted from the URL for all request types
+ * - If URL doesn't match the determined locale, redirects to localized URL (only for document requests)
  * - De-localizes URLs before passing to server (e.g., `/fr/about` → `/about`)
  *
  * @template T - The return type of the resolve function
