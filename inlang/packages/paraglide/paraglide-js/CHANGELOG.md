@@ -4,7 +4,8 @@
 
 ## 2.0.0-beta.31
 
-- fix: `getLocale` returns correct value on SvelteKit server [#463](https://github.com/opral/inlang-paraglide-js/issues/463)
+- fix: `getLocale` returns correct value on SvelteKit server [#461](https://github.com/opral/inlang-paraglide-js/issues/461)
+
   - Removes the `Sec-Fetch-Dest` check from URL locale extraction
   - URL locale extraction now works for all request types, not just document requests
   - Maintains the `Sec-Fetch-Dest` check for redirects only
