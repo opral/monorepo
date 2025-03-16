@@ -4,6 +4,27 @@
 
 ## 2.0.0-beta.31
 
+- feat: New API: `createParaglide()`
+
+  The function allows a no build step or before build step access to Paraglide's compiled APIs.
+
+  ```typescript
+  const project = await fs.readFile("./project.inlang");
+
+  const paraglide = await createParaglideModule({
+    project,
+    compilerOptions: {
+      strategy: ["url"],
+    }
+  });
+
+  // Use runtime functions
+  paraglide.localizeUrl("https://example.com", { locale: "de" });
+
+  // Use server middleware
+  app.use(paraglide.paraglideMiddleware());
+  ```
+
 - fix: `getLocale` returns correct value on SvelteKit server [#461](https://github.com/opral/inlang-paraglide-js/issues/461)
 
   - Removes the `Sec-Fetch-Dest` check from URL locale extraction
