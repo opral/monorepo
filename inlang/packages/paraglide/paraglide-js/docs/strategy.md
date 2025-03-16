@@ -381,6 +381,8 @@ urlPatterns: [
 
 Within each pattern's `localized` array, the order of locale patterns also matters. When localizing a URL, the first matching pattern for the target locale will be used. Similarly, when delocalizing a URL, patterns are checked in order.
 
+This is especially important for path-based localization where one locale has a prefix (like `/de/`) and another doesn't. In these cases, put the more specific pattern (with prefix) first.
+
 ```js
 // ❌ INCORRECT ORDER: The first pattern is too general
 {
@@ -397,6 +399,24 @@ Within each pattern's `localized` array, the order of locale patterns also matte
   localized: [
     ["en", "https://example.com/en/blog/:id"], // Specific pattern first
     ["en", "https://example.com/:path(.*)?"], // General pattern last
+  ],
+}
+
+// ❌ INCORRECT ORDER FOR DELOCALIZATION: Generic pattern first will cause problems
+{
+  pattern: "/:path(.*)?",
+  localized: [
+    ["en", "/:path(.*)?"],      // Generic pattern will match everything including "/de/about"
+    ["de", "/de/:path(.*)?"],   // Pattern with prefix won't be reached for delocalization
+  ],
+}
+
+// ✅ CORRECT ORDER: More specific patterns with prefixes should come first
+{
+  pattern: "/:path(.*)?",
+  localized: [
+    ["de", "/de/:path(.*)?"],   // Specific pattern with prefix first
+    ["en", "/:path(.*)?"],      // Generic pattern last
   ],
 }
 ```
