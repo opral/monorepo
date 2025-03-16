@@ -625,3 +625,74 @@ test("routing to a 404 page", async () => {
 		runtime.localizeUrl("https://example.com/other-path", { locale: "de" }).href
 	).toBe("https://example.com/de/other-path");
 });
+
+// Test for port number issue with specific port numbers in the URL pattern
+test("handles explicit port numbers in URL patterns correctly", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					// Using explicit port number - this causes issues with deLocalizeUrl
+					pattern: "http://localhost:5173/:path(.*)?",
+					localized: [
+						["de", "http://localhost:5173/de/:path(.*)?"],
+						["en", "http://localhost:5173/:path(.*)?"],
+					],
+				},
+			],
+		},
+	});
+
+	// Localization should work correctly
+	expect(
+		runtime.localizeUrl("http://localhost:5173/about", { locale: "de" }).href
+	).toBe("http://localhost:5173/de/about");
+
+	expect(
+		runtime.localizeUrl("http://localhost:5173/about", { locale: "en" }).href
+	).toBe("http://localhost:5173/about");
+
+	// This is where the bug occurs - delocalizing a URL with a port number
+	// The port number (5173) is incorrectly treated as a path parameter
+	expect(
+		runtime.deLocalizeUrl("http://localhost:5173/de/about").href
+	).toBe("http://localhost:5173/about");
+});
+
+// Test for the correct approach using port as a pattern parameter
+test("correctly handles port numbers as pattern parameters", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "de"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					// Using port as a proper pattern parameter with :: syntax
+					pattern: "http://localhost::port/:path(.*)?",
+					localized: [
+						["de", "http://localhost::port/de/:path(.*)?"],
+						["en", "http://localhost::port/:path(.*)?"],
+					],
+				},
+			],
+		},
+	});
+
+	// Localization should work correctly
+	expect(
+		runtime.localizeUrl("http://localhost:5173/about", { locale: "de" }).href
+	).toBe("http://localhost:5173/de/about");
+
+	expect(
+		runtime.localizeUrl("http://localhost:5173/about", { locale: "en" }).href
+	).toBe("http://localhost:5173/about");
+
+	// Delocalization should also work correctly with the proper pattern
+	expect(
+		runtime.deLocalizeUrl("http://localhost:5173/de/about").href
+	).toBe("http://localhost:5173/about");
+});
