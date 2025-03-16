@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
 
 test("normal named groups", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -32,7 +32,7 @@ test("normal named groups", async () => {
 });
 
 test("handles relative named groups", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -62,7 +62,7 @@ test("handles relative named groups", async () => {
 });
 
 test("wildcards", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -88,7 +88,7 @@ test("wildcards", async () => {
 });
 
 test("optional parameters", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -109,7 +109,7 @@ test("optional parameters", async () => {
 });
 
 test("regex works", async () => {
-	const { extractLocaleFromUrl } = await createRuntimeForTesting({
+	const { extractLocaleFromUrl } = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -133,7 +133,7 @@ test("regex works", async () => {
 });
 
 test("default url pattern", async () => {
-	const r = await createRuntimeForTesting({
+	const r = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 	});

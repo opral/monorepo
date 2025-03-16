@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "../runtime/create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
 
 test("sets the locale and origin", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de", "fr"],
 		compilerOptions: {
@@ -42,7 +42,7 @@ test("sets the locale and origin", async () => {
 });
 
 test("delocalizes the url if the url strategy is used and returns the locale", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -64,7 +64,7 @@ test("delocalizes the url if the url strategy is used and returns the locale", a
 });
 
 test("does not delocalize the url if the url strategy is not used", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -86,7 +86,7 @@ test("does not delocalize the url if the url strategy is not used", async () => 
 });
 
 test("redirects to localized URL when non-URL strategy determines locale", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "fr"],
 		compilerOptions: {
@@ -126,7 +126,7 @@ test("redirects to localized URL when non-URL strategy determines locale", async
 });
 
 test("does not redirect if URL already matches determined locale", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "fr"],
 		compilerOptions: {
@@ -162,7 +162,7 @@ test("does not redirect if URL already matches determined locale", async () => {
 });
 
 test("works with disableAsyncLocalStorage option", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de", "fr"],
 		compilerOptions: {
@@ -198,7 +198,7 @@ test("works with disableAsyncLocalStorage option", async () => {
 });
 
 test("works with sequential parallel requests using disableAsyncLocalStorage", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de", "fr"],
 		compilerOptions: {
@@ -240,7 +240,7 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 
 // https://github.com/opral/inlang-paraglide-js/issues/442
 test("falls back to next strategy when cookie contains invalid locale", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "fr"],
 		compilerOptions: {
@@ -295,7 +295,7 @@ test("falls back to next strategy when cookie contains invalid locale", async ()
 //
 // strategy: ["cookie", "url"]
 test.skip("doesn't redirect if disableUrlRedirect is true", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "fr"],
 		compilerOptions: {
@@ -337,7 +337,7 @@ test.skip("doesn't redirect if disableUrlRedirect is true", async () => {
 });
 
 test("only redirects if the request.headers.get('Sec-Fetch-Dest') === 'document'", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "fr"],
 		compilerOptions: {

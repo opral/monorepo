@@ -4,6 +4,29 @@
 
 ## 2.0.0-beta.31
 
+- feat: New API: `createParaglideModule`
+
+  - Added a new `createParaglideModule` function that creates an in-memory Paraglide module for use in testing and non-bundled environments
+  - This function provides access to both runtime and server middleware functions without requiring a build step
+  - Automatically includes URLPattern polyfill when needed
+  - Includes a mock `m` object with message functions that throw helpful errors explaining that real messages need to be provided for testing
+
+  ```typescript
+  const paraglide = await createParaglideModule({
+    baseLocale: "en",
+    locales: ["en", "de"],
+    compilerOptions: {
+      strategy: ["url"],
+    }
+  });
+
+  // Use runtime functions
+  paraglide.localizeUrl("https://example.com", { locale: "de" });
+
+  // Use server middleware
+  app.use(paraglide.paraglideMiddleware());
+  ```
+
 - fix: `getLocale` returns correct value on SvelteKit server [#461](https://github.com/opral/inlang-paraglide-js/issues/461)
 
   - Removes the `Sec-Fetch-Dest` check from URL locale extraction

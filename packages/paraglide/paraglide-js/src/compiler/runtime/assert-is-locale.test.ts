@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
 
 test("throws if the locale is not available", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 	});
@@ -11,7 +11,7 @@ test("throws if the locale is not available", async () => {
 });
 
 test("passes if the locale is available", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 	});
@@ -19,7 +19,7 @@ test("passes if the locale is available", async () => {
 });
 
 test("the return value is a Locale", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 	});

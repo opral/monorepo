@@ -1,9 +1,9 @@
 import { AsyncLocalStorage } from "async_hooks";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
 import { test, expect } from "vitest";
 
 test("tracks message calls", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 	});

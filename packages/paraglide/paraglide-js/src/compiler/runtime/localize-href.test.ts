@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
 
 test("uses the locale from getLocale() if no locale is provided", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -26,7 +26,7 @@ test("uses the locale from getLocale() if no locale is provided", async () => {
 });
 
 test("returns an absolute href if the provided href is absolute", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -53,7 +53,7 @@ test("returns an absolute href if the provided href is absolute", async () => {
 
 // useful if domain based localization is used for example
 test("returns an absolute href if the provided href is relative but the origin of the localized href differs", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -96,7 +96,7 @@ test("returns an absolute href if the provided href is relative but the origin o
 test("adding a base path", async () => {
 	const base = "shop";
 
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -126,7 +126,7 @@ test("adding a base path", async () => {
 });
 
 test("default url patterns to improve out of the box experience", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de", "fr"],
 		compilerOptions: {

@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
 
 test("returns the locale from the cookie", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "fr"],
 		compilerOptions: {
@@ -20,7 +20,7 @@ test("returns the locale from the cookie", async () => {
 });
 
 test("returns the locale from the pathname for document requests", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en"],
 		compilerOptions: {
@@ -43,7 +43,7 @@ test("returns the locale from the pathname for document requests", async () => {
 });
 
 test("returns the baseLocale if no other strategy matches", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en"],
 		compilerOptions: {
@@ -56,7 +56,7 @@ test("returns the baseLocale if no other strategy matches", async () => {
 });
 
 test("throws an error if no locale is found", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en"],
 		compilerOptions: {
@@ -70,7 +70,7 @@ test("throws an error if no locale is found", async () => {
 });
 
 test("returns the preferred locale from Accept-Language header", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "fr", "de"],
 		compilerOptions: {
@@ -108,7 +108,7 @@ test("returns the preferred locale from Accept-Language header", async () => {
 });
 
 test("should fall back to next strategy when cookie contains invalid locale", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "fr"],
 		compilerOptions: {
@@ -129,7 +129,7 @@ test("should fall back to next strategy when cookie contains invalid locale", as
 });
 
 test("skips over localStorage strategy as it is not supported on the server", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "fr"],
 		compilerOptions: {
@@ -144,7 +144,7 @@ test("skips over localStorage strategy as it is not supported on the server", as
 });
 
 test("resolves the locale from the url for all request types", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "fr"],
 		compilerOptions: {
@@ -172,7 +172,7 @@ test("resolves the locale from the url for all request types", async () => {
 });
 
 test("cookie strategy precedes URL strategy for API requests with wildcards", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "fr", "de"],
 		compilerOptions: {
@@ -195,7 +195,7 @@ test("cookie strategy precedes URL strategy for API requests with wildcards", as
 	const apiRequestWithCookie = new Request("https://example.com/api/data", {
 		headers: {
 			"Sec-Fetch-Dest": "empty",
-			"cookie": "PARAGLIDE_LOCALE=de",
+			cookie: "PARAGLIDE_LOCALE=de",
 		},
 	});
 	const apiLocale = runtime.extractLocaleFromRequest(apiRequestWithCookie);
@@ -213,7 +213,7 @@ test("cookie strategy precedes URL strategy for API requests with wildcards", as
 
 // https://github.com/opral/inlang-paraglide-js/issues/436
 test("preferredLanguage precedence over url", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
