@@ -11,6 +11,18 @@
   - Maintains the `Sec-Fetch-Dest` check for redirects only
   - Eliminates inconsistencies between client-side and server-side locale detection
 
+- fix: Support for explicit port numbers in URL patterns
+
+  - Fixed an issue where using explicit port numbers in URL patterns (like `http://localhost:5173/:path?`) would cause errors
+  - Port numbers are now correctly handled and won't be interpreted as parameter names
+  - Both formats now work: explicit ports (`http://localhost:5173`) and parametric ports (`http://localhost::port`)
+
+- improve: Better error handling in server middleware
+
+  - Added try-catch block with detailed error logging to middleware
+  - Returns user-friendly error responses with stack traces when errors occur
+  - Helps with debugging issues in frameworks that don't provide stack traces
+
 ## 2.0.0-beta.30
 
 - improve: if no url pattern matches, `localizeUrl()` and `deLocalizeUrl()` will return the input url unchanged instead of throwing an error [#452](https://github.com/opral/inlang-paraglide-js/issues/452#issuecomment-2715761308)
