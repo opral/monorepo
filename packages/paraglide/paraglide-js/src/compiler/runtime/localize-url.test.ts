@@ -1,10 +1,15 @@
 import { test, expect } from "vitest";
 import { createParaglide } from "../create-paraglide.js";
+import { newProject } from "@inlang/sdk";
 
 test("pathname based localization", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -77,8 +82,12 @@ test("pathname based localization", async () => {
 
 test("cross domain urls", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -146,8 +155,12 @@ test("cross domain urls", async () => {
 
 test("multi tenancy", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de", "fr"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -211,8 +224,12 @@ test("multi tenancy", async () => {
 
 test("providing a URL object as input", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -238,8 +255,12 @@ test("providing a URL object as input", async () => {
 
 test("localhost with portname", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -285,8 +306,12 @@ test("localhost with portname", async () => {
 
 test("it keeps the query parameters", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -314,8 +339,12 @@ test("it keeps the query parameters", async () => {
 
 test("it keeps the url hash", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -346,8 +375,12 @@ test("it keeps the url hash", async () => {
 // This means any request, including https://example.com/about, will match.
 test("it keeps the url path", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -373,8 +406,12 @@ test("it keeps the url path", async () => {
 
 test("uses getLocale when no locale is provided", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -423,8 +460,12 @@ test.each([
 	},
 ])("default url pattern", async (compilerOptions) => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions,
 	});
 
@@ -464,8 +505,12 @@ test.each([
 
 test("auto fills the url base path", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -496,8 +541,12 @@ test("auto fills the url base path", async () => {
 // https://github.com/opral/inlang-paraglide-js/issues/454
 test("works with no trailing slash at the end", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -524,8 +573,12 @@ test("works with no trailing slash at the end", async () => {
 // https://github.com/opral/inlang-paraglide-js/issues/452#issuecomment-2715761308
 test("falls through if no match is found", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -551,8 +604,12 @@ test("falls through if no match is found", async () => {
 
 test("defining no localized pattern leads to a fallthrough", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -579,8 +636,12 @@ test("defining no localized pattern leads to a fallthrough", async () => {
 // https://github.com/opral/inlang-paraglide-js/issues/456
 test("routing to a 404 page", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -629,8 +690,12 @@ test("routing to a 404 page", async () => {
 // Test showing the importance of pattern order in the localized array
 test("pattern order in localized array - correct order (specific first)", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -664,8 +729,12 @@ test("pattern order in localized array - correct order (specific first)", async 
 // Test showing the importance of pattern order in the localized array
 test("pattern order in localized array - incorrect order (generic first)", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -702,8 +771,12 @@ test("pattern order in localized array - incorrect order (generic first)", async
 // Test for port number issue with specific port numbers in the URL pattern
 test("handles explicit port numbers in URL patterns correctly", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -738,8 +811,12 @@ test("handles explicit port numbers in URL patterns correctly", async () => {
 // Test for the correct approach using port as a pattern parameter
 test("correctly handles port numbers as pattern parameters", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [

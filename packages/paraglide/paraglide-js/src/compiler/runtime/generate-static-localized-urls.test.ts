@@ -1,11 +1,16 @@
 import { test, expect } from "vitest";
 import { createParaglide } from "../create-paraglide.js";
+import { newProject } from "@inlang/sdk";
 import "@inlang/paraglide-js/urlpattern-polyfill";
 
 test("generates localized URLs using default URL pattern", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de", "fr"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			// undefined creates the default pattern
@@ -38,8 +43,12 @@ test("generates localized URLs using default URL pattern", async () => {
 
 test("generates localized URLs using custom URL patterns", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -83,8 +92,12 @@ test("generates localized URLs using custom URL patterns", async () => {
 
 test("handles paths that don't match any pattern by including them", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -120,8 +133,12 @@ test("handles paths that don't match any pattern by including them", async () =>
 
 test("handles URL objects as input", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -159,8 +176,12 @@ test("handles URL objects as input", async () => {
 
 test("generates localized URLs from paths", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de", "fr"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			// undefined creates the default pattern

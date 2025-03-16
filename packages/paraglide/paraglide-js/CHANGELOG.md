@@ -6,15 +6,18 @@
 
 - feat: New API: `createParaglideModule`
 
-  - Added a new `createParaglideModule` function that creates an in-memory Paraglide module for use in testing and non-bundled environments
-  - This function provides access to both runtime and server middleware functions without requiring a build step
-  - Automatically includes URLPattern polyfill when needed
-  - Includes a mock `m` object with message functions that throw helpful errors explaining that real messages need to be provided for testing
+  The function allows a no build step or before build step access to Paraglide's compiled APIs.
 
   ```typescript
+  import { newProject } from "@inlang/sdk";
+
   const paraglide = await createParaglideModule({
-    baseLocale: "en",
-    locales: ["en", "de"],
+    project: await newProject({
+      settings: {
+        baseLocale: "en",
+        locales: ["en", "de"],
+      },
+    }),
     compilerOptions: {
       strategy: ["url"],
     }

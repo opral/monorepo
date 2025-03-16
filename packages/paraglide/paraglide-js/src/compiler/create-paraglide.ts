@@ -6,15 +6,22 @@ import {
 } from "./compiler-options.js";
 import { createRuntimeFile } from "./runtime/create-runtime.js";
 import { createServerFile } from "./server/create-server-file.js";
+import { loadProjectInMemory } from "@inlang/sdk";
 
 /**
  * Creates an in-memory Paraglide module for use in tests and non-bundled environments.
  *
  * @example
+ *   import { newProject } from "@inlang/sdk";
+ *
  *   const paraglide = await createParaglide({
- *     baseLocale: "en",
- *     locales: ["en", "de"],
- *     compilerOptions,
+ *     project: await newProject({
+ *       settings: {
+ *         baseLocale: "en",
+ *         locales: ["en", "de"],
+ *       },
+ *     }),
+ *     compilerOptions, // optional
  *   })
  *
  *   // Access functions
@@ -22,10 +29,25 @@ import { createServerFile } from "./server/create-server-file.js";
  *   app.use(paraglide.paraglideMiddleware())
  */
 export async function createParaglide(args: {
-	baseLocale: string;
-	locales: string[];
+	project: Blob;
 	compilerOptions?: Omit<CompilerOptions, "outdir" | "project" | "fs">;
 }): Promise<Runtime & ServerRuntime & { m: Record<string, unknown> }> {
+	// Load the project from the blob
+	const project = await loadProjectInMemory({ blob: args.project });
+	const settings = await project.settings.get();
+
+	// Extract baseLocale and locales from the project
+	const baseLocale = settings.baseLocale;
+	const locales = settings.locales;
+
+	if (!baseLocale) {
+		throw new Error("Project must have a baseLocale defined");
+	}
+
+	if (!locales || locales.length === 0) {
+		throw new Error("Project must have locales defined");
+	}
+
 	// Ensure URLPattern is available
 	// Note: This is required for URL-based locale strategies
 	try {
@@ -37,8 +59,8 @@ export async function createParaglide(args: {
 	}
 
 	const clientSideRuntime = createRuntimeFile({
-		baseLocale: args.baseLocale,
-		locales: args.locales,
+		baseLocale,
+		locales,
 		compilerOptions: {
 			...defaultCompilerOptions,
 			...args.compilerOptions,
@@ -68,9 +90,7 @@ export async function createParaglide(args: {
 			if (typeof prop === 'string' && prop !== 'then') {
 				throw new Error(
 					"Message functions are not available in createParaglideModule. " +
-					"To use message functions in tests, you need to mock them or " +
-					"provide your own implementation. If you need this functionality, " +
-					"please file an issue at https://github.com/opral/monorepo/issues"
+					"Upvote and explain your use case in https://github.com/opral/inlang-paraglide-js/issues/471"
 				);
 			}
 			return undefined;
