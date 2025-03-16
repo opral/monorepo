@@ -374,9 +374,13 @@ test.skip("doesn't redirect if disableUrlRedirect is true", async () => {
 });
 
 test("handles URLs with and without trailing slashes", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "baseLocale"],
 			urlPatterns: [
@@ -460,9 +464,13 @@ test("handles URLs with and without trailing slashes", async () => {
 });
 
 test("correctly redirects when URL needs localization and retains trailing slash", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie", "url"],
 			cookieName: "PARAGLIDE_LOCALE",
