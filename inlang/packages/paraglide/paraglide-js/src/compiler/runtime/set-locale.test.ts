@@ -1,5 +1,5 @@
 import { test, expect, vi } from "vitest";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
 
 test("sets the cookie to a different locale", async () => {
 	// @ts-expect-error - global variable definition
@@ -10,7 +10,7 @@ test("sets the cookie to a different locale", async () => {
 	globalThis.window.location = {};
 	globalThis.window.location.reload = vi.fn();
 
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -37,7 +37,7 @@ test("url pattern strategy sets the window location", async () => {
 	globalThis.window.location.hostname = "example.com";
 	globalThis.window.location.reload = vi.fn();
 
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -65,7 +65,7 @@ test("url pattern strategy sets the window location", async () => {
 
 // `!document.cookie` was used which returned false for an empty string
 test("sets the cookie when it's an empty string", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "fr"],
 		compilerOptions: {
@@ -83,7 +83,7 @@ test("sets the cookie when it's an empty string", async () => {
 });
 
 test("when strategy precedes URL, it should set the locale and re-direct to the URL", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "fr"],
 		compilerOptions: {
@@ -129,7 +129,7 @@ test("should not reload when setting locale to current locale", async () => {
 	globalThis.window.location = {};
 	globalThis.window.location.reload = vi.fn();
 
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -164,7 +164,7 @@ test("sets the locale to localStorage", async () => {
 	// @ts-expect-error - global variable definition
 	globalThis.window = {};
 
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -199,7 +199,7 @@ test("should set locale in all configured storage mechanisms regardless of which
 	globalThis.window.location.reload = vi.fn();
 
 	// Create runtime with multiple strategies
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de", "fr"],
 		compilerOptions: {

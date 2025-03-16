@@ -1,11 +1,11 @@
 import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
 
 test("returns undefined if document is not available", async () => {
 	// @ts-expect-error - global variable definition
 	globalThis.document = undefined;
 
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 	});
@@ -14,7 +14,7 @@ test("returns undefined if document is not available", async () => {
 });
 
 test("matches the locale of a cookie", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
@@ -36,7 +36,7 @@ test("matches the locale of a cookie", async () => {
 // not supported anymore or development on localhost shares multiple apps with
 // different locales
 test("returns undefined if the locale is not defined in the locales", async () => {
-	const runtime = await createRuntimeForTesting({
+	const runtime = await createParaglide({
 		baseLocale: "en",
 		locales: ["en", "de"],
 		compilerOptions: {
