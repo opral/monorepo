@@ -1,11 +1,5 @@
 import fs from "node:fs";
-import type { Runtime } from "./type.js";
-import {
-	defaultCompilerOptions,
-	type CompilerOptions,
-} from "../compiler-options.js";
-import { createServerFile } from "../server/create-server-file.js";
-import type { ServerRuntime } from "../server/type.js";
+import type { CompilerOptions } from "../compiler-options.js";
 
 /**
  * Returns the code for the `runtime.js` module
@@ -168,50 +162,4 @@ function injectCode(path: string): string {
 	// Regex to match single-line and multi-line imports
 	const importRegex = /import\s+[\s\S]*?from\s+['"][^'"]+['"]\s*;?/g;
 	return code.replace(importRegex, "").trim();
-}
-
-/**
- * Returns the runtime module as an object for testing purposes.
- *
- * @example
- *   const runtime = await createRuntime({
- *      baseLocale: "en",
- *      locales: ["en", "de"],
- *   })
- */
-export async function createRuntimeForTesting(args: {
-	baseLocale: string;
-	locales: string[];
-	compilerOptions?: Omit<CompilerOptions, "outdir" | "project" | "fs">;
-}): Promise<Runtime & ServerRuntime> {
-	const clientSideRuntime = createRuntimeFile({
-		baseLocale: args.baseLocale,
-		locales: args.locales,
-		compilerOptions: {
-			...defaultCompilerOptions,
-			...args.compilerOptions,
-		},
-	})
-		// remove the polyfill import statement to avoid module resolution logic in testing
-		.replace(`import "@inlang/paraglide-js/urlpattern-polyfill";`, "");
-
-	// remove the server-side runtime import statement to avoid module resolution logic in testing
-	const serverSideRuntime = createServerFile({
-		compiledBundles: [],
-		compilerOptions: {
-			experimentalMiddlewareLocaleSplitting: false,
-		},
-	})
-		.replace(`import * as runtime from "./runtime.js";`, "")
-		// the runtime functions are bundles, hence remove the runtime namespace
-		.replaceAll("runtime.", "");
-
-	await import("urlpattern-polyfill");
-
-	return await import(
-		"data:text/javascript;base64," +
-			Buffer.from(clientSideRuntime + serverSideRuntime, "utf-8").toString(
-				"base64"
-			)
-	);
 }
