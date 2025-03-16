@@ -3,5 +3,6 @@ export default [
   "inlang/packages/sherlock",
   "inlang/packages/paraglide/*",
   "inlang/packages/sdk",
+  "lix/packages/plugins/*",
   "packages/*",
 ];
