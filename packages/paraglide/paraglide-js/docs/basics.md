@@ -1,11 +1,11 @@
 ---
-imports: 
+imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
 # Basics
 
-## Adding and removing locales 
+## Adding and removing locales
 
 To add a new locale, add it to the `locales` array in `<project0name>.inlang/settings.json` file.
 
@@ -45,7 +45,7 @@ import { m } from "./paraglide/messages.js";
 console.log(m.hello_world()); // "Hello World!"
 ```
 
-## Using parameters 
+## Using parameters
 
 For messages with parameters, simply pass an object with the parameter values:
 
@@ -85,6 +85,21 @@ import { setLocale } from "./paraglide/runtime.js";
 setLocale("de");
 ```
 
+### Disabling reloading
+
+By default, `setLocale()` triggers a full page reload. This is a deliberate design decision that:
+
+- Enables a small, efficient runtime without complex state management
+- Makes Paraglide work in any framework without requiring framework-specific adapters
+- Follows the pattern used by major websites like YouTube, as language switching is an infrequent action that doesn't justify the complexity of a no-reload approach
+
+If you need to change the locale without a page reload, you can pass `{ reload: false }` as the second parameter, but then you'll need to handle UI updates yourself.
+
+```js
+// Change locale without reloading the page
+setLocale("de", { reload: false });
+```
+
 ## Getting the current locale
 
 To get the current locale, use the `getLocale` function:
@@ -117,24 +132,23 @@ You likely want to use one of the built-in strategies. Visit the [strategy docum
 
 ## Dynamically calling messages
 
-You can dynamically call messages by specifying what messages you expect beforehand. Specifying the messages beforehand preserves tree-shaking. 
+You can dynamically call messages by specifying what messages you expect beforehand. Specifying the messages beforehand preserves tree-shaking.
 
 ```ts
 import { m } from "./paraglide/messages.js";
 
 const messages = {
-  greeting: m.greeting,
-  goodbye: m.goodbye
-}
+	greeting: m.greeting,
+	goodbye: m.goodbye,
+};
 
 let messageKey = "greeting";
 
-console.log(messages[messageKey]()); 
+console.log(messages[messageKey]());
 // "Hello World!"
 ```
 
-
-## Advanced usage 
+## Advanced usage
 
 - [Choosing your strategy](/m/gerre34r/library-inlang-paraglideJs/strategy)
 - [Server-side rendering](/m/gerre34r/library-inlang-paraglideJs/server-side-rendering)
