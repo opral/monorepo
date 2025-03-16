@@ -300,8 +300,19 @@ function fillMissingUrlParts(url, match) {
  * @returns {URL} - The constructed URL with named groups filled.
  */
 function fillPattern(pattern, values, origin) {
+	// Pre-process the pattern to handle explicit port numbers
+	// This detects patterns like "http://localhost:5173" and protects the port number
+	// from being interpreted as a parameter
+	let processedPattern = pattern.replace(
+		/(https?:\/\/[^:/]+):(\d+)(\/|$)/g, 
+		(_, protocol, port, slash) => {
+			// Replace ":5173" with "#PORT-5173#" to protect it from parameter replacement
+			return `${protocol}#PORT-${port}#${slash}`;
+		}
+	);
+
 	// First, handle group delimiters with curly braces
-	let processedGroupDelimiters = pattern.replace(
+	let processedGroupDelimiters = processedPattern.replace(
 		/\{([^{}]*)\}([?+*]?)/g,
 		(_, content, modifier) => {
 			// For optional group delimiters
@@ -315,7 +326,7 @@ function fillPattern(pattern, values, origin) {
 	);
 
 	// Then handle named groups
-	const filled = processedGroupDelimiters.replace(
+	let filled = processedGroupDelimiters.replace(
 		/(\/?):([a-zA-Z0-9_]+)(\([^)]*\))?([?+*]?)/g,
 		(_, slash, name, __, modifier) => {
 			const value = values[name];
@@ -346,6 +357,9 @@ function fillPattern(pattern, values, origin) {
 			return `${slash}${value}`;
 		}
 	);
+
+	// Restore port numbers
+	filled = filled.replace(/#PORT-(\d+)#/g, ":$1");
 
 	return new URL(filled, origin);
 }
