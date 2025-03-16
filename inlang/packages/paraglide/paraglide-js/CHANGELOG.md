@@ -4,20 +4,15 @@
 
 ## 2.0.0-beta.31
 
-- feat: New API: `createParaglideModule`
+- feat: New API: `createParaglide()`
 
   The function allows a no build step or before build step access to Paraglide's compiled APIs.
 
   ```typescript
-  import { newProject } from "@inlang/sdk";
+  const project = await fs.readFile("./project.inlang");
 
   const paraglide = await createParaglideModule({
-    project: await newProject({
-      settings: {
-        baseLocale: "en",
-        locales: ["en", "de"],
-      },
-    }),
+    project,
     compilerOptions: {
       strategy: ["url"],
     }

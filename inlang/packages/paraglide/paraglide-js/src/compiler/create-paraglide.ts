@@ -12,6 +12,13 @@ import { loadProjectInMemory } from "@inlang/sdk";
  * Creates an in-memory Paraglide module for use in tests and non-bundled environments.
  *
  * @example
+ *	 const project = await fs.readFile("./project.inlang");
+ *   const paraglide = await createParaglide({
+ *     project,
+ *     compilerOptions, // optional
+ *   })
+ *
+ * @example
  *   import { newProject } from "@inlang/sdk";
  *
  *   const paraglide = await createParaglide({
