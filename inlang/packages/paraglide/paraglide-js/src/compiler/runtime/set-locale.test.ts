@@ -1,5 +1,6 @@
 import { test, expect, vi } from "vitest";
 import { createParaglide } from "../create-paraglide.js";
+import { newProject } from "@inlang/sdk";
 
 test("sets the cookie to a different locale", async () => {
 	// @ts-expect-error - global variable definition
@@ -11,8 +12,12 @@ test("sets the cookie to a different locale", async () => {
 	globalThis.window.location.reload = vi.fn();
 
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -38,8 +43,9 @@ test("url pattern strategy sets the window location", async () => {
 	globalThis.window.location.reload = vi.fn();
 
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: { baseLocale: "en", locales: ["en", "de"] },
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -66,8 +72,12 @@ test("url pattern strategy sets the window location", async () => {
 // `!document.cookie` was used which returned false for an empty string
 test("sets the cookie when it's an empty string", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "fr"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -84,8 +94,12 @@ test("sets the cookie when it's an empty string", async () => {
 
 test("when strategy precedes URL, it should set the locale and re-direct to the URL", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "fr"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie", "url", "baseLocale"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -130,8 +144,12 @@ test("should not reload when setting locale to current locale", async () => {
 	globalThis.window.location.reload = vi.fn();
 
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -165,8 +183,12 @@ test("sets the locale to localStorage", async () => {
 	globalThis.window = {};
 
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["localStorage"],
 		},
@@ -200,8 +222,12 @@ test("should set locale in all configured storage mechanisms regardless of which
 
 	// Create runtime with multiple strategies
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de", "fr"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "localStorage", "cookie", "baseLocale"],
 			cookieName: "PARAGLIDE_LOCALE",

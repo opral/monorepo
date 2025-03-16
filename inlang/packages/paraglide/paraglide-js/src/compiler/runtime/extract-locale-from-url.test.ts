@@ -1,10 +1,15 @@
 import { test, expect } from "vitest";
 import { createParaglide } from "../create-paraglide.js";
+import { newProject } from "@inlang/sdk";
 
 test("normal named groups", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			urlPatterns: [
 				{
@@ -33,8 +38,12 @@ test("normal named groups", async () => {
 
 test("handles relative named groups", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			urlPatterns: [
 				{
@@ -63,8 +72,12 @@ test("handles relative named groups", async () => {
 
 test("wildcards", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			urlPatterns: [
 				{
@@ -89,8 +102,12 @@ test("wildcards", async () => {
 
 test("optional parameters", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			urlPatterns: [
 				{
@@ -110,8 +127,12 @@ test("optional parameters", async () => {
 
 test("regex works", async () => {
 	const { extractLocaleFromUrl } = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			urlPatterns: [
 				{
@@ -134,8 +155,12 @@ test("regex works", async () => {
 
 test("default url pattern", async () => {
 	const r = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 	});
 
 	expect(r.extractLocaleFromUrl("https://example.com/")).toBe("en");

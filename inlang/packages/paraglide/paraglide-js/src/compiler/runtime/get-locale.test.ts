@@ -1,12 +1,17 @@
 import { test, expect, vi } from "vitest";
 import { createParaglide } from "../create-paraglide.js";
+import { newProject } from "@inlang/sdk";
 
 test("matching by strategy works", async () => {
 	const baseLocale = "en";
 
 	const runtime = await createParaglide({
-		baseLocale,
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale,
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie", "baseLocale"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -23,8 +28,12 @@ test("matching by strategy works", async () => {
 
 test("throws if variable is used without baseLocale as fallback strategy", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["globalVariable"],
 		},
@@ -39,8 +48,12 @@ test("throws if variable is used without baseLocale as fallback strategy", async
 
 test("retrieves the locale for a url pattern", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			isServer: "false",
@@ -67,8 +80,12 @@ test("retrieves the locale for a url pattern", async () => {
 
 test("url pattern strategy doesn't throw during SSR", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "baseLocale"],
 			urlPatterns: [
@@ -90,8 +107,12 @@ test("doesn't throw for an old cookie locale", async () => {
 	const baseLocale = "en";
 
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie", "baseLocale"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -110,8 +131,12 @@ test("returns the preferred locale from navigator.languages", async () => {
 	const originalNavigator = globalThis.navigator;
 
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "fr", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
 		compilerOptions: {
 			isServer: "false",
 			strategy: ["preferredLanguage"],
@@ -137,8 +162,12 @@ test("returns the preferred locale from navigator.languages", async () => {
 
 test("returns the locale from local storage", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["localStorage"],
 			localStorageKey: "PARAGLIDE_LOCALE",
@@ -158,8 +187,12 @@ test("returns the locale from local storage", async () => {
 test("initially sets the locale after resolving it for the first time", async () => {
 	// Create runtime with multiple strategies
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de", "fr"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "cookie"],
 			isServer: "false",

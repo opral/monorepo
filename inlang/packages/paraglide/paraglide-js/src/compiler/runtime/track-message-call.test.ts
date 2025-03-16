@@ -1,11 +1,16 @@
 import { AsyncLocalStorage } from "async_hooks";
 import { createParaglide } from "../create-paraglide.js";
+import { newProject } from "@inlang/sdk";
 import { test, expect } from "vitest";
 
 test("tracks message calls", async () => {
 	const runtime = await createParaglide({
-		baseLocale: "en",
-		locales: ["en", "de"],
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 	});
 
 	const mockMessage = (str: string) => {
