@@ -143,7 +143,7 @@ test("skips over localStorage strategy as it is not supported on the server", as
 	expect(runtime.extractLocaleFromRequest(request)).toBe("en");
 });
 
-test("does not resolve the locale from the url if request is not a document request", async () => {
+test("resolves the locale from the url for all request types", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
 		locales: ["en", "fr"],
@@ -161,14 +161,54 @@ test("does not resolve the locale from the url if request is not a document requ
 		},
 	});
 
-	// Document request - should use URL strategy
+	// Non-document request should still use URL strategy
 	const request = new Request("https://example.com/fr/home", {
 		headers: {
 			"Sec-Fetch-Dest": "something",
 		},
 	});
 	const locale = runtime.extractLocaleFromRequest(request);
-	expect(locale).toBe("en");
+	expect(locale).toBe("fr");
+});
+
+test("cookie strategy precedes URL strategy for API requests with wildcards", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr", "de"],
+		compilerOptions: {
+			strategy: ["cookie", "url", "baseLocale"],
+			cookieName: "PARAGLIDE_LOCALE",
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:path(.*)",
+					localized: [
+						["fr", "https://example.com/fr/:path(.*)"],
+						["de", "https://example.com/de/:path(.*)"],
+						["en", "https://example.com/:path(.*)"],
+					],
+				},
+			],
+		},
+	});
+
+	// API request with cookie should use cookie locale
+	const apiRequestWithCookie = new Request("https://example.com/api/data", {
+		headers: {
+			"Sec-Fetch-Dest": "empty",
+			"cookie": "PARAGLIDE_LOCALE=de",
+		},
+	});
+	const apiLocale = runtime.extractLocaleFromRequest(apiRequestWithCookie);
+	expect(apiLocale).toBe("de");
+
+	// API request without cookie should fall back to URL strategy
+	const apiRequestNoMatch = new Request("https://example.com/api/data", {
+		headers: {
+			"Sec-Fetch-Dest": "empty",
+		},
+	});
+	const fallbackLocale = runtime.extractLocaleFromRequest(apiRequestNoMatch);
+	expect(fallbackLocale).toBe("en");
 });
 
 // https://github.com/opral/inlang-paraglide-js/issues/436
