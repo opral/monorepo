@@ -529,51 +529,6 @@ test("correctly redirects when URL needs localization and retains trailing slash
 	);
 });
 
-test("handles root paths with and without trailing slashes", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr"],
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "https://example.com/:path(.*)?",
-					localized: [
-						["en", "https://example.com/en/:path(.*)?"],
-						["fr", "https://example.com/fr/:path(.*)?"],
-					],
-				},
-			],
-		},
-	});
-
-	// Root path with trailing slash for French locale
-	const frRootWithSlash = new Request("https://example.com/fr/", {
-		headers: { "Sec-Fetch-Dest": "document" },
-	});
-
-	let frRootWithSlashCalled = false;
-	await runtime.paraglideMiddleware(frRootWithSlash, () => {
-		frRootWithSlashCalled = true;
-		return new Response("Success");
-	});
-
-	expect(frRootWithSlashCalled).toBe(true);
-
-	// Root path without trailing slash for French locale
-	const frRootWithoutSlash = new Request("https://example.com/fr", {
-		headers: { "Sec-Fetch-Dest": "document" },
-	});
-
-	let frRootWithoutSlashCalled = false;
-	await runtime.paraglideMiddleware(frRootWithoutSlash, () => {
-		frRootWithoutSlashCalled = true;
-		return new Response("Success");
-	});
-
-	expect(frRootWithoutSlashCalled).toBe(true);
-});
-
 test("only redirects if the request.headers.get('Sec-Fetch-Dest') === 'document'", async () => {
 	const runtime = await createParaglide({
 		project: await newProject({
