@@ -1,10 +1,15 @@
 import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
+import { newProject } from "@inlang/sdk";
 
 test("uses the locale from getLocale() if no locale is provided", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
@@ -26,9 +31,13 @@ test("uses the locale from getLocale() if no locale is provided", async () => {
 });
 
 test("returns an absolute href if the provided href is absolute", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
@@ -53,9 +62,13 @@ test("returns an absolute href if the provided href is absolute", async () => {
 
 // useful if domain based localization is used for example
 test("returns an absolute href if the provided href is relative but the origin of the localized href differs", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
@@ -96,9 +109,13 @@ test("returns an absolute href if the provided href is relative but the origin o
 test("adding a base path", async () => {
 	const base = "shop";
 
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
@@ -126,9 +143,13 @@ test("adding a base path", async () => {
 });
 
 test("default url patterns to improve out of the box experience", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
 		compilerOptions: {
 			isServer: "false",
 			strategy: ["url"],
