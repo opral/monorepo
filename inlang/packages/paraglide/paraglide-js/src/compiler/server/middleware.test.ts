@@ -336,6 +336,207 @@ test.skip("doesn't redirect if disableUrlRedirect is true", async () => {
 	expect(middlewareResolveWasCalled).toBe(true);
 });
 
+test("handles URLs with and without trailing slashes", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr"],
+		compilerOptions: {
+			strategy: ["url", "baseLocale"],
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:path(.*)?",
+					localized: [
+						["en", "https://example.com/en/:path(.*)?"],
+						["fr", "https://example.com/fr/:path(.*)?"],
+					],
+				},
+			],
+		},
+	});
+
+	// Request with trailing slash
+	const requestWithTrailingSlash = new Request("https://example.com/fr/", {
+		headers: { "Sec-Fetch-Dest": "document" },
+	});
+
+	let middlewareResolveWasCalled = false;
+	await runtime.paraglideMiddleware(requestWithTrailingSlash, () => {
+		middlewareResolveWasCalled = true;
+		return new Response("Success");
+	});
+
+	// Middleware should be called since the URL is already properly localized
+	// even though it has a trailing slash
+	expect(middlewareResolveWasCalled).toBe(true);
+
+	// Request with trailing slash in a deeper path
+	const requestWithDeepTrailingSlash = new Request(
+		"https://example.com/fr/about/",
+		{
+			headers: { "Sec-Fetch-Dest": "document" },
+		}
+	);
+
+	let deepPathResolveWasCalled = false;
+	await runtime.paraglideMiddleware(requestWithDeepTrailingSlash, () => {
+		deepPathResolveWasCalled = true;
+		return new Response("Success");
+	});
+
+	// Middleware should be called since the URL is already properly localized
+	expect(deepPathResolveWasCalled).toBe(true);
+
+	// nested path with no trailing slash and baseLocale redirect
+	const requestWithoutTrailingSlash = new Request(
+		"https://example.com/cars/electric",
+		{
+			headers: { "Sec-Fetch-Dest": "document" },
+		}
+	);
+
+	const response = await runtime.paraglideMiddleware(
+		requestWithoutTrailingSlash,
+		() => {
+			return new Response("Success");
+		}
+	);
+
+	expect(response instanceof Response).toBe(true);
+	expect(response.status).toBe(307);
+	expect(response.headers.get("Location")).toBe(
+		"https://example.com/en/cars/electric"
+	);
+
+	// Request with no trailing slash
+	const requestWithoutSlash = new Request("https://example.com/fr", {
+		headers: { "Sec-Fetch-Dest": "document" },
+	});
+
+	let middlewareResolveWasCalledWithoutSlash = false;
+	await runtime.paraglideMiddleware(requestWithoutSlash, () => {
+		middlewareResolveWasCalledWithoutSlash = true;
+		return new Response("Success");
+	});
+
+	// Middleware should be called since the URL is already properly localized
+	expect(middlewareResolveWasCalledWithoutSlash).toBe(true);
+});
+
+test("correctly redirects when URL needs localization and retains trailing slash", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr"],
+		compilerOptions: {
+			strategy: ["cookie", "url"],
+			cookieName: "PARAGLIDE_LOCALE",
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:path(.*)?",
+					localized: [
+						["en", "https://example.com/en/:path(.*)?"],
+						["fr", "https://example.com/fr/:path(.*)?"],
+					],
+				},
+			],
+		},
+	});
+
+	// Request to URL in en with cookie specifying French and trailing slash
+	const requestWithTrailingSlash = new Request(
+		"https://example.com/en/some-path/",
+		{
+			headers: {
+				cookie: `PARAGLIDE_LOCALE=fr`,
+				"Sec-Fetch-Dest": "document",
+			},
+		}
+	);
+
+	const responseWithTrailingSlash = await runtime.paraglideMiddleware(
+		requestWithTrailingSlash,
+		() => {
+			// This shouldn't be called since we should redirect
+			throw new Error("Should not reach here");
+		}
+	);
+
+	expect(responseWithTrailingSlash instanceof Response).toBe(true);
+	expect(responseWithTrailingSlash.status).toBe(307); // Redirect status code
+	expect(responseWithTrailingSlash.headers.get("Location")).toBe(
+		"https://example.com/fr/some-path/"
+	);
+
+	// Request to URL in en with cookie specifying French without trailing slash
+	const requestWithoutTrailingSlash = new Request(
+		"https://example.com/en/some-path",
+		{
+			headers: {
+				cookie: `PARAGLIDE_LOCALE=fr`,
+				"Sec-Fetch-Dest": "document",
+			},
+		}
+	);
+
+	const responseWithoutTrailingSlash = await runtime.paraglideMiddleware(
+		requestWithoutTrailingSlash,
+		() => {
+			// This shouldn't be called since we should redirect
+			throw new Error("Should not reach here");
+		}
+	);
+
+	expect(responseWithoutTrailingSlash instanceof Response).toBe(true);
+	expect(responseWithoutTrailingSlash.status).toBe(307); // Redirect status code
+	expect(responseWithoutTrailingSlash.headers.get("Location")).toBe(
+		"https://example.com/fr/some-path"
+	);
+});
+
+test("handles root paths with and without trailing slashes", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:path(.*)?",
+					localized: [
+						["en", "https://example.com/en/:path(.*)?"],
+						["fr", "https://example.com/fr/:path(.*)?"],
+					],
+				},
+			],
+		},
+	});
+
+	// Root path with trailing slash for French locale
+	const frRootWithSlash = new Request("https://example.com/fr/", {
+		headers: { "Sec-Fetch-Dest": "document" },
+	});
+
+	let frRootWithSlashCalled = false;
+	await runtime.paraglideMiddleware(frRootWithSlash, () => {
+		frRootWithSlashCalled = true;
+		return new Response("Success");
+	});
+
+	expect(frRootWithSlashCalled).toBe(true);
+
+	// Root path without trailing slash for French locale
+	const frRootWithoutSlash = new Request("https://example.com/fr", {
+		headers: { "Sec-Fetch-Dest": "document" },
+	});
+
+	let frRootWithoutSlashCalled = false;
+	await runtime.paraglideMiddleware(frRootWithoutSlash, () => {
+		frRootWithoutSlashCalled = true;
+		return new Response("Success");
+	});
+
+	expect(frRootWithoutSlashCalled).toBe(true);
+});
+
 test("only redirects if the request.headers.get('Sec-Fetch-Dest') === 'document'", async () => {
 	const runtime = await createRuntimeForTesting({
 		baseLocale: "en",
@@ -395,4 +596,51 @@ test("only redirects if the request.headers.get('Sec-Fetch-Dest') === 'document'
 
 	// Middleware should be called since no redirect for API requests
 	expect(apiMiddlewareResolveWasCalled).toBe(true);
+});
+
+test("handles base locale URLs with and without trailing slashes", async () => {
+	const runtime = await createRuntimeForTesting({
+		baseLocale: "en",
+		locales: ["en", "fr"],
+		compilerOptions: {
+			strategy: ["url"],
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:path(.*)?",
+					localized: [
+						["en", "https://example.com/:path(.*)?"], // Base locale has no prefix
+						["fr", "https://example.com/fr/:path(.*)?"],
+					],
+				},
+			],
+		},
+	});
+
+	// Base locale with trailing slash
+	const enWithSlash = new Request("https://example.com/about/", {
+		headers: { "Sec-Fetch-Dest": "document" },
+	});
+
+	let enWithSlashCalled = false;
+	await runtime.paraglideMiddleware(enWithSlash, ({ locale }) => {
+		enWithSlashCalled = true;
+		expect(locale).toBe("en");
+		return new Response("Success");
+	});
+
+	expect(enWithSlashCalled).toBe(true);
+
+	// Base locale without trailing slash
+	const enWithoutSlash = new Request("https://example.com/about", {
+		headers: { "Sec-Fetch-Dest": "document" },
+	});
+
+	let enWithoutSlashCalled = false;
+	await runtime.paraglideMiddleware(enWithoutSlash, ({ locale }) => {
+		enWithoutSlashCalled = true;
+		expect(locale).toBe("en");
+		return new Response("Success");
+	});
+
+	expect(enWithoutSlashCalled).toBe(true);
 });
