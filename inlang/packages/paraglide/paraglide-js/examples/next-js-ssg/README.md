@@ -50,12 +50,12 @@ export default {
 +       strategy: ["url", "cookie", "baseLocale"],
 +				urlPatterns: [
 +					{
-						pattern: 'https://:domain(.*)/:path*',
-						localized: [
-							['de', 'https://:domain(.*)/de/:path*'],
-							['en', 'https://:domain(.*)/:path*'],
-						],
-					},
++						pattern: 'https://:domain(.*)/:path*',
++						localized: [
++							['de', 'https://:domain(.*)/de/:path*'],
++							['en', 'https://:domain(.*)/:path*'],
++						],
++					},
 +				],
 +			})
 +		);
