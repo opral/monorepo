@@ -1,24 +1,28 @@
 # Paraglide JS 2.0 🚀
 
-Paraglide JS 2.0 had three main goals:
+Paraglide JS 2.0 had three main goals which have all been achieved:
 
 1. Use the new inlang SDK v2 which supports variants [#201](https://github.com/opral/inlang-paraglide-js/issues/201).
 2. Unify the API across any framework [#217](https://github.com/opral/inlang-paraglide-js/issues/217).
 3. Support any i18n strategy (cookie, url, domain, session, etc).
 
-I am happy to announce that all three goals have been achieved!
+- 🌐 **Variants (pluralization) are now supported** [docs](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/variants)
+- 😍 **No more adapters or providers are needed** (!)
+- 🛣️ **Any strategy (url, cookie, local storage) is now supported** [docs](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy)
 
-- **Variants are now supported** [docs](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/variants)
-- **No more adapters or providers are needed** (!)
-- **Any strategy is now supported** [docs](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy)
+In addition, Paraglide JS 2.0 comes with:
 
-In addition, Paraglide JS 2.0 comes with several DX improvements:
+- 🌟 **Nested message keys** are now supported (most requested feature!)
+- ✨ **Auto-imports** when writing `m.` (no more manual `import * as m`)
+- 🍌 **Arbitrary key names** including emojis via `m["🍌"]()`
+- 🔄 **Incremental migration** to Paraglide JS is now possible
+- 🏘️ **Multi-tenancy support** for domain-based routing
+- 🔧 **Exposing the compiler API** for advanced workflows
+- 🛣️ **Configurable routing strategies** (URL, cookie, domain, etc)
+- 🧪 **Experimental per-locale splitting** for decreasing bundle sizes
+- 🌐 **Framework-agnostic server middleware** for SSR (SvelteKit, Next.js, etc)
 
-- **Nested message keys** are now supported (most requested feature!)
-- **Auto-imports** when writing `m.` (no more manual `import * as m`)
-- **Arbitrary key names** including emojis via `m["🍌"]()`
-
-## New features
+## Highlights
 
 ### No more adapters are needed
 
@@ -111,7 +115,7 @@ console.log(i18next.t("greeting", { name: "World" }));
 console.log(m.greeting({ name: "World" }));
 ```
 
-## 🏘️ Multi-tenancy support
+### 🏘️ Multi-tenancy support
 
 Paraglide JS 2.0 supports multi-tenant applications. Read more about it [here](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/multi-tenancy).
 
