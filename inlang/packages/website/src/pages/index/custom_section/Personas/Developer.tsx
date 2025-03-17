@@ -2,7 +2,6 @@ import { For } from "solid-js";
 import Link from "#src/renderer/Link.jsx";
 import {
 	IconAstro,
-	IconFlutter,
 	IconJavascript,
 	IconNextjs,
 	IconReact,
@@ -20,55 +19,49 @@ const stacks = [
 		name: "Svelte",
 		param: "svelte",
 		icon: <IconSvelte class={logoStyling} />,
-		link: "/c/svelte",
+		link: "/m/gerre34r/library-inlang-paraglideJs/sveltekit",
 	},
 	{
 		name: "Next.js",
 		param: "nextjs",
 		icon: <IconNextjs class={"w-[28px] h-[28px] " + logoStyling} />,
-		link: "/c/nextjs",
+		link: "/m/gerre34r/library-inlang-paraglideJs/nextjs",
 	},
 	{
 		name: "Solid",
 		param: "solid",
 		icon: <IconSolid class={logoStyling} />,
-		link: "/c/solid",
+		link: "/m/gerre34r/library-inlang-paraglideJs/vite",
 	},
 	{
 		name: "Astro",
 		param: "astro",
 		icon: <IconAstro class={logoStyling} />,
-		link: "/c/astro",
+		link: "/m/gerre34r/library-inlang-paraglideJs/astro",
 	},
 	{
 		name: "Remix",
 		param: "remix",
 		icon: <IconRemix class={"w-[34px] h-[34px] " + logoStyling} />,
-		link: "/c/remix",
+		link: "/m/gerre34r/library-inlang-paraglideJs/vite",
 	},
 	{
 		name: "React",
 		param: "react",
 		icon: <IconReact class={"w-[34px] h-[34px] " + logoStyling} />,
-		link: "/c/react",
+		link: "/m/gerre34r/library-inlang-paraglideJs/vite",
 	},
 	{
 		name: "Vue",
 		param: "vue",
 		icon: <IconVue class={logoStyling} />,
-		link: "/c/vue",
+		link: "/m/gerre34r/library-inlang-paraglideJs/vite",
 	},
 	{
 		name: "Javascript",
 		param: "javascript",
 		icon: <IconJavascript class={logoStyling} />,
-		link: "/c/javascript",
-	},
-	{
-		name: "Flutter",
-		param: "flutter",
-		icon: <IconFlutter class={logoStyling} />,
-		link: "/c/flutter",
+		link: "/m/gerre34r/library-inlang-paraglideJs/vanilla-js-ts",
 	},
 ];
 
