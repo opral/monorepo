@@ -5,9 +5,9 @@ imports:
 
 # Benchmark
 
-The internationalization (i18n) library you choose can significantly impact your application's bundle size and overall performance.
+This benchmark compares the transfer size of different i18n libraries and their implementations. The goal is to understand how the size of the library changes with different configurations, such as the number of locales, messages per page, and namespace size.
 
-Tip: Paraglide JS has not reached its final optimizations yet. Tickets like [per locale builds](https://github.com/opral/inlang-paraglide-js/issues/88) or [pruning server side rendered messages](https://github.com/opral/inlang-paraglide-js/issues/354) are yet to be implemented. Pull requests are welcome!
+Tip: Paraglide JS has not reached its final optimizations yet. Tickets like [#88 per locale builds](https://github.com/opral/inlang-paraglide-js/issues/88) or [#354 pruning server side rendered messages](https://github.com/opral/inlang-paraglide-js/issues/354) are yet to be implemented. Pull requests are welcome!
 
 
 <benchmark-visualization src="https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-results.json"></benchmark-visualization>
@@ -18,7 +18,7 @@ Tip: Paraglide JS has not reached its final optimizations yet. Tickets like [per
 The benchmark creates a static website for each configuration (library variant, number of locales, messages per page, and namespace size). Each website is loaded in a headless browser, and the total transfer size is measured.
 
 - **Number of Locales**: How does an i18n library scale with the number of locales?
-- **Number of Message per page**: How does an i18n library scale with the number of messages that are used on a given page?
+- **Number of used Messages**: How does an i18n library scale with the number of messages that are used on a given page?
 - **Library Implementation Variants**: Testing different implementation approaches:
   - **Paraglide**:
     - `default`: Standard implementation
