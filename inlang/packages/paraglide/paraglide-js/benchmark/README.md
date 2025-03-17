@@ -1,6 +1,6 @@
 ---
 imports: 
-  - https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-visualization.js
+  - https://cdn.jsdelivr.net/gh/opral/monorepo@parjs-446-create-a-graph-in-the-benchmark/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-visualization.js
 ---
 
 # Benchmark
@@ -8,7 +8,7 @@ imports:
 The internationalization (i18n) library you choose can significantly impact your application's bundle size and overall performance.
 
 
-<benchmark-visualization src="https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-results.json"></benchmark-visualization>
+<benchmark-visualization src="https://cdn.jsdelivr.net/gh/opral/monorepo@parjs-446-create-a-graph-in-the-benchmark/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-results.json"></benchmark-visualization>
 
 
 ### What is Being Tested
