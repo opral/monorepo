@@ -44,15 +44,14 @@ export default function Page() {
 				/>
 			))}
 			<Link
-				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
+				href={`https://inlang.com${
+					i18nRouting(currentPageContext.urlParsed.pathname).url
+				}`}
 				rel="canonical"
 			/>
 			<MarketplaceLayout>
 				<HeroSearch />
 				<Features />
-				<div class="max-w-4xl prose prose-lg mx-auto">
-					<SolidMarkdown children={landingMarkdown} />
-				</div>
 				<div class="max-w-4xl prose prose-lg mx-auto">
 					<h2>Adoption</h2>
 					<p>
@@ -69,6 +68,9 @@ export default function Page() {
 						// @ts-ignore
 						frameBorder="0"
 					></iframe>
+				</div>
+				<div class="max-w-4xl prose prose-lg mx-auto">
+					<SolidMarkdown children={landingMarkdown} />
 				</div>
 
 				{/* Note if we  want the old landingpage back
