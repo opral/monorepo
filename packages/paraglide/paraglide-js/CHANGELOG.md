@@ -27,22 +27,14 @@
 
 - fix: `getLocale` returns correct value on SvelteKit server [#461](https://github.com/opral/inlang-paraglide-js/issues/461)
 
-  - Removes the `Sec-Fetch-Dest` check from URL locale extraction
-  - URL locale extraction now works for all request types, not just document requests
-  - Maintains the `Sec-Fetch-Dest` check for redirects only
-  - Eliminates inconsistencies between client-side and server-side locale detection
+- fix: Prevent redirect loops by normalizing URLs with trailing slashes [#408](https://github.com/opral/inlang-paraglide-js/issues/408)
+
 
 - fix: Support for explicit port numbers in URL patterns
 
-  - Fixed an issue where using explicit port numbers in URL patterns (like `http://localhost:5173/:path?`) would cause errors
-  - Port numbers are now correctly handled and won't be interpreted as parameter names
-  - Both formats now work: explicit ports (`http://localhost:5173`) and parametric ports (`http://localhost::port`)
 
 - improve: Better error handling in server middleware
 
-  - Added try-catch block with detailed error logging to middleware
-  - Returns user-friendly error responses with stack traces when errors occur
-  - Helps with debugging issues in frameworks that don't provide stack traces
 
 ## 2.0.0-beta.30
 
