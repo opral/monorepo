@@ -32,11 +32,22 @@ export const setupMdDemo = async (lix: Lix) => {
 		.values({
 			path: "/demo.md",
 			data: new TextEncoder().encode(`# The AI Markdown Editor
-_AI-powered Markdown editor with change tracking._
 
-[Sign up](https://opral.substack.com/) for to get notified about the beta.
+## [Sign up](https://forms.gle/mpXxyiXsQ6yhuGS58) for the waitlist
 
 ---
+
+## Features
+
+### Lix change control
+
+- 🔄 Change tracking: See who changed what
+- 📌 Versioning: The possibility to create divergent states (branches in Git)
+- 🔀 Change Proposals: (WIP [#242](https://github.com/opral/lix-sdk/issues/242)) Everyone can contribute, you accept or reject changes
+- 🤝 Collaboration: Asynchronous (Git-like) or real-time collaboration (Google Docs-like)
+- ✅ Validation Rules: (WIP [#239](https://github.com/opral/lix-sdk/issues/239)) Define and enforce validation rules for your document
+
+### Autocompletes your document with AI
 
 Try the **AI commands** or use \`Cmd+J\` to open the AI menu.`),
 		})
