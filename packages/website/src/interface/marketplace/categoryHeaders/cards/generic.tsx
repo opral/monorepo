@@ -17,14 +17,14 @@ const GenericHeader = () => {
 					<div class="pt-6 flex gap-4">
 						<Button
 							type="secondary"
-							href="/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp"
+							href="/m/gerre34r/library-inlang-paraglideJs"
 						>
 							{m.marketplace_application_header_svelte_button()}
 						</Button>
 						<Button
 							type="text"
 							chevron
-							href="/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp"
+							href="/m/gerre34r/library-inlang-paraglideJs"
 						>
 							Svelte Summit Talk 2023
 						</Button>
