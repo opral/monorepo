@@ -4,7 +4,32 @@
  *
  */
 
-const random = (bytes: any) => crypto.getRandomValues(new Uint8Array(bytes));
+/**
+ * Polyfill for crypto.getRandomValues in environments that don't have it,
+ * such as older versions of Node in Stackblitz.
+ * 
+ * This implementation is not cryptographically secure, but is sufficient for ID generation
+ * in these environments. In environments with proper crypto support, we'll use the native implementation.
+ * 
+ * See: https://github.com/opral/lix-sdk/issues/258
+ */
+const insecureRandom = (array: Uint8Array) => {
+  for (let i = 0; i < array.length; i++) {
+    array[i] = Math.floor(Math.random() * 256);
+  }
+  return array;
+};
+
+// Use crypto.getRandomValues if available, otherwise use our polyfill
+const random = (bytes: any) => {
+  const array = new Uint8Array(bytes);
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    return crypto.getRandomValues(array);
+  }
+  
+  // Fallback to insecure random number generator if crypto is not available
+  return insecureRandom(array);
+};
 
 const customRandom = (
 	alphabet: string,

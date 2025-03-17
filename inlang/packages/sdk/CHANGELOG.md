@@ -1,5 +1,12 @@
 # @inlang/sdk
 
+## 2.4.2
+
+### Patch Changes
+
+- Updated dependencies [59f6c92]
+  - @lix-js/sdk@0.4.2
+
 ## 2.4.1
 
 ### Patch Changes

@@ -323,6 +323,96 @@ test("falls back to next strategy when cookie contains invalid locale", async ()
 	});
 });
 
+// can likely be removed once the default url pattern polyfill workaround is removed
+// because URLPattern seems to be handling this correctly
+test("prevents redirect loops by normalizing URLs with trailing slashes in different scenarios", async () => {
+	// Create two different runtimes to test different strategy configurations
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
+		compilerOptions: {
+			strategy: ["cookie", "url"],
+			cookieName: "PARAGLIDE_LOCALE",
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:path(.*)?",
+					localized: [
+						["en", "https://example.com/en/:path(.*)?"],
+						["fr", "https://example.com/fr/:path(.*)?"],
+					],
+				},
+			],
+		},
+	});
+
+	// SCENARIO 1: Basic trailing slash normalization with cookie strategy
+
+	// Case 1A: Request URL has trailing slash, but localized URL might not
+	const requestWithTrailingSlash = new Request("https://example.com/fr/page/", {
+		headers: {
+			"Sec-Fetch-Dest": "document",
+			cookie: `PARAGLIDE_LOCALE=fr`,
+		},
+	});
+
+	let response = await runtime.paraglideMiddleware(
+		requestWithTrailingSlash,
+		() => {
+			return new Response("No redirect needed");
+		}
+	);
+
+	// Middleware should be called (no redirect) because normalized URLs match
+	expect(response.status).toBe(200);
+	expect(await response.text()).toBe("No redirect needed");
+
+	// Case 1B: Request URL has no trailing slash, but localized URL might
+	const requestWithoutTrailingSlash = new Request(
+		"https://example.com/fr/page",
+		{
+			headers: {
+				"Sec-Fetch-Dest": "document",
+				cookie: `PARAGLIDE_LOCALE=fr`,
+			},
+		}
+	);
+
+	response = await runtime.paraglideMiddleware(
+		requestWithoutTrailingSlash,
+		() => {
+			return new Response("No redirect needed");
+		}
+	);
+
+	expect(response.status).toBe(200);
+
+	// Case 1C: redirect wanted because cookie is set to fr but url is en
+	const requestDifferentPath = new Request(
+		"https://example.com/en/different-page",
+		{
+			headers: {
+				"Sec-Fetch-Dest": "document",
+				cookie: `PARAGLIDE_LOCALE=fr`,
+			},
+		}
+	);
+
+	response = await runtime.paraglideMiddleware(requestDifferentPath, () => {
+		// This shouldn't be called since we should redirect
+		throw new Error("Should not reach here");
+	});
+
+	// Should redirect to fr version
+	expect(response.status).toBe(307);
+	expect(response.headers.get("Location")).toBe(
+		"https://example.com/fr/different-page"
+	);
+});
+
 // not implemented because users should disable redirects by
 // making another strategy preceed the url strategy
 //

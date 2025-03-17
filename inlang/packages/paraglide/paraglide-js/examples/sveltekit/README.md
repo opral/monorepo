@@ -20,7 +20,7 @@ This example shows how to use Paraglide with SvelteKit.The source code can be fo
 ### Install paraglide js
 
 ```bash
-npx @inlang/paraglide-js@beta init
+npx @inlang/paraglide-js@latest init
 ```
 
 ### Add the `paraglideVitePlugin()` to `vite.config.js`.
@@ -66,9 +66,12 @@ import { paraglideMiddleware } from '$lib/paraglide/server';
 
 // creating a handle to use the paraglide middleware
 const paraglideHandle: Handle = ({ event, resolve }) =>
-	paraglideMiddleware(event.request, ({ locale }) => {
+	paraglideMiddleware(event.request, ({ request: localizedRequest, locale }) => {
+		event.request = localizedRequest;
 		return resolve(event, {
-			transformPageChunk: ({ html }) => html.replace('%lang%', locale)
+			transformPageChunk: ({ html }) => {
+				return html.replace('lang%', locale);
+			}
 		});
 	});
 

@@ -36,10 +36,7 @@ export const extractLocaleFromRequest = (request) => {
 				?.split("; ")
 				.find((c) => c.startsWith(cookieName + "="))
 				?.split("=")[1];
-		} else if (
-			TREE_SHAKE_URL_STRATEGY_USED &&
-			strat === "url"
-		) {
+		} else if (TREE_SHAKE_URL_STRATEGY_USED && strat === "url") {
 			locale = extractLocaleFromUrl(request.url);
 		} else if (
 			TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED &&

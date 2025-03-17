@@ -1,5 +1,11 @@
 # @inlang/plugin-t-function-matcher
 
+## 2.0.4
+
+### Patch Changes
+
+- @inlang/sdk@2.4.2
+
 ## 2.0.3
 
 ### Patch Changes

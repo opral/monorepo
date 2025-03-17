@@ -20,7 +20,7 @@ const RemixHeader = () => {
 					<div class="pt-6 flex gap-4">
 						<Button
 							type="secondary"
-							href="/g/wxcebbig/guide-lorissigrist-useParaglideJsWithNextjsAppRouter"
+							href="/m/fnhuwzrx/paraglide-remix-i18n"
 						>
 							{m.marketplace_application_header_svelte_button()}
 						</Button>
@@ -52,7 +52,7 @@ const RemixHeader = () => {
 				</Link>
 				<div class="flex-1 h-[260px] flex flex-col gap-4 md:min-w-[380px]">
 					<Link
-						href="/g/pposhsfh"
+						href="/m/fnhuwzrx/paraglide-remix-i18n"
 						class="w-full flex-1 bg-background rounded-xl border border-surface-300 flex flex-col relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
 						<div class="pl-8 pb-2 -mt-[2px]">
@@ -67,9 +67,9 @@ const RemixHeader = () => {
 							</svg>
 						</div>
 						<div class="flex-1 flex flex-col justify-end">
-							<h3 class="font-medium text-lg px-8 pb-1">Remix Guide</h3>
+							<h3 class="font-medium text-lg px-8 pb-1">Paraglide Remix Documentation</h3>
 							<p class="text-surface-500 px-8 pb-6 text-sm pr-20">
-								How to integrate ParaglideJS into a Remix project.
+								Official documentation for Paraglide JS with Remix.
 							</p>
 						</div>
 						<div class="absolute top-4 right-4 w-8 h-8 border border-surface-300 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">

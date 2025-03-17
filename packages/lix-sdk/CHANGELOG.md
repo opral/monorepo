@@ -1,5 +1,11 @@
 # @lix-js/sdk
 
+## 0.4.2
+
+### Patch Changes
+
+- 59f6c92: Add polyfill for crypto.getRandomValues to ensure nanoid works in environments without crypto support (like older versions of Node in Stackblitz). Fixes https://github.com/opral/lix-sdk/issues/258
+
 ## 0.4.1
 
 ### Patch Changes

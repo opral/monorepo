@@ -23,7 +23,7 @@ This example demonstrates how to use Paraglide JS with Astro in SSR mode. The so
 ### 1. If you have not initialized Paraglide JS yet, run:
 
 ```bash
-npx @inlang/paraglide-js@beta init
+npx @inlang/paraglide-js@latest init
 ```
 
 ### 2. Add the vite plugin to the `astro.config.mjs` file and set `output` to `server`:
