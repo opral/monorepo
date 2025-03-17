@@ -7,7 +7,6 @@
   "ignore": [
     "@inlang/cli-example",
     "@inlang/fink",
-    "@inlang/paraglide-js",
     "@inlang/paraglide-js-benchmark",
     "@inlang/paraglide-js-example-cli",
     "@inlang/paraglide-js-example-vite",
