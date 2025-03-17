@@ -115,6 +115,7 @@ export const runBuilds = async () => {
 			await fs.writeFile(outputPath, html, "utf-8");
 		}
 		await fs.cp("./messages", `./dist/${base}/messages`, { recursive: true });
+		await fs.rm("./messages", { force: true, recursive: true });
 	}
 };
 

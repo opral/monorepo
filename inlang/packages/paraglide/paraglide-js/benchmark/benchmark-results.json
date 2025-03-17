@@ -3,8 +3,8 @@
     {
       "locales": 5,
       "usedMessages": 100,
-      "namespaceSize": 250,
-      "namespaceSizeFactor": 2.5,
+      "namespaceSize": 200,
+      "namespaceSizeFactor": 2,
       "results": [
         {
           "library": "paraglide (experimental-middleware-locale-splitting)",
@@ -16,11 +16,11 @@
         },
         {
           "library": "i18next (default)",
-          "size": 1416
+          "size": 205
         },
         {
           "library": "i18next (http-backend)",
-          "size": 170.1
+          "size": 167.5
         }
       ]
     },
@@ -40,7 +40,7 @@
         },
         {
           "library": "i18next (default)",
-          "size": 1481.4
+          "size": 283.3
         },
         {
           "library": "i18next (http-backend)",
@@ -50,6 +50,30 @@
     },
     {
       "locales": 5,
+      "usedMessages": 100,
+      "namespaceSize": 1000,
+      "namespaceSizeFactor": 10,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 17.9
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 47.1
+        },
+        {
+          "library": "i18next (default)",
+          "size": 414.1
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 209.3
+        }
+      ]
+    },
+    {
+      "locales": 5,
       "usedMessages": 200,
       "namespaceSize": 500,
       "namespaceSizeFactor": 2.5,
@@ -64,7 +88,7 @@
         },
         {
           "library": "i18next (default)",
-          "size": 1486.3
+          "size": 288.3
         },
         {
           "library": "i18next (http-backend)",
@@ -88,7 +112,7 @@
         },
         {
           "library": "i18next (default)",
-          "size": 1617
+          "size": 419
         },
         {
           "library": "i18next (http-backend)",
@@ -97,58 +121,10 @@
       ]
     },
     {
-      "locales": 5,
-      "usedMessages": 300,
-      "namespaceSize": 750,
-      "namespaceSizeFactor": 2.5,
-      "results": [
-        {
-          "library": "paraglide (experimental-middleware-locale-splitting)",
-          "size": 36.5
-        },
-        {
-          "library": "paraglide (default)",
-          "size": 124.4
-        },
-        {
-          "library": "i18next (default)",
-          "size": 1556.6
-        },
-        {
-          "library": "i18next (http-backend)",
-          "size": 203.5
-        }
-      ]
-    },
-    {
-      "locales": 5,
-      "usedMessages": 300,
-      "namespaceSize": 1500,
-      "namespaceSizeFactor": 5,
-      "results": [
-        {
-          "library": "paraglide (experimental-middleware-locale-splitting)",
-          "size": 36.5
-        },
-        {
-          "library": "paraglide (default)",
-          "size": 124.4
-        },
-        {
-          "library": "i18next (default)",
-          "size": 1755.1
-        },
-        {
-          "library": "i18next (http-backend)",
-          "size": 243.3
-        }
-      ]
-    },
-    {
       "locales": 10,
       "usedMessages": 100,
-      "namespaceSize": 250,
-      "namespaceSizeFactor": 2.5,
+      "namespaceSize": 200,
+      "namespaceSizeFactor": 2,
       "results": [
         {
           "library": "paraglide (experimental-middleware-locale-splitting)",
@@ -160,11 +136,11 @@
         },
         {
           "library": "i18next (default)",
-          "size": 1083.8
+          "size": 259
         },
         {
           "library": "i18next (http-backend)",
-          "size": 170.1
+          "size": 167.5
         }
       ]
     },
@@ -184,7 +160,7 @@
         },
         {
           "library": "i18next (default)",
-          "size": 1214.4
+          "size": 415.7
         },
         {
           "library": "i18next (http-backend)",
@@ -194,6 +170,30 @@
     },
     {
       "locales": 10,
+      "usedMessages": 100,
+      "namespaceSize": 1000,
+      "namespaceSizeFactor": 10,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 17.9
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 76.2
+        },
+        {
+          "library": "i18next (default)",
+          "size": 677.2
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 209.3
+        }
+      ]
+    },
+    {
+      "locales": 10,
       "usedMessages": 200,
       "namespaceSize": 500,
       "namespaceSizeFactor": 2.5,
@@ -208,7 +208,7 @@
         },
         {
           "library": "i18next (default)",
-          "size": 1220.9
+          "size": 422.2
         },
         {
           "library": "i18next (http-backend)",
@@ -232,7 +232,7 @@
         },
         {
           "library": "i18next (default)",
-          "size": 1482.4
+          "size": 683.7
         },
         {
           "library": "i18next (http-backend)",
@@ -241,58 +241,10 @@
       ]
     },
     {
-      "locales": 10,
-      "usedMessages": 300,
-      "namespaceSize": 750,
-      "namespaceSizeFactor": 2.5,
-      "results": [
-        {
-          "library": "paraglide (experimental-middleware-locale-splitting)",
-          "size": 36.6
-        },
-        {
-          "library": "paraglide (default)",
-          "size": 211.7
-        },
-        {
-          "library": "i18next (default)",
-          "size": 1358.1
-        },
-        {
-          "library": "i18next (http-backend)",
-          "size": 203.6
-        }
-      ]
-    },
-    {
-      "locales": 10,
-      "usedMessages": 300,
-      "namespaceSize": 1500,
-      "namespaceSizeFactor": 5,
-      "results": [
-        {
-          "library": "paraglide (experimental-middleware-locale-splitting)",
-          "size": 36.6
-        },
-        {
-          "library": "paraglide (default)",
-          "size": 211.7
-        },
-        {
-          "library": "i18next (default)",
-          "size": 1755.1
-        },
-        {
-          "library": "i18next (http-backend)",
-          "size": 243.3
-        }
-      ]
-    },
-    {
       "locales": 20,
       "usedMessages": 100,
-      "namespaceSize": 250,
-      "namespaceSizeFactor": 2.5,
+      "namespaceSize": 200,
+      "namespaceSizeFactor": 2,
       "results": [
         {
           "library": "paraglide (experimental-middleware-locale-splitting)",
@@ -304,11 +256,11 @@
         },
         {
           "library": "i18next (default)",
-          "size": 419.2
+          "size": 367.1
         },
         {
           "library": "i18next (http-backend)",
-          "size": 170.2
+          "size": 167.5
         }
       ]
     },
@@ -333,6 +285,30 @@
         {
           "library": "i18next (http-backend)",
           "size": 183.2
+        }
+      ]
+    },
+    {
+      "locales": 20,
+      "usedMessages": 100,
+      "namespaceSize": 1000,
+      "namespaceSizeFactor": 10,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 18
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 134.5
+        },
+        {
+          "library": "i18next (default)",
+          "size": 1203.5
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 209.4
         }
       ]
     },
@@ -381,54 +357,6 @@
         {
           "library": "i18next (http-backend)",
           "size": 213
-        }
-      ]
-    },
-    {
-      "locales": 20,
-      "usedMessages": 300,
-      "namespaceSize": 750,
-      "namespaceSizeFactor": 2.5,
-      "results": [
-        {
-          "library": "paraglide (experimental-middleware-locale-splitting)",
-          "size": 36.7
-        },
-        {
-          "library": "paraglide (default)",
-          "size": 391.7
-        },
-        {
-          "library": "i18next (default)",
-          "size": 961.2
-        },
-        {
-          "library": "i18next (http-backend)",
-          "size": 203.6
-        }
-      ]
-    },
-    {
-      "locales": 20,
-      "usedMessages": 300,
-      "namespaceSize": 1500,
-      "namespaceSizeFactor": 5,
-      "results": [
-        {
-          "library": "paraglide (experimental-middleware-locale-splitting)",
-          "size": 36.7
-        },
-        {
-          "library": "paraglide (default)",
-          "size": 391.7
-        },
-        {
-          "library": "i18next (default)",
-          "size": 1755.1
-        },
-        {
-          "library": "i18next (http-backend)",
-          "size": 243.3
         }
       ]
     }
