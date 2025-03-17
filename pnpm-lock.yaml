@@ -2873,6 +2873,9 @@ importers:
       '@udecode/plate-table':
         specifier: ^45.0.0
         version: 45.0.0(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@udecode/plate-test-utils':
+        specifier: ^45.0.6
+        version: 45.0.6(slate@0.112.0)
       '@udecode/plate-toggle':
         specifier: ^45.0.6
         version: 45.0.6(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -9819,6 +9822,9 @@ packages:
       '@udecode/plate': '>=44.0.7'
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
+
+  '@udecode/plate-test-utils@45.0.6':
+    resolution: {integrity: sha512-eGakzhnp1zygkSVxnC/BLftkFpnjnDhH27NHwYI5sN4WgDVjcr2r3wWSA35E+Kqt024BB5aDdKo1nt52wHd/0A==}
 
   '@udecode/plate-toggle@45.0.6':
     resolution: {integrity: sha512-myfUqQ2vXXIouQRoNUHI4/b6uJb7zURgpX5J/e4BrWtQ7rPvRg3ew7H4G8vu71bOuAMcHJiHTpEiPEGMseyoqQ==}
@@ -29338,6 +29344,13 @@ snapshots:
       lodash: 4.17.21
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
+
+  '@udecode/plate-test-utils@45.0.6(slate@0.112.0)':
+    dependencies:
+      '@udecode/slate': 45.0.6
+      slate-hyperscript: 0.100.0(slate@0.112.0)
+    transitivePeerDependencies:
+      - slate
 
   '@udecode/plate-toggle@45.0.6(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
