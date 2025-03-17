@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 3.0.4
+
+### Patch Changes
+
+- @inlang/sdk@2.4.2
+
 ## 3.0.3
 
 ### Patch Changes
