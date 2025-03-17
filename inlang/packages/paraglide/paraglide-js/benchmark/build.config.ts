@@ -11,10 +11,10 @@ export const builds: BuildConfig[] = [
 			paraglide: ["default", "experimental-middleware-locale-splitting"],
 			i18next: ["default", "http-backend"],
 		},
-		locales: [5, 10],
-		messages: [200],
+		locales: [5, 10, 20],
+		messages: [100, 200, 300],
 		percentDynamic: 20,
-		namespaceSizeFactors: [1, 2.5],
+		namespaceSizeFactors: [1, 2.5, 5],
 	}),
 ];
 

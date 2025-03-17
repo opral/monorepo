@@ -1,7 +1,44 @@
 /**
- * @typedef {Object} BenchmarkResult
- * @property {string} library - The name of the library
- * @property {number} size - The total transfer size in KB
+ * @typedef {Object} LibraryGroup
+ * @property {string} name - The name of the library group
+ * @property {string[]} libraries - Array of library names in this group
+ * @property {string} color - The color associated with this group
+ */
+
+/**
+ * @typedef {Object} FilterValues
+ * @property {number} [locales] - Number of locales
+ * @property {number} [messages] - Number of messages
+ * @property {number} [namespace] - Namespace size
+ */
+
+/**
+ * @typedef {Object} ChartDataPoint
+ * @property {number} x - X-axis value
+ * @property {number} y - Y-axis value
+ */
+
+/**
+ * @typedef {Object} ChartDataset
+ * @property {string} label - Dataset label
+ * @property {ChartDataPoint[]} data - Array of data points
+ * @property {string} borderColor - Border color
+ * @property {string} backgroundColor - Background color
+ * @property {number} borderWidth - Border width
+ * @property {number} tension - Line tension
+ * @property {boolean} fill - Whether to fill area under line
+ * @property {string} group - Group name
+ */
+
+/**
+ * @typedef {Object} ChartData
+ * @property {ChartDataset[]} datasets - Array of datasets
+ */
+
+/**
+ * @typedef {Object} ScenarioResult
+ * @property {string} library - Library name
+ * @property {number} size - Bundle size in KB
  */
 
 /**
@@ -9,8 +46,7 @@
  * @property {number} locales - Number of locales
  * @property {number} usedMessages - Number of used messages
  * @property {number} namespaceSize - Size of namespace
- * @property {number} namespaceSizeFactor - Factor of namespace size compared to used messages
- * @property {BenchmarkResult[]} results - Benchmark results for this scenario
+ * @property {ScenarioResult[]} results - Benchmark results
  */
 
 /**
@@ -21,19 +57,67 @@
 class BenchmarkVisualization extends HTMLElement {
 	constructor() {
 		super();
+		/** @type {BenchmarkData|null} */
+		this.data = null;
+		/** @type {Record<string, any>} */
+		this.charts = {};
+		/** @type {LibraryGroup[]} */
+		this.libraryGroups = [
+			{
+				name: "paraglide",
+				libraries: [
+					"paraglide (experimental-middleware-locale-splitting)",
+					"paraglide (default)",
+				],
+				color: "rgb(75, 192, 192)",
+			},
+			{
+				name: "i18next",
+				libraries: ["i18next (default)", "i18next (http-backend)"],
+				color: "rgb(54, 162, 235)",
+			},
+		];
+		/** @type {Set<string>} */
+		this.activeGroups = new Set(["paraglide", "i18next"]);
 		this.attachShadow({ mode: "open" });
-		this.localesChart = null;
-		this.messagesChart = null;
 		this.loadChartJS();
 	}
 
+	static get observedAttributes() {
+		return ["src"];
+	}
+
+	/**
+	 * @param {string} name
+	 * @param {string|null} oldValue
+	 * @param {string} newValue
+	 */
+	async attributeChangedCallback(name, oldValue, newValue) {
+		if (name === "src" && oldValue !== newValue) {
+			try {
+				const response = await fetch(newValue);
+				/** @type {BenchmarkData} */
+				const data = await response.json();
+				this.setData(data);
+			} catch (error) {
+				console.error("Failed to load data:", error);
+			}
+		}
+	}
+
 	async loadChartJS() {
+		if (window.Chart) {
+			if (this.data) {
+				this.render();
+			}
+			return;
+		}
+
 		const script = document.createElement("script");
 		script.src = "https://cdn.jsdelivr.net/npm/chart.js";
 		script.onload = () => {
-			if (this.pendingData) {
-				this.setData(this.pendingData);
-				this.pendingData = null;
+			if (this.data) {
+				this.render();
 			}
 		};
 		document.head.appendChild(script);
@@ -43,197 +127,195 @@ class BenchmarkVisualization extends HTMLElement {
 	 * @param {BenchmarkData} data
 	 */
 	setData(data) {
-		if (!window.Chart) {
-			this.pendingData = data;
-			return;
-		}
 		this.data = data;
-		this.render();
-	}
-
-	/**
-	 * @param {number} locales
-	 * @param {number} messages
-	 * @param {number} namespaceSize
-	 * @returns {BenchmarkResult[] | undefined}
-	 */
-	findClosestScenario(locales, messages, namespaceSize) {
-		return this.data.scenarios.find(
-			(s) =>
-				s.locales === locales &&
-				s.usedMessages === messages &&
-				s.namespaceSize === namespaceSize
-		)?.results;
+		if (window.Chart) {
+			this.render();
+		}
 	}
 
 	connectedCallback() {
-		this.render();
-		
-		// Load data from src attribute if provided
-		const src = this.getAttribute('src');
+		const src = this.getAttribute("src");
 		if (src) {
-			this.loadDataFromSrc(src);
+			this.attributeChangedCallback("src", null, src);
 		}
-	}
-	
-	async loadDataFromSrc(src) {
-		try {
-			const response = await fetch(src);
-			if (!response.ok) {
-				throw new Error(`Failed to load data: ${response.status}`);
-			}
-			const data = await response.json();
-			this.setData(data);
-		} catch (error) {
-			console.error('Error loading benchmark data:', error);
-			const errorEl = document.createElement('div');
-			errorEl.textContent = `Error loading benchmark data: ${error.message}`;
-			errorEl.style.color = 'red';
-			errorEl.style.padding = '20px';
-			this.shadowRoot.appendChild(errorEl);
-		}
-	}
-
-	getColors() {
-		return [
-			"rgb(75, 192, 192)",
-			"rgb(54, 162, 235)",
-			"rgb(255, 99, 132)",
-			"rgb(255, 206, 86)",
-		];
-	}
-
-	findClosestMessage(namespaceSize) {
-		// Find the closest message count for the given namespace size factor
-		const messages = [...new Set(this.data.scenarios.map(s => s.usedMessages))];
-		const factors = [...new Set(this.data.scenarios.map(s => s.namespaceSizeFactor))];
-		
-		// For scenarios with the same factor, find their messages
-		for (const scenario of this.data.scenarios) {
-			if (scenario.namespaceSize === namespaceSize && scenario.usedMessages) {
-				return scenario.usedMessages;
-			}
-		}
-		
-		return 200; // Default if not found
 	}
 
 	/**
-	 * @param {number} messages
-	 * @param {number} namespaceSize
+	 * @returns {{ locales: number[], usedMessages: number[], namespaceSizes: number[] }}
 	 */
-	prepareChartDataByLocales(messages, namespaceSize) {
-		if (!this.data || !this.data.scenarios || this.data.scenarios.length === 0) {
-			return { datasets: [] };
-		}
+	getAvailableValues() {
+		if (!this.data?.scenarios)
+			return { locales: [], usedMessages: [], namespaceSizes: [] };
 
-		const libraries = [...new Set(this.data.scenarios.flatMap(s => s.results.map(r => r.library)))];
-		const colors = this.getColors();
-		
-		const datasets = libraries.map((library, index) => {
-			// Filter scenarios with matching messages and namespace size
-			const relevantScenarios = this.data.scenarios.filter(s => 
-				s.usedMessages === messages && s.namespaceSize === namespaceSize
-			);
-			
-			// Sort by locales
-			relevantScenarios.sort((a, b) => a.locales - b.locales);
-			
-			const data = relevantScenarios.map(scenario => {
-				const result = scenario.results.find(r => r.library === library);
-				return {
-					x: scenario.locales,
-					y: result ? result.size : 0
-				};
-			}).filter(point => point.y > 0); // Only include points with data
-			
-			return {
-				label: library,
-				data: data,
-				borderColor: colors[index % colors.length],
-				backgroundColor: colors[index % colors.length].replace(')', ', 0.1)').replace('rgb', 'rgba'),
-				borderWidth: 2,
-				tension: 0.4,
-				fill: false,
-			};
-		}).filter(dataset => dataset.data.length > 0); // Only include datasets with data
+		const locales = [
+			...new Set(this.data.scenarios.map((s) => s.locales)),
+		].sort((a, b) => a - b);
+		const usedMessages = [
+			...new Set(this.data.scenarios.map((s) => s.usedMessages)),
+		].sort((a, b) => a - b);
+		const namespaceSizes = [
+			...new Set(this.data.scenarios.map((s) => s.namespaceSize)),
+		].sort((a, b) => a - b);
 
-		return {
-			datasets,
-		};
+		return { locales, usedMessages, namespaceSizes };
 	}
-	
+
 	/**
 	 * @param {number} locales
+	 * @param {number} usedMessages
 	 * @param {number} namespaceSize
+	 * @returns {ScenarioResult[]|null}
 	 */
-	prepareChartDataByMessages(locales, namespaceSize) {
-		if (!this.data || !this.data.scenarios || this.data.scenarios.length === 0) {
-			return { datasets: [] };
+	findExactScenario(locales, usedMessages, namespaceSize) {
+		if (!this.data?.scenarios) return null;
+
+		const scenario = this.data.scenarios.find(
+			(s) =>
+				s.locales === locales &&
+				s.usedMessages === usedMessages &&
+				s.namespaceSize === namespaceSize
+		);
+
+		return scenario?.results || null;
+	}
+
+	/**
+	 * @param {'locales'|'usedMessages'} type
+	 * @param {FilterValues} filterValues
+	 * @returns {ChartData}
+	 */
+	prepareChartData(type, filterValues) {
+		if (!this.data?.scenarios) return { datasets: [] };
+
+		let filteredScenarios = this.data.scenarios;
+
+		if (type === "locales" && filterValues.messages && filterValues.namespace) {
+			filteredScenarios = this.data.scenarios.filter(
+				(s) =>
+					s.usedMessages === filterValues.messages &&
+					s.namespaceSize === filterValues.namespace
+			);
+		} else if (
+			type === "usedMessages" &&
+			filterValues.locales &&
+			filterValues.namespace
+		) {
+			filteredScenarios = this.data.scenarios.filter(
+				(s) =>
+					s.locales === filterValues.locales &&
+					s.namespaceSize === filterValues.namespace
+			);
 		}
 
-		const libraries = [...new Set(this.data.scenarios.flatMap(s => s.results.map(r => r.library)))];
-		const colors = this.getColors();
-		
-		// Find factor for this namespace size
-		const factor = this.data.scenarios.find(s => s.namespaceSize === namespaceSize)?.namespaceSizeFactor || 1;
-		
-		const datasets = libraries.map((library, index) => {
-			// Filter scenarios with matching locales and similar factor
-			const relevantScenarios = this.data.scenarios.filter(s => 
-				s.locales === locales && 
-				Math.abs(s.namespaceSizeFactor - factor) < 0.1 // Allow small factor difference
-			);
-			
-			// Sort by message count
-			relevantScenarios.sort((a, b) => a.usedMessages - b.usedMessages);
-			
-			const data = relevantScenarios.map(scenario => {
-				const result = scenario.results.find(r => r.library === library);
-				return {
-					x: scenario.usedMessages,
-					y: result ? result.size : 0
-				};
-			}).filter(point => point.y > 0); // Only include points with data
-			
-			return {
+		const datasets = this.libraryGroups.flatMap((group) => {
+			if (!this.activeGroups.has(group.name)) return [];
+
+			return group.libraries.map((library) => ({
 				label: library,
-				data: data,
-				borderColor: colors[index % colors.length],
-				backgroundColor: colors[index % colors.length].replace(')', ', 0.1)').replace('rgb', 'rgba'),
+				data: filteredScenarios.map((scenario) => ({
+					x: scenario[type],
+					y: scenario.results.find((r) => r.library === library)?.size || 0,
+				})),
+				borderColor: this.adjustColor(
+					group.color,
+					group.libraries.indexOf(library)
+				),
+				backgroundColor: this.adjustColor(
+					group.color,
+					group.libraries.indexOf(library)
+				),
 				borderWidth: 2,
 				tension: 0.4,
 				fill: false,
-			};
-		}).filter(dataset => dataset.data.length > 0); // Only include datasets with data
+				group: group.name,
+			}));
+		});
 
-		return {
-			datasets,
-		};
+		return { datasets };
 	}
 
-	renderCharts(locales, messages, namespaceSize) {
-		if (!window.Chart) return;
+	/**
+	 * @param {string} baseColor
+	 * @param {number} index
+	 * @returns {string}
+	 */
+	adjustColor(baseColor, index) {
+		if (index === 0) return baseColor;
 
-		// Render locales chart
-		this.renderLocalesChart(messages, namespaceSize);
-		
-		// Render messages chart
-		this.renderMessagesChart(locales, namespaceSize);
+		const rgb = baseColor.match(/\d+/g).map(Number);
+		const lighterRgb = rgb.map((value) => Math.min(255, value + 40));
+		return `rgb(${lighterRgb.join(", ")})`;
 	}
 
-	renderLocalesChart(messages, namespaceSize) {
-		const canvas = this.shadowRoot.getElementById("localesChart");
-		if (!canvas) return;
-
-		if (this.localesChart) {
-			this.localesChart.destroy();
+	/**
+	 * @param {string} groupName
+	 */
+	toggleLibraryGroup(groupName) {
+		if (this.activeGroups.has(groupName)) {
+			this.activeGroups.delete(groupName);
+		} else {
+			this.activeGroups.add(groupName);
 		}
 
-		// Prepare data for locales chart (x-axis is locales)
-		const chartData = this.prepareChartDataByLocales(messages, namespaceSize);
+		this.updateChart("locales");
+		this.updateChart("usedMessages");
+		this.updateResults();
+	}
 
-		this.localesChart = new window.Chart(canvas, {
+	/**
+	 * @param {'locales'|'usedMessages'} type
+	 */
+	updateChart(type) {
+		if (!this.shadowRoot || !this.data || !window.Chart) return;
+
+		const chartId = type === "locales" ? "localesChart" : "messagesChart";
+		/** @type {HTMLCanvasElement|null} */
+		const canvas = this.shadowRoot.getElementById(chartId);
+		if (!canvas) return;
+
+		const filterValues = {
+			locales: parseInt(
+				this.shadowRoot.getElementById(`${chartId}-locales`)?.value || "0"
+			),
+			messages: parseInt(
+				this.shadowRoot.getElementById(`${chartId}-messages`)?.value || "0"
+			),
+			namespace: parseInt(
+				this.shadowRoot.getElementById(`${chartId}-namespace`)?.value || "0"
+			),
+		};
+
+		if (this.charts[type]) {
+			this.charts[type].data = this.prepareChartData(type, filterValues);
+			this.charts[type].update();
+		} else {
+			this.createChart(canvas, type, filterValues);
+		}
+	}
+
+	/**
+	 * @param {HTMLCanvasElement} canvas
+	 * @param {'locales'|'usedMessages'} type
+	 * @param {FilterValues} filterValues
+	 */
+	createChart(canvas, type, filterValues) {
+		if (!canvas || !window.Chart) return;
+
+		if (this.charts[type]) {
+			this.charts[type].destroy();
+		}
+
+		const chartData = this.prepareChartData(type, filterValues);
+
+		const maxY = Math.max(
+			...chartData.datasets.flatMap((dataset) =>
+				dataset.data.map((point) => point.y)
+			)
+		);
+
+		const yAxisMax = maxY * 1.2;
+
+		this.charts[type] = new window.Chart(canvas, {
 			type: "line",
 			data: chartData,
 			options: {
@@ -244,13 +326,13 @@ class BenchmarkVisualization extends HTMLElement {
 					mode: "index",
 				},
 				plugins: {
-					title: {
-						display: true,
-						text: `Transfer Size by Number of Locales (Used Messages: ${messages}, Namespace Size: ${namespaceSize})`,
-					},
 					legend: {
-						display: true,
 						position: "top",
+						labels: {
+							font: {
+								family: "system-ui, -apple-system, sans-serif",
+							},
+						},
 					},
 					tooltip: {
 						callbacks: {
@@ -262,20 +344,37 @@ class BenchmarkVisualization extends HTMLElement {
 				scales: {
 					x: {
 						type: "linear",
-						display: true,
 						title: {
 							display: true,
-							text: "Number of Locales",
+							text:
+								type === "locales"
+									? "Number of Locales"
+									: "Number of Used Messages",
+							font: {
+								family: "system-ui, -apple-system, sans-serif",
+							},
 						},
 						ticks: {
-							stepSize: 5,
+							stepSize: type === "locales" ? 5 : 100,
+							font: {
+								family: "system-ui, -apple-system, sans-serif",
+							},
 						},
 					},
 					y: {
 						beginAtZero: true,
+						suggestedMax: yAxisMax,
 						title: {
 							display: true,
 							text: "Transfer Size (KB)",
+							font: {
+								family: "system-ui, -apple-system, sans-serif",
+							},
+						},
+						ticks: {
+							font: {
+								family: "system-ui, -apple-system, sans-serif",
+							},
 						},
 					},
 				},
@@ -283,127 +382,169 @@ class BenchmarkVisualization extends HTMLElement {
 		});
 	}
 
-	renderMessagesChart(locales, namespaceSize) {
-		const canvas = this.shadowRoot.getElementById("messagesChart");
-		if (!canvas) return;
+	updateResults() {
+		if (!this.shadowRoot || !this.data) return;
 
-		if (this.messagesChart) {
-			this.messagesChart.destroy();
+		const locales = parseInt(
+			this.shadowRoot.getElementById("locales")?.value || "5"
+		);
+		const messages = parseInt(
+			this.shadowRoot.getElementById("messages")?.value || "200"
+		);
+		const namespace = parseInt(
+			this.shadowRoot.getElementById("namespace")?.value || "500"
+		);
+
+		if (this.shadowRoot.getElementById("localesValue")) {
+			this.shadowRoot.getElementById("localesValue").textContent =
+				locales.toString();
+		}
+		if (this.shadowRoot.getElementById("messagesValue")) {
+			this.shadowRoot.getElementById("messagesValue").textContent =
+				messages.toString();
+		}
+		if (this.shadowRoot.getElementById("namespaceValue")) {
+			this.shadowRoot.getElementById("namespaceValue").textContent =
+				namespace.toString();
 		}
 
-		// Prepare data for messages chart (x-axis is messages)
-		const chartData = this.prepareChartDataByMessages(locales, namespaceSize);
+		const results = this.findExactScenario(locales, messages, namespace);
+		if (!results) {
+			const tbody = this.shadowRoot.getElementById("results");
+			if (tbody) {
+				tbody.innerHTML = `
+          <tr>
+            <td colspan="2" class="text-center text-gray-500">
+              No data available for the selected combination
+            </td>
+          </tr>
+        `;
+			}
+			return;
+		}
 
-		this.messagesChart = new window.Chart(canvas, {
-			type: "line",
-			data: chartData,
-			options: {
-				responsive: true,
-				maintainAspectRatio: false,
-				interaction: {
-					intersect: false,
-					mode: "index",
-				},
-				plugins: {
-					title: {
-						display: true,
-						text: `Transfer Size by Used Messages (Locales: ${locales}, Factor: ${(namespaceSize / this.findClosestMessage(namespaceSize)).toFixed(1)}x)`,
-					},
-					legend: {
-						display: true,
-						position: "top",
-					},
-					tooltip: {
-						callbacks: {
-							label: (context) =>
-								`${context.dataset.label}: ${context.parsed.y.toFixed(1)} KB`,
-						},
-					},
-				},
-				scales: {
-					x: {
-						type: "linear",
-						display: true,
-						title: {
-							display: true,
-							text: "Used Messages",
-						},
-					},
-					y: {
-						beginAtZero: true,
-						title: {
-							display: true,
-							text: "Transfer Size (KB)",
-						},
-					},
-				},
-			},
-		});
+		const activeLibraries = this.libraryGroups
+			.filter((group) => this.activeGroups.has(group.name))
+			.flatMap((group) => group.libraries);
+
+		const filteredResults = results.filter((result) =>
+			activeLibraries.includes(result.library)
+		);
+
+		const maxSize = Math.max(...filteredResults.map((r) => r.size));
+		const tbody = this.shadowRoot.getElementById("results");
+		if (tbody) {
+			tbody.innerHTML = filteredResults
+				.map((result) => {
+					const group = this.libraryGroups.find((g) =>
+						g.libraries.includes(result.library)
+					);
+					const colorIndex = group.libraries.indexOf(result.library);
+					const barColor = this.adjustColor(group.color, colorIndex);
+
+					return `
+          <tr>
+            <td>${result.library}</td>
+            <td class="bar-cell">
+              <div class="bar" style="width: ${(result.size / maxSize) * 100}%; background-color: ${barColor}"></div>
+              ${result.size.toFixed(1)} KB
+            </td>
+          </tr>
+        `;
+				})
+				.join("");
+		}
 	}
 
 	render() {
-		if (!this.data) return;
+		if (!this.data || !window.Chart) return;
 
 		const style = `
       :host {
         display: block;
         font-family: system-ui, -apple-system, sans-serif;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
       }
       .controls {
         background: #f5f5f5;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
+        padding: 1.25rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
       }
       .slider-group {
-        margin-bottom: 15px;
+        margin-bottom: 1rem;
+      }
+      .slider-group:last-child {
+        margin-bottom: 0;
       }
       label {
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 0.5rem;
         font-weight: 500;
       }
       .slider-container {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 0.625rem;
       }
-      input[type="range"] {
+      select {
         flex: 1;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        background-color: white;
       }
       .value {
-        min-width: 60px;
+        min-width: 3.75rem;
         text-align: right;
+        font-family: monospace;
       }
-      .factor {
-        min-width: 50px;
-        color: #666;
+      .section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       }
-      h3 {
-        margin-top: 30px;
-        margin-bottom: 10px;
-        color: #333;
-        font-size: 1.2rem;
+      h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0 0 1.5rem 0;
       }
-      .chart-container {
-        height: 400px;
-        margin-bottom: 30px;
+      .library-toggles {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      .toggle-button {
+        padding: 0.5rem 1rem;
+        border: 2px solid;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .toggle-button[data-active="true"] {
+        opacity: 1;
+      }
+      .toggle-button[data-active="false"] {
+        opacity: 0.5;
       }
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 20px;
+        margin-top: 1.25rem;
       }
       th, td {
-        padding: 12px;
+        padding: 0.75rem;
         text-align: left;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid #e5e7eb;
       }
       th {
-        background: #f5f5f5;
+        background: #f9fafb;
         font-weight: 600;
       }
       .bar-cell {
@@ -414,111 +555,309 @@ class BenchmarkVisualization extends HTMLElement {
         left: 0;
         top: 50%;
         transform: translateY(-50%);
-        height: 8px;
-        background: #4CAF50;
+        height: 0.5rem;
         opacity: 0.3;
-        border-radius: 4px;
+        border-radius: 0.25rem;
+      }
+      .chart-container {
+        height: 400px;
+        width: 100%;
+        position: relative;
+      }
+      .text-center {
+        text-align: center;
+      }
+      .text-gray-500 {
+        color: #6b7280;
       }
     `;
 
-		const maxLocales = Math.max(...this.data.scenarios.map((s) => s.locales));
-		const maxMessages = Math.max(...this.data.scenarios.map((s) => s.messages));
-		const maxNamespaceSize = Math.max(
-			...this.data.scenarios.map((s) => s.namespaceSize)
-		);
+		const { locales, usedMessages, namespaceSizes } = this.getAvailableValues();
 
 		this.shadowRoot.innerHTML = `
       <style>${style}</style>
-      <div class="controls">
-        <div class="slider-group">
-          <label for="locales">Number of Locales</label>
-          <div class="slider-container">
-            <input type="range" id="locales" min="5" max="${maxLocales}" step="5" value="5">
-            <span class="value" id="localesValue">5</span>
+      <div class="container">
+        <section class="section">
+          <h2>Interactive Bundle Size Comparison</h2>
+          <div class="library-toggles">
+            ${this.libraryGroups
+							.map(
+								(group) => `
+              <button
+                class="toggle-button"
+                data-group="${group.name}"
+                data-active="${this.activeGroups.has(group.name)}"
+                style="border-color: ${group.color}; color: ${group.color}; background: ${group.color}10"
+              >
+                ${group.name}
+              </button>
+            `
+							)
+							.join("")}
           </div>
-        </div>
-        <div class="slider-group">
-          <label for="messages">Used Messages</label>
-          <div class="slider-container">
-            <input type="range" id="messages" min="100" max="${maxMessages}" step="100" value="200">
-            <span class="value" id="messagesValue">200</span>
+          <div class="controls">
+            <div class="slider-group">
+              <label for="locales">Number of Locales</label>
+              <div class="slider-container">
+                <select id="locales">
+                  ${locales
+										.map(
+											(value) => `
+                    <option value="${value}">${value}</option>
+                  `
+										)
+										.join("")}
+                </select>
+                <span class="value" id="localesValue">${locales[0]}</span>
+              </div>
+            </div>
+            <div class="slider-group">
+              <label for="messages">Number of Used Messages</label>
+              <div class="slider-container">
+                <select id="messages">
+                  ${usedMessages
+										.map(
+											(value) => `
+                    <option value="${value}">${value}</option>
+                  `
+										)
+										.join("")}
+                </select>
+                <span class="value" id="messagesValue">${usedMessages[0]}</span>
+              </div>
+            </div>
+            <div class="slider-group">
+              <label for="namespace">Namespace Size</label>
+              <div class="slider-container">
+                <select id="namespace">
+                  ${namespaceSizes
+										.map(
+											(value) => `
+                    <option value="${value}">${value}</option>
+                  `
+										)
+										.join("")}
+                </select>
+                <span class="value" id="namespaceValue">${namespaceSizes[0]}</span>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="slider-group">
-          <label for="namespace">Namespace Size</label>
-          <div class="slider-container">
-            <input type="range" id="namespace" min="100" max="${maxNamespaceSize}" step="100" value="500">
-            <span class="value" id="namespaceValue">500</span>
-            <span class="factor" id="namespaceFactorValue">(2.5x)</span>
-          </div>
-        </div>
-      </div>
-      <h3>Size by Number of Locales</h3>
-      <div class="chart-container">
-        <canvas id="localesChart"></canvas>
-      </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Library</th>
+                <th>Total Transfer Size</th>
+              </tr>
+            </thead>
+            <tbody id="results"></tbody>
+          </table>
+        </section>
 
-      <h3>Size by Used Messages</h3>
-      <div class="chart-container">
-        <canvas id="messagesChart"></canvas>
-      </div>
+        <section class="section">
+          <h2>Scaling with Messages</h2>
+          <div class="library-toggles">
+            ${this.libraryGroups
+							.map(
+								(group) => `
+              <button
+                class="toggle-button"
+                data-group="${group.name}"
+                data-active="${this.activeGroups.has(group.name)}"
+                style="border-color: ${group.color}; color: ${group.color}; background: ${group.color}10"
+              >
+                ${group.name}
+              </button>
+            `
+							)
+							.join("")}
+          </div>
+          <div class="controls">
+            <div class="slider-group">
+              <label for="messagesChart-locales">Number of Locales</label>
+              <div class="slider-container">
+                <select id="messagesChart-locales">
+                  ${locales
+										.map(
+											(value) => `
+                    <option value="${value}">${value}</option>
+                  `
+										)
+										.join("")}
+                </select>
+              </div>
+            </div>
+            <div class="slider-group">
+              <label for="messagesChart-namespace">Namespace Size</label>
+              <div class="slider-container">
+                <select id="messagesChart-namespace">
+                  ${namespaceSizes
+										.map(
+											(value) => `
+                    <option value="${value}">${value}</option>
+                  `
+										)
+										.join("")}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="messagesChart"></canvas>
+          </div>
+        </section>
 
-      <h3>Raw Results</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Library</th>
-            <th>Total Transfer Size</th>
-          </tr>
-        </thead>
-        <tbody id="results"></tbody>
-      </table>
+        <section class="section">
+          <h2>Scaling with Locales</h2>
+          <div class="library-toggles">
+            ${this.libraryGroups
+							.map(
+								(group) => `
+              <button
+                class="toggle-button"
+                data-group="${group.name}"
+                data-active="${this.activeGroups.has(group.name)}"
+                style="border-color: ${group.color}; color: ${group.color}; background: ${group.color}10"
+              >
+                ${group.name}
+              </button>
+            `
+							)
+							.join("")}
+          </div>
+          <div class="controls">
+            <div class="slider-group">
+              <label for="localesChart-messages">Number of Used Messages</label>
+              <div class="slider-container">
+                <select id="localesChart-messages">
+                  ${usedMessages
+										.map(
+											(value) => `
+                    <option value="${value}">${value}</option>
+                  `
+										)
+										.join("")}
+                </select>
+              </div>
+            </div>
+            <div class="slider-group">
+              <label for="localesChart-namespace">Namespace Size</label>
+              <div class="slider-container">
+                <select id="localesChart-namespace">
+                  ${namespaceSizes
+										.map(
+											(value) => `
+                    <option value="${value}">${value}</option>
+                  `
+										)
+										.join("")}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="localesChart"></canvas>
+          </div>
+        </section>
+      </div>
     `;
 
-		const updateResults = () => {
-			const locales = parseInt(this.shadowRoot.getElementById("locales").value);
-			const messages = parseInt(
-				this.shadowRoot.getElementById("messages").value
-			);
-			const namespace = parseInt(
-				this.shadowRoot.getElementById("namespace").value
-			);
+		// Add event listeners for library toggle buttons
+		this.shadowRoot.querySelectorAll(".toggle-button").forEach((button) => {
+			button.addEventListener("click", () => {
+				const groupName = button.getAttribute("data-group");
+				this.toggleLibraryGroup(groupName);
 
-			this.shadowRoot.getElementById("localesValue").textContent = locales;
-			this.shadowRoot.getElementById("messagesValue").textContent = messages;
-			this.shadowRoot.getElementById("namespaceValue").textContent = namespace;
-			this.shadowRoot.getElementById("namespaceFactorValue").textContent = `(${(namespace / messages).toFixed(1)}x)`;
-
-			const results = this.findClosestScenario(locales, messages, namespace);
-			if (!results) return;
-
-			const maxSize = Math.max(...results.map((r) => r.size));
-			const tbody = this.shadowRoot.getElementById("results");
-			tbody.innerHTML = results
-				.map(
-					(result) => `
-        <tr>
-          <td>${result.library}</td>
-          <td class="bar-cell">
-            <div class="bar" style="width: ${(result.size / maxSize) * 100}%"></div>
-            ${result.size} KB
-          </td>
-        </tr>
-      `
-				)
-				.join("");
-
-			this.renderCharts(locales, messages, namespace);
-		};
-
-		["locales", "messages", "namespace"].forEach((id) => {
-			this.shadowRoot
-				.getElementById(id)
-				.addEventListener("input", updateResults);
+				// Update button states
+				this.shadowRoot
+					.querySelectorAll(`[data-group="${groupName}"]`)
+					.forEach((btn) => {
+						btn.setAttribute(
+							"data-active",
+							this.activeGroups.has(groupName).toString()
+						);
+					});
+			});
 		});
 
-		updateResults();
+		// Add event listeners for the main comparison controls
+		["locales", "messages", "namespace"].forEach((id) => {
+			const element = this.shadowRoot.getElementById(id);
+			if (element) {
+				element.addEventListener("change", () => this.updateResults());
+			}
+		});
+
+		// Add event listeners for the messages chart controls
+		["messagesChart-locales", "messagesChart-namespace"].forEach((id) => {
+			const element = this.shadowRoot.getElementById(id);
+			if (element) {
+				element.addEventListener("change", () =>
+					this.updateChart("usedMessages")
+				);
+			}
+		});
+
+		// Add event listeners for the locales chart controls
+		["localesChart-messages", "localesChart-namespace"].forEach((id) => {
+			const element = this.shadowRoot.getElementById(id);
+			if (element) {
+				element.addEventListener("change", () => this.updateChart("locales"));
+			}
+		});
+
+		// Create the initial charts
+		setTimeout(() => {
+			this.updateChart("usedMessages");
+			this.updateChart("locales");
+		}, 0);
+
+		// Initial update for the comparison table
+		this.updateResults();
+	}
+
+	disconnectedCallback() {
+		// Clean up charts
+		Object.values(this.charts).forEach((chart) => chart.destroy());
+
+		// Remove event listeners
+		if (this.shadowRoot) {
+			// Library toggle buttons
+			this.shadowRoot.querySelectorAll(".toggle-button").forEach((button) => {
+				const groupName = button.getAttribute("data-group");
+				button.removeEventListener("click", () =>
+					this.toggleLibraryGroup(groupName)
+				);
+			});
+
+			// Main comparison controls
+			["locales", "messages", "namespace"].forEach((id) => {
+				const element = this.shadowRoot.getElementById(id);
+				if (element) {
+					element.removeEventListener("change", () => this.updateResults());
+				}
+			});
+
+			// Messages chart controls
+			["messagesChart-locales", "messagesChart-namespace"].forEach((id) => {
+				const element = this.shadowRoot.getElementById(id);
+				if (element) {
+					element.removeEventListener("change", () =>
+						this.updateChart("usedMessages")
+					);
+				}
+			});
+
+			// Locales chart controls
+			["localesChart-messages", "localesChart-namespace"].forEach((id) => {
+				const element = this.shadowRoot.getElementById(id);
+				if (element) {
+					element.removeEventListener("change", () =>
+						this.updateChart("locales")
+					);
+				}
+			});
+		}
 	}
 }
 
-customElements.define("benchmark-visualization", BenchmarkVisualization);
+customElements.define("i18n-visualization", I18nVisualization);
