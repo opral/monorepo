@@ -2,8 +2,9 @@
   "scenarios": [
     {
       "locales": 5,
-      "messages": 200,
+      "usedMessages": 200,
       "namespaceSize": 500,
+      "namespaceSizeFactor": 2.5,
       "results": [
         {
           "library": "paraglide (experimental-middleware-locale-splitting)",
@@ -25,8 +26,9 @@
     },
     {
       "locales": 10,
-      "messages": 200,
+      "usedMessages": 200,
       "namespaceSize": 500,
+      "namespaceSizeFactor": 2.5,
       "results": [
         {
           "library": "paraglide (experimental-middleware-locale-splitting)",
@@ -43,29 +45,6 @@
         {
           "library": "i18next (http-backend)",
           "size": 191
-        }
-      ]
-    },
-    {
-      "locales": 20,
-      "messages": 200,
-      "namespaceSize": 500,
-      "results": [
-        {
-          "library": "paraglide (experimental-middleware-locale-splitting)",
-          "size": 31.5
-        },
-        {
-          "library": "paraglide (default)",
-          "size": 265.9
-        },
-        {
-          "library": "i18next (default)",
-          "size": 694.3
-        },
-        {
-          "library": "i18next (http-backend)",
-          "size": 191.1
         }
       ]
     }

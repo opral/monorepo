@@ -204,8 +204,8 @@ async function runBenchmarks() {
 		
 		// Add configuration details as code blocks
 		markdownOutput += `\`Locales: ${config.locale}\`  \n`;
-		markdownOutput += `\`Messages: ${config.message}\`   \n`;
-		markdownOutput += `\`Namespace Size: ${config.namespaceSize}\` \n\n`;
+		markdownOutput += `\`Used Messages: ${config.message}\`   \n`;
+		markdownOutput += `\`Namespace Size: ${config.namespaceSize} (${(config.namespaceSize! / config.message).toFixed(1)}x)\` \n\n`;
 		
 		// Create table for this configuration
 		let tableData: string[][] = [];
@@ -253,12 +253,15 @@ async function runBenchmarks() {
 
 				return {
 					locales: config.locale,
-					messages: config.message,
+					usedMessages: config.message,
 					namespaceSize: config.namespaceSize,
+					namespaceSizeFactor: parseFloat(
+						(config.namespaceSize! / config.message).toFixed(1)
+					),
 					results: sortedLibraryEntries.map(([key, size]) => ({
 						library: libraryModeMap.get(key) || key,
-						size: parseFloat((size / 1024).toFixed(1)) // Size in KB
-					}))
+						size: parseFloat((size / 1024).toFixed(1)), // Size in KB
+					})),
 				};
 			})
 	};
