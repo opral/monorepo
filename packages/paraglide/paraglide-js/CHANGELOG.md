@@ -26,6 +26,12 @@ In addition, Paraglide JS 2.0 comes with:
 
 ### Highlights
 
+#### Interactive benchmark 
+
+Check out the [benchmark](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/benchmark) to see how Paraglide JS compares to other libraries like i18next.
+
+![Benchmark Visualization](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/assets/interactive-benchmark.png)
+
 #### No more adapters are needed
 
 ```diff
