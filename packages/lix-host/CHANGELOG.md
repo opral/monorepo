@@ -1,5 +1,12 @@
 # @lix-js/host
 
+## 0.0.12
+
+### Patch Changes
+
+- Updated dependencies [59f6c92]
+  - @lix-js/sdk@0.4.2
+
 ## 0.0.11
 
 ### Patch Changes
