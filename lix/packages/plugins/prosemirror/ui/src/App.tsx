@@ -1,11 +1,11 @@
 import Editor from "./components/Editor";
 import { useState } from "react";
-import { lix, pollingInterval } from "./state";
+import { lix, pollingInterval, prosemirrorDocument } from "./state";
 import { useDebounceCallback, useInterval } from "usehooks-ts";
 
 function App() {
-	const [initialDoc] = useState<any>(null);
-	const [currentDoc, setCurrentDoc] = useState<any>(null);
+	const [initialDoc] = useState<any>(prosemirrorDocument);
+	const [currentDoc, setCurrentDoc] = useState<any>(initialDoc);
 
 	const [, setForceRender] = useState(0);
 

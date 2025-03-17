@@ -23,3 +23,22 @@ setInterval(async () => {
 		.select("snapshot.content")
 		.execute();
 }, pollingInterval);
+
+export let prosemirrorDocument: any =
+	// initial document defaults to empty document
+	{
+		type: "doc",
+		content: [],
+	};
+
+setInterval(async () => {
+	const blob = await lix.db
+		.selectFrom("file")
+		.where("file.path", "=", "/prosemirror.json")
+		.select("data")
+		.executeTakeFirst();
+
+	if (blob) {
+		prosemirrorDocument = JSON.parse(new TextDecoder().decode(blob.data));
+	}
+}, pollingInterval);

@@ -1,100 +1,43 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { EditorState } from "prosemirror-state";
-import { EditorView } from 'prosemirror-view';
-import { Schema } from 'prosemirror-model';
-import { keymap } from 'prosemirror-keymap';
-import { baseKeymap } from 'prosemirror-commands';
-import { history } from 'prosemirror-history';
+import { EditorView } from "prosemirror-view";
+import { keymap } from "prosemirror-keymap";
+import { baseKeymap } from "prosemirror-commands";
+import { history } from "prosemirror-history";
 import { idPlugin } from "../prosemirror/id-plugin";
-
-// Create a very basic schema with _id attributes for change detection
-const schema = new Schema({
-	nodes: {
-		doc: {
-			content: "paragraph+",
-			attrs: { _id: { default: null } },
-		},
-		paragraph: {
-			content: "text*",
-			group: "block",
-			parseDOM: [{ tag: "p" }],
-			toDOM() {
-				return ["p", 0];
-			},
-			attrs: { _id: { default: null } },
-		},
-		text: {
-			group: "inline",
-		},
-	},
-	marks: {},
-});
+import { schema } from "../prosemirror/schema";
 
 interface EditorProps {
 	onChange: (doc: any) => void;
-	externalDoc?: any; // External document to update the editor with
+	externalDoc: any; // External document to update the editor with
 }
 
 const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [view, setView] = useState<EditorView | null>(null);
 
+	// Initialize editor
 	useEffect(() => {
-		// Only run once on component mount
 		if (!editorRef.current) return;
 
-		// Get the initial document - either from props or create a default one
-		let initialDoc;
+		// Choose which doc to use
+		const initialDoc = externalDoc;
 
-		// Use fixed IDs to ensure consistency
-		// These IDs will remain the same throughout the editor's lifetime
-		const FIXED_DOC_ID = "doc-1";
-		const FIXED_PARAGRAPH_ID = "p-1";
-
-		if (externalDoc && Object.keys(externalDoc).length > 0) {
-			try {
-				// When importing from externalDoc, preserve the existing IDs
-				initialDoc = schema.nodeFromJSON(externalDoc);
-
-				// If the external doc doesn't have IDs, add them using our fixed IDs
-				if (!initialDoc.attrs || !initialDoc.attrs._id) {
-					initialDoc.attrs = { ...initialDoc.attrs, _id: FIXED_DOC_ID };
-				}
-			} catch (error) {
-				// Fallback to default document with fixed IDs
-				initialDoc = schema.node("doc", { _id: FIXED_DOC_ID }, [
-					schema.node("paragraph", { _id: FIXED_PARAGRAPH_ID }, [
-						schema.text("Type here..."),
-					]),
-				]);
-			}
-		} else {
-			// Create a default document with fixed IDs
-			initialDoc = schema.node("doc", { _id: FIXED_DOC_ID }, [
-				schema.node("paragraph", { _id: FIXED_PARAGRAPH_ID }, [
-					schema.text("Type here..."),
-				]),
-			]);
-		}
-
-		// Create plugins array including an ID plugin for the change detector
+		// Create plugins array including our custom ID plugin
 		const plugins = [history(), keymap(baseKeymap), idPlugin];
 
-		// Set up the editor state with our plugins and initial document
+		// Create the editor state
 		const state = EditorState.create({
-			schema,
-			doc: initialDoc, // Use the document we created with IDs
+			doc: schema.nodeFromJSON(initialDoc),
 			plugins,
 		});
 
-		// Create the editor view with a transaction handler
+		// Create the editor view
 		const view = new EditorView(editorRef.current, {
 			state,
-			// IMPORTANT: Make sure it's editable
 			editable: () => true,
-			// Handle transactions (changes to the document)
 			dispatchTransaction: (transaction) => {
-				// Get the updated state by applying the transaction
+				// Apply the transaction to create a new state
 				const newState = view.state.apply(transaction);
 
 				// Update the editor view
@@ -115,31 +58,29 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 			view.focus();
 		}, 100);
 
-		// Clean up the editor when component unmounts
+		// Clean up on unmount
 		return () => {
 			view.destroy();
 		};
 	}, []);
 
-	// Effect to update editor when externalDoc changes
+	// Update editor when externalDoc changes
 	useEffect(() => {
-		if (view && externalDoc) {
+		if (view && externalDoc && externalDoc.type === "doc") {
 			try {
-				// Create a new document from the external state
-				// Important: Use setNodeMarkup to preserve externalDoc attrs including _id values
-				const newDocNode = schema.nodeFromJSON(externalDoc);
+				// Create a transaction to replace the document
+				const tr = view.state.tr;
 
-				// Create a transaction that replaces the entire document
-				const tr = view.state.tr.replaceWith(
-					0,
-					view.state.doc.content.size,
-					newDocNode.content,
-				);
+				// Create a new document from JSON
+				const newDoc = schema.nodeFromJSON(externalDoc);
 
-				// Apply the transaction to update the editor
+				// Replace the current document
+				tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
+
+				// Apply the transaction
 				view.dispatch(tr);
 			} catch (error) {
-				// Error handling for updating editor with external document
+				console.error("Error updating document:", error);
 			}
 		}
 	}, [view, externalDoc]);
