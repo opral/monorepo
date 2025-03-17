@@ -1,0 +1,167 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.ProseMirror {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  min-height: 200px;
+  outline: none;
+  background-color: white;
+  color: #333;
+}
+
+.ProseMirror:focus {
+  border-color: blue;
+}
+
+.ProseMirror h1, .ProseMirror h2, .ProseMirror h3, 
+.ProseMirror h4, .ProseMirror h5, .ProseMirror h6 {
+  line-height: 1.1;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror ul, .ProseMirror ol {
+  padding-left: 30px;
+}
+
+.ProseMirror blockquote {
+  padding-left: 1em;
+  border-left: 3px solid #eee;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.ProseMirror pre {
+  background-color: #f5f5f5;
+  padding: 0.5em;
+  border-radius: 3px;
+  overflow-x: auto;
+}
+
+.ProseMirror code {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.ProseMirror th, .ProseMirror td {
+  border: 1px solid #ddd;
+  padding: 0.5em;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.editor-container {
+  margin-bottom: 20px;
+}
+
+.changes-container {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.changes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+button {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #3a7cc7;
+}
+
+.change-item {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.change-add {
+  background-color: rgba(0, 255, 0, 0.1);
+  border-left: 3px solid green;
+}
+
+.change-update {
+  background-color: rgba(255, 165, 0, 0.1);
+  border-left: 3px solid orange;
+}
+
+.change-delete {
+  background-color: rgba(255, 0, 0, 0.1);
+  border-left: 3px solid red;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
