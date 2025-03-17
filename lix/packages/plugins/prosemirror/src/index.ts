@@ -13,4 +13,3 @@ export const plugin: LixPlugin = {
 // Export the main functions for easier consumption by the UI
 export { detectChanges, applyChanges };
 export type { ProsemirrorNode };
-
