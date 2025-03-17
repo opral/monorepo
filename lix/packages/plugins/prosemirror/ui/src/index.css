@@ -18,6 +18,8 @@ body {
   display: flex;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #f5f8fa;
+  color: #333;
 }
 
 #root {
@@ -28,17 +30,41 @@ body {
 }
 
 .ProseMirror {
-  border: 1px solid #ccc;
-  border-radius: 4px;
   padding: 10px;
-  min-height: 200px;
-  outline: none;
+  min-height: 100px;
+  outline: none !important;
   background-color: white;
   color: #333;
+  cursor: text !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+  width: 100%;
 }
 
-.ProseMirror:focus {
-  border-color: blue;
+/* Make sure it's visible when it has focus */
+.ProseMirror-focused {
+  /* no special styling needed, the wrapper will show it has focus */
+}
+
+/* Makes the cursor visible */
+.ProseMirror-cursor {
+  border-left: 1px solid black;
+  border-right: none;
+  width: 0;
+  display: block !important;
+}
+
+.editor-wrapper {
+  cursor: text !important;
+  position: relative;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.editor-wrapper:focus-within {
+  border-color: #4a90e2 !important;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.25);
 }
 
 .ProseMirror h1, .ProseMirror h2, .ProseMirror h3, 

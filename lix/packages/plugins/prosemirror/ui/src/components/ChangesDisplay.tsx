@@ -13,15 +13,19 @@ interface Change {
 interface ChangesDisplayProps {
   changes: Change[];
   previousDoc: any;
+  onRollbackChange?: (change: Change) => void;
 }
 
-const ChangesDisplay: React.FC<ChangesDisplayProps> = ({ changes, previousDoc }) => {
+const ChangesDisplay: React.FC<ChangesDisplayProps> = ({ changes, previousDoc, onRollbackChange }) => {
   // Function to find a node by ID in a document
   const findNodeById = (doc: any, id: string): any => {
-    if (!doc || !doc.content) return null;
+    if (!doc || typeof doc !== 'object') return null;
     
     // Check if this is the node we're looking for
-    if (doc._id === id) return doc;
+    if (doc.attrs?._id === id) return doc;
+    
+    // If no content, return null
+    if (!Array.isArray(doc.content)) return null;
     
     // Recursively search through content
     for (const node of doc.content) {
@@ -46,35 +50,42 @@ const ChangesDisplay: React.FC<ChangesDisplayProps> = ({ changes, previousDoc })
     
     let description = `${node.type}`;
     
-    if (node.content && node.content.length) {
-      // For text-containing nodes, show some content
-      const hasText = node.content.some((child: any) => 
-        child.type === 'text' && child.text
-      );
+    // Extract text content from node
+    const extractText = (n: any): string => {
+      if (!n) return '';
       
-      if (hasText) {
-        const textContent = node.content
-          .filter((child: any) => child.type === 'text')
-          .map((child: any) => child.text)
-          .join('');
-        
-        const preview = textContent.length > 30 
-          ? textContent.substring(0, 30) + '...' 
-          : textContent;
-        
-        description += `: "${preview}"`;
+      // Direct text node
+      if (n.type === 'text' && n.text) {
+        return n.text;
       }
+      
+      // Node with content
+      if (Array.isArray(n.content)) {
+        return n.content.map(extractText).join('');
+      }
+      
+      return '';
+    };
+    
+    // Get text content
+    const textContent = extractText(node);
+    if (textContent) {
+      const preview = textContent.length > 30 
+        ? textContent.substring(0, 30) + '...' 
+        : textContent;
+      
+      description += `: "${preview}"`;
     }
     
-    // For nodes with attributes, show them
+    // Show attributes except for _id
     if (node.attrs) {
-      const attrString = Object.entries(node.attrs)
+      const validAttrs = Object.entries(node.attrs)
         .filter(([key]) => key !== '_id') // Don't show _id as it's internal
         .map(([key, value]) => `${key}=${JSON.stringify(value)}`)
         .join(', ');
       
-      if (attrString) {
-        description += ` [${attrString}]`;
+      if (validAttrs) {
+        description += ` [${validAttrs}]`;
       }
     }
     
@@ -83,10 +94,8 @@ const ChangesDisplay: React.FC<ChangesDisplayProps> = ({ changes, previousDoc })
 
   return (
     <div className="changes-container">
-      <h3>Detected Changes ({changes.length})</h3>
-      
       {changes.length === 0 && (
-        <p>No changes detected yet. Try editing the document.</p>
+        <p>No changes detected yet. Take a snapshot and make some edits!</p>
       )}
       
       {changes.map((change, index) => {
@@ -95,8 +104,30 @@ const ChangesDisplay: React.FC<ChangesDisplayProps> = ({ changes, previousDoc })
         
         return (
           <div key={index} className={changeClass}>
-            <strong>{changeType.toUpperCase()}: </strong>
-            <span>{change.entity_id}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <strong>{changeType.toUpperCase()}: </strong>
+                <span>{change.entity_id}</span>
+              </div>
+              
+              {onRollbackChange && (
+                <button 
+                  onClick={() => onRollbackChange(change)}
+                  style={{ 
+                    fontSize: '12px', 
+                    padding: '2px 6px',
+                    backgroundColor: '#ff9800',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '3px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Rollback
+                </button>
+              )}
+            </div>
+            
             {changeType !== 'delete' && change.snapshot && (
               <div>
                 <small>{getNodeDescription(change.snapshot)}</small>
