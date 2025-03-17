@@ -10,7 +10,7 @@ The internationalization (i18n) library you choose can significantly impact your
 Tip: Paraglide JS has not reached its final optimizations yet. Tickets like [per locale builds](https://github.com/opral/inlang-paraglide-js/issues/88) or [pruning server side rendered messages](https://github.com/opral/inlang-paraglide-js/issues/354) are yet to be implemented. Pull requests are welcome!
 
 
-<benchmark-visualization src="https://raw.githubusercontent.com/opral/monorepo/parjs-446-create-a-graph-in-the-benchmark/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-results.json"></benchmark-visualization>
+<benchmark-visualization src="https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-results.json"></benchmark-visualization>
 
 
 ### What is Being Tested
