@@ -169,7 +169,7 @@ export async function paraglideMiddleware(request, resolve) {
  */
 function normalizeURL(url) {
 	const urlObj = new URL(url);
-	// strip trailing slash from pathname
+	// // strip trailing slash from pathname
 	urlObj.pathname = urlObj.pathname.replace(/\/$/, "");
 	return urlObj.href;
 }
