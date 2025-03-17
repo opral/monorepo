@@ -1,3 +1,8 @@
+---
+imports:
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-embed.js
+---
+
 # Comparison
 
 Paraglide's compiler approach enables optimizations that are not possible with runtime libraries. Below is a comparison of Paraglide JS with other popular i18n libraries.
@@ -28,3 +33,7 @@ Paraglide's compiler approach enables optimizations that are not possible with r
 | **Message syntax agnostic** [ℹ️](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/file-formats)</sup> | [✅ Via inlang plugins](https://inlang.com/c/plugins)                                                     | [✅ Via different backends](https://www.i18next.com/how-to/add-or-load-translations#load-using-a-backend-plugin) | ❌ Only ICU                                                                                      |
 | **Scales well over 15 locales**                                                                               | [🟠 Experimental split locale option](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/benchmark) | [✅ Via HTTP backend](https://github.com/i18next/i18next-http-backend)                                           | ❌ No                                                                                            |
 | **Component interpolation**                                                                                   | [❌ Upvote issue #240](https://github.com/opral/inlang-sdk/issues/240)                                    | [🟠 Only for React](https://react.i18next.com/legacy-v9/trans-component)                                         | [🟠 Only for React](https://formatjs.github.io/docs/react-intl/components/#rich-text-formatting) |
+
+## Benchmark
+
+<markdown-wc-embed src="https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/benchmark/README.md"></markdown-wc-embed>
