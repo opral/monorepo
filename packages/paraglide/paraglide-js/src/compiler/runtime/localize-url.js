@@ -304,7 +304,7 @@ function fillPattern(pattern, values, origin) {
 	// This detects patterns like "http://localhost:5173" and protects the port number
 	// from being interpreted as a parameter
 	let processedPattern = pattern.replace(
-		/(https?:\/\/[^:/]+):(\d+)(\/|$)/g, 
+		/(https?:\/\/[^:/]+):(\d+)(\/|$)/g,
 		(_, protocol, port, slash) => {
 			// Replace ":5173" with "#PORT-5173#" to protect it from parameter replacement
 			return `${protocol}#PORT-${port}#${slash}`;

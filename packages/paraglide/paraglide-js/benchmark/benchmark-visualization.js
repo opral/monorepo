@@ -860,4 +860,4 @@ class BenchmarkVisualization extends HTMLElement {
 	}
 }
 
-customElements.define("i18n-visualization", I18nVisualization);
+customElements.define("benchmark-visualization", BenchmarkVisualization);
