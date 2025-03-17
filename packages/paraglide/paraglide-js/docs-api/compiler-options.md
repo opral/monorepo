@@ -283,13 +283,13 @@ first tried to be detected in the url, then in a cookie, and finally
 fallback to the base locale.
 
 The default ensures that the browser takes a cookie approach,
-server-side takes the variable (because cookie is unavailable),
+server-side takes the globalVariable (because cookie is unavailable),
 whereas both fallback to the base locale if not available.
 
 ##### Default
 
 ```ts
-["url", "cookie", "variable", "baseLocale"]
+["cookie", "globalVariable", "baseLocale"]
 ```
 
 #### urlPatterns?
