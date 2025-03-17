@@ -7,8 +7,9 @@
 /**
  * @typedef {Object} Scenario
  * @property {number} locales - Number of locales
- * @property {number} messages - Number of messages
+ * @property {number} usedMessages - Number of used messages
  * @property {number} namespaceSize - Size of namespace
+ * @property {number} namespaceSizeFactor - Factor of namespace size compared to used messages
  * @property {BenchmarkResult[]} results - Benchmark results for this scenario
  */
 
@@ -21,7 +22,8 @@ class BenchmarkVisualization extends HTMLElement {
 	constructor() {
 		super();
 		this.attachShadow({ mode: "open" });
-		this.chart = null;
+		this.localesChart = null;
+		this.messagesChart = null;
 		this.loadChartJS();
 	}
 
@@ -59,7 +61,7 @@ class BenchmarkVisualization extends HTMLElement {
 		return this.data.scenarios.find(
 			(s) =>
 				s.locales === locales &&
-				s.messages === messages &&
+				s.usedMessages === messages &&
 				s.namespaceSize === namespaceSize
 		)?.results;
 	}
@@ -92,56 +94,146 @@ class BenchmarkVisualization extends HTMLElement {
 		}
 	}
 
+	getColors() {
+		return [
+			"rgb(75, 192, 192)",
+			"rgb(54, 162, 235)",
+			"rgb(255, 99, 132)",
+			"rgb(255, 206, 86)",
+		];
+	}
+
+	findClosestMessage(namespaceSize) {
+		// Find the closest message count for the given namespace size factor
+		const messages = [...new Set(this.data.scenarios.map(s => s.usedMessages))];
+		const factors = [...new Set(this.data.scenarios.map(s => s.namespaceSizeFactor))];
+		
+		// For scenarios with the same factor, find their messages
+		for (const scenario of this.data.scenarios) {
+			if (scenario.namespaceSize === namespaceSize && scenario.usedMessages) {
+				return scenario.usedMessages;
+			}
+		}
+		
+		return 200; // Default if not found
+	}
+
 	/**
 	 * @param {number} messages
 	 * @param {number} namespaceSize
 	 */
-	prepareChartData(messages, namespaceSize) {
-		const libraries = this.data.scenarios[0].results.map((r) => r.library);
-		const datasets = libraries.map((library, index) => {
-			const colors = [
-				"rgb(75, 192, 192)",
-				"rgb(54, 162, 235)",
-				"rgb(255, 99, 132)",
-				"rgb(255, 206, 86)",
-			];
+	prepareChartDataByLocales(messages, namespaceSize) {
+		if (!this.data || !this.data.scenarios || this.data.scenarios.length === 0) {
+			return { datasets: [] };
+		}
 
-			const data = this.data.scenarios.map((scenario) => {
-				const result = scenario.results.find((r) => r.library === library);
+		const libraries = [...new Set(this.data.scenarios.flatMap(s => s.results.map(r => r.library)))];
+		const colors = this.getColors();
+		
+		const datasets = libraries.map((library, index) => {
+			// Filter scenarios with matching messages and namespace size
+			const relevantScenarios = this.data.scenarios.filter(s => 
+				s.usedMessages === messages && s.namespaceSize === namespaceSize
+			);
+			
+			// Sort by locales
+			relevantScenarios.sort((a, b) => a.locales - b.locales);
+			
+			const data = relevantScenarios.map(scenario => {
+				const result = scenario.results.find(r => r.library === library);
 				return {
 					x: scenario.locales,
-					y: result ? result.size : 0,
+					y: result ? result.size : 0
 				};
-			});
-
+			}).filter(point => point.y > 0); // Only include points with data
+			
 			return {
 				label: library,
 				data: data,
-				borderColor: colors[index],
+				borderColor: colors[index % colors.length],
+				backgroundColor: colors[index % colors.length].replace(')', ', 0.1)').replace('rgb', 'rgba'),
 				borderWidth: 2,
 				tension: 0.4,
 				fill: false,
 			};
-		});
+		}).filter(dataset => dataset.data.length > 0); // Only include datasets with data
+
+		return {
+			datasets,
+		};
+	}
+	
+	/**
+	 * @param {number} locales
+	 * @param {number} namespaceSize
+	 */
+	prepareChartDataByMessages(locales, namespaceSize) {
+		if (!this.data || !this.data.scenarios || this.data.scenarios.length === 0) {
+			return { datasets: [] };
+		}
+
+		const libraries = [...new Set(this.data.scenarios.flatMap(s => s.results.map(r => r.library)))];
+		const colors = this.getColors();
+		
+		// Find factor for this namespace size
+		const factor = this.data.scenarios.find(s => s.namespaceSize === namespaceSize)?.namespaceSizeFactor || 1;
+		
+		const datasets = libraries.map((library, index) => {
+			// Filter scenarios with matching locales and similar factor
+			const relevantScenarios = this.data.scenarios.filter(s => 
+				s.locales === locales && 
+				Math.abs(s.namespaceSizeFactor - factor) < 0.1 // Allow small factor difference
+			);
+			
+			// Sort by message count
+			relevantScenarios.sort((a, b) => a.usedMessages - b.usedMessages);
+			
+			const data = relevantScenarios.map(scenario => {
+				const result = scenario.results.find(r => r.library === library);
+				return {
+					x: scenario.usedMessages,
+					y: result ? result.size : 0
+				};
+			}).filter(point => point.y > 0); // Only include points with data
+			
+			return {
+				label: library,
+				data: data,
+				borderColor: colors[index % colors.length],
+				backgroundColor: colors[index % colors.length].replace(')', ', 0.1)').replace('rgb', 'rgba'),
+				borderWidth: 2,
+				tension: 0.4,
+				fill: false,
+			};
+		}).filter(dataset => dataset.data.length > 0); // Only include datasets with data
 
 		return {
 			datasets,
 		};
 	}
 
-	renderChart(messages, namespaceSize) {
+	renderCharts(locales, messages, namespaceSize) {
 		if (!window.Chart) return;
 
-		const canvas = this.shadowRoot.querySelector("canvas");
+		// Render locales chart
+		this.renderLocalesChart(messages, namespaceSize);
+		
+		// Render messages chart
+		this.renderMessagesChart(locales, namespaceSize);
+	}
+
+	renderLocalesChart(messages, namespaceSize) {
+		const canvas = this.shadowRoot.getElementById("localesChart");
 		if (!canvas) return;
 
-		if (this.chart) {
-			this.chart.destroy();
+		if (this.localesChart) {
+			this.localesChart.destroy();
 		}
 
-		const chartData = this.prepareChartData(messages, namespaceSize);
+		// Prepare data for locales chart (x-axis is locales)
+		const chartData = this.prepareChartDataByLocales(messages, namespaceSize);
 
-		this.chart = new window.Chart(canvas, {
+		this.localesChart = new window.Chart(canvas, {
 			type: "line",
 			data: chartData,
 			options: {
@@ -152,6 +244,10 @@ class BenchmarkVisualization extends HTMLElement {
 					mode: "index",
 				},
 				plugins: {
+					title: {
+						display: true,
+						text: `Transfer Size by Number of Locales (Used Messages: ${messages}, Namespace Size: ${namespaceSize})`,
+					},
 					legend: {
 						display: true,
 						position: "top",
@@ -177,7 +273,64 @@ class BenchmarkVisualization extends HTMLElement {
 					},
 					y: {
 						beginAtZero: true,
-						suggestedMax: 770, // 700KB + 10% margin
+						title: {
+							display: true,
+							text: "Transfer Size (KB)",
+						},
+					},
+				},
+			},
+		});
+	}
+
+	renderMessagesChart(locales, namespaceSize) {
+		const canvas = this.shadowRoot.getElementById("messagesChart");
+		if (!canvas) return;
+
+		if (this.messagesChart) {
+			this.messagesChart.destroy();
+		}
+
+		// Prepare data for messages chart (x-axis is messages)
+		const chartData = this.prepareChartDataByMessages(locales, namespaceSize);
+
+		this.messagesChart = new window.Chart(canvas, {
+			type: "line",
+			data: chartData,
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				interaction: {
+					intersect: false,
+					mode: "index",
+				},
+				plugins: {
+					title: {
+						display: true,
+						text: `Transfer Size by Used Messages (Locales: ${locales}, Factor: ${(namespaceSize / this.findClosestMessage(namespaceSize)).toFixed(1)}x)`,
+					},
+					legend: {
+						display: true,
+						position: "top",
+					},
+					tooltip: {
+						callbacks: {
+							label: (context) =>
+								`${context.dataset.label}: ${context.parsed.y.toFixed(1)} KB`,
+						},
+					},
+				},
+				scales: {
+					x: {
+						type: "linear",
+						display: true,
+						title: {
+							display: true,
+							text: "Used Messages",
+						},
+					},
+					y: {
+						beginAtZero: true,
 						title: {
 							display: true,
 							text: "Transfer Size (KB)",
@@ -225,9 +378,19 @@ class BenchmarkVisualization extends HTMLElement {
         min-width: 60px;
         text-align: right;
       }
+      .factor {
+        min-width: 50px;
+        color: #666;
+      }
+      h3 {
+        margin-top: 30px;
+        margin-bottom: 10px;
+        color: #333;
+        font-size: 1.2rem;
+      }
       .chart-container {
         height: 400px;
-        margin-bottom: 20px;
+        margin-bottom: 30px;
       }
       table {
         width: 100%;
@@ -275,7 +438,7 @@ class BenchmarkVisualization extends HTMLElement {
           </div>
         </div>
         <div class="slider-group">
-          <label for="messages">Number of Messages</label>
+          <label for="messages">Used Messages</label>
           <div class="slider-container">
             <input type="range" id="messages" min="100" max="${maxMessages}" step="100" value="200">
             <span class="value" id="messagesValue">200</span>
@@ -286,12 +449,21 @@ class BenchmarkVisualization extends HTMLElement {
           <div class="slider-container">
             <input type="range" id="namespace" min="100" max="${maxNamespaceSize}" step="100" value="500">
             <span class="value" id="namespaceValue">500</span>
+            <span class="factor" id="namespaceFactorValue">(2.5x)</span>
           </div>
         </div>
       </div>
+      <h3>Size by Number of Locales</h3>
       <div class="chart-container">
-        <canvas></canvas>
+        <canvas id="localesChart"></canvas>
       </div>
+
+      <h3>Size by Used Messages</h3>
+      <div class="chart-container">
+        <canvas id="messagesChart"></canvas>
+      </div>
+
+      <h3>Raw Results</h3>
       <table>
         <thead>
           <tr>
@@ -315,6 +487,7 @@ class BenchmarkVisualization extends HTMLElement {
 			this.shadowRoot.getElementById("localesValue").textContent = locales;
 			this.shadowRoot.getElementById("messagesValue").textContent = messages;
 			this.shadowRoot.getElementById("namespaceValue").textContent = namespace;
+			this.shadowRoot.getElementById("namespaceFactorValue").textContent = `(${(namespace / messages).toFixed(1)}x)`;
 
 			const results = this.findClosestScenario(locales, messages, namespace);
 			if (!results) return;
@@ -335,7 +508,7 @@ class BenchmarkVisualization extends HTMLElement {
 				)
 				.join("");
 
-			this.renderChart(messages, namespace);
+			this.renderCharts(locales, messages, namespace);
 		};
 
 		["locales", "messages", "namespace"].forEach((id) => {

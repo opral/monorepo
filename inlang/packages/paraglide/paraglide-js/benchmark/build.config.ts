@@ -11,10 +11,10 @@ export const builds: BuildConfig[] = [
 			paraglide: ["default", "experimental-middleware-locale-splitting"],
 			i18next: ["default", "http-backend"],
 		},
-		locales: [5, 10, 20],
+		locales: [5, 10],
 		messages: [200],
 		percentDynamic: 20,
-		namespaceSizes: [500],
+		namespaceSizeFactors: [1, 2.5],
 	}),
 ];
 
@@ -60,6 +60,7 @@ export function createBuildMatrix(config: {
 	percentDynamic: number;
 	generateAboutPage?: boolean;
 	namespaceSizes?: Array<number>;
+	namespaceSizeFactors?: Array<number>;
 }): BuildConfig[] {
 	const builds = [];
 
@@ -67,7 +68,28 @@ export function createBuildMatrix(config: {
 		for (const mode of modes) {
 			for (const locale of config.locales) {
 				for (const message of config.messages) {
-					if (config.namespaceSizes && config.namespaceSizes.length > 0) {
+					if (
+						config.namespaceSizeFactors &&
+						config.namespaceSizeFactors.length > 0
+					) {
+						// Create builds with different namespace size factors
+						for (const factor of config.namespaceSizeFactors) {
+							const namespaceSize = Math.round(message * factor);
+
+							builds.push({
+								library: library as BuildConfig["library"],
+								libraryMode: mode,
+								locales: locale,
+								messages: message,
+								namespaceSize,
+								percentDynamic: config.percentDynamic,
+								generateAboutPage: config.generateAboutPage ?? true,
+							});
+						}
+					} else if (
+						config.namespaceSizes &&
+						config.namespaceSizes.length > 0
+					) {
 						// Create builds with different namespace sizes
 						for (const namespaceSize of config.namespaceSizes) {
 							// Throw error if namespace size is lower than message count
