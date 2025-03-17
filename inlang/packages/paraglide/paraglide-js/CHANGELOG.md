@@ -236,6 +236,22 @@ Read https://github.com/opral/inlang-paraglide-js/issues/438#issuecomment-270373
 +<button onclick="setLocale('de')">Deutsch</button>
 ```
 
+#### Lint rules got deprecated
+
+Remove lint rules from your project modules. 
+
+We want to re-introduce lint rules in a better form in the future. Please upvote the [#239 lix validation rules](https://github.com/opral/lix-sdk/issues/239) proposal.
+
+```diff
+modules: [
+-  "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
+-	 "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js"
+   ...
+]
+
+```
+
+
 ## 2.0.0-beta.31 (released as 2.0.0)
 
 - feat: New API: `createParaglide()`

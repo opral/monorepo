@@ -18,9 +18,8 @@
 	"pages": {
 		"": {
 			"/": "./docs/introduction.md",
-			"/limitations": "./docs/limitations.md",
+			"/comparison": "./docs/comparison.md",
 			"/benchmark": "./benchmark/README.md",
-			"/migrating-to-v2": "./docs/migrating-to-v2.md",
 			"/changelog": "./CHANGELOG.md"
 		},
 		"Getting Started": {
