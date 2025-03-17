@@ -15,7 +15,8 @@
 		"test:watch": "vitest",
 		"lint": "eslint src/**/* --fix",
 		"dev": "tsc --watch",
-		"format": "prettier ./src --write"
+		"format": "prettier ./src --write",
+		"ui:dev": "cd ui && pnpm dev"
 	},
 	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
 	"sideEffects": false,
