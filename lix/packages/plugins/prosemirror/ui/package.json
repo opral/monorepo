@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@lix-js/sdk": "workspace:*",
     "@lix-js/plugin-prosemirror": "workspace:*",
+    "@lix-js/sdk": "workspace:*",
     "prosemirror-commands": "^1.5.2",
+    "prosemirror-history": "^1.4.1",
+    "prosemirror-keymap": "^1.2.2",
     "prosemirror-model": "^1.19.3",
     "prosemirror-schema-basic": "^1.2.2",
     "prosemirror-schema-list": "^1.3.0",
