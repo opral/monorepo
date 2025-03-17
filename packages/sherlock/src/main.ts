@@ -19,7 +19,7 @@ import fg from "fast-glob"
 import { saveProjectToDirectory, type IdeExtensionConfig } from "@inlang/sdk"
 import path from "node:path"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
-import { setupFileSystemWatcher } from "./utilities/fs/setupFileSystemWatcher.js"
+import { setupDirectMessageWatcher } from "./utilities/fs/experimental/directMessageHandler.js"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
@@ -96,8 +96,14 @@ export async function main(args: {
 		await registerExtensionComponents(args)
 		await handleInlangErrors()
 
-		// TODO: Replace by reactive settings API?
-		setupFileSystemWatcher(args)
+		// Set up both file system watchers
+		// setupFileSystemWatcher(args)
+
+		// Set up direct message watcher as a fallback
+		setupDirectMessageWatcher({
+			context: args.context,
+			workspaceFolder: args.workspaceFolder,
+		})
 
 		return
 	} else {

@@ -18,6 +18,9 @@ import { msg } from "./msg.js"
 // Store previous subscription state
 let subscription: { unsubscribe: () => void } | undefined
 let previousBundles: BundleNested[] | undefined
+// Track last update time to prevent update storms
+let lastUpdateTime = 0
+const UPDATE_THROTTLE_MS = 500
 
 export function createMessageWebviewProvider(args: {
 	workspaceFolder: vscode.WorkspaceFolder
@@ -30,8 +33,11 @@ export function createMessageWebviewProvider(args: {
 	let debounceTimer: NodeJS.Timeout | undefined
 	// Add a flag to track subscription status
 	let isSubscribing = false
+	// Add flag to prevent event loops
+	let isProcessingUpdate = false
 
 	const updateMessages = async () => {
+		console.log("Message view update requested")
 		const project = state().project as InlangProject | undefined
 		if (!project) {
 			isLoading = true
@@ -40,13 +46,23 @@ export function createMessageWebviewProvider(args: {
 			return
 		}
 
+		// Prevent updates that are too frequent
+		const now = Date.now()
+		if (now - lastUpdateTime < UPDATE_THROTTLE_MS) {
+			console.log("Throttling message view update - too frequent")
+			return
+		}
+		lastUpdateTime = now
+
 		// Prevent multiple subscriptions from running simultaneously
 		if (isSubscribing) {
+			console.log("Skipping message view update - already subscribing")
 			return
 		}
 
 		// Ensure we are only subscribing when the project actually changes
 		if (subscribedToProjectPath !== state().selectedProjectPath) {
+			console.log(`Subscribing to new project: ${state().selectedProjectPath}`)
 			isSubscribing = true
 
 			// Clear existing subscription safely
@@ -75,6 +91,7 @@ export function createMessageWebviewProvider(args: {
 
 					// Only update if bundles actually changed
 					if (!isEqual(previousBundles, newBundles)) {
+						console.log(`Bundles updated: ${newBundles.length} messages`)
 						previousBundles = [...newBundles]
 						bundles = newBundles
 						isLoading = false
@@ -83,6 +100,23 @@ export function createMessageWebviewProvider(args: {
 					isSubscribing = false // Ensure flag resets after fetch
 				}
 			)
+		} else {
+			// Force a one-time refresh of data if the project is the same
+			console.log("Forcing message view refresh")
+			try {
+				const result = await selectBundleNested(project.db).execute()
+				
+				// Only update if bundles actually changed
+				if (!isEqual(previousBundles, result)) {
+					console.log(`Bundles refreshed: ${result.length} messages`)
+					previousBundles = [...result]
+					bundles = result
+					isLoading = false
+					throttledUpdateWebviewContent()
+				}
+			} catch (error) {
+				console.error("Error refreshing messages:", error)
+			}
 		}
 	}
 
@@ -97,6 +131,51 @@ export function createMessageWebviewProvider(args: {
 			}
 		}
 	}
+	
+	// Forcefully refresh message data
+	const forceMessageRefresh = async () => {
+		// Prevent recursive calls
+		if (isProcessingUpdate) {
+			console.log("Already processing an update, skipping")
+			return
+		}
+		
+		isProcessingUpdate = true
+		console.log("Forcing immediate message refresh")
+		const project = state().project as InlangProject | undefined
+		if (!project) {
+			isProcessingUpdate = false
+			return
+		}
+		
+		try {
+			// Reset isSubscribing flag to ensure we can process the request
+			isSubscribing = false
+			
+			// Bypass throttling for this critical update
+			lastUpdateTime = 0
+			
+			// Force a fresh query
+			const result = await selectBundleNested(project.db).execute()
+			
+			// Always update regardless of whether it appears changed
+			console.log(`Forced refresh: ${result.length} messages loaded`)
+			// Force a complete refresh by explicitly changing the reference
+			previousBundles = JSON.parse(JSON.stringify(result)) 
+			bundles = [...result]
+			isLoading = false
+			
+			// Update the view immediately without throttling
+			updateWebviewContent()
+		} catch (error) {
+			console.error("Error during forced message refresh:", error)
+		} finally {
+			// Allow future updates again
+			setTimeout(() => {
+				isProcessingUpdate = false
+			}, 200)
+		}
+	}
 
 	const debounceUpdate = () => {
 		const activeEditor = vscode.window.activeTextEditor
@@ -106,8 +185,15 @@ export function createMessageWebviewProvider(args: {
 		}
 		debounceTimer = setTimeout(() => {
 			if (activeFileContent !== fileContent) {
+				console.log("File content changed in editor, updating view")
 				activeFileContent = fileContent
+				
+				// First update the webview content to reflect current file
 				updateWebviewContent()
+				
+				// Then trigger a data refresh to ensure latest translations are shown
+				// This is important when editing translation files directly
+				updateMessages()
 			}
 		}, 300)
 	}
@@ -239,6 +325,7 @@ export function createMessageWebviewProvider(args: {
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.event(() => {
+					console.log("ON_DID_CREATE_MESSAGE event triggered")
 					updateMessages()
 					persistMessages()
 				})
@@ -246,6 +333,7 @@ export function createMessageWebviewProvider(args: {
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => {
+					console.log("ON_DID_EXTRACT_MESSAGE event triggered")
 					updateMessages()
 					persistMessages()
 				})
@@ -253,19 +341,29 @@ export function createMessageWebviewProvider(args: {
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => {
-					updateMessages()
-					persistMessages()
+					console.log("ON_DID_EDIT_MESSAGE event triggered - forcing immediate refresh")
+					// Use our special forced refresh that bypasses throttling and always updates
+					forceMessageRefresh()
+					
+					// Don't automatically update the editor view anymore
+					// to prevent overriding user edits
+					console.log("Not automatically updating editor view")
+					
+					// Don't save here as this might have been triggered by a file system watcher
+					// preventing update loops
 				})
 			)
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event(() => {
+					console.log("ON_DID_PROJECT_TREE_VIEW_CHANGE event triggered")
 					updateMessages()
 				})
 			)
 
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_SETTINGS_VIEW_CHANGE.event(() => {
+					console.log("ON_DID_SETTINGS_VIEW_CHANGE event triggered")
 					updateMessages()
 				})
 			)
