@@ -1,6 +1,8 @@
 import Editor from "./components/Editor";
+import ChangesDisplay from "./components/ChangesDisplay";
+import LixDebugPanel from "./components/LixDebugPanel";
 import { useState } from "react";
-import { lix, pollingInterval, prosemirrorDocument } from "./state";
+import { lix, pollingInterval, prosemirrorDocument, changes } from "./state";
 import { useDebounceCallback, useInterval } from "usehooks-ts";
 
 function App() {
@@ -38,42 +40,15 @@ function App() {
 	return (
 		<div className="app-container">
 			<h1>ProseMirror Lix Plugin Demo</h1>
-			<p>Edit the document below. Changes will be detected and displayed.</p>
+			<p>Edit the document below. Changes will be automatically saved to Lix.</p>
 
 			<Editor onChange={handleDocChange} externalDoc={initialDoc} />
 
-			<div className="debug-section" style={{ marginTop: "20px" }}>
-				<h3>Current Document AST</h3>
-				<pre
-					style={{
-						backgroundColor: "#f5f5f5",
-						padding: "10px",
-						borderRadius: "4px",
-						maxHeight: "200px",
-						overflow: "auto",
-						color: "#333",
-					}}
-				>
-					{JSON.stringify(currentDoc, null, 2)}
-				</pre>
-			</div>
+			<LixDebugPanel lix={lix} currentDoc={currentDoc} />
 
 			<div className="changes-section" style={{ marginTop: "20px" }}>
-				<div
-					className="changes-header"
-					style={{
-						display: "flex",
-						justifyContent: "space-between",
-						alignItems: "center",
-					}}
-				></div>
-				{/* <ChangesDisplay
-					changes={changes}
-					previousDoc={previousDoc}
-					onRollbackChange={() => {
-						throw new Error("Not implemented");
-					}}
-				/> */}
+				{/* Display changes from Lix */}
+				<ChangesDisplay changes={changes} />
 			</div>
 		</div>
 	);
