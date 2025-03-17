@@ -1,49 +1,15 @@
+---
+imports: 
+  - https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-visualization.js
+---
+
 # Benchmark
 
 The internationalization (i18n) library you choose can significantly impact your application's bundle size and overall performance.
 
-This benchmark provides data-driven insights comparing Paraglide-JS with i18next, one of the most popular i18n solutions.
 
-## Results
+<benchmark-visualization src="https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-results.json"></benchmark-visualization>
 
-TL;DR
-
-- Paraglide JS is significantly smaller than i18next in all scenarios with less than 15 locales.
-- Above approx 15 locales, i18next has a lower bundle size with the `http-backend`. 
-- The [experimental per-locale splitting](https://github.com/opral/inlang-paraglide-js/issues/425) is consitently the smallest in all scenarios.
-
-`Locales: 5`  
-`Messages: 200`  
-`Namespace Size: 500`
-
-| Library                                              | Total Transfer Size |
-| ---------------------------------------------------- | ------------------- |
-| paraglide (experimental-middleware-locale-splitting) | 31.5 KB             |
-| paraglide (default)                                  | 90.1 KB             |
-| i18next (default)                                    | 694.3 KB            |
-| i18next (http-backend)                               | 191.0 KB            |
-
-`Locales: 10`  
-`Messages: 200`  
-`Namespace Size: 500`
-
-| Library                                              | Total Transfer Size |
-| ---------------------------------------------------- | ------------------- |
-| paraglide (experimental-middleware-locale-splitting) | 31.6 KB             |
-| paraglide (default)                                  | 148.3 KB            |
-| i18next (default)                                    | 694.3 KB            |
-| i18next (http-backend)                               | 191.0 KB            |
-
-`Locales: 20`  
-`Messages: 200`  
-`Namespace Size: 500`
-
-| Library                                              | Total Transfer Size |
-| ---------------------------------------------------- | ------------------- |
-| paraglide (experimental-middleware-locale-splitting) | 31.7 KB             |
-| paraglide (default)                                  | 266.1 KB            |
-| i18next (default)                                    | 694.3 KB            |
-| i18next (http-backend)                               | 191.1 KB            |
 
 ### What is Being Tested
 

@@ -237,9 +237,39 @@ async function runBenchmarks() {
 		runNumber++;
 	}
 
+	// Generate JSON data for the interactive component
+	const jsonData = {
+		scenarios: sortedConfigs
+			.filter(([_, config]) => Object.values(config.results).some(size => size > 0))
+			.map(([_, config]) => {
+				// Sort libraries (paraglide first, then i18next)
+				const sortedLibraryEntries = Object.entries(config.results)
+					.sort((a, b) => {
+						if (a[0].startsWith("paraglide")) return -1; // paraglide comes first
+						if (b[0].startsWith("paraglide")) return 1;
+						return a[0].localeCompare(b[0]);
+					})
+					.filter(([_, size]) => size > 0); // Skip libraries with no results
+
+				return {
+					locales: config.locale,
+					messages: config.message,
+					namespaceSize: config.namespaceSize,
+					results: sortedLibraryEntries.map(([key, size]) => ({
+						library: libraryModeMap.get(key) || key,
+						size: parseFloat((size / 1024).toFixed(1)) // Size in KB
+					}))
+				};
+			})
+	};
+
 	// Write the markdown tables to a file for easy copying
 	fs.writeFileSync("benchmark-results.md", markdownOutput);
 	console.log("\nResults saved to benchmark-results.md");
+
+	// Write the JSON data to a file
+	fs.writeFileSync("benchmark-results.json", JSON.stringify(jsonData, null, 2));
+	console.log("Results saved to benchmark-results.json");
 
 	return markdownOutput;
 }
