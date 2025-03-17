@@ -19,6 +19,7 @@
 		"": {
 			"/": "./docs/introduction.md",
 			"/comparison": "./docs/comparison.md",
+			"/benchmark": "./benchmark/README.md",
 			"/changelog": "./CHANGELOG.md"
 		},
 		"Getting Started": {

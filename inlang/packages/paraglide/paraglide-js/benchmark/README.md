@@ -3,9 +3,15 @@ imports:
   - https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-visualization.js
 ---
 
-This benchmark compares the transfer size of different i18n libraries and their implementations. The goal is to understand how the size of the library changes with different configurations, such as the number of locales, messages per page, and namespace size.
+# Benchmark
 
-Tip: Paraglide JS has not reached its final optimizations yet. Tickets like [#88 per locale builds](https://github.com/opral/inlang-paraglide-js/issues/88) or [#354 pruning server side rendered messages](https://github.com/opral/inlang-paraglide-js/issues/354) are yet to be implemented. Pull requests are welcome!
+This benchmark compares the transfer size of different i18n libraries and their implementations. 
+
+The goal is to understand how the size of the library changes with different configurations, such as the number of locales, messages per page, and namespace size.
+
+If you are looking for a feature comparison, check out the [comparison table](/m/gerre34r/library-inlang-paraglideJs/comparison).
+
+💡 **Tip**: Paraglide JS has not reached its final optimizations yet. Tickets like [#88 per locale builds](https://github.com/opral/inlang-paraglide-js/issues/88) or [#354 pruning server side rendered messages](https://github.com/opral/inlang-paraglide-js/issues/354) are yet to be implemented. Pull requests are welcome!
 
 
 <benchmark-visualization src="https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-results.json"></benchmark-visualization>
