@@ -19,6 +19,9 @@
 		"noEmit": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
-		"strict": true
+		"strict": true,
+		"paths": {
+			"react": [ "./node_modules/@types/react" ]
+		}
 	}
 }
