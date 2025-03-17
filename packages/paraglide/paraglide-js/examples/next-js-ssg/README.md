@@ -28,7 +28,7 @@ This is an example of how to use Paraglide with Next JS with SSG. The source cod
 ### Install paraglide js
 
 ```bash
-npx @inlang/paraglide-js@beta init
+npx @inlang/paraglide-js@latest init
 ```
 
 ### Add the webpack plugin to the `next.config.js` file:

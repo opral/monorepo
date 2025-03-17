@@ -20,7 +20,7 @@ This example shows how to use Paraglide with SvelteKit.The source code can be fo
 ### Install paraglide js
 
 ```bash
-npx @inlang/paraglide-js@beta init
+npx @inlang/paraglide-js@latest init
 ```
 
 ### Add the `paraglideVitePlugin()` to `vite.config.js`.
