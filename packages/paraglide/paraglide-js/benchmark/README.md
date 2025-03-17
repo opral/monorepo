@@ -1,6 +1,6 @@
 ---
 imports: 
-  - https://raw.githubusercontent.com/opral/monorepo/parjs-446-create-a-graph-in-the-benchmark/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-visualization.js
+  - https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-visualization.js
 ---
 
 # Benchmark
