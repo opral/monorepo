@@ -81,7 +81,6 @@ const Footer = () => {
 				href: "/c/plugins",
 			},
 			{ name: m.footer_categories_lintrules(), href: "/c/lint-rules" },
-			{ name: m.footer_resources_guides(), href: "/c/guides" },
 		];
 	};
 
