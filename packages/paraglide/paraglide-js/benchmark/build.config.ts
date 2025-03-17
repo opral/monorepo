@@ -6,15 +6,27 @@ import { type UserConfig } from "vite";
  * If not specified, it defaults to the same value as messages.
  */
 export const builds: BuildConfig[] = [
+	// For m=100
 	...createBuildMatrix({
 		libraries: {
 			paraglide: ["default", "experimental-middleware-locale-splitting"],
 			i18next: ["default", "http-backend"],
 		},
 		locales: [5, 10, 20],
-		messages: [100, 200, 300],
+		messages: [100],
 		percentDynamic: 20,
-		namespaceSizeFactors: [1, 2.5, 5],
+		namespaceSizes: [100, 200, 500, 1000],
+	}),
+	// For m=200
+	...createBuildMatrix({
+		libraries: {
+			paraglide: ["default", "experimental-middleware-locale-splitting"],
+			i18next: ["default", "http-backend"],
+		},
+		locales: [5, 10, 20],
+		messages: [200],
+		percentDynamic: 20,
+		namespaceSizes: [200, 500, 1000],
 	}),
 ];
 
@@ -60,7 +72,6 @@ export function createBuildMatrix(config: {
 	percentDynamic: number;
 	generateAboutPage?: boolean;
 	namespaceSizes?: Array<number>;
-	namespaceSizeFactors?: Array<number>;
 }): BuildConfig[] {
 	const builds = [];
 
@@ -68,28 +79,7 @@ export function createBuildMatrix(config: {
 		for (const mode of modes) {
 			for (const locale of config.locales) {
 				for (const message of config.messages) {
-					if (
-						config.namespaceSizeFactors &&
-						config.namespaceSizeFactors.length > 0
-					) {
-						// Create builds with different namespace size factors
-						for (const factor of config.namespaceSizeFactors) {
-							const namespaceSize = Math.round(message * factor);
-
-							builds.push({
-								library: library as BuildConfig["library"],
-								libraryMode: mode,
-								locales: locale,
-								messages: message,
-								namespaceSize,
-								percentDynamic: config.percentDynamic,
-								generateAboutPage: config.generateAboutPage ?? true,
-							});
-						}
-					} else if (
-						config.namespaceSizes &&
-						config.namespaceSizes.length > 0
-					) {
+					if (config.namespaceSizes && config.namespaceSizes.length > 0) {
 						// Create builds with different namespace sizes
 						for (const namespaceSize of config.namespaceSizes) {
 							// Throw error if namespace size is lower than message count
