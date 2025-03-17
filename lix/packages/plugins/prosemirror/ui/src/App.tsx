@@ -1,51 +1,46 @@
 import Editor from "./components/Editor";
 import { useState } from "react";
+import { lix, pollingInterval } from "./state";
+import { useDebounceCallback, useInterval } from "usehooks-ts";
 
 function App() {
+	const [initialDoc] = useState<any>(null);
 	const [currentDoc, setCurrentDoc] = useState<any>(null);
 
-	// Handle doc changes from the editor
-	const handleDocChange = (newDoc: any) => {
-		// Always update current document state
-		console.log("Document changed from editor");
+	const [, setForceRender] = useState(0);
 
-		// Ensure all nodes have the proper structure with attrs
-		// This is needed for proper change detection
-		const ensureNodeStructure = (node: any) => {
-			if (!node) return node;
+	useInterval(() => {
+		setForceRender((prev) => prev + 1);
+	}, pollingInterval);
 
-			// Make sure the node has attrs with _id if not text
-			if (node.type !== "text") {
-				node.attrs = node.attrs || {};
-				if (!node.attrs._id) {
-					node.attrs._id = `${node.type}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-				}
-			}
+	//
+	// Debouncing to prevent too many updates
+	const handleDocChange = useDebounceCallback((newDoc: any) => {
+		const file = new TextEncoder().encode(JSON.stringify(newDoc));
 
-			// Recursively process content
-			if (node.content && Array.isArray(node.content)) {
-				node.content = node.content.map(ensureNodeStructure);
-			}
+		lix.db
+			.insertInto("file")
+			.values({
+				path: "/prosemirror.json",
+				data: file,
+			})
+			.onConflict((oc) =>
+				oc.doUpdateSet({
+					data: file,
+				}),
+			)
+			.execute()
+			.then(() => console.log("File saved to lix"));
 
-			return node;
-		};
-
-		// Create a deep copy and ensure proper structure
-		const processedDoc = ensureNodeStructure(
-			JSON.parse(JSON.stringify(newDoc)),
-		);
-
-		setCurrentDoc(processedDoc);
-
-		// Update current document with the processed version
-	};
+		setCurrentDoc(newDoc);
+	}, 100);
 
 	return (
 		<div className="app-container">
 			<h1>ProseMirror Lix Plugin Demo</h1>
 			<p>Edit the document below. Changes will be detected and displayed.</p>
 
-			<Editor onChange={handleDocChange} externalDoc={currentDoc} />
+			<Editor onChange={handleDocChange} externalDoc={initialDoc} />
 
 			<div className="debug-section" style={{ marginTop: "20px" }}>
 				<h3>Current Document AST</h3>

@@ -43,8 +43,6 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 		// Only run once on component mount
 		if (!editorRef.current) return;
 
-		console.log("Creating editor...");
-
 		// Get the initial document - either from props or create a default one
 		let initialDoc;
 
@@ -54,7 +52,6 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 		const FIXED_PARAGRAPH_ID = "p-1";
 
 		if (externalDoc && Object.keys(externalDoc).length > 0) {
-			console.log("Using external document for initialization");
 			try {
 				// When importing from externalDoc, preserve the existing IDs
 				initialDoc = schema.nodeFromJSON(externalDoc);
@@ -64,7 +61,6 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 					initialDoc.attrs = { ...initialDoc.attrs, _id: FIXED_DOC_ID };
 				}
 			} catch (error) {
-				console.error("Error parsing external document:", error);
 				// Fallback to default document with fixed IDs
 				initialDoc = schema.node("doc", { _id: FIXED_DOC_ID }, [
 					schema.node("paragraph", { _id: FIXED_PARAGRAPH_ID }, [
@@ -74,7 +70,6 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 			}
 		} else {
 			// Create a default document with fixed IDs
-			console.log("Creating default document with fixed IDs");
 			initialDoc = schema.node("doc", { _id: FIXED_DOC_ID }, [
 				schema.node("paragraph", { _id: FIXED_PARAGRAPH_ID }, [
 					schema.text("Type here..."),
@@ -107,7 +102,6 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 
 				// Notify parent component of changes
 				if (transaction.docChanged) {
-					console.log("Document changed!");
 					onChange(newState.doc.toJSON());
 				}
 			},
@@ -119,12 +113,10 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 		// Focus the editor
 		setTimeout(() => {
 			view.focus();
-			console.log("Editor focused");
 		}, 100);
 
 		// Clean up the editor when component unmounts
 		return () => {
-			console.log("Destroying editor");
 			view.destroy();
 		};
 	}, []);
@@ -133,8 +125,6 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 	useEffect(() => {
 		if (view && externalDoc) {
 			try {
-				console.log("Updating editor with external document:", externalDoc);
-
 				// Create a new document from the external state
 				// Important: Use setNodeMarkup to preserve externalDoc attrs including _id values
 				const newDocNode = schema.nodeFromJSON(externalDoc);
@@ -148,30 +138,22 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 
 				// Apply the transaction to update the editor
 				view.dispatch(tr);
-
-				console.log("Editor updated with external document");
 			} catch (error) {
-				console.error("Error updating editor with external document:", error);
+				// Error handling for updating editor with external document
 			}
 		}
 	}, [view, externalDoc]);
 
 	// Handle clicks to focus the editor
 	const handleClick = () => {
-		console.log("Click on editor container");
 		if (view && !view.hasFocus()) {
 			view.focus();
-			console.log("Editor focused after click");
 		}
 	};
 
 	return (
 		<div className="editor-container">
-			<div className="toolbar">
-				<button onClick={() => console.log(view?.state.doc.toJSON())}>
-					Debug
-				</button>
-			</div>
+			<div className="toolbar"></div>
 
 			<div
 				className="editor-wrapper"

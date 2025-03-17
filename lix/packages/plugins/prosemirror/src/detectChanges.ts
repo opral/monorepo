@@ -24,6 +24,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	before,
 	after,
 }) => {
+	console.log("detecting changes");
 	// Early return for identical files
 	if (before && after && before.data === after.data) {
 		return [];
