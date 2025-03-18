@@ -5,3 +5,7 @@ packages/md-app/src/components/editor/plugins/*.ts
 # also exclude ui
 packages/md-app/src/components/plate-ui/*.tsx
 packages/md-app/src/components/plate-ui/*.ts
+
+
+
+packages/md-app/src/components/editor/plugins/markdown/fixtures/*.md
