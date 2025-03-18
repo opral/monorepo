@@ -1,8 +1,7 @@
 import { Schema } from "prosemirror-model";
 
-// Define a minimal schema that supports basic content
+// Define a schema that supports basic content including lists
 // We need to define a schema for ProseMirror to work with
-// but we keep it minimal to focus on document structure
 export const schema = new Schema({
   nodes: {
     // The top level document node
@@ -25,6 +24,18 @@ export const schema = new Schema({
         id: { default: "" }
       },
       toDOM(node) { return [`h${node.attrs.level}`, 0] }
+    },
+    
+    // List nodes
+    bullet_list: {
+      content: "list_item+",
+      group: "block",
+      toDOM() { return ["ul", 0] }
+    },
+    list_item: {
+      content: "paragraph block*",
+      defining: true,
+      toDOM() { return ["li", 0] }
     },
     
     // Inline content

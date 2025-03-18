@@ -1,13 +1,17 @@
 import React from 'react';
 import { toBlob } from '@lix-js/sdk';
+import { useAtomValue } from 'jotai';
+import { lixAtom } from '../state';
 
 interface LixDebugPanelProps {
-  lix: any;
   currentDoc: any;
 }
 
-const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc }) => {
+const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ currentDoc }) => {
+  const lix = useAtomValue(lixAtom);
   const handleDownloadLixDb = async () => {
+    if (!lix) return;
+    
     try {
       // Get the Lix database blob using the correct API
       const blob = await toBlob({ lix });
@@ -32,6 +36,8 @@ const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc }) => {
   };
 
   const handlePrintChangeCounts = async () => {
+    if (!lix) return;
+    
     try {
       // Get change counts from the database
       const changeCounts = await lix.db
@@ -84,6 +90,9 @@ const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc }) => {
       </div>
 
       <h4 style={{ marginTop: "15px" }}>Current Document AST</h4>
+      <div style={{ marginBottom: "10px" }}>
+        <small style={{ color: "#666" }}>Document structure (not editable)</small>
+      </div>
       <pre
         style={{
           backgroundColor: "#f5f5f5",

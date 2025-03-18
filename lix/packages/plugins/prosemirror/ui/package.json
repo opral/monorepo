@@ -12,6 +12,8 @@
 	"dependencies": {
 		"@lix-js/plugin-prosemirror": "workspace:*",
 		"@lix-js/sdk": "workspace:*",
+		"jotai": "^2.11.1",
+		"native-file-system-adapter": "^3.0.1",
 		"prosemirror-commands": "^1.5.2",
 		"prosemirror-history": "^1.4.1",
 		"prosemirror-keymap": "^1.2.2",

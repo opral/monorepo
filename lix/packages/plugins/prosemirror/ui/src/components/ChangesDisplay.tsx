@@ -1,30 +1,62 @@
-import React from 'react';
-import { Change } from '@lix-js/sdk';
+import React, { useState, useEffect } from "react";
+// Import Change type directly from SDK to avoid using it immediately
+import { useAtomValue } from "jotai";
+import { lixAtom, withPollingAtom } from "../state";
+import { Change } from "@lix-js/sdk";
 
-interface ChangesDisplayProps {
-  changes: Array<Change & { content: any }>;
-}
+interface ChangesDisplayProps {}
 
-const ChangesDisplay: React.FC<ChangesDisplayProps> = ({ changes }) => {
-  if (!changes || changes.length === 0) {
-    return (
-      <div className="changes-empty">
-        <p>No changes detected yet.</p>
-      </div>
-    );
-  }
+const ChangesDisplay: React.FC<ChangesDisplayProps> = () => {
+	const [changes, setChanges] = useState<Array<Change & { content: any }>>([]);
+	const lix = useAtomValue(lixAtom);
+	const pollingTimestamp = useAtomValue(withPollingAtom);
 
-  // Group changes by timestamp
-  const groupedChanges = changes.reduce((acc: Record<string, Array<Change & { content: any }>>, change) => {
-    const timestamp = new Date(change.created_at).toLocaleString();
-    if (!acc[timestamp]) {
-      acc[timestamp] = [];
-    }
-    acc[timestamp].push(change);
-    return acc;
-  }, {});
+	// Use effect to load changes when lix or pollingTimestamp changes
+	useEffect(() => {
+		if (!lix) return;
 
-  return (
+		const loadChanges = async () => {
+			try {
+				const loadedChanges = await lix.db
+					.selectFrom("change")
+					.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+					.innerJoin("file", "change.file_id", "file.id")
+					.where("file.path", "=", "/prosemirror.json")
+					.selectAll("change")
+					.select("snapshot.content")
+					.execute();
+
+				setChanges(loadedChanges);
+			} catch (error) {
+				console.error("Error loading changes:", error);
+				setChanges([]);
+			}
+		};
+
+		loadChanges();
+	}, [lix, pollingTimestamp]);
+	if (!changes || changes.length === 0) {
+		return (
+			<div className="changes-empty">
+				<p>No changes detected yet.</p>
+			</div>
+		);
+	}
+
+	// Group changes by timestamp
+	const groupedChanges = changes.reduce(
+		(acc: Record<string, Array<Change & { content: any }>>, change) => {
+			const timestamp = new Date(change.created_at).toLocaleString();
+			if (!acc[timestamp]) {
+				acc[timestamp] = [];
+			}
+			acc[timestamp].push(change);
+			return acc;
+		},
+		{},
+	);
+
+	return (
 		<div className="changes-container">
 			<h3>Document History ({changes.length} changes)</h3>
 
