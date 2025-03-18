@@ -35,21 +35,24 @@ function App() {
 			.then(() => console.log("File saved to lix"));
 
 		setCurrentDoc(newDoc);
-	}, 100);
+	}, 400); // Increased from 100ms to 400ms for better performance while still being responsive
 
 	return (
 		<div className="app-container">
 			<h1>ProseMirror Lix Plugin Demo</h1>
-			<p>Edit the document below. Changes will be automatically saved to Lix.</p>
 
-			<Editor onChange={handleDocChange} externalDoc={initialDoc} />
+			<div className="editor-changes-container">
+				<div className="editor-section">
+					<Editor onChange={handleDocChange} externalDoc={initialDoc} />
+				</div>
+				
+				<div className="changes-section">
+					{/* Display changes from Lix */}
+					<ChangesDisplay changes={changes} />
+				</div>
+			</div>
 
 			<LixDebugPanel lix={lix} currentDoc={currentDoc} />
-
-			<div className="changes-section" style={{ marginTop: "20px" }}>
-				{/* Display changes from Lix */}
-				<ChangesDisplay changes={changes} />
-			</div>
 		</div>
 	);
 }

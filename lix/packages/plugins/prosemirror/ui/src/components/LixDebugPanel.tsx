@@ -56,9 +56,9 @@ const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc }) => {
           <button 
             onClick={handleDownloadLixDb}
             style={{ 
-              backgroundColor: "#4a90e2", 
-              color: "white", 
-              border: "none", 
+              backgroundColor: "#f5f5f5", 
+              color: "#333", 
+              border: "1px solid #ccc", 
               borderRadius: "4px", 
               padding: "5px 10px",
               marginRight: "10px",
@@ -70,9 +70,9 @@ const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc }) => {
           <button 
             onClick={handlePrintChangeCounts}
             style={{ 
-              backgroundColor: "#9c27b0", 
-              color: "white", 
-              border: "none", 
+              backgroundColor: "#f5f5f5", 
+              color: "#333", 
+              border: "1px solid #ccc", 
               borderRadius: "4px", 
               padding: "5px 10px",
               cursor: "pointer"

@@ -5,7 +5,7 @@ export let lix = await openLixInMemory({
 	providePlugins: [prosemirrorPlugin],
 });
 
-
+// store all changes
 export let changes: Array<Change & { content: any }> = [];
 
 export let prosemirrorDocument: any =
@@ -33,7 +33,6 @@ setInterval(async () => {
 		.where("file.path", "=", "/prosemirror.json")
 		.selectAll("change")
 		.select("snapshot.content")
+		.orderBy("change.created_at", "desc")
 		.execute();
 }, pollingInterval);
-
-

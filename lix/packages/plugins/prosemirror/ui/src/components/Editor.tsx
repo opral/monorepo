@@ -100,18 +100,17 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 				className="editor-wrapper"
 				onClick={handleClick}
 				style={{
-					border: "2px solid #ccc",
+					border: "1px solid #ccc",
 					borderRadius: "4px",
-					padding: "5px",
+					padding: "0",
 					cursor: "text",
-					backgroundColor: "#fff",
+					backgroundColor: "#fff"
 				}}
 			>
 				{/* The actual editor will be mounted here */}
 				<div
 					ref={editorRef}
 					className="editor"
-					style={{ minHeight: "150px" }}
 				/>
 			</div>
 		</div>
