@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/plugin-m-function-matcher",
-	"version": "2.0.4",
+	"version": "2.0.5",
 	"type": "module",
 	"exports": {
 		".": "./dist/index.js"
