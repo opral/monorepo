@@ -104,7 +104,8 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 					borderRadius: "4px",
 					padding: "0",
 					cursor: "text",
-					backgroundColor: "#fff"
+					backgroundColor: "#fff",
+					minHeight: "300px"
 				}}
 			>
 				{/* The actual editor will be mounted here */}

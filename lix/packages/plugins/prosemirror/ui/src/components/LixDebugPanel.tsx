@@ -1,12 +1,14 @@
 import React from 'react';
 import { toBlob } from '@lix-js/sdk';
+import { Change } from '@lix-js/sdk';
 
 interface LixDebugPanelProps {
   lix: any;
   currentDoc: any;
+  changes: Array<Change & { content: any }>;
 }
 
-const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc }) => {
+const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc, changes }) => {
   const handleDownloadLixDb = async () => {
     try {
       // Get the Lix database blob using the correct API
@@ -31,21 +33,35 @@ const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc }) => {
     }
   };
 
-  const handlePrintChangeCounts = async () => {
-    try {
-      // Get change counts from the database
-      const changeCounts = await lix.db
-        .selectFrom('change')
-        .innerJoin('file', 'change.file_id', 'file.id')
-        .where('file.path', '=', '/prosemirror.json')
-        .select(lix.db.fn.count('change.id').as('count'))
-        .executeTakeFirst();
+  // Function to get a readable content preview for changes
+  const getContentPreview = (change: Change & { content: any }): string => {
+    if (!change.content) return "Content deleted";
+    
+    if (typeof change.content === "object") {
+      // For text nodes, show the text content
+      if (change.content.text) {
+        return change.content.text.substring(0, 60) + 
+               (change.content.text.length > 60 ? "..." : "");
+      }
       
-      console.log('Change counts:', changeCounts);
-      alert(`Total changes for /prosemirror.json: ${changeCounts?.count || 0}`);
-    } catch (error) {
-      console.error('Error counting changes:', error);
+      // For paragraph nodes, extract content from their children
+      if (change.content.content && Array.isArray(change.content.content)) {
+        const textNodes = change.content.content
+          .filter((node: any) => node.type === "text" && node.text)
+          .map((node: any) => node.text);
+
+        if (textNodes.length > 0) {
+          const combinedText = textNodes.join(" ");
+          return combinedText.substring(0, 60) + 
+                 (combinedText.length > 60 ? "..." : "");
+        }
+      }
+      
+      // For other node types
+      return `${change.content.type || "Unknown"} node`;
     }
+    
+    return "Unknown content";
   };
 
   return (
@@ -61,41 +77,81 @@ const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc }) => {
               border: "1px solid #ccc", 
               borderRadius: "4px", 
               padding: "5px 10px",
-              marginRight: "10px",
               cursor: "pointer"
             }}
           >
             Download Lix Blob
           </button>
-          <button 
-            onClick={handlePrintChangeCounts}
-            style={{ 
-              backgroundColor: "#f5f5f5", 
-              color: "#333", 
-              border: "1px solid #ccc", 
-              borderRadius: "4px", 
-              padding: "5px 10px",
-              cursor: "pointer"
-            }}
-          >
-            Count Changes
-          </button>
         </div>
       </div>
 
-      <h4 style={{ marginTop: "15px" }}>Current Document AST</h4>
-      <pre
-        style={{
-          backgroundColor: "#f5f5f5",
-          padding: "10px",
-          borderRadius: "4px",
-          maxHeight: "200px",
-          overflow: "auto",
-          color: "#333",
-        }}
-      >
-        {JSON.stringify(currentDoc, null, 2)}
-      </pre>
+      <div className="debug-content" style={{ display: "flex", gap: "20px", marginTop: "15px" }}>
+        {/* Current Document AST */}
+        <div className="debug-panel" style={{ flex: 1 }}>
+          <h4>Current Document AST</h4>
+          <pre
+            style={{
+              backgroundColor: "#f5f5f5",
+              padding: "10px",
+              borderRadius: "4px",
+              height: "400px",
+              overflow: "auto",
+              color: "#333",
+            }}
+          >
+            {JSON.stringify(currentDoc, null, 2)}
+          </pre>
+        </div>
+
+        {/* All Changes */}
+        <div className="debug-panel" style={{ flex: 1 }}>
+          <h4>All Changes {changes.length > 0 ? `(${changes.length})` : ""}</h4>
+          <div 
+            className="change-graph"
+            style={{
+              backgroundColor: "#f5f5f5",
+              padding: "10px",
+              borderRadius: "4px",
+              height: "400px",
+              overflow: "auto",
+              color: "#333",
+            }}
+          >
+            {changes.length > 0 ? (
+              changes.map((change, index, array) => (
+                <div key={`change-${change.id}`} className="change-group">
+                  <div className="graph-node">
+                    <div className="graph-dot"></div>
+                    {index < array.length - 1 && <div className="graph-line"></div>}
+                  </div>
+                  
+                  <div className="change-content-wrapper">
+                    <div className="change-timestamp">
+                      <strong>{new Date(change.created_at).toLocaleString()}</strong>
+                    </div>
+
+                    <div className="change-item-container">
+                      <div className={`change-item change-${!change.content ? "deleted" : "added"}`}>
+                        <div className="change-header">
+                          <span className="change-type">{!change.content ? "Deleted" : "Added"}</span>
+                          <span className="change-node-type">{change.content?.type || "Unknown"}</span>
+                        </div>
+                        <div className="change-content">
+                          <span className="change-preview">{getContentPreview(change)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="empty-graph">
+                <p className="empty-message">No changes detected yet. Start editing to see changes.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

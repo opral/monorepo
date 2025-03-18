@@ -1,5 +1,4 @@
 import Editor from "./components/Editor";
-import ChangesDisplay from "./components/ChangesDisplay";
 import LixDebugPanel from "./components/LixDebugPanel";
 import { useState } from "react";
 import { lix, pollingInterval, prosemirrorDocument, changes } from "./state";
@@ -41,18 +40,11 @@ function App() {
 		<div className="app-container">
 			<h1>ProseMirror Lix Plugin Demo</h1>
 
-			<div className="editor-changes-container">
-				<div className="editor-section">
-					<Editor onChange={handleDocChange} externalDoc={initialDoc} />
-				</div>
-				
-				<div className="changes-section">
-					{/* Display changes from Lix */}
-					<ChangesDisplay changes={changes} />
-				</div>
+			<div className="editor-section">
+				<Editor onChange={handleDocChange} externalDoc={initialDoc} />
 			</div>
 
-			<LixDebugPanel lix={lix} currentDoc={currentDoc} />
+			<LixDebugPanel lix={lix} currentDoc={currentDoc} changes={changes} />
 		</div>
 	);
 }
