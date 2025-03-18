@@ -5,15 +5,27 @@ export let lix = await openLixInMemory({
 	providePlugins: [prosemirrorPlugin],
 });
 
+
+export let changes: Array<Change & { content: any }> = [];
+
+export let prosemirrorDocument: any =
+	// initial document defaults to empty document
+	{
+		type: "doc",
+		content: [],
+	};
+
 /**
  * Lix does not have subscriptions yet.
  * https://github.com/opral/lix-sdk/issues/262
  */
 export const pollingInterval = 250;
 
-export let changes: Array<Change & { content: any }> = [];
-
+// running all queries in the same interval
+// note: this is done on purpose to avoid adopting a state
+// management solution which would complicate the example
 setInterval(async () => {
+	// QUERYING CHANGES
 	changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
@@ -24,21 +36,4 @@ setInterval(async () => {
 		.execute();
 }, pollingInterval);
 
-export let prosemirrorDocument: any =
-	// initial document defaults to empty document
-	{
-		type: "doc",
-		content: [],
-	};
 
-setInterval(async () => {
-	const blob = await lix.db
-		.selectFrom("file")
-		.where("file.path", "=", "/prosemirror.json")
-		.select("data")
-		.executeTakeFirst();
-
-	if (blob) {
-		prosemirrorDocument = JSON.parse(new TextDecoder().decode(blob.data));
-	}
-}, pollingInterval);
