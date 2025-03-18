@@ -11,7 +11,7 @@ test("it should not detect changes if the document did not update", async () => 
 			content: [
 				{
 					type: "paragraph",
-					_id: "39u49u212",
+					attrs: { id: "39u49u212" },
 					content: [
 						{
 							type: "text",
@@ -52,7 +52,7 @@ test("it should detect insertion of a new node", async () => {
 			content: [
 				{
 					type: "paragraph",
-					_id: "paragraph-1",
+					attrs: { id: "paragraph-1" },
 					content: [
 						{
 							type: "text",
@@ -70,7 +70,7 @@ test("it should detect insertion of a new node", async () => {
 			content: [
 				{
 					type: "paragraph",
-					_id: "paragraph-1",
+					attrs: { id: "paragraph-1" },
 					content: [
 						{
 							type: "text",
@@ -80,7 +80,7 @@ test("it should detect insertion of a new node", async () => {
 				},
 				{
 					type: "paragraph",
-					_id: "paragraph-2",
+					attrs: { id: "paragraph-2" },
 					content: [
 						{
 							type: "text",
@@ -123,7 +123,7 @@ test("it should detect modification of an existing node", async () => {
 			content: [
 				{
 					type: "paragraph",
-					_id: "paragraph-1",
+					attrs: { id: "paragraph-1" },
 					content: [
 						{
 							type: "text",
@@ -141,7 +141,7 @@ test("it should detect modification of an existing node", async () => {
 			content: [
 				{
 					type: "paragraph",
-					_id: "paragraph-1",
+					attrs: { id: "paragraph-1" },
 					content: [
 						{
 							type: "text",
@@ -189,7 +189,7 @@ test("it should detect deletion of a node", async () => {
 			content: [
 				{
 					type: "paragraph",
-					_id: "paragraph-1",
+					attrs: { id: "paragraph-1" },
 					content: [
 						{
 							type: "text",
@@ -199,7 +199,7 @@ test("it should detect deletion of a node", async () => {
 				},
 				{
 					type: "paragraph",
-					_id: "paragraph-2",
+					attrs: { id: "paragraph-2" },
 					content: [
 						{
 							type: "text",
@@ -217,7 +217,7 @@ test("it should detect deletion of a node", async () => {
 			content: [
 				{
 					type: "paragraph",
-					_id: "paragraph-1",
+					attrs: { id: "paragraph-1" },
 					content: [
 						{
 							type: "text",
@@ -260,7 +260,7 @@ test("it should detect multiple changes in a single document", async () => {
 			content: [
 				{
 					type: "paragraph",
-					_id: "paragraph-1",
+					attrs: { id: "paragraph-1" },
 					content: [
 						{
 							type: "text",
@@ -270,7 +270,7 @@ test("it should detect multiple changes in a single document", async () => {
 				},
 				{
 					type: "paragraph",
-					_id: "paragraph-2",
+					attrs: { id: "paragraph-2" },
 					content: [
 						{
 							type: "text",
@@ -280,7 +280,7 @@ test("it should detect multiple changes in a single document", async () => {
 				},
 				{
 					type: "paragraph",
-					_id: "paragraph-3",
+					attrs: { id: "paragraph-3" },
 					content: [
 						{
 							type: "text",
@@ -298,7 +298,7 @@ test("it should detect multiple changes in a single document", async () => {
 			content: [
 				{
 					type: "paragraph",
-					_id: "paragraph-1",
+					attrs: { id: "paragraph-1" },
 					content: [
 						{
 							type: "text",
@@ -308,7 +308,7 @@ test("it should detect multiple changes in a single document", async () => {
 				},
 				{
 					type: "paragraph",
-					_id: "paragraph-2",
+					attrs: { id: "paragraph-2" },
 					content: [
 						{
 							type: "text",
@@ -318,7 +318,7 @@ test("it should detect multiple changes in a single document", async () => {
 				},
 				{
 					type: "paragraph",
-					_id: "paragraph-4",
+					attrs: { id: "paragraph-4" },
 					content: [
 						{
 							type: "text",
@@ -392,8 +392,7 @@ test("it should detect changes in headings with different levels", async () => {
 			content: [
 				{
 					type: "heading",
-					_id: "heading-1",
-					attrs: { level: 1 },
+					attrs: { id: "heading-1", level: 1 },
 					content: [
 						{
 							type: "text",
@@ -411,8 +410,7 @@ test("it should detect changes in headings with different levels", async () => {
 			content: [
 				{
 					type: "heading",
-					_id: "heading-1",
-					attrs: { level: 2 },
+					attrs: { id: "heading-1", level: 2 },
 					content: [
 						{
 							type: "text",
@@ -460,7 +458,7 @@ test("it should detect changes in text marks", async () => {
 			content: [
 				{
 					type: "paragraph",
-					_id: "paragraph-1",
+					attrs: { id: "paragraph-1" },
 					content: [
 						{
 							type: "text",
@@ -478,7 +476,7 @@ test("it should detect changes in text marks", async () => {
 			content: [
 				{
 					type: "paragraph",
-					_id: "paragraph-1",
+					attrs: { id: "paragraph-1" },
 					content: [
 						{
 							type: "text",
@@ -541,26 +539,26 @@ test("it should detect changes in complex block structures like lists", async ()
 			content: [
 				{
 					type: "bullet_list",
-					_id: "list-1",
+					attrs: { id: "list-1" },
 					content: [
 						{
 							type: "list_item",
-							_id: "item-1",
+							attrs: { id: "item-1" },
 							content: [
 								{
 									type: "paragraph",
-									_id: "item-1-p",
+									attrs: { id: "item-1-p" },
 									content: [{ type: "text", text: "First item" }],
 								},
 							],
 						},
 						{
 							type: "list_item",
-							_id: "item-2",
+							attrs: { id: "item-2" },
 							content: [
 								{
 									type: "paragraph",
-									_id: "item-2-p",
+									attrs: { id: "item-2-p" },
 									content: [{ type: "text", text: "Second item" }],
 								},
 							],
@@ -577,39 +575,39 @@ test("it should detect changes in complex block structures like lists", async ()
 			content: [
 				{
 					type: "bullet_list",
-					_id: "list-1",
+					attrs: { id: "list-1" },
 					content: [
 						{
 							type: "list_item",
-							_id: "item-1",
+							attrs: { id: "item-1" },
 							content: [
 								{
 									type: "paragraph",
-									_id: "item-1-p",
+									attrs: { id: "item-1-p" },
 									content: [{ type: "text", text: "First item modified" }],
 								},
 							],
 						},
 						{
 							type: "list_item",
-							_id: "item-2",
+							attrs: { id: "item-2" },
 							content: [
 								{
 									type: "paragraph",
-									_id: "item-2-p",
+									attrs: { id: "item-2-p" },
 									content: [{ type: "text", text: "Second item" }],
 								},
 								{
 									type: "bullet_list",
-									_id: "nested-list",
+									attrs: { id: "nested-list" },
 									content: [
 										{
 											type: "list_item",
-											_id: "nested-item-1",
+											attrs: { id: "nested-item-1" },
 											content: [
 												{
 													type: "paragraph",
-													_id: "nested-p",
+													attrs: { id: "nested-p" },
 													content: [{ type: "text", text: "Nested item" }],
 												},
 											],
@@ -620,11 +618,11 @@ test("it should detect changes in complex block structures like lists", async ()
 						},
 						{
 							type: "list_item",
-							_id: "item-3",
+							attrs: { id: "item-3" },
 							content: [
 								{
 									type: "paragraph",
-									_id: "item-3-p",
+									attrs: { id: "item-3-p" },
 									content: [{ type: "text", text: "New third item" }],
 								},
 							],
@@ -688,8 +686,8 @@ test("it should detect changes in nodes with custom attributes", async () => {
 			content: [
 				{
 					type: "image",
-					_id: "image-1",
 					attrs: {
+						id: "image-1",
 						src: "old-image.jpg",
 						alt: "Old image description",
 						title: "Old title",
@@ -707,8 +705,8 @@ test("it should detect changes in nodes with custom attributes", async () => {
 			content: [
 				{
 					type: "image",
-					_id: "image-1",
 					attrs: {
+						id: "image-1",
 						src: "new-image.jpg",
 						alt: "New image description",
 						title: "New title",
@@ -758,30 +756,30 @@ test("it should detect changes in tables", async () => {
 			content: [
 				{
 					type: "table",
-					_id: "table-1",
+					attrs: { id: "table-1" },
 					content: [
 						{
 							type: "table_row",
-							_id: "row-1",
+							attrs: { id: "row-1" },
 							content: [
 								{
 									type: "table_cell",
-									_id: "cell-1-1",
+									attrs: { id: "cell-1-1" },
 									content: [
 										{
 											type: "paragraph",
-											_id: "cell-1-1-p",
+											attrs: { id: "cell-1-1-p" },
 											content: [{ type: "text", text: "Row 1, Cell 1" }],
 										},
 									],
 								},
 								{
 									type: "table_cell",
-									_id: "cell-1-2",
+									attrs: { id: "cell-1-2" },
 									content: [
 										{
 											type: "paragraph",
-											_id: "cell-1-2-p",
+											attrs: { id: "cell-1-2-p" },
 											content: [{ type: "text", text: "Row 1, Cell 2" }],
 										},
 									],
@@ -800,19 +798,19 @@ test("it should detect changes in tables", async () => {
 			content: [
 				{
 					type: "table",
-					_id: "table-1",
+					attrs: { id: "table-1" },
 					content: [
 						{
 							type: "table_row",
-							_id: "row-1",
+							attrs: { id: "row-1" },
 							content: [
 								{
 									type: "table_cell",
-									_id: "cell-1-1",
+									attrs: { id: "cell-1-1" },
 									content: [
 										{
 											type: "paragraph",
-											_id: "cell-1-1-p",
+											attrs: { id: "cell-1-1-p" },
 											content: [
 												{ type: "text", text: "Row 1, Cell 1 modified" },
 											],
@@ -821,11 +819,11 @@ test("it should detect changes in tables", async () => {
 								},
 								{
 									type: "table_cell",
-									_id: "cell-1-2",
+									attrs: { id: "cell-1-2" },
 									content: [
 										{
 											type: "paragraph",
-											_id: "cell-1-2-p",
+											attrs: { id: "cell-1-2-p" },
 											content: [{ type: "text", text: "Row 1, Cell 2" }],
 										},
 									],
@@ -834,26 +832,26 @@ test("it should detect changes in tables", async () => {
 						},
 						{
 							type: "table_row",
-							_id: "row-2",
+							attrs: { id: "row-2" },
 							content: [
 								{
 									type: "table_cell",
-									_id: "cell-2-1",
+									attrs: { id: "cell-2-1" },
 									content: [
 										{
 											type: "paragraph",
-											_id: "cell-2-1-p",
+											attrs: { id: "cell-2-1-p" },
 											content: [{ type: "text", text: "Row 2, Cell 1" }],
 										},
 									],
 								},
 								{
 									type: "table_cell",
-									_id: "cell-2-2",
+									attrs: { id: "cell-2-2" },
 									content: [
 										{
 											type: "paragraph",
-											_id: "cell-2-2-p",
+											attrs: { id: "cell-2-2-p" },
 											content: [{ type: "text", text: "Row 2, Cell 2" }],
 										},
 									],
@@ -914,8 +912,10 @@ test("it should detect changes in code blocks", async () => {
 			content: [
 				{
 					type: "code_block",
-					_id: "code-1",
-					attrs: { language: "javascript" },
+					attrs: {
+						id: "code-1",
+						language: "javascript",
+					},
 					content: [
 						{
 							type: "text",
@@ -933,8 +933,10 @@ test("it should detect changes in code blocks", async () => {
 			content: [
 				{
 					type: "code_block",
-					_id: "code-1",
-					attrs: { language: "typescript" },
+					attrs: {
+						id: "code-1",
+						language: "typescript",
+					},
 					content: [
 						{
 							type: "text",
@@ -984,11 +986,11 @@ test("it should detect changes in blockquotes", async () => {
 			content: [
 				{
 					type: "blockquote",
-					_id: "quote-1",
+					attrs: { id: "quote-1" },
 					content: [
 						{
 							type: "paragraph",
-							_id: "quote-p-1",
+							attrs: { id: "quote-p-1" },
 							content: [
 								{
 									type: "text",
@@ -1008,11 +1010,11 @@ test("it should detect changes in blockquotes", async () => {
 			content: [
 				{
 					type: "blockquote",
-					_id: "quote-1",
+					attrs: { id: "quote-1" },
 					content: [
 						{
 							type: "paragraph",
-							_id: "quote-p-1",
+							attrs: { id: "quote-p-1" },
 							content: [
 								{
 									type: "text",
@@ -1022,7 +1024,7 @@ test("it should detect changes in blockquotes", async () => {
 						},
 						{
 							type: "paragraph",
-							_id: "quote-p-2",
+							attrs: { id: "quote-p-2" },
 							content: [
 								{
 									type: "text",
@@ -1090,7 +1092,7 @@ test("it should detect changes in links", async () => {
 			content: [
 				{
 					type: "paragraph",
-					_id: "p-1",
+					attrs: { id: "p-1" },
 					content: [
 						{
 							type: "text",
@@ -1125,7 +1127,7 @@ test("it should detect changes in links", async () => {
 			content: [
 				{
 					type: "paragraph",
-					_id: "p-1",
+					attrs: { id: "p-1" },
 					content: [
 						{
 							type: "text",

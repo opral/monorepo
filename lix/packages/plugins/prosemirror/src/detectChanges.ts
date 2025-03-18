@@ -24,7 +24,6 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	before,
 	after,
 }) => {
-	console.log("detecting changes");
 	// Early return for identical files
 	if (before && after && before.data === after.data) {
 		return [];
@@ -89,12 +88,18 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 
 /**
  * Recursively collects all nodes with IDs into a map
+ * IDs can be either in node._id (legacy) or node.attrs.id (preferred)
  */
 function collectNodesWithId(
 	node: ProsemirrorNode,
 	nodeMap: Map<string, ProsemirrorNode>,
 ) {
-	if (node._id) {
+	// Check for ID in node.attrs.id (preferred location)
+	if (node.attrs && node.attrs.id) {
+		nodeMap.set(node.attrs.id, node);
+	}
+	// Also check for legacy _id directly on the node
+	else if (node._id) {
 		nodeMap.set(node._id, node);
 	}
 

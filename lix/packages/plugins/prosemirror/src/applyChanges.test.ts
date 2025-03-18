@@ -16,7 +16,7 @@ test("it detects and applies changes to a Prosemirror document", async () => {
 		content: [
 			{
 				type: "paragraph",
-				_id: "para-1",
+				attrs: { id: "para-1" },
 				content: [
 					{
 						type: "text",
@@ -33,7 +33,7 @@ test("it detects and applies changes to a Prosemirror document", async () => {
 		content: [
 			{
 				type: "paragraph",
-				_id: "para-1",
+				attrs: { id: "para-1" },
 				content: [
 					{
 						type: "text",
@@ -43,7 +43,7 @@ test("it detects and applies changes to a Prosemirror document", async () => {
 			},
 			{
 				type: "paragraph",
-				_id: "para-2",
+				attrs: { id: "para-2" },
 				content: [
 					{
 						type: "text",
@@ -60,7 +60,7 @@ test("it detects and applies changes to a Prosemirror document", async () => {
 		content: [
 			{
 				type: "paragraph",
-				_id: "para-1",
+				attrs: { id: "para-1" },
 				content: [
 					{
 						type: "text",
@@ -70,7 +70,7 @@ test("it detects and applies changes to a Prosemirror document", async () => {
 			},
 			{
 				type: "paragraph",
-				_id: "para-2",
+				attrs: { id: "para-2" },
 				content: [
 					{
 						type: "text",
@@ -80,7 +80,7 @@ test("it detects and applies changes to a Prosemirror document", async () => {
 			},
 			{
 				type: "paragraph",
-				_id: "para-3",
+				attrs: { id: "para-3" },
 				content: [
 					{
 						type: "text",
@@ -97,7 +97,7 @@ test("it detects and applies changes to a Prosemirror document", async () => {
 		content: [
 			{
 				type: "paragraph",
-				_id: "para-1",
+				attrs: { id: "para-1" },
 				content: [
 					{
 						type: "text",
@@ -107,7 +107,7 @@ test("it detects and applies changes to a Prosemirror document", async () => {
 			},
 			{
 				type: "paragraph",
-				_id: "para-3",
+				attrs: { id: "para-3" },
 				content: [
 					{
 						type: "text",
@@ -160,7 +160,7 @@ test("it detects and applies changes to a Prosemirror document", async () => {
 		content: [
 			{
 				type: "paragraph",
-				_id: "para-1",
+				attrs: { id: "para-1" },
 				content: [
 					{
 						type: "text",
@@ -170,7 +170,7 @@ test("it detects and applies changes to a Prosemirror document", async () => {
 			},
 			{
 				type: "paragraph",
-				_id: "para-3",
+				attrs: { id: "para-3" },
 				content: [
 					{
 						type: "text",
@@ -198,7 +198,7 @@ test("it handles create, update, and delete operations correctly", async () => {
 		content: [
 			{
 				type: "paragraph",
-				_id: "para-1",
+				attrs: { id: "para-1" },
 				content: [
 					{
 						type: "text",
@@ -215,7 +215,7 @@ test("it handles create, update, and delete operations correctly", async () => {
 		content: [
 			{
 				type: "paragraph",
-				_id: "para-1",
+				attrs: { id: "para-1" },
 				content: [
 					{
 						type: "text",
@@ -225,7 +225,7 @@ test("it handles create, update, and delete operations correctly", async () => {
 			},
 			{
 				type: "paragraph",
-				_id: "para-2",
+				attrs: { id: "para-2" },
 				content: [
 					{
 						type: "text",
@@ -242,7 +242,7 @@ test("it handles create, update, and delete operations correctly", async () => {
 		content: [
 			{
 				type: "paragraph",
-				_id: "para-1",
+				attrs: { id: "para-1" },
 				content: [
 					{
 						type: "text",
@@ -289,7 +289,7 @@ test("it handles create, update, and delete operations correctly", async () => {
 		content: [
 			{
 				type: "paragraph",
-				_id: "para-1",
+				attrs: { id: "para-1" },
 				content: [
 					{
 						type: "text",
@@ -314,7 +314,7 @@ test("it correctly applies changes to text with marks", async () => {
 		content: [
 			{
 				type: "paragraph",
-				_id: "p-1",
+				attrs: { id: "p-1" },
 				content: [
 					{
 						type: "text",
@@ -331,7 +331,7 @@ test("it correctly applies changes to text with marks", async () => {
 		content: [
 			{
 				type: "paragraph",
-				_id: "p-1",
+				attrs: { id: "p-1" },
 				content: [
 					{
 						type: "text",
@@ -404,7 +404,7 @@ test("it correctly applies changes to text with marks", async () => {
 
 	// Validate paragraph structure and content
 	const paragraph = appliedDoc.content[0];
-	expect(paragraph._id).toEqual("p-1");
+	expect(paragraph.attrs?.id).toEqual("p-1");
 	expect(paragraph.content).toHaveLength(6);
 
 	// Check text with marks
@@ -429,26 +429,26 @@ test("it correctly applies changes to nested list structures", async () => {
 		content: [
 			{
 				type: "bullet_list",
-				_id: "list-1",
+				attrs: { id: "list-1" },
 				content: [
 					{
 						type: "list_item",
-						_id: "item-1",
+						attrs: { id: "item-1" },
 						content: [
 							{
 								type: "paragraph",
-								_id: "item-1-p",
+								attrs: { id: "item-1-p" },
 								content: [{ type: "text", text: "First item" }],
 							},
 						],
 					},
 					{
 						type: "list_item",
-						_id: "item-2",
+						attrs: { id: "item-2" },
 						content: [
 							{
 								type: "paragraph",
-								_id: "item-2-p",
+								attrs: { id: "item-2-p" },
 								content: [{ type: "text", text: "Second item" }],
 							},
 						],
@@ -464,39 +464,39 @@ test("it correctly applies changes to nested list structures", async () => {
 		content: [
 			{
 				type: "bullet_list",
-				_id: "list-1",
+				attrs: { id: "list-1" },
 				content: [
 					{
 						type: "list_item",
-						_id: "item-1",
+						attrs: { id: "item-1" },
 						content: [
 							{
 								type: "paragraph",
-								_id: "item-1-p",
+								attrs: { id: "item-1-p" },
 								content: [{ type: "text", text: "First item modified" }],
 							},
 						],
 					},
 					{
 						type: "list_item",
-						_id: "item-2",
+						attrs: { id: "item-2" },
 						content: [
 							{
 								type: "paragraph",
-								_id: "item-2-p",
+								attrs: { id: "item-2-p" },
 								content: [{ type: "text", text: "Second item" }],
 							},
 							{
 								type: "bullet_list",
-								_id: "nested-list",
+								attrs: { id: "nested-list" },
 								content: [
 									{
 										type: "list_item",
-										_id: "nested-item-1",
+										attrs: { id: "nested-item-1" },
 										content: [
 											{
 												type: "paragraph",
-												_id: "nested-p",
+												attrs: { id: "nested-p" },
 												content: [{ type: "text", text: "Nested item" }],
 											},
 										],
@@ -507,11 +507,11 @@ test("it correctly applies changes to nested list structures", async () => {
 					},
 					{
 						type: "list_item",
-						_id: "item-3",
+						attrs: { id: "item-3" },
 						content: [
 							{
 								type: "paragraph",
-								_id: "item-3-p",
+								attrs: { id: "item-3-p" },
 								content: [{ type: "text", text: "New third item" }],
 							},
 						],
@@ -552,39 +552,39 @@ test("it correctly applies changes to nested list structures", async () => {
 		content: [
 			{
 				type: "bullet_list",
-				_id: "list-1",
+				attrs: { id: "list-1" },
 				content: [
 					{
 						type: "list_item",
-						_id: "item-1",
+						attrs: { id: "item-1" },
 						content: [
 							{
 								type: "paragraph",
-								_id: "item-1-p",
+								attrs: { id: "item-1-p" },
 								content: [{ type: "text", text: "First item modified" }],
 							},
 						],
 					},
 					{
 						type: "list_item",
-						_id: "item-2",
+						attrs: { id: "item-2" },
 						content: [
 							{
 								type: "paragraph",
-								_id: "item-2-p",
+								attrs: { id: "item-2-p" },
 								content: [{ type: "text", text: "Second item" }],
 							},
 							{
 								type: "bullet_list",
-								_id: "nested-list",
+								attrs: { id: "nested-list" },
 								content: [
 									{
 										type: "list_item",
-										_id: "nested-item-1",
+										attrs: { id: "nested-item-1" },
 										content: [
 											{
 												type: "paragraph",
-												_id: "nested-p",
+												attrs: { id: "nested-p" },
 												content: [{ type: "text", text: "Nested item" }],
 											},
 										],
@@ -595,11 +595,11 @@ test("it correctly applies changes to nested list structures", async () => {
 					},
 					{
 						type: "list_item",
-						_id: "item-3",
+						attrs: { id: "item-3" },
 						content: [
 							{
 								type: "paragraph",
-								_id: "item-3-p",
+								attrs: { id: "item-3-p" },
 								content: [{ type: "text", text: "New third item" }],
 							},
 						],
@@ -622,30 +622,30 @@ test("it correctly applies changes to tables", async () => {
 		content: [
 			{
 				type: "table",
-				_id: "table-1",
+				attrs: { id: "table-1" },
 				content: [
 					{
 						type: "table_row",
-						_id: "row-1",
+						attrs: { id: "row-1" },
 						content: [
 							{
 								type: "table_cell",
-								_id: "cell-1-1",
+								attrs: { id: "cell-1-1" },
 								content: [
 									{
 										type: "paragraph",
-										_id: "cell-1-1-p",
+										attrs: { id: "cell-1-1-p" },
 										content: [{ type: "text", text: "Row 1, Cell 1" }],
 									},
 								],
 							},
 							{
 								type: "table_cell",
-								_id: "cell-1-2",
+								attrs: { id: "cell-1-2" },
 								content: [
 									{
 										type: "paragraph",
-										_id: "cell-1-2-p",
+										attrs: { id: "cell-1-2-p" },
 										content: [{ type: "text", text: "Row 1, Cell 2" }],
 									},
 								],
@@ -663,30 +663,30 @@ test("it correctly applies changes to tables", async () => {
 		content: [
 			{
 				type: "table",
-				_id: "table-1",
+				attrs: { id: "table-1" },
 				content: [
 					{
 						type: "table_row",
-						_id: "row-1",
+						attrs: { id: "row-1" },
 						content: [
 							{
 								type: "table_cell",
-								_id: "cell-1-1",
+								attrs: { id: "cell-1-1" },
 								content: [
 									{
 										type: "paragraph",
-										_id: "cell-1-1-p",
+										attrs: { id: "cell-1-1-p" },
 										content: [{ type: "text", text: "Row 1, Cell 1 modified" }],
 									},
 								],
 							},
 							{
 								type: "table_cell",
-								_id: "cell-1-2",
+								attrs: { id: "cell-1-2" },
 								content: [
 									{
 										type: "paragraph",
-										_id: "cell-1-2-p",
+										attrs: { id: "cell-1-2-p" },
 										content: [{ type: "text", text: "Row 1, Cell 2" }],
 									},
 								],
@@ -695,26 +695,26 @@ test("it correctly applies changes to tables", async () => {
 					},
 					{
 						type: "table_row",
-						_id: "row-2",
+						attrs: { id: "row-2" },
 						content: [
 							{
 								type: "table_cell",
-								_id: "cell-2-1",
+								attrs: { id: "cell-2-1" },
 								content: [
 									{
 										type: "paragraph",
-										_id: "cell-2-1-p",
+										attrs: { id: "cell-2-1-p" },
 										content: [{ type: "text", text: "Row 2, Cell 1" }],
 									},
 								],
 							},
 							{
 								type: "table_cell",
-								_id: "cell-2-2",
+								attrs: { id: "cell-2-2" },
 								content: [
 									{
 										type: "paragraph",
-										_id: "cell-2-2-p",
+										attrs: { id: "cell-2-2-p" },
 										content: [{ type: "text", text: "Row 2, Cell 2" }],
 									},
 								],
@@ -757,30 +757,30 @@ test("it correctly applies changes to tables", async () => {
 		content: [
 			{
 				type: "table",
-				_id: "table-1",
+				attrs: { id: "table-1" },
 				content: [
 					{
 						type: "table_row",
-						_id: "row-1",
+						attrs: { id: "row-1" },
 						content: [
 							{
 								type: "table_cell",
-								_id: "cell-1-1",
+								attrs: { id: "cell-1-1" },
 								content: [
 									{
 										type: "paragraph",
-										_id: "cell-1-1-p",
+										attrs: { id: "cell-1-1-p" },
 										content: [{ type: "text", text: "Row 1, Cell 1 modified" }],
 									},
 								],
 							},
 							{
 								type: "table_cell",
-								_id: "cell-1-2",
+								attrs: { id: "cell-1-2" },
 								content: [
 									{
 										type: "paragraph",
-										_id: "cell-1-2-p",
+										attrs: { id: "cell-1-2-p" },
 										content: [{ type: "text", text: "Row 1, Cell 2" }],
 									},
 								],
@@ -789,26 +789,26 @@ test("it correctly applies changes to tables", async () => {
 					},
 					{
 						type: "table_row",
-						_id: "row-2",
+						attrs: { id: "row-2" },
 						content: [
 							{
 								type: "table_cell",
-								_id: "cell-2-1",
+								attrs: { id: "cell-2-1" },
 								content: [
 									{
 										type: "paragraph",
-										_id: "cell-2-1-p",
+										attrs: { id: "cell-2-1-p" },
 										content: [{ type: "text", text: "Row 2, Cell 1" }],
 									},
 								],
 							},
 							{
 								type: "table_cell",
-								_id: "cell-2-2",
+								attrs: { id: "cell-2-2" },
 								content: [
 									{
 										type: "paragraph",
-										_id: "cell-2-2-p",
+										attrs: { id: "cell-2-2-p" },
 										content: [{ type: "text", text: "Row 2, Cell 2" }],
 									},
 								],
@@ -833,11 +833,11 @@ test("it correctly applies changes to blockquotes", async () => {
 		content: [
 			{
 				type: "blockquote",
-				_id: "quote-1",
+				attrs: { id: "quote-1" },
 				content: [
 					{
 						type: "paragraph",
-						_id: "quote-p-1",
+						attrs: { id: "quote-p-1" },
 						content: [
 							{
 								type: "text",
@@ -856,11 +856,11 @@ test("it correctly applies changes to blockquotes", async () => {
 		content: [
 			{
 				type: "blockquote",
-				_id: "quote-1",
+				attrs: { id: "quote-1" },
 				content: [
 					{
 						type: "paragraph",
-						_id: "quote-p-1",
+						attrs: { id: "quote-p-1" },
 						content: [
 							{
 								type: "text",
@@ -870,7 +870,7 @@ test("it correctly applies changes to blockquotes", async () => {
 					},
 					{
 						type: "paragraph",
-						_id: "quote-p-2",
+						attrs: { id: "quote-p-2" },
 						content: [
 							{
 								type: "text",
@@ -914,11 +914,11 @@ test("it correctly applies changes to blockquotes", async () => {
 		content: [
 			{
 				type: "blockquote",
-				_id: "quote-1",
+				attrs: { id: "quote-1" },
 				content: [
 					{
 						type: "paragraph",
-						_id: "quote-p-1",
+						attrs: { id: "quote-p-1" },
 						content: [
 							{
 								type: "text",
@@ -928,7 +928,7 @@ test("it correctly applies changes to blockquotes", async () => {
 					},
 					{
 						type: "paragraph",
-						_id: "quote-p-2",
+						attrs: { id: "quote-p-2" },
 						content: [
 							{
 								type: "text",
@@ -954,8 +954,7 @@ test("it correctly applies changes to mixed content", async () => {
 		content: [
 			{
 				type: "heading",
-				_id: "heading-1",
-				attrs: { level: 1 },
+				attrs: { id: "heading-1", level: 1 },
 				content: [
 					{
 						type: "text",
@@ -965,7 +964,7 @@ test("it correctly applies changes to mixed content", async () => {
 			},
 			{
 				type: "paragraph",
-				_id: "p-1",
+				attrs: { id: "p-1" },
 				content: [
 					{
 						type: "text",
@@ -975,8 +974,7 @@ test("it correctly applies changes to mixed content", async () => {
 			},
 			{
 				type: "code_block",
-				_id: "code-1",
-				attrs: { language: "javascript" },
+				attrs: { id: "code-1", language: "javascript" },
 				content: [
 					{
 						type: "text",
@@ -993,8 +991,7 @@ test("it correctly applies changes to mixed content", async () => {
 		content: [
 			{
 				type: "heading",
-				_id: "heading-1",
-				attrs: { level: 2 }, // Changed level
+				attrs: { id: "heading-1", level: 2 }, // Changed level
 				content: [
 					{
 						type: "text",
@@ -1004,7 +1001,7 @@ test("it correctly applies changes to mixed content", async () => {
 			},
 			{
 				type: "paragraph",
-				_id: "p-1",
+				attrs: { id: "p-1" },
 				content: [
 					{
 						type: "text",
@@ -1019,7 +1016,7 @@ test("it correctly applies changes to mixed content", async () => {
 			},
 			{
 				type: "paragraph",
-				_id: "p-2",
+				attrs: { id: "p-2" },
 				content: [
 					{
 						type: "text",
@@ -1029,8 +1026,7 @@ test("it correctly applies changes to mixed content", async () => {
 			},
 			{
 				type: "code_block",
-				_id: "code-1",
-				attrs: { language: "typescript" },
+				attrs: { id: "code-1", language: "typescript" },
 				content: [
 					{
 						type: "text",
@@ -1068,25 +1064,29 @@ test("it correctly applies changes to mixed content", async () => {
 
 	// Verify each node is present with correct structure
 	const headingNode = appliedDoc.content.find(
-		(node: any) => node._id === "heading-1",
+		(node: any) => node.attrs?.id === "heading-1",
 	);
 	expect(headingNode).toBeDefined();
 	expect(headingNode?.attrs?.level).toEqual(2);
 	expect(headingNode?.content?.[0]?.text).toEqual("Modified Heading");
 
-	const p1Node = appliedDoc.content.find((node: any) => node._id === "p-1");
+	const p1Node = appliedDoc.content.find(
+		(node: any) => node.attrs?.id === "p-1",
+	);
 	expect(p1Node).toBeDefined();
 	expect(p1Node?.content?.length).toEqual(2);
 	expect(p1Node?.content?.[0]?.text).toEqual("A modified paragraph with ");
 	expect(p1Node?.content?.[1]?.text).toEqual("formatting");
 	expect(p1Node?.content?.[1]?.marks?.[0]?.type).toEqual("strong");
 
-	const p2Node = appliedDoc.content.find((node: any) => node._id === "p-2");
+	const p2Node = appliedDoc.content.find(
+		(node: any) => node.attrs?.id === "p-2",
+	);
 	expect(p2Node).toBeDefined();
 	expect(p2Node?.content?.[0]?.text).toEqual("A new paragraph");
 
 	const codeNode = appliedDoc.content.find(
-		(node: any) => node._id === "code-1",
+		(node: any) => node.attrs?.id === "code-1",
 	);
 	expect(codeNode).toBeDefined();
 	expect(codeNode?.attrs?.language).toEqual("typescript");
