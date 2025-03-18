@@ -42,7 +42,7 @@ const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc }) => {
         .executeTakeFirst();
       
       console.log('Change counts:', changeCounts);
-      alert(`Total changes in database: ${changeCounts?.count || 0}`);
+      alert(`Total changes for /prosemirror.json: ${changeCounts?.count || 0}`);
     } catch (error) {
       console.error('Error counting changes:', error);
     }

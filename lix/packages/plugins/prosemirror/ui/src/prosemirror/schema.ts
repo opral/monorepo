@@ -14,7 +14,7 @@ export const schema = new Schema({
     paragraph: { 
       content: "inline*", 
       group: "block",
-      attrs: { _id: { default: "" } },
+      attrs: { id: { default: "" } },
       toDOM() { return ["p", 0] }
     },
     heading: {
@@ -22,7 +22,7 @@ export const schema = new Schema({
       group: "block",
       attrs: { 
         level: { default: 1 },
-        _id: { default: "" }
+        id: { default: "" }
       },
       toDOM(node) { return [`h${node.attrs.level}`, 0] }
     },

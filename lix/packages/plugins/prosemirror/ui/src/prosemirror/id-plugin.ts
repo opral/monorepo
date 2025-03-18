@@ -13,14 +13,14 @@ export const idPlugin = new Plugin({
 		// Skip the doc node but process all others
 		newState.doc.descendants((node, pos) => {
 			// Only add IDs to non-text nodes and only if they don't already have an _id
-			if (!node.isText && (!node.attrs || !node.attrs._id)) {
+			if (!node.isText && (!node.attrs || !node.attrs.id)) {
 				const nodeId = crypto.randomUUID();
 
 				// Create new attrs object if it doesn't exist
 				const attrs = node.attrs || {};
 
-				// Set the _id attribute
-				tr = tr.setNodeMarkup(pos, null, { ...attrs, _id: nodeId });
+				// Set the id attribute
+				tr = tr.setNodeMarkup(pos, null, { ...attrs, id: nodeId });
 				modified = true;
 			}
 		});
