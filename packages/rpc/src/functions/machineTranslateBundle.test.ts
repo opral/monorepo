@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { machineTranslateBundle } from "./machineTranslateBundle.js";
-import type { BundleNested } from "@inlang/sdk";
+import type { BundleNested, Text } from "@inlang/sdk";
 
 test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 	"it should machine translate to all provided target locales and variants",
@@ -242,13 +242,13 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 		// Create a spy to track fetch calls
 		const originalFetch = global.fetch;
 		let fetchCalls = 0;
-		
+
 		// Mock fetch to count calls
 		global.fetch = async (url, options) => {
 			fetchCalls++;
 			return originalFetch(url, options);
 		};
-		
+
 		try {
 			// Create a bundle with an English source message with two variants
 			// and a German message with matching variants but different content
@@ -313,7 +313,12 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 									id: "de-variant-1",
 									messageId: "de-message-id",
 									matches: [],
-									pattern: [{ type: "text", value: "Standardtext (sollte nicht übersetzt werden)" }],
+									pattern: [
+										{
+											type: "text",
+											value: "Standardtext (sollte nicht übersetzt werden)",
+										},
+									],
 								},
 								// Variant with count=1
 								{
@@ -326,7 +331,12 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 											value: "1",
 										},
 									],
-									pattern: [{ type: "text", value: "Ein Element (sollte nicht übersetzt werden)" }],
+									pattern: [
+										{
+											type: "text",
+											value: "Ein Element (sollte nicht übersetzt werden)",
+										},
+									],
 								},
 							],
 						},
@@ -337,72 +347,73 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 			// Verify the result
 			expect(result.error).toBeUndefined();
 			const messages = result.data?.messages;
-			
+
 			// We should have 3 messages (en, de, fr)
 			expect(messages).toHaveLength(3);
-			
+
 			// Find the German message
-			const germanMessage = messages?.find(m => m.locale === "de");
+			const germanMessage = messages?.find((m) => m.locale === "de");
 			expect(germanMessage).toBeDefined();
 			expect(germanMessage?.id).toBe("de-message-id");
-			
+
 			// Find the German variants
 			const germanVariants = germanMessage?.variants || [];
-			
+
 			// Should have 3 variants now (2 existing + 1 new for count=2)
 			expect(germanVariants).toHaveLength(3);
-			
+
 			// Verify the default variant (empty matches) was preserved
-			const defaultVariant = germanVariants.find(v => v.matches?.length === 0);
+			const defaultVariant = germanVariants.find(
+				(v) => v.matches?.length === 0
+			);
 			expect(defaultVariant).toBeDefined();
 			expect(defaultVariant?.pattern).toStrictEqual([
-				{ type: "text", value: "Standardtext (sollte nicht übersetzt werden)" }
+				{ type: "text", value: "Standardtext (sollte nicht übersetzt werden)" },
 			]);
-			
+
 			// Verify the count=1 variant was preserved
-			const countOneVariant = germanVariants.find(v => {
+			const countOneVariant = germanVariants.find((v) => {
 				if (!v.matches || v.matches.length !== 1) return false;
 				const match = v.matches[0];
 				if (!match) return false;
 				return (
-					match.type === "literal-match" && 
-					match.key === "count" && 
-					"value" in match && 
+					match.type === "literal-match" &&
+					match.key === "count" &&
+					"value" in match &&
 					match.value === "1"
 				);
 			});
 			expect(countOneVariant).toBeDefined();
 			expect(countOneVariant?.pattern).toStrictEqual([
-				{ type: "text", value: "Ein Element (sollte nicht übersetzt werden)" }
+				{ type: "text", value: "Ein Element (sollte nicht übersetzt werden)" },
 			]);
-			
+
 			// Verify a new variant was added for count=2
-			const countTwoVariant = germanVariants.find(v => {
+			const countTwoVariant = germanVariants.find((v) => {
 				if (!v.matches || v.matches.length !== 1) return false;
 				const match = v.matches[0];
 				if (!match) return false;
 				return (
-					match.type === "literal-match" && 
-					match.key === "count" && 
-					"value" in match && 
+					match.type === "literal-match" &&
+					match.key === "count" &&
+					"value" in match &&
 					match.value === "2"
 				);
 			});
 			expect(countTwoVariant).toBeDefined();
 			expect(countTwoVariant?.pattern?.[0]?.type).toBe("text");
-			
+
 			// Find the French message
-			const frenchMessage = messages?.find(m => m.locale === "fr");
+			const frenchMessage = messages?.find((m) => m.locale === "fr");
 			expect(frenchMessage).toBeDefined();
-			
+
 			// French should have 3 variants (all translated)
 			expect(frenchMessage?.variants.length).toBe(3);
-			
+
 			// Verify fetch was called 4 times:
 			// - 1 for the new German variant (count=2)
 			// - 3 for all French variants
 			expect(fetchCalls).toBe(4);
-			
 		} finally {
 			// Restore the original fetch
 			global.fetch = originalFetch;
@@ -461,5 +472,114 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 				}),
 			])
 		);
+	}
+);
+
+test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
+	"should translate empty patterns and patterns with empty text",
+	async () => {
+		const result = await machineTranslateBundle({
+			sourceLocale: "en",
+			targetLocales: ["de"],
+			bundle: {
+				id: "mock-bundle-id",
+				declarations: [],
+				messages: [
+					// English source message
+					{
+						id: "en-message-id",
+						bundleId: "mock-bundle-id",
+						locale: "en",
+						selectors: [],
+						variants: [
+							// Regular variant with content (default)
+							{
+								id: "en-variant-1",
+								messageId: "en-message-id",
+								matches: [],
+								pattern: [{ type: "text", value: "Original text" }],
+							},
+							// Variant with count=1 match
+							{
+								id: "en-variant-2",
+								messageId: "en-message-id",
+								matches: [
+									{
+										type: "literal-match",
+										key: "count",
+										value: "1",
+									},
+								],
+								pattern: [{ type: "text", value: "One item" }],
+							},
+						],
+					},
+					// German message with empty variants
+					{
+						id: "de-message-id",
+						bundleId: "mock-bundle-id",
+						locale: "de",
+						selectors: [],
+						variants: [
+							// Empty pattern array
+							{
+								id: "de-variant-empty-array",
+								messageId: "de-message-id",
+								matches: [],
+								pattern: [], // Empty pattern array
+							},
+							// Pattern with empty text
+							{
+								id: "de-variant-empty-text",
+								messageId: "de-message-id",
+								matches: [
+									{
+										type: "literal-match",
+										key: "count",
+										value: "1",
+									},
+								],
+								pattern: [{ type: "text", value: "" }], // Pattern with empty text
+							},
+						],
+					},
+				],
+			} as BundleNested,
+		});
+
+		// Verify the result
+		expect(result.error).toBeUndefined();
+		const messages = result.data?.messages;
+
+		// Find the German message
+		const germanMessage = messages?.find((m) => m.locale === "de");
+		expect(germanMessage).toBeDefined();
+
+		// Find the German variants
+		const germanVariants = germanMessage?.variants || [];
+
+		// The empty pattern array should have been translated
+		const emptyArrayVariant = germanVariants.find(
+			(v) => v.id === "de-variant-empty-array"
+		);
+		expect(emptyArrayVariant).toBeDefined();
+
+		// The empty text variant should have been translated
+		const emptyTextVariant = germanVariants.find(
+			(v) => v.id === "de-variant-empty-text"
+		);
+		expect(emptyTextVariant).toBeDefined();
+
+		// Test that the existing variants were updated, not replaced
+		expect(emptyArrayVariant?.id).toBe("de-variant-empty-array");
+		expect(emptyTextVariant?.id).toBe("de-variant-empty-text");
+
+		// Test that they have content now
+		expect(emptyArrayVariant?.pattern).toHaveLength(1);
+		expect(emptyTextVariant?.pattern).toHaveLength(1);
+
+		// Make sure the text is not empty anymore
+		expect((emptyArrayVariant?.pattern?.[0] as Text).value).not.toBe("");
+		expect((emptyTextVariant?.pattern?.[0] as Text).value).not.toBe("");
 	}
 );
