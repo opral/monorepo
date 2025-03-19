@@ -61,14 +61,15 @@ jobs:
           cat api-docs/*.md >> README.md
         working-directory: packages/lix-sdk
       
+      # Only commit and push changes when running on the main branch
       - name: Commit and Push Docs & README.md
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add api-docs/ README.md
           git commit -m "Update API Docs and README" || echo "No changes to commit"
-          # Push changes directly to the branch the workflow is running on
-          git push origin HEAD:${GITHUB_REF#refs/heads/}
+          git push
         working-directory: packages/lix-sdk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
