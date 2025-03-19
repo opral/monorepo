@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Change } from '@lix-js/sdk';
 import { createCheckpoint } from '../utilities/createCheckpoint';
+import { toUserTime } from "../utilities/timeUtils";
 import { lix, checkpoints as stateCheckpoints } from '../state';
 
 interface CheckpointsProps {
@@ -9,24 +10,8 @@ interface CheckpointsProps {
 
 // Extend the Change type to include an optional metadata property
 interface ExtendedChange extends Change {
-  content: any;
-  metadata?: string | Record<string, any>;
-}
-
-// Format time for display in user's local timezone
-const formatTime = (dateString: string): string => {
-  const date = new Date(dateString);
-  
-  // Format with date and time in user's locale
-  return date.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true
-  });
+	content: any;
+	metadata?: string | Record<string, any>;
 };
 
 // Get a summary preview from a change or checkpoint
@@ -98,49 +83,80 @@ const Checkpoints: React.FC<CheckpointsProps> = ({ changes }) => {
   };
 
   return (
-    <div className="checkpoints-container">
-      <div className="checkpoints-header">
-        <h3>History</h3>
-        <button 
-          className="create-checkpoint-button"
-          onClick={handleCreateCheckpoint}
-          disabled={isCreatingCheckpoint || changes.length === 0}
-        >
-          {isCreatingCheckpoint ? 'Creating...' : 'Create Checkpoint'}
-        </button>
-      </div>
-      
-      <div className="checkpoints-list">
-        {stateCheckpoints.length > 0 ? (
-          stateCheckpoints.map((checkpoint) => {
-            const isSelected = checkpoint.id === selectedCheckpointId;
-            
-            return (
-              <div 
-                key={`checkpoint-${checkpoint.id}`} 
-                className={`checkpoint-item ${isSelected ? 'selected' : ''}`}
-                onClick={() => setSelectedCheckpointId(checkpoint.id)}
-              >
-                <div className="checkpoint-timestamp">
-                  <strong>{formatTime(checkpoint.created_at)}</strong>
-                </div>
-                <div className="checkpoint-preview">
-                  {getCheckpointPreview(checkpoint.changes)}
-                </div>
-                <div className="checkpoint-changes-count">
-                  {checkpoint.changes.length} changes
-                </div>
-              </div>
-            );
-          })
-        ) : (
-          <div className="empty-checkpoints">
-            <p>No checkpoints available. Create your first checkpoint to save a version of your document.</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+		<div
+			className="checkpoints-container"
+			style={{ border: "1px solid #ddd", borderRadius: "4px" }}
+		>
+			<div
+				className="checkpoints-header"
+				style={{
+					padding: "10px",
+					borderBottom: "1px solid #ddd",
+					background: "#f9f9f9",
+				}}
+			>
+				<h3 style={{ margin: "0 0 10px 0" }}>History</h3>
+				<button
+					style={{
+						padding: "5px 10px",
+						background: "#f9f9f9",
+						border: "1px solid #ddd",
+						borderRadius: "4px",
+						cursor:
+							isCreatingCheckpoint || changes.length === 0
+								? "not-allowed"
+								: "pointer",
+						opacity: isCreatingCheckpoint || changes.length === 0 ? 0.6 : 1,
+					}}
+					onClick={handleCreateCheckpoint}
+					disabled={isCreatingCheckpoint || changes.length === 0}
+				>
+					{isCreatingCheckpoint ? "Creating..." : "Create Checkpoint"}
+				</button>
+			</div>
+
+			<div
+				className="checkpoints-list"
+				style={{ maxHeight: "400px", overflow: "auto" }}
+			>
+				{stateCheckpoints.length > 0 ? (
+					stateCheckpoints.map((checkpoint) => {
+						const isSelected = checkpoint.id === selectedCheckpointId;
+
+						return (
+							<div
+								key={`checkpoint-${checkpoint.id}`}
+								style={{
+									padding: "10px",
+									borderBottom: "1px solid #eee",
+									background: isSelected ? "#f5f5f5" : "white",
+									cursor: "pointer",
+								}}
+								onClick={() => setSelectedCheckpointId(checkpoint.id)}
+							>
+								<div style={{ fontWeight: "normal", marginBottom: "3px" }}>
+									{toUserTime(checkpoint.created_at)}
+								</div>
+								<div style={{ marginBottom: "3px", fontSize: "0.9em" }}>
+									{getCheckpointPreview(checkpoint.changes)}
+								</div>
+								<div style={{ fontSize: "0.8em", color: "#666" }}>
+									{checkpoint.changes.length} changes
+								</div>
+							</div>
+						);
+					})
+				) : (
+					<div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
+						<p>
+							No checkpoints available. Create your first checkpoint to save a
+							version of your document.
+						</p>
+					</div>
+				)}
+			</div>
+		</div>
+	);
 };
 
 export default Checkpoints;

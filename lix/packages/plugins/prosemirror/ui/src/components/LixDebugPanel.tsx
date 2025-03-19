@@ -1,6 +1,7 @@
 import React from 'react';
 import { toBlob } from '@lix-js/sdk';
 import { Change } from '@lix-js/sdk';
+import { toUserTime } from "../utilities/timeUtils";
 
 interface LixDebugPanelProps {
   lix: any;
@@ -77,94 +78,99 @@ const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc, changes 
   };
 
   return (
-    <div className="debug-section" style={{ marginTop: "20px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3>Debug Tools</h3>
-        <div>
-          <button 
-            onClick={handleDownloadLixDb}
-            style={{ 
-              backgroundColor: "#f5f5f5", 
-              color: "#333", 
-              border: "1px solid #ccc", 
-              borderRadius: "4px", 
-              padding: "5px 10px",
-              cursor: "pointer"
-            }}
-          >
-            Download Lix Blob
-          </button>
-        </div>
-      </div>
+		<div className="debug-section" style={{ marginTop: "20px" }}>
+			<div
+				style={{
+					display: "flex",
+					justifyContent: "space-between",
+					alignItems: "center",
+				}}
+			>
+				<h3>Debug Tools</h3>
+				<div>
+					<button
+						onClick={handleDownloadLixDb}
+						style={{
+							backgroundColor: "#f5f5f5",
+							color: "#333",
+							border: "1px solid #ccc",
+							borderRadius: "4px",
+							padding: "5px 10px",
+							cursor: "pointer",
+						}}
+					>
+						Download Lix Blob
+					</button>
+				</div>
+			</div>
 
-      <div className="debug-content" style={{ display: "flex", gap: "20px", marginTop: "15px" }}>
-        {/* Current Document AST */}
-        <div className="debug-panel" style={{ flex: 1 }}>
-          <h4>Current Document AST</h4>
-          <pre
-            style={{
-              backgroundColor: "#f5f5f5",
-              padding: "10px",
-              borderRadius: "4px",
-              height: "400px",
-              overflow: "auto",
-              color: "#333",
-            }}
-          >
-            {JSON.stringify(currentDoc, null, 2)}
-          </pre>
-        </div>
+			<div
+				className="debug-content"
+				style={{ display: "flex", gap: "20px", marginTop: "15px" }}
+			>
+				{/* Current Document AST */}
+				<div className="debug-panel" style={{ flex: 1 }}>
+					<h4>Current Document AST</h4>
+					<pre
+						style={{
+							backgroundColor: "#f5f5f5",
+							padding: "10px",
+							borderRadius: "4px",
+							height: "400px",
+							overflow: "auto",
+							color: "#333",
+						}}
+					>
+						{JSON.stringify(currentDoc, null, 2)}
+					</pre>
+				</div>
 
-        {/* All Changes */}
-        <div className="debug-panel" style={{ flex: 1 }}>
-          <h4>All Changes {changes.length > 0 ? `(${changes.length})` : ""}</h4>
-          <div 
-            className="change-graph"
-            style={{
-              backgroundColor: "#f5f5f5",
-              padding: "10px",
-              borderRadius: "4px",
-              height: "400px",
-              overflow: "auto",
-              color: "#333",
-            }}
-          >
-            {changes.length > 0 ? (
-              changes.map((change, index, array) => (
-                <div key={`change-${change.id}`} className="change-group">
-                  <div className="graph-node">
-                    <div className="graph-dot"></div>
-                    {index < array.length - 1 && <div className="graph-line"></div>}
-                  </div>
-                  
-                  <div className="change-content-wrapper">
-                    <div className="change-timestamp">
-                      <strong>{new Date(change.created_at).toLocaleString()}</strong>
-                    </div>
+				{/* All Changes */}
+				<div className="debug-panel" style={{ flex: 1 }}>
+					<h4>All Changes {changes.length > 0 ? `(${changes.length})` : ""}</h4>
+					<div
+						style={{
+							backgroundColor: "#f5f5f5",
+							padding: "10px",
+							borderRadius: "4px",
+							height: "400px",
+							overflow: "auto",
+						}}
+					>
+						{changes.length > 0 ? (
+							changes.map((change) => (
+								<div
+									key={`change-${change.id}`}
+									style={{
+										padding: "8px",
+										marginBottom: "8px",
+										borderBottom: "1px solid #ddd",
+										background: "white",
+									}}
+								>
+									<div style={{ fontWeight: "normal", marginBottom: "3px" }}>
+										{toUserTime(change.created_at)}
+									</div>
 
-                    <div className="change-item-container">
-                      <div className="change-item">
-                        <div className="change-header">
-                          <span className="change-node-type">{change.content?.type || "Unknown"}</span>
-                        </div>
-                        <div className="change-content">
-                          <span className="change-preview">{getContentPreview(change)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="empty-graph">
-                <p className="empty-message">No changes detected yet. Start editing to see changes.</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+									<div style={{ marginBottom: "3px" }}>
+										Type: {change.content?.type || "Unknown"}
+									</div>
+
+									<div style={{ fontSize: "0.9em" }}>
+										{getContentPreview(change) || "No preview available"}
+									</div>
+								</div>
+							))
+						) : (
+							<div style={{ padding: "20px", textAlign: "center" }}>
+								<p>No changes detected yet. Start editing to see changes.</p>
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 };
 
 export default LixDebugPanel;
