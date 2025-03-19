@@ -5,9 +5,6 @@ on:
       - main
     paths:
       - 'packages/lix-sdk/**'
-  pull_request:
-    paths:
-      - 'packages/lix-sdk/**'
 
 jobs:
   generate-docs:
@@ -61,9 +58,8 @@ jobs:
           cat api-docs/*.md >> README.md
         working-directory: packages/lix-sdk
       
-      # Only commit and push changes when running on the main branch
+      # Since we're only triggering on push to main, no conditional is needed
       - name: Commit and Push Docs & README.md
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
