@@ -37,7 +37,7 @@ jobs:
       - name: Generate API docs
         run: |
           mkdir -p api-docs
-          typedoc --out api-docs --readme none --entryDocument README.md --outputFileStrategy modules
+          typedoc --out api-docs --readme none --entryDocument README.md --router module
         working-directory: packages/lix-sdk
 
       - name: Commit and push changes
