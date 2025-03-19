@@ -1,0 +1,73 @@
+name: Generate Lix API Docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/lix-sdk/**'
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+          run_install: false
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-store-${{ runner.arch }}
+      
+      - name: Install dependencies
+        run: pnpm install --filter "@lix-js/sdk..."
+      
+      - name: Build lix-sdk and dependencies
+        run: pnpm --filter "@lix-js/sdk..." build
+      
+      - name: Install Typedoc and markdown plugin
+        run: pnpm add -D typedoc typedoc-plugin-markdown
+        working-directory: packages/lix-sdk
+      
+      - name: Generate Markdown Documentation
+        run: pnpm exec typedoc --out api-docs --plugin typedoc-plugin-markdown --skipErrorChecking ./src
+        working-directory: packages/lix-sdk
+      
+      - name: Generate README.md from API Docs
+        run: |
+          echo "# Lix SDK API Documentation" > README.md
+          echo "" >> README.md
+          cat api-docs/*.md >> README.md
+        working-directory: packages/lix-sdk
+      
+      - name: Commit and Push Docs & README.md
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add api-docs/ README.md
+          git commit -m "Update API Docs and README" || echo "No changes to commit"
+          git pull --rebase
+          git push
+        working-directory: packages/lix-sdk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
