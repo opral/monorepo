@@ -94,19 +94,9 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 
 	return (
 		<div className="editor-container">
-			<div className="toolbar"></div>
-
 			<div
 				className="editor-wrapper"
 				onClick={handleClick}
-				style={{
-					border: "1px solid #ccc",
-					borderRadius: "4px",
-					padding: "0",
-					cursor: "text",
-					backgroundColor: "#fff",
-					minHeight: "300px"
-				}}
 			>
 				{/* The actual editor will be mounted here */}
 				<div

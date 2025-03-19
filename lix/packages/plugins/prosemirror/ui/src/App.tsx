@@ -1,5 +1,6 @@
 import Editor from "./components/Editor";
 import LixDebugPanel from "./components/LixDebugPanel";
+import Checkpoints from "./components/Checkpoints";
 import { useState } from "react";
 import { lix, pollingInterval, prosemirrorDocument, changes } from "./state";
 import { useDebounceCallback, useInterval } from "usehooks-ts";
@@ -40,10 +41,18 @@ function App() {
 		<div className="app-container">
 			<h1>ProseMirror Lix Plugin Demo</h1>
 
-			<div className="editor-section">
-				<Editor onChange={handleDocChange} externalDoc={initialDoc} />
+			{/* Split layout: Editor and Checkpoints */}
+			<div className="editor-checkpoints-container">
+				{/* Left side: Editor */}
+				<div className="editor-container">
+					<Editor onChange={handleDocChange} externalDoc={initialDoc} />
+				</div>
+				
+				{/* Right side: Checkpoints */}
+				<Checkpoints changes={changes} />
 			</div>
 
+			{/* Debug tools at the bottom */}
 			<LixDebugPanel lix={lix} currentDoc={currentDoc} changes={changes} />
 		</div>
 	);

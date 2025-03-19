@@ -33,9 +33,10 @@ const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc, changes 
     }
   };
 
+
   // Function to get a readable content preview for changes
   const getContentPreview = (change: Change & { content: any }): string => {
-    if (!change.content) return "Content deleted";
+    if (!change.content) return "No content available";
     
     if (typeof change.content === "object") {
       // For text nodes, show the text content
@@ -57,11 +58,17 @@ const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc, changes 
         }
       }
       
-      // For other node types
-      return `${change.content.type || "Unknown"} node`;
+      // For empty paragraphs or other empty nodes, just return empty string
+      if (change.content.type === "paragraph" && 
+          (!change.content.content || change.content.content.length === 0)) {
+        return "";
+      }
+      
+      // For other node types, if we can't extract anything meaningful
+      return "";
     }
     
-    return "Unknown content";
+    return "";
   };
 
   return (
@@ -131,9 +138,8 @@ const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc, changes 
                     </div>
 
                     <div className="change-item-container">
-                      <div className={`change-item change-${!change.content ? "deleted" : "added"}`}>
+                      <div className="change-item">
                         <div className="change-header">
-                          <span className="change-type">{!change.content ? "Deleted" : "Added"}</span>
                           <span className="change-node-type">{change.content?.type || "Unknown"}</span>
                         </div>
                         <div className="change-content">
