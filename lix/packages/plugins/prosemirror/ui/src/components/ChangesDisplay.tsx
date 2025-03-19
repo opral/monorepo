@@ -88,17 +88,12 @@ const ChangesDisplay: React.FC<ChangesDisplayProps> = ({ changes }) => {
       
       <div className="change-graph">
         {filteredChanges.length > 0 ? (
-          filteredChanges.map((change, index, array) => {
+          filteredChanges.map((change) => {
             const extendedChange = change as ExtendedChange;
             const isCheckpointChange = isCheckpoint(extendedChange);
             
             return (
               <div key={`change-${change.id}`} className="change-group">
-                <div className="graph-node">
-                  <div className={`graph-dot ${isCheckpointChange ? 'checkpoint-dot' : ''}`}></div>
-                  {index < array.length - 1 && <div className="graph-line"></div>}
-                </div>
-                
                 <div className="change-content-wrapper">
                   <div className="change-timestamp">
                     <strong>{new Date(change.created_at).toLocaleString()}</strong>
