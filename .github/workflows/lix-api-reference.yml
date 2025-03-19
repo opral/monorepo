@@ -27,21 +27,21 @@ jobs:
         working-directory: packages/lix-sdk
       
       - name: Generate Markdown Documentation
-        run: npx typedoc --out docs --plugin typedoc-plugin-markdown ./src
+        run: npx typedoc --out api-docs --plugin typedoc-plugin-markdown ./src
         working-directory: packages/lix-sdk
       
       - name: Generate README.md from API Docs
         run: |
           echo "# Lix SDK API Documentation" > README.md
           echo "" >> README.md
-          cat docs/*.md >> README.md
+          cat api-docs/*.md >> README.md
         working-directory: packages/lix-sdk
       
       - name: Commit and Push Docs & README.md
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/ README.md
+          git add api-docs/ README.md
           git commit -m "Update API Docs and README" || echo "No changes to commit"
           git push
         working-directory: packages/lix-sdk
