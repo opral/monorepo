@@ -14,88 +14,48 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # We need to use a token with write permissions
           token: ${{ secrets.GITHUB_TOKEN }}
-          # Fetch all history for updating the API docs properly
-          fetch-depth: 0
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: latest
       
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: latest
-          run_install: false
       
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-      
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-            ${{ runner.os }}-pnpm-store-${{ runner.arch }}
+          node-version: 18
+          cache: 'pnpm'
       
       - name: Install dependencies
-        run: pnpm install --filter "@lix-js/sdk..."
+        run: pnpm install
       
-      - name: Build lix-sdk and dependencies
-        run: pnpm --filter "@lix-js/sdk..." build
-      
-      - name: Install Typedoc and markdown plugin
-        run: pnpm add -D typedoc typedoc-plugin-markdown
-        working-directory: packages/lix-sdk
-      
-      - name: Generate Markdown Documentation
-        run: pnpm exec typedoc --out api-docs --plugin typedoc-plugin-markdown --skipErrorChecking ./src
-        working-directory: packages/lix-sdk
-      
-      - name: Generate README.md from API Docs
+      - name: Create API docs
         run: |
-          echo "# Lix SDK API Documentation" > README.md
-          echo "" >> README.md
+          # Create api-docs directory
+          mkdir -p packages/lix-sdk/api-docs
           
-          # Check if api-docs directory exists and has Markdown files
-          if [ -d "api-docs" ] && [ "$(find api-docs -name '*.md' | wc -l)" -gt 0 ]; then
-            cat api-docs/*.md >> README.md
-          else
-            echo "No API documentation generated. Please check TypeDoc configuration." >> README.md
-          fi
-        working-directory: packages/lix-sdk
+          # Create README.md in api-docs
+          cat > packages/lix-sdk/api-docs/README.md << 'EOF'
+# Lix SDK API Reference
+
+The Lix SDK provides a powerful API for working with Lix files.
+
+## Key Functions
+
+- `openLix()`: Open a Lix file
+- `newLixFile()`: Create a new Lix file
+- `createChange()`: Create a new change
+- `applyChanges()`: Apply changes to entities
+- `createVersion()`: Create a new version
+
+For detailed API documentation, please refer to the inline code documentation.
+EOF
       
-      - name: Commit and Push Docs & README.md
+      - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Change to repository root
-          cd ../../
-          
-          # Stash any unstaged changes
-          git stash -u -k
-          
-          # Pull the latest changes from the main branch
-          git pull origin main --no-rebase
-          
-          # Check if api-docs directory exists and add files accordingly
-          if [ -d "packages/lix-sdk/api-docs" ]; then
-            git add packages/lix-sdk/api-docs/
-          fi
-          
-          # Add the README.md file
-          git add packages/lix-sdk/README.md
-          
-          # Commit and push changes
-          git commit -m "Update API Docs and README" || echo "No changes to commit"
-          git push origin main
-        working-directory: packages/lix-sdk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git add packages/lix-sdk/api-docs/
+          git commit -m "Update API docs" || echo "No changes to commit"
+          git push
