@@ -5,6 +5,7 @@ import type {
 } from "../account/database-schema.js";
 import type { KeyValueTable } from "../key-value/database-schema.js";
 import type { MutationLogTable } from "./mutation-log/database-schema.js";
+import type { ChangeProposalTable } from "../change-proposal/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -31,6 +32,9 @@ export type LixDatabaseSchema = {
 
 	// key value
 	key_value: KeyValueTable;
+
+	// change proposal
+	change_proposal: ChangeProposalTable;
 
 	// discussion
 	discussion: DiscussionTable;
