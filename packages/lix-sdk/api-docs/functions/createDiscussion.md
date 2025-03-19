@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / createDiscussion
+[@lix-js/sdk](../README.md) / createDiscussion
 
 # Function: createDiscussion()
 
 > **createDiscussion**(`args`): `Promise`\<`object` & `object`\>
 
-Defined in: [packages/lix-sdk/src/discussion/create-discussion.ts:15](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/discussion/create-discussion.ts#L15)
+Defined in: [packages/lix-sdk/src/discussion/create-discussion.ts:15](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/discussion/create-discussion.ts#L15)
 
 Creates a new discussion with the first comment.
 

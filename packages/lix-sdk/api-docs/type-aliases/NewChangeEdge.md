@@ -2,10 +2,10 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / NewChangeEdge
+[@lix-js/sdk](../README.md) / NewChangeEdge
 
 # Type Alias: NewChangeEdge
 
 > **NewChangeEdge** = `Insertable`\<`ChangeEdgeTable`\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:114](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/database/schema.ts#L114)
+Defined in: [packages/lix-sdk/src/database/schema.ts:114](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/database/schema.ts#L114)

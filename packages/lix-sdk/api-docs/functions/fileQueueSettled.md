@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / fileQueueSettled
+[@lix-js/sdk](../README.md) / fileQueueSettled
 
 # Function: fileQueueSettled()
 
 > **fileQueueSettled**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/file-queue/file-queue-settled.ts:11](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/file-queue/file-queue-settled.ts#L11)
+Defined in: [packages/lix-sdk/src/file-queue/file-queue-settled.ts:11](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/file-queue/file-queue-settled.ts#L11)
 
 Waits until the file queue is settled.
 

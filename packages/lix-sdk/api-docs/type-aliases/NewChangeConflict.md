@@ -2,10 +2,10 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / NewChangeConflict
+[@lix-js/sdk](../README.md) / NewChangeConflict
 
 # Type Alias: NewChangeConflict
 
 > **NewChangeConflict** = `Insertable`\<`ChangeConflictTable`\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:246](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/database/schema.ts#L246)
+Defined in: [packages/lix-sdk/src/database/schema.ts:246](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/database/schema.ts#L246)

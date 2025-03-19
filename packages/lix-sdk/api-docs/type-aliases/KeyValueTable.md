@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / KeyValueTable
+[@lix-js/sdk](../README.md) / KeyValueTable
 
 # Type Alias: KeyValueTable
 
 > **KeyValueTable** = `object`
 
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:30](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/key-value/database-schema.ts#L30)
+Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:30](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/key-value/database-schema.ts#L30)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:30](https://githu
 
 > **key**: `KeyValueKeys`
 
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:39](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/key-value/database-schema.ts#L39)
+Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:39](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/key-value/database-schema.ts#L39)
 
 The key of the key-value pair.
 
@@ -34,7 +34,7 @@ Lix prefixes its keys with "lix-" to avoid conflicts with user-defined keys.
 
 > **skip\_change\_control**: `Generated`\<`boolean`\>
 
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:59](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/key-value/database-schema.ts#L59)
+Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:59](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/key-value/database-schema.ts#L59)
 
 If `true`, the key-value pair is not tracked with own change control.
 
@@ -53,7 +53,7 @@ false
 
 > **value**: `string`
 
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:50](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/key-value/database-schema.ts#L50)
+Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:50](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/key-value/database-schema.ts#L50)
 
 The value of the key-value pair.
 

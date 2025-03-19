@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / createVersion
+[@lix-js/sdk](../README.md) / createVersion
 
 # Function: createVersion()
 
 > **createVersion**(`args`): `Promise`\<\{ `id`: `string`; `name`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/version/create-version.ts:23](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/version/create-version.ts#L23)
+Defined in: [packages/lix-sdk/src/version/create-version.ts:23](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/version/create-version.ts#L23)
 
 Creates a new Version.
 

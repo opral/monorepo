@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / withSkipOwnChangeControl
+[@lix-js/sdk](../README.md) / withSkipOwnChangeControl
 
 # Function: withSkipOwnChangeControl()
 
 > **withSkipOwnChangeControl**\<`T`\>(`db`, `operation`): `Promise`\<`T`\>
 
-Defined in: [packages/lix-sdk/src/own-change-control/with-skip-own-change-control.ts:3](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/own-change-control/with-skip-own-change-control.ts#L3)
+Defined in: [packages/lix-sdk/src/own-change-control/with-skip-own-change-control.ts:3](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/own-change-control/with-skip-own-change-control.ts#L3)
 
 ## Type Parameters
 

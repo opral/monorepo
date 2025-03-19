@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / createChangeSet
+[@lix-js/sdk](../README.md) / createChangeSet
 
 # Function: createChangeSet()
 
 > **createChangeSet**(`args`): `Promise`\<\{ `id`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:13](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/change-set/create-change-set.ts#L13)
+Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:13](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/change-set/create-change-set.ts#L13)
 
 Creates a change set with the given changes, optionally within an open transaction.
 

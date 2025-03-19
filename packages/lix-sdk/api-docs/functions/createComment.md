@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / createComment
+[@lix-js/sdk](../README.md) / createComment
 
 # Function: createComment()
 
 > **createComment**(`args`): `Promise`\<\{ `content`: `string`; `discussion_id`: `string`; `id`: `string`; `parent_id`: `null` \| `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/discussion/create-comment.ts:4](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/discussion/create-comment.ts#L4)
+Defined in: [packages/lix-sdk/src/discussion/create-comment.ts:4](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/discussion/create-comment.ts#L4)
 
 ## Parameters
 

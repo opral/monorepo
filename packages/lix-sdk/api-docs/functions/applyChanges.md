@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / applyChanges
+[@lix-js/sdk](../README.md) / applyChanges
 
 # Function: applyChanges()
 
 > **applyChanges**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/change/apply-changes.ts:24](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/change/apply-changes.ts#L24)
+Defined in: [packages/lix-sdk/src/change/apply-changes.ts:24](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/change/apply-changes.ts#L24)
 
 Applies the given changes to the lix.
 

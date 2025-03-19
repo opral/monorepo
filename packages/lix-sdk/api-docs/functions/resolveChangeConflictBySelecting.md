@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / resolveChangeConflictBySelecting
+[@lix-js/sdk](../README.md) / resolveChangeConflictBySelecting
 
 # Function: resolveChangeConflictBySelecting()
 
 > **resolveChangeConflictBySelecting**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/change-conflict/resolve-conflict-by-selecting.ts:10](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/change-conflict/resolve-conflict-by-selecting.ts#L10)
+Defined in: [packages/lix-sdk/src/change-conflict/resolve-conflict-by-selecting.ts:10](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/change-conflict/resolve-conflict-by-selecting.ts#L10)
 
 Resolves a conflict by selecting one of the two
 changes in the conflict.

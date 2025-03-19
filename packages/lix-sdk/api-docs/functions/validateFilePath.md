@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / validateFilePath
+[@lix-js/sdk](../README.md) / validateFilePath
 
 # Function: validateFilePath()
 
 > **validateFilePath**(`path`): `void`
 
-Defined in: [packages/lix-sdk/src/file/validate-file-path.ts:12](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/file/validate-file-path.ts#L12)
+Defined in: [packages/lix-sdk/src/file/validate-file-path.ts:12](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/file/validate-file-path.ts#L12)
 
 Validates a file path.
 

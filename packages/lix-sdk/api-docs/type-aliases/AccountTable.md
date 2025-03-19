@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / AccountTable
+[@lix-js/sdk](../README.md) / AccountTable
 
 # Type Alias: AccountTable
 
 > **AccountTable** = `object`
 
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:43](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/account/database-schema.ts#L43)
+Defined in: [packages/lix-sdk/src/account/database-schema.ts:43](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/account/database-schema.ts#L43)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/account/database-schema.ts:43](https://github.
 
 > **id**: `Generated`\<`string`\>
 
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:44](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/account/database-schema.ts#L44)
+Defined in: [packages/lix-sdk/src/account/database-schema.ts:44](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/account/database-schema.ts#L44)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/lix-sdk/src/account/database-schema.ts:44](https://github.
 
 > **name**: `string`
 
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:45](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/account/database-schema.ts#L45)
+Defined in: [packages/lix-sdk/src/account/database-schema.ts:45](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/account/database-schema.ts#L45)

@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / createSnapshot
+[@lix-js/sdk](../README.md) / createSnapshot
 
 # Function: createSnapshot()
 
 > **createSnapshot**(`args`): `Promise`\<\{ `content`: `null` \| `Record`\<`string`, `any`\>; `id`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/snapshot/create-snapshot.ts:15](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/snapshot/create-snapshot.ts#L15)
+Defined in: [packages/lix-sdk/src/snapshot/create-snapshot.ts:15](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/snapshot/create-snapshot.ts#L15)
 
 Creates a snapshot and inserts it or retrieves the existing snapshot from the database.
 

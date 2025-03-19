@@ -2,10 +2,10 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / Newversion
+[@lix-js/sdk](../README.md) / Newversion
 
 # Type Alias: Newversion
 
 > **Newversion** = `Insertable`\<`VersionTable`\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:201](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/database/schema.ts#L201)
+Defined in: [packages/lix-sdk/src/database/schema.ts:201](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/database/schema.ts#L201)

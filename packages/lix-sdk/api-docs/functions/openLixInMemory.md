@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / openLixInMemory
+[@lix-js/sdk](../README.md) / openLixInMemory
 
 # Function: openLixInMemory()
 
 > **openLixInMemory**(`args`): `Promise`\<`Promise`\<[`Lix`](../type-aliases/Lix.md)\>\>
 
-Defined in: [packages/lix-sdk/src/lix/open-lix-in-memory.ts:8](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/lix/open-lix-in-memory.ts#L8)
+Defined in: [packages/lix-sdk/src/lix/open-lix-in-memory.ts:8](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/lix/open-lix-in-memory.ts#L8)
 
 Opens a lix in memory.
 

@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / changeIsLeafInVersion
+[@lix-js/sdk](../README.md) / changeIsLeafInVersion
 
 # Function: changeIsLeafInVersion()
 
 > **changeIsLeafInVersion**(`version`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/query-filter/change-is-leaf-in-version.ts:16](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/query-filter/change-is-leaf-in-version.ts#L16)
+Defined in: [packages/lix-sdk/src/query-filter/change-is-leaf-in-version.ts:16](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/query-filter/change-is-leaf-in-version.ts#L16)
 
 Selects changes that are not a parent of any other change within the specified version.
 

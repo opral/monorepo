@@ -2,7 +2,7 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / jsonArrayFrom
+[@lix-js/sdk](../README.md) / jsonArrayFrom
 
 # Function: jsonArrayFrom()
 

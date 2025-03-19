@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / Lix
+[@lix-js/sdk](../README.md) / Lix
 
 # Type Alias: Lix
 
 > **Lix** = `object`
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:13](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/lix/open-lix.ts#L13)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:13](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/lix/open-lix.ts#L13)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/lix/open-lix.ts:13](https://github.com/opral/m
 
 > **db**: `Kysely`\<[`LixDatabaseSchema`](LixDatabaseSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:25](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/lix/open-lix.ts#L25)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:25](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/lix/open-lix.ts#L25)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/lix-sdk/src/lix/open-lix.ts:25](https://github.com/opral/m
 
 > **plugin**: `object`
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:26](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/lix/open-lix.ts#L26)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:26](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/lix/open-lix.ts#L26)
 
 #### getAll()
 
@@ -40,7 +40,7 @@ Defined in: [packages/lix-sdk/src/lix/open-lix.ts:26](https://github.com/opral/m
 
 > **sqlite**: `SqliteWasmDatabase`
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:24](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/lix/open-lix.ts#L24)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:24](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/lix/open-lix.ts#L24)
 
 The raw SQLite instance.
 

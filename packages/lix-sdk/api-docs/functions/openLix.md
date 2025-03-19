@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / openLix
+[@lix-js/sdk](../README.md) / openLix
 
 # Function: openLix()
 
 > **openLix**(`args`): `Promise`\<[`Lix`](../type-aliases/Lix.md)\>
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:34](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/lix/open-lix.ts#L34)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:34](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/lix/open-lix.ts#L34)
 
 Common setup between different lix environments.
 

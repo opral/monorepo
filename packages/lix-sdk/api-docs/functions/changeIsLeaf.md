@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / changeIsLeaf
+[@lix-js/sdk](../README.md) / changeIsLeaf
 
 # Function: changeIsLeaf()
 
 > **changeIsLeaf**(): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/query-filter/change-is-leaf.ts:18](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/query-filter/change-is-leaf.ts#L18)
+Defined in: [packages/lix-sdk/src/query-filter/change-is-leaf.ts:18](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/query-filter/change-is-leaf.ts#L18)
 
 Selects changes that are not a parent of any other change.
 

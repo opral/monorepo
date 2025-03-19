@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / newLixFile
+[@lix-js/sdk](../README.md) / newLixFile
 
 # Function: newLixFile()
 
 > **newLixFile**(): `Promise`\<`Blob`\>
 
-Defined in: [packages/lix-sdk/src/lix/new-lix.ts:14](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/lix/new-lix.ts#L14)
+Defined in: [packages/lix-sdk/src/lix/new-lix.ts:14](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/lix/new-lix.ts#L14)
 
 Creates a new lix file.
 

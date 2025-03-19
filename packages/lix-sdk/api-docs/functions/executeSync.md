@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / executeSync
+[@lix-js/sdk](../README.md) / executeSync
 
 # Function: executeSync()
 
 > **executeSync**(`args`): `any`[]
 
-Defined in: [packages/lix-sdk/src/database/execute-sync.ts:15](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/database/execute-sync.ts#L15)
+Defined in: [packages/lix-sdk/src/database/execute-sync.ts:15](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/database/execute-sync.ts#L15)
 
 Execute a query synchronously.
 

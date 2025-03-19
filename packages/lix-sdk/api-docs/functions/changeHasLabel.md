@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / changeHasLabel
+[@lix-js/sdk](../README.md) / changeHasLabel
 
 # Function: changeHasLabel()
 
 > **changeHasLabel**(`name`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/query-filter/change-has-label.ts:25](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/query-filter/change-has-label.ts#L25)
+Defined in: [packages/lix-sdk/src/query-filter/change-has-label.ts:25](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/query-filter/change-has-label.ts#L25)
 
 Selects changes that have a label with the given name.
 

@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / ExperimentalChangeSchema
+[@lix-js/sdk](../README.md) / ExperimentalChangeSchema
 
 # Type Alias: ExperimentalChangeSchema
 
 > **ExperimentalChangeSchema** = \{ `key`: `string`; `schema`: `JSONSchema`; `type`: `"json"`; \} \| \{ `key`: `string`; `schema`: `undefined`; `type`: `"blob"`; \}
 
-Defined in: [packages/lix-sdk/src/change-schema/types.ts:43](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/change-schema/types.ts#L43)
+Defined in: [packages/lix-sdk/src/change-schema/types.ts:43](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/change-schema/types.ts#L43)
 
 The schema of a detected change.
 

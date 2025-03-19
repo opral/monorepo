@@ -2,7 +2,7 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / sql
+[@lix-js/sdk](../README.md) / sql
 
 # Variable: sql
 

@@ -2,7 +2,7 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / jsonObjectFrom
+[@lix-js/sdk](../README.md) / jsonObjectFrom
 
 # Function: jsonObjectFrom()
 

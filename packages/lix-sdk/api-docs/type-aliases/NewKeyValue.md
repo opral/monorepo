@@ -2,10 +2,10 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / NewKeyValue
+[@lix-js/sdk](../README.md) / NewKeyValue
 
 # Type Alias: NewKeyValue
 
 > **NewKeyValue** = `Insertable`\<[`KeyValueTable`](KeyValueTable.md)\>
 
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:28](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/key-value/database-schema.ts#L28)
+Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:28](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/key-value/database-schema.ts#L28)

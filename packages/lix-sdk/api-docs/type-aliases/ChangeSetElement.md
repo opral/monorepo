@@ -2,10 +2,10 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / ChangeSetElement
+[@lix-js/sdk](../README.md) / ChangeSetElement
 
 # Type Alias: ChangeSetElement
 
 > **ChangeSetElement** = `Selectable`\<`ChangeSetElementTable`\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:152](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/database/schema.ts#L152)
+Defined in: [packages/lix-sdk/src/database/schema.ts:152](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/database/schema.ts#L152)

@@ -2,10 +2,10 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / LixFile
+[@lix-js/sdk](../README.md) / LixFile
 
 # Type Alias: LixFile
 
 > **LixFile** = `Selectable`\<`LixFileTable`\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:67](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/database/schema.ts#L67)
+Defined in: [packages/lix-sdk/src/database/schema.ts:67](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/database/schema.ts#L67)

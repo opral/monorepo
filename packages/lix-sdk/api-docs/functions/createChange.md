@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / createChange
+[@lix-js/sdk](../README.md) / createChange
 
 # Function: createChange()
 
 > **createChange**(`args`, `options`?): `Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/change/create-change.ts:15](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/change/create-change.ts#L15)
+Defined in: [packages/lix-sdk/src/change/create-change.ts:15](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/change/create-change.ts#L15)
 
 Programatically create a change in the database.
 

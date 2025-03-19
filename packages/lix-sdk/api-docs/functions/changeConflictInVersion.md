@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / changeConflictInVersion
+[@lix-js/sdk](../README.md) / changeConflictInVersion
 
 # Function: changeConflictInVersion()
 
 > **changeConflictInVersion**(`version`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_conflict"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/query-filter/change-conflict-in-version.ts:15](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/query-filter/change-conflict-in-version.ts#L15)
+Defined in: [packages/lix-sdk/src/query-filter/change-conflict-in-version.ts:15](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/query-filter/change-conflict-in-version.ts#L15)
 
 Filters if a conflict is in the given version.
 

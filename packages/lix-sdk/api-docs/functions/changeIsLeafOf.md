@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / changeIsLeafOf
+[@lix-js/sdk](../README.md) / changeIsLeafOf
 
 # Function: changeIsLeafOf()
 
 > **changeIsLeafOf**(`change`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/query-filter/change-is-leaf-of.ts:29](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/query-filter/change-is-leaf-of.ts#L29)
+Defined in: [packages/lix-sdk/src/query-filter/change-is-leaf-of.ts:29](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/query-filter/change-is-leaf-of.ts#L29)
 
 Filter to select the last descendant of the specified change.
 

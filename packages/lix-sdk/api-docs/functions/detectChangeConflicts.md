@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / detectChangeConflicts
+[@lix-js/sdk](../README.md) / detectChangeConflicts
 
 # Function: detectChangeConflicts()
 
 > **detectChangeConflicts**(`args`): `Promise`\<[`DetectedConflict`](../type-aliases/DetectedConflict.md)[]\>
 
-Defined in: [packages/lix-sdk/src/change-conflict/detect-change-conflicts.ts:21](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/change-conflict/detect-change-conflicts.ts#L21)
+Defined in: [packages/lix-sdk/src/change-conflict/detect-change-conflicts.ts:21](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/change-conflict/detect-change-conflicts.ts#L21)
 
 Detects conflicts in the given set of changes.
 

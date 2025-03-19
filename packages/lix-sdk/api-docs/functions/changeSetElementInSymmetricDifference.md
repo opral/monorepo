@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../globals.md) / changeSetElementInSymmetricDifference
+[@lix-js/sdk](../README.md) / changeSetElementInSymmetricDifference
 
 # Function: changeSetElementInSymmetricDifference()
 
 > **changeSetElementInSymmetricDifference**(`a`, `b`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set_element"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/change-set/change-set-element-in-symmetric-difference.ts:19](https://github.com/opral/monorepo/blob/e988989a407211f6aa9551fb06720fedf7059729/packages/lix-sdk/src/change-set/change-set-element-in-symmetric-difference.ts#L19)
+Defined in: [packages/lix-sdk/src/change-set/change-set-element-in-symmetric-difference.ts:19](https://github.com/opral/monorepo/blob/cf4299047f63a84de437bf67ff42fca1baa00869/packages/lix-sdk/src/change-set/change-set-element-in-symmetric-difference.ts#L19)
 
 Returns the symmetric difference between two change sets.
 
