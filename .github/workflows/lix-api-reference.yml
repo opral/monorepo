@@ -1,4 +1,5 @@
 name: Generate Lix API Docs
+
 on:
   push:
     branches:
@@ -36,15 +37,16 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-store-${{ runner.arch }}
       
-      - name: Install root dependencies
-        run: pnpm install
+      - name: Install dependencies
+        run: pnpm install --filter "@lix-js/sdk..."
       
       - name: Build lix-sdk and dependencies
         run: pnpm --filter "@lix-js/sdk..." build
       
       - name: Install Typedoc and markdown plugin
-        run: pnpm add -D typedoc typedoc-plugin-markdown --ignore-workspace-root-check
+        run: pnpm add -D typedoc typedoc-plugin-markdown
         working-directory: packages/lix-sdk
       
       - name: Generate Markdown Documentation
@@ -58,13 +60,13 @@ jobs:
           cat api-docs/*.md >> README.md
         working-directory: packages/lix-sdk
       
-      # Since we're only triggering on push to main, no conditional is needed
       - name: Commit and Push Docs & README.md
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add api-docs/ README.md
           git commit -m "Update API Docs and README" || echo "No changes to commit"
+          git pull --rebase
           git push
         working-directory: packages/lix-sdk
         env:
