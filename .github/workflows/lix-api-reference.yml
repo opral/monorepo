@@ -32,7 +32,7 @@ jobs:
         run: pnpm install
 
       - name: Build project
-        run: pnpm --filter "@lix-sdk..." build
+        run: pnpm --filter "@lix-js/sdk..." build
 
       - name: Install TypeDoc
         run: npm install -g typedoc typedoc-plugin-markdown
