@@ -31,16 +31,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build project
-        run: pnpm --filter "@lix-sdk..." build
+      - name: Install TypeDoc
+        run: npm install -g typedoc typedoc-plugin-markdown
       
-      - name: Create API docs
+      - name: Generate API docs
         run: |
-          # Create api-docs directory
-          mkdir -p packages/lix-sdk/api-docs
-
-      - name: Generate Markdown Documentation
-        run: pnpm exec typedoc --out api-docs --plugin typedoc-plugin-markdown --skipErrorChecking ./src
+          mkdir -p api-docs
+          typedoc --out api-docs --plugin typedoc-plugin-markdown --skipErrorChecking ./src
         working-directory: packages/lix-sdk
 
       - name: Commit and push changes
