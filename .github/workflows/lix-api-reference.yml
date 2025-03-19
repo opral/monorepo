@@ -13,6 +13,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # We need to use a token with write permissions
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Fetch all history for updating the API docs properly
+          fetch-depth: 0
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -64,10 +69,22 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add api-docs/ README.md
+          
+          # Change to repository root
+          cd ../../
+          
+          # Stash any unstaged changes
+          git stash -u -k
+          
+          # Pull the latest changes from the main branch
+          git pull origin main --no-rebase
+          
+          # Stage and commit our changes
+          git add packages/lix-sdk/api-docs/ packages/lix-sdk/README.md
           git commit -m "Update API Docs and README" || echo "No changes to commit"
-          git pull --rebase
-          git push
+          
+          # Push the changes back to the repository
+          git push origin main
         working-directory: packages/lix-sdk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
