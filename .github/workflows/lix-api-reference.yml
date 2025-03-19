@@ -29,29 +29,19 @@ jobs:
       
       - name: Install dependencies
         run: pnpm install
+
+      - name: Build project
+        run: pnpm build
       
       - name: Create API docs
         run: |
           # Create api-docs directory
           mkdir -p packages/lix-sdk/api-docs
-          
-          # Create README.md in api-docs
-          cat > packages/lix-sdk/api-docs/README.md << 'EOF'
-# Lix SDK API Reference
 
-The Lix SDK provides a powerful API for working with Lix files.
+      - name: Generate Markdown Documentation
+        run: pnpm exec typedoc --out api-docs --plugin typedoc-plugin-markdown --skipErrorChecking ./src
+        working-directory: packages/lix-sdk
 
-## Key Functions
-
-- `openLix()`: Open a Lix file
-- `newLixFile()`: Create a new Lix file
-- `createChange()`: Create a new change
-- `applyChanges()`: Apply changes to entities
-- `createVersion()`: Create a new version
-
-For detailed API documentation, please refer to the inline code documentation.
-EOF
-      
       - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
