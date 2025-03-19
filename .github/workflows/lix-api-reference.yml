@@ -1,9 +1,13 @@
-name: Generate Markdown API Docs
+name: Generate Lix API Docs
 on:
   push:
     branches:
       - main
+    paths:
+      - 'packages/lix-sdk/**'
   pull_request:
+    paths:
+      - 'packages/lix-sdk/**'
 
 jobs:
   generate-docs:
