@@ -100,8 +100,8 @@ h1 {
   display: flex;
   border: 1px solid #ccc;
   overflow: hidden;
-  min-height: 300px;
-  max-height: 60vh;
+  min-height: 500px;
+  max-height: 70vh;
   flex: 0 1 auto;
   margin-bottom: 10px;
 }

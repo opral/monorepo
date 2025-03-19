@@ -13,6 +13,7 @@ export let checkpoints: Array<{
 	id: string;
 	created_at: string;
 	changes: Array<Change & { content: any }>;
+	message?: string; // Message from discussion if available
 }> = [];
 
 export let prosemirrorDocument: any =
@@ -58,7 +59,7 @@ setInterval(async () => {
 			.select("change_set.id")
 			.execute();
 
-		// 2. For each checkpoint set, get its entity changes and derive creation time
+		// 2. For each checkpoint set, get its entity changes, discussion, and derive creation time
 		const checkpointResults = await Promise.all(
 			checkpointSets.map(async (set) => {
 				// Get entity changes for this checkpoint
@@ -76,25 +77,56 @@ setInterval(async () => {
 					.orderBy("change.created_at", "desc")
 					.execute();
 
+				// Get any discussions associated with this change set
+				let message: string | undefined = undefined;
+				try {
+					// Look for a discussion and its first comment
+					const discussion = await lix.db
+						.selectFrom("discussion")
+						.where("change_set_id", "=", set.id)
+						.select("id")
+						.executeTakeFirst();
+
+					if (discussion) {
+						// Get the first comment from this discussion
+						const comment = await lix.db
+							.selectFrom("comment")
+							.where("discussion_id", "=", discussion.id)
+							.select("content")
+							// No orderBy needed since CommentTable doesn't have created_at column
+							.limit(1)
+							.executeTakeFirst();
+
+						if (comment) {
+							message = comment.content;
+						}
+					}
+				} catch (error) {
+					console.log("Error fetching discussion for checkpoint:", error);
+				}
+
 				// Use the newest change timestamp as the checkpoint creation time
 				// (using the change most recently created - first in our sorted results)
-				const timestamp = setChanges.length > 0
-					? setChanges[0].created_at
-					: new Date().toISOString();
+				const timestamp =
+					setChanges.length > 0
+						? setChanges[0].created_at
+						: new Date().toISOString();
 
 				return {
 					id: set.id,
 					created_at: timestamp,
 					changes: setChanges,
+					message,
 				};
 			}),
 		);
-		
+
 		// Sort checkpoints by their derived timestamps (newest first)
-		checkpointResults.sort((a, b) => 
-			new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+		checkpointResults.sort(
+			(a, b) =>
+				new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
 		);
-		
+
 		checkpoints = checkpointResults;
 	} catch (error) {
 		console.error("Error fetching checkpoints:", error);
