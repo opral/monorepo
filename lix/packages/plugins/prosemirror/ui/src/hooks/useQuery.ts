@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 
 /**
  * A simple hook to poll data with a specified interval
- * @param queryFn - Function that returns a promise with the data
- * @param interval - Polling interval in milliseconds
- * @param deps - Optional dependencies to trigger refetch (similar to useEffect deps)
- * @returns Object with data, isLoading, error, and refetch function
+ * 
+ * @example
+ *   const [data] = useQuery(() lix.db.selectFrom("change_set").selectAll().execute())
  */
 export function useQuery<T>(
 	queryFn: () => Promise<T>,

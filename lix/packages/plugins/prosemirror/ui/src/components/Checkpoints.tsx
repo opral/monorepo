@@ -2,11 +2,9 @@ import React, { useState } from "react";
 import { Change, applyChanges } from "@lix-js/sdk";
 import { createCheckpoint } from "../utilities/createCheckpoint";
 import { toUserTime } from "../utilities/timeUtils";
-import { lix, checkpoints as stateCheckpoints } from "../state";
-
-interface CheckpointsProps {
-	changes: Array<Change & { content: any }>;
-}
+import { lix } from "../state";
+import { useQuery } from "../hooks/useQuery";
+import { selectChanges, selectCheckpoints } from "../queries";
 
 // Extend the Change type to include an optional metadata property
 interface ExtendedChange extends Change {
@@ -50,21 +48,22 @@ const getContentPreview = (change: ExtendedChange): string => {
 };
 
 // Get a summary preview from a checkpoint
-const getCheckpointPreview = (
-	changes: Array<Change & { content: any }>,
-): string => {
+const getCheckpointPreview = (changes: Array<ExtendedChange>): string => {
 	if (!changes || changes.length === 0) return "Empty checkpoint";
 
 	// Get the first change with content
 	const changeWithContent = changes.find((c) => c.content);
 	if (changeWithContent) {
-		return getContentPreview(changeWithContent as ExtendedChange);
+		return getContentPreview(changeWithContent);
 	}
 
 	return `Checkpoint with ${changes.length} changes`;
 };
 
-const Checkpoints: React.FC<CheckpointsProps> = ({ changes }) => {
+const Checkpoints: React.FC = () => {
+	const [changes] = useQuery(selectChanges);
+	const [stateCheckpoints] = useQuery(selectCheckpoints);
+
 	// State for selected checkpoint and message input
 	const [selectedCheckpointId, setSelectedCheckpointId] = useState<
 		string | null
@@ -74,7 +73,7 @@ const Checkpoints: React.FC<CheckpointsProps> = ({ changes }) => {
 
 	// Handler for creating a checkpoint
 	const handleCreateCheckpoint = async () => {
-		if (isCreatingCheckpoint || changes.length === 0) return;
+		if (isCreatingCheckpoint || !changes || changes.length === 0) return;
 
 		try {
 			setIsCreatingCheckpoint(true);
@@ -152,16 +151,19 @@ const Checkpoints: React.FC<CheckpointsProps> = ({ changes }) => {
 							border: "1px solid #ddd",
 							borderRadius: "4px",
 							cursor:
-								isCreatingCheckpoint || changes.length === 0
+								isCreatingCheckpoint || !changes || changes.length === 0
 									? "not-allowed"
 									: "pointer",
-							opacity: isCreatingCheckpoint || changes.length === 0 ? 0.6 : 1,
+							opacity:
+								isCreatingCheckpoint || !changes || changes.length === 0
+									? 0.6
+									: 1,
 							width: "100%",
 							marginBottom: "10px",
 							boxSizing: "border-box",
 						}}
 						onClick={handleCreateCheckpoint}
-						disabled={isCreatingCheckpoint || changes.length === 0}
+						disabled={isCreatingCheckpoint || !changes || changes.length === 0}
 					>
 						{isCreatingCheckpoint ? "Creating..." : "Create"}
 					</button>
@@ -172,8 +174,8 @@ const Checkpoints: React.FC<CheckpointsProps> = ({ changes }) => {
 				className="checkpoints-list"
 				style={{ maxHeight: "400px", overflow: "auto" }}
 			>
-				{stateCheckpoints.length > 0 ? (
-					stateCheckpoints.map((checkpoint) => {
+				{(stateCheckpoints?.length ?? 0 > 0) ? (
+					stateCheckpoints?.map((checkpoint) => {
 						const isSelected = checkpoint.id === selectedCheckpointId;
 
 						return (
@@ -188,17 +190,19 @@ const Checkpoints: React.FC<CheckpointsProps> = ({ changes }) => {
 								onClick={async () => {
 									try {
 										setSelectedCheckpointId(checkpoint.id);
-										
+
 										// Apply the changes from this checkpoint
 										await applyChanges({
 											lix,
-											changes: checkpoint.changes
+											changes: checkpoint.changes,
 										});
-										
-										console.log(`Applied changes from checkpoint: ${checkpoint.id}`);
-										
+
+										console.log(
+											`Applied changes from checkpoint: ${checkpoint.id}`,
+										);
+
 										// Dispatch a custom event to notify that a checkpoint has been applied
-										window.dispatchEvent(new CustomEvent('apply-checkpoint'));
+										window.dispatchEvent(new CustomEvent("apply-checkpoint"));
 									} catch (error) {
 										console.error("Error applying checkpoint changes:", error);
 									}

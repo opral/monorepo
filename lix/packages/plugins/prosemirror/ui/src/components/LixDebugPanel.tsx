@@ -1,83 +1,85 @@
-import React from 'react';
-import { toBlob } from '@lix-js/sdk';
-import { Change } from '@lix-js/sdk';
+import { toBlob } from "@lix-js/sdk";
+import { Change } from "@lix-js/sdk";
 import { toUserTime } from "../utilities/timeUtils";
+import { useQuery } from "../hooks/useQuery";
+import { selectChanges, selectProsemirrorDocument } from "../queries";
 
-interface LixDebugPanelProps {
-  lix: any;
-  currentDoc: any;
-  changes: Array<Change & { content: any }>;
-  checkpoints?: Array<{
-    id: string;
-    created_at: string;
-    changes: Array<Change & { content: any }>;
-  }>;
-}
+const LixDebugPanel = ({ lix }) => {
+	const [changes] = useQuery(selectChanges);
+	const [currentDoc] = useQuery(selectProsemirrorDocument);
 
-const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc, changes }) => {
-  const handleDownloadLixDb = async () => {
-    try {
-      // Get the Lix database blob using the correct API
-      const blob = await toBlob({ lix });
-      
-      // Create a download link
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `lix-prosemirror-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.lix`;
-      document.body.appendChild(a);
-      a.click();
-      
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 0);
-    } catch (error) {
-      console.error("Error downloading Lix database:", error);
-      alert("Error downloading Lix database: " + (error as Error).message);
-    }
-  };
+	if (changes === null) {
+		return <p>Loading...</p>;
+	}
 
+	const handleDownloadLixDb = async () => {
+		try {
+			// Get the Lix database blob using the correct API
+			const blob = await toBlob({ lix });
 
-  // Function to get a readable content preview for changes
-  const getContentPreview = (change: Change & { content: any }): string => {
-    if (!change.content) return "No content available";
-    
-    if (typeof change.content === "object") {
-      // For text nodes, show the text content
-      if (change.content.text) {
-        return change.content.text.substring(0, 60) + 
-               (change.content.text.length > 60 ? "..." : "");
-      }
-      
-      // For paragraph nodes, extract content from their children
-      if (change.content.content && Array.isArray(change.content.content)) {
-        const textNodes = change.content.content
-          .filter((node: any) => node.type === "text" && node.text)
-          .map((node: any) => node.text);
+			// Create a download link
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `lix-prosemirror-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.lix`;
+			document.body.appendChild(a);
+			a.click();
 
-        if (textNodes.length > 0) {
-          const combinedText = textNodes.join(" ");
-          return combinedText.substring(0, 60) + 
-                 (combinedText.length > 60 ? "..." : "");
-        }
-      }
-      
-      // For empty paragraphs or other empty nodes, just return empty string
-      if (change.content.type === "paragraph" && 
-          (!change.content.content || change.content.content.length === 0)) {
-        return "";
-      }
-      
-      // For other node types, if we can't extract anything meaningful
-      return "";
-    }
-    
-    return "";
-  };
+			// Clean up
+			setTimeout(() => {
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+			}, 0);
+		} catch (error) {
+			console.error("Error downloading Lix database:", error);
+			alert("Error downloading Lix database: " + (error as Error).message);
+		}
+	};
 
-  return (
+	// Function to get a readable content preview for changes
+	const getContentPreview = (change: Change & { content: any }): string => {
+		if (!change.content) return "No content available";
+
+		if (typeof change.content === "object") {
+			// For text nodes, show the text content
+			if (change.content.text) {
+				return (
+					change.content.text.substring(0, 60) +
+					(change.content.text.length > 60 ? "..." : "")
+				);
+			}
+
+			// For paragraph nodes, extract content from their children
+			if (change.content.content && Array.isArray(change.content.content)) {
+				const textNodes = change.content.content
+					.filter((node: any) => node.type === "text" && node.text)
+					.map((node: any) => node.text);
+
+				if (textNodes.length > 0) {
+					const combinedText = textNodes.join(" ");
+					return (
+						combinedText.substring(0, 60) +
+						(combinedText.length > 60 ? "..." : "")
+					);
+				}
+			}
+
+			// For empty paragraphs or other empty nodes, just return empty string
+			if (
+				change.content.type === "paragraph" &&
+				(!change.content.content || change.content.content.length === 0)
+			) {
+				return "";
+			}
+
+			// For other node types, if we can't extract anything meaningful
+			return "";
+		}
+
+		return "";
+	};
+
+	return (
 		<div className="debug-section" style={{ marginTop: "20px" }}>
 			<div
 				style={{
@@ -140,7 +142,7 @@ const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc, changes 
 						{changes.length > 0 ? (
 							changes.map((change) => (
 								<div
-									key={`change-${change.id}`}
+									key={`change-${change?.id}`}
 									style={{
 										padding: "8px",
 										marginBottom: "8px",
@@ -149,11 +151,11 @@ const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc, changes 
 									}}
 								>
 									<div style={{ fontWeight: "normal", marginBottom: "3px" }}>
-										{toUserTime(change.created_at)}
+										{toUserTime(change?.created_at)}
 									</div>
 
 									<div style={{ marginBottom: "3px" }}>
-										Type: {change.content?.type || "Unknown"}
+										Type: {change?.content?.type || "Unknown"}
 									</div>
 
 									<div style={{ fontSize: "0.9em" }}>

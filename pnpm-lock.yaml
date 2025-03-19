@@ -1954,21 +1954,21 @@ importers:
         specifier: ^1.31.7
         version: 1.38.1
       react:
-        specifier: ^18.2.0
-        version: 18.3.1
+        specifier: ^19.0.0
+        version: 19.0.0
       react-dom:
-        specifier: ^18.2.0
-        version: 18.3.1(react@18.3.1)
+        specifier: ^19.0.0
+        version: 19.0.0(react@19.0.0)
       usehooks-ts:
         specifier: ^3.1.1
-        version: 3.1.1(react@18.3.1)
+        version: 3.1.1(react@19.0.0)
     devDependencies:
       '@types/react':
-        specifier: ^18.2.15
-        version: 18.3.18
+        specifier: ^19.0.0
+        version: 19.0.8
       '@types/react-dom':
-        specifier: ^18.2.7
-        version: 18.3.5(@types/react@18.3.18)
+        specifier: ^19.0.0
+        version: 19.0.3(@types/react@19.0.8)
       '@typescript-eslint/eslint-plugin':
         specifier: ^6.0.0
         version: 6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.2))(eslint@8.57.1)(typescript@5.8.2)
@@ -21799,7 +21799,7 @@ snapshots:
   '@mdx-js/react@2.3.0(react@18.3.1)':
     dependencies:
       '@types/mdx': 2.0.13
-      '@types/react': 18.3.18
+      '@types/react': 19.0.8
       react: 18.3.1
 
   '@mermaid-js/parser@0.3.0':
@@ -39205,10 +39205,10 @@ snapshots:
     dependencies:
       react: 19.0.0
 
-  usehooks-ts@3.1.1(react@18.3.1):
+  usehooks-ts@3.1.1(react@19.0.0):
     dependencies:
       lodash.debounce: 4.0.8
-      react: 18.3.1
+      react: 19.0.0
 
   userhome@1.0.0: {}
 
