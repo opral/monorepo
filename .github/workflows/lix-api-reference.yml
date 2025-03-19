@@ -40,16 +40,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
       
-      - name: Install dependencies
+      - name: Install root dependencies
         run: pnpm install
-        working-directory: packages/lix-sdk
+      
+      - name: Build lix-sdk and dependencies
+        run: pnpm --filter "@lix-js/sdk..." build
       
       - name: Install Typedoc and markdown plugin
         run: pnpm add -D typedoc typedoc-plugin-markdown --ignore-workspace-root-check
         working-directory: packages/lix-sdk
       
       - name: Generate Markdown Documentation
-        run: pnpm exec typedoc --out api-docs --plugin typedoc-plugin-markdown ./src
+        run: pnpm exec typedoc --out api-docs --plugin typedoc-plugin-markdown --skipErrorChecking ./src
         working-directory: packages/lix-sdk
       
       - name: Generate README.md from API Docs
