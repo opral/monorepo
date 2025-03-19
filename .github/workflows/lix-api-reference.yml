@@ -40,7 +40,26 @@ jobs:
       - name: Generate API docs
         run: |
           mkdir -p api-docs
-          typedoc --out api-docs --plugin typedoc-plugin-markdown --skipErrorChecking ./src
+          
+          # First generate TypeDoc files with simple options
+          typedoc --out api-docs --plugin typedoc-plugin-markdown --skipErrorChecking --readme none ./src
+          
+          # Then combine all generated markdown files into a single README.md
+          echo "# Lix SDK API Reference" > api-docs/README.md
+          echo "" >> api-docs/README.md
+          
+          # Loop through all markdown files except README.md itself
+          for file in $(find api-docs -name "*.md" -not -name "README.md" | sort); do
+            echo "## $(basename "$file" .md)" >> api-docs/README.md
+            echo "" >> api-docs/README.md
+            cat "$file" >> api-docs/README.md
+            echo "" >> api-docs/README.md
+            echo "---" >> api-docs/README.md
+            echo "" >> api-docs/README.md
+          done
+          
+          # Remove all other markdown files
+          find api-docs -name "*.md" -not -name "README.md" -delete
         working-directory: packages/lix-sdk
 
       - name: Commit and push changes
