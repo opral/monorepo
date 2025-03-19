@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { Change } from "@lix-js/sdk";
+import { Change, applyChanges } from "@lix-js/sdk";
 import { createCheckpoint } from "../utilities/createCheckpoint";
 import { toUserTime } from "../utilities/timeUtils";
-import { lix, checkpoints as stateCheckpoints } from "../state";
+import { lix, checkpoints as stateCheckpoints, prosemirrorDocument } from "../state";
 
 interface CheckpointsProps {
 	changes: Array<Change & { content: any }>;
@@ -185,7 +185,24 @@ const Checkpoints: React.FC<CheckpointsProps> = ({ changes }) => {
 									background: isSelected ? "#f5f5f5" : "white",
 									cursor: "pointer",
 								}}
-								onClick={() => setSelectedCheckpointId(checkpoint.id)}
+								onClick={async () => {
+									try {
+										setSelectedCheckpointId(checkpoint.id);
+										
+										// Apply the changes from this checkpoint
+										await applyChanges({
+											lix,
+											changes: checkpoint.changes
+										});
+										
+										console.log(`Applied changes from checkpoint: ${checkpoint.id}`);
+										
+										// The document will be updated in the next polling cycle
+										// in the state.ts interval
+									} catch (error) {
+										console.error("Error applying checkpoint changes:", error);
+									}
+								}}
 							>
 								{checkpoint.message ? (
 									<div
