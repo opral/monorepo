@@ -6,6 +6,11 @@ interface LixDebugPanelProps {
   lix: any;
   currentDoc: any;
   changes: Array<Change & { content: any }>;
+  checkpoints?: Array<{
+    id: string;
+    created_at: string;
+    changes: Array<Change & { content: any }>;
+  }>;
 }
 
 const LixDebugPanel: React.FC<LixDebugPanelProps> = ({ lix, currentDoc, changes }) => {

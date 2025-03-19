@@ -2,7 +2,7 @@ import Editor from "./components/Editor";
 import LixDebugPanel from "./components/LixDebugPanel";
 import Checkpoints from "./components/Checkpoints";
 import { useState } from "react";
-import { lix, pollingInterval, prosemirrorDocument, changes } from "./state";
+import { lix, pollingInterval, prosemirrorDocument, changes, checkpoints } from "./state";
 import { useDebounceCallback, useInterval } from "usehooks-ts";
 
 function App() {
@@ -53,7 +53,11 @@ function App() {
 			</div>
 
 			{/* Debug tools at the bottom */}
-			<LixDebugPanel lix={lix} currentDoc={currentDoc} changes={changes} />
+			<LixDebugPanel 
+				lix={lix} 
+				currentDoc={currentDoc} 
+				changes={changes}
+			/>
 		</div>
 	);
 }
