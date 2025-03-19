@@ -16,18 +16,36 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+          run_install: false
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
       
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
         working-directory: packages/lix-sdk
       
       - name: Install Typedoc and markdown plugin
-        run: npm install --no-save typedoc typedoc-plugin-markdown
+        run: pnpm add --no-save typedoc typedoc-plugin-markdown
         working-directory: packages/lix-sdk
       
       - name: Generate Markdown Documentation
-        run: npx typedoc --out api-docs --plugin typedoc-plugin-markdown ./src
+        run: pnpm exec typedoc --out api-docs --plugin typedoc-plugin-markdown ./src
         working-directory: packages/lix-sdk
       
       - name: Generate README.md from API Docs
