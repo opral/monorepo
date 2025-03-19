@@ -41,7 +41,7 @@ jobs:
         working-directory: packages/lix-sdk
       
       - name: Install Typedoc and markdown plugin
-        run: pnpm add --no-save typedoc typedoc-plugin-markdown
+        run: pnpm add -D typedoc typedoc-plugin-markdown --ignore-workspace-root-check
         working-directory: packages/lix-sdk
       
       - name: Generate Markdown Documentation
