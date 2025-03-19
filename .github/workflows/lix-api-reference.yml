@@ -62,7 +62,13 @@ jobs:
         run: |
           echo "# Lix SDK API Documentation" > README.md
           echo "" >> README.md
-          cat api-docs/*.md >> README.md
+          
+          # Check if api-docs directory exists and has Markdown files
+          if [ -d "api-docs" ] && [ "$(find api-docs -name '*.md' | wc -l)" -gt 0 ]; then
+            cat api-docs/*.md >> README.md
+          else
+            echo "No API documentation generated. Please check TypeDoc configuration." >> README.md
+          fi
         working-directory: packages/lix-sdk
       
       - name: Commit and Push Docs & README.md
@@ -79,11 +85,16 @@ jobs:
           # Pull the latest changes from the main branch
           git pull origin main --no-rebase
           
-          # Stage and commit our changes
-          git add packages/lix-sdk/api-docs/ packages/lix-sdk/README.md
-          git commit -m "Update API Docs and README" || echo "No changes to commit"
+          # Check if api-docs directory exists and add files accordingly
+          if [ -d "packages/lix-sdk/api-docs" ]; then
+            git add packages/lix-sdk/api-docs/
+          fi
           
-          # Push the changes back to the repository
+          # Add the README.md file
+          git add packages/lix-sdk/README.md
+          
+          # Commit and push changes
+          git commit -m "Update API Docs and README" || echo "No changes to commit"
           git push origin main
         working-directory: packages/lix-sdk
         env:
