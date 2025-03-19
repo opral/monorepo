@@ -1,6 +1,7 @@
 import Editor from "./components/Editor";
 import LixDebugPanel from "./components/LixDebugPanel";
 import Checkpoints from "./components/Checkpoints";
+import AccountSelector from "./components/AccountSelector";
 import { useState } from "react";
 import { lix, pollingInterval, prosemirrorDocument, changes } from "./state";
 import { useDebounceCallback, useInterval } from "usehooks-ts";
@@ -39,7 +40,17 @@ function App() {
 
 	return (
 		<div className="app-container">
-			<h1>ProseMirror Lix Plugin Demo</h1>
+			<div
+				style={{
+					display: "flex",
+					justifyContent: "space-between",
+					alignItems: "center",
+					marginBottom: "20px",
+				}}
+			>
+				<h1>ProseMirror Lix Plugin Demo</h1>
+				<AccountSelector />
+			</div>
 
 			{/* Split layout: Editor and Checkpoints */}
 			<div className="editor-checkpoints-container">

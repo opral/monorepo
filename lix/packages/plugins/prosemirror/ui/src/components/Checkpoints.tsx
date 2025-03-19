@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Change, applyChanges } from "@lix-js/sdk";
 import { createCheckpoint } from "../utilities/createCheckpoint";
 import { toUserTime } from "../utilities/timeUtils";
-import { lix, checkpoints as stateCheckpoints, prosemirrorDocument } from "../state";
+import { lix, checkpoints as stateCheckpoints } from "../state";
 
 interface CheckpointsProps {
 	changes: Array<Change & { content: any }>;
