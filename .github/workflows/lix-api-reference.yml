@@ -40,7 +40,7 @@ jobs:
       - name: Generate API docs
         run: |
           mkdir -p api-docs
-          typedoc --out api-docs --plugin typedoc-plugin-markdown ./src 
+          typedoc --out api-docs --plugin typedoc-plugin-markdown --skipErrorChecking ./src
         working-directory: packages/lix-sdk
 
       - name: Commit and push changes
