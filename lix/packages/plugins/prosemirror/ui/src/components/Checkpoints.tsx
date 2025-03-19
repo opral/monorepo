@@ -197,8 +197,8 @@ const Checkpoints: React.FC<CheckpointsProps> = ({ changes }) => {
 										
 										console.log(`Applied changes from checkpoint: ${checkpoint.id}`);
 										
-										// The document will be updated in the next polling cycle
-										// in the state.ts interval
+										// Dispatch a custom event to notify that a checkpoint has been applied
+										window.dispatchEvent(new CustomEvent('apply-checkpoint'));
 									} catch (error) {
 										console.error("Error applying checkpoint changes:", error);
 									}

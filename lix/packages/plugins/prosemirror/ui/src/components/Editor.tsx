@@ -6,6 +6,7 @@ import { baseKeymap } from "prosemirror-commands";
 import { history } from "prosemirror-history";
 import { idPlugin } from "../prosemirror/id-plugin";
 import { schema } from "../prosemirror/schema";
+import { selectProsemirrorDocument } from "../queries";
 
 interface EditorProps {
 	onChange: (doc: any) => void;
@@ -57,7 +58,7 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 		setTimeout(() => {
 			view.focus();
 		}, 100);
-
+		
 		// Clean up on unmount
 		return () => {
 			view.destroy();
@@ -84,6 +85,47 @@ const Editor: React.FC<EditorProps> = ({ onChange, externalDoc }) => {
 			}
 		}
 	}, [view, externalDoc]);
+	
+	// Listen for checkpoint application events
+	useEffect(() => {
+		if (!view) return;
+		
+		// Define event handler for checkpoint application
+		const handleApplyCheckpoint = async () => {
+			console.log("Checkpoint application detected, updating editor...");
+			
+			try {
+				// Get the latest document from the database
+				const latest = await selectProsemirrorDocument();
+				
+				if (latest && view) {
+					// Create a transaction to replace the document
+					const tr = view.state.tr;
+					
+					// Create a new document from the updated data
+					const newDoc = schema.nodeFromJSON(latest);
+					
+					// Replace the current document
+					tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
+					
+					// Apply the transaction
+					view.dispatch(tr);
+					
+					console.log('Editor successfully updated with checkpoint changes');
+				}
+			} catch (error) {
+				console.error('Error applying checkpoint changes to editor:', error);
+			}
+		};
+		
+		// Add event listener
+		window.addEventListener('apply-checkpoint', handleApplyCheckpoint);
+		
+		// Clean up
+		return () => {
+			window.removeEventListener('apply-checkpoint', handleApplyCheckpoint);
+		};
+	}, [view]);
 
 	// Handle clicks to focus the editor
 	const handleClick = () => {
