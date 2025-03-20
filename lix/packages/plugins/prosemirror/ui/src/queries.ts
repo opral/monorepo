@@ -145,3 +145,14 @@ export async function selectCurrentVersion() {
     .selectAll()
     .executeTakeFirstOrThrow();
 }
+
+/**
+ * Selects the current active account
+ */
+export async function selectActiveAccount() {
+  return lix.db
+    .selectFrom("active_account")
+    .innerJoin("account", "active_account.id", "account.id")
+    .selectAll()
+    .executeTakeFirst();
+}
