@@ -249,7 +249,7 @@ Read https://github.com/opral/inlang-paraglide-js/issues/438#issuecomment-270373
 +<button onclick="setLocale('de')">Deutsch</button>
 ```
 
-#### Lint rules got deprecated
+#### Lint rules were deprecated
 
 Remove lint rules from your project modules.
 
@@ -262,6 +262,15 @@ modules: [
    ...
 ]
 
+```
+
+#### `localizeHref()` is now required
+
+Some Paraglide adapters used AST transforms to automatically transform `<a>` into localized links. That led to many bugs and edge cases. The AST transforms were removed for v2.  
+
+```diff
+-<a href="/page"></a>
++<a href={localizeHref("/page")}
 ```
 
 ## 2.0.0-beta.31 (released as 2.0.0)
