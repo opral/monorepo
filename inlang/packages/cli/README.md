@@ -99,8 +99,8 @@ If one of the commands can't be found, you probably use an outdated CLI version.
 CLI for inlang.
 
 Options:
-  -V, --version         output the version number
-  -h, --help            display help for command
+  -V, --version         Output the version number
+  -h, --help            Display help for command
 
 Commands:
   project [command]  Commands for managing your inlang project
@@ -108,7 +108,7 @@ Commands:
   machine [command]  Commands for automating translations.
   open [command]     Commands for open parts of the inlang ecosystem.
   module [command]   Commands for build inlang modules.
-  help [command]     display help for command
+  help [command]     Display help for command
 ```
 
 The following commands are available with the inlang CLI:
