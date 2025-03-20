@@ -187,6 +187,16 @@ export default function Index() {
                 SDK documentation
               </a>
             </div>
+            <div className="flex gap-2 mt-2 justify-center md:justify-start">
+              <img
+                src="https://img.shields.io/npm/dw/%40lix-js%2Fsdk?logo=npm&logoColor=red&label=npm%20downloads"
+                alt="npm downloads"
+              />
+              <img
+                src="https://img.shields.io/discord/897438559458430986?style=flat&logo=discord&labelColor=white"
+                alt="discord"
+              />
+            </div>
           </div>
           <div>
             {coreFeatures.map((feature, index) => (
