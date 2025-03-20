@@ -11,21 +11,25 @@ This test shows several notable transformations in list formatting:
 These transformations maintain the semantic structure while improving consistency.
 -->
 
-## Unordered Lists
+## tc - simple unordered list
 
 - Item 1
 - Item 2
 - Item 3
 
+## tc - asterisk unordered list
+
 * Alternative item 1
 * Alternative item 2
 * Alternative item 3
+
+## tc - plus unordered list
 
 + Another alternative item 1
 + Another alternative item 2
 + Another alternative item 3
 
-## Nested Unordered Lists
+## tc - nested unordered lists
 
 - Item 1
   - Nested item 1.1
@@ -37,13 +41,13 @@ These transformations maintain the semantic structure while improving consistenc
   - Nested item 2.1
   - Nested item 2.2
 
-## Ordered Lists
+## tc - simple ordered list
 
 1. First item
 2. Second item
 3. Third item
 
-## Nested Ordered Lists
+## tc - nested ordered lists
 
 1. First item
    1. Nested item 1.1
@@ -55,7 +59,7 @@ These transformations maintain the semantic structure while improving consistenc
    1. Nested item 2.1
    2. Nested item 2.2
 
-## Mixed Lists
+## tc - mixed ordered and unordered lists
 
 1. Ordered item 1
 2. Ordered item 2
@@ -66,7 +70,7 @@ These transformations maintain the semantic structure while improving consistenc
    - Unordered nested item 2.3
 3. Ordered item 3
 
-## Lists with Formatting
+## tc - list items with formatting
 
 - **Bold item**
 - *Italic item*
@@ -75,7 +79,7 @@ These transformations maintain the semantic structure while improving consistenc
 - Item with [link](https://example.com)
 - Item with *nested **formatting***
 
-## Lists with Paragraphs
+## tc - list items with paragraphs
 
 - First item
 
@@ -87,7 +91,7 @@ These transformations maintain the semantic structure while improving consistenc
 
   Paragraph within the second list item.
 
-## Task Lists
+## tc - task lists
 
 - [x] Completed task
 - [ ] Incomplete task

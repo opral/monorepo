@@ -1,5 +1,4 @@
 # Empty paragraphs test
-
 <!-- 
 TEST REASONING:
 Empty paragraphs are crucial for document structure and should be preserved.

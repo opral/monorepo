@@ -1,10 +1,9 @@
 # Empty paragraphs test
-
 <!-- 
 TEST REASONING:
 Empty paragraphs are crucial for document structure and should be preserved.
 However, the serializer may normalize multiple consecutive newlines to a single blank line.
-This expected output represents the actual serialization behavior, not the ideal behavior.
+This test verifies how the serializer handles empty paragraphs during the roundtrip process.
 -->
 
 Line with content

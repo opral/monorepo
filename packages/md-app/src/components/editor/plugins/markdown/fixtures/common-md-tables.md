@@ -13,28 +13,28 @@ These changes improve readability and consistency without altering the
 structural meaning or data relationships within the tables.
 -->
 
-## Basic Table
+## tc - basic table
 
 | Header 1 | Header 2 | Header 3 |
 | -------- | -------- | -------- |
 | Cell 1   | Cell 2   | Cell 3   |
 | Cell 4   | Cell 5   | Cell 6   |
 
-## Table with Alignment
+## tc - table with alignment
 
 | Left-aligned | Center-aligned | Right-aligned |
 | :----------- | :------------: | ------------: |
 | Left         |     Center     |         Right |
 | Left         |     Center     |         Right |
 
-## Table with Formatting
+## tc - table with formatting
 
 | **Bold Header** | *Italic Header* | ~~Strikethrough Header~~ |
 | --------------- | --------------- | ------------------------ |
 | **Bold Cell**   | *Italic Cell*   | ~~Strikethrough Cell~~   |
 | `Code Cell`     | [Link](https://example.com) | ![Image](https://example.com/image.jpg) |
 
-## Table with Empty Cells
+## tc - table with empty cells
 
 | Header 1 | Header 2 | Header 3 |
 | -------- | -------- | -------- |
@@ -42,27 +42,27 @@ structural meaning or data relationships within the tables.
 |          | Content  |          |
 | Content  | Content  | Content  |
 
-## Table with Varying Column Width
+## tc - table with varying column width
 
 | Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
 | ----- | ------------- | --------------------------------------------------- |
 | 1     | Data          | Long content that extends across multiple characters |
 | 2     | More Data     | More long content in this cell                       |
 
-## Table with Line Breaks
+## tc - table with line breaks
 
 | Header 1 | Header 2 |
 | -------- | -------- |
 | Line 1<br>Line 2 | Line 1<br>Line 2 |
 | Single Line | Single Line |
 
-## Table with Escaped Pipe Characters
+## tc - table with escaped pipe characters
 
 | Column with \| pipe | Regular column |
 | ------------------ | -------------- |
 | Data with \| pipe  | Regular data   |
 
-## Simplified Table Syntax
+## tc - simplified table syntax
 
 Header 1 | Header 2
 -------- | --------

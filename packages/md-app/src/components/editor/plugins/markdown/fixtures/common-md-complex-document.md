@@ -23,6 +23,8 @@ This one has a line break\
 created with a backslash.
 
 ## Headings
+<!-- reason for differing expectation:
+we currently expect a line break after each paragraph -->
 
 # Level 1 Heading
 ## Level 2 Heading
@@ -62,6 +64,8 @@ Alternative Level 2 Heading
 [![Image with link](https://example.com/image.jpg "Click me")](https://example.com)
 
 ## Lists
+<!-- reason for differing expectation:
+the identation may differ 1 meaning is the same -->
 
 ### Unordered Lists
 

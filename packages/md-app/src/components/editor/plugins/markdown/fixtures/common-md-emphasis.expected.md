@@ -7,25 +7,46 @@ This is acceptable because the semantic meaning and visual rendering are identic
 and standardizing on one syntax improves consistency throughout the document.
 -->
 
+## tc - italic with asterisks
 
 _Italic text_ using single asterisks.
 
+## tc - italic with underscores
+
 _Italic text_ using single underscores.
+
+## tc - bold with asterisks
 
 **Bold text** using double asterisks.
 
+## tc - bold with underscores
+
 **Bold text** using double underscores.
+
+## tc - bold-italic with asterisks
 
 ***Bold and italic*** using triple asterisks.
 
+## tc - bold-italic with underscores
+
 ***Bold and italic*** using triple underscores.
+
+## tc - mixed formatting inline
 
 **Bold text with _italic_ inside**.
 
+## tc - italic with bold inside
+
 _Italic text with **bold** inside_.
+
+## tc - strikethrough
 
 ~~Strikethrough text~~ using double tildes.
 
+## tc - mixed styles in paragraph
+
 Mixed **bold** and _italic_ and ~~strikethrough~~ in one paragraph.
+
+## tc - nested styles
 
 Text with **multiple _styles_** applied.
