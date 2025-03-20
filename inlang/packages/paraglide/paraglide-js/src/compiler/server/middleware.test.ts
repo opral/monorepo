@@ -538,19 +538,18 @@ test("does not catch errors thrown by downstream resolve call", async () => {
 			},
 		}),
 		compilerOptions: {
-			strategy: ["url"]
+			strategy: ["url"],
 		},
 	});
 
-	await expect(
-		 () =>
-			 runtime.paraglideMiddleware(
-				new Request(new URL("https://example.com/page"), {
-					headers: { "Sec-Fetch-Dest": "document" },
-				}),
-				() => {
-					throw new Error("Downstream error");
-				}
-			)
+	await expect(() =>
+		runtime.paraglideMiddleware(
+			new Request(new URL("https://example.com/page"), {
+				headers: { "Sec-Fetch-Dest": "document" },
+			}),
+			() => {
+				throw new Error("Downstream error");
+			}
+		)
 	).rejects.toThrow();
 });
