@@ -173,12 +173,6 @@ const Editor: React.FC = () => {
 			<div className="editor-wrapper" onClick={handleClick}>
 				{/* The actual editor will be mounted here */}
 				<div ref={editorRef} className="editor" />
-
-				{/* Mode indicator */}
-				<div className="mode-indicator">
-					{currentMode === "write" ? "Write Mode" : "Propose Changes Mode"}
-					<span className="version-info">Version: {currentVersion?.name}</span>
-				</div>
 			</div>
 		</div>
 	);

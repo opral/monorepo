@@ -82,6 +82,7 @@ function createMergedNode(
 			"created",
 			beforeNodesById,
 			afterNodesById,
+			beforeNode,
 		);
 	}
 
@@ -92,10 +93,28 @@ function createMergedNode(
 			"deleted",
 			beforeNodesById,
 			afterNodesById,
+			beforeNode,
 		);
 	}
 
-	// Both nodes exist, determine if they were modified
+	// For nodes with IDs, we need to do a deep comparison of their content
+	// to determine if they've been modified
+	if (beforeNode?.attrs?.id && afterNode?.attrs?.id && 
+		beforeNode.attrs.id === afterNode.attrs.id) {
+		// Check if the content has changed
+		const hasContentChanged = contentHasChanged(beforeNode, afterNode);
+		const diffState = hasContentChanged ? "updated" : "unmodified";
+		
+		return convertToDiffNode(
+			afterNode,
+			diffState,
+			beforeNodesById,
+			afterNodesById,
+			beforeNode,
+		);
+	}
+
+	// For other nodes, determine if they were modified using direct comparison
 	const diffState = nodesAreEqual(beforeNode, afterNode)
 		? "unmodified"
 		: "updated";
@@ -106,7 +125,39 @@ function createMergedNode(
 		diffState,
 		beforeNodesById,
 		afterNodesById,
+		beforeNode,
 	);
+}
+
+/**
+ * Checks if the content of two nodes has changed, including text content of children
+ */
+function contentHasChanged(beforeNode: any, afterNode: any): boolean {
+	if (!beforeNode || !afterNode) return true;
+	
+	// Different types means content has changed
+	if (beforeNode.type !== afterNode.type) return true;
+	
+	// For text nodes, compare text content
+	if (beforeNode.text !== afterNode.text) return true;
+	
+	// If one has content and the other doesn't, content has changed
+	if ((!beforeNode.content && afterNode.content) || 
+		(beforeNode.content && !afterNode.content)) return true;
+	
+	// If content arrays have different lengths, content has changed
+	if (beforeNode.content?.length !== afterNode.content?.length) return true;
+	
+	// Compare each child recursively
+	if (beforeNode.content && afterNode.content) {
+		for (let i = 0; i < beforeNode.content.length; i++) {
+			if (contentHasChanged(beforeNode.content[i], afterNode.content[i])) {
+				return true;
+			}
+		}
+	}
+	
+	return false;
 }
 
 /**
@@ -117,6 +168,7 @@ function convertToDiffNode(
 	diffState: DiffState,
 	beforeNodesById: Map<string, any>,
 	afterNodesById: Map<string, any>,
+	beforeNode?: any, // Optional before node for text comparison
 ): DiffNode {
 	if (!node) {
 		throw new Error("Cannot convert null node to DiffNode");
@@ -130,27 +182,62 @@ function convertToDiffNode(
 	// Add text content if this is a text node
 	if (node.text) {
 		result.text = node.text;
+		
+		// Special handling for text nodes - compare text content directly
+		if (diffState !== "created" && diffState !== "deleted" && 
+			beforeNode && beforeNode.text !== node.text) {
+			// Ensure attrs exists before accessing it
+			result.attrs = result.attrs || {};
+			result.attrs.diff = "updated";
+		}
 	}
 
 	// Process child nodes if any
 	if (node.content && Array.isArray(node.content)) {
 		result.content = [];
+		let hasUpdatedChildren = false;
 
 		// Track which child IDs have been processed
 		const processedIds = new Set<string>();
 
 		// For each child in the current node
-		node.content.forEach((childNode: any) => {
+		node.content.forEach((childNode: any, index: number) => {
 			const childId = childNode.attrs?.id;
-
-			// Skip nodes without IDs
+			
+			// For text nodes or nodes without IDs, we need to compare by position
 			if (!childId) {
+				// Find corresponding child in the before node by index
+				const beforeChild = beforeNode?.content?.[index];
+				
+				// Determine diff state based on content comparison and parent state
+				let childDiffState = diffState;
+				
+				// For created or deleted parent nodes, children inherit the state
+				if (diffState === "created" || diffState === "deleted") {
+					childDiffState = diffState;
+				} 
+				// Otherwise, determine state based on content comparison
+				else if (beforeChild && childNode.type === "text" && beforeChild.text !== childNode.text) {
+					childDiffState = "updated";
+					hasUpdatedChildren = true;
+				}
+				
 				const childDiffNode = convertToDiffNode(
 					childNode,
-					diffState, // Inherit parent's diff state if no ID
+					childDiffState,
 					beforeNodesById,
 					afterNodesById,
+					beforeChild,
 				);
+				
+				// Only count as updated if we're not already created or deleted
+				if (diffState !== "created" && diffState !== "deleted" &&
+					(childDiffNode.attrs?.diff === "updated" || 
+					childDiffNode.attrs?.diff === "created" || 
+					childDiffNode.attrs?.diff === "deleted")) {
+					hasUpdatedChildren = true;
+				}
+				
 				result.content!.push(childDiffNode);
 				return;
 			}
@@ -169,16 +256,25 @@ function convertToDiffNode(
 				beforeNodesById,
 				afterNodesById,
 			);
+			
+			// Only count as updated if we're not already created or deleted
+			if (diffState !== "created" && diffState !== "deleted" &&
+				(mergedChild.attrs?.diff === "updated" || 
+				mergedChild.attrs?.diff === "created" || 
+				mergedChild.attrs?.diff === "deleted")) {
+				hasUpdatedChildren = true;
+			}
+			
 			result.content!.push(mergedChild);
 		});
 
 		// Add deleted nodes that exist in beforeDoc but not in afterDoc
-		if (node.attrs?.id) {
-			const beforeNode = beforeNodesById.get(node.attrs.id);
+		if (node.attrs?.id && diffState !== "created" && diffState !== "deleted") {
+			const beforeNodeWithId = beforeNodesById.get(node.attrs.id);
 
-			if (beforeNode?.content) {
+			if (beforeNodeWithId?.content) {
 				// Find deleted children that exist in beforeNode but not in afterNode
-				beforeNode.content.forEach((beforeChild: any) => {
+				beforeNodeWithId.content.forEach((beforeChild: any) => {
 					const childId = beforeChild.attrs?.id;
 					if (childId && !processedIds.has(childId)) {
 						// This child exists in before but not in after (or hasn't been processed), so it was deleted
@@ -189,9 +285,17 @@ function convertToDiffNode(
 							afterNodesById,
 						);
 						result.content!.push(deletedChild);
+						hasUpdatedChildren = true;
 					}
 				});
 			}
+		}
+		
+		// If any children were updated, created, or deleted, mark this node as updated
+		// But only if it's not already marked as created or deleted
+		if (hasUpdatedChildren && result.attrs && 
+			diffState !== "created" && diffState !== "deleted") {
+			result.attrs.diff = "updated";
 		}
 	}
 
@@ -200,39 +304,49 @@ function convertToDiffNode(
 
 /**
  * Compares two nodes to determine if they are equal
- * This is a simplified comparison - in a real implementation,
- * you might want to do a more thorough comparison
  */
 function nodesAreEqual(nodeA: any, nodeB: any): boolean {
 	if (!nodeA || !nodeB) return false;
 
-	// Compare node types
+	// Check if types are the same
 	if (nodeA.type !== nodeB.type) return false;
 
-	// Compare text content
+	// Check if text content is the same (for text nodes)
 	if (nodeA.text !== nodeB.text) return false;
 
-	// Compare attributes (excluding id)
-	const attrsA = { ...nodeA.attrs };
-	const attrsB = { ...nodeB.attrs };
+	// Check if attributes are the same (excluding the id attribute)
+	if (nodeA.attrs || nodeB.attrs) {
+		const attrsA = { ...nodeA.attrs };
+		const attrsB = { ...nodeB.attrs };
 
-	delete attrsA.id;
-	delete attrsB.id;
+		// Remove id attribute from comparison
+		delete attrsA.id;
+		delete attrsB.id;
 
-	if (JSON.stringify(attrsA) !== JSON.stringify(attrsB)) return false;
+		// Compare remaining attributes
+		for (const key in attrsA) {
+			if (attrsA[key] !== attrsB[key]) return false;
+		}
 
-	// For leaf nodes without content, we're done
-	if (!nodeA.content && !nodeB.content) return true;
+		for (const key in attrsB) {
+			if (attrsB[key] !== attrsA[key]) return false;
+		}
+	}
 
-	// If one has content and the other doesn't, they're not equal
-	if ((!nodeA.content && nodeB.content) || (nodeA.content && !nodeB.content))
-		return false;
+	// Check if content arrays have the same length
+	const contentA = nodeA.content || [];
+	const contentB = nodeB.content || [];
+	if (contentA.length !== contentB.length) return false;
 
-	// If content arrays have different lengths, they're not equal
-	if (nodeA.content?.length !== nodeB.content?.length) return false;
-
-	// We don't compare child nodes here - that's handled by the recursive structure
-	// of createMergedNode
+	// For nodes with IDs, we don't need to check their content
+	// as they will be compared separately
+	// For nodes without IDs, we need to check their content recursively
+	if (!nodeA.attrs?.id) {
+		// Check each child recursively
+		for (let i = 0; i < contentA.length; i++) {
+			if (!nodesAreEqual(contentA[i], contentB[i])) return false;
+		}
+	}
 
 	return true;
 }
