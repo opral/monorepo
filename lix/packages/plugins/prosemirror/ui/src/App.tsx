@@ -19,15 +19,20 @@ function App() {
 				<AccountSelector />
 			</div>
 
-			{/* Split layout: Editor and Checkpoints */}
-			<div className="editor-checkpoints-container">
+			{/* Split layout: Editor, Version, and Checkpoints */}
+			<div className="main-layout">
 				{/* Left side: Editor */}
 				<div className="editor-container">
 					<Editor />
 				</div>
 
-				{/* Right side: Checkpoints */}
-				<Checkpoints />
+				{/* Right side: Checkpoints only */}
+				<div className="right-panel">
+					{/* Checkpoints section */}
+					<div className="checkpoints-panel">
+						<Checkpoints />
+					</div>
+				</div>
 			</div>
 
 			{/* Debug tools at the bottom */}

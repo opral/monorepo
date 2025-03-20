@@ -112,6 +112,8 @@ const Checkpoints: React.FC = () => {
 						alignSelf: "flex-start",
 						width: "100%",
 						paddingLeft: "20px",
+						fontSize: "14px",
+						fontWeight: "bold"
 					}}
 				>
 					Checkpoints

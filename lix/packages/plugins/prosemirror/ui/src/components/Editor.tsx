@@ -6,15 +6,19 @@ import { baseKeymap } from "prosemirror-commands";
 import { history } from "prosemirror-history";
 import { idPlugin } from "../prosemirror/id-plugin";
 import { schema } from "../prosemirror/schema";
-import { selectProsemirrorDocument } from "../queries";
+import { selectProsemirrorDocument, selectCurrentVersion } from "../queries";
 import { useQuery } from "../hooks/useQuery";
 import { lix } from "../state";
 import { useDebounceCallback } from "usehooks-ts";
+import VersionSelector from "./VersionSelector";
+import { switchVersion } from "@lix-js/sdk";
 
 const Editor: React.FC = () => {
 	const [docInLix] = useQuery(selectProsemirrorDocument);
+	const [currentVersion] = useQuery(selectCurrentVersion);
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [view, setView] = useState<EditorView | null>(null);
+	const [mode, setMode] = useState<string>("write");
 
 	/**
 	 * Write the current document to Lix.
@@ -153,11 +157,84 @@ const Editor: React.FC = () => {
 		}
 	};
 
+	// Toggle between write and proposed modes
+	const toggleMode = () => {
+		if (!view) return;
+
+		const newMode = mode === "proposed" ? "write" : "proposed";
+		setMode(newMode);
+
+		// Create plugins array including our custom ID plugin
+		const plugins = [history(), keymap(baseKeymap), idPlugin];
+
+		// Create a new editor state
+		const newState = EditorState.create({
+			doc: schema.nodeFromJSON(docInLix ?? { type: "doc", content: [] }),
+			plugins,
+		});
+
+		// Update the editor view
+		view.updateState(newState);
+	};
+
+	// Handle version change
+	const handleVersionChange = async (versionId: string) => {
+		try {
+			await switchVersion({ lix, to: { id: versionId } });
+
+			// Reload the document from the database after switching versions
+			const latest = await selectProsemirrorDocument();
+
+			if (latest && view) {
+				// Create a transaction to replace the document
+				const tr = view.state.tr;
+
+				// Create a new document from the updated data
+				const newDoc = schema.nodeFromJSON(latest);
+
+				// Replace the current document
+				tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
+
+				// Apply the transaction
+				view.dispatch(tr);
+
+				console.log("Editor successfully updated after version change");
+			}
+		} catch (error) {
+			console.error("Error switching versions:", error);
+		}
+	};
+
 	return (
 		<div className="editor-container">
+			{/* Tab selector for write/proposed modes */}
+			<div className="mode-tabs">
+				<button
+					className={`mode-tab ${mode === "write" ? "active" : ""}`}
+					onClick={toggleMode}
+				>
+					Write
+				</button>
+				<button
+					className={`mode-tab ${mode === "proposed" ? "active" : ""}`}
+					onClick={toggleMode}
+				>
+					Proposed Changes
+				</button>
+
+				{/* Version selector component */}
+				<VersionSelector onVersionChange={handleVersionChange} />
+			</div>
+
 			<div className="editor-wrapper" onClick={handleClick}>
 				{/* The actual editor will be mounted here */}
 				<div ref={editorRef} className="editor" />
+
+				{/* Mode indicator */}
+				<div className="mode-indicator">
+					{mode === "write" ? "Write Mode" : "Proposed Changes Mode"}
+					<span className="version-info">Version: {currentVersion?.name}</span>
+				</div>
 			</div>
 		</div>
 	);

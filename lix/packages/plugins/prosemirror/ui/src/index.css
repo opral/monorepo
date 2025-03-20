@@ -97,13 +97,7 @@ h1 {
 }
 
 .editor-checkpoints-container {
-  display: flex;
-  border: 1px solid #ccc;
-  overflow: hidden;
-  min-height: 500px;
-  max-height: 70vh;
-  flex: 0 1 auto;
-  margin-bottom: 10px;
+  display: none;
 }
 
 .editor-changes-container {
@@ -159,7 +153,7 @@ button {
 }
 
 button:hover {
-  background-color: #e5e5e5;
+  opacity: 0.8;
 }
 
 .debug-section {
@@ -305,7 +299,7 @@ button:hover {
 }
 
 .create-checkpoint-button:hover {
-  background-color: #e5e5e5;
+  opacity: 0.8;
 }
 
 .checkpoints-list {
@@ -321,7 +315,7 @@ button:hover {
 }
 
 .checkpoint-item:hover {
-  background-color: #f5f5f5;
+  opacity: 0.8;
 }
 
 .checkpoint-item.selected {
@@ -402,3 +396,191 @@ pre {
 }
 
 /* No media queries needed - using consistent light theme */
+
+/* Mode tabs styling */
+.mode-tabs {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 0;
+}
+
+.mode-tab {
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 0;
+  outline: none;
+}
+
+.mode-tab:hover {
+  opacity: 0.8;
+}
+
+.mode-tab:focus {
+  outline: none;
+}
+
+.mode-tab.active {
+  border-bottom-color: #000;
+  font-weight: bold;
+}
+
+/* Mode indicator */
+.mode-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 5px 10px;
+  background-color: #f5f5f5;
+  border-top: 1px solid #ddd;
+  font-size: 12px;
+  color: #666;
+  text-align: left;
+}
+
+.version-info {
+  font-weight: normal;
+  color: #888;
+  margin-left: 5px;
+}
+
+/* Version selector UI */
+.version-selector {
+  margin-left: auto;
+  position: relative;
+}
+
+.version-button {
+  background: none;
+  border: 1px solid #ddd;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  outline: none;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.version-button:hover {
+  opacity: 0.8;
+}
+
+.version-icon {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  position: relative;
+}
+
+.version-icon:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 3px;
+  width: 1px;
+  height: 12px;
+  background-color: #000;
+}
+
+.version-icon:after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 6px;
+  height: 1px;
+  background-color: #000;
+}
+
+.version-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  border: 1px solid #ddd;
+  background-color: white;
+  z-index: 10;
+}
+
+.version-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.version-item {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  cursor: pointer;
+}
+
+.version-item:last-child {
+  border-bottom: none;
+}
+
+.version-item:hover {
+  opacity: 0.8;
+}
+
+.version-item.current {
+  font-weight: bold;
+}
+
+.version-number {
+  width: 50px;
+}
+
+.version-date {
+  flex: 1;
+  font-size: 12px;
+  color: #666;
+}
+
+.new-version {
+  border-top: 1px solid #ddd;
+  justify-content: center;
+}
+
+.create-version {
+  font-size: 12px;
+}
+
+/* Main layout */
+.main-layout {
+  display: flex;
+  height: calc(100vh - 120px);
+  width: 100%;
+  border: 1px solid #ddd;
+}
+
+.right-panel {
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #ddd;
+}
+
+.checkpoints-panel {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Hide the old container */
+.editor-checkpoints-container {
+  display: none;
+}
+
+/* Version panel styles kept for potential future use */
+.version-panel {
+  display: none;
+}

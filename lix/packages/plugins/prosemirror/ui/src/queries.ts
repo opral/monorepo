@@ -124,3 +124,24 @@ export async function selectCheckpoints() {
     return [];
   }
 }
+
+/**
+ * Selects all versions 
+ */
+export async function selectVersions() {
+  return await lix.db
+    .selectFrom("version")
+    .selectAll()
+    .execute();
+}
+
+/**
+ * Selects the current version
+ */
+export async function selectCurrentVersion() {
+  return await lix.db
+    .selectFrom("current_version")
+    .innerJoin("version", "current_version.id", "version.id")
+    .selectAll()
+    .executeTakeFirstOrThrow();
+}
