@@ -80,6 +80,8 @@ export const handle: Handle = paraglideHandle;
 
 ### Add a reroute hook in `src/hooks.ts`
 
+IMPORTANT: The `reroute()` function must be exported from the `src/hook.ts` file, not `src/hooks.server.ts`.
+
 ```typescript
 import type { Reroute } from '@sveltejs/kit';
 import { deLocalizeUrl } from '$lib/paraglide/runtime';
