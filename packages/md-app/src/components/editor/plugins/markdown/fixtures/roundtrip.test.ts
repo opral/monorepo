@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import { describe, expect, test } from "vitest";
 import { ExtendedMarkdownPlugin } from "../markdown-plugin.js";
 
@@ -16,9 +17,37 @@ const fixturesFiles = fs
 	.readdirSync(fixturesDir)
 	.filter((file) => file.endsWith(".md"));
 
+/**
+ * Creates a diff.md file with an HTML table comparing expected and actual results
+ */
+function createDiffFile(fileName: string, expected: string, actual: string) {
+	const diffContent = `<table>
+<tr>
+<td>expected</td>
+<td>actual</td>
+</tr>
+<tr>
+<td>
+
+${expected}
+
+</td>
+<td>
+
+${actual}
+
+</td>
+</tr>
+</table>`;
+	
+	const diffPath = path.join(fixturesDir, `${fileName}.diff.md`);
+	fs.writeFileSync(diffPath, diffContent);
+	console.log(`Created diff file at: ${diffPath}`);
+}
+
 describe("roundtrip", () => {
 	for (const file of fixturesFiles) {
-		if (file.endsWith("expected.md")) {
+		if (file.endsWith("expected.md") || file.endsWith("diff.md")) {
 			continue;
 		}
 		test("in and out for " + file + " should match", async () => {
@@ -69,7 +98,13 @@ describe("roundtrip", () => {
 				.getApi(ExtendedMarkdownPlugin)
 				.markdown.serialize(deserializedNodes);
 
-			expect(serializedMarkdown).toBe(expectedMarkdown);
+			try {
+				expect(serializedMarkdown).toBe(expectedMarkdown);
+			} catch (error) {
+				// Create a diff file if the test fails
+				createDiffFile(fileName, expectedMarkdown, serializedMarkdown);
+				throw error; // Re-throw the error to fail the test
+			}
 		});
 	}
 

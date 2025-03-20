@@ -88,6 +88,16 @@ HTML entities: &amp; &lt; &gt; &quot; &apos;
 ```
 Line 1
 Line 2
+Line 3
+
+Line 5 (after empty line)
+```
+
+## Code Blocks with Multiple Lines
+
+```
+Line 1
+Line 2
 
 
 Line 5 (after two empty lines)

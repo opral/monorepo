@@ -12,20 +12,32 @@ in blockquotes, preserving the essential semantic meaning. This is a compromise
 between perfect fidelity and practical serialization.
 -->
 
+## tc - simple blockquote.
+
 
 > This is a simple blockquote.
+
+## tc - multi line blockquote.
 
 > This blockquote
 spans multiple lines
 in the source Markdown.
 
+## tc - blockquote - inline formatting
+
 > This blockquote contains **formatted** text with _emphasis_ and `code`.
 
+## tc - blockquote - with link
+
 > This blockquote contains a [link](https://example.com).
+
+## tc - blockquote - nested
 
 > Nested blockquotes:
 > > This is a nested blockquote.
 > > > This is a deeply nested blockquote.
+
+## tc - blockquote - multiple paragraphs
 
 > Blockquote with multiple paragraphs:
 >
@@ -33,9 +45,11 @@ in the source Markdown.
 >
 > This is the third paragraph in the blockquote.
 
+## tc - blockquote - containing markdown
+
 > Blockquote with other elements:
 >
-> ### Heading in a blockquote
+> ## tc - Heading in a blockquote
 >
 > - List item in blockquote
 > - Another list item
@@ -44,9 +58,13 @@ in the source Markdown.
 > Code block in blockquote
 > ```
 
+## tc - blockquote - followed by text
+
 > Blockquote followed by text.
 
 Regular paragraph after a blockquote.
+
+## tc - blockquote - character inline - not detef
 
 Text with > character that is not a blockquote.
 
