@@ -1,10 +1,10 @@
 # Comprehensive Markdown Test Document
 
-## Introduction
+## tc - introduction
 
 This document demonstrates a wide variety of Markdown syntax elements and how they interact with each other. It's designed to test the roundtrip conversion capabilities of Markdown processors.
 
-## Text Formatting
+## tc - text formatting
 
 Plain text paragraphs are the most basic element. This paragraph demonstrates *italic text*, **bold text**, and ***bold italic text***.
 
@@ -12,7 +12,7 @@ You can also use _underscores_ for __emphasis__ and ___both___ if you prefer.
 
 Other formatting options include ~~strikethrough~~ and `inline code`.
 
-## Paragraphs and Line Breaks
+## tc - paragraphs and line breaks
 
 Paragraphs are separated by blank lines.
 
@@ -22,7 +22,7 @@ created with two trailing spaces.
 This one has a line break\
 created with a backslash.
 
-## Headings
+## tc - headings
 <!-- reason for differing expectation:
 we currently expect a line break after each paragraph -->
 
@@ -39,7 +39,7 @@ Alternative Level 1 Heading
 Alternative Level 2 Heading
 ---------------------------
 
-## Links
+## tc - links
 
 [Basic link](https://example.com)
 
@@ -53,7 +53,7 @@ Alternative Level 2 Heading
 
 [ref]: https://example.com "Reference Example"
 
-## Images
+## tc - images
 
 ![Image example](https://example.com/image.jpg "Sample Image")
 
@@ -63,7 +63,7 @@ Alternative Level 2 Heading
 
 [![Image with link](https://example.com/image.jpg "Click me")](https://example.com)
 
-## Lists
+## tc - unordered lists
 <!-- reason for differing expectation:
 the identation may differ 1 meaning is the same -->
 
@@ -76,6 +76,8 @@ the identation may differ 1 meaning is the same -->
     - Deeply nested item
 - Item 3
 
+## tc - ordered lists
+
 ### Ordered Lists
 
 1. First item
@@ -83,6 +85,8 @@ the identation may differ 1 meaning is the same -->
    1. Nested first
    2. Nested second
 3. Third item
+
+## tc - mixed lists
 
 ### Mixed Lists
 
@@ -92,13 +96,15 @@ the identation may differ 1 meaning is the same -->
      1. Ordered sub-sub-item
 2. Second ordered item
 
+## tc - task lists
+
 ### Task Lists
 
 - [x] Completed task
 - [ ] Incomplete task
 - [x] Another completed task
 
-## Blockquotes
+## tc - blockquotes
 
 > Simple blockquote
 
@@ -108,7 +114,7 @@ the identation may differ 1 meaning is the same -->
 >
 > > Nested blockquote.
 
-## Code Blocks
+## tc - code blocks
 
 Indented code block:
 
@@ -132,7 +138,7 @@ function example() {
 }
 ```
 
-## Tables
+## tc - tables
 
 | Header 1 | Header 2 | Header 3 |
 | -------- | :------: | -------: |
@@ -144,7 +150,7 @@ function example() {
 | *Italic*  | **Bold**  | `Code`   |
 | [Link](https://example.com) | ![Image](https://example.com/image.jpg) | > Quote |
 
-## Horizontal Rules
+## tc - horizontal rules
 
 Above horizontal rule.
 
@@ -160,14 +166,14 @@ ___
 
 Below horizontal rule.
 
-## HTML
+## tc - html
 
 <div style="color: blue;">
   Some HTML content 
   <span>with nested elements</span>
 </div>
 
-## Escaping Characters
+## tc - escaping characters
 
 \*This is not italic\*
 
@@ -175,7 +181,7 @@ Below horizontal rule.
 
 \# This is not a heading
 
-## Combined Elements
+## tc - combined elements
 
 > # Heading in a blockquote
 >
@@ -194,13 +200,13 @@ Below horizontal rule.
      Code block in a list
      ```
 
-## Special Characters
+## tc - special characters
 
 HTML entities: &amp; &lt; &gt; &quot; &apos;
 
 Literal characters: & < > " '
 
-## Footnotes
+## tc - footnotes
 
 Text with a footnote.[^1]
 
@@ -210,7 +216,7 @@ Another paragraph with a different footnote.[^2]
 [^2]: This is the second footnote with multiple lines.
     Indented to be part of the footnote.
 
-## Definition Lists
+## tc - definition lists
 
 Term 1
 : Definition 1
@@ -219,7 +225,7 @@ Term 2
 : Definition 2a
 : Definition 2b
 
-## Line Breaks and Empty Paragraphs
+## tc - line breaks and empty paragraphs
 
 This paragraph is followed by empty paragraphs.
 

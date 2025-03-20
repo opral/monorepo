@@ -1,5 +1,4 @@
 # Lists
-
 <!--
 TEST REASONING:
 This expected output shows several notable transformations in list formatting:
