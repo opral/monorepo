@@ -1,5 +1,13 @@
 # @lix-js/sdk
 
+## 0.4.3
+
+### Patch Changes
+
+- 8ce6666: Fix glob pattern behavior in file queue by removing prepending slash and add proper null checks for `plugin.detectChangesGlob`.
+
+  Also update the error message explanation for file paths to correctly state why paths need to start with a root slash.
+
 ## 0.4.2
 
 ### Patch Changes

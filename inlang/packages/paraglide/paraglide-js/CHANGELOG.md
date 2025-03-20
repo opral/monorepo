@@ -1,5 +1,12 @@
 # @inlang/paraglide-js
 
+## 2.0.1
+
+### Patch Changes
+
+- b906c0c: fix: window undefined bug in webpack
+  - @inlang/sdk@2.4.3
+
 ## Paraglide JS 2.0 🚀
 
 Paraglide JS 2.0 had three main goals which have all been achieved:
@@ -26,7 +33,7 @@ In addition, Paraglide JS 2.0 comes with:
 
 ### Highlights
 
-#### Interactive benchmark 
+#### Interactive benchmark
 
 Check out the [benchmark](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/benchmark) to see how Paraglide JS compares to other libraries like i18next.
 
@@ -222,7 +229,7 @@ function App() {
 
 Paraglide JS 2.0 build output now defaults to [message-modules](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/compiler-options#outputstructure) to improve tree-shaking. Some filesystem's limitations require key names to be shorter than 255 characters.
 
-Upvote [#423](https://github.com/opral/inlang-paraglide-js/issues/423) to remove this limitation. 
+Upvote [#423](https://github.com/opral/inlang-paraglide-js/issues/423) to remove this limitation.
 
 ```diff
 - m.this_is_a_very_long_key_name_that_should_be_shortened()
@@ -231,9 +238,9 @@ Upvote [#423](https://github.com/opral/inlang-paraglide-js/issues/423) to remove
 
 #### Changing the locale requires a reload
 
-Changing the locale works via `setLocale()` in any framework now. 
+Changing the locale works via `setLocale()` in any framework now.
 
-If you used an adapter in v1 like the SvelteKit one, this behavior is new. The new behaviour leads to a page reload. The reload is a deliberate design decision. Reloading the site eliminates the need for providers, adapters, and API differences between frameworks. Furthermore, optimizations like per-locale splitting is expected to be easier to implement. 
+If you used an adapter in v1 like the SvelteKit one, this behavior is new. The new behaviour leads to a page reload. The reload is a deliberate design decision. Reloading the site eliminates the need for providers, adapters, and API differences between frameworks. Furthermore, optimizations like per-locale splitting is expected to be easier to implement.
 
 Read https://github.com/opral/inlang-paraglide-js/issues/438#issuecomment-2703733096 for more information.
 
@@ -244,7 +251,7 @@ Read https://github.com/opral/inlang-paraglide-js/issues/438#issuecomment-270373
 
 #### Lint rules got deprecated
 
-Remove lint rules from your project modules. 
+Remove lint rules from your project modules.
 
 We want to re-introduce lint rules in a better form in the future. Please upvote the [#239 lix validation rules](https://github.com/opral/lix-sdk/issues/239) proposal.
 
@@ -257,7 +264,6 @@ modules: [
 
 ```
 
-
 ## 2.0.0-beta.31 (released as 2.0.0)
 
 - feat: New API: `createParaglide()`
@@ -268,10 +274,10 @@ modules: [
   const project = await fs.readFile("./project.inlang");
 
   const paraglide = await createParaglideModule({
-    project,
-    compilerOptions: {
-      strategy: ["url"],
-    }
+  	project,
+  	compilerOptions: {
+  		strategy: ["url"],
+  	},
   });
 
   // Use runtime functions
@@ -285,12 +291,9 @@ modules: [
 
 - fix: Prevent redirect loops by normalizing URLs with trailing slashes [#408](https://github.com/opral/inlang-paraglide-js/issues/408)
 
-
 - fix: Support for explicit port numbers in URL patterns
 
-
 - improve: Better error handling in server middleware
-
 
 ## 2.0.0-beta.30
 
@@ -309,7 +312,7 @@ paraglideVitePlugin({
 
 ```
 
-- improve: allow fall through. enables partially localized patterns and thereby eases adoption. 
+- improve: allow fall through. enables partially localized patterns and thereby eases adoption.
 
 ## 2.0.0-beta.29
 
@@ -319,11 +322,11 @@ paraglideVitePlugin({
 
 ## 2.0.0-beta.28
 
-### BREAKING update to the URLPattern API  
+### BREAKING update to the URLPattern API
 
 https://github.com/opral/monorepo/pull/3485
 
-The `localizedNamedGroups` and `deLocalizedNamedGroups` API has been replaced with a tuple-based `localized` array to: 
+The `localizedNamedGroups` and `deLocalizedNamedGroups` API has been replaced with a tuple-based `localized` array to:
 
 - enable translated pathnames in any combination
 - make the API more intuitive
@@ -336,13 +339,13 @@ Before
 
 ```json
 {
-  "pattern": "https://:domain(.*)/:locale(de|fr)?/:path*",
-  "deLocalizedNamedGroups": { "locale": null },
-  "localizedNamedGroups": {
-    "en": { "locale": null },
-    "fr": { "locale": "fr" },
-    "de": { "locale": "de" }
-  }
+	"pattern": "https://:domain(.*)/:locale(de|fr)?/:path*",
+	"deLocalizedNamedGroups": { "locale": null },
+	"localizedNamedGroups": {
+		"en": { "locale": null },
+		"fr": { "locale": "fr" },
+		"de": { "locale": "de" }
+	}
 }
 ```
 
@@ -380,12 +383,11 @@ console.log(localizedUrls.map(url => url.pathnames))
 >> ...
 ```
 
-
 ## 2.0.0-beta.27
 
 - fix wrong matching in API requests [#427](https://github.com/opral/inlang-paraglide-js/issues/427)
 
-Paraglide JS is no longer extracting the locale from API requests for the `url` strategy because that can lead to unwanted re-directs. To get the right locale in API requests, at least add the `baseLocale` strategy to your options. 
+Paraglide JS is no longer extracting the locale from API requests for the `url` strategy because that can lead to unwanted re-directs. To get the right locale in API requests, at least add the `baseLocale` strategy to your options.
 
 ```diff
 -strategy: ["url"]
@@ -394,17 +396,15 @@ Paraglide JS is no longer extracting the locale from API requests for the `url` 
 
 - consolidated `message-modules` output into a single file [#434](https://github.com/opral/inlang-paraglide-js/issues/434) to severaly improve scalability
 
-
-
 - `experimentalMiddlewareLocaleSplitting` option https://github.com/opral/inlang-paraglide-js/issues/425#issuecomment-2692351073
 
-- fix [setLocale() triggers re-loads if the same locale is set](https://github.com/opral/inlang-paraglide-js/issues/430) 
+- fix [setLocale() triggers re-loads if the same locale is set](https://github.com/opral/inlang-paraglide-js/issues/430)
 
 - fix [serverMiddleware() throws when cookie contains invalid locale](https://github.com/opral/inlang-paraglide-js/issues/442)
 
 - add `localStorage` strategy [#431](https://github.com/opral/inlang-paraglide-js/issues/431)
 
-- fix url strategy with optional locale always resoles base locale  [#436](https://github.com/opral/inlang-paraglide-js/issues/436)
+- fix url strategy with optional locale always resoles base locale [#436](https://github.com/opral/inlang-paraglide-js/issues/436)
 
 ## 2.0.0-beta.26
 
@@ -412,9 +412,9 @@ Paraglide JS is no longer extracting the locale from API requests for the `url` 
 
 ## 2.0.0-beta.25
 
-- added optional localized groups 
+- added optional localized groups
 - keeps hashes, etc. in the URL when localizing https://github.com/opral/monorepo/pull/3452
-- fixes the multi-variant return 
+- fixes the multi-variant return
 
 ## 2.0.0-beta.24
 
@@ -424,7 +424,7 @@ Paraglide JS is no longer extracting the locale from API requests for the `url` 
 
 ## 2.0.0-beta.23
 
-Renames and splits the `serverMiddleware()` into a dedicated `server.js` file to avoid bundler issues. 
+Renames and splits the `serverMiddleware()` into a dedicated `server.js` file to avoid bundler issues.
 
 ```diff
 - import { serverMiddleware } from "./paraglide/runtime.js";
@@ -471,9 +471,9 @@ If you have code from an adapter, remove it and follow the examples in the docum
 
 ## 2.0.0-beta.18
 
-Added URLPatterns as a replacement for the beta 17 pathnames API. 
+Added URLPatterns as a replacement for the beta 17 pathnames API.
 
-The URLPattern API is extremly powerful. You can express base paths, translated pathnames, domain based localization, and even multi-tenancy. 
+The URLPattern API is extremly powerful. You can express base paths, translated pathnames, domain based localization, and even multi-tenancy.
 
 Read the docs [here](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy#url) and make PRs to improve the documentation.
 
