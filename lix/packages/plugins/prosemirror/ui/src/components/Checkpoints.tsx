@@ -202,9 +202,8 @@ const Checkpoints: React.FC = () => {
 										console.log(
 											`Applied changes from checkpoint: ${checkpoint.id}`,
 										);
-
-										// Dispatch a custom event to notify that a checkpoint has been applied
-										window.dispatchEvent(new CustomEvent("apply-checkpoint"));
+										
+										// The Lix plugin will automatically detect the changes through polling
 									} catch (error) {
 										console.error("Error applying checkpoint changes:", error);
 									}
