@@ -40,23 +40,17 @@ export default async function onBeforeRender(pageContext: any) {
 			uniqueID: item.uniqueID,
 		}));
 
-	// Filter out unlisted items
-	items = items.filter((item) => {
-		// Check the unlisted property first, then fall back to keywords for backward compatibility
-		// Using type assertion to handle the new unlisted property
-		return (
-			(item as any).unlisted !== true && !item.keywords?.includes("unlisted")
-		);
-	});
+	// Filter out deprecated items
+	const filteredItems = items.filter((item: any) => item.deprecated !== true);
 
-	if (!q && items.length === 0) {
+	if (!q && filteredItems.length === 0) {
 		throw render(404);
 	}
 
 	return {
 		pageContext: {
 			pageProps: {
-				items: items,
+				items: filteredItems,
 			},
 		},
 	};
