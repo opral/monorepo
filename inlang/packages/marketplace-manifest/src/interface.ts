@@ -16,6 +16,20 @@ const MarketplaceManifestBase = Type.Object({
 				"The slug which overrides the slug on inlang.com. Only lowercase letters and numbers.",
 		})
 	),
+	deprecated: Type.Optional(
+		Type.Boolean({
+			description:
+				"If true, the item will not be shown in the marketplace listings but will still be accessible via direct URL. A deprecation banner will be shown on the item's page.",
+			default: false,
+		})
+	),
+	deprecatedMessage: Type.Optional(
+		Translatable(
+			Type.String({
+				description: "A message explaining why the item is deprecated and what to use instead.",
+			})
+		)
+	),
 	icon: Type.Optional(Type.String()),
 	gallery: Type.Optional(
 		Type.Array(

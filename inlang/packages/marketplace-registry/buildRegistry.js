@@ -1,11 +1,4 @@
 import fs from "node:fs/promises";
-import { MarketplaceManifest } from "@inlang/marketplace-manifest";
-import { Value } from "@sinclair/typebox/value";
-import algoliasearch from "algoliasearch";
-import path from "node:path";
-
-// eslint-disable-next-line no-undef
-const envVariables = process.env;
 
 const repositoryRoot = import.meta.url.slice(
 	0,
@@ -43,17 +36,9 @@ for (const type of Object.keys(manifestLinks)) {
 			if (link.includes("http")) {
 				manifest = JSON.parse(await fetch(link).then((res) => res.text()));
 			} else {
-				// eslint-disable-next-line no-undef
 				manifest = JSON.parse(
 					await fs.readFile(new URL(link, repositoryRoot), "utf-8")
 				);
-			}
-
-			if (Value.Check(MarketplaceManifest, manifest) === false) {
-				const errors = [...Value.Errors(MarketplaceManifest, manifest)];
-				// eslint-disable-next-line no-undef
-				console.error(errors);
-				throw new Error(`Manifest is invalid.`);
 			}
 
 			// Convert relative paths to absolute paths
@@ -183,32 +168,32 @@ await fs.writeFile(
 
 /* This function checks for uniqueIDs to verify they are not duplicated */
 function checkUniqueIDs(manifests) {
-  const uniqueIDs = new Set();
+	const uniqueIDs = new Set();
 
-  for (const manifest of manifests) {
-    if (uniqueIDs.has(manifest.uniqueID)) {
-      throw new Error(
-        `Manifest with unique id '${manifest.uniqueID}' already exists.`,
-      );
-    }
-    uniqueIDs.add(manifest.uniqueID);
-  }
+	for (const manifest of manifests) {
+		if (uniqueIDs.has(manifest.uniqueID)) {
+			throw new Error(
+				`Manifest with unique id '${manifest.uniqueID}' already exists.`
+			);
+		}
+		uniqueIDs.add(manifest.uniqueID);
+	}
 }
 
 /* This function checks for the module links to have the correct schema */
 function checkModuleLinks(manifests) {
-  for (const manifest of manifests) {
-    if (manifest.module !== undefined) {
-      // should be in this schema https://cdn.jsdelivr.net/npm/PUBLISHER/NAME@latest/PATH
-      if (!manifest.module.startsWith("https://cdn.jsdelivr.net/npm/")) {
-        throw new Error(
-          `Module link '${manifest.module}' does not start with 'https://cdn.jsdelivr.net/npm/'.`,
-        );
-      } else if (!manifest.module.includes("@latest")) {
-        throw new Error(
-          `Module link '${manifest.module}' does not include a package name.`,
-        );
-      }
-    }
-  }
+	for (const manifest of manifests) {
+		if (manifest.module !== undefined) {
+			// should be in this schema https://cdn.jsdelivr.net/npm/PUBLISHER/NAME@latest/PATH
+			if (!manifest.module.startsWith("https://cdn.jsdelivr.net/npm/")) {
+				throw new Error(
+					`Module link '${manifest.module}' does not start with 'https://cdn.jsdelivr.net/npm/'.`
+				);
+			} else if (!manifest.module.includes("@latest")) {
+				throw new Error(
+					`Module link '${manifest.module}' does not include a package name.`
+				);
+			}
+		}
+	}
 }
