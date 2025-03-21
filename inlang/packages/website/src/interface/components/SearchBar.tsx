@@ -33,7 +33,7 @@ export default function SearchBar() {
 		});
 
 	return (
-		<div></div>
+		<div id="search-input"></div>
 		// <form
 		// 	class="group relative flex justify-center gap-1 px-3 items-center border h-8 w-full py-0.5 rounded-lg transition-all duration-150 bg-background border-surface-200 focus-within:border-primary"
 		// 	onSubmit={(e) => {
