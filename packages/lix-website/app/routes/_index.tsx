@@ -162,9 +162,26 @@ export default function Index() {
       <main className="w-full max-w-5xl px-4 mx-auto space-y-16 md:space-y-20">
         <div className="grid md:grid-cols-2 justify-center md:justify-start gap-16 md:gap-8 lg:gap-24 mt-12 mb-12">
           <div className="max-w-md">
+            <div className="flex gap-2 mb-2 justify-center md:justify-start">
+              <a
+                href="https://www.npmjs.com/package/@lix-js/sdk"
+                target="_blank"
+              >
+                <img
+                  src="https://img.shields.io/npm/dw/%40lix-js%2Fsdk?logo=npm&logoColor=red&label=npm%20downloads"
+                  alt="npm downloads"
+                />
+              </a>
+              <a href="https://discord.gg/xjQA897RyK" target="_blank">
+                <img
+                  src="https://img.shields.io/discord/897438559458430986?style=flat&logo=discord&labelColor=white"
+                  alt="discord"
+                />
+              </a>
+            </div>
             <div>
               <h1 className="text-5xl leading-[1.2] font-semibold">
-                Your SDK for change control
+                A change control system & SDK
               </h1>
             </div>
             <p className="mt-8 mb-6">
@@ -186,16 +203,6 @@ export default function Index() {
               >
                 SDK documentation
               </a>
-            </div>
-            <div className="flex gap-2 mt-2 justify-center md:justify-start">
-              <img
-                src="https://img.shields.io/npm/dw/%40lix-js%2Fsdk?logo=npm&logoColor=red&label=npm%20downloads"
-                alt="npm downloads"
-              />
-              <img
-                src="https://img.shields.io/discord/897438559458430986?style=flat&logo=discord&labelColor=white"
-                alt="discord"
-              />
             </div>
           </div>
           <div>
