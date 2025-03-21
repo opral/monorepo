@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 2.0.3
+
+### Patch Changes
+
+- cf404e0: improve: handle duplicate inputs https://github.com/opral/inlang-paraglide-js/issues/479
+
 ## 2.0.2
 
 ### Patch Changes
