@@ -20,6 +20,7 @@
 		"./dist",
 		"./bin"
 	],
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js",
 		"./urlpattern-polyfill": "./dist/urlpattern-polyfill/index.js"
