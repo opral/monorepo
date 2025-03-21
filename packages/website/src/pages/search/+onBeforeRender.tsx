@@ -26,17 +26,20 @@ export default async function onBeforeRender(pageContext: any): Promise<{ pageCo
 		});
 	}
 
-	// Filter out unlisted items
-	items = items.filter((item) => {
-		// Check the unlisted property first, then fall back to keywords for backward compatibility
-		// Using type assertion to handle the new unlisted property
-		return (item as any).unlisted !== true && !item.keywords.includes("external") && !item.keywords.includes("unlisted");
+	// Filter out deprecated items
+	const filteredItems = items.filter((item) => {
+		// Check if the item has the deprecated property
+		if ((item as any).deprecated !== undefined) {
+			return !(item as any).deprecated;
+		}
+		// Backward compatibility: check if the item has the "website" keyword
+		return item.keywords?.includes("website") ?? false;
 	});
 
 	return {
 		pageContext: {
 			pageProps: {
-				items: items,
+				items: filteredItems,
 			},
 		},
 	};
