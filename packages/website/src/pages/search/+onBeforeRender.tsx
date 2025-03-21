@@ -26,8 +26,12 @@ export default async function onBeforeRender(pageContext: any): Promise<{ pageCo
 		});
 	}
 
-	// Filter out external items
-	items = items.filter((item) => !item.keywords.includes("external"));
+	// Filter out unlisted items
+	items = items.filter((item) => {
+		// Check the unlisted property first, then fall back to keywords for backward compatibility
+		// Using type assertion to handle the new unlisted property
+		return (item as any).unlisted !== true && !item.keywords.includes("external") && !item.keywords.includes("unlisted");
+	});
 
 	return {
 		pageContext: {
