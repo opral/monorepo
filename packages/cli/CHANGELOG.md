@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 3.0.6
+
+### Patch Changes
+
+- c1adffe: Fix typo and inconsistent casing in CLI help output
+
 ## 3.0.5
 
 ### Patch Changes
