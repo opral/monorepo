@@ -1,29 +1,29 @@
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
+import { history } from "prosemirror-history";
 import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
-import { history } from "prosemirror-history";
 import { idPlugin } from "../prosemirror/id-plugin";
 import { schema } from "../prosemirror/schema";
 import { lixProsemirror } from "../prosemirror/lix-plugin";
+import { useEffect, useRef, useState } from "react";
 import {
 	selectProsemirrorDocument,
 	selectCurrentVersion,
 	selectActiveAccount,
+	selectVersions,
 } from "../queries";
 import { useQuery } from "../hooks/useQuery";
 import { lix } from "../state";
 import { createVersion, switchVersion } from "@lix-js/sdk";
-import React, { useEffect, useRef, useState } from "react";
-import VersionSelector from "./VersionSelector";
 
 const Editor: React.FC = () => {
 	const [docInLix] = useQuery(selectProsemirrorDocument);
 	const [currentVersion] = useQuery(selectCurrentVersion);
 	const [activeAccount] = useQuery(selectActiveAccount);
+	const [versions] = useQuery(selectVersions);
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [view, setView] = useState<EditorView | null>(null);
-	const [currentMode, setCurrentMode] = useState<string>("write");
 
 	// Initialize editor
 	useEffect(() => {
@@ -77,97 +77,72 @@ const Editor: React.FC = () => {
 		}
 	};
 
-	// Handle mode change
-	const handleModeChange = async () => {
-		// If switching to proposed changes mode
-		if (currentMode === "write") {
-			try {
-				// Get the user's first name
-				const accountName = activeAccount?.name || "User";
-				const firstName = accountName.split(" ")[0];
-				const userVersionName = `${firstName}'s changes`;
-
-				// Check if a version with the user's name already exists
-				const versions = await lix.db
-					.selectFrom("version")
-					.select(["id", "name"])
-					.execute();
-				const userVersion = versions.find((v) => v.name === userVersionName);
-
-				// Use existing version or create a new one
-				const targetVersionId = userVersion
-					? userVersion.id
-					: (await createVersion({
-							lix,
-							name: userVersionName,
-							from: currentVersion ? { id: currentVersion.id } : undefined,
-					  })).id;
-
-				// Switch to the user's version
-				await switchVersion({ lix, to: { id: targetVersionId } });
-
-				// Update the mode
-				setCurrentMode("proposed");
-			} catch (error) {
-				console.error("Error creating new version:", error);
-				return; // Don't proceed with mode change if version creation fails
-			}
-		} else {
-			// If switching back to write mode
-			try {
-				// Get the main version
-				const versions = await lix.db
-					.selectFrom("version")
-					.select(["id", "name"])
-					.execute();
-				const mainVersion = versions.find((v) => v.name === "main");
-
-				if (mainVersion) {
-					// Switch to the main version
-					await switchVersion({ lix, to: { id: mainVersion.id } });
-
-					// Update the mode
-					setCurrentMode("write");
-				} else {
-					console.warn("Main version not found");
-				}
-			} catch (error) {
-				console.error("Error switching to main version:", error);
-			}
-		}
-	};
-
 	// Handle version change
 	const handleVersionChange = async (versionId: string) => {
 		try {
 			await switchVersion({ lix, to: { id: versionId } });
-
-			// Update the mode
-			setCurrentMode("write");
+			// focus back to the editor when switching versions
+			view?.focus();
 		} catch (error) {
-			console.error("Error switching versions:", error);
+			console.error("Error switching version:", error);
 		}
+	};
+
+	// Handle delete version
+	const handleDeleteVersion = async (
+		versionId: string,
+		e: React.MouseEvent,
+	) => {
+		// Stop event propagation to prevent triggering version change
+		e.stopPropagation();
+
+		try {
+			// Delete the version
+			await lix.db.deleteFrom("version").where("id", "=", versionId).execute();
+			// Focus back to the editor
+			view?.focus();
+		} catch (error) {
+			console.error("Error deleting version:", error);
+		}
+	};
+
+	// Handle create version
+	const handleCreateVersion = async () => {
+		const existingVersion = versions?.find(
+			(version) => version.name === `${activeAccount?.name}'s Version`,
+		);
+		if (existingVersion) {
+			await switchVersion({ lix, to: { id: existingVersion.id } });
+		} else {
+			const newVersion = await createVersion({
+				lix,
+				name: `${activeAccount?.name}'s Version`,
+				from: { id: currentVersion!.id },
+			});
+			await switchVersion({ lix, to: { id: newVersion.id } });
+		}
+		// focus back to the editor when switching versions
+		view?.focus();
 	};
 
 	return (
 		<div className="editor-container">
 			{/* Tab selector for write/proposed modes */}
 			<div className="mode-tabs">
-				<button
-					className={`mode-tab ${currentMode === "write" ? "active" : ""}`}
-					onClick={handleModeChange}
-				>
-					Write
-				</button>
-				<button
-					className={`mode-tab ${currentMode === "proposed" ? "active" : ""}`}
-					onClick={handleModeChange}
-				>
-					Propose Changes
-				</button>
+				{versions?.map((version) => (
+					<div className="flex items-center" key={version.id}>
+						<button
+							className={`mode-tab ${version.id === currentVersion?.id ? "active" : ""}`}
+							onClick={() => handleVersionChange(version.id)}
+						>
+							{version.name}
+						</button>
+					</div>
+				))}
 
-				{/* Version selector component */}
-				<VersionSelector onVersionChange={handleVersionChange} />
+				<button className="mode-tab" onClick={handleCreateVersion}>
+					+ Version
+				</button>
 			</div>
 
 			<div className="editor-wrapper" onClick={handleClick}>
