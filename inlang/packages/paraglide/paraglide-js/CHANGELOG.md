@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 2.0.2
+
+### Patch Changes
+
+- a6c43ea: fix: error handling in paraglideMiddleware breaks SvelteKit features that rely on errors being thrown
+
 ## 2.0.1
 
 ### Patch Changes
@@ -266,7 +272,7 @@ modules: [
 
 #### `localizeHref()` is now required
 
-Some Paraglide adapters used AST transforms to automatically transform `<a>` into localized links. That led to many bugs and edge cases. The AST transforms were removed for v2.  
+Some Paraglide adapters used AST transforms to automatically transform `<a>` into localized links. That led to many bugs and edge cases. The AST transforms were removed for v2.
 
 ```diff
 -<a href="/page"></a>
