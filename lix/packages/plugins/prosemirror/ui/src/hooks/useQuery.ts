@@ -1,50 +1,51 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
- * A simple hook to poll data with a specified interval
- * 
- * @example
- *   const [data] = useQuery(() lix.db.selectFrom("change_set").selectAll().execute())
+ * Polls a query function and updates the state with the result.
+ *
+ * @param queryFn - The function to poll
+ * @param interval - The interval in milliseconds
+ * @returns A tuple of [data, loading, error, fetch]
  */
 export function useQuery<T>(
 	queryFn: () => Promise<T>,
-	interval: number = 250,
-	deps: any[] = [],
-): [T | null, boolean, Error | null, () => Promise<void>] {
+	interval = 250,
+): [T | null, boolean, Error | null, () => void] {
 	const [data, setData] = useState<T | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
 
-	// Function to fetch data
-	const fetchData = async () => {
-		setIsLoading(true);
+	const dataRef = useRef<string | null>(null); // serialized data
+	const mountedRef = useRef(true);
+
+	const fetch = async () => {
 		try {
 			const result = await queryFn();
-			setData(result);
+			const serialized = JSON.stringify(result);
+			if (!mountedRef.current) return;
+
+			if (serialized !== dataRef.current) {
+				dataRef.current = serialized;
+				setData(result);
+			}
 			setError(null);
 		} catch (err) {
+			if (!mountedRef.current) return;
 			setError(err instanceof Error ? err : new Error(String(err)));
 		} finally {
-			setIsLoading(false);
+			if (mountedRef.current) setLoading(false);
 		}
 	};
 
-	// Initial fetch and polling setup
 	useEffect(() => {
-		// Fetch immediately
-		fetchData();
+		mountedRef.current = true;
+		fetch();
+		const id = setInterval(fetch, interval);
+		return () => {
+			mountedRef.current = false;
+			clearInterval(id);
+		};
+	}, [interval]);
 
-		// Set up polling interval
-		const intervalId = setInterval(fetchData, interval);
-
-		// Clean up on unmount or deps change
-		return () => clearInterval(intervalId);
-	}, [...deps, interval]); // Include interval in deps
-
-	// Function to manually trigger refetch
-	const refetch = () => {
-		return fetchData();
-	};
-
-	return [data, isLoading, error, refetch];
+	return [data, loading, error, fetch];
 }
