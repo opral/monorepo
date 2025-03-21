@@ -16,6 +16,13 @@ const MarketplaceManifestBase = Type.Object({
 				"The slug which overrides the slug on inlang.com. Only lowercase letters and numbers.",
 		})
 	),
+	unlisted: Type.Optional(
+		Type.Boolean({
+			description:
+				"If true, the item will not be shown in the marketplace listings but will still be accessible via direct URL.",
+			default: false,
+		})
+	),
 	icon: Type.Optional(Type.String()),
 	gallery: Type.Optional(
 		Type.Array(

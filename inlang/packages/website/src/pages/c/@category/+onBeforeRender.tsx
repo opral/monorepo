@@ -40,9 +40,13 @@ export default async function onBeforeRender(pageContext: any) {
 			uniqueID: item.uniqueID,
 		}));
 
-	// Filter out items with the "unlisted" keyword
+	// Filter out unlisted items
 	items = items.filter((item) => {
-		return !item.keywords?.includes("unlisted");
+		// Check the unlisted property first, then fall back to keywords for backward compatibility
+		// Using type assertion to handle the new unlisted property
+		return (
+			(item as any).unlisted !== true && !item.keywords?.includes("unlisted")
+		);
 	});
 
 	if (!q && items.length === 0) {
