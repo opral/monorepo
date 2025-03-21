@@ -1,6 +1,6 @@
 import Editor from "./components/Editor";
 import LixDebugPanel from "./components/LixDebugPanel";
-import Checkpoints from "./components/Checkpoints";
+import Sidebar from "./components/Sidebar";
 import AccountSelector from "./components/AccountSelector";
 import { lix } from "./state";
 
@@ -26,11 +26,11 @@ function App() {
 					<Editor />
 				</div>
 
-				{/* Right side: Checkpoints only */}
+				{/* Right side: Sidebar with Checkpoints and Proposals */}
 				<div className="right-panel">
-					{/* Checkpoints section */}
+					{/* Sidebar containing Checkpoints and Proposals tabs */}
 					<div className="checkpoints-panel">
-						<Checkpoints />
+						<Sidebar />
 					</div>
 				</div>
 			</div>

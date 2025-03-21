@@ -13,7 +13,7 @@ interface ExtendedChange extends Change {
 }
 
 // Get a summary preview from a change or checkpoint
-const getContentPreview = (change: ExtendedChange): string => {
+function getContentPreview(change: ExtendedChange) {
 	if (!change.content) return "Content deleted";
 
 	if (typeof change.content === "object") {
@@ -48,7 +48,7 @@ const getContentPreview = (change: ExtendedChange): string => {
 };
 
 // Get a summary preview from a checkpoint
-const getCheckpointPreview = (changes: Array<ExtendedChange>): string => {
+function getCheckpointPreview(changes: ExtendedChange[]) {
 	if (changes.length === 0) return "No changes";
 
 	const previews = changes.map(getContentPreview);
@@ -65,7 +65,6 @@ const Checkpoints: React.FC = () => {
 	>(null);
 	const [isCreatingCheckpoint, setIsCreatingCheckpoint] = useState(false);
 	const [checkpointMessage, setCheckpointMessage] = useState("");
-	const [activeTab, setActiveTab] = useState("checkpoints");
 
 	// Handler for creating a checkpoint
 	const handleCreateCheckpoint = async () => {
@@ -86,136 +85,71 @@ const Checkpoints: React.FC = () => {
 		}
 	};
 
-	// Mock functions for proposals
-	const handleProposals = () => {
-		console.log("Proposals tab clicked");
-	};
-
 	return (
-		<div
-			className="checkpoints-container"
-			style={{ border: "none", borderRadius: "0", margin: 0, padding: 0 }}
-		>
+		<>
 			<div
-				className="checkpoints-header"
 				style={{
+					padding: "5px 0",
 					display: "flex",
-					borderBottom: "1px solid #e5e7eb",
-					height: "40px", // Match the height of the version bar in the Editor
-					margin: 0,
-					padding: 0,
+					flexDirection: "column",
 				}}
 			>
-				<button
-					style={{
-						flex: 1,
-						padding: "0",
-						border: "none",
-						outline: "none",
-						background: "none",
-						cursor: "pointer",
-						fontWeight: activeTab === "checkpoints" ? "bold" : "normal",
-						fontSize: "14px",
-					}}
-					onClick={() => setActiveTab("checkpoints")}
-				>
-					Checkpoints
-				</button>
-				<div style={{ width: "1px", height: "14px", background: "#e5e7eb" }}></div>
-				<button
-					style={{
-						flex: 1,
-						padding: "0",
-						border: "none",
-						outline: "none",
-						background: "none",
-						cursor: "pointer",
-						fontWeight: activeTab === "proposals" ? "bold" : "normal",
-						fontSize: "14px",
-					}}
-					onClick={() => setActiveTab("proposals")}
-				>
-					Proposals
-				</button>
-			</div>
-
-			{activeTab === "checkpoints" && (
 				<div
 					style={{
-						padding: "5px 0",
-						display: "flex",
-						flexDirection: "column",
+						paddingLeft: "20px",
+						paddingRight: "20px",
+						width: "100%",
+						boxSizing: "border-box",
 					}}
 				>
-					<div
+					<input
+						id="checkpoint-message-input"
+						type="text"
+						value={checkpointMessage}
+						onChange={(e) => setCheckpointMessage(e.target.value)}
+						placeholder="Add a message"
 						style={{
-							paddingLeft: "20px",
-							paddingRight: "20px",
 							width: "100%",
+							padding: "4px 8px",
+							marginBottom: "5px",
+							border: "1px solid #ddd",
+							borderRadius: "4px",
 							boxSizing: "border-box",
+							height: "28px",
+							fontSize: "13px",
 						}}
+						onKeyDown={(e) => {
+							if (e.key === "Enter") handleCreateCheckpoint();
+						}}
+					/>
+
+					<button
+						style={{
+							padding: "4px 8px",
+							background: "#f9f9f9",
+							border: "1px solid #ddd",
+							borderRadius: "4px",
+							cursor:
+								isCreatingCheckpoint || !changes || changes.length === 0
+									? "not-allowed"
+									: "pointer",
+							opacity:
+								isCreatingCheckpoint || !changes || changes.length === 0
+									? 0.6
+									: 1,
+							width: "100%",
+							marginBottom: "5px",
+							boxSizing: "border-box",
+							height: "28px",
+							fontSize: "13px",
+						}}
+						onClick={handleCreateCheckpoint}
+						disabled={isCreatingCheckpoint || !changes || changes.length === 0}
 					>
-						<input
-							id="checkpoint-message-input"
-							type="text"
-							value={checkpointMessage}
-							onChange={(e) => setCheckpointMessage(e.target.value)}
-							placeholder="Add a message"
-							style={{
-								width: "100%",
-								padding: "4px 8px",
-								marginBottom: "5px",
-								border: "1px solid #ddd",
-								borderRadius: "4px",
-								boxSizing: "border-box",
-								height: "28px",
-								fontSize: "13px",
-							}}
-							onKeyDown={(e) => {
-								if (e.key === "Enter") handleCreateCheckpoint();
-							}}
-						/>
-
-						<button
-							style={{
-								padding: "4px 8px",
-								background: "#f9f9f9",
-								border: "1px solid #ddd",
-								borderRadius: "4px",
-								cursor:
-									isCreatingCheckpoint || !changes || changes.length === 0
-										? "not-allowed"
-										: "pointer",
-								opacity:
-									isCreatingCheckpoint || !changes || changes.length === 0
-										? 0.6
-										: 1,
-								width: "100%",
-								marginBottom: "5px",
-								boxSizing: "border-box",
-								height: "28px",
-								fontSize: "13px",
-							}}
-							onClick={handleCreateCheckpoint}
-							disabled={isCreatingCheckpoint || !changes || changes.length === 0}
-						>
-							{isCreatingCheckpoint ? "Creating..." : "Create"}
-						</button>
-					</div>
+						{isCreatingCheckpoint ? "Creating..." : "Create"}
+					</button>
 				</div>
-			)}
-
-			{activeTab === "proposals" && (
-				<div
-					style={{
-						padding: "20px",
-						textAlign: "center",
-						color: "#666",
-					}}
-				>
-					<p>Proposals content goes here.</p>
-				</div>
-			)}
+			</div>
 
 			<div
 				className="checkpoints-list"
@@ -293,7 +227,7 @@ const Checkpoints: React.FC = () => {
 					</div>
 				)}
 			</div>
-		</div>
+		</>
 	);
 };
 
