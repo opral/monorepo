@@ -1,4 +1,5 @@
-/* Add this to your existing CSS file */
+@import "tailwindcss";
+
 
 /* Diff view container */
 .diff-container {

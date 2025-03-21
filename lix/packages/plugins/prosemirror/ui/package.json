@@ -12,6 +12,7 @@
 	"dependencies": {
 		"@lix-js/plugin-prosemirror": "workspace:*",
 		"@lix-js/sdk": "workspace:*",
+		"@tailwindcss/vite": "^4.0.15",
 		"prosemirror-commands": "^1.5.2",
 		"prosemirror-history": "^1.4.1",
 		"prosemirror-keymap": "^1.2.2",
@@ -22,6 +23,7 @@
 		"prosemirror-view": "^1.31.7",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
+		"tailwindcss": "^4.0.15",
 		"usehooks-ts": "^3.1.1"
 	},
 	"devDependencies": {
