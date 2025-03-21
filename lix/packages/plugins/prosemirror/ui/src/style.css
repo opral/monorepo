@@ -145,7 +145,7 @@
 .mode-tab-fixed {
   position: sticky;
   right: 0;
-  background-color: #fff;
+  background-color: white;
   border-left: 1px solid #e5e7eb;
   height: 100%;
   z-index: 10;
@@ -159,6 +159,9 @@
   cursor: pointer;
   white-space: nowrap;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mode-tabs button:disabled {
