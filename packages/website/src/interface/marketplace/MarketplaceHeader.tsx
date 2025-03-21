@@ -7,6 +7,7 @@ import * as m from "#src/paraglide/messages.js";
 import { LanguagePicker } from "#src/pages/index/LanguagePicker.jsx";
 import { Banner } from "../components/Banner.jsx";
 import { languageTag } from "#src/paraglide/runtime.js";
+import CategoryTabs from "./CategoryTabs.jsx";
 
 const MarketplaceHeader = (props: { withBorder: boolean }) => {
 	const socialMediaLinks = [
@@ -103,6 +104,7 @@ const MarketplaceHeader = (props: { withBorder: boolean }) => {
 						<LanguagePicker />
 					</div>
 				</div>
+				<CategoryTabs></CategoryTabs>
 			</header>
 		</>
 	);
