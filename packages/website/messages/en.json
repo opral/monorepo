@@ -199,5 +199,7 @@
 	"newsletter_unsubscribed_description": "We're sad to see you go. If you have any feedback, please let us know on our",
 	"newsletter_unsubscribed_title": "You're unsubscribed",
 	"home_lix_button_text": "Read more about Lix",
-	"home_credibility_tag_text": "Used by {count} devs, designers and translators"
+	"home_credibility_tag_text": "Used by {count} devs, designers and translators",
+	"deprecated_item_title": "Deprecated Item",
+	"deprecated_item_default_message": "This item has been deprecated and is no longer actively maintained. It remains accessible for existing users but may be removed in the future."
 }
