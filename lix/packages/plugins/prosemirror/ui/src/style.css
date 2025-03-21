@@ -104,6 +104,63 @@
 }
 
 /* Mode tabs */
+.mode-tabs {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  position: relative;
+  height: 40px;
+}
+
+.mode-tabs-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  flex-grow: 1;
+  scrollbar-width: thin;
+  -ms-overflow-style: none;
+}
+
+.mode-tabs-scroll-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+.mode-tabs-scroll-container::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+}
+
+.mode-tab {
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.mode-tab.active {
+  border-bottom: 2px solid #000;
+  font-weight: 500;
+}
+
+.mode-tab-fixed {
+  position: sticky;
+  right: 0;
+  background-color: #fff;
+  border-left: 1px solid #e5e7eb;
+  height: 100%;
+  z-index: 10;
+}
+
+.mode-tab-fixed button {
+  height: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
 .mode-tabs button:disabled {
   opacity: 0.5;
   cursor: not-allowed;

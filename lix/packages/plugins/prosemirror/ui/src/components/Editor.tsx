@@ -23,7 +23,11 @@ const Editor: React.FC = () => {
 	const [activeAccount] = useQuery(selectActiveAccount);
 	const [versions] = useQuery(selectVersions);
 	const editorRef = useRef<HTMLDivElement>(null);
+	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const [view, setView] = useState<EditorView | null>(null);
+
+	// Determine if current version is the main version (assuming main version is the first one)
+	const isMainVersion = versions?.[0]?.id === currentVersion?.id;
 
 	// Initialize editor
 	useEffect(() => {
@@ -70,6 +74,13 @@ const Editor: React.FC = () => {
 		};
 	}, []);
 
+	// Scroll to the end of the scrollbar
+	const scrollToEnd = () => {
+		if (scrollContainerRef.current) {
+			scrollContainerRef.current.scrollLeft = scrollContainerRef.current.scrollWidth;
+		}
+	};
+
 	// Handle clicks to focus the editor
 	const handleClick = () => {
 		if (view && !view.hasFocus()) {
@@ -108,41 +119,78 @@ const Editor: React.FC = () => {
 
 	// Handle create version
 	const handleCreateVersion = async () => {
-		const existingVersion = versions?.find(
-			(version) => version.name === `${activeAccount?.name}'s Version`,
-		);
-		if (existingVersion) {
-			await switchVersion({ lix, to: { id: existingVersion.id } });
-		} else {
-			const newVersion = await createVersion({
-				lix,
-				name: `${activeAccount?.name}'s Version`,
-				from: { id: currentVersion!.id },
-			});
-			await switchVersion({ lix, to: { id: newVersion.id } });
+		try {
+			const existingVersion = versions?.find(
+				(version) => version.name === `${activeAccount?.name}'s Version`,
+			);
+			if (existingVersion) {
+				await switchVersion({ lix, to: { id: existingVersion.id } });
+			} else {
+				const newVersion = await createVersion({
+					lix,
+					name: `${activeAccount?.name}'s Version`,
+					from: { id: currentVersion!.id },
+				});
+				await switchVersion({ lix, to: { id: newVersion.id } });
+			}
+			// focus back to the editor when switching versions
+			view?.focus();
+			
+			// Scroll to the end of the scrollbar after a short delay to ensure DOM update
+			setTimeout(() => {
+				scrollToEnd();
+			}, 100);
+		} catch (error) {
+			console.error("Error creating version:", error);
 		}
-		// focus back to the editor when switching versions
-		view?.focus();
 	};
+
+	// Handle propose changes
+	const handleProposeChanges = () => {
+		// Here you would implement the proposal functionality
+		console.log("Propose changes from version:", currentVersion?.name);
+	};
+
+	// Effect to scroll to the end when versions change
+	useEffect(() => {
+		if (versions && versions.length > 0) {
+			scrollToEnd();
+		}
+	}, [versions?.length]);
 
 	return (
 		<div className="editor-container">
-			{/* Tab selector for write/proposed modes */}
+			{/* Tab selector for versions with fixed button on right */}
 			<div className="mode-tabs">
-				{versions?.map((version) => (
-					<div className="flex items-center" key={version.id}>
+				<div className="mode-tabs-scroll-container" ref={scrollContainerRef}>
+					{versions?.map((version) => (
 						<button
+							key={version.id}
 							className={`mode-tab ${version.id === currentVersion?.id ? "active" : ""}`}
 							onClick={() => handleVersionChange(version.id)}
 						>
 							{version.name}
 						</button>
-					</div>
-				))}
+					))}
+				</div>
 
-				<button className="mode-tab" onClick={handleCreateVersion}>
-					+ Version
-				</button>
+				<div className="mode-tab-fixed">
+					{isMainVersion ? (
+						<button 
+							className="mode-tab"
+							onClick={handleCreateVersion}
+						>
+							+ Version
+						</button>
+					) : (
+						<button 
+							className="mode-tab"
+							onClick={handleProposeChanges}
+						>
+							Propose
+						</button>
+					)}
+				</div>
 			</div>
 
 			<div className="editor-wrapper" onClick={handleClick}>
