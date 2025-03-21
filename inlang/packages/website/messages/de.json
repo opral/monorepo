@@ -157,7 +157,7 @@
 	"marketplace_header_lintRule_toast_title": "Was sind Lint Regeln?",
 	"marketplace_header_lintRules_button_text": "Eigene Lint Regel entwickeln",
 	"marketplace_header_lintRules_description": "Validiere Inhalte in einem Inlang-Projekt.",
-	"marketplace_header_lintRules_title": "Lint Regeln",
+	"marketplace_header_lintRules_title": "Validierungsregeln",
 	"marketplace_header_lix_button": "Mehr lesen",
 	"marketplace_header_lix_button_text": "lix besuchen",
 	"marketplace_header_lix_description": "Das lix change control system ist ein system, welches es dir erlaubt git im backend laufen zu lassen. Es ist außerdem für das Web verfügbar.",

@@ -14,14 +14,10 @@ const CategoryTabs = () => {
 				name: m.marketplace_header_plugins_title(),
 				href: "/c/plugins",
 			},
-			// {
-			// 	name: m.marketplace_header_lintRules_title(),
-			// 	href: "/c/lint-rules",
-			// },
-			// {
-			// 	name: m.marketplace_header_guides_title(),
-			// 	href: "/c/guides",
-			// },
+			{
+				name: m.marketplace_header_lintRules_title(),
+				href: "https://github.com/opral/lix-sdk/issues/239",
+			},
 		];
 	};
 	return (
