@@ -1,18 +1,33 @@
-import { search } from "#src/services/search/index.js";
+import { registry } from "@inlang/marketplace-registry";
+import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
 
-export default async function onBeforeRender(pageContext: any) {
+type RegistryItem = MarketplaceManifest & { uniqueID: string };
+
+export default async function onBeforeRender(pageContext: any): Promise<{ pageContext: { pageProps: { items: RegistryItem[] } } }> {
 	const { q } = pageContext.urlParsed.search;
 
-	const results = await search({ term: q });
+	let items = [...registry];
 
-	let items = JSON.parse(results.data as string).map((item: any) => {
-		item.uniqueID = item.objectID;
-		delete item.readme;
-		delete item.objectID;
-		return item;
-	});
+	// If there's a search query, filter the registry items
+	if (q && q.trim() !== "") {
+		const searchTerm = q.toLowerCase();
+		items = items.filter((item) => {
+			const displayName = typeof item.displayName === "object" 
+				? item.displayName.en.toLowerCase() 
+				: item.displayName.toLowerCase();
+			const description = typeof item.description === "object"
+				? item.description.en.toLowerCase()
+				: item.description.toLowerCase();
+			const keywords = item.keywords.join(" ").toLowerCase();
+			
+			return displayName.includes(searchTerm) || 
+				description.includes(searchTerm) || 
+				keywords.includes(searchTerm);
+		});
+	}
 
-	items = items.filter((i: any) => i.keywords.includes("external") === false);
+	// Filter out external items
+	items = items.filter((item) => !item.keywords.includes("external"));
 
 	return {
 		pageContext: {
