@@ -2,6 +2,7 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "messageLintRule.inlang.messageWithoutSource",
 	"icon": "./assets/icon.png",
+	"unlisted": true,
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/without_source-marketplace-cover.jpg"
 	],

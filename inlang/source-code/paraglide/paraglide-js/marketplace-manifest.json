@@ -1,6 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJs",
+	"unlisted": true,
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglideNoBg.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/og.png",

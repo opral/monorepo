@@ -2,6 +2,7 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJsAdapterSolidStart",
 	"slug": "paraglide-solidstart-i18n",
+	"unlisted": true,
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-solidstart/assets/icon.png",
 	"displayName": {
 		"en": "Paraglide-SolidStart"

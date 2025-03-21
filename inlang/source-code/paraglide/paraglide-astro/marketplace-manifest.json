@@ -2,6 +2,7 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJsAdapterAstro",
 	"slug": "paraglide-astro-i18n",
+	"unlisted": true,
 	"icon": "./assets/icon.svg",
 	"gallery": ["./assets/og.png"],
 	"displayName": {

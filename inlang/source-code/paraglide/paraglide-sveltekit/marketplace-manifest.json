@@ -2,6 +2,7 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJsAdapterSvelteKit",
 	"slug": "paraglide-sveltekit-i18n",
+	"unlisted": true,
 	"icon": "./assets/icon.png",
 	"gallery": [
 		"./assets/og.png"
