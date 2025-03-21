@@ -2,6 +2,7 @@
 	"name": "@inlang/rpc",
 	"type": "module",
 	"private": true,
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js",
 		"./router": "./dist/router.js"

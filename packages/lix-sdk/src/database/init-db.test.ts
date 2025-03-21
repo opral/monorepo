@@ -441,9 +441,7 @@ test("invalid file paths should be rejected", async () => {
 			})
 			.returningAll()
 			.execute()
-	).rejects.toThrowError(
-		"File path must start with a slash"
-	);
+	).rejects.toThrowError("File path must start with a slash");
 });
 
 test("vector clock functions", async () => {

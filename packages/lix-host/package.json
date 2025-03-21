@@ -4,6 +4,7 @@
 	"type": "module",
 	"version": "0.0.13",
 	"license": "Apache-2.0",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js"
 	},

@@ -17,7 +17,7 @@ test("the alphabet does not contain dashes `-` because they break selecting the 
 /**
  * Test the crypto polyfill that was added to fix environments without crypto support
  * like older versions of Node in Stackblitz.
- * 
+ *
  * See: https://github.com/opral/lix-sdk/issues/258
  */
 test("polyfill works when crypto is not available", () => {
