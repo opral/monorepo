@@ -2,7 +2,10 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJsAdapterSvelteKit",
 	"slug": "paraglide-sveltekit-i18n",
-	"unlisted": true,
+	"deprecated": true,
+	"deprecatedMessage": {
+		"en": "Adapters are not needed in Paraglide JS 2.0 anymore. Use Paraglide JS 2.0 directly https://inlang.com/m/gerre34r/library-inlang-paraglideJs"
+	},
 	"icon": "./assets/icon.png",
 	"gallery": [
 		"./assets/og.png"

@@ -1,8 +1,11 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "messageLintRule.inlang.missingTranslation",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/assets/icon.png",
-	"unlisted": true,
+	"icon": "./assets/icon.png",
+	"deprecated": true,
+	"deprecatedMessage": {
+		"en": "Lint rules are going to be replaced by lix validation rules. Please upvote https://github.com/opral/lix-sdk/issues/239"
+	},
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/missing_translation-marketplace-cover.jpg"
 	],

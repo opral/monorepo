@@ -1,8 +1,11 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
-	"id": "app.inlang.ninjaI18nAction",
+	"id": "app.inlang.githubLintAction",
 	"icon": "./assets/ninja-logo.png",
-	"unlisted": true,
+	"deprecated": true,
+	"deprecatedMessage": {
+		"en": "Lint rules are going to be replaced by lix validation rules. Please upvote https://github.com/opral/lix-sdk/issues/239"
+	},
 	"gallery": [],
 	"displayName": {
 		"en": "Ninja i18n - GitHub Lint Action"

@@ -2,8 +2,11 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJsAdapterSolidStart",
 	"slug": "paraglide-solidstart-i18n",
-	"unlisted": true,
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-solidstart/assets/icon.png",
+	"deprecated": true,
+	"deprecatedMessage": {
+		"en": "Adapters are not needed in Paraglide JS 2.0 anymore. Use Paraglide JS 2.0 directly https://inlang.com/m/gerre34r/library-inlang-paraglideJs"
+	},
 	"displayName": {
 		"en": "Paraglide-SolidStart"
 	},

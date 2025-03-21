@@ -2,8 +2,11 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJsAdapterAstro",
 	"slug": "paraglide-astro-i18n",
-	"unlisted": true,
-	"icon": "./assets/icon.svg",
+	"icon": "./assets/icon.png",
+	"deprecated": true,
+	"deprecatedMessage": {
+		"en": "Adapters are not needed in Paraglide JS 2.0 anymore. Use Paraglide JS 2.0 directly https://inlang.com/m/gerre34r/library-inlang-paraglideJs"
+	},
 	"gallery": ["./assets/og.png"],
 	"displayName": {
 		"en": "Paraglide-Astro"
