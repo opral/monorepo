@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 2.0.4
+
+### Patch Changes
+
+- @inlang/sdk@2.4.4
+
 ## 2.0.3
 
 ### Patch Changes

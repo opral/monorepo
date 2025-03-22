@@ -1,5 +1,11 @@
 # @lix-js/sdk
 
+## 0.4.4
+
+### Patch Changes
+
+- 85478f8: chore: reduce the minmum node version to v18 to unblock adoption https://github.com/opral/lix-sdk/issues/277
+
 ## 0.4.3
 
 ### Patch Changes
