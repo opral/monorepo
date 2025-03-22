@@ -1,5 +1,5 @@
 import { lix } from "./state";
-import { Change } from "@lix-js/sdk";
+import { Change, ChangeProposal, jsonArrayFrom } from "@lix-js/sdk";
 
 /**
  * Selects the current prosemirror document from the lix database
@@ -129,7 +129,19 @@ export async function selectCheckpoints() {
  * Selects open change proposals from the database
  */
 export async function selectOpenChangeProposals() {
-	return lix.db.selectFrom("change_proposal").selectAll().execute();
+	try {
+		return lix.db
+			.selectFrom("change_proposal")
+			.innerJoin("change", "change.entity_id", "change_proposal.id")
+			.innerJoin("change_author", "change_author.change_id", "change.id")
+			.innerJoin("account", "account.id", "change_author.account_id")
+			.selectAll("change_proposal")
+			.select("account.name as account_name")
+			.execute();
+	} catch (e) {
+		console.error("Error selecting open change proposals:", e);
+		return [];
+	}
 }
 
 /**
@@ -167,4 +179,39 @@ export async function selectMainVersion() {
 		.where("name", "=", "main")
 		.selectAll()
 		.executeTakeFirstOrThrow();
+}
+
+export async function selectDiscussionOfProposal(proposal: ChangeProposal) {
+	console.log("getting discussion");
+
+	try {
+		const result = await lix.db
+			.selectFrom("discussion")
+			.where("change_set_id", "=", proposal.change_set_id)
+			.select((eb) => [
+				jsonArrayFrom(
+					eb
+						.selectFrom("comment")
+						.select(["comment.content", "comment.id", "comment.discussion_id"])
+						.innerJoin("change", "change.entity_id", "comment.id")
+						.innerJoin("change_author", "change_author.change_id", "change.id")
+						.innerJoin("account", "account.id", "change_author.account_id")
+						.select(["change.created_at", "account.name as author_name"])
+						.whereRef("comment.discussion_id", "=", "discussion.id"),
+				).as("comments"),
+			])
+			.selectAll("discussion")
+			.executeTakeFirst();
+
+		if (result) {
+			// the automatic json parser doesn't work for some reason
+			result.comments = JSON.parse(result.comments as unknown as string);
+		}
+
+		console.log("discussion", result);
+		return result;
+	} catch (error) {
+		console.error("Error selecting discussion for proposal:", error);
+		return null;
+	}
 }
