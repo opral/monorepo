@@ -71,6 +71,7 @@ body {
   border-right: 1px solid #ccc;
   padding: 0;
   margin: 0;
+  background-color: #fff;
 }
 
 .editor {
@@ -89,6 +90,13 @@ body {
   padding: 10px;
   box-sizing: border-box;
   background-color: #f5f8fa;
+}
+
+.main-layout {
+  display: flex;
+  height: 80vh;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
 }
 
 h1 {
@@ -277,9 +285,12 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #e5e7eb;
   background-color: #f5f5f5;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .checkpoints-header h3 {
@@ -400,24 +411,31 @@ pre {
 /* Mode tabs styling */
 .mode-tabs {
   display: flex;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 0;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  position: relative;
+  height: 40px;
+  background-color: #fff;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .mode-tab {
   padding: 8px 16px;
-  background: none;
   border: none;
-  border-bottom: 1px solid transparent;
+  background: none;
   cursor: pointer;
+  white-space: nowrap;
   font-size: 14px;
-  font-weight: 500;
+  height: 40px;
+  box-sizing: border-box;
   border-radius: 0;
-  outline: none;
 }
 
 .mode-tab:hover {
-  opacity: 0.8;
+  background-color: #f9f9f9;
+  border-radius: 0;
 }
 
 .mode-tab:focus {
@@ -425,8 +443,9 @@ pre {
 }
 
 .mode-tab.active {
-  border-bottom-color: #000;
-  font-weight: bold;
+  border-bottom: 2px solid #000;
+  font-weight: 500;
+  border-radius: 0;
 }
 
 /* Mode indicator */
@@ -556,23 +575,24 @@ pre {
 }
 
 /* Main layout */
-.main-layout {
-  display: flex;
-  height: calc(100vh - 120px);
-  width: 100%;
-  border: 1px solid #ddd;
-}
-
 .right-panel {
-  width: 250px;
+  width: 300px;
   display: flex;
   flex-direction: column;
   border-left: 1px solid #ddd;
+  background-color: #fff;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 .checkpoints-panel {
   flex: 1;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 /* Hide the old container */
