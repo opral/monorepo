@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import { createDocDiff, type DiffNode } from "@lix-js/plugin-prosemirror";
 import { lix } from "../state";
 import { switchVersion } from "@lix-js/sdk";
