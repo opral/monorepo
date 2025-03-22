@@ -38,3 +38,44 @@ test("change_proposal.id should default to uuid_v7", async () => {
 
 	expect(validate(result.id)).toBe(true);
 });
+
+test("change proposals are change controlled", async () => {
+	const lix = await openLixInMemory({});
+
+	const mockChange = await lix.db
+		.insertInto("change")
+		.values({
+			schema_key: "file",
+			entity_id: "entity1",
+			file_id: "mock",
+			plugin_key: "mock-plugin",
+			snapshot_id: "no-content",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// Create a change set to use in the proposal
+	const changeSet = await createChangeSet({
+		lix,
+		changes: [mockChange],
+	});
+
+	const result = await lix.db
+		.insertInto("change_proposal")
+		.values({
+			change_set_id: changeSet.id,
+			source_change_set_id: changeSet.id,
+			target_change_set_id: changeSet.id,
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const change = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", result.id)
+		.where("schema_key", "=", "lix_change_proposal_table")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(change.entity_id).toBe(result.id);
+});
