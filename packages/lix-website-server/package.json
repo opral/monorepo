@@ -2,7 +2,7 @@
   "name": "lix-website-server",
   "type": "module",
   "private": true,
-  "version": "0.0.12",
+  "version": "0.0.13",
   "scripts": {
     "dev": "tsx watch ./src/main.ts",
     "production": "NODE_ENV=production tsx ./src/main.ts",

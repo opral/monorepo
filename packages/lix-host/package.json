@@ -2,7 +2,7 @@
 	"name": "@lix-js/host",
 	"private": true,
 	"type": "module",
-	"version": "0.0.13",
+	"version": "0.0.14",
 	"license": "Apache-2.0",
 	"types": "./dist/index.d.ts",
 	"exports": {
