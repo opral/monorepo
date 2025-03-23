@@ -41,3 +41,25 @@ test("creating a change set should succeed", async () => {
 		expect.arrayContaining([mockChanges[0]?.id, mockChanges[1]?.id])
 	);
 });
+
+test("creating a change set with empty changes array should succeed", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create a change set with an empty changes array
+	const changeSet = await createChangeSet({
+		lix: lix,
+		changes: [],
+	});
+
+	// Verify the change set was created
+	expect(changeSet.id).toBeDefined();
+
+	// Verify no change_set_element records were created
+	const changeSetMembers = await lix.db
+		.selectFrom("change_set_element")
+		.selectAll()
+		.where("change_set_id", "=", changeSet.id)
+		.execute();
+
+	expect(changeSetMembers).toHaveLength(0);
+});

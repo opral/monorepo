@@ -21,15 +21,17 @@ export async function createChangeSet(args: {
 			.returningAll()
 			.executeTakeFirstOrThrow();
 
-		await trx
-			.insertInto("change_set_element")
-			.values(
-				args.changes.map((change) => ({
-					change_id: change.id,
-					change_set_id: changeSet.id,
-				}))
-			)
-			.execute();
+		if (args.changes.length > 0) {
+			await trx
+				.insertInto("change_set_element")
+				.values(
+					args.changes.map((change) => ({
+						change_id: change.id,
+						change_set_id: changeSet.id,
+					}))
+				)
+				.execute();
+		}
 		return changeSet;
 	};
 
