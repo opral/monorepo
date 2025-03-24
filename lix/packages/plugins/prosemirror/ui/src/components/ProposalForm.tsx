@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { useQuery } from "../hooks/useQuery";
 import {
 	selectCurrentVersion,
@@ -26,10 +26,6 @@ export default function ProposalForm() {
 	const [activeAccount] = useQuery(selectActiveAccount);
 	const [currentChangeSet] = useQuery(selectCurrentChangeSet);
 
-	// Component state
-	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
 	// Create a ref for the discussion component to access its methods
 	const discussionRef = useRef<DiscussionHandle>(null);
 
@@ -40,11 +36,6 @@ export default function ProposalForm() {
 
 	// Handler for submitting the proposal
 	const handleSubmitProposal = async () => {
-		if (isSubmitting) return;
-
-		setIsSubmitting(true);
-		setErrorMessage(null);
-
 		try {
 			// Get the comment text from the Discussion component
 			const commentText = discussionRef.current?.getCommentText() || "";
@@ -106,33 +97,19 @@ export default function ProposalForm() {
 			discussionRef.current?.clearCommentText();
 		} catch (error) {
 			console.error("Error creating proposal:", error);
-			setErrorMessage("Failed to create proposal. Please try again.");
-		} finally {
-			setIsSubmitting(false);
 		}
 	};
 
 	// Form actions footer
 	const actionFooter = (
 		<div className="flex justify-between items-center p-4">
-			<button
-				className="btn btn-outline"
-				onClick={() => {}}
-				disabled={isSubmitting}
-			>
+			<button className="btn btn-outline" onClick={() => {}}>
 				Cancel
 			</button>
 
 			<div className="flex items-center gap-2">
-				{errorMessage && (
-					<span className="text-error text-sm">{errorMessage}</span>
-				)}
-				<button
-					className="btn btn-primary"
-					onClick={handleSubmitProposal}
-					disabled={isSubmitting}
-				>
-					{isSubmitting ? "Submitting..." : "Submit Proposal"}
+				<button className="btn btn-primary" onClick={handleSubmitProposal}>
+					Submit Proposal
 				</button>
 			</div>
 		</div>
