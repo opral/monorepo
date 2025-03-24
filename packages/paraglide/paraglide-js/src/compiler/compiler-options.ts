@@ -12,6 +12,7 @@ export const defaultCompilerOptions = {
 	isServer: "typeof window === 'undefined'",
 	strategy: ["cookie", "globalVariable", "baseLocale"],
 	cookieName: "PARAGLIDE_LOCALE",
+	cookieMaxAge: 60 * 60 * 24 * 400,
 } as const satisfies Partial<CompilerOptions>;
 
 export type CompilerOptions = {
@@ -96,6 +97,12 @@ export type CompilerOptions = {
 	 * @default 'PARAGLIDE_LOCALE'
 	 */
 	cookieName?: string;
+	/**
+	 * The max-age in seconds of the cookie until it expires.
+	 *
+	 * @default 60 * 60 * 24 * 400
+	 */
+	cookieMaxAge?: number;
 	/**
 	 * The `additionalFiles` option is an array of paths to additional files that should be copied to the output directory.
 	 *
