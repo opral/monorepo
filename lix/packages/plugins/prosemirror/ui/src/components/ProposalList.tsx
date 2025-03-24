@@ -61,7 +61,6 @@ const ProposalList: React.FC<ProposalListProps> = ({
 		<div className="proposal-list flex flex-col h-full p-4">
 			{/* Header with title and create button */}
 			<div className="flex justify-between items-center mb-4">
-				<h2 className="text-lg font-medium">Proposals</h2>
 				{onCreateProposal && (
 					<button className="btn btn-sm btn-primary" onClick={onCreateProposal}>
 						<Plus size={16} className="mr-1" />

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useQuery } from "../hooks/useQuery";
 import {
 	selectCurrentVersion,
@@ -15,19 +15,11 @@ import {
 import ProposalItem, { ProposalData } from "./ProposalItem";
 import { DiscussionHandle } from "./Discussion";
 
-interface ProposalFormProps {
-	onClose: () => void;
-	onSubmitSuccess?: () => void;
-}
-
 /**
  * ProposalForm component
  * Allows users to create new proposals with comments
  */
-const ProposalForm: React.FC<ProposalFormProps> = ({
-	onClose,
-	onSubmitSuccess,
-}) => {
+export default function ProposalForm() {
 	// Load necessary data
 	const [currentVersion] = useQuery(selectCurrentVersion);
 	const [mainVersion] = useQuery(selectMainVersion);
@@ -112,14 +104,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 
 			// Clear the comment text field
 			discussionRef.current?.clearCommentText();
-
-			// Report success
-			if (onSubmitSuccess) {
-				onSubmitSuccess();
-			}
-
-			// Close the form
-			onClose();
 		} catch (error) {
 			console.error("Error creating proposal:", error);
 			setErrorMessage("Failed to create proposal. Please try again.");
@@ -133,7 +117,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		<div className="flex justify-between items-center p-4">
 			<button
 				className="btn btn-outline"
-				onClick={onClose}
+				onClick={() => {}}
 				disabled={isSubmitting}
 			>
 				Cancel
@@ -169,8 +153,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 	return (
 		<div className="proposal-form h-full flex flex-col">
 			{/* Header */}
-			<div className="tabs border-b h-10 flex items-center justify-center">
-				<div className="tab tab-bordered tab-active flex items-center gap-2 px-4 h-10">
+			<div className="tabs border-b border-base-300 h-10 flex items-center justify-center">
+				<div className="tab tab-active flex items-center gap-2 px-4 h-10">
 					<svg
 						width="16"
 						height="16"
@@ -204,6 +188,4 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 			</div>
 		</div>
 	);
-};
-
-export default ProposalForm;
+}

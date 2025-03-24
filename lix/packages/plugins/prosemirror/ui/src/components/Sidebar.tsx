@@ -1,68 +1,60 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Checkpoints from "./Checkpoints";
 import ProposalList from "./ProposalList";
-import ProposalForm from "./ProposalForm";
 import clsx from "clsx";
+import { useQuery } from "../hooks/useQuery";
+import { selectCurrentVersion, selectMainVersion } from "../queries";
+import ProposalForm from "./ProposalForm";
 
-export type SidebarTab = "checkpoints" | "proposals" | "create-proposal";
+export default function Sidebar() {
+	const [currentVersion] = useQuery(selectCurrentVersion);
+	const [mainVersion] = useQuery(selectMainVersion);
 
-const Sidebar: React.FC = () => {
-	const [activeTab, setActiveTab] = useState<SidebarTab>("checkpoints");
+	const isMainVersion = currentVersion?.id === mainVersion?.id;
 
-	const handleTabChange = (tab: SidebarTab) => {
-		setActiveTab(tab);
-	};
+	return isMainVersion ? <MainVersionSidebar /> : <ProposeChangesSidebar />;
+}
 
-	const handleCloseProposalCreate = () => {
-		setActiveTab("proposals");
-	};
+function MainVersionSidebar() {
+	const [activeTab, setActiveTab] = useState<"checkpoints" | "proposals">(
+		"checkpoints",
+	);
 
 	return (
 		<div className="flex flex-col h-full">
-			{/* Hide tabs when create-proposal is active */}
-			{activeTab !== "create-proposal" && (
-				<div className="tabs tabs-bordered flex justify-around border-b border-base-300 h-10">
-					<a
-						className={clsx(
-							"tab tab-bordered",
-							activeTab === "checkpoints" && "tab-active",
-						)}
-						onClick={() => handleTabChange("checkpoints")}
-					>
-						Checkpoints
-					</a>
-					<a
-						className={clsx(
-							"tab tab-bordered",
-							activeTab === "proposals" && "tab-active",
-						)}
-						onClick={() => handleTabChange("proposals")}
-					>
-						Proposals
-					</a>
-				</div>
-			)}
+			<div className="tabs tabs-bordered flex justify-around items-center border-b border-base-300 h-10">
+				<a
+					className={clsx(
+						"tab tab-bordered",
+						activeTab === "checkpoints" && "tab-active",
+					)}
+					onClick={() => setActiveTab("checkpoints")}
+				>
+					Checkpoints
+				</a>
+				<a
+					className={clsx(
+						"tab tab-bordered",
+						activeTab === "proposals" && "tab-active",
+					)}
+					onClick={() => setActiveTab("proposals")}
+				>
+					Proposals
+				</a>
+			</div>
 
 			<div className="flex-1 overflow-auto">
 				{activeTab === "checkpoints" && <Checkpoints />}
-				{activeTab === "proposals" && (
-					<ProposalList
-						onCreateProposal={() => handleTabChange("create-proposal")}
-					/>
-				)}
-				{activeTab === "create-proposal" && (
-					<ProposalForm onClose={handleCloseProposalCreate} />
-				)}
+				{activeTab === "proposals" && <ProposalList />}
 			</div>
 		</div>
 	);
-};
+}
 
-export default Sidebar;
-
-// Export for use in other components
-export const showProposalCreate = (
-	setTab: React.Dispatch<React.SetStateAction<SidebarTab>>,
-) => {
-	setTab("create-proposal");
-};
+function ProposeChangesSidebar() {
+	return (
+		<div className="flex flex-col h-full">
+			<ProposalForm />
+		</div>
+	);
+}

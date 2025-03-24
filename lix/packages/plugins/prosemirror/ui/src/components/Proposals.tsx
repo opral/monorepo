@@ -2,7 +2,7 @@ import React from "react";
 import { useQuery } from "../hooks/useQuery";
 import { selectOpenChangeProposals } from "../queries";
 import ProposalItem from "./ProposalItem";
-import { Plus, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useKeyValue } from "../hooks/useKeyValue";
 
 interface ProposalListProps {
@@ -59,17 +59,6 @@ const ProposalList: React.FC<ProposalListProps> = ({
 
 	return (
 		<div className="proposal-list flex flex-col h-full p-4">
-			{/* Header with title and create button */}
-			<div className="flex justify-between items-center mb-4">
-				<h2 className="text-lg font-medium">Proposals</h2>
-				{onCreateProposal && (
-					<button className="btn btn-sm btn-primary" onClick={onCreateProposal}>
-						<Plus size={16} className="mr-1" />
-						New Proposal
-					</button>
-				)}
-			</div>
-
 			{/* Proposal list or empty state */}
 			<div className="overflow-y-auto flex-1">
 				{(proposals?.length ?? 0) > 0 ? (
