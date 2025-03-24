@@ -2,6 +2,7 @@ import { useQuery } from "../hooks/useQuery";
 import { selectOpenChangeProposals } from "../queries";
 import { FileText } from "lucide-react";
 import { ChangeSet } from "./ChangeSet";
+import { lix } from "../state";
 
 /**
  * ProposalList component
@@ -16,7 +17,7 @@ export default function Proposals() {
 	};
 
 	const handleReject = (id: string) => {
-		console.log("Rejecting proposal:", id);
+		lix.db.deleteFrom("change_proposal").where("id", "=", id).execute();
 	};
 
 	return (
