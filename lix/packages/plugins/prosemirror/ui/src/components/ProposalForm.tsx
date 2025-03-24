@@ -1,16 +1,6 @@
 import { useRef } from "react";
 import { useQuery } from "../hooks/useQuery";
-import {
-	selectCurrentVersion,
-	selectMainVersion,
-	selectProposedChangeSet,
-} from "../queries";
-import { lix } from "../state";
-import {
-	changeIsLeafInVersion,
-	createChangeSet,
-	createChangeProposal,
-} from "@lix-js/sdk";
+import { selectProposedChangeSet } from "../queries";
 import { DiscussionHandle } from "./Discussion";
 import { ChangeSet } from "./ChangeSet";
 
@@ -20,78 +10,10 @@ import { ChangeSet } from "./ChangeSet";
  */
 export default function ProposalForm() {
 	// Load necessary data
-	const [currentVersion] = useQuery(selectCurrentVersion);
-	const [mainVersion] = useQuery(selectMainVersion);
 	const [proposedChangeSet] = useQuery(selectProposedChangeSet);
 
 	// Create a ref for the discussion component to access its methods
 	const discussionRef = useRef<DiscussionHandle>(null);
-
-	// Handler for submitting the proposal
-	const handleSubmitProposal = async () => {
-		try {
-			// Get the comment text from the Discussion component
-			const commentText = discussionRef.current?.getCommentText() || "";
-
-			// Create a timestamp to make each proposal unique
-			const timestamp = Date.now();
-			const uniqueId = `proposal-${timestamp}`;
-
-			// Create a unique label for this proposal to avoid conflicts
-			const proposalLabel = await lix.db
-				.insertInto("label")
-				.values({ name: uniqueId })
-				.returningAll()
-				.executeTakeFirstOrThrow();
-
-			// Get leaf changes from both versions
-			const sourceChanges = await lix.db
-				.selectFrom("change")
-				.where(changeIsLeafInVersion(currentVersion!))
-				.innerJoin("file", "change.file_id", "file.id")
-				.where("file.path", "=", "/prosemirror.json")
-				.select("change.id")
-				.execute();
-
-			const targetChanges = await lix.db
-				.selectFrom("change")
-				.where(changeIsLeafInVersion(mainVersion!))
-				.innerJoin("file", "change.file_id", "file.id")
-				.where("file.path", "=", "/prosemirror.json")
-				.select("change.id")
-				.execute();
-
-			// Create change sets with unique labels to avoid conflicts
-			const sourceChangeSet = await createChangeSet({
-				lix,
-				changes: sourceChanges,
-				labels: [proposalLabel],
-				// @ts-expect-error
-				metadata: {
-					title: `Proposed changes (${timestamp})`,
-					description: commentText.trim() || undefined,
-				},
-			});
-
-			const targetChangeSet = await createChangeSet({
-				lix,
-				changes: targetChanges,
-				labels: [proposalLabel],
-			});
-
-			// Create the change proposal
-			await createChangeProposal({
-				lix,
-				source_change_set: sourceChangeSet,
-				target_change_set: targetChangeSet,
-			});
-
-			// Clear the comment text field
-			discussionRef.current?.clearCommentText();
-		} catch (error) {
-			console.error("Error creating proposal:", error);
-		}
-	};
 
 	return (
 		<div className="proposal-form h-full flex flex-col">
@@ -131,10 +53,7 @@ export default function ProposalForm() {
 									</button>
 
 									<div className="flex items-center gap-2">
-										<button
-											className="btn btn-primary"
-											onClick={handleSubmitProposal}
-										>
+										<button className="btn btn-primary" onClick={() => {}}>
 											Submit Proposal
 										</button>
 									</div>

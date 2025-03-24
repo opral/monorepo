@@ -366,20 +366,22 @@ export async function selectProposedChangeSet(): Promise<
 		.select(["change_id as id"])
 		.execute();
 
-	// always keep the proposal up to date. this demo
-	// is purposefully simple by encouraging short lived
-	// proposals that dont run out of sync with the main
-	// version
-	await lix.db
-		.insertInto("change_set_element")
-		.values(
-			proposedChanges.map((c) => ({
-				change_set_id: proposedChangeSet.id,
-				change_id: c.id,
-			})),
-		)
-		.onConflict((oc) => oc.doNothing())
-		.execute();
+  if (proposedChanges.length > 0) {
+		// always keep the proposal up to date. this demo
+		// is purposefully simple by encouraging short lived
+		// proposals that dont run out of sync with the main
+		// version
+		await lix.db
+			.insertInto("change_set_element")
+			.values(
+				proposedChanges.map((c) => ({
+					change_set_id: proposedChangeSet.id,
+					change_id: c.id,
+				})),
+			)
+			.onConflict((oc) => oc.doNothing())
+			.execute();
+	}
 
 	await lix.db
 		.insertInto("change_proposal")
