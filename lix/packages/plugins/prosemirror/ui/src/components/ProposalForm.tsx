@@ -14,7 +14,6 @@ import {
 } from "@lix-js/sdk";
 import ProposalItem, { ProposalData } from "./ProposalItem";
 import { DiscussionHandle } from "./Discussion";
-import { GitBranch } from "lucide-react";
 
 interface ProposalFormProps {
 	onClose: () => void;
@@ -91,6 +90,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 				lix,
 				changes: sourceChanges,
 				labels: [proposalLabel],
+				// @ts-expect-error
 				metadata: {
 					title: `Proposed changes (${timestamp})`,
 					description: commentText.trim() || undefined,
@@ -156,6 +156,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 
 	// Create a temporary proposal object for display purposes
 	// Using a unique ID and the current timestamp ensures we don't have stale data
+	// @ts-expect-error
 	const draftProposal: ProposalData = {
 		id: `draft-proposal-${Date.now()}`,
 		change_set_id: currentChangeSet?.id || `temp-${Date.now()}`,

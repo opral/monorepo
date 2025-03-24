@@ -29,10 +29,7 @@ interface EditorProps {
 	hidePropose?: boolean;
 }
 
-const Editor: React.FC<EditorProps> = ({
-	onProposeChanges,
-	hidePropose = false,
-}) => {
+const Editor: React.FC<EditorProps> = ({ onProposeChanges }) => {
 	const [docInLix] = useQuery(selectProsemirrorDocument);
 	const [currentVersion] = useQuery(selectCurrentVersion);
 	const [mainVersion] = useQuery(selectMainVersion);

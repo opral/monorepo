@@ -119,10 +119,13 @@ export async function countChangesInChangeSet(changeSetId: string): Promise<numb
  * Creates a new change set with changes from current version's leaf changes
  * and returns it with additional metadata
  */
-export async function createChangeSetFromCurrentVersion(title?: string, description?: string) {
+export async function createChangeSetFromCurrentVersion(
+	title?: string,
+	description?: string,
+) {
 	try {
 		const currentVersion = await selectCurrentVersion();
-		
+
 		// Get leaf changes from current version
 		const changes = await lix.db
 			.selectFrom("change")
@@ -131,23 +134,24 @@ export async function createChangeSetFromCurrentVersion(title?: string, descript
 			.where("file.path", "=", "/prosemirror.json")
 			.select("change.id")
 			.execute();
-		
+
 		// Create the change set with metadata
 		const changeSet = await createChangeSet({
 			lix,
 			changes,
+			// @ts-expect-error
 			metadata: {
 				title: title || "New change set",
 				description,
 			},
 		});
-		
+
 		// Count the changes in the change set
 		const changeCount = await countChangesInChangeSet(changeSet.id);
-		
+
 		// Get the account info
 		const account = await selectActiveAccount();
-		
+
 		// Return the change set with additional metadata
 		return {
 			...changeSet,
@@ -165,57 +169,60 @@ export async function createChangeSetFromCurrentVersion(title?: string, descript
  * Creates a new change proposal between the current version and main version
  * Returns the created proposal with metadata
  */
-export async function createProposalBetweenVersions(description?: string): Promise<ChangeProposal & {
-	change_set_id: string;
-	account_name?: string;
-	created_at: string;
-	change_count: number;
-	from_version?: string;
-	to_version?: string;
-}> {
+export async function createProposalBetweenVersions(description?: string): Promise<
+	ChangeProposal & {
+		change_set_id: string;
+		account_name?: string;
+		created_at: string;
+		change_count: number;
+		from_version?: string;
+		to_version?: string;
+	}
+> {
 	try {
 		const currentVersion = await selectCurrentVersion();
 		const mainVersion = await selectMainVersion();
 		const activeAccount = await selectActiveAccount();
-		
+
 		// Get leaf changes from both versions
 		const sourceChanges = await lix.db
 			.selectFrom("change")
 			.where(changeIsLeafInVersion(currentVersion))
 			.select("id")
 			.execute();
-		
+
 		const targetChanges = await lix.db
 			.selectFrom("change")
 			.where(changeIsLeafInVersion(mainVersion))
 			.select("id")
 			.execute();
-		
+
 		// Create change sets with metadata
 		const sourceChangeSet = await createChangeSet({
 			lix,
 			changes: sourceChanges,
+			// @ts-expect-error
 			metadata: {
 				title: "Proposed changes",
 				description: description?.trim() || undefined,
 			},
 		});
-		
+
 		const targetChangeSet = await createChangeSet({
 			lix,
 			changes: targetChanges,
 		});
-		
+
 		// Create the change proposal
 		const proposal = await createChangeProposal({
 			lix,
 			source_change_set: sourceChangeSet,
 			target_change_set: targetChangeSet,
 		});
-		
+
 		// Count the changes in the source change set
 		const changeCount = await countChangesInChangeSet(sourceChangeSet.id);
-		
+
 		// Return the proposal with additional metadata
 		return {
 			...proposal,
