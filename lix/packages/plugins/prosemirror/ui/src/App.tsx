@@ -26,10 +26,7 @@ function App() {
 
 				<div className="grid grid-cols-12 w-full border-t border-base-300 gap-0">
 					<div className="col-span-8 border-r border-base-300">
-						<Editor 
-							onProposeChanges={handleProposeChanges} 
-							hidePropose={activeSidebarTab === "create-proposal"} 
-						/>
+						<Editor />
 					</div>
 
 					<div className="col-span-4">
